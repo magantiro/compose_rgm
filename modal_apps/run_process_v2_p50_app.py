@@ -35,6 +35,9 @@ LAUNCHER_SOURCE = "modal_apps/run_process_v2_p50_app.py"
 IMAGE_SOURCE_DIRECTORIES = ("src", "configs")
 
 PREPARED_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_p50_prepared"
+LEGACY_PREPARED_RUN_ROOT = (
+    PREPARED_OUTPUT_PREFIX + "/d9ffc03094161dcadb3d1fc670d9c4e9595ec31787cca7964560a7a591b2f1dc"
+)
 RUN_OUTPUT_PREFIX = "/artifacts/editing_v2/process_v2_p50"
 P50_POLICY_SOURCE = "configs/editing_v2_process_v2_p50_recipe_policy.json"
 T1_EVIDENCE_SOURCE = "configs/editing_v2_process_v2_p50_t1_evidence.json"
@@ -369,6 +372,7 @@ def _imports() -> dict[str, Any]:
         build_process_v2_p50_prepared_inputs,
         build_process_v2_p50_selection,
         compile_process_v2_p50_entries,
+        convert_process_v2_p50_v1_leaf,
         load_process_v2_p50_inputs,
         run_process_v2_p50,
         validate_process_v2_p50_prepared_inputs,
@@ -419,6 +423,7 @@ def _imports() -> dict[str, Any]:
         "build_selection": build_process_v2_p50_selection,
         "validate_selection": validate_process_v2_p50_selection,
         "compile_entries": compile_process_v2_p50_entries,
+        "convert_v1_leaf": convert_process_v2_p50_v1_leaf,
         "build_prepared": build_process_v2_p50_prepared_inputs,
         "validate_prepared": validate_process_v2_p50_prepared_inputs,
         "load_runtime": load_process_v2_p50_inputs,
@@ -875,6 +880,75 @@ def scan_completed_remote(
 
 @app.function(
     image=image,
+    cpu=2.0,
+    memory=16 * 1024,
+    timeout=30 * 60,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def migrate_v1_leaves_remote(
+    selection_path: str,
+    legacy_run_root: str,
+    run_root: str,
+    task_identity_sha256s: list[str],
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Convert compatible exhaustive leaves without molecular computation."""
+
+    _validate_remote_revision(revision)
+    artifact_volume.reload()
+    loaded = _imports()
+    selection = loaded["validate_selection"](
+        _read_canonical_object(
+            _require_artifact_path(selection_path, field="selection_path"),
+            label="the Process-V2 P50 selection",
+        )
+    )
+    old_root = _require_artifact_path(legacy_run_root, field="legacy_run_root")
+    new_root = _require_physical_artifact_path(run_root, field="run_root")
+    converted = 0
+    already_current = 0
+    with _heartbeat("process_v2_p50_legacy_leaf_conversion"):
+        for task_id in task_identity_sha256s:
+            destination = _leaf_path(new_root, task_id)
+            if destination.is_file():
+                _validate_leaf(
+                    _read_canonical_object(destination, label="a Process-V2 P50 leaf"),
+                    selection_sha256=str(selection["selection_sha256"]),
+                    task_identity_sha256=task_id,
+                )
+                already_current += 1
+                continue
+            source = _leaf_path(old_root, task_id)
+            if not source.is_file():
+                continue
+            converted_leaf = loaded["convert_v1_leaf"](
+                selection,
+                _read_canonical_object(source, label="a legacy Process-V2 P50 leaf"),
+            )
+            converted_leaf = _validate_leaf(
+                converted_leaf,
+                selection_sha256=str(selection["selection_sha256"]),
+                task_identity_sha256=task_id,
+            )
+            _publish_canonical(destination, converted_leaf, loaded=loaded)
+            converted += 1
+    artifact_volume.commit()
+    response = {
+        "phase": "process_v2_p50_legacy_leaf_conversion_complete",
+        "legacy_run_root": str(old_root),
+        "run_root": str(new_root),
+        "expected_task_count": len(task_identity_sha256s),
+        "converted_task_count": converted,
+        "already_current_task_count": already_current,
+        "molecular_reenumeration_count": 0,
+    }
+    _progress(**response)
+    return response
+
+
+@app.function(
+    image=image,
     cpu=CPU_PER_LEAF,
     memory=CPU_MEMORY_MB,
     timeout=CPU_LEAF_TIMEOUT_SECONDS,
@@ -1260,16 +1334,16 @@ def run_p50_gpu_remote(
     timeout=COORDINATOR_TIMEOUT_SECONDS,
     max_containers=1,
 )
-def driver(
+def prepare_driver(
     active8_run_root: str,
     gate_zero_decision_path: str,
     scoped_t1_output_prefix: str,
     prepared_output_prefix: str,
-    run_output_prefix: str,
     max_cpu_containers: int,
+    legacy_prepared_run_root: str,
     revision: dict[str, Any],
 ) -> dict[str, Any]:
-    """Run restart-safe preparation and exactly one bounded scratch GPU job."""
+    """Publish complete restart-safe CPU inputs without allocating a GPU."""
 
     _validate_remote_revision(revision)
     if type(max_cpu_containers) is not int or not 1 <= max_cpu_containers <= MAX_CPU_CONTAINERS:
@@ -1291,6 +1365,13 @@ def driver(
         revision,
     )
     expected = list(selected["task_identity_sha256s"])
+    migration = migrate_v1_leaves_remote.remote(
+        selected["selection_path"],
+        legacy_prepared_run_root,
+        selected["run_root"],
+        expected,
+        revision,
+    )
     completed = set(
         scan_completed_remote.remote(
             selected["selection_path"], selected["run_root"], expected, revision
@@ -1337,8 +1418,51 @@ def driver(
     prepared = finalize_prepared_remote.remote(
         selected["selection_path"], selected["run_root"], expected, revision
     )
+    response = {
+        "phase": "process_v2_p50_preparation_complete",
+        "prepared": prepared,
+        "scoped_t1": scoped_t1,
+        "max_cpu_containers": max_cpu_containers,
+        "cpu_submission_waves": len(waves),
+        "image_revision": revision,
+        "legacy_leaf_migration": migration,
+        "p50_training_launched": False,
+        "p500_authorized": False,
+        "p500_launched": False,
+    }
+    _progress(
+        "process_v2_p50_preparation_complete",
+        prepared_sha256=prepared["prepared_sha256"],
+        reused_legacy_tasks=migration["converted_task_count"],
+        computed_tasks=len(missing),
+        p50_training_launched=False,
+        p500_authorized=False,
+        p500_launched=False,
+    )
+    return response
+
+
+@app.function(
+    image=image,
+    cpu=0.25,
+    memory=1024,
+    timeout=COORDINATOR_TIMEOUT_SECONDS,
+    max_containers=1,
+)
+def train_driver(
+    prepared_path: str,
+    active8_run_root: str,
+    gate_zero_decision_path: str,
+    t1_result_path: str,
+    t1_decision_path: str,
+    run_output_prefix: str,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Run only the bounded GPU pilot from an immutable prepared artifact."""
+
+    _validate_remote_revision(revision)
     gpu = run_p50_gpu_remote.remote(
-        prepared["prepared_path"],
+        prepared_path,
         active8_run_root,
         gate_zero_decision_path,
         t1_result_path,
@@ -1347,24 +1471,153 @@ def driver(
         revision,
     )
     response = {
-        "phase": "process_v2_p50_driver_complete",
-        "prepared": prepared,
+        "phase": "process_v2_p50_training_complete",
         "pilot": gpu,
-        "scoped_t1": scoped_t1,
-        "max_cpu_containers": max_cpu_containers,
-        "cpu_submission_waves": len(waves),
         "image_revision": revision,
         "p500_authorized": gpu["p500_authorized"],
         "p500_launched": False,
     }
     _progress(
-        "process_v2_p50_driver_complete",
-        prepared_sha256=prepared["prepared_sha256"],
+        "process_v2_p50_training_complete",
         decision_status=gpu["decision_status"],
         p500_authorized=gpu["p500_authorized"],
         p500_launched=False,
     )
     return response
+
+
+@app.function(
+    image=image,
+    cpu=0.25,
+    memory=1024,
+    timeout=COORDINATOR_TIMEOUT_SECONDS,
+    max_containers=1,
+)
+def driver(
+    active8_run_root: str,
+    gate_zero_decision_path: str,
+    scoped_t1_output_prefix: str,
+    prepared_output_prefix: str,
+    run_output_prefix: str,
+    max_cpu_containers: int,
+    legacy_prepared_run_root: str,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Compatibility path that composes the separate prepare and train drivers."""
+
+    _validate_remote_revision(revision)
+    prepared = prepare_driver.remote(
+        active8_run_root,
+        gate_zero_decision_path,
+        scoped_t1_output_prefix,
+        prepared_output_prefix,
+        max_cpu_containers,
+        legacy_prepared_run_root,
+        revision,
+    )
+    gpu = train_driver.remote(
+        prepared["prepared"]["prepared_path"],
+        active8_run_root,
+        gate_zero_decision_path,
+        prepared["scoped_t1"]["result_path"],
+        prepared["scoped_t1"]["decision_path"],
+        run_output_prefix,
+        revision,
+    )
+    return {
+        **prepared,
+        "phase": "process_v2_p50_driver_complete",
+        "pilot": gpu["pilot"],
+        "p500_authorized": gpu["p500_authorized"],
+        "p500_launched": False,
+    }
+
+
+@app.local_entrypoint()
+def prepare(
+    active8_run_root: str,
+    gate_zero_decision_path: str,
+    expected_commit: str,
+    scoped_t1_output_prefix: str = SCOPED_T1_OUTPUT_PREFIX,
+    prepared_output_prefix: str = PREPARED_OUTPUT_PREFIX,
+    max_cpu_containers: int = MAX_CPU_CONTAINERS,
+    legacy_prepared_run_root: str = LEGACY_PREPARED_RUN_ROOT,
+    wait_for_completion: bool = False,
+) -> None:
+    """Spawn CPU-only preparation and return without allocating a GPU."""
+
+    revision = local_image_revision(expected_commit=expected_commit)
+    arguments = (
+        active8_run_root,
+        gate_zero_decision_path,
+        scoped_t1_output_prefix,
+        prepared_output_prefix,
+        int(max_cpu_containers),
+        legacy_prepared_run_root,
+        revision,
+    )
+    if wait_for_completion:
+        print(json.dumps(prepare_driver.remote(*arguments), indent=2, sort_keys=True))
+        return
+    call = prepare_driver.spawn(*arguments)
+    print(
+        json.dumps(
+            {
+                "phase": "process_v2_p50_preparation_launched",
+                "driver_call_id": call.object_id,
+                "max_cpu_containers": int(max_cpu_containers),
+                "commit": revision["commit"],
+                "image_revision_sha256": revision["image_revision_sha256"],
+                "p50_training_launched": False,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
+
+
+@app.local_entrypoint()
+def train(
+    prepared_path: str,
+    active8_run_root: str,
+    gate_zero_decision_path: str,
+    t1_result_path: str,
+    t1_decision_path: str,
+    expected_commit: str,
+    run_output_prefix: str = RUN_OUTPUT_PREFIX,
+    wait_for_completion: bool = False,
+) -> None:
+    """Spawn GPU-only P50 from one explicit immutable prepared artifact."""
+
+    revision = local_image_revision(expected_commit=expected_commit)
+    arguments = (
+        prepared_path,
+        active8_run_root,
+        gate_zero_decision_path,
+        t1_result_path,
+        t1_decision_path,
+        run_output_prefix,
+        revision,
+    )
+    if wait_for_completion:
+        print(json.dumps(train_driver.remote(*arguments), indent=2, sort_keys=True))
+        return
+    call = train_driver.spawn(*arguments)
+    print(
+        json.dumps(
+            {
+                "phase": "process_v2_p50_training_launched",
+                "driver_call_id": call.object_id,
+                "prepared_path": prepared_path,
+                "commit": revision["commit"],
+                "image_revision_sha256": revision["image_revision_sha256"],
+                "p50_training_launched": True,
+                "p500_launched": False,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
 
 
 @app.local_entrypoint()
@@ -1376,6 +1629,7 @@ def main(
     prepared_output_prefix: str = PREPARED_OUTPUT_PREFIX,
     run_output_prefix: str = RUN_OUTPUT_PREFIX,
     max_cpu_containers: int = MAX_CPU_CONTAINERS,
+    legacy_prepared_run_root: str = LEGACY_PREPARED_RUN_ROOT,
     wait_for_completion: bool = False,
 ) -> None:
     """Spawn one disconnect-safe Process-V2 P50 driver and return immediately."""
@@ -1388,6 +1642,7 @@ def main(
         prepared_output_prefix,
         run_output_prefix,
         int(max_cpu_containers),
+        legacy_prepared_run_root,
         revision,
     )
     if wait_for_completion:
@@ -1415,6 +1670,7 @@ def main(
 
 __all__ = [
     "MAX_CPU_CONTAINERS",
+    "LEGACY_PREPARED_RUN_ROOT",
     "PREPARED_OUTPUT_PREFIX",
     "RUN_OUTPUT_PREFIX",
     "app",
@@ -1423,8 +1679,13 @@ __all__ = [
     "local_image_revision",
     "main",
     "materialize_scoped_t1_remote",
+    "migrate_v1_leaves_remote",
     "prepare_leaf_remote",
+    "prepare_driver",
+    "prepare",
     "prepare_selection_remote",
     "run_p50_gpu_remote",
     "scan_completed_remote",
+    "train_driver",
+    "train",
 ]

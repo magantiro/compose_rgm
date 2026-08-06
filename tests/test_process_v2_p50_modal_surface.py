@@ -109,18 +109,24 @@ def test_gpu_has_no_selected_checkpoint_input_or_load_call() -> None:
     assert '"t1_selected_checkpoint_loaded": False' in body
 
 
-def test_driver_orders_selection_fanout_reduction_and_gpu() -> None:
-    body = ast.get_source_segment(_source(), _function("driver"))
-    assert body is not None
-    assert body.index("prepare_selection_remote.remote(") < body.index(
+def test_split_drivers_order_preparation_before_explicit_gpu_training() -> None:
+    prepare_body = ast.get_source_segment(_source(), _function("prepare_driver"))
+    train_body = ast.get_source_segment(_source(), _function("train_driver"))
+    combined_body = ast.get_source_segment(_source(), _function("driver"))
+    assert prepare_body is not None
+    assert train_body is not None
+    assert combined_body is not None
+    assert prepare_body.index("prepare_selection_remote.remote(") < prepare_body.index(
         "prepare_leaf_remote.starmap("
     )
-    assert body.index("prepare_leaf_remote.starmap(") < body.index(
+    assert prepare_body.index("prepare_leaf_remote.starmap(") < prepare_body.index(
         "finalize_prepared_remote.remote("
     )
-    assert body.index("finalize_prepared_remote.remote(") < body.index("run_p50_gpu_remote.remote(")
-    assert body.count("prepare_leaf_remote.starmap(") == 1
-    assert body.count("run_p50_gpu_remote.remote(") == 1
+    assert "run_p50_gpu_remote" not in prepare_body
+    assert train_body.count("run_p50_gpu_remote.remote(") == 1
+    assert combined_body.index("prepare_driver.remote(") < combined_body.index(
+        "train_driver.remote("
+    )
 
 
 def test_canary_publishes_one_reusable_worst_case_leaf_without_gpu() -> None:
@@ -142,12 +148,21 @@ def test_scoped_t1_materialization_binds_the_current_authenticated_source() -> N
 
 
 def test_cpu_map_sends_addresses_not_selection_payloads() -> None:
-    body = ast.get_source_segment(_source(), _function("driver"))
+    body = ast.get_source_segment(_source(), _function("prepare_driver"))
     assert body is not None
     starmap = body[body.index("prepare_leaf_remote.starmap(") :]
     assert 'selected["selection_path"]' in starmap
     assert "selection," not in starmap
     assert "for wave_index" not in body
+
+
+def test_legacy_leaf_migration_is_json_only_and_reuses_current_selection() -> None:
+    body = ast.get_source_segment(_source(), _function("migrate_v1_leaves_remote"))
+    assert body is not None
+    assert 'loaded["convert_v1_leaf"](' in body
+    assert "prepare_leaf_remote" not in body
+    assert "compile_entries" not in body
+    assert '"molecular_reenumeration_count": 0' in body
 
 
 def test_decision_is_the_last_scientific_publication() -> None:
@@ -349,7 +364,15 @@ def test_runtime_import_surface_names_only_current_process_v2_modules() -> None:
 
 def test_local_entrypoint_is_disconnect_safe_by_default() -> None:
     body = ast.get_source_segment(_source(), _function("main"))
+    prepare_body = ast.get_source_segment(_source(), _function("prepare"))
+    train_body = ast.get_source_segment(_source(), _function("train"))
     assert body is not None
+    assert prepare_body is not None
+    assert train_body is not None
     assert "wait_for_completion: bool = False" in body
     assert "driver.spawn(*arguments)" in body
+    assert "prepare_driver.spawn(*arguments)" in prepare_body
+    assert '"p50_training_launched": False' in prepare_body
+    assert "train_driver.spawn(*arguments)" in train_body
+    assert '"prepared_path": prepared_path' in train_body
     assert '"p500_launched": False' in body

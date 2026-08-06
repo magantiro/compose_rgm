@@ -66,6 +66,9 @@ from compose_v4.experiments.editing_v2_semantic_t1_capacity_runner import (
     _hazard_state,
     _rng_state,
 )
+from compose_v4.experiments.editing_v2_semantic_t1_prepared_inputs import (
+    compiled_successor_map_from_payload,
+)
 from compose_v4.experiments.factorized_mark_conditional import (
     FactorizedMarkCollator,
     FactorizedMarkExample,
@@ -79,6 +82,7 @@ from compose_v4.experiments.factorized_successor_training import (
     factorized_successor_identity_loss,
     forward_teacher_successor_batch,
     rewrite_action_codec_sha256,
+    teacher_successor_fiber_from_exact_digest,
 )
 from compose_v4.model.factorized_tracelet_rate_model import FactorizedTraceletRateModel
 from compose_v4.rewrite import action_codec_v4
@@ -776,6 +780,135 @@ def compile_process_v2_p50_entries(
     return {**body, "leaf_sha256": canonical_sha256(body)}
 
 
+def convert_process_v2_p50_v1_leaf(
+    selection: Mapping[str, Any], legacy_leaf: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Convert one exhaustive v1 leaf without re-enumerating chemistry."""
+
+    leaf = dict(legacy_leaf)
+    leaf_body = {key: item for key, item in leaf.items() if key != "leaf_sha256"}
+    task_id = str(leaf.get("task_identity_sha256"))
+    selected = {
+        str(entry["p50_entry_sha256"]): entry
+        for entry in selection["entries"]
+        if entry["task_identity_sha256"] == task_id
+    }
+    if (
+        set(leaf)
+        != {
+            "task_identity_sha256",
+            "selection_sha256",
+            "entry_count",
+            "entries",
+            "leaf_sha256",
+        }
+        or leaf.get("leaf_sha256") != canonical_sha256(leaf_body)
+        or leaf.get("selection_sha256") != selection.get("selection_sha256")
+        or leaf.get("entry_count") != len(leaf.get("entries", ()))
+        or not selected
+    ):
+        raise ProcessV2P50RuntimeError("a legacy P50 leaf binding disagrees")
+
+    converted: list[dict[str, Any]] = []
+    for raw in leaf["entries"]:
+        entry = dict(raw)
+        old_body = {key: item for key, item in entry.items() if key != "p50_compiled_entry_sha256"}
+        identifier = str(entry.get("p50_entry_sha256"))
+        selection_entry = selected.get(identifier)
+        try:
+            state = decode_state(entry["exact_state"])
+            partition = compiled_successor_map_from_payload(entry["successor_partition"])
+            fiber = teacher_successor_fiber_from_exact_digest(
+                partition, str(entry["target_state_sha256"])
+            )
+        except (KeyError, TypeError, ValueError, SuccessorTrainingError) as error:
+            raise ProcessV2P50RuntimeError("a legacy P50 entry is invalid") from error
+        all_marks = (
+            tuple(mark for group in partition.successor_groups for mark in group.marks)
+            + partition.virtual_marks
+        )
+        family_counts: dict[str, int] = {}
+        for mark in all_marks:
+            family = mark.alias.family_name
+            family_counts[family] = family_counts.get(family, 0) + 1
+        exact_aliases = tuple(
+            mark.alias
+            for group in partition.successor_groups
+            for mark in group.marks
+            if mark.successor_state_sha256 == entry.get("target_state_sha256")
+            and mark.action_sha256 == entry.get("teacher_action_sha256")
+            and mark.alias.family_name == entry.get("model_family")
+        )
+        raw_mark_count = len(all_marks)
+        if (
+            selection_entry is None
+            or entry.get("p50_compiled_entry_sha256") != canonical_sha256(old_body)
+            or encode_state(state) != entry["exact_state"]
+            or persistent_slot_state_sha256(state) != entry.get("source_state_sha256")
+            or partition.source_state_sha256 != entry.get("source_state_sha256")
+            or entry.get("raw_mark_count") != raw_mark_count
+            or entry.get("canonical_successor_count") != len(partition.successor_groups)
+            or entry.get("productive_alias_count")
+            != sum(len(group.marks) for group in partition.successor_groups)
+            or entry.get("production_successor_alias_multiplicity") != len(fiber.aliases)
+            or entry.get("virtual_alias_count") != len(partition.virtual_marks)
+            or len(exact_aliases) != 1
+            or entry.get("hazard_included") is not False
+            or entry.get("model_scores_or_probabilities_stored") is not False
+            or any(
+                entry.get(field) != selection_entry.get(selection_field)
+                for field, selection_field in (
+                    ("model_family", "model_family"),
+                    ("capability_cell_id", "capability_cell_id"),
+                    ("partition_role", "partition_role"),
+                    ("source_state_sha256", "source_state_sha256"),
+                    ("target_state_sha256", "target_state_sha256"),
+                    ("successor_canonical_key", "canonical_successor_key"),
+                    ("teacher_action_sha256", "action_sha256"),
+                )
+            )
+        ):
+            raise ProcessV2P50RuntimeError("a legacy P50 entry identity disagrees")
+        new_body = {
+            "p50_entry_sha256": identifier,
+            "model_family": entry["model_family"],
+            "capability_cell_id": entry["capability_cell_id"],
+            "partition_role": entry["partition_role"],
+            "support_time_hex": entry["support_time_hex"],
+            "source_state_sha256": entry["source_state_sha256"],
+            "target_state_sha256": entry["target_state_sha256"],
+            "successor_canonical_key": entry["successor_canonical_key"],
+            "teacher_action_sha256": entry["teacher_action_sha256"],
+            "objective_coefficient": entry["objective_coefficient"],
+            "raw_mark_count": raw_mark_count,
+            "decoded_mark_count": raw_mark_count,
+            "marks_by_family": dict(sorted(family_counts.items())),
+            "production_successor_alias_multiplicity": len(fiber.aliases),
+            "virtual_alias_count": len(fiber.state_support.virtual_aliases),
+            "exact_state": entry["exact_state"],
+            "teacher_successor_fiber": _teacher_fiber_payload(fiber),
+            "exact_teacher_alias": _alias_payload(exact_aliases[0]),
+            "model_scores_or_probabilities_stored": False,
+            "hazard_included": False,
+        }
+        converted.append(
+            {
+                **new_body,
+                "p50_compiled_entry_sha256": canonical_sha256(new_body),
+            }
+        )
+    if {entry["p50_entry_sha256"] for entry in converted} != set(selected):
+        raise ProcessV2P50RuntimeError("a legacy P50 leaf omits selected task entries")
+    converted.sort(key=lambda entry: entry["p50_entry_sha256"])
+    body = {
+        "task_identity_sha256": task_id,
+        "selection_sha256": selection["selection_sha256"],
+        "entry_count": len(converted),
+        "entries": converted,
+    }
+    return {**body, "leaf_sha256": canonical_sha256(body)}
+
+
 def build_process_v2_p50_prepared_inputs(
     selection: Mapping[str, Any], *, leaves: Sequence[Mapping[str, Any]]
 ) -> dict[str, Any]:
@@ -1290,6 +1423,7 @@ __all__ = [
     "build_process_v2_p50_prepared_inputs",
     "build_process_v2_p50_selection",
     "compile_process_v2_p50_entries",
+    "convert_process_v2_p50_v1_leaf",
     "load_process_v2_p50_inputs",
     "run_process_v2_p50",
     "validate_process_v2_p50_prepared_inputs",

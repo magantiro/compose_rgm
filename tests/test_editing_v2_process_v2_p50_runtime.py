@@ -12,9 +12,15 @@ from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
 from compose_v4.chem.persistent_state_identity import persistent_slot_state_sha256
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.experiments.factorized_successor_training import (
+    CanonicalSuccessorAliasGroup,
+    CompiledStateSuccessorMap,
+    CompiledSuccessorMark,
     StateProductiveSupport,
     TeacherSuccessorAlias,
     TeacherSuccessorFiber,
+)
+from compose_v4.experiments.editing_v2_semantic_t1_prepared_inputs import (
+    compiled_successor_map_payload,
 )
 from compose_v4.rewrite.kernel import canonical_state_key
 from compose_v4.rewrite.trace_shard import encode_state
@@ -245,3 +251,103 @@ def test_compact_prepared_input_round_trips_only_the_teacher_fiber() -> None:
     loaded = runtime.load_process_v2_p50_inputs(prepared)
     assert loaded.fibers_by_id[identifier] == fiber
     assert not hasattr(loaded, "partitions_by_id")
+
+
+def test_exhaustive_v1_leaf_converts_without_molecular_reenumeration() -> None:
+    state = pad_molecular_graph(smiles_to_molecular_graph("CCO"), 8)
+    source_sha = persistent_slot_state_sha256(state)
+    target_sha = _sha("target-state")
+    action_sha = _sha("teacher-action")
+    alias = TeacherSuccessorAlias(
+        family_name="atom_restate",
+        table_name="atom_restate",
+        coordinate=(2, 0),
+    )
+    mark = CompiledSuccessorMark(
+        alias=alias,
+        successor_state_sha256=target_sha,
+        action_sha256=action_sha,
+    )
+    partition = CompiledStateSuccessorMap(
+        state_support=StateProductiveSupport(
+            source_key=canonical_state_key(state),
+            source_state_sha256=source_sha,
+        ),
+        successor_groups=(CanonicalSuccessorAliasGroup(target_key="CCN", marks=(mark,)),),
+    )
+    task_id = _sha("task")
+    candidate_body = {
+        "v1_task_identity_sha256": _sha("v1-task"),
+        "task_identity_sha256": task_id,
+        "entry_index": 0,
+        "trace_id": "trace",
+        "step_index": 0,
+        "progress_index": 0,
+        "partition_role": "train",
+        "data_lane": "observed_local_analogue",
+        "executor_rule": "atom_restate_semantic",
+        "model_family": "atom_restate",
+        "capability_cell_id": "ns:atom_restate:element_identity_change",
+        "source_state_sha256": source_sha,
+        "target_state_sha256": target_sha,
+        "source_canonical_key": canonical_state_key(state),
+        "canonical_successor_key": "CCN",
+        "action_sha256": action_sha,
+        "assignment_sha256": _sha("assignment"),
+    }
+    identifier = runtime._candidate_identity(candidate_body)
+    candidate = {**candidate_body, "p50_entry_sha256": identifier}
+    selection = {
+        "selection_sha256": _sha("selection"),
+        "entries": [candidate],
+    }
+    old_body = {
+        "p50_entry_sha256": identifier,
+        "model_family": "atom_restate",
+        "capability_cell_id": candidate["capability_cell_id"],
+        "partition_role": "train",
+        "support_time_hex": float(0.5).hex(),
+        "source_state_sha256": source_sha,
+        "target_state_sha256": target_sha,
+        "successor_canonical_key": "CCN",
+        "teacher_action_sha256": action_sha,
+        "objective_coefficient": 1,
+        "raw_mark_count": 1,
+        "canonical_successor_count": 1,
+        "productive_alias_count": 1,
+        "production_successor_alias_multiplicity": 1,
+        "virtual_alias_count": 0,
+        "exact_state": encode_state(state),
+        "successor_partition": compiled_successor_map_payload(partition),
+        "model_scores_or_probabilities_stored": False,
+        "hazard_included": False,
+    }
+    old_entry = {
+        **old_body,
+        "p50_compiled_entry_sha256": runtime.canonical_sha256(old_body),
+    }
+    leaf_body = {
+        "task_identity_sha256": task_id,
+        "selection_sha256": selection["selection_sha256"],
+        "entry_count": 1,
+        "entries": [old_entry],
+    }
+    legacy_leaf = {**leaf_body, "leaf_sha256": runtime.canonical_sha256(leaf_body)}
+    converted = runtime.convert_process_v2_p50_v1_leaf(selection, legacy_leaf)
+    entry = converted["entries"][0]
+    assert "successor_partition" not in entry
+    assert entry["teacher_successor_fiber"]["aliases"] == [runtime._alias_payload(alias)]
+    assert entry["exact_teacher_alias"] == runtime._alias_payload(alias)
+    assert entry["decoded_mark_count"] == 1
+
+    corrupted = copy.deepcopy(legacy_leaf)
+    corrupted_entry = corrupted["entries"][0]
+    corrupted_entry["raw_mark_count"] = 2
+    corrupted_body = {
+        key: value for key, value in corrupted_entry.items() if key != "p50_compiled_entry_sha256"
+    }
+    corrupted_entry["p50_compiled_entry_sha256"] = runtime.canonical_sha256(corrupted_body)
+    corrupted_leaf_body = {key: value for key, value in corrupted.items() if key != "leaf_sha256"}
+    corrupted["leaf_sha256"] = runtime.canonical_sha256(corrupted_leaf_body)
+    with pytest.raises(runtime.ProcessV2P50RuntimeError, match="identity disagrees"):
+        runtime.convert_process_v2_p50_v1_leaf(selection, corrupted)
