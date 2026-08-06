@@ -321,6 +321,9 @@ def build_process_v2_t1_scoped_capacity_result(
     repair_results: Mapping[str, Mapping[str, Any]],
     capacity_policy: Mapping[str, Any],
     score_revision_receipt: Mapping[str, Any],
+    current_process_identity_sha256: str,
+    current_active8_completion_sha256: str,
+    current_gate_zero_decision_sha256: str,
 ) -> dict[str, Any]:
     """Build one non-authorizing result from the minimum sufficient receipts."""
 
@@ -367,6 +370,18 @@ def build_process_v2_t1_scoped_capacity_result(
         or set(repair_results) != set(REPAIRED_FAMILIES)
     ):
         raise ProcessV2T1ScopedResultError("the original T1 diagnostic identity disagrees")
+    if (
+        not _is_sha(current_process_identity_sha256)
+        or not _is_sha(current_active8_completion_sha256)
+        or not _is_sha(current_gate_zero_decision_sha256)
+        or current_process_identity_sha256
+        != base["provenance"]["process_identity_sha256"]
+        or current_active8_completion_sha256
+        != base["provenance"]["active8_completion_sha256"]
+    ):
+        raise ProcessV2T1ScopedResultError(
+            "current T1 source differs from the frozen process or Active8 evidence"
+        )
 
     thresholds = capacity_policy["thresholds"]
     base_rows = base["entry_metrics"]
@@ -452,9 +467,9 @@ def build_process_v2_t1_scoped_capacity_result(
         **authority_false_block(),
         "objective_unit": "exact_source_frozen_time_canonical_successor",
         "panel_kind": "unique_state_single_target_canonical_successor_capacity",
-        "process_identity_sha256": base["provenance"]["process_identity_sha256"],
-        "active8_completion_sha256": base["provenance"]["active8_completion_sha256"],
-        "gate_zero_decision_sha256": base["provenance"]["gate_zero_decision_sha256"],
+        "process_identity_sha256": current_process_identity_sha256,
+        "active8_completion_sha256": current_active8_completion_sha256,
+        "gate_zero_decision_sha256": current_gate_zero_decision_sha256,
         "panel_sha256": base["provenance"]["panel_sha256"],
         "panel_entry_inventory_sha256": base["provenance"][
             "panel_entry_inventory_sha256"

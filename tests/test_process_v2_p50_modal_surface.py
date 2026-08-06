@@ -123,6 +123,23 @@ def test_driver_orders_selection_fanout_reduction_and_gpu() -> None:
     assert body.count("run_p50_gpu_remote.remote(") == 1
 
 
+def test_scoped_t1_materialization_binds_the_current_authenticated_source() -> None:
+    body = ast.get_source_segment(_source(), _function("materialize_scoped_t1_remote"))
+    assert body is not None
+    assert (
+        "current_process_identity_sha256=source.contracts.process_identity_sha256"
+        in body
+    )
+    assert (
+        "current_active8_completion_sha256=source.index.active8_completion_sha256"
+        in body
+    )
+    assert (
+        'current_gate_zero_decision_sha256=source.decision["decision_sha256"]'
+        in body
+    )
+
+
 def test_cpu_map_sends_addresses_not_selection_payloads() -> None:
     body = ast.get_source_segment(_source(), _function("driver"))
     assert body is not None

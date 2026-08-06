@@ -660,6 +660,9 @@ def materialize_scoped_t1_remote(
         repair_results=sources,
         capacity_policy=capacity_policy,
         score_revision_receipt=score_receipt,
+        current_process_identity_sha256=source.contracts.process_identity_sha256,
+        current_active8_completion_sha256=source.index.active8_completion_sha256,
+        current_gate_zero_decision_sha256=source.decision["decision_sha256"],
     )
     result = loaded["validate_scoped_t1_result"](result)
     run_identity = _sha256(

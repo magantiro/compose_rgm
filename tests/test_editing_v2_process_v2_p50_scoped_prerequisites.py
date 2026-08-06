@@ -61,6 +61,10 @@ def _inputs() -> tuple[
 def test_scoped_prerequisites_accept_the_exact_family_receipt_chain() -> None:
     p50_policy, capacity_policy, gate, result, decision = _inputs()
 
+    assert gate["gate_zero_structural_contract_sha256"] == _policy(
+        "editing_v2_process_v2_gate_zero_structural.json"
+    )["contract_sha256"]
+
     binding = validate_process_v2_p50_scoped_prerequisite_relationships(
         p50_policy=p50_policy,
         capacity_policy=capacity_policy,
