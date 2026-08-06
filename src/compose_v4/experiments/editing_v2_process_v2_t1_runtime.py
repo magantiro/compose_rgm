@@ -28,11 +28,14 @@ import hashlib
 import json
 import time
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from types import MappingProxyType, SimpleNamespace
 from typing import Any, Callable
 
+import torch
+
+from compose_v4.chem.molecular_graph import ORGANIC_VOCABULARY
 from compose_v4.chem.persistent_state_identity import persistent_slot_state_sha256
 from compose_v4.data.editing_v2_process_v2_active8_plan import (
     MODEL_RUNTIME_FIELDS,
@@ -68,6 +71,7 @@ from compose_v4.experiments.editing_v2_semantic_runtime import (
     SemanticScratchModelConfig,
     SemanticScratchRuntime,
     build_semantic_scratch_runtime,
+    model_identity_atom_delete_action_semantics,
 )
 from compose_v4.experiments.editing_v2_semantic_t1_prepared_inputs import (
     compiled_successor_map_from_payload,
@@ -81,6 +85,10 @@ from compose_v4.experiments.factorized_successor_training import (
     require_exact_successor_action_identity,
     rewrite_action_codec_sha256,
     teacher_successor_fiber_from_exact_digest,
+)
+from compose_v4.model.contextual_ring_restate_rate_model import (
+    CONTEXTUAL_RING_RESTATE_SCORER_MODE,
+    ContextualRingRestateFactorizedTraceletRateModel,
 )
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
 from compose_v4.rewrite import action_codec_v4
@@ -133,6 +141,7 @@ _IMPLEMENTATION_FILES = (
     "src/compose_v4/experiments/factorized_successor_training.py",
     "src/compose_v4/experiments/editing_v2_semantic_t1_prepared_inputs.py",
     "src/compose_v4/experiments/editing_v2_semantic_runtime.py",
+    "src/compose_v4/model/contextual_ring_restate_rate_model.py",
     "src/compose_v4/model/factorized_tracelet_rate_model.py",
     "src/compose_v4/model/relational_reroute_rate_model.py",
 )
@@ -185,6 +194,9 @@ _SCORE_INDEPENDENT_MODEL_RUNTIME_FIELDS = (
 
 class ProcessV2T1RuntimeError(RuntimeError):
     """A Process-V2 T1 prerequisite or exact successor partition is invalid."""
+
+
+_RING_RESTATE_SCORE_REVISION_FIELD = "ring_restate_context_scorer_mode"
 
 
 def _file_sha256(path: Path) -> str:
@@ -393,7 +405,77 @@ def _scratch_runtime_for_score_revision(
         atom_vocabulary_class_count=int(predecessor["atom_vocabulary_class_count"]),
         catalog_fingerprint=str(predecessor["catalog_fingerprint"]),
     )
-    runtime = build_semantic_scratch_runtime(config, semantic)
+    predecessor_runtime = build_semantic_scratch_runtime(config, semantic)
+    predecessor_identity = dict(predecessor_runtime.semantic_model_identity)
+    with torch.random.fork_rng(devices=[]):
+        torch.manual_seed(config.initialization_seed)
+        model = ContextualRingRestateFactorizedTraceletRateModel(
+            predecessor_runtime.model.ring_catalog,
+            hidden_dim=config.hidden_dim,
+            message_passing_steps=config.message_passing_steps,
+            mark_dim=config.mark_dim,
+            enable_ring_restates=bool(
+                predecessor_identity["compute_ring_restates"]
+            ),
+            enable_cyclic_graft=bool(predecessor_identity["compute_cyclic_graft"]),
+            enable_heteroatom_scan=True,
+            enable_ring_opening=bool(predecessor_identity["compute_ring_opening"]),
+            enable_cycle_ops=bool(predecessor_identity["enable_cycle_ops"]),
+            cycle_open_scorer_mode=str(
+                predecessor_identity["cycle_open_scorer_mode"]
+            ),
+            editing_process_semantics=str(
+                predecessor_identity["editing_process_semantics"]
+            ),
+            atom_restate_action_semantics=str(
+                predecessor_identity["atom_restate_action_semantics"]
+            ),
+            ring_restate_scorer_mode=str(
+                predecessor_identity["ring_restate_scorer_mode"]
+            ),
+            cycle_close_action_semantics=str(
+                predecessor_identity["cycle_close_action_semantics"]
+            ),
+            cycle_open_action_semantics=str(
+                predecessor_identity["cycle_open_action_semantics"]
+            ),
+            atom_delete_action_semantics=(
+                model_identity_atom_delete_action_semantics(predecessor_identity)
+            ),
+            enable_ring_grow_macro=bool(
+                predecessor_identity["compute_ring_grow_support"]
+            ),
+            enable_ring_system_delete=bool(
+                predecessor_identity["compute_ring_system_delete"]
+            ),
+            atom_vocabulary=ORGANIC_VOCABULARY,
+        ).to(dtype=torch.float32)
+    predecessor_state = predecessor_runtime.model.state_dict()
+    current_state = model.state_dict()
+    if any(
+        name not in current_state or not torch.equal(value, current_state[name])
+        for name, value in predecessor_state.items()
+    ):
+        raise ProcessV2T1RuntimeError(
+            "ring-restatement score revision changed a predecessor parameter"
+        )
+    added_parameters = tuple(sorted(set(current_state) - set(predecessor_state)))
+    if added_parameters != ("ring_restate_context_head.weight",) or bool(
+        current_state[added_parameters[0]].count_nonzero()
+    ):
+        raise ProcessV2T1RuntimeError(
+            "ring-restatement score revision is not one zero-initialized residual"
+        )
+    current_identity = {
+        **predecessor_identity,
+        _RING_RESTATE_SCORE_REVISION_FIELD: CONTEXTUAL_RING_RESTATE_SCORER_MODE,
+    }
+    runtime = replace(
+        predecessor_runtime,
+        model=model.eval(),
+        semantic_model_identity=current_identity,
+        initial_model_state_sha256=state_dict_semantic_sha256(current_state),
+    )
     current = model_runtime_descriptor(runtime)
     if any(
         current[field] != predecessor[field]
@@ -428,6 +510,14 @@ def _scratch_runtime_for_score_revision(
         "current_initial_model_state_sha256": current[
             "initial_model_state_sha256"
         ],
+        "score_revision": {
+            "schema": "compose.editing_v2.process_v2_t1_score_revision",
+            "schema_version": 1,
+            _RING_RESTATE_SCORE_REVISION_FIELD: (
+                CONTEXTUAL_RING_RESTATE_SCORER_MODE
+            ),
+            "added_parameters": list(added_parameters),
+        },
         "support_geometry_sha256": canonical_sha256(
             {field: current[field] for field in _SCORE_INDEPENDENT_MODEL_RUNTIME_FIELDS}
         ),

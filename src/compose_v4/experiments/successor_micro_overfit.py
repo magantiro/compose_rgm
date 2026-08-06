@@ -570,7 +570,10 @@ _HEAD_PREFIXES_BY_FAMILY = {
     "cycle_insert": ("cycle_close_head.",),
     "cycle_attach": ("cycle_open_head.",),
     "ring_system_delete": ("ring_system_delete_head.",),
-    "ring_system_restate": ("ring_restate_head.",),
+    "ring_system_restate": (
+        "ring_restate_head.",
+        "ring_restate_context_head.",
+    ),
 }
 
 _LOCAL_ADAPTER_PREFIXES_BY_FAMILY = {

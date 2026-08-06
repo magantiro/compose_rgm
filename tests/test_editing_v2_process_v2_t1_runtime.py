@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from pathlib import Path
+from types import MappingProxyType
 
 import pytest
 
@@ -145,6 +146,54 @@ def test_score_only_model_revision_reuses_active8_support_but_not_its_state(
         runtime.initial_model_state_sha256
     )
     assert binding["model_runtime"]["semantic_model_process_contract_sha256"] != "3" * 64
+
+
+def test_score_revision_bridge_adds_only_contextual_ring_restate_capacity(
+    genuine_stage,
+    monkeypatch,
+) -> None:
+    _stage, source, _decision = genuine_stage
+    predecessor = dict(source.plan["binding"]["model_runtime"])
+    frozen = {
+        "prepared_completion_sha256": "a" * 64,
+        "prepared_completion_file_sha256": "b" * 64,
+        "prepared_artifact_sha256": "c" * 64,
+        "prepared_file_sha256": "d" * 64,
+        "prepared_implementation_sha256": "e" * 64,
+        "initial_model_state_sha256": predecessor["initial_model_state_sha256"],
+        "model_identity_sha256": predecessor["model_identity_sha256"],
+        "semantic_model_process_contract_sha256": predecessor[
+            "semantic_model_process_contract_sha256"
+        ],
+    }
+    monkeypatch.setattr(
+        t1_runtime,
+        "_SCORE_REVISION_PREDECESSOR",
+        MappingProxyType(frozen),
+    )
+
+    runtime, binding, bridge = t1_runtime._scratch_runtime_for_score_revision(
+        predecessor,
+        repo_root=ROOT,
+    )
+
+    assert isinstance(
+        runtime.model,
+        t1_runtime.ContextualRingRestateFactorizedTraceletRateModel,
+    )
+    assert runtime.process_identity_sha256 == source.contracts.process_identity_sha256
+    assert binding["model_runtime"]["operator_capability_fingerprint"] == (
+        predecessor["operator_capability_fingerprint"]
+    )
+    assert binding["model_runtime"]["initial_model_state_sha256"] != (
+        predecessor["initial_model_state_sha256"]
+    )
+    assert bridge["score_revision"]["ring_restate_context_scorer_mode"] == (
+        t1_runtime.CONTEXTUAL_RING_RESTATE_SCORER_MODE
+    )
+    assert bridge["score_revision"]["added_parameters"] == [
+        "ring_restate_context_head.weight"
+    ]
 
 
 def test_active8_support_geometry_change_blocks_t1_model_reconstruction(
