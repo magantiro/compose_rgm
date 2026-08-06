@@ -55,7 +55,6 @@ from compose_v4.experiments.editing_v2_process_v2_t1_panel import (
 )
 from compose_v4.experiments.editing_v2_process_v2_t1_runtime import (
     ProcessV2T1RuntimeError,
-    _entry_from_exact_transition,
     build_process_v2_score_revised_scratch_runtime,
 )
 from compose_v4.experiments.editing_v2_semantic_t1_capacity_runner import (
@@ -67,30 +66,29 @@ from compose_v4.experiments.editing_v2_semantic_t1_capacity_runner import (
     _hazard_state,
     _rng_state,
 )
-from compose_v4.experiments.editing_v2_semantic_t1_prepared_inputs import (
-    compiled_successor_map_from_payload,
-)
 from compose_v4.experiments.factorized_mark_conditional import (
     FactorizedMarkCollator,
     FactorizedMarkExample,
 )
 from compose_v4.experiments.factorized_successor_training import (
-    CompiledStateSuccessorMap,
+    StateProductiveSupport,
     SuccessorTrainingError,
+    TeacherSuccessorAlias,
     TeacherSuccessorFiber,
+    compile_teacher_successor_fibers_support_only,
     factorized_successor_identity_loss,
     forward_teacher_successor_batch,
-    require_exact_successor_action_identity,
-    teacher_successor_fiber_from_exact_digest,
+    rewrite_action_codec_sha256,
 )
 from compose_v4.model.factorized_tracelet_rate_model import FactorizedTraceletRateModel
+from compose_v4.rewrite import action_codec_v4
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
 
 SELECTION_SCHEMA = "compose.editing_v2.process_v2_p50_selection"
 SELECTION_SCHEMA_VERSION = 1
 SELECTION_STATUS = "PROCESS_V2_P50_SELECTION_NO_DOWNSTREAM_AUTHORITY"
 PREPARED_SCHEMA = "compose.editing_v2.process_v2_p50_prepared_inputs"
-PREPARED_SCHEMA_VERSION = 1
+PREPARED_SCHEMA_VERSION = 2
 PREPARED_STATUS = "PROCESS_V2_P50_PREPARED_INPUTS_NO_DOWNSTREAM_AUTHORITY"
 SELECTION_FILENAME = "PROCESS_V2_P50_SELECTION.json"
 PREPARED_FILENAME = "PROCESS_V2_P50_PREPARED_INPUTS.json"
@@ -112,6 +110,96 @@ def _require_sha(value: object, *, field: str) -> str:
     ):
         raise ProcessV2P50RuntimeError(f"{field} must be a lowercase SHA-256")
     return value
+
+
+def _alias_payload(alias: TeacherSuccessorAlias) -> dict[str, Any]:
+    return {
+        "family_name": alias.family_name,
+        "table_name": alias.table_name,
+        "coordinate": list(alias.coordinate),
+    }
+
+
+def _alias_from_payload(value: object) -> TeacherSuccessorAlias:
+    if not isinstance(value, Mapping) or set(value) != {
+        "family_name",
+        "table_name",
+        "coordinate",
+    }:
+        raise ProcessV2P50RuntimeError("a compact P50 successor alias is malformed")
+    coordinate = value["coordinate"]
+    if (
+        not isinstance(value["family_name"], str)
+        or not value["family_name"]
+        or not isinstance(value["table_name"], str)
+        or not value["table_name"]
+        or not isinstance(coordinate, list)
+        or not coordinate
+        or any(type(item) is not int or item < 0 for item in coordinate)
+    ):
+        raise ProcessV2P50RuntimeError("a compact P50 successor coordinate is malformed")
+    return TeacherSuccessorAlias(
+        family_name=str(value["family_name"]),
+        table_name=str(value["table_name"]),
+        coordinate=tuple(coordinate),
+    )
+
+
+def _teacher_fiber_payload(fiber: TeacherSuccessorFiber) -> dict[str, Any]:
+    return {
+        "source_key": fiber.source_key,
+        "target_key": fiber.target_key,
+        "target_state_sha256": fiber.target_state_sha256,
+        "aliases": [_alias_payload(alias) for alias in fiber.aliases],
+        "state_support": {
+            "source_key": fiber.state_support.source_key,
+            "source_state_sha256": fiber.state_support.source_state_sha256,
+            "virtual_aliases": [
+                _alias_payload(alias) for alias in fiber.state_support.virtual_aliases
+            ],
+        },
+    }
+
+
+def _teacher_fiber_from_payload(value: object) -> TeacherSuccessorFiber:
+    if not isinstance(value, Mapping) or set(value) != {
+        "source_key",
+        "target_key",
+        "target_state_sha256",
+        "aliases",
+        "state_support",
+    }:
+        raise ProcessV2P50RuntimeError("a compact P50 teacher fiber is malformed")
+    support = value["state_support"]
+    aliases = value["aliases"]
+    if (
+        not isinstance(support, Mapping)
+        or set(support) != {"source_key", "source_state_sha256", "virtual_aliases"}
+        or not isinstance(aliases, list)
+        or not isinstance(support["virtual_aliases"], list)
+    ):
+        raise ProcessV2P50RuntimeError("a compact P50 state support is malformed")
+    try:
+        state_support = StateProductiveSupport(
+            source_key=str(support["source_key"]),
+            source_state_sha256=_require_sha(
+                support["source_state_sha256"], field="P50 source state"
+            ),
+            virtual_aliases=tuple(
+                _alias_from_payload(alias) for alias in support["virtual_aliases"]
+            ),
+        )
+        return TeacherSuccessorFiber(
+            source_key=str(value["source_key"]),
+            target_key=str(value["target_key"]),
+            target_state_sha256=_require_sha(
+                value["target_state_sha256"], field="P50 target state"
+            ),
+            aliases=tuple(_alias_from_payload(alias) for alias in aliases),
+            state_support=state_support,
+        )
+    except ValueError as error:
+        raise ProcessV2P50RuntimeError("a compact P50 teacher fiber is invalid") from error
 
 
 def _candidate_identity(candidate: Mapping[str, Any]) -> str:
@@ -590,31 +678,80 @@ def compile_process_v2_p50_entries(
     ]
     try:
         resolved = resolve_process_v2_t1_entries(source, resolver_entries)
-        scratch, _binding, _score_receipt = (
-            build_process_v2_score_revised_scratch_runtime(source)
-        )
+        scratch, _binding, _score_receipt = build_process_v2_score_revised_scratch_runtime(source)
     except (ProcessV2T1PanelError, ProcessV2T1RuntimeError) as error:
         raise ProcessV2P50RuntimeError(str(error)) from error
     addressed_by_entry: dict[str, Any] = {}
     for item in resolved:
         for entry in item.panel_entries:
             addressed_by_entry[str(entry["panel_entry_sha256"])] = item.addressed_trace
-    compiled: list[dict[str, Any]] = []
-    for index, entry in enumerate(resolver_entries, start=1):
-        try:
-            prepared = _entry_from_exact_transition(
-                entry,
-                addressed=addressed_by_entry[str(entry["panel_entry_sha256"])],
-                scratch_runtime=scratch,
-                support_time=_COMPILE_SUPPORT_TIME,
+    sources: list[Any] = []
+    targets: list[Any] = []
+    for entry in resolver_entries:
+        addressed = addressed_by_entry[str(entry["panel_entry_sha256"])]
+        progress = int(entry["progress_index"])
+        source_state = addressed.path.state_at(progress)
+        target_state = addressed.path.state_at(progress + 1)
+        step = addressed.trace.steps[progress]
+        observed_action_sha256 = rewrite_action_codec_sha256(
+            step.rule_name,
+            step.action,
+            schema_version=action_codec_v4.SCHEMA_VERSION,
+        )
+        if (
+            observed_action_sha256 != entry["action_sha256"]
+            or persistent_slot_state_sha256(source_state) != entry["source_state_sha256"]
+            or persistent_slot_state_sha256(target_state) != entry["target_state_sha256"]
+        ):
+            raise ProcessV2P50RuntimeError(
+                "a selected P50 action or exact state changed after selection"
             )
-        except ProcessV2T1RuntimeError as error:
-            raise ProcessV2P50RuntimeError(str(error)) from error
-        prepared_body = dict(prepared)
-        p50_entry_sha256 = prepared_body.pop("panel_entry_sha256")
-        prepared_body.pop("entry_sha256")
-        prepared_body["p50_entry_sha256"] = p50_entry_sha256
-        prepared_body["partition_role"] = entry["partition_role"]
+        sources.append(source_state)
+        targets.append(target_state)
+    try:
+        compact_rows = compile_teacher_successor_fibers_support_only(
+            scratch.model,
+            tuple(sources),
+            tuple(targets),
+            teacher_action_sha256s=tuple(str(entry["action_sha256"]) for entry in resolver_entries),
+            teacher_families=tuple(str(entry["model_family"]) for entry in resolver_entries),
+            times=tuple(_COMPILE_SUPPORT_TIME for _entry in resolver_entries),
+        )
+    except (SuccessorTrainingError, ValueError) as error:
+        raise ProcessV2P50RuntimeError(
+            "could not compile compact exact P50 teacher-successor fibers"
+        ) from error
+
+    compiled: list[dict[str, Any]] = []
+    for index, (entry, source_state, compact) in enumerate(
+        zip(resolver_entries, sources, compact_rows, strict=True), start=1
+    ):
+        state_payload = encode_state(source_state)
+        if encode_state(decode_state(state_payload)) != state_payload:
+            raise ProcessV2P50RuntimeError("P50 exact-state encoding is not byte-stable")
+        fiber = compact.teacher_fiber
+        prepared_body = {
+            "p50_entry_sha256": entry["p50_entry_sha256"],
+            "model_family": entry["model_family"],
+            "capability_cell_id": entry["capability_cell_id"],
+            "partition_role": entry["partition_role"],
+            "support_time_hex": float(_COMPILE_SUPPORT_TIME).hex(),
+            "source_state_sha256": entry["source_state_sha256"],
+            "target_state_sha256": entry["target_state_sha256"],
+            "successor_canonical_key": entry["canonical_successor_key"],
+            "teacher_action_sha256": entry["action_sha256"],
+            "objective_coefficient": 1,
+            "raw_mark_count": compact.raw_mark_count,
+            "decoded_mark_count": compact.decoded_mark_count,
+            "marks_by_family": dict(compact.marks_by_family),
+            "production_successor_alias_multiplicity": len(fiber.aliases),
+            "virtual_alias_count": len(fiber.state_support.virtual_aliases),
+            "exact_state": state_payload,
+            "teacher_successor_fiber": _teacher_fiber_payload(fiber),
+            "exact_teacher_alias": _alias_payload(compact.exact_teacher_alias),
+            "model_scores_or_probabilities_stored": False,
+            "hazard_included": False,
+        }
         prepared = {
             **prepared_body,
             "p50_compiled_entry_sha256": canonical_sha256(prepared_body),
@@ -724,24 +861,31 @@ def validate_process_v2_p50_prepared_inputs(value: object) -> dict[str, Any]:
         identifier = _require_sha(entry.get("p50_entry_sha256"), field="P50 entry")
         try:
             state = decode_state(entry["exact_state"])
-            partition = compiled_successor_map_from_payload(entry["successor_partition"])
-            teacher = teacher_successor_fiber_from_exact_digest(
-                partition, str(entry["target_state_sha256"])
-            )
-            require_exact_successor_action_identity(
-                partition,
-                target_state_sha256=str(entry["target_state_sha256"]),
-                action_sha256=str(entry["teacher_action_sha256"]),
-            )
+            teacher = _teacher_fiber_from_payload(entry["teacher_successor_fiber"])
+            exact_teacher_alias = _alias_from_payload(entry["exact_teacher_alias"])
         except (KeyError, TypeError, ValueError, SuccessorTrainingError) as error:
             raise ProcessV2P50RuntimeError("a compiled P50 entry is invalid") from error
+        marks_by_family = entry.get("marks_by_family")
         if (
             identifier in observed
             or entry.get("p50_compiled_entry_sha256") != canonical_sha256(body)
             or encode_state(state) != entry["exact_state"]
             or persistent_slot_state_sha256(state) != entry["source_state_sha256"]
-            or partition.source_state_sha256 != entry["source_state_sha256"]
+            or teacher.state_support.source_state_sha256 != entry["source_state_sha256"]
+            or teacher.target_state_sha256 != entry["target_state_sha256"]
             or teacher.target_key != entry["successor_canonical_key"]
+            or exact_teacher_alias not in teacher.aliases
+            or entry.get("production_successor_alias_multiplicity") != len(teacher.aliases)
+            or entry.get("virtual_alias_count") != len(teacher.state_support.virtual_aliases)
+            or type(entry.get("raw_mark_count")) is not int
+            or type(entry.get("decoded_mark_count")) is not int
+            or not 0 < entry["decoded_mark_count"] <= entry["raw_mark_count"]
+            or not isinstance(marks_by_family, Mapping)
+            or any(
+                not isinstance(family, str) or type(count) is not int or count < 0
+                for family, count in marks_by_family.items()
+            )
+            or sum(marks_by_family.values()) != entry["raw_mark_count"]
             or entry.get("partition_role") not in {TRAIN_ROLE, VALIDATION_ROLE}
             or entry.get("hazard_included") is not False
             or entry.get("model_scores_or_probabilities_stored") is not False
@@ -766,7 +910,6 @@ def validate_process_v2_p50_prepared_inputs(value: object) -> dict[str, Any]:
 class LoadedProcessV2P50Inputs:
     prepared: Mapping[str, Any]
     states_by_id: Mapping[str, Any]
-    partitions_by_id: Mapping[str, CompiledStateSuccessorMap]
     fibers_by_id: Mapping[str, TeacherSuccessorFiber]
     metadata_by_id: Mapping[str, Mapping[str, Any]]
 
@@ -775,24 +918,18 @@ def load_process_v2_p50_inputs(value: Mapping[str, Any]) -> LoadedProcessV2P50In
     prepared_value = validate_process_v2_p50_prepared_inputs(value)
     entries = tuple(prepared_value["entries"])
     states: dict[str, Any] = {}
-    partitions: dict[str, CompiledStateSuccessorMap] = {}
     fibers: dict[str, TeacherSuccessorFiber] = {}
     metadata: dict[str, Mapping[str, Any]] = {}
     for entry in entries:
         identifier = str(entry["p50_entry_sha256"])
         state = decode_state(entry["exact_state"])
-        partition = compiled_successor_map_from_payload(entry["successor_partition"])
-        fiber = teacher_successor_fiber_from_exact_digest(
-            partition, str(entry["target_state_sha256"])
-        )
+        fiber = _teacher_fiber_from_payload(entry["teacher_successor_fiber"])
         states[identifier] = state
-        partitions[identifier] = partition
         fibers[identifier] = fiber
         metadata[identifier] = MappingProxyType(dict(entry))
     return LoadedProcessV2P50Inputs(
         prepared=MappingProxyType(prepared_value),
         states_by_id=MappingProxyType(states),
-        partitions_by_id=MappingProxyType(partitions),
         fibers_by_id=MappingProxyType(fibers),
         metadata_by_id=MappingProxyType(metadata),
     )
@@ -937,9 +1074,7 @@ def run_process_v2_p50(
                 "graft_relation_head.weight"
                 if family == "bond_reroute"
                 else (
-                    "ring_restate_context_head.weight"
-                    if family == "ring_system_restate"
-                    else None
+                    "ring_restate_context_head.weight" if family == "ring_system_restate" else None
                 )
             ),
             "finite_nonzero_revision_parameter_gradient_exposure_steps": 0,
@@ -1032,9 +1167,7 @@ def run_process_v2_p50(
             exposure["finite_nonzero_global_gradient_exposure_steps"] += int(finite_nonzero)
             exposure["all_exposure_step_global_gradients_finite"] &= all_gradients_finite
             exposure["cumulative_exposure_step_global_gradient_l2"] += global_gradient_l2
-            exposure["finite_nonzero_action_route_gradient_exposure_steps"] += int(
-                route_l2 > 0.0
-            )
+            exposure["finite_nonzero_action_route_gradient_exposure_steps"] += int(route_l2 > 0.0)
             exposure["all_exposure_step_action_route_gradients_finite"] &= route_finite
             exposure["cumulative_exposure_step_action_route_gradient_l2"] += route_l2
             revision_name = exposure["required_revision_parameter"]
@@ -1052,15 +1185,11 @@ def run_process_v2_p50(
                     raise ProcessV2P50RuntimeError(
                         f"nonfinite or absent {revision_name} gradient at step {step + 1}"
                     )
-                exposure[
-                    "finite_nonzero_revision_parameter_gradient_exposure_steps"
-                ] += int(revision_l2 > 0.0)
-                exposure[
-                    "all_exposure_step_revision_parameter_gradients_finite"
-                ] &= revision_finite
-                exposure[
-                    "cumulative_exposure_step_revision_parameter_gradient_l2"
-                ] += revision_l2
+                exposure["finite_nonzero_revision_parameter_gradient_exposure_steps"] += int(
+                    revision_l2 > 0.0
+                )
+                exposure["all_exposure_step_revision_parameter_gradients_finite"] &= revision_finite
+                exposure["cumulative_exposure_step_revision_parameter_gradient_l2"] += revision_l2
         for cell, count in row_cell_counts.items():
             exposure = cell_exposure[cell]
             exposure["observed_example_count"] += count

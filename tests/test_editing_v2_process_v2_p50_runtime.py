@@ -8,6 +8,16 @@ from types import SimpleNamespace
 
 import pytest
 
+from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+from compose_v4.chem.persistent_state_identity import persistent_slot_state_sha256
+from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.experiments.factorized_successor_training import (
+    StateProductiveSupport,
+    TeacherSuccessorAlias,
+    TeacherSuccessorFiber,
+)
+from compose_v4.rewrite.kernel import canonical_state_key
+from compose_v4.rewrite.trace_shard import encode_state
 from compose_v4.experiments.editing_v2_process_v2_p50_prerequisites import (
     ProcessV2P50ScopedPrerequisites,
 )
@@ -164,3 +174,74 @@ def test_time_derivation_binds_stream_position_and_entry() -> None:
     assert observed == runtime._time_hex(stream_index=0, candidate=first, seed=31)
     assert observed != runtime._time_hex(stream_index=1, candidate=first, seed=31)
     assert observed != runtime._time_hex(stream_index=0, candidate=second, seed=31)
+
+
+def test_compact_prepared_input_round_trips_only_the_teacher_fiber() -> None:
+    state = pad_molecular_graph(smiles_to_molecular_graph("CCO"), 8)
+    source_sha = persistent_slot_state_sha256(state)
+    alias = TeacherSuccessorAlias(
+        family_name="atom_restate",
+        table_name="atom_restate",
+        coordinate=(2, 0),
+    )
+    fiber = TeacherSuccessorFiber(
+        source_key=canonical_state_key(state),
+        target_key="CCN",
+        target_state_sha256=_sha("target-state"),
+        aliases=(alias,),
+        state_support=StateProductiveSupport(
+            source_key=canonical_state_key(state),
+            source_state_sha256=source_sha,
+        ),
+    )
+    identifier = _sha("compact-entry")
+    entry_body = {
+        "p50_entry_sha256": identifier,
+        "model_family": "atom_restate",
+        "capability_cell_id": "ns:atom_restate:element_identity_change",
+        "partition_role": "train",
+        "support_time_hex": float(0.5).hex(),
+        "source_state_sha256": source_sha,
+        "target_state_sha256": fiber.target_state_sha256,
+        "successor_canonical_key": fiber.target_key,
+        "teacher_action_sha256": _sha("teacher-action"),
+        "objective_coefficient": 1,
+        "raw_mark_count": 7,
+        "decoded_mark_count": 1,
+        "marks_by_family": {"atom_restate": 7},
+        "production_successor_alias_multiplicity": 1,
+        "virtual_alias_count": 0,
+        "exact_state": encode_state(state),
+        "teacher_successor_fiber": runtime._teacher_fiber_payload(fiber),
+        "exact_teacher_alias": runtime._alias_payload(alias),
+        "model_scores_or_probabilities_stored": False,
+        "hazard_included": False,
+    }
+    entry = {
+        **entry_body,
+        "p50_compiled_entry_sha256": runtime.canonical_sha256(entry_body),
+    }
+    stream = [{"p50_entry_sha256": identifier}]
+    body = {
+        "schema": runtime.PREPARED_SCHEMA,
+        "schema_version": runtime.PREPARED_SCHEMA_VERSION,
+        "status": runtime.PREPARED_STATUS,
+        **runtime.authority_false_block(),
+        "selection_sha256": _sha("selection"),
+        "prerequisites_binding_sha256": _sha("prerequisites"),
+        "initial_model_state_sha256": _sha("initial"),
+        "training_stream": stream,
+        "training_stream_sha256": runtime.canonical_sha256(stream),
+        "required_cells": [entry_body["capability_cell_id"]],
+        "training_family_step_opportunities": {"atom_restate": 1},
+        "training_cell_step_opportunities": {entry_body["capability_cell_id"]: 1},
+        "validation_entry_sha256s": [],
+        "validation_inventory_sha256": runtime.canonical_sha256([]),
+        "validation_unsupported_required_cells": [],
+        "entry_count": 1,
+        "entries": [entry],
+    }
+    prepared = {**body, "prepared_sha256": runtime.canonical_sha256(body)}
+    loaded = runtime.load_process_v2_p50_inputs(prepared)
+    assert loaded.fibers_by_id[identifier] == fiber
+    assert not hasattr(loaded, "partitions_by_id")

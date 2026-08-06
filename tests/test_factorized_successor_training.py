@@ -13,6 +13,7 @@ from compose_v4.chem.molecular_graph import (
     ORGANIC_VOCABULARY,
     smiles_to_molecular_graph,
 )
+from compose_v4.chem.persistent_state_identity import persistent_slot_state_sha256
 from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.experiments.factorized_successor_training import (
@@ -23,9 +24,11 @@ from compose_v4.experiments.factorized_successor_training import (
     compile_state_productive_support,
     compile_state_successor_map,
     compile_teacher_successor_fiber,
+    compile_teacher_successor_fibers_support_only,
     factorized_successor_bregman_loss,
     factorized_successor_identity_loss,
     forward_teacher_successor_batch,
+    rewrite_action_codec_sha256,
     teacher_successor_fiber_from_compiled_state,
     teacher_successor_fiber_from_exact_digest,
 )
@@ -67,9 +70,9 @@ def _model(catalog, *, seed: int) -> FactorizedTraceletRateModel:
 @pytest.fixture
 def model():
     target = _state("c1ccccc1")
-    source = DegreeBoundedCarbonTreePrior(
-        sizes=(target.n_real_atoms,)
-    ).sample(np.random.default_rng(3), n_slots=_SLOTS)
+    source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
+        np.random.default_rng(3), n_slots=_SLOTS
+    )
     trace = compile_carbon_tree_to_target(
         source,
         target,
@@ -125,9 +128,7 @@ def test_differentiable_fiber_probability_matches_production_mark_sum(model):
         compute_ring_opening=True,
     )
     prediction = forward_teacher_successor_batch(model, batch, (fiber,))
-    observed_probability = float(
-        prediction.selected_successor_log_probability.detach().exp()
-    )
+    observed_probability = float(prediction.selected_successor_log_probability.detach().exp())
     assert observed_probability == pytest.approx(expected_probability, abs=2e-6)
     assert float(prediction.productive_log_probability.detach().exp()) == pytest.approx(
         result.diagnostics.raw_productive_mass,
@@ -140,10 +141,54 @@ def test_differentiable_fiber_probability_matches_production_mark_sum(model):
         abs=2e-6,
     )
     assert float(prediction.productive_hazard.detach()) == pytest.approx(
-        result.marked_law.total_hazard
-        * result.diagnostics.raw_productive_mass,
+        result.marked_law.total_hazard * result.diagnostics.raw_productive_mass,
         abs=2e-6,
     )
+
+
+def test_support_only_teacher_compiler_matches_exhaustive_partition(model, monkeypatch):
+    source = _state("c1ccccc1")
+    result = canonical_successor_result(model.eval(), source, 0.41)
+    marks_by_key: dict[str, list] = defaultdict(list)
+    states_by_key = {}
+    for mark in result.marked_law.marks:
+        successor = _SYSTEM.apply(source, mark.executor_rule_name, mark.action)
+        key = canonical_state_key(successor)
+        if key == result.marked_law.source_key:
+            continue
+        marks_by_key[key].append((mark, successor))
+        states_by_key[key] = successor
+    target_key, target_marks = max(marks_by_key.items(), key=lambda item: len(item[1]))
+    target = states_by_key[target_key]
+    target_digest = persistent_slot_state_sha256(target)
+    teacher_mark = next(
+        mark
+        for mark, successor in target_marks
+        if persistent_slot_state_sha256(successor) == target_digest
+    )
+    exhaustive = compile_state_successor_map(model, source, time=0.41)
+    exhaustive_fiber = teacher_successor_fiber_from_exact_digest(exhaustive, target_digest)
+
+    def encoder_must_not_run(*_args, **_kwargs):
+        raise AssertionError("support-only compilation called the neural encoder")
+
+    monkeypatch.setattr(model, "_encode_batch", encoder_must_not_run)
+    (compiled,) = compile_teacher_successor_fibers_support_only(
+        model,
+        (source,),
+        (target,),
+        teacher_action_sha256s=(
+            rewrite_action_codec_sha256(
+                teacher_mark.executor_rule_name,
+                teacher_mark.action,
+            ),
+        ),
+        teacher_families=(teacher_mark.family_name,),
+        times=(0.41,),
+    )
+    assert compiled.teacher_fiber == exhaustive_fiber
+    assert compiled.raw_mark_count == len(result.marked_law.marks)
+    assert compiled.decoded_mark_count < compiled.raw_mark_count
 
 
 def test_alias_aggregation_changes_loss_and_gradients(model):
@@ -381,17 +426,23 @@ def test_state_compiler_derivatives_preserve_public_fiber_behavior(model):
     )
 
     assert strict == derived
-    assert compile_teacher_successor_fiber(
-        model,
-        source,
-        target,
-        time=0.31,
-    ) == derived
-    assert compile_state_productive_support(
-        model,
-        source,
-        time=0.31,
-    ) == compiled.state_support
+    assert (
+        compile_teacher_successor_fiber(
+            model,
+            source,
+            target,
+            time=0.31,
+        )
+        == derived
+    )
+    assert (
+        compile_state_productive_support(
+            model,
+            source,
+            time=0.31,
+        )
+        == compiled.state_support
+    )
 
     with pytest.raises(
         SuccessorTrainingError,

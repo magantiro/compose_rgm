@@ -57,7 +57,7 @@ def _clean_source_fixture(tmp_path: Path) -> tuple[Path, str]:
 
 def test_launcher_is_the_exact_bounded_fast_path() -> None:
     source = _source()
-    assert launcher.MAX_CPU_CONTAINERS == 40
+    assert launcher.MAX_CPU_CONTAINERS == 80
     assert launcher.CPU_PER_LEAF == 1.0
     assert source.count('gpu="A10G"') == 1
     assert "prepare_leaf_remote.starmap(" in source
@@ -126,18 +126,9 @@ def test_driver_orders_selection_fanout_reduction_and_gpu() -> None:
 def test_scoped_t1_materialization_binds_the_current_authenticated_source() -> None:
     body = ast.get_source_segment(_source(), _function("materialize_scoped_t1_remote"))
     assert body is not None
-    assert (
-        "current_process_identity_sha256=source.contracts.process_identity_sha256"
-        in body
-    )
-    assert (
-        "current_active8_completion_sha256=source.index.active8_completion_sha256"
-        in body
-    )
-    assert (
-        'current_gate_zero_decision_sha256=source.decision["decision_sha256"]'
-        in body
-    )
+    assert "current_process_identity_sha256=source.contracts.process_identity_sha256" in body
+    assert "current_active8_completion_sha256=source.index.active8_completion_sha256" in body
+    assert 'current_gate_zero_decision_sha256=source.decision["decision_sha256"]' in body
 
 
 def test_cpu_map_sends_addresses_not_selection_payloads() -> None:
@@ -289,9 +280,7 @@ def test_selection_cache_is_bound_to_the_fresh_prerequisite_chain() -> None:
         "prerequisites_binding_sha256": "a" * 64,
         "prerequisites": prerequisites.as_payload(),
     }
-    launcher._require_selection_prerequisite_binding(
-        selection, prerequisites=prerequisites
-    )
+    launcher._require_selection_prerequisite_binding(selection, prerequisites=prerequisites)
     with pytest.raises(RuntimeError, match="selection prerequisite binding disagrees"):
         launcher._require_selection_prerequisite_binding(
             {**selection, "prerequisites_binding_sha256": "c" * 64},
@@ -303,9 +292,7 @@ def test_selection_is_reopened_before_the_metadata_scan() -> None:
     body = ast.get_source_segment(_source(), _function("prepare_selection_remote"))
     assert body is not None
     assert "selection_cache_hit = selection_path.is_file()" in body
-    assert body.index("if selection_cache_hit:") < body.index(
-        'loaded["build_selection"]('
-    )
+    assert body.index("if selection_cache_hit:") < body.index('loaded["build_selection"](')
     assert 'label="the cached Process-V2 P50 selection"' in body
 
 
@@ -317,7 +304,7 @@ def test_cpu_groups_are_complete_disjoint_and_bounded() -> None:
     assert len({item for group in groups for item in group}) == len(values)
 
 
-@pytest.mark.parametrize("maximum", [0, 41, True])
+@pytest.mark.parametrize("maximum", [0, 81, True])
 def test_cpu_groups_refuse_invalid_bounds(maximum: int) -> None:
     with pytest.raises(ValueError, match="must lie"):
         launcher._groups(("a",), maximum=maximum)

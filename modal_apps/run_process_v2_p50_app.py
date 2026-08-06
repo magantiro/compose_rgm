@@ -45,7 +45,7 @@ LEAF_FILENAME = "PROCESS_V2_P50_PREPARED_LEAF.json"
 TASKS_DIRNAME = "tasks"
 TERMINAL_CHECKPOINT_FILENAME = "PROCESS_V2_P50_TERMINAL.pt"
 
-MAX_CPU_CONTAINERS = 40
+MAX_CPU_CONTAINERS = 80
 CPU_PER_LEAF = 1.0
 CPU_MEMORY_MB = 8 * 1024
 CPU_LEAF_TIMEOUT_SECONDS = 45 * 60
@@ -71,6 +71,8 @@ _RUNNER_IMPLEMENTATION_SOURCES = (
     "src/compose_v4/experiments/editing_v2_process_v2_p50_runtime.py",
     "src/compose_v4/experiments/editing_v2_process_v2_t1_scoped_result.py",
     "src/compose_v4/experiments/editing_v2_process_v2_t1_runtime.py",
+    "src/compose_v4/experiments/factorized_successor_training.py",
+    "src/compose_v4/experiments/score_free_successor_support.py",
 )
 
 image = (
@@ -635,18 +637,14 @@ def materialize_scoped_t1_remote(
         )
     )
     source = _open_source(
-        active8_run_root=_require_artifact_path(
-            active8_run_root, field="active8_run_root"
-        ),
+        active8_run_root=_require_artifact_path(active8_run_root, field="active8_run_root"),
         gate_zero_decision_path=_require_artifact_path(
             gate_zero_decision_path, field="gate_zero_decision_path"
         ),
         loaded=loaded,
     )
     _scratch, _binding, score_receipt = loaded["build_scratch"](source)
-    capacity_policy = loaded["load_policy"](
-        loaded["T1_CAPACITY_POLICY"], repo_root=REMOTE_ROOT
-    )
+    capacity_policy = loaded["load_policy"](loaded["T1_CAPACITY_POLICY"], repo_root=REMOTE_ROOT)
     sources: dict[str, dict[str, Any]] = {}
     source_hashes: dict[str, str] = {}
     for name, descriptor in manifest["input_sources"].items():
@@ -680,9 +678,7 @@ def materialize_scoped_t1_remote(
     decision_path = run_root / loaded["SCOPED_T1_DECISION_FILENAME"]
     _publish_canonical(result_path, result, loaded=loaded)
     result_file_sha256 = _file_sha256(result_path)
-    decision = loaded["build_scoped_t1_decision"](
-        result, result_file_sha256=result_file_sha256
-    )
+    decision = loaded["build_scoped_t1_decision"](result, result_file_sha256=result_file_sha256)
     _publish_canonical(decision_path, decision, loaded=loaded)
     decision = loaded["validate_scoped_t1_decision"](
         _read_canonical_object(decision_path, label="the scoped T1 decision"),
@@ -747,13 +743,9 @@ def prepare_selection_remote(
     selection_cache_hit = selection_path.is_file()
     if selection_cache_hit:
         selection = loaded["validate_selection"](
-            _read_canonical_object(
-                selection_path, label="the cached Process-V2 P50 selection"
-            )
+            _read_canonical_object(selection_path, label="the cached Process-V2 P50 selection")
         )
-        _require_selection_prerequisite_binding(
-            selection, prerequisites=prerequisites
-        )
+        _require_selection_prerequisite_binding(selection, prerequisites=prerequisites)
     else:
         source = _open_source(
             active8_run_root=active8_root,
@@ -761,13 +753,9 @@ def prepare_selection_remote(
             loaded=loaded,
         )
         with _heartbeat("process_v2_p50_metadata_selection"):
-            selection = loaded["build_selection"](
-                source, prerequisites=prerequisites
-            )
+            selection = loaded["build_selection"](source, prerequisites=prerequisites)
         selection = loaded["validate_selection"](selection)
-        _require_selection_prerequisite_binding(
-            selection, prerequisites=prerequisites
-        )
+        _require_selection_prerequisite_binding(selection, prerequisites=prerequisites)
         _publish_canonical(selection_path, selection, loaded=loaded)
         artifact_volume.commit()
     task_ids = sorted({str(entry["task_identity_sha256"]) for entry in selection["entries"]})
@@ -1026,8 +1014,7 @@ def run_p50_gpu_remote(
         "execution_environment": environment,
     }
     if (
-        score_receipt["receipt_sha256"]
-        != prerequisites.t1_score_revision_receipt_sha256
+        score_receipt["receipt_sha256"] != prerequisites.t1_score_revision_receipt_sha256
         or score_receipt["current_initial_model_state_sha256"]
         != prerequisites.t1_initial_model_state_sha256
         or loaded["state_dict_sha256"](scratch.model.state_dict())

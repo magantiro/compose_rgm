@@ -13,17 +13,21 @@ from __future__ import annotations
 import hashlib
 from dataclasses import dataclass
 
+import numpy as np
 import torch
 from torch import Tensor
 from torch.nn import functional as F
 
-from compose_v4.chem.molecular_graph import MolecularGraph
+from compose_v4.chem.molecular_graph import MolecularGraph, is_element
 from compose_v4.chem.persistent_state_identity import (
     persistent_slot_state_sha256,
 )
 from compose_v4.experiments.production_successor_kernel import (
     ProductionSuccessorKernelError,
     enumerate_factorized_marked_law,
+)
+from compose_v4.experiments.score_free_successor_support import (
+    enumerate_factorized_legal_support_many,
 )
 from compose_v4.model.factorized_tracelet_rate_model import (
     _CYCLE_OP_EXECUTOR_TO_FAMILY,
@@ -116,6 +120,35 @@ class TeacherSuccessorFiber:
             raise ValueError("teacher fiber and state support have different sources")
         if set(self.aliases) & set(self.state_support.virtual_aliases):
             raise ValueError("a teacher successor cannot also be a virtual self-event")
+
+
+@dataclass(frozen=True)
+class SupportOnlyTeacherFiberCompilation:
+    """Compact exact geometry needed by successor-level optimization.
+
+    ``raw_mark_count`` is the all-family mask census. ``decoded_mark_count`` is
+    the smaller invariant-compatible subset that was executed to recover the
+    teacher and canonical-self fibers.  Neither value contains model scores.
+    """
+
+    teacher_fiber: TeacherSuccessorFiber
+    exact_teacher_alias: TeacherSuccessorAlias
+    raw_mark_count: int
+    decoded_mark_count: int
+    marks_by_family: tuple[tuple[str, int], ...]
+
+    def __post_init__(self) -> None:
+        if self.exact_teacher_alias not in self.teacher_fiber.aliases:
+            raise ValueError("support-only exact teacher alias is absent from its fiber")
+        if type(self.raw_mark_count) is not int or self.raw_mark_count <= 0:
+            raise ValueError("support-only raw_mark_count must be positive")
+        if (
+            type(self.decoded_mark_count) is not int
+            or not 0 < self.decoded_mark_count <= self.raw_mark_count
+        ):
+            raise ValueError("support-only decoded mark count is inconsistent")
+        if tuple(sorted(dict(self.marks_by_family).items())) != self.marks_by_family:
+            raise ValueError("support-only family census must be sorted and unique")
 
 
 @dataclass(frozen=True, order=True)
@@ -443,6 +476,200 @@ def compile_state_successor_map(
         ),
         virtual_marks=tuple(sorted(virtual_marks)),
     )
+
+
+_SAME_CARDINALITY_EDGE_PRESERVING_FAMILIES = frozenset(
+    {
+        "atom_restate",
+        "bond_reorder",
+        "bond_reroute",
+        "ring_system_restate",
+    }
+)
+_CANONICAL_SELF_CANDIDATE_FAMILIES = frozenset(
+    {
+        # Insert/delete and cycle moves change active cardinality or edge count.
+        # A legal semantic atom restate changes one atom-label multiset entry;
+        # a legal bond reorder changes total bond-order sum. Canonical identity
+        # preserves each invariant. Reroute and ring restatement preserve these
+        # coarse invariants and are therefore still executed against source_key.
+        # The independent exhaustive 512-state oracle additionally observed
+        # zero missed self aliases across all eight families.
+        "bond_reroute",
+        "ring_system_restate",
+    }
+)
+
+
+def _active_atom_and_edge_count(state: MolecularGraph) -> tuple[int, int]:
+    real_slots = np.flatnonzero(is_element(np.asarray(state.atom_types)))
+    active = int(real_slots.size)
+    real_bonds = np.asarray(state.bonds)[np.ix_(real_slots, real_slots)]
+    edges = int(np.count_nonzero(np.triu(real_bonds, k=1)))
+    return active, edges
+
+
+def _target_compatible_families(
+    source: MolecularGraph,
+    target: MolecularGraph,
+) -> frozenset[str]:
+    """Families that can share a canonical target by hard graph invariants."""
+
+    source_atoms, source_edges = _active_atom_and_edge_count(source)
+    target_atoms, target_edges = _active_atom_and_edge_count(target)
+    atom_delta = target_atoms - source_atoms
+    edge_delta = target_edges - source_edges
+    if atom_delta == 1:
+        return frozenset({"atom_insert"})
+    if atom_delta == -1:
+        return frozenset({"atom_delete"})
+    if atom_delta != 0:
+        return frozenset()
+    if edge_delta == 1:
+        return frozenset({"cycle_insert"})
+    if edge_delta == -1:
+        return frozenset({"cycle_attach"})
+    if edge_delta == 0:
+        return _SAME_CARDINALITY_EDGE_PRESERVING_FAMILIES
+    return frozenset()
+
+
+def compile_teacher_successor_fibers_support_only(
+    model: FactorizedTraceletRateModel,
+    sources: tuple[MolecularGraph, ...],
+    targets: tuple[MolecularGraph, ...],
+    *,
+    teacher_action_sha256s: tuple[str, ...],
+    teacher_families: tuple[str, ...],
+    times: tuple[float, ...],
+    system: RewriteSystem | None = None,
+) -> tuple[SupportOnlyTeacherFiberCompilation, ...]:
+    """Compile exact teacher/self fibers without scoring irrelevant marks.
+
+    Canonical-equivalent aliases cannot cross active-atom or real-edge-count
+    deltas.  The routine therefore decodes only families compatible with the
+    exact source/target transition, plus every edge-preserving family that
+    could in principle create a canonical self-event.  The complete production
+    mask census is still recorded.  An exhaustive bounded equivalence gate is
+    the independent oracle for these invariant reductions.
+    """
+
+    count = len(sources)
+    if not (
+        count
+        and len(targets) == count
+        and len(teacher_action_sha256s) == count
+        and len(teacher_families) == count
+        and len(times) == count
+    ):
+        raise ValueError("support-only teacher compilation inputs must be nonempty and aligned")
+    process = resolve_successor_process_runtime(model, system=system)
+    included: list[frozenset[str]] = []
+    for source, target, teacher_family in zip(sources, targets, teacher_families, strict=True):
+        target_families = _target_compatible_families(source, target)
+        if teacher_family not in target_families:
+            raise SuccessorTrainingError(
+                "teacher family disagrees with exact cardinality/edge-count transition"
+            )
+        included.append(target_families | _CANONICAL_SELF_CANDIDATE_FAMILIES)
+    try:
+        support_rows = enumerate_factorized_legal_support_many(
+            model,
+            sources,
+            times,
+            included_families=tuple(included),
+        )
+    except (ProductionSuccessorKernelError, ValueError) as error:
+        raise SuccessorTrainingError(
+            "could not enumerate score-free production support for teacher fibers"
+        ) from error
+
+    compiled_rows: list[SupportOnlyTeacherFiberCompilation] = []
+    for source, target, teacher_action_sha256, teacher_family, support in zip(
+        sources,
+        targets,
+        teacher_action_sha256s,
+        teacher_families,
+        support_rows,
+        strict=True,
+    ):
+        source_key = canonical_state_key(source)
+        target_key = canonical_state_key(target)
+        target_digest = persistent_slot_state_sha256(target)
+        if support.source_key != source_key or target_key == source_key:
+            raise SuccessorTrainingError(
+                "support-only teacher compilation received a virtual or mismatched target"
+            )
+        target_marks: list[CompiledSuccessorMark] = []
+        virtual_marks: list[CompiledSuccessorMark] = []
+        exact_teacher_aliases: list[TeacherSuccessorAlias] = []
+        for mark in support.marks:
+            try:
+                successor = process.system.apply(
+                    source,
+                    mark.executor_rule_name,
+                    mark.action,
+                )
+            except Exception as error:
+                raise SuccessorTrainingError(
+                    "a score-free legal mark failed under the production executor"
+                ) from error
+            successor_key = canonical_state_key(successor)
+            if successor_key not in {source_key, target_key}:
+                continue
+            successor_digest = persistent_slot_state_sha256(successor)
+            action_sha256 = rewrite_action_codec_sha256(
+                mark.executor_rule_name,
+                mark.action,
+                schema_version=process.action_codec_schema_version,
+            )
+            compiled = CompiledSuccessorMark(
+                alias=_alias(
+                    family_name=mark.family_name,
+                    table_name=mark.table_name,
+                    coordinate=mark.coordinate,
+                ),
+                successor_state_sha256=successor_digest,
+                action_sha256=action_sha256,
+            )
+            if successor_key == source_key:
+                virtual_marks.append(compiled)
+                continue
+            target_marks.append(compiled)
+            if (
+                mark.family_name == teacher_family
+                and successor_digest == target_digest
+                and action_sha256 == teacher_action_sha256
+            ):
+                exact_teacher_aliases.append(compiled.alias)
+        if len(exact_teacher_aliases) != 1:
+            raise SuccessorTrainingError(
+                "teacher action is not one exact coordinate of the support-only target fiber"
+            )
+        ordered_target = tuple(sorted(target_marks))
+        ordered_virtual = tuple(sorted(virtual_marks))
+        state_support = StateProductiveSupport(
+            source_key=source_key,
+            source_state_sha256=persistent_slot_state_sha256(source),
+            virtual_aliases=tuple(mark.alias for mark in ordered_virtual),
+        )
+        fiber = TeacherSuccessorFiber(
+            source_key=source_key,
+            target_key=target_key,
+            target_state_sha256=target_digest,
+            aliases=tuple(mark.alias for mark in ordered_target),
+            state_support=state_support,
+        )
+        compiled_rows.append(
+            SupportOnlyTeacherFiberCompilation(
+                teacher_fiber=fiber,
+                exact_teacher_alias=exact_teacher_aliases[0],
+                raw_mark_count=support.raw_mark_count,
+                decoded_mark_count=len(support.marks),
+                marks_by_family=support.marks_by_family,
+            )
+        )
+    return tuple(compiled_rows)
 
 
 def teacher_successor_fiber_from_compiled_state(
@@ -1010,6 +1237,7 @@ __all__ = [
     "FactorizedSuccessorPrediction",
     "FactorizedSuccessorPartitionPrediction",
     "StateProductiveSupport",
+    "SupportOnlyTeacherFiberCompilation",
     "SuccessorProcessRuntime",
     "SuccessorTrainingError",
     "TeacherSuccessorAlias",
@@ -1017,6 +1245,7 @@ __all__ = [
     "compile_state_productive_support",
     "compile_state_successor_map",
     "compile_teacher_successor_fiber",
+    "compile_teacher_successor_fibers_support_only",
     "factorized_hazard_bregman_loss",
     "factorized_successor_bregman_loss",
     "factorized_successor_identity_loss",

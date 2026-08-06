@@ -4,6 +4,7 @@ These tests use real model masks, the real executor, and real molecular
 canonicalization.  The independent dictionary implementation is imported only
 here as an oracle; reported results use the segmented production path.
 """
+
 from __future__ import annotations
 
 from collections import defaultdict
@@ -30,6 +31,9 @@ from compose_v4.experiments.production_successor_kernel import (
     _coordinate_action,
     canonical_successor_result,
     enumerate_factorized_marked_law,
+)
+from compose_v4.experiments.score_free_successor_support import (
+    enumerate_factorized_legal_support_many,
 )
 from compose_v4.experiments.reference_successor_kernel import (
     compare_against_reference,
@@ -83,9 +87,9 @@ def _state(smiles: str):
 def ring_catalog():
     def trace(smiles: str):
         target = _state(smiles)
-        source = DegreeBoundedCarbonTreePrior(
-            sizes=(target.n_real_atoms,)
-        ).sample(np.random.default_rng(1), n_slots=_SLOTS)
+        source = DegreeBoundedCarbonTreePrior(sizes=(target.n_real_atoms,)).sample(
+            np.random.default_rng(1), n_slots=_SLOTS
+        )
         return compile_carbon_tree_to_target(
             source,
             target,
@@ -93,9 +97,7 @@ def ring_catalog():
             align_source=True,
         )
 
-    return build_typed_ring_catalog(
-        tuple(trace(smiles) for smiles in ("c1ccccc1", "C1CCNCC1"))
-    )
+    return build_typed_ring_catalog(tuple(trace(smiles) for smiles in ("c1ccccc1", "C1CCNCC1")))
 
 
 @pytest.fixture(scope="module")
@@ -139,10 +141,33 @@ def _prepared_batch(model, state, *, compute_ring_system_delete=None):
 
 
 def _coordinates(mask):
-    return {
-        tuple(int(value) for value in row)
-        for row in torch.nonzero(mask[0], as_tuple=False)
-    }
+    return {tuple(int(value) for value in row) for row in torch.nonzero(mask[0], as_tuple=False)}
+
+
+def test_score_free_support_matches_scored_legal_coordinates(model, monkeypatch):
+    states = (_state("CCO"), _state("c1ccccc1"))
+    scored = tuple(enumerate_factorized_marked_law(model, state, 0.37) for state in states)
+
+    def encoder_must_not_run(*_args, **_kwargs):
+        raise AssertionError("score-free support called the neural encoder")
+
+    monkeypatch.setattr(model, "_encode_batch", encoder_must_not_run)
+    selected_family = frozenset({"atom_delete", "cycle_attach"})
+    support = enumerate_factorized_legal_support_many(
+        model,
+        states,
+        (0.37, 0.37),
+        included_families=(selected_family, selected_family),
+    )
+    for row, law in zip(support, scored, strict=True):
+        assert row.raw_mark_count == len(law.marks)
+        expected = {
+            (mark.family_name, mark.table_name, mark.coordinate)
+            for mark in law.marks
+            if mark.family_name in selected_family
+        }
+        observed = {(mark.family_name, mark.table_name, mark.coordinate) for mark in row.marks}
+        assert observed == expected
 
 
 def _raw_and_filtered_tables(model, state):
@@ -260,9 +285,7 @@ def test_fast_primitive_charge_masks_equal_exhaustive_executor_oracle(model):
             if raw_coordinates - expected_coordinates:
                 excluded_families.add(family_name)
 
-    primitive_families = {
-        family_name for family_name, _ in _PRIMITIVE_TABLE_FAMILIES
-    }
+    primitive_families = {family_name for family_name, _ in _PRIMITIVE_TABLE_FAMILIES}
     assert retained_families == primitive_families
     assert excluded_families == primitive_families
 
@@ -301,9 +324,7 @@ def test_ring_macro_candidates_equal_exact_charge_policy_oracle(
         )
         assert batch.ring_delete_actions is not None
         assert batch.ring_delete_actions[0] == expected_delete
-        removed["ring_system_delete"] |= bool(
-            set(raw_delete) - set(expected_delete)
-        )
+        removed["ring_system_delete"] |= bool(set(raw_delete) - set(expected_delete))
         retained["ring_system_delete"] |= bool(expected_delete)
 
         raw_restate = enumerate_ring_system_restate_actions(
@@ -316,9 +337,7 @@ def test_ring_macro_candidates_equal_exact_charge_policy_oracle(
             raw_restate,
         )
         assert batch.ring_restate_actions[0] == expected_restate
-        removed["ring_system_restate"] |= bool(
-            set(raw_restate) - set(expected_restate)
-        )
+        removed["ring_system_restate"] |= bool(set(raw_restate) - set(expected_restate))
         retained["ring_system_restate"] |= bool(expected_restate)
 
     assert removed == {
@@ -393,24 +412,21 @@ def test_segmented_production_path_matches_dictionary_oracle(model):
     )
 
     produced_probabilities = {
-        successor.key: successor.probability
-        for successor in result.batch.successors
+        successor.key: successor.probability for successor in result.batch.successors
     }
     reference_probabilities = {
-        successor.key: successor.probability
-        for successor in reference.successors
+        successor.key: successor.probability for successor in reference.successors
     }
-    assert compare_against_reference(
-        produced_probabilities,
-        reference_probabilities,
-        tolerance=2e-7,
-    ) == []
-    assert {
-        successor.key: successor.alias_count
-        for successor in result.batch.successors
-    } == {
-        successor.key: successor.alias_count
-        for successor in reference.successors
+    assert (
+        compare_against_reference(
+            produced_probabilities,
+            reference_probabilities,
+            tolerance=2e-7,
+        )
+        == []
+    )
+    assert {successor.key: successor.alias_count for successor in result.batch.successors} == {
+        successor.key: successor.alias_count for successor in reference.successors
     }
     assert result.batch.virtual_mass == pytest.approx(
         reference.virtual_mass,
@@ -421,11 +437,7 @@ def test_segmented_production_path_matches_dictionary_oracle(model):
 def test_alias_mass_is_summed_before_productive_conditioning(model):
     state = _state("c1ccccc1")
     result = canonical_successor_result(model, state, 0.29)
-    aliased = [
-        successor
-        for successor in result.batch.successors
-        if successor.alias_count > 1
-    ]
+    aliased = [successor for successor in result.batch.successors if successor.alias_count > 1]
     assert aliased, "symmetric benzene should expose at least one aliased successor"
 
     raw_mass_by_successor: dict[str, float] = defaultdict(float)
@@ -445,8 +457,7 @@ def test_alias_mass_is_summed_before_productive_conditioning(model):
     for successor in aliased:
         assert successor.alias_count == raw_count_by_successor[successor.key]
         assert successor.probability == pytest.approx(
-            raw_mass_by_successor[successor.key]
-            / result.diagnostics.raw_productive_mass,
+            raw_mass_by_successor[successor.key] / result.diagnostics.raw_productive_mass,
             abs=2e-7,
         )
 
@@ -477,16 +488,11 @@ def test_delete_disabled_direct_kernel_identity_and_support_are_explicit(
 
     flags = dict(result.batch.identity.support_signature.capability_flags)
     assert flags["enable_ring_system_delete"] is False
-    assert (
-        result.batch.identity.support_signature.charge_policy
-        == CHARGE_POLICY_VERSION
-    )
+    assert result.batch.identity.support_signature.charge_policy == CHARGE_POLICY_VERSION
     assert result.batch.identity.support_signature.ringcore_configuration.endswith(
         ":ring_system_delete_disabled"
     )
-    assert not any(
-        mark.family_name == "ring_system_delete" for mark in result.marked_law.marks
-    )
+    assert not any(mark.family_name == "ring_system_delete" for mark in result.marked_law.marks)
     assert any(mark.family_name == "cycle_attach" for mark in result.marked_law.marks)
 
 
