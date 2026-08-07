@@ -15,6 +15,7 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import multiprocessing
 import os
 import platform
 import re
@@ -56,6 +57,14 @@ COLLATED_TASKS_DIRNAME = "collated_tasks"
 
 MAX_CPU_CONTAINERS = 100
 CPU_PER_LEAF = 1.0
+#: Cores per PREP leaf. Modal bills core-seconds, so N cores in one container
+#: cost the same as N containers -- but containers are tier-capped and cores are
+#: not, which makes this the only lever that buys wall clock without buying
+#: compute. Memory scales with it because each forked child holds its own
+#: chemistry cache.
+PREP_CPU_PER_LEAF = 8.0
+PREP_MEMORY_MB = 32 * 1024
+PREP_COMPILE_WORKERS = 8
 CPU_MEMORY_MB = 8 * 1024
 CPU_LEAF_TIMEOUT_SECONDS = 45 * 60
 #: Held back from a prep slice's compile budget for the collation,
@@ -1369,10 +1378,56 @@ def chunk_pilot_remote(
     return payload
 
 
+#: Set by the parent before forking; children inherit it copy-on-write.  A
+#: module global rather than an argument because fork inheritance is the point:
+#: the opened source and the built model must NOT be pickled to the children.
+_FORK_STATE: dict[str, Any] = {}
+
+
+def _compile_subrange_child(sub_offset: int, sub_limit: int) -> dict[str, Any]:
+    """Compile and publish ONE sub-range in a forked child.
+
+    Each child publishes its own offset-addressed slice, so the parent never
+    merges tensors across processes and a child that stops on its deadline
+    degrades exactly the way a whole slice would.
+    """
+
+    state = _FORK_STATE
+    loaded = state["loaded"]
+    started = time.monotonic()
+    result = loaded["compile_chunk"](
+        state["source"],
+        state["model"],
+        task_identity_sha256=state["task_identity_sha256"],
+        offset=int(sub_offset),
+        limit=int(sub_limit),
+        deadline_seconds=float(state["deadline_seconds"]),
+        progress_callback=None,
+    )
+    receipt = loaded["publish_chunk"](result, output_root=Path(state["output_root"]))
+    elapsed = time.monotonic() - started
+    payload = {
+        "entry_offset": int(sub_offset),
+        "requested_entry_count": int(sub_limit),
+        "entry_count": int(receipt["entry_count"]),
+        "stopped_on_deadline": bool(result["stopped_on_deadline"]),
+        "next_offset": int(result["next_offset"]),
+        "unfinished_entry_count": int(result["unfinished_entry_count"]),
+        "elapsed_seconds": elapsed,
+        "ms_per_entry": 1000.0 * elapsed / max(int(receipt["entry_count"]), 1),
+        "receipt_sha256": receipt["receipt_sha256"],
+    }
+    print(
+        json.dumps({"phase": "process_v2_prep_subrange_complete", **payload}, sort_keys=True),
+        flush=True,
+    )
+    return payload
+
+
 @app.function(
     image=image,
-    cpu=CPU_PER_LEAF,
-    memory=CPU_MEMORY_MB,
+    cpu=PREP_CPU_PER_LEAF,
+    memory=PREP_MEMORY_MB,
     timeout=CPU_LEAF_TIMEOUT_SECONDS,
     max_containers=MAX_CPU_CONTAINERS,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
@@ -1385,6 +1440,7 @@ def prep_slice_remote(
     offset: int,
     limit: int,
     revision: dict[str, Any],
+    compile_workers: int = 1,
 ) -> dict[str, Any]:
     """Compile ONE slice of one chunk and publish it. Trains nothing."""
 
@@ -1477,6 +1533,64 @@ def prep_slice_remote(
             f"setup consumed {started - entered:.0f}s of the "
             f"{CPU_LEAF_TIMEOUT_SECONDS}s worker wall, leaving no compile budget"
         )
+    # Fan the slice across processes INSIDE the container.  Modal bills
+    # core-seconds, so N cores in one container cost the same as N containers
+    # -- but the container cap is a tier limit and the core count is not, which
+    # makes this the only lever that buys wall-clock without buying compute.
+    # The fork happens AFTER setup so the ~110s source open and scratch build
+    # are paid once and inherited copy-on-write, and each child publishes its
+    # OWN offset-addressed slice, so nothing has to be merged back.
+    workers = max(1, int(compile_workers))
+    if workers > 1 and int(limit) > workers:
+        global _FORK_STATE
+        _FORK_STATE = {
+            "source": source,
+            "model": scratch.model,
+            "loaded": loaded,
+            "task_identity_sha256": task_identity_sha256,
+            "output_root": str(preflight_root),
+            "deadline_seconds": deadline,
+        }
+        span = int(limit) // workers
+        ranges = [
+            (int(offset) + index * span, span if index < workers - 1 else int(limit) - span * (workers - 1))
+            for index in range(workers)
+        ]
+        _emit(
+            {
+                "phase": "process_v2_prep_slice_fanned",
+                "compile_workers": workers,
+                "sub_ranges": ranges,
+            }
+        )
+        context = multiprocessing.get_context("fork")
+        with context.Pool(processes=workers) as pool:
+            children = pool.starmap(_compile_subrange_child, ranges)
+        entries_published = sum(int(row["entry_count"]) for row in children)
+        payload = {
+            "phase": "process_v2_prep_slice_complete",
+            "task_identity_sha256": task_identity_sha256,
+            "entry_offset": int(offset),
+            "entry_count": entries_published,
+            "requested_entry_count": int(limit),
+            "compile_workers": workers,
+            "sub_slices": children,
+            "stopped_on_deadline": any(bool(row["stopped_on_deadline"]) for row in children),
+            "next_offset": int(offset) + entries_published,
+            "unfinished_entry_count": int(limit) - entries_published,
+            "elapsed_seconds": time.monotonic() - started,
+            "setup_seconds": started - entered,
+            "worker_seconds": time.monotonic() - entered,
+            "worker_timeout_seconds": CPU_LEAF_TIMEOUT_SECONDS,
+            "ms_per_entry_wall": (
+                1000.0 * (time.monotonic() - started) / max(entries_published, 1)
+            ),
+            "p50_training_launched": False,
+        }
+        artifact_volume.commit()
+        print(json.dumps(payload, sort_keys=True), flush=True)
+        return payload
+
     result = loaded["compile_chunk"](
         source,
         scratch.model,
@@ -1526,6 +1640,7 @@ def prep_subset(
     chunk_plan_path: str,
     slice_size: int = 300,
     max_slices: int = 0,
+    compile_workers: int = PREP_COMPILE_WORKERS,
 ) -> None:
     """Fan a pinned chunk list out as EQUAL slices, one worker per slice.
 
@@ -1559,6 +1674,7 @@ def prep_subset(
                     offset,
                     min(int(slice_size), total - offset),
                     revision,
+                    int(compile_workers),
                 )
             )
     if int(max_slices) > 0:

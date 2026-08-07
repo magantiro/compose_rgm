@@ -495,7 +495,10 @@ def test_the_prep_slice_default_leaves_headroom_under_the_worker_timeout() -> No
     defaults = dict(
         zip(
             [argument.arg for argument in node.args.args][-len(node.args.defaults) :],
-            [ast.literal_eval(value) for value in node.args.defaults],
+            [
+                ast.literal_eval(value) if isinstance(value, ast.Constant) else value.id
+                for value in node.args.defaults
+            ],
             strict=True,
         )
     )
