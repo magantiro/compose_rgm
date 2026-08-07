@@ -585,3 +585,42 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   Distinguish it from a real regression by import closure, not by re-running: the failing test's
   33-module closure had ZERO overlap with the files the branch changed, which is structural proof.
   This is the LOAD half of the hazard whose WRITE half is the 2026-08-02 P50 working-tree race.
+
+## 2026-08-06 (P50 compile cost: measured, and where it actually goes)
+
+- **The teacher-fiber compile costs ~2.12 s/entry on real drug-like leads at 40 slots** (measured,
+  `compile_prepared_entries`, n=24 Jin leads). Full train corpus of 1,803,032 transitions = **13.3 h on
+  80 CPU workers**. Stored form is **2,503 B/entry** (independently confirmed against a real production
+  leaf at 2,585 B/entry), so full-corpus leaves are ~4.5 GiB; the COLLATED tensors are 92 KiB/entry
+  (~158 GiB) because collation pads to fixed shapes.
+- **Where the time goes (cProfile, 8 entries):** `prepare_factorized_mark_batch` is 88% of it, and inside
+  it `_semantic_cycle_close_admission_mask` (1.48 s/state) plus `_semantic_atom_restate_admission_mask`
+  (1.06 s/state) are ~90%. The leaf cost is **55,210 `molecular_graph_to_smiles` calls for 8 entries --
+  ~6,900 RDKit round-trips per entry.** RDKit sanitization is the authoritative validity gate, is C++
+  per-molecule, and does not vectorise.
+- **THE BIG ONE -- the expensive chemistry is computed TWICE on the same states.** The compile calls
+  `prepare_factorized_mark_batch` (via `enumerate_factorized_legal_support_many`), extracts the teacher
+  and self-event aliases, and **discards the masks**; then `collate_process_v2_p50_entries` calls
+  `FactorizedMarkCollator`, which calls `prepare_factorized_mark_batch` **again** on the same states to
+  build the tensors. Fusing the two into one pass per state is ~2x on the whole prep.
+- **Do NOT "store prepared, collate live".** Collation is not chemistry-free despite its docstring: it
+  runs the admission masks. Collating per batch would re-run ~13 h of chemistry PER EPOCH. Store the
+  collated tensors sharded (~600 MiB/shard over 270 chunks) so training is chemistry-free.
+- **`resolve_semantic_cycle_close` re-does source work per candidate.** `is_valid_state(state)`,
+  `canonical_state_key(state)` and `_exact_state_identity(state)` are recomputed for each of ~698
+  candidates on an unchanging source, even though the hoisted `context` already carries `source_key` and
+  `exact_source_identity`. Profile arithmetic puts this at ~0.69 ms x 698 = ~482 ms of the 1.48 s
+  cycle-close mask (INFERRED, not patched).
+- **`included_families` exists and is computed by the caller, but is never passed to
+  `prepare_factorized_mark_batch`** (`score_free_successor_support.py`: `requested` is used only in the
+  decode loop at line 146). So the family restriction narrows decoding, not the dominant mask work.
+- **Levers that did NOT pay (all measured, so do not re-try):** size-bucketing 40->26 slots = 13%;
+  `chemistry_feature_cache` = **8.8% ceiling** (13,732 of 14,951 source states in a real chunk appear
+  exactly once); vectorising the atom/bond loops in `molecular_graph_to_smiles` = **1.24x** on that
+  function (120/120 identical output) = ~7.5% of compile; reusing Active8's work = **does not apply**,
+  its `candidate_evidence` carries only `teacher_coordinate_legal` /
+  `teacher_executes_to_exact_successor` and the canonical keys, not a mark census or alias coordinates.
+- **METHOD WARNING, paid for twice today.** A standalone microbenchmark of the bond scan measured it at
+  **105% of the enclosing function** -- impossible -- because the real loop short-circuits on null atoms
+  (~300 cells) while the benchmark walked all 780. Always time the real function head-to-head with an
+  equivalence check, never a transcription of its inner loop.
