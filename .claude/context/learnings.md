@@ -652,3 +652,30 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
 - **The production row->entry mapping is exact on real data.** `_candidate_from_transition` mapped
   13,774/13,774 real train rows with zero refusals and zero identity collisions, and 16,385/16,385 on the
   other chunk. Every published row satisfies the frozen evidence contract.
+
+## 2026-08-06 (measured on Modal: the real prep cost, and a projection I got wrong)
+
+- **MEASURED on the real path, one train chunk, 256 entries:** `ms_per_entry` **2046.09**,
+  `elapsed_seconds` 523.8, `chemistry_states_cached` **149 of 256** (58.2% distinct). Full train corpus
+  of 1,803,032 transitions is therefore **~1,025 core-hours: 12.8 h on 80 workers, 3.4 h on 300,
+  ~$48** either way since Modal bills core-seconds. Wall clock past this point is a worker-count
+  choice, not an optimisation problem.
+- **The compile/collate fusion is confirmed remotely.** 2,046 ms/entry against a local FUSED benchmark
+  of 2,148 and an unfused 3,909 -- about 1.9x, consistent with the 1.82x measured locally with
+  byte-identical output.
+- **CORRECTION: within-chunk source reuse is NOT a second multiplier.** I projected ~7 h by stacking it
+  on top of the fusion. The pilot's 2,046 ms/entry already contains 42% cache hits and they bought only
+  ~5%, not 2x. The cache saves the ADMISSION MASKS; the alias search, executor calls and encoding are
+  per-ENTRY not per-STATE and do not cache. Do not multiply a per-state saving by a per-entry rate.
+- **O(n^2) I/O caught before it scaled.** `chunk_transition_rows` first streamed the whole role and
+  filtered by task, so every worker in a per-chunk fan-out would read all 270 train shards (~600 MB
+  each). Worse, that read sat INSIDE the region the pilot timed, so it would have corrupted the
+  measurement as well as the runtime. `iter_process_v2_role_shards` now takes an optional
+  `task_identity_sha256` so the existing digest/count/row authentication stays the single authority for
+  whatever is opened.
+- **The volume Gate-0 decision was on v5-era contracts while the repo is on v6**, so NO stage could open
+  the Active8 source -- T1, P50 and the training prep alike. Re-running Gate 0 took **~2 minutes** and
+  reproduced `decision_sha256` **613259c4...** byte-identically to the repo fixture, which is a clean
+  demonstration that the content-addressed chain is deterministic. Check
+  `load_gate_zero_contracts(repo_root=...)` against a decision BEFORE concluding a branch caused drift;
+  here it had not.
