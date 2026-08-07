@@ -417,6 +417,7 @@ def _imports() -> dict[str, Any]:
     )
     from compose_v4.experiments.editing_v2_process_v2_chunk_compile import (
         compile_process_v2_chunk_shard,
+        publish_process_v2_chunk_shard,
     )
     from compose_v4.experiments.editing_v2_process_v2_t1_panel import (
         open_process_v2_t1_source,
@@ -469,6 +470,7 @@ def _imports() -> dict[str, Any]:
         "validate_selection": validate_process_v2_p50_selection,
         "compile_entries": compile_process_v2_p50_entries,
         "compile_chunk": compile_process_v2_chunk_shard,
+        "publish_chunk": publish_process_v2_chunk_shard,
         "convert_v1_leaf": convert_process_v2_p50_v1_leaf,
         "build_prepared": build_process_v2_p50_prepared_inputs,
         "validate_prepared": validate_process_v2_p50_prepared_inputs,
@@ -1360,6 +1362,131 @@ def chunk_pilot_remote(
     }
     print(json.dumps(payload, sort_keys=True), flush=True)
     return payload
+
+
+@app.function(
+    image=image,
+    cpu=CPU_PER_LEAF,
+    memory=CPU_MEMORY_MB,
+    timeout=CPU_LEAF_TIMEOUT_SECONDS,
+    max_containers=MAX_CPU_CONTAINERS,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def prep_slice_remote(
+    active8_run_root: str,
+    gate_zero_decision_path: str,
+    output_root: str,
+    task_identity_sha256: str,
+    offset: int,
+    limit: int,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Compile ONE slice of one chunk and publish it. Trains nothing."""
+
+    _validate_remote_revision(revision)
+    artifact_volume.reload()
+    loaded = _imports()
+    source = _open_source(
+        active8_run_root=_require_artifact_path(active8_run_root, field="active8_run_root"),
+        gate_zero_decision_path=_require_artifact_path(
+            gate_zero_decision_path, field="gate_zero_decision_path"
+        ),
+        loaded=loaded,
+    )
+    scratch, _binding, _receipt = loaded["build_scratch"](source)
+    started = time.monotonic()
+    result = loaded["compile_chunk"](
+        source,
+        scratch.model,
+        task_identity_sha256=task_identity_sha256,
+        offset=int(offset),
+        limit=int(limit),
+    )
+    receipt = loaded["publish_chunk"](
+        result,
+        output_root=_require_artifact_path(output_root, field="output_root"),
+    )
+    artifact_volume.commit()
+    payload = {
+        "phase": "process_v2_prep_slice_complete",
+        "task_identity_sha256": task_identity_sha256,
+        "entry_offset": int(offset),
+        "entry_count": int(receipt["entry_count"]),
+        "elapsed_seconds": time.monotonic() - started,
+        "receipt_sha256": receipt["receipt_sha256"],
+        "batch_bytes": int(receipt["batch_bytes"]),
+        "p50_training_launched": False,
+    }
+    print(json.dumps(payload, sort_keys=True), flush=True)
+    return payload
+
+
+@app.local_entrypoint()
+def prep_subset(
+    active8_run_root: str,
+    gate_zero_decision_path: str,
+    output_root: str,
+    expected_commit: str,
+    chunk_plan_path: str,
+    slice_size: int = 1500,
+) -> None:
+    """Fan a pinned chunk list out as EQUAL slices, one worker per slice.
+
+    The unit is a slice rather than a chunk because chunk sizes differ by 4.5x
+    here, and one-container-per-chunk floors the wall clock at the largest chunk
+    however many containers run -- the straggler that made the earlier bounded
+    pilot slow.
+    """
+
+    revision = local_image_revision(expected_commit=expected_commit)
+    plan = json.loads(Path(chunk_plan_path).read_text())
+    work: list[tuple[Any, ...]] = []
+    for entry in plan["chunks"]:
+        total = int(entry["transitions"])
+        for offset in range(0, total, int(slice_size)):
+            work.append(
+                (
+                    active8_run_root,
+                    gate_zero_decision_path,
+                    output_root,
+                    str(entry["task_identity_sha256"]),
+                    offset,
+                    min(int(slice_size), total - offset),
+                    revision,
+                )
+            )
+    print(
+        json.dumps(
+            {
+                "phase": "process_v2_prep_subset_planned",
+                "chunks": len(plan["chunks"]),
+                "slices": len(work),
+                "slice_size": int(slice_size),
+                "planned_transitions": sum(int(c["transitions"]) for c in plan["chunks"]),
+            },
+            indent=2,
+            sort_keys=True,
+        ),
+        flush=True,
+    )
+    published = 0
+    entries = 0
+    for result in prep_slice_remote.starmap(work):
+        published += 1
+        entries += int(result["entry_count"])
+    print(
+        json.dumps(
+            {
+                "phase": "process_v2_prep_subset_complete",
+                "slices_published": published,
+                "entries_published": entries,
+                "output_root": output_root,
+                "p50_training_launched": False,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
 
 
 @app.local_entrypoint()

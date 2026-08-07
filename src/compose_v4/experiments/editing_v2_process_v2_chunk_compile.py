@@ -110,16 +110,23 @@ def compile_process_v2_chunk_shard(
     *,
     task_identity_sha256: str,
     partition_role: str = TRAIN_ROLE,
+    offset: int = 0,
     limit: int | None = None,
     chemistry_feature_cache_limit: int = 16_384,
     progress_callback: Callable[[Mapping[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     """Compile a whole chunk and collate it from ONE chemistry pass.
 
-    ``limit`` truncates the chunk for a bounded pilot; it changes how much is
-    compiled, never how any individual entry is compiled.
+    ``offset``/``limit`` select a contiguous SLICE of the chunk.  They exist so
+    the unit of parallelism can be smaller than a chunk: chunk sizes here differ
+    by 4.5x (~2,827 entries in a synthetic-walk chunk against ~12,858 in a
+    multistep one), so one-container-per-chunk floors the wall clock at the
+    largest chunk no matter how many containers run.  Slicing divides the work
+    evenly instead.  Neither changes how any individual entry is compiled.
     """
 
+    if type(offset) is not int or offset < 0:
+        raise ProcessV2ChunkCompileError("chunk compile offset must be a nonnegative int")
     if limit is not None and (type(limit) is not int or limit <= 0):
         raise ProcessV2ChunkCompileError("chunk compile limit must be a positive int")
 
@@ -128,8 +135,11 @@ def compile_process_v2_chunk_shard(
         task_identity_sha256=task_identity_sha256,
         partition_role=partition_role,
     )
-    if limit is not None:
-        rows = rows[:limit]
+    rows = rows[offset:] if limit is None else rows[offset : offset + limit]
+    if not rows:
+        raise ProcessV2ChunkCompileError(
+            f"chunk slice offset={offset} limit={limit} selects no transitions"
+        )
     entries = [_candidate_from_transition(row) for row in rows]
 
     resolver_entries = [
@@ -218,6 +228,7 @@ def compile_process_v2_chunk_shard(
     return {
         "task_identity_sha256": task_identity_sha256,
         "partition_role": partition_role,
+        "entry_offset": int(offset),
         "entry_count": len(compiled),
         "entries": compiled,
         "batch": batch,
@@ -260,13 +271,18 @@ def publish_process_v2_chunk_shard(
 
     task_identity_sha256 = str(result["task_identity_sha256"])
     entries = list(result["entries"])
-    directory = Path(output_root) / CHUNKS_DIRNAME / task_identity_sha256
+    offset = int(result["entry_offset"])
+    # Slice-addressed, because the compile unit is a slice: two workers may hold
+    # different ranges of the same chunk and must not collide on one path.
+    slice_id = f"{offset:09d}-{len(entries):09d}"
+    directory = Path(output_root) / CHUNKS_DIRNAME / task_identity_sha256 / slice_id
 
     entries_payload = {
         "schema": SHARD_SCHEMA,
         "schema_version": SHARD_SCHEMA_VERSION,
         "task_identity_sha256": task_identity_sha256,
         "partition_role": str(result["partition_role"]),
+        "entry_offset": offset,
         "entry_count": len(entries),
         "entries": entries,
     }
@@ -285,6 +301,7 @@ def publish_process_v2_chunk_shard(
         **authority_false_block(),
         "task_identity_sha256": task_identity_sha256,
         "partition_role": str(result["partition_role"]),
+        "entry_offset": offset,
         "entry_count": len(entries),
         "entries_file_sha256": hashlib.sha256(entries_bytes).hexdigest(),
         "entries_payload_sha256": canonical_sha256(entries_payload),

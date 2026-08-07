@@ -56,3 +56,27 @@ def test_the_chunk_and_role_are_passed_to_the_reader_not_filtered_after(monkeypa
     assert seen["partition_role"] == "train"
     assert seen["task_identity_sha256"] == wanted
     assert [row["n"] for row in rows] == [1]
+
+
+def test_a_slice_offset_must_be_a_nonnegative_integer() -> None:
+    for bad in (-1, 1.0, "0", None):
+        with pytest.raises(chunk.ProcessV2ChunkCompileError, match="nonnegative int"):
+            chunk.compile_process_v2_chunk_shard(
+                object(), object(), task_identity_sha256="a" * 64, offset=bad
+            )
+
+
+def test_an_empty_slice_refuses_rather_than_publishing_nothing(monkeypatch) -> None:
+    """A stride past the end of a chunk is a planning error, not an empty success."""
+
+    rows = ({"task_identity_sha256": "b" * 64},) * 4
+    monkeypatch.setattr(
+        chunk, "iter_process_v2_role_shards", lambda *a, **k: iter((({}, rows),))
+    )
+    with pytest.raises(chunk.ProcessV2ChunkCompileError, match="selects no transitions"):
+        chunk.compile_process_v2_chunk_shard(
+            type("S", (), {"active8_run_root": None, "contracts": None, "index": None})(),
+            object(),
+            task_identity_sha256="b" * 64,
+            offset=99,
+        )
