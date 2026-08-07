@@ -29,9 +29,21 @@ model-ready collated batch.
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
+from pathlib import Path
 from typing import Any
 
+import hashlib
+import io
+
+import torch
+
 from compose_v4.chem.persistent_state_identity import persistent_slot_state_sha256
+from compose_v4.data.editing_v2_process_v2_schema import (
+    authority_false_block,
+    canonical_bytes,
+    canonical_sha256,
+)
+from compose_v4.data.immutable_artifact import write_bytes_if_absent
 from compose_v4.data.editing_v2_process_v2_gate_zero import (
     ProcessV2GateZeroError,
     iter_process_v2_role_shards,
@@ -215,7 +227,89 @@ def compile_process_v2_chunk_shard(
     }
 
 
+CHUNKS_DIRNAME = "chunks"
+ENTRIES_FILENAME = "ENTRIES.json"
+BATCH_FILENAME = "BATCH.pt"
+RECEIPT_FILENAME = "RECEIPT.json"
+SHARD_SCHEMA = "compose.editing_v2.process_v2_chunk_shard"
+SHARD_SCHEMA_VERSION = 1
+SHARD_STATUS = "PROCESS_V2_CHUNK_SHARD_EVIDENCE_ONLY_NO_AUTHORITY"
+
+
+def publish_process_v2_chunk_shard(
+    result: Mapping[str, Any],
+    *,
+    output_root: Path,
+) -> dict[str, Any]:
+    """Publish one compiled chunk immutably: entries, tensors, and a receipt.
+
+    BOTH products of the single chemistry pass are stored, deliberately:
+
+    * ``ENTRIES.json`` -- the compact teacher fibers, ~2.5 kB per entry. This is
+      what a resampler reads, so changing the sampling law, reweighting, or
+      running an epsilon arm costs nothing beyond reading it.
+    * ``BATCH.pt`` -- the collated model-ready tensors, ~92 kB per entry. This
+      is what training reads. It is stored rather than rebuilt because
+      collation is NOT chemistry-free despite its name: it runs the admission
+      masks, so collating per batch would re-pay the entire corpus chemistry on
+      every epoch.
+
+    The receipt binds both by content hash and is self-hashed, so a consumer
+    can authenticate the tensors it is about to train on without parsing them.
+    """
+
+    task_identity_sha256 = str(result["task_identity_sha256"])
+    entries = list(result["entries"])
+    directory = Path(output_root) / CHUNKS_DIRNAME / task_identity_sha256
+
+    entries_payload = {
+        "schema": SHARD_SCHEMA,
+        "schema_version": SHARD_SCHEMA_VERSION,
+        "task_identity_sha256": task_identity_sha256,
+        "partition_role": str(result["partition_role"]),
+        "entry_count": len(entries),
+        "entries": entries,
+    }
+    entries_bytes = canonical_bytes(entries_payload) + b"\n"
+    write_bytes_if_absent(directory / ENTRIES_FILENAME, entries_bytes)
+
+    buffer = io.BytesIO()
+    torch.save(result["batch"], buffer)
+    batch_bytes = buffer.getvalue()
+    write_bytes_if_absent(directory / BATCH_FILENAME, batch_bytes)
+
+    body = {
+        "schema": f"{SHARD_SCHEMA}_receipt",
+        "schema_version": SHARD_SCHEMA_VERSION,
+        "status": SHARD_STATUS,
+        **authority_false_block(),
+        "task_identity_sha256": task_identity_sha256,
+        "partition_role": str(result["partition_role"]),
+        "entry_count": len(entries),
+        "entries_file_sha256": hashlib.sha256(entries_bytes).hexdigest(),
+        "entries_payload_sha256": canonical_sha256(entries_payload),
+        "batch_file_sha256": hashlib.sha256(batch_bytes).hexdigest(),
+        "batch_bytes": len(batch_bytes),
+        "chemistry_states_compiled": int(result["chemistry_states_cached"]),
+        "family_counts": dict(result["family_counts"]),
+        "capability_cell_counts": dict(result["capability_cell_counts"]),
+    }
+    receipt = {**body, "receipt_sha256": canonical_sha256(body)}
+    write_bytes_if_absent(
+        directory / RECEIPT_FILENAME, canonical_bytes(receipt) + b"\n"
+    )
+    return receipt
+
+
 __all__ = [
+    "publish_process_v2_chunk_shard",
+    "SHARD_STATUS",
+    "SHARD_SCHEMA_VERSION",
+    "SHARD_SCHEMA",
+    "RECEIPT_FILENAME",
+    "ENTRIES_FILENAME",
+    "CHUNKS_DIRNAME",
+    "BATCH_FILENAME",
     "TRAIN_ROLE",
     "ProcessV2ChunkCompileError",
     "chunk_transition_rows",

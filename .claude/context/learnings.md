@@ -679,3 +679,24 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   demonstration that the content-addressed chain is deterministic. Check
   `load_gate_zero_contracts(repo_root=...)` against a decision BEFORE concluding a branch caused drift;
   here it had not.
+
+## 2026-08-06 (lane -> family map: ALL ring editing is synthetic)
+
+- **Scanned all 270 train `TASK_SUMMARY.json` (metadata only, no molecular content).** Lanes are nearly
+  family-PURE, and chunks are lane-homogeneous, so a contiguous "slice of the corpus" is NOT a miniature
+  of it:
+  - `real_endpoint_multistep_path` (106 chunks, 1.36M transitions = 75% of train): **insert/delete ONLY**
+  - `reversible_synthetic_walk` (130): the ONLY lane with all 8 families
+  - `linker_positional_topology_analogue` (12): **bond_reroute only**, 23,349
+  - `operator_aware_real_endpoint` (11): atom_restate 19,615 + bond_reorder 919 only
+  - `observed_local_analogue` (11): insert/delete only
+- **EVERY ring-topology transition in the train corpus comes from the SYNTHETIC corruption lane.**
+  `cycle_insert` 122,183 in 102 chunks, `cycle_attach` 84,940 in 102, `ring_system_restate` 17,067 in 29
+  -- all `reversible_synthetic_walk`, zero in any real-chemistry lane. Experiment D claims topological
+  adaptation; on this corpus it would be trained entirely on corrupted-molecule walks. That is a
+  claim-scoping decision to make deliberately, not to discover in review.
+  `bond_reroute` and `atom_restate` each appear in two lanes, so they at least have a real-chemistry
+  source; the ring operators do not.
+- **Consequence for any subset:** family coverage requires `reversible_synthetic_walk`. Selecting chunks
+  at random, or taking a contiguous fifth, would very likely yield insert/delete only and tell you
+  nothing about whether graft, restate or the ring ops can learn.
