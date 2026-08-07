@@ -58,6 +58,9 @@ MAX_CPU_CONTAINERS = 100
 CPU_PER_LEAF = 1.0
 CPU_MEMORY_MB = 8 * 1024
 CPU_LEAF_TIMEOUT_SECONDS = 45 * 60
+#: Held back from a prep slice's compile budget for the collation,
+#: publication and volume commit that still run after the compile ends.
+PREP_SLICE_RESERVE_SECONDS = 5 * 60
 COORDINATOR_TIMEOUT_SECONDS = 6 * 3600
 GPU_TIMEOUT_SECONDS = 20 * 60
 HEARTBEAT_SECONDS = 30
@@ -1393,14 +1396,39 @@ def prep_slice_remote(
         ),
         loaded=loaded,
     )
+    # Timed from ENTRY, not from the end of setup.  The worker timeout covers
+    # source open and scratch build too, so a budget derived from a
+    # compile-only rate silently omits whatever setup costs -- which is how an
+    # 800-entry slice sized at "27 of 45 minutes" hit the 2,700s wall.
+    entered = time.monotonic()
     scratch, _binding, _receipt = loaded["build_scratch"](source)
     started = time.monotonic()
+
+    def _progress(event: dict[str, Any]) -> None:
+        # Printed, not accumulated: the point is that a slow slice is visible
+        # WHILE it is slow.  A worker that reports only on completion tells you
+        # nothing when it is about to be killed.
+        print(json.dumps({**event, "entry_offset": int(offset)}, sort_keys=True), flush=True)
+
+    # Everything already spent on setup comes out of the wall, and a margin is
+    # held back for collation, publication and the volume commit that still
+    # follow the compile.
+    deadline = (
+        CPU_LEAF_TIMEOUT_SECONDS - (started - entered) - PREP_SLICE_RESERVE_SECONDS
+    )
+    if deadline <= 0:
+        raise RuntimeError(
+            f"setup consumed {started - entered:.0f}s of the "
+            f"{CPU_LEAF_TIMEOUT_SECONDS}s worker wall, leaving no compile budget"
+        )
     result = loaded["compile_chunk"](
         source,
         scratch.model,
         task_identity_sha256=task_identity_sha256,
         offset=int(offset),
         limit=int(limit),
+        deadline_seconds=deadline,
+        progress_callback=_progress,
     )
     receipt = loaded["publish_chunk"](
         result,
@@ -1412,7 +1440,14 @@ def prep_slice_remote(
         "task_identity_sha256": task_identity_sha256,
         "entry_offset": int(offset),
         "entry_count": int(receipt["entry_count"]),
+        "requested_entry_count": int(result["requested_entry_count"]),
+        "stopped_on_deadline": bool(result["stopped_on_deadline"]),
+        "next_offset": int(result["next_offset"]),
+        "unfinished_entry_count": int(result["unfinished_entry_count"]),
         "elapsed_seconds": time.monotonic() - started,
+        "setup_seconds": started - entered,
+        "worker_seconds": time.monotonic() - entered,
+        "worker_timeout_seconds": CPU_LEAF_TIMEOUT_SECONDS,
         "receipt_sha256": receipt["receipt_sha256"],
         "batch_bytes": int(receipt["batch_bytes"]),
         "p50_training_launched": False,
@@ -1428,7 +1463,7 @@ def prep_subset(
     output_root: str,
     expected_commit: str,
     chunk_plan_path: str,
-    slice_size: int = 800,
+    slice_size: int = 300,
     max_slices: int = 0,
 ) -> None:
     """Fan a pinned chunk list out as EQUAL slices, one worker per slice.
@@ -1437,6 +1472,15 @@ def prep_subset(
     here, and one-container-per-chunk floors the wall clock at the largest chunk
     however many containers run -- the straggler that made the earlier bounded
     pilot slow.
+
+    ``slice_size`` defaults to 300 rather than 800 because 800 DID time out.  It
+    was sized from a compile-only rate of 2,046 ms/entry measured on a single
+    chunk, which put a slice at 27 of the 45 available minutes -- but the worker
+    timeout also covers source open and scratch build, and the rate itself
+    varies with a chunk's distinct-source fraction.  300 leaves margin for both
+    at the cost of paying setup more often; the ``setup_seconds`` a slice now
+    reports is what should size this properly, so the next run measures the term
+    that was missing instead of guessing again.
     """
 
     revision = local_image_revision(expected_commit=expected_commit)
@@ -1474,22 +1518,62 @@ def prep_subset(
     )
     published = 0
     entries = 0
-    for result in prep_slice_remote.starmap(work):
+    failures: list[dict[str, Any]] = []
+    unfinished: list[dict[str, Any]] = []
+    slowest = 0.0
+    # `return_exceptions` so ONE bad slice costs one slice, not the run.  The
+    # default raises on the first failure and abandons every slice still in
+    # flight, even though each worker commits its own output on success -- so a
+    # single 45-minute timeout used to discard an otherwise complete fan-out.
+    # Re-running is safe: publication is write-if-absent, so a slice that
+    # already landed is a no-op and only the failures are recomputed.
+    for index, result in enumerate(
+        prep_slice_remote.starmap(work, return_exceptions=True)
+    ):
+        if isinstance(result, Exception):
+            failures.append(
+                {
+                    "task_identity_sha256": str(work[index][3]),
+                    "entry_offset": int(work[index][4]),
+                    "limit": int(work[index][5]),
+                    "error": f"{type(result).__name__}: {result}"[:200],
+                }
+            )
+            continue
         published += 1
         entries += int(result["entry_count"])
-    print(
-        json.dumps(
-            {
-                "phase": "process_v2_prep_subset_complete",
-                "slices_published": published,
-                "entries_published": entries,
-                "output_root": output_root,
-                "p50_training_launched": False,
-            },
-            indent=2,
-            sort_keys=True,
-        )
-    )
+        slowest = max(slowest, float(result.get("worker_seconds", 0.0)))
+        if int(result.get("unfinished_entry_count", 0)):
+            # A slice that stopped on its deadline published what it finished.
+            # The remainder is named rather than dropped, so re-running is a
+            # bounded top-up instead of a rerun of everything.
+            unfinished.append(
+                {
+                    "task_identity_sha256": str(result["task_identity_sha256"]),
+                    "entry_offset": int(result["next_offset"]),
+                    "limit": int(result["unfinished_entry_count"]),
+                    "reason": "stopped_on_deadline",
+                }
+            )
+    summary = {
+        "phase": "process_v2_prep_subset_complete",
+        "slices_planned": len(work),
+        "slices_published": published,
+        "slices_failed": len(failures),
+        "failures": failures,
+        "slices_short": len(unfinished),
+        "unfinished": unfinished,
+        "entries_published": entries,
+        "entries_unfinished": sum(int(row["limit"]) for row in unfinished),
+        "slowest_worker_seconds": slowest,
+        "worker_timeout_seconds": CPU_LEAF_TIMEOUT_SECONDS,
+        # Loud, because a partial fan-out that reads as complete is how a
+        # training set silently ends up smaller than it claims to be.
+        "complete": not failures and not unfinished,
+        "output_root": output_root,
+        "p50_training_launched": False,
+    }
+    print(json.dumps(summary, indent=2, sort_keys=True))
 
 
 @app.local_entrypoint()

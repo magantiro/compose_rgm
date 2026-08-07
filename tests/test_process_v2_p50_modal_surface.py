@@ -447,3 +447,60 @@ def test_local_entrypoint_is_disconnect_safe_by_default() -> None:
     assert "train_driver.spawn(*arguments)" in train_body
     assert '"prepared_path": prepared_path' in train_body
     assert '"p500_launched": False' in body
+
+
+def test_a_single_failed_slice_cannot_discard_the_whole_prep_fan_out() -> None:
+    """One slice that times out must cost one slice, not the run.
+
+    The default ``starmap`` raises on the first failure and abandons every slice
+    still in flight -- which is what discarded an otherwise healthy fan-out when
+    a single 800-entry slice hit the 2,700s worker timeout.  Each worker commits
+    its own output on success, and publication is write-if-absent, so surviving
+    the failure and re-running only the failures is both safe and cheap.
+    """
+
+    source = _source()
+    assert "prep_slice_remote.starmap(work, return_exceptions=True)" in source
+    assert "isinstance(result, Exception)" in source
+    # The failures have to be REPORTED, or a partial run reads as a complete one.
+    for field in ('"slices_planned"', '"slices_failed"', '"failures"'):
+        assert field in source, field
+
+
+def test_a_prep_slice_reports_the_setup_the_worker_timeout_also_pays_for() -> None:
+    """Sizing must see every term inside the timeout, not just the compile.
+
+    ``slice_size`` was set from a compile-only rate while the worker timeout
+    also covered source open and scratch build, so the budget omitted a term
+    and the slice died at the wall.
+    """
+
+    source = _source()
+    assert '"setup_seconds": started - entered' in source
+    assert '"worker_seconds": time.monotonic() - entered' in source
+    assert '"worker_timeout_seconds": CPU_LEAF_TIMEOUT_SECONDS' in source
+
+
+def test_the_prep_slice_default_leaves_headroom_under_the_worker_timeout() -> None:
+    """800 entries per slice is the size that actually timed out."""
+
+    import ast
+
+    tree = ast.parse(_source())
+    node = next(
+        item
+        for item in ast.walk(tree)
+        if isinstance(item, ast.FunctionDef) and item.name == "prep_subset"
+    )
+    defaults = dict(
+        zip(
+            [argument.arg for argument in node.args.args][-len(node.args.defaults) :],
+            [ast.literal_eval(value) for value in node.args.defaults],
+            strict=True,
+        )
+    )
+    default = defaults["slice_size"]
+    assert default == 300
+    # Even at 2x the 2,046 ms/entry measured rate the compile fits with room
+    # left for setup inside the 45-minute wall.
+    assert default * 2 * 2.046 < launcher.CPU_LEAF_TIMEOUT_SECONDS * 0.75

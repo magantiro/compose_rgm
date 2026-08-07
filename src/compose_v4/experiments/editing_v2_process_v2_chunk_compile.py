@@ -34,6 +34,7 @@ from typing import Any
 
 import hashlib
 import io
+import time
 
 import torch
 
@@ -113,6 +114,8 @@ def compile_process_v2_chunk_shard(
     offset: int = 0,
     limit: int | None = None,
     chemistry_feature_cache_limit: int = 16_384,
+    compile_batch_size: int = 25,
+    deadline_seconds: float | None = None,
     progress_callback: Callable[[Mapping[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     """Compile a whole chunk and collate it from ONE chemistry pass.
@@ -123,12 +126,42 @@ def compile_process_v2_chunk_shard(
     multistep one), so one-container-per-chunk floors the wall clock at the
     largest chunk no matter how many containers run.  Slicing divides the work
     evenly instead.  Neither changes how any individual entry is compiled.
+
+    ``compile_batch_size`` exists for OBSERVABILITY, not for throughput.  The
+    expensive chemistry lives inside one batched
+    ``compile_teacher_successor_fibers_support_only`` call, so compiling a whole
+    slice in one shot emits no progress at all until it is finished -- a worker
+    could run an entire 45-minute timeout and report nothing before dying, which
+    is exactly what happened.  Compiling in sub-batches over the SAME shared
+    chemistry cache makes rate measurable while it is happening; the compiled
+    entries are identical either way.
+
+    ``deadline_seconds`` bounds the compile against a wall.  When the measured
+    rate projects past it, the compile STOPS and returns what it finished rather
+    than being killed with nothing: slices are offset-addressed, so a short
+    slice is a valid published slice and ``next_offset`` names the remainder to
+    re-queue.  Degrading to less work beats losing all of it.
+
+    The deadline is enforced BETWEEN sub-batches, so it is precise to one
+    sub-batch and the first one always runs -- there is no rate to project from
+    until something has been measured.  ``compile_batch_size`` must therefore be
+    small enough that a single sub-batch fits inside the reserve; at 25 entries
+    and the measured 2,046 ms/entry that is ~51s against a five-minute reserve.
+    A sub-batch that overruns anyway is reported in the progress event as
+    ``overran_deadline``, so the cause is visible rather than inferred from a
+    kill.
     """
 
     if type(offset) is not int or offset < 0:
         raise ProcessV2ChunkCompileError("chunk compile offset must be a nonnegative int")
     if limit is not None and (type(limit) is not int or limit <= 0):
         raise ProcessV2ChunkCompileError("chunk compile limit must be a positive int")
+    if type(compile_batch_size) is not int or compile_batch_size <= 0:
+        raise ProcessV2ChunkCompileError("compile batch size must be a positive int")
+    if deadline_seconds is not None and (
+        not isinstance(deadline_seconds, (int, float)) or deadline_seconds <= 0
+    ):
+        raise ProcessV2ChunkCompileError("deadline seconds must be a positive number")
 
     rows = chunk_transition_rows(
         source,
@@ -191,15 +224,52 @@ def compile_process_v2_chunk_shard(
     )
     shared_cache = collator._chemistry_feature_cache
 
-    compiled = compile_prepared_entries(
-        model,
-        sources,
-        targets,
-        resolver_entries,
-        task_identity_sha256=task_identity_sha256,
-        progress_callback=progress_callback,
-        chemistry_feature_cache=shared_cache,
-    )
+    compiled: list[dict[str, Any]] = []
+    started = time.monotonic()
+    stopped_on_deadline = False
+    for batch_start in range(0, len(resolver_entries), compile_batch_size):
+        batch_end = min(batch_start + compile_batch_size, len(resolver_entries))
+        compiled.extend(
+            compile_prepared_entries(
+                model,
+                sources[batch_start:batch_end],
+                targets[batch_start:batch_end],
+                resolver_entries[batch_start:batch_end],
+                task_identity_sha256=task_identity_sha256,
+                chemistry_feature_cache=shared_cache,
+            )
+        )
+        elapsed = time.monotonic() - started
+        rate = elapsed / len(compiled)
+        remaining = len(resolver_entries) - len(compiled)
+        if progress_callback is not None:
+            progress_callback(
+                {
+                    "phase": "process_v2_chunk_compile_progress",
+                    "task_identity_sha256": task_identity_sha256,
+                    "completed": len(compiled),
+                    "total": len(resolver_entries),
+                    "elapsed_seconds": elapsed,
+                    "ms_per_entry": rate * 1000.0,
+                    "projected_remaining_seconds": rate * remaining,
+                    "deadline_seconds": deadline_seconds,
+                    "overran_deadline": bool(
+                        deadline_seconds is not None and elapsed > float(deadline_seconds)
+                    ),
+                }
+            )
+        # Project BEFORE committing to another sub-batch, so the decision is
+        # made on measured rate rather than discovered at the wall.
+        if (
+            deadline_seconds is not None
+            and remaining
+            and elapsed + rate * min(compile_batch_size, remaining) > float(deadline_seconds)
+        ):
+            stopped_on_deadline = True
+            break
+    # The one-shot path sorts its whole output; concatenated sub-batches must be
+    # sorted the same way or the published order would depend on batching.
+    compiled.sort(key=lambda row: row["p50_entry_sha256"])
     batch = collator(
         [
             FactorizedMarkExample(
@@ -235,6 +305,12 @@ def compile_process_v2_chunk_shard(
         "family_counts": dict(sorted(families.items())),
         "capability_cell_counts": dict(sorted(cells.items())),
         "chemistry_states_cached": len(shared_cache),
+        "requested_entry_count": len(resolver_entries),
+        "stopped_on_deadline": stopped_on_deadline,
+        # Named so a short slice is re-queueable rather than silently lost.
+        "next_offset": int(offset) + len(compiled),
+        "unfinished_entry_count": len(resolver_entries) - len(compiled),
+        "compile_seconds": time.monotonic() - started,
     }
 
 
