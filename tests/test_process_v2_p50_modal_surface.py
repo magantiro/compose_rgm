@@ -615,3 +615,23 @@ def test_a_bounded_prep_run_samples_every_lane_not_one_chunk() -> None:
     # The synthetic lane is the ONLY one carrying all eight families, so a
     # bounded run that misses it cannot say anything about ring editing.
     assert "reversible_synthetic_walk" in lanes
+
+
+def test_an_explicit_slice_list_replaces_the_derived_plan() -> None:
+    """Two machines must be able to split one corpus with no overlap.
+
+    Deriving the plan on both sides cannot guarantee disjointness, and the
+    remote driver has no way to know a slice already exists elsewhere until it
+    has already paid to compile it -- publication is write-if-absent, which
+    checks at WRITE time, long after the compute is spent. So whoever computes
+    the split hands over an explicit list.
+    """
+
+    source = _source()
+    assert "slice_list_path: str = \"\"" in source
+    assert "if slice_list_path:" in source
+    assert '"source": "explicit_slice_list"' in source
+    # Both paths must fan out through the SAME helper, or failure isolation and
+    # the completeness flag drift apart between them.
+    assert source.count("_run_prep_work(work, output_root=output_root)") == 2
+    assert "def _run_prep_work(" in source

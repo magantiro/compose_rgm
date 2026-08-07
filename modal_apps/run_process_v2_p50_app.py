@@ -1631,84 +1631,14 @@ def prep_slice_remote(
     return payload
 
 
-@app.local_entrypoint()
-def prep_subset(
-    active8_run_root: str,
-    gate_zero_decision_path: str,
-    output_root: str,
-    expected_commit: str,
-    chunk_plan_path: str,
-    slice_size: int = 300,
-    max_slices: int = 0,
-    compile_workers: int = PREP_COMPILE_WORKERS,
-) -> None:
-    """Fan a pinned chunk list out as EQUAL slices, one worker per slice.
+def _run_prep_work(work: list[tuple[Any, ...]], *, output_root: str) -> None:
+    """Fan a slice list out and report honestly.
 
-    The unit is a slice rather than a chunk because chunk sizes differ by 4.5x
-    here, and one-container-per-chunk floors the wall clock at the largest chunk
-    however many containers run -- the straggler that made the earlier bounded
-    pilot slow.
-
-    ``slice_size`` defaults to 300 rather than 800 because 800 DID time out.  It
-    was sized from a compile-only rate of 2,046 ms/entry measured on a single
-    chunk, which put a slice at 27 of the 45 available minutes -- but the worker
-    timeout also covers source open and scratch build, and the rate itself
-    varies with a chunk's distinct-source fraction.  300 leaves margin for both
-    at the cost of paying setup more often; the ``setup_seconds`` a slice now
-    reports is what should size this properly, so the next run measures the term
-    that was missing instead of guessing again.
+    Shared by the derived-plan path and the explicit-slice-list path so the
+    failure isolation, deadline top-up accounting and completeness flag cannot
+    drift between them.
     """
 
-    revision = local_image_revision(expected_commit=expected_commit)
-    plan = json.loads(Path(chunk_plan_path).read_text())
-    per_chunk: list[list[tuple[Any, ...]]] = []
-    for entry in plan["chunks"]:
-        total = int(entry["transitions"])
-        per_chunk.append(
-            [
-                (
-                    active8_run_root,
-                    gate_zero_decision_path,
-                    output_root,
-                    str(entry["task_identity_sha256"]),
-                    offset,
-                    min(int(slice_size), total - offset),
-                    revision,
-                    int(compile_workers),
-                )
-                for offset in range(0, total, int(slice_size))
-            ]
-        )
-    # ROUND-ROBIN across chunks, not chunk-by-chunk.  Lanes are near
-    # family-pure and chunks are lane-homogeneous, so a chunk-ordered list makes
-    # any truncation a single lane: `max_slices=8` drew all eight slices from
-    # one `real_endpoint_multistep_path` chunk, covering two of eight families
-    # and none of the ring operators.  Interleaving makes every prefix of the
-    # work list proportional to the plan, so a bounded run is a miniature of the
-    # corpus rather than a corner of it.  A full run is unaffected.
-    work: list[tuple[Any, ...]] = [
-        slice_work
-        for index in range(max((len(rows) for rows in per_chunk), default=0))
-        for rows in per_chunk
-        if index < len(rows)
-        for slice_work in (rows[index],)
-    ]
-    if int(max_slices) > 0:
-        work = work[: int(max_slices)]
-    print(
-        json.dumps(
-            {
-                "phase": "process_v2_prep_subset_planned",
-                "chunks": len(plan["chunks"]),
-                "slices": len(work),
-                "slice_size": int(slice_size),
-                "planned_transitions": sum(int(c["transitions"]) for c in plan["chunks"]),
-            },
-            indent=2,
-            sort_keys=True,
-        ),
-        flush=True,
-    )
     published = 0
     entries = 0
     failures: list[dict[str, Any]] = []
@@ -1767,6 +1697,129 @@ def prep_subset(
         "p50_training_launched": False,
     }
     print(json.dumps(summary, indent=2, sort_keys=True))
+
+
+@app.local_entrypoint()
+def prep_subset(
+    active8_run_root: str,
+    gate_zero_decision_path: str,
+    output_root: str,
+    expected_commit: str,
+    chunk_plan_path: str,
+    slice_size: int = 300,
+    max_slices: int = 0,
+    compile_workers: int = PREP_COMPILE_WORKERS,
+    slice_list_path: str = "",
+) -> None:
+    """Fan a pinned chunk list out as EQUAL slices, one worker per slice.
+
+    The unit is a slice rather than a chunk because chunk sizes differ by 4.5x
+    here, and one-container-per-chunk floors the wall clock at the largest chunk
+    however many containers run -- the straggler that made the earlier bounded
+    pilot slow.
+
+    ``slice_size`` defaults to 300 rather than 800 because 800 DID time out.  It
+    was sized from a compile-only rate of 2,046 ms/entry measured on a single
+    chunk, which put a slice at 27 of the 45 available minutes -- but the worker
+    timeout also covers source open and scratch build, and the rate itself
+    varies with a chunk's distinct-source fraction.  300 leaves margin for both
+    at the cost of paying setup more often; the ``setup_seconds`` a slice now
+    reports is what should size this properly, so the next run measures the term
+    that was missing instead of guessing again.
+    """
+
+    revision = local_image_revision(expected_commit=expected_commit)
+    plan = json.loads(Path(chunk_plan_path).read_text())
+
+    # An EXPLICIT slice list, when supplied, replaces the derived plan entirely.
+    # Two machines can then split one corpus with a guarantee of no overlap:
+    # whoever computes the list decides who compiles what. Deriving the plan on
+    # both sides cannot give that guarantee, and recompiling a slice another
+    # machine already owns is pure waste -- the driver has no way to know a
+    # slice exists elsewhere until it has already paid to compile it.
+    if slice_list_path:
+        rows = json.loads(Path(slice_list_path).read_text())
+        work = [
+            (
+                active8_run_root,
+                gate_zero_decision_path,
+                output_root,
+                str(row["task_identity_sha256"]),
+                int(row["entry_offset"]),
+                int(row["limit"]),
+                revision,
+                int(compile_workers),
+            )
+            for row in rows
+        ]
+        if int(max_slices) > 0:
+            work = work[: int(max_slices)]
+        print(
+            json.dumps(
+                {
+                    "phase": "process_v2_prep_subset_planned",
+                    "source": "explicit_slice_list",
+                    "slice_list_path": slice_list_path,
+                    "slices": len(work),
+                    "planned_transitions": sum(int(w[5]) for w in work),
+                },
+                indent=2,
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+        _run_prep_work(work, output_root=output_root)
+        return
+
+    per_chunk: list[list[tuple[Any, ...]]] = []
+    for entry in plan["chunks"]:
+        total = int(entry["transitions"])
+        per_chunk.append(
+            [
+                (
+                    active8_run_root,
+                    gate_zero_decision_path,
+                    output_root,
+                    str(entry["task_identity_sha256"]),
+                    offset,
+                    min(int(slice_size), total - offset),
+                    revision,
+                    int(compile_workers),
+                )
+                for offset in range(0, total, int(slice_size))
+            ]
+        )
+    # ROUND-ROBIN across chunks, not chunk-by-chunk.  Lanes are near
+    # family-pure and chunks are lane-homogeneous, so a chunk-ordered list makes
+    # any truncation a single lane: `max_slices=8` drew all eight slices from
+    # one `real_endpoint_multistep_path` chunk, covering two of eight families
+    # and none of the ring operators.  Interleaving makes every prefix of the
+    # work list proportional to the plan, so a bounded run is a miniature of the
+    # corpus rather than a corner of it.  A full run is unaffected.
+    work: list[tuple[Any, ...]] = [
+        slice_work
+        for index in range(max((len(rows) for rows in per_chunk), default=0))
+        for rows in per_chunk
+        if index < len(rows)
+        for slice_work in (rows[index],)
+    ]
+    if int(max_slices) > 0:
+        work = work[: int(max_slices)]
+    print(
+        json.dumps(
+            {
+                "phase": "process_v2_prep_subset_planned",
+                "chunks": len(plan["chunks"]),
+                "slices": len(work),
+                "slice_size": int(slice_size),
+                "planned_transitions": sum(int(c["transitions"]) for c in plan["chunks"]),
+            },
+            indent=2,
+            sort_keys=True,
+        ),
+        flush=True,
+    )
+    _run_prep_work(work, output_root=output_root)
 
 
 @app.local_entrypoint()
