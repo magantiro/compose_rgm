@@ -624,3 +624,31 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   **105% of the enclosing function** -- impossible -- because the real loop short-circuits on null atoms
   (~300 cells) while the benchmark walked all 780. Always time the real function head-to-head with an
   equivalence check, never a transcription of its inner loop.
+
+## 2026-08-06 (corpus shape + the cache measurement I got wrong)
+
+- **CORRECTION to the 8.8% chemistry-cache ceiling recorded above.** That was measured on a
+  `controller_validation` chunk (91% distinct sources) -- a SEALED role I opened without checking the
+  role first. On a real TRAIN chunk (`real_endpoint_multistep_path`) source states are only **49.6%
+  unique: 6,826 distinct of 13,774 transitions, mean 2.02 transitions per source.** So a within-chunk
+  chemistry cache can avoid roughly **half** the compiles on train, not 8.8%. The 2.02 is almost
+  certainly because both directions are taught, so every intermediate state is the source of one forward
+  and one inverse transition. LESSON: check the partition role before measuring anything, and never let
+  a number from one role stand in for another.
+- **The P50 selection can never exploit that reuse.** It selects 3,200 entries spread across 275 tasks,
+  ~12 per task, so repeated sources almost never land in the same call. A chunk-level compile holding one
+  cache across all ~13,774 entries does. This is an argument for the chunk unit independent of the
+  compile/collate fusion, and the two stack.
+- **Corpus shape (from `PROCESS_V2_ACTIVE8_PLAN.json`, 328 planned tasks):** train 270,
+  controller_validation 22, final_test 20, validation 16. Train data lanes:
+  `reversible_synthetic_walk` **130**, `real_endpoint_multistep_path` 106,
+  `linker_positional_topology_analogue` 12, `observed_local_analogue` 11,
+  `operator_aware_real_endpoint` 11. So **48% of train chunks are synthetic corruption walks** -- the mix
+  the master plan asks for does exist, but corruption is the single largest lane and that is worth
+  stating before any training claim about learned rates.
+- **Chunks are lane-homogeneous.** Both chunks inspected were ~50/50 `atom_insert`/`atom_delete` and
+  contained no other family, so a single chunk is NOT a miniature of the corpus. Do not infer
+  corpus-level family balance from one chunk.
+- **The production row->entry mapping is exact on real data.** `_candidate_from_transition` mapped
+  13,774/13,774 real train rows with zero refusals and zero identity collisions, and 16,385/16,385 on the
+  other chunk. Every published row satisfies the frozen evidence contract.
