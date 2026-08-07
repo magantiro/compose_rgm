@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import json
 import subprocess
 from pathlib import Path
 from types import SimpleNamespace
@@ -583,3 +584,34 @@ def test_a_prep_slice_proves_it_can_write_before_it_computes_anything() -> None:
     assert preflight_at < compile_at, "the writability preflight must precede the compile"
     assert "process_v2_prep_slice_output_writable" in text
     assert "not writable before any work was done" in text
+
+
+def test_a_bounded_prep_run_samples_every_lane_not_one_chunk() -> None:
+    """Chunks are lane-homogeneous and lanes are near family-pure.
+
+    A chunk-ordered work list makes any truncation a single lane: max_slices=8
+    once drew all eight slices from one real_endpoint_multistep_path chunk,
+    which carries insert/delete only -- two of eight families, and none of the
+    ring operators. Interleaving makes every prefix proportional to the plan.
+    """
+
+    source = _source()
+    assert "ROUND-ROBIN across chunks" in source
+    assert "per_chunk" in source
+
+    plan = json.loads((ROOT / "configs/process_v2_prep_subset.json").read_text())
+    per_chunk = [
+        [(entry["lane"], offset) for offset in range(0, int(entry["transitions"]), 1000)]
+        for entry in plan["chunks"]
+    ]
+    work = [
+        rows[index]
+        for index in range(max(len(rows) for rows in per_chunk))
+        for rows in per_chunk
+        if index < len(rows)
+    ]
+    lanes = {lane for lane, _ in work[:8]}
+    assert len(lanes) == 5, lanes
+    # The synthetic lane is the ONLY one carrying all eight families, so a
+    # bounded run that misses it cannot say anything about ring editing.
+    assert "reversible_synthetic_walk" in lanes

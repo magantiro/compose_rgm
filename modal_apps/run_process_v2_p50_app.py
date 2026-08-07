@@ -1661,11 +1661,11 @@ def prep_subset(
 
     revision = local_image_revision(expected_commit=expected_commit)
     plan = json.loads(Path(chunk_plan_path).read_text())
-    work: list[tuple[Any, ...]] = []
+    per_chunk: list[list[tuple[Any, ...]]] = []
     for entry in plan["chunks"]:
         total = int(entry["transitions"])
-        for offset in range(0, total, int(slice_size)):
-            work.append(
+        per_chunk.append(
+            [
                 (
                     active8_run_root,
                     gate_zero_decision_path,
@@ -1676,7 +1676,23 @@ def prep_subset(
                     revision,
                     int(compile_workers),
                 )
-            )
+                for offset in range(0, total, int(slice_size))
+            ]
+        )
+    # ROUND-ROBIN across chunks, not chunk-by-chunk.  Lanes are near
+    # family-pure and chunks are lane-homogeneous, so a chunk-ordered list makes
+    # any truncation a single lane: `max_slices=8` drew all eight slices from
+    # one `real_endpoint_multistep_path` chunk, covering two of eight families
+    # and none of the ring operators.  Interleaving makes every prefix of the
+    # work list proportional to the plan, so a bounded run is a miniature of the
+    # corpus rather than a corner of it.  A full run is unaffected.
+    work: list[tuple[Any, ...]] = [
+        slice_work
+        for index in range(max((len(rows) for rows in per_chunk), default=0))
+        for rows in per_chunk
+        if index < len(rows)
+        for slice_work in (rows[index],)
+    ]
     if int(max_slices) > 0:
         work = work[: int(max_slices)]
     print(
