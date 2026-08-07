@@ -61,6 +61,8 @@ CPU_LEAF_TIMEOUT_SECONDS = 45 * 60
 #: Held back from a prep slice's compile budget for the collation,
 #: publication and volume commit that still run after the compile ends.
 PREP_SLICE_RESERVE_SECONDS = 5 * 60
+#: Written once per output root to prove writability BEFORE the compile.
+PREP_PREFLIGHT_FILENAME = "PROCESS_V2_PREP_WRITABILITY_PREFLIGHT.json"
 COORDINATOR_TIMEOUT_SECONDS = 6 * 3600
 GPU_TIMEOUT_SECONDS = 20 * 60
 HEARTBEAT_SECONDS = 30
@@ -1416,6 +1418,33 @@ def prep_slice_remote(
     artifact_volume.reload()
     loaded = _imports()
     _emit({"phase": "process_v2_prep_slice_imports_ready"})
+
+    # PROVE the output is writable before paying for the compile.  Publication
+    # runs last, so a write-time fault -- a symlinked component, a bad root, a
+    # permission problem -- surfaces only after the full slice has been
+    # computed, and every container discards its work at once.  This exercises
+    # the real writer on the real path, so it fails in seconds instead of in
+    # tens of minutes.
+    preflight_root = _require_physical_artifact_path(output_root, field="output_root")
+    try:
+        loaded["write_bytes_if_absent"](
+            preflight_root / PREP_PREFLIGHT_FILENAME,
+            _canonical_bytes(
+                {
+                    "schema": "compose.editing_v2.process_v2_prep_writability_preflight",
+                    "schema_version": 1,
+                    "status": "PROCESS_V2_PREP_PREFLIGHT_EVIDENCE_ONLY_NO_AUTHORITY",
+                    **loaded["authority_false_block"](),
+                }
+            )
+            + b"\n",
+        )
+    except Exception as error:  # noqa: BLE001 - surface the real cause remotely
+        raise RuntimeError(
+            f"prep output root is not writable before any work was done: "
+            f"{preflight_root}: {type(error).__name__}: {error}"
+        ) from error
+    _emit({"phase": "process_v2_prep_slice_output_writable"})
     source = _open_source(
         active8_run_root=_require_artifact_path(active8_run_root, field="active8_run_root"),
         gate_zero_decision_path=_require_artifact_path(
@@ -1459,7 +1488,12 @@ def prep_slice_remote(
     )
     receipt = loaded["publish_chunk"](
         result,
-        output_root=_require_artifact_path(output_root, field="output_root"),
+        # PHYSICAL, not logical.  `/artifacts` is a symlink in the container and
+        # the immutable-artifact writer refuses any path with a symlinked
+        # component, so a write target resolved the read way fails AFTER the
+        # whole compile has been paid for.  Reads take the logical path; writes
+        # take the resolved one, as every other publishing site here does.
+        output_root=_require_physical_artifact_path(output_root, field="output_root"),
     )
     artifact_volume.commit()
     payload = {

@@ -537,3 +537,46 @@ def test_a_prep_slice_reports_progress_before_it_does_any_work() -> None:
     ):
         assert phase in source, phase
     assert '"setup_seconds": started - entered' in source
+
+
+def test_write_targets_resolve_the_artifact_symlink_but_reads_do_not() -> None:
+    """`/artifacts` is a symlink in the container.
+
+    The immutable-artifact writer refuses any path with a symlinked component,
+    so a WRITE target resolved the read way fails -- and it fails at publish
+    time, which is after the entire compile has been paid for. Reads take the
+    logical path; writes take the physical one.
+    """
+
+    source = _source()
+    assert (
+        'output_root=_require_physical_artifact_path(output_root, field="output_root")'
+        in source
+    )
+    assert 'output_root=_require_artifact_path(' not in source
+    # Reads keep the logical form.
+    assert 'active8_run_root=_require_artifact_path(' in source
+
+
+def test_a_prep_slice_proves_it_can_write_before_it_computes_anything() -> None:
+    """Publication runs last, so a write fault costs the whole slice.
+
+    Ten containers once discarded a completed compile each because the output
+    root was unwritable -- a fault knowable in seconds. The worker now exercises
+    the real writer on the real path up front.
+    """
+
+    source = _source()
+    tree = ast.parse(source)
+    node = next(
+        item
+        for item in ast.walk(tree)
+        if isinstance(item, ast.FunctionDef) and item.name == "prep_slice_remote"
+    )
+    text = ast.get_source_segment(source, node)
+    assert text is not None
+    preflight_at = text.index("PREP_PREFLIGHT_FILENAME")
+    compile_at = text.index('loaded["compile_chunk"]')
+    assert preflight_at < compile_at, "the writability preflight must precede the compile"
+    assert "process_v2_prep_slice_output_writable" in text
+    assert "not writable before any work was done" in text
