@@ -22,6 +22,27 @@ detail lives in the imported context files below and in scoped `CLAUDE.md`s.
 3. **`.claude/` is code.** Edit the context files in the same PR as the change that makes them
    true; keep them terse. Stale context is worse than none.
 
+## Hold the goal
+
+Before any remote run, and before any optimisation, state in one sentence **what question the
+output answers**. Then check the thing you are about to launch actually answers it.
+
+This exists because of a concrete failure. The goal was *a balanced training set, to see whether
+the model learns*. Over several hours that turned into slice sizing, worker timeouts, progress
+logging, symlink resolution and intra-container parallelism — every one a real defect, none of
+them the goal — and the run that finally launched sampled **one lane, two of eight families**,
+which could not answer the question at all. Nobody chose that; it drifted there one reasonable
+step at a time.
+
+- **A fix on the path is not the path.** Fixing a real blocker is right; three fixes deep, re-read
+  the goal before the fourth.
+- **Optimising throughput for a job that produces the wrong artifact is worse than not optimising.**
+  Check *what* is being produced before making it faster or cheaper.
+- **Say the cost of the detour out loud.** "This is a 20-minute detour to fix X, then back to the
+  balanced set" keeps it bounded and lets the user veto it.
+- This is **not** an argument against parallel work or against fixing things you notice. Notice
+  them, say them, park them. The failure mode is silently *substituting* them for the goal.
+
 ## Reasoning discipline
 
 Separate what is **measured**, what is **inferred**, and what is **assumed**, and say which.
