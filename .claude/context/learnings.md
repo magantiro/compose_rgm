@@ -691,7 +691,7 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   - `operator_aware_real_endpoint` (11): atom_restate 19,615 + bond_reorder 919 only
   - `observed_local_analogue` (11): insert/delete only
 - **EVERY ring-topology transition in the train corpus comes from the SYNTHETIC corruption lane.**
-  `cycle_insert` 122,183 in 102 chunks, `cycle_attach` 84,940 in 102, `ring_system_restate` 17,067 in 29
+  `cycle_insert` 122,183 in 102 chunks, `cycle_attach` 84,940 in 102, `ring_system_restate` 16,380 in 29 (CORRECTED 2026-08-07: I first wrote 17,067; the frozen Gate-0 decision says 16,380, and the eight family counts sum exactly to 1,803,032. Take family counts from the decision, not from a re-scan)
   -- all `reversible_synthetic_walk`, zero in any real-chemistry lane. Experiment D claims topological
   adaptation; on this corpus it would be trained entirely on corrupted-molecule walks. That is a
   claim-scoping decision to make deliberately, not to discover in review.
