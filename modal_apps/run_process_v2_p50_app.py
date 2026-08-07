@@ -415,6 +415,9 @@ def _imports() -> dict[str, Any]:
         validate_process_v2_p50_prepared_inputs,
         validate_process_v2_p50_selection,
     )
+    from compose_v4.experiments.editing_v2_process_v2_chunk_compile import (
+        compile_process_v2_chunk_shard,
+    )
     from compose_v4.experiments.editing_v2_process_v2_t1_panel import (
         open_process_v2_t1_source,
     )
@@ -465,6 +468,7 @@ def _imports() -> dict[str, Any]:
         "build_selection": build_process_v2_p50_selection,
         "validate_selection": validate_process_v2_p50_selection,
         "compile_entries": compile_process_v2_p50_entries,
+        "compile_chunk": compile_process_v2_chunk_shard,
         "convert_v1_leaf": convert_process_v2_p50_v1_leaf,
         "build_prepared": build_process_v2_p50_prepared_inputs,
         "validate_prepared": validate_process_v2_p50_prepared_inputs,
@@ -1293,6 +1297,95 @@ def prepare_selection_remote(
     }
     _progress(**response)
     return response
+
+
+@app.function(
+    image=image,
+    cpu=CPU_PER_LEAF,
+    memory=CPU_MEMORY_MB,
+    timeout=CPU_LEAF_TIMEOUT_SECONDS,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def chunk_pilot_remote(
+    active8_run_root: str,
+    gate_zero_decision_path: str,
+    task_identity_sha256: str,
+    limit: int,
+    revision: dict[str, Any],
+) -> dict[str, Any]:
+    """Compile a bounded slice of ONE chunk selection-free, and time it.
+
+    This publishes nothing and trains nothing.  It exists to replace a
+    projection with a measurement before the full corpus pass is paid for: the
+    fused compile shares one chemistry pass with collation, and a real chunk is
+    the only place the within-chunk source reuse can actually be observed.
+    """
+
+    _validate_remote_revision(revision)
+    artifact_volume.reload()
+    loaded = _imports()
+    source = _open_source(
+        active8_run_root=_require_artifact_path(active8_run_root, field="active8_run_root"),
+        gate_zero_decision_path=_require_artifact_path(
+            gate_zero_decision_path, field="gate_zero_decision_path"
+        ),
+        loaded=loaded,
+    )
+    scratch, _binding, _receipt = loaded["build_scratch"](source)
+    started = time.monotonic()
+    result = loaded["compile_chunk"](
+        source,
+        scratch.model,
+        task_identity_sha256=task_identity_sha256,
+        limit=int(limit),
+    )
+    elapsed = time.monotonic() - started
+    entries = int(result["entry_count"])
+    payload = {
+        "phase": "process_v2_chunk_pilot_complete",
+        "task_identity_sha256": task_identity_sha256,
+        "partition_role": result["partition_role"],
+        "entry_count": entries,
+        "elapsed_seconds": elapsed,
+        "ms_per_entry": 1000.0 * elapsed / max(entries, 1),
+        "chemistry_states_cached": int(result["chemistry_states_cached"]),
+        "distinct_source_fraction": (
+            int(result["chemistry_states_cached"]) / entries if entries else None
+        ),
+        "family_counts": result["family_counts"],
+        "capability_cell_counts": result["capability_cell_counts"],
+        "p50_training_launched": False,
+        "artifact_published": False,
+    }
+    print(json.dumps(payload, sort_keys=True), flush=True)
+    return payload
+
+
+@app.local_entrypoint()
+def chunk_pilot(
+    active8_run_root: str,
+    gate_zero_decision_path: str,
+    expected_commit: str,
+    task_identity_sha256: str,
+    limit: int = 256,
+) -> None:
+    """Measure the fused chunk compile on one real chunk. Publishes nothing."""
+
+    revision = local_image_revision(expected_commit=expected_commit)
+    print(
+        json.dumps(
+            chunk_pilot_remote.remote(
+                active8_run_root,
+                gate_zero_decision_path,
+                task_identity_sha256,
+                int(limit),
+                revision,
+            ),
+            indent=2,
+            sort_keys=True,
+        )
+    )
 
 
 @app.local_entrypoint()
