@@ -504,3 +504,36 @@ def test_the_prep_slice_default_leaves_headroom_under_the_worker_timeout() -> No
     # Even at 2x the 2,046 ms/entry measured rate the compile fits with room
     # left for setup inside the 45-minute wall.
     assert default * 2 * 2.046 < launcher.CPU_LEAF_TIMEOUT_SECONDS * 0.75
+
+
+def test_a_prep_slice_reports_progress_before_it_does_any_work() -> None:
+    """An operator must be able to tell "starting up" from "hung" in minutes.
+
+    The compile only emits once its first sub-batch lands, and setup runs
+    BEFORE that -- setup being exactly the unknown these runs measure. Without
+    an entry-time signal a stuck worker and a slow one look identical until the
+    45-minute wall.
+    """
+
+    source = _source()
+    tree = ast.parse(source)
+    node = next(
+        item
+        for item in ast.walk(tree)
+        if isinstance(item, ast.FunctionDef) and item.name == "prep_slice_remote"
+    )
+    body = [stmt for stmt in node.body if not isinstance(stmt, ast.Expr)]
+    # `entered` must be the first executable statement, or the shard reads and
+    # the scratch build fall outside the measurement while staying inside the wall.
+    first = body[0]
+    assert isinstance(first, ast.Assign)
+    assert first.targets[0].id == "entered"
+
+    for phase in (
+        "process_v2_prep_slice_entered",
+        "process_v2_prep_slice_imports_ready",
+        "process_v2_prep_slice_source_open",
+        "process_v2_prep_slice_setup_complete",
+    ):
+        assert phase in source, phase
+    assert '"setup_seconds": started - entered' in source

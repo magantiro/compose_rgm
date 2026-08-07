@@ -1386,9 +1386,36 @@ def prep_slice_remote(
 ) -> dict[str, Any]:
     """Compile ONE slice of one chunk and publish it. Trains nothing."""
 
+    # FIRST statement, so every term inside the worker wall is measured.  The
+    # wall covers the shard reads and the scratch build as well as the compile,
+    # and a budget derived from a compile-only rate silently omits them -- which
+    # is how an 800-entry slice sized at "27 of 45 minutes" hit the 2,700s wall.
+    entered = time.monotonic()
+
+    def _emit(event: dict[str, Any]) -> None:
+        # Printed as it happens, not accumulated and returned.  A worker that
+        # reports only on completion tells you nothing while it is dying, and a
+        # slice that is about to blow the wall is exactly when you need to know.
+        print(
+            json.dumps(
+                {
+                    **event,
+                    "task_identity_sha256": task_identity_sha256,
+                    "entry_offset": int(offset),
+                    "since_entry_seconds": time.monotonic() - entered,
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+
+    # Emitted BEFORE any work, so an operator can tell "still starting up" from
+    # "never started" without waiting for the first compile sub-batch.
+    _emit({"phase": "process_v2_prep_slice_entered", "limit": int(limit)})
     _validate_remote_revision(revision)
     artifact_volume.reload()
     loaded = _imports()
+    _emit({"phase": "process_v2_prep_slice_imports_ready"})
     source = _open_source(
         active8_run_root=_require_artifact_path(active8_run_root, field="active8_run_root"),
         gate_zero_decision_path=_require_artifact_path(
@@ -1396,19 +1423,19 @@ def prep_slice_remote(
         ),
         loaded=loaded,
     )
-    # Timed from ENTRY, not from the end of setup.  The worker timeout covers
-    # source open and scratch build too, so a budget derived from a
-    # compile-only rate silently omits whatever setup costs -- which is how an
-    # 800-entry slice sized at "27 of 45 minutes" hit the 2,700s wall.
-    entered = time.monotonic()
+    _emit({"phase": "process_v2_prep_slice_source_open"})
     scratch, _binding, _receipt = loaded["build_scratch"](source)
     started = time.monotonic()
-
-    def _progress(event: dict[str, Any]) -> None:
-        # Printed, not accumulated: the point is that a slow slice is visible
-        # WHILE it is slow.  A worker that reports only on completion tells you
-        # nothing when it is about to be killed.
-        print(json.dumps({**event, "entry_offset": int(offset)}, sort_keys=True), flush=True)
+    # The number every future sizing decision needs, reported the moment it is
+    # known rather than only on success.
+    _emit(
+        {
+            "phase": "process_v2_prep_slice_setup_complete",
+            "setup_seconds": started - entered,
+            "worker_timeout_seconds": CPU_LEAF_TIMEOUT_SECONDS,
+        }
+    )
+    _progress = _emit
 
     # Everything already spent on setup comes out of the wall, and a margin is
     # held back for collation, publication and the volume commit that still
