@@ -56,6 +56,7 @@ COLLATED_RECEIPT_FILENAME = "PROCESS_V2_P50_COLLATED_RECEIPT.json"
 COLLATED_TASKS_DIRNAME = "collated_tasks"
 
 MAX_CPU_CONTAINERS = 100
+PREP_MAX_CONTAINERS = 20  # cap the prep fan-out; speed dial, not a cost dial
 CPU_PER_LEAF = 1.0
 #: Cores per PREP leaf. Modal bills core-seconds, so N cores in one container
 #: cost the same as N containers -- but containers are tier-capped and cores are
@@ -1426,10 +1427,10 @@ def _compile_subrange_child(sub_offset: int, sub_limit: int) -> dict[str, Any]:
 
 @app.function(
     image=image,
-    cpu=PREP_CPU_PER_LEAF,
-    memory=PREP_MEMORY_MB,
+    cpu=1.0,
+    memory=8 * 1024,
     timeout=CPU_LEAF_TIMEOUT_SECONDS,
-    max_containers=MAX_CPU_CONTAINERS,
+    max_containers=PREP_MAX_CONTAINERS,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
 def prep_slice_remote(
