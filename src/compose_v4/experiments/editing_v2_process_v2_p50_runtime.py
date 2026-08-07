@@ -1466,6 +1466,41 @@ def _evaluation_rows(
     return rows
 
 
+def capability_regressions(
+    baseline_by_family: Mapping[str, float],
+    observed_by_family: Mapping[str, float],
+    ceilings: Mapping[str, float],
+) -> list[dict[str, Any]]:
+    """Families whose canonical-successor NLL rose past their ceiling.
+
+    Pure, so the abort decision can be tested without a model.  A family absent
+    from ``ceilings`` is not judged; a family absent from either measurement is
+    a caller error rather than a silent pass, because "not measured" and "did
+    not regress" must never look alike.
+    """
+
+    rows: list[dict[str, Any]] = []
+    for family in sorted(ceilings):
+        if family not in baseline_by_family or family not in observed_by_family:
+            raise ProcessV2P50RuntimeError(
+                f"capability check lacks a measurement for family {family!r}"
+            )
+        baseline_nll = float(baseline_by_family[family])
+        observed_nll = float(observed_by_family[family])
+        regression = observed_nll - baseline_nll
+        if regression > float(ceilings[family]):
+            rows.append(
+                {
+                    "family": family,
+                    "baseline_canonical_successor_nll": baseline_nll,
+                    "observed_canonical_successor_nll": observed_nll,
+                    "regression_nats": regression,
+                    "ceiling_nats": float(ceilings[family]),
+                }
+            )
+    return rows
+
+
 def _aggregate_validation(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     def mean(selected: Sequence[Mapping[str, Any]]) -> float:
         return sum(float(row["canonical_successor_nll"]) for row in selected) / len(
@@ -1492,8 +1527,25 @@ def run_process_v2_p50(
     policy: Mapping[str, Any],
     progress_callback: Callable[[Mapping[str, Any]], None] | None = None,
     materialized: MaterializedProcessV2P50Batch | None = None,
+    capability_check_every_steps: int = 0,
+    maximum_family_nll_regression: Mapping[str, float] | None = None,
 ) -> dict[str, Any]:
-    """Run exactly fifty scratch, hazard-free canonical-successor updates."""
+    """Run exactly fifty scratch, hazard-free canonical-successor updates.
+
+    ``capability_check_every_steps`` re-evaluates the frozen validation panel
+    mid-run and ABORTS when a required family regresses past its ceiling.  It
+    defaults to 0, which disables the check and leaves this function byte
+    identical to the behaviour every published P50 artifact was produced under.
+
+    This exists because per-step gradient monitoring cannot see the failure it
+    is meant to guard.  A family whose head receives finite, nonzero gradient
+    on every step can still be driven to zero capability -- that is exactly what
+    happened over 16,000 steps to ring opening and graft, both of which were
+    working at initialisation.  Gradient presence proves a family is being
+    updated; it says nothing about the direction.  Only re-measuring capability
+    against the frozen baseline can distinguish the two, so a long run must do
+    it on a cadence rather than once at the end.
+    """
 
     optimization = policy["optimization"]
     if (
@@ -1548,6 +1600,34 @@ def run_process_v2_p50(
             }
         )
     families = tuple(policy["active_families"])
+    if type(capability_check_every_steps) is not int or capability_check_every_steps < 0:
+        raise ProcessV2P50RuntimeError(
+            "capability_check_every_steps must be a nonnegative integer"
+        )
+    # Fail closed: a cadence without ceilings would evaluate and never refuse,
+    # which reads as protection while providing none.
+    if bool(capability_check_every_steps) != (maximum_family_nll_regression is not None):
+        raise ProcessV2P50RuntimeError(
+            "the capability cadence and its per-family ceilings must be set together"
+        )
+    capability_ceilings: dict[str, float] = {}
+    if maximum_family_nll_regression is not None:
+        capability_ceilings = {
+            str(family): float(value)
+            for family, value in maximum_family_nll_regression.items()
+        }
+        if set(capability_ceilings) != set(families):
+            raise ProcessV2P50RuntimeError(
+                "capability ceilings must cover exactly the active families"
+            )
+        if any(
+            not math.isfinite(value) or value < 0.0
+            for value in capability_ceilings.values()
+        ):
+            raise ProcessV2P50RuntimeError(
+                "capability ceilings must be finite and nonnegative"
+            )
+    capability_checks: list[dict[str, Any]] = []
     required_cells = tuple(runtime.prepared["required_cells"])
     family_examples = Counter(
         row["model_family"] for row in runtime.prepared["training_stream"]
@@ -1729,6 +1809,44 @@ def run_process_v2_p50(
                     "loss": losses[-1],
                 }
             )
+        if (
+            capability_check_every_steps
+            and (step + 1) % capability_check_every_steps == 0
+        ):
+            # `_evaluation_rows` restores the previous training mode itself.
+            observed = _aggregate_validation(
+                _evaluation_rows(
+                    runtime,
+                    model,
+                    validation_ids,
+                    batch_size=int(optimization["batch_size"]),
+                    materialized=materialized,
+                )
+            )
+            regressions = capability_regressions(
+                baseline["by_family"], observed["by_family"], capability_ceilings
+            )
+            capability_checks.append(
+                {
+                    "optimizer_step": step + 1,
+                    "overall_mean_successor_nll": float(
+                        observed["overall_mean_successor_nll"]
+                    ),
+                    "by_family": {
+                        family: float(value)
+                        for family, value in sorted(observed["by_family"].items())
+                    },
+                    "regressions": regressions,
+                }
+            )
+            if regressions:
+                worst = max(regressions, key=lambda row: row["regression_nats"])
+                raise ProcessV2P50RuntimeError(
+                    "capability regression aborted the run at optimizer step "
+                    f"{step + 1}: {worst['family']} regressed "
+                    f"{worst['regression_nats']:.6f} nats against a ceiling of "
+                    f"{worst['ceiling_nats']:.6f}"
+                )
     final_rows = _evaluation_rows(
         runtime,
         model,
@@ -1793,6 +1911,7 @@ def run_process_v2_p50(
         "optimizer_steps_completed": len(losses),
         "losses": losses,
         "trajectory": trajectory,
+        "capability_checks": capability_checks,
         "baseline_validation": baseline,
         "final_validation": final,
         "validation_entry_metrics": validation_entry_metrics,
@@ -1818,6 +1937,7 @@ __all__ = [
     "LoadedProcessV2P50Inputs",
     "ProcessV2P50RuntimeError",
     "build_process_v2_p50_prepared_inputs",
+    "capability_regressions",
     "build_process_v2_p50_selection",
     "collate_process_v2_p50_entries",
     "compile_process_v2_p50_entries",

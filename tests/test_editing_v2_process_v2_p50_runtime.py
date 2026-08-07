@@ -531,3 +531,48 @@ def test_exhaustive_v1_leaf_converts_without_molecular_reenumeration() -> None:
     corrupted["leaf_sha256"] = runtime.canonical_sha256(corrupted_leaf_body)
     with pytest.raises(runtime.ProcessV2P50RuntimeError, match="identity disagrees"):
         runtime.convert_process_v2_p50_v1_leaf(selection, corrupted)
+
+
+def test_capability_regressions_reports_only_families_past_their_ceiling() -> None:
+    """The abort decision, tested against hand-written expectations."""
+
+    baseline = {"bond_reroute": 2.0, "atom_delete": 1.0, "cycle_attach": 3.0}
+    observed = {"bond_reroute": 2.9, "atom_delete": 0.5, "cycle_attach": 3.2}
+    ceilings = {"bond_reroute": 0.25, "atom_delete": 0.25, "cycle_attach": 0.25}
+
+    rows = runtime.capability_regressions(baseline, observed, ceilings)
+
+    # bond_reroute rose 0.9 (> 0.25) and cycle_attach rose 0.2 (<= 0.25);
+    # atom_delete improved, so only bond_reroute is reported.
+    assert [row["family"] for row in rows] == ["bond_reroute"]
+    assert rows[0]["regression_nats"] == pytest.approx(0.9)
+    assert rows[0]["ceiling_nats"] == pytest.approx(0.25)
+    assert rows[0]["baseline_canonical_successor_nll"] == pytest.approx(2.0)
+    assert rows[0]["observed_canonical_successor_nll"] == pytest.approx(2.9)
+
+
+def test_capability_regression_exactly_at_the_ceiling_is_not_an_abort() -> None:
+    """The comparison is strict, so a run is never killed by the boundary."""
+
+    rows = runtime.capability_regressions(
+        {"bond_reroute": 1.0}, {"bond_reroute": 1.25}, {"bond_reroute": 0.25}
+    )
+    assert rows == []
+
+
+def test_capability_regressions_refuse_an_unmeasured_family() -> None:
+    """"Not measured" must never be indistinguishable from "did not regress"."""
+
+    with pytest.raises(runtime.ProcessV2P50RuntimeError, match="lacks a measurement"):
+        runtime.capability_regressions(
+            {"bond_reroute": 1.0}, {}, {"bond_reroute": 0.25}
+        )
+
+
+def test_capability_regressions_ignore_families_without_a_ceiling() -> None:
+    rows = runtime.capability_regressions(
+        {"bond_reroute": 1.0, "atom_delete": 1.0},
+        {"bond_reroute": 9.0, "atom_delete": 9.0},
+        {"atom_delete": 0.25},
+    )
+    assert [row["family"] for row in rows] == ["atom_delete"]
