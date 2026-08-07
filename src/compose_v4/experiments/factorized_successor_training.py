@@ -11,7 +11,9 @@ chemistry.
 from __future__ import annotations
 
 import hashlib
+from collections.abc import MutableMapping
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 import torch
@@ -543,6 +545,8 @@ def compile_teacher_successor_fibers_support_only(
     teacher_families: tuple[str, ...],
     times: tuple[float, ...],
     system: RewriteSystem | None = None,
+    chemistry_feature_cache: MutableMapping[Any, Any] | None = None,
+    chemistry_feature_cache_limit: int = 2048,
 ) -> tuple[SupportOnlyTeacherFiberCompilation, ...]:
     """Compile exact teacher/self fibers without scoring irrelevant marks.
 
@@ -578,6 +582,8 @@ def compile_teacher_successor_fibers_support_only(
             sources,
             times,
             included_families=tuple(included),
+            chemistry_feature_cache=chemistry_feature_cache,
+            chemistry_feature_cache_limit=chemistry_feature_cache_limit,
         )
     except (ProductionSuccessorKernelError, ValueError) as error:
         raise SuccessorTrainingError(

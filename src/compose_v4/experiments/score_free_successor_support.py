@@ -9,7 +9,7 @@ unchanged production masks, and decodes only caller-selected families.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import MutableMapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -68,6 +68,8 @@ def enumerate_factorized_legal_support_many(
     times: Sequence[float],
     *,
     included_families: Sequence[frozenset[str]] | None = None,
+    chemistry_feature_cache: MutableMapping[Any, Any] | None = None,
+    chemistry_feature_cache_limit: int = 2048,
 ) -> tuple[FactorizedLegalSupport, ...]:
     """Decode selected legal marks without evaluating the neural scorer.
 
@@ -111,6 +113,8 @@ def enumerate_factorized_legal_support_many(
         (0.0,) * len(selected_states),
         use_aromatic_bond_view=True,
         ring_catalog=model.ring_catalog,
+        chemistry_feature_cache=chemistry_feature_cache,
+        chemistry_feature_cache_limit=chemistry_feature_cache_limit,
         **operator_capability_batch_kwargs(model.operator_capabilities),
     ).to(model.device)
     dtype = next(model.parameters()).dtype

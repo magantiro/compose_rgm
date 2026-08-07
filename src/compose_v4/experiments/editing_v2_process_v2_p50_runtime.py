@@ -19,7 +19,7 @@ import json
 import math
 import random
 from collections import Counter
-from collections.abc import Callable, Iterable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sequence
 from dataclasses import dataclass, replace
 from pathlib import Path
 from types import MappingProxyType
@@ -839,6 +839,7 @@ def compile_prepared_entries(
     *,
     task_identity_sha256: str,
     progress_callback: Callable[[Mapping[str, Any]], None] | None = None,
+    chemistry_feature_cache: MutableMapping[Any, Any] | None = None,
 ) -> list[dict[str, Any]]:
     """Compile the compact teacher-successor fiber for already-resolved states.
 
@@ -860,6 +861,7 @@ def compile_prepared_entries(
                 str(entry["model_family"]) for entry in entries
             ),
             times=tuple(_COMPILE_SUPPORT_TIME for _entry in entries),
+            chemistry_feature_cache=chemistry_feature_cache,
         )
     except (SuccessorTrainingError, ValueError) as error:
         raise ProcessV2P50RuntimeError(
