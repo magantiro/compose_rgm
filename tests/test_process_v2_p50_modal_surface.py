@@ -58,7 +58,7 @@ def _clean_source_fixture(tmp_path: Path) -> tuple[Path, str]:
 
 def test_launcher_is_the_exact_bounded_fast_path() -> None:
     source = _source()
-    assert launcher.MAX_CPU_CONTAINERS == 80
+    assert launcher.MAX_CPU_CONTAINERS == 100
     assert launcher.CPU_PER_LEAF == 1.0
     assert source.count('gpu="A10G"') == 1
     assert "prepare_leaf_remote.starmap(" in source
@@ -392,10 +392,18 @@ def test_gpu_is_unreachable_until_cpu_collation_completion() -> None:
     assert 'collated["completion"]["completion_path"]' in body
 
 
-@pytest.mark.parametrize("maximum", [0, 81, True])
+@pytest.mark.parametrize("maximum", [0, True])
 def test_cpu_groups_refuse_invalid_bounds(maximum: int) -> None:
     with pytest.raises(ValueError, match="must lie"):
         launcher._groups(("a",), maximum=maximum)
+
+
+def test_cpu_groups_refuse_more_than_the_declared_maximum() -> None:
+    """Derived from the launcher's own constant, so raising the cap cannot
+    silently leave this test asserting a stale number."""
+
+    with pytest.raises(ValueError, match="must lie"):
+        launcher._groups(("a",), maximum=launcher.MAX_CPU_CONTAINERS + 1)
 
 
 def test_local_revision_binds_every_serialized_tracked_byte(tmp_path: Path) -> None:

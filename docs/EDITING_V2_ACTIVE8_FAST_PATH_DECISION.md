@@ -8,7 +8,15 @@ one-CPU, 4-GiB resource envelope but was censored before its two production-size
 tasks completed. A subsequent production-chunk canary completed 13,597 teacher
 transitions in 61.55 seconds. A separate bounded equivalence panel matched the
 exhaustive admission evidence exactly. The release map therefore uses independent,
-content-addressed task invocations with a runtime concurrency bound of at most 80.
+content-addressed task invocations with a runtime concurrency bound of at most 100.
+The bound was 80, matching the original five-container/sixteen-CPU geometry. It is
+raised here because the training-prep fan-out is one single-threaded CPU per
+container (`CPU_PER_LEAF = 1.0`, `OMP_NUM_THREADS=1`), so concurrency is a wall-clock
+dial over a fixed ~1,025 core-hours rather than a change in total work or cost.
+It remains a declared bound, asserted by
+`test_launcher_is_the_exact_bounded_fast_path`, so raising it again is a deliberate
+edit and not a silent constant change. The Volume-v1 concurrent-committer question is
+separate and is validated by a bounded fan-out before any full run.
 
 ## Decision
 
