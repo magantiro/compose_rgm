@@ -831,6 +831,91 @@ def validate_process_v2_p50_selection(value: object) -> dict[str, Any]:
     return selection
 
 
+def compile_prepared_entries(
+    model: Any,
+    sources: Sequence[Any],
+    targets: Sequence[Any],
+    entries: Sequence[Mapping[str, Any]],
+    *,
+    task_identity_sha256: str,
+    progress_callback: Callable[[Mapping[str, Any]], None] | None = None,
+) -> list[dict[str, Any]]:
+    """Compile the compact teacher-successor fiber for already-resolved states.
+
+    Split out of the P50 leaf compiler so a selection-free chunk compile can
+    reuse the SAME per-entry chemistry rather than restate it.  The entry
+    shape this returns is the one production already publishes, so any second
+    caller inherits it instead of inventing a parallel one that drifts.
+    """
+
+    try:
+        compact_rows = compile_teacher_successor_fibers_support_only(
+            model,
+            tuple(sources),
+            tuple(targets),
+            teacher_action_sha256s=tuple(
+                str(entry["action_sha256"]) for entry in entries
+            ),
+            teacher_families=tuple(
+                str(entry["model_family"]) for entry in entries
+            ),
+            times=tuple(_COMPILE_SUPPORT_TIME for _entry in entries),
+        )
+    except (SuccessorTrainingError, ValueError) as error:
+        raise ProcessV2P50RuntimeError(
+            "could not compile compact exact P50 teacher-successor fibers"
+        ) from error
+
+    compiled: list[dict[str, Any]] = []
+    for index, (entry, source_state, compact) in enumerate(
+        zip(entries, sources, compact_rows, strict=True), start=1
+    ):
+        state_payload = encode_state(source_state)
+        if encode_state(decode_state(state_payload)) != state_payload:
+            raise ProcessV2P50RuntimeError(
+                "P50 exact-state encoding is not byte-stable"
+            )
+        fiber = compact.teacher_fiber
+        prepared_body = {
+            "p50_entry_sha256": entry["p50_entry_sha256"],
+            "model_family": entry["model_family"],
+            "capability_cell_id": entry["capability_cell_id"],
+            "partition_role": entry["partition_role"],
+            "support_time_hex": float(_COMPILE_SUPPORT_TIME).hex(),
+            "source_state_sha256": entry["source_state_sha256"],
+            "target_state_sha256": entry["target_state_sha256"],
+            "successor_canonical_key": entry["canonical_successor_key"],
+            "teacher_action_sha256": entry["action_sha256"],
+            "objective_coefficient": 1,
+            "raw_mark_count": compact.raw_mark_count,
+            "decoded_mark_count": compact.decoded_mark_count,
+            "marks_by_family": dict(compact.marks_by_family),
+            "production_successor_alias_multiplicity": len(fiber.aliases),
+            "virtual_alias_count": len(fiber.state_support.virtual_aliases),
+            "exact_state": state_payload,
+            "teacher_successor_fiber": _teacher_fiber_payload(fiber),
+            "exact_teacher_alias": _alias_payload(compact.exact_teacher_alias),
+            "model_scores_or_probabilities_stored": False,
+            "hazard_included": False,
+        }
+        prepared = {
+            **prepared_body,
+            "p50_compiled_entry_sha256": canonical_sha256(prepared_body),
+        }
+        compiled.append(prepared)
+        if progress_callback is not None:
+            progress_callback(
+                {
+                    "phase": "process_v2_p50_compile_entry",
+                    "task_identity_sha256": task_identity_sha256,
+                    "completed": index,
+                    "total": len(entries),
+                }
+            )
+    compiled.sort(key=lambda row: row["p50_entry_sha256"])
+    return compiled
+
+
 def compile_process_v2_p50_entries(
     selection: Mapping[str, Any],
     *,
@@ -886,71 +971,14 @@ def compile_process_v2_p50_entries(
             )
         sources.append(source_state)
         targets.append(target_state)
-    try:
-        compact_rows = compile_teacher_successor_fibers_support_only(
-            scratch.model,
-            tuple(sources),
-            tuple(targets),
-            teacher_action_sha256s=tuple(
-                str(entry["action_sha256"]) for entry in resolver_entries
-            ),
-            teacher_families=tuple(
-                str(entry["model_family"]) for entry in resolver_entries
-            ),
-            times=tuple(_COMPILE_SUPPORT_TIME for _entry in resolver_entries),
-        )
-    except (SuccessorTrainingError, ValueError) as error:
-        raise ProcessV2P50RuntimeError(
-            "could not compile compact exact P50 teacher-successor fibers"
-        ) from error
-
-    compiled: list[dict[str, Any]] = []
-    for index, (entry, source_state, compact) in enumerate(
-        zip(resolver_entries, sources, compact_rows, strict=True), start=1
-    ):
-        state_payload = encode_state(source_state)
-        if encode_state(decode_state(state_payload)) != state_payload:
-            raise ProcessV2P50RuntimeError(
-                "P50 exact-state encoding is not byte-stable"
-            )
-        fiber = compact.teacher_fiber
-        prepared_body = {
-            "p50_entry_sha256": entry["p50_entry_sha256"],
-            "model_family": entry["model_family"],
-            "capability_cell_id": entry["capability_cell_id"],
-            "partition_role": entry["partition_role"],
-            "support_time_hex": float(_COMPILE_SUPPORT_TIME).hex(),
-            "source_state_sha256": entry["source_state_sha256"],
-            "target_state_sha256": entry["target_state_sha256"],
-            "successor_canonical_key": entry["canonical_successor_key"],
-            "teacher_action_sha256": entry["action_sha256"],
-            "objective_coefficient": 1,
-            "raw_mark_count": compact.raw_mark_count,
-            "decoded_mark_count": compact.decoded_mark_count,
-            "marks_by_family": dict(compact.marks_by_family),
-            "production_successor_alias_multiplicity": len(fiber.aliases),
-            "virtual_alias_count": len(fiber.state_support.virtual_aliases),
-            "exact_state": state_payload,
-            "teacher_successor_fiber": _teacher_fiber_payload(fiber),
-            "exact_teacher_alias": _alias_payload(compact.exact_teacher_alias),
-            "model_scores_or_probabilities_stored": False,
-            "hazard_included": False,
-        }
-        prepared = {
-            **prepared_body,
-            "p50_compiled_entry_sha256": canonical_sha256(prepared_body),
-        }
-        compiled.append(prepared)
-        if progress_callback is not None:
-            progress_callback(
-                {
-                    "phase": "process_v2_p50_compile_entry",
-                    "task_identity_sha256": task_identity_sha256,
-                    "completed": index,
-                    "total": len(entries),
-                }
-            )
-    compiled.sort(key=lambda row: row["p50_entry_sha256"])
+    compiled = compile_prepared_entries(
+        scratch.model,
+        sources,
+        targets,
+        resolver_entries,
+        task_identity_sha256=task_identity_sha256,
+        progress_callback=progress_callback,
+    )
     body = {
         "task_identity_sha256": task_identity_sha256,
         "selection_sha256": selection["selection_sha256"],
