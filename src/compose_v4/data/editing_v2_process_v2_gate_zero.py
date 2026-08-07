@@ -1071,6 +1071,7 @@ def iter_process_v2_role_shards(
     contracts: GateZeroContracts,
     index: GateZeroSourceIndex,
     partition_role: str,
+    task_identity_sha256: str | None = None,
 ) -> Iterator[tuple[Mapping[str, Any], tuple[dict[str, Any], ...]]]:
     """Yield authenticated Active8 shards for one explicitly requested role.
 
@@ -1085,11 +1086,21 @@ def iter_process_v2_role_shards(
         raise ProcessV2GateZeroError(
             f"unknown Process-V2 partition role: {partition_role!r}"
         )
+    # A caller that wants ONE chunk must not pay to open the whole role: without
+    # this filter every worker in a per-chunk fan-out reads every shard of the
+    # role, which is O(n^2) I/O across the run and invisible in a single-chunk
+    # test.  Selecting here keeps the digest, count and row authentication below
+    # as the single authority for whatever is opened.
     selected = reduction_order(
         tuple(
             shard
             for shard in index.shards
-            if shard["partition_role"] == partition_role and shard["nonempty"]
+            if shard["partition_role"] == partition_role
+            and shard["nonempty"]
+            and (
+                task_identity_sha256 is None
+                or str(shard["task_identity_sha256"]) == task_identity_sha256
+            )
         )
     )
     parent = Path(active8_run_root) / ACTIVE8_TASKS_DIRNAME

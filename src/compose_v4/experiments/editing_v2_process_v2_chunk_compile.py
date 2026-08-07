@@ -80,13 +80,9 @@ def chunk_transition_rows(
             contracts=source.contracts,
             index=source.index,
             partition_role=partition_role,
+            task_identity_sha256=task_identity_sha256,
         )
-        rows = [
-            row
-            for _shard, published in shards
-            for row in published
-            if str(row.get("task_identity_sha256")) == task_identity_sha256
-        ]
+        rows = [row for _shard, published in shards for row in published]
     except ProcessV2GateZeroError as error:
         raise ProcessV2ChunkCompileError(str(error)) from error
     if not rows:

@@ -32,33 +32,27 @@ def test_an_empty_chunk_refuses_instead_of_compiling_nothing(monkeypatch) -> Non
         chunk.chunk_transition_rows(source, task_identity_sha256="b" * 64)
 
 
-def test_rows_are_filtered_to_the_named_chunk(monkeypatch) -> None:
-    wanted, other = "c" * 64, "d" * 64
-    published = (
-        {"task_identity_sha256": wanted, "n": 1},
-        {"task_identity_sha256": other, "n": 2},
-        {"task_identity_sha256": wanted, "n": 3},
-    )
-    monkeypatch.setattr(
-        chunk, "iter_process_v2_role_shards", lambda *a, **k: iter((({}, published),))
-    )
-    source = type("S", (), {"active8_run_root": None, "contracts": None, "index": None})()
-    rows = chunk.chunk_transition_rows(source, task_identity_sha256=wanted)
-    assert [row["n"] for row in rows] == [1, 3]
+def test_the_chunk_and_role_are_passed_to_the_reader_not_filtered_after(monkeypatch) -> None:
+    """Both selectors must reach the reader.
 
-
-def test_the_partition_role_is_passed_to_the_reader_not_filtered_after(monkeypatch) -> None:
-    """Sealing depends on the role never being opened, so it must be a reader argument."""
+    The role matters because sealing depends on a held-out shard never being
+    opened.  The task matters because a per-chunk fan-out that filters after
+    reading opens every shard of the role in every worker -- O(n^2) I/O that a
+    single-chunk test cannot reveal.
+    """
 
     seen: dict[str, object] = {}
+    wanted = "c" * 64
 
-    def _reader(run_root, *, contracts, index, partition_role):
+    def _reader(run_root, *, contracts, index, partition_role, task_identity_sha256=None):
         seen["partition_role"] = partition_role
-        return iter(((({}), ({"task_identity_sha256": "e" * 64},)),))
+        seen["task_identity_sha256"] = task_identity_sha256
+        return iter((({}, ({"task_identity_sha256": wanted, "n": 1},)),))
 
     monkeypatch.setattr(chunk, "iter_process_v2_role_shards", _reader)
     source = type("S", (), {"active8_run_root": None, "contracts": None, "index": None})()
-    chunk.chunk_transition_rows(
-        source, task_identity_sha256="e" * 64, partition_role="train"
-    )
+    rows = chunk.chunk_transition_rows(source, task_identity_sha256=wanted)
+
     assert seen["partition_role"] == "train"
+    assert seen["task_identity_sha256"] == wanted
+    assert [row["n"] for row in rows] == [1]
