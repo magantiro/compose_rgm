@@ -54,7 +54,7 @@ COLLATED_PAYLOAD_FILENAME = "PROCESS_V2_P50_COLLATED_BATCH.pt"
 COLLATED_RECEIPT_FILENAME = "PROCESS_V2_P50_COLLATED_RECEIPT.json"
 COLLATED_TASKS_DIRNAME = "collated_tasks"
 
-MAX_CPU_CONTAINERS = 80
+MAX_CPU_CONTAINERS = 100
 CPU_PER_LEAF = 1.0
 CPU_MEMORY_MB = 8 * 1024
 CPU_LEAF_TIMEOUT_SECONDS = 45 * 60
@@ -1428,7 +1428,8 @@ def prep_subset(
     output_root: str,
     expected_commit: str,
     chunk_plan_path: str,
-    slice_size: int = 1500,
+    slice_size: int = 800,
+    max_slices: int = 0,
 ) -> None:
     """Fan a pinned chunk list out as EQUAL slices, one worker per slice.
 
@@ -1455,6 +1456,8 @@ def prep_subset(
                     revision,
                 )
             )
+    if int(max_slices) > 0:
+        work = work[: int(max_slices)]
     print(
         json.dumps(
             {
