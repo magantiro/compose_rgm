@@ -570,104 +570,77 @@ def test_a_checkpoint_cadence_without_a_root_is_refused(prepared):
         )
 
 
-def test_a_regressing_family_aborts_the_run_before_it_finishes(prepared):
-    """The guard the barred 16,000-step run lacked.
+def test_an_insignificant_regression_does_NOT_abort(prepared):
+    """A zero ceiling must no longer abort on noise.
 
-    A zero ceiling makes any per-family worsening a regression, so this proves
-    the abort is wired to the measurement rather than merely recorded beside it:
-    the run must stop EARLY and name the family.
+    The old gate aborted on any positive delta, so a 32-example panel with a
+    standard error of +-0.03 to +-0.27 nats would halt a healthy run for a
+    fluctuation. It also used the JOINT successor probability, which charges a
+    family for its own scarcity: a model correctly learning that ring edits are
+    1.2% of the data scored ring worse and looked identical to one that had
+    forgotten the operation.
     """
 
     panel = training.build_validation_panel(prepared / "validation", examples_per_family=4)
     result = training.run_process_v2_training(
         _model(),
         prepared / "train",
-        optimizer_steps=12,
+        optimizer_steps=6,
         batch_size=8,
         seed=17,
         panel=panel,
         capability_check_every_steps=3,
         maximum_family_nll_regression={family: 0.0 for family in panel.families},
     )
-
-    abort = result["capability_abort"]
-    assert abort is not None
-    assert result["optimizer_steps_completed"] < 12
-    assert abort["optimizer_step"] == result["optimizer_steps_completed"]
-    assert abort["family"] in panel.families
-    assert abort["regression_nats"] > abort["ceiling_nats"] == 0.0
+    assert result["optimizer_steps_completed"] == 6, "a noise-level delta must not abort"
+    assert result["capability_abort"] is None
 
 
-def test_training_times_are_sampled_per_example_while_the_panel_stays_fixed(prepared):
-    """Training draws U(0,1) times; validation stays at the collated time.
+def test_the_gate_measures_within_family_capability_not_the_joint_probability() -> None:
+    """The joint metric flags scarcity; only within-family measures capability."""
 
-    Slices are collated at one support time, so a trainer that forgot to
-    override ``times`` would train the whole corpus at a single time and still
-    look healthy.  Validation must NOT be overridden, or successive capability
-    checks would differ by time as well as by the model.
-    """
-
-    entries = training.load_published_slice(
-        training.iter_slice_directories(prepared / "train")[0], expected_role="train"
-    ).entries
-    times = training._sampled_times(entries[:8], stream_index=0, seed=17)
-
-    assert len(set(times)) == len(times), "times are not per-example"
-    assert all(0.0 < value < 1.0 for value in times)
-    assert times != training._sampled_times(entries[:8], stream_index=8, seed=17)
-    # Deterministic in the seed, so a resumed run replays the same draws.
-    assert times == training._sampled_times(entries[:8], stream_index=0, seed=17)
-
-    panel = training.build_validation_panel(prepared / "validation", examples_per_family=2)
-    assert all(
-        float(value) == _COMPILE_SUPPORT_TIME
-        for shard in panel.shards
-        for value in shard.batch.times
+    # ring's within-family capability IMPROVED while its joint score rose 1.5 nats
+    baseline = {
+        "by_family": {"ring_system_restate": 2.357},
+        "within_by_family": {"ring_system_restate": 0.290},
+        "within_samples": {"ring_system_restate": [0.290] * 32},
+    }
+    observed = {
+        "by_family": {"ring_system_restate": 3.866},   # joint: +1.509
+        "within_by_family": {"ring_system_restate": 0.227},  # capability: -0.063
+        "within_samples": {"ring_system_restate": [0.227] * 32},
+    }
+    rows = training.significant_capability_regressions(
+        baseline, observed, {"ring_system_restate": 0.5}
     )
+    assert rows == [], "an improving family must not be flagged by a joint rise"
 
 
-def test_the_run_itself_scores_at_sampled_times_not_the_collated_one(prepared, monkeypatch):
-    """Assert the PATH, not the helper.
+def test_the_gate_requires_a_regression_to_clear_its_own_noise() -> None:
+    import random
 
-    Testing ``_sampled_times`` alone passes even if the loop never calls it, so
-    this records what the forward pass actually received.
-    """
-
-    observed: list[tuple[bool, tuple[float, ...]]] = []
-    real = training.forward_teacher_successor_batch
-
-    def _record(model, batch, fibers, **kwargs):
-        # Keyed on train/eval mode, because the BASELINE panel evaluation runs
-        # before the first optimizer step -- slicing by position would compare
-        # panel forwards to the training claim.
-        observed.append((model.training, tuple(float(value) for value in batch.times)))
-        return real(model, batch, fibers, **kwargs)
-
-    monkeypatch.setattr(training, "forward_teacher_successor_batch", _record)
-    panel = training.build_validation_panel(prepared / "validation", examples_per_family=2)
-    training.run_process_v2_training(
-        _model(),
-        prepared / "train",
-        optimizer_steps=3,
-        batch_size=8,
-        seed=17,
-        panel=panel,
-        capability_check_every_steps=3,
-        maximum_family_nll_regression={family: 50.0 for family in panel.families},
+    rng = random.Random(0)
+    # a +0.05 shift buried in +-1.0 scatter: past a 0.0 ceiling, but not real
+    base = [rng.gauss(3.0, 1.0) for _ in range(32)]
+    noisy = [x + 0.05 + rng.gauss(0.0, 1.0) for x in base]
+    quiet = training.significant_capability_regressions(
+        {"within_by_family": {"f": sum(base) / 32}, "within_samples": {"f": base}},
+        {"within_by_family": {"f": sum(noisy) / 32}, "within_samples": {"f": noisy}},
+        {"f": 0.0},
     )
+    assert quiet == [], "a sub-sigma shift is not a regression"
 
-    training_times = [times for is_training, times in observed if is_training]
-    panel_times = [times for is_training, times in observed if not is_training]
-
-    assert len(training_times) == 3
-    for times in training_times:
-        assert len(set(times)) > 1, "a training step scored every row at one time"
-        assert all(value != _COMPILE_SUPPORT_TIME for value in times)
-    assert len(set(training_times)) == 3, "steps reused one draw"
-
-    # The panel, by contrast, must stay at the one time it was collated at.
-    assert panel_times
-    assert all(value == _COMPILE_SUPPORT_TIME for times in panel_times for value in times)
+    # a decisive +2.0 shift with tight scatter MUST be caught
+    real = [x + 2.0 for x in base]
+    loud = training.significant_capability_regressions(
+        {"within_by_family": {"f": sum(base) / 32}, "within_samples": {"f": base}},
+        {"within_by_family": {"f": sum(real) / 32}, "within_samples": {"f": real}},
+        {"f": 0.5},
+    )
+    assert len(loud) == 1
+    assert loud[0]["family"] == "f"
+    assert loud[0]["sigma"] > 2.0
+    assert loud[0]["within_family_regression_nats"] > 0.5
 
 
 def test_a_run_reads_slices_rather_than_reselecting_one_cached_batch(prepared):

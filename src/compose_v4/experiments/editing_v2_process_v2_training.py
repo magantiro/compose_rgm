@@ -264,6 +264,68 @@ def build_validation_panel(
     )
 
 
+def significant_capability_regressions(
+    baseline: Mapping[str, Any],
+    observed: Mapping[str, Any],
+    ceilings: Mapping[str, float],
+    *,
+    minimum_sigma: float = 2.0,
+) -> list[dict[str, Any]]:
+    """Families whose WITHIN-family NLL rose past their ceiling AND the noise.
+
+    Two corrections to the naive gate, both learned by getting them wrong.
+
+    Wrong quantity: the joint successor probability charges a family for its own
+    scarcity, so correctly calibrating a 1.2% prior looks exactly like forgetting
+    the operation.  At step 400 the joint metric flagged ring and bond_reorder
+    while their within-family capability was flat or improving, and said nothing
+    about bond_reroute, the one family genuinely degrading on held-out data.
+
+    No noise floor: a thirty-two example panel carries a standard error of
+    +-0.03 to +-0.27 nats per family, so deltas of +0.06 and +0.26 were read as
+    regressions when both sat at one sigma.  A regression must clear its own
+    uncertainty before it is called one.
+    """
+
+    base = baseline["within_by_family"]
+    obs = observed["within_by_family"]
+    samples = observed.get("within_samples", {})
+    base_samples = baseline.get("within_samples", {})
+    rows: list[dict[str, Any]] = []
+    for family in sorted(ceilings):
+        if family not in base or family not in obs:
+            raise ProcessV2TrainingError(
+                f"capability check lacks a within-family measurement for {family!r}"
+            )
+        regression = float(obs[family]) - float(base[family])
+        paired = base_samples.get(family) and samples.get(family)
+        if paired and len(base_samples[family]) == len(samples[family]):
+            # Paired per-example differences: the panel is fixed, so pairing
+            # removes between-example variance and measures the shift itself.
+            deltas = [
+                samples[family][i] - base_samples[family][i]
+                for i in range(len(samples[family]))
+            ]
+            n = len(deltas)
+            mean = sum(deltas) / n
+            variance = sum((x - mean) ** 2 for x in deltas) / (n - 1) if n > 1 else 0.0
+            standard_error = math.sqrt(variance / n) if n > 1 else 0.0
+        else:
+            mean, standard_error = regression, 0.0
+        sigma = abs(mean) / standard_error if standard_error > 0 else float("inf")
+        if regression > float(ceilings[family]) and sigma >= float(minimum_sigma):
+            rows.append(
+                {
+                    "family": family,
+                    "within_family_regression_nats": regression,
+                    "standard_error_nats": standard_error,
+                    "sigma": sigma,
+                    "ceiling_nats": float(ceilings[family]),
+                }
+            )
+    return rows
+
+
 def evaluate_validation_panel(
     model: FactorizedTraceletRateModel, panel: ValidationPanel, *, batch_size: int = 64
 ) -> dict[str, Any]:
@@ -288,19 +350,45 @@ def evaluate_validation_panel(
                         batch.to(model.device),
                         tuple(shard.fibers[index] for index in indices),
                     )
-                    nlls = -prediction.selected_productive_successor_log_probability.detach().cpu()
-                    for index, nll in zip(indices, nlls, strict=True):
-                        rows.append((str(shard.entries[index]["model_family"]), float(nll)))
+                    joint = -prediction.selected_productive_successor_log_probability.detach().cpu()
+                    # WITHIN-family is the capability signal.  The joint quantity
+                    # folds in how often the model thinks a family occurs at all,
+                    # so a model correctly learning that ring edits are 1.2% of
+                    # the data scores ring worse on it -- indistinguishable from
+                    # forgetting the operation.  Measured at step 400: ring's
+                    # joint rose 1.509 nats while its within-family capability
+                    # IMPROVED by 0.063.  The controller chooses the family at
+                    # inference, so the family prior is precisely what gets
+                    # overridden; within-family is what determines whether the
+                    # editor works.
+                    within = (
+                        -prediction.selected_within_teacher_family_log_probability.detach().cpu()
+                    )
+                    for position, index in enumerate(indices):
+                        rows.append(
+                            (
+                                str(shard.entries[index]["model_family"]),
+                                float(joint[position]),
+                                float(within[position]),
+                            )
+                        )
     finally:
         model.train(was_training)
 
     by_family: dict[str, float] = {}
-    for family in sorted({family for family, _ in rows}):
-        selected = [nll for name, nll in rows if name == family]
+    within_by_family: dict[str, float] = {}
+    within_samples: dict[str, list[float]] = {}
+    for family in sorted({family for family, _joint, _within in rows}):
+        selected = [j for name, j, _w in rows if name == family]
         by_family[family] = sum(selected) / len(selected)
+        w = [x for name, _j, x in rows if name == family]
+        within_samples[family] = w
+        within_by_family[family] = sum(w) / len(w)
     return {
+        "within_by_family": within_by_family,
+        "within_samples": within_samples,
         "example_count": len(rows),
-        "overall_mean_successor_nll": sum(nll for _, nll in rows) / len(rows),
+        "overall_mean_successor_nll": sum(j for _n, j, _w in rows) / len(rows),
         "by_family": by_family,
     }
 
@@ -466,7 +554,7 @@ def run_process_v2_training(
         if any(not math.isfinite(value) or value < 0.0 for value in ceilings.values()):
             raise ProcessV2TrainingError("capability ceilings must be finite and nonnegative")
         baseline = evaluate_validation_panel(model, panel, batch_size=batch_size)
-        missing = set(ceilings) - set(baseline["by_family"])
+        missing = set(ceilings) - set(baseline["within_by_family"])
         if missing:
             # "not measured" and "did not regress" must never look alike.
             raise ProcessV2TrainingError(
@@ -614,8 +702,8 @@ def run_process_v2_training(
                 if capability_check_every_steps and step % capability_check_every_steps == 0:
                     assert panel is not None and baseline is not None
                     observed = evaluate_validation_panel(model, panel, batch_size=batch_size)
-                    regressions = capability_regressions(
-                        baseline["by_family"], observed["by_family"], ceilings
+                    regressions = significant_capability_regressions(
+                        baseline, observed, ceilings
                     )
                     capability_checks.append(
                         {
@@ -639,11 +727,15 @@ def run_process_v2_training(
                             }
                         )
                     if regressions:
-                        worst = max(regressions, key=lambda row: row["regression_nats"])
+                        worst = max(regressions, key=lambda row: row["within_family_regression_nats"])
                         aborted = {
                             "optimizer_step": step,
                             "family": worst["family"],
-                            "regression_nats": float(worst["regression_nats"]),
+                            "within_family_regression_nats": float(
+                                worst["within_family_regression_nats"]
+                            ),
+                            "standard_error_nats": float(worst["standard_error_nats"]),
+                            "sigma": float(worst["sigma"]),
                             "ceiling_nats": float(worst["ceiling_nats"]),
                         }
                         break
@@ -767,6 +859,7 @@ __all__ = [
     "ValidationPanel",
     "build_validation_panel",
     "capability_regressions",
+    "significant_capability_regressions",
     "evaluate_validation_panel",
     "iter_slice_directories",
     "load_published_slice",
