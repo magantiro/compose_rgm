@@ -665,3 +665,132 @@ def test_a_run_reads_slices_rather_than_reselecting_one_cached_batch(prepared):
     assert result["epochs_started"] > 1
     assert result["slices_read"] >= result["epochs_started"]
     assert result["unique_training_examples_seen"] > 0
+
+
+# ---- Family-aware sampling ----
+
+
+def test_family_weights_actually_shift_the_sampled_mixture(prepared):
+    """Uniform iteration reproduces whatever mixture is on disk.
+
+    That mixture is an artifact: the two largest lanes are insert/delete ONLY by
+    construction, so atom_insert is 24% of the corpus for reasons of corpus
+    design rather than of chemistry. Weights must move the mixture the model
+    actually sees.
+    """
+
+    observed: list[str] = []
+    real = training.forward_teacher_successor_batch
+
+    def _record(model, batch, fibers, **kwargs):
+        observed.extend(str(name) for name in batch.teacher_rule_names)
+        return real(model, batch, fibers, **kwargs)
+
+    import collections
+
+    panel = training.build_validation_panel(prepared / "validation", examples_per_family=2)
+    common = dict(
+        optimizer_steps=12, batch_size=8, seed=17, panel=panel,
+        capability_check_every_steps=12,
+        maximum_family_nll_regression={f: 50.0 for f in panel.families},
+    )
+
+    import pytest as _pytest
+    mp = _pytest.MonkeyPatch()
+    try:
+        mp.setattr(training, "forward_teacher_successor_batch", _record)
+        training.run_process_v2_training(_model(), prepared / "train", **common)
+        uniform = collections.Counter(observed[: 12 * 8])
+
+        observed.clear()
+        heavy = {f: (20.0 if f == "ring_system_restate" else 1.0) for f in panel.families}
+        training.run_process_v2_training(
+            _model(), prepared / "train", family_weights=heavy, **common
+        )
+        weighted = collections.Counter(observed[: 12 * 8])
+    finally:
+        mp.undo()
+
+    u = uniform.get("ring_system_restate", 0)
+    w = weighted.get("ring_system_restate", 0)
+    assert w > u, f"weighting ring 20x did not raise its share ({u} -> {w})"
+
+
+def test_slice_visit_weights_never_exclude_a_slice(prepared):
+    """Every slice must keep nonzero probability.
+
+    Zeroing a slice would make part of the corpus unreachable, which is a
+    silent data loss rather than a sampling choice.
+    """
+
+    counts = training.slice_family_counts(prepared / "train")
+    assert counts, "no slices found"
+    weights = training._slice_visit_weights(
+        counts, {"ring_system_restate": 50.0, "atom_insert": 1.0}
+    )
+    assert len(weights) == len(counts)
+    assert all(v > 0.0 for v in weights.values()), "a slice was excluded entirely"
+
+
+def test_weights_that_select_nothing_are_refused(prepared):
+    counts = training.slice_family_counts(prepared / "train")
+    with pytest.raises(training.ProcessV2TrainingError, match="no slice"):
+        training._slice_visit_weights(counts, dict.fromkeys(next(iter(counts.values())), 0.0))
+
+
+def test_the_default_is_still_uniform_iteration(prepared):
+    """Weighting must be opt-in: the recorded mixture stays reproducible."""
+
+    panel = training.build_validation_panel(prepared / "validation", examples_per_family=2)
+    result = training.run_process_v2_training(
+        _model(), prepared / "train", optimizer_steps=4, batch_size=8, seed=17,
+        panel=panel, capability_check_every_steps=4,
+        maximum_family_nll_regression={f: 50.0 for f in panel.families},
+    )
+    assert result["family_weights"] is None
+
+
+def test_within_slice_weighting_shifts_a_single_slice(prepared):
+    """Isolate the second lever.
+
+    The end-to-end mixture test passes on slice-visit weighting alone, so it
+    cannot see within-slice weighting break. Drawing from ONE slice removes the
+    first lever entirely: any shift here is the entry-level weighting.
+    """
+
+    import collections
+    import random
+
+    directory = training.iter_slice_directories(prepared / "train")[0]
+    loaded = training.load_published_slice(directory, expected_role="train")
+    families = {str(e["model_family"]) for e in loaded.entries}
+    target = "ring_system_restate" if "ring_system_restate" in families else sorted(families)[0]
+
+    def mixture(weights):
+        rng = random.Random(0)
+        drawn = collections.Counter()
+        for _ in range(60):
+            idx = training._weighted_minibatch(
+                loaded, batch_size=8, weights=weights, rng=rng
+            )
+            drawn.update(str(loaded.entries[i]["model_family"]) for i in idx)
+        return drawn
+
+    flat = mixture(dict.fromkeys(families, 1.0))
+    heavy = mixture({f: (50.0 if f == target else 1.0) for f in families})
+    assert heavy[target] > flat[target], (
+        f"within-slice weighting did not raise {target} "
+        f"({flat[target]} -> {heavy[target]})"
+    )
+
+
+def test_within_slice_weighting_refuses_an_all_zero_slice(prepared):
+    import random
+
+    directory = training.iter_slice_directories(prepared / "train")[0]
+    loaded = training.load_published_slice(directory, expected_role="train")
+    families = {str(e["model_family"]) for e in loaded.entries}
+    with pytest.raises(training.ProcessV2TrainingError, match="select nothing"):
+        training._weighted_minibatch(
+            loaded, batch_size=4, weights=dict.fromkeys(families, 0.0), rng=random.Random(0)
+        )

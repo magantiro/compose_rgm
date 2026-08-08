@@ -409,6 +409,74 @@ def _minibatch_plan(
     )
 
 
+def slice_family_counts(prep_root: Path) -> dict[Path, dict[str, int]]:
+    """Per-slice family composition, read from receipts only.
+
+    Cheap: the receipt carries `family_counts`, so no tensor is loaded to plan
+    sampling.
+    """
+
+    counts: dict[Path, dict[str, int]] = {}
+    for directory in iter_slice_directories(prep_root):
+        receipt = json.loads((directory / RECEIPT_FILENAME).read_text())
+        counts[directory] = {
+            str(family): int(n) for family, n in receipt["family_counts"].items()
+        }
+    return counts
+
+
+def _weighted_minibatch(
+    loaded: LoadedSlice,
+    *,
+    batch_size: int,
+    weights: Mapping[str, float],
+    rng: random.Random,
+) -> tuple[int, ...]:
+    """Sample one minibatch from a slice, weighted by family.
+
+    Rebalancing needs BOTH levers and this is the second: a slice's own mixture
+    is re-weighted here, while which slice gets visited is weighted by the
+    caller.  Within-slice weighting alone cannot help -- a
+    `real_endpoint_multistep_path` slice holds no ring transitions to oversample,
+    because the lanes are near family-pure by construction.
+
+    Sampling is with replacement, so a scarce family can exceed its share of the
+    slice.  That repeats information rather than adding it, which is why weights
+    should be modest: the binding constraint on a rare family is its unique
+    example count, not how often it is drawn.
+    """
+
+    population = list(range(loaded.entry_count))
+    per_entry = [
+        max(float(weights.get(str(loaded.entries[index]["model_family"]), 1.0)), 0.0)
+        for index in population
+    ]
+    if sum(per_entry) <= 0.0:
+        raise ProcessV2TrainingError("family weights select nothing in this slice")
+    return tuple(rng.choices(population, weights=per_entry, k=batch_size))
+
+
+def _slice_visit_weights(
+    counts: Mapping[Path, Mapping[str, int]], weights: Mapping[str, float]
+) -> dict[Path, float]:
+    """How often to visit each slice, given the target family mixture.
+
+    A slice is worth visiting in proportion to the weighted mass it holds, so
+    family-rich slices are drawn more often without any slice being excluded --
+    every slice keeps nonzero probability, which keeps the whole corpus reachable.
+    """
+
+    out: dict[Path, float] = {}
+    for directory, family_counts in counts.items():
+        out[directory] = sum(
+            float(weights.get(family, 1.0)) * int(n) for family, n in family_counts.items()
+        )
+    total = sum(out.values())
+    if total <= 0.0:
+        raise ProcessV2TrainingError("family weights select no slice")
+    return out
+
+
 def _sampled_times(
     entries: Sequence[Mapping[str, Any]], *, stream_index: int, seed: int
 ) -> tuple[float, ...]:
@@ -445,6 +513,7 @@ def run_process_v2_training(
     resume_from: Path | None = None,
     resume_weights_only: bool = False,
     parameter_scope: str = "all",
+    family_weights: Mapping[str, float] | None = None,
     progress_callback: Callable[[Mapping[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     """Train the productive jump law over published prep slices.
@@ -582,21 +651,46 @@ def run_process_v2_training(
     epochs = 0
     aborted: dict[str, Any] | None = None
 
+    # Family-weighted sampling replaces uniform iteration when weights are given.
+    # Uniform iteration reproduces whatever mixture happens to be on disk, and
+    # that mixture is an artifact: the two largest lanes are insert/delete ONLY by
+    # construction, so `atom_insert` is 24% of the corpus for reasons of corpus
+    # design rather than of chemistry.
+    visit_weights: dict[Path, float] = {}
+    if family_weights is not None:
+        visit_weights = _slice_visit_weights(
+            slice_family_counts(Path(prep_root)), family_weights
+        )
+
     model.train()
     while step < optimizer_steps and aborted is None:
         epochs += 1
-        # Shuffle slice order per epoch, not just rows within a slice.  Fixed
-        # slice order would make every epoch present the corpus in the same
-        # sequence, which correlates a family's exposure with the point in the
-        # epoch it sits at.
-        epoch_slices = list(slice_dirs)
-        rng.shuffle(epoch_slices)
+        if family_weights is not None:
+            # Draw slices by weight rather than sweeping them, so a step's family
+            # mixture follows the target instead of the disk order.
+            epoch_slices = rng.choices(
+                list(visit_weights), weights=list(visit_weights.values()), k=len(slice_dirs)
+            )
+        else:
+            # Shuffle slice order per epoch, not just rows within a slice.  Fixed
+            # slice order would make every epoch present the corpus in the same
+            # sequence, which correlates a family's exposure with the point in the
+            # epoch it sits at.
+            epoch_slices = list(slice_dirs)
+            rng.shuffle(epoch_slices)
         for directory in epoch_slices:
             if step >= optimizer_steps or aborted is not None:
                 break
             loaded = load_published_slice(directory, expected_role=TRAIN_ROLE)
             slices_read += 1
-            for indices in _minibatch_plan(loaded.entry_count, batch_size=batch_size, rng=rng):
+            plan = (
+                (_weighted_minibatch(
+                    loaded, batch_size=batch_size, weights=family_weights, rng=rng
+                ),)
+                if family_weights is not None
+                else _minibatch_plan(loaded.entry_count, batch_size=batch_size, rng=rng)
+            )
+            for indices in plan:
                 if step >= optimizer_steps:
                     break
                 entries = tuple(loaded.entries[index] for index in indices)
@@ -764,6 +858,7 @@ def run_process_v2_training(
         "checkpoints": checkpoints,
         "final_model_state_sha256": state_dict_semantic_sha256(model.state_dict()),
         "parameter_scope": parameter_scope,
+        "family_weights": dict(family_weights) if family_weights else None,
         "trainable_parameters": sum(p.numel() for p in trainable),
         "hazard_frozen": True,
         "artifact_published": False,
@@ -863,5 +958,6 @@ __all__ = [
     "evaluate_validation_panel",
     "iter_slice_directories",
     "load_published_slice",
+    "slice_family_counts",
     "run_process_v2_training",
 ]
