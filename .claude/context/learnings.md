@@ -727,3 +727,35 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   transition needs `resume_weights_only`: restore weights, RNG and step, start fresh moments. It is
   opt-in so it can never happen silently -- a quiet fresh optimizer looks like a resume and behaves
   like a restart.
+
+## 2026-08-08 (the regression was the METRIC, not the model)
+
+- **`selected_productive_successor_log_probability` is a JOINT probability and must not be
+  used as a capability gate.** It folds "how often does this family occur" together with "can the
+  model execute it". A model that correctly learns ring edits are 1.2% of the data necessarily
+  scores ring examples worse on it, which is indistinguishable from forgetting the skill.
+  Decomposed at step 400: `ring_system_restate` JOINT +1.509 = WITHIN -0.063 (capability improved)
+  plus FAMILY-PRIOR +1.571 (calibration). Same for `bond_reorder`: WITHIN -0.006.
+  Use `selected_within_teacher_family_log_probability` -- and it is the right target anyway,
+  because the controller picks the family at inference, so the base model's family prior is
+  exactly what gets overridden.
+- **A 32-example panel has a standard error of +-0.03 to +-0.27 nats per family.** `atom_delete`
+  +0.259 sits at 1.0 sigma; `cycle_attach` +0.062 likewise. Both were read as regressions before
+  the noise floor was measured. Compute SE before calling any per-family delta a finding.
+- **Judge a family by its margin over uniform-within-family, not by its delta.** All eight sit
+  2.66-6.67 nats better than guessing over their own legal successors. The three "flat" families
+  were flat because they started near the floor (`atom_delete` 1.61, `bond_reorder` 1.92); the
+  families that improved most started worst (`atom_insert` 5.79->3.62). `ring_system_restate` at
+  0.227 (+6.67) is the BEST family in the model -- the one that looked like it was collapsing.
+- **The panel was 100% inside the training set.** Every number above is fit, not generalisation.
+  A random holdout of the train role does not fix it either: 29.3% of train entries share a source
+  molecule with another entry, so the same molecule lands on both sides. The corpus `validation`
+  role is the only clean split; sealing means the GATE does not read it, not that training may not
+  validate against it. Verified disjoint five ways including "val source also a train TARGET".
+- **All six hard families are exhausted at 94-100% of what the corpus holds.** Only
+  `atom_insert`/`atom_delete` have data left, and `atom_insert` is the weakest family, so further
+  compilation helps where the model is worst. The resulting dilution is a TRAINING-time concern:
+  compiling is one-time and irreversible, sampling is free and per-run.
+- **6 compile workers is the measured optimum on a 12-core machine** (589% CPU, 0 swapouts/s)
+  against 8 (536%, 1,409) and 10 (6,339, degrading). Each worker holds its own chemistry cache, so
+  the constraint is memory. Oversubscription took a build from 5,507 entries/h to 250.
