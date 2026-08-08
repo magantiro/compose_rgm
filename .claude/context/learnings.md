@@ -700,3 +700,30 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
 - **Consequence for any subset:** family coverage requires `reversible_synthetic_walk`. Selecting chunks
   at random, or taking a contiguous fifth, would very likely yield insert/delete only and tell you
   nothing about whether graft, restate or the ring ops can learn.
+
+## 2026-08-08 (rare-family regression: measured, and the first hypothesis falsified)
+
+- **The 16,000-step failure reproduces at step 400 and the capability gate catches it.** Production
+  6.2M model (`hidden_dim=256`, `message_passing_steps=6`), 54,043-entry set, balanced 32-per-family
+  panel, loose 1.5-nat ceiling. Aggregate loss improved 39% (6.516 -> 3.986) while
+  `ring_system_restate` regressed 1.509 nats. A run watching only aggregate loss calls this healthy.
+- **Exactly 2 of 8 families regressed, and they are the two rarest.** Dose-response with data share:
+  `ring_system_restate` 1.2% (+1.509), `bond_reorder` 2.2% (+1.433), `bond_reroute` 7.1% (-0.038,
+  the break-even point), everything above 10% improved. `cycle_insert` is structurally similar to
+  ring and improved MOST (-3.121) on 16x the data, so the operator is not intrinsically unlearnable.
+- **HYPOTHESIS FALSIFIED: it is not trunk drift.** Resuming the step-400 checkpoint with
+  `heads_plus_local_adapter` (80% of the model frozen, 1,210,866 trainable) left ring and
+  bond_reorder degrading at the SAME rate (+0.568, +0.569). Freezing the trunk changed nothing for
+  them while the abundant families improved further.
+- **What the falsification narrowed it to.** With the trunk frozen the only shared trainable surface
+  is `pair_project.`, contested by exactly four families, and phase-2 deltas are monotonic in their
+  data share: cycle_insert 18.2% -1.449, cycle_attach 12.6% -0.177, bond_reorder 2.2% +0.569,
+  ring_system_restate 1.2% +0.568. Next test is `heads_only`, which freezes `pair_project.`
+- **Do not cite the T1 `heads_plus_local_adapter` pass as evidence a family trains.** That 0.947
+  minimum teacher probability is a MICRO-OVERFIT probe -- memorising a 64-example panel. It
+  establishes a mechanism worth testing, not an outcome. I quoted it as a training result and the
+  phase-2 run contradicted it within an hour.
+- **AdamW state cannot cross a parameter-scope change** (119 trainable tensors vs 33), so a phase
+  transition needs `resume_weights_only`: restore weights, RNG and step, start fresh moments. It is
+  opt-in so it can never happen silently -- a quiet fresh optimizer looks like a resume and behaves
+  like a restart.

@@ -81,6 +81,9 @@ from compose_v4.experiments.factorized_successor_training import (
     factorized_successor_identity_loss,
     forward_teacher_successor_batch,
 )
+from compose_v4.experiments.successor_micro_overfit import (
+    configure_micro_overfit_parameters,
+)
 from compose_v4.model.factorized_tracelet_rate_model import FactorizedTraceletRateModel
 
 VALIDATION_ROLE = "validation"
@@ -352,6 +355,8 @@ def run_process_v2_training(
     checkpoint_every_steps: int = 0,
     checkpoint_root: Path | None = None,
     resume_from: Path | None = None,
+    resume_weights_only: bool = False,
+    parameter_scope: str = "all",
     progress_callback: Callable[[Mapping[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     """Train the productive jump law over published prep slices.
@@ -390,21 +395,58 @@ def run_process_v2_training(
 
     hazard_initial = _hazard_state(model)
     named_parameters = dict(model.named_parameters())
+    if parameter_scope == "all":
+        for name, parameter in named_parameters.items():
+            parameter.requires_grad_(True)
+    else:
+        # A restricted scope freezes the shared trunk and trains only the family
+        # heads plus their local adapters.  This exists because rare families do
+        # not lose to gradient starvation alone -- they lose because the trunk is
+        # rewritten beneath them.  `ring_system_restate` reads `pair_project.`
+        # and two restate embeddings; `atom_insert` at twenty-four percent of the
+        # data rewrites that surface while ring gets one percent of the gradient,
+        # so ring's inputs drift out from under a head that cannot hold them.
+        # Freezing the trunk makes the representation stationary, which is the
+        # regime the T1 capacity ladder recorded for this family.
+        configure_micro_overfit_parameters(
+            model, tuple(ACTION_ROUTE_PREFIXES), scope=parameter_scope
+        )
+    # The hazard stays frozen under EVERY scope: "all" would otherwise unfreeze
+    # it, and the objective is hazard-free by construction.
     trainable: list[torch.Tensor] = []
     for name, parameter in named_parameters.items():
-        parameter.requires_grad_(not name.startswith(TOTAL_HAZARD_PREFIX))
+        if name.startswith(TOTAL_HAZARD_PREFIX):
+            parameter.requires_grad_(False)
         if parameter.requires_grad:
             trainable.append(parameter)
+    if not trainable:
+        raise ProcessV2TrainingError(f"scope {parameter_scope!r} selected no trainable parameter")
     optimizer = torch.optim.AdamW(
         trainable, lr=float(learning_rate), weight_decay=float(weight_decay)
     )
 
     resumed_from_step = 0
     if resume_from is not None:
-        resumed_from_step, sampler_state = load_training_checkpoint(
-            Path(resume_from), model, optimizer
-        )
-        rng.setstate(sampler_state)
+        if resume_weights_only:
+            # A PHASE CHANGE, not an ordinary resume.  AdamW moments are indexed
+            # by the trainable parameter set, so they cannot cross a scope
+            # change: phase one trains the whole model, phase two trains heads
+            # only, and the optimizer groups do not correspond.  Restoring
+            # weights while starting fresh moments is the correct semantics, and
+            # it is opt-in precisely so it can never happen by accident -- a
+            # silent fresh optimizer would look like a resume and behave like a
+            # restart, which is what `load_training_checkpoint` exists to refuse.
+            payload = torch.load(Path(resume_from), weights_only=False)
+            model.load_state_dict(payload["model_state"])
+            resumed_from_step = int(payload["optimizer_step"])
+            rng.setstate(payload["sampler_rng_state"])
+            torch.set_rng_state(payload["torch_rng_state"])
+            hazard_initial = _hazard_state(model)
+        else:
+            resumed_from_step, sampler_state = load_training_checkpoint(
+                Path(resume_from), model, optimizer
+            )
+            rng.setstate(sampler_state)
         if resumed_from_step >= optimizer_steps:
             raise ProcessV2TrainingError(
                 f"the checkpoint is already at step {resumed_from_step}, "
@@ -629,6 +671,8 @@ def run_process_v2_training(
         "capability_abort": aborted,
         "checkpoints": checkpoints,
         "final_model_state_sha256": state_dict_semantic_sha256(model.state_dict()),
+        "parameter_scope": parameter_scope,
+        "trainable_parameters": sum(p.numel() for p in trainable),
         "hazard_frozen": True,
         "artifact_published": False,
         "checkpoint_selection_authorized": False,
