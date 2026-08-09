@@ -1177,3 +1177,22 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   So real-source scaffold diversity goes 21,872 -> ~39,600 (about 1.8x) while the headline including
   synthetic is ~5.5x. Do not let the aggregate imply real-chemistry breadth the corpus does not
   have -- state the real-only figure alongside it.
+- **V2 MIXTURE TABLES (`scripts/editing_v2_v2_mixture_plan.py`,
+  `diagnostics/editing_v2_v2_mixture_plan.json`).** (1) The per-scaffold cap retention curve for
+  `real_endpoint_multistep_path` is FLAT on every diversity axis:
+      cap 1 -> 159,967 rows (9.2%), 23,525 scaffolds, 12,520 new (100%), ins/del 100%
+      cap 2 -> 289,218 (16.7%)   cap 4 -> 484,055 (27.9%)   cap 16 -> 925,830 (53.4%)
+  all retaining 100% of scaffolds and 100% of new scaffolds, because a per-scaffold cap of 1 already
+  touches every scaffold. So **cap=1 (or 2) is correct and cap=4 would have taken 3x the rows for
+  zero additional chemistry** -- the earlier cap=4 suggestion was an artefact of which column the
+  census happened to instrument. The lane is 100% insert/delete at every cap, so no cap changes its
+  family character; it is worth taking ONLY for scaffold breadth.
+  (2) Capability-driven synthetic sampling at 12,000/family selects 56,459 sources / 148,030 rows
+  (38% of the lane) and satisfies all eight families with none short (cycle_attach 51,926,
+  atom_restate 19,152, ring_system_restate 13,152, cycle_insert 12,000 = the binding constraint,
+  since synthetic is the ONLY source of cycle families).
+  (3) MIXTURE WARNING: at that target V2 lands near 40% synthetic (new real 201,709 vs new synthetic
+  148,030, plus the existing 70,301 at ~32% synthetic), which is not "real dominates, synthetic
+  regularizes". Lower per-family targets trade cycle coverage for synthetic share; a LINEAR
+  EXTRAPOLATION (estimate, not measured) puts target 6,000 near 28% and target 3,000 near 19%.
+  Measure rather than extrapolate before freezing the recipe.

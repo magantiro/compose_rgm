@@ -1,0 +1,78 @@
+{
+  "multistep_retention_curve": [
+    {
+      "cap": 1,
+      "insert_delete_share": 1.0,
+      "new_scaffold_fraction": 1.0,
+      "retained_new_scaffolds": 12520,
+      "retained_row_fraction": 0.09232574393828598,
+      "retained_rows": 159967,
+      "retained_scaffolds": 23525
+    },
+    {
+      "cap": 2,
+      "insert_delete_share": 1.0,
+      "new_scaffold_fraction": 1.0,
+      "retained_new_scaffolds": 12520,
+      "retained_row_fraction": 0.1669235968064863,
+      "retained_rows": 289218,
+      "retained_scaffolds": 23525
+    },
+    {
+      "cap": 4,
+      "insert_delete_share": 1.0,
+      "new_scaffold_fraction": 1.0,
+      "retained_new_scaffolds": 12520,
+      "retained_row_fraction": 0.2793747334265631,
+      "retained_rows": 484055,
+      "retained_scaffolds": 23525
+    },
+    {
+      "cap": 8,
+      "insert_delete_share": 1.0,
+      "new_scaffold_fraction": 1.0,
+      "retained_new_scaffolds": 12520,
+      "retained_row_fraction": 0.4125682413569605,
+      "retained_rows": 714831,
+      "retained_scaffolds": 23525
+    },
+    {
+      "cap": 16,
+      "insert_delete_share": 1.0,
+      "new_scaffold_fraction": 1.0,
+      "retained_new_scaffolds": 12520,
+      "retained_row_fraction": 0.5343473560820876,
+      "retained_rows": 925830,
+      "retained_scaffolds": 23525
+    }
+  ],
+  "multistep_total_new_scaffolds": 12520,
+  "multistep_total_rows": 1732637,
+  "schema": "compose.editing_v2.v2_mixture_plan",
+  "schema_version": 1,
+  "skip": [
+    "observed_local_analogue (uncompiled)"
+  ],
+  "status": "PLAN_EVIDENCE_ONLY_NO_AUTHORITY",
+  "synthetic_capability_sample": {
+    "capability_cells_available": 21,
+    "families_short": {},
+    "family_coverage": {
+      "atom_delete": 13953,
+      "atom_insert": 12000,
+      "atom_restate": 19152,
+      "bond_reorder": 12985,
+      "bond_reroute": 12862,
+      "cycle_attach": 51926,
+      "cycle_insert": 12000,
+      "ring_system_restate": 13152
+    },
+    "per_family_target": 12000,
+    "rows_selected": 148030,
+    "sources_selected": 56459
+  },
+  "take_whole": [
+    "operator_aware_real_endpoint",
+    "linker_positional_topology_analogue"
+  ]
+}
