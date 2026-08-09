@@ -1,0 +1,36 @@
+{
+  "capability_cells": {
+    "editing_v2_active8_v1:atom_restate:element_identity_change": 15694,
+    "editing_v2_active8_v1:bond_reorder:bond_order_decrease": 352,
+    "editing_v2_active8_v1:bond_reorder:bond_order_increase": 338,
+    "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_acyclic_source": 96,
+    "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_cyclic_source": 5475,
+    "editing_v2_active8_v1:bond_reroute:single_atom_pendant_acyclic_source": 120,
+    "editing_v2_active8_v1:bond_reroute:single_atom_pendant_cyclic_source": 14789
+  },
+  "cross_half_duplicate_pairs": 0,
+  "distinct_canonical_pairs": 36864,
+  "duplicate_pairs_within_corpus": 0,
+  "entries_local": 15086,
+  "entries_modal": 21778,
+  "entries_total": 36864,
+  "families": {
+    "atom_restate": 15694,
+    "bond_reorder": 690,
+    "bond_reroute": 20480
+  },
+  "frozen_sha256": "5602c942db42a7a39a29aa71f873ef390d6e3975d5ab184c6e8a0912c121eeaf",
+  "lanes": [
+    "operator_aware_real_endpoint",
+    "linker_positional_topology_analogue"
+  ],
+  "partition_roles": {
+    "train": 36864
+  },
+  "schema": "compose.editing_v2.v2_two_lane_realized_census",
+  "schema_version": 1,
+  "slices_local": 66,
+  "slices_modal": 1448,
+  "slices_without_receipt_or_entries": 0,
+  "status": "CENSUS_EVIDENCE_ONLY_NO_AUTHORITY"
+}
