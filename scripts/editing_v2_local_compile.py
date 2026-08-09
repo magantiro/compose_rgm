@@ -33,12 +33,21 @@ slice, which is the difference between 139 setups and 6.
 from __future__ import annotations
 
 import argparse
+import atexit
 import json
 import multiprocessing as mp
 import os
+import signal
 import sys
 import time
 from pathlib import Path
+
+#: Refuse to start below this much free RAM. Each worker carries torch, rdkit and
+#: its own chemistry cache; starting into a swapping machine does not run slowly,
+#: it thrashes and produces nothing. Measured: a run with 8.1 GB free and 7.6 GB
+#: already swapped published ZERO slices in two hours at load 20.
+MIN_FREE_GB_PER_WORKER = 1.2
+MIN_FREE_GB_ABSOLUTE = 4.0
 
 ROOT = Path("/private/tmp/compose-t1-collated-cache")
 for _p in (ROOT / "src", ROOT / "tests", ROOT / "scripts"):
@@ -106,6 +115,58 @@ def _compile_slice(job: tuple) -> dict:
                 "entries": 0, "seconds": time.monotonic() - began}
 
 
+def _free_gb() -> float:
+    """Free + inactive pages, which is what a new process can actually claim."""
+
+    import subprocess
+
+    try:
+        out = subprocess.run(["vm_stat"], capture_output=True, text=True, timeout=10).stdout
+    except Exception:  # noqa: BLE001
+        return float("inf")
+    page = 4096
+    free = inactive = 0
+    for line in out.splitlines():
+        if "page size of" in line:
+            page = int(line.split("page size of")[1].split()[0])
+        elif line.startswith("Pages free:"):
+            free = int(line.split(":")[1].strip().rstrip("."))
+        elif line.startswith("Pages inactive:"):
+            inactive = int(line.split(":")[1].strip().rstrip("."))
+    return (free + inactive) * page / 1024 ** 3
+
+
+def _own_process_group() -> None:
+    """Put workers in our own group so killing the parent kills the children.
+
+    `multiprocessing` spawn workers do NOT carry the script name in their command
+    line -- they run `from multiprocessing.spawn import spawn_main` -- so
+    `pkill -f <script>` matches only the parent and silently orphans every
+    worker. Twelve such orphans once spun for two hours at load 20 while the
+    parent looked dead. Killing the group is the only reliable teardown.
+    """
+
+    try:
+        os.setpgrp()
+    except OSError:
+        return
+    pgid = os.getpgrp()
+
+    def _teardown(*_args):
+        try:
+            signal.signal(signal.SIGTERM, signal.SIG_IGN)
+            os.killpg(pgid, signal.SIGTERM)
+        except Exception:  # noqa: BLE001
+            pass
+
+    atexit.register(_teardown)
+    for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+        try:
+            signal.signal(sig, lambda *_a: (_teardown(), os._exit(143)))
+        except Exception:  # noqa: BLE001
+            pass
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--artifact-root", required=True)
@@ -141,6 +202,17 @@ def main() -> int:
             "  Do NOT call neutralize_catalog_drift() -- it overwrites the expected value."
         ) from error
     print(f"catalog fingerprint verified: {_expected}", flush=True)
+
+    free = _free_gb()
+    needed = max(MIN_FREE_GB_ABSOLUTE, MIN_FREE_GB_PER_WORKER * args.workers)
+    print(f"free memory {free:.1f} GB, need {needed:.1f} GB for {args.workers} workers", flush=True)
+    if free < needed:
+        raise SystemExit(
+            f"REFUSING TO START: {free:.1f} GB free, {needed:.1f} GB needed for "
+            f"{args.workers} workers.\n  Free memory or lower --workers. Starting into a "
+            "swapping machine thrashes and publishes nothing."
+        )
+    _own_process_group()
 
     manifest = json.loads(Path(args.manifest).read_text())
     lanes = [l for l in args.lanes.split(",") if l]
