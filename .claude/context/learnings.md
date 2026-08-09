@@ -1262,3 +1262,21 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   STALE FIGURES, do not reuse: "10.8% synthetic" and "102,430 rows" were both pre-dedup or
   pre-fix. ALWAYS recompute headline counts after the transformation that actually produces the
   training corpus.
+- **THE CHEMISTRY KERNEL CANNOT BE OPTIMIZED WITHOUT RE-SEALING PROCESS V2.**
+  Profiling one compile slice found the dominant cost is not what anyone assumed: 5 entries issued
+  **80,448 `molecular_graph_to_smiles` calls over 6,391 distinct graphs -- 92.1% redundant**, one
+  graph converted **11,141 times**. Support enumeration re-validates the same intermediate graphs,
+  and `canonical_state_key` rebuilds the exact string `is_rdkit_valid` already computed and threw
+  away (`is_rdkit_valid` = graph -> SMILES -> re-parse, i.e. two full RDKit sanitizations per call).
+  A content-addressed memo on those two pure functions is trivial and exact -- and it is NOT
+  SHIPPABLE. `src/compose_v4/chem/molecular_graph.py` is the first of the 18 files in
+  `_PROCESS_V2_IMPLEMENTATION_RELATIVE_PATHS`, hashed into `implementation_source_sha256`, which IS
+  the process identity. Adding the cache moved it `0c938177 -> a31040f6`, and every contract then
+  refused to load: "not the live Process-V2 identity". Every hot function in the profile
+  (`kernel.py`, `operators.py`, `aromatic_kekule.py`, `semantic_atom_restate.py`,
+  `factorized_tracelet_rate_model.py`) is in that same set, so there is no identity-free seam to
+  hide a cache behind. That is the design working, not a bug: the corpus is reproducible only by
+  exactly these bytes, and slices compiled under two identities would be a split-brain corpus.
+  CONSEQUENCE: kernel performance work is a deliberate PROCESS REVISION -- re-seal the chain,
+  re-run Gate 0, recompile every row -- never an incidental speedup mid-corpus. Patch and its 13
+  equivalence tests are preserved for that revision. Do not benchmark-and-commit chemistry.
