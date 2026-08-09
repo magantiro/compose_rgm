@@ -20,15 +20,28 @@ per-corpus cost and leaves sampling free forever after.
 
 WHAT IT DOES NOT DO
 -------------------
-It selects nothing, weights nothing and trains nothing.  It compiles every
-Active8-accepted transition of one chunk in one partition role and returns both
-products of that single chemistry pass: the compact teacher fibers, and the
-model-ready collated batch.
+It weights nothing and trains nothing.  It compiles Active8-accepted transitions
+of one chunk in one partition role and returns both products of that single
+chemistry pass: the compact teacher fibers, and the model-ready collated batch.
+
+By default it compiles EVERY such transition.  ``source_subset`` narrows which
+source molecules are materialized, which is a different thing from binding a
+sampling law: it says "materialize chemistry for these sources" and still says
+nothing about how the resulting rows are weighted, so the law remains free to
+change without invalidating a leaf.  The subset's digest is returned and
+published, because the same ``offset`` names different rows under different
+subsets and the two must never be confused.
+
+It exists because the compile unit is a contiguous byte range while a selection
+is a set of molecules, and those disagree badly when the selection is scattered:
+the V2 recipe's 4,921 ring_system_restate rows sit ~195-per-task across all 27
+synthetic train tasks, so compiling whole tasks materializes 140,743 records to
+obtain 4,921 -- 28.6x the wanted chemistry.
 """
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from pathlib import Path
 from typing import Any
 
@@ -113,6 +126,7 @@ def compile_process_v2_chunk_shard(
     partition_role: str = TRAIN_ROLE,
     offset: int = 0,
     limit: int | None = None,
+    source_subset: Iterable[str] | None = None,
     chemistry_feature_cache_limit: int = 16_384,
     compile_batch_size: int = 25,
     deadline_seconds: float | None = None,
@@ -168,6 +182,39 @@ def compile_process_v2_chunk_shard(
         task_identity_sha256=task_identity_sha256,
         partition_role=partition_role,
     )
+    # A SOURCE SUBSET, when given, restricts the stream to named source molecules
+    # BEFORE slicing, so offset/limit address the selected stream and no worker
+    # is spent on a range that contains nothing wanted.
+    #
+    # This exists because the compile unit is a contiguous byte range, not a set
+    # of molecules, and the two disagree badly when a selection is scattered.
+    # MEASURED: the 4,921 ring_system_restate rows the V2 recipe wants are spread
+    # across all 27 synthetic train tasks at ~195 each, inside 140,743 total
+    # records -- compiling whole tasks pays for 28.6x the wanted chemistry
+    # (~$47 against ~$1.66).
+    #
+    # It restricts WHICH CHEMISTRY IS MATERIALIZED and says nothing about how
+    # rows are weighted afterwards, so the sampling law stays out of
+    # compilation. The subset digest is returned and published so a slice
+    # compiled from a subset is never mistaken for one compiled whole: the same
+    # offset means different rows under different subsets.
+    source_subset_sha256 = None
+    if source_subset is not None:
+        wanted = frozenset(str(key) for key in source_subset)
+        if not wanted:
+            raise ProcessV2ChunkCompileError("source subset must name at least one source")
+        source_subset_sha256 = canonical_sha256(sorted(wanted))
+        rows = [
+            row
+            for row in rows
+            if str(row["candidate_evidence"]["source_canonical_key"]) in wanted
+        ]
+        if not rows:
+            raise ProcessV2ChunkCompileError(
+                f"source subset {source_subset_sha256[:16]} selects no transitions "
+                f"in task {task_identity_sha256[:12]}"
+            )
+    selected_row_count = len(rows)
     rows = rows[offset:] if limit is None else rows[offset : offset + limit]
     if not rows:
         raise ProcessV2ChunkCompileError(
@@ -296,6 +343,8 @@ def compile_process_v2_chunk_shard(
             cells.get(str(entry["capability_cell_id"]), 0) + 1
         )
     return {
+        "source_subset_sha256": source_subset_sha256,
+        "source_subset_selected_rows": selected_row_count,
         "task_identity_sha256": task_identity_sha256,
         "partition_role": partition_role,
         "entry_offset": int(offset),
