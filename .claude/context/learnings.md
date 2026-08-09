@@ -1244,3 +1244,21 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   The manifest carries `split_constraint` requiring all records sharing a source_canonical_key to
   land in one component -- the leakage route is created by the very structure that makes the corpus
   useful.
+- **POST-DEDUP CENSUS CAUGHT A SILENT FLOOR FAILURE; V2 NOW FROZEN.**
+  (`scripts/editing_v2_postdedup_census.py`.) The synthetic family floor is applied to RAW rows, but
+  the corpus is deduplicated to distinct canonical (x,y) afterwards, so a family whose synthetic
+  sources duplicate heavily lands UNDER its floor. Measured: at floor 5,000 `ring_system_restate`
+  reached only 3,379 new + 623 compiled = **4,002, a 20% shortfall**, and nothing in the pre-dedup
+  numbers showed it. Left alone it would have surfaced months later as "the rare family still
+  underperforms" after a multi-day compile and a full training run.
+  FIXING IT GLOBALLY IS AN OVER-CORRECTION: raising the floor 5,000 -> 6,500 recovered the 998-row
+  shortfall but lifted every other family too (atom_restate 18,100 -> 33,371), adding ~22k synthetic
+  rows and moving the mixture 14.5% -> 21.6%. PER-FAMILY floors (5,000 default,
+  ring_system_restate=6,500) meet the guarantee at **16.4% synthetic** with 17,000 fewer synthetic
+  rows.
+  FROZEN V2: 107,872 rows post-dedup; 16.4% combined synthetic; ring_system_restate 623 -> 5,307;
+  43.0% multi-successor sources (mean 1.574); 18 cross-lane duplicate pairs (per-lane dedup alone
+  would have missed these); selection sha256 b1a38c2f4ba8401b, census sha256 56cf4a717970f02a.
+  STALE FIGURES, do not reuse: "10.8% synthetic" and "102,430 rows" were both pre-dedup or
+  pre-fix. ALWAYS recompute headline counts after the transformation that actually produces the
+  training corpus.

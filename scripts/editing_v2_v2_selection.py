@@ -121,7 +121,15 @@ def scan(active8_root: Path, compiled: set[str], cache_path: Path) -> dict:
     return blob
 
 
-def select(blob: dict, floor: int, cap: int) -> dict:
+def select(blob: dict, floor: int, cap: int, overrides: dict | None = None) -> dict:
+    # PER-FAMILY floors. The floor is applied to RAW rows but the corpus is
+    # deduplicated to distinct canonical (x, y) afterwards, so a family whose
+    # synthetic sources duplicate heavily lands under its floor. Raising the
+    # GLOBAL floor to compensate is an over-correction: lifting 5,000 -> 6,500 to
+    # recover ring_system_restate's 998-row shortfall pulled in 22k extra synthetic
+    # rows across every other family and moved the mixture from 14.5% to 21.6%
+    # synthetic. Compensate only the family that actually falls short.
+    overrides = overrides or {}
     uncompiled = blob["uncompiled"]
     compiled_fams = collections.Counter(blob["compiled_families"])
     scaffolds = blob["scaffolds"]
@@ -164,12 +172,13 @@ def select(blob: dict, floor: int, cap: int) -> dict:
     flat = [(task, source, info) for task, sources in synth.items()
             for source, info in sources.items()]
     families = set(compiled_fams) | {f for _t, _s, i in flat for f in i["families"]}
-    short0 = {f for f in families if compiled_fams.get(f, 0) < floor}
+    floor_of = {f: int(overrides.get(f, floor)) for f in families}
+    short0 = {f for f in families if compiled_fams.get(f, 0) < floor_of[f]}
     flat.sort(key=lambda e: (-sum(v for f, v in e[2]["families"].items() if f in short0),
                              e[1]))
     got: collections.Counter = collections.Counter()
     for task, source, info in flat:
-        if all(compiled_fams.get(f, 0) + got.get(f, 0) >= floor for f in families):
+        if all(compiled_fams.get(f, 0) + got.get(f, 0) >= floor_of[f] for f in families):
             break
         chosen[SYNTHETIC_LANE][task].append(source)
         got.update(info["families"])
@@ -189,6 +198,7 @@ def select(blob: dict, floor: int, cap: int) -> dict:
         "schema_version": 1,
         "status": "SELECTION_EVIDENCE_ONLY_NO_AUTHORITY",
         "recipe": {"multistep_cap_per_scaffold": cap, "synthetic_family_floor": floor,
+                   "synthetic_family_floor_overrides": overrides,
                    "take_whole": list(TAKE_WHOLE), "skip": list(SKIP)},
         "rows_by_lane": {k: int(v) for k, v in sorted(stats.items())},
         "rows_total": int(sum(stats.values())),
@@ -238,13 +248,18 @@ def main() -> int:
     ap.add_argument("--cache", default="diagnostics/.v2_scan_cache.pkl")
     ap.add_argument("--synthetic-family-floor", type=int, default=5000)
     ap.add_argument("--multistep-cap", type=int, default=1)
+    ap.add_argument("--floor-override", action="append", default=[],
+                    metavar="FAMILY=N",
+                    help="per-family floor, e.g. ring_system_restate=6500")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
     plan = json.loads(Path(args.prep_subset).read_text())
     compiled = {c["task_identity_sha256"] for c in plan["chunks"]}
     blob = scan(Path(args.active8_root), compiled, Path(args.cache))
-    manifest = select(blob, args.synthetic_family_floor, args.multistep_cap)
+    overrides = dict(o.split('=') for o in args.floor_override)
+    overrides = {k: int(v) for k, v in overrides.items()}
+    manifest = select(blob, args.synthetic_family_floor, args.multistep_cap, overrides)
 
     print(f"\n{'lane':38s} {'rows':>10} {'tasks':>7} {'sources':>9}")
     for lane, tasks in manifest["selection"].items():

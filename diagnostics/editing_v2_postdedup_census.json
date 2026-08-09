@@ -1,0 +1,37 @@
+{
+  "capability_cells": 14,
+  "combined_synthetic_share": 0.1639,
+  "cross_lane_duplicate_pairs": 19,
+  "distinct_canonical_pairs": 107872,
+  "distinct_sources": 68536,
+  "duplicate_fraction": 0.4393,
+  "existing_compiled_real_rows": 122656,
+  "existing_compiled_synthetic_rows": 22524,
+  "family_totals": {
+    "atom_delete": 23262,
+    "atom_insert": 24336,
+    "atom_restate": 18187,
+    "bond_reorder": 7657,
+    "bond_reroute": 29702,
+    "cycle_attach": 44,
+    "ring_system_restate": 4684
+  },
+  "frozen_sha256": "56cf4a717970f02aef25f655ad7e9a901f0603b31a7cc2ca7323c4da8eca5fc2",
+  "mean_successors_per_source": 1.574,
+  "multi_successor_fraction": 0.4295,
+  "multi_successor_sources": 29435,
+  "new_synthetic_rows": 18956,
+  "new_synthetic_share": 0.1757,
+  "raw_records_scanned": 192391,
+  "rows_after_dedup_total": 107872,
+  "rows_by_lane": {
+    "linker_positional_topology_analogue": 23073,
+    "operator_aware_real_endpoint": 18663,
+    "real_endpoint_multistep_path": 47180,
+    "reversible_synthetic_walk": 18956
+  },
+  "schema": "compose.editing_v2.postdedup_census",
+  "schema_version": 1,
+  "selection_sha256": "b1a38c2f4ba8401b36fc87d50088e98f67ecd7751e3f1d3287e1828161d20456",
+  "status": "CENSUS_EVIDENCE_ONLY_NO_AUTHORITY"
+}
