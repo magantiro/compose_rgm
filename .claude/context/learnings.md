@@ -759,3 +759,365 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
 - **6 compile workers is the measured optimum on a 12-core machine** (589% CPU, 0 swapouts/s)
   against 8 (536%, 1,409) and 10 (6,339, degrading). Each worker holds its own chemistry cache, so
   the constraint is memory. Oversubscription took a build from 5,507 entries/h to 250.
+- **Top-1 teacher-match is the WRONG metric for the B-edit model, by design.** `PAPER_MASTER_PLAN.md`
+  §0 (LOCKED 2026-07-26) fixes the base as a source-AGNOSTIC prior `Q_theta(y|x,t)`: it never sees
+  `x_src`, because source-conditioning lives in the Doob controller `h_phi` applied at inference.
+  A correct universal prior therefore SPREADS mass over every plausible edit; scoring high on
+  teacher-match would mean memorising one chemist's arbitrary choice. Cross-entropy against a single
+  sampled teacher action is still a valid generator-matching loss (a Bregman divergence, so its
+  minimiser is the marginal jump law) -- which is exactly why a perfectly trained model would STILL
+  show high NLL here. Do NOT propose source-conditioning the base to "fix" accuracy; that is arm B
+  of the mandatory A/B/C ablation, never the main model.
+- **The Phase-A gate is five criteria, none of them accuracy** (plan §2): low identity collapse, low
+  edit cycling, held-out-scaffold generalization, reasonable operator coverage, useful local
+  exploration from unseen sources. Measure these before judging the model.
+- **Score families against uniform-over-legal-marks, not against the untrained model.** The untrained
+  net is not uniform. Correcting the baseline reversed two readings at step 3000: `cycle_insert` is
+  the strongest family (28.3x chance over a 152-mark menu), while `ring_system_restate`'s 58%
+  "accuracy" is a 1-of-4 coin flip at 1.5x. `bond_reroute` at 0.8x is genuinely BELOW uniform out of
+  sample -- capacity fitting noise, and the reason plan §3 item 5 floors it with
+  `Q_ref = (1-eps)*Q_theta + eps*Q_legal`.
+- **Menu size does not explain family difficulty; determinism does.** `cycle_insert` (152 legal
+  marks) reaches 28.3x while `bond_reroute` (154) sits at 0.8x. Where the source's chemistry forces
+  the answer the model learns it; where the answer is a design choice living in the destination, it
+  cannot.
+- **Corpus health, measured on the 70,301-entry train role:** lane mix 33.8% observed_local_analogue
+  / 32.0% reversible_synthetic_walk / 24.2% real_endpoint_multistep_path / 5.9% / 4.1%, matching the
+  §3 mixture rather than being corruption-dominated; identity edits 0.00%, which is STRUCTURAL --
+  `factorized_successor_training.py:112` raises on `source_key == target_key`. Three further
+  per-entry invariants are enforced at compile time (executor-executable action, action provably
+  reaches the recorded target, family consistent with the atom/edge delta). The plan's §2 PATH-level
+  checks (round-trip `A ->pi B ->pi^-1 A`, similarity departure, protected core) do NOT run at
+  chunk-compile time.
+- **Do not estimate the irreducible entropy floor from repeat source states in this corpus.**
+  `atom_delete` carries a 9.1% duplicate `(source, teacher_action)` rate (`atom_insert` 2.7%, others
+  ~0); its apparent "chemists agree" concentration was ~1,960 collisions against ~1,940 duplicate
+  records. Dedupe before any retrain, and note that after deduping there are too few genuine repeats
+  left for the estimator to say anything.
+- **`smiles_to_molecular_graph` returns a TIGHT graph and silently deletes the whole
+  `atom_insert` family from the legal support.** Insertion is a birth operation that needs a free
+  slot; corpus states carry `n_slots=40` (padded to `max_atoms`), a SMILES round-trip carries
+  exactly `n_real_atoms`. Measured effect: 1267 -> 1930 marks at 36 heavy atoms, 179 -> 358 at 15
+  (support understated by 35-100%). Fix: `pad_molecular_graph(g, 40)` from `compose_v4.chem.state`,
+  or decode the corpus payload with `decode_state` (`rewrite/trace_shard.py:86`) instead of
+  re-parsing SMILES. This invalidated a rollout gate, a safe-mass probe, and a baseline comparison
+  before it was caught. The tell was that `atom_insert` appeared at 10% in ROLLOUTS but 0% in
+  single-state enumeration -- one deletion frees a slot, so the family reappears mid-trajectory.
+  Any "operator coverage" claim from an unpadded rollout is an artifact.
+- **Slice iteration order is lane- and family-sorted; never sample by taking the first N.** This
+  produced three separate bad measurements in one session: held-out sources that were 100%
+  `reversible_synthetic_walk` vs train 100% `real_endpoint_multistep_path` (making a
+  "generalization" gap that was pure lane), a teacher-drift sample from one lane compared against a
+  model sample from another, and a baseline comparison whose 240 rows excluded `cycle_insert`,
+  `cycle_attach` and `atom_insert` entirely -- omitting the model's strongest family and inverting
+  the conclusion. Always stratify by lane and family, and print the realized strata.
+- **LEARNING MATTERS: on the correct padded support the prior beats both free baselines.** Held-out,
+  320 transitions stratified 40/family, scored by canonical-successor NLL on identical support:
+  model 4.943 vs uniform-over-distinct-successors 6.414 (**+1.472 nats, 4.4x**) vs
+  state-independent empirical-family 5.912 (**+0.969 nats, 2.6x**). 6 of 8 families beat uniform,
+  five by >1.5 nats. Robustness: excluding `cycle_insert` (the outlier at +5.44) the remaining seven
+  still average +0.905 vs uniform and +0.297 vs empirical-family; corpus-weighted rather than
+  stratified gives +1.445 and +0.530. Losers vs uniform are `atom_restate` (-0.65) and `atom_insert`
+  (-0.29); vs empirical-family, `atom_delete` (-1.27, tiny menu plus a 30% corpus prior makes the
+  frequency law very strong there). Both margins GREW after padding even though the support nearly
+  doubled (432 -> 718 successors), and dropped rows went 40/320 -> 0/320.
+- **`scratchpad/eval_invariant.py` is the preflight every COMPOSE evaluation must pass.** It compares
+  the probe's realized legal-family census against the census the production compiler recorded for
+  the same source state -- stronger than asserting `n_slots == 40`, because it also catches a wrong
+  rewrite system, catalog, or family gating. Verified to pass on padded states and to fire on tight
+  ones with the exact diagnosis (`disagreeing: {'atom_insert': 663}`). Run it on a sample of an
+  experiment's OWN sources before the experiment does any work.
+- **Only ONE lane has full operator coverage, and it is the SYNTHETIC one.** Family coverage per lane
+  over the 70,301-entry train role: `observed_local_analogue` 2 families (insert/delete 50/50),
+  `reversible_synthetic_walk` **all 8**, `real_endpoint_multistep_path` 2 (insert/delete 50/50),
+  `operator_aware_real_endpoint` 2 (restate 94.5%, reorder 5.5%), `linker_positional_topology_analogue`
+  1 (reroute 100%). Consequence: `cycle_insert` (9,827), `cycle_attach` (6,832) and
+  `ring_system_restate` (623) are **100% synthetic with zero real-data support**, and `bond_reorder`
+  is 81% synthetic. `cycle_insert` is simultaneously the model's strongest family and its least real
+  one. For a paper claiming native topology change this is a DATA-GENERATION gap, not a modelling one.
+- **Progress conditioning (`tau`) is a compiler artifact, not chemistry -- do not train on it as-is.**
+  In `real_endpoint_multistep_path`, family share moves monotonically from atom_delete 91.4% at
+  tau<0.34 to atom_insert 94.2% at tau>0.67, over ONLY those two families: a demolish-then-rebuild
+  decomposition of A->B. In `reversible_synthetic_walk`, where operators are applied by a real
+  stochastic process, the family law is FLAT across tau (all six families constant to within noise).
+  So a progress-conditioned model would beat the no-time model on held-out NLL by learning the path
+  compiler's tie-breaking convention, and would bake a shrink-early/grow-late bias into the
+  generative dynamics that a budget-driven controller inherits. This also blocks proper Generator
+  Matching: GM needs a probability path, and the only paths available come from that same compiler.
+  The blocker on GM is NOT cost (metadata joins 100%) -- it is the absence of chemically meaningful
+  multi-step paths.
+- **Validation is 90.1% synthetic corruption (12,743 / 14,140), but the learning result is
+  CONSERVATIVE, not inflated.** Controlled within family and normalised by log(menu), the model does
+  BETTER on real than synthetic rows: `bond_reroute` +1.515 real vs +0.201 synthetic,
+  `atom_restate` +2.350 vs +1.215, `bond_reorder` +0.552 vs +0.338. Random legal corruption is
+  genuinely less predictable than an edit a chemist chose for a reason, so the model is not learning
+  the corruption generator's bias.
+- **Train and validation family mixes differ by up to 10x** (`atom_insert` 30.0% train -> 3.1% valid;
+  `atom_delete` 30.3% -> 4.5%; cycle families ~2.7x enriched in valid), because the split is by
+  lane/task and family composition rides along with lane. NEVER compare a held-out family
+  calibration against the TRAIN corpus prior -- doing so produced a confident but wrong claim that
+  the model under-weights the two largest families. Fitted family biases (8 scalars, LBFGS, source-
+  disjoint halves of validation) are worth a real but modest **+0.128 nats** on the joint successor
+  NLL, and are tuned to validation's mix so they must be refit before use on train-like data. The
+  family head emits `MARK_RULE_NAMES` order (10 slots) not `ACTIVE8_FAMILIES` order (8); they agree
+  on slots 0-6 and diverge at 7, so the contract order silently maps ring_system_restate onto
+  disabled ring_system_grow.
+- **Exact finite-horizon bridge control VERIFIED to machine precision** (`scratchpad/exact_bridge.py`).
+  On the closed enumerable graph (197 states / 2,140 edges from a 5-slot carbon seed), with the learned
+  successor law as reference R and backward recursion `h_b(x) = sum_y R(y|x) e^{-c} h_{b-1}(y)`:
+  terminal-tilt TV 1.4e-16 to 2.4e-16, `|h_B(x0) - sum_y R^B(x0,y)g(y)|` ~1e-16, max |row sum - 1|
+  4.4e-16, **zero** edges with P*>0 where R==0, backward-equation residual exactly 0, and
+  mid-trajectory objective switching reproduces the exact bridge from the realized state (TV 1.2e-16).
+  Reach probabilities: ring 0.561 -> 1.000000000000, bicyclic 0.104 -> 1.000000000000, triple bond
+  0.214 -> 1.000000000000. The h-ratios telescope so the controlled B-step endpoint law equals the
+  reference law tilted by g -- this is what makes the controller a BRIDGE rather than a heuristic.
+  **Caveat: `mean_mass_inside_graph` is only 0.648 (min 0.013)** because the graph is built by the
+  DE-NOVO enumerator while the model is scored through the EDITING kernel, so R is a renormalised
+  restriction of the learned law, not the full molecular law. Rebuild the enumerable graph under the
+  editing rewrite system before quoting these as statements about the production process.
+- **Exact finite-horizon Doob/KL control, verified on a slice CLOSED UNDER THE EDITING KERNEL**
+  (`scratchpad/exact_bridge_v2.py`; v1 was closed under the de-novo enumerator instead and leaked
+  35% of successor mass through silent renormalisation). Escaped mass now goes to an explicit
+  absorbing CEMETERY with g=0, so every row sums to 1 to 3.3e-16 with no rescaling. Results at
+  budget 6 on a 196-state carbon-only closure: common target (P=0.127) TV 9.9e-17; **rarest
+  reachable target (reference P=1.94e-12) TV exactly 0.0** with partition agreement 4e-28;
+  unreachable target gives h_B(x0)=0 and an explicitly UNDEFINED controlled row rather than an
+  epsilon patch. Zero support violations and zero cemetery leak under the bridge in every reachable
+  case. Call this **exact finite-horizon Doob/KL control**, NOT a two-marginal Schrodinger bridge --
+  and note that `P(target)=1` under an indicator desirability is definitional whenever the event is
+  reachable, so it is a sanity check, never a performance result.
+- **The editing kernel inserts heteroatoms, so a carbon-only slice is acyclic and leaks.** From
+  `CCCC` at 5 slots: 181 marks, of which 118 are `atom_insert` producing boron/nitrogen/etc; only
+  16 of 93 successors are carbon-only (74.5% of mass). The closure therefore contains ZERO ring
+  states, which is why ring targets read as unreachable rather than rare. The de-novo enumerator
+  gets 149 ring states of 197 only because it restricts elements at the enumerator level. Choose
+  bounded slices by what the kernel actually proposes, and remember the slice (<=5 heavy atoms) is
+  far off-distribution for a model trained on ~26-heavy-atom drug-like molecules.
+- **Step 5 first result: h_phi fits the exact control law on TRAINED goals, fails to generalise to
+  UNSEEN ones.** On the cached 197-key closure with exact h as oracle (`scratchpad/learned_value.py`,
+  budget 6, chemical-descriptor features, no per-state embedding): fit goals reach zero-accuracy
+  ~1.00, log-MAE 0.21-0.28, per-transition TV 0.057-0.069, terminal TV 0.049-0.094. Held-out goals
+  degrade to terminal TV 0.37-0.49. So the weak axis is GOAL generalisation, not state
+  generalisation or value regression -- which bears directly on the "same frozen prior, swap z, no
+  retraining" modularity claim: the PRIOR is reusable, but h_phi currently is not.
+- **Never condition a value on a one-hot goal id when testing goal generalisation.** A held-out
+  one-hot slot is untrained, so its weights are still at initialisation and the test measures the
+  encoding rather than the value function. Encoding the goal by a descriptor of the target SET
+  (centroid of member state features + set size) improved held-out `branched` terminal TV from
+  0.604 to 0.370. Raw-value MSE is also the wrong loss here: exact values span 0 to ~1e-12 to ~1, so
+  split the head into a reachability CLASSIFIER (is h_b exactly zero) plus a log-value REGRESSION,
+  and judge by TV of the induced controlled kernel and of the propagated terminal law, never by
+  pointwise value error.
+- **Heteroatom ring formation works; the acyclic exact slice was a SLICE property.** From N/O/S
+  acyclic sources at 8 slots, `cycle_close` enumerates, executes and sanitises heterocycles with the
+  heteroatom verified inside the ring (`NumAtomRings > 0`): pyrrolidine C1CCNC1, THF C1CCOC1,
+  tetrahydrothiophene C1CCSC1, piperidine C1CCNCC1, pyrazolidine C1CCNNC1, plus unsaturated
+  C1=NCCC1 / C1#CCNC1. Ring formation comes from the primitive cycle operator, not a ring-template
+  mechanism. The carbon-only bounded slice contains 149 ring states of 196 and has ring mass 0.126
+  at budget 6 -- an earlier "zero rings / unreachable" reading was a bug in a throwaway probe.
+- **A universal goal-conditioned value DOES generalise -- over a goal LANGUAGE, not over named
+  predicates** (`scratchpad/universal_value.py`). Training on 750 procedurally generated goals
+  (box / soft-Boltzmann / conjunction over interpretable state features), encoded by SEMANTIC
+  PARAMETERS (active features, bounds, weights) and fit with a four-term loss (reachability BCE +
+  log-value + log-domain backward residual + controlled-row KL), against exact Doob values on the
+  197-state closure at budget 6:
+      split            zero-acc  transTV  termTV mean  termTV median
+      train             0.9921   0.0768     0.0992        0.0484
+      interpolation     0.9887   0.0948     0.1327        0.0655
+      composition       0.9658   0.1483     0.1893        0.1713
+      extrapolation     0.9625   0.1556     0.1593        0.0633
+  The earlier round's held-out failure (termTV 0.37-0.49) was the ENCODING plus only four training
+  predicates, not the value function. Mean and median diverge on every split, so a tail of hard
+  goals persists even where typical performance is good, and the late-training loss is unstable
+  (0.76 -> 2.20 -> 0.95), so these are not converged numbers.
+- **Corpus verdict: targeted V2 repair, NOT a redo.** Three cautions beyond the obvious plan.
+  (a) Ring closure/opening pairs are precisely what MMP mining handles worst -- they change the
+  scaffold -- so scope a bounded feasibility probe before committing to a V2 timeline.
+  (b) Downweighting the compiled-path lane does NOT fix the two-family concentration:
+  `real_endpoint_multistep_path` (24.2%) AND `observed_local_analogue` (33.8%) are BOTH
+  insert/delete-only, so 58% of the corpus sits in two families and only one of those lanes is a
+  path lane. (c) Real-data volume and NLL are currently ANTI-correlated -- the two families losing
+  to uniform (`atom_restate` -0.65, `atom_insert` -0.29) are among the best supplied with real data,
+  while the strongest (`cycle_insert` +5.44) has none. Mining real ring data is for CLAIM validity,
+  not for scores; say so in advance so a flat result is not misread as failure.
+- **The topology-provenance gap is a PAIR-SELECTION problem, not a compiler or compute problem.**
+  Measured over the Active8 output: of 61,424 real-lane traces, exactly **1** has endpoints that
+  differ in ring count (`real_endpoint_multistep_path` 0/47,863; `observed_local_analogue` 1/6,555;
+  `linker_positional_topology_analogue` 0/4,958; `operator_aware_real_endpoint` 0/2,048). Analogue/
+  MMP mining requires a shared scaffold with a large constant core, and a shared scaffold
+  mathematically EXCLUDES a ring-count change -- so the corpus cannot contain real ring-forming
+  chemistry by construction. Consequently: compiling more tasks will not help (zero ring-touching
+  accepted rows in ANY real lane, compiled or not, across ~299k uncompiled real-lane rows), and
+  extending the path compiler will not help either (the endpoints themselves do not differ). Closing
+  this needs a DIFFERENT pair source -- ring formation/opening, ring expansion/contraction, scaffold
+  hops -- which is exactly what MMP is designed to exclude. The alternative is to scope the topology
+  claim to synthetic-validated CAPABILITY rather than learned chemistry.
+- **The corpus can grow ~10x for free on every other family.** 328 Active8 tasks exist on disk; only
+  34 are in `configs/process_v2_prep_subset.json`. Accepted uncompiled rows: 254,576
+  `real_endpoint_multistep_path`, 23,075 `linker_positional_topology_analogue`, 18,667
+  `operator_aware_real_endpoint`, 2,459 `observed_local_analogue`, 282,051
+  `reversible_synthetic_walk`. Pure compute, no mining risk, and it targets exactly the two families
+  that currently lose to uniform (`atom_restate`, `atom_insert`).
+- **h_phi's failure mode is RARE TARGETS, and that is exactly the lead-optimization regime.** With a
+  stabilised run (16 goals/step, grad clipping, cosine decay) on the 197-state closure at budget 6:
+      split          zero-acc  transTV  termTV mean / med / p90 / max   >0.3   corr(log tgtfrac, tv)
+      train           0.9946    0.0684   0.0796 / 0.045 / 0.181 / 0.363    3%       -0.31
+      interpolation   0.9890    0.0858   0.1204 / 0.066 / 0.292 / 0.997    8%       -0.58
+      composition     0.9671    0.1471   0.1877 / 0.168 / 0.356 / 0.502   17%       -0.29
+      extrapolation   0.9625    0.1560   0.1605 / 0.069 / 0.430 / 0.499   27%       -0.77
+  The correlation between log target-fraction and terminal TV is negative on EVERY split: the rarer
+  the target, the worse the value. By goal kind, conjunctions (smallest target sets) are hardest
+  (`and` 0.233 interp / 0.331 extrap) and dense Boltzmann goals easiest (`soft` 0.110 / 0.072).
+  Since real multi-objective lead-op goals ARE narrow conjunctions of property constraints, the
+  amortised value is weakest precisely where the flagship application needs it -- design Step 6
+  around a fallback tier (SMC/Feynman-Kac correction, or exact h on enumerable slices) rather than
+  assuming one learned value covers every objective. Stabilisation only moved train 0.0992 -> 0.0796
+  and the loss still oscillates, so the variance is inherent across goals of very different
+  target-set size; importance-weighting toward rare targets is the untried lever.
+- **Step 6: local guidance samples the WRONG distribution; SMC amplifies a good value but cannot
+  rescue a bad one.** Difficulty-stratified against the exact bridge on the 197-state closure
+  (budget 6, goals binned by q_z = P_R{X_B in G_z} computed BEFORE any control; median TV):
+      band                n   greedy  boltzmann  h_phi  h_phi+SMC  unguidedSMC  ESS_tw
+      broad q>1e-2       87   0.1731   0.1074    0.0349   0.0368     0.0428      0.778
+      mid 1e-2..1e-5     26   0.9430   0.9511    0.2063   0.5000     0.4220      0.350
+      rare q<1e-5         7   0.9867   0.9998    0.5304   0.5000     0.5000      0.197
+  Greedy and Boltzmann collapse to TV 0.94-1.00 outside the broad band -- the plan's headline
+  (high reward, wrong distribution) is demonstrated. Reachability precision 0.9931 / recall 0.9917.
+  A TV of exactly 0.5000 is the signature of ZERO total particle weight (no particle reached the
+  target), not graceful degradation.
+- **The SMC is correct; the value is the bottleneck.** Re-running twisted SMC with the EXACT h
+  returns full mass on every goal and achieves **TV = 0.0000 at q = 1.94e-12 with 2,000 particles**,
+  while unguided SMC returns zero mass on rare goals. So twisted Feynman-Kac reaches a rare target
+  only if the potential steers particles there: it gives variance reduction proportional to h's
+  quality and cannot manufacture reachability from a bad h. **Consequence: improving h_phi in the
+  rare regime is a PREREQUISITE, not a fallback** -- importance-weighting the training goal
+  distribution toward rare targets moves onto the critical path. Also: even with exact h, SMC TV
+  ranges 0.03-0.32 across goals purely from 2,000-particle Monte Carlo error, so SMC arms are not
+  comparable to analytic arms without matched budgets.
+- **Rarity-balanced h_phi training is NET NEGATIVE -- the rare tail is not a sampling problem.**
+  Matched ablation (same 4,000-goal pool, same eval goals, same seed; only the training
+  distribution differs; alpha=0.35, weight cap 8x, strata-balanced across band x kind, row-KL
+  upweighted 4x):
+      band   median targets   control h_phi   balanced h_phi   delta
+      broad        72             0.0639          0.1344      -0.0705
+      mid          18             0.2368          0.2534      -0.0165
+      rare          7             0.5269          0.4935      +0.0334
+  It doubles broad-regime error to buy 6% in rare, and 0.494 is still a half-wrong distribution.
+  The control reproduces the earlier Step 6 numbers on this harder conjunction-biased pool
+  (0.064/0.237/0.527 vs 0.035/0.206/0.530), which confirms the pool -- not a regression -- explained
+  the first apparent collapse. INTERPRETATION: rare goals are not hard because they are
+  under-sampled; they are hard because h spans ~12 orders of magnitude and the successors that
+  matter carry vanishing mass. That is a representation/precision problem, so reweighting the goal
+  distribution cannot fix it. NEXT: nested / annealed bridge control (progressively tightening
+  regions, or g_beta1 -> ... -> g_betaL), which converts one rare-event problem into a sequence of
+  easy ones -- do NOT keep enlarging the value network.
+- **Always run the matched control before reading a training-distribution result.** The first
+  rarity-balanced run looked like a catastrophic failure against the Step 6 baseline, but that
+  baseline used a DIFFERENT goal pool (unbiased vs 45% conjunction-biased) with easier goals in
+  every band and median rare target-set size 1 vs 7. Only the same-pool ablation separated "the
+  weighting hurt" from "these goals are harder".
+- **Rare MULTI-STATE targets barely exist in a 197-state closure.** Sorting rare goals by
+  target-set size still gives median 1 in an unbiased pool; a conjunction-biased pool reaches median
+  7. Since a single-terminal-state rare goal has a degenerate conditioned law (TV=0 is trivial
+  there), the meaningful finite-particle SMC benchmark needs either a larger closure or a longer
+  budget.
+- **Split the exact-slice roles; do not make the small closure carry rare-event inference.** The
+  197-state closure is the right testbed for exact terminal tilt, unreachable rows, dynamic
+  retargeting, exact-h supervision, h_phi interpolation/composition, and the broad->mid->rare
+  degradation curve -- all settled there at machine precision or with adequate power. It is the
+  WRONG testbed for finite-particle rare-event inference, because rare multi-state targets barely
+  exist in it. CAVEAT ON AN EARLIER CLAIM: the `q = 1.94e-12 -> TV = 0.0000` twisted-SMC result used
+  a SINGLE terminal state, so the conditioned law is degenerate and TV=0 is the easy case; it is a
+  numerical stress test that log-weights survive ~12 orders of magnitude, NOT evidence that SMC
+  solves multimodal rare conditioning. A dedicated larger slice (6 slots, ~967 states; measured
+  scaling is ~5x states per added slot: 4->51, 5->197, 6->967) gives targets with |G_z| ~ 5-50 at
+  q_z ~ 1e-3/1e-5/1e-7 while keeping exact h computable (dense R ~7.5 MB, R^B is six 967^3 matmuls).
+  7 slots (~4,800 states) makes per-goal matrix powers too slow to iterate on.
+- **Rare-event benchmark on the 966-state closure (multi-state targets, |G| 5-50, 2,000 particles).**
+  Median TV against the exact bridge; `exactH+SMC` is the Monte-Carlo FLOOR at this budget and is
+  what every other SMC arm must be read against:
+      band          n  |G|   h_phi  h_phi+SMC  unguided  exactH+SMC   mass    ESS
+      1e-2..1e-4   25   19  0.3076    0.5000    0.5000     0.0774    0.240  0.365
+      1e-4..1e-6   25   28  0.4633    0.5000    0.5000     0.2701    0.240  0.156
+      q<1e-6       25    8  0.4985    0.5000    0.5000     0.0873    0.000  0.158
+  (1) Twisted SMC DOES solve multimodal rare conditioning given a good potential -- TV 0.087 at
+  q<1e-6 on 8-state targets, non-degenerate, which the earlier single-state 1.94e-12 result could
+  not show. (2) A BAD potential makes twisted SMC WORSE THAN NO SMC: h_phi+SMC returns zero median
+  mass in every band including 1e-2..1e-4 where h_phi alone scores 0.308, because the twist steers
+  particles away and the weights cannot recover. SMC amplifies the value's errors as well as its
+  signal. (3) Monte-Carlo error tracks TARGET SPREAD, not rarity -- the floor is worst at
+  1e-4..1e-6 (|G|=28, 0.270) and best at q<1e-6 (|G|=8, 0.087) -- so an SMC number quoted without
+  its per-band floor is uninterpretable. CONSEQUENCE: "amortise broadly, correct the tail with SMC"
+  does not work, because correction needs a potential good enough to steer, which is exactly what is
+  missing in the tail. Nested/annealed bridge control is the only remaining route, and its
+  justification is that it MANUFACTURES usable potentials by never asking for a vanishing event in
+  one shot -- not that it works around any limitation of SMC itself.
+- **Hard staging is BIASED; anneal as a twisting schedule inside SMC instead.** First annealed-bridge
+  probe on the 966-state closure (rare conjunctive goals, q 1.2e-07..9.9e-04, |G| 5-50, 3 stages
+  with beta chosen by bisection so each intermediate target's reference mass hits q^(j/L)):
+      arm                    median TV   median target mass
+      exact one-shot            0.0000        1.0000
+      EXACT staged (oracle)     0.4608        0.6005     <- perfect values, still biased
+      h_phi one-shot            0.4872        0.0256
+      h_phi+SMC one-shot        0.6953        1.0000
+      LEARNED staged            0.4854        0.0293
+  The staged arm ran a bridge to each intermediate set AT INTERMEDIATE TIMES, which conditions on
+  strictly more than the terminal event -- hence a large bias that no amount of value accuracy can
+  remove. Annealing must therefore enter as a twisting/PROPOSAL schedule inside SMC, where
+  importance weights correct it (unbiased for any schedule), not as hard intermediate conditioning.
+  Including the EXACT-staged oracle is what caught this: without it, `LEARNED staged ~= h_phi
+  one-shot` would have read as "annealing does not help" rather than "this annealing is the wrong
+  kind". Staging does buy target attainment (mass 0.60 vs 0.026, ~23x) at the cost of distributional
+  fidelity -- relevant if attainment ever matters more than exactness.
+- **Annealed-twisting GATE FAILED, structurally: one beta per transition cannot span the range.**
+  Exact h_beta, no training, 966-state closure, rare multi-state goals (q 2.6e-07..7.2e-05,
+  |G| 5-50, 4,000 particles). With an ESS-respecting adaptive ladder beta only climbs to ~1-2.4
+  over the 6 transitions, ESS stays near target (0.52-0.57), and TARGET MASS IS 0.000 on 11 of 12
+  goals -- the proposal is too weak to steer into the event. Forcing beta=200 instead reaches the
+  target (mass 1.0, TV 0.127 vs a 0.102 floor) but is not annealing at all and runs ESS 0.09-0.32.
+  So ESS-respecting beta is too weak to reach; reach-capable beta destroys ESS; and SIX TRANSITIONS
+  is not enough room to traverse between them. Fix: decouple tempering from state transitions --
+  standard SMC-samplers use many tempering steps at a FIXED time index with MCMC rejuvenation
+  between them -- or lengthen the horizon. Do not tie one temperature to each transition.
+- **Two adaptive-ESS traps, both worth remembering.** (1) Scoring the spread of Z(x) across CURRENT
+  particles is the wrong criterion: degeneracy comes from the 1/h(y) factor AFTER proposing, and at
+  step 1 all particles sit on one state so the proxy is flat and beta pins to beta_max -- producing
+  a vacuous "PASS" with no annealing. (2) The right criterion is available in CLOSED FORM: for
+  y ~ P(.|x) ∝ R(x,y)h(y), the incremental weight Z(x)/h(y) has E[w|x]=1 and
+  E[w^2|x] = Z(x) * sum_{y:h(y)>0} R(x,y)/h(y), so post-step ESS is predictable before sampling.
+  Also: for hard conjunctions anneal a CONTINUOUS violation magnitude (distance outside the boxes);
+  an indicator raised to any power is still an indicator, and a count of satisfied constraints gives
+  only k+1 coarse levels.
+- **Terminology: annealed twisted SMC is CONSISTENT / asymptotically exact, not "unbiased".** The
+  self-normalised finite-particle estimator carries Monte Carlo bias. Pass criteria must therefore
+  be "matches the one-shot bridge to the same finite-particle floor plain exact twisting achieves at
+  this budget", never "matches exactly".
+- **PATH-SPACE SMC SAMPLER GATE: PASS.** Keeping the six molecular edits fixed as task semantics and
+  moving tempering into the inference layer -- targets `pi_j(path) ∝ prod_b R(x_{b-1},x_b) *
+  g_{beta_j}(x_B)` with endpoint-only reweighting, ESS-adaptive beta, resampling, and suffix
+  regeneration between levels -- recovers the one-shot exact bridge on rare multi-state goals
+  (q 1.2e-07..4.5e-05, |G| 5-50, 4,000 particles, 966-state closure):
+      median TV 0.0256   median target mass 1.000   ESS 0.61-0.65   only 7-10 tempering levels
+  The rejuvenation is a GIBBS move accepted with probability 1, because with exact h_beta the
+  twisted kernel generates precisely pi_j(suffix | prefix). **With a learned h_phi that is no longer
+  true and an MH ratio is required** -- not a drop-in swap, and the reason to gate the exact case
+  first.
+- **CORRECTION: plain exact-h twisted SMC is NOT the Monte-Carlo floor.** It resamples WITHOUT
+  rejuvenation, so resampling duplicates particles and destroys diversity. At the same 4,000-particle
+  budget the path sampler is ~7x more accurate (median TV 0.0256 vs 0.1771). Earlier statements that
+  ~0.09 was "the floor" / "known achievable" understated the reachable accuracy; future arms should
+  be measured against ~0.026. Resample-then-rejuvenate, and never quote a resampling-only estimator
+  as a floor.
+- **Durable machinery now lives in the REPO, not scratchpad.** Promoted with tests
+  (`tests/test_editing_v2_bridge_control.py`, 6 passing):
+    `src/compose_v4/experiments/editing_v2_evaluation_semantics.py` -- the production-semantics
+      preflight (`assert_production_state_semantics`, `production_state_from_smiles`). Run it on a
+      sample of an experiment's OWN sources before the experiment does any work.
+    `src/compose_v4/experiments/editing_v2_bridge_control.py` -- editing-kernel closure with an
+      explicit CEMETERY, exact backward values, controlled kernel (unreachable rows returned as
+      all-zero/UNDEFINED rather than epsilon-patched), `terminal_tilt_residual` evidence, and the
+      path-space annealed SMC sampler.
+  Verified against the real 966-state closure after promotion: terminal-tilt TV 1.5e-16, zero
+  support violations, path-sampler TV 0.0303 at mass 1.000 / ESS 0.639 / 8 levels -- matching the
+  scratchpad run. Everything else built this session (~90 files) is genuinely throwaway probing and
+  correctly stays in scratchpad.
