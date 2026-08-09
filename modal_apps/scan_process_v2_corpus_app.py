@@ -111,6 +111,58 @@ def scan_corpus(corpus_root: str) -> dict:
     image=image,
     cpu=2.0,
     memory=8 * 1024,
+    timeout=30 * 60,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def corpus_pairs(corpus_root: str) -> dict:
+    """Return each entry's raw ``(source_state_sha256, successor_canonical_key)``.
+
+    The scan's blake2b digests cannot be re-keyed: reconciliation must key on
+    ``source_canonical_key`` because the state hash is over the padded slot
+    arrangement and inflates 1.31x in the multistep lane. Raw components can be
+    translated locally against a state->canonical map; digests cannot.
+
+    Returning ~2 MB of key components beats pulling ~2 GB of BATCH.pt tensors,
+    and beats reconstructing the pairs from slice offsets -- which was tried and
+    failed validation, because a published offset does not index the task's row
+    order the way it appears to.
+    """
+
+    artifact_volume.reload()
+    chunks = Path(corpus_root) / "chunks"
+    pairs: set[str] = set()
+    entries = 0
+    for task_dir in sorted(chunks.iterdir()):
+        if not task_dir.is_dir():
+            continue
+        for slice_dir in sorted(task_dir.iterdir()):
+            payload = slice_dir / "ENTRIES.json"
+            if not (slice_dir / "RECEIPT.json").exists() or not payload.exists():
+                continue
+            for entry in json.loads(payload.read_text())["entries"]:
+                entries += 1
+                pairs.add(
+                    f'{entry["source_state_sha256"]}\t{entry["successor_canonical_key"]}'
+                )
+    return {"entries": entries, "pairs": sorted(pairs)}
+
+
+@app.local_entrypoint()
+def pairs(
+    corpus_root: str = "/artifacts/editing_v2/process_v2_v2_corpus",
+    out: str = "",
+) -> None:
+    result = corpus_pairs.remote(corpus_root)
+    print(f"entries {result['entries']:,}  distinct state-keyed pairs {len(result['pairs']):,}")
+    if out:
+        Path(out).write_text(json.dumps(result["pairs"]))
+        print(f"wrote {out}")
+
+
+@app.function(
+    image=image,
+    cpu=2.0,
+    memory=8 * 1024,
     timeout=60 * 60,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
