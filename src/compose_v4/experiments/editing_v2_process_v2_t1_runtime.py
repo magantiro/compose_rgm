@@ -27,11 +27,11 @@ from __future__ import annotations
 import hashlib
 import json
 import time
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, replace
 from pathlib import Path
 from types import MappingProxyType, SimpleNamespace
-from typing import Any, Callable
+from typing import Any
 
 import torch
 
@@ -90,8 +90,8 @@ from compose_v4.model.contextual_ring_restate_rate_model import (
     CONTEXTUAL_RING_RESTATE_SCORER_MODE,
     ContextualRingRestateFactorizedTraceletRateModel,
 )
-from compose_v4.rewrite.trace_shard import decode_state, encode_state
 from compose_v4.rewrite import action_codec_v4
+from compose_v4.rewrite.trace_shard import decode_state, encode_state
 
 PLAN_SCHEMA = "compose.editing_v2.process_v2_t1_prepared_plan"
 PLAN_SCHEMA_VERSION = 2
@@ -363,9 +363,33 @@ def _scratch_runtime_from_descriptor(
 
 
 def _scratch_runtime_for_score_revision(
-    predecessor_descriptor: Mapping[str, Any], *, repo_root: Path
+    predecessor_descriptor: Mapping[str, Any],
+    *,
+    repo_root: Path,
+    materialized_state: Mapping[str, Any] | None = None,
 ) -> tuple[SemanticScratchRuntime, dict[str, Any], dict[str, Any]]:
-    """Build the current scorer on one exact predecessor's support geometry."""
+    """Build the current scorer on one exact predecessor's support geometry.
+
+    ``materialized_state`` supplies the two state dicts instead of re-deriving
+    them from ``initialization_seed``.  It changes WHERE the weights come from
+    and nothing else: every assertion below still runs, so the frozen
+    ``initial_model_state_sha256`` is still enforced -- it is simply verified
+    against loaded bytes rather than against a reconstruction.
+
+    That is a STRICTER check, not a weaker one.  Seed reconstruction proves the
+    running environment can regenerate the state; loading and verifying proves
+    the state actually in use IS the frozen one.
+
+    It exists because the reconstruction is only satisfiable on the platform
+    that produced the constant.  PyTorch's CPU ``normal_`` fill is vectorized
+    per architecture and reproducible only on the same platform, so a macOS
+    arm64 host on the identical pinned versions rebuilds this architecture --
+    118 parameters, zero shape mismatches, same seed, same ring catalog -- with
+    different numbers.  Pinning cannot fix that; it is not a version
+    difference.  Overwriting the expected constant instead would be the
+    ``neutralize_catalog_drift()`` antipattern and would split-brain the corpus,
+    since the already-compiled rows were scored under the frozen state.
+    """
 
     predecessor = dict(predecessor_descriptor)
     if tuple(sorted(predecessor)) != MODEL_RUNTIME_FIELDS:
@@ -406,6 +430,10 @@ def _scratch_runtime_for_score_revision(
         catalog_fingerprint=str(predecessor["catalog_fingerprint"]),
     )
     predecessor_runtime = build_semantic_scratch_runtime(config, semantic)
+    if materialized_state is not None:
+        predecessor_runtime.model.load_state_dict(
+            materialized_state["predecessor"], strict=True
+        )
     predecessor_identity = dict(predecessor_runtime.semantic_model_identity)
     with torch.random.fork_rng(devices=[]):
         torch.manual_seed(config.initialization_seed)
@@ -450,6 +478,8 @@ def _scratch_runtime_for_score_revision(
             ),
             atom_vocabulary=ORGANIC_VOCABULARY,
         ).to(dtype=torch.float32)
+    if materialized_state is not None:
+        model.load_state_dict(materialized_state["revised"], strict=True)
     predecessor_state = predecessor_runtime.model.state_dict()
     if set(predecessor_state) - {"graft_relation_head.weight"} == set(predecessor_state):
         raise ProcessV2T1RuntimeError(
@@ -591,8 +621,47 @@ def _scratch_runtime_for_score_revision(
     }
 
 
+def load_materialized_scorer_state(directory: Path) -> dict[str, Any]:
+    """Load and authenticate scorer weights materialized on the frozen platform.
+
+    Returns the two state dicts for ``materialized_state``.  The receipt is
+    checked against the frozen constant BEFORE the bytes are handed to the
+    builder, so unauthenticated weights cannot reach a compile even if the
+    builder's own assertions were ever loosened.  See
+    ``modal_apps/materialize_process_v2_predecessor_state_app.py``.
+    """
+
+    directory = Path(directory)
+    receipt = json.loads((directory / "MATERIALIZATION_RECEIPT.json").read_text())
+    frozen = _SCORE_REVISION_PREDECESSOR["initial_model_state_sha256"]
+    if receipt.get("base_state_sha256") != frozen:
+        raise ProcessV2T1RuntimeError(
+            f"materialized scorer receipt names base state "
+            f"{receipt.get('base_state_sha256')}, not the frozen {frozen}"
+        )
+    predecessor = torch.load(
+        directory / "predecessor_state.pt", map_location="cpu", weights_only=True
+    )
+    revised = torch.load(
+        directory / "revised_state.pt", map_location="cpu", weights_only=True
+    )
+    base_state = {
+        name: value
+        for name, value in predecessor.items()
+        if name != "graft_relation_head.weight"
+    }
+    observed = state_dict_semantic_sha256(base_state)
+    if observed != frozen:
+        raise ProcessV2T1RuntimeError(
+            f"materialized scorer bytes hash {observed}, not the frozen {frozen}"
+        )
+    return {"predecessor": predecessor, "revised": revised, "receipt": receipt}
+
+
 def build_process_v2_score_revised_scratch_runtime(
     source: ProcessV2T1Source,
+    *,
+    materialized_state: Mapping[str, Any] | None = None,
 ) -> tuple[SemanticScratchRuntime, dict[str, Any], dict[str, Any]]:
     """Construct the P50 scorer and its exact zero-residual containment receipt."""
 
@@ -600,7 +669,7 @@ def build_process_v2_score_revised_scratch_runtime(
     if not isinstance(bound, Mapping) or tuple(sorted(bound)) != MODEL_RUNTIME_FIELDS:
         raise ProcessV2T1RuntimeError("Active8 plan lacks its model runtime descriptor")
     runtime, binding, bridge = _scratch_runtime_for_score_revision(
-        bound, repo_root=source.repo_root
+        bound, repo_root=source.repo_root, materialized_state=materialized_state
     )
     if runtime.process_identity_sha256 != source.contracts.process_identity_sha256:
         raise ProcessV2T1RuntimeError("score-revised scratch process identity changed")
@@ -2155,21 +2224,21 @@ __all__ = [
     "ProcessV2T1RuntimeError",
     "ProcessV2T1RuntimeInputs",
     "authenticate_process_v2_t1_prepared_plan_for_worker",
+    "build_process_v2_score_revised_scratch_runtime",
     "build_process_v2_t1_prepared_inputs",
-    "build_reused_process_v2_t1_prepared_inputs",
     "build_process_v2_t1_prepared_plan",
     "build_process_v2_t1_scratch_runtime",
-    "build_process_v2_score_revised_scratch_runtime",
-    "compile_process_v2_t1_prepared_leaf",
+    "build_reused_process_v2_t1_prepared_inputs",
     "compile_authenticated_process_v2_t1_prepared_leaf",
+    "compile_process_v2_t1_prepared_leaf",
     "load_process_v2_t1_capacity_policy",
     "load_process_v2_t1_runtime_inputs",
     "publish_process_v2_t1_prepared_inputs",
     "publish_reused_process_v2_t1_prepared_inputs",
+    "validate_process_v2_t1_leaf_reuse_plan",
     "validate_process_v2_t1_prepared_inputs",
     "validate_process_v2_t1_prepared_leaf",
     "validate_process_v2_t1_prepared_plan",
-    "validate_process_v2_t1_leaf_reuse_plan",
     "write_process_v2_t1_prepared_leaf",
     "write_process_v2_t1_prepared_plan",
 ]
