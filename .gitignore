@@ -45,3 +45,5 @@ paper_iclr_stochastic_rewriting/main.bbl
 paper_iclr_stochastic_rewriting/main.blg
 scripts/presentation/__pycache__/
 .claude/settings.local.json
+diagnostics/.v2_scan_cache.pkl
+diagnostics/.v2_successor_cache.pkl

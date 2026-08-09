@@ -1,0 +1,12 @@
+{
+  "selection": "v2_calibration_single_task",
+  "target_transitions": 2048,
+  "transitions": 2048,
+  "chunks": [
+    {
+      "lane": "operator_aware_real_endpoint",
+      "task_identity_sha256": "633e7225508fab44c781bfb911a8164903903aa87e3b67f4481ba5c5f5c35a97",
+      "transitions": 2048
+    }
+  ]
+}
