@@ -122,6 +122,26 @@ def main() -> int:
 
     import gzip
 
+    # FAIL CLOSED before spawning anything. The scratch runtime would raise on a
+    # drifted catalog anyway, but inside six workers, 107 s in, with the real
+    # cause buried under multiprocessing tracebacks. A divergent chemistry
+    # kernel must stop the run here, and must never be neutralised: a local venv
+    # on rdkit 2026.03.4 reconstructs 82fd910c instead of 639ff607, and a
+    # 50-state parity gate showed 2 states whose canonical successor keys then
+    # differ. Compiling under that would key half the corpus differently.
+    import compose_v4.experiments.editing_gate_zero_runtime as _gz
+    _expected = _gz.PRODUCTION_RINGCORE_CATALOG_FINGERPRINT
+    try:
+        _gz.build_production_ringcore_catalog(max_atoms=40)
+    except _gz.EditingGateZeroRuntimeError as error:
+        raise SystemExit(
+            f"REFUSING TO COMPILE: catalog fingerprint drift.\n  {error}\n"
+            "  Reproduce the pinned production environment (python 3.11, torch 2.4.0, "
+            "numpy 1.26.4, scipy 1.13.1, networkx 3.3, rdkit 2024.3.5).\n"
+            "  Do NOT call neutralize_catalog_drift() -- it overwrites the expected value."
+        ) from error
+    print(f"catalog fingerprint verified: {_expected}", flush=True)
+
     manifest = json.loads(Path(args.manifest).read_text())
     lanes = [l for l in args.lanes.split(",") if l]
     a8 = Path(args.active8_root)
