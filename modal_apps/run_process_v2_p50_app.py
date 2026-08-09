@@ -56,7 +56,7 @@ COLLATED_RECEIPT_FILENAME = "PROCESS_V2_P50_COLLATED_RECEIPT.json"
 COLLATED_TASKS_DIRNAME = "collated_tasks"
 
 MAX_CPU_CONTAINERS = 100
-PREP_MAX_CONTAINERS = 50  # cap the prep fan-out; speed dial, not a cost dial
+PREP_MAX_CONTAINERS = 20  # cap the prep fan-out; speed dial, not a cost dial
 CPU_PER_LEAF = 1.0
 #: Cores per PREP leaf. Modal bills core-seconds, so N cores in one container
 #: cost the same as N containers -- but containers are tier-capped and cores are
