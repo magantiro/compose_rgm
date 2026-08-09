@@ -1,0 +1,55 @@
+{
+  "available_not_required_pairs": 63881,
+  "available_pairs": 102316,
+  "entries_without_canonical_translation": 0,
+  "frozen_sha256": "9e67dbe1ce70e95b8668a77347aae11568f40bb0f5716c15afd3c2f976ce47d2",
+  "missing": {
+    "by_capability_cell": {
+      "editing_v2_active8_v1:atom_delete:leaf_death": 22465,
+      "editing_v2_active8_v1:atom_insert:one_neighbor_birth": 23562,
+      "editing_v2_active8_v1:atom_restate:element_identity_change": 2493,
+      "editing_v2_active8_v1:bond_reorder:bond_order_decrease": 3549,
+      "editing_v2_active8_v1:bond_reorder:bond_order_increase": 3418,
+      "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_acyclic_source": 193,
+      "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_cyclic_source": 3804,
+      "editing_v2_active8_v1:bond_reroute:single_atom_pendant_acyclic_source": 85,
+      "editing_v2_active8_v1:bond_reroute:single_atom_pendant_cyclic_source": 5140,
+      "editing_v2_active8_v1:cycle_attach:open_from_monocyclic_ring_system": 23,
+      "editing_v2_active8_v1:cycle_attach:open_from_nonarticulated_polycyclic_ring_system": 21,
+      "editing_v2_active8_v1:ring_system_restate:aromatization": 1965,
+      "editing_v2_active8_v1:ring_system_restate:coordinated_ring_bond_state_change": 109,
+      "editing_v2_active8_v1:ring_system_restate:dearomatization": 2610
+    },
+    "by_family": {
+      "atom_delete": 22465,
+      "atom_insert": 23562,
+      "atom_restate": 2493,
+      "bond_reorder": 6967,
+      "bond_reroute": 9222,
+      "cycle_attach": 44,
+      "ring_system_restate": 4684
+    },
+    "by_lane": {
+      "linker_positional_topology_analogue": 2593,
+      "operator_aware_real_endpoint": 2281,
+      "real_endpoint_multistep_path": 45609,
+      "reversible_synthetic_walk": 18954
+    },
+    "by_role": {
+      "controller_validation": 2635,
+      "final_test": 3077,
+      "train": 61130,
+      "validation": 2595
+    },
+    "distinct_sources": 36794,
+    "distinct_tasks": 160,
+    "real_rows": 50483,
+    "rows": 69437,
+    "synthetic_rows": 18954
+  },
+  "missing_pairs": 69437,
+  "required_pairs": 107872,
+  "schema": "compose.editing_v2.manifest_library_reconciliation",
+  "schema_version": 1,
+  "status": "RECONCILIATION_EVIDENCE_ONLY_NO_AUTHORITY"
+}

@@ -170,6 +170,10 @@ def main() -> int:
     parser.add_argument("--manifest", default="diagnostics/editing_v2_v2_selection_manifest.json")
     parser.add_argument("--corpus-root", action="append", default=[],
                         help="Local compiled corpus tree. Repeatable.")
+    parser.add_argument("--pairs-file", action="append", default=[],
+                        help="JSON list of 'source_state_sha256\\tsuccessor_canonical_key' "
+                             "for a corpus not on this disk. Translated canonically "
+                             "here, so unlike a digest list it can be re-keyed.")
     parser.add_argument("--out", required=True)
     parser.add_argument("--missing-sources-out", default="",
                         help="Write the source keys of M\\A, grouped by task, ready "
@@ -192,6 +196,21 @@ def main() -> int:
         untranslated_total += untranslated
         print(f"corpus {root}: {len(found):,} distinct pairs"
               + (f"  ({untranslated:,} entries had no canonical translation)" if untranslated else ""))
+        available |= found
+    for path in args.pairs_file:
+        raw = json.loads(Path(path).read_text())
+        found = set()
+        missing_translation = 0
+        for item in raw:
+            state, _, successor = str(item).partition("\t")
+            canonical = state_to_canonical.get(state)
+            if canonical is None:
+                missing_translation += 1
+                continue
+            found.add(pair_digest(canonical, successor))
+        untranslated_total += missing_translation
+        print(f"pairs {path}: {len(found):,} distinct pairs"
+              + (f"  ({missing_translation:,} untranslated)" if missing_translation else ""))
         available |= found
     print(f"AVAILABLE union: {len(available):,} distinct canonical pairs\n")
 
