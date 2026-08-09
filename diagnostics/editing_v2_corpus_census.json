@@ -1,0 +1,147 @@
+{
+  "accepted_rows_scanned": 2311080,
+  "compiled_scaffolds_sampled": 18788,
+  "lanes": [
+    {
+      "compiled": {
+        "families": {
+          "bond_reroute": 2869
+        },
+        "rows": 2869,
+        "sources_not_already_compiled": 0,
+        "unique_sources": 2780,
+        "unique_successors": 2779
+      },
+      "lane": "linker_positional_topology_analogue",
+      "uncompiled": {
+        "families": {
+          "bond_reroute": 23075
+        },
+        "rows": 23075,
+        "sources_not_already_compiled": 16609,
+        "unique_sources": 21269,
+        "unique_successors": 21257
+      }
+    },
+    {
+      "compiled": {
+        "families": {
+          "atom_delete": 21234,
+          "atom_insert": 21234
+        },
+        "rows": 42468,
+        "sources_not_already_compiled": 0,
+        "unique_sources": 25158,
+        "unique_successors": 25144
+      },
+      "lane": "observed_local_analogue",
+      "uncompiled": {
+        "families": {
+          "atom_delete": 2459,
+          "atom_insert": 2459
+        },
+        "rows": 4918,
+        "sources_not_already_compiled": 2764,
+        "unique_sources": 2764,
+        "unique_successors": 2761
+      }
+    },
+    {
+      "compiled": {
+        "families": {
+          "atom_restate": 3921,
+          "bond_reorder": 229
+        },
+        "rows": 4150,
+        "sources_not_already_compiled": 0,
+        "unique_sources": 4114,
+        "unique_successors": 4095
+      },
+      "lane": "operator_aware_real_endpoint",
+      "uncompiled": {
+        "families": {
+          "atom_restate": 17765,
+          "bond_reorder": 902
+        },
+        "rows": 18667,
+        "sources_not_already_compiled": 12713,
+        "unique_sources": 17159,
+        "unique_successors": 17123
+      }
+    },
+    {
+      "compiled": {
+        "families": {
+          "atom_delete": 36547,
+          "atom_insert": 36622
+        },
+        "rows": 73169,
+        "sources_not_already_compiled": 0,
+        "unique_sources": 51912,
+        "unique_successors": 51924
+      },
+      "lane": "real_endpoint_multistep_path",
+      "uncompiled": {
+        "families": {
+          "atom_delete": 865891,
+          "atom_insert": 866746
+        },
+        "rows": 1732637,
+        "sources_not_already_compiled": 319721,
+        "unique_sources": 375894,
+        "unique_successors": 375032
+      }
+    },
+    {
+      "compiled": {
+        "families": {
+          "atom_delete": 959,
+          "atom_insert": 685,
+          "atom_restate": 1668,
+          "bond_reorder": 984,
+          "bond_reroute": 946,
+          "cycle_attach": 6832,
+          "cycle_insert": 9827,
+          "ring_system_restate": 623
+        },
+        "rows": 22524,
+        "sources_not_already_compiled": 0,
+        "unique_sources": 16135,
+        "unique_successors": 13216
+      },
+      "lane": "reversible_synthetic_walk",
+      "uncompiled": {
+        "families": {
+          "atom_delete": 26268,
+          "atom_insert": 18204,
+          "atom_restate": 51946,
+          "bond_reorder": 25851,
+          "bond_reroute": 25302,
+          "cycle_attach": 89804,
+          "cycle_insert": 130831,
+          "ring_system_restate": 18397
+        },
+        "rows": 386603,
+        "sources_not_already_compiled": 252135,
+        "unique_sources": 255540,
+        "unique_successors": 216818
+      }
+    }
+  ],
+  "new_scaffolds_from_uncompiled": 23930,
+  "schema": "compose.editing_v2.corpus_census",
+  "schema_version": 1,
+  "status": "CENSUS_EVIDENCE_ONLY_NO_AUTHORITY",
+  "tasks_compiled": 34,
+  "tasks_on_disk": 328,
+  "uncompiled_family_totals": {
+    "atom_delete": 894618,
+    "atom_insert": 887409,
+    "atom_restate": 69711,
+    "bond_reorder": 26753,
+    "bond_reroute": 48377,
+    "cycle_attach": 89804,
+    "cycle_insert": 130831,
+    "ring_system_restate": 18397
+  }
+}

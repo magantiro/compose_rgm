@@ -43,6 +43,25 @@ step at a time.
 - This is **not** an argument against parallel work or against fixing things you notice. Notice
   them, say them, park them. The failure mode is silently *substituting* them for the goal.
 
+## Scratchpad is for things you expect to throw away
+
+Anything carrying a **theorem, an invariant, or a reusable interface** is written into `src/` with
+tests *when it is written* — not promoted later. Scratchpad is for probes whose conclusions you
+expect to discard.
+
+The test: *would the paper cite this, or would another experiment import it?* If yes, it is repo
+code. Verified numbers produced by an unimportable script are numbers nobody can reproduce.
+
+This exists because of a concrete failure. The exact bridge control, the path-space sampler and the
+evaluation-semantics preflight were all built in scratchpad and validated there — one of them was
+described in writing as "the preflight every COMPOSE evaluation must pass" while living in a temp
+directory where nothing could import it. Two of them were load-bearing for the paper. Promoting
+them afterwards worked, but the tests were retrofitted rather than written alongside, which is
+exactly when a guard is weakest.
+
+Exploratory training runs, one-off diagnostics and dead ends belong in scratchpad and should stay
+there — several of them encode assumptions since disproved.
+
 ## Reasoning discipline
 
 Separate what is **measured**, what is **inferred**, and what is **assumed**, and say which.

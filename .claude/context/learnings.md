@@ -1121,3 +1121,39 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   support violations, path-sampler TV 0.0303 at mass 1.000 / ESS 0.639 / 8 levels -- matching the
   scratchpad run. Everything else built this session (~90 files) is genuinely throwaway probing and
   correctly stays in scratchpad.
+- **MH-corrected rejuvenation with a learned h_phi: derivation looks right, empirics INCONCLUSIVE.**
+  Demoting the value to a proposal and restoring the target by Metropolis-Hastings is computable
+  from h_phi alone -- every R factor cancels between target and proposal, leaving
+      alpha = min(1, [g_beta(x'_B)/g_beta(x_B)] * [L(S)/L(S')]),
+      L(S)  = prod_{k>m} h^phi_{B-k}(x_k) / Z^phi_{B-k+1}(x_{k-1}).
+  With deliberately corrupted h_phi (lognormal sigma) on the 966-state closure, acceptance falls as
+  predicted (0.994 / 0.746 / 0.555 / 0.375 at sigma 0 / 0.5 / 1 / 2) but terminal TV also rises
+  (0.027 / 0.053 / 0.122 / 0.353). That is consistent with EITHER bias (derivation wrong) or
+  variance (poor mixing leaves post-resampling duplicates, shrinking the count of distinct paths).
+  A particle-scaling check at sigma=2 was under-powered and confounded: TV fell 0.367 -> 0.239 ->
+  0.126 at N = 1k/4k/16k (roughly 1/sqrt(N)) then rose to 0.213 at 48k, because the beta ladder is
+  ESS-ADAPTIVE and therefore a different algorithm at each N, and the median was over only 5 goals.
+  CLEAN REDESIGN before concluding: freeze the beta schedule from the sigma=0 run and reuse it
+  across all N and sigma, use >=30 goals, average several seeds per cell. Do not record a verdict
+  until that runs -- a FAIL here would itself be an over-claim.
+- **V2 CENSUS (`scripts/editing_v2_corpus_census.py`, `diagnostics/editing_v2_corpus_census.json`):
+  compile selectively, not wholesale.** 328 Active8 tasks, 34 compiled, 2,311,080 accepted
+  transitions scanned (an earlier 299k figure came from `rows.jsonl.gz`, a coarser granularity).
+  Uncompiled by lane:
+      real_endpoint_multistep_path      1,732,637 rows   0 cycle   ~100% insert/delete
+      reversible_synthetic_walk           386,603 rows   239,032 cycle  (the ONLY cycle source)
+      linker_positional_topology_analogue  23,075 rows   0 cycle   100% bond_reroute
+      operator_aware_real_endpoint         18,667 rows   0 cycle   95% atom_restate
+      observed_local_analogue               4,918 rows   0 cycle   insert/delete
+  (1) ZERO cycle-family rows in any real lane across all 2.31M rows -- the topology gap is confirmed
+  at full scale and is a pair-selection problem, not a compute one. (2) Compiling everything would
+  push insert/delete from 60.3% to 82.3%: `real_endpoint_multistep_path` is 1.73M rows of pure
+  insert/delete and would make the imbalance WORSE. (3) The two SMALL lanes are the valuable ones
+  and are invisible if you reason from row counts: `operator_aware_real_endpoint` adds 17,765 real
+  `atom_restate` (5.5x the ~3,900 currently held, and atom_restate is the family that LOSES to
+  uniform at -0.65), and `linker_positional_topology_analogue` adds 23,075 real `bond_reroute` (9x
+  the ~2,870 held, for the family marginal at +0.20). PLAN: take those two lanes whole (~42k rows),
+  subsample `real_endpoint_multistep_path` for scaffold diversity only, subsample the synthetic walk
+  for cycle coverage. New Bemis-Murcko scaffolds 23,930 vs 18,788 compiled-sampled (~2x diversity),
+  far less than the ~10x row count implies -- many new sources are analogues of molecules already
+  present.
