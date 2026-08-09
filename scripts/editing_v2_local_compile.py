@@ -57,7 +57,8 @@ for _p in (ROOT / "src", ROOT / "tests", ROOT / "scripts"):
 _W: dict = {}
 
 
-def _init(active8_root: str, gate_zero: str, artifact_root: str) -> None:
+def _init(active8_root: str, gate_zero: str, artifact_root: str,
+          materialized_state: str) -> None:
     import torch
 
     torch.set_num_threads(1)
@@ -66,6 +67,7 @@ def _init(active8_root: str, gate_zero: str, artifact_root: str) -> None:
     )
     from compose_v4.experiments.editing_v2_process_v2_t1_runtime import (
         build_process_v2_score_revised_scratch_runtime,
+        load_materialized_scorer_state,
     )
 
     source = open_process_v2_t1_source(
@@ -74,20 +76,31 @@ def _init(active8_root: str, gate_zero: str, artifact_root: str) -> None:
         artifact_root=Path(artifact_root),
         repo_root=ROOT,
     )
-    runtime, _binding, _receipt = build_process_v2_score_revised_scratch_runtime(source)
+    state = load_materialized_scorer_state(Path(materialized_state))
+    runtime, _binding, _receipt = build_process_v2_score_revised_scratch_runtime(
+        source, materialized_state=state
+    )
     _W["source"] = source
     _W["model"] = runtime.model
 
 
-def _published(output_root: Path, task: str, offset: int) -> bool:
-    """A slice is done when its receipt exists; count is unknown until compiled."""
+def _published(output_root: Path, task: str, offset: int, count: int) -> bool:
+    """A slice is done when the receipt for THIS EXACT offset-count exists.
 
-    directory = Path(output_root) / "chunks" / task
-    if not directory.is_dir():
-        return False
-    prefix = f"{offset:09d}-"
-    return any((directory / d / "RECEIPT.json").exists()
-               for d in os.listdir(directory) if d.startswith(prefix))
+    Matching the offset prefix alone is wrong whenever two runs use different
+    ``--slice-size``: a 50-entry slice published at offset 0 would satisfy a
+    planned 250-entry slice at offset 0, silently dropping 200 entries with no
+    error anywhere. Resuming a partly-compiled task at a different slice size
+    is a normal thing to do, so the check has to be exact.
+
+    Note this makes size changes SAFE, not free: ranges compiled under the old
+    size are simply recompiled under the new one, and overlapping publications
+    would double-count. Finish a task at one size, or clear it before changing.
+    """
+
+    receipt = (Path(output_root) / "chunks" / task
+               / f"{offset:09d}-{count:09d}" / "RECEIPT.json")
+    return receipt.exists()
 
 
 def _compile_slice(job: tuple) -> dict:
@@ -97,7 +110,7 @@ def _compile_slice(job: tuple) -> dict:
         publish_process_v2_chunk_shard,
     )
 
-    if _published(Path(output_root), task, offset):
+    if _published(Path(output_root), task, offset, limit):
         return {"task": task, "offset": offset, "skipped": True, "entries": 0}
     began = time.monotonic()
     try:
@@ -175,10 +188,22 @@ def main() -> int:
     ap.add_argument("--manifest", default="diagnostics/editing_v2_v2_selection_manifest.json")
     ap.add_argument("--lanes", default="operator_aware_real_endpoint,linker_positional_topology_analogue")
     ap.add_argument("--output-root", required=True)
+    ap.add_argument(
+        "--materialized-state", required=True,
+        help="Directory from materialize_process_v2_predecessor_state_app. Required "
+             "locally: this host cannot re-derive the frozen scorer state from its "
+             "seed (PyTorch CPU init is only reproducible on the platform that "
+             "produced the constant), so the authenticated bytes are loaded instead.")
     ap.add_argument("--partition-role", default="train")
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--slice-size", type=int, default=250)
     ap.add_argument("--compile-batch-size", type=int, default=25)
+    ap.add_argument("--max-slices", type=int, default=0,
+                    help="0 = all; a small value smoke-tests that slices actually publish")
+    ap.add_argument("--plan-only", action="store_true",
+                    help="Print the slice plan and exit. Knowing the entry count and "
+                         "projected wall clock BEFORE spawning is the difference between "
+                         "choosing a worker count and discovering it hours in.")
     args = ap.parse_args()
 
     import gzip
@@ -203,10 +228,24 @@ def main() -> int:
         ) from error
     print(f"catalog fingerprint verified: {_expected}", flush=True)
 
+    # Authenticate the scorer bytes here for the same reason: inside the pool this
+    # surfaces as six identical tracebacks 107 s in, and a Pool RESPAWNS workers
+    # that die in the initializer, so a failure looks like a busy run that never
+    # publishes rather than like an error. That cost two hours once.
+    from compose_v4.experiments.editing_v2_process_v2_t1_runtime import (
+        load_materialized_scorer_state,
+    )
+    _state = load_materialized_scorer_state(Path(args.materialized_state))
+    print("materialized scorer authenticated: "
+          f"{_state['receipt']['base_state_sha256'][:16]} "
+          f"(built on {_state['receipt']['software']['system']}/"
+          f"{_state['receipt']['software']['machine']})", flush=True)
+    del _state
+
     free = _free_gb()
     needed = max(MIN_FREE_GB_ABSOLUTE, MIN_FREE_GB_PER_WORKER * args.workers)
     print(f"free memory {free:.1f} GB, need {needed:.1f} GB for {args.workers} workers", flush=True)
-    if free < needed:
+    if free < needed and not args.plan_only:
         raise SystemExit(
             f"REFUSING TO START: {free:.1f} GB free, {needed:.1f} GB needed for "
             f"{args.workers} workers.\n  Free memory or lower --workers. Starting into a "
@@ -215,7 +254,7 @@ def main() -> int:
     _own_process_group()
 
     manifest = json.loads(Path(args.manifest).read_text())
-    lanes = [l for l in args.lanes.split(",") if l]
+    lanes = [lane for lane in args.lanes.split(",") if lane]
     a8 = Path(args.active8_root)
 
     jobs = []
@@ -230,18 +269,34 @@ def main() -> int:
                 jobs.append((task, offset, limit, args.partition_role,
                              args.output_root, args.compile_batch_size))
 
-    done_already = sum(1 for j in jobs if _published(Path(args.output_root), j[0], j[1]))
+    if args.max_slices > 0:
+        # Bounded smoke test: prove a slice PUBLISHES before committing hours.
+        jobs = [j for j in jobs
+                if not _published(Path(args.output_root), j[0], j[1], j[2])][: args.max_slices]
+
+    done_already = sum(1 for j in jobs
+                       if _published(Path(args.output_root), j[0], j[1], j[2]))
     planned = sum(j[2] for j in jobs)
     print(f"lanes {lanes}", flush=True)
     print(f"slices {len(jobs)} ({done_already} already published), "
           f"planned entries {planned:,}, workers {args.workers}", flush=True)
+
+    if args.plan_only:
+        # 614 entries/h/worker measured on this host at slice-size 50, steady state
+        # (excludes the ~107 s per-worker setup, which is paid once).
+        remaining = planned - sum(j[2] for j in jobs
+                                  if _published(Path(args.output_root), j[0], j[1], j[2]))
+        for count in (2, 4, 6):
+            print(f"  {count} workers -> {remaining / (614 * count):.1f}h")
+        return 0
 
     Path(args.output_root).mkdir(parents=True, exist_ok=True)
     began = time.monotonic()
     entries = failures = skipped = 0
     context = mp.get_context("spawn")
     with context.Pool(args.workers, initializer=_init,
-                      initargs=(args.active8_root, args.gate_zero, args.artifact_root)) as pool:
+                      initargs=(args.active8_root, args.gate_zero, args.artifact_root,
+                                args.materialized_state)) as pool:
         for n, row in enumerate(pool.imap_unordered(_compile_slice, jobs), 1):
             if row.get("skipped"):
                 skipped += 1
