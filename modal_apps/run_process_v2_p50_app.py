@@ -1406,6 +1406,15 @@ def _compile_subrange_child(sub_offset: int, sub_limit: int) -> dict[str, Any]:
         deadline_seconds=float(state["deadline_seconds"]),
         progress_callback=None,
     )
+    # Refuse to publish rows that were supposed to be filtered and were not.
+    # Publication is immutable, so a wrong slice written here is permanent and
+    # indistinguishable from a right one; the only safe moment to notice is
+    # before the write.
+    if state.get("source_subset") and not result.get("source_subset_sha256"):
+        raise RuntimeError(
+            "source subset was requested but the compile applied none; refusing "
+            "to publish unfiltered rows as a subset slice"
+        )
     receipt = loaded["publish_chunk"](result, output_root=Path(state["output_root"]))
     elapsed = time.monotonic() - started
     payload = {
@@ -1418,6 +1427,14 @@ def _compile_subrange_child(sub_offset: int, sub_limit: int) -> dict[str, Any]:
         "elapsed_seconds": elapsed,
         "ms_per_entry": 1000.0 * elapsed / max(int(receipt["entry_count"]), 1),
         "receipt_sha256": receipt["receipt_sha256"],
+        # Report the subset the compile ACTUALLY applied, not the one we meant
+        # to pass. These two fields exist because the subset once failed to
+        # reach the forked children and the fan-out compiled the unfiltered
+        # stream while every slice reported success: no error, no failed slice,
+        # correct receipts, wrong rows. A run that filters and a run that does
+        # not must not look identical in the log.
+        "source_subset_sha256": result.get("source_subset_sha256"),
+        "source_subset_selected_rows": result.get("source_subset_selected_rows"),
     }
     print(
         json.dumps({"phase": "process_v2_prep_subrange_complete", **payload}, sort_keys=True),
