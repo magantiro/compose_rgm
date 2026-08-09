@@ -1,0 +1,108 @@
+{
+  "by_role": {
+    "train": {
+      "by_capability_cell": {
+        "editing_v2_active8_v1:atom_delete:leaf_death": 19085,
+        "editing_v2_active8_v1:atom_insert:one_neighbor_birth": 18755,
+        "editing_v2_active8_v1:atom_restate:element_identity_change": 21273,
+        "editing_v2_active8_v1:atom_restate:valence_state_change": 8,
+        "editing_v2_active8_v1:bond_reorder:bond_order_decrease": 941,
+        "editing_v2_active8_v1:bond_reorder:bond_order_increase": 934,
+        "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_acyclic_source": 122,
+        "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_cyclic_source": 6752,
+        "editing_v2_active8_v1:bond_reroute:single_atom_pendant_acyclic_source": 141,
+        "editing_v2_active8_v1:bond_reroute:single_atom_pendant_cyclic_source": 17276,
+        "editing_v2_active8_v1:cycle_attach:open_from_articulated_polycyclic_ring_system": 211,
+        "editing_v2_active8_v1:cycle_attach:open_from_monocyclic_ring_system": 3557,
+        "editing_v2_active8_v1:cycle_attach:open_from_nonarticulated_polycyclic_ring_system": 2965,
+        "editing_v2_active8_v1:cycle_insert:close_to_articulated_polycyclic_ring_system": 235,
+        "editing_v2_active8_v1:cycle_insert:close_to_monocyclic_ring_system": 5557,
+        "editing_v2_active8_v1:cycle_insert:close_to_nonarticulated_polycyclic_ring_system": 3930,
+        "editing_v2_active8_v1:ring_system_restate:aromatization": 258,
+        "editing_v2_active8_v1:ring_system_restate:coordinated_ring_bond_state_change": 11,
+        "editing_v2_active8_v1:ring_system_restate:dearomatization": 305
+      },
+      "by_family": {
+        "atom_delete": 19085,
+        "atom_insert": 18755,
+        "atom_restate": 21281,
+        "bond_reorder": 1875,
+        "bond_reroute": 24291,
+        "cycle_attach": 6733,
+        "cycle_insert": 9722,
+        "ring_system_restate": 574
+      },
+      "by_lane": {
+        "linker_positional_topology_analogue": 23348,
+        "observed_local_analogue": 18891,
+        "operator_aware_real_endpoint": 20525,
+        "real_endpoint_multistep_path": 17340,
+        "reversible_synthetic_walk": 22212
+      },
+      "capability_cells": 19,
+      "distinct_sources": 79558,
+      "multi_successor_fraction": 0.22,
+      "multi_successor_sources": 17500,
+      "pairs": 102316,
+      "real_pairs": 80104,
+      "synthetic_pairs": 22212,
+      "synthetic_share": 0.2171
+    }
+  },
+  "canonical_pairs": 102316,
+  "duplicate_pairs_collapsed": 2162,
+  "frozen_sha256": "8c2446915024dd5ce131c16ca0f8d21b114eba9d4f330754de8b127c554a4276",
+  "overall": {
+    "by_capability_cell": {
+      "editing_v2_active8_v1:atom_delete:leaf_death": 19085,
+      "editing_v2_active8_v1:atom_insert:one_neighbor_birth": 18755,
+      "editing_v2_active8_v1:atom_restate:element_identity_change": 21273,
+      "editing_v2_active8_v1:atom_restate:valence_state_change": 8,
+      "editing_v2_active8_v1:bond_reorder:bond_order_decrease": 941,
+      "editing_v2_active8_v1:bond_reorder:bond_order_increase": 934,
+      "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_acyclic_source": 122,
+      "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_cyclic_source": 6752,
+      "editing_v2_active8_v1:bond_reroute:single_atom_pendant_acyclic_source": 141,
+      "editing_v2_active8_v1:bond_reroute:single_atom_pendant_cyclic_source": 17276,
+      "editing_v2_active8_v1:cycle_attach:open_from_articulated_polycyclic_ring_system": 211,
+      "editing_v2_active8_v1:cycle_attach:open_from_monocyclic_ring_system": 3557,
+      "editing_v2_active8_v1:cycle_attach:open_from_nonarticulated_polycyclic_ring_system": 2965,
+      "editing_v2_active8_v1:cycle_insert:close_to_articulated_polycyclic_ring_system": 235,
+      "editing_v2_active8_v1:cycle_insert:close_to_monocyclic_ring_system": 5557,
+      "editing_v2_active8_v1:cycle_insert:close_to_nonarticulated_polycyclic_ring_system": 3930,
+      "editing_v2_active8_v1:ring_system_restate:aromatization": 258,
+      "editing_v2_active8_v1:ring_system_restate:coordinated_ring_bond_state_change": 11,
+      "editing_v2_active8_v1:ring_system_restate:dearomatization": 305
+    },
+    "by_family": {
+      "atom_delete": 19085,
+      "atom_insert": 18755,
+      "atom_restate": 21281,
+      "bond_reorder": 1875,
+      "bond_reroute": 24291,
+      "cycle_attach": 6733,
+      "cycle_insert": 9722,
+      "ring_system_restate": 574
+    },
+    "by_lane": {
+      "linker_positional_topology_analogue": 23348,
+      "observed_local_analogue": 18891,
+      "operator_aware_real_endpoint": 20525,
+      "real_endpoint_multistep_path": 17340,
+      "reversible_synthetic_walk": 22212
+    },
+    "capability_cells": 19,
+    "distinct_sources": 79558,
+    "multi_successor_fraction": 0.22,
+    "multi_successor_sources": 17500,
+    "pairs": 102316,
+    "real_pairs": 80104,
+    "synthetic_pairs": 22212,
+    "synthetic_share": 0.2171
+  },
+  "schema": "compose.editing_v2.available_library_census",
+  "schema_version": 1,
+  "state_keyed_pairs": 104478,
+  "status": "CENSUS_EVIDENCE_ONLY_NO_AUTHORITY",
+  "stream_records_matched": 128316
+}
