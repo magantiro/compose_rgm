@@ -1223,3 +1223,24 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
 - **Cache an expensive corpus scan before sweeping over it.** The mixture script re-scanned 2.31M
   rows and recomputed ~476k Murcko scaffolds on every run -- ~13 of each 15 minutes was identical
   work, three runs running. Only the sweep parameters changed.
+- **V2 SELECTION FINAL: source/scaffold diversity picks WHICH x; distinct canonical successors
+  decide how much supervision each x keeps.** Two guards, both measured, both load-bearing.
+  (1) MULTI-SUCCESSOR PRESERVATION (`scripts/editing_v2_multisuccessor_audit.py`): selecting one
+  `(task, source)` pair per scaffold discarded 8,145 distinct successors (17% of pairs) and dropped
+  the multi-successor rate 67.7% -> 57.2%. Taking the selected SOURCE across every task it appears
+  in restores it. The selection is 3.2x ENRICHED in multi-successor states vs the candidate pool
+  (57.2% vs 17.8% even before the fix), because ranking by `-rows` picks the most productive source
+  per scaffold. Median distinct successors per selected source is 2.
+  (2) CANONICAL (x,y) DEDUP IS MANDATORY: 45.1% of selected records are duplicate canonical pairs
+  (multistep 63.6%, synthetic 10.7%, the two valuable real lanes 0.0%), and ONE (x,y) appears 129
+  times. Uncollapsed, that successor carries 129x its true mass from compiler serialisation alone --
+  a serialisation artefact learned as chemistry. Duplicate serialisation is NOT repeated independent
+  observation; keep provenance as metadata only.
+  NET: 186,571 raw -> **102,430 deduped rows**, versus 109,055 for the one-task-per-source variant --
+  same size, but 67.7% multi-successor instead of 57.2%. Duplicate serialisations traded for genuine
+  conditional-distribution supervision at no cost in corpus size.
+  (3) SPLIT BY SOURCE, NEVER BY ROW. Because 67.7% of selected sources carry several distinct
+  successors, splitting rows independently puts y1 in train and y2 in validation for the same x.
+  The manifest carries `split_constraint` requiring all records sharing a source_canonical_key to
+  land in one component -- the leakage route is created by the very structure that makes the corpus
+  useful.

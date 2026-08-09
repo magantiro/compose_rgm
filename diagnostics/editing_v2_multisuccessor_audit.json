@@ -1,0 +1,38 @@
+{
+  "lane": "real_endpoint_multistep_path",
+  "multi_successor_rate_ratio": 3.204035874439462,
+  "schema": "compose.editing_v2.multisuccessor_audit",
+  "schema_version": 1,
+  "sets": [
+    {
+      "fraction_multi_successor": 0.1784,
+      "label": "candidate pool (all task,source)",
+      "max_successors": 10,
+      "mean_successors": 1.199,
+      "median_successors": 1,
+      "sources": 1266659,
+      "successor_pairs": 1519219
+    },
+    {
+      "fraction_multi_successor": 0.5716,
+      "label": "SELECTED (task,source)",
+      "max_successors": 9,
+      "mean_successors": 1.659,
+      "median_successors": 2,
+      "sources": 23525,
+      "successor_pairs": 39036
+    },
+    {
+      "fraction_multi_successor": 0.677,
+      "label": "selected sources, all tasks",
+      "max_successors": 12,
+      "mean_successors": 2.006,
+      "median_successors": 2,
+      "sources": 23525,
+      "successor_pairs": 47181
+    }
+  ],
+  "status": "AUDIT_EVIDENCE_ONLY_NO_AUTHORITY",
+  "successor_pairs_retained_fraction": 0.025694781331723735,
+  "verdict": "PRESERVED"
+}
