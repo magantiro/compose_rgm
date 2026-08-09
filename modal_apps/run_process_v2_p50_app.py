@@ -1711,6 +1711,9 @@ def prep_subset(
     max_slices: int = 0,
     compile_workers: int = PREP_COMPILE_WORKERS,
     slice_list_path: str = "",
+    max_cost_usd: float = 0.0,
+    usd_per_core_hour: float = 0.0,
+    seconds_per_entry: float = 11.5,
 ) -> None:
     """Fan a pinned chunk list out as EQUAL slices, one worker per slice.
 
@@ -1731,6 +1734,56 @@ def prep_subset(
 
     revision = local_image_revision(expected_commit=expected_commit)
     plan = json.loads(Path(chunk_plan_path).read_text())
+
+    def _fit_budget(rows: list[tuple[Any, ...]]) -> list[tuple[Any, ...]]:
+        """Drop trailing slices until projected spend fits ``max_cost_usd``.
+
+        A cost ESTIMATE printed next to a fan-out is not a budget -- nothing
+        stops the fan-out. This truncates the work list before submission, so
+        the ceiling is enforced by not launching the work rather than by
+        watching it spend.
+
+        ``seconds_per_entry`` must be MEASURED for the corpus being compiled;
+        the default is the observed Modal single-vCPU rate for Process-V2
+        chunk compiles. ``usd_per_core_hour`` is a rate the caller supplies --
+        it is deliberately not hardcoded, because a stale price silently turns
+        a hard cap into a soft one.
+
+        What gets dropped is always printed. A truncated run that reports
+        nothing reads as a complete run.
+        """
+
+        if float(max_cost_usd) <= 0:
+            return rows
+        per_entry = float(seconds_per_entry) / 3600.0 * float(usd_per_core_hour)
+        kept: list[tuple[Any, ...]] = []
+        spend = 0.0
+        for row in rows:
+            cost = int(row[5]) * per_entry
+            if spend + cost > float(max_cost_usd):
+                break
+            kept.append(row)
+            spend += cost
+        print(
+            json.dumps(
+                {
+                    "phase": "process_v2_prep_subset_budget",
+                    "max_cost_usd": round(float(max_cost_usd), 2),
+                    "usd_per_core_hour": float(usd_per_core_hour),
+                    "seconds_per_entry": float(seconds_per_entry),
+                    "slices_requested": len(rows),
+                    "slices_kept": len(kept),
+                    "slices_dropped": len(rows) - len(kept),
+                    "entries_kept": sum(int(r[5]) for r in kept),
+                    "entries_dropped": sum(int(r[5]) for r in rows[len(kept):]),
+                    "projected_cost_usd": round(spend, 2),
+                },
+                indent=2,
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+        return kept
 
     # An EXPLICIT slice list, when supplied, replaces the derived plan entirely.
     # Two machines can then split one corpus with a guarantee of no overlap:
@@ -1769,7 +1822,7 @@ def prep_subset(
             ),
             flush=True,
         )
-        _run_prep_work(work, output_root=output_root)
+        _run_prep_work(_fit_budget(work), output_root=output_root)
         return
 
     per_chunk: list[list[tuple[Any, ...]]] = []
@@ -1820,7 +1873,7 @@ def prep_subset(
         ),
         flush=True,
     )
-    _run_prep_work(work, output_root=output_root)
+    _run_prep_work(_fit_budget(work), output_root=output_root)
 
 
 @app.local_entrypoint()
