@@ -1280,3 +1280,12 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   CONSEQUENCE: kernel performance work is a deliberate PROCESS REVISION -- re-seal the chain,
   re-run Gate 0, recompile every row -- never an incidental speedup mid-corpus. Patch and its 13
   equivalence tests are preserved for that revision. Do not benchmark-and-commit chemistry.
+  MEASURED PAYOFF, so the revision can be costed rather than guessed: unit costs are SMILES
+  240us, re-parse 91us, content-key 13.4us. Chemistry is 23.3s of a 39.4s five-entry compile
+  (59%); the memo takes it to 3.2s (**7.3x on chemistry**) including a 1.08s key-hashing tax,
+  giving **2.05x END-TO-END**, 7.88 -> 3.85 s/entry. A full 36,864-record compile goes 117.8
+  -> 57.6 Modal core-hours. Beware two traps that inflate this: replaying `is_rdkit_valid` and
+  `molecular_graph_to_smiles` as independent workloads double-counts (valid CALLS smiles) and
+  reports ~3.5x; and `is_rdkit_valid` cannot be intercepted by patching the module attribute,
+  because callers such as `chem/state.py` bind it directly at import -- the memo therefore has
+  to live INSIDE the function, which is also why it cannot dodge the identity hash.
