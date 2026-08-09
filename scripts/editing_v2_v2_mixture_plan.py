@@ -38,6 +38,7 @@ from pathlib import Path
 
 CAPS = (1, 2, 4, 8, 16)
 CYCLE_FAMILIES = {"cycle_insert", "cycle_attach", "ring_system_restate"}
+SOURCE_CELLS: dict = collections.defaultdict(set)
 
 
 def _scaffold_fn():
@@ -59,11 +60,19 @@ def _scaffold_fn():
 
 
 def collect(active8_root: Path, compiled: set[str]):
-    """Per-lane, uncompiled: rows and families per source, plus capability cells."""
+    """Per-lane rows/families per source and capability cells, both sides.
+
+    The compiled side matters: synthetic selection must be INCREMENTAL against
+    coverage the corpus already has.  A fresh per-family quota would re-buy
+    capability that is already present -- the compiled corpus already holds
+    ~9.8k cycle_insert and ~6.8k cycle_attach examples.
+    """
 
     per_lane_source_rows = collections.defaultdict(collections.Counter)
     per_lane_source_fams = collections.defaultdict(lambda: collections.defaultdict(collections.Counter))
     per_lane_cells = collections.defaultdict(collections.Counter)
+    compiled_fams: collections.Counter = collections.Counter()
+    compiled_cells: collections.Counter = collections.Counter()
     compiled_sources: set[str] = set()
 
     for task in sorted(os.listdir(active8_root / "tasks")):
@@ -81,12 +90,16 @@ def collect(active8_root: Path, compiled: set[str]):
             source = evidence["source_canonical_key"]
             if is_compiled:
                 compiled_sources.add(source)
+                compiled_fams[record["model_family"]] += 1
+                compiled_cells[record.get("capability_cell_id", "?")] += 1
                 continue
             family = record["model_family"]
             per_lane_source_rows[lane][source] += 1
             per_lane_source_fams[lane][source][family] += 1
             per_lane_cells[lane][record.get("capability_cell_id", "?")] += 1
-    return per_lane_source_rows, per_lane_source_fams, per_lane_cells, compiled_sources
+            SOURCE_CELLS[(lane, source)].add(record.get("capability_cell_id", "?"))
+    return (per_lane_source_rows, per_lane_source_fams, per_lane_cells,
+            compiled_sources, compiled_fams, compiled_cells)
 
 
 def retention_curve(source_rows, source_fams, scaffold_of, compiled_scaffolds):
@@ -132,59 +145,90 @@ def retention_curve(source_rows, source_fams, scaffold_of, compiled_scaffolds):
     return out, total_rows, len(all_new)
 
 
-def synthetic_coverage(source_rows, source_fams, cells, per_family_target):
-    """Smallest capability-driven synthetic sample: greedy on unmet family need."""
+def incremental_synthetic_sweep(source_rows, source_fams, source_cells,
+                                compiled_fams, compiled_cells, all_cells,
+                                real_rows_existing, real_rows_new, synthetic_rows_existing,
+                                targets):
+    """How much ADDITIONAL synthetic is needed to close capability gaps.
 
-    need = collections.Counter()
-    supply = collections.Counter()
-    for source, fam_counter in source_fams.items():
-        supply.update(fam_counter)
-    for family, available in supply.items():
-        need[family] = min(per_family_target, available)
+    Not a per-family quota: the compiled corpus already holds ~9.8k cycle_insert
+    and ~6.8k cycle_attach, so a fresh quota re-buys coverage that exists.
 
-    remaining = collections.Counter(need)
-    chosen: list[str] = []
-    got: collections.Counter = collections.Counter()
-    # Sources that serve the scarcest families first.
-    order = sorted(
-        source_fams,
-        key=lambda s: -sum(
-            v for f, v in source_fams[s].items()
-            if remaining[f] > 0 and f in CYCLE_FAMILIES
-        ) - 0.001 * sum(source_fams[s].values()),
-    )
-    for source in order:
-        if not any(remaining[f] > 0 for f in source_fams[source]):
-            continue
-        chosen.append(source)
-        for f, v in source_fams[source].items():
-            got[f] += v
-            remaining[f] = max(0, remaining[f] - v)
-        if all(v == 0 for v in remaining.values()):
-            break
-    return {
-        "per_family_target": per_family_target,
-        "sources_selected": len(chosen),
-        "rows_selected": int(sum(source_rows[s] for s in chosen)),
-        "family_coverage": dict(got.most_common()),
-        "families_short": {f: int(v) for f, v in remaining.items() if v > 0},
-        "capability_cells_available": len(cells),
-    }
+    CAPABILITY CELLS ARE NOT THE BINDING CRITERION.  Measured: the compiled
+    corpus already covers 19 of 21 cells and the uncompiled synthetic adds only
+    2 more, saturating below the smallest target swept.  What is actually scarce
+    is the RAREST FAMILY -- `ring_system_restate` sits at 623 compiled -- so the
+    target is a floor on the rarest family's combined old+new count, and sources
+    are ranked by how much they advance whichever family is currently furthest
+    below that floor.
+
+    An earlier version ranked by total cycle-family density while stopping on
+    `cycle_insert` alone, so cycle_attach-heavy sources sorted first without
+    advancing the stop condition and every row count was inflated.
+    """
+
+    covered0 = set(compiled_cells)
+    out = []
+    for target in targets:
+        covered = set(covered0)
+        got: collections.Counter = collections.Counter()
+        chosen: list[str] = []
+        families = set(compiled_fams) | {f for s in source_fams for f in source_fams[s]}
+
+        def deficit(counter):
+            return {f: max(0, target - (compiled_fams.get(f, 0) + counter.get(f, 0)))
+                    for f in families}
+
+        # Rank by unseen cells first, then by how much a source advances the
+        # families currently furthest below the floor -- aligned with the stop
+        # condition rather than a proxy for it.
+        short0 = {f for f, d in deficit(collections.Counter()).items() if d > 0}
+        order = sorted(
+            source_fams,
+            key=lambda s: (-len(source_cells.get(s, ()) - covered0),
+                           -sum(v for f, v in source_fams[s].items() if f in short0),
+                           sum(source_fams[s].values())),
+        )
+        for source in order:
+            if not any(d > 0 for d in deficit(got).values()):
+                break
+            chosen.append(source)
+            got.update(source_fams[source])
+            covered |= source_cells.get(source, set())
+        rows = int(sum(source_rows[s] for s in chosen))
+        total_real = real_rows_existing + real_rows_new
+        total_synth = synthetic_rows_existing + rows
+        combined = {f: int(compiled_fams.get(f, 0) + got.get(f, 0))
+                    for f in set(compiled_fams) | set(got)}
+        out.append({
+            "rarest_family_floor": target,
+            "sources_selected": len(chosen),
+            "rows_selected": rows,
+            "synthetic_share_including_existing": total_synth / max(total_real + total_synth, 1),
+            "capability_cells_covered": len(covered),
+            "capability_cells_total": len(all_cells),
+            "new_cells_vs_compiled": len(covered - covered0),
+            "cells_still_uncovered": len(all_cells - covered),
+            "family_totals_existing_plus_new": dict(sorted(combined.items(), key=lambda kv: -kv[1])),
+            "rarest_family_count": min(combined.values()) if combined else 0,
+        })
+    return out
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--active8-root", required=True)
     ap.add_argument("--prep-subset", default="configs/process_v2_prep_subset.json")
-    ap.add_argument("--synthetic-family-target", type=int, default=12000)
+    ap.add_argument("--multistep-cap", type=int, default=1)
+    ap.add_argument("--sweep", default="1000,2000,3000,5000,8000")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
     plan = json.loads(Path(args.prep_subset).read_text())
     compiled = {c["task_identity_sha256"] for c in plan["chunks"]}
-    rows_by_lane, fams_by_lane, cells_by_lane, compiled_sources = collect(
-        Path(args.active8_root), compiled
-    )
+    (rows_by_lane, fams_by_lane, cells_by_lane,
+     compiled_sources, compiled_fams, compiled_cells) = collect(Path(args.active8_root), compiled)
+
     scaffold = _scaffold_fn()
     cache: dict[str, str | None] = {}
 
@@ -194,38 +238,64 @@ def main() -> int:
         return cache[s]
 
     compiled_scaffolds = {s for s in (scaffold_of(k) for k in compiled_sources) if s}
-    print(f"compiled scaffolds {len(compiled_scaffolds):,}", flush=True)
-
     lane = "real_endpoint_multistep_path"
     curve, total_rows, total_new = retention_curve(
         rows_by_lane[lane], fams_by_lane[lane], scaffold_of, compiled_scaffolds
     )
-    print(f"\n{lane}: {total_rows:,} rows, {total_new:,} new scaffolds available")
-    print(f"{'cap':>4} {'rows':>10} {'row%':>6} {'scaffolds':>10} {'new':>8} {'new%':>6} {'ins/del':>8}")
+    print(f"{lane}: {total_rows:,} rows, {total_new:,} new scaffolds")
+    print(f"{'cap':>4} {'rows':>10} {'row%':>6} {'new scaffolds':>14} {'new%':>6}")
     for row in curve:
         print(f"{row['cap']:>4} {row['retained_rows']:>10,} "
-              f"{100 * row['retained_row_fraction']:>5.1f}% {row['retained_scaffolds']:>10,} "
-              f"{row['retained_new_scaffolds']:>8,} {100 * row['new_scaffold_fraction']:>5.1f}% "
-              f"{100 * row['insert_delete_share']:>7.1f}%")
+              f"{100 * row['retained_row_fraction']:>5.1f}% {row['retained_new_scaffolds']:>14,} "
+              f"{100 * row['new_scaffold_fraction']:>5.1f}%")
+
+    chosen_cap = next(r for r in curve if r["cap"] == args.multistep_cap)
+    real_new = (chosen_cap["retained_rows"]
+                + sum(rows_by_lane["operator_aware_real_endpoint"].values())
+                + sum(rows_by_lane["linker_positional_topology_analogue"].values()))
+    real_existing = sum(
+        sum(rows_by_lane[k].values()) for k in rows_by_lane if k != "reversible_synthetic_walk"
+    ) * 0  # compiled-side real rows come from the census, not the uncompiled tallies
+    census_path = Path("diagnostics/editing_v2_corpus_census.json")
+    real_existing = 0
+    synth_existing = 0
+    if census_path.exists():
+        cen = json.loads(census_path.read_text())
+        for e in cen["lanes"]:
+            if e["lane"] == "reversible_synthetic_walk":
+                synth_existing += e["compiled"]["rows"]
+            else:
+                real_existing += e["compiled"]["rows"]
 
     synth = "reversible_synthetic_walk"
-    cov = synthetic_coverage(rows_by_lane[synth], fams_by_lane[synth],
-                             cells_by_lane[synth], args.synthetic_family_target)
-    print(f"\n{synth}: capability-driven sample (target {cov['per_family_target']:,}/family)")
-    print(f"  sources {cov['sources_selected']:,}  rows {cov['rows_selected']:,} "
-          f"of {sum(rows_by_lane[synth].values()):,}")
-    print(f"  coverage {cov['family_coverage']}")
-    if cov["families_short"]:
-        print(f"  SHORT: {cov['families_short']}")
+    all_cells = set(compiled_cells) | set(cells_by_lane[synth])
+    src_cells = {s: SOURCE_CELLS[(synth, s)] for s in fams_by_lane[synth]}
+    targets = [int(x) for x in args.sweep.split(",")]
+    sweep = incremental_synthetic_sweep(
+        rows_by_lane[synth], fams_by_lane[synth], src_cells,
+        compiled_fams, compiled_cells, all_cells,
+        real_existing, real_new, synth_existing, targets,
+    )
+    print(f"\nINCREMENTAL synthetic sweep (real: {real_existing:,} existing + {real_new:,} new; "
+          f"synthetic already compiled: {synth_existing:,})")
+    print(f"{'floor':>9} {'sources':>8} {'rows':>9} {'synth%':>7} {'cells':>7} {'new cells':>10} "
+          f"{'uncov':>6} {'rarest fam':>11}")
+    for row in sweep:
+        print(f"{row['rarest_family_floor']:>9,} {row['sources_selected']:>8,} "
+              f"{row['rows_selected']:>9,} {100 * row['synthetic_share_including_existing']:>6.1f}% "
+              f"{row['capability_cells_covered']:>7} {row['new_cells_vs_compiled']:>10} "
+              f"{row['cells_still_uncovered']:>6} {row['rarest_family_count']:>11,}")
 
     report = {
         "schema": "compose.editing_v2.v2_mixture_plan",
-        "schema_version": 1,
+        "schema_version": 2,
         "status": "PLAN_EVIDENCE_ONLY_NO_AUTHORITY",
         "multistep_retention_curve": curve,
-        "multistep_total_rows": total_rows,
-        "multistep_total_new_scaffolds": total_new,
-        "synthetic_capability_sample": cov,
+        "multistep_cap_selected": args.multistep_cap,
+        "real_rows_existing": real_existing,
+        "real_rows_new": real_new,
+        "synthetic_rows_existing": synth_existing,
+        "incremental_synthetic_sweep": sweep,
         "take_whole": ["operator_aware_real_endpoint", "linker_positional_topology_analogue"],
         "skip": ["observed_local_analogue (uncompiled)"],
     }

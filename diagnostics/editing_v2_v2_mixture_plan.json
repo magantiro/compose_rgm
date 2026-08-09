@@ -1,4 +1,112 @@
 {
+  "incremental_synthetic_sweep": [
+    {
+      "capability_cells_covered": 21,
+      "capability_cells_total": 21,
+      "cells_still_uncovered": 0,
+      "family_totals_existing_plus_new": {
+        "atom_delete": 58764,
+        "atom_insert": 58548,
+        "atom_restate": 5617,
+        "bond_reorder": 1226,
+        "bond_reroute": 3825,
+        "cycle_attach": 6927,
+        "cycle_insert": 9827,
+        "ring_system_restate": 1002
+      },
+      "new_cells_vs_compiled": 2,
+      "rarest_family_count": 1002,
+      "rarest_family_floor": 1000,
+      "rows_selected": 556,
+      "sources_selected": 125,
+      "synthetic_share_including_existing": 0.06642777993639282
+    },
+    {
+      "capability_cells_covered": 21,
+      "capability_cells_total": 21,
+      "cells_still_uncovered": 0,
+      "family_totals_existing_plus_new": {
+        "atom_delete": 58803,
+        "atom_insert": 58563,
+        "atom_restate": 5664,
+        "bond_reorder": 2701,
+        "bond_reroute": 3853,
+        "cycle_attach": 7163,
+        "cycle_insert": 9827,
+        "ring_system_restate": 2000
+      },
+      "new_cells_vs_compiled": 2,
+      "rarest_family_count": 2000,
+      "rarest_family_floor": 2000,
+      "rows_selected": 3394,
+      "sources_selected": 1222,
+      "synthetic_share_including_existing": 0.07399160107684358
+    },
+    {
+      "capability_cells_covered": 21,
+      "capability_cells_total": 21,
+      "cells_still_uncovered": 0,
+      "family_totals_existing_plus_new": {
+        "atom_delete": 58803,
+        "atom_insert": 58563,
+        "atom_restate": 5664,
+        "bond_reorder": 4021,
+        "bond_reroute": 3853,
+        "cycle_attach": 7163,
+        "cycle_insert": 9827,
+        "ring_system_restate": 3000
+      },
+      "new_cells_vs_compiled": 2,
+      "rarest_family_count": 3000,
+      "rarest_family_floor": 3000,
+      "rows_selected": 5714,
+      "sources_selected": 2382,
+      "synthetic_share_including_existing": 0.08008440087010037
+    },
+    {
+      "capability_cells_covered": 21,
+      "capability_cells_total": 21,
+      "cells_still_uncovered": 0,
+      "family_totals_existing_plus_new": {
+        "atom_delete": 58839,
+        "atom_insert": 58581,
+        "atom_restate": 5706,
+        "bond_reorder": 7183,
+        "bond_reroute": 9499,
+        "cycle_attach": 7312,
+        "cycle_insert": 9827,
+        "ring_system_restate": 5000
+      },
+      "new_cells_vs_compiled": 2,
+      "rarest_family_count": 5000,
+      "rarest_family_floor": 5000,
+      "rows_selected": 16767,
+      "sources_selected": 7687,
+      "synthetic_share_including_existing": 0.10804441560155752
+    },
+    {
+      "capability_cells_covered": 21,
+      "capability_cells_total": 21,
+      "cells_still_uncovered": 0,
+      "family_totals_existing_plus_new": {
+        "atom_delete": 65465,
+        "atom_insert": 58735,
+        "atom_restate": 22383,
+        "bond_reorder": 10660,
+        "bond_reroute": 12612,
+        "cycle_attach": 84810,
+        "cycle_insert": 9843,
+        "ring_system_restate": 8000
+      },
+      "new_cells_vs_compiled": 2,
+      "rarest_family_count": 8000,
+      "rarest_family_floor": 8000,
+      "rows_selected": 127328,
+      "sources_selected": 36020,
+      "synthetic_share_including_existing": 0.3159987938011501
+    }
+  ],
+  "multistep_cap_selected": 1,
   "multistep_retention_curve": [
     {
       "cap": 1,
@@ -46,31 +154,15 @@
       "retained_scaffolds": 23525
     }
   ],
-  "multistep_total_new_scaffolds": 12520,
-  "multistep_total_rows": 1732637,
+  "real_rows_existing": 122656,
+  "real_rows_new": 201709,
   "schema": "compose.editing_v2.v2_mixture_plan",
-  "schema_version": 1,
+  "schema_version": 2,
   "skip": [
     "observed_local_analogue (uncompiled)"
   ],
   "status": "PLAN_EVIDENCE_ONLY_NO_AUTHORITY",
-  "synthetic_capability_sample": {
-    "capability_cells_available": 21,
-    "families_short": {},
-    "family_coverage": {
-      "atom_delete": 13953,
-      "atom_insert": 12000,
-      "atom_restate": 19152,
-      "bond_reorder": 12985,
-      "bond_reroute": 12862,
-      "cycle_attach": 51926,
-      "cycle_insert": 12000,
-      "ring_system_restate": 13152
-    },
-    "per_family_target": 12000,
-    "rows_selected": 148030,
-    "sources_selected": 56459
-  },
+  "synthetic_rows_existing": 22524,
   "take_whole": [
     "operator_aware_real_endpoint",
     "linker_positional_topology_analogue"

@@ -1196,3 +1196,30 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   regularizes". Lower per-family targets trade cycle coverage for synthetic share; a LINEAR
   EXTRAPOLATION (estimate, not measured) puts target 6,000 near 28% and target 3,000 near 19%.
   Measure rather than extrapolate before freezing the recipe.
+- **V2 RECIPE FROZEN.** Corrected incremental synthetic sweep (floor on every family's combined
+  old+new count, ranking aligned to the stop condition):
+      floor  sources    rows  synth%  cells uncov  rarest fam
+      1,000      125     556    6.6%     21     0       1,002
+      2,000    1,222   3,394    7.4%     21     0       2,000
+      3,000    2,382   5,714    8.0%     21     0       3,000
+      5,000    7,687  16,767   10.8%     21     0       5,000
+      8,000   36,020 127,328   31.6%     21     0       8,000
+  Sharp knee between 5,000 and 8,000 (7.6x the rows for a 1.6x higher floor, as the scarce families
+  exhaust dense sources). CHOSEN: floor 5,000.
+      real_endpoint_multistep_path   cap 1/scaffold   159,967
+      linker_positional_topology     whole             23,075
+      operator_aware_real_endpoint   whole             18,667
+      reversible_synthetic_walk      floor 5,000       16,767
+      observed_local_analogue        SKIP                   -
+      new 218,476 + existing 145,180 = 363,656 rows, 10.8% synthetic, all 21 cells,
+      ring_system_restate 623 -> 5,000.
+  THREE ERRORS CORRECTED ALONG THE WAY, all mine: (a) "~40% synthetic" used the wrong denominator,
+  omitting the 122,656 existing compiled real rows -- the true range was always 26-32% and is now
+  10.8%; (b) capability cells were never the binding criterion -- the compiled corpus already covers
+  19 of 21 and synthetic adds only 2, saturating below the smallest target swept, so the real
+  constraint is rare-FAMILY counts; (c) the greedy ranked sources by total cycle-family density
+  while stopping on `cycle_insert` alone, inflating row counts by up to 170x (556 vs 95,678 at floor
+  1,000). Rank by the same quantity the stop condition uses.
+- **Cache an expensive corpus scan before sweeping over it.** The mixture script re-scanned 2.31M
+  rows and recomputed ~476k Murcko scaffolds on every run -- ~13 of each 15 minutes was identical
+  work, three runs running. Only the sweep parameters changed.
