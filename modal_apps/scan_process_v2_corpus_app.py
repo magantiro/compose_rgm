@@ -107,6 +107,62 @@ def scan_corpus(corpus_root: str) -> dict:
     }
 
 
+@app.function(
+    image=image,
+    cpu=2.0,
+    memory=8 * 1024,
+    timeout=60 * 60,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def archive_corpus(corpus_root: str, archive_path: str) -> dict:
+    """Tar a corpus into ONE file on the volume so it can be pulled down.
+
+    ``modal volume get`` does not recurse a directory -- it writes nothing and
+    leaves empty directories behind -- so backing up ~1,450 slices would
+    otherwise mean ~4,350 CLI calls. One archive is one call.
+
+    The uncompressed tar is deliberate: ``BATCH.pt`` tensors dominate the bytes
+    and do not compress usefully, so gzip would cost minutes of CPU to save
+    little, and a corrupt gzip loses everything while a truncated tar loses only
+    its tail.
+    """
+
+    import hashlib
+    import tarfile
+
+    artifact_volume.reload()
+    root = Path(corpus_root)
+    target = Path(archive_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    files = 0
+    with tarfile.open(target, "w") as archive:
+        for path in sorted(root.rglob("*")):
+            if path.is_file():
+                archive.add(path, arcname=str(path.relative_to(root)))
+                files += 1
+    digest = hashlib.sha256()
+    with target.open("rb") as handle:
+        for block in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(block)
+    artifact_volume.commit()
+    return {
+        "archive_path": str(target),
+        "files": files,
+        "bytes": target.stat().st_size,
+        "sha256": digest.hexdigest(),
+    }
+
+
+@app.local_entrypoint()
+def archive(
+    corpus_root: str = "/artifacts/editing_v2/process_v2_v2_corpus",
+    archive_path: str = "/artifacts/editing_v2/backups/process_v2_v2_corpus.tar",
+) -> None:
+    result = archive_corpus.remote(corpus_root, archive_path)
+    print(json.dumps(result, indent=2, sort_keys=True))
+    print(f"\nnow: modal volume get compose-v4-artifacts {archive_path.lstrip('/')} <dest>")
+
+
 @app.local_entrypoint()
 def main(
     corpus_root: str = "/artifacts/editing_v2/process_v2_v2_corpus",
