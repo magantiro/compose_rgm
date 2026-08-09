@@ -1442,8 +1442,17 @@ def prep_slice_remote(
     limit: int,
     revision: dict[str, Any],
     compile_workers: int = 1,
+    source_subset: list[str] | None = None,
 ) -> dict[str, Any]:
-    """Compile ONE slice of one chunk and publish it. Trains nothing."""
+    """Compile ONE slice of one chunk and publish it. Trains nothing.
+
+    ``source_subset`` restricts the stream to named source molecules before
+    slicing, so offset/limit address the SELECTED stream. It exists because a
+    scattered selection makes whole-task compilation absurd: the
+    ring_system_restate top-up wants sources spread ~195-per-task across 27
+    tasks, and compiling those tasks whole would materialize 140,743 records to
+    reach them.
+    """
 
     # FIRST statement, so every term inside the worker wall is measured.  The
     # wall covers the shard reads and the scratch build as well as the compile,
@@ -1598,6 +1607,7 @@ def prep_slice_remote(
         task_identity_sha256=task_identity_sha256,
         offset=int(offset),
         limit=int(limit),
+        source_subset=list(source_subset) if source_subset else None,
         deadline_seconds=deadline,
         progress_callback=_progress,
     )
@@ -1842,6 +1852,7 @@ def prep_subset(
                 int(row["limit"]),
                 revision,
                 int(compile_workers),
+                list(row.get("sources") or []) or None,
             )
             for row in rows
         ]
@@ -1879,6 +1890,7 @@ def prep_subset(
                     min(int(slice_size), total - offset),
                     revision,
                     int(compile_workers),
+                    None,
                 )
                 for offset in range(0, total, int(slice_size))
             ]
