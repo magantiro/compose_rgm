@@ -1402,6 +1402,7 @@ def _compile_subrange_child(sub_offset: int, sub_limit: int) -> dict[str, Any]:
         task_identity_sha256=state["task_identity_sha256"],
         offset=int(sub_offset),
         limit=int(sub_limit),
+        source_subset=state.get("source_subset"),
         deadline_seconds=float(state["deadline_seconds"]),
         progress_callback=None,
     )
@@ -1560,6 +1561,13 @@ def prep_slice_remote(
             "task_identity_sha256": task_identity_sha256,
             "output_root": str(preflight_root),
             "deadline_seconds": deadline,
+            # The subset MUST ride into the forked children. The parent's
+            # single-shot compile call is a fallback that does not run when
+            # workers > 1, so passing the subset only there silently compiles
+            # the UNFILTERED stream -- which is exactly what happened: a
+            # ring_system_restate top-up returned the task's natural family mix
+            # (1 in 15) instead of the subset's (roughly 2 in 3).
+            "source_subset": list(source_subset) if source_subset else None,
         }
         span = int(limit) // workers
         ranges = [
