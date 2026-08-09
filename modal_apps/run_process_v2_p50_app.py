@@ -1632,19 +1632,56 @@ def prep_slice_remote(
     return payload
 
 
-def _run_prep_work(work: list[tuple[Any, ...]], *, output_root: str) -> None:
+def _run_prep_work(
+    work: list[tuple[Any, ...]], *, output_root: str, usd_per_entry: float = 0.0
+) -> None:
     """Fan a slice list out and report honestly.
 
     Shared by the derived-plan path and the explicit-slice-list path so the
     failure isolation, deadline top-up accounting and completeness flag cannot
     drift between them.
+
+    A ROLLING progress line is emitted per completed slice. The end-of-run
+    summary alone is not enough at this fan-out: 178 slices across 50
+    containers is a firehose of per-slice JSON with no way to answer "is this
+    going okay" until it is already over. Progress carries failures and spend
+    as they accumulate, so a run that is going wrong can be killed early
+    instead of discovered late.
     """
 
+    total = len(work)
+    planned_entries = sum(int(row[5]) for row in work)
+    began = time.monotonic()
     published = 0
     entries = 0
     failures: list[dict[str, Any]] = []
     unfinished: list[dict[str, Any]] = []
     slowest = 0.0
+    def _emit_progress(completed: int) -> None:
+        elapsed = time.monotonic() - began
+        rate = entries / max(elapsed, 1e-9)
+        print(
+            json.dumps(
+                {
+                    "phase": "process_v2_prep_subset_progress",
+                    "slices_completed": completed,
+                    "slices_total": total,
+                    "entries_published": entries,
+                    "entries_planned": planned_entries,
+                    "failures": len(failures),
+                    "unfinished_ranges": len(unfinished),
+                    "elapsed_seconds": round(elapsed, 1),
+                    "entries_per_hour": round(rate * 3600),
+                    "eta_hours": round(
+                        max(planned_entries - entries, 0) / max(rate, 1e-9) / 3600, 2
+                    ),
+                    "spend_usd_so_far": round(entries * float(usd_per_entry), 2),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+
     # `return_exceptions` so ONE bad slice costs one slice, not the run.  The
     # default raises on the first failure and abandons every slice still in
     # flight, even though each worker commits its own output on success -- so a
@@ -1663,6 +1700,7 @@ def _run_prep_work(work: list[tuple[Any, ...]], *, output_root: str) -> None:
                     "error": f"{type(result).__name__}: {result}"[:200],
                 }
             )
+            _emit_progress(index + 1)
             continue
         published += 1
         entries += int(result["entry_count"])
@@ -1679,6 +1717,7 @@ def _run_prep_work(work: list[tuple[Any, ...]], *, output_root: str) -> None:
                     "reason": "stopped_on_deadline",
                 }
             )
+        _emit_progress(index + 1)
     summary = {
         "phase": "process_v2_prep_subset_complete",
         "slices_planned": len(work),
@@ -1822,7 +1861,8 @@ def prep_subset(
             ),
             flush=True,
         )
-        _run_prep_work(_fit_budget(work), output_root=output_root)
+        _run_prep_work(_fit_budget(work), output_root=output_root,
+                       usd_per_entry=float(seconds_per_entry)/3600.0*float(usd_per_core_hour))
         return
 
     per_chunk: list[list[tuple[Any, ...]]] = []
@@ -1873,7 +1913,8 @@ def prep_subset(
         ),
         flush=True,
     )
-    _run_prep_work(_fit_budget(work), output_root=output_root)
+    _run_prep_work(_fit_budget(work), output_root=output_root,
+                   usd_per_entry=float(seconds_per_entry)/3600.0*float(usd_per_core_hour))
 
 
 @app.local_entrypoint()
