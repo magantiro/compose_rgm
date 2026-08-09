@@ -61,11 +61,23 @@ def _covered_from_listing(path: Path) -> dict[str, set[int]]:
     covered: dict[str, set[int]] = {}
     if not path or not Path(path).exists():
         return covered
+    seen_receipt_lines = 0
     for line in Path(path).read_text().splitlines():
         line = line.strip()
-        if "RECEIPT.json" not in line or "/chunks/" not in line:
+        if "RECEIPT.json" not in line:
             continue
-        parts = line.split("/chunks/", 1)[1].split("/")
+        seen_receipt_lines += 1
+        # The listing may be rooted ("editing_v2/.../chunks/<task>/...") or
+        # relative ("chunks/<task>/..."), so anchor on the segment itself
+        # rather than on "/chunks/" -- requiring the leading slash silently
+        # matched NOTHING against a relative listing, and a zero here is
+        # indistinguishable from "the volume is empty". That mistake costs a
+        # full recompile of work already paid for.
+        marker = "chunks/"
+        index = line.find(marker)
+        if index < 0:
+            continue
+        parts = line[index + len(marker):].split("/")
         if len(parts) < 3:
             continue
         task, slice_id = parts[0], parts[1]
@@ -74,6 +86,12 @@ def _covered_from_listing(path: Path) -> dict[str, set[int]]:
             continue
         offset, count = int(offset_text), int(count_text)
         covered.setdefault(task, set()).update(range(offset, offset + count))
+    if seen_receipt_lines and not covered:
+        raise SystemExit(
+            f"REFUSING TO PLAN: {path} names {seen_receipt_lines} receipts but none "
+            "parsed into a task/offset-count. Planning would re-request work that is "
+            "already published. Check the listing format."
+        )
     return covered
 
 
