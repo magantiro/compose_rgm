@@ -62,6 +62,26 @@ exactly when a guard is weakest.
 Exploratory training runs, one-off diagnostics and dead ends belong in scratchpad and should stay
 there — several of them encode assumptions since disproved.
 
+## Fail closed on catalog drift
+
+Any **claim-bearing** evaluation or **corpus compilation** must abort if the reconstructed
+RingCore catalog fingerprint differs from the frozen production value `639ff6078c32d43c`.
+`neutralize_catalog_drift()` — which catches the drift error and overwrites the EXPECTED
+fingerprint with whatever the local environment produced — is a scratch/dev probe helper only.
+It must never appear in code that compiles corpus data or produces a number the paper cites.
+
+The production environment is pinned by the Modal image: **python 3.11, torch 2.4.0,
+numpy 1.26.4, scipy 1.13.1, networkx 3.3, rdkit 2024.3.5**. Reproduce it locally rather than
+suppressing the check; a matching venv reconstructs the fingerprint on its own.
+
+This is not hypothetical. A local venv on rdkit 2026.03.4 drifted to `82fd910c`, and a 50-state
+parity gate against the pinned versions found 2 states whose canonical successor inventory
+differed — an aromaticity-perception change, same molecule, different canonical key. Structure
+was identical (same mark counts, families, alias multiplicities), so nothing crashed. Compiling
+under the wrong environment would have produced a split-brain corpus where half the canonical
+keys came from a different chemistry kernel, and the fingerprint check is the only thing that
+catches it.
+
 ## Reasoning discipline
 
 Separate what is **measured**, what is **inferred**, and what is **assumed**, and say which.
