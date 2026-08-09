@@ -1,6 +1,6 @@
 {
   "accepted_rows_scanned": 2311080,
-  "compiled_scaffolds_sampled": 18788,
+  "compiled_scaffolds": 21872,
   "lanes": [
     {
       "compiled": {
@@ -128,7 +128,56 @@
       }
     }
   ],
-  "new_scaffolds_from_uncompiled": 23930,
+  "new_scaffolds_from_uncompiled": 99380,
+  "scaffold_cap": 0,
+  "scaffold_count_is_exact": true,
+  "scaffolds_by_lane": {
+    "linker_positional_topology_analogue": {
+      "new_vs_compiled": 3121,
+      "sources_per_scaffold_max": 801,
+      "sources_per_scaffold_median": 2,
+      "sources_per_scaffold_p90": 4,
+      "sources_retained_at_cap_1": 7573,
+      "sources_retained_at_cap_4": 17260,
+      "unique_scaffolds": 7573
+    },
+    "observed_local_analogue": {
+      "new_vs_compiled": 19,
+      "sources_per_scaffold_max": 952,
+      "sources_per_scaffold_median": 17,
+      "sources_per_scaffold_p90": 90,
+      "sources_retained_at_cap_1": 55,
+      "sources_retained_at_cap_4": 214,
+      "unique_scaffolds": 55
+    },
+    "operator_aware_real_endpoint": {
+      "new_vs_compiled": 2092,
+      "sources_per_scaffold_max": 670,
+      "sources_per_scaffold_median": 2,
+      "sources_per_scaffold_p90": 4,
+      "sources_retained_at_cap_1": 6600,
+      "sources_retained_at_cap_4": 13995,
+      "unique_scaffolds": 6600
+    },
+    "real_endpoint_multistep_path": {
+      "new_vs_compiled": 12519,
+      "sources_per_scaffold_max": 31569,
+      "sources_per_scaffold_median": 7,
+      "sources_per_scaffold_p90": 23,
+      "sources_retained_at_cap_1": 23524,
+      "sources_retained_at_cap_4": 91545,
+      "unique_scaffolds": 23524
+    },
+    "reversible_synthetic_walk": {
+      "new_vs_compiled": 88030,
+      "sources_per_scaffold_max": 18527,
+      "sources_per_scaffold_median": 1,
+      "sources_per_scaffold_p90": 3,
+      "sources_retained_at_cap_1": 94852,
+      "sources_retained_at_cap_4": 153115,
+      "unique_scaffolds": 94852
+    }
+  },
   "schema": "compose.editing_v2.corpus_census",
   "schema_version": 1,
   "status": "CENSUS_EVIDENCE_ONLY_NO_AUTHORITY",

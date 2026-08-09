@@ -1157,3 +1157,23 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   for cycle coverage. New Bemis-Murcko scaffolds 23,930 vs 18,788 compiled-sampled (~2x diversity),
   far less than the ~10x row count implies -- many new sources are analogues of molecules already
   present.
+- **UNCAPPED scaffold census: 99,380 new scaffolds, not 23,930.** The capped figure was a 4x
+  understatement quoted as if measured; the report now carries `scaffold_count_is_exact` and prints
+  [EXACT] vs [FLOOR] so it cannot recur. Compiled corpus holds 21,872 scaffolds. Per-lane
+  concentration (uncompiled sources; med/p90/max = sources per scaffold):
+      reversible_synthetic_walk             94,852 scaffolds  88,030 new   med 1  p90 3   max 18,527
+      real_endpoint_multistep_path          23,524            12,519 new   med 7  p90 23  max 31,569
+      linker_positional_topology_analogue    7,573             3,121 new   med 2  p90 4   max 801
+      operator_aware_real_endpoint           6,600             2,092 new   med 2  p90 4   max 670
+      observed_local_analogue                   55                19 new   med 17 p90 90  max 952
+  SUBSAMPLING RULE this implies: take `operator_aware_real_endpoint` and
+  `linker_positional_topology_analogue` WHOLE (already diverse, med 2 / p90 4, nothing wasted);
+  cap `real_endpoint_multistep_path` at 4 sources per scaffold, retaining 91,545 of 375,894 sources
+  (24%) while keeping essentially all 12,519 new scaffolds -- it is row-heavy and diversity-light,
+  with a single scaffold carrying 31,569 sources; SKIP uncompiled `observed_local_analogue`
+  (4,918 rows for 19 new scaffolds).
+- **89% of the scaffold-diversity gain is SYNTHETIC.** The reversible walk supplies 88,030 of the
+  99,380 new scaffolds at median 1 source per scaffold; all real lanes together contribute ~17,750.
+  So real-source scaffold diversity goes 21,872 -> ~39,600 (about 1.8x) while the headline including
+  synthetic is ~5.5x. Do not let the aggregate imply real-chemistry breadth the corpus does not
+  have -- state the real-only figure alongside it.
