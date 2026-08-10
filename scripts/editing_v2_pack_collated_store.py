@@ -64,6 +64,21 @@ STRUCTURAL_INT_RANGES: dict[str, tuple[int, int]] = {
 }
 
 
+def _single_row_template(batch):
+    """Keep row 0 of every per-row field; constants ride along unchanged."""
+
+    import dataclasses
+
+    values = {}
+    for field in dataclasses.fields(batch):
+        value = getattr(batch, field.name)
+        if torch.is_tensor(value):
+            values[field.name] = value[:1].clone()
+        elif isinstance(value, tuple) and len(value) == int(batch.batch_size):
+            values[field.name] = value[:1]
+    return dataclasses.replace(batch, **values)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", action="append", required=True,
@@ -118,6 +133,12 @@ def main() -> int:
                 layout = plan_layout(batch, int_ranges=STRUCTURAL_INT_RANGES)
                 print(f"record bytes    {layout.record_bytes:,} "
                       f"({layout.record_bytes / 1024:.2f} kB/example)")
+                # One row is enough: the template supplies only the constant
+                # configuration fields (semantics strings, disabled-capability
+                # Nones, scorer mode). Every per-row field is replaced on read,
+                # so the template's row count is irrelevant -- but shipping it
+                # with the store means a consumer needs no compiled slice.
+                torch.save(_single_row_template(batch), out / "TEMPLATE.pt")
 
             # Reject the whole slice if it does not round-trip. Doing this per
             # slice rather than once keeps a bad field from being discovered
