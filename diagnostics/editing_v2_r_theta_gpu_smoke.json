@@ -1,0 +1,72 @@
+{
+  "batch_size": 32,
+  "binding": {
+    "eval_panel_entries": 14131,
+    "eval_panel_sha256": "b9caa79e99b93a64544c85e6c151404ce3f013f1df297f94f5f505580304ccfa",
+    "initial_model_state_sha256": "3e6bd109a80a5850e9dc3cb16d0dfe5ab9c7c3e83904f3d1f6afe9fa32800fe9",
+    "initialization_seed": 20260730,
+    "library_sha256": "2d553afa5560319455855bf75306b6e9d5169180562be7b139cf14336f7ecb26",
+    "manifest_sha256": "3325d442f51a993bc16c6e99870d72942d1721ac881a6aef44d21cc84cf176ca",
+    "packed_store_records_sha256": "b232a6fa069fef8cdd491e5d9b94fc2d445fce357c753c77128216cf60cc2df0",
+    "packed_store_rows": 151059,
+    "sampling_law_sha256": "59bee2b8ffb0252fc3be79a2adf625be3b800b5e361566f6cbb0c6f5bf994ac0",
+    "split_sha256": "747d17b5935a7808a35919a5a17fb2bbf76ca2974d6169518c8a21bcf673df25"
+  },
+  "examples": 6400,
+  "gpu": "A10G",
+  "gpu_data_wait_fraction": 0.0093,
+  "invariants": {
+    "frozen_hazard_bitwise_unchanged": true,
+    "frozen_hazard_parameters_checked": [
+      "total_hazard_head.0.bias",
+      "total_hazard_head.0.weight",
+      "total_hazard_head.2.bias",
+      "total_hazard_head.2.weight"
+    ],
+    "frozen_hazard_received_no_gradient": true,
+    "gradients_finite_every_step": true,
+    "loss_finite_every_step": true,
+    "stream_ids_checked": 116375,
+    "stream_ids_unresolved": 0
+  },
+  "loss": {
+    "first": 5.54309,
+    "last": 3.859,
+    "mean_last_10": 3.83185
+  },
+  "milliseconds_per_step": {
+    "backward": 503.6,
+    "data_fetch_collate": 4.84,
+    "forward_and_loss": 114.93,
+    "host_to_device": 1.05,
+    "optimizer": 8.7,
+    "total_step": 634.31
+  },
+  "peak_vram_bytes": 1422351360,
+  "peak_vram_gb": 1.325,
+  "projection": {
+    "assumed_usd_per_hour": 1.1,
+    "epoch_examples": 144870,
+    "epoch_hours": 0.798,
+    "epoch_seconds": 2871.7,
+    "epoch_usd": 0.88
+  },
+  "schema": "compose.editing_v2.r_theta_gpu_smoke",
+  "schema_version": 1,
+  "setup": {
+    "library_entries": 151059,
+    "library_seconds": 20.14,
+    "model_seconds": 166.39
+  },
+  "status": "GPU_SMOKE_EVIDENCE_ONLY_NO_AUTHORITY",
+  "steps": 200,
+  "throughput_examples_per_second": 50.45,
+  "timing_share": {
+    "backward": 0.7939,
+    "data_fetch_collate": 0.0076,
+    "forward_and_loss": 0.1812,
+    "host_to_device": 0.0017,
+    "optimizer": 0.0137
+  },
+  "warmup_steps": 5
+}
