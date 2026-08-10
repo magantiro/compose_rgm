@@ -58,6 +58,7 @@ a training run that looks healthy and optimizes the wrong thing.
 
 from __future__ import annotations
 
+import gzip
 import json
 from dataclasses import dataclass
 from pathlib import Path
@@ -243,8 +244,62 @@ class CorpusTrainingLibrary:
         )
 
 
+#: One gzipped JSON-lines file holding every entry the loader needs, so a
+#: consumer reads ONE object instead of one per compiled slice.
+CONSOLIDATED_FILENAME = "LIBRARY.jsonl.gz"
+
+#: The only entry fields the training path reads. Consolidating just these
+#: keeps the file small and makes it obvious what a consumer depends on.
+CONSOLIDATED_FIELDS = (
+    "p50_entry_sha256",
+    "p50_compiled_entry_sha256",
+    "teacher_successor_fiber",
+    "source_state_sha256",
+    "target_state_sha256",
+    "production_successor_alias_multiplicity",
+    "exact_state",
+    "support_time_hex",
+    "model_family",
+    "capability_cell_id",
+)
+
+
 def _slice_entry_files(root: Path) -> list[Path]:
     return sorted(root.rglob(ENTRIES_FILENAME))
+
+
+def _entry_stream(roots: Sequence[Path]) -> Iterable[tuple[str, Mapping[str, Any]]]:
+    """Yield ``(origin, entry)`` from per-slice files or a consolidated file.
+
+    A consolidated file is preferred when present. Reading 4,764 small objects
+    costs little on a local SSD and a great deal on a network volume, where
+    per-object latency dominates -- so the same loader has to work either way.
+    """
+
+    for root in roots:
+        consolidated = root / CONSOLIDATED_FILENAME
+        if consolidated.exists():
+            with gzip.open(consolidated, "rt") as handle:
+                for line in handle:
+                    if line.strip():
+                        yield str(consolidated), json.loads(line)
+            continue
+        if not root.is_dir():
+            raise CorpusTrainingLibraryError(f"corpus chunk root is not a directory: {root}")
+        for entries_file in _slice_entry_files(root):
+            try:
+                document = json.loads(entries_file.read_text())
+            except (OSError, json.JSONDecodeError) as error:
+                raise CorpusTrainingLibraryError(
+                    f"compiled slice is unreadable: {entries_file}"
+                ) from error
+            raw_entries = document.get("entries")
+            if not isinstance(raw_entries, list):
+                raise CorpusTrainingLibraryError(
+                    f"compiled slice has no entry list: {entries_file}"
+                )
+            for entry in raw_entries:
+                yield str(entries_file), entry
 
 
 def load_corpus_training_library(
@@ -275,84 +330,71 @@ def load_corpus_training_library(
     slice_count = 0
     excluded_count = 0
 
-    for root in resolved:
-        if not root.is_dir():
-            raise CorpusTrainingLibraryError(f"corpus chunk root is not a directory: {root}")
-        for entries_file in _slice_entry_files(root):
-            slice_count += 1
-            try:
-                document = json.loads(entries_file.read_text())
-            except (OSError, json.JSONDecodeError) as error:
+    origins: set[str] = set()
+    for origin, raw in _entry_stream(resolved):
+        origins.add(origin)
+        entry_id = str(raw["p50_entry_sha256"])
+        compiled_entry_id = str(raw["p50_compiled_entry_sha256"])
+        fiber_payload = raw.get("teacher_successor_fiber")
+        if fiber_payload is None:
+            # A terminal row carries no molecular jump to supervise.
+            raise CorpusTrainingLibraryError(
+                f"compiled entry {entry_id} has no teacher successor fiber"
+            )
+
+        # A duplicate id is only safe when the two records agree. The
+        # library HAS 4 of these across two roots; a conflicting pair
+        # would otherwise resolve by read order.
+        canonical = json.dumps(raw, sort_keys=True, separators=(",", ":"))
+        if entry_id in payload_by_id:
+            if payload_by_id[entry_id] != canonical:
                 raise CorpusTrainingLibraryError(
-                    f"compiled slice is unreadable: {entries_file}"
-                ) from error
-            raw_entries = document.get("entries")
-            if not isinstance(raw_entries, list):
-                raise CorpusTrainingLibraryError(
-                    f"compiled slice has no entry list: {entries_file}"
+                    f"compiled entry {entry_id} appears twice with different content"
                 )
-            for raw in raw_entries:
-                entry_id = str(raw["p50_entry_sha256"])
-                compiled_entry_id = str(raw["p50_compiled_entry_sha256"])
-                fiber_payload = raw.get("teacher_successor_fiber")
-                if fiber_payload is None:
-                    # A terminal row carries no molecular jump to supervise.
-                    raise CorpusTrainingLibraryError(
-                        f"compiled entry {entry_id} has no teacher successor fiber"
-                    )
+            continue
+        payload_by_id[entry_id] = canonical
 
-                # A duplicate id is only safe when the two records agree. The
-                # library HAS 4 of these across two roots; a conflicting pair
-                # would otherwise resolve by read order.
-                canonical = json.dumps(raw, sort_keys=True, separators=(",", ":"))
-                if entry_id in payload_by_id:
-                    if payload_by_id[entry_id] != canonical:
-                        raise CorpusTrainingLibraryError(
-                            f"compiled entry {entry_id} appears twice with different content"
-                        )
-                    continue
-                payload_by_id[entry_id] = canonical
+        fiber = teacher_fiber_from_library_payload(fiber_payload)
+        if fiber.state_support.source_state_sha256 != _require_sha256(
+            raw["source_state_sha256"], field="entry source state"
+        ):
+            raise CorpusTrainingLibraryError(
+                f"compiled entry {entry_id} disagrees with its fiber on the source state"
+            )
+        if fiber.target_state_sha256 != _require_sha256(
+            raw["target_state_sha256"], field="entry target state"
+        ):
+            raise CorpusTrainingLibraryError(
+                f"compiled entry {entry_id} disagrees with its fiber on the target state"
+            )
+        multiplicity = int(raw["production_successor_alias_multiplicity"])
+        if len(fiber.aliases) != multiplicity:
+            raise CorpusTrainingLibraryError(
+                f"compiled entry {entry_id} records {multiplicity} teacher aliases "
+                f"but its fiber holds {len(fiber.aliases)}"
+            )
 
-                fiber = teacher_fiber_from_library_payload(fiber_payload)
-                if fiber.state_support.source_state_sha256 != _require_sha256(
-                    raw["source_state_sha256"], field="entry source state"
-                ):
-                    raise CorpusTrainingLibraryError(
-                        f"compiled entry {entry_id} disagrees with its fiber on the source state"
-                    )
-                if fiber.target_state_sha256 != _require_sha256(
-                    raw["target_state_sha256"], field="entry target state"
-                ):
-                    raise CorpusTrainingLibraryError(
-                        f"compiled entry {entry_id} disagrees with its fiber on the target state"
-                    )
-                multiplicity = int(raw["production_successor_alias_multiplicity"])
-                if len(fiber.aliases) != multiplicity:
-                    raise CorpusTrainingLibraryError(
-                        f"compiled entry {entry_id} records {multiplicity} teacher aliases "
-                        f"but its fiber holds {len(fiber.aliases)}"
-                    )
+        if fiber.source_key in excluded:
+            excluded_count += 1
+            continue
 
-                if fiber.source_key in excluded:
-                    excluded_count += 1
-                    continue
+        state_payload = raw["exact_state"]
+        if verify_state_roundtrip and encode_state(decode_state(state_payload)) != state_payload:
+            raise CorpusTrainingLibraryError(
+                f"compiled entry {entry_id} state does not survive a decode round trip"
+            )
 
-                state_payload = raw["exact_state"]
-                if verify_state_roundtrip and encode_state(decode_state(state_payload)) != state_payload:
-                    raise CorpusTrainingLibraryError(
-                        f"compiled entry {entry_id} state does not survive a decode round trip"
-                    )
+        by_id[entry_id] = CorpusEntry(
+            entry_id=entry_id,
+            compiled_entry_id=compiled_entry_id,
+            state_json=json.dumps(state_payload, separators=(",", ":")).encode(),
+            teacher_fiber=fiber,
+            support_time_hex=str(raw["support_time_hex"]),
+            model_family=str(raw["model_family"]),
+            capability_cell_id=str(raw["capability_cell_id"]),
+        )
 
-                by_id[entry_id] = CorpusEntry(
-                    entry_id=entry_id,
-                    compiled_entry_id=compiled_entry_id,
-                    state_json=json.dumps(state_payload, separators=(",", ":")).encode(),
-                    teacher_fiber=fiber,
-                    support_time_hex=str(raw["support_time_hex"]),
-                    model_family=str(raw["model_family"]),
-                    capability_cell_id=str(raw["capability_cell_id"]),
-                )
-
+    slice_count = len(origins)
     if not slice_count:
         raise CorpusTrainingLibraryError(
             "no compiled slice was found under any corpus root; refusing to "
