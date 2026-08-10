@@ -1,0 +1,269 @@
+"""Profile the corpus R_theta training step on a GPU before committing to a run.
+
+This exists because the local CPU smoke cannot answer the question that decides
+the full run. MEASURED locally: ~14 s per 32-example step, single-core bound,
+~2.3 examples/s, which projects to roughly 17 hours for one 144,870-example
+epoch. That proves the loop is correct and proves nothing about the accelerator,
+because forward/backward shrinks by a large factor on a GPU while the loader
+does not. A data wait that is invisible at 14 s/step can dominate at 0.1 s/step.
+
+So this measures the RATIO, not just the speed:
+
+    data       library.inputs_for + collation      (CPU, does not shrink)
+    host->dev  batch.to(device)                    (grows in relative terms)
+    compute    forward + loss + backward + step    (shrinks on GPU)
+
+and reports peak VRAM plus a projected epoch time and cost, so the full run is
+authorized against a measurement rather than an expectation.
+
+It writes no checkpoint and commits nothing to the volume. It is a measurement.
+"""
+
+from __future__ import annotations
+
+import json
+import time
+from pathlib import Path
+from typing import Any
+
+import modal
+
+from modal_apps.run_process_v2_p50_app import (  # reuse the exact environment
+    ARTIFACT_ROOT,
+    artifact_volume,
+    image,
+)
+
+app = modal.App("compose-v4-r-theta-gpu-smoke")
+
+#: Twenty minutes is generous for a few hundred steps and bounds the spend.
+SMOKE_TIMEOUT_SECONDS = 20 * 60
+#: Published Modal A10G rate, for the projection only. The receipt records it
+#: so a stale constant is visible rather than silently wrong.
+A10G_USD_PER_HOUR = 1.10
+
+
+@app.function(
+    image=image,
+    gpu="A10G",
+    cpu=8.0,
+    memory=64 * 1024,
+    timeout=SMOKE_TIMEOUT_SECONDS,
+    max_containers=1,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def profile_r_theta_step(
+    *,
+    run_root: str,
+    corpus_roots: list[str],
+    steps: int = 200,
+    batch_size: int = 32,
+    learning_rate: float = 1e-4,
+) -> dict[str, Any]:
+    import torch
+
+    from compose_v4.data.corpus_training_library import load_corpus_training_library
+    from compose_v4.experiments.editing_v2_process_v2_t1_panel import (
+        open_process_v2_t1_source,
+    )
+    from compose_v4.experiments.editing_v2_process_v2_t1_runtime import (
+        build_process_v2_score_revised_scratch_runtime,
+        load_materialized_scorer_state,
+    )
+    from compose_v4.experiments.editing_v2_semantic_t1_capacity_runner import (
+        TOTAL_HAZARD_PREFIX,
+        _attach_successor_family_coordinates,
+    )
+    from compose_v4.experiments.factorized_mark_conditional import (
+        FactorizedMarkCollator,
+        FactorizedMarkExample,
+    )
+    from compose_v4.experiments.factorized_successor_training import (
+        factorized_successor_identity_loss,
+        forward_teacher_successor_batch,
+    )
+
+    artifact_volume.reload()
+    root = Path(run_root)
+    inputs = root / "run_inputs"
+    repo_root = Path("/root")
+
+    if not torch.cuda.is_available():
+        raise RuntimeError("the GPU smoke was scheduled without a visible device")
+    device = torch.device("cuda")
+
+    started = time.perf_counter()
+    source = open_process_v2_t1_source(
+        Path(json.loads((inputs / "RUN_PATHS.json").read_text())["active8_root"]),
+        gate_zero_decision_path=Path(
+            json.loads((inputs / "RUN_PATHS.json").read_text())["gate_zero"]
+        ),
+        artifact_root=Path(
+            json.loads((inputs / "RUN_PATHS.json").read_text())["artifact_root"]
+        ),
+        repo_root=repo_root,
+    )
+    state = load_materialized_scorer_state(root / "materialized_scorer")
+    runtime, binding, _containment = build_process_v2_score_revised_scratch_runtime(
+        source, materialized_state=state
+    )
+    model = runtime.model.to(device)
+    model_seconds = time.perf_counter() - started
+
+    freeze = json.loads((inputs / "editing_v2_v2_dataset_freeze.json").read_text())
+    manifest = json.loads(
+        (inputs / "editing_v2_prepared_training_manifest.json").read_text()
+    )
+    if manifest["sampling_law_sha256"] != freeze["sampling_law_sha256"]:
+        raise RuntimeError("manifest does not bind the frozen sampling law")
+    index = json.loads(
+        (inputs / "editing_v2_prepared_training_index.json").read_text()
+    )
+    if index["manifest_sha256"] != manifest["manifest_sha256"]:
+        raise RuntimeError("stream index was built for another manifest")
+    resolution = json.loads(
+        (inputs / "editing_v2_split_precedence_resolution.json").read_text()
+    )
+    sequence = index["sequence"]
+
+    library_started = time.perf_counter()
+    library = load_corpus_training_library(
+        [Path(r) for r in corpus_roots],
+        excluded_sources=resolution["excluded_source_keys"]["train"],
+        verify_state_roundtrip=False,
+    )
+    library_seconds = time.perf_counter() - library_started
+
+    collator = FactorizedMarkCollator.from_capabilities(
+        model.operator_capabilities,
+        use_aromatic_bond_view=True,
+        ring_catalog=model.ring_catalog,
+    )
+    trainable = [p for p in model.parameters() if p.requires_grad]
+    optimizer = torch.optim.AdamW(trainable, lr=learning_rate)
+    model.train()
+    torch.cuda.reset_peak_memory_stats()
+
+    data_seconds = 0.0
+    transfer_seconds = 0.0
+    compute_seconds = 0.0
+    losses: list[float] = []
+    hazard_touched: set[str] = set()
+
+    # A handful of untimed warmup steps: the first CUDA kernels include
+    # allocator and autotune costs that would otherwise be charged to compute
+    # and make the ratio look worse than steady state.
+    warmup = min(5, max(1, steps // 20))
+    loop_started = None
+
+    for step in range(warmup + steps):
+        timed = step >= warmup
+        if timed and loop_started is None:
+            torch.cuda.synchronize()
+            loop_started = time.perf_counter()
+
+        start = step * batch_size
+        selected = sequence[start : start + batch_size]
+        if len(selected) < batch_size:
+            raise RuntimeError("stream exhausted before the requested step count")
+
+        mark = time.perf_counter()
+        states, fibers, entries = library.inputs_for(selected)
+        examples = [
+            FactorizedMarkExample(
+                state=state_value,
+                time=float.fromhex(entry.support_time_hex),
+                teacher_action=None,
+                teacher_rule_name=None,
+                teacher_rate=1.0,
+                importance_weight=1.0,
+            )
+            for state_value, entry in zip(states, entries, strict=True)
+        ]
+        host_batch = _attach_successor_family_coordinates(
+            collator(examples),
+            [{"model_family": entry.model_family} for entry in entries],
+        )
+        if timed:
+            data_seconds += time.perf_counter() - mark
+
+        mark = time.perf_counter()
+        batch = host_batch.to(device)
+        torch.cuda.synchronize()
+        if timed:
+            transfer_seconds += time.perf_counter() - mark
+
+        mark = time.perf_counter()
+        optimizer.zero_grad(set_to_none=True)
+        prediction = forward_teacher_successor_batch(model, batch, fibers)
+        loss = factorized_successor_identity_loss(prediction, batch)
+        if not bool(torch.isfinite(loss)):
+            raise RuntimeError(f"nonfinite loss at step {step + 1}")
+        loss.backward()
+        for name, parameter in model.named_parameters():
+            if name.startswith(TOTAL_HAZARD_PREFIX) and parameter.grad is not None:
+                hazard_touched.add(name)
+        optimizer.step()
+        torch.cuda.synchronize()
+        if timed:
+            compute_seconds += time.perf_counter() - mark
+            losses.append(float(loss.detach()))
+
+    wall = time.perf_counter() - loop_started
+    if hazard_touched:
+        raise RuntimeError(f"frozen hazard received a gradient: {sorted(hazard_touched)}")
+
+    examples_seen = steps * batch_size
+    per_second = examples_seen / wall
+    epoch_seconds = manifest["epoch_size"] / per_second
+    receipt = {
+        "schema": "compose.editing_v2.r_theta_gpu_smoke",
+        "schema_version": 1,
+        "status": "GPU_SMOKE_EVIDENCE_ONLY_NO_AUTHORITY",
+        "gpu": "A10G",
+        "steps": steps,
+        "warmup_steps": warmup,
+        "batch_size": batch_size,
+        "examples": examples_seen,
+        "setup": {
+            "model_seconds": round(model_seconds, 2),
+            "library_seconds": round(library_seconds, 2),
+            "library_entries": len(library),
+        },
+        "timing_seconds": {
+            "wall": round(wall, 3),
+            "data": round(data_seconds, 3),
+            "host_to_device": round(transfer_seconds, 3),
+            "compute": round(compute_seconds, 3),
+        },
+        "timing_share": {
+            "data": round(data_seconds / wall, 4),
+            "host_to_device": round(transfer_seconds / wall, 4),
+            "compute": round(compute_seconds / wall, 4),
+        },
+        "throughput_examples_per_second": round(per_second, 2),
+        "peak_vram_bytes": int(torch.cuda.max_memory_allocated()),
+        "loss": {
+            "first": round(losses[0], 5),
+            "last": round(losses[-1], 5),
+            "mean_last_10": round(sum(losses[-10:]) / len(losses[-10:]), 5),
+        },
+        "projection": {
+            "epoch_examples": manifest["epoch_size"],
+            "epoch_seconds": round(epoch_seconds, 1),
+            "epoch_hours": round(epoch_seconds / 3600, 3),
+            "assumed_usd_per_hour": A10G_USD_PER_HOUR,
+            "epoch_usd": round(epoch_seconds / 3600 * A10G_USD_PER_HOUR, 2),
+        },
+        "binding": {
+            "initialization_seed": binding["model_runtime"]["initialization_seed"],
+            "initial_model_state_sha256":
+                binding["model_runtime"]["initial_model_state_sha256"],
+            "library_sha256": freeze["library_sha256"],
+            "split_sha256": freeze["split_sha256"],
+            "sampling_law_sha256": freeze["sampling_law_sha256"],
+            "manifest_sha256": manifest["manifest_sha256"],
+        },
+    }
+    # Deliberately no artifact_volume.commit(): this run writes nothing.
+    return receipt
