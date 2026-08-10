@@ -192,12 +192,34 @@ def main() -> int:
     parser.add_argument("--max-oversample", type=float, default=3.0,
                         help="How many times a real row may be repeated before a "
                              "family falls back to synthetic supply.")
+    parser.add_argument("--reserve-ids", default=None,
+                        help="Matched-validation reserve ids file; its source "
+                             "keys are excluded from the draw.")
     parser.add_argument("--out", required=True)
     args = parser.parse_args()
 
     precedence = json.loads(Path(args.precedence).read_text())
     excluded = set(precedence["excluded_source_keys"].get("train", []))
     print(f"held-out source exclusions applied to train: {len(excluded):,}")
+
+    # The law is REGENERATED over the eligible set, never filtered afterwards.
+    # Family targets are clamped to [floor, cap] and renormalized against
+    # availability, and the synthetic overshoot is trimmed from whichever
+    # families have the most real headroom -- so deleting rows from a finished
+    # sequence would quietly change the realized coefficients the law claims to
+    # guarantee, while the artifact went on reporting the old ones.
+    reserve_digest = None
+    if args.reserve_ids:
+        with gzip.open(args.reserve_ids, "rt") as handle:
+            reserve = json.load(handle)
+        reserve_sources = set(reserve["reserve_source_keys"])
+        overlap = len(excluded & reserve_sources)
+        excluded |= reserve_sources
+        reserve_digest = hashlib.sha256(
+            "\n".join(sorted(reserve_sources)).encode()).hexdigest()[:12]
+        print(f"matched-validation reserve sources excluded: "
+              f"{len(reserve_sources):,} (already held out: {overlap:,}); "
+              f"reserve source digest {reserve_digest}")
 
     state_pairs = load_library(args.corpus_root, args.pairs_file)
     print(f"library state-keyed pairs: {len(state_pairs):,}")
@@ -243,6 +265,9 @@ def main() -> int:
             "synthetic_target": args.synthetic_target,
         },
         "held_out_source_exclusions": len(excluded),
+        # Binds the law to the split it was derived under. A law read against a
+        # different reserve is not this law, however similar its coefficients.
+        "matched_validation_reserve_source_digest": reserve_digest,
         "eligible_canonical_train_pairs": total,
         "available_composition": {
             "synthetic_share": round(available_synth, 4),

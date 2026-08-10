@@ -158,6 +158,9 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--train-library", type=Path, required=True)
     parser.add_argument("--provenance", type=Path, required=True)
+    parser.add_argument("--precedence", type=Path, required=True,
+                        help="Split precedence resolution. Its train-role source "
+                             "exclusions are dropped BEFORE carving.")
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--target-entries", type=int, default=15000)
     parser.add_argument("--seed", type=int, default=20260810)
@@ -173,6 +176,17 @@ def main() -> int:
     started = time.perf_counter()
 
     entries = read_library(args.train_library)
+    # Sources claimed by a higher-precedence role must never be drawn, and the
+    # validated loader already drops them. Carving before applying them would
+    # define the split over 151,078 entries while the loader yields 151,059,
+    # and every downstream count would be off by the difference.
+    precedence = json.loads(args.precedence.read_text())
+    held_out = set(precedence["excluded_source_keys"].get("train", []))
+    before = len(entries)
+    entries = [e for e in entries if e["source"] not in held_out]
+    print(f"precedence exclusions: {len(held_out):,} train-role source keys, "
+          f"{before - len(entries):,} entries dropped", flush=True)
+
     with gzip.open(args.provenance, "rt") as handle:
         provenance = json.load(handle)
     synthetic_lane = provenance["synthetic_lane"]
