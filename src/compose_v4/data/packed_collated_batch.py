@@ -52,6 +52,7 @@ from __future__ import annotations
 
 import dataclasses
 import json
+import pickle
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -86,8 +87,32 @@ BOOL_FIELDS = (
 )
 FLOAT_FIELDS = ("times", "teacher_rates", "importance_weights")
 
+#: Per-row fields that are Python objects rather than tensors. These are NOT
+#: compile-time constants -- MEASURED, ``ring_restate_actions`` is populated on
+#: every row (~402 B) and the descriptors on every row (~241 B) -- so taking
+#: them from a template makes the model raise "semantic ring-restatement
+#: metadata does not align with the batch". They are stored per row.
+#:
+#: ``states`` is deliberately absent: at ~7 kB/row it would dominate the store,
+#: and it is reconstructed exactly by ``decode_state(entry.exact_state)``,
+#: which the corpus loader already does in 19 us.
+#:
+#: The four currently-empty fields are stored anyway rather than assumed empty
+#: corpus-wide, because "it was empty in the slice I looked at" is not a
+#: property of the corpus.
+META_FIELDS = (
+    "teacher_actions",
+    "teacher_rule_names",
+    "ring_restate_actions",
+    "ring_restate_successor_group_ids",
+    "ring_restate_successor_group_descriptors",
+    "ring_restate_successor_group_multiplicities",
+    "ring_delete_actions",
+    "ring_teacher_semantic_certificates",
+)
+
 SCHEMA = "compose.editing_v2.packed_collated_batch"
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 class PackedCollatedBatchError(RuntimeError):
@@ -250,6 +275,35 @@ def unpack_rows(
     return dataclasses.replace(template, **values)
 
 
+def pack_metadata(batch: Any) -> list[bytes]:
+    """Serialize the per-row Python metadata, one blob per example."""
+
+    n = int(batch.batch_size)
+    columns = {}
+    for name in META_FIELDS:
+        value = getattr(batch, name)
+        if not isinstance(value, (tuple, list)) or len(value) != n:
+            raise PackedCollatedBatchError(
+                f"metadata field {name!r} is not one entry per row "
+                f"({type(value).__name__}, expected {n})"
+            )
+        columns[name] = value
+    return [
+        pickle.dumps(
+            {name: columns[name][row] for name in META_FIELDS},
+            protocol=pickle.HIGHEST_PROTOCOL,
+        )
+        for row in range(n)
+    ]
+
+
+def unpack_metadata(blobs: Sequence[bytes]) -> dict[str, tuple[Any, ...]]:
+    """Rebuild the per-row metadata columns from row blobs, in order."""
+
+    rows = [pickle.loads(blob) for blob in blobs]
+    return {name: tuple(row[name] for row in rows) for name in META_FIELDS}
+
+
 def assert_roundtrip(batch: Any, layout: PackedLayout) -> None:
     """Raise unless packing and unpacking reproduces every tensor exactly.
 
@@ -266,6 +320,12 @@ def assert_roundtrip(batch: Any, layout: PackedLayout) -> None:
         if original.dtype != restored.dtype or not torch.equal(original, restored):
             raise PackedCollatedBatchError(
                 f"packed field {spec.name!r} does not round-trip exactly"
+            )
+    restored_meta = unpack_metadata(pack_metadata(batch))
+    for name, column in restored_meta.items():
+        if column != tuple(getattr(batch, name)):
+            raise PackedCollatedBatchError(
+                f"metadata field {name!r} does not round-trip exactly"
             )
 
 
@@ -288,6 +348,12 @@ class PackedCollatedStore:
             mode="r",
             shape=(len(header["entry_ids"]), self.layout.record_bytes),
         )
+        self._meta = np.memmap(directory / "PACKED_META.bin", dtype=np.uint8, mode="r")
+        self._meta_offsets = np.load(directory / "PACKED_META_OFFSETS.npy")
+        if int(self._meta_offsets.shape[0]) != len(header["entry_ids"]) + 1:
+            raise PackedCollatedBatchError(
+                "packed metadata offsets disagree with the row count"
+            )
 
     def __len__(self) -> int:
         return int(self._records.shape[0])
@@ -304,13 +370,21 @@ class PackedCollatedStore:
                 "training stream references a row outside the packed store"
             ) from error
         records = np.ascontiguousarray(self._records[indices])
-        return unpack_rows(records, self.layout, template, extra=extra)
+        blobs = [
+            self._meta[self._meta_offsets[i] : self._meta_offsets[i + 1]].tobytes()
+            for i in indices
+        ]
+        merged: dict[str, Any] = dict(unpack_metadata(blobs))
+        if extra:
+            merged.update(extra)
+        return unpack_rows(records, self.layout, template, extra=merged)
 
 
 __all__ = [
     "BOOL_FIELDS",
     "FLOAT_FIELDS",
     "INT_FIELDS",
+    "META_FIELDS",
     "SCHEMA",
     "SCHEMA_VERSION",
     "FieldSpec",
@@ -318,7 +392,9 @@ __all__ = [
     "PackedCollatedStore",
     "PackedLayout",
     "assert_roundtrip",
+    "pack_metadata",
     "pack_slice",
     "plan_layout",
+    "unpack_metadata",
     "unpack_rows",
 ]

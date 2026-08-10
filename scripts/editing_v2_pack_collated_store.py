@@ -38,10 +38,12 @@ import torch  # noqa: E402
 from compose_v4.data.durable_path import require_durable_path  # noqa: E402
 from compose_v4.data.packed_collated_batch import (  # noqa: E402
     INT_FIELDS,
+    META_FIELDS,
     SCHEMA,
     SCHEMA_VERSION,
     PackedCollatedBatchError,
     assert_roundtrip,
+    pack_metadata,
     pack_slice,
     plan_layout,
 )
@@ -100,6 +102,9 @@ def main() -> int:
     started = time.perf_counter()
     digest = hashlib.sha256()
 
+    meta_offsets: list[int] = [0]
+    meta_cursor = 0
+    meta_sink = (out / "PACKED_META.bin").open("wb")
     with (out / "PACKED.bin").open("wb") as sink:
         for position, directory in enumerate(slices):
             batch = torch.load(directory / "BATCH.pt", map_location="cpu", weights_only=False)
@@ -119,6 +124,7 @@ def main() -> int:
             # after the store is already published.
             assert_roundtrip(batch, layout)
             records = pack_slice(batch, layout)
+            blobs = pack_metadata(batch)
 
             keep: list[int] = []
             for row, entry in enumerate(entries):
@@ -140,11 +146,20 @@ def main() -> int:
                 block = np.ascontiguousarray(records[keep])
                 sink.write(block.tobytes())
                 digest.update(block.tobytes())
+                for row in keep:
+                    meta_sink.write(blobs[row])
+                    meta_cursor += len(blobs[row])
+                    meta_offsets.append(meta_cursor)
 
             if (position + 1) % 400 == 0 or position + 1 == len(slices):
                 elapsed = time.perf_counter() - started
                 print(f"  {position + 1:5,}/{len(slices):,} slices  "
                       f"{len(entry_ids):8,} rows  {elapsed:6.0f}s")
+
+    meta_sink.close()
+    np.save(out / "PACKED_META_OFFSETS.npy", np.asarray(meta_offsets, dtype=np.int64))
+    if len(meta_offsets) != len(entry_ids) + 1:
+        raise SystemExit("metadata offsets disagree with the kept row count")
 
     assert layout is not None
     header = {
@@ -158,6 +173,8 @@ def main() -> int:
         "duplicate_rows_skipped": duplicates,
         "rows_dropped_by_precedence": dropped,
         "records_sha256": digest.hexdigest(),
+        "metadata_fields": list(META_FIELDS),
+        "metadata_bytes": meta_cursor,
         "layout": layout.to_payload(),
         "entry_ids": entry_ids,
     }

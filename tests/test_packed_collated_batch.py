@@ -18,13 +18,16 @@ import torch
 
 from compose_v4.data.packed_collated_batch import (
     BOOL_FIELDS,
+    META_FIELDS,
     FLOAT_FIELDS,
     INT_FIELDS,
     PackedCollatedBatchError,
     PackedLayout,
     assert_roundtrip,
+    pack_metadata,
     pack_slice,
     plan_layout,
+    unpack_metadata,
     unpack_rows,
 )
 
@@ -73,6 +76,14 @@ class _Batch:
     times: torch.Tensor
     teacher_rates: torch.Tensor
     importance_weights: torch.Tensor
+    teacher_actions: tuple = ()
+    teacher_rule_names: tuple = ()
+    ring_restate_actions: tuple = ()
+    ring_restate_successor_group_ids: tuple = ()
+    ring_restate_successor_group_descriptors: tuple = ()
+    ring_restate_successor_group_multiplicities: tuple = ()
+    ring_delete_actions: tuple = ()
+    ring_teacher_semantic_certificates: tuple = ()
     marker: str = "constant-config-field"
 
     @property
@@ -93,6 +104,18 @@ def _batch(n: int = 6, *, seed: int = 0, overrides=None) -> _Batch:
         values[name] = torch.from_numpy(rng.integers(0, 2, size=shape).astype(bool))
     for name in FLOAT_FIELDS:
         values[name] = torch.from_numpy(rng.random(n).astype(np.float32))
+    # Per-row Python metadata, deliberately DISTINCT per row so a reordering
+    # or an off-by-one shows up instead of matching by accident.
+    values["teacher_actions"] = tuple(None for _ in range(n))
+    values["teacher_rule_names"] = tuple(None for _ in range(n))
+    values["ring_restate_actions"] = tuple((f"act-{i}",) for i in range(n))
+    values["ring_restate_successor_group_ids"] = tuple((i, i + 1) for i in range(n))
+    values["ring_restate_successor_group_descriptors"] = tuple(
+        ({"ring": i},) for i in range(n)
+    )
+    values["ring_restate_successor_group_multiplicities"] = tuple((i + 1,) for i in range(n))
+    values["ring_delete_actions"] = tuple(() for _ in range(n))
+    values["ring_teacher_semantic_certificates"] = tuple(() for _ in range(n))
     if overrides:
         values.update(overrides)
     return _Batch(**values)
@@ -203,3 +226,38 @@ def test_packed_form_is_much_smaller_than_the_compiled_tensors() -> None:
         for spec in layout.fields
     )
     assert layout.record_bytes < original / 3
+
+
+def test_per_row_metadata_round_trips_and_is_not_a_constant() -> None:
+    """The bug this caught: ring-restate metadata is per ROW, not per compile.
+
+    Taking it from a template made the model raise "semantic ring-restatement
+    metadata does not align with the batch" -- but only once a forward ran, and
+    only because the template happened to have a different row count. With a
+    matching count it would have silently trained on another row's metadata.
+    """
+
+    batch = _batch(n=6)
+    restored = unpack_metadata(pack_metadata(batch))
+    for name in META_FIELDS:
+        assert restored[name] == tuple(getattr(batch, name)), name
+    assert len({tuple(v) for v in batch.ring_restate_successor_group_ids}) == 6
+
+
+def test_metadata_blobs_follow_the_requested_row_order() -> None:
+    batch = _batch(n=6)
+    blobs = pack_metadata(batch)
+    order = [3, 0, 3]
+    restored = unpack_metadata([blobs[i] for i in order])
+    assert restored["ring_restate_actions"] == tuple(
+        batch.ring_restate_actions[i] for i in order
+    )
+
+
+def test_metadata_field_with_the_wrong_length_is_refused() -> None:
+    """A template's tuples are the wrong length for a gathered minibatch."""
+
+    batch = _batch(n=6)
+    batch = dataclasses.replace(batch, ring_restate_actions=(("only-one",),))
+    with pytest.raises(PackedCollatedBatchError, match="one entry per row"):
+        pack_metadata(batch)
