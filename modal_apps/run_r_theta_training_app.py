@@ -253,7 +253,10 @@ def train_segment(
     # A 2.9-hour run that only speaks every 500 steps is indistinguishable
     # from a hung one, and on a paid device that ambiguity costs money.
     log_every = 50
-    window_started = time.perf_counter()
+    # Accumulate STEP time only. Charging the panel eval and the 87.8 MB
+    # checkpoint write to training throughput made the alarm fire at every
+    # eval, and an alarm that cries wolf 54 times is worse than none.
+    window_seconds = 0.0
     window_losses: list[float] = []
     # Anomaly baselines. Streaming numbers is not the same as saying something
     # is wrong, and a 2.9-hour run should announce trouble rather than leave it
@@ -282,6 +285,7 @@ def train_segment(
             stop_reason = "STREAM_EXHAUSTED"
             break
 
+        step_started = time.perf_counter()
         batch, fibers, _entries = build_training(selected)
         optimizer.zero_grad(set_to_none=True)
         prediction = forward_teacher_successor_batch(model, batch, fibers)
@@ -298,12 +302,13 @@ def train_segment(
                 )
         optimizer.step()
         completed_steps += 1
+        window_seconds += time.perf_counter() - step_started
         value = float(loss.detach())
         losses.append(value)
         window_losses.append(value)
 
         if completed_steps % log_every == 0:
-            elapsed = time.perf_counter() - window_started
+            elapsed = window_seconds
             print(
                 f"  step {completed_steps:6,}/{maximum_steps:,}  "
                 f"loss {sum(window_losses) / len(window_losses):7.4f}  "
@@ -313,7 +318,12 @@ def train_segment(
             )
             window_loss = sum(window_losses) / len(window_losses)
             throughput = log_every * batch_size / elapsed
-            if reference_throughput is None:
+            # Skip the opening windows as a baseline: the first carries CUDA
+            # allocator and autotune warmup and reads ~20% slow, which would
+            # set the threshold too low to catch a real regression.
+            if completed_steps <= 2 * log_every:
+                pass
+            elif reference_throughput is None:
                 reference_throughput = throughput
             elif throughput < 0.6 * reference_throughput:
                 warn(
@@ -326,7 +336,7 @@ def train_segment(
                     f"{window_loss:.4f} over one window"
                 )
             previous_window_loss = window_loss
-            window_started = time.perf_counter()
+            window_seconds = 0.0
             window_losses = []
 
         if completed_steps % evaluate_every == 0:
