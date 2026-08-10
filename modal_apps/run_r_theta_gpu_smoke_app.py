@@ -1,20 +1,33 @@
 """Profile the corpus R_theta training step on a GPU before committing to a run.
 
 This exists because the local CPU smoke cannot answer the question that decides
-the full run. MEASURED locally: ~14 s per 32-example step, single-core bound,
-~2.3 examples/s, which projects to roughly 17 hours for one 144,870-example
-epoch. That proves the loop is correct and proves nothing about the accelerator,
-because forward/backward shrinks by a large factor on a GPU while the loader
-does not. A data wait that is invisible at 14 s/step can dominate at 0.1 s/step.
+the full run. Forward/backward shrinks by a large factor on an accelerator while
+the input path does not, so a data wait that is invisible at seconds-per-step
+can dominate at milliseconds-per-step. Only a GPU measurement settles it.
 
-So this measures the RATIO, not just the speed:
+So this measures the RATIO, not just the speed, splitting the step finely
+enough to name the next optimization target if one exists:
 
-    data       library.inputs_for + collation      (CPU, does not shrink)
-    host->dev  batch.to(device)                    (grows in relative terms)
-    compute    forward + loss + backward + step    (shrinks on GPU)
+    data       library.inputs_for + packed gather   (CPU, does not shrink)
+    host->dev  batch.to(device)                     (grows in relative terms)
+    forward    forward_teacher_successor_batch + loss
+    backward   loss.backward()
+    optimizer  grad checks + optimizer.step()
 
-and reports peak VRAM plus a projected epoch time and cost, so the full run is
-authorized against a measurement rather than an expectation.
+THE INPUT PATH IS A GATHER, NOT CHEMISTRY
+-----------------------------------------
+An earlier version of this app collated per batch, which was wrong. MEASURED:
+fresh collation of 32 rows costs 108.74 s against 2.38 s of model math -- 97.2%
+of the step -- because it runs RDKit admission masks over every candidate
+successor. Collating inside a GPU container rents an accelerator to run a
+valence checker, and the cost does not shrink on the device.
+
+Batches therefore come from the packed store, a row-addressed copy of the
+tensors the compile step already produced: a 32-row gather is 25.71 ms and the
+resulting loss is bitwise identical to the collated one. If this smoke still
+shows a bottleneck, it will be in ``forward``, where
+``_factorized_action_probability_tables`` builds the legal-mark tables -- not in
+the dataset, which is now three orders of magnitude too small to matter.
 
 It writes no checkpoint and commits nothing to the volume. It is a measurement.
 """
@@ -56,6 +69,7 @@ def profile_r_theta_step(
     *,
     run_root: str,
     corpus_roots: list[str],
+    packed_store: str,
     steps: int = 200,
     batch_size: int = 32,
     learning_rate: float = 1e-4,
@@ -63,6 +77,7 @@ def profile_r_theta_step(
     import torch
 
     from compose_v4.data.corpus_training_library import load_corpus_training_library
+    from compose_v4.data.packed_collated_batch import PackedCollatedStore
     from compose_v4.experiments.editing_v2_process_v2_t1_panel import (
         open_process_v2_t1_source,
     )
@@ -73,10 +88,6 @@ def profile_r_theta_step(
     from compose_v4.experiments.editing_v2_semantic_t1_capacity_runner import (
         TOTAL_HAZARD_PREFIX,
         _attach_successor_family_coordinates,
-    )
-    from compose_v4.experiments.factorized_mark_conditional import (
-        FactorizedMarkCollator,
-        FactorizedMarkExample,
     )
     from compose_v4.experiments.factorized_successor_training import (
         factorized_successor_identity_loss,
@@ -134,21 +145,57 @@ def profile_r_theta_step(
     )
     library_seconds = time.perf_counter() - library_started
 
-    collator = FactorizedMarkCollator.from_capabilities(
-        model.operator_capabilities,
-        use_aromatic_bond_view=True,
-        ring_catalog=model.ring_catalog,
+    # Every id the frozen stream will ever draw must resolve BEFORE spending
+    # GPU time, not on the step that happens to reach a missing one.
+    unresolved = [
+        entry_id
+        for entry_id in set(sequence)
+        if entry_id not in library.index_by_entry_id
+    ]
+    if unresolved:
+        raise RuntimeError(
+            f"{len(unresolved):,} stream ids do not resolve against the library"
+        )
+
+    panel = json.loads((inputs / "editing_v2_eval_panel.json").read_text())
+
+    # The collated tensors come from the packed store, never from RDKit.
+    # MEASURED locally: re-collating 32 rows is 108.74 s against a 25.71 ms
+    # gather, and the resulting loss is bitwise identical. Collating inside a
+    # GPU container would rent an accelerator to run a valence checker.
+    store = PackedCollatedStore(Path(packed_store))
+    template = torch.load(
+        Path(packed_store) / "TEMPLATE.pt", map_location="cpu", weights_only=False
     )
+    absent = [i for i in set(sequence) if i not in store.row_by_entry_id]
+    if absent:
+        raise RuntimeError(f"{len(absent):,} stream ids are absent from the packed store")
+
     trainable = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.AdamW(trainable, lr=learning_rate)
     model.train()
     torch.cuda.reset_peak_memory_stats()
 
+    # The hazard head is frozen. Checking only that it received no GRADIENT is
+    # weaker than checking it did not MOVE: a stray optimizer group, a weight
+    # decay term, or an in-place write would change it with no gradient ever
+    # appearing. Snapshot the values and compare them bit-for-bit at the end.
+    hazard_before = {
+        name: parameter.detach().clone()
+        for name, parameter in model.named_parameters()
+        if name.startswith(TOTAL_HAZARD_PREFIX)
+    }
+    if not hazard_before:
+        raise RuntimeError("no frozen hazard parameters found; the check is vacuous")
+
     data_seconds = 0.0
     transfer_seconds = 0.0
-    compute_seconds = 0.0
+    forward_seconds = 0.0
+    backward_seconds = 0.0
+    optimizer_seconds = 0.0
     losses: list[float] = []
     hazard_touched: set[str] = set()
+    nonfinite_grads: set[str] = set()
 
     # A handful of untimed warmup steps: the first CUDA kernels include
     # allocator and autotune costs that would otherwise be charged to compute
@@ -169,19 +216,21 @@ def profile_r_theta_step(
 
         mark = time.perf_counter()
         states, fibers, entries = library.inputs_for(selected)
-        examples = [
-            FactorizedMarkExample(
-                state=state_value,
-                time=float.fromhex(entry.support_time_hex),
-                teacher_action=None,
-                teacher_rule_name=None,
-                teacher_rate=1.0,
-                importance_weight=1.0,
-            )
-            for state_value, entry in zip(states, entries, strict=True)
-        ]
+        host_batch = store.rows_for(
+            selected,
+            template,
+            extra={
+                "states": tuple(states),
+                "times": torch.tensor(
+                    [float.fromhex(e.support_time_hex) for e in entries],
+                    dtype=torch.float32,
+                ),
+                "teacher_rates": torch.ones(batch_size, dtype=torch.float32),
+                "importance_weights": torch.ones(batch_size, dtype=torch.float32),
+            },
+        )
         host_batch = _attach_successor_family_coordinates(
-            collator(examples),
+            host_batch,
             [{"model_family": entry.model_family} for entry in entries],
         )
         if timed:
@@ -193,25 +242,49 @@ def profile_r_theta_step(
         if timed:
             transfer_seconds += time.perf_counter() - mark
 
-        mark = time.perf_counter()
         optimizer.zero_grad(set_to_none=True)
+        mark = time.perf_counter()
         prediction = forward_teacher_successor_batch(model, batch, fibers)
         loss = factorized_successor_identity_loss(prediction, batch)
+        torch.cuda.synchronize()
+        if timed:
+            forward_seconds += time.perf_counter() - mark
         if not bool(torch.isfinite(loss)):
             raise RuntimeError(f"nonfinite loss at step {step + 1}")
+
+        mark = time.perf_counter()
         loss.backward()
+        torch.cuda.synchronize()
+        if timed:
+            backward_seconds += time.perf_counter() - mark
+
+        mark = time.perf_counter()
         for name, parameter in model.named_parameters():
-            if name.startswith(TOTAL_HAZARD_PREFIX) and parameter.grad is not None:
-                hazard_touched.add(name)
+            if name.startswith(TOTAL_HAZARD_PREFIX):
+                if parameter.grad is not None:
+                    hazard_touched.add(name)
+            elif parameter.grad is not None and not bool(
+                torch.isfinite(parameter.grad).all()
+            ):
+                nonfinite_grads.add(name)
         optimizer.step()
         torch.cuda.synchronize()
         if timed:
-            compute_seconds += time.perf_counter() - mark
+            optimizer_seconds += time.perf_counter() - mark
             losses.append(float(loss.detach()))
 
     wall = time.perf_counter() - loop_started
     if hazard_touched:
         raise RuntimeError(f"frozen hazard received a gradient: {sorted(hazard_touched)}")
+    if nonfinite_grads:
+        raise RuntimeError(f"nonfinite gradients: {sorted(nonfinite_grads)}")
+    hazard_moved = sorted(
+        name
+        for name, before in hazard_before.items()
+        if not torch.equal(before, dict(model.named_parameters())[name].detach())
+    )
+    if hazard_moved:
+        raise RuntimeError(f"frozen hazard parameters CHANGED: {hazard_moved}")
 
     examples_seen = steps * batch_size
     per_second = examples_seen / wall
@@ -230,19 +303,37 @@ def profile_r_theta_step(
             "library_seconds": round(library_seconds, 2),
             "library_entries": len(library),
         },
-        "timing_seconds": {
-            "wall": round(wall, 3),
-            "data": round(data_seconds, 3),
-            "host_to_device": round(transfer_seconds, 3),
-            "compute": round(compute_seconds, 3),
+        "milliseconds_per_step": {
+            "data_fetch_collate": round(data_seconds / steps * 1000, 2),
+            "host_to_device": round(transfer_seconds / steps * 1000, 2),
+            "forward_and_loss": round(forward_seconds / steps * 1000, 2),
+            "backward": round(backward_seconds / steps * 1000, 2),
+            "optimizer": round(optimizer_seconds / steps * 1000, 2),
+            "total_step": round(wall / steps * 1000, 2),
         },
         "timing_share": {
-            "data": round(data_seconds / wall, 4),
+            "data_fetch_collate": round(data_seconds / wall, 4),
             "host_to_device": round(transfer_seconds / wall, 4),
-            "compute": round(compute_seconds / wall, 4),
+            "forward_and_loss": round(forward_seconds / wall, 4),
+            "backward": round(backward_seconds / wall, 4),
+            "optimizer": round(optimizer_seconds / wall, 4),
         },
+        # The number that decides whether to optimize the input path at all.
+        "gpu_data_wait_fraction": round(
+            (data_seconds + transfer_seconds) / wall, 4
+        ),
         "throughput_examples_per_second": round(per_second, 2),
         "peak_vram_bytes": int(torch.cuda.max_memory_allocated()),
+        "peak_vram_gb": round(torch.cuda.max_memory_allocated() / 1024**3, 3),
+        "invariants": {
+            "loss_finite_every_step": True,
+            "gradients_finite_every_step": True,
+            "frozen_hazard_received_no_gradient": True,
+            "frozen_hazard_bitwise_unchanged": True,
+            "frozen_hazard_parameters_checked": sorted(hazard_before),
+            "stream_ids_unresolved": 0,
+            "stream_ids_checked": len(set(sequence)),
+        },
         "loss": {
             "first": round(losses[0], 5),
             "last": round(losses[-1], 5),
@@ -263,7 +354,34 @@ def profile_r_theta_step(
             "split_sha256": freeze["split_sha256"],
             "sampling_law_sha256": freeze["sampling_law_sha256"],
             "manifest_sha256": manifest["manifest_sha256"],
+            "packed_store_rows": len(store),
+            "packed_store_records_sha256": store.header["records_sha256"],
+            "eval_panel_sha256": panel["panel_sha256"],
+            "eval_panel_entries": panel["entry_count"],
         },
     }
+
+    step_ms = receipt["milliseconds_per_step"]
+    print("")
+    print(f"data fetch / collate     {step_ms['data_fetch_collate']:8.2f} ms")
+    print(f"host -> GPU              {step_ms['host_to_device']:8.2f} ms")
+    print(f"forward + loss           {step_ms['forward_and_loss']:8.2f} ms")
+    print(f"backward                 {step_ms['backward']:8.2f} ms")
+    print(f"optimizer                {step_ms['optimizer']:8.2f} ms")
+    print(f"total step               {step_ms['total_step']:8.2f} ms")
+    print(f"GPU data-wait fraction   {receipt['gpu_data_wait_fraction'] * 100:8.2f} %")
+    print(f"peak VRAM                {receipt['peak_vram_gb']:8.3f} GB")
+    print(f"examples / sec           {receipt['throughput_examples_per_second']:8.2f}")
+    print("")
+    print(f"initial state hash       {receipt['binding']['initial_model_state_sha256']}")
+    print(f"sampling law             {receipt['binding']['sampling_law_sha256']}")
+    print(f"eval panel               {receipt['binding']['eval_panel_sha256']}")
+    print(f"hazard before/after      identical ({len(hazard_before)} tensors)")
+    print(f"loss / gradients         finite at every step")
+    print(f"unresolved stream ids    0 of {len(set(sequence)):,}")
+    print(f"projected epoch          {receipt['projection']['epoch_hours']:.3f} h "
+          f"(${receipt['projection']['epoch_usd']:.2f} at "
+          f"${A10G_USD_PER_HOUR:.2f}/h)")
+
     # Deliberately no artifact_volume.commit(): this run writes nothing.
     return receipt
