@@ -1,0 +1,27 @@
+{
+  "batch_size": 32,
+  "batches": 5,
+  "cpu_wall_seconds": {
+    "original": 26.4,
+    "speedup": 0.96,
+    "vectorized": 27.55
+  },
+  "device": "cpu",
+  "max_abs_difference": {
+    "family_log_probabilities": 0.0,
+    "gradient_any_trainable_parameter": 7.451e-09,
+    "loss": 9.537e-07,
+    "productive_hazard": 0.0,
+    "productive_log_probability": 0.0,
+    "selected_productive_successor_log_probability": 9.537e-07,
+    "selected_successor_log_probability": 9.537e-07,
+    "selected_within_teacher_family_log_probability": 9.537e-07,
+    "teacher_family_log_probability": 0.0,
+    "total_hazard": 0.0
+  },
+  "schema": "compose.editing_v2.vectorized_scoring_parity",
+  "schema_version": 1,
+  "speed_caveat": "CPU shows no speedup, but CPU is not where the cost was: on A10G backward is 79% of the step because thousands of tiny autograd nodes each cost a kernel launch, which CPU does not pay. This implementation also still does O(aliases) Python work building index lists. Whether the reduced node count wins must be measured ON GPU.",
+  "status": "PARITY_EVIDENCE_ONLY_NO_AUTHORITY",
+  "tolerance_note": "A segmented logsumexp reassociates the sum, so bitwise equality is not expected. The observed differences are float32 epsilon on the aggregated quantities and ~1e-8 on gradients; every unaggregated output is exactly equal."
+}
