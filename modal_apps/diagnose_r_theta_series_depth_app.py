@@ -4,26 +4,40 @@ WHY
 ---
 The validation shards are congeneric series (32 Murcko scaffolds per shard, ten
 variants each, 1.4% singletons) while the training shards are diverse libraries
-(1,337 scaffolds, 55% singletons). But 85.5% of validation source-instances sit
-on a scaffold the model HAS seen, so this is not chemical novelty. The proposed
-mechanism is that discriminating among near-identical analogues -- where the
-teacher makes different choices for molecules the model sees as nearly the same
--- is a different capability from transferring across diverse chemistry.
+(1,337 scaffolds, 55% singletons). The proposed mechanism is that discriminating
+among near-identical analogues -- where the teacher makes different choices for
+molecules the model sees as nearly the same -- is a different capability from
+transferring across diverse chemistry.
 
-THE CONTROL THAT MAKES IT INTERPRETABLE
----------------------------------------
-Series depth and scaffold rarity are different axes and may be correlated: a
-deep panel series could also sit on a scaffold the model saw rarely. Binning by
-depth alone would confound "hard to discriminate close analogues" with "rarely
-seen scaffold". Both are measured here, and family and provenance are held
-fixed within every comparison so neither can leak in.
+SCAFFOLD COVERAGE, AGAINST THE RIGHT REFERENCE SET
+--------------------------------------------------
+An earlier pass put coverage at 85.5% and concluded this was not chemical
+novelty. That counted train-ROLE sources across 30 Active8 shards, but the
+model trained on the compiled LIBRARY -- 106,759 of 564,316 role sources.
+Against what the model actually saw, coverage is 56%: 6,224 of 14,140 panel
+entries sit on a scaffold absent from the training corpus.
+
+THE CONTROL, AND WHY IT ONLY WORKS IN ONE DIRECTION
+---------------------------------------------------
+Series depth and train scaffold support are nearly collinear here, Pearson
++0.974, so binning cannot separate them into independent axes. What saves the
+test is that the two push in OPPOSITE directions on the same partition: more
+support should ease prediction, more depth should harden it. So the reading is
+asymmetric, and it is declared before the run rather than chosen after it.
 
 WHAT WOULD CONFIRM IT
 ---------------------
-Identity NLL rising monotonically with panel_depth at fixed train_support.
-Flat, or rising only with falling train_support, means series structure is NOT
-the mechanism and it remains unidentified -- which is the outcome to report
-honestly rather than narrate around.
+Identity NLL RISING monotonically with panel_depth. Because support rises with
+depth, a rising curve rises against a force that should lower it, which is
+conservative evidence for the depth mechanism.
+
+Identity NLL FALLING is uninformative: support helping and depth not hurting
+are indistinguishable. Flat is a negative result -- series structure is not the
+mechanism, it remains unidentified, and that is the outcome to report honestly
+rather than narrate around.
+
+Family and provenance are held fixed in the conditioned table so family mix
+cannot masquerade as a depth effect.
 """
 
 from __future__ import annotations
@@ -49,7 +63,10 @@ image = _base_image.env({"PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}"})
 app = modal.App("compose-v4-r-theta-series-depth")
 
 MINIMUM_CELL = 40
-DEPTH_EDGES = ((1, 1), (2, 4), (5, 9), (10, 24), (25, 10**9))
+#: Depth 0 is a real bucket -- 361 panel entries are the only member of their
+#: scaffold. Omitting it dropped them into an unsortable "?" and crashed the
+#: report after the scoring had already succeeded.
+DEPTH_EDGES = ((0, 0), (1, 1), (2, 4), (5, 9), (10, 24), (25, 10**9))
 SUPPORT_EDGES = ((0, 0), (1, 4), (5, 24), (25, 10**9))
 
 
@@ -58,7 +75,14 @@ def _label(value: int, edges) -> str:
         if low <= value <= high:
             return f"{low}" if low == high else (
                 f"{low}-{high}" if high < 10**9 else f"{low}+")
-    return "?"
+    return f"?{value}"
+
+
+def _order(label: str) -> int:
+    """Sort bucket labels numerically, keeping any unbucketed value last."""
+    if label.startswith("?"):
+        return 10**12
+    return int(label.split("-")[0].rstrip("+"))
 
 
 @app.function(
@@ -163,6 +187,16 @@ def diagnose_series_depth(
         row["provenance"] = ("unknown" if lane is None else
                              ("synthetic" if lane == synthetic_lane else "real"))
 
+    # Persist the scored rows BEFORE aggregating. Scoring is the GPU cost and
+    # the tables are pure arithmetic over these rows, so a reporting bug should
+    # never force a second pass -- the first attempt crashed in exactly that way.
+    dump = root / "diagnostics"
+    dump.mkdir(parents=True, exist_ok=True)
+    with gzip.open(dump / f"SERIES_DEPTH_ROWS_{output_name}.json.gz", "wt") as handle:
+        json.dump(rows, handle)
+    artifact_volume.commit()
+    print(f"[{time.perf_counter()-started:6.1f}s] wrote scored rows", flush=True)
+
     def aggregate(selected):
         return {
             "entries": len(selected),
@@ -179,7 +213,7 @@ def diagnose_series_depth(
         print(f"{'bucket':>10} {'n':>7} {'identity':>9} {'family':>8} {'joint':>7}",
               flush=True)
         out = {}
-        for label in sorted(grouped, key=lambda s: int(s.split("-")[0].rstrip("+"))):
+        for label in sorted(grouped, key=_order):
             cell = grouped[label]
             if len(cell) < MINIMUM_CELL:
                 out[label] = {"available": False, "entries": len(cell)}
@@ -208,7 +242,7 @@ def diagnose_series_depth(
         for kind in ("real", "synthetic"):
             labels = sorted(
                 {k[2] for k in grouped if k[0] == family and k[1] == kind},
-                key=lambda s: int(s.split("-")[0].rstrip("+")))
+                key=_order)
             for label in labels:
                 cell = grouped[(family, kind, label)]
                 key = f"{family}|{kind}|{label}"
