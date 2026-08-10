@@ -1,0 +1,104 @@
+{
+  "cell_floor": 256,
+  "distinct_entries_drawn": 106428,
+  "drift_from_law": {
+    "atom_delete": -2e-05,
+    "atom_insert": -2.3e-05,
+    "atom_restate": 2.4e-05,
+    "bond_reorder": -3e-06,
+    "bond_reroute": -2e-06,
+    "cycle_attach": -3e-06,
+    "cycle_insert": 2.8e-05,
+    "ring_system_restate": -2e-06
+  },
+  "eligible_rows": 136028,
+  "eligible_rows_never_drawn": 29600,
+  "epoch_size": 136028,
+  "frozen_sha256": "e27494a462504b3030d0b6c430b09b4192ad9d56cfe6e4831a661c8f815ea3d4",
+  "gates": {
+    "every_family_within_0p005_of_law": true,
+    "law_bound_to_this_split": true,
+    "no_capability_cell_starved": true,
+    "sequence_covers_only_training_ids": true,
+    "synthetic_share_within_0p005_of_law": true
+  },
+  "law_frozen_sha256": "b0cc66f168f1cf3e7a4b5bacfb1138059005251a10561d6961c3ea1c5dd7ac73",
+  "matched_validation_reserve_source_digest": "c7c3c462f17f",
+  "never_drawn_by_stratum": {
+    "atom_delete|synthetic": {
+      "available": 5392,
+      "never_drawn": 5392,
+      "never_drawn_fraction": 1.0
+    },
+    "atom_insert|synthetic": {
+      "available": 3618,
+      "never_drawn": 3618,
+      "never_drawn_fraction": 1.0
+    },
+    "atom_restate|real": {
+      "available": 17396,
+      "never_drawn": 23,
+      "never_drawn_fraction": 0.0013
+    },
+    "atom_restate|synthetic": {
+      "available": 10654,
+      "never_drawn": 10609,
+      "never_drawn_fraction": 0.9958
+    },
+    "bond_reorder|synthetic": {
+      "available": 5483,
+      "never_drawn": 1022,
+      "never_drawn_fraction": 0.1864
+    },
+    "bond_reroute|real": {
+      "available": 20707,
+      "never_drawn": 104,
+      "never_drawn_fraction": 0.005
+    },
+    "bond_reroute|synthetic": {
+      "available": 5416,
+      "never_drawn": 5268,
+      "never_drawn_fraction": 0.9727
+    },
+    "cycle_attach|synthetic": {
+      "available": 4621,
+      "never_drawn": 2327,
+      "never_drawn_fraction": 0.5036
+    },
+    "cycle_insert|synthetic": {
+      "available": 8848,
+      "never_drawn": 87,
+      "never_drawn_fraction": 0.0098
+    },
+    "ring_system_restate|synthetic": {
+      "available": 14247,
+      "never_drawn": 1150,
+      "never_drawn_fraction": 0.0807
+    }
+  },
+  "recounted_coefficients": {
+    "by_family": {
+      "atom_delete": 0.17298,
+      "atom_insert": 0.160777,
+      "atom_restate": 0.204224,
+      "bond_reorder": 0.049997,
+      "bond_reroute": 0.190198,
+      "cycle_attach": 0.049997,
+      "cycle_insert": 0.064428,
+      "ring_system_restate": 0.107398
+    },
+    "synthetic_share": 0.211767
+  },
+  "schema": "compose.editing_v2.prepared_training_manifest",
+  "schema_version": 2,
+  "seed": 20260810,
+  "sequence_length": 136027,
+  "sequence_sha256": "48270afde24e8eac0cb6da64fa937c5956811d8988b65161e756bd492580fd93",
+  "starved_capability_cells": [],
+  "status": "PREPARED_SEQUENCE_EVIDENCE_ONLY_NO_AUTHORITY",
+  "zero_mass_note": "These strata receive NO training mass under this law, because their family's real supply already meets its target. The sequence is fixed, so this is permanent exclusion, not slow exposure -- more epochs will not reach them. Any evaluation view that includes them measures a capability the law deliberately declines to train, and must weight them by the LAW's draw share rather than the library's composition.",
+  "zero_mass_strata": [
+    "atom_delete|synthetic",
+    "atom_insert|synthetic"
+  ]
+}
