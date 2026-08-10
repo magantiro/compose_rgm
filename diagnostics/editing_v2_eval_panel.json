@@ -1,0 +1,112 @@
+{
+  "deployment_weights": {
+    "cell_share": {
+      "editing_v2_active8_v1:atom_delete:leaf_death": 0.17477,
+      "editing_v2_active8_v1:atom_insert:one_neighbor_birth": 0.16225,
+      "editing_v2_active8_v1:atom_restate:element_identity_change": 0.20589,
+      "editing_v2_active8_v1:atom_restate:valence_state_change": 0.00036,
+      "editing_v2_active8_v1:bond_reorder:bond_order_decrease": 0.02316,
+      "editing_v2_active8_v1:bond_reorder:bond_order_increase": 0.02292,
+      "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_acyclic_source": 0.00148,
+      "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_cyclic_source": 0.05846,
+      "editing_v2_active8_v1:bond_reroute:single_atom_pendant_acyclic_source": 0.0012,
+      "editing_v2_active8_v1:bond_reroute:single_atom_pendant_cyclic_source": 0.13084,
+      "editing_v2_active8_v1:cycle_attach:open_from_articulated_polycyclic_ring_system": 0.00142,
+      "editing_v2_active8_v1:cycle_attach:open_from_monocyclic_ring_system": 0.0241,
+      "editing_v2_active8_v1:cycle_attach:open_from_nonarticulated_polycyclic_ring_system": 0.01971,
+      "editing_v2_active8_v1:cycle_insert:close_to_articulated_polycyclic_ring_system": 0.00158,
+      "editing_v2_active8_v1:cycle_insert:close_to_monocyclic_ring_system": 0.03736,
+      "editing_v2_active8_v1:cycle_insert:close_to_nonarticulated_polycyclic_ring_system": 0.02611,
+      "editing_v2_active8_v1:ring_system_restate:aromatization": 0.0476,
+      "editing_v2_active8_v1:ring_system_restate:coordinated_ring_bond_state_change": 0.00451,
+      "editing_v2_active8_v1:ring_system_restate:dearomatization": 0.05628
+    },
+    "family_share": {
+      "atom_delete": 0.17477,
+      "atom_insert": 0.16225,
+      "atom_restate": 0.20625,
+      "bond_reorder": 0.04607,
+      "bond_reroute": 0.19199,
+      "cycle_attach": 0.04523,
+      "cycle_insert": 0.06505,
+      "ring_system_restate": 0.10839
+    },
+    "note": "training-draw shares; use to reweight panel means so they estimate held-out performance UNDER THE SAMPLING LAW"
+  },
+  "entries_dropped_by_precedence": 9,
+  "entry_count": 14131,
+  "gates": {
+    "all_training_cells_present": true,
+    "all_training_families_present": true,
+    "every_source_in_validation_role": true,
+    "manifest_binds_frozen_law": true,
+    "no_source_in_another_role": true,
+    "panel_nonempty": true,
+    "zero_entry_overlap_with_train": true,
+    "zero_source_overlap_with_train": true
+  },
+  "library_sha256": "2d553afa5560319455855bf75306b6e9d5169180562be7b139cf14336f7ecb26",
+  "panel_composition": {
+    "cell_counts": {
+      "editing_v2_active8_v1:atom_delete:leaf_death": 635,
+      "editing_v2_active8_v1:atom_insert:one_neighbor_birth": 437,
+      "editing_v2_active8_v1:atom_restate:element_identity_change": 1865,
+      "editing_v2_active8_v1:atom_restate:valence_state_change": 4,
+      "editing_v2_active8_v1:bond_reorder:bond_order_decrease": 341,
+      "editing_v2_active8_v1:bond_reorder:bond_order_increase": 349,
+      "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_acyclic_source": 8,
+      "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_cyclic_source": 420,
+      "editing_v2_active8_v1:bond_reroute:single_atom_pendant_acyclic_source": 2,
+      "editing_v2_active8_v1:bond_reroute:single_atom_pendant_cyclic_source": 907,
+      "editing_v2_active8_v1:cycle_attach:open_from_articulated_polycyclic_ring_system": 17,
+      "editing_v2_active8_v1:cycle_attach:open_from_monocyclic_ring_system": 1459,
+      "editing_v2_active8_v1:cycle_attach:open_from_nonarticulated_polycyclic_ring_system": 2240,
+      "editing_v2_active8_v1:cycle_insert:close_to_articulated_polycyclic_ring_system": 21,
+      "editing_v2_active8_v1:cycle_insert:close_to_monocyclic_ring_system": 2128,
+      "editing_v2_active8_v1:cycle_insert:close_to_nonarticulated_polycyclic_ring_system": 2987,
+      "editing_v2_active8_v1:ring_system_restate:aromatization": 124,
+      "editing_v2_active8_v1:ring_system_restate:coordinated_ring_bond_state_change": 47,
+      "editing_v2_active8_v1:ring_system_restate:dearomatization": 140
+    },
+    "family_counts": {
+      "atom_delete": 635,
+      "atom_insert": 437,
+      "atom_restate": 1869,
+      "bond_reorder": 690,
+      "bond_reroute": 1337,
+      "cycle_attach": 3716,
+      "cycle_insert": 5136,
+      "ring_system_restate": 311
+    },
+    "family_share": {
+      "atom_delete": 0.04494,
+      "atom_insert": 0.03092,
+      "atom_restate": 0.13226,
+      "bond_reorder": 0.04883,
+      "bond_reroute": 0.09461,
+      "cycle_attach": 0.26297,
+      "cycle_insert": 0.36346,
+      "ring_system_restate": 0.02201
+    }
+  },
+  "panel_sha256": "b9caa79e99b93a64544c85e6c151404ce3f013f1df297f94f5f505580304ccfa",
+  "role": "validation",
+  "sampling_law_sha256": "59bee2b8ffb0252fc3be79a2adf625be3b800b5e361566f6cbb0c6f5bf994ac0",
+  "schema": "compose.editing_v2.eval_panel",
+  "schema_version": 1,
+  "source_count": 9422,
+  "split_sha256": "747d17b5935a7808a35919a5a17fb2bbf76ca2974d6169518c8a21bcf673df25",
+  "status": "FROZEN_EVAL_PANEL",
+  "thin_cells": {
+    "cells": {
+      "editing_v2_active8_v1:atom_restate:valence_state_change": 4,
+      "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_acyclic_source": 8,
+      "editing_v2_active8_v1:bond_reroute:single_atom_pendant_acyclic_source": 2,
+      "editing_v2_active8_v1:cycle_attach:open_from_articulated_polycyclic_ring_system": 17,
+      "editing_v2_active8_v1:cycle_insert:close_to_articulated_polycyclic_ring_system": 21
+    },
+    "note": "per-cell means over these are not usable gate signals",
+    "threshold_entries": 30
+  },
+  "training_manifest_sha256": "3325d442f51a993bc16c6e99870d72942d1721ac881a6aef44d21cc84cf176ca"
+}
