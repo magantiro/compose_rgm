@@ -1,0 +1,24 @@
+{
+  "aggregate_sha256": "d822b99f9e3338a9162fcab4f544d79b291591f93ce8c90eafbb48f9feac3a83",
+  "conclusion": "source_index_sha256 covers decision shards, not transition streams, so the two can differ while the roles agree -- and here they do agree, byte for byte. The panel's role gate and its final_test leak finding stand.",
+  "cross_check": "Raw role sizes minus the frozen split resolution's exclusions (10 controller_validation, 97 train, 6 validation, 0 final_test) reproduce the frozen kept counts exactly.",
+  "question": "The gate-zero decisions disagree on source_index_sha256 (local 2dd60909 vs the volume's v6). The eval panel's role gate, which caught 3 final_test sources, read partition_role from the LOCAL transition streams, so the panel's held-out claim depended on those streams matching the ones the corpus was compiled under.",
+  "result": "IDENTICAL",
+  "role_source_digests": {
+    "controller_validation": "fa699fe4f12918960eb4ae09a203091775f67762209c446fe3b84723071703ed",
+    "final_test": "7281f81eaf8080571c769ef0db6bb50bdeb59c429823cf6e48ae6205c60430e0",
+    "train": "fe99da330132f39cfc69dec2de506bcd57a2218b37154d76e909425ae888bbbd",
+    "validation": "ded30eda905fb16ed8620102a4e21a7a96c5d8eac3f4d621e8877660b72e35a3"
+  },
+  "schema": "compose.editing_v2.active8_stream_provenance",
+  "schema_version": 1,
+  "sources_per_role": {
+    "controller_validation": 43268,
+    "final_test": 35657,
+    "train": 564316,
+    "validation": 26587
+  },
+  "status": "PROVENANCE_EVIDENCE_ONLY_NO_AUTHORITY",
+  "stream_bytes": 348806238,
+  "stream_count": 328
+}
