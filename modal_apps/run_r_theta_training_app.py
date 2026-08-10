@@ -524,13 +524,35 @@ def train_segment(
                     k: v.detach().cpu().clone() for k, v in model.state_dict().items()
                 }
             families = summary["by_family"]
+            # REF-LAW leads the line because it is the number that selects.
+            # The first version of this print carried panel-native and
+            # deployment only, so the log showed everything except the
+            # quantity the checkpoint was actually chosen by.
+            bands = summary["by_support_band"]
             print(
-                f"[step {completed_steps:6,}] panel NLL "
-                f"{summary['panel_native']['mean_nll']:.4f}  "
-                f"deployment {summary['deployment_weighted_mean_nll']:.4f}  "
-                f"min p {summary['panel_native']['minimum_probability']:.3e}",
+                f"[step {completed_steps:6,}] REF-LAW "
+                f"{summary['reference_law_weighted_mean_nll']:.4f}  "
+                f"{'ELIGIBLE' if criterion[0] else 'GATED'}  "
+                f"native {summary['panel_native']['mean_nll']:.4f}  "
+                f"deployment {summary['deployment_weighted_mean_nll']:.4f}",
                 flush=True,
             )
+            if bands:
+                print(
+                    "           bands     "
+                    + "  ".join(f"{name} {value['mean_nll']:.3f}"
+                               for name, value in bands.items()),
+                    flush=True,
+                )
+            if summary["zero_mass_stratum"]:
+                print(
+                    "           zero-mass "
+                    + "  ".join(
+                        f"{name.split('|')[0][:6]}.{name.split('|')[1][:4]} "
+                        f"{value['mean_nll']:.2f}"
+                        for name, value in summary["zero_mass_stratum"].items()),
+                    flush=True,
+                )
             print(
                 "           families  "
                 + "  ".join(
