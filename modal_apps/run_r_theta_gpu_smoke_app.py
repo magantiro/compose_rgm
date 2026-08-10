@@ -78,6 +78,7 @@ def profile_r_theta_step(
     steps: int = 200,
     batch_size: int = 32,
     learning_rate: float = 1e-4,
+    scorer: str = "original",
 ) -> dict[str, Any]:
     """Paths come from RUN_PATHS.json on the volume, not the command line.
 
@@ -104,6 +105,19 @@ def profile_r_theta_step(
     from compose_v4.experiments.factorized_successor_training import (
         factorized_successor_identity_loss,
         forward_teacher_successor_batch,
+    )
+    from compose_v4.experiments.editing_v2_vectorized_successor_scoring import (
+        forward_teacher_successor_batch_vectorized,
+    )
+
+    # Which scorer is measured is recorded in the receipt, so a profile can
+    # never be attributed to the wrong implementation.
+    if scorer not in ("original", "vectorized"):
+        raise RuntimeError(f"unknown scorer {scorer!r}")
+    forward_scorer = (
+        forward_teacher_successor_batch
+        if scorer == "original"
+        else forward_teacher_successor_batch_vectorized
     )
 
     artifact_volume.reload()
@@ -265,7 +279,7 @@ def profile_r_theta_step(
 
         optimizer.zero_grad(set_to_none=True)
         mark = time.perf_counter()
-        prediction = forward_teacher_successor_batch(model, batch, fibers)
+        prediction = forward_scorer(model, batch, fibers)
         loss = factorized_successor_identity_loss(prediction, batch)
         torch.cuda.synchronize()
         if timed:
@@ -316,6 +330,7 @@ def profile_r_theta_step(
         "schema_version": 1,
         "status": "GPU_SMOKE_EVIDENCE_ONLY_NO_AUTHORITY",
         "gpu": "A10G",
+        "scorer": scorer,
         "steps": steps,
         "warmup_steps": warmup,
         "batch_size": batch_size,
@@ -410,6 +425,8 @@ def profile_r_theta_step(
 
 
 @app.local_entrypoint()
-def main(steps: int = 200, batch_size: int = 32) -> None:
-    receipt = profile_r_theta_step.remote(steps=steps, batch_size=batch_size)
+def main(steps: int = 200, batch_size: int = 32, scorer: str = "original") -> None:
+    receipt = profile_r_theta_step.remote(
+        steps=steps, batch_size=batch_size, scorer=scorer
+    )
     print(json.dumps(receipt, indent=2, sort_keys=True))
