@@ -1,0 +1,43 @@
+{
+  "decision": "keep batch 32; vectorize the per-alias scoring before any long run",
+  "finding": "Batching is a dead end for this model. Backward scales 14.3x for a 4x batch because the autograd graph is thousands of tiny nodes from the per-batch-element and per-alias Python loops; throughput falls 3x. VRAM headroom is irrelevant - the step was never memory-bound.",
+  "gpu": "A10G",
+  "measurements": [
+    {
+      "backward_ms": 503.6,
+      "backward_share": 0.794,
+      "batch_size": 32,
+      "data_ms": 4.84,
+      "examples_per_second": 50.45,
+      "forward_and_loss_ms": 114.93,
+      "host_to_device_ms": 1.05,
+      "optimizer_ms": 8.7,
+      "peak_vram_gb": 1.325,
+      "steps": 200,
+      "total_step_ms": 634.31
+    },
+    {
+      "backward_ms": 7220.25,
+      "backward_share": 0.93,
+      "batch_size": 128,
+      "data_ms": 17.67,
+      "examples_per_second": 16.49,
+      "forward_and_loss_ms": 506.94,
+      "host_to_device_ms": 3.0,
+      "optimizer_ms": 11.86,
+      "peak_vram_gb": 4.93,
+      "steps": 40,
+      "total_step_ms": 7761.6
+    }
+  ],
+  "scaling_32_to_128": {
+    "backward": 14.34,
+    "batch": 4.0,
+    "examples_per_second": 0.327,
+    "forward": 4.41,
+    "total_step": 12.24
+  },
+  "schema": "compose.editing_v2.r_theta_batch_probe",
+  "schema_version": 1,
+  "status": "BATCH_PROBE_EVIDENCE_ONLY_NO_AUTHORITY"
+}
