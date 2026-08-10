@@ -1,0 +1,154 @@
+{
+  "attribution_source": "consolidated_library+entry_provenance",
+  "available_composition": {
+    "by_family": {
+      "atom_delete": 0.1747,
+      "atom_insert": 0.1623,
+      "atom_restate": 0.2062,
+      "bond_reorder": 0.046,
+      "bond_reroute": 0.192,
+      "cycle_attach": 0.0452,
+      "cycle_insert": 0.0651,
+      "ring_system_restate": 0.1084
+    },
+    "synthetic_share": 0.4284
+  },
+  "constraints": {
+    "family_cap": 0.22,
+    "family_floor": 0.05,
+    "max_oversample": 3.0,
+    "synthetic_target": 0.18
+  },
+  "eligible_canonical_train_pairs": 136028,
+  "frozen_sha256": "b0cc66f168f1cf3e7a4b5bacfb1138059005251a10561d6961c3ea1c5dd7ac73",
+  "gates": {
+    "every_family_retained": true,
+    "no_family_above_cap": true,
+    "no_family_below_floor": true,
+    "no_stratum_oversampled_past_bound": true,
+    "real_chemistry_dominates": true,
+    "shares_sum_to_one": true,
+    "synthetic_at_or_below_supply_floor": true
+  },
+  "matched_validation_reserve_source_digest": "c7c3c462f17f",
+  "matched_validation_reserve_sources": 10653,
+  "precedence_held_out_sources": 97,
+  "realized_coefficients": {
+    "by_family": {
+      "atom_delete": 0.173,
+      "atom_insert": 0.1608,
+      "atom_restate": 0.2042,
+      "bond_reorder": 0.05,
+      "bond_reroute": 0.1902,
+      "cycle_attach": 0.05,
+      "cycle_insert": 0.0644,
+      "ring_system_restate": 0.1074
+    },
+    "synthetic_share": 0.2098
+  },
+  "residual_synthetic_excess": 0.029763,
+  "schema": "compose.editing_v2.training_sampling_law",
+  "schema_version": 2,
+  "status": "SAMPLING_LAW_EVIDENCE_ONLY_NO_AUTHORITY",
+  "strata": [
+    {
+      "available_pairs": 18367,
+      "draw_share": 0.172981,
+      "family": "atom_delete",
+      "oversample_factor": 1.2811,
+      "per_row_weight": 9.418056e-06,
+      "provenance": "real"
+    },
+    {
+      "available_pairs": 18465,
+      "draw_share": 0.160779,
+      "family": "atom_insert",
+      "oversample_factor": 1.1844,
+      "per_row_weight": 8.707232e-06,
+      "provenance": "real"
+    },
+    {
+      "available_pairs": 17396,
+      "draw_share": 0.204223,
+      "family": "atom_restate",
+      "oversample_factor": 1.5969,
+      "per_row_weight": 1.1739641e-05,
+      "provenance": "real"
+    },
+    {
+      "available_pairs": 780,
+      "draw_share": 0.017202,
+      "family": "bond_reorder",
+      "oversample_factor": 3.0,
+      "per_row_weight": 2.2054283e-05,
+      "provenance": "real"
+    },
+    {
+      "available_pairs": 5483,
+      "draw_share": 0.032798,
+      "family": "bond_reorder",
+      "oversample_factor": 0.8137,
+      "per_row_weight": 5.9817e-06,
+      "provenance": "synthetic"
+    },
+    {
+      "available_pairs": 20707,
+      "draw_share": 0.190193,
+      "family": "bond_reroute",
+      "oversample_factor": 1.2494,
+      "per_row_weight": 9.184959e-06,
+      "provenance": "real"
+    },
+    {
+      "available_pairs": 1529,
+      "draw_share": 0.033721,
+      "family": "cycle_attach",
+      "oversample_factor": 3.0,
+      "per_row_weight": 2.2054283e-05,
+      "provenance": "real"
+    },
+    {
+      "available_pairs": 4621,
+      "draw_share": 0.016279,
+      "family": "cycle_attach",
+      "oversample_factor": 0.4792,
+      "per_row_weight": 3.522831e-06,
+      "provenance": "synthetic"
+    },
+    {
+      "available_pairs": 1,
+      "draw_share": 2.2e-05,
+      "family": "cycle_insert",
+      "oversample_factor": 3.0,
+      "per_row_weight": 2.2054283e-05,
+      "provenance": "real"
+    },
+    {
+      "available_pairs": 8848,
+      "draw_share": 0.064405,
+      "family": "cycle_insert",
+      "oversample_factor": 0.9901,
+      "per_row_weight": 7.279e-06,
+      "provenance": "synthetic"
+    },
+    {
+      "available_pairs": 504,
+      "draw_share": 0.011115,
+      "family": "ring_system_restate",
+      "oversample_factor": 3.0,
+      "per_row_weight": 2.2054283e-05,
+      "provenance": "real"
+    },
+    {
+      "available_pairs": 14247,
+      "draw_share": 0.096282,
+      "family": "ring_system_restate",
+      "oversample_factor": 0.9193,
+      "per_row_weight": 6.75804e-06,
+      "provenance": "synthetic"
+    }
+  ],
+  "synthetic_supply_floor": 0.2098,
+  "synthetic_target_reachable": false,
+  "why_not_active8": "The local Active8 copy diverges from the volume's, and every field the walk would attribute is already carried by the objects the training loader reads. A second walk could only agree or describe a population the sampler never draws from."
+}

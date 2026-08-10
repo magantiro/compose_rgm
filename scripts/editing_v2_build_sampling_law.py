@@ -131,11 +131,44 @@ def allocate(rows: list[dict], *, floor: float, cap: float, synthetic_target: fl
     families = sorted({r["family"] for r in rows})
     total = len(rows)
 
-    # 1. family targets: availability, clamped, renormalized
+    # 1. family targets: availability, clamped to [floor, cap], normalized.
+    #
+    #    Clamping once and then renormalizing does NOT deliver the floor: the
+    #    renormalization divides the clamped values by their sum, so a family
+    #    pinned AT the floor lands just under it whenever that sum exceeds 1.
+    #    MEASURED under the previous law: floor 0.05 claimed, bond_reorder and
+    #    cycle_attach both delivered 0.0497. Small, but the artifact asserted a
+    #    guarantee it did not keep.
+    #
+    #    Water-filling instead: pin whichever family violates a bound, hold it
+    #    exactly there, and redistribute the remaining mass proportionally among
+    #    the families still free. Each pass pins at least one family, so it
+    #    terminates, and every bound holds exactly on exit.
     raw = {f: sum(v for (fam, _), v in supply.items() if fam == f) / total for f in families}
-    clamped = {f: min(max(raw[f], floor), cap) for f in families}
-    scale = sum(clamped.values())
-    target = {f: clamped[f] / scale for f in families}
+    pinned: dict[str, float] = {}
+    free = list(families)
+    while True:
+        room = 1.0 - sum(pinned.values())
+        weight = sum(raw[f] for f in free)
+        share = {f: (room * raw[f] / weight if weight > 0 else room / len(free))
+                 for f in free}
+        low = [f for f in free if share[f] < floor]
+        high = [f for f in free if share[f] > cap]
+        if not low and not high:
+            break
+        for family in low:
+            pinned[family] = floor
+        for family in high:
+            pinned[family] = cap
+        free = [f for f in free if f not in pinned]
+        if not free:
+            break
+    target = {**pinned, **{f: share[f] for f in free}}
+    drift = sum(target.values()) - 1.0
+    if abs(drift) > 1e-9:
+        raise RuntimeError(
+            f"family targets sum to {sum(target.values())!r}; floor {floor} and "
+            f"cap {cap} cannot both hold over {len(families)} families")
 
     # 2. prefer real within each family, OVERSAMPLING real up to
     #    max_oversample before falling back to synthetic.
@@ -177,7 +210,16 @@ def allocate(rows: list[dict], *, floor: float, cap: float, synthetic_target: fl
             draw[(family, True)] -= move
             draw[(family, False)] += move
             excess -= move
-    return {"supply": supply, "target": target, "draw": draw, "total": total}
+    else:
+        excess = 0.0
+    # Residual excess means the synthetic target is BELOW what the supply can
+    # deliver: every family with real headroom has been drained and what remains
+    # is synthetic-only supply, which the trim refuses to touch because doing so
+    # would reintroduce the capability hole this corpus was repaired to close.
+    # Reported so "target not met" can be told apart from "target unreachable".
+    return {"supply": supply, "target": target, "draw": draw, "total": total,
+            "residual_synthetic_excess": max(excess, 0.0),
+            "synthetic_supply_floor": sum(v for (_, syn), v in draw.items() if syn)}
 
 
 def main() -> int:
