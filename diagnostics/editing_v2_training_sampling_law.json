@@ -1,0 +1,115 @@
+{
+  "available_composition": {
+    "by_family": {
+      "atom_delete": 0.1666,
+      "atom_insert": 0.1525,
+      "atom_restate": 0.2149,
+      "bond_reorder": 0.0467,
+      "bond_reroute": 0.2001,
+      "cycle_attach": 0.0465,
+      "cycle_insert": 0.0671,
+      "ring_system_restate": 0.1057
+    },
+    "synthetic_share": 0.4461
+  },
+  "constraints": {
+    "family_cap": 0.22,
+    "family_floor": 0.05,
+    "synthetic_target": 0.18
+  },
+  "eligible_canonical_train_pairs": 144870,
+  "frozen_sha256": "a8550bbda704f423effa051db3c643ecdd16e0222e1b313a35ccaf4ff913eff9",
+  "held_out_source_exclusions": 97,
+  "realized_coefficients": {
+    "by_family": {
+      "atom_delete": 0.1655,
+      "atom_insert": 0.1514,
+      "atom_restate": 0.2135,
+      "bond_reorder": 0.0497,
+      "bond_reroute": 0.1987,
+      "cycle_attach": 0.0497,
+      "cycle_insert": 0.0666,
+      "ring_system_restate": 0.1049
+    },
+    "synthetic_share": 0.2521
+  },
+  "schema": "compose.editing_v2.training_sampling_law",
+  "schema_version": 1,
+  "status": "SAMPLING_LAW_EVIDENCE_ONLY_NO_AUTHORITY",
+  "strata": [
+    {
+      "available_pairs": 18293,
+      "draw_share": 0.165484,
+      "family": "atom_delete",
+      "oversample_factor": 1.3105,
+      "per_row_weight": 9.046302e-06,
+      "provenance": "real"
+    },
+    {
+      "available_pairs": 18080,
+      "draw_share": 0.151422,
+      "family": "atom_insert",
+      "oversample_factor": 1.2133,
+      "per_row_weight": 8.375126e-06,
+      "provenance": "real"
+    },
+    {
+      "available_pairs": 19613,
+      "draw_share": 0.213469,
+      "family": "atom_restate",
+      "oversample_factor": 1.5768,
+      "per_row_weight": 1.0884075e-05,
+      "provenance": "real"
+    },
+    {
+      "available_pairs": 910,
+      "draw_share": 0.018844,
+      "family": "bond_reorder",
+      "oversample_factor": 3.0,
+      "per_row_weight": 2.0708221e-05,
+      "provenance": "real"
+    },
+    {
+      "available_pairs": 5857,
+      "draw_share": 0.030817,
+      "family": "bond_reorder",
+      "oversample_factor": 0.7622,
+      "per_row_weight": 5.261597e-06,
+      "provenance": "synthetic"
+    },
+    {
+      "available_pairs": 23346,
+      "draw_share": 0.198715,
+      "family": "bond_reroute",
+      "oversample_factor": 1.2331,
+      "per_row_weight": 8.511744e-06,
+      "provenance": "real"
+    },
+    {
+      "available_pairs": 6733,
+      "draw_share": 0.049662,
+      "family": "cycle_attach",
+      "oversample_factor": 1.0685,
+      "per_row_weight": 7.375858e-06,
+      "provenance": "synthetic"
+    },
+    {
+      "available_pairs": 9721,
+      "draw_share": 0.066647,
+      "family": "cycle_insert",
+      "oversample_factor": 0.9932,
+      "per_row_weight": 6.85603e-06,
+      "provenance": "synthetic"
+    },
+    {
+      "available_pairs": 15306,
+      "draw_share": 0.104938,
+      "family": "ring_system_restate",
+      "oversample_factor": 0.9932,
+      "per_row_weight": 6.85603e-06,
+      "provenance": "synthetic"
+    }
+  ],
+  "synthetic_floor_from_supply": 0.2212,
+  "synthetic_target_met": false
+}
