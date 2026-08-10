@@ -6,7 +6,32 @@
     "speedup": 0.96,
     "vectorized": 27.55
   },
+  "decision": "Keep the original as default; the vectorization is verified-correct and 4.6% faster but does not justify changing the objective's core path for a claim-bearing run. At 52.87 examples/s an epoch is 45 min and $0.82, so the pilot is affordable without further optimization. If throughput becomes binding, profile inside the model with torch.profiler rather than guessing again.",
   "device": "cpu",
+  "diagnosis_was_wrong": "The prediction was that backward would fall from ~500 ms to tens of ms because the per-alias Python loops generate thousands of tiny autograd nodes. Collapsing those into a handful moved backward by 2%. The alias loop was therefore NOT the dominant backward cost. Backward is 5.1x forward, which is unusual, so the remaining ~490 ms is inside _factorized_action_probability_tables (GNN encode and the per-family action-table heads) -- the batched part, which is unprofiled. The batch-scaling evidence (backward 14.3x for 4x batch) is real but has another cause.",
+  "gpu_measurement": {
+    "batch_size": 32,
+    "change": {
+      "backward": -0.021,
+      "forward": -0.161,
+      "throughput": 0.048,
+      "total_step": -0.046
+    },
+    "device": "A10G",
+    "original": {
+      "backward_ms": 503.6,
+      "examples_per_second": 50.45,
+      "forward_and_loss_ms": 114.93,
+      "total_step_ms": 634.31
+    },
+    "steps": 200,
+    "vectorized": {
+      "backward_ms": 493.19,
+      "examples_per_second": 52.87,
+      "forward_and_loss_ms": 96.43,
+      "total_step_ms": 605.26
+    }
+  },
   "max_abs_difference": {
     "family_log_probabilities": 0.0,
     "gradient_any_trainable_parameter": 7.451e-09,
