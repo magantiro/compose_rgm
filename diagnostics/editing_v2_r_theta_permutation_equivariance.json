@@ -1,0 +1,25 @@
+{
+  "finding": "The architecture is slot-permutation equivariant to float32 epsilon across every action table. Positional memorization is not the mechanism.",
+  "hypothesis": "The scorer keys on slot position, so it can memorize 'the atom at slot 7 of this molecule' rather than transferable chemistry -- which would explain fitting training and failing held out for the atom-level families.",
+  "max_abs_sorted_difference": {
+    "atom_delete": 1e-06,
+    "atom_restate": 1e-06,
+    "bond_reorder": 0.0,
+    "bond_reroute": 0.0,
+    "cycle_attach": 0.0,
+    "cycle_insert": 0.0,
+    "grow_connected": 1e-06,
+    "grow_root": 0.0,
+    "ring_system_delete": 0.0,
+    "ring_system_grow": 0.0,
+    "ring_system_restate": 0.0
+  },
+  "measurement_artifact": "family_log_probabilities and action_log_z compared as nan because disabled families carry -inf by design (enabled = isfinite(action_log_z)) and -inf minus -inf is nan. Those should have been masked; it is not a finding.",
+  "method": "Relabel the occupied slots of a validation molecule (same molecule, different slot order) and compare the SORTED per-table logits. Equivariance is structural, so no trained checkpoint is needed, and comparing sorted values avoids remapping teacher coordinates under the permutation.",
+  "open": "The mechanism. No evidence-backed candidate remains. An untested orientation: the failing families select among many chemically similar sites within one molecule (219-420 marks over ~25 atoms) while the transferring ones select among coarser topological objects. A scorer that assigns near-identical embeddings to near-identical atoms could fit training by using the whole-molecule embedding to break ties, and that tie-breaking would not transfer -- but this has NOT been measured.",
+  "result": "REFUTED",
+  "schema": "compose.editing_v2.r_theta_permutation_equivariance",
+  "schema_version": 1,
+  "status": "DIAGNOSTIC_EVIDENCE_ONLY_NO_AUTHORITY",
+  "still_established": "The transfer failure is real and family-specific (+2.86 to +4.55 nats on 72.8% of the draw, about zero for the other four) and is not explained by branching, coverage, capability-cell mix, or slot position."
+}
