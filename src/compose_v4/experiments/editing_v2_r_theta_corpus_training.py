@@ -270,7 +270,23 @@ def evaluate_panel(
                     .cpu()
                     .tolist()
                 )
-                for entry, value in zip(entries, log_probabilities, strict=True):
+                # The joint NLL cannot say WHICH half is wrong. The scorer
+                # already returns both factors of
+                #     P(y|x) = P(F|x) . P(y|x,F)
+                # and discarding them means a +4 nat gap cannot be attributed
+                # to the family gate or to site selection -- which imply
+                # different fixes. Keep them.
+                family_terms = (
+                    prediction.teacher_family_log_probability.detach().cpu().tolist()
+                )
+                identity_terms = (
+                    prediction.selected_within_teacher_family_log_probability.detach()
+                    .cpu()
+                    .tolist()
+                )
+                for entry, value, family_term, identity_term in zip(
+                    entries, log_probabilities, family_terms, identity_terms, strict=True
+                ):
                     rows.append(
                         {
                             "entry_id": entry.entry_id,
@@ -279,6 +295,8 @@ def evaluate_panel(
                             "teacher_successor_log_probability": float(value),
                             "teacher_successor_probability": math.exp(float(value)),
                             "teacher_successor_nll": -float(value),
+                            "family_nll": -float(family_term),
+                            "identity_nll": -float(identity_term),
                         }
                     )
     finally:
