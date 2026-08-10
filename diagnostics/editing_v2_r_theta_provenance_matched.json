@@ -1,0 +1,255 @@
+{
+  "by_stratum": {
+    "atom_delete|real": {
+      "available": true,
+      "family_gap": 1.898266997897702,
+      "held_out": {
+        "entries": 103,
+        "family_nll": 3.3316058892648197,
+        "identity_nll": 2.448038182212311,
+        "joint_nll": 5.779644073791874
+      },
+      "identity_gap": 1.755119713895915,
+      "joint_gap": 3.653386713214291,
+      "train": {
+        "entries": 1200,
+        "family_nll": 1.4333388913671177,
+        "identity_nll": 0.692918468316396,
+        "joint_nll": 2.126257360577583
+      }
+    },
+    "atom_delete|synthetic": {
+      "available": true,
+      "family_gap": 0.8023582837390966,
+      "held_out": {
+        "entries": 532,
+        "family_nll": 3.184104805602167,
+        "identity_nll": 2.387821888341043,
+        "joint_nll": 5.571926695063598
+      },
+      "identity_gap": 1.8813623776534174,
+      "joint_gap": 2.683720662512902,
+      "train": {
+        "entries": 165,
+        "family_nll": 2.3817465218630702,
+        "identity_nll": 0.5064595106876257,
+        "joint_nll": 2.888206032550696
+      }
+    },
+    "atom_insert|real": {
+      "available": false,
+      "held_out_entries": 21,
+      "train_entries": 1200
+    },
+    "atom_insert|synthetic": {
+      "available": false,
+      "held_out_entries": 416,
+      "train_entries": 12
+    },
+    "atom_restate|real": {
+      "available": true,
+      "family_gap": 0.3373597163128188,
+      "held_out": {
+        "entries": 753,
+        "family_nll": 1.8353370485869378,
+        "identity_nll": 3.258139854566668,
+        "joint_nll": 5.093476902124575
+      },
+      "identity_gap": 1.2912844821278398,
+      "joint_gap": 1.6286441990507554,
+      "train": {
+        "entries": 1200,
+        "family_nll": 1.497977332274119,
+        "identity_nll": 1.9668553724388282,
+        "joint_nll": 3.4648327030738195
+      }
+    },
+    "atom_restate|synthetic": {
+      "available": true,
+      "family_gap": 0.6453715416438199,
+      "held_out": {
+        "entries": 1116,
+        "family_nll": 2.8381112445960337,
+        "identity_nll": 6.508807505117095,
+        "joint_nll": 9.346918739725613
+      },
+      "identity_gap": 4.128403896651289,
+      "joint_gap": 4.773775429453837,
+      "train": {
+        "entries": 312,
+        "family_nll": 2.1927397029522138,
+        "identity_nll": 2.380403608465806,
+        "joint_nll": 4.573143310271776
+      }
+    },
+    "bond_reorder|real": {
+      "available": true,
+      "family_gap": -0.6702837559904298,
+      "held_out": {
+        "entries": 95,
+        "family_nll": 2.264833516823618,
+        "identity_nll": 1.5905418897929944,
+        "joint_nll": 3.855375410381116
+      },
+      "identity_gap": 0.2655099352303103,
+      "joint_gap": -0.4047738168448456,
+      "train": {
+        "entries": 593,
+        "family_nll": 2.9351172728140478,
+        "identity_nll": 1.325031954562684,
+        "joint_nll": 4.260149227225962
+      }
+    },
+    "bond_reorder|synthetic": {
+      "available": true,
+      "family_gap": -0.20958487168830997,
+      "held_out": {
+        "entries": 595,
+        "family_nll": 2.0129421760054194,
+        "identity_nll": 1.561898314351795,
+        "joint_nll": 3.5748404914591494
+      },
+      "identity_gap": 0.15561041742062365,
+      "joint_gap": -0.053974453066410355,
+      "train": {
+        "entries": 1200,
+        "family_nll": 2.2225270476937293,
+        "identity_nll": 1.4062878969311714,
+        "joint_nll": 3.6288149445255597
+      }
+    },
+    "bond_reroute|real": {
+      "available": true,
+      "family_gap": 0.27643249724810337,
+      "held_out": {
+        "entries": 697,
+        "family_nll": 1.495312297190279,
+        "identity_nll": 3.3388644855367917,
+        "joint_nll": 4.834176780845719
+      },
+      "identity_gap": 1.040568219288963,
+      "joint_gap": 1.3170007131159278,
+      "train": {
+        "entries": 1200,
+        "family_nll": 1.2188797999421757,
+        "identity_nll": 2.298296266247829,
+        "joint_nll": 3.517176067729791
+      }
+    },
+    "bond_reroute|synthetic": {
+      "available": true,
+      "family_gap": 0.1783306855502742,
+      "held_out": {
+        "entries": 640,
+        "family_nll": 2.277937406208366,
+        "identity_nll": 5.331856204196811,
+        "joint_nll": 7.6097936075180765
+      },
+      "identity_gap": 2.3181690328645628,
+      "joint_gap": 2.4964997151406934,
+      "train": {
+        "entries": 308,
+        "family_nll": 2.099606720658092,
+        "identity_nll": 3.013687171332248,
+        "joint_nll": 5.113293892377383
+      }
+    },
+    "cycle_attach|real": {
+      "available": true,
+      "family_gap": -0.056920009983813635,
+      "held_out": {
+        "entries": 1200,
+        "family_nll": 2.237526680032412,
+        "identity_nll": 2.573876061538855,
+        "joint_nll": 4.811402745048205
+      },
+      "identity_gap": 0.06380751683268082,
+      "joint_gap": 0.0068875110239554616,
+      "train": {
+        "entries": 683,
+        "family_nll": 2.2944466900162257,
+        "identity_nll": 2.5100685447061744,
+        "joint_nll": 4.804515234024249
+      }
+    },
+    "cycle_attach|synthetic": {
+      "available": true,
+      "family_gap": -0.001898733675480102,
+      "held_out": {
+        "entries": 1200,
+        "family_nll": 2.4105366586645443,
+        "identity_nll": 2.4566008879741035,
+        "joint_nll": 4.867137544353803
+      },
+      "identity_gap": -0.09953710397084548,
+      "joint_gap": -0.10143583714961935,
+      "train": {
+        "entries": 1200,
+        "family_nll": 2.4124353923400244,
+        "identity_nll": 2.556137991944949,
+        "joint_nll": 4.968573381503423
+      }
+    },
+    "cycle_insert|real": {
+      "available": false,
+      "held_out_entries": 0,
+      "train_entries": 1
+    },
+    "cycle_insert|synthetic": {
+      "available": true,
+      "family_gap": -0.14367682516730085,
+      "held_out": {
+        "entries": 1200,
+        "family_nll": 0.7510556197197487,
+        "identity_nll": 1.5859729813039303,
+        "joint_nll": 2.3370286002755165
+      },
+      "identity_gap": 0.5370471755384156,
+      "joint_gap": 0.3933703508973121,
+      "train": {
+        "entries": 1200,
+        "family_nll": 0.8947324448870495,
+        "identity_nll": 1.0489258057655146,
+        "joint_nll": 1.9436582493782044
+      }
+    },
+    "ring_system_restate|real": {
+      "available": false,
+      "held_out_entries": 38,
+      "train_entries": 197
+    },
+    "ring_system_restate|synthetic": {
+      "available": true,
+      "family_gap": 0.14501966757100715,
+      "held_out": {
+        "entries": 273,
+        "family_nll": 1.5947644718455307,
+        "identity_nll": 0.4388137154090099,
+        "joint_nll": 2.033578186463087
+      },
+      "identity_gap": -0.11893643375999557,
+      "joint_gap": 0.026083232940007584,
+      "train": {
+        "entries": 1200,
+        "family_nll": 1.4497448042745236,
+        "identity_nll": 0.5577501491690054,
+        "joint_nll": 2.0074949535230795
+      }
+    }
+  },
+  "checkpoint_step": 1750,
+  "headline": "BOTH. Provenance matching removes roughly 60% of the atom_restate gap (4.55 -> 1.63) and 55% of bond_reroute (2.86 -> 1.32), so the earlier 'representation failure' reading was premature and the panel does confound teacher-policy shift with source generalization. But a residual persists after matching (+1.63, +1.32, +3.65) and is concentrated in the IDENTITY factor: outside atom_delete the family gate is calibrated (fam gap +0.18 to +0.65) while within-family site selection carries 79-93% of what is left.",
+  "minimum_stratum": 40,
+  "per_stratum_cap": 1200,
+  "positive_control": "cycle_attach real->real is +0.01 on 1,200 held-out real rows. Real endpoint-derived transfer is achievable in this setup, so the objective is not broken in general.",
+  "reading": "Within-provenance gaps near zero mean the earlier per-family gaps measured teacher-policy shift, not failure to generalize. A gap concentrated in family_gap indicts the family gate; one in identity_gap indicts the candidate scorer.",
+  "schema": "compose.editing_v2.r_theta_provenance_matched",
+  "status": "DIAGNOSTIC_EVIDENCE_ONLY_NO_AUTHORITY",
+  "unresolved": {
+    "atom_delete_real": "103 held-out rows, just above the 40-entry floor",
+    "atom_insert": "21 real held-out entries; unresolvable without a re-freeze, and 15.1% of the law",
+    "cycle_insert": "0 real held-out entries",
+    "training_maturity": "checkpoint at step 1,500, about 33% of one epoch; no evidence on whether gaps narrow",
+    "volume_confound": "n_tr capped at 1,200, so training volume cannot be ranked above that and is confounded with difficulty in the thin synthetic atom strata (165, 312, 308)"
+  }
+}
