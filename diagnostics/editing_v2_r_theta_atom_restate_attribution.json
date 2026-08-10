@@ -1,0 +1,336 @@
+{
+  "attribution": {
+    "atom_delete": {
+      "dominant_factor": "family_gate",
+      "family_delta": -0.0579,
+      "identity_delta": 0.0126,
+      "joint_delta": -0.0452
+    },
+    "atom_insert": {
+      "dominant_factor": "identity_scorer",
+      "family_delta": 0.009,
+      "identity_delta": -0.0356,
+      "joint_delta": -0.0265
+    },
+    "atom_restate": {
+      "dominant_factor": "identity_scorer",
+      "family_delta": -0.0059,
+      "identity_delta": 0.0082,
+      "joint_delta": 0.0023
+    },
+    "bond_reorder": {
+      "dominant_factor": "family_gate",
+      "family_delta": 0.0978,
+      "identity_delta": -0.0618,
+      "joint_delta": 0.036
+    },
+    "bond_reroute": {
+      "dominant_factor": "family_gate",
+      "family_delta": 0.0869,
+      "identity_delta": -0.0113,
+      "joint_delta": 0.0756
+    },
+    "cycle_attach": {
+      "dominant_factor": "family_gate",
+      "family_delta": -0.2104,
+      "identity_delta": -0.0109,
+      "joint_delta": -0.2213
+    },
+    "cycle_insert": {
+      "dominant_factor": "family_gate",
+      "family_delta": 0.3166,
+      "identity_delta": -0.0431,
+      "joint_delta": 0.2735
+    },
+    "ring_system_restate": {
+      "dominant_factor": "family_gate",
+      "family_delta": -0.004,
+      "identity_delta": -0.0015,
+      "joint_delta": -0.0055
+    }
+  },
+  "by_cell_final": {
+    "editing_v2_active8_v1:atom_delete:leaf_death": {
+      "entries": 2641,
+      "family_nll": 1.9039172629703405,
+      "identity_nll": 1.0047250721590937,
+      "joint_nll": 2.9086423342266756
+    },
+    "editing_v2_active8_v1:atom_insert:one_neighbor_birth": {
+      "entries": 2427,
+      "family_nll": 1.7769450044584068,
+      "identity_nll": 3.3502521891504538,
+      "joint_nll": 5.127197194796901
+    },
+    "editing_v2_active8_v1:atom_restate:element_identity_change": {
+      "entries": 3097,
+      "family_nll": 1.8455232841124796,
+      "identity_nll": 3.4567973249990938,
+      "joint_nll": 5.302320608447589
+    },
+    "editing_v2_active8_v1:bond_reorder:bond_order_decrease": {
+      "entries": 351,
+      "family_nll": 2.2025016898825296,
+      "identity_nll": 1.2520802404593538,
+      "joint_nll": 3.454581928558839
+    },
+    "editing_v2_active8_v1:bond_reorder:bond_order_increase": {
+      "entries": 346,
+      "family_nll": 2.2081732467096837,
+      "identity_nll": 1.4700433032404137,
+      "joint_nll": 3.678216549357927
+    },
+    "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_cyclic_source": {
+      "entries": 894,
+      "family_nll": 1.8886060430699547,
+      "identity_nll": 3.0786084112705,
+      "joint_nll": 4.967214453273705
+    },
+    "editing_v2_active8_v1:bond_reroute:single_atom_pendant_cyclic_source": {
+      "entries": 1946,
+      "family_nll": 1.604769953598344,
+      "identity_nll": 2.391328902400165,
+      "joint_nll": 3.99609885817319
+    },
+    "editing_v2_active8_v1:cycle_attach:open_from_monocyclic_ring_system": {
+      "entries": 357,
+      "family_nll": 1.3673496876819795,
+      "identity_nll": 2.321798669189966,
+      "joint_nll": 3.6891483492544053
+    },
+    "editing_v2_active8_v1:cycle_attach:open_from_nonarticulated_polycyclic_ring_system": {
+      "entries": 299,
+      "family_nll": 1.4246709385145468,
+      "identity_nll": 2.774875356999528,
+      "joint_nll": 4.199546290879265
+    },
+    "editing_v2_active8_v1:cycle_insert:close_to_monocyclic_ring_system": {
+      "entries": 561,
+      "family_nll": 0.6035227249073506,
+      "identity_nll": 0.693412448955225,
+      "joint_nll": 1.2969351717920015
+    },
+    "editing_v2_active8_v1:cycle_insert:close_to_nonarticulated_polycyclic_ring_system": {
+      "entries": 392,
+      "family_nll": 1.3804863891790013,
+      "identity_nll": 1.533755384504377,
+      "joint_nll": 2.914241773741586
+    },
+    "editing_v2_active8_v1:ring_system_restate:aromatization": {
+      "entries": 736,
+      "family_nll": 0.5769609878707738,
+      "identity_nll": 0.142434699417841,
+      "joint_nll": 0.7193956876011647
+    },
+    "editing_v2_active8_v1:ring_system_restate:coordinated_ring_bond_state_change": {
+      "entries": 65,
+      "family_nll": 1.1089110295897207,
+      "identity_nll": 0.8991857490179918,
+      "joint_nll": 2.0080967765588027
+    },
+    "editing_v2_active8_v1:ring_system_restate:dearomatization": {
+      "entries": 821,
+      "family_nll": 1.4886126627194969,
+      "identity_nll": 0.7882588834396306,
+      "joint_nll": 2.276871545814277
+    }
+  },
+  "by_cell_selected": {
+    "editing_v2_active8_v1:atom_delete:leaf_death": {
+      "entries": 2641,
+      "family_nll": 1.961779806479411,
+      "identity_nll": 0.9921123253852299,
+      "joint_nll": 2.9538921320903304
+    },
+    "editing_v2_active8_v1:atom_insert:one_neighbor_birth": {
+      "entries": 2427,
+      "family_nll": 1.7678980939320492,
+      "identity_nll": 3.385844484910977,
+      "joint_nll": 5.153742580684949
+    },
+    "editing_v2_active8_v1:atom_restate:element_identity_change": {
+      "entries": 3097,
+      "family_nll": 1.8521612429180028,
+      "identity_nll": 3.4477607238897017,
+      "joint_nll": 5.299921966653737
+    },
+    "editing_v2_active8_v1:bond_reorder:bond_order_decrease": {
+      "entries": 351,
+      "family_nll": 2.130140608999125,
+      "identity_nll": 1.3061425283423855,
+      "joint_nll": 3.436283137426417
+    },
+    "editing_v2_active8_v1:bond_reorder:bond_order_increase": {
+      "entries": 346,
+      "family_nll": 2.08454341144231,
+      "identity_nll": 1.5397695301671248,
+      "joint_nll": 3.6243129403604937
+    },
+    "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_cyclic_source": {
+      "entries": 894,
+      "family_nll": 1.7906762513538335,
+      "identity_nll": 2.7666899737895734,
+      "joint_nll": 4.557366223676626
+    },
+    "editing_v2_active8_v1:bond_reroute:single_atom_pendant_cyclic_source": {
+      "entries": 1946,
+      "family_nll": 1.522578769848746,
+      "identity_nll": 2.551048149920441,
+      "joint_nll": 4.073626920841213
+    },
+    "editing_v2_active8_v1:cycle_attach:open_from_monocyclic_ring_system": {
+      "entries": 357,
+      "family_nll": 1.605545779570144,
+      "identity_nll": 2.336673752934325,
+      "joint_nll": 3.942219523154721
+    },
+    "editing_v2_active8_v1:cycle_attach:open_from_nonarticulated_polycyclic_ring_system": {
+      "entries": 299,
+      "family_nll": 1.591966651056124,
+      "identity_nll": 2.7843373192592606,
+      "joint_nll": 4.3763039674248585
+    },
+    "editing_v2_active8_v1:cycle_insert:close_to_monocyclic_ring_system": {
+      "entries": 561,
+      "family_nll": 0.43833901832351685,
+      "identity_nll": 0.7478055039590056,
+      "joint_nll": 1.1861445240795931
+    },
+    "editing_v2_active8_v1:cycle_insert:close_to_nonarticulated_polycyclic_ring_system": {
+      "entries": 392,
+      "family_nll": 0.8813102564023694,
+      "identity_nll": 1.5689532028283089,
+      "joint_nll": 2.4502634594635087
+    },
+    "editing_v2_active8_v1:ring_system_restate:aromatization": {
+      "entries": 736,
+      "family_nll": 0.6322452246183631,
+      "identity_nll": 0.20815165197912036,
+      "joint_nll": 0.8403968762748105
+    },
+    "editing_v2_active8_v1:ring_system_restate:coordinated_ring_bond_state_change": {
+      "entries": 65,
+      "family_nll": 0.941015800783554,
+      "identity_nll": 0.8485835181979032,
+      "joint_nll": 1.789599305849809
+    },
+    "editing_v2_active8_v1:ring_system_restate:dearomatization": {
+      "entries": 821,
+      "family_nll": 1.4603060108862462,
+      "identity_nll": 0.7362679407799142,
+      "joint_nll": 2.1965739504138098
+    }
+  },
+  "by_family_final": {
+    "atom_delete": {
+      "entries": 2641,
+      "family_nll": 1.9039172629703405,
+      "identity_nll": 1.0047250721590937,
+      "joint_nll": 2.9086423342266756
+    },
+    "atom_insert": {
+      "entries": 2427,
+      "family_nll": 1.7769450044584068,
+      "identity_nll": 3.3502521891504538,
+      "joint_nll": 5.127197194796901
+    },
+    "atom_restate": {
+      "entries": 3106,
+      "family_nll": 1.848702893409511,
+      "identity_nll": 3.466175812141249,
+      "joint_nll": 5.314878705234122
+    },
+    "bond_reorder": {
+      "entries": 697,
+      "family_nll": 2.205317125552824,
+      "identity_nll": 1.3602799818112141,
+      "joint_nll": 3.5655971061721594
+    },
+    "bond_reroute": {
+      "entries": 2879,
+      "family_nll": 1.693769573792686,
+      "identity_nll": 2.6239974305173432,
+      "joint_nll": 4.317767005448707
+    },
+    "cycle_attach": {
+      "entries": 682,
+      "family_nll": 1.3809918184324967,
+      "identity_nll": 2.534826999186071,
+      "joint_nll": 3.9158188104629517
+    },
+    "cycle_insert": {
+      "entries": 977,
+      "family_nll": 0.9450097089791109,
+      "identity_nll": 1.0736428974892185,
+      "joint_nll": 2.018652604448637
+    },
+    "ring_system_restate": {
+      "entries": 1622,
+      "family_nll": 1.0597247226195612,
+      "identity_nll": 0.49965447334256297,
+      "joint_nll": 1.5593791958472878
+    }
+  },
+  "by_family_selected": {
+    "atom_delete": {
+      "entries": 2641,
+      "family_nll": 1.961779806479411,
+      "identity_nll": 0.9921123253852299,
+      "joint_nll": 2.9538921320903304
+    },
+    "atom_insert": {
+      "entries": 2427,
+      "family_nll": 1.7678980939320492,
+      "identity_nll": 3.385844484910977,
+      "joint_nll": 5.153742580684949
+    },
+    "atom_restate": {
+      "entries": 3106,
+      "family_nll": 1.854639277178782,
+      "identity_nll": 3.4579482893366547,
+      "joint_nll": 5.312587566553817
+    },
+    "bond_reorder": {
+      "entries": 697,
+      "family_nll": 2.107505558275082,
+      "identity_nll": 1.4221180557905344,
+      "joint_nll": 3.5296236134883836
+    },
+    "bond_reroute": {
+      "entries": 2879,
+      "family_nll": 1.6068950989007038,
+      "identity_nll": 2.635299328674497,
+      "joint_nll": 4.242194428051375
+    },
+    "cycle_attach": {
+      "entries": 682,
+      "family_nll": 1.5913851343728929,
+      "identity_nll": 2.5456914761898455,
+      "joint_nll": 4.137076604925642
+    },
+    "cycle_insert": {
+      "entries": 977,
+      "family_nll": 0.6284076299479263,
+      "identity_nll": 1.116704102388241,
+      "joint_nll": 1.745111734010546
+    },
+    "ring_system_restate": {
+      "entries": 1622,
+      "family_nll": 1.0637544681304898,
+      "identity_nll": 0.5011304093217053,
+      "joint_nll": 1.5648848761456449
+    }
+  },
+  "external_cohort_at_selected": {
+    "entries": 14131,
+    "family_nll": 1.780288899674662,
+    "identity_nll": 2.5561119172160973,
+    "joint_nll": 4.336400817149376
+  },
+  "external_cohort_note": "Cross-cohort diagnostic, never a selection input. Its support composition is an accident of how those shards were mined -- 42.6% at band 0 against the training population's 19.3%.",
+  "final_step": 4251,
+  "reading": "family_delta dominant means the gate is reallocating mass away from the family as others improve, which is an allocation effect and may be correct learning. identity_delta dominant means the model is choosing worse sites WITHIN the family, which is real capability degradation and the case that would justify acting.",
+  "schema": "compose.editing_v2.r_theta_atom_restate_attribution",
+  "selected_step": 3000,
+  "status": "DIAGNOSTIC_EVIDENCE_ONLY_NO_AUTHORITY"
+}
