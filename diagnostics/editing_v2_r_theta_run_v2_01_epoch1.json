@@ -1,0 +1,217 @@
+{
+  "collapse_baseline": {
+    "cell:editing_v2_active8_v1:atom_delete:leaf_death": 2.785694904961129,
+    "cell:editing_v2_active8_v1:atom_insert:one_neighbor_birth": 5.478276928707951,
+    "cell:editing_v2_active8_v1:atom_restate:element_identity_change": 5.061051806096381,
+    "cell:editing_v2_active8_v1:bond_reorder:bond_order_decrease": 3.680529722460994,
+    "cell:editing_v2_active8_v1:bond_reorder:bond_order_increase": 4.1662325542097145,
+    "cell:editing_v2_active8_v1:bond_reroute:multi_atom_pendant_cyclic_source": 4.746162567096002,
+    "cell:editing_v2_active8_v1:bond_reroute:single_atom_pendant_cyclic_source": 4.20762252997519,
+    "cell:editing_v2_active8_v1:cycle_attach:open_from_monocyclic_ring_system": 5.068758393536095,
+    "cell:editing_v2_active8_v1:cycle_attach:open_from_nonarticulated_polycyclic_ring_system": 5.370797091901901,
+    "cell:editing_v2_active8_v1:cycle_insert:close_to_monocyclic_ring_system": 2.2251550643414313,
+    "cell:editing_v2_active8_v1:cycle_insert:close_to_nonarticulated_polycyclic_ring_system": 3.9582794278251883,
+    "cell:editing_v2_active8_v1:ring_system_restate:aromatization": 1.5666420000564794,
+    "cell:editing_v2_active8_v1:ring_system_restate:coordinated_ring_bond_state_change": 2.2472073096495406,
+    "cell:editing_v2_active8_v1:ring_system_restate:dearomatization": 2.784099013157797,
+    "family:atom_delete": 2.785694904961129,
+    "family:atom_insert": 5.478276928707951,
+    "family:atom_restate": 5.071479149465015,
+    "family:bond_reorder": 3.921639019139699,
+    "family:bond_reroute": 4.405706750265879,
+    "family:cycle_attach": 5.201493188083346,
+    "family:cycle_insert": 2.9801331853671353,
+    "family:ring_system_restate": 2.2101493692794945
+  },
+  "collapse_tolerance_nats": 0.5,
+  "completed_steps": 4251,
+  "curve": [
+    {
+      "collapsed": [],
+      "eligible": true,
+      "panel_native_mean_nll": 4.115900171107617,
+      "reference_law_weighted_mean_nll": 3.5638669491343244,
+      "step": 500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "panel_native_mean_nll": 4.039984261432052,
+      "reference_law_weighted_mean_nll": 3.3517931688203473,
+      "step": 1000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "panel_native_mean_nll": 3.9933536926549746,
+      "reference_law_weighted_mean_nll": 3.268913717922094,
+      "step": 1500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "panel_native_mean_nll": 4.046542314643886,
+      "reference_law_weighted_mean_nll": 3.230490106032119,
+      "step": 2000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "panel_native_mean_nll": 3.935469809428128,
+      "reference_law_weighted_mean_nll": 3.1303088362011233,
+      "step": 2500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "panel_native_mean_nll": 3.8951758659201805,
+      "reference_law_weighted_mean_nll": 3.1211290963207663,
+      "step": 3000
+    },
+    {
+      "collapsed": [
+        "cell:editing_v2_active8_v1:atom_restate:element_identity_change",
+        "family:atom_restate"
+      ],
+      "eligible": false,
+      "panel_native_mean_nll": 3.9308506158829197,
+      "reference_law_weighted_mean_nll": 3.081208071743614,
+      "step": 3500
+    },
+    {
+      "collapsed": [
+        "cell:editing_v2_active8_v1:atom_restate:element_identity_change",
+        "family:atom_restate"
+      ],
+      "eligible": false,
+      "panel_native_mean_nll": 3.9227405468138397,
+      "reference_law_weighted_mean_nll": 3.0287856781071922,
+      "step": 4000
+    }
+  ],
+  "epoch": 1,
+  "external_cohort": null,
+  "external_cohort_note": "NOT MEASURED. The diagnostic was gated on an epoch boundary nested inside the evaluate_every block; epoch_steps 4,251 (3x13x109) and evaluate_every 500 (2^2x5^3) are coprime, so the conditions never coincided. The deeper cause was that no evaluation ran on the final step at all, since 4,251 is not a multiple of 500 -- the final model state was never scored and could never be selected. Both fixed.",
+  "families_first_to_last": {
+    "atom_delete": {
+      "delta": 0.12332820765947794,
+      "first": 2.785694904961129,
+      "last": 2.909023112620607
+    },
+    "atom_insert": {
+      "delta": -0.46705537575186096,
+      "first": 5.478276928707951,
+      "last": 5.01122155295609
+    },
+    "atom_restate": {
+      "delta": 0.5285584815302276,
+      "first": 5.071479149465015,
+      "last": 5.600037630995242
+    },
+    "bond_reorder": {
+      "delta": -0.5141327424319608,
+      "first": 3.921639019139699,
+      "last": 3.407506276707738
+    },
+    "bond_reroute": {
+      "delta": 0.1155708437787446,
+      "first": 4.405706750265879,
+      "last": 4.521277594044624
+    },
+    "cycle_attach": {
+      "delta": -1.496912375398395,
+      "first": 5.201493188083346,
+      "last": 3.7045808126849513
+    },
+    "cycle_insert": {
+      "delta": -1.2049968698983795,
+      "first": 2.9801331853671353,
+      "last": 1.7751363154687558
+    },
+    "ring_system_restate": {
+      "delta": -0.933078367276859,
+      "first": 2.2101493692794945,
+      "last": 1.2770710020026355
+    }
+  },
+  "findings": {
+    "families_improved": 5,
+    "family_and_cell_are_one_signal": "cell:element_identity_change tracks family:atom_restate to +-0.003 at every point; the family's other cell is thin and excluded, so the gate names two capabilities where there is one.",
+    "gate_rejected_the_best_scoring_checkpoints": [
+      3500,
+      4000
+    ],
+    "improvement_increases_with_support_but_not_monotonically": true,
+    "panel_native_is_non_monotone": true,
+    "reference_law_first_to_last": [
+      3.5638669491343244,
+      3.0287856781071922
+    ],
+    "reference_law_nll_improves_monotonically": true,
+    "zero_mass_strata_all_degraded": true
+  },
+  "identity": {
+    "eval_panel_sha256": "c7c3c462f17f",
+    "initial_model_state_sha256": "3e6bd109a80a5850e9dc3cb16d0dfe5ab9c7c3e83904f3d1f6afe9fa32800fe9",
+    "initialization_seed": 20260730,
+    "library_sha256": "2d553afa5560319455855bf75306b6e9d5169180562be7b139cf14336f7ecb26",
+    "manifest_sha256": "e27494a462504b3030d0b6c430b09b4192ad9d56cfe6e4831a661c8f815ea3d4",
+    "packed_store_records_sha256": "b232a6fa069fef8cdd491e5d9b94fc2d445fce357c753c77128216cf60cc2df0",
+    "sampling_law_sha256": "b0cc66f168f1cf3e7a4b5bacfb1138059005251a10561d6961c3ea1c5dd7ac73",
+    "split_sha256": "c7c3c462f17f"
+  },
+  "identity_sha256": "426ac15e7f4cc68c2b0208992dd230d2e283c6cc524092df3cb2d3c5898b3b9a",
+  "run": "run_v2_01",
+  "schema": "compose.editing_v2.r_theta_run_epoch_report",
+  "selected_criterion": [
+    1,
+    -3.1211290963207663,
+    -3000
+  ],
+  "selected_step": 3000,
+  "status": "RESULT_EVIDENCE_ONLY_NO_DOWNSTREAM_AUTHORITY",
+  "support_bands_first_to_last": {
+    "0": {
+      "delta": -0.18055601577081415,
+      "first": 4.233936375056254,
+      "last": 4.05338035928544
+    },
+    "1-4": {
+      "delta": -0.08256261588131375,
+      "first": 4.044258013777189,
+      "last": 3.9616953978958755
+    },
+    "25+": {
+      "delta": -0.4767398954270905,
+      "first": 4.28920840346071,
+      "last": 3.812468508033619
+    },
+    "5-24": {
+      "delta": -0.26941600264642585,
+      "first": 4.080095375240611,
+      "last": 3.810679372594185
+    }
+  },
+  "zero_mass_strata_first_to_last": {
+    "atom_delete|synthetic": {
+      "delta": 1.64844610476103,
+      "first": 4.173812055587769,
+      "last": 5.822258160348799
+    },
+    "atom_insert|synthetic": {
+      "delta": 0.9207646227502213,
+      "first": 7.287288174691138,
+      "last": 8.20805279744136
+    },
+    "atom_restate|synthetic": {
+      "delta": 1.7930297047133639,
+      "first": 7.680518533420646,
+      "last": 9.47354823813401
+    },
+    "bond_reroute|synthetic": {
+      "delta": 1.2530594534980937,
+      "first": 6.766765199219569,
+      "last": 8.019824652717663
+    }
+  }
+}

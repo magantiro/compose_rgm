@@ -424,7 +424,14 @@ def train_segment(
             window_seconds = 0.0
             window_losses = []
 
-        if completed_steps % evaluate_every == 0:
+        # ALSO on the final step. maximum_steps need not be a multiple of
+        # evaluate_every -- one epoch is 4,251 steps against an interval of 500
+        # -- so the run previously ended with its last evaluation 251 steps in
+        # the past. The final model state was never scored and so could never
+        # be selected, and the epoch-boundary cohort diagnostic, nested inside
+        # this block, could never fire either.
+        if (completed_steps % evaluate_every == 0
+                or completed_steps >= maximum_steps):
             rows = evaluate_panel(
                 model, entry_ids=panel_ids, build_batch=build_panel,
                 batch_size=batch_size,
@@ -452,7 +459,19 @@ def train_segment(
                 summary, step=completed_steps, baseline=collapse_baseline)
 
             cohort_mean_nll = None
-            if cohort_ids and completed_steps % epoch_steps == 0:
+            # Trigger on an epoch boundary OR the final step. Requiring
+            # `% epoch_steps == 0` INSIDE the `% evaluate_every == 0` block
+            # meant both had to divide the step: with epoch_steps 4,251
+            # (= 3 x 13 x 109) and evaluate_every 500 (= 2^2 x 5^3) the gcd is
+            # 1, so the two conditions could not coincide before step 2,125,500
+            # and the diagnostic never ran at all.
+            at_epoch_boundary = (
+                completed_steps % epoch_steps == 0
+                or completed_steps >= maximum_steps
+                or completed_steps // epoch_steps
+                > (completed_steps - evaluate_every) // epoch_steps
+            )
+            if cohort_ids and at_epoch_boundary:
                 try:
                     cohort_rows = evaluate_panel(
                         model, entry_ids=cohort_ids, build_batch=build_cohort,
@@ -496,6 +515,11 @@ def train_segment(
                     # worsened -- with nothing recorded to say which families
                     # are responsible. Computing a diagnostic every 250 steps
                     # and discarding it is worse than not computing it.
+                    "by_family_factor_nll": {
+                        name: {"family": value.get("mean_family_nll"),
+                               "identity": value.get("mean_identity_nll")}
+                        for name, value in summary["by_family"].items()
+                    },
                     "by_family_mean_nll": {
                         name: value["mean_nll"]
                         for name, value in summary["by_family"].items()

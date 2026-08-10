@@ -390,13 +390,28 @@ def summarize_panel(
     def aggregate(selected: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         nlls = [float(item["teacher_successor_nll"]) for item in selected]
         probabilities = [float(item["teacher_successor_probability"]) for item in selected]
-        return {
+        measured = {
             "entries": len(selected),
             "mean_nll": sum(nlls) / len(nlls),
             "maximum_nll": max(nlls),
             "minimum_probability": min(probabilities),
             "mean_probability": sum(probabilities) / len(probabilities),
         }
+        # P(y|x) = P(F|x) . P(y|x,F). A joint mean cannot say WHICH factor moved,
+        # and the two imply different fixes: a family-gate drift is an allocation
+        # problem across families, a within-family drift is the candidate scorer.
+        # The scorer already returns both, so carrying them costs nothing and
+        # not carrying them cost a whole diagnostic pass when atom_restate
+        # degraded.
+        family_terms = [float(item["family_nll"]) for item in selected
+                        if item.get("family_nll") is not None]
+        identity_terms = [float(item["identity_nll"]) for item in selected
+                          if item.get("identity_nll") is not None]
+        if family_terms:
+            measured["mean_family_nll"] = sum(family_terms) / len(family_terms)
+        if identity_terms:
+            measured["mean_identity_nll"] = sum(identity_terms) / len(identity_terms)
+        return measured
 
     by_family: dict[str, list[Mapping[str, Any]]] = {}
     by_cell: dict[str, list[Mapping[str, Any]]] = {}
