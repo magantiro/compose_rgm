@@ -1,0 +1,501 @@
+{
+  "atom_delete_note": "atom_delete's held-out jump is more family than identity (family 1.47 -> 3.33, identity 0.69 -> 2.45), so its gate is genuinely miscalibrated at the validation boundary, consistent with the provenance-matched run.",
+  "by_cell": {
+    "atom_delete|real|held_out": {
+      "available": true,
+      "entries": 103,
+      "family_nll": 3.3316058892648197,
+      "identity_nll": 2.448038182212311,
+      "joint_nll": 5.779644073791874,
+      "population_entries": 103
+    },
+    "atom_delete|real|seen_transition": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 1.4507014844814936,
+      "identity_nll": 0.7390066476662954,
+      "joint_nll": 2.189708130955696,
+      "population_entries": 8223
+    },
+    "atom_delete|real|unseen_sibling": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 1.5045159834623336,
+      "identity_nll": 0.7128680002689362,
+      "joint_nll": 2.2173839851220447,
+      "population_entries": 2543
+    },
+    "atom_delete|real|unseen_source": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 1.4724307604630789,
+      "identity_nll": 0.6880773343642552,
+      "joint_nll": 2.1605080942312878,
+      "population_entries": 9632
+    },
+    "atom_delete|synthetic|held_out": {
+      "available": true,
+      "entries": 532,
+      "family_nll": 3.184104805602167,
+      "identity_nll": 2.387821888341043,
+      "joint_nll": 5.571926695063598,
+      "population_entries": 532
+    },
+    "atom_delete|synthetic|seen_transition": {
+      "available": true,
+      "entries": 165,
+      "family_nll": 2.381746530532837,
+      "identity_nll": 0.5064595157449896,
+      "joint_nll": 2.8882060462778263,
+      "population_entries": 165
+    },
+    "atom_delete|synthetic|unseen_sibling": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 3.2741380639870963,
+      "identity_nll": 2.005652843515078,
+      "joint_nll": 5.2797909061113995,
+      "population_entries": 888
+    },
+    "atom_delete|synthetic|unseen_source": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 3.0732619275649387,
+      "identity_nll": 2.213319639364878,
+      "joint_nll": 5.286581565539042,
+      "population_entries": 4949
+    },
+    "atom_insert|real|held_out": {
+      "available": false,
+      "entries": 21
+    },
+    "atom_insert|real|seen_transition": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 1.2703722552023828,
+      "identity_nll": 3.324764243463675,
+      "joint_nll": 4.595136498212814,
+      "population_entries": 7929
+    },
+    "atom_insert|real|unseen_sibling": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 1.2126580474277338,
+      "identity_nll": 3.360420526266098,
+      "joint_nll": 4.5730785695711775,
+      "population_entries": 1191
+    },
+    "atom_insert|real|unseen_source": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 1.3112931240846712,
+      "identity_nll": 3.2138902120788893,
+      "joint_nll": 4.525183339516322,
+      "population_entries": 11387
+    },
+    "atom_insert|synthetic|held_out": {
+      "available": true,
+      "entries": 416,
+      "family_nll": 3.011501206156726,
+      "identity_nll": 4.555053778279286,
+      "joint_nll": 7.56655497619739,
+      "population_entries": 416
+    },
+    "atom_insert|synthetic|seen_transition": {
+      "available": false,
+      "entries": 12
+    },
+    "atom_insert|synthetic|unseen_sibling": {
+      "available": true,
+      "entries": 437,
+      "family_nll": 2.4895692355163583,
+      "identity_nll": 4.498936757343039,
+      "joint_nll": 6.988505990881669,
+      "population_entries": 437
+    },
+    "atom_insert|synthetic|unseen_source": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 2.737829388293127,
+      "identity_nll": 4.53833701411883,
+      "joint_nll": 7.276166406472524,
+      "population_entries": 3554
+    },
+    "atom_restate|real|held_out": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 1.8219732348124187,
+      "identity_nll": 3.21051426867644,
+      "joint_nll": 5.0324875060717265,
+      "population_entries": 753
+    },
+    "atom_restate|real|seen_transition": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 1.4934255868196487,
+      "identity_nll": 2.018200344542662,
+      "joint_nll": 3.5116259336471556,
+      "population_entries": 9955
+    },
+    "atom_restate|real|unseen_sibling": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 1.5628008892138798,
+      "identity_nll": 2.313639236589273,
+      "joint_nll": 3.8764401225248974,
+      "population_entries": 1887
+    },
+    "atom_restate|real|unseen_source": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 1.5771841235955557,
+      "identity_nll": 2.1799826380610465,
+      "joint_nll": 3.7571667655309042,
+      "population_entries": 7513
+    },
+    "atom_restate|synthetic|held_out": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 2.8471888477603593,
+      "identity_nll": 6.551383698185285,
+      "joint_nll": 9.398572545846303,
+      "population_entries": 1116
+    },
+    "atom_restate|synthetic|seen_transition": {
+      "available": true,
+      "entries": 312,
+      "family_nll": 2.1927397067730245,
+      "identity_nll": 2.380403619928238,
+      "joint_nll": 4.573143324790856,
+      "population_entries": 312
+    },
+    "atom_restate|synthetic|unseen_sibling": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 2.8787157846490543,
+      "identity_nll": 6.677259673873584,
+      "joint_nll": 9.555975476106008,
+      "population_entries": 1405
+    },
+    "atom_restate|synthetic|unseen_source": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 2.808972435394923,
+      "identity_nll": 6.72796722928683,
+      "joint_nll": 9.53693966905276,
+      "population_entries": 10084
+    },
+    "bond_reorder|real|held_out": {
+      "available": true,
+      "entries": 95,
+      "family_nll": 2.264833516823618,
+      "identity_nll": 1.5905418897929944,
+      "joint_nll": 3.855375410381116,
+      "population_entries": 95
+    },
+    "bond_reorder|real|seen_transition": {
+      "available": true,
+      "entries": 593,
+      "family_nll": 2.9351172718089105,
+      "identity_nll": 1.3250319543616567,
+      "joint_nll": 4.260149226421851,
+      "population_entries": 593
+    },
+    "bond_reorder|real|unseen_sibling": {
+      "available": true,
+      "entries": 73,
+      "family_nll": 2.4633016243372876,
+      "identity_nll": 1.490556107808466,
+      "joint_nll": 3.9538577288797456,
+      "population_entries": 73
+    },
+    "bond_reorder|real|unseen_source": {
+      "available": true,
+      "entries": 206,
+      "family_nll": 2.786847250554168,
+      "identity_nll": 1.444465359437813,
+      "joint_nll": 4.231312610570667,
+      "population_entries": 206
+    },
+    "bond_reorder|synthetic|held_out": {
+      "available": true,
+      "entries": 595,
+      "family_nll": 2.0129421760054194,
+      "identity_nll": 1.561898314351795,
+      "joint_nll": 3.5748404914591494,
+      "population_entries": 595
+    },
+    "bond_reorder|synthetic|seen_transition": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 2.220640416840712,
+      "identity_nll": 1.3996716718872388,
+      "joint_nll": 3.620312088727951,
+      "population_entries": 1803
+    },
+    "bond_reorder|synthetic|unseen_sibling": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 2.2669457696874935,
+      "identity_nll": 1.5506777866681416,
+      "joint_nll": 3.817623556057612,
+      "population_entries": 612
+    },
+    "bond_reorder|synthetic|unseen_source": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 2.217835504213969,
+      "identity_nll": 1.4074065256118775,
+      "joint_nll": 3.625242030719916,
+      "population_entries": 3673
+    },
+    "bond_reroute|real|held_out": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 1.4824281998475393,
+      "identity_nll": 3.3441212083896,
+      "joint_nll": 4.8265494070450465,
+      "population_entries": 697
+    },
+    "bond_reroute|real|seen_transition": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 1.230417031844457,
+      "identity_nll": 2.1509092130263645,
+      "joint_nll": 3.3813262416919074,
+      "population_entries": 10093
+    },
+    "bond_reroute|real|unseen_sibling": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 1.2720656499266625,
+      "identity_nll": 2.4274939479430517,
+      "joint_nll": 3.699559590617816,
+      "population_entries": 2124
+    },
+    "bond_reroute|real|unseen_source": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 1.2117537053426106,
+      "identity_nll": 2.191634826362133,
+      "joint_nll": 3.4033885314067205,
+      "population_entries": 10745
+    },
+    "bond_reroute|synthetic|held_out": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 2.272744888365269,
+      "identity_nll": 5.335385629733404,
+      "joint_nll": 7.608130514224371,
+      "population_entries": 640
+    },
+    "bond_reroute|synthetic|seen_transition": {
+      "available": true,
+      "entries": 308,
+      "family_nll": 2.0996067171747033,
+      "identity_nll": 3.01368718758806,
+      "joint_nll": 5.113293903214591,
+      "population_entries": 308
+    },
+    "bond_reroute|synthetic|unseen_sibling": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 2.366450174252192,
+      "identity_nll": 5.104212657213211,
+      "joint_nll": 7.470662833849589,
+      "population_entries": 791
+    },
+    "bond_reroute|synthetic|unseen_source": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 2.2570764164129895,
+      "identity_nll": 5.0196532133221625,
+      "joint_nll": 7.2767296266555785,
+      "population_entries": 4941
+    },
+    "cycle_attach|real|held_out": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 2.2879301766554514,
+      "identity_nll": 2.574560541510582,
+      "joint_nll": 4.862490722338358,
+      "population_entries": 1468
+    },
+    "cycle_attach|real|seen_transition": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 2.2664426948626835,
+      "identity_nll": 2.5035496139526368,
+      "joint_nll": 4.769992307424546,
+      "population_entries": 683
+    },
+    "cycle_attach|real|unseen_sibling": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 2.348366892536481,
+      "identity_nll": 2.507597582936287,
+      "joint_nll": 4.8559644770622254,
+      "population_entries": 745
+    },
+    "cycle_attach|real|unseen_source": {
+      "available": true,
+      "entries": 267,
+      "family_nll": 2.3185821646608216,
+      "identity_nll": 2.4837843389546825,
+      "joint_nll": 4.802366505847888,
+      "population_entries": 267
+    },
+    "cycle_attach|synthetic|held_out": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 2.4493065440654753,
+      "identity_nll": 2.444316300948461,
+      "joint_nll": 4.893622843821843,
+      "population_entries": 2248
+    },
+    "cycle_attach|synthetic|seen_transition": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 2.4090795701742174,
+      "identity_nll": 2.5275518550475438,
+      "joint_nll": 4.93663142323494,
+      "population_entries": 2049
+    },
+    "cycle_attach|synthetic|unseen_sibling": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 2.4064536064863207,
+      "identity_nll": 2.5933658562103905,
+      "joint_nll": 4.999819461107254,
+      "population_entries": 1969
+    },
+    "cycle_attach|synthetic|unseen_source": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 2.5196821906169258,
+      "identity_nll": 2.5473833048343657,
+      "joint_nll": 5.067065498828888,
+      "population_entries": 1119
+    },
+    "cycle_insert|real|held_out": {
+      "available": false,
+      "entries": 0
+    },
+    "cycle_insert|real|seen_transition": {
+      "available": false,
+      "entries": 1
+    },
+    "cycle_insert|real|unseen_sibling": {
+      "available": false,
+      "entries": 0
+    },
+    "cycle_insert|real|unseen_source": {
+      "available": false,
+      "entries": 0
+    },
+    "cycle_insert|synthetic|held_out": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 0.7782521415067216,
+      "identity_nll": 1.5406501354773838,
+      "joint_nll": 2.3189022759596507,
+      "population_entries": 5136
+    },
+    "cycle_insert|synthetic|seen_transition": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 0.9098554026894271,
+      "identity_nll": 0.991288821734488,
+      "joint_nll": 1.901144222219785,
+      "population_entries": 3682
+    },
+    "cycle_insert|synthetic|unseen_sibling": {
+      "available": false,
+      "entries": 0
+    },
+    "cycle_insert|synthetic|unseen_source": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 1.0467185610284409,
+      "identity_nll": 1.153626213086148,
+      "joint_nll": 2.2003447727362313,
+      "population_entries": 6143
+    },
+    "ring_system_restate|real|held_out": {
+      "available": false,
+      "entries": 38
+    },
+    "ring_system_restate|real|seen_transition": {
+      "available": true,
+      "entries": 197,
+      "family_nll": 1.8912006197544524,
+      "identity_nll": 0.6498083918530324,
+      "joint_nll": 2.541009010397238,
+      "population_entries": 197
+    },
+    "ring_system_restate|real|unseen_sibling": {
+      "available": true,
+      "entries": 112,
+      "family_nll": 1.8944421564894063,
+      "identity_nll": 0.7957378194800445,
+      "joint_nll": 2.690179973308529,
+      "population_entries": 112
+    },
+    "ring_system_restate|real|unseen_source": {
+      "available": true,
+      "entries": 238,
+      "family_nll": 1.8972653026590829,
+      "identity_nll": 0.6530367683212296,
+      "joint_nll": 2.550302069978554,
+      "population_entries": 238
+    },
+    "ring_system_restate|synthetic|held_out": {
+      "available": true,
+      "entries": 273,
+      "family_nll": 1.5947644718455307,
+      "identity_nll": 0.4388137154090099,
+      "joint_nll": 2.033578186463087,
+      "population_entries": 273
+    },
+    "ring_system_restate|synthetic|seen_transition": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 1.502434776236769,
+      "identity_nll": 0.5180048500932753,
+      "joint_nll": 2.0204396270712217,
+      "population_entries": 5610
+    },
+    "ring_system_restate|synthetic|unseen_sibling": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 1.47878048181301,
+      "identity_nll": 0.6161328354043265,
+      "joint_nll": 2.0949133171637855,
+      "population_entries": 936
+    },
+    "ring_system_restate|synthetic|unseen_source": {
+      "available": true,
+      "entries": 600,
+      "family_nll": 1.4276352379408976,
+      "identity_nll": 0.5258162744964162,
+      "joint_nll": 1.9534515133500099,
+      "population_entries": 9280
+    }
+  },
+  "checkpoint_step": 1750,
+  "controls": "cycle_attach 2.50/2.51/2.48/2.57, ring_system_restate 0.65/0.80/0.65, bond_reorder 1.33/1.49/1.44/1.59 -- flat across all four categories in both lanes.",
+  "distinct_transitions_consumed": 51615,
+  "headline": "Three phenomena were superimposed and are now separated. (1) On the REAL lane seen_transition ~ unseen_sibling ~ unseen_source for every atom family, so there is no memorization of training molecules and no deficit on unobserved alternative successors -- the source-only cross-entropy objective learns a transferable edit law within its training population. (2) The synthetic atom strata show a 2.4-5.0 nat cliff from seen to unseen WITHIN the same population on 165-312 consumed rows: ordinary thin-stratum underexposure, which full epochs will fix. (3) The residual real-lane gap appears ONLY between unseen_source and held_out, both of which are unseen, so it has no exposure component and is a population effect at the validation-role boundary.",
+  "minimum_cell": 40,
+  "per_cell_cap": 600,
+  "prediction": "Resuming to one or two epochs will substantially shrink the synthetic seen/unseen cliff and leave the real-lane held_out gap essentially unchanged, because unseen_source already scores like seen and more exposure cannot improve on that.",
+  "reading": "Within a family the branching factor cancels, so categories are directly comparable. seen good / unseen_sibling bad means incomplete multi-successor exposure and motivates multi-positive supervision. seen good with unseen_source and held_out both bad means transferable features are not yet learned and more exposure may help. unseen_source good with held_out bad means a residual population or split mismatch.",
+  "refuted_hypotheses": [
+    "memorization of training molecules (seen ~ unseen_source on the real lane)",
+    "suppression of unobserved alternative successors, i.e. Arm B's premise (unseen_sibling ~ seen_transition on the real lane)",
+    "one-hot cross-entropy being incapable of learning a transferable law"
+  ],
+  "schema": "compose.editing_v2.r_theta_exposure_stratified",
+  "sources_touched": 47344,
+  "status": "DIAGNOSTIC_EVIDENCE_ONLY_NO_AUTHORITY"
+}
