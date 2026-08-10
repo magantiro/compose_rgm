@@ -97,6 +97,12 @@ THIN_CELL_ENTRIES = 30
 #: scaffold definition -- not a claim that the chemistry is novel.
 SUPPORT_BAND_ORDER = ("0", "1-4", "5-24", "25+")
 
+#: A capability degrading by more than this many nats from its FIRST
+#: measurement counts as collapsed. Loose enough not to fire on ordinary
+#: step-to-step movement, tight enough that a genuinely abandoned operator
+#: cannot hide inside it.
+COLLAPSE_TOLERANCE_NATS = 0.5
+
 
 class RThetaTrainingError(RuntimeError):
     """The corpus training run cannot proceed safely."""
@@ -196,8 +202,15 @@ def write_checkpoint(
     trajectory: Sequence[Mapping[str, Any]],
     stream_sha256: str,
     resume_count: int,
+    collapse_baseline: Mapping[str, float] | None = None,
 ) -> dict[str, Any]:
-    """Persist everything a resume needs, atomically, with digests."""
+    """Persist everything a resume needs, atomically, with digests.
+
+    ``collapse_baseline`` is run state, not a derived quantity. Collapse is
+    defined against the FIRST evaluation, so a resume that recaptured it from a
+    mid-training summary would compare each capability against an already
+    degraded reference and the gate would stop detecting anything.
+    """
 
     model_state = _clone_state(model)
     optimizer_state = optimizer.state_dict()
@@ -222,6 +235,8 @@ def write_checkpoint(
         # Without this a resume silently restarts the sampling and dropout
         # streams, which changes the trajectory while every count still agrees.
         "rng_state": _rng_state(),
+        "collapse_baseline": (dict(collapse_baseline)
+                              if collapse_baseline is not None else None),
         "stream_sha256": stream_sha256,
         "torch_version": str(torch.__version__),
         "resume_count": int(resume_count),
@@ -501,19 +516,88 @@ def capability_floor(summary: Mapping[str, Any]) -> float:
     return float(min(candidates))
 
 
-def selection_criterion(summary: Mapping[str, Any], *, step: int) -> tuple[float, float, int]:
+def capability_baseline(summary: Mapping[str, Any]) -> dict[str, float]:
+    """Per-capability mean NLL at the first evaluation, for collapse detection.
+
+    Captured once and compared against, rather than tracking each capability's
+    best-so-far. Best-so-far is the stricter reading and was rejected: normal
+    step-to-step fluctuation would trip it constantly, and a gate that fires on
+    noise stops being a gate.
+    """
+
+    baseline = {f"family:{name}": float(value["mean_nll"])
+                for name, value in summary["by_family"].items()}
+    baseline.update({
+        f"cell:{name}": float(value["mean_nll"])
+        for name, value in summary["by_capability_cell"].items()
+        if value["entries"] >= THIN_CELL_ENTRIES
+    })
+    return baseline
+
+
+def collapsed_capabilities(
+    summary: Mapping[str, Any],
+    *,
+    baseline: Mapping[str, float] | None,
+    tolerance_nats: float = COLLAPSE_TOLERANCE_NATS,
+) -> tuple[str, ...]:
+    """Which capabilities are worse than they were before training began.
+
+    Collapse is defined against the FIRST evaluation, so it means "this
+    operator has actively degraded relative to the untrained model" -- an
+    unambiguous fact, not a threshold picked to make the run pass. An absolute
+    probability floor was rejected because families differ in branching factor
+    from 59 to 420 median legal marks, so one number cannot mean the same thing
+    across them.
+
+    Thin cells never gate: a mean over fewer than THIN_CELL_ENTRIES entries
+    would fire or not fire at random. They are reported by ``summarize_panel``
+    and excluded from the baseline above.
+    """
+
+    if not baseline:
+        return ()
+    current = {f"family:{name}": float(value["mean_nll"])
+               for name, value in summary["by_family"].items()}
+    current.update({
+        f"cell:{name}": float(value["mean_nll"])
+        for name, value in summary["by_capability_cell"].items()
+        if value["entries"] >= THIN_CELL_ENTRIES
+    })
+    return tuple(sorted(
+        name for name, reference in baseline.items()
+        if name in current and current[name] > reference + tolerance_nats
+    ))
+
+
+def selection_criterion(
+    summary: Mapping[str, Any],
+    *,
+    step: int,
+    baseline: Mapping[str, float] | None = None,
+    tolerance_nats: float = COLLAPSE_TOLERANCE_NATS,
+) -> tuple[int, float, int]:
     """Higher is better, lexicographically:
 
-        (capability floor, -reference-law-weighted NLL, -step)
+        (eligible, -reference-law-weighted NLL, -step)
 
-    Best reference-law-weighted NLL SUBJECT TO no family or capability-cell
-    collapse. The floor leads, so a checkpoint that has abandoned an operator
-    cannot win on a good weighted mean -- which is precisely what a mean hides.
+    LOWEST reference-law-weighted NLL, SUBJECT TO no capability collapse. The
+    gate is a predicate, not a quantity: it decides which checkpoints may
+    compete, and among those the weighted NLL alone decides which wins.
 
-    The weighted NLL is required, not optional. Falling back to the panel-native
-    mean when the law weights are absent would silently select against a
-    different population than the one the run claims to estimate, and every
-    count would still look right.
+    An earlier version led on the capability floor itself, which quietly made
+    "maximize the weakest capability" a second objective -- a checkpoint with a
+    trivially better floor would beat one with substantially better matched
+    NLL. Capability checks exist to stop an aggregate hiding a dead operator,
+    not to become the thing being optimized.
+
+    Ties break toward the EARLIER step: if two checkpoints are indistinguishable
+    on the reserve, the one that got there with less training is the one to keep.
+
+    If nothing is eligible the ordering still returns a best-of-bad rather than
+    failing, since a run must end on some checkpoint -- but eligibility is the
+    leading term, so any eligible checkpoint beats every ineligible one, and the
+    trajectory records which is which.
     """
 
     weighted = summary.get("reference_law_weighted_mean_nll")
@@ -522,7 +606,9 @@ def selection_criterion(summary: Mapping[str, Any], *, step: int) -> tuple[float
             "selection needs reference_law_weighted_mean_nll; pass "
             "reference_law_stratum_share to summarize_panel rather than "
             "selecting on a population the law does not describe")
-    return (capability_floor(summary), -float(weighted), -int(step))
+    collapsed = collapsed_capabilities(
+        summary, baseline=baseline, tolerance_nats=tolerance_nats)
+    return (0 if collapsed else 1, -float(weighted), -int(step))
 
 
 def assert_training_invariants(
@@ -554,7 +640,10 @@ __all__ = [
     "RThetaTrainingError",
     "RunIdentity",
     "assert_training_invariants",
+    "COLLAPSE_TOLERANCE_NATS",
+    "capability_baseline",
     "capability_floor",
+    "collapsed_capabilities",
     "evaluate_panel",
     "load_checkpoint",
     "selection_criterion",

@@ -16,6 +16,9 @@ import torch
 
 from compose_v4.experiments.editing_v2_r_theta_corpus_training import (
     THIN_CELL_ENTRIES,
+    capability_baseline,
+    capability_floor,
+    collapsed_capabilities,
     RThetaTrainingError,
     RunIdentity,
     assert_training_invariants,
@@ -224,26 +227,103 @@ def test_thin_cells_are_flagged_rather_than_silently_gated() -> None:
     assert summary["by_capability_cell"]["thin"]["entries"] < THIN_CELL_ENTRIES
 
 
-def test_selection_prefers_the_checkpoint_that_abandoned_no_capability() -> None:
-    """A good weighted mean must not outvote a dead operator.
+def test_capability_gate_rejects_a_collapsed_checkpoint() -> None:
+    """Collapse is a GATE: it decides who may compete, not who wins.
 
-    Collapse means a whole family or capability cell has died. Both checkpoints
-    here have the same reference-law-weighted mean; one has let ``rare`` fall
-    apart and pays for it elsewhere.
+    ``rare`` degrades 2.0 -> 3.5 nats against its own first measurement, so
+    that checkpoint is ineligible however good its weighted mean looks.
     """
 
     shares = {"keep|real": 0.5, "rare|real": 0.5}
-    healthy = summarize_panel(
+    start = summarize_panel(
         [_row("keep", "c1", 2.0, tag=str(i)) for i in range(4)]
         + [_row("rare", "c2", 2.0, tag=str(i)) for i in range(4)],
         reference_law_stratum_share=shares)
+    baseline = capability_baseline(start)
+
     collapsed = summarize_panel(
-        [_row("keep", "c1", 0.5, tag=str(i)) for i in range(4)]
+        [_row("keep", "c1", 0.3, tag=str(i)) for i in range(4)]
         + [_row("rare", "c2", 3.5, tag=str(i)) for i in range(4)],
         reference_law_stratum_share=shares)
-    assert healthy["reference_law_weighted_mean_nll"] == pytest.approx(
-        collapsed["reference_law_weighted_mean_nll"])
-    assert selection_criterion(healthy, step=1) > selection_criterion(collapsed, step=1)
+    # Only the FAMILY is named: c1 and c2 hold 4 entries each, below
+    # THIN_CELL_ENTRIES, so they never entered the baseline and never gate.
+    assert collapsed_capabilities(collapsed, baseline=baseline) == ("family:rare",)
+    # Better weighted mean than the baseline checkpoint, but ineligible.
+    assert (collapsed["reference_law_weighted_mean_nll"]
+            < start["reference_law_weighted_mean_nll"])
+    assert selection_criterion(start, step=1, baseline=baseline) > \
+        selection_criterion(collapsed, step=2, baseline=baseline)
+
+
+def test_a_better_matched_nll_wins_over_a_better_capability_floor() -> None:
+    """The gate must not become a second objective.
+
+    A: slightly better minimum capability probability, substantially worse
+       reference-law-weighted NLL.
+    B: clears every capability gate, much better weighted NLL.
+
+    B must win. An earlier implementation led lexicographically on the
+    capability floor itself, so A would have taken it on a 0.02-nat edge in the
+    weakest cell while giving up 1.3 nats on the number that matters.
+    """
+
+    shares = {"a|real": 0.5, "b|real": 0.5}
+    start = summarize_panel(
+        [_row("a", "c1", 2.50, tag=str(i)) for i in range(4)]
+        + [_row("b", "c2", 2.50, tag=str(i)) for i in range(4)],
+        reference_law_stratum_share=shares)
+    baseline = capability_baseline(start)
+
+    # A is uniformly mediocre, so its WEAKEST capability is comparatively
+    # strong. B is excellent on one and merely holds baseline on the other, so
+    # its weakest is slightly weaker -- while its mean is far better.
+    checkpoint_a = summarize_panel(
+        [_row("a", "c1", 2.40, tag=str(i)) for i in range(4)]
+        + [_row("b", "c2", 2.40, tag=str(i)) for i in range(4)],
+        reference_law_stratum_share=shares)
+    checkpoint_b = summarize_panel(
+        [_row("a", "c1", 0.20, tag=str(i)) for i in range(4)]
+        + [_row("b", "c2", 2.50, tag=str(i)) for i in range(4)],
+        reference_law_stratum_share=shares)
+
+    # A really does hold the better floor: its weakest capability is stronger.
+    assert capability_floor(checkpoint_a) > capability_floor(checkpoint_b)
+    # B really is substantially better on the number that decides.
+    assert (checkpoint_b["reference_law_weighted_mean_nll"]
+            < checkpoint_a["reference_law_weighted_mean_nll"] - 1.0)
+    # Neither has collapsed, so both compete and B wins on matched NLL.
+    assert collapsed_capabilities(checkpoint_a, baseline=baseline) == ()
+    assert collapsed_capabilities(checkpoint_b, baseline=baseline) == ()
+    assert selection_criterion(checkpoint_b, step=2, baseline=baseline) > \
+        selection_criterion(checkpoint_a, step=1, baseline=baseline)
+
+
+def test_ties_break_toward_the_earlier_step() -> None:
+    """Indistinguishable on the reserve: keep the one that trained less."""
+
+    shares = {"f|real": 1.0}
+    early = summarize_panel([_row("f", "c", 2.0)], reference_law_stratum_share=shares)
+    late = summarize_panel([_row("f", "c", 2.0)], reference_law_stratum_share=shares)
+    assert selection_criterion(early, step=100) > selection_criterion(late, step=900)
+
+
+def test_thin_cells_never_gate() -> None:
+    """A mean over a handful of entries would fire or not fire at random."""
+
+    shares = {"f|real": 1.0}
+    start = summarize_panel(
+        [_row("f", "thin", 2.0, tag=str(i)) for i in range(2)]
+        + [_row("f", "fat", 2.0, tag=str(i)) for i in range(THIN_CELL_ENTRIES + 5)],
+        reference_law_stratum_share=shares)
+    baseline = capability_baseline(start)
+    assert "cell:thin" not in baseline
+
+    # The thin cell falls apart; the gate stays silent about it.
+    worse = summarize_panel(
+        [_row("f", "thin", 9.0, tag=str(i)) for i in range(2)]
+        + [_row("f", "fat", 2.0, tag=str(i)) for i in range(THIN_CELL_ENTRIES + 5)],
+        reference_law_stratum_share=shares)
+    assert "cell:thin" not in collapsed_capabilities(worse, baseline=baseline)
 
 
 def test_selection_refuses_a_population_the_law_does_not_describe() -> None:

@@ -89,6 +89,9 @@ def train_segment(
         assert_training_invariants,
         evaluate_panel,
         load_checkpoint,
+        capability_baseline,
+        capability_floor,
+        collapsed_capabilities,
         selection_criterion,
         summarize_panel,
         write_checkpoint,
@@ -258,6 +261,7 @@ def train_segment(
     optimizer = torch.optim.AdamW(trainable, lr=learning_rate)
     completed_steps = 0
     resume_count = 0
+    collapse_baseline = None
     selected_step = 0
     selected_criterion_value = None
     selected_state = None
@@ -280,6 +284,10 @@ def train_segment(
         )
         selected_state = payload.get("selected_model_state") or None
         trajectory = [dict(item) for item in payload["trajectory"]]
+        # Restore rather than recapture: a baseline taken from a
+        # mid-training summary would compare each capability against an
+        # already degraded reference, and the gate would detect nothing.
+        collapse_baseline = payload.get("collapse_baseline")
         model.to(device)
         print(f"resumed at step {completed_steps:,} (resume #{resume_count})", flush=True)
 
@@ -399,7 +407,17 @@ def train_segment(
                 # reported under zero_mass_stratum and never vote.
                 reference_law_stratum_share=reference_law_stratum_share,
             )
-            criterion = selection_criterion(summary, step=completed_steps)
+            if collapse_baseline is None:
+                # First evaluation of the run defines "before training".
+                collapse_baseline = capability_baseline(summary)
+                print(f"  collapse baseline captured over "
+                      f"{len(collapse_baseline)} capabilities", flush=True)
+            collapsed = collapsed_capabilities(summary, baseline=collapse_baseline)
+            if collapsed:
+                warn(f"capability collapse at step {completed_steps}: "
+                     f"{list(collapsed)}")
+            criterion = selection_criterion(
+                summary, step=completed_steps, baseline=collapse_baseline)
             trajectory.append(
                 {
                     "step": completed_steps,
@@ -411,7 +429,9 @@ def train_segment(
                     # trajectory shows what actually chose the checkpoint.
                     "reference_law_weighted_mean_nll":
                         summary["reference_law_weighted_mean_nll"],
-                    "capability_floor": criterion[0],
+                    "eligible": bool(criterion[0]),
+                    "collapsed_capabilities": list(collapsed),
+                    "capability_floor": capability_floor(summary),
                     "by_support_band_mean_nll": {
                         name: value["mean_nll"]
                         for name, value in summary["by_support_band"].items()
@@ -504,7 +524,8 @@ def train_segment(
                 model=model, optimizer=optimizer, identity=identity,
                 completed_steps=completed_steps, selected_step=selected_step,
                 selected_criterion=selected_criterion_value, selected_state=selected_state,
-                trajectory=trajectory, stream_sha256=stream_sha256, resume_count=resume_count,
+                trajectory=trajectory, stream_sha256=stream_sha256,
+                resume_count=resume_count, collapse_baseline=collapse_baseline,
             )
             artifact_volume.commit()
             print(
@@ -521,6 +542,7 @@ def train_segment(
         completed_steps=completed_steps, selected_step=selected_step,
         selected_criterion=selected_criterion_value, selected_state=selected_state,
         trajectory=trajectory, stream_sha256=stream_sha256, resume_count=resume_count,
+        collapse_baseline=collapse_baseline,
     )
     artifact_volume.commit()
     print(
