@@ -1,17 +1,25 @@
 {
   "band_composition_vs_existing_panel": {
-    "caveat": "These are the OLD panel's per-band means applied to new weights. The reserve is drawn from the training population, so its per-band means should be better than an externally mined cohort's; the reweighting DIRECTION is the claim here, not the absolute value.",
-    "correction_to_the_earlier_estimate": "An earlier note said support-matching would move identity NLL from 2.62 to about 1.94. That conflated the MATCHED view with the SUPPORTED-scaffold view; 1.94 is band 25+ alone. Applying training weights to the same per-band means gives 2.74, i.e. matching moves the number +0.12, slightly WORSE than the old raw mean rather than 0.69 nats better. The re-freeze buys an interpretable number, not a flattering one.",
+    "caveat": "These are the OLD externally mined cohort's per-band means under new weights. The reserve is drawn from the training population, so its absolute values should be better; the reweighting DIRECTION is the claim here, not the magnitude.",
+    "existing_16_shard_panel_identity_nll": {
+      "0": 2.84,
+      "1-4": 2.929,
+      "25+": 1.935,
+      "5-24": 2.69
+    },
     "existing_16_shard_panel_share": {
       "0": 0.4258,
       "1-4": 0.1373,
       "25+": 0.2199,
       "5-24": 0.217
     },
-    "finding": "The existing panel is BIMODAL against the training population: it over-represents band 0 (42.6% vs 19.3%) and band 25+ (22.0% vs 10.4%) while under-representing band 1-4 (13.7% vs 43.4%), which is the hardest band at 2.93. That is the accidental support composition, quantified.",
+    "existing_panel_raw_mean_identity_nll": 2.6207,
+    "existing_panel_under_matched_weights": 2.7437,
+    "finding": "The existing panel is BIMODAL against the training population: it over-represents band 0 (42.6% vs 19.3%) and band 25+ (22.0% vs 10.4%) while under-representing band 1-4 (13.7% vs 43.4%), which is the hardest band at 2.93.",
+    "matching_does_not_flatter_the_number": "Applying training weights to the existing panel's own per-band means moves it 2.62 -> 2.74, i.e. +0.12. Matching buys an interpretable number, not a better one. An earlier note claimed 2.62 -> 1.94; that conflated the matched view with the supported-scaffold view, since 1.94 is band 25+ alone.",
     "reserve_share": {
       "0": 0.1905,
-      "1-4": 0.4365,
+      "1-4": 0.4364,
       "25+": 0.1052,
       "5-24": 0.2678
     },
@@ -27,46 +35,47 @@
     "every_family_present": true,
     "every_lane_present": true,
     "near_duplicate_clusters_disjoint": true,
-    "new_scaffold_stratum_usable": true,
     "no_unparseable_sources": true,
     "sources_disjoint": true,
     "supported_scaffold_stratum_usable": true,
-    "training_retains_all_families": true
+    "training_retains_all_families": true,
+    "unsupported_scaffold_stratum_usable": true
   },
   "matched_selection_weights": {
-    "0": 0.19256749307245077,
-    "1-4": 0.43391081285694333,
-    "25+": 0.10444612682008952,
-    "5-24": 0.26907556725051635
+    "0": 0.1925511036627048,
+    "1-4": 0.4339162201298081,
+    "25+": 0.10444919770373474,
+    "5-24": 0.26908347850375236
   },
   "minimum_band_entries": 100,
   "near_duplicate_tanimoto": 0.95,
   "not_a_causal_claim": "Support is not asserted to cause the gap. Bands 0 and 1-4 are indistinguishable and the benefit concentrates at 25+, consistent with a latent typical-chemistry axis. The split only has to stop representing that axis by accident.",
   "pairs_compared": 2431365,
   "reserve_band_counts": {
-    "0": 2863,
-    "1-4": 6561,
+    "0": 2864,
+    "1-4": 6560,
     "25+": 1581,
     "5-24": 4026
   },
   "reserve_entries": 15031,
-  "reserve_sources": 10653,
+  "reserve_sources": 10654,
+  "scaffold_definition": "RDKit MurckoScaffoldSmiles on the source molecule. Acyclic molecules yield the empty scaffold and are treated as one explicit class, not as missing -- an earlier pass let the falsy empty string collapse them into 'no scaffold', which put 361 acyclic entries at the bottom of a series-depth curve they did not belong on.",
   "schema": "compose.editing_v2.matched_validation_reserve",
   "seed": 20260810,
-  "source_library_entries": 151082,
-  "split_digest": "02981debe31b",
+  "source_library_entries": 151078,
+  "split_digest": "4cebfbe455ae",
   "status": "FROZEN",
   "training_band_share": {
-    "0": 0.19256749307245077,
-    "1-4": 0.43391081285694333,
-    "25+": 0.10444612682008952,
-    "5-24": 0.26907556725051635
+    "0": 0.1925511036627048,
+    "1-4": 0.4339162201298081,
+    "25+": 0.10444919770373474,
+    "5-24": 0.26908347850375236
   },
-  "training_entries_retained": 136051,
+  "training_entries_retained": 136047,
   "views": {
     "external_cohort": "the existing 16-shard validation panel, retained as a cross-cohort test and NOT a selection input",
     "matched": "all bands, reweighted by matched_selection_weights; the checkpoint-selection number",
-    "new_scaffold": "band 0 only; extrapolation to unseen chemistry",
-    "supported_scaffold": "band 25+ only; new molecules in familiar series"
+    "supported_scaffold": "band 25+ only; new molecules in familiar series",
+    "unsupported_scaffold": "band 0 only -- no POST-SPLIT training source shares this Murcko scaffold. A property of this split under this scaffold definition, NOT a claim that the scaffold is chemically novel"
   }
 }

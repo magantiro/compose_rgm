@@ -43,7 +43,9 @@ its own. The views are read off the strata:
 
     matched            support bands reweighted to the TRAINING population.
                        This is the checkpoint-selection number.
-    new_scaffold       support == 0. Extrapolation to unseen chemistry.
+    unsupported_scaffold  support == 0: no POST-SPLIT training source shares
+                       the scaffold. A property of this split under this
+                       scaffold definition, not a claim of chemical novelty.
     supported_scaffold support >= 25. Editing new molecules in familiar series.
 
 The 16-shard panel is retained as an externally mined cross-cohort test and is
@@ -76,6 +78,16 @@ NEAR_DUPLICATE_TANIMOTO = 0.95
 #: Below this a band mean is noise and must not carry a selection weight.
 MINIMUM_BAND_ENTRIES = 100
 
+#: The existing 16-shard panel, ring-scaffold entries, MEASURED at pilot step
+#: 1,750 (diagnostics/editing_v2_r_theta_series_depth.json). Carried here only
+#: to show what the reweighting does; nothing selects on it.
+EXISTING_PANEL_ENTRIES = {"0": 5863, "1-4": 1891, "5-24": 2988, "25+": 3028}
+EXISTING_PANEL_IDENTITY_NLL = {"0": 2.840, "1-4": 2.929, "5-24": 2.690, "25+": 1.935}
+EXISTING_PANEL_SHARE = {
+    band: round(count / sum(EXISTING_PANEL_ENTRIES.values()), 4)
+    for band, count in EXISTING_PANEL_ENTRIES.items()
+}
+
 
 def band_label(value: int) -> str:
     for low, high in SUPPORT_BANDS:
@@ -105,20 +117,40 @@ class Union:
 
 
 def read_library(path: Path) -> list[dict]:
-    out = []
-    with gzip.open(path, "rt") as handle:
-        for line in handle:
-            entry = json.loads(line)
-            fiber = entry.get("teacher_successor_fiber") or {}
-            source = str(fiber.get("source_key", ""))
-            if not source:
-                continue
-            out.append({
-                "entry_id": str(entry["p50_entry_sha256"]),
-                "source": source,
-                "family": str(entry["model_family"]),
-                "cell": str(entry["capability_cell_id"]),
-            })
+    """One record per DISTINCT entry id.
+
+    MEASURED: the consolidated train library holds 151,082 lines but 151,078
+    distinct ids -- 4 ids appear twice, byte-identical in every field including
+    the fiber. The validated loader keeps one of each, so counting lines here
+    would make this artifact claim 15,031 reserve rows against a packed store
+    holding 15,029, and the identity chain would fail downstream on a
+    discrepancy that has nothing to do with the split. Exact repeats are
+    collapsed; a genuine id collision is refused rather than silently resolved.
+    """
+
+    out: list[dict] = []
+    seen: dict[str, str] = {}
+    for line in gzip.open(path, "rt"):
+        entry = json.loads(line)
+        fiber = entry.get("teacher_successor_fiber") or {}
+        source = str(fiber.get("source_key", ""))
+        if not source:
+            continue
+        entry_id = str(entry["p50_entry_sha256"])
+        fingerprint = json.dumps(entry, sort_keys=True)
+        if entry_id in seen:
+            if seen[entry_id] != fingerprint:
+                raise SystemExit(
+                    f"conflicting records share entry id {entry_id}; refusing to "
+                    "pick one, since the split would silently depend on the choice")
+            continue
+        seen[entry_id] = fingerprint
+        out.append({
+            "entry_id": entry_id,
+            "source": source,
+            "family": str(entry["model_family"]),
+            "cell": str(entry["capability_cell_id"]),
+        })
     return out
 
 
@@ -274,6 +306,17 @@ def main() -> int:
     scale = sum(weights.values())
     weights = {k: v / scale for k, v in weights.items()} if scale else {}
 
+    # What the reweighting does to a number we already have, so the fresh run's
+    # matched value is not misread as a regression against the old raw mean.
+    existing_total = sum(EXISTING_PANEL_ENTRIES.values())
+    existing_raw = sum(EXISTING_PANEL_ENTRIES[b] * EXISTING_PANEL_IDENTITY_NLL[b]
+                       for b in EXISTING_PANEL_ENTRIES) / existing_total
+    existing_matched = sum(
+        (train_band.get(b, 0) / max(total_train, 1)) * EXISTING_PANEL_IDENTITY_NLL[b]
+        for b in EXISTING_PANEL_ENTRIES)
+    print(f"\nexisting 16-shard panel: raw {existing_raw:.3f} -> under matched "
+          f"weights {existing_matched:.3f} ({existing_matched - existing_raw:+.3f})")
+
     # Gates. Each is a property the reserve must have to carry its claim.
     reserve_sources = {e["source"] for e in reserve}
     train_sources = {e["source"] for e in remaining}
@@ -286,7 +329,7 @@ def main() -> int:
             {e["family"] for e in reserve} == {e["family"] for e in entries}),
         "every_lane_present": (
             {e["lane"] for e in reserve} == {e["lane"] for e in entries}),
-        "new_scaffold_stratum_usable":
+        "unsupported_scaffold_stratum_usable":
             reserve_band.get("0", 0) >= MINIMUM_BAND_ENTRIES,
         "supported_scaffold_stratum_usable":
             reserve_band.get("25+", 0) >= MINIMUM_BAND_ENTRIES,
@@ -323,12 +366,47 @@ def main() -> int:
         "views": {
             "matched": "all bands, reweighted by matched_selection_weights; "
                        "the checkpoint-selection number",
-            "new_scaffold": "band 0 only; extrapolation to unseen chemistry",
+            "unsupported_scaffold": "band 0 only -- no POST-SPLIT training source shares this Murcko scaffold. A property of this split under this scaffold definition, NOT a claim that the scaffold is chemically novel",
             "supported_scaffold": "band 25+ only; new molecules in familiar series",
             "external_cohort": "the existing 16-shard validation panel, retained "
                                "as a cross-cohort test and NOT a selection input",
         },
         "gates": gates,
+        "scaffold_definition": (
+            "RDKit MurckoScaffoldSmiles on the source molecule. Acyclic molecules "
+            "yield the empty scaffold and are treated as one explicit class, not "
+            "as missing -- an earlier pass let the falsy empty string collapse "
+            "them into 'no scaffold', which put 361 acyclic entries at the bottom "
+            "of a series-depth curve they did not belong on."),
+        "band_composition_vs_existing_panel": {
+            "existing_16_shard_panel_share": EXISTING_PANEL_SHARE,
+            "existing_16_shard_panel_identity_nll": EXISTING_PANEL_IDENTITY_NLL,
+            "training_population_share": {
+                k: round(train_band.get(k, 0) / max(total_train, 1), 4)
+                for k in EXISTING_PANEL_SHARE},
+            "reserve_share": {
+                k: round(reserve_band.get(k, 0) / max(len(reserve), 1), 4)
+                for k in EXISTING_PANEL_SHARE},
+            "existing_panel_raw_mean_identity_nll": round(existing_raw, 4),
+            "existing_panel_under_matched_weights": round(existing_matched, 4),
+            "finding": (
+                "The existing panel is BIMODAL against the training population: "
+                "it over-represents band 0 (42.6% vs 19.3%) and band 25+ (22.0% "
+                "vs 10.4%) while under-representing band 1-4 (13.7% vs 43.4%), "
+                "which is the hardest band at 2.93."),
+            "matching_does_not_flatter_the_number": (
+                f"Applying training weights to the existing panel's own per-band "
+                f"means moves it {existing_raw:.2f} -> {existing_matched:.2f}, i.e. "
+                f"{existing_matched - existing_raw:+.2f}. Matching buys an "
+                "interpretable number, not a better one. An earlier note claimed "
+                "2.62 -> 1.94; that conflated the matched view with the "
+                "supported-scaffold view, since 1.94 is band 25+ alone."),
+            "caveat": (
+                "These are the OLD externally mined cohort's per-band means under "
+                "new weights. The reserve is drawn from the training population, "
+                "so its absolute values should be better; the reweighting "
+                "DIRECTION is the claim here, not the magnitude."),
+        },
         "not_a_causal_claim": (
             "Support is not asserted to cause the gap. Bands 0 and 1-4 are "
             "indistinguishable and the benefit concentrates at 25+, consistent "
@@ -342,7 +420,13 @@ def main() -> int:
         json.dump({"reserve_entry_ids": reserve_ids,
                    "training_entry_ids": train_ids,
                    "reserve_band_by_entry_id": {e["entry_id"]: e["band"]
-                                                for e in reserve}}, handle)
+                                                for e in reserve},
+                   # The sampling law excludes by SOURCE canonical key, not by
+                   # entry id, and it reads Active8 rather than this library --
+                   # so the keys are emitted here rather than re-derived
+                   # downstream, where a second scaffolding pass could disagree.
+                   "reserve_source_keys": sorted(reserve_sources),
+                   "training_source_keys": sorted(train_sources)}, handle)
     print(f"\nwrote {args.out} and {ids_path.name}  digest {digest}")
     return 0 if all(gates.values()) else 1
 
