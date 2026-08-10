@@ -1,0 +1,64 @@
+{
+  "by_family": {
+    "atom_delete": {
+      "gap": 4.22,
+      "held_out": 6.64,
+      "law_share": 0.165,
+      "train": 2.42
+    },
+    "atom_insert": {
+      "gap": 4.08,
+      "held_out": 9.12,
+      "law_share": 0.151,
+      "train": 5.03
+    },
+    "atom_restate": {
+      "gap": 4.55,
+      "held_out": 7.84,
+      "law_share": 0.213,
+      "train": 3.29
+    },
+    "bond_reorder": {
+      "gap": -0.34,
+      "held_out": 3.23,
+      "law_share": 0.05,
+      "train": 3.57
+    },
+    "bond_reroute": {
+      "gap": 2.86,
+      "held_out": 6.72,
+      "law_share": 0.199,
+      "train": 3.86
+    },
+    "cycle_attach": {
+      "gap": -0.26,
+      "held_out": 4.05,
+      "law_share": 0.05,
+      "train": 4.32
+    },
+    "cycle_insert": {
+      "gap": 0.33,
+      "held_out": 2.5,
+      "law_share": 0.067,
+      "train": 2.17
+    },
+    "ring_system_restate": {
+      "gap": 0.05,
+      "held_out": 1.55,
+      "law_share": 0.105,
+      "train": 1.5
+    }
+  },
+  "checkpoint_step": 1500,
+  "decision": "Pilot stopped at step 1,950 (~$0.52). Do not scale the run. Determine whether the validation pool is structurally unlike the training pool for the atom families, or whether those families genuinely do not transfer across source molecules.",
+  "finding": "Bimodal and clean: four families at +2.86 to +4.55 nats, four at -0.34 to +0.33. The four with large gaps are 72.8% of the training draw. They FIT training well (atom_delete 2.42 against a 4.79 uniform baseline) and are WORSE than uniform held out (6.64). So the failure is transfer, not budget: more epochs widen this rather than closing it.",
+  "held_out_entries": 14131,
+  "held_out_overall_mean_nll": 4.4188,
+  "note_on_the_curve": "Trend claims on the eval series were made twice and refuted twice. The law-weighted mean oscillates 5.7-6.2 with no direction, and it is structurally the noisiest metric available because it reweights small per-family panel means by large law shares. This finding rests on the train-vs-held-out LEVEL comparison, which does not depend on the trajectory.",
+  "schema": "compose.editing_v2.r_theta_pilot_family_gap",
+  "schema_version": 1,
+  "status": "PILOT_FINDING_EVIDENCE_ONLY_NO_AUTHORITY",
+  "train_overall_mean_nll": 3.3479,
+  "train_sample": 4000,
+  "why_it_was_invisible": "The aggregate held-out NLL (4.42) looks reasonable because the panel is 62.6% cycle_insert and cycle_attach, which generalize almost perfectly, while the law-heavy families that fail are the panel's thinnest strata. Reporting only the panel-native mean would have hidden this entirely."
+}
