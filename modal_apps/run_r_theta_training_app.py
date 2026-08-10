@@ -356,6 +356,20 @@ def train_segment(
                         summary["panel_native"]["minimum_probability"],
                     "deployment_weighted_mean_nll": summary["deployment_weighted_mean_nll"],
                     "criterion": list(criterion),
+                    # Keep the per-family and per-cell means. Without them the
+                    # aggregates can move in opposite directions -- as they did
+                    # here, panel-native improving while deployment-weighted
+                    # worsened -- with nothing recorded to say which families
+                    # are responsible. Computing a diagnostic every 250 steps
+                    # and discarding it is worse than not computing it.
+                    "by_family_mean_nll": {
+                        name: value["mean_nll"]
+                        for name, value in summary["by_family"].items()
+                    },
+                    "by_cell_mean_nll": {
+                        name: value["mean_nll"]
+                        for name, value in summary["by_capability_cell"].items()
+                    },
                 }
             )
             if trajectory[:-1]:
@@ -375,6 +389,7 @@ def train_segment(
                 selected_state = {
                     k: v.detach().cpu().clone() for k, v in model.state_dict().items()
                 }
+            families = summary["by_family"]
             print(
                 f"[step {completed_steps:6,}] panel NLL "
                 f"{summary['panel_native']['mean_nll']:.4f}  "
@@ -382,6 +397,40 @@ def train_segment(
                 f"min p {summary['panel_native']['minimum_probability']:.3e}",
                 flush=True,
             )
+            print(
+                "           families  "
+                + "  ".join(
+                    f"{name.split('_')[0][:5]}.{name.split('_')[-1][:3]} "
+                    f"{value['mean_nll']:.2f}"
+                    for name, value in sorted(families.items())
+                ),
+                flush=True,
+            )
+            # The aggregates moved in opposite directions in this run, so watch
+            # the law-heavy families explicitly rather than only the means.
+            if len(trajectory) > 1:
+                earlier_families = trajectory[-2].get("by_family_mean_nll", {})
+                regressed = sorted(
+                    name
+                    for name, value in families.items()
+                    if name in earlier_families
+                    and value["mean_nll"] > earlier_families[name] * 1.05
+                )
+                if regressed:
+                    warn(f"held-out NLL rose >5% for families: {regressed}")
+            if (
+                summary["deployment_weighted_mean_nll"] is not None
+                and len(trajectory) > 1
+                and trajectory[-2]["deployment_weighted_mean_nll"] is not None
+                and summary["deployment_weighted_mean_nll"]
+                > trajectory[-2]["deployment_weighted_mean_nll"] * 1.03
+            ):
+                warn(
+                    "deployment-weighted NLL rose "
+                    f"{trajectory[-2]['deployment_weighted_mean_nll']:.4f} -> "
+                    f"{summary['deployment_weighted_mean_nll']:.4f} while "
+                    f"panel-native is {summary['panel_native']['mean_nll']:.4f}"
+                )
 
         if completed_steps % checkpoint_every == 0:
             assert_training_invariants(model, hazard_before=hazard_before, step=completed_steps)
