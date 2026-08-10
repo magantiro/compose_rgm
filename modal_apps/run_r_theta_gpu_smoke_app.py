@@ -43,9 +43,17 @@ import modal
 
 from modal_apps.run_process_v2_p50_app import (  # reuse the exact environment
     ARTIFACT_ROOT,
+    REMOTE_ROOT,
     artifact_volume,
-    image,
 )
+from modal_apps.run_process_v2_p50_app import image as _base_image
+
+# The base image puts modal_apps/run_process_v2_p50_app.py under REMOTE_ROOT but
+# only puts REMOTE_ROOT/src on PYTHONPATH, so importing this module inside the
+# container fails at "No module named 'modal_apps'". Add the parent so the
+# namespace package resolves; the src entry must be kept because .env REPLACES
+# the variable rather than appending to it.
+image = _base_image.env({"PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}"})
 
 app = modal.App("compose-v4-r-theta-gpu-smoke")
 
@@ -101,7 +109,9 @@ def profile_r_theta_step(
     artifact_volume.reload()
     root = Path(run_root)
     inputs = root / "run_inputs"
-    repo_root = Path("/root")
+    # The image puts the repo under REMOTE_ROOT, not /root: configs/ and src/
+    # live there, and the contract chain resolves its artifacts relative to it.
+    repo_root = REMOTE_ROOT
     paths = json.loads((inputs / "RUN_PATHS.json").read_text())
     corpus_roots = [str(r) for r in paths["corpus_roots"]]
     packed_store = str(paths["packed_store"])
@@ -123,6 +133,10 @@ def profile_r_theta_step(
     )
     model = runtime.model.to(device)
     model_seconds = time.perf_counter() - started
+    # Phase prints, because a silent container is indistinguishable from a
+    # hung one: the first attempt sat eleven minutes in setup with no way to
+    # tell which read was slow.
+    print(f"[{model_seconds:6.1f}s] model on {device}", flush=True)
 
     freeze = json.loads((inputs / "editing_v2_v2_dataset_freeze.json").read_text())
     manifest = json.loads(
@@ -147,6 +161,8 @@ def profile_r_theta_step(
         verify_state_roundtrip=False,
     )
     library_seconds = time.perf_counter() - library_started
+    print(f"[{time.perf_counter() - started:6.1f}s] library {len(library):,} entries "
+          f"({library_seconds:.1f}s)", flush=True)
 
     # Every id the frozen stream will ever draw must resolve BEFORE spending
     # GPU time, not on the step that happens to reach a missing one.
@@ -173,6 +189,8 @@ def profile_r_theta_step(
     absent = [i for i in set(sequence) if i not in store.row_by_entry_id]
     if absent:
         raise RuntimeError(f"{len(absent):,} stream ids are absent from the packed store")
+    print(f"[{time.perf_counter() - started:6.1f}s] packed store {len(store):,} rows",
+          flush=True)
 
     trainable = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.AdamW(trainable, lr=learning_rate)
@@ -277,6 +295,7 @@ def profile_r_theta_step(
             losses.append(float(loss.detach()))
 
     wall = time.perf_counter() - loop_started
+    print(f"[{time.perf_counter() - started:6.1f}s] {steps} timed steps done", flush=True)
     if hazard_touched:
         raise RuntimeError(f"frozen hazard received a gradient: {sorted(hazard_touched)}")
     if nonfinite_grads:
