@@ -1,0 +1,44 @@
+{
+  "cross_cohort": {
+    "distinct_scaffolds_sampled_train": 26929,
+    "distinct_scaffolds_validation": 1544,
+    "note": "Few scaffolds shared but those few are the large series scaffolds, so 85.5% of validation source-instances sit on a scaffold seen in training. Source instances (54,283) exceed unique validation sources (26,587) because sources recur across validation shards.",
+    "shared_scaffolds": 146,
+    "shared_share_of_validation_scaffolds": 0.095,
+    "validation_source_instances_covered_by_train_scaffolds": 0.855
+  },
+  "findings": {
+    "feasibility": "STRONGLY YES. 1,337 scaffold groups per training shard with 55% singletons, so grouped assignment is abundant and easy to balance.",
+    "interpretation": "The earlier 'different chemical cohort' reading was WRONG. Scaffolds are largely shared (85.5% of validation source-instances). The difference is SAMPLING DESIGN: training shards are diverse library samples (1,337 scaffolds, 55% singletons); validation shards are congeneric analogue series (32 scaffolds, ten variants each, 1.4% singletons).",
+    "necessity": "LOW but worth doing. Median group size 1.0 and largest group 5.87% mean naive source holdout would leak little; grouping is cheap insurance."
+  },
+  "next_test": "Within the existing panel, does performance degrade with SERIES DEPTH -- worse on sources from large scaffold groups than small ones? If yes, series structure is the mechanism. If flat, something else about those 16 shards is responsible and the mechanism is still unidentified.",
+  "per_shard": {
+    "train": {
+      "median_largest_group_share": 0.0587,
+      "median_scaffold_groups": 1337,
+      "median_singleton_group_share": 0.551,
+      "median_sources": 3584,
+      "median_sources_per_group": 1.0
+    },
+    "validation": {
+      "median_largest_group_share": 0.1724,
+      "median_scaffold_groups": 32,
+      "median_singleton_group_share": 0.014,
+      "median_sources": 2171,
+      "median_sources_per_group": 10.0
+    }
+  },
+  "purpose": "Ahead of the split re-freeze: is scaffold-grouped within-shard assignment feasible, is it necessary, and are the train and validation cohorts chemically distinct?",
+  "reframing": "Lead optimisation IS analogue-series work, so the 16-shard panel may be CLOSER to the deployment distribution than the diverse training set. It is not a flawed validation set to demote -- it is the deployment-shaped question. What it cannot do is serve as a neutral in-domain selection signal.",
+  "scaffolds_in_more_than_one_training_shard": {
+    "count": 5938,
+    "of": 26929,
+    "share": 0.221
+  },
+  "schema": "compose.editing_v2.scaffold_audit",
+  "schema_version": 1,
+  "status": "DIAGNOSTIC_EVIDENCE_ONLY_NO_AUTHORITY",
+  "train_shards_sampled": 30,
+  "validation_shards": 16
+}
