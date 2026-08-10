@@ -1289,3 +1289,26 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   reports ~3.5x; and `is_rdkit_valid` cannot be intercepted by patching the module attribute,
   because callers such as `chem/state.py` bind it directly at import -- the memo therefore has
   to live INSIDE the function, which is also why it cannot dodge the identity hash.
+- **/private/tmp IS REAPED MID-SESSION; NEVER LET IT HOLD THE ONLY COPY.**
+  Three near-misses in one day, each caught by luck rather than by a check: the
+  70,301-entry `train_65k` corpus lived only in a scratchpad directory with a
+  partial (31,543-row) backup and was briefly believed not to exist at all;
+  21,778 compiled entries lived only on a Modal volume; and then the git
+  WORKTREE holding the day's work was reaped while a test run was in flight --
+  `.git` vanished and `src/` went from 118 modules to 18. That last one first
+  presented as `ModuleNotFoundError: editing_p50_gate` and read exactly like a
+  pytest path problem.
+  NOTHING WAS LOST, for two reasons worth knowing. A git worktree keeps its
+  objects in the PARENT repository, so all 25 commits survived the deletion of
+  the checkout and were recovered with `git worktree prune` + `git worktree add`
+  against a durable path. And the corpora had already been replicated to
+  `~/compose_trainset_backup` after the first scare.
+  THE FIX IS A GATE, NOT A HABIT: `compose_v4.data.durable_path` refuses a
+  source-of-truth path under `/private/tmp` or `/var/folders`, with
+  `COMPOSE_ALLOW_REAPABLE_PATH=1` as an explicit per-invocation opt-out for
+  genuinely disposable probes. A rule you have to remember is a rule that fails
+  at 00:30 after twenty hours of work -- which is precisely when it did.
+  STILL OUTSTANDING after all that: 25 commits existed on NO remote branch, so
+  the code was single-copy on one disk even after the corpora were safe. Push
+  the branch; replication is the only real protection, the gate just removes
+  the failure mode already paid for.

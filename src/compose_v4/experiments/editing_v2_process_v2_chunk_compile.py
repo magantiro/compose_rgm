@@ -399,7 +399,22 @@ def publish_process_v2_chunk_shard(
     offset = int(result["entry_offset"])
     # Slice-addressed, because the compile unit is a slice: two workers may hold
     # different ranges of the same chunk and must not collide on one path.
+    #
+    # A SOURCE SUBSET changes what an offset means -- it indexes the FILTERED
+    # stream -- so the subset digest is part of the address, not just the
+    # payload. Without it two logically different materializations address the
+    # same location: republishing a corrected subset compile over an earlier
+    # whole-task run raised ImmutableArtifactError on
+    # ``000000140-000000015/ENTRIES.json``, same path, different rows. The
+    # immutable writer caught that one; the next could be a silent overwrite
+    # under a writer that permitted it, or a corpus that quietly mixes both.
+    #
+    # Whole-task slices keep their historical two-field name, so every artifact
+    # already on disk stays addressable and no published corpus is orphaned.
+    subset_digest = result.get("source_subset_sha256")
     slice_id = f"{offset:09d}-{len(entries):09d}"
+    if subset_digest:
+        slice_id = f"{slice_id}-{str(subset_digest)[:16]}"
     directory = Path(output_root) / CHUNKS_DIRNAME / task_identity_sha256 / slice_id
 
     entries_payload = {

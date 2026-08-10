@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 from editing_v2_modal_slice_plan import (  # noqa: E402
     _covered_from_listing,
+    _parse_slice_id,
     _covered_from_local,
     _runs,
 )
@@ -106,3 +107,36 @@ def test_the_two_publishers_use_different_grids_and_still_union(tmp_path: Path) 
 )
 def test_runs_chunks_contiguous_gaps(missing, limit, expected) -> None:
     assert _runs(missing, limit) == expected
+
+
+def test_subset_slice_ids_are_parsed_not_dropped() -> None:
+    """A subset slice carries a third field; two-field parsing DROPS it.
+
+    Dropping it means the planner treats published work as missing and
+    re-requests it -- money already spent, spent again. The digest is in the
+    address precisely because under a subset the offset indexes the filtered
+    stream, so the two-field name alone is ambiguous.
+    """
+
+    assert _parse_slice_id("000000140-000000015") == (140, 15)
+    assert _parse_slice_id("000000140-000000015-c27c9502789f1093") == (140, 15)
+
+
+def test_non_numeric_slice_ids_are_rejected() -> None:
+    assert _parse_slice_id("chunks") is None
+    assert _parse_slice_id("abc-def") is None
+    assert _parse_slice_id("000000140") is None
+
+
+def test_subset_and_whole_task_slices_both_count_as_covered(tmp_path: Path) -> None:
+    """The same range compiled whole and under a subset are different artifacts.
+
+    Both are real publications and both cover their records, so coverage must
+    union them rather than recognise only the historical two-field name.
+    """
+
+    root = tmp_path / "corpus" / "chunks" / TASK
+    for name in ("000000000-000000010", "000000010-000000010-c27c9502789f1093"):
+        (root / name).mkdir(parents=True)
+        (root / name / "RECEIPT.json").write_text("{}")
+    assert _covered_from_local(tmp_path / "corpus")[TASK] == set(range(20))

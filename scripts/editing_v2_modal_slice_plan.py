@@ -31,6 +31,23 @@ import json
 from pathlib import Path
 
 
+def _parse_slice_id(slice_id: str) -> tuple[int, int] | None:
+    """``<offset>-<count>`` or ``<offset>-<count>-<subset16>``.
+
+    A slice compiled from a source subset carries the subset digest in its
+    address, because under a subset the offset indexes the FILTERED stream and
+    the same two-field name would otherwise mean two different things. Parsing
+    with a two-field split silently DROPS every such slice from coverage, which
+    would make the planner re-request work that is already published -- the
+    exact failure this planner exists to prevent.
+    """
+
+    parts = slice_id.split("-")
+    if len(parts) < 2 or not (parts[0].isdigit() and parts[1].isdigit()):
+        return None
+    return int(parts[0]), int(parts[1])
+
+
 def _covered_from_local(root: Path) -> dict[str, set[int]]:
     """Record indices already published under a local ``chunks/`` tree."""
 
@@ -44,8 +61,10 @@ def _covered_from_local(root: Path) -> dict[str, set[int]]:
         for slice_dir in task.iterdir():
             if not (slice_dir / "RECEIPT.json").exists():
                 continue
-            offset_text, _, count_text = slice_dir.name.partition("-")
-            offset, count = int(offset_text), int(count_text)
+            parsed = _parse_slice_id(slice_dir.name)
+            if parsed is None:
+                continue
+            offset, count = parsed
             covered.setdefault(task.name, set()).update(range(offset, offset + count))
     return covered
 
@@ -81,10 +100,10 @@ def _covered_from_listing(path: Path) -> dict[str, set[int]]:
         if len(parts) < 3:
             continue
         task, slice_id = parts[0], parts[1]
-        offset_text, _, count_text = slice_id.partition("-")
-        if not (offset_text.isdigit() and count_text.isdigit()):
+        parsed = _parse_slice_id(slice_id)
+        if parsed is None:
             continue
-        offset, count = int(offset_text), int(count_text)
+        offset, count = parsed
         covered.setdefault(task, set()).update(range(offset, offset + count))
     if seen_receipt_lines and not covered:
         raise SystemExit(

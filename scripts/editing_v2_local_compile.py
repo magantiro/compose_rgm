@@ -98,9 +98,18 @@ def _published(output_root: Path, task: str, offset: int, count: int) -> bool:
     would double-count. Finish a task at one size, or clear it before changing.
     """
 
-    receipt = (Path(output_root) / "chunks" / task
-               / f"{offset:09d}-{count:09d}" / "RECEIPT.json")
-    return receipt.exists()
+    directory = Path(output_root) / "chunks" / task
+    exact = directory / f"{offset:09d}-{count:09d}"
+    if (exact / "RECEIPT.json").exists():
+        return True
+    # A slice compiled from a source subset carries the subset digest as a third
+    # field, so an exact two-field match alone would recompile it.
+    prefix = f"{offset:09d}-{count:09d}-"
+    return directory.is_dir() and any(
+        (directory / name / "RECEIPT.json").exists()
+        for name in os.listdir(directory)
+        if name.startswith(prefix)
+    )
 
 
 def _compile_slice(job: tuple) -> dict:
