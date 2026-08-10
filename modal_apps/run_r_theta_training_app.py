@@ -23,6 +23,7 @@ inputs produces a result nothing can be attributed to.
 
 from __future__ import annotations
 
+import gzip
 import json
 import time
 from pathlib import Path
@@ -125,19 +126,65 @@ def train_segment(
     print(f"[{time.perf_counter() - segment_started:6.1f}s] model on {device}", flush=True)
 
     freeze = json.loads((inputs / "editing_v2_v2_dataset_freeze.json").read_text())
-    manifest = json.loads(
-        (inputs / "editing_v2_prepared_training_manifest.json").read_text()
-    )
-    panel_artifact = json.loads((inputs / "editing_v2_eval_panel.json").read_text())
-    index = json.loads((inputs / "editing_v2_prepared_training_index.json").read_text())
     resolution = json.loads(
         (inputs / "editing_v2_split_precedence_resolution.json").read_text()
     )
-    if manifest["sampling_law_sha256"] != freeze["sampling_law_sha256"]:
-        raise RThetaTrainingError("manifest does not bind the frozen sampling law")
-    if index["manifest_sha256"] != manifest["manifest_sha256"]:
-        raise RThetaTrainingError("stream index was built for another manifest")
+
+    # ---- v2 identities: the post-split reserve, law and sequence ------------
+    # The reserve is carved from WITHIN the train library, so both sides share
+    # one packed store and one corpus root. The separate 16-shard panel is
+    # retained as an external cross-cohort test and is not read here -- it is
+    # never a selection input.
+    law = json.loads((inputs / "editing_v2_sampling_law_v2.json").read_text())
+    manifest = json.loads(
+        (inputs / "editing_v2_prepared_training_manifest_v2.json").read_text()
+    )
+    index = json.loads(
+        (inputs / "editing_v2_prepared_training_index_v2.json").read_text()
+    )
+    with gzip.open(
+        inputs / "editing_v2_matched_validation_reserve_ids.json.gz", "rt"
+    ) as handle:
+        reserve = json.load(handle)
+    gate = json.loads((inputs / "editing_v2_post_split_freeze_gate.json").read_text())
+
+    if gate["status"] != "FROZEN":
+        raise RThetaTrainingError(
+            f"pre-freeze gate is {gate['status']}, not FROZEN; refusing to train")
+    if manifest["law_frozen_sha256"] != law["frozen_sha256"]:
+        raise RThetaTrainingError("manifest does not bind this sampling law")
+    if gate["law_frozen_sha256"] != law["frozen_sha256"]:
+        raise RThetaTrainingError("the gate that passed was run against another law")
+    if gate["manifest_frozen_sha256"] != manifest["frozen_sha256"]:
+        raise RThetaTrainingError("the gate that passed was run against another manifest")
+    if (law.get("matched_validation_reserve_source_digest")
+            != manifest.get("matched_validation_reserve_source_digest")):
+        raise RThetaTrainingError("law and manifest bind different reserves")
     sequence = index["sequence"]
+
+    panel_ids = list(reserve["reserve_entry_ids"])
+    reserve_band_by_entry_id = dict(reserve["reserve_band_by_entry_id"])
+    training_ids = set(reserve["training_entry_ids"])
+    if set(sequence) - training_ids:
+        raise RThetaTrainingError("the training sequence reaches outside the split")
+    if set(panel_ids) & set(sequence):
+        raise RThetaTrainingError("a reserve entry appears in the training sequence")
+
+    with gzip.open(inputs / "ENTRY_PROVENANCE.json.gz", "rt") as handle:
+        provenance = json.load(handle)
+    synthetic_lane = provenance["synthetic_lane"]
+    reserve_lane_by_entry_id = {
+        entry_id: ("synthetic" if provenance["lane_by_entry_id"].get(entry_id)
+                   == synthetic_lane else "real")
+        for entry_id in panel_ids
+    }
+    # The law defines the reference process; its realized draw share per
+    # "family|lane" is what weights the selection number. Strata absent here,
+    # or given zero, are reported as diagnostics and never vote.
+    reference_law_stratum_share = {
+        f'{s["family"]}|{s["provenance"]}': float(s["draw_share"])
+        for s in law["strata"]
+    }
 
     library = load_corpus_training_library(
         [Path(r) for r in paths["corpus_roots"]],
@@ -148,23 +195,18 @@ def train_segment(
     template = torch.load(
         Path(paths["packed_store"]) / "TEMPLATE.pt", map_location="cpu", weights_only=False
     )
-    panel_library = load_corpus_training_library(
-        [Path(r) for r in paths["panel_corpus_roots"]],
-        excluded_sources=resolution["excluded_source_keys"]["validation"],
-        verify_state_roundtrip=False,
-    )
-    panel_store = PackedCollatedStore(Path(paths["packed_panel_store"]))
-    panel_template = torch.load(
-        Path(paths["packed_panel_store"]) / "TEMPLATE.pt",
-        map_location="cpu",
-        weights_only=False,
-    )
-    panel_ids = json.loads(
-        (inputs / "editing_v2_eval_panel_ids.json").read_text()
-    )["entry_ids"]
+    # MEASURED: the packed train store holds exactly 151,059 rows -- the same
+    # 4 duplicate ids and 19 precedence drops the carve found independently --
+    # and its row set is exactly training + reserve. So one store serves both
+    # sides and nothing needs repacking for the new split.
+    panel_library, panel_store, panel_template = library, store, template
+    missing = [i for i in panel_ids if i not in library]
+    if missing:
+        raise RThetaTrainingError(
+            f"{len(missing):,} reserve entries are absent from the train library")
     print(
-        f"[{time.perf_counter() - segment_started:6.1f}s] library {len(library):,} / "
-        f"panel {len(panel_library):,}",
+        f"[{time.perf_counter() - segment_started:6.1f}s] library {len(library):,} = "
+        f"train {len(training_ids):,} + reserve {len(panel_ids):,}",
         flush=True,
     )
 
@@ -199,15 +241,18 @@ def train_segment(
         initialization_seed=int(binding["model_runtime"]["initialization_seed"]),
         initial_model_state_sha256=str(binding["model_runtime"]["initial_model_state_sha256"]),
         library_sha256=str(freeze["library_sha256"]),
-        split_sha256=str(freeze["split_sha256"]),
-        sampling_law_sha256=str(freeze["sampling_law_sha256"]),
-        manifest_sha256=str(manifest["manifest_sha256"]),
+        # The reserve digest IS the split identity now: the frozen freeze file
+        # describes the pre-reserve division and would bind the wrong one.
+        split_sha256=str(law["matched_validation_reserve_source_digest"]),
+        sampling_law_sha256=str(law["frozen_sha256"]),
+        manifest_sha256=str(manifest["frozen_sha256"]),
         packed_store_records_sha256=str(store.header["records_sha256"]),
-        eval_panel_sha256=str(panel_artifact["panel_sha256"]),
+        eval_panel_sha256=str(gate["reserve_source_digest"]),
     )
-    stream_sha256 = json.loads((inputs / "editing_v2_prepared_training_index.json").read_text())[
-        "manifest_sha256"
-    ]
+    # The digest of the SEQUENCE itself, not of the manifest that produced it.
+    # A resume must verify the order it is about to consume, and two manifests
+    # can agree while their sequences differ.
+    stream_sha256 = str(manifest["sequence_sha256"])
 
     trainable = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.AdamW(trainable, lr=learning_rate)
@@ -341,11 +386,18 @@ def train_segment(
 
         if completed_steps % evaluate_every == 0:
             rows = evaluate_panel(
-                model, entry_ids=panel_ids, build_batch=build_panel, batch_size=batch_size
+                model, entry_ids=panel_ids, build_batch=build_panel,
+                batch_size=batch_size,
+                lane_by_entry_id=reserve_lane_by_entry_id,
+                support_band_by_entry_id=reserve_band_by_entry_id,
             )
             summary = summarize_panel(
                 rows,
-                deployment_family_share=manifest["coefficient_proof"]["family_realized"],
+                deployment_family_share=law["realized_coefficients"]["by_family"],
+                # The law defines the reference process R_theta estimates, so it
+                # supplies the selection weights. Strata it gives zero mass are
+                # reported under zero_mass_stratum and never vote.
+                reference_law_stratum_share=reference_law_stratum_share,
             )
             criterion = selection_criterion(summary, step=completed_steps)
             trajectory.append(
@@ -355,6 +407,19 @@ def train_segment(
                     "panel_native_minimum_probability":
                         summary["panel_native"]["minimum_probability"],
                     "deployment_weighted_mean_nll": summary["deployment_weighted_mean_nll"],
+                    # The selection number. Recorded first-class so the
+                    # trajectory shows what actually chose the checkpoint.
+                    "reference_law_weighted_mean_nll":
+                        summary["reference_law_weighted_mean_nll"],
+                    "capability_floor": criterion[0],
+                    "by_support_band_mean_nll": {
+                        name: value["mean_nll"]
+                        for name, value in summary["by_support_band"].items()
+                    },
+                    "zero_mass_stratum_mean_nll": {
+                        name: value["mean_nll"]
+                        for name, value in summary["zero_mass_stratum"].items()
+                    },
                     "criterion": list(criterion),
                     # Keep the per-family and per-cell means. Without them the
                     # aggregates can move in opposite directions -- as they did

@@ -181,11 +181,15 @@ def test_checkpoint_write_is_atomic(tmp_path: Path) -> None:
     assert not list(tmp_path.glob("*.partial"))
 
 
-def _row(family: str, cell: str, nll: float) -> dict:
+def _row(family: str, cell: str, nll: float, *, lane: str = "real",
+         support_band: str | None = None, tag: str = "") -> dict:
     return {
-        "entry_id": f"{family}-{cell}-{nll}",
+        "entry_id": f"{family}-{cell}-{nll}-{lane}-{tag}",
         "model_family": family,
         "capability_cell_id": cell,
+        "lane": lane,
+        "stratum": f"{family}|{lane}",
+        "support_band": support_band,
         "teacher_successor_nll": nll,
         "teacher_successor_probability": math.exp(-nll),
         "teacher_successor_log_probability": -nll,
@@ -220,14 +224,88 @@ def test_thin_cells_are_flagged_rather_than_silently_gated() -> None:
     assert summary["by_capability_cell"]["thin"]["entries"] < THIN_CELL_ENTRIES
 
 
-def test_selection_prefers_the_checkpoint_that_abandoned_nothing() -> None:
-    """A mean hides a transition the model has given up on entirely."""
+def test_selection_prefers_the_checkpoint_that_abandoned_no_capability() -> None:
+    """A good weighted mean must not outvote a dead operator.
 
-    uniform = summarize_panel([_row("f", "c", 2.0), _row("f", "c", 2.0)])
-    lopsided = summarize_panel([_row("f", "c", 0.1), _row("f", "c", 3.5)])
-    assert lopsided["panel_native"]["mean_nll"] < uniform["panel_native"]["mean_nll"]
-    # ...but selection still prefers the one with no abandoned successor.
-    assert selection_criterion(uniform, step=1) > selection_criterion(lopsided, step=1)
+    Collapse means a whole family or capability cell has died. Both checkpoints
+    here have the same reference-law-weighted mean; one has let ``rare`` fall
+    apart and pays for it elsewhere.
+    """
+
+    shares = {"keep|real": 0.5, "rare|real": 0.5}
+    healthy = summarize_panel(
+        [_row("keep", "c1", 2.0, tag=str(i)) for i in range(4)]
+        + [_row("rare", "c2", 2.0, tag=str(i)) for i in range(4)],
+        reference_law_stratum_share=shares)
+    collapsed = summarize_panel(
+        [_row("keep", "c1", 0.5, tag=str(i)) for i in range(4)]
+        + [_row("rare", "c2", 3.5, tag=str(i)) for i in range(4)],
+        reference_law_stratum_share=shares)
+    assert healthy["reference_law_weighted_mean_nll"] == pytest.approx(
+        collapsed["reference_law_weighted_mean_nll"])
+    assert selection_criterion(healthy, step=1) > selection_criterion(collapsed, step=1)
+
+
+def test_selection_refuses_a_population_the_law_does_not_describe() -> None:
+    """Falling back to the panel-native mean would select on the wrong thing.
+
+    The reserve is stratified to the LIBRARY; the model is trained under the
+    LAW. Selecting without the weights would silently optimize for a different
+    population while every count still looked right.
+    """
+
+    summary = summarize_panel([_row("f", "c", 2.0)])
+    assert summary["reference_law_weighted_mean_nll"] is None
+    with pytest.raises(RThetaTrainingError, match="reference_law_weighted_mean_nll"):
+        selection_criterion(summary, step=1)
+
+
+def test_zero_mass_strata_are_reported_but_never_weighted() -> None:
+    """Compiled-but-undrawn chemistry is a diagnostic, not a vote.
+
+    MEASURED: the law gives atom_delete|synthetic exactly zero draw because
+    that family's real supply already meets its target. Scoring it would select
+    for imitating a teacher policy we deliberately chose not to train.
+    """
+
+    rows = ([_row("atom_delete", "c1", 1.0, lane="real", tag=str(i)) for i in range(4)]
+            + [_row("atom_delete", "c1", 9.0, lane="synthetic", tag=str(i))
+               for i in range(4)])
+    summary = summarize_panel(
+        rows, reference_law_stratum_share={"atom_delete|real": 0.17,
+                                           "atom_delete|synthetic": 0.0})
+    # The catastrophic synthetic rows are measured...
+    assert summary["zero_mass_stratum"]["atom_delete|synthetic"]["mean_nll"] == 9.0
+    # ...and contribute nothing to the number that selects.
+    assert summary["reference_law_weighted_mean_nll"] == pytest.approx(1.0)
+    assert summary["panel_native"]["mean_nll"] == pytest.approx(5.0)
+
+
+def test_weights_renormalize_over_strata_the_reserve_can_measure() -> None:
+    """Dropping an unmeasurable stratum must reweight, not shrink.
+
+    MEASURED: cycle_insert|real carries 2.2e-05 of the law over a supply of one
+    row, which sits on the training side, so the reserve cannot measure it.
+    Weighting without renormalizing would drag the mean toward zero.
+    """
+
+    summary = summarize_panel(
+        [_row("a", "c", 2.0, tag="0"), _row("b", "c", 4.0, tag="1")],
+        reference_law_stratum_share={"a|real": 0.25, "b|real": 0.25,
+                                     "absent|real": 0.5})
+    assert summary["reference_law_weighted_mean_nll"] == pytest.approx(3.0)
+    assert summary["reference_law_mass_measured"] == pytest.approx(1.0)
+
+
+def test_support_bands_report_in_regime_order() -> None:
+    """The generalization regimes are a view, not a selection input."""
+
+    rows = ([_row("f", "c", 1.0, support_band="25+", tag=str(i)) for i in range(3)]
+            + [_row("f", "c", 3.0, support_band="0", tag=str(i)) for i in range(3)])
+    summary = summarize_panel(rows, reference_law_stratum_share={"f|real": 1.0})
+    assert list(summary["by_support_band"]) == ["0", "25+"]
+    assert summary["by_support_band"]["0"]["mean_nll"] == 3.0
+    assert summary["by_support_band"]["25+"]["mean_nll"] == 1.0
 
 
 def test_empty_panel_is_refused() -> None:

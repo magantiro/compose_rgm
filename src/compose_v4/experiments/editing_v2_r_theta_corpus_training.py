@@ -25,12 +25,39 @@ the path it found them at.
 
 SELECTION IS NOT THE LAST STEP
 ------------------------------
-The checkpoint that ships is chosen by held-out ``(minimum teacher-successor
-probability, -mean NLL)`` -- the same criterion the T1 runner uses -- evaluated
-on the frozen panel, never by final training loss. The panel is NOT distributed
-like the training draw (cycle_insert is 36.33% of it against 6.50% of the law),
-so both the panel-native mean and the deployment-weighted mean are reported and
-neither is presented as "the" number.
+The checkpoint that ships is chosen on the held-out reserve, never by final
+training loss, and the number it is chosen by is the REFERENCE-LAW-WEIGHTED
+mean NLL, subject to no family or capability-cell collapse.
+
+Reference-law-weighted, not "training-weighted". The claim is not "evaluate
+this way because SGD happened to sample this way". It is that the sampling law
+DEFINES the molecular reference process R_theta is meant to estimate: the
+compiled library is what chemistry is AVAILABLE, and the law is what the model
+is supposed to LEARN. A stratum the law assigns zero mass therefore contributes
+zero to the selection number.
+
+That distinction is load-bearing here. MEASURED: the law gives
+``atom_delete|synthetic`` and ``atom_insert|synthetic`` exactly zero draw, and
+``atom_restate|synthetic`` 0.4%, because those families' real supply already
+meets their targets. Scoring the model on them would select partly for
+imitating a synthetic teacher policy we deliberately chose not to train --
+recreating, on the lane axis, the population mismatch the support-stratified
+reserve was built to remove.
+
+FOUR VIEWS, ONE RESERVE, ONE VOTE
+---------------------------------
+    reference_law_weighted   the selection number
+    by_family / by_capability_cell
+                             selection GATES; a good weighted mean must not
+                             hide a collapsing operator or capability cell
+    by_support_band          unsupported / low / medium / well-supported,
+                             the generalization regimes
+    zero_mass_stratum        compiled-but-undrawn chemistry. Scientifically
+                             interesting, diagnostic only, never a vote.
+
+Reporting them separately is what lets one metric avoid answering contradictory
+questions. The externally mined 16-shard panel is retained as a cross-cohort
+test and is likewise never a selection input.
 """
 
 from __future__ import annotations
@@ -64,6 +91,11 @@ TOTAL_HAZARD_PREFIX = "total_hazard_head."
 
 #: A per-cell mean over fewer than this many entries is noise, not a gate.
 THIN_CELL_ENTRIES = 30
+
+#: Support bands, keyed on how many POST-SPLIT training sources share the
+#: entry's Murcko scaffold. Band "0" is unsupported under this split and this
+#: scaffold definition -- not a claim that the chemistry is novel.
+SUPPORT_BAND_ORDER = ("0", "1-4", "5-24", "25+")
 
 
 class RThetaTrainingError(RuntimeError):
@@ -247,6 +279,8 @@ def evaluate_panel(
     entry_ids: Sequence[str],
     build_batch,
     batch_size: int,
+    lane_by_entry_id: Mapping[str, str] | None = None,
+    support_band_by_entry_id: Mapping[str, str] | None = None,
 ) -> list[dict[str, Any]]:
     """Score the held-out panel through the TEACHER path.
 
@@ -287,11 +321,21 @@ def evaluate_panel(
                 for entry, value, family_term, identity_term in zip(
                     entries, log_probabilities, family_terms, identity_terms, strict=True
                 ):
+                    lane = (lane_by_entry_id or {}).get(entry.entry_id)
                     rows.append(
                         {
                             "entry_id": entry.entry_id,
                             "model_family": entry.model_family,
                             "capability_cell_id": entry.capability_cell_id,
+                            # The stratum key the reference law is indexed by.
+                            # Carried here rather than rejoined downstream, so a
+                            # row can never be weighted by a lane it does not
+                            # have.
+                            "lane": lane,
+                            "stratum": (None if lane is None
+                                        else f"{entry.model_family}|{lane}"),
+                            "support_band": (support_band_by_entry_id or {}).get(
+                                entry.entry_id),
                             "teacher_successor_log_probability": float(value),
                             "teacher_successor_probability": math.exp(float(value)),
                             "teacher_successor_nll": -float(value),
@@ -308,12 +352,21 @@ def summarize_panel(
     rows: Sequence[Mapping[str, Any]],
     *,
     deployment_family_share: Mapping[str, float] | None = None,
+    reference_law_stratum_share: Mapping[str, float] | None = None,
 ) -> dict[str, Any]:
-    """Aggregate panel rows, reporting BOTH means rather than choosing one.
+    """Aggregate reserve rows into four views, only one of which votes.
 
-    The panel is not distributed like the training draw, so its plain mean is
-    not an estimate of performance under the sampling law. Reporting only one
-    of the two invites reading it as the other.
+    The reserve is stratified to the LIBRARY's composition, but R_theta is
+    trained under the LAW's, and the two differ sharply on the lane axis --
+    42.8% synthetic available against 21.0% drawn, with two strata at exactly
+    zero. A plain mean is therefore not an estimate of the reference process;
+    it is an estimate over chemistry that includes capabilities the law
+    deliberately declines to train.
+
+    ``reference_law_stratum_share`` supplies the law's realized draw share per
+    ``"family|lane"``. Strata it does not mention, or gives zero, are excluded
+    from the selection number and reported under ``zero_mass_stratum`` instead
+    -- visible as a stress diagnostic, never a vote.
     """
 
     if not rows:
@@ -351,33 +404,125 @@ def summarize_panel(
         if covered > 0:
             deployment_mean_nll = weighted / covered
 
+    # ---- view 1: the selection number -------------------------------------
+    by_stratum: dict[str, list[Mapping[str, Any]]] = {}
+    for row in rows:
+        if row.get("stratum"):
+            by_stratum.setdefault(str(row["stratum"]), []).append(row)
+    strata = {name: aggregate(items) for name, items in sorted(by_stratum.items())}
+
+    reference_law_weighted = None
+    weighted_strata: dict[str, dict[str, Any]] = {}
+    zero_mass: dict[str, dict[str, Any]] = {}
+    if reference_law_stratum_share:
+        positive = {k: float(v) for k, v in reference_law_stratum_share.items()
+                    if float(v) > 0}
+        # Renormalize over strata the reserve can actually measure. Dropping a
+        # stratum without renormalizing would quietly shrink the weighted mean
+        # toward zero rather than reweight it.
+        usable = {k: v for k, v in positive.items() if k in strata}
+        scale = sum(usable.values())
+        if scale > 0:
+            reference_law_weighted = sum(
+                (weight / scale) * strata[name]["mean_nll"]
+                for name, weight in usable.items()
+            )
+            weighted_strata = {
+                name: {"law_weight": weight,
+                       "normalized_weight": weight / scale,
+                       **strata[name]}
+                for name, weight in sorted(usable.items())
+            }
+        for name, measured in sorted(strata.items()):
+            if positive.get(name, 0.0) <= 0:
+                zero_mass[name] = {"law_weight": positive.get(name, 0.0), **measured}
+
+    # ---- view 3: generalization regimes ------------------------------------
+    by_band: dict[str, list[Mapping[str, Any]]] = {}
+    for row in rows:
+        if row.get("support_band"):
+            by_band.setdefault(str(row["support_band"]), []).append(row)
+    bands = {
+        name: aggregate(by_band[name])
+        for name in SUPPORT_BAND_ORDER if name in by_band
+    }
+
     return {
+        # Not a selection input. Kept because a reader who sees only the
+        # weighted number cannot tell how much the weighting moved it.
         "panel_native": overall,
-        # Reweighted to the training draw. Answers a different question than
-        # panel_native, and the artifact says so rather than implying one.
         "deployment_weighted_mean_nll": deployment_mean_nll,
+        # THE selection number. Weighted by the law that defines the reference
+        # process, not by what the reserve happens to contain.
+        "reference_law_weighted_mean_nll": reference_law_weighted,
+        "reference_law_weighted_strata": weighted_strata,
+        "reference_law_mass_measured": sum(
+            item["normalized_weight"] for item in weighted_strata.values()
+        ) if weighted_strata else None,
+        # Selection GATES: a good weighted mean must not hide a dead operator.
         "by_family": families,
         "by_capability_cell": cells,
+        # Generalization regimes.
+        "by_support_band": bands,
+        # Diagnostic only. Compiled chemistry the law declines to train; scoring
+        # it would select for imitating a teacher policy we chose not to learn.
+        "zero_mass_stratum": zero_mass,
         "thin_cells": sorted(
             name for name, value in cells.items() if value["entries"] < THIN_CELL_ENTRIES
         ),
     }
 
 
-def selection_criterion(summary: Mapping[str, Any], *, step: int) -> tuple[float, float, int]:
-    """Higher is better, lexicographically.
+def capability_floor(summary: Mapping[str, Any]) -> float:
+    """The weakest capability the checkpoint still supports.
 
-    Minimum probability first: a checkpoint that has abandoned some transition
-    entirely is worse than one that is uniformly mediocre, and a mean hides
-    exactly that.
+    Collapse means a whole FAMILY or CAPABILITY CELL has died, not that one
+    example is hard. The previous criterion led on the minimum probability over
+    all entries, which is a single-row order statistic: over 15,031 rows it is
+    dominated by whichever entry happens to be hardest, and it moves between
+    checkpoints for reasons that have nothing to do with capability.
+
+    So the floor is the smallest MEAN probability over families and non-thin
+    capability cells. Thin cells are excluded because a mean over fewer than
+    THIN_CELL_ENTRIES entries would fire or not fire at random -- they are
+    reported by ``summarize_panel`` and gated deliberately, not trusted here.
     """
 
-    native = summary["panel_native"]
-    return (
-        float(native["minimum_probability"]),
-        -float(native["mean_nll"]),
-        -int(step),
-    )
+    candidates = [
+        value["mean_probability"] for value in summary["by_family"].values()
+    ] + [
+        value["mean_probability"]
+        for value in summary["by_capability_cell"].values()
+        if value["entries"] >= THIN_CELL_ENTRIES
+    ]
+    if not candidates:
+        raise RThetaTrainingError(
+            "no family or non-thin capability cell to floor selection on")
+    return float(min(candidates))
+
+
+def selection_criterion(summary: Mapping[str, Any], *, step: int) -> tuple[float, float, int]:
+    """Higher is better, lexicographically:
+
+        (capability floor, -reference-law-weighted NLL, -step)
+
+    Best reference-law-weighted NLL SUBJECT TO no family or capability-cell
+    collapse. The floor leads, so a checkpoint that has abandoned an operator
+    cannot win on a good weighted mean -- which is precisely what a mean hides.
+
+    The weighted NLL is required, not optional. Falling back to the panel-native
+    mean when the law weights are absent would silently select against a
+    different population than the one the run claims to estimate, and every
+    count would still look right.
+    """
+
+    weighted = summary.get("reference_law_weighted_mean_nll")
+    if weighted is None:
+        raise RThetaTrainingError(
+            "selection needs reference_law_weighted_mean_nll; pass "
+            "reference_law_stratum_share to summarize_panel rather than "
+            "selecting on a population the law does not describe")
+    return (capability_floor(summary), -float(weighted), -int(step))
 
 
 def assert_training_invariants(
@@ -403,11 +548,13 @@ __all__ = [
     "CHECKPOINT_FILENAME",
     "CHECKPOINT_SCHEMA",
     "CHECKPOINT_SCHEMA_VERSION",
+    "SUPPORT_BAND_ORDER",
     "THIN_CELL_ENTRIES",
     "TOTAL_HAZARD_PREFIX",
     "RThetaTrainingError",
     "RunIdentity",
     "assert_training_invariants",
+    "capability_floor",
     "evaluate_panel",
     "load_checkpoint",
     "selection_criterion",
