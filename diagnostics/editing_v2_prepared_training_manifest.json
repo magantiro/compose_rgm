@@ -1,0 +1,70 @@
+{
+  "capability_cell_realized": {
+    "editing_v2_active8_v1:atom_delete:leaf_death": 23974,
+    "editing_v2_active8_v1:atom_insert:one_neighbor_birth": 21937,
+    "editing_v2_active8_v1:atom_restate:element_identity_change": 30870,
+    "editing_v2_active8_v1:atom_restate:valence_state_change": 55,
+    "editing_v2_active8_v1:bond_reorder:bond_order_decrease": 3621,
+    "editing_v2_active8_v1:bond_reorder:bond_order_increase": 3573,
+    "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_acyclic_source": 255,
+    "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_cyclic_source": 7743,
+    "editing_v2_active8_v1:bond_reroute:single_atom_pendant_acyclic_source": 215,
+    "editing_v2_active8_v1:bond_reroute:single_atom_pendant_cyclic_source": 20575,
+    "editing_v2_active8_v1:cycle_attach:open_from_articulated_polycyclic_ring_system": 227,
+    "editing_v2_active8_v1:cycle_attach:open_from_monocyclic_ring_system": 3782,
+    "editing_v2_active8_v1:cycle_attach:open_from_nonarticulated_polycyclic_ring_system": 3186,
+    "editing_v2_active8_v1:cycle_insert:close_to_articulated_polycyclic_ring_system": 235,
+    "editing_v2_active8_v1:cycle_insert:close_to_monocyclic_ring_system": 5514,
+    "editing_v2_active8_v1:cycle_insert:close_to_nonarticulated_polycyclic_ring_system": 3906,
+    "editing_v2_active8_v1:ring_system_restate:aromatization": 6636,
+    "editing_v2_active8_v1:ring_system_restate:coordinated_ring_bond_state_change": 656,
+    "editing_v2_active8_v1:ring_system_restate:dearomatization": 7910
+  },
+  "cell_floor": 256,
+  "coefficient_proof": {
+    "capability_cells": 19,
+    "family_drift": {
+      "atom_delete": 0.0,
+      "atom_insert": 0.0,
+      "atom_restate": -0.0,
+      "bond_reorder": -0.0,
+      "bond_reroute": 0.0,
+      "cycle_attach": 0.0,
+      "cycle_insert": -0.0,
+      "ring_system_restate": -0.0
+    },
+    "family_expected": {
+      "atom_delete": 0.16548,
+      "atom_insert": 0.15142,
+      "atom_restate": 0.21347,
+      "bond_reorder": 0.04966,
+      "bond_reroute": 0.19872,
+      "cycle_attach": 0.04966,
+      "cycle_insert": 0.06665,
+      "ring_system_restate": 0.10494
+    },
+    "family_realized": {
+      "atom_delete": 0.16549,
+      "atom_insert": 0.15143,
+      "atom_restate": 0.21347,
+      "bond_reorder": 0.04966,
+      "bond_reroute": 0.19872,
+      "cycle_attach": 0.04967,
+      "cycle_insert": 0.06665,
+      "ring_system_restate": 0.10494
+    },
+    "synthetic_expected": 0.25206,
+    "synthetic_realized": 0.25365,
+    "worst_family_drift": 0.0
+  },
+  "eligible_entries": 144870,
+  "epoch_size": 144870,
+  "excluded_sources": 97,
+  "library_sha256": "2d553afa5560319455855bf75306b6e9d5169180562be7b139cf14336f7ecb26",
+  "manifest_sha256": "da6e2375ace5d59e8d3c90ea2b477954bee7370b5dd76239f956572747bae8ed",
+  "sampling_law_sha256": "93dd460167d65146d2914bc4a2071e698e4af13a2473a3b03662dbd6200d28cd",
+  "schema": "compose.editing_v2.prepared_training_manifest",
+  "schema_version": 1,
+  "seed": 20260810,
+  "split_sha256": "747d17b5935a7808a35919a5a17fb2bbf76ca2974d6169518c8a21bcf673df25"
+}

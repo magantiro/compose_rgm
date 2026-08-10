@@ -63,6 +63,11 @@ EXPECTED = {
     "realized_synthetic_share": 0.252,
     "excluded_train_sources": 97,
     "cross_role_source_overlap": 0,
+    # A family-level law can extinguish a capability outright: measured,
+    # atom_restate:valence_state_change (55 pairs, synthetic-only) received ZERO
+    # mass while every family coefficient read perfectly and drift was +0.00000.
+    # This is the only gate that looks below family granularity.
+    "capability_cells_with_mass": 19,
 }
 #: Shares are compared at three decimals, the precision they were declared at.
 SHARE_TOLERANCE = 0.0005
@@ -85,6 +90,9 @@ def main() -> int:
     parser.add_argument("--active8-root", required=True)
     parser.add_argument("--corpus-root", action="append", default=[])
     parser.add_argument("--pairs-file", action="append", default=[])
+    parser.add_argument("--manifest", required=True,
+                        help="Prepared training manifest; its realized per-cell mass "
+                             "is gated here.")
     parser.add_argument("--out", required=True)
     args = parser.parse_args()
 
@@ -129,6 +137,10 @@ def main() -> int:
     eligible_total = len(eligible)
     min_share = min(v / total for v in families.values())
 
+    manifest = json.loads(Path(args.manifest).read_text())
+    realized_cells = manifest.get("capability_cell_realized", {})
+    cells_with_mass = sum(1 for v in realized_cells.values() if v > 0)
+
     checks = [
         ("canonical_train_pairs", total == EXPECTED["canonical_train_pairs"],
          f"{total:,} (expected {EXPECTED['canonical_train_pairs']:,})"),
@@ -149,6 +161,10 @@ def main() -> int:
          f"{len(excluded['train'])} (expected {EXPECTED['excluded_train_sources']})"),
         ("cross_role_source_overlap", overlap == EXPECTED["cross_role_source_overlap"],
          f"{overlap} (expected {EXPECTED['cross_role_source_overlap']})"),
+        ("capability_cells_with_mass",
+         cells_with_mass == EXPECTED["capability_cells_with_mass"],
+         f"{cells_with_mass} of {len(realized_cells)} drawn "
+         f"(expected {EXPECTED['capability_cells_with_mass']})"),
     ]
     _fail(checks)
 
@@ -167,7 +183,9 @@ def main() -> int:
     }
     law_body = {
         "constraints": {"family_floor": 0.05, "family_cap": 0.22,
-                        "synthetic_target": 0.18, "max_oversample": 3.0},
+                        "synthetic_target": 0.18, "max_oversample": 3.0,
+                        "capability_cell_floor": int(manifest["cell_floor"])},
+        "capability_cell_realized": realized_cells,
         "strata": sorted(
             [
                 {"family": f, "provenance": "synthetic" if syn else "real",

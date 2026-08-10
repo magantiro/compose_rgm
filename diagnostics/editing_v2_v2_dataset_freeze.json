@@ -42,6 +42,7 @@
   "gates": {
     "canonical_train_pairs": "144,886 (expected 144,886)",
     "capability_cells": "19 (expected 19)",
+    "capability_cells_with_mass": "19 of 19 drawn (expected 19)",
     "cross_role_source_overlap": "0 (expected 0)",
     "excluded_train_sources": "97 (expected 97)",
     "families": "8 (expected 8)",
@@ -61,7 +62,7 @@
     ]
   },
   "library_sha256": "2d553afa5560319455855bf75306b6e9d5169180562be7b139cf14336f7ecb26",
-  "sampling_law_sha256": "93dd460167d65146d2914bc4a2071e698e4af13a2473a3b03662dbd6200d28cd",
+  "sampling_law_sha256": "59bee2b8ffb0252fc3be79a2adf625be3b800b5e361566f6cbb0c6f5bf994ac0",
   "schema": "compose.editing_v2.v2_dataset_freeze",
   "schema_version": 1,
   "split": {
