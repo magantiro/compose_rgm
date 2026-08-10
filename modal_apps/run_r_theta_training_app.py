@@ -250,6 +250,27 @@ def train_segment(
     deadline = segment_started + SEGMENT_TIMEOUT_SECONDS - WALL_MARGIN_SECONDS
     stop_reason = "MAXIMUM_STEPS_REACHED"
     losses: list[float] = []
+    # A 2.9-hour run that only speaks every 500 steps is indistinguishable
+    # from a hung one, and on a paid device that ambiguity costs money.
+    log_every = 50
+    window_started = time.perf_counter()
+    window_losses: list[float] = []
+    # Anomaly baselines. Streaming numbers is not the same as saying something
+    # is wrong, and a 2.9-hour run should announce trouble rather than leave it
+    # to be noticed in a plot afterwards.
+    previous_window_loss: float | None = None
+    reference_throughput: float | None = None
+    warnings: list[str] = []
+
+    def warn(message: str) -> None:
+        warnings.append(f"step {completed_steps}: {message}")
+        print(f"  WARN  {message}", flush=True)
+    print(
+        f"training from step {completed_steps:,} to {maximum_steps:,} "
+        f"(batch {batch_size}, eval every {evaluate_every}, "
+        f"checkpoint every {checkpoint_every})",
+        flush=True,
+    )
 
     while completed_steps < maximum_steps:
         if time.perf_counter() > deadline:
@@ -277,7 +298,36 @@ def train_segment(
                 )
         optimizer.step()
         completed_steps += 1
-        losses.append(float(loss.detach()))
+        value = float(loss.detach())
+        losses.append(value)
+        window_losses.append(value)
+
+        if completed_steps % log_every == 0:
+            elapsed = time.perf_counter() - window_started
+            print(
+                f"  step {completed_steps:6,}/{maximum_steps:,}  "
+                f"loss {sum(window_losses) / len(window_losses):7.4f}  "
+                f"{log_every * batch_size / elapsed:6.1f} ex/s  "
+                f"segment {time.perf_counter() - segment_started:6.0f}s",
+                flush=True,
+            )
+            window_loss = sum(window_losses) / len(window_losses)
+            throughput = log_every * batch_size / elapsed
+            if reference_throughput is None:
+                reference_throughput = throughput
+            elif throughput < 0.6 * reference_throughput:
+                warn(
+                    f"throughput {throughput:.1f} ex/s is below 60% of the "
+                    f"opening {reference_throughput:.1f} ex/s"
+                )
+            if previous_window_loss is not None and window_loss > 1.5 * previous_window_loss:
+                warn(
+                    f"training loss rose {previous_window_loss:.4f} -> "
+                    f"{window_loss:.4f} over one window"
+                )
+            previous_window_loss = window_loss
+            window_started = time.perf_counter()
+            window_losses = []
 
         if completed_steps % evaluate_every == 0:
             rows = evaluate_panel(
@@ -298,6 +348,17 @@ def train_segment(
                     "criterion": list(criterion),
                 }
             )
+            if trajectory[:-1]:
+                earlier = trajectory[-2]["panel_native_mean_nll"]
+                current = summary["panel_native"]["mean_nll"]
+                if current > earlier * 1.10:
+                    warn(
+                        f"held-out NLL worsened {earlier:.4f} -> {current:.4f}; "
+                        "this is where overfitting or divergence shows first"
+                    )
+            if summary["panel_native"]["minimum_probability"] <= 0.0:
+                warn("a held-out transition has zero probability; the model has "
+                     "abandoned it entirely")
             if selected_criterion_value is None or criterion > selected_criterion_value:
                 selected_criterion_value = criterion
                 selected_step = completed_steps
@@ -314,7 +375,7 @@ def train_segment(
 
         if completed_steps % checkpoint_every == 0:
             assert_training_invariants(model, hazard_before=hazard_before, step=completed_steps)
-            write_checkpoint(
+            written = write_checkpoint(
                 checkpoint_path,
                 model=model, optimizer=optimizer, identity=identity,
                 completed_steps=completed_steps, selected_step=selected_step,
@@ -322,6 +383,12 @@ def train_segment(
                 trajectory=trajectory, stream_sha256=stream_sha256, resume_count=resume_count,
             )
             artifact_volume.commit()
+            print(
+                f"  checkpoint step {completed_steps:6,}  "
+                f"{written['file_bytes'] / 1e6:.1f} MB  "
+                f"sha {written['file_sha256'][:12]}  best step {selected_step:,}",
+                flush=True,
+            )
 
     assert_training_invariants(model, hazard_before=hazard_before, step=completed_steps)
     receipt = write_checkpoint(
@@ -332,6 +399,14 @@ def train_segment(
         trajectory=trajectory, stream_sha256=stream_sha256, resume_count=resume_count,
     )
     artifact_volume.commit()
+    print(
+        f"segment end: {stop_reason} at step {completed_steps:,} "
+        f"after {time.perf_counter() - segment_started:.0f}s; "
+        f"best step {selected_step:,}; warnings {len(warnings)}",
+        flush=True,
+    )
+    for message in warnings:
+        print(f"  WARN {message}", flush=True)
     return {
         "schema": "compose.editing_v2.r_theta_training_segment",
         "status": "R_THETA_SEGMENT_EVIDENCE_ONLY_NO_AUTHORITY",
@@ -345,6 +420,7 @@ def train_segment(
         "checkpoint": receipt,
         "trajectory": trajectory,
         "recent_loss_mean": (sum(losses[-50:]) / len(losses[-50:])) if losses else None,
+        "warnings": warnings,
     }
 
 
@@ -354,11 +430,44 @@ def main(
     maximum_steps: int = 4527,
     batch_size: int = 32,
     evaluate_every: int = 500,
+    checkpoint_every: int = 250,
+    max_segments: int = 12,
 ) -> None:
-    receipt = train_segment.remote(
-        output_name=output_name,
-        maximum_steps=maximum_steps,
-        batch_size=batch_size,
-        evaluate_every=evaluate_every,
-    )
-    print(json.dumps(receipt, indent=2, sort_keys=True))
+    """Drive segments until the step budget is met.
+
+    Each call resumes the previous checkpoint, so the only cost of a segment
+    boundary is one setup (~190 s). ``max_segments`` is a runaway guard: if a
+    segment ever returns without advancing, this stops rather than looping
+    forever on a paid device.
+    """
+
+    previous = -1
+    for segment in range(max_segments):
+        receipt = train_segment.remote(
+            output_name=output_name,
+            maximum_steps=maximum_steps,
+            batch_size=batch_size,
+            evaluate_every=evaluate_every,
+            checkpoint_every=checkpoint_every,
+        )
+        done = int(receipt["completed_steps"])
+        print(
+            f"\n=== segment {segment + 1}: {receipt['stop_reason']} at "
+            f"{done:,}/{maximum_steps:,} steps in "
+            f"{receipt['segment_seconds']:.0f}s ===\n",
+            flush=True,
+        )
+        if receipt.get("warnings"):
+            print(f"!! {len(receipt['warnings'])} warning(s) this segment:")
+            for message in receipt["warnings"]:
+                print(f"   {message}")
+        if done >= maximum_steps:
+            print(json.dumps(receipt, indent=2, sort_keys=True))
+            return
+        if done <= previous:
+            raise SystemExit(
+                f"segment made no progress ({previous:,} -> {done:,}); stopping "
+                "rather than burning GPU on a loop"
+            )
+        previous = done
+    raise SystemExit(f"hit max_segments={max_segments} before the step budget")
