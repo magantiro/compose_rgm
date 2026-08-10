@@ -22,13 +22,31 @@ in ``ENTRIES.json``:
 
 So the corpus training inputs are ~355 MB of JSON, not 31 GB.
 
-RAW PAYLOADS RESIDENT, STATES DECODED ON DEMAND
------------------------------------------------
-MEASURED: a decoded state costs 8.30 kB against 0.56 kB for its raw payload --
-decoding inflates 15x, so holding decoded states would cost 1.20 GB against
-0.09 GB. Decoding is also cheap: 19 us per state, so a 64-example minibatch
-decodes in 1.2 ms, which is noise beside a GPU step. This module therefore
-keeps raw payloads and decodes per minibatch.
+STATES HELD AS BYTES, DECODED ON DEMAND
+---------------------------------------
+MEASURED: a decoded state costs 8.30 kB of live objects against 0.56 kB for
+its serialized payload. The saving is only real if what stays resident is
+BYTES. A first cut kept the parsed ``dict`` instead and measured 1.228 GB
+across 151,059 entries -- 8.1 kB per entry, essentially the decoded cost,
+because Python dict-and-list overhead dwarfs the numbers inside. Holding
+parsed JSON to avoid holding decoded objects saves nothing.
+
+So each state stays as encoded bytes and is parsed and decoded per minibatch.
+
+MEASURED end to end over the real 151,059-entry library:
+
+    holding parsed state dicts      1.228 GB   (8.10 kB/entry)
+    holding state bytes             0.727 GB   (5.05 kB/entry)
+    minibatch of 64                 2.13 ms
+
+Note what that does NOT say. Serialized states are ~0.6 kB each, so if states
+were the whole story this would sit near 0.1 GB. The remaining ~4.4 kB/entry
+is the DECODED teacher fibers -- two SMILES keys (one duplicated inside
+``state_support``), two 64-character digests, and a tuple of alias dataclasses
+per entry. Shrinking this further means attacking the fibers, not the states.
+0.727 GB of host RAM is not worth that, but the number is recorded here so the
+next person optimizes the right object -- which is the mistake this module
+exists to correct.
 
 WHAT THIS REFUSES
 -----------------
@@ -154,7 +172,9 @@ class CorpusEntry:
     """One training transition, with its source state still encoded."""
 
     entry_id: str
-    state_payload: Mapping[str, Any]
+    #: The ``exact_state`` payload as encoded bytes. Kept serialized because a
+    #: parsed dict costs ~8.1 kB against ~0.6 kB here, per measurement.
+    state_json: bytes
     teacher_fiber: TeacherSuccessorFiber
     support_time_hex: str
     model_family: str
@@ -164,10 +184,13 @@ class CorpusEntry:
     def source_key(self) -> str:
         return self.teacher_fiber.source_key
 
-    def state(self) -> Any:
-        """Decode this entry's source state. MEASURED at 19 us."""
+    def state_payload(self) -> Mapping[str, Any]:
+        return json.loads(self.state_json)
 
-        return decode_state(self.state_payload)
+    def state(self) -> Any:
+        """Decode this entry's source state. MEASURED at ~21 us with the parse."""
+
+        return decode_state(json.loads(self.state_json))
 
 
 @dataclass(frozen=True, slots=True)
@@ -311,7 +334,7 @@ def load_corpus_training_library(
 
                 by_id[entry_id] = CorpusEntry(
                     entry_id=entry_id,
-                    state_payload=state_payload,
+                    state_json=json.dumps(state_payload, separators=(",", ":")).encode(),
                     teacher_fiber=fiber,
                     support_time_hex=str(raw["support_time_hex"]),
                     model_family=str(raw["model_family"]),

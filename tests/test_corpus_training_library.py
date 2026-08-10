@@ -236,6 +236,22 @@ def test_malformed_alias_coordinate_is_refused(tmp_path: Path) -> None:
         _load(tmp_path)
 
 
+def test_states_stay_serialized_rather_than_parsed(tmp_path: Path) -> None:
+    """Holding parsed dicts measured 8.1 kB/entry -- the decoded cost.
+
+    A parsed ``dict`` of small ints costs about as much as the decoded state,
+    so keeping one to avoid the other saves nothing. The saving only exists
+    while the payload stays as bytes, and nothing else in the type system says
+    so, hence this test.
+    """
+
+    _write_slice(tmp_path, "s", [_entry("a" * 64)])
+    entry = _load(tmp_path).entries[0]
+    assert isinstance(entry.state_json, bytes)
+    assert entry.state_payload() == _state()
+    assert entry.state() is not None
+
+
 def test_state_that_does_not_round_trip_is_refused(tmp_path: Path) -> None:
     """A slot layout that decodes to something else trains normally and wrongly.
 
