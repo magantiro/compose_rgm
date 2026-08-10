@@ -706,10 +706,64 @@ def _materialize_panel(
     )
 
 
+class _LazySemanticT1Panel:
+    """Same retrieval contract as the resident panel, materialized per call.
+
+    The resident panel pre-builds every collated row and keeps them all alive.
+    That is right for a 512-entry panel and impossible at corpus scale: the
+    collated tensors measure ~92 kB per entry, so 144,870 of them is ~14 GB
+    before Python overhead, and peak memory would scale with the CORPUS rather
+    than the minibatch.
+
+    Nothing about that is inherent. ``_batch_for_ids`` already builds a batch
+    for an arbitrary ID set from ``runtime``, whose per-entry cost is the padded
+    state (~7 kB) rather than the collated tensors. So the large path simply
+    does not pre-materialize: it builds each minibatch on demand and lets it be
+    freed.
+
+    This is a STORAGE change only. Sampling happens upstream and hands this
+    object an ID sequence; it decides when tensors are built, never which rows
+    are drawn or in what order. Parity against the resident panel is tested on
+    the same IDs.
+    """
+
+    __slots__ = ("_runtime", "_model", "_collator", "panel_ids", "index_by_panel_id")
+
+    def __init__(
+        self,
+        runtime: SemanticT1RuntimeInputs,
+        model: FactorizedTraceletRateModel,
+        collator: FactorizedMarkCollator,
+        panel_ids: Sequence[str],
+    ) -> None:
+        self._runtime = runtime
+        self._model = model
+        self._collator = collator
+        self.panel_ids = tuple(str(panel_id) for panel_id in panel_ids)
+        self.index_by_panel_id = {
+            panel_id: index for index, panel_id in enumerate(self.panel_ids)
+        }
+
+    def materialize(
+        self, panel_ids: Sequence[str]
+    ) -> tuple[Any, tuple[Any, ...], tuple[Any, ...], tuple[Mapping[str, Any], ...]]:
+        unknown = [pid for pid in panel_ids if pid not in self.index_by_panel_id]
+        if unknown:
+            raise SemanticT1CapacityRunnerError(
+                "T1 address stream references a panel entry outside the lazy panel"
+            )
+        return _batch_for_ids(self._runtime, self._model, self._collator, tuple(panel_ids))
+
+
 def _batch_from_materialized_panel(
-    panel: _MaterializedSemanticT1Panel,
+    panel: _MaterializedSemanticT1Panel | _LazySemanticT1Panel,
     panel_ids: Sequence[str],
 ) -> tuple[Any, tuple[Any, ...], tuple[Any, ...], tuple[Mapping[str, Any], ...]]:
+    # One seam for both panels, so every downstream consumer -- training,
+    # metrics, capability checks -- goes through the same retrieval regardless
+    # of whether rows are resident or built on demand.
+    if isinstance(panel, _LazySemanticT1Panel):
+        return panel.materialize(panel_ids)
     try:
         indices = tuple(panel.index_by_panel_id[panel_id] for panel_id in panel_ids)
     except KeyError as error:
