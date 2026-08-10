@@ -1,0 +1,116 @@
+{
+  "assumed_nll_sigma": 2.5,
+  "capability_cells_in_sequence": 19,
+  "declared_capability_cells": 19,
+  "eligible_library_entries": 151059,
+  "families": 8,
+  "gates": {
+    "all_declared_cells_positive_in_sequence": true,
+    "all_families_positive": true,
+    "law_bound_to_this_reserve": true,
+    "no_reserve_entry_in_training_sequence": true,
+    "no_reserve_source_in_training_sequence": true,
+    "primary_metric_standard_error_within_bound": true,
+    "sequence_recount_matches_law": true,
+    "training_and_reserve_partition_the_eligible_library": true,
+    "unrepresented_law_mass_within_bound": true
+  },
+  "law_frozen_sha256": "b0cc66f168f1cf3e7a4b5bacfb1138059005251a10561d6961c3ea1c5dd7ac73",
+  "manifest_frozen_sha256": "e27494a462504b3030d0b6c430b09b4192ad9d56cfe6e4831a661c8f815ea3d4",
+  "positive_weight_strata": 12,
+  "precedence_excluded_entries": 19,
+  "primary_metric_standard_error": 0.02373,
+  "primary_metric_standard_error_bound": 0.05,
+  "reserve_source_digest": "c7c3c462f17f",
+  "schema": "compose.editing_v2.post_split_freeze_gate",
+  "standard_error_by_stratum": {
+    "atom_delete|real": {
+      "law_weight": 0.172981,
+      "reserve_entries": 2031,
+      "standard_error_contribution": 0.0096
+    },
+    "atom_insert|real": {
+      "law_weight": 0.160779,
+      "reserve_entries": 2042,
+      "standard_error_contribution": 0.00889
+    },
+    "atom_restate|real": {
+      "law_weight": 0.204223,
+      "reserve_entries": 1959,
+      "standard_error_contribution": 0.01154
+    },
+    "bond_reorder|real": {
+      "law_weight": 0.017202,
+      "reserve_entries": 92,
+      "standard_error_contribution": 0.00448
+    },
+    "bond_reorder|synthetic": {
+      "law_weight": 0.032798,
+      "reserve_entries": 605,
+      "standard_error_contribution": 0.00333
+    },
+    "bond_reroute|real": {
+      "law_weight": 0.190193,
+      "reserve_entries": 2255,
+      "standard_error_contribution": 0.01001
+    },
+    "cycle_attach|real": {
+      "law_weight": 0.033721,
+      "reserve_entries": 166,
+      "standard_error_contribution": 0.00654
+    },
+    "cycle_attach|synthetic": {
+      "law_weight": 0.016279,
+      "reserve_entries": 516,
+      "standard_error_contribution": 0.00179
+    },
+    "cycle_insert|synthetic": {
+      "law_weight": 0.064405,
+      "reserve_entries": 977,
+      "standard_error_contribution": 0.00515
+    },
+    "ring_system_restate|real": {
+      "law_weight": 0.011115,
+      "reserve_entries": 43,
+      "standard_error_contribution": 0.00424
+    },
+    "ring_system_restate|synthetic": {
+      "law_weight": 0.096282,
+      "reserve_entries": 1579,
+      "standard_error_contribution": 0.00606
+    }
+  },
+  "starved_capability_cells": [],
+  "status": "FROZEN",
+  "strata_unrepresented_in_reserve": {
+    "cycle_insert|real": {
+      "law_weight": 2.2e-05,
+      "training_supply": 1
+    }
+  },
+  "stratum_drift": {
+    "atom_delete|real": -1e-06,
+    "atom_insert|real": -2e-06,
+    "atom_restate|real": -0.00033,
+    "atom_restate|synthetic": 0.000331,
+    "bond_reorder|real": 0.0,
+    "bond_reorder|synthetic": -3e-06,
+    "bond_reroute|real": -0.001083,
+    "bond_reroute|synthetic": 0.001088,
+    "cycle_attach|real": -0.000588,
+    "cycle_attach|synthetic": 0.000585,
+    "cycle_insert|real": 0.0,
+    "cycle_insert|synthetic": 1e-06,
+    "ring_system_restate|real": 0.0,
+    "ring_system_restate|synthetic": 0.0
+  },
+  "thin_strata_declared_not_gated": {
+    "bond_reorder|real": 92,
+    "ring_system_restate|real": 43
+  },
+  "thin_stratum_note": "Declared, not gated. A per-stratum mean over this many entries is not a stable reading on its own, but its contribution to the weighted primary metric is bounded by its law weight and is reported above.",
+  "unrepresented_law_mass": 2.2e-05,
+  "unrepresented_law_mass_bound": 0.001,
+  "worst_stratum_drift_from_law": 0.001088,
+  "zero_mass_strata": []
+}
