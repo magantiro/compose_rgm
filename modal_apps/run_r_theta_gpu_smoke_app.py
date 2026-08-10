@@ -66,14 +66,18 @@ A10G_USD_PER_HOUR = 1.10
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
 def profile_r_theta_step(
-    *,
-    run_root: str,
-    corpus_roots: list[str],
-    packed_store: str,
+    run_root: str = "/artifacts/editing_v2/r_theta_run",
     steps: int = 200,
     batch_size: int = 32,
     learning_rate: float = 1e-4,
 ) -> dict[str, Any]:
+    """Paths come from RUN_PATHS.json on the volume, not the command line.
+
+    The corpus roots and the packed store live next to the data they describe,
+    so a profile cannot be run against one corpus while claiming another. It
+    also keeps list arguments off the Modal CLI, where they do not round-trip.
+    """
+
     import torch
 
     from compose_v4.data.corpus_training_library import load_corpus_training_library
@@ -98,6 +102,9 @@ def profile_r_theta_step(
     root = Path(run_root)
     inputs = root / "run_inputs"
     repo_root = Path("/root")
+    paths = json.loads((inputs / "RUN_PATHS.json").read_text())
+    corpus_roots = [str(r) for r in paths["corpus_roots"]]
+    packed_store = str(paths["packed_store"])
 
     if not torch.cuda.is_available():
         raise RuntimeError("the GPU smoke was scheduled without a visible device")
@@ -105,16 +112,12 @@ def profile_r_theta_step(
 
     started = time.perf_counter()
     source = open_process_v2_t1_source(
-        Path(json.loads((inputs / "RUN_PATHS.json").read_text())["active8_root"]),
-        gate_zero_decision_path=Path(
-            json.loads((inputs / "RUN_PATHS.json").read_text())["gate_zero"]
-        ),
-        artifact_root=Path(
-            json.loads((inputs / "RUN_PATHS.json").read_text())["artifact_root"]
-        ),
+        Path(paths["active8_root"]),
+        gate_zero_decision_path=Path(paths["gate_zero"]),
+        artifact_root=Path(paths["artifact_root"]),
         repo_root=repo_root,
     )
-    state = load_materialized_scorer_state(root / "materialized_scorer")
+    state = load_materialized_scorer_state(Path(paths["materialized_scorer"]))
     runtime, binding, _containment = build_process_v2_score_revised_scratch_runtime(
         source, materialized_state=state
     )
@@ -385,3 +388,9 @@ def profile_r_theta_step(
 
     # Deliberately no artifact_volume.commit(): this run writes nothing.
     return receipt
+
+
+@app.local_entrypoint()
+def main(steps: int = 200, batch_size: int = 32) -> None:
+    receipt = profile_r_theta_step.remote(steps=steps, batch_size=batch_size)
+    print(json.dumps(receipt, indent=2, sort_keys=True))
