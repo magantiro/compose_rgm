@@ -128,6 +128,16 @@ def train_segment(
     model = runtime.model.to(device)
     print(f"[{time.perf_counter() - segment_started:6.1f}s] model on {device}", flush=True)
 
+    # Defined before the artifact loads: the external-cohort guard below warns
+    # on failure, and a NameError there would crash the run on the exact path
+    # that exists to keep a diagnostic from crashing the run.
+    warnings: list[str] = []
+    completed_steps = 0
+
+    def warn(message: str) -> None:
+        warnings.append(f"step {completed_steps}: {message}")
+        print(f"  WARN  {message}", flush=True)
+
     freeze = json.loads((inputs / "editing_v2_v2_dataset_freeze.json").read_text())
     resolution = json.loads(
         (inputs / "editing_v2_split_precedence_resolution.json").read_text()
@@ -203,6 +213,28 @@ def train_segment(
     # and its row set is exactly training + reserve. So one store serves both
     # sides and nothing needs repacking for the new split.
     panel_library, panel_store, panel_template = library, store, template
+
+    # The externally mined 16-shard cohort. A DIAGNOSTIC, never a selection
+    # input: its support composition is an accident of how those shards were
+    # mined (42.6% at band 0 against the training population's 19.3%), which is
+    # exactly why it cannot drive early stopping. Loaded here so an epoch
+    # boundary can report it without a second container.
+    try:
+        cohort_library = load_corpus_training_library(
+            [Path(r) for r in paths["panel_corpus_roots"]],
+            excluded_sources=resolution["excluded_source_keys"]["validation"],
+            verify_state_roundtrip=False,
+        )
+        cohort_store = PackedCollatedStore(Path(paths["packed_panel_store"]))
+        cohort_template = torch.load(
+            Path(paths["packed_panel_store"]) / "TEMPLATE.pt",
+            map_location="cpu", weights_only=False,
+        )
+        cohort_ids = [e.entry_id for e in cohort_library.entries]
+    except Exception as error:  # noqa: BLE001 - a diagnostic must not stop a paid run
+        warn(f"external cohort unavailable, continuing without it: {error!r}")
+        cohort_library = cohort_store = cohort_template = None
+        cohort_ids = []
     missing = [i for i in panel_ids if i not in library]
     if missing:
         raise RThetaTrainingError(
@@ -239,6 +271,11 @@ def train_segment(
 
     build_training = make_builder(library, store, template)
     build_panel = make_builder(panel_library, panel_store, panel_template)
+    build_cohort = (make_builder(cohort_library, cohort_store, cohort_template)
+                    if cohort_library is not None else None)
+    # One pass over the realized sequence, which is 136,027 rows now --
+    # not the 144,870 the old manifest carried.
+    epoch_steps = max(1, -(-len(sequence) // batch_size))
 
     identity = RunIdentity(
         initialization_seed=int(binding["model_runtime"]["initialization_seed"]),
@@ -316,11 +353,6 @@ def train_segment(
     # to be noticed in a plot afterwards.
     previous_window_loss: float | None = None
     reference_throughput: float | None = None
-    warnings: list[str] = []
-
-    def warn(message: str) -> None:
-        warnings.append(f"step {completed_steps}: {message}")
-        print(f"  WARN  {message}", flush=True)
     print(
         f"training from step {completed_steps:,} to {maximum_steps:,} "
         f"(batch {batch_size}, eval every {evaluate_every}, "
@@ -418,6 +450,22 @@ def train_segment(
                      f"{list(collapsed)}")
             criterion = selection_criterion(
                 summary, step=completed_steps, baseline=collapse_baseline)
+
+            cohort_mean_nll = None
+            if cohort_ids and completed_steps % epoch_steps == 0:
+                try:
+                    cohort_rows = evaluate_panel(
+                        model, entry_ids=cohort_ids, build_batch=build_cohort,
+                        batch_size=batch_size,
+                    )
+                    cohort_mean_nll = sum(
+                        r["teacher_successor_nll"] for r in cohort_rows
+                    ) / len(cohort_rows)
+                    print(f"  external cohort (diagnostic, not selection): "
+                          f"{cohort_mean_nll:.4f} over {len(cohort_rows):,}",
+                          flush=True)
+                except Exception as error:  # noqa: BLE001
+                    warn(f"external cohort evaluation failed: {error!r}")
             trajectory.append(
                 {
                     "step": completed_steps,
@@ -440,6 +488,7 @@ def train_segment(
                         name: value["mean_nll"]
                         for name, value in summary["zero_mass_stratum"].items()
                     },
+                    "external_cohort_mean_nll": cohort_mean_nll,
                     "criterion": list(criterion),
                     # Keep the per-family and per-cell means. Without them the
                     # aggregates can move in opposite directions -- as they did
