@@ -1,0 +1,122 @@
+{
+  "acyclic": {
+    "entries": 361,
+    "identity_nll": 3.4636
+  },
+  "acyclic_entries_reported_separately": 361,
+  "by_series_depth_ring_only": {
+    "1": {
+      "entries": 626,
+      "family_nll": 2.3246,
+      "identity_nll": 3.8739,
+      "joint_nll": 6.1984
+    },
+    "10-24": {
+      "entries": 1376,
+      "family_nll": 1.7732,
+      "identity_nll": 2.6228,
+      "joint_nll": 4.396
+    },
+    "2-4": {
+      "entries": 1160,
+      "family_nll": 2.3758,
+      "identity_nll": 3.6698,
+      "joint_nll": 6.0456
+    },
+    "25+": {
+      "entries": 9959,
+      "family_nll": 1.6737,
+      "identity_nll": 2.421,
+      "joint_nll": 4.0947
+    },
+    "5-9": {
+      "entries": 649,
+      "family_nll": 1.8694,
+      "identity_nll": 2.5957,
+      "joint_nll": 4.4651
+    }
+  },
+  "by_train_scaffold_support_ring_only": {
+    "0": {
+      "entries": 5863,
+      "family_nll": 1.8774,
+      "identity_nll": 2.84,
+      "joint_nll": 4.7175
+    },
+    "1-4": {
+      "entries": 1891,
+      "family_nll": 1.9774,
+      "identity_nll": 2.9288,
+      "joint_nll": 4.9062
+    },
+    "25+": {
+      "entries": 3028,
+      "family_nll": 1.3839,
+      "identity_nll": 1.9351,
+      "joint_nll": 3.319
+    },
+    "5-24": {
+      "entries": 2988,
+      "family_nll": 1.8726,
+      "identity_nll": 2.6901,
+      "joint_nll": 4.5626
+    }
+  },
+  "checkpoint_step": 1750,
+  "consequence_for_the_split": "The re-freeze remains motivated, but on the COVERAGE axis, not the series-depth axis. Carving a population-matched panel should match train scaffold support; matching series depth would if anything make the panel look worse, not better.",
+  "declared_before_run": {
+    "falling": "uninformative on its own -- support helping and depth not hurting are indistinguishable",
+    "flat": "negative result; series structure is not the mechanism",
+    "rising": "conservative evidence for the series-depth mechanism, since support rises with depth and should lower error"
+  },
+  "depth_at_fixed_zero_support": {
+    "1": {
+      "entries": 592,
+      "family_nll": 2.3361,
+      "identity_nll": 3.8975,
+      "joint_nll": 6.2335
+    },
+    "10-24": {
+      "entries": 752,
+      "family_nll": 1.6209,
+      "identity_nll": 2.5347,
+      "joint_nll": 4.1556
+    },
+    "2-4": {
+      "entries": 1100,
+      "family_nll": 2.4183,
+      "identity_nll": 3.718,
+      "joint_nll": 6.1362
+    },
+    "25+": {
+      "entries": 2865,
+      "family_nll": 1.6289,
+      "identity_nll": 2.3914,
+      "joint_nll": 4.0203
+    },
+    "5-9": {
+      "entries": 554,
+      "family_nll": 1.947,
+      "identity_nll": 2.7015,
+      "joint_nll": 4.6486
+    }
+  },
+  "finding": "Identity NLL FALLS monotonically with analogue-series depth, from 3.87 at depth 1 to 2.42 at depth 25+. The direction is the opposite of the prediction, and it survives both available controls: at fixed zero train support (n=5,863) it falls 3.90->2.39, and within the 0-24 heavy-atom band (n=6,992, mean size flat at 20.0 across buckets) it falls 4.30->2.15. So it is neither the support effect nor a branching-factor artifact. The panel's WORST entries are its 1,786 shallow singleton-scaffold entries at ~3.7-3.9; its 9,959 deep-series entries are its BEST at 2.42. Since the panel is 70% deep-series, congeneric structure is not what depresses panel performance -- it flatters it.",
+  "panel_scaffold_coverage_vs_compiled_training_library": {
+    "panel_entries_covered_fraction": 0.585,
+    "panel_sources_covered_fraction": 0.588,
+    "superseded_figure": 0.855,
+    "why_superseded": "0.855 counted train-ROLE sources over 30 Active8 shards; the model trained on the compiled library of 106,759 of 564,316 role sources"
+  },
+  "pearson_depth_vs_heavy_atoms": -0.149,
+  "pearson_depth_vs_train_support": 0.974,
+  "pearson_heavy_atoms_vs_identity_nll": 0.115,
+  "prediction_under_test": "identity NLL RISES monotonically with panel series depth",
+  "reading": "Both axes plausibly measure the same latent quantity -- how typical the chemistry is. A deep panel series means a generic scaffold; high train support means a seen scaffold. The worst cell is the unusual one-off: singleton panel scaffold with zero train support. This is associational, not causal: depth was not manipulated.",
+  "ring_scaffold_entries": 13770,
+  "schema": "compose.editing_v2.r_theta_series_depth_resolved",
+  "scored_entries": 14131,
+  "status": "DIAGNOSTIC_EVIDENCE_ONLY_NO_AUTHORITY",
+  "verdict": "REFUTED_OPPOSITE_DIRECTION",
+  "what_the_gap_does_track": "Train scaffold support. Support 25+ scores 1.94 against 2.84 at zero support, and 41.5% of panel entries sit on a scaffold with no training-library source. Support-matching the panel would move identity NLL from 2.62 to about 1.94, roughly 0.69 nats or 26%. Note the effect is not smooth: zero support (2.84) and support 1-4 (2.93) are indistinguishable, so only heavy support helps."
+}
