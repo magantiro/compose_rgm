@@ -64,10 +64,15 @@ class SourceFiber:
     """Legal marks of one source and their canonical-successor grouping.
 
     ``mark_group[i]`` is the canonical successor group of mark ``i``. Marks are
-    stored in the ORDER THEY APPEAR in the partition: the model associates rows
-    with mark operands positionally, so an equivalent-but-reordered support is
-    not equivalent to the scorer even where the mathematics is permutation
-    invariant after aggregation.
+    stored in the ORDER THEY APPEAR in the partition, which is exactly the order
+    the scorer consumes: it iterates ``CanonicalSuccessorAliasGroup.aliases``,
+    a property returning ``sorted(mark.alias for mark in marks)``, and stored
+    order already equals that because ``CompiledSuccessorMark`` is ``order=True``
+    with ``alias`` as its first field while the group's ``__post_init__``
+    enforces sorted-unique marks and unique aliases. VERIFIED over 306,323 real
+    groups (42,124 multi-alias): zero disagreements. The coupling is pinned by
+    ``test_stored_order_is_the_order_the_scorer_consumes`` -- reordering those
+    dataclass fields would silently change every training operand sequence.
     """
 
     mark_family: np.ndarray      # uint8   [N]

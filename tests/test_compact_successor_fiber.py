@@ -6,9 +6,12 @@ Two properties carry the whole representation change:
   probability equal to their sum, and MEASURED 13.75% of real groups hold more
   than one mark (up to 18). A schema that assumed one mark per group would look
   correct on most sampled entries and silently corrupt the objective.
-* **mark order** -- the scorer associates rows with mark operands positionally,
-  so a support holding the right marks in the wrong order is a different input,
-  even where the mathematics is permutation invariant after aggregation.
+* **mark order** -- the scorer iterates ``group.aliases``, a property that
+  returns marks SORTED by alias. Preserving partition order is only correct
+  because stored order already equals sorted-alias order (``order=True`` with
+  ``alias`` first, plus a sorted-unique invariant). That is a structural
+  coincidence between two classes, so it is pinned against the real class
+  below rather than assumed.
 
 The one-source-two-teachers test exists because the real 512-entry panel has
 512 DISTINCT sources and therefore cannot exercise sharing at all -- yet
@@ -193,6 +196,79 @@ def test_group_reference_outside_the_fiber_is_refused() -> None:
             mark_group=np.asarray([0, 5], dtype=np.int32),
             group_count=1,
         )
+
+
+def test_stored_order_is_the_order_the_scorer_consumes() -> None:
+    """Pin the coupling the encoder's order preservation silently depends on.
+
+    ``build_source_fiber`` walks ``group["marks"]`` in stored order, but the
+    scorer never touches ``marks`` -- it iterates the ``aliases`` property,
+    which SORTS. Those coincide only because ``CompiledSuccessorMark`` is
+    ``order=True`` with ``alias`` first and the group forbids unsorted or
+    duplicated marks. Reorder those fields and every training operand sequence
+    changes with nothing else failing, so assert it against the real class.
+    """
+
+    fst = pytest.importorskip(
+        "compose_v4.experiments.factorized_successor_training"
+    )
+
+    # Deliberately not in sorted order; the group is required to sort them.
+    written = [
+        ("bond_reroute", "reroute", (7,)),
+        ("atom_insert", "grow_connected", (3, 2, 1)),
+        ("atom_restate", "restate", (4, 5)),
+        ("atom_insert", "grow_connected", (1, 2, 3)),
+    ]
+    marks = tuple(sorted(
+        fst.CompiledSuccessorMark(
+            alias=fst.TeacherSuccessorAlias(
+                family_name=family, table_name=table, coordinate=coordinate
+            ),
+            successor_state_sha256=f"{index:064x}",
+            action_sha256=f"{index + 100:064x}",
+        )
+        for index, (family, table, coordinate) in enumerate(written)
+    ))
+    group = fst.CanonicalSuccessorAliasGroup(target_key="PRODUCT", marks=marks)
+    assert [a.family_name for a in group.aliases] != [w[0] for w in written], (
+        "fixture must exercise a case where sorting actually reorders"
+    )
+
+    partition = {
+        "source_key": "CCO",
+        "source_state_sha256": "c" * 64,
+        "successor_groups": [{
+            "target_key": group.target_key,
+            "marks": [
+                {
+                    "alias": {
+                        "family_name": mark.alias.family_name,
+                        "table_name": mark.alias.table_name,
+                        "coordinate": list(mark.alias.coordinate),
+                    },
+                    "successor_state_sha256": mark.successor_state_sha256,
+                    "action_sha256": mark.action_sha256,
+                }
+                for mark in group.marks
+            ],
+        }],
+        "virtual_marks": [],
+    }
+    fiber, _keys = _build(partition)
+
+    def _padded(coordinate):
+        return list(coordinate) + [COORDINATE_PAD] * (3 - len(coordinate))
+
+    scorer_order = [
+        (FAMILY_IDS[a.family_name], TABLE_IDS[a.table_name], _padded(a.coordinate))
+        for a in group.aliases
+    ]
+    encoder_order = [
+        (int(f), int(t), [int(v) for v in c])
+        for f, t, c in zip(fiber.mark_family, fiber.mark_table, fiber.mark_coords)
+    ]
+    assert encoder_order == scorer_order
 
 
 def test_compact_form_is_far_smaller_than_the_partition() -> None:
