@@ -235,7 +235,7 @@ def train_segment(
         warn(f"external cohort unavailable, continuing without it: {error!r}")
         cohort_library = cohort_store = cohort_template = None
         cohort_ids = []
-    missing = [i for i in panel_ids if i not in library]
+    missing = [i for i in panel_ids if i not in library.index_by_entry_id]
     if missing:
         raise RThetaTrainingError(
             f"{len(missing):,} reserve entries are absent from the train library")
