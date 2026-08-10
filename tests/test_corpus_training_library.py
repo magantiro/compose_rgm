@@ -68,7 +68,8 @@ def _state(n: int = 3) -> dict:
 def _entry(entry_id: str, **overrides) -> dict:
     fiber = overrides.pop("teacher_successor_fiber", _fiber())
     entry = {
-        "p50_compiled_entry_sha256": entry_id,
+        "p50_entry_sha256": entry_id,
+        "p50_compiled_entry_sha256": "f" + entry_id[1:],
         "teacher_successor_fiber": fiber,
         "source_state_sha256": SOURCE_SHA,
         "target_state_sha256": TARGET_SHA,
@@ -271,6 +272,25 @@ def test_round_trip_check_can_be_skipped(tmp_path: Path) -> None:
     broken["bonds"] = [[0, 1, 1], [1, 2, 1], [0, 2, 0]]
     _write_slice(tmp_path, "s", [_entry("a" * 64, exact_state=broken)])
     assert len(_load(tmp_path, verify_state_roundtrip=False)) == 1
+
+
+def test_stream_key_is_the_manifest_id_not_the_compiled_id(tmp_path: Path) -> None:
+    """MEASURED: the two ids are never equal across the whole library.
+
+    The prepared manifest's sequence is keyed on p50_entry_sha256, so that is
+    what a training stream resolves against. Keying the library on the compile
+    -side id instead resolves nothing -- which fails loudly, but only once
+    something actually tries to draw a batch.
+    """
+
+    _write_slice(tmp_path, "s", [_entry("a" * 64)])
+    library = _load(tmp_path)
+    entry = library.entries[0]
+    assert entry.entry_id == "a" * 64
+    assert entry.compiled_entry_id == "f" + "a" * 63
+    assert entry.entry_id != entry.compiled_entry_id
+    assert "a" * 64 in library.index_by_entry_id
+    assert entry.compiled_entry_id in library.index_by_compiled_entry_id
 
 
 def test_decoder_agrees_with_the_p50_runtime_decoder() -> None:

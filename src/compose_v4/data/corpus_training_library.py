@@ -171,7 +171,14 @@ def teacher_fiber_from_library_payload(value: object) -> TeacherSuccessorFiber:
 class CorpusEntry:
     """One training transition, with its source state still encoded."""
 
+    #: ``p50_entry_sha256`` -- the id the prepared manifest's sequence uses, so
+    #: it is the key a training stream resolves against. MEASURED: this is
+    #: never equal to ``compiled_entry_id``; keying on the wrong one resolves
+    #: nothing at all, which at least fails loudly.
     entry_id: str
+    #: ``p50_compiled_entry_sha256`` -- the compile-side identity. Carried so a
+    #: receipt or slice reconciliation keyed that way can still be joined.
+    compiled_entry_id: str
     #: The ``exact_state`` payload as encoded bytes. Kept serialized because a
     #: parsed dict costs ~8.1 kB against ~0.6 kB here, per measurement.
     state_json: bytes
@@ -199,6 +206,9 @@ class CorpusTrainingLibrary:
 
     entries: tuple[CorpusEntry, ...]
     index_by_entry_id: Mapping[str, int]
+    #: Secondary index, so a compile-side receipt can be joined without
+    #: rereading the library.
+    index_by_compiled_entry_id: Mapping[str, int]
     #: Entries dropped because their source is held out under split precedence.
     excluded_entry_count: int
     #: Slice directories read.
@@ -282,7 +292,8 @@ def load_corpus_training_library(
                     f"compiled slice has no entry list: {entries_file}"
                 )
             for raw in raw_entries:
-                entry_id = str(raw["p50_compiled_entry_sha256"])
+                entry_id = str(raw["p50_entry_sha256"])
+                compiled_entry_id = str(raw["p50_compiled_entry_sha256"])
                 fiber_payload = raw.get("teacher_successor_fiber")
                 if fiber_payload is None:
                     # A terminal row carries no molecular jump to supervise.
@@ -334,6 +345,7 @@ def load_corpus_training_library(
 
                 by_id[entry_id] = CorpusEntry(
                     entry_id=entry_id,
+                    compiled_entry_id=compiled_entry_id,
                     state_json=json.dumps(state_payload, separators=(",", ":")).encode(),
                     teacher_fiber=fiber,
                     support_time_hex=str(raw["support_time_hex"]),
@@ -353,11 +365,18 @@ def load_corpus_training_library(
         )
 
     ordered = tuple(by_id[entry_id] for entry_id in sorted(by_id))
+    by_compiled = {entry.compiled_entry_id: index for index, entry in enumerate(ordered)}
+    if len(by_compiled) != len(ordered):
+        raise CorpusTrainingLibraryError(
+            "two entries share a compiled entry id; the secondary index would "
+            "silently resolve to one of them"
+        )
     return CorpusTrainingLibrary(
         entries=ordered,
         index_by_entry_id=MappingProxyType(
             {entry.entry_id: index for index, entry in enumerate(ordered)}
         ),
+        index_by_compiled_entry_id=MappingProxyType(by_compiled),
         excluded_entry_count=excluded_count,
         slice_count=slice_count,
     )
