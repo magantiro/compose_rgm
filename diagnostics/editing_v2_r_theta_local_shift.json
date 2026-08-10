@@ -1,0 +1,89 @@
+{
+  "caveat": "n = 8 families, so the rank correlations are individually weak; the evidence is the extreme cases rather than the coefficients. atom_insert retains the largest genuine shift of any family (2-hop TV 0.721, target TV 0.277), so its gap is the least cleanly attributed.",
+  "conclusion": "Bottom-left of the 2x2: local distributions match or favour the failing families, and the model still fails. This is a representation problem for atom-identity and connectivity-rewiring decisions, not a corpus or split problem. Ring-topology and bond-order decisions transfer.",
+  "finding": "The data/split explanation is refuted, and at radius 2 the relationship INVERTS. cycle_attach and bond_reorder have the worst coverage of any family (15.7% and 16.6% of validation edits in never-seen 2-hop environments, median train frequency 12 and 16) and generalize best (-0.26, -0.34). atom_delete has the best coverage (3.3% unseen, frequency 322) and fails by +4.22. Capability cell mix is identical between pools for exactly the four families that fail (TV 0.000-0.009) while the generalizing families carry more cell shift.",
+  "method": "For every entry in both pools, take the teacher alias's first coordinate as the edit site and fingerprint its 1-hop and 2-hop environment (element, formal charge, implicit H, degree, and the sorted neighbour bond environment). Compare coverage and distribution per family, with the four generalizing families as control.",
+  "per_family": {
+    "atom_delete": {
+      "arity": 1,
+      "gap": 4.22,
+      "median_train_freq_2hop": 322,
+      "table": "atom_delete",
+      "tv_2hop": 0.591,
+      "unseen_1hop": 0.003,
+      "unseen_2hop": 0.033
+    },
+    "atom_insert": {
+      "arity": 3,
+      "gap": 4.08,
+      "median_train_freq_2hop": 30,
+      "table": "grow_connected",
+      "tv_2hop": 0.721,
+      "unseen_1hop": 0.023,
+      "unseen_2hop": 0.133
+    },
+    "atom_restate": {
+      "arity": 2,
+      "gap": 4.55,
+      "median_train_freq_2hop": 69,
+      "table": "atom_restate",
+      "tv_2hop": 0.531,
+      "unseen_1hop": 0.011,
+      "unseen_2hop": 0.174
+    },
+    "bond_reorder": {
+      "arity": 3,
+      "gap": -0.34,
+      "median_train_freq_2hop": 16,
+      "table": "bond_reorder",
+      "tv_2hop": 0.597,
+      "unseen_1hop": 0.019,
+      "unseen_2hop": 0.166
+    },
+    "bond_reroute": {
+      "arity": 2,
+      "gap": 2.86,
+      "median_train_freq_2hop": 343,
+      "table": "bond_reroute",
+      "tv_2hop": 0.405,
+      "unseen_1hop": 0.006,
+      "unseen_2hop": 0.072
+    },
+    "cycle_attach": {
+      "arity": 2,
+      "gap": -0.26,
+      "median_train_freq_2hop": 12,
+      "table": "cycle_attach",
+      "tv_2hop": 0.569,
+      "unseen_1hop": 0.003,
+      "unseen_2hop": 0.157
+    },
+    "cycle_insert": {
+      "arity": 3,
+      "gap": 0.33,
+      "median_train_freq_2hop": 47,
+      "table": "cycle_insert",
+      "tv_2hop": 0.365,
+      "unseen_1hop": 0.001,
+      "unseen_2hop": 0.064
+    },
+    "ring_system_restate": {
+      "arity": 1,
+      "gap": 0.05,
+      "median_train_freq_2hop": 355,
+      "table": "ring_system_restate",
+      "tv_2hop": 0.487,
+      "unseen_1hop": 0.003,
+      "unseen_2hop": 0.074
+    }
+  },
+  "question": "Does the family-specific generalization gap come from a shift in the LOCAL EDIT TASK between the train and validation pools, or from the model's representation of local edit decisions?",
+  "rank_correlation_with_gap": {
+    "median_train_freq_2hop": 0.405,
+    "motif_tv_2hop": 0.0,
+    "unseen_2hop": -0.167
+  },
+  "schema": "compose.editing_v2.r_theta_local_shift",
+  "schema_version": 1,
+  "status": "DIAGNOSTIC_EVIDENCE_ONLY_NO_AUTHORITY"
+}
