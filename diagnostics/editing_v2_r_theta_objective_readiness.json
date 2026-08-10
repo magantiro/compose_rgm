@@ -1,0 +1,48 @@
+{
+  "estimator_note": "With m distinct successors, minimizing the sum of -log P(y_i|x) is optimized at P(y_i|x)=1/m. Multiple one-hot labels converge to the empirical conditional; they do not suppress each other at convergence. Multi-positive supervision is therefore a VARIANCE REDUCTION of the same estimator, not a different target -- so it and 'train longer' attack the same deficiency.",
+  "exposure_confound": {
+    "corpus_distinct_entries": 116375,
+    "distinct_seen_at_step_1500": 44826,
+    "epoch_draws": 144870,
+    "note": "The provenance-matched gaps (+1.63 atom_restate, +1.32 bond_reroute, +3.65 atom_delete) used the consumed stream prefix as 'train', so they compare rows seen about once against rows never seen, at 6.18M parameters over 44,826 examples. They are not train-distribution vs held-out.",
+    "share_seen": 0.385
+  },
+  "exposure_of_multi_successor_sources": {
+    "median_fraction_of_successors_seen": 0.5,
+    "note": "Cross-entropy cannot average over labels it has not drawn, so at this checkpoint 'one-hot suppresses alternatives' and 'has not seen the alternatives yet' are the same observation.",
+    "sources_touched_by_step_1500": 12404,
+    "sources_with_all_successors_seen": 1762,
+    "sources_with_at_most_half_seen": 9860
+  },
+  "goal_conditioning_blocker": {
+    "appearing_in_more_than_one_lane": 0,
+    "multi_successor_sources": 27865,
+    "note": "Lane is a property of the SOURCE, not the transition. No source appears under two lanes, so the corpus contains zero observed variation of p(y|x,z) with z for fixed x. A goal-marginal target would be synthesized entirely from an assumed goal distribution plus an oracle, with nothing measured to validate it. It also means lane and chemical population are perfectly confounded, so the provenance finding is actionable but mechanistically unidentified -- 'different teacher policy' cannot be separated from 'different source population' in this data."
+  },
+  "multi_successor_structure": {
+    "note": "Multi-positive supervision is identical to one-hot for 75.6% of sources, so it can address at most ~24% of the training signal.",
+    "share_multi_successor": 0.244,
+    "share_single_successor": 0.756,
+    "sources_by_distinct_successors": {
+      "1": 86184,
+      "2": 24151,
+      "3": 2545,
+      "4": 852,
+      "5": 189,
+      "6": 112,
+      "7": 16
+    },
+    "train_sources": 114049
+  },
+  "question": "Do the pilot results justify changing the R_theta objective, adopting goal-conditioned soft supervision (goal-marginal reference), or both?",
+  "recommendation": [
+    "1. Train arm A to >=2 full epochs and re-measure provenance-matched gaps (~$2). Removes the exposure confound; at 2 epochs each entry is drawn ~2.5x so cross-entropy can average over multi-successor sources.",
+    "2. Re-freeze reserving real-lane SOURCES per family (not re-splitting transitions, since lane is source-level).",
+    "3. Then A vs B (source-grouped multi-positive), with the 24.4% ceiling declared in advance.",
+    "4. Hold C. It cannot be evaluated on this corpus and depends on h_z, the weakest existing component (QED sidecar gave 0/5 molecule-level lift)."
+  ],
+  "schema": "compose.editing_v2.r_theta_objective_readiness",
+  "schema_version": 1,
+  "separation": "Two distinct questions. 'Is goal-marginal training the fix for this gap?' -- no evidence, and this corpus cannot produce any. 'Is it the right design for a reusable objective-agnostic prior?' -- plausible, and a paper contribution. Only the second is currently live.",
+  "status": "ANALYSIS_EVIDENCE_ONLY_NO_AUTHORITY"
+}
