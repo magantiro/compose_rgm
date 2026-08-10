@@ -1,0 +1,90 @@
+{
+  "census": {
+    "available_synthetic_share": 0.4461,
+    "canonical_train_pairs": 144886,
+    "capability_cells": 19,
+    "distinct_sources": 106759,
+    "eligible_after_exclusions": 144870,
+    "family_available_pairs": {
+      "atom_delete": 24137,
+      "atom_insert": 22088,
+      "atom_restate": 31143,
+      "bond_reorder": 6767,
+      "bond_reroute": 28987,
+      "cycle_attach": 6733,
+      "cycle_insert": 9722,
+      "ring_system_restate": 15309
+    },
+    "family_available_share": {
+      "atom_delete": 0.1666,
+      "atom_insert": 0.1525,
+      "atom_restate": 0.2149,
+      "bond_reorder": 0.0467,
+      "bond_reroute": 0.2001,
+      "cycle_attach": 0.0465,
+      "cycle_insert": 0.0671,
+      "ring_system_restate": 0.1057
+    },
+    "family_realized_share": {
+      "atom_delete": 0.1655,
+      "atom_insert": 0.1514,
+      "atom_restate": 0.2135,
+      "bond_reorder": 0.0497,
+      "bond_reroute": 0.1987,
+      "cycle_attach": 0.0497,
+      "cycle_insert": 0.0666,
+      "ring_system_restate": 0.1049
+    },
+    "multi_successor_fraction": 0.2944,
+    "multi_successor_sources": 31429,
+    "realized_synthetic_share": 0.2521
+  },
+  "gates": {
+    "canonical_train_pairs": "144,886 (expected 144,886)",
+    "capability_cells": "19 (expected 19)",
+    "cross_role_source_overlap": "0 (expected 0)",
+    "excluded_train_sources": "97 (expected 97)",
+    "families": "8 (expected 8)",
+    "min_family_share": "4.65% (floor 4.65%)",
+    "multi_successor_fraction": "29.44% (expected 29.4%)",
+    "realized_synthetic_share": "25.21% (expected 25.2%)"
+  },
+  "inputs": {
+    "active8_root": "/Users/rmaganti/compose_trainset_backup/localprep/artifacts/editing_v2/process_v2_active8/8ecc0e5e825a15200560c58960d4f662c9ca23be785c825c9c24aa73308144bb",
+    "corpus_roots": [
+      "/Users/rmaganti/compose_trainset_backup/train_65k",
+      "/Users/rmaganti/compose_trainset_backup/v2_corpus"
+    ],
+    "pair_digest_files": [
+      "/Users/rmaganti/compose_trainset_backup/pair_digests/modal_pairs2.json",
+      "/Users/rmaganti/compose_trainset_backup/pair_digests/rsr_topup_pairs.json"
+    ]
+  },
+  "library_sha256": "2d553afa5560319455855bf75306b6e9d5169180562be7b139cf14336f7ecb26",
+  "sampling_law_sha256": "93dd460167d65146d2914bc4a2071e698e4af13a2473a3b03662dbd6200d28cd",
+  "schema": "compose.editing_v2.v2_dataset_freeze",
+  "schema_version": 1,
+  "split": {
+    "precedence": [
+      "final_test",
+      "controller_validation",
+      "validation",
+      "train"
+    ],
+    "residual_cross_role_overlap": 0,
+    "sources_excluded_per_role": {
+      "controller_validation": 10,
+      "final_test": 0,
+      "train": 97,
+      "validation": 6
+    },
+    "sources_per_role_kept": {
+      "controller_validation": 43258,
+      "final_test": 35657,
+      "train": 564219,
+      "validation": 26581
+    }
+  },
+  "split_sha256": "747d17b5935a7808a35919a5a17fb2bbf76ca2974d6169518c8a21bcf673df25",
+  "status": "FROZEN_DATASET_IDENTITY"
+}
