@@ -1,0 +1,55 @@
+{
+  "downstream_consequence": {
+    "lane_mix_by_role": {
+      "controller_validation": {
+        "real": 0.91,
+        "synthetic": 0.07
+      },
+      "final_test": {
+        "real": 0.85,
+        "synthetic": 0.13
+      },
+      "train": {
+        "real": 0.76,
+        "synthetic": 0.2
+      },
+      "validation": {
+        "real": 0.82,
+        "synthetic": 0.16
+      }
+    },
+    "note": "At ROLE level the lane mixes are similar, yet per family they diverge sharply (atom_insert 16.3% synthetic in train against 95.2% in validation). The 16 validation shards mine different family x lane combinations, so shard implies cohort implies family mix, lane mix and teacher policy together. This is the upstream source of the provenance shift measured earlier."
+  },
+  "implication_for_the_refreeze": "Reserving more real sources from the validation ROLE cannot fix this -- every validation source sits in those same 16 shards. A population-matched panel must be carved from WITHIN the 270 training shards, source-disjoint. Whether that is safe depends on whether a shard is an analogue series (in which case within-shard holdout leaks near relatives) or a diverse sample; splitting by shard is the standard defence against exactly that leakage, so the trade-off must be measured rather than assumed.",
+  "precedence_is_not_the_cause": {
+    "note": "Our resolution moved almost nothing; roles were already disjoint upstream.",
+    "sources_excluded_by_precedence": {
+      "controller_validation": 10,
+      "final_test": 0,
+      "train": 97,
+      "validation": 6
+    }
+  },
+  "question": "The exposure diagnostic localized the residual real-lane gap to the boundary between training-role and validation-role sources -- both unseen, so a population effect rather than a learning one. What separates the populations?",
+  "recommended_evaluation_design": [
+    "Primary validation for checkpoint selection: source-disjoint holdout carved from within the 270 training shards, stratified by lane, family and capability cell, sized to give atom_insert and atom_delete real coverage.",
+    "Secondary: retain the present 16-shard panel explicitly labelled as a cross-cohort / OOD stress test, not as ordinary validation.",
+    "final_test (20 shards) remains untouched."
+  ],
+  "root_cause": {
+    "active8_task_shards_with_transitions": 328,
+    "finding": "partition_role is assigned PER TASK SHARD, not per source. Validation is 16 specific upstream mining shards with zero overlap against the 270 training shards, so it is a different mining cohort by construction and cannot be a neutral sample of the training population. The unseen_source -> held_out boundary IS a shard boundary.",
+    "pairwise_shard_overlap": 0,
+    "shards_containing_exactly_one_role": 328,
+    "shards_containing_more_than_one_role": 0,
+    "shards_per_role": {
+      "controller_validation": 22,
+      "final_test": 20,
+      "train": 270,
+      "validation": 16
+    }
+  },
+  "schema": "compose.editing_v2.split_cohort_root_cause",
+  "schema_version": 1,
+  "status": "DIAGNOSTIC_EVIDENCE_ONLY_NO_AUTHORITY"
+}
