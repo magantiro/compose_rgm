@@ -225,10 +225,23 @@ def run_exact_control(
     # defined over what is actually reachable so a reachable=false result would
     # be a finding rather than a test-design artifact.
     sizes = np.where(reachable_mask, sizes_all, 0)
-    live_sizes = sizes[reachable_mask]
-    threshold = float(np.median(live_sizes)) if live_sizes.size else 0.0
-    g2 = np.where(reachable_mask & (sizes <= threshold), 1.0, 0.0)
-    retarget_label = f"reachable states with <= {threshold:.0f} heavy atoms (SHRINK)"
+    # STRICTLY SMALLER THAN THE SWITCH STATE. A median threshold degenerates
+    # whenever the reachable sizes pile up at the top: from CC(C)C the median
+    # was 6, the maximum, so "<= 6" selected 299 of 299 reachable states and the
+    # tilt was by a constant -- exact, and verifying nothing. Shrinking below
+    # the state actually occupied is non-trivial by construction and genuinely
+    # conflicts with the GROW objective that produced the state.
+    switch_size = int(sizes_all[switch])
+    g2 = np.where(reachable_mask & (sizes < switch_size), 1.0, 0.0)
+    retarget_label = (f"reachable states with < {switch_size} heavy atoms "
+                      f"(SHRINK, switch state has {switch_size})")
+    selected, available = int(g2.sum()), int(reachable_mask.sum())
+    if not 0 < selected < available:
+        raise RuntimeError(
+            f"degenerate retarget objective: {selected} of {available} reachable "
+            "states selected. A target that is empty tests unreachability and a "
+            "target that is everything tests a constant tilt; neither tests "
+            "retargeting.")
     print(f"  retarget objective: {retarget_label} -- {int(g2.sum())} of "
           f"{int(reachable_mask.sum())} reachable", flush=True)
     retarget = terminal_tilt_residual(R, g2, remaining, switch)
