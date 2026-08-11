@@ -280,7 +280,17 @@ def run_exact_control(
             "exact g'-tilted law FROM THE REALISED SWITCH STATE, which is what "
             "makes mid-trajectory objective change coherent rather than heuristic."),
     }
+    # Write to the VOLUME, not just the return value. A returned result is lost
+    # if the local client disconnects, which is exactly what kept happening on
+    # this ~8 minute run; an artifact on the volume survives that and makes
+    # `modal run --detach` usable.
+    out = root / "exactness"
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "experiment_b_exact_control.json").write_text(
+        json.dumps(result, indent=2, sort_keys=True) + "\n")
+    artifact_volume.commit()
     print("\nVERDICT " + json.dumps(result["verdict"], indent=2), flush=True)
+    print(f"wrote {out / 'experiment_b_exact_control.json'}", flush=True)
     return result
 
 
