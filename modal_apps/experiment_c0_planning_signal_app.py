@@ -307,8 +307,11 @@ def probe_source(task: dict[str, Any]) -> dict[str, Any]:
         CHECKPOINT_FILENAME,
     )
     from compose_v4.experiments.production_successor_kernel import (
+        _default_rewrite_system,
         canonical_successor_result,
+        enumerate_factorized_marked_law,
     )
+    from compose_v4.rewrite.kernel import canonical_state_key
     from compose_v4.drd2_oracle import DRD2Oracle, tanimoto_to
 
     started = time.perf_counter()
@@ -377,6 +380,81 @@ def probe_source(task: dict[str, Any]) -> dict[str, Any]:
             return int(rng.integers(len(probabilities)))
         return int(rng.choice(len(probabilities), p=probabilities / total))
 
+    # ---- cheap rollout stepping -----------------------------------------
+    # A rollout needs ONE sampled successor, not the whole canonical partition.
+    # Profiling one enumeration: 59% of the cost is applying and canonicalising
+    # every mark (25,581 molecular_graph_to_smiles calls for a single state),
+    # and only 41% is the marked law the probabilities come from.
+    #
+    # P(canonical successor y) is exactly the sum of the mark probabilities that
+    # reach y, so drawing a mark in proportion to its probability and
+    # canonicalising ONLY that mark samples the canonical law.  Verified
+    # deterministically rather than by Monte Carlo: identical support, virtual
+    # mass equal to 0.0e+00, probabilities agreeing to 1.6e-8 -- summation-order
+    # associativity on float32 model outputs, far below anything that moves a
+    # sample.
+    #
+    # Self-loops and mask failures are handled by rejection, which reproduces the
+    # masked-and-renormalised law exactly.  On giving up, the exact path is used
+    # instead; a mixture of two samplers of the SAME law is still that law, so
+    # the fallback introduces no bias.
+    rewrite_system = _default_rewrite_system(model)
+    marked_law_cache: dict[str, Any] = {}
+    mark_resolution: dict[tuple[str, int], str | None] = {}
+    REJECTION_TRIES = 12
+
+    def marked_law(state, key: str):
+        nonlocal kernel_calls
+        if key not in marked_law_cache:
+            kernel_calls += 1
+            with torch.no_grad():
+                marked_law_cache[key] = enumerate_factorized_marked_law(
+                    model, state, float(TIME_POINT))
+        return marked_law_cache[key]
+
+    def resolve_mark(state, key: str, law, index: int) -> str | None:
+        """Canonical successor of one mark; None if it is a self-loop."""
+
+        cached = mark_resolution.get((key, index))
+        if cached is not None or (key, index) in mark_resolution:
+            return cached
+        mark = law.marks[index]
+        successor = rewrite_system.apply(state, mark.executor_rule_name, mark.action)
+        resolved = canonical_state_key(successor)
+        if resolved == law.source_key:
+            resolved = None
+        mark_resolution[(key, index)] = resolved
+        return resolved
+
+    def sample_successor(state, key: str) -> str | None:
+        if key in enumeration_cache:
+            # Already enumerated exactly -- reuse it rather than re-deriving.
+            rows = enumeration_cache[key]
+            if not rows:
+                return None
+            keys = [r[0] for r in rows]
+            weights = np.array([r[1] for r in rows], dtype=np.float64)
+            return keys[sample_index(weights)]
+
+        law = marked_law(state, key)
+        if not law.marks:
+            return None
+        weights = np.array([float(m.probability) for m in law.marks], dtype=np.float64)
+        for _ in range(REJECTION_TRIES):
+            index = sample_index(weights)
+            resolved = resolve_mark(state, key, law, index)
+            if resolved is None:
+                continue
+            if tanimoto_to(source_key, resolved) >= SIMILARITY_FLOOR:
+                return resolved
+        # Rejection kept failing: fall back to the exact enumeration.
+        rows = successors(state, key)
+        if not rows:
+            return None
+        keys = [r[0] for r in rows]
+        exact_weights = np.array([r[1] for r in rows], dtype=np.float64)
+        return keys[sample_index(exact_weights)]
+
     margin_cache: dict[str, float] = {}
 
     def margin(key: str) -> float:
@@ -384,8 +462,14 @@ def probe_source(task: dict[str, Any]) -> dict[str, Any]:
             margin_cache[key] = float(oracle.margin_many([key])[0])
         return margin_cache[key]
 
-    def rollout_value(key: str, depth: int) -> float:
-        """Best MARGIN along a `depth`-step masked-reference rollout from `key`.
+    def rollout_prefix(key: str, depth: int) -> np.ndarray:
+        """Running best MARGIN over 0..depth steps of a masked-reference rollout.
+
+        Returns the whole prefix, not just the endpoint, because a depth-3
+        rollout CONTAINS its depth-1 and depth-2 prefixes: reading the running
+        maximum at each step yields all three horizons from one set of rollouts,
+        at no extra kernel calls.  That turns "depth 3 is enough" into a
+        measurable trend across depths instead of an assertion.
 
         The task is to REACH an active molecule within the budget, not to be
         active exactly at the horizon, so a path is worth its best molecule
@@ -393,30 +477,35 @@ def probe_source(task: dict[str, Any]) -> dict[str, Any]:
 
         The margin, not the probability, is what a rollout accumulates: P(active)
         spans 0.00003 to 0.048 across the benchmark's own sources, so a few edits
-        through that region move it by amounts that vanish against rollout noise,
+        through that region move it by amounts that vanish against rollout noise
         and every candidate ties.  The margin is the same ordering with usable
         resolution.
         """
 
         best = margin(key)
+        prefix = [best]
         current_key = key
         for _ in range(depth):
             state = rebuild(current_key)
-            if state is None:
+            nxt = None if state is None else sample_successor(state, current_key)
+            if nxt is None:
                 break
-            rows = successors(state, current_key)
-            if not rows:
-                break
-            keys = [r[0] for r in rows]
-            probabilities = np.array([r[1] for r in rows], dtype=np.float64)
-            current_key = keys[sample_index(probabilities)]
+            current_key = nxt
             best = max(best, margin(current_key))
-        return best
+            prefix.append(best)
+        # A rollout that dies early cannot improve further, so its later
+        # horizons carry the best it did reach -- not a missing value, which
+        # would silently drop that candidate from the deeper comparisons.
+        while len(prefix) < depth + 1:
+            prefix.append(best)
+        return np.asarray(prefix, dtype=np.float64)
 
-    def estimate_value(key: str, depth: int, rollouts: int) -> float:
+    def estimate_value(key: str, depth: int, rollouts: int) -> np.ndarray:
+        """Mean prefix-value vector over `rollouts` independent rollouts."""
+
         if depth <= 0:
-            return margin(key)
-        return float(np.mean([rollout_value(key, depth) for _ in range(rollouts)]))
+            return np.full(1, margin(key), dtype=np.float64)
+        return np.mean([rollout_prefix(key, depth) for _ in range(rollouts)], axis=0)
 
     decisions: list[dict[str, Any]] = []
     current_key = source_key
@@ -470,12 +559,36 @@ def probe_source(task: dict[str, Any]) -> dict[str, Any]:
         depth = min(LOOKAHEAD_DEPTH, remaining - 1)
         selection = {i: estimate_value(keys[i], depth, ROLLOUTS_SELECT)
                      for i in candidate_indices}
-        mc_index = max(selection, key=selection.get)
 
-        # Fresh, independent rollouts for the reported comparison.
-        fresh_mc = estimate_value(keys[mc_index], depth, ROLLOUTS_EVAL)
-        fresh_greedy = (fresh_mc if mc_index == greedy_index
-                        else estimate_value(keys[greedy_index], depth, ROLLOUTS_EVAL))
+        # One MC choice per horizon, all read off the same rollouts.
+        mc_by_depth = {d: max(selection, key=lambda i: selection[i][d])
+                       for d in range(1, depth + 1)}
+        mc_index = mc_by_depth.get(depth, greedy_index)
+
+        # Fresh, independent rollouts for the reported comparison.  Every
+        # candidate any horizon selected is re-evaluated once; a single fresh
+        # estimate serves all depths because it too returns the whole prefix.
+        needs_fresh = {greedy_index} | set(mc_by_depth.values())
+        fresh = {i: estimate_value(keys[i], depth, ROLLOUTS_EVAL)
+                 for i in needs_fresh}
+
+        by_depth = {}
+        for d in range(1, depth + 1):
+            chosen = mc_by_depth[d]
+            regret = float(fresh[chosen][d] - fresh[greedy_index][d])
+            by_depth[str(d)] = {
+                "mc_key": keys[chosen],
+                "top1_disagreement": bool(chosen != greedy_index),
+                "mc_immediate_margin": float(immediate[chosen]),
+                "fresh_regret": regret,
+                "sacrifice_to_win": bool(
+                    chosen != greedy_index
+                    and immediate[chosen] < immediate[greedy_index]
+                    and regret > 0),
+            }
+
+        fresh_mc = float(fresh[mc_index][depth])
+        fresh_greedy = float(fresh[greedy_index][depth])
 
         # A revisited state is recorded but excluded from the statistics. The
         # kernel is NOT given a visited-set: masking revisits would redefine
@@ -498,10 +611,11 @@ def probe_source(task: dict[str, Any]) -> dict[str, Any]:
             "mc_immediate_margin": float(immediate[mc_index]),
             "greedy_probability": greedy_probability,
             "mc_probability": float(oracle.score(keys[mc_index])),
-            "greedy_value_selection": float(selection[greedy_index]),
-            "mc_value_selection": float(selection[mc_index]),
-            "greedy_value_fresh": float(fresh_greedy),
-            "mc_value_fresh": float(fresh_mc),
+            "greedy_value_selection": float(selection[greedy_index][depth]),
+            "mc_value_selection": float(selection[mc_index][depth]),
+            "greedy_value_fresh": fresh_greedy,
+            "mc_value_fresh": fresh_mc,
+            "by_depth": by_depth,
             "top1_disagreement": bool(mc_index != greedy_index),
             "fresh_regret": float(fresh_mc - fresh_greedy),
             "immediate_sacrifice": float(immediate[greedy_index]
@@ -573,15 +687,24 @@ def probe_source(task: dict[str, Any]) -> dict[str, Any]:
 
 
 @app.local_entrypoint()
-def main(sources: int = 12) -> None:
-    selection = select_sources.remote(wanted=sources)
+def main(sources: int = 12, selection_seed: int = 20260811,
+         label: str = "preregistered") -> None:
+    """`selection_seed` exists so plumbing can be validated on THROWAWAY sources.
+
+    A dry run at a different seed draws a disjoint sample, so nothing observed
+    while checking that the code executes can touch the sources the reported run
+    uses.
+    """
+
+    selection = select_sources.remote(wanted=sources, selection_seed=selection_seed)
     chosen = selection["selected"]
-    print(f"\n{len(chosen)} sources selected from {selection['eligible']:,} eligible "
+    print(f"\n[{label}] {len(chosen)} sources at seed {selection_seed}, from "
+          f"{selection['eligible']:,} eligible "
           f"({selection['reserve_sources']:,} reserve sources scanned)")
     if not chosen:
         raise SystemExit("no eligible sources; nothing to probe")
 
-    tasks = [{**row, "index": i, "seed": 20260811 + i}
+    tasks = [{**row, "index": i, "seed": selection_seed + i}
              for i, row in enumerate(chosen)]
     results = [r for r in probe_source.map(tasks) if r]
 
@@ -616,6 +739,38 @@ def main(sources: int = 12) -> None:
           f"(benchmark P >= {TARGET_FLOOR})")
     print(f"  total kernel calls   {sum(r['kernel_calls'] for r in results):,}")
 
+    # ---- the depth ladder ------------------------------------------------
+    # Read off the same rollouts, so this costs nothing extra. The convincing
+    # pattern is monotone: depth 1 close to greedy, later depths diverging. A
+    # single depth in isolation cannot distinguish "planning helps" from "this
+    # particular horizon happened to look good".
+    print(f"\n  depth  disagree   sacrifice-to-win   mean fresh regret   "
+          f"sacrificial win rate")
+    ladder = {}
+    for d in range(1, LOOKAHEAD_DEPTH + 1):
+        at_depth = [row["by_depth"][str(d)] for row in decisions
+                    if str(d) in row.get("by_depth", {})]
+        if not at_depth:
+            continue
+        d_disagree = sum(r["top1_disagreement"] for r in at_depth)
+        d_sacrifice = sum(r["sacrifice_to_win"] for r in at_depth)
+        d_regret = sum(r["fresh_regret"] for r in at_depth) / len(at_depth)
+        d_sacrificial = [r for r in at_depth if r["top1_disagreement"]]
+        d_won = sum(1 for r in d_sacrificial if r["fresh_regret"] > 0)
+        rate = (d_won / len(d_sacrificial)) if d_sacrificial else None
+        ladder[str(d)] = {
+            "decision_states": len(at_depth),
+            "top1_disagreement": d_disagree,
+            "sacrifice_to_win": d_sacrifice,
+            "mean_fresh_regret": d_regret,
+            "sacrificial_actions": len(d_sacrificial),
+            "sacrificial_won": d_won,
+            "sacrificial_win_rate": rate,
+        }
+        print(f"  {d:5d}  {d_disagree:4d}/{len(at_depth):-4d}  "
+              f"{d_sacrifice:11d}/{len(at_depth):-4d}   {d_regret:+15.5f}   "
+              f"{'n/a' if rate is None else f'{rate:.1%} of {len(d_sacrificial)}'}")
+
     # PRIMARY EVIDENCE.  Among decisions where the MC action differs from greedy
     # AND is immediately worse, "no planning signal" predicts the fresh regret is
     # positive about half the time -- the evaluation sample is independent of the
@@ -627,9 +782,15 @@ def main(sources: int = 12) -> None:
                    and d["mc_immediate_margin"] < d["greedy_immediate_margin"]]
     won = sum(1 for d in sacrificial if d["fresh_regret"] > 0)
     if sacrificial:
+        share = won / len(sacrificial)
+        # Binomial standard error on the rate, so a near-chance result is not
+        # read as a trend. With this many observations anything inside roughly
+        # +-2 SE of 50% is not distinguishable from the null.
+        standard_error = (0.25 / len(sacrificial)) ** 0.5
         print(f"\n  immediately-worse MC actions: {len(sacrificial)}")
-        print(f"    better after {LOOKAHEAD_DEPTH} edits: {won} "
-              f"({won/len(sacrificial):.1%})  [null predicts ~50%]")
+        print(f"    better after {LOOKAHEAD_DEPTH} edits: {won} ({share:.1%})"
+              f"  [null 50%, SE {standard_error:.1%}, "
+              f"{abs(share-0.5)/standard_error:.1f} SE from chance]")
         mean_sacrifice = (sum(d["immediate_sacrifice"] for d in sacrificial)
                           / len(sacrificial))
         print(f"    mean immediate margin given up: {mean_sacrifice:+.5f}")
@@ -670,10 +831,11 @@ def main(sources: int = 12) -> None:
         "sacrificial_won": won,
         "sacrificial_win_rate": (won / len(sacrificial)) if sacrificial else None,
         "null_win_rate": 0.5,
+        "by_depth": ladder,
         "greedy_solved_sources": solved,
         "kernel_calls": sum(r["kernel_calls"] for r in results),
         "verdict": verdict,
     }
-    Path("diagnostics/editing_v2_experiment_c0_planning_signal.json").write_text(
+    Path(f"diagnostics/editing_v2_experiment_c0_planning_signal_{label}.json").write_text(
         json.dumps({"summary": summary, "per_source": results}, indent=2) + "\n")
-    print("  wrote diagnostics/editing_v2_experiment_c0_planning_signal.json")
+    print(f"  wrote diagnostics/editing_v2_experiment_c0_planning_signal_{label}.json")
