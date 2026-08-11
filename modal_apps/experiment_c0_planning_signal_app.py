@@ -538,13 +538,21 @@ def probe_source(task: dict[str, Any]) -> dict[str, Any]:
         # made MC-best = greedy-best almost by construction: greedy's margin is
         # the maximum over ALL successors, which a random draw's short rollout
         # essentially never overtakes.
-        picked: list[int] = []
-        for index in np.argsort(-immediate)[:CANDIDATES_TOP_MARGIN]:
-            picked.append(int(index))
-        for index in np.argsort(-reference)[:CANDIDATES_TOP_REFERENCE]:
-            if int(index) not in picked:
-                picked.append(int(index))
-        rest = [i for i in range(len(keys)) if i not in set(picked)]
+        # Greedy's own index is seeded FIRST rather than assumed to head the
+        # top-margin stratum. Margins tie exactly whenever two successors fold to
+        # the same fingerprint -- symmetric edits do this routinely -- and
+        # np.argsort is not stable, so with enough ties at the maximum the
+        # argmax index can fall outside the top-K and the regret comparison would
+        # have no greedy value to compare against.
+        picked: list[int] = [greedy_index]
+        seen_candidates = {greedy_index}
+        for stratum, count in ((-immediate, CANDIDATES_TOP_MARGIN),
+                               (-reference, CANDIDATES_TOP_REFERENCE)):
+            for index in np.argsort(stratum)[:count]:
+                if int(index) not in seen_candidates:
+                    picked.append(int(index))
+                    seen_candidates.add(int(index))
+        rest = [i for i in range(len(keys)) if i not in seen_candidates]
         if rest and CANDIDATES_RANDOM > 0:
             weights = reference[rest]
             take = min(CANDIDATES_RANDOM, len(rest))
@@ -686,27 +694,13 @@ def probe_source(task: dict[str, Any]) -> dict[str, Any]:
     return payload
 
 
-@app.local_entrypoint()
-def main(sources: int = 12, selection_seed: int = 20260811,
-         label: str = "preregistered") -> None:
-    """`selection_seed` exists so plumbing can be validated on THROWAWAY sources.
+def summarise(results: list[dict[str, Any]]) -> dict[str, Any]:
+    """Aggregate per-source probes into the reported statistics.
 
-    A dry run at a different seed draws a disjoint sample, so nothing observed
-    while checking that the code executes can touch the sources the reported run
-    uses.
+    A module-level function rather than inline in the entrypoint so it can be
+    exercised without Modal.  This is the one stage that runs only after every
+    container has been paid for, so a crash here is the most expensive kind.
     """
-
-    selection = select_sources.remote(wanted=sources, selection_seed=selection_seed)
-    chosen = selection["selected"]
-    print(f"\n[{label}] {len(chosen)} sources at seed {selection_seed}, from "
-          f"{selection['eligible']:,} eligible "
-          f"({selection['reserve_sources']:,} reserve sources scanned)")
-    if not chosen:
-        raise SystemExit("no eligible sources; nothing to probe")
-
-    tasks = [{**row, "index": i, "seed": selection_seed + i}
-             for i, row in enumerate(chosen)]
-    results = [r for r in probe_source.map(tasks) if r]
 
     # A revisited state contributes nothing new and would double-count whatever
     # it contributed the first time; the kernel was left untouched, so revisits
@@ -719,7 +713,9 @@ def main(sources: int = 12, selection_seed: int = 20260811,
           f"(from {len(results)} sources; {duplicates} revisited states dropped, "
           f"{len(everything)} total)")
     if not decisions:
-        raise SystemExit("no decision states with lookahead; nothing to report")
+        return {"schema": "compose.editing_v2.c0_summary",
+                "sources": len(results), "decision_states": 0,
+                "verdict": "NO DATA -- no decision states with a horizon"}
 
     disagreements = sum(d["top1_disagreement"] for d in decisions)
     sacrifices = sum(d["sacrifice_to_win"] for d in decisions)
@@ -836,6 +832,34 @@ def main(sources: int = 12, selection_seed: int = 20260811,
         "kernel_calls": sum(r["kernel_calls"] for r in results),
         "verdict": verdict,
     }
-    Path(f"diagnostics/editing_v2_experiment_c0_planning_signal_{label}.json").write_text(
+    return summary
+
+
+@app.local_entrypoint()
+def main(sources: int = 12, selection_seed: int = 20260811,
+         label: str = "preregistered") -> None:
+    """`selection_seed` exists so plumbing can be validated on THROWAWAY sources.
+
+    A dry run at a different seed draws a disjoint sample, so nothing observed
+    while checking that the code executes can touch the sources the reported run
+    uses.
+    """
+
+    selection = select_sources.remote(wanted=sources, selection_seed=selection_seed)
+    chosen = selection["selected"]
+    print(f"\n[{label}] {len(chosen)} sources at seed {selection_seed}, from "
+          f"{selection['eligible']:,} eligible "
+          f"({selection['reserve_sources']:,} reserve sources scanned)")
+    if not chosen:
+        raise SystemExit("no eligible sources; nothing to probe")
+
+    tasks = [{**row, "index": i, "seed": selection_seed + i}
+             for i, row in enumerate(chosen)]
+    results = [r for r in probe_source.map(tasks) if r]
+
+    summary = summarise(results)
+    destination = Path(
+        f"diagnostics/editing_v2_experiment_c0_planning_signal_{label}.json")
+    destination.write_text(
         json.dumps({"summary": summary, "per_source": results}, indent=2) + "\n")
-    print(f"  wrote diagnostics/editing_v2_experiment_c0_planning_signal_{label}.json")
+    print(f"  wrote {destination}")
