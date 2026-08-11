@@ -153,11 +153,38 @@ def run_exact_control(
     live[index[CEMETERY]] = -1.0
     switch = int(np.argmax(live))
 
-    def contains_oxygen(key: str) -> bool:
-        return "O" in key or "o" in key
+    # The second objective must be REACHABLE from the realised switch state, or
+    # the test degenerates into a second unreachability check. A first attempt
+    # picked "contains oxygen" a priori; the switch state under a
+    # nitrogen-seeking bridge was BCCN, which cannot reach oxygen in the
+    # remaining budget, so it reported reachable=false and demonstrated nothing
+    # about retargeting.
+    #
+    # So g' is defined RELATIVE to what the reference process can actually reach
+    # from the switch state: among states reachable in the remaining budget,
+    # target the larger half by heavy-atom count. That is a genuine conflicting
+    # objective -- the first bridge sought nitrogen, this one seeks growth --
+    # and it is nonempty by construction.
+    remaining = budget - half
+    from_switch = np.zeros(len(keys))
+    from_switch[switch] = 1.0
+    for _ in range(remaining):
+        from_switch = from_switch @ R
+    reachable_mask = from_switch > 0
+    reachable_mask[index[CEMETERY]] = False
 
-    g2 = np.array([0.0 if k == CEMETERY else float(contains_oxygen(k)) for k in keys])
-    retarget = terminal_tilt_residual(R, g2, budget - half, switch)
+    def heavy_atoms(key: str) -> int:
+        graph = smiles_to_molecular_graph(key)
+        return 0 if graph is None else int((graph.atom_types >= 0).sum())
+
+    sizes = np.array([0 if (k == CEMETERY or not reachable_mask[i]) else heavy_atoms(k)
+                      for i, k in enumerate(keys)])
+    live_sizes = sizes[reachable_mask]
+    threshold = float(np.median(live_sizes)) if live_sizes.size else 0.0
+    g2 = np.where(reachable_mask & (sizes >= threshold), 1.0, 0.0)
+    print(f"  retarget objective: reachable states with >= {threshold:.0f} heavy atoms "
+          f"-- {int(g2.sum())} of {int(reachable_mask.sum())} reachable", flush=True)
+    retarget = terminal_tilt_residual(R, g2, remaining, switch)
     print(f"[{time.perf_counter()-started:6.1f}s] retarget from {keys[switch]!r}: "
           f"{json.dumps(retarget)}", flush=True)
 
@@ -172,8 +199,8 @@ def run_exact_control(
                   "reach_probability": primary.get("partition")},
         "primary": primary,
         "unreachable": unreachable,
-        "retargeting": {"switch_state": keys[switch], "new_target": "contains oxygen",
-                        "remaining_budget": budget - half, **retarget},
+        "retargeting": {"switch_state": keys[switch], "new_target": "reachable states in the larger half by heavy-atom count",
+                        "remaining_budget": remaining, **retarget},
         "verdict": {
             "terminal_tilt_exact": primary.get("terminal_tilt_tv", 1.0) < 1e-9,
             "support_preserved": primary.get("support_violations", 1) == 0,
