@@ -19,6 +19,7 @@ from compose_v4.experiments.editing_v2_r_theta_corpus_training import (
     capability_baseline,
     capability_floor,
     collapsed_capabilities,
+    regressed_capabilities,
     RThetaTrainingError,
     RunIdentity,
     assert_training_invariants,
@@ -185,8 +186,13 @@ def test_checkpoint_write_is_atomic(tmp_path: Path) -> None:
 
 
 def _row(family: str, cell: str, nll: float, *, lane: str = "real",
-         support_band: str | None = None, tag: str = "") -> dict:
+         support_band: str | None = None, tag: str = "",
+         identity: float | None = None) -> dict:
+    # P(y|x) = P(F|x).P(y|x,F); the gate reads the identity factor only.
+    identity_nll = nll / 2 if identity is None else identity
     return {
+        "family_nll": nll - identity_nll,
+        "identity_nll": identity_nll,
         "entry_id": f"{family}-{cell}-{nll}-{lane}-{tag}",
         "model_family": family,
         "capability_cell_id": cell,
@@ -227,32 +233,64 @@ def test_thin_cells_are_flagged_rather_than_silently_gated() -> None:
     assert summary["by_capability_cell"]["thin"]["entries"] < THIN_CELL_ENTRIES
 
 
-def test_capability_gate_rejects_a_collapsed_checkpoint() -> None:
-    """Collapse is a GATE: it decides who may compete, not who wins.
+def test_collapse_needs_two_consecutive_regressed_evaluations() -> None:
+    """A single excursion is not a collapse.
 
-    ``rare`` degrades 2.0 -> 3.5 nats against its own first measurement, so
-    that checkpoint is ineligible however good its weighted mean looks.
+    MEASURED in epoch 1: atom_restate went +0.24 -> +0.61 -> +0.53 -> +0.24
+    against its baseline, gating two checkpoints and then returning to exactly
+    where it started. One evaluation cannot tell an excursion from a loss.
     """
 
     shares = {"keep|real": 0.5, "rare|real": 0.5}
     start = summarize_panel(
-        [_row("keep", "c1", 2.0, tag=str(i)) for i in range(4)]
-        + [_row("rare", "c2", 2.0, tag=str(i)) for i in range(4)],
+        [_row("keep", "c1", 4.0, identity=2.0, tag=str(i)) for i in range(4)]
+        + [_row("rare", "c2", 4.0, identity=2.0, tag=str(i)) for i in range(4)],
         reference_law_stratum_share=shares)
     baseline = capability_baseline(start)
+    assert baseline["source"] == "initialization"
 
-    collapsed = summarize_panel(
-        [_row("keep", "c1", 0.3, tag=str(i)) for i in range(4)]
-        + [_row("rare", "c2", 3.5, tag=str(i)) for i in range(4)],
+    excursion = summarize_panel(
+        [_row("keep", "c1", 4.0, identity=2.0, tag=str(i)) for i in range(4)]
+        + [_row("rare", "c2", 5.5, identity=3.5, tag=str(i)) for i in range(4)],
         reference_law_stratum_share=shares)
-    # Only the FAMILY is named: c1 and c2 hold 4 entries each, below
-    # THIN_CELL_ENTRIES, so they never entered the baseline and never gate.
-    assert collapsed_capabilities(collapsed, baseline=baseline) == ("family:rare",)
-    # Better weighted mean than the baseline checkpoint, but ineligible.
-    assert (collapsed["reference_law_weighted_mean_nll"]
-            < start["reference_law_weighted_mean_nll"])
-    assert selection_criterion(start, step=1, baseline=baseline) > \
-        selection_criterion(collapsed, step=2, baseline=baseline)
+    # Regressed on this evaluation...
+    assert regressed_capabilities(excursion, baseline=baseline) == ("family:rare",)
+    # ...but not collapsed, because nothing was regressed before it.
+    assert collapsed_capabilities(excursion, baseline=baseline,
+                                  previously_regressed=()) == ()
+    assert selection_criterion(excursion, step=1, baseline=baseline)[0] == 1
+    # A second consecutive regression IS a collapse.
+    assert collapsed_capabilities(
+        excursion, baseline=baseline,
+        previously_regressed=("family:rare",)) == ("family:rare",)
+    assert selection_criterion(excursion, step=2, baseline=baseline,
+                               previously_regressed=("family:rare",))[0] == 0
+
+
+def test_family_head_reallocation_does_not_gate() -> None:
+    """The joint moved 0.32 nats; the capability did not move at all.
+
+    MEASURED: between steps 3,000 and 4,251 cycle_insert's joint NLL rose 0.274
+    entirely on a family-head term of +0.317 while its identity term FELL
+    0.043. Gating on the joint called that a capability collapse. It is the
+    model reallocating probability across operators, which the reference-law
+    metric already judges.
+    """
+
+    shares = {"f|real": 1.0}
+    start = summarize_panel(
+        [_row("f", "c", 4.0, identity=2.0, tag=str(i)) for i in range(4)],
+        reference_law_stratum_share=shares)
+    baseline = capability_baseline(start)
+    # Joint up 1.0 nat, all of it in the family head; identity slightly better.
+    reallocated = summarize_panel(
+        [_row("f", "c", 5.0, identity=1.95, tag=str(i)) for i in range(4)],
+        reference_law_stratum_share=shares)
+    assert reallocated["by_family"]["f"]["mean_nll"] - start["by_family"]["f"]["mean_nll"] == 1.0
+    assert regressed_capabilities(reallocated, baseline=baseline) == ()
+    assert collapsed_capabilities(
+        reallocated, baseline=baseline,
+        previously_regressed=("family:f", "cell:c")) == ()
 
 
 def test_a_better_matched_nll_wins_over_a_better_capability_floor() -> None:

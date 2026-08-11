@@ -202,7 +202,8 @@ def write_checkpoint(
     trajectory: Sequence[Mapping[str, Any]],
     stream_sha256: str,
     resume_count: int,
-    collapse_baseline: Mapping[str, float] | None = None,
+    collapse_baseline: Mapping[str, Any] | None = None,
+    previously_regressed: Sequence[str] = (),
 ) -> dict[str, Any]:
     """Persist everything a resume needs, atomically, with digests.
 
@@ -237,6 +238,11 @@ def write_checkpoint(
         "rng_state": _rng_state(),
         "collapse_baseline": (dict(collapse_baseline)
                               if collapse_baseline is not None else None),
+        # Collapse needs two CONSECUTIVE regressed evaluations, so which
+        # capabilities were regressed at the previous evaluation is run state:
+        # losing it across a segment boundary would reset the counter and let
+        # a genuine collapse restart from zero every resume.
+        "previously_regressed": list(previously_regressed),
         "stream_sha256": stream_sha256,
         "torch_version": str(torch.__version__),
         "resume_count": int(resume_count),
@@ -531,65 +537,99 @@ def capability_floor(summary: Mapping[str, Any]) -> float:
     return float(min(candidates))
 
 
-def capability_baseline(summary: Mapping[str, Any]) -> dict[str, float]:
-    """Per-capability mean NLL at the first evaluation, for collapse detection.
+def _identity_by_capability(summary: Mapping[str, Any]) -> dict[str, float]:
+    """Within-family identity NLL per family and per non-thin capability cell.
 
-    Captured once and compared against, rather than tracking each capability's
-    best-so-far. Best-so-far is the stricter reading and was rejected: normal
-    step-to-step fluctuation would trip it constantly, and a gate that fires on
-    noise stops being a gate.
+    IDENTITY, NOT JOINT. The joint mean is -log P(F|x) - log P(y|x,F), so it
+    moves whenever the family head reallocates probability across operators --
+    something a joint successor model is entitled to learn, and which the
+    reference-law-weighted metric already judges. Gating on it conflated
+    "the model changed its mind about how often atom_restate occurs" with
+    "the model got worse at performing an atom_restate".
+
+    MEASURED, and this is why the definition changed: between steps 3,000 and
+    4,251 the largest identity movement across eight families was 0.062 nats
+    while family-head movement reached 0.317, and identity IMPROVED for six of
+    the eight. The capability the gate exists to protect never moved.
+
+    Identity answers the question the gate is actually asking: GIVEN that this
+    is an atom_restate move, has the model got worse at choosing the correct
+    restatement?
     """
 
-    baseline = {f"family:{name}": float(value["mean_nll"])
-                for name, value in summary["by_family"].items()}
-    baseline.update({
-        f"cell:{name}": float(value["mean_nll"])
-        for name, value in summary["by_capability_cell"].items()
-        if value["entries"] >= THIN_CELL_ENTRIES
-    })
-    return baseline
+    values: dict[str, float] = {}
+    for name, value in summary["by_family"].items():
+        if value.get("mean_identity_nll") is not None:
+            values[f"family:{name}"] = float(value["mean_identity_nll"])
+    for name, value in summary["by_capability_cell"].items():
+        if (value["entries"] >= THIN_CELL_ENTRIES
+                and value.get("mean_identity_nll") is not None):
+            values[f"cell:{name}"] = float(value["mean_identity_nll"])
+    return values
+
+
+def capability_baseline(summary: Mapping[str, Any]) -> dict[str, Any]:
+    """The immutable capability reference: identity NLL at the FROZEN INIT.
+
+    ``source`` records where it came from. A baseline taken at step 500 is
+    already a trained model, which makes "degraded relative to baseline" mean
+    something that drifts with when the first evaluation happened to land. The
+    initialization is frozen and seeded, so R_theta_0 is reproducible and the
+    comparison is stable across runs and resumes.
+    """
+
+    return {"source": "initialization", "values": _identity_by_capability(summary)}
+
+
+def regressed_capabilities(
+    summary: Mapping[str, Any],
+    *,
+    baseline: Mapping[str, Any] | None,
+    tolerance_nats: float = COLLAPSE_TOLERANCE_NATS,
+) -> tuple[str, ...]:
+    """Capabilities whose identity NLL is over tolerance AT THIS EVALUATION."""
+
+    if not baseline or not baseline.get("values"):
+        return ()
+    reference = baseline["values"]
+    current = _identity_by_capability(summary)
+    return tuple(sorted(
+        name for name, start in reference.items()
+        if name in current and current[name] > start + tolerance_nats
+    ))
 
 
 def collapsed_capabilities(
     summary: Mapping[str, Any],
     *,
-    baseline: Mapping[str, float] | None,
+    baseline: Mapping[str, Any] | None,
+    previously_regressed: Sequence[str] = (),
     tolerance_nats: float = COLLAPSE_TOLERANCE_NATS,
 ) -> tuple[str, ...]:
-    """Which capabilities are worse than they were before training began.
+    """Collapse = regressed on TWO CONSECUTIVE evaluations.
 
-    Collapse is defined against the FIRST evaluation, so it means "this
-    operator has actively degraded relative to the untrained model" -- an
-    unambiguous fact, not a threshold picked to make the run pass. An absolute
-    probability floor was rejected because families differ in branching factor
-    from 59 to 420 median legal marks, so one number cannot mean the same thing
-    across them.
+    A single evaluation cannot distinguish an excursion from a loss. MEASURED:
+    atom_restate went +0.24 -> +0.61 -> +0.53 -> +0.24 against its baseline
+    across epoch 1, gating two checkpoints and then returning to exactly where
+    it started. It oscillates with roughly +-0.2 amplitude against a 0.5
+    threshold, so instantaneous firing is structural rather than diagnostic.
 
-    Thin cells never gate: a mean over fewer than THIN_CELL_ENTRIES entries
-    would fire or not fire at random. They are reported by ``summarize_panel``
-    and excluded from the baseline above.
+    Requiring two consecutive evaluations costs one evaluation of latency and
+    removes the whole class of single-point excursions. A capability that has
+    genuinely been abandoned stays abandoned.
     """
 
-    if not baseline:
-        return ()
-    current = {f"family:{name}": float(value["mean_nll"])
-               for name, value in summary["by_family"].items()}
-    current.update({
-        f"cell:{name}": float(value["mean_nll"])
-        for name, value in summary["by_capability_cell"].items()
-        if value["entries"] >= THIN_CELL_ENTRIES
-    })
-    return tuple(sorted(
-        name for name, reference in baseline.items()
-        if name in current and current[name] > reference + tolerance_nats
-    ))
+    current = set(regressed_capabilities(
+        summary, baseline=baseline, tolerance_nats=tolerance_nats))
+    return tuple(sorted(current & set(previously_regressed)))
 
 
 def selection_criterion(
     summary: Mapping[str, Any],
     *,
     step: int,
-    baseline: Mapping[str, float] | None = None,
+    baseline: Mapping[str, Any] | None = None,
+    previously_regressed: Sequence[str] = (),
     tolerance_nats: float = COLLAPSE_TOLERANCE_NATS,
 ) -> tuple[int, float, int]:
     """Higher is better, lexicographically:
@@ -597,22 +637,23 @@ def selection_criterion(
         (eligible, -reference-law-weighted NLL, -step)
 
     LOWEST reference-law-weighted NLL, SUBJECT TO no capability collapse. The
-    gate is a predicate, not a quantity: it decides which checkpoints may
-    compete, and among those the weighted NLL alone decides which wins.
+    gate is a predicate deciding who may compete; among survivors the weighted
+    NLL alone decides. Ties break toward the EARLIER step.
 
     An earlier version led on the capability floor itself, which quietly made
-    "maximize the weakest capability" a second objective -- a checkpoint with a
-    trivially better floor would beat one with substantially better matched
-    NLL. Capability checks exist to stop an aggregate hiding a dead operator,
-    not to become the thing being optimized.
+    "maximize the weakest capability" a second objective. Capability checks
+    exist to stop an aggregate hiding a dead operator, not to become the thing
+    being optimized.
 
-    Ties break toward the EARLIER step: if two checkpoints are indistinguishable
-    on the reserve, the one that got there with less training is the one to keep.
+    Collapse is now identity-based and requires two consecutive evaluations;
+    see ``collapsed_capabilities``. Family-head reallocation is deliberately NOT
+    hard-gated here -- the reference-law-weighted metric already judges whether
+    the overall allocation is improving under the law, and a genuine family
+    abandonment would show up there too.
 
-    If nothing is eligible the ordering still returns a best-of-bad rather than
-    failing, since a run must end on some checkpoint -- but eligibility is the
-    leading term, so any eligible checkpoint beats every ineligible one, and the
-    trajectory records which is which.
+    The weighted NLL is required, not optional. Falling back to the panel-native
+    mean would silently select against a different population than the one the
+    run claims to estimate, and every count would still look right.
     """
 
     weighted = summary.get("reference_law_weighted_mean_nll")
@@ -622,7 +663,8 @@ def selection_criterion(
             "reference_law_stratum_share to summarize_panel rather than "
             "selecting on a population the law does not describe")
     collapsed = collapsed_capabilities(
-        summary, baseline=baseline, tolerance_nats=tolerance_nats)
+        summary, baseline=baseline, previously_regressed=previously_regressed,
+        tolerance_nats=tolerance_nats)
     return (0 if collapsed else 1, -float(weighted), -int(step))
 
 
@@ -659,6 +701,7 @@ __all__ = [
     "capability_baseline",
     "capability_floor",
     "collapsed_capabilities",
+    "regressed_capabilities",
     "evaluate_panel",
     "load_checkpoint",
     "selection_criterion",

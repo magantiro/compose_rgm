@@ -92,6 +92,7 @@ def train_segment(
         capability_baseline,
         capability_floor,
         collapsed_capabilities,
+        regressed_capabilities,
         selection_criterion,
         summarize_panel,
         write_checkpoint,
@@ -294,11 +295,37 @@ def train_segment(
     # can agree while their sequences differ.
     stream_sha256 = str(manifest["sequence_sha256"])
 
+    # THE IMMUTABLE CAPABILITY BASELINE, scored on the frozen initialization
+    # BEFORE any checkpoint restores weights over it. A baseline taken at the
+    # first mid-training evaluation is already a trained model, so "degraded
+    # relative to baseline" would drift with wherever that evaluation happened
+    # to land. R_theta_0 is seeded and frozen, so this is reproducible.
+    #
+    # Recomputed every segment rather than trusted from the checkpoint, and
+    # then CHECKED against the stored one: the initialization is deterministic,
+    # so a disagreement means the run is not the experiment it claims to be.
+    def score_reserve():
+        rows = evaluate_panel(
+            model, entry_ids=panel_ids, build_batch=build_panel,
+            batch_size=batch_size, lane_by_entry_id=reserve_lane_by_entry_id,
+            support_band_by_entry_id=reserve_band_by_entry_id)
+        return summarize_panel(
+            rows,
+            deployment_family_share=law["realized_coefficients"]["by_family"],
+            reference_law_stratum_share=reference_law_stratum_share)
+
+    initialization_summary = score_reserve()
+    collapse_baseline = capability_baseline(initialization_summary)
+    print(f"[{time.perf_counter() - segment_started:6.1f}s] R_theta_0 baseline over "
+          f"{len(collapse_baseline['values'])} capabilities; init ref-law "
+          f"{initialization_summary['reference_law_weighted_mean_nll']:.4f}",
+          flush=True)
+
     trainable = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.AdamW(trainable, lr=learning_rate)
     completed_steps = 0
     resume_count = 0
-    collapse_baseline = None
+    previously_regressed: tuple[str, ...] = ()
     selected_step = 0
     selected_criterion_value = None
     selected_state = None
@@ -321,12 +348,47 @@ def train_segment(
         )
         selected_state = payload.get("selected_model_state") or None
         trajectory = [dict(item) for item in payload["trajectory"]]
-        # Restore rather than recapture: a baseline taken from a
-        # mid-training summary would compare each capability against an
-        # already degraded reference, and the gate would detect nothing.
-        collapse_baseline = payload.get("collapse_baseline")
+        stored_baseline = payload.get("collapse_baseline")
+        if (isinstance(stored_baseline, dict)
+                and stored_baseline.get("source") == "initialization"):
+            drift = max(
+                (abs(v - stored_baseline["values"].get(k, v))
+                 for k, v in collapse_baseline["values"].items()), default=0.0)
+            if drift > 1e-4:
+                raise RThetaTrainingError(
+                    f"the initialization baseline moved by {drift:.6f} nats "
+                    "between segments; the frozen init is not reproducing")
+            print(f"  init baseline reproduces to {drift:.2e} nats", flush=True)
+        elif stored_baseline is not None:
+            warn("checkpoint carries a pre-initialization baseline; the gate "
+                 "semantics changed to identity NLL, so it is discarded")
+        previously_regressed = tuple(payload.get("previously_regressed") or ())
         model.to(device)
         print(f"resumed at step {completed_steps:,} (resume #{resume_count})", flush=True)
+
+        # Score the RESUMED state before taking another optimizer step. Without
+        # this, a state that was never evaluated -- because the previous
+        # segment ended on a step that was not a multiple of evaluate_every --
+        # can never be selected, however good it is. That is exactly what hid
+        # step 4,251, which was eligible and on a still-falling curve.
+        resumed_summary = score_reserve()
+        resumed_regressed = regressed_capabilities(
+            resumed_summary, baseline=collapse_baseline)
+        resumed_criterion = selection_criterion(
+            resumed_summary, step=completed_steps, baseline=collapse_baseline,
+            previously_regressed=previously_regressed)
+        print(f"  resumed state: REF-LAW "
+              f"{resumed_summary['reference_law_weighted_mean_nll']:.4f}  "
+              f"{'ELIGIBLE' if resumed_criterion[0] else 'GATED'}", flush=True)
+        if selected_criterion_value is None or resumed_criterion > tuple(
+                selected_criterion_value):
+            selected_step = completed_steps
+            selected_criterion_value = resumed_criterion
+            selected_state = {k: v.detach().cpu().clone()
+                              for k, v in model.state_dict().items()}
+            print(f"  promoted the resumed state to selected "
+                  f"(step {completed_steps:,})", flush=True)
+        previously_regressed = resumed_regressed
 
     hazard_before = {
         name: parameter.detach().clone()
@@ -446,17 +508,20 @@ def train_segment(
                 # reported under zero_mass_stratum and never vote.
                 reference_law_stratum_share=reference_law_stratum_share,
             )
-            if collapse_baseline is None:
-                # First evaluation of the run defines "before training".
-                collapse_baseline = capability_baseline(summary)
-                print(f"  collapse baseline captured over "
-                      f"{len(collapse_baseline)} capabilities", flush=True)
-            collapsed = collapsed_capabilities(summary, baseline=collapse_baseline)
+            regressed = regressed_capabilities(summary, baseline=collapse_baseline)
+            collapsed = collapsed_capabilities(
+                summary, baseline=collapse_baseline,
+                previously_regressed=previously_regressed)
+            if regressed and not collapsed:
+                print(f"  identity regressed (first consecutive): {list(regressed)}",
+                      flush=True)
             if collapsed:
-                warn(f"capability collapse at step {completed_steps}: "
-                     f"{list(collapsed)}")
+                warn(f"capability collapse at step {completed_steps} "
+                     f"(two consecutive): {list(collapsed)}")
             criterion = selection_criterion(
-                summary, step=completed_steps, baseline=collapse_baseline)
+                summary, step=completed_steps, baseline=collapse_baseline,
+                previously_regressed=previously_regressed)
+            previously_regressed = regressed
 
             cohort_mean_nll = None
             # Trigger on an epoch boundary OR the final step. Requiring
@@ -498,6 +563,7 @@ def train_segment(
                         summary["reference_law_weighted_mean_nll"],
                     "eligible": bool(criterion[0]),
                     "collapsed_capabilities": list(collapsed),
+                    "regressed_capabilities": list(regressed),
                     "capability_floor": capability_floor(summary),
                     "by_support_band_mean_nll": {
                         name: value["mean_nll"]
@@ -621,6 +687,7 @@ def train_segment(
                 selected_criterion=selected_criterion_value, selected_state=selected_state,
                 trajectory=trajectory, stream_sha256=stream_sha256,
                 resume_count=resume_count, collapse_baseline=collapse_baseline,
+                previously_regressed=previously_regressed,
             )
             artifact_volume.commit()
             print(
@@ -638,6 +705,7 @@ def train_segment(
         selected_criterion=selected_criterion_value, selected_state=selected_state,
         trajectory=trajectory, stream_sha256=stream_sha256, resume_count=resume_count,
         collapse_baseline=collapse_baseline,
+        previously_regressed=previously_regressed,
     )
     artifact_volume.commit()
     print(
