@@ -75,6 +75,33 @@ involuntary preemption.
 
 ---
 
+## Established — when planning matters, and when it does not
+
+Two results that read as contradictory are actually a characterisation.
+
+**DRD2 (C0): planning did not help.** Mean fresh regret negative at every depth,
+sacrificial win rate 0.5 SE from chance, greedy solved 7/12 sources. Outcomes
+were bimodal — solved in 1–5 edits or never close — so a locally easy landscape
+left planning nothing to buy.
+
+**Known-reachable target recovery (C): planning rescued half of greedy's
+failures.** 12/24 → 18/24 exact recovery; **6 of the 12 targets greedy missed
+were recovered**, none lost; best similarity 0.8589 → 0.9335; cost 5.2×.
+
+Together these characterise *when* remaining-budget information matters, rather
+than searching for a benchmark where the method wins. That framing is stronger
+than either result alone.
+
+**Do not headline the p-value.** McNemar one-sided p = 0.0156, but the rollout
+policy is constructed to be no worse than its greedy base under the value used
+for improvement, so `greedy-only = 0` is a structural guarantee, not an
+observation. The scientific effect is the 50% rescue rate among greedy failures.
+
+**Two claims the panel cannot support**: any horizon trend (+3 / 0 / +2 at 4/5/6
+steps) and any mechanism story — every pair is a delete-insert fragment swap.
+
+---
+
 ## Structural limit — one-cut MMP cannot produce diverse multi-step panels
 
 Measured while building the fresh evaluation panel, and the reason the

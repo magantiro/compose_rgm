@@ -69,6 +69,38 @@ virtual-mass gap. ~$1.50–3.00 for 12 sources, ~45 min.
 
 ## Landed
 
+### Experiment C — future-aware control rescues half of greedy's failures
+
+On 24 held-out, **known-reachable** 4–6 step transformations, with the strict
+override rule (the planner may override greedy only on strictly better
+remaining-budget value; ties keep greedy):
+
+| | greedy | rollout lookahead |
+|---|---|---|
+| exact recovery | 12/24 | **18/24** |
+| mean best similarity | 0.8589 | 0.9335 |
+| kernel cost | 71 calls | 368 marginal (**5.2×**) |
+
+**The claim to make is the rescue rate: 6 of the 12 targets greedy failed to
+recover were rescued by future-aware control — 50%.** Zero went the other way.
+
+**The claim NOT to make is the p-value.** McNemar gives one-sided p = 0.0156,
+but the comparison is *asymmetric by construction*: the rollout policy is built
+to be no worse than its greedy base under the value used for improvement, so
+`greedy-only = 0` is guaranteed rather than observed. Quoting the p-value as the
+headline would dress up a structural guarantee as an empirical finding. Proper
+source-level uncertainty comes later, from the sealed panel.
+
+The planner is **surgical**: 11 overrides across 72 decisions (15%), with 215
+tied candidates deferring to greedy. It is not behaving differently everywhere
+and getting lucky.
+
+Also not supported: any horizon trend (+3 / 0 / +2 at 4/5/6 steps), and any
+mechanism story — the panel is uniformly delete-insert fragment swaps.
+
+**This is what earns `h_phi` its place**: an expensive computation
+(`V_greedy(x, z, b)`, 5.2× cost) that is *already demonstrated useful*.
+
 ### Phase 0 — `R_theta` frozen
 
 Frozen at **step 12,500**: reference-law NLL **5.4603 → 2.8364**, within-family
