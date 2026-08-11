@@ -1,0 +1,1667 @@
+{
+  "schema": "compose.editing_v2.h_phi_teacher_cost_probe",
+  "status": "COST_MEASUREMENT_ONLY_NO_DATASET_GENERATED",
+  "training_law": "V_G(x, z, b) = outcome of greedy continuation from x toward z with b edits remaining; two heads, recovery and terminal similarity",
+  "labels": 198,
+  "kernel_calls": 180,
+  "labels_per_call": 1.1,
+  "positive_prevalence": 0.25252525252525254,
+  "per_pair": [
+    {
+      "index": 0,
+      "steps": 4,
+      "labels": 32,
+      "positives": 2,
+      "kernel_calls": 25,
+      "cache_hits": 24,
+      "teacher_cache_hits": 0,
+      "seconds": 1062.2,
+      "label_rows": [
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCCN4C=C4)cc3)nc21",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.85,
+          "immediate": 0.85,
+          "is_greedy_action": true
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCCP(C)C)cc3)nc21",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.9137931034482759,
+          "immediate": 0.819672131147541,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CNCCOc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 3,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.819672131147541,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CN(CN)CCOc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.9,
+          "immediate": 0.8125,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CN(C)CCOc1ccc(Nc2ncc3cc(-c4ccccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.85,
+          "immediate": 0.6716417910447762,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CN(C)CCOc1ccc(Nc2ncc3cc(-c4c(F)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.85,
+          "immediate": 0.746268656716418,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CN(C)CCOc1ccc(Nc2ncc3cc(-c4c(Cl)cc(F)cc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.85,
+          "immediate": 0.6764705882352942,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CN(C)CC[IH3]c1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.85,
+          "immediate": 0.6376811594202898,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCCN4C=C4Cl)cc3)nc21",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.85,
+          "immediate": 0.8333333333333334,
+          "is_greedy_action": true
+        },
+        {
+          "state": "CC1=CN1CCOc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.85,
+          "immediate": 0.8225806451612904,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CNCCOc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 2,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.819672131147541,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCCN4C=C4N)cc3)nc21",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.85,
+          "immediate": 0.8095238095238095,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2ccccc2Cl)cc2cnc(Nc3ccc(OCCN4C=C4)cc3)nc21",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.85,
+          "immediate": 0.7076923076923077,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2ccc(Cl)cc2Cl)cc2cnc(Nc3ccc(OCCN4C=C4)cc3)nc21",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.85,
+          "immediate": 0.6470588235294118,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(F)cccc2Cl)cc2cnc(Nc3ccc(OCCN4C=C4)cc3)nc21",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.85,
+          "immediate": 0.7692307692307693,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCCN4C=[IH2]4)cc3)nc21",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.85,
+          "immediate": 0.7936507936507936,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCCN4C=C4)cc3)nc21",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.85,
+          "immediate": 0.85,
+          "is_greedy_action": true
+        },
+        {
+          "state": "CC1=CN1CCOc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.85,
+          "immediate": 0.8225806451612904,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCCN4C(Cl)=C4Cl)cc3)nc21",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8333333333333334,
+          "immediate": 0.819672131147541,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCCN4C=C4N)cc3)nc21",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.85,
+          "immediate": 0.8095238095238095,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2ccccc2Cl)cc2cnc(Nc3ccc(OCCN4C=C4Cl)cc3)nc21",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.85,
+          "immediate": 0.6923076923076923,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2ccc(Cl)cc2Cl)cc2cnc(Nc3ccc(OCCN4C=C4Cl)cc3)nc21",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8333333333333334,
+          "immediate": 0.6323529411764706,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)c(N)c2cnc(Nc3ccc(OCCN4C=C4Cl)cc3)nc21",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8333333333333334,
+          "immediate": 0.6231884057971014,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)c(S)c2cnc(Nc3ccc(OCCN4C=C4Cl)cc3)nc21",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8333333333333334,
+          "immediate": 0.6,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCCN4C=C4Cl)cc3)nc21",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.8333333333333334,
+          "immediate": 0.8333333333333334,
+          "is_greedy_action": true
+        },
+        {
+          "state": "CC1=CN1CCOc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.8225806451612904,
+          "immediate": 0.8225806451612904,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CNCCOc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.819672131147541,
+          "immediate": 0.819672131147541,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCCN4C=C4N)cc3)nc21",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.8095238095238095,
+          "immediate": 0.8095238095238095,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2ccccc2Cl)cc2cnc(Nc3ccc(OCCN4C=C4)cc3)nc21",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.7076923076923077,
+          "immediate": 0.7076923076923077,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2ccc(Cl)cc2Cl)cc2cnc(Nc3ccc(OCCN4C=C4)cc3)nc21",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.6470588235294118,
+          "immediate": 0.6470588235294118,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c([PH4])cccc2Cl)cc2cnc(Nc3ccc(OCCN4C=C4)cc3)nc21",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.7575757575757576,
+          "immediate": 0.7575757575757576,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)c(P)c2cnc(Nc3ccc(OCCN4C=C4)cc3)nc21",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.6,
+          "immediate": 0.6,
+          "is_greedy_action": false
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "steps": 4,
+      "labels": 31,
+      "positives": 2,
+      "kernel_calls": 24,
+      "cache_hits": 22,
+      "teacher_cache_hits": 0,
+      "seconds": 473.1,
+      "label_rows": [
+        {
+          "state": "COC(=O)C1=C(c2ccc(Cl)c(C(F)(F)F)c2)CC2CCC1N2CNCN",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.8305084745762712,
+          "is_greedy_action": true
+        },
+        {
+          "state": "CONCN1C2CCC1C(C(=O)OC)=C(c1ccc(Cl)c(C(F)(F)F)c1)C2",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.8103448275862069,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CNCN1C2CCC1C(C(=O)OC)=C(c1ccc(Cl)c(C(F)(F)F)c1)C2",
+          "remaining": 3,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.8103448275862069,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COC(=O)C1=C(c2ccc(Cl)c(C(F)(F)F)c2)CC2CCC1N2CNCCN",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.85,
+          "immediate": 0.8032786885245902,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCNCN1C2CCC1C(C(=O)OC)=C(C1CCC(Cl)C(C(F)(F)F)C1)C2",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.3918918918918919,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCNCN1C(C)CCC1C(=Cc1ccc(Cl)c(C(F)(F)F)c1)C(=O)OC",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.3670886075949367,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCNCN1C2CCC1(I)C(C(=O)OC)=C(c1ccc(Cl)c(C(F)(F)F)c1)C2",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.5205479452054794,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COC(=O)C1=C(c2ccc(Cl)c(C(F)(F)F)c2)CC2CCC1N2C[IH]CN",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.847457627118644,
+          "is_greedy_action": true
+        },
+        {
+          "state": "COC(=O)C1=C(c2ccc(Cl)c(C(F)(F)F)c2)CC2CCC1N2COCN",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.8305084745762712,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COC(=O)C1=C(c2ccc(Cl)c(C(F)(F)F)c2)CC2CCC1N2CSCN",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.8305084745762712,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COC(=O)C1=C(c2ccc(Cl)c(C(F)(F)F)c2)CC2CCC1N2CCCN",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.8305084745762712,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COC(=O)C1=C(C2CCC(Cl)C(C(F)(F)F)C2)CC2CCC1N2CNCN",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.4246575342465753,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CNCN1C2CCC1C(C(=O)OC)=C(c1ccc(Cl)c(C(F)(F)F)c1)C2",
+          "remaining": 2,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.8103448275862069,
+          "is_greedy_action": false
+        },
+        {
+          "state": "NCNCN1C2CCC13COC(=O)C2=C(c1ccc(Cl)c(C(F)(F)F)c1)C3",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.3875,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COC(=O)C1=C(c2cc3c(Cl)c(C(F)(F)F)c2-3)CC2CCC1N2CNCN",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.5211267605633803,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COC(=O)C1=C(c2ccc(Cl)c(C(F)(F)F)c2)CC2CCC1N2CCCN",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.8305084745762712,
+          "is_greedy_action": true
+        },
+        {
+          "state": "COC(=O)C1=C(c2ccc(Cl)c(C(F)(F)F)c2)CC2CCC1N2CNCN",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.8305084745762712,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COC(=O)C1=C(c2ccc(Cl)c(C(F)(F)F)c2)CC2CCC1N2C[PH3]CN",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.8305084745762712,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COC(=O)C1=C(c2ccc(Cl)c(C(F)(F)F)c2)CC2CCC1N2CSCN",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.8305084745762712,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COC(=O)C1=C(C2CCC(Cl)C(C(F)(F)F)C2)CC2CCC1N2C[IH]CN",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.43243243243243246,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COC(=O)C1=C(c2ccc(Cl)c(C(F)(F)F)c2)CC2CCC1N2C[IH]C#N",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.7741935483870968,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COC(=O)C1=C(c2cc(C(F)(F)F)c(Cl)cc2[SH3])CC2CCC1N2C[IH]CN",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.6086956521739131,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COC(=O)C1=C(c2ccc([IH4])c(C(F)(F)F)c2)CC2CCC1N2C[IH]CN",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.676923076923077,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COC(=O)C1=C(c2ccc(Cl)c(C(F)(F)F)c2)CC2CCC1N2C[IH]CN",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.847457627118644,
+          "immediate": 0.847457627118644,
+          "is_greedy_action": true
+        },
+        {
+          "state": "COC(=O)C1=C(c2ccc(Cl)c(C(F)(F)F)c2)CC2CCC1N2CC(=O)CN",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.8448275862068966,
+          "immediate": 0.8448275862068966,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COC(=O)C1=C(c2ccc(Cl)c(C(F)(F)F)c2)CC2CCC1N2CC(=P)CN",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.8448275862068966,
+          "immediate": 0.8448275862068966,
+          "is_greedy_action": false
+        },
+        {
+          "state": "C=C(CN)CN1C2CCC1C(C(=O)OC)=C(c1ccc(Cl)c(C(F)(F)F)c1)C2",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.8305084745762712,
+          "immediate": 0.8305084745762712,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCCN1C2CCC1C(C(=O)OC)=C(c1ccc(Cl)c(C(F)(F)F)c1)C2",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.8103448275862069,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CNCCCN1C2CCC1C(C(=O)OC)=C(c1ccc(Cl)c(C(F)(F)F)c1)C2",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.7580645161290323,
+          "immediate": 0.7580645161290323,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COC(=O)C1=C2CC3CCC1N3CCCNc1cc(Cl)c(C(F)(F)F)cc12",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.4794520547945205,
+          "immediate": 0.4794520547945205,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COC(=O)C1=C(c2ccc(Cl)c(C(F)(F)F)c2)CC2CCC1N2CCC=N",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.7580645161290323,
+          "immediate": 0.7580645161290323,
+          "is_greedy_action": false
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "steps": 5,
+      "labels": 28,
+      "positives": 9,
+      "kernel_calls": 41,
+      "cache_hits": 25,
+      "teacher_cache_hits": 0,
+      "seconds": 858.0,
+      "label_rows": [
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cc(CC=O)cc2Cl)cc2cnc(Nc3ccc(O)cc3)nc21",
+          "remaining": 4,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.7586206896551724,
+          "is_greedy_action": true
+        },
+        {
+          "state": "CCOc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 4,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.7543859649122807,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCCO)cc3)nc21",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8333333333333334,
+          "immediate": 0.7457627118644068,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(NCC=O)cc3)nc21",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8461538461538461,
+          "immediate": 0.7413793103448276,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCC(=O)S)cc3)nc21",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8181818181818182,
+          "immediate": 0.7333333333333333,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2c3nc(nc21)Nc1ccc(cc1)OCC3=O",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8301886792452831,
+          "immediate": 0.3698630136986301,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCc1cc(Cl)c(-c2cc3cnc(Nc4ccc(O)cc4)nc3n(C)c2=O)c(Cl)c1",
+          "remaining": 3,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.8,
+          "is_greedy_action": true
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cc(NC=O)cc2Cl)cc2cnc(Nc3ccc(O)cc3)nc21",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8181818181818182,
+          "immediate": 0.7719298245614035,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cc(PC=O)cc2Cl)cc2cnc(Nc3ccc(O)cc3)nc21",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8301886792452831,
+          "immediate": 0.7719298245614035,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cc(C(=P)C=O)cc2Cl)cc2cnc(Nc3ccc(O)cc3)nc21",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8035714285714286,
+          "immediate": 0.7586206896551724,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cc(CC=O)cc2Cl)cc2cnc(Nc3ccccc3)nc21",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8301886792452831,
+          "immediate": 0.639344262295082,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cc(CC=O)cc2Cl)c(N)c2cnc(Nc3ccc(O)cc3)nc21",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8301886792452831,
+          "immediate": 0.5294117647058824,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Bn1c(=O)c(-c2c(Cl)cc(CC=O)cc2Cl)cc2cnc(Nc3ccc(O)cc3)nc21",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8301886792452831,
+          "immediate": 0.59375,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cc1cc(Cl)c(-c2cc3cnc(Nc4ccc(O)cc4)nc3n(C)c2=O)c(Cl)c1",
+          "remaining": 2,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.8301886792452831,
+          "is_greedy_action": true
+        },
+        {
+          "state": "CNc1cc(Cl)c(-c2cc3cnc(Nc4ccc(O)cc4)nc3n(C)c2=O)c(Cl)c1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8181818181818182,
+          "immediate": 0.8148148148148148,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CPc1cc(Cl)c(-c2cc3cnc(Nc4ccc(O)cc4)nc3n(C)c2=O)c(Cl)c1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8301886792452831,
+          "immediate": 0.8148148148148148,
+          "is_greedy_action": false
+        },
+        {
+          "state": "C#Cc1cc(Cl)c(-c2cc3cnc(Nc4ccc(O)cc4)nc3n(C)c2=O)c(Cl)c1",
+          "remaining": 2,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.8035714285714286,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCc1cc(Cl)c(-c2cc3cnc(Nc4ccccc4)nc3n(C)c2=O)c(Cl)c1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8301886792452831,
+          "immediate": 0.6896551724137931,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCc1cc(Cl)c(-c2cc3cnc(Nc4ccc(O)cc4)nc3n(CN)c2=O)c(Cl)c1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8301886792452831,
+          "immediate": 0.6190476190476191,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCc1cc(Cl)c(-c2cc3cnc(Nc4ccc(O)cc4)nc3n(C)c2=O)c(Cl)c1[PH4]",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8301886792452831,
+          "immediate": 0.7049180327868853,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(O)cc3)nc21",
+          "remaining": 1,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 1.0,
+          "is_greedy_action": true
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cc(O)cc2Cl)cc2cnc(Nc3ccc(O)cc3)nc21",
+          "remaining": 1,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.8627450980392157,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cc(Cl)cc2Cl)cc2cnc(Nc3ccc(O)cc3)nc21",
+          "remaining": 1,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.8627450980392157,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cc([SH3])cc2Cl)cc2cnc(Nc3ccc(O)cc3)nc21",
+          "remaining": 1,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.8301886792452831,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cc1cc(Cl)c(-c2cc3cnc(Nc4ccccc4)nc3n(C)c2=O)c(Cl)c1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8301886792452831,
+          "immediate": 0.6964285714285714,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COc1ccc(Nc2ncc3cc(-c4c(Cl)cc(C)cc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8301886792452831,
+          "immediate": 0.65,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cc1cc(Cl)c(-c2cc3c(C)nc(Nc4ccc(O)cc4)nc3[nH]c2=O)c(Cl)c1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8301886792452831,
+          "immediate": 0.40298507462686567,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cc1cc(F)c(-c2cc3cnc(Nc4ccc(O)cc4)nc3n(C)c2=O)c(Cl)c1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8703703703703703,
+          "immediate": 0.7288135593220338,
+          "is_greedy_action": false
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "steps": 5,
+      "labels": 39,
+      "positives": 0,
+      "kernel_calls": 22,
+      "cache_hits": 59,
+      "teacher_cache_hits": 0,
+      "seconds": 477.4,
+      "label_rows": [
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(ON)cc3)nc21",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.8103448275862069,
+          "is_greedy_action": true
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(O[IH4])cc3)nc21",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7966101694915254,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.7796610169491526,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCl)cc3)nc21",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7796610169491526,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccccc3)nc21",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7241379310344828,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CNC(=O)C(=Cc1cnc(Nc2ccc(O)cc2)nc1)c1c(Cl)cccc1Cl",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.2987012987012987,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CN1C(=N)C(=CN=CNc2ccc(O)cc2)C=C(c2c(Cl)cccc2Cl)C1=O",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.22093023255813954,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(O[IH4])cc3)nc21",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7966101694915254,
+          "is_greedy_action": true
+        },
+        {
+          "state": "COc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.7796610169491526,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(CN)cc3)nc21",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7796610169491526,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCl)cc3)nc21",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7796610169491526,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(O)cc3)nc21",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7166666666666667,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3cccc(ON)c3)nc21",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7096774193548387,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2c(N)nc(Nc3ccc(O)cc3)nc21",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.5294117647058824,
+          "is_greedy_action": false
+        },
+        {
+          "state": "NOc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(CS)c3n2)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.6515151515151515,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(ON)cc3)nc21",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.8103448275862069,
+          "is_greedy_action": true
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCl)cc3)nc21",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7796610169491526,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.7796610169491526,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OF)cc3)nc21",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7666666666666667,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(O)cc3)nc21",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7166666666666667,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3cccc(O[IH4])c3)nc21",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.6984126984126984,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(N(N)c3ccc(O[IH4])cc3)nc21",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.5428571428571428,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc([SH2][IH4])cc3)nc21",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.6935483870967742,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(O[IH4])cc3)nc21",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7966101694915254,
+          "is_greedy_action": true
+        },
+        {
+          "state": "COc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.7796610169491526,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(CN)cc3)nc21",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7796610169491526,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCl)cc3)nc21",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7796610169491526,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(O)cc3)nc21",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7166666666666667,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3cccc(ON)c3)nc21",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7096774193548387,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)c(F)c2cnc(Nc3ccc(ON)cc3)nc21",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.5735294117647058,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(ON)c(P)c3)nc21",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.6666666666666666,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(ON)cc3)nc21",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.8103448275862069,
+          "is_greedy_action": true
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCl)cc3)nc21",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.7796610169491526,
+          "immediate": 0.7796610169491526,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.7796610169491526,
+          "immediate": 0.7796610169491526,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OF)cc3)nc21",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.7666666666666667,
+          "immediate": 0.7666666666666667,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(O)cc3)nc21",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.7166666666666667,
+          "immediate": 0.7166666666666667,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3cccc(O[IH4])c3)nc21",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.6984126984126984,
+          "immediate": 0.6984126984126984,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CN(c1ccc(O[IH4])cc1)c1ncc2cc(-c3c(Cl)cccc3Cl)c(=O)[nH]c2n1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.37662337662337664,
+          "immediate": 0.37662337662337664,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cc1cc(Cl)c(-c2cc3cnc(Nc4ccc(O[IH4])cc4)nc3n(C)c2=O)c(Cl)c1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.671875,
+          "immediate": 0.671875,
+          "is_greedy_action": false
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "steps": 6,
+      "labels": 30,
+      "positives": 29,
+      "kernel_calls": 31,
+      "cache_hits": 48,
+      "teacher_cache_hits": 0,
+      "seconds": 768.2,
+      "label_rows": [
+        {
+          "state": "CCOc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 5,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.7166666666666667,
+          "is_greedy_action": true
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3cccc(OCC=O)c3)nc21",
+          "remaining": 5,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.6984126984126984,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(CCC=O)cc3)nc21",
+          "remaining": 5,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.6825396825396826,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(NCC=O)cc3)nc21",
+          "remaining": 5,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.6774193548387096,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCCO)cc3)nc21",
+          "remaining": 5,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.65625,
+          "is_greedy_action": false
+        },
+        {
+          "state": "O=CCOc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n([SH3])c3n2)cc1",
+          "remaining": 5,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.5142857142857142,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)c3cc-3c2Cl)cc2cnc(Nc3ccc(OCC=O)cc3)nc21",
+          "remaining": 5,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.5217391304347826,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCOc1cccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)c1",
+          "remaining": 4,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.7627118644067796,
+          "is_greedy_action": true
+        },
+        {
+          "state": "CCc1cc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)ccc1O",
+          "remaining": 4,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.75,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCCc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 4,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.7457627118644068,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCNc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 4,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.7413793103448276,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 4,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.6833333333333333,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCOc1ccc(Nc2ncc3cc(-c4ccccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 4,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.5846153846153846,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCOc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(Cl)c3n2)cc1",
+          "remaining": 4,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.5846153846153846,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCOc1ccc(Nc2ncc3cc(-c4c(Cl)cc(C)cc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 4,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.6,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCCc1cccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)c1",
+          "remaining": 3,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.8571428571428571,
+          "is_greedy_action": true
+        },
+        {
+          "state": "CCc1cc(O)cc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)c1",
+          "remaining": 3,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.7966101694915254,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCNc1cccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)c1",
+          "remaining": 3,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.7894736842105263,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCc1cc(Cl)c(-c2cc3cnc(Nc4cccc(O)c4)nc3n(C)c2=O)c(Cl)c1",
+          "remaining": 3,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.7666666666666667,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCOc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 3,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.7166666666666667,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COc1cccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)c1",
+          "remaining": 3,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.7288135593220338,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCOc1cccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C#[PH2])c3n2)c1",
+          "remaining": 3,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.6119402985074627,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCOc1cccc2c1-c1c(-c3c(Cl)cccc3Cl)c(=O)n(C)c3nc(ncc13)-[nH]-2",
+          "remaining": 3,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.3466666666666667,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCc1cccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)c1",
+          "remaining": 2,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 1.0,
+          "is_greedy_action": true
+        },
+        {
+          "state": "CCc1cccc(Nc2ncc3cc(-c4c(Cl)cc(C)cc4Cl)c(=O)n(C)c3n2)c1",
+          "remaining": 2,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.875,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCc1cccc(Nc2ncc3cc(-c4c(Cl)ccc(C)c4Cl)c(=O)n(C)c3n2)c1",
+          "remaining": 2,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.8305084745762712,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCCCc1cccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)c1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.9074074074074074,
+          "immediate": 0.8275862068965517,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCCc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 2,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.7457627118644068,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCC([PH4])c1cccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)c1",
+          "remaining": 2,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.7258064516129032,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCCc1cccc(N2c3cc(Cl)c(c(Cl)c3)-c3cc4cnc2nc4n(C)c3=O)c1",
+          "remaining": 2,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.5072463768115942,
+          "is_greedy_action": false
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "steps": 6,
+      "labels": 38,
+      "positives": 8,
+      "kernel_calls": 37,
+      "cache_hits": 72,
+      "teacher_cache_hits": 0,
+      "seconds": 763.4,
+      "label_rows": [
+        {
+          "state": "CCc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7213114754098361,
+          "is_greedy_action": true
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3cccc(CCN)c3)nc21",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.703125,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3cccc(CN)c3)nc21",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.6984126984126984,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COc1cccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)c1",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.6825396825396826,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cc1cccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)c1",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.6612903225806451,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCc1cccc(N([IH2])c2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)c1",
+          "remaining": 5,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.4861111111111111,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cc1cc(C)cc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)c1",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.6721311475409836,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.7796610169491526,
+          "is_greedy_action": true
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(CN)cc3)nc21",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7796610169491526,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(CCN)cc3)nc21",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.7704918032786885,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CNc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.7288135593220338,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7288135593220338,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCc1ccc(Nc2ncc3cc(C4=C(Cl)C=[SH3]C=C4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.4931506849315068,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CC(C)c1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.7049180327868853,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCN)cc3)nc21",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.8620689655172413,
+          "is_greedy_action": true
+        },
+        {
+          "state": "CCOc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 3,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.8135593220338984,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCCl)cc3)nc21",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.8135593220338984,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(ON)cc3)nc21",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8103448275862069,
+          "immediate": 0.8103448275862069,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COc1ccc(Nc2ncc3cc(-c4ccccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.640625,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COc1cccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)c1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.6825396825396826,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COc1ccc(NC=NC=C2C=C(c3c(Cl)cccc3Cl)C(=O)N(C)C2=N)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.25882352941176473,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCOc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)[nH]c3n2)cc1",
+          "remaining": 3,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.5522388059701493,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCOc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 2,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.8135593220338984,
+          "is_greedy_action": true
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCCl)cc3)nc21",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.8135593220338984,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OON)cc3)nc21",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.8135593220338984,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCNN)cc3)nc21",
+          "remaining": 2,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.8032786885245902,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.7796610169491526,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CNCOc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.7868852459016393,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc([SH2]c3ccc(OCN)cc3)nc21",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.5882352941176471,
+          "is_greedy_action": false
+        },
+        {
+          "state": "C=NCOc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.7619047619047619,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCCN)cc3)nc21",
+          "remaining": 1,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 1.0,
+          "is_greedy_action": true
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCCF)cc3)nc21",
+          "remaining": 1,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.864406779661017,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCN)cc3)nc21",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.8620689655172413,
+          "is_greedy_action": false
+        },
+        {
+          "state": "Cn1c(=O)c(-c2c(Cl)cccc2Cl)cc2cnc(Nc3ccc(OCCCl)cc3)nc21",
+          "remaining": 1,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.847457627118644,
+          "is_greedy_action": false
+        },
+        {
+          "state": "COc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.7796610169491526,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCOc1ccc(Nc2ncc3cc(-c4ccccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8333333333333334,
+          "immediate": 0.671875,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CC([PH4])Oc1ccc(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)cc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8333333333333334,
+          "immediate": 0.71875,
+          "is_greedy_action": false
+        },
+        {
+          "state": "CCOC1CCC(Nc2ncc3cc(-c4c(Cl)cccc4Cl)c(=O)n(C)c3n2)CC1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8135593220338984,
+          "immediate": 0.5492957746478874,
+          "is_greedy_action": false
+        }
+      ]
+    }
+  ]
+}
