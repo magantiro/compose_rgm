@@ -223,6 +223,64 @@ class DRD2Oracle:
         first, second = _binary_probability_coupling(sigmoid)
         return second if self.platt_orientation == "flipped" else first
 
+    def margins(self, fingerprints: np.ndarray) -> np.ndarray:
+        """logit P(active) -- the SVM margin, increasing with activity.
+
+        With the flipped orientation P(active) = sigmoid(A d + B) exactly, so
+        ``A d + B`` IS the log-odds and is strictly monotone in the probability:
+        ranking by margin and ranking by probability are the SAME ranking, so a
+        greedy controller behaves identically under either.
+
+        The margin exists for numerical RESOLUTION, not for a different ordering.
+        Across the benchmark's own source molecules the probability spans
+        0.00003 to 0.048 while the margin spans about 1.2, so a short rollout
+        into the low-activity regime can register progress that the probability
+        cannot.
+
+        Monotonicity does NOT survive taking expectations: E[max margin] and
+        E[max probability] are different objectives and may order candidates
+        differently.  The margin is therefore a mechanism-detection signal only,
+        never a restatement of the benchmark outcome, which stays P(active)
+        against the 0.5 threshold.
+        """
+
+        return self.prob_a * self.decision_values(fingerprints) + self.prob_b
+
+    def _map_many(self, smiles: Sequence[str], reduce, fill: float,
+                  batch: int) -> np.ndarray:
+        smiles = list(smiles)
+        out = np.full(len(smiles), fill, dtype=np.float64)
+        index: list[int] = []
+        rows: list[np.ndarray] = []
+
+        def flush() -> None:
+            if not rows:
+                return
+            out[index] = reduce(np.vstack(rows))
+            index.clear()
+            rows.clear()
+
+        for position, item in enumerate(smiles):
+            row = oracle_fingerprint(item)
+            if row is None:
+                continue
+            index.append(position)
+            rows.append(row)
+            if len(rows) >= batch:
+                flush()
+        flush()
+        return out
+
+    def margin_many(self, smiles: Sequence[str], *, batch: int = 512) -> np.ndarray:
+        """Margins per SMILES; unparseable molecules take -inf, not 0.0.
+
+        Zero is a perfectly good margin -- it is exactly P = 0.5, the success
+        threshold -- so an unparseable molecule must not be given one. That
+        would make a non-molecule look like a solved target.
+        """
+
+        return self._map_many(smiles, self.margins, -np.inf, batch)
+
     def score_many(self, smiles: Sequence[str],
                    *, batch: int = 512) -> np.ndarray:
         """P(active) per SMILES; unparseable molecules score 0.0.

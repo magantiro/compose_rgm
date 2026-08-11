@@ -34,14 +34,42 @@ h is estimated from few rollouts, so argmax over K noisy estimates is biased
 upward -- it would inflate both disagreement and regret, i.e. bias the result
 toward "planning helps", which is the dangerous direction.  So selection and
 evaluation use INDEPENDENT rollout samples: MC-best is chosen on one sample and
-the reported regret is computed on a fresh one.  Immediate value g needs no such
-care; it is exact.
+the reported regret is computed on a fresh one.  Immediate value needs no such
+care; it is exact for every legal successor.
 
-The candidate subset is drawn from the reference law, NOT from the top of the
-g-ranking.  Preselecting by g would make a sacrificial edit -- low g, high h --
-impossible to observe by construction.  Because only K of ~600 successors are
-evaluated, the measured MC-best is a lower bound on the true one, so any
-discordance found here understates the real planning signal.
+WHAT THIS PROBE IS NOT
+----------------------
+Planning is scored in MARGIN units -- logit P(active), the SVM margin.  The
+margin is strictly monotone with the benchmark probability, so a greedy
+controller makes identical choices under either; what it adds is resolution,
+since P(active) spans 0.00003 to 0.048 across the benchmark's own sources and a
+few edits through that region move it by less than rollout noise.
+
+Monotonicity does NOT survive taking expectations: E[max margin] and
+E[max P(active)] are different objectives and can rank candidates differently.
+So this is a MECHANISM-DETECTION probe -- "is there evidence that future
+reachability can change decisions?" -- and nothing here is a benchmark result.
+Demonstrating the real thing on benchmark outcomes (P(active), success at 0.5,
+oracle cost) is Experiment C's job.
+
+DESIGN POINTS THAT DECIDE WHETHER THE ANSWER MEANS ANYTHING
+-----------------------------------------------------------
+Sources are drawn at RANDOM from the eligible pool at a fixed seed.  Taking the
+head of a sorted SMILES list clusters by leading element and returns a
+chemically unrepresentative sample.
+
+The candidate pool is three strata -- top margin, top reference-law probability,
+and random reference-law draws.  Comparing greedy against a handful of purely
+random draws out of ~500 legal successors made MC-best = greedy-best almost by
+construction, since greedy's margin is the maximum over ALL successors and a
+random draw's short rollout essentially never overtakes it.  The strata give
+both obvious high-reward edits and plausible "sacrifice now, win later" edits a
+chance to be examined.  Only ~8 of ~500 successors are evaluated, so measured
+discordance still UNDERSTATES the real signal.
+
+The kernel is NOT given a visited-set.  Masking revisited states would redefine
+R_theta, and the reference law has to stay the law being studied; revisits are
+recorded and dropped from the statistics instead.
 
 CPU ONLY.  Executor and oracle work; no GPU.
 """
@@ -89,14 +117,32 @@ TARGET_FLOOR = 0.5
 SIMILARITY_FLOOR = 0.4
 #: Productive edits available.
 BUDGET = 6
-#: Steps of rollout beyond a candidate when estimating its future value.
-LOOKAHEAD_DEPTH = 2
-#: Successors given a Monte-Carlo value estimate at each decision state.
-CANDIDATES = 5
+#: Steps of rollout beyond a candidate when estimating its future value.  A
+#: six-edit task probed with two-step planning is too easy to falsely call
+#: "no planning signal", so the horizon is half the budget.
+LOOKAHEAD_DEPTH = 3
+#: Heavy-atom band for sources, matching the benchmark's own DRD2 source set
+#: (median 24, range 13-41).  Outcome-independent: it looks at molecule size,
+#: never at reachability or reward.  Below this band a Tanimoto >= 0.4 mask
+#: leaves only a handful of legal edits.
+MIN_HEAVY_ATOMS = 13
+MAX_HEAVY_ATOMS = 41
+
+# ---- candidate pool ------------------------------------------------------
+# Three strata, unioned and deduplicated.  Greedy's own pick is always present
+# (it heads the top-margin stratum), so the regret comparison is never against
+# an action greedy would not have taken.
+#: Best immediate margin -- where a "sacrifice among plausible actions" lives.
+CANDIDATES_TOP_MARGIN = 4
+#: Highest reference-law probability -- what R_theta itself considers likely.
+CANDIDATES_TOP_REFERENCE = 2
+#: Drawn from the reference law -- the only stratum that can reach the tail.
+CANDIDATES_RANDOM = 2
+
 #: Rollouts per candidate for SELECTING the MC-best action.
 ROLLOUTS_SELECT = 2
 #: Fresh, independent rollouts for SCORING the selected action (winner's curse).
-ROLLOUTS_EVAL = 4
+ROLLOUTS_EVAL = 3
 #: Kernel time point, matching the training and partition conventions.
 TIME_POINT = 0.5
 
@@ -105,19 +151,24 @@ TIME_POINT = 0.5
     image=image, cpu=8.0, memory=64 * 1024, timeout=60 * 60,
     max_containers=1, volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
-def select_sources(wanted: int = 16, scan_limit: int = 4000) -> dict[str, Any]:
+def select_sources(wanted: int = 12, scan_limit: int = 12000,
+                   selection_seed: int = 20260811) -> dict[str, Any]:
     """Choose probe sources on OUTCOME-INDEPENDENT criteria only.
 
     Representable by COMPOSE, genuinely held out, below the DRD2 source ceiling,
-    and not already solved.  Deliberately NO rollout-based reachability screen:
-    removing sources that look hard under exploratory rollouts would discard
-    exactly the instances where planning is supposed to pay, and "unsolvable in
-    six edits" is a scientifically meaningful outcome rather than grounds for
-    exclusion.
+    not already solved, and within the benchmark's own heavy-atom band.  Then a
+    random fixed-seed draw.
+
+    Deliberately NO rollout-based reachability screen: removing sources that
+    look hard under exploratory rollouts would discard exactly the instances
+    where planning is supposed to pay, and "unsolvable in six edits" is a
+    scientifically meaningful outcome rather than grounds for exclusion.
     """
 
     import gzip
     import sys
+
+    import numpy as np
 
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
     from compose_v4.data.corpus_training_library import load_corpus_training_library
@@ -158,47 +209,69 @@ def select_sources(wanted: int = 16, scan_limit: int = 4000) -> dict[str, Any]:
     # count its own padding assigned to this source.  Resolving it here means
     # they never load the corpus at all, which is most of their memory and most
     # of their startup.
-    # Eligibility is counted over the WHOLE scan; only state resolution stops
-    # early. Reporting the collected count as though it were the eligible count
-    # would understate the pool by whatever the cap truncated.
-    eligible_total = int((scores < SOURCE_CEILING).sum())
-    already_solved = int((scores >= TARGET_FLOOR).sum())
-    collection_cap = max(wanted * 4, wanted)
+    # Heavy atoms come from RDKit, not from counting slots: the state tensor is
+    # padded and its NULL slots are not distinguishable by sign, so
+    # `(atom_types >= 0).sum()` returns the slot count for every molecule alike.
+    from rdkit import Chem, RDLogger
+    RDLogger.DisableLog("rdApp.*")
 
-    eligible = []
-    for key, score in zip(candidates, scores):
-        if score >= SOURCE_CEILING:
-            continue
+    def heavy_atoms(smiles: str) -> int:
+        mol = Chem.MolFromSmiles(smiles)
+        return -1 if mol is None else int(mol.GetNumHeavyAtoms())
+
+    sizes = np.array([heavy_atoms(k) for k in candidates])
+    below_ceiling = scores < SOURCE_CEILING
+    in_band = (sizes >= MIN_HEAVY_ATOMS) & (sizes <= MAX_HEAVY_ATOMS)
+    already_solved = int((scores >= TARGET_FLOOR).sum())
+    keep = np.flatnonzero(below_ceiling & in_band)
+    print(f"  DRD2 < {SOURCE_CEILING}: {int(below_ceiling.sum()):,}; "
+          f"already solved: {already_solved}; "
+          f"in {MIN_HEAVY_ATOMS}-{MAX_HEAVY_ATOMS} heavy atoms: "
+          f"{int(in_band.sum()):,}; eligible on both: {len(keep):,}", flush=True)
+    if len(keep) == 0:
+        raise RuntimeError("no eligible sources after the preregistered filters")
+
+    # Random, fixed-seed draw.  Taking the head of a sorted SMILES list is not a
+    # neutral sample: SMILES order tracks leading element, so it returns an
+    # alphabetically clustered and chemically unrepresentative set.
+    order = np.random.default_rng(selection_seed).permutation(len(keep))
+    drawn = [int(keep[i]) for i in order[:wanted]]
+
+    chosen = []
+    for position in drawn:
+        key = candidates[position]
         entry_id = representative[key]
         state, _f, _e = library.inputs_for([entry_id])
-        eligible.append({
+        chosen.append({
             "source": key,
             "entry_id": entry_id,
-            "drd2": float(score),
+            "drd2": float(scores[position]),
             "slots": int(state[0].atom_types.shape[0]),
-            "heavy_atoms": int((state[0].atom_types >= 0).sum()),
+            "heavy_atoms": int(sizes[position]),
         })
-        if len(eligible) >= collection_cap:
-            break
-    print(f"  eligible (DRD2 < {SOURCE_CEILING}): {eligible_total:,} of "
-          f"{len(candidates):,} scanned; already solved: {already_solved}; "
-          f"states resolved for {len(eligible):,} (cap {collection_cap})",
-          flush=True)
-
-    chosen = eligible[:wanted]
+    eligible_total = len(keep)
+    print(f"  drew {len(chosen)} sources at seed {selection_seed}; "
+          f"heavy atoms {min(c['heavy_atoms'] for c in chosen)}-"
+          f"{max(c['heavy_atoms'] for c in chosen)}", flush=True)
     payload = {
         "schema": "compose.editing_v2.c0_source_selection",
         "criteria": {
             "source_ceiling": SOURCE_CEILING, "target_floor": TARGET_FLOOR,
+            "min_heavy_atoms": MIN_HEAVY_ATOMS, "max_heavy_atoms": MAX_HEAVY_ATOMS,
             "outcome_independent": True,
+            "selection_seed": selection_seed,
             "note": "no rollout-based reachability screen; unsolvable sources are "
-                    "reported, not excluded",
+                    "reported, not excluded. The heavy-atom band matches the "
+                    "benchmark's own DRD2 source set and looks only at molecule "
+                    "size. Sources are drawn at random from the eligible pool: "
+                    "taking the head of a sorted SMILES list clusters by leading "
+                    "element and is not a neutral sample.",
         },
         "reserve_sources": len(representative),
         "scanned": len(candidates),
         "eligible": eligible_total,
-        "states_resolved": len(eligible),
-        "collection_cap": collection_cap,
+        "below_ceiling": int(below_ceiling.sum()),
+        "in_heavy_atom_band": int(in_band.sum()),
         "already_solved": already_solved,
         "selected": chosen,
     }
@@ -304,15 +377,28 @@ def probe_source(task: dict[str, Any]) -> dict[str, Any]:
             return int(rng.integers(len(probabilities)))
         return int(rng.choice(len(probabilities), p=probabilities / total))
 
+    margin_cache: dict[str, float] = {}
+
+    def margin(key: str) -> float:
+        if key not in margin_cache:
+            margin_cache[key] = float(oracle.margin_many([key])[0])
+        return margin_cache[key]
+
     def rollout_value(key: str, depth: int) -> float:
-        """max DRD2 along a `depth`-step masked-reference rollout starting at `key`.
+        """Best MARGIN along a `depth`-step masked-reference rollout from `key`.
 
         The task is to REACH an active molecule within the budget, not to be
-        active exactly at the horizon, so the value of a path is the best
-        molecule on it rather than its endpoint.
+        active exactly at the horizon, so a path is worth its best molecule
+        rather than its endpoint.
+
+        The margin, not the probability, is what a rollout accumulates: P(active)
+        spans 0.00003 to 0.048 across the benchmark's own sources, so a few edits
+        through that region move it by amounts that vanish against rollout noise,
+        and every candidate ties.  The margin is the same ordering with usable
+        resolution.
         """
 
-        best = float(oracle.score(key))
+        best = margin(key)
         current_key = key
         for _ in range(depth):
             state = rebuild(current_key)
@@ -324,18 +410,19 @@ def probe_source(task: dict[str, Any]) -> dict[str, Any]:
             keys = [r[0] for r in rows]
             probabilities = np.array([r[1] for r in rows], dtype=np.float64)
             current_key = keys[sample_index(probabilities)]
-            best = max(best, float(oracle.score(current_key)))
+            best = max(best, margin(current_key))
         return best
 
     def estimate_value(key: str, depth: int, rollouts: int) -> float:
         if depth <= 0:
-            return float(oracle.score(key))
+            return margin(key)
         return float(np.mean([rollout_value(key, depth) for _ in range(rollouts)]))
 
     decisions: list[dict[str, Any]] = []
     current_key = source_key
     current_state = start_state
     trajectory = [source_key]
+    seen_states: set[str] = set()
     solved_at = None
 
     for step in range(BUDGET):
@@ -347,23 +434,38 @@ def probe_source(task: dict[str, Any]) -> dict[str, Any]:
 
         keys = [r[0] for r in rows]
         reference = np.array([r[1] for r in rows], dtype=np.float64)
-        immediate = oracle.score_many(keys)          # exact, every legal successor
+        # Exact for every legal successor -- no estimation anywhere in `immediate`.
+        immediate = oracle.margin_many(keys)
+        for key, value in zip(keys, immediate):
+            margin_cache.setdefault(key, float(value))
         greedy_index = int(np.argmax(immediate))
 
-        # Candidate subset: greedy's choice always, plus draws from the reference
-        # law.  Never top-g preselection -- that would make a sacrificial edit
-        # unobservable.
-        pool = [i for i in range(len(keys)) if i != greedy_index]
-        weights = reference[pool]
-        take = min(CANDIDATES - 1, len(pool))
-        if take > 0 and weights.sum() > 0:
-            drawn = rng.choice(pool, size=take, replace=False,
-                               p=weights / weights.sum())
-        elif take > 0:
-            drawn = rng.choice(pool, size=take, replace=False)
-        else:
-            drawn = np.array([], dtype=int)
-        candidate_indices = [greedy_index] + [int(i) for i in drawn]
+        # Candidate pool, three strata, unioned and deduplicated:
+        #   top margin     -- where a sacrifice AMONG PLAUSIBLE ACTIONS lives
+        #   top reference  -- what R_theta itself considers likely
+        #   random draws   -- the only stratum that reaches the tail
+        # Greedy's pick heads the first stratum, so it is always evaluated.
+        # Comparing greedy against a handful of purely random draws out of ~500
+        # made MC-best = greedy-best almost by construction: greedy's margin is
+        # the maximum over ALL successors, which a random draw's short rollout
+        # essentially never overtakes.
+        picked: list[int] = []
+        for index in np.argsort(-immediate)[:CANDIDATES_TOP_MARGIN]:
+            picked.append(int(index))
+        for index in np.argsort(-reference)[:CANDIDATES_TOP_REFERENCE]:
+            if int(index) not in picked:
+                picked.append(int(index))
+        rest = [i for i in range(len(keys)) if i not in set(picked)]
+        if rest and CANDIDATES_RANDOM > 0:
+            weights = reference[rest]
+            take = min(CANDIDATES_RANDOM, len(rest))
+            if weights.sum() > 0:
+                drawn = rng.choice(rest, size=take, replace=False,
+                                   p=weights / weights.sum())
+            else:
+                drawn = rng.choice(rest, size=take, replace=False)
+            picked.extend(int(i) for i in drawn)
+        candidate_indices = picked
 
         depth = min(LOOKAHEAD_DEPTH, remaining - 1)
         selection = {i: estimate_value(keys[i], depth, ROLLOUTS_SELECT)
@@ -375,16 +477,27 @@ def probe_source(task: dict[str, Any]) -> dict[str, Any]:
         fresh_greedy = (fresh_mc if mc_index == greedy_index
                         else estimate_value(keys[greedy_index], depth, ROLLOUTS_EVAL))
 
+        # A revisited state is recorded but excluded from the statistics. The
+        # kernel is NOT given a visited-set: masking revisits would redefine
+        # R_theta, and the reference law has to stay the law being studied.
+        duplicate = current_key in seen_states
+        seen_states.add(current_key)
+
+        greedy_probability = float(oracle.score(keys[greedy_index]))
         decisions.append({
             "step": step,
             "remaining_budget": remaining,
             "lookahead_steps": depth,
             "state": current_key,
+            "duplicate_state": duplicate,
             "legal_successors": len(keys),
+            "candidates_evaluated": len(candidate_indices),
             "greedy_key": keys[greedy_index],
             "mc_key": keys[mc_index],
-            "greedy_immediate": float(immediate[greedy_index]),
-            "mc_immediate": float(immediate[mc_index]),
+            "greedy_immediate_margin": float(immediate[greedy_index]),
+            "mc_immediate_margin": float(immediate[mc_index]),
+            "greedy_probability": greedy_probability,
+            "mc_probability": float(oracle.score(keys[mc_index])),
             "greedy_value_selection": float(selection[greedy_index]),
             "mc_value_selection": float(selection[mc_index]),
             "greedy_value_fresh": float(fresh_greedy),
@@ -397,11 +510,13 @@ def probe_source(task: dict[str, Any]) -> dict[str, Any]:
                 mc_index != greedy_index
                 and immediate[mc_index] < immediate[greedy_index]
                 and fresh_mc > fresh_greedy),
-            "best_immediate_available": float(immediate.max()),
+            "best_immediate_margin": float(immediate.max()),
         })
-        print(f"  step {step}: {len(keys):4d} legal  g*={immediate.max():.4f}  "
+        print(f"  step {step}: {len(keys):4d} legal  {len(candidate_indices)} cand  "
+              f"margin*={immediate.max():+.3f} P={greedy_probability:.4f}  "
               f"disagree={mc_index != greedy_index}  "
-              f"regret={fresh_mc - fresh_greedy:+.4f}  "
+              f"regret={fresh_mc - fresh_greedy:+.4f}"
+              f"{'  [dup]' if duplicate else ''}  "
               f"({time.perf_counter()-started:.0f}s, {kernel_calls} kernel calls)",
               flush=True)
 
@@ -413,7 +528,10 @@ def probe_source(task: dict[str, Any]) -> dict[str, Any]:
             break
         current_state = nxt
         trajectory.append(current_key)
-        if immediate[greedy_index] >= TARGET_FLOOR and solved_at is None:
+        # Success is the BENCHMARK quantity -- P(active) against 0.5 -- not the
+        # margin used for planning. Comparing a margin to 0.5 would be comparing
+        # a log-odds to a probability.
+        if greedy_probability >= TARGET_FLOOR and solved_at is None:
             solved_at = step + 1
             break
 
@@ -427,8 +545,15 @@ def probe_source(task: dict[str, Any]) -> dict[str, Any]:
         "config": {
             "budget": BUDGET, "similarity_floor": SIMILARITY_FLOOR,
             "target_floor": TARGET_FLOOR, "lookahead_depth": LOOKAHEAD_DEPTH,
-            "candidates": CANDIDATES, "rollouts_select": ROLLOUTS_SELECT,
+            "candidates_top_margin": CANDIDATES_TOP_MARGIN,
+            "candidates_top_reference": CANDIDATES_TOP_REFERENCE,
+            "candidates_random": CANDIDATES_RANDOM,
+            "rollouts_select": ROLLOUTS_SELECT,
             "rollouts_eval": ROLLOUTS_EVAL, "time_point": TIME_POINT,
+            "planning_signal": "logit P(active) (SVM margin); monotone with the "
+                               "benchmark probability so greedy is unchanged, but "
+                               "with resolution in the low-activity regime",
+            "outcome_signal": "P(active) against 0.5, the benchmark quantity",
         },
         "greedy_trajectory": trajectory,
         "greedy_solved_at": solved_at,
@@ -448,7 +573,7 @@ def probe_source(task: dict[str, Any]) -> dict[str, Any]:
 
 
 @app.local_entrypoint()
-def main(sources: int = 16) -> None:
+def main(sources: int = 12) -> None:
     selection = select_sources.remote(wanted=sources)
     chosen = selection["selected"]
     print(f"\n{len(chosen)} sources selected from {selection['eligible']:,} eligible "
@@ -460,10 +585,16 @@ def main(sources: int = 16) -> None:
              for i, row in enumerate(chosen)]
     results = [r for r in probe_source.map(tasks) if r]
 
-    decisions = [d for r in results for d in r["decisions"]
-                 if d["lookahead_steps"] >= 1]
+    # A revisited state contributes nothing new and would double-count whatever
+    # it contributed the first time; the kernel was left untouched, so revisits
+    # are dropped HERE rather than prevented there.
+    everything = [d for r in results for d in r["decisions"]]
+    duplicates = sum(d["duplicate_state"] for d in everything)
+    decisions = [d for d in everything
+                 if d["lookahead_steps"] >= 1 and not d["duplicate_state"]]
     print(f"\n{len(decisions)} decision states with a non-trivial horizon "
-          f"(from {len(results)} sources)")
+          f"(from {len(results)} sources; {duplicates} revisited states dropped, "
+          f"{len(everything)} total)")
     if not decisions:
         raise SystemExit("no decision states with lookahead; nothing to report")
 
@@ -472,6 +603,7 @@ def main(sources: int = 16) -> None:
     regrets = [d["fresh_regret"] for d in decisions]
     positive = sum(1 for r in regrets if r > 0)
     mean_regret = sum(regrets) / len(regrets)
+    solved = sum(1 for r in results if r["greedy_solved_at"] is not None)
 
     print(f"\n  top-1 disagreement   {disagreements:4d} / {len(decisions)} "
           f"({disagreements/len(decisions):6.1%})")
@@ -479,42 +611,66 @@ def main(sources: int = 16) -> None:
           f"({sacrifices/len(decisions):6.1%})")
     print(f"  fresh regret > 0     {positive:4d} / {len(decisions)} "
           f"({positive/len(decisions):6.1%})")
-    print(f"  mean fresh regret    {mean_regret:+.5f}")
+    print(f"  mean fresh regret    {mean_regret:+.5f}  (margin units)")
+    print(f"  greedy solved        {solved} / {len(results)} sources "
+          f"(benchmark P >= {TARGET_FLOOR})")
     print(f"  total kernel calls   {sum(r['kernel_calls'] for r in results):,}")
 
-    # Self-calibrating null.  Among decisions where the MC action differs from
-    # greedy AND is immediately worse, "no planning signal" predicts the fresh
-    # regret is positive about half the time -- the fresh sample is independent
-    # of the one that selected the action, so under the null its sign is a coin
-    # flip.  A rate near 50% is noise however large the disagreement count is;
-    # a rate well above 50% is the phenomenon.
+    # PRIMARY EVIDENCE.  Among decisions where the MC action differs from greedy
+    # AND is immediately worse, "no planning signal" predicts the fresh regret is
+    # positive about half the time -- the evaluation sample is independent of the
+    # one that selected the action, so under the null its sign is a coin flip.
+    # A rate near 50% is noise however large the disagreement count is; a rate
+    # well above 50% is the phenomenon.
     sacrificial = [d for d in decisions
                    if d["top1_disagreement"]
-                   and d["mc_immediate"] < d["greedy_immediate"]]
+                   and d["mc_immediate_margin"] < d["greedy_immediate_margin"]]
+    won = sum(1 for d in sacrificial if d["fresh_regret"] > 0)
     if sacrificial:
-        won = sum(1 for d in sacrificial if d["fresh_regret"] > 0)
         print(f"\n  immediately-worse MC actions: {len(sacrificial)}")
-        print(f"    of those, better after the horizon: {won} "
+        print(f"    better after {LOOKAHEAD_DEPTH} edits: {won} "
               f"({won/len(sacrificial):.1%})  [null predicts ~50%]")
-        mean_sacrifice = sum(d["immediate_sacrifice"] for d in sacrificial) / len(sacrificial)
-        print(f"    mean immediate DRD2 given up: {mean_sacrifice:+.5f}")
+        mean_sacrifice = (sum(d["immediate_sacrifice"] for d in sacrificial)
+                          / len(sacrificial))
+        print(f"    mean immediate margin given up: {mean_sacrifice:+.5f}")
+    else:
+        print("\n  no immediately-worse MC actions were chosen at all")
 
-    verdict = ("GO -- future value changes consequential decisions"
-               if disagreements / len(decisions) >= 0.15 and mean_regret > 0
-               else "STOP / INCONCLUSIVE -- see the null comparison above")
+    if not sacrificial or disagreements == 0:
+        verdict = ("STOP -- future value never changed a decision; "
+                   "greedy is already the planner on this task")
+    elif won / len(sacrificial) > 0.5 and mean_regret > 0:
+        verdict = (f"GO -- sacrificial actions pay off {won/len(sacrificial):.0%} "
+                   f"of the time against a ~50% null, with positive mean regret")
+    else:
+        verdict = ("STOP / INCONCLUSIVE -- sacrificial actions pay off at about "
+                   "chance; no evidence future value changes decisions for the better")
     print(f"\n  {verdict}")
 
     summary = {
         "schema": "compose.editing_v2.c0_summary",
+        "status": "MECHANISM_DETECTION_PROBE_NOT_A_BENCHMARK_RESULT",
+        "reading": (
+            "Regret is in MARGIN units (logit P(active)). The margin is monotone "
+            "with the benchmark probability, so greedy's ranking is identical "
+            "under either -- but monotonicity does NOT survive taking "
+            "expectations, so E[max margin] and E[max P] are different "
+            "objectives. This probe therefore answers only 'is there evidence "
+            "that future reachability changes decisions'. Benchmark outcomes -- "
+            "P(active), success at 0.5, oracle cost -- are Experiment C's job."),
         "sources": len(results),
         "decision_states": len(decisions),
+        "decision_states_total": len(everything),
+        "duplicate_states_dropped": duplicates,
         "top1_disagreement": disagreements,
         "sacrifice_to_win": sacrifices,
         "fresh_regret_positive": positive,
         "mean_fresh_regret": mean_regret,
         "sacrificial_actions": len(sacrificial),
-        "sacrificial_won": (sum(1 for d in sacrificial if d["fresh_regret"] > 0)
-                            if sacrificial else 0),
+        "sacrificial_won": won,
+        "sacrificial_win_rate": (won / len(sacrificial)) if sacrificial else None,
+        "null_win_rate": 0.5,
+        "greedy_solved_sources": solved,
         "kernel_calls": sum(r["kernel_calls"] for r in results),
         "verdict": verdict,
     }
