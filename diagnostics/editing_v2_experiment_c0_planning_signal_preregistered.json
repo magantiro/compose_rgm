@@ -1,0 +1,2604 @@
+{
+  "summary": {
+    "schema": "compose.editing_v2.c0_summary",
+    "status": "MECHANISM_DETECTION_PROBE_NOT_A_BENCHMARK_RESULT",
+    "reading": "Regret is in MARGIN units (logit P(active)). The margin is monotone with the benchmark probability, so greedy's ranking is identical under either -- but monotonicity does NOT survive taking expectations, so E[max margin] and E[max P] are different objectives. This probe therefore answers only 'is there evidence that future reachability changes decisions'. Benchmark outcomes -- P(active), success at 0.5, oracle cost -- are Experiment C's job.",
+    "sources": 12,
+    "decision_states": 46,
+    "decision_states_total": 51,
+    "duplicate_states_dropped": 0,
+    "top1_disagreement": 16,
+    "sacrifice_to_win": 8,
+    "fresh_regret_positive": 9,
+    "mean_fresh_regret": -0.021038285841253158,
+    "sacrificial_actions": 14,
+    "sacrificial_won": 8,
+    "sacrificial_win_rate": 0.5714285714285714,
+    "null_win_rate": 0.5,
+    "by_depth": {
+      "1": {
+        "decision_states": 46,
+        "top1_disagreement": 14,
+        "sacrifice_to_win": 4,
+        "mean_fresh_regret": -0.032025010500305186,
+        "sacrificial_actions": 14,
+        "sacrificial_won": 6,
+        "sacrificial_win_rate": 0.42857142857142855
+      },
+      "2": {
+        "decision_states": 39,
+        "top1_disagreement": 14,
+        "sacrifice_to_win": 5,
+        "mean_fresh_regret": -0.05438213033839913,
+        "sacrificial_actions": 14,
+        "sacrificial_won": 5,
+        "sacrificial_win_rate": 0.35714285714285715
+      },
+      "3": {
+        "decision_states": 32,
+        "top1_disagreement": 14,
+        "sacrifice_to_win": 7,
+        "mean_fresh_regret": -0.03215414740315452,
+        "sacrificial_actions": 14,
+        "sacrificial_won": 7,
+        "sacrificial_win_rate": 0.5
+      }
+    },
+    "greedy_solved_sources": 7,
+    "kernel_calls": 1325,
+    "verdict": "STOP / INCONCLUSIVE -- sacrificial actions pay off at about chance; no evidence future value changes decisions for the better"
+  },
+  "per_source": [
+    {
+      "schema": "compose.editing_v2.c0_probe",
+      "source": "CC(=O)N1CCC2(CC1)OC1C(I)CC(C(C)(C)C)CC1C[N+]2(C)C",
+      "entry_id": "11aa8d6bef4fa612c6158f0392d9624de70899807dad859fc7a25aa159c8c92e",
+      "source_drd2": 0.005864449651196091,
+      "seed": 20260811,
+      "selected_step": 12500,
+      "config": {
+        "budget": 6,
+        "similarity_floor": 0.4,
+        "target_floor": 0.5,
+        "lookahead_depth": 3,
+        "candidates_top_margin": 4,
+        "candidates_top_reference": 2,
+        "candidates_random": 2,
+        "rollouts_select": 2,
+        "rollouts_eval": 3,
+        "time_point": 0.5,
+        "planning_signal": "logit P(active) (SVM margin); monotone with the benchmark probability so greedy is unchanged, but with resolution in the low-activity regime",
+        "outcome_signal": "P(active) against 0.5, the benchmark quantity"
+      },
+      "greedy_trajectory": [
+        "CC(=O)N1CCC2(CC1)OC1C(I)CC(C(C)(C)C)CC1C[N+]2(C)C",
+        "CCN1CCC2(CC1)OC1C(I)CC(C(C)(C)C)CC1C[N+]2(C)C",
+        "CCN1CCC2(CC1)OC1C(I)CC(C(C)(C)C)[IH3]C1C[N+]2(C)C",
+        "CCN1CCC2(CC1)OC1C(I)CC(C(C)(C)Br)[IH3]C1C[N+]2(C)C",
+        "CCN1CCC2(CC1)OC1C(I)CC(C(C)(Br)Br)[IH3]C1C[N+]2(C)C",
+        "CCN1CCC2(CC1)OC1C(I)CC(C(C)(Br)Br)[IH2]([IH2])C1C[N+]2(C)C",
+        "CC(Br)(Br)C1CC(I)C2OC3(CCN(CC#P)CC3)[N+](C)(C)CC2[IH2]1[IH2]"
+      ],
+      "greedy_solved_at": null,
+      "decisions": [
+        {
+          "step": 0,
+          "remaining_budget": 6,
+          "lookahead_steps": 3,
+          "state": "CC(=O)N1CCC2(CC1)OC1C(I)CC(C(C)(C)C)CC1C[N+]2(C)C",
+          "duplicate_state": false,
+          "legal_successors": 629,
+          "candidates_evaluated": 8,
+          "greedy_key": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(C)C)CC1C[N+]2(C)C",
+          "mc_key": "CC(=[IH])N1CCC2(CC1)OC1C(I)CC(C(C)(C)C)CC1C[N+]2(C)C",
+          "greedy_immediate_margin": -4.262120649505857,
+          "mc_immediate_margin": -4.356158958224244,
+          "greedy_probability": 0.014078827905966589,
+          "mc_probability": 0.012817309677335492,
+          "greedy_value_selection": -4.262120649505857,
+          "mc_value_selection": -4.157807104311468,
+          "greedy_value_fresh": -4.2370070878371395,
+          "mc_value_fresh": -4.157807104311468,
+          "by_depth": {
+            "1": {
+              "mc_key": "CC(=[IH])N1CCC2(CC1)OC1C(I)CC(C(C)(C)C)CC1C[N+]2(C)C",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -4.356158958224244,
+              "fresh_regret": 0.10431354519438862,
+              "sacrifice_to_win": true
+            },
+            "2": {
+              "mc_key": "CC(=[IH])N1CCC2(CC1)OC1C(I)CC(C(C)(C)C)CC1C[N+]2(C)C",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -4.356158958224244,
+              "fresh_regret": 0.07919998352567159,
+              "sacrifice_to_win": true
+            },
+            "3": {
+              "mc_key": "CC(=[IH])N1CCC2(CC1)OC1C(I)CC(C(C)(C)C)CC1C[N+]2(C)C",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -4.356158958224244,
+              "fresh_regret": 0.07919998352567159,
+              "sacrifice_to_win": true
+            }
+          },
+          "top1_disagreement": true,
+          "fresh_regret": 0.07919998352567159,
+          "immediate_sacrifice": 0.09403830871838714,
+          "sacrifice_to_win": true,
+          "best_immediate_margin": -4.262120649505857
+        },
+        {
+          "step": 1,
+          "remaining_budget": 5,
+          "lookahead_steps": 3,
+          "state": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(C)C)CC1C[N+]2(C)C",
+          "duplicate_state": false,
+          "legal_successors": 523,
+          "candidates_evaluated": 8,
+          "greedy_key": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(C)C)[IH3]C1C[N+]2(C)C",
+          "mc_key": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(C)C)[IH3]C1C[N+]2(C)C",
+          "greedy_immediate_margin": -3.709086235508968,
+          "mc_immediate_margin": -3.709086235508968,
+          "greedy_probability": 0.024430357117230787,
+          "mc_probability": 0.024430357117230787,
+          "greedy_value_selection": -3.709086235508968,
+          "mc_value_selection": -3.709086235508968,
+          "greedy_value_fresh": -3.709086235508968,
+          "mc_value_fresh": -3.709086235508968,
+          "by_depth": {
+            "1": {
+              "mc_key": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(C)C)[IH3]C1C[N+]2(C)C",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.709086235508968,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(C)C)[IH3]C1C[N+]2(C)C",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.709086235508968,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(C)C)[IH3]C1C[N+]2(C)C",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.709086235508968,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -3.709086235508968
+        },
+        {
+          "step": 2,
+          "remaining_budget": 4,
+          "lookahead_steps": 3,
+          "state": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(C)C)[IH3]C1C[N+]2(C)C",
+          "duplicate_state": false,
+          "legal_successors": 146,
+          "candidates_evaluated": 8,
+          "greedy_key": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(C)Br)[IH3]C1C[N+]2(C)C",
+          "mc_key": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(C)Br)[IH3]C1C[N+]2(C)C",
+          "greedy_immediate_margin": -3.428393127214515,
+          "mc_immediate_margin": -3.428393127214515,
+          "greedy_probability": 0.03228060883977676,
+          "mc_probability": 0.03228060883977676,
+          "greedy_value_selection": -3.428393127214515,
+          "mc_value_selection": -3.428393127214515,
+          "greedy_value_fresh": -3.4283931272145147,
+          "mc_value_fresh": -3.4283931272145147,
+          "by_depth": {
+            "1": {
+              "mc_key": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(C)Br)[IH3]C1C[N+]2(C)C",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.428393127214515,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(C)Br)[IH3]C1C[N+]2(C)C",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.428393127214515,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(C)Br)[IH3]C1C[N+]2(C)C",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.428393127214515,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -3.428393127214515
+        },
+        {
+          "step": 3,
+          "remaining_budget": 3,
+          "lookahead_steps": 2,
+          "state": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(C)Br)[IH3]C1C[N+]2(C)C",
+          "duplicate_state": false,
+          "legal_successors": 47,
+          "candidates_evaluated": 7,
+          "greedy_key": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(Br)Br)[IH3]C1C[N+]2(C)C",
+          "mc_key": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(Br)Br)[IH3]C1C[N+]2(C)C",
+          "greedy_immediate_margin": -3.1729820957143895,
+          "mc_immediate_margin": -3.1729820957143895,
+          "greedy_probability": 0.041545351848045746,
+          "mc_probability": 0.041545351848045746,
+          "greedy_value_selection": -3.1729820957143895,
+          "mc_value_selection": -3.1729820957143895,
+          "greedy_value_fresh": -3.17298209571439,
+          "mc_value_fresh": -3.17298209571439,
+          "by_depth": {
+            "1": {
+              "mc_key": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(Br)Br)[IH3]C1C[N+]2(C)C",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.1729820957143895,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(Br)Br)[IH3]C1C[N+]2(C)C",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.1729820957143895,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -3.1729820957143895
+        },
+        {
+          "step": 4,
+          "remaining_budget": 2,
+          "lookahead_steps": 1,
+          "state": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(Br)Br)[IH3]C1C[N+]2(C)C",
+          "duplicate_state": false,
+          "legal_successors": 44,
+          "candidates_evaluated": 8,
+          "greedy_key": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(Br)Br)[IH2]([IH2])C1C[N+]2(C)C",
+          "mc_key": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(Br)Br)[IH2]([IH2])C1C[N+]2(C)C",
+          "greedy_immediate_margin": -3.1057194657007505,
+          "mc_immediate_margin": -3.1057194657007505,
+          "greedy_probability": 0.04438750706627883,
+          "mc_probability": 0.04438750706627883,
+          "greedy_value_selection": -3.1057194657007505,
+          "mc_value_selection": -3.1057194657007505,
+          "greedy_value_fresh": -3.10571946570075,
+          "mc_value_fresh": -3.10571946570075,
+          "by_depth": {
+            "1": {
+              "mc_key": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(Br)Br)[IH2]([IH2])C1C[N+]2(C)C",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.1057194657007505,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -3.1057194657007505
+        },
+        {
+          "step": 5,
+          "remaining_budget": 1,
+          "lookahead_steps": 0,
+          "state": "CCN1CCC2(CC1)OC1C(I)CC(C(C)(Br)Br)[IH2]([IH2])C1C[N+]2(C)C",
+          "duplicate_state": false,
+          "legal_successors": 36,
+          "candidates_evaluated": 7,
+          "greedy_key": "CC(Br)(Br)C1CC(I)C2OC3(CCN(CC#P)CC3)[N+](C)(C)CC2[IH2]1[IH2]",
+          "mc_key": "CC(Br)(Br)C1CC(I)C2OC3(CCN(CC#P)CC3)[N+](C)(C)CC2[IH2]1[IH2]",
+          "greedy_immediate_margin": -3.147565429092271,
+          "mc_immediate_margin": -3.147565429092271,
+          "greedy_probability": 0.04259795338014494,
+          "mc_probability": 0.04259795338014494,
+          "greedy_value_selection": -3.147565429092271,
+          "mc_value_selection": -3.147565429092271,
+          "greedy_value_fresh": -3.147565429092271,
+          "mc_value_fresh": -3.147565429092271,
+          "by_depth": {},
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -3.147565429092271
+        }
+      ],
+      "kernel_calls": 105,
+      "seconds": 534.9
+    },
+    {
+      "schema": "compose.editing_v2.c0_probe",
+      "source": "N=C(O)NN=C(I)c1ccc2ncc(C(O)c3cc4cccnc4cc3F)n2n1",
+      "entry_id": "42a18049e6c9e82933101d1f8a827781d5daddb9fdc7800fe9f1b22088601d94",
+      "source_drd2": 0.003650183882453353,
+      "seed": 20260812,
+      "selected_step": 12500,
+      "config": {
+        "budget": 6,
+        "similarity_floor": 0.4,
+        "target_floor": 0.5,
+        "lookahead_depth": 3,
+        "candidates_top_margin": 4,
+        "candidates_top_reference": 2,
+        "candidates_random": 2,
+        "rollouts_select": 2,
+        "rollouts_eval": 3,
+        "time_point": 0.5,
+        "planning_signal": "logit P(active) (SVM margin); monotone with the benchmark probability so greedy is unchanged, but with resolution in the low-activity regime",
+        "outcome_signal": "P(active) against 0.5, the benchmark quantity"
+      },
+      "greedy_trajectory": [
+        "N=C(O)NN=C(I)c1ccc2ncc(C(O)c3cc4cccnc4cc3F)n2n1",
+        "N=C(O)NN=C(I)C1CCC2NCC(C(O)c3cc4cccnc4cc3F)N2N1",
+        "N=C(O)NN=C(I)C1CCC2NCC(C(O)c3cc4cccnc4cc3F)N2C1",
+        "N=C(O)NN=C(I)C1CCC2NCC(C(N)c3cc4cccnc4cc3F)N2C1",
+        "N=C(O)NN=C(I)C1CCCN(C(CN)C(N)c2cc3cccnc3cc2F)C1",
+        "CCCN(CCC(I)=NNC(=N)O)C(CN)C(N)c1cc2cccnc2cc1F"
+      ],
+      "greedy_solved_at": 5,
+      "decisions": [
+        {
+          "step": 0,
+          "remaining_budget": 6,
+          "lookahead_steps": 3,
+          "state": "N=C(O)NN=C(I)c1ccc2ncc(C(O)c3cc4cccnc4cc3F)n2n1",
+          "duplicate_state": false,
+          "legal_successors": 510,
+          "candidates_evaluated": 8,
+          "greedy_key": "N=C(O)NN=C(I)C1CCC2NCC(C(O)c3cc4cccnc4cc3F)N2N1",
+          "mc_key": "N=C(O)NN=C(I)C1CCC2NCC(C(O)c3cc4cccnc4cc3F)N2N1",
+          "greedy_immediate_margin": -3.4419988097510608,
+          "mc_immediate_margin": -3.4419988097510608,
+          "greedy_probability": 0.03184841920473242,
+          "mc_probability": 0.03184841920473242,
+          "greedy_value_selection": -3.4419988097510608,
+          "mc_value_selection": -3.4419988097510608,
+          "greedy_value_fresh": -3.4419988097510608,
+          "mc_value_fresh": -3.4419988097510608,
+          "by_depth": {
+            "1": {
+              "mc_key": "N=C(O)NN=C(I)C1CCC2NCC(C(O)c3cc4cccnc4cc3F)N2N1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.4419988097510608,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "N=C(O)NN=C(I)C1CCC2NCC(C(O)c3cc4cccnc4cc3F)N2N1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.4419988097510608,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "N=C(O)NN=C(I)C1CCC2NCC(C(O)c3cc4cccnc4cc3F)N2N1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.4419988097510608,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -3.4419988097510608
+        },
+        {
+          "step": 1,
+          "remaining_budget": 5,
+          "lookahead_steps": 3,
+          "state": "N=C(O)NN=C(I)C1CCC2NCC(C(O)c3cc4cccnc4cc3F)N2N1",
+          "duplicate_state": false,
+          "legal_successors": 336,
+          "candidates_evaluated": 8,
+          "greedy_key": "N=C(O)NN=C(I)C1CCC2NCC(C(O)c3cc4cccnc4cc3F)N2C1",
+          "mc_key": "N=C(O)NN=C(I)C(N)CCCNCCC(O)c1cc2cccnc2cc1F",
+          "greedy_immediate_margin": -2.5903986191686768,
+          "mc_immediate_margin": -2.863996906096604,
+          "greedy_probability": 0.06975893995987159,
+          "mc_probability": 0.056229452075060825,
+          "greedy_value_selection": -2.5903986191686768,
+          "mc_value_selection": -2.402822368705778,
+          "greedy_value_fresh": -2.590398619168664,
+          "mc_value_fresh": -2.7474319190292262,
+          "by_depth": {
+            "1": {
+              "mc_key": "N=C(O)NN=C(I)C(N)CCCNCCC(O)c1cc2cccnc2cc1F",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -2.863996906096604,
+              "fresh_regret": -0.15703329986056236,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "N=C(O)NN=C(I)C(N)CCCNCCC(O)c1cc2cccnc2cc1F",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -2.863996906096604,
+              "fresh_regret": -0.15703329986056236,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "N=C(O)NN=C(I)C(N)CCCNCCC(O)c1cc2cccnc2cc1F",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -2.863996906096604,
+              "fresh_regret": -0.15703329986056236,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": true,
+          "fresh_regret": -0.15703329986056236,
+          "immediate_sacrifice": 0.2735982869279274,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -2.5903986191686768
+        },
+        {
+          "step": 2,
+          "remaining_budget": 4,
+          "lookahead_steps": 3,
+          "state": "N=C(O)NN=C(I)C1CCC2NCC(C(O)c3cc4cccnc4cc3F)N2C1",
+          "duplicate_state": false,
+          "legal_successors": 349,
+          "candidates_evaluated": 8,
+          "greedy_key": "N=C(O)NN=C(I)C1CCC2NCC(C(N)c3cc4cccnc4cc3F)N2C1",
+          "mc_key": "N=C(O)NN=C(I)C1CCC2[PH3]CC(C(O)c3cc4cccnc4cc3F)N2C1",
+          "greedy_immediate_margin": -1.2415078009367526,
+          "mc_immediate_margin": -1.4651965079583016,
+          "greedy_probability": 0.22417382144195505,
+          "mc_probability": 0.1876741268376079,
+          "greedy_value_selection": -1.2415078009367526,
+          "mc_value_selection": -0.9995195871197693,
+          "greedy_value_fresh": -1.2415078009367526,
+          "mc_value_fresh": -1.1138051148939048,
+          "by_depth": {
+            "1": {
+              "mc_key": "N=C(O)NN=C(I)C1CCC2[PH3]CC(C(O)c3cc4cccnc4cc3F)N2C1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -1.4651965079583016,
+              "fresh_regret": -0.22368870702154897,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "N=C(O)NN=C(I)C1CCC2[PH3]CC(C(O)c3cc4cccnc4cc3F)N2C1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -1.4651965079583016,
+              "fresh_regret": -0.22368870702154897,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "N=C(O)NN=C(I)C1CCC2[PH3]CC(C(O)c3cc4cccnc4cc3F)N2C1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -1.4651965079583016,
+              "fresh_regret": 0.12770268604284785,
+              "sacrifice_to_win": true
+            }
+          },
+          "top1_disagreement": true,
+          "fresh_regret": 0.12770268604284785,
+          "immediate_sacrifice": 0.22368870702154897,
+          "sacrifice_to_win": true,
+          "best_immediate_margin": -1.2415078009367526
+        },
+        {
+          "step": 3,
+          "remaining_budget": 3,
+          "lookahead_steps": 2,
+          "state": "N=C(O)NN=C(I)C1CCC2NCC(C(N)c3cc4cccnc4cc3F)N2C1",
+          "duplicate_state": false,
+          "legal_successors": 341,
+          "candidates_evaluated": 8,
+          "greedy_key": "N=C(O)NN=C(I)C1CCCN(C(CN)C(N)c2cc3cccnc3cc2F)C1",
+          "mc_key": "N=C(O)NN=C(I)C1CCC2CCC(C(N)c3cc4cccnc4cc3F)N2C1",
+          "greedy_immediate_margin": -0.5287191140699472,
+          "mc_immediate_margin": -0.5338426662812392,
+          "greedy_probability": 0.37223357363572795,
+          "mc_probability": 0.3710829830913217,
+          "greedy_value_selection": -0.5287191140699472,
+          "mc_value_selection": -0.391195724807473,
+          "greedy_value_fresh": -0.49991627350200635,
+          "mc_value_fresh": -0.43874470529872767,
+          "by_depth": {
+            "1": {
+              "mc_key": "N=C(O)NN=C(I)C1CCC2CCC(C(N)c3cc4cccnc4cc3F)N2C1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -0.5338426662812392,
+              "fresh_regret": 0.08997440877121954,
+              "sacrifice_to_win": true
+            },
+            "2": {
+              "mc_key": "N=C(O)NN=C(I)C1CCC2CCC(C(N)c3cc4cccnc4cc3F)N2C1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -0.5338426662812392,
+              "fresh_regret": 0.06117156820327868,
+              "sacrifice_to_win": true
+            }
+          },
+          "top1_disagreement": true,
+          "fresh_regret": 0.06117156820327868,
+          "immediate_sacrifice": 0.005123552211292015,
+          "sacrifice_to_win": true,
+          "best_immediate_margin": -0.5287191140699472
+        },
+        {
+          "step": 4,
+          "remaining_budget": 2,
+          "lookahead_steps": 1,
+          "state": "N=C(O)NN=C(I)C1CCCN(C(CN)C(N)c2cc3cccnc3cc2F)C1",
+          "duplicate_state": false,
+          "legal_successors": 385,
+          "candidates_evaluated": 8,
+          "greedy_key": "CCCN(CCC(I)=NNC(=N)O)C(CN)C(N)c1cc2cccnc2cc1F",
+          "mc_key": "CCCN(CCC(I)=NNC(=N)O)C(CN)C(N)c1cc2cccnc2cc1F",
+          "greedy_immediate_margin": 0.8654470428850806,
+          "mc_immediate_margin": 0.8654470428850806,
+          "greedy_probability": 0.7037977047416454,
+          "mc_probability": 0.7037977047416454,
+          "greedy_value_selection": 0.8654470428850806,
+          "mc_value_selection": 0.8654470428850806,
+          "greedy_value_fresh": 0.8654470428850806,
+          "mc_value_fresh": 0.8654470428850806,
+          "by_depth": {
+            "1": {
+              "mc_key": "CCCN(CCC(I)=NNC(=N)O)C(CN)C(N)c1cc2cccnc2cc1F",
+              "top1_disagreement": false,
+              "mc_immediate_margin": 0.8654470428850806,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": 0.8654470428850806
+        }
+      ],
+      "kernel_calls": 154,
+      "seconds": 1586.4
+    },
+    {
+      "schema": "compose.editing_v2.c0_probe",
+      "source": "O=[SH2](c1ccc(NC(O)S)cc1)c1sc2ncccc2c1-c1ccc(Cl)cc1",
+      "entry_id": "765cd3a0ce61815ac65498b13a4146df44284db540632949c62ed5e065747f49",
+      "source_drd2": 0.007377042767800063,
+      "seed": 20260813,
+      "selected_step": 12500,
+      "config": {
+        "budget": 6,
+        "similarity_floor": 0.4,
+        "target_floor": 0.5,
+        "lookahead_depth": 3,
+        "candidates_top_margin": 4,
+        "candidates_top_reference": 2,
+        "candidates_random": 2,
+        "rollouts_select": 2,
+        "rollouts_eval": 3,
+        "time_point": 0.5,
+        "planning_signal": "logit P(active) (SVM margin); monotone with the benchmark probability so greedy is unchanged, but with resolution in the low-activity regime",
+        "outcome_signal": "P(active) against 0.5, the benchmark quantity"
+      },
+      "greedy_trajectory": [
+        "O=[SH2](c1ccc(NC(O)S)cc1)c1sc2ncccc2c1-c1ccc(Cl)cc1",
+        "O=[SH2](c1ccc(BC(O)S)cc1)c1sc2ncccc2c1-c1ccc(Cl)cc1",
+        "B=[SH2](c1ccc(BC(O)S)cc1)c1sc2ncccc2c1-c1ccc(Cl)cc1",
+        "B=[SH2](c1ccc(BC(O)S)cc1)c1sc2nc(Cl)ccc2c1-c1ccc(Cl)cc1",
+        "BB=[SH2](c1ccc(BC(O)S)cc1)c1sc2nc(Cl)ccc2c1-c1ccc(Cl)cc1",
+        "B=BB=[SH2](c1ccc(BC(O)S)cc1)c1sc2nc(Cl)ccc2c1-c1ccc(Cl)cc1",
+        "OC(S)Bc1ccc([SH2](=BB=BF)c2sc3nc(Cl)ccc3c2-c2ccc(Cl)cc2)cc1"
+      ],
+      "greedy_solved_at": null,
+      "decisions": [
+        {
+          "step": 0,
+          "remaining_budget": 6,
+          "lookahead_steps": 3,
+          "state": "O=[SH2](c1ccc(NC(O)S)cc1)c1sc2ncccc2c1-c1ccc(Cl)cc1",
+          "duplicate_state": false,
+          "legal_successors": 421,
+          "candidates_evaluated": 9,
+          "greedy_key": "O=[SH2](c1ccc(BC(O)S)cc1)c1sc2ncccc2c1-c1ccc(Cl)cc1",
+          "mc_key": "OC(S)Nc1ccc([SH3](O)c2sc3ncccc3c2-c2ccc(Cl)cc2)cc1",
+          "greedy_immediate_margin": -3.805072797726713,
+          "mc_immediate_margin": -4.376883168722338,
+          "greedy_probability": 0.0222051595929618,
+          "mc_probability": 0.012554816641875572,
+          "greedy_value_selection": -3.507095761101805,
+          "mc_value_selection": -3.3322148566455834,
+          "greedy_value_fresh": -3.7620583123669973,
+          "mc_value_fresh": -4.328304278950815,
+          "by_depth": {
+            "1": {
+              "mc_key": "OC(S)Nc1ccc([SH3](O)c2sc3ncccc3c2-c2ccc(Cl)cc2)cc1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -4.376883168722338,
+              "fresh_regret": -0.5718103709956339,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "OC(S)Nc1ccc([SH3](O)c2sc3ncccc3c2-c2ccc(Cl)cc2)cc1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -4.376883168722338,
+              "fresh_regret": -0.5232314812241108,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "OC(S)Nc1ccc([SH3](O)c2sc3ncccc3c2-c2ccc(Cl)cc2)cc1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -4.376883168722338,
+              "fresh_regret": -0.5662459665838173,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": true,
+          "fresh_regret": -0.5662459665838173,
+          "immediate_sacrifice": 0.5718103709956246,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -3.805072797726713
+        },
+        {
+          "step": 1,
+          "remaining_budget": 5,
+          "lookahead_steps": 3,
+          "state": "O=[SH2](c1ccc(BC(O)S)cc1)c1sc2ncccc2c1-c1ccc(Cl)cc1",
+          "duplicate_state": false,
+          "legal_successors": 379,
+          "candidates_evaluated": 8,
+          "greedy_key": "B=[SH2](c1ccc(BC(O)S)cc1)c1sc2ncccc2c1-c1ccc(Cl)cc1",
+          "mc_key": "B=[SH2](c1ccc(BC(O)S)cc1)c1sc2ncccc2c1-c1ccc(Cl)cc1",
+          "greedy_immediate_margin": -2.7129720251867004,
+          "mc_immediate_margin": -2.7129720251867004,
+          "greedy_probability": 0.062212249369571815,
+          "mc_probability": 0.062212249369571815,
+          "greedy_value_selection": -2.6571091334776846,
+          "mc_value_selection": -2.6571091334776846,
+          "greedy_value_fresh": -2.7129720251867,
+          "mc_value_fresh": -2.7129720251867,
+          "by_depth": {
+            "1": {
+              "mc_key": "B=[SH2](c1ccc(BC(O)S)cc1)c1sc2ncccc2c1-c1ccc(Cl)cc1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -2.7129720251867004,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "B=[SH2](c1ccc(BC(O)S)cc1)c1sc2ncccc2c1-c1ccc(Cl)cc1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -2.7129720251867004,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "B=[SH2](c1ccc(BC(O)S)cc1)c1sc2ncccc2c1-c1ccc(Cl)cc1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -2.7129720251867004,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -2.7129720251867004
+        },
+        {
+          "step": 2,
+          "remaining_budget": 4,
+          "lookahead_steps": 3,
+          "state": "B=[SH2](c1ccc(BC(O)S)cc1)c1sc2ncccc2c1-c1ccc(Cl)cc1",
+          "duplicate_state": false,
+          "legal_successors": 333,
+          "candidates_evaluated": 8,
+          "greedy_key": "B=[SH2](c1ccc(BC(O)S)cc1)c1sc2nc(Cl)ccc2c1-c1ccc(Cl)cc1",
+          "mc_key": "B=[SH2](c1ccc(BC(O)S)cc1)c1sc2nc(Cl)ccc2c1-c1ccc(Cl)cc1",
+          "greedy_immediate_margin": -2.183013186610575,
+          "mc_immediate_margin": -2.183013186610575,
+          "greedy_probability": 0.10128644072207546,
+          "mc_probability": 0.10128644072207546,
+          "greedy_value_selection": -2.150826653257665,
+          "mc_value_selection": -2.150826653257665,
+          "greedy_value_fresh": -2.183013186610575,
+          "mc_value_fresh": -2.183013186610575,
+          "by_depth": {
+            "1": {
+              "mc_key": "B=[SH2](c1ccc(BC(O)S)cc1)c1sc2nc(Cl)ccc2c1-c1ccc(Cl)cc1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -2.183013186610575,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "B=[SH2](c1ccc(BC(O)S)cc1)c1sc2nc(Cl)ccc2c1-c1ccc(Cl)cc1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -2.183013186610575,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "B=[SH2](c1ccc(BC(O)S)cc1)c1sc2nc(Cl)ccc2c1-c1ccc(Cl)cc1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -2.183013186610575,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -2.183013186610575
+        },
+        {
+          "step": 3,
+          "remaining_budget": 3,
+          "lookahead_steps": 2,
+          "state": "B=[SH2](c1ccc(BC(O)S)cc1)c1sc2nc(Cl)ccc2c1-c1ccc(Cl)cc1",
+          "duplicate_state": false,
+          "legal_successors": 50,
+          "candidates_evaluated": 7,
+          "greedy_key": "BB=[SH2](c1ccc(BC(O)S)cc1)c1sc2nc(Cl)ccc2c1-c1ccc(Cl)cc1",
+          "mc_key": "BB=[SH2](c1ccc(BC(O)S)cc1)c1sc2nc(Cl)ccc2c1-c1ccc(Cl)cc1",
+          "greedy_immediate_margin": -2.118640119904769,
+          "mc_immediate_margin": -2.118640119904769,
+          "greedy_probability": 0.10729840810124071,
+          "mc_probability": 0.10729840810124071,
+          "greedy_value_selection": -2.118640119904762,
+          "mc_value_selection": -2.118640119904762,
+          "greedy_value_fresh": -2.11864011990476,
+          "mc_value_fresh": -2.11864011990476,
+          "by_depth": {
+            "1": {
+              "mc_key": "BB=[SH2](c1ccc(BC(O)S)cc1)c1sc2nc(Cl)ccc2c1-c1ccc(Cl)cc1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -2.118640119904769,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "BB=[SH2](c1ccc(BC(O)S)cc1)c1sc2nc(Cl)ccc2c1-c1ccc(Cl)cc1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -2.118640119904769,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -2.118640119904769
+        },
+        {
+          "step": 4,
+          "remaining_budget": 2,
+          "lookahead_steps": 1,
+          "state": "BB=[SH2](c1ccc(BC(O)S)cc1)c1sc2nc(Cl)ccc2c1-c1ccc(Cl)cc1",
+          "duplicate_state": false,
+          "legal_successors": 94,
+          "candidates_evaluated": 8,
+          "greedy_key": "B=BB=[SH2](c1ccc(BC(O)S)cc1)c1sc2nc(Cl)ccc2c1-c1ccc(Cl)cc1",
+          "mc_key": "B=BB=[SH2](c1ccc(BC(O)S)cc1)c1sc2nc(Cl)ccc2c1-c1ccc(Cl)cc1",
+          "greedy_immediate_margin": -1.8500135009228942,
+          "mc_immediate_margin": -1.8500135009228942,
+          "greedy_probability": 0.1358715838267308,
+          "mc_probability": 0.1358715838267308,
+          "greedy_value_selection": -1.8500135009228942,
+          "mc_value_selection": -1.8500135009228942,
+          "greedy_value_fresh": -1.8500135009228942,
+          "mc_value_fresh": -1.8500135009228942,
+          "by_depth": {
+            "1": {
+              "mc_key": "B=BB=[SH2](c1ccc(BC(O)S)cc1)c1sc2nc(Cl)ccc2c1-c1ccc(Cl)cc1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -1.8500135009228942,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -1.8500135009228942
+        },
+        {
+          "step": 5,
+          "remaining_budget": 1,
+          "lookahead_steps": 0,
+          "state": "B=BB=[SH2](c1ccc(BC(O)S)cc1)c1sc2nc(Cl)ccc2c1-c1ccc(Cl)cc1",
+          "duplicate_state": false,
+          "legal_successors": 30,
+          "candidates_evaluated": 8,
+          "greedy_key": "OC(S)Bc1ccc([SH2](=BB=BF)c2sc3nc(Cl)ccc3c2-c2ccc(Cl)cc2)cc1",
+          "mc_key": "OC(S)Bc1ccc([SH2](=BB=BF)c2sc3nc(Cl)ccc3c2-c2ccc(Cl)cc2)cc1",
+          "greedy_immediate_margin": -1.7983079197149954,
+          "mc_immediate_margin": -1.7983079197149954,
+          "greedy_probability": 0.1420574582948326,
+          "mc_probability": 0.1420574582948326,
+          "greedy_value_selection": -1.7983079197149954,
+          "mc_value_selection": -1.7983079197149954,
+          "greedy_value_fresh": -1.7983079197149954,
+          "mc_value_fresh": -1.7983079197149954,
+          "by_depth": {},
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -1.7983079197149954
+        }
+      ],
+      "kernel_calls": 154,
+      "seconds": 1498.1
+    },
+    {
+      "schema": "compose.editing_v2.c0_probe",
+      "source": "Cn1c(=O)n(CC(=O)N2CCN(c3scnc3-c3nc4cc(OCF)ccc4[nH]3)CC2)c2ccccc21",
+      "entry_id": "d1ef78a78b510c57e669c31e8f0b169dc622187358dee726d4841823d5621437",
+      "source_drd2": 0.01054118120503068,
+      "seed": 20260814,
+      "selected_step": 12500,
+      "config": {
+        "budget": 6,
+        "similarity_floor": 0.4,
+        "target_floor": 0.5,
+        "lookahead_depth": 3,
+        "candidates_top_margin": 4,
+        "candidates_top_reference": 2,
+        "candidates_random": 2,
+        "rollouts_select": 2,
+        "rollouts_eval": 3,
+        "time_point": 0.5,
+        "planning_signal": "logit P(active) (SVM margin); monotone with the benchmark probability so greedy is unchanged, but with resolution in the low-activity regime",
+        "outcome_signal": "P(active) against 0.5, the benchmark quantity"
+      },
+      "greedy_trajectory": [
+        "Cn1c(=O)n(CC(=O)N2CCN(c3scnc3-c3nc4cc(OCF)ccc4[nH]3)CC2)c2ccccc21",
+        "Cn1c(=O)n(CCN2CCN(c3scnc3-c3nc4cc(OCF)ccc4[nH]3)CC2)c2ccccc21",
+        "CI1C(=O)N(CCN2CCN(c3scnc3-c3nc4cc(OCF)ccc4[nH]3)CC2)c2ccccc21"
+      ],
+      "greedy_solved_at": 2,
+      "decisions": [
+        {
+          "step": 0,
+          "remaining_budget": 6,
+          "lookahead_steps": 3,
+          "state": "Cn1c(=O)n(CC(=O)N2CCN(c3scnc3-c3nc4cc(OCF)ccc4[nH]3)CC2)c2ccccc21",
+          "duplicate_state": false,
+          "legal_successors": 669,
+          "candidates_evaluated": 8,
+          "greedy_key": "Cn1c(=O)n(CCN2CCN(c3scnc3-c3nc4cc(OCF)ccc4[nH]3)CC2)c2ccccc21",
+          "mc_key": "B=C(Cn1c(=O)n(C)c2ccccc21)N1CCN(c2scnc2-c2nc3cc(OCF)ccc3[nH]2)CC1",
+          "greedy_immediate_margin": -1.7628112257317985,
+          "mc_immediate_margin": -2.26629825251153,
+          "greedy_probability": 0.1464389083071545,
+          "mc_probability": 0.09395294917818824,
+          "greedy_value_selection": -1.7045856133285933,
+          "mc_value_selection": 0.05056269898545612,
+          "greedy_value_fresh": -1.3762962302995885,
+          "mc_value_fresh": -2.038181184618872,
+          "by_depth": {
+            "1": {
+              "mc_key": "B=C(Cn1c(=O)n(C)c2ccccc21)N1CCN(c2scnc2-c2nc3cc(OCF)ccc3[nH]2)CC1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -2.26629825251153,
+              "fresh_regret": -0.7010515065137184,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "B=C(Cn1c(=O)n(C)c2ccccc21)N1CCN(c2scnc2-c2nc3cc(OCF)ccc3[nH]2)CC1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -2.26629825251153,
+              "fresh_regret": -0.664222105878655,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "B=C(Cn1c(=O)n(C)c2ccccc21)N1CCN(c2scnc2-c2nc3cc(OCF)ccc3[nH]2)CC1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -2.26629825251153,
+              "fresh_regret": -0.6618849543192835,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": true,
+          "fresh_regret": -0.6618849543192835,
+          "immediate_sacrifice": 0.5034870267797313,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -1.7628112257317985
+        },
+        {
+          "step": 1,
+          "remaining_budget": 5,
+          "lookahead_steps": 3,
+          "state": "Cn1c(=O)n(CCN2CCN(c3scnc3-c3nc4cc(OCF)ccc4[nH]3)CC2)c2ccccc21",
+          "duplicate_state": false,
+          "legal_successors": 711,
+          "candidates_evaluated": 8,
+          "greedy_key": "CI1C(=O)N(CCN2CCN(c3scnc3-c3nc4cc(OCF)ccc4[nH]3)CC2)c2ccccc21",
+          "mc_key": "CI1C(=O)N(CCN2CCN(c3scnc3-c3nc4cc(OCF)ccc4[nH]3)CC2)c2ccccc21",
+          "greedy_immediate_margin": 2.27846759838335,
+          "mc_immediate_margin": 2.27846759838335,
+          "greedy_probability": 0.9072268925817301,
+          "mc_probability": 0.9072268925817301,
+          "greedy_value_selection": 2.7470845596458466,
+          "mc_value_selection": 2.7470845596458466,
+          "greedy_value_fresh": 2.4357231819693466,
+          "mc_value_fresh": 2.4357231819693466,
+          "by_depth": {
+            "1": {
+              "mc_key": "CI1C(=O)N(CCN2CCN(c3scnc3-c3nc4cc(OCF)ccc4[nH]3)CC2)c2ccccc21",
+              "top1_disagreement": false,
+              "mc_immediate_margin": 2.27846759838335,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "CI1C(=O)N(CCN2CCN(c3scnc3-c3nc4cc(OCF)ccc4[nH]3)CC2)c2ccccc21",
+              "top1_disagreement": false,
+              "mc_immediate_margin": 2.27846759838335,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "CI1C(=O)N(CCN2CCN(c3scnc3-c3nc4cc(OCF)ccc4[nH]3)CC2)c2ccccc21",
+              "top1_disagreement": false,
+              "mc_immediate_margin": 2.27846759838335,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": 2.27846759838335
+        }
+      ],
+      "kernel_calls": 83,
+      "seconds": 1135.6
+    },
+    {
+      "schema": "compose.editing_v2.c0_probe",
+      "source": "C=C1C(O)C(O)CC2(C)C1CCC1(C)C2CC(C(=O)O)=C2C3C(CCC(C)C3C)CCC21C",
+      "entry_id": "6cc8f8e1baece820508d69a0d942b8b5cfaef766ad0d9d7278df6d92e3431e11",
+      "source_drd2": 0.019522485990413736,
+      "seed": 20260815,
+      "selected_step": 12500,
+      "config": {
+        "budget": 6,
+        "similarity_floor": 0.4,
+        "target_floor": 0.5,
+        "lookahead_depth": 3,
+        "candidates_top_margin": 4,
+        "candidates_top_reference": 2,
+        "candidates_random": 2,
+        "rollouts_select": 2,
+        "rollouts_eval": 3,
+        "time_point": 0.5,
+        "planning_signal": "logit P(active) (SVM margin); monotone with the benchmark probability so greedy is unchanged, but with resolution in the low-activity regime",
+        "outcome_signal": "P(active) against 0.5, the benchmark quantity"
+      },
+      "greedy_trajectory": [
+        "C=C1C(O)C(O)CC2(C)C1CCC1(C)C2CC(C(=O)O)=C2C3C(CCC(C)C3C)CCC21C",
+        "B=C(O)C1=C2C3C(CCC(C)C3C)CCC2(C)C2(C)CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+        "B=C(O)C1=C2C3C(C)C4(C)CCC34CCC2(C)C2(C)CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+        "B=C(O)C1=C2C3C(C)C45CCC6(CCC7C(=C)C(O)C(O)CC7(C)C6C1)C2(C)CCC34CC5",
+        "B=C(O)C1=C2C3C4CCC25CCC32CCC42CCC52CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+        "B=C(O)C1=C2C3C4(C)CCC25CCC32CCC42CCC52CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+        "C=C1C(O)C(O)CC2(C)C1CCC13CCC45CCC46CCC14CCC5(C)C6C4=C(C(O)=BN)CC23"
+      ],
+      "greedy_solved_at": null,
+      "decisions": [
+        {
+          "step": 0,
+          "remaining_budget": 6,
+          "lookahead_steps": 3,
+          "state": "C=C1C(O)C(O)CC2(C)C1CCC1(C)C2CC(C(=O)O)=C2C3C(CCC(C)C3C)CCC21C",
+          "duplicate_state": false,
+          "legal_successors": 1490,
+          "candidates_evaluated": 8,
+          "greedy_key": "B=C(O)C1=C2C3C(CCC(C)C3C)CCC2(C)C2(C)CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+          "mc_key": "C=C1C(O)C(O)CC2(C)C3CC(C(=O)O)=C4C5C(C)C(C)CCC56CCC4(C)C3(C)CCC126",
+          "greedy_immediate_margin": -3.7473453770382115,
+          "mc_immediate_margin": -3.7739766073839984,
+          "greedy_probability": 0.023518123589818675,
+          "mc_probability": 0.022903128250672818,
+          "greedy_value_selection": -3.7380608892384024,
+          "mc_value_selection": -3.7181217763258756,
+          "greedy_value_fresh": -3.7355078583133703,
+          "mc_value_fresh": -3.706244445023939,
+          "by_depth": {
+            "1": {
+              "mc_key": "C=C(O)C1=C2C3C(CCC(C)C3C)CCC2(C)C2(C)CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -3.7473453770382115,
+              "fresh_regret": 0.0014298703335029472,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "C=C1C(O)C(O)CC2(C)C3CC(C(=O)O)=C4C5C(C)C(C)CCC56CCC4(C)C3(C)CCC126",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -3.7739766073839984,
+              "fresh_regret": 0.025185358552252346,
+              "sacrifice_to_win": true
+            },
+            "3": {
+              "mc_key": "C=C1C(O)C(O)CC2(C)C3CC(C(=O)O)=C4C5C(C)C(C)CCC56CCC4(C)C3(C)CCC126",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -3.7739766073839984,
+              "fresh_regret": 0.029263413289431384,
+              "sacrifice_to_win": true
+            }
+          },
+          "top1_disagreement": true,
+          "fresh_regret": 0.029263413289431384,
+          "immediate_sacrifice": 0.02663123034578696,
+          "sacrifice_to_win": true,
+          "best_immediate_margin": -3.7473453770382115
+        },
+        {
+          "step": 1,
+          "remaining_budget": 5,
+          "lookahead_steps": 3,
+          "state": "B=C(O)C1=C2C3C(CCC(C)C3C)CCC2(C)C2(C)CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+          "duplicate_state": false,
+          "legal_successors": 1521,
+          "candidates_evaluated": 8,
+          "greedy_key": "B=C(O)C1=C2C3C(C)C4(C)CCC34CCC2(C)C2(C)CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+          "mc_key": "B=C(O)C1=C2C3C(C)C4(C)CCC34CCC2(C)C2(C)CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+          "greedy_immediate_margin": -3.6668158894547096,
+          "mc_immediate_margin": -3.6668158894547096,
+          "greedy_probability": 0.025478969654778492,
+          "mc_probability": 0.025478969654778492,
+          "greedy_value_selection": -3.6668158894547096,
+          "mc_value_selection": -3.6668158894547096,
+          "greedy_value_fresh": -3.666815889454709,
+          "mc_value_fresh": -3.666815889454709,
+          "by_depth": {
+            "1": {
+              "mc_key": "B=C(O)C1=C2C3C(C)C4(C)CCC34CCC2(C)C2(C)CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.6668158894547096,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "B=C(O)C1=C2C3C(C)C4(C)CCC34CCC2(C)C2(C)CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.6668158894547096,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "B=C(O)C1=C2C3C(C)C4(C)CCC34CCC2(C)C2(C)CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.6668158894547096,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -3.6668158894547096
+        },
+        {
+          "step": 2,
+          "remaining_budget": 4,
+          "lookahead_steps": 3,
+          "state": "B=C(O)C1=C2C3C(C)C4(C)CCC34CCC2(C)C2(C)CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+          "duplicate_state": false,
+          "legal_successors": 795,
+          "candidates_evaluated": 8,
+          "greedy_key": "B=C(O)C1=C2C3C(C)C45CCC6(CCC7C(=C)C(O)C(O)CC7(C)C6C1)C2(C)CCC34CC5",
+          "mc_key": "B=C(O)C1=C2C3C(C)C45CCC6(CCC7C(=C)C(O)C(O)CC7(C)C6C1)C2(C)CCC34CC5",
+          "greedy_immediate_margin": -3.6082054971551125,
+          "mc_immediate_margin": -3.6082054971551125,
+          "greedy_probability": 0.027006887822349255,
+          "mc_probability": 0.027006887822349255,
+          "greedy_value_selection": -3.6072693597986447,
+          "mc_value_selection": -3.6072693597986447,
+          "greedy_value_fresh": -3.6072693597986447,
+          "mc_value_fresh": -3.6072693597986447,
+          "by_depth": {
+            "1": {
+              "mc_key": "B=C(O)C1=C2C3C(C)C45CCC6(CCC7C(=C)C(O)C(O)CC7(C)C6C1)C2(C)CCC34CC5",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.6082054971551125,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "B=C(O)C1=C2C3C(C)C45CCC6(CCC7C(=C)C(O)C(O)CC7(C)C6C1)C2(C)CCC34CC5",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.6082054971551125,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "B=C(O)C1=C2C3C(C)C45CCC6(CCC7C(=C)C(O)C(O)CC7(C)C6C1)C2(C)CCC34CC5",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.6082054971551125,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -3.6082054971551125
+        },
+        {
+          "step": 3,
+          "remaining_budget": 3,
+          "lookahead_steps": 2,
+          "state": "B=C(O)C1=C2C3C(C)C45CCC6(CCC7C(=C)C(O)C(O)CC7(C)C6C1)C2(C)CCC34CC5",
+          "duplicate_state": false,
+          "legal_successors": 485,
+          "candidates_evaluated": 8,
+          "greedy_key": "B=C(O)C1=C2C3C4CCC25CCC32CCC42CCC52CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+          "mc_key": "B=C(O)C1=C2C3C4CCC25CCC32CCC42CCC52CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+          "greedy_immediate_margin": -3.582560624267817,
+          "mc_immediate_margin": -3.582560624267817,
+          "greedy_probability": 0.027703549953521013,
+          "mc_probability": 0.027703549953521013,
+          "greedy_value_selection": -3.582560624267817,
+          "mc_value_selection": -3.582560624267817,
+          "greedy_value_fresh": -3.582560624267817,
+          "mc_value_fresh": -3.582560624267817,
+          "by_depth": {
+            "1": {
+              "mc_key": "B=C(O)C1=C2C3C4CCC25CCC32CCC42CCC52CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.582560624267817,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "B=C(O)C1=C2C3C4CCC25CCC32CCC42CCC52CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.582560624267817,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -3.582560624267817
+        },
+        {
+          "step": 4,
+          "remaining_budget": 2,
+          "lookahead_steps": 1,
+          "state": "B=C(O)C1=C2C3C4CCC25CCC32CCC42CCC52CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+          "duplicate_state": false,
+          "legal_successors": 52,
+          "candidates_evaluated": 8,
+          "greedy_key": "B=C(O)C1=C2C3C4(C)CCC25CCC32CCC42CCC52CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+          "mc_key": "B=C(O)C1=C2C3C4(C)CCC25CCC32CCC42CCC52CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+          "greedy_immediate_margin": -3.5695794859131533,
+          "mc_immediate_margin": -3.5695794859131533,
+          "greedy_probability": 0.02806292044646004,
+          "mc_probability": 0.02806292044646004,
+          "greedy_value_selection": -3.5695794859131533,
+          "mc_value_selection": -3.5695794859131533,
+          "greedy_value_fresh": -3.568627992959668,
+          "mc_value_fresh": -3.568627992959668,
+          "by_depth": {
+            "1": {
+              "mc_key": "B=C(O)C1=C2C3C4(C)CCC25CCC32CCC42CCC52CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.5695794859131533,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -3.5695794859131533
+        },
+        {
+          "step": 5,
+          "remaining_budget": 1,
+          "lookahead_steps": 0,
+          "state": "B=C(O)C1=C2C3C4(C)CCC25CCC32CCC42CCC52CCC3C(=C)C(O)C(O)CC3(C)C2C1",
+          "duplicate_state": false,
+          "legal_successors": 107,
+          "candidates_evaluated": 7,
+          "greedy_key": "C=C1C(O)C(O)CC2(C)C1CCC13CCC45CCC46CCC14CCC5(C)C6C4=C(C(O)=BN)CC23",
+          "mc_key": "C=C1C(O)C(O)CC2(C)C1CCC13CCC45CCC46CCC14CCC5(C)C6C4=C(C(O)=BN)CC23",
+          "greedy_immediate_margin": -3.566725007052697,
+          "mc_immediate_margin": -3.566725007052697,
+          "greedy_probability": 0.02814255845333247,
+          "mc_probability": 0.02814255845333247,
+          "greedy_value_selection": -3.566725007052697,
+          "mc_value_selection": -3.566725007052697,
+          "greedy_value_fresh": -3.566725007052697,
+          "mc_value_fresh": -3.566725007052697,
+          "by_depth": {},
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -3.566725007052697
+        }
+      ],
+      "kernel_calls": 145,
+      "seconds": 1911.1
+    },
+    {
+      "schema": "compose.editing_v2.c0_probe",
+      "source": "CC(CBr)n1c2c(c3ccccc31)CCNc1ccccc1-2",
+      "entry_id": "9c23548bdd966a68eb31ec8f528f6bff816420200a076b2ce3f9e8faea324e13",
+      "source_drd2": 0.012350739581265728,
+      "seed": 20260816,
+      "selected_step": 12500,
+      "config": {
+        "budget": 6,
+        "similarity_floor": 0.4,
+        "target_floor": 0.5,
+        "lookahead_depth": 3,
+        "candidates_top_margin": 4,
+        "candidates_top_reference": 2,
+        "candidates_random": 2,
+        "rollouts_select": 2,
+        "rollouts_eval": 3,
+        "time_point": 0.5,
+        "planning_signal": "logit P(active) (SVM margin); monotone with the benchmark probability so greedy is unchanged, but with resolution in the low-activity regime",
+        "outcome_signal": "P(active) against 0.5, the benchmark quantity"
+      },
+      "greedy_trajectory": [
+        "CC(CBr)n1c2c(c3ccccc31)CCNc1ccccc1-2",
+        "BrCC1Cc2ccc3c(c2)c2c(n31)-c1ccccc1NCC2",
+        "BrC1c2c3ccc4c2c2c(n4C1C3)-c1ccccc1NCC2",
+        "CC1(Br)c2c3ccc4c2c2c(n4C1C3)-c1ccccc1NCC2",
+        "CCC1(Br)c2c3ccc4c2c2c(n4C1C3)-c1ccccc1NCC2",
+        "CCC1(Br)c2c3ccc4c2c2c(n4C1(O)C3)-c1ccccc1NCC2"
+      ],
+      "greedy_solved_at": 5,
+      "decisions": [
+        {
+          "step": 0,
+          "remaining_budget": 6,
+          "lookahead_steps": 3,
+          "state": "CC(CBr)n1c2c(c3ccccc31)CCNc1ccccc1-2",
+          "duplicate_state": false,
+          "legal_successors": 501,
+          "candidates_evaluated": 8,
+          "greedy_key": "BrCC1Cc2ccc3c(c2)c2c(n31)-c1ccccc1NCC2",
+          "mc_key": "BrCC1Cc2ccc3c(c2)c2c(n31)-c1ccccc1NCC2",
+          "greedy_immediate_margin": -1.438338895748995,
+          "mc_immediate_margin": -1.438338895748995,
+          "greedy_probability": 0.19180300884441953,
+          "mc_probability": 0.19180300884441953,
+          "greedy_value_selection": -1.1775151125809256,
+          "mc_value_selection": -1.1775151125809256,
+          "greedy_value_fresh": -1.438338895748995,
+          "mc_value_fresh": -1.438338895748995,
+          "by_depth": {
+            "1": {
+              "mc_key": "BrCC1Cc2ccc3c(c2)c2c(n31)-c1ccccc1NCC2",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -1.438338895748995,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "BrCC1Cc2ccc3c(c2)c2c(n31)-c1ccccc1NCC2",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -1.438338895748995,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "BrCC1Cc2ccc3c(c2)c2c(n31)-c1ccccc1NCC2",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -1.438338895748995,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -1.438338895748995
+        },
+        {
+          "step": 1,
+          "remaining_budget": 5,
+          "lookahead_steps": 3,
+          "state": "BrCC1Cc2ccc3c(c2)c2c(n31)-c1ccccc1NCC2",
+          "duplicate_state": false,
+          "legal_successors": 181,
+          "candidates_evaluated": 8,
+          "greedy_key": "BrC1c2c3ccc4c2c2c(n4C1C3)-c1ccccc1NCC2",
+          "mc_key": "NCC1Cc2ccc3c(c2)c2c(n31)-c1ccccc1NCC2",
+          "greedy_immediate_margin": -0.5703547123511683,
+          "mc_immediate_margin": -0.6339394593295424,
+          "greedy_probability": 0.36295136322009447,
+          "mc_probability": 0.3490787010413603,
+          "greedy_value_selection": -0.5703547123511683,
+          "mc_value_selection": 0.088727740255095,
+          "greedy_value_fresh": -0.5703547123511683,
+          "mc_value_fresh": -0.1521613262731175,
+          "by_depth": {
+            "1": {
+              "mc_key": "NCC1Cc2ccc3c(c2)c2c(n31)-c1ccccc1NCC2",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -0.6339394593295424,
+              "fresh_regret": 0.15299175414987626,
+              "sacrifice_to_win": true
+            },
+            "2": {
+              "mc_key": "NCC1Cc2ccc3c(c2)c2c(n31)-c1ccccc1NCC2",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -0.6339394593295424,
+              "fresh_regret": 0.4181933860780508,
+              "sacrifice_to_win": true
+            },
+            "3": {
+              "mc_key": "NCC1Cc2ccc3c(c2)c2c(n31)-c1ccccc1NCC2",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -0.6339394593295424,
+              "fresh_regret": 0.4181933860780508,
+              "sacrifice_to_win": true
+            }
+          },
+          "top1_disagreement": true,
+          "fresh_regret": 0.4181933860780508,
+          "immediate_sacrifice": 0.06358474697837413,
+          "sacrifice_to_win": true,
+          "best_immediate_margin": -0.5703547123511683
+        },
+        {
+          "step": 2,
+          "remaining_budget": 4,
+          "lookahead_steps": 3,
+          "state": "BrC1c2c3ccc4c2c2c(n4C1C3)-c1ccccc1NCC2",
+          "duplicate_state": false,
+          "legal_successors": 12,
+          "candidates_evaluated": 6,
+          "greedy_key": "CC1(Br)c2c3ccc4c2c2c(n4C1C3)-c1ccccc1NCC2",
+          "mc_key": "CC1(Br)c2c3ccc4c2c2c(n4C1C3)-c1ccccc1NCC2",
+          "greedy_immediate_margin": -0.7520412325242871,
+          "mc_immediate_margin": -0.7520412325242871,
+          "greedy_probability": 0.3203766925186733,
+          "mc_probability": 0.3203766925186733,
+          "greedy_value_selection": -0.5623353841084242,
+          "mc_value_selection": -0.5623353841084242,
+          "greedy_value_fresh": -0.5703547123511683,
+          "mc_value_fresh": -0.5703547123511683,
+          "by_depth": {
+            "1": {
+              "mc_key": "CC1c2c3ccc4c2c2c(n4C1C3)-c1ccccc1NCC2",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -1.0326402965264596,
+              "fresh_regret": -0.024786107816001435,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "CC1c2c3ccc4c2c2c(n4C1C3)-c1ccccc1NCC2",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -1.0326402965264596,
+              "fresh_regret": -0.024786107816001435,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "CC1(Br)c2c3ccc4c2c2c(n4C1C3)-c1ccccc1NCC2",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -0.7520412325242871,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -0.7520412325242871
+        },
+        {
+          "step": 3,
+          "remaining_budget": 3,
+          "lookahead_steps": 2,
+          "state": "CC1(Br)c2c3ccc4c2c2c(n4C1C3)-c1ccccc1NCC2",
+          "duplicate_state": false,
+          "legal_successors": 72,
+          "candidates_evaluated": 8,
+          "greedy_key": "CCC1(Br)c2c3ccc4c2c2c(n4C1C3)-c1ccccc1NCC2",
+          "mc_key": "CCC1(Br)c2c3ccc4c2c2c(n4C1C3)-c1ccccc1NCC2",
+          "greedy_immediate_margin": -0.036033444477316934,
+          "mc_immediate_margin": -0.036033444477316934,
+          "greedy_probability": 0.49099266514366463,
+          "mc_probability": 0.49099266514366463,
+          "greedy_value_selection": -0.036033444477316934,
+          "mc_value_selection": -0.036033444477316934,
+          "greedy_value_fresh": -0.036033444477316934,
+          "mc_value_fresh": -0.036033444477316934,
+          "by_depth": {
+            "1": {
+              "mc_key": "CCC1(Br)c2c3ccc4c2c2c(n4C1C3)-c1ccccc1NCC2",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -0.036033444477316934,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "CCC1(Br)c2c3ccc4c2c2c(n4C1C3)-c1ccccc1NCC2",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -0.036033444477316934,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -0.036033444477316934
+        },
+        {
+          "step": 4,
+          "remaining_budget": 2,
+          "lookahead_steps": 1,
+          "state": "CCC1(Br)c2c3ccc4c2c2c(n4C1C3)-c1ccccc1NCC2",
+          "duplicate_state": false,
+          "legal_successors": 90,
+          "candidates_evaluated": 8,
+          "greedy_key": "CCC1(Br)c2c3ccc4c2c2c(n4C1(O)C3)-c1ccccc1NCC2",
+          "mc_key": "CCC1(Br)c2c3ccc4c2c2c(n4C1(S)C3)-c1ccccc1NCC2",
+          "greedy_immediate_margin": 0.09721176634420481,
+          "mc_immediate_margin": 0.09721176634420481,
+          "greedy_probability": 0.5242867245373646,
+          "mc_probability": 0.5242867245373646,
+          "greedy_value_selection": 0.09721176634418405,
+          "mc_value_selection": 0.09721176634420481,
+          "greedy_value_fresh": 0.09721176634418405,
+          "mc_value_fresh": 0.09721176634420481,
+          "by_depth": {
+            "1": {
+              "mc_key": "CCC1(Br)c2c3ccc4c2c2c(n4C1(S)C3)-c1ccccc1NCC2",
+              "top1_disagreement": true,
+              "mc_immediate_margin": 0.09721176634420481,
+              "fresh_regret": 2.0761170560490427e-14,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": true,
+          "fresh_regret": 2.0761170560490427e-14,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": 0.09721176634420481
+        }
+      ],
+      "kernel_calls": 100,
+      "seconds": 726.5
+    },
+    {
+      "schema": "compose.editing_v2.c0_probe",
+      "source": "Cn1ccc(COc2ccc3nc(C4CCCCC4C(=O)O)n(Cc4ccc(OC(F)(F)F)cc4Br)c3c2)n1",
+      "entry_id": "5a42d8af1d9836420a328a3bf632c0291ddd1315f8fecf2daacfd474a3655e55",
+      "source_drd2": 0.03656699171653731,
+      "seed": 20260817,
+      "selected_step": 12500,
+      "config": {
+        "budget": 6,
+        "similarity_floor": 0.4,
+        "target_floor": 0.5,
+        "lookahead_depth": 3,
+        "candidates_top_margin": 4,
+        "candidates_top_reference": 2,
+        "candidates_random": 2,
+        "rollouts_select": 2,
+        "rollouts_eval": 3,
+        "time_point": 0.5,
+        "planning_signal": "logit P(active) (SVM margin); monotone with the benchmark probability so greedy is unchanged, but with resolution in the low-activity regime",
+        "outcome_signal": "P(active) against 0.5, the benchmark quantity"
+      },
+      "greedy_trajectory": [
+        "Cn1ccc(COc2ccc3nc(C4CCCCC4C(=O)O)n(Cc4ccc(OC(F)(F)F)cc4Br)c3c2)n1",
+        "Cn1ccc(COc2ccc3nc(C4CCNCC4C(=O)O)n(Cc4ccc(OC(F)(F)F)cc4Br)c3c2)n1",
+        "CN1CCC(c2nc3ccc(OCc4cc[nH]n4)cc3n2Cc2ccc(OC(F)(F)F)cc2Br)C(C(=O)O)C1",
+        "O=C(O)C1CN(CC(F)(F)F)CCC1c1nc2ccc(OCc3cc[nH]n3)cc2n1Cc1ccc(O)cc1Br"
+      ],
+      "greedy_solved_at": 3,
+      "decisions": [
+        {
+          "step": 0,
+          "remaining_budget": 6,
+          "lookahead_steps": 3,
+          "state": "Cn1ccc(COc2ccc3nc(C4CCCCC4C(=O)O)n(Cc4ccc(OC(F)(F)F)cc4Br)c3c2)n1",
+          "duplicate_state": false,
+          "legal_successors": 893,
+          "candidates_evaluated": 8,
+          "greedy_key": "Cn1ccc(COc2ccc3nc(C4CCNCC4C(=O)O)n(Cc4ccc(OC(F)(F)F)cc4Br)c3c2)n1",
+          "mc_key": "Cn1ccc(COC2CCC3NC(C4CCCCC4C(=O)O)N(Cc4ccc(OC(F)(F)F)cc4Br)C3C2)n1",
+          "greedy_immediate_margin": -2.368992931492542,
+          "mc_immediate_margin": -2.587579390984925,
+          "greedy_probability": 0.08556797347436455,
+          "mc_probability": 0.069942109411015,
+          "greedy_value_selection": -2.368992931492542,
+          "mc_value_selection": -2.125001405791048,
+          "greedy_value_fresh": -1.8222141014666793,
+          "mc_value_fresh": -1.7660242780195832,
+          "by_depth": {
+            "1": {
+              "mc_key": "Cn1ccc(COC2CCC3NC(C4CCCCC4C(=O)O)N(Cc4ccc(OC(F)(F)F)cc4Br)C3C2)n1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -2.587579390984925,
+              "fresh_regret": 0.3981841874327865,
+              "sacrifice_to_win": true
+            },
+            "2": {
+              "mc_key": "Cn1ccc(COC2CCC3NC(C4CCCCC4C(=O)O)N(Cc4ccc(OC(F)(F)F)cc4Br)C3C2)n1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -2.587579390984925,
+              "fresh_regret": 0.05618982344709611,
+              "sacrifice_to_win": true
+            },
+            "3": {
+              "mc_key": "Cn1ccc(COC2CCC3NC(C4CCCCC4C(=O)O)N(Cc4ccc(OC(F)(F)F)cc4Br)C3C2)n1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -2.587579390984925,
+              "fresh_regret": 0.05618982344709611,
+              "sacrifice_to_win": true
+            }
+          },
+          "top1_disagreement": true,
+          "fresh_regret": 0.05618982344709611,
+          "immediate_sacrifice": 0.21858645949238298,
+          "sacrifice_to_win": true,
+          "best_immediate_margin": -2.368992931492542
+        },
+        {
+          "step": 1,
+          "remaining_budget": 5,
+          "lookahead_steps": 3,
+          "state": "Cn1ccc(COc2ccc3nc(C4CCNCC4C(=O)O)n(Cc4ccc(OC(F)(F)F)cc4Br)c3c2)n1",
+          "duplicate_state": false,
+          "legal_successors": 866,
+          "candidates_evaluated": 8,
+          "greedy_key": "CN1CCC(c2nc3ccc(OCc4cc[nH]n4)cc3n2Cc2ccc(OC(F)(F)F)cc2Br)C(C(=O)O)C1",
+          "mc_key": "CN1CCC(c2nc3ccc(OCc4cc[nH]n4)cc3n2Cc2ccc(OC(F)(F)F)cc2Br)C(C(=O)O)C1",
+          "greedy_immediate_margin": -0.9464768377837669,
+          "mc_immediate_margin": -0.9464768377837669,
+          "greedy_probability": 0.2795939402703042,
+          "mc_probability": 0.2795939402703042,
+          "greedy_value_selection": -0.9464768377837669,
+          "mc_value_selection": -0.9464768377837669,
+          "greedy_value_fresh": -0.8487667174676998,
+          "mc_value_fresh": -0.8487667174676998,
+          "by_depth": {
+            "1": {
+              "mc_key": "CN1CCC(c2nc3ccc(OCc4cc[nH]n4)cc3n2Cc2ccc(OC(F)(F)F)cc2Br)C(C(=O)O)C1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -0.9464768377837669,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "CN1CCC(c2nc3ccc(OCc4cc[nH]n4)cc3n2Cc2ccc(OC(F)(F)F)cc2Br)C(C(=O)O)C1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -0.9464768377837669,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "CN1CCC(c2nc3ccc(OCc4cc[nH]n4)cc3n2Cc2ccc(OC(F)(F)F)cc2Br)C(C(=O)O)C1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -0.9464768377837669,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -0.9464768377837669
+        },
+        {
+          "step": 2,
+          "remaining_budget": 4,
+          "lookahead_steps": 3,
+          "state": "CN1CCC(c2nc3ccc(OCc4cc[nH]n4)cc3n2Cc2ccc(OC(F)(F)F)cc2Br)C(C(=O)O)C1",
+          "duplicate_state": false,
+          "legal_successors": 848,
+          "candidates_evaluated": 8,
+          "greedy_key": "O=C(O)C1CN(CC(F)(F)F)CCC1c1nc2ccc(OCc3cc[nH]n3)cc2n1Cc1ccc(O)cc1Br",
+          "mc_key": "O=C(O)C1CN(CC(F)(F)F)CCC1c1nc2ccc(OCc3cc[nH]n3)cc2n1Cc1ccc(O)cc1Br",
+          "greedy_immediate_margin": 0.1462640373218006,
+          "mc_immediate_margin": 0.1462640373218006,
+          "greedy_probability": 0.5365160410377696,
+          "mc_probability": 0.5365160410377696,
+          "greedy_value_selection": 0.1462640373218006,
+          "mc_value_selection": 0.1462640373218006,
+          "greedy_value_fresh": 0.20755270232684042,
+          "mc_value_fresh": 0.20755270232684042,
+          "by_depth": {
+            "1": {
+              "mc_key": "O=C(O)C1CN(CC(F)(F)F)CCC1c1nc2ccc(OCc3cc[nH]n3)cc2n1Cc1ccc(O)cc1Br",
+              "top1_disagreement": false,
+              "mc_immediate_margin": 0.1462640373218006,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "O=C(O)C1CN(CC(F)(F)F)CCC1c1nc2ccc(OCc3cc[nH]n3)cc2n1Cc1ccc(O)cc1Br",
+              "top1_disagreement": false,
+              "mc_immediate_margin": 0.1462640373218006,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "O=C(O)C1CN(CC(F)(F)F)CCC1c1nc2ccc(OCc3cc[nH]n3)cc2n1Cc1ccc(O)cc1Br",
+              "top1_disagreement": false,
+              "mc_immediate_margin": 0.1462640373218006,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": 0.1462640373218006
+        }
+      ],
+      "kernel_calls": 126,
+      "seconds": 2069.0
+    },
+    {
+      "schema": "compose.editing_v2.c0_probe",
+      "source": "COc1cc2c(cc1O)OC1c3cc(CC=C(C)C)ccc3OCC21",
+      "entry_id": "3498c3270a673f3f3176667b1f91fb3b9b756aa10b723d357378af52987ab34b",
+      "source_drd2": 0.04604821055175308,
+      "seed": 20260818,
+      "selected_step": 12500,
+      "config": {
+        "budget": 6,
+        "similarity_floor": 0.4,
+        "target_floor": 0.5,
+        "lookahead_depth": 3,
+        "candidates_top_margin": 4,
+        "candidates_top_reference": 2,
+        "candidates_random": 2,
+        "rollouts_select": 2,
+        "rollouts_eval": 3,
+        "time_point": 0.5,
+        "planning_signal": "logit P(active) (SVM margin); monotone with the benchmark probability so greedy is unchanged, but with resolution in the low-activity regime",
+        "outcome_signal": "P(active) against 0.5, the benchmark quantity"
+      },
+      "greedy_trajectory": [
+        "COc1cc2c(cc1O)OC1c3cc(CC=C(C)C)ccc3OCC21",
+        "COc1cc2c(cc1O)OC1c3cc(CC=C(C)C)ccc3BCC21"
+      ],
+      "greedy_solved_at": 1,
+      "decisions": [
+        {
+          "step": 0,
+          "remaining_budget": 6,
+          "lookahead_steps": 3,
+          "state": "COc1cc2c(cc1O)OC1c3cc(CC=C(C)C)ccc3OCC21",
+          "duplicate_state": false,
+          "legal_successors": 551,
+          "candidates_evaluated": 8,
+          "greedy_key": "COc1cc2c(cc1O)OC1c3cc(CC=C(C)C)ccc3BCC21",
+          "mc_key": "COc1cc2c(cc1O)OC1c3cc(CC=C(C)C)ccc3CCC21",
+          "greedy_immediate_margin": 0.902973488341932,
+          "mc_immediate_margin": 0.902973488341932,
+          "greedy_probability": 0.7115606235105363,
+          "mc_probability": 0.7115606235105363,
+          "greedy_value_selection": 0.9587677025973839,
+          "mc_value_selection": 1.5118619182969828,
+          "greedy_value_fresh": 1.4702278272131373,
+          "mc_value_fresh": 1.0670197930252001,
+          "by_depth": {
+            "1": {
+              "mc_key": "COc1cc2c(cc1O)OC1c3cc(CC=C(C)C)ccc3CCC21",
+              "top1_disagreement": true,
+              "mc_immediate_margin": 0.902973488341932,
+              "fresh_regret": -0.11940965158734007,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "COc1cc2c(cc1O)OC1c3cc(CC=C(C)C)ccc3CCC21",
+              "top1_disagreement": true,
+              "mc_immediate_margin": 0.902973488341932,
+              "fresh_regret": -0.4166892345285843,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "COc1cc2c(cc1O)OC1c3cc(CC=C(C)C)ccc3CCC21",
+              "top1_disagreement": true,
+              "mc_immediate_margin": 0.902973488341932,
+              "fresh_regret": -0.40320803418793716,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": true,
+          "fresh_regret": -0.40320803418793716,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": 0.902973488341932
+        }
+      ],
+      "kernel_calls": 47,
+      "seconds": 436.2
+    },
+    {
+      "schema": "compose.editing_v2.c0_probe",
+      "source": "CCN(CCNC(=O)c1cc(C)ccc1N1CCOCC1)c1ccc(C(C)=O)cc1F",
+      "entry_id": "67f33d099e3c6ee4b8fe083dfe1fd2c2ed7e0da01f85d32ea1c545b640c731e0",
+      "source_drd2": 0.010758445378142205,
+      "seed": 20260819,
+      "selected_step": 12500,
+      "config": {
+        "budget": 6,
+        "similarity_floor": 0.4,
+        "target_floor": 0.5,
+        "lookahead_depth": 3,
+        "candidates_top_margin": 4,
+        "candidates_top_reference": 2,
+        "candidates_random": 2,
+        "rollouts_select": 2,
+        "rollouts_eval": 3,
+        "time_point": 0.5,
+        "planning_signal": "logit P(active) (SVM margin); monotone with the benchmark probability so greedy is unchanged, but with resolution in the low-activity regime",
+        "outcome_signal": "P(active) against 0.5, the benchmark quantity"
+      },
+      "greedy_trajectory": [
+        "CCN(CCNC(=O)c1cc(C)ccc1N1CCOCC1)c1ccc(C(C)=O)cc1F",
+        "CCN(CCNC(=O)c1cc(C)ccc1N1CCNCC1)c1ccc(C(C)=O)cc1F",
+        "CCN(CCNC(=O)c1cc2ccc1N1CCN(CC1)C2)c1ccc(C(C)=O)cc1F"
+      ],
+      "greedy_solved_at": 2,
+      "decisions": [
+        {
+          "step": 0,
+          "remaining_budget": 6,
+          "lookahead_steps": 3,
+          "state": "CCN(CCNC(=O)c1cc(C)ccc1N1CCOCC1)c1ccc(C(C)=O)cc1F",
+          "duplicate_state": false,
+          "legal_successors": 709,
+          "candidates_evaluated": 8,
+          "greedy_key": "CCN(CCNC(=O)c1cc(C)ccc1N1CCNCC1)c1ccc(C(C)=O)cc1F",
+          "mc_key": "CCN(CCNC(=O)c1cc(C)ccc1N1CCNCC1)c1ccc(C(C)=O)cc1F",
+          "greedy_immediate_margin": -1.7015073927778592,
+          "mc_immediate_margin": -1.7015073927778592,
+          "greedy_probability": 0.1542688155097222,
+          "mc_probability": 0.1542688155097222,
+          "greedy_value_selection": -1.7015073927778592,
+          "mc_value_selection": -1.7015073927778592,
+          "greedy_value_fresh": -1.7015073927778592,
+          "mc_value_fresh": -1.7015073927778592,
+          "by_depth": {
+            "1": {
+              "mc_key": "CCN(CCNC(=O)c1cc(C)ccc1N1CCNCC1)c1ccc(C(C)=O)cc1F",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -1.7015073927778592,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "CCN(CCNC(=O)c1cc(C)ccc1N1CCNCC1)c1ccc(C(C)=O)cc1F",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -1.7015073927778592,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "CCN(CCNC(=O)c1cc(C)ccc1N1CCNCC1)c1ccc(C(C)=O)cc1F",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -1.7015073927778592,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -1.7015073927778592
+        },
+        {
+          "step": 1,
+          "remaining_budget": 5,
+          "lookahead_steps": 3,
+          "state": "CCN(CCNC(=O)c1cc(C)ccc1N1CCNCC1)c1ccc(C(C)=O)cc1F",
+          "duplicate_state": false,
+          "legal_successors": 714,
+          "candidates_evaluated": 8,
+          "greedy_key": "CCN(CCNC(=O)c1cc2ccc1N1CCN(CC1)C2)c1ccc(C(C)=O)cc1F",
+          "mc_key": "CCN(CCNC(=O)c1cc2ccc1N1CCN(CC1)C2)c1ccc(C(C)=O)cc1F",
+          "greedy_immediate_margin": 1.737371004339863,
+          "mc_immediate_margin": 1.737371004339863,
+          "greedy_probability": 0.8504689895050996,
+          "mc_probability": 0.8504689895050996,
+          "greedy_value_selection": 2.241455535885204,
+          "mc_value_selection": 2.241455535885204,
+          "greedy_value_fresh": 1.737371004339863,
+          "mc_value_fresh": 1.737371004339863,
+          "by_depth": {
+            "1": {
+              "mc_key": "CCCc1ccc(N2CCNCC2)c(C(=O)NCCNc2ccc(C(C)=O)cc2F)c1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": 0.2596529434500642,
+              "fresh_regret": -0.27645808425050666,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "CCCc1ccc(N2CCNCC2)c(C(=O)NCCNc2ccc(C(C)=O)cc2F)c1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": 0.2596529434500642,
+              "fresh_regret": -0.27645808425050666,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "CCN(CCNC(=O)c1cc2ccc1N1CCN(CC1)C2)c1ccc(C(C)=O)cc1F",
+              "top1_disagreement": false,
+              "mc_immediate_margin": 1.737371004339863,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": 1.737371004339863
+        }
+      ],
+      "kernel_calls": 64,
+      "seconds": 505.0
+    },
+    {
+      "schema": "compose.editing_v2.c0_probe",
+      "source": "C[SH2](=O)c1ccc2nc(NC(=O)C34CC5CC(C3)CC(N(O)C=O)(C5)C4)sc2c1",
+      "entry_id": "13eb52100cf3c5c1ab1b61ccc090c401e283b18f1b5d6290e91c54d19486edc0",
+      "source_drd2": 0.0019361305522884059,
+      "seed": 20260820,
+      "selected_step": 12500,
+      "config": {
+        "budget": 6,
+        "similarity_floor": 0.4,
+        "target_floor": 0.5,
+        "lookahead_depth": 3,
+        "candidates_top_margin": 4,
+        "candidates_top_reference": 2,
+        "candidates_random": 2,
+        "rollouts_select": 2,
+        "rollouts_eval": 3,
+        "time_point": 0.5,
+        "planning_signal": "logit P(active) (SVM margin); monotone with the benchmark probability so greedy is unchanged, but with resolution in the low-activity regime",
+        "outcome_signal": "P(active) against 0.5, the benchmark quantity"
+      },
+      "greedy_trajectory": [
+        "C[SH2](=O)c1ccc2nc(NC(=O)C34CC5CC(C3)CC(N(O)C=O)(C5)C4)sc2c1",
+        "C=C(C=c1sc(NC(=O)C23CC4CC(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=O",
+        "C=C(C=c1sc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=O",
+        "C=C(C(Br)=c1sc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=O",
+        "C=C(C(Br)=c1sc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=[IH3]",
+        "C=c1nc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)sc1=C(Br)C(=CBr)[SH2](C)=[IH3]",
+        "C=c1nc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)sc1=C(Br)C(=C(Br)Br)[SH2](C)=[IH3]"
+      ],
+      "greedy_solved_at": null,
+      "decisions": [
+        {
+          "step": 0,
+          "remaining_budget": 6,
+          "lookahead_steps": 3,
+          "state": "C[SH2](=O)c1ccc2nc(NC(=O)C34CC5CC(C3)CC(N(O)C=O)(C5)C4)sc2c1",
+          "duplicate_state": false,
+          "legal_successors": 580,
+          "candidates_evaluated": 7,
+          "greedy_key": "C=C(C=c1sc(NC(=O)C23CC4CC(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=O",
+          "mc_key": "C=CC(=Cc1cnc(NC(=O)C23CC4CC(C2)CC(N(O)C=O)(C4)C3)s1)[SH2](C)=O",
+          "greedy_immediate_margin": -4.59879444031532,
+          "mc_immediate_margin": -4.624209604415433,
+          "greedy_probability": 0.010058977779364563,
+          "mc_probability": 0.009806786699970184,
+          "greedy_value_selection": -4.59879444031532,
+          "mc_value_selection": -4.501843836426592,
+          "greedy_value_fresh": -4.59879444031532,
+          "mc_value_fresh": -4.1651708024039005,
+          "by_depth": {
+            "1": {
+              "mc_key": "C=C(C=c1sc(NC(=O)C23CC4CC(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=O",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -4.59879444031532,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "C=C(C=c1sc(NC(=O)C23CC4CC(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=O",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -4.59879444031532,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "C=CC(=Cc1cnc(NC(=O)C23CC4CC(C2)CC(N(O)C=O)(C4)C3)s1)[SH2](C)=O",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -4.624209604415433,
+              "fresh_regret": 0.43362363791141956,
+              "sacrifice_to_win": true
+            }
+          },
+          "top1_disagreement": true,
+          "fresh_regret": 0.43362363791141956,
+          "immediate_sacrifice": 0.025415164100112797,
+          "sacrifice_to_win": true,
+          "best_immediate_margin": -4.59879444031532
+        },
+        {
+          "step": 1,
+          "remaining_budget": 5,
+          "lookahead_steps": 3,
+          "state": "C=C(C=c1sc(NC(=O)C23CC4CC(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=O",
+          "duplicate_state": false,
+          "legal_successors": 508,
+          "candidates_evaluated": 8,
+          "greedy_key": "C=C(C=c1sc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=O",
+          "mc_key": "C=C(C=c1sc(NC(=P)C23CC4CC(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=O",
+          "greedy_immediate_margin": -3.9336061279673746,
+          "mc_immediate_margin": -4.009788310451003,
+          "greedy_probability": 0.01953709323908679,
+          "mc_probability": 0.018108598468117368,
+          "greedy_value_selection": -3.9336061279673746,
+          "mc_value_selection": -3.9123924432291197,
+          "greedy_value_fresh": -3.9336061279673746,
+          "mc_value_fresh": -4.009788310451003,
+          "by_depth": {
+            "1": {
+              "mc_key": "C=C(C=c1sc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=O",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.9336061279673746,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "C=C(C=c1sc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=O",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.9336061279673746,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "C=C(C=c1sc(NC(=P)C23CC4CC(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=O",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -4.009788310451003,
+              "fresh_regret": -0.0761821824836284,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": true,
+          "fresh_regret": -0.0761821824836284,
+          "immediate_sacrifice": 0.0761821824836284,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -3.9336061279673746
+        },
+        {
+          "step": 2,
+          "remaining_budget": 4,
+          "lookahead_steps": 3,
+          "state": "C=C(C=c1sc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=O",
+          "duplicate_state": false,
+          "legal_successors": 180,
+          "candidates_evaluated": 9,
+          "greedy_key": "C=C(C(Br)=c1sc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=O",
+          "mc_key": "C=C(C(Br)=c1sc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=O",
+          "greedy_immediate_margin": -3.21718010198036,
+          "mc_immediate_margin": -3.21718010198036,
+          "greedy_probability": 0.039774797259622276,
+          "mc_probability": 0.039774797259622276,
+          "greedy_value_selection": -3.21718010198036,
+          "mc_value_selection": -3.21718010198036,
+          "greedy_value_fresh": -3.2171801019803596,
+          "mc_value_fresh": -3.2171801019803596,
+          "by_depth": {
+            "1": {
+              "mc_key": "C=C(C(Br)=c1sc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=O",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.21718010198036,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "C=C(C(Br)=c1sc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=O",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.21718010198036,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "C=C(C(Br)=c1sc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=O",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -3.21718010198036,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -3.21718010198036
+        },
+        {
+          "step": 3,
+          "remaining_budget": 3,
+          "lookahead_steps": 2,
+          "state": "C=C(C(Br)=c1sc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=O",
+          "duplicate_state": false,
+          "legal_successors": 155,
+          "candidates_evaluated": 8,
+          "greedy_key": "C=C(C(Br)=c1sc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=[IH3]",
+          "mc_key": "C=C(C(Br)=c1sc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=[IH3]",
+          "greedy_immediate_margin": -2.713741659003942,
+          "mc_immediate_margin": -2.713741659003942,
+          "greedy_probability": 0.06216736256192953,
+          "mc_probability": 0.06216736256192953,
+          "greedy_value_selection": -2.713741659003942,
+          "mc_value_selection": -2.713741659003942,
+          "greedy_value_fresh": -2.713741659003942,
+          "mc_value_fresh": -2.713741659003942,
+          "by_depth": {
+            "1": {
+              "mc_key": "C=C(C(Br)=c1sc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=[IH3]",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -2.713741659003942,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "C=C(C(Br)=c1sc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=[IH3]",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -2.713741659003942,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -2.713741659003942
+        },
+        {
+          "step": 4,
+          "remaining_budget": 2,
+          "lookahead_steps": 1,
+          "state": "C=C(C(Br)=c1sc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)nc1=C)[SH2](C)=[IH3]",
+          "duplicate_state": false,
+          "legal_successors": 150,
+          "candidates_evaluated": 9,
+          "greedy_key": "C=c1nc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)sc1=C(Br)C(=CBr)[SH2](C)=[IH3]",
+          "mc_key": "C=c1nc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)sc1=C(Br)C(=CBr)[SH2](C)=[IH3]",
+          "greedy_immediate_margin": -2.407546508872744,
+          "mc_immediate_margin": -2.407546508872744,
+          "greedy_probability": 0.08259910363467407,
+          "mc_probability": 0.08259910363467407,
+          "greedy_value_selection": -2.386102763446253,
+          "mc_value_selection": -2.386102763446253,
+          "greedy_value_fresh": -2.386102763446253,
+          "mc_value_fresh": -2.386102763446253,
+          "by_depth": {
+            "1": {
+              "mc_key": "C=c1nc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)sc1=C(Br)C(=CBr)[SH2](C)=[IH3]",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -2.407546508872744,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -2.407546508872744
+        },
+        {
+          "step": 5,
+          "remaining_budget": 1,
+          "lookahead_steps": 0,
+          "state": "C=c1nc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)sc1=C(Br)C(=CBr)[SH2](C)=[IH3]",
+          "duplicate_state": false,
+          "legal_successors": 117,
+          "candidates_evaluated": 8,
+          "greedy_key": "C=c1nc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)sc1=C(Br)C(=C(Br)Br)[SH2](C)=[IH3]",
+          "mc_key": "C=c1nc(NC(=O)C23CC4CN(C2)CC(N(O)C=O)(C4)C3)sc1=C(Br)C(=C(Br)Br)[SH2](C)=[IH3]",
+          "greedy_immediate_margin": -2.0908377379498093,
+          "mc_immediate_margin": -2.0908377379498093,
+          "greedy_probability": 0.10999070158119065,
+          "mc_probability": 0.10999070158119065,
+          "greedy_value_selection": -2.0908377379498093,
+          "mc_value_selection": -2.0908377379498093,
+          "greedy_value_fresh": -2.0908377379498093,
+          "mc_value_fresh": -2.0908377379498093,
+          "by_depth": {},
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -2.0908377379498093
+        }
+      ],
+      "kernel_calls": 112,
+      "seconds": 775.4
+    },
+    {
+      "schema": "compose.editing_v2.c0_probe",
+      "source": "CC(=NNC(=O)c1cccc(Br)c1O)c1cc2cc(Cl)ccc2n1C",
+      "entry_id": "1a4567877d7a75d91ad03a6416698baf8a75956bbf503825b0836fb835fa6448",
+      "source_drd2": 0.001639245881128408,
+      "seed": 20260821,
+      "selected_step": 12500,
+      "config": {
+        "budget": 6,
+        "similarity_floor": 0.4,
+        "target_floor": 0.5,
+        "lookahead_depth": 3,
+        "candidates_top_margin": 4,
+        "candidates_top_reference": 2,
+        "candidates_random": 2,
+        "rollouts_select": 2,
+        "rollouts_eval": 3,
+        "time_point": 0.5,
+        "planning_signal": "logit P(active) (SVM margin); monotone with the benchmark probability so greedy is unchanged, but with resolution in the low-activity regime",
+        "outcome_signal": "P(active) against 0.5, the benchmark quantity"
+      },
+      "greedy_trajectory": [
+        "CC(=NNC(=O)c1cccc(Br)c1O)c1cc2cc(Cl)ccc2n1C",
+        "CC(=NNC(=O)c1cccc(Br)c1O)C1CC2CC(Cl)CCC2N1C",
+        "CC(=NNC(=O)c1cccc(Br)c1O)C1CCC(CCCCl)N1C",
+        "CC(=NNC(=O)c1cccc(Br)c1O)C1CCCN1CCCCCl"
+      ],
+      "greedy_solved_at": 3,
+      "decisions": [
+        {
+          "step": 0,
+          "remaining_budget": 6,
+          "lookahead_steps": 3,
+          "state": "CC(=NNC(=O)c1cccc(Br)c1O)c1cc2cc(Cl)ccc2n1C",
+          "duplicate_state": false,
+          "legal_successors": 437,
+          "candidates_evaluated": 8,
+          "greedy_key": "CC(=NNC(=O)c1cccc(Br)c1O)C1CC2CC(Cl)CCC2N1C",
+          "mc_key": "CC(=NNC(=O)c1cccc(Br)c1O)C1CC2CC(Cl)CCC2N1C",
+          "greedy_immediate_margin": -2.17096005021351,
+          "mc_immediate_margin": -2.17096005021351,
+          "greedy_probability": 0.1023888956874092,
+          "mc_probability": 0.1023888956874092,
+          "greedy_value_selection": -2.17096005021351,
+          "mc_value_selection": -2.17096005021351,
+          "greedy_value_fresh": -2.17096005021351,
+          "mc_value_fresh": -2.17096005021351,
+          "by_depth": {
+            "1": {
+              "mc_key": "CC(=NNC(=O)c1cccc(Br)c1O)C1CC2CC(Cl)CCC2N1C",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -2.17096005021351,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "CC(=NNC(=O)c1cccc(Br)c1O)C1CC2CC(Cl)CCC2N1C",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -2.17096005021351,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "CC(=NNC(=O)c1cccc(Br)c1O)C1CC2CC(Cl)CCC2N1C",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -2.17096005021351,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -2.17096005021351
+        },
+        {
+          "step": 1,
+          "remaining_budget": 5,
+          "lookahead_steps": 3,
+          "state": "CC(=NNC(=O)c1cccc(Br)c1O)C1CC2CC(Cl)CCC2N1C",
+          "duplicate_state": false,
+          "legal_successors": 367,
+          "candidates_evaluated": 8,
+          "greedy_key": "CC(=NNC(=O)c1cccc(Br)c1O)C1CCC(CCCCl)N1C",
+          "mc_key": "CC(=NNC(=O)c1cccc(Br)c1O)C1CCC(CCC(C)Cl)N1C",
+          "greedy_immediate_margin": -1.219957753077639,
+          "mc_immediate_margin": -1.2247960873634833,
+          "greedy_probability": 0.22794405215027955,
+          "mc_probability": 0.2270936998232035,
+          "greedy_value_selection": -1.219957753077639,
+          "mc_value_selection": -1.153309483355022,
+          "greedy_value_fresh": -1.219957753077639,
+          "mc_value_fresh": -1.2247960873634833,
+          "by_depth": {
+            "1": {
+              "mc_key": "CC(=NNC(=O)c1cccc(Br)c1O)C1CCC(CCCCl)N1C",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -1.219957753077639,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "CC(=NNC(=O)c1cccc(Br)c1O)C1CCC(CCCCl)N1C",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -1.219957753077639,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "CC(=NNC(=O)c1cccc(Br)c1O)C1CCC(CCC(C)Cl)N1C",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -1.2247960873634833,
+              "fresh_regret": -0.004838334285844237,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": true,
+          "fresh_regret": -0.004838334285844237,
+          "immediate_sacrifice": 0.004838334285844237,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -1.219957753077639
+        },
+        {
+          "step": 2,
+          "remaining_budget": 4,
+          "lookahead_steps": 3,
+          "state": "CC(=NNC(=O)c1cccc(Br)c1O)C1CCC(CCCCl)N1C",
+          "duplicate_state": false,
+          "legal_successors": 372,
+          "candidates_evaluated": 8,
+          "greedy_key": "CC(=NNC(=O)c1cccc(Br)c1O)C1CCCN1CCCCCl",
+          "mc_key": "CC(=NNC(=O)c1cccc(Br)c1O)C1CCCN1CCCCCl",
+          "greedy_immediate_margin": 0.41864617723851644,
+          "mc_immediate_margin": 0.41864617723851644,
+          "greedy_probability": 0.6041692272778023,
+          "mc_probability": 0.6041692272778023,
+          "greedy_value_selection": 0.41864617723851644,
+          "mc_value_selection": 0.41864617723851644,
+          "greedy_value_fresh": 0.5967178059562438,
+          "mc_value_fresh": 0.5967178059562438,
+          "by_depth": {
+            "1": {
+              "mc_key": "CC(=NNC(=O)c1cccc(Br)c1O)C1CCCN1CCCCCl",
+              "top1_disagreement": false,
+              "mc_immediate_margin": 0.41864617723851644,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "CC(=NNC(=O)c1cccc(Br)c1O)C1CCCN1CCCCCl",
+              "top1_disagreement": false,
+              "mc_immediate_margin": 0.41864617723851644,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "CC(=NNC(=O)c1cccc(Br)c1O)C1CCCN1CCCCCl",
+              "top1_disagreement": false,
+              "mc_immediate_margin": 0.41864617723851644,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": 0.41864617723851644
+        }
+      ],
+      "kernel_calls": 109,
+      "seconds": 523.6
+    },
+    {
+      "schema": "compose.editing_v2.c0_probe",
+      "source": "CC(=O)Nc1nc(C)c(-c2csc(C(=O)Nc3nnn[nH]3)n2)s1",
+      "entry_id": "bb25d3f6e9e6fefb620a6f8500561c363e17e7f817842155a2c5933435568a11",
+      "source_drd2": 0.00041077010281151963,
+      "seed": 20260822,
+      "selected_step": 12500,
+      "config": {
+        "budget": 6,
+        "similarity_floor": 0.4,
+        "target_floor": 0.5,
+        "lookahead_depth": 3,
+        "candidates_top_margin": 4,
+        "candidates_top_reference": 2,
+        "candidates_random": 2,
+        "rollouts_select": 2,
+        "rollouts_eval": 3,
+        "time_point": 0.5,
+        "planning_signal": "logit P(active) (SVM margin); monotone with the benchmark probability so greedy is unchanged, but with resolution in the low-activity regime",
+        "outcome_signal": "P(active) against 0.5, the benchmark quantity"
+      },
+      "greedy_trajectory": [
+        "CC(=O)Nc1nc(C)c(-c2csc(C(=O)Nc3nnn[nH]3)n2)s1",
+        "CC(=O)Nc1nc(C)c(-c2nsc(C(=O)Nc3nnn[nH]3)n2)s1",
+        "Cc1nc(NC(=O)O)sc1-c1nsc(C(=O)Nc2nnn[nH]2)n1",
+        "Cc1nc(NC(=O)O)sc1-c1nsc(CNc2nnn[nH]2)n1",
+        "Cc1nc(NC(=O)O)sc1-c1n[nH]c(CNc2nnn[nH]2)n1",
+        "Cc1nc(NC(=O)O)sc1C1=[PH2]NC(CNc2nnn[nH]2)=N1",
+        "Cc1nc(NC(=O)O)sc1C1=P2=C(Nc3nnn[nH]3)C(=N1)N2"
+      ],
+      "greedy_solved_at": null,
+      "decisions": [
+        {
+          "step": 0,
+          "remaining_budget": 6,
+          "lookahead_steps": 3,
+          "state": "CC(=O)Nc1nc(C)c(-c2csc(C(=O)Nc3nnn[nH]3)n2)s1",
+          "duplicate_state": false,
+          "legal_successors": 350,
+          "candidates_evaluated": 8,
+          "greedy_key": "CC(=O)Nc1nc(C)c(-c2nsc(C(=O)Nc3nnn[nH]3)n2)s1",
+          "mc_key": "Cc1nc(NC(=O)O)sc1-c1csc(C(=O)Nc2nnn[nH]2)n1",
+          "greedy_immediate_margin": -6.331593421009875,
+          "mc_immediate_margin": -6.411001999499299,
+          "greedy_probability": 0.0017791684498422462,
+          "mc_probability": 0.0016433549029069168,
+          "greedy_value_selection": -5.825536990271766,
+          "mc_value_selection": -5.811674307259529,
+          "greedy_value_fresh": -6.04634069516289,
+          "mc_value_fresh": -6.375268356736314,
+          "by_depth": {
+            "1": {
+              "mc_key": "CC(=O)Nc1nc(C)c(-c2nsc(C(=O)Nc3nnn[nH]3)n2)s1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -6.331593421009875,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "Cc1nc(NC(=O)O)sc1-c1csc(C(=O)Nc2nnn[nH]2)n1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -6.411001999499299,
+              "fresh_regret": -0.3289276615734247,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "Cc1nc(NC(=O)O)sc1-c1csc(C(=O)Nc2nnn[nH]2)n1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -6.411001999499299,
+              "fresh_regret": -0.3289276615734247,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": true,
+          "fresh_regret": -0.3289276615734247,
+          "immediate_sacrifice": 0.07940857848942429,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -6.331593421009875
+        },
+        {
+          "step": 1,
+          "remaining_budget": 5,
+          "lookahead_steps": 3,
+          "state": "CC(=O)Nc1nc(C)c(-c2nsc(C(=O)Nc3nnn[nH]3)n2)s1",
+          "duplicate_state": false,
+          "legal_successors": 277,
+          "candidates_evaluated": 8,
+          "greedy_key": "Cc1nc(NC(=O)O)sc1-c1nsc(C(=O)Nc2nnn[nH]2)n1",
+          "mc_key": "CC(=O)Cc1nc(C)c(-c2nsc(C(=O)Nc3nnn[nH]3)n2)s1",
+          "greedy_immediate_margin": -5.477817718013256,
+          "mc_immediate_margin": -5.623624238863777,
+          "greedy_probability": 0.004178076880040101,
+          "mc_probability": 0.003611294665483689,
+          "greedy_value_selection": -5.474473894534134,
+          "mc_value_selection": -5.416232181586922,
+          "greedy_value_fresh": -5.477817718013256,
+          "mc_value_fresh": -5.45260293191422,
+          "by_depth": {
+            "1": {
+              "mc_key": "CC(=O)Cc1nc(C)c(-c2nsc(C(=O)Nc3nnn[nH]3)n2)s1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -5.623624238863777,
+              "fresh_regret": -0.14580652085052126,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "CC(=O)Cc1nc(C)c(-c2nsc(C(=O)Nc3nnn[nH]3)n2)s1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -5.623624238863777,
+              "fresh_regret": -0.14580652085052126,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "CC(=O)Cc1nc(C)c(-c2nsc(C(=O)Nc3nnn[nH]3)n2)s1",
+              "top1_disagreement": true,
+              "mc_immediate_margin": -5.623624238863777,
+              "fresh_regret": 0.025214786099035713,
+              "sacrifice_to_win": true
+            }
+          },
+          "top1_disagreement": true,
+          "fresh_regret": 0.025214786099035713,
+          "immediate_sacrifice": 0.14580652085052126,
+          "sacrifice_to_win": true,
+          "best_immediate_margin": -5.477817718013256
+        },
+        {
+          "step": 2,
+          "remaining_budget": 4,
+          "lookahead_steps": 3,
+          "state": "Cc1nc(NC(=O)O)sc1-c1nsc(C(=O)Nc2nnn[nH]2)n1",
+          "duplicate_state": false,
+          "legal_successors": 177,
+          "candidates_evaluated": 8,
+          "greedy_key": "Cc1nc(NC(=O)O)sc1-c1nsc(CNc2nnn[nH]2)n1",
+          "mc_key": "Cc1nc(NC(=O)O)sc1-c1nsc(CNc2nnn[nH]2)n1",
+          "greedy_immediate_margin": -5.072537473350297,
+          "mc_immediate_margin": -5.072537473350297,
+          "greedy_probability": 0.0062652854774144515,
+          "mc_probability": 0.0062652854774144515,
+          "greedy_value_selection": -5.072537473350297,
+          "mc_value_selection": -5.072537473350297,
+          "greedy_value_fresh": -5.072537473350297,
+          "mc_value_fresh": -5.072537473350297,
+          "by_depth": {
+            "1": {
+              "mc_key": "Cc1nc(NC(=O)O)sc1-c1nsc(CNc2nnn[nH]2)n1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -5.072537473350297,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "Cc1nc(NC(=O)O)sc1-c1nsc(CNc2nnn[nH]2)n1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -5.072537473350297,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "3": {
+              "mc_key": "Cc1nc(NC(=O)O)sc1-c1nsc(CNc2nnn[nH]2)n1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -5.072537473350297,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -5.072537473350297
+        },
+        {
+          "step": 3,
+          "remaining_budget": 3,
+          "lookahead_steps": 2,
+          "state": "Cc1nc(NC(=O)O)sc1-c1nsc(CNc2nnn[nH]2)n1",
+          "duplicate_state": false,
+          "legal_successors": 92,
+          "candidates_evaluated": 8,
+          "greedy_key": "Cc1nc(NC(=O)O)sc1-c1n[nH]c(CNc2nnn[nH]2)n1",
+          "mc_key": "Cc1nc(NC(=O)O)sc1-c1n[nH]c(CNc2nnn[nH]2)n1",
+          "greedy_immediate_margin": -4.84761467921812,
+          "mc_immediate_margin": -4.84761467921812,
+          "greedy_probability": 0.007844698865000945,
+          "mc_probability": 0.007844698865000945,
+          "greedy_value_selection": -4.84761467921812,
+          "mc_value_selection": -4.84761467921812,
+          "greedy_value_fresh": -4.84761467921812,
+          "mc_value_fresh": -4.84761467921812,
+          "by_depth": {
+            "1": {
+              "mc_key": "Cc1nc(NC(=O)O)sc1-c1n[nH]c(CNc2nnn[nH]2)n1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -4.84761467921812,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            },
+            "2": {
+              "mc_key": "Cc1nc(NC(=O)O)sc1-c1n[nH]c(CNc2nnn[nH]2)n1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -4.84761467921812,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -4.84761467921812
+        },
+        {
+          "step": 4,
+          "remaining_budget": 2,
+          "lookahead_steps": 1,
+          "state": "Cc1nc(NC(=O)O)sc1-c1n[nH]c(CNc2nnn[nH]2)n1",
+          "duplicate_state": false,
+          "legal_successors": 108,
+          "candidates_evaluated": 8,
+          "greedy_key": "Cc1nc(NC(=O)O)sc1C1=[PH2]NC(CNc2nnn[nH]2)=N1",
+          "mc_key": "Cc1nc(NC(=O)O)sc1C1=[PH2]NC(CNc2nnn[nH]2)=N1",
+          "greedy_immediate_margin": -4.690799231778295,
+          "mc_immediate_margin": -4.690799231778295,
+          "greedy_probability": 0.009175557845547027,
+          "mc_probability": 0.009175557845547027,
+          "greedy_value_selection": -4.690799231778295,
+          "mc_value_selection": -4.690799231778295,
+          "greedy_value_fresh": -4.690799231778295,
+          "mc_value_fresh": -4.690799231778295,
+          "by_depth": {
+            "1": {
+              "mc_key": "Cc1nc(NC(=O)O)sc1C1=[PH2]NC(CNc2nnn[nH]2)=N1",
+              "top1_disagreement": false,
+              "mc_immediate_margin": -4.690799231778295,
+              "fresh_regret": 0.0,
+              "sacrifice_to_win": false
+            }
+          },
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -4.690799231778295
+        },
+        {
+          "step": 5,
+          "remaining_budget": 1,
+          "lookahead_steps": 0,
+          "state": "Cc1nc(NC(=O)O)sc1C1=[PH2]NC(CNc2nnn[nH]2)=N1",
+          "duplicate_state": false,
+          "legal_successors": 125,
+          "candidates_evaluated": 8,
+          "greedy_key": "Cc1nc(NC(=O)O)sc1C1=P2=C(Nc3nnn[nH]3)C(=N1)N2",
+          "mc_key": "Cc1nc(NC(=O)O)sc1C1=P2=C(Nc3nnn[nH]3)C(=N1)N2",
+          "greedy_immediate_margin": -4.533876186696794,
+          "mc_immediate_margin": -4.533876186696794,
+          "greedy_probability": 0.01073292344618983,
+          "mc_probability": 0.01073292344618983,
+          "greedy_value_selection": -4.533876186696794,
+          "mc_value_selection": -4.533876186696794,
+          "greedy_value_fresh": -4.533876186696794,
+          "mc_value_fresh": -4.533876186696794,
+          "by_depth": {},
+          "top1_disagreement": false,
+          "fresh_regret": 0.0,
+          "immediate_sacrifice": 0.0,
+          "sacrifice_to_win": false,
+          "best_immediate_margin": -4.533876186696794
+        }
+      ],
+      "kernel_calls": 126,
+      "seconds": 638.3
+    }
+  ]
+}
