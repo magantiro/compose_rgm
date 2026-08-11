@@ -1,0 +1,130 @@
+{
+  "band": "0.05-0.10 -> stop and freeze unless the curve is clearly still steep",
+  "completed_steps": 12753,
+  "curve_is_not_clearly_steep_because": [
+    "the last four deltas are -0.0140, -0.0043, -0.0148, +0.0184; three sit inside the ~0.026 measured noise floor and the final one is POSITIVE",
+    "the epoch ends ABOVE its own best: 2.8547 at step 12,753 against 2.8364 at 12,500",
+    "only 4 of 9 within-epoch deltas exceed the noise floor at all",
+    "per-epoch gains roughly halve (0.535, 0.152, 0.087); extrapolation puts epoch 4 near 0.04, below the stop threshold outright"
+  ],
+  "decision": "FREEZE at step 12,500",
+  "epoch_3_gain_nats": 0.0874,
+  "epoch_4": "NOT TAKEN. The rule requires a fresh explicit decision above 0.10; the gain is 0.0874 and the curve is not steep. Also unaffordable: spend is ~$3.9 against the $4 cap.",
+  "epochs_completed": 3,
+  "external_cohort_readings": {
+    "step_12753": 4.4064,
+    "step_3000": 4.3364,
+    "step_4500": 4.5787,
+    "step_8502": 4.3817,
+    "step_9000": 4.3288
+  },
+  "identity": {
+    "eval_panel_sha256": "c7c3c462f17f",
+    "initial_model_state_sha256": "3e6bd109a80a5850e9dc3cb16d0dfe5ab9c7c3e83904f3d1f6afe9fa32800fe9",
+    "initialization_seed": 20260730,
+    "library_sha256": "2d553afa5560319455855bf75306b6e9d5169180562be7b139cf14336f7ecb26",
+    "manifest_sha256": "e27494a462504b3030d0b6c430b09b4192ad9d56cfe6e4831a661c8f815ea3d4",
+    "packed_store_records_sha256": "b232a6fa069fef8cdd491e5d9b94fc2d445fce357c753c77128216cf60cc2df0",
+    "sampling_law_sha256": "b0cc66f168f1cf3e7a4b5bacfb1138059005251a10561d6961c3ea1c5dd7ac73",
+    "split_sha256": "c7c3c462f17f"
+  },
+  "identity_regressions_across_epoch_3": 0,
+  "identity_sha256": "426ac15e7f4cc68c2b0208992dd230d2e283c6cc524092df3cb2d3c5898b3b9a",
+  "identity_vs_initialization": {
+    "atom_delete": {
+      "delta": -0.6614,
+      "final": 0.9878416888554048,
+      "initialization": 1.6492439411391548
+    },
+    "atom_insert": {
+      "delta": -1.88,
+      "final": 3.2726127147600885,
+      "initialization": 5.152638616216099
+    },
+    "atom_restate": {
+      "delta": -1.8581,
+      "final": 3.346538061932142,
+      "initialization": 5.204675498349546
+    },
+    "bond_reorder": {
+      "delta": -0.2487,
+      "final": 1.2970207545644412,
+      "initialization": 1.545679897967849
+    },
+    "bond_reroute": {
+      "delta": -1.1311,
+      "final": 2.5064826351812046,
+      "initialization": 3.6375924133931483
+    },
+    "cycle_attach": {
+      "delta": -0.0061,
+      "final": 2.536552307892405,
+      "initialization": 2.542687498054896
+    },
+    "cycle_insert": {
+      "delta": -3.9207,
+      "final": 0.7939727955714426,
+      "initialization": 4.714679651885096
+    },
+    "ring_system_restate": {
+      "delta": -0.2165,
+      "final": 0.49740279092604217,
+      "initialization": 0.7139357416609212
+    }
+  },
+  "independent_reason_to_stop": "Epoch 3 improved ONLY well-supported chemistry. Support bands moved +0.0138 (band 0) and +0.0146 (band 1-4) -- worse -- against -0.0433 (5-24) and -0.0748 (25+). Further epochs sharpen supported chemistry at the cost of the unsupported-scaffold generalization regime, which is one of the paper's reported results.",
+  "outstanding_before_paper_bearing_runs": [
+    "RunIdentity does not bind the code commit (seven of eight required bindings present)",
+    "the dataset freeze does not name its upstream source asset: guacamol-subset-500000-seed0, sha 70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791, inferred from editing_v2 configs and corroborated empirically (MW p90 499.3, ORGANIC_VOCABULARY element set) but NOT recorded in the artifact chain -- the Active8 receipts name no source asset",
+    "three independently trained seeds are required; this run is development only"
+  ],
+  "per_epoch_gain_nats": {
+    "epoch_1": 0.5351,
+    "epoch_2": 0.1522,
+    "epoch_3": 0.0874
+  },
+  "previously_regressed_at_end": [],
+  "reference_law_nll_initialization_to_selected": [
+    5.4603,
+    2.8363681845047877
+  ],
+  "rule_applied": "diagnostics/editing_v2_epoch3_preregistration.json",
+  "run": "run_v2_01",
+  "schema": "compose.editing_v2.r_theta_freeze_decision",
+  "selected_criterion": [
+    1,
+    -2.8363681845047877,
+    -12500
+  ],
+  "selected_reference_law_weighted_mean_nll": 2.8363681845047877,
+  "selected_step": 12500,
+  "status": "FROZEN",
+  "support_bands_epoch_3": {
+    "0": {
+      "delta": 0.0138,
+      "end": 4.028249733481603,
+      "start": 4.014465195345737
+    },
+    "1-4": {
+      "delta": 0.0146,
+      "end": 3.853760583960258,
+      "start": 3.8391324564661278
+    },
+    "25+": {
+      "delta": -0.0748,
+      "end": 3.594475051972736,
+      "start": 3.6693127224413535
+    },
+    "5-24": {
+      "delta": -0.0433,
+      "end": 3.6585891236392682,
+      "start": 3.7019110419581422
+    }
+  },
+  "what_this_freezes": [
+    "objective (ordinary canonical-successor likelihood)",
+    "architecture",
+    "corpus, sampling law, split, reserve",
+    "the selected weights at step 12,500"
+  ]
+}
