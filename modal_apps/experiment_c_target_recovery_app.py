@@ -4,10 +4,15 @@ PREREGISTERED HYPOTHESIS
 ------------------------
 Remaining-budget hypothesis: future-aware value control will improve exact
 recovery of held-out, multi-step reachable molecular targets relative to myopic
-control, with the advantage expected to increase with transformation horizon.
+control.
 
 Deliberately NOT "will substantially outperform" -- the experiment has to earn
 the adverb. A null is a publishable result here and is reported as one.
+
+The earlier clause "with the advantage expected to increase with transformation
+horizon" is DROPPED, having been tested and not supported: the first run gave
++3 at 4 steps, 0 at 5, +2 at 6. Horizon is still reported, now as an
+observation rather than a prediction.
 
 WHY THIS PANEL ANSWERS WHAT DRD2 COULD NOT
 ------------------------------------------
@@ -242,7 +247,25 @@ def recover(task: dict[str, Any]) -> dict[str, Any]:
         for index in picked:
             outcome = greedy_from(keys[index], remaining - 1)
             values[index] = (outcome["recovered"], outcome["best"])
-        chosen = max(values, key=lambda i: (values[i][0], values[i][1], -i))
+
+        # STRICT IMPROVEMENT ONLY. The planner may override greedy only when a
+        # candidate has strictly better remaining-budget value; on a tie it
+        # takes the greedy action.
+        #
+        # The first run broke ties by key index, which is arbitrary, and 43 of
+        # its 52 disagreements were exact ties. That left the result open to
+        # "some recoveries came from taking an arbitrary different trajectory,
+        # not from identifying better future value" -- rollout value is only a
+        # LOWER bound on what re-planning achieves, so a tie at evaluation time
+        # can still diverge afterwards. Requiring strict improvement makes every
+        # override attributable to future value.
+        greedy_value = values[greedy_index]
+        challengers = {i: v for i, v in values.items() if v > greedy_value}
+        tied = sum(1 for i, v in values.items()
+                   if i != greedy_index and v == greedy_value)
+        chosen = (max(challengers, key=lambda i: (challengers[i][0],
+                                                  challengers[i][1], -i))
+                  if challengers else greedy_index)
 
         decisions.append({
             "step": step_index,
@@ -252,7 +275,11 @@ def recover(task: dict[str, Any]) -> dict[str, Any]:
             "chosen_key": keys[chosen],
             "greedy_immediate": float(immediate[greedy_index]),
             "chosen_immediate": float(immediate[chosen]),
+            # Under the strict rule every disagreement IS a strict improvement
+            # in remaining-budget value, so this is no longer contaminated by
+            # arbitrary tie-breaks.
             "disagreed": bool(chosen != greedy_index),
+            "tied_candidates_kept_greedy": tied,
             # Exact, not estimated: the planner took a worse-looking edit.
             "sacrificed_immediate": bool(
                 immediate[chosen] < immediate[greedy_index]),
@@ -370,8 +397,9 @@ def summarise(results: list[dict[str, Any]]) -> dict[str, Any]:
         "hypothesis": (
             "Remaining-budget hypothesis: future-aware value control will improve "
             "exact recovery of held-out, multi-step reachable molecular targets "
-            "relative to myopic control, with the advantage expected to increase "
-            "with transformation horizon."),
+            "relative to myopic control. The horizon clause was tested in the "
+            "tie-broken-by-index run and not supported (+3/0/+2 at 4/5/6), so it "
+            "is dropped; horizon is reported as an observation."),
         "pairs": len(results),
         "greedy_recovered": g, "lookahead_recovered": l,
         "by_verified_steps": {k: dict(v) for k, v in by_len.items()},
@@ -379,6 +407,12 @@ def summarise(results: list[dict[str, Any]]) -> dict[str, Any]:
         "mean_best_lookahead": sum(r["lookahead"]["best"] for r in results) / len(results),
         "decisions": len(decisions), "disagreed": disagreed,
         "sacrificed_immediate": sacrificed, "sacrifice_paid_off": paid,
+        "override_rule": (
+            "strict improvement only: the planner overrides greedy only when a "
+            "candidate has strictly better remaining-budget value; ties keep the "
+            "greedy action"),
+        "tied_candidates_kept_greedy": sum(
+            d.get("tied_candidates_kept_greedy", 0) for d in decisions),
         "kernel_calls_greedy": sum(r["kernel_calls_greedy"] for r in results),
         "kernel_calls_total": sum(r["kernel_calls_total"] for r in results),
         "policy_improvement_regressions": len(regressions),
