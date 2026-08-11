@@ -1,0 +1,40 @@
+{
+  "schema": "compose.editing_v2.development_reference_checkpoint",
+  "schema_version": 1,
+  "status": "DEVELOPMENT_REFERENCE_CHECKPOINT",
+  "explicitly_not": "PAPER_BEARING",
+  "checkpoint": {
+    "run": "run_v2_01",
+    "selected_step": 12500,
+    "reference_law_weighted_mean_nll": 2.8364,
+    "path": "/artifacts/editing_v2/r_theta_run/runs/run_v2_01/R_THETA_CHECKPOINT.pt",
+    "checkpoint_schema_version_at_write": 1
+  },
+  "why_it_is_not_paper_bearing": "It was trained before RunIdentity bound the code commit, so it carries seven of the eight required identity bindings and is CHECKPOINT_SCHEMA_VERSION 1. It is deliberately NOT retrofitted: it did its job -- architecture, objective, data law, and checkpoint-selection calibration -- and the paper seeds start fresh under the full contract.",
+  "what_it_may_be_used_for": [
+    "choosing controller architectures",
+    "debugging tasks and interfaces",
+    "determining oracle and edit budgets",
+    "rejecting bad baselines",
+    "identifying which experiments are strongest",
+    "deciding what belongs in the paper"
+  ],
+  "what_it_may_not_be_used_for": [
+    "any claim-bearing number in the paper",
+    "the final base-model likelihood table",
+    "final controller comparisons once architecture and tasks are frozen"
+  ],
+  "labelling_requirement": "Every result produced from this checkpoint must be labelled DEVELOPMENT / EXPERIMENT-DESIGN RESULT. Once choices are frozen, claim-bearing numbers are rerun under the final protocol.",
+  "identity": {
+    "reserve_digest": "b580fdef6486",
+    "sampling_law_frozen_sha256": "b0cc66f168f1cf3e",
+    "manifest_frozen_sha256": "e27494a462504b30",
+    "packed_store_records_sha256": "b232a6fa069fef8cdd491e5d9b94fc2d445fce357c753c77128216cf60cc2df0",
+    "library_sha256": "2d553afa5560319455855bf75306b6e9d5169180562be7b139cf14336f7ecb26",
+    "initialization_seed": 20260730,
+    "git_commit_sha": null
+  },
+  "three_seeds_deferred": "Deliberately NOT launched. The seeds establish that the trained reference model is REPRODUCIBLE; they are not a prerequisite for building or debugging the experiments. Spending on them before knowing whether bridge control beats the simpler alternatives would buy little if the controller, the tasks, or the benchmark turn out to need rework. Launch them after the first major decision point.",
+  "first_major_decision_point": "Does bridge control actually beat the simpler alternatives -- greedy, hard mask, local Boltzmann, beam search -- on the tasks COMPOSE is supposed to uniquely enable? If yes, spend on paper seeds and final reruns. If no, we learned it before generating mountains of final artifacts.",
+  "statistics_note": "Not every expensive experiment needs multiplying by every seed dimension. A likely design: 3 R_theta seeds for the base-model likelihood table, ONE preregistered validation-selected checkpoint for expensive controller comparisons, and many source molecules plus controller seeds for optimization uncertainty."
+}
