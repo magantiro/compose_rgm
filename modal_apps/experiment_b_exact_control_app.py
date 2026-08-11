@@ -65,6 +65,7 @@ def run_exact_control(
     heavy_atom_cap: int = 7,
     state_cap: int = 900,
     budget: int = 6,
+    elements: str = "",
 ) -> dict[str, Any]:
     import numpy as np
     import torch
@@ -111,13 +112,43 @@ def run_exact_control(
           f"{checkpoint['selected_step']:,}", flush=True)
 
     # ---- the enumerable slice, built BY THE KERNEL THAT WILL BE CONTROLLED --
-    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.chem.molecular_graph import (
+        IDX_TO_ELEMENT,
+        smiles_to_molecular_graph,
+    )
+
+    # A CLOSED slice matters more than a chemically broad one. This is a
+    # VERIFICATION slice, not a chemistry benchmark: the claim is that the
+    # implemented Doob controller realizes the specified controlled law exactly
+    # on a finite executable kernel, and for that you WANT a space small enough
+    # to enumerate exhaustively. Molecular-scale relevance is established
+    # separately, by approximate control on real molecules.
+    #
+    # Capping heavy atoms alone admits the whole 10-element ORGANIC_VOCABULARY
+    # and the space does not close: 6,036 states and still growing. The
+    # registered precedent is carbon-only at 6 slots -- 967 canonical states,
+    # 14,432 edges.
+    allowed = {s for s in elements.split(",") if s} or None
 
     def admissible(key: str) -> bool:
-        graph = smiles_to_molecular_graph(key)
+        # The kernel emits SENTINEL keys, not only SMILES: deleting methane's
+        # only atom yields '<NULL>'. smiles_to_molecular_graph RAISES on those
+        # rather than returning None, so the original `if graph is None` guard
+        # was dead code -- latent in the earlier runs, and surfaced immediately
+        # by a single-atom seed.
+        try:
+            graph = smiles_to_molecular_graph(key)
+        except Exception:
+            return False
         if graph is None:
             return False
-        return int((graph.atom_types >= 0).sum()) <= heavy_atom_cap
+        if int((graph.atom_types >= 0).sum()) > heavy_atom_cap:
+            return False
+        if allowed is not None:
+            present = {IDX_TO_ELEMENT[int(i)] for i in graph.atom_types if int(i) >= 0}
+            if not present <= allowed:
+                return False
+        return True
 
     states, rows, stop = build_editing_closure(
         model, seed_smiles, admissible=admissible, slots=heavy_atom_cap + 1,
@@ -127,12 +158,23 @@ def run_exact_control(
           f"(+cemetery), stop={stop}", flush=True)
 
     # ---- a target set that needs several edits to reach --------------------
-    def contains_nitrogen(key: str) -> bool:
-        return "N" in key or "n" in key
+    # An element indicator is the wrong objective on a chemically restricted
+    # slice: "contains nitrogen" is EMPTY under carbon-only, so the primary
+    # check would silently degenerate into another unreachability test -- the
+    # same trap the retargeting test already fell into once.
+    def heavy_atoms(key: str) -> int:
+        try:
+            graph = smiles_to_molecular_graph(key)
+        except Exception:
+            return 0
+        return 0 if graph is None else int((graph.atom_types >= 0).sum())
 
-    g = np.array([0.0 if k == CEMETERY else float(contains_nitrogen(k)) for k in keys])
+    sizes_all = np.array([0 if k == CEMETERY else heavy_atoms(k) for k in keys])
+    target_size = int(sizes_all.max())
+    g = np.where((sizes_all >= target_size) & (np.array(keys) != CEMETERY), 1.0, 0.0)
+    target_label = f"heavy atoms >= {target_size} (GROW)"
     x0 = index.get(seed_smiles, index[sorted(states)[0]])
-    print(f"  target: contains N -- {int(g.sum())} of {len(keys)-1} states", flush=True)
+    print(f"  target: {target_label} -- {int(g.sum())} of {len(keys)-1} states", flush=True)
 
     # terminal_tilt_residual is the module's own tested routine and returns the
     # tilt TV, support violations, row-sum error and backward-equation residual
@@ -148,7 +190,13 @@ def run_exact_control(
     # ---- DYNAMIC RETARGETING from a REALISED intermediate state ------------
     half = max(1, budget // 2)
     h = backward_values(R, g, budget)
-    midway = propagate(R, h, half, x0, len(keys))
+    # h[half:] , NOT h. propagate walks b = budget..1 and builds its kernel from
+    # (h[b-1], h[b]), so passing the full 6-step h with budget=3 uses h[0..3] --
+    # the LAST three steps -- instead of h[3..6], the first three. The symptom
+    # was a switch state of 'C': methane cannot reach 6 heavy atoms in 3 more
+    # edits, so the true 3-step-in law gives it zero mass. Slicing the tail
+    # yields exactly (h5,h6), (h4,h5), (h3,h4).
+    midway = propagate(R, h[half:], half, x0, len(keys))
     live = midway.copy()
     live[index[CEMETERY]] = -1.0
     switch = int(np.argmax(live))
@@ -173,17 +221,16 @@ def run_exact_control(
     reachable_mask = from_switch > 0
     reachable_mask[index[CEMETERY]] = False
 
-    def heavy_atoms(key: str) -> int:
-        graph = smiles_to_molecular_graph(key)
-        return 0 if graph is None else int((graph.atom_types >= 0).sum())
-
-    sizes = np.array([0 if (k == CEMETERY or not reachable_mask[i]) else heavy_atoms(k)
-                      for i, k in enumerate(keys)])
+    # SHRINK -- a genuinely conflicting objective to the GROW primary, and
+    # defined over what is actually reachable so a reachable=false result would
+    # be a finding rather than a test-design artifact.
+    sizes = np.where(reachable_mask, sizes_all, 0)
     live_sizes = sizes[reachable_mask]
     threshold = float(np.median(live_sizes)) if live_sizes.size else 0.0
-    g2 = np.where(reachable_mask & (sizes >= threshold), 1.0, 0.0)
-    print(f"  retarget objective: reachable states with >= {threshold:.0f} heavy atoms "
-          f"-- {int(g2.sum())} of {int(reachable_mask.sum())} reachable", flush=True)
+    g2 = np.where(reachable_mask & (sizes <= threshold), 1.0, 0.0)
+    retarget_label = f"reachable states with <= {threshold:.0f} heavy atoms (SHRINK)"
+    print(f"  retarget objective: {retarget_label} -- {int(g2.sum())} of "
+          f"{int(reachable_mask.sum())} reachable", flush=True)
     retarget = terminal_tilt_residual(R, g2, remaining, switch)
     print(f"[{time.perf_counter()-started:6.1f}s] retarget from {keys[switch]!r}: "
           f"{json.dumps(retarget)}", flush=True)
@@ -193,13 +240,15 @@ def run_exact_control(
         "status": "DEVELOPMENT_RESULT_NOT_PAPER_BEARING",
         "checkpoint": {"run": "run_v2_01", "selected_step": int(checkpoint["selected_step"])},
         "slice": {"seed_smiles": seed_smiles, "heavy_atom_cap": heavy_atom_cap,
+                  "elements": sorted(allowed) if allowed else "unrestricted",
+                  "is_a_verification_slice_not_a_chemistry_benchmark": True,
                   "states": len(states), "stop_reason": stop, "budget": budget,
-                  "target": "contains nitrogen",
+                  "target": target_label,
                   "target_states": int(g.sum()),
                   "reach_probability": primary.get("partition")},
         "primary": primary,
         "unreachable": unreachable,
-        "retargeting": {"switch_state": keys[switch], "new_target": "reachable states in the larger half by heavy-atom count",
+        "retargeting": {"switch_state": keys[switch], "new_target": retarget_label,
                         "remaining_budget": remaining, **retarget},
         "verdict": {
             "terminal_tilt_exact": primary.get("terminal_tilt_tv", 1.0) < 1e-9,
@@ -224,7 +273,8 @@ def run_exact_control(
 
 @app.local_entrypoint()
 def main(seed_smiles: str = "CCO", heavy_atom_cap: int = 7,
-         state_cap: int = 900, budget: int = 6) -> None:
+         state_cap: int = 900, budget: int = 6, elements: str = "") -> None:
     print(json.dumps(run_exact_control.remote(
         seed_smiles=seed_smiles, heavy_atom_cap=heavy_atom_cap,
-        state_cap=state_cap, budget=budget), indent=2, sort_keys=True))
+        state_cap=state_cap, budget=budget, elements=elements),
+        indent=2, sort_keys=True))
