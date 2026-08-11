@@ -22,6 +22,7 @@ from compose_v4.experiments.editing_v2_r_theta_corpus_training import (
     regressed_capabilities,
     RThetaTrainingError,
     RunIdentity,
+    resolve_launch_commit,
     assert_training_invariants,
     load_checkpoint,
     selection_criterion,
@@ -34,6 +35,7 @@ SHA = "a" * 64
 
 def _identity(**overrides) -> RunIdentity:
     values = dict(
+        git_commit_sha="a1b2c3d4" * 5,
         initialization_seed=20260730,
         initial_model_state_sha256="3" + SHA[1:],
         library_sha256="1" + SHA[1:],
@@ -439,3 +441,102 @@ def test_moved_hazard_parameters_stop_the_run() -> None:
         dict(model.named_parameters())["0.weight"].add_(1.0)
     with pytest.raises(RThetaTrainingError, match="frozen hazard parameters changed"):
         assert_training_invariants(model, hazard_before=before, step=2)
+
+
+# --- code-commit binding -------------------------------------------------
+#
+# A paper-bearing run must bind the code that produced it. Three seeds that
+# differ only in seed can only be shown to differ only in seed if the commit
+# is recorded, and a commit that does not describe the running bytes is worse
+# than none: it makes divergent runs look identically provenanced.
+
+
+def _repo(tmp_path: Path, dirty: bool = False) -> Path:
+    import subprocess
+    root = tmp_path / "repo"
+    root.mkdir()
+    run = lambda *a: subprocess.run(["git", "-C", str(root), *a], check=True,
+                                    capture_output=True)
+    run("init", "-q")
+    run("config", "user.email", "t@t")
+    run("config", "user.name", "t")
+    (root / "f.txt").write_text("one")
+    run("add", "-A")
+    run("commit", "-qm", "one")
+    if dirty:
+        (root / "f.txt").write_text("two")
+    return root
+
+
+def test_fresh_run_records_the_current_commit(tmp_path: Path) -> None:
+    import subprocess
+    root = _repo(tmp_path)
+    head = subprocess.run(["git", "-C", str(root), "rev-parse", "HEAD"],
+                          capture_output=True, text=True, check=True).stdout.strip()
+    assert resolve_launch_commit(root) == head
+    assert len(head) == 40
+
+
+def test_dirty_worktree_refuses_launch(tmp_path: Path) -> None:
+    root = _repo(tmp_path, dirty=True)
+    with pytest.raises(RThetaTrainingError, match="dirty worktree"):
+        resolve_launch_commit(root)
+
+
+def _write(path: Path, identity: RunIdentity):
+    model = _model()
+    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
+    return write_checkpoint(
+        path, model=model, optimizer=optimizer, identity=identity,
+        completed_steps=1, selected_step=1, selected_criterion=None,
+        selected_state=None, trajectory=[], stream_sha256=SHA, resume_count=0)
+
+
+def test_resume_from_the_same_commit_passes(tmp_path: Path) -> None:
+    identity = _identity()
+    _write(tmp_path / "ck.pt", identity)
+    payload = load_checkpoint(
+        tmp_path / "ck.pt", model=_model(),
+        optimizer=torch.optim.AdamW(_model().parameters(), lr=1e-3),
+        identity=identity, expected_stream_sha256=SHA)
+    assert payload["identity"]["git_commit_sha"] == identity.git_commit_sha
+
+
+def test_resume_after_a_code_change_is_refused(tmp_path: Path) -> None:
+    _write(tmp_path / "ck.pt", _identity())
+    with pytest.raises(RThetaTrainingError, match="refusing to resume across a code change"):
+        load_checkpoint(
+            tmp_path / "ck.pt", model=_model(),
+            optimizer=torch.optim.AdamW(_model().parameters(), lr=1e-3),
+            identity=_identity(git_commit_sha="f" * 40),
+            expected_stream_sha256=SHA)
+
+
+def test_checkpoint_carries_the_identity_forward(tmp_path: Path) -> None:
+    """A result artifact must be attributable to the run that produced it."""
+
+    identity = _identity()
+    _write(tmp_path / "ck.pt", identity)
+    payload = load_checkpoint(
+        tmp_path / "ck.pt", model=_model(),
+        optimizer=torch.optim.AdamW(_model().parameters(), lr=1e-3),
+        identity=identity, expected_stream_sha256=SHA)
+    assert payload["identity"] == identity.payload()
+    assert payload["identity_sha256"] == identity.sha256()
+    assert payload["schema_version"] == 2
+
+
+def test_legacy_development_runs_are_readable_but_not_paper_bearing() -> None:
+    """The step-12,500 development checkpoint did its job. It does not get
+    retrofitted into the new contract and called paper-bearing."""
+
+    legacy = _identity(git_commit_sha=None)
+    assert legacy.paper_bearing is False
+    with pytest.raises(RThetaTrainingError, match="LEGACY development run"):
+        legacy.require_paper_bearing()
+    # ...and a bound run is eligible.
+    current = _identity()
+    assert current.paper_bearing is True
+    current.require_paper_bearing()
+    # The two are different experiments by digest.
+    assert legacy.sha256() != current.sha256()

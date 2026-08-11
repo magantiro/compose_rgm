@@ -82,7 +82,7 @@ from compose_v4.experiments.factorized_successor_training import (
 )
 
 CHECKPOINT_SCHEMA = "compose.editing_v2.r_theta_corpus_checkpoint"
-CHECKPOINT_SCHEMA_VERSION = 1
+CHECKPOINT_SCHEMA_VERSION = 2
 CHECKPOINT_STATUS = "RECOVERABLE_R_THETA_STATE_NO_DOWNSTREAM_AUTHORITY"
 CHECKPOINT_FILENAME = "R_THETA_CHECKPOINT.pt"
 
@@ -106,6 +106,46 @@ COLLAPSE_TOLERANCE_NATS = 0.5
 
 class RThetaTrainingError(RuntimeError):
     """The corpus training run cannot proceed safely."""
+
+
+def resolve_launch_commit(repo_root: Path | str = ".") -> str:
+    """The commit a PAPER-BEARING run is launched from. Fail-closed.
+
+    Resolved LOCALLY at launch and carried into the remote function, because
+    the training container mounts src/, configs/ and the app files but not
+    ``.git`` -- asking the container for its own commit would return nothing.
+
+    A dirty worktree is refused rather than recorded. A commit that does not
+    describe the bytes actually running is worse than no commit at all: it
+    makes three seeds look identically provenanced while they differ.
+    """
+
+    import subprocess
+
+    root = str(repo_root)
+    try:
+        sha = subprocess.run(
+            ["git", "-C", root, "rev-parse", "HEAD"],
+            capture_output=True, text=True, check=True).stdout.strip()
+        dirty = subprocess.run(
+            ["git", "-C", root, "status", "--porcelain"],
+            capture_output=True, text=True, check=True).stdout.strip()
+    except (subprocess.CalledProcessError, FileNotFoundError) as error:
+        raise RThetaTrainingError(
+            f"cannot resolve the launch commit under {root!r}: {error}") from error
+    if len(sha) != 40 or any(c not in "0123456789abcdef" for c in sha):
+        raise RThetaTrainingError(f"unexpected commit sha {sha!r}")
+    if dirty:
+        # Porcelain v1 is "XY PATH", but the status field is not always two
+        # characters wide in practice and a fixed slice silently truncated the
+        # first letter of every path it reported. Split on whitespace instead:
+        # an error message that corrupts the filenames it names is worse than
+        # no message.
+        changed = [line.split(maxsplit=1)[-1] for line in dirty.splitlines()][:8]
+        raise RThetaTrainingError(
+            "refusing to launch a paper-bearing run from a dirty worktree; "
+            f"{len(dirty.splitlines())} path(s) differ from HEAD, e.g. {changed}")
+    return sha
 
 
 def _torch_bytes(payload: Mapping[str, Any]) -> bytes:
@@ -162,6 +202,9 @@ class RunIdentity:
     still present itself as the same experiment.
     """
 
+    #: The commit the run was launched from. None marks a LEGACY development
+    #: checkpoint, readable for analysis and NOT eligible as paper-bearing.
+    git_commit_sha: str | None
     initialization_seed: int
     initial_model_state_sha256: str
     library_sha256: str
@@ -173,6 +216,7 @@ class RunIdentity:
 
     def payload(self) -> dict[str, Any]:
         return {
+            "git_commit_sha": self.git_commit_sha,
             "initialization_seed": self.initialization_seed,
             "initial_model_state_sha256": self.initial_model_state_sha256,
             "library_sha256": self.library_sha256,
@@ -187,6 +231,19 @@ class RunIdentity:
         return hashlib.sha256(
             json.dumps(self.payload(), sort_keys=True).encode()
         ).hexdigest()
+
+    @property
+    def paper_bearing(self) -> bool:
+        """A run is paper-bearing only if it binds the code that produced it."""
+        return bool(self.git_commit_sha)
+
+    def require_paper_bearing(self) -> None:
+        if not self.paper_bearing:
+            raise RThetaTrainingError(
+                "this run identity carries no git_commit_sha, so it is a LEGACY "
+                "development run. It stays readable for analysis and is not "
+                "eligible as paper-bearing; start a fresh run under the full "
+                "identity contract rather than retrofitting this one.")
 
 
 def write_checkpoint(
@@ -281,6 +338,18 @@ def load_checkpoint(
     payload = torch.load(io.BytesIO(encoded), map_location="cpu", weights_only=False)
     if payload.get("schema") != CHECKPOINT_SCHEMA:
         raise RThetaTrainingError("checkpoint schema disagrees")
+    stored_version = int(payload.get("schema_version", 1))
+    if stored_version != CHECKPOINT_SCHEMA_VERSION:
+        raise RThetaTrainingError(
+            f"checkpoint is schema version {stored_version}, this build writes "
+            f"{CHECKPOINT_SCHEMA_VERSION}; a legacy checkpoint cannot masquerade "
+            "as a run of the current format. Read it for analysis instead.")
+    stored_commit = (payload.get("identity") or {}).get("git_commit_sha")
+    if stored_commit != identity.git_commit_sha:
+        raise RThetaTrainingError(
+            f"checkpoint was written from commit {stored_commit!r} and this run "
+            f"is {identity.git_commit_sha!r}; refusing to resume across a code "
+            "change, which would make one run of two different programs")
     if payload.get("identity_sha256") != identity.sha256():
         raise RThetaTrainingError(
             "checkpoint was written against different frozen inputs; refusing "
@@ -696,6 +765,7 @@ __all__ = [
     "TOTAL_HAZARD_PREFIX",
     "RThetaTrainingError",
     "RunIdentity",
+    "resolve_launch_commit",
     "assert_training_invariants",
     "COLLAPSE_TOLERANCE_NATS",
     "capability_baseline",

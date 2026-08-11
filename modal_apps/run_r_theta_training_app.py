@@ -42,6 +42,8 @@ from modal_apps.run_process_v2_p50_app import image as _base_image
 # REMOTE_ROOT but only puts REMOTE_ROOT/src on PYTHONPATH.
 image = _base_image.env({"PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}"})
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
 app = modal.App("compose-v4-r-theta-training")
 
 #: One hour per segment. Long enough to amortize the ~190 s setup, short
@@ -63,6 +65,7 @@ WALL_MARGIN_SECONDS = 180.0
 def train_segment(
     run_root: str = "/artifacts/editing_v2/r_theta_run",
     output_name: str = "run_01",
+    git_commit_sha: str | None = None,
     maximum_steps: int = 4527,
     batch_size: int = 32,
     learning_rate: float = 1e-4,
@@ -279,6 +282,10 @@ def train_segment(
     epoch_steps = max(1, -(-len(sequence) // batch_size))
 
     identity = RunIdentity(
+        # Resolved LOCALLY at launch and passed in: this container mounts src/,
+        # configs/ and the app files, not .git, so it cannot resolve its own
+        # commit. None marks a legacy development run.
+        git_commit_sha=git_commit_sha,
         initialization_seed=int(binding["model_runtime"]["initialization_seed"]),
         initial_model_state_sha256=str(binding["model_runtime"]["initial_model_state_sha256"]),
         library_sha256=str(freeze["library_sha256"]),
@@ -736,6 +743,7 @@ def train_segment(
 @app.local_entrypoint()
 def main(
     output_name: str = "run_01",
+    paper_bearing: bool = False,
     maximum_steps: int = 4527,
     batch_size: int = 32,
     evaluate_every: int = 500,
@@ -750,10 +758,25 @@ def main(
     forever on a paid device.
     """
 
+    # A paper-bearing run binds the commit that produced it and refuses to
+    # start from a dirty worktree. Three seeds can only be shown to differ ONLY
+    # in seed if the code they ran is recorded.
+    git_commit_sha = None
+    if paper_bearing:
+        from compose_v4.experiments.editing_v2_r_theta_corpus_training import (
+            resolve_launch_commit,
+        )
+        git_commit_sha = resolve_launch_commit(REPO_ROOT)
+        print(f"paper-bearing launch from commit {git_commit_sha}", flush=True)
+    else:
+        print("DEVELOPMENT launch: no commit binding, not eligible as "
+              "paper-bearing", flush=True)
+
     previous = -1
     for segment in range(max_segments):
         receipt = train_segment.remote(
             output_name=output_name,
+            git_commit_sha=git_commit_sha,
             maximum_steps=maximum_steps,
             batch_size=batch_size,
             evaluate_every=evaluate_every,
