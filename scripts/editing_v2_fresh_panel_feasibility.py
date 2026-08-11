@@ -85,6 +85,10 @@ def main() -> int:
     parser.add_argument("--max-pairs", type=int, default=4000,
                         help="cap on pairs compiled; a cap that BINDS is reported")
     parser.add_argument("--seed", type=int, default=20260811)
+    parser.add_argument("--pool", choices=("reserve", "training"), default="reserve",
+                        help="'training' mines HELD-IN molecules for h_phi teacher "
+                             "data; both endpoints are then training sources and "
+                             "cannot collide with the reserve-mined evaluation panel")
     args = parser.parse_args()
 
     from build_analogue_trace_pool import SYSTEM, compile_one_cut, mine_one_cut_pairs
@@ -98,14 +102,24 @@ def main() -> int:
     started = time.perf_counter()
 
     reserve = json.load(gzip.open(args.reserve, "rt"))
-    reserve_sources = list(reserve["reserve_source_keys"])
     training_sources = set(reserve["training_source_keys"])
     training_ids = set(reserve["training_entry_ids"])
-    leaked_sources = [s for s in reserve_sources if s in training_sources]
-    print(f"held-out pool: {len(reserve_sources):,} reserve molecules; "
-          f"{len(leaked_sources)} of them also in the training-source universe")
-    if leaked_sources:
-        reserve_sources = [s for s in reserve_sources if s not in training_sources]
+    if args.pool == "training":
+        # HELD-IN pool for h_phi teacher data. Both endpoints are training
+        # sources, and the training-source and reserve key sets are disjoint,
+        # so a pair mined here CANNOT collide with the reserve-mined evaluation
+        # panel on either endpoint. No filtering is needed for that.
+        reserve_sources = sorted(training_sources)
+        leaked_sources = []
+        print(f"HELD-IN pool: {len(reserve_sources):,} training molecules "
+              f"(teacher data; disjoint from the evaluation panel by construction)")
+    else:
+        reserve_sources = list(reserve["reserve_source_keys"])
+        leaked_sources = [s for s in reserve_sources if s in training_sources]
+        print(f"held-out pool: {len(reserve_sources):,} reserve molecules; "
+              f"{len(leaked_sources)} of them also in the training-source universe")
+        if leaked_sources:
+            reserve_sources = [s for s in reserve_sources if s not in training_sources]
 
     supervised = training_transitions(args.corpus, training_ids)
     print(f"[{time.perf_counter()-started:5.1f}s] {len(supervised):,} exact supervised "
@@ -115,7 +129,8 @@ def main() -> int:
     pool = sorted(reserve_sources)
     rng.shuffle(pool)
     pool = pool[: args.sources]
-    print(f"mining one-cut pairs over {len(pool):,} held-out molecules "
+    label = "HELD-IN" if args.pool == "training" else "held-out"
+    print(f"mining one-cut pairs over {len(pool):,} {label} molecules "
           f"(seed {args.seed})", flush=True)
 
     pairs = mine_one_cut_pairs(pool)
@@ -169,9 +184,15 @@ def main() -> int:
             continue
 
         transitions = list(zip(keys, keys[1:]))
-        if any(t in supervised for t in transitions):
+        overlaps = any(t in supervised for t in transitions)
+        if overlaps:
             leaked += 1
-            continue
+            # For the HELD-IN teacher pool, overlap with R_theta's supervised
+            # transitions is irrelevant and must not exclude: h_phi learns
+            # V_greedy, a property of the greedy policy, and is evaluated only
+            # on the sealed panel. Counted, not rejected.
+            if args.pool != "training":
+                continue
 
         trajectory = [tanimoto_to(keys[-1], k) for k in keys]
         rising = all(y > x for x, y in zip(trajectory, trajectory[1:]))
@@ -180,6 +201,11 @@ def main() -> int:
             "shape": "REFERENCE_MONOTONE" if rising else "REFERENCE_DIP",
             "similarity_trajectory": [round(v, 4) for v in trajectory],
             "heavy_atom_delta": mol_b.GetNumHeavyAtoms() - mol_a.GetNumHeavyAtoms(),
+            # Emitted here so downstream Modal entrypoints -- which run in the
+            # Modal CLI venv and have no RDKit -- never need chemistry.
+            "source_heavy_atoms": mol_a.GetNumHeavyAtoms(),
+            "target_heavy_atoms": mol_b.GetNumHeavyAtoms(),
+            "slots": max(mol_a.GetNumHeavyAtoms(), mol_b.GetNumHeavyAtoms()) + 2,
             "ring_delta": (mol_b.GetRingInfo().NumRings()
                                - mol_a.GetRingInfo().NumRings()),
             "compiler_path_class": (meta or {}).get("compiler_path_class"),
@@ -196,7 +222,9 @@ def main() -> int:
     print(f"  compiled path length distribution: {dict(sorted(lengths.items())[:12])}")
     print(f"  compile outcomes: {dict(reasons.most_common(8))}")
     print(f"  rejected for training leakage: {leaked:,}")
-    print(f"  ACCEPTED strict held-out 4-6 step transformations: {len(accepted):,}")
+    kind = ("HELD-IN teacher transformations" if args.pool == "training"
+            else "strict held-out 4-6 step transformations")
+    print(f"  ACCEPTED {kind}: {len(accepted):,}")
     print(f"    REFERENCE_MONOTONE {shapes['REFERENCE_MONOTONE']:,} / "
           f"REFERENCE_DIP {shapes['REFERENCE_DIP']:,}")
     print(f"    steps 4/5/6: {by_len.get(4,0):,} / {by_len.get(5,0):,} / "
@@ -208,6 +236,14 @@ def main() -> int:
     args.out.write_text(json.dumps({
         "schema": "compose.editing_v2.fresh_panel_feasibility",
         "status": "FEASIBILITY_COUNTS_ONLY_LOCAL_RDKIT_FREEZES_NOTHING",
+        "pool": args.pool,
+        "pool_note": (
+            "training = HELD-IN molecules for h_phi teacher data. Both endpoints "
+            "are training sources, and the training-source and reserve key sets "
+            "are disjoint, so these pairs cannot collide with the reserve-mined "
+            "evaluation panel on either endpoint. Training-transition overlap is "
+            "counted but NOT excluded here: h_phi learns V_greedy, a property of "
+            "the greedy policy, and is evaluated only on the sealed panel."),
         "caveat": (
             "Counted with this machine's RDKit, which differs from the Modal "
             "image holding the authoritative kernel. Feasibility estimate only; "
