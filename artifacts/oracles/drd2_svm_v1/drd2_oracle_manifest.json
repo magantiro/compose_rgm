@@ -1,0 +1,1071 @@
+{
+  "schema": "compose.oracle.drd2_svm_v1",
+  "provenance": {
+    "model": "wengong-jin/iclr19-graph2graph props/clf_py36.pkl",
+    "lineage": "Olivecrona et al. REINVENT DRD2 activity SVM; the oracle behind the classic similarity-constrained DRD2 benchmark and the VJTNN/GrIDDD success numbers",
+    "pickle_sha256": "dbc473fca922c834dbaee6eaba832caaff26d4f891734078fb1af359a111100f",
+    "pickle_bytes": 35417609,
+    "opened_once": "This pickle is unpickled exactly once, by this script, in a throwaway environment. The experiment runtime consumes only the extracted arrays."
+  },
+  "fingerprint": {
+    "definition": "AllChem.GetMorganFingerprint(mol, 3, useCounts=True, useFeatures=True), folded to 2048 by identifier % 2048, int32 counts",
+    "radius": 3,
+    "size": 2048,
+    "use_counts": true,
+    "use_features": true,
+    "folding": "modulo on the raw Morgan identifier"
+  },
+  "similarity": {
+    "definition": "AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=2048, useChirality=False) with Tanimoto",
+    "note": "the similarity constraint uses a DIFFERENT fingerprint from the oracle: ECFP4 bits, not FCFP6 counts"
+  },
+  "model": {
+    "kernel": "rbf",
+    "gamma": 0.015625,
+    "n_support_vectors": 2159,
+    "n_features": 2048,
+    "intercept": [
+      0.7125836032811219
+    ],
+    "prob_a": [
+      -6.211945206856577
+    ],
+    "prob_b": [
+      0.8851107846985695
+    ],
+    "classes": [
+      0,
+      1
+    ]
+  },
+  "parameters_npz_sha256": "7c9224c12c423ba24cce7d15715409eb4dee26af40ab64fb621b3336079f0815",
+  "parity_panel": {
+    "source": "iclr19-graph2graph data/drd2/test.txt",
+    "molecules": 200,
+    "unparseable": 0
+  },
+  "reference_scores": [
+    {
+      "smiles": "N#Cc1ccccc1COc1cccc(C(=O)N2CCN(c3ccc(Br)cn3)CC2)c1",
+      "predict_proba_class1": 0.0003649837582419078,
+      "decision_function": -1.4167491066714515
+    },
+    {
+      "smiles": "C[N+](C)(C)CCOC(=O)C1(c2ccccc2)CCCC1",
+      "predict_proba_class1": 0.0011905930687518126,
+      "decision_function": -1.22641252953791
+    },
+    {
+      "smiles": "O=C(CN1C(=O)/C(=C\\c2ccco2)SC1=S)NCCc1c[nH]c2ccccc12",
+      "predict_proba_class1": 0.0004687600532718073,
+      "decision_function": -1.3764656538890112
+    },
+    {
+      "smiles": "Cc1ccc(CN(C)CN2C(=O)N[C@@]3(CCCC[C@@H]3C)C2=O)cc1",
+      "predict_proba_class1": 0.00044474095827228845,
+      "decision_function": -1.3849330719677058
+    },
+    {
+      "smiles": "O=C(NC1CC1)C1CCN(c2ncccn2)CC1",
+      "predict_proba_class1": 0.00957249995499834,
+      "decision_function": -0.8907874255828627
+    },
+    {
+      "smiles": "CC(=O)c1ccc(OCC(=O)N2CCN(c3ccccc3F)CC2)cc1",
+      "predict_proba_class1": 0.0001386809093842512,
+      "decision_function": -1.5725260354073738
+    },
+    {
+      "smiles": "O=C(CSc1nccn1C1CC1)N1CCN(c2cccc(C(F)(F)F)c2)CC1",
+      "predict_proba_class1": 0.007524329113112315,
+      "decision_function": -0.9295712769929297
+    },
+    {
+      "smiles": "CC[NH2+][C@H]1CCCC[C@@H](C[C@@H]2CSc3ccccc32)C1",
+      "predict_proba_class1": 0.023716462366614094,
+      "decision_function": -0.7443746197949253
+    },
+    {
+      "smiles": "O=C(CSc1nnc(-c2cccs2)[nH]1)N1CCCc2ccccc21",
+      "predict_proba_class1": 0.004171807264375806,
+      "decision_function": -1.0245471063406995
+    },
+    {
+      "smiles": "O=C(Cn1cc([N+](=O)[O-])ccc1=O)NCC1COc2ccccc2O1",
+      "predict_proba_class1": 0.0005061735270813094,
+      "decision_function": -1.3641041946540549
+    },
+    {
+      "smiles": "Cc1ccccc1Cn1c(=O)n(Cc2ccccc2)c(=O)c2c3c(sc21)CCC3",
+      "predict_proba_class1": 0.006812286130933436,
+      "decision_function": -0.9455829730327892
+    },
+    {
+      "smiles": "CC(C)(C)SCCNC(=O)C=Cc1ccc([N+](=O)[O-])cc1",
+      "predict_proba_class1": 7.316477796482912e-05,
+      "decision_function": -1.6754666758154522
+    },
+    {
+      "smiles": "C[NH+](C)[C@H]1CC[C@H](NC(=O)c2ccc3c(c2)C(=O)N(Cc2ccccc2)C3=O)C1",
+      "predict_proba_class1": 0.002537132334053007,
+      "decision_function": -1.1046136735512122
+    },
+    {
+      "smiles": "COc1ccc(C2C(C(=O)N3CCN(c4ccccn4)CC3)CCC(=O)N2c2cc(OC)c(OC)c(OC)c2)cc1",
+      "predict_proba_class1": 0.010572814431449706,
+      "decision_function": -0.8747716269493253
+    },
+    {
+      "smiles": "N#CCc1ccc(NC(=O)N2CCN(C(=O)c3ccccc3F)CC2)cc1",
+      "predict_proba_class1": 7.057591785837644e-05,
+      "decision_function": -1.6812660109665047
+    },
+    {
+      "smiles": "COc1ccccc1CN(C)C(=O)c1cccc(S(=O)(=O)N2CCN(Cc3ccccc3)CC2)c1",
+      "predict_proba_class1": 0.006538562491623583,
+      "decision_function": -0.9521877181954214
+    },
+    {
+      "smiles": "Cc1cc(C)n(CC(O)COc2ccc(F)cc2)n1",
+      "predict_proba_class1": 0.00011273535400795476,
+      "decision_function": -1.6058702829687688
+    },
+    {
+      "smiles": "O=C(COc1ccc(F)cc1)NCCN1CCCC1",
+      "predict_proba_class1": 0.003897761407997691,
+      "decision_function": -1.0354869746112312
+    },
+    {
+      "smiles": "COc1ccccc1CNc1ccc(N2CCCCC2)cc1",
+      "predict_proba_class1": 0.027374074847966876,
+      "decision_function": -0.7211460026960057
+    },
+    {
+      "smiles": "CN(CCOCC1CC1)C(=O)c1cc2c(s1)-c1ccccc1OC2",
+      "predict_proba_class1": 0.00031784307516739515,
+      "decision_function": -1.4390118962032685
+    },
+    {
+      "smiles": "NCCCN1CCN(c2ccccc2)CC1",
+      "predict_proba_class1": 0.01378325726511632,
+      "decision_function": -0.8320241415751788
+    },
+    {
+      "smiles": "O=C(CSC1CCCC1)N1CCC(c2nc3ccccc3s2)CC1",
+      "predict_proba_class1": 0.006802201996371676,
+      "decision_function": -0.9458215544773181
+    },
+    {
+      "smiles": "COC(=O)[C@@H]1CN(Cc2ncoc2C(C)C)CCO1",
+      "predict_proba_class1": 0.001793071452043513,
+      "decision_function": -1.1604931734795132
+    },
+    {
+      "smiles": "COc1cccc(C(=O)N2CCC(C(=O)NCc3ccco3)CC2)c1",
+      "predict_proba_class1": 0.00034812305886886225,
+      "decision_function": -1.424362966483614
+    },
+    {
+      "smiles": "CC(=O)c1ccccc1C(=O)N1CCC(CO)(CCOc2ccccc2)CC1",
+      "predict_proba_class1": 0.0011059740028129261,
+      "decision_function": -1.2382809746714993
+    },
+    {
+      "smiles": "COc1ccccc1N1CCN(C(=O)C(=O)N/N=C/c2ccc(Cl)cc2Cl)CC1",
+      "predict_proba_class1": 0.0017333618948456118,
+      "decision_function": -1.1659452944230266
+    },
+    {
+      "smiles": "CCc1ccc(CN2CC[NH+](Cc3ccc([S@](C)=O)cc3)CC2)s1",
+      "predict_proba_class1": 0.01800085901783873,
+      "decision_function": -0.7889452914197238
+    },
+    {
+      "smiles": "Cc1nn(Cc2ccccc2)c(C)c1CNC(=O)NC1CC1",
+      "predict_proba_class1": 0.0044030611860545145,
+      "decision_function": -1.0158605417652962
+    },
+    {
+      "smiles": "O=C(O)C1=C(C(=O)N2CCc3ccccc32)C2CCC1C1CC21",
+      "predict_proba_class1": 0.016476818790681625,
+      "decision_function": -0.8032265576244543
+    },
+    {
+      "smiles": "FC(F)(F)c1cccc(NC(=S)N2CCCC2)c1",
+      "predict_proba_class1": 0.0001478154531361822,
+      "decision_function": -1.56225728863788
+    },
+    {
+      "smiles": "COc1cc(C)c(NC(=O)COc2cccc(C)c2)cc1OC",
+      "predict_proba_class1": 0.00017391436992177252,
+      "decision_function": -1.5360821485939493
+    },
+    {
+      "smiles": "CC(=O)c1ccc(N2CC[NH+](C[C@H]3CCOC3)CC2)c(F)c1",
+      "predict_proba_class1": 0.0025768611417839628,
+      "decision_function": -1.1021122649600021
+    },
+    {
+      "smiles": "S=c1sc2ccccc2n1CCc1ccncc1",
+      "predict_proba_class1": 0.004553779920949328,
+      "decision_function": -1.0104412618400698
+    },
+    {
+      "smiles": "CON=C(COc1ccc(F)cc1)c1ccc(OC)cc1",
+      "predict_proba_class1": 0.0006662002673166665,
+      "decision_function": -1.3198810560538445
+    },
+    {
+      "smiles": "Cc1ccc(NC(=O)N2CCN(c3ncccc3F)CC2)cc1",
+      "predict_proba_class1": 9.052450372011071e-05,
+      "decision_function": -1.6411929578915476
+    },
+    {
+      "smiles": "COc1ccc(CNC(=O)c2ccc3c(c2)N(Cc2ccc(C)cc2)CCS3)cc1",
+      "predict_proba_class1": 0.0036283280020860654,
+      "decision_function": -1.0470196696935683
+    },
+    {
+      "smiles": "O=c1ccc(Br)cn1CCCOc1ccccc1",
+      "predict_proba_class1": 0.0031642610800604936,
+      "decision_function": -1.0690526976980927
+    },
+    {
+      "smiles": "NNC(=O)c1cc2ccccc2[nH]1",
+      "predict_proba_class1": 0.0022495937118624672,
+      "decision_function": -1.1239782425890552
+    },
+    {
+      "smiles": "CCOc1cc2c(cc1Cl)C1=CCCC1C(=O)O2",
+      "predict_proba_class1": 0.0033466725967226897,
+      "decision_function": -1.0600292904860842
+    },
+    {
+      "smiles": "CCN(CCCNC(=O)N1CCC[C@@H](CO)C1)c1ccccc1",
+      "predict_proba_class1": 0.00016102454417174253,
+      "decision_function": -1.5484786312683454
+    },
+    {
+      "smiles": "COc1ccccc1NC1CCN(C(=O)NC[C@@H](C)N2CCOCC2)CC1",
+      "predict_proba_class1": 0.02984114311650637,
+      "decision_function": -0.7071500005531463
+    },
+    {
+      "smiles": "CCc1csc([C@H]2CCC[NH+](Cc3ccc(OC)c(OC)c3)C2)n1",
+      "predict_proba_class1": 0.03767789454027759,
+      "decision_function": -0.6692239202036063
+    },
+    {
+      "smiles": "CC(=O)N1CCN(Cc2cc(N[C@H](C)[C@H]3CCCO3)cc[nH+]2)CC1",
+      "predict_proba_class1": 0.03196758567651776,
+      "decision_function": -0.6959720301524206
+    },
+    {
+      "smiles": "C#CCN1CCN(Cc2coc(-c3cccc(Cl)c3)n2)CC1",
+      "predict_proba_class1": 0.010810569974589807,
+      "decision_function": -0.8711877393124539
+    },
+    {
+      "smiles": "O=C([C@@H]1CCCN1C(=O)C[C@H](O)c1ccc(Cl)cc1)N1CCOCC1",
+      "predict_proba_class1": 0.0035523014409247064,
+      "decision_function": -1.0504290603719872
+    },
+    {
+      "smiles": "COc1cccc(C(=O)Nc2cccc(-c3ccccc3)c2)c1",
+      "predict_proba_class1": 0.001974972241795509,
+      "decision_function": -1.1449380290157598
+    },
+    {
+      "smiles": "O=S(=O)(c1ccccc1)N1CCN(c2cccc(Cl)c2)CC1",
+      "predict_proba_class1": 0.0005466902770483329,
+      "decision_function": -1.351708224968838
+    },
+    {
+      "smiles": "CCOc1cc2[nH]c(=S)n(CCCN3CCOCC3)c(=O)c2cc1OCC",
+      "predict_proba_class1": 0.004546507846188754,
+      "decision_function": -1.0106985941271218
+    },
+    {
+      "smiles": "O=C([O-])c1ccccc1C(=O)NCCN1CCOCC1",
+      "predict_proba_class1": 0.0007627843677727777,
+      "decision_function": -1.2980866362322578
+    },
+    {
+      "smiles": "COc1ccc(NC(=O)c2cnc3ccccc3n2)cc1OC",
+      "predict_proba_class1": 0.0004904054017556493,
+      "decision_function": -1.3691987708650444
+    },
+    {
+      "smiles": "O=C(CSc1ccc(Cl)cc1)Nc1ccc(-c2nc3ccccc3[nH]2)cc1",
+      "predict_proba_class1": 0.004478325437589661,
+      "decision_function": -1.0131315315455662
+    },
+    {
+      "smiles": "Cc1cc(C(=O)N2CCCC(N3CCN(c4ccc(F)cc4)CC3)C2)no1",
+      "predict_proba_class1": 0.004867329707921444,
+      "decision_function": -0.9997195993508923
+    },
+    {
+      "smiles": "COCC[C@H]([NH2+][C@H]1CCCc2c1cnn2C)c1ccc(Cl)cc1",
+      "predict_proba_class1": 0.04345635370675281,
+      "decision_function": -0.6459161365205841
+    },
+    {
+      "smiles": "Cc1ccccc1Cc1noc(C[NH+]2CCC[C@H](CS(N)(=O)=O)C2)n1",
+      "predict_proba_class1": 0.0022788399397268904,
+      "decision_function": -1.121898773982695
+    },
+    {
+      "smiles": "COC(=O)c1ccc(C=NN2CCN(c3ccccc3)CC2)cc1",
+      "predict_proba_class1": 0.0002185702363161033,
+      "decision_function": -1.4992910245054463
+    },
+    {
+      "smiles": "COc1ccc(-n2c(=S)[nH]c3cc(C(=O)NCCCN4CCOCC4)ccc3c2=O)cc1",
+      "predict_proba_class1": 0.006618012002879062,
+      "decision_function": -0.9502426265988175
+    },
+    {
+      "smiles": "Nc1cc(N)nc(SCC(=O)N2CCc3ccccc32)n1",
+      "predict_proba_class1": 0.007521590227989177,
+      "decision_function": -0.9296299174577506
+    },
+    {
+      "smiles": "COc1ccc([C@H]2CCCN2C(=O)Nc2ccccc2OC(C)C)c(OC)c1",
+      "predict_proba_class1": 0.004601731230241666,
+      "decision_function": -1.0087546548614275
+    },
+    {
+      "smiles": "CCCCNC(=O)CSc1nc2ccccc2n1S(=O)(=O)c1ccc(Cl)cc1",
+      "predict_proba_class1": 0.00016316556063726803,
+      "decision_function": -1.5463523091347726
+    },
+    {
+      "smiles": "Cc1nn(Cc2ccccc2Cl)c(C)c1C(=O)NC1CCCc2ccccc21",
+      "predict_proba_class1": 0.0023727903192948814,
+      "decision_function": -1.1153948103006641
+    },
+    {
+      "smiles": "CNC(=O)c1ccc(Cl)c(NC(=O)C[C@H]2C[C@H]3CC[C@@H]2C3)c1",
+      "predict_proba_class1": 0.0021320566670991335,
+      "decision_function": -1.1326172593622303
+    },
+    {
+      "smiles": "CCOC(=O)C1(S(=O)(=O)c2ccccc2)CCN(Cc2ccc(Cl)cc2)CC1",
+      "predict_proba_class1": 0.008101459247207475,
+      "decision_function": -0.9176673509471561
+    },
+    {
+      "smiles": "O=C(c1cc(O)nc2ccccc12)N1CCN(c2cccc(C(F)(F)F)c2)CC1",
+      "predict_proba_class1": 0.0030491577627074816,
+      "decision_function": -1.0750182514872741
+    },
+    {
+      "smiles": "COc1cc(OC)cc(C(=O)Nc2ccccc2N2CCOCC2)c1",
+      "predict_proba_class1": 0.0004695085554110897,
+      "decision_function": -1.3762088099715994
+    },
+    {
+      "smiles": "O=C(O)CCC(=O)c1c[nH]c2ccccc12",
+      "predict_proba_class1": 0.0029769233345323933,
+      "decision_function": -1.0788781109141603
+    },
+    {
+      "smiles": "O=C(NCC(=O)N1CCN(c2ccccc2)CC1)c1ccccc1",
+      "predict_proba_class1": 0.0003335558206775507,
+      "decision_function": -1.431244201456669
+    },
+    {
+      "smiles": "c1ccc2c(CC[NH2+][C@H]3CCSC3)c[nH]c2c1",
+      "predict_proba_class1": 0.04612933582511024,
+      "decision_function": -0.6361354735289306
+    },
+    {
+      "smiles": "C/C(=N\\NC(=O)CNC(=O)c1ccc(F)cc1)c1ccc(Cl)cc1",
+      "predict_proba_class1": 0.0005454118429004557,
+      "decision_function": -1.3520851187595646
+    },
+    {
+      "smiles": "CCS(=O)(=O)N1CCN(Cc2ccccc2)CC1",
+      "predict_proba_class1": 0.0017726385114629722,
+      "decision_function": -1.1623382131753919
+    },
+    {
+      "smiles": "NNC(=O)c1ccc2c(c1)C(=O)c1ccccc1C2=O",
+      "predict_proba_class1": 0.002463643407132601,
+      "decision_function": -1.1093456775291026
+    },
+    {
+      "smiles": "N#Cc1cccc([C@@H]2C[NH2+]CC[NH2+]2)c1",
+      "predict_proba_class1": 0.011389699676521255,
+      "decision_function": -0.86277698321257
+    },
+    {
+      "smiles": "COCCn1c(CNC(=O)c2ccc3c(c2)OCO3)nc2cccnc21",
+      "predict_proba_class1": 0.0005419577119086076,
+      "decision_function": -1.3531078623252037
+    },
+    {
+      "smiles": "CC(=Cc1ccccc1)C(=O)N1CCN(c2ccccc2F)CC1",
+      "predict_proba_class1": 0.0003454316449724626,
+      "decision_function": -1.4256123761162747
+    },
+    {
+      "smiles": "O=C(Nc1ccc(Cl)cc1)N1CCN(C(=O)C2CCCO2)CC1",
+      "predict_proba_class1": 0.002536624588561388,
+      "decision_function": -1.1046458951079672
+    },
+    {
+      "smiles": "CCCN1CCN(CCCNC(=O)c2cc3c(=O)oc4ccc(C)cc4c3s2)CC1",
+      "predict_proba_class1": 0.0048512049631175115,
+      "decision_function": -1.0002539124066026
+    },
+    {
+      "smiles": "Cc1nc2ncnn2c(C)c1CCC(=O)N1CCc2ccccc21",
+      "predict_proba_class1": 0.006925608530993394,
+      "decision_function": -0.9429258709217379
+    },
+    {
+      "smiles": "O=C(Nc1ccc(N2CCN(c3ccc(C(F)(F)F)cn3)CC2)nc1)c1cccs1",
+      "predict_proba_class1": 0.006223913621770786,
+      "decision_function": -0.9601301746534728
+    },
+    {
+      "smiles": "CC(C)(C)OC(=O)N1CC[C@H](CNc2cccc(Br)c2)C1",
+      "predict_proba_class1": 0.0015854003922665947,
+      "decision_function": -1.1803092761889546
+    },
+    {
+      "smiles": "COc1cc(C=NNC(=O)CCC(=O)NCc2ccccc2)cc(OC)c1OC",
+      "predict_proba_class1": 0.0008347083453554606,
+      "decision_function": -1.2835811043059882
+    },
+    {
+      "smiles": "N#Cc1cccc(CN2CCN(C(=O)c3cccs3)CC2)c1",
+      "predict_proba_class1": 0.01931447303750755,
+      "decision_function": -0.7775693009506484
+    },
+    {
+      "smiles": "O=C(C=Cc1ccco1)NC(=S)N1CCCCC1",
+      "predict_proba_class1": 0.000806757216122533,
+      "decision_function": -1.289064061562383
+    },
+    {
+      "smiles": "O=S(=O)(NCCN1CCO[C@H](c2ccccc2)C1)c1ccc(F)cc1",
+      "predict_proba_class1": 0.04815815852367184,
+      "decision_function": -0.6290703482398723
+    },
+    {
+      "smiles": "COc1ccc(N2CCN(S(=O)(=O)c3cc(C)c(Cl)cc3C)CC2)cc1",
+      "predict_proba_class1": 0.0022157122010065208,
+      "decision_function": -1.1264213567202273
+    },
+    {
+      "smiles": "C[C@@H](CNC(=O)c1ccccc1F)N1CCc2ccccc21",
+      "predict_proba_class1": 0.0009046091667867767,
+      "decision_function": -1.270634882604631
+    },
+    {
+      "smiles": "COc1ccccc1N1CCN(C(=O)Cn2ncc3ccsc3c2=O)CC1",
+      "predict_proba_class1": 0.0008938573869855427,
+      "decision_function": -1.2725596978527745
+    },
+    {
+      "smiles": "O=C(NCc1ccc(OC(F)(F)F)cc1)[C@@H]1COc2ccccc2C1",
+      "predict_proba_class1": 0.008856464427438104,
+      "decision_function": -0.9033134310762885
+    },
+    {
+      "smiles": "Cc1ccc(S(=O)(=O)N2CCN(c3ccccn3)CC2)cc1",
+      "predict_proba_class1": 0.00012831113481037186,
+      "decision_function": -1.585037033865735
+    },
+    {
+      "smiles": "NC(=O)C[C@H]1CCC[NH+](Cc2cccc(O)c2)C1",
+      "predict_proba_class1": 0.011302031953534901,
+      "decision_function": -0.8640224036822612
+    },
+    {
+      "smiles": "Cc1cccc(OP(=O)(NCc2ccccc2)Oc2cccc(C)c2)c1",
+      "predict_proba_class1": 0.0024931763443554263,
+      "decision_function": -1.1074272849092464
+    },
+    {
+      "smiles": "CC(C)CSc1nc2ccccc2n1CC(N)=O",
+      "predict_proba_class1": 0.00014981167992753747,
+      "decision_function": -1.560097822755604
+    },
+    {
+      "smiles": "COc1ccccc1NC(=S)N1CCN(c2ncccn2)CC1",
+      "predict_proba_class1": 0.000555529606033669,
+      "decision_function": -1.3491261784436464
+    },
+    {
+      "smiles": "CC(CCc1ccccc1)NC(=O)c1ccc(F)cc1",
+      "predict_proba_class1": 0.0023455053973440655,
+      "decision_function": -1.1172567635171082
+    },
+    {
+      "smiles": "Cc1ccccc1CNC(=O)N1CCC(CC(N)=O)CC1",
+      "predict_proba_class1": 0.0010200751437728422,
+      "decision_function": -1.2512963844238736
+    },
+    {
+      "smiles": "COc1ccc(C(=O)NCC2OCCc3ccccc32)cc1",
+      "predict_proba_class1": 0.004956420347223041,
+      "decision_function": -0.9967989986760293
+    },
+    {
+      "smiles": "Cc1ccc(-n2cc(C(O)NCc3cccnc3)cc2O)cc1",
+      "predict_proba_class1": 0.004153458520688558,
+      "decision_function": -1.0252568239016182
+    },
+    {
+      "smiles": "CC(=O)c1ccc(NC(=O)CN2CCN(S(=O)(=O)c3ccc(Cl)cc3)CC2)cc1",
+      "predict_proba_class1": 0.0003433690398305163,
+      "decision_function": -1.4265764864055683
+    },
+    {
+      "smiles": "O=C(NCCCC(=O)N1CCc2ccccc21)c1cccc(F)c1Cl",
+      "predict_proba_class1": 0.011982655059535637,
+      "decision_function": -0.8545963555046462
+    },
+    {
+      "smiles": "COc1cccc(N2CC[NH+](C[C@@H]3CCCO3)CC2)c1",
+      "predict_proba_class1": 0.003705624394038273,
+      "decision_function": -1.0436257833044056
+    },
+    {
+      "smiles": "O=C(N[C@@H](Cc1ccccc1)C(=O)N1CCN(c2ncccn2)CC1)c1ccc(Cl)cc1",
+      "predict_proba_class1": 0.0009071193534257251,
+      "decision_function": -1.270188796081317
+    },
+    {
+      "smiles": "O=C(c1cccc(F)c1)N1CCCC(C(=O)N2CCCCC2)C1",
+      "predict_proba_class1": 0.0005871959015907302,
+      "decision_function": -1.3402019570299077
+    },
+    {
+      "smiles": "CCOC(=O)Cn1c(CN2CCN(c3ccc(F)cc3)CC2)nc2c1c(=O)n(C)c(=O)n2C",
+      "predict_proba_class1": 0.013172626606555205,
+      "decision_function": -0.8393314570462599
+    },
+    {
+      "smiles": "Cc1ccc(NS(=O)(=O)c2ccc3oc(=O)ccc3c2)cc1Cl",
+      "predict_proba_class1": 0.00035138736646490295,
+      "decision_function": -1.4228605063865498
+    },
+    {
+      "smiles": "OCCNCCCCCOc1ccc(F)cc1",
+      "predict_proba_class1": 0.006227330393907541,
+      "decision_function": -0.9600417912653555
+    },
+    {
+      "smiles": "Cc1ccc(OCCNC(=O)[C@H]2COc3ccccc3O2)cc1",
+      "predict_proba_class1": 0.00667693648716777,
+      "decision_function": -0.9488150408510777
+    },
+    {
+      "smiles": "C[C@@H](C(=O)[O-])N(C)C(=O)NC[C@H]1CN2CCC[C@@H]2CO1",
+      "predict_proba_class1": 0.004553957283568616,
+      "decision_function": -1.0104349907545247
+    },
+    {
+      "smiles": "Cc1cccc(C)c1NC(=O)N1CCN(CCNC(=O)c2ccccc2F)CC1",
+      "predict_proba_class1": 0.004793638487363664,
+      "decision_function": -1.0021760365258099
+    },
+    {
+      "smiles": "O=C(CN1C(=O)N[C@@]2(CCc3ccccc32)C1=O)NCc1ccco1",
+      "predict_proba_class1": 0.0003826665344673758,
+      "decision_function": -1.409132949000404
+    },
+    {
+      "smiles": "Clc1ccc2[nH]c([C@H]3CC[C@@H]4CCCC[C@@H]4[NH2+]3)nc2c1",
+      "predict_proba_class1": 0.012427098222827634,
+      "decision_function": -0.8487251717683559
+    },
+    {
+      "smiles": "CCCC(=O)Nc1ccc(C(=O)N2CCN(c3cccc(C)c3C)CC2)cc1",
+      "predict_proba_class1": 0.0003798071851012986,
+      "decision_function": -1.4103403384835804
+    },
+    {
+      "smiles": "CNC(=O)CN1CCCc2ccccc21",
+      "predict_proba_class1": 0.0010804216359760126,
+      "decision_function": -1.2420439355733162
+    },
+    {
+      "smiles": "Cc1ccc2c(c1)c1c(n2C[C@H](O)CN2C(=O)CNC2=O)C(=O)CCC1",
+      "predict_proba_class1": 0.000393543789414942,
+      "decision_function": -1.4046209254685176
+    },
+    {
+      "smiles": "Cc1cccc(C(=O)NCC(=O)N2CCN(c3ccccc3F)CC2)c1",
+      "predict_proba_class1": 0.00022680007849978259,
+      "decision_function": -1.4933409517823437
+    },
+    {
+      "smiles": "O=C(NCCN1CCCCC1)c1ccco1",
+      "predict_proba_class1": 0.01567513055985027,
+      "decision_function": -0.8112758574410186
+    },
+    {
+      "smiles": "COc1ccccc1N1CCN(C(CNC(=O)C(=O)NCCN(C)C)c2cccnc2)CC1",
+      "predict_proba_class1": 0.023686356313974137,
+      "decision_function": -0.7445801724947166
+    },
+    {
+      "smiles": "C/C=C(\\C)C(=O)N1CC[C@H](c2ccc(OC)cc2)C1",
+      "predict_proba_class1": 0.0008569578327506122,
+      "decision_function": -1.2793462754365872
+    },
+    {
+      "smiles": "C[C@H]1C[NH+](CC(=O)N2CCc3ccc([N+](=O)[O-])cc32)C[C@@H](C)S1",
+      "predict_proba_class1": 0.0036901035558433203,
+      "decision_function": -1.0443015486818352
+    },
+    {
+      "smiles": "Cc1ccn2cc(C(=O)NCc3ccc4c(c3)OCO4)nc2c1",
+      "predict_proba_class1": 0.00043177509059686293,
+      "decision_function": -1.3896960283575583
+    },
+    {
+      "smiles": "COc1ccc(CCn2c(=O)[nH]c3cc(C(=O)NCCCN4CCOCC4)ccc3c2=O)cc1OC",
+      "predict_proba_class1": 0.004853462442702803,
+      "decision_function": -1.0001790012980705
+    },
+    {
+      "smiles": "COc1ccc(CNC(=O)c2ccc(C)c(-n3cccc3)c2)cc1OC",
+      "predict_proba_class1": 0.0005750324923849933,
+      "decision_function": -1.3435715972715516
+    },
+    {
+      "smiles": "Cc1csc(=O)n1CCC(=O)N1CCC(c2nc3ccccc3s2)CC1",
+      "predict_proba_class1": 0.0012015780839411277,
+      "decision_function": -1.2249340339474335
+    },
+    {
+      "smiles": "COc1ccc(NC(=S)N(CCCN2CCCC(C)C2)Cc2cccs2)cc1",
+      "predict_proba_class1": 0.03431340704539136,
+      "decision_function": -0.6844582704576776
+    },
+    {
+      "smiles": "COc1ccc(OC)c(CN2CCN(C(=O)c3cccc4ccccc34)CC2)c1",
+      "predict_proba_class1": 0.007101747406493774,
+      "decision_function": -0.938880917959706
+    },
+    {
+      "smiles": "O=C(CN1CCCC1)Nc1ccccc1C(=O)c1ccccc1",
+      "predict_proba_class1": 0.006404856053192419,
+      "decision_function": -0.9555150743791856
+    },
+    {
+      "smiles": "Cc1ccc(-c2nc(CC(=O)Nc3cccc(C(=O)NC4CC4)c3)cs2)cc1",
+      "predict_proba_class1": 0.0011241606406538404,
+      "decision_function": -1.235655313260958
+    },
+    {
+      "smiles": "O=C(/C=C/c1cccnc1)NCC(=O)OCc1ccccc1",
+      "predict_proba_class1": 5.975740603176406e-05,
+      "decision_function": -1.7080524438056885
+    },
+    {
+      "smiles": "COc1cccc(CCC(=O)N2c3ccc([N+](=O)[O-])cc3C[C@@H]2C)c1Cl",
+      "predict_proba_class1": 0.0014191496339508148,
+      "decision_function": -1.198142922097911
+    },
+    {
+      "smiles": "O=C(CC1CCCCC1)Nc1ccc(F)cc1F",
+      "predict_proba_class1": 0.00047883329865951494,
+      "decision_function": -1.373042967395798
+    },
+    {
+      "smiles": "O=C1c2ccccc2C(=O)N1CCCc1nc(-c2ccccc2)no1",
+      "predict_proba_class1": 0.0008637075554595398,
+      "decision_function": -1.278083292970893
+    },
+    {
+      "smiles": "Cc1cnccc1NC(=O)NC[C@@H]1CCCN(c2ncccn2)C1",
+      "predict_proba_class1": 0.038738080917529116,
+      "decision_function": -0.6646979831082446
+    },
+    {
+      "smiles": "O=C(c1ccnc2ccccc12)N1CCCC1",
+      "predict_proba_class1": 0.0002851702931279391,
+      "decision_function": -1.456473634820344
+    },
+    {
+      "smiles": "COc1ccc(N2CCOCC2)c(NC(=O)c2cccs2)c1",
+      "predict_proba_class1": 0.0007291106916418534,
+      "decision_function": -1.305354902209873
+    },
+    {
+      "smiles": "COc1cc(OC)cc(C(=O)N2CCN(c3ccccc3F)CC2)c1",
+      "predict_proba_class1": 0.0007634851872257344,
+      "decision_function": -1.2979388003560761
+    },
+    {
+      "smiles": "N#Cc1ccc(N2CCN(C(=O)CN3CCc4ccccc43)CC2)nc1",
+      "predict_proba_class1": 0.0031383622266339256,
+      "decision_function": -1.070375840438132
+    },
+    {
+      "smiles": "CCN(C[C@@H]1COc2ccccc2O1)C(=O)NCCOC",
+      "predict_proba_class1": 0.0012079588939456355,
+      "decision_function": -1.2240814210637359
+    },
+    {
+      "smiles": "O=C(Nc1cccc(NC(=O)N2CC[C@@H](CCO)C2)c1)c1ccoc1",
+      "predict_proba_class1": 0.000337258873986477,
+      "decision_function": -1.4294668853548245
+    },
+    {
+      "smiles": "CCC(=O)N1CCc2cc(S(=O)(=O)N3CCc4ccccc43)ccc21",
+      "predict_proba_class1": 0.01056068631822901,
+      "decision_function": -0.8749565934898142
+    },
+    {
+      "smiles": "Cc1noc(C)c1S(=O)(=O)N1CCN(Cc2cccc(Br)c2)CC1",
+      "predict_proba_class1": 0.0018452144361236263,
+      "decision_function": -1.1558784523453398
+    },
+    {
+      "smiles": "CCCN1C2CCCC1CC(NC(=S)NCCCOCC)C2",
+      "predict_proba_class1": 0.007331406155124239,
+      "decision_function": -0.9337548804838601
+    },
+    {
+      "smiles": "O=C(NCC1CCN(c2ncccn2)CC1)c1cc(=O)c2ccccc2o1",
+      "predict_proba_class1": 0.00796545468847787,
+      "decision_function": -0.9203944876646641
+    },
+    {
+      "smiles": "C[C@H]([NH2+]CCn1cnc2c1c(=O)n(C)c(=O)n2C)[C@H](C)n1cccn1",
+      "predict_proba_class1": 0.002688608881027126,
+      "decision_function": -1.0952778863211319
+    },
+    {
+      "smiles": "COc1cccc2cc(C(=O)NCC3(c4cccs4)CC3)oc12",
+      "predict_proba_class1": 0.0006523438079071632,
+      "decision_function": -1.323264647148457
+    },
+    {
+      "smiles": "Cc1ccc(N2CCN(CC(=O)N3CCN(c4cccc[nH+]4)CC3)C2=O)cc1",
+      "predict_proba_class1": 0.0031452102021965285,
+      "decision_function": -1.0700249265478396
+    },
+    {
+      "smiles": "O=C(Cn1ncc2ccccc21)N1CCc2ccccc21",
+      "predict_proba_class1": 0.0017334677058227438,
+      "decision_function": -1.165935467589847
+    },
+    {
+      "smiles": "O=C(c1ccc(F)cc1)C1CCN(C(=O)Nc2ccccc2C(F)(F)F)CC1",
+      "predict_proba_class1": 0.0010667121532735035,
+      "decision_function": -1.244099708917329
+    },
+    {
+      "smiles": "Cn1c(CN2CCCC2)nc2cc(NC(=O)Nc3ccccc3)ccc21",
+      "predict_proba_class1": 0.005407451396504862,
+      "decision_function": -0.9827748728600101
+    },
+    {
+      "smiles": "C[C@@H]1CN(C2CCN(c3ccc(Cl)cn3)CC2)CCO1",
+      "predict_proba_class1": 0.03394530239962904,
+      "decision_function": -0.6862129571326285
+    },
+    {
+      "smiles": "O=C(c1ccc(Cl)cc1)[C@@H]1CCC[NH+](Cc2ccc(Oc3ncccn3)cc2)C1",
+      "predict_proba_class1": 0.004315074894987135,
+      "decision_function": -1.0191105903486422
+    },
+    {
+      "smiles": "O=C(CSc1ccccc1O)N[C@H]1CCc2ccccc21",
+      "predict_proba_class1": 0.0023327454649085307,
+      "decision_function": -1.1181349604299688
+    },
+    {
+      "smiles": "Cc1ccc(F)cc1C(=O)NCCOc1ccc([N-]S(C)(=O)=O)cc1",
+      "predict_proba_class1": 0.0008570336980598273,
+      "decision_function": -1.2793320246078386
+    },
+    {
+      "smiles": "Cc1ccc(Cl)cc1N1CCN(C(=O)CCC(=O)O)CC1",
+      "predict_proba_class1": 0.0006004192497476729,
+      "decision_function": -1.3366169702481394
+    },
+    {
+      "smiles": "O=C(NCc1ccccc1)c1ccc(NC(=O)N2CC3CCCN3c3ccccc32)cc1",
+      "predict_proba_class1": 0.008789734667177605,
+      "decision_function": -0.9045318637615628
+    },
+    {
+      "smiles": "Cc1cccc(OC(=O)c2cc3ccccc3o2)c1",
+      "predict_proba_class1": 0.00010859757172038598,
+      "decision_function": -1.6118899801717763
+    },
+    {
+      "smiles": "C/[NH+]=C(/NCc1coc(-c2ccccc2)n1)N1CCc2ccccc21",
+      "predict_proba_class1": 0.01659354989417122,
+      "decision_function": -0.8020871481710882
+    },
+    {
+      "smiles": "CC1Cc2ccccc2N1C(=O)CSc1nncn1C",
+      "predict_proba_class1": 0.0012804293796054836,
+      "decision_function": -1.2147020238192043
+    },
+    {
+      "smiles": "O=C(Nc1ccc(F)cc1)c1cccc(S(=O)(=O)N2CCc3ccccc32)c1",
+      "predict_proba_class1": 0.0011569116017942393,
+      "decision_function": -1.2310323242384031
+    },
+    {
+      "smiles": "Cn1c(=O)c2c(ncn2CCN2C(=O)c3ccccc3S2(=O)=O)n(C)c1=O",
+      "predict_proba_class1": 0.00031436617626148095,
+      "decision_function": -1.4407825693781595
+    },
+    {
+      "smiles": "Cc1ccc(CN2CCC[C@@H]([NH+]3CCN(Cc4ccc5c(c4)OCO5)CC3)C2)s1",
+      "predict_proba_class1": 0.033202709619292795,
+      "decision_function": -0.6898102500063747
+    },
+    {
+      "smiles": "CCN(CC)C(=O)Cc1cn(Cc2ccc(Cl)cc2)c2ccccc12",
+      "predict_proba_class1": 0.002716418963806265,
+      "decision_function": -1.093621193471455
+    },
+    {
+      "smiles": "Cn1c(CSc2nc3ccccc3s2)nnc1SCC(=O)NCCCN1CCOCC1",
+      "predict_proba_class1": 0.003761866249481606,
+      "decision_function": -1.0412005397649027
+    },
+    {
+      "smiles": "COc1ccc(C[NH+]2CCC(Cc3ccccc3)CC2)cc1OC",
+      "predict_proba_class1": 0.017517697621741664,
+      "decision_function": -0.7933383064079769
+    },
+    {
+      "smiles": "O=C(CCc1cccnc1)Nc1ccc(OCc2ccccc2)cc1",
+      "predict_proba_class1": 0.00039498676008671314,
+      "decision_function": -1.4040317528989243
+    },
+    {
+      "smiles": "COc1cccc(CNC(=O)c2ccc(Cl)c(S(=O)(=O)N3CCOCC3)c2)c1",
+      "predict_proba_class1": 0.0005291696161240564,
+      "decision_function": -1.3569519124252292
+    },
+    {
+      "smiles": "Fc1ccccc1N1CCN(c2nnnn2-c2ccccc2)CC1",
+      "predict_proba_class1": 0.0074436690359082494,
+      "decision_function": -0.9313072340427521
+    },
+    {
+      "smiles": "COc1cccc(S(=O)(=O)NCC2CCN(S(C)(=O)=O)CC2)c1",
+      "predict_proba_class1": 0.0006508400063770744,
+      "decision_function": -1.3236361731872128
+    },
+    {
+      "smiles": "COc1cccc(C(=O)NCc2ccc(CN3CCCC3=O)cc2)c1OC",
+      "predict_proba_class1": 0.019946922825768282,
+      "decision_function": -0.7723636385282739
+    },
+    {
+      "smiles": "OCCNCCOc1ccc(Cl)c(Cl)c1",
+      "predict_proba_class1": 0.01779782867347773,
+      "decision_function": -0.7907768362292749
+    },
+    {
+      "smiles": "C[C@H]1CN(C(C)(C)CNC(=O)c2ccc(N3CCCC3=O)cc2)C[C@@H](C)O1",
+      "predict_proba_class1": 0.008445393792688684,
+      "decision_function": -0.9109698189659369
+    },
+    {
+      "smiles": "CCO[C@H](CCNC(=O)c1cc2ccccc2[nH]1)C(C)C",
+      "predict_proba_class1": 0.0007787301514846826,
+      "decision_function": -1.2947560652560783
+    },
+    {
+      "smiles": "CCOc1ccc(Br)cc1C(=O)NC(=S)N1CCc2ccccc21",
+      "predict_proba_class1": 0.0024248507721152507,
+      "decision_function": -1.1119007981853184
+    },
+    {
+      "smiles": "CC(C)CC[C@@H](C)NC(=O)N1CCc2ccccc21",
+      "predict_proba_class1": 0.010176159804259751,
+      "decision_function": -0.880933651610977
+    },
+    {
+      "smiles": "Cc1nc(CN2CCN(C(=O)c3ccc(F)c(F)c3)CC2)no1",
+      "predict_proba_class1": 0.0020589878568928067,
+      "decision_function": -1.138231293998712
+    },
+    {
+      "smiles": "CC(OC(=O)c1c[nH]c2ccccc12)C(=O)N1CCCC1",
+      "predict_proba_class1": 0.00019494081662557776,
+      "decision_function": -1.517708999479884
+    },
+    {
+      "smiles": "COc1ccc(-n2nc(C(=O)NCC(=O)NCCCN3CCOCC3)c3ccccc3c2=O)cc1",
+      "predict_proba_class1": 0.005455434262668792,
+      "decision_function": -0.9813523080170963
+    },
+    {
+      "smiles": "Cc1ccc(C)c(N2CCN(C(=O)c3ccc4c(c3)c(C)c(C)n4C)CC2)c1",
+      "predict_proba_class1": 0.0022372695627976423,
+      "decision_function": -1.124862623330089
+    },
+    {
+      "smiles": "O=C(NCCCc1ccccc1)[C@H]1C[C@H]1c1ccccc1",
+      "predict_proba_class1": 0.0014389616903776696,
+      "decision_function": -1.1959110537218034
+    },
+    {
+      "smiles": "CCOc1ccc(-n2c(O)cc(N(O)c3ccccc3)c2O)cc1",
+      "predict_proba_class1": 0.003261794708048503,
+      "decision_function": -1.0641651615400893
+    },
+    {
+      "smiles": "COc1cccc(C(=O)N2CCN(C(=O)COc3ccc4ccccc4c3)CC2)c1",
+      "predict_proba_class1": 0.0029610368442933356,
+      "decision_function": -1.0797395647483372
+    },
+    {
+      "smiles": "O=C(CN1CCN(S(=O)(=O)c2ccccc2)CC1)NCc1ccccc1",
+      "predict_proba_class1": 0.0005057689633981513,
+      "decision_function": -1.3642329112586102
+    },
+    {
+      "smiles": "CCc1ccsc1CNC(=O)N1CCC(COC)CC1",
+      "predict_proba_class1": 0.008201904405030094,
+      "decision_function": -0.9156824409321686
+    },
+    {
+      "smiles": "O=C(Cc1cccc(NC(=O)C2CCCN(C(=O)C3CCC3)C2)c1)Nc1cccc(C(=O)N2CCCC2)c1",
+      "predict_proba_class1": 0.007453421784476937,
+      "decision_function": -0.9310963405072621
+    },
+    {
+      "smiles": "Cc1ccc(CN2C(=O)CSc3ccc(C(=O)NC4CC4)cc32)cc1",
+      "predict_proba_class1": 0.005440513815905713,
+      "decision_function": -0.981793315648092
+    },
+    {
+      "smiles": "Cc1ccccc1C(=O)Nc1ccnn1C1CCN(Cc2ccncc2)CC1",
+      "predict_proba_class1": 0.03534228116009241,
+      "decision_function": -0.6796498782714289
+    },
+    {
+      "smiles": "COc1cccc(C(=O)CN2C3=NCCCN3c3ccccc32)c1",
+      "predict_proba_class1": 0.0019278475210778286,
+      "decision_function": -1.148825885385292
+    },
+    {
+      "smiles": "Cc1ccc(S(=O)(=O)N2CCC(C(=O)N3CCc4ccccc43)CC2)cc1C",
+      "predict_proba_class1": 0.0016353114105699957,
+      "decision_function": -1.1753193638446318
+    },
+    {
+      "smiles": "c1ccc(-c2ncn(CCc3c[nH]c4ccccc34)c2-c2cccnc2)cc1",
+      "predict_proba_class1": 0.006356327012720216,
+      "decision_function": -0.9567399400200877
+    },
+    {
+      "smiles": "O=C(NCC[NH+]1CCN(C(=O)COc2ccccc2)CC1)c1ccc2c(c1)OCO2",
+      "predict_proba_class1": 0.0026652981697399968,
+      "decision_function": -1.0966797980616856
+    },
+    {
+      "smiles": "COCc1ccc(C(=O)N(C[C@H]2CCCO2)c2ccncc2)cc1",
+      "predict_proba_class1": 0.0038374177805142024,
+      "decision_function": -1.0379990714362024
+    },
+    {
+      "smiles": "COc1ccc(C(=O)NCCn2cnc(-c3ccc(F)cc3)cc2=O)cc1",
+      "predict_proba_class1": 0.0010299735325442932,
+      "decision_function": -1.2497418131578863
+    },
+    {
+      "smiles": "CC(C)(C)OC(=O)NCCCCCO",
+      "predict_proba_class1": 0.0016744067328278145,
+      "decision_function": -1.1715159971888318
+    },
+    {
+      "smiles": "COc1ccccc1/C=C/C(=O)Nc1ccccc1C(N)=O",
+      "predict_proba_class1": 6.850622155801588e-05,
+      "decision_function": -1.6860574914328128
+    },
+    {
+      "smiles": "CCCCOc1cccc(C(=O)N2CCN(Cc3ccccc3)CC2)c1",
+      "predict_proba_class1": 0.02444398143749313,
+      "decision_function": -0.7394843710133354
+    },
+    {
+      "smiles": "CCc1ccc(N2C[C@@H](c3nc4ccccc4n3CC)CC2=O)cc1",
+      "predict_proba_class1": 0.0017505669517124546,
+      "decision_function": -1.1643552624811595
+    },
+    {
+      "smiles": "CCOc1cc(C(=O)N2CCOCC2)ccc1OCc1ccccc1",
+      "predict_proba_class1": 0.00010466132729857261,
+      "decision_function": -1.61783326645312
+    },
+    {
+      "smiles": "Cc1ccc(NC(=O)CN2CCN(C(=O)C3CCN(C(=O)c4cccs4)CC3)CC2)cc1",
+      "predict_proba_class1": 0.018202948286817743,
+      "decision_function": -0.787142515494617
+    },
+    {
+      "smiles": "COc1cccc(OC)c1C(=O)N1CCN(c2nccn2-c2ccccc2F)CC1",
+      "predict_proba_class1": 0.002013809224322671,
+      "decision_function": -1.1418030221116193
+    },
+    {
+      "smiles": "CCC(=O)N1CCc2cc(Br)cc(S(=O)(=O)NCCCN(C)Cc3ccccc3)c21",
+      "predict_proba_class1": 0.040866443180381164,
+      "decision_function": -0.6559652095226925
+    },
+    {
+      "smiles": "COc1cc2c(cc1OC)[C@@H](c1ccccc1)N(C(=O)COC(=O)C1CC1)CC2",
+      "predict_proba_class1": 0.0014282745320178699,
+      "decision_function": -1.197111138824596
+    },
+    {
+      "smiles": "CS(=O)(=O)CCCNC(=O)c1cc2cccc(Cl)c2o1",
+      "predict_proba_class1": 3.697152672587608e-05,
+      "decision_function": -1.7853462801224835
+    },
+    {
+      "smiles": "CC[NH2+][C@H]1c2cc(OC)ccc2CC[C@H]1SCC",
+      "predict_proba_class1": 0.008222762919354549,
+      "decision_function": -0.9152732983222907
+    },
+    {
+      "smiles": "C[C@@H]1C[C@@H]1NC(=O)C(=O)Nc1cc(Cl)ccc1OC[C@@H]1CCCO1",
+      "predict_proba_class1": 0.00039671687722556777,
+      "decision_function": -1.4033281678236693
+    }
+  ],
+  "platt_orientation": "flipped",
+  "parity": {
+    "tolerance": 1e-09,
+    "max_abs_probability_gap": 2.187833247901949e-14,
+    "max_abs_decision_gap": 1.34781075189494e-13,
+    "orientation_rejected": {
+      "direct": 0.9999260569465482
+    },
+    "source_panel": {
+      "molecules": 200,
+      "mean": 0.006238209836278494,
+      "max": 0.04815815852366899,
+      "fraction_above_0.5": 0.0
+    },
+    "active_panel": {
+      "molecules": 300,
+      "mean": 0.8313397458413072,
+      "min": 0.5,
+      "fraction_above_0.5": 1.0
+    },
+    "verdict": "numpy reimplementation reproduces the original estimator"
+  }
+}
