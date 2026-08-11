@@ -1,0 +1,344 @@
+{
+  "capability_baseline_source": "initialization",
+  "completed_steps": 8502,
+  "curve": [
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 4.115900171107617,
+      "reference_law_weighted_mean_nll": 3.5638669491343244,
+      "regressed": [],
+      "step": 500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 4.039984261432052,
+      "reference_law_weighted_mean_nll": 3.3517931688203473,
+      "regressed": [],
+      "step": 1000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.9933536926549746,
+      "reference_law_weighted_mean_nll": 3.268913717922094,
+      "regressed": [],
+      "step": 1500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 4.046542314643886,
+      "reference_law_weighted_mean_nll": 3.230490106032119,
+      "regressed": [],
+      "step": 2000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.935469809428128,
+      "reference_law_weighted_mean_nll": 3.1303088362011233,
+      "regressed": [],
+      "step": 2500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.8951758659201805,
+      "reference_law_weighted_mean_nll": 3.1211290963207663,
+      "regressed": [],
+      "step": 3000
+    },
+    {
+      "collapsed": [
+        "cell:editing_v2_active8_v1:atom_restate:element_identity_change",
+        "family:atom_restate"
+      ],
+      "eligible": false,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.9308506158829197,
+      "reference_law_weighted_mean_nll": 3.081208071743614,
+      "regressed": [],
+      "step": 3500
+    },
+    {
+      "collapsed": [
+        "cell:editing_v2_active8_v1:atom_restate:element_identity_change",
+        "family:atom_restate"
+      ],
+      "eligible": false,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.9227405468138397,
+      "reference_law_weighted_mean_nll": 3.0287856781071922,
+      "regressed": [],
+      "step": 4000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": 4.578683956123598,
+      "panel_native_mean_nll": 3.8605052676902196,
+      "reference_law_weighted_mean_nll": 3.0399041192245524,
+      "regressed": [],
+      "step": 4500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.856198152004889,
+      "reference_law_weighted_mean_nll": 3.0121954054450075,
+      "regressed": [],
+      "step": 5000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.8795007746239145,
+      "reference_law_weighted_mean_nll": 2.995455764821362,
+      "regressed": [],
+      "step": 5500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.8856904671586494,
+      "reference_law_weighted_mean_nll": 3.0197663080086814,
+      "regressed": [],
+      "step": 6000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.8932836046947363,
+      "reference_law_weighted_mean_nll": 2.9905873409953063,
+      "regressed": [],
+      "step": 6500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.924561758029307,
+      "reference_law_weighted_mean_nll": 2.9705222132178766,
+      "regressed": [],
+      "step": 7000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.8635778929536335,
+      "reference_law_weighted_mean_nll": 2.960062319090029,
+      "regressed": [],
+      "step": 7500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.791821506740102,
+      "reference_law_weighted_mean_nll": 2.9531452135653202,
+      "regressed": [],
+      "step": 8000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.8334612683662277,
+      "reference_law_weighted_mean_nll": 2.9238343594855665,
+      "regressed": [],
+      "step": 8500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": 4.381683914107246,
+      "panel_native_mean_nll": 3.817759559216728,
+      "reference_law_weighted_mean_nll": 2.930743953510341,
+      "regressed": [],
+      "step": 8502
+    }
+  ],
+  "epochs_completed": 2,
+  "external_cohort_readings": {
+    "step_3000": 4.3364,
+    "step_4500": 4.5787,
+    "step_8502": 4.3817
+  },
+  "findings": {
+    "atom_restate_identity_delta": -1.8178383570598622,
+    "atom_restate_joint_delta": 0.18301036806161797,
+    "external_cohort_flat": true,
+    "identity_improved_for_every_family": true,
+    "identity_regressions_in_epoch_2": 0,
+    "metric_step_to_step_noise_nats": 0.026,
+    "noise_evidence": "Steps 7,956 and 8,000 are 44 optimizer steps apart and differ by 0.026 nats on a deterministic evaluation, comparable to the typical 500-step improvement. Differences below ~0.03 between adjacent evaluations are not resolvable; the freeze gate predicted 0.024 standard error.",
+    "reference_law_improves_from_initialization": [
+      5.4603,
+      2.9238
+    ],
+    "zero_mass_strata_continue_to_degrade": true
+  },
+  "identity": {
+    "eval_panel_sha256": "c7c3c462f17f",
+    "initial_model_state_sha256": "3e6bd109a80a5850e9dc3cb16d0dfe5ab9c7c3e83904f3d1f6afe9fa32800fe9",
+    "initialization_seed": 20260730,
+    "library_sha256": "2d553afa5560319455855bf75306b6e9d5169180562be7b139cf14336f7ecb26",
+    "manifest_sha256": "e27494a462504b3030d0b6c430b09b4192ad9d56cfe6e4831a661c8f815ea3d4",
+    "packed_store_records_sha256": "b232a6fa069fef8cdd491e5d9b94fc2d445fce357c753c77128216cf60cc2df0",
+    "sampling_law_sha256": "b0cc66f168f1cf3e7a4b5bacfb1138059005251a10561d6961c3ea1c5dd7ac73",
+    "split_sha256": "c7c3c462f17f"
+  },
+  "identity_sha256": "426ac15e7f4cc68c2b0208992dd230d2e283c6cc524092df3cb2d3c5898b3b9a",
+  "identity_vs_initialization": {
+    "atom_delete": {
+      "delta": -0.6440081585315718,
+      "final": 1.005235782607583,
+      "initialization": 1.6492439411391548
+    },
+    "atom_insert": {
+      "delta": -1.8626236011449526,
+      "final": 3.2900150150711465,
+      "initialization": 5.152638616216099
+    },
+    "atom_restate": {
+      "delta": -1.8178383570598622,
+      "final": 3.3868371412896834,
+      "initialization": 5.204675498349546
+    },
+    "bond_reorder": {
+      "delta": -0.23348291854840442,
+      "final": 1.3121969794194446,
+      "initialization": 1.545679897967849
+    },
+    "bond_reroute": {
+      "delta": -1.094474987380825,
+      "final": 2.5431174260123233,
+      "initialization": 3.6375924133931483
+    },
+    "cycle_attach": {
+      "delta": -0.006684298039881131,
+      "final": 2.536003200015015,
+      "initialization": 2.542687498054896
+    },
+    "cycle_insert": {
+      "delta": -3.807556749703356,
+      "final": 0.9071229021817406,
+      "initialization": 4.714679651885096
+    },
+    "ring_system_restate": {
+      "delta": -0.2132527917513276,
+      "final": 0.5006829499095936,
+      "initialization": 0.7139357416609212
+    }
+  },
+  "initialization_reference_law_nll": 5.4603,
+  "initialization_reproduces_across_segments_nats": 0.0,
+  "joint_first_to_last": {
+    "atom_delete": {
+      "delta": 0.13433057360918133,
+      "first": 2.785694904961129,
+      "last": 2.9200254785703104
+    },
+    "atom_insert": {
+      "delta": -0.4292876089753852,
+      "first": 5.478276928707951,
+      "last": 5.0489893197325655
+    },
+    "atom_restate": {
+      "delta": 0.18301036806161797,
+      "first": 5.071479149465015,
+      "last": 5.254489517526633
+    },
+    "bond_reorder": {
+      "delta": -0.7233205573844432,
+      "first": 3.921639019139699,
+      "last": 3.198318461755256
+    },
+    "bond_reroute": {
+      "delta": -0.04846533701294842,
+      "first": 4.405706750265879,
+      "last": 4.357241413252931
+    },
+    "cycle_attach": {
+      "delta": -1.3849729781975841,
+      "first": 5.201493188083346,
+      "last": 3.8165202098857622
+    },
+    "cycle_insert": {
+      "delta": -1.368392591954742,
+      "first": 2.9801331853671353,
+      "last": 1.6117405934123934
+    },
+    "ring_system_restate": {
+      "delta": -0.8862580093847985,
+      "first": 2.2101493692794945,
+      "last": 1.323891359894696
+    }
+  },
+  "run": "run_v2_01",
+  "schema": "compose.editing_v2.r_theta_run_epoch_report",
+  "selected_criterion": [
+    1,
+    -2.9238343594855665,
+    -8500
+  ],
+  "selected_step": 8500,
+  "status": "RESULT_EVIDENCE_ONLY_NO_DOWNSTREAM_AUTHORITY",
+  "support_bands": {
+    "0": {
+      "delta": -0.2194711797105171,
+      "first": 4.233936375056254,
+      "last": 4.014465195345737
+    },
+    "1-4": {
+      "delta": -0.20512555731106152,
+      "first": 4.044258013777189,
+      "last": 3.8391324564661278
+    },
+    "25+": {
+      "delta": -0.6198956810193561,
+      "first": 4.28920840346071,
+      "last": 3.6693127224413535
+    },
+    "5-24": {
+      "delta": -0.3781843332824688,
+      "first": 4.080095375240611,
+      "last": 3.7019110419581422
+    }
+  },
+  "zero_mass_strata": {
+    "atom_delete|synthetic": {
+      "delta": 1.7401977171663372,
+      "first": 4.173812055587769,
+      "last": 5.914009772754106
+    },
+    "atom_insert|synthetic": {
+      "delta": 0.9877171559767284,
+      "first": 7.287288174691138,
+      "last": 8.275005330667867
+    },
+    "atom_restate|synthetic": {
+      "delta": 1.4552592430929572,
+      "first": 7.680518533420646,
+      "last": 9.135777776513603
+    },
+    "bond_reroute|synthetic": {
+      "delta": 0.7960647182204781,
+      "first": 6.766765199219569,
+      "last": 7.562829917440047
+    }
+  }
+}
