@@ -1,0 +1,354 @@
+{
+  "capability_baseline_source": "initialization",
+  "caveats": [
+    "The support-band gradient is measured WITHIN one reserve on one split; the two low bands are tied within 0.015, so 'transfers to unsupported chemistry but benefits increasingly from denser support' is supportable while a strict monotone-in-support claim is not.",
+    "Adjacent evaluations differ by up to 0.026 nats from optimizer noise alone, so single-interval differences below that are not resolvable.",
+    "The external cohort is a cross-cohort diagnostic and was never a selection input; its composition is an accident of how those shards were mined."
+  ],
+  "completed_steps": 12753,
+  "curve": [
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 4.115900171107617,
+      "reference_law_weighted_mean_nll": 3.5638669491343244,
+      "step": 500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 4.039984261432052,
+      "reference_law_weighted_mean_nll": 3.3517931688203473,
+      "step": 1000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.9933536926549746,
+      "reference_law_weighted_mean_nll": 3.268913717922094,
+      "step": 1500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 4.046542314643886,
+      "reference_law_weighted_mean_nll": 3.230490106032119,
+      "step": 2000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.935469809428128,
+      "reference_law_weighted_mean_nll": 3.1303088362011233,
+      "step": 2500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.8951758659201805,
+      "reference_law_weighted_mean_nll": 3.1211290963207663,
+      "step": 3000
+    },
+    {
+      "collapsed": [
+        "cell:editing_v2_active8_v1:atom_restate:element_identity_change",
+        "family:atom_restate"
+      ],
+      "eligible": false,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.9308506158829197,
+      "reference_law_weighted_mean_nll": 3.081208071743614,
+      "step": 3500
+    },
+    {
+      "collapsed": [
+        "cell:editing_v2_active8_v1:atom_restate:element_identity_change",
+        "family:atom_restate"
+      ],
+      "eligible": false,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.9227405468138397,
+      "reference_law_weighted_mean_nll": 3.0287856781071922,
+      "step": 4000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": 4.578683956123598,
+      "panel_native_mean_nll": 3.8605052676902196,
+      "reference_law_weighted_mean_nll": 3.0399041192245524,
+      "step": 4500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.856198152004889,
+      "reference_law_weighted_mean_nll": 3.0121954054450075,
+      "step": 5000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.8795007746239145,
+      "reference_law_weighted_mean_nll": 2.995455764821362,
+      "step": 5500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.8856904671586494,
+      "reference_law_weighted_mean_nll": 3.0197663080086814,
+      "step": 6000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.8932836046947363,
+      "reference_law_weighted_mean_nll": 2.9905873409953063,
+      "step": 6500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.924561758029307,
+      "reference_law_weighted_mean_nll": 2.9705222132178766,
+      "step": 7000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.8635778929536335,
+      "reference_law_weighted_mean_nll": 2.960062319090029,
+      "step": 7500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.791821506740102,
+      "reference_law_weighted_mean_nll": 2.9531452135653202,
+      "step": 8000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.8334612683662277,
+      "reference_law_weighted_mean_nll": 2.9238343594855665,
+      "step": 8500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": 4.381683914107246,
+      "panel_native_mean_nll": 3.817759559216728,
+      "reference_law_weighted_mean_nll": 2.930743953510341,
+      "step": 8502
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": 4.328761503850146,
+      "panel_native_mean_nll": 3.8241143644626336,
+      "reference_law_weighted_mean_nll": 2.9041162736905335,
+      "step": 9000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.8018505020932927,
+      "reference_law_weighted_mean_nll": 2.8823479163277983,
+      "step": 9500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.823599360202666,
+      "reference_law_weighted_mean_nll": 2.885313366412493,
+      "step": 10000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.961755212510142,
+      "reference_law_weighted_mean_nll": 2.9185811326511613,
+      "step": 10500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.791260489735582,
+      "reference_law_weighted_mean_nll": 2.8694372476877246,
+      "step": 11000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.783561881086116,
+      "reference_law_weighted_mean_nll": 2.8554657496959406,
+      "step": 11500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.8792759770172203,
+      "reference_law_weighted_mean_nll": 2.8511941444631796,
+      "step": 12000
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": null,
+      "panel_native_mean_nll": 3.8800647858715918,
+      "reference_law_weighted_mean_nll": 2.8363681845047877,
+      "step": 12500
+    },
+    {
+      "collapsed": [],
+      "eligible": true,
+      "external_cohort_mean_nll": 4.406365521128252,
+      "panel_native_mean_nll": 3.8071740538617442,
+      "reference_law_weighted_mean_nll": 2.854731391322595,
+      "step": 12753
+    }
+  ],
+  "epoch_gains_nats": {
+    "epoch_1_from_step_500": 0.5351,
+    "epoch_2": 0.1522,
+    "epoch_3": 0.0874
+  },
+  "epochs": 3,
+  "external_cohort_readings": {
+    "step_12753": 4.4064,
+    "step_3000": 4.3364,
+    "step_4500": 4.5787,
+    "step_8502": 4.3817,
+    "step_9000": 4.3288
+  },
+  "families_worse_than_initialization": 0,
+  "frozen_by_this_decision": [
+    "objective: ordinary canonical-successor likelihood, unchanged throughout",
+    "architecture",
+    "corpus, sampling law, split and matched-validation reserve",
+    "goal-marginal training remains PARKED: it must earn entry on control cost, SMC ESS, mode coverage or oracle efficiency, not on rescuing R_theta"
+  ],
+  "identity": {
+    "eval_panel_sha256": "c7c3c462f17f",
+    "initial_model_state_sha256": "3e6bd109a80a5850e9dc3cb16d0dfe5ab9c7c3e83904f3d1f6afe9fa32800fe9",
+    "initialization_seed": 20260730,
+    "library_sha256": "2d553afa5560319455855bf75306b6e9d5169180562be7b139cf14336f7ecb26",
+    "manifest_sha256": "e27494a462504b3030d0b6c430b09b4192ad9d56cfe6e4831a661c8f815ea3d4",
+    "packed_store_records_sha256": "b232a6fa069fef8cdd491e5d9b94fc2d445fce357c753c77128216cf60cc2df0",
+    "sampling_law_sha256": "b0cc66f168f1cf3e7a4b5bacfb1138059005251a10561d6961c3ea1c5dd7ac73",
+    "split_sha256": "c7c3c462f17f"
+  },
+  "identity_regressions_epochs_2_and_3": 0,
+  "identity_sha256": "426ac15e7f4cc68c2b0208992dd230d2e283c6cc524092df3cb2d3c5898b3b9a",
+  "identity_vs_initialization": {
+    "atom_delete": {
+      "delta": -0.66140225228375,
+      "final": 0.9878416888554048,
+      "initialization": 1.6492439411391548
+    },
+    "atom_insert": {
+      "delta": -1.8800259014560106,
+      "final": 3.2726127147600885,
+      "initialization": 5.152638616216099
+    },
+    "atom_restate": {
+      "delta": -1.8581374364174037,
+      "final": 3.346538061932142,
+      "initialization": 5.204675498349546
+    },
+    "bond_reorder": {
+      "delta": -0.24865914340340778,
+      "final": 1.2970207545644412,
+      "initialization": 1.545679897967849
+    },
+    "bond_reroute": {
+      "delta": -1.1311097782119437,
+      "final": 2.5064826351812046,
+      "initialization": 3.6375924133931483
+    },
+    "cycle_attach": {
+      "delta": -0.006135190162491089,
+      "final": 2.536552307892405,
+      "initialization": 2.542687498054896
+    },
+    "cycle_insert": {
+      "delta": -3.920706856313654,
+      "final": 0.7939727955714426,
+      "initialization": 4.714679651885096
+    },
+    "ring_system_restate": {
+      "delta": -0.21653295073487905,
+      "final": 0.49740279092604217,
+      "initialization": 0.7139357416609212
+    }
+  },
+  "initialization_reference_law_nll": 5.4603,
+  "preregistered_decision": {
+    "curve_is_not_steep": "Epoch gains roughly halve each epoch: 0.535 -> 0.152 -> 0.087. Over the last 3,000 steps the descent averaged about -0.010 nats per 500 steps, near the measured 0.026-nat resolution. A fourth epoch extrapolates to roughly 0.05, at the threshold where the rule says stop.",
+    "measured_gain_nats": 0.0874,
+    "outcome": "STOP AND FREEZE",
+    "rule": "0.05-0.10 -> stop and freeze unless the curve is clearly still steep"
+  },
+  "run": "run_v2_01",
+  "schema": "compose.editing_v2.r_theta_frozen_reference_process",
+  "selected_criterion": [
+    1,
+    -2.8363681845047877,
+    -12500
+  ],
+  "selected_model_state_sha256": "c977ee3fe0cfdcafa204a2add27f3feef59f5dfcf4f3384659d8902a9006167c",
+  "selected_reference_law_weighted_mean_nll": 2.8363681845047877,
+  "selected_step": 12500,
+  "status": "FROZEN_REFERENCE_PROCESS",
+  "support_bands": {
+    "0": {
+      "delta": -0.20568664157465122,
+      "first": 4.233936375056254,
+      "last": 4.028249733481603
+    },
+    "1-4": {
+      "delta": -0.19049742981693152,
+      "first": 4.044258013777189,
+      "last": 3.853760583960258
+    },
+    "25+": {
+      "delta": -0.6947333514879737,
+      "first": 4.28920840346071,
+      "last": 3.594475051972736
+    },
+    "5-24": {
+      "delta": -0.4215062516013428,
+      "first": 4.080095375240611,
+      "last": 3.6585891236392682
+    }
+  },
+  "total_improvement_from_initialization_nats": 2.6239318154952125,
+  "zero_mass_strata": {
+    "atom_delete|synthetic": 6.309827631027972,
+    "atom_insert|synthetic": 8.657947784894473,
+    "atom_restate|synthetic": 9.426684180029392,
+    "bond_reroute|synthetic": 7.787679131596517
+  }
+}
