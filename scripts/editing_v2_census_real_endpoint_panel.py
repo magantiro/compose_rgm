@@ -139,6 +139,8 @@ def main() -> int:
     parser.add_argument("--provenance", required=True, type=Path)
     parser.add_argument("--reserve", required=True, type=Path)
     parser.add_argument("--out", required=True, type=Path)
+    parser.add_argument("--held-out-by-construction", action="store_true",
+                        help="partition shares no entry id with training")
     args = parser.parse_args()
 
     records = load_records(args.corpus)
@@ -178,10 +180,17 @@ def main() -> int:
                  [c for c in banded
                   if all(lane_by_entry.get(e["p50_entry_sha256"]) == REAL_LANE
                          for e in c)])
-    source_held = stage("source key in the matched reserve",
-                        [c for c in real
-                         if c[0]["teacher_successor_fiber"]["source_key"]
-                         in reserve_sources])
+    if args.held_out_by_construction:
+        # The panel partition shares no entry id with the training corpus, so
+        # "no transition used in training" holds for every trace here rather
+        # than being a filter. Stated explicitly so the funnel cannot be read
+        # as though a stage were quietly dropped.
+        source_held = stage("held out by construction (disjoint partition)", real)
+    else:
+        source_held = stage("source key in the matched reserve",
+                            [c for c in real
+                             if c[0]["teacher_successor_fiber"]["source_key"]
+                             in reserve_sources])
     endpoints_clean = stage("BOTH endpoints absent from training-source universe",
                             [c for c in source_held
                              if c[0]["teacher_successor_fiber"]["source_key"]

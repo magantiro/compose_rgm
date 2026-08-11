@@ -1,0 +1,17 @@
+{
+  "schema": "compose.editing_v2.real_endpoint_panel_census",
+  "status": "READ_ONLY_CENSUS_SELECTS_NOTHING",
+  "join": {
+    "forked_states": 2380,
+    "abandoned_at_fork": 1407,
+    "chain_heads": 2444,
+    "chains": 2444
+  },
+  "funnel": {
+    "verified 4-6 step chains": 42,
+    "every transition in lane real_endpoint_multistep_path": 0,
+    "held out by construction (disjoint partition)": 0,
+    "BOTH endpoints absent from training-source universe": 0,
+    "no transition of the trace used in training": 0
+  }
+}
