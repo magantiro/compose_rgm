@@ -82,8 +82,9 @@ RANDOM_LEGAL = 2
 
 
 @app.function(
-    image=image, cpu=2.0, memory=12 * 1024, timeout=4 * 60 * 60,
-    max_containers=14, volumes={str(ARTIFACT_ROOT): artifact_volume},
+    image=image, cpu=2.0, memory=12 * 1024, timeout=60 * 60,
+    max_containers=40, retries=2,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
 def collect(task: dict[str, Any]) -> dict[str, Any]:
     """Collect union-covered teacher labels for one held-in transformation."""
@@ -113,6 +114,19 @@ def collect(task: dict[str, Any]) -> dict[str, Any]:
 
     started = time.perf_counter()
     artifact_volume.reload()
+
+    # RESUME. A pair whose shard is already on the volume is never recomputed,
+    # so a killed or preempted run is restarted by simply relaunching: it costs
+    # only the pairs that were genuinely in flight. This is what makes a
+    # multi-hour fan-out safe to interrupt.
+    shard_dir = Path(RUN_ROOT) / "h_phi_teacher" / task.get("role", "train")
+    shard_path = shard_dir / f"{task['index']:04d}.json"
+    if shard_path.exists():
+        done = json.loads(shard_path.read_text())
+        print(f"  pair {task['index']}: resumed from volume "
+              f"({done['labels']} labels), no recompute", flush=True)
+        return done
+
     paths = json.loads((Path(RUN_ROOT) / "run_inputs" / "RUN_PATHS.json").read_text())
     source = open_process_v2_t1_source(
         Path(paths["active8_root"]),
@@ -298,12 +312,22 @@ def collect(task: dict[str, Any]) -> dict[str, Any]:
     seconds = time.perf_counter() - started
     print(f"  pair {task['index']}: {states} states, {len(labels)} labels, "
           f"{calls} calls, {positives} positive, {seconds:.0f}s", flush=True)
-    return {
-        "index": task["index"], "steps": budget,
+
+    payload = {
+        "index": task["index"], "pair_id": task["pair_id"], "steps": budget,
         "decision_states": states, "labels": len(labels), "positives": positives,
         "kernel_calls": calls, "cache_hits": hits, "teacher_cache_hits": teacher_hits,
         "seconds": round(seconds, 1), "label_rows": labels,
     }
+    # Persist HERE, not only in the client. A multi-hour fan-out whose results
+    # exist solely as return values is one network blip away from losing
+    # everything -- the exact failure that cost an Experiment B run earlier.
+    # Each container writes its own shard, so a disconnect costs only the pairs
+    # still in flight.
+    shard_dir.mkdir(parents=True, exist_ok=True)
+    shard_path.write_text(json.dumps(payload, indent=2) + "\n")
+    artifact_volume.commit()
+    return payload
 
 
 @app.local_entrypoint()
@@ -331,7 +355,7 @@ def main(pairs: int = 12, role: str = "train",
     for length in (4, 5, 6):
         band = [r for r in rows if r["steps"] == length]
         chosen.extend(band[:per])
-    tasks = [{**row, "index": i,
+    tasks = [{**row, "index": i, "role": role,
               "pair_id": f"{row['steps']}:{row['source']}>>{row['target']}"}
              for i, row in enumerate(chosen)]
     print(f"union-collecting {len(tasks)} held-in pairs "
