@@ -1,0 +1,79 @@
+{
+  "audited_against": {
+    "active8_root": "8ecc0e5e825a15200560c58960d4f662c9ca23be785c825c9c24aa73308144bb",
+    "precedence_resolution": "editing_v2_split_precedence_resolution.json",
+    "reserve_digest": "b580fdef6486"
+  },
+  "exact_overlap": {
+    "with_external_cohort_as_loaded": 0,
+    "with_external_cohort_raw_file": 3,
+    "with_matched_reserve": 0,
+    "with_training_universe": 0
+  },
+  "explicitly_not": "FINAL_TEST_SCIENTIFICALLY_OPENED",
+  "final_test_distinct_sources": 35657,
+  "final_test_source_set_sha256": "17b306b77c2563b6c2f3dea8b80b38b455ab3c358f98db647f5da4fd0cc1be20",
+  "finding": "CLEAN. Zero exact overlap with the training universe, the matched reserve, or the external cohort as loaded. Zero genuine near-duplicates.",
+  "methodological_caveat_for_the_criterion": "The same ECFP4 Tanimoto >= 0.95 criterion clusters near-duplicates in the reserve carve, where 192 of 106,530 clusters hold more than one source. Some of those merges may be this same alkane degeneracy. The direction is SAFE: spurious merging assigns a whole cluster to one side of the split, which is more conservative, not leakier. Worth stating in methods rather than discovering under review.",
+  "near_duplicate_candidates_before_verification": 6,
+  "near_duplicate_candidates_were_all_fingerprint_artifacts": "Six candidates flagged at Tanimoto 1.000 were all linear alkanes, C11 through C16, matching against OCTANE (C8H18). ECFP4 is degenerate for unbranched chains: past a few atoms the set of circular substructures stops changing, so undecane and hexadecane carry identical bit vectors despite being different molecules. Verified by canonical SMILES and molecular formula -- 0 of 6 are the same molecule. Reporting these as leakage would have been wrong.",
+  "near_duplicate_fraction": 0.000168,
+  "near_duplicates_with_training_at_0p95": 0,
+  "raw_cohort_overlap_explained": "3 sources appear in both final_test and the RAW 16-shard panel file, and all 3 are inside the 6 declared validation-role precedence exclusions, so the cohort AS LOADED overlaps final_test by ZERO. The precedence machinery caught them as designed. This is not a leak.",
+  "recommended_action": "None. No final_test source needs excluding. The role stays sealed.",
+  "role_source_counts": {
+    "controller_validation": 43268,
+    "final_test": 35657,
+    "train": 564316,
+    "validation": 26587
+  },
+  "scaffold_shared_fraction": 0.8932,
+  "scaffold_shared_with_training": 31849,
+  "schema": "compose.editing_v2.final_test_integrity_audit",
+  "schema_version": 1,
+  "state": "FINAL_TEST_INTEGRITY_AUDITED",
+  "verified_alkane_candidates": [
+    {
+      "final_test": "CCCCCCCCCCC",
+      "nearest_training": "CCCCCCCC",
+      "same_molecule": false,
+      "tanimoto": 1.0
+    },
+    {
+      "final_test": "CCCCCCCCCCCC",
+      "nearest_training": "CCCCCCCC",
+      "same_molecule": false,
+      "tanimoto": 1.0
+    },
+    {
+      "final_test": "CCCCCCCCCCCCC",
+      "nearest_training": "CCCCCCCC",
+      "same_molecule": false,
+      "tanimoto": 1.0
+    },
+    {
+      "final_test": "CCCCCCCCCCCCCC",
+      "nearest_training": "CCCCCCCC",
+      "same_molecule": false,
+      "tanimoto": 1.0
+    },
+    {
+      "final_test": "CCCCCCCCCCCCCCC",
+      "nearest_training": "CCCCCCCC",
+      "same_molecule": false,
+      "tanimoto": 1.0
+    },
+    {
+      "final_test": "CCCCCCCCCCCCCCCC",
+      "nearest_training": "CCCCCCCC",
+      "same_molecule": false,
+      "tanimoto": 1.0
+    }
+  ],
+  "what_was_computed": "counts, split membership, exact overlap, scaffold overlap, ECFP4 near-duplicate overlap, and set hashes -- from identities and fingerprints only",
+  "what_was_deliberately_not_computed": [
+    "no model was loaded and no R_theta output was produced",
+    "no NLL, no per-family or per-cell performance, no controller or optimization outcome",
+    "no property or difficulty distribution that could inform task design, thresholds or comparator choice"
+  ]
+}
