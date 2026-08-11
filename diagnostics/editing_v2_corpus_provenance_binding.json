@@ -1,84 +1,124 @@
 {
-  "schema": "compose.editing_v2.corpus_provenance_binding",
-  "schema_version": 1,
-  "status": "PROVENANCE_EVIDENCE_ONLY_NO_TRAINING_AUTHORITY",
-  "purpose": "Bind the frozen training corpus to its upstream molecular source. The dataset freeze proves WHICH BYTES; it did not record WHICH CORPUS. This closes that gap as far as the artifacts allow and states plainly what remains open.",
   "binds": {
     "dataset_freeze": "editing_v2_v2_dataset_freeze.json",
     "library_sha256": "2d553afa5560319455855bf75306b6e9d5169180562be7b139cf14336f7ecb26",
+    "packed_store_records_sha256": "b232a6fa069fef8cdd491e5d9b94fc2d445fce357c753c77128216cf60cc2df0",
     "reserve_digest": "b580fdef6486",
-    "sampling_law_sha256": "b0cc66f168f1cf3e",
-    "packed_store_records_sha256": "b232a6fa069fef8cdd491e5d9b94fc2d445fce357c753c77128216cf60cc2df0"
+    "sampling_law_sha256": "b0cc66f168f1cf3e"
   },
-  "upstream_sources": [
-    {
-      "layers": ["corruption", "cycle_ops"],
-      "source_asset_id": "guacamol-subset-500000-seed0",
-      "source_asset_path": "/guacamol/guacamol_subset_500000_seed0.smiles",
-      "source_asset_sha256": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791",
-      "source_kind": "executor_generated_walk_from_real_endpoint",
-      "namespace": "compose.editing_v2.guacamol_subset_500000_seed0.source_group.v1",
-      "declared_in": ["configs/editing_v2_overlay_source_bindings_v1.json", "configs/editing_v2_candidate_provenance_decisions_v1.json"]
-    },
-    {
-      "layers": ["mmp_analogue"],
-      "source_asset_id": "mmp-analogue-pool-v2-252fbfaafe1c1fb3b16f",
-      "source_asset_path": "/artifacts/mmp_pool_frozen_v2/mmp_pool_v2_252fbfaafe1c1fb3b16f/edit_pool_full.jsonl",
-      "source_asset_sha256": "409507ec0de192fe756e851b1ce7b3dcd76f1ddb8b3d981d6d720b457d616f4c",
-      "pool_records": 344153,
-      "pool_contract_sha256": "226e91253100c0ffc4edb9d57805fcd53d0d474921df9a6b5aa70d0a4c386925",
-      "launch_commit": "7d3069c15acb283dc1",
-      "source_kind": "inferred_real_endpoint_pair",
-      "upstream_molecule_source": "UNRESOLVED -- see open_links"
-    }
-  ],
+  "confidence": "HIGH that the source pool is GuacaMol-derived and NOT ZINC250k, on two independent grounds (config declarations with SHA-256, and measured molecular statistics). NOT absolute, because one end-to-end artifact binding is missing.",
   "empirical_corroboration": {
-    "note": "Measured on 4,000 randomly sampled training sources, independent of any config.",
+    "aromatic_rings_median": 2,
+    "element_distribution": {
+      "B": 0.001,
+      "Br": 0.003,
+      "C": 0.748,
+      "Cl": 0.009,
+      "F": 0.012,
+      "I": 0.002,
+      "N": 0.105,
+      "O": 0.105,
+      "P": 0.002,
+      "S": 0.015
+    },
+    "element_reading": "exactly the ORGANIC_VOCABULARY set (C,N,O,F,S,P,Cl,Br,I,B) including boron, which is a distinctive fingerprint; rules OUT ZINC250k, which carries no boron and effectively no phosphorus",
+    "fraction_csp3_median": 0.3,
+    "heavy_atoms_median": 26,
     "molecular_weight_median": 371.6,
     "molecular_weight_p90": 499.3,
     "molecular_weight_p90_reading": "a hard MW <= 500 filter, consistent with GuacaMol",
-    "heavy_atoms_median": 26,
+    "note": "Measured on 4,000 randomly sampled training sources, independent of any config.",
     "rings_median": 3,
-    "aromatic_rings_median": 2,
-    "zero_ring_fraction": 0.016,
-    "fraction_csp3_median": 0.300,
-    "element_distribution": {"C": 0.748, "O": 0.105, "N": 0.105, "S": 0.015, "F": 0.012, "Cl": 0.009, "Br": 0.003, "P": 0.002, "I": 0.002, "B": 0.001},
-    "element_reading": "exactly the ORGANIC_VOCABULARY set (C,N,O,F,S,P,Cl,Br,I,B) including boron, which is a distinctive fingerprint; rules OUT ZINC250k, which carries no boron and effectively no phosphorus"
+    "zero_ring_fraction": 0.016
   },
   "leakage_audit": {
-    "training_source_universe": 96094,
+    "cohort_is_on_the_current_corpus": {
+      "cohort_is_strict_subset_of_the_validation_role": true,
+      "consolidation_generation": "consolidated_train 2026-08-10 06:34, consolidated_panel 06:36 -- two minutes apart, same generation",
+      "deliberately_not_re_derived_at_the_re_freeze": "The re-freeze carved the matched reserve from WITHIN the train library and left the cohort untouched on purpose. Its scientific value is that it is an independently mined population with a different support composition (42.6% band 0 against the training population's 19.3%). Rebuilding it against the new split would destroy exactly the property that makes it external.",
+      "same_active8_run": "8ecc0e5e825a15200560c58960d4f662c9ca23be785c825c9c24aa73308144bb",
+      "sources_outside_that_role": 0
+    },
+    "one_source_in_both_raw_libraries_resolved": {
+      "in_final_training_source_set": false,
+      "in_matched_reserve": false,
+      "in_train_role_exclusions": true,
+      "in_validation_role_exclusions": false,
+      "mechanism": "The source appeared in BOTH the train and validation roles. Precedence is final_test > controller_validation > validation > train, so it was excluded from TRAIN -- the lower-precedence side -- and kept in the cohort. The evaluation population wins and the training population yields, which is the correct direction.",
+      "note": "a lanostane-type triterpenoid acetate -- unusual for GuacaMol but genuinely in it",
+      "source": "CC(=O)OC1CCC2(C)C(CCC3(C)C2CCC2C4C(C(C)CO)CCC4(C)CCC23C)C1(C)C",
+      "verdict": "CLEAN. Cohort as loaded has 0 overlap with the final training set and 0 with the matched reserve.",
+      "why_this_was_worth_checking": "The earlier audit reported zero overlap using POST-precedence sets, which is correct but does not say why. Comparing the RAW library files surfaced one shared source; without tracing it, 'zero' rested on an assumption rather than a named mechanism."
+    },
     "panels": {
-      "matched_validation_reserve": {
-        "sources": 10653,
-        "exact_molecule_overlap_with_training": 0,
-        "exact_overlap_fraction": 0.0,
-        "scaffold_shared_with_training": 8677,
-        "scaffold_shared_fraction": 0.8145,
-        "near_duplicate_status": "cluster-disjoint BY CONSTRUCTION (ECFP4 Tanimoto >= 0.95, formula- and scaffold-blocked, 2,431,365 pairs compared exhaustively)"
-      },
       "external_16_shard_cohort": {
-        "sources": 9425,
         "exact_molecule_overlap_with_training": 0,
         "exact_overlap_fraction": 0.0,
-        "scaffold_shared_with_training": 5539,
-        "scaffold_shared_fraction": 0.5877,
+        "method": "every cohort source sharing a training scaffold was compared against every training molecule on that scaffold",
         "near_duplicate_at_tanimoto_0p95": 0,
         "near_duplicate_fraction": 0.0,
-        "method": "every cohort source sharing a training scaffold was compared against every training molecule on that scaffold"
+        "raw_file_minus_as_loaded_explained": "3 sources are removed by validation-role precedence exclusions -- the three shared with final_test.",
+        "scaffold_shared_fraction": 0.5877,
+        "scaffold_shared_with_training": 5539,
+        "sources": 9425,
+        "sources_as_loaded": 9422,
+        "sources_raw_file": 9425
       },
-      "final_test": "NOT AUDITED -- the role is sealed and uncompiled (33,683 source records exist). Must be audited before the final test is opened."
+      "final_test": "NOT AUDITED -- the role is sealed and uncompiled (33,683 source records exist). Must be audited before the final test is opened.",
+      "matched_validation_reserve": {
+        "exact_molecule_overlap_with_training": 0,
+        "exact_overlap_fraction": 0.0,
+        "near_duplicate_status": "cluster-disjoint BY CONSTRUCTION (ECFP4 Tanimoto >= 0.95, formula- and scaffold-blocked, 2,431,365 pairs compared exhaustively)",
+        "scaffold_shared_fraction": 0.8145,
+        "scaffold_shared_with_training": 8677,
+        "sources": 10653
+      }
     },
-    "reading": "Both evaluation panels are exactly disjoint AND near-duplicate disjoint from the training source universe. The reserve's higher scaffold sharing (81% vs 59%) is by design: it was carved from the same population, which is what makes it population-matched."
+    "reading": "Both evaluation panels are exactly disjoint AND near-duplicate disjoint from the training source universe. The reserve's higher scaffold sharing (81% vs 59%) is by design: it was carved from the same population, which is what makes it population-matched.",
+    "training_source_universe": 96094
   },
-  "resolved_questions": {
-    "training_authorized_false": "NOT a live blocker. The flag appears on ALL 20 editing_v2 configs, including gate_zero_structural, capability_cells, t1_panel_policy and active8_decision_runtime -- every one of which the training run actually reads. It is a project-wide convention meaning a frozen design artifact does not itself confer training authority."
-  },
+  "methods_wording": "The editing corpus was derived from a fixed 500,000-molecule GuacaMol source pool by compiling executable local transitions, real-endpoint analogue relations, and reversible synthetic walks. COMPOSE was NOT trained as an unconditional GuacaMol distribution model: the learned object is R_theta(y|x), a transition law over source-successor edits, not p_theta(x).",
   "open_links": [
     "The Active8 run 8ecc0e5e... records NO source asset in any of its four receipts, and its transition records carry no provenance field. The link from the trained corpus to the GuacaMol asset is inferred from configs and corroborated empirically, not recorded in the artifact chain.",
     "It CANNOT be closed by subset-testing: the lane is executor_generated_walk_from_real_endpoint, so only the ENDPOINTS are GuacaMol molecules and walked intermediate sources will not appear in any GuacaMol file.",
     "The MMP pool's own upstream molecule source is unresolved. Its contract at /artifacts/mmp_pool_frozen_v2/.../MMP_POOL_COMPLETE.json was not retrievable at that path on the compose-v4-artifacts volume.",
     "final_test leakage is unaudited."
   ],
-  "methods_wording": "The editing corpus was derived from a fixed 500,000-molecule GuacaMol source pool by compiling executable local transitions, real-endpoint analogue relations, and reversible synthetic walks. COMPOSE was NOT trained as an unconditional GuacaMol distribution model: the learned object is R_theta(y|x), a transition law over source-successor edits, not p_theta(x).",
-  "confidence": "HIGH that the source pool is GuacaMol-derived and NOT ZINC250k, on two independent grounds (config declarations with SHA-256, and measured molecular statistics). NOT absolute, because one end-to-end artifact binding is missing."
+  "purpose": "Bind the frozen training corpus to its upstream molecular source. The dataset freeze proves WHICH BYTES; it did not record WHICH CORPUS. This closes that gap as far as the artifacts allow and states plainly what remains open.",
+  "resolved_questions": {
+    "training_authorized_false": "NOT a live blocker. The flag appears on ALL 20 editing_v2 configs, including gate_zero_structural, capability_cells, t1_panel_policy and active8_decision_runtime -- every one of which the training run actually reads. It is a project-wide convention meaning a frozen design artifact does not itself confer training authority."
+  },
+  "schema": "compose.editing_v2.corpus_provenance_binding",
+  "schema_version": 1,
+  "status": "PROVENANCE_EVIDENCE_ONLY_NO_TRAINING_AUTHORITY",
+  "upstream_sources": [
+    {
+      "declared_in": [
+        "configs/editing_v2_overlay_source_bindings_v1.json",
+        "configs/editing_v2_candidate_provenance_decisions_v1.json"
+      ],
+      "layers": [
+        "corruption",
+        "cycle_ops"
+      ],
+      "namespace": "compose.editing_v2.guacamol_subset_500000_seed0.source_group.v1",
+      "source_asset_id": "guacamol-subset-500000-seed0",
+      "source_asset_path": "/guacamol/guacamol_subset_500000_seed0.smiles",
+      "source_asset_sha256": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791",
+      "source_kind": "executor_generated_walk_from_real_endpoint"
+    },
+    {
+      "launch_commit": "7d3069c15acb283dc1",
+      "layers": [
+        "mmp_analogue"
+      ],
+      "pool_contract_sha256": "226e91253100c0ffc4edb9d57805fcd53d0d474921df9a6b5aa70d0a4c386925",
+      "pool_records": 344153,
+      "source_asset_id": "mmp-analogue-pool-v2-252fbfaafe1c1fb3b16f",
+      "source_asset_path": "/artifacts/mmp_pool_frozen_v2/mmp_pool_v2_252fbfaafe1c1fb3b16f/edit_pool_full.jsonl",
+      "source_asset_sha256": "409507ec0de192fe756e851b1ce7b3dcd76f1ddb8b3d981d6d720b457d616f4c",
+      "source_kind": "inferred_real_endpoint_pair",
+      "upstream_molecule_source": "UNRESOLVED -- see open_links"
+    }
+  ]
 }
