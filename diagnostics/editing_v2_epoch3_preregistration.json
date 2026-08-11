@@ -1,0 +1,27 @@
+{
+  "schema": "compose.editing_v2.epoch3_preregistration",
+  "status": "PREREGISTERED_BEFORE_THE_RESULT",
+  "written_at_step": 8502,
+  "selected_before_epoch_3": {"step": 8500, "reference_law_weighted_mean_nll": 2.9238},
+  "question": "Have we trained the best R_theta we reasonably can before freezing it for every downstream experiment?",
+  "not_the_question": "Does ordinary canonical-successor likelihood work? That is answered: 5.4603 -> 2.9238 from initialization, with within-family identity improving in all eight families.",
+  "run": {"from_step": 8502, "to_step": 12753, "epochs": 3,
+          "intervention_policy": "none unless actual divergence or persistent identity-capability regression"},
+  "decision_rule_at_the_epoch_3_boundary": [
+    {"improvement_nats": "< 0.05", "action": "STOP and freeze"},
+    {"improvement_nats": "0.05 to 0.10", "action": "STOP and freeze, unless the curve is clearly still steep"},
+    {"improvement_nats": "> 0.10", "action": "CONSIDER epoch 4, but only on a fresh explicit decision -- no automatic continuation"}
+  ],
+  "improvement_is_measured_as": "best eligible reference-law-weighted NLL at the epoch-3 boundary, minus 2.9238",
+  "why_a_threshold_of_0.05": "The measured step-to-step resolution of this metric is ~0.026 nats -- steps 7,956 and 8,000, 44 optimizer steps apart, differ by that much on a deterministic evaluation. A 0.05 threshold is roughly twice the noise floor, so an improvement that clears it is resolvable rather than a wobble.",
+  "epoch_2_bought_nats": 0.1522,
+  "epoch_1_bought_nats": 0.5351,
+  "budget": {"cap_usd": 4.0, "spent_usd_estimate": 2.62, "epoch_3_estimate_usd": 1.10,
+             "note": "Epoch 3 consumes most of the remaining margin. No epoch 4 without a new budget decision."},
+  "frozen_by_this_decision": [
+    "the objective -- ordinary canonical-successor likelihood, unchanged",
+    "the architecture",
+    "the corpus, sampling law, split and reserve",
+    "goal-marginal training is PARKED, not deleted: it must now earn entry by improving control cost, SMC ESS, mode coverage or oracle efficiency, not by rescuing R_theta"
+  ]
+}
