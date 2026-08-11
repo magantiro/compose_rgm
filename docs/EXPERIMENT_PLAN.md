@@ -8,6 +8,30 @@ prescribed high-entropy prior with a time-dependent learned reverse scheduler,
 learned event clock and trajectory likelihood, centered on unconditional
 GuacaMol-style distribution learning. That is not the system we have.
 
+### Documents this supersedes — do not read, cite or execute
+
+Found in the repo at the time this plan was written. Several are titled as
+though authoritative; none of them is. **This file is the only current plan.**
+
+```
+paper/PAPER_STATUS.md
+paper/manuscript.pdf
+paper_arxiv/COMPLETION_PLAN.md
+docs/PAPER_MASTER_PLAN.md
+docs/PAPER1_FRAMING_AUTHORITATIVE.md      <- name claims authority; superseded
+docs/PAPER_POSITIONING_EXACT_CONTROL.md
+docs/PAPER_REWRITE_BRIEF.md
+docs/PAPER_REFRAME_CONTROL_SUBSTRATE.md
+docs/DEVELOPMENT_PLAN.md
+docs/EXPERIMENT_INFRASTRUCTURE_PLAN.md
+docs/BASE_ELEMENT_EXPANSION_PLAN.md
+docs/EDITING_V2_CYCLE_OPEN_MIGRATION_PLAN.md
+```
+
+They are left on disk unmodified — deleting or rewriting them was not
+authorized. If a stale plan being merely *present* is a risk, stamping a
+supersession banner on each is a one-line change per file, on request.
+
 ## What the paper is
 
 > COMPOSE learns a source-agnostic stochastic reference kernel over executable
