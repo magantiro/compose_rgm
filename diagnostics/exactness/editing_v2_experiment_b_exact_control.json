@@ -1,47 +1,44 @@
 {
-  "caveats": {
-    "dense_representation_bound": "R is n x n float64: 6,036 states is ~292 MB, 20,000 would be ~3.2 GB. Closing an element-unrestricted slice is infeasible densely, not just slow.",
-    "slice_not_closed": "stop_reason is state_cap at 6,036 states, so the slice is TRUNCATED. The admissible filter caps heavy-atom count only and admits the whole ORGANIC_VOCABULARY -- B, S, P, Cl, Br, I -- which explodes the space. The plan's '966-state closure' was almost certainly C/N/O restricted.",
-    "what_truncation_does_affect": "Interpretation of the reach probabilities. Some missing mass sits in states enumeration stopped at rather than genuinely outside the chemistry, so they are properties of THIS SLICE, not of the process.",
-    "what_truncation_does_not_affect": "Every exactness number. The Doob transform is exact on whatever finite kernel it is given, cemetery included, so tilt TV, support violations, row sums and backward residual all stand."
-  },
   "checkpoint": {
     "run": "run_v2_01",
     "selected_step": 12500
   },
   "primary": {
     "backward_residual": 0.0,
-    "h_partition_gap": 3.469446951953614e-18,
+    "h_partition_gap": 2.0328790734103208e-20,
     "max_row_sum_error": 4.440892098500626e-16,
-    "partition": 0.010863256173618748,
+    "partition": 3.777658993177834e-05,
     "reachable": true,
     "support_violations": 0,
-    "terminal_tilt_tv": 1.2050066468010208e-16
+    "terminal_tilt_tv": 1.768279462406427e-16
   },
   "reading": "Exact Doob agreement with the analytic tilted law at machine precision is self-verifying: no code review is a stronger statement. Support preservation means the controller reweights EXISTING legal rates and never invents an edge. An unreachable target must report h=0 rather than be epsilon-patched. Retargeting must reproduce the exact g'-tilted law FROM THE REALISED SWITCH STATE, which is what makes mid-trajectory objective change coherent rather than heuristic.",
   "retargeting": {
     "backward_residual": 0.0,
-    "h_partition_gap": 6.938893903907228e-18,
+    "h_partition_gap": 0.0,
     "max_row_sum_error": 4.440892098500626e-16,
-    "new_target": "reachable states in the larger half by heavy-atom count",
-    "partition": 0.03093655846084613,
+    "new_target": "reachable states with < 4 heavy atoms (SHRINK, switch state has 4)",
+    "partition": 0.08366207378784624,
     "reachable": true,
     "remaining_budget": 3,
     "support_violations": 0,
-    "switch_state": "NCCO",
-    "terminal_tilt_tv": 1.12213937673379e-16
+    "switch_state": "CC(C)C",
+    "terminal_tilt_tv": 1.3879481873708965e-17
   },
-  "retargeting_test_was_fixed": "A first attempt picked 'contains oxygen' a priori. The switch state under a nitrogen-seeking bridge was BCCN, which cannot reach oxygen in the remaining budget, so it reported reachable=false and was a SECOND unreachability check wearing the label of a retargeting test. g' is now defined over states the process can actually reach from the switch state.",
   "schema": "compose.editing_v2.experiment_b_exact_control",
   "slice": {
     "budget": 6,
-    "heavy_atom_cap": 7,
-    "reach_probability": 0.010863256173618748,
-    "seed_smiles": "CCO",
-    "states": 6036,
-    "stop_reason": "state_cap",
-    "target": "contains nitrogen",
-    "target_states": 947
+    "elements": [
+      "C"
+    ],
+    "heavy_atom_cap": 6,
+    "is_a_verification_slice_not_a_chemistry_benchmark": true,
+    "reach_probability": 3.777658993177834e-05,
+    "seed_smiles": "C",
+    "states": 966,
+    "stop_reason": "closed",
+    "target": "heavy atoms >= 6 (GROW)",
+    "target_states": 770
   },
   "status": "DEVELOPMENT_RESULT_NOT_PAPER_BEARING",
   "unreachable": {
