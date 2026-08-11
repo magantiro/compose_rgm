@@ -40,16 +40,30 @@ a coin flip. Near 50% is noise at any disagreement count; well above 50% is the
 phenomenon. **STOP** at chance; **GO** clearly above it; **INCONCLUSIVE** means
 deepen C0, not run full C anyway.
 
-Two structural conservatisms: selection and evaluation use independent rollout
+Reported as a **ladder over depths 1/2/3 on the same states**. Depth 3 gates the
+idea; the ladder is what makes it convincing, since one depth alone cannot
+separate "planning helps" from "this horizon happened to look good". It is free:
+a depth-3 rollout contains its depth-1 and depth-2 prefixes.
+
+Structural conservatisms: selection and evaluation use independent rollout
 samples (argmax over noisy estimates is biased upward, toward "planning helps"),
-and only 5 of ~600 successors are MC-evaluated, so measured discordance
+and only ~8 of ~500 successors are MC-evaluated, so measured discordance
 **understates** the true signal.
 
-Costing note: the first estimate (~$0.50) was wrong because it counted kernel
-calls and ignored that Modal bills **memory-time**, which dominates. Restructured
-so probe containers never load the corpus — they inherit the slot count from the
-selection step and rebuild the start state from its canonical key. ~$1.50–3.00
-for 12 sources.
+**Not a benchmark result.** Planning is scored in margin units (logit
+`P(active)`), monotone with the benchmark probability so greedy is unchanged, but
+monotonicity does not survive taking expectations — `E[max margin]` and
+`E[max P]` are different objectives. Benchmark outcomes are Experiment C's job.
+
+Two costing lessons, both recorded in the decision log: the first quote (~$0.50)
+counted kernel calls and ignored that Modal bills **memory-time**; and the
+per-call cost was profiled rather than assumed. 41% of an enumeration is the
+marked law, 59% is applying and canonicalising every mark
+(`molecular_graph_to_smiles`: 25,581 calls for one state). Memoizing that would
+be the biggest win but it is inside the Process-V2 content hash, so instead
+rollouts sample a single mark — exact, since `P(canonical y)` is the sum of mark
+probabilities reaching `y`. Verified at 0 support mismatch and 0.000e+00
+virtual-mass gap. ~$1.50–3.00 for 12 sources, ~45 min.
 
 ---
 
