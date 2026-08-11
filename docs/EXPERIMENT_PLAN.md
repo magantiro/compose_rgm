@@ -65,6 +65,34 @@ The focused submission is four things:
 
 ---
 
+### Dataset provenance — say this, not "we trained on GuacaMol"
+
+> The editing corpus was derived from a fixed **500,000-molecule GuacaMol source
+> pool** by compiling executable local transitions, real-endpoint analogue
+> relations, and reversible synthetic walks. COMPOSE was **not** trained as an
+> unconditional GuacaMol distribution model: the learned object is
+> `R_theta(y|x)`, a transition law over source–successor edits, not `p_theta(x)`.
+
+Source asset `guacamol-subset-500000-seed0`, sha
+`70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791`. Full record
+and the open links in `diagnostics/editing_v2_corpus_provenance_binding.json`.
+
+**Disclose, do not hide, the shared provenance with PMO's GuacaMol MPO
+objectives.** The defence is measured, not asserted: against a training universe
+of 96,094 sources, the matched reserve and the external 16-shard cohort both have
+**zero exact molecule overlap** and **zero near-duplicates** at ECFP4 Tanimoto
+≥ 0.95. `final_test` is sealed and **not yet audited** — audit it before opening
+that role.
+
+GuacaMol is harder than ZINC250k for *distribution matching*, which is not the
+object here; for a broad executable-edit reference kernel the extra chemical
+diversity is an asset. **Do not retrain on ZINC because ZINC is easier.** A
+matched-scale `R_theta^{GuacaMol}` vs `R_theta^{ZINC}` ablation is worth having
+only if reviewers make dataset dependence central — it is not on the critical
+path. Making at least one **ZINC-derived source-conditioned panel** a major
+Experiment 5 Track B task is the cleaner answer, since it tests cross-dataset
+transfer directly.
+
 ## The four claims
 
 Every experiment must map to one of these.
