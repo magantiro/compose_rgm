@@ -69,6 +69,44 @@ involuntary preemption.
 | The most-oversampled strata overfit first | **Refuted** | cycle_attach, bond_reorder, ring_system_restate sit at the 3.0× oversample ceiling and improved most |
 | `atom_restate` suffered capability collapse | **Refuted** | Its *identity* improved 1.82 nats; the joint gate was reading family-head reallocation |
 | Cross-cohort performance is degrading | **Refuted** | Third and fourth readings returned to baseline |
+| DRD2 is rugged enough that future value beats greedy | **Refuted** | C0: mean fresh regret **negative at every depth**; sacrificial win rate 57.1% at **0.5 SE** from chance. Greedy solved **7/12** sources — outcomes are bimodal (1–5 edits, or never close), leaving planning nothing to buy |
+| Historical traces can be reconstructed from the corpus | **Refuted, structurally** | The corpora are samples of `(state, edit)` pairs across capability cells, not paths: **29,928 forked states** in train, 2,380 in a 14,140-entry panel. Strict funnel reached **0** on both partitions |
+| The `linker_positional_topology_analogue` lane implies two-cut/topology mining | **Refuted** | It is a **post-hoc router label** for candidates whose operator family is in `{bond_reroute, cycle_insert, cycle_attach, ring_system_restate}`. No two-cut or ring-analogue miner exists — zero hits for `two_cut`/`double_cut`/`n_cuts` across the repo |
+
+---
+
+## Structural limit — one-cut MMP cannot produce diverse multi-step panels
+
+Measured while building the fresh evaluation panel, and the reason the
+non-locality experiment is on hold rather than running.
+
+Compile outcomes over 972 nominated pairs: 160 `bond_reroute` + 146
+`atom_restate` + 17 `bond_reorder` = **323 direct compiles**, against **exactly
+323 paths of length 1** in the length distribution. Every direct compile is a
+single step; everything of length ≥2 is `delete_insert_fallback`. There is no
+middle.
+
+So **every 4–6 step transformation this machinery can produce is a delete-insert
+fragment swap by construction.** Consequences, all observed:
+
+- `ring_delta` is **0 across all 91** accepted pairs — `iter_one_cut_transformations`
+  skips ring bonds and requires an acyclic variable fragment, so ring systems
+  can never change.
+- The 86% `REFERENCE_DIP` rate is a **compiler artifact**: delete-then-insert
+  removes the fragment before adding its replacement, so it mechanically dips.
+  A dip stratum built this way is confounded with path-construction strategy.
+
+The 91 pairs remain valid as a **held-out multi-step recovery cohort** — both
+endpoints held out (reserve keys are disjoint from the 96,094 training-source
+universe), fresh post-split compilation, replay-verified endpoints, and 99 pairs
+rejected against 130,432 supervised transitions. They support exact target
+recovery under a declared budget over a *single* transformation class. They do
+not support any non-locality claim.
+
+Provenance claim to make: **held-out endpoints plus unseen supervised
+transitions.** Not "the model never saw any intermediate" — 38 of 91 have an
+intermediate appearing elsewhere as a training source, which is described rather
+than excluded.
 
 ---
 
