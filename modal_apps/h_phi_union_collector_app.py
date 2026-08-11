@@ -267,9 +267,11 @@ def collect(task: dict[str, Any]) -> dict[str, Any]:
         if forced is not None and forced in keys and keys.index(forced) not in seen:
             picked.append(keys.index(forced))
 
+        block = []
         for index in picked:
             recovered, best = value(keys[index], remaining - 1)
-            labels.append({
+            block.append({
+                "pair_id": task["pair_id"],
                 "decision_state": state_key,
                 "candidate": keys[index],
                 "remaining": remaining - 1,
@@ -280,6 +282,16 @@ def collect(task: dict[str, Any]) -> dict[str, Any]:
                 "is_teacher_action": bool(forced is not None and keys[index] == forced),
                 "visited_by": sorted(policies),
             })
+        # Stratum is a property of the STATE, so it can only be stamped once all
+        # of that state's candidates are labelled. Recorded explicitly at write
+        # time rather than reconstructed later, so stratified subsampling cannot
+        # silently disagree with what was generated.
+        recoveries = [row["recovery"] for row in block]
+        kind = ("contrastive" if (any(recoveries) and not all(recoveries))
+                else "all_positive" if all(recoveries) else "all_negative")
+        for row in block:
+            row["state_kind"] = kind
+        labels.extend(block)
 
     states = len({(row["decision_state"], row["remaining"]) for row in labels})
     positives = sum(1 for row in labels if row["recovery"])
@@ -295,18 +307,33 @@ def collect(task: dict[str, Any]) -> dict[str, Any]:
 
 
 @app.local_entrypoint()
-def main(pairs: int = 12) -> None:
-    rows = json.loads(
-        (ROOT / "diagnostics/editing_v2_heldin_teacher_pairs.json").read_text()
-    )["transformations"]
-    # Balanced across horizons, and offset from the cost probe's pairs so this
-    # is a fresh sample rather than a re-measurement of the same six.
+def main(pairs: int = 12, role: str = "train",
+         carve: str = "diagnostics/editing_v2_teacher_validation_carve.json",
+         out: str = "diagnostics/editing_v2_h_phi_union_collector_check.json") -> None:
+    carve_path = ROOT / carve
+    if carve_path.exists():
+        payload = json.loads(carve_path.read_text())
+        if role not in payload:
+            raise SystemExit(f"role {role!r} not in the carve; "
+                             f"have {sorted(k for k in payload if isinstance(payload[k], list))}")
+        rows = payload[role]
+        print(f"carve {carve}: role={role}, {len(rows)} pairs available "
+              f"(train/validation split by PAIR, made before generation)")
+    else:
+        rows = json.loads(
+            (ROOT / "diagnostics/editing_v2_heldin_teacher_pairs.json").read_text()
+        )["transformations"]
+        print(f"no carve at {carve}; falling back to the raw pair list")
+
+    # Balanced across horizons.
     chosen: list[dict[str, Any]] = []
     per = max(1, pairs // 3)
     for length in (4, 5, 6):
         band = [r for r in rows if r["steps"] == length]
-        chosen.extend(band[2:2 + per])
-    tasks = [{**row, "index": i} for i, row in enumerate(chosen)]
+        chosen.extend(band[:per])
+    tasks = [{**row, "index": i,
+              "pair_id": f"{row['steps']}:{row['source']}>>{row['target']}"}
+             for i, row in enumerate(chosen)]
     print(f"union-collecting {len(tasks)} held-in pairs "
           f"{dict(collections.Counter(t['steps'] for t in tasks))}")
 
@@ -320,12 +347,27 @@ def main(pairs: int = 12) -> None:
           f"{sum(r['teacher_cache_hits'] for r in results):,} "
           f"(was 0 under greedy-only collection)")
 
-    destination = ROOT / "diagnostics/editing_v2_h_phi_union_collector_check.json"
+    kinds = collections.Counter(
+        row["state_kind"]
+        for r in results for row in r["label_rows"])
+    if kinds:
+        total_rows = sum(kinds.values())
+        print("  label strata: " + "  ".join(
+            f"{k} {v} ({v/total_rows:.1%})" for k, v in sorted(kinds.items())))
+        negative_share = kinds.get("all_negative", 0) / max(total_rows, 1)
+        if negative_share > 0.70:
+            print(f"  WARNING all-negative share {negative_share:.1%} exceeds 70% -- "
+                  f"stop and diagnose PAIR SAMPLING before training. Do not "
+                  f"oversample 'good' pairs after seeing controller outcomes.")
+
+    destination = ROOT / out
     destination.write_text(json.dumps({
         "schema": "compose.editing_v2.h_phi_union_collector_check",
         "status": "GENERATOR_VERIFICATION_NOT_A_DATASET",
         "collector": ("greedy-visited UNION rollout-teacher-visited states; "
                       "V_G unchanged"),
+        "role": role, "carve": carve,
+        "label_strata": dict(kinds),
         "per_pair": results,
     }, indent=2) + "\n")
     print(f"  wrote {destination}")
