@@ -114,6 +114,36 @@ Validity is the substrate. **Reusable stochastic control is the contribution.**
 
 ---
 
+### The three-layer story — and a de-emphasis Experiment 1 forces
+
+> **legality → plausibility → purpose**
+>
+> The rewrite system defines *what is executable*. The learned successor model
+> learns *which concrete molecular continuation is plausible*. Finite-horizon
+> control learns *which plausible continuation is useful for the future
+> objective*.
+>
+> executor → legality · `R_theta` → plausible molecular transport ·
+> `h_phi` → future-aware task control
+
+Experiment 1 established the middle box **developmentally** — a sampled
+evaluation on the development checkpoint, not yet paper-established, though
+scientifically there is no ambiguity left about whether learning matters.
+
+**De-emphasize hierarchical operator scheduling as a source of novelty.** The
+measured decomposition is `identity learning >> family scheduling`: learning the
+family head buys 1.08 nats over uniform, learning within-family identity buys
+2.15 and lands within 0.19 of the full model. Scheduling matters, but the
+evidence says the learned chemical knowledge lives in choosing the specific
+molecular successor within an edit family. That is a cleaner story anyway, and
+it retrospectively explains the training behaviour: family probability could
+move without representing capability loss, because the hard learning problem was
+the conditional molecular decision inside a family.
+
+**Do not run more C1 variants now.** No local-feature MLP, no full external
+cohort, no 20k-source breakdown, no architecture ablations. Bank them as
+possible later confirmatory work.
+
 ## Phase 0 — Finish and freeze `R_theta`
 
 Epoch 3 is running. Let it finish. Use the **epoch-level** result, not adjacent
