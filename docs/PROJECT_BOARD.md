@@ -15,31 +15,93 @@ History and established findings: [`docs/DECISION_LOG.md`](DECISION_LOG.md).
 
 ## In flight
 
-### P0 — Finish epoch 3, apply the preregistered rule, freeze `R_theta`
+### C0 — Is there a planning problem at all?
 
-Run `run_v2_01`, steps 8,502 → 12,753, on preemptible A10G.
+`modal_apps/experiment_c0_planning_signal_app.py`. Gates the full six-arm
+controller pilot **before** any `h_phi` is trained.
 
+Task, preregistered: DRD2 `< 0.05` → `>= 0.5`, ECFP4 Tanimoto to the source
+`>= 0.4`, six productive edits, held-out reserve sources.
+
+The deciding statistic is **not** global rank correlation — across ~600
+successors, immediate and future value agree on hundreds of obviously bad edits
+while disagreeing on the few that matter. What decides it:
+
+| statistic | question |
+|---|---|
+| top-1 disagreement | does MC value pick a different edit than greedy? |
+| fresh regret | `h(MC-best) - h(greedy-best)` on independent rollouts |
+| **sacrifice-to-win** | is the MC edit *worse now* and *better later*? |
+
+**Self-calibrating null.** Among disagreements where the MC action is
+immediately worse, "no signal" predicts fresh regret is positive ~**50%** of the
+time — the evaluation sample is independent of the selecting one, so its sign is
+a coin flip. Near 50% is noise at any disagreement count; well above 50% is the
+phenomenon. **STOP** at chance; **GO** clearly above it; **INCONCLUSIVE** means
+deepen C0, not run full C anyway.
+
+Two structural conservatisms: selection and evaluation use independent rollout
+samples (argmax over noisy estimates is biased upward, toward "planning helps"),
+and only 5 of ~600 successors are MC-evaluated, so measured discordance
+**understates** the true signal.
+
+Costing note: the first estimate (~$0.50) was wrong because it counted kernel
+calls and ignored that Modal bills **memory-time**, which dominates. Restructured
+so probe containers never load the corpus — they inherit the slot count from the
+selection step and rebuild the start state from its canonical key. ~$1.50–3.00
+for 12 sources.
+
+---
+
+## Landed
+
+### Phase 0 — `R_theta` frozen
+
+Frozen at **step 12,500**: reference-law NLL **5.4603 → 2.8364**, within-family
+identity improved in **all 8 families**. Preregistered epoch-3 rule applied.
 Identity chain: reserve `b580fdef6486` / law `b0cc66f168f1` / manifest
 `e27494a46250` / store `b232a6fa069f`; freeze gate FROZEN 9/9.
 
-Entering epoch 3: selected step 8,500 at reference-law NLL **2.9238**, from an
-initialization value of **5.4603**. Within-family identity improved in **all 8
-families** over two epochs.
+### Claim 1 — learning beats corpus-level operator frequencies
 
-Preregistered rule — `diagnostics/editing_v2_epoch3_preregistration.json`:
+`R_theta` **1.46 nats** below the empirical-family baseline, which is the strong
+form: it gets the correct global operator frequencies, exact legal support,
+state-dependent availability, and alias aggregation. Development result on the
+step-12,500 reference checkpoint.
 
-| epoch-3 gain | action |
+### Claim 3 — exact finite-horizon control (Experiment B)
+
+`diagnostics/exactness/editing_v2_experiment_b_exact_control.json`. Closed slice,
+realised switch state, and a non-degenerate retarget objective **in one run** —
+the three had previously only been demonstrated separately.
+
+| | |
 |---|---|
-| < ~0.05 nats | **stop and freeze** |
-| 0.05 – 0.10 | stop and freeze unless the curve is clearly still steep |
-| > 0.10 | consider epoch 4 **only** on a fresh explicit decision |
+| slice | 966 states, `stop_reason=closed` |
+| switch state | `CC(C)C`, on-trajectory |
+| retarget | SHRINK to <4 heavy atoms; proper subset, guard-enforced |
+| primary tilt TV | 1.77e-16 |
+| retarget tilt TV | 1.39e-17 |
+| support violations | 0 · backward residual 0.0 |
+| `open_caveat` | null |
 
-Read the **epoch-level** result. Effective resolution of this metric is ~0.026
-nats, so adjacent 500-step points are not interpretable.
+### DRD2 oracle — frozen, parity-verified
 
-Budget: ~$1.38 of the $4 cap remained at launch; epoch 3 costs ~$1.10. **Epoch 4
-is not affordable under the current cap.** One preemption already occurred near
-step 9,750 and recovered cleanly; each costs ~$0.10.
+`artifacts/oracles/drd2_svm_v1/`. The classic benchmark SVM (Olivecrona
+REINVENT; the model behind the published VJTNN/GrIDDD numbers), extracted from
+its Python-3.6 pickle **once** and reimplemented in numpy. The runtime imports no
+sklearn and unpickles nothing.
+
+Parity vs the original estimator: **2.19e-14** on probabilities, **1.35e-13** on
+decision values. Reproducing `predict_proba` required reproducing libsvm's
+Wu-Lin-Weng coupling, not just the Platt sigmoid — the exact fixed point of that
+iteration *is* the sigmoid, but libsvm stops at `max_error < 0.005/k`, and
+short-circuiting it left a 1.7e-3 discrepancy that would decide molecules sitting
+on the 0.5 success threshold.
+
+Sanity checks a constant scorer would fail: source panel max **0.0482** (which
+independently confirms it is the `<0.05` set the benchmark uses), active panel
+**300/300** above 0.5.
 
 ---
 

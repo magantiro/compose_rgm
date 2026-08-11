@@ -16,7 +16,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from compose_v4.oracles.drd2_numpy import (
+from compose_v4.drd2_oracle import (
     DRD2Oracle,
     _binary_probability_coupling,
     oracle_fingerprint,

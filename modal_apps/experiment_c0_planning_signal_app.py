@@ -121,7 +121,7 @@ def select_sources(wanted: int = 16, scan_limit: int = 4000) -> dict[str, Any]:
 
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
     from compose_v4.data.corpus_training_library import load_corpus_training_library
-    from compose_v4.oracles.drd2_numpy import DRD2Oracle
+    from compose_v4.drd2_oracle import DRD2Oracle
 
     started = time.perf_counter()
     artifact_volume.reload()
@@ -158,6 +158,13 @@ def select_sources(wanted: int = 16, scan_limit: int = 4000) -> dict[str, Any]:
     # count its own padding assigned to this source.  Resolving it here means
     # they never load the corpus at all, which is most of their memory and most
     # of their startup.
+    # Eligibility is counted over the WHOLE scan; only state resolution stops
+    # early. Reporting the collected count as though it were the eligible count
+    # would understate the pool by whatever the cap truncated.
+    eligible_total = int((scores < SOURCE_CEILING).sum())
+    already_solved = int((scores >= TARGET_FLOOR).sum())
+    collection_cap = max(wanted * 4, wanted)
+
     eligible = []
     for key, score in zip(candidates, scores):
         if score >= SOURCE_CEILING:
@@ -171,11 +178,12 @@ def select_sources(wanted: int = 16, scan_limit: int = 4000) -> dict[str, Any]:
             "slots": int(state[0].atom_types.shape[0]),
             "heavy_atoms": int((state[0].atom_types >= 0).sum()),
         })
-        if len(eligible) >= wanted * 4:
+        if len(eligible) >= collection_cap:
             break
-    already_solved = int((scores >= TARGET_FLOOR).sum())
-    print(f"  eligible (DRD2 < {SOURCE_CEILING}): {len(eligible):,}; "
-          f"already solved: {already_solved}", flush=True)
+    print(f"  eligible (DRD2 < {SOURCE_CEILING}): {eligible_total:,} of "
+          f"{len(candidates):,} scanned; already solved: {already_solved}; "
+          f"states resolved for {len(eligible):,} (cap {collection_cap})",
+          flush=True)
 
     chosen = eligible[:wanted]
     payload = {
@@ -188,7 +196,9 @@ def select_sources(wanted: int = 16, scan_limit: int = 4000) -> dict[str, Any]:
         },
         "reserve_sources": len(representative),
         "scanned": len(candidates),
-        "eligible": len(eligible),
+        "eligible": eligible_total,
+        "states_resolved": len(eligible),
+        "collection_cap": collection_cap,
         "already_solved": already_solved,
         "selected": chosen,
     }
@@ -226,7 +236,7 @@ def probe_source(task: dict[str, Any]) -> dict[str, Any]:
     from compose_v4.experiments.production_successor_kernel import (
         canonical_successor_result,
     )
-    from compose_v4.oracles.drd2_numpy import DRD2Oracle, tanimoto_to
+    from compose_v4.drd2_oracle import DRD2Oracle, tanimoto_to
 
     started = time.perf_counter()
     source_key = task["source"]

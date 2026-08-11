@@ -26,7 +26,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from compose_v4.oracles.drd2_numpy import (  # noqa: E402
+from compose_v4.drd2_oracle import (  # noqa: E402
     DRD2Oracle,
     oracle_fingerprint,
 )
