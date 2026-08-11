@@ -13,12 +13,12 @@ from compose_v4.experiments.ring_restate_primitive_path_audit import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_TRANSFER_ROOT = Path(
-    "/private/tmp/claude-502/"
-    "-Users-rmaganti-Documents-Codex-2026-07-14-ok-so-"
-    "compose-rgm-claude-generators/"
-    "6d6fc94f-1f64-41f3-8db5-e0589f315b48/scratchpad/transfer"
-)
+#: There is deliberately no default. This previously pointed into a scratchpad
+#: directory belonging to a session from 2026-07-14, which no longer exists --
+#: committed code silently referencing dead per-session storage. A missing
+#: --transfer-root now fails loudly instead of resolving to a path that cannot
+#: be there.
+DEFAULT_TRANSFER_ROOT = None
 
 
 def parse_args() -> argparse.Namespace:
@@ -28,7 +28,8 @@ def parse_args() -> argparse.Namespace:
             "the production macro executor and authoritative primitive lowering."
         )
     )
-    parser.add_argument("--transfer-root", type=Path, default=DEFAULT_TRANSFER_ROOT)
+    parser.add_argument("--transfer-root", type=Path, default=DEFAULT_TRANSFER_ROOT,
+                        required=DEFAULT_TRANSFER_ROOT is None)
     parser.add_argument(
         "--charge-policy-audit",
         type=Path,
