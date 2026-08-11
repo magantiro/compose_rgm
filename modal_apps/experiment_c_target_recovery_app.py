@@ -389,20 +389,20 @@ def summarise(results: list[dict[str, Any]]) -> dict[str, Any]:
 @app.local_entrypoint()
 def main(pairs: int = 24) -> None:
     import collections
-    import random
 
-    from rdkit import Chem, RDLogger
-
-    RDLogger.DisableLog("rdApp.*")
+    # No chemistry here on purpose: `modal run` executes this entrypoint in the
+    # Modal CLI's own virtualenv, which has no RDKit even when the system
+    # interpreter does. Sizes and slot budgets are precomputed into the artifact.
     feasibility = json.loads(
         (ROOT / "diagnostics/editing_v2_fresh_panel_feasibility.json").read_text())
     rows = feasibility["transformations"]
+    missing = [r for r in rows if "slots" not in r or "source_heavy_atoms" not in r]
+    if missing:
+        raise SystemExit(
+            f"{len(missing)} rows lack precomputed slots/size; regenerate the "
+            f"feasibility artifact before running")
     for row in rows:
-        mol = Chem.MolFromSmiles(row["source"])
-        row["size"] = mol.GetNumHeavyAtoms() if mol else 0
-        row["slots"] = max(
-            row["size"],
-            Chem.MolFromSmiles(row["target"]).GetNumHeavyAtoms()) + 2
+        row["size"] = row["source_heavy_atoms"]
 
     # Stratified across verified path length, spread across molecular size
     # within each band. Deterministic; no outcome is consulted.

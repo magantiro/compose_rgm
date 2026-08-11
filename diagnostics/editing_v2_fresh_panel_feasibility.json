@@ -63,7 +63,10 @@
       "heavy_atom_delta": 0,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 2
+      "intermediates_seen_as_training_source": 2,
+      "source_heavy_atoms": 31,
+      "target_heavy_atoms": 31,
+      "slots": 33
     },
     {
       "source": "O=S(=O)(O)C(F)(F)F",
@@ -82,7 +85,10 @@
       "heavy_atom_delta": -2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 8,
+      "target_heavy_atoms": 6,
+      "slots": 10
     },
     {
       "source": "CCS(=O)(=O)O",
@@ -99,7 +105,10 @@
       "heavy_atom_delta": 2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 6,
+      "target_heavy_atoms": 8,
+      "slots": 10
     },
     {
       "source": "Clc1ccc2ocnc2c1",
@@ -117,7 +126,10 @@
       "heavy_atom_delta": 3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 10,
+      "target_heavy_atoms": 13,
+      "slots": 15
     },
     {
       "source": "CC(=O)Nc1ccc(C(=O)Nc2cccc(-c3cccc(-c4nc5cc(F)ccc5[nH]4)c3)c2)cn1",
@@ -135,7 +147,10 @@
       "heavy_atom_delta": 3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 1
+      "intermediates_seen_as_training_source": 1,
+      "source_heavy_atoms": 35,
+      "target_heavy_atoms": 38,
+      "slots": 40
     },
     {
       "source": "CC(=O)Nc1ccccc1C(=O)Nc1ccc(C(=O)N2CCNC(N(C)C)c3ccccc32)cc1",
@@ -153,7 +168,10 @@
       "heavy_atom_delta": -1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 35,
+      "target_heavy_atoms": 34,
+      "slots": 37
     },
     {
       "source": "O=C1C(=O)N(Cc2ccc(C(F)(F)F)cc2)c2ccccc21",
@@ -172,7 +190,10 @@
       "heavy_atom_delta": -2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 22,
+      "target_heavy_atoms": 20,
+      "slots": 24
     },
     {
       "source": "CC(=O)Nc1ccc(C(=O)NCc2noc(-c3c4ccccc4nn3CCn3ccnc3)n2)cc1",
@@ -191,7 +212,10 @@
       "heavy_atom_delta": -2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 35,
+      "target_heavy_atoms": 33,
+      "slots": 37
     },
     {
       "source": "COc1cc(O)c2c(=O)c(-c3ccc(O)cc3)coc2c1",
@@ -210,7 +234,10 @@
       "heavy_atom_delta": 4,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 1
+      "intermediates_seen_as_training_source": 1,
+      "source_heavy_atoms": 21,
+      "target_heavy_atoms": 25,
+      "slots": 27
     },
     {
       "source": "CON=C(c1ccc(C)cc1)c1cnccn1",
@@ -227,7 +254,10 @@
       "heavy_atom_delta": 2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 2
+      "intermediates_seen_as_training_source": 2,
+      "source_heavy_atoms": 17,
+      "target_heavy_atoms": 19,
+      "slots": 21
     },
     {
       "source": "CCON=C(c1ccccc1)c1cnccn1",
@@ -244,7 +274,10 @@
       "heavy_atom_delta": 2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 2
+      "intermediates_seen_as_training_source": 2,
+      "source_heavy_atoms": 17,
+      "target_heavy_atoms": 19,
+      "slots": 21
     },
     {
       "source": "CC(C)CCOC1CCC([N+](=O)[O-])=C2N(Cc3ccc(Cl)nc3)CCN21",
@@ -263,7 +296,10 @@
       "heavy_atom_delta": -4,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 26,
+      "target_heavy_atoms": 22,
+      "slots": 28
     },
     {
       "source": "CCC(C)NC(=O)c1ccc(CSCc2ccccc2)o1",
@@ -281,7 +317,10 @@
       "heavy_atom_delta": -3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 21,
+      "target_heavy_atoms": 18,
+      "slots": 23
     },
     {
       "source": "CC(C)N(C)c1nc(Cl)c(-c2ccccc2)n(CC(=O)NCc2ccc(C(=N)N)cc2)c1=O",
@@ -299,7 +338,10 @@
       "heavy_atom_delta": -1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 33,
+      "target_heavy_atoms": 32,
+      "slots": 35
     },
     {
       "source": "CCCCCCCCCC(=O)CC",
@@ -318,7 +360,10 @@
       "heavy_atom_delta": 4,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 13,
+      "target_heavy_atoms": 17,
+      "slots": 19
     },
     {
       "source": "CCCCCCCCCCCCCC(=O)CC",
@@ -336,7 +381,10 @@
       "heavy_atom_delta": -3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 17,
+      "target_heavy_atoms": 14,
+      "slots": 19
     },
     {
       "source": "COc1cc2c(c(O)c1OC)-c1cccc(=O)cc1C(NC(C)=O)CC2",
@@ -354,7 +402,10 @@
       "heavy_atom_delta": -3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 26,
+      "target_heavy_atoms": 23,
+      "slots": 28
     },
     {
       "source": "CCOC(=O)N=c1sc(C)cn1-c1cccc(C(F)(F)F)c1",
@@ -373,7 +424,10 @@
       "heavy_atom_delta": 0,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 22,
+      "target_heavy_atoms": 22,
+      "slots": 24
     },
     {
       "source": "CCCCCCCCCCCCCCCCCCCC(=O)O",
@@ -390,7 +444,10 @@
       "heavy_atom_delta": -2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 22,
+      "target_heavy_atoms": 20,
+      "slots": 24
     },
     {
       "source": "Cc1ccc(C2=C(C#N)C(O)=NC(c3ccc(OCCCC(F)(F)F)cc3)(C(F)(F)F)C2)cc1",
@@ -407,7 +464,10 @@
       "heavy_atom_delta": 2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 1
+      "intermediates_seen_as_training_source": 1,
+      "source_heavy_atoms": 34,
+      "target_heavy_atoms": 36,
+      "slots": 38
     },
     {
       "source": "CC1CCCc2ccccc21",
@@ -424,7 +484,10 @@
       "heavy_atom_delta": 2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 11,
+      "target_heavy_atoms": 13,
+      "slots": 15
     },
     {
       "source": "CC1CCCc2ccccc21",
@@ -442,7 +505,10 @@
       "heavy_atom_delta": 3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 11,
+      "target_heavy_atoms": 14,
+      "slots": 16
     },
     {
       "source": "O=CNc1ccc2c(c1)CCCC2",
@@ -460,7 +526,10 @@
       "heavy_atom_delta": 1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 13,
+      "target_heavy_atoms": 14,
+      "slots": 16
     },
     {
       "source": "CCCCN(CCC)C1CCc2ccccc2C1",
@@ -477,7 +546,10 @@
       "heavy_atom_delta": -2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 18,
+      "target_heavy_atoms": 16,
+      "slots": 20
     },
     {
       "source": "CN(CCO)Cc1csc2ccc(Br)cc12",
@@ -495,7 +567,10 @@
       "heavy_atom_delta": -1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 1
+      "intermediates_seen_as_training_source": 1,
+      "source_heavy_atoms": 16,
+      "target_heavy_atoms": 15,
+      "slots": 18
     },
     {
       "source": "CC(=O)NC(=Cc1ccccc1)C(=O)OCC(=O)c1ccc(F)cc1",
@@ -513,7 +588,10 @@
       "heavy_atom_delta": -1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 1
+      "intermediates_seen_as_training_source": 1,
+      "source_heavy_atoms": 25,
+      "target_heavy_atoms": 24,
+      "slots": 27
     },
     {
       "source": "N#CCOC(=O)C(Cc1ccccc1)NC(=O)c1ccccc1",
@@ -530,7 +608,10 @@
       "heavy_atom_delta": -2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 23,
+      "target_heavy_atoms": 21,
+      "slots": 25
     },
     {
       "source": "O=C(C=Cc1ccc(O)c(O)c1)N1CCCCC1",
@@ -547,7 +628,10 @@
       "heavy_atom_delta": 2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 3
+      "intermediates_seen_as_training_source": 3,
+      "source_heavy_atoms": 18,
+      "target_heavy_atoms": 20,
+      "slots": 22
     },
     {
       "source": "O=C(C=Cc1ccc(O)c(O)c1)N1CCCCC1",
@@ -565,7 +649,10 @@
       "heavy_atom_delta": 3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 3
+      "intermediates_seen_as_training_source": 3,
+      "source_heavy_atoms": 18,
+      "target_heavy_atoms": 21,
+      "slots": 23
     },
     {
       "source": "CCOCCS(=O)(=O)O",
@@ -583,7 +670,10 @@
       "heavy_atom_delta": -1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 2
+      "intermediates_seen_as_training_source": 2,
+      "source_heavy_atoms": 9,
+      "target_heavy_atoms": 8,
+      "slots": 11
     },
     {
       "source": "CCOCCS(=O)(=O)O",
@@ -601,7 +691,10 @@
       "heavy_atom_delta": -1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 2
+      "intermediates_seen_as_training_source": 2,
+      "source_heavy_atoms": 9,
+      "target_heavy_atoms": 8,
+      "slots": 11
     },
     {
       "source": "CCOCCS(=O)(=O)O",
@@ -619,7 +712,10 @@
       "heavy_atom_delta": -3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 2
+      "intermediates_seen_as_training_source": 2,
+      "source_heavy_atoms": 9,
+      "target_heavy_atoms": 6,
+      "slots": 11
     },
     {
       "source": "CCS(=O)(=O)O",
@@ -636,7 +732,10 @@
       "heavy_atom_delta": 2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 6,
+      "target_heavy_atoms": 8,
+      "slots": 10
     },
     {
       "source": "NC1(Cc2ccccc2OC(F)(F)F)CCN(c2ncnc3[nH]ccc23)CC1",
@@ -655,7 +754,10 @@
       "heavy_atom_delta": -4,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 28,
+      "target_heavy_atoms": 24,
+      "slots": 30
     },
     {
       "source": "CCOc1ccc(CNC(=O)CCc2cn(C)c3ccccc23)cc1",
@@ -672,7 +774,10 @@
       "heavy_atom_delta": -2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 25,
+      "target_heavy_atoms": 23,
+      "slots": 27
     },
     {
       "source": "NCCCN(C1=NS(=O)(=O)c2ccccc21)c1ccccc1",
@@ -690,7 +795,10 @@
       "heavy_atom_delta": -3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 3
+      "intermediates_seen_as_training_source": 3,
+      "source_heavy_atoms": 22,
+      "target_heavy_atoms": 19,
+      "slots": 24
     },
     {
       "source": "CC[IH3]c1ccc(NC(O)CSc2nc([PH4])c3c[nH]nc3n2)cc1",
@@ -708,7 +816,10 @@
       "heavy_atom_delta": 1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 24,
+      "target_heavy_atoms": 25,
+      "slots": 27
     },
     {
       "source": "CCCCC(O)(CC(=O)OC)C(=O)OC1C(OC)=CC23CCCN2CCc2cc4c(cc2C13)OCO4",
@@ -725,7 +836,10 @@
       "heavy_atom_delta": 2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 36,
+      "target_heavy_atoms": 38,
+      "slots": 40
     },
     {
       "source": "OCCOc1ccc2nc(-c3cn(-c4ccc(O)cc4)nn3)ccc2c1",
@@ -744,7 +858,10 @@
       "heavy_atom_delta": 4,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 4
+      "intermediates_seen_as_training_source": 4,
+      "source_heavy_atoms": 26,
+      "target_heavy_atoms": 30,
+      "slots": 32
     },
     {
       "source": "O=S(=O)(NCCc1c[nH]c2ccccc12)c1ccc(F)cc1",
@@ -761,7 +878,10 @@
       "heavy_atom_delta": 2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 1
+      "intermediates_seen_as_training_source": 1,
+      "source_heavy_atoms": 22,
+      "target_heavy_atoms": 24,
+      "slots": 26
     },
     {
       "source": "O=C(O)C(Cc1c[nH]c2ccccc12)NS(=O)(=O)c1ccccc1",
@@ -778,7 +898,10 @@
       "heavy_atom_delta": -2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 1
+      "intermediates_seen_as_training_source": 1,
+      "source_heavy_atoms": 24,
+      "target_heavy_atoms": 22,
+      "slots": 26
     },
     {
       "source": "CC(C(=O)Nc1nccs1)c1ccc(Cl)cc1",
@@ -795,7 +918,10 @@
       "heavy_atom_delta": 2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 17,
+      "target_heavy_atoms": 19,
+      "slots": 21
     },
     {
       "source": "Clc1ccc2[nH]c3c(c2c1)CNCC3",
@@ -812,7 +938,10 @@
       "heavy_atom_delta": 2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 14,
+      "target_heavy_atoms": 16,
+      "slots": 18
     },
     {
       "source": "OC([SH3])C1NCCc2[nH]c3ccccc3c21",
@@ -829,7 +958,10 @@
       "heavy_atom_delta": -2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 16,
+      "target_heavy_atoms": 14,
+      "slots": 18
     },
     {
       "source": "NC(CO)C(=O)O",
@@ -848,7 +980,10 @@
       "heavy_atom_delta": 2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 1
+      "intermediates_seen_as_training_source": 1,
+      "source_heavy_atoms": 7,
+      "target_heavy_atoms": 9,
+      "slots": 11
     },
     {
       "source": "NC(=O)c1cccc(NC(=O)Nc2ccc(-c3ccnc4[nH]cnc34)cc2)c1",
@@ -865,7 +1000,10 @@
       "heavy_atom_delta": -2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 1
+      "intermediates_seen_as_training_source": 1,
+      "source_heavy_atoms": 28,
+      "target_heavy_atoms": 26,
+      "slots": 30
     },
     {
       "source": "CCNCCOc1ccc(C=C2C(=O)Nc3ccc(Cl)cc32)cc1",
@@ -882,7 +1020,10 @@
       "heavy_atom_delta": -2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 2
+      "intermediates_seen_as_training_source": 2,
+      "source_heavy_atoms": 24,
+      "target_heavy_atoms": 22,
+      "slots": 26
     },
     {
       "source": "CCCCOc1ccc(C=C2C(=O)Nc3ccc(Cl)cc32)cc1",
@@ -899,7 +1040,10 @@
       "heavy_atom_delta": -2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 23,
+      "target_heavy_atoms": 21,
+      "slots": 25
     },
     {
       "source": "CCNCCOc1ccc(C=C2C(=O)Nc3ccc(Cl)cc32)cc1",
@@ -917,7 +1061,10 @@
       "heavy_atom_delta": -3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 2
+      "intermediates_seen_as_training_source": 2,
+      "source_heavy_atoms": 24,
+      "target_heavy_atoms": 21,
+      "slots": 26
     },
     {
       "source": "CN1CC(Cl)=C(c2cn(S(=O)(=O)c3ccccc3Br)c3ccc(F)cc23)C1",
@@ -934,7 +1081,10 @@
       "heavy_atom_delta": 2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 1
+      "intermediates_seen_as_training_source": 1,
+      "source_heavy_atoms": 27,
+      "target_heavy_atoms": 29,
+      "slots": 31
     },
     {
       "source": "OCCN1CCN(C2=Nc3ccccc3CC=C2c2ccccc2)CC1",
@@ -951,7 +1101,10 @@
       "heavy_atom_delta": -2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 1
+      "intermediates_seen_as_training_source": 1,
+      "source_heavy_atoms": 26,
+      "target_heavy_atoms": 24,
+      "slots": 28
     },
     {
       "source": "CC(=O)NCC(=O)NC(CCCN=C(N)N)C(=O)c1nc2ccccc2s1",
@@ -969,7 +1122,10 @@
       "heavy_atom_delta": -1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 27,
+      "target_heavy_atoms": 26,
+      "slots": 29
     },
     {
       "source": "O=C(NO)c1sc2ccccc2c1Cl",
@@ -986,7 +1142,10 @@
       "heavy_atom_delta": 2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 14,
+      "target_heavy_atoms": 16,
+      "slots": 18
     },
     {
       "source": "CCOC(=O)C(Cc1ccccc1)NC(=O)C=Cc1ccccc1",
@@ -1005,7 +1164,10 @@
       "heavy_atom_delta": -4,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 2
+      "intermediates_seen_as_training_source": 2,
+      "source_heavy_atoms": 24,
+      "target_heavy_atoms": 20,
+      "slots": 26
     },
     {
       "source": "O=C1C(=Cc2ccc(O)c(O)c2)SC(=S)N1c1cccc(C(F)(F)F)c1",
@@ -1022,7 +1184,10 @@
       "heavy_atom_delta": 2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 2
+      "intermediates_seen_as_training_source": 2,
+      "source_heavy_atoms": 26,
+      "target_heavy_atoms": 28,
+      "slots": 30
     },
     {
       "source": "Cc1cc(=NN=Cc2cccc(Cl)c2)c2ccccc2[nH]1",
@@ -1040,7 +1205,10 @@
       "heavy_atom_delta": 3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 1
+      "intermediates_seen_as_training_source": 1,
+      "source_heavy_atoms": 21,
+      "target_heavy_atoms": 24,
+      "slots": 26
     },
     {
       "source": "C=CC1(CO)OC(n2ccc(N)nc2=O)C(F)C1O",
@@ -1057,7 +1225,10 @@
       "heavy_atom_delta": 0,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 19,
+      "target_heavy_atoms": 19,
+      "slots": 21
     },
     {
       "source": "CC(=O)N1CCOC(c2c(C(=O)O)sc3ccccc23)C1",
@@ -1075,7 +1246,10 @@
       "heavy_atom_delta": -1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 21,
+      "target_heavy_atoms": 20,
+      "slots": 23
     },
     {
       "source": "CC1OC(=O)C2CC3CCCCC3C(C=Cc3ccc(-c4ccc(F)cc4)cn3)C12",
@@ -1093,7 +1267,10 @@
       "heavy_atom_delta": 3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 1
+      "intermediates_seen_as_training_source": 1,
+      "source_heavy_atoms": 30,
+      "target_heavy_atoms": 33,
+      "slots": 35
     },
     {
       "source": "CCNC(=O)c1c2cc[n+](C)cc2c(C)c2c1[nH]c1ccccc12",
@@ -1111,7 +1288,10 @@
       "heavy_atom_delta": 3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 2
+      "intermediates_seen_as_training_source": 2,
+      "source_heavy_atoms": 24,
+      "target_heavy_atoms": 27,
+      "slots": 29
     },
     {
       "source": "CCNC(=O)c1c2cc[n+](C)cc2c(C)c2c1[nH]c1ccccc12",
@@ -1128,7 +1308,10 @@
       "heavy_atom_delta": 2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 24,
+      "target_heavy_atoms": 26,
+      "slots": 28
     },
     {
       "source": "CCNCC1CN(c2ccc(N3C(=O)c4ccncc4C3=O)c(F)c2)C(=O)O1",
@@ -1146,7 +1329,10 @@
       "heavy_atom_delta": 1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 28,
+      "target_heavy_atoms": 29,
+      "slots": 31
     },
     {
       "source": "O=c1cc(O)ccn1Cc1ccccc1",
@@ -1164,7 +1350,10 @@
       "heavy_atom_delta": 3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 4
+      "intermediates_seen_as_training_source": 4,
+      "source_heavy_atoms": 15,
+      "target_heavy_atoms": 18,
+      "slots": 20
     },
     {
       "source": "COc1c2occc2c(OC)c2c(=O)cc(CS)oc12",
@@ -1181,7 +1370,10 @@
       "heavy_atom_delta": 0,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 3
+      "intermediates_seen_as_training_source": 3,
+      "source_heavy_atoms": 20,
+      "target_heavy_atoms": 20,
+      "slots": 22
     },
     {
       "source": "CCCCNC(=O)C1CCC(CNS(=O)(=O)c2ccc(NC(C)=O)cc2)CC1",
@@ -1199,7 +1391,10 @@
       "heavy_atom_delta": -3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 28,
+      "target_heavy_atoms": 25,
+      "slots": 30
     },
     {
       "source": "C=CCNC1=NN=C(c2cc(C)n(CC=C)c2[IH2])CS1",
@@ -1217,7 +1412,10 @@
       "heavy_atom_delta": -1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 20,
+      "target_heavy_atoms": 19,
+      "slots": 22
     },
     {
       "source": "C=C(C)C1CCC2(C(=O)n3ccnc3)CCC3(C)C(CCC4C5(C)C=C(C#N)C(=O)C(C)(C)C5CCC43C)C12",
@@ -1235,7 +1433,10 @@
       "heavy_atom_delta": -1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 39,
+      "target_heavy_atoms": 38,
+      "slots": 41
     },
     {
       "source": "FC(F)(F)C(F)(F)C(F)(F)F",
@@ -1253,7 +1454,10 @@
       "heavy_atom_delta": 3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 11,
+      "target_heavy_atoms": 14,
+      "slots": 16
     },
     {
       "source": "C=C(C)C1CC=C(CO)CCC2OC2(C)CCC=C(C)CC1O",
@@ -1271,7 +1475,10 @@
       "heavy_atom_delta": -1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 23,
+      "target_heavy_atoms": 22,
+      "slots": 25
     },
     {
       "source": "COc1ccc(-c2cc(-c3ccc([N+](=O)[O-])cc3)[nH]n2)cc1",
@@ -1289,7 +1496,10 @@
       "heavy_atom_delta": -1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 22,
+      "target_heavy_atoms": 21,
+      "slots": 24
     },
     {
       "source": "COc1cc(C=CC(=O)O)cc2cc(-c3ccccc3)oc12",
@@ -1308,7 +1518,10 @@
       "heavy_atom_delta": -4,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 22,
+      "target_heavy_atoms": 18,
+      "slots": 24
     },
     {
       "source": "Cc1ccc(C(C)(C)O)cc1-c1nnc2c(C)nc3ccc(C4CC4)nc3n12",
@@ -1326,7 +1539,10 @@
       "heavy_atom_delta": -3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 28,
+      "target_heavy_atoms": 25,
+      "slots": 30
     },
     {
       "source": "CC(C)(C)N(NC(=O)c1ccccc1)C(=O)c1ccccc1",
@@ -1344,7 +1560,10 @@
       "heavy_atom_delta": -3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 1
+      "intermediates_seen_as_training_source": 1,
+      "source_heavy_atoms": 22,
+      "target_heavy_atoms": 19,
+      "slots": 24
     },
     {
       "source": "CNC(=NO)c1cccnc1Oc1ccc(OC)cc1",
@@ -1362,7 +1581,10 @@
       "heavy_atom_delta": 3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 1
+      "intermediates_seen_as_training_source": 1,
+      "source_heavy_atoms": 20,
+      "target_heavy_atoms": 23,
+      "slots": 25
     },
     {
       "source": "CCOC(=O)COc1ccc(C(=O)c2ccc(O)c(CN)c2)c(Cl)c1Cl",
@@ -1380,7 +1602,10 @@
       "heavy_atom_delta": 1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 26,
+      "target_heavy_atoms": 27,
+      "slots": 29
     },
     {
       "source": "Cc1cc(S(=O)(=O)c2ccc3c(c2)nc(C(C)(C)C)n3CC2CCOCC2)ccn1",
@@ -1397,7 +1622,10 @@
       "heavy_atom_delta": 2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 2
+      "intermediates_seen_as_training_source": 2,
+      "source_heavy_atoms": 30,
+      "target_heavy_atoms": 32,
+      "slots": 34
     },
     {
       "source": "C=CC(=CC=CBr)N1N=NCC1c1ccncc1",
@@ -1416,7 +1644,10 @@
       "heavy_atom_delta": 0,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 18,
+      "target_heavy_atoms": 18,
+      "slots": 20
     },
     {
       "source": "NCCCNc1nc(-c2ccncc2)cc2cnccc12",
@@ -1433,7 +1664,10 @@
       "heavy_atom_delta": -2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 1
+      "intermediates_seen_as_training_source": 1,
+      "source_heavy_atoms": 21,
+      "target_heavy_atoms": 19,
+      "slots": 23
     },
     {
       "source": "CCN1CCN(c2ccc(-c3cc4ncn(C)c(=O)c4c(NC(C)C)n3)cc2)CC1",
@@ -1451,7 +1685,10 @@
       "heavy_atom_delta": 1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 30,
+      "target_heavy_atoms": 31,
+      "slots": 33
     },
     {
       "source": "Cc1cc(C)c2c(N)c(-c3nnc(S)n3CC=[SH4])sc2n1",
@@ -1470,7 +1707,10 @@
       "heavy_atom_delta": 0,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 21,
+      "target_heavy_atoms": 21,
+      "slots": 23
     },
     {
       "source": "Brc1ccc2c(c1)ncn2-c1ccccc1",
@@ -1488,7 +1728,10 @@
       "heavy_atom_delta": 3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 1
+      "intermediates_seen_as_training_source": 1,
+      "source_heavy_atoms": 16,
+      "target_heavy_atoms": 19,
+      "slots": 21
     },
     {
       "source": "CCNc1ccc(Cl)cc1Sc1ncccc1[N+](=O)[O-]",
@@ -1506,7 +1749,10 @@
       "heavy_atom_delta": 1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 20,
+      "target_heavy_atoms": 21,
+      "slots": 23
     },
     {
       "source": "CC(C)CCON=O",
@@ -1524,7 +1770,10 @@
       "heavy_atom_delta": -1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 1
+      "intermediates_seen_as_training_source": 1,
+      "source_heavy_atoms": 8,
+      "target_heavy_atoms": 7,
+      "slots": 10
     },
     {
       "source": "CN1c2c(C(=O)Nc3ccc(NS(C)(=O)=O)cc3)nn(-c3ccc(N)cc3)c2-c2ccccc2S1(=O)=O",
@@ -1542,7 +1791,10 @@
       "heavy_atom_delta": 3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 4
+      "intermediates_seen_as_training_source": 4,
+      "source_heavy_atoms": 37,
+      "target_heavy_atoms": 40,
+      "slots": 42
     },
     {
       "source": "Cc1csc2nc(Cc3ccc(C(=O)c4ccc(CO)cc4)cc3)oc(=O)c12",
@@ -1559,7 +1811,10 @@
       "heavy_atom_delta": 0,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 28,
+      "target_heavy_atoms": 28,
+      "slots": 30
     },
     {
       "source": "CC(=O)N(CCC(c1ccco1)C(C)C)Cc1ccc(Cl)cc1",
@@ -1577,7 +1832,10 @@
       "heavy_atom_delta": -1,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 23,
+      "target_heavy_atoms": 22,
+      "slots": 25
     },
     {
       "source": "Oc1cc(O)nc(S)n1",
@@ -1596,7 +1854,10 @@
       "heavy_atom_delta": 4,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 9,
+      "target_heavy_atoms": 13,
+      "slots": 15
     },
     {
       "source": "CC(O)N1CCN(c2ncc(C(=O)NO)s2)CC1",
@@ -1615,7 +1876,10 @@
       "heavy_atom_delta": 0,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 18,
+      "target_heavy_atoms": 18,
+      "slots": 20
     },
     {
       "source": "CCCCCn1ncc2c(N)c(C(=O)NOCC)cnc21",
@@ -1634,7 +1898,10 @@
       "heavy_atom_delta": 0,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 21,
+      "target_heavy_atoms": 21,
+      "slots": 23
     },
     {
       "source": "CS(=O)(=O)c1cccc(Oc2cccc(-c3c(C(N)=O)cnc4c(Cl)cccc34)c2)c1",
@@ -1652,7 +1919,10 @@
       "heavy_atom_delta": 3,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 0
+      "intermediates_seen_as_training_source": 0,
+      "source_heavy_atoms": 31,
+      "target_heavy_atoms": 34,
+      "slots": 36
     },
     {
       "source": "C=CCN1CCC23c4c5ccc(O)c4OC2c2[nH]c4ccccc4c2CC3(O)C1C5",
@@ -1671,7 +1941,11 @@
       "heavy_atom_delta": 2,
       "ring_delta": 0,
       "compiler_path_class": "delete_insert_fallback",
-      "intermediates_seen_as_training_source": 2
+      "intermediates_seen_as_training_source": 2,
+      "source_heavy_atoms": 30,
+      "target_heavy_atoms": 32,
+      "slots": 34
     }
-  ]
+  ],
+  "note_slots": "source/target heavy-atom counts and the slot budget are precomputed so the Modal local entrypoint needs no RDKit -- it runs in the Modal CLI venv, not the system interpreter"
 }
