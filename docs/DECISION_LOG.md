@@ -92,6 +92,39 @@ These cost real money or hid real results, and are fixed.
 - **Three earlier logging defects:** throughput charged eval and checkpoint time, producing a false WARN at every eval; the alarm watched only panel-native and missed a 9.2% deployment regression; the per-family breakdown was computed and discarded.
 - **The carve was defined over the wrong set** — 151,078 entries where the loader yields 151,059; 12 of 97 precedence-held-out source keys were live, 2 of them in the reserve.
 - **Four byte-identical duplicate entry ids** would have made the artifact claim 15,031 reserve rows against a store holding 15,029.
+- **Cost estimates counted work, not billed resources.** C0 was quoted at ~$0.50 from kernel-call arithmetic; Modal bills **memory-time**, which dominated, and the real figure for the config as written was ~$7 — no cheaper than the experiment it was meant to gate. Fixed structurally, by removing the corpus load from the probe containers rather than by re-quoting. Assume this failure mode until a quote is built from allocation × wall-time.
+- **`compose_v4/oracles/__init__.py` eagerly imports `joblib`.** Putting a new module in that package makes every consumer pay for the unrelated pan-lung oracle stack, which is absent from the Modal image. Caught by a 2-minute smoke test rather than 40 minutes into a 12-way fan-out; the DRD2 oracle now lives at `compose_v4.drd2_oracle`.
+
+---
+
+## Oracle provenance — DRD2
+
+The classic benchmark SVM ships as a Python-3.6 sklearn pickle. It is opened
+**once**, by `scripts/drd2_oracle_extract.py`, and the runtime thereafter
+evaluates frozen arrays in numpy — no sklearn import, no unpickling.
+
+Two things had to be reproduced rather than assumed:
+
+- **libsvm's Wu-Lin-Weng coupling**, not just the Platt sigmoid. The exact fixed
+  point of that iteration *is* the sigmoid, but libsvm stops at
+  `max_error < 0.005/k`. Short-circuiting it left a **1.7e-3** discrepancy —
+  enough to move molecules sitting on the 0.5 success threshold, which is
+  exactly where success rates are decided.
+- **The Platt orientation.** An inverted oracle returns entirely plausible
+  probabilities in [0,1] while rewarding the wrong molecules. Both orientations
+  are scored against the original estimator and the agreeing one is pinned; the
+  rejected one is asserted to *fail* parity, so agreement is evidence rather
+  than luck.
+
+Parity: **2.19e-14** on probabilities, **1.35e-13** on decision values, over a
+200-molecule panel. Discrimination: source panel max **0.0482** (independently
+confirming it is the `<0.05` set the benchmark uses), active panel **300/300**
+above 0.5 — a constant scorer would pass parity on inactives alone.
+
+Note the task uses **two different fingerprints**: activity is scored with
+count-based FCFP6 (radius 3, `useFeatures=True`, folded by modulo), while the
+similarity constraint uses ECFP4 bits (radius 2, 2048). Conflating them would
+silently redefine the constrained benchmark.
 
 ---
 
