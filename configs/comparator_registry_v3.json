@@ -1,0 +1,288 @@
+{
+  "claims": {
+    "C1_REFERENCE_LEARNING": "the learned reference beats legal/random/empirical proposals",
+    "C2_EXECUTABLE_TRANSPORT": "the process produces healthy executable trajectories",
+    "C3_FINITE_HORIZON_CONTROL": "bridge control is genuinely future-aware",
+    "C4_DYNAMIC_CONTROL": "capabilities static optimizers do not naturally provide"
+  },
+  "comparators": [
+    {
+      "adapter_status": "native",
+      "answers": "does learning anything at all improve on the chemistry kernel by itself",
+      "claim_id": "C1_REFERENCE_LEARNING",
+      "comparator_type": "law_only",
+      "definition": "uniform over DISTINCT PRODUCTIVE CANONICAL molecular successors -- not raw marks, not operator coordinates, aliases already collapsed, identical productive support to COMPOSE",
+      "id": "uniform_canonical_successor",
+      "metrics_applicable": [
+        "reference_law_nll",
+        "identity_nll",
+        "teacher_mass"
+      ],
+      "required_status": "must_run",
+      "support_relation": "identical"
+    },
+    {
+      "adapter_status": "native",
+      "answers": "does the network learn state-dependent chemistry, or only corpus-level family frequencies",
+      "claim_id": "C1_REFERENCE_LEARNING",
+      "comparator_type": "law_only",
+      "definition": "see frozen_definitions.state_independent_empirical_family_prior",
+      "id": "state_independent_empirical_family_prior",
+      "metrics_applicable": [
+        "reference_law_nll",
+        "identity_nll",
+        "teacher_mass"
+      ],
+      "required_status": "must_run",
+      "support_relation": "identical"
+    },
+    {
+      "adapter_status": "native",
+      "answers": "how much of the gain comes from learning WHICH KIND of edit to make",
+      "claim_id": "C1_REFERENCE_LEARNING",
+      "comparator_type": "law_only",
+      "definition": "R_theta's P(k|x); uniform over distinct successors within the selected family",
+      "id": "learned_family_uniform_identity",
+      "metrics_applicable": [
+        "reference_law_nll",
+        "identity_nll",
+        "teacher_mass"
+      ],
+      "required_status": "must_run",
+      "support_relation": "identical"
+    },
+    {
+      "adapter_status": "native",
+      "answers": "how much comes from learning WHERE/HOW to execute the edit",
+      "claim_id": "C1_REFERENCE_LEARNING",
+      "comparator_type": "law_only",
+      "definition": "frozen q(k); R_theta(y|x,k) within family",
+      "id": "empirical_family_learned_identity",
+      "metrics_applicable": [
+        "reference_law_nll",
+        "identity_nll",
+        "teacher_mass"
+      ],
+      "required_status": "must_run",
+      "support_relation": "identical"
+    },
+    {
+      "adapter_status": "native",
+      "answers": "the reference point",
+      "claim_id": "C1_REFERENCE_LEARNING",
+      "comparator_type": "law_only",
+      "definition": "COMPOSE R_theta itself, unguided",
+      "id": "learned_unguided_prior",
+      "metrics_applicable": [
+        "reference_law_nll",
+        "identity_nll",
+        "teacher_mass"
+      ],
+      "required_status": "must_run",
+      "support_relation": "identical"
+    },
+    {
+      "adapter_status": "native",
+      "answers": "improvement from optimization rather than architectural bias",
+      "claim_id": "C1_REFERENCE_LEARNING",
+      "comparator_type": "law_only",
+      "conditional_on": "run only if the core C1 result is strong",
+      "id": "untrained_same_architecture",
+      "metrics_applicable": [
+        "reference_law_nll",
+        "identity_nll"
+      ],
+      "required_status": "conditional",
+      "support_relation": "identical"
+    },
+    {
+      "adapter_status": "native",
+      "answers": "whether a full GNN is necessary beyond atom/bond descriptors",
+      "claim_id": "C1_REFERENCE_LEARNING",
+      "comparator_type": "law_only",
+      "conditional_on": "run only if the core C1 result is strong",
+      "id": "local_feature_mlp",
+      "metrics_applicable": [
+        "reference_law_nll",
+        "identity_nll"
+      ],
+      "required_status": "conditional",
+      "support_relation": "identical"
+    },
+    {
+      "adapter_status": "native",
+      "answers": "constraints without future value",
+      "claim_id": "C3_FINITE_HORIZON_CONTROL",
+      "comparator_type": "controller",
+      "id": "hard_feasibility_mask",
+      "required_status": "must_run",
+      "support_relation": "restricted"
+    },
+    {
+      "adapter_status": "native",
+      "claim_id": "C3_FINITE_HORIZON_CONTROL",
+      "comparator_type": "controller",
+      "id": "greedy_immediate_reward",
+      "required_status": "must_run",
+      "support_relation": "identical"
+    },
+    {
+      "adapter_status": "native",
+      "claim_id": "C3_FINITE_HORIZON_CONTROL",
+      "comparator_type": "controller",
+      "id": "local_boltzmann_tilt",
+      "required_status": "must_run",
+      "support_relation": "identical"
+    },
+    {
+      "adapter_status": "native",
+      "claim_id": "C3_FINITE_HORIZON_CONTROL",
+      "comparator_type": "search",
+      "id": "beam_or_best_first_search",
+      "required_status": "must_run",
+      "support_relation": "identical"
+    },
+    {
+      "adapter_status": "native",
+      "claim_id": "C3_FINITE_HORIZON_CONTROL",
+      "comparator_type": "search",
+      "id": "untwisted_smc",
+      "required_status": "must_run",
+      "support_relation": "identical"
+    },
+    {
+      "adapter_status": "native",
+      "answers": "the gold standard on the enumerable closure",
+      "claim_id": "C3_FINITE_HORIZON_CONTROL",
+      "comparator_type": "controller",
+      "id": "exact_doob_transform",
+      "required_status": "must_run",
+      "support_relation": "identical"
+    },
+    {
+      "adapter_status": "native",
+      "claim_id": "C4_DYNAMIC_CONTROL",
+      "comparator_type": "controller",
+      "id": "learned_bridge_controller",
+      "required_status": "must_run",
+      "support_relation": "identical"
+    },
+    {
+      "adapter_status": "not_yet_qualified",
+      "claim_id": "C4_DYNAMIC_CONTROL",
+      "comparator_type": "external",
+      "id": "MARS",
+      "note": "has nothing to say about whether R_theta learned the declared successor law -- it does not share that law, support or training target. Relevant only for optimization. DO NOT implement during the C1 work.",
+      "required_status": "must_run",
+      "support_relation": "external"
+    },
+    {
+      "adapter_status": "not_yet_qualified",
+      "claim_id": "C4_DYNAMIC_CONTROL",
+      "comparator_type": "external",
+      "id": "DDSBM",
+      "note": "has nothing to say about whether R_theta learned the declared successor law -- it does not share that law, support or training target. Relevant only for optimization. DO NOT implement during the C1 work.",
+      "required_status": "must_run",
+      "support_relation": "external"
+    },
+    {
+      "adapter_status": "not_yet_qualified",
+      "claim_id": "C4_DYNAMIC_CONTROL",
+      "comparator_type": "external",
+      "id": "GraphXForm",
+      "note": "has nothing to say about whether R_theta learned the declared successor law -- it does not share that law, support or training target. Relevant only for optimization. DO NOT implement during the C1 work.",
+      "required_status": "must_run",
+      "support_relation": "external"
+    },
+    {
+      "adapter_status": "not_yet_qualified",
+      "claim_id": "C4_DYNAMIC_CONTROL",
+      "comparator_type": "external",
+      "id": "GraphGA",
+      "note": "has nothing to say about whether R_theta learned the declared successor law -- it does not share that law, support or training target. Relevant only for optimization. DO NOT implement during the C1 work.",
+      "required_status": "must_run",
+      "support_relation": "external"
+    },
+    {
+      "adapter_status": "not_yet_qualified",
+      "claim_id": "C4_DYNAMIC_CONTROL",
+      "comparator_type": "external",
+      "id": "REINVENT",
+      "note": "has nothing to say about whether R_theta learned the declared successor law -- it does not share that law, support or training target. Relevant only for optimization. DO NOT implement during the C1 work.",
+      "required_status": "must_run",
+      "support_relation": "external"
+    }
+  ],
+  "design_note": "Organized by CLAIM and COMPARATOR ROLE, deliberately not by paper section or experiment number. Section numbers and framing have already changed repeatedly; the stable objects are the four scientific claims and what each comparator is for. The paper may call these Experiment 1, E2 or Figure 3 without rewriting scientific infrastructure.",
+  "external_adapter_gate": {
+    "published_numbers_only_policy": "contextual_unless_every_task_field_matches",
+    "required_fields": [
+      "code_repository_and_commit",
+      "environment_lock",
+      "checkpoint_identity",
+      "input_standardization",
+      "source_set_identity",
+      "objective_implementation_hashes",
+      "constraint_implementation_hashes",
+      "oracle_budget_accounting",
+      "seed_policy",
+      "selection_rule",
+      "output_standardization",
+      "failure_handling"
+    ]
+  },
+  "frozen_definitions": {
+    "state_independent_empirical_family_prior": {
+      "formula": "P_emp(y|x) proportional to sum over k with y in N_k(x) of q(k)/|N_k(x)|, normalized over families legal at x",
+      "frozen_before_seeing_its_results": true,
+      "q_of_k_source": "diagnostics/editing_v2_sampling_law_v2.json realized_coefficients.by_family",
+      "steps": [
+        "estimate a single family distribution q(k) from the REALIZED FROZEN TRAINING LAW, not raw corpus counts",
+        "at state x, remove families with no legal productive successors",
+        "renormalize q(k) over the families legal at x",
+        "within a legal family, assign mass uniformly over DISTINCT CANONICAL successors produced by that family",
+        "if the same canonical molecule is reachable through multiple families, SUM those contributions at the canonical-successor level"
+      ],
+      "why_this_and_not_the_weaker_version": "It is much stronger than 'sample a family by global frequency then pick a raw mark': it gets the correct global operator frequencies, the exact legal chemistry support, state-dependent availability for free, and alias aggregation. What it does NOT get is learned molecular-context dependence, which is exactly what makes R_theta > P_emp mean the network learned state-dependent chemistry."
+    },
+    "uniform_canonical_successor": {
+      "formula": "P_unif(y|x) = 1 / |N+(x)| over distinct productive canonical successors",
+      "frozen_before_seeing_its_results": true
+    }
+  },
+  "global_fairness_rules": [
+    "Use identical source molecules, objective implementations, feasibility predicates, and final evaluators.",
+    "Count every property-oracle evaluation, including rejected candidates, particles, prescreened candidates, and reranked endpoints.",
+    "Report model calls, legal successors scored, wall time, and accelerator class separately from oracle calls.",
+    "Use the same random seeds and output sample count when the baseline interface permits it.",
+    "Never claim equal support for an external method; report representation and support differences explicitly.",
+    "Do not compare published numbers unless the task, oracle, constraints, budget, and selection rule are identical.",
+    "Tune on development tasks only and evaluate the sealed final task set once."
+  ],
+  "registry_id": "compose-claim-scoped-comparators-v3",
+  "reporting": {
+    "breakdowns_for_compose_vs_the_two_core_nonlearned_arms": [
+      "8 families",
+      "19 capability cells",
+      "support bands 0 / 1-4 / 5-24 / 25+",
+      "external cohort"
+    ],
+    "do_not_initially_add": "ten more baselines; add untrained-architecture and local-feature MLP only as confirmatory ablations if the core result is strong",
+    "primary_table_columns": [
+      "reference_law_nll",
+      "identity_nll",
+      "teacher_mass"
+    ],
+    "primary_table_rows": [
+      "uniform_canonical_successor",
+      "state_independent_empirical_family_prior",
+      "learned_family_uniform_identity",
+      "empirical_family_learned_identity",
+      "learned_unguided_prior"
+    ]
+  },
+  "schema": "compose.comparator_registry",
+  "schema_version": 3,
+  "status": "PREIMPLEMENTATION",
+  "supersedes_registry_id": "compose-editing-and-control-comparators-v2"
+}
