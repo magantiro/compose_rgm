@@ -38,10 +38,14 @@ def decision_states(pair: dict[str, Any]) -> list[list[dict[str, Any]]]:
     decision step within a pair without needing an explicit index.
     """
 
-    grouped: dict[int, list[dict[str, Any]]] = collections.defaultdict(list)
+    grouped: dict[Any, list[dict[str, Any]]] = collections.defaultdict(list)
     for row in pair.get("label_rows", []):
-        grouped[int(row["remaining"])].append(row)
-    return [grouped[k] for k in sorted(grouped, reverse=True)]
+        # Union-collected rows name their decision state explicitly. Greedy-only
+        # rows do not, but there `remaining` alone identifies the step because
+        # the trajectory is linear and strictly decreasing.
+        key = (row.get("decision_state"), int(row["remaining"]))
+        grouped[key].append(row)
+    return [grouped[k] for k in sorted(grouped, key=lambda k: (-k[1], str(k[0])))]
 
 
 def main() -> int:
@@ -122,6 +126,26 @@ def main() -> int:
           f"({greedy_worse/total:.1%} of all states)")
     if greedy_missing:
         print(f"    ({greedy_missing} states had no greedy candidate recorded)")
+
+    # Split by collector, so stratified subsampling can be checked later.
+    by_policy: dict[str, collections.Counter] = collections.defaultdict(
+        collections.Counter)
+    for candidates in states:
+        tag = "/".join(candidates[0].get("visited_by", ["greedy"]))
+        recoveries = [bool(c["recovery"]) for c in candidates]
+        kind = ("contrastive" if (any(recoveries) and not all(recoveries))
+                else "all_positive" if all(recoveries) else "all_negative")
+        by_policy[tag][kind] += 1
+    if len(by_policy) > 1 or "greedy" not in by_policy:
+        print("\n  by collector policy:")
+        for tag in sorted(by_policy):
+            counts = by_policy[tag]
+            n = sum(counts.values())
+            print(f"    {tag:16} {n:4d} states  contrastive {counts['contrastive']:3d} "
+                  f"({counts['contrastive']/max(n,1):5.1%})")
+    teacher_actions = sum(1 for s in states for c in s if c.get("is_teacher_action"))
+    if teacher_actions:
+        print(f"  teacher-selected actions present in candidate sets: {teacher_actions}")
 
     print(f"\n  reading: contrastive states teach the recovery ranking; "
           f"homogeneous ones teach calibration. Oversample the former, keep a "
