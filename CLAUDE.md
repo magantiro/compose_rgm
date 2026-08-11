@@ -14,6 +14,24 @@ lives in `paper_iclr_stochastic_rewriting/`.
 This file loads automatically every session. Keep it short and high-signal —
 detail lives in the imported context files below and in scoped `CLAUDE.md`s.
 
+## Plan of record — read this before any other document
+
+- **[`docs/EXPERIMENT_PLAN.md`](docs/EXPERIMENT_PLAN.md)** — the ONLY current
+  experiment plan.
+- **[`docs/PROJECT_BOARD.md`](docs/PROJECT_BOARD.md)** — the durable task board.
+  The in-session task tool has been wiped twice; this file is what persists.
+- **[`docs/DECISION_LOG.md`](docs/DECISION_LOG.md)** — what is established, and
+  what was tried and refuted. Read it before re-running an experiment.
+
+**Everything else in `docs/` and every `paper*/` directory is HISTORY** unless
+it is linked from one of those three. `docs/` holds 84 markdown files accumulated
+across several earlier framings; a dozen are stamped ARCHIVED, but absence of a
+banner does not mean a document is current. Default to history.
+
+The manuscript's existing experimental section describes a materially different
+model and must not be executed or cited.
+
+
 ## How we work
 
 1. **Context auto-loads.** The `@`-imported files at the bottom are in your context now.

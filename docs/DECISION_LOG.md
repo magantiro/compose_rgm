@@ -1,0 +1,116 @@
+# Decision Log — what is established, and what was refuted
+
+**Read this before re-running an experiment.**
+
+This is not a replay of the wiped task board. Task titles are cheap to lose and
+recoverable from git; what is expensive to lose is *which hypotheses were tested
+and killed*, because nothing stops someone from testing them again. Six of the
+agent's own hypotheses were refuted during this work, several published claims
+were corrected, and none of that is legible from a list of commit subjects.
+
+Scope: the `run_v2_01` line, 2026-08-10. Plan of record:
+[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md).
+
+---
+
+## Established
+
+**Ordinary canonical-successor likelihood learns the declared reference process.**
+Reference-law-weighted NLL falls from **5.4603** at the frozen initialization to
+**2.9238** at the selected step 8,500 — 2.54 nats over two epochs.
+
+**Within-family identity NLL improved in all eight families** against R_θ0:
+
+| family | init → final | Δ |
+|---|---|---|
+| cycle_insert | 4.7147 → 0.9071 | −3.81 |
+| atom_insert | 5.1526 → 3.2900 | −1.86 |
+| atom_restate | 5.2047 → 3.3868 | −1.82 |
+| bond_reroute | 3.6376 → 2.5431 | −1.09 |
+| atom_delete | 1.6492 → 1.0052 | −0.64 |
+| bond_reorder | 1.5457 → 1.3122 | −0.23 |
+| ring_system_restate | 0.7139 → 0.5007 | −0.21 |
+| cycle_attach | 2.5427 → 2.5360 | −0.01 |
+
+**Improvement scales with training scaffold support**, over two epochs:
+−0.22 / −0.21 / −0.38 / **−0.62** across bands 0 / 1–4 / 5–24 / 25+. Supportable
+phrasing: *transfers to unsupported chemistry, benefits increasingly from denser
+support*. **Not** supportable: a strict monotone-in-support claim — the two low
+bands are tied within 0.015, and at the epoch-1 boundary they inverted.
+
+**No cross-cohort cost.** External 16-shard cohort: 4.3364 → 4.5787 → 4.3817 →
+4.3288 across steps 3,000 / 4,500 / 8,502 / 9,000. Flat to slightly improving
+while in-population improved 0.20 nats.
+
+**The metric's resolution is ~0.026 nats.** Steps 7,956 and 8,000 are 44
+optimizer steps apart and differ by that much on a deterministic evaluation —
+comparable to a typical 500-step gain. The pre-run freeze gate predicted 0.024
+standard error. **Adjacent evaluations closer than ~0.03 nats are not
+interpretable.** Four trend calls made from consecutive points were each
+overturned at the next point.
+
+**The initialization is bit-reproducible.** R_θ0 scored identically (0.00e+00
+difference) across three fresh containers, including one following an
+involuntary preemption.
+
+---
+
+## Refuted — do not re-test without new reason
+
+| Hypothesis | Verdict | Evidence |
+|---|---|---|
+| The compact successor fiber is the object to optimize | **Wrong target** | Partitions are discarded by the training loop; only teacher fibers are read |
+| Larger batches will speed training | **Refuted** | Batch 128 is 3× worse than 32 |
+| Vectorized backward pass gives a large speedup | **Refuted** | 2%, not 20× |
+| The model memorizes slot permutations | **Refuted** | Scorer is equivariant to 1e-6 |
+| The gap is a representation problem | **Refuted** | Provenance correlation ρ = +0.762 |
+| Validation is a different chemical cohort | **Refuted at role level** | 85.5% scaffold coverage — *but see the correction below* |
+| Held-out error grows with analogue-series depth | **Refuted, opposite direction** | Error *falls* 3.87 → 2.42 with depth, surviving both fixed-zero-support (n=5,863) and fixed-molecule-size (n=6,992) controls |
+| The most-oversampled strata overfit first | **Refuted** | cycle_attach, bond_reorder, ring_system_restate sit at the 3.0× oversample ceiling and improved most |
+| `atom_restate` suffered capability collapse | **Refuted** | Its *identity* improved 1.82 nats; the joint gate was reading family-head reallocation |
+| Cross-cohort performance is degrading | **Refuted** | Third and fourth readings returned to baseline |
+
+---
+
+## Corrections to claims that were made and then found wrong
+
+- **Scaffold coverage is 58.5% of panel entries, not 85.5%.** The 85.5% figure counted train-*role* sources across 30 Active8 shards; the model trains on the compiled **library**, 106,759 of 564,316 role sources. This reversed a retraction: chemical novelty *is* substantial from the model's point of view.
+- **Support-matching does not flatter the number.** An earlier note claimed 2.62 → 1.94; that conflated the matched view with the supported-scaffold view (1.94 is band 25+ alone). Training weights on the same per-band means give 2.74 — matching moves the number **+0.12**, slightly worse. The re-freeze buys an interpretable number, not a better one.
+- **Depth 0 meant acyclic, not shallow.** All 361 depth-0 entries were molecules with an empty Murcko scaffold; `if s:` treated the empty string as no-scaffold. A category error at the exact end of the curve the hypothesis was about.
+- **The family floor was never enforced.** Clamping to [floor, cap] then renormalizing divides by the sum, so a family pinned *at* the floor lands under it. The pilot's law claimed 0.05 and delivered 0.0497. Replaced with water-filling.
+- **The joint NLL is the wrong quantity for a capability gate.** It moves with family-head reallocation the model is entitled to perform. Across eight families the largest identity movement was 0.062 nats against family movement of 0.317. The gate now reads identity, over two consecutive evaluations.
+
+---
+
+## Defects found in the harness itself
+
+These cost real money or hid real results, and are fixed.
+
+- **No evaluation ran on the final step.** One epoch is 4,251 steps against an interval of 500, so runs ended with their last evaluation 251 steps stale. The final model state was never scored and could never be selected — this hid step 4,000, whose weights are now permanently lost, and step 4,251, which was eligible and better than the then-selected checkpoint.
+- **The eval line logged everything except the number that selects.** Panel-native, deployment and minimum probability were printed; reference-law-weighted NLL and the gate verdict were not.
+- **Re-collating per batch cost 98.17 s per 32 examples** — 97.2% of step time. Fixed by the packed store; GPU data-wait fell to 0.93%.
+- **Three earlier logging defects:** throughput charged eval and checkpoint time, producing a false WARN at every eval; the alarm watched only panel-native and missed a 9.2% deployment regression; the per-family breakdown was computed and discarded.
+- **The carve was defined over the wrong set** — 151,078 entries where the loader yields 151,059; 12 of 97 precedence-held-out source keys were live, 2 of them in the reserve.
+- **Four byte-identical duplicate entry ids** would have made the artifact claim 15,031 reserve rows against a store holding 15,029.
+
+---
+
+## Identity chain — `run_v2_01`
+
+```
+reserve   b580fdef6486     15,031 reserve / 136,028 training / 151,059 total
+law       b0cc66f168f1     7 gates; synthetic 21.0%; family floors exact at 5.00%
+manifest  e27494a46250     5 gates; drift ≤0.003%; sequence 136,027
+store     b232a6fa069f     unchanged — already covered the split exactly
+gate      FROZEN 9/9       primary-metric standard error 0.0237 (bound 0.05)
+```
+
+**The law never draws 29,600 of 136,028 rows** — whole synthetic strata in
+families whose real supply already meets target: `atom_delete|synthetic` and
+`atom_insert|synthetic` at exactly 0%, `atom_restate|synthetic` 99.6%,
+`bond_reroute|synthetic` 97.3%. The sequence is fixed, so this is **permanent
+exclusion, not slow exposure** — no number of epochs reaches them. Those strata
+degraded +0.80 to +1.79 nats during training and are reported as diagnostics,
+never weighted into selection.
+
+Cost to date ≈ **$2.6** on A10G (preemptible), against a $4 cap.

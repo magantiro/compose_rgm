@@ -1,3 +1,9 @@
+> **ARCHIVED — DO NOT USE.**
+> Superseded by [`docs/EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md), which is the only
+> current plan. This document describes an earlier framing of the project and its
+> experiment list must not be executed or cited. Kept on disk because other files
+> still link to it; read it as history, not as instruction.
+
 # Experiment infrastructure plan v2 (E1–E7)
 
 Build plan for the paper's experimental program, executed while the RingCore-V1 editing prior trains.

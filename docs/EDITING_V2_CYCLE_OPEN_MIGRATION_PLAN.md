@@ -1,3 +1,9 @@
+> **ARCHIVED — DO NOT USE.**
+> Superseded by [`docs/EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md), which is the only
+> current plan. This document describes an earlier framing of the project and its
+> experiment list must not be executed or cited. Kept on disk because other files
+> still link to it; read it as history, not as instruction.
+
 # Editing V2 semantic cycle-open migration plan
 
 Status: implementation plan. This document does not authorize corpus
