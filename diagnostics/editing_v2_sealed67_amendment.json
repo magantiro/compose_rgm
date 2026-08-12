@@ -1,0 +1,46 @@
+{
+  "schema": "compose.editing_v2.sealed67_protocol_amendment",
+  "status": "AMENDED_BEFORE_ANY_SEALED_OUTCOME_WAS_EVALUATED",
+  "amendment": "During the final pre-outcome integrity audit, two of the 67 sealed source-target pairs were found to reuse source molecules present in the 24-pair development panel. No target-recovery outcomes from the sealed panel had been evaluated. Because controller configuration was selected using the development panel, these two pairs violate the intended endpoint-level independence of the final evaluation. The primary evaluation denominator is therefore fixed at the 65 endpoint-clean pairs. The originally sealed 67-pair result will also be reported as a sensitivity analysis. No replacement pairs will be introduced.",
+  "exclusion_criterion": "mechanical and outcome-independent: exclude any sealed pair whose SOURCE endpoint appears in the 24 development pairs",
+  "root_cause": "The dev/sealed split at commit 571ec9d was pair-disjoint only. Endpoint-disjoint connected-component splitting was applied to h_phi's train/validation carve but not to the evaluation panel -- the stricter standard went to the model's data and the looser one to the evaluation, which is backwards.",
+  "counts": {
+    "original_sealed": 67,
+    "excluded": 2,
+    "primary_clean": 65
+  },
+  "hashes": {
+    "original_67": "6b0706741282de5fc3d4c4a8d78335ee29897c1a581b572e8dc5d4bff0009d2d",
+    "excluded_2": "5d49ce3f04d117f365cec07c3794be0aa768cac4717a2e0e53aa05bed03404c1",
+    "clean_65": "4d93b4f4710d87f50cbc130a16296de90f230ea05db0541f0a08169fc032b9e7",
+    "app_sha256": "232d66ce3823388e641159bbcc44d4eef29502c5f353ba986a2b8a68bc114d1f",
+    "preregistration_sha256": "5da8574373dee75d133dc70e64d4df3ee215eb85b7b06bb085ea8562482d095e"
+  },
+  "excluded_pairs": [
+    {
+      "source": "O=C(C=Cc1ccc(O)c(O)c1)N1CCCCC1",
+      "target": "O=C(C=Cc1ccc(OC(F)F)cc1)N1CCCCC1",
+      "steps": 4,
+      "shares_source_with_development_target": [
+        "O=C(C=Cc1ccc(OC(F)(F)F)cc1)N1CCCCC1"
+      ]
+    },
+    {
+      "source": "CCS(=O)(=O)O",
+      "target": "CNCCS(=O)(=O)O",
+      "steps": 4,
+      "shares_source_with_development_target": [
+        "O=S(=O)(O)CCNCl"
+      ]
+    }
+  ],
+  "arms_unchanged": [
+    "greedy",
+    "full",
+    "sim1",
+    "sim2",
+    "hphi1",
+    "ref1"
+  ],
+  "note": "The seal still did its job: it prevented choosing examples by outcome. This is a pre-outcome integrity correction to it, not an abandonment."
+}
