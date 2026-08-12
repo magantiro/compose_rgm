@@ -1,0 +1,1728 @@
+{
+  "schema": "compose.editing_v2.verified_hybrid",
+  "status": "DEVELOPMENT_24_SEALED_67_UNTOUCHED",
+  "universe": "Experiment C's exact set: greedy + top-4 similarity + top-2 R_theta, deduplicated, no random stratum",
+  "k_meaning": "K counts NON-GREEDY challengers; greedy always included",
+  "pairs": 24,
+  "greedy_recovered": 12,
+  "full_recovered": 18,
+  "headroom": 6,
+  "safety_property_held": true,
+  "arms": {
+    "greedy": {
+      "recovered": 12,
+      "extra_over_greedy": 0,
+      "rescue_retention": 0.0,
+      "continuations_total": 0,
+      "continuations_per_pair": 0.0,
+      "universe_candidates_seen": 470,
+      "fraction_of_universe_evaluated": 0.0,
+      "lost_versus_greedy": 0,
+      "mean_best_similarity": 0.8589007513671415,
+      "overrides": 0
+    },
+    "full": {
+      "recovered": 18,
+      "extra_over_greedy": 6,
+      "rescue_retention": 1.0,
+      "continuations_total": 419,
+      "continuations_per_pair": 17.458333333333332,
+      "universe_candidates_seen": 419,
+      "fraction_of_universe_evaluated": 1.0,
+      "lost_versus_greedy": 0,
+      "mean_best_similarity": 0.9335436539480657,
+      "overrides": 9
+    },
+    "sim1": {
+      "recovered": 16,
+      "extra_over_greedy": 4,
+      "rescue_retention": 0.6666666666666666,
+      "continuations_total": 150,
+      "continuations_per_pair": 6.25,
+      "universe_candidates_seen": 430,
+      "fraction_of_universe_evaluated": 0.3488372093023256,
+      "lost_versus_greedy": 0,
+      "mean_best_similarity": 0.904602333830275,
+      "overrides": 7
+    },
+    "sim2": {
+      "recovered": 17,
+      "extra_over_greedy": 5,
+      "rescue_retention": 0.8333333333333334,
+      "continuations_total": 222,
+      "continuations_per_pair": 9.25,
+      "universe_candidates_seen": 423,
+      "fraction_of_universe_evaluated": 0.524822695035461,
+      "lost_versus_greedy": 0,
+      "mean_best_similarity": 0.9244436036715449,
+      "overrides": 8
+    },
+    "ref1": {
+      "recovered": 13,
+      "extra_over_greedy": 1,
+      "rescue_retention": 0.16666666666666666,
+      "continuations_total": 162,
+      "continuations_per_pair": 6.75,
+      "universe_candidates_seen": 467,
+      "fraction_of_universe_evaluated": 0.3468950749464668,
+      "lost_versus_greedy": 0,
+      "mean_best_similarity": 0.8667912961023155,
+      "overrides": 2
+    },
+    "ref2": {
+      "recovered": 13,
+      "extra_over_greedy": 1,
+      "rescue_retention": 0.16666666666666666,
+      "continuations_total": 243,
+      "continuations_per_pair": 10.125,
+      "universe_candidates_seen": 467,
+      "fraction_of_universe_evaluated": 0.5203426124197003,
+      "lost_versus_greedy": 0,
+      "mean_best_similarity": 0.867680343043994,
+      "overrides": 3
+    },
+    "hphi1": {
+      "recovered": 17,
+      "extra_over_greedy": 5,
+      "rescue_retention": 0.8333333333333334,
+      "continuations_total": 152,
+      "continuations_per_pair": 6.333333333333333,
+      "universe_candidates_seen": 432,
+      "fraction_of_universe_evaluated": 0.35185185185185186,
+      "lost_versus_greedy": 0,
+      "mean_best_similarity": 0.9239873809846637,
+      "overrides": 7
+    },
+    "hphi2": {
+      "recovered": 17,
+      "extra_over_greedy": 5,
+      "rescue_retention": 0.8333333333333334,
+      "continuations_total": 225,
+      "continuations_per_pair": 9.375,
+      "universe_candidates_seen": 427,
+      "fraction_of_universe_evaluated": 0.5269320843091335,
+      "lost_versus_greedy": 0,
+      "mean_best_similarity": 0.9256531092128918,
+      "overrides": 9
+    }
+  },
+  "per_pair": [
+    {
+      "index": 7,
+      "source": "CCCCC(O)(CC(=O)OC)C(=O)OC1C(OC)=CC23CCCN2CCc2cc4c(cc2C13)OCO4",
+      "target": "CCCCCCC(O)(CC(=O)OC)C(=O)OC1C(OC)=CC23CCCN2CCc2cc4c(cc2C13)OCO4",
+      "verified_steps": 4,
+      "arms": {
+        "greedy": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "full": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 10,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "sim1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "sim2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "ref1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "ref2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "hphi1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "hphi2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        }
+      },
+      "kernel_calls": 9,
+      "seconds": 447.7
+    },
+    {
+      "index": 11,
+      "source": "CC(=O)N1CCOC(c2c(C(=O)O)sc3ccccc23)C1",
+      "target": "CC(=O)N1CCOC(c2c(C=O)sc3ccccc23)C1",
+      "verified_steps": 5,
+      "arms": {
+        "greedy": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "full": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "sim1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 2,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "sim2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 3,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "ref1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 2,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "ref2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 3,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "hphi1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 2,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "hphi2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 3,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        }
+      },
+      "kernel_calls": 6,
+      "seconds": 212.9
+    },
+    {
+      "index": 10,
+      "source": "O=C(C=Cc1ccc(O)c(O)c1)N1CCCCC1",
+      "target": "O=C(C=Cc1ccc(OC(F)(F)F)cc1)N1CCCCC1",
+      "verified_steps": 5,
+      "arms": {
+        "greedy": {
+          "recovered": false,
+          "best": 0.725,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 29
+        },
+        "full": {
+          "recovered": false,
+          "best": 0.725,
+          "continuation_evaluations": 29,
+          "overrides": 0,
+          "universe_candidates_seen": 29
+        },
+        "sim1": {
+          "recovered": false,
+          "best": 0.725,
+          "continuation_evaluations": 10,
+          "overrides": 0,
+          "universe_candidates_seen": 29
+        },
+        "sim2": {
+          "recovered": false,
+          "best": 0.725,
+          "continuation_evaluations": 15,
+          "overrides": 0,
+          "universe_candidates_seen": 29
+        },
+        "ref1": {
+          "recovered": false,
+          "best": 0.725,
+          "continuation_evaluations": 10,
+          "overrides": 0,
+          "universe_candidates_seen": 29
+        },
+        "ref2": {
+          "recovered": false,
+          "best": 0.725,
+          "continuation_evaluations": 15,
+          "overrides": 0,
+          "universe_candidates_seen": 29
+        },
+        "hphi1": {
+          "recovered": false,
+          "best": 0.725,
+          "continuation_evaluations": 10,
+          "overrides": 0,
+          "universe_candidates_seen": 29
+        },
+        "hphi2": {
+          "recovered": false,
+          "best": 0.725,
+          "continuation_evaluations": 15,
+          "overrides": 0,
+          "universe_candidates_seen": 29
+        }
+      },
+      "kernel_calls": 15,
+      "seconds": 222.6
+    },
+    {
+      "index": 6,
+      "source": "Cc1csc2nc(Cc3ccc(C(=O)c4ccc(CO)cc4)cc3)oc(=O)c12",
+      "target": "Cc1csc2nc(Cc3ccc(C(=O)c4cccc(NO)c4)cc3)oc(=O)c12",
+      "verified_steps": 4,
+      "arms": {
+        "greedy": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "full": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 12,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "sim1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "sim2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "ref1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "ref2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "hphi1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "hphi2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        }
+      },
+      "kernel_calls": 20,
+      "seconds": 493.4
+    },
+    {
+      "index": 21,
+      "source": "CCOC(=O)C(Cc1ccccc1)NC(=O)C=Cc1ccccc1",
+      "target": "O=C(C=Cc1ccccc1)NCCc1ccc(O)cc1",
+      "verified_steps": 6,
+      "arms": {
+        "greedy": {
+          "recovered": false,
+          "best": 0.7894736842105263,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 33
+        },
+        "full": {
+          "recovered": false,
+          "best": 0.8108108108108109,
+          "continuation_evaluations": 34,
+          "overrides": 1,
+          "universe_candidates_seen": 34
+        },
+        "sim1": {
+          "recovered": false,
+          "best": 0.8108108108108109,
+          "continuation_evaluations": 12,
+          "overrides": 1,
+          "universe_candidates_seen": 34
+        },
+        "sim2": {
+          "recovered": false,
+          "best": 0.8108108108108109,
+          "continuation_evaluations": 18,
+          "overrides": 1,
+          "universe_candidates_seen": 34
+        },
+        "ref1": {
+          "recovered": false,
+          "best": 0.7894736842105263,
+          "continuation_evaluations": 12,
+          "overrides": 0,
+          "universe_candidates_seen": 33
+        },
+        "ref2": {
+          "recovered": false,
+          "best": 0.8108108108108109,
+          "continuation_evaluations": 18,
+          "overrides": 1,
+          "universe_candidates_seen": 33
+        },
+        "hphi1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 12,
+          "overrides": 1,
+          "universe_candidates_seen": 32
+        },
+        "hphi2": {
+          "recovered": false,
+          "best": 0.8108108108108109,
+          "continuation_evaluations": 18,
+          "overrides": 1,
+          "universe_candidates_seen": 34
+        }
+      },
+      "kernel_calls": 58,
+      "seconds": 1277.7
+    },
+    {
+      "index": 1,
+      "source": "O=C(NO)c1sc2ccccc2c1Cl",
+      "target": "O=C(NO)c1cc2cc([N+](=O)[O-])ccc2s1",
+      "verified_steps": 4,
+      "arms": {
+        "greedy": {
+          "recovered": false,
+          "best": 0.6486486486486487,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 23
+        },
+        "full": {
+          "recovered": false,
+          "best": 0.6486486486486487,
+          "continuation_evaluations": 23,
+          "overrides": 0,
+          "universe_candidates_seen": 23
+        },
+        "sim1": {
+          "recovered": false,
+          "best": 0.6486486486486487,
+          "continuation_evaluations": 8,
+          "overrides": 0,
+          "universe_candidates_seen": 23
+        },
+        "sim2": {
+          "recovered": false,
+          "best": 0.6486486486486487,
+          "continuation_evaluations": 12,
+          "overrides": 0,
+          "universe_candidates_seen": 23
+        },
+        "ref1": {
+          "recovered": false,
+          "best": 0.6486486486486487,
+          "continuation_evaluations": 8,
+          "overrides": 0,
+          "universe_candidates_seen": 23
+        },
+        "ref2": {
+          "recovered": false,
+          "best": 0.6486486486486487,
+          "continuation_evaluations": 12,
+          "overrides": 0,
+          "universe_candidates_seen": 23
+        },
+        "hphi1": {
+          "recovered": false,
+          "best": 0.6486486486486487,
+          "continuation_evaluations": 8,
+          "overrides": 0,
+          "universe_candidates_seen": 23
+        },
+        "hphi2": {
+          "recovered": false,
+          "best": 0.6486486486486487,
+          "continuation_evaluations": 12,
+          "overrides": 0,
+          "universe_candidates_seen": 23
+        }
+      },
+      "kernel_calls": 13,
+      "seconds": 146.7
+    },
+    {
+      "index": 17,
+      "source": "Oc1cc(O)nc(S)n1",
+      "target": "C#CCCSc1nc(O)cc(O)n1",
+      "verified_steps": 6,
+      "arms": {
+        "greedy": {
+          "recovered": false,
+          "best": 0.5666666666666667,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 35
+        },
+        "full": {
+          "recovered": false,
+          "best": 0.6666666666666666,
+          "continuation_evaluations": 35,
+          "overrides": 1,
+          "universe_candidates_seen": 35
+        },
+        "sim1": {
+          "recovered": false,
+          "best": 0.5666666666666667,
+          "continuation_evaluations": 12,
+          "overrides": 0,
+          "universe_candidates_seen": 35
+        },
+        "sim2": {
+          "recovered": false,
+          "best": 0.5666666666666667,
+          "continuation_evaluations": 18,
+          "overrides": 0,
+          "universe_candidates_seen": 35
+        },
+        "ref1": {
+          "recovered": false,
+          "best": 0.5666666666666667,
+          "continuation_evaluations": 12,
+          "overrides": 0,
+          "universe_candidates_seen": 35
+        },
+        "ref2": {
+          "recovered": false,
+          "best": 0.5666666666666667,
+          "continuation_evaluations": 18,
+          "overrides": 0,
+          "universe_candidates_seen": 35
+        },
+        "hphi1": {
+          "recovered": false,
+          "best": 0.6666666666666666,
+          "continuation_evaluations": 12,
+          "overrides": 1,
+          "universe_candidates_seen": 35
+        },
+        "hphi2": {
+          "recovered": false,
+          "best": 0.6666666666666666,
+          "continuation_evaluations": 18,
+          "overrides": 1,
+          "universe_candidates_seen": 35
+        }
+      },
+      "kernel_calls": 34,
+      "seconds": 190.8
+    },
+    {
+      "index": 16,
+      "source": "NC(CO)C(=O)O",
+      "target": "N=C(N)NNCC(=O)O",
+      "verified_steps": 6,
+      "arms": {
+        "greedy": {
+          "recovered": false,
+          "best": 0.5217391304347826,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 36
+        },
+        "full": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 36,
+          "overrides": 1,
+          "universe_candidates_seen": 36
+        },
+        "sim1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 10,
+          "overrides": 2,
+          "universe_candidates_seen": 30
+        },
+        "sim2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 15,
+          "overrides": 2,
+          "universe_candidates_seen": 30
+        },
+        "ref1": {
+          "recovered": false,
+          "best": 0.5217391304347826,
+          "continuation_evaluations": 12,
+          "overrides": 0,
+          "universe_candidates_seen": 36
+        },
+        "ref2": {
+          "recovered": false,
+          "best": 0.5217391304347826,
+          "continuation_evaluations": 18,
+          "overrides": 0,
+          "universe_candidates_seen": 36
+        },
+        "hphi1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 10,
+          "overrides": 2,
+          "universe_candidates_seen": 30
+        },
+        "hphi2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 15,
+          "overrides": 2,
+          "universe_candidates_seen": 30
+        }
+      },
+      "kernel_calls": 74,
+      "seconds": 188.3
+    },
+    {
+      "index": 0,
+      "source": "CCS(=O)(=O)O",
+      "target": "O=S(=O)(O)CCNCl",
+      "verified_steps": 4,
+      "arms": {
+        "greedy": {
+          "recovered": false,
+          "best": 0.5238095238095238,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 23
+        },
+        "full": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 17,
+          "overrides": 1,
+          "universe_candidates_seen": 17
+        },
+        "sim1": {
+          "recovered": false,
+          "best": 0.5238095238095238,
+          "continuation_evaluations": 8,
+          "overrides": 0,
+          "universe_candidates_seen": 23
+        },
+        "sim2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 9,
+          "overrides": 1,
+          "universe_candidates_seen": 16
+        },
+        "ref1": {
+          "recovered": false,
+          "best": 0.5238095238095238,
+          "continuation_evaluations": 8,
+          "overrides": 0,
+          "universe_candidates_seen": 23
+        },
+        "ref2": {
+          "recovered": false,
+          "best": 0.5238095238095238,
+          "continuation_evaluations": 12,
+          "overrides": 0,
+          "universe_candidates_seen": 23
+        },
+        "hphi1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 1,
+          "universe_candidates_seen": 16
+        },
+        "hphi2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 9,
+          "overrides": 1,
+          "universe_candidates_seen": 16
+        }
+      },
+      "kernel_calls": 18,
+      "seconds": 104.6
+    },
+    {
+      "index": 20,
+      "source": "CCOC(=O)N=c1sc(C)cn1-c1cccc(C(F)(F)F)c1",
+      "target": "Cc1cn(-c2cccc(C(F)(F)F)c2)c(=NC(=O)N(C)C)s1",
+      "verified_steps": 6,
+      "arms": {
+        "greedy": {
+          "recovered": false,
+          "best": 0.7708333333333334,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 36
+        },
+        "full": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 17,
+          "overrides": 1,
+          "universe_candidates_seen": 17
+        },
+        "sim1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 1,
+          "universe_candidates_seen": 18
+        },
+        "sim2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 9,
+          "overrides": 1,
+          "universe_candidates_seen": 18
+        },
+        "ref1": {
+          "recovered": false,
+          "best": 0.7708333333333334,
+          "continuation_evaluations": 12,
+          "overrides": 0,
+          "universe_candidates_seen": 36
+        },
+        "ref2": {
+          "recovered": false,
+          "best": 0.7708333333333334,
+          "continuation_evaluations": 18,
+          "overrides": 0,
+          "universe_candidates_seen": 36
+        },
+        "hphi1": {
+          "recovered": false,
+          "best": 0.7708333333333334,
+          "continuation_evaluations": 12,
+          "overrides": 0,
+          "universe_candidates_seen": 36
+        },
+        "hphi2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 9,
+          "overrides": 1,
+          "universe_candidates_seen": 18
+        }
+      },
+      "kernel_calls": 42,
+      "seconds": 471.5
+    },
+    {
+      "index": 23,
+      "source": "CC(=O)Nc1ccc(C(=O)NCc2noc(-c3c4ccccc4nn3CCn3ccnc3)n2)cc1",
+      "target": "COc1ccccc1C(=O)NCc1noc(-c2c3ccccc3nn2CCn2ccnc2)n1",
+      "verified_steps": 6,
+      "arms": {
+        "greedy": {
+          "recovered": false,
+          "best": 0.855072463768116,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 36
+        },
+        "full": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 23,
+          "overrides": 1,
+          "universe_candidates_seen": 23
+        },
+        "sim1": {
+          "recovered": false,
+          "best": 0.8970588235294118,
+          "continuation_evaluations": 12,
+          "overrides": 1,
+          "universe_candidates_seen": 35
+        },
+        "sim2": {
+          "recovered": false,
+          "best": 0.8970588235294118,
+          "continuation_evaluations": 18,
+          "overrides": 1,
+          "universe_candidates_seen": 35
+        },
+        "ref1": {
+          "recovered": false,
+          "best": 0.855072463768116,
+          "continuation_evaluations": 12,
+          "overrides": 0,
+          "universe_candidates_seen": 36
+        },
+        "ref2": {
+          "recovered": false,
+          "best": 0.855072463768116,
+          "continuation_evaluations": 18,
+          "overrides": 0,
+          "universe_candidates_seen": 36
+        },
+        "hphi1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 8,
+          "overrides": 1,
+          "universe_candidates_seen": 23
+        },
+        "hphi2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 18,
+          "overrides": 2,
+          "universe_candidates_seen": 34
+        }
+      },
+      "kernel_calls": 57,
+      "seconds": 1554.1
+    },
+    {
+      "index": 19,
+      "source": "Cc1cc(C)c2c(N)c(-c3nnc(S)n3CC=[SH4])sc2n1",
+      "target": "C=C=Cn1c(S)nnc1-c1sc2nc(C)cc(C)c2c1N",
+      "verified_steps": 6,
+      "arms": {
+        "greedy": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "full": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 12,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "sim1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "sim2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "ref1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "ref2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "hphi1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "hphi2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        }
+      },
+      "kernel_calls": 15,
+      "seconds": 250.6
+    },
+    {
+      "index": 15,
+      "source": "C=C(C)C1CCC2(C(=O)n3ccnc3)CCC3(C)C(CCC4C5(C)C=C(C#N)C(=O)C(C)(C)C5CCC43C)C12",
+      "target": "CCC1CCC2(C(=O)n3ccnc3)CCC3(C)C(CCC4C5(C)C=C(C#N)C(=O)C(C)(C)C5CCC43C)C12",
+      "verified_steps": 5,
+      "arms": {
+        "greedy": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "full": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "sim1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 2,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "sim2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 3,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "ref1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 2,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "ref2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 3,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "hphi1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 2,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "hphi2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 3,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        }
+      },
+      "kernel_calls": 7,
+      "seconds": 438.5
+    },
+    {
+      "index": 3,
+      "source": "NCCCNc1nc(-c2ccncc2)cc2cnccc12",
+      "target": "CCNc1nc(-c2ccncc2)cc2cnccc12",
+      "verified_steps": 4,
+      "arms": {
+        "greedy": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "full": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 10,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "sim1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "sim2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "ref1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "ref2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "hphi1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "hphi2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        }
+      },
+      "kernel_calls": 13,
+      "seconds": 257.3
+    },
+    {
+      "index": 2,
+      "source": "CCCCN(CCC)C1CCc2ccccc2C1",
+      "target": "CCCN(CC)C1CCc2ccccc2C1",
+      "verified_steps": 4,
+      "arms": {
+        "greedy": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "full": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 12,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "sim1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "sim2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "ref1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "ref2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "hphi1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        },
+        "hphi2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 12
+        }
+      },
+      "kernel_calls": 10,
+      "seconds": 230.3
+    },
+    {
+      "index": 14,
+      "source": "CCN1CCN(c2ccc(-c3cc4ncn(C)c(=O)c4c(NC(C)C)n3)cc2)CC1",
+      "target": "CC(C)Nc1nc(-c2ccc(N3CCN(C(C)C)CC3)cc2)cc2ncn(C)c(=O)c12",
+      "verified_steps": 5,
+      "arms": {
+        "greedy": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "full": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "sim1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 2,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "sim2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 3,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "ref1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 2,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "ref2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 3,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "hphi1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 2,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "hphi2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 3,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        }
+      },
+      "kernel_calls": 8,
+      "seconds": 387.0
+    },
+    {
+      "index": 18,
+      "source": "CC(O)N1CCN(c2ncc(C(=O)NO)s2)CC1",
+      "target": "CC(=O)C1CN(c2ncc(C(=O)NO)s2)CCN1",
+      "verified_steps": 6,
+      "arms": {
+        "greedy": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "full": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 10,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "sim1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "sim2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "ref1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "ref2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "hphi1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        },
+        "hphi2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 10
+        }
+      },
+      "kernel_calls": 18,
+      "seconds": 238.3
+    },
+    {
+      "index": 22,
+      "source": "NC1(Cc2ccccc2OC(F)(F)F)CCN(c2ncnc3[nH]ccc23)CC1",
+      "target": "NC1(Cc2ccc(Cl)cc2)CCN(c2ncnc3[nH]ccc23)CC1",
+      "verified_steps": 6,
+      "arms": {
+        "greedy": {
+          "recovered": false,
+          "best": 0.7884615384615384,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 33
+        },
+        "full": {
+          "recovered": false,
+          "best": 0.803921568627451,
+          "continuation_evaluations": 35,
+          "overrides": 1,
+          "universe_candidates_seen": 35
+        },
+        "sim1": {
+          "recovered": false,
+          "best": 0.7884615384615384,
+          "continuation_evaluations": 12,
+          "overrides": 0,
+          "universe_candidates_seen": 33
+        },
+        "sim2": {
+          "recovered": false,
+          "best": 0.7884615384615384,
+          "continuation_evaluations": 18,
+          "overrides": 0,
+          "universe_candidates_seen": 33
+        },
+        "ref1": {
+          "recovered": false,
+          "best": 0.803921568627451,
+          "continuation_evaluations": 12,
+          "overrides": 1,
+          "universe_candidates_seen": 35
+        },
+        "ref2": {
+          "recovered": false,
+          "best": 0.803921568627451,
+          "continuation_evaluations": 18,
+          "overrides": 1,
+          "universe_candidates_seen": 35
+        },
+        "hphi1": {
+          "recovered": false,
+          "best": 0.7884615384615384,
+          "continuation_evaluations": 12,
+          "overrides": 0,
+          "universe_candidates_seen": 33
+        },
+        "hphi2": {
+          "recovered": false,
+          "best": 0.7884615384615384,
+          "continuation_evaluations": 18,
+          "overrides": 0,
+          "universe_candidates_seen": 33
+        }
+      },
+      "kernel_calls": 43,
+      "seconds": 1083.6
+    },
+    {
+      "index": 13,
+      "source": "CCOC(=O)COc1ccc(C(=O)c2ccc(O)c(CN)c2)c(Cl)c1Cl",
+      "target": "CCOC(=O)COc1ccc(C(=O)c2ccc(O)c(C(N)=O)c2)c(Cl)c1Cl",
+      "verified_steps": 5,
+      "arms": {
+        "greedy": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "full": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "sim1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 2,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "sim2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 3,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "ref1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 2,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "ref2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 3,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "hphi1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 2,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "hphi2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 3,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        }
+      },
+      "kernel_calls": 9,
+      "seconds": 333.0
+    },
+    {
+      "index": 5,
+      "source": "CCOc1ccc(CNC(=O)CCc2cn(C)c3ccccc23)cc1",
+      "target": "Cn1cc(CCC(=O)NCc2ccc(Cl)cc2)c2ccccc21",
+      "verified_steps": 4,
+      "arms": {
+        "greedy": {
+          "recovered": false,
+          "best": 0.8260869565217391,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 20
+        },
+        "full": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 15,
+          "overrides": 1,
+          "universe_candidates_seen": 15
+        },
+        "sim1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 1,
+          "universe_candidates_seen": 15
+        },
+        "sim2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 9,
+          "overrides": 1,
+          "universe_candidates_seen": 15
+        },
+        "ref1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 1,
+          "universe_candidates_seen": 15
+        },
+        "ref2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 9,
+          "overrides": 1,
+          "universe_candidates_seen": 15
+        },
+        "hphi1": {
+          "recovered": false,
+          "best": 0.8260869565217391,
+          "continuation_evaluations": 8,
+          "overrides": 0,
+          "universe_candidates_seen": 20
+        },
+        "hphi2": {
+          "recovered": false,
+          "best": 0.8260869565217391,
+          "continuation_evaluations": 12,
+          "overrides": 0,
+          "universe_candidates_seen": 20
+        }
+      },
+      "kernel_calls": 20,
+      "seconds": 571.6
+    },
+    {
+      "index": 9,
+      "source": "FC(F)(F)C(F)(F)C(F)(F)F",
+      "target": "FC(F)(F)C(F)(F)C(F)(F)C(F)(F)F",
+      "verified_steps": 5,
+      "arms": {
+        "greedy": {
+          "recovered": false,
+          "best": 0.75,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 30
+        },
+        "full": {
+          "recovered": false,
+          "best": 0.75,
+          "continuation_evaluations": 30,
+          "overrides": 0,
+          "universe_candidates_seen": 30
+        },
+        "sim1": {
+          "recovered": false,
+          "best": 0.75,
+          "continuation_evaluations": 10,
+          "overrides": 0,
+          "universe_candidates_seen": 30
+        },
+        "sim2": {
+          "recovered": false,
+          "best": 0.75,
+          "continuation_evaluations": 15,
+          "overrides": 0,
+          "universe_candidates_seen": 30
+        },
+        "ref1": {
+          "recovered": false,
+          "best": 0.75,
+          "continuation_evaluations": 10,
+          "overrides": 0,
+          "universe_candidates_seen": 30
+        },
+        "ref2": {
+          "recovered": false,
+          "best": 0.75,
+          "continuation_evaluations": 15,
+          "overrides": 0,
+          "universe_candidates_seen": 30
+        },
+        "hphi1": {
+          "recovered": false,
+          "best": 0.75,
+          "continuation_evaluations": 10,
+          "overrides": 0,
+          "universe_candidates_seen": 30
+        },
+        "hphi2": {
+          "recovered": false,
+          "best": 0.75,
+          "continuation_evaluations": 15,
+          "overrides": 0,
+          "universe_candidates_seen": 30
+        }
+      },
+      "kernel_calls": 11,
+      "seconds": 147.5
+    },
+    {
+      "index": 8,
+      "source": "CC(C)CCON=O",
+      "target": "CCC(C)(C)OC",
+      "verified_steps": 5,
+      "arms": {
+        "greedy": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 18
+        },
+        "full": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 18,
+          "overrides": 0,
+          "universe_candidates_seen": 18
+        },
+        "sim1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 18
+        },
+        "sim2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 9,
+          "overrides": 0,
+          "universe_candidates_seen": 18
+        },
+        "ref1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 18
+        },
+        "ref2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 9,
+          "overrides": 0,
+          "universe_candidates_seen": 18
+        },
+        "hphi1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 18
+        },
+        "hphi2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 9,
+          "overrides": 0,
+          "universe_candidates_seen": 18
+        }
+      },
+      "kernel_calls": 28,
+      "seconds": 182.9
+    },
+    {
+      "index": 4,
+      "source": "CCCCOc1ccc(C=C2C(=O)Nc3ccc(Cl)cc32)cc1",
+      "target": "CCOc1ccc(C=C2C(=O)Nc3ccc(Cl)cc32)cc1",
+      "verified_steps": 4,
+      "arms": {
+        "greedy": {
+          "recovered": false,
+          "best": 0.8478260869565217,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 22
+        },
+        "full": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 11,
+          "overrides": 1,
+          "universe_candidates_seen": 11
+        },
+        "sim1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 1,
+          "universe_candidates_seen": 11
+        },
+        "sim2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 1,
+          "universe_candidates_seen": 11
+        },
+        "ref1": {
+          "recovered": false,
+          "best": 0.8478260869565217,
+          "continuation_evaluations": 8,
+          "overrides": 0,
+          "universe_candidates_seen": 22
+        },
+        "ref2": {
+          "recovered": false,
+          "best": 0.8478260869565217,
+          "continuation_evaluations": 12,
+          "overrides": 0,
+          "universe_candidates_seen": 22
+        },
+        "hphi1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 4,
+          "overrides": 1,
+          "universe_candidates_seen": 11
+        },
+        "hphi2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 1,
+          "universe_candidates_seen": 11
+        }
+      },
+      "kernel_calls": 12,
+      "seconds": 269.4
+    },
+    {
+      "index": 12,
+      "source": "CC(=O)N(CCC(c1ccco1)C(C)C)Cc1ccc(Cl)cc1",
+      "target": "CC(C)C(CCN(C=O)Cc1ccc(Cl)cc1)c1ccco1",
+      "verified_steps": 5,
+      "arms": {
+        "greedy": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 0,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "full": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 6,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "sim1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 2,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "sim2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 3,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "ref1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 2,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "ref2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 3,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "hphi1": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 2,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        },
+        "hphi2": {
+          "recovered": true,
+          "best": 1.0,
+          "continuation_evaluations": 3,
+          "overrides": 0,
+          "universe_candidates_seen": 6
+        }
+      },
+      "kernel_calls": 6,
+      "seconds": 198.0
+    }
+  ],
+  "paired_tests": {
+    "hphi1_vs_sim1": {
+      "a_only": 3,
+      "b_only": 2,
+      "discordant": 5,
+      "exact_p_one_sided": 0.5
+    },
+    "hphi2_vs_sim2": {
+      "a_only": 1,
+      "b_only": 1,
+      "discordant": 2,
+      "exact_p_one_sided": 0.75
+    },
+    "hphi1_vs_ref1": {
+      "a_only": 5,
+      "b_only": 1,
+      "discordant": 6,
+      "exact_p_one_sided": 0.1094
+    },
+    "full_vs_hphi1": {
+      "a_only": 2,
+      "b_only": 1,
+      "discordant": 3,
+      "exact_p_one_sided": 0.5
+    },
+    "full_vs_sim2": {
+      "a_only": 1,
+      "b_only": 0,
+      "discordant": 1,
+      "exact_p_one_sided": 0.5
+    }
+  },
+  "verdict": "THE HYBRID WORKS AND THE PRIORITISER DOES NOT MATTER. hphi1 (17/24, 83% of full rollout gain, 35% of continuations) and sim2 (17/24, 52%) are statistically INDISTINGUISHABLE from full rollout 18/24 (p=0.50 both). h_phi vs similarity is noise: 17 vs 16 at K=1 is 3 discordant one way and 2 the other (p=0.50), and 1-1 at K=2. Per the preregistered reading, exact-target similarity is a privileged cheap proposal heuristic for THIS goal; do not tune h_phi to beat it here. R_theta probability is the weakest prioritiser (13/24; 5-1 discordant vs hphi1, p=0.109, suggestive not established) -- edit plausibility is not edit usefulness toward a goal. THE SAFETY PROPERTY HELD FOR EVERY ARM: zero greedy losses, by construction, which direct override could not promise. NOTE pair 21 is recovered ONLY by hphi1, not by full rollout: full rollout is greedy-improvement per step, not globally optimal, so the guarantee is never-worse-than-greedy, not matches-full-rollout."
+}
