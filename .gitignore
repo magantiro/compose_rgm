@@ -47,3 +47,8 @@ scripts/presentation/__pycache__/
 .claude/settings.local.json
 diagnostics/.v2_scan_cache.pkl
 diagnostics/.v2_successor_cache.pkl
+
+# Frozen h_phi controller weights: 5.1 MB total, and the manifest records
+# their sha256, so the blanket *.pt rule above would leave a frozen model
+# unreproducible. Tracked deliberately.
+!artifacts/h_phi_frozen_v1/*.pt
