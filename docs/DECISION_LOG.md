@@ -102,6 +102,42 @@ steps) and any mechanism story — every pair is a delete-insert fragment swap.
 
 ---
 
+## The amortisation gap — why a learned value is not a cheap planner
+
+Explicit full-horizon rollout rescues half of greedy's failures (18/24 vs
+12/24, six rescues, **zero** losses, 5.2x cost). A learned `h_phi` trained on
+14,110 teacher labels from that exact teacher **does not retain the benefit**.
+
+| data | rescue ranking | harmful override | contrastive |
+|---|---|---|---|
+| 2k | 30.5% ± 7.8% | 21.5% ± 1.2% | 52.3% |
+| 5k | 35.2% ± 6.9% | 17.2% ± 1.3% | 59.3% |
+| 10k | 42.2% ± 6.0% | 13.8% ± 2.1% | 65.9% |
+| all | 44.5% ± 6.9% | 16.0% ± 2.1% | 63.6% |
+
+Baselines — rescue: greedy 0% by construction, random 20.8%,
+second-highest-similarity 33.3%. Harmful: greedy 0%, random 27.0%.
+
+`h_phi` learns real signal: every metric beats its baseline and improves
+monotonically with data. But **no override threshold yields net benefit** —
+−10.2 states at margin 0, −2.2 at 1.5, −0.2 at 4.0, and the sole positive
+(+0.5 at margin 6.0) is where it overrides 9 of ~415 states and has stopped
+acting.
+
+**The structural cause, which generalises beyond this model.** States where
+greedy is already safe (158) outnumber states needing rescue (36) by 4:1, so
+**precision dominates recall** and a learned value must be very precise before
+overriding pays. Explicit rollout never faced this: policy improvement
+guaranteed it could never harm. That guarantee is doing far more work than
+"slower but equivalent" suggests.
+
+**Not saturated.** Rescue ranking still climbs at the largest subset, so
+data/capacity limitation and genuine unlearnability are both consistent with
+this evidence. This experiment cannot separate them, and the writeup should not
+imply otherwise.
+
+---
+
 ## Structural limit — one-cut MMP cannot produce diverse multi-step panels
 
 Measured while building the fresh evaluation panel, and the reason the
