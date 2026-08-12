@@ -61,9 +61,21 @@ app = modal.App("compose-v4-h-phi-encode-states")
 
 RUN_ROOT = "/artifacts/editing_v2/r_theta_run"
 TIME_POINT = 0.5
-#: Molecules per encoder forward pass. Padding is to the batch maximum, so
-#: grouping by size keeps wasted slots low.
+#: Molecules per encoder forward pass.
 BATCH = 64
+#: FIXED canonical slot width for every molecule, training and inference alike.
+#:
+#: The embedding is NOT padding-invariant: `structural` carries n_real/n_slots,
+#: so slot count enters the features directly. Measured on one molecule,
+#: |e(n) - e(n+4)| = 1.2e-2 and |e(n) - e(n+12)| = 2.4e-2, against 4.7e-2 for a
+#: large change in t -- comparable, not negligible.
+#:
+#: Padding each batch to its own maximum would therefore give the same molecule
+#: different features depending on batch composition, and inference (padding to
+#: a pair's own slot count) would differ again. h_phi must see one width
+#: everywhere. 48 covers the largest molecule in the data (42 heavy atoms) with
+#: margin.
+CANONICAL_SLOTS = 48
 
 
 @app.function(
@@ -128,14 +140,18 @@ def encode(shard: dict[str, Any]) -> dict[str, Any]:
     print(f"  parsed {len(graphs):,}/{len(keys):,} ({len(unparsable)} unparsable)",
           flush=True)
 
-    # Group by atom count so a batch pads to a similar width; padding to the
-    # batch maximum otherwise wastes most of the compute on the widest molecule.
-    ordered = sorted(graphs, key=lambda k: graphs[k].n_atoms)
+    oversized = [k for k, g in graphs.items() if g.n_atoms > CANONICAL_SLOTS]
+    if oversized:
+        raise RuntimeError(
+            f"{len(oversized)} molecules exceed CANONICAL_SLOTS={CANONICAL_SLOTS}; "
+            f"raise it rather than padding them inconsistently")
+    ordered = sorted(graphs)
     embeddings: dict[str, list[float]] = {}
     for start in range(0, len(ordered), BATCH):
         chunk = ordered[start:start + BATCH]
-        width = max(graphs[k].n_atoms for k in chunk)
-        states = tuple(pad_molecular_graph(graphs[k], width) for k in chunk)
+        # One width for every molecule everywhere -- see CANONICAL_SLOTS.
+        states = tuple(pad_molecular_graph(graphs[k], CANONICAL_SLOTS)
+                       for k in chunk)
         batch = prepare_factorized_mark_batch(
             states, tuple(float(TIME_POINT) for _ in chunk),
             tuple(None for _ in chunk), tuple(None for _ in chunk),
@@ -156,6 +172,8 @@ def encode(shard: dict[str, Any]) -> dict[str, Any]:
     np_path = out / f"shard-{shard['index']:03d}.npz"
     np.savez_compressed(
         np_path,
+        canonical_slots=np.array([CANONICAL_SLOTS]),
+        time_point=np.array([TIME_POINT]),
         keys=np.array(sorted(embeddings), dtype=object),
         vectors=np.array([embeddings[k] for k in sorted(embeddings)],
                          dtype=np.float32))
