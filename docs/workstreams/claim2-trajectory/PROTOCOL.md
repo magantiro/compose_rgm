@@ -338,3 +338,45 @@ trajectories cannot be silently truncated on exactly the sources that need the
 support most.
 
 Only the smoke is being requested.
+
+---
+
+## Operational contract for the eventual run
+
+Two failure modes the main lane hit today, folded in here so this lane cannot
+repeat them.
+
+**1. `modal run` uses a different interpreter, and it has no RDKit.** A
+`@app.local_entrypoint()` must therefore never import RDKit or do molecule
+work. This lane already has the right shape and it is now enforced by test:
+
+- panel selection is a normal `python3` script
+  (`scripts/claim2_select_trajectory_panel.py`) writing a committed artifact
+  under `diagnostics/`;
+- that artifact is mounted into the image with `add_local_file`;
+- the entrypoint only reads JSON and builds task dicts.
+
+`tests/test_claim2_rollout_resumability.py` asserts the entrypoint body and the
+module scope reference neither `rdkit` nor `compose_v4`. This is better than
+repairing the interpreter, because it makes the panel auditable and byte-identical
+across reruns rather than recomputed at launch.
+
+**2. Launch detached, and make a relaunch cheap.** Three independent layers,
+because the first two are not sufficient:
+
+- the server-side `drive()` fan-out stops `.map()` stalling when the client
+  goes away — but it does **not** keep the app alive if the client dies;
+- `modal run --detach` does, verified by `modal app list` showing
+  `ephemeral (detached)` — but even that did not save the main lane's run
+  through a client-side DNS failure *at launch*;
+- so every task commits its own shard to the volume as it completes, and
+  `drive()` skips sources whose committed shard matches the current task
+  identity. A relaunch after an outage costs only the sources that had not
+  finished.
+
+Reuse is **exact or not at all**. A shard is skipped only if its source,
+horizon, seed set, kernel budget, panel hash and frozen-family-law hash all
+match, and only if it did not end with an exhausted budget. Reusing a shard
+produced under a different panel or horizon would mix two measurements into one
+table with nothing downstream able to detect it, which is worse than
+recomputing. All eight rejection cases are unit-tested.

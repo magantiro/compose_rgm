@@ -181,6 +181,32 @@ def test_instrument_checks_surface_a_kernel_disagreement():
     assert checks["kernel_cross_check_disagreements"][0]["source"].endswith(".1")
 
 
+def test_enumeration_failures_are_surfaced_and_not_absorbed_into_dead_ends():
+    """A failed enumeration truncates a trajectory but is not a chemical dead end.
+
+    Silently counting it as one would inflate the early-dead-end rate of
+    whichever arm happened to walk into the unenumerable state.
+    """
+    shard = make_shard(0)
+    shard["enumeration_failures"] = {"CCOCCO": "ValueError: boom"}
+    shard["trajectories"][0]["stop_reason"] = "enumeration_failed"
+    shard["trajectories"][1]["stop_reason"] = "budget_exhausted"
+    checks = analysis.instrument_checks([shard])
+    assert checks["enumeration_failures"] == {"CCOCCO": "ValueError: boom"}
+    assert checks["trajectories_truncated_by_failure_or_budget"] == 2
+
+
+def test_instrument_checks_report_the_measured_cost_per_enumeration():
+    """The number every later cost estimate depends on must reach the artifact."""
+    shards = [make_shard(i) for i in range(3)]
+    for index, shard in enumerate(shards):
+        shard["seconds_per_kernel_call"] = 10.0 + index
+    checks = analysis.instrument_checks(shards)
+    assert checks["measured_seconds_per_kernel_call"]["median"] == pytest.approx(11.0)
+    assert checks["measured_seconds_per_kernel_call"]["min"] == pytest.approx(10.0)
+    assert checks["measured_seconds_per_kernel_call"]["max"] == pytest.approx(12.0)
+
+
 def test_instrument_checks_flag_a_degenerate_single_successor_state():
     """Three arms over a one-successor support are one process with three labels."""
     shard = make_shard(0)

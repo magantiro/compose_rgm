@@ -218,6 +218,18 @@
       "note": "Quoted so the size of the eventual ask is visible now. This lane does not run it and does not select its sources."
     }
   },
+  "operational_contract": {
+    "launch_command": "modal run --detach modal_apps/claim2_trajectory_characterization_app.py --sources 8 --seeds 2 --horizon 6 --kernel-budget 40",
+    "verify_detached": "modal app list must show 'ephemeral (detached)'",
+    "local_entrypoint_must_not_import_rdkit": "modal run uses a different interpreter without rdkit; panel selection is a normal python3 script writing a committed artifact under diagnostics/, mounted with add_local_file, and the entrypoint only reads JSON. Enforced by tests/test_claim2_rollout_resumability.py.",
+    "durability_layers": [
+      "server-side drive() fan-out so a client disconnect cannot stall .map()",
+      "modal run --detach so the app survives client death",
+      "per-source shard commit plus a resumable driver, because neither of the above survived a client-side DNS failure at launch in the main lane"
+    ],
+    "shard_reuse_rule": "exact or not at all: source, horizon, seed set, kernel budget, panel_sha256 and family_law_sha256 must all match and budget_exhausted must be false",
+    "shard_identity_fields": ["source", "horizon", "panel_sha256", "family_law_sha256"]
+  },
   "artifacts": {
     "transport_laws": "src/compose_v4/experiments/claim2_transport_laws.py",
     "metric_suite": "src/compose_v4/experiments/claim2_trajectory_metrics.py",
@@ -225,11 +237,14 @@
     "panel_selection": "scripts/claim2_select_trajectory_panel.py",
     "envelope_calibration": "scripts/claim2_calibrate_descriptor_envelope.py",
     "analysis": "scripts/analyse_claim2_trajectories.py",
+    "handoff_manifest_refresh": "scripts/claim2_refresh_handoff_manifest.py",
     "tests": [
       "tests/test_claim2_transport_laws.py",
       "tests/test_claim2_trajectory_metrics.py",
       "tests/test_claim2_trajectory_analysis.py",
-      "tests/test_claim2_trajectory_panel.py"
+      "tests/test_claim2_trajectory_panel.py",
+      "tests/test_claim2_handoff_manifest.py",
+      "tests/test_claim2_rollout_resumability.py"
     ]
   }
 }

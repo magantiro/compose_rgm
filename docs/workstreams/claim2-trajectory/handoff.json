@@ -1,0 +1,288 @@
+{
+  "schema": "compose.workstream.handoff",
+  "schema_version": 1,
+  "workstream": "B",
+  "name": "Claim 2 - what molecular transport did R_theta learn?",
+  "claim_id": 2,
+  "branch": "codex/compose-claim2-trajectory",
+  "base_commit": "04f1c46",
+  "implementation_commit": "e5636034bd0aceb30f6dbc1004920095f3404565",
+  "status": "DESIGN_ONLY",
+  "held_out_opened": false,
+  "held_out_gate": {
+    "mechanism": "argparse hard failure",
+    "script": "scripts/claim2_select_trajectory_panel.py",
+    "flag": "--i-am-authorized-to-open-the-matched-reserve",
+    "tested_by": "tests/test_claim2_trajectory_panel.py::test_reserve_pool_refuses_to_run_without_written_authorization",
+    "reserve_source_list_materialized": false
+  },
+  "modal_runs_launched": 0,
+  "gpu_used": false,
+  "frozen_inputs": [
+    {
+      "object": "process_v2_chemistry",
+      "path": "configs/editing_v2_process_v2_capability_cells.json",
+      "sha256": "069e0f5e528ebccc88eaf2529c9a606a5e3ea5c8804b820636327c6969c8efcb",
+      "process_identity_sha256": "0c938177a34819e6e828920c1f66e240c6eb251fe7c9ea6cfe6757829dceb2dd",
+      "verified": true
+    },
+    {
+      "object": "r_theta_decision_record",
+      "path": "diagnostics/editing_v2_r_theta_FROZEN.json",
+      "sha256": "30a468b9478777b9758cf7868fd748049c604cc505b23cf1daca018d1b7e5c41",
+      "run": "run_v2_01",
+      "selected_step": 12500,
+      "identity_sha256": "426ac15e7f4cc68c2b0208992dd230d2e283c6cc524092df3cb2d3c5898b3b9a",
+      "selected_model_state_sha256": "c977ee3fe0cfdcafa204a2add27f3feef59f5dfcf4f3384659d8902a9006167c",
+      "checkpoint_bytes_verified": false,
+      "checkpoint_bytes_verified_reason": "the checkpoint lives on the Modal volume and this lane launched nothing"
+    },
+    {
+      "object": "split_and_reserve_ids",
+      "path": "diagnostics/editing_v2_matched_validation_reserve_ids.json.gz",
+      "sha256": "ba9270faf8bea1a67ad103c6da887efeef257a66fcb9ca1c3faf088f770994a1",
+      "held_in_sources": 96094,
+      "reserve_sources": 10653,
+      "verified": true
+    },
+    {
+      "object": "empirical_family_sampling_law",
+      "path": "diagnostics/editing_v2_sampling_law_v2.json",
+      "sha256": "d6e0f3294ecd4e35c89ae5c807221f20b54e89e67d871db68df3d3012b22f191",
+      "declared_frozen_sha256": "b0cc66f168f1cf3e7a4b5bacfb1138059005251a10561d6961c3ea1c5dd7ac73",
+      "verified": true
+    },
+    {
+      "object": "baseline_definition_registry",
+      "path": "configs/comparator_registry_v3.json",
+      "sha256": "2281d19ad6f997fa82e627946f18b06b6d233d2e34081f3d926aaf36357d37a1",
+      "key": "frozen_definitions.state_independent_empirical_family_prior",
+      "verified": true
+    },
+    {
+      "object": "goal_or_oracle",
+      "path": null,
+      "note": "NONE. This lane has no objective, oracle or controller."
+    }
+  ],
+  "artifacts_created": [
+    {
+      "path": "configs/claim2_trajectory_protocol_v1.json",
+      "sha256": "50815d3883522ba4a2ab1f962ba581ad96d80fdbc550045f58dcda30097e757b",
+      "status": "DESIGN_ONLY",
+      "purpose": "machine-readable frozen protocol and cost model"
+    },
+    {
+      "path": "diagnostics/claim2_descriptor_envelope.json",
+      "sha256": "7290b0cf7f24630ad41af7d06c908294ad0d832d0dd243f98f4199fa5339bbe5",
+      "envelope_sha256": "fb369161b303a49cdf6f05611691e67a59bbfe4a9e8c5afcfbba22129f97694e",
+      "status": "DESIGN_ONLY",
+      "purpose": "fidelity axis, calibrated on 96094 held-in molecules before any trajectory",
+      "held_in_self_retention": 0.9639
+    },
+    {
+      "path": "diagnostics/claim2_trajectory_development_panel.json",
+      "sha256": "3842d769ab13f73afe4485d010a90802d7732bc124c8469c952d51e62ebe2c60",
+      "panel_sha256": "a4282229742eff2edc37f752410a75239d4410c266b1670af4d3552baab8cf9e",
+      "status": "SMOKE_HELD_IN",
+      "purpose": "36 held-in sources, 4 support bands x 3 size bands x 3"
+    },
+    {
+      "path": "src/compose_v4/experiments/claim2_transport_laws.py",
+      "sha256": "af64a6ca9981566bb1f1835609db3349413e7633a77137a1c7b3669114a8918f",
+      "status": "DESIGN_ONLY"
+    },
+    {
+      "path": "src/compose_v4/experiments/claim2_trajectory_metrics.py",
+      "sha256": "ca6dc267e07cdabcd6033d6104a05325d23b2f7408dc63752ab74a1539113dda",
+      "status": "DESIGN_ONLY"
+    },
+    {
+      "path": "modal_apps/claim2_trajectory_characterization_app.py",
+      "sha256": "fedc430903c9142be6215561d1e99e1a7087d3ef4290001b060fd9faaf2e685d",
+      "status": "DESIGN_ONLY"
+    },
+    {
+      "path": "scripts/claim2_select_trajectory_panel.py",
+      "sha256": "d418aa1f5e86b43d05660b1f6fedc1c9e96a3fc6a6e843685a803ddc6731b0e5",
+      "status": "DESIGN_ONLY"
+    },
+    {
+      "path": "scripts/claim2_calibrate_descriptor_envelope.py",
+      "sha256": "eb6d2913d4d253cd2d3c026bbdf811e63014df3591245be8de2496b32e039467",
+      "status": "DESIGN_ONLY"
+    },
+    {
+      "path": "scripts/claim2_refresh_handoff_manifest.py",
+      "sha256": "265538cd5f87b55e55518d86c4093e82fe2dfab6913136697d6c2feff1f8d97b",
+      "status": "DESIGN_ONLY",
+      "purpose": "recompute every digest in this manifest from the real files; --check gates a handoff without being able to paper over a stale hash"
+    },
+    {
+      "path": "scripts/analyse_claim2_trajectories.py",
+      "sha256": "7753e8b340c8fa58016311edd1d86c0d170d745acb3063419d2140dcddcaa118",
+      "status": "DESIGN_ONLY"
+    }
+  ],
+  "existing_files_modified": [],
+  "tests": {
+    "command": "PYTHONPATH=src python3 -m pytest tests/test_claim2_transport_laws.py tests/test_claim2_trajectory_metrics.py tests/test_claim2_trajectory_analysis.py tests/test_claim2_trajectory_panel.py tests/test_claim2_handoff_manifest.py tests/test_claim2_rollout_resumability.py -q",
+    "passed": 117,
+    "failed": 0,
+    "requires_modal": false,
+    "requires_checkpoint": false,
+    "runtime_seconds": 5
+  },
+  "results": {
+    "trajectories_generated": 0,
+    "note": "No result exists. The only measured quantities are calibration facts."
+  },
+  "gate_verdicts": [
+    {
+      "gate": "metric_suite_frozen_before_any_result",
+      "verdict": "PASS"
+    },
+    {
+      "gate": "falsifiability_gate_executable",
+      "verdict": "PASS"
+    },
+    {
+      "gate": "frontier_verdict_can_contradict_the_claim",
+      "verdict": "PASS"
+    },
+    {
+      "gate": "envelope_calibrated_before_trajectories",
+      "verdict": "PASS"
+    },
+    {
+      "gate": "held_out_boundary_intact",
+      "verdict": "PASS"
+    },
+    {
+      "gate": "baselines_reuse_frozen_definitions",
+      "verdict": "PASS"
+    },
+    {
+      "gate": "arms_differ_on_real_molecules",
+      "verdict": "INCONCLUSIVE",
+      "resolved_by": "the smoke"
+    },
+    {
+      "gate": "kernel_cross_check_on_real_states",
+      "verdict": "INCONCLUSIVE",
+      "resolved_by": "the smoke"
+    },
+    {
+      "gate": "measured_seconds_per_enumeration_for_this_path",
+      "verdict": "INCONCLUSIVE",
+      "resolved_by": "the smoke"
+    }
+  ],
+  "invalid_or_superseded_runs": [],
+  "known_defects_fixed": [
+    {
+      "defect": "panel digest hashed presentation order rather than the source set, so a cosmetic reordering would look like a different panel",
+      "detected_by": "tests/test_claim2_trajectory_panel.py::test_committed_panel_sources_are_distinct_and_hash_bound",
+      "conclusion_depended_on_it": false,
+      "corrective_commit": "e5636034bd0aceb30f6dbc1004920095f3404565"
+    },
+    {
+      "defect": "a fabricated SHA-256 tail in this manifest: the envelope digest was recorded with a real 16-character prefix and an invented remainder",
+      "detected_by": "a spot check against the artifact; now permanently guarded by tests/test_claim2_handoff_manifest.py, which recomputes every digest from the file it describes",
+      "conclusion_depended_on_it": false,
+      "severity_note": "a wrong digest is worse than a missing one because it looks verified; handoff acceptance gates 2 and 3 depend on these values"
+    },
+    {
+      "defect": "a state whose enumeration raised was retried by every trajectory reaching it, each retry paying full enumeration cost while consuming no budget, and the truncation was labelled budget_exhausted rather than enumeration_failed",
+      "detected_by": "review of the rollout loop before launch",
+      "conclusion_depended_on_it": false,
+      "impact_if_shipped": "unbounded time on a pathological source, and enumeration failures silently inflating the early-dead-end rate of whichever arm walked into the bad state",
+      "fix": "failures are cached alongside successes and reported separately in every shard and in the analysis instrument checks"
+    },
+    {
+      "defect": "the rollout was launchable without --detach and a relaunch would have recomputed every already-completed source",
+      "detected_by": "main-lane operational report after a client-side DNS failure",
+      "conclusion_depended_on_it": false,
+      "fix": "resumable drive() with exact shard-identity matching; --detach in every documented command and in the launcher's own banner"
+    }
+  ],
+  "smoke_plan": {
+    "authorized": false,
+    "command": "modal run --detach modal_apps/claim2_trajectory_characterization_app.py --sources 8 --seeds 2 --horizon 6 --kernel-budget 40",
+    "pool": "held-in",
+    "sources": 8,
+    "arms": 3,
+    "seeds": 2,
+    "horizon": 6,
+    "worst_case_enumerations_per_source": 32,
+    "worst_case_total_enumerations": 256,
+    "expected_container_hours": 1.5,
+    "worst_case_container_hours": 3.8,
+    "expected_wall_clock_minutes": 11,
+    "cpu_per_container": 2.0,
+    "gpu": "none",
+    "measured_basis": {
+      "pooled_median_seconds_per_kernel_call": 14,
+      "pooled_p90_seconds_per_kernel_call": 35,
+      "sources": [
+        "diagnostics/editing_v2_h_phi_teacher_train_labels.json (280 tasks, median 13.8)",
+        "diagnostics/editing_v2_experiment_c0_planning_signal_preregistered.json (12 tasks, median 8.6)",
+        "diagnostics/editing_v2_sealed67_result.json (27 tasks, median 14.8)",
+        "diagnostics/retarget_calibration_result.json (30 tasks, median 20.6)"
+      ],
+      "this_lane_overhead_assumption": "1.2-1.5x for one extra model forward; the smoke measures it and records seconds_per_kernel_call per shard"
+    },
+    "what_it_resolves": [
+      "whether the three arms produce genuinely different transition laws on real molecular supports",
+      "whether enumerate_successor_row agrees with canonical_successor_result",
+      "the true per-enumeration cost this lane pays, on which every later estimate depends"
+    ],
+    "what_it_cannot_resolve": "the claim. No Pareto verdict is emitted below 20 sources.",
+    "verify_detached": "modal app list must show 'ephemeral (detached)'",
+    "resumable": true,
+    "resume_note": "every task commits its shard to the volume as it completes and the driver skips sources whose committed shard matches source, horizon, seed set, kernel budget, panel_sha256 and family_law_sha256 and did not exhaust its budget; a relaunch after an outage costs only the sources that had not finished"
+  },
+  "not_authorized_and_not_requested": [
+    {
+      "action": "full held-in development run",
+      "sources": 36,
+      "seeds": 3,
+      "expected_container_hours": 10.1
+    },
+    {
+      "action": "confirmatory matched-reserve run",
+      "sources": 96,
+      "seeds": 3,
+      "expected_container_hours": 27
+    },
+    {
+      "action": "materializing the matched-reserve panel"
+    },
+    {
+      "action": "any use of the global final test"
+    },
+    {
+      "action": "H=8 comparison before H=6 is shown insufficient"
+    },
+    {
+      "action": "the optional fourth arm"
+    }
+  ],
+  "recommended_next_action": "Authorize the 8-source held-in smoke at an expected 1.5 container-hours (worst case 3.8), CPU only. It resolves all three INCONCLUSIVE gates and nothing else is authorized until it reports.",
+  "operational_contract": {
+    "local_entrypoint_is_rdkit_free": true,
+    "reason": "modal run uses a different interpreter without rdkit; molecule work belongs in a committed, mounted panel computed by a normal python3 script",
+    "enforced_by": "tests/test_claim2_rollout_resumability.py::test_the_local_entrypoint_never_imports_rdkit",
+    "durability_layers": [
+      "server-side drive() fan-out so a client disconnect cannot stall .map()",
+      "modal run --detach so the app survives client death",
+      "per-source shard commit plus a resumable driver, because neither of the above survived a client-side DNS failure at launch in the main lane"
+    ],
+    "shard_identity_fields": [
+      "source",
+      "horizon",
+      "panel_sha256",
+      "family_law_sha256"
+    ]
+  }
+}

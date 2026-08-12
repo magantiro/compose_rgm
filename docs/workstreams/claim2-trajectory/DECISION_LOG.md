@@ -237,6 +237,75 @@ does. Both gate directions are unit-tested.
 
 ---
 
+## 2026-08-12 — Adopt the main lane's two operational findings before launching
+
+**Evidence before:** the main lane hit both failures today, in a live run.
+
+**Finding 1 — `modal run` uses a different interpreter and it lacks RDKit**, so
+a `@app.local_entrypoint()` doing molecule work dies at launch.
+
+**Decision:** keep panel selection in a normal `python3` script writing a
+committed artifact, mount it with `add_local_file`, and let the entrypoint only
+read JSON. This lane already had that shape; it is now **enforced by test** —
+`test_the_local_entrypoint_never_imports_rdkit` and
+`test_module_scope_imports_stay_light_enough_for_modals_interpreter` fail if
+`rdkit` or `compose_v4` appears at module scope or in the entrypoint body.
+
+**Rejected:** installing RDKit into the launch interpreter. Computing the panel
+at launch would make it a function of whatever machine launched, where the
+committed artifact makes it auditable and byte-identical across reruns.
+
+**Finding 2 — server-side fan-out and `--detach` are both insufficient alone.**
+The `drive()` fan-out stops `.map()` stalling when the client goes away but does
+not keep the app alive; `--detach` does, but did not save the main lane's run
+through a client-side DNS failure *at launch*.
+
+**Decision:** three layers. Fan-out, `--detach` (documented in the command and
+in the launcher's own banner, verified via `modal app list` showing
+`ephemeral (detached)`), and **per-source shard commits with a resumable
+driver** that skips sources whose committed shard matches the current task.
+
+**Reuse is exact or not at all.** A shard is skipped only if source, horizon,
+seed set, kernel budget, panel hash and frozen-family-law hash all match, and
+only if it did not end with an exhausted budget. Reusing a shard from a
+different panel or horizon would mix two measurements into one table with
+nothing downstream able to detect it — worse than recomputing. All eight
+rejection cases are unit-tested in
+`tests/test_claim2_rollout_resumability.py`.
+
+**Changes a frozen object:** no.
+
+---
+
+## 2026-08-12 — Make `handoff.json` self-verifying after fabricating a digest
+
+**Evidence before:** none — this was a defect found in my own work.
+
+**What happened:** while writing `handoff.json` I recorded the envelope's
+content hash as `fb369161b303a49c50f9cf9de7a83ec26…`. The first 16 hex
+characters were real; **the rest was invented**. A spot check against
+`diagnostics/claim2_descriptor_envelope.json` caught it.
+
+**Why it matters more than a typo:** handoff acceptance gates 2 and 3 are
+"`handoff.json` validates" and "all frozen-input hashes match". A wrong digest
+is worse than a missing one, because it looks verified. Nothing downstream
+depended on it — no run had occurred — but the same habit applied to a frozen
+input would have produced a lane that appeared hash-bound and was not.
+
+**Decision:** `tests/test_claim2_handoff_manifest.py` recomputes **every**
+digest in the manifest from the file it describes, checks the inner content
+hashes of the envelope and panel against their own artifacts, checks the
+declared `R_theta` identity against the decision record, asserts the held-out
+status is self-consistent, and asserts the smoke command matches the app's real
+entrypoint with a budget covering the declared worst case.
+
+**Rejected:** fixing the digit and moving on. The failure mode was
+transcription, and transcription recurs.
+
+**Changes a frozen object:** no.
+
+---
+
 ## 2026-08-12 — Discrepancies recorded, not silently reconciled
 
 1. **Capability cells: 22, not 19.** `docs/EXPERIMENT_PLAN.md` says "19

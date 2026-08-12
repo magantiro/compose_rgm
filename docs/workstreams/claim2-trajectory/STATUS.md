@@ -13,7 +13,7 @@ executable command, not as a list of molecules.
 
 **Last completed gate:**
 - transport laws, metric suite, rollout app, panel selection and analysis
-  implemented; **89 local tests pass**, no Modal, no checkpoint;
+  implemented; **117 local tests pass**, no Modal, no checkpoint;
 - descriptor envelope calibrated on all 96,094 held-in molecules **before any
   trajectory exists** — `diagnostics/claim2_descriptor_envelope.json`,
   envelope sha256 `fb369161b303a49c…`, held-in self-retention **0.9639**;
@@ -25,13 +25,17 @@ executable command, not as a list of molecules.
 **Next action (needs authorization — one bounded step):**
 
 ```bash
-modal run modal_apps/claim2_trajectory_characterization_app.py \
+modal run --detach modal_apps/claim2_trajectory_characterization_app.py \
   --sources 8 --seeds 2 --horizon 6 --kernel-budget 40
+# then confirm: modal app list  ->  ephemeral (detached)
 ```
 
 8 held-in sources × 3 arms × 2 seeds × H=6, CPU only, 2 CPU per container.
 **Expected ~1.5 container-hours, worst case ~3.8**, wall ~11–30 min.
 See `PROTOCOL.md` §Cost for the measured basis of that estimate.
+
+Shards commit per source as they finish and a relaunch skips any that already
+match, so an outage costs only the sources that had not completed.
 
 **Blocked on:** the lead's explicit go-ahead. The brief said build, cost, and
 stop.

@@ -93,6 +93,24 @@ def instrument_checks(shards: list[dict[str, Any]]) -> dict[str, Any]:
         for row in shard.get("state_divergence", {}).values()
         if int(row["support_size"]) <= 1
     )
+    # An enumeration failure truncates a trajectory but is NOT a chemical dead
+    # end, so it must be visible rather than absorbed into the dead-end rate.
+    failures = {
+        state: reason
+        for shard in shards
+        for state, reason in (shard.get("enumeration_failures") or {}).items()
+    }
+    rates = [
+        shard["seconds_per_kernel_call"]
+        for shard in shards
+        if shard.get("seconds_per_kernel_call")
+    ]
+    truncated = sum(
+        1
+        for shard in shards
+        for trajectory in shard["trajectories"]
+        if trajectory["stop_reason"] in {"enumeration_failed", "budget_exhausted"}
+    )
     return {
         "kernel_cross_check_disagreements": disagreements,
         "kernel_cross_check_unchecked_sources": unchecked,
@@ -104,6 +122,13 @@ def instrument_checks(shards: list[dict[str, Any]]) -> dict[str, Any]:
         "degenerate_state_fraction": degenerate / states if states else None,
         "singleton_support_states": singleton_support,
         "budget_exhausted_sources": sum(1 for s in shards if s.get("budget_exhausted")),
+        "enumeration_failures": failures,
+        "trajectories_truncated_by_failure_or_budget": truncated,
+        "measured_seconds_per_kernel_call": {
+            "median": statistics.median(rates) if rates else None,
+            "min": min(rates) if rates else None,
+            "max": max(rates) if rates else None,
+        },
         "banned_statistics": sorted(BANNED_STATISTICS),
     }
 
@@ -272,6 +297,17 @@ def main() -> int:
     print(
         f"  degenerate states: {checks['degenerate_states']}/{checks['states_measured']} "
         f"({checks['singleton_support_states']} with |N+(x)| <= 1)"
+    )
+    print(
+        f"  enumeration failures: {len(checks['enumeration_failures'])}; "
+        f"trajectories truncated by failure or budget: "
+        f"{checks['trajectories_truncated_by_failure_or_budget']}"
+    )
+    print(
+        f"  MEASURED seconds per enumeration: "
+        f"{checks['measured_seconds_per_kernel_call']['median']} "
+        f"(min {checks['measured_seconds_per_kernel_call']['min']}, "
+        f"max {checks['measured_seconds_per_kernel_call']['max']})"
     )
 
     invalid = bool(checks["kernel_cross_check_disagreements"])

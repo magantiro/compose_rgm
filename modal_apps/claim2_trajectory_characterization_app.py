@@ -152,23 +152,34 @@ def _runtime():
     model.eval()
 
     cache: dict[str, SuccessorRow] = {}
+    failed: dict[str, str] = {}
     counter = {"calls": 0, "seconds": 0.0, "cross_check_calls": 0}
 
     def state_of(key: str):
         return pad_molecular_graph(smiles_to_molecular_graph(key), CANONICAL_SLOTS)
 
     def row_for(key: str, budget: int) -> SuccessorRow | None:
-        """Enumerated row for ``key``; ``None`` when the budget is exhausted."""
+        """Enumerated row for ``key``; ``None`` on budget exhaustion or failure.
+
+        Failures are cached alongside successes. Without that, a state whose
+        enumeration raises would be retried by every one of the 3*seeds
+        trajectories that reaches it -- each retry paying the full enumeration
+        cost while consuming no budget, because a failed call is not a call.
+        The caller distinguishes the two ``None`` cases through ``failed``.
+        """
         if key in cache:
             return cache[key]
+        if key in failed:
+            return None
         if counter["calls"] >= budget:
             return None
         started = time.perf_counter()
         try:
             row = enumerate_successor_row(model, state_of(key), TIME_POINT)
         except Exception as error:  # noqa: BLE001 - one bad state must not lose the source
-            print(f"    enumeration failed at {key}: {type(error).__name__}: {error}"[:220],
-                  flush=True)
+            failed[key] = f"{type(error).__name__}: {error}"[:220]
+            counter["seconds"] += time.perf_counter() - started
+            print(f"    enumeration failed at {key}: {failed[key]}", flush=True)
             return None
         counter["calls"] += 1
         counter["seconds"] += time.perf_counter() - started
@@ -181,7 +192,7 @@ def _runtime():
             model, state_of(key), TIME_POINT, row
         )
 
-    return row_for, cross_check, counter, checkpoint.get("selected_step")
+    return row_for, cross_check, counter, failed, checkpoint.get("selected_step")
 
 
 @app.function(
@@ -208,7 +219,7 @@ def roll_source(task: dict[str, Any]) -> dict[str, Any]:
     from compose_v4.rewrite.kernel import canonical_state_key
 
     started = time.perf_counter()
-    row_for, cross_check, counter, selected_step = _runtime()
+    row_for, cross_check, counter, failed, selected_step = _runtime()
     horizon = int(task.get("horizon", HORIZON))
     seeds = tuple(task.get("seeds", SEEDS))
     budget = int(task.get("kernel_budget", DEFAULT_KERNEL_BUDGET))
@@ -253,8 +264,14 @@ def roll_source(task: dict[str, Any]) -> dict[str, Any]:
             for step in range(horizon):
                 row = row_for(states[-1], budget)
                 if row is None:
-                    stop = "budget_exhausted"
-                    budget_exhausted = True
+                    # An enumeration FAILURE is not a chemical dead end and must
+                    # not be counted as one; the early-dead-end rate is a
+                    # reported metric.
+                    if states[-1] in failed:
+                        stop = "enumeration_failed"
+                    else:
+                        stop = "budget_exhausted"
+                        budget_exhausted = True
                     break
                 if row.is_terminal:
                     stop = "terminal_state"
@@ -311,6 +328,7 @@ def roll_source(task: dict[str, Any]) -> dict[str, Any]:
         ),
         "kernel_budget": budget,
         "budget_exhausted": budget_exhausted,
+        "enumeration_failures": failed,
         "seconds": round(time.perf_counter() - started, 1),
     }
 
@@ -339,10 +357,37 @@ def roll_source(task: dict[str, Any]) -> dict[str, Any]:
         "index": int(task["index"]),
         "kernel_calls": counter["calls"],
         "seconds": payload["seconds"],
+        "seconds_per_kernel_call": payload["seconds_per_kernel_call"],
         "minimum_divergence": minimum,
         "budget_exhausted": budget_exhausted,
+        "enumeration_failures": len(failed),
         "kernel_agrees": None if kernel_agreement is None else kernel_agreement["agrees"],
     }
+
+
+#: Fields that must match for an already-committed shard to be reused. A shard
+#: produced under a different panel, horizon, seed set or budget is NOT the same
+#: measurement, and silently reusing it would be worse than recomputing it.
+SHARD_IDENTITY_FIELDS = ("source", "horizon", "panel_sha256", "family_law_sha256")
+
+
+def _reusable_shard(path: Path, task: dict[str, Any]) -> bool:
+    """Whether a committed shard already answers exactly this task."""
+    try:
+        payload = json.loads(path.read_text())
+    except Exception:  # noqa: BLE001 - a truncated shard is simply redone
+        return False
+    if payload.get("schema") != "compose.claim2.trajectory_shard":
+        return False
+    for field in SHARD_IDENTITY_FIELDS:
+        if payload.get(field) != task.get(field):
+            return False
+    if list(payload.get("seeds", ())) != list(task.get("seeds", ())):
+        return False
+    if payload.get("kernel_budget") != task.get("kernel_budget"):
+        return False
+    # A shard truncated by an exhausted budget is not a completed measurement.
+    return not payload.get("budget_exhausted", False)
 
 
 @app.function(
@@ -353,23 +398,63 @@ def roll_source(task: dict[str, Any]) -> dict[str, Any]:
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
 def drive(tasks: list[dict[str, Any]]) -> dict[str, Any]:
-    """Fan out ON MODAL so a client disconnect cannot stall or lose the run."""
+    """Fan out ON MODAL so a client disconnect cannot stall or lose the run.
+
+    Server-side fan-out stops ``.map()`` stalling when the client goes away, but
+    it does NOT keep the app alive through a client death -- launch with
+    ``modal run --detach`` for that, and verify with ``modal app list`` showing
+    ``ephemeral (detached)``.
+
+    Neither of those survives a DNS failure at launch, so durability is the
+    third layer: every task commits its own shard as it completes, and this
+    driver skips sources whose shard is already committed and matches the
+    current task identity. A relaunch after an outage therefore costs only the
+    sources that had not finished.
+    """
+    artifact_volume.reload()
+    pending, skipped = [], []
+    for task in tasks:
+        shard = (
+            Path(RUN_ROOT)
+            / task.get("out_dir", "claim2_trajectory_smoke")
+            / f"source-{int(task['index']):04d}.json"
+        )
+        if shard.exists() and _reusable_shard(shard, task):
+            skipped.append(int(task["index"]))
+        else:
+            pending.append(task)
+    if skipped:
+        print(
+            f"resuming: {len(skipped)} shard(s) already committed and matching "
+            f"({sorted(skipped)}); {len(pending)} to run",
+            flush=True,
+        )
+
     done, failed = [], 0
     for result in roll_source.map(
-        tasks, order_outputs=False, return_exceptions=True, wrap_returned_exceptions=False
+        pending, order_outputs=False, return_exceptions=True, wrap_returned_exceptions=False
     ):
         if isinstance(result, Exception):
             failed += 1
             print(f"  task failed: {type(result).__name__}: {result}"[:200], flush=True)
             continue
         done.append(result)
+    rates = [row["seconds_per_kernel_call"] for row in done if row["seconds_per_kernel_call"]]
     return {
         "completed": len(done),
+        "skipped_already_committed": len(skipped),
+        "requested": len(tasks),
         "failed": failed,
         "kernel_calls": sum(row["kernel_calls"] for row in done),
         "budget_exhausted": sum(bool(row["budget_exhausted"]) for row in done),
+        "enumeration_failures": sum(row["enumeration_failures"] for row in done),
         "kernel_disagreements": sum(row["kernel_agrees"] is False for row in done),
         "minimum_divergence": min((row["minimum_divergence"] for row in done), default=0.0),
+        # The number every later cost estimate depends on, measured rather than
+        # assumed. This is one of the three things the smoke exists to resolve.
+        "median_seconds_per_kernel_call": (
+            sorted(rates)[len(rates) // 2] if rates else None
+        ),
     }
 
 
@@ -434,13 +519,24 @@ def main(
         f"  commit {commit[:12]}  CPU only, 2 CPU per container\n"
         f"  worst-case enumerations per source: {per_source} "
         f"(cache shared across arms and seeds; budget {kernel_budget})\n"
-        f"  worst case total: {per_source * len(tasks)} enumerations"
+        f"  worst case total: {per_source * len(tasks)} enumerations\n"
+        f"  LAUNCH WITH --detach, and confirm 'ephemeral (detached)' in `modal app list`.\n"
+        f"  Shards commit per source as they finish and a relaunch skips them, so an\n"
+        f"  outage costs only the sources that had not completed."
     )
 
     summary = drive.remote(tasks)
-    print(f"\ncompleted {summary['completed']}/{len(tasks)}, failed {summary['failed']}")
+    print(
+        f"\ncompleted {summary['completed']}/{len(tasks)}, "
+        f"skipped {summary['skipped_already_committed']} already committed, "
+        f"failed {summary['failed']}"
+    )
     print(f"  kernel calls {summary['kernel_calls']}")
+    print(f"  MEASURED median seconds per enumeration: "
+          f"{summary['median_seconds_per_kernel_call']}  "
+          f"(protocol assumed 14 s/call x 1.2-1.5 overhead)")
     print(f"  budget exhausted on {summary['budget_exhausted']} sources")
+    print(f"  enumeration failures {summary['enumeration_failures']}")
     print(f"  minimum arm divergence across all states: {summary['minimum_divergence']:.4f}")
     if summary["kernel_disagreements"]:
         raise SystemExit(
