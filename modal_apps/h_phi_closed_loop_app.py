@@ -68,6 +68,10 @@ image = (
         ROOT / "diagnostics/editing_v2_controller_panel_seal.json",
         str(REMOTE_ROOT / "diagnostics/editing_v2_controller_panel_seal.json"),
         copy=True)
+    .add_local_file(
+        ROOT / "diagnostics/editing_v2_teacher_cohort_freeze.json",
+        str(REMOTE_ROOT / "diagnostics/editing_v2_teacher_cohort_freeze.json"),
+        copy=True)
 )
 app = modal.App("compose-v4-h-phi-closed-loop")
 
@@ -326,7 +330,7 @@ def run_pair(task: dict[str, Any]) -> dict[str, Any]:
     payload = {"index": task["index"], "source": start_key, "target": target_key,
                "verified_steps": budget, "greedy": greedy, "by_threshold": arms,
                "kernel_calls": calls, "seconds": round(seconds, 1)}
-    out = Path(RUN_ROOT) / "h_phi_closed_loop"
+    out = Path(RUN_ROOT) / task.get("out_dir", "h_phi_closed_loop")
     out.mkdir(parents=True, exist_ok=True)
     (out / f"{task['index']:03d}.json").write_text(
         json.dumps(payload, indent=2) + "\n")
@@ -340,7 +344,7 @@ def drive(tasks: list[dict[str, Any]]) -> dict[str, Any]:
     """Fan out server-side so a client disconnect cannot stall the run."""
 
     results = [r for r in run_pair.map(tasks) if r]
-    out = Path(RUN_ROOT) / "h_phi_closed_loop" / "aggregate.json"
+    out = Path(RUN_ROOT) / task.get("out_dir", "h_phi_closed_loop") / "aggregate.json"
     out.write_text(json.dumps({"pairs": len(results), "per_pair": results},
                               indent=2) + "\n")
     artifact_volume.commit()
@@ -348,14 +352,36 @@ def drive(tasks: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 @app.local_entrypoint()
-def main() -> None:
-    seal = json.loads(
-        (ROOT / "diagnostics/editing_v2_controller_panel_seal.json").read_text())
-    development = seal["development"]
-    tasks = [{**row, "index": i} for i, row in enumerate(development)]
-    print(f"closed-loop on {len(tasks)} DEVELOPMENT pairs "
-          f"(seal {seal['commitment']['development_sha256'][:16]}); "
+def main(panel: str = "development", pairs: int = 24) -> None:
+    """panel='development' (the 24) or 'heldin' (targets h_phi TRAINED on).
+
+    The held-in panel is the sharp diagnostic: if h_phi beats greedy closed-loop
+    on targets it trained on, the failure is cross-target TRANSFER. If it fails
+    even there despite ~88% offline training rescue, then pointwise offline
+    prediction is misaligned with sequential deployment regardless of
+    generalisation -- and pairwise training alone would be unlikely to fix it.
+    """
+
+    if panel == "development":
+        seal = json.loads(
+            (ROOT / "diagnostics/editing_v2_controller_panel_seal.json").read_text())
+        rows = seal["development"]
+        out_dir, tag = "h_phi_closed_loop", seal["commitment"]["development_sha256"]
+    else:
+        cohort = json.loads(
+            (ROOT / "diagnostics/editing_v2_teacher_cohort_freeze.json").read_text())
+        # Stratified across horizons, matching the development panel's 8/8/8.
+        # Taking the head of the cohort list would give all 4-step pairs, since
+        # it is ordered by band -- not comparable to what greedy faces on the 24.
+        rows = []
+        per = max(1, pairs // 3)
+        for length in (4, 5, 6):
+            rows.extend([r for r in cohort["train"] if r["steps"] == length][:per])
+        out_dir, tag = "h_phi_closed_loop_heldin", cohort["commitment"]["train_sha256"]
+    tasks = [{**row, "index": i, "out_dir": out_dir}
+             for i, row in enumerate(rows[:pairs])]
+    print(f"closed-loop on {len(tasks)} {panel.upper()} pairs ({tag[:16]}); "
           f"the sealed 67 are untouched")
     print(f"thresholds fixed in advance: {THRESHOLDS}")
-    print(drive.remote(tasks))
-    print("  results under editing_v2/r_theta_run/h_phi_closed_loop/")
+    print(drive.remote(tasks, out_dir))
+    print(f"  results under editing_v2/r_theta_run/{out_dir}/")
