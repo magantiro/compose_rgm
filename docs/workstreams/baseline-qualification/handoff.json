@@ -51,7 +51,7 @@
       "subcapability": "C4c_retargeting"
     }
   ],
-  "content_commit": "401063c9a7233732055205a80ce578460e2d2d9a",
+  "content_commit": "f76f833dc41e766c4a9ea0a86df06b5fad23f7d5",
   "content_commit_note": "The commit at which every sha256 in durable_artifacts was computed. This manifest is committed immediately after it, so branch HEAD is one commit ahead of content_commit and differs from it only by this file. The manifest cannot name its own commit, which is why the two are separate.",
   "durable_artifacts": {
     "baselines/ddsbm/README.md": "332526fb54423db36bb49319796514a7b9d57740abc3b4a374fb63db03bb8c4a",
@@ -68,7 +68,7 @@
     "baselines/reinvent/environment.lock": "7a42319e9fc5f72ddfa29e995a4226eecd2393ba45e2533ef2b93eafdc2428f2",
     "configs/comparator_registry_v3.json": "672ae90f8e2e938f19b3d5013e70deaaa127302c62e605bbee185bc5bc0e3147",
     "docs/workstreams/baseline-qualification/COMPARATOR_MATRIX.md": "5c6bf76f388efc5820fcd1cbda93cf841b8f83986cfdd9f7d4b8274e7635c6c4",
-    "docs/workstreams/baseline-qualification/DECISION_LOG.md": "af035fddec6877f1fdf45193ca2119291b904fa88b7cbdd38dbc5c6982ae0cb0",
+    "docs/workstreams/baseline-qualification/DECISION_LOG.md": "1b4c94f4bfb497423599c8722ed59b57002928ec07318bf06643048f4a2f243c",
     "docs/workstreams/baseline-qualification/FAIRNESS_CONTRACT.md": "a27168951b65107d7d2a2fa5171c72d83084533bc09ce9916728ca7960413e9a",
     "docs/workstreams/baseline-qualification/HANDOFF.md": "bc56a43cbcce41621dc0fef001507285ee72667672a81d0f5711b3dfe29264d2",
     "docs/workstreams/baseline-qualification/PROTOCOL.md": "ce08ec411ccec6459a536921e41b060451eb9636fc7dda232ba4136d309810e9",
