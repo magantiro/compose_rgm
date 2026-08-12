@@ -332,15 +332,20 @@ def run_arms(task: dict[str, Any]) -> dict[str, Any]:
                 break
             keys = [r[0] for r in rows]
             reference = np.array([r[1] for r in rows], dtype=float)
-            immediate = np.array([utility(k, goal) for k in keys], dtype=float)
-            greedy_index = max(range(len(keys)),
-                               key=lambda i: (immediate[i], keys[i]))
+            # RANK IS A TUPLE (worst, mean). It must stay a list of tuples --
+            # np.array(..., dtype=float) would build an (n,2) array and every
+            # comparison below would then be an ambiguous array truth value.
+            rank = [utility(k, goal) for k in keys]
+            order = sorted(range(len(keys)), key=lambda i: (rank[i], keys[i]),
+                           reverse=True)
+            greedy_index = order[0]
             picked, seen = [greedy_index], {greedy_index}
-            for stratum, count in ((-immediate, CANDIDATES_TOP_IMMEDIATE),
-                                   (-reference, CANDIDATES_TOP_REFERENCE)):
-                for index in np.argsort(stratum, kind="stable")[:count]:
-                    if int(index) not in seen:
-                        picked.append(int(index)); seen.add(int(index))
+            for index in order[:CANDIDATES_TOP_IMMEDIATE]:
+                if index not in seen:
+                    picked.append(index); seen.add(index)
+            for index in np.argsort(-reference, kind="stable")[:CANDIDATES_TOP_REFERENCE]:
+                if int(index) not in seen:
+                    picked.append(int(index)); seen.add(int(index))
             rest = [i for i in range(len(keys)) if i not in seen]
             if rest and CANDIDATES_RANDOM > 0:
                 for index in rng.sample(rest, min(CANDIDATES_RANDOM, len(rest))):
