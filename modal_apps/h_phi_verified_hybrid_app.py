@@ -71,6 +71,10 @@ image = (
         ROOT / "diagnostics/editing_v2_controller_panel_seal.json",
         str(REMOTE_ROOT / "diagnostics/editing_v2_controller_panel_seal.json"),
         copy=True)
+    .add_local_file(
+        ROOT / "diagnostics/editing_v2_sealed67_amendment.json",
+        str(REMOTE_ROOT / "diagnostics/editing_v2_sealed67_amendment.json"),
+        copy=True)
 )
 app = modal.App("compose-v4-h-phi-verified-hybrid")
 
@@ -384,6 +388,19 @@ def main(panel: str = "development") -> None:
     if panel == "sealed":
         rows = seal["sealed"]
         digest = seal["commitment"]["sealed_sha256"]
+        # Exclusion comes from the COMMITTED amendment, so which pairs are
+        # primary is fixed before any outcome exists rather than decided at
+        # analysis time.
+        amendment = json.loads(
+            (ROOT / "diagnostics/editing_v2_sealed67_amendment.json").read_text())
+        excluded = {(r["source"], r["target"])
+                    for r in amendment["excluded_pairs"]}
+        for row in rows:
+            row["excluded_from_primary"] = (row["source"], row["target"]) in excluded
+        print(f"  amendment: primary denominator "
+              f"{sum(1 for r in rows if not r['excluded_from_primary'])} clean, "
+              f"{len(excluded)} excluded for sharing a source with development; "
+              f"all {len(rows)} run and reported as sensitivity")
         print(f"OPENING THE SEALED PANEL: {len(rows)} pairs ({digest[:16]}). "
               f"Sealed at commit 571ec9d, before any h_phi work existed. "
               f"This is the one-shot evaluation; the protocol is preregistered "
