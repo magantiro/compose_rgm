@@ -22,7 +22,12 @@ executable command, not as a list of molecules.
 - protocol and the mobility–fidelity decision rule frozen **before any result**
   — `configs/claim2_trajectory_protocol_v1.json`.
 
-**Next action (needs authorization — one bounded step):**
+**AUTHORIZED 2026-08-12 by the main lane — the 8-source smoke only.**
+Scope frozen before the run in `PROTOCOL.md` §"What the 8-source smoke is
+allowed to answer": it may report the six instrument/cost questions and
+**may not answer Claim 2**. No automatic promotion to the 36-source run.
+
+**Authorized command:**
 
 ```bash
 modal run --detach modal_apps/claim2_trajectory_characterization_app.py \

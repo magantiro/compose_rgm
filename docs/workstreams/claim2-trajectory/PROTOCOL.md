@@ -341,6 +341,48 @@ Only the smoke is being requested.
 
 ---
 
+## What the 8-source smoke is allowed to answer
+
+Authorized by the main lane on 2026-08-12: *"AUTHORIZE NEXT GATE — the 8-source
+smoke only."* Frozen here **before the run**.
+
+**This run may not answer Claim 2.** Eight sources is below the pre-declared
+20-source floor, and `analyse_claim2_trajectories.py` refuses to emit a Pareto
+verdict below it whatever the point estimates show. If `R_theta` looks
+excellent on 8 sources, **that is not a result.**
+
+The six questions it *is* allowed to answer:
+
+1. Do all three laws actually diverge on real states?
+2. Does the alternate learned-law construction numerically agree with the
+   canonical scorer?
+3. Do trajectories complete under the budget without instrument errors?
+4. Are the metric distributions non-degenerate?
+5. Are reversal / revisit / dead-end measurements behaving as intended?
+6. What is the measured runtime and cost per enumeration?
+
+**No automatic promotion.** The 36-source held-in development run is not
+authorized by this smoke passing; it needs a separate main-lane decision after
+these gates are reviewed. The route is
+`8-source smoke → 36-source held-in development → main review → matched-reserve
+confirmation`, and the reserve is not opened before the frontier definition has
+been shown interpretable and non-pathological on held-in sources.
+
+### The question Claim 2 must eventually answer
+
+> Does learning organize executable molecular motion into a **better
+> mobility–fidelity tradeoff** than support-only stochastic rewriting?
+
+**Not** "does `R_theta` stay close to the training distribution" — a process
+that barely moves would win that trivially, which is exactly why mobility is a
+co-equal axis and why heavy-atom and ring-system change are reported beside
+Tanimoto distance. The expected shape of a good result is that uniform moves a
+lot but drifts and cycles, empirical-family stays plausible but organizes local
+moves poorly, and `R_theta` sits on a better **frontier** without maximizing
+every individual metric.
+
+---
+
 ## Operational contract for the eventual run
 
 Two failure modes the main lane hit today, folded in here so this lane cannot

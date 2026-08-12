@@ -68,7 +68,7 @@
   "artifacts_created": [
     {
       "path": "configs/claim2_trajectory_protocol_v1.json",
-      "sha256": "50815d3883522ba4a2ab1f962ba581ad96d80fdbc550045f58dcda30097e757b",
+      "sha256": "2114c9b6bce1687c31a1acbc075f2469bcff36084e05dc51664cfac32f83d273",
       "status": "DESIGN_ONLY",
       "purpose": "machine-readable frozen protocol and cost model"
     },
