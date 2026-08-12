@@ -1,0 +1,3803 @@
+{
+  "schema": "compose.retarget.calibration_result",
+  "status": "HELD_IN_CALIBRATION_RUNS_ONCE",
+  "cohort_sha256": "e402e318fd9540fb51fc93c7481094beec4c5f968a582f7349d6359f24e19a5f",
+  "sources": 30,
+  "potency": {
+    "0.3": {
+      "start": 0,
+      "end": 17,
+      "rate": 0.5666666666666667,
+      "verdict": "USABLE"
+    },
+    "0.5": {
+      "start": 0,
+      "end": 13,
+      "rate": 0.43333333333333335,
+      "verdict": "USABLE"
+    },
+    "0.7": {
+      "start": 0,
+      "end": 10,
+      "rate": 0.3333333333333333,
+      "verdict": "USABLE"
+    }
+  },
+  "potency_climb_median": 4.775932926471795,
+  "developability": {
+    "at_switch": 3,
+    "greedy": 29,
+    "verified": 29,
+    "verdict": "USABLE",
+    "binary_headroom": 0
+  },
+  "horizon": {
+    "4": {
+      "states": 30,
+      "disagreement": 22,
+      "sacrificial": 22,
+      "sacrifice_won": 20,
+      "mean_regret": 0.039988666600844054
+    },
+    "3": {
+      "states": 30,
+      "disagreement": 16,
+      "sacrificial": 16,
+      "sacrifice_won": 16,
+      "mean_regret": 0.013045323023851514
+    },
+    "2": {
+      "states": 30,
+      "disagreement": 17,
+      "sacrificial": 17,
+      "sacrifice_won": 14,
+      "mean_regret": 0.00889652327175936
+    },
+    "1": {
+      "states": 30,
+      "disagreement": 0,
+      "sacrificial": 0,
+      "sacrifice_won": 0,
+      "mean_regret": 0.0
+    }
+  },
+  "gate": {
+    "decision_states": 120,
+    "top1_disagreement": 55,
+    "disagreements_higher_vg": 50,
+    "disagreements_tied": 5,
+    "disagreements_lower_vg": 0,
+    "sacrifice_to_win_NOT_REPORTED": "Circular: the lookahead action is argmax(V_G), so V_G(chosen) >= V_G(greedy) by construction and 0 of 55 disagreements could have been a loss. C0 avoided this with an independent evaluation sample; that safeguard was dropped here on the incorrect reasoning that a deterministic V_G has no winner's curse. The bias is selecting and scoring with the same function, which determinism does not remove.",
+    "sources_where_lookahead_would_differ": 27,
+    "sources_where_outcome_differed": 0,
+    "mean_future_regret": 0.015482628224113731,
+    "regret_as_fraction_of_movement": 0.013878733458359896,
+    "verdict": "CLOSED",
+    "reasons": [
+      "greedy already reaches the region 29/30 -- CEILING, so a real planning advantage would have nowhere to show"
+    ]
+  },
+  "anti_tuning": "The region is set once and not retuned. A closed gate is recorded as a result: subclaim B leaves the paper.",
+  "per_source": [
+    {
+      "index": 0,
+      "source": "Cc1ccccc1-c1noc(-c2cc3ccccc3oc2=O)n1",
+      "switch_state": "O=c1[nH]c2ccc3c4cc(C[SH3])c5cc4c3c2cc1c1nc5no1",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "Cc1ccccc1-c1noc(-c2cc3ccccc3oc2=O)n1",
+          "drd2_logodds": -7.893809741274304,
+          "qed": 0.5265185755234126,
+          "clogp": 3.8184200000000024
+        },
+        {
+          "key": "Cc1ccc2cc1c1noc(n1)c1cc3c(cccc23)oc1=O",
+          "drd2_logodds": -5.354815825663542,
+          "qed": 0.40512778523530474,
+          "clogp": 3.944020000000002
+        },
+        {
+          "key": "Cc1cc2c3ccc4oc(=O)c5cc4c3c2cc1c1noc5n1",
+          "drd2_logodds": -4.1868776831318675,
+          "qed": 0.39689070544006144,
+          "clogp": 3.9728200000000014
+        },
+        {
+          "key": "Cc1cc2c3ccc4[nH]c(=O)c5cc4c3c2cc1c1noc5n1",
+          "drd2_logodds": -3.6959109985409446,
+          "qed": 0.4638956137205519,
+          "clogp": 3.7079200000000014
+        },
+        {
+          "key": "O=c1[nH]c2ccc3c4cc(C[SH3])c5cc4c3c2cc1c1nc5no1",
+          "drd2_logodds": -3.3335817034298874,
+          "qed": 0.5010461699804494,
+          "clogp": 3.2939000000000016
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -3.3335817034298874,
+          "climb_achieved": 4.560228037844417
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -3.3335817034298874,
+          "climb_achieved": 4.560228037844417
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -3.3335817034298874,
+          "climb_achieved": 4.560228037844417
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -0.3328424842929661,
+      "develop_greedy_score": 0.6492796448761899,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.010472631700296886,
+          "greedy_immediate": 0.33721578727827756,
+          "chosen_immediate": -0.2196611631362645,
+          "greedy_future": 0.6492796448761899,
+          "best_future": 0.6597522765764868,
+          "greedy_success": true
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.012574131619865092,
+          "greedy_immediate": 0.5927339496986513,
+          "chosen_immediate": 0.23315997962649393,
+          "greedy_future": 0.6492796448761899,
+          "best_future": 0.661853776496055,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.01102755073550632,
+          "greedy_immediate": 0.6492796448761895,
+          "chosen_immediate": 0.6477604239067939,
+          "greedy_future": 0.6492796448761899,
+          "best_future": 0.6603071956116963,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.6492796448761899,
+          "chosen_immediate": 0.6492796448761899,
+          "greedy_future": 0.6492796448761899,
+          "best_future": 0.6492796448761899,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 42,
+      "seconds": 505.9
+    },
+    {
+      "index": 1,
+      "source": "COc1ccc(-c2nc(CS(=O)(=O)CC(=O)NCc3ccccc3Br)c(C)o2)cc1",
+      "switch_state": "COc1ccc2cc1Cc1oc-2nc1CS(=O)(=O)CCN1CC=CC1=CC=CBr",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "COc1ccc(-c2nc(CS(=O)(=O)CC(=O)NCc3ccccc3Br)c(C)o2)cc1",
+          "drd2_logodds": -9.687585995557717,
+          "qed": 0.5146298919765823,
+          "clogp": 3.6523200000000022
+        },
+        {
+          "key": "COc1ccc(-c2nc(CS(=O)(=O)CC(=O)NCC=CC=CC=CBr)c(C)o2)cc1",
+          "drd2_logodds": -5.506429280790974,
+          "qed": 0.5050187345963196,
+          "clogp": 3.710620000000003
+        },
+        {
+          "key": "COc1ccc(-c2nc(CS(=O)(=O)CCNCC=CC=CC=CBr)c(C)o2)cc1",
+          "drd2_logodds": -3.9830654668926,
+          "qed": 0.38317518954106317,
+          "clogp": 4.184020000000004
+        },
+        {
+          "key": "COc1ccc2cc1Cc1oc-2nc1CS(=O)(=O)CCNCC=CC=CC=CBr",
+          "drd2_logodds": -3.138867386819652,
+          "qed": 0.35227251426871836,
+          "clogp": 3.7798000000000025
+        },
+        {
+          "key": "COc1ccc2cc1Cc1oc-2nc1CS(=O)(=O)CCN1CC=CC1=CC=CBr",
+          "drd2_logodds": -2.1312434474703386,
+          "qed": 0.5152678912926416,
+          "clogp": 3.8335000000000035
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -2.1312434474703386,
+          "climb_achieved": 7.556342548087378
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -2.1312434474703386,
+          "climb_achieved": 7.556342548087378
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -2.1312434474703386,
+          "climb_achieved": 7.556342548087378
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -0.32505003265973914,
+      "develop_greedy_score": 0.5617355252954546,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.02823807140795176,
+          "greedy_immediate": 0.08584006299248323,
+          "chosen_immediate": 0.015164446783985036,
+          "greedy_future": 0.5617355252954546,
+          "best_future": 0.5899735967034063,
+          "greedy_success": true
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.00855463347706198,
+          "greedy_immediate": 0.5018525771288707,
+          "chosen_immediate": 0.4773726567128749,
+          "greedy_future": 0.5617355252954546,
+          "best_future": 0.5702901587725165,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.5592360587938051,
+          "chosen_immediate": 0.5592360587938051,
+          "greedy_future": 0.5617355252954546,
+          "best_future": 0.5617355252954546,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.5617355252954546,
+          "chosen_immediate": 0.5617355252954546,
+          "greedy_future": 0.5617355252954546,
+          "best_future": 0.5617355252954546,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 49,
+      "seconds": 927.6
+    },
+    {
+      "index": 2,
+      "source": "CC(=O)CCC(C)C1CCC2C3=C(CCC21C)C1(C)CCC(=O)C(C)C1CC3=O",
+      "switch_state": "CC12CCC34C(Cc5cc5=O)CCC56CCC(=O)CC53CC(=O)C1=C6CCC24C",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "CC(=O)CCC(C)C1CCC2C3=C(CCC21C)C1(C)CCC(=O)C(C)C1CC3=O",
+          "drd2_logodds": -4.439159128419665,
+          "qed": 0.6093745774550802,
+          "clogp": 5.708900000000006
+        },
+        {
+          "key": "CC(=O)CCC(C)C12CCC3C4=C(CCC31C)C1(C)CCC(=O)C(C)C12CC4=O",
+          "drd2_logodds": -4.010311789217548,
+          "qed": 0.6336077203386639,
+          "clogp": 5.462900000000006
+        },
+        {
+          "key": "CC1C(=O)CCC2(C)C3=C4C(=O)CC12C1(C(C)Cc2cc2=O)CCC4C1(C)CC3",
+          "drd2_logodds": -3.6321600434659995,
+          "qed": 0.7569289315369081,
+          "clogp": 4.572200000000004
+        },
+        {
+          "key": "CC1C(=O)CCC23CCC(Cc4cc4=O)C45CCC6C(=C2CCC64C)C(=O)CC135",
+          "drd2_logodds": -3.245790182120678,
+          "qed": 0.7553548370807214,
+          "clogp": 4.326200000000004
+        },
+        {
+          "key": "CC12CCC34C(Cc5cc5=O)CCC56CCC(=O)CC53CC(=O)C1=C6CCC24C",
+          "drd2_logodds": -3.00938993478822,
+          "qed": 0.748563173917354,
+          "clogp": 4.470300000000004
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -3.00938993478822,
+          "climb_achieved": 1.4297691936314454
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -3.00938993478822,
+          "climb_achieved": 1.4297691936314454
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -3.00938993478822,
+          "climb_achieved": 1.4297691936314454
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -0.24055781501384524,
+      "develop_greedy_score": 0.6314581781790569,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.005157782912794229,
+          "greedy_immediate": 0.4000339061356383,
+          "chosen_immediate": -0.05887981433979202,
+          "greedy_future": 0.6314581781790569,
+          "best_future": 0.6366159610918511,
+          "greedy_success": true
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.011444926106146891,
+          "greedy_immediate": 0.5734644063252325,
+          "chosen_immediate": 0.5521942397331648,
+          "greedy_future": 0.6314581781790569,
+          "best_future": 0.6429031042852038,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.6165894509373433,
+          "chosen_immediate": 0.594624462011778,
+          "greedy_future": 0.6314581781790569,
+          "best_future": 0.6314581781790569,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.6314581781790569,
+          "chosen_immediate": 0.6314581781790569,
+          "greedy_future": 0.6314581781790569,
+          "best_future": 0.6314581781790569,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 49,
+      "seconds": 971.4
+    },
+    {
+      "index": 3,
+      "source": "C=CC=C(C=C)CCC(=O)N1C(=O)C(C(C)O)C1OC(C)=O",
+      "switch_state": "O=C1C=CC=CC=CC=CC(=O)N2C(=O)C(C(O)C=C1)C2O",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "C=CC=C(C=C)CCC(=O)N1C(=O)C(C(C)O)C1OC(C)=O",
+          "drd2_logodds": -7.216273365858746,
+          "qed": 0.4355135282314855,
+          "clogp": 1.3199999999999998
+        },
+        {
+          "key": "C=CC=C(C=C)C=CC(=O)N1C(=O)C(C(C)O)C1OC(C)=O",
+          "drd2_logodds": -6.185367807241567,
+          "qed": 0.34366243010645775,
+          "clogp": 1.0959999999999999
+        },
+        {
+          "key": "C=CC=CC=CC=CC(=O)N1C(=O)C(C(C)O)C1OC(C)=O",
+          "drd2_logodds": -4.841529537766296,
+          "qed": 0.34366243010645775,
+          "clogp": 1.0959999999999999
+        },
+        {
+          "key": "CC(=O)C=CC=CC=CC=CC(=O)N1C(=O)C(C(C)O)C1O",
+          "drd2_logodds": -4.2197807139303976,
+          "qed": 0.4227932202862841,
+          "clogp": 0.4843999999999998
+        },
+        {
+          "key": "O=C1C=CC=CC=CC=CC(=O)N2C(=O)C(C(O)C=C1)C2O",
+          "drd2_logodds": -3.884761247143846,
+          "qed": 0.48548533480172185,
+          "clogp": 0.01440000000000008
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -3.884761247143846,
+          "climb_achieved": 3.3315121187149
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -3.884761247143846,
+          "climb_achieved": 3.3315121187149
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -3.884761247143846,
+          "climb_achieved": 3.3315121187149
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -0.5980390528535117,
+      "develop_greedy_score": 0.5808165471647543,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.05341664961140602,
+          "greedy_immediate": 0.012270647765399127,
+          "chosen_immediate": -0.1010621795402491,
+          "greedy_future": 0.5808165471647543,
+          "best_future": 0.6342331967761603,
+          "greedy_success": true
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.3508503394312741,
+          "chosen_immediate": 0.3508503394312741,
+          "greedy_future": 0.5808165471647543,
+          "best_future": 0.5808165471647543,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 7,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.47940109329613184,
+          "chosen_immediate": 0.47940109329613184,
+          "greedy_future": 0.5808165471647543,
+          "best_future": 0.5808165471647543,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.5808165471647543,
+          "chosen_immediate": 0.5808165471647543,
+          "greedy_future": 0.5808165471647543,
+          "best_future": 0.5808165471647543,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 43,
+      "seconds": 501.7
+    },
+    {
+      "index": 4,
+      "source": "CCCc1c(C(=O)OCC)c(C(=O)OCC)c2c(-c3ccccc3)cc(N3CCOCC3)nn12",
+      "switch_state": "CCCc1c(C(=O)[SH4]CC)c(C(=[IH])OCC)c2n1[IH2]=C(N1CCOCC1)c1c-2c2ccc1cc2",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "CCCc1c(C(=O)OCC)c(C(=O)OCC)c2c(-c3ccccc3)cc(N3CCOCC3)nn12",
+          "drd2_logodds": -4.854309215123606,
+          "qed": 0.4624543601155103,
+          "clogp": 4.143800000000003
+        },
+        {
+          "key": "CCCc1c(C(=O)OCC)c(C(=O)OCC)c2c3c4ccc(cc4)c3c(N3CCOCC3)nn12",
+          "drd2_logodds": -3.8332922778569163,
+          "qed": 0.37960274848598163,
+          "clogp": 4.221000000000004
+        },
+        {
+          "key": "CCCc1c(C(=O)[SH4]CC)c(C(=O)OCC)c2c3c4ccc(cc4)c3c(N3CCOCC3)nn12",
+          "drd2_logodds": -3.1223260683714953,
+          "qed": 0.37176916099856455,
+          "clogp": 3.866800000000003
+        },
+        {
+          "key": "CCCc1c(C(=O)[SH4]CC)c(C(=O)OCC)c2n1[IH2]=C(N1CCOCC1)c1c-2c2ccc1cc2",
+          "drd2_logodds": -1.558228267008542,
+          "qed": 0.3068000559381122,
+          "clogp": 3.720000000000004
+        },
+        {
+          "key": "CCCc1c(C(=O)[SH4]CC)c(C(=[IH])OCC)c2n1[IH2]=C(N1CCOCC1)c1c-2c2ccc1cc2",
+          "drd2_logodds": -0.6115583580509503,
+          "qed": 0.32903545052355593,
+          "clogp": 4.225100000000006
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": -0.6115583580509503,
+          "climb_achieved": 4.2427508570726555
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -0.6115583580509503,
+          "climb_achieved": 4.2427508570726555
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -0.6115583580509503,
+          "climb_achieved": 4.2427508570726555
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -0.8750588367657393,
+      "develop_greedy_score": 0.2687419082431523,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.13052780632635697,
+          "greedy_immediate": -0.6529379524263162,
+          "chosen_immediate": -0.6556603518174063,
+          "greedy_future": 0.2687419082431523,
+          "best_future": 0.39926971456950927,
+          "greedy_success": false
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.12853024773144672,
+          "greedy_immediate": -0.44603701411270796,
+          "chosen_immediate": -0.44841773378234384,
+          "greedy_future": 0.2687419082431523,
+          "best_future": 0.39727215597459903,
+          "greedy_success": false
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.0690256776827256,
+          "greedy_immediate": -0.15622743931891625,
+          "chosen_immediate": -0.2522615668620655,
+          "greedy_future": 0.2687419082431523,
+          "best_future": 0.3377675859258779,
+          "greedy_success": false
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.2687419082431523,
+          "chosen_immediate": 0.2687419082431523,
+          "greedy_future": 0.2687419082431523,
+          "best_future": 0.2687419082431523,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 48,
+      "seconds": 1463.5
+    },
+    {
+      "index": 5,
+      "source": "Cn1c(-c2ccc(F)cc2)[n+](C)c2ccccc21",
+      "switch_state": "C[n+]1c2n(CN)c3c(cccc31)CCC(F)CCC2",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "Cn1c(-c2ccc(F)cc2)[n+](C)c2ccccc21",
+          "drd2_logodds": -5.807490929362346,
+          "qed": 0.5792485952754836,
+          "clogp": 2.8089000000000013
+        },
+        {
+          "key": "Cn1c(C2CCC(F)CC2)[n+](C)c2ccccc21",
+          "drd2_logodds": -2.1785636854555532,
+          "qed": 0.6850074730441571,
+          "clogp": 2.9985000000000017
+        },
+        {
+          "key": "Cn1c2[n+](C)c3cccc(c31)C1CC(F)CCC21",
+          "drd2_logodds": -0.7029294955226488,
+          "qed": 0.6310254994813892,
+          "clogp": 2.7056000000000004
+        },
+        {
+          "key": "Cn1c2[n+](C)c3cccc(c31)CCC(F)CCC2",
+          "drd2_logodds": 0.08001342304187686,
+          "qed": 0.632790707695517,
+          "clogp": 2.609800000000001
+        },
+        {
+          "key": "C[n+]1c2n(CN)c3c(cccc31)CCC(F)CCC2",
+          "drd2_logodds": 1.005763295140492,
+          "qed": 0.7837012105387351,
+          "clogp": 1.9889999999999992
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 1.005763295140492,
+          "climb_achieved": 6.813254224502838
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 1.005763295140492,
+          "climb_achieved": 6.813254224502838
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 1.005763295140492,
+          "climb_achieved": 6.813254224502838
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": true,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": 0.3506066765892738,
+      "develop_greedy_score": 0.6446696998405289,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.011242764618640377,
+          "greedy_immediate": 0.5773249269001731,
+          "chosen_immediate": 0.5600143997113499,
+          "greedy_future": 0.6446696998405289,
+          "best_future": 0.6559124644591693,
+          "greedy_success": true
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.011818401435434334,
+          "greedy_immediate": 0.6266542692275122,
+          "chosen_immediate": 0.47672795673716833,
+          "greedy_future": 0.6446696998405289,
+          "best_future": 0.6564881012759632,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.0024730931565574155,
+          "greedy_immediate": 0.6410231668551036,
+          "chosen_immediate": 0.6406189743170625,
+          "greedy_future": 0.6446696998405289,
+          "best_future": 0.6471427929970863,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.6446696998405289,
+          "chosen_immediate": 0.6446696998405289,
+          "greedy_future": 0.6446696998405289,
+          "best_future": 0.6446696998405289,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 47,
+      "seconds": 541.8
+    },
+    {
+      "index": 6,
+      "source": "CC(C)C#CC(c1ccc(Cl)cc1)N1CCC(CC(=O)O)CC1c1ccc(C(F)(F)F)cc1",
+      "switch_state": "C#CC12CC(Cc3cc(Cl)ccc31)c1c(C(F)F)ccc(c1F)C1CC(CC(=O)O)CCN12",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "CC(C)C#CC(c1ccc(Cl)cc1)N1CCC(CC(=O)O)CC1c1ccc(C(F)(F)F)cc1",
+          "drd2_logodds": -1.3331148428111532,
+          "qed": 0.47174770861276766,
+          "clogp": 6.987300000000006
+        },
+        {
+          "key": "CC(C)C#CC(c1ccc(Cl)cc1)N1CCC(CC(=O)O)CC1c1ccc(C(F)F)cc1F",
+          "drd2_logodds": 0.1159448555493976,
+          "qed": 0.4532133274600284,
+          "clogp": 7.045200000000005
+        },
+        {
+          "key": "C#CC(c1ccc(Cl)cc1)N1CCC(CC(=O)O)CC1c1ccc(C(F)F)c(C(C)C)c1F",
+          "drd2_logodds": 1.143224472554001,
+          "qed": 0.43058620280495014,
+          "clogp": 7.142400000000005
+        },
+        {
+          "key": "C#CC1c2ccc(Cl)cc2CC(C)c2c(C(F)F)ccc(c2F)C2CC(CC(=O)O)CCN12",
+          "drd2_logodds": 2.04870165382071,
+          "qed": 0.5033064542829209,
+          "clogp": 6.6786000000000065
+        },
+        {
+          "key": "C#CC12CC(Cc3cc(Cl)ccc31)c1c(C(F)F)ccc(c1F)C1CC(CC(=O)O)CCN12",
+          "drd2_logodds": 2.897913047583388,
+          "qed": 0.5381319472697893,
+          "clogp": 6.216600000000005
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 2.897913047583388,
+          "climb_achieved": 4.231027890394541
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 2.897913047583388,
+          "climb_achieved": 4.231027890394541
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 2.897913047583388,
+          "climb_achieved": 4.231027890394541
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -1.0716351804682898,
+      "develop_greedy_score": 0.40256079537540734,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": -0.1939678427685322,
+          "chosen_immediate": -0.1939678427685322,
+          "greedy_future": 0.40256079537540734,
+          "best_future": 0.40256079537540734,
+          "greedy_success": false
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.19690648060166793,
+          "chosen_immediate": 0.19690648060166793,
+          "greedy_future": 0.40256079537540734,
+          "best_future": 0.40256079537540734,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 7,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.03262249323503974,
+          "greedy_immediate": 0.3645727035238629,
+          "chosen_immediate": 0.35863212395292615,
+          "greedy_future": 0.40256079537540734,
+          "best_future": 0.4351832886104471,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.40256079537540734,
+          "chosen_immediate": 0.40256079537540734,
+          "greedy_future": 0.40256079537540734,
+          "best_future": 0.40256079537540734,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 46,
+      "seconds": 1455.6
+    },
+    {
+      "index": 7,
+      "source": "O=C1c2cc(O)c(O)c(O)c2C(=O)c2cccc(O)c21",
+      "switch_state": "O=C1c2cc([SH3])c(O)cc2Cc2ccc(O)c(O)c21",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "O=C1c2cc(O)c(O)c(O)c2C(=O)c2cccc(O)c21",
+          "drd2_logodds": -2.3816505293633794,
+          "qed": 0.4581921386248092,
+          "clogp": 1.2843999999999998
+        },
+        {
+          "key": "O=C1c2ccc(O)c(O)c2C(=O)c2ccc(O)c(O)c21",
+          "drd2_logodds": -1.551504060728983,
+          "qed": 0.4581921386248092,
+          "clogp": 1.2843999999999998
+        },
+        {
+          "key": "O=C1c2ccc(O)c(O)c2Cc2ccc(O)c(O)c21",
+          "drd2_logodds": -1.2818408837245865,
+          "qed": 0.4594607721118595,
+          "clogp": 1.6441999999999997
+        },
+        {
+          "key": "O=C1c2cc(O)c(O)cc2Cc2ccc(O)c(O)c21",
+          "drd2_logodds": -0.639421755629008,
+          "qed": 0.4594607721118595,
+          "clogp": 1.6441999999999997
+        },
+        {
+          "key": "O=C1c2cc([SH3])c(O)cc2Cc2ccc(O)c(O)c21",
+          "drd2_logodds": -0.09544334375304087,
+          "qed": 0.5460221079769897,
+          "clogp": 1.6918999999999995
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": -0.09544334375304087,
+          "climb_achieved": 2.2862071856103388
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -0.09544334375304087,
+          "climb_achieved": 2.2862071856103388
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -0.09544334375304087,
+          "climb_achieved": 2.2862071856103388
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -0.20319766092147964,
+      "develop_greedy_score": 0.6405514086109672,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.014501802974202116,
+          "greedy_immediate": 0.33421833970346154,
+          "chosen_immediate": 0.15214416311455997,
+          "greedy_future": 0.6405514086109672,
+          "best_future": 0.6550532115851693,
+          "greedy_success": true
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.002111671481247579,
+          "greedy_immediate": 0.5545415961666819,
+          "chosen_immediate": 0.40725560832681695,
+          "greedy_future": 0.6405514086109672,
+          "best_future": 0.6426630800922147,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.6298491836767475,
+          "chosen_immediate": 0.6298491836767475,
+          "greedy_future": 0.6405514086109672,
+          "best_future": 0.6405514086109672,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.6405514086109672,
+          "chosen_immediate": 0.6405514086109672,
+          "greedy_future": 0.6405514086109672,
+          "best_future": 0.6405514086109672,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 47,
+      "seconds": 457.0
+    },
+    {
+      "index": 8,
+      "source": "COc1ccc2nc(-c3cccc(F)c3)sc2c1",
+      "switch_state": "Oc1ccc2c(c1)[SH4]C(c1cc(F)cc3c1C3)=[SH3]2",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "COc1ccc2nc(-c3cccc(F)c3)sc2c1",
+          "drd2_logodds": -6.717454100073776,
+          "qed": 0.690572765211144,
+          "clogp": 4.111000000000002
+        },
+        {
+          "key": "COc1ccc2c(c1)SC(c1cccc(F)c1)=[SH3]2",
+          "drd2_logodds": -4.212412968199103,
+          "qed": 0.7797245862451341,
+          "clogp": 3.407200000000002
+        },
+        {
+          "key": "Cc1cc(F)cc(C2=[SH3]c3ccc(O)cc3S2)c1",
+          "drd2_logodds": -2.6656692088228517,
+          "qed": 0.8078317530918588,
+          "clogp": 3.4126200000000004
+        },
+        {
+          "key": "Cc1cc(F)cc(C2=[SH3]c3ccc(O)cc3[SH4]2)c1",
+          "drd2_logodds": -0.8633372946279174,
+          "qed": 0.7970702027588256,
+          "clogp": 2.3418200000000002
+        },
+        {
+          "key": "Oc1ccc2c(c1)[SH4]C(c1cc(F)cc3c1C3)=[SH3]2",
+          "drd2_logodds": 0.7071133283808836,
+          "qed": 0.6763684530926429,
+          "clogp": 1.937600000000001
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 0.7071133283808836,
+          "climb_achieved": 7.42456742845466
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 0.7071133283808836,
+          "climb_achieved": 7.42456742845466
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": 0.7071133283808836,
+          "climb_achieved": 7.42456742845466
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": true,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": 0.15257506119451744,
+      "develop_greedy_score": 0.5963793186983523,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.014289028135489601,
+          "greedy_immediate": 0.5048584959857174,
+          "chosen_immediate": -0.21922549794878388,
+          "greedy_future": 0.5963793186983523,
+          "best_future": 0.6106683468338419,
+          "greedy_success": true
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.0026601320529230366,
+          "greedy_immediate": 0.5834768059141491,
+          "chosen_immediate": 0.22151209678312092,
+          "greedy_future": 0.5963793186983523,
+          "best_future": 0.5990394507512753,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.5876378510342047,
+          "chosen_immediate": 0.5876378510342047,
+          "greedy_future": 0.5963793186983523,
+          "best_future": 0.5963793186983523,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.5963793186983523,
+          "chosen_immediate": 0.5963793186983523,
+          "greedy_future": 0.5963793186983523,
+          "best_future": 0.5963793186983523,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 45,
+      "seconds": 513.2
+    },
+    {
+      "index": 9,
+      "source": "C=C1CCCC2C1(C)CCP(C)C2(C)CC1=C2OC(C)(C)N=C2C=C(OC)C1O",
+      "switch_state": "CCC1(C)N=C2C(=C3CC45CCC6(CCCCC64C2=C(OC)C3O)CCP5)O1",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "C=C1CCCC2C1(C)CCP(C)C2(C)CC1=C2OC(C)(C)N=C2C=C(OC)C1O",
+          "drd2_logodds": -4.503387636060904,
+          "qed": 0.4954699148718183,
+          "clogp": 5.379400000000006
+        },
+        {
+          "key": "C=C1CCCC23C4=C(OC)C(O)C(=C5OC(C)(C)N=C54)CC2(C)P(C)CCC13C",
+          "drd2_logodds": -4.162391709598875,
+          "qed": 0.47693073606666186,
+          "clogp": 5.133400000000005
+        },
+        {
+          "key": "C=C1CCCC23C4=C(OC)C(O)C(=C5OC(C)(C)N=C54)CC24CCC13CCP4C",
+          "drd2_logodds": -4.031397170870433,
+          "qed": 0.4920286720519348,
+          "clogp": 4.887400000000005
+        },
+        {
+          "key": "C=C1CCCC23C4=C(OC)C(O)C(=C5OC(C)(CC)N=C54)CC24CCC13CCP4",
+          "drd2_logodds": -3.8917781038021184,
+          "qed": 0.520394466835842,
+          "clogp": 4.844300000000006
+        },
+        {
+          "key": "CCC1(C)N=C2C(=C3CC45CCC6(CCCCC64C2=C(OC)C3O)CCP5)O1",
+          "drd2_logodds": -3.7783398761020335,
+          "qed": 0.6838887527830965,
+          "clogp": 4.678200000000007
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -3.7783398761020335,
+          "climb_achieved": 0.7250477599588709
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -3.7783398761020335,
+          "climb_achieved": 0.7250477599588709
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -3.7783398761020335,
+          "climb_achieved": 0.7250477599588709
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -0.3478516576592105,
+      "develop_greedy_score": 0.5290226676500387,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.19036156824003891,
+          "chosen_immediate": 0.19036156824003866,
+          "greedy_future": 0.5290226676500387,
+          "best_future": 0.5290226676500387,
+          "greedy_success": true
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.41608626815623495,
+          "chosen_immediate": 0.41608626815623495,
+          "greedy_future": 0.5290226676500387,
+          "best_future": 0.5290226676500387,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.4857164075099598,
+          "chosen_immediate": 0.4857164075099598,
+          "greedy_future": 0.5290226676500387,
+          "best_future": 0.5290226676500387,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.5290226676500387,
+          "chosen_immediate": 0.5290226676500387,
+          "greedy_future": 0.5290226676500387,
+          "best_future": 0.5290226676500387,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 48,
+      "seconds": 1027.4
+    },
+    {
+      "index": 10,
+      "source": "Cc1ccc(-c2nc(N)c3cc(Cc4ccccc4)sc3n2)o1",
+      "switch_state": "Cc1ccc(C2NC(N)N3CC4(Cc5cc(S)ccc54)SC3N2)o1",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "Cc1ccc(-c2nc(N)c3cc(Cc4ccccc4)sc3n2)o1",
+          "drd2_logodds": -7.138827106303352,
+          "qed": 0.6059094235272763,
+          "clogp": 4.432720000000002
+        },
+        {
+          "key": "Cc1ccc(C2NC(N)C3CC(Cc4ccccc4)SC3N2)o1",
+          "drd2_logodds": -2.07847152391368,
+          "qed": 0.8080759914732104,
+          "clogp": 2.7547200000000007
+        },
+        {
+          "key": "Cc1ccc(C2NC(N)C3CC4(Cc5ccccc54)SC3N2)o1",
+          "drd2_logodds": -0.42549132623055264,
+          "qed": 0.7513540251985321,
+          "clogp": 2.5950200000000008
+        },
+        {
+          "key": "Cc1ccc(C2NC(N)N3CC4(Cc5ccccc54)SC3N2)o1",
+          "drd2_logodds": 0.726849052863779,
+          "qed": 0.741835964882792,
+          "clogp": 1.8057199999999995
+        },
+        {
+          "key": "Cc1ccc(C2NC(N)N3CC4(Cc5cc(S)ccc54)SC3N2)o1",
+          "drd2_logodds": 1.6276796635146689,
+          "qed": 0.5842823504844449,
+          "clogp": 2.09442
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 1.6276796635146689,
+          "climb_achieved": 8.76650676981802
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 1.6276796635146689,
+          "climb_achieved": 8.76650676981802
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 1.6276796635146689,
+          "climb_achieved": 8.76650676981802
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -0.07391965868803149,
+      "develop_greedy_score": 0.5564302930211633,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.09914506987995375,
+          "greedy_immediate": 0.41400455767204375,
+          "chosen_immediate": 0.35705484903190354,
+          "greedy_future": 0.5564302930211633,
+          "best_future": 0.6555753629011171,
+          "greedy_success": true
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.06716107270556326,
+          "greedy_immediate": 0.49964474276702037,
+          "chosen_immediate": 0.47436609266325347,
+          "greedy_future": 0.5564302930211633,
+          "best_future": 0.6235913657267266,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.05465783404550251,
+          "greedy_immediate": 0.540010960069779,
+          "chosen_immediate": 0.5244480248749654,
+          "greedy_future": 0.5564302930211633,
+          "best_future": 0.6110881270666658,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.5564302930211633,
+          "chosen_immediate": 0.5564302930211633,
+          "greedy_future": 0.5564302930211633,
+          "best_future": 0.5564302930211633,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 49,
+      "seconds": 768.0
+    },
+    {
+      "index": 11,
+      "source": "O=C(I)Nc1cc[n+](CC(=O)c2ccc(Cl)cc2)cc1",
+      "switch_state": "Nc1cc[n+](CCc2cc(S)c(Cl)cc2C(=[SH4])I)cc1",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "O=C(I)Nc1cc[n+](CC(=O)c2ccc(Cl)cc2)cc1",
+          "drd2_logodds": -8.19462156425119,
+          "qed": 0.2803394118092404,
+          "clogp": 3.4773000000000014
+        },
+        {
+          "key": "Nc1cc[n+](CC(=O)c2ccc(Cl)cc2C(=O)I)cc1",
+          "drd2_logodds": -5.035969765484036,
+          "qed": 0.37073839504028533,
+          "clogp": 2.6678000000000006
+        },
+        {
+          "key": "Nc1cc[n+](CC(=O)c2cc(S)c(Cl)cc2C(=O)I)cc1",
+          "drd2_logodds": -3.547689678508961,
+          "qed": 0.2561670134815631,
+          "clogp": 2.956500000000001
+        },
+        {
+          "key": "Nc1cc[n+](CCc2cc(S)c(Cl)cc2C(=O)I)cc1",
+          "drd2_logodds": -1.844363717930454,
+          "qed": 0.34562568326985277,
+          "clogp": 3.316300000000001
+        },
+        {
+          "key": "Nc1cc[n+](CCc2cc(S)c(Cl)cc2C(=[SH4])I)cc1",
+          "drd2_logodds": -0.6924406669453471,
+          "qed": 0.2478122936043405,
+          "clogp": 2.780800000000001
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": -0.6924406669453471,
+          "climb_achieved": 7.502180897305842
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -0.6924406669453471,
+          "climb_achieved": 7.502180897305842
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -0.6924406669453471,
+          "climb_achieved": 7.502180897305842
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -1.12215690100032,
+      "develop_greedy_score": 0.6127983495404358,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.0014878239419183759,
+          "greedy_immediate": -0.313776224179973,
+          "chosen_immediate": -0.3579426940881909,
+          "greedy_future": 0.6127983495404358,
+          "best_future": 0.6142861734823541,
+          "greedy_success": false
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.24838395032994834,
+          "chosen_immediate": 0.24838395032994834,
+          "greedy_future": 0.6127983495404358,
+          "best_future": 0.6127983495404358,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 7,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.5707707437429673,
+          "chosen_immediate": 0.5707707437429673,
+          "greedy_future": 0.6127983495404358,
+          "best_future": 0.6127983495404358,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.6127983495404358,
+          "chosen_immediate": 0.6127983495404358,
+          "greedy_future": 0.6127983495404358,
+          "best_future": 0.6127983495404358,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 46,
+      "seconds": 562.5
+    },
+    {
+      "index": 12,
+      "source": "CS(=O)(=O)Nc1ccc(OCC(O)CN(CCc2ccc(Cl)c(Cl)c2)Cc2ccc(O)cc2)cc1",
+      "switch_state": "CS(=O)(=O)Nc1cc2c(cc1O)OCCCN(CCc1ccc(Cl)c(Cl)c1)CC1CCC(N)C2C1",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "CS(=O)(=O)Nc1ccc(OCC(O)CN(CCc2ccc(Cl)c(Cl)c2)Cc2ccc(O)cc2)cc1",
+          "drd2_logodds": -2.145510931933714,
+          "qed": 0.3124119966984135,
+          "clogp": 4.555100000000004
+        },
+        {
+          "key": "CS(=O)(=O)Nc1ccc(OCCCN(CCc2ccc(Cl)c(Cl)c2)Cc2ccc(O)cc2)cc1O",
+          "drd2_logodds": 0.12810473449180437,
+          "qed": 0.21379559409928378,
+          "clogp": 5.289900000000006
+        },
+        {
+          "key": "CS(=O)(=O)Nc1ccc(OCCCN(CCc2ccc(Cl)c(Cl)c2)CC2CCC(O)CC2)cc1O",
+          "drd2_logodds": 1.9897603960366923,
+          "qed": 0.25839032990531696,
+          "clogp": 4.935200000000007
+        },
+        {
+          "key": "CS(=O)(=O)Nc1ccc(OCCCN(CCc2ccc(Cl)c(Cl)c2)CC2CCC(N)CC2)cc1O",
+          "drd2_logodds": 3.0558209627056065,
+          "qed": 0.25941201119656887,
+          "clogp": 4.901600000000005
+        },
+        {
+          "key": "CS(=O)(=O)Nc1cc2c(cc1O)OCCCN(CCc1ccc(Cl)c(Cl)c1)CC1CCC(N)C2C1",
+          "drd2_logodds": 3.913318131071189,
+          "qed": 0.4770987499546884,
+          "clogp": 4.608700000000003
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 3.913318131071189,
+          "climb_achieved": 6.058829063004903
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 3.913318131071189,
+          "climb_achieved": 6.058829063004903
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 3.913318131071189,
+          "climb_achieved": 6.058829063004903
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -0.5200235387165518,
+      "develop_greedy_score": 0.24982894278264148,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.125569337267487,
+          "greedy_immediate": -0.1215970010169621,
+          "chosen_immediate": -0.30503256852422206,
+          "greedy_future": 0.24982894278264148,
+          "best_future": 0.3753982800501285,
+          "greedy_success": false
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 7,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.023903212302685835,
+          "chosen_immediate": 0.023903212302685835,
+          "greedy_future": 0.24982894278264148,
+          "best_future": 0.24982894278264148,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.021791340505635776,
+          "greedy_immediate": 0.14022673401025193,
+          "chosen_immediate": 0.08939342037261243,
+          "greedy_future": 0.24982894278264148,
+          "best_future": 0.27162028328827725,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 7,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.24982894278264148,
+          "chosen_immediate": 0.24982894278264148,
+          "greedy_future": 0.24982894278264148,
+          "best_future": 0.24982894278264148,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 46,
+      "seconds": 1311.8
+    },
+    {
+      "index": 13,
+      "source": "C=CCNCCn1ccc2ccc3ncccc3c21",
+      "switch_state": "C=CCNCCc1c[nH]c2cc(S)ccncc(S)cc12",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "C=CCNCCn1ccc2ccc3ncccc3c21",
+          "drd2_logodds": -1.4994591260977932,
+          "qed": 0.5578630210616393,
+          "clogp": 2.9651000000000014
+        },
+        {
+          "key": "C=CCNCCc1c[nH]c2c1ccc1ncccc12",
+          "drd2_logodds": 1.4200996142893751,
+          "qed": 0.5403036796297075,
+          "clogp": 3.034200000000001
+        },
+        {
+          "key": "C=CCNCCc1c[nH]c2c1ccc1nccc(S)c12",
+          "drd2_logodds": 2.8282384530602176,
+          "qed": 0.3817913342366523,
+          "clogp": 3.322900000000002
+        },
+        {
+          "key": "C=CCNCCc1c[nH]c2cc(S)ccncccc12",
+          "drd2_logodds": 3.1369297484798455,
+          "qed": 0.44806587162489436,
+          "clogp": 3.294100000000001
+        },
+        {
+          "key": "C=CCNCCc1c[nH]c2cc(S)ccncc(S)cc12",
+          "drd2_logodds": 3.4921786890013804,
+          "qed": 0.3866762881461234,
+          "clogp": 3.5828000000000015
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 3.4921786890013804,
+          "climb_achieved": 4.991637815099174
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 3.4921786890013804,
+          "climb_achieved": 4.991637815099174
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 3.4921786890013804,
+          "climb_achieved": 4.991637815099174
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -0.6868365603187789,
+      "develop_greedy_score": 0.6653421300768352,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.12445977329907813,
+          "chosen_immediate": 0.12445977329907813,
+          "greedy_future": 0.6653421300768352,
+          "best_future": 0.6653421300768352,
+          "greedy_success": true
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.3921656040768367,
+          "chosen_immediate": 0.3921656040768367,
+          "greedy_future": 0.6653421300768352,
+          "best_future": 0.6653421300768352,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.004506193114027224,
+          "greedy_immediate": 0.654458339116086,
+          "chosen_immediate": 0.6414823232186665,
+          "greedy_future": 0.6653421300768352,
+          "best_future": 0.6698483231908624,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.6653421300768352,
+          "chosen_immediate": 0.6653421300768352,
+          "greedy_future": 0.6653421300768352,
+          "best_future": 0.6653421300768352,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 42,
+      "seconds": 604.5
+    },
+    {
+      "index": 14,
+      "source": "COc1cccc(C=Nn2c(N)c(S(=O)(=O)c3cccs3)c3nc4ccccc4nc32)c1",
+      "switch_state": "COc1cccc2c1C1(S(=O)(=[IH])c3cccs3)C(N)N(N=C2)C2NC3CC4CCC3N4C21",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "COc1cccc(C=Nn2c(N)c(S(=O)(=O)c3cccs3)c3nc4ccccc4nc32)c1",
+          "drd2_logodds": -6.0355358067703335,
+          "qed": 0.3950210974248582,
+          "clogp": 3.951800000000002
+        },
+        {
+          "key": "COc1cccc(C=NN2C(N)C(S(=O)(=O)c3cccs3)C3NC4CCCCC4NC32)c1",
+          "drd2_logodds": -4.302991909079888,
+          "qed": 0.5652705574991018,
+          "clogp": 1.7321999999999997
+        },
+        {
+          "key": "COc1cccc(C=NN2C(N)C(S(=O)(=O)c3cccs3)C3C2NC2CC4CCC2N43)c1",
+          "drd2_logodds": -2.2319314531829697,
+          "qed": 0.6339954855723795,
+          "clogp": 1.4366999999999994
+        },
+        {
+          "key": "COc1cccc(C=NN2C(N)C(S(=O)(=[IH])c3cccs3)C3C2NC2CC4CCC2N43)c1",
+          "drd2_logodds": -0.513784402501609,
+          "qed": 0.4146400375352477,
+          "clogp": 2.3886000000000003
+        },
+        {
+          "key": "COc1cccc2c1C1(S(=O)(=[IH])c3cccs3)C(N)N(N=C2)C2NC3CC4CCC3N4C21",
+          "drd2_logodds": 0.6377049851886669,
+          "qed": 0.5400482555178838,
+          "clogp": 2.2288999999999994
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 0.6377049851886669,
+          "climb_achieved": 6.673240791959
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 0.6377049851886669,
+          "climb_achieved": 6.673240791959
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": 0.6377049851886669,
+          "climb_achieved": 6.673240791959
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -0.20174203075733926,
+      "develop_greedy_score": 0.4249604867854701,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.06925235891896558,
+          "greedy_immediate": 0.10662933160397133,
+          "chosen_immediate": 0.04543401179656177,
+          "greedy_future": 0.4249604867854701,
+          "best_future": 0.4942128457044357,
+          "greedy_success": true
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.21833248167336997,
+          "chosen_immediate": 0.21833248167336997,
+          "greedy_future": 0.4249604867854701,
+          "best_future": 0.4249604867854701,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.014182843584226945,
+          "greedy_immediate": 0.3659376479737086,
+          "chosen_immediate": 0.3215404169857317,
+          "greedy_future": 0.4249604867854701,
+          "best_future": 0.43914333036969705,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.4249604867854701,
+          "chosen_immediate": 0.4249604867854701,
+          "greedy_future": 0.4249604867854701,
+          "best_future": 0.4249604867854701,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 39,
+      "seconds": 1199.3
+    },
+    {
+      "index": 15,
+      "source": "CC(C)CN(C)C(=O)c1nc(-c2ccccc2)c2cc(Cl)ccc2n1",
+      "switch_state": "CCCN(C)CC1NC2CCC(Cl)CC2C(c2cccc(C)c2)[SH4]1",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "CC(C)CN(C)C(=O)c1nc(-c2ccccc2)c2cc(Cl)ccc2n1",
+          "drd2_logodds": -8.609308631300813,
+          "qed": 0.6838237628746593,
+          "clogp": 4.678200000000004
+        },
+        {
+          "key": "CC(C)CN(C)C(=O)C1NC2CCC(Cl)CC2C(c2ccccc2)N1",
+          "drd2_logodds": -4.607834347082328,
+          "qed": 0.8076081597959238,
+          "clogp": 3.137100000000001
+        },
+        {
+          "key": "CC(C)CN(C)CC1NC2CCC(Cl)CC2C(c2ccccc2)N1",
+          "drd2_logodds": -1.5311749693333272,
+          "qed": 0.7950507296640077,
+          "clogp": 3.610500000000002
+        },
+        {
+          "key": "CCCN(C)CC1NC2CCC(Cl)CC2C(c2cccc(C)c2)N1",
+          "drd2_logodds": 0.9300107019427017,
+          "qed": 0.7940417637696976,
+          "clogp": 3.672920000000002
+        },
+        {
+          "key": "CCCN(C)CC1NC2CCC(Cl)CC2C(c2cccc(C)c2)[SH4]1",
+          "drd2_logodds": 3.114440950084429,
+          "qed": 0.7939166790296497,
+          "clogp": 3.7457200000000053
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 3.114440950084429,
+          "climb_achieved": 11.723749581385242
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 3.114440950084429,
+          "climb_achieved": 11.723749581385242
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 3.114440950084429,
+          "climb_achieved": 11.723749581385242
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": true,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": 0.08980020586506203,
+      "develop_greedy_score": 0.6581224538048752,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.5878858901322221,
+          "chosen_immediate": 0.5878858901322221,
+          "greedy_future": 0.6581224538048752,
+          "best_future": 0.6581224538048752,
+          "greedy_success": true
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.625209449189985,
+          "chosen_immediate": 0.625209449189985,
+          "greedy_future": 0.6581224538048752,
+          "best_future": 0.6581224538048752,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.643953417601402,
+          "chosen_immediate": 0.643953417601402,
+          "greedy_future": 0.6581224538048752,
+          "best_future": 0.6581224538048752,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.6581224538048752,
+          "chosen_immediate": 0.6581224538048752,
+          "greedy_future": 0.6581224538048752,
+          "best_future": 0.6581224538048752,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 44,
+      "seconds": 664.5
+    },
+    {
+      "index": 16,
+      "source": "CC(=O)Nc1ccc(C=CC(=O)c2sc(-n3nc(-c4ccccc4)cc3C3CCCCC3)nc2C)cc1",
+      "switch_state": "CC(=[SH4])Nc1ccc(CCCc2sc(-n3nc(-c4ccccc4)cc3C3CCCNC3)nc2C)cc1",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "CC(=O)Nc1ccc(C=CC(=O)c2sc(-n3nc(-c4ccccc4)cc3C3CCCCC3)nc2C)cc1",
+          "drd2_logodds": -3.8394501949020263,
+          "qed": 0.21053522620442813,
+          "clogp": 7.206420000000006
+        },
+        {
+          "key": "CC(=[SH4])Nc1ccc(C=CC(=O)c2sc(-n3nc(-c4ccccc4)cc3C3CCCCC3)nc2C)cc1",
+          "drd2_logodds": -2.644954374299423,
+          "qed": 0.15977749121654417,
+          "clogp": 6.936420000000007
+        },
+        {
+          "key": "CC(=[SH4])Nc1ccc(CCC(=O)c2sc(-n3nc(-c4ccccc4)cc3C3CCCCC3)nc2C)cc1",
+          "drd2_logodds": -2.196821252882807,
+          "qed": 0.19900581395515834,
+          "clogp": 6.855820000000007
+        },
+        {
+          "key": "CC(=[SH4])Nc1ccc(CCCc2sc(-n3nc(-c4ccccc4)cc3C3CCCCC3)nc2C)cc1",
+          "drd2_logodds": -1.8752827594480135,
+          "qed": 0.25053283056554243,
+          "clogp": 7.2156200000000075
+        },
+        {
+          "key": "CC(=[SH4])Nc1ccc(CCCc2sc(-n3nc(-c4ccccc4)cc3C3CCCNC3)nc2C)cc1",
+          "drd2_logodds": -1.4875476862091255,
+          "qed": 0.2961461324353355,
+          "clogp": 5.634920000000007
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -1.4875476862091255,
+          "climb_achieved": 2.351902508692901
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -1.4875476862091255,
+          "climb_achieved": 2.351902508692901
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -1.4875476862091255,
+          "climb_achieved": 2.351902508692901
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -1.0660358969517452,
+      "develop_greedy_score": 0.04486571960274533,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": -0.64328394206237,
+          "chosen_immediate": -0.6605729315514821,
+          "greedy_future": 0.04486571960274533,
+          "best_future": 0.04486571960274533,
+          "greedy_success": false
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": -0.2955702784702912,
+          "chosen_immediate": -0.2955702784702912,
+          "greedy_future": 0.04486571960274533,
+          "best_future": 0.04486571960274533,
+          "greedy_success": false
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": -0.025000750319573387,
+          "chosen_immediate": -0.025000750319573387,
+          "greedy_future": 0.04486571960274533,
+          "best_future": 0.04486571960274533,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.04486571960274533,
+          "chosen_immediate": 0.04486571960274533,
+          "greedy_future": 0.04486571960274533,
+          "best_future": 0.04486571960274533,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 39,
+      "seconds": 1893.6
+    },
+    {
+      "index": 17,
+      "source": "CC(=NNC(=O)c1ccc(O)nn1)c1cccnc1",
+      "switch_state": "C=c1cc(C(=N)O)c2cncc(c2)c(C)n[nH]c1=[SH4]",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "CC(=NNC(=O)c1ccc(O)nn1)c1cccnc1",
+          "drd2_logodds": -8.526204932418565,
+          "qed": 0.6232997652798649,
+          "clogp": 0.7311999999999999
+        },
+        {
+          "key": "Cc1n[nH]c(=O)c2cc(c(O)nn2)c2cncc1c2",
+          "drd2_logodds": -4.862898303143714,
+          "qed": 0.6163075629592664,
+          "clogp": 0.8375199999999998
+        },
+        {
+          "key": "Cc1n[nH]c(=O)c2cnc(O)c(c2)c2cncc1c2",
+          "drd2_logodds": -4.193019713120745,
+          "qed": 0.6330047355828611,
+          "clogp": 1.4425199999999998
+        },
+        {
+          "key": "Cc1n[nH]c(=[SH4])c2cnc(O)c(c2)c2cncc1c2",
+          "drd2_logodds": -3.6113216102151693,
+          "qed": 0.6123220381161788,
+          "clogp": 1.7410099999999995
+        },
+        {
+          "key": "C=c1cc(C(=N)O)c2cncc(c2)c(C)n[nH]c1=[SH4]",
+          "drd2_logodds": -2.948062827707461,
+          "qed": 0.41344855212905623,
+          "clogp": 1.0619799999999997
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -2.948062827707461,
+          "climb_achieved": 5.578142104711104
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -2.948062827707461,
+          "climb_achieved": 5.578142104711104
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -2.948062827707461,
+          "climb_achieved": 5.578142104711104
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -0.6140536399595847,
+      "develop_greedy_score": 0.5790889479622116,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.046561178273352155,
+          "greedy_immediate": 0.1478970357581408,
+          "chosen_immediate": -0.022861003077931905,
+          "greedy_future": 0.5790889479622116,
+          "best_future": 0.6256501262355637,
+          "greedy_success": true
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.017412675435544145,
+          "greedy_immediate": 0.47919304051223394,
+          "chosen_immediate": 0.47455009551205507,
+          "greedy_future": 0.5790889479622116,
+          "best_future": 0.5965016233977557,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.020561150781518878,
+          "greedy_immediate": 0.5467601763658059,
+          "chosen_immediate": 0.5208917756035848,
+          "greedy_future": 0.5790889479622116,
+          "best_future": 0.5996500987437304,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.5790889479622116,
+          "chosen_immediate": 0.5790889479622116,
+          "greedy_future": 0.5790889479622116,
+          "best_future": 0.5790889479622116,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 46,
+      "seconds": 513.6
+    },
+    {
+      "index": 18,
+      "source": "C=Cc1cccc(NC(=O)NC2CCC(C(=O)I3CCN(C)CC3)CC2)c1",
+      "switch_state": "C=Cc1ccc([IH4])c(NC(=[IH])NC2CCC(C(=O)[IH]CCN3CCC3)CC2)c1",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "C=Cc1cccc(NC(=O)NC2CCC(C(=O)I3CCN(C)CC3)CC2)c1",
+          "drd2_logodds": -2.4986962722355965,
+          "qed": 0.378501506071293,
+          "clogp": 3.9883000000000033
+        },
+        {
+          "key": "C=Cc1ccc([IH4])c(NC(=O)NC2CCC(C(=O)I3CCN(C)CC3)CC2)c1",
+          "drd2_logodds": -1.1506844834460892,
+          "qed": 0.30396768854279527,
+          "clogp": 3.5221000000000027
+        },
+        {
+          "key": "C=Cc1ccc([IH4])c(NC(=[IH])NC2CCC(C(=O)I3CCN(C)CC3)CC2)c1",
+          "drd2_logodds": 0.15372151459551464,
+          "qed": 0.2564251379041072,
+          "clogp": 3.6568000000000023
+        },
+        {
+          "key": "C=Cc1ccc([IH4])c(NC(=[IH])NC2CCC(C(=O)I3CCN4CC3C4)CC2)c1",
+          "drd2_logodds": 1.3909722141645728,
+          "qed": 0.25769370463696284,
+          "clogp": 3.409200000000002
+        },
+        {
+          "key": "C=Cc1ccc([IH4])c(NC(=[IH])NC2CCC(C(=O)[IH]CCN3CCC3)CC2)c1",
+          "drd2_logodds": 1.9194093118247149,
+          "qed": 0.2202265818765768,
+          "clogp": 3.6137000000000024
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 1.9194093118247149,
+          "climb_achieved": 4.418105584060312
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 1.9194093118247149,
+          "climb_achieved": 4.418105584060312
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 1.9194093118247149,
+          "climb_achieved": 4.418105584060312
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -1.2107007725550307,
+      "develop_greedy_score": 0.5573740873668513,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": -0.6029586101161551,
+          "chosen_immediate": -0.6029586101161551,
+          "greedy_future": 0.5573740873668513,
+          "best_future": 0.5573740873668513,
+          "greedy_success": false
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.05359624687603015,
+          "greedy_immediate": -0.19075205032401865,
+          "chosen_immediate": -0.2606121795600521,
+          "greedy_future": 0.5573740873668513,
+          "best_future": 0.6109703342428815,
+          "greedy_success": false
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.32956459312668324,
+          "chosen_immediate": 0.32956459312668324,
+          "greedy_future": 0.5573740873668513,
+          "best_future": 0.5573740873668513,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.5573740873668513,
+          "chosen_immediate": 0.5573740873668513,
+          "greedy_future": 0.5573740873668513,
+          "best_future": 0.5573740873668513,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 44,
+      "seconds": 1102.8
+    },
+    {
+      "index": 19,
+      "source": "Cc1ccc(C=Cc2ncc([N+](=O)[O-])n2CCOC(=O)c2c[nH]c3ccccc23)cc1",
+      "switch_state": "Cc1ccc(C=CC2NCC([N+](=O)[O-])N2CC[SH4]Cc2c[nH]c3cccc([IH4])c23)cc1",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "Cc1ccc(C=Cc2ncc([N+](=O)[O-])n2CCOC(=O)c2c[nH]c3ccccc23)cc1",
+          "drd2_logodds": -6.98010591293714,
+          "qed": 0.2692069975430756,
+          "clogp": 4.608420000000003
+        },
+        {
+          "key": "Cc1ccc(C=CC2NCC([N+](=O)[O-])N2CCOC(=O)c2c[nH]c3ccccc23)cc1",
+          "drd2_logodds": -4.692259497424484,
+          "qed": 0.345928662952544,
+          "clogp": 3.180620000000001
+        },
+        {
+          "key": "Cc1ccc(C=CC2NCC([N+](=O)[O-])N2CC[SH4]C(=O)c2c[nH]c3ccccc23)cc1",
+          "drd2_logodds": -1.823486754080345,
+          "qed": 0.4354820734429784,
+          "clogp": 2.8264200000000024
+        },
+        {
+          "key": "Cc1ccc(C=CC2NCC([N+](=O)[O-])N2CC[SH4]Cc2c[nH]c3ccccc23)cc1",
+          "drd2_logodds": 0.3725939458465499,
+          "qed": 0.3295944881679134,
+          "clogp": 3.1862200000000023
+        },
+        {
+          "key": "Cc1ccc(C=CC2NCC([N+](=O)[O-])N2CC[SH4]Cc2c[nH]c3cccc([IH4])c23)cc1",
+          "drd2_logodds": 2.434313379466198,
+          "qed": 0.19384579575380229,
+          "clogp": 2.7200200000000034
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 2.434313379466198,
+          "climb_achieved": 9.414419292403338
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 2.434313379466198,
+          "climb_achieved": 9.414419292403338
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 2.434313379466198,
+          "climb_achieved": 9.414419292403338
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -1.2939165751368051,
+      "develop_greedy_score": 0.04207974234581061,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": -0.8630365980087251,
+          "chosen_immediate": -0.8630365980087251,
+          "greedy_future": 0.04207974234581061,
+          "best_future": 0.04207974234581061,
+          "greedy_success": false
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.009468915678915134,
+          "greedy_immediate": -0.17905314096267244,
+          "chosen_immediate": -0.27792941572097624,
+          "greedy_future": 0.04207974234581061,
+          "best_future": 0.051548658024725746,
+          "greedy_success": false
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.009700385442237322,
+          "greedy_immediate": 0.010783210685065023,
+          "chosen_immediate": 0.010624821111803791,
+          "greedy_future": 0.04207974234581061,
+          "best_future": 0.051780127788047935,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.04207974234581061,
+          "chosen_immediate": 0.04207974234581061,
+          "greedy_future": 0.04207974234581061,
+          "best_future": 0.04207974234581061,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 44,
+      "seconds": 1294.5
+    },
+    {
+      "index": 20,
+      "source": "O=C(NCc1ccccc1)c1ccc2c(O)c(S(=O)(=O)c3ccccc3)c(=O)[nH]c2c1",
+      "switch_state": "C=C1c2ccc3c(O)c(c(=O)[nH]c3c2)S(=O)(=O)c2cccc(c2)-c2cccc(c2)CN1C[SH3]",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "O=C(NCc1ccccc1)c1ccc2c(O)c(S(=O)(=O)c3ccccc3)c(=O)[nH]c2c1",
+          "drd2_logodds": -5.825022799567952,
+          "qed": 0.44652395619075774,
+          "clogp": 2.996500000000001
+        },
+        {
+          "key": "O=C1NCc2cccc(c2)-c2cccc(c2)S(=O)(=O)c2c(O)c3ccc1cc3[nH]c2=O",
+          "drd2_logodds": -4.102995140213048,
+          "qed": 0.39503730687718425,
+          "clogp": 2.9769000000000005
+        },
+        {
+          "key": "C=C1NCc2cccc(c2)-c2cccc(c2)S(=O)(=O)c2c(O)c3ccc1cc3[nH]c2=O",
+          "drd2_logodds": -2.997205793218998,
+          "qed": 0.39403689663296604,
+          "clogp": 3.807400000000003
+        },
+        {
+          "key": "C=C1c2ccc3c(O)c(c(=O)[nH]c3c2)S(=O)(=O)c2cccc(c2)-c2cccc(c2)CN1C",
+          "drd2_logodds": -2.147908839932012,
+          "qed": 0.42526801513585544,
+          "clogp": 4.149600000000004
+        },
+        {
+          "key": "C=C1c2ccc3c(O)c(c(=O)[nH]c3c2)S(=O)(=O)c2cccc(c2)-c2cccc(c2)CN1C[SH3]",
+          "drd2_logodds": -1.4169172959609362,
+          "qed": 0.4334778660760372,
+          "clogp": 3.8717000000000046
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -1.4169172959609362,
+          "climb_achieved": 4.408105503607016
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -1.4169172959609362,
+          "climb_achieved": 4.408105503607016
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -1.4169172959609362,
+          "climb_achieved": 4.408105503607016
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -0.5528338774369986,
+      "develop_greedy_score": 0.2324358968292107,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 7,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.14964435724069328,
+          "greedy_immediate": -0.07518501064184607,
+          "chosen_immediate": -0.15933205407472747,
+          "greedy_future": 0.2324358968292107,
+          "best_future": 0.382080254069904,
+          "greedy_success": false
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.08053225085349527,
+          "chosen_immediate": 0.08053225085349527,
+          "greedy_future": 0.2324358968292107,
+          "best_future": 0.2324358968292107,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.1696929064960963,
+          "chosen_immediate": 0.1696929064960963,
+          "greedy_future": 0.2324358968292107,
+          "best_future": 0.2324358968292107,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.2324358968292107,
+          "chosen_immediate": 0.2324358968292107,
+          "greedy_future": 0.2324358968292107,
+          "best_future": 0.2324358968292107,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 40,
+      "seconds": 979.7
+    },
+    {
+      "index": 21,
+      "source": "O=C1OC2(CCN(C(=O)Nc3ncc(-c4cccc(C(F)F)c4)cn3)CC2)c2ccccc21",
+      "switch_state": "C=C(Nc1ncc(-c2cc(F)cc(CF)c2)cp1)N1CCC(c2ccccc2C=O)CC1",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "O=C1OC2(CCN(C(=O)Nc3ncc(-c4cccc(C(F)F)c4)cn3)CC2)c2ccccc21",
+          "drd2_logodds": -5.102151586998805,
+          "qed": 0.5811299290111608,
+          "clogp": 4.7748000000000035
+        },
+        {
+          "key": "C=C(Nc1ncc(-c2cccc(C(F)F)c2)cn1)N1CCC2(CC1)OC(=O)c1ccccc12",
+          "drd2_logodds": -0.5662949584316073,
+          "qed": 0.5463691920956538,
+          "clogp": 5.126000000000005
+        },
+        {
+          "key": "C=C(Nc1ncc(-c2cccc(C(F)F)c2)cn1)N1CCC(c2ccccc2C=O)CC1",
+          "drd2_logodds": 0.8322438067274952,
+          "qed": 0.4866988016323981,
+          "clogp": 5.656400000000005
+        },
+        {
+          "key": "C=C(Nc1ncc(-c2cc(F)cc(CF)c2)cn1)N1CCC(c2ccccc2C=O)CC1",
+          "drd2_logodds": 2.122639989084539,
+          "qed": 0.5097478973482004,
+          "clogp": 5.327400000000005
+        },
+        {
+          "key": "C=C(Nc1ncc(-c2cc(F)cc(CF)c2)cp1)N1CCC(c2ccccc2C=O)CC1",
+          "drd2_logodds": 3.4729005676800666,
+          "qed": 0.4159975862634159,
+          "clogp": 6.5125000000000055
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 3.4729005676800666,
+          "climb_achieved": 8.575052154678872
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 3.4729005676800666,
+          "climb_achieved": 8.575052154678872
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 3.4729005676800666,
+          "climb_achieved": 8.575052154678872
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -1.22610283384496,
+      "develop_greedy_score": 0.3521915702552228,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.04237891196374338,
+          "greedy_immediate": -0.5552900897502855,
+          "chosen_immediate": -0.665168765537569,
+          "greedy_future": 0.3521915702552228,
+          "best_future": 0.3945704822189662,
+          "greedy_success": false
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.0015701731886654802,
+          "greedy_immediate": -0.07303483082240138,
+          "chosen_immediate": -0.15415347529905032,
+          "greedy_future": 0.3521915702552228,
+          "best_future": 0.3537617434438883,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.0018992918432824135,
+          "greedy_immediate": 0.211550174677352,
+          "chosen_immediate": 0.20663598576977074,
+          "greedy_future": 0.3521915702552228,
+          "best_future": 0.3540908620985052,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.3521915702552228,
+          "chosen_immediate": 0.3521915702552228,
+          "greedy_future": 0.3521915702552228,
+          "best_future": 0.3521915702552228,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 45,
+      "seconds": 1086.9
+    },
+    {
+      "index": 22,
+      "source": "C#CCNC(=O)COCOC(C=C(C=CC(=O)OCC)OC(C)=O)COC(C)=O",
+      "switch_state": "O=C1C=CC2=CC(COC(=O)C=CC(=O)O2)OCOCC(=O)SCC#C[SH2]#CCO1",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "C#CCNC(=O)COCOC(C=C(C=CC(=O)OCC)OC(C)=O)COC(C)=O",
+          "drd2_logodds": -4.621180982825654,
+          "qed": 0.0661862608682505,
+          "clogp": 0.22450000000000014
+        },
+        {
+          "key": "C#CCNC(=O)COCOC1C=C(C=CC(=O)OCC)OC(=O)C=CC(=O)OC1",
+          "drd2_logodds": -4.197744352793269,
+          "qed": 0.13749896134038628,
+          "clogp": -0.2454999999999996
+        },
+        {
+          "key": "C#CCSC(=O)COCOC1C=C(C=CC(=O)OCC)OC(=O)C=CC(=O)OC1",
+          "drd2_logodds": -3.9986599819606123,
+          "qed": 0.13201347419830228,
+          "clogp": 0.8980999999999997
+        },
+        {
+          "key": "C#CCSC(=O)COCOC1C=C(C=CC(=O)OCC#[SH3])OC(=O)C=CC(=O)OC1",
+          "drd2_logodds": -3.8581097032952645,
+          "qed": 0.11926627622618481,
+          "clogp": 0.23179999999999995
+        },
+        {
+          "key": "O=C1C=CC2=CC(COC(=O)C=CC(=O)O2)OCOCC(=O)SCC#C[SH2]#CCO1",
+          "drd2_logodds": -3.773424605809419,
+          "qed": 0.2889676701412071,
+          "clogp": 0.3764999999999997
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -3.773424605809419,
+          "climb_achieved": 0.8477563770162346
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -3.773424605809419,
+          "climb_achieved": 0.8477563770162346
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -3.773424605809419,
+          "climb_achieved": 0.8477563770162346
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -1.006039564949556,
+      "develop_greedy_score": 0.09167247530805686,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 7,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.11081646535848017,
+          "greedy_immediate": -0.6070350493045698,
+          "chosen_immediate": -0.6285152934586873,
+          "greedy_future": 0.09167247530805686,
+          "best_future": 0.20248894066653703,
+          "greedy_success": false
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.009415925981653375,
+          "greedy_immediate": -0.28494555867280086,
+          "chosen_immediate": -0.47695255006922976,
+          "greedy_future": 0.09167247530805686,
+          "best_future": 0.10108840128971024,
+          "greedy_success": false
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.016522444772023442,
+          "greedy_immediate": -0.016494497777546423,
+          "chosen_immediate": -0.18459828602081008,
+          "greedy_future": 0.09167247530805686,
+          "best_future": 0.1081949200800803,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.09167247530805686,
+          "chosen_immediate": 0.09167247530805686,
+          "greedy_future": 0.09167247530805686,
+          "best_future": 0.09167247530805686,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 43,
+      "seconds": 809.9
+    },
+    {
+      "index": 23,
+      "source": "CC(=O)OCCCC1(C)C(C)=CCC2C3Cc4cn[nH]c4NC3(C)CCC21",
+      "switch_state": "CC(=CCN1CCCC2(C)Nc3[nH]ncc3CC12)N(C)CCCO[IH](C)=O",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "CC(=O)OCCCC1(C)C(C)=CCC2C3Cc4cn[nH]c4NC3(C)CCC21",
+          "drd2_logodds": -4.788190498348174,
+          "qed": 0.4651900459451088,
+          "clogp": 4.478400000000003
+        },
+        {
+          "key": "CC1=CCC2C3Cc4cn[nH]c4NC3(C)CCC2C1(C)CCCO[IH](C)=O",
+          "drd2_logodds": -4.048592009987436,
+          "qed": 0.2638080009470446,
+          "clogp": 5.0609000000000055
+        },
+        {
+          "key": "CC1=CCN2C3Cc4cn[nH]c4NC3(C)CCC2C1(C)CCCO[IH](C)=O",
+          "drd2_logodds": -3.0184953833741455,
+          "qed": 0.28525365710803097,
+          "clogp": 3.8614000000000033
+        },
+        {
+          "key": "CC(=CCN1CCCC2(C)Nc3[nH]ncc3CC12)C(C)CCCO[IH](C)=O",
+          "drd2_logodds": -2.3247356382773203,
+          "qed": 0.24856311101179657,
+          "clogp": 4.109000000000003
+        },
+        {
+          "key": "CC(=CCN1CCCC2(C)Nc3[nH]ncc3CC12)N(C)CCCO[IH](C)=O",
+          "drd2_logodds": -1.1280644372144957,
+          "qed": 0.33115810704819565,
+          "clogp": 2.972100000000002
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -1.1280644372144957,
+          "climb_achieved": 3.6601260611336777
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -1.1280644372144957,
+          "climb_achieved": 3.6601260611336777
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -1.1280644372144957,
+          "climb_achieved": 3.6601260611336777
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -0.8575177007396425,
+      "develop_greedy_score": 0.6031117375609302,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.005457775500776085,
+          "greedy_immediate": 0.1297176026803978,
+          "chosen_immediate": 0.046456092566720834,
+          "greedy_future": 0.6031117375609302,
+          "best_future": 0.6085695130617063,
+          "greedy_success": true
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.010283823991209862,
+          "greedy_immediate": 0.5086724487234244,
+          "chosen_immediate": 0.26567644072115204,
+          "greedy_future": 0.6031117375609302,
+          "best_future": 0.61339556155214,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.5612768151636136,
+          "chosen_immediate": 0.5520717379211456,
+          "greedy_future": 0.6031117375609302,
+          "best_future": 0.6031117375609302,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 7,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.6031117375609302,
+          "chosen_immediate": 0.6031117375609302,
+          "greedy_future": 0.6031117375609302,
+          "best_future": 0.6031117375609302,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 46,
+      "seconds": 1168.2
+    },
+    {
+      "index": 24,
+      "source": "C=C1CCC=CCCC(C2=CCC(C(C)[IH2])[IH3][SH2]2)CC1O",
+      "switch_state": "C=C1CCC=CC2CC([IH2])C3[IH3][SH2]c4cc3c2p4CC1O",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "C=C1CCC=CCCC(C2=CCC(C(C)[IH2])[IH3][SH2]2)CC1O",
+          "drd2_logodds": -4.8299381034167315,
+          "qed": 0.3167742421360338,
+          "clogp": 4.264700000000008
+        },
+        {
+          "key": "C=C1CCC=CCCN(C2=CCC(C(C)[IH2])[IH3][SH2]2)CC1O",
+          "drd2_logodds": -4.209412320724302,
+          "qed": 0.3315788959537559,
+          "clogp": 3.1278000000000064
+        },
+        {
+          "key": "C=C1CCC=CCc2c3cc(n2CC1O)[SH2][IH3]C3C(C)[IH2]",
+          "drd2_logodds": -2.6761110156996555,
+          "qed": 0.3337392248590619,
+          "clogp": 3.2798000000000043
+        },
+        {
+          "key": "C=C1CCC=CCc2c3cc(p2CC1O)[SH2][IH3]C3C(C)[IH2]",
+          "drd2_logodds": -1.5829767077775851,
+          "qed": 0.31021628171145116,
+          "clogp": 4.464900000000008
+        },
+        {
+          "key": "C=C1CCC=CC2CC([IH2])C3[IH3][SH2]c4cc3c2p4CC1O",
+          "drd2_logodds": -0.797673068264831,
+          "qed": 0.2890316286665026,
+          "clogp": 4.389800000000008
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": -0.797673068264831,
+          "climb_achieved": 4.032265035151901
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -0.797673068264831,
+          "climb_achieved": 4.032265035151901
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -0.797673068264831,
+          "climb_achieved": 4.032265035151901
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -1.0004359820272424,
+      "develop_greedy_score": 0.6078215992429279,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.007925399254496979,
+          "greedy_immediate": -0.7122636845090176,
+          "chosen_immediate": -0.7135900115001544,
+          "greedy_future": 0.6078215992429279,
+          "best_future": 0.6157469984974249,
+          "greedy_success": false
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.020135397871518745,
+          "greedy_immediate": 0.24954608004866743,
+          "chosen_immediate": 0.1354637507565538,
+          "greedy_future": 0.6078215992429279,
+          "best_future": 0.6279569971144466,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.007925399254496979,
+          "greedy_immediate": 0.4837465028387663,
+          "chosen_immediate": 0.48154079103726266,
+          "greedy_future": 0.6078215992429279,
+          "best_future": 0.6157469984974249,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.6078215992429279,
+          "chosen_immediate": 0.6078215992429279,
+          "greedy_future": 0.6078215992429279,
+          "best_future": 0.6078215992429279,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 46,
+      "seconds": 626.8
+    },
+    {
+      "index": 25,
+      "source": "COc1ncccc1NC(=O)C(C)(C)Cc1ccc(C(=O)Oc2ccc(C(=N)N)cc2F)s1",
+      "switch_state": "COc1cc(C(=N)N)cc(F)c1OC(=O)c1ccc(CC2(C)CN(C3CCCNC3)C2)s1",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "COc1ncccc1NC(=O)C(C)(C)Cc1ccc(C(=O)Oc2ccc(C(=N)N)cc2F)s1",
+          "drd2_logodds": -7.798759847453236,
+          "qed": 0.1976152404652705,
+          "clogp": 4.001470000000002
+        },
+        {
+          "key": "COC1NCCCC1NC(=O)C(C)(C)Cc1ccc(C(=O)Oc2ccc(C(=N)N)cc2F)s1",
+          "drd2_logodds": -4.066917109806377,
+          "qed": 0.2008749833609112,
+          "clogp": 2.7998699999999994
+        },
+        {
+          "key": "COC1NCCCC1NCC(C)(C)Cc1ccc(C(=O)Oc2ccc(C(=N)N)cc2F)s1",
+          "drd2_logodds": -2.610219365123279,
+          "qed": 0.197097336818794,
+          "clogp": 3.27327
+        },
+        {
+          "key": "COC1NCCCC1N1CC(C)(Cc2ccc(C(=O)Oc3ccc(C(=N)N)cc3F)s2)C1",
+          "drd2_logodds": -1.041364227977677,
+          "qed": 0.2542277855182945,
+          "clogp": 2.9793700000000003
+        },
+        {
+          "key": "COc1cc(C(=N)N)cc(F)c1OC(=O)c1ccc(CC2(C)CN(C3CCCNC3)C2)s1",
+          "drd2_logodds": 0.68230416088331,
+          "qed": 0.2541978898028955,
+          "clogp": 3.0154700000000014
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 0.68230416088331,
+          "climb_achieved": 8.481064008336546
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 0.68230416088331,
+          "climb_achieved": 8.481064008336546
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": 0.68230416088331,
+          "climb_achieved": 8.481064008336546
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -1.1020054973252822,
+      "develop_greedy_score": 0.5194644781115042,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": -0.011335261973403786,
+          "chosen_immediate": -0.011335261973403786,
+          "greedy_future": 0.5194644781115042,
+          "best_future": 0.5194644781115042,
+          "greedy_success": true
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.3407521460778653,
+          "chosen_immediate": 0.3407521460778653,
+          "greedy_future": 0.5194644781115042,
+          "best_future": 0.5194644781115042,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 7,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.46248765833736166,
+          "chosen_immediate": 0.46248765833736166,
+          "greedy_future": 0.5194644781115042,
+          "best_future": 0.5194644781115042,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 7,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.5194644781115042,
+          "chosen_immediate": 0.5194644781115042,
+          "greedy_future": 0.5194644781115042,
+          "best_future": 0.5194644781115042,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 45,
+      "seconds": 1345.3
+    },
+    {
+      "index": 26,
+      "source": "Cc1ccc(Oc2ccc(-c3nnc(-c4ccccc4)o3)cc2[N+](=O)[O-])cc1C",
+      "switch_state": "Cc1ccc2oc3cc4c5c6nnc(o6)c6c4c4c(c5c3[N+](=O)[O-])c4c6c2c1C",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "Cc1ccc(Oc2ccc(-c3nnc(-c4ccccc4)o3)cc2[N+](=O)[O-])cc1C",
+          "drd2_logodds": -6.194424397626504,
+          "qed": 0.3211334449596563,
+          "clogp": 5.720940000000004
+        },
+        {
+          "key": "Cc1ccc2oc3ccc(cc3[N+](=O)[O-])c3nnc(o3)c3ccccc3c2c1C",
+          "drd2_logodds": -4.992527119910116,
+          "qed": 0.2622598134014039,
+          "clogp": 5.924840000000004
+        },
+        {
+          "key": "Cc1ccc2oc3ccc4c5nnc(o5)c5ccc(cc5c2c1C)c4c3[N+](=O)[O-]",
+          "drd2_logodds": -4.224132344795666,
+          "qed": 0.25694817710271317,
+          "clogp": 5.953640000000004
+        },
+        {
+          "key": "Cc1ccc2oc3ccc4c5nnc(o5)c5cc6c(c4c3[N+](=O)[O-])c6c5c2c1C",
+          "drd2_logodds": -3.8666631627591945,
+          "qed": 0.25623466945747236,
+          "clogp": 5.982440000000003
+        },
+        {
+          "key": "Cc1ccc2oc3cc4c5c6nnc(o6)c6c4c4c(c5c3[N+](=O)[O-])c4c6c2c1C",
+          "drd2_logodds": -3.6270621289479656,
+          "qed": 0.2558824534818021,
+          "clogp": 6.011240000000002
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -3.6270621289479656,
+          "climb_achieved": 2.5673622686785382
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -3.6270621289479656,
+          "climb_achieved": 2.5673622686785382
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -3.6270621289479656,
+          "climb_achieved": 2.5673622686785382
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -1.212526198542646,
+      "develop_greedy_score": 0.10858953311411976,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": -0.2854092680008575,
+          "chosen_immediate": -0.2854092680008575,
+          "greedy_future": 0.10858953311411976,
+          "best_future": 0.10858953311411976,
+          "greedy_success": false
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": -0.11172908435682408,
+          "chosen_immediate": -0.11172908435682408,
+          "greedy_future": 0.10858953311411976,
+          "best_future": 0.10858953311411976,
+          "greedy_success": false
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 7,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.024484581061852684,
+          "chosen_immediate": 0.024484581061852684,
+          "greedy_future": 0.10858953311411976,
+          "best_future": 0.10858953311411976,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.10858953311411976,
+          "chosen_immediate": 0.10858953311411976,
+          "greedy_future": 0.10858953311411976,
+          "best_future": 0.10858953311411976,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 48,
+      "seconds": 907.9
+    },
+    {
+      "index": 27,
+      "source": "CCCCCOc1ccc(-c2nc(CNC(C)CCCCC)co2)cc1",
+      "switch_state": "CCCCCN(Cc1cocn1)C1CCC(CC)c2c(O)cccc2C1",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "CCCCCOc1ccc(-c2nc(CNC(C)CCCCC)co2)cc1",
+          "drd2_logodds": -5.046729520866146,
+          "qed": 0.44816105225302555,
+          "clogp": 5.9690000000000065
+        },
+        {
+          "key": "CCCCCC(C)N(CCCCC)Cc1coc(-c2ccc(O)cc2)n1",
+          "drd2_logodds": -2.0943736913873874,
+          "qed": 0.4721417032751648,
+          "clogp": 6.0082000000000075
+        },
+        {
+          "key": "CCCCCN1Cc2coc(n2)-c2ccc(O)c(c2)C(CC)CCC1C",
+          "drd2_logodds": 0.06811429943538772,
+          "qed": 0.6965914967243589,
+          "clogp": 5.715300000000006
+        },
+        {
+          "key": "CCCCCN(Cc1cocn1)C(C)CCC(CC)c1ccccc1O",
+          "drd2_logodds": 1.6401020942795772,
+          "qed": 0.49188844993500425,
+          "clogp": 5.734900000000007
+        },
+        {
+          "key": "CCCCCN(Cc1cocn1)C1CCC(CC)c2c(O)cccc2C1",
+          "drd2_logodds": 3.302336673624568,
+          "qed": 0.5168592660994671,
+          "clogp": 5.271100000000006
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 3.302336673624568,
+          "climb_achieved": 8.349066194490714
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 3.302336673624568,
+          "climb_achieved": 8.349066194490714
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": true,
+          "best_logodds": 3.302336673624568,
+          "climb_achieved": 8.349066194490714
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -0.6661664871629641,
+      "develop_greedy_score": 0.5755336619798256,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.030144837162010774,
+          "greedy_immediate": -0.07709581689615329,
+          "chosen_immediate": -0.4730353363321758,
+          "greedy_future": 0.5755336619798256,
+          "best_future": 0.6056784991418364,
+          "greedy_success": false
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.024621315082319684,
+          "greedy_immediate": 0.3833112265526696,
+          "chosen_immediate": 0.2682076968203123,
+          "greedy_future": 0.5755336619798256,
+          "best_future": 0.6001549770621453,
+          "greedy_success": true
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 2.220446049250313e-16,
+          "greedy_immediate": 0.525775629062936,
+          "chosen_immediate": 0.5257756290629357,
+          "greedy_future": 0.5755336619798256,
+          "best_future": 0.5755336619798258,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.5755336619798256,
+          "chosen_immediate": 0.5755336619798256,
+          "greedy_future": 0.5755336619798256,
+          "best_future": 0.5755336619798256,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 44,
+      "seconds": 1024.7
+    },
+    {
+      "index": 28,
+      "source": "C=ICN(Cc1nnc(S[SH2]CN(CO)c2nc(C)cs2)[nH]1)C(=O)c1ccccc1",
+      "switch_state": "C=CC=C[SH4]CN(CI=C)Cc1nnc(S[SH2]CN(CO)c2nccs2)n1C",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "C=ICN(Cc1nnc(S[SH2]CN(CO)c2nc(C)cs2)[nH]1)C(=O)c1ccccc1",
+          "drd2_logodds": -8.183342957626863,
+          "qed": 0.1186435356667192,
+          "clogp": 3.1910200000000017
+        },
+        {
+          "key": "C=ICN(Cc1nnc(S[SH2]CN(CO)c2nc(C)cs2)[nH]1)C(=O)[SH2]1=CC=CC=C1",
+          "drd2_logodds": -4.202352906380189,
+          "qed": 0.10809135119778494,
+          "clogp": 3.089820000000003
+        },
+        {
+          "key": "C=ICN(Cc1nnc(S[SH2]CN(CO)c2nccs2)n1C)C(=O)[SH2]1=CC=CC=C1",
+          "drd2_logodds": -3.632532484564706,
+          "qed": 0.1121599371262022,
+          "clogp": 2.791800000000002
+        },
+        {
+          "key": "C=ICN(Cc1nnc(S[SH2]CN(CO)c2nccs2)n1C)C[SH2]1=CC=CC=C1",
+          "drd2_logodds": -2.9789922553558084,
+          "qed": 0.10248130081118981,
+          "clogp": 2.6293000000000015
+        },
+        {
+          "key": "C=CC=C[SH4]CN(CI=C)Cc1nnc(S[SH2]CN(CO)c2nccs2)n1C",
+          "drd2_logodds": -2.1452039334841517,
+          "qed": 0.09254264921239644,
+          "clogp": 2.3721999999999994
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -2.1452039334841517,
+          "climb_achieved": 6.038139024142711
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -2.1452039334841517,
+          "climb_achieved": 6.038139024142711
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -2.1452039334841517,
+          "climb_achieved": 6.038139024142711
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": true,
+      "develop_verified_success": true,
+      "develop_switch_score": -1.5000444575073426,
+      "develop_greedy_score": 0.41490682612468205,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": -1.0798922013392334,
+          "chosen_immediate": -1.0798922013392334,
+          "greedy_future": 0.41490682612468205,
+          "best_future": 0.41490682612468205,
+          "greedy_success": false
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": -0.16142179201619547,
+          "chosen_immediate": -0.16142179201619547,
+          "greedy_future": 0.41490682612468205,
+          "best_future": 0.41490682612468205,
+          "greedy_success": false
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.26820649458104673,
+          "chosen_immediate": 0.24157063737204634,
+          "greedy_future": 0.41490682612468205,
+          "best_future": 0.41490682612468205,
+          "greedy_success": true
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": 0.41490682612468205,
+          "chosen_immediate": 0.41490682612468205,
+          "greedy_future": 0.41490682612468205,
+          "best_future": 0.41490682612468205,
+          "greedy_success": true
+        }
+      ],
+      "kernel_calls": 49,
+      "seconds": 1093.3
+    },
+    {
+      "index": 29,
+      "source": "CC(=O)N1CCOc2ccc(S(=O)(=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)cc21",
+      "switch_state": "CC(=O)N1CCOc2c([IH4])cc([SH2](=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=[IH2]3)c([IH4])c21",
+      "prefix_length": 4,
+      "trajectory": [
+        {
+          "key": "CC(=O)N1CCOc2ccc(S(=O)(=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)cc21",
+          "drd2_logodds": -5.22841096083501,
+          "qed": 0.36667203478478605,
+          "clogp": 0.6605000000000001
+        },
+        {
+          "key": "CC(=O)N1CCOc2c([IH4])cc(S(=O)(=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)cc21",
+          "drd2_logodds": -4.028112117403692,
+          "qed": 0.21265204054544615,
+          "clogp": 0.19429999999999992
+        },
+        {
+          "key": "CC(=O)N1CCOc2c([IH4])cc(S(=O)(=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)c([IH4])c21",
+          "drd2_logodds": -3.2299439096853266,
+          "qed": 0.1827415779246637,
+          "clogp": -0.2719000000000003
+        },
+        {
+          "key": "CC(=O)N1CCOc2c([IH4])cc([SH2](=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)c([IH4])c21",
+          "drd2_logodds": -2.6485839389809094,
+          "qed": 0.18104766469801245,
+          "clogp": -0.4733999999999996
+        },
+        {
+          "key": "CC(=O)N1CCOc2c([IH4])cc([SH2](=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=[IH2]3)c([IH4])c21",
+          "drd2_logodds": -2.075372151585997,
+          "qed": 0.16986740303215492,
+          "clogp": -0.8345999999999998
+        }
+      ],
+      "potency_reach": {
+        "0.3": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -2.075372151585997,
+          "climb_achieved": 3.153038809249013
+        },
+        "0.5": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -2.075372151585997,
+          "climb_achieved": 3.153038809249013
+        },
+        "0.7": {
+          "start_satisfies": false,
+          "end_satisfies": false,
+          "best_logodds": -2.075372151585997,
+          "climb_achieved": 3.153038809249013
+        }
+      },
+      "develop_start_success": false,
+      "develop_switch_success": false,
+      "develop_greedy_success": false,
+      "develop_verified_success": false,
+      "develop_switch_score": -1.4031752660066352,
+      "develop_greedy_score": -0.6523711473891106,
+      "decision_states": [
+        {
+          "step": 0,
+          "remaining": 4,
+          "candidates": 8,
+          "top1_disagreement": true,
+          "sacrificial": true,
+          "sacrifice_won": true,
+          "future_regret": 0.2434299455763062,
+          "greedy_immediate": -1.0864048909569806,
+          "chosen_immediate": -1.0893443565197796,
+          "greedy_future": -0.6523711473891106,
+          "best_future": -0.4089412018128044,
+          "greedy_success": false
+        },
+        {
+          "step": 1,
+          "remaining": 3,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": -0.8005787341218329,
+          "chosen_immediate": -0.8005787341218329,
+          "greedy_future": -0.6523711473891106,
+          "best_future": -0.6523711473891106,
+          "greedy_success": false
+        },
+        {
+          "step": 2,
+          "remaining": 2,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": -0.7243627006505384,
+          "chosen_immediate": -0.7243627006505384,
+          "greedy_future": -0.6523711473891106,
+          "best_future": -0.6523711473891106,
+          "greedy_success": false
+        },
+        {
+          "step": 3,
+          "remaining": 1,
+          "candidates": 8,
+          "top1_disagreement": false,
+          "sacrificial": false,
+          "sacrifice_won": false,
+          "future_regret": 0.0,
+          "greedy_immediate": -0.6523711473891106,
+          "chosen_immediate": -0.6523711473891106,
+          "greedy_future": -0.6523711473891106,
+          "best_future": -0.6523711473891106,
+          "greedy_success": false
+        }
+      ],
+      "kernel_calls": 43,
+      "seconds": 993.6
+    }
+  ]
+}

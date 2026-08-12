@@ -242,6 +242,55 @@ goal domination — never to maximise COMPOSE's advantage.**
 Calibrate on held-in sources only. Freeze the goal language **and** the switch
 templates before any held-out panel is touched.
 
+## Calibration outcome — 30 held-in sources, cohort `e402e318`
+
+`diagnostics/retarget_calibration_result.json`. Ran once.
+
+**1. Potency: all three thresholds usable, and reachability is settled.** 0/30
+sources start satisfied; after the 4-edit prefix 17/13/10 of 30 reach P ≥
+0.3/0.5/0.7. Median climb **+4.78 log-odds in four greedy edits** (p90 +8.59,
+max +11.72). This closes the question the movability census left open — the
+matched-pair pessimism was wrong and the position-independent best-of-N reading
+was right. **P ≥ 0.5 at 13/30 is the operating point**: neither floor nor
+ceiling.
+
+**2. Developability at 4 post-switch edits: CEILING.** greedy 29/30, verified
+29/30, binary headroom **0**. The region is simply easy to reach with four edits
+and a ~500-wide fiber.
+
+**3. Horizon:** contrastive decisions concentrate early — 22/30 states show
+top-1 disagreement at remaining 4, then 16, 17, and 0 at remaining 1 (where
+lookahead is vacuous by construction).
+
+**4. THE GATE: CLOSED.** Not for absence of disagreement — lookahead would act
+differently at 55/120 decision states (46%), on 27/30 sources. But the outcome
+differed on **0** of those 27. A ceiling, not a null: a real planning advantage
+would have had nowhere to show.
+
+Per the anti-tuning rule the region is **not** retuned. This is the outcome the
+stop rule anticipated: *"greedy and verified retarget identical → dynamic
+switching works, future-aware planning adds nothing for that goal. Do not force
+a controller claim from it."*
+
+### Instrument defect found in this analysis — do not reuse the statistic
+
+The intended headline, sacrifice-to-win, is **circular and was withdrawn**. The
+lookahead action is chosen as `argmax(V_G)`, so `V_G(chosen) >= V_G(greedy)`
+holds by construction and "the sacrifice won" is true whenever the two disagree
+and do not tie. The data confirm it: of 55 disagreements, 50 higher, 5 tied,
+**0 lower** — a genuine measurement would show losses.
+
+C0 avoided this by scoring on an independent evaluation sample. That safeguard
+was dropped here on the reasoning that a deterministic `V_G` has no winner's
+curse. That reasoning is wrong: the bias is selecting and scoring with the same
+function, and determinism does not remove it. Only two quantities from this run
+are admissible — **top-1 disagreement** (non-circular: it says the controller
+would act differently) and the **endpoint comparison**.
+
+Any future planning-signal probe must either score on an independent
+continuation or compare endpoints. Deterministic lookahead does not license
+dropping the split.
+
 ## Protocol (unchanged from the agreed design; recorded so it can be preregistered)
 
 **Switch classes.** `P → P∧D` (late constraint addition), `D → P∧D` (reverse late
