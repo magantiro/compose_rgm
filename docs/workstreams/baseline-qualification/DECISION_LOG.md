@@ -110,6 +110,26 @@ rejected, and whether it changes a frozen object.
   the license gap is not a compute gate and cannot be resolved by us.
 - **Changes a frozen object.** No.
 
+## 2026-08-12 — The "DO NOT implement during the C1 work" guard was removed from the external rows
+
+- **Decision.** Each external comparator row in `configs/comparator_registry_v3.json`
+  carried the note "Relevant only for optimization. DO NOT implement during the C1
+  work." That sentence was dropped when the rows were rewritten.
+- **Evidence before.** The guard existed to stop the Claim-1 workstream from being
+  pulled into external-baseline plumbing before the reference-law result existed.
+  `docs/EXPERIMENT_PLAN.md` records Experiment 1 as **done developmentally**
+  (1.46 nats over uniform legal rewriting on the frozen matched reserve), and
+  `docs/workstreams/PARALLEL_WORKSTREAMS_AND_HANDOFF.md` creates this lane
+  specifically to qualify those adapters. The condition the guard protected has
+  therefore expired.
+- **Alternatives rejected.** Keeping the sentence. Rejected: it now reads as a
+  standing prohibition on the very work this lane was created to do, and a stale
+  prohibition is worse than none. The substantive half of the old note — that an
+  external method says nothing about whether `R_theta` learned the declared
+  successor law — was **kept verbatim**, because that half is still true and is
+  the reason externals are `N/A` for C1, C2 and C3.
+- **Changes a frozen object.** No.
+
 ## 2026-08-12 — The oracle-accounting asymmetry is recorded as a fairness blocker, not resolved
 
 - **Decision.** The registry records, but does not settle, the fact that HN-GFN's
