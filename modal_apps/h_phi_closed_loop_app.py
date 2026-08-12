@@ -340,11 +340,13 @@ def run_pair(task: dict[str, Any]) -> dict[str, Any]:
 
 @app.function(image=image, cpu=1.0, memory=4 * 1024, timeout=8 * 60 * 60,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
-def drive(tasks: list[dict[str, Any]]) -> dict[str, Any]:
+def drive(tasks: list[dict[str, Any]],
+          out_dir: str = "h_phi_closed_loop") -> dict[str, Any]:
     """Fan out server-side so a client disconnect cannot stall the run."""
 
     results = [r for r in run_pair.map(tasks) if r]
-    out = Path(RUN_ROOT) / task.get("out_dir", "h_phi_closed_loop") / "aggregate.json"
+    out = Path(RUN_ROOT) / out_dir / "aggregate.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({"pairs": len(results), "per_pair": results},
                               indent=2) + "\n")
     artifact_volume.commit()
