@@ -72,6 +72,10 @@ path-dependent (non-terminal) rewards without a Feynman–Kac potential.
 | **F** | Pre-RingCore exact-control artifacts | **BARRED** | Superseded registry and task selections; the revised manuscript reports no number from them |
 | **G** | Same-base controller table; Pareto/HV-AUC/IGD+; dynamic switching; Pareto fan; pathwise constraints; held-out oracle | **PENDING** | Needs a frozen non-starved edit checkpoint |
 | **G** | Base-B mechanism artifacts | **BARRED** | Superseded CNOF base; the revised manuscript reports no number from them |
+| **4A** | Myopic control leaves known-reachable targets unrecovered; verified remaining-budget control substantially improves exact recovery | **MEASURED (sealed)** | None. 65 endpoint-clean held-out pairs, greedy 26/65 → verified rollout 40/65, paired **+21.5 pp [12.3, 33.5]** exact, rescuing 35.9% [21.2, 52.8] of greedy's 39 failures. Preregistered at `diagnostics/editing_v2_sealed67_preregistration.json`, result at `diagnostics/editing_v2_sealed67_result.json`. Effect size, not McNemar: greedy-only wins are impossible by construction |
+| **4A** | Goal-aware prioritization preserves most or all of that gain at far fewer future continuations | **MEASURED (sealed, secondary)** | None. `h_phi` top-1 40/65 at 35% of continuations; similarity top-2 37/65 (79% gain retention) at 52%; `R_theta` top-1 33/65 (50%) — plausibility is not purpose. Safety property held on every arm: no arm lost a pair greedy recovers |
+| **4A** | "`h_phi` beats similarity" | **NOT CLAIMED** | Not preregistered and not established (development discordance 3-vs-2 at K=1, p=0.50). Exact-target recovery privileges Tanimoto-to-the-answer, so this test bed cannot settle it |
+| **4A** | "`h_phi` reproduces full rollout" | **NOT CLAIMED** | It matches the recovery **count**, not the rescue **set** — misses one of full's rescues, finds one full misses. The rollout controller re-plans after each commit and is not globally optimal, so a smaller shortlist can reach a different successful basin |
 
 ---
 

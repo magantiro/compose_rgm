@@ -317,6 +317,77 @@ no support violation; stability across budgets. **Do not proceed to expensive
 external sweeps until the controller clearly beats the future-blind internal
 baselines.**
 
+### 4A. Exact-target recovery — DONE, SEALED, AND CLOSED
+
+The first goal language run was the narrowest one: `z` is a specific target
+molecule and the objective is exact recovery within a declared edit budget.
+Development panel 24 pairs, then a one-shot sealed panel committed at 571ec9d
+before any `h_phi` work existed. Result:
+`diagnostics/editing_v2_sealed67_result.json`; protocol
+`diagnostics/editing_v2_sealed67_preregistration.json` and its pre-outcome
+amendment.
+
+**Primary — 65 endpoint-clean pairs:**
+
+| arm | recovered | gain retention | rescue-set overlap | continuations |
+|---|---|---|---|---|
+| greedy | 26/65 (40%) | — | — | 0% |
+| verified rollout, full candidate set | 40/65 (62%) | 100% | 14/14 | 100% |
+| `h_phi` top-1 + verified rollout | 40/65 (62%) | 100% | 13/14 | 35% |
+| similarity top-2 + verified rollout | 37/65 (57%) | 79% | 11/14 | 52% |
+| similarity top-1 + verified rollout | 34/65 (52%) | 57% | 8/14 | 35% |
+| `R_theta` top-1 + verified rollout | 33/65 (51%) | 50% | 7/14 | 35% |
+
+Paired difference greedy → verified rollout **+21.5 pp [12.3, 33.5]**, exact,
+rescuing 35.9% [21.2, 52.8] of greedy's 39 failures. Reported as an effect size,
+not a McNemar p-value: the controller keeps greedy's action in every shortlist
+and overrides only on strict improvement, so greedy-only wins are impossible by
+construction and the one-sided discordance is a design property. That same
+property is what makes the safety result meaningful — no arm lost a pair greedy
+recovers, on any panel.
+
+**What this licenses:**
+
+> Myopic control leaves many known-reachable molecular targets unrecovered.
+> Verified remaining-budget control substantially improves exact recovery, and
+> goal-aware prioritization can preserve most or all of that gain while
+> evaluating far fewer future continuations.
+
+**What it does not license:**
+
+- **Not** "`h_phi` beats similarity." Not preregistered, not established. Exact
+  target recovery privileges Tanimoto-to-the-answer; a similarity win here would
+  be a fact about the test bed. `h_phi` is a **secondary efficiency** result.
+- **Not** "`h_phi` reproduces full rollout." It matches the **count**, not the
+  **set** — it misses one of full's rescues and finds one full misses. The
+  rollout controller re-plans after each committed action, so it is not globally
+  optimal over the rewrite graph and a smaller shortlist can steer into a
+  different successful basin. Magnitude and set are not interchangeable.
+- **Not** a claim about the `h_phi` of this plan's goal language. This `h_phi`
+  was trained for one target-molecule objective, not for property directions,
+  boxes or conjunctions.
+
+The separation the three-layer story predicts is now measured: `R_theta` top-1 is
+the **weakest** prioritiser of the three (50% gain retention, 7/14 rescues).
+Plausibility is not purpose.
+
+**This branch is closed.** Do not tune `h_phi`, sweep more `K`, rank all ~500
+successors, build a pairwise `h_phi`, or manufacture another target-recovery
+panel. Development and sealed confirmation both exist; further percentage points
+here are worth less than any of 4B–4D.
+
+### 4B–4D — where the remaining Claim 4 value is
+
+Exact target recovery is the one goal with a privileged non-learned heuristic. The
+capabilities a static optimizer actually lacks are the ones where no such
+heuristic exists:
+
+1. **Dynamic retargeting** from a realized intermediate molecule (Experiment 6).
+2. **Pathwise constraints** — a motif or scaffold valid throughout the
+   trajectory, not merely at the endpoint (Experiment 7).
+3. **A goal with no known target molecule**, where learned or estimated
+   desirability has a real reason to exist.
+
 ---
 
 ## Experiment 5 — Static molecular optimization (two tracks)
@@ -586,8 +657,24 @@ Development run `run_v2_01`, identity chain: reserve `b580fdef6486` / law
 `b0cc66f168f1` / manifest `e27494a46250` / store `b232a6fa069f`, freeze gate
 FROZEN 9/9.
 
-- **Phase 0** — epoch 3 in flight (8,502 → 12,753). Epoch-2 selected step 8,500 at reference-law NLL 2.9238, from an initialization value of 5.4603. Within-family identity improved in all 8 families. Stopping rule preregistered.
-- Everything else in this plan is **not started**.
+- **Phase 0** — done. `R_theta` frozen under the preregistered epoch-level rule.
+- **Experiment 1** — done developmentally. Learning matters: **1.46 nats** over
+  uniform legal rewriting on the frozen matched reserve. Decomposition is
+  identity ≫ family scheduling, which is why this plan de-emphasizes hierarchical
+  scheduling as a novelty source.
+- **Experiment 4A, exact-target recovery** — **done, sealed, and closed** (§4A).
+  Greedy 40% → verified rollout 62% on 65 endpoint-clean held-out pairs;
+  learned top-1 prioritization matches that recovery count at ~35% of the
+  continuation evaluations. Claim 4 is no longer speculative for this goal.
+- **Experiments 2, 3, 5–8** — not started. §4B–4D names the three that now carry
+  the most Claim 4 value.
+
+Superseded en route, recorded so they are not re-run: the C0 planning-signal
+probe on DRD2 was **negative** (`diagnostics/` C0 artifacts) and the
+corpus-trace reconstruction of multi-step histories was **refuted**; the
+evaluation panel was rebuilt fresh from held-out molecules instead. A direct
+`h_phi` **override** controller was also negative — the working controller uses
+`h_phi` only to propose, with a verified rollout making every commit.
 
 ### Known gaps against this plan's requirements
 
