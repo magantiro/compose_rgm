@@ -1,0 +1,1829 @@
+{
+  "schema": "compose.editing_v2.h_phi_closed_loop",
+  "status": "CLOSED_LOOP_ON_THE_24_DEVELOPMENT_PAIRS_SEALED_67_UNTOUCHED",
+  "panel": "development 24, seal 9455db369eb1acf3",
+  "greedy_recovered": 12,
+  "greedy_mean_best_similarity": 0.8589007513671415,
+  "rollout_recovered_experiment_c": 18,
+  "by_threshold": [
+    {
+      "threshold": 0.0,
+      "recovered": 6,
+      "h_phi_only": 0,
+      "greedy_only": 6,
+      "overrides": 83,
+      "mean_best_similarity": 0.7065902338988929
+    },
+    {
+      "threshold": 0.5,
+      "recovered": 9,
+      "h_phi_only": 1,
+      "greedy_only": 4,
+      "overrides": 69,
+      "mean_best_similarity": 0.7173631069108505
+    },
+    {
+      "threshold": 1.0,
+      "recovered": 10,
+      "h_phi_only": 1,
+      "greedy_only": 3,
+      "overrides": 58,
+      "mean_best_similarity": 0.7340249823171492
+    },
+    {
+      "threshold": 1.5,
+      "recovered": 11,
+      "h_phi_only": 1,
+      "greedy_only": 2,
+      "overrides": 51,
+      "mean_best_similarity": 0.7832231705415004
+    },
+    {
+      "threshold": 2.0,
+      "recovered": 12,
+      "h_phi_only": 2,
+      "greedy_only": 2,
+      "overrides": 38,
+      "mean_best_similarity": 0.8236536177299829
+    },
+    {
+      "threshold": 3.0,
+      "recovered": 12,
+      "h_phi_only": 2,
+      "greedy_only": 2,
+      "overrides": 30,
+      "mean_best_similarity": 0.8201610256500308
+    },
+    {
+      "threshold": 4.0,
+      "recovered": 12,
+      "h_phi_only": 1,
+      "greedy_only": 1,
+      "overrides": 16,
+      "mean_best_similarity": 0.8420920080869053
+    },
+    {
+      "threshold": 6.0,
+      "recovered": 12,
+      "h_phi_only": 0,
+      "greedy_only": 0,
+      "overrides": 6,
+      "mean_best_similarity": 0.853187261958
+    }
+  ],
+  "verdict": "h_phi never beats greedy at any threshold. Ceiling 12/24 -- a tie -- reached only by nearly ceasing to act (6 overrides at margin 6.0). At margin 0 it destroys half of greedy's recoveries (6/24). Mean best similarity is below greedy at EVERY threshold. It retains 0% of explicit rollout's gain (greedy 12, rollout 18, h_phi 12). The learned signal is nonzero -- at margin 2.0 it rescues 2 pairs greedy misses -- but it loses 2 others, the ~1:1 rescue/harm trade the offline sweep predicted, now confirmed at pair level.",
+  "per_pair": [
+    {
+      "index": 7,
+      "source": "CCCCC(O)(CC(=O)OC)C(=O)OC1C(OC)=CC23CCCN2CCc2cc4c(cc2C13)OCO4",
+      "target": "CCCCCCC(O)(CC(=O)OC)C(=O)OC1C(OC)=CC23CCCN2CCc2cc4c(cc2C13)OCO4",
+      "verified_steps": 4,
+      "greedy": {
+        "recovered": true,
+        "best": 1.0,
+        "final": 1.0,
+        "overrides": 0,
+        "steps": 2
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": false,
+          "best": 0.9452054794520548,
+          "final": 0.8831168831168831,
+          "overrides": 4,
+          "steps": 4
+        },
+        "0.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "1.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "1.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "2.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "3.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "4.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "6.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        }
+      },
+      "kernel_calls": 5,
+      "seconds": 1054.8
+    },
+    {
+      "index": 11,
+      "source": "CC(=O)N1CCOC(c2c(C(=O)O)sc3ccccc23)C1",
+      "target": "CC(=O)N1CCOC(c2c(C=O)sc3ccccc23)C1",
+      "verified_steps": 5,
+      "greedy": {
+        "recovered": true,
+        "best": 1.0,
+        "final": 1.0,
+        "overrides": 0,
+        "steps": 1
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": false,
+          "best": 0.7115384615384616,
+          "final": 0.2077922077922078,
+          "overrides": 4,
+          "steps": 5
+        },
+        "0.5": {
+          "recovered": false,
+          "best": 0.7115384615384616,
+          "final": 0.5166666666666667,
+          "overrides": 4,
+          "steps": 5
+        },
+        "1.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "1.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "2.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "3.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "4.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "6.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        }
+      },
+      "kernel_calls": 9,
+      "seconds": 401.8
+    },
+    {
+      "index": 10,
+      "source": "O=C(C=Cc1ccc(O)c(O)c1)N1CCCCC1",
+      "target": "O=C(C=Cc1ccc(OC(F)(F)F)cc1)N1CCCCC1",
+      "verified_steps": 5,
+      "greedy": {
+        "recovered": false,
+        "best": 0.725,
+        "final": 0.7,
+        "overrides": 0,
+        "steps": 5
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": false,
+          "best": 0.5476190476190477,
+          "final": 0.2641509433962264,
+          "overrides": 5,
+          "steps": 5
+        },
+        "0.5": {
+          "recovered": false,
+          "best": 0.6,
+          "final": 0.6,
+          "overrides": 5,
+          "steps": 5
+        },
+        "1.0": {
+          "recovered": false,
+          "best": 0.5454545454545454,
+          "final": 0.5333333333333333,
+          "overrides": 5,
+          "steps": 5
+        },
+        "1.5": {
+          "recovered": false,
+          "best": 0.6,
+          "final": 0.3469387755102041,
+          "overrides": 4,
+          "steps": 5
+        },
+        "2.0": {
+          "recovered": false,
+          "best": 0.5454545454545454,
+          "final": 0.2545454545454545,
+          "overrides": 4,
+          "steps": 5
+        },
+        "3.0": {
+          "recovered": false,
+          "best": 0.7,
+          "final": 0.5306122448979592,
+          "overrides": 3,
+          "steps": 5
+        },
+        "4.0": {
+          "recovered": false,
+          "best": 0.725,
+          "final": 0.7,
+          "overrides": 0,
+          "steps": 5
+        },
+        "6.0": {
+          "recovered": false,
+          "best": 0.725,
+          "final": 0.7,
+          "overrides": 0,
+          "steps": 5
+        }
+      },
+      "kernel_calls": 23,
+      "seconds": 673.6
+    },
+    {
+      "index": 6,
+      "source": "Cc1csc2nc(Cc3ccc(C(=O)c4ccc(CO)cc4)cc3)oc(=O)c12",
+      "target": "Cc1csc2nc(Cc3ccc(C(=O)c4cccc(NO)c4)cc3)oc(=O)c12",
+      "verified_steps": 4,
+      "greedy": {
+        "recovered": true,
+        "best": 1.0,
+        "final": 1.0,
+        "overrides": 0,
+        "steps": 2
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 1,
+          "steps": 2
+        },
+        "0.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 1,
+          "steps": 2
+        },
+        "1.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "1.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "2.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "3.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "4.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "6.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        }
+      },
+      "kernel_calls": 3,
+      "seconds": 500.7
+    },
+    {
+      "index": 21,
+      "source": "CCOC(=O)C(Cc1ccccc1)NC(=O)C=Cc1ccccc1",
+      "target": "O=C(C=Cc1ccccc1)NCCc1ccc(O)cc1",
+      "verified_steps": 6,
+      "greedy": {
+        "recovered": false,
+        "best": 0.7894736842105263,
+        "final": 0.7894736842105263,
+        "overrides": 0,
+        "steps": 6
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": false,
+          "best": 0.49019607843137253,
+          "final": 0.49019607843137253,
+          "overrides": 4,
+          "steps": 6
+        },
+        "0.5": {
+          "recovered": false,
+          "best": 0.44642857142857145,
+          "final": 0.43103448275862066,
+          "overrides": 5,
+          "steps": 6
+        },
+        "1.0": {
+          "recovered": false,
+          "best": 0.40384615384615385,
+          "final": 0.2903225806451613,
+          "overrides": 4,
+          "steps": 6
+        },
+        "1.5": {
+          "recovered": false,
+          "best": 0.7209302325581395,
+          "final": 0.7209302325581395,
+          "overrides": 3,
+          "steps": 6
+        },
+        "2.0": {
+          "recovered": false,
+          "best": 0.8108108108108109,
+          "final": 0.7894736842105263,
+          "overrides": 1,
+          "steps": 6
+        },
+        "3.0": {
+          "recovered": false,
+          "best": 0.40384615384615385,
+          "final": 0.39655172413793105,
+          "overrides": 3,
+          "steps": 6
+        },
+        "4.0": {
+          "recovered": false,
+          "best": 0.7894736842105263,
+          "final": 0.7894736842105263,
+          "overrides": 0,
+          "steps": 6
+        },
+        "6.0": {
+          "recovered": false,
+          "best": 0.7894736842105263,
+          "final": 0.7894736842105263,
+          "overrides": 0,
+          "steps": 6
+        }
+      },
+      "kernel_calls": 31,
+      "seconds": 1551.6
+    },
+    {
+      "index": 1,
+      "source": "O=C(NO)c1sc2ccccc2c1Cl",
+      "target": "O=C(NO)c1cc2cc([N+](=O)[O-])ccc2s1",
+      "verified_steps": 4,
+      "greedy": {
+        "recovered": false,
+        "best": 0.6486486486486487,
+        "final": 0.6486486486486487,
+        "overrides": 0,
+        "steps": 4
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": false,
+          "best": 0.4878048780487805,
+          "final": 0.45454545454545453,
+          "overrides": 4,
+          "steps": 4
+        },
+        "0.5": {
+          "recovered": false,
+          "best": 0.2978723404255319,
+          "final": 0.08928571428571429,
+          "overrides": 4,
+          "steps": 4
+        },
+        "1.0": {
+          "recovered": false,
+          "best": 0.40476190476190477,
+          "final": 0.3953488372093023,
+          "overrides": 3,
+          "steps": 4
+        },
+        "1.5": {
+          "recovered": false,
+          "best": 0.4222222222222222,
+          "final": 0.4222222222222222,
+          "overrides": 3,
+          "steps": 4
+        },
+        "2.0": {
+          "recovered": false,
+          "best": 0.6486486486486487,
+          "final": 0.3829787234042553,
+          "overrides": 2,
+          "steps": 4
+        },
+        "3.0": {
+          "recovered": false,
+          "best": 0.4418604651162791,
+          "final": 0.4418604651162791,
+          "overrides": 2,
+          "steps": 4
+        },
+        "4.0": {
+          "recovered": false,
+          "best": 0.6486486486486487,
+          "final": 0.32608695652173914,
+          "overrides": 1,
+          "steps": 4
+        },
+        "6.0": {
+          "recovered": false,
+          "best": 0.6486486486486487,
+          "final": 0.6486486486486487,
+          "overrides": 0,
+          "steps": 4
+        }
+      },
+      "kernel_calls": 20,
+      "seconds": 465.7
+    },
+    {
+      "index": 17,
+      "source": "Oc1cc(O)nc(S)n1",
+      "target": "C#CCCSc1nc(O)cc(O)n1",
+      "verified_steps": 6,
+      "greedy": {
+        "recovered": false,
+        "best": 0.5666666666666667,
+        "final": 0.5666666666666667,
+        "overrides": 0,
+        "steps": 6
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": false,
+          "best": 0.42857142857142855,
+          "final": 0.4,
+          "overrides": 5,
+          "steps": 6
+        },
+        "0.5": {
+          "recovered": false,
+          "best": 0.3225806451612903,
+          "final": 0.08888888888888889,
+          "overrides": 6,
+          "steps": 6
+        },
+        "1.0": {
+          "recovered": false,
+          "best": 0.42424242424242425,
+          "final": 0.2708333333333333,
+          "overrides": 5,
+          "steps": 6
+        },
+        "1.5": {
+          "recovered": false,
+          "best": 0.42424242424242425,
+          "final": 0.043478260869565216,
+          "overrides": 6,
+          "steps": 6
+        },
+        "2.0": {
+          "recovered": false,
+          "best": 0.42424242424242425,
+          "final": 0.20512820512820512,
+          "overrides": 5,
+          "steps": 6
+        },
+        "3.0": {
+          "recovered": false,
+          "best": 0.6666666666666666,
+          "final": 0.6666666666666666,
+          "overrides": 1,
+          "steps": 6
+        },
+        "4.0": {
+          "recovered": false,
+          "best": 0.6666666666666666,
+          "final": 0.6666666666666666,
+          "overrides": 1,
+          "steps": 6
+        },
+        "6.0": {
+          "recovered": false,
+          "best": 0.5666666666666667,
+          "final": 0.3333333333333333,
+          "overrides": 2,
+          "steps": 6
+        }
+      },
+      "kernel_calls": 27,
+      "seconds": 400.5
+    },
+    {
+      "index": 16,
+      "source": "NC(CO)C(=O)O",
+      "target": "N=C(N)NNCC(=O)O",
+      "verified_steps": 6,
+      "greedy": {
+        "recovered": false,
+        "best": 0.5217391304347826,
+        "final": 0.5217391304347826,
+        "overrides": 0,
+        "steps": 6
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": false,
+          "best": 0.2692307692307692,
+          "final": 0.14285714285714285,
+          "overrides": 6,
+          "steps": 6
+        },
+        "0.5": {
+          "recovered": false,
+          "best": 0.2692307692307692,
+          "final": 0.2692307692307692,
+          "overrides": 6,
+          "steps": 6
+        },
+        "1.0": {
+          "recovered": false,
+          "best": 0.2692307692307692,
+          "final": 0.23333333333333334,
+          "overrides": 6,
+          "steps": 6
+        },
+        "1.5": {
+          "recovered": false,
+          "best": 0.2692307692307692,
+          "final": 0.024390243902439025,
+          "overrides": 6,
+          "steps": 6
+        },
+        "2.0": {
+          "recovered": false,
+          "best": 0.2692307692307692,
+          "final": 0.2692307692307692,
+          "overrides": 6,
+          "steps": 6
+        },
+        "3.0": {
+          "recovered": false,
+          "best": 0.38461538461538464,
+          "final": 0.32142857142857145,
+          "overrides": 4,
+          "steps": 6
+        },
+        "4.0": {
+          "recovered": false,
+          "best": 0.4166666666666667,
+          "final": 0.4166666666666667,
+          "overrides": 2,
+          "steps": 6
+        },
+        "6.0": {
+          "recovered": false,
+          "best": 0.38461538461538464,
+          "final": 0.2857142857142857,
+          "overrides": 4,
+          "steps": 6
+        }
+      },
+      "kernel_calls": 21,
+      "seconds": 222.1
+    },
+    {
+      "index": 0,
+      "source": "CCS(=O)(=O)O",
+      "target": "O=S(=O)(O)CCNCl",
+      "verified_steps": 4,
+      "greedy": {
+        "recovered": false,
+        "best": 0.5238095238095238,
+        "final": 0.47619047619047616,
+        "overrides": 0,
+        "steps": 4
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": false,
+          "best": 0.35,
+          "final": 0.32,
+          "overrides": 3,
+          "steps": 4
+        },
+        "0.5": {
+          "recovered": false,
+          "best": 0.35,
+          "final": 0.17857142857142858,
+          "overrides": 4,
+          "steps": 4
+        },
+        "1.0": {
+          "recovered": false,
+          "best": 0.35,
+          "final": 0.27586206896551724,
+          "overrides": 4,
+          "steps": 4
+        },
+        "1.5": {
+          "recovered": false,
+          "best": 0.35,
+          "final": 0.32,
+          "overrides": 3,
+          "steps": 4
+        },
+        "2.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 1,
+          "steps": 3
+        },
+        "3.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 1,
+          "steps": 3
+        },
+        "4.0": {
+          "recovered": false,
+          "best": 0.47619047619047616,
+          "final": 0.32,
+          "overrides": 3,
+          "steps": 4
+        },
+        "6.0": {
+          "recovered": false,
+          "best": 0.5238095238095238,
+          "final": 0.47619047619047616,
+          "overrides": 0,
+          "steps": 4
+        }
+      },
+      "kernel_calls": 18,
+      "seconds": 213.9
+    },
+    {
+      "index": 20,
+      "source": "CCOC(=O)N=c1sc(C)cn1-c1cccc(C(F)(F)F)c1",
+      "target": "Cc1cn(-c2cccc(C(F)(F)F)c2)c(=NC(=O)N(C)C)s1",
+      "verified_steps": 6,
+      "greedy": {
+        "recovered": false,
+        "best": 0.7708333333333334,
+        "final": 0.7708333333333334,
+        "overrides": 0,
+        "steps": 6
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": false,
+          "best": 0.6981132075471698,
+          "final": 0.35294117647058826,
+          "overrides": 5,
+          "steps": 6
+        },
+        "0.5": {
+          "recovered": false,
+          "best": 0.7169811320754716,
+          "final": 0.7115384615384616,
+          "overrides": 2,
+          "steps": 6
+        },
+        "1.0": {
+          "recovered": false,
+          "best": 0.7169811320754716,
+          "final": 0.7115384615384616,
+          "overrides": 1,
+          "steps": 6
+        },
+        "1.5": {
+          "recovered": false,
+          "best": 0.7169811320754716,
+          "final": 0.7115384615384616,
+          "overrides": 2,
+          "steps": 6
+        },
+        "2.0": {
+          "recovered": false,
+          "best": 0.7708333333333334,
+          "final": 0.7708333333333334,
+          "overrides": 0,
+          "steps": 6
+        },
+        "3.0": {
+          "recovered": false,
+          "best": 0.7708333333333334,
+          "final": 0.7708333333333334,
+          "overrides": 0,
+          "steps": 6
+        },
+        "4.0": {
+          "recovered": false,
+          "best": 0.7708333333333334,
+          "final": 0.7708333333333334,
+          "overrides": 0,
+          "steps": 6
+        },
+        "6.0": {
+          "recovered": false,
+          "best": 0.7708333333333334,
+          "final": 0.7708333333333334,
+          "overrides": 0,
+          "steps": 6
+        }
+      },
+      "kernel_calls": 12,
+      "seconds": 829.3
+    },
+    {
+      "index": 23,
+      "source": "CC(=O)Nc1ccc(C(=O)NCc2noc(-c3c4ccccc4nn3CCn3ccnc3)n2)cc1",
+      "target": "COc1ccccc1C(=O)NCc1noc(-c2c3ccccc3nn2CCn2ccnc2)n1",
+      "verified_steps": 6,
+      "greedy": {
+        "recovered": false,
+        "best": 0.855072463768116,
+        "final": 0.855072463768116,
+        "overrides": 0,
+        "steps": 6
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": false,
+          "best": 0.7162162162162162,
+          "final": 0.449438202247191,
+          "overrides": 6,
+          "steps": 6
+        },
+        "0.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 2,
+          "steps": 4
+        },
+        "1.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 2,
+          "steps": 4
+        },
+        "1.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 1,
+          "steps": 4
+        },
+        "2.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 1,
+          "steps": 4
+        },
+        "3.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 1,
+          "steps": 4
+        },
+        "4.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 1,
+          "steps": 4
+        },
+        "6.0": {
+          "recovered": false,
+          "best": 0.855072463768116,
+          "final": 0.855072463768116,
+          "overrides": 0,
+          "steps": 6
+        }
+      },
+      "kernel_calls": 12,
+      "seconds": 1704.7
+    },
+    {
+      "index": 19,
+      "source": "Cc1cc(C)c2c(N)c(-c3nnc(S)n3CC=[SH4])sc2n1",
+      "target": "C=C=Cn1c(S)nnc1-c1sc2nc(C)cc(C)c2c1N",
+      "verified_steps": 6,
+      "greedy": {
+        "recovered": true,
+        "best": 1.0,
+        "final": 1.0,
+        "overrides": 0,
+        "steps": 2
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": false,
+          "best": 0.6181818181818182,
+          "final": 0.053763440860215055,
+          "overrides": 6,
+          "steps": 6
+        },
+        "0.5": {
+          "recovered": false,
+          "best": 0.6181818181818182,
+          "final": 0.125,
+          "overrides": 6,
+          "steps": 6
+        },
+        "1.0": {
+          "recovered": false,
+          "best": 0.6181818181818182,
+          "final": 0.39436619718309857,
+          "overrides": 6,
+          "steps": 6
+        },
+        "1.5": {
+          "recovered": false,
+          "best": 0.6181818181818182,
+          "final": 0.3611111111111111,
+          "overrides": 6,
+          "steps": 6
+        },
+        "2.0": {
+          "recovered": false,
+          "best": 0.6181818181818182,
+          "final": 0.14285714285714285,
+          "overrides": 6,
+          "steps": 6
+        },
+        "3.0": {
+          "recovered": false,
+          "best": 0.6181818181818182,
+          "final": 0.14942528735632185,
+          "overrides": 6,
+          "steps": 6
+        },
+        "4.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "6.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        }
+      },
+      "kernel_calls": 20,
+      "seconds": 948.3
+    },
+    {
+      "index": 15,
+      "source": "C=C(C)C1CCC2(C(=O)n3ccnc3)CCC3(C)C(CCC4C5(C)C=C(C#N)C(=O)C(C)(C)C5CCC43C)C12",
+      "target": "CCC1CCC2(C(=O)n3ccnc3)CCC3(C)C(CCC4C5(C)C=C(C#N)C(=O)C(C)(C)C5CCC43C)C12",
+      "verified_steps": 5,
+      "greedy": {
+        "recovered": true,
+        "best": 1.0,
+        "final": 1.0,
+        "overrides": 0,
+        "steps": 1
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "0.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "1.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "1.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "2.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "3.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "4.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "6.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        }
+      },
+      "kernel_calls": 1,
+      "seconds": 361.5
+    },
+    {
+      "index": 3,
+      "source": "NCCCNc1nc(-c2ccncc2)cc2cnccc12",
+      "target": "CCNc1nc(-c2ccncc2)cc2cnccc12",
+      "verified_steps": 4,
+      "greedy": {
+        "recovered": true,
+        "best": 1.0,
+        "final": 1.0,
+        "overrides": 0,
+        "steps": 2
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "0.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "1.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "1.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "2.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "3.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "4.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "6.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        }
+      },
+      "kernel_calls": 2,
+      "seconds": 342.0
+    },
+    {
+      "index": 2,
+      "source": "CCCCN(CCC)C1CCc2ccccc2C1",
+      "target": "CCCN(CC)C1CCc2ccccc2C1",
+      "verified_steps": 4,
+      "greedy": {
+        "recovered": true,
+        "best": 1.0,
+        "final": 1.0,
+        "overrides": 0,
+        "steps": 2
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": false,
+          "best": 0.875,
+          "final": 0.8,
+          "overrides": 3,
+          "steps": 4
+        },
+        "0.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 2,
+          "steps": 4
+        },
+        "1.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 2,
+          "steps": 4
+        },
+        "1.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "2.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "3.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "4.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        },
+        "6.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        }
+      },
+      "kernel_calls": 6,
+      "seconds": 243.4
+    },
+    {
+      "index": 14,
+      "source": "CCN1CCN(c2ccc(-c3cc4ncn(C)c(=O)c4c(NC(C)C)n3)cc2)CC1",
+      "target": "CC(C)Nc1nc(-c2ccc(N3CCN(C(C)C)CC3)cc2)cc2ncn(C)c(=O)c12",
+      "verified_steps": 5,
+      "greedy": {
+        "recovered": true,
+        "best": 1.0,
+        "final": 1.0,
+        "overrides": 0,
+        "steps": 1
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "0.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "1.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "1.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "2.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "3.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "4.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "6.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        }
+      },
+      "kernel_calls": 1,
+      "seconds": 402.0
+    },
+    {
+      "index": 18,
+      "source": "CC(O)N1CCN(c2ncc(C(=O)NO)s2)CC1",
+      "target": "CC(=O)C1CN(c2ncc(C(=O)NO)s2)CCN1",
+      "verified_steps": 6,
+      "greedy": {
+        "recovered": true,
+        "best": 1.0,
+        "final": 1.0,
+        "overrides": 0,
+        "steps": 2
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": false,
+          "best": 0.5192307692307693,
+          "final": 0.2361111111111111,
+          "overrides": 6,
+          "steps": 6
+        },
+        "0.5": {
+          "recovered": false,
+          "best": 0.5192307692307693,
+          "final": 0.23529411764705882,
+          "overrides": 5,
+          "steps": 6
+        },
+        "1.0": {
+          "recovered": false,
+          "best": 0.5192307692307693,
+          "final": 0.3968253968253968,
+          "overrides": 3,
+          "steps": 6
+        },
+        "1.5": {
+          "recovered": false,
+          "best": 0.5192307692307693,
+          "final": 0.2112676056338028,
+          "overrides": 6,
+          "steps": 6
+        },
+        "2.0": {
+          "recovered": false,
+          "best": 0.5192307692307693,
+          "final": 0.18666666666666668,
+          "overrides": 6,
+          "steps": 6
+        },
+        "3.0": {
+          "recovered": false,
+          "best": 0.5192307692307693,
+          "final": 0.22058823529411764,
+          "overrides": 6,
+          "steps": 6
+        },
+        "4.0": {
+          "recovered": false,
+          "best": 0.5192307692307693,
+          "final": 0.3492063492063492,
+          "overrides": 6,
+          "steps": 6
+        },
+        "6.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 2
+        }
+      },
+      "kernel_calls": 31,
+      "seconds": 868.8
+    },
+    {
+      "index": 22,
+      "source": "NC1(Cc2ccccc2OC(F)(F)F)CCN(c2ncnc3[nH]ccc23)CC1",
+      "target": "NC1(Cc2ccc(Cl)cc2)CCN(c2ncnc3[nH]ccc23)CC1",
+      "verified_steps": 6,
+      "greedy": {
+        "recovered": false,
+        "best": 0.7884615384615384,
+        "final": 0.7843137254901961,
+        "overrides": 0,
+        "steps": 6
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": false,
+          "best": 0.75,
+          "final": 0.6379310344827587,
+          "overrides": 4,
+          "steps": 6
+        },
+        "0.5": {
+          "recovered": false,
+          "best": 0.75,
+          "final": 0.75,
+          "overrides": 3,
+          "steps": 6
+        },
+        "1.0": {
+          "recovered": false,
+          "best": 0.75,
+          "final": 0.5573770491803278,
+          "overrides": 5,
+          "steps": 6
+        },
+        "1.5": {
+          "recovered": false,
+          "best": 0.75,
+          "final": 0.5230769230769231,
+          "overrides": 4,
+          "steps": 6
+        },
+        "2.0": {
+          "recovered": false,
+          "best": 0.7547169811320755,
+          "final": 0.7547169811320755,
+          "overrides": 2,
+          "steps": 6
+        },
+        "3.0": {
+          "recovered": false,
+          "best": 0.7547169811320755,
+          "final": 0.7547169811320755,
+          "overrides": 2,
+          "steps": 6
+        },
+        "4.0": {
+          "recovered": false,
+          "best": 0.7735849056603774,
+          "final": 0.5901639344262295,
+          "overrides": 2,
+          "steps": 6
+        },
+        "6.0": {
+          "recovered": false,
+          "best": 0.7884615384615384,
+          "final": 0.7843137254901961,
+          "overrides": 0,
+          "steps": 6
+        }
+      },
+      "kernel_calls": 15,
+      "seconds": 1662.7
+    },
+    {
+      "index": 13,
+      "source": "CCOC(=O)COc1ccc(C(=O)c2ccc(O)c(CN)c2)c(Cl)c1Cl",
+      "target": "CCOC(=O)COc1ccc(C(=O)c2ccc(O)c(C(N)=O)c2)c(Cl)c1Cl",
+      "verified_steps": 5,
+      "greedy": {
+        "recovered": true,
+        "best": 1.0,
+        "final": 1.0,
+        "overrides": 0,
+        "steps": 1
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "0.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "1.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "1.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "2.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "3.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "4.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "6.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        }
+      },
+      "kernel_calls": 1,
+      "seconds": 240.5
+    },
+    {
+      "index": 5,
+      "source": "CCOc1ccc(CNC(=O)CCc2cn(C)c3ccccc23)cc1",
+      "target": "Cn1cc(CCC(=O)NCc2ccc(Cl)cc2)c2ccccc21",
+      "verified_steps": 4,
+      "greedy": {
+        "recovered": false,
+        "best": 0.8260869565217391,
+        "final": 0.8085106382978723,
+        "overrides": 0,
+        "steps": 4
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": false,
+          "best": 0.7450980392156863,
+          "final": 0.6111111111111112,
+          "overrides": 4,
+          "steps": 4
+        },
+        "0.5": {
+          "recovered": false,
+          "best": 0.8085106382978723,
+          "final": 0.8043478260869565,
+          "overrides": 3,
+          "steps": 4
+        },
+        "1.0": {
+          "recovered": false,
+          "best": 0.8085106382978723,
+          "final": 0.8043478260869565,
+          "overrides": 3,
+          "steps": 4
+        },
+        "1.5": {
+          "recovered": false,
+          "best": 0.8085106382978723,
+          "final": 0.8043478260869565,
+          "overrides": 3,
+          "steps": 4
+        },
+        "2.0": {
+          "recovered": false,
+          "best": 0.8085106382978723,
+          "final": 0.8043478260869565,
+          "overrides": 3,
+          "steps": 4
+        },
+        "3.0": {
+          "recovered": false,
+          "best": 0.8260869565217391,
+          "final": 0.8085106382978723,
+          "overrides": 0,
+          "steps": 4
+        },
+        "4.0": {
+          "recovered": false,
+          "best": 0.8260869565217391,
+          "final": 0.8085106382978723,
+          "overrides": 0,
+          "steps": 4
+        },
+        "6.0": {
+          "recovered": false,
+          "best": 0.8260869565217391,
+          "final": 0.8085106382978723,
+          "overrides": 0,
+          "steps": 4
+        }
+      },
+      "kernel_calls": 8,
+      "seconds": 744.4
+    },
+    {
+      "index": 9,
+      "source": "FC(F)(F)C(F)(F)C(F)(F)F",
+      "target": "FC(F)(F)C(F)(F)C(F)(F)C(F)(F)F",
+      "verified_steps": 5,
+      "greedy": {
+        "recovered": false,
+        "best": 0.75,
+        "final": 0.5,
+        "overrides": 0,
+        "steps": 5
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": false,
+          "best": 0.75,
+          "final": 0.5,
+          "overrides": 3,
+          "steps": 5
+        },
+        "0.5": {
+          "recovered": false,
+          "best": 0.75,
+          "final": 0.3333333333333333,
+          "overrides": 3,
+          "steps": 5
+        },
+        "1.0": {
+          "recovered": false,
+          "best": 0.75,
+          "final": 0.3333333333333333,
+          "overrides": 2,
+          "steps": 5
+        },
+        "1.5": {
+          "recovered": false,
+          "best": 0.75,
+          "final": 0.5,
+          "overrides": 2,
+          "steps": 5
+        },
+        "2.0": {
+          "recovered": false,
+          "best": 0.75,
+          "final": 0.5,
+          "overrides": 0,
+          "steps": 5
+        },
+        "3.0": {
+          "recovered": false,
+          "best": 0.75,
+          "final": 0.5,
+          "overrides": 1,
+          "steps": 5
+        },
+        "4.0": {
+          "recovered": false,
+          "best": 0.75,
+          "final": 0.5,
+          "overrides": 0,
+          "steps": 5
+        },
+        "6.0": {
+          "recovered": false,
+          "best": 0.75,
+          "final": 0.5,
+          "overrides": 0,
+          "steps": 5
+        }
+      },
+      "kernel_calls": 7,
+      "seconds": 152.2
+    },
+    {
+      "index": 8,
+      "source": "CC(C)CCON=O",
+      "target": "CCC(C)(C)OC",
+      "verified_steps": 5,
+      "greedy": {
+        "recovered": true,
+        "best": 1.0,
+        "final": 1.0,
+        "overrides": 0,
+        "steps": 3
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": false,
+          "best": 0.20833333333333334,
+          "final": 0.14814814814814814,
+          "overrides": 5,
+          "steps": 5
+        },
+        "0.5": {
+          "recovered": false,
+          "best": 0.20833333333333334,
+          "final": 0.14814814814814814,
+          "overrides": 5,
+          "steps": 5
+        },
+        "1.0": {
+          "recovered": false,
+          "best": 0.20833333333333334,
+          "final": 0.14814814814814814,
+          "overrides": 5,
+          "steps": 5
+        },
+        "1.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 3
+        },
+        "2.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 3
+        },
+        "3.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 3
+        },
+        "4.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 3
+        },
+        "6.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 3
+        }
+      },
+      "kernel_calls": 7,
+      "seconds": 129.7
+    },
+    {
+      "index": 4,
+      "source": "CCCCOc1ccc(C=C2C(=O)Nc3ccc(Cl)cc32)cc1",
+      "target": "CCOc1ccc(C=C2C(=O)Nc3ccc(Cl)cc32)cc1",
+      "verified_steps": 4,
+      "greedy": {
+        "recovered": false,
+        "best": 0.8478260869565217,
+        "final": 0.8260869565217391,
+        "overrides": 0,
+        "steps": 4
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": false,
+          "best": 0.8478260869565217,
+          "final": 0.7872340425531915,
+          "overrides": 3,
+          "steps": 4
+        },
+        "0.5": {
+          "recovered": false,
+          "best": 0.8478260869565217,
+          "final": 0.7872340425531915,
+          "overrides": 3,
+          "steps": 4
+        },
+        "1.0": {
+          "recovered": false,
+          "best": 0.8478260869565217,
+          "final": 0.8260869565217391,
+          "overrides": 2,
+          "steps": 4
+        },
+        "1.5": {
+          "recovered": false,
+          "best": 0.8478260869565217,
+          "final": 0.7872340425531915,
+          "overrides": 2,
+          "steps": 4
+        },
+        "2.0": {
+          "recovered": false,
+          "best": 0.8478260869565217,
+          "final": 0.8260869565217391,
+          "overrides": 1,
+          "steps": 4
+        },
+        "3.0": {
+          "recovered": false,
+          "best": 0.8478260869565217,
+          "final": 0.8260869565217391,
+          "overrides": 0,
+          "steps": 4
+        },
+        "4.0": {
+          "recovered": false,
+          "best": 0.8478260869565217,
+          "final": 0.8260869565217391,
+          "overrides": 0,
+          "steps": 4
+        },
+        "6.0": {
+          "recovered": false,
+          "best": 0.8478260869565217,
+          "final": 0.8260869565217391,
+          "overrides": 0,
+          "steps": 4
+        }
+      },
+      "kernel_calls": 4,
+      "seconds": 550.5
+    },
+    {
+      "index": 12,
+      "source": "CC(=O)N(CCC(c1ccco1)C(C)C)Cc1ccc(Cl)cc1",
+      "target": "CC(C)C(CCN(C=O)Cc1ccc(Cl)cc1)c1ccco1",
+      "verified_steps": 5,
+      "greedy": {
+        "recovered": true,
+        "best": 1.0,
+        "final": 1.0,
+        "overrides": 0,
+        "steps": 1
+      },
+      "by_threshold": {
+        "0.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 2,
+          "steps": 4
+        },
+        "0.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "1.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "1.5": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "2.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "3.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "4.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        },
+        "6.0": {
+          "recovered": true,
+          "best": 1.0,
+          "final": 1.0,
+          "overrides": 0,
+          "steps": 1
+        }
+      },
+      "kernel_calls": 3,
+      "seconds": 287.2
+    }
+  ]
+}
