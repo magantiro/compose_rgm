@@ -62,6 +62,12 @@ app = modal.App("compose-v4-h-phi-encode-states")
 RUN_ROOT = "/artifacts/editing_v2/r_theta_run"
 TIME_POINT = 0.5
 #: Molecules per encoder forward pass.
+#:
+#: MEASURED: 198s per 64-molecule batch = 3.1s per molecule. The encoder forward
+#: pass is cheap; prepare_factorized_mark_batch is not -- it does the same heavy
+#: RDKit work (ring catalog, topology, aromatic view) that dominates the kernel.
+#: So this job is CPU-bound on chemistry, parallel across molecules, and wants
+#: many small containers rather than a few large ones.
 BATCH = 64
 #: FIXED canonical slot width for every molecule, training and inference alike.
 #:
@@ -79,8 +85,8 @@ CANONICAL_SLOTS = 48
 
 
 @app.function(
-    image=image, cpu=4.0, memory=16 * 1024, timeout=4 * 60 * 60,
-    max_containers=8, volumes={str(ARTIFACT_ROOT): artifact_volume},
+    image=image, cpu=2.0, memory=8 * 1024, timeout=4 * 60 * 60,
+    max_containers=40, volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
 def encode(shard: dict[str, Any]) -> dict[str, Any]:
     """Embed a list of canonical molecule keys with the frozen R_theta encoder."""
@@ -186,7 +192,7 @@ def encode(shard: dict[str, Any]) -> dict[str, Any]:
 
 
 @app.local_entrypoint()
-def main(shards: int = 8) -> None:
+def main(shards: int = 40) -> None:
     keys: set[str] = set()
     for name in ("editing_v2_h_phi_teacher_train_labels.json",
                  "editing_v2_h_phi_teacher_validation_labels.json"):
