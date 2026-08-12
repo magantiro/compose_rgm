@@ -84,14 +84,44 @@ def test_declared_process_identity_matches_the_capability_cell_registry(manifest
 
 
 def test_held_out_status_is_explicit_and_consistent(manifest):
-    """Gate 4: held-out-open status must be explicit and must not contradict itself."""
+    """Gate 4: held-out-open status must be explicit and must not contradict itself.
+
+    These invariants must survive the smoke. Held-in work does not open the
+    reserve, and no amount of held-in evidence changes that.
+    """
     assert manifest["held_out_opened"] is False
     assert manifest["held_out_gate"]["reserve_source_list_materialized"] is False
-    assert manifest["modal_runs_launched"] == 0
     assert manifest["gpu_used"] is False
-    assert manifest["results"]["trajectories_generated"] == 0
     for entry in manifest["artifacts_created"]:
         assert entry["status"] in {"DESIGN_ONLY", "SMOKE_HELD_IN"}
+
+
+def test_the_smoke_did_not_and_could_not_answer_claim_2(manifest):
+    """The 20-source floor must bind even though the 8-source numbers exist.
+
+    This is the invariant the main lane asked for explicitly: if R_theta looks
+    good on 8 sources, that is not a result.
+    """
+    result = manifest.get("smoke_result")
+    if result is None:
+        return
+    assert result["may_not_answer_claim_2"] is True
+    assert result["verdict_emitted"] is False
+    assert result["sources"] < manifest["smoke_plan"].get("minimum_sources_for_verdict", 20)
+    assert result["provisional_observation_not_a_result"]["warning"]
+
+
+def test_a_launched_run_is_recorded_honestly(manifest):
+    """Either nothing ran, or the app id and gate results are both present."""
+    launched = manifest["modal_runs_launched"]
+    if launched == 0:
+        assert manifest["results"]["trajectories_generated"] == 0
+        return
+    assert manifest.get("modal_app_id")
+    assert manifest["smoke_plan"]["authorized"] is True
+    assert manifest["smoke_result"]["gates"]
+    for gate in manifest["smoke_result"]["gates"].values():
+        assert gate["verdict"] in {"PASS", "FAIL", "INCONCLUSIVE"}
 
 
 def test_no_confirmatory_panel_file_exists_on_this_branch():
@@ -110,9 +140,8 @@ def test_every_gate_verdict_is_one_of_the_allowed_values(manifest):
             assert gate.get("resolved_by"), f"{gate['gate']} must say what resolves it"
 
 
-def test_smoke_plan_is_costed_and_not_authorized(manifest):
+def test_smoke_plan_is_costed_and_cpu_only(manifest):
     plan = manifest["smoke_plan"]
-    assert plan["authorized"] is False
     assert plan["gpu"] == "none"
     assert plan["expected_container_hours"] > 0
     assert plan["worst_case_container_hours"] >= plan["expected_container_hours"]

@@ -1,0 +1,931 @@
+{
+  "by_support_band": {
+    "0": {
+      "empirical_family": {
+        "family_entropy": 1.2950474016384972,
+        "fidelity": 0.9791666666666666,
+        "mobility": 0.7589658644249143,
+        "revisit_rate": 0.010416666666666666,
+        "sources": 8
+      },
+      "r_theta": {
+        "family_entropy": 0.7911904859364337,
+        "fidelity": 1.0,
+        "mobility": 0.5836365057376278,
+        "revisit_rate": 0.28125,
+        "sources": 8
+      },
+      "uniform_canonical": {
+        "family_entropy": 1.047929150154589,
+        "fidelity": 0.78125,
+        "mobility": 0.721534785628867,
+        "revisit_rate": 0.0,
+        "sources": 8
+      }
+    }
+  },
+  "cells_by_arm": {
+    "empirical_family": [
+      "atom_delete:atom_delete",
+      "atom_insert:grow_connected",
+      "atom_restate:atom_restate",
+      "bond_reorder:bond_reorder",
+      "bond_reroute:bond_reroute",
+      "cycle_attach:cycle_attach",
+      "cycle_insert:cycle_insert",
+      "ring_system_restate:ring_system_restate"
+    ],
+    "r_theta": [
+      "atom_delete:atom_delete",
+      "atom_insert:grow_connected",
+      "atom_restate:atom_restate",
+      "bond_reorder:bond_reorder",
+      "bond_reroute:bond_reroute",
+      "cycle_attach:cycle_attach",
+      "cycle_insert:cycle_insert",
+      "ring_system_restate:ring_system_restate"
+    ],
+    "uniform_canonical": [
+      "atom_delete:atom_delete",
+      "atom_insert:grow_connected",
+      "atom_restate:atom_restate",
+      "bond_reroute:bond_reroute",
+      "cycle_attach:cycle_attach",
+      "cycle_insert:cycle_insert"
+    ]
+  },
+  "comparisons": {
+    "r_theta_vs_empirical_family": {
+      "fidelity": {
+        "ci_high": 0.062499999999999986,
+        "ci_low": 0.0,
+        "difference": 0.02083333333333333,
+        "direction_meaning": "higher is more fidelity",
+        "resolved": false
+      },
+      "mobility": {
+        "ci_high": -0.034128238904111104,
+        "ci_low": -0.37136193038650195,
+        "difference": -0.1753293586872865,
+        "direction_meaning": "higher is more mobility",
+        "resolved": true
+      },
+      "verdict": "UNDERPOWERED_NO_VERDICT"
+    },
+    "r_theta_vs_uniform_canonical": {
+      "fidelity": {
+        "ci_high": 0.39583333333333337,
+        "ci_low": 0.0625,
+        "difference": 0.21875,
+        "direction_meaning": "higher is more fidelity",
+        "resolved": true
+      },
+      "mobility": {
+        "ci_high": -0.011926613716515143,
+        "ci_low": -0.3445493007728013,
+        "difference": -0.1378982798912391,
+        "direction_meaning": "higher is more mobility",
+        "resolved": true
+      },
+      "verdict": "UNDERPOWERED_NO_VERDICT"
+    }
+  },
+  "envelope_sha256": "fb369161b303a49cdf6f05611691e67a59bbfe4a9e8c5afcfbba22129f97694e",
+  "families_by_arm": {
+    "empirical_family": [
+      "atom_delete",
+      "atom_insert",
+      "atom_restate",
+      "bond_reorder",
+      "bond_reroute",
+      "cycle_attach",
+      "cycle_insert",
+      "ring_system_restate"
+    ],
+    "r_theta": [
+      "atom_delete",
+      "atom_insert",
+      "atom_restate",
+      "bond_reorder",
+      "bond_reroute",
+      "cycle_attach",
+      "cycle_insert",
+      "ring_system_restate"
+    ],
+    "uniform_canonical": [
+      "atom_delete",
+      "atom_insert",
+      "atom_restate",
+      "bond_reroute",
+      "cycle_attach",
+      "cycle_insert"
+    ]
+  },
+  "frontier": {
+    "empirical_family": {
+      "arm": "empirical_family",
+      "fidelity": 0.9791666666666666,
+      "mobility": 0.7663080705843863,
+      "source_count": 8,
+      "state_count": 96,
+      "trajectory_count": 16
+    },
+    "r_theta": {
+      "arm": "r_theta",
+      "fidelity": 1.0,
+      "mobility": 0.6228179730117714,
+      "source_count": 8,
+      "state_count": 96,
+      "trajectory_count": 16
+    },
+    "uniform_canonical": {
+      "arm": "uniform_canonical",
+      "fidelity": 0.78125,
+      "mobility": 0.7499476620289843,
+      "source_count": 8,
+      "state_count": 96,
+      "trajectory_count": 16
+    }
+  },
+  "instrument_checks": {
+    "arm_divergence_max": 0.4990785435630689,
+    "arm_divergence_median": 0.4245518900343643,
+    "arm_divergence_min": 0.24182367930679807,
+    "banned_statistics": [
+      "reference_log_likelihood_of_own_trajectories",
+      "reference_probability_of_chosen_successor",
+      "support_size_by_arm",
+      "validity_rate_by_arm"
+    ],
+    "budget_exhausted_sources": 0,
+    "degenerate_state_fraction": 0.0,
+    "degenerate_states": 0,
+    "enumeration_failures": {},
+    "kernel_cross_check_disagreements": [],
+    "kernel_cross_check_unchecked_sources": 0,
+    "measured_seconds_per_kernel_call": {
+      "max": 20.36,
+      "median": 16.43,
+      "min": 5.87
+    },
+    "singleton_support_states": 0,
+    "states_measured": 221,
+    "trajectories_truncated_by_failure_or_budget": 0
+  },
+  "minimum_sources_for_verdict": 20,
+  "per_source": {
+    "empirical_family": {
+      "BrC1=[PH2]SC=C1Cc1cc[nH]c1": {
+        "any_state_revisit_rate": 0.08333333333333333,
+        "cells_used": [
+          "atom_delete:atom_delete",
+          "atom_insert:grow_connected",
+          "atom_restate:atom_restate",
+          "bond_reorder:bond_reorder",
+          "bond_reroute:bond_reroute",
+          "cycle_insert:cycle_insert",
+          "ring_system_restate:ring_system_restate"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.813076923076923,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 1.0,
+        "families_used": [
+          "atom_delete",
+          "atom_insert",
+          "atom_restate",
+          "bond_reorder",
+          "bond_reroute",
+          "cycle_insert",
+          "ring_system_restate"
+        ],
+        "heavy_atom_change": 0.0,
+        "immediate_reversal_rate": 0.1,
+        "mean_standardized_drift": 1.2381264615094978,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 1.4015818669677031,
+        "ring_system_change": -1.0,
+        "seeds": 2,
+        "size_band": "small",
+        "support_band": "0",
+        "unique_state_fraction": 0.9285714285714286
+      },
+      "C=C1CCCC2C1(C)CCP(C)C2(C)CC1=C2OC(C)(C)N=C2C=C(OC)C1O": {
+        "any_state_revisit_rate": 0.0,
+        "cells_used": [
+          "atom_delete:atom_delete",
+          "atom_insert:grow_connected",
+          "atom_restate:atom_restate",
+          "bond_reorder:bond_reorder",
+          "bond_reroute:bond_reroute",
+          "cycle_insert:cycle_insert"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.7743004418262149,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 1.0,
+        "families_used": [
+          "atom_delete",
+          "atom_insert",
+          "atom_restate",
+          "bond_reorder",
+          "bond_reroute",
+          "cycle_insert"
+        ],
+        "heavy_atom_change": -0.5,
+        "immediate_reversal_rate": 0.0,
+        "mean_standardized_drift": 1.4025726763277975,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 1.4451858789480823,
+        "ring_system_change": 0.0,
+        "seeds": 2,
+        "size_band": "large",
+        "support_band": "0",
+        "unique_state_fraction": 1.0
+      },
+      "C=Cc1cccc(NC(=O)NC2CCC(C(=O)I3CCN(C)CC3)CC2)c1": {
+        "any_state_revisit_rate": 0.0,
+        "cells_used": [
+          "atom_delete:atom_delete",
+          "atom_insert:grow_connected",
+          "atom_restate:atom_restate",
+          "bond_reorder:bond_reorder",
+          "ring_system_restate:ring_system_restate"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.7174531835205993,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 1.0,
+        "families_used": [
+          "atom_delete",
+          "atom_insert",
+          "atom_restate",
+          "bond_reorder",
+          "ring_system_restate"
+        ],
+        "heavy_atom_change": 1.0,
+        "immediate_reversal_rate": 0.0,
+        "mean_standardized_drift": 1.6756249331921085,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 0.9678002527269727,
+        "ring_system_change": 0.0,
+        "seeds": 2,
+        "size_band": "medium",
+        "support_band": "0",
+        "unique_state_fraction": 1.0
+      },
+      "C=ICN(Cc1nnc(S[SH2]CN(CO)c2nc(C)cs2)[nH]1)C(=O)c1ccccc1": {
+        "any_state_revisit_rate": 0.0,
+        "cells_used": [
+          "atom_delete:atom_delete",
+          "atom_insert:grow_connected",
+          "atom_restate:atom_restate",
+          "bond_reroute:bond_reroute",
+          "cycle_insert:cycle_insert"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.7626262626262627,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 0.8333333333333334,
+        "families_used": [
+          "atom_delete",
+          "atom_insert",
+          "atom_restate",
+          "bond_reroute",
+          "cycle_insert"
+        ],
+        "heavy_atom_change": -1.5,
+        "immediate_reversal_rate": 0.0,
+        "mean_standardized_drift": 1.0043504205881228,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 1.286057336874379,
+        "ring_system_change": 0.0,
+        "seeds": 2,
+        "size_band": "large",
+        "support_band": "0",
+        "unique_state_fraction": 1.0
+      },
+      "CC(=O)N1CCOc2ccc(S(=O)(=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)cc21": {
+        "any_state_revisit_rate": 0.0,
+        "cells_used": [
+          "atom_delete:atom_delete",
+          "atom_insert:grow_connected",
+          "atom_restate:atom_restate",
+          "bond_reroute:bond_reroute",
+          "cycle_insert:cycle_insert"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.7699898785425101,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 1.0,
+        "families_used": [
+          "atom_delete",
+          "atom_insert",
+          "atom_restate",
+          "bond_reroute",
+          "cycle_insert"
+        ],
+        "heavy_atom_change": 1.0,
+        "immediate_reversal_rate": 0.0,
+        "mean_standardized_drift": 1.2484959817695618,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 1.3296613488547582,
+        "ring_system_change": -0.5,
+        "seeds": 2,
+        "size_band": "large",
+        "support_band": "0",
+        "unique_state_fraction": 1.0
+      },
+      "CC(=O)N1CCc2c(c(Nc3cccc(C)c3)nn2Cc2cccnc2)C1": {
+        "any_state_revisit_rate": 0.0,
+        "cells_used": [
+          "atom_delete:atom_delete",
+          "atom_insert:grow_connected",
+          "atom_restate:atom_restate",
+          "bond_reorder:bond_reorder",
+          "bond_reroute:bond_reroute"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.7300505050505051,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 1.0,
+        "families_used": [
+          "atom_delete",
+          "atom_insert",
+          "atom_restate",
+          "bond_reorder",
+          "bond_reroute"
+        ],
+        "heavy_atom_change": -1.0,
+        "immediate_reversal_rate": 0.0,
+        "mean_standardized_drift": 1.4064723807633053,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 1.286057336874379,
+        "ring_system_change": 0.0,
+        "seeds": 2,
+        "size_band": "medium",
+        "support_band": "0",
+        "unique_state_fraction": 1.0
+      },
+      "CC(=O)NC1NC(Cl)CC(NCC2(CO)CCC2)N1": {
+        "any_state_revisit_rate": 0.0,
+        "cells_used": [
+          "atom_delete:atom_delete",
+          "atom_insert:grow_connected",
+          "atom_restate:atom_restate",
+          "bond_reorder:bond_reorder",
+          "bond_reroute:bond_reroute",
+          "cycle_insert:cycle_insert"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.7328277356446371,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 1.0,
+        "families_used": [
+          "atom_delete",
+          "atom_insert",
+          "atom_restate",
+          "bond_reorder",
+          "bond_reroute",
+          "cycle_insert"
+        ],
+        "heavy_atom_change": 1.0,
+        "immediate_reversal_rate": 0.0,
+        "mean_standardized_drift": 1.9985676901196143,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 1.4015818669677031,
+        "ring_system_change": 0.0,
+        "seeds": 2,
+        "size_band": "small",
+        "support_band": "0",
+        "unique_state_fraction": 1.0
+      },
+      "CC(=O)OCCCC1(C)C(C)=CCC2C3Cc4cn[nH]c4NC3(C)CCC21": {
+        "any_state_revisit_rate": 0.0,
+        "cells_used": [
+          "atom_delete:atom_delete",
+          "atom_insert:grow_connected",
+          "atom_restate:atom_restate",
+          "bond_reroute:bond_reroute",
+          "cycle_attach:cycle_attach",
+          "cycle_insert:cycle_insert"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.7714019851116626,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 1.0,
+        "families_used": [
+          "atom_delete",
+          "atom_insert",
+          "atom_restate",
+          "bond_reroute",
+          "cycle_attach",
+          "cycle_insert"
+        ],
+        "heavy_atom_change": 0.5,
+        "immediate_reversal_rate": 0.0,
+        "mean_standardized_drift": 2.068660801953545,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 1.242453324894,
+        "ring_system_change": 0.0,
+        "seeds": 2,
+        "size_band": "medium",
+        "support_band": "0",
+        "unique_state_fraction": 1.0
+      }
+    },
+    "r_theta": {
+      "BrC1=[PH2]SC=C1Cc1cc[nH]c1": {
+        "any_state_revisit_rate": 0.6666666666666666,
+        "cells_used": [
+          "bond_reorder:bond_reorder",
+          "ring_system_restate:ring_system_restate"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.0,
+        "endpoint_uniqueness": 0.5,
+        "envelope_retention": 1.0,
+        "families_used": [
+          "bond_reorder",
+          "ring_system_restate"
+        ],
+        "heavy_atom_change": 0.0,
+        "immediate_reversal_rate": 0.7,
+        "mean_standardized_drift": 1.1354918975424662,
+        "multi_family_fraction": 0.5,
+        "operator_family_entropy": 0.3182570841474064,
+        "ring_system_change": 0.0,
+        "seeds": 2,
+        "size_band": "small",
+        "support_band": "0",
+        "unique_state_fraction": 0.42857142857142855
+      },
+      "C=C1CCCC2C1(C)CCP(C)C2(C)CC1=C2OC(C)(C)N=C2C=C(OC)C1O": {
+        "any_state_revisit_rate": 0.0,
+        "cells_used": [
+          "atom_delete:atom_delete",
+          "atom_insert:grow_connected",
+          "atom_restate:atom_restate",
+          "bond_reorder:bond_reorder",
+          "bond_reroute:bond_reroute"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.6382716049382716,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 1.0,
+        "families_used": [
+          "atom_delete",
+          "atom_insert",
+          "atom_restate",
+          "bond_reorder",
+          "bond_reroute"
+        ],
+        "heavy_atom_change": 0.0,
+        "immediate_reversal_rate": 0.0,
+        "mean_standardized_drift": 0.804570392295383,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 0.9830877585747854,
+        "ring_system_change": 0.0,
+        "seeds": 2,
+        "size_band": "large",
+        "support_band": "0",
+        "unique_state_fraction": 1.0
+      },
+      "C=Cc1cccc(NC(=O)NC2CCC(C(=O)I3CCN(C)CC3)CC2)c1": {
+        "any_state_revisit_rate": 0.25,
+        "cells_used": [
+          "atom_delete:atom_delete",
+          "atom_insert:grow_connected",
+          "atom_restate:atom_restate",
+          "bond_reroute:bond_reroute",
+          "ring_system_restate:ring_system_restate"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.6038302277432712,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 1.0,
+        "families_used": [
+          "atom_delete",
+          "atom_insert",
+          "atom_restate",
+          "bond_reroute",
+          "ring_system_restate"
+        ],
+        "heavy_atom_change": 0.5,
+        "immediate_reversal_rate": 0.30000000000000004,
+        "mean_standardized_drift": 1.2078752386143383,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 1.286057336874379,
+        "ring_system_change": 0.0,
+        "seeds": 2,
+        "size_band": "medium",
+        "support_band": "0",
+        "unique_state_fraction": 0.7857142857142857
+      },
+      "C=ICN(Cc1nnc(S[SH2]CN(CO)c2nc(C)cs2)[nH]1)C(=O)c1ccccc1": {
+        "any_state_revisit_rate": 0.08333333333333333,
+        "cells_used": [
+          "bond_reorder:bond_reorder",
+          "ring_system_restate:ring_system_restate"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.5284397163120568,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 1.0,
+        "families_used": [
+          "bond_reorder",
+          "ring_system_restate"
+        ],
+        "heavy_atom_change": 0.0,
+        "immediate_reversal_rate": 0.1,
+        "mean_standardized_drift": 1.2182191509700258,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 0.6648306744273791,
+        "ring_system_change": 0.0,
+        "seeds": 2,
+        "size_band": "large",
+        "support_band": "0",
+        "unique_state_fraction": 0.9285714285714286
+      },
+      "CC(=O)N1CCOc2ccc(S(=O)(=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)cc21": {
+        "any_state_revisit_rate": 0.3333333333333333,
+        "cells_used": [
+          "bond_reorder:bond_reorder",
+          "ring_system_restate:ring_system_restate"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.6073643410852713,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 1.0,
+        "families_used": [
+          "bond_reorder",
+          "ring_system_restate"
+        ],
+        "heavy_atom_change": 0.0,
+        "immediate_reversal_rate": 0.4,
+        "mean_standardized_drift": 1.8166045998997338,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 0.45056120886630463,
+        "ring_system_change": 0.0,
+        "seeds": 2,
+        "size_band": "large",
+        "support_band": "0",
+        "unique_state_fraction": 0.7142857142857143
+      },
+      "CC(=O)N1CCc2c(c(Nc3cccc(C)c3)nn2Cc2cccnc2)C1": {
+        "any_state_revisit_rate": 0.25,
+        "cells_used": [
+          "bond_reorder:bond_reorder",
+          "cycle_attach:cycle_attach",
+          "cycle_insert:cycle_insert",
+          "ring_system_restate:ring_system_restate"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.6726491405460061,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 1.0,
+        "families_used": [
+          "bond_reorder",
+          "cycle_attach",
+          "cycle_insert",
+          "ring_system_restate"
+        ],
+        "heavy_atom_change": 0.0,
+        "immediate_reversal_rate": 0.2,
+        "mean_standardized_drift": 1.6814092931816509,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 0.8901112788605314,
+        "ring_system_change": 0.0,
+        "seeds": 2,
+        "size_band": "medium",
+        "support_band": "0",
+        "unique_state_fraction": 0.7857142857142857
+      },
+      "CC(=O)NC1NC(Cl)CC(NCC2(CO)CCC2)N1": {
+        "any_state_revisit_rate": 0.41666666666666663,
+        "cells_used": [
+          "atom_restate:atom_restate",
+          "bond_reorder:bond_reorder",
+          "bond_reroute:bond_reroute",
+          "cycle_attach:cycle_attach",
+          "cycle_insert:cycle_insert",
+          "ring_system_restate:ring_system_restate"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.8304935370152762,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 1.0,
+        "families_used": [
+          "atom_restate",
+          "bond_reorder",
+          "bond_reroute",
+          "cycle_attach",
+          "cycle_insert",
+          "ring_system_restate"
+        ],
+        "heavy_atom_change": 0.0,
+        "immediate_reversal_rate": 0.5,
+        "mean_standardized_drift": 2.7437085070247864,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 1.0056358089538555,
+        "ring_system_change": -0.5,
+        "seeds": 2,
+        "size_band": "small",
+        "support_band": "0",
+        "unique_state_fraction": 0.6428571428571428
+      },
+      "CC(=O)OCCCC1(C)C(C)=CCC2C3Cc4cn[nH]c4NC3(C)CCC21": {
+        "any_state_revisit_rate": 0.25,
+        "cells_used": [
+          "bond_reorder:bond_reorder",
+          "cycle_attach:cycle_attach",
+          "cycle_insert:cycle_insert",
+          "ring_system_restate:ring_system_restate"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.7880434782608696,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 1.0,
+        "families_used": [
+          "bond_reorder",
+          "cycle_attach",
+          "cycle_insert",
+          "ring_system_restate"
+        ],
+        "heavy_atom_change": 0.0,
+        "immediate_reversal_rate": 0.2,
+        "mean_standardized_drift": 1.457512924838071,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 0.7309827367868281,
+        "ring_system_change": 0.0,
+        "seeds": 2,
+        "size_band": "medium",
+        "support_band": "0",
+        "unique_state_fraction": 0.7857142857142857
+      }
+    },
+    "uniform_canonical": {
+      "BrC1=[PH2]SC=C1Cc1cc[nH]c1": {
+        "any_state_revisit_rate": 0.0,
+        "cells_used": [
+          "atom_insert:grow_connected",
+          "atom_restate:atom_restate",
+          "cycle_attach:cycle_attach"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.8409961685823755,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 0.9166666666666667,
+        "families_used": [
+          "atom_insert",
+          "atom_restate",
+          "cycle_attach"
+        ],
+        "heavy_atom_change": 4.0,
+        "immediate_reversal_rate": 0.0,
+        "mean_standardized_drift": 2.136442280654972,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 0.752038698388137,
+        "ring_system_change": -0.5,
+        "seeds": 2,
+        "size_band": "small",
+        "support_band": "0",
+        "unique_state_fraction": 1.0
+      },
+      "C=C1CCCC2C1(C)CCP(C)C2(C)CC1=C2OC(C)(C)N=C2C=C(OC)C1O": {
+        "any_state_revisit_rate": 0.0,
+        "cells_used": [
+          "atom_insert:grow_connected",
+          "atom_restate:atom_restate",
+          "bond_reroute:bond_reroute",
+          "cycle_insert:cycle_insert"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.624577417173766,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 0.75,
+        "families_used": [
+          "atom_insert",
+          "atom_restate",
+          "bond_reroute",
+          "cycle_insert"
+        ],
+        "heavy_atom_change": 3.0,
+        "immediate_reversal_rate": 0.0,
+        "mean_standardized_drift": 1.8360647022567416,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 0.9830877585747855,
+        "ring_system_change": 0.5,
+        "seeds": 2,
+        "size_band": "large",
+        "support_band": "0",
+        "unique_state_fraction": 1.0
+      },
+      "C=Cc1cccc(NC(=O)NC2CCC(C(=O)I3CCN(C)CC3)CC2)c1": {
+        "any_state_revisit_rate": 0.0,
+        "cells_used": [
+          "atom_delete:atom_delete",
+          "atom_insert:grow_connected",
+          "atom_restate:atom_restate"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.6317374284853959,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 0.41666666666666663,
+        "families_used": [
+          "atom_delete",
+          "atom_insert",
+          "atom_restate"
+        ],
+        "heavy_atom_change": 2.5,
+        "immediate_reversal_rate": 0.0,
+        "mean_standardized_drift": 1.9578808010211566,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 0.8239592165010822,
+        "ring_system_change": -0.5,
+        "seeds": 2,
+        "size_band": "medium",
+        "support_band": "0",
+        "unique_state_fraction": 1.0
+      },
+      "C=ICN(Cc1nnc(S[SH2]CN(CO)c2nc(C)cs2)[nH]1)C(=O)c1ccccc1": {
+        "any_state_revisit_rate": 0.0,
+        "cells_used": [
+          "atom_insert:grow_connected",
+          "atom_restate:atom_restate",
+          "bond_reroute:bond_reroute",
+          "cycle_attach:cycle_attach",
+          "cycle_insert:cycle_insert"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.5827965138309965,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 0.3333333333333333,
+        "families_used": [
+          "atom_insert",
+          "atom_restate",
+          "bond_reroute",
+          "cycle_attach",
+          "cycle_insert"
+        ],
+        "heavy_atom_change": 3.0,
+        "immediate_reversal_rate": 0.0,
+        "mean_standardized_drift": 2.053857859004053,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 1.0986122886681096,
+        "ring_system_change": 0.0,
+        "seeds": 2,
+        "size_band": "large",
+        "support_band": "0",
+        "unique_state_fraction": 1.0
+      },
+      "CC(=O)N1CCOc2ccc(S(=O)(=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)cc21": {
+        "any_state_revisit_rate": 0.0,
+        "cells_used": [
+          "atom_insert:grow_connected",
+          "atom_restate:atom_restate",
+          "bond_reroute:bond_reroute",
+          "cycle_insert:cycle_insert"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.7329258436047686,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 0.8333333333333333,
+        "families_used": [
+          "atom_insert",
+          "atom_restate",
+          "bond_reroute",
+          "cycle_insert"
+        ],
+        "heavy_atom_change": 2.0,
+        "immediate_reversal_rate": 0.0,
+        "mean_standardized_drift": 2.021610407673566,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 1.170532806781055,
+        "ring_system_change": 0.0,
+        "seeds": 2,
+        "size_band": "large",
+        "support_band": "0",
+        "unique_state_fraction": 1.0
+      },
+      "CC(=O)N1CCc2c(c(Nc3cccc(C)c3)nn2Cc2cccnc2)C1": {
+        "any_state_revisit_rate": 0.0,
+        "cells_used": [
+          "atom_insert:grow_connected",
+          "atom_restate:atom_restate",
+          "bond_reroute:bond_reroute",
+          "cycle_insert:cycle_insert"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.7669694804532,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 1.0,
+        "families_used": [
+          "atom_insert",
+          "atom_restate",
+          "bond_reroute",
+          "cycle_insert"
+        ],
+        "heavy_atom_change": 3.0,
+        "immediate_reversal_rate": 0.0,
+        "mean_standardized_drift": 2.3442053874229174,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 1.0986122886681096,
+        "ring_system_change": -0.5,
+        "seeds": 2,
+        "size_band": "medium",
+        "support_band": "0",
+        "unique_state_fraction": 1.0
+      },
+      "CC(=O)NC1NC(Cl)CC(NCC2(CO)CCC2)N1": {
+        "any_state_revisit_rate": 0.0,
+        "cells_used": [
+          "atom_insert:grow_connected",
+          "atom_restate:atom_restate",
+          "bond_reroute:bond_reroute",
+          "cycle_insert:cycle_insert"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.8029761904761905,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 1.0,
+        "families_used": [
+          "atom_insert",
+          "atom_restate",
+          "bond_reroute",
+          "cycle_insert"
+        ],
+        "heavy_atom_change": 1.0,
+        "immediate_reversal_rate": 0.0,
+        "mean_standardized_drift": 2.2045642686539795,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 1.286057336874379,
+        "ring_system_change": 0.5,
+        "seeds": 2,
+        "size_band": "small",
+        "support_band": "0",
+        "unique_state_fraction": 1.0
+      },
+      "CC(=O)OCCCC1(C)C(C)=CCC2C3Cc4cn[nH]c4NC3(C)CCC21": {
+        "any_state_revisit_rate": 0.0,
+        "cells_used": [
+          "atom_delete:atom_delete",
+          "atom_insert:grow_connected",
+          "atom_restate:atom_restate",
+          "bond_reroute:bond_reroute",
+          "cycle_insert:cycle_insert"
+        ],
+        "committed_edits": 6.0,
+        "early_dead_end_rate": 0.0,
+        "endpoint_tanimoto_distance": 0.7892992424242424,
+        "endpoint_uniqueness": 1.0,
+        "envelope_retention": 1.0,
+        "families_used": [
+          "atom_delete",
+          "atom_insert",
+          "atom_restate",
+          "bond_reroute",
+          "cycle_insert"
+        ],
+        "heavy_atom_change": 0.0,
+        "immediate_reversal_rate": 0.0,
+        "mean_standardized_drift": 1.4644271853120883,
+        "multi_family_fraction": 1.0,
+        "operator_family_entropy": 1.170532806781055,
+        "ring_system_change": 1.5,
+        "seeds": 2,
+        "size_band": "medium",
+        "support_band": "0",
+        "unique_state_fraction": 1.0
+      }
+    }
+  },
+  "schema": "compose.claim2.trajectory_analysis",
+  "shard_directory": "diagnostics/claim2_trajectory_smoke_shards/claim2_trajectory_smoke",
+  "source_count": 8,
+  "status": "SMOKE_HELD_IN",
+  "verdict_emitted": false
+}

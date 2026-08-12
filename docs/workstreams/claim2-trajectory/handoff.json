@@ -7,7 +7,7 @@
   "branch": "codex/compose-claim2-trajectory",
   "base_commit": "04f1c46",
   "implementation_commit": "e5636034bd0aceb30f6dbc1004920095f3404565",
-  "status": "DESIGN_ONLY",
+  "status": "SMOKE_HELD_IN",
   "held_out_opened": false,
   "held_out_gate": {
     "mechanism": "argparse hard failure",
@@ -16,7 +16,7 @@
     "tested_by": "tests/test_claim2_trajectory_panel.py::test_reserve_pool_refuses_to_run_without_written_authorization",
     "reserve_source_list_materialized": false
   },
-  "modal_runs_launched": 0,
+  "modal_runs_launched": 1,
   "gpu_used": false,
   "frozen_inputs": [
     {
@@ -122,6 +122,12 @@
       "path": "scripts/analyse_claim2_trajectories.py",
       "sha256": "7753e8b340c8fa58016311edd1d86c0d170d745acb3063419d2140dcddcaa118",
       "status": "DESIGN_ONLY"
+    },
+    {
+      "path": "diagnostics/claim2_trajectory_smoke.json",
+      "sha256": "bd891be509ca170fc64f263a16d792473ae39050c4c7e27ceca59a94c699baa6",
+      "status": "SMOKE_HELD_IN",
+      "purpose": "local analysis of the 8-source smoke: gates, frontier point estimates, per-source metrics"
     }
   ],
   "existing_files_modified": [],
@@ -134,8 +140,8 @@
     "runtime_seconds": 5
   },
   "results": {
-    "trajectories_generated": 0,
-    "note": "No result exists. The only measured quantities are calibration facts."
+    "trajectories_generated": 48,
+    "note": "8 sources x 3 arms x 2 seeds. Instrument evidence only: no Claim-2 verdict was emitted and none may be inferred from the point estimates."
   },
   "gate_verdicts": [
     {
@@ -207,7 +213,7 @@
     }
   ],
   "smoke_plan": {
-    "authorized": false,
+    "authorized": true,
     "command": "modal run --detach modal_apps/claim2_trajectory_characterization_app.py --sources 8 --seeds 2 --horizon 6 --kernel-budget 40",
     "pool": "held-in",
     "sources": 8,
@@ -216,6 +222,7 @@
     "horizon": 6,
     "worst_case_enumerations_per_source": 32,
     "worst_case_total_enumerations": 256,
+    "minimum_sources_for_verdict": 20,
     "expected_container_hours": 1.5,
     "worst_case_container_hours": 3.8,
     "expected_wall_clock_minutes": 11,
@@ -240,7 +247,9 @@
     "what_it_cannot_resolve": "the claim. No Pareto verdict is emitted below 20 sources.",
     "verify_detached": "modal app list must show 'ephemeral (detached)'",
     "resumable": true,
-    "resume_note": "every task commits its shard to the volume as it completes and the driver skips sources whose committed shard matches source, horizon, seed set, kernel budget, panel_sha256 and family_law_sha256 and did not exhaust its budget; a relaunch after an outage costs only the sources that had not finished"
+    "resume_note": "every task commits its shard to the volume as it completes and the driver skips sources whose committed shard matches source, horizon, seed set, kernel budget, panel_sha256 and family_law_sha256 and did not exhaust its budget; a relaunch after an outage costs only the sources that had not finished",
+    "authorized_by": "main lane, 2026-08-12, 8-source smoke only, no automatic promotion",
+    "ran": true
   },
   "not_authorized_and_not_requested": [
     {
@@ -268,7 +277,7 @@
       "action": "the optional fourth arm"
     }
   ],
-  "recommended_next_action": "Authorize the 8-source held-in smoke at an expected 1.5 container-hours (worst case 3.8), CPU only. It resolves all three INCONCLUSIVE gates and nothing else is authorized until it reports.",
+  "recommended_next_action": "Review these gates. The 36-source held-in development run is NOT authorized by this smoke passing; at the measured 16.43 s/enumeration it is roughly 10 container-hours. Weigh it against the provisional observation that R_theta moved less and cycled more than both unlearned arms on 8 sources.",
   "operational_contract": {
     "local_entrypoint_is_rdkit_free": true,
     "reason": "modal run uses a different interpreter without rdkit; molecule work belongs in a committed, mounted panel computed by a normal python3 script",
@@ -284,5 +293,85 @@
       "panel_sha256",
       "family_law_sha256"
     ]
+  },
+  "modal_app_id": "ap-TifBx7AHzBMd6x4cGH5BZN",
+  "smoke_result": {
+    "status": "SMOKE_HELD_IN",
+    "may_not_answer_claim_2": true,
+    "verdict_emitted": false,
+    "sources": 8,
+    "kernel_calls": 221,
+    "budget_exhausted_sources": 0,
+    "enumeration_failures": 0,
+    "trajectories_truncated": 0,
+    "gates": {
+      "arms_diverge_on_real_states": {
+        "verdict": "PASS",
+        "min_pairwise_tv": 0.2418,
+        "median_pairwise_tv": 0.4246,
+        "max_pairwise_tv": 0.4991,
+        "states": 221,
+        "degenerate_states": 0
+      },
+      "kernel_cross_check": {
+        "verdict": "PASS",
+        "disagreements": 0,
+        "unchecked_sources": 0
+      },
+      "completion_under_budget": {
+        "verdict": "PASS",
+        "budget_exhausted_sources": 0,
+        "enumeration_failures": 0
+      },
+      "metric_distributions_non_degenerate": {
+        "verdict": "PASS",
+        "resolved_axis_comparisons": 3,
+        "axis_comparisons": 4
+      },
+      "health_measurements_behaving": {
+        "verdict": "PASS",
+        "note": "revisit and reversal discriminate strongly across arms; dead-end rate is 0.000 for every arm"
+      },
+      "measured_cost": {
+        "verdict": "PASS",
+        "median_seconds_per_enumeration": 16.43,
+        "min": 5.87,
+        "max": 20.36,
+        "predicted_band": [
+          16.8,
+          21.0
+        ]
+      }
+    },
+    "provisional_observation_not_a_result": {
+      "warning": "n=8 is below the pre-declared 20-source floor; no verdict was emitted and none may be inferred from these point estimates",
+      "by_arm": {
+        "r_theta": {
+          "mobility": 0.6228,
+          "fidelity": 1.0,
+          "revisit": 0.2812,
+          "reversal": 0.3,
+          "heavy_atom_change": 0.0625,
+          "families": 8
+        },
+        "uniform_canonical": {
+          "mobility": 0.7499,
+          "fidelity": 0.7812,
+          "revisit": 0.0,
+          "reversal": 0.0,
+          "heavy_atom_change": 2.3125,
+          "families": 6
+        },
+        "empirical_family": {
+          "mobility": 0.7663,
+          "fidelity": 0.9792,
+          "revisit": 0.0104,
+          "reversal": 0.0125,
+          "heavy_atom_change": 0.0625,
+          "families": 8
+        }
+      },
+      "implication": "R_theta moved less and cycled more than both unlearned arms on these 8 sources. If that holds at n=36 the frontier verdict is more likely incomparable than dominates, and the cycling rates are the direction the pathological-cycling stop rule watches. Operator collapse is NOT indicated: R_theta committed all 8 active families while uniform committed 6."
+    }
   }
 }
