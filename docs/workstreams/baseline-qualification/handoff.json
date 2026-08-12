@@ -51,7 +51,7 @@
       "subcapability": "C4c_retargeting"
     }
   ],
-  "content_commit": "f76f833dc41e766c4a9ea0a86df06b5fad23f7d5",
+  "content_commit": "e8df8c6ee4d3a4b77210bef53f04926ae2647106",
   "content_commit_note": "The commit at which every sha256 in durable_artifacts was computed. This manifest is committed immediately after it, so branch HEAD is one commit ahead of content_commit and differs from it only by this file. The manifest cannot name its own commit, which is why the two are separate.",
   "durable_artifacts": {
     "baselines/ddsbm/README.md": "332526fb54423db36bb49319796514a7b9d57740abc3b4a374fb63db03bb8c4a",
@@ -67,16 +67,16 @@
     "baselines/reinvent/README.md": "a7ce7d7a0d21bc0cdd6948e3cd4d2af7af7574a6e7350365b622f7526f31a306",
     "baselines/reinvent/environment.lock": "7a42319e9fc5f72ddfa29e995a4226eecd2393ba45e2533ef2b93eafdc2428f2",
     "configs/comparator_registry_v3.json": "672ae90f8e2e938f19b3d5013e70deaaa127302c62e605bbee185bc5bc0e3147",
-    "docs/workstreams/baseline-qualification/COMPARATOR_MATRIX.md": "5c6bf76f388efc5820fcd1cbda93cf841b8f83986cfdd9f7d4b8274e7635c6c4",
-    "docs/workstreams/baseline-qualification/DECISION_LOG.md": "1b4c94f4bfb497423599c8722ed59b57002928ec07318bf06643048f4a2f243c",
-    "docs/workstreams/baseline-qualification/FAIRNESS_CONTRACT.md": "a27168951b65107d7d2a2fa5171c72d83084533bc09ce9916728ca7960413e9a",
-    "docs/workstreams/baseline-qualification/HANDOFF.md": "bc56a43cbcce41621dc0fef001507285ee72667672a81d0f5711b3dfe29264d2",
-    "docs/workstreams/baseline-qualification/PROTOCOL.md": "ce08ec411ccec6459a536921e41b060451eb9636fc7dda232ba4136d309810e9",
-    "docs/workstreams/baseline-qualification/STATUS.md": "8a988f51d99ee14f5427421bc60d3bfb1e360fa4c81e3919a0b69a6c6b013b93",
-    "docs/workstreams/baseline-qualification/comparator_registry_v3.json": "e018b5585ad30fad3a4d7fa1f5ac8201569c5b07b5ca3d96587829146132accd",
-    "scripts/render_comparator_registry.py": "b030ff3af6c10dc7f6140856199c7fe06e35d15896338d9b863d3f9ac8ec6c5b",
-    "src/compose_v4/experiments/baseline_qualification.py": "2c715c8cf97404c6e85cf30773d3539576f72e25cbe6c58fbd4e1ecc1ab7d1bc",
-    "tests/test_baseline_qualification.py": "795c77572fd9e8ee9237254d48486cfec8689f18692a9b1e3ffbee14cc68f2be"
+    "docs/workstreams/baseline-qualification/COMPARATOR_MATRIX.md": "77b6baa774fd9a41213b6f5ecc53bb584260263c1a67f7eb6ecb0e4b46c55349",
+    "docs/workstreams/baseline-qualification/DECISION_LOG.md": "f403b0fab497ed77112c76a364613cf95e7fad4a10678445883de78c0ae6684b",
+    "docs/workstreams/baseline-qualification/FAIRNESS_CONTRACT.md": "74ead737fd94751ad08da12a38ebfddb6732886e2dd9a5c070f21984cafd6c8c",
+    "docs/workstreams/baseline-qualification/HANDOFF.md": "0ac9d99a17e2c0ff8fc7d0bdc433d0f21542671ba55406bdacbdf27b54bf00f1",
+    "docs/workstreams/baseline-qualification/PROTOCOL.md": "b72a2ada441806d87da0a82703530b9e445451d73d66922778d7113dea6e45b4",
+    "docs/workstreams/baseline-qualification/STATUS.md": "54ba415edff700b91de6b82e385a609124896c6d92dc548c8a0615f4658eac7b",
+    "docs/workstreams/baseline-qualification/comparator_registry_v3.json": "01c60206ba271e56b25b49db7ef0e37563ca7fd51672f8ee498f04acf240691e",
+    "scripts/render_comparator_registry.py": "3c9d5d7fcfa47a155fd6c4b5fd9f6388c124bb03deec51a812ce0ad431e1e19c",
+    "src/compose_v4/experiments/baseline_qualification.py": "4fb5a744e24beb37919f0dcf7f64f60c63f1f1b9d81901e131358da644ed31b1",
+    "tests/test_baseline_qualification.py": "adf47db62598c71695869bbb54a95e3117e32187a343981a0089bccfb5d0c923"
   },
   "external_dependencies_installed": 0,
   "frozen_inputs": {
