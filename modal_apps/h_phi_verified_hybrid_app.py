@@ -81,8 +81,12 @@ CANONICAL_SLOTS = 48
 CANDIDATES_TOP_SIMILARITY = 4
 CANDIDATES_TOP_REFERENCE = 2
 #: K counts NON-GREEDY challengers; greedy is always included separately.
+#: SIX ARMS, frozen for the sealed panel. hphi2 and ref2 are deliberately
+#: dropped: they answered nothing the 24 did not already answer, and adding
+#: arms after seeing development results is how a one-shot panel gets spent
+#: on multiplicity.
 ARMS = (("greedy", None), ("full", None),
-        ("sim", 1), ("sim", 2), ("ref", 1), ("ref", 2), ("hphi", 1), ("hphi", 2))
+        ("sim", 1), ("sim", 2), ("hphi", 1), ("ref", 1))
 
 
 @app.function(
@@ -352,7 +356,7 @@ def run_pair(task: dict[str, Any]) -> dict[str, Any]:
     payload = {"index": task["index"], "source": start_key, "target": target_key,
                "verified_steps": budget, "arms": results,
                "kernel_calls": calls, "seconds": round(seconds, 1)}
-    out = Path(RUN_ROOT) / "h_phi_verified_hybrid"
+    out = Path(RUN_ROOT) / task.get("out_dir", "h_phi_verified_hybrid")
     out.mkdir(parents=True, exist_ok=True)
     (out / f"{task['index']:03d}.json").write_text(
         json.dumps(payload, indent=2) + "\n")
@@ -362,9 +366,10 @@ def run_pair(task: dict[str, Any]) -> dict[str, Any]:
 
 @app.function(image=image, cpu=1.0, memory=4 * 1024, timeout=8 * 60 * 60,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
-def drive(tasks: list[dict[str, Any]]) -> dict[str, Any]:
+def drive(tasks: list[dict[str, Any]],
+          out_dir: str = "h_phi_verified_hybrid") -> dict[str, Any]:
     results = [r for r in run_pair.map(tasks) if r]
-    out = Path(RUN_ROOT) / "h_phi_verified_hybrid" / "aggregate.json"
+    out = Path(RUN_ROOT) / out_dir / "aggregate.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({"pairs": len(results), "per_pair": results},
                               indent=2) + "\n")
@@ -373,13 +378,26 @@ def drive(tasks: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 @app.local_entrypoint()
-def main() -> None:
+def main(panel: str = "development") -> None:
     seal = json.loads(
         (ROOT / "diagnostics/editing_v2_controller_panel_seal.json").read_text())
-    tasks = [{**row, "index": i} for i, row in enumerate(seal["development"])]
-    print(f"verified hybrid on {len(tasks)} DEVELOPMENT pairs "
-          f"({seal['commitment']['development_sha256'][:16]}); sealed 67 untouched")
+    if panel == "sealed":
+        rows = seal["sealed"]
+        digest = seal["commitment"]["sealed_sha256"]
+        print(f"OPENING THE SEALED PANEL: {len(rows)} pairs ({digest[:16]}). "
+              f"Sealed at commit 571ec9d, before any h_phi work existed. "
+              f"This is the one-shot evaluation; the protocol is preregistered "
+              f"and nothing about it may change after this run.")
+    else:
+        rows = seal["development"]
+        digest = seal["commitment"]["development_sha256"]
+        print(f"verified hybrid on {len(rows)} DEVELOPMENT pairs ({digest[:16]}); "
+              f"sealed 67 untouched")
+    tasks = [{**row, "index": i} for i, row in enumerate(rows)]
     print(f"universe = greedy + top-{CANDIDATES_TOP_SIMILARITY} similarity + "
           f"top-{CANDIDATES_TOP_REFERENCE} R_theta  (Experiment C's exact set)")
     print(f"arms: {[m if k is None else f'{m}{k}' for m, k in ARMS]}")
-    print(drive.remote(tasks))
+    out_dir = ("h_phi_verified_hybrid_sealed" if panel == "sealed"
+               else "h_phi_verified_hybrid")
+    tasks = [{**t, "out_dir": out_dir} for t in tasks]
+    print(drive.remote(tasks, out_dir))

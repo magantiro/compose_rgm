@@ -1,0 +1,52 @@
+{
+  "schema": "compose.editing_v2.sealed67_preregistration",
+  "status": "PREREGISTERED_BEFORE_THE_SEAL_WAS_OPENED",
+  "panel": {
+    "pairs": 67,
+    "sealed_sha256": "6b0706741282de5fc3d4c4a8d78335ee29897c1a581b572e8dc5d4bff0009d2d",
+    "sealed_at_commit": "571ec9d, before any h_phi work existed"
+  },
+  "protocol_hashes": {
+    "app_sha256": "232d66ce3823388e641159bbcc44d4eef29502c5f353ba986a2b8a68bc114d1f",
+    "h_phi_weights_sha256": "12e664679800ddf82a2f29bf675b3dd96968dcb8ff98113fe9c5b4aad7372a6b",
+    "seal_sha256": "28ce2dff7b49e7ad47130e4619e4bc9f1a0222a64ae78b5a6186eb89dca77fdd"
+  },
+  "arms": [
+    "greedy",
+    "full rollout-policy-improvement over Experiment C's candidate universe",
+    "similarity-top1 + verified rollout",
+    "similarity-top2 + verified rollout",
+    "h_phi-top1 + verified rollout",
+    "R_theta-top1 + verified rollout"
+  ],
+  "arms_note": "Six, frozen. h_phi-top2, direct h_phi override, random proposals and all-successor ranking are deliberately excluded: redundant, or a different question. No arm may be added after this run.",
+  "primary_endpoint": "exact target recovery within the declared budget",
+  "secondary": [
+    "best target similarity",
+    "continuation evaluations",
+    "kernel calls and wall time",
+    "breakdown by verified path length 4/5/6",
+    "rescue-set overlap with full rollout"
+  ],
+  "H1": {
+    "statement": "R_full > R_greedy -- future-aware verification rescues myopic failures",
+    "reporting": "Lead with paired effect size and uncertainty, NOT a McNemar p-value: the verified controller is CONSTRUCTED to retain greedy's option, so the one-sided discordance is structural and a p-value would dress a design property as a finding."
+  },
+  "H2": {
+    "statement": "sim2 + verified rollout is THE preregistered efficient controller, selected on the 24 for exact-target recovery",
+    "reporting": "Report gain retention (R_sim2-R_greedy)/(R_full-R_greedy) AND the actual rescue-set overlap. The 24 showed these are NOT interchangeable: hphi1 retained 5/6 in magnitude but only 4/6 of full's actual rescues, plus one full itself missed."
+  },
+  "h_phi_role": "SECONDARY learned-prioritisation arm. 'h_phi beats similarity' is explicitly NOT a hypothesis -- the 24 did not establish it (3-vs-2 discordant at K=1, p=0.50). The question is only whether learned future-value information can serve as a useful proposal signal under verified control. If it ties similarity again, that is a complete answer for this task.",
+  "not_evidence_against_learned_desirability": "A similarity win would show exact-target recovery is a poor test bed for learned desirability -- the goal IS a molecule, so Tanimoto-to-the-answer is privileged. No such heuristic exists for property conjunctions, pathwise constraints, or mid-trajectory retargeting.",
+  "terminology": "'full' is full-remaining-budget ROLLOUT EVALUATION under a greedy base policy -- a rollout policy-improvement controller, NOT globally optimal dynamic programming over the rewrite graph.",
+  "stopping_rule": "Whatever happens is the answer. No threshold changes, no new K, no dropping difficult pairs, no new model, no rerun.",
+  "development_reference": {
+    "greedy": 12,
+    "full": 18,
+    "sim1": 16,
+    "sim2": 17,
+    "hphi1": 17,
+    "ref1": 13,
+    "of": 24
+  }
+}
