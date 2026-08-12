@@ -1,0 +1,172 @@
+{
+  "schema": "compose.editing_v2.h_phi_learning_curve",
+  "architecture": "frozen R_theta encoder -> [e_y,e_z,e_y-e_z,e_y*e_z,sim,budget] -> 2-layer MLP -> {recovery, similarity}",
+  "losses": "pointwise BCE + MSE; no ranking loss, no class weighting",
+  "ranking": "lexicographic on raw predictions: recovery then similarity; no probability cutoff",
+  "encoder_meta": {
+    "canonical_slots": 48,
+    "time_point": 0.5
+  },
+  "curve": [
+    {
+      "requested": "2000",
+      "states": 259,
+      "labels": 1429,
+      "rescue_ranking": 0.3125,
+      "rescue_states": 32,
+      "harmful_override_rate": 0.22151898734177214,
+      "harmful_states": 158,
+      "contrastive_ranking": 0.5169491525423728,
+      "contrastive_states": 118,
+      "teacher_top1_agreement": 0.7,
+      "value_regret": 0.23366375267505646,
+      "bce": 1.538845181465149,
+      "similarity_mae": 0.16737677156925201
+    },
+    {
+      "requested": "5000",
+      "states": 649,
+      "labels": 3566,
+      "rescue_ranking": 0.28125,
+      "rescue_states": 32,
+      "harmful_override_rate": 0.17088607594936708,
+      "harmful_states": 158,
+      "contrastive_ranking": 0.576271186440678,
+      "contrastive_states": 118,
+      "teacher_top1_agreement": 0.7368421052631579,
+      "value_regret": 0.20497211813926697,
+      "bce": 0.9630929827690125,
+      "similarity_mae": 0.1260453760623932
+    },
+    {
+      "requested": "10000",
+      "states": 1295,
+      "labels": 7351,
+      "rescue_ranking": 0.375,
+      "rescue_states": 32,
+      "harmful_override_rate": 0.12658227848101267,
+      "harmful_states": 158,
+      "contrastive_ranking": 0.6610169491525424,
+      "contrastive_states": 118,
+      "teacher_top1_agreement": 0.7894736842105263,
+      "value_regret": 0.16397377848625183,
+      "bce": 1.2182321548461914,
+      "similarity_mae": 0.12746630609035492
+    },
+    {
+      "requested": "all",
+      "states": 1825,
+      "labels": 10308,
+      "rescue_ranking": 0.375,
+      "rescue_states": 32,
+      "harmful_override_rate": 0.17088607594936708,
+      "harmful_states": 158,
+      "contrastive_ranking": 0.6016949152542372,
+      "contrastive_states": 118,
+      "teacher_top1_agreement": 0.7526315789473684,
+      "value_regret": 0.19267000257968903,
+      "bce": 1.155234694480896,
+      "similarity_mae": 0.11701696366071701
+    }
+  ],
+  "seed_aggregate": {
+    "seeds": 4,
+    "note": "mean +- stdev over seeds 20260811/101/202/303",
+    "2000": {
+      "rescue": 0.305,
+      "rescue_sd": 0.078,
+      "harmful": 0.215,
+      "harmful_sd": 0.012,
+      "contrastive": 0.523
+    },
+    "5000": {
+      "rescue": 0.352,
+      "rescue_sd": 0.069,
+      "harmful": 0.172,
+      "harmful_sd": 0.013,
+      "contrastive": 0.593
+    },
+    "10000": {
+      "rescue": 0.422,
+      "rescue_sd": 0.06,
+      "harmful": 0.138,
+      "harmful_sd": 0.021,
+      "contrastive": 0.659
+    },
+    "all": {
+      "rescue": 0.445,
+      "rescue_sd": 0.069,
+      "harmful": 0.16,
+      "harmful_sd": 0.021,
+      "contrastive": 0.636
+    }
+  },
+  "baselines": {
+    "rescue_states": 36,
+    "harmful_exposure_states": 158,
+    "rescue_greedy": 0.0,
+    "rescue_random": 0.208,
+    "rescue_second_similarity": 0.333,
+    "harmful_greedy": 0.0,
+    "harmful_random": 0.27
+  },
+  "override_threshold_sweep": [
+    {
+      "margin": 0.0,
+      "overrides": 165.2,
+      "rescued": 14.5,
+      "harmed": 24.8,
+      "net": -10.2
+    },
+    {
+      "margin": 0.5,
+      "overrides": 140.0,
+      "rescued": 13.8,
+      "harmed": 20.8,
+      "net": -7.0
+    },
+    {
+      "margin": 1.0,
+      "overrides": 111.8,
+      "rescued": 12.5,
+      "harmed": 17.2,
+      "net": -4.8
+    },
+    {
+      "margin": 1.5,
+      "overrides": 87.8,
+      "rescued": 10.2,
+      "harmed": 12.5,
+      "net": -2.2
+    },
+    {
+      "margin": 2.0,
+      "overrides": 68.0,
+      "rescued": 8.5,
+      "harmed": 10.8,
+      "net": -2.2
+    },
+    {
+      "margin": 3.0,
+      "overrides": 44.5,
+      "rescued": 5.5,
+      "harmed": 8.0,
+      "net": -2.5
+    },
+    {
+      "margin": 4.0,
+      "overrides": 26.8,
+      "rescued": 3.8,
+      "harmed": 4.0,
+      "net": -0.2
+    },
+    {
+      "margin": 6.0,
+      "overrides": 8.8,
+      "rescued": 1.8,
+      "harmed": 1.2,
+      "net": 0.5
+    }
+  ],
+  "verdict": "NEGATIVE on net benefit: no override threshold yields meaningful net gain. The only positive net (+0.5 at margin 6.0) occurs where h_phi overrides 8.8 of ~415 states, i.e. has stopped acting. h_phi DID learn (contrastive 66% vs 21% random; harmful 13.8% vs 27% random; monotone with data), but discrimination is not sharp enough to act on. Structural cause: the harmful-exposure population (158) is 4x the rescue population (36), so precision dominates. Explicit rollout never faced this because policy improvement guaranteed it never harmed. NOT SATURATED: rescue ranking still climbing at the largest subset, so this is data- or capacity-limited rather than proof the value is unlearnable."
+}
