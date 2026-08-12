@@ -1,0 +1,124 @@
+{
+  "adapter_status": {
+    "DDSBM": "blocked",
+    "GraphGA": "designed_not_built",
+    "GraphXForm": "designed_not_built",
+    "HN_GFN": "blocked_cpu",
+    "MARS": "designed_not_built",
+    "REINVENT": "designed_not_built"
+  },
+  "artifact_status": "DESIGN_ONLY",
+  "base_commit": "04f1c46",
+  "blocking_decisions_for_the_main_workstream": [
+    "Declare the oracle-counting convention (FAIRNESS_CONTRACT.md section 0). COMPOSE's rule counts every evaluation including rejects; PMO's counts unique valid canonical SMILES only. The choice changes the ranking and blocks every comparator run.",
+    "Decide how HN-GFN's surrogate-in-the-loop is reported; its 1000-call budget is not spent on the true oracle.",
+    "Review the two docs/RELATED_WORK_MATRIX.md cells flagged in DECISION_LOG.md (MARS pathwise; DDSBM var-card / birth-death).",
+    "Add a references.bib entry for REINVENT 4 (Loeffler et al. 2024, doi 10.1186/s13321-024-00812-5); gao2022pmo is PMO and must not stand in for it."
+  ],
+  "branch": "codex/compose-baseline-qualification",
+  "claim_id": "C4",
+  "commands": {
+    "regenerate_rendering": "PYTHONPATH=src python scripts/render_comparator_registry.py",
+    "smoke": null,
+    "tests": "PYTHONPATH=src pytest tests/test_baseline_qualification.py tests/test_comparator_registry.py -q",
+    "validate_and_check_rendering": "PYTHONPATH=src python scripts/render_comparator_registry.py --check",
+    "verify_hashes": "shasum -a 256 <each path in durable_artifacts> and compare"
+  },
+  "compose_claims_a_baseline_does_natively": [
+    {
+      "method": "REINVENT",
+      "one_line": "Changes the objective within a single run and carries the adapted agent across the change.",
+      "subcapability": "C4c_retargeting"
+    },
+    {
+      "method": "REINVENT",
+      "one_line": "Warm restart from a supplied molecule under a new objective.",
+      "subcapability": "C4c_retargeting"
+    },
+    {
+      "method": "HN_GFN",
+      "one_line": "One trained model samples under any preference vector over its objective set with no retraining.",
+      "subcapability": "C4c_retargeting"
+    },
+    {
+      "method": "GraphXForm",
+      "one_line": "Applies structural action masking at every action step, pre-softmax, recomputed after every action.",
+      "subcapability": "C4d_pathwise"
+    },
+    {
+      "method": "MARS",
+      "one_line": "A new run can be launched from the exact realized molecule under a new objective using stock entry points: construct a new Estimator with the new objectives and call Sampler.",
+      "subcapability": "C4c_retargeting"
+    }
+  ],
+  "content_commit": "66591ff0d89e22e8e85f72f15ee6757b8bf153ea",
+  "content_commit_note": "The commit containing every artifact below. This manifest is committed immediately after it, so branch HEAD is one commit ahead of content_commit and differs from it only by this file.",
+  "durable_artifacts": {
+    "baselines/ddsbm/README.md": "332526fb54423db36bb49319796514a7b9d57740abc3b4a374fb63db03bb8c4a",
+    "baselines/ddsbm/environment.lock": "7e1712fe95bcfc366fd72916cb0730e2c163404bdee81be3ec8877109682f4b7",
+    "baselines/graph_ga/README.md": "572190555991b0d9ce4bd467b56c1d8b55b717d292abc8997b05741425ee90e1",
+    "baselines/graph_ga/environment.lock": "346358817e6af9987d34f33a9a1d35a1889c5f04ba4d52f81b2370f66145876e",
+    "baselines/graphxform/README.md": "b40d9be21a9244cef0e81179de190625ccd838cd7f205a9cbda568c8513e1743",
+    "baselines/graphxform/environment.lock": "2b50e573c0849d68bf653c297ba5c769b2853928bf34d8c7c567545e3425762a",
+    "baselines/hn_gfn/README.md": "66c97cab1155beceba7381f57f279ca986c2ddfee4fc3e0e743f0c839d3a4298",
+    "baselines/hn_gfn/environment.lock": "a5612ebcc670ae72e3ddce5a08b7540f20edddbd5bad433ee21b7a76a292ce42",
+    "baselines/mars/README.md": "66ad87505c50b037e03d2a7ecab36ef1f44b74a00e9e7568a62436ba7567e1ea",
+    "baselines/mars/environment.lock": "3210a728ae963e8dde57f75bc345cdaa2436d7d15d456e1e84d3531e08a836ab",
+    "baselines/reinvent/README.md": "a7ce7d7a0d21bc0cdd6948e3cd4d2af7af7574a6e7350365b622f7526f31a306",
+    "baselines/reinvent/environment.lock": "7a42319e9fc5f72ddfa29e995a4226eecd2393ba45e2533ef2b93eafdc2428f2",
+    "configs/comparator_registry_v3.json": "672ae90f8e2e938f19b3d5013e70deaaa127302c62e605bbee185bc5bc0e3147",
+    "docs/workstreams/baseline-qualification/COMPARATOR_MATRIX.md": "eeda42034cbf1fc3742ea8f18f71e7bf6696e0eb07cc5033c954ad0a76056600",
+    "docs/workstreams/baseline-qualification/DECISION_LOG.md": "af035fddec6877f1fdf45193ca2119291b904fa88b7cbdd38dbc5c6982ae0cb0",
+    "docs/workstreams/baseline-qualification/FAIRNESS_CONTRACT.md": "a27168951b65107d7d2a2fa5171c72d83084533bc09ce9916728ca7960413e9a",
+    "docs/workstreams/baseline-qualification/HANDOFF.md": "bc56a43cbcce41621dc0fef001507285ee72667672a81d0f5711b3dfe29264d2",
+    "docs/workstreams/baseline-qualification/PROTOCOL.md": "ce08ec411ccec6459a536921e41b060451eb9636fc7dda232ba4136d309810e9",
+    "docs/workstreams/baseline-qualification/STATUS.md": "8a988f51d99ee14f5427421bc60d3bfb1e360fa4c81e3919a0b69a6c6b013b93",
+    "docs/workstreams/baseline-qualification/comparator_registry_v3.json": "e018b5585ad30fad3a4d7fa1f5ac8201569c5b07b5ca3d96587829146132accd",
+    "scripts/render_comparator_registry.py": "0988ab60ed7efd2664de3d9b12332e84d8012fbd174f2c4c4f6873b61563fad2",
+    "src/compose_v4/experiments/baseline_qualification.py": "2c715c8cf97404c6e85cf30773d3539576f72e25cbe6c58fbd4e1ecc1ab7d1bc",
+    "tests/test_baseline_qualification.py": "795c77572fd9e8ee9237254d48486cfec8689f18692a9b1e3ffbee14cc68f2be"
+  },
+  "external_dependencies_installed": 0,
+  "frozen_inputs": {
+    "drd2_oracle": {
+      "exercised": false,
+      "note": "designated shared oracle for every adapter; numpy-only so it cannot drift",
+      "path": "src/compose_v4/drd2_oracle.py",
+      "sha256": "318cc812b3a5c591ee4bcb8c2cd2da004ff5b147856c9b0375e7fe81a3bf1a44"
+    },
+    "goal_language_normalizers": {
+      "exercised": false,
+      "path": "diagnostics/retarget_goal_language_normalizers.json",
+      "sha256": "187d1ccc60b00c858f0f54f729a99ea91e06d33a913287886c80080889a76cc8"
+    },
+    "ringcore_catalog_fingerprint": {
+      "exercised": false,
+      "note": "named for the adapters to bind to; no chemistry was run in this lane",
+      "value": "639ff6078c32d43c"
+    }
+  },
+  "held_out_data_opened": false,
+  "modal_runs_launched": 0,
+  "projected_smoke_cpu_core_hours": {
+    "DDSBM": "N/A",
+    "GraphGA": "PROJECTION, NOT MEASURED. About 820 oracle calls per source, 4100 total. The frozen DRD2 oracle is a numpy RBF-SVM over folded count fingerprints, order milliseconds per molecule; RDKit crossover and mutation dominate at order 10 ms per child. Expect a few minutes wall on one core. Budget 0.1 CPU-core-hours.",
+    "GraphXForm": "PROJECTION, NOT MEASURED. 347 MB checkpoint download once. The unit cost is a d=512, 10-block transformer forward for beam 32 on ~25-atom graphs; at roughly 1000 forwards plus 1280 training samples per epoch, expect order 5-10 minutes per epoch per source on a few CPU cores. Budget 2-4 CPU-core-hours for the whole 5-source, 3-epoch smoke, and treat anything beyond 6 as the signal to stop and request GPU authorisation.",
+    "HN_GFN": "N/A on CPU. On one V100 the published full loop is 10-13 h; a reduced smoke would be a small fraction of that but is not costable without a run.",
+    "MARS": "PROJECTION, NOT MEASURED. Sampler ~0.2 CPU-core-hours. Dominant cost is the one-time vocabulary build over 1,488,640 ChEMBL SMILES with RDKit bond-breaking enumeration, ~0.5-1.0 CPU-core-hours, cacheable to the artifact volume and paid once. Budget 1.5 CPU-core-hours for the first smoke, 0.2 thereafter.",
+    "REINVENT": "PROJECTION, NOT MEASURED. Adapter A: an Olivecrona-style RNN sampling 64 SMILES of ~60 tokens per step on CPU, order seconds per step; ~20 steps per source gives a few minutes each, so budget 0.3 CPU-core-hours for 5 sources plus a small prior download. Adapter B: transformer priors are larger; budget 0.5-1.0 CPU-core-hours plus the Zenodo prior downloads. Total 1.0-1.5 CPU-core-hours."
+  },
+  "recommended_next_action": "Build and smoke the GraphGA adapter on 3-5 held-in sources under one declared oracle-counting convention. Projected 0.1 CPU-core-hours, HIGH confidence.",
+  "schema": "compose.workstream_handoff",
+  "schema_version": 1,
+  "smoke_executed": false,
+  "verdicts": {
+    "DDSBM": "CONTEXT_ONLY",
+    "GraphGA": "MUST_RUN",
+    "GraphXForm": "MUST_RUN",
+    "HN_GFN": "CONDITIONAL",
+    "MARS": "MUST_RUN",
+    "REINVENT": "MUST_RUN"
+  },
+  "working_tree_clean_at_handoff": true,
+  "workstream": "D \u2014 external-baseline qualification and adapter readiness"
+}
