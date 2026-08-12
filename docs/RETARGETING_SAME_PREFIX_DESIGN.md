@@ -291,6 +291,62 @@ Any future planning-signal probe must either score on an independent
 continuation or compare endpoints. Deterministic lookahead does not license
 dropping the split.
 
+### The 4+4 and 3+3 verdicts above are WITHDRAWN — there was no verified arm
+
+Both runs compared greedy against greedy. `verified_land` was computed as
+`rollout(switch_key, POST_STEPS, develop_score)` — a pure greedy continuation —
+while the decision loop committed `current = keys[greedy_index]`. The loop
+computed the lookahead's preferred action at every step and then discarded it.
+
+The tell was in the 3+3 output: identical final utility on **all 30** sources
+while the lookahead disagreed at 38/90 decision states across 27/30 sources.
+Disagreement that never once changes an outcome is not a ceiling; it is an arm
+that was never run. Headroom 0 was definitional.
+
+## Calibration outcome — 3+3, verified arm actually implemented
+
+`diagnostics/retarget_calibration_result_3plus3_fixed.json`. Same cohort
+`e402e318`, same thresholds, region, utility, clip, temperature and candidate
+law. The verified arm now commits `argmax V_G` under the sealed-67 strict-
+improvement rule and re-plans from the committed state.
+
+**Binary endpoint — still a ceiling.** greedy 28/30, verified 28/30, headroom
+**0**. The lookahead overrode greedy on most sources and changed the outcome on
+**none**.
+
+**Continuous utility — verified is better, but the direction is guaranteed.**
+Mean +0.0361, median +0.0177, higher on 23/30, lower on **0**. The zero is the
+**policy-improvement theorem**, not a measurement: greedy's action is always in
+the candidate set, `futures[greedy_index]` *is* greedy's own landing value, and
+strict improvement never commits a lower `V_G`, so by induction the verified
+landing cannot be worse. Only the **magnitude** is admissible — and it is
+**+3.2% of the typical post-switch movement**, never enough to flip a success.
+
+**GATE: CLOSED.** Per the pre-committed rule: no budget 2, no tighter box, no
+harder threshold. Subclaim B is dropped for this goal.
+
+> On this target-free developability goal, retargeting is easy enough that
+> myopic control suffices. Future-aware control is never worse and is slightly
+> better in utility, but the advantage is small and never decides an outcome.
+
+This is not damaging. The sealed exact-target result (40% → 62%) already
+establishes that future-aware control matters where the problem is hard. Not
+every goal has to reproduce it.
+
+### Three instrument defects in one experiment — the shared shape
+
+All three reported a quantity whose sign was fixed in advance:
+
+1. **sacrifice-to-win** — action chosen as `argmax V_G`, then scored by `V_G`.
+2. **no verified arm** — both arms were greedy, so headroom was 0 by definition.
+3. **sign test on paired utility** — policy improvement guarantees `verified ≥
+   greedy`, so the null of 0.5 was false before any data existed.
+
+The lesson is procedural: **before reporting a statistic, ask what value it
+could take if the hypothesis were false.** If the answer is "none", it is not a
+measurement. C0's independent-evaluation-sample design was the right pattern and
+should not have been dropped.
+
 ## Protocol (unchanged from the agreed design; recorded so it can be preregistered)
 
 **Switch classes.** `P → P∧D` (late constraint addition), `D → P∧D` (reverse late

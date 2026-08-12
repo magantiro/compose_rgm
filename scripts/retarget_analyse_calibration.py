@@ -170,17 +170,27 @@ def main() -> int:
               f"mean {d.mean():+.4f}, median {np.median(d):+.4f}")
         print(f"    verified higher on {wins}/{n}, lower on {losses}, "
               f"tied on {n - wins - losses}")
-        if wins + losses:
-            p_sign = float(stats.binomtest(wins, wins + losses, 0.5,
-                                           alternative="greater").pvalue)
-            print(f"    sign test on the {wins + losses} discordant sources: "
-                  f"one-sided p={p_sign:.4f}")
-        else:
-            p_sign = None
+        # NO SIGN TEST. verified >= greedy is GUARANTEED here, not observed:
+        # greedy's action is always in the candidate set, futures[greedy_index]
+        # IS greedy's own landing value, and strict improvement never commits a
+        # lower V_G -- so by induction over the horizon the verified landing
+        # cannot be worse. That is the policy-improvement theorem. A sign test
+        # against 0.5 would assume a null that is false by construction, which
+        # is the same error already made twice in this experiment.
+        print("    0 losses is the POLICY-IMPROVEMENT GUARANTEE, not evidence.")
+        print("    Admissible: the MAGNITUDE, and whether it flips an outcome.")
+        movement_mean = abs(movement.mean())
+        print(f"    magnitude: {d.mean():+.4f} = "
+              f"{d.mean() / movement_mean:.1%} of typical post-switch movement")
         utility = {"mean_difference": float(d.mean()),
                    "median_difference": float(np.median(d)),
                    "verified_higher": wins, "verified_lower": losses,
-                   "sign_test_one_sided_p": p_sign}
+                   "fraction_of_movement": float(d.mean() / movement_mean),
+                   "direction_is_guaranteed": True,
+                   "sign_test_NOT_REPORTED": (
+                       "verified >= greedy follows from policy improvement; a "
+                       "sign test would assume a null that is false by "
+                       "construction")}
     else:
         utility = {"note": "verified landing score not recorded in this run"}
         print("  paired final utility: not recorded in this run")
