@@ -77,8 +77,12 @@ TIME_POINT = 0.5
 CANONICAL_SLOTS = 48
 
 #: Prefix under A, then the same budget again under B.
-PREFIX_STEPS = 4
-POST_STEPS = 4
+#: 4+4 CEILINGED -- greedy reached the developability region 29/30, leaving no
+#: room to measure a planning advantage. The calibration mandate allowed exactly
+#: one alternative, 3+3, and this is it. Budget 2 is NOT on the table: shortening
+#: until greedy finally loses is result-shaping, not calibration.
+PREFIX_STEPS = 3
+POST_STEPS = 3
 
 #: Candidate universe for a TARGET-FREE goal. Experiment C's top-similarity
 #: stratum has no analogue without a target molecule, so the immediate-score
@@ -315,6 +319,10 @@ def calibrate_source(task: dict[str, Any]) -> dict[str, Any]:
             futures[index] = value
 
         best_index = max(picked, key=lambda i: (futures[i], keys[i]))
+        # STRICT IMPROVEMENT, as in the sealed-67 controller: override greedy
+        # only when the lookahead is strictly better; ties keep greedy.
+        chosen_index = (best_index if futures[best_index] > futures[greedy_index]
+                        else greedy_index)
         disagree = best_index != greedy_index
         # A SACRIFICE is an action that looks worse right now. Only those can
         # demonstrate that future value changed the decision for the better.
@@ -332,11 +340,14 @@ def calibrate_source(task: dict[str, Any]) -> dict[str, Any]:
             "greedy_future": float(futures[greedy_index]),
             "best_future": float(futures[best_index]),
             "greedy_success": bool(develop_success(keys[greedy_index])),
+            "overrode_greedy": bool(chosen_index != greedy_index),
         })
-        current = keys[greedy_index]
+        current = keys[chosen_index]
 
-    verified_land, _v = rollout(switch_key, POST_STEPS, develop_score)
-    greedy_land = current
+    # The two arms, now genuinely distinct: `current` followed the lookahead
+    # under strict improvement, `greedy_land` is the pure myopic continuation.
+    greedy_land, _g = rollout(switch_key, POST_STEPS, develop_score)
+    verified_land = current
     payload = {
         "index": int(task["index"]),
         "source": task["source"],
@@ -350,6 +361,7 @@ def calibrate_source(task: dict[str, Any]) -> dict[str, Any]:
         "develop_verified_success": bool(develop_success(verified_land)),
         "develop_switch_score": float(develop_score(switch_key)),
         "develop_greedy_score": float(develop_score(greedy_land)),
+        "develop_verified_score": float(develop_score(verified_land)),
         "decision_states": states,
         "kernel_calls": calls,
         "seconds": round(time.perf_counter() - started, 1),
@@ -386,7 +398,7 @@ def main(sources: int = 10, smoke: bool = False) -> None:
     chosen = [dict(row) for row in cohort["sources"]][: 2 if smoke else sources]
     for row in chosen:
         row["out_dir"] = ("retarget_goal_calibration_smoke" if smoke
-                          else "retarget_goal_calibration")
+                          else "retarget_goal_calibration_3plus3_fixed")
 
     print(f"{'SMOKE' if smoke else 'CALIBRATION'}: {len(chosen)} held-in sources "
           f"from cohort {cohort['cohort_sha256'][:16]}")

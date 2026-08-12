@@ -148,14 +148,42 @@ def main() -> int:
     print(f"  typical post-switch movement {movement.mean():+.4f}; "
           f"the V_G gap is {relative:.1%} of it")
 
-    # The only admissible evidence: did acting on the lookahead change the
-    # OUTCOME, on sources where it would have acted differently at all?
+    # ------------------------------------------------------------------
+    # ENDPOINT-ONLY EVIDENCE. The only admissible comparison: did acting on the
+    # lookahead change the OUTCOME? Reported two ways, both paired by source --
+    # binary success and final utility -- because a goal can be reached by both
+    # arms while one lands further inside the region.
+    # ------------------------------------------------------------------
     would_differ = [r for r in rows
                     if any(s["top1_disagreement"] for s in r["decision_states"])]
     changed = [r for r in would_differ
                if r["develop_greedy_success"] != r["develop_verified_success"]]
     print(f"\n  sources where lookahead would act differently : {len(would_differ)}/{n}")
     print(f"  ...where the OUTCOME actually differed         : {len(changed)}")
+
+    if all("develop_verified_score" in r for r in rows):
+        gs = np.array([r["develop_greedy_score"] for r in rows])
+        vs = np.array([r["develop_verified_score"] for r in rows])
+        d = vs - gs
+        wins = int((d > 0).sum()); losses = int((d < 0).sum())
+        print(f"  paired final utility, verified - greedy       : "
+              f"mean {d.mean():+.4f}, median {np.median(d):+.4f}")
+        print(f"    verified higher on {wins}/{n}, lower on {losses}, "
+              f"tied on {n - wins - losses}")
+        if wins + losses:
+            p_sign = float(stats.binomtest(wins, wins + losses, 0.5,
+                                           alternative="greater").pvalue)
+            print(f"    sign test on the {wins + losses} discordant sources: "
+                  f"one-sided p={p_sign:.4f}")
+        else:
+            p_sign = None
+        utility = {"mean_difference": float(d.mean()),
+                   "median_difference": float(np.median(d)),
+                   "verified_higher": wins, "verified_lower": losses,
+                   "sign_test_one_sided_p": p_sign}
+    else:
+        utility = {"note": "verified landing score not recorded in this run"}
+        print("  paired final utility: not recorded in this run")
 
     gate = "OPEN" if headroom > 0 else "CLOSED"
     reasons = []
@@ -178,6 +206,7 @@ def main() -> int:
                            "verified": verified, "verdict": develop_verdict,
                            "binary_headroom": int(headroom)},
         "horizon": horizon,
+        "endpoint_utility": utility,
         "gate": {
             "decision_states": total, "top1_disagreement": disagree,
             "disagreements_higher_vg": disagree - ties - losses,
