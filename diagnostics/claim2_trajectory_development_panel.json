@@ -1,0 +1,428 @@
+{
+  "authorization": null,
+  "burned_excluded": [],
+  "burned_source_files": [
+    "diagnostics/editing_v2_controller_panel_seal.json",
+    "diagnostics/editing_v2_experiment_c0_planning_signal.json"
+  ],
+  "composition": {
+    "0|large": 3,
+    "0|medium": 3,
+    "0|small": 3,
+    "1-4|large": 3,
+    "1-4|medium": 3,
+    "1-4|small": 3,
+    "25+|large": 3,
+    "25+|medium": 3,
+    "25+|small": 3,
+    "5-24|large": 3,
+    "5-24|medium": 3,
+    "5-24|small": 3
+  },
+  "criteria": {
+    "headroom_rule": "upper heavy-atom bound leaves 6 atoms below the frozen 40-atom process ceiling so the ceiling cannot masquerade as a learned preference against growth",
+    "heavy_atoms": [
+      12,
+      34
+    ],
+    "size_bands": [
+      [
+        "small",
+        12,
+        19
+      ],
+      [
+        "medium",
+        20,
+        27
+      ],
+      [
+        "large",
+        28,
+        34
+      ]
+    ],
+    "support_bands": [
+      "0",
+      "1-4",
+      "5-24",
+      "25+"
+    ],
+    "support_definition": "distinct retained held-in training source molecules sharing the RDKit Murcko scaffold; a held-in molecule does not support itself"
+  },
+  "held_out_opened": false,
+  "panel_sha256": "a4282229742eff2edc37f752410a75239d4410c266b1670af4d3552baab8cf9e",
+  "pool": "held-in training sources only",
+  "rejected": {
+    "cell_full": 111,
+    "no_scaffold": 0,
+    "size_window": 17,
+    "unparseable": 0
+  },
+  "requested": 36,
+  "schema": "compose.claim2.trajectory_panel",
+  "seed": 20260812,
+  "sources": [
+    {
+      "has_ring": true,
+      "heavy_atoms": 29,
+      "index": 0,
+      "scaffold_support": 0,
+      "size_band": "large",
+      "slots": 48,
+      "source": "C=C1CCCC2C1(C)CCP(C)C2(C)CC1=C2OC(C)(C)N=C2C=C(OC)C1O",
+      "support_band": "0"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 30,
+      "index": 1,
+      "scaffold_support": 0,
+      "size_band": "large",
+      "slots": 48,
+      "source": "C=ICN(Cc1nnc(S[SH2]CN(CO)c2nc(C)cs2)[nH]1)C(=O)c1ccccc1",
+      "support_band": "0"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 28,
+      "index": 2,
+      "scaffold_support": 0,
+      "size_band": "large",
+      "slots": 48,
+      "source": "CC(=O)N1CCOc2ccc(S(=O)(=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)cc21",
+      "support_band": "0"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 27,
+      "index": 3,
+      "scaffold_support": 0,
+      "size_band": "medium",
+      "slots": 48,
+      "source": "C=Cc1cccc(NC(=O)NC2CCC(C(=O)I3CCN(C)CC3)CC2)c1",
+      "support_band": "0"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 27,
+      "index": 4,
+      "scaffold_support": 0,
+      "size_band": "medium",
+      "slots": 48,
+      "source": "CC(=O)N1CCc2c(c(Nc3cccc(C)c3)nn2Cc2cccnc2)C1",
+      "support_band": "0"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 27,
+      "index": 5,
+      "scaffold_support": 0,
+      "size_band": "medium",
+      "slots": 48,
+      "source": "CC(=O)OCCCC1(C)C(C)=CCC2C3Cc4cn[nH]c4NC3(C)CCC21",
+      "support_band": "0"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 12,
+      "index": 6,
+      "scaffold_support": 0,
+      "size_band": "small",
+      "slots": 48,
+      "source": "BrC1=[PH2]SC=C1Cc1cc[nH]c1",
+      "support_band": "0"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 19,
+      "index": 7,
+      "scaffold_support": 0,
+      "size_band": "small",
+      "slots": 48,
+      "source": "CC(=O)NC1NC(Cl)CC(NCC2(CO)CCC2)N1",
+      "support_band": "0"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 18,
+      "index": 8,
+      "scaffold_support": 0,
+      "size_band": "small",
+      "slots": 48,
+      "source": "NN=c1sc(C2CCCO2)nn1CC1CCCC1",
+      "support_band": "0"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 33,
+      "index": 9,
+      "scaffold_support": 1,
+      "size_band": "large",
+      "slots": 48,
+      "source": "CC(C)C#CC(c1ccc(Cl)cc1)N1CCC(CC(=O)O)CC1c1ccc(C(F)(F)F)cc1",
+      "support_band": "1-4"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 34,
+      "index": 10,
+      "scaffold_support": 2,
+      "size_band": "large",
+      "slots": 48,
+      "source": "CCCc1c(C(=O)OCC)c(C(=O)OCC)c2c(-c3ccccc3)cc(N3CCOCC3)nn12",
+      "support_band": "1-4"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 30,
+      "index": 11,
+      "scaffold_support": 3,
+      "size_band": "large",
+      "slots": 48,
+      "source": "COc1ccc(-c2nc(CS(=O)(=O)CC(=O)NCc3ccccc3Br)c(C)o2)cc1",
+      "support_band": "1-4"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 23,
+      "index": 12,
+      "scaffold_support": 3,
+      "size_band": "medium",
+      "slots": 48,
+      "source": "COCc1noc(-c2ccc(N3CCCCC3COC)nc2)n1",
+      "support_band": "1-4"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 27,
+      "index": 13,
+      "scaffold_support": 1,
+      "size_band": "medium",
+      "slots": 48,
+      "source": "COc1cccc(C(=O)C2(NC(=O)c3cccc(OC)c3C)CCCC2)c1",
+      "support_band": "1-4"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 23,
+      "index": 14,
+      "scaffold_support": 2,
+      "size_band": "medium",
+      "slots": 48,
+      "source": "Cc1ccc(-c2nc(N)c3cc(Cc4ccccc4)sc3n2)o1",
+      "support_band": "1-4"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 19,
+      "index": 15,
+      "scaffold_support": 1,
+      "size_band": "small",
+      "slots": 48,
+      "source": "CC(OC(=O)c1cccs1)C(=O)NCC1CCCO1",
+      "support_band": "1-4"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 18,
+      "index": 16,
+      "scaffold_support": 1,
+      "size_band": "small",
+      "slots": 48,
+      "source": "Cn1c(-c2ccc(F)cc2)[n+](C)c2ccccc21",
+      "support_band": "1-4"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 18,
+      "index": 17,
+      "scaffold_support": 1,
+      "size_band": "small",
+      "slots": 48,
+      "source": "O=C(c1cc(-c2ccccc2)on1)N1CCCC1",
+      "support_band": "1-4"
+    },
+    {
+      "has_ring": false,
+      "heavy_atoms": 29,
+      "index": 18,
+      "scaffold_support": 1480,
+      "size_band": "large",
+      "slots": 48,
+      "source": "C#CCNC(=O)COCOC(C=C(C=CC(=O)OCC)OC(C)=O)COC(C)=O",
+      "support_band": "25+"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 29,
+      "index": 19,
+      "scaffold_support": 810,
+      "size_band": "large",
+      "slots": 48,
+      "source": "C#CCOC=CC=C(C=COC)CCNC(=O)C(OCC#C)c1ccc(Cl)cc1",
+      "support_band": "25+"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 32,
+      "index": 20,
+      "scaffold_support": 48,
+      "size_band": "large",
+      "slots": 48,
+      "source": "CC=CC=C(C)CC(=O)Oc1cc(OC(=O)c2ccccc2C)c(C(C)=O)cc1C(C)=O",
+      "support_band": "25+"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 26,
+      "index": 21,
+      "scaffold_support": 61,
+      "size_band": "medium",
+      "slots": 48,
+      "source": "CCCCCOc1ccc(-c2nc(CNC(C)CCCCC)co2)cc1",
+      "support_band": "25+"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 25,
+      "index": 22,
+      "scaffold_support": 28,
+      "size_band": "medium",
+      "slots": 48,
+      "source": "COCCN1C(=O)NC(c2cccc(C(F)(F)F)c2)C(C(C)=O)=C1C",
+      "support_band": "25+"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 20,
+      "index": 23,
+      "scaffold_support": 72,
+      "size_band": "medium",
+      "slots": 48,
+      "source": "O=C1c2cc(O)c(O)c(O)c2C(=O)c2cccc(O)c21",
+      "support_band": "25+"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 18,
+      "index": 24,
+      "scaffold_support": 58,
+      "size_band": "small",
+      "slots": 48,
+      "source": "COc1ccc2nc(-c3cccc(F)c3)sc2c1",
+      "support_band": "25+"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 19,
+      "index": 25,
+      "scaffold_support": 93,
+      "size_band": "small",
+      "slots": 48,
+      "source": "O=C(O)Cc1cccc2c(=O)c3ccccc3oc12",
+      "support_band": "25+"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 16,
+      "index": 26,
+      "scaffold_support": 26,
+      "size_band": "small",
+      "slots": 48,
+      "source": "O=C(O)Cc1nc(-c2ccc(Cl)cc2)no1",
+      "support_band": "25+"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 29,
+      "index": 27,
+      "scaffold_support": 5,
+      "size_band": "large",
+      "slots": 48,
+      "source": "CC(=O)CCC(C)C1CCC2C3=C(CCC21C)C1(C)CCC(=O)C(C)C1CC3=O",
+      "support_band": "5-24"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 31,
+      "index": 28,
+      "scaffold_support": 5,
+      "size_band": "large",
+      "slots": 48,
+      "source": "Cc1ccc(C=Cc2ncc([N+](=O)[O-])n2CCOC(=O)c2c[nH]c3ccccc23)cc1",
+      "support_band": "5-24"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 33,
+      "index": 29,
+      "scaffold_support": 12,
+      "size_band": "large",
+      "slots": 48,
+      "source": "O=C1OC2(CCN(C(=O)Nc3ncc(-c4cccc(C(F)F)c4)cn3)CC2)c2ccccc21",
+      "support_band": "5-24"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 22,
+      "index": 30,
+      "scaffold_support": 10,
+      "size_band": "medium",
+      "slots": 48,
+      "source": "C=CC=C(C=C)CCC(=O)N1C(=O)C(C(C)O)C1OC(C)=O",
+      "support_band": "5-24"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 23,
+      "index": 31,
+      "scaffold_support": 7,
+      "size_band": "medium",
+      "slots": 48,
+      "source": "Cc1ccccc1-c1noc(-c2cc3ccccc3oc2=O)n1",
+      "support_band": "5-24"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 26,
+      "index": 32,
+      "scaffold_support": 7,
+      "size_band": "medium",
+      "slots": 48,
+      "source": "O=C(NCc1ccccc1F)C1CCCN1S(=O)(=O)c1ccc(F)cc1",
+      "support_band": "5-24"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 19,
+      "index": 33,
+      "scaffold_support": 5,
+      "size_band": "small",
+      "slots": 48,
+      "source": "C=CCNCCn1ccc2ccc3ncccc3c21",
+      "support_band": "5-24"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 18,
+      "index": 34,
+      "scaffold_support": 6,
+      "size_band": "small",
+      "slots": 48,
+      "source": "COC(=O)C(c1ccc(F)cc1)C1CCCCN1",
+      "support_band": "5-24"
+    },
+    {
+      "has_ring": true,
+      "heavy_atoms": 14,
+      "index": 35,
+      "scaffold_support": 5,
+      "size_band": "small",
+      "slots": 48,
+      "source": "O=C(Nc1ccccc1)C1CCCC1",
+      "support_band": "5-24"
+    }
+  ],
+  "status": "SMOKE_HELD_IN"
+}

@@ -1,0 +1,67 @@
+{
+  "calibration_count": 96094,
+  "calibration_source": "training_source_keys of editing_v2_matched_validation_reserve_ids.json.gz (96094 molecules of 96094)",
+  "envelope_sha256": "fb369161b303a49cdf6f05611691e67a59bbfe4a9e8c5afcfbba22129f97694e",
+  "held_in_self_retention": 0.9639207442712344,
+  "held_in_unparseable": 0,
+  "held_in_usable": 96094,
+  "lower": [
+    144.17000000000002,
+    -1.6446526999999982,
+    0.10191516591685751,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    9.0
+  ],
+  "lower_quantile": 0.005,
+  "mean": [
+    378.7834973047225,
+    3.3636313725102527,
+    0.5582541581104247,
+    0.010479322330218328,
+    1.4472391616542135,
+    4.508907944304535,
+    3.2326784190480153,
+    0.33211093195421426,
+    26.201344516827273
+  ],
+  "names": [
+    "molecular_weight",
+    "clogp",
+    "qed",
+    "formal_charge",
+    "hbd",
+    "hba",
+    "ring_count",
+    "fraction_csp3",
+    "heavy_atoms"
+  ],
+  "schema": "compose.claim2.descriptor_envelope",
+  "status": "DESIGN_ONLY_CALIBRATED_ON_HELD_IN_BEFORE_ANY_TRAJECTORY",
+  "stdev": [
+    92.63796612036326,
+    1.6737368732732087,
+    0.19927265706998948,
+    0.1108351286267441,
+    1.2158524141178075,
+    1.8834143987950547,
+    1.1773188016516518,
+    0.22085001065467438,
+    6.329909232379476
+  ],
+  "upper": [
+    620.4375350000003,
+    7.711381900000006,
+    0.9288277793169256,
+    1.0,
+    6.0,
+    11.0,
+    7.0,
+    1.0,
+    40.0
+  ],
+  "upper_quantile": 0.995
+}

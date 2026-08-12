@@ -1,0 +1,235 @@
+{
+  "schema": "compose.claim2.trajectory_protocol",
+  "schema_version": 1,
+  "status": "DESIGN_ONLY_FROZEN_BEFORE_ANY_TRAJECTORY_EXISTS",
+  "claim_id": 2,
+  "workstream": "B",
+  "claim": "The executor defines what can happen; R_theta organizes those legal edits into coherent molecular trajectories that achieve nontrivial structural movement without the pathological drift, cycling, or operator collapse induced by unlearned same-support transport laws.",
+  "non_claims": [
+    "no claim about physical dynamics",
+    "no claim about synthetic route plausibility",
+    "no claim about medicinal plausibility; the descriptor envelope is a distributional sanity check",
+    "no claim that fewer reversals is intrinsically better; reversibility may be part of the reference law",
+    "no claim of distribution-learning quality; this is source-conditioned transport, not unconditional generation"
+  ],
+  "frozen_inputs": {
+    "r_theta": {
+      "artifact": "diagnostics/editing_v2_r_theta_FROZEN.json",
+      "run": "run_v2_01",
+      "selected_step": 12500,
+      "identity_sha256": "426ac15e7f4cc68c2b0208992dd230d2e283c6cc524092df3cb2d3c5898b3b9a",
+      "selected_model_state_sha256": "c977ee3fe0cfdcafa204a2add27f3feef59f5dfcf4f3384659d8902a9006167c",
+      "checkpoint_location": "/artifacts/editing_v2/r_theta_run/runs/run_v2_01/R_THETA_CHECKPOINT.pt",
+      "note": "Development checkpoint; predates the code-commit binding, so this workstream is development evidence and not paper-bearing until the frozen seeds exist."
+    },
+    "empirical_family_law": {
+      "artifact": "diagnostics/editing_v2_sampling_law_v2.json",
+      "field": "realized_coefficients.by_family",
+      "frozen_sha256": "b0cc66f168f1cf3e7a4b5bacfb1138059005251a10561d6961c3ea1c5dd7ac73",
+      "by_family": {
+        "atom_delete": 0.173,
+        "atom_insert": 0.1608,
+        "atom_restate": 0.2042,
+        "bond_reorder": 0.05,
+        "bond_reroute": 0.1902,
+        "cycle_attach": 0.05,
+        "cycle_insert": 0.0644,
+        "ring_system_restate": 0.1074
+      },
+      "definition_source": "configs/comparator_registry_v3.json :: frozen_definitions.state_independent_empirical_family_prior"
+    },
+    "process": {
+      "capability_cells": "configs/editing_v2_process_v2_capability_cells.json",
+      "process_identity_sha256": "0c938177a34819e6e828920c1f66e240c6eb251fe7c9ea6cfe6757829dceb2dd",
+      "active_families": 8,
+      "registry_cells": 22,
+      "maximum_active_atoms": 40,
+      "charge_policy": "charge_preserving_only",
+      "stereochemistry": "out_of_scope"
+    },
+    "split": {
+      "artifact": "diagnostics/editing_v2_matched_validation_reserve_ids.json.gz",
+      "held_in_sources": 96094,
+      "held_out_reserve_sources": 10653
+    },
+    "descriptor_envelope": {
+      "artifact": "diagnostics/claim2_descriptor_envelope.json",
+      "calibrated_on": "held-in training_source_keys",
+      "calibrated_before_any_trajectory": true
+    }
+  },
+  "arms": {
+    "comparison_type": "law_only",
+    "shared_support": "identical executable canonical-successor support at every state; only the probability assignment differs",
+    "members": [
+      {
+        "id": "r_theta",
+        "law": "P_theta(y | x), the frozen learned reference process, conditioned on taking a productive jump"
+      },
+      {
+        "id": "uniform_canonical",
+        "law": "1 / |N+(x)| over distinct productive canonical successors after alias collapse"
+      },
+      {
+        "id": "empirical_family",
+        "law": "sum over families k reaching y of qhat(k) / |N_k(x)|, with qhat the frozen realized family law restricted to families legal at x and renormalized there"
+      }
+    ],
+    "optional_fourth_arm_not_implemented": "empirical family + learned identity; deferred because it needs a within-family score the trajectory row does not carry, and the workstream permits it only if already cheap"
+  },
+  "rollout": {
+    "horizon": 6,
+    "horizon_escalation_rule": "H=8 may be compared ONCE on held-in smoke only if H=6 fails to expose structural movement. It is not a tuning knob and never differs across arms.",
+    "seeds_per_source": 3,
+    "smoke_seeds_per_source": 2,
+    "time_point": 0.5,
+    "canonical_slots": 48,
+    "common_random_numbers": "all arms consume the identical uniform variate at the identical step over the identical sorted successor order",
+    "commit_rule": "every accepted canonical successor is committed as sampled; no controller, objective or oracle enters this lane"
+  },
+  "panels": {
+    "development": {
+      "artifact": "diagnostics/claim2_trajectory_development_panel.json",
+      "pool": "held-in",
+      "sources": 36,
+      "stratification": "4 scaffold-support bands x 3 heavy-atom size bands, 3 sources per cell",
+      "status": "SMOKE_HELD_IN",
+      "opened": true
+    },
+    "confirmatory": {
+      "artifact": "NOT MATERIALIZED -- definition only",
+      "pool": "matched validation reserve",
+      "command": "python scripts/claim2_select_trajectory_panel.py --pool reserve --count 96 --seed 20260812 --out diagnostics/claim2_trajectory_confirmatory_panel.json --i-am-authorized-to-open-the-matched-reserve '<authorizing agent>'",
+      "sources": 96,
+      "stratification": "4 scaffold-support bands x 3 heavy-atom size bands, 8 sources per cell",
+      "disjointness": {
+        "from_exact_target_development_and_sealed_panels": "diagnostics/editing_v2_controller_panel_seal.json, both source AND target endpoints of all 91 pairs (164 distinct reserve endpoints)",
+        "from_planning_signal_probe": "diagnostics/editing_v2_experiment_c0_planning_signal.json (2 reserve sources)",
+        "from_retargeting_sources": "diagnostics/retarget_calibration_cohort.json is held-in only; verified 0 reserve overlap",
+        "from_pathwise_constraint_sources": "configs/benchmarks/cnof_leads.json is a disjoint benchmark lineage; verified 0 reserve overlap",
+        "from_global_final_test": "diagnostics/editing_v2_final_test_integrity_audit.json records exact_overlap.with_matched_reserve = 0; the reserve and final_test are source-disjoint by construction"
+      },
+      "fresh_reserve_pool_after_exclusions": 10487,
+      "status": "DESIGN_ONLY",
+      "opened": false,
+      "authorization_required": "the main workstream, in writing, recorded verbatim in the artifact"
+    }
+  },
+  "primary_result": {
+    "kind": "mobility-fidelity frontier",
+    "mobility_axis": "median over sources of the per-source mean endpoint ECFP4 Tanimoto distance from the source molecule",
+    "fidelity_axis": "mean over sources of the per-source fraction of committed intermediate states inside the held-in descriptor envelope",
+    "decision_rule": "Pareto relation of r_theta to each unlearned arm, using only axes whose paired bootstrap 95% interval over SOURCES excludes zero",
+    "possible_outcomes": ["dominates", "dominated_by", "incomparable", "unresolved"],
+    "incomparable_is_a_result": "mobility bought with fidelity, or the reverse, is publishable and must not be scalarized away after the fact",
+    "independent_statistical_unit": "the source molecule; rollout seeds are repeated measures and are averaged within source before any interval",
+    "minimum_sources_for_a_verdict": 20
+  },
+  "secondary_metrics": [
+    "heavy_atom_change",
+    "ring_system_change",
+    "unique_state_fraction",
+    "immediate_reversal_rate",
+    "two_cycle_rate",
+    "any_state_revisit_rate",
+    "early_dead_end_rate",
+    "operator_family_entropy",
+    "family_coverage_count",
+    "multi_family_trajectory_fraction",
+    "endpoint_uniqueness",
+    "standardized_descriptor_drift",
+    "arm_divergence_tv"
+  ],
+  "stratification": "every metric is reported separately across scaffold-support bands 0 / 1-4 / 5-24 / 25+; the goal is an honest characterization of how mobility and fidelity change as training support weakens, not a claim that support does not matter",
+  "instrument_gates": {
+    "falsifiability_gate": "every metric in src/compose_v4/experiments/claim2_trajectory_metrics.py METRIC_REGISTRY must declare what value it would take if the hypothesis were false; validate_metric_registry refuses any that does not",
+    "arm_divergence_gate": "pairwise total variation between the three laws is recorded at every state; a run whose arms never diverge is INVALID_INSTRUMENT, not a null result",
+    "kernel_cross_check_gate": "each source verifies enumerate_successor_row against canonical_successor_result on its source state; any disagreement marks the run INVALID_INSTRUMENT",
+    "power_gate": "no Pareto verdict is emitted below 20 sources, whatever the point estimates show",
+    "banned_statistics": {
+      "reference_log_likelihood_of_own_trajectories": "E_R[log R] >= E_U[log R] is Gibbs' inequality; the sign is fixed before any data exists",
+      "reference_probability_of_chosen_successor": "selector and scorer are the same object",
+      "support_size_by_arm": "identical across arms by construction; a difference is a bug, not a result",
+      "validity_rate_by_arm": "100% for every arm is structural, imposed by the executor"
+    }
+  },
+  "stop_rules": [
+    "all arms nearly identical after the single held-in horizon check -> stop and report that the horizon cannot expose the difference",
+    "R_theta collapses to one operator family or cycles pathologically -> stop and report the negative characterization",
+    "descriptor metrics reveal broad off-distribution drift -> stop and report",
+    "the suite cannot distinguish mobility from trivial growth or shrinkage -> stop; this is why heavy-atom and ring-system change are reported beside Tanimoto distance",
+    "kernel cross-check disagreement -> INVALID_INSTRUMENT, fix before any analysis"
+  ],
+  "allowed_calibration": [
+    "the descriptor envelope, on held-in molecules, before any trajectory exists (done)",
+    "the development panel, mechanically and outcome-independently, from held-in sources (done)",
+    "one held-in horizon comparison H=6 versus H=8 if and only if H=6 fails to expose movement"
+  ],
+  "forbidden_adaptations": [
+    "retraining, fine-tuning or reselecting R_theta",
+    "changing the objective, architecture, corpus, operator set or process identity",
+    "refitting the descriptor envelope after seeing trajectories",
+    "adding, removing or reweighting an arm after seeing results",
+    "introducing a scalarization of the two frontier axes after seeing the point estimates",
+    "opening the matched reserve without written main-workstream authorization",
+    "any use of the global final test"
+  ],
+  "cost_model": {
+    "unit": "one canonical-successor enumeration on 2 CPU",
+    "measured_evidence": {
+      "source": "committed diagnostics with >=20 kernel calls per task, so container startup is amortized",
+      "editing_v2_h_phi_teacher_train_labels.json": {"tasks": 280, "median_seconds_per_call": 13.8, "range": [1.9, 53.2]},
+      "editing_v2_experiment_c0_planning_signal_preregistered.json": {"tasks": 12, "median_seconds_per_call": 8.6},
+      "editing_v2_sealed67_result.json": {"tasks": 27, "median_seconds_per_call": 14.8},
+      "retarget_calibration_result.json": {"tasks": 30, "median_seconds_per_call": 20.6},
+      "pooled_median_seconds_per_call": 14,
+      "pooled_p90_seconds_per_call": 35
+    },
+    "this_lane_overhead": "enumerate_successor_row runs compile_state_successor_map plus forward_compiled_successor_partitions: one mark-execution pass and two model forwards, versus canonical_successor_result's one pass and one forward. Assumed 1.2-1.5x; the smoke MEASURES it and records seconds_per_kernel_call per shard.",
+    "worst_case_enumerations_per_source": "1 + 3*seeds*(horizon-1) + 1",
+    "smoke": {
+      "sources": 8,
+      "seeds": 2,
+      "horizon": 6,
+      "worst_case_enumerations_per_source": 32,
+      "worst_case_total_enumerations": 256,
+      "expected_container_hours": 1.5,
+      "worst_case_container_hours": 3.8,
+      "expected_wall_clock_minutes": 11,
+      "cpu_per_container": 2.0,
+      "containers": 8,
+      "gpu": "none, ever"
+    },
+    "full_held_in_development_run_if_authorized_later": {
+      "sources": 36,
+      "seeds": 3,
+      "horizon": 6,
+      "worst_case_enumerations_per_source": 47,
+      "expected_container_hours": 10.1,
+      "worst_case_container_hours": 25
+    },
+    "confirmatory_matched_reserve_if_authorized_later": {
+      "sources": 96,
+      "seeds": 3,
+      "horizon": 6,
+      "worst_case_enumerations_per_source": 47,
+      "expected_container_hours": 27,
+      "worst_case_container_hours": 67,
+      "note": "Quoted so the size of the eventual ask is visible now. This lane does not run it and does not select its sources."
+    }
+  },
+  "artifacts": {
+    "transport_laws": "src/compose_v4/experiments/claim2_transport_laws.py",
+    "metric_suite": "src/compose_v4/experiments/claim2_trajectory_metrics.py",
+    "rollout_app": "modal_apps/claim2_trajectory_characterization_app.py",
+    "panel_selection": "scripts/claim2_select_trajectory_panel.py",
+    "envelope_calibration": "scripts/claim2_calibrate_descriptor_envelope.py",
+    "analysis": "scripts/analyse_claim2_trajectories.py",
+    "tests": [
+      "tests/test_claim2_transport_laws.py",
+      "tests/test_claim2_trajectory_metrics.py",
+      "tests/test_claim2_trajectory_analysis.py",
+      "tests/test_claim2_trajectory_panel.py"
+    ]
+  }
+}
