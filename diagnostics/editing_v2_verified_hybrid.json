@@ -1724,5 +1724,88 @@
       "exact_p_one_sided": 0.5
     }
   },
-  "verdict": "THE HYBRID WORKS AND THE PRIORITISER DOES NOT MATTER. hphi1 (17/24, 83% of full rollout gain, 35% of continuations) and sim2 (17/24, 52%) are statistically INDISTINGUISHABLE from full rollout 18/24 (p=0.50 both). h_phi vs similarity is noise: 17 vs 16 at K=1 is 3 discordant one way and 2 the other (p=0.50), and 1-1 at K=2. Per the preregistered reading, exact-target similarity is a privileged cheap proposal heuristic for THIS goal; do not tune h_phi to beat it here. R_theta probability is the weakest prioritiser (13/24; 5-1 discordant vs hphi1, p=0.109, suggestive not established) -- edit plausibility is not edit usefulness toward a goal. THE SAFETY PROPERTY HELD FOR EVERY ARM: zero greedy losses, by construction, which direct override could not promise. NOTE pair 21 is recovered ONLY by hphi1, not by full rollout: full rollout is greedy-improvement per step, not globally optimal, so the guarantee is never-worse-than-greedy, not matches-full-rollout."
+  "verdict": "THE HYBRID WORKS AND THE PRIORITISER DOES NOT MATTER. hphi1 reaches 17/24 using 35% of the continuation evaluations, sim2 17/24 using 52%, against greedy 12/24 and full rollout evaluation 18/24. Paired tests DID NOT DETECT a difference between these and full rollout (p=0.50); at n=24 that is failure to detect, NOT demonstrated equivalence. h_phi vs similarity is noise: 3-vs-2 discordant at K=1 (p=0.50), 1-1 at K=2. Per the preregistered reading, exact-target similarity is a privileged cheap heuristic for a goal that IS a molecule; do not tune h_phi to beat it here, and do not read this as evidence against learned desirability for goals with no privileged distance heuristic. R_theta probability is the weakest prioritiser (13/24, 1/6 of full's rescues) -- edit plausibility is not edit usefulness toward a goal. THE SAFETY PROPERTY HELD FOR EVERY ARM: zero greedy losses, structurally, which direct override could not promise.",
+  "rescue_set_decomposition": {
+    "note": "Retention is a RATIO OF MAGNITUDES, not a subset relation. Different controllers rescue different pairs, so \"83% retention\" must not be read as \"5 of full rollout's 6 rescues retained\".",
+    "greedy_fails_on": [
+      0,
+      1,
+      4,
+      5,
+      9,
+      10,
+      16,
+      17,
+      20,
+      21,
+      22,
+      23
+    ],
+    "full_rescues": [
+      0,
+      4,
+      5,
+      16,
+      20,
+      23
+    ],
+    "arms": {
+      "sim1": {
+        "rescues": [
+          4,
+          5,
+          16,
+          20
+        ],
+        "of_full_set": "4/6",
+        "unique": []
+      },
+      "sim2": {
+        "rescues": [
+          0,
+          4,
+          5,
+          16,
+          20
+        ],
+        "of_full_set": "5/6",
+        "unique": []
+      },
+      "hphi1": {
+        "rescues": [
+          0,
+          4,
+          16,
+          21,
+          23
+        ],
+        "of_full_set": "4/6",
+        "unique": [
+          21
+        ]
+      },
+      "hphi2": {
+        "rescues": [
+          0,
+          4,
+          16,
+          20,
+          23
+        ],
+        "of_full_set": "5/6",
+        "unique": []
+      },
+      "ref1": {
+        "rescues": [
+          5
+        ],
+        "of_full_set": "1/6",
+        "unique": []
+      }
+    }
+  },
+  "terminology": {
+    "full": "full-remaining-budget ROLLOUT EVALUATION under a greedy base policy, i.e. a rollout policy-improvement controller. NOT globally optimal dynamic programming over the rewrite graph, and must not be called \"full planning\".",
+    "retention": "ratio of magnitudes (R_arm - R_greedy)/(R_full - R_greedy), not set overlap"
+  }
 }
