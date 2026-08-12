@@ -357,8 +357,13 @@ def run_pair(task: dict[str, Any]) -> dict[str, Any]:
                       for n, r in results.items())
           + f"  ({calls} calls, {seconds:.0f}s)", flush=True)
 
+    # The amendment's exclusion flag must travel back OUT with the result, not
+    # just in with the task: the first sealed run built this payload from an
+    # explicit key list and silently dropped it, so the primary/sensitivity
+    # split had to be recovered by joining on index afterwards.
     payload = {"index": task["index"], "source": start_key, "target": target_key,
                "verified_steps": budget, "arms": results,
+               "excluded_from_primary": bool(task.get("excluded_from_primary", False)),
                "kernel_calls": calls, "seconds": round(seconds, 1)}
     out = Path(RUN_ROOT) / task.get("out_dir", "h_phi_verified_hybrid")
     out.mkdir(parents=True, exist_ok=True)
