@@ -322,9 +322,23 @@ def run_arms(task: dict[str, Any]) -> dict[str, Any]:
             current = nxt
         return current
 
-    def verified_run(key: str, budget: int, goal: str) -> tuple[str, int]:
-        """Commit argmax V_G under strict improvement, then re-plan."""
-        current, overrides = key, 0
+    def greedy_path(key: str, budget: int, goal: str) -> list[str]:
+        """Same policy as greedy_run, but keeps the trace. Used only for the
+        recorded arms -- V_G rollouts inside verified_run stay on greedy_run so
+        the hot path allocates nothing extra."""
+        path, current = [key], key
+        for _ in range(budget):
+            nxt = greedy_step(current, goal)
+            if nxt is None:
+                break
+            current = nxt
+            path.append(current)
+        return path
+
+    def verified_run(key: str, budget: int, goal: str):
+        """Commit argmax V_G under strict improvement, then re-plan.
+        Returns (path, overrides); the landing is path[-1]."""
+        current, overrides, path = key, 0, [key]
         for step in range(budget):
             remaining = budget - step
             rows = successors(current, slots)
@@ -356,20 +370,22 @@ def run_arms(task: dict[str, Any]) -> dict[str, Any]:
             chosen = best if futures[best] > futures[greedy_index] else greedy_index
             overrides += int(chosen != greedy_index)
             current = keys[chosen]
-        return current, overrides
+            path.append(current)
+        return path, overrides
 
-    landings: dict[str, str] = {}
+    paths: dict[str, list[str]] = {}
     overrides: dict[str, int] = {}
     # continue_A: the negative control -- keep optimising the OLD goal.
-    landings["continue_A"] = greedy_run(switch, post, goal_a)
-    landings["greedy_retarget"] = greedy_run(switch, post, "B")
-    landings["verified_retarget"], overrides["verified_retarget"] = \
+    paths["continue_A"] = greedy_path(switch, post, goal_a)
+    paths["greedy_retarget"] = greedy_path(switch, post, "B")
+    paths["verified_retarget"], overrides["verified_retarget"] = \
         verified_run(switch, post, "B")
     # restart: discard the realised history, same remaining budget.
-    landings["restart"], overrides["restart"] = verified_run(start, post, "B")
+    paths["restart"], overrides["restart"] = verified_run(start, post, "B")
     # clairvoyant: B known from step 0, full horizon. No surprise.
-    landings["clairvoyant"], overrides["clairvoyant"] = \
+    paths["clairvoyant"], overrides["clairvoyant"] = \
         verified_run(start, HORIZON, "B")
+    landings = {name: path[-1] for name, path in paths.items()}
 
     arms = {name: {"landing": key,
                    "b_worst_margin": utility(key, "B")[0],
@@ -377,7 +393,10 @@ def run_arms(task: dict[str, Any]) -> dict[str, Any]:
                    "b_success": bool(success(key, "B")),
                    "p_success": bool(success(key, "P")),
                    "d_success": bool(success(key, "D")),
-                   "overrides": overrides.get(name)}
+                   "overrides": overrides.get(name),
+                   # Full realised path. Lets prefix-edit survival, undo and
+                   # reuse be quantified after the fact without a rerun.
+                   "trajectory": paths[name]}
             for name, key in landings.items()}
 
     payload = {"index": int(task["index"]), "history": goal_a,
