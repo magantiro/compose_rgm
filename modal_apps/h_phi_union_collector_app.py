@@ -391,12 +391,23 @@ def main(pairs: int = 12, role: str = "train",
         )["transformations"]
         print(f"no carve at {carve}; falling back to the raw pair list")
 
-    # Balanced across horizons.
+    # Balanced across horizons. When the request covers the whole set, take
+    # ALL of it: `pairs // 3` per band silently drops the remainder, which cost
+    # two pairs of a frozen 96/97/97 cohort (96*3 = 288, not 290) and quietly
+    # broke the commitment that every frozen pair is labelled.
     chosen: list[dict[str, Any]] = []
-    per = max(1, pairs // 3)
-    for length in (4, 5, 6):
-        band = [r for r in rows if r["steps"] == length]
-        chosen.extend(band[:per])
+    if pairs >= len(rows):
+        chosen = list(rows)
+    else:
+        per = max(1, pairs // 3)
+        for length in (4, 5, 6):
+            band = [r for r in rows if r["steps"] == length]
+            chosen.extend(band[:per])
+        # Top up deterministically so the count is exact rather than rounded down.
+        if len(chosen) < pairs:
+            seen = {(r["source"], r["target"]) for r in chosen}
+            chosen.extend([r for r in rows
+                           if (r["source"], r["target"]) not in seen][:pairs - len(chosen)])
     tasks = [{**row, "index": i, "role": role,
               "pair_id": f"{row['steps']}:{row['source']}>>{row['target']}"}
              for i, row in enumerate(chosen)]
