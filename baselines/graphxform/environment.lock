@@ -1,0 +1,53 @@
+# GraphXForm environment lock — DECLARATIVE, NOT INSTALLED.
+#
+# This file records the dependency set required to build the official
+# GraphXForm environment CPU-only. Nothing here has been installed or resolved:
+# the qualification lane was authorised for environment/adapter DESIGN only.
+# Treat every pin below as "the version the upstream repository asks for",
+# not as "the version we resolved and tested".
+#
+# Source of truth: https://github.com/grimmlab/graphxform requirements.txt,
+# Dockerfile, and README.md.
+#
+# STATUS: UNRESOLVED
+# VERIFIED-AGAINST: repository contents read 2026-08-12
+# CPU-ONLY: yes (upstream config.py already defaults every device to "cpu")
+
+python==3.11
+
+# Upstream requirements.txt
+rdkit~=2023.9.6
+mordred
+numpy~=1.26.4
+torch>=2.6.0
+torch_geometric
+ray
+tqdm
+requests~=2.32.3
+pandas~=2.2.2
+scikit-learn~=1.5.0
+matplotlib~=3.9.0
+guacamol
+scipy
+
+# Manual install, must match the local torch build. Not on PyPI for every
+# torch/CPU combination; upstream README says to install it by hand.
+torch_scatter
+
+# --- Known conflicts that must be resolved before any run -------------------
+# 1. Dockerfile pins pytorch/pytorch:2.5.1-cuda12.1 while requirements.txt
+#    demands torch>=2.6.0. The two cannot both be satisfied. For a CPU-only
+#    build, prefer the requirements.txt constraint on a CPU torch wheel.
+# 2. guacamol imports `scipy.histogram`, removed in modern scipy. Upstream
+#    README documents the patch: use `from numpy import histogram`.
+# 3. rdkit~=2023.9.6 DIFFERS from the COMPOSE production pin (rdkit 2024.3.5).
+#    The baseline therefore runs in its OWN container; COMPOSE canonicalisation
+#    and the frozen oracle must be applied on the COMPOSE side, never inside
+#    the GraphXForm container, or the RingCore catalog fingerprint check
+#    (639ff6078c32d43c) is meaningless for the comparison.
+#
+# --- Checkpoint --------------------------------------------------------------
+# graphxform_pretrained.zip, ~347,364,546 bytes
+# https://syncandshare.lrz.de/dl/fiJs7ZHuCFsVskeoab5aZg/graphxform_pretrained.zip
+# Not hashed here: the file has not been downloaded. Hash it on first fetch and
+# record the sha256 in the qualification registry before any claim-bearing run.

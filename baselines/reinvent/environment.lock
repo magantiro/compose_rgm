@@ -1,0 +1,50 @@
+# REINVENT environment lock — DECLARATIVE, NOT INSTALLED.
+#
+# TWO ENVIRONMENTS. They are different systems and must not share a container.
+#
+# STATUS: UNRESOLVED
+# CPU-ONLY: yes for both. REINVENT 4 falls back to CPU automatically when no GPU
+#           is present (README), and PMO's 2.0-era RNN is small.
+# LICENSE: REINVENT 4 Apache-2.0; PMO MIT; REINVENT 2.0 repo UNVERIFIED.
+
+# ============================================================================
+# A. PMO-wrapped REINVENT (2.0-era Olivecrona RNN) -- for oracle-efficiency
+#    parity and comparability with published PMO numbers.
+#    Source: https://github.com/wenhao-gao/mol_opt main/reinvent/
+# ============================================================================
+python==3.11
+torch
+rdkit==2024.3.5       # PMO does not pin rdkit; pinned here to the COMPOSE
+                      # production version so canonicalisation cannot drift.
+numpy==1.26.4
+pyyaml                # main/optimizer.py reads hparams_default.yaml
+# tdc                 DELIBERATELY OMITTED. PMO's oracles come from Therapeutics
+#                     Data Commons; a COMPOSE comparison supplies its own frozen
+#                     oracle through Oracle.assign_evaluator, and omitting tdc
+#                     makes it impossible to reach a TDC oracle by accident.
+#
+# Ships its own data/Prior.ckpt. Hyperparameters (main/reinvent/hparams_default.yaml):
+#   learning_rate 0.0005, batch_size 64, sigma 500, experience_replay 24
+# NOTE: PMO tuned sigma for ITS environment and explicitly warns to re-tune when
+# the environment changes. Using 500 on a COMPOSE objective is a DEVIATION.
+
+# ============================================================================
+# B. REINVENT 4 -- for the staged-learning (mid-run objective change) arm.
+#    Source: https://github.com/MolecularAI/REINVENT4
+# ============================================================================
+# python>=3.11        (README; the paper states >=3.10)
+# torch
+# rdkit
+# Optional: OpenEye (separate license, NOT used here), Chemprop
+#
+# Priors from Zenodo doi 10.5281/zenodo.15641296 (latest-version DOI
+# 10.5281/zenodo.20701824), apache2.0:
+#   libinvent.prior, linkinvent.prior, pepinvent.prior, reinvent_pubchem.prior,
+#   libinvent_transformer_pubchem.prior, linkinvent_transformer_pubchem.prior
+# NOT HASHED HERE -- nothing was downloaded. Hash on first fetch and record the
+# sha256 in the qualification registry before any claim-bearing run.
+#
+# RECORD WHICH PRIOR IS USED. Table 4 of the paper lists Reinvent/ChEMBL 25,
+# Libinvent/ChEMBL 27, Linkinvent/ChEMBL 27, Mol2Mol/ChEMBL 28 and
+# Mol2Mol/PubChem, and the six Mol2Mol similarity variants (medium, high,
+# scaffold, generic scaffold, MMP, PubChem) are materially different models.

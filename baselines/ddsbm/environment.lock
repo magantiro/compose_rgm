@@ -1,0 +1,40 @@
+# DDSBM environment lock — DECLARATIVE, NOT INSTALLED, AND NOT BUILDABLE HERE.
+#
+# Source of truth: https://github.com/junhkim1226/DDSBM, main @ b7787042.
+#
+# STATUS: BLOCKED
+# CPU-ONLY: NO. Training is four-GPU and no checkpoints exist, so there is no
+#           inference-only CPU path. Under this lane's CPU-only constraint,
+#           DDSBM cannot be run at all.
+# LICENSE:  NONE PRESENT IN THE REPOSITORY. Default all-rights-reserved.
+#           Resolve with the authors before any use beyond reading the code.
+
+python==3.9
+torch==2.0.1          # +cu118
+torch_geometric==2.3.1
+rdkit==2023.03.2
+pytorch_lightning==2.0.4
+hydra-core==1.3.2
+numpy==1.23
+pandas==1.4
+pygmtools==0.5.3
+fcd-torch
+wandb
+
+# --- Non-pip dependencies ----------------------------------------------------
+# graph-tool==2.45     conda-only; upstream README documents an LD_PRELOAD
+#                      workaround for a symbol clash
+# EDeN                 installed from a git URL, not PyPI
+# orca                 C++ binary, compiled locally with g++
+#
+# --- Why this is BLOCKED rather than UNRESOLVED ------------------------------
+# 1. No license. Nothing else matters until that is settled.
+# 2. No pretrained checkpoints (README TODO unchecked; open issue #1 asked and
+#    the reply did not supply them). A comparison therefore requires training
+#    from scratch: 6 IMF iterations x 300 epochs on 4x RTX A4000 for ZINC.
+# 3. The Polymer experiment is not reproducible from the repository at all --
+#    experiments/EXPERIMENTS.md has a Polymer section whose Data processing,
+#    Training and Sampling code blocks are empty, and data/raw/ has no polymer
+#    file.
+#
+# Built on DiGress (Vignac et al. 2022).

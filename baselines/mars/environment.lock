@@ -1,0 +1,56 @@
+# MARS environment lock — DECLARATIVE, NOT INSTALLED.
+#
+# Records the dependency set the official (archived) MARS repository asks for.
+# Nothing here has been installed or resolved; the qualification lane was
+# authorised for environment/adapter DESIGN only.
+#
+# Source of truth: https://github.com/bytedance/markov-molecular-sampling
+# environment.yml and README.md, read 2026-08-12. Repository is ARCHIVED.
+#
+# STATUS: UNRESOLVED
+# CPU-ONLY: yes, upstream documents a CPU install path
+# LICENSE: CC BY-NC 4.0 (non-commercial) -- see README.md in this directory
+
+python==3.9.6
+
+# Upstream environment.yml, GPU variant (recorded for provenance, NOT used here)
+#   pytorch==1.9.0=py3.9_cuda10.2_cudnn7.6.5_0
+#   cudatoolkit==10.2.89
+#   dgl-cuda10.2==0.7.0
+
+# CPU variant, per upstream README:
+#   conda install pytorch cpuonly -c pytorch
+#   conda install -c dglteam dgl
+torch==1.9.0          # cpuonly build
+dgl==0.7.0            # NOT torch-geometric; the GNN is dgl NNConv + GRU + Set2Set
+rdkit==2021.03.4
+scikit-learn==0.23.2
+numpy==1.20.3
+networkx==2.6.2
+tensorboard==2.5.0
+
+# --- Resolution risks that must be settled before any run -------------------
+# 1. torch 1.9.0 and dgl 0.7.0 are from 2021. Whether either still resolves on a
+#    current index, and whether dgl 0.7.0's API (g.number_of_edges(),
+#    dgl.nn.pytorch.glob.Set2Set) still matches, is UNVERIFIED -- nothing was
+#    installed. This is the single largest execution risk for MARS.
+# 2. The shipped oracle pickles (estimator/scorer/kinase_rf/{gsk3b,jnk3}.pkl)
+#    are scikit-learn 0.23.2 artifacts. They are NOT needed for a COMPOSE
+#    comparison -- COMPOSE supplies its own frozen oracle -- so the sklearn pin
+#    can be relaxed if only the sampler is used. Confirm before relaxing.
+# 3. rdkit 2021.03.4 DIFFERS from the COMPOSE production pin (2024.3.5). The
+#    baseline runs in its OWN container. All canonicalisation and all oracle
+#    evaluation happen on the COMPOSE side; molecules cross the boundary as
+#    SMILES only.
+#
+# --- Prerequisite steps ------------------------------------------------------
+# a. The fragment vocabulary is NOT shipped (data/vocab_* is gitignored).
+#    Regenerate: python -m MARS.datasets.prepro_vocab
+#    Input: data/chembl.txt, 1,488,640 SMILES. Top 1000 fragments, <=10 heavy
+#    atoms, single attachment point.
+# b. Hardcoded paths require the checkout directory to be literally named MARS,
+#    and commands must be run from OUTSIDE it.
+#
+# --- Checkpoint --------------------------------------------------------------
+# NONE. No proposal/editor checkpoint exists upstream and no shipped code path
+# writes one. Every run starts from a randomly initialised editor.

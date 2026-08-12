@@ -1,0 +1,51 @@
+# HN-GFN environment lock — DECLARATIVE, NOT INSTALLED.
+#
+# Source of truth: https://github.com/violet-sto/HN-GFN README, read 2026-08-12.
+#
+# STATUS: UNRESOLVED, AND UPSTREAM SHIPS NO PINS AT ALL.
+#         The repository has no requirements.txt, environment.yml, setup.py or
+#         pyproject.toml. Every version below is OUR reconstruction of what the
+#         2023-12-24 code expects, not an upstream pin.
+# CPU-ONLY: NO. Defaults to --device cuda; published cost is 10-13 h on one
+#           V100 for the 8-round MOBO loop; no checkpoint is released, so there
+#           is no inference-only CPU path.
+# LICENSE: MIT
+
+python==3.9
+
+torch
+numpy<1.24            # REQUIRED: dataset.py / mol_mdp_ext.py / utils/chem.py
+                      # use np.bool and np.int, removed in NumPy 1.24
+scipy
+tqdm
+pymoo
+botorch<0.9           # REQUIRED: proxy/regression.py imports
+                      # AnalyticMultiOutputObjective and
+                      # IdentityAnalyticMultiOutputObjective, removed from
+                      # modern BoTorch. This is open issue #1 upstream and is
+                      # UNRESOLVED -- the exact last working version is a guess
+                      # and must be bisected before any run.
+gpytorch
+pandas
+rdkit
+torch-geometric
+h5py
+ray
+scikit-learn
+tensorboard
+
+# --- Bundled artifacts already in the repo (no download needed) --------------
+# oracle/gsk3b.pkl                       27 MB
+# oracle/jnk3.pkl                        11 MB
+# oracle/scorer/kinase_rf/gsk3b.pkl      97 MB
+# oracle/scorer/kinase_rf/jnk3.pkl       37 MB
+# oracle/scorer/drd2/clf_py36.pkl        python-3.6 sklearn pickle; DO NOT USE.
+#                                        COMPOSE has its own numpy DRD2 oracle
+#                                        (src/compose_v4/drd2_oracle.py) which
+#                                        cannot drift with the environment.
+# data/docked_mols.h5                    98 MB
+# data/pretrained_proxy/*                surrogate init
+# data/blocks_105.json                   fragment vocabulary
+#
+# --- Deprecations that will warn or fail -------------------------------------
+# Dirichlet(...).sample_n(1)   main.py, main_mobo.py
