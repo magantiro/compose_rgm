@@ -1,0 +1,187 @@
+{
+  "schema": "compose.workstream.handoff",
+  "workstream": "C_pathwise_constraints",
+  "claim_id": "claim4_trajectory_level_design",
+  "branch": "codex/compose-pathwise-constraints",
+  "base_commit": "04f1c4661c0f4977d00849893550e02d52dc7c64",
+  "head_commit": "3abe0fdc3e2fd616766862774665c553ca2ee9fc",
+  "head_commit_note": "the commit that introduced this workstream; handoff.json itself is amended into it",
+  "working_tree_clean": true,
+  "status": "DESIGN_ONLY",
+  "held_out_opened": false,
+  "modal_runs_launched": 0,
+  "question": "Can COMPOSE require an exact labeled structural motif at every committed state, and does that constraint actually bind, i.e. does endpoint-only filtering return molecules that reached validity through forbidden intermediates?",
+  "frozen_inputs": {
+    "held_in_pool": {
+      "path": "diagnostics/editing_v2_matched_validation_reserve_ids.json.gz",
+      "key": "training_source_keys",
+      "count": 96094,
+      "sha256": "ba9270faf8bea1a67ad103c6da887efeef257a66fcb9ca1c3faf088f770994a1"
+    },
+    "normalizers": {
+      "path": "diagnostics/retarget_goal_language_normalizers.json",
+      "sha256": "187d1ccc60b00c858f0f54f729a99ea91e06d33a913287886c80080889a76cc8"
+    },
+    "oracle": {
+      "path": "artifacts/oracles/drd2_svm_v1/drd2_svm_parameters.npz",
+      "sha256": "7c9224c12c423ba24cce7d15715409eb4dee26af40ab64fb621b3336079f0815"
+    },
+    "r_theta": {
+      "volume": "compose-v4-artifacts",
+      "path": "/artifacts/editing_v2/r_theta_run/runs/run_v2_01",
+      "retrained": false,
+      "note": "loaded identically to modal_apps/retarget_intervention_app.py; not hashed locally because the volume is not mounted"
+    },
+    "kernel": {
+      "entrypoint": "compose_v4.experiments.production_successor_kernel.canonical_successor_result",
+      "time_point": 0.5,
+      "slots": 48,
+      "modified": false
+    },
+    "goal": {
+      "definition": "B = P AND D",
+      "source": "modal_apps/retarget_intervention_app.py",
+      "potency_threshold": 0.5,
+      "qed_floor": 0.6,
+      "logp_box": [1.0, 4.0]
+    }
+  },
+  "artifacts": [
+    {
+      "path": "configs/pathwise_constraints_protocol_v1.json",
+      "status": "DESIGN_ONLY",
+      "purpose": "frozen scientific contract"
+    },
+    {
+      "path": "diagnostics/pathwise_constraints_census.json",
+      "status": "SMOKE_HELD_IN",
+      "sha256": "cf44a31f7e65d0c11bbd594359913d056a0c8f94eb34035cbbb2be93295886d0",
+      "purpose": "source-only held-in viability census over 20000 molecules",
+      "caveat": "does NOT resolve the vacuity gate or the support-removal rate"
+    },
+    {
+      "path": "diagnostics/pathwise_constraints_smoke_panel.json",
+      "status": "DESIGN_ONLY",
+      "sha256": "6b3f93722d80c59752aae33060ba6f79ee4cc4c9177458ccc1143456ff52f8de",
+      "panel_sha256": "8b47a0e417dc1403863e2ec3b592cde50f942ebb1e5de81b560278e57e72fabd",
+      "purpose": "6 held-in smoke sources, outcome-independent selection"
+    },
+    {
+      "path": "src/compose_v4/experiments/pathwise_constraints.py",
+      "status": "DESIGN_ONLY",
+      "sha256": "d6caa8645eb9c65859e75c23eabde80f6ed37970dca008a498e9ceb6017dac94",
+      "purpose": "constraint predicate, motif rule, mask, eligibility"
+    },
+    {
+      "path": "src/compose_v4/experiments/pathwise_arms.py",
+      "status": "DESIGN_ONLY",
+      "sha256": "d6eb1a8b454ad8ac11b4a656fdc719d1666008126671c74ae8c46c77fe278faa",
+      "purpose": "all seven arm policies as pure functions"
+    },
+    {
+      "path": "modal_apps/pathwise_constraints_app.py",
+      "status": "DESIGN_ONLY",
+      "sha256": "0d27f0e85bce58ba5a8dba010e9754fb9ed40d4b1c3b479b2fb90d855ea71e8c",
+      "purpose": "CPU-only runner with durable per-source shards"
+    },
+    {
+      "path": "scripts/analyse_pathwise_constraints.py",
+      "status": "DESIGN_ONLY",
+      "purpose": "shard aggregation and gate verdicts"
+    }
+  ],
+  "motif_rule": {
+    "id": "largest_ring_system_v1",
+    "outcome_independent": true,
+    "reads": "source molecule only"
+  },
+  "arms": {
+    "stage_A": [
+      "unconstrained_greedy",
+      "endpoint_only",
+      "pathwise_greedy",
+      "pathwise_stochastic",
+      "mask_only_sampling"
+    ],
+    "stage_B": ["unconstrained_verified", "pathwise_verified"]
+  },
+  "tests": {
+    "command": "python3 -m pytest tests/test_pathwise_constraint.py tests/test_pathwise_arms.py tests/test_pathwise_analysis.py -q",
+    "count": 64,
+    "result": "PASS",
+    "key_negative_test": "tests/test_pathwise_analysis.py::test_analyser_FAILS_the_vacuity_gate_when_nothing_ever_violates"
+  },
+  "census_headline": {
+    "scanned": 20000,
+    "fraction_with_ring_system": 0.9832,
+    "median_motif_atoms": 9,
+    "median_motif_fraction": 0.3103,
+    "median_free_atoms": 18,
+    "eligibility_yield": 0.7491,
+    "already_satisfies_B": 187,
+    "already_satisfies_D": 6526,
+    "already_satisfies_P": 466
+  },
+  "not_measurements": {
+    "zero_violations_on_masked_arms": "definitional; bug detector only",
+    "pathwise_verified_minus_pathwise_greedy": "sign guaranteed by policy improvement on utility AND binary success; only magnitude, top-1 disagreement, and headroom over the greedy-failure denominator are admissible"
+  },
+  "gate_status": {
+    "G0_mask_integrity": "NOT_ASSESSED",
+    "G1_constraint_non_vacuous": "INCONCLUSIVE_REQUIRES_STAGE_A",
+    "G2_mask_leaves_room_to_act": "INCONCLUSIVE_REQUIRES_STAGE_A",
+    "G3_feasible_paths_can_improve": "INCONCLUSIVE_REQUIRES_STAGE_A",
+    "G4_distinguishable": "INCONCLUSIVE_REQUIRES_STAGE_A",
+    "G5_planning_subclaim": "NOT_ASSESSED_STAGE_B"
+  },
+  "cost_model": {
+    "fitted_from": [
+      "diagnostics/retarget_prefixes_committed.json (3 calls, median 170.7 s)",
+      "diagnostics/retarget_calibration_result_3plus3_fixed.json (26 calls, median 535.65 s)"
+    ],
+    "container_startup_seconds": 123,
+    "seconds_per_kernel_call": 15.9,
+    "cpu": 2.0,
+    "gpu": "NEVER"
+  },
+  "costed_plan": {
+    "stage_A": {
+      "command": "modal run modal_apps/pathwise_constraints_app.py --stage A --sources 6",
+      "sources": 6,
+      "arms": 5,
+      "estimated_kernel_calls_per_source": 85,
+      "estimated_kernel_calls_range": [65, 110],
+      "estimated_container_hours": 2.5,
+      "estimated_container_hours_range": [1.9, 3.1],
+      "estimated_wall_minutes": 30,
+      "resolves": ["G1", "G2", "G3", "G4"],
+      "authorised": false
+    },
+    "stage_B": {
+      "command": "modal run modal_apps/pathwise_constraints_app.py --stage B --sources 6",
+      "sources": 6,
+      "arms": 2,
+      "estimated_kernel_calls_per_source": 155,
+      "estimated_kernel_calls_range": [120, 200],
+      "estimated_container_hours": 4.3,
+      "estimated_container_hours_range": [3.3, 5.4],
+      "estimated_wall_minutes": 55,
+      "resolves": ["G5"],
+      "authorised": false,
+      "precondition": "G1 PASS"
+    },
+    "per_source_kernel_call_budget": 360
+  },
+  "recommended_next_action": "Authorise stage A only: 6 held-in sources, CPU only, ~2.5 container-hours, ~30 min wall. It resolves the vacuity gate G1, which decides whether this workstream has a claim at all.",
+  "not_recommended": [
+    "stage B before G1 passes",
+    "opening any held-out panel",
+    "changing the motif rule if G1 fails",
+    "citing any number in this handoff as claim-bearing"
+  ],
+  "deviations_from_brief": [
+    "eligibility drops 'kernel offers motif-destroying successors' (brief line 207) because it is the numerator of the vacuity gate",
+    "two arms added beyond the brief's five to remove budget and controller confounds",
+    "docs directory uses the hyphenated name per the lead's mission; all other paths use the underscored form"
+  ]
+}

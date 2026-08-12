@@ -1,0 +1,145 @@
+{
+  "schema": "compose.pathwise.smoke_panel",
+  "status": "DESIGN_ONLY",
+  "held_out_opened": false,
+  "pool": "held-in training_source_keys only",
+  "motif_rule": "largest_ring_system_v1",
+  "seed": 20260813,
+  "scanned": 7,
+  "rejected": {
+    "motif_too_small": 1,
+    "motif_fraction": 1
+  },
+  "selection_rule": "first N eligible sources in shuffled scan order; no ranking, no preference, no successor enumeration, no arm outcome",
+  "eligibility_constants": {
+    "heavy_atom_band": [
+      18,
+      38
+    ],
+    "min_motif_atoms": 6,
+    "motif_fraction_band": [
+      0.2,
+      0.7
+    ],
+    "min_free_atoms": 8,
+    "excludes_sources_already_satisfying_B": true
+  },
+  "goal": {
+    "definition": "B = P AND D",
+    "potency_threshold": 0.5,
+    "qed_floor": 0.6,
+    "logp_box": [
+      1.0,
+      4.0
+    ]
+  },
+  "disjoint_from": [
+    "diagnostics/retarget_calibration_cohort.json (30 sources, excluded by SMILES)",
+    "reserve_source_keys (held-out; asserted empty intersection)"
+  ],
+  "sources": [
+    {
+      "index": 0,
+      "source": "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+      "slots": 48,
+      "heavy_atoms": 20,
+      "motif_smarts": "[#6;a;+0]:1:[#6;a;+0]:[#6;a;+0]:[#6;a;+0]:[#6;a;+0]:[#7;a;+0]:1",
+      "motif_atoms": 6,
+      "motif_bonds": 6,
+      "motif_rings": 1,
+      "motif_fraction": 0.3,
+      "free_atoms": 14,
+      "qed": 0.8458,
+      "clogp": 3.5159,
+      "drd2_logodds": -8.9174,
+      "b_worst_margin_at_source": -3.4087,
+      "binding_term_at_source": "potency"
+    },
+    {
+      "index": 1,
+      "source": "CC(O)Cc1ccc(-c2cnc3[nH]ccc3n2)c(N=C2CCC[SH2]C2)n1",
+      "slots": 48,
+      "heavy_atoms": 26,
+      "motif_smarts": "[#6;a;+0]:2:[#6;a;+0]:[#7;a;+0]:[#6;a;+0]:1:[#7;a;+0]:[#6;a;+0]:[#6;a;+0]:[#6;a;+0]:1:[#7;a;+0]:2",
+      "motif_atoms": 9,
+      "motif_bonds": 10,
+      "motif_rings": 2,
+      "motif_fraction": 0.3462,
+      "free_atoms": 17,
+      "qed": 0.74,
+      "clogp": 3.0073,
+      "drd2_logodds": -4.7833,
+      "b_worst_margin_at_source": -1.8284,
+      "binding_term_at_source": "potency"
+    },
+    {
+      "index": 2,
+      "source": "CC(=O)OC(=C(C)Cc1ccccc1)c1ccccc1C",
+      "slots": 48,
+      "heavy_atoms": 21,
+      "motif_smarts": "[#6;a;+0]:1:[#6;a;+0]:[#6;a;+0]:[#6;a;+0]:[#6;a;+0]:[#6;a;+0]:1",
+      "motif_atoms": 6,
+      "motif_bonds": 6,
+      "motif_rings": 1,
+      "motif_fraction": 0.2857,
+      "free_atoms": 15,
+      "qed": 0.6072,
+      "clogp": 4.5318,
+      "drd2_logodds": -7.9146,
+      "b_worst_margin_at_source": -3.0254,
+      "binding_term_at_source": "potency"
+    },
+    {
+      "index": 3,
+      "source": "CNC(Cc1c[nH]c2ccccc12)C(=O)NC(Cc1c[nH]cn1)C(=O)OC",
+      "slots": 48,
+      "heavy_atoms": 27,
+      "motif_smarts": "[#6;a;+0]:1:[#6;a;+0]:[#7;a;+0]:[#6;a;+0]:2:[#6;a;+0]:[#6;a;+0]:[#6;a;+0]:[#6;a;+0]:[#6;a;+0]:1:2",
+      "motif_atoms": 9,
+      "motif_bonds": 10,
+      "motif_rings": 2,
+      "motif_fraction": 0.3333,
+      "free_atoms": 18,
+      "qed": 0.4413,
+      "clogp": 0.922,
+      "drd2_logodds": -3.2244,
+      "b_worst_margin_at_source": -1.2325,
+      "binding_term_at_source": "potency"
+    },
+    {
+      "index": 4,
+      "source": "C=C(C)C1=[PH](OC2CCCCC2)C(=O)NN=C1c1ccccc1",
+      "slots": 48,
+      "heavy_atoms": 23,
+      "motif_smarts": "[#6;a;+0]:1:[#6;a;+0]:[#6;a;+0]:[#6;a;+0]:[#6;a;+0]:[#6;a;+0]:1",
+      "motif_atoms": 6,
+      "motif_bonds": 6,
+      "motif_rings": 1,
+      "motif_fraction": 0.2609,
+      "free_atoms": 17,
+      "qed": 0.835,
+      "clogp": 4.3409,
+      "drd2_logodds": -7.7956,
+      "b_worst_margin_at_source": -2.9799,
+      "binding_term_at_source": "potency"
+    },
+    {
+      "index": 5,
+      "source": "CC(=[SH4])CC(O)c1coc2cccc(COO)c2c1=O",
+      "slots": 48,
+      "heavy_atoms": 20,
+      "motif_smarts": "[#6;a;+0]:2:[#6;a;+0]:[#8;a;+0]:[#6;a;+0]:1:[#6;a;+0]:[#6;a;+0]:[#6;a;+0]:[#6;a;+0]:[#6;a;+0]:1:[#6;a;+0]:2",
+      "motif_atoms": 10,
+      "motif_bonds": 11,
+      "motif_rings": 2,
+      "motif_fraction": 0.5,
+      "free_atoms": 10,
+      "qed": 0.4969,
+      "clogp": 1.5251,
+      "drd2_logodds": -6.8984,
+      "b_worst_margin_at_source": -2.6369,
+      "binding_term_at_source": "potency"
+    }
+  ],
+  "panel_sha256": "8b47a0e417dc1403863e2ec3b592cde50f942ebb1e5de81b560278e57e72fabd"
+}

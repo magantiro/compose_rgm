@@ -1,0 +1,106 @@
+{
+  "schema": "compose.pathwise.protocol",
+  "version": "v1",
+  "status": "DESIGN_ONLY",
+  "held_out_opened": false,
+  "claim": "Because every COMPOSE state is a complete molecule and every transition is executable, an exact labeled-subgraph requirement can be imposed on every committed state, not merely on the endpoint. Endpoint-only filtering can return a valid final molecule after traversing forbidden intermediates; support masking makes those states unreachable by construction.",
+  "non_claims": [
+    "that constrained control beats unconstrained control on the objective",
+    "that the protected motif is a medicinally meaningful pharmacophore",
+    "that future-aware control beats greedy under the mask (its sign is guaranteed by policy improvement)",
+    "anything about held-out generalisation"
+  ],
+  "frozen_inputs": {
+    "r_theta": "runs/run_v2_01 selected checkpoint on volume compose-v4-artifacts at /artifacts/editing_v2/r_theta_run; NOT retrained, NOT modified",
+    "kernel": "compose_v4.experiments.production_successor_kernel.canonical_successor_result at TIME_POINT=0.5, CANONICAL slots=48",
+    "goal_language": "B = P AND D, taken verbatim from modal_apps/retarget_intervention_app.py",
+    "normalizers": "diagnostics/retarget_goal_language_normalizers.json sha256 187d1ccc60b00c858f0f54f729a99ea91e06d33a913287886c80080889a76cc8",
+    "oracle": "artifacts/oracles/drd2_svm_v1 npz sha256 7c9224c12c423ba24cce7d15715409eb4dee26af40ab64fb621b3336079f0815",
+    "pool": "diagnostics/editing_v2_matched_validation_reserve_ids.json.gz training_source_keys (held-in, 96094) sha256 ba9270faf8bea1a67ad103c6da887efeef257a66fcb9ca1c3faf088f770994a1"
+  },
+  "constraint": {
+    "definition": "at every committed state x_t, the protected motif embeds into x_t as an exact atom/bond-labeled subgraph (monomorphism, not necessarily induced)",
+    "atom_label": "atomic number AND aromaticity flag AND formal charge",
+    "bond_label": "aromatic, or exact bond order",
+    "explicitly_not": [
+      "fingerprint or Tanimoto similarity",
+      "endpoint recovery",
+      "Murcko scaffold string equality"
+    ],
+    "outside_the_motif": "unconstrained; substitution and deletion elsewhere is the room to act"
+  },
+  "motif_rule": {
+    "id": "largest_ring_system_v1",
+    "definition": "the largest fused ring system of the SOURCE (connected components of the ring-bond graph), taken with exact labels",
+    "tie_break": "atom count, then ring count, then sorted atom-index tuple",
+    "outcome_independent": true,
+    "reads": "the source molecule only; no trajectory, no successor set, no arm outcome"
+  },
+  "eligibility": {
+    "heavy_atom_band": [18, 38],
+    "min_motif_atoms": 6,
+    "motif_fraction_band": [0.2, 0.7],
+    "min_free_atoms": 8,
+    "excludes_sources_already_satisfying_B": true,
+    "excludes_retarget_calibration_cohort": true,
+    "deliberately_not_a_criterion": "'the frozen kernel offers both motif-preserving and motif-destroying legal successors' -- it is the numerator of the vacuity gate, so filtering on it would make a non-vacuous mask true by construction",
+    "selection_rule": "first N eligible sources in scan order under seed 20260813; no ranking, no preference"
+  },
+  "protocol": {
+    "horizon": 6,
+    "goal": "B",
+    "rollouts": 6,
+    "shortlist": 3,
+    "candidates_top_immediate": 4,
+    "candidates_top_reference": 2,
+    "candidates_random": 2,
+    "kernel_call_budget_per_source": 360,
+    "independent_statistical_unit": "the source molecule; rollouts from one source are repeated measures"
+  },
+  "arms": {
+    "stage_A": {
+      "unconstrained_greedy": "greedy on u_B over the full legal support; context and the source of the vacuity gate",
+      "endpoint_only": "6 stochastic unconstrained goal-directed rollouts; keep those with a motif-valid ENDPOINT; return the best by u_B",
+      "pathwise_greedy": "greedy on u_B over the masked support",
+      "pathwise_stochastic": "budget-matched twin of endpoint_only: same rollout count, same policy, masked support",
+      "mask_only_sampling": "sample R_theta over the masked support with NO goal; separates feasibility from objective control"
+    },
+    "stage_B": {
+      "unconstrained_verified": "verified remaining-budget control over the full support; like-for-like partner for the cost of the guarantee",
+      "pathwise_verified": "verified remaining-budget control inside the masked support"
+    }
+  },
+  "primary_metrics": [
+    "endpoint_valid_path_invalid rate on unconstrained_greedy and on endpoint_only rollouts",
+    "mask removed_fraction along UNCONSTRAINED states",
+    "paired terminal utility, pathwise_stochastic minus endpoint_only"
+  ],
+  "secondary_metrics": [
+    "feasible-trajectory completion rate",
+    "endpoint motif validity per arm",
+    "B/P/D success per arm",
+    "marginal kernel calls per arm in run order"
+  ],
+  "not_measurements": {
+    "zero_violations_on_masked_arms": "definitional; reported as a bug detector only, never with a denominator or a p-value",
+    "pathwise_verified_minus_pathwise_greedy": "sign guaranteed by policy improvement on both utility and binary success; only magnitude, top-1 disagreement, and headroom over the greedy-failure denominator are admissible"
+  },
+  "gates": {
+    "G0_mask_integrity": "any committed violation on a masked arm voids the run",
+    "G1_constraint_non_vacuous": "STOP if endpoint_valid_path_invalid < 0.10 on both the trajectory and the rollout denominators",
+    "G2_mask_leaves_room_to_act": "STOP if mean removed_fraction <= 0.02 (vacuous) or >= 0.95 (infeasible)",
+    "G3_feasible_paths_can_improve": "STOP if no pathwise arm improves u_B over the source on any panel member",
+    "G4_distinguishable": "STOP if endpoint_only and pathwise_stochastic land identically on every source"
+  },
+  "allowed_calibration": [
+    "eligibility constants may be set from the SOURCE-ONLY census yield, since no successor enumeration, trajectory or arm outcome enters it",
+    "horizon may be checked once on held-in smoke if H=6 proves too short to expose any violation"
+  ],
+  "forbidden_adaptations": [
+    "changing the motif rule until one makes a desired arm win",
+    "retraining or modifying R_theta, the kernel, or the operators",
+    "adding kernel-derived criteria to source eligibility",
+    "opening any held-out panel",
+    "reporting the definitional zero as a finding"
+  ]
+}
