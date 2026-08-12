@@ -12,6 +12,48 @@ table.
 
 ---
 
+## 0a. What each comparison is actually testing
+
+**"Future-aware control helps" is not a universal COMPOSE claim.** It is
+established on hard exact-target recovery and *measured absent* on an easy
+target-free property goal:
+
+| | established | measured absent |
+|---|---|---|
+| task | exact-target recovery, finite edit budget, sealed 65 pairs | bounded developability goal (cLogP box + QED floor) after a same-prefix switch, 3+3 |
+| result | greedy 26/65 (40%) → verified rollout 40/65 (62%), +21.5 pp [12.3, 33.5] | greedy 28/30 = verified 28/30, binary headroom **0**; gate CLOSED |
+| artifact | `diagnostics/editing_v2_sealed67_result.json` | `diagnostics/retarget_calibration_result_3plus3_fixed.json` |
+
+Three consequences that change how the tables below must be read:
+
+1. **The static-optimization table (C4a) is a competitiveness sanity check, not
+   a claim-bearing test.** PMO's DRD2/GSK3β/JNK3 tasks and the developability box
+   are exactly the *easy target-free property goals* where COMPOSE has now
+   measured that future-aware control adds nothing. A baseline winning there
+   refutes nothing COMPOSE claims. A COMPOSE win there supports the weaker
+   sentence "the substrate plus ordinary control is competitive" — which is worth
+   having, and is not the novelty argument.
+2. **The regime where a baseline would actually have to beat COMPOSE is C4b**,
+   and on C4b none of the six methods is applicable at all: GraphXForm cannot
+   delete an atom, MARS has no remaining-budget concept, GraphGA does not
+   preserve the source, REINVENT and HN-GFN have no intermediate molecular
+   states, DDSBM has no oracle in the loop. Report `N/A`. **Do not report the
+   absence of an applicable baseline as a COMPOSE win.**
+3. **C4c is about intervention responsiveness and prefix reuse, not post-switch
+   planning quality** — because the post-switch planning subclaim was gated on a
+   measurement and the gate closed. So the REINVENT-staged-learning and
+   MARS-restart arms are judged on **post-switch oracle cost and whether a
+   restart was required**, not on endpoint score. That is already the standard in
+   `docs/EXPERIMENT_PLAN.md` Experiment 6.
+
+**Binding anti-tuning rule.** Do not select a comparison task because it makes
+greedy fail. A goal on which future-aware control shows no advantage is
+*reported*, not replaced. This rule is inherited from
+`docs/RETARGETING_SAME_PREFIX_DESIGN.md` and applies to baseline selection as
+much as to goal selection.
+
+---
+
 ## 0. The one decision that must be made first
 
 **Declare the oracle-counting convention before any run, and apply it to every

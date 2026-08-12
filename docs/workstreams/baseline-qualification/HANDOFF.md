@@ -128,6 +128,8 @@ to the right objects later.
 | No held-out or sealed data opened | **PASS** | no panel loaded; no diagnostics read beyond hashing two frozen inputs |
 | No Modal run launched, no heavy dependency installed | **PASS** | no `modal` invocation; no install |
 | A baseline natively does a COMPOSE claim | **FIRED — escalated** | REINVENT 4 staged learning; HN-GFN preference conditioning; GraphXForm per-step masking |
+| C4a comparison is claim-bearing | **FAIL — reclassified as a competitiveness sanity check** | the main lane's held-in calibration measured future-aware control adding nothing on an easy target-free property goal (greedy 28/30 = verified 28/30, headroom 0, gate CLOSED); PMO's DRD2/GSK3β/JNK3 tasks are that regime |
+| Any baseline is applicable to C4b, the regime where future-aware control *is* established | **FAIL — all six are `N/A`** | GraphXForm cannot delete; MARS has no remaining-budget concept; GraphGA does not preserve the source; REINVENT and HN-GFN have no intermediate molecular states; DDSBM has no oracle in the loop. **Report `N/A`, never as a COMPOSE win.** |
 | GraphXForm qualifies as a native pathwise baseline | **FAIL** | shipped substructure constraints are a terminal `-inf` filter; no SMARTS anywhere in the repo. It instantiates the *endpoint-only filtering* arm instead. |
 | DDSBM qualifies as a matched comparator | **FAIL** | no LICENSE file (all rights reserved), no checkpoints, intermediates are not molecules, zero oracle calls at sampling |
 
@@ -265,6 +267,16 @@ One bounded action only:
   no amount of engineering fixes an absent LICENSE file.
 - **Do not run any baseline before the oracle-counting convention is declared.**
   A run under an undeclared convention has to be repeated.
+- **Do not read the C4a static-optimization table as a test of future-aware
+  control.** It is a competitiveness sanity check. PMO's DRD2/GSK3β/JNK3 tasks
+  are the easy target-free regime where COMPOSE has *measured* that future-aware
+  control adds nothing (greedy 28/30 = verified 28/30, gate CLOSED). A baseline
+  winning there refutes nothing; a COMPOSE win there supports only "the substrate
+  plus ordinary control is competitive".
+- **Do not report "no baseline is applicable to C4b" as a COMPOSE win.** It is a
+  scope fact and belongs in an `N/A` cell.
+- **Do not pick a comparison task because it makes greedy fail.** The anti-tuning
+  rule in `docs/RETARGETING_SAME_PREFIX_DESIGN.md` binds baseline selection too.
 - **Do not weaken the C4c claim to "COMPOSE changes objective mid-run".**
   REINVENT 4 does that natively. Claim the conjunction — unanticipated goal,
   realized molecular history preserved, finite remaining budget, frozen reference

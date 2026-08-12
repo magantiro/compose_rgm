@@ -128,6 +128,31 @@ def render(registry: dict) -> str:
             )
         add("")
 
+    scoping = registry["compose_claim_scoping"]
+    add("## Read this before designing any comparison")
+    add("")
+    add(f"**{_escape(scoping['headline'])}**")
+    add("")
+    established = scoping["where_it_is_established"]
+    absent = scoping["where_it_is_measured_absent"]
+    add("| | established | measured absent |")
+    add("|---|---|---|")
+    add(f"| task | {_escape(established['task'])} | {_escape(absent['task'])} |")
+    add(f"| result | {_escape(established['result'])} | {_escape(absent['result'])} |")
+    add(f"| artifact | `{_escape(established['artifact'])}` | `{_escape(absent['artifact'])}` |")
+    add(f"| status | {_escape(established['status'])} | {_escape(absent['status'])} |")
+    add("")
+    if absent.get("corroborating"):
+        add(f"{absent['corroborating']}")
+        add("")
+    add("Consequences that bind every comparison below:")
+    add("")
+    for item in scoping["consequences_for_every_comparison_in_this_registry"]:
+        add(f"- {item}")
+    add("")
+    add(f"**What this does not weaken.** {scoping['what_this_does_not_weaken']}")
+    add("")
+
     add("## Capability matrix")
     add("")
     lines.extend(_capability_table(methods))

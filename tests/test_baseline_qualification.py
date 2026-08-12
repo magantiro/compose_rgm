@@ -98,6 +98,22 @@ def test_aggregate_verdict_cannot_be_softer_than_its_rows() -> None:
         validate_qualification_registry(registry)
 
 
+def test_claim_scoping_carries_both_halves() -> None:
+    """The negative result is not optional."""
+    registry = _registry()
+    scoping = registry["compose_claim_scoping"]
+    assert scoping["where_it_is_established"]["artifact"].strip()
+    assert scoping["where_it_is_measured_absent"]["artifact"].strip()
+    assert scoping["consequences_for_every_comparison_in_this_registry"]
+
+
+def test_dropping_the_unflattering_half_of_the_scoping_is_rejected() -> None:
+    registry = copy.deepcopy(_registry())
+    registry["compose_claim_scoping"].pop("where_it_is_measured_absent")
+    with pytest.raises(BaselineQualificationError, match="where_it_is_measured_absent"):
+        validate_qualification_registry(registry)
+
+
 def test_must_run_methods_declare_where_the_comparison_is_unfair() -> None:
     registry = _registry()
     for method in registry["methods"]:

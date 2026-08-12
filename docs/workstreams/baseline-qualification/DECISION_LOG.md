@@ -130,6 +130,40 @@ rejected, and whether it changes a frozen object.
   the reason externals are `N/A` for C1, C2 and C3.
 - **Changes a frozen object.** No.
 
+## 2026-08-12 — C4a demoted to a competitiveness sanity check after the main lane's calibration result
+
+- **Decision.** The static-optimization comparison (C4a) against MARS,
+  GraphXForm, GraphGA and REINVENT is classified as a **competitiveness sanity
+  check, not a claim-bearing test.** The classification of those methods as
+  `MUST_RUN` is unchanged — what changed is what a result there may be read as.
+- **Evidence before.** Supplied by the main lane and cross-checked against
+  `docs/RETARGETING_SAME_PREFIX_DESIGN.md`: on a target-free bounded
+  developability goal, greedy reaches the region 28/30 and verified
+  remaining-budget control also 28/30 — binary headroom **0**, gate CLOSED,
+  subclaim B dropped. The continuous-utility advantage (+0.0361 mean, higher on
+  23/30, lower on 0) has a sign guaranteed by the policy-improvement theorem, so
+  only its magnitude is admissible: +3.2% of typical post-switch movement, never
+  enough to flip a success. The earlier C0 probe on DRD2 was negative for the
+  same reason. Meanwhile the sealed exact-target result stands at greedy 26/65
+  vs verified rollout 40/65.
+- **Why this matters here specifically.** PMO's DRD2/GSK3β/JNK3 tasks *are* easy
+  target-free property goals. Without this scoping, a strong MARS or REINVENT
+  result on them would be read — by us or by a reviewer — as refuting
+  "future-aware control helps", a claim COMPOSE does not make for that regime;
+  and a COMPOSE win would be oversold as supporting it.
+- **Alternatives rejected.** (a) Demoting the four methods to `CONTEXT_ONLY`.
+  Rejected: they are still the right comparators for competitiveness, and PMO's
+  finding that simple methods beat newer ones under controlled budgets is exactly
+  why the check is worth running. (b) Selecting a harder comparison task on which
+  greedy fails, so that the C4a table becomes claim-bearing. Rejected as a direct
+  violation of the anti-tuning rule, which this lane now inherits explicitly.
+- **Changes a frozen object.** No. Verdicts and adapter statuses are unchanged;
+  only the interpretation contract is added.
+- **Recorded in.** `compose_claim_scoping` in the qualification registry,
+  `FAIRNESS_CONTRACT.md` §0a, `PROTOCOL.md`, and enforced by
+  `validate_qualification_registry`, which now refuses a registry that carries
+  only the flattering half of the scoping.
+
 ## 2026-08-12 — The oracle-accounting asymmetry is recorded as a fairness blocker, not resolved
 
 - **Decision.** The registry records, but does not settle, the fact that HN-GFN's

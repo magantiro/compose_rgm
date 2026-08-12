@@ -198,6 +198,29 @@ def validate_qualification_registry(registry: dict[str, Any]) -> None:
         "this lane must declare explicitly that no held-out data were opened",
     )
 
+    # "Future-aware control helps" is established on hard exact-target recovery
+    # and measured ABSENT on an easy target-free property goal. A registry that
+    # does not carry both halves invites a comparison that reads as testing a
+    # claim COMPOSE does not make -- in either direction.
+    scoping = registry.get("compose_claim_scoping") or {}
+    for field in (
+        "headline",
+        "where_it_is_established",
+        "where_it_is_measured_absent",
+        "consequences_for_every_comparison_in_this_registry",
+    ):
+        _require(
+            bool(scoping.get(field)),
+            f"compose_claim_scoping omits {field}; both the positive and the "
+            "negative result must be carried, not just the flattering one",
+        )
+    for half in ("where_it_is_established", "where_it_is_measured_absent"):
+        _require(
+            bool((scoping[half] or {}).get("artifact")),
+            f"compose_claim_scoping.{half} must name the diagnostics artifact "
+            "that established it",
+        )
+
     methods = registry.get("methods") or []
     ids = [str(row.get("id")) for row in methods]
     _require(len(ids) == len(set(ids)), "duplicate method identifiers")

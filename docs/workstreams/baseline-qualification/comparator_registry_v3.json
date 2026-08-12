@@ -20,6 +20,29 @@
     "C4d_pathwise": "pathwise constraints: a labeled motif preserved at every committed intermediate state, on a support that includes deletions and topology changes; PLANNED"
   },
   "frozen_process_claim": "R_theta is not retrained between C4a, C4b, C4c and C4d. A baseline that reaches C4c or C4d only by retraining per objective does not refute that claim; a baseline that reaches them without retraining does. That is why objective_specific_retraining is a required column and why the escalation list below matters more than any table of results.",
+  "compose_claim_scoping": {
+    "headline": "'Future-aware control helps' is NOT a universal COMPOSE claim. It is ESTABLISHED on hard exact-target recovery and MEASURED ABSENT on an easy target-free property goal. Every fairness contract below is written against that scoping, and a comparison that ignores it will be read as testing a claim COMPOSE does not make.",
+    "where_it_is_established": {
+      "task": "C4b exact-target recovery from a source under a finite edit budget, sealed panel, 65 endpoint-clean pairs",
+      "result": "greedy 26/65 (40%) vs verified remaining-budget rollout 40/65 (62%); paired difference +21.5 pp [12.3, 33.5], rescuing 35.9% [21.2, 52.8] of greedy's 39 failures. Learned top-1 prioritisation matches the recovery count at ~35% of the continuation evaluations.",
+      "artifact": "diagnostics/editing_v2_sealed67_result.json; preregistration diagnostics/editing_v2_sealed67_preregistration.json",
+      "status": "CONFIRMATORY_HELD_OUT, sealed, branch closed"
+    },
+    "where_it_is_measured_absent": {
+      "task": "target-free bounded developability goal (cLogP box + QED floor) after a same-prefix goal switch, 3+3 horizon",
+      "result": "greedy 28/30 vs verified 28/30, binary headroom 0. Continuous utility favours verified (mean +0.0361, higher on 23/30, lower on 0) but the DIRECTION is guaranteed by the policy-improvement theorem and only the magnitude is admissible: +3.2% of typical post-switch movement, never enough to flip a success. Gate CLOSED; subclaim B dropped for this goal under the pre-committed anti-tuning rule.",
+      "artifact": "diagnostics/retarget_calibration_result_3plus3_fixed.json, cohort e402e318; design and gate in docs/RETARGETING_SAME_PREFIX_DESIGN.md",
+      "corroborating": "The earlier C0 planning-signal probe on DRD2 was also negative: 8/14 sacrificial actions won against a null of 0.5, mean fresh regret -0.021 (diagnostics/editing_v2_experiment_c0_planning_signal_preregistered.json).",
+      "status": "held-in calibration, ran once"
+    },
+    "consequences_for_every_comparison_in_this_registry": [
+      "C4a static optimization on easy target-free property goals -- which is what PMO's DRD2/GSK3b/JNK3 tasks and the developability box are -- is a COMPETITIVENESS SANITY CHECK, not a claim-bearing test. A baseline winning there refutes nothing about future-aware control, because COMPOSE does not claim future-aware control helps there. A COMPOSE win there supports 'the substrate plus ordinary control is competitive', which is a weaker and different sentence.",
+      "The regime where a baseline would actually have to beat COMPOSE is hard, bounded-feasibility, finite-remaining-budget search where myopic control provably fails -- i.e. C4b. On that regime none of the six methods is even applicable: GraphXForm cannot delete an atom, MARS has no remaining-budget concept, GraphGA does not preserve the source, REINVENT and HN-GFN have no intermediate molecular states, and DDSBM has no oracle in the loop. That is a scope fact and must be reported as N/A, not as a COMPOSE win.",
+      "C4c retargeting is therefore about INTERVENTION RESPONSIVENESS and PREFIX REUSE, not about post-switch planning quality. The comparison against REINVENT staged learning and MARS-restart is on post-switch oracle cost and whether a restart was required -- exactly what docs/EXPERIMENT_PLAN.md Experiment 6 already says: 'A strong result is not merely a higher endpoint score. It is comparable or better final quality with substantially lower post-switch oracle cost and no restart.'",
+      "Do not choose a comparison task because it makes greedy fail. The anti-tuning rule in docs/RETARGETING_SAME_PREFIX_DESIGN.md is binding on this lane too: the goal is fixed once, and a goal on which future-aware control shows no advantage is reported, not replaced."
+    ],
+    "what_this_does_not_weaken": "The frozen-process property is untouched by this scoping. One R_theta serves C4a, C4b, C4c and C4d with no retraining between them, and that is the claim the escalation list tests. Whether the controller on top of it is future-aware or myopic on a given goal is a separate, per-goal question that has now been answered in both directions."
+  },
   "methods": [
     {
       "id": "MARS",

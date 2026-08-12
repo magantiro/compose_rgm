@@ -30,6 +30,22 @@ atom addition and deletion** through a dummy atom type inside a padded node
 array. `docs/RELATED_WORK_MATRIX.md` marks it `✗` on `var-card` and
 `birth/death`; on this evidence both should be `~`.
 
+## Scoping that changes how the tables are read
+
+"Future-aware control helps" is **not** a universal COMPOSE claim. Established on
+hard exact-target recovery (greedy 26/65 → verified rollout 40/65, sealed);
+**measured absent** on an easy target-free property goal (greedy 28/30 = verified
+28/30, headroom 0, gate CLOSED). Therefore:
+
+- the **C4a static-optimization table is a competitiveness sanity check**, not a
+  claim-bearing test — PMO's DRD2/GSK3β/JNK3 tasks are exactly that easy regime;
+- the regime a baseline would actually have to win is **C4b**, where **none of
+  the six methods is applicable** — report `N/A`, never as a COMPOSE win;
+- **C4c is judged on post-switch oracle cost and no-restart**, not on endpoint
+  score.
+
+Full scoping with artifacts: `FAIRNESS_CONTRACT.md` §0a.
+
 ## Verdicts
 
 | method | verdict | why |

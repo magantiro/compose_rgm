@@ -54,6 +54,15 @@ retraining per objective does not refute the claim; a baseline that can do them
 *without* retraining does. The registry must record retraining requirements
 precisely for exactly this reason.
 
+**"Future-aware control helps" is scoped, not universal.** It is established on
+C4b (greedy 26/65 → verified rollout 40/65, sealed) and *measured absent* on an
+easy target-free property goal (greedy 28/30 = verified 28/30, binary headroom 0,
+gate CLOSED). This lane must not design a comparison that reads as testing the
+universal version. The full scoping, with artifacts, is in the registry's
+`compose_claim_scoping` block and in `FAIRNESS_CONTRACT.md` §0a; it is the reason
+the C4a table is classified as a competitiveness sanity check rather than a
+claim-bearing test.
+
 ---
 
 ## Evidence standard
