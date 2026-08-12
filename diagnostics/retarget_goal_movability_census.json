@@ -1,0 +1,130 @@
+{
+  "schema": "compose.retarget.goal_movability_census",
+  "best_of_n_per_step": {
+    "1": {
+      "expected_best_step": 0.7580780102147362,
+      "four_steps": 3.032312040858945,
+      "covers_0.3": false,
+      "covers_0.5": false,
+      "covers_0.7": false
+    },
+    "5": {
+      "expected_best_step": 2.0979784468657834,
+      "four_steps": 8.391913787463134,
+      "covers_0.3": true,
+      "covers_0.5": true,
+      "covers_0.7": true
+    },
+    "20": {
+      "expected_best_step": 4.19797890289285,
+      "four_steps": 16.7919156115714,
+      "covers_0.3": true,
+      "covers_0.5": true,
+      "covers_0.7": true
+    },
+    "100": {
+      "expected_best_step": 9.031652928082996,
+      "four_steps": 36.126611712331986,
+      "covers_0.3": true,
+      "covers_0.5": true,
+      "covers_0.7": true
+    },
+    "500": {
+      "expected_best_step": 13.316364279341034,
+      "four_steps": 53.265457117364136,
+      "covers_0.3": true,
+      "covers_0.5": true,
+      "covers_0.7": true
+    }
+  },
+  "status": "COUNTS_ONLY_FREEZES_NOTHING_SELECTS_NO_GOAL",
+  "instrument": "real one-cut matched pairs on the held-out reserve; one local structural change per pair, no kernel required",
+  "caveat": "MMP neighbours are a PROXY for the executor's 1-edit neighbourhood, not the same set. The executor may reach moves MMP mining does not, and vice versa. This bounds local movability; it does not enumerate the real fiber.",
+  "per_edit_bar_caveat": "The per-edit requirement divides the climb evenly over 4 edits and assumes gains add. Real ascents are not additive, so clearing the bar is necessary, not sufficient.",
+  "sources_sampled": 10653,
+  "matched_pairs": 972,
+  "molecules_scored": 1581,
+  "absolute_deltas": {
+    "drd2_logodds": {
+      "p50": 0.3692350176927879,
+      "p90": 1.681638187061322,
+      "p99": 5.627604539346965,
+      "max": 13.99931102319362,
+      "fraction_below_0.01": 0.06584362139917696,
+      "fraction_below_0.1": 0.19238683127572018
+    },
+    "qed": {
+      "p50": 0.038421462610933654,
+      "p90": 0.16305712941330355,
+      "p99": 0.30716887156824885,
+      "max": 0.4480439762934965,
+      "fraction_below_0.01": 0.23251028806584362,
+      "fraction_below_0.1": 0.7674897119341564
+    },
+    "clogp": {
+      "p50": 0.39009999999999945,
+      "p90": 1.0290400000000022,
+      "p99": 1.8413220000000021,
+      "max": 2.392300000000003,
+      "fraction_below_0.01": 0.13271604938271606,
+      "fraction_below_0.1": 0.20679012345679013
+    }
+  },
+  "single_edit_gain_favourable_direction": {
+    "drd2_logodds": {
+      "positive_edits": 954,
+      "total_directed_edits": 1944,
+      "p50": 0.3795953860558008,
+      "p75": 0.8889254994999363,
+      "p90": 1.7109526233806662,
+      "p99": 5.793484236854033,
+      "max": 13.99931102319362
+    },
+    "qed": {
+      "positive_edits": 874,
+      "total_directed_edits": 1944,
+      "p50": 0.047907923967496935,
+      "p75": 0.10246288238263827,
+      "p90": 0.1676444676600844,
+      "p99": 0.3246979523783847,
+      "max": 0.4480439762934965
+    },
+    "clogp": {
+      "positive_edits": 883,
+      "total_directed_edits": 1944,
+      "p50": 0.4267000000000012,
+      "p75": 0.7505999999999995,
+      "p90": 1.0684800000000028,
+      "p99": 1.8736280000000025,
+      "max": 2.392300000000003
+    }
+  },
+  "neighbour_degree_median": 1,
+  "drd2_climb_required": {
+    "0.3": {
+      "target_logodds": -0.8472978603872036,
+      "median_start_logodds": -5.540019621445908,
+      "climb_required": 4.692721761058705,
+      "per_edit_required_over_4": 1.1731804402646762,
+      "fraction_of_edits_at_or_above_per_edit_requirement": 0.08539094650205761,
+      "fraction_of_edits_achieving_the_whole_climb": 0.006172839506172839
+    },
+    "0.5": {
+      "target_logodds": 0.0,
+      "median_start_logodds": -5.540019621445908,
+      "climb_required": 5.540019621445908,
+      "per_edit_required_over_4": 1.385004905361477,
+      "fraction_of_edits_at_or_above_per_edit_requirement": 0.06738683127572016,
+      "fraction_of_edits_achieving_the_whole_climb": 0.0051440329218107
+    },
+    "0.7": {
+      "target_logodds": 0.8472978603872034,
+      "median_start_logodds": -5.540019621445908,
+      "climb_required": 6.3873174818331115,
+      "per_edit_required_over_4": 1.5968293704582779,
+      "fraction_of_edits_at_or_above_per_edit_requirement": 0.05555555555555555,
+      "fraction_of_edits_achieving_the_whole_climb": 0.004629629629629629
+    }
+  },
+  "seed": 20260812
+}

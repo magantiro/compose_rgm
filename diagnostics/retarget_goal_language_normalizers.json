@@ -1,0 +1,96 @@
+{
+  "schema": "compose.retarget.goal_language_normalizers",
+  "status": "HELD_IN_NORMALIZERS_NO_THRESHOLD_SELECTED",
+  "normalizers": {
+    "drd2_logodds": {
+      "median": -5.521657630461303,
+      "iqr": 2.6160788815821414,
+      "p25": -6.852530315645909,
+      "p75": -4.236451434063768,
+      "source": "held-in only"
+    },
+    "qed": {
+      "median": 0.56676118212139,
+      "iqr": 0.3139245718923388,
+      "p25": 0.40656281835267216,
+      "p75": 0.720487390245011,
+      "source": "held-in only"
+    },
+    "clogp": {
+      "median": 3.4210500000000024,
+      "iqr": 2.0833575000000017,
+      "p25": 2.3688650000000004,
+      "p75": 4.452222500000002,
+      "source": "held-in only"
+    }
+  },
+  "normalizer_choice": "IQR, not standard deviation: the DRD2 log-odds distribution has a long upper tail and a handful of actives would otherwise set the scale for the inactive bulk",
+  "distribution_shift": {
+    "drd2_logodds": {
+      "held_in_median": -5.521657630461303,
+      "held_out_median": -5.542671616306293,
+      "iqr_ratio_in_over_out": 1.0426477747275633,
+      "median_difference": 0.02101398584498959
+    },
+    "qed": {
+      "held_in_median": 0.56676118212139,
+      "held_out_median": 0.564643033569058,
+      "iqr_ratio_in_over_out": 0.9865046705768362,
+      "median_difference": 0.0021181485523320553
+    },
+    "clogp": {
+      "held_in_median": 3.4210500000000024,
+      "held_out_median": 3.402720000000002,
+      "iqr_ratio_in_over_out": 0.9988768758690123,
+      "median_difference": 0.01833000000000018
+    }
+  },
+  "drd2_gain_by_starting_band": {
+    "[-inf, -6)": {
+      "n": 775,
+      "fraction_favourable": 0.5625806451612904,
+      "mean_favourable_gain": 0.7769593314800509,
+      "p90_favourable": 1.906990995361157,
+      "p99_favourable": 4.036084498352743,
+      "max": 6.281907790624645
+    },
+    "[-6, -4)": {
+      "n": 765,
+      "fraction_favourable": 0.4666666666666667,
+      "mean_favourable_gain": 0.7371073090302938,
+      "p90_favourable": 1.5274712887881385,
+      "p99_favourable": 12.043574267461294,
+      "max": 13.99931102319362
+    },
+    "[-4, -2)": {
+      "n": 270,
+      "fraction_favourable": 0.4148148148148148,
+      "mean_favourable_gain": 0.45167432510031397,
+      "p90_favourable": 1.1248314986266221,
+      "p99_favourable": 2.2289764349663206,
+      "max": 2.7554673256127424
+    },
+    "[-2, 0)": {
+      "n": 88,
+      "fraction_favourable": 0.375,
+      "mean_favourable_gain": 1.374028940899056,
+      "p90_favourable": 1.9375089931857796,
+      "p99_favourable": 10.786275941710144,
+      "max": 11.122687082613625
+    },
+    "[0, inf)": {
+      "n": 46,
+      "fraction_favourable": 0.34782608695652173,
+      "mean_favourable_gain": 0.9481419523301438,
+      "p90_favourable": 1.9641373834599836,
+      "p99_favourable": 2.57461915402844,
+      "max": 2.6109788809884833
+    }
+  },
+  "position_independence_verdict": "POSITION-INDEPENDENT -- the favourable tail is available from typical inactive starts, so best-of-N over a wide fiber is not obviously blocked",
+  "held_in_sample": 20000,
+  "held_out_total": 10653,
+  "matched_pairs": 972,
+  "seed": 20260812,
+  "caveat": "Stratified gains are measured on held-out matched pairs because that is where the panel will live; they set no threshold and inform no normalizer. Normalizers come from held-in only."
+}

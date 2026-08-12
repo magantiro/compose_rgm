@@ -1,0 +1,151 @@
+{
+  "schema": "compose.retarget.goal_feasibility_census",
+  "status": "COUNTS_ONLY_FREEZES_NOTHING_SELECTS_NO_THRESHOLD",
+  "purpose": "Decide whether a potency->developability goal switch is well-posed BEFORE writing a controller. Threshold choice is a separate held-in calibration step, deliberately not made here.",
+  "pool": "held-out matched validation reserve, disjoint from R_theta training sources",
+  "molecules_total": 10653,
+  "molecules_usable": 10653,
+  "logp_box": [
+    1.0,
+    4.0
+  ],
+  "distributions": {
+    "potency": {
+      "p1": 4.552886147768924e-05,
+      "p5": 0.0001593064373866385,
+      "p10": 0.0003176675629849213,
+      "p25": 0.0010811121585709348,
+      "p50": 0.003915752983931,
+      "p75": 0.013279360371222121,
+      "p90": 0.04607679954959076,
+      "p95": 0.16396398525813607,
+      "p99": 0.8307746825992497
+    },
+    "qed": {
+      "p1": 0.12751234312694532,
+      "p5": 0.21610398555986193,
+      "p10": 0.27797472690178365,
+      "p25": 0.4008995194275873,
+      "p50": 0.564643033569058,
+      "p75": 0.7191185621299179,
+      "p90": 0.8132854956631199,
+      "p95": 0.8585469357374689,
+      "p99": 0.918286880635358
+    },
+    "clogp": {
+      "p1": -1.0210200000000003,
+      "p5": 0.61506,
+      "p10": 1.3381799999999997,
+      "p25": 2.3720999999999997,
+      "p50": 3.402720000000002,
+      "p75": 4.457800000000002,
+      "p90": 5.422600000000004,
+      "p95": 6.053352000000004,
+      "p99": 7.209816000000007
+    },
+    "heavy_atoms": {
+      "p1": 11.0,
+      "p5": 16.0,
+      "p10": 18.0,
+      "p25": 22.0,
+      "p50": 26.0,
+      "p75": 31.0,
+      "p90": 35.0,
+      "p95": 37.0,
+      "p99": 39.0
+    }
+  },
+  "correlations": {
+    "potency_vs_qed": {
+      "pearson": 0.0375480710661507,
+      "spearman": -0.2393392575129361
+    },
+    "potency_vs_clogp": {
+      "pearson": 0.12351419341235548,
+      "spearman": 0.29745101109966104
+    },
+    "potency_vs_logp_in_box": {
+      "pearson": -0.07439911448912559,
+      "spearman": -0.2591001325567146
+    },
+    "qed_vs_clogp": {
+      "pearson": -0.19767748780375785,
+      "spearman": -0.24177444231418238
+    }
+  },
+  "base_rates": {
+    "potency>=0.3_qed>=0.5": {
+      "P": 0.03294846522106449,
+      "D": 0.4146249882662161,
+      "P_and_D": 0.012766356894771427,
+      "P_and_D_count": 136,
+      "neither": 0.5651929034074908,
+      "lift_over_independence": 0.9344935747471406
+    },
+    "potency>=0.3_qed>=0.6": {
+      "P": 0.03294846522106449,
+      "D": 0.3282643386839388,
+      "P_and_D": 0.011358302825495166,
+      "P_and_D_count": 121,
+      "neither": 0.6501454989204919,
+      "lift_over_independence": 1.050157766486048
+    },
+    "potency>=0.3_qed>=0.7": {
+      "P": 0.03294846522106449,
+      "D": 0.22472542945649113,
+      "P_and_D": 0.009199286585938233,
+      "P_and_D_count": 98,
+      "neither": 0.7515253919083826,
+      "lift_over_independence": 1.2424151546958564
+    },
+    "potency>=0.5_qed>=0.5": {
+      "P": 0.02149629212428424,
+      "D": 0.4146249882662161,
+      "P_and_D": 0.008636064958227729,
+      "P_and_D_count": 92,
+      "neither": 0.5725147845677274,
+      "lift_over_independence": 0.9689399728915573
+    },
+    "potency>=0.5_qed>=0.6": {
+      "P": 0.02149629212428424,
+      "D": 0.3282643386839388,
+      "P_and_D": 0.007791232516661973,
+      "P_and_D_count": 83,
+      "neither": 0.658030601708439,
+      "lift_over_independence": 1.1041266812601693
+    },
+    "potency>=0.5_qed>=0.7": {
+      "P": 0.02149629212428424,
+      "D": 0.22472542945649113,
+      "P_and_D": 0.005913827090960293,
+      "P_and_D_count": 63,
+      "neither": 0.759692105510185,
+      "lift_over_independence": 1.2242013330268904
+    },
+    "potency>=0.7_qed>=0.5": {
+      "P": 0.014174410964047686,
+      "D": 0.4146249882662161,
+      "P_and_D": 0.005819956819675209,
+      "P_and_D_count": 62,
+      "neither": 0.5770205575894114,
+      "lift_over_independence": 0.9902828775636576
+    },
+    "potency>=0.7_qed>=0.6": {
+      "P": 0.014174410964047686,
+      "D": 0.3282643386839388,
+      "P_and_D": 0.005068994649394537,
+      "P_and_D_count": 54,
+      "neither": 0.6626302450014081,
+      "lift_over_independence": 1.089414389249442
+    },
+    "potency>=0.7_qed>=0.7": {
+      "P": 0.014174410964047686,
+      "D": 0.22472542945649113,
+      "P_and_D": 0.0035670703088331924,
+      "P_and_D_count": 38,
+      "neither": 0.7646672298882944,
+      "lift_over_independence": 1.119836013875749
+    }
+  },
+  "rdkit_caveat": "Local RDKit, which differs from the Modal image holding the authoritative kernel. Feasibility estimate only."
+}
