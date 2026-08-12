@@ -615,3 +615,49 @@ Continues same-prefix retargeting. It owns all decisions about:
 - final experiment ordering;
 - paper-bearing seeds and final test.
 
+
+---
+
+# Main-agent handoff evaluation order (binding)
+
+When a lane's packet arrives, do NOT merge the branch or ask the agent for more
+experiments. Process in this order, and note that **results come fourth**:
+
+1. **`PROTOCOL.md` — before any result.** Does the scientific question still
+   match the paper story?
+2. **`DECISION_LOG.md`.** Were any choices made *after* seeing outcomes that
+   should have been frozen earlier?
+3. **`handoff.json`.** Base commit, frozen model/data hashes, held-out status,
+   artifact locations.
+4. **Then the results.**
+
+Then exactly one of three decisions — no fourth option:
+
+- **MERGE** — the lane answered its question cleanly.
+- **AUTHORIZE NEXT GATE** — e.g. permit a held-out run.
+- **STOP / REVISE** — the instrument or the scientific premise failed.
+
+The ordering exists to stop us being seduced by a good number before checking
+whether the experiment that produced it was the one we intended.
+
+# Project-wide rule: could this statistic have gone the other way?
+
+**Before reporting any statistic, ask what value it could take if the hypothesis
+were false. If the answer is "none", it is not a measurement.**
+
+Adopted after three defects in a single day, all the same shape — a quantity
+whose sign was fixed before any data existed:
+
+1. **sacrifice-to-win** — the action was chosen as `argmax V_G` and then scored
+   by `V_G`. 50 higher, 5 tied, 0 lower out of 55; zero losses was definitional.
+2. **a "verified" arm that was secretly greedy** — `verified_land` was a plain
+   greedy continuation and the decision loop committed greedy's action, so
+   headroom was 0 by construction and two runs' CEILING verdicts were void.
+3. **a sign test against a false null** — policy improvement guarantees
+   `verified >= greedy`, so testing against 0.5 tested something already known.
+
+Related trap, same family: a constraint arm that *cannot* violate its constraint
+by construction has not demonstrated anything by not violating it. The
+measurement is what the *unconstrained* arms do, and what the constraint costs.
+
+This rule applies to every lane and to the main lane equally.
