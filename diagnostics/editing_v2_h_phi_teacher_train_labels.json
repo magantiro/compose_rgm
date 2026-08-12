@@ -2,11 +2,11 @@
   "schema": "compose.editing_v2.h_phi_union_collector_check",
   "status": "REASSEMBLED_FROM_VOLUME_SHARDS",
   "role": "train",
-  "shards": 287,
+  "shards": 290,
   "expected_pairs": 290,
   "label_strata": {
-    "contrastive": 4878,
-    "all_negative": 7361,
+    "contrastive": 4894,
+    "all_negative": 7580,
     "all_positive": 1636
   },
   "per_pair": [
@@ -176813,6 +176813,1286 @@
       ]
     },
     {
+      "index": 244,
+      "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+      "steps": 6,
+      "decision_states": 11,
+      "labels": 84,
+      "positives": 2,
+      "kernel_calls": 76,
+      "cache_hits": 157,
+      "teacher_cache_hits": 33,
+      "seconds": 3329.4,
+      "label_rows": [
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "CC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.9074074074074074,
+          "immediate": 0.9074074074074074,
+          "is_greedy_action": true,
+          "is_teacher_action": true,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "CC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8909090909090909,
+          "immediate": 0.8909090909090909,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "CC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8909090909090909,
+          "immediate": 0.8275862068965517,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "CC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.9074074074074074,
+          "immediate": 0.8245614035087719,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "CC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CNCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.9074074074074074,
+          "immediate": 0.7666666666666667,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "CC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCC(I)c1c[nH]c2ccccc12",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.9074074074074074,
+          "immediate": 0.5588235294117647,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "CC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CC(N)CCN(Cc1cc2ccccc2cc1S)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.9074074074074074,
+          "immediate": 0.6060606060606061,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "CCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 0,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 1.0,
+          "is_greedy_action": true,
+          "is_teacher_action": true,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "contrastive"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "CCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.9074074074074074,
+          "immediate": 0.9074074074074074,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "contrastive"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "CCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "O=C(CCCc1c[nH]c2ccccc12)N(CCF)Cc1ccc2ccccc2c1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.8545454545454545,
+          "immediate": 0.8545454545454545,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "contrastive"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "CCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "O=C(CCCc1c[nH]c2ccccc12)N(CCS)Cc1ccc2ccccc2c1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.8518518518518519,
+          "immediate": 0.8518518518518519,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "contrastive"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "CCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CC(C)N(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.6833333333333333,
+          "immediate": 0.6833333333333333,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "contrastive"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "CCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.7857142857142857,
+          "immediate": 0.7857142857142857,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "contrastive"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "CCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CCCN(Cc1ccc2pcccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.6615384615384615,
+          "immediate": 0.6615384615384615,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "contrastive"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "CCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1cn(O)c2ccccc12",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.5373134328358209,
+          "immediate": 0.5373134328358209,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "contrastive"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "N=C(N)C(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8909090909090909,
+          "immediate": 0.8275862068965517,
+          "is_greedy_action": true,
+          "is_teacher_action": true,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "N=C(N)C(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "N=C(N)CCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8909090909090909,
+          "immediate": 0.8103448275862069,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "N=C(N)C(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NC(N)C(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8909090909090909,
+          "immediate": 0.7966101694915254,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "N=C(N)C(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NN=C(N)CCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8909090909090909,
+          "immediate": 0.7833333333333333,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "N=C(N)C(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "N=C(N)C(CN)CN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8305084745762712,
+          "immediate": 0.7301587301587301,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "N=C(N)C(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "N=C(N)C(N)CCN1Cc2cc3ccccc3cc2C(c2c[nH]c3ccccc23)CCC1=O",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8909090909090909,
+          "immediate": 0.25,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "N=C(N)C(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CCN(Cc1ccc2ccc(C(N)C(=N)N)cc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.9074074074074074,
+          "immediate": 0.6142857142857143,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCNCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.8,
+          "is_greedy_action": true,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "N=C(N)CCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.7833333333333333,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "N=C(N)C(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.8909090909090909,
+          "immediate": 0.7704918032786885,
+          "is_greedy_action": false,
+          "is_teacher_action": true,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NC(=O)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.7704918032786885,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "N=C(N)NCCCc1ccc2c(CCCC(=O)NCc3ccc4ccccc4c3)c[nH]c2c1",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.5,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "N=C(N)NCCCN1Cc2ccc3ccc(cc3c2)C(CCc2c[nH]c3ccccc23)C1=O",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.3181818181818182,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8909090909090909,
+          "immediate": 0.8909090909090909,
+          "is_greedy_action": true,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCN(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8275862068965517,
+          "immediate": 0.8275862068965517,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCCN(Cc1ccc2cc(CN)ccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8909090909090909,
+          "immediate": 0.8245614035087719,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCC(O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8909090909090909,
+          "immediate": 0.8135593220338984,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.9074074074074074,
+          "immediate": 0.8103448275862069,
+          "is_greedy_action": false,
+          "is_teacher_action": true,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CNCC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8909090909090909,
+          "immediate": 0.734375,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCC(F)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8909090909090909,
+          "immediate": 0.8135593220338984,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CC([IH4])Cc1c[nH]c2ccccc12",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8909090909090909,
+          "immediate": 0.5970149253731343,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.875,
+          "is_greedy_action": true,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCC(=P)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.8596491228070176,
+          "immediate": 0.8596491228070176,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCC(=[SH4])CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.8448275862068966,
+          "immediate": 0.8448275862068966,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCC(=[SH2])CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.8448275862068966,
+          "immediate": 0.8448275862068966,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.7796610169491526,
+          "immediate": 0.7796610169491526,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CNCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.7301587301587301,
+          "immediate": 0.7301587301587301,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "C=CC=Cc1cc(CCCC(=O)N(CCC(=O)CCN)Cc2ccc3ccccc3c2)c[nH]1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.5571428571428572,
+          "immediate": 0.5571428571428572,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c(CN)[nH]c2ccccc12",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.5735294117647058,
+          "immediate": 0.5735294117647058,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.875,
+          "is_greedy_action": true,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCC(=P)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.8596491228070176,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCC(=[SH4])CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.8448275862068966,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCC(=[SH2])CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.8448275862068966,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.7796610169491526,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CNCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.7301587301587301,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)BCCc1c[nH]c2ccccc12",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.671875,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CCC(=O)CCN(Cc1cc(N)c2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.6363636363636364,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.875,
+          "is_greedy_action": true,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCC(=P)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.8596491228070176,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCNCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.9074074074074074,
+          "immediate": 0.8448275862068966,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCC(=[SH2])CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.8448275862068966,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8909090909090909,
+          "immediate": 0.7931034482758621,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CNCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.7419354838709677,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CCN(Cc1cc2ccccc2cc1CCCN)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.6557377049180327,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CCN(Cc1cc(CCCN)c2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.6666666666666666,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.875,
+          "is_greedy_action": true,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCC(=P)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.8596491228070176,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCNCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.9074074074074074,
+          "immediate": 0.8448275862068966,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCC(=[SH2])CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.8448275862068966,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8909090909090909,
+          "immediate": 0.7931034482758621,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CNCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.7419354838709677,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2cc(N)ccc12",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.676923076923077,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCCPCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.7833333333333333,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NC(=O)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.9074074074074074,
+          "immediate": 0.8392857142857143,
+          "is_greedy_action": true,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "contrastive"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "O=C(CCCc1c[nH]c2ccccc12)N(CCCF)Cc1ccc2ccccc2c1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.9074074074074074,
+          "immediate": 0.8392857142857143,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "contrastive"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NC(=P)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.9074074074074074,
+          "immediate": 0.8392857142857143,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "contrastive"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NOCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.9074074074074074,
+          "immediate": 0.8245614035087719,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "contrastive"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 1,
+          "recovery": true,
+          "similarity": 1.0,
+          "immediate": 0.8214285714285714,
+          "is_greedy_action": false,
+          "is_teacher_action": true,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "contrastive"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CNCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.9074074074074074,
+          "immediate": 0.7666666666666667,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "contrastive"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NC1CCN(C(=O)CCCc2c[nH]c3ccccc23)Cc2ccc3ccc1cc3c2",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.9074074074074074,
+          "immediate": 0.44,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "contrastive"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NC(=[SH4])CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.9074074074074074,
+          "immediate": 0.8103448275862069,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "contrastive"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCNCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.875,
+          "is_greedy_action": true,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCNCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCC(N)CCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8909090909090909,
+          "immediate": 0.8275862068965517,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCNCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCCCN(Cc1ccc2cc(CN)ccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8909090909090909,
+          "immediate": 0.8245614035087719,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCNCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCBCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.8135593220338984,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCNCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CNCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.9074074074074074,
+          "immediate": 0.7666666666666667,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCNCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "CNCNCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.7301587301587301,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCNCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCNCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1cn([IH2])c2ccccc12",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.5277777777777778,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:N=C(N)NCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12>>NCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "decision_state": "NCNCCCN(Cc1ccc2ccccc2c1)C(=O)CCCc1c[nH]c2ccccc12",
+          "candidate": "NCN1CCCN(Cc2ccc3ccccc3c2)C(=O)CCCc2c1[nH]c1ccccc21",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.3037974683544304,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        }
+      ]
+    },
+    {
       "index": 245,
       "pair_id": "6:NCCCN1C(=O)CN=C(c2ccccc2F)c2cc(Cl)ccc21>>O=CC1N=C(c2ccccc2F)c2cc(Cl)ccc2NC1=O",
       "steps": 6,
@@ -217311,6 +218591,2339 @@
           "state_kind": "all_negative"
         }
       ]
+    },
+    {
+      "index": 288,
+      "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+      "steps": 5,
+      "decision_states": 8,
+      "labels": 65,
+      "positives": 0,
+      "kernel_calls": 59,
+      "cache_hits": 82,
+      "teacher_cache_hits": 31,
+      "seconds": 256.2,
+      "label_rows": [
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "CSc1nc([N+](=O)[O-])cn1-c1ccccc1",
+          "candidate": "CSc1nc([N+]([O-])=[IH3])cn1-c1ccccc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.45,
+          "immediate": 0.45,
+          "is_greedy_action": true,
+          "is_teacher_action": true,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "CSc1nc([N+](=O)[O-])cn1-c1ccccc1",
+          "candidate": "B=[N+]([O-])c1cn(-c2ccccc2)c(SC)n1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.45,
+          "immediate": 0.43902439024390244,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "CSc1nc([N+](=O)[O-])cn1-c1ccccc1",
+          "candidate": "CSc1nc([N+]([O-])=[SH4])cn1-c1ccccc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.45,
+          "immediate": 0.43902439024390244,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "CSc1nc([N+](=O)[O-])cn1-c1ccccc1",
+          "candidate": "CSc1nc([N+]([O-])=[SH2])cn1-c1ccccc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.45,
+          "immediate": 0.43902439024390244,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "CSc1nc([N+](=O)[O-])cn1-c1ccccc1",
+          "candidate": "O=[N+]([O-])c1cn(-c2ccccc2)c(S)n1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.43902439024390244,
+          "immediate": 0.2727272727272727,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "CSc1nc([N+](=O)[O-])cn1-c1ccccc1",
+          "candidate": "CCc1nc([N+](=O)[O-])cn1-c1ccccc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.43902439024390244,
+          "immediate": 0.28888888888888886,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "CSc1nc([N+](=O)[O-])cn1-c1ccccc1",
+          "candidate": "CSc1nc([N+](=O)[O-])cn1-c1cc2cc-2c1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.43902439024390244,
+          "immediate": 0.2553191489361702,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "CSc1nc([N+](=O)[O-])cn1-c1ccccc1",
+          "candidate": "C=CC=CC(=C)n1cc([N+](=O)[O-])nc1SC",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.43902439024390244,
+          "immediate": 0.2037037037037037,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "CSc1nc([N+]([O-])=[IH3])cn1-c1ccccc1",
+          "candidate": "B=[N+]([O-])c1cn(-c2ccccc2)c(SC)n1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.43902439024390244,
+          "immediate": 0.43902439024390244,
+          "is_greedy_action": true,
+          "is_teacher_action": true,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "CSc1nc([N+]([O-])=[IH3])cn1-c1ccccc1",
+          "candidate": "CSc1nc([N+]([O-])=[SH4])cn1-c1ccccc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.43902439024390244,
+          "immediate": 0.43902439024390244,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "CSc1nc([N+]([O-])=[IH3])cn1-c1ccccc1",
+          "candidate": "CSc1nc([N+]([O-])=P)cn1-c1ccccc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.43902439024390244,
+          "immediate": 0.43902439024390244,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "CSc1nc([N+]([O-])=[IH3])cn1-c1ccccc1",
+          "candidate": "CSc1nc([N+]([O-])=S)cn1-c1ccccc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.43902439024390244,
+          "immediate": 0.43902439024390244,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "CSc1nc([N+]([O-])=[IH3])cn1-c1ccccc1",
+          "candidate": "CSc1nc([N+]([O-])=[IH])cn1-c1ccccc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.43902439024390244,
+          "immediate": 0.43902439024390244,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "CSc1nc([N+]([O-])=[IH3])cn1-c1ccccc1",
+          "candidate": "CSc1nc([N+]([O-])=[IH3])cn1C1CCCCC1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.19607843137254902,
+          "immediate": 0.19607843137254902,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "CSc1nc([N+]([O-])=[IH3])cn1-c1ccccc1",
+          "candidate": "CSC1NC([N+]([O-])=[IH3])CN1c1ccccc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.25,
+          "immediate": 0.25,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "CSc1nc([N+]([O-])=[IH3])cn1-c1ccccc1",
+          "candidate": "[O-][N+](=[IH3])c1cn(-c2ccccc2)c(S[IH4])n1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.3181818181818182,
+          "immediate": 0.3181818181818182,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "CSc1nc([N+]([O-])=[IH3])cn1-c1ccccc1",
+          "candidate": "CSc1ccc(-n2cnc([N+]([O-])=[IH3])c2)cc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.22916666666666666,
+          "immediate": 0.22916666666666666,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+](=O)[O-])nc(S)n1-c1ccccc1",
+          "candidate": "CSc1nc([N+](=O)[O-])cn1-c1ccccc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.45,
+          "immediate": 0.43902439024390244,
+          "is_greedy_action": true,
+          "is_teacher_action": true,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+](=O)[O-])nc(S)n1-c1ccccc1",
+          "candidate": "Cc1c([N+](=O)[O-])ncn1-c1ccccc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.3333333333333333,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+](=O)[O-])nc(S)n1-c1ccccc1",
+          "candidate": "O=[N+]([O-])c1ncn(-c2ccccc2)c1CS",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.3333333333333333,
+          "immediate": 0.2826086956521739,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+](=O)[O-])nc(S)n1-c1ccccc1",
+          "candidate": "O=[N+]([O-])c1cn(-c2ccccc2)c(S)n1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.45,
+          "immediate": 0.2727272727272727,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+](=O)[O-])nc(S)n1-c1ccccc1",
+          "candidate": "CC1=C([N+](=O)[O-])N=C(S)[IH2]1c1ccccc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.43902439024390244,
+          "immediate": 0.16,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+](=O)[O-])nc(S)n1-c1ccccc1",
+          "candidate": "Cc1ccccc1-n1cc([N+](=O)[O-])nc1S",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.45,
+          "immediate": 0.17647058823529413,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+](=O)[O-])ncn1-c1ccccc1",
+          "candidate": "B=[N+]([O-])c1ncn(-c2ccccc2)c1C",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.3333333333333333,
+          "is_greedy_action": true,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+](=O)[O-])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+]([O-])=P)ncn1-c1ccccc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.3333333333333333,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+](=O)[O-])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+]([O-])=S)ncn1-c1ccccc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.3333333333333333,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+](=O)[O-])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+]([O-])=[SH2])ncn1-c1ccccc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.3488372093023256,
+          "immediate": 0.3333333333333333,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+](=O)[O-])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+]([O-])=[IH3])ncn1-c1ccccc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.3333333333333333,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+](=O)[O-])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+](=O)[O-])ncn1-c1ccc(F)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.20833333333333334,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+](=O)[O-])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+](=O)[O-])ncn1-c1ccc(Cl)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.20833333333333334,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+](=O)[O-])ncn1-c1ccccc1",
+          "candidate": "CC=C(N=CNc1ccccc1)[N+](=O)[O-]",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.14285714285714285,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+](=O)[O-])ncn1-c1ccccc1",
+          "candidate": "O=[N+]([O-])c1ncn(-c2ccccc2)c1CP",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.2826086956521739,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+](=O)[O-])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+](=O)[O-])nc(S)n1-c1ccccc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.45,
+          "immediate": 0.23404255319148937,
+          "is_greedy_action": false,
+          "is_teacher_action": true,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH3][PH4])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+]([O-])=[SH4])ncn1-c1ccccc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.3333333333333333,
+          "is_greedy_action": true,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH3][PH4])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+]([O-])=[SH3][PH4])ccn1-c1ccccc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.32558139534883723,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH3][PH4])ncn1-c1ccccc1",
+          "candidate": "C[SH3]=[N+]([O-])c1ncn(-c2ccccc2)c1C",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.3181818181818182,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH3][PH4])ncn1-c1ccccc1",
+          "candidate": "[O-][N+](=[SH3][PH4])c1ncn(-c2ccccc2)c1[PH4]",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.3181818181818182,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH3][PH4])ncn1-c1ccccc1",
+          "candidate": "CC1C([N+]([O-])=[SH3][PH4])NCN1c1ccccc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.22,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH3][PH4])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+]([O-])=[SH3][PH4])ncn1C1CCCCC1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.12962962962962962,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH3][PH4])ncn1-c1ccccc1",
+          "candidate": "CC1=C([N+]([O-])=[SH3][PH4])[SH]=CN1c1ccccc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.22916666666666666,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH3][PH4])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+]([O-])=[SH3][PH4])ncn1[SH2]1=CC=CC=C1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.125,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH4])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+]([O-])=[SH3][PH4])ncn1-c1ccccc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.3409090909090909,
+          "is_greedy_action": true,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH4])ncn1-c1ccccc1",
+          "candidate": "B=[N+]([O-])c1ncn(-c2ccccc2)c1C",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.3333333333333333,
+          "immediate": 0.3333333333333333,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH4])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+]([O-])=[PH3])ncn1-c1ccccc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.3333333333333333,
+          "immediate": 0.3333333333333333,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH4])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+]([O-])=[IH])ncn1-c1ccccc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.3333333333333333,
+          "immediate": 0.3333333333333333,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH4])ncn1-c1ccccc1",
+          "candidate": "CC1C([N+]([O-])=[SH4])NCN1c1ccccc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.20833333333333334,
+          "immediate": 0.20833333333333334,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH4])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+]([O-])=[SH4])ncn1C1CCCCC1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.11538461538461539,
+          "immediate": 0.11538461538461539,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH4])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+]([O-])=[SH]#N)ncn1-c1ccccc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.3111111111111111,
+          "immediate": 0.3111111111111111,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH4])ncn1-c1ccccc1",
+          "candidate": "CC1=C([N+]([O-])=[SH4])N=[PH2]N1c1ccccc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.24444444444444444,
+          "immediate": 0.24444444444444444,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH4])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+]([O-])=[SH3][PH4])ncn1-c1ccccc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.3409090909090909,
+          "is_greedy_action": true,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH4])ncn1-c1ccccc1",
+          "candidate": "B=[N+]([O-])c1ncn(-c2ccccc2)c1C",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.3333333333333333,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH4])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+]([O-])=[PH3])ncn1-c1ccccc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.3333333333333333,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH4])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+]([O-])=[IH])ncn1-c1ccccc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.3333333333333333,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH4])ncn1-c1ccccc1",
+          "candidate": "CC1C([N+]([O-])=[SH4])NCN1c1ccccc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.20833333333333334,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH4])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+]([O-])=[SH4])ncn1C1CCCCC1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.11538461538461539,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH4])ncn1-c1ccccc1",
+          "candidate": "[O-][N+](=[SH4])c1ncn(-c2ccccc2)c1F",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.3023255813953488,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "Cc1c([N+]([O-])=[SH4])ncn1-c1ccccc1",
+          "candidate": "Cc1c([N+]([O-])=[SH4])ncn1-c1cccc([PH4])c1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.21568627450980393,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "O=[N+]([O-])c1cn(-c2ccccc2)cn1",
+          "candidate": "Cc1c([N+](=O)[O-])ncn1-c1ccccc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.3333333333333333,
+          "is_greedy_action": true,
+          "is_teacher_action": true,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "O=[N+]([O-])c1cn(-c2ccccc2)cn1",
+          "candidate": "O=[N+]([O-])c1ncn(-c2ccccc2)c1[PH4]",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.30952380952380953,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "O=[N+]([O-])c1cn(-c2ccccc2)cn1",
+          "candidate": "Nc1c([N+](=O)[O-])ncn1-c1ccccc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.3023255813953488,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "O=[N+]([O-])c1cn(-c2ccccc2)cn1",
+          "candidate": "O=[N+]([O-])c1ncn(-c2ccccc2)c1[SH3]",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.3023255813953488,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "O=[N+]([O-])c1cn(-c2ccccc2)cn1",
+          "candidate": "O=[N+]([O-])c1cn(-c2ccc(F)cc2)cn1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.14285714285714285,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "O=[N+]([O-])c1cn(-c2ccccc2)cn1",
+          "candidate": "O=[N+]([O-])c1cn(-c2ccc(Cl)cc2)cn1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.14285714285714285,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "O=[N+]([O-])c1cn(-c2ccccc2)cn1",
+          "candidate": "O=[N+]([O-])C1=CN(c2ccccc2)C=[IH2]1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.2,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "5:O=[N+]([O-])c1cn(-c2ccccc2)cn1>>CSc1nccn1-c1ccccc1",
+          "decision_state": "O=[N+]([O-])c1cn(-c2ccccc2)cn1",
+          "candidate": "[O-][N+](=[SH4])c1cn(-c2ccccc2)cn1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.3409090909090909,
+          "immediate": 0.2558139534883721,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        }
+      ]
+    },
+    {
+      "index": 289,
+      "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+      "steps": 6,
+      "decision_states": 11,
+      "labels": 86,
+      "positives": 0,
+      "kernel_calls": 103,
+      "cache_hits": 142,
+      "teacher_cache_hits": 35,
+      "seconds": 2006.8,
+      "label_rows": [
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1",
+          "candidate": "CCCNCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.7777777777777778,
+          "is_greedy_action": true,
+          "is_teacher_action": true,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1",
+          "candidate": "CCCNCOc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.7777777777777778,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1",
+          "candidate": "COCCN(C(=O)CCC(=O)Nc1ccccn1)C(CNC(C)C)c1ccc(OC)cc1",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.7741935483870968,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1",
+          "candidate": "COCCN(C(=O)CCC(=O)Nc1ccccn1)C(CNCC(C)C)c1ccc(OC)cc1",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.8305084745762712,
+          "immediate": 0.7619047619047619,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1",
+          "candidate": "CCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.746031746031746,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1",
+          "candidate": "CCN(C)CC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.8771929824561403,
+          "immediate": 0.734375,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1",
+          "candidate": "CCCNCC(c1ccc(OC)c(N)c1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.8305084745762712,
+          "immediate": 0.5733333333333334,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1",
+          "candidate": "CCCNC(OC)C(c1ccccc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1",
+          "remaining": 5,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.5942028985507246,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy",
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCNCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.8333333333333334,
+          "is_greedy_action": true,
+          "is_teacher_action": true,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COc1ccc(C(C)N(CCOCNC(C)C)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.875,
+          "immediate": 0.8166666666666667,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "CCCOCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.8032786885245902,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "CCNCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8771929824561403,
+          "immediate": 0.8032786885245902,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "CCN(C)COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8448275862068966,
+          "immediate": 0.7777777777777778,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COc1ccc(C(C)N(C(=O)CCC(=O)Nc2ccccn2)C2CCCNCOC2)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8771929824561403,
+          "immediate": 0.56,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "CCCNNOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.765625,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCOc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "candidate": "CCCCCOc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.8166666666666667,
+          "is_greedy_action": true,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCOc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "candidate": "COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OCNC(C)C)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.8166666666666667,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCOc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "candidate": "COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OCNCOC)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.8166666666666667,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCOc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "candidate": "CCNCOc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.8032786885245902,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCOc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "candidate": "CCCNCOc1ccc(CN(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.5352112676056338,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCOc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "candidate": "B=C(NCCC)Oc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.7424242424242424,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "CCCNCOc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "candidate": "CCCNCOc1ccc(C(C)N(C(=O)CCC(=O)Nc2ccccn2)C(C)OC)cc1",
+          "remaining": 4,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.5492957746478874,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.8947368421052632,
+          "is_greedy_action": true,
+          "is_teacher_action": true,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCC(=O)OCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.864406779661017,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCC(C)OCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.864406779661017,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCCCCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.8620689655172413,
+          "immediate": 0.8620689655172413,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccccc1OC",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.6615384615384615,
+          "immediate": 0.6615384615384615,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1cccc(OC)c1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.7121212121212122,
+          "immediate": 0.7121212121212122,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCCOCCN1C(=O)CCC(=O)N(c2ccccn2)C1(C)c1ccc(OC)cc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.27380952380952384,
+          "immediate": 0.27380952380952384,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc([IH]C)cc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.7076923076923077,
+          "immediate": 0.7076923076923077,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.8947368421052632,
+          "is_greedy_action": true,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCC(=O)OCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.864406779661017,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCC(C)OCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8813559322033898,
+          "immediate": 0.864406779661017,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCCCCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.8620689655172413,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccccc1OC",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.6615384615384615,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1cccc(OC)c1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.7121212121212122,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCC(S)OCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8666666666666667,
+          "immediate": 0.8360655737704918,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCC1COc2ccc(cc2)C(C)N(C(=O)CCC(=O)Nc2ccccn2)CCO1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.36470588235294116,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.8947368421052632,
+          "is_greedy_action": true,
+          "is_teacher_action": true,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCC(=O)OCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.864406779661017,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCC(C)OCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8813559322033898,
+          "immediate": 0.864406779661017,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCCCCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.8620689655172413,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccccc1OC",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.6615384615384615,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1cccc(OC)c1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.7121212121212122,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COC(=[SH4])CCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.7903225806451613,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCCOCCN(C(=O)C(Br)CC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.6376811594202898,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "candidate": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.864406779661017,
+          "is_greedy_action": true,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "candidate": "B=C(CCOC)Oc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.847457627118644,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "candidate": "COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OCCC(=O)OC)cc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.8305084745762712,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "candidate": "COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OCOCOC)cc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.8305084745762712,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "candidate": "COCCCOc1ccc(CN(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.5846153846153846,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "candidate": "COCCCOc1cccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)c1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.7301587301587301,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "candidate": "COCCCOc1ccc(C(C)N(CCOC)C(=O)CC(=N)C(=O)Nc2ccccn2)cc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.6363636363636364,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCCOc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "candidate": "COCCCOc1ccc(C(C)N(OCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "remaining": 2,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.6363636363636364,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OCNCOC)cc1",
+          "candidate": "COCCCOc1ccc(C(C)N(CCOC)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.8596491228070176,
+          "is_greedy_action": true,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OCNCOC)cc1",
+          "candidate": "COCNCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.8333333333333334,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OCNCOC)cc1",
+          "candidate": "COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OCOCOC)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.8305084745762712,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OCNCOC)cc1",
+          "candidate": "COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OCN([IH4])COC)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.819672131147541,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OCNCOC)cc1",
+          "candidate": "COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OCNCO)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.8032786885245902,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OCNCOC)cc1",
+          "candidate": "COCCN(Cc1ccc(OCNCOC)cc1)C(=O)CCC(=O)Nc1ccccn1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.5588235294117647,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OCNCOC)cc1",
+          "candidate": "COCCN(C(=O)CCC(=O)Nc1ccpcn1)C(C)c1ccc(OCNCOC)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.6086956521739131,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OCNCOC)cc1",
+          "candidate": "COCCC(C)(NC(=O)CCC(=O)Nc1ccccn1)c1ccc(OCNCOC)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.4520547945205479,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.864406779661017,
+          "immediate": 0.864406779661017,
+          "is_greedy_action": true,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCNOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.85,
+          "immediate": 0.85,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCBOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.8360655737704918,
+          "immediate": 0.8360655737704918,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCPOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.8360655737704918,
+          "immediate": 0.8360655737704918,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccccc1OC",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.6825396825396826,
+          "immediate": 0.6825396825396826,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCOOCCN(Cc1ccc(OC)cc1)C(=O)CCC(=O)Nc1ccccn1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.6153846153846154,
+          "immediate": 0.6153846153846154,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCC[SH2]OCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.8360655737704918,
+          "immediate": 0.8360655737704918,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCOOCCN(C(=O)CC(=[IH])C(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 0,
+          "recovery": false,
+          "similarity": 0.6666666666666666,
+          "immediate": 0.6666666666666666,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "greedy"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.864406779661017,
+          "is_greedy_action": true,
+          "is_teacher_action": true,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCNOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.85,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCBOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.8360655737704918,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCPOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.8360655737704918,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccccc1OC",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.6825396825396826,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCOOCCN(Cc1ccc(OC)cc1)C(=O)CCC(=O)Nc1ccccn1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.6153846153846154,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)C1=CC=[PH](OC)C=C1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.5915492957746479,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCOOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)c([PH4])c1",
+          "remaining": 1,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.6764705882352942,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCNCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCCCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.864406779661017,
+          "is_greedy_action": true,
+          "is_teacher_action": true,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCNCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCSCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.8333333333333334,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCNCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCOCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.8333333333333334,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCNCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCC(N)OCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.819672131147541,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCNCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COc1ccc(C(C)N(CCOCNCO)C(=O)CCC(=O)Nc2ccccn2)cc1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.8032786885245902,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCNCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCNCOCCN(Cc1ccc(OC)cc1)C(=O)CCC(=O)Nc1ccccn1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.5882352941176471,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCNCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCNCOCCN1C(=O)CCC(=O)Nc2ncccc2COc2ccc(cc2)C1C",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.16326530612244897,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        },
+        {
+          "pair_id": "6:CCCNCC(c1ccc(OC)cc1)N(CCOC)C(=O)CCC(=O)Nc1ccccn1>>COCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "decision_state": "COCNCOCCN(C(=O)CCC(=O)Nc1ccccn1)C(C)c1ccc(OC)cc1",
+          "candidate": "COCNCOC1CN(C(C)c2ccc(OC)cc2)C(=O)CC1C(=O)Nc1ccccn1",
+          "remaining": 3,
+          "recovery": false,
+          "similarity": 0.8947368421052632,
+          "immediate": 0.43037974683544306,
+          "is_greedy_action": false,
+          "is_teacher_action": false,
+          "visited_by": [
+            "rollout"
+          ],
+          "state_kind": "all_negative"
+        }
+      ]
     }
-  ]
+  ],
+  "dataset_identity": {
+    "schema": "compose.editing_v2.h_phi_teacher_dataset",
+    "status": "FROZEN_TEACHER_DATASET_NO_EXAMPLES_ADDED_AFTER_THIS",
+    "labels_sha256": "f893118a61e351df9475f9da92fed30d1348588df09035da9f3cf648af28fa36",
+    "pairs": 290,
+    "labels": 14110,
+    "decision_states": 1794,
+    "cohort_sha256": "72609676531f8797",
+    "training_law": "V_G(x,z,b) = outcome of greedy continuation from x toward z with b edits remaining",
+    "heads": [
+      "recovery (exact target reached under greedy continuation)",
+      "terminal similarity"
+    ]
+  }
 }
