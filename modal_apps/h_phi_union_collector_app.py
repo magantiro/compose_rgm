@@ -330,6 +330,48 @@ def collect(task: dict[str, Any]) -> dict[str, Any]:
     return payload
 
 
+@app.function(
+    image=image, cpu=1.0, memory=4 * 1024, timeout=24 * 60 * 60,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def drive(tasks: list[dict[str, Any]], out_name: str) -> dict[str, Any]:
+    """Fan out from INSIDE Modal, so nothing depends on the local client.
+
+    `.map()` submits inputs from wherever it is called. Called locally, a
+    dropped connection stops new inputs being submitted -- `--detach` keeps the
+    app alive but leaves it with nothing to do. That is exactly what happened:
+    a DNS failure killed the client and the run stalled at 29 of 290 pairs with
+    ~20 idle containers.
+
+    Running the map here makes submission server-side, so the job survives the
+    laptop closing rather than merely surviving it gracefully.
+    """
+
+    results = [r for r in collect.map(tasks) if r]
+    labels = sum(r["labels"] for r in results)
+    states = sum(r["decision_states"] for r in results)
+    calls = sum(r["kernel_calls"] for r in results)
+    kinds: dict[str, int] = {}
+    for r in results:
+        for row in r["label_rows"]:
+            kinds[row["state_kind"]] = kinds.get(row["state_kind"], 0) + 1
+
+    summary = {
+        "schema": "compose.editing_v2.h_phi_union_collector_check",
+        "status": "GENERATED_SERVER_SIDE",
+        "pairs": len(results), "decision_states": states,
+        "labels": labels, "kernel_calls": calls,
+        "label_strata": kinds,
+        "per_pair": results,
+    }
+    out = Path(RUN_ROOT) / "h_phi_teacher" / out_name
+    out.write_text(json.dumps(summary, indent=2) + "\n")
+    artifact_volume.commit()
+    print(f"driver done: {len(results)} pairs, {labels:,} labels, "
+          f"{calls:,} kernel calls -> {out}", flush=True)
+    return {k: v for k, v in summary.items() if k != "per_pair"}
+
+
 @app.local_entrypoint()
 def main(pairs: int = 12, role: str = "train",
          carve: str = "diagnostics/editing_v2_teacher_validation_carve.json",
@@ -361,37 +403,15 @@ def main(pairs: int = 12, role: str = "train",
     print(f"union-collecting {len(tasks)} held-in pairs "
           f"{dict(collections.Counter(t['steps'] for t in tasks))}")
 
-    results = [r for r in collect.map(tasks) if r]
-    labels = sum(r["labels"] for r in results)
-    calls = sum(r["kernel_calls"] for r in results)
-    states = sum(r["decision_states"] for r in results)
-    print(f"\n  {states} decision states, {labels:,} labels, {calls:,} kernel calls "
-          f"({labels/max(calls,1):.2f} labels per call)")
-    print(f"  teacher-value cache hits "
-          f"{sum(r['teacher_cache_hits'] for r in results):,} "
-          f"(was 0 under greedy-only collection)")
+    # Dispatch and return. The local client only kicks the driver off; it does
+    # NOT feed inputs, so a dropped connection cannot stall the fan-out. Results
+    # are written to the volume by the driver and by each pair's own shard;
+    # reassemble locally with scripts/editing_v2_collect_teacher_shards.py.
+    print("dispatching to the on-Modal driver (submission is server-side, so "
+          "this survives the client disconnecting)")
+    summary = drive.remote(tasks, f"aggregate_{role}.json")
+    print(f"\n  {summary}")
+    print(f"  aggregate written to the volume at "
+          f"editing_v2/r_theta_run/h_phi_teacher/aggregate_{role}.json")
+    print(f"  per-pair shards under editing_v2/r_theta_run/h_phi_teacher/{role}/")
 
-    kinds = collections.Counter(
-        row["state_kind"]
-        for r in results for row in r["label_rows"])
-    if kinds:
-        total_rows = sum(kinds.values())
-        print("  label strata: " + "  ".join(
-            f"{k} {v} ({v/total_rows:.1%})" for k, v in sorted(kinds.items())))
-        negative_share = kinds.get("all_negative", 0) / max(total_rows, 1)
-        if negative_share > 0.70:
-            print(f"  WARNING all-negative share {negative_share:.1%} exceeds 70% -- "
-                  f"stop and diagnose PAIR SAMPLING before training. Do not "
-                  f"oversample 'good' pairs after seeing controller outcomes.")
-
-    destination = ROOT / out
-    destination.write_text(json.dumps({
-        "schema": "compose.editing_v2.h_phi_union_collector_check",
-        "status": "GENERATOR_VERIFICATION_NOT_A_DATASET",
-        "collector": ("greedy-visited UNION rollout-teacher-visited states; "
-                      "V_G unchanged"),
-        "role": role, "carve": carve,
-        "label_strata": dict(kinds),
-        "per_pair": results,
-    }, indent=2) + "\n")
-    print(f"  wrote {destination}")
