@@ -83,7 +83,7 @@ RANDOM_LEGAL = 2
 
 @app.function(
     image=image, cpu=2.0, memory=12 * 1024, timeout=60 * 60,
-    max_containers=20, retries=2,
+    max_containers=60, retries=2,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
 def collect(task: dict[str, Any]) -> dict[str, Any]:
