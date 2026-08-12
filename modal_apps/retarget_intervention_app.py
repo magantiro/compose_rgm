@@ -426,6 +426,24 @@ def run_arms(task: dict[str, Any]) -> dict[str, Any]:
 def drive(phase: str, tasks: list[dict[str, Any]]) -> int:
     """Fan out ON MODAL so a client disconnect cannot stall the run."""
     fn = build_prefix if phase == "prefix" else run_arms
+    # RESUME. Shards are committed per task, so a relaunch must not redo
+    # completed work. Filtering here -- on Modal, with the volume mounted --
+    # rather than inside the task avoids paying a container start and a
+    # checkpoint load just to discover the answer already exists.
+    artifact_volume.reload()
+    remaining = []
+    for task in tasks:
+        sub = ("retarget_prefixes" if phase == "prefix"
+               else task.get("out_dir", "retarget_intervention"))
+        shard = Path(RUN_ROOT) / sub / f"{task['history']}_{task['index']:03d}.json"
+        if shard.exists():
+            continue
+        remaining.append(task)
+    skipped = len(tasks) - len(remaining)
+    if skipped:
+        print(f"resume: {skipped} already committed, running {len(remaining)}",
+              flush=True)
+    tasks = remaining
     done = 0
     for _ in fn.map(tasks, order_outputs=False, return_exceptions=True,
                     wrap_returned_exceptions=False):
