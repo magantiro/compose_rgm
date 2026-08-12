@@ -15,13 +15,13 @@
     "rule": "exclude sources already inside the developability region"
   },
   "seed": 20260812,
-  "scanned": 16,
+  "scanned": 57,
   "rejected": {
     "unparseable": 0,
-    "size_band": 1,
-    "already_developable": 5
+    "size_band": 4,
+    "already_developable": 23
   },
-  "cohort_sha256": "bd851841a61e28a781e039fada6a180286a29f85f78fa311ef1ca0e1e8a0edfd",
+  "cohort_sha256": "e402e318fd9540fb51fc93c7481094beec4c5f968a582f7349d6359f24e19a5f",
   "sources": [
     {
       "index": 0,
@@ -102,6 +102,166 @@
       "heavy_atoms": 29,
       "qed": 0.4955,
       "clogp": 5.3794
+    },
+    {
+      "index": 10,
+      "source": "Cc1ccc(-c2nc(N)c3cc(Cc4ccccc4)sc3n2)o1",
+      "slots": 48,
+      "heavy_atoms": 23,
+      "qed": 0.6059,
+      "clogp": 4.4327
+    },
+    {
+      "index": 11,
+      "source": "O=C(I)Nc1cc[n+](CC(=O)c2ccc(Cl)cc2)cc1",
+      "slots": 48,
+      "heavy_atoms": 20,
+      "qed": 0.2803,
+      "clogp": 3.4773
+    },
+    {
+      "index": 12,
+      "source": "CS(=O)(=O)Nc1ccc(OCC(O)CN(CCc2ccc(Cl)c(Cl)c2)Cc2ccc(O)cc2)cc1",
+      "slots": 48,
+      "heavy_atoms": 35,
+      "qed": 0.3124,
+      "clogp": 4.5551
+    },
+    {
+      "index": 13,
+      "source": "C=CCNCCn1ccc2ccc3ncccc3c21",
+      "slots": 48,
+      "heavy_atoms": 19,
+      "qed": 0.5579,
+      "clogp": 2.9651
+    },
+    {
+      "index": 14,
+      "source": "COc1cccc(C=Nn2c(N)c(S(=O)(=O)c3cccs3)c3nc4ccccc4nc32)c1",
+      "slots": 48,
+      "heavy_atoms": 32,
+      "qed": 0.395,
+      "clogp": 3.9518
+    },
+    {
+      "index": 15,
+      "source": "CC(C)CN(C)C(=O)c1nc(-c2ccccc2)c2cc(Cl)ccc2n1",
+      "slots": 48,
+      "heavy_atoms": 25,
+      "qed": 0.6838,
+      "clogp": 4.6782
+    },
+    {
+      "index": 16,
+      "source": "CC(=O)Nc1ccc(C=CC(=O)c2sc(-n3nc(-c4ccccc4)cc3C3CCCCC3)nc2C)cc1",
+      "slots": 48,
+      "heavy_atoms": 37,
+      "qed": 0.2105,
+      "clogp": 7.2064
+    },
+    {
+      "index": 17,
+      "source": "CC(=NNC(=O)c1ccc(O)nn1)c1cccnc1",
+      "slots": 48,
+      "heavy_atoms": 19,
+      "qed": 0.6233,
+      "clogp": 0.7312
+    },
+    {
+      "index": 18,
+      "source": "C=Cc1cccc(NC(=O)NC2CCC(C(=O)I3CCN(C)CC3)CC2)c1",
+      "slots": 48,
+      "heavy_atoms": 27,
+      "qed": 0.3785,
+      "clogp": 3.9883
+    },
+    {
+      "index": 19,
+      "source": "Cc1ccc(C=Cc2ncc([N+](=O)[O-])n2CCOC(=O)c2c[nH]c3ccccc23)cc1",
+      "slots": 48,
+      "heavy_atoms": 31,
+      "qed": 0.2692,
+      "clogp": 4.6084
+    },
+    {
+      "index": 20,
+      "source": "O=C(NCc1ccccc1)c1ccc2c(O)c(S(=O)(=O)c3ccccc3)c(=O)[nH]c2c1",
+      "slots": 48,
+      "heavy_atoms": 31,
+      "qed": 0.4465,
+      "clogp": 2.9965
+    },
+    {
+      "index": 21,
+      "source": "O=C1OC2(CCN(C(=O)Nc3ncc(-c4cccc(C(F)F)c4)cn3)CC2)c2ccccc21",
+      "slots": 48,
+      "heavy_atoms": 33,
+      "qed": 0.5811,
+      "clogp": 4.7748
+    },
+    {
+      "index": 22,
+      "source": "C#CCNC(=O)COCOC(C=C(C=CC(=O)OCC)OC(C)=O)COC(C)=O",
+      "slots": 48,
+      "heavy_atoms": 29,
+      "qed": 0.0662,
+      "clogp": 0.2245
+    },
+    {
+      "index": 23,
+      "source": "CC(=O)OCCCC1(C)C(C)=CCC2C3Cc4cn[nH]c4NC3(C)CCC21",
+      "slots": 48,
+      "heavy_atoms": 27,
+      "qed": 0.4652,
+      "clogp": 4.4784
+    },
+    {
+      "index": 24,
+      "source": "C=C1CCC=CCCC(C2=CCC(C(C)[IH2])[IH3][SH2]2)CC1O",
+      "slots": 48,
+      "heavy_atoms": 21,
+      "qed": 0.3168,
+      "clogp": 4.2647
+    },
+    {
+      "index": 25,
+      "source": "COc1ncccc1NC(=O)C(C)(C)Cc1ccc(C(=O)Oc2ccc(C(=N)N)cc2F)s1",
+      "slots": 48,
+      "heavy_atoms": 33,
+      "qed": 0.1976,
+      "clogp": 4.0015
+    },
+    {
+      "index": 26,
+      "source": "Cc1ccc(Oc2ccc(-c3nnc(-c4ccccc4)o3)cc2[N+](=O)[O-])cc1C",
+      "slots": 48,
+      "heavy_atoms": 29,
+      "qed": 0.3211,
+      "clogp": 5.7209
+    },
+    {
+      "index": 27,
+      "source": "CCCCCOc1ccc(-c2nc(CNC(C)CCCCC)co2)cc1",
+      "slots": 48,
+      "heavy_atoms": 26,
+      "qed": 0.4482,
+      "clogp": 5.969
+    },
+    {
+      "index": 28,
+      "source": "C=ICN(Cc1nnc(S[SH2]CN(CO)c2nc(C)cs2)[nH]1)C(=O)c1ccccc1",
+      "slots": 48,
+      "heavy_atoms": 30,
+      "qed": 0.1186,
+      "clogp": 3.191
+    },
+    {
+      "index": 29,
+      "source": "CC(=O)N1CCOc2ccc(S(=O)(=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)cc21",
+      "slots": 48,
+      "heavy_atoms": 28,
+      "qed": 0.3667,
+      "clogp": 0.6605
     }
   ]
 }

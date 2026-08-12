@@ -119,7 +119,7 @@ def _goal_helpers():
 
 @app.function(
     image=image, cpu=2.0, memory=12 * 1024, timeout=4 * 60 * 60,
-    max_containers=12, retries=1,
+    max_containers=30, retries=1,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
 def calibrate_source(task: dict[str, Any]) -> dict[str, Any]:
