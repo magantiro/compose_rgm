@@ -42,6 +42,11 @@ def _escape(text: object) -> str:
     return str(text).replace("|", "\\|").replace("\n", " ").strip()
 
 
+def _sentence(text: object) -> str:
+    """Trim a trailing period so joined fields do not render as '..'."""
+    return str(text).strip().rstrip(".")
+
+
 def _capability_table(methods: list[dict]) -> list[str]:
     header = ["method"] + [label for _, label in _AXIS_HEADERS]
     lines = ["| " + " | ".join(header) + " |", "|" + "---|" * len(header)]
@@ -172,10 +177,12 @@ def render(registry: dict) -> str:
             )
         add("")
         oracle = method["oracle_accounting"]
-        add(f"**Oracle accounting.** {oracle['definition']} "
-            f"Rejected proposals counted: {oracle['counts_rejected_proposals']}. "
-            f"Training-phase oracle calls: {oracle['training_phase_oracle_calls']}. "
-            f"Default total budget: {oracle['default_total_budget']}.")
+        add("**Oracle accounting.**")
+        add("")
+        add(f"- *Definition.* {_sentence(oracle['definition'])}.")
+        add(f"- *Rejected proposals counted.* {_sentence(oracle['counts_rejected_proposals'])}.")
+        add(f"- *Training-phase calls.* {_sentence(oracle['training_phase_oracle_calls'])}.")
+        add(f"- *Default total budget.* {_sentence(oracle['default_total_budget'])}.")
         add("")
         add(f"**Edit / generation budget.** {method['edit_budget']}")
         add("")
@@ -187,14 +194,20 @@ def render(registry: dict) -> str:
                 add(f"- {item}")
         add("")
         contract = method["fairness_contract"]
-        add(f"**Fairness contract.** Matched quantity: {contract.get('matched_quantity', 'N/A')}. "
-            f"Not fair because: {contract.get('not_fair_because', 'N/A')}")
+        add("**Fairness contract.**")
+        add("")
+        add(f"- *Matched quantity.* {_sentence(contract.get('matched_quantity', 'N/A'))}.")
+        add(f"- *Not fair because.* {_sentence(contract.get('not_fair_because', 'N/A'))}.")
+        if contract.get("n_a_metrics"):
+            add(f"- *Reported as N/A.* {_sentence(contract['n_a_metrics'])}.")
         add("")
         smoke = method.get("smoke_cost") or {}
         if smoke:
-            add(f"**Costed smoke.** {smoke.get('plan', '')} "
-                f"Estimated CPU cost: {smoke.get('estimate', 'UNKNOWN')}. "
-                f"Confidence: {smoke.get('confidence', 'UNKNOWN')}.")
+            add("**Costed smoke — NOT EXECUTED.**")
+            add("")
+            add(f"- *Plan.* {_sentence(smoke.get('plan', ''))}.")
+            add(f"- *Estimate.* {_sentence(smoke.get('estimate', 'UNKNOWN'))}.")
+            add(f"- *Confidence.* {_sentence(smoke.get('confidence', 'UNKNOWN'))}.")
             add("")
 
     add("## Fairness rules that bind every method")
@@ -202,14 +215,28 @@ def render(registry: dict) -> str:
     for rule in registry["global_fairness_rules"]:
         add(f"- {rule}")
     add("")
+    smoke_plan = registry["smoke_plan"]
     add("## Smoke plan")
     add("")
-    add(registry["smoke_plan"]["definition"])
+    add(smoke_plan["definition"])
     add("")
-    add(f"- sources: {registry['smoke_plan']['sources']}")
-    add(f"- executed: {registry['smoke_plan']['executed']}")
-    add(f"- total estimated cost: {registry['smoke_plan']['total_estimate']}")
+    add(f"- **Sources.** {smoke_plan['sources']}")
+    add(f"- **Executed.** {'yes' if smoke_plan['executed'] else 'no'}")
     add("")
+    if smoke_plan.get("recommended_order"):
+        add("Recommended order:")
+        add("")
+        for step in smoke_plan["recommended_order"]:
+            add(f"1. {step}")
+        add("")
+    add(f"**Total estimate.** {smoke_plan['total_estimate']}")
+    add("")
+    if smoke_plan.get("hard_constraints_observed"):
+        add("Hard constraints observed in this lane:")
+        add("")
+        for item in smoke_plan["hard_constraints_observed"]:
+            add(f"- {item}")
+        add("")
     return "\n".join(lines) + "\n"
 
 
