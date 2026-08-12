@@ -16,6 +16,36 @@ generators already span preferences, and iterative optimizers already continue
 from a molecule. It is the conjunction: **unanticipated intervention +
 realized-history continuity + finite-horizon replanning, on one frozen `R_theta`.**
 
+## Three subclaims, on the goal structures where each is meaningful
+
+Retargeting is not one claim, and **one goal pair must not carry all three**.
+Forcing them together is what pushes a design toward picking the objective that
+makes greedy fail, which would make the whole result read as engineered.
+
+| | subclaim | goal structure | what it needs |
+|---|---|---|---|
+| **A** | **Intervention responsiveness** — COMPOSE responds coherently to an unanticipated goal change | natural switches `P → P∧D`, `D → P∧D` | retarget beats continue-A on B. **Verified control does NOT need to beat greedy here.** Greedy being decent is fine — the claim is about responding to the switch at all |
+| **B** | **Future-aware adaptation** — remaining-budget reasoning beats myopic reasoning after the switch | bounded developability region: `L ≤ cLogP ≤ U` **and** `QED ≥ q` | a goal whose feasible set is bounded, so a locally attractive edit can consume future room. Gated on the held-in contrastive measurement below |
+| **C** | **Prefix reuse** — the realized history is worth keeping | compatible `P → P∧D` vs conflicting `P → D`, reported separately | continue-from-`x_tau` vs restart-from-`x_0`. The prediction is **asymmetric**: compatible should often help, conflicting may favour restart. Continuation is not required to always win |
+
+**Why a bounded region for B, stated as a principle rather than a convenience.**
+Bounded feasibility is *inherently* non-monotone: moving toward the box is good,
+overshooting is bad, and a locally attractive edit can consume the room needed to
+land inside it later. That is a structural property of constrained design, not an
+artifact chosen because greedy does badly on it. A monotone threshold ("more
+potency is always better") has no such structure, which is exactly why C0 found
+no planning signal on it.
+
+**The region is `cLogP` box + `QED` floor, not `cLogP` alone.** A single scalar
+box reads as a toy. A bounded developability region is a real medicinal-chemistry
+object and target-free, with no privileged similarity heuristic.
+
+**Anti-tuning rule, binding.** The held-in calibration asks *once* whether the
+bounded region contains contrastive future-sensitive decisions. If it does,
+freeze it. **If it does not, do not adjust the interval until it does** —
+record that future-aware-vs-greedy is not a strong retargeting subclaim for that
+goal and proceed with subclaims A and C. Subclaim B is allowed to fail.
+
 ## What the feasibility censuses established
 
 Three local, kernel-free censuses were run before any controller was written.
@@ -60,14 +90,29 @@ Margins, for a lower bound `c_j` and the obvious two-sided form inside a box:
 m_j(x) = (f_j(x) - c_j) / s_j
 ```
 
-Terminal utility is a soft minimum over margins, which prioritizes the
-worst-satisfied requirement rather than letting one easy property compensate
-indefinitely for a failed constraint:
+Success and dense ranking are defined **separately**, because the asymmetry
+below would otherwise let one hard objective drown out every other criterion for
+the whole trajectory.
+
+**Binary success** — the reported outcome, unclipped:
 
 ```
-u_g(x) = -tau_g * log sum_j exp(-m_j(x) / tau_g)
 success_g(x) = 1{ m_j(x) >= 0  for all j }
 ```
+
+**Dense ranking** — for guidance only, over *clipped* margins:
+
+```
+m~_j(x) = clip(m_j(x), -c, +c)
+u_g(x)  = -tau_g * log sum_j exp(-m~_j(x) / tau_g)
+```
+
+Clipping is what keeps the soft-min a conjunction rather than a proxy for its
+hardest term. Without it, a DRD2 margin sitting 2+ units below zero pins the
+soft minimum for the entire trajectory and every developability improvement is
+invisible to the controller. Clipping changes **no** success outcome — only
+whether the dense signal is usable. `c` is frozen on held-in data with the other
+parameters.
 
 **DRD2 is scored in log-odds, never in P(active).** The pool sits at median
 P(active) = 0.004, where probability is saturated and a probability delta
@@ -142,37 +187,60 @@ Therefore: **do not stake H2 (future-aware adaptation) on the potency term.**
 There is direct prior evidence it will not separate, and given the soft-min
 asymmetry above, a P∧D goal is mostly a potency goal.
 
-### Where lookahead should separate instead: the cLogP box
+### What this does and does not license
 
-A monotone threshold goal ("more potency is always better") gives greedy nothing
-to fall into — the immediate score and the eventual score point the same way,
-which is precisely why C0 found no signal. A **box** constraint does not:
+It licenses **separating the subclaims**: potency switches remain the natural
+setting for intervention responsiveness and prefix reuse (subclaims A and C),
+where greedy being decent is not a problem, and the bounded developability
+region is the setting where future-aware adaptation (subclaim B) is even
+testable.
 
-> cLogP ∈ [1, 4]. From below the box, every step that raises cLogP looks good to
-> greedy — and past 4.0 it becomes harmful. Overshoot is a real, structural
-> greedy trap that only remaining-budget reasoning avoids.
+It does **not** license "replace potency with cLogP because cLogP makes greedy
+fail." Two guards against that reading, both binding:
 
-The median reserve molecule sits at cLogP 3.40 with the box ceiling at 4.0 and a
-median favourable single edit of +0.43 — so a single greedy step overshoots from
-the median. This is the goal most likely to demonstrate the claim, and it is
-target-free with no privileged similarity heuristic.
+- Subclaim B is **gated on a measurement, not on an expectation.** The held-in
+  contrastive analysis decides it, and subclaim B is allowed to fail.
+- The interval is set **once** for feasible-region base rate, and is not
+  retuned if the contrastive measurement comes back empty.
 
-**Recommendation:** let developability carry H2, and let potency carry
-"hard, rare goal". Do not let the headline rest on a term C0 already probed and
-found flat.
+The structural argument for why a bounded region is the right setting stands on
+its own: the feasible set is bounded, so overshoot is possible and a locally
+attractive edit can consume the room needed to land inside later. For reference,
+the median reserve molecule sits at cLogP 3.40 against a candidate ceiling of
+4.0 with a median favourable single edit of +0.43 — the geometry that makes
+overshoot reachable is present. Whether the controller's actual decisions are
+future-sensitive is a separate, measured question.
 
-## What the held-in calibration must decide (step 3, not yet run)
+## What the held-in calibration must decide (step 3)
 
-Only these, and then freeze:
+Only these, and then freeze. Every one is chosen to **avoid floor/ceiling and
+goal domination — never to maximise COMPOSE's advantage.**
 
-1. Potency threshold `c_P` — the grid is 0.3 / 0.5 / 0.7; the census cannot pick
-   it because it does not measure reachability under the real fiber.
-2. QED threshold and the cLogP box.
-3. Horizon: `H = 8, tau = 4` versus `3 + 3`. Chosen to avoid floor and ceiling
-   effects — **not** to maximise COMPOSE's margin.
-4. Soft-min temperature `tau_g`.
+1. Potency threshold `c_P` from the grid 0.3 / 0.5 / 0.7. The census cannot pick
+   it: it measures the local landscape, not reachability under the real fiber.
+2. QED floor `q` and the cLogP interval `[L, U]`, chosen for a reasonable
+   feasible-region base rate.
+3. Horizon: `H = 8, tau = 4` versus `3 + 3` — enough post-switch room without
+   making the task trivial.
+4. Soft-min temperature `tau_g` and clip `c`.
+5. **The gate on subclaim B — the dynamic-retargeting analogue of C0.** On
+   held-in post-switch states under the bounded developability goal, measure:
 
-Calibrate on held-in sources only. Freeze before the held-out panel is touched.
+   > How often does greedy's best immediate action differ from the best
+   > remaining-budget action, and when it differs, how often does that
+   > difference actually pay off?
+
+   Reported as C0 reported it: top-1 disagreement, sacrifice-to-win rate against
+   a null of 0.5, and future regret of greedy. **This is the measurement that
+   decides whether subclaim B is in the paper.**
+
+   Unlike C0, the lookahead here is the **deterministic greedy continuation**
+   `V_G`, not a Monte Carlo estimate — it is what the sealed-67 controller
+   actually commits, it carries the policy-improvement guarantee, and it removes
+   the MC noise that forced C0's independent selection/evaluation samples.
+
+Calibrate on held-in sources only. Freeze the goal language **and** the switch
+templates before any held-out panel is touched.
 
 ## Protocol (unchanged from the agreed design; recorded so it can be preregistered)
 
@@ -192,6 +260,12 @@ future goal.
 retargeting · restart from `x_0` under B with the same post-switch budget ·
 static compromise `u_A + u_B` from step zero · clairvoyant schedule (upper
 reference; the gap to it is the **price of surprise**).
+
+**No external baseline is qualified yet.** MARS-switch, GraphXForm-restart and
+preference-conditioned generators wait until the internal causal table shows
+intervention responsiveness, future-aware advantage where expected, prefix reuse
+and a bounded price of surprise. Building adapters before the internal effect is
+real spends the budget on plumbing for an effect that may not exist.
 
 **Hypotheses.** H1 intervention responsiveness (retarget > continue-A) · H2
 future-aware adaptation (verified > greedy) · H3 stateful prefix reuse

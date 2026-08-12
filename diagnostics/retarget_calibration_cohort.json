@@ -1,0 +1,107 @@
+{
+  "schema": "compose.retarget.calibration_cohort",
+  "status": "FROZEN_BEFORE_CALIBRATION_OUTCOME_INDEPENDENT",
+  "pool": "held-in training sources only",
+  "criteria": {
+    "heavy_atoms": [
+      18,
+      38
+    ],
+    "qed_floor": 0.6,
+    "logp_box": [
+      1.0,
+      4.0
+    ],
+    "rule": "exclude sources already inside the developability region"
+  },
+  "seed": 20260812,
+  "scanned": 16,
+  "rejected": {
+    "unparseable": 0,
+    "size_band": 1,
+    "already_developable": 5
+  },
+  "cohort_sha256": "bd851841a61e28a781e039fada6a180286a29f85f78fa311ef1ca0e1e8a0edfd",
+  "sources": [
+    {
+      "index": 0,
+      "source": "Cc1ccccc1-c1noc(-c2cc3ccccc3oc2=O)n1",
+      "slots": 48,
+      "heavy_atoms": 23,
+      "qed": 0.5265,
+      "clogp": 3.8184
+    },
+    {
+      "index": 1,
+      "source": "COc1ccc(-c2nc(CS(=O)(=O)CC(=O)NCc3ccccc3Br)c(C)o2)cc1",
+      "slots": 48,
+      "heavy_atoms": 30,
+      "qed": 0.5146,
+      "clogp": 3.6523
+    },
+    {
+      "index": 2,
+      "source": "CC(=O)CCC(C)C1CCC2C3=C(CCC21C)C1(C)CCC(=O)C(C)C1CC3=O",
+      "slots": 48,
+      "heavy_atoms": 29,
+      "qed": 0.6094,
+      "clogp": 5.7089
+    },
+    {
+      "index": 3,
+      "source": "C=CC=C(C=C)CCC(=O)N1C(=O)C(C(C)O)C1OC(C)=O",
+      "slots": 48,
+      "heavy_atoms": 22,
+      "qed": 0.4355,
+      "clogp": 1.32
+    },
+    {
+      "index": 4,
+      "source": "CCCc1c(C(=O)OCC)c(C(=O)OCC)c2c(-c3ccccc3)cc(N3CCOCC3)nn12",
+      "slots": 48,
+      "heavy_atoms": 34,
+      "qed": 0.4625,
+      "clogp": 4.1438
+    },
+    {
+      "index": 5,
+      "source": "Cn1c(-c2ccc(F)cc2)[n+](C)c2ccccc21",
+      "slots": 48,
+      "heavy_atoms": 18,
+      "qed": 0.5792,
+      "clogp": 2.8089
+    },
+    {
+      "index": 6,
+      "source": "CC(C)C#CC(c1ccc(Cl)cc1)N1CCC(CC(=O)O)CC1c1ccc(C(F)(F)F)cc1",
+      "slots": 48,
+      "heavy_atoms": 33,
+      "qed": 0.4717,
+      "clogp": 6.9873
+    },
+    {
+      "index": 7,
+      "source": "O=C1c2cc(O)c(O)c(O)c2C(=O)c2cccc(O)c21",
+      "slots": 48,
+      "heavy_atoms": 20,
+      "qed": 0.4582,
+      "clogp": 1.2844
+    },
+    {
+      "index": 8,
+      "source": "COc1ccc2nc(-c3cccc(F)c3)sc2c1",
+      "slots": 48,
+      "heavy_atoms": 18,
+      "qed": 0.6906,
+      "clogp": 4.111
+    },
+    {
+      "index": 9,
+      "source": "C=C1CCCC2C1(C)CCP(C)C2(C)CC1=C2OC(C)(C)N=C2C=C(OC)C1O",
+      "slots": 48,
+      "heavy_atoms": 29,
+      "qed": 0.4955,
+      "clogp": 5.3794
+    }
+  ]
+}
