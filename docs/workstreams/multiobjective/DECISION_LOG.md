@@ -255,6 +255,49 @@ rejected, and whether it changes a frozen object.
   GSK3β/JNK3.
 - **Changes a frozen object.** No. It declines to create one.
 
+## 2026-08-13 — All six dimensions fail; the pre-committed repair route closes
+
+- **Decision.** Dimensions 3, 4 and 6 resolve to **FAIL**, joining 1, 2 and 5.
+  The verdict is unchanged but its basis is now complete rather than partial.
+- **Dimension 3, HV reference point.** HN-GFN uses `ref_point=torch.zeros(...)`
+  at `dataset.py:37`, `main_mobo.py:397`, `utils/metrics.py:87`, computed over
+  the **entire accumulated oracle-scored dataset** (`dataset.py:131-135`).
+  InversionGNN states **no molecular reference point**: the paper's only
+  occurrence of "reference point" is `(1,1)` at `inv.txt:208`, in the
+  **synthetic minimization** task, and there is no HV code in its `molecular/`
+  directory. COMPOSE uses a frozen held-in p5 nadir with a p99 normalizer.
+- **Dimension 4, weights and top-K.** HN-GFN's MOBO weights are 5 i.i.d.
+  Dirichlet draws **resampled every outer round** (`main_mobo.py:483`); its
+  synthetic experiment uses 5 evenly spaced (`main.py:493`); InversionGNN uses 5
+  uniformly random angles (Algorithm 3, `inv.txt:430`); COMPOSE uses 5 frozen.
+  HN-GFN does not agree with itself between its own two experiments, and the
+  GSK3β/JNK3 MOBO numbers are the **random-weight** ones.
+- **Dimension 6, `±` semantics.** HN-GFN's `±` is over **3 random seeds**
+  (`hngfn.txt:491`); InversionGNN's is over **5 weight vectors**
+  (`inv.txt:430,433`) and the word "seed" never appears in that paper. These are
+  different statistics — one is run-to-run noise, the other is spread across the
+  front, which for a preference-conditioned method is signal. Neither paper
+  defines `±` as std or CI; that stays `UNVERIFIED` for both.
+- **The pre-committed question, now answered.** This log recorded, *before* the
+  extraction arrived, that if InversionGNN had rerun HN-GFN under TDC oracles
+  then its single table would be a legitimate citation source. **It did rerun
+  HN-GFN — at 50K+20K = 70,000 oracle calls** (`inv.txt:395-399`), against the
+  **1,000** HN-GFN publishes for itself (`hngfn.txt:489-491`,
+  `main_mobo.py:50-52`). A **70×** disagreement. The two reported hypervolumes
+  differ accordingly: 0.669 ± 0.061 (HN-GFN's own, Table 5) versus 0.592 ± 0.042
+  (InversionGNN's Table 4 attribution).
+- **Consequence.** Both routes to a head-to-head table are now closed. Citing
+  each paper separately fails dimension 1; citing InversionGNN's internally
+  consistent table would misrepresent HN-GFN by 70× in budget. The gap is
+  recorded as a **protocol mismatch, not a reproduction failure** — a distinction
+  that protects both papers and that we are only entitled to draw because the
+  budgets were read from primary sources rather than assumed.
+- **Binding citation rule.** Cite each paper's own number **for its own method
+  only**, each carrying its own oracle, budget, reference point and `±`
+  semantics. Never quote 0.592 as "HN-GFN's hypervolume"; never place 0.669 and
+  0.763 side by side as a comparison.
+- **Changes a frozen object.** No.
+
 ## 2026-08-13 — The budget finding generalizes, and names an existing queued item
 
 - **Observation.** Standard molecular-optimization benchmarks budget oracle calls

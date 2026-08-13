@@ -160,6 +160,7 @@
   ],
   "unresolved_fairness_risks": [
     "HN-GFN and InversionGNN do not share a GSK3b/JNK3 oracle; their published numbers are not head-to-head with each other",
+    "the two papers disagree by 70x on HN-GFN's oracle budget (1,000 published by HN-GFN vs 50K+20K attributed by InversionGNN), and their HV values for HN-GFN differ accordingly (0.669 vs 0.592)",
     "TDC's GSK3b/JNK3 oracle is sklearn-version-dependent and neither paper states which pickle it used",
     "COMPOSE's per-trajectory oracle demand exceeds standard benchmark budgets by 1-2 orders of magnitude; this is a property of exhaustive-fiber control, not a defect, but it forecloses head-to-head oracle-budget comparison",
     "surrogate-versus-direct oracle asymmetry; mitigated by an axis and a refusal, not eliminated",
@@ -174,13 +175,13 @@
     "command": "python3 -m pytest tests/test_multiobjective_qualification.py -q"
   },
   "durable_artifacts": {
-    "docs/workstreams/multiobjective/STATUS.md": "d7ad8ccc8faf7468ee90767b8fde0432754b7dac5e23cd2bcfee9729b708e037",
+    "docs/workstreams/multiobjective/STATUS.md": "30124b2374491cf1ef699cd1c199cf73620219f3f47b1e367a3ab924e48a9b6f",
     "docs/workstreams/multiobjective/PROTOCOL.md": "407821e08ba52121d3bca286a63f0cb1b4f6b78268c373cbc8889d6379eee705",
     "docs/workstreams/multiobjective/BASELINE_TASK_MATRIX.md": "334614114cbd12313b27fc5462c4f9da987e7f3a2c572f58b1e936b694eed838",
     "docs/workstreams/multiobjective/SOURCE_CONDITIONING_AUDIT.md": "c81a9a22afbfec223b8577bab46106f1b1fb724747212652359b609038cebbc6",
-    "docs/workstreams/multiobjective/BENCHMARK_ALIGNMENT_AUDIT.md": "4330637c1e3ff3e3a4ecb645af41edf44536d9ade5fffbd69da3d64fbcf8cbec",
+    "docs/workstreams/multiobjective/BENCHMARK_ALIGNMENT_AUDIT.md": "6b04aa4165c0b732f5432ff742aa6b09a3860c200990596b9eec76cac7e2dab1",
     "docs/workstreams/multiobjective/SAME_LAB_LINEAGE.md": "7c9c496b742c985073ab127e1a2c101e3fb96f14b218a212cb1f5ec999493b10",
-    "docs/workstreams/multiobjective/DECISION_LOG.md": "5e78c78c40709944a0e7eb25a3e27ff527d92fdac2c3a71007cc0b9415aba21d",
+    "docs/workstreams/multiobjective/DECISION_LOG.md": "50d42815f6ecd3132e8003e8a73982a35480f917c65a67b2f2432f69879d93bf",
     "docs/workstreams/multiobjective/HANDOFF.md": "1396b2f568ecdc083adeaaa0107c5f09abfbcbc6b2eaca4304d6ef1e6a6b463c",
     "src/compose_v4/experiments/multiobjective_qualification.py": "243511659c504e34a11e6009e2a19bed9e922f0f088e52daa4bf513cd35359ae",
     "tests/test_multiobjective_qualification.py": "c22804b1c3e4c1c6a5644da1fc845ee09fcd19a6bf61d8e61695f3bc7432ee35"
@@ -203,7 +204,7 @@
   },
   "benchmark_alignment_audit": {
     "candidate": "GSK3b + JNK3",
-    "verdict": "FREEZE_DECLINED",
+    "verdict": "FREEZE_DECLINED_ALL_SIX_DIMENSIONS_FAIL",
     "published_values_label": "CONTEXTUAL_NON_HEAD_TO_HEAD",
     "criterion_applied": "external protocol overlap alone; no COMPOSE outcome entered the decision; the in-flight P3/P4 repair was neither consulted nor waited for",
     "dimensions": {
@@ -239,17 +240,35 @@
         "blocking_dependency_named_not_designed": "reference-prioritized shortlisting, docs/QUEUED_EXPERIMENTS.md, QUEUED_CONDITIONAL -- NO DESIGN / NO RUN"
       },
       "3_hypervolume_reference_point": {
-        "verdict": "PENDING"
+        "verdict": "FAIL",
+        "hn_gfn": "ref_point=torch.zeros(len(objectives)) at dataset.py:37, main_mobo.py:397, utils/metrics.py:87; HV computed over the ENTIRE accumulated oracle-scored dataset (dataset.py:131-135), not a fixed-size front; paper hngfn.txt:436-438 agrees, '(0, 0)'",
+        "inversiongnn": "NO molecular reference point stated. The only 'reference point' in the paper is (1,1) at inv.txt:208, belonging to the SYNTHETIC MINIMIZATION task. No hypervolume code anywhere in the repo's molecular/ directory.",
+        "compose": "frozen held-in p5 nadir with p99 normalizer, diagnostics/pareto_tradeoff_census.json :: frozen_scales; deliberately not bounded by 1"
       },
       "4_top_k_and_preference_weighting": {
-        "verdict": "PENDING"
+        "verdict": "FAIL",
+        "hn_gfn_mobo": "np.random.dirichlet(alpha_vector, 5*(2**(n_obj-2))) at main_mobo.py:483 -> 5 i.i.d. random draws RESAMPLED EVERY OUTER ROUND; this is the config behind the GSK3b/JNK3 MOBO numbers",
+        "hn_gfn_synthetic": "circle_points(K=5, min_angle=0.1, max_angle=pi/2-0.1) at main.py:493 -> evenly spaced in angle; a DIFFERENT experiment from the MOBO one",
+        "inversiongnn": "5 weight vectors, Algorithm 3: uniformly distributed u in [0,1], theta = (pi/2)u -> uniformly random angle (inv.txt:430)",
+        "compose": "(0.1, 0.3, 0.5, 0.7, 0.9) fixed and frozen, pareto_control_app.py:103",
+        "top_k": "HN-GFN keeps top-20 by SCALARIZED UCB ACQUISITION VALUE per weight, 5x20=100 (main_mobo.py:382,390) -- not by oracle score. InversionGNN uses top-100 for APS, top-20 for Non-Uniformity (inv.txt:433), and 'all the solutions of all weights' for Table 3 (inv.txt:453) -- three conventions inside one paper."
       },
       "5_validity_and_canonicalization": {
-        "verdict": "FAIL_CONTRIBUTORY",
-        "evidence": "HN-GFN canonicalizes by SMILES round-trip (utils/chem.py:37-43) applied at oracle/scorer/scorer.py:23, then scorer.py:35 scores unparseable molecules as 0. and keeps them in the batch; COMPOSE's support is legal by construction, so the top-K sets are drawn from populations with different validity semantics"
+        "verdict": "FAIL",
+        "evidence": "HN-GFN canonicalizes by SMILES round-trip (utils/chem.py:37-43) applied at oracle/scorer/scorer.py:23, then scorer.py:35 scores unparseable molecules as 0. and keeps them in the batch; COMPOSE's support is legal by construction, so the top-K sets are drawn from populations with different validity semantics",
+        "three_treatments": {
+          "hn_gfn": "RDKit round-trip (utils/chem.py:37-43) at scorer.py:23; invalid -> score 0. and RETAINED in the batch (scorer.py:35)",
+          "inversiongnn": "vocabulary-subset test, NOT RDKit sanitization (chemutils.py:177-180); invalid -> DROPPED entirely (inference_utils.py:98-99,111-112,133-134,154-155 return set())",
+          "compose": "cannot occur; support is legal by construction",
+          "mitigating_note": "because HN-GFN's HV ref point is (0,0), a zero-scored invalid molecule contributes nothing to its HV; the distortion falls on diversity, top-K and the budget denominator rather than on HV"
+        }
       },
       "6_seeds_and_reporting_convention": {
-        "verdict": "PENDING"
+        "verdict": "FAIL",
+        "hn_gfn": "'Each experiment is repeated with 3 random seeds' (hngfn.txt:491); +/- is dispersion OVER SEEDS",
+        "inversiongnn": "'the 5 different weight vectors to serve as independent trials' (inv.txt:430); 'For each weight, we compute the results separately and report the average results across all 5 trials' (inv.txt:433); the word 'seed' never appears in the paper; +/- is dispersion OVER PREFERENCE WEIGHTS",
+        "why_fatal": "different statistics -- one is run-to-run noise at fixed preference, the other is spread across the front, which for a preference-conditioned method is signal not noise",
+        "std_or_ci": "UNVERIFIED for both papers; neither defines it"
       }
     },
     "fallback_in_preference_order": [
@@ -261,7 +280,21 @@
       "compute": "~58 min per source on 8 CPUs for all five arms; ~12 core-hours for a 12-source panel; CPU-only; compute is NOT the obstacle",
       "oracle_work": "~270,000 unique evaluations per source on the primary arm; ~3.2M across 12 sources",
       "actual_blocker": "COMPOSE cannot call tdc.Oracle. Installing PyTDC is barred and TDC's sklearn-dependent model selection is the exact drift artifacts/oracles/drd2_svm_v1 exists to prevent. Needs a version-independent extraction of two RandomForests (97MB, 38MB), hash-bound with a parity panel: 1-2 days engineering, zero GPU. NOT AUTHORIZED, NOT STARTED, and should not be built to serve this comparison since dimensions 1 and 2 fail regardless."
-    }
+    },
+    "decisive_finding_budget_disagreement_between_papers": {
+      "claim": "The two published papers disagree by 70x about how many oracle calls HN-GFN spends",
+      "hn_gfn_own_statement": "1,000 = 200 initial + 8 rounds x 100 (hngfn.txt:489-491; main_mobo.py:50-52)",
+      "inversiongnn_attribution_to_hn_gfn": "50K+20K = 70,000 (inv.txt:395-399, Table 3 Oracle Calls column; notation defined at inv.txt:428)",
+      "resulting_hv_disagreement": {
+        "hn_gfn_reports_its_own": "0.669 +/- 0.061 (HN-GFN Table 5, Evidential = the default hindsight config)",
+        "inversiongnn_reports_hn_gfn_as": "0.592 +/- 0.042 (InversionGNN Table 4)",
+        "inversiongnn_reports_itself_as": "0.763 +/- 0.031 (InversionGNN Table 4)"
+      },
+      "consequence": "BOTH routes to a head-to-head table are closed. Citing each paper separately fails dimension 1 (different oracles). Citing InversionGNN's internally consistent single table would misrepresent HN-GFN by 70x in budget.",
+      "classification": "PROTOCOL MISMATCH, NOT A REPRODUCTION FAILURE -- a distinction we are only entitled to draw because both budgets were read from primary sources",
+      "pre_committed": "this audit recorded the if-then citation rule BEFORE the extraction arrived, so the citation target was not chosen after the fact"
+    },
+    "binding_citation_rule": "Cite each paper's own number FOR ITS OWN METHOD ONLY, each carrying its own oracle, budget, reference point and +/- semantics. Never quote InversionGNN's 0.592 as 'HN-GFN's hypervolume'. Never place HN-GFN's 0.669 beside InversionGNN's 0.763 as a comparison."
   },
   "rings": {
     "ring_1_same_methodological_realm": {

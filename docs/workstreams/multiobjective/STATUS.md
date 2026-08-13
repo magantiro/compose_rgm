@@ -28,10 +28,23 @@ extraction that does not exist).
 |---|---|---|
 | 1 | oracle files / score definitions | **FAIL** |
 | 2 | allowed query / oracle budget | **FAIL** |
-| 3 | hypervolume reference point | `PENDING` |
-| 4 | top-K and preference weighting | `PENDING` |
-| 5 | validity and canonicalization | **FAIL (contributory)** |
-| 6 | seeds and reporting convention | `PENDING` |
+| 3 | hypervolume reference point | **FAIL** |
+| 4 | top-K and preference weighting | **FAIL** |
+| 5 | validity and canonicalization | **FAIL** |
+| 6 | seeds and reporting convention | **FAIL** |
+
+**All six fail.** The audit expected one or two to fail and the rest to pass.
+
+**The single most damaging fact.** InversionGNN's Table 3 attributes
+**50K+20K = 70,000** oracle calls to HN-GFN (`inv.txt:395-399`), while HN-GFN's
+own paper states **1,000** (`hngfn.txt:489-491`, matching `main_mobo.py:50-52`).
+A **70× disagreement between two published papers about the same method**. Their
+hypervolumes disagree accordingly — HN-GFN reports its own as 0.669 ± 0.061,
+InversionGNN reports HN-GFN's as 0.592 ± 0.042. That is a **protocol mismatch,
+not a reproduction failure**, and it closes the last route to a valid
+head-to-head table: citing each paper is blocked by dimension 1, and citing
+InversionGNN's single self-consistent table would misrepresent HN-GFN by 70× in
+budget.
 
 **Dimension 1.** HN-GFN scores GSK3β/JNK3 with a **1024-bit** ECFP4 against its
 own RandomForest pickles (`utils/chem.py:63`, `kinase_scorer.py:18`). TDC — which
