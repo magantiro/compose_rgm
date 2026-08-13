@@ -1,0 +1,187 @@
+{
+  "KNOWN_ADAPTER_DEFECT": "VERDICT IS FAIL, and the defect is in OUR ADAPTER, not in GraphXForm. On 1 of 3 sources the run raised 'AssertionError: Trying to take action 1 on level 1, but it is set to infeasible'. Cause: _greedy_action in graphxform_adapter.py takes an argmax over raw logits with an ad-hoc mask lookup that does not exist on MoleculeDesign, so upstream's OWN masking is bypassed and an infeasible action can be selected at action level 1. The fix is to route the decision through upstream's masked_log_probs_for_current_action_level rather than a hand-rolled argmax -- i.e. to use the method's own machinery, which is what the adapter rule requires anyway. Recorded rather than worked around; the smoke does not pass until it is fixed.",
+  "applicability": {
+    "domain": {
+      "allowed_atomic_numbers": [
+        6,
+        7,
+        8,
+        9,
+        15,
+        16,
+        17,
+        35,
+        53
+      ],
+      "heavy_atom_ceiling": 42,
+      "max_num_atoms": 50,
+      "required_headroom": 8,
+      "strip_to_largest_fragment": true
+    },
+    "frozen": "2026-08-13, before any COMPOSE-versus-GraphXForm number existed",
+    "inapplicable": [],
+    "inapplicable_reasons": {},
+    "n_applicable": 30,
+    "n_inapplicable": 0,
+    "n_total": 30,
+    "upstream_evidence": {
+      "atom_ceiling": "config.py:18 `self.max_num_atoms = 50` -> upper_limit_atoms",
+      "atom_ceiling_failure": "AssertionError: Trying to take action 1 on level 0, but it is set to infeasible",
+      "commit": "867bdcf9d9a8d4a6bfe29a93106b62b383b1a232",
+      "constructive_only": "action space is AddAtom / AddBond / DontChange; arXiv:2411.01667 section 3.3.3 defers removal to future work",
+      "element_set": "config.py:20-49 (atom_vocabulary, 23 entries)",
+      "repository": "https://github.com/grimmlab/graphxform",
+      "unsupported_element_failure": "molecule_design.py:649 `atom_idx = atomic_num_to_atom_idx[k]` -- uncaught KeyError"
+    }
+  },
+  "artifact_status": "SMOKE_HELD_IN",
+  "checks": {
+    "all_three_counters_wired": true,
+    "applicability_domain_applied_and_reported": true,
+    "counter_identity_holds": true,
+    "model_ran_and_decided_for_every_source": false,
+    "scored_through_the_pinned_evaluator": true,
+    "upstream_checkout_is_unmodified": true
+  },
+  "cohort_sha256": "e402e318fd9540fb51fc93c7481094beec4c5f968a582f7349d6359f24e19a5f",
+  "environment": {
+    "note": "GraphXForm py3.11 venv; objective scored under pinned rdkit 2024.3.5",
+    "python": "3.11.13"
+  },
+  "held_out_data_opened": false,
+  "pretrained_model_terminates_immediately": "MEASURED, and it is CORRECT BEHAVIOUR rather than a defect. Greedy argmax from the un-fine-tuned pretrained checkpoint selects TERMINATE on the first decision for every held-in source, because the model is looking at an already-valid drug-like molecule (P(terminate) ~ 0.99 in an independent probe). GraphXForm's published protocol reaches extensions through per-objective SELF-IMPROVEMENT FINE-TUNING plus beam search, not greedy argmax on the pretrained weights. Masking the terminate action to force extension would ALTER THE PROPOSAL DISTRIBUTION, which the adapter rule bars, so it was not done. The consequence is that a meaningful GraphXForm comparison must include its fine-tuning loop, and the oracle calls that loop consumes must be counted -- which the fairness contract already requires.",
+  "runs": [
+    {
+      "best_score": -0.12819196138548436,
+      "best_smiles": "CC1=CC=CC=C1C1=NOC(C2=CC3=CC=CC=C3OC2=O)=N1",
+      "counters": {
+        "cache_hits": 0,
+        "duplicate_requests": 0,
+        "evaluator_calls": 1,
+        "failed_proposals": 0,
+        "oracle_requests": 1,
+        "unique_valid_canonical_evaluations": 1
+      },
+      "demand_ratio_requests_over_unique": 1.0,
+      "errors": [],
+      "invariants": {
+        "caching cannot erase a wasteful request": true,
+        "evaluator_calls matches the cache setting": true,
+        "oracle_requests == unique + duplicate_requests + failed_proposals": true,
+        "oracle_requests >= unique_valid_canonical_evaluations": true
+      },
+      "n_states": 1,
+      "settings": {
+        "beam_width": 6,
+        "checkpoint": "/tmp/baseline_envs/graphxform-ckpt/weights.pt",
+        "device": "cpu",
+        "max_atoms": 50,
+        "note": "greedy extension from the supplied molecule; states are recorded at action-level-0 boundaries, the only points where a complete connected molecule exists",
+        "upstream_commit": "867bdcf9d9a8d4a6bfe29a93106b62b383b1a232"
+      },
+      "source": "Cc1ccccc1-c1noc(-c2cc3ccccc3oc2=O)n1",
+      "trajectory_states": [
+        "CC1=CC=CC=C1C1=NOC(C2=CC3=CC=CC=C3OC2=O)=N1"
+      ],
+      "wall_seconds": 0.019
+    },
+    {
+      "best_score": -0.16606310818729517,
+      "best_smiles": "COC1=CC=C(C2=NC(CS(=O)(=O)CC(=O)NCC3=CC=CC=C3Br)=C(C)O2)C=C1",
+      "counters": {
+        "cache_hits": 0,
+        "duplicate_requests": 0,
+        "evaluator_calls": 1,
+        "failed_proposals": 0,
+        "oracle_requests": 1,
+        "unique_valid_canonical_evaluations": 1
+      },
+      "demand_ratio_requests_over_unique": 1.0,
+      "errors": [],
+      "invariants": {
+        "caching cannot erase a wasteful request": true,
+        "evaluator_calls matches the cache setting": true,
+        "oracle_requests == unique + duplicate_requests + failed_proposals": true,
+        "oracle_requests >= unique_valid_canonical_evaluations": true
+      },
+      "n_states": 1,
+      "settings": {
+        "beam_width": 6,
+        "checkpoint": "/tmp/baseline_envs/graphxform-ckpt/weights.pt",
+        "device": "cpu",
+        "max_atoms": 50,
+        "note": "greedy extension from the supplied molecule; states are recorded at action-level-0 boundaries, the only points where a complete connected molecule exists",
+        "upstream_commit": "867bdcf9d9a8d4a6bfe29a93106b62b383b1a232"
+      },
+      "source": "COc1ccc(-c2nc(CS(=O)(=O)CC(=O)NCc3ccccc3Br)c(C)o2)cc1",
+      "trajectory_states": [
+        "COC1=CC=C(C2=NC(CS(=O)(=O)CC(=O)NCC3=CC=CC=C3Br)=C(C)O2)C=C1"
+      ],
+      "wall_seconds": 0.019
+    },
+    {
+      "best_score": -0.6031982029008477,
+      "best_smiles": "CC(=O)CCC(C)C1CCC2C3=C(CCC21C)C1(C)CCC(=O)C(C)C1CC3=O",
+      "counters": {
+        "cache_hits": 0,
+        "duplicate_requests": 0,
+        "evaluator_calls": 1,
+        "failed_proposals": 0,
+        "oracle_requests": 1,
+        "unique_valid_canonical_evaluations": 1
+      },
+      "demand_ratio_requests_over_unique": 1.0,
+      "errors": [
+        {
+          "error": "AssertionError: Trying to take action 1 on level 1, but it is set to infeasible"
+        }
+      ],
+      "invariants": {
+        "caching cannot erase a wasteful request": true,
+        "evaluator_calls matches the cache setting": true,
+        "oracle_requests == unique + duplicate_requests + failed_proposals": true,
+        "oracle_requests >= unique_valid_canonical_evaluations": true
+      },
+      "n_states": 1,
+      "settings": {
+        "beam_width": 6,
+        "checkpoint": "/tmp/baseline_envs/graphxform-ckpt/weights.pt",
+        "device": "cpu",
+        "max_atoms": 50,
+        "note": "greedy extension from the supplied molecule; states are recorded at action-level-0 boundaries, the only points where a complete connected molecule exists",
+        "upstream_commit": "867bdcf9d9a8d4a6bfe29a93106b62b383b1a232"
+      },
+      "source": "CC(=O)CCC(C)C1CCC2C3=C(CCC21C)C1(C)CCC(=O)C(C)C1CC3=O",
+      "trajectory_states": [
+        "CC(=O)CCC(C)C1CCC2C3=C(CCC21C)C1(C)CCC(=O)C(C)C1CC3=O"
+      ],
+      "wall_seconds": 0.031
+    }
+  ],
+  "schema": "compose.baselines.graphxform_held_in_smoke",
+  "shared_evaluator": {
+    "objective": "developability",
+    "pinned": true,
+    "rdkit": "2024.03.5",
+    "ready": true,
+    "required_rdkit": "2024.03.5"
+  },
+  "sources_used": [
+    "Cc1ccccc1-c1noc(-c2cc3ccccc3oc2=O)n1",
+    "COc1ccc(-c2nc(CS(=O)(=O)CC(=O)NCc3ccccc3Br)c(C)o2)cc1",
+    "CC(=O)CCC(C)C1CCC2C3=C(CCC21C)C1(C)CCC(=O)C(C)C1CC3=O"
+  ],
+  "title": "GRAPHXFORM (real upstream) \u2014 HELD-IN ADAPTER SMOKE",
+  "total_wall_seconds": 1.56,
+  "upstream": {
+    "commit": "867bdcf9d9a8d4a6bfe29a93106b62b383b1a232",
+    "files_checked": 41,
+    "recorded_diffs": {
+      "main.py": "empty CUDA_VISIBLE_DEVICES yields [''] so ray tries to start a raylet with 1 GPU; and torch>=2.6 defaults weights_only=True, which breaks reload of checkpoints the run writes itself. The official weights.pt is unaffected.",
+      "pretrain.py": "same torch.load weights_only fix"
+    },
+    "unmodified": true
+  },
+  "verdict": "FAIL",
+  "what_this_is_not": "A measurement of GraphXForm's optimization quality, and not a COMPOSE-versus-GraphXForm comparison. One greedy extension pass at a smoke-sized budget; the paper's configuration is beam width 512 with per-objective fine-tuning."
+}
