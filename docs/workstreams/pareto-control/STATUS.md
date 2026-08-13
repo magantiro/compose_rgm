@@ -6,9 +6,22 @@
 **Status:** `DESIGN_ONLY` for the arms and the smoke plan; `SMOKE_HELD_IN` for
 the Stage 0 census.
 
-**Branch / commit:** `codex/compose-pareto-control` @ `5e74228` (base `a0e680d`).
+**Branch / commit:** `codex/compose-pareto-control` @ `69a96ff` (base `a0e680d`).
 
-**Running:** nothing. **No Modal run has been launched in this lane.**
+**Running:** the held-in smoke, **authorized by main** after the census passed.
+
+| | |
+|---|---|
+| app | `compose-v4-pareto-control` |
+| app id | `ap-YJkZtmnhwS8i7RTWNq0Br9` |
+| **state** | **`ephemeral (detached)`** — verified, not assumed |
+| tasks | 13 (12 run_source + 1 on-Modal drive) |
+| launched | 2026-08-13T02:20:53-04:00 |
+| sources | 12 held-in, cohort `adea8e5510852d69` |
+| shortlist | K = 8 (unchanged) |
+| client-side timeout wrapper | none, deliberately |
+
+Not in this run: h_phi, R_theta-vs-empirical-family ablation arms, held-out panel, development panel.
 
 **Held-out opened:** **NO.** `reserve_source_keys` was never read. Every
 measurement uses `training_source_keys`.
@@ -68,7 +81,7 @@ the census sources. Costed in `HANDOFF.md`: ~700 kernel calls per source,
 
 | file | status | sha256 |
 |---|---|---|
-| `docs/workstreams/pareto-control/PROTOCOL.md` | `DESIGN_ONLY` | `f7e9c7964095be70` |
+| `docs/workstreams/pareto-control/PROTOCOL.md` | `DESIGN_ONLY` | `07750b255cecb40e` |
 | `configs/pareto_control_protocol_v1.json` | `DESIGN_ONLY` | `91d8a466a54b1ca7` |
 | `src/compose_v4/experiments/pareto_control.py` | `DESIGN_ONLY` | `608a11f74ef22101` |
 | `modal_apps/pareto_control_app.py` | `DESIGN_ONLY (not launched)` | `87c77e1b8210d2b8` |

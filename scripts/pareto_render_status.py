@@ -30,7 +30,7 @@ the Stage 0 census.
 
 **Branch / commit:** `{branch}` @ `{commit}` (base `a0e680d`).
 
-**Running:** nothing. **No Modal run has been launched in this lane.**
+{running_block}
 
 **Held-out opened:** **NO.** `reserve_source_keys` was never read. Every
 measurement uses `training_source_keys`.
@@ -180,6 +180,26 @@ def main() -> int:
                   if target.exists() else "MISSING")
         artifact_rows.append(f"| `{path}` | `{status}` | `{digest}` |")
 
+    run_path = REPO / "diagnostics/pareto_control_run.json"
+    if run_path.exists():
+        r = json.loads(run_path.read_text())
+        running_block = (
+            f"**Running:** the held-in smoke, **authorized by main** after the "
+            f"census passed.\n\n"
+            f"| | |\n|---|---|\n"
+            f"| app | `{r['app']}` |\n| app id | `{r['app_id']}` |\n"
+            f"| **state** | **`{r['state_verified']}`** — verified, not assumed |\n"
+            f"| tasks | {r['tasks']} ({r['tasks_breakdown']}) |\n"
+            f"| launched | {r['launched_at']} |\n"
+            f"| sources | {r['n_sources']} held-in, cohort "
+            f"`{r['cohort_sha256_prefix']}` |\n"
+            f"| shortlist | K = {r['shortlist']['K']} (unchanged) |\n"
+            f"| client-side timeout wrapper | none, deliberately |\n\n"
+            f"Not in this run: {', '.join(r['not_in_this_run'])}.")
+    else:
+        running_block = ("**Running:** nothing. "
+                         "**No Modal run has been launched in this lane.**")
+
     branch = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=REPO,
                             capture_output=True, text=True).stdout.strip()
     commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=REPO,
@@ -194,7 +214,8 @@ def main() -> int:
         ib_states=census["instruments"]["I_B"]["n_states"],
         reach_n=reach["n_sources"], reach_rows="\n".join(reach_rows),
         gate_heading=gate_heading,
-        cohort_sha=cohort_sha, artifact_rows="\n".join(artifact_rows)))
+        cohort_sha=cohort_sha, artifact_rows="\n".join(artifact_rows),
+        running_block=running_block))
     print(f"wrote {args.out}  (adopted pair: {adopted})")
     return 0
 

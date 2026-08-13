@@ -1,0 +1,58 @@
+{
+  "schema": "compose.pareto.control_run_record",
+  "status": "SMOKE_HELD_IN",
+  "held_out_opened": false,
+  "authorized_by": "main lane, after the 60-source Stage 0 census passed",
+  "app": "compose-v4-pareto-control",
+  "app_id": "ap-YJkZtmnhwS8i7RTWNq0Br9",
+  "state_verified": "ephemeral (detached)",
+  "state_verification": "modal app list --json, checked after launch rather than assumed",
+  "tasks": 13,
+  "tasks_breakdown": "12 run_source + 1 on-Modal drive",
+  "launched_at": "2026-08-13T02:20:53-04:00",
+  "command": "modal run --detach modal_apps/pareto_control_app.py --sources 12",
+  "client_side_timeout_wrapper": false,
+  "why_no_wrapper": "--detach did not survive client-side DNS failures twice on this project; a client-side timeout would add a second way to lose the run. Durability is structural instead.",
+  "profile": "rahul-94866",
+  "hardware": "CPU only, cpu=8.0, OMP_NUM_THREADS=4, memory 16 GiB",
+  "max_containers": 12,
+
+  "cohort": "diagnostics/pareto_control_cohort.json",
+  "cohort_sha256_prefix": "adea8e5510852d69",
+  "n_sources": 12,
+  "pair": "potency_vs_developability",
+  "budget_edits": 6,
+  "preferences": [0.1, 0.3, 0.5, 0.7, 0.9],
+  "shortlist": {"top_immediate": 4, "top_reference": 2, "n_random": 2, "K": 8},
+  "shortlist_note": "K=8 unchanged. Main declined the shortlist-4 variant: the ~$9 saving is a cost consideration, not a scientific one, and narrowing the lookahead right after establishing the task has genuine geometry would undercut the reason the smoke exists.",
+
+  "arms": ["unguided", "greedy_pref", "gen_rank@greedy", "verified_pref",
+           "gen_rank@verified", "prefix_branching"],
+  "not_in_this_run": ["h_phi", "R_theta-vs-empirical-family ablation arms",
+                      "held-out panel", "development panel"],
+
+  "durability": {
+    "per_source_durable_shard": true,
+    "checkpoint_after_every_arm": true,
+    "resumable_driver_skips_existing_shards": true,
+    "fanout_runs_on_modal": true,
+    "shard_dir": "/artifacts/editing_v2/r_theta_run/pareto_control_smoke",
+    "contrast_with_census": "scripts/pareto_tradeoff_census.py held 75 minutes in memory and wrote once at the end; that pattern is deliberately not repeated here."
+  },
+
+  "questions_this_smoke_must_answer": [
+    "Do requested preferences yield distinct CLOSED-LOOP molecular outcomes, not merely distinct one-step choices?",
+    "Does greedy preference control beat unguided and generate-then-rank meaningfully?",
+    "Is there headroom for verified future-aware control over greedy?",
+    "Are hypervolume and coverage away from ceilings and floors?",
+    "Are oracle and kernel budgets reported honestly under all counters?",
+    "Does anything collapse from candidate-set size or computational mechanics?"
+  ],
+  "framing": "Instrument work, not a paper result.",
+
+  "reporting_rules": {
+    "no_arm_is_globally_budget_matched": "With a ~600-successor fiber there is no single notion of matched compute. Pareto quality is reported against BOTH unique valid oracle evaluations AND kernel/reference-process calls, with each arm's position on both stated.",
+    "gen_rank_is_one_sided": "Only the kernel-matched end of the P3/P4 bracket is affordable. A kernel-matched generate-then-rank may be vastly oracle-richer than the closed-loop arms; that makes it a strong baseline IN ONE RESOURCE DIMENSION and it must be described that way, never as globally budget matched.",
+    "no_pvalue_for_guaranteed_signs": "verified >= greedy follows from policy improvement; magnitude only."
+  }
+}
