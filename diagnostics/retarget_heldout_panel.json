@@ -1,0 +1,367 @@
+{
+  "schema": "compose.retarget.heldout_confirmation_panel",
+  "status": "SEALED_BEFORE_ANY_PREFIX_WAS_GENERATED",
+  "panel_size": 40,
+  "seed": 20260815,
+  "pool": "held-out matched validation reserve",
+  "selection_order": [
+    "registry exclusion",
+    "x_0 applicability",
+    "seeded shuffle"
+  ],
+  "eligibility": {
+    "heavy_atoms": [
+      18,
+      38
+    ],
+    "qed_floor": 0.6,
+    "logp_box": [
+      1.0,
+      4.0
+    ],
+    "rule": "exclude sources already inside the developability region",
+    "identical_to": "the development cohort's rule, reused verbatim"
+  },
+  "not_an_eligibility_criterion": "anything about prefix behaviour, including post-prefix headroom. Conditioning on that would guarantee the confirmation reproduces the development result by construction.",
+  "claim_bearing_registry": {
+    "exact_target_sealed": 120,
+    "exact_target_development": 48,
+    "retargeting_development": 30
+  },
+  "zero_overlap_verified": {
+    "training_universe": 0,
+    "retargeting_development": 0,
+    "exact_target_sealed": 0,
+    "exact_target_development": 0
+  },
+  "panel_sha256": "947e297a2b2c3b99a3a40cf2c7cb8784be141991d73d7fdb33d71ab305c3994a",
+  "scanned": 71,
+  "rejected": {
+    "unparseable": 0,
+    "size_band": 9,
+    "already_developable": 22
+  },
+  "no_replacement_rule": "No source may be replaced because its prefix behaves awkwardly or its outcome is inconvenient.",
+  "sources": [
+    {
+      "index": 0,
+      "source": "COC12C=CC3(CC1(C)C(O)c1ccc(C)cc1)C1Cc4ccc(O)c5c4C3(CCN1CC1CC1)C2O5",
+      "slots": 48,
+      "heavy_atoms": 37,
+      "qed": 0.5776,
+      "clogp": 4.8248
+    },
+    {
+      "index": 1,
+      "source": "CNCCCn1c2c(c3cc(OC)c(OC)cc3c1=O)C(=O)c1cc3c(cc1-2)OCO3",
+      "slots": 48,
+      "heavy_atoms": 31,
+      "qed": 0.478,
+      "clogp": 2.5683
+    },
+    {
+      "index": 2,
+      "source": "Nc1cccc(-c2cn3c(n2)sc2ccccc23)c1",
+      "slots": 48,
+      "heavy_atoms": 19,
+      "qed": 0.5319,
+      "clogp": 3.7982
+    },
+    {
+      "index": 3,
+      "source": "COc1ccc(-n2nc(C(=O)Nc3ccc(CO)cc3)nc2-c2cc(OC)c(OC)c(OC)c2)cc1",
+      "slots": 48,
+      "heavy_atoms": 36,
+      "qed": 0.3647,
+      "clogp": 3.7133
+    },
+    {
+      "index": 4,
+      "source": "CC(=O)NC(CCc1ccpc2ccccc12)c1ccccc1",
+      "slots": 48,
+      "heavy_atoms": 23,
+      "qed": 0.6847,
+      "clogp": 5.2299
+    },
+    {
+      "index": 5,
+      "source": "Cc1nn2c(COCc3cn(Cc4ccccc4F)nn3)c(-c3ccc(Cl)cc3)nc2s1",
+      "slots": 48,
+      "heavy_atoms": 32,
+      "qed": 0.339,
+      "clogp": 4.9153
+    },
+    {
+      "index": 6,
+      "source": "C#CCNCc1ccc(-c2cccc(C(N)=Nc3cccc(C)c3)c2)cc1",
+      "slots": 48,
+      "heavy_atoms": 27,
+      "qed": 0.2982,
+      "clogp": 4.4218
+    },
+    {
+      "index": 7,
+      "source": "CC12CCC3C(CCC4CC(=NOc5ccc([N+](=O)[O-])cc5)C(Cl)CC43C)C1CCC2O",
+      "slots": 48,
+      "heavy_atoms": 32,
+      "qed": 0.3428,
+      "clogp": 5.9505
+    },
+    {
+      "index": 8,
+      "source": "CCCCCN(C)C(=O)C(=O)c1c(-c2ccccc2)[nH]c2ccc(Cl)cc12",
+      "slots": 48,
+      "heavy_atoms": 27,
+      "qed": 0.3413,
+      "clogp": 5.3196
+    },
+    {
+      "index": 9,
+      "source": "CCON1C(=O)C2(CCCCC2)C(=O)C12C=CCCC2",
+      "slots": 48,
+      "heavy_atoms": 20,
+      "qed": 0.5757,
+      "clogp": 2.7786
+    },
+    {
+      "index": 10,
+      "source": "O=C(COC(=O)C=Cc1ccccc1)NC1CCS(=O)(=O)C1",
+      "slots": 48,
+      "heavy_atoms": 22,
+      "qed": 0.6311,
+      "clogp": 0.5463
+    },
+    {
+      "index": 11,
+      "source": "CCN(CCNCOC(C)C)Cc1cc(Nc2ccnc3cc(Cl)ccc23)ccc1O",
+      "slots": 48,
+      "heavy_atoms": 31,
+      "qed": 0.2171,
+      "clogp": 5.1314
+    },
+    {
+      "index": 12,
+      "source": "CC(=O)NC(Cc1c[nH]c2ccc(Br)cc12)[PH](=O)NC(Cc1ccccc1)C(=O)NCC(N)=O",
+      "slots": 48,
+      "heavy_atoms": 34,
+      "qed": 0.2334,
+      "clogp": 2.2122
+    },
+    {
+      "index": 13,
+      "source": "COc1ccccc1-n1c(SCC(N)=O)nnc1-c1ccc(S(=O)(=O)N2CCCCC2)cc1",
+      "slots": 48,
+      "heavy_atoms": 33,
+      "qed": 0.4851,
+      "clogp": 2.6949
+    },
+    {
+      "index": 14,
+      "source": "O=C(O)c1cccc(-c2ccc(C=C3SC(=Nc4ccc(Cl)cc4)N(c4ccccn4)C3=O)o2)c1",
+      "slots": 48,
+      "heavy_atoms": 35,
+      "qed": 0.3134,
+      "clogp": 6.5018
+    },
+    {
+      "index": 15,
+      "source": "C=CCN1C(=O)CC2(C1=O)C(=O)N(CCCC(O)=S)c1ccc(F)cc12",
+      "slots": 48,
+      "heavy_atoms": 26,
+      "qed": 0.3557,
+      "clogp": 2.0206
+    },
+    {
+      "index": 16,
+      "source": "CC=C(CCOc1cc(C(=O)NCC2CCN(c3ccncc3)CC2)cc(OC(C)=O)c1Br)C(Cl)=CCCl",
+      "slots": 48,
+      "heavy_atoms": 38,
+      "qed": 0.1332,
+      "clogp": 6.4925
+    },
+    {
+      "index": 17,
+      "source": "CC(=O)Nc1ncc(C(=O)Nc2ccc(-c3cccc(-c4nc5cc(F)ccc5[nH]4)c3)cc2)s1",
+      "slots": 48,
+      "heavy_atoms": 34,
+      "qed": 0.306,
+      "clogp": 5.7032
+    },
+    {
+      "index": 18,
+      "source": "CC(=O)Nc1cccc(C2CSC(N=C(N)N)N2)n1",
+      "slots": 48,
+      "heavy_atoms": 19,
+      "qed": 0.4561,
+      "clogp": -0.0255
+    },
+    {
+      "index": 19,
+      "source": "CCCCCCNc1ccc(C=Cc2ccnc3ccccc23)cc1",
+      "slots": 48,
+      "heavy_atoms": 25,
+      "qed": 0.4835,
+      "clogp": 6.3974
+    },
+    {
+      "index": 20,
+      "source": "CC(=O)OCCOC(C(COC(C)=O)OC(C)=O)N1c2ccccc2C2CCc3c([nH]c4ccccc34)C21",
+      "slots": 48,
+      "heavy_atoms": 38,
+      "qed": 0.2547,
+      "clogp": 4.1596
+    },
+    {
+      "index": 21,
+      "source": "COc1ccc2c(C(=O)c3ccc(OCCN4CCCCC4)cc3)c(-c3ccc(C)cc3)sc2c1",
+      "slots": 48,
+      "heavy_atoms": 35,
+      "qed": 0.2524,
+      "clogp": 6.981
+    },
+    {
+      "index": 22,
+      "source": "CC1=CC(O)C(C2=C(C=O)CC3C(C2)CC(O)C2C(C)(C)CCCC32C)CC1=O",
+      "slots": 48,
+      "heavy_atoms": 29,
+      "qed": 0.6872,
+      "clogp": 4.0015
+    },
+    {
+      "index": 23,
+      "source": "O=C(COc1ccc(C=NNS(=O)(=O)c2ccccc2)cc1)Nc1cccc(Cl)c1",
+      "slots": 48,
+      "heavy_atoms": 30,
+      "qed": 0.4097,
+      "clogp": 3.6699
+    },
+    {
+      "index": 24,
+      "source": "Cc1cc2ccccc2nc1-c1ccc(N(Cc2cccnc2)C(=O)c2ccc(O)cc2O)cc1",
+      "slots": 48,
+      "heavy_atoms": 35,
+      "qed": 0.3422,
+      "clogp": 5.8634
+    },
+    {
+      "index": 25,
+      "source": "C=CC(=[SH4])Nc1cccc(-c2cn3nc(-c4cccc(OC)c4)sc3n2)c1",
+      "slots": 48,
+      "heavy_atoms": 27,
+      "qed": 0.4094,
+      "clogp": 3.9879
+    },
+    {
+      "index": 26,
+      "source": "CC(=CC=CC(C)C(O)C(C)C(C)(O)C(C)C1OC2CCC(O2)C1C)C(N)=O",
+      "slots": 48,
+      "heavy_atoms": 28,
+      "qed": 0.4329,
+      "clogp": 2.5344
+    },
+    {
+      "index": 27,
+      "source": "CN(C)CCCOc1ccccc1CCc1ccc(Cl)cc1",
+      "slots": 48,
+      "heavy_atoms": 22,
+      "qed": 0.6667,
+      "clogp": 4.4557
+    },
+    {
+      "index": 28,
+      "source": "C=CC(Br)=CC=CNc1nc(N2CCOCC2)nc2c1ncn2Cc1ccccc1",
+      "slots": 48,
+      "heavy_atoms": 30,
+      "qed": 0.5282,
+      "clogp": 4.1016
+    },
+    {
+      "index": 29,
+      "source": "CC(=O)N1CSCC1C(=O)N1CCN(C2CCC(N3CCOCC3)NN2)CC1",
+      "slots": 48,
+      "heavy_atoms": 28,
+      "qed": 0.6064,
+      "clogp": -1.0756
+    },
+    {
+      "index": 30,
+      "source": "CCCn1c(-c2ccc(Cl)cc2Cl)nc2cc(C(=O)NN=Cc3ccc(Br)cc3)ccc21",
+      "slots": 48,
+      "heavy_atoms": 32,
+      "qed": 0.2169,
+      "clogp": 6.9465
+    },
+    {
+      "index": 31,
+      "source": "C#CCOc1ccc(CCNC(=O)C(NS(=O)(=O)N(C)C)c2ccc(C(C)C)cc2)cc1OC",
+      "slots": 48,
+      "heavy_atoms": 34,
+      "qed": 0.4489,
+      "clogp": 2.6266
+    },
+    {
+      "index": 32,
+      "source": "CC(O)NC1C(CO)OC(c2nc(C(N)=O)cs2)C1O",
+      "slots": 48,
+      "heavy_atoms": 20,
+      "qed": 0.41,
+      "clogp": -1.6684
+    },
+    {
+      "index": 33,
+      "source": "C=CC=C(C(=C)Br)c1nc(-c2ccccc2Br)ns1",
+      "slots": 48,
+      "heavy_atoms": 19,
+      "qed": 0.641,
+      "clogp": 5.4456
+    },
+    {
+      "index": 34,
+      "source": "CC(=NN1C(C)CCC[PH2]1C)c1ccc(Cl)c([N+](=O)[O-])c1",
+      "slots": 48,
+      "heavy_atoms": 21,
+      "qed": 0.365,
+      "clogp": 3.9478
+    },
+    {
+      "index": 35,
+      "source": "CC=C1C(=CCS(=O)(=O)NC(C)(C)CO)C(=NO)c2cc(S(=O)(=O)NC(C)(C)CO)ccc21",
+      "slots": 48,
+      "heavy_atoms": 33,
+      "qed": 0.2481,
+      "clogp": 0.9477
+    },
+    {
+      "index": 36,
+      "source": "CCc1nc(-c2ncn3c2CN=C(c2ccccc2)c2ccccc2-3)no1",
+      "slots": 48,
+      "heavy_atoms": 27,
+      "qed": 0.5599,
+      "clogp": 3.8357
+    },
+    {
+      "index": 37,
+      "source": "CC(=O)N(Cc1ccccc1)C1CCC(C(N)Cc2cc(F)ccc2F)CC1",
+      "slots": 48,
+      "heavy_atoms": 28,
+      "qed": 0.7977,
+      "clogp": 4.4421
+    },
+    {
+      "index": 38,
+      "source": "CCN1N=C(c2ccc3ccccc3c2)OC1(Br)C1CCCCC1",
+      "slots": 48,
+      "heavy_atoms": 24,
+      "qed": 0.5145,
+      "clogp": 5.4825
+    },
+    {
+      "index": 39,
+      "source": "C=CCC12C[IH]N(CC3CCC3)C(Cc3ccc(O)cc31)C2(C)O",
+      "slots": 48,
+      "heavy_atoms": 24,
+      "qed": 0.3249,
+      "clogp": 3.6155
+    }
+  ]
+}

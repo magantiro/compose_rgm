@@ -90,6 +90,10 @@ image = (
         ROOT / "diagnostics/retarget_calibration_cohort.json",
         str(REMOTE_ROOT / "diagnostics/retarget_calibration_cohort.json"),
         copy=True)
+    .add_local_file(
+        ROOT / "diagnostics/retarget_heldout_panel.json",
+        str(REMOTE_ROOT / "diagnostics/retarget_heldout_panel.json"),
+        copy=True)
     .add_local_dir(ROOT / "artifacts/oracles/drd2_svm_v1",
                    str(REMOTE_ROOT / "artifacts/oracles/drd2_svm_v1"), copy=True)
 )
@@ -130,8 +134,11 @@ CANDIDATES_TOP_REFERENCE = 2
 CANDIDATES_RANDOM = 2
 
 HISTORIES = ("P", "D")
+#: SIX arms for the held-out confirmation. greedy_restart is promoted from the
+#: separate development phase to a first-class arm so H2 carries its
+#: controller-matched sensitivity in the same run.
 ARMS = ("continue_A", "greedy_retarget", "verified_retarget",
-        "restart", "clairvoyant")
+        "greedy_restart", "restart", "clairvoyant")
 
 
 def _runtime():
@@ -280,7 +287,8 @@ def build_prefix(task: dict[str, Any]) -> dict[str, Any]:
                "a_mean_switch": utility(trajectory[-1], goal_a)[1],
                "kernel_calls": counter["calls"],
                "seconds": round(time.perf_counter() - started, 1)}
-    out = Path(RUN_ROOT) / "retarget_prefixes"
+    out = Path(RUN_ROOT) / ("retarget_heldout_prefixes"
+                            if task.get("heldout") else "retarget_prefixes")
     out.mkdir(parents=True, exist_ok=True)
     (out / f"{goal_a}_{task['index']:03d}.json").write_text(
         json.dumps(payload, indent=2) + "\n")
@@ -415,6 +423,13 @@ def run_arms(task: dict[str, Any]) -> dict[str, Any]:
         paths["greedy_retarget"] = greedy_path(switch, post, "B")
         checkpoint("greedy_retarget", paths["greedy_retarget"], None)
 
+    # greedy_restart: the controller-matched partner for greedy_retarget.
+    if "greedy_restart" in done_arms:
+        paths["greedy_restart"] = done_arms["greedy_restart"]["trajectory"]
+    else:
+        paths["greedy_restart"] = greedy_path(start, post, "B")
+        checkpoint("greedy_restart", paths["greedy_restart"], None)
+
     for name, start_state, budget in (
             ("verified_retarget", switch, post),
             # restart: discard the realised history, same remaining budget.
@@ -525,7 +540,8 @@ def drive(phase: str, tasks: list[dict[str, Any]]) -> int:
     artifact_volume.reload()
     remaining = []
     for task in tasks:
-        sub = {"prefix": "retarget_prefixes",
+        sub = {"prefix": ("retarget_heldout_prefixes" if task.get("heldout")
+                          else "retarget_prefixes"),
                "greedy_restart": "retarget_greedy_restart"}.get(
             phase, task.get("out_dir", "retarget_intervention"))
         shard = Path(RUN_ROOT) / sub / f"{task['history']}_{task['index']:03d}.json"
@@ -545,21 +561,28 @@ def drive(phase: str, tasks: list[dict[str, Any]]) -> int:
 
 
 @app.local_entrypoint()
-def main(phase: str = "prefix", sources: int = 30, smoke: bool = False) -> None:
-    cohort = json.loads(
-        (ROOT / "diagnostics/retarget_calibration_cohort.json").read_text())
+def main(phase: str = "prefix", sources: int = 30, smoke: bool = False,
+         heldout: bool = False) -> None:
+    panel_file = ("diagnostics/retarget_heldout_panel.json" if heldout
+                  else "diagnostics/retarget_calibration_cohort.json")
+    cohort = json.loads((ROOT / panel_file).read_text())
     rows = cohort["sources"][: 4 if smoke else sources]
+    if heldout:
+        print(f"HELD-OUT CONFIRMATION PANEL {cohort['panel_sha256'][:16]} "
+              f"({len(cohort['sources'])} sealed sources)")
 
     if phase == "prefix":
-        tasks = [{**r, "history": h} for h in HISTORIES for r in rows]
+        tasks = [{**r, "history": h, "heldout": heldout}
+                 for h in HISTORIES for r in rows]
         print(f"PHASE 1 -- {len(tasks)} prefixes ({len(rows)} sources x "
               f"{len(HISTORIES)} histories), {SWITCH_AT} edits under goal A.")
         print("Goal B is NOT constructed in this phase.")
         print(f"completed {drive.remote('prefix', tasks)}")
         return
 
-    prefixes = json.loads(
-        (ROOT / "diagnostics/retarget_prefixes_committed.json").read_text())
+    prefixes = json.loads((ROOT / ("diagnostics/retarget_heldout_prefixes_committed.json"
+                                   if heldout else
+                                   "diagnostics/retarget_prefixes_committed.json")).read_text())
     index = {(p["history"], p["index"]): p for p in prefixes["prefixes"]}
     tasks = []
     for h in HISTORIES:
@@ -570,6 +593,7 @@ def main(phase: str = "prefix", sources: int = 30, smoke: bool = False) -> None:
             tasks.append({**r, "history": h, "start_key": p["start_key"],
                           "switch_state": p["switch_state"],
                           "out_dir": ("retarget_intervention_smoke" if smoke
+                                      else "retarget_heldout" if heldout
                                       else "retarget_intervention")})
     if phase == "greedy_restart":
         print(f"PROTOCOL-COMPLETION ARM -- greedy restart from x_0, "
