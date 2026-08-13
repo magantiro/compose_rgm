@@ -786,3 +786,23 @@ could never report "neither axis dominates".
 So: every new analysis metric ships with a fixture in which its intended
 conclusion is **false**, and a test asserting the metric says so. This is the
 whole rule; do not build more process around it.
+
+---
+
+# Project-wide rule: no hyperparameter search for a favourable operating point
+
+**Do not sweep a knob and select the attractive value.** Where an efficiency or
+capacity parameter must be chosen, pre-register ONE operating point from a
+stated requirement — a target reduction in oracle demand, a fixed query budget,
+a structural argument — and report the outcome at that point.
+
+The prohibited pattern is running `K ∈ {4, 8, 16, 32, 64, 128}` and reporting
+whichever K looks best. That is choosing the result and then naming a
+configuration for it.
+
+Where a curve is genuinely the object of study, say so in advance and report the
+whole curve, not its maximum.
+
+The same applies to comparisons defined by a resource: report **fraction of
+quality retained against fraction of resource spent**, which is a curve with a
+meaning, rather than a single ratio at a chosen point.
