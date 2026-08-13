@@ -1,0 +1,38 @@
+{
+  "schema": "compose.workstreams.durability_manifest",
+  "status": "VERIFIED_BY_COMPARING_REFS_NOT_BY_PUSH_EXIT_CODE",
+  "note": "A push loop reporting success is not proof the remote holds the commit. Each entry below was verified by comparing `git rev-parse <branch>` against `git ls-remote --heads origin <branch>`.",
+  "lane_state": {
+    "codex/compose-claim2-trajectory": "RUNNING -- head is live and will move",
+    "codex/compose-pathwise-constraints": "DONE through protocol A2, DORMANT",
+    "codex/compose-baseline-qualification": "INFRASTRUCTURE QUALIFIED -- not an experimental result",
+    "codex/compose-pareto-control": "RUNNING -- head is live and will move"
+  },
+  "branches": {
+    "codex/compose-claim2-trajectory": {
+      "local_head": "a0a5afb9485fbd4d3ca3b1c04caad9de0147f80b",
+      "remote_head": "a0a5afb9485fbd4d3ca3b1c04caad9de0147f80b",
+      "verified_identical": true,
+      "tracking_ref": "refs/heads/codex/compose-claim2-trajectory"
+    },
+    "codex/compose-pathwise-constraints": {
+      "local_head": "39f0ef1cffc1407cd60b426cac6815d12a8f81c9",
+      "remote_head": "39f0ef1cffc1407cd60b426cac6815d12a8f81c9",
+      "verified_identical": true,
+      "tracking_ref": "refs/heads/codex/compose-pathwise-constraints"
+    },
+    "codex/compose-baseline-qualification": {
+      "local_head": "4247f2225751e77b3814bc4bd20edca5e4427d2c",
+      "remote_head": "4247f2225751e77b3814bc4bd20edca5e4427d2c",
+      "verified_identical": true,
+      "tracking_ref": "refs/heads/codex/compose-baseline-qualification"
+    },
+    "codex/compose-pareto-control": {
+      "local_head": "d206d557bedada27de8de00330fe2f5bcdb97c05",
+      "remote_head": "d206d557bedada27de8de00330fe2f5bcdb97c05",
+      "verified_identical": true,
+      "tracking_ref": "refs/heads/codex/compose-pareto-control"
+    }
+  },
+  "why_central": "Recorded here rather than in each lane's handoff.json because two lanes are still committing; editing a running agent's worktree invites a conflict. Each lane should also stamp its own pushed head when it next reports, at which point its head is stable."
+}
