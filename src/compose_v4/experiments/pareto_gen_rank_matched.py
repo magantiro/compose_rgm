@@ -60,19 +60,32 @@ instead of being hostage to whether the last trajectory overshot by a few calls.
 If closed-loop control wins on one axis and loses on another, the prefix is what
 lets us report that rather than pick the flattering axis.
 
-A THIRD ERROR IN THE SAME DIRECTION, FOUND WHILE FIXING THE SECOND
-------------------------------------------------------------------
-`unguided_run` scores its own endpoint to populate `endpoint_z`, and the
-original arm then called `metered.z_many(endpoints)` over the whole pool. The
-enumeration cache suppresses the second NATIVE call but not the RAW counter, so
-every gen_rank endpoint was billed twice. Verified on the committed smoke:
+HARNESS OVERHEAD IN THE BASELINE'S REQUEST COUNT -- AUDITED, NOT ASSUMED
+------------------------------------------------------------------------
+`gen_rank` records `raw_oracle_calls == 2 * n_trajectories` on all 24 committed
+arm-instances. That is NOT automatically over-counting: the frozen convention
+says duplicate algorithmic requests count, and a cache hit incrementing the raw
+counter is that convention working as designed.
 
-    raw_oracle_calls == 2 * n_trajectories   on ALL 24 gen_rank arm-instances
+The admissible question is whether the ALGORITHM asked twice or the HARNESS did.
+Traced in `docs/PARETO_ORACLE_REQUEST_AUDIT.md`: `unguided_run` never reads an
+objective during generation -- it samples from `R_theta` alone -- and scores its
+endpoint only afterwards, to populate `Trajectory.endpoint_z`. The ranking step
+then calls `z_many` over the pool, re-requesting values the harness is already
+holding; `np.stack([t.endpoint_z for t in pool])` yields the identical matrix
+with zero further requests. A competent generate-and-rank scores each generated
+molecule once, and this comparator is one WE author, so its recorded demand must
+reflect the method rather than our data structure.
 
-`raw_oracle_calls` is the reported "algorithmic demand" axis, so the baseline's
-demand was overstated 2x -- again in the direction that flatters COMPOSE. This
-module scores each endpoint exactly once, reading `endpoint_z` rather than
-re-metering it, and the per-t hypervolumes come from vectors already paid for.
+So this module reads `endpoint_z` and the per-t hypervolumes come from vectors
+already paid for. Note the direction: correcting it makes the baseline look
+CHEAPER, against COMPOSE.
+
+The same one-request-per-trajectory pattern exists in the COMPOSE arms at their
+`Trajectory` construction sites, where it is 0.02% and 0.00% of their totals. It
+is disclosed and deliberately NOT corrected -- doing so would require re-running
+those arms and would destroy the serial baseline the fan-out parity replay must
+match exactly.
 """
 
 from __future__ import annotations
