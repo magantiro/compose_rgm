@@ -1,0 +1,425 @@
+{
+  "schema": "compose.pathwise.a2_source",
+  "status": "SMOKE_HELD_IN",
+  "index": 0,
+  "source": "C=C(F)C(=CC=CF)C1CC1NC(=O)CC(C)(C)NCC(=O)N1CCCC1C#N",
+  "start_key": "C=C(F)C(=CC=CF)C1CC1NC(=O)CC(C)(C)NCC(=O)N1CCCC1C#N",
+  "start_clogp": 2.6568,
+  "corridor": [
+    2.3688650000000004,
+    4.452222500000002
+  ],
+  "horizon": 6,
+  "goal": "B",
+  "rollouts_requested": 6,
+  "rollouts_completed": 6,
+  "violating_rollouts": 6,
+  "endpoint_valid_path_invalid_events": 6,
+  "source_has_event": true,
+  "rollouts": [
+    {
+      "rollout": 0,
+      "trajectory": [
+        "C=C(F)C(=CC=CF)C1CC1NC(=O)CC(C)(C)NCC(=O)N1CCCC1C#N",
+        "CC(C)(CC(=O)NC1CC1c1ccc(F)cc1F)NCC(=O)N1CCCC1C#N",
+        "CC(C)(CC(=O)NC1CC1c1ccc(F)cc1F)NCCN1CCCC1C#N",
+        "CC1(C)CC(=O)NC2CC2c2ccc(F)c(c2F)N1CCN1CCCC1C#N",
+        "B=C1CC(C)(C)N(CCN2CCCC2C#N)c2c(F)ccc(c2F)C2CC2N1",
+        "B=C1CC(C)(C)N(C(C#N)CN2CCCC2)c2c(F)ccc(c2F)C2CC2N1",
+        "B=C1CC(C)(C)N(C(C#N)CN2CCCC2)c2cc(cc(F)c2F)C2CC2N1"
+      ],
+      "dead_end_step": null,
+      "audit": {
+        "states": 7,
+        "source_feasible": true,
+        "endpoint_feasible": true,
+        "any_violation": true,
+        "violation_count": 1,
+        "first_violation_index": 1,
+        "returned": true,
+        "endpoint_valid_path_invalid": true
+      },
+      "excursions": [
+        {
+          "start_index": 1,
+          "duration": 1,
+          "max_depth": 0.1591,
+          "returned": true
+        }
+      ],
+      "clogp": [
+        2.6568,
+        2.2098,
+        2.6832,
+        2.9136,
+        2.4177,
+        2.4177,
+        2.4177
+      ],
+      "terminal_utility": [
+        0.6797905146888665,
+        0.8556143894643838
+      ]
+    },
+    {
+      "rollout": 1,
+      "trajectory": [
+        "C=C(F)C(=CC=CF)C1CC1NC(=O)CC(C)(C)NCC(=O)N1CCCC1C#N",
+        "CC(C)(CC(=O)NC1CC1c1ccc(F)cc1F)NCC(=O)N1CCCC1C#N",
+        "CC(C)(CC(=O)NC1CC1c1ccc(F)cc1F)NCCN1CCCC1C#N",
+        "CC1(C)CC(=O)NC2CC2c2ccc(F)c(c2F)N1CCN1CCCC1C#N",
+        "B=C1CC(C)(C)N(CCN2CCCC2C#N)c2c(F)ccc(c2F)C2CC2N1",
+        "B=C1CC(C)(C)N(CCN2CCCC2)c2c(F)ccc(c2F)C2CC2(C#N)N1",
+        "B=C1CC(C)(C)N(CCN2CCCC2)c2cc(cc(F)c2F)C2CC2(C#N)N1"
+      ],
+      "dead_end_step": null,
+      "audit": {
+        "states": 7,
+        "source_feasible": true,
+        "endpoint_feasible": true,
+        "any_violation": true,
+        "violation_count": 1,
+        "first_violation_index": 1,
+        "returned": true,
+        "endpoint_valid_path_invalid": true
+      },
+      "excursions": [
+        {
+          "start_index": 1,
+          "duration": 1,
+          "max_depth": 0.1591,
+          "returned": true
+        }
+      ],
+      "clogp": [
+        2.6568,
+        2.2098,
+        2.6832,
+        2.9136,
+        2.4177,
+        2.4193,
+        2.4193
+      ],
+      "terminal_utility": [
+        0.6798163946506306,
+        0.928532586310317
+      ]
+    },
+    {
+      "rollout": 2,
+      "trajectory": [
+        "C=C(F)C(=CC=CF)C1CC1NC(=O)CC(C)(C)NCC(=O)N1CCCC1C#N",
+        "CC(C)(CC(=O)NC1CC1c1ccc(F)cc1F)NCC(=O)N1CCCC1C#N",
+        "CC(C)(CC(=O)NC1CC1c1ccc(F)cc1F)NCCN1CCCC1C#N",
+        "CC1(CC(=O)NC2CC2c2ccc(F)cc2F)CC(CN2CCCC2C#N)N1",
+        "CN(C(=O)CC1CC(CN2CCCC2C#N)N1)C1CC1c1ccc(F)cc1F",
+        "CN(C(=O)CC1(C#N)CC(CN2CCCC2)N1)C1CC1c1ccc(F)cc1F",
+        "Cc1cc(F)ccc1C1CC1N(C)C(=O)CC1(C#N)CC(CN2CCCC2)N1"
+      ],
+      "dead_end_step": null,
+      "audit": {
+        "states": 7,
+        "source_feasible": true,
+        "endpoint_feasible": true,
+        "any_violation": true,
+        "violation_count": 1,
+        "first_violation_index": 1,
+        "returned": true,
+        "endpoint_valid_path_invalid": true
+      },
+      "excursions": [
+        {
+          "start_index": 1,
+          "duration": 1,
+          "max_depth": 0.1591,
+          "returned": true
+        }
+      ],
+      "clogp": [
+        2.6568,
+        2.2098,
+        2.6832,
+        2.4356,
+        2.3877,
+        2.3893,
+        2.5586
+      ],
+      "terminal_utility": [
+        0.6918639743778965,
+        0.7914218599448043
+      ]
+    },
+    {
+      "rollout": 3,
+      "trajectory": [
+        "C=C(F)C(=CC=CF)C1CC1NC(=O)CC(C)(C)NCC(=O)N1CCCC1C#N",
+        "CC(C)(CC(=O)NC1CC1c1ccc(F)cc1F)NCC(=O)N1CCCC1C#N",
+        "CC(C)(CC(=O)NC1CC1c1ccc(F)cc1F)NCCN1CCCC1C#N",
+        "CC1(C)CC(=O)NC2CC2c2ccc(F)c(c2F)N1CCN1CCCC1C#N",
+        "B=C1CC(C)(C)N(CCN2CCCC2C#N)c2c(F)ccc(c2F)C2CC2N1",
+        "B=C1CC(C)(C)N(C(C#N)CN2CCCC2)c2c(F)ccc(c2F)C2CC2N1",
+        "B=C1CC(C)(C)N(C(C#N)CN2CCCC2)c2cc(cc(F)c2F)C2CC2N1"
+      ],
+      "dead_end_step": null,
+      "audit": {
+        "states": 7,
+        "source_feasible": true,
+        "endpoint_feasible": true,
+        "any_violation": true,
+        "violation_count": 1,
+        "first_violation_index": 1,
+        "returned": true,
+        "endpoint_valid_path_invalid": true
+      },
+      "excursions": [
+        {
+          "start_index": 1,
+          "duration": 1,
+          "max_depth": 0.1591,
+          "returned": true
+        }
+      ],
+      "clogp": [
+        2.6568,
+        2.2098,
+        2.6832,
+        2.9136,
+        2.4177,
+        2.4177,
+        2.4177
+      ],
+      "terminal_utility": [
+        0.6797905146888665,
+        0.8556143894643838
+      ]
+    },
+    {
+      "rollout": 4,
+      "trajectory": [
+        "C=C(F)C(=CC=CF)C1CC1NC(=O)CC(C)(C)NCC(=O)N1CCCC1C#N",
+        "CC(C)(CC(=O)NC1CC1c1ccc(F)cc1F)NCC(=O)N1CCCC1C#N",
+        "CC(C)(CC(=O)NC1CC1c1ccc(F)cc1F)NCCN1CCCC1C#N",
+        "CC1(C)CC(=O)NC2CC2c2ccc(F)c(c2F)N1CCN1CCCC1C#N",
+        "B=C1CC(C)(C)N(CCN2CCCC2C#N)c2c(F)ccc(c2F)C2CC2N1",
+        "B=C1CC(C)(C)N(CCN2CCCC2)c2c(F)ccc(c2F)C2CC2(C#N)N1",
+        "B=C1CC(C)(C)N(CCN2CCCC2)c2cc(cc(F)c2F)C2CC2(C#N)N1"
+      ],
+      "dead_end_step": null,
+      "audit": {
+        "states": 7,
+        "source_feasible": true,
+        "endpoint_feasible": true,
+        "any_violation": true,
+        "violation_count": 1,
+        "first_violation_index": 1,
+        "returned": true,
+        "endpoint_valid_path_invalid": true
+      },
+      "excursions": [
+        {
+          "start_index": 1,
+          "duration": 1,
+          "max_depth": 0.1591,
+          "returned": true
+        }
+      ],
+      "clogp": [
+        2.6568,
+        2.2098,
+        2.6832,
+        2.9136,
+        2.4177,
+        2.4193,
+        2.4193
+      ],
+      "terminal_utility": [
+        0.6798163946506306,
+        0.928532586310317
+      ]
+    },
+    {
+      "rollout": 5,
+      "trajectory": [
+        "C=C(F)C(=CC=CF)C1CC1NC(=O)CC(C)(C)NCC(=O)N1CCCC1C#N",
+        "CC(C)(CC(=O)NC1CC1c1ccc(F)cc1F)NCC(=O)N1CCCC1C#N",
+        "CC(C)(CC(=O)NC1CC1c1ccc(F)cc1F)NCCN1CCCC1C#N",
+        "CC1(CC(=O)NC2CC2c2ccc(F)cc2F)CC(CN2CCCC2C#N)N1",
+        "CN(C(=O)CC1CC(CN2CCCC2C#N)N1)C1CC1c1ccc(F)cc1F",
+        "CN(C(=O)CC1CC(C#N)(CN2CCCC2)N1)C1CC1c1ccc(F)cc1F",
+        "Cc1cc(F)ccc1C1CC1N(C)C(=O)CC1CC(C#N)(CN2CCCC2)N1"
+      ],
+      "dead_end_step": null,
+      "audit": {
+        "states": 7,
+        "source_feasible": true,
+        "endpoint_feasible": true,
+        "any_violation": true,
+        "violation_count": 1,
+        "first_violation_index": 1,
+        "returned": true,
+        "endpoint_valid_path_invalid": true
+      },
+      "excursions": [
+        {
+          "start_index": 1,
+          "duration": 1,
+          "max_depth": 0.1591,
+          "returned": true
+        }
+      ],
+      "clogp": [
+        2.6568,
+        2.2098,
+        2.6832,
+        2.4356,
+        2.3877,
+        2.3893,
+        2.5586
+      ],
+      "terminal_utility": [
+        0.6918639743778965,
+        0.7842917024940341
+      ]
+    }
+  ],
+  "mask_census": [
+    {
+      "step": 0,
+      "candidates": 826,
+      "kept": 528,
+      "retention": 0.639225181598063,
+      "retained_reference_mass": 0.0009140164598754862,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 1,
+      "candidates": 704,
+      "kept": 228,
+      "retention": 0.32386363636363635,
+      "retained_reference_mass": 0.6368788233977748,
+      "empty_after_mask": false,
+      "state_feasible": false
+    },
+    {
+      "step": 2,
+      "candidates": 749,
+      "kept": 503,
+      "retention": 0.671562082777036,
+      "retained_reference_mass": 0.96738469610087,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 3,
+      "candidates": 692,
+      "kept": 545,
+      "retention": 0.7875722543352601,
+      "retained_reference_mass": 0.9258283393011775,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 4,
+      "candidates": 724,
+      "kept": 314,
+      "retention": 0.43370165745856354,
+      "retained_reference_mass": 0.5345082891241626,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 5,
+      "candidates": 612,
+      "kept": 279,
+      "retention": 0.45588235294117646,
+      "retained_reference_mass": 0.5485289392031694,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 6,
+      "candidates": 613,
+      "kept": 280,
+      "retention": 0.4567699836867863,
+      "retained_reference_mass": 0.5348064176562303,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 5,
+      "candidates": 600,
+      "kept": 279,
+      "retention": 0.465,
+      "retained_reference_mass": 0.5801782136569091,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 6,
+      "candidates": 601,
+      "kept": 280,
+      "retention": 0.46589018302828616,
+      "retained_reference_mass": 0.5607028988071533,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 3,
+      "candidates": 791,
+      "kept": 341,
+      "retention": 0.4310998735777497,
+      "retained_reference_mass": 0.6144302592197568,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 4,
+      "candidates": 791,
+      "kept": 320,
+      "retention": 0.404551201011378,
+      "retained_reference_mass": 0.5999401885259456,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 5,
+      "candidates": 661,
+      "kept": 292,
+      "retention": 0.44175491679273826,
+      "retained_reference_mass": 0.6448964254535416,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 6,
+      "candidates": 720,
+      "kept": 401,
+      "retention": 0.5569444444444445,
+      "retained_reference_mass": 0.7538206221615582,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 5,
+      "candidates": 661,
+      "kept": 289,
+      "retention": 0.4372163388804841,
+      "retained_reference_mass": 0.6417025113484408,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 6,
+      "candidates": 720,
+      "kept": 400,
+      "retention": 0.5555555555555556,
+      "retained_reference_mass": 0.7572269137836978,
+      "empty_after_mask": false,
+      "state_feasible": true
+    }
+  ],
+  "kernel_calls": 15,
+  "kernel_call_budget": 200,
+  "seconds": 304.1
+}

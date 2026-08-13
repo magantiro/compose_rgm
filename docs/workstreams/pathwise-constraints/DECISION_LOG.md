@@ -475,6 +475,68 @@ recovery definitions, and rollout law are all carried over unchanged.
 
 ---
 
+## 2026-08-13 — STAGE A2 EXECUTED. PASSES 5/5. Lane stopped as instructed.
+
+**Decision.** Launch A2 exactly as committed at `39f0ef1c`; change nothing;
+report; stop.
+
+**Authorisation.** Lane 1 veto cleared — `R_theta` is KEPT. Its cycling is
+inherited from a locally reversible training reference process (mutual-edge
+fraction 0.733 against a 0.33 threshold frozen before that census) and the
+preregistered REOPEN conditions all failed. A2 was therefore no longer void.
+
+**Execution.** App `ap-CH7z7NUbkOxv7mvU74HPRD`, verified `ephemeral (detached)`
+before proceeding. **No client-side `timeout` wrapper** — lane 1 lost a run at
+22/36 today because killing a wrapped client cancelled the detached job.
+Progress was tracked by polling `modal app list` and the volume instead. 12/12
+shards committed, 0 void, 0 failures.
+
+**Result.** All five pre-committed criteria pass:
+
+| Criterion | Threshold | Observed |
+|---|---:|---:|
+| V3 event yield | ≥ 20 | **25** |
+| V4a median retention | ≥ 0.10 | **0.573** |
+| V4b mask-empty | ≤ 0.05 | **0.0038** |
+| V5a source spread | ≥ 0.333 | **0.667** (8/12) |
+| V5b largest source share | ≤ 0.50 | **0.24** |
+
+**Nothing was adjusted.** Corridor, horizon, `R_theta`, violation and recovery
+definitions, rollout law, panel and all five thresholds are exactly as
+committed before the run. Stage A remains permanently FAIL and A2 is not a
+reinterpretation of it.
+
+**What this does and does not establish.** A2 shows the reversible-excursion
+mechanism is present on **new** sources, spread across **distinct molecules**,
+and that the mask leaves a controller room to act — the last of which had never
+been measurable. It does **not** independently establish that cLogP corridors
+are special: family B was selected because it showed the effect, so A2 is
+developmental follow-up by construction.
+
+**Frozen object touched.** None.
+
+---
+
+## 2026-08-13 — Two caveats recorded against a PASS, because they bear on the next design
+
+**Decision.** Report retention heterogeneity and residual absorption alongside
+the PASS rather than only the headline.
+
+**Evidence.** Per-source median retention spans **0.048 to 0.917**; the pooled
+median of 0.573 passes V4a comfortably but conceals two sources (1 and 5) where
+a masked controller would face a very tight choice set. Separately, 4 of 12
+sources produced no event at all, and 3 of those had violating rollouts that
+never returned — absorption still occurs for some molecules.
+
+**Why record it.** A PASS on pooled statistics is the easiest place for a
+per-source failure mode to hide, and the downstream experiment is source-level.
+Reporting only the pooled median would set up exactly the surprise this lane
+has spent three stages learning to avoid.
+
+**Frozen object touched.** None.
+
+---
+
 ## 2026-08-13 — V5a source-spread threshold set at 1/3, from downstream sizing
 
 **Decision.** Require ≥1/3 of A2 sources to show at least one endpoint-valid /

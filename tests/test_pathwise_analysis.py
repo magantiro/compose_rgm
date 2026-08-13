@@ -230,14 +230,32 @@ def test_reversibility_census_verdicts_survive_later_refactors(tmp_path):
 
 
 def test_stage_a_verdict_is_recorded_as_fail_everywhere_it_appears():
-    """Stage A2 must not read as reopening or softening stage A."""
+    """Stage A2 must never read as reopening or softening stage A.
+
+    These invariants hold whatever A2 returns. A2 passing is exactly when the
+    temptation to reread stage A as "nearly right" is strongest, so the guard
+    matters more after a PASS than before one.
+    """
     handoff = json.loads(
         (REPO / "docs/workstreams/pathwise-constraints/handoff.json").read_text())
     assert handoff["gate_status"]["G1_constraint_non_vacuous"] == "FAIL"
     assert handoff["headline_result"]["verdict"] == "FAIL"
     assert handoff["reversibility_census"]["outcome"] == "NO_FAMILY_PASSES"
     assert handoff["stage_a2"]["stage_a_verdict_unchanged"] == "FAIL"
-    assert handoff["stage_a2"]["launched"] is False
+    # A2 is developmental follow-up by construction and must say so, because
+    # family B was selected precisely because it showed the effect.
+    assert "developmental follow-up, not independent confirmation" in (
+        handoff["stage_a2"]["framing_verbatim"])
+    assert "selected BECAUSE it showed the effect" in (
+        handoff["stage_a2"]["does_not_establish"])
+
+
+def test_stage_b_is_not_marked_authorised_by_an_a2_pass():
+    """A2 answers viability, not whether the causal experiment is funded."""
+    handoff = json.loads(
+        (REPO / "docs/workstreams/pathwise-constraints/handoff.json").read_text())
+    assert handoff["stage_a2"]["stage_b_authorised"] is False
+    assert handoff["costed_plan"]["stage_B"]["authorised"] is False
 
 
 def test_analyser_refuses_an_all_void_run(tmp_path):

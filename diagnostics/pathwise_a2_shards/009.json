@@ -1,0 +1,399 @@
+{
+  "schema": "compose.pathwise.a2_source",
+  "status": "SMOKE_HELD_IN",
+  "index": 9,
+  "source": "C=C(C1=CC=C(c2ccccc2)C=[PH2]1)C1CCOC(Br)OO1",
+  "start_key": "C=C(C1=CC=C(c2ccccc2)C=[PH2]1)C1CCOC(Br)OO1",
+  "start_clogp": 4.1523,
+  "corridor": [
+    2.3688650000000004,
+    4.452222500000002
+  ],
+  "horizon": 6,
+  "goal": "B",
+  "rollouts_requested": 6,
+  "rollouts_completed": 6,
+  "violating_rollouts": 1,
+  "endpoint_valid_path_invalid_events": 0,
+  "source_has_event": false,
+  "rollouts": [
+    {
+      "rollout": 0,
+      "trajectory": [
+        "C=C(C1=CC=C(c2ccccc2)C=[PH2]1)C1CCOC(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C1CCOC(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C1CCNC(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C1CCN(C)C(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccc(Br)cc12)C1CCN(C)COO1",
+        "C=C(C1=C(N)C=C2C=[PH]1c1ccc(Br)cc12)C1CCN(C)COO1",
+        "CN1CCC(c2c[nH]c3c2[PH]2=CC(=C3)c3cc(Br)ccc32)OOC1"
+      ],
+      "dead_end_step": null,
+      "audit": {
+        "states": 7,
+        "source_feasible": true,
+        "endpoint_feasible": true,
+        "any_violation": false,
+        "violation_count": 0,
+        "first_violation_index": null,
+        "returned": false,
+        "endpoint_valid_path_invalid": false
+      },
+      "excursions": [],
+      "clogp": [
+        4.1523,
+        3.5946,
+        3.1676,
+        3.5098,
+        3.5513,
+        2.8377,
+        2.8943
+      ],
+      "terminal_utility": [
+        -0.044659634089968016,
+        0.2491409071459232
+      ]
+    },
+    {
+      "rollout": 1,
+      "trajectory": [
+        "C=C(C1=CC=C(c2ccccc2)C=[PH2]1)C1CCOC(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C1CCOC(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C1CCNC(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C12CCN1C(Br)OO2",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C12CCN1C(Br)NO2",
+        "C=C(C1=CC=C2C=[PH]1c1ccc(Br)cc12)C12CCN1CNO2",
+        "C=C(C(=CC)[PH]1=CCc2cc(Br)ccc21)C12CCN1CNO2"
+      ],
+      "dead_end_step": null,
+      "audit": {
+        "states": 7,
+        "source_feasible": true,
+        "endpoint_feasible": true,
+        "any_violation": false,
+        "violation_count": 0,
+        "first_violation_index": null,
+        "returned": false,
+        "endpoint_valid_path_invalid": false
+      },
+      "excursions": [],
+      "clogp": [
+        4.1523,
+        3.5946,
+        3.1676,
+        3.2213,
+        2.7943,
+        2.8358,
+        3.0012
+      ],
+      "terminal_utility": [
+        0.013836373915184327,
+        0.21299960299224363
+      ]
+    },
+    {
+      "rollout": 2,
+      "trajectory": [
+        "C=C(C1=CC=C(c2ccccc2)C=[PH2]1)C1CCOC(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C1CCOC(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C1CCNC(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C12CCN1C(Br)OO2",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C12CCN1C(Br)NO2",
+        "C=C(C1=CC=C2C=[PH]1c1ccc(Br)cc12)C12CCN1CNO2",
+        "C=C(C(=CC)[PH]1=CCc2cc(Br)ccc21)C12CCN1CNO2"
+      ],
+      "dead_end_step": null,
+      "audit": {
+        "states": 7,
+        "source_feasible": true,
+        "endpoint_feasible": true,
+        "any_violation": false,
+        "violation_count": 0,
+        "first_violation_index": null,
+        "returned": false,
+        "endpoint_valid_path_invalid": false
+      },
+      "excursions": [],
+      "clogp": [
+        4.1523,
+        3.5946,
+        3.1676,
+        3.2213,
+        2.7943,
+        2.8358,
+        3.0012
+      ],
+      "terminal_utility": [
+        0.013836373915184327,
+        0.21299960299224363
+      ]
+    },
+    {
+      "rollout": 3,
+      "trajectory": [
+        "C=C(C1=CC=C(c2ccccc2)C=[PH2]1)C1CCOC(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C1CCOC(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C1CCNC(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C1CCN(C)C(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C1CCN(C)C(N)OO1",
+        "C=C(C(=CC)[PH]1=CCc2ccccc21)C1CCN(C)C(N)OO1",
+        "C=C1C([PH]2=CCc3ccccc32)=CCC12CCN(C)C(N)OO2"
+      ],
+      "dead_end_step": null,
+      "audit": {
+        "states": 7,
+        "source_feasible": true,
+        "endpoint_feasible": false,
+        "any_violation": true,
+        "violation_count": 3,
+        "first_violation_index": 4,
+        "returned": false,
+        "endpoint_valid_path_invalid": false
+      },
+      "excursions": [
+        {
+          "start_index": 4,
+          "duration": 3,
+          "max_depth": 0.3759,
+          "returned": false
+        }
+      ],
+      "clogp": [
+        4.1523,
+        3.5946,
+        3.1676,
+        3.5098,
+        2.0736,
+        2.239,
+        1.993
+      ],
+      "terminal_utility": [
+        -0.016610411840924627,
+        0.1872431322042036
+      ]
+    },
+    {
+      "rollout": 4,
+      "trajectory": [
+        "C=C(C1=CC=C(c2ccccc2)C=[PH2]1)C1CCOC(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C1CCOC(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C1CCNC(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C12CCN1C(Br)OO2",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C12CCN1C(Br)NO2",
+        "C=C(C1=CC=C2C=[PH]1c1ccc(Br)cc12)C12CCN1CNO2",
+        "C=C(C(=CC)[PH]1=CCc2cc(Br)ccc21)C12CCN1CNO2"
+      ],
+      "dead_end_step": null,
+      "audit": {
+        "states": 7,
+        "source_feasible": true,
+        "endpoint_feasible": true,
+        "any_violation": false,
+        "violation_count": 0,
+        "first_violation_index": null,
+        "returned": false,
+        "endpoint_valid_path_invalid": false
+      },
+      "excursions": [],
+      "clogp": [
+        4.1523,
+        3.5946,
+        3.1676,
+        3.2213,
+        2.7943,
+        2.8358,
+        3.0012
+      ],
+      "terminal_utility": [
+        0.013836373915184327,
+        0.21299960299224363
+      ]
+    },
+    {
+      "rollout": 5,
+      "trajectory": [
+        "C=C(C1=CC=C(c2ccccc2)C=[PH2]1)C1CCOC(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C1CCOC(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C1CCNC(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccccc12)C1CCN(C)C(Br)OO1",
+        "C=C(C1=CC=C2C=[PH]1c1ccc(Br)cc12)C1CCN(C)COO1",
+        "C=C(CCCN(C)CO)C1=CC=C2C=[PH]1c1ccc(Br)cc12",
+        "C=C1CCCN(CO)CC2=[PH]3C1=CC=C2c1cc(Br)ccc13"
+      ],
+      "dead_end_step": null,
+      "audit": {
+        "states": 7,
+        "source_feasible": true,
+        "endpoint_feasible": true,
+        "any_violation": false,
+        "violation_count": 0,
+        "first_violation_index": null,
+        "returned": false,
+        "endpoint_valid_path_invalid": false
+      },
+      "excursions": [],
+      "clogp": [
+        4.1523,
+        3.5946,
+        3.1676,
+        3.5098,
+        3.5513,
+        3.6033,
+        3.3573
+      ],
+      "terminal_utility": [
+        0.10018243677225155,
+        0.30650151467368997
+      ]
+    }
+  ],
+  "mask_census": [
+    {
+      "step": 0,
+      "candidates": 471,
+      "kept": 378,
+      "retention": 0.802547770700637,
+      "retained_reference_mass": 0.3296348978645672,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 1,
+      "candidates": 474,
+      "kept": 454,
+      "retention": 0.9578059071729957,
+      "retained_reference_mass": 0.9996822955219067,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 2,
+      "candidates": 500,
+      "kept": 455,
+      "retention": 0.91,
+      "retained_reference_mass": 0.9995936528915009,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 3,
+      "candidates": 549,
+      "kept": 525,
+      "retention": 0.9562841530054644,
+      "retained_reference_mass": 0.999398048926448,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 4,
+      "candidates": 538,
+      "kept": 516,
+      "retention": 0.9591078066914498,
+      "retained_reference_mass": 0.999957478961494,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 5,
+      "candidates": 576,
+      "kept": 468,
+      "retention": 0.8125,
+      "retained_reference_mass": 0.9954262053638071,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 6,
+      "candidates": 543,
+      "kept": 443,
+      "retention": 0.8158379373848987,
+      "retained_reference_mass": 0.8920598161661979,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 3,
+      "candidates": 443,
+      "kept": 402,
+      "retention": 0.90744920993228,
+      "retained_reference_mass": 0.9996323713365417,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 4,
+      "candidates": 469,
+      "kept": 361,
+      "retention": 0.7697228144989339,
+      "retained_reference_mass": 0.9995741588254093,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 5,
+      "candidates": 459,
+      "kept": 360,
+      "retention": 0.7843137254901961,
+      "retained_reference_mass": 0.997258226464997,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 6,
+      "candidates": 549,
+      "kept": 463,
+      "retention": 0.843351548269581,
+      "retained_reference_mass": 0.9998125677877675,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 4,
+      "candidates": 593,
+      "kept": 161,
+      "retention": 0.2715008431703204,
+      "retained_reference_mass": 0.8218726042025889,
+      "empty_after_mask": false,
+      "state_feasible": false
+    },
+    {
+      "step": 5,
+      "candidates": 692,
+      "kept": 262,
+      "retention": 0.3786127167630058,
+      "retained_reference_mass": 0.06614136017195413,
+      "empty_after_mask": false,
+      "state_feasible": false
+    },
+    {
+      "step": 6,
+      "candidates": 635,
+      "kept": 144,
+      "retention": 0.22677165354330708,
+      "retained_reference_mass": 0.7576135990321614,
+      "empty_after_mask": false,
+      "state_feasible": false
+    },
+    {
+      "step": 5,
+      "candidates": 635,
+      "kept": 598,
+      "retention": 0.9417322834645669,
+      "retained_reference_mass": 0.9984918640792892,
+      "empty_after_mask": false,
+      "state_feasible": true
+    },
+    {
+      "step": 6,
+      "candidates": 544,
+      "kept": 494,
+      "retention": 0.9080882352941176,
+      "retained_reference_mass": 0.9991181738033836,
+      "empty_after_mask": false,
+      "state_feasible": true
+    }
+  ],
+  "kernel_calls": 16,
+  "kernel_call_budget": 200,
+  "seconds": 331.1
+}

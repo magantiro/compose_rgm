@@ -1,0 +1,148 @@
+{
+  "schema": "compose.pathwise.a2_prevalence",
+  "status": "SMOKE_HELD_IN",
+  "held_out_opened": false,
+  "framing": "Family B was selected for follow-up AFTER the three-family feasibility census because it alone exhibited the intended reversible-excursion mechanism. Stage A2 is developmental follow-up, not independent confirmation of the phenomenon.",
+  "stage_a_verdict_unchanged": "FAIL",
+  "panel_sha256": "79845e8d985bf7a2676ebd4d75b6fc8626159a021106e24089ef0366f003b600",
+  "shards": 12,
+  "shards_void": 0,
+  "void_reasons": null,
+  "independent_unit": "source",
+  "trajectory_level": {
+    "trajectories": 72,
+    "violating": 43,
+    "violation_incidence": 0.5972,
+    "return_rate_among_violators": 0.5814,
+    "endpoint_valid_path_invalid_events": 25,
+    "note": "no interval reported: trajectories from one source are repeated measures, not independent observations"
+  },
+  "source_level": {
+    "sources": 12,
+    "sources_with_at_least_one_event": 8,
+    "fraction_of_sources_with_event": 0.6667,
+    "events_by_source": {
+      "0": 6,
+      "1": 1,
+      "2": 5,
+      "3": 0,
+      "4": 4,
+      "5": 0,
+      "6": 4,
+      "7": 3,
+      "8": 1,
+      "9": 0,
+      "10": 0,
+      "11": 1
+    },
+    "largest_single_source_share_of_events": 0.24,
+    "bootstrap_fraction_of_sources_with_event": {
+      "n_sources": 12,
+      "point": 0.6667,
+      "ci95_low": 0.4167,
+      "ci95_high": 0.9167,
+      "draws": 10000,
+      "unit": "source (rollouts kept together)"
+    },
+    "bootstrap_per_source_event_rate": {
+      "n_sources": 12,
+      "point": 0.3472,
+      "ci95_low": 0.1667,
+      "ci95_high": 0.5556,
+      "draws": 10000,
+      "unit": "source (rollouts kept together)"
+    },
+    "bootstrap_per_source_violation_rate": {
+      "n_sources": 12,
+      "point": 0.5972,
+      "ci95_low": 0.3889,
+      "ci95_high": 0.7917,
+      "draws": 10000,
+      "unit": "source (rollouts kept together)"
+    }
+  },
+  "excursion_geometry": {
+    "max_depth_logp": {
+      "n": 43,
+      "mean": 0.7985,
+      "median": 0.6928,
+      "min": 0.0072,
+      "max": 2.0546
+    },
+    "duration_steps": {
+      "n": 43,
+      "mean": 3.4651,
+      "median": 4.0,
+      "min": 1.0,
+      "max": 6.0
+    },
+    "note": "duration is the number of consecutive states outside the corridor; a multi-step excursion is budget spent inside a forbidden region, invisible to endpoint-only filtering"
+  },
+  "mask_viability_V4": {
+    "states_measured": 261,
+    "median_retention": 0.5734,
+    "retention_summary": {
+      "n": 261,
+      "mean": 0.5221,
+      "median": 0.5734,
+      "min": 0.0,
+      "max": 0.9806
+    },
+    "per_source_median_retention": {
+      "n": 12,
+      "mean": 0.5027,
+      "median": 0.5993,
+      "min": 0.0476,
+      "max": 0.9173
+    },
+    "mask_empty_states": 1,
+    "mask_empty_fraction": 0.0038
+  },
+  "criteria": {
+    "V3_event_yield": {
+      "threshold": 20,
+      "observed": 25,
+      "pass": true
+    },
+    "V4a_median_retention": {
+      "threshold": 0.1,
+      "observed": 0.5734,
+      "pass": true
+    },
+    "V4b_mask_empty_rare": {
+      "threshold": 0.05,
+      "observed": 0.0038,
+      "pass": true
+    },
+    "V5a_source_spread": {
+      "threshold": 0.3333,
+      "observed": 0.6667,
+      "pass": true
+    },
+    "V5b_no_single_source_dominates": {
+      "threshold": 0.5,
+      "observed": 0.24,
+      "pass": true
+    }
+  },
+  "verdict": "PASS",
+  "failed_criteria": null,
+  "consequence": "advance to a causal source-level pathwise-control experiment",
+  "cost": {
+    "kernel_calls": {
+      "n": 12,
+      "mean": 21.75,
+      "median": 24.0,
+      "min": 15.0,
+      "max": 28.0
+    },
+    "seconds": {
+      "n": 12,
+      "mean": 399.8583,
+      "median": 348.95,
+      "min": 270.9,
+      "max": 652.8
+    }
+  },
+  "analysis_sha256": "c8e2741154e9d96ca34d581c137da57dbfc8fa8a67f070f51d4dcf5e742a1be6"
+}

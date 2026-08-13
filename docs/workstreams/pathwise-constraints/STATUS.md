@@ -1,42 +1,62 @@
 # Workstream C — Pathwise Constraints: Status
 
-- **Status:** Stage A2 `DESIGN_ONLY` — **committed, NOT LAUNCHED, awaiting lane 1**
-- **What is running:** **NOTHING.** Zero Modal invocations since stage A.
+- **Status:** Stage A2 **EXECUTED — PASSES ALL FIVE CRITERIA** (`SMOKE_HELD_IN`)
+- **What is running:** **NOTHING.** A2 finished 12/12 clean; no run is open.
 - **Held-out data opened:** **NO.**
+- **Stage B:** **NOT authorised.** Main lane decides after seeing these numbers.
+
+## Stage A2 verdict — PASS
+
+| # | Criterion | Threshold | Observed | |
+|---|---|---:|---:|:--:|
+| **V3** | event yield | ≥ 20 | **25** | PASS |
+| **V4a** | median support retention | ≥ 0.10 | **0.573** | PASS |
+| **V4b** | mask-empty fraction | ≤ 0.05 | **0.0038** (1/261) | PASS |
+| **V5a** | source spread | ≥ 0.333 | **0.667** (8/12) | PASS |
+| **V5b** | largest single-source share | ≤ 0.50 | **0.24** | PASS |
+
+**Source spread is the headline: 8 of 12 sources produced at least one
+endpoint-valid / path-invalid event**, source-clustered bootstrap 95% CI
+**[0.417, 0.917]** — the criterion holds at the lower bound, not just at the
+point estimate.
+
+Trajectory level (72 trajectories, **12 observations**): violation incidence
+0.597 (43/72); return rate among violators **0.581** (25/43).
+
+Excursions are substantial, not boundary grazes: median max depth **0.693**
+logP, median duration **4.0 of 6 steps** outside the corridor — real budget
+spent in a forbidden region, invisible to endpoint-only filtering.
+
+**V4 was evaluable for the first time.** The corridor mask keeps a median
+**57.3%** of legal successors and emptied the support at exactly 1 of 261
+states.
 
 ## Current position
 
 | Stage | Verdict | State |
 |---|---|---|
-| Ring-system stage A | **G1 FAIL** | CLOSED, not revised |
+| Ring-system stage A | **G1 FAIL** | CLOSED, permanently, not revised |
 | Three-family reversibility census | **NO FAMILY PASSES** | CLOSED |
-| **Stage A2 — cLogP corridor prevalence** | — | **protocol + runner committed, deferred** |
+| **Stage A2 — cLogP corridor prevalence** | **PASS (5/5)** | complete |
 
-**Stage A2 is drafted and committed but deliberately not launched.** Every A2
-trajectory would be generated under the frozen `R_theta` that lane 1 is
-deciding whether to discard; spending ~2.1 container-hours now risks measuring
-a model about to be replaced. Pathwise is upside, lane 1 is load-bearing.
-
-### A2 in one line
-
-12 **new** held-in sources × 6 rollouts, cLogP corridor `[2.3689, 4.4522]`
-**unchanged**, H=6, same `R_theta`, same rollout law. **The source is the
-independent unit** — 72 trajectories, 12 observations, source-clustered
-bootstrap on everything.
-
-Criteria fixed before the run: **V3** ≥20 events (retained) · **V4a** median
-support retention ≥0.10 · **V4b** mask-empty ≤5% · **V5a** ≥1/3 of sources have
-an event · **V5b** largest source ≤50% of events.
-
-**Cost if authorised: ≈2.1 container-hours** (range 1.6–2.8), ~11 min wall,
-CPU only, `--detach`, resumable driver, 200-call circuit breaker.
-
-### Honest framing, carried in the protocol and in the analysis output
+### Honest framing, carried in the protocol and emitted in the analysis JSON
 
 > Family B was selected for follow-up AFTER the three-family feasibility census
 > because it alone exhibited the intended reversible-excursion mechanism. Stage
 > A2 is developmental follow-up, not independent confirmation of the
 > phenomenon.
+
+What A2 adds beyond stage A: prevalence on **new** sources, spread across
+**distinct molecules**, and **V4 mask viability** — none of which existed
+before. What it does not add: independent evidence that cLogP corridors are
+special, since B was chosen for showing the effect.
+
+### Cost
+
+12 sources, **≈1.33 container-hours** against a 2.1 h estimate (63%). 21.75
+kernel calls/source mean (estimate 35), 400 s/source mean. Circuit breaker
+never approached. Launched `--detach`, verified `ephemeral (detached)`, 12/12
+shards committed, 0 void.
 
 ---
 
@@ -135,11 +155,17 @@ Well under budget; the 360-call circuit breaker was never approached.
 
 ## Next action
 
-**Wait for lane 1.** Stage A2 is committed and ready. Do not launch it until
-lane 1 resolves whether the frozen `R_theta` survives — otherwise the run
-measures a model that may be discarded.
+**None from this lane. Stopped as instructed.** A2 passed on pre-committed
+criteria; the main lane decides whether a causal source-level pathwise-control
+experiment follows. **Stage B is not authorised by the A2 result** and was not
+run.
 
-This lane recommends **not** paying for stage B and **not** searching a fourth
-predicate. If lane 1 keeps `R_theta`, A2 is a single bounded ~2.1
-container-hour run that either opens a causal source-level experiment or closes
-pathwise constraints for good.
+Two things the main lane should weigh before designing that experiment, both
+recorded in `HANDOFF.md`:
+
+1. **Retention is highly heterogeneous** — per-source median retention spans
+   0.048 to 0.917. The pooled median passes V4a comfortably, but a controller
+   on sources 1 and 5 would face a very tight choice set.
+2. **Absorption has not disappeared** — 4 of 12 sources produced no event, and
+   3 of those had violating rollouts that never returned. Reversibility is a
+   property of most molecules here, not all.

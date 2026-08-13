@@ -16,7 +16,95 @@
 > i.e. does endpoint-only filtering return molecules that reached validity by
 > passing through forbidden intermediates?
 
-# STAGE A2 — committed, NOT LAUNCHED, awaiting lane 1
+# STAGE A2 — EXECUTED, PASSES 5/5
+
+App `ap-CH7z7NUbkOxv7mvU74HPRD`, verified `ephemeral (detached)`, launched with
+**no client-side `timeout` wrapper**. 12/12 shards committed, 0 void, 0
+failures. Nothing was adjusted from the protocol committed at `39f0ef1c`.
+
+## Per-criterion verdict
+
+| # | Criterion | Threshold | Observed | Verdict |
+|---|---|---:|---:|:--:|
+| **V3** | event yield | ≥ 20 | **25** | **PASS** |
+| **V4a** | median support retention | ≥ 0.10 | **0.5734** | **PASS** |
+| **V4b** | mask-empty fraction | ≤ 0.05 | **0.0038** (1/261) | **PASS** |
+| **V5a** | **source spread** | ≥ 0.3333 | **0.6667** (8/12) | **PASS** |
+| **V5b** | largest single-source share | ≤ 0.50 | **0.24** | **PASS** |
+
+### Source spread — the number you asked for first
+
+**8 of 12 sources produced at least one endpoint-valid / path-invalid event
+= 0.667.** Source-clustered bootstrap 95% CI **[0.417, 0.917]** (10 000 draws,
+resampling sources with their rollouts kept together). **The criterion holds at
+the CI lower bound**, not merely at the point estimate.
+
+Events by source: `{0:6, 1:1, 2:5, 3:0, 4:4, 5:0, 6:4, 7:3, 8:1, 9:0, 10:0,
+11:1}` — no molecule supplies more than a quarter of the total.
+
+### Trajectory level (72 trajectories, 12 observations — no interval given)
+
+| Metric | Value |
+|---|---:|
+| violation incidence | 0.5972 (43/72) |
+| return rate among violators | **0.5814** (25/43) |
+| endpoint-valid / path-invalid events | **25** |
+
+Per-source rates with clustered bootstrap: event rate 0.347 CI [0.167, 0.556];
+violation rate 0.597 CI [0.389, 0.792].
+
+### Excursion geometry — not boundary grazes
+
+| Metric | median | mean | max |
+|---|---:|---:|---:|
+| max depth (logP) | **0.693** | 0.799 | 2.055 |
+| **duration (steps outside)** | **4.0** | 3.47 | 6 |
+
+A median excursion spends **4 of 6 steps** outside the corridor. That is real
+budget spent inside a forbidden region, and endpoint-only filtering cannot see
+any of it.
+
+### V4 — evaluable for the first time
+
+261 states measured. Median retention **0.5734**; mean 0.5221; range 0–0.9806.
+The mask emptied the support at exactly **1 of 261** states.
+
+## Two caveats that bear on the next design
+
+1. **Retention is highly heterogeneous.** Per-source median retention spans
+   **0.048 to 0.917**. The pooled median passes V4a comfortably but conceals
+   sources 1 and 5, where a masked controller would face a very tight choice
+   set. The downstream experiment is source-level, which is exactly where a
+   pooled statistic can hide a per-source failure.
+2. **Absorption has not disappeared.** 4 of 12 sources produced no event; 3 of
+   those had violating rollouts that never returned. Reversibility is a
+   property of most molecules in this panel, not all of them.
+
+## What A2 does and does not establish
+
+**Does:** the reversible-excursion mechanism is present on **new** held-in
+sources, spread across **distinct molecules** at a rate whose CI lower bound
+clears the pre-committed bar, and the corridor mask leaves a controller real
+room to act.
+
+**Does not:** independently establish that cLogP corridors are special. Family
+B was selected *because* it showed the effect, so A2 is developmental
+follow-up. **Stage A remains permanently FAIL and A2 is not a reinterpretation
+of it.**
+
+## Cost
+
+| | Estimate | Actual |
+|---|---:|---:|
+| kernel calls / source | 35 | **21.75** (15–28) |
+| seconds / source | ~624 | **400** (271–653) |
+| container-hours | 2.1 | **≈1.33** |
+
+63% of estimate. Circuit breaker (200 calls) never approached.
+
+---
+
+# Stage A2 design as committed (`39f0ef1c`)
 
 > **Family B was selected for follow-up AFTER the three-family feasibility
 > census because it alone exhibited the intended reversible-excursion
@@ -552,18 +640,26 @@ terminal filter changes the returned molecule. The capability gap is real; the
 
 # Recommended next action
 
-> **Hold.** Stage A2 is committed and ready to run. Do **not** launch it until
-> lane 1 resolves whether the frozen `R_theta` survives — every A2 trajectory
-> would be generated under that model, and ~2.1 container-hours spent now could
-> be measuring something about to be discarded.
->
-> If lane 1 keeps `R_theta`: authorise A2 as a single bounded run. It either
-> opens a causal source-level pathwise experiment or closes pathwise
-> constraints for good, and it is instrumented to do either.
->
-> If lane 1 replaces `R_theta`: A2 as written is void. The corridor, criteria
-> and analysis carry over, but the panel and any results must be regenerated
-> under the new process — do not reuse stage-A shards across a model change.
+> **Main lane decides.** A2 passed 5/5 on pre-committed criteria, so the
+> viability question this lane was asked is answered: a causal, source-level
+> pathwise-control experiment on the cLogP corridor is feasible under the
+> frozen `R_theta`. **Stage B is not authorised by that result and was not
+> run.** This lane has stopped.
+
+If the main lane designs that causal experiment, three things from A2 should
+carry into it:
+
+1. **Power it on sources, not trajectories.** The per-source event rate is
+   0.347 with CI [0.167, 0.556]; the fraction of sources showing the phenomenon
+   is 0.667 with CI [0.417, 0.917]. A 60-source panel implies roughly 25–55
+   informative sources — comfortable, but the interval is wide at n=12.
+2. **Pre-register a per-source retention floor.** Pooled median retention is
+   0.573, but two of twelve sources sit near 0.05. Whether those sources are
+   admissible is a design decision that should be made before the run, not
+   after seeing which arm they hurt.
+3. **Expect a mixed population.** A third of sources showed no excursion at
+   all. The causal contrast only exists on the informative subset, and the
+   denominator for any headline rate must say which one it is.
 
 # Actions explicitly not recommended
 
