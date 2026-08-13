@@ -137,11 +137,35 @@ def render(registry: dict) -> str:
     add("")
     add(f"**Barred.** {_escape(wording['barred_phrase'])}")
     add("")
+    add(f"**Sanctioned phrasing.** \"{_escape(wording['sanctioned_phrasing'])}\"")
+    add("")
     add(f"**Why this wording.** {_escape(wording['why_this_wording_survives_review'])}")
     add("")
     add(f"**Mol2Mol, beside it.** {_escape(wording['mol2mol_belongs_beside_it'])}")
     add("")
     add(f"**MARS naming rule.** {_escape(wording['mars_naming_rule'])}")
+    add("")
+
+    pres = registry["manuscript_presentation"]
+    add("## Manuscript rule — qualify broadly, present narrowly")
+    add("")
+    add(f"**{_escape(pres['rule'])}**")
+    add("")
+    add("| tier | method | question it answers |")
+    add("|---|---|---|")
+    for method, role in pres["reviewer_facing_hierarchy"].items():
+        tier = role.split("--")[0].strip()
+        rest = role.split("--", 1)[1].strip() if "--" in role else ""
+        add(f"| {_escape(tier)} | **{_escape(method)}** | {_escape(rest)} |")
+    add("")
+    add(f"**Success criterion.** {_escape(pres['success_criterion'])}")
+    add("")
+    add(f"**Barred claim.** {_escape(pres['barred_claim'])}")
+    add("")
+    add(f"**Sanctioned framing.** {_escape(pres['sanctioned_framing'])}")
+    add("")
+    for rule in pres["selection_rules"]:
+        add(f"- {rule}")
     add("")
 
     scoping = registry["compose_claim_scoping"]

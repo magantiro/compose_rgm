@@ -60,21 +60,45 @@ Read the third and fourth columns together. Neither column is the finding on its
 | GraphGA | `source_conditioning` | A one-line SMILES file seeds every individual with the same molecule, but there is no source concept in the method and the source is explicitly not preserved. | GB_GA.py::make_initial_population random.choice with replacement; abstract 'The molecules found by the GB-GA bear little resemblance to the molecules used to construct the initial mating pool'; nearest-ZINC Tanimoto 0.27 and 0.12. |
 | GraphGA | `intermediate_states_exposed` | Every individual is a complete molecule, but the lineage is a two-parent DAG that the code does not persist, and the only logged trajectory is a best-so-far curve. There is no molecule-to-molecule edit path to score pathwise metrics on. | GB_GA.py::reproduce returns only the child, the parent debug print is commented out, and high_scores stores one (best_score, best_smiles) tuple per generation. |
 | GraphGA | `restart_at_supplied_state_under_new_objective` | Mechanically possible by writing the final population out as a seed file and passing a new scoring_function, but it is not a provided feature and nothing in the paper or repository describes it. | GB_GA.GA(args) unpacks a single scoring_function; make_initial_population reads a SMILES file. |
-| REINVENT | `dynamic_goal_switching_native` | Staged learning is a genuine native mid-run objective change, and the boundary is SOFT: optimizer state carries, there is no LR scheduler, and the inception buffer is never cleared. But it re-targets a POLICY, not a realized molecule; it fires at a stage boundary set by max_score or max_steps rather than at an arbitrary step; and parameter updates continue after the switch. COMPOSE performs zero parameter updates and carries forward the actual molecule. | REINVENT 4 paper section 'Staged learning'; configs/staged_learning.toml [[stage]] blocks with per-stage max_score and chkpt_file. |
+| REINVENT | `dynamic_goal_switching_native` | Staged learning is a genuine native mid-run objective change, and the boundary is SOFT: optimizer state carries, there is no LR scheduler, and the inception buffer is never cleared. But it re-targets a POLICY, not a realized molecule; it fires at a stage boundary set by max_score or max_steps rather than after a realized molecular prefix has accumulated; and parameter updates continue after the switch. COMPOSE performs zero parameter updates and carries forward the actual molecule. | REINVENT 4 paper section 'Staged learning'; configs/staged_learning.toml [[stage]] blocks with per-stage max_score and chkpt_file. |
 
 ## The retargeting claim — exact wording, binding
 
 *BINDING project-wide, 2026-08-13. Recorded in docs/RETARGETING_SAME_PREFIX_DESIGN.md.*
 
-> COMPOSE performs inference-time intervention on an explicit realized molecular STATE while all learned parameters remain fixed; changing the goal changes only the control computation. REINVENT carries forward a learned policy and its optimizer state and keeps updating it. COMPOSE carries forward the actual molecule x_3 and performs zero parameter updates.
+> COMPOSE performs inference-time intervention on an explicit realized molecular STATE while all learned parameters remain fixed; changing the goal changes only the control computation. REINVENT carries forward a learned policy and its optimizer state and keeps updating it. COMPOSE carries forward the actual molecule x_3 and performs zero parameter updates. The intervention happens AFTER A REALIZED MOLECULAR PREFIX HAS ACCUMULATED; the scalable experiment fixes tau=3 and H=6, so no claim of invariance to switch time is made.
 
-**Barred.** 'without retraining' is BARRED. This lane's source reading of REINVENT 4 killed it: the Adam optimizer state carries across a stage boundary unbroken, there is no learning-rate scheduler in the RL path at all, and the inception replay buffer is never cleared. 'Retraining' is also a term a reviewer can argue about.
+**Barred.** TWO phrases are barred. (1) 'without retraining' -- this lane's source reading of REINVENT 4 killed it: the Adam optimizer state carries across a stage boundary unbroken, there is no learning-rate scheduler in the RL path at all, and the inception replay buffer is never cleared. 'Retraining' is also a term a reviewer can argue about. (2) 'the goal changes at an arbitrary step' -- the scalable experiment fixes tau=3 and H=6, so invariance to switch time is NOT established and claiming it would assert something we have not measured. The sanctioned phrasing is 'after a realized molecular prefix has accumulated'.
+
+**Sanctioned phrasing.** "after a realized molecular prefix has accumulated"
 
 **Why this wording.** It is checkable rather than definitional. 'Zero parameter updates' is a fact about a run that can be audited from the code path; 'without retraining' is a claim about what counts as training, which REINVENT's warm optimizer makes arguable.
 
 **Mol2Mol, beside it.** REINVENT 4's Mol2Mol accepts a complete input molecule, but the paper states 'the scaffold can change within the limits of the given similarity'. The supplied molecule is therefore a SIMILARITY ANCHOR, not a continued state. There is no realized molecular history to carry forward and no finite remaining-budget notion. This is the difference the operational wording makes precise.
 
 **MARS naming rule.** The MARS arm is 'restart at x_tau under a new objective' -- a NEW optimization launched from the current molecule. Never 'continuation' and never 'same-prefix retargeting'. The molecule is preserved as an initial state; the proposal, the imitation dataset and the temperature counter are all reset.
+
+## Manuscript rule — qualify broadly, present narrowly
+
+**QUALIFY BROADLY, PRESENT NARROWLY. Keep qualifying every method -- that is what protects against reviewer surprises and lets the paper choose intelligently later. But a method does not enter the paper because its adapter works. SUNK ENGINEERING EFFORT IS NOT A REASON FOR A BASELINE TO OCCUPY A FIGURE. The final comparator set is chosen by which scientific question each method answers, and by nothing else.**
+
+| tier | method | question it answers |
+|---|---|---|
+| PRIMARY | **DDSBM** | modern stochastic graph-transformation comparator; blocked on licence, stays CONTEXT_ONLY until that resolves |
+| ANCHOR | **GraphGA_or_REINVENT** | exactly ONE conventional anchor, whichever fits the task |
+| PRIMARY | **GraphXForm** | modern learned graph editing/generation comparator |
+| PRIMARY | **HN_GFN** | Pareto/preference comparator, coordinated with Lane 4 |
+| DEMOTED to a structurally relevant anchor, not a headline modern baseline. Its value is answering 'why isn't this just a graph-editing optimizer?' | **MARS** | it is sequential graph editing, structurally the closest method to COMPOSE. Beating a 2021 method proves nothing about the state of the art. Include it where its sequential-edit semantics make the comparison scientifically useful; otherwise supplementary table. |
+
+**Success criterion.** COMPOSE does NOT need to win the standard optimization table. The table answers whether COMPOSE remains a credible molecular-design method despite being built for richer process-level control. GraphXForm best on one conventional task and REINVENT best on another, with COMPOSE competitive across the set, is a perfectly good outcome -- and more credible than a table where we somehow win everything. What WOULD be a problem is COMPOSE substantially worse than every strong modern method on EVERY conventional task. That is a different thing from not ranking first.
+
+**Barred claim.** 'outperforms state of the art' and its paraphrases are barred from every artifact. There will be no broad apples-to-apples sweep and the claim is not needed. Enforced by validate_qualification_registry over the whole registry, not one field.
+
+**Sanctioned framing.** COMPOSE achieves competitive molecular optimization while enabling forms of stateful, inference-time control that conventional goal-directed generators do not naturally represent.
+
+- Select a baseline because it is strong, contemporary and relevant -- NEVER because COMPOSE is likely to beat it.
+- Freeze the task-specific comparator set BEFORE viewing any COMPOSE-versus-baseline outcome.
+- Give every method its native algorithmic machinery; compare in common outcome and accounting space.
 
 ## Read this before designing any comparison
 

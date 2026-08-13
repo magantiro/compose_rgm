@@ -91,6 +91,39 @@
     "Non-commercial and unlicensed code is a provenance blocker, not a footnote. MARS is CC BY-NC 4.0 and DDSBM has no license at all."
   ],
   "held_out_data_opened": false,
+  "manuscript_presentation": {
+    "barred_claim": "'outperforms state of the art' and its paraphrases are barred from every artifact. There will be no broad apples-to-apples sweep and the claim is not needed. Enforced by validate_qualification_registry over the whole registry, not one field.",
+    "reviewer_facing_hierarchy": {
+      "DDSBM": "PRIMARY -- modern stochastic graph-transformation comparator; blocked on licence, stays CONTEXT_ONLY until that resolves",
+      "GraphGA_or_REINVENT": "ANCHOR -- exactly ONE conventional anchor, whichever fits the task",
+      "GraphXForm": "PRIMARY -- modern learned graph editing/generation comparator",
+      "HN_GFN": "PRIMARY -- Pareto/preference comparator, coordinated with Lane 4",
+      "MARS": "DEMOTED to a structurally relevant anchor, not a headline modern baseline. Its value is answering 'why isn't this just a graph-editing optimizer?' -- it is sequential graph editing, structurally the closest method to COMPOSE. Beating a 2021 method proves nothing about the state of the art. Include it where its sequential-edit semantics make the comparison scientifically useful; otherwise supplementary table."
+    },
+    "rule": "QUALIFY BROADLY, PRESENT NARROWLY. Keep qualifying every method -- that is what protects against reviewer surprises and lets the paper choose intelligently later. But a method does not enter the paper because its adapter works. SUNK ENGINEERING EFFORT IS NOT A REASON FOR A BASELINE TO OCCUPY A FIGURE. The final comparator set is chosen by which scientific question each method answers, and by nothing else.",
+    "sanctioned_framing": "COMPOSE achieves competitive molecular optimization while enabling forms of stateful, inference-time control that conventional goal-directed generators do not naturally represent.",
+    "selection_rules": [
+      "Select a baseline because it is strong, contemporary and relevant -- NEVER because COMPOSE is likely to beat it.",
+      "Freeze the task-specific comparator set BEFORE viewing any COMPOSE-versus-baseline outcome.",
+      "Give every method its native algorithmic machinery; compare in common outcome and accounting space."
+    ],
+    "success_criterion": "COMPOSE does NOT need to win the standard optimization table. The table answers whether COMPOSE remains a credible molecular-design method despite being built for richer process-level control. GraphXForm best on one conventional task and REINVENT best on another, with COMPOSE competitive across the set, is a perfectly good outcome -- and more credible than a table where we somehow win everything. What WOULD be a problem is COMPOSE substantially worse than every strong modern method on EVERY conventional task. That is a different thing from not ranking first."
+  },
+  "mars_oracle_preflight_gate": {
+    "checks": [
+      "predict_proba must never exceed 1.0 -- this is where the count/proportion bug shows up first and most brutally",
+      "known actives mean above threshold (gsk3b 0.80, jnk3 0.75)",
+      "at least 90% of known actives clear 0.5",
+      "random ChEMBL mean below 0.35",
+      "actives must outscore random"
+    ],
+    "enforcement": "compose_v4.experiments.mars_oracle_preflight.require_preflight RAISES MarsOraclePreflightError. It is a preflight that ABORTS, not a test someone remembers to run, and it is wired into scripts/mars_held_in_smoke.py before any number is produced. ANY MARS ARTIFACT PRODUCED WITHOUT A PASSING GATE IS INVALID_INSTRUMENT.",
+    "fingerprint_note": "The gate uses MARS's OWN fingerprint, GetMorganFingerprintAsBitVect(mol, 2, 1024) from MARS/common/chem.py. A plausible-looking 2048-bit substitute raises a shape error rather than mis-scoring, which is the one place scikit-learn is helpfully loud.",
+    "measured_pass": "gsk3b actives 0.878 with 99.7% above 0.5, random 0.075; jnk3 actives 0.843 with 99.7% above 0.5, random 0.033; max probability 1.00 for both. Close to the reference values 0.91/0.84 actives and 0.07/0.04 random.",
+    "negative_control": "VERIFIED THE GATE ACTUALLY FIRES. With the counts-to-proportions step disabled -- simulating exactly the partial fix a future porter would write -- the gate raised: 'predict_proba returned 558.4, which is not a probability ... random ChEMBL mean 9.101 > 0.35; the oracle is not discriminating'. A gate that has never been shown to fire is decoration.",
+    "status": "IN PLACE AND ENFORCING 2026-08-13",
+    "why_it_exists": "MARS's shipped kinase pickles were written with scikit-learn 0.19.0. A shim that fixes only the import errors loads them successfully and then returns 'probabilities' in the hundreds, because since sklearn 1.3 tree_.value stores PROPORTIONS while 0.19 stored raw COUNTS and predict_proba no longer normalizes. IT DOES NOT CRASH. MARS would sample against meaningless scores for an entire run that looked completely successful -- a silent numerical corruption in a BASELINE, where nobody would think to check."
+  },
   "methods": [
     {
       "adapter": {
@@ -649,21 +682,35 @@
       "axis": "dynamic_goal_switching_native",
       "evidence": "REINVENT 4 paper section 'Staged learning'; configs/staged_learning.toml [[stage]] blocks with per-stage max_score and chkpt_file.",
       "method": "REINVENT",
-      "why_not": "Staged learning is a genuine native mid-run objective change, and the boundary is SOFT: optimizer state carries, there is no LR scheduler, and the inception buffer is never cleared. But it re-targets a POLICY, not a realized molecule; it fires at a stage boundary set by max_score or max_steps rather than at an arbitrary step; and parameter updates continue after the switch. COMPOSE performs zero parameter updates and carries forward the actual molecule."
+      "why_not": "Staged learning is a genuine native mid-run objective change, and the boundary is SOFT: optimizer state carries, there is no LR scheduler, and the inception buffer is never cleared. But it re-targets a POLICY, not a realized molecule; it fires at a stage boundary set by max_score or max_steps rather than after a realized molecular prefix has accumulated; and parameter updates continue after the switch. COMPOSE performs zero parameter updates and carries forward the actual molecule."
     }
   ],
   "purpose": "Records, for each external method, which COMPOSE Claim-4 sub-capability it is a valid comparator for, what matched budget means for it, and where the comparison stops being fair. Every capability cell carries a primary source or is marked UNVERIFIED. This registry contains no results and authorises no run.",
   "registry_id": "compose-external-baseline-qualification-v3",
   "retargeting_claim_wording": {
-    "barred_phrase": "'without retraining' is BARRED. This lane's source reading of REINVENT 4 killed it: the Adam optimizer state carries across a stage boundary unbroken, there is no learning-rate scheduler in the RL path at all, and the inception replay buffer is never cleared. 'Retraining' is also a term a reviewer can argue about.",
+    "barred_phrase": "TWO phrases are barred. (1) 'without retraining' -- this lane's source reading of REINVENT 4 killed it: the Adam optimizer state carries across a stage boundary unbroken, there is no learning-rate scheduler in the RL path at all, and the inception replay buffer is never cleared. 'Retraining' is also a term a reviewer can argue about. (2) 'the goal changes at an arbitrary step' -- the scalable experiment fixes tau=3 and H=6, so invariance to switch time is NOT established and claiming it would assert something we have not measured. The sanctioned phrasing is 'after a realized molecular prefix has accumulated'.",
+    "guard_note": "The validator rejects an operational_claim that literally contains either barred phrase. That fired on an earlier draft of this very field, which quoted one of them in order to disclaim it -- a rendered table would have shown the barred wording. The claim now states what IS established and lets barred_phrase carry the prohibition.",
     "mars_naming_rule": "The MARS arm is 'restart at x_tau under a new objective' -- a NEW optimization launched from the current molecule. Never 'continuation' and never 'same-prefix retargeting'. The molecule is preserved as an initial state; the proposal, the imitation dataset and the temperature counter are all reset.",
     "mol2mol_belongs_beside_it": "REINVENT 4's Mol2Mol accepts a complete input molecule, but the paper states 'the scaffold can change within the limits of the given similarity'. The supplied molecule is therefore a SIMILARITY ANCHOR, not a continued state. There is no realized molecular history to carry forward and no finite remaining-budget notion. This is the difference the operational wording makes precise.",
-    "operational_claim": "COMPOSE performs inference-time intervention on an explicit realized molecular STATE while all learned parameters remain fixed; changing the goal changes only the control computation. REINVENT carries forward a learned policy and its optimizer state and keeps updating it. COMPOSE carries forward the actual molecule x_3 and performs zero parameter updates.",
+    "operational_claim": "COMPOSE performs inference-time intervention on an explicit realized molecular STATE while all learned parameters remain fixed; changing the goal changes only the control computation. REINVENT carries forward a learned policy and its optimizer state and keeps updating it. COMPOSE carries forward the actual molecule x_3 and performs zero parameter updates. The intervention happens AFTER A REALIZED MOLECULAR PREFIX HAS ACCUMULATED; the scalable experiment fixes tau=3 and H=6, so no claim of invariance to switch time is made.",
+    "sanctioned_phrasing": "after a realized molecular prefix has accumulated",
     "status": "BINDING project-wide, 2026-08-13. Recorded in docs/RETARGETING_SAME_PREFIX_DESIGN.md.",
     "why_this_wording_survives_review": "It is checkable rather than definitional. 'Zero parameter updates' is a fact about a run that can be audited from the code path; 'without retraining' is a claim about what counts as training, which REINVENT's warm optimizer makes arguable."
   },
   "schema": "compose.baseline_qualification",
   "schema_version": 3,
+  "shared_evaluator": {
+    "architecture": "baseline-native environment -> raw SMILES -> shared evaluator pinned to production RDKit 2024.3.5 -> canonical key + validity + oracle score. Baselines are NOT forced into one environment; that breaks the old implementations. Canonicalization and scoring happen exactly once, under the pin, so unique_valid_canonical_evaluations is genuinely comparable across methods and a canonicalization difference cannot silently alter a budget.",
+    "artifact": "diagnostics/baselines/shared_evaluator_validation.json",
+    "implementation": [
+      "scripts/compose_shared_evaluator_server.py -- line-delimited JSON server that REFUSES TO START unless rdkit.__version__ == 2024.03.5",
+      "src/compose_v4/experiments/shared_evaluator.py -- subprocess client; deliberately a subprocess and not an import, because the whole point is that the evaluator's RDKit is not the caller's RDKit",
+      "scripts/validate_shared_evaluator.py -- the two-version validation"
+    ],
+    "pinned_venv": "python3.11 -m venv /tmp/baseline_envs/rdkit-prod-2024_3_5; pip install 'rdkit==2024.3.5' 'numpy==1.26.4'",
+    "status": "BUILT AND VALIDATED 2026-08-13",
+    "validation": "PASS. 55-molecule panel: 30 held-in sources (cohort e402e318) plus 25 adversarial edge cases spanning aromaticity perception, tautomer-ish spellings, charges, stereocentres, explicit hydrogens and unparseable strings. Local rdkit 2025.09.6 versus pinned 2024.03.5: 55 agreements, ZERO canonical-key disagreements, ZERO validity disagreements. Recorded rather than assumed; disagreements would have been listed, not smoothed."
+  },
   "smoke_plan": {
     "conventional_suite": "docs/workstreams/baseline-qualification/CONVENTIONAL_SUITE.md -- five tasks frozen 2026-08-13 before any COMPOSE-versus-baseline outcome",
     "definition": "A held-in smoke is 3-5 held-in source molecules, one objective, and the smallest budget at which the method's own loop runs end to end. Its only purpose is to prove the adapter executes, the frozen COMPOSE oracle is being called, and the oracle counter is wired. A smoke result is SMOKE_HELD_IN and can never be cited for or against any claim. NOTHING BELOW HAS BEEN EXECUTED; every figure is a projection.",
@@ -699,6 +746,13 @@
         "The monkeypatch point matters: MARS/estimator/estimator.py binds get_scores at import time, so patching the scorer module alone is silently ineffective and the run fails with a bare NotImplementedError from the unpatched dispatcher.",
         "Objective scale is a deviation: MARS sums per-objective scores its own objectives keep in [0, 1] and its acceptance ratio is scale-sensitive, so the raw COMPOSE margin is logistically squashed into (0, 1). Ordering preserved, scale not."
       ],
+      "native_configuration_run": {
+        "configuration": "MARS's NATIVE published chain count: num_mols=1000, the main.py default. Chains were NOT reduced to fit our budget -- 40 was chosen earlier only because 5 crashed, which is the wrong reason to pick a number. STEPS were reduced (6 rather than the 1000 default); the population, which is what the algorithm's viability depends on, is native.",
+        "measured": "7,000 oracle_requests for 1,679 unique valid canonical evaluations with 5,321 duplicate requests: demand ratio 4.17, up from 3.73 at 40 chains. GraphGA measured 1.30 on the same accounting. 147 s wall on CPU.",
+        "status": "PASS 2026-08-13",
+        "vocabulary": "FULL vocabulary, not the reduced one: prepro_vocab over all 1,488,640 ChEMBL SMILES, 46 minutes, yielding 81,752 distinct arms of which the top 1,000 are used -- the paper's configuration. The earlier 60k-truncated build (15,641 arms) is superseded.",
+        "why_the_ratio_is_information": "MARS has no cache anywhere and rescores its current molecule whenever a proposal is rejected, so its demand grows with population. Reporting its 1,679 beside GraphGA's 92 as if they were the same quantity would understate its work by more than 4x. This is a property of the algorithm, not something to normalise away."
+      },
       "native_regime_row_is_producible": "CORRECTION to the earlier record. The fairness contract requires a native-regime MARS row alongside the matched-budget row, and this lane previously judged that impossible because the shipped oracles would not load. With the validated sklearn shim above they DO load and score correctly, so the native-regime row IS producible on MARS's own gsk3b/jnk3 objectives. The remaining cost is compute, not archaeology.",
       "silent_corruption_hazard": "Any future MARS port must validate the kinase oracles against known actives before trusting a number. A partial fix that resolves only the import errors returns values up to 1169.7 without raising, which would corrupt every score in the run while looking like a successful load.",
       "status": "PASS, SMOKE_HELD_IN, executed 2026-08-13",

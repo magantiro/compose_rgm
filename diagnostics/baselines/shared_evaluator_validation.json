@@ -1,0 +1,36 @@
+{
+  "architecture": "baseline-native environment -> raw SMILES -> shared evaluator pinned to production RDKit 2024.3.5 -> canonical key + validity + oracle score. Baselines are NOT forced into one environment; that breaks the old implementations. Canonicalization and scoring happen exactly once, under the pin, so unique_valid_canonical_evaluations is comparable across methods.",
+  "artifact_status": "SMOKE_HELD_IN",
+  "checks": {
+    "evaluator_is_pinned_to_production_rdkit": true,
+    "evaluator_returns_a_score": true,
+    "no_canonical_key_disagreements": true,
+    "no_validity_disagreements": true
+  },
+  "comparison": {
+    "agreements": 55,
+    "disagreements": [],
+    "n": 55,
+    "n_disagreements": 0,
+    "pinned_rdkit": "2024.03.5",
+    "valid_in_local_only": [],
+    "valid_in_pinned_only": []
+  },
+  "held_out_data_opened": false,
+  "local_python": "3.14.2",
+  "local_rdkit": "2025.09.6",
+  "panel": {
+    "cohort_sha256": "e402e318fd9540fb51fc93c7481094beec4c5f968a582f7349d6359f24e19a5f",
+    "edge_cases": 25,
+    "held_in_sources": 30,
+    "total": 55
+  },
+  "schema": "compose.baselines.shared_evaluator_validation",
+  "score_probe": {
+    "canonical": "Cc1ccccc1-c1noc(-c2cc3ccccc3oc2=O)n1",
+    "score": -0.12819196138548436,
+    "valid": true
+  },
+  "title": "SHARED EVALUATOR VALIDATION \u2014 pinned RDKit 2024.3.5",
+  "verdict": "PASS"
+}

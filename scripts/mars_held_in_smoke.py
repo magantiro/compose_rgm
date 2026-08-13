@@ -102,6 +102,52 @@ def developability_objective():
     }
 
 
+def run_oracle_preflight(sample: int) -> dict:
+    """Abort unless MARS's own kinase oracles score actives far above random."""
+    import random
+
+    from compose_v4.experiments.mars_oracle_preflight import (
+        load_kinase_oracle,
+        require_preflight,
+    )
+
+    chembl_path = Path("MARS/data/chembl.txt")
+    if not chembl_path.exists():
+        raise SystemExit(
+            "preflight cannot run: MARS/data/chembl.txt not found. Run this "
+            "script from the directory CONTAINING the MARS checkout."
+        )
+    chembl = [
+        line.strip() for line in chembl_path.read_text().splitlines() if line.strip()
+    ]
+    rng = random.Random(0)
+    random_molecules = rng.sample(chembl, min(sample, len(chembl)))
+
+    results = {}
+    for name in ("gsk3b", "jnk3"):
+        # The actives files are CSV with a `smiles,<label>` header line.
+        rows = [
+            line.strip()
+            for line in Path(f"MARS/data/actives_{name}.txt").read_text().splitlines()
+            if line.strip()
+        ][1:]
+        actives = [row.split(",")[0] for row in rows][:sample]
+        model = load_kinase_oracle(f"MARS/estimator/scorer/kinase_rf/{name}.pkl")
+        results[name] = require_preflight(
+            name, model, actives, random_molecules
+        ).as_dict()
+    return {
+        "status": "PASS",
+        "gate": (
+            "known actives versus random ChEMBL, enforced by "
+            "compose_v4.experiments.mars_oracle_preflight.require_preflight, "
+            "which RAISES rather than warns. Any MARS artifact produced without "
+            "this gate is INVALID_INSTRUMENT."
+        ),
+        "results": results,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sources", type=int, default=5)
@@ -111,11 +157,19 @@ def main() -> int:
     parser.add_argument("--vocab", type=str, default="chembl60k")
     parser.add_argument("--vocab-size", type=int, default=1000)
     parser.add_argument("--output", type=Path, default=OUTPUT)
+    parser.add_argument("--preflight-sample", type=int, default=300)
     args = parser.parse_args()
 
     silence_rdkit()
     sources, cohort_sha = load_sources(args.sources)
     objective, goal = developability_objective()
+
+    # HARD PREFLIGHT. Not a test someone remembers to run: this aborts before a
+    # single number is produced. MARS's shipped kinase oracles load happily on a
+    # modern scikit-learn with only the import errors fixed, and then return
+    # "probabilities" in the hundreds. Any MARS artifact produced without a
+    # passing gate is INVALID_INSTRUMENT.
+    preflight = run_oracle_preflight(args.preflight_sample)
 
     import torch
     from rdkit import Chem
@@ -251,6 +305,7 @@ def main() -> int:
             "~550-1000 steps."
         ),
         "held_out_data_opened": False,
+        "oracle_preflight": preflight,
         "sources": {
             "cohort": "diagnostics/retarget_calibration_cohort.json",
             "cohort_sha256": cohort_sha,

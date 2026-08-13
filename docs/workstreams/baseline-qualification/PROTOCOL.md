@@ -65,6 +65,68 @@ claim-bearing test.
 
 ---
 
+## The manuscript rule — QUALIFY BROADLY, PRESENT NARROWLY
+
+Binding, and it governs everything below.
+
+Keep qualifying every method: that is what protects us from reviewer surprises
+and lets the paper choose intelligently later. But **a method does not enter the
+paper because its adapter works. Sunk engineering effort is not a reason for a
+baseline to occupy a figure.** The final comparator set is chosen by which
+scientific question each method answers, and by nothing else.
+
+### Reviewer-facing hierarchy
+
+| tier | method | the question it answers |
+|---|---|---|
+| **PRIMARY** | **GraphXForm** | modern learned graph editing/generation |
+| **PRIMARY** | **DDSBM** | modern stochastic graph transformation — blocked on licence, `CONTEXT_ONLY` until that resolves |
+| **PRIMARY** | **HN-GFN** | Pareto / preference control, coordinated with Lane 4 |
+| **ANCHOR** | **GraphGA or REINVENT 4** — *one* of them, whichever fits the task | conventional goal-directed optimization |
+| **DEMOTED** | **MARS** | "why isn't this just a graph-editing optimizer?" — it is sequential graph editing, structurally the closest method to COMPOSE |
+
+**MARS is not the method that carries a claim of modern generative
+competitiveness.** Beating a 2021 method proves nothing about the state of the
+art. Include it where its sequential-edit semantics make the comparison
+scientifically useful; otherwise it belongs in a supplementary table. Its
+correctness work is finished anyway, because the scikit-learn silent-corruption
+finding proved why that work mattered.
+
+### Selection rules
+
+1. Select a baseline because it is **strong, contemporary and relevant** — never
+   because COMPOSE is likely to beat it.
+2. Freeze the task-specific comparator set **before** viewing any
+   COMPOSE-versus-baseline outcome.
+3. Give every method its **native algorithmic machinery**; compare in common
+   **outcome** and **accounting** space.
+
+## The success criterion — state it before any number exists
+
+> **COMPOSE does not need to win the standard optimization table.** The table
+> answers whether COMPOSE remains a credible molecular-design method despite
+> being built for richer process-level control. GraphXForm best on one
+> conventional task and REINVENT best on another, with COMPOSE competitive
+> across the set, is a perfectly good outcome — and more credible than a table
+> where we somehow win everything.
+>
+> What **would** be a problem is COMPOSE substantially worse than every strong
+> modern method on **every** conventional task. That is a different thing from
+> not ranking first.
+
+### Barred claim
+
+**"Outperforms state of the art" is barred from every artifact this lane
+produces**, along with its paraphrases. We will not have a broad apples-to-apples
+sweep and the claim is not needed. The sanctioned framing is:
+
+> COMPOSE achieves competitive molecular optimization while enabling forms of
+> stateful, inference-time control that conventional goal-directed generators do
+> not naturally represent.
+
+Enforced by `validate_qualification_registry`, which rejects a registry
+containing the barred string.
+
 ## Evidence standard
 
 Binding, and the reason this lane exists.

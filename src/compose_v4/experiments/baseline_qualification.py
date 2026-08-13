@@ -217,10 +217,48 @@ def validate_qualification_registry(registry: dict[str, Any]) -> None:
             bool(wording.get(field)),
             f"retargeting_claim_wording omits {field}",
         )
+    claim = str(wording.get("operational_claim", "")).lower()
+    # Both phrases are barred for the same reason: each asserts something the
+    # experiments have not established. "without retraining" is arguable because
+    # REINVENT's optimizer state survives a stage boundary; "at an arbitrary
+    # step" claims switch-time invariance, and the scalable experiment fixes
+    # tau=3, H=6.
+    for barred in ("without retraining", "at an arbitrary step"):
+        _require(
+            barred not in claim,
+            f"the operational claim must not reuse the barred phrase {barred!r}",
+        )
     _require(
-        "without retraining" not in str(wording.get("operational_claim", "")).lower(),
-        "the operational claim must not reuse the barred phrase 'without retraining'",
+        bool(wording.get("sanctioned_phrasing")),
+        "retargeting_claim_wording must record the sanctioned phrasing",
     )
+
+    # "Outperforms state of the art" is barred project-wide: there will be no
+    # broad apples-to-apples sweep, and the claim is not needed. Checked over
+    # the WHOLE registry, not one field, because the phrase is most likely to
+    # appear in a method note written in passing.
+    presentation = registry.get("manuscript_presentation") or {}
+    # The field that DECLARES the ban has to quote the phrase, so exempt it --
+    # otherwise the guard fires on its own prohibition. Everything else is
+    # checked, because the phrase is most likely to slip into a method note
+    # written in passing rather than into a field anyone reviews.
+    searchable = dict(registry)
+    searchable["manuscript_presentation"] = {
+        k: v for k, v in presentation.items() if k != "barred_claim"
+    }
+    serialized = json.dumps(searchable).lower()
+    for barred in ("outperforms state of the art", "outperforms the state of the art"):
+        _require(
+            barred not in serialized,
+            f"the barred claim {barred!r} appears in the registry; the sanctioned "
+            "framing is competitive optimization plus stateful inference-time control",
+        )
+
+    for field in ("rule", "reviewer_facing_hierarchy", "success_criterion"):
+        _require(
+            bool(presentation.get(field)),
+            f"manuscript_presentation omits {field}; qualify broadly, present narrowly",
+        )
 
     scoping = registry.get("compose_claim_scoping") or {}
     for field in (

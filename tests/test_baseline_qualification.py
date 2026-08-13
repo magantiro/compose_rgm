@@ -155,12 +155,19 @@ def test_claim_scoped_registry_agrees_with_the_qualification_verdicts() -> None:
         )
 
 
-def test_barred_phrase_cannot_reappear_in_the_operational_claim() -> None:
-    """'without retraining' is barred project-wide; REINVENT's warm optimizer killed it."""
+@pytest.mark.parametrize(
+    "bad_claim",
+    [
+        # REINVENT's warm optimizer makes this arguable.
+        "COMPOSE changes goal without retraining.",
+        # The scalable experiment fixes tau=3, H=6, so switch-time invariance
+        # is not established.
+        "COMPOSE retargets at an arbitrary step of the trajectory.",
+    ],
+)
+def test_barred_phrases_cannot_reappear_in_the_operational_claim(bad_claim) -> None:
     registry = copy.deepcopy(_registry())
-    registry["retargeting_claim_wording"]["operational_claim"] = (
-        "COMPOSE changes goal without retraining."
-    )
+    registry["retargeting_claim_wording"]["operational_claim"] = bad_claim
     with pytest.raises(BaselineQualificationError, match="barred phrase"):
         validate_qualification_registry(registry)
 
@@ -171,4 +178,30 @@ def test_retargeting_wording_is_present_and_operational() -> None:
     assert "zero parameter updates" in claim
     assert "realized" in claim
     assert wording["mars_naming_rule"].strip()
+    assert wording["sanctioned_phrasing"] == (
+        "after a realized molecular prefix has accumulated"
+    )
     assert wording["mol2mol_belongs_beside_it"].strip()
+
+
+def test_barred_sota_claim_is_rejected_anywhere_in_the_registry() -> None:
+    """The phrase is most likely to slip into a method note, not a reviewed field."""
+    registry = copy.deepcopy(_registry())
+    registry["methods"][0]["adapter"]["note"] = "COMPOSE outperforms state of the art here."
+    with pytest.raises(BaselineQualificationError, match="barred claim"):
+        validate_qualification_registry(registry)
+
+
+def test_the_ban_declaration_may_quote_the_phrase_it_bans() -> None:
+    registry = _registry()
+    assert "outperforms state of the art" in (
+        registry["manuscript_presentation"]["barred_claim"].lower()
+    )
+    validate_qualification_registry(registry)
+
+
+def test_manuscript_presentation_is_present() -> None:
+    pres = _registry()["manuscript_presentation"]
+    assert "sunk engineering effort" in pres["rule"].lower()
+    assert pres["reviewer_facing_hierarchy"]["MARS"].startswith("DEMOTED")
+    assert "does not need to win" in pres["success_criterion"].lower()
