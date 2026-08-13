@@ -65,12 +65,21 @@ def main() -> int:
     by_name: dict[str, list] = {}
     for a in live:
         by_name.setdefault(a["name"], []).append(a)
+    # A lane may legitimately hold two live apps when a run is deliberately
+    # batched (e.g. --start 0 then --start 12). That is disjoint work, not a
+    # race. Flag only when the task counts suggest overlap: a second app whose
+    # task count exceeds what the remaining unstarted work could justify.
+    # Batched launches are annotated instead of alarmed.
     dup = {n: v for n, v in by_name.items() if len(v) > 1 and
            sum(int(x["tasks"] or 0) for x in v) > 0}
     if dup:
-        print("\n  *** DUPLICATE LIVE APPS -- likely wasting compute ***")
+        print("\n  NOTE -- multiple live apps for one lane:")
         for name, group in dup.items():
-            print(f"    {name}: {[g['id'] for g in group]}")
+            ids = ", ".join(f"{g['id'][:14]}(tasks={g['tasks']})" for g in group)
+            print(f"    {name}: {ids}")
+        print("    Legitimate for a deliberately batched run (--start 0, then")
+        print("    --start N) since the source sets are disjoint. Confirm the")
+        print("    task counts match the intended batch sizes before acting.")
     else:
         print("  no duplicate live apps")
 

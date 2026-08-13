@@ -878,3 +878,20 @@ Note the shape of the two late failures this rule addresses: in both, the
 **guard** rather than the metric was the sign-fixed object. A wrong metric gets
 re-examined; a test enforcing a wrong metric makes re-examination look like a
 regression. The anti-tautology rule must point at its own guards.
+
+---
+
+# Pending fix: Stage B has no per-arm checkpointing
+
+`modal_apps/pathwise_stage_b_app.py` writes a durable shard per source but no
+per-arm partial, unlike the retargeting and Pareto apps. A preemption there
+costs the **whole task** rather than one arm, and intra-task progress is
+invisible — which is why Stage B reports 0 partials while the other lanes
+report many.
+
+Completed per-source shards are safe and the resumable driver skips them, so
+this is a cost and visibility gap rather than a correctness risk.
+
+**Fix it before any Stage B rerun or held-out confirmation, and not before the
+current run finishes** — touching a live app to add durability would create more
+risk than it removes.
