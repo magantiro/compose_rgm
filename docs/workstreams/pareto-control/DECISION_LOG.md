@@ -756,3 +756,40 @@ entry stands as the record that it was looked at.
 
 **Changes a frozen object:** no.
 
+---
+
+## D-019b · 2026-08-13 · The n=4 pattern is FALSIFIED at n=5
+
+**Status: `SUPERSEDED`.** Recorded at **05:22 EDT, 5 of 12 sources complete**,
+six minutes after D-019.
+
+Source **006** completed at `greedy 1.2688 -> verified 1.2869`: **HV above 1, so
+past the p99 scale, and verified is HIGHER by +0.018.** D-019's rule said sources
+past `z*` should show verified worse. They do not.
+
+| source | verified - greedy | HV level | consistent with D-019? |
+|---|---:|---|---|
+| 002 | +0.267 | < 1 | yes |
+| 008 | +0.211 | < 1 | yes |
+| 000 | -0.001 | > 1 | yes |
+| 010 | -0.073 | > 1 | yes |
+| **006** | **+0.018** | **> 1** | **NO** |
+
+**The sign rule is dead.** Saturation does not predict the direction of the
+set-level HV difference.
+
+**What I am deliberately NOT doing.** The five points still admit a weaker
+story -- the two large gains sit below the scale and the three small changes sit
+above it, so saturation might predict *magnitude* rather than *sign*. **That
+hypothesis is not recorded as a finding and will not be pursued.** Replacing a
+falsified rule with a fresh one fitted to the same five points is how an
+exploratory note becomes a result nobody chose to test, and the second
+hypothesis would have exactly as much support as the first did an hour ago.
+
+**What this vindicates.** D-019 was labelled `EXPLORATORY` and given an explicit
+dissolution clause. It dissolved within six minutes and one source. The record
+now shows the pattern was looked at, stated, and abandoned -- which is the
+outcome the labelling existed to make cheap.
+
+**Changes a frozen object:** no. Supersedes an exploratory note, nothing else.
+

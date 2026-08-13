@@ -123,12 +123,15 @@
   },
   "exploratory_observations": {
     "hv_sign_vs_saturation": {
-      "status": "EXPLORATORY -- not preregistered, not a frozen metric",
+      "status": "SUPERSEDED -- FALSIFIED at n=5",
       "recorded_at": "2026-08-13T05:16-04:00, 4 of 12 sources complete",
       "observation": "the sign of verified minus greedy set-level HV separates by whether the source exceeded the held-in p99 scale: +0.267 and +0.211 where HV < 1, -0.001 and -0.073 where HV > 1",
       "hypothesis": "future-aware control helps where the front has room and slightly hurts once the source has saturated the objective scale, trading front spread for per-preference value",
       "caveat": "n=4; a two-versus-two split occurs by chance often enough that this is not evidence",
-      "reporting_rule": "if it survives to twelve sources it is reported as an exploratory observation GENERATED AT n=4, never as a preregistered test"
+      "reporting_rule": "if it survives to twelve sources it is reported as an exploratory observation GENERATED AT n=4, never as a preregistered test",
+      "falsified_by": "source 006: greedy 1.2688 -> verified 1.2869. HV above 1 (past z*) yet verified HIGHER by +0.018, which the rule said could not happen",
+      "falsified_at": "2026-08-13T05:22-04:00, 5 of 12 sources",
+      "not_replaced": "a weaker magnitude-based story still fits the five points and is deliberately NOT recorded; replacing a falsified rule with a fresh one fitted to the same data is how an exploratory note becomes a result nobody chose to test"
     }
   }
 }
