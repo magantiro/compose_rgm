@@ -363,5 +363,36 @@
       "qed": 0.3249,
       "clogp": 3.6155
     }
-  ]
+  ],
+  "claim_bearing_registry_units": {
+    "WARNING": "report pairs, endpoint entries and unique canonical molecules separately. They are three different numbers and have already been confused once: '84' is unique SOURCES, '168' was a SUM of two group sizes, and the true union is 164.",
+    "exact_target_sealed": {
+      "pairs": 67,
+      "endpoint_entries": 134,
+      "unique_canonical_molecules": 120,
+      "unique_sources": 62,
+      "unique_targets": 63
+    },
+    "exact_target_development": {
+      "pairs": 24,
+      "endpoint_entries": 48,
+      "unique_canonical_molecules": 48,
+      "unique_sources": 24,
+      "unique_targets": 24
+    },
+    "union_across_both_exact_target_sets": {
+      "total_pairs": 91,
+      "unique_sources_only": 84,
+      "unique_canonical_molecules_both_endpoints": 164,
+      "sum_of_group_sizes_NOT_the_union": 168,
+      "molecules_in_both_groups": 4
+    },
+    "retargeting_development": {
+      "unique_sources": 30,
+      "pool": "held-in, disjoint from the reserve"
+    },
+    "registry_union_total_unique_molecules": 194,
+    "of_which_present_in_the_reserve": 164,
+    "exclusion_was_a_set_union": true
+  }
 }
