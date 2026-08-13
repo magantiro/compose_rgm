@@ -1,13 +1,4 @@
 {
-  "accounting_instrument_check": {
-    "artifact": "diagnostics/baselines/graph_ga_accounting_smoke.json",
-    "checks_passed": 7,
-    "cpu_seconds": 0.22,
-    "environment_caveat": "rdkit 2025.09.6, not the production pin 2024.3.5",
-    "not_a_measurement_of": "GraphGA. Upstream GB-GA is not vendored; the stream is GA-shaped only.",
-    "sources": "5 held-in, cohort e402e318",
-    "verdict": "PASS"
-  },
   "adapter_status": {
     "DDSBM": "blocked",
     "GraphGA": "designed_not_built",
@@ -59,7 +50,7 @@
       "subcapability": "C4c_retargeting"
     }
   ],
-  "content_commit": "a63c24d266e6174083f8562b8e4634c39d81fd2b",
+  "content_commit": "1a535f18c4a5db2386e17451f2a7b54d1295a5a0",
   "content_commit_note": "The commit at which every sha256 in durable_artifacts was computed. This manifest is committed immediately after it, so branch HEAD is one commit ahead of content_commit and differs from it only by this file. The manifest cannot name its own commit, which is why the two are separate.",
   "durable_artifacts": {
     "baselines/ddsbm/README.md": "332526fb54423db36bb49319796514a7b9d57740abc3b4a374fb63db03bb8c4a",
@@ -75,22 +66,22 @@
     "baselines/reinvent/README.md": "a7ce7d7a0d21bc0cdd6948e3cd4d2af7af7574a6e7350365b622f7526f31a306",
     "baselines/reinvent/environment.lock": "7a42319e9fc5f72ddfa29e995a4226eecd2393ba45e2533ef2b93eafdc2428f2",
     "configs/comparator_registry_v3.json": "672ae90f8e2e938f19b3d5013e70deaaa127302c62e605bbee185bc5bc0e3147",
-    "diagnostics/baselines/graph_ga_accounting_smoke.json": "eb65843876cd45f04c84044b2d9f3ad48259923702985ea8a7b1252107ff9268",
+    "diagnostics/baselines/oracle_accounting_harness_stress_test.json": "f5c317fe9cd2ec384989c41961a56f02ebcbc3bdc7c0dca7d3fae88ed7708c28",
     "docs/RELATED_WORK_MATRIX.md": "aaf2a41d64b84dad3e084a0d8841a5579862ee78ccc2f32675ccfbd0c2c911e5",
-    "docs/workstreams/baseline-qualification/COMPARATOR_MATRIX.md": "afe9f1cec8dd0d2c699819d39159895fa69ef02781ade9a6b8e1c835b5d96318",
-    "docs/workstreams/baseline-qualification/DECISION_LOG.md": "6aa5ebc8851a105d558e3896465ab1f1331e11c536d256aef66e636a713aaafd",
-    "docs/workstreams/baseline-qualification/FAIRNESS_CONTRACT.md": "f09096a14cc9ea75fbfd010cb42ebf28d25a3ee59e9a52e8b93a46b808ee8419",
-    "docs/workstreams/baseline-qualification/HANDOFF.md": "a5985b2e056e8d80a4b7ccc87e06cf929bc37758138123012371544290e3aabf",
-    "docs/workstreams/baseline-qualification/PROTOCOL.md": "b72a2ada441806d87da0a82703530b9e445451d73d66922778d7113dea6e45b4",
-    "docs/workstreams/baseline-qualification/STATUS.md": "0fc73b834b43330921c817d2dc081832d4c79852585313c8ab4f13fc52d36ac8",
-    "docs/workstreams/baseline-qualification/comparator_registry_v3.json": "1d5f4ba39fab63f71310f5f3f68c7e093880f2a7bd5366713e35d9fdbdbe6340",
+    "docs/workstreams/baseline-qualification/COMPARATOR_MATRIX.md": "50e0c34f699bd10ffd1fbf7d79c1f7f521124e421d115fbbc2957f4740abbabc",
+    "docs/workstreams/baseline-qualification/DECISION_LOG.md": "e46c07c0c122621342d6e704b49b26f70474528f7ecef10a522d3ad5b599a19b",
+    "docs/workstreams/baseline-qualification/FAIRNESS_CONTRACT.md": "126705324257d6ec01c115bd33fcd8e2c92b23c3e391fda97f34c1d63702dd92",
+    "docs/workstreams/baseline-qualification/HANDOFF.md": "85554a383444db9d5e95809cf6f37a156cde765c9bcdbcf08cb3a440834b2fed",
+    "docs/workstreams/baseline-qualification/PROTOCOL.md": "e780ea1844dfe7f21e23b273988182f88d2555fe401ce7f029d9b5854b5588a6",
+    "docs/workstreams/baseline-qualification/STATUS.md": "deea1c9240c35c59606100dc0845dd1406b994765c3620cb5004a0e473cbb94e",
+    "docs/workstreams/baseline-qualification/comparator_registry_v3.json": "7342b6edaffcb80bb993c6334cfa7d2ccb757a6ef320c554bda3db28e71d029f",
     "paper_iclr_stochastic_rewriting/references.bib": "5aad478f512110ce4d8dbe1119ec57bd1ce67a8a88eac3b41d8b23f726ac5bc9",
-    "scripts/baseline_accounting_smoke.py": "325b52cbf123fb6dd4dd1d69601f8b126e2d06eeadc54bca2155ff90d3085ac2",
+    "scripts/oracle_accounting_stress_test.py": "6cf37cf2e97e76377efc5640521dcb6a8b23401af7eb7caf44520ea97e0ab767",
     "scripts/render_comparator_registry.py": "3c9d5d7fcfa47a155fd6c4b5fd9f6388c124bb03deec51a812ce0ad431e1e19c",
     "src/compose_v4/experiments/baseline_qualification.py": "4fb5a744e24beb37919f0dcf7f64f60c63f1f1b9d81901e131358da644ed31b1",
-    "src/compose_v4/experiments/oracle_accounting.py": "da9bb9bbc7d546efbfdc7777a8fc31e3108cf93a5edb9433c2b3a260af4c2d5d",
+    "src/compose_v4/experiments/oracle_accounting.py": "e53ad480967fc6fc61bfd74442139225dd453e4e406aca538fb794fef2139982",
     "tests/test_baseline_qualification.py": "adf47db62598c71695869bbb54a95e3117e32187a343981a0089bccfb5d0c923",
-    "tests/test_oracle_accounting.py": "52234bbd5f84037405f972ea46abfb86fecf37702566e71fbeae9b060515eea7"
+    "tests/test_oracle_accounting.py": "e7ffe2626304f0f0ef4a5e1cca53c4fd486c101ebc25ff86d1cb465739d104d8"
   },
   "external_dependencies_installed": 0,
   "frozen_inputs": {
@@ -119,15 +110,34 @@
   ],
   "modal_runs_launched": 0,
   "naming_rule": "The MARS arm is 'restart at x_tau under a new objective' -- a NEW optimization launched from the current molecule. It must never be described as native same-prefix retargeting or continuation. The molecule is preserved; the proposal, imitation dataset and temperature are not.",
+  "no_baseline_has_been_run": "There is NO GraphGA result and no result for any other external method. The single execution in this lane is an ORACLE-ACCOUNTING HARNESS STRESS TEST driving the shared accountant with a GA-SHAPED, adversarial-by-construction candidate stream. Upstream GB-GA was never vendored and nothing external was installed.",
   "oracle_accounting": {
+    "conceptual_invariant": "Caching may reduce evaluator work, but it cannot erase wasteful algorithmic requests. That is why a cache hit still increments oracle_requests.",
     "counters": {
-      "benchmark_native": "unique valid canonical molecules scored; ONLY for comparison against published PMO numbers",
-      "raw_compute": "every invocation incl. duplicates, rejects, invalids, rescores; for ALL efficiency claims"
+      "evaluator_calls": "expensive oracle executions after caching; real work",
+      "oracle_requests": "every scoring request incl. duplicates, rejects and invalids; ALGORITHMIC DEMAND, NOT CPU",
+      "unique_valid_canonical_evaluations": "distinct valid canonical molecules evaluated; benchmark-native, ONLY for comparison against published PMO numbers"
     },
     "implementation": "src/compose_v4/experiments/oracle_accounting.py",
-    "measured_gap": "same stream, budget 120: benchmark_native bought 120 distinct molecules over 288 invocations; raw_compute bought 59 over 120",
-    "rule": "both always logged, never substituted, counter named in every caption",
-    "status": "FROZEN 2026-08-13"
+    "measured_gap": "same stream, budget 120: unique_valid_canonical_evaluations bought 120 distinct molecules over 288 requests; oracle_requests bought 59 over 120. Disabling the cache left requests at 288 and unique at 120 while moving evaluator_calls from 120 to 262.",
+    "required_ratio": "oracle_requests / unique_valid_canonical_evaluations",
+    "rule": "all three always logged, never substituted, counter named in every caption; for a literal-compute number report wall and core time",
+    "status": "FROZEN 2026-08-13, three counters"
+  },
+  "oracle_accounting_harness_stress_test": {
+    "THIS_IS_NOT_A_GRAPHGA_RESULT": "Do not cite it as a GraphGA smoke, a GraphGA result, or evidence about GraphGA's behaviour.",
+    "artifact": "diagnostics/baselines/oracle_accounting_harness_stress_test.json",
+    "checks_passed": 9,
+    "cpu_seconds": "<1",
+    "environment_caveat": "rdkit 2025.09.6, not the production pin 2024.3.5",
+    "required_before_any_claim_bearing_graphga_comparison": [
+      "the actual upstream GB-GA implementation vendored",
+      "the production RDKit pin 2024.3.5, or an explicitly isolated environment whose canonicalization is reconciled against it",
+      "the real algorithm terminating against every counter"
+    ],
+    "sources": "5 held-in, cohort e402e318",
+    "title": "ORACLE-ACCOUNTING HARNESS STRESS TEST",
+    "verdict": "PASS"
   },
   "projected_smoke_cpu_core_hours": {
     "DDSBM": "N/A",
@@ -137,7 +147,7 @@
     "MARS": "PROJECTION, NOT MEASURED. Sampler ~0.2 CPU-core-hours. Dominant cost is the one-time vocabulary build over 1,488,640 ChEMBL SMILES with RDKit bond-breaking enumeration, ~0.5-1.0 CPU-core-hours, cacheable to the artifact volume and paid once. Budget 1.5 CPU-core-hours for the first smoke, 0.2 thereafter.",
     "REINVENT": "PROJECTION, NOT MEASURED. Adapter A: an Olivecrona-style RNN sampling 64 SMILES of ~60 tokens per step on CPU, order seconds per step; ~20 steps per source gives a few minutes each, so budget 0.3 CPU-core-hours for 5 sources plus a small prior download. Adapter B: transformer priors are larger; budget 0.5-1.0 CPU-core-hours plus the Zenodo prior downloads. Total 1.0-1.5 CPU-core-hours."
   },
-  "recommended_next_action": "NONE. HOLD. The instrument gate passed and the main workstream's instruction is to stop there; Lane 1 may force an R_theta retrain, which would invalidate any adapter built now. When the hold lifts: vendor upstream GB-GA (MIT) and run the real GraphGA adapter on 3-5 held-in sources under the frozen dual accounting, projected 0.1 CPU-core-hours.",
+  "recommended_next_action": "NONE. HOLD. The harness gate passed and the main workstream's instruction is to stop there: do not run external baseline sweeps and do not launch anything on Modal, because Lane 1 may reopen the base process and every external comparison would have to be repeated. Local adapter preparation is permitted and was NOT started, deliberately. When the hold lifts: vendor upstream GB-GA (MIT), reconcile canonicalization against the production RDKit pin 2024.3.5, and run the real GraphGA adapter on 3-5 held-in sources under the frozen three-counter accounting, projected 0.1 CPU-core-hours.",
   "resolved_since_last_handoff": [
     "Oracle-counting convention: FROZEN as dual accounting, see oracle_accounting.",
     "docs/RELATED_WORK_MATRIX.md corrections: MERGED on this branch with lead approval (DDSBM var-card/birth-death to partial; new GraphXForm and REINVENT 4 rows; per-cell sentences). MARS pathwise deliberately unchanged.",
