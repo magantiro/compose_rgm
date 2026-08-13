@@ -848,3 +848,33 @@ carries and hides ceiling effects. Report exceedance descriptively; do not
 introduce a robust or clipped variant after seeing a result.
 
 Ratios built on the same normalizer are unaffected, since the constant cancels.
+
+# Meta-rule: a sign guarantee belongs to an estimand, not to an arm pair
+
+Every `GUARANTEED_SIGN` declaration must carry **both**:
+
+1. **a written mathematical reason** the sign is guaranteed, naming the estimand
+   it applies to; and
+2. **an adversarial fixture** showing that a NEIGHBOURING metric on the SAME
+   arm pair, which lacks that guarantee, can go the opposite direction.
+
+A green test must establish the **scope** of a guarantee, not merely perpetuate
+the declaration.
+
+**Why.** A registry keyed on the contrast alone marked every metric on
+`verified_pref` vs `greedy_pref` as sign-guaranteed — hypervolume included —
+and suppressed the comparison. A passing test asserted exactly that, so the
+error was held in place by the machinery meant to prevent it. Only the
+per-preference scalarized continuation value that verified control explicitly
+optimises carries the guarantee; hypervolume is a set-level object and moves
+either way.
+
+**Permanent regression case:** Pareto smoke source 000, where verified improved
+the preference-conditioned scalarized values while `HV_verified` (1.0060) fell
+*below* `HV_greedy` (1.0074). If a future refactor starts suppressing that
+comparison again, this must fail loudly.
+
+Note the shape of the two late failures this rule addresses: in both, the
+**guard** rather than the metric was the sign-fixed object. A wrong metric gets
+re-examined; a test enforcing a wrong metric makes re-examination look like a
+regression. The anti-tautology rule must point at its own guards.
