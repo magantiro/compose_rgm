@@ -373,18 +373,61 @@ def run_arms(task: dict[str, Any]) -> dict[str, Any]:
             path.append(current)
         return path, overrides
 
+    # PER-ARM CHECKPOINTING. A task runs 22-39 minutes across five arms and
+    # Modal preempts containers; without this, a preemption at minute 30
+    # discards everything and the restart re-pays the checkpoint load too.
+    # Partial results are committed as each arm lands, so a restarted
+    # container resumes at arm granularity.
+    out_dir = Path(RUN_ROOT) / task.get("out_dir", "retarget_intervention")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    partial_path = out_dir / f"{goal_a}_{task['index']:03d}.partial.json"
+    partial: dict[str, Any] = {}
+    if partial_path.exists():
+        try:
+            partial = json.loads(partial_path.read_text())
+            if partial.get("switch_state") != switch:
+                partial = {}          # different prefix -- never mix runs
+        except Exception:             # noqa: BLE001
+            partial = {}
+    done_arms = partial.get("arms", {})
+    if done_arms:
+        print(f"[{goal_a}/{task['index']:03d}] resuming with "
+              f"{len(done_arms)}/{len(ARMS)} arms already done", flush=True)
+
+    def checkpoint(name: str, path_list: list[str], ov: int | None) -> None:
+        done_arms[name] = {"trajectory": path_list, "overrides": ov}
+        partial_path.write_text(json.dumps(
+            {"switch_state": switch, "arms": done_arms}, indent=2) + "\n")
+        artifact_volume.commit()
+
     paths: dict[str, list[str]] = {}
     overrides: dict[str, int] = {}
     # continue_A: the negative control -- keep optimising the OLD goal.
-    paths["continue_A"] = greedy_path(switch, post, goal_a)
-    paths["greedy_retarget"] = greedy_path(switch, post, "B")
-    paths["verified_retarget"], overrides["verified_retarget"] = \
-        verified_run(switch, post, "B")
-    # restart: discard the realised history, same remaining budget.
-    paths["restart"], overrides["restart"] = verified_run(start, post, "B")
-    # clairvoyant: B known from step 0, full horizon. No surprise.
-    paths["clairvoyant"], overrides["clairvoyant"] = \
-        verified_run(start, HORIZON, "B")
+    if "continue_A" in done_arms:
+        paths["continue_A"] = done_arms["continue_A"]["trajectory"]
+    else:
+        paths["continue_A"] = greedy_path(switch, post, goal_a)
+        checkpoint("continue_A", paths["continue_A"], None)
+
+    if "greedy_retarget" in done_arms:
+        paths["greedy_retarget"] = done_arms["greedy_retarget"]["trajectory"]
+    else:
+        paths["greedy_retarget"] = greedy_path(switch, post, "B")
+        checkpoint("greedy_retarget", paths["greedy_retarget"], None)
+
+    for name, start_state, budget in (
+            ("verified_retarget", switch, post),
+            # restart: discard the realised history, same remaining budget.
+            ("restart", start, post),
+            # clairvoyant: B known from step 0, full horizon. No surprise.
+            ("clairvoyant", start, HORIZON)):
+        if name in done_arms:
+            paths[name] = done_arms[name]["trajectory"]
+            overrides[name] = done_arms[name]["overrides"]
+        else:
+            paths[name], overrides[name] = verified_run(start_state, budget, "B")
+            checkpoint(name, paths[name], overrides[name])
+
     landings = {name: path[-1] for name, path in paths.items()}
 
     arms = {name: {"landing": key,
@@ -409,8 +452,8 @@ def run_arms(task: dict[str, Any]) -> dict[str, Any]:
                "distinct_landings": len({a["landing"] for a in arms.values()}),
                "kernel_calls": counter["calls"],
                "seconds": round(time.perf_counter() - started, 1)}
-    out = Path(RUN_ROOT) / task.get("out_dir", "retarget_intervention")
-    out.mkdir(parents=True, exist_ok=True)
+    out = out_dir
+    partial_path.unlink(missing_ok=True)
     (out / f"{goal_a}_{task['index']:03d}.json").write_text(
         json.dumps(payload, indent=2) + "\n")
     artifact_volume.commit()

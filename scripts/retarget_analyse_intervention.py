@@ -130,8 +130,12 @@ def main() -> int:
     parser.add_argument("--out", required=True, type=Path)
     args = parser.parse_args()
 
+    # Exclude *.partial.json -- per-arm checkpoints written mid-task. They
+    # carry an incomplete `arms` map and would silently under-report every
+    # comparison if globbed in alongside finished shards.
     rows = [json.loads(Path(f).read_text())
-            for f in glob.glob(str(args.shards / "*.json"))]
+            for f in glob.glob(str(args.shards / "*.json"))
+            if not f.endswith(".partial.json")]
     if not rows:
         raise SystemExit(f"no shards under {args.shards}")
     prefixes = json.loads(args.prefixes.read_text())
