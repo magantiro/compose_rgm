@@ -475,6 +475,100 @@ recovery definitions, and rollout law are all carried over unchanged.
 
 ---
 
+## 2026-08-13 — STAGE B designed and committed. NOT launched.
+
+**Decision.** Build the stage-B protocol, panel, runner, analyser and tests;
+commit them; launch nothing.
+
+**Authorisation.** Lead authorised stage-B *design* after A2 passed 5/5. The
+situation is materially different from rings: the frozen corridor produced 25
+events across 8 of 12 sources with the criterion holding at the CI lower bound,
+excursions of median 0.693 logP lasting a median 4 of 6 steps, and a mask that
+leaves real room to act.
+
+**Objective.** DRD2 potency alone, frozen in the retargeting lane. Chosen
+because it is independently motivated and already frozen. **No objective search
+was performed** — searching objectives is how a pathwise effect gets
+manufactured.
+
+**Arms.** Exactly four causal arms in a 2×2 of {where enforced} × {how
+navigated}, dispatched from a declared `(mask, endpoint_only, controller)`
+triple through one code path. `unconstrained_potency` is descriptive only. No
+fifth causal arm: each extra arm is another comparison a reader must be stopped
+from making.
+
+**Frozen object touched.** None. Corridor, horizon, `R_theta`, kernel, goal
+language and verified-controller strata all carried over unchanged.
+
+---
+
+## 2026-08-13 — PRIMARY estimand switched to the UNCONDITIONAL hidden-path rate
+
+**Decision.** Preregister both forms, with the **unconditional** rate primary:
+
+- PRIMARY `P(x_H ∈ C AND ∃t<H: x_t ∉ C)` — denominator is every eligible source;
+- SECONDARY `P(∃t<H: x_t ∉ C | x_H ∈ C)` — reported **with its denominator,
+  every time**.
+
+**Evidence before the decision.** The conditional form's denominator is
+**controller-dependent**: an arm that rarely delivers an acceptable endpoint
+can post a dramatic rate on a handful of trajectories. That is the same failure
+family this project has caught repeatedly — a quantity whose value is driven by
+something other than the effect it appears to measure.
+
+**Also fixed.** Both estimands are reported **separately for greedy and
+verified** endpoint-only control and never pooled, because the controller
+changes which endpoints become acceptable and pooling mixes two denominators.
+
+**Verification that the distinction is real.**
+`test_conditional_fraction_can_be_dramatic_on_a_tiny_denominator` builds a case
+where 10 of 12 sources fail to deliver at all: the conditional fraction reads
+**1.0** while the honest unconditional rate is **2/12 = 0.167**. The test
+asserts the report exposes both and that the primary is the smaller.
+
+**Frozen object touched.** Supersedes the conditional-only estimand named in
+the first stage-B authorisation. Recorded rather than silently swapped.
+
+---
+
+## 2026-08-13 — Terminal cost: three outcomes declared informative in advance
+
+**Decision.** Record, before the run, that little/no cost, moderate cost, and
+large cost or frequent support collapse are **all informative**, and that none
+is a failure.
+
+**Why now.** Once numbers exist, whichever outcome appears will be tempting to
+narrate as the intended one. Writing all three down first removes that freedom.
+The protocol also states explicitly that **there is no expectation that
+pathwise beats endpoint-only on potency** — the mask can only shrink the
+reachable set, so framing a potency win as the goal would be suspicious.
+
+**Frozen object touched.** None.
+
+---
+
+## 2026-08-13 — Support-tight handling predeclared from the A2 spread
+
+**Decision.** SUPPORT_TIGHT = median retained legal-successor fraction < 0.10,
+measured along the **descriptive** arm's states. All 24 sources stay in the
+primary ITT; a sensitivity analysis excluding them is secondary; the threshold
+is frozen and is not redefined after seeing which arm suffers.
+
+**Evidence before the decision.** A2's per-source median retention spanned
+0.048 to 0.917 — a spread the pooled 0.573 conceals, on a design whose unit is
+the source.
+
+**Why 0.10 is not a new number.** It is the V4a viability threshold already in
+use since the A2 protocol.
+
+**Why the descriptive arm.** Measuring retention along a constrained arm's own
+path would only ever visit states the mask had already approved, making the
+classification depend on the outcome it is meant to condition.
+
+**Frozen object touched.** None.
+
+---
+
 ## 2026-08-13 — STAGE A2 EXECUTED. PASSES 5/5. Lane stopped as instructed.
 
 **Decision.** Launch A2 exactly as committed at `39f0ef1c`; change nothing;

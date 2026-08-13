@@ -564,6 +564,178 @@ not launched.
 
 ---
 
+# ADDENDUM 3 — Stage B: corridor-constrained potency control
+
+**Status:** `DESIGN_ONLY`. **Committed, NOT LAUNCHED.**
+**Panel:** `diagnostics/pathwise_stage_b_panel.json`, `panel_sha256 2d993508…`
+
+## The question
+
+> When terminally acceptable trajectories can pass through forbidden
+> intermediate states, what is the **cost and benefit** of enforcing the
+> constraint throughout molecular evolution?
+
+**Not** "can the mask achieve zero violations". That is guaranteed by
+construction and stays barred from the results table, checked only as a bug
+detector.
+
+**Task:** increase DRD2 potency subject to `2.3689 ≤ cLogP(x_t) ≤ 4.4522` for
+all `t`, `H = 6`.
+
+**Objective provenance:** DRD2 potency alone (goal `P`), frozen in the
+retargeting lane. Chosen because it is independently motivated and already
+frozen, **not** because it maximises the pathwise effect. No objective search
+was performed.
+
+## The four primary arms — a 2×2
+
+| | navigate myopically | navigate with lookahead |
+|---|---|---|
+| **enforce at `t=H` only** | `endpoint_greedy` | `endpoint_verified` |
+| **enforce at every `t`** | `pathwise_greedy` | `pathwise_verified` |
+
+All four run the **same code path** (`build_stage_b_arm`), dispatched from a
+declared `(mask, endpoint_only, controller)` triple. A terminal-cost difference
+between `endpoint_greedy` and `pathwise_greedy` therefore cannot be an artefact
+of two separately written policies — the failure that let the retargeting
+lane's "verified arm was secretly greedy" survive two runs.
+
+`unconstrained_potency` is recorded as **DESCRIPTIVE ONLY**, never enters a
+causal contrast, and is the arm whose visited states define the retention
+census. **No fifth causal arm.**
+
+## Estimands
+
+### PRIMARY — hidden-path RATE (unconditional)
+
+> `P( x_H ∈ C  AND  ∃t < H : x_t ∉ C )`
+
+**Every eligible source stays in the denominator.** It cannot collapse.
+Answers: how often does endpoint-only optimisation actually produce an endpoint
+we would accept despite an invalid trajectory?
+
+### SECONDARY — hidden-path FRACTION among accepted endpoints
+
+> `P( ∃t < H : x_t ∉ C  |  x_H ∈ C )`
+
+The intuitive reading, but **its denominator is controller-dependent**: an arm
+that rarely delivers an acceptable endpoint can post a dramatic rate on a
+handful of trajectories. **The denominator is reported alongside it every
+time.** `test_conditional_fraction_can_be_dramatic_on_a_tiny_denominator`
+constructs exactly that case (2/2 = 1.0 conditional against 2/12 = 0.167
+unconditional) and checks the report exposes both.
+
+**Both are reported separately for greedy and verified endpoint-only control
+and are never pooled**, because the controller changes which endpoints become
+acceptable and pooling would mix two different denominators.
+
+Both can be zero. The ring-motif family returned exactly zero.
+
+### TERMINAL COST — controller parity
+
+- `Δ^G = U_P(pathwise_greedy) − U_P(endpoint_greedy)`
+- `Δ^V = U_P(pathwise_verified) − U_P(endpoint_verified)`
+
+Each pair shares a controller and a source and differs **only** in where the
+constraint is enforced, so the sign is free.
+
+**Three outcomes are declared informative in advance. None is a failure:**
+
+1. **little or no potency cost** → strongest pathwise result;
+2. **moderate potency cost** → still meaningful; the constraint genuinely
+   restricts molecular evolution;
+3. **large cost or frequent support collapse** → pathwise control works
+   formally but is practically too restrictive for this corridor — a real
+   finding.
+
+**There is no expectation that pathwise beats endpoint-only on potency.**
+Framing that as the goal would be suspicious, since the mask can only shrink
+the reachable set.
+
+### FUTURE-AWARE — guaranteed sign, therefore not a primary claim
+
+`U_P(pathwise_verified) − U_P(pathwise_greedy)`. Verified contains greedy's
+action and overrides only on strict improvement, so the direction is fixed
+before any molecule exists.
+
+**No sign test. No "verified never loses".** Reported: effect size,
+top-1 disagreement, and **constrained-performance recovered** (planning gain as
+a fraction of the potency the mask cost under greedy parity, undefined and
+omitted where the mask cost nothing). Binary headroom is given over the
+denominator of sources where `pathwise_greedy` actually failed; **headroom 0
+over a denominator of 0 is a CEILING, not a null**, and the subclaim closes
+exactly as the retargeting lane closed its own.
+
+## Panel — 24 new held-in sources
+
+Seed 20260815. Disjoint from the 6 stage-A, 12 A2, and 30 retargeting sources,
+and from `reserve_source_keys`; asserted in code and in tests.
+
+**Eligibility is source-only and EXCURSION-BLIND:** parses · heavy atoms in the
+frozen band · `cLogP(x_0)` inside the corridor · potency headroom at step zero.
+**Nothing about whether a molecule previously produced an excursion.**
+Selecting on excursion propensity would make the primary estimand true by
+construction; `test_stage_b_eligibility_is_excursion_blind` pins the signature.
+
+**The source is the independent unit.** All intervals are source-clustered
+bootstraps.
+
+## Support-tight sources — predeclared before the run
+
+A2 found per-source median retention spanning **0.048 to 0.917**, which a
+pooled median of 0.573 conceals. Therefore, fixed now:
+
+- a source is **SUPPORT_TIGHT** when its median retained legal-successor
+  fraction is **< 0.10** — the viability threshold already in use, **not a new
+  number**;
+- retention is measured along the **DESCRIPTIVE** arm's states, so the
+  classification cannot depend on any constrained arm's outcome;
+- **all 24 sources stay in the primary intention-to-treat analysis**;
+- the **fraction of support-tight sources is reported**;
+- a **predeclared sensitivity analysis excluding them** is reported alongside;
+- **the threshold is never redefined after seeing which arm suffers.**
+
+### Source-level diagnostics, preregistered
+
+- retained-support fraction per source;
+- **mask-empty rate per source**, not pooled;
+- number of feasible actions at each step;
+- whether a terminal failure is attributable to `no_legal_successor`,
+  `empty_after_mask`, or `controller_stopped_with_support_available`.
+
+## Costed plan — NOT AUTHORISED TO RUN
+
+```bash
+PYTHONPATH=src:. MODAL_PROFILE=rahul-94866 \
+  modal run --detach modal_apps/pathwise_stage_b_app.py --sources 24
+# verify `modal app list` shows `ephemeral (detached)`
+# do NOT wrap the client in `timeout`: killing it cancels the detached job
+```
+
+| | Estimate |
+|---|---:|
+| sources | 24 |
+| arms | 4 causal + 1 descriptive |
+| kernel calls / source | ~120–150 (two lookahead arms dominate) |
+| cost basis | measured: 123 s startup + 14.3 s per call |
+| **container-hours** | **≈ 12–15** |
+| wall time | ~45 min at 24 parallel containers |
+| circuit breaker | 400 calls/source |
+
+**This is 9–11× the A2 spend** and the largest run in this lane. The panel is
+source-sharded and the driver skips committed shards, so it may be authorised
+in halves (`--start 0 --sources 12`, then `--start 12 --sources 12`) with no
+wasted work.
+
+## Scope limits
+
+No held-out confirmation is designed. If stage B works, that decision comes
+after. Stage A remains permanently **FAIL**, and A2 remains developmental
+follow-up rather than independent confirmation that cLogP corridors are
+special — family B was selected because it showed the effect.
+
+---
+
 ## External comparator evidence (from the baseline-qualification lane)
 
 **GraphXForm's action masking is genuinely pathwise, but only over valence,

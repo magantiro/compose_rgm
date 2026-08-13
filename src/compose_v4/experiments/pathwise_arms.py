@@ -28,6 +28,10 @@ from compose_v4.experiments.pathwise_arm_names import (
     ALL_ARMS,
     STAGE_A,
     STAGE_B,
+    STAGE_B_ALL,
+    STAGE_B_CORRIDOR_ARMS,
+    STAGE_B_DESCRIPTIVE_ARM,
+    STAGE_B_SPEC,
 )
 from compose_v4.experiments.pathwise_constraints import (
     mask_successors,
@@ -39,8 +43,13 @@ __all__ = [
     "ARM_BUILDERS",
     "STAGE_A",
     "STAGE_B",
+    "STAGE_B_ALL",
+    "STAGE_B_CORRIDOR_ARMS",
+    "STAGE_B_DESCRIPTIVE_ARM",
+    "STAGE_B_SPEC",
     "ArmContext",
     "best_of_n",
+    "build_stage_b_arm",
     "greedy_path",
     "stochastic_path",
     "verified_path",
@@ -83,17 +92,45 @@ class ArmContext:
                       reverse=True)
 
 
-def greedy_path(ctx: ArmContext, start: str, *, mask: bool) -> dict:
-    """Commit the best immediate successor. Stops on an empty support."""
-    path, current, dead = [start], start, None
+def _enforce_here(step: int, horizon: int, *, mask: bool,
+                  endpoint_only: bool) -> bool:
+    """Where the constraint bites.
+
+    `endpoint_only=True` applies the mask ONLY when choosing the final
+    committed state, which is exactly what "the constraint is checked on the
+    product" means operationally. `endpoint_only=False` applies it at every
+    step. The two differ in nothing else, which is what makes the 2x2 of
+    {where enforced} x {how navigated} an actual factorial rather than two
+    unrelated policies.
+    """
+    if not mask:
+        return False
+    return (step == horizon - 1) if endpoint_only else True
+
+
+def greedy_path(ctx: ArmContext, start: str, *, mask: bool,
+                endpoint_only: bool = False) -> dict:
+    """Commit the best immediate successor. Stops on an empty support.
+
+    `endpoint_terminal_infeasible` records the case that matters for the
+    endpoint arms: the controller reached the last step and no successor
+    satisfied the constraint, so it cannot deliver a compliant product at all.
+    Those trajectories leave the conditioning set of the primary estimand
+    rather than being quietly counted as compliant.
+    """
+    path, current, dead, infeasible = [start], start, None, False
     for step in range(ctx.horizon):
-        rows = ctx.support(current, mask=mask)
+        here = _enforce_here(step, ctx.horizon, mask=mask,
+                             endpoint_only=endpoint_only)
+        rows = ctx.support(current, mask=here)
         if not rows:
             dead = step
+            infeasible = bool(here)
             break
         current = ctx.ranked(rows)[0][0]
         path.append(current)
-    return {"trajectory": path, "dead_end_step": dead}
+    return {"trajectory": path, "dead_end_step": dead,
+            "endpoint_terminal_infeasible": infeasible}
 
 
 def stochastic_path(ctx: ArmContext, start: str, *, mask: bool,
@@ -118,7 +155,8 @@ def stochastic_path(ctx: ArmContext, start: str, *, mask: bool,
     return {"trajectory": path, "dead_end_step": dead}
 
 
-def verified_path(ctx: ArmContext, start: str, *, mask: bool) -> dict:
+def verified_path(ctx: ArmContext, start: str, *, mask: bool,
+                  endpoint_only: bool = False) -> dict:
     """Commit argmax V_G under strict improvement, then re-plan.
 
     Every lookahead rollout obeys the same mask as the committed step, so the
@@ -131,11 +169,15 @@ def verified_path(ctx: ArmContext, start: str, *, mask: bool) -> dict:
     commits a lower V_G.
     """
     current, overrides, disagreements, path, dead = start, 0, 0, [start], None
+    infeasible = False
     for step in range(ctx.horizon):
         remaining = ctx.horizon - step
-        rows = ctx.support(current, mask=mask)
+        here = _enforce_here(step, ctx.horizon, mask=mask,
+                             endpoint_only=endpoint_only)
+        rows = ctx.support(current, mask=here)
         if not rows:
             dead = step
+            infeasible = bool(here)
             break
         keys = [row[0] for row in rows]
         reference = [row[1] for row in rows]
@@ -159,9 +201,15 @@ def verified_path(ctx: ArmContext, start: str, *, mask: bool) -> dict:
                 picked.append(index)
                 seen.add(index)
 
+        # The lookahead plans over the REMAINING horizon under the same
+        # enforcement rule, so an endpoint-only controller's rollouts also
+        # enforce only at the true final step and a pathwise controller's
+        # rollouts stay inside the feasible set the whole way.
         lookahead = ArmContext(**{**ctx.__dict__, "horizon": remaining - 1})
         futures = {
-            i: ctx.utility(greedy_path(lookahead, keys[i], mask=mask)["trajectory"][-1])
+            i: ctx.utility(
+                greedy_path(lookahead, keys[i], mask=mask,
+                            endpoint_only=endpoint_only)["trajectory"][-1])
             for i in picked
         }
         best = max(picked, key=lambda i: (futures[i], keys[i]))
@@ -171,7 +219,8 @@ def verified_path(ctx: ArmContext, start: str, *, mask: bool) -> dict:
         current = keys[chosen]
         path.append(current)
     return {"trajectory": path, "dead_end_step": dead, "overrides": overrides,
-            "top1_disagreements": disagreements}
+            "top1_disagreements": disagreements,
+            "endpoint_terminal_infeasible": infeasible}
 
 
 def best_of_n(ctx: ArmContext, start: str, *, mask: bool, goal_aware: bool,
@@ -203,6 +252,20 @@ def best_of_n(ctx: ArmContext, start: str, *, mask: bool, goal_aware: bool,
 #: Arm name -> builder. The names and the stage partition live in
 #: `pathwise_arm_names`, which has no RDKit dependency, because `modal run`
 #: imports the app module in the launcher's interpreter.
+def build_stage_b_arm(name: str, ctx: ArmContext, start: str) -> dict:
+    """Dispatch a stage-B arm from its declared (mask, endpoint_only, controller).
+
+    Reading the arm's behaviour off the spec table rather than hand-writing
+    five closures is what keeps the 2x2 an actual factorial: `endpoint_greedy`
+    and `pathwise_greedy` are provably the same code path differing in one
+    boolean, so a terminal-cost difference between them cannot be an artefact
+    of two separately written policies.
+    """
+    mask, endpoint_only, controller = STAGE_B_SPEC[name]
+    runner = verified_path if controller == "verified" else greedy_path
+    return runner(ctx, start, mask=mask, endpoint_only=endpoint_only)
+
+
 ARM_BUILDERS: dict[str, Callable[[ArmContext, str], dict]] = {
     "unconstrained_greedy":
         lambda ctx, s: greedy_path(ctx, s, mask=False),

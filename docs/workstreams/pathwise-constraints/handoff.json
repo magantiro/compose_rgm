@@ -7,7 +7,7 @@
   "head_commit": "39f0ef1cffc1407cd60b426cac6815d12a8f81c9",
   "head_commit_note": "the commit main verified by ref comparison; A2 result commits land on top of it and are listed in commit_trail",
   "working_tree_clean": true,
-  "status": "SMOKE_HELD_IN_STAGE_A2_PASS",
+  "status": "DESIGN_ONLY_STAGE_B_COMMITTED_NOT_LAUNCHED",
   "held_out_opened": false,
   "modal_runs_launched": 1,
   "question": "Can COMPOSE require an exact labeled structural motif at every committed state, and does that constraint actually bind, i.e. does endpoint-only filtering return molecules that reached validity through forbidden intermediates?",
@@ -163,6 +163,30 @@
       "status": "DESIGN_ONLY",
       "sha256": "afe04fa937cf0aaf0640f9c96a4827cf9f2ca2b66a1cfdc0d2071b75ad7d6128",
       "purpose": "A2 gate verdicts with source-clustered bootstrap"
+    },
+    {
+      "path": "diagnostics/pathwise_stage_b_panel.json",
+      "status": "DESIGN_ONLY",
+      "sha256": "ef9197502b0e8e0d72a0caf30f1f8b4da7d9c0ef4dd27ee5f0ed90c238f06daa",
+      "purpose": "frozen stage-B panel, 24 new held-in sources"
+    },
+    {
+      "path": "modal_apps/pathwise_stage_b_app.py",
+      "status": "DESIGN_ONLY",
+      "sha256": "9a0867f2fcb489d5e569c22c358af082565f9c08d4ac0462876b767420b33fbb",
+      "purpose": "stage-B runner (NOT launched)"
+    },
+    {
+      "path": "scripts/pathwise_select_stage_b_panel.py",
+      "status": "DESIGN_ONLY",
+      "sha256": "2190479f48b8a4300f7d41ba7bb33de919534847de3a8ae91e6a2ffd888506c6",
+      "purpose": "excursion-blind panel selector"
+    },
+    {
+      "path": "scripts/analyse_pathwise_stage_b.py",
+      "status": "DESIGN_ONLY",
+      "sha256": "623782793abf42075d8359532cdf5b5c464ad63e6f5686c48f4098fd231afc12",
+      "purpose": "stage-B estimands, ITT + frozen sensitivity"
     }
   ],
   "motif_rule": {
@@ -184,8 +208,8 @@
     ]
   },
   "tests": {
-    "command": "python3 -m pytest tests/test_pathwise_constraint.py tests/test_pathwise_arms.py tests/test_pathwise_analysis.py tests/test_pathwise_a2_prevalence.py -q",
-    "count": 84,
+    "command": "python3 -m pytest tests/test_pathwise_constraint.py tests/test_pathwise_arms.py tests/test_pathwise_analysis.py tests/test_pathwise_a2_prevalence.py tests/test_pathwise_stage_b.py -q",
+    "count": 109,
     "result": "PASS",
     "key_negative_test": "tests/test_pathwise_analysis.py::test_analyser_FAILS_the_vacuity_gate_when_nothing_ever_violates"
   },
@@ -269,7 +293,7 @@
     },
     "per_source_kernel_call_budget": 360
   },
-  "recommended_next_action": "Main lane decides. A2 passed 5/5 on pre-committed criteria, so a causal source-level pathwise-control experiment on the cLogP corridor is feasible under the frozen R_theta. Stage B is NOT authorised by that result and was not run; this lane has stopped. If the causal experiment is designed, power it on sources not trajectories, pre-register a per-source retention floor, and state which denominator any headline rate uses.",
+  "recommended_next_action": "Authorise the Stage B launch, or its first half. Protocol, panel, runner, analyser and 22 stage-B tests are committed and frozen; nothing is running. At 9-11x the A2 spend the bounded option is --start 0 --sources 12 first; the driver skips committed shards so the second half later costs nothing extra.",
   "not_recommended": [
     "stage B: unauthorised, and greedy is already at ceiling so headroom is 0 by definition",
     "changing the motif rule, horizon, or panel and re-running",
@@ -281,7 +305,11 @@
     "reusing stage-A shards across a model change",
     "treating A2 as independent confirmation: family B was selected because it showed the effect",
     "reading A2 as revising stage A, which remains permanently FAIL",
-    "quoting pooled median retention without the per-source spread (0.048 to 0.917)"
+    "quoting pooled median retention without the per-source spread (0.048 to 0.917)",
+    "adding a fifth causal arm to stage B",
+    "searching objectives: potency was frozen in the retargeting lane",
+    "reporting the conditional hidden-path fraction without its denominator",
+    "treating a terminal potency cost as a failed result"
   ],
   "deviations_from_brief": [
     "eligibility drops 'kernel offers motif-destroying successors' (brief line 207) because it is the numerator of the vacuity gate",
@@ -621,5 +649,123 @@
       "sha": "39f0ef1",
       "what": "denominator rule stated; verdict pinned in tests (VERIFIED BY MAIN)"
     }
-  ]
+  ],
+  "stage_b_corridor": {
+    "status": "DESIGN_ONLY",
+    "launched": false,
+    "authorised_to_launch": false,
+    "question": "when terminally acceptable trajectories can pass through forbidden intermediate states, what is the COST and BENEFIT of enforcing the constraint throughout molecular evolution?",
+    "not_the_question": "can the mask achieve zero violations -- guaranteed by construction, barred from the results table, checked only as a bug detector",
+    "task": "increase DRD2 potency subject to 2.3689 <= cLogP(x_t) <= 4.4522 for all t, H=6",
+    "objective": {
+      "name": "DRD2 potency alone (goal P)",
+      "provenance": "frozen in the retargeting lane",
+      "chosen_because": "independently motivated and already frozen",
+      "objective_search_performed": false
+    },
+    "arms": {
+      "causal_2x2": {
+        "endpoint_greedy": "enforce at t=H, navigate myopically",
+        "pathwise_greedy": "enforce at every t, navigate myopically",
+        "endpoint_verified": "enforce at t=H, navigate with lookahead",
+        "pathwise_verified": "enforce at every t, navigate with lookahead"
+      },
+      "descriptive_only": "unconstrained_potency",
+      "fifth_causal_arm": false,
+      "single_code_path": "all four dispatched from a declared (mask, endpoint_only, controller) triple via build_stage_b_arm, so a terminal-cost difference cannot be an artefact of two separately written policies"
+    },
+    "estimands": {
+      "PRIMARY_hidden_path_rate": {
+        "definition": "P(x_H in C AND exists t<H: x_t not in C)",
+        "denominator": "every eligible source",
+        "denominator_is_controller_independent": true,
+        "can_be_zero": true
+      },
+      "SECONDARY_hidden_path_fraction": {
+        "definition": "P(exists t<H: x_t not in C | x_H in C)",
+        "denominator": "accepted endpoints",
+        "DENOMINATOR_IS_CONTROLLER_DEPENDENT": true,
+        "reported_with_denominator_every_time": true
+      },
+      "reported_separately_for_greedy_and_verified": true,
+      "pooled": false,
+      "why_primary_changed": "the conditional denominator is controller-dependent: an arm that rarely delivers an acceptable endpoint can post a dramatic rate on a handful of trajectories. Superseded the conditional-only estimand from the first stage-B authorisation.",
+      "distinction_is_tested": "test_conditional_fraction_can_be_dramatic_on_a_tiny_denominator: conditional 1.0 vs unconditional 2/12 = 0.167"
+    },
+    "terminal_cost": {
+      "delta_G": "U_P(pathwise_greedy) - U_P(endpoint_greedy)",
+      "delta_V": "U_P(pathwise_verified) - U_P(endpoint_verified)",
+      "controller_parity": true,
+      "sign_is_free": true,
+      "no_expectation_pathwise_beats_endpoint_only": true,
+      "three_outcomes_informative_in_advance": [
+        "little or no potency cost -> strongest pathwise result",
+        "moderate potency cost -> still meaningful",
+        "large cost or frequent support collapse -> practically too restrictive for this corridor, a real finding"
+      ],
+      "none_is_a_failure": true
+    },
+    "future_aware": {
+      "comparison": "U_P(pathwise_verified) - U_P(pathwise_greedy)",
+      "sign_guaranteed_by": "policy improvement",
+      "sign_test_computed": false,
+      "reported": [
+        "effect size",
+        "top-1 disagreement",
+        "constrained-performance recovered"
+      ],
+      "binary_headroom_denominator": "sources where pathwise_greedy failed",
+      "zero_over_zero": "CEILING_NOT_A_NULL"
+    },
+    "panel": {
+      "path": "diagnostics/pathwise_stage_b_panel.json",
+      "panel_sha256": "2d9935085f7e19975660d04230036cc62151cfb7a22ebc1ea799f02ff1d2425c",
+      "sources": 24,
+      "seed": 20260815,
+      "disjoint_from": {
+        "stage_a": 6,
+        "a2": 12,
+        "retarget": 30
+      },
+      "eligibility_is_excursion_blind": true,
+      "why": "selecting on excursion propensity would make the primary estimand true by construction"
+    },
+    "independent_unit": "source",
+    "support_tight": {
+      "threshold": 0.1,
+      "predeclared_before_run": true,
+      "is_a_new_number": false,
+      "provenance": "the V4a viability threshold already in use since A2",
+      "measured_on": "states visited by the DESCRIPTIVE unconstrained arm",
+      "all_sources_stay_in_primary_ITT": true,
+      "sensitivity_excluding_them": "reported, secondary",
+      "threshold_redefinable_after_seeing_outcomes": false
+    },
+    "source_level_diagnostics": [
+      "retained-support fraction per source",
+      "mask-empty rate per source (not pooled)",
+      "number of feasible actions at each step",
+      "terminal-failure attribution: no_legal_successor / empty_after_mask / controller_stopped_with_support_available"
+    ],
+    "costed_plan": {
+      "command": "PYTHONPATH=src:. MODAL_PROFILE=rahul-94866 modal run --detach modal_apps/pathwise_stage_b_app.py --sources 24",
+      "estimated_kernel_calls_per_source": [
+        120,
+        150
+      ],
+      "cost_basis": "measured: 123 s startup + 14.3 s per kernel call",
+      "estimated_container_hours": [
+        12,
+        15
+      ],
+      "estimated_wall_minutes": 45,
+      "per_source_kernel_call_budget": 400,
+      "relative_to_a2": "9-11x the A2 spend; the largest run in this lane",
+      "can_be_run_in_halves": "--start 0 --sources 12, then --start 12 --sources 12",
+      "resumable": true,
+      "cpu_only": true,
+      "authorised": false
+    },
+    "held_out_confirmation_designed": false
+  }
 }

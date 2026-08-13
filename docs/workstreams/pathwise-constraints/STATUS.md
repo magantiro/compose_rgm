@@ -1,9 +1,56 @@
 # Workstream C — Pathwise Constraints: Status
 
-- **Status:** Stage A2 **EXECUTED — PASSES ALL FIVE CRITERIA** (`SMOKE_HELD_IN`)
-- **What is running:** **NOTHING.** A2 finished 12/12 clean; no run is open.
-- **Held-out data opened:** **NO.**
-- **Stage B:** **NOT authorised.** Main lane decides after seeing these numbers.
+- **Status:** Stage B **DESIGNED AND COMMITTED — NOT LAUNCHED**
+- **What is running:** **NOTHING.** No Modal run is open.
+- **Held-out data opened:** **NO.** No held-out confirmation is designed.
+
+## Stage B — frozen, awaiting launch authorisation
+
+**Question:** when terminally acceptable trajectories can pass through
+forbidden intermediate states, what is the cost and benefit of enforcing the
+constraint throughout molecular evolution?
+
+**Task:** increase DRD2 potency subject to `2.3689 ≤ cLogP(x_t) ≤ 4.4522` for
+all `t`, `H=6`. Objective frozen from the retargeting lane; no objective search.
+
+**2×2, one code path:**
+
+| | greedy | verified |
+|---|---|---|
+| enforce at `t=H` | `endpoint_greedy` | `endpoint_verified` |
+| enforce at every `t` | `pathwise_greedy` | `pathwise_verified` |
+
+plus `unconstrained_potency`, **descriptive only**. No fifth causal arm.
+
+**Estimands:**
+
+- **PRIMARY** hidden-path RATE `P(x_H ∈ C AND ∃t<H: x_t ∉ C)` — denominator is
+  every eligible source, cannot collapse.
+- **SECONDARY** hidden-path FRACTION `P(∃t<H: x_t ∉ C | x_H ∈ C)` — intuitive,
+  but **controller-dependent denominator**, always reported with it.
+- Both reported **separately for greedy and verified**, never pooled.
+- **Terminal cost** `Δ^G`, `Δ^V` under controller parity; sign is free, and
+  three outcomes are declared informative in advance — none is a failure.
+
+**Panel:** 24 new held-in sources, `panel_sha256 2d993508…`, seed 20260815,
+disjoint from all 48 previously used sources. Eligibility is **excursion-blind**.
+
+**Support-tight predeclared:** median retention < 0.10 (the existing viability
+number). All 24 stay in the primary ITT; sensitivity excluding them is
+secondary; the threshold is frozen.
+
+**Cost: ≈12–15 container-hours**, ~45 min wall — **9–11× the A2 spend**, the
+largest run in this lane. Source-sharded and resumable, so it can be authorised
+in halves.
+
+## Prior stages
+
+| Stage | Verdict | State |
+|---|---|---|
+| Ring-system stage A | **G1 FAIL** | CLOSED, permanently, not revised |
+| Three-family reversibility census | **NO FAMILY PASSES** | CLOSED |
+| Stage A2 — cLogP corridor prevalence | **PASS (5/5)** | complete |
+| **Stage B — corridor-constrained potency** | — | **committed, not launched** |
 
 ## Stage A2 verdict — PASS
 
@@ -155,17 +202,18 @@ Well under budget; the 360-call circuit breaker was never approached.
 
 ## Next action
 
-**None from this lane. Stopped as instructed.** A2 passed on pre-committed
-criteria; the main lane decides whether a causal source-level pathwise-control
-experiment follows. **Stage B is not authorised by the A2 result** and was not
-run.
+**Await launch authorisation for Stage B.** The protocol, panel, runner,
+analyser and 22 stage-B tests are committed. Nothing is running.
 
-Two things the main lane should weigh before designing that experiment, both
-recorded in `HANDOFF.md`:
+Because Stage B is 9–11× the A2 spend, the lead may prefer to authorise it in
+halves: `--start 0 --sources 12`, inspect, then `--start 12 --sources 12`. The
+driver skips committed shards, so the second half costs nothing extra and an
+outage costs nothing.
 
-1. **Retention is highly heterogeneous** — per-source median retention spans
-   0.048 to 0.917. The pooled median passes V4a comfortably, but a controller
-   on sources 1 and 5 would face a very tight choice set.
-2. **Absorption has not disappeared** — 4 of 12 sources produced no event, and
-   3 of those had violating rollouts that never returned. Reversibility is a
-   property of most molecules here, not all.
+Two facts from A2 that shaped this design and are already handled:
+
+1. **Retention heterogeneity** (0.048–0.917) is handled by the predeclared
+   support-tight classification with ITT plus frozen-threshold sensitivity.
+2. **Absorption has not disappeared** — a third of A2 sources produced no
+   excursion. The primary estimand's denominator is every eligible source
+   precisely so that this cannot inflate the headline.

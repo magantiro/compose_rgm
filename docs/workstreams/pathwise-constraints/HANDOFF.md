@@ -16,6 +16,109 @@
 > i.e. does endpoint-only filtering return molecules that reached validity by
 > passing through forbidden intermediates?
 
+# STAGE B — DESIGNED AND COMMITTED, NOT LAUNCHED
+
+**Question:** when terminally acceptable trajectories can pass through
+forbidden intermediate states, what is the cost and benefit of enforcing the
+constraint throughout molecular evolution? **Not** "can the mask achieve zero
+violations" — that is definitional and barred from the results table.
+
+**Task:** increase DRD2 potency subject to `2.3689 ≤ cLogP(x_t) ≤ 4.4522` for
+all `t`, `H=6`. Objective frozen from the retargeting lane; **no objective
+search**.
+
+## The 2×2 — one code path, two booleans
+
+| | greedy | verified |
+|---|---|---|
+| **enforce at `t=H`** | `endpoint_greedy` | `endpoint_verified` |
+| **enforce at every `t`** | `pathwise_greedy` | `pathwise_verified` |
+
+Dispatched from a declared `(mask, endpoint_only, controller)` triple through
+`build_stage_b_arm`, so a terminal-cost difference cannot be an artefact of two
+separately written policies. `unconstrained_potency` is **descriptive only**.
+**No fifth causal arm.**
+
+## Estimands
+
+| | Definition | Denominator |
+|---|---|---|
+| **PRIMARY** hidden-path RATE | `P(x_H ∈ C AND ∃t<H: x_t ∉ C)` | **every eligible source** — cannot collapse |
+| **SECONDARY** hidden-path FRACTION | `P(∃t<H: x_t ∉ C \| x_H ∈ C)` | accepted endpoints — **controller-dependent**, always reported alongside |
+
+**Both reported separately for greedy and verified endpoint-only control, never
+pooled** — the controller changes which endpoints become acceptable, so pooling
+mixes two denominators.
+
+Why the switch: the conditional form is intuitive but an arm that rarely
+delivers can post a dramatic rate on a handful of trajectories.
+`test_conditional_fraction_can_be_dramatic_on_a_tiny_denominator` builds that
+case — conditional **1.0** against unconditional **2/12 = 0.167** — and asserts
+the report exposes both.
+
+## Terminal cost — sign is free, three outcomes informative in advance
+
+`Δ^G = U_P(pathwise_greedy) − U_P(endpoint_greedy)`;
+`Δ^V = U_P(pathwise_verified) − U_P(endpoint_verified)`. Each pair shares a
+controller and a source and differs only in where enforcement happens.
+
+1. little or no potency cost → strongest pathwise result;
+2. moderate cost → still meaningful; the constraint genuinely restricts
+   molecular evolution;
+3. large cost or frequent support collapse → pathwise control works formally
+   but is practically too restrictive for this corridor — a real finding.
+
+**None is a failure, and there is no expectation that pathwise beats
+endpoint-only.** The mask can only shrink the reachable set.
+
+## Future-aware — guaranteed sign, not a primary claim
+
+`pathwise_verified − pathwise_greedy` is fixed in direction by policy
+improvement. **No sign test.** Reported: effect size, top-1 disagreement, and
+constrained-performance recovered. Binary headroom over the denominator of
+sources where `pathwise_greedy` failed; **0 over 0 is a CEILING, not a null**.
+
+## Panel and predeclared handling
+
+24 new held-in sources, `panel_sha256 2d993508…`, seed 20260815, disjoint from
+all 48 previously used sources. **Eligibility is excursion-blind** — selecting
+on excursion propensity would make the primary estimand true by construction,
+and a test pins the signature.
+
+**Support-tight (predeclared):** median retention `< 0.10` measured along the
+**descriptive** arm's states. All 24 stay in the **primary ITT**; sensitivity
+excluding them is secondary; **the threshold is frozen**.
+
+**Source-level diagnostics:** retained-support fraction per source; mask-empty
+rate **per source**; feasible actions at each step; terminal-failure
+attribution (`no_legal_successor` / `empty_after_mask` /
+`controller_stopped_with_support_available`).
+
+## Cost — NOT AUTHORISED
+
+| | Estimate |
+|---|---:|
+| kernel calls / source | ~120–150 |
+| cost basis | measured: 123 s startup + 14.3 s/call |
+| **container-hours** | **≈ 12–15** |
+| wall | ~45 min at 24 parallel containers |
+| circuit breaker | 400 calls/source |
+
+**9–11× the A2 spend** — the largest run in this lane. Source-sharded and
+resumable, so it can be authorised in halves (`--start 0 --sources 12`, then
+`--start 12 --sources 12`) with no wasted work.
+
+```bash
+PYTHONPATH=src:. MODAL_PROFILE=rahul-94866 \
+  modal run --detach modal_apps/pathwise_stage_b_app.py --sources 24
+# verify `ephemeral (detached)`; do NOT wrap the client in `timeout`
+```
+
+No held-out confirmation is designed. Stage A remains permanently **FAIL**; A2
+remains developmental follow-up.
+
+---
+
 # STAGE A2 — EXECUTED, PASSES 5/5
 
 App `ap-CH7z7NUbkOxv7mvU74HPRD`, verified `ephemeral (detached)`, launched with
@@ -640,26 +743,22 @@ terminal filter changes the returned molecule. The capability gap is real; the
 
 # Recommended next action
 
-> **Main lane decides.** A2 passed 5/5 on pre-committed criteria, so the
-> viability question this lane was asked is answered: a causal, source-level
-> pathwise-control experiment on the cLogP corridor is feasible under the
-> frozen `R_theta`. **Stage B is not authorised by that result and was not
-> run.** This lane has stopped.
+> **Authorise the Stage B launch, or authorise its first half.** The protocol,
+> panel, runner, analyser and 22 stage-B tests are committed and frozen;
+> nothing is running. Given this is 9–11× the A2 spend, the bounded option is
+> `--start 0 --sources 12` first — the driver skips committed shards, so the
+> second half later costs nothing extra.
 
-If the main lane designs that causal experiment, three things from A2 should
-carry into it:
+All three concerns raised from A2 are now handled inside the frozen design:
 
-1. **Power it on sources, not trajectories.** The per-source event rate is
-   0.347 with CI [0.167, 0.556]; the fraction of sources showing the phenomenon
-   is 0.667 with CI [0.417, 0.917]. A 60-source panel implies roughly 25–55
-   informative sources — comfortable, but the interval is wide at n=12.
-2. **Pre-register a per-source retention floor.** Pooled median retention is
-   0.573, but two of twelve sources sit near 0.05. Whether those sources are
-   admissible is a design decision that should be made before the run, not
-   after seeing which arm they hurt.
-3. **Expect a mixed population.** A third of sources showed no excursion at
-   all. The causal contrast only exists on the informative subset, and the
-   denominator for any headline rate must say which one it is.
+1. **Powered on sources, not trajectories** — the source is the independent
+   unit and every interval is a source-clustered bootstrap.
+2. **Per-source retention floor pre-registered** — SUPPORT_TIGHT at `< 0.10`,
+   measured on the descriptive arm, ITT keeps all 24, sensitivity is secondary,
+   threshold frozen.
+3. **Mixed population handled by the denominator** — the primary estimand is
+   unconditional, so sources that never leave the corridor stay in the
+   denominator instead of inflating a conditional rate.
 
 # Actions explicitly not recommended
 

@@ -1,0 +1,308 @@
+{
+  "schema": "compose.pathwise.stage_b_panel",
+  "status": "DESIGN_ONLY",
+  "held_out_opened": false,
+  "pool": "held-in training_source_keys only",
+  "seed": 20260815,
+  "scanned": 74,
+  "rejected": {
+    "source_outside_corridor": 44,
+    "already_potent": 3,
+    "size_band": 10
+  },
+  "excluded_prior_panels": {
+    "stage_a": 6,
+    "a2": 12,
+    "retarget": 30
+  },
+  "objective": {
+    "name": "DRD2 potency (goal P)",
+    "provenance": "frozen in the retargeting lane; chosen because it is independently motivated and already frozen, NOT because it maximises the pathwise effect",
+    "threshold": 0.5
+  },
+  "constraint": {
+    "clogp_corridor": [
+      2.3688650000000004,
+      4.452222500000002
+    ],
+    "provenance": "frozen held-in interquartile range, read at runtime; UNCHANGED since the three-family census"
+  },
+  "eligibility": {
+    "heavy_atom_band": [
+      18,
+      38
+    ],
+    "source_clogp_inside_corridor": true,
+    "excludes_sources_already_potent": true,
+    "excursion_history_used": false,
+    "note": "eligibility is EXCURSION-BLIND: selecting on excursion propensity would make the primary estimand true by construction"
+  },
+  "selection_rule": "first N eligible sources in shuffled scan order; no ranking, no preference, no successor enumeration, no arm outcome",
+  "sources": [
+    {
+      "index": 0,
+      "source": "CC1CN(C(=S)NN=CC2CCCCN2)CCN1C1CCCCCC1",
+      "slots": 48,
+      "heavy_atoms": 25,
+      "clogp": 2.7177,
+      "clogp_headroom_low": 0.3488,
+      "clogp_headroom_high": 1.7345,
+      "drd2_logodds": -4.3891,
+      "potency_margin_at_source": -1.6777
+    },
+    {
+      "index": 1,
+      "source": "O=S(=O)(c1ccc(F)cc1)c1ccc2c(c1)OC1CNCCC21",
+      "slots": 48,
+      "heavy_atoms": 23,
+      "clogp": 2.4964,
+      "clogp_headroom_low": 0.1275,
+      "clogp_headroom_high": 1.9558,
+      "drd2_logodds": -1.2652,
+      "potency_margin_at_source": -0.4836
+    },
+    {
+      "index": 2,
+      "source": "CCOC(=O)C(C)OP(=O)(OCC1C=CC(n2cc(C)c(=O)[nH]c2=O)O1)Oc1ccccc1",
+      "slots": 48,
+      "heavy_atoms": 33,
+      "clogp": 2.4705,
+      "clogp_headroom_low": 0.1017,
+      "clogp_headroom_high": 1.9817,
+      "drd2_logodds": -5.9941,
+      "potency_margin_at_source": -2.2913
+    },
+    {
+      "index": 3,
+      "source": "C=CCn1c(=O)c2ccccc2n2c(SCc3nnc(-c4ccccc4[IH4])o3)nnc12",
+      "slots": 48,
+      "heavy_atoms": 31,
+      "clogp": 3.1063,
+      "clogp_headroom_low": 0.7374,
+      "clogp_headroom_high": 1.3459,
+      "drd2_logodds": -6.4484,
+      "potency_margin_at_source": -2.4649
+    },
+    {
+      "index": 4,
+      "source": "O=C(c1ccc(Cl)cc1)C1CCC2C=CC=NN21",
+      "slots": 48,
+      "heavy_atoms": 18,
+      "clogp": 2.9113,
+      "clogp_headroom_low": 0.5424,
+      "clogp_headroom_high": 1.5409,
+      "drd2_logodds": -6.4938,
+      "potency_margin_at_source": -2.4823
+    },
+    {
+      "index": 5,
+      "source": "CCCCc1cnc2nc3c(cc2c1N)c(NC(C)=O)nn3C",
+      "slots": 48,
+      "heavy_atoms": 23,
+      "clogp": 2.3997,
+      "clogp_headroom_low": 0.0308,
+      "clogp_headroom_high": 2.0525,
+      "drd2_logodds": -5.9836,
+      "potency_margin_at_source": -2.2872
+    },
+    {
+      "index": 6,
+      "source": "CC(Nc1nccc(N2C(=O)OCC2C(C)C(F)F)n1)c1cn(-c2ccc(F)cc2)cn1",
+      "slots": 48,
+      "heavy_atoms": 32,
+      "clogp": 4.2009,
+      "clogp_headroom_low": 1.832,
+      "clogp_headroom_high": 0.2513,
+      "drd2_logodds": -4.6113,
+      "potency_margin_at_source": -1.7627
+    },
+    {
+      "index": 7,
+      "source": "CC=C(C=CCOCCCC(=O)Nc1cccc(S(=O)(=O)N2CCOCC2)c1)C(C)=O",
+      "slots": 48,
+      "heavy_atoms": 31,
+      "clogp": 2.5343,
+      "clogp_headroom_low": 0.1654,
+      "clogp_headroom_high": 1.9179,
+      "drd2_logodds": -6.7931,
+      "potency_margin_at_source": -2.5967
+    },
+    {
+      "index": 8,
+      "source": "CC(C)c1cccc(Cn2cc(-c3ccc(O)c(O)c3)nn2)c1",
+      "slots": 48,
+      "heavy_atoms": 23,
+      "clogp": 3.528,
+      "clogp_headroom_low": 1.1591,
+      "clogp_headroom_high": 0.9242,
+      "drd2_logodds": -6.2182,
+      "potency_margin_at_source": -2.3769
+    },
+    {
+      "index": 9,
+      "source": "Cc1cccc(NS(=O)(=O)c2ccc(-c3ccc(C#N)cc3)cc2)n1",
+      "slots": 48,
+      "heavy_atoms": 25,
+      "clogp": 3.7295,
+      "clogp_headroom_low": 1.3606,
+      "clogp_headroom_high": 0.7227,
+      "drd2_logodds": -6.1918,
+      "potency_margin_at_source": -2.3668
+    },
+    {
+      "index": 10,
+      "source": "Cc1ncc([N+](=O)[O-])n1CCOC(=O)c1ccccc1OCc1ccccc1",
+      "slots": 48,
+      "heavy_atoms": 28,
+      "clogp": 3.5357,
+      "clogp_headroom_low": 1.1669,
+      "clogp_headroom_high": 0.9165,
+      "drd2_logodds": -8.8943,
+      "potency_margin_at_source": -3.3999
+    },
+    {
+      "index": 11,
+      "source": "Nc1ccc2c(c1)S(=O)(=O)C=C(c1c(O)c3cc(F)ccc3n(Cc3ccc(F)cc3)c1=O)N2",
+      "slots": 48,
+      "heavy_atoms": 34,
+      "clogp": 3.8136,
+      "clogp_headroom_low": 1.4447,
+      "clogp_headroom_high": 0.6386,
+      "drd2_logodds": -4.3355,
+      "potency_margin_at_source": -1.6572
+    },
+    {
+      "index": 12,
+      "source": "COc1cc(OC)c2c(=O)c3ccccc3n(C)c2c1",
+      "slots": 48,
+      "heavy_atoms": 20,
+      "clogp": 2.7089,
+      "clogp_headroom_low": 0.34,
+      "clogp_headroom_high": 1.7433,
+      "drd2_logodds": -7.4159,
+      "potency_margin_at_source": -2.8347
+    },
+    {
+      "index": 13,
+      "source": "O=C(O)c1cn(Cc2ccccc2)c2ccc(I)cc2c1=O",
+      "slots": 48,
+      "heavy_atoms": 22,
+      "clogp": 3.3526,
+      "clogp_headroom_low": 0.9837,
+      "clogp_headroom_high": 1.0996,
+      "drd2_logodds": -5.5941,
+      "potency_margin_at_source": -2.1384
+    },
+    {
+      "index": 14,
+      "source": "O=C(Nc1ccccc1F)c1cc(S(=O)(=O)N2CCCCC2)cs1",
+      "slots": 48,
+      "heavy_atoms": 24,
+      "clogp": 3.3141,
+      "clogp_headroom_low": 0.9452,
+      "clogp_headroom_high": 1.1381,
+      "drd2_logodds": -11.2536,
+      "potency_margin_at_source": -4.3017
+    },
+    {
+      "index": 15,
+      "source": "Cc1cccc2c1CC(=Cc1cccc(C)c1C(=O)O)C2=O",
+      "slots": 48,
+      "heavy_atoms": 22,
+      "clogp": 3.824,
+      "clogp_headroom_low": 1.4552,
+      "clogp_headroom_high": 0.6282,
+      "drd2_logodds": -5.428,
+      "potency_margin_at_source": -2.0748
+    },
+    {
+      "index": 16,
+      "source": "Cc1ccc(C=CC(=O)OC23CCC(=O)C4Oc5c(O)ccc6c5C42CCN(CC2CC2)C3C6)cc1",
+      "slots": 48,
+      "heavy_atoms": 36,
+      "clogp": 4.0981,
+      "clogp_headroom_low": 1.7293,
+      "clogp_headroom_high": 0.3541,
+      "drd2_logodds": -2.6443,
+      "potency_margin_at_source": -1.0108
+    },
+    {
+      "index": 17,
+      "source": "C=CC[IH2](NCc1ccco1)c1ccc(OC)cc1OC",
+      "slots": 48,
+      "heavy_atoms": 21,
+      "clogp": 3.3282,
+      "clogp_headroom_low": 0.9593,
+      "clogp_headroom_high": 1.124,
+      "drd2_logodds": -6.3975,
+      "potency_margin_at_source": -2.4455
+    },
+    {
+      "index": 18,
+      "source": "Cc1ccc(NC(=O)N2C3CCC2CC(S(=O)(=O)c2ccccc2)C3)cc1",
+      "slots": 48,
+      "heavy_atoms": 27,
+      "clogp": 3.9962,
+      "clogp_headroom_low": 1.6274,
+      "clogp_headroom_high": 0.456,
+      "drd2_logodds": -8.7255,
+      "potency_margin_at_source": -3.3354
+    },
+    {
+      "index": 19,
+      "source": "COc1cc(C2C(Cl)C(=O)N2NC(=O)c2ccccc2)cc(OC)c1OC",
+      "slots": 48,
+      "heavy_atoms": 27,
+      "clogp": 2.5481,
+      "clogp_headroom_low": 0.1792,
+      "clogp_headroom_high": 1.9041,
+      "drd2_logodds": -5.3296,
+      "potency_margin_at_source": -2.0372
+    },
+    {
+      "index": 20,
+      "source": "CC(=O)Nc1scnc1CNCc1ccc(OC(C)C)nc1",
+      "slots": 48,
+      "heavy_atoms": 22,
+      "clogp": 2.5735,
+      "clogp_headroom_low": 0.2046,
+      "clogp_headroom_high": 1.8787,
+      "drd2_logodds": -6.6542,
+      "potency_margin_at_source": -2.5436
+    },
+    {
+      "index": 21,
+      "source": "Cc1cpc(S(=O)(=O)B2CCCCC2)cc1NC(=O)CN1CCN(C=O)C(C)C1",
+      "slots": 48,
+      "heavy_atoms": 29,
+      "clogp": 2.6252,
+      "clogp_headroom_low": 0.2564,
+      "clogp_headroom_high": 1.827,
+      "drd2_logodds": -6.4627,
+      "potency_margin_at_source": -2.4704
+    },
+    {
+      "index": 22,
+      "source": "C=CCSc1nnc(NC(=O)c2ccc(NC(C)=O)cc2)s1",
+      "slots": 48,
+      "heavy_atoms": 22,
+      "clogp": 3.0269,
+      "clogp_headroom_low": 0.658,
+      "clogp_headroom_high": 1.4253,
+      "drd2_logodds": -9.4217,
+      "potency_margin_at_source": -3.6015
+    },
+    {
+      "index": 23,
+      "source": "CSc1ccccc1NC(=O)CN(C)CC(=O)Nc1cccc(Br)c1",
+      "slots": 48,
+      "heavy_atoms": 25,
+      "clogp": 3.68,
+      "clogp_headroom_low": 1.3111,
+      "clogp_headroom_high": 0.7722,
+      "drd2_logodds": -9.413,
+      "potency_margin_at_source": -3.5981
+    }
+  ],
+  "panel_sha256": "2d9935085f7e19975660d04230036cc62151cfb7a22ebc1ea799f02ff1d2425c"
+}
