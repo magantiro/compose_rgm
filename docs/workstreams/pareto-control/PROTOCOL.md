@@ -291,16 +291,20 @@ show that a non-greedy action was worth taking.
    > - **Equal endpoint counts, enforced on every HV contrast.** HV is computed
    >   over committed endpoints only and every arm contributes exactly 5. An arm
    >   may cost more; it may never contribute more points.
-   > - **Compute parity, enforced only where a contrast claims it.** Compute is
-   >   *not* one of the four parity dimensions — `budget` there means the **edit**
-   >   budget `H = 6`, which every contrast holds. P3 and P4 do claim compute
-   >   parity, because handing `gen_rank` the control arm's budget is the entire
-   >   point of them, and the gate fails them if the native-call gap exceeds 10%
-   >   or the kernel ratio exceeds 1.25. **P2 does not.** A lookahead controller
-   >   intrinsically spends more compute than a myopic one, and throttling it to
-   >   greedy's compute would delete the mechanism under test; so P2 holds the
-   >   edit budget, holds the endpoint count, and **reports** the compute ratio,
-   >   flagged `COMPUTE_ASYMMETRIC_BY_DESIGN_REPORT_THE_RATIO`.
+   > - **Compute parity, enforced on one axis at a time.** Compute is *not* one
+   >   of the four parity dimensions — `budget` there means the **edit** budget
+   >   `H = 6`, which every contrast holds. Each contrast declares which compute
+   >   axis it claims, and only that axis is enforced; the other is reported with
+   >   the flag `COMPUTE_ASYMMETRIC_ON_AN_UNCLAIMED_AXIS_REPORT_THE_RATIO`.
+   >     - **P2 claims neither.** A lookahead controller intrinsically spends
+   >       more compute than a myopic one, and throttling it to greedy's compute
+   >       would delete the mechanism under test.
+   >     - **P3/P4 claim `kernel`, and cannot also claim `native`.** One kernel
+   >       call yields ~600 candidates, so the two axes are unsatisfiable
+   >       together: kernel-matched `gen_rank` sees ~4 endpoints against the
+   >       control arm's ~15,600 scored candidates, and native-matched
+   >       `gen_rank` would need ~2,600 trajectories and ~30 h per source. Each
+   >       instance claims one axis; the pair is the declared bracket.
    >
    > An earlier version of the gate failed P2 for its compute asymmetry, which
    > would have made verified-vs-greedy unrunnable. That is recorded rather than
@@ -401,7 +405,7 @@ data existed:
 | **D3** | a sign test against a null that a theorem makes false | statistics on the guaranteed-sign registry may report magnitude only; requesting a p-value for one is an error |
 | **D4** | a fabricated SHA-256 in a manifest | every hash in `handoff.json` is recomputed from the file on disk |
 | **D5** | the parity confound | every declared contrast must vary exactly one of {controller, start, budget, objective} |
-| **D6** | hypervolume inflated by generating more molecules | endpoint counts must be equal across the two arms of **every** HV contrast; compute parity (native gap <= 10%, kernel ratio <= 1.25) is enforced only on contrasts that **claim** it, and reported elsewhere |
+| **D6** | hypervolume inflated by generating more molecules | endpoint counts must be equal across the two arms of **every** HV contrast; compute parity is enforced only on the **one axis** a contrast claims (`kernel` ratio <= 1.25, or `native` gap <= 10%), and the unclaimed axis is reported |
 
 Additionally, every reported statistic must declare its **falsifying range** —
 the values it could take if the hypothesis were false. A statistic with an empty

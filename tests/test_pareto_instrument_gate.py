@@ -212,7 +212,7 @@ def test_d5_rejects_a_contrast_naming_an_undeclared_arm():
 #: A generate-then-rank contrast: handing gen_rank the control arm's budget IS
 #: the point, so compute parity is claimed here and is enforced.
 CONTRAST = [Contrast("P3", "greedy_pref", "gen_rank", "controller",
-                     budget_parity_claimed=True)]
+                     budget_parity_axis="kernel")]
 #: A lookahead-vs-myopic contrast: the compute asymmetry is the mechanism under
 #: test, so it is reported rather than failed.
 INTRINSIC = [Contrast("P2", "verified_pref", "greedy_pref", "controller")]
@@ -247,12 +247,13 @@ def test_d6_rejects_a_kernel_budget_blowout_even_at_matched_oracle_calls():
 def test_d6_rejects_a_native_oracle_call_gap_beyond_tolerance():
     r = _report()
     check_d6_hv_budget_matched(
-        CONTRAST,
+        [Contrast("P3n", "greedy_pref", "gen_rank", "controller",
+                  budget_parity_axis="native")],
         {"greedy_pref": {"native_oracle_calls": 100, "kernel_calls": 26},
          "gen_rank": {"native_oracle_calls": 400, "kernel_calls": 26}},
         {"greedy_pref": 5, "gen_rank": 5}, r)
     assert not r.passed
-    assert r.checks[0]["detail"]["contrasts"]["P3"]["flag"] == "BUDGET_ASYMMETRIC_NATIVE"
+    assert r.checks[0]["detail"]["contrasts"]["P3n"]["flag"] == "BUDGET_ASYMMETRIC_NATIVE"
 
 
 def test_d6_accepts_a_matched_contrast():
@@ -290,7 +291,7 @@ def test_d6_reports_rather_than_fails_an_intrinsic_compute_asymmetry():
         {"verified_pref": 5, "greedy_pref": 5}, r)
     assert r.passed
     entry = r.checks[0]["detail"]["contrasts"]["P2"]
-    assert entry["flag"] == "COMPUTE_ASYMMETRIC_BY_DESIGN_REPORT_THE_RATIO"
+    assert entry["flag"] == "COMPUTE_ASYMMETRIC_ON_AN_UNCLAIMED_AXIS_REPORT_THE_RATIO"
     assert entry["kernel_call_ratio"] > 10
 
 
@@ -305,3 +306,22 @@ def test_d6_still_forces_equal_endpoint_counts_even_when_compute_is_intrinsic():
         {"verified_pref": 40, "greedy_pref": 5}, r)
     assert not r.passed
     assert r.checks[0]["detail"]["contrasts"]["P2"]["flag"] == "UNEQUAL_ENDPOINTS"
+
+
+def test_d6_reports_the_native_gap_when_only_the_kernel_axis_is_claimed():
+    """The affordable end of the P3 bracket. gen_rank matched on kernel calls
+    sees far fewer distinct molecules than the closed-loop arm, and requiring
+    native parity too would make the contrast unrunnable at BOTH ends -- one
+    kernel call yields ~600 candidates, so the two axes cannot be satisfied
+    simultaneously. The unclaimed axis is reported."""
+    r = _report()
+    check_d6_hv_budget_matched(
+        CONTRAST,
+        {"greedy_pref": {"native_oracle_calls": 15600, "kernel_calls": 26},
+         "gen_rank": {"native_oracle_calls": 4, "kernel_calls": 24}},
+        {"greedy_pref": 5, "gen_rank": 5}, r)
+    assert r.passed
+    entry = r.checks[0]["detail"]["contrasts"]["P3"]
+    assert entry["budget_parity_axis"] == "kernel"
+    assert entry["flag"] == "COMPUTE_ASYMMETRIC_ON_AN_UNCLAIMED_AXIS_REPORT_THE_RATIO"
+    assert entry["native_call_gap"] > 100

@@ -86,17 +86,26 @@ class Contrast:
     #: vary stated out loud, and may not. The main lane's audit handled its own
     #: confounded Q1 the same way rather than deleting it.
     status: str = "PRIMARY"
-    #: True only where COMPUTE parity is part of what the contrast claims.
+    #: Which COMPUTE axis this contrast claims parity on: "kernel", "native", or
+    #: None. Only the claimed axis is enforced; the other is reported.
     #:
     #: Compute is NOT one of the four parity dimensions -- `budget` there means
-    #: the EDIT budget, H=6, which every contrast holds. A lookahead controller
-    #: intrinsically spends more compute than a myopic one, and throttling it to
-    #: greedy's compute would delete the mechanism under test; the honest
-    #: treatment is to hold the edit budget and REPORT the compute ratio. The
-    #: generate-then-rank contrasts are different: giving `gen_rank` the control
-    #: arm's budget is the entire point of them, so there compute parity is
-    #: claimed and is enforced.
-    budget_parity_claimed: bool = False
+    #: the EDIT budget, H=6, which every contrast holds. Two distinct reasons an
+    #: axis goes unclaimed:
+    #:
+    #:   * P2 claims neither. A lookahead controller intrinsically spends more
+    #:     compute than a myopic one, and throttling it to greedy's compute would
+    #:     delete the mechanism under test.
+    #:   * P3/P4 cannot claim BOTH, because one kernel call yields ~600
+    #:     candidates: matching generate-then-rank on kernel calls starves it of
+    #:     molecules, while matching it on native oracle calls hands it ~600x the
+    #:     kernel budget. Demanding both would make the contrast unrunnable at
+    #:     either end, so each instance claims one axis and the pair is reported
+    #:     as a bracket.
+    #:
+    #: Equal endpoint counts are required regardless. That is the structural
+    #: control on hypervolume inflation and it is never optional.
+    budget_parity_axis: str | None = None
 
 
 @dataclass
@@ -288,7 +297,7 @@ def check_d6_hv_budget_matched(contrasts: Sequence[Contrast],
         entry = {"endpoint_counts": [na, nb], "equal_endpoint_counts": equal_points,
                  "native_call_gap": round(native_gap, 4),
                  "kernel_call_ratio": round(kernel_ratio, 3),
-                 "budget_parity_claimed": c.budget_parity_claimed,
+                 "budget_parity_axis": c.budget_parity_axis,
                  "flag": None}
         # Equal endpoint counts are enforced for EVERY hypervolume contrast.
         # That is the structural control on the inflation channel: an arm cannot
@@ -296,15 +305,18 @@ def check_d6_hv_budget_matched(contrasts: Sequence[Contrast],
         if not equal_points:
             entry["flag"] = "UNEQUAL_ENDPOINTS"
             ok = False
-        elif c.budget_parity_claimed and native_gap > native_tolerance:
+        elif c.budget_parity_axis == "native" and native_gap > native_tolerance:
             entry["flag"] = "BUDGET_ASYMMETRIC_NATIVE"
             ok = False
-        elif c.budget_parity_claimed and kernel_ratio > kernel_ratio_limit:
+        elif c.budget_parity_axis == "kernel" and kernel_ratio > kernel_ratio_limit:
             entry["flag"] = "BUDGET_ASYMMETRIC_KERNEL"
             ok = False
-        elif kernel_ratio > kernel_ratio_limit:
-            # Reported, not failed: the compute asymmetry IS the mechanism here.
-            entry["flag"] = "COMPUTE_ASYMMETRIC_BY_DESIGN_REPORT_THE_RATIO"
+        elif kernel_ratio > kernel_ratio_limit or native_gap > native_tolerance:
+            # Reported, not failed: on an UNCLAIMED axis the asymmetry is either
+            # the mechanism under test (P2) or one declared end of a bracket
+            # (P3/P4). Failing here would hide the experiment rather than a
+            # confound; the ratio is what the reader needs instead.
+            entry["flag"] = "COMPUTE_ASYMMETRIC_ON_AN_UNCLAIMED_AXIS_REPORT_THE_RATIO"
         detail[c.name] = entry
     report.add("D6_hv_budget_matched", ok,
                {"contrasts": detail,
@@ -345,10 +357,13 @@ LANE_CONTRASTS = (
     Contrast("P1_unguided_floor", "greedy_pref", "unguided", "objective",
              status="CONTEXT_ONLY"),
     Contrast("P2_future_awareness", "verified_pref", "greedy_pref", "controller"),
+    # The affordable end of the bracket: gen_rank matched on KERNEL calls. The
+    # native-matched end needs ~2,600 unguided trajectories per source (~15,600
+    # kernel calls, ~30 h) and is costed for main rather than run here.
     Contrast("P3_closed_vs_open_loop", "greedy_pref", "gen_rank@greedy", "controller",
-             budget_parity_claimed=True),
+             budget_parity_axis="kernel"),
     Contrast("P4_closed_vs_open_loop_verified", "verified_pref", "gen_rank@verified",
-             "controller", budget_parity_claimed=True),
+             "controller", budget_parity_axis="kernel"),
     Contrast("P5_preference_responsiveness", "greedy_pref@w=0.9", "greedy_pref@w=0.1",
              "objective"),
     Contrast("P6_same_prefix_branching", "branch@w_i", "branch@w_j", "objective"),

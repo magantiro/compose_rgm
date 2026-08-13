@@ -283,6 +283,40 @@ which kind of error was made.
 
 ---
 
+## D-011 · 2026-08-13 · The same mistake again, one level down: D6 is now axis-aware
+
+**Decision.** `budget_parity_claimed: bool` becomes `budget_parity_axis: "kernel"
+| "native" | None`. Only the claimed axis is enforced; the unclaimed one is
+reported. P3/P4 claim `kernel`.
+
+**Evidence before the decision.** Working through `generate_then_rank`'s ledger:
+a kernel-matched `gen_rank` runs ~4 trajectories and scores ~4 endpoints, while
+`greedy_pref` scores ~15,600 candidates. Under D-010's rule P3 claimed compute
+parity outright, so the gate would have failed it on the **native** axis — and
+a native-matched `gen_rank` would fail on the **kernel** axis. Both ends of the
+declared bracket would have been rejected, leaving P3/P4 unreportable.
+
+**Why this is the same error as D-010.** D-010 fixed a gate that forbade P2 by
+conflating compute with the edit budget. The fix conflated something else: that
+a contrast claiming compute parity claims it on *both* axes. With ~600
+candidates per kernel call the two axes are not simultaneously satisfiable, so
+demanding both is demanding the impossible. A gate that cannot be satisfied is
+indistinguishable from a gate that is never run.
+
+**Alternatives rejected.** Loosening the tolerances until both axes pass (that
+is tuning the check to fit the data, at the level of the instrument); dropping
+D6 for P3/P4 entirely (it still has to enforce equal endpoint counts, which is
+the actual inflation control).
+
+**Cost consequence, recorded for main.** Only the **kernel-matched** end of the
+bracket is affordable in the smoke. The native-matched end needs ~2,600 unguided
+trajectories per source, ~15,600 kernel calls, ~30 h per source. It is costed
+and deferred, not quietly dropped — and until it is run, P3/P4 are one-sided.
+
+**Changes a frozen object:** yes — `PROTOCOL.md` §7.3 and §9. Before any run.
+
+---
+
 ## D-006 · 2026-08-13 · Census verdict
 
 *(Recorded after the census ran; see `diagnostics/pareto_tradeoff_census.json`.)*
