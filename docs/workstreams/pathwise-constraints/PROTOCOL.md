@@ -727,6 +727,37 @@ source-sharded and the driver skips committed shards, so it may be authorised
 in halves (`--start 0 --sources 12`, then `--start 12 --sources 12`) with no
 wasted work.
 
+## Status of a positive result — written before any number exists
+
+> **If Stage B is positive it remains DEVELOPMENTAL, not a headline claim,
+> because the cLogP family emerged from the feasibility screen rather than
+> being specified in advance. It would need its own held-out confirmation
+> before it can be stated as a result.**
+
+This is recorded now, before the run, precisely so it cannot be softened later
+by a number that makes it inconvenient. The provenance chain is: ring motif
+failed → three families were screened → cLogP was the only one exhibiting the
+mechanism → A2 confirmed prevalence → Stage B measures cost and benefit. Every
+link after the screen inherits the screen's selection, and no amount of
+downstream rigour removes it.
+
+## Batch discipline — 12 + 12 with a locked gate
+
+Stage B may be run operationally as two 12-source batches for durability and
+cost control. **After batch 1 only INSTRUMENT HEALTH may be inspected:** shard
+completeness, mask-empty logic, runtimes, hashes, circuit-breaker margin.
+
+**Arm effects, terminal costs and hidden-path rates may NOT be inspected before
+batch 2 launches. Batch 2 runs regardless of anything batch 1 shows.** Looking
+at outcomes and then choosing whether to continue turns the bounded half-panel
+into optional stopping and spends the panel.
+
+This is enforced mechanically, not by intention:
+`scripts/check_stage_b_instrument_health.py` reads the shards and reports only
+health fields. It has no access path to `U_P`, to any violation count, or to
+any arm landing, and `tests/test_pathwise_stage_b.py` asserts that its output
+contains no outcome field.
+
 ## Scope limits
 
 No held-out confirmation is designed. If stage B works, that decision comes

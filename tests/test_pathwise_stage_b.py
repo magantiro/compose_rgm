@@ -366,6 +366,62 @@ def test_stage_b_panel_is_disjoint_and_starts_inside_the_corridor():
         assert state_is_feasible("B_physchem_corridor", row["source"])
 
 
+def test_health_check_cannot_leak_an_outcome(tmp_path):
+    """The batch gate, enforced by construction rather than by intention.
+
+    Between batch 1 and batch 2 only instrument health may be inspected, and
+    batch 2 runs regardless. If the health report could show an arm effect, the
+    bounded half-panel would become optional stopping. So the report is checked
+    to contain none of the outcome-bearing fields, even though the shards it
+    reads are full of them.
+    """
+    hidden = make_arm([INSIDE, OUTSIDE, INSIDE_2], 9.9)
+    shards = [make_shard(i, endpoint_greedy_arm=hidden) for i in range(12)]
+    shard_dir = tmp_path / "shards"
+    shard_dir.mkdir(parents=True)
+    for shard in shards:
+        (shard_dir / f"{shard['index']:03d}.json").write_text(json.dumps(shard))
+
+    out = tmp_path / "health.json"
+    proc = subprocess.run(
+        [sys.executable, str(REPO / "scripts/check_stage_b_instrument_health.py"),
+         "--shards", str(shard_dir), "--expect", "12", "--out", str(out)],
+        capture_output=True, text=True, cwd=str(REPO), check=False)
+    assert proc.returncode == 0, proc.stderr
+
+    text = out.read_text()
+    for token in ("U_P", "landing", "trajectory", "hidden_path", "delta_",
+                  "any_intermediate_violation", "endpoint_in_C", "terminal_cost"):
+        assert token not in text, f"health report leaked {token}"
+    # and the utility value itself must not appear anywhere
+    assert "9.9" not in text
+
+    report = json.loads(text)
+    assert report["batch_2_runs_regardless"] is True
+    assert report["healthy"] is True
+
+
+def test_health_check_flags_a_broken_instrument(tmp_path):
+    """It must be able to say NOT healthy, or it is not a check."""
+    shards = [make_shard(i, endpoint_greedy_arm=make_arm([INSIDE, INSIDE_2], 1.0))
+              for i in range(12)]
+    shards[3]["mask_empty_states"] = 2          # contradicts fraction 0.0
+    shards[7]["support_tight"] = True           # contradicts retention 0.5
+    shard_dir = tmp_path / "shards"
+    shard_dir.mkdir(parents=True)
+    for shard in shards:
+        (shard_dir / f"{shard['index']:03d}.json").write_text(json.dumps(shard))
+
+    proc = subprocess.run(
+        [sys.executable, str(REPO / "scripts/check_stage_b_instrument_health.py"),
+         "--shards", str(shard_dir), "--expect", "12"],
+        capture_output=True, text=True, cwd=str(REPO), check=False)
+    assert proc.returncode == 0, proc.stderr
+    assert "HEALTHY: False" in proc.stdout
+    report = json.loads(proc.stdout.split("\nHEALTHY")[0])
+    assert len(report["mask_empty_logic_errors"]) == 2
+
+
 def test_stage_b_eligibility_is_excursion_blind():
     """Selecting on excursion propensity would make the primary estimand true
     by construction. Pin the signature so it cannot be reintroduced quietly."""
