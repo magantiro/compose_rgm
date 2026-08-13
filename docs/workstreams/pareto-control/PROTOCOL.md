@@ -255,6 +255,20 @@ achieved front is.
 two control arms with different costs. This is a parity requirement, not an
 extra arm type.
 
+> **The two budget axes buy ~600x different amounts of search, and the contrast
+> must be reported as a bracket.** One kernel call yields ~600 candidate
+> molecules on this process, measured. So matching `gen_rank` on **native oracle
+> calls** hands it roughly 600x the closed-loop arms' kernel budget — that is
+> the hypervolume inflation channel wearing a benchmark convention's clothes.
+> Matching on **kernel calls** instead gives it far fewer distinct molecules
+> than the closed-loop arms see, which understates it on the axis the
+> multi-objective literature actually budgets. Neither matching is "the fair
+> one." P3 and P4 are therefore reported at **both** matchings, with the
+> kernel-call ratio stated, and the honest reading is that the truth is
+> bracketed between them. Quoting one matching alone would be a reporting choice
+> that decides the winner, which is the same failure as quoting one HV-AUC
+> convention.
+
 Shortlist for `verified_pref`, frozen: 4 by immediate scalarized score, 2 by
 `R_theta` reference probability, 2 uniformly at random — the same 4/2/2
 stratification the calibration used. The random stratum is retained
@@ -331,22 +345,31 @@ Parity is mandatory. A parity audit in the main lane found a contrast
 (`verified_retarget` vs `continue_A`) that varied **controller and objective**
 at once and inflated its effect by roughly 11%.
 
-| id | question | arm | base | controller | start | budget | objective | **varies** |
-|---|---|---|---|---|---|---|---|---|
-| **P1** | does preference conditioning do anything? | `greedy_pref` | `unguided` | greedy / none | `x_0` = `x_0` | H=6 = H=6 | `s(.\|w)` / none | **controller** |
-| **P2** | does future-awareness help? | `verified_pref` | `greedy_pref` | verified / greedy | `x_0` = `x_0` | matched native oracle calls | `s(.\|w)` = same | **controller** |
-| **P3** | closed loop vs generate-then-rank | `greedy_pref` | `gen_rank@greedy` | closed / open loop | `x_0` = `x_0` | matched native oracle calls | `s(.\|w)` = same | **controller** |
-| **P4** | closed loop vs generate-then-rank, future-aware | `verified_pref` | `gen_rank@verified` | closed / open loop | `x_0` = `x_0` | matched native oracle calls | `s(.\|w)` = same | **controller** |
-| **P5** | do different preferences give different futures? | `greedy_pref @ w=0.9` | `greedy_pref @ w=0.1` | greedy = greedy | `x_0` = `x_0` | H=6 = H=6 | w=0.9 / w=0.1 | **objective** |
-| **P6** | same realized prefix, preference-dependent futures | `branch @ w_i` from `x_3` | `branch @ w_j` from `x_3` | greedy = greedy | `x_3` = `x_3` | H-3 = H-3 | w_i / w_j | **objective** |
+| id | status | question | arm | base | controller | start | budget | objective | **varies** |
+|---|---|---|---|---|---|---|---|---|---|
+| **P1** | **CONTEXT_ONLY** | unguided floor | `greedy_pref` | `unguided` | greedy / **none** | `x_0` = `x_0` | H=6 = H=6 | `s(.\|w)` / **none** | **controller + objective** |
+| **P2** | PRIMARY | does future-awareness help? | `verified_pref` | `greedy_pref` | verified / greedy | `x_0` = `x_0` | matched native oracle calls | `s(.\|w)` = same | **controller** |
+| **P3** | PRIMARY | closed loop vs generate-then-rank | `greedy_pref` | `gen_rank@greedy` | closed / open loop | `x_0` = `x_0` | matched native oracle calls | `s(.\|w)` = same | **controller** |
+| **P4** | PRIMARY | closed loop vs generate-then-rank, future-aware | `verified_pref` | `gen_rank@verified` | closed / open loop | `x_0` = `x_0` | matched native oracle calls | `s(.\|w)` = same | **controller** |
+| **P5** | PRIMARY | do different preferences give different futures? | `greedy_pref @ w=0.9` | `greedy_pref @ w=0.1` | greedy = greedy | `x_0` = `x_0` | H=6 = H=6 | w=0.9 / w=0.1 | **objective** |
+| **P6** | PRIMARY | same realized prefix, preference-dependent futures | `branch @ w_i` from `x_3` | `branch @ w_j` from `x_3` | greedy = greedy | `x_3` = `x_3` | H-3 = H-3 | w_i / w_j | **objective** |
 
-P1 is the only contrast in which the base arm has no objective at all; that is
-the definition of the unguided floor, and `unguided` is scored under every
-preference post hoc, so the objective is not applied asymmetrically at
-selection time.
+**P1 is confounded and is labelled so.** An earlier draft of this table claimed
+P1 varied only the controller. `scripts/pareto_instrument_gate.py` rejected it:
+an arm with no controller cannot have an objective either, so `greedy_pref` vs
+`unguided` unavoidably varies **both**. That is the same shape as the confound
+the main lane's audit found in `verified_retarget` vs `continue_A`, which
+inflated its effect ~11%. P1 is therefore kept as the floor, reported with the
+confound stated out loud, and **may not carry a headline**. The parity-clean
+forms of the same question are **P3** (closed vs open loop, same objective) and
+**P5** (objective only).
+
+The gate caught this before any run, which is the only reason it is a
+documentation note rather than a retraction.
 
 P2 is deliberately **not** `verified_pref` vs `unguided`: that would vary
-controller and objective together and reproduce the main lane's confound.
+controller and objective together and reproduce the main lane's confound
+exactly.
 
 ## 9. Instrument discipline — executable
 

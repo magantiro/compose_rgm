@@ -160,6 +160,96 @@ lane's audit caught.
 
 ---
 
+## D-007 · 2026-08-13 · A G4 statistic of MY OWN had no falsifying range; withdrawn before any pair verdict
+
+**Decision.** Withdraw `best candidate at a state reaches the pooled p99` as the
+G4 saturation statistic and replace it with **single-objective greedy rollouts
+at the full 6-edit budget**.
+
+**Evidence before the decision.** The first census smoke printed
+`G4 reach fractions {'P': 0.133, 'D': 0.933, 'S': 1.0}`. The `S: 1.0` prompted
+the project-wide question — *what value could this take if the hypothesis were
+false?* — and the answer is: essentially none. With a fiber of width `n`,
+`P(max of n draws >= pooled p99) = 1 - 0.99^n`, which is **0.9973 at n = 589**.
+The measured fiber width was 589–613. The statistic was going to read ~1.0
+whatever the chemistry did.
+
+This is defect shape number six of the same family, and the first one this
+project caught in its own instrument *before* the run rather than after.
+
+**The replacement, and why it is two-sided.** Reach fraction is now the fraction
+of held-in sources whose 6-edit single-objective greedy rollout attains the
+objective's ceiling, where the ceiling is analytic for O-D (the clipped soft-min
+cannot exceed `1.32669`) and the held-in pool p99 for O-P. Both can plainly come
+out anywhere in [0, 1]. O-S has no reachable ceiling at all — `T = 1` requires
+zero edits — so it is tested for **inertness** instead: an objective that six
+real edits cannot move is not controllable and degenerates the pair. Inertness
+can equally well come out false.
+
+**Alternatives rejected.** Keeping the statistic and caveating it in prose. The
+project has five recorded instances of exactly that not working.
+
+**Changes a frozen object:** yes — it changes the G4 operationalization declared
+in `PROTOCOL.md` §6.3/§6.4. Timing matters and is verifiable in the history: the
+change was made when only the *reach fractions* had been seen, before any
+per-pair gate verdict was computed or printed. The G4 **threshold** (0.85) was
+not touched.
+
+**Consequence worth recording.** Under the corrected statistic, developability
+does **not** saturate as a continuous Pareto axis, even though the committed
+retargeting calibration reports greedy reaching the binary developability region
+on 28/30 sources in three edits. Reaching the region is not the same as
+exhausting the axis: the region boundary sits far below the clip ceiling. The
+old binary reading would have rejected pair 1 for the wrong reason.
+
+---
+
+## D-008 · 2026-08-13 · The executable gate rejected MY OWN parity table
+
+**Decision.** Demote contrast P1 (`greedy_pref` vs `unguided`) from PRIMARY to
+`CONTEXT_ONLY`, and record in `PROTOCOL.md` §8 that it varies **controller and
+objective**.
+
+**Evidence before the decision.** `scripts/pareto_instrument_gate.py`, run as a
+design-stage self-test with no results in existence, failed check
+`D5_contrast_parity` and printed
+`P1: varies ["controller", "objective"], intended "objective"`. The protocol
+table had claimed P1 varied only the controller. It was wrong: an arm with no
+controller cannot have an objective either, so the two are inseparable in that
+contrast.
+
+This is the same shape as the confound the main lane's audit found in
+`verified_retarget` vs `continue_A`, which inflated its effect by roughly 11%.
+
+**Alternatives rejected.** Deleting P1 (the unguided floor is genuinely
+informative); redefining `unguided` to carry an objective (it would stop being
+unguided). The parity-clean forms of the same question already exist as P3
+(closed vs open loop, same objective) and P5 (objective only), so nothing is
+lost by demoting P1.
+
+**Changes a frozen object:** yes — `PROTOCOL.md` §8. Before any run.
+
+---
+
+## D-009 · 2026-08-13 · The two budget axes differ ~600x, so P3/P4 are reported as a bracket
+
+**Decision.** Run `gen_rank` at **both** matchings — kernel-matched and
+native-oracle-matched — and report P3/P4 as a bracket rather than a number.
+
+**Evidence before the decision.** One kernel call yields ~600 candidate
+molecules (measured: fiber width 589–613). So matching `gen_rank` on native
+oracle calls hands it ~600x the closed-loop arms' kernel budget, which is the
+hypervolume inflation channel wearing a benchmark convention's clothes; matching
+on kernel calls gives it far fewer distinct molecules than the closed-loop arms
+see, which understates it on the axis the multi-objective literature budgets.
+
+**Alternatives rejected.** Picking one axis and calling it fair. Whichever is
+chosen decides the winner, which makes the choice a result rather than a method.
+
+**Changes a frozen object:** extends `PROTOCOL.md` §7.2. Before any run.
+
+---
+
 ## D-006 · 2026-08-13 · Census verdict
 
 *(Recorded after the census ran; see `diagnostics/pareto_tradeoff_census.json`.)*

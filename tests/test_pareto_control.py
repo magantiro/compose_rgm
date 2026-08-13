@@ -1,0 +1,455 @@
+"""Local tests for target-free Pareto / preference control.
+
+Every test runs on a TOY state graph with hand-computable optima: no RDKit, no
+rewrite kernel, no frozen R_theta checkpoint. That is deliberate. Two of the
+five instrument defects already found in this project were control-logic bugs --
+"a verified arm that was secretly greedy" and "an action selected by argmax V_G
+then scored by V_G" -- and both would have been caught in seconds by a toy graph
+whose right answer is known in advance. A test suite that needs the real kernel
+is a test suite that does not get run.
+"""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+from compose_v4.experiments.pareto_control import (  # noqa: E402
+    CostLedger,
+    branch_from_common_prefix,
+    MeteredProcess,
+    Scalarization,
+    WeightedSum,
+    endpoint_diversity,
+    generate_then_rank,
+    greedy_preference_run,
+    hypervolume,
+    normalized_hypervolume,
+    pareto_front_indices,
+    preference_coverage,
+    source_paired_bootstrap,
+    trajectories_for_budget,
+    trajectories_for_kernel_budget,
+    unguided_run,
+    verified_preference_run,
+)
+
+UTOPIA = np.array([10.0, 10.0])
+REFERENCE = np.array([0.0, 0.0])
+
+
+# ---------------------------------------------------------------------------
+# Toy process: a two-step trap where the locally best action destroys the future
+# ---------------------------------------------------------------------------
+
+TRAP_EDGES = {
+    "root": [("A", 0.5), ("B", 0.5)],
+    #  A looks better right now ...
+    "A": [("A1", 0.5), ("A2", 0.5)],
+    #  ... but every continuation from A is poor, while B's are excellent.
+    "B": [("B1", 0.9), ("B2", 0.1)],
+}
+TRAP_Z = {
+    "root": [5.0, 5.0],
+    "A": [8.0, 8.0], "A1": [8.0, 1.0], "A2": [1.0, 8.0],
+    "B": [6.0, 6.0], "B1": [9.5, 9.5], "B2": [2.0, 2.0],
+}
+
+
+class ToyProcess:
+    def __init__(self, edges: dict[str, list[tuple[str, float]]]) -> None:
+        self.edges = edges
+
+    def successors(self, key: str) -> list[tuple[str, float]]:
+        return list(self.edges.get(key, []))
+
+
+class ToyObjectives:
+    def __init__(self, table: dict[str, list[float]]) -> None:
+        self.table = table
+
+    def z(self, key: str) -> np.ndarray:
+        return np.array(self.table[key], dtype=float)
+
+
+def trap() -> MeteredProcess:
+    return MeteredProcess(ToyProcess(TRAP_EDGES), ToyObjectives(TRAP_Z))
+
+
+SCALARIZE = Scalarization(UTOPIA)
+
+
+# ---------------------------------------------------------------------------
+# Scalarization
+# ---------------------------------------------------------------------------
+
+def test_chebyshev_matches_the_written_formula():
+    z = np.array([[8.0, 2.0]])
+    got = SCALARIZE(z, 0.5)[0]
+    expected = max(0.5 * 2.0, 0.5 * 8.0) + 1e-3 * (2.0 + 8.0)
+    assert got == pytest.approx(expected)
+
+
+def test_chebyshev_selects_a_point_no_weighted_sum_can_ever_select():
+    """The reason PROTOCOL forbids scalarizing by weighted sum alone.
+
+    (4, 4) is nondominated but sits strictly inside the convex hull of (10, 0)
+    and (0, 10), so max(10w, 10(1-w)) >= 5 > 4 for EVERY w: no weighted sum ever
+    picks it. Chebyshev does. An experiment run only on weighted sums would
+    report a smaller achievable front than actually exists.
+    """
+    z = np.array([[10.0, 0.0], [4.0, 4.0], [0.0, 10.0]])
+    keys = ["hi_a", "middle", "hi_b"]
+
+    ws = WeightedSum()
+    picked_by_sum = {keys[int(np.argmin(ws(z, w)))] for w in np.linspace(0, 1, 201)}
+    assert "middle" not in picked_by_sum
+
+    picked_by_cheb = {keys[int(np.argmin(SCALARIZE(z, w)))]
+                      for w in np.linspace(0, 1, 201)}
+    assert "middle" in picked_by_cheb
+
+
+def test_binding_index_identifies_which_objective_is_binding():
+    z = np.array([[9.0, 2.0]])
+    assert int(SCALARIZE.binding_index(z, 0.5)[0]) == 1
+    # Weighting objective 0 hard enough makes its (small) gap binding instead.
+    assert int(SCALARIZE.binding_index(z, 0.99)[0]) == 0
+
+
+# ---------------------------------------------------------------------------
+# Arms
+# ---------------------------------------------------------------------------
+
+def test_greedy_takes_the_locally_best_action_and_walks_into_the_trap():
+    run = greedy_preference_run(trap(), "root", 2, 0.5, SCALARIZE)
+    assert run.states[1] == "A", "greedy must prefer A, which scores better now"
+    assert run.endpoint in {"A1", "A2"}
+    assert run.complete
+
+
+def test_verified_sacrifices_the_locally_best_action_and_lands_better():
+    run = verified_preference_run(trap(), "root", 2, 0.5, SCALARIZE, seed=0)
+    assert run.states[1] == "B", "remaining-budget lookahead must reject A"
+    assert run.endpoint == "B1"
+    assert run.overrode_greedy >= 1
+
+
+def test_verified_and_greedy_are_genuinely_different_arms():
+    """Instrument gate D2, as a unit test.
+
+    A 'verified' arm whose committed action sequence equals greedy's on every
+    source is greedy wearing a different label. That exact defect voided two
+    runs in the main lane and made a headroom of 0 definitional.
+    """
+    greedy = greedy_preference_run(trap(), "root", 2, 0.5, SCALARIZE)
+    verified = verified_preference_run(trap(), "root", 2, 0.5, SCALARIZE, seed=0)
+    assert greedy.actions != verified.actions
+
+
+def test_verified_is_never_worse_than_greedy_which_is_a_theorem_not_a_result():
+    """Policy improvement: greedy's action is always in the shortlist, and the
+    strict-improvement rule never commits a worse landing. So `verified <=
+    greedy` in scalarized loss holds BY CONSTRUCTION.
+
+    This test asserts the guarantee precisely so that no downstream report may
+    present it as evidence. A sign test against a null of 0.5 here would be
+    testing something already known to be true -- defect 3 of the five.
+    """
+    for weight in (0.1, 0.3, 0.5, 0.7, 0.9):
+        greedy = greedy_preference_run(trap(), "root", 2, weight, SCALARIZE)
+        verified = verified_preference_run(trap(), "root", 2, weight, SCALARIZE, seed=0)
+        gs = float(SCALARIZE(greedy.endpoint_z, weight)[0])
+        vs = float(SCALARIZE(verified.endpoint_z, weight)[0])
+        assert vs <= gs + 1e-9
+
+
+def test_greedy_shortlist_always_contains_greedys_own_action():
+    """Without this the strict-improvement rule cannot be a superset of greedy
+    and the guarantee above would silently fail."""
+    run = verified_preference_run(trap(), "root", 2, 0.5, SCALARIZE, seed=0,
+                                  top_immediate=1, top_reference=0, n_random=0)
+    assert run.decisions[0]["candidates"] >= 1
+
+
+def test_unguided_is_reproducible_and_preference_blind():
+    a = unguided_run(trap(), "root", 2, seed=7)
+    b = unguided_run(trap(), "root", 2, seed=7)
+    assert a.states == b.states
+    assert np.isnan(a.weight), "the unguided arm must not carry a preference"
+
+
+def test_unguided_follows_the_reference_law_not_the_objective():
+    """B1 has probability 0.9 under the toy reference law and B2 has 0.1, so a
+    reference-law sampler must visit B1 far more often. If the arm were secretly
+    scoring by objective it would always take B1 (or always A)."""
+    counts = {"B1": 0, "B2": 0}
+    for seed in range(400):
+        run = unguided_run(MeteredProcess(ToyProcess({"B": TRAP_EDGES["B"]}),
+                                          ToyObjectives(TRAP_Z)), "B", 1, seed=seed)
+        counts[run.endpoint] += 1
+    assert 0.80 < counts["B1"] / 400 < 0.98
+
+
+def test_generate_then_rank_returns_one_endpoint_per_preference():
+    metered = trap()
+    preferences = (0.1, 0.3, 0.5, 0.7, 0.9)
+    out = generate_then_rank(metered, "root", 2, preferences, SCALARIZE,
+                             n_trajectories=8, seed=3)
+    assert len(out) == len(preferences)
+    assert [t.weight for t in out] == list(preferences)
+
+
+def test_generate_then_rank_budget_parity_is_computed_not_guessed():
+    """P3/P4 must vary CONTROLLER only. If gen_rank's trajectory count were a
+    free parameter the contrast would vary controller AND budget -- the parity
+    defect the main lane's audit caught, which inflated its effect ~11%."""
+    assert trajectories_for_budget(target_native_calls=70, budget=6,
+                                   mean_fiber_width=500.0) == 10
+    assert trajectories_for_budget(target_native_calls=1, budget=6,
+                                   mean_fiber_width=500.0) == 1
+
+
+def test_the_two_budget_axes_disagree_by_orders_of_magnitude():
+    """Why P3/P4 must be reported as a bracket rather than a single number.
+
+    One kernel call yields ~600 candidates on the real process, so matching
+    generate-then-rank on native oracle calls hands it vastly more search than
+    matching it on kernel calls. Neither is "the fair one", and quoting either
+    alone is a reporting choice that decides the winner.
+    """
+    native_matched = trajectories_for_budget(
+        target_native_calls=26 * 600, budget=6, mean_fiber_width=600.0)
+    kernel_matched = trajectories_for_kernel_budget(
+        target_kernel_calls=26, budget=6)
+    assert native_matched / kernel_matched > 100
+
+
+# ---------------------------------------------------------------------------
+# Cost ledger
+# ---------------------------------------------------------------------------
+
+def test_native_and_raw_oracle_calls_differ_and_both_are_counted():
+    """The two conventions must never be substituted for one another. Raw counts
+    every scoring invocation; native counts distinct molecules. Their difference
+    IS the caching effect, and it is a reported quantity."""
+    metered = trap()
+    verified_preference_run(metered, "root", 2, 0.5, SCALARIZE, seed=0)
+    led = metered.ledger
+    assert led.raw_oracle_calls > led.native_oracle_calls
+    # Six of the seven toy states are scored. `root` is not: an arm scores
+    # CANDIDATES, never the state it is already standing on, so the start state
+    # never enters the oracle count.
+    assert led.native_oracle_calls == 6
+    assert "root" not in metered._z
+    assert led.kernel_calls == 3  # root, A, B enumerated once each
+
+
+def test_kernel_calls_count_distinct_states_only():
+    metered = trap()
+    metered.successors("root")
+    metered.successors("root")
+    assert metered.ledger.kernel_calls == 1
+
+
+def test_cost_ledgers_add():
+    total = CostLedger(1, 2, 3) + CostLedger(10, 20, 30)
+    assert total.as_dict() == {"native_oracle_calls": 11, "raw_oracle_calls": 22,
+                               "kernel_calls": 33}
+
+
+def test_verified_costs_more_kernel_calls_than_greedy():
+    """Not a defect -- it is why P2 must be run at matched oracle budget and why
+    the kernel-call ratio is reported alongside."""
+    g, v = trap(), trap()
+    greedy_preference_run(g, "root", 2, 0.5, SCALARIZE)
+    verified_preference_run(v, "root", 2, 0.5, SCALARIZE, seed=0)
+    assert v.ledger.kernel_calls >= g.ledger.kernel_calls
+
+
+# ---------------------------------------------------------------------------
+# Metrics
+# ---------------------------------------------------------------------------
+
+def test_pareto_front_drops_dominated_points():
+    z = np.array([[1.0, 1.0], [2.0, 2.0], [0.5, 3.0]])
+    assert sorted(pareto_front_indices(z).tolist()) == [1, 2]
+
+
+def test_hypervolume_of_a_single_point_is_the_rectangle():
+    assert hypervolume(np.array([[3.0, 4.0]]), REFERENCE) == pytest.approx(12.0)
+
+
+def test_hypervolume_of_two_points_is_the_staircase():
+    # (4,1) contributes 4*1; (1,4) adds 1*(4-1) on top.
+    z = np.array([[4.0, 1.0], [1.0, 4.0]])
+    assert hypervolume(z, REFERENCE) == pytest.approx(4.0 + 3.0)
+
+
+def test_hypervolume_ignores_points_below_the_reference():
+    z = np.array([[3.0, 4.0], [-1.0, 100.0]])
+    assert hypervolume(z, REFERENCE) == pytest.approx(12.0)
+
+
+def test_normalized_hypervolume_is_bounded_by_one():
+    z = np.array([[10.0, 10.0]])
+    assert normalized_hypervolume(z, REFERENCE, UTOPIA) == pytest.approx(1.0)
+
+
+def test_hypervolume_cannot_be_inflated_by_adding_dominated_points():
+    """The inflation channel, closed. Adding molecules that are dominated does
+    not raise HV -- which is why HV is computed over committed endpoints only,
+    one per preference, so arms cannot differ in point count either."""
+    base = np.array([[4.0, 4.0]])
+    padded = np.vstack([base, np.array([[1.0, 1.0], [2.0, 3.0], [3.0, 2.0]])])
+    assert hypervolume(padded, REFERENCE) == pytest.approx(hypervolume(base, REFERENCE))
+
+
+def test_preference_coverage_is_minimal_when_all_endpoints_collapse():
+    z = np.repeat(np.array([[5.0, 5.0]]), 5, axis=0)
+    keys = [f"same{i}" for i in range(5)]
+    cov = preference_coverage(z, (0.1, 0.3, 0.5, 0.7, 0.9), SCALARIZE, keys)
+    assert cov == pytest.approx(0.0)
+
+
+def test_preference_coverage_rewards_distinct_preference_matched_endpoints():
+    """`z[i]` is the endpoint produced by `preferences[i]`. A higher weight on
+    objective 0 penalizes objective 0's gap harder and so pulls toward higher
+    objective-0 value, which is why the endpoints run in INCREASING objective 0
+    as the weight rises."""
+    z = np.array([[1.0, 9.5], [4.0, 8.0], [6.0, 6.0], [8.0, 4.0], [9.5, 1.0]])
+    keys = ["e0", "e1", "e2", "e3", "e4"]
+    cov = preference_coverage(z, (0.1, 0.3, 0.5, 0.7, 0.9), SCALARIZE, keys)
+    assert cov > 0.5
+
+
+def test_endpoint_diversity_is_zero_for_identical_endpoints():
+    assert endpoint_diversity(np.ones((4, 4))) == pytest.approx(0.0)
+
+
+def test_endpoint_diversity_rises_as_endpoints_separate():
+    sim = np.array([[1.0, 0.2], [0.2, 1.0]])
+    assert endpoint_diversity(sim) == pytest.approx(0.8)
+
+
+def test_bootstrap_resamples_sources_not_branches():
+    """The source is the independent unit. Passing 5 sources must give n=5 even
+    though each source carries 5 preference branches; resampling branches would
+    understate the interval fivefold."""
+    out = source_paired_bootstrap([0.1, 0.2, 0.3, -0.1, 0.05])
+    assert out["n"] == 5
+    assert out["ci95_low"] <= out["mean"] <= out["ci95_high"]
+    assert out["wins"] == 4 and out["losses"] == 1
+
+
+def test_bootstrap_reports_losses_so_a_guaranteed_sign_is_visible():
+    """If an arm's advantage is guaranteed, `losses` is 0 and the reader can see
+    that the statistic had no falsifying range. The function never hides it."""
+    out = source_paired_bootstrap([0.1, 0.2, 0.3])
+    assert out["losses"] == 0
+
+
+# ---------------------------------------------------------------------------
+# Preference responsiveness -- contrast P5 in miniature
+# ---------------------------------------------------------------------------
+
+FAN_EDGES = {"root": [(f"e{i}", 0.2) for i in range(5)]}
+FAN_Z = {"root": [5.0, 5.0], "e0": [9.5, 1.0], "e1": [8.0, 4.0],
+         "e2": [6.0, 6.0], "e3": [4.0, 8.0], "e4": [1.0, 9.5]}
+
+
+def test_different_preferences_choose_different_endpoints():
+    """The claim, in miniature: one state, five preferences, distinct futures.
+    If this collapsed to one endpoint the Pareto claim would be empty -- which
+    is exactly what census gate G5 measures on real fibers."""
+    picks = set()
+    for weight in (0.1, 0.3, 0.5, 0.7, 0.9):
+        metered = MeteredProcess(ToyProcess(FAN_EDGES), ToyObjectives(FAN_Z))
+        picks.add(greedy_preference_run(metered, "root", 1, weight, SCALARIZE).endpoint)
+    assert len(picks) >= 3
+
+
+def test_preference_ordering_is_monotone_in_the_weight():
+    """Raising the weight on objective 0 must never move the choice toward lower
+    objective-0 value. A controller that ignored the preference would fail this,
+    and so would a sign error in the scalarization."""
+    values = []
+    for weight in (0.1, 0.3, 0.5, 0.7, 0.9):
+        metered = MeteredProcess(ToyProcess(FAN_EDGES), ToyObjectives(FAN_Z))
+        run = greedy_preference_run(metered, "root", 1, weight, SCALARIZE)
+        values.append(FAN_Z[run.endpoint][0])
+    assert values == sorted(values)
+
+
+def test_dead_end_states_are_reported_incomplete_not_silently_truncated():
+    metered = MeteredProcess(ToyProcess({"root": [("leaf", 1.0)]}),
+                             ToyObjectives({"root": [5.0, 5.0], "leaf": [6.0, 6.0]}))
+    run = greedy_preference_run(metered, "root", 4, 0.5, SCALARIZE)
+    assert run.endpoint == "leaf"
+    assert run.complete is False
+
+
+def test_argmin_ties_break_on_key_not_enumeration_order():
+    """Determinism: a rerun must commit the same trajectory, so ties cannot
+    depend on the order the kernel happened to emit successors in."""
+    edges = {"root": [("zzz", 0.5), ("aaa", 0.5)]}
+    table = {"root": [5.0, 5.0], "zzz": [7.0, 7.0], "aaa": [7.0, 7.0]}
+    forward = greedy_preference_run(
+        MeteredProcess(ToyProcess(edges), ToyObjectives(table)), "root", 1, 0.5, SCALARIZE)
+    reversed_edges = {"root": list(reversed(edges["root"]))}
+    backward = greedy_preference_run(
+        MeteredProcess(ToyProcess(reversed_edges), ToyObjectives(table)), "root", 1,
+        0.5, SCALARIZE)
+    assert forward.endpoint == backward.endpoint == "aaa"
+
+
+# ---------------------------------------------------------------------------
+# Contrast P6 -- one realized history, many preference-dependent futures
+# ---------------------------------------------------------------------------
+
+PREFIX_EDGES = {
+    "root": [("p1", 1.0)], "p1": [("p2", 1.0)], "p2": [("x3", 1.0)],
+    "x3": [(f"e{i}", 0.2) for i in range(5)],
+}
+PREFIX_Z = {"root": [5.0, 5.0], "p1": [5.0, 5.0], "p2": [5.0, 5.0],
+            "x3": [5.0, 5.0], "e0": [1.0, 9.5], "e1": [4.0, 8.0],
+            "e2": [6.0, 6.0], "e3": [8.0, 4.0], "e4": [9.5, 1.0]}
+
+
+def test_all_branches_share_the_identical_prefix():
+    """The figure's whole statement is ONE history, many futures. If the
+    branches diverged before the branch point it would be five trajectories,
+    which is a different and much weaker claim."""
+    metered = MeteredProcess(ToyProcess(PREFIX_EDGES), ToyObjectives(PREFIX_Z))
+    out = branch_from_common_prefix(metered, "root", 3, 1,
+                                    (0.1, 0.3, 0.5, 0.7, 0.9), SCALARIZE)
+    assert out["branch_point"] == "x3"
+    assert out["prefix"].states == ["root", "p1", "p2", "x3"]
+    for run in out["branches"].values():
+        assert run.states[0] == "x3"
+
+
+def test_branches_from_the_identical_state_still_diverge_by_preference():
+    metered = MeteredProcess(ToyProcess(PREFIX_EDGES), ToyObjectives(PREFIX_Z))
+    out = branch_from_common_prefix(metered, "root", 3, 1,
+                                    (0.1, 0.3, 0.5, 0.7, 0.9), SCALARIZE)
+    endpoints = {run.endpoint for run in out["branches"].values()}
+    assert len(endpoints) >= 3
+
+
+def test_prefix_is_committed_before_any_branch_preference_is_used():
+    """The prefix must be reachable under its own weight alone. If a branch
+    preference leaked into prefix construction the prefix would differ between
+    branches -- which this asserts it does not."""
+    a = branch_from_common_prefix(
+        MeteredProcess(ToyProcess(PREFIX_EDGES), ToyObjectives(PREFIX_Z)),
+        "root", 3, 1, (0.1,), SCALARIZE)
+    b = branch_from_common_prefix(
+        MeteredProcess(ToyProcess(PREFIX_EDGES), ToyObjectives(PREFIX_Z)),
+        "root", 3, 1, (0.9,), SCALARIZE)
+    assert a["prefix"].states == b["prefix"].states
