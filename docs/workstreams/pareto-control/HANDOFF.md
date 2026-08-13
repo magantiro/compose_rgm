@@ -178,11 +178,49 @@ five gates, not the best-scoring pair.
 - *Artifact status:* P1 demoted to `CONTEXT_ONLY`; may not carry a headline.
 - *Corrective commit:* `0d2b487`. See `DECISION_LOG.md` D-008.
 
-**3. Budget-axis ambiguity for generate-then-rank (design finding, not a bug).**
+**3. A gate check that forbade the experiment instead of a confound — twice.**
+- *What was wrong:* D6 originally failed any hypervolume contrast whose compute
+  budgets differed. That makes **P2** (lookahead vs myopic) unrunnable, because
+  a lookahead controller intrinsically spends more compute — that *is* the
+  mechanism. Corrected, it then demanded compute parity on **both** axes at
+  once, which makes **P3/P4** unrunnable at either end of their declared
+  bracket, because one kernel call yields ~600 candidates and the two axes are
+  not simultaneously satisfiable.
+- *How detected:* running the analysis end to end on synthetic shards, and then
+  working through `generate_then_rank`'s cost ledger.
+- *Did a conclusion depend on it:* **no.** Both caught before any run.
+- *Now:* equal endpoint counts are required on **every** HV contrast — that is
+  the actual inflation control — while compute parity is enforced only on the
+  **one axis** a contrast declares, and the unclaimed axis is reported.
+- *Corrective commits:* `18c01ef`, `4019c30`. See `DECISION_LOG.md` D-010, D-011.
+
+> A check that forbids the experiment is as wrong as one that permits a
+> confound, and only the log shows which kind of error was made. The tempting
+> repair in both cases — loosen the tolerance until it passes — would have been
+> tuning the instrument to fit the data.
+
+**4. Budget-axis ambiguity for generate-then-rank (design finding, not a bug).**
 One kernel call yields ~600 candidates, so matching `gen_rank` on native oracle
 calls hands it ~600x the closed-loop arms' kernel budget, while matching on
-kernel calls starves it of molecules. P3/P4 are therefore reported as a bracket
-at both matchings. See `DECISION_LOG.md` D-009.
+kernel calls starves it of molecules. P3/P4 are declared as a bracket at both
+matchings — but **only the kernel-matched end is affordable in the smoke** (the
+native-matched end needs ~2,600 trajectories and ~30 h per source), so P3/P4
+will be **one-sided** until main authorizes the other end. See `DECISION_LOG.md`
+D-009 and D-011.
+
+**5. A hand-transcribed constant that was simply wrong.**
+The developability clip ceiling was typed as `1.32669` in `PROTOCOL.md` and
+`DECISION_LOG.md`; computed (`clip - tau*log 2`) it is `1.3267132048600137`, and
+a gate threshold reads it. Corrected from the computed value, and
+`tests/test_pareto_protocol_config.py` now recomputes it rather than reading it,
+so the config and the code cannot drift apart again.
+
+**6. Two contrasts that were being skipped silently.**
+`scripts/analyse_pareto_control.py` dropped **P5** and **P6** without a word,
+because they are within-arm preference contrasts rather than arm-vs-arm ones.
+A contrast that vanishes silently from a report is indistinguishable from one
+that was never run. Both are now implemented, and anything else missing is
+recorded in `skipped_contrasts`. Corrective commit `d442c2e`.
 
 # Known limitations
 
