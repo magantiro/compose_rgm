@@ -140,8 +140,77 @@ def main() -> int:
         print(f"  {history}-first: median {np.median(frac):.1%} recovered "
               f"(n={int(usable.sum())})")
 
+    # FULL SOURCE-LEVEL DISTRIBUTIONS, not just summaries. Two reasons.
+    # A mean plus an interval cannot be re-analysed later -- if we want a
+    # different estimator, a different subgroup, or a robustness check, the
+    # per-source values must exist. And figure examples must be selectable by
+    # a preregistered rule rather than by eye, which requires knowing where
+    # each source sits in the effect distribution.
+    per_source = {}
+    for history in ("P", "D"):
+        rsx = by[history]
+        switch = np.array([r["b_worst_at_switch"] for r in rsx])
+        clair = np.array([r["arms"]["clairvoyant"]["b_worst_margin"] for r in rsx])
+        ret = np.array([r["arms"]["verified_retarget"]["b_worst_margin"] for r in rsx])
+        rho = (ret - switch) / (clair - switch)
+        entries = []
+        for k, r in enumerate(rsx):
+            row = {"index": r["index"], "source": r["source"],
+                   "switch_state": r["switch_state"],
+                   "b_worst_at_switch": r["b_worst_at_switch"],
+                   "rho_recovery": float(rho[k])}
+            for name, arm, base, _status in CONTRASTS:
+                row[name] = (r["arms"][arm]["b_worst_margin"]
+                             - r["arms"][base]["b_worst_margin"])
+            for arm in ARM_SEMANTICS:
+                row[f"margin_{arm}"] = r["arms"][arm]["b_worst_margin"]
+                row[f"success_{arm}"] = r["arms"][arm]["b_success"]
+            entries.append(row)
+        per_source[history] = entries
+
+    # PREREGISTERED FIGURE-EXAMPLE SELECTION. Fixed here, before any figure is
+    # drawn, so trajectories are chosen by where they sit in the effect
+    # distribution rather than by which molecules look best.
+    examples = {}
+    for history, entries in per_source.items():
+        chosen = {}
+        for name, _arm, _base, status in CONTRASTS:
+            if status != "PRIMARY":
+                continue
+            vals = np.array([e[name] for e in entries])
+            median = float(np.median(vals))
+            typical = entries[int(np.argmin(np.abs(vals - median)))]
+            # The informative counterexample: the source that most contradicts
+            # the headline direction. If none contradicts it, say so rather
+            # than substituting the weakest supporting case.
+            against = vals < 0 if median > 0 else vals > 0
+            counter = (entries[int(np.argmax(np.abs(vals * against)))]
+                       if against.any() else None)
+            chosen[name] = {
+                "rule": ("typical = source nearest the median effect; "
+                         "counterexample = source most strongly opposing the "
+                         "headline direction, or null if none opposes it"),
+                "median_effect": median,
+                "typical_source_index": typical["index"],
+                "typical_effect": typical[name],
+                "counterexample_source_index": counter["index"] if counter else None,
+                "counterexample_effect": counter[name] if counter else None,
+            }
+        examples[history] = chosen
+
+    print("\nPREREGISTERED FIGURE EXAMPLES (selected by rule, not by eye)")
+    for history, chosen in examples.items():
+        for name, c in chosen.items():
+            ce = ("none opposes" if c["counterexample_source_index"] is None
+                  else f"src {c['counterexample_source_index']} ({c['counterexample_effect']:+.3f})")
+            print(f"  {history}-first {name:<24} typical src "
+                  f"{c['typical_source_index']} ({c['typical_effect']:+.3f})   "
+                  f"counterexample {ce}")
+
     args.out.write_text(json.dumps({
         "schema": "compose.retarget.controller_parity_audit",
+        "per_source_distributions": per_source,
+        "preregistered_figure_examples": examples,
         "status": "AUDIT_OF_A_DEVELOPMENT_PANEL",
         "arm_semantics": {k: dict(zip(("controller", "start", "budget", "objective"), v))
                           for k, v in ARM_SEMANTICS.items()},
