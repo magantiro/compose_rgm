@@ -83,20 +83,37 @@ tensorboard==2.5.0
 # was removed from modern RDKit. Replace with a local
 # `iteritems = lambda d: iter(d.items())`.
 #
-# --- THE SHIPPED ORACLES DO NOT LOAD -----------------------------------------
-# MEASURED 2026-08-13: unpickling estimator/scorer/kinase_rf/gsk3b.pkl on
-# scikit-learn 1.9.0 raises
-#     ModuleNotFoundError: No module named 'sklearn.ensemble.forest'
-# That module path was removed after scikit-learn 0.21, so the shipped pickles
-# predate even the environment.yml pin of 0.23.2.
+# --- THE SHIPPED ORACLES: LOADABLE, BUT A NAIVE PORT IS SILENTLY WRONG -------
+# A plain unpickle of estimator/scorer/kinase_rf/gsk3b.pkl on scikit-learn 1.9.0
+# raises `ModuleNotFoundError: No module named 'sklearn.ensemble.forest'`. The
+# pickles were written with scikit-learn 0.19.0 and need THREE independent fixes:
+#   1. module renames: sklearn.ensemble.forest -> _forest,
+#      sklearn.tree.tree -> _classes
+#   2. the tree node dtype gained a `missing_go_to_left` field in sklearn 1.3
+#   3. attribute renames: n_features_ -> n_features_in_,
+#      base_estimator -> estimator, plus monotonic_cst
 #
-# CONSEQUENCE FOR THE FAIRNESS CONTRACT: MARS cannot be run on its OWN published
-# objectives (gsk3b, jnk3) without scikit-learn archaeology. The contract's
-# requirement of a "native-regime MARS row" alongside the matched-budget row
-# therefore cannot be satisfied from the shipped artifacts. Either the pickles
-# are rebuilt from the shipped data/kinase.tsv, or the native-regime row is
-# taken from the literature and labelled context-only. This does NOT block a
-# COMPOSE comparison, which supplies its own frozen oracle by design.
+# THE DANGEROUS ONE, and the reason this block is long: since sklearn 1.3
+# `tree_.value` stores class PROPORTIONS and `predict_proba` no longer
+# normalizes, while 0.19 stored raw COUNTS. Fixing only the import errors yields
+# "probabilities" as large as 1169.7. IT DOES NOT CRASH. MARS would sample
+# happily against meaningless scores and the run would look successful.
+# Counts must be converted to proportions at load.
+#
+# VALIDATION THAT MUST BE REPEATED BY ANY FUTURE PORT: after the fix, known
+# actives score mean 0.84 (jnk3) and 0.91 (gsk3b), 98-100% above the 0.5 success
+# threshold, versus 0.04/0.07 for random ChEMBL at 0-2%. Sanity-correct, not
+# merely non-crashing. Never trust a MARS oracle number without this check.
+#
+# CONSEQUENCE FOR THE FAIRNESS CONTRACT: the required "native-regime MARS row"
+# on MARS's own gsk3b/jnk3 objectives IS producible. The remaining cost is
+# compute, not archaeology.
+#
+# --- Four undocumented import-time dependencies ------------------------------
+# pyyaml       (dgl.graphbolt)
+# tensorboard  (SummaryWriter)
+# networkx     (scorer.py)
+# pandas<2.3   pip resolves pandas 3.x, incompatible with the numpy<2 DGL forces
 #
 # --- Vocabulary --------------------------------------------------------------
 # data/vocab_* is gitignored upstream and must be rebuilt from data/chembl.txt
