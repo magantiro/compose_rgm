@@ -22,6 +22,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from compose_v4.experiments.pareto_control import (  # noqa: E402
     CostLedger,
     branch_from_common_prefix,
+    ReferenceFrontError,
+    budget_to_fraction,
+    hv_reference_value,
+    preference_region_coverage,
+    union_reference_front,
     MeteredProcess,
     Scalarization,
     WeightedSum,
@@ -453,3 +458,92 @@ def test_prefix_is_committed_before_any_branch_preference_is_used():
         MeteredProcess(ToyProcess(PREFIX_EDGES), ToyObjectives(PREFIX_Z)),
         "root", 3, 1, (0.9,), SCALARIZE)
     assert a["prefix"].states == b["prefix"].states
+
+
+# ---------------------------------------------------------------------------
+# HV_ref must not come from COMPOSE, and efficiency is the reported axis
+#
+# Frozen 2026-08-13, before any hypervolume number existed.
+# ---------------------------------------------------------------------------
+
+def test_hv_ref_refuses_to_be_derived_from_a_single_arm():
+    """The structural-favorability hazard, as an executable check.
+
+    If the denominator of "reached 90% of the attainable front" were COMPOSE's
+    own best front, the statement would be partly about COMPOSE's own ceiling
+    and every efficiency curve would inherit the bias -- a metric that cannot
+    fully disappoint. It raises rather than warns, because a warning would
+    eventually be ignored.
+    """
+    only_compose = {"verified_pref": np.array([[9.0, 1.0], [1.0, 9.0]])}
+    with pytest.raises(ReferenceFrontError):
+        union_reference_front(only_compose)
+    with pytest.raises(ReferenceFrontError):
+        hv_reference_value(only_compose, REFERENCE, UTOPIA)
+
+
+def test_hv_ref_is_the_union_across_methods_not_the_best_single_method():
+    """The union front must dominate every contributor, so no arm can move the
+    goalposts toward itself by being the only one measured."""
+    fronts = {
+        "greedy_pref": np.array([[9.0, 1.0], [5.0, 5.0]]),
+        "hn_gfn": np.array([[1.0, 9.0], [4.0, 6.0]]),
+    }
+    union = union_reference_front(fronts)
+    hv_union = hypervolume(union, REFERENCE)
+    for name, z in fronts.items():
+        assert hypervolume(z, REFERENCE) <= hv_union + 1e-9, name
+    # (9,1) and (1,9) are both on the union front; neither method alone has both.
+    assert any(np.allclose(row, [9.0, 1.0]) for row in union)
+    assert any(np.allclose(row, [1.0, 9.0]) for row in union)
+
+
+def test_hv_ref_grows_when_an_external_method_extends_the_front():
+    """An external method reaching further must RAISE the bar, not lower it."""
+    base = {"greedy_pref": np.array([[5.0, 5.0]]),
+            "unguided": np.array([[4.0, 4.0]])}
+    extended = dict(base, hn_gfn=np.array([[9.0, 1.0], [1.0, 9.0]]))
+    assert (hv_reference_value(extended, REFERENCE, UTOPIA)
+            > hv_reference_value(base, REFERENCE, UTOPIA))
+
+
+def test_the_frozen_nadir_is_a_parameter_not_read_off_the_results():
+    """The reference corner comes from the held-in scales. Passing a different
+    nadir must change HV, which is what makes it a frozen input rather than
+    something the results can quietly set."""
+    z = np.array([[5.0, 5.0]])
+    assert hypervolume(z, np.array([0.0, 0.0])) == pytest.approx(25.0)
+    assert hypervolume(z, np.array([4.0, 4.0])) == pytest.approx(1.0)
+
+
+def test_b90_returns_none_when_the_target_is_never_reached():
+    """None is a real outcome. Substituting the maximum budget would silently
+    turn a failure into a finite, comparable-looking number."""
+    assert budget_to_fraction([0.1, 0.2, 0.3], [1, 2, 3], hv_ref=1.0) is None
+
+
+def test_b90_is_the_first_budget_reaching_ninety_percent_of_hv_ref():
+    assert budget_to_fraction([0.1, 0.5, 0.91, 0.95], [10, 20, 30, 40],
+                              hv_ref=1.0) == 30.0
+
+
+def test_b90_uses_best_so_far_so_a_dip_cannot_delay_it():
+    assert budget_to_fraction([0.95, 0.10, 0.10], [5, 10, 15],
+                              hv_ref=1.0) == 5.0
+
+
+def test_region_coverage_punishes_one_excellent_cluster():
+    """A method producing a single potency-heavy cluster must not score well
+    just because its hypervolume is decent."""
+    front = np.array([[0.0, 10.0], [10.0, 0.0]])
+    clustered = np.array([[9.6, 0.4], [9.7, 0.3], [9.8, 0.2], [9.9, 0.1], [10.0, 0.0]])
+    spread = np.array([[0.0, 10.0], [2.5, 7.5], [5.0, 5.0], [7.5, 2.5], [10.0, 0.0]])
+    assert preference_region_coverage(clustered, front)["coverage"] == pytest.approx(0.2)
+    assert preference_region_coverage(spread, front)["coverage"] == pytest.approx(1.0)
+
+
+def test_region_coverage_flags_a_degenerate_front_instead_of_scoring_it():
+    front = np.array([[5.0, 5.0], [5.0, 5.0]])
+    out = preference_region_coverage(np.array([[5.0, 5.0]]), front)
+    assert out["degenerate_front"] is True
+    assert out["coverage"] == 0.0

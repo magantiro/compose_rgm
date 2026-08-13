@@ -535,3 +535,104 @@ def source_paired_bootstrap(differences: Sequence[float], *, resamples: int = 20
             "ci95_high": float(np.percentile(boot, 97.5)),
             "wins": int((d > 1e-9).sum()), "losses": int((d < -1e-9).sum()),
             "ties": int((np.abs(d) <= 1e-9).sum())}
+
+
+# ---------------------------------------------------------------------------
+# Reference front and efficiency metrics
+#
+# FROZEN 2026-08-13 02:27 EDT, BEFORE any hypervolume number existed. At the
+# time of writing the authorized 12-source smoke had emitted 6 arm checkpoints
+# and ZERO `DONE` lines, and `DONE` is the only place an HV value is printed.
+# ---------------------------------------------------------------------------
+
+class ReferenceFrontError(ValueError):
+    """Raised when HV_ref would be derived from a single arm."""
+
+
+def union_reference_front(fronts_by_method: dict[str, np.ndarray]) -> np.ndarray:
+    """The UNION nondominated front across every method and arm.
+
+    WHY HV_ref MAY NOT COME FROM COMPOSE
+    ------------------------------------
+    If the denominator of "reached 90% of the attainable front" is the best
+    front COMPOSE itself produced, then the statement is partly about COMPOSE's
+    own ceiling, and every efficiency curve inherits that bias. That is the same
+    shape as the defects already caught in this project: a metric that cannot
+    fully disappoint. A method that simply stopped early would drag the
+    goalposts toward itself.
+
+    So HV_ref is computed from the pooled endpoints of ALL arms and ALL external
+    methods on the frozen evaluation set. Passing a single method raises, rather
+    than warning -- a warning would eventually be ignored.
+    """
+    if len(fronts_by_method) < 2:
+        raise ReferenceFrontError(
+            "HV_ref must be the union nondominated front across all methods and "
+            f"arms, not one arm's own front. Got {sorted(fronts_by_method)}. "
+            "Use the frozen box normalisation instead if only one method exists.")
+    pooled = np.vstack([np.atleast_2d(z) for z in fronts_by_method.values()])
+    pooled = pooled[np.all(np.isfinite(pooled), axis=1)]
+    if len(pooled) == 0:
+        raise ReferenceFrontError("no finite endpoints in any method")
+    return pooled[pareto_front_indices(pooled)]
+
+
+def hv_reference_value(fronts_by_method: dict[str, np.ndarray],
+                       reference: np.ndarray, utopia: np.ndarray) -> float:
+    """`HV_ref` -- normalized hypervolume of the UNION front.
+
+    `reference` is the frozen NADIR CORNER taken from the held-in scales (p5),
+    never a corner read off observed results.
+    """
+    return normalized_hypervolume(
+        union_reference_front(fronts_by_method), reference, utopia)
+
+
+def budget_to_fraction(hv_trace: Sequence[float], budgets: Sequence[float],
+                       hv_ref: float, fraction: float = 0.9) -> float | None:
+    """`B_90` / `N_90`: the smallest budget at which best-so-far HV reaches
+    `fraction * HV_ref`.
+
+    Returns None if never reached. None is a real outcome and must be reported
+    as such -- substituting the maximum budget would silently convert a failure
+    into a finite, comparable-looking number.
+    """
+    if hv_ref <= 0 or len(hv_trace) == 0:
+        return None
+    target = fraction * hv_ref
+    best = np.maximum.accumulate(np.asarray(hv_trace, dtype=float))
+    hit = np.flatnonzero(best >= target)
+    return float(np.asarray(budgets, dtype=float)[hit[0]]) if len(hit) else None
+
+
+def preference_region_coverage(endpoints_z: np.ndarray,
+                               reference_front: np.ndarray,
+                               n_regions: int = 5) -> dict[str, Any]:
+    """What fraction of the front's REGIONS does a method actually occupy?
+
+    A method that produces one excellent potency-heavy cluster must not score
+    well merely because its hypervolume is decent. The union front's extent on
+    objective 0 is cut into `n_regions` equal bins, and coverage is the number
+    of DISTINCT bins the method's endpoints land in, over `n_regions`.
+
+    Range [1/n_regions, 1]. Five preferences collapsing into one bin gives 0.2;
+    one endpoint per bin gives 1.0. Both are attainable, so it measures.
+    """
+    front = np.atleast_2d(reference_front)
+    front = front[np.all(np.isfinite(front), axis=1)]
+    z = np.atleast_2d(endpoints_z)
+    z = z[np.all(np.isfinite(z), axis=1)]
+    if len(front) == 0 or len(z) == 0:
+        return {"coverage": 0.0, "occupied_regions": [], "n_regions": n_regions,
+                "degenerate_front": True}
+    lo, hi = float(np.min(front[:, 0])), float(np.max(front[:, 0]))
+    if hi <= lo:
+        return {"coverage": 0.0, "occupied_regions": [], "n_regions": n_regions,
+                "degenerate_front": True}
+    edges = np.linspace(lo, hi, n_regions + 1)
+    bins = np.clip(np.digitize(z[:, 0], edges[1:-1]), 0, n_regions - 1)
+    occupied = sorted({int(b) for b in bins})
+    return {"coverage": len(occupied) / n_regions,
+            "occupied_regions": occupied, "n_regions": n_regions,
+            "region_edges_objective0": [float(e) for e in edges],
+            "degenerate_front": False}

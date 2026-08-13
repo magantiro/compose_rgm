@@ -338,6 +338,66 @@ show that a non-greedy action was worth taking.
    > silently corrected: a check that forbids the experiment is as wrong as one
    > that permits a confound.
 
+1b. **`HV_ref` and the reference corner — NEITHER MAY COME FROM COMPOSE.**
+   *Frozen 2026-08-13 02:27 EDT, before any hypervolume number existed: the
+   authorized smoke had emitted 6 arm checkpoints and zero `DONE` lines, and
+   `DONE` is the only place an HV value is printed.*
+
+   - **Reference corner (nadir):** `r_j` = held-in **p5**, from the frozen
+     scales in `diagnostics/pareto_tradeoff_census.json`. It is a frozen input,
+     never a corner read off observed results.
+   - **Utopia:** `z*_j` = held-in **p99**, likewise frozen.
+   - **`HV_ref`, the denominator of "reached 90% of the attainable front":** the
+     **union nondominated front across ALL methods and ALL arms** on the frozen
+     evaluation set — internal arms *and* external methods together. Where only
+     internal arms exist, the **fixed box normalisation** `[r, z*]`, established
+     in advance, is used instead.
+
+   > **Why this is a hazard and not a detail.** If `HV_ref` were the best front
+   > COMPOSE produces, then "reaches 90% of reference HV" would be partly a
+   > statement about COMPOSE's own ceiling, and every efficiency curve would
+   > inherit that bias. It is the same shape as the five defects already caught
+   > here: a metric that cannot fully disappoint. A method that simply stopped
+   > early would drag the goalposts toward itself.
+   >
+   > `union_reference_front()` **raises** `ReferenceFrontError` when handed a
+   > single method, and `tests/test_pareto_control.py` asserts it. A warning
+   > would eventually be ignored.
+
+1c. **Efficiency is the primary axis, not final HV.** The question is how
+   efficiently a controllable molecular process sweeps useful regions of the
+   front, not whether final HV is 0.83 versus 0.79. Frozen quantities:
+
+   - **`HV(b)`** — best-so-far hypervolume as a function of budget `b`;
+   - **`HV-AUC`** over a fixed budget `B`, normalized to [0, 1];
+   - **`B_90` = min{ b : HV(b) >= 0.9 * HV_ref }** — the budget to reach 90% of
+     the attainable front. **`None` when never reached**, and reported as
+     `None`: substituting the maximum budget would silently convert a failure
+     into a finite, comparable-looking number;
+   - **preference region coverage** — of the five requested `w`, the fraction
+     occupying **distinct regions** of the union front (objective-0 extent cut
+     into five equal bins). Range [0.2, 1.0]. A method producing one excellent
+     potency-heavy cluster scores **0.2** however good its hypervolume is.
+
+1d. **Two efficiency axes, never mixed.**
+
+   | axis | x | applies to | headline statistic |
+   |---|---|---|---|
+   | **INTERNAL** | completed controlled **trajectories** | COMPOSE arms **only** | **`N_90`** — trajectories to reach 90% of `HV_ref` |
+   | **EXTERNAL** | **unique valid canonical evaluations**, and additionally **oracle requests** | cross-method, incl. external baselines | `B_90` on each counter |
+
+   The interesting internal claim lives on the trajectory axis — *"20
+   preference-directed trajectories where unguided needs 100"*. But **trajectory
+   count is not comparable across methods**: HN-GFN, GraphGA and REINVENT do not
+   share a trajectory object. **External methods are never plotted on the
+   trajectory axis.**
+
+1e. **The honest framing.** A result where an external method reaches slightly
+   higher **final** HV while COMPOSE has substantially better **HV-AUC**, or
+   reaches 90% front coverage with several times fewer oracle evaluations, is a
+   **good** result and is reported as such — not as a loss. Nothing is tuned to
+   win final HV. Equally, **if COMPOSE is worse on both, that is reported.**
+
 2. **HV-AUC — two conventions, reported together, never substituted.**
    - `HV-AUC@native`: x-axis = **distinct molecules scored** by the property
      oracle (the benchmark-native convention).
