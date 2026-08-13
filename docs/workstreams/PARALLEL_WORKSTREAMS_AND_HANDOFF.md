@@ -661,3 +661,31 @@ by construction has not demonstrated anything by not violating it. The
 measurement is what the *unconstrained* arms do, and what the constraint costs.
 
 This rule applies to every lane and to the main lane equally.
+
+---
+
+# Project-wide rule: MMP proxies are diagnostics, not authorities
+
+**Do not use one-cut matched-pair proxies for load-bearing reachability or
+control-geometry conclusions when exact successor fibers are available.**
+
+Two measured cases, both of which changed the qualitative picture:
+
+1. **Reachability.** A matched-pair movability census suggested a DRD2 potency
+   threshold was out of reach in four edits — median favourable edit +0.38
+   log-odds against a required climb of ~5.5. The real fiber then climbed
+   **+4.42 log-odds in three greedy edits**. The proxy sees a median of one
+   neighbour per molecule; the fiber is ~500–600 wide.
+2. **Control geometry.** The Pareto census ran both instruments on the same
+   objective pair. The MMP proxy gave 1.66 mean distinct preference selections
+   and 41% unanimous states; the exact fibers gave **2.34 and 10%**. The proxy
+   reads borderline where the executable support is comfortable.
+
+That is not a calibration offset — it changes how much choice the controller
+appears to have.
+
+**Consequence.** MMP mining stays useful as a cheap diagnostic and for
+nominating real chemical relationships. It is not evidence about executable
+support. Any manuscript claim resting materially on MMP-based reachability or
+support estimates must be re-evidenced with exact-fiber measurement where
+feasible.

@@ -527,6 +527,14 @@ reinforces it: an input molecule can condition subsequent generation, but
 **similarity anchor**, not the exact state of one ongoing executable
 trajectory.
 
+**Do not write "the goal changes at an arbitrary step."** The formal machinery
+operates from any realized state, but the scalable experiment fixes `tau=3,
+H=6`. Invariance to switch time is NOT established. Say instead:
+
+> After a realized molecular prefix has accumulated, COMPOSE can change the
+> active objective and continue from the exact current molecular state while
+> keeping all learned parameters fixed.
+
 **Paper-level wording, preferred:**
 
 > COMPOSE represents molecular design as control of a learned executable
