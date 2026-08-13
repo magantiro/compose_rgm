@@ -52,6 +52,51 @@ for free, and the lane contract requires a costed plan to main first.
 
 **Changes a frozen object:** no.
 
+**Superseded in part by D-002b**, below, before any census ran.
+
+---
+
+## D-002b · 2026-08-13 · The REAL successor fiber is enumerable locally; it becomes the primary instrument
+
+**Decision.** Census C2–C4 on the real model-gated canonical successor support
+(instrument I-A), with the MMP proxy retained as a cross-check (I-B). Taken
+**before** any census statistic was computed.
+
+**Evidence before the decision.**
+- `canonical_successor_result(model, state, 0.5)` returns **334 and 339**
+  canonical successors for two drug-sized held-in molecules at **5.2–5.7 s per
+  state** on this machine, after a 63 s runtime build. That is the real
+  ~250–600-wide fiber, not a proxy.
+- The legal mask is structural — it comes from the model's action tables, not
+  its weights — so the frozen `R_theta` checkpoint (which is only on the Modal
+  volume) is **not needed to enumerate support**. The census reads support and
+  properties only and never reads a probability.
+- The local Active8 pairs with gate-zero **v7** while the volume's `RUN_PATHS`
+  pins **v6**, which `scripts/verification/kernel_cost_profile.py` warns about.
+  This was **checked, not assumed**: `process_identity_sha256`,
+  `gate_zero_structural_contract_sha256`, `contracts_binding_sha256`,
+  `active8_completion_sha256`, `enforced_structural_clauses`,
+  `model_family_counts` and `executor_rule_counts` are **byte-identical**
+  between the two decisions. They differ in corpus accounting, not in the
+  executable support.
+
+**Why this matters for the verdict, not just for precision.** Under D-002 alone,
+a G2/G5 failure could only ever have been `PROVISIONAL_REJECT_PENDING_FIBER`,
+because the MMP proxy's bias runs one way. With I-A the failure direction
+becomes conclusive too, so the gate can actually reject a pair rather than defer
+it. A gate that can only pass is not a gate.
+
+**Alternatives rejected.** Keeping the MMP proxy alone (cheaper, but leaves
+every rejection provisional); using the purely combinatorial
+`enumerate_action_fiber` (78 successors under `editing_v2_semantic` — a
+different and much narrower support than the model-gated one, so it would have
+censused a set the controller does not actually see).
+
+**Changes a frozen object:** no. Changes this lane's census instrument, before
+the census ran.
+
+---
+
 ---
 
 ## D-003 · 2026-08-13 · Objective-pair order predeclared and committed BEFORE the census ran

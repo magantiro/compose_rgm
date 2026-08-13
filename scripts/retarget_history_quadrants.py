@@ -23,6 +23,22 @@ second. A single discordant source is not a subgroup; the question is whether
 the discordance repeats. Naming a source before knowing how many share its
 behaviour is how a post-hoc subgroup claim gets born.
 
+THE UNIT IS THE SOURCE, NOT THE OBSERVATION. The 60 rows are 30 molecular
+sources observed under TWO histories, not 60 independent sources. Counts
+pooled across histories ("x/60") describe source-history OBSERVATIONS. Every
+uncertainty statement must be computed within a history, where n=30 and the
+source is the independent unit -- which is how the paired intervals in
+`retarget_controller_parity_audit.py` are built.
+
+SOURCES HURT UNDER BOTH ARE AN OUTCOME-DEFINED SUBSET, NOT A SUBGROUP. They
+are identified by having the outcome one would then be explaining. A subgroup
+must be recognisable from a pre-existing feature. Measured on this panel, the
+best candidate pre-existing feature -- potency margin at the switch state --
+has a Spearman correlation with the history effect of only +0.119 (p=0.53,
+n=30, D-first). The median split between the outcome-defined groups looked far
+more suggestive than that, which is exactly what dichotomising on the outcome
+does to a near-zero continuous association.
+
 This arm was added AFTER the verified Q2 result was seen, so everything here is
 development robustness, not confirmation.
 """
@@ -76,7 +92,8 @@ def main() -> int:
                      "delta_greedy": float(dg), "delta_verified": float(dv),
                      "quadrant": quadrant})
 
-    print("QUADRANT COUNTS -- asked before any individual source is named")
+    print("QUADRANT COUNTS -- 30 sources x 2 histories = 60 OBSERVATIONS,")
+    print("not 60 independent sources. Asked before any source is named.")
     print(f"{'quadrant':>28} {'P-first':>8} {'D-first':>8} {'total':>7}")
     order = ("helps under both", "helps only under verified",
              "hurts only under verified", "hurts under both")
@@ -116,7 +133,7 @@ def main() -> int:
 
     print("\nDISCORDANT SOURCES (the two controller classes disagree in sign)")
     disc = [r for r in rows if (r["delta_greedy"] > EPS) != (r["delta_verified"] > EPS)]
-    print(f"  {len(disc)}/{len(rows)} sources disagree")
+    print(f"  {len(disc)}/{len(rows)} source-history observations disagree")
     for r in sorted(disc, key=lambda r: abs(r["delta_verified"] - r["delta_greedy"]),
                     reverse=True)[:6]:
         print(f"  {r['history']}-first src {r['index']:>2}  "

@@ -115,59 +115,96 @@ stronger requirement.
 
 ## 6. Stage 0 — tradeoff census and the headroom gate
 
-### 6.1 Instrument
+### 6.1 Instruments — two, run on the same sources
 
-Kernel-free and fully local: RDKit + the frozen DRD2 SVM + one-cut matched
-molecular pairs mined over the held-in pool by `mine_one_cut_pairs`. No Modal,
-no `R_theta`, no GPU.
+Both are **fully local**. No Modal run, no GPU, no `R_theta` weights.
 
-A **proxy decision state** is a held-in molecule with heavy-atom count in
-[18, 38] (the frozen cohort size band, outcome-independent) and at least two
-one-cut MMP neighbours. Its neighbours are the candidate set. An MMP pair is by
-construction one local structural change on a shared core — the same kind of
-move the executor makes.
+**I-A — the real canonical successor fiber (PRIMARY).** The model-gated
+canonical successor support is enumerable on this machine:
 
-### 6.2 Known one-sided bias of this instrument — and what it licenses
+```
+open_process_v2_t1_source(<local Active8>, gate_zero_decision_path=<v7>, ...)
+build_process_v2_score_revised_scratch_runtime(source, materialized_state=<matscorer>)
+canonical_successor_result(model, pad_molecular_graph(g, 48), 0.5).batch.successors
+```
 
-The MMP neighbourhood has median degree 1 and p90 degree 5. The real successor
-fiber is ~500 wide. The proxy therefore **understates** how often a tradeoff
-candidate is available and **understates** preference distinguishability. This
-bias has a fixed direction, so:
+Measured cost on this machine: **~5.5 s per state, ~334 canonical successors**
+for a drug-sized molecule, after a 63 s one-time runtime build.
 
-- A pair that **PASSES** G2 or G5 on the proxy passes conservatively. The
-  verdict stands without fiber confirmation.
-- A pair that **FAILS only** G2 or G5 is marked
-  `PROVISIONAL_REJECT_PENDING_FIBER`, the census proceeds to the next pair, and
-  the handoff must request a fiber-level held-in smoke before the rejection is
-  treated as final.
-- G1 (pool correlation) and G4 (saturation) are measured on pool statistics and
-  on **real committed fiber rollouts**, so they are conclusive in both
-  directions.
+> **Why the support is the frozen support even without the frozen checkpoint.**
+> The legal mask comes from the model's structural action tables, not from its
+> weights; only the *probabilities* need the trained `R_theta`. The census reads
+> **support only** — which candidates exist and what their properties are — and
+> never reads a probability. The local Active8 pairs with gate-zero **v7** while
+> the volume's `RUN_PATHS` pins **v6**, so this was checked rather than assumed:
+> `process_identity_sha256`, `gate_zero_structural_contract_sha256`,
+> `contracts_binding_sha256`, `active8_completion_sha256`,
+> `enforced_structural_clauses`, `model_family_counts` and
+> `executor_rule_counts` are **byte-identical between v6 and v7**. The two
+> decisions differ in corpus accounting, not in the executable support.
 
-Recording the bias direction in advance is what makes a "fail" interpretable.
+A **decision state** is a held-in molecule with heavy-atom count in [18, 38]
+(the frozen cohort size band, outcome-independent) with a non-empty successor
+set. Two depths are censused per source: `d0` = the source itself, and `d1` = a
+**uniformly random** legal successor of the source under a fixed seed. The
+depth-1 state is drawn objective-independently so that the same states serve all
+three candidate pairs and no pair gets a state selected in its favour.
+
+**I-B — one-cut matched molecular pairs (CROSS-CHECK).** `mine_one_cut_pairs`
+over the full held-in pool: 81,500 pairs, 30,976 molecules with >= 2 neighbours,
+51.6 s, no kernel at all. An MMP pair is one local structural change on a shared
+core — a real medicinal-chemistry analogue of an executor move, drawn from real
+molecules rather than from the executor's own action set.
+
+### 6.2 Why both, and what a disagreement between them means
+
+The two instruments have different and partly opposite biases, so agreement
+between them is worth more than either alone.
+
+- I-B's neighbourhood has median degree 1 and p90 degree 5 against I-A's ~334.
+  I-B therefore **understates** tradeoff availability and preference
+  distinguishability.
+- I-A is the executor's own action set, so it is the right support for the
+  claim, but it is exactly the set the controller will search — it cannot tell
+  us whether the tradeoff structure is a property of chemistry or an artifact of
+  the operator inventory. I-B, drawn from real molecules, can.
+
+Decision rule, predeclared:
+
+- **Both pass** → the gate passes; conclusive.
+- **Both fail** → the gate fails; conclusive.
+- **I-A passes, I-B fails** → gate passes, flagged
+  `OPERATOR_SET_DEPENDENT` — the tradeoff exists in the executable support but
+  is not visible in real analogue pairs, which is a caveat the paper must carry.
+- **I-A fails, I-B passes** → gate **fails**; the controller can only act
+  through I-A, so a tradeoff invisible to the executor is not actionable.
+
+G1 (pool correlation) and G4 (saturation) do not use either neighbourhood
+instrument: G1 is a pool statistic and G4 is read from **committed real-fiber
+rollouts**, so both are conclusive on their own.
 
 ### 6.3 The five measurements
 
-| id | measurement | definition |
-|---|---|---|
-| C1 | objective correlation | Spearman `rho` between the two objectives over all census candidates; and, where both objectives are pool-defined, over the raw held-in pool |
-| C2 | Pareto-front width | size of the nondominated set over census candidates in normalized coordinates; the range of each objective along that front; and the number of front points selected by at least one weight on a fine Chebyshev grid (a front that is effectively a point selects 1) |
-| C3 | local successor tradeoff frequency | per **edit**: the fraction of MMP moves landing in each sign quadrant of `(dz_1, dz_2)`. Per **state**: the fraction of states offering at least one `(+,-)` candidate, and separately at least one `(-,+)` candidate |
-| C4 | preference distinguishability | per state, the augmented-Chebyshev argmax under each `w in {0.1,0.3,0.5,0.7,0.9}`; report the mean number of **distinct** candidates selected and the fraction of states where all five preferences select the same candidate |
-| C5 | reachable floors/ceilings under a 6-edit budget | from **committed held-in real-fiber rollouts** (`retarget_calibration_result_3plus3_fixed.json`) for O-P and O-D; for O-S from the census edit-size distribution plus the analytic bound, flagged as needing fiber confirmation |
+| id | measurement | instrument | definition |
+|---|---|---|---|
+| C1 | objective correlation | pool + I-A | Spearman `rho` between the two objectives over all census candidates; and, where both objectives are pool-defined, over the raw held-in pool |
+| C2 | Pareto-front width | I-A | size of the nondominated set over census candidates in normalized coordinates; the range of each objective along that front; and the number of front points selected by at least one weight on a fine Chebyshev grid (a front that is effectively a point selects 1) |
+| C3 | local successor tradeoff frequency | I-A + I-B | per **move**: the fraction landing in each sign quadrant of `(dz_1, dz_2)`. Per **state**: the fraction of legal decision states offering at least one `(+,-)` candidate, and separately at least one `(-,+)` candidate |
+| C4 | preference distinguishability | I-A + I-B | per state, the augmented-Chebyshev argmax under each `w in {0.1,0.3,0.5,0.7,0.9}`; report the mean number of **distinct** candidates selected and the fraction of states where all five preferences select the same candidate |
+| C5 | reachable floors/ceilings under a 6-edit budget | committed shards + I-A | from **committed held-in real-fiber rollouts** (`retarget_calibration_result_3plus3_fixed.json`) for O-P and O-D; for O-S from the I-A one-step similarity distribution plus the analytic bound, flagged as needing multi-step confirmation |
 
 ### 6.4 The headroom gate — numeric thresholds, predeclared
 
 All five must pass. Each threshold is stated so that the statistic could
 plainly fall on either side of it.
 
-| gate | criterion | reject if | conclusive? |
+| gate | criterion | reject if | judged on |
 |---|---|---|---|
-| **G1** alignment | objectives must not be near-redundant | Spearman `rho >= +0.70` | yes |
-| **G2** local tradeoff | tradeoff moves must be common | quadrant fraction `(+,-) + (-,+) < 0.20`; **or** either direction alone `< 0.05`; **or** fraction of states offering a `(+,-)` candidate `< 0.25`; **or** fraction offering a `(-,+)` candidate `< 0.25` | pass-only |
-| **G3** no domination | no single objective may be binding for every preference | the same objective is the binding Chebyshev term in `> 0.90` of (state, preference) decisions | pass-only |
-| **G4** no saturation | a 6-edit budget must not exhaust either axis | either objective's committed reach fraction `> 0.85` | yes |
-| **G5** front richness | preferences must select different candidates | mean distinct selections across the five preferences `< 2.0`; **or** the fraction of states where all five agree `> 0.50` | pass-only |
+| **G1** alignment | objectives must not be near-redundant | Spearman `rho >= +0.70` | pool; conclusive |
+| **G2** local tradeoff | tradeoff moves must be common | quadrant fraction `(+,-) + (-,+) < 0.20`; **or** either direction alone `< 0.05`; **or** fraction of states offering a `(+,-)` candidate `< 0.25`; **or** fraction offering a `(-,+)` candidate `< 0.25` | I-A primary, I-B cross-check, §6.2 rule |
+| **G3** no domination | no single objective may be binding for every preference | the same objective is the binding Chebyshev term in `> 0.90` of (state, preference) decisions | I-A primary |
+| **G4** no saturation | a 6-edit budget must not exhaust either axis | either objective's committed reach fraction `> 0.85` | committed shards; conclusive |
+| **G5** front richness | preferences must select different candidates | mean distinct selections across the five preferences `< 2.0`; **or** the fraction of states where all five agree `> 0.50` | I-A primary, I-B cross-check, §6.2 rule |
 
 **Why this gate exists.** A calibration in this project reported
 "29/30 vs 28/30" and called it a result. It was a **ceiling**: the task was easy
