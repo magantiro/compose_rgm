@@ -54,10 +54,38 @@ median and an IQR over 96,094 molecules; a 1e−14 perturbation per value moves 
 scale constant of magnitude 2.6161 by ~1e−14. Mixing a batched normalizer with
 B=1 controller scores is a relative error of ~1e−14 and is not a concern.
 
-**Where it is unresolved:** `experiment_c0_planning_signal_app.py` uses *both*
-shapes. Whether its cached B=1 values are ever compared against its batched
-values is not established here. It should be checked before that experiment's
-numbers are relied on again.
+### The one mixed site, AUDITED AND CLOSED
+
+`experiment_c0_planning_signal_app.py` uses both shapes, and worse than it first
+looked: `margin_cache` is populated from **both** paths — `margin()` writes B=1
+values (line 462) and the batched loop `setdefault`s batched ones (line 529). So
+a molecule's cached value depends on **which path saw it first**, and the cache
+holds a mixture.
+
+The bounded audit asked the only question that matters: *did any claim-bearing
+decision change?*
+
+**No, on two independent grounds.**
+
+1. **Every decision-bearing comparison reads one batched array.**
+   `greedy_index = argmax(immediate)`, `immediate[chosen] < immediate[greedy_index]`,
+   and the sacrifice statistic all index `immediate`, computed in a single
+   batched call and therefore internally consistent whatever shape produced it.
+   The mixed cache feeds only `rollout_prefix`'s running max (lines 485, 494,
+   507).
+2. **The experiment is superseded and its result was negative.**
+   `docs/EXPERIMENT_PLAN.md:672` — *"Superseded en route, recorded so they are
+   not re-run: the C0 planning-signal probe on DRD2 was **negative**."* And C0's
+   `sacrifice_to_win` statistic was separately withdrawn as circular. **No live
+   claim depends on any C0 number.**
+
+**Closed. No requalification needed.**
+
+And the standing rule that follows: **no sealed result is reopened because a
+floating-point implementation can differ at 1e-14.** A result is reopened only
+if an actual action or outcome is shown to have changed. Exact-target,
+retargeting, Stage B and the Pareto smoke all score at B=1 throughout and are
+untouched by this.
 
 ## The fix exists, is one line, and costs 0.4%
 
