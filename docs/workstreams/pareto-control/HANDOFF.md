@@ -384,6 +384,27 @@ What the smoke checks instead:
 despite Stage 0 passing.** That is an acceptable outcome and will be reported as
 a failure rather than repaired.
 
+# P3 and P4 are INVALID in this smoke — no closed-loop vs generate-and-rank comparison
+
+`trajectories_for_kernel_budget()` predicts `K` assuming **6 fresh kernel calls
+per trajectory**. False: unguided trajectories from a shared root collide in the
+enumeration cache, so marginal trajectories cost almost nothing. On source 000,
+`gen_rank@verified` requested **61 trajectories** to match `verified_pref`'s 368
+kernel calls and consumed **60** — a sixth of the budget.
+
+Measured kernel ratios **1.455–2.250** (P3) and **2.745–6.133** (P4) against a
+declared limit of 1.25. The gate barred both.
+
+> **The miss underfunds the BASELINE, which flatters COMPOSE.** Any P3/P4 number
+> from these shards would look better for us than a genuinely matched comparison.
+> The tolerance was **not** loosened and `gen_rank` was **not** re-run — changing
+> the rule after seeing it fail is tuning the check to fit the data.
+
+P3/P4 were already one-sided on the oracle axis; they are now unusable on the
+kernel axis too. **This smoke contains no admissible closed-loop versus
+generate-and-rank comparison.** Fixing the matcher to *iterate until the kernel
+ledger reaches the target* is a post-smoke item.
+
 # Known limitations
 
 - **Census depth.** Decision states at depths 0 and 1 only. Whether the tradeoff

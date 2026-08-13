@@ -76,7 +76,8 @@ def test_a_clean_run_reports_every_contrast(tmp_path):
     assert run(shards, out).returncode == 0
     data = json.loads(out.read_text())
     assert data["status"] == "SMOKE_HELD_IN"
-    assert data["gate"]["passed"] is True
+    assert data["gate"]["global_checks_passed"] is True
+    assert data["gate"]["barred_contrasts"] == []
     for name in ("P1_unguided_floor", "P2_future_awareness",
                  "P3_closed_vs_open_loop", "P4_closed_vs_open_loop_verified"):
         assert name in data["contrasts"]
@@ -99,12 +100,44 @@ def test_a_failing_gate_produces_no_statistics_at_all(tmp_path):
     assert "arms" not in data
 
 
-def test_unequal_endpoint_counts_fail_the_run(tmp_path):
-    """An arm contributing more endpoints wins on hypervolume by arithmetic."""
+def test_unequal_endpoint_counts_BAR_THE_CONTRAST_not_the_whole_run(tmp_path):
+    """An arm contributing more endpoints wins on hypervolume by arithmetic, so
+    the affected contrast must be withheld.
+
+    But it must NOT suppress every other number. An earlier version wrote
+    INVALID_INSTRUMENT and no statistics at all, which made the D6 tolerance the
+    only thing standing between the reader and a full report -- exactly the
+    pressure that gets tolerances loosened. D6 is per-contrast; D1-D5 are global.
+    """
     shards, out = tmp_path / "shards", tmp_path / "analysis.json"
     write_shards(shards, unequal_endpoints=True)
+    assert run(shards, out).returncode == 0
+    data = json.loads(out.read_text())
+    assert data["status"] == "SMOKE_HELD_IN"
+
+    barred = data["gate"]["barred_contrasts"]
+    assert "P3_closed_vs_open_loop" in barred
+    p3 = data["contrasts"]["P3_closed_vs_open_loop"]
+    assert p3["status"] == "INVALID_CONTRAST"
+    assert "WITHHELD" in p3["normalized_hypervolume"]
+
+    # everything not implicated still stands
+    assert "WITHHELD" not in data["contrasts"]["P2_future_awareness"][
+        "normalized_hypervolume"]
+    assert data["preference_responsiveness"]
+    assert data["efficiency"]["N_90_trajectories"]
+
+
+def test_a_GLOBAL_check_failure_still_suppresses_every_number(tmp_path):
+    """The per-contrast change must not weaken the global checks: if arms are
+    indistinguishable, nothing is trustworthy and nothing is written."""
+    shards, out = tmp_path / "shards", tmp_path / "analysis.json"
+    write_shards(shards, identical_arms=True)
     assert run(shards, out).returncode == 1
-    assert json.loads(out.read_text())["status"] == "INVALID_INSTRUMENT"
+    data = json.loads(out.read_text())
+    assert data["status"] == "INVALID_INSTRUMENT"
+    assert "contrasts" not in data
+    assert "D2_arms_are_distinct" in data["failed_checks"]
 
 
 def test_p5_measures_preference_responsiveness_and_could_be_zero(tmp_path):

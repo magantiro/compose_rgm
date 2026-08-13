@@ -654,3 +654,63 @@ retained against fraction of potency evaluations retained.
 **Changes a frozen object:** no. Nothing implemented, nothing authorised, no
 metric, threshold or arm touched.
 
+---
+
+## D-018 · 2026-08-13 · P3/P4 are INVALID in this smoke: my budget matching underfunds the baseline
+
+**Found by pre-flighting the analysis on the two real completed shards**, before
+the run landed. The gate failed D6 on `P3` and `P4` with kernel ratios of
+**1.455-2.250** and **2.745-6.133** against a declared limit of 1.25.
+
+**The defect, exactly.** `trajectories_for_kernel_budget()` predicts `K` from
+the control arm's kernel count assuming **6 fresh kernel calls per trajectory**.
+That assumption is false: unguided trajectories launched from a shared root
+collide heavily in the enumeration cache, so marginal trajectories cost almost
+nothing.
+
+| source | arm | kernel calls | trajectories requested |
+|---|---|---:|---:|
+| 000 | `verified_pref` | 368 | — |
+| 000 | `gen_rank@verified` | **60** | 61 |
+| 002 | `verified_pref` | 398 | — |
+| 002 | `gen_rank@verified` | **145** | 66 |
+
+61 trajectories x 6 steps = 366 state visits but only **60 distinct states**, so
+`gen_rank` consumed a sixth of the kernel budget it was supposed to match.
+
+**The direction matters and it flatters us.** The baseline is *underfunded*, not
+overfunded. Any P3/P4 result computed from these shards would make COMPOSE look
+better than a genuinely kernel-matched comparison would. That is exactly the
+direction in which I should be least willing to give myself the benefit of the
+doubt.
+
+**Consequence, and what is NOT done.** `P3` and `P4` are **withheld** from this
+smoke: their metrics are replaced by `WITHHELD` with the reason recorded, and
+the contrasts carry `status: INVALID_CONTRAST`. The tolerance is **not**
+loosened, and `gen_rank` is **not** re-run with more trajectories — changing the
+budget rule after seeing that it failed would be tuning the check to fit the
+data. Fixing `trajectories_for_kernel_budget()` to *iterate until the kernel
+ledger actually reaches the target*, rather than predicting from a fixed
+per-trajectory cost, is a **post-smoke** item.
+
+**So P3/P4 were already one-sided on the oracle axis, and are now unusable on
+the kernel axis too.** In this smoke there is **no admissible closed-loop versus
+generate-and-rank comparison at all.** That is the honest position.
+
+### The second defect: D6 was over-broad
+
+A D6 failure previously wrote `INVALID_INSTRUMENT` and **no statistics at all**,
+discarding P1, P2, P5, P6, the arm summaries and the efficiency curves along
+with the two bad contrasts.
+
+That is wrong in a specific and dangerous way: **it makes the tolerance the only
+thing standing between the reader and a full report**, which is precisely the
+pressure that gets tolerances loosened. D6 is per-contrast by construction,
+unlike D1-D5 which are global instrument properties, so it now **bars the
+affected contrasts and lets the rest stand**. Global failures still write no
+numbers.
+
+**Changes a frozen object:** no threshold, no metric, no arm. It changes the
+*scope* of a check from run-wide to contrast-wide, and it withholds two
+contrasts that the check correctly rejected.
+

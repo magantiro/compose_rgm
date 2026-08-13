@@ -324,5 +324,14 @@
     "direction_determined_by": "the larger development experiment, not this smoke",
     "if_better_per_preference_but_worse_set_hv": "COMPOSE's controller operates per-trajectory and per-preference, not as a jointly archive-coordinated Pareto optimiser. Not a bug in hypervolume and not necessarily a control failure. Report it; do NOT add archive-aware coupling to make verified win HV.",
     "if_verified_improves_both": "a genuinely strong result precisely because the HV gain was demonstrably capable of going the other way"
-  }
+  },
+  "known_invalid_contrasts_in_smoke": {
+    "P3_closed_vs_open_loop": "BUDGET_ASYMMETRIC_KERNEL",
+    "P4_closed_vs_open_loop_verified": "BUDGET_ASYMMETRIC_KERNEL",
+    "cause": "trajectories_for_kernel_budget assumes 6 fresh kernel calls per trajectory; cache collisions between unguided trajectories from a shared root make marginal trajectories nearly free, so gen_rank consumed as little as a sixth of the intended kernel budget",
+    "direction": "underfunds the BASELINE, which flatters COMPOSE",
+    "action_taken": "both contrasts withheld; tolerance NOT loosened, gen_rank NOT re-run",
+    "post_smoke_fix": "iterate until the kernel ledger reaches the target rather than predicting K from a fixed per-trajectory cost"
+  },
+  "d6_scope": "per-contrast -- bars the affected contrasts and lets the rest stand; D1-D5 are global and bar everything"
 }

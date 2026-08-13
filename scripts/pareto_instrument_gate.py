@@ -318,8 +318,20 @@ def check_d6_hv_budget_matched(contrasts: Sequence[Contrast],
             # confound; the ratio is what the reader needs instead.
             entry["flag"] = "COMPUTE_ASYMMETRIC_ON_AN_UNCLAIMED_AXIS_REPORT_THE_RATIO"
         detail[c.name] = entry
+    # D6 is PER-CONTRAST by construction, unlike D1-D5 which are global
+    # instrument properties. A budget failure on one contrast says nothing about
+    # the others, so it INVALIDATES THAT CONTRAST rather than the whole run --
+    # the same treatment P1 gets for its parity confound. Suppressing every
+    # number because one comparison is unmatched would discard valid results and
+    # would tempt the next person to loosen the tolerance to get them back.
+    invalid = [name for name, e in detail.items()
+               if e.get("flag") in ("UNEQUAL_ENDPOINTS", "BUDGET_ASYMMETRIC_NATIVE",
+                                    "BUDGET_ASYMMETRIC_KERNEL")]
     report.add("D6_hv_budget_matched", ok,
                {"contrasts": detail,
+                "invalidated_contrasts": invalid,
+                "scope": ("per-contrast: these contrasts are barred, the rest of "
+                          "the analysis stands"),
                 "rule": "Equal endpoint counts are required everywhere -- an arm "
                         "must not win by contributing more points. Compute parity "
                         "is enforced only where a contrast claims it (the "

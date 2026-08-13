@@ -122,15 +122,32 @@ def main() -> int:
     for check in gate.checks:
         print(f"  {'PASS' if check['pass'] else 'FAIL'}  {check['check']}")
 
-    if not gate.passed:
+    # D1-D5 are GLOBAL instrument properties: if any fails, nothing is
+    # trustworthy and no number is written. D6 is per-contrast, so it bars the
+    # affected contrasts and lets the rest stand.
+    global_failures = [c for c in gate.failures if c["check"] != "D6_hv_budget_matched"]
+    d6 = next((c for c in gate.checks if c["check"] == "D6_hv_budget_matched"), None)
+    barred = set(d6["detail"].get("invalidated_contrasts", [])) if d6 else set()
+
+    if global_failures:
         payload = {"schema": "compose.pareto.control_analysis",
                    "status": "INVALID_INSTRUMENT",
-                   "reason": "the instrument gate failed; no statistic is reported",
+                   "reason": ("a GLOBAL instrument check failed; no statistic is "
+                              "reported"),
+                   "failed_checks": [c["check"] for c in global_failures],
                    "gate": gate.checks}
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(json.dumps(payload, indent=2) + "\n")
-        print(f"\nGATE FAILED. Wrote {args.out} with NO statistics.")
+        print(f"\nGLOBAL GATE FAILURE. Wrote {args.out} with NO statistics.")
         return 1
+
+    if barred:
+        print("\n  D6 BARRED CONTRASTS (reported as INVALID, not silently "
+              "dropped):")
+        for name in sorted(barred):
+            e = d6["detail"]["contrasts"][name]
+            print(f"    {name}: {e['flag']}  kernel ratio "
+                  f"{e['kernel_call_ratio']}, native gap {e['native_call_gap']}")
 
     # --- Per-arm summaries -------------------------------------------------
     summary: dict[str, Any] = {}
@@ -182,7 +199,19 @@ def main() -> int:
                     "policy improvement fixes the sign; a test against a null of "
                     "0.5 would assume something already known to be false")
             entry[metric] = boot
+        if contrast.name in barred:
+            entry["status"] = "INVALID_CONTRAST"
+            entry["barred_by"] = "D6_hv_budget_matched"
+            entry["reason"] = d6["detail"]["contrasts"][contrast.name]["flag"]
+            for metric in METRICS:
+                entry[metric] = {"WITHHELD": ("barred by D6; the arms did not "
+                                              "hold the budget parity this "
+                                              "contrast claims")}
         contrasts[contrast.name] = entry
+        if contrast.name in barred:
+            print(f"  {contrast.name:<34} WITHHELD -- "
+                  f"{entry['reason']}")
+            continue
         hv = entry["normalized_hypervolume"]
         flag = "" if contrast.status == "PRIMARY" else "  [CONTEXT_ONLY]"
         print(f"  {contrast.name:<34} HV {hv['mean']:>+8.4f} "
@@ -497,7 +526,9 @@ def main() -> int:
         "held_out_opened": False,
         "n_sources": len(rows),
         "pair": rows[0].get("pair"),
-        "gate": {"passed": True, "checks": gate.checks},
+        "gate": {"global_checks_passed": True,
+                 "barred_contrasts": sorted(barred),
+                 "checks": gate.checks},
         "withdrawn_statistics": WITHDRAWN_STATISTICS,
         "arms": summary,
         "contrasts": contrasts,
