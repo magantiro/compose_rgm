@@ -464,11 +464,60 @@ def run_arms(task: dict[str, Any]) -> dict[str, Any]:
     return payload
 
 
+@app.function(image=image, cpu=2.0, memory=12 * 1024, timeout=2 * 60 * 60,
+              max_containers=30, retries=1,
+              volumes={str(ARTIFACT_ROOT): artifact_volume})
+def run_greedy_restart(task: dict[str, Any]) -> dict[str, Any]:
+    """PROTOCOL-COMPLETION ARM. Greedy restart from x_0 with the post-switch
+    budget -- the controller-matched partner for `greedy_retarget`.
+
+    Added AFTER the verified Q2 result was seen, so it is labelled a
+    development robustness arm, not part of the frozen five. It does not
+    rescue Q2 -- that comparison already had controller parity -- it asks the
+    strictly stronger question of whether the value of history survives under
+    BOTH controller classes. The three outcomes are all informative and the
+    two are not required to agree.
+
+    Three greedy steps: the cheapest arm in the experiment.
+    """
+    started = time.perf_counter()
+    _props, _m, utility, success, successors, counter = _runtime()
+    slots, start = int(task["slots"]), task["start_key"]
+
+    current = start
+    trajectory = [current]
+    for _ in range(HORIZON - SWITCH_AT):
+        rows = successors(current, slots)
+        if not rows:
+            break
+        current = max(rows, key=lambda r: (utility(r[0], "B"), r[0]))[0]
+        trajectory.append(current)
+
+    payload = {"index": int(task["index"]), "history": task["history"],
+               "source": task["source"], "start_key": start,
+               "arm": "greedy_restart",
+               "landing": current, "trajectory": trajectory,
+               "b_worst_margin": utility(current, "B")[0],
+               "b_mean_margin": utility(current, "B")[1],
+               "b_success": bool(success(current, "B")),
+               "kernel_calls": counter["calls"],
+               "seconds": round(time.perf_counter() - started, 1)}
+    out = Path(RUN_ROOT) / "retarget_greedy_restart"
+    out.mkdir(parents=True, exist_ok=True)
+    (out / f"{task['history']}_{task['index']:03d}.json").write_text(
+        json.dumps(payload, indent=2) + "\n")
+    artifact_volume.commit()
+    print(f"[gr {task['history']}/{task['index']:03d}] {counter['calls']} calls "
+          f"{payload['seconds']:.0f}s  worst {payload['b_worst_margin']:+.4f}", flush=True)
+    return payload
+
+
 @app.function(image=image, cpu=0.25, memory=2048, timeout=10 * 60 * 60,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
 def drive(phase: str, tasks: list[dict[str, Any]]) -> int:
     """Fan out ON MODAL so a client disconnect cannot stall the run."""
-    fn = build_prefix if phase == "prefix" else run_arms
+    fn = ({"prefix": build_prefix, "greedy_restart": run_greedy_restart}
+          .get(phase, run_arms))
     # RESUME. Shards are committed per task, so a relaunch must not redo
     # completed work. Filtering here -- on Modal, with the volume mounted --
     # rather than inside the task avoids paying a container start and a
@@ -476,8 +525,9 @@ def drive(phase: str, tasks: list[dict[str, Any]]) -> int:
     artifact_volume.reload()
     remaining = []
     for task in tasks:
-        sub = ("retarget_prefixes" if phase == "prefix"
-               else task.get("out_dir", "retarget_intervention"))
+        sub = {"prefix": "retarget_prefixes",
+               "greedy_restart": "retarget_greedy_restart"}.get(
+            phase, task.get("out_dir", "retarget_intervention"))
         shard = Path(RUN_ROOT) / sub / f"{task['history']}_{task['index']:03d}.json"
         if shard.exists():
             continue
@@ -521,6 +571,11 @@ def main(phase: str = "prefix", sources: int = 30, smoke: bool = False) -> None:
                           "switch_state": p["switch_state"],
                           "out_dir": ("retarget_intervention_smoke" if smoke
                                       else "retarget_intervention")})
+    if phase == "greedy_restart":
+        print(f"PROTOCOL-COMPLETION ARM -- greedy restart from x_0, "
+              f"{len(tasks)} branch points, {HORIZON - SWITCH_AT} edits")
+        print(f"completed {drive.remote('greedy_restart', tasks)}")
+        return
     print(f"PHASE 2 -- {len(tasks)} branch points from committed prefixes "
           f"{prefixes['prefixes_sha256'][:16]}")
     print(f"arms: {', '.join(ARMS)}; horizon {HORIZON}, switch at {SWITCH_AT}")
