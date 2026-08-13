@@ -344,6 +344,62 @@ a rate.
 
 ---
 
+## 2026-08-13 — PREDECLARATION of three reversible-constraint families (sealed before measurement)
+
+**Decision.** Declare families A, B, C, their thresholds, their rank order and
+the pass criteria, and **commit them before running any measurement**.
+
+**Evidence available before the decision.** Only the ring-system result: that
+violation of a protected fused ring system is absorbing (19 broke, 0
+recovered). Nothing about how any of A, B or C behaves on any trajectory — no
+family had been evaluated when this was written.
+
+**Why the ordering matters.** The lane's whole credibility rests on not
+choosing a constraint because it produces the wanted answer. Committing the
+declaration first makes the ordering checkable in git history rather than
+asserted in prose. The precedence rule (take the first passing family in
+A, B, C — never the most favourable) is fixed now for the same reason.
+
+**Threshold provenance, deliberately not my choice.**
+- A: 14 standard literature reactive/structural alerts, chemically motivated,
+  never checked against a COMPOSE trajectory.
+- B: cLogP `[p25, p75]` **read at runtime** from the frozen
+  `retarget_goal_language_normalizers.json`. Loading rather than transcribing
+  removes any opportunity to nudge the bound.
+- C: `HEAVY_ATOM_BAND = (18, 38)`, reused verbatim from the already-frozen
+  eligibility band. No new number.
+
+**Alternatives rejected.** Picking a cLogP corridor width by trying several —
+that is precisely the failure mode named in the authorisation. Adding a fourth
+family as insurance — the bound is the point of the lane.
+
+**Instrument check performed before sealing (not a measurement of the
+families).** All 14 alert SMARTS parse and fire on hand-written positive
+controls; three clean molecules produce no false positives; both corridors load
+from their frozen files.
+
+**Frozen object touched.** None. The ring-system protocol, threshold, horizon
+and source set are untouched and remain CLOSED.
+
+---
+
+## 2026-08-13 — Census computed from committed shards; no new compute for V1–V3
+
+**Decision.** Compute metrics 1–3 from the stage-A shards already in the
+repository rather than launching a run.
+
+**Evidence before the decision.** Availability check on the committed shards:
+42 unconstrained-support trajectories, 294 committed states, all complete at
+H = 6. Enumerated successor sets are **not** stored, so mask support-retention
+and mask-empty frequency (V4) are not derivable and would need new compute.
+
+**Consequence.** V1–V3 cost nothing. V4 is deferred, and any family clearing
+V1–V3 is reported as CONDITIONAL PASS pending V4 rather than as a full pass.
+
+**Frozen object touched.** None.
+
+---
+
 ## 2026-08-12 — External evidence folded in: GraphXForm is an endpoint-only comparator
 
 **Decision.** Record the baseline lane's finding in `PROTOCOL.md` and

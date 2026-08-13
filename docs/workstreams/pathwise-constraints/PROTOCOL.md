@@ -285,6 +285,99 @@ its legal support largely preserves ring systems — not a prompt to re-roll.
 
 ---
 
+# ADDENDUM — Reversible-constraint feasibility census (salvage lane)
+
+**Status:** `DESIGN_ONLY` at the time of writing. **This section was committed
+BEFORE any family was measured.** Commit order is the evidence.
+
+**Scope, as authorised:** a feasibility census only. No controller run, no
+stage B, no held-out data. The ring-system negative is CLOSED and its
+threshold, horizon, ring definition and source set are not reopened.
+
+## Why a second family at all
+
+The ring-system premise failed for a *specific* reason: a broken fused ring
+system was never rebuilt, so violation was **absorbing** and endpoint validity
+implied path validity. The pathwise/endpoint distinction only has teeth when
+violation is **reversible** — when a trajectory can leave the feasible set and
+return. That is a property of the constraint family, not of COMPOSE, so it is
+worth one bounded check across families chosen for reversibility.
+
+## The three families, declared in advance and ranked in advance
+
+Implemented in `src/compose_v4/experiments/pathwise_reversible_families.py`.
+
+| Rank | Family | Constraint at every committed state `x_t` |
+|---|---|---|
+| **A** | `A_undesired_motif` | no undesired reactive group present |
+| **B** | `B_physchem_corridor` | `cLogP(x_t)` inside the frozen held-in interquartile range |
+| **C** | `C_size_corridor` | heavy-atom count inside the frozen panel eligibility band |
+
+**Precedence rule, fixed now:** if more than one family passes, advance the
+**first in the order A, B, C** — never the one that looks most favourable.
+
+### Where every threshold comes from
+
+No number below was chosen by me. Each is read from an artifact that was
+already frozen for another purpose.
+
+- **A** — a fixed list of 14 standard medicinal-chemistry reactive/structural
+  alerts (acyl halide, sulfonyl halide, aldehyde, anhydride, Michael acceptor,
+  epoxide, aziridine, nitro, azide, isocyanate, thiol, peroxide, hydrazine,
+  N-nitroso). Written from chemical motivation. Not derived from, filtered by,
+  or checked against any COMPOSE trajectory.
+- **B** — `[p25, p75]` of cLogP loaded **at runtime** from
+  `diagnostics/retarget_goal_language_normalizers.json`, whose own status is
+  `HELD_IN_NORMALIZERS_NO_THRESHOLD_SELECTED`. Reading it at runtime rather
+  than transcribing it means the corridor cannot be quietly nudged. The
+  interquartile range is the summary that already existed in that file; it was
+  not picked for how many states it would flag.
+- **C** — `HEAVY_ATOM_BAND = (18, 38)`, reused verbatim from the frozen
+  eligibility band already used by the retargeting cohort and by this lane's
+  own panel. No new number at all.
+
+**Choosing a corridor because it produces violations is the failure mode this
+census guards against.** The defence is that the corridors are pre-existing
+canonical summaries, loaded not typed, and committed before measurement.
+
+## Metrics, per family, on held-in unconstrained trajectories
+
+1. mid-path violation frequency;
+2. **fraction of violating paths that RETURN to a feasible endpoint** — the key
+   number, and the one that was 0 for the ring system;
+3. absolute count of endpoint-valid / path-invalid trajectories;
+4. median legal-support retention under the mask;
+5. frequency of mask-empty states.
+
+Metrics 1–3 are computable from the **already-committed stage-A shards** (42
+unconstrained-support trajectories, 294 committed states) with **no new
+compute**. Metrics 4–5 need enumerated successor sets, which the shards do not
+store, and would require a new Modal run.
+
+## Viability criteria, fixed before the census runs
+
+A family PASSES only if **all** hold:
+
+| # | Criterion | Threshold |
+|---|---|---|
+| V1 | violation is non-vacuous | at least one violating trajectory, and not every trajectory violating |
+| V2 | **violation is reversible** | **≥ 10%** of violating trajectories return to a feasible endpoint |
+| V3 | enough events to study | **≥ 20** endpoint-valid / path-invalid trajectories |
+| V4 | mask leaves room | median support retention meaningful, mask-empty states rare |
+
+V4 is not evaluable from the committed shards. A family that clears V1–V3 is
+reported as **CONDITIONAL PASS pending V4**, with the bounded run that would
+settle it costed — never as a full pass.
+
+## If no family passes
+
+**Pathwise constraints leave the main paper entirely.** The ring-system
+negative goes to the appendix as a mechanistic finding about the frozen
+kernel's legal support. **No fourth or fifth predicate is searched.** That
+bound is the point of this lane.
+
+---
+
 ## External comparator evidence (from the baseline-qualification lane)
 
 **GraphXForm's action masking is genuinely pathwise, but only over valence,
