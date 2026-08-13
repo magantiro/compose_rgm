@@ -449,3 +449,70 @@ precisely so that a disagreement could be seen rather than assumed.
 
 **Changes a frozen object:** no. It makes §6.2's existing precedence rule
 explicit rather than implicit.
+
+---
+
+## D-014 · 2026-08-13 · Held-in smoke AUTHORIZED by main and launched; shortlist stays at K=8
+
+**Decision.** Launch the 12-source held-in smoke. **Shortlist K = 8 unchanged**
+(4 immediate / 2 reference / 2 random).
+
+**Authorization.** Main lane, after the 60-source census passed. The ~$18 was
+authorized explicitly; the ~$9 shortlist-4 saving was declined on the grounds
+that it is a cost consideration and not a scientific one, and that deliberately
+weakening the controller is the wrong move immediately after establishing that
+the task has genuine geometry. K was frozen in `PROTOCOL.md` §7.2, so it stays
+frozen — this lane did not get to choose either way, which is the point of
+freezing it.
+
+**Launch, verified rather than assumed.**
+
+| | |
+|---|---|
+| app | `compose-v4-pareto-control` |
+| app id | `ap-YJkZtmnhwS8i7RTWNq0Br9` |
+| **state** | **`ephemeral (detached)`** — confirmed in `modal app list` |
+| tasks | 13 (12 sources + 1 on-Modal driver) |
+| launched | 2026-08-13 02:20:53 EDT |
+| command | `modal run --detach modal_apps/pareto_control_app.py --sources 12` |
+| profile | `rahul-94866`, CPU only |
+| cohort | `adea8e5510852d69`, 12 held-in sources |
+| pair | `potency_vs_developability` |
+
+**No client-side timeout wrapper**, deliberately: the census's single-write
+defect and two prior `--detach` losses to client-side DNS failures are the
+reason. Durability here is structural — one durable shard per source, a
+checkpoint committed after **every arm**, a driver that skips sources whose
+shard already exists, and the fan-out running on Modal so a client disconnect
+cannot stall it.
+
+**What is NOT in this run.** No `h_phi`. No ablation arms. No held-out panel. No
+development panel. The frozen protocol's five arms plus the P6 prefix-branching
+mode, and nothing else.
+
+**Changes a frozen object:** no.
+
+---
+
+## D-015 · 2026-08-13 · This lane is now the definitive host of the R_theta ablation
+
+**Decision.** Record that the registered `R_theta`-versus-empirical-family
+ablation is hosted **here**, and that it is staged **after** Pareto control is
+validated — not folded into this smoke.
+
+**Evidence before the decision.** The preregistration made Pareto the ablation
+host *conditional on the geometry gate passing*. It passed: 2.342 of 5 distinct
+selections across 120 real-fiber decision states, 10% unanimous, a front of 5.90
+nondominated candidates spanning 4.77 distinct weight-selected points.
+
+**Binding consequence.** The host **may not be moved later because some
+conventional benchmark makes `R_theta` look better.** That is the whole function
+of a conditional preregistration: the condition was measured, so the host is
+settled by the measurement rather than by which venue flatters the result.
+
+**Staging.** Validate preference control first on the 12-source smoke, then run
+the registered ablation. Arms are not multiplied in this smoke, because the
+frozen protocol does not require them here.
+
+**Changes a frozen object:** no — it discharges a conditional one.
+
