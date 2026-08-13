@@ -1,0 +1,244 @@
+{
+  "schema": "compose.retarget.controller_parity_audit",
+  "status": "AUDIT_OF_A_DEVELOPMENT_PANEL",
+  "arm_semantics": {
+    "continue_A": {
+      "controller": "greedy",
+      "start": "x_3",
+      "budget": "H-tau",
+      "objective": "A"
+    },
+    "greedy_retarget": {
+      "controller": "greedy",
+      "start": "x_3",
+      "budget": "H-tau",
+      "objective": "B"
+    },
+    "verified_retarget": {
+      "controller": "verified",
+      "start": "x_3",
+      "budget": "H-tau",
+      "objective": "B"
+    },
+    "restart": {
+      "controller": "verified",
+      "start": "x_0",
+      "budget": "H-tau",
+      "objective": "B"
+    },
+    "clairvoyant": {
+      "controller": "verified",
+      "start": "x_0",
+      "budget": "H",
+      "objective": "B"
+    }
+  },
+  "parity_checks": {
+    "Q1 responsiveness": {
+      "differs_in": [
+        "objective"
+      ],
+      "arm": {
+        "controller": "greedy",
+        "start": "x_3",
+        "budget": "H-tau",
+        "objective": "B"
+      },
+      "base": {
+        "controller": "greedy",
+        "start": "x_3",
+        "budget": "H-tau",
+        "objective": "A"
+      },
+      "isolates_one_mechanism": true
+    },
+    "Q1 responsiveness (confounded)": {
+      "differs_in": [
+        "controller",
+        "objective"
+      ],
+      "arm": {
+        "controller": "verified",
+        "start": "x_3",
+        "budget": "H-tau",
+        "objective": "B"
+      },
+      "base": {
+        "controller": "greedy",
+        "start": "x_3",
+        "budget": "H-tau",
+        "objective": "A"
+      },
+      "isolates_one_mechanism": false
+    },
+    "Q2 value of history": {
+      "differs_in": [
+        "start"
+      ],
+      "arm": {
+        "controller": "verified",
+        "start": "x_3",
+        "budget": "H-tau",
+        "objective": "B"
+      },
+      "base": {
+        "controller": "verified",
+        "start": "x_0",
+        "budget": "H-tau",
+        "objective": "B"
+      },
+      "isolates_one_mechanism": true
+    },
+    "Q3 price of surprise": {
+      "differs_in": [
+        "start",
+        "budget"
+      ],
+      "arm": {
+        "controller": "verified",
+        "start": "x_3",
+        "budget": "H-tau",
+        "objective": "B"
+      },
+      "base": {
+        "controller": "verified",
+        "start": "x_0",
+        "budget": "H",
+        "objective": "B"
+      },
+      "isolates_one_mechanism": false
+    }
+  },
+  "paired_differences": {
+    "P": {
+      "Q1 responsiveness": {
+        "mean": 0.7160031102373702,
+        "median": 0.7380921008459072,
+        "ci95": [
+          0.5119848117559483,
+          0.9224285716113851
+        ],
+        "wins": 23,
+        "losses": 1,
+        "tied": 6,
+        "n": 30,
+        "status": "PRIMARY",
+        "parity": true
+      },
+      "Q1 responsiveness (confounded)": {
+        "mean": 0.8063266335963986,
+        "median": 0.7887582191671977,
+        "ci95": [
+          0.6157883253736748,
+          0.992449872591348
+        ],
+        "wins": 28,
+        "losses": 0,
+        "tied": 2,
+        "n": 30,
+        "status": "SUPERSEDED",
+        "parity": false
+      },
+      "Q2 value of history": {
+        "mean": 0.4440902979987157,
+        "median": 0.36981207530268156,
+        "ci95": [
+          0.34847775808720277,
+          0.550106385308164
+        ],
+        "wins": 30,
+        "losses": 0,
+        "tied": 0,
+        "n": 30,
+        "status": "PRIMARY",
+        "parity": true
+      },
+      "Q3 price of surprise": {
+        "mean": -0.2886423458553771,
+        "median": -0.12238169428586937,
+        "ci95": [
+          -0.40425538480324025,
+          -0.17979864208709284
+        ],
+        "wins": 3,
+        "losses": 26,
+        "tied": 1,
+        "n": 30,
+        "status": "PRIMARY",
+        "parity": false
+      }
+    },
+    "D": {
+      "Q1 responsiveness": {
+        "mean": 1.4056718849865353,
+        "median": 1.527587264813062,
+        "ci95": [
+          1.1808213746012757,
+          1.620006929447377
+        ],
+        "wins": 30,
+        "losses": 0,
+        "tied": 0,
+        "n": 30,
+        "status": "PRIMARY",
+        "parity": true
+      },
+      "Q1 responsiveness (confounded)": {
+        "mean": 1.5855329627590844,
+        "median": 1.5909838205684488,
+        "ci95": [
+          1.3813059410683746,
+          1.7862486011608714
+        ],
+        "wins": 30,
+        "losses": 0,
+        "tied": 0,
+        "n": 30,
+        "status": "SUPERSEDED",
+        "parity": false
+      },
+      "Q2 value of history": {
+        "mean": 0.2900994278039651,
+        "median": 0.24747354158500356,
+        "ci95": [
+          0.10410257616890062,
+          0.4840823890310679
+        ],
+        "wins": 22,
+        "losses": 8,
+        "tied": 0,
+        "n": 30,
+        "status": "PRIMARY",
+        "parity": true
+      },
+      "Q3 price of surprise": {
+        "mean": -0.48061113589230814,
+        "median": -0.4340306547601819,
+        "ci95": [
+          -0.6920796820182956,
+          -0.2742025783801576
+        ],
+        "wins": 6,
+        "losses": 24,
+        "tied": 0,
+        "n": 30,
+        "status": "PRIMARY",
+        "parity": false
+      }
+    }
+  },
+  "q3_recovery_fraction": {
+    "P": {
+      "median": 0.8720513176498146,
+      "mean": 0.7909441015496212,
+      "n": 30
+    },
+    "D": {
+      "median": 0.8095872703959505,
+      "mean": 0.8206179154903851,
+      "n": 30
+    }
+  },
+  "finding": "Q2 and Q3 held controller parity as executed. Q1 did not: verified_retarget vs continue_A confounds the objective change with controller sophistication. The matched Q1 is greedy_retarget vs continue_A, and is now primary.",
+  "still_missing": "greedy-matched Q2 requires a greedy restart from x_0, which was not run. Q2 currently rests on the verified-matched pair only."
+}
