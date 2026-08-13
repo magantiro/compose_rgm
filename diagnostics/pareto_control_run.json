@@ -77,5 +77,22 @@
     "command": "modal volume get compose-v4-artifacts editing_v2/r_theta_run/pareto_control_smoke <local dir>",
     "then": "python3 scripts/analyse_pareto_control.py --shards <local dir> --out diagnostics/pareto_control_analysis.json",
     "note": "The analysis runs the instrument gate on the shards BEFORE computing any contrast, and on failure writes INVALID_INSTRUMENT with no numbers at all."
+  },
+  "potency_watch": {
+    "status": "WATCH ONLY -- no threshold is moved",
+    "the_two_numbers_and_which_line_each_faced": {
+      "G3_binding_share_0.76": "potency was the binding Chebyshev term in 76% of (state, preference) decisions, against the G3 rejection line of 0.90",
+      "G4_potency_reach_0.700": "14 of 20 sources reached the held-in p99 within six greedy edits, against the G4 rejection line of 0.85"
+    },
+    "both_passed": true,
+    "binding_rule": "The lines stay exactly where they were frozen at d206d55. Tightening the task now because a passing number feels close to its line is moving a line after seeing the census, which is the thing the preregistration exists to prevent.",
+    "checks_in_this_smoke": [
+      "Do extreme preference weights (w=0.1 vs w=0.9) produce different ENDPOINTS, not merely different one-step choices?",
+      "Does the potency-heavy side stop moving early?",
+      "Does one objective dominate most final Pareto points?",
+      "Do final preference selections stay differentiated?",
+      "Does HV stop improving because potency effectively saturates?"
+    ],
+    "acceptable_outcome": "If these come back badly the smoke can legitimately FAIL the Pareto experiment despite Stage 0 passing. That is an acceptable outcome and will be reported as a failure, not repaired."
   }
 }

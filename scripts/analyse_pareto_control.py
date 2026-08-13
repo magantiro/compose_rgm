@@ -34,8 +34,11 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
 from compose_v4.experiments.pareto_control import (  # noqa: E402
-    budget_to_fraction,
-    hv_reference_value,
+    INTERNAL_METHOD_UNIVERSE,
+    budget_to_ninety,
+    check_method_universe,
+    pooled_attainable_hypervolume,
+    summarize_b90,
     normalized_hypervolume,
     preference_region_coverage,
     source_paired_bootstrap,
@@ -195,67 +198,77 @@ def main() -> int:
     utopia = np.array([scales["frozen_scales"]["utopia_p99"][pair_key_a],
                        scales["frozen_scales"]["utopia_p99"][pair_key_b]])
 
+    universe = [m for m in INTERNAL_METHOD_UNIVERSE if m in arms]
     efficiency: dict[str, Any] = {
-        "hv_ref_definition": ("union nondominated front across ALL arms (and all "
-                              "external methods when present); never one arm's "
-                              "own front"),
-        "reference_corner": "held-in p5, frozen; never read off results",
+        "nadir_r": ("held-in p5 from the frozen scales -- the corner used to "
+                    "COMPUTE hypervolume, frozen before any outcome"),
         "utopia": "held-in p99, frozen",
+        "HV_star_internal": (
+            "pooled terminal nondominated union of the PREDECLARED INTERNAL ARMS "
+            "at the fixed maximum number of trajectories. Never one arm's own "
+            "front. Its value is known only after every arm runs, but the RULE "
+            "is preregistered and METHOD-SYMMETRIC: a strong arm that expands "
+            "the pooled frontier raises the bar for everyone including itself."),
+        "threshold_name": "90% of POOLED ATTAINABLE hypervolume",
+        "name_discipline": ("never 'reference HV' and never '90% of COMPOSE's "
+                            "front' -- the name is where this bias survives "
+                            "review"),
         "frozen_before_any_hv_number": True,
         "internal_axis": "completed controlled trajectories -- COMPOSE arms only",
         "external_axis": ("unique valid canonical evaluations, and oracle "
                           "requests; external methods are NEVER placed on the "
                           "trajectory axis"),
+        "declared_internal_universe": list(INTERNAL_METHOD_UNIVERSE),
+        "universe_present_in_shards": universe,
         "per_source": {},
     }
 
-    n90: dict[str, list[float]] = {arm: [] for arm in arms}
-    n90_unreached: dict[str, int] = {arm: 0 for arm in arms}
-    region_cov: dict[str, list[float]] = {arm: [] for arm in arms}
+    n90: dict[str, list[dict[str, Any]]] = {arm: [] for arm in universe}
+    region_cov: dict[str, list[float]] = {arm: [] for arm in universe}
 
     for row in rows:
         fronts = {arm: np.asarray(row["arms"][arm]["endpoint_z"], dtype=float)
-                  for arm in arms if arm in row.get("arms", {})
+                  for arm in universe if arm in row.get("arms", {})
                   and row["arms"][arm].get("endpoint_z")}
         if len(fronts) < 2:
             continue
+        # "Pooled" is meaningless without a membership list, and a union that
+        # silently gains or loses a method moves every B_90 in the table.
+        membership = check_method_universe(fronts, universe, label="internal")
         union = union_reference_front(fronts)
-        hv_ref = hv_reference_value(fronts, reference, utopia)
+        hv_star_internal = pooled_attainable_hypervolume(fronts, reference, utopia)
         efficiency["per_source"][str(row["index"])] = {
-            "hv_ref": hv_ref, "union_front_size": int(len(union))}
+            "HV_star_internal": hv_star_internal,
+            "union_front_size": int(len(union)),
+            "membership": membership}
         for arm, z in fronts.items():
             # Internal axis: one committed trajectory per preference branch, so
-            # best-so-far HV after k trajectories over k = 1..5.
+            # best-so-far HV after k trajectories, k = 1..5.
             trace = [normalized_hypervolume(z[: k + 1], reference, utopia)
                      for k in range(len(z))]
-            hit = budget_to_fraction(trace, list(range(1, len(z) + 1)), hv_ref)
-            if hit is None:
-                n90_unreached[arm] += 1
-            else:
-                n90[arm].append(hit)
+            n90[arm].append(budget_to_ninety(
+                trace, list(range(1, len(z) + 1)), hv_star_internal))
             region_cov[arm].append(
                 preference_region_coverage(z, union)["coverage"])
 
-    efficiency["N_90_trajectories"] = {
-        arm: {"median": (float(np.median(v)) if v else None),
-              "n_reached": len(v), "n_never_reached": n90_unreached[arm],
-              "note": ("sources that never reach 0.9*HV_ref are reported as "
-                       "n_never_reached, not as the maximum budget")}
-        for arm, v in n90.items()}
+    efficiency["N_90_trajectories"] = {arm: summarize_b90(v) for arm, v in n90.items()}
     efficiency["preference_region_coverage"] = {
         arm: {"mean": (float(np.mean(v)) if v else None), "n": len(v)}
         for arm, v in region_cov.items()}
 
-    print("\nEFFICIENCY -- internal axis (trajectories), COMPOSE arms only")
-    print(f"  {'arm':<20}{'N_90 median':>14}{'reached':>10}{'never':>8}"
+    print("\nEFFICIENCY -- INTERNAL axis (trajectories), COMPOSE arms only")
+    print("  threshold = 90% of POOLED ATTAINABLE hypervolume (HV_star_internal)")
+    print(f"  {'arm':<20}{'N_90 median':>14}{'uncens':>9}{'CENSORED':>10}"
           f"{'region cov':>13}")
-    for arm in arms:
+    for arm in universe:
         e = efficiency["N_90_trajectories"][arm]
         c = efficiency["preference_region_coverage"][arm]
-        med = "n/a" if e["median"] is None else f"{e['median']:.2f}"
+        med = ("N_90 > N_max" if e["median_uncensored"] is None
+               else f"{e['median_uncensored']:.2f}")
         cov = "n/a" if c["mean"] is None else f"{c['mean']:.3f}"
-        print(f"  {arm:<20}{med:>14}{e['n_reached']:>10}"
-              f"{e['n_never_reached']:>8}{cov:>13}")
+        print(f"  {arm:<20}{med:>14}{e['n_uncensored']:>9}"
+              f"{e['n_censored']:>10}{cov:>13}")
+    print("  censored sources are counted, never imputed at N_max")
 
     # --- P5 and P6: WITHIN-arm preference contrasts -------------------------
     # These vary the objective ONLY: same controller, same start, same budget,

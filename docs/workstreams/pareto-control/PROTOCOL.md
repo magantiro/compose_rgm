@@ -338,65 +338,89 @@ show that a non-greedy action was worth taking.
    > silently corrected: a check that forbids the experiment is as wrong as one
    > that permits a confound.
 
-1b. **`HV_ref` and the reference corner — NEITHER MAY COME FROM COMPOSE.**
-   *Frozen 2026-08-13 02:27 EDT, before any hypervolume number existed: the
-   authorized smoke had emitted 6 arm checkpoints and zero `DONE` lines, and
-   `DONE` is the only place an HV value is printed.*
+1b. **TWO references, deliberately named apart.** Conflating them is how a
+   favourable ceiling survives review.
 
-   - **Reference corner (nadir):** `r_j` = held-in **p5**, from the frozen
-     scales in `diagnostics/pareto_tradeoff_census.json`. It is a frozen input,
-     never a corner read off observed results.
-   - **Utopia:** `z*_j` = held-in **p99**, likewise frozen.
-   - **`HV_ref`, the denominator of "reached 90% of the attainable front":** the
-     **union nondominated front across ALL methods and ALL arms** on the frozen
-     evaluation set — internal arms *and* external methods together. Where only
-     internal arms exist, the **fixed box normalisation** `[r, z*]`, established
-     in advance, is used instead.
+   | symbol | what it is | frozen how |
+   |---|---|---|
+   | **`r`** | the **NADIR corner** used to *compute* hypervolume | held-in **p5** from the frozen scales, fixed before any outcome. Clean. |
+   | **`z*`** | the utopia corner | held-in **p99**, likewise |
+   | **`HV_star`** | the **TARGET** whose 90% level *defines* budget-to-90% | **pooled nondominated union of ALL predeclared methods at the common maximum evaluation budget** |
 
-   > **Why this is a hazard and not a detail.** If `HV_ref` were the best front
-   > COMPOSE produces, then "reaches 90% of reference HV" would be partly a
-   > statement about COMPOSE's own ceiling, and every efficiency curve would
-   > inherit that bias. It is the same shape as the five defects already caught
-   > here: a metric that cannot fully disappoint. A method that simply stopped
-   > early would drag the goalposts toward itself.
-   >
-   > `union_reference_front()` **raises** `ReferenceFrontError` when handed a
-   > single method, and `tests/test_pareto_control.py` asserts it. A warning
-   > would eventually be ignored.
+   ```
+   HV_star     = HV( pooled nondominated union of all predeclared methods
+                     at the common maximum evaluation budget )
+   B_90^(m)    = min { b : HV_m(b) >= 0.9 * HV_star }
+   ```
 
-1c. **Efficiency is the primary axis, not final HV.** The question is how
-   efficiently a controllable molecular process sweeps useful regions of the
-   front, not whether final HV is 0.83 versus 0.79. Frozen quantities:
+   Its numerical value is known only after every method runs, but **the rule is
+   preregistered and METHOD-SYMMETRIC**: nobody defines the ceiling from their
+   own performance, and a strong method that expands the pooled frontier raises
+   the bar for **everyone including itself**. That symmetry is the whole point.
 
-   - **`HV(b)`** — best-so-far hypervolume as a function of budget `b`;
-   - **`HV-AUC`** over a fixed budget `B`, normalized to [0, 1];
-   - **`B_90` = min{ b : HV(b) >= 0.9 * HV_ref }** — the budget to reach 90% of
-     the attainable front. **`None` when never reached**, and reported as
-     `None`: substituting the maximum budget would silently convert a failure
-     into a finite, comparable-looking number;
-   - **preference region coverage** — of the five requested `w`, the fraction
-     occupying **distinct regions** of the union front (objective-0 extent cut
-     into five equal bins). Range [0.2, 1.0]. A method producing one excellent
-     potency-heavy cluster scores **0.2** however good its hypervolume is.
+   > **Name it "90% of POOLED ATTAINABLE hypervolume".** Not "90% of reference
+   > HV", not "90% of COMPOSE's front". The name is where this kind of bias
+   > survives review.
 
-1d. **Two efficiency axes, never mixed.**
+   `union_reference_front()` **raises** `ReferenceFrontError` when handed a
+   single method.
 
-   | axis | x | applies to | headline statistic |
+1c. **CENSORING — the part that matters most.** If a method never reaches the
+   threshold inside the budget, report **`B_90 > B_max`** or mark it
+   **`CENSORED`**. **Do NOT substitute `B_max`.**
+
+   > Substituting the maximum makes a method that never got there look like one
+   > that got there at the last moment — a failure rendered as a success. That
+   > is precisely the defect family this project has now caught **six** times,
+   > and it is easier to commit here than anywhere else **because the
+   > substitution looks like tidiness.**
+
+   `budget_to_ninety()` returns `{"censored": True, "value": None,
+   "reported_as": "B_90 > B_max"}` and never a number. `summarize_b90()` takes
+   the median over **uncensored sources only** and reports the **censoring rate**
+   beside it, because a median that quietly pooled censored sources at `B_max`
+   would be the same substitution one level up.
+
+1d. **The internal analogue is SEPARATE and must not be mixed.**
+
+   ```
+   N_90 = min { N : HV(N) >= 0.9 * HV_star_internal }
+   ```
+
+   where `HV_star_internal` is the **pooled terminal union of the PREDECLARED
+   INTERNAL ARMS** at the fixed maximum number of trajectories.
+
+   | axis | x | members | headline |
    |---|---|---|---|
-   | **INTERNAL** | completed controlled **trajectories** | COMPOSE arms **only** | **`N_90`** — trajectories to reach 90% of `HV_ref` |
-   | **EXTERNAL** | **unique valid canonical evaluations**, and additionally **oracle requests** | cross-method, incl. external baselines | `B_90` on each counter |
+   | **INTERNAL** | completed controlled **trajectories** | COMPOSE arms only | **`N_90`** |
+   | **EXTERNAL** | **unique valid canonical evaluations**, and **oracle requests** | internal arms + qualified external methods | **`B_90`** on each counter |
 
-   The interesting internal claim lives on the trajectory axis — *"20
-   preference-directed trajectories where unguided needs 100"*. But **trajectory
-   count is not comparable across methods**: HN-GFN, GraphGA and REINVENT do not
-   share a trajectory object. **External methods are never plotted on the
-   trajectory axis.**
+   Trajectories are the axis where the interesting COMPOSE claim lives —
+   preference-directed control sweeping the frontier with far fewer molecular
+   evolutions than unguided or generate-and-rank. But **external methods are
+   never plotted on a trajectory axis**: HN-GFN, GraphGA and REINVENT do not
+   share that object.
 
-1e. **The honest framing.** A result where an external method reaches slightly
+1e. **THE METHOD UNIVERSE, committed.** "Pooled" is meaningless without a
+   membership list, and a union that silently gains or loses a method changes
+   **every** `B_90` in the table while nothing in the table appears to change.
+
+   - **`INTERNAL_METHOD_UNIVERSE`** = `unguided`, `gen_rank@greedy`,
+     `gen_rank@verified`, `greedy_pref`, `verified_pref`.
+   - **`EXTERNAL_METHOD_UNIVERSE`** = the internal universe **plus every
+     qualified external method**. External members are added only by the
+     baselines lane; none is qualified yet, so today it equals the internal
+     universe and `B_90` is internal-only.
+
+   `check_method_universe()` raises `MethodUniverseError` on any drift, missing
+   or extra. Membership is checked per source and recorded in the output.
+
+1f. **The honest framing.** A result where an external method reaches slightly
    higher **final** HV while COMPOSE has substantially better **HV-AUC**, or
-   reaches 90% front coverage with several times fewer oracle evaluations, is a
-   **good** result and is reported as such — not as a loss. Nothing is tuned to
-   win final HV. Equally, **if COMPOSE is worse on both, that is reported.**
+   reaches 90% pooled-attainable coverage with several times fewer oracle
+   evaluations, is a **good** result and is reported as such — not as a loss.
+   Nothing is tuned to win final HV. **If COMPOSE is worse on both, that is
+   reported.**
 
 2. **HV-AUC — two conventions, reported together, never substituted.**
    - `HV-AUC@native`: x-axis = **distinct molecules scored** by the property

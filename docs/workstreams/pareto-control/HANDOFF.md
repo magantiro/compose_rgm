@@ -352,6 +352,33 @@ A contrast that vanishes silently from a report is indistinguishable from one
 that was never run. Both are now implemented, and anything else missing is
 recorded in `skipped_contrasts`. Corrective commit `d442c2e`.
 
+# The potency ceiling: a live risk to WATCH, not a reason to change anything
+
+Two numbers passed close to their lines, and they face **different** lines:
+
+- **G3 binding share 0.76** — potency was the binding Chebyshev term in 76% of
+  (state, preference) decisions, against a rejection line of **0.90**.
+- **G4 potency reach 0.700** — 14 of 20 sources reached the held-in p99 within
+  six greedy edits, against a rejection line of **0.85**.
+
+**Both passed, and both lines stay exactly where they were frozen at `d206d55`.**
+Tightening the task now because a passing number feels uncomfortably close to
+its line would be moving a line after seeing the census — the one thing the
+preregistration exists to prevent.
+
+What the smoke checks instead:
+
+1. Do extreme preference weights (`w=0.1` vs `w=0.9`) produce different
+   **endpoints**, not merely different one-step choices?
+2. Does the potency-heavy side stop moving early?
+3. Does one objective dominate most final Pareto points?
+4. Do final preference selections stay differentiated?
+5. Does HV stop improving because potency effectively saturates?
+
+**If these come back badly the smoke can legitimately fail the Pareto experiment
+despite Stage 0 passing.** That is an acceptable outcome and will be reported as
+a failure rather than repaired.
+
 # Known limitations
 
 - **Census depth.** Decision states at depths 0 and 1 only. Whether the tradeoff

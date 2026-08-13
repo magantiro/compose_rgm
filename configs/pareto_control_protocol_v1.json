@@ -219,9 +219,6 @@
     "evidence": "the authorized 12-source smoke had emitted 6 arm checkpoints and ZERO DONE lines; DONE is the only place an HV value is printed",
     "reference_corner": "held-in p5 from the frozen scales; never read off results",
     "utopia": "held-in p99 from the frozen scales",
-    "hv_ref": "union nondominated front across ALL methods and ALL arms on the frozen evaluation set; where only internal arms exist, the fixed box normalisation [r, z*] established in advance",
-    "hv_ref_must_not_come_from_compose": true,
-    "hv_ref_guard": "union_reference_front() raises ReferenceFrontError on a single method; asserted in tests/test_pareto_control.py",
     "primary_axis": "efficiency, not final hypervolume",
     "quantities": [
       "HV(b)",
@@ -244,6 +241,42 @@
       "applies_to": "cross-method including external baselines",
       "forbidden": "external methods are NEVER plotted on the trajectory axis; HN-GFN, GraphGA and REINVENT do not share a trajectory object"
     },
-    "honest_framing": "higher final HV for an external method alongside better HV-AUC or far fewer oracle evaluations for COMPOSE is a GOOD result and is reported as such; if COMPOSE is worse on both, that is reported too; nothing is tuned to win final HV"
+    "honest_framing": "higher final HV for an external method alongside better HV-AUC or far fewer oracle evaluations for COMPOSE is a GOOD result and is reported as such; if COMPOSE is worse on both, that is reported too; nothing is tuned to win final HV",
+    "two_references": {
+      "r_nadir": "held-in p5; the corner used to COMPUTE hypervolume; clean",
+      "z_star_utopia": "held-in p99",
+      "HV_star": "the TARGET whose 90% level defines budget-to-90%: pooled nondominated union of ALL predeclared methods at the common maximum evaluation budget",
+      "why_named_apart": "conflating them is how a favourable ceiling survives review"
+    },
+    "threshold_name": "90% of POOLED ATTAINABLE hypervolume",
+    "forbidden_names": [
+      "90% of reference HV",
+      "90% of COMPOSE's front"
+    ],
+    "method_symmetric": "a strong method that expands the pooled frontier raises the bar for everyone including itself",
+    "censoring": {
+      "rule": "report B_90 > B_max or mark CENSORED",
+      "never": "substitute B_max",
+      "why": "substituting the maximum makes a method that never got there look like one that got there at the last moment -- a failure rendered as a success",
+      "aggregation": "median over uncensored sources only, reported beside the censoring rate; a median pooling censored sources at B_max is the same substitution one level up"
+    },
+    "N_90": {
+      "definition": "min { N : HV(N) >= 0.9 * HV_star_internal }",
+      "HV_star_internal": "pooled terminal union of the PREDECLARED INTERNAL ARMS at the fixed maximum number of trajectories",
+      "axis": "completed controlled trajectories; COMPOSE arms only"
+    },
+    "method_universe": {
+      "internal": [
+        "unguided",
+        "gen_rank@greedy",
+        "gen_rank@verified",
+        "greedy_pref",
+        "verified_pref"
+      ],
+      "external": "internal universe plus every qualified external method; none qualified yet, so today it equals the internal universe and B_90 is internal-only",
+      "guard": "check_method_universe() raises MethodUniverseError on any drift",
+      "why": "a union that silently gains or loses a method changes every B_90 in the table while nothing in the table appears to change"
+    },
+    "no_further_metric_changes": true
   }
 }

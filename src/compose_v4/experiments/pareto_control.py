@@ -577,32 +577,92 @@ def union_reference_front(fronts_by_method: dict[str, np.ndarray]) -> np.ndarray
     return pooled[pareto_front_indices(pooled)]
 
 
-def hv_reference_value(fronts_by_method: dict[str, np.ndarray],
-                       reference: np.ndarray, utopia: np.ndarray) -> float:
-    """`HV_ref` -- normalized hypervolume of the UNION front.
+def pooled_attainable_hypervolume(fronts_by_method: dict[str, np.ndarray],
+                                  nadir: np.ndarray,
+                                  utopia: np.ndarray) -> float:
+    """`HV_star` -- the POOLED ATTAINABLE hypervolume.
 
-    `reference` is the frozen NADIR CORNER taken from the held-in scales (p5),
-    never a corner read off observed results.
+    Normalized hypervolume of the pooled nondominated union of ALL
+    predeclared methods at the common maximum evaluation budget.
+
+    `nadir` is `r`, the frozen corner from the held-in scales (p5) used to
+    COMPUTE hypervolume. It is a different object from `HV_star`, which is
+    the TARGET whose 90% level defines budget-to-90%. Conflating the two is
+    how a favourable ceiling survives review.
+
+    Its numerical value is known only after every method has run, but the
+    RULE is preregistered and METHOD-SYMMETRIC: nobody defines the ceiling
+    from their own performance, and a strong method that expands the pooled
+    frontier raises the bar for everyone including itself.
     """
     return normalized_hypervolume(
-        union_reference_front(fronts_by_method), reference, utopia)
+        union_reference_front(fronts_by_method), nadir, utopia)
 
 
-def budget_to_fraction(hv_trace: Sequence[float], budgets: Sequence[float],
-                       hv_ref: float, fraction: float = 0.9) -> float | None:
-    """`B_90` / `N_90`: the smallest budget at which best-so-far HV reaches
-    `fraction * HV_ref`.
+#: Backwards-compatible alias. Prefer the frozen name.
+hv_reference_value = pooled_attainable_hypervolume
 
-    Returns None if never reached. None is a real outcome and must be reported
-    as such -- substituting the maximum budget would silently convert a failure
-    into a finite, comparable-looking number.
+
+#: Two DIFFERENT references, deliberately named apart. Conflating them is how
+#: a favourable ceiling survives review.
+#:
+#:   r        the fixed NADIR corner used to COMPUTE hypervolume. Held-in p5,
+#:            frozen from data before any outcome existed.
+#:   HV_star  the TARGET hypervolume whose 90% level DEFINES budget-to-90%.
+#:            The pooled nondominated union of ALL predeclared methods at the
+#:            common maximum evaluation budget.
+#:
+#: HV_star is called "POOLED ATTAINABLE hypervolume" and never "reference HV"
+#: or "COMPOSE's front". The name is where this kind of bias survives review.
+
+
+def budget_to_ninety(hv_trace: Sequence[float], budgets: Sequence[float],
+                     hv_star: float, fraction: float = 0.9) -> dict[str, Any]:
+    """`B_90` / `N_90`: smallest budget at which best-so-far HV reaches
+    `fraction * HV_star` -- 90% of the POOLED ATTAINABLE hypervolume.
+
+    CENSORING. If the threshold is never reached inside the budget this returns
+    ``{"censored": True, "value": None, "reported_as": "B_90 > B_max"}``. It
+    does **not** substitute `B_max`.
+
+    Substituting the maximum makes a method that never got there look like one
+    that got there at the last moment -- a failure rendered as a success. That
+    is the defect family this project has caught six times, and it is easier to
+    commit here than anywhere else because the substitution looks like tidiness.
     """
-    if hv_ref <= 0 or len(hv_trace) == 0:
-        return None
-    target = fraction * hv_ref
+    b = np.asarray(budgets, dtype=float)
+    b_max = float(b[-1]) if len(b) else float("nan")
+    if hv_star <= 0 or len(hv_trace) == 0:
+        return {"value": None, "censored": True, "b_max": b_max,
+                "reported_as": "B_90 > B_max", "reason": "no usable HV_star or trace"}
     best = np.maximum.accumulate(np.asarray(hv_trace, dtype=float))
-    hit = np.flatnonzero(best >= target)
-    return float(np.asarray(budgets, dtype=float)[hit[0]]) if len(hit) else None
+    hit = np.flatnonzero(best >= fraction * hv_star)
+    if len(hit) == 0:
+        return {"value": None, "censored": True, "b_max": b_max,
+                "reported_as": "B_90 > B_max",
+                "best_fraction_of_hv_star": float(best[-1] / hv_star)}
+    return {"value": float(b[hit[0]]), "censored": False, "b_max": b_max,
+            "reported_as": "B_90"}
+
+
+def summarize_b90(results: Sequence[dict[str, Any]]) -> dict[str, Any]:
+    """Aggregate `B_90` across sources WITHOUT letting censoring vanish.
+
+    The median is taken over uncensored sources only and is reported alongside
+    the censored count. A median that silently pooled censored sources at
+    `B_max` would be the same substitution one level up.
+    """
+    values = [r["value"] for r in results if not r["censored"]]
+    censored = [r for r in results if r["censored"]]
+    return {
+        "median_uncensored": float(np.median(values)) if values else None,
+        "n_uncensored": len(values),
+        "n_censored": len(censored),
+        "censoring_rate": len(censored) / max(len(results), 1),
+        "note": ("censored sources are counted, never imputed at B_max; a median "
+                 "over uncensored sources alone is meaningless without the "
+                 "censoring rate beside it"),
+    }
 
 
 def preference_region_coverage(endpoints_z: np.ndarray,
@@ -636,3 +696,50 @@ def preference_region_coverage(endpoints_z: np.ndarray,
             "occupied_regions": occupied, "n_regions": n_regions,
             "region_edges_objective0": [float(e) for e in edges],
             "degenerate_front": False}
+
+
+# ---------------------------------------------------------------------------
+# THE METHOD UNIVERSE. "Pooled" is meaningless without a membership list, and a
+# union that silently gains or loses a method between drafts changes every B_90
+# in the table. So membership is declared here, frozen, and checked.
+# ---------------------------------------------------------------------------
+
+#: Contributors to HV_star_internal -- the pooled terminal union used for N_90
+#: on the INTERNAL trajectory axis. COMPOSE arms only.
+INTERNAL_METHOD_UNIVERSE = (
+    "unguided",
+    "gen_rank@greedy",
+    "gen_rank@verified",
+    "greedy_pref",
+    "verified_pref",
+)
+
+#: Contributors to HV_star -- the pooled union used for B_90 on the EXTERNAL
+#: evaluation/oracle axes. Internal arms PLUS every qualified external method.
+#: External members are added only by the baselines lane; none is qualified yet,
+#: so today this equals the internal universe and B_90 is internal-only.
+EXTERNAL_METHOD_UNIVERSE: tuple[str, ...] = INTERNAL_METHOD_UNIVERSE
+
+
+class MethodUniverseError(ValueError):
+    """Raised when a pooled union does not match its declared membership."""
+
+
+def check_method_universe(fronts_by_method: dict[str, np.ndarray],
+                          declared: Sequence[str], *, label: str) -> dict[str, Any]:
+    """Assert the pooled union is exactly the declared universe.
+
+    A union that quietly gains a method inflates HV_star and pushes every B_90
+    out; one that quietly loses a method deflates it and pulls every B_90 in.
+    Either way the whole table moves without anything in the table changing, so
+    the membership is checked rather than trusted.
+    """
+    present, want = set(fronts_by_method), set(declared)
+    missing, unexpected = sorted(want - present), sorted(present - want)
+    if missing or unexpected:
+        raise MethodUniverseError(
+            f"{label} pooled union does not match its declared membership. "
+            f"missing={missing} unexpected={unexpected}. Update the declared "
+            f"universe deliberately, or fix the inputs -- do not let the union "
+            f"drift.")
+    return {"label": label, "members": sorted(want), "n_members": len(want)}

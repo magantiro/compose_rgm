@@ -23,8 +23,12 @@ from compose_v4.experiments.pareto_control import (  # noqa: E402
     CostLedger,
     branch_from_common_prefix,
     ReferenceFrontError,
-    budget_to_fraction,
-    hv_reference_value,
+    INTERNAL_METHOD_UNIVERSE,
+    MethodUniverseError,
+    budget_to_ninety,
+    check_method_universe,
+    pooled_attainable_hypervolume,
+    summarize_b90,
     preference_region_coverage,
     union_reference_front,
     MeteredProcess,
@@ -466,7 +470,7 @@ def test_prefix_is_committed_before_any_branch_preference_is_used():
 # Frozen 2026-08-13, before any hypervolume number existed.
 # ---------------------------------------------------------------------------
 
-def test_hv_ref_refuses_to_be_derived_from_a_single_arm():
+def test_hv_star_refuses_to_be_derived_from_a_single_arm():
     """The structural-favorability hazard, as an executable check.
 
     If the denominator of "reached 90% of the attainable front" were COMPOSE's
@@ -479,10 +483,10 @@ def test_hv_ref_refuses_to_be_derived_from_a_single_arm():
     with pytest.raises(ReferenceFrontError):
         union_reference_front(only_compose)
     with pytest.raises(ReferenceFrontError):
-        hv_reference_value(only_compose, REFERENCE, UTOPIA)
+        pooled_attainable_hypervolume(only_compose, REFERENCE, UTOPIA)
 
 
-def test_hv_ref_is_the_union_across_methods_not_the_best_single_method():
+def test_hv_star_is_the_pooled_union_not_the_best_single_method():
     """The union front must dominate every contributor, so no arm can move the
     goalposts toward itself by being the only one measured."""
     fronts = {
@@ -498,13 +502,13 @@ def test_hv_ref_is_the_union_across_methods_not_the_best_single_method():
     assert any(np.allclose(row, [1.0, 9.0]) for row in union)
 
 
-def test_hv_ref_grows_when_an_external_method_extends_the_front():
+def test_hv_star_grows_when_an_external_method_extends_the_front():
     """An external method reaching further must RAISE the bar, not lower it."""
     base = {"greedy_pref": np.array([[5.0, 5.0]]),
             "unguided": np.array([[4.0, 4.0]])}
     extended = dict(base, hn_gfn=np.array([[9.0, 1.0], [1.0, 9.0]]))
-    assert (hv_reference_value(extended, REFERENCE, UTOPIA)
-            > hv_reference_value(base, REFERENCE, UTOPIA))
+    assert (pooled_attainable_hypervolume(extended, REFERENCE, UTOPIA)
+            > pooled_attainable_hypervolume(base, REFERENCE, UTOPIA))
 
 
 def test_the_frozen_nadir_is_a_parameter_not_read_off_the_results():
@@ -516,20 +520,82 @@ def test_the_frozen_nadir_is_a_parameter_not_read_off_the_results():
     assert hypervolume(z, np.array([4.0, 4.0])) == pytest.approx(1.0)
 
 
-def test_b90_returns_none_when_the_target_is_never_reached():
-    """None is a real outcome. Substituting the maximum budget would silently
-    turn a failure into a finite, comparable-looking number."""
-    assert budget_to_fraction([0.1, 0.2, 0.3], [1, 2, 3], hv_ref=1.0) is None
+def test_b90_censors_rather_than_substituting_b_max():
+    """THE substitution that must never happen.
+
+    Imputing B_max makes a method that never got there look like one that got
+    there at the last moment -- a failure rendered as a success. It is easier to
+    commit here than anywhere else because the substitution looks like tidiness.
+    """
+    out = budget_to_ninety([0.1, 0.2, 0.3], [1, 2, 3], hv_star=1.0)
+    assert out["censored"] is True
+    assert out["value"] is None
+    assert out["reported_as"] == "B_90 > B_max"
+    assert out["value"] != out["b_max"]
 
 
-def test_b90_is_the_first_budget_reaching_ninety_percent_of_hv_ref():
-    assert budget_to_fraction([0.1, 0.5, 0.91, 0.95], [10, 20, 30, 40],
-                              hv_ref=1.0) == 30.0
+def test_b90_is_the_first_budget_reaching_ninety_percent_of_pooled_attainable_hv():
+    out = budget_to_ninety([0.1, 0.5, 0.91, 0.95], [10, 20, 30, 40], hv_star=1.0)
+    assert out["censored"] is False and out["value"] == 30.0
 
 
 def test_b90_uses_best_so_far_so_a_dip_cannot_delay_it():
-    assert budget_to_fraction([0.95, 0.10, 0.10], [5, 10, 15],
-                              hv_ref=1.0) == 5.0
+    out = budget_to_ninety([0.95, 0.10, 0.10], [5, 10, 15], hv_star=1.0)
+    assert out["censored"] is False and out["value"] == 5.0
+
+
+def test_b90_reports_how_close_a_censored_method_got():
+    """A censored method that reached 89% and one that reached 5% are different
+    facts, and the summary must not flatten them into 'did not reach'."""
+    out = budget_to_ninety([0.1, 0.89], [1, 2], hv_star=1.0)
+    assert out["censored"] is True
+    assert out["best_fraction_of_hv_star"] == pytest.approx(0.89)
+
+
+def test_censoring_survives_aggregation_across_sources():
+    """The same substitution one level up: a median that quietly pooled censored
+    sources at B_max would hide exactly what censoring exists to show."""
+    results = [budget_to_ninety([0.95], [1], hv_star=1.0),
+               budget_to_ninety([0.95], [1], hv_star=1.0),
+               budget_to_ninety([0.10], [1], hv_star=1.0)]
+    summary = summarize_b90(results)
+    assert summary["n_uncensored"] == 2
+    assert summary["n_censored"] == 1
+    assert summary["censoring_rate"] == pytest.approx(1 / 3)
+    assert summary["median_uncensored"] == 1.0
+
+
+def test_hv_star_is_method_symmetric_a_strong_method_raises_its_own_bar():
+    """The whole point of the pooled rule: a method that expands the frontier
+    raises the threshold for everyone INCLUDING ITSELF, so no one can define the
+    ceiling from their own performance."""
+    without = {"greedy_pref": np.array([[5.0, 5.0]]),
+               "unguided": np.array([[4.0, 4.0]])}
+    with_strong = dict(without, verified_pref=np.array([[9.0, 1.0], [1.0, 9.0]]))
+    hv_without = pooled_attainable_hypervolume(without, REFERENCE, UTOPIA)
+    hv_with = pooled_attainable_hypervolume(with_strong, REFERENCE, UTOPIA)
+    assert hv_with > hv_without
+    # And the strong method now needs a HIGHER absolute HV to clear 90%.
+    assert 0.9 * hv_with > 0.9 * hv_without
+
+
+def test_the_pooled_union_must_match_its_declared_membership():
+    """"Pooled" is meaningless without a membership list. A union that silently
+    gains or loses a method changes every B_90 in the table while nothing in the
+    table appears to change."""
+    fronts = {m: np.array([[5.0, 5.0]]) for m in INTERNAL_METHOD_UNIVERSE}
+    assert check_method_universe(
+        fronts, INTERNAL_METHOD_UNIVERSE, label="internal")["n_members"] == 5
+
+    fronts["a_method_nobody_declared"] = np.array([[9.0, 9.0]])
+    with pytest.raises(MethodUniverseError):
+        check_method_universe(fronts, INTERNAL_METHOD_UNIVERSE, label="internal")
+
+
+def test_a_missing_member_is_also_caught_not_just_an_extra_one():
+    fronts = {m: np.array([[5.0, 5.0]]) for m in INTERNAL_METHOD_UNIVERSE[:-1]}
+    with pytest.raises(MethodUniverseError):
+        check_method_universe(fronts, INTERNAL_METHOD_UNIVERSE, label="internal")
 
 
 def test_region_coverage_punishes_one_excellent_cluster():
