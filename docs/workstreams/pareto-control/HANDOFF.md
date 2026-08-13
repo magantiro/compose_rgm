@@ -108,6 +108,17 @@ Full contract in `PROTOCOL.md`. Summary:
   design stage with no results in existence.
 - `scripts/pareto_write_handoff_manifest.py` — manifest with hashes recomputed
   from disk.
+- `scripts/pareto_select_cohort.py` + `diagnostics/pareto_control_cohort.json` —
+  the smoke cohort, frozen on pre-control criteria and **verifiably disjoint**
+  from the census sources (the census's selection is deterministic, so the
+  script reconstructs and excludes them rather than asserting disjointness).
+- `scripts/analyse_pareto_control.py` — shards to contrasts. Runs the gate
+  **first**; on failure it writes `INVALID_INSTRUMENT` and no numbers at all.
+- `scripts/pareto_render_status.py` — `STATUS.md` is generated from the census
+  artifact, so no number on it is hand-typed.
+- `configs/pareto_control_protocol_v1.json` — every frozen constant, the pair
+  order, the gate thresholds, the parity table and the withdrawn statistics, in
+  a form a program can check.
 - `modal_apps/pareto_control_app.py` — the costed held-in smoke. **Not
   launched.**
 - `docs/workstreams/pareto-control/FIGURE_DESIGN.md` — the qualitative figure,
@@ -124,7 +135,9 @@ Full contract in `PROTOCOL.md`. Summary:
 | cost ledger: native < raw, kernel counted once | pass | the two conventions cannot be silently substituted |
 | HV cannot be inflated by dominated points | pass | the inflation channel |
 | all five branches share the identical prefix | pass | contrast P6 |
-| `scripts/pareto_instrument_gate.py` (design self-test) | **PASS** after two failures it caught | see below |
+| `pytest tests/test_pareto_instrument_gate.py` | **23 passed** | proves the gate can FAIL, on all five defect shapes |
+| `scripts/pareto_instrument_gate.py` (design self-test) | **PASS** after three failures it caught | see below |
+| `pytest tests/ --collect-only` | 4,030 collected, no import errors | the lane integrates cleanly |
 | `scripts/pareto_tradeoff_census.py` | ran to completion, held-in | `diagnostics/pareto_tradeoff_census.json` |
 
 # Results
@@ -242,13 +255,19 @@ docs/workstreams/pareto-control/DECISION_LOG.md
 docs/workstreams/pareto-control/FIGURE_DESIGN.md
 docs/workstreams/pareto-control/HANDOFF.md
 docs/workstreams/pareto-control/handoff.json
+configs/pareto_control_protocol_v1.json
 scripts/pareto_tradeoff_census.py
 scripts/pareto_instrument_gate.py
 scripts/pareto_write_handoff_manifest.py
+scripts/pareto_select_cohort.py
+scripts/pareto_render_status.py
+scripts/analyse_pareto_control.py
 src/compose_v4/experiments/pareto_control.py
 tests/test_pareto_control.py
+tests/test_pareto_instrument_gate.py
 modal_apps/pareto_control_app.py
 diagnostics/pareto_tradeoff_census.json
+diagnostics/pareto_control_cohort.json
 ```
 
 # Recommended next action
