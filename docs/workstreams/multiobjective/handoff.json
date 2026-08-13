@@ -1,0 +1,182 @@
+{
+  "schema": "compose.workstream.multiobjective.handoff_v1",
+  "workstream": "multiobjective",
+  "lane": 5,
+  "branch": "codex/compose-multiobjective-package",
+  "base_commit": "f6146d7",
+  "base_branch": "codex/editing-v2-successor-fiber-fastpath",
+  "content_commit": "STAMPED_BY_FOLLOWUP_COMMIT",
+  "artifact_status": "DESIGN_ONLY",
+  "held_out_data_opened": false,
+  "compute_spent": {
+    "modal_runs": 0,
+    "gpu_hours": 0,
+    "cpu_core_hours": 0,
+    "baseline_executions": 0,
+    "note": "Stage 0 and Stage 1 are local reads, four public clones, and one test file."
+  },
+  "stage": {
+    "stage_0_literature_and_fairness_freeze": "COMPLETE",
+    "stage_1_local_qualification": "COMPLETE",
+    "stage_2_held_in_smoke": "NOT_AUTHORIZED",
+    "stage_3_common_evaluation": "BLOCKED_ON_LANE_4_HANDOFF"
+  },
+  "method_status": {
+    "HN_GFN": {
+      "panel": "PANEL_B_GLOBAL_COMPETENCE",
+      "runnable": "GPU_ONLY",
+      "upstream": "github.com/violet-sto/HN-GFN",
+      "upstream_commit": "90078b8ceeee3e907deeced9b096a6e395b71177",
+      "license": "MIT",
+      "published_runtime": "10 hours on 1 Tesla V100; +33% with hindsight training (paper Appendix B.4)",
+      "blockers": [
+        "no released GFlowNet checkpoint, so no CPU inference path",
+        "botorch AnalyticMultiOutputObjective removed upstream; version must be bisected",
+        "upstream ships no dependency pins of any kind"
+      ],
+      "true_oracle_budget": 1000,
+      "true_oracle_budget_source": "main_mobo.py:50-52 (200 init + 8 rounds x 100)",
+      "consumes_surrogate": true
+    },
+    "InversionGNN": {
+      "panel": "PANEL_B_GLOBAL_COMPETENCE",
+      "runnable": "NO_AS_SHIPPED",
+      "upstream": "github.com/ivanniu/InversionGNN",
+      "upstream_commit": "cfdf1d9a981ca4ce5dd7293dc38373ddf9377718",
+      "license": "NONE_DECLARED_ALL_RIGHTS_RESERVED",
+      "published_runtime": "UNVERIFIED",
+      "blockers": [
+        "model_ckpt = '' then torch.load(model_ckpt) at molecular/denovo.py:75-76",
+        "arity mismatch: molecular/denovo.py:107 calls a 4-parameter function defined at molecular/inference_utils.py:153 with 6 arguments",
+        "no DRD2 objective",
+        "no LICENSE file; code may not be vendored"
+      ],
+      "consumes_surrogate": true
+    },
+    "OP_GFN": {
+      "panel": "EXCLUDED",
+      "runnable": "N_A",
+      "upstream": "github.com/yhangchen/OP-GFN",
+      "upstream_commit": "369e910891d3c9e20b8272d8291310fb9cc11c4d",
+      "license": "CC-BY-NC-ND-4.0",
+      "exclusion_reasons": [
+        "not preference-conditioned in its own mode (seh_frag_moo.py:398,414)",
+        "objective set asserted closed to {seh,qed,sa,mw} (seh_frag_moo.py:62)",
+        "NoDerivatives licence forbids distributing the adapter that would be required"
+      ]
+    },
+    "MOG_DFM": {
+      "status": "NOT_FAITHFULLY_PORTABLE",
+      "secondary": "CONCEPTUAL_LINEAGE"
+    },
+    "AReUReDi": {
+      "status": "NOT_FAITHFULLY_PORTABLE",
+      "secondary": "CONCEPTUAL_LINEAGE"
+    },
+    "PepTune": {
+      "status": "CONCEPTUAL_LINEAGE"
+    },
+    "pCoMole": {
+      "status": "UNVERIFIED",
+      "reason": "primary document is OpenReview-only and not machine-reachable; not on arXiv; the PDF was not read",
+      "verified_fields": [
+        "title",
+        "authors",
+        "venue"
+      ],
+      "unverified_fields": [
+        "native_state_space",
+        "transition_object",
+        "source_conditioning",
+        "base_generator_fixed",
+        "guidance_horizon",
+        "preference_mechanism",
+        "feasibility_semantics",
+        "official_code",
+        "small_molecule_graph_support",
+        "reported_compute"
+      ],
+      "escalation": "a human with an OpenReview login or an author contact must obtain it before submission"
+    }
+  },
+  "panel_admission": {
+    "PANEL_A_SOURCE_CONDITIONED": [
+      "COMPOSE fixed-preference control",
+      "generate-and-rank P3/P4",
+      "empirical-family reference ablation",
+      "preference-blind floor"
+    ],
+    "PANEL_B_GLOBAL_COMPETENCE": [
+      "HN-GFN",
+      "InversionGNN (conditional)",
+      "COMPOSE (open question)"
+    ],
+    "rule": "no comparison crosses panels; enforced by multiobjective_qualification.assert_not_cross_panel"
+  },
+  "resource_axes": [
+    "algorithmic_oracle_requests",
+    "unique_oracle_evaluations",
+    "evaluator_calls",
+    "surrogate_calls",
+    "benchmark_eval_requests",
+    "kernel_calls",
+    "completed_trajectories",
+    "wall_core_seconds"
+  ],
+  "new_axis_introduced": {
+    "name": "surrogate_calls",
+    "why": "HN-GFN spends its 1000-call oracle budget while training against a learned proxy; COMPOSE pays the evaluator directly. Without this axis an oracle-efficiency comparison reports amortization."
+  },
+  "verified_facts": {
+    "drd2_oracle_shared_provenance": {
+      "claim": "HN-GFN's oracle/scorer/drd2/clf_py36.pkl is the pickle COMPOSE's frozen DRD2 oracle was extracted from",
+      "sha256": "dbc473fca922c834dbaee6eaba832caaff26d4f891734078fb1af359a111100f",
+      "bytes": 35417609,
+      "method": "shasum -a 256 on the clone, compared with provenance.pickle_sha256 and provenance.pickle_bytes in artifacts/oracles/drd2_svm_v1/drd2_oracle_manifest.json",
+      "does_not_license": "a claim of bit-identical scores; COMPOSE uses extracted numpy parameters and HN-GFN calls sklearn predict_proba. Score parity is UNVERIFIED."
+    }
+  },
+  "open_decisions": [
+    "Panel B objective pair is not frozen. {DRD2,QED} admits HN-GFN and excludes InversionGNN; {GSK3b,JNK3} admits both externals and is not COMPOSE's frozen axis. Recommendation: {GSK3b,JNK3}. Must be frozen before any outcome exists.",
+    "Whether COMPOSE has a legitimate global de novo arm and can enter Panel B at all."
+  ],
+  "recommended_minimum_baseline_set": [
+    "HN-GFN in Panel B",
+    "internal generate-and-rank P3/P4 in Panel A (Lane 4 owns the run)"
+  ],
+  "unresolved_fairness_risks": [
+    "surrogate-versus-direct oracle asymmetry; mitigated by an axis and a refusal, not eliminated",
+    "HN-GFN's linear weighted sum cannot express nonconvex front regions a Chebyshev can reach; a method property, never a COMPOSE win",
+    "Panel B's objective pair choice is not neutral between the two externals",
+    "local environment is rdkit 2025.09.6, not the production pin 2024.03.5; no canonical key produced locally is claim-bearing",
+    "pCoMole unread"
+  ],
+  "tests": {
+    "file": "tests/test_multiobjective_qualification.py",
+    "passed": 23,
+    "failed": 0,
+    "command": "python3 -m pytest tests/test_multiobjective_qualification.py -q"
+  },
+  "durable_artifacts": {
+    "docs/workstreams/multiobjective/STATUS.md": "9d3eb485f5424b1faf9131115dc8f26e32016c3185394849a097eb1a221ce73c",
+    "docs/workstreams/multiobjective/PROTOCOL.md": "c91dd25ab3950a34394a110266c096720307ee22897a1cbda5192747708ff53e",
+    "docs/workstreams/multiobjective/BASELINE_TASK_MATRIX.md": "28bb4a404a9610181890ff551861b96578cd62ef8460eb4ec1540690f539983a",
+    "docs/workstreams/multiobjective/SOURCE_CONDITIONING_AUDIT.md": "c81a9a22afbfec223b8577bab46106f1b1fb724747212652359b609038cebbc6",
+    "docs/workstreams/multiobjective/SAME_LAB_LINEAGE.md": "d681c6b42e5ce7d086d5c64aa280fbd0ba3fd1f6dbde12e838ed1da413f5af8b",
+    "docs/workstreams/multiobjective/DECISION_LOG.md": "d5c4e943bb3b68ecf07c0eb35e2da94b3721fc27493c049e2a6789691eda67db",
+    "docs/workstreams/multiobjective/HANDOFF.md": "1396b2f568ecdc083adeaaa0107c5f09abfbcbc6b2eaca4304d6ef1e6a6b463c",
+    "src/compose_v4/experiments/multiobjective_qualification.py": "243511659c504e34a11e6009e2a19bed9e922f0f088e52daa4bf513cd35359ae",
+    "tests/test_multiobjective_qualification.py": "c22804b1c3e4c1c6a5644da1fc845ee09fcd19a6bf61d8e61695f3bc7432ee35"
+  },
+  "frozen_inputs_read_only": {
+    "diagnostics/pareto_tradeoff_census.json": "5b1fc96b4ceb3a757da0e5f036fec59356ef135ddc4d2a3f285fb933f4c636a1",
+    "artifacts/oracles/drd2_svm_v1/drd2_oracle_manifest.json": "423737efb6e4c942bf2b207b5c92c2ad6c5856ca0d4d301aa796f799cc8acbfc",
+    "diagnostics/pareto_smoke_hv_auc.json": "b0b45e16b47c79681ddd65c9e56009d303e809c76c6d944a75a6348c89c48746",
+    "diagnostics/pareto_semantic_oracle_accounting.json": "ab457381c2ea14e5ade46a4b4526e5eb024b25a26c699a5d845aba5fde72f0f6"
+  },
+  "lane_4_files_modified": [],
+  "reproduction": {
+    "tests": "python3 -m pytest tests/test_multiobjective_qualification.py -q",
+    "drd2_identity": "git clone https://github.com/violet-sto/HN-GFN.git && git checkout 90078b8ceeee3e907deeced9b096a6e395b71177 && shasum -a 256 oracle/scorer/drd2/clf_py36.pkl"
+  }
+}
