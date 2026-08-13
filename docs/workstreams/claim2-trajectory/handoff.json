@@ -7,7 +7,7 @@
   "branch": "codex/compose-claim2-trajectory",
   "base_commit": "04f1c46",
   "implementation_commit": "e5636034bd0aceb30f6dbc1004920095f3404565",
-  "status": "SMOKE_HELD_IN",
+  "status": "DEVELOPMENT",
   "held_out_opened": false,
   "held_out_gate": {
     "mechanism": "argparse hard failure",
@@ -16,7 +16,7 @@
     "tested_by": "tests/test_claim2_trajectory_panel.py::test_reserve_pool_refuses_to_run_without_written_authorization",
     "reserve_source_list_materialized": false
   },
-  "modal_runs_launched": 1,
+  "modal_runs_launched": 4,
   "gpu_used": false,
   "frozen_inputs": [
     {
@@ -99,7 +99,7 @@
     },
     {
       "path": "modal_apps/claim2_trajectory_characterization_app.py",
-      "sha256": "fedc430903c9142be6215561d1e99e1a7087d3ef4290001b060fd9faaf2e685d",
+      "sha256": "2f3478a7139139ca1f8663988f69208c603e374e5fb72e225a7b2859a0192f76",
       "status": "DESIGN_ONLY"
     },
     {
@@ -120,7 +120,7 @@
     },
     {
       "path": "scripts/analyse_claim2_trajectories.py",
-      "sha256": "7753e8b340c8fa58016311edd1d86c0d170d745acb3063419d2140dcddcaa118",
+      "sha256": "b07cdaa9da09aef23293676f9e57902f714f48a0b17475ea5dd9f8a46e4a11ca",
       "status": "DESIGN_ONLY"
     },
     {
@@ -140,8 +140,8 @@
     "runtime_seconds": 5
   },
   "results": {
-    "trajectories_generated": 48,
-    "note": "8 sources x 3 arms x 2 seeds. Instrument evidence only: no Claim-2 verdict was emitted and none may be inferred from the point estimates."
+    "trajectories_generated": 264,
+    "note": "8-source smoke plus 36-source held-in development run. Held-in development evidence; the matched reserve was never opened."
   },
   "gate_verdicts": [
     {
@@ -277,7 +277,7 @@
       "action": "the optional fourth arm"
     }
   ],
-  "recommended_next_action": "Review these gates. The 36-source held-in development run is NOT authorized by this smoke passing; at the measured 16.43 s/enumeration it is roughly 10 container-hours. Weigh it against the provisional observation that R_theta moved less and cycled more than both unlearned arms on 8 sources.",
+  "recommended_next_action": "Main-lane review. Do NOT reopen R_theta: its local reversibility is inherited from a reference process whose distinct teacher transitions are 73.3% mutual. Decide whether matched-reserve confirmation (~27 container-hours) is warranted given the frontier lands on incomparable rather than dominates.",
   "operational_contract": {
     "local_entrypoint_is_rdkit_free": true,
     "reason": "modal run uses a different interpreter without rdkit; molecule work belongs in a committed, mounted panel computed by a normal python3 script",
@@ -373,5 +373,319 @@
       },
       "implication": "R_theta moved less and cycled more than both unlearned arms on these 8 sources. If that holds at n=36 the frontier verdict is more likely incomparable than dominates, and the cycling rates are the direction the pathological-cycling stop rule watches. Operator collapse is NOT indicated: R_theta committed all 8 active families while uniform committed 6."
     }
+  },
+  "cycle_attribution": {
+    "status": "DEVELOPMENT",
+    "definitions_frozen_at_commit": "5c81818",
+    "central_causal_question": "are the training reference transitions themselves reversible?",
+    "corpus_census": {
+      "teacher_transitions": 151059,
+      "distinct_directed_edges": 144870,
+      "mutual_pairs": 53118,
+      "mutual_edge_fraction": 0.7333195278525575
+    },
+    "preregistered_thresholds": {
+      "inherited": 0.33,
+      "model_specific": 0.1
+    },
+    "verdict": "inherited_reversibility",
+    "reading": "R_theta learned a locally reversible reference process. Its cycling is INHERITED, not a compositional pathology.",
+    "by_arm": {
+      "r_theta": {
+        "cancelled_fraction": 0.2916666666666667,
+        "net_edits": 4.25,
+        "immediate_two_cycles": 0.9027777777777778,
+        "longer_revisits": 0.2638888888888889,
+        "displacement_per_net_edit": 0.1486076551627752,
+        "reversal_by_family": {
+          "atom_delete": {
+            "committed": 76,
+            "rate": 0.013157894736842105,
+            "undone_next_step": 1
+          },
+          "atom_insert": {
+            "committed": 65,
+            "rate": 0.16923076923076924,
+            "undone_next_step": 11
+          },
+          "atom_restate": {
+            "committed": 66,
+            "rate": 0.13636363636363635,
+            "undone_next_step": 9
+          },
+          "bond_reorder": {
+            "committed": 48,
+            "rate": 0.22916666666666666,
+            "undone_next_step": 11
+          },
+          "bond_reroute": {
+            "committed": 74,
+            "rate": 0.0945945945945946,
+            "undone_next_step": 7
+          },
+          "cycle_attach": {
+            "committed": 21,
+            "rate": 0.42857142857142855,
+            "undone_next_step": 9
+          },
+          "cycle_insert": {
+            "committed": 34,
+            "rate": 0.029411764705882353,
+            "undone_next_step": 1
+          },
+          "ring_system_restate": {
+            "committed": 48,
+            "rate": 0.3333333333333333,
+            "undone_next_step": 16
+          }
+        }
+      },
+      "uniform_canonical": {
+        "cancelled_fraction": 0.004629629629629629,
+        "net_edits": 5.972222222222222,
+        "immediate_two_cycles": 0.013888888888888888,
+        "longer_revisits": 0.0,
+        "displacement_per_net_edit": 0.1286168106829221,
+        "reversal_by_family": {
+          "atom_delete": {
+            "committed": 8,
+            "rate": 0.0,
+            "undone_next_step": 0
+          },
+          "atom_insert": {
+            "committed": 181,
+            "rate": 0.0055248618784530384,
+            "undone_next_step": 1
+          },
+          "atom_restate": {
+            "committed": 131,
+            "rate": 0.0,
+            "undone_next_step": 0
+          },
+          "bond_reorder": {
+            "committed": 2,
+            "rate": 0.0,
+            "undone_next_step": 0
+          },
+          "bond_reroute": {
+            "committed": 46,
+            "rate": 0.0,
+            "undone_next_step": 0
+          },
+          "cycle_attach": {
+            "committed": 7,
+            "rate": 0.0,
+            "undone_next_step": 0
+          },
+          "cycle_insert": {
+            "committed": 56,
+            "rate": 0.0,
+            "undone_next_step": 0
+          },
+          "ring_system_restate": {
+            "committed": 1,
+            "rate": 0.0,
+            "undone_next_step": 0
+          }
+        }
+      },
+      "empirical_family": {
+        "cancelled_fraction": 0.032407407407407406,
+        "net_edits": 5.805555555555555,
+        "immediate_two_cycles": 0.08333333333333333,
+        "longer_revisits": 0.013888888888888888,
+        "displacement_per_net_edit": 0.13514379351781358,
+        "reversal_by_family": {
+          "atom_delete": {
+            "committed": 80,
+            "rate": 0.0,
+            "undone_next_step": 0
+          },
+          "atom_insert": {
+            "committed": 67,
+            "rate": 0.029850746268656716,
+            "undone_next_step": 2
+          },
+          "atom_restate": {
+            "committed": 107,
+            "rate": 0.0,
+            "undone_next_step": 0
+          },
+          "bond_reorder": {
+            "committed": 23,
+            "rate": 0.0,
+            "undone_next_step": 0
+          },
+          "bond_reroute": {
+            "committed": 88,
+            "rate": 0.011363636363636364,
+            "undone_next_step": 1
+          },
+          "cycle_attach": {
+            "committed": 11,
+            "rate": 0.0,
+            "undone_next_step": 0
+          },
+          "cycle_insert": {
+            "committed": 24,
+            "rate": 0.041666666666666664,
+            "undone_next_step": 1
+          },
+          "ring_system_restate": {
+            "committed": 32,
+            "rate": 0.0625,
+            "undone_next_step": 2
+          }
+        }
+      }
+    },
+    "controlled_comparison_caveat": "The controlled arms are DETERMINISTIC argmax-utility policies, which are monotone non-decreasing in utility, so an immediate two-cycle requires an exact utility tie and is close to structurally excluded. 'Control has less cycling than a stochastic sampler' is therefore largely definitional and is NOT clean evidence that control suppresses cycling. It is reported as context. The falsifiable comparison is r_theta versus empirical_family: both are stochastic samplers over the identical support, so a difference between them could have come out either way."
+  },
+  "development_result": {
+    "status": "DEVELOPMENT",
+    "sources": 36,
+    "verdict_emitted": true,
+    "frontier": {
+      "empirical_family": {
+        "arm": "empirical_family",
+        "fidelity": 0.9212962962962963,
+        "mobility": 0.7634686124862486,
+        "source_count": 36,
+        "state_count": 432,
+        "trajectory_count": 72
+      },
+      "r_theta": {
+        "arm": "r_theta",
+        "fidelity": 0.9675925925925926,
+        "mobility": 0.5515115866825668,
+        "source_count": 36,
+        "state_count": 432,
+        "trajectory_count": 72
+      },
+      "uniform_canonical": {
+        "arm": "uniform_canonical",
+        "fidelity": 0.8310185185185185,
+        "mobility": 0.7755289365482757,
+        "source_count": 36,
+        "state_count": 432,
+        "trajectory_count": 72
+      }
+    },
+    "comparisons": {
+      "r_theta_vs_empirical_family": {
+        "diagnostic_only_axes": [
+          "net_mobility_per_edit"
+        ],
+        "fidelity": {
+          "ci_high": 0.09722222222222221,
+          "ci_low": 0.004629629629629632,
+          "difference": 0.046296296296296294,
+          "direction_meaning": "higher is more fidelity",
+          "resolved": true
+        },
+        "mobility": {
+          "ci_high": -0.18191786019938486,
+          "ci_low": -0.3093129222816826,
+          "difference": -0.24569038998849585,
+          "direction_meaning": "higher is more mobility",
+          "resolved": true
+        },
+        "net_mobility_per_edit": {
+          "ci_high": 0.04138019045829272,
+          "ci_low": -0.012845519839077037,
+          "difference": 0.013549240968867211,
+          "direction_meaning": "higher is more net_mobility_per_edit",
+          "resolved": false
+        },
+        "verdict": "incomparable",
+        "verdict_axes": [
+          "mobility",
+          "fidelity"
+        ]
+      },
+      "r_theta_vs_uniform_canonical": {
+        "diagnostic_only_axes": [
+          "net_mobility_per_edit"
+        ],
+        "fidelity": {
+          "ci_high": 0.21990740740740744,
+          "ci_low": 0.07175925925925924,
+          "difference": 0.13657407407407407,
+          "direction_meaning": "higher is more fidelity",
+          "resolved": true
+        },
+        "mobility": {
+          "ci_high": -0.17617541870028297,
+          "ci_low": -0.3085401500640252,
+          "difference": -0.2439316823624009,
+          "direction_meaning": "higher is more mobility",
+          "resolved": true
+        },
+        "net_mobility_per_edit": {
+          "ci_high": 0.045915962564657097,
+          "ci_low": -0.005135842034501114,
+          "difference": 0.019388331808407946,
+          "direction_meaning": "higher is more net_mobility_per_edit",
+          "resolved": false
+        },
+        "verdict": "incomparable",
+        "verdict_axes": [
+          "mobility",
+          "fidelity"
+        ]
+      }
+    },
+    "families_by_arm": {
+      "empirical_family": 8,
+      "r_theta": 8,
+      "uniform_canonical": 8
+    },
+    "operator_collapse": false,
+    "instrument_gates": {
+      "kernel_cross_check_disagreements": 0,
+      "degenerate_states": 0,
+      "states_measured": 1025,
+      "enumeration_failures": 0,
+      "trajectories_truncated": 0,
+      "measured_seconds_per_enumeration": {
+        "max": 38.67,
+        "median": 14.469999999999999,
+        "min": 3.43
+      }
+    },
+    "did_not_replicate_from_the_smoke": [
+      {
+        "finding": "displacement per net edit favouring r_theta",
+        "at_8_sources": {
+          "r_theta": 0.2129,
+          "uniform": 0.1203,
+          "empirical": 0.1309
+        },
+        "at_36_sources": {
+          "r_theta": 0.1477,
+          "uniform": 0.1286,
+          "empirical": 0.1351
+        },
+        "resolved_at_36": false,
+        "note": "reported as an unresolved diagnostic and never promoted into the verdict; the 20-source floor is why this did not become a claim"
+      },
+      {
+        "finding": "cancelled fraction for r_theta",
+        "at_8_sources": 0.438,
+        "at_36_sources": 0.292
+      }
+    ]
+  },
+  "decision_rule": {
+    "preregistered_by": "main lane, before Step 2 ran",
+    "branch": "KEEP_AND_REFRAME",
+    "reopen_r_theta": false,
+    "reopen_criteria_all_required": {
+      "cycling_is_model_specific": false,
+      "worse_on_both_net_mobility_and_fidelity": false,
+      "controlled_trajectories_also_cyclic": false
+    },
+    "frontier_result": "incomparable",
+    "reframing": "learned local reference dynamics, not goal-directed transport: R_theta supplies plausible local molecular motion and control supplies purpose"
   }
 }

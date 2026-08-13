@@ -1,0 +1,824 @@
+{
+  "arms": [
+    "r_theta",
+    "uniform_canonical",
+    "empirical_family"
+  ],
+  "budget_exhausted": false,
+  "canonical_slots": 48,
+  "checkpoint_selected_step": 12500,
+  "code_commit": "a0a5afb9485fbd4d3ca3b1c04caad9de0147f80b",
+  "cross_check_calls": 1,
+  "enumeration_failures": {},
+  "family_frequencies": {
+    "atom_delete": 0.173,
+    "atom_insert": 0.1608,
+    "atom_restate": 0.2042,
+    "bond_reorder": 0.05,
+    "bond_reroute": 0.1902,
+    "cycle_attach": 0.05,
+    "cycle_insert": 0.0644,
+    "ring_system_restate": 0.1074
+  },
+  "family_law_sha256": "b0cc66f168f1cf3e7a4b5bacfb1138059005251a10561d6961c3ea1c5dd7ac73",
+  "has_ring": true,
+  "heavy_atoms": 27,
+  "horizon": 6,
+  "index": 13,
+  "kernel_agreement": {
+    "agrees": true,
+    "alias_counts_match": true,
+    "keys_match": true,
+    "max_absolute_probability_difference": 1.4265994746631705e-08,
+    "production_support_size": 577,
+    "row_support_size": 577,
+    "source_key": "COc1cccc(C(=O)C2(NC(=O)c3cccc(OC)c3C)CCCC2)c1",
+    "tolerance": 0.0001
+  },
+  "kernel_budget": 40,
+  "kernel_calls": 29,
+  "kernel_seconds": 477.91,
+  "panel_sha256": "a4282229742eff2edc37f752410a75239d4410c266b1670af4d3552baab8cf9e",
+  "schema": "compose.claim2.trajectory_shard",
+  "seconds": 576.1,
+  "seconds_per_kernel_call": 16.48,
+  "seeds": [
+    0,
+    1
+  ],
+  "size_band": "medium",
+  "source": "COc1cccc(C(=O)C2(NC(=O)c3cccc(OC)c3C)CCCC2)c1",
+  "source_support_size": 577,
+  "start_key": "COc1cccc(C(=O)C2(NC(=O)c3cccc(OC)c3C)CCCC2)c1",
+  "state_divergence": {
+    "CCCCC(C)(NC(=O)c1cccc(O)c1)C(=O)c1cccc(OC)c1": {
+      "degenerate": false,
+      "minimum": 0.39212588555858313,
+      "pairwise": {
+        "r_theta|empirical_family": 0.8392752966943821,
+        "r_theta|uniform_canonical": 0.8822112249326507,
+        "uniform_canonical|empirical_family": 0.39212588555858313
+      },
+      "support_size": 734
+    },
+    "CCCCC(NC(=O)c1cccc(OC)c1)C(=O)c1cccc(OC)c1": {
+      "degenerate": false,
+      "minimum": 0.389647619047619,
+      "pairwise": {
+        "r_theta|empirical_family": 0.8316509180564313,
+        "r_theta|uniform_canonical": 0.9042109536001509,
+        "uniform_canonical|empirical_family": 0.389647619047619
+      },
+      "support_size": 735
+    },
+    "COc1c2cc(OC=O)c(c1Cl)C(=O)C1(CCCC1)NC(=O)c1ccc-2cc1C": {
+      "degenerate": false,
+      "minimum": 0.3937707317073171,
+      "pairwise": {
+        "r_theta|empirical_family": 0.7286843272433261,
+        "r_theta|uniform_canonical": 0.8758435255161445,
+        "uniform_canonical|empirical_family": 0.3937707317073171
+      },
+      "support_size": 492
+    },
+    "COc1c2cc(OC=[PH3])c(c1Cl)C(=O)C1(CCCC1)NC(=O)c1ccc-2cc1C": {
+      "degenerate": false,
+      "minimum": 0.4021018315018315,
+      "pairwise": {
+        "r_theta|empirical_family": 0.6996561982009623,
+        "r_theta|uniform_canonical": 0.8713922677473711,
+        "uniform_canonical|empirical_family": 0.4021018315018315
+      },
+      "support_size": 546
+    },
+    "COc1c2ccc(c1C)C(=O)NC1(CCCC1)C(=O)c1ccc-2c(OC)c1Cl": {
+      "degenerate": false,
+      "minimum": 0.40230254403131116,
+      "pairwise": {
+        "r_theta|empirical_family": 0.777161034735955,
+        "r_theta|uniform_canonical": 0.810450830166067,
+        "uniform_canonical|empirical_family": 0.40230254403131116
+      },
+      "support_size": 511
+    },
+    "COc1cc(OC)c(C(=O)NC2(C(=O)c3ccccc3)CCCC2)cc1C": {
+      "degenerate": false,
+      "minimum": 0.43319541984732823,
+      "pairwise": {
+        "r_theta|empirical_family": 0.816855501306904,
+        "r_theta|uniform_canonical": 0.8468065268294067,
+        "uniform_canonical|empirical_family": 0.43319541984732823
+      },
+      "support_size": 524
+    },
+    "COc1cc2c(OC)c(Cl)c1C(=O)C1(CCCC1)NC(=O)c1ccc-2cc1C": {
+      "degenerate": false,
+      "minimum": 0.40263125,
+      "pairwise": {
+        "r_theta|empirical_family": 0.820580975087903,
+        "r_theta|uniform_canonical": 0.8452006000504231,
+        "uniform_canonical|empirical_family": 0.40263125
+      },
+      "support_size": 512
+    },
+    "COc1ccc(C(=O)C2(NC(=O)c3cccc(OC)c3)CCCC2)cc1": {
+      "degenerate": false,
+      "minimum": 0.44401772151898733,
+      "pairwise": {
+        "r_theta|empirical_family": 0.8512111547591878,
+        "r_theta|uniform_canonical": 0.8926360606209671,
+        "uniform_canonical|empirical_family": 0.44401772151898733
+      },
+      "support_size": 474
+    },
+    "COc1ccc(C(=O)NC2(C(=O)c3cccc(OC)c3)CCCC2)cc1": {
+      "degenerate": false,
+      "minimum": 0.44401772151898733,
+      "pairwise": {
+        "r_theta|empirical_family": 0.8484606132601089,
+        "r_theta|uniform_canonical": 0.893121321379567,
+        "uniform_canonical|empirical_family": 0.44401772151898733
+      },
+      "support_size": 474
+    },
+    "COc1ccc(C(=O)NC2(C(=O)c3ccccc3)CCCC2)c(OC)c1": {
+      "degenerate": false,
+      "minimum": 0.44428421052631584,
+      "pairwise": {
+        "r_theta|empirical_family": 0.8140876937028162,
+        "r_theta|uniform_canonical": 0.8629229612196384,
+        "uniform_canonical|empirical_family": 0.44428421052631584
+      },
+      "support_size": 475
+    },
+    "COc1ccc(C(=O)NC2(C(=O)c3ccccc3OC)CCCC2)cc1": {
+      "degenerate": false,
+      "minimum": 0.4437501057082453,
+      "pairwise": {
+        "r_theta|empirical_family": 0.8420272101656454,
+        "r_theta|uniform_canonical": 0.8763574419327533,
+        "uniform_canonical|empirical_family": 0.4437501057082453
+      },
+      "support_size": 473
+    },
+    "COc1cccc(C(=O)C(C)(CCCC#P)NC(=O)c2cccc(O)c2)c1": {
+      "degenerate": false,
+      "minimum": 0.378859587020649,
+      "pairwise": {
+        "r_theta|empirical_family": 0.8096378587813452,
+        "r_theta|uniform_canonical": 0.8788266801066428,
+        "uniform_canonical|empirical_family": 0.378859587020649
+      },
+      "support_size": 678
+    },
+    "COc1cccc(C(=O)C2(NC(=O)c3ccc(OC)cc3C)CCCC2)c1": {
+      "degenerate": false,
+      "minimum": 0.4284856152512998,
+      "pairwise": {
+        "r_theta|empirical_family": 0.8310273948091504,
+        "r_theta|uniform_canonical": 0.8867201351781506,
+        "uniform_canonical|empirical_family": 0.4284856152512998
+      },
+      "support_size": 577
+    },
+    "COc1cccc(C(=O)C2(NC(=O)c3ccc(OC)cc3F)CCCC2)c1": {
+      "degenerate": false,
+      "minimum": 0.4211747126436782,
+      "pairwise": {
+        "r_theta|empirical_family": 0.8379915134751876,
+        "r_theta|uniform_canonical": 0.8922632880779934,
+        "uniform_canonical|empirical_family": 0.4211747126436782
+      },
+      "support_size": 522
+    },
+    "COc1cccc(C(=O)C2(NC(=O)c3cccc(OC)c3C)CCCC2)c1": {
+      "degenerate": false,
+      "minimum": 0.4267525129982669,
+      "pairwise": {
+        "r_theta|empirical_family": 0.8421323982960977,
+        "r_theta|uniform_canonical": 0.8894373643188567,
+        "uniform_canonical|empirical_family": 0.4267525129982669
+      },
+      "support_size": 577
+    },
+    "COc1cccc(C(=O)C2(NC(=O)c3cccc(OC=[PH3])c3C)CCCC2)c1": {
+      "degenerate": false,
+      "minimum": 0.42704371941272434,
+      "pairwise": {
+        "r_theta|empirical_family": 0.6837068277823091,
+        "r_theta|uniform_canonical": 0.8811917276664509,
+        "uniform_canonical|empirical_family": 0.42704371941272434
+      },
+      "support_size": 613
+    },
+    "COc1cccc(C(=O)C2(NCc3cccc(OC)c3C)CCCC2)c1": {
+      "degenerate": false,
+      "minimum": 0.42959513776337116,
+      "pairwise": {
+        "r_theta|empirical_family": 0.8359565281562465,
+        "r_theta|uniform_canonical": 0.8870722734850046,
+        "uniform_canonical|empirical_family": 0.42959513776337116
+      },
+      "support_size": 617
+    },
+    "COc1cccc(C(=O)NC(CCCC#P)C(=O)c2cccc(OC)c2)c1": {
+      "degenerate": false,
+      "minimum": 0.37738466076696164,
+      "pairwise": {
+        "r_theta|empirical_family": 0.8359086425589921,
+        "r_theta|uniform_canonical": 0.9002640455369629,
+        "uniform_canonical|empirical_family": 0.37738466076696164
+      },
+      "support_size": 678
+    },
+    "COc1cccc(C(=O)NC2(C(=O)c3cccc(OC)c3)CCCC2)c1": {
+      "degenerate": false,
+      "minimum": 0.4399181818181818,
+      "pairwise": {
+        "r_theta|empirical_family": 0.8585374166668231,
+        "r_theta|uniform_canonical": 0.9121143236278206,
+        "uniform_canonical|empirical_family": 0.4399181818181818
+      },
+      "support_size": 528
+    },
+    "COc1cccc(C(=O)NC2(C(=O)c3cccc(OC)c3Cl)CCCC2)c1C": {
+      "degenerate": false,
+      "minimum": 0.40919649122807017,
+      "pairwise": {
+        "r_theta|empirical_family": 0.8216916542430879,
+        "r_theta|uniform_canonical": 0.8602844623926015,
+        "uniform_canonical|empirical_family": 0.40919649122807017
+      },
+      "support_size": 570
+    },
+    "COc1cccc(C(=O)NC2(C(=O)c3ccccc3)CCCC2)c1OC": {
+      "degenerate": false,
+      "minimum": 0.44217894736842106,
+      "pairwise": {
+        "r_theta|empirical_family": 0.8207691791424772,
+        "r_theta|uniform_canonical": 0.8624555128882684,
+        "uniform_canonical|empirical_family": 0.44217894736842106
+      },
+      "support_size": 475
+    },
+    "COc1cccc(CNC2(C(=O)C3CCC(SC)CC3)CCCC2)c1Cl": {
+      "degenerate": false,
+      "minimum": 0.43715948553054657,
+      "pairwise": {
+        "r_theta|empirical_family": 0.7617673184290118,
+        "r_theta|uniform_canonical": 0.889994386224887,
+        "uniform_canonical|empirical_family": 0.43715948553054657
+      },
+      "support_size": 622
+    },
+    "COc1cccc(CNC2(C(=O)c3ccc(SC)cc3)CCCC2)c1C": {
+      "degenerate": false,
+      "minimum": 0.43488571428571426,
+      "pairwise": {
+        "r_theta|empirical_family": 0.8185706197865578,
+        "r_theta|uniform_canonical": 0.8730477016381636,
+        "uniform_canonical|empirical_family": 0.43488571428571426
+      },
+      "support_size": 560
+    },
+    "COc1cccc(CNC2(C(=O)c3ccc(SC)cc3)CCCC2)c1Cl": {
+      "degenerate": false,
+      "minimum": 0.42802574257425746,
+      "pairwise": {
+        "r_theta|empirical_family": 0.8240728069736154,
+        "r_theta|uniform_canonical": 0.8759200537538893,
+        "uniform_canonical|empirical_family": 0.42802574257425746
+      },
+      "support_size": 505
+    },
+    "COc1cccc(CNC2(C(=O)c3cccc(SC)c3)CCCC2)c1C": {
+      "degenerate": false,
+      "minimum": 0.42982330097087385,
+      "pairwise": {
+        "r_theta|empirical_family": 0.8162352645816526,
+        "r_theta|uniform_canonical": 0.8752083134319477,
+        "uniform_canonical|empirical_family": 0.42982330097087385
+      },
+      "support_size": 618
+    },
+    "Cc1c(OC=[PH3])cccc1C(=O)NC1(C(=O)c2cccc(OS)c2)BOC(Br)C1": {
+      "degenerate": false,
+      "minimum": 0.4000930875576037,
+      "pairwise": {
+        "r_theta|empirical_family": 0.798581065173044,
+        "r_theta|uniform_canonical": 0.9527296387534536,
+        "uniform_canonical|empirical_family": 0.4000930875576037
+      },
+      "support_size": 651
+    },
+    "Cc1c(OC=[PH3])cccc1C(=O)NC1(C(=O)c2cccc(OS)c2)CCC(Br)C1": {
+      "degenerate": false,
+      "minimum": 0.40862816901408455,
+      "pairwise": {
+        "r_theta|empirical_family": 0.7384521183738444,
+        "r_theta|uniform_canonical": 0.9222023125103317,
+        "uniform_canonical|empirical_family": 0.40862816901408455
+      },
+      "support_size": 710
+    },
+    "Cc1c(OC=[PH3])cccc1C(=O)NC1(C(=O)c2cccc(OS)c2)CCCC1": {
+      "degenerate": false,
+      "minimum": 0.4204293515358362,
+      "pairwise": {
+        "r_theta|empirical_family": 0.7038372746118658,
+        "r_theta|uniform_canonical": 0.9105964110774306,
+        "uniform_canonical|empirical_family": 0.4204293515358362
+      },
+      "support_size": 586
+    },
+    "Cc1c(OC=[PH3])cccc1C(=O)NC1(C(=O)c2cccc(OS)c2)COC(Br)C1": {
+      "degenerate": false,
+      "minimum": 0.4036827067669173,
+      "pairwise": {
+        "r_theta|empirical_family": 0.7749696784912913,
+        "r_theta|uniform_canonical": 0.9387805946630983,
+        "uniform_canonical|empirical_family": 0.4036827067669173
+      },
+      "support_size": 665
+    }
+  },
+  "status": "DEVELOPMENT",
+  "support_band": "1-4",
+  "time_point": 0.5,
+  "trajectories": [
+    {
+      "arm": "r_theta",
+      "cells": [
+        [
+          "atom_delete:atom_delete"
+        ],
+        [
+          "bond_reroute:bond_reroute"
+        ],
+        [
+          "bond_reroute:bond_reroute"
+        ],
+        [
+          "bond_reroute:bond_reroute"
+        ],
+        [
+          "atom_insert:grow_connected"
+        ],
+        [
+          "atom_insert:grow_connected"
+        ]
+      ],
+      "committed_edits": 6,
+      "families": [
+        [
+          "atom_delete"
+        ],
+        [
+          "bond_reroute"
+        ],
+        [
+          "bond_reroute"
+        ],
+        [
+          "bond_reroute"
+        ],
+        [
+          "atom_insert"
+        ],
+        [
+          "atom_insert"
+        ]
+      ],
+      "forward_probabilities": [
+        0.11997715757530991,
+        0.2169723577861251,
+        0.001955982238238454,
+        0.028364239892442012,
+        0.0010988653994856402,
+        0.00033766966367445255
+      ],
+      "reverse_probabilities": [
+        0.00039997905404709255,
+        0.05694160504708214,
+        0.016282715783586615,
+        0.011634020951496559,
+        0.14247911045156228,
+        null
+      ],
+      "seed": 0,
+      "states": [
+        "COc1cccc(C(=O)C2(NC(=O)c3cccc(OC)c3C)CCCC2)c1",
+        "COc1cccc(C(=O)NC2(C(=O)c3cccc(OC)c3)CCCC2)c1",
+        "COc1ccc(C(=O)C2(NC(=O)c3cccc(OC)c3)CCCC2)cc1",
+        "COc1cccc(C(=O)NC2(C(=O)c3ccccc3)CCCC2)c1OC",
+        "COc1ccc(C(=O)NC2(C(=O)c3ccccc3)CCCC2)c(OC)c1",
+        "COc1cc(OC)c(C(=O)NC2(C(=O)c3ccccc3)CCCC2)cc1C",
+        "COc1cc(OC)c(C(=O)NC2(C(=O)c3ccccc3)CCCC2)cc1CBr"
+      ],
+      "stop_reason": "horizon",
+      "support_sizes": [
+        577,
+        528,
+        474,
+        475,
+        475,
+        524
+      ]
+    },
+    {
+      "arm": "uniform_canonical",
+      "cells": [
+        [
+          "atom_insert:grow_connected"
+        ],
+        [
+          "cycle_insert:cycle_insert"
+        ],
+        [
+          "bond_reroute:bond_reroute"
+        ],
+        [
+          "atom_insert:grow_connected"
+        ],
+        [
+          "atom_restate:atom_restate"
+        ],
+        [
+          "atom_insert:grow_connected"
+        ]
+      ],
+      "committed_edits": 6,
+      "families": [
+        [
+          "atom_insert"
+        ],
+        [
+          "cycle_insert"
+        ],
+        [
+          "bond_reroute"
+        ],
+        [
+          "atom_insert"
+        ],
+        [
+          "atom_restate"
+        ],
+        [
+          "atom_insert"
+        ]
+      ],
+      "forward_probabilities": [
+        0.00031103991221118163,
+        1.9161896368027594e-12,
+        0.002814101151689314,
+        9.047807270169653e-07,
+        0.0007073029380791696,
+        9.064840105722206e-07
+      ],
+      "reverse_probabilities": [
+        0.040339830225501076,
+        1.993656860988065e-07,
+        0.0009870297977379104,
+        0.09819030101984806,
+        4.0019968759316864e-05,
+        null
+      ],
+      "seed": 0,
+      "states": [
+        "COc1cccc(C(=O)C2(NC(=O)c3cccc(OC)c3C)CCCC2)c1",
+        "COc1cccc(C(=O)NC2(C(=O)c3cccc(OC)c3Cl)CCCC2)c1C",
+        "COc1c2ccc(c1C)C(=O)NC1(CCCC1)C(=O)c1ccc-2c(OC)c1Cl",
+        "COc1cc2c(OC)c(Cl)c1C(=O)C1(CCCC1)NC(=O)c1ccc-2cc1C",
+        "COc1c2cc(OC=[PH3])c(c1Cl)C(=O)C1(CCCC1)NC(=O)c1ccc-2cc1C",
+        "COc1c2cc(OC=O)c(c1Cl)C(=O)C1(CCCC1)NC(=O)c1ccc-2cc1C",
+        "COc1c2cc(OC=O)c(c1Cl)C(=O)C1(CCCC1[IH4])NC(=O)c1ccc-2cc1C"
+      ],
+      "stop_reason": "horizon",
+      "support_sizes": [
+        577,
+        570,
+        511,
+        512,
+        546,
+        492
+      ]
+    },
+    {
+      "arm": "empirical_family",
+      "cells": [
+        [
+          "atom_delete:atom_delete"
+        ],
+        [
+          "cycle_attach:cycle_attach"
+        ],
+        [
+          "atom_insert:grow_connected"
+        ],
+        [
+          "bond_reroute:bond_reroute"
+        ],
+        [
+          "atom_delete:atom_delete"
+        ],
+        [
+          "bond_reroute:bond_reroute"
+        ]
+      ],
+      "committed_edits": 6,
+      "families": [
+        [
+          "atom_delete"
+        ],
+        [
+          "cycle_attach"
+        ],
+        [
+          "atom_insert"
+        ],
+        [
+          "bond_reroute"
+        ],
+        [
+          "atom_delete"
+        ],
+        [
+          "bond_reroute"
+        ]
+      ],
+      "forward_probabilities": [
+        0.11997715757530991,
+        4.5794556973948574e-10,
+        1.2085311595402806e-07,
+        2.4172619906676347e-05,
+        0.025167896797185563,
+        0.0014421377929628718
+      ],
+      "reverse_probabilities": [
+        0.00039997905404709255,
+        2.8824791441405003e-08,
+        0.0651558951851502,
+        0.0019420831356049058,
+        1.3268430936345748e-07,
+        null
+      ],
+      "seed": 0,
+      "states": [
+        "COc1cccc(C(=O)C2(NC(=O)c3cccc(OC)c3C)CCCC2)c1",
+        "COc1cccc(C(=O)NC2(C(=O)c3cccc(OC)c3)CCCC2)c1",
+        "CCCCC(NC(=O)c1cccc(OC)c1)C(=O)c1cccc(OC)c1",
+        "COc1cccc(C(=O)NC(CCCC#P)C(=O)c2cccc(OC)c2)c1",
+        "COc1cccc(C(=O)C(C)(CCCC#P)NC(=O)c2cccc(O)c2)c1",
+        "CCCCC(C)(NC(=O)c1cccc(O)c1)C(=O)c1cccc(OC)c1",
+        "CCCCC(C)(NC(=O)c1ccccc1)C(=O)c1cc(O)cc(OC)c1"
+      ],
+      "stop_reason": "horizon",
+      "support_sizes": [
+        577,
+        528,
+        735,
+        678,
+        678,
+        734
+      ]
+    },
+    {
+      "arm": "r_theta",
+      "cells": [
+        [
+          "bond_reroute:bond_reroute"
+        ],
+        [
+          "atom_restate:atom_restate"
+        ],
+        [
+          "atom_delete:atom_delete"
+        ],
+        [
+          "bond_reroute:bond_reroute"
+        ],
+        [
+          "bond_reroute:bond_reroute"
+        ],
+        [
+          "bond_reroute:bond_reroute"
+        ]
+      ],
+      "committed_edits": 6,
+      "families": [
+        [
+          "bond_reroute"
+        ],
+        [
+          "atom_restate"
+        ],
+        [
+          "atom_delete"
+        ],
+        [
+          "bond_reroute"
+        ],
+        [
+          "bond_reroute"
+        ],
+        [
+          "bond_reroute"
+        ]
+      ],
+      "forward_probabilities": [
+        0.06686410430790868,
+        0.022752682720190046,
+        0.1441747833232588,
+        0.09979971734746623,
+        0.10340417970805713,
+        0.10912248542030466
+      ],
+      "reverse_probabilities": [
+        0.01684439958221203,
+        0.01636399316238717,
+        0.002101440493121946,
+        0.10340417970805713,
+        0.09979971734746623,
+        null
+      ],
+      "seed": 1,
+      "states": [
+        "COc1cccc(C(=O)C2(NC(=O)c3cccc(OC)c3C)CCCC2)c1",
+        "COc1cccc(C(=O)C2(NC(=O)c3ccc(OC)cc3C)CCCC2)c1",
+        "COc1cccc(C(=O)C2(NC(=O)c3ccc(OC)cc3F)CCCC2)c1",
+        "COc1ccc(C(=O)NC2(C(=O)c3cccc(OC)c3)CCCC2)cc1",
+        "COc1ccc(C(=O)NC2(C(=O)c3ccccc3OC)CCCC2)cc1",
+        "COc1ccc(C(=O)NC2(C(=O)c3cccc(OC)c3)CCCC2)cc1",
+        "COc1cccc(C(=O)C2(NC(=O)c3ccccc3OC)CCCC2)c1"
+      ],
+      "stop_reason": "horizon",
+      "support_sizes": [
+        577,
+        577,
+        522,
+        474,
+        473,
+        474
+      ]
+    },
+    {
+      "arm": "uniform_canonical",
+      "cells": [
+        [
+          "atom_insert:grow_connected"
+        ],
+        [
+          "atom_restate:atom_restate"
+        ],
+        [
+          "atom_insert:grow_connected"
+        ],
+        [
+          "atom_restate:atom_restate"
+        ],
+        [
+          "atom_restate:atom_restate"
+        ],
+        [
+          "bond_reroute:bond_reroute"
+        ]
+      ],
+      "committed_edits": 6,
+      "families": [
+        [
+          "atom_insert"
+        ],
+        [
+          "atom_restate"
+        ],
+        [
+          "atom_insert"
+        ],
+        [
+          "atom_restate"
+        ],
+        [
+          "atom_restate"
+        ],
+        [
+          "bond_reroute"
+        ]
+      ],
+      "forward_probabilities": [
+        3.679805628650923e-08,
+        1.9204648748811525e-05,
+        5.726511374154036e-06,
+        1.0153195028512396e-06,
+        7.059239962026503e-07,
+        6.35485262359381e-07
+      ],
+      "reverse_probabilities": [
+        0.07132946904793028,
+        0.002581000729152285,
+        0.002409502379701856,
+        4.110185818590094e-06,
+        3.275927802460604e-05,
+        null
+      ],
+      "seed": 1,
+      "states": [
+        "COc1cccc(C(=O)C2(NC(=O)c3cccc(OC)c3C)CCCC2)c1",
+        "COc1cccc(C(=O)C2(NC(=O)c3cccc(OC=[PH3])c3C)CCCC2)c1",
+        "Cc1c(OC=[PH3])cccc1C(=O)NC1(C(=O)c2cccc(OS)c2)CCCC1",
+        "Cc1c(OC=[PH3])cccc1C(=O)NC1(C(=O)c2cccc(OS)c2)CCC(Br)C1",
+        "Cc1c(OC=[PH3])cccc1C(=O)NC1(C(=O)c2cccc(OS)c2)COC(Br)C1",
+        "Cc1c(OC=[PH3])cccc1C(=O)NC1(C(=O)c2cccc(OS)c2)BOC(Br)C1",
+        "Cc1ccccc1C(=O)NC1(C(=O)c2cccc(OS)c2)BOC(Br)(OC=[PH3])C1"
+      ],
+      "stop_reason": "horizon",
+      "support_sizes": [
+        577,
+        613,
+        586,
+        710,
+        665,
+        651
+      ]
+    },
+    {
+      "arm": "empirical_family",
+      "cells": [
+        [
+          "atom_delete:atom_delete"
+        ],
+        [
+          "atom_restate:atom_restate"
+        ],
+        [
+          "bond_reroute:bond_reroute"
+        ],
+        [
+          "atom_restate:atom_restate"
+        ],
+        [
+          "ring_system_restate:ring_system_restate"
+        ],
+        [
+          "bond_reroute:bond_reroute"
+        ]
+      ],
+      "committed_edits": 6,
+      "families": [
+        [
+          "atom_delete"
+        ],
+        [
+          "atom_restate"
+        ],
+        [
+          "bond_reroute"
+        ],
+        [
+          "atom_restate"
+        ],
+        [
+          "ring_system_restate"
+        ],
+        [
+          "bond_reroute"
+        ]
+      ],
+      "forward_probabilities": [
+        0.00023937442848406083,
+        0.0010020766019165348,
+        0.06496241693371646,
+        0.02240575346070342,
+        6.826836826256773e-05,
+        0.0003626434135403832
+      ],
+      "reverse_probabilities": [
+        0.00023196383205385042,
+        0.09361835575834847,
+        0.015574984065902435,
+        0.020129077045297233,
+        0.14037513519002637,
+        null
+      ],
+      "seed": 1,
+      "states": [
+        "COc1cccc(C(=O)C2(NC(=O)c3cccc(OC)c3C)CCCC2)c1",
+        "COc1cccc(C(=O)C2(NCc3cccc(OC)c3C)CCCC2)c1",
+        "COc1cccc(CNC2(C(=O)c3cccc(SC)c3)CCCC2)c1C",
+        "COc1cccc(CNC2(C(=O)c3ccc(SC)cc3)CCCC2)c1C",
+        "COc1cccc(CNC2(C(=O)c3ccc(SC)cc3)CCCC2)c1Cl",
+        "COc1cccc(CNC2(C(=O)C3CCC(SC)CC3)CCCC2)c1Cl",
+        "CSC1CCC(C(=O)C2(NCc3c(C)ccc(O)c3Cl)CCCC2)CC1"
+      ],
+      "stop_reason": "horizon",
+      "support_sizes": [
+        577,
+        617,
+        618,
+        560,
+        505,
+        622
+      ]
+    }
+  ]
+}

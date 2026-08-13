@@ -383,6 +383,32 @@ every individual metric.
 
 ---
 
+## The cycle-attribution decision rule (preregistered by the main lane)
+
+Frozen before Step 2 ran.
+
+| Branch | Condition | Holds? |
+|---|---|---|
+| **KEEP AND REFRAME** | reversibility inherited from the reference law · fidelity materially better · control suppresses cycles · net mobility remains useful | **YES** |
+| **REOPEN `R_theta`** | cycling model-specific **and** worse on both net mobility and fidelity **and** controlled trajectories also cyclic | **NO — all three fail** |
+| **REPORT INCOMPARABLE** | fidelity better, mobility worse, neither dominates | **YES (frontier)** |
+
+The two "YES" rows are not in conflict: the branch decides whether to reopen
+the model (no), the frontier describes what was measured (`incomparable`).
+
+Attribution definitions live in
+`src/compose_v4/experiments/claim2_cycle_attribution.py`, frozen at `5c81818`
+before evaluation, with reading thresholds ≥ 0.33 → `inherited`,
+≤ 0.10 → `model_specific`, and anything between — or a missing census —
+`inconclusive` rather than guessed.
+
+**One-step likelihood not composing into usable dynamics is precisely the
+failure this lane exists to detect**, so a good NLL is never a reason to
+dismiss a bad trajectory result. The corpus census is what licensed the
+"inherited" reading here — not the likelihood.
+
+---
+
 ## Operational contract for the eventual run
 
 Two failure modes the main lane hit today, folded in here so this lane cannot

@@ -237,6 +237,86 @@ does. Both gate directions are unit-tested.
 
 ---
 
+## 2026-08-13 — Cycle attribution: the reversibility is INHERITED
+
+**Evidence before:** the 8-source smoke showed `R_theta` revisit 0.281 and
+reversal 0.300 against ~0.01 for empirical-family, with lower displacement.
+Nothing about its cause.
+
+**Decision:** freeze the decomposition and the reading thresholds first
+(`5c81818`), then measure.
+
+**Result:** the training corpus has a **mutual-edge fraction of 0.7333** over
+144,870 distinct directed teacher transitions. The preregistered `inherited`
+threshold was 0.33 and `model_specific` was 0.10. `R_theta` learned a locally
+reversible reference process; it did not invent the reversibility.
+
+**Why this was worth doing before touching the model:** the same measurement
+supported opposite conclusions with opposite consequences, and the corpus
+census separated them decisively. Acting on the 8-source signal without it
+would have meant reopening a frozen model to fix faithful behaviour.
+
+**Changes a frozen object:** no. It is the reason not to.
+
+---
+
+## 2026-08-13 — Report the controlled-arm comparison as context, not evidence
+
+**Evidence before:** controlled arms showed ~0% cancellation against
+`R_theta`'s 29–44%.
+
+**Decision:** record it, and record beside it that **the comparison has a
+near-fixed sign**. The controlled arms are deterministic argmax-utility
+policies, monotone non-decreasing in utility, so an immediate two-cycle
+requires an exact tie and is close to structurally excluded.
+
+**Rejected:** presenting "goal control suppresses backtracking" as a clean
+finding. It is largely definitional. The falsifiable comparison is `r_theta`
+versus `empirical_family` — both stochastic samplers over identical support —
+where 29.2% against 3.2% could have come out either way.
+
+**Changes a frozen object:** no.
+
+---
+
+## 2026-08-13 — Net mobility is a diagnostic, never a verdict axis
+
+**Evidence before:** at n=8, displacement per net edit favoured `R_theta`
+0.213 against 0.120 and 0.131 — the most flattering number in the lane.
+
+**Decision:** report it beside the frontier as `diagnostic_only_axes`; leave
+the verdict on the two axes declared before any data existed.
+
+**Vindicated at n=36:** the effect **did not replicate as resolved** —
++0.0194 [−0.0051, +0.0459], interval spanning zero. Had it been promoted into
+the decision rule on the strength of the 8-source panel, the lane would have
+reported a mobility win that the larger panel does not support.
+
+**Changes a frozen object:** no. It preserves one.
+
+---
+
+## 2026-08-13 — A short client timeout cancelled a detached run
+
+**Evidence before:** the main lane's warning that `--detach` did not survive a
+client-side failure twice.
+
+**What happened:** the 36-source launch was wrapped in `timeout 300`. When the
+timeout killed the client, cancellation signals propagated to the workers
+despite `--detach`, and the app stopped with 22 of 36 sources complete.
+
+**Why it cost nothing:** the resumable driver skipped all 22 committed shards
+on relaunch and started only 14 tasks. Roughly six container-hours of work was
+preserved by a feature added before it was needed.
+
+**Decision:** never wrap `modal run --detach` in a short client-side timeout;
+launch it in the background and poll `modal app list` instead
+(`scripts/claim2_wait_for_app.py`).
+
+**Changes a frozen object:** no.
+
+---
+
 ## 2026-08-12 — Adopt the main lane's two operational findings before launching
 
 **Evidence before:** the main lane hit both failures today, in a live run.
