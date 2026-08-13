@@ -16,7 +16,67 @@
 > i.e. does endpoint-only filtering return molecules that reached validity by
 > passing through forbidden intermediates?
 
-# Headline result — G1 FAILED
+# Salvage lane — reversibility census: NO FAMILY PASSES
+
+Families, thresholds, rank order and pass criteria were sealed in commit
+`bf14d53` **before** the measuring script existed. Computed from the committed
+stage-A shards: **42 unconstrained trajectories, 294 states, no new compute.**
+
+| Family | violators | returned | **return rate** | events | V1 | V2 | V3 | Verdict |
+|---|---:|---:|---:|---:|:--:|:--:|:--:|---|
+| **A** undesired reactive group | 1/35 | 1 | 1.000 | **1** | ✓ | ✓ | ✗ | **FAIL** |
+| **B** cLogP corridor `[2.369, 4.452]` | 7/21 | 6 | **0.857** | **6** | ✓ | ✓ | ✗ | **FAIL** |
+| **C** heavy atoms `[18, 38]` | 0/42 | 0 | 0.000 | 0 | ✗ | ✗ | ✗ | **FAIL** |
+
+V1 non-vacuous · V2 return rate ≥ 0.10 · V3 ≥ 20 endpoint-valid/path-invalid
+events · V4 mask leaves room — **V4 was not evaluable**, since the shards store
+trajectories but not enumerated successor sets.
+
+**Verdict: no family passes. Pathwise constraints leave the main paper. The
+ring-system negative goes to the appendix. No fourth predicate was searched.**
+
+## The failure modes differ, and the difference is material
+
+- **C is vacuous** — heavy-atom count never left the frozen band in 42
+  trajectories. Dead for a scientific reason, like the ring system.
+- **A and B are genuinely REVERSIBLE** — return rates 1.000 and 0.857, both far
+  above the 0.10 floor. They fail on **event count alone**, which is a property
+  of the 42-trajectory pool inherited from the 6-source smoke panel. At the
+  observed rates, V3 needs ~**701** trajectories for A and ~**71** for B.
+
+So the reversibility question the salvage lane was asked to settle got a
+**positive answer for cLogP** — and an underpowered one. That is different from
+the ring system, which failed on reversibility itself (0 of 19).
+
+## Family B's excursions are not boundary noise
+
+| Metric | Value |
+|---|---:|
+| excursions measured | 7 |
+| min depth | 0.120 logP |
+| **median depth** | **0.700 logP** |
+| max depth | 0.954 logP |
+| median as fraction of corridor width | **0.336** |
+| excursions below the 0.1-unit noise threshold | **0 / 7** |
+
+Example (source 1, unconstrained greedy): cLogP
+3.01 → 2.40 → 2.57 → **1.67** → 2.27 → 2.62 → 2.47 — a real departure below the
+corridor, and a return.
+
+*Disclosure: this diagnostic was added after seeing B's return rate, as a guard
+against an obvious artifact. It changed no threshold, no criterion and no
+verdict.*
+
+## What this lane will not do
+
+B's near-miss is exactly the kind of result that invites relitigating a frozen
+bar. The criteria were fixed before measurement so that the person who measured
+cannot do that. **Recorded as FAIL.** Whether a larger pool is worth buying is
+escalated below, not decided here.
+
+---
+
+# Ring-system result (CLOSED) — G1 FAILED
 
 > **Motif destruction is absorbing under the frozen kernel at H = 6.** Of 42
 > rollouts on the unconstrained support, **19 broke** the protected motif and
@@ -414,22 +474,32 @@ terminal filter changes the returned molecule. The capability gap is real; the
 
 # Recommended next action
 
-> **Accept the negative and stop this lane.** The premise gate failed cleanly
-> on a frozen protocol with the anti-tuning rule honoured. Fold one sentence
-> into the paper's limitations or related-work framing — that COMPOSE can
-> impose exact pathwise structural constraints at zero kernel cost, and that on
-> held-in sources at H = 6 this capability is not *needed*, because motif
-> destruction is absorbing — and spend the remaining budget on lanes whose
-> premise held.
+> **Accept both negatives and close the lane.** Under frozen criteria applied
+> as written, the ring-system premise failed on reversibility and no
+> replacement family cleared the bar. Move pathwise constraints out of the main
+> paper, keep the ring-system absorption finding as an appendix result about
+> the frozen kernel's legal support, and spend the remaining budget on lanes
+> whose premise held.
 
-If the lead wants one bounded follow-up instead, the only one that tests a
-genuinely different question rather than re-rolling this one:
+## The one decision that is the lead's, not this lane's
 
-> Ask whether **any** COMPOSE-reachable motif class is recoverable at all, by
-> measuring restore events for a *weaker* constraint (e.g. ring-count
-> preservation) on the same 6 sources and the same shards. This is an
-> instrument-characterisation question about the kernel's reversibility, not an
-> attempt to make the pathwise arm win, and it should be labelled as such.
+Family B (cLogP corridor) is **reversible** — 6 of 7 violators returned, with
+excursions a third of the corridor wide — and failed **only** the 20-event bar,
+on a 42-trajectory pool inherited from a 6-source smoke panel.
+
+If the lead judges that the reversibility question deserves a powered answer
+rather than an underpowered one, the bounded run that would settle it:
+
+- **~12 held-in sources × 6 rollouts ≈ 72 unconstrained trajectories**, which
+  clears V3 at the observed rate (~71 needed).
+- Stage-A cost basis: 51 kernel calls and 853 s per source ⇒ **≈ 2.8
+  container-hours**, CPU only, `--detach`, resumable driver.
+- It would also produce the successor sets needed for **V4**, which the current
+  shards cannot answer.
+
+This lane does **not** recommend it and does not consider it authorised. It is
+recorded because the alternative — reporting "all three failed" without noting
+that two failed on power and one on science — would misinform the decision.
 
 # Actions explicitly not recommended
 
@@ -446,6 +516,11 @@ genuinely different question rather than re-rolling this one:
   on 2/6) to the lane's headline. It is a different, weaker claim on n = 6.
 - Do **not** merge the two extra arms into the paper's arm table without
   noting they were added beyond the brief's five (see `DECISION_LOG.md`).
+- Do **not** search a fourth or fifth constraint predicate. Three were
+  predeclared and ranked; searching further is the failure mode the salvage
+  lane's bounds exist to prevent.
+- Do **not** lower the 20-event bar to convert family B into a pass. If the
+  lead wants B answered, buy the trajectories; do not move the line.
 
 # Deviations from the brief, flagged for the lead
 

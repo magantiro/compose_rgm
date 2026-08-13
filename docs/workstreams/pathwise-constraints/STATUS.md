@@ -1,6 +1,41 @@
 # Workstream C — Pathwise Constraints: Status
 
-- **Status:** `SMOKE_HELD_IN` — stage A complete, **G1 FAILED**, lane stopped per stop rule
+- **Status:** `SMOKE_HELD_IN` — ring-system G1 FAILED (closed); reversibility census **NO FAMILY PASSES**; lane complete
+- **Salvage-lane verdict:** none of the three predeclared families clears the frozen criteria. **Pathwise constraints leave the main paper.** The ring-system negative goes to the appendix. No fourth predicate was searched.
+
+## Reversibility census (2026-08-13, no new compute)
+
+Families, thresholds, rank order and pass criteria were sealed in commit
+`bf14d53` **before** the measuring script was written.
+
+| Family | violators | returned | return rate | events | V1 | V2 | V3 | verdict | failure mode |
+|---|---:|---:|---:|---:|:--:|:--:|:--:|---|---|
+| **A** undesired motif | 1/35 | 1 | 1.000 | **1** | ✓ | ✓ | ✗ | FAIL | underpowered |
+| **B** cLogP corridor | 7/21 | 6 | **0.857** | **6** | ✓ | ✓ | ✗ | FAIL | underpowered |
+| **C** size corridor | 0/42 | 0 | 0.000 | 0 | ✗ | ✗ | ✗ | FAIL | **vacuous** |
+
+Criteria: V1 non-vacuous · V2 return rate ≥ 0.10 · V3 ≥ 20 endpoint-valid /
+path-invalid events · V4 mask leaves room (**not evaluable from shards**).
+
+**The failure modes differ and that difference is material.** C is vacuous —
+heavy-atom count never left the frozen band, so it is dead for a scientific
+reason, like the ring system. A and B are **reversible** (return rates 1.000
+and 0.857, both far above the 0.10 floor) and fail only on **event count**,
+which is a function of the 42-trajectory pool inherited from the 6-source smoke
+panel. At the observed rates, V3 would need ~**701** trajectories for A and
+~**71** for B.
+
+Family B's excursions are **not boundary noise**: median depth 0.700 logP units
+= 33.6% of the corridor width, 0 of 7 below the 0.1-unit noise threshold. Real
+departures that came back.
+
+**Per the frozen precedence and stop rules, this is a FAIL and the lane stops.**
+Whether B's underpowered result justifies a larger pool is the lead's call, not
+this lane's — see `HANDOFF.md`.
+
+---
+
+- **Status (ring-system stage A):** `SMOKE_HELD_IN` — **G1 FAILED**, closed
 - **Branch:** `codex/compose-pathwise-constraints`
 - **Base commit:** `04f1c46`
 - **What is running:** **NOTHING.** Stage A finished; stage B was never launched.
@@ -61,6 +96,8 @@ Well under budget; the 360-call circuit breaker was never approached.
 
 ## Next action
 
-**None from this lane.** Handing back to main with the frozen protocol and a
-FAILED premise gate. See `HANDOFF.md` for the three options the lead may pick
-between; this lane recommends **not** paying for stage B.
+**None from this lane.** Both gates failed under frozen criteria. Handing back
+to main. This lane recommends **not** paying for stage B and **not** searching
+a fourth predicate; the one open question — whether family B's underpowered
+result warrants a larger trajectory pool — is explicitly the lead's to decide,
+and is costed in `HANDOFF.md`.

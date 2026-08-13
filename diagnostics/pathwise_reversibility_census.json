@@ -1,0 +1,143 @@
+{
+  "schema": "compose.pathwise.reversibility_census",
+  "status": "SMOKE_HELD_IN",
+  "held_out_opened": false,
+  "new_compute_used": false,
+  "provenance": "computed from committed stage-A shards; families, thresholds, rank order and pass criteria were sealed in commit bf14d53 BEFORE this script was written",
+  "trajectory_pool": {
+    "trajectories": 42,
+    "states": 294,
+    "arms_used": [
+      "unconstrained_greedy",
+      "unconstrained_verified",
+      "endpoint_only"
+    ],
+    "note": "masked arms excluded: their trajectories were shaped by the ring-system mask and are not a free sample"
+  },
+  "declared_thresholds": {
+    "A_undesired_motif": [
+      "acyl_halide",
+      "aldehyde",
+      "anhydride",
+      "azide",
+      "aziridine",
+      "epoxide",
+      "hydrazine",
+      "isocyanate",
+      "michael_acceptor",
+      "n_nitroso",
+      "nitro",
+      "peroxide",
+      "sulfonyl_halide",
+      "thiol"
+    ],
+    "B_clogp_corridor": [
+      2.3688650000000004,
+      4.452222500000002
+    ],
+    "C_heavy_atom_corridor": [
+      18,
+      38
+    ]
+  },
+  "criteria": {
+    "V2_return_rate_floor": 0.1,
+    "V3_min_events": 20,
+    "V4": "requires enumerated successor sets; not stored in shards"
+  },
+  "precedence_rule": "take the first PASSING family in FAMILY_ORDER, never the most favourable",
+  "families": [
+    {
+      "family": "A_undesired_motif",
+      "description": "no undesired reactive group present at any committed state",
+      "threshold_provenance": "fixed literature structural-alert list; not derived from any COMPOSE trajectory",
+      "trajectories_considered": 42,
+      "source_already_infeasible": 7,
+      "denominator_source_feasible": 35,
+      "violating_trajectories": 1,
+      "violation_rate": 0.0286,
+      "returned_to_feasible_endpoint": 1,
+      "RETURN_RATE_among_violators": 1.0,
+      "endpoint_valid_path_invalid_events": 1,
+      "violation_count_per_violating_path": 4.0,
+      "criteria": {
+        "V1_non_vacuous": true,
+        "V2_reversible_at_10pct": true,
+        "V3_at_least_20_events": false,
+        "V4_mask_leaves_room": "NOT_EVALUABLE_FROM_SHARDS"
+      },
+      "verdict": "FAIL",
+      "failure_mode": "UNDERPOWERED_reversible_but_too_few_events",
+      "trajectories_needed_for_V3_at_observed_rate": 701,
+      "excursion_depth": {
+        "applicable": false,
+        "note": "severity is categorical for a motif family"
+      }
+    },
+    {
+      "family": "B_physchem_corridor",
+      "description": "cLogP(x_t) within the frozen held-in interquartile range",
+      "threshold_provenance": "read at runtime from diagnostics/retarget_goal_language_normalizers.json (status HELD_IN_NORMALIZERS_NO_THRESHOLD_SELECTED)",
+      "trajectories_considered": 42,
+      "source_already_infeasible": 21,
+      "denominator_source_feasible": 21,
+      "violating_trajectories": 7,
+      "violation_rate": 0.3333,
+      "returned_to_feasible_endpoint": 6,
+      "RETURN_RATE_among_violators": 0.8571,
+      "endpoint_valid_path_invalid_events": 6,
+      "violation_count_per_violating_path": 1.571,
+      "criteria": {
+        "V1_non_vacuous": true,
+        "V2_reversible_at_10pct": true,
+        "V3_at_least_20_events": false,
+        "V4_mask_leaves_room": "NOT_EVALUABLE_FROM_SHARDS"
+      },
+      "verdict": "FAIL",
+      "failure_mode": "UNDERPOWERED_reversible_but_too_few_events",
+      "trajectories_needed_for_V3_at_observed_rate": 71,
+      "excursion_depth": {
+        "applicable": true,
+        "n": 7,
+        "min": 0.1202,
+        "median": 0.7003,
+        "max": 0.9536,
+        "median_as_fraction_of_corridor_width": 0.3361,
+        "boundary_noise_excursions": 0,
+        "boundary_noise_threshold": 0.1,
+        "interpretation": "excursions well inside the corridor width are real departures; a high count of boundary-noise excursions would mean the return statistic is an artifact of where the bound happens to fall"
+      }
+    },
+    {
+      "family": "C_size_corridor",
+      "description": "heavy-atom count within the frozen panel eligibility band",
+      "threshold_provenance": "reused verbatim from pathwise_constraints.HEAVY_ATOM_BAND, frozen for the retargeting cohort and this lane's panel",
+      "trajectories_considered": 42,
+      "source_already_infeasible": 0,
+      "denominator_source_feasible": 42,
+      "violating_trajectories": 0,
+      "violation_rate": 0.0,
+      "returned_to_feasible_endpoint": 0,
+      "RETURN_RATE_among_violators": 0.0,
+      "endpoint_valid_path_invalid_events": 0,
+      "violation_count_per_violating_path": null,
+      "criteria": {
+        "V1_non_vacuous": false,
+        "V2_reversible_at_10pct": false,
+        "V3_at_least_20_events": false,
+        "V4_mask_leaves_room": "NOT_EVALUABLE_FROM_SHARDS"
+      },
+      "verdict": "FAIL",
+      "failure_mode": "VACUOUS_no_violations",
+      "trajectories_needed_for_V3_at_observed_rate": null,
+      "excursion_depth": {
+        "applicable": true,
+        "n": 0
+      }
+    }
+  ],
+  "families_passing_V1_V3": [],
+  "advance": null,
+  "outcome": "NO FAMILY PASSES -- pathwise constraints leave the main paper; the ring-system negative goes to the appendix; no fourth predicate is searched",
+  "census_sha256": "11f0d9e38b0e980664721e0479f5956b9cf31089a21257e76bcd12341cc832c2"
+}

@@ -51,6 +51,12 @@
   },
   "artifacts": [
     {
+      "path": "diagnostics/pathwise_reversibility_census.json",
+      "status": "SMOKE_HELD_IN",
+      "sha256": "0ec99f293433741fdba3652be987a0b0f292b2f0582eda419a40a9b24454fcb3",
+      "purpose": "reversibility feasibility census over three predeclared families"
+    },
+    {
       "path": "diagnostics/pathwise_constraints_smoke.json",
       "status": "SMOKE_HELD_IN",
       "sha256": "435e45e78a7b2a17be3b9462135d62f13433fa05005abb5c5dab896baf4a07cb",
@@ -109,6 +115,18 @@
       "status": "SMOKE_HELD_IN",
       "sha256": "4d09aeab948a9af6c32e721cea3e3bce70a8b6f0fda810c045cc2b48a2561629",
       "purpose": "dependency-free arm names; keeps the modal launcher RDKit-free"
+    },
+    {
+      "path": "src/compose_v4/experiments/pathwise_reversible_families.py",
+      "status": "SMOKE_HELD_IN",
+      "sha256": "175cd835d6ed357f6c36caaeec7b03fa5cde2c491b9542a7940d52b164ae99c8",
+      "purpose": "the three predeclared families; thresholds loaded from frozen files"
+    },
+    {
+      "path": "scripts/pathwise_reversibility_census.py",
+      "status": "SMOKE_HELD_IN",
+      "sha256": "c21c20739c37988e8b8dfdb9637e6a8838f958d1103623b1e1f443b218c413a5",
+      "purpose": "census over committed shards; no Modal access required"
     }
   ],
   "motif_rule": {
@@ -215,13 +233,15 @@
     },
     "per_source_kernel_call_budget": 360
   },
-  "recommended_next_action": "Accept the negative and stop this lane. The premise gate failed cleanly on a frozen protocol with the anti-tuning rule honoured. Fold the capability/consequence distinction into the paper's limitations or related-work framing and spend the remaining budget on lanes whose premise held.",
+  "recommended_next_action": "Accept both negatives and close the lane. Move pathwise constraints out of the main paper, keep the ring-system absorption finding as an appendix result about the frozen kernel's legal support, and spend the remaining budget on lanes whose premise held. The one open question -- whether family B's underpowered reversibility result deserves a powered answer -- is escalated to the lead, costed, and NOT recommended by this lane.",
   "not_recommended": [
     "stage B: unauthorised, and greedy is already at ceiling so headroom is 0 by definition",
     "changing the motif rule, horizon, or panel and re-running",
     "opening any held-out panel",
     "reporting 'masked arms had zero violations' as a finding",
-    "promoting the secondary finding to the lane headline"
+    "promoting the secondary finding to the lane headline",
+    "searching a fourth or fifth constraint predicate",
+    "lowering the 20-event bar to convert family B into a pass"
   ],
   "deviations_from_brief": [
     "eligibility drops 'kernel offers motif-destroying successors' (brief line 207) because it is the numerator of the vacuity gate",
@@ -276,5 +296,76 @@
       "kernel_calls_per_source": 85
     },
     "circuit_breaker_approached": false
+  },
+  "reversibility_census": {
+    "status": "SMOKE_HELD_IN",
+    "new_compute_used": false,
+    "predeclaration_commit": "bf14d53",
+    "predeclared_before_measurement": true,
+    "trajectory_pool": 42,
+    "states": 294,
+    "criteria": {
+      "V1_non_vacuous": "at least one violator, not all violating",
+      "V2_return_rate_floor": 0.1,
+      "V3_min_events": 20,
+      "V4_mask_leaves_room": "NOT_EVALUABLE_FROM_SHARDS"
+    },
+    "families": {
+      "A_undesired_motif": {
+        "violators": "1/35",
+        "returned": 1,
+        "return_rate": 1.0,
+        "events": 1,
+        "verdict": "FAIL",
+        "failure_mode": "UNDERPOWERED_reversible_but_too_few_events",
+        "trajectories_needed_for_V3": 701
+      },
+      "B_physchem_corridor": {
+        "violators": "7/21",
+        "returned": 6,
+        "return_rate": 0.8571,
+        "events": 6,
+        "verdict": "FAIL",
+        "failure_mode": "UNDERPOWERED_reversible_but_too_few_events",
+        "trajectories_needed_for_V3": 71
+      },
+      "C_size_corridor": {
+        "violators": "0/42",
+        "returned": 0,
+        "return_rate": 0.0,
+        "events": 0,
+        "verdict": "FAIL",
+        "failure_mode": "VACUOUS_no_violations",
+        "trajectories_needed_for_V3": null
+      }
+    },
+    "advance": null,
+    "outcome": "NO_FAMILY_PASSES",
+    "consequence": "pathwise constraints leave the main paper; the ring-system negative goes to the appendix; no fourth predicate searched",
+    "failure_mode_distinction": "C is VACUOUS (0 violations, dead for a scientific reason). A and B are genuinely REVERSIBLE (return rates 1.000 and 0.857, far above the 0.10 floor) and fail on EVENT COUNT alone, which is a property of the 42-trajectory pool inherited from the 6-source smoke panel.",
+    "family_B_excursion_depth": {
+      "applicable": true,
+      "n": 7,
+      "min": 0.1202,
+      "median": 0.7003,
+      "max": 0.9536,
+      "median_as_fraction_of_corridor_width": 0.3361,
+      "boundary_noise_excursions": 0,
+      "boundary_noise_threshold": 0.1,
+      "interpretation": "excursions well inside the corridor width are real departures; a high count of boundary-noise excursions would mean the return statistic is an artifact of where the bound happens to fall"
+    }
+  },
+  "escalated_to_lead": {
+    "question": "family B (cLogP corridor) is reversible and failed only the 20-event bar on an inherited 42-trajectory pool; does the reversibility question deserve a powered answer?",
+    "bounded_run_that_would_settle_it": {
+      "sources": 12,
+      "trajectories": 72,
+      "v3_requirement_at_observed_rate": 71,
+      "estimated_container_hours": 2.8,
+      "also_resolves": "V4 (mask retention), which the current shards cannot answer"
+    },
+    "this_lane_recommends_it": false,
+    "authorised": false,
+    "explicitly_forbidden": "lowering the 20-event bar to convert B into a pass"
   }
 }

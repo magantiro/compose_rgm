@@ -400,6 +400,57 @@ V1–V3 is reported as CONDITIONAL PASS pending V4 rather than as a full pass.
 
 ---
 
+## 2026-08-13 — CENSUS RESULT: no family passes. Lane stops.
+
+**Decision.** Apply the frozen criteria as written, record FAIL for all three
+families, and stop. No fourth predicate searched.
+
+**Evidence.** `diagnostics/pathwise_reversibility_census.json`:
+
+| Family | violators | returned | return rate | events | verdict |
+|---|---:|---:|---:|---:|---|
+| A undesired motif | 1/35 | 1 | 1.000 | 1 | FAIL (V3) |
+| B cLogP corridor | 7/21 | 6 | 0.857 | 6 | FAIL (V3) |
+| C size corridor | 0/42 | 0 | 0.000 | 0 | FAIL (V1) |
+
+**What I am NOT doing.** B's return rate of 0.857 is far above the 0.10 floor
+and its excursions are real, so it is tempting to argue the 20-event bar was
+too high for a 42-trajectory pool. I am not making that argument as a decision.
+The criteria were frozen before measurement precisely so that a near-miss
+cannot be relitigated by the person who measured it. Recorded as FAIL; the
+question of a larger pool is escalated to the lead, not resolved here.
+
+**The failure modes differ, and the difference is reported.** C is vacuous —
+heavy-atom count never left the frozen band. A and B are reversible and fail on
+event count alone, which is a property of the inherited 6-source pool. Calling
+all three "FAIL" without that distinction would misinform the lead.
+
+**Frozen object touched.** None.
+
+---
+
+## 2026-08-13 — Excursion-depth diagnostic added after seeing B's return rate
+
+**Decision.** Add `excursion_depth` to the census and rerun.
+
+**Evidence before the decision.** Family B returned 6 of 7 violators. The
+obvious artifact for a corridor constraint is that "violations" are tiny
+excursions a hair past the bound, in which case "reversible" would be noise
+about where the quartile happens to fall rather than chemistry.
+
+**Disclosure.** This diagnostic was added AFTER seeing the return rate. It
+changes **no threshold, no criterion and no verdict** — it only qualifies a
+number that already existed. B remains FAIL.
+
+**Result.** Excursions are real: median depth 0.700 logP units, 33.6% of the
+corridor width; 0 of 7 below the 0.1-unit boundary-noise threshold. Example
+trajectory (source 1, unconstrained greedy): cLogP 3.01 → 2.40 → 2.57 → **1.67**
+→ 2.27 → 2.62 → 2.47 — a genuine departure below the corridor and a return.
+
+**Frozen object touched.** None.
+
+---
+
 ## 2026-08-12 — External evidence folded in: GraphXForm is an endpoint-only comparator
 
 **Decision.** Record the baseline lane's finding in `PROTOCOL.md` and
