@@ -191,7 +191,7 @@ rollouts**, so both are conclusive on their own.
 | C2 | Pareto-front width | I-A | size of the nondominated set over census candidates in normalized coordinates; the range of each objective along that front; and the number of front points selected by at least one weight on a fine Chebyshev grid (a front that is effectively a point selects 1) |
 | C3 | local successor tradeoff frequency | I-A + I-B | per **move**: the fraction landing in each sign quadrant of `(dz_1, dz_2)`. Per **state**: the fraction of legal decision states offering at least one `(+,-)` candidate, and separately at least one `(-,+)` candidate |
 | C4 | preference distinguishability | I-A + I-B | per state, the augmented-Chebyshev argmax under each `w in {0.1,0.3,0.5,0.7,0.9}`; report the mean number of **distinct** candidates selected and the fraction of states where all five preferences select the same candidate |
-| C5 | reachable floors/ceilings under a 6-edit budget | committed shards + I-A | from **committed held-in real-fiber rollouts** (`retarget_calibration_result_3plus3_fixed.json`) for O-P and O-D; for O-S from the I-A one-step similarity distribution plus the analytic bound, flagged as needing multi-step confirmation |
+| C5 | reachable floors/ceilings under a 6-edit budget | I-A rollouts + committed shards | **single-objective greedy rollouts at the full 6-edit budget**, run on I-A. Ceiling: analytic for O-D (the clipped soft-min cannot exceed `1.32669`), held-in pool p99 for O-P. O-S has no reachable ceiling — `T = 1` needs zero edits — so it is tested for **inertness** instead: six real edits that cannot move an axis make it uncontrollable. `retarget_calibration_result_3plus3_fixed.json` corroborates at 3 edits. See DECISION_LOG D-007 for the statistic this replaced and why. |
 
 ### 6.4 The headroom gate — numeric thresholds, predeclared
 
@@ -203,7 +203,7 @@ plainly fall on either side of it.
 | **G1** alignment | objectives must not be near-redundant | Spearman `rho >= +0.70` | pool; conclusive |
 | **G2** local tradeoff | tradeoff moves must be common | quadrant fraction `(+,-) + (-,+) < 0.20`; **or** either direction alone `< 0.05`; **or** fraction of states offering a `(+,-)` candidate `< 0.25`; **or** fraction offering a `(-,+)` candidate `< 0.25` | I-A primary, I-B cross-check, §6.2 rule |
 | **G3** no domination | no single objective may be binding for every preference | the same objective is the binding Chebyshev term in `> 0.90` of (state, preference) decisions | I-A primary |
-| **G4** no saturation | a 6-edit budget must not exhaust either axis | either objective's committed reach fraction `> 0.85` | committed shards; conclusive |
+| **G4** no saturation | a 6-edit budget must not exhaust either axis | either objective's reach fraction `> 0.85` (for O-S: the axis is inert) | I-A 6-edit rollouts; conclusive |
 | **G5** front richness | preferences must select different candidates | mean distinct selections across the five preferences `< 2.0`; **or** the fraction of states where all five agree `> 0.50` | I-A primary, I-B cross-check, §6.2 rule |
 
 **Why this gate exists.** A calibration in this project reported
