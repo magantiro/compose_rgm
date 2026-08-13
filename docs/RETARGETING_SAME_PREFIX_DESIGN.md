@@ -543,3 +543,73 @@ H=6`. Invariance to switch time is NOT established. Say instead:
 
 Avoid "repeatedly training objective-specific generators" as the foil — not
 every baseline does that, and the sentence is not needed for the claim to land.
+
+---
+
+# HELD-OUT CONFIRMATION — complete, and this claim is CLOSED
+
+40 source-disjoint held-out sources x 2 histories, six arms, panel sealed at
+`947e297a`, prefixes committed at `66687121` before goal B was constructed.
+All three preregistered questions replicate.
+
+| | P-first | D-first |
+|---|---|---|
+| **Q1** responsiveness (greedy-matched) | **+0.748** [+0.608, +0.891] 36W/0L | **+1.462** [+1.240, +1.691] 40W/0L |
+| **H2** sensitivity (greedy-matched) | **+0.367** [+0.251, +0.482] 37W/3L | +0.211 [+0.065, +0.361] 26W/14L, p=0.081 |
+| **Q2** value of history (verified, PRIMARY) | **+0.302** [+0.186, +0.413] 35W/5L | **+0.176** [+0.069, +0.283] 29W/11L, p=0.006 |
+| **Q3** price of surprise | **−0.252** [−0.364, −0.155] | **−0.428** [−0.580, −0.288] |
+
+Development → confirmation: Q1 +0.716/+1.406 → +0.748/+1.462. Q2 +0.444/+0.290
+→ +0.302/+0.176. Q3 −0.289/−0.481 → −0.252/−0.428. **Direction holds
+everywhere; Q2 shrank by roughly a third.** Development panels usually
+overstate magnitude, and the confirmation existed to find that out. Replication
+under an untouched protocol is the result; the shrinkage is not an apology.
+
+## Wording that is CORRECT, and one that is not
+
+**Do NOT write** "history's value is controller-dependent for D-first." The
+D-first mean history effect is **positive under both controllers**. What differs
+is source-level sign consistency — 26/40 under greedy against 29/40 under
+verified.
+
+**Write instead:**
+
+> For developability-first histories, retaining the realized molecule had a
+> positive average effect under both controllers, but the effect was
+> heterogeneous and less consistently positive under greedy control.
+
+## Descriptive, not statistical
+
+D-first `continue_A` reaches the conjunction **1/40** while holding
+developability **40/40**. It is the clearest single row in the panel and it sits
+near a floor, so the load-bearing Q1 result is the **+1.462 continuous effect**,
+not the 1/40.
+
+## Wiring audit, appendix not result
+
+`greedy_restart` and `restart` return identical medians across both histories
+(−0.5316, −0.4283). Correct by construction: once you restart from `x_0` the
+prior history has ceased to exist, so restart(P-first) must equal
+restart(D-first). Useful confirmation the arms are wired correctly.
+
+## The claim this licenses
+
+> COMPOSE treats the current molecule as a persistent state of the design
+> process. When the objective changes after a molecular trajectory has already
+> begun, inference-time control can be recomputed from the exact realized
+> molecule while the learned reference dynamics remain fixed. On a
+> source-disjoint held-out panel, retargeting reliably redirects subsequent
+> molecular evolution, retains measurable value from the realized history, and
+> exhibits a reproducible cost of not having known the eventual objective in
+> advance.
+
+It does **not** depend on "nobody else changes objectives", "the baseline
+retrains", "at an arbitrary step", or "history always helps" — all of which
+were considered and are barred.
+
+## THIS BRANCH IS CLOSED
+
+No further retargeting experiments. Not another switch time, not another goal,
+not 60 sources, not a search for which D-first molecules are harmful, not
+another controller architecture. Development, parity correction, robustness arm,
+frozen source-disjoint confirmation, three questions replicated. Bank it.
