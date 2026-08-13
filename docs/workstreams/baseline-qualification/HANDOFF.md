@@ -13,23 +13,26 @@
   it only by `handoff.json`, which must be written after the content commit in
   order to hash it.
 - **Working tree clean:** yes
-- **Status:** `DESIGN_ONLY`, plus one `SMOKE_HELD_IN` harness stress test
-  (`diagnostics/baselines/oracle_accounting_harness_stress_test.json`).
-  **HOLDING** by instruction from the main workstream.
+- **Status:** `DESIGN_ONLY` design artifacts, plus **two** `SMOKE_HELD_IN` runs:
+  the accounting harness stress test, and a **real upstream GB-GA** held-in
+  adapter smoke. **ACTIVE**; deliverables A–C complete; stopped before sweeps.
 - **Held-out data opened:** **no**
 
-# ⚠ No baseline has been run. There is no GraphGA result.
+# ⚠ What has and has not been run
 
-The one execution in this lane is an **ORACLE-ACCOUNTING HARNESS STRESS TEST**.
-It exercises the shared accountant with a GA-*shaped*, adversarial-by-construction
-candidate stream. **Upstream GB-GA was never vendored, nothing external was
-installed, and nothing here is evidence about GraphGA's behaviour.** A reader who
-carries away "GraphGA smoke passed" has the wrong belief.
+**Run:** (1) the oracle-accounting harness stress test, on a GA-*shaped*
+adversarial stream — an instrument check on the accountant, not a GraphGA result;
+(2) a **real upstream GB-GA** held-in adapter smoke, using the vendored
+byte-identical algorithm (commit `4b49f182`) on 5 held-in sources.
 
-Before any claim-bearing GraphGA comparison: the actual upstream implementation
-vendored; the production RDKit pin **2024.3.5**, or an explicitly isolated
-environment whose canonicalization is reconciled against it; and the real
-algorithm terminating against every counter.
+**Not run:** any COMPOSE-versus-baseline comparison, any sweep, any Modal job,
+and any baseline other than GraphGA. Nothing was installed into the project
+environment; environment probes used throwaway venvs under `/tmp`.
+
+**Still required before a claim-bearing GraphGA comparison:** the production
+RDKit pin **2024.3.5**, or an isolated environment whose canonicalization is
+reconciled against it. Both smokes ran on 2025.09.6 and are stamped
+`pin_matches_production: false`.
 
 # ⚠ Manuscript lane: two files need merging
 
@@ -124,6 +127,22 @@ to the right objects later.
   Every lock is declarative and marked `UNRESOLVED` or `BLOCKED`; nothing was
   installed.
 - `PROTOCOL.md`, `FAIRNESS_CONTRACT.md`, `DECISION_LOG.md`, `STATUS.md`.
+- `src/compose_v4/experiments/oracle_accounting.py` — the three frozen counters
+  and the invariant that caching cannot erase a wasteful request.
+- **`baselines/graph_ga/upstream/`** — the REAL upstream GB-GA, byte-identical to
+  commit `4b49f182`, MIT, with `PROVENANCE.md` recording exact hashes and the two
+  properties of that code an adapter must handle.
+- **`src/compose_v4/experiments/graph_ga_adapter.py`** — drives the real
+  algorithm under three-counter accounting, derives the offspring size prior from
+  the panel rather than upstream's ZINC constants, and forces the caller to
+  declare a non-negativity transform because GB-GA's selection cannot accept a
+  negative objective.
+- **`CONVENTIONAL_SUITE.md`** — five tasks (T1 single-property, T2
+  multi-property, T3 similarity-constrained, T4 topology/cardinality, T5 PMO
+  aggregate), each freezing all nine required fields, frozen before any outcome.
+- **`FAIRNESS_MATRIX.md`** — method × task, `native` / `adapted` /
+  `inappropriate`, with every adaptation listed in-cell. Six of thirty-five cells
+  are `native`; six are `inappropriate`.
 
 # Tests and smoke checks
 
@@ -134,7 +153,15 @@ to the right objects later.
 | `tests/test_comparator_registry.py` (14 tests, pre-existing) | PASS — unaffected | — |
 | `scripts/render_comparator_registry.py --check` | PASS (in-sync) | `COMPARATOR_MATRIX.md` |
 | **ORACLE-ACCOUNTING HARNESS STRESS TEST**, 5 held-in sources | **PASS**, 9/9 checks, under one CPU-second | `diagnostics/baselines/oracle_accounting_harness_stress_test.json` |
-| Held-in smoke of any baseline **method** | **NOT RUN** — nothing external was installed; upstream GB-GA is not vendored | — |
+| **GRAPH GA held-in adapter smoke — REAL upstream GB-GA** | **PASS**, 9/9 checks, 2.7 s | `diagnostics/baselines/graph_ga_held_in_smoke.json` |
+| `tests/test_graph_ga_adapter.py` (6 tests, incl. upstream sha256 check) | PASS | — |
+| Held-in smoke of MARS / REINVENT / GraphXForm / DDSBM / HN-GFN | **NOT RUN** — environments probed only | — |
+
+The GraphGA smoke reproduced two published behaviours: upstream's accounting
+identity (`oracle_requests == population_size × (generations+1)`, 120 = 20×6) and
+the paper's own claim that found molecules "bear little resemblance to the
+molecules used to construct the initial mating pool" — **measured median
+nearest-seed ECFP4 Tanimoto 0.236 against the paper's reported 0.27**.
 
 The stress test verified: canonicalization collapses equivalent SMILES
 spellings; duplicates charge `oracle_requests` and not
@@ -243,7 +270,10 @@ pytest tests/test_comparator_registry.py -q      # pre-existing, must stay green
 
 # ORACLE-ACCOUNTING HARNESS STRESS TEST — held-in, <1 s CPU, durable artifact.
 # NOT a GraphGA run.
-python scripts/oracle_accounting_stress_test.py --sources 5
+python scripts/graph_ga_held_in_smoke.py
+scripts/oracle_accounting_stress_test.py
+src/compose_v4/experiments/graph_ga_adapter.py
+tests/test_graph_ga_adapter.py --sources 5
 pytest tests/test_oracle_accounting.py -q
 
 # baseline METHOD smoke — NONE. Upstream code is not vendored and the lane is
@@ -273,10 +303,17 @@ two cannot disagree.
 # Files changed
 
 ```text
+baselines/graph_ga/upstream/
+diagnostics/baselines/graph_ga_held_in_smoke.json
 diagnostics/baselines/oracle_accounting_harness_stress_test.json
 docs/RELATED_WORK_MATRIX.md
+docs/workstreams/baseline-qualification/CONVENTIONAL_SUITE.md
+docs/workstreams/baseline-qualification/FAIRNESS_MATRIX.md
 paper_iclr_stochastic_rewriting/references.bib
+scripts/graph_ga_held_in_smoke.py
 scripts/oracle_accounting_stress_test.py
+src/compose_v4/experiments/graph_ga_adapter.py
+tests/test_graph_ga_adapter.py
 src/compose_v4/experiments/oracle_accounting.py
 tests/test_oracle_accounting.py
 baselines/ddsbm/README.md
@@ -307,11 +344,12 @@ tests/test_baseline_qualification.py
 
 # Recommended next action
 
-> **None. HOLD.** The instrument gate passed and the main workstream's
-> instruction is to stop there. Lane 1 is investigating whether `R_theta`'s
-> iterated dynamics are pathological; if that forces a retrain, every downstream
-> comparison would have to be repeated, so no expensive adapter should be built
-> against a model that might be replaced.
+> **Apply the one-line `rdkit.six` fix and bring MARS up on python 3.11**, then
+> smoke it exactly as GraphGA was smoked. MARS is the last `MUST_RUN` method
+> whose environment is not proven end to end, and the probe reduced it to a
+> single known line (`estimator/scorer/sa_scorer.py:27`,
+> `from rdkit.six import iteritems`). Estimated 1–2 h. Everything it plugs into —
+> the accountant, the smoke pattern, the counters — already exists.
 
 Local adapter preparation — vendoring, environment files, wrapper code, local
 tests — **is** permitted by the current instruction. It was **not started**,

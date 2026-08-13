@@ -130,6 +130,50 @@ rejected, and whether it changes a frozen object.
   the reason externals are `N/A` for C1, C2 and C3.
 - **Changes a frozen object.** No.
 
+## 2026-08-13 (later still) — Hold lifted; real implementations, frozen suite, fairness matrix
+
+- **Decision.** Vendored the **real** upstream GB-GA byte-identical, built an
+  adapter that drives it under three-counter accounting, smoked it on 5 held-in
+  sources, froze a five-task conventional suite, and produced the method x task
+  fairness matrix. Environments for the other five methods were probed in
+  throwaway `/tmp` venvs and reported honestly.
+- **Evidence before.** The main lane lifted the hold: Lane 1 step 1 found the
+  training reference process is itself locally reversible (mutual-edge fraction
+  0.733 across 151,059 teacher transitions against an inherited threshold of
+  0.33), so `R_theta`'s cycling is faithful modelling, and most of this lane's
+  work is model-independent anyway.
+- **What running the real code changed, that reading it could not.** Three
+  findings, none visible from the paper or README:
+  1. `crossover.average_size` / `crossover.size_stdev` are **undocumented
+     required globals**. Unset, `mol_OK` raises `NameError` into a bare
+     `except`, every candidate is rejected, `crossover` always returns `None`,
+     and `reproduce()`'s unbounded `while` loop spins forever **with no error**.
+     They are also a soft size prior, hence a fairness parameter: panel-derived
+     versus upstream ZINC moved mean endpoint heavy atoms 14.65 to 16.25.
+  2. **An oracle budget does not bound GB-GA's runtime.** Failed crossovers cost
+     no oracle calls. A wall-clock guard is mandatory.
+  3. **GB-GA cannot run task T2 at all.** Its roulette selection needs a
+     non-negative objective (upstream's own `logP_max` clamps for this reason);
+     the COMPOSE developability margin is negative for the entire initial
+     population, so the clamp zeroes everything and
+     `calculate_normalized_fitness` raises `ZeroDivisionError`. Measured, and
+     recorded in the artifact as `upstream_clamp_probe` rather than dodged.
+- **Alternatives rejected.** (a) Making T2 run for GraphGA with a constant shift
+  and reporting the number. Rejected: the shift changes the fitness ratios
+  roulette selection acts on, on a task the scoping already says is not
+  claim-bearing. `inappropriate` is the honest cell. (b) Vendoring
+  `scoring_functions.py` and its 4.5 MB of ZINC data. Rejected: it is the paper's
+  own objective, not the algorithm; a faithful `calculate_scores` shim is
+  reproduced verbatim instead, and `tests/test_graph_ga_adapter.py` asserts the
+  three vendored algorithm files still hash to upstream.
+- **Two verifications that weakened our own position, recorded because they do.**
+  REINVENT 4 carries the **Adam optimizer state and the inception replay buffer**
+  across a stage boundary and has **no LR scheduler at all**, so "the baseline
+  must retrain" is too weak a distinction; and HN-GFN is a **linear** weighted
+  sum while Lane 4 froze **Chebyshev**, so the two do not match.
+- **Changes a frozen object.** Yes: it creates the frozen conventional suite and
+  the fairness matrix, both frozen before any COMPOSE-versus-baseline outcome.
+
 ## 2026-08-13 (later) — Counters renamed and split three ways; the naming was misleading
 
 - **Decision.** The two-counter scheme below is **SUPERSEDED**. `raw_compute` was

@@ -26,16 +26,19 @@ real algorithm terminating against every counter. The stress test ran on rdkit
 2025.09.6 and is stamped `pin_matches_production: false`, which keeps its
 canonical keys out of any scientific result.
 
-## HOLD
+## Where the real implementations stand
 
-Per the main workstream: **do not run external baseline sweeps and do not launch
-anything on Modal.** Lane 1 is still deciding whether `R_theta`'s iterated
-dynamics force reopening the base process; every external comparison would have
-to be repeated if it does.
+| method | environment | adapter | evidence |
+|---|---|---|---|
+| **GraphGA** | native, RDKit-only | **BUILT AND SMOKED** — real upstream vendored byte-identical | `diagnostics/baselines/graph_ga_held_in_smoke.json`, PASS 9/9 |
+| **MARS** | **FEASIBLE-WITH-WORK, python 3.11 only** — DGL 2.2.0 + torch 2.1.2 works, `Set2Set` and `number_of_edges()` intact, editor instantiates (2.6 M params) | designed | one-line `rdkit.six` blocker; ~1–2 h |
+| **REINVENT 4** | **FEASIBLE**, installs on python 3.14 CPU | designed | undeclared `scipy` is the only packaging bug |
+| **GraphXForm** | **FEASIBLE** — `torch_scatter` compiled, transformer instantiates (31.5 M params), checkpoint 331 MiB verified | designed | expected blocker did not occur |
+| **DDSBM** | **BLOCKED** — no LICENSE (legal, not technical), python 3.9 pin, `graph-tool` conda-only, `orca/` missing from the clone | none | days, needs Linux |
+| **HN-GFN** | **BLOCKED** — zero dependency pins, botorch API drift | none | ~1 day of version archaeology |
 
-Local adapter preparation — vendoring, environment files, wrapper code, local
-tests — is permitted. **It has not been started**, deliberately: the budget is
-tight and the base process may change.
+No sweep was run. No Modal job was launched. Nothing was installed into the
+project environment — probes used throwaway venvs under `/tmp`.
 
 ## Frozen this round: three-counter oracle accounting
 
@@ -134,16 +137,40 @@ Full scoping with artifacts: `FAIRNESS_CONTRACT.md` §0a.
 Under USD 1 of compute at a nominal CPU rate. **The cost of this lane is
 engineering time on dependency rot, not credits.**
 
+## Two findings that change what the paper may claim
+
+1. **REINVENT 4's stage boundary is far softer than we recorded.** Verified in
+   source: the Agent network is created once *outside* the stage loop; the Adam
+   optimizer is constructed **once** and the same object is placed in every work
+   package, so `exp_avg`, `exp_avg_sq` and the step counter **carry across the
+   objective switch unbroken**; there is **no LR scheduler in the RL path at
+   all**; and the inception replay buffer is never cleared, carrying stage-N
+   molecules with their **stale stage-N scores** into stage N+1. Only the
+   diversity-filter memories purge. So a stage boundary changes the scoring
+   function and the termination criterion and essentially nothing about the
+   optimizer state. **"The baseline must retrain" is too weak a distinction.**
+   What survives: COMPOSE changes goal at an arbitrary step of a realized
+   *molecular* history and recomputes only the control law.
+2. **HN-GFN is a LINEAR weighted sum, and Lane 4 froze Chebyshev.** Its opt-in
+   `Tchebycheff` branch is not classical Chebyshev either — an augmented max-min
+   with no ideal point and a hardcoded 0.1. Linear scalarization cannot recover
+   concave front regions. This must be reported as a difference, not described
+   as matching. See `FAIRNESS_MATRIX.md`.
+
 ## Next action
 
-**None. HOLDING.** The lane's work is complete and the harness gate passed.
+**None. Deliverables A–C are complete; stopping before expensive sweeps.** The lane's work is complete and the harness gate passed.
 Resume only on an explicit instruction from the main workstream, and only after
 Lane 1 resolves whether `R_theta` is being retrained.
 
-When it resumes, the first bounded action is: **vendor upstream GB-GA (MIT),
-reconcile canonicalization against the production RDKit pin 2024.3.5, and run
-the real GraphGA adapter on 3–5 held-in sources**, 0.1 CPU-core-hours. The
-accountant it plugs into is already built, tested and stress-tested.
+The next bounded action, when authorised: **apply the one-line `rdkit.six` fix
+and bring MARS up on python 3.11**, then smoke it exactly as GraphGA was smoked.
+It is the last `MUST_RUN` method whose environment is not yet proven end to end.
+
+Still outstanding before any claim-bearing comparison: **the production RDKit
+pin 2024.3.5**. Both smokes ran on 2025.09.6 and are stamped
+`pin_matches_production: false`, which keeps their canonical keys out of any
+scientific result.
 
 ## Manuscript-lane merge request
 
