@@ -32,6 +32,82 @@ condition.
 
 ---
 
+## REVISED HIERARCHY — P3 is elevated to a primary conceptual comparison
+
+The smoke's hierarchy under-ranked P3, partly because it was inadmissible at the
+time. Inadmissibility was a **budget-matcher defect, not a weak question.**
+
+COMPOSE's claim is not merely that changing a preference produces different
+molecules. It is that **controlling the evolving molecular state online is
+useful compared with generating candidates and ranking them afterward.** That is
+precisely what P3 tests, and it is the question a reviewer will actually ask:
+
+> Why do I need this whole control formalism? Why not generate a batch from
+> `R_θ`, score them, and keep the Pareto set?
+
+Architecturally the two differ in exactly one place:
+
+```
+generate-and-rank:  legality → plausibility → generate → purpose ONLY AT THE END
+COMPOSE:            legality → plausibility → purpose FED BACK AT EVERY STATE
+```
+
+P3 asks whether that last box does anything. **It is capable of returning "the
+closed-loop structure doesn't buy much here", and that falsifying possibility is
+why it matters.**
+
+| rank | question | what it establishes |
+|---|---|---|
+| **A** | **Q1 (P5/P6)** | *capability* — the same frozen process can be recontrolled under different target-free preferences, and those preferences produce meaningfully different futures. Without this, "Pareto control" is not real |
+| **B** | **Q3 (P3)** | *structural advantage* — does closed-loop control of the evolving molecule beat a **fairly funded** generate-then-rank? Arguably more important than P2 for Figure 5 |
+| **C** | **Q2 / P4** | *increment* — does richer future-aware control add more on top? Less load-bearing, because exact-target recovery already proves future-aware reasoning can matter |
+| **D** | **Q2 frontier quality** | HV, **HV-AUC**, coverage, nondominated behaviour, preference coverage |
+
+## Sequencing: P3/P4 are repaired BEFORE the larger development launches
+
+**Do not launch the larger development with these comparisons still broken.**
+
+1. Fix the generate-and-rank budget matcher.
+2. Top up **only** the missing baseline computation, on the 12 existing smoke
+   sources.
+3. Recompute P3/P4 from the existing COMPOSE artifacts plus the corrected
+   baseline. **Touch no COMPOSE outcome.**
+4. Determine whether the repaired comparisons are meaningful under the frozen
+   resource convention.
+5. Then launch.
+
+**P5 is not rerun.** It was never inadmissible — it is a valid PRIMARY
+preference-responsiveness contrast and its result stands. Only P3 and P4 were
+barred, and only because `gen_rank` was underfunded in the direction that
+flatters COMPOSE. The correct response is not to discard valid COMPOSE
+trajectories; it is to finish the comparator fairly.
+
+### There is probably no single universal P3
+
+Closed-loop control and generate-and-rank consume resources in structurally
+different ways, so **one arbitrary matching convention must not decide the
+story.** Report a **resource frontier**:
+
+```
+HV_closed-loop(B)   vs   HV_generate-and-rank(B)
+```
+
+under, separately: **unique expensive objective evaluations**;
+**kernel / generative work**; **completed trajectories**; and wall compute as a
+clearly secondary axis.
+
+A plausible and fully reportable outcome is: *closed-loop control reaches much
+better HV per complete trajectory, but uses considerably more objective
+queries.* That is neither "P3 wins" nor "P3 loses" — it is the real structural
+comparison. **If the P3 conclusion changes depending on which resource axis is
+used, say so explicitly** rather than hiding it behind one budget number.
+
+That axis is also exactly where `R_θ` plausibility shortlisting would later be
+expected to improve things — which is why shortlisting is gated on this result
+rather than run alongside it.
+
+---
+
 ## The four frozen questions
 
 ### P1 — Preference responsiveness

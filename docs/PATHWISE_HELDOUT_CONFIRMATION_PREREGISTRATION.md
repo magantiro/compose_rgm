@@ -86,33 +86,62 @@ conservative direction, rather than presented as the same rule.
 lower bound of the 95% source-clustered bootstrap CI on mean Δ^V  >  −δ
 ```
 
-### δ = 0.25 held-in DRD2 interquartile ranges
+### δ = 0.25 held-in DRD2 IQR units — justified on the ODDS RATIO
 
-**Justified from the frozen property normalisation alone.** `U` is expressed in
-held-in normalized-margin units, where 1.0 = the spread between the 25th and
-75th percentile of DRD2 log-odds over the 96,094 held-in molecules (frozen
-normalizer, IQR = 2.6161). The *same* frozen file supplies the corridor: the
-central half of the held-in cLogP distribution, exactly one held-in IQR wide.
-Both axes of this experiment are already denominated in held-in interquartile
-units, so the margin is too.
+**An earlier draft justified this as "a quarter of the held-in IQR". That was
+the wrong justification** — an arbitrary fraction of a spread carries no
+scientific meaning, and "smaller margins are unaffordable" is a planning fact,
+never a justification. The margin is re-derived here on the raw scale, from
+quantities all fixed before Stage B.
 
-```
-δ = 0.25 IQR  =  0.654 DRD2 log-odds units
-```
+**The scale is a log-odds.** `src/compose_v4/drd2_oracle.py` emits
+`margin = A·d + B = logit P(active)` under Platt scaling, with the orientation
+pinned by a parity test against the original estimator rather than inferred. The
+goal threshold is `POTENCY_THRESHOLD = 0.5`, i.e. **margin 0 is exactly
+P(active) = 0.5**. `U` divides that by the frozen held-in IQR of 2.6161 log-odds.
 
-**Why a quarter, and not a half or a tenth:**
+So a margin in `U` units converts to a **scale-free odds ratio**, which is the
+right invariant on a logit scale:
 
-- **Half an IQR** moves a molecule a quarter of the way across the entire
-  held-in population. That is a loss anyone would call material, so it is too
-  permissive to serve as a *noninferiority* margin.
-- **A tenth of an IQR** sits below the resolution at which the held-in
-  population distinguishes its own members, and the power table below shows it
-  would not be resolvable at any panel size this project can afford — an
-  unmeetable standard rather than a strict one.
-- **A quarter** is the largest loss that still leaves the pathwise arm inside
-  the same held-in quartile band as the endpoint-only arm on a typical source.
-  Stated as the practical claim it licenses: *enforcing the corridor throughout
-  must not cost a quartile step in potency.*
+| δ (U) | log-odds | **odds ratio** | at the P=0.5 threshold | drop |
+|---:|---:|---:|---:|---:|
+| 0.10 | 0.262 | 1.30× | 0.500 → 0.435 | 6.5 pp |
+| 0.15 | 0.392 | 1.48× | 0.500 → 0.403 | 9.7 pp |
+| 0.20 | 0.523 | 1.69× | 0.500 → 0.372 | 12.8 pp |
+| **0.25** | **0.654** | **1.92×** | **0.500 → 0.342** | **15.8 pp** |
+| 0.30 | 0.785 | 2.19× | 0.500 → 0.313 | 18.7 pp |
+
+**The justification: δ = 0.25 permits at most a 1.92-fold reduction in the odds
+of predicted activity — just under the two-fold line that medicinal chemistry
+conventionally treats as the threshold of experimental significance.** A
+noninferiority claim that survives this margin is a claim that pathwise
+enforcement costs less than a two-fold odds loss.
+
+**Two limitations of that justification, stated rather than buried.**
+
+1. **The two-fold convention is an analogy, not an identity.** The oracle emits
+   a *classifier's* log-odds of activity, not a measured IC50 or Ki. A 1.92×
+   odds ratio on `P(active)` is **not** a 1.92× potency shift, and must never be
+   written as one.
+2. **At the success threshold this margin is not small.** A molecule sitting
+   exactly at P = 0.5 would be pushed to P = 0.342 — from passing to clearly
+   failing. The logit is steepest at 0.5, so this is the worst case rather than
+   the typical one, but it is real and a reviewer will find it.
+
+**Why not tighter.** Measured, not asserted: tightening to δ = 0.20 (odds ratio
+1.69×) drops joint power at n = 48 from 0.892 to 0.788 and requires **n ≈ 64**
+to recover it — a 33% larger panel. That price is recorded here so the choice is
+visible; it is **not** the reason for the choice.
+
+**Two consequences, binding on the report.**
+
+- **δ = 0.20 is a preregistered secondary sensitivity.** It costs no additional
+  compute and lets a skeptical reader see the stricter bar. It is reported
+  always, whichever way it comes out, and never substituted for the primary.
+- **The number of sources whose endpoint-only terminal utility sits within δ of
+  the success threshold is reported.** Those are the sources where the margin's
+  leniency actually bites, and their count is the honest measure of how much
+  work the worst case is doing.
 
 ### Disclosure, so the margin can be audited rather than trusted
 
@@ -193,9 +222,9 @@ is sized on the *joint* rate rather than on either criterion alone.
 | **0.25** | **0.976** |
 | 0.30 | 0.996 |
 
-A tenth of an IQR is unresolvable at any panel size this project can afford —
-that is the measured basis for calling it an unmeetable standard rather than a
-strict one.
+This table is a **planning** artifact. It records what each margin costs; it does
+**not** justify the choice among them. The justification is the odds-ratio
+argument above.
 
 ### P2 correctly fails if the true cost is worse than Stage B measured
 
