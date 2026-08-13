@@ -1,0 +1,511 @@
+{
+  "schema": "compose.pareto.semantic_oracle_accounting",
+  "status": "POST_HOC_DERIVATION_NO_RERUN",
+  "source_artifact": "the committed 12-source smoke shards; NOT rewritten",
+  "per_source": {
+    "0": {
+      "unguided": {
+        "raw_instrument_oracle_requests": 5,
+        "algorithmic_oracle_requests": 0,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 5,
+        "kernel_calls": 10,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "greedy_pref": {
+        "raw_instrument_oracle_requests": 15917,
+        "algorithmic_oracle_requests": 15912,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 4932,
+        "kernel_calls": 9,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@greedy": {
+        "raw_instrument_oracle_requests": 4,
+        "algorithmic_oracle_requests": 2,
+        "harness_only_requests": 2,
+        "native_oracle_calls": 2,
+        "kernel_calls": 4,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "verified_pref": {
+        "raw_instrument_oracle_requests": 345338,
+        "algorithmic_oracle_requests": 345333,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 197818,
+        "kernel_calls": 368,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@verified": {
+        "raw_instrument_oracle_requests": 122,
+        "algorithmic_oracle_requests": 61,
+        "harness_only_requests": 61,
+        "native_oracle_calls": 30,
+        "kernel_calls": 60,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      }
+    },
+    "1": {
+      "unguided": {
+        "raw_instrument_oracle_requests": 5,
+        "algorithmic_oracle_requests": 0,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 5,
+        "kernel_calls": 22,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "greedy_pref": {
+        "raw_instrument_oracle_requests": 19300,
+        "algorithmic_oracle_requests": 19295,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 10447,
+        "kernel_calls": 16,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@greedy": {
+        "raw_instrument_oracle_requests": 6,
+        "algorithmic_oracle_requests": 3,
+        "harness_only_requests": 3,
+        "native_oracle_calls": 3,
+        "kernel_calls": 14,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "verified_pref": {
+        "raw_instrument_oracle_requests": 406629,
+        "algorithmic_oracle_requests": 406624,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 239819,
+        "kernel_calls": 388,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@verified": {
+        "raw_instrument_oracle_requests": 130,
+        "algorithmic_oracle_requests": 65,
+        "harness_only_requests": 65,
+        "native_oracle_calls": 60,
+        "kernel_calls": 173,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      }
+    },
+    "2": {
+      "unguided": {
+        "raw_instrument_oracle_requests": 5,
+        "algorithmic_oracle_requests": 0,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 5,
+        "kernel_calls": 15,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "greedy_pref": {
+        "raw_instrument_oracle_requests": 13950,
+        "algorithmic_oracle_requests": 13945,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 7079,
+        "kernel_calls": 16,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@greedy": {
+        "raw_instrument_oracle_requests": 6,
+        "algorithmic_oracle_requests": 3,
+        "harness_only_requests": 3,
+        "native_oracle_calls": 3,
+        "kernel_calls": 11,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "verified_pref": {
+        "raw_instrument_oracle_requests": 273854,
+        "algorithmic_oracle_requests": 273849,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 174294,
+        "kernel_calls": 398,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@verified": {
+        "raw_instrument_oracle_requests": 132,
+        "algorithmic_oracle_requests": 66,
+        "harness_only_requests": 66,
+        "native_oracle_calls": 58,
+        "kernel_calls": 145,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      }
+    },
+    "3": {
+      "unguided": {
+        "raw_instrument_oracle_requests": 5,
+        "algorithmic_oracle_requests": 0,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 5,
+        "kernel_calls": 20,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "greedy_pref": {
+        "raw_instrument_oracle_requests": 29139,
+        "algorithmic_oracle_requests": 29134,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 19112,
+        "kernel_calls": 20,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@greedy": {
+        "raw_instrument_oracle_requests": 6,
+        "algorithmic_oracle_requests": 3,
+        "harness_only_requests": 3,
+        "native_oracle_calls": 2,
+        "kernel_calls": 9,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "verified_pref": {
+        "raw_instrument_oracle_requests": 623333,
+        "algorithmic_oracle_requests": 623328,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 387296,
+        "kernel_calls": 402,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@verified": {
+        "raw_instrument_oracle_requests": 134,
+        "algorithmic_oracle_requests": 67,
+        "harness_only_requests": 67,
+        "native_oracle_calls": 50,
+        "kernel_calls": 141,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      }
+    },
+    "4": {
+      "unguided": {
+        "raw_instrument_oracle_requests": 5,
+        "algorithmic_oracle_requests": 0,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 5,
+        "kernel_calls": 20,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "greedy_pref": {
+        "raw_instrument_oracle_requests": 47092,
+        "algorithmic_oracle_requests": 47087,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 21048,
+        "kernel_calls": 15,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@greedy": {
+        "raw_instrument_oracle_requests": 4,
+        "algorithmic_oracle_requests": 2,
+        "harness_only_requests": 2,
+        "native_oracle_calls": 2,
+        "kernel_calls": 11,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "verified_pref": {
+        "raw_instrument_oracle_requests": 960207,
+        "algorithmic_oracle_requests": 960202,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 531075,
+        "kernel_calls": 371,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@verified": {
+        "raw_instrument_oracle_requests": 124,
+        "algorithmic_oracle_requests": 62,
+        "harness_only_requests": 62,
+        "native_oracle_calls": 62,
+        "kernel_calls": 242,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      }
+    },
+    "5": {
+      "unguided": {
+        "raw_instrument_oracle_requests": 5,
+        "algorithmic_oracle_requests": 0,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 5,
+        "kernel_calls": 20,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "greedy_pref": {
+        "raw_instrument_oracle_requests": 17421,
+        "algorithmic_oracle_requests": 17416,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 10257,
+        "kernel_calls": 17,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@greedy": {
+        "raw_instrument_oracle_requests": 6,
+        "algorithmic_oracle_requests": 3,
+        "harness_only_requests": 3,
+        "native_oracle_calls": 3,
+        "kernel_calls": 10,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "verified_pref": {
+        "raw_instrument_oracle_requests": 406247,
+        "algorithmic_oracle_requests": 406242,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 287051,
+        "kernel_calls": 450,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@verified": {
+        "raw_instrument_oracle_requests": 150,
+        "algorithmic_oracle_requests": 75,
+        "harness_only_requests": 75,
+        "native_oracle_calls": 69,
+        "kernel_calls": 188,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      }
+    },
+    "6": {
+      "unguided": {
+        "raw_instrument_oracle_requests": 5,
+        "algorithmic_oracle_requests": 0,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 5,
+        "kernel_calls": 21,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "greedy_pref": {
+        "raw_instrument_oracle_requests": 18032,
+        "algorithmic_oracle_requests": 18027,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 4129,
+        "kernel_calls": 7,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@greedy": {
+        "raw_instrument_oracle_requests": 2,
+        "algorithmic_oracle_requests": 1,
+        "harness_only_requests": 1,
+        "native_oracle_calls": 1,
+        "kernel_calls": 5,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "verified_pref": {
+        "raw_instrument_oracle_requests": 378028,
+        "algorithmic_oracle_requests": 378023,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 219329,
+        "kernel_calls": 369,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@verified": {
+        "raw_instrument_oracle_requests": 124,
+        "algorithmic_oracle_requests": 62,
+        "harness_only_requests": 62,
+        "native_oracle_calls": 56,
+        "kernel_calls": 176,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      }
+    },
+    "7": {
+      "unguided": {
+        "raw_instrument_oracle_requests": 5,
+        "algorithmic_oracle_requests": 0,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 5,
+        "kernel_calls": 21,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "greedy_pref": {
+        "raw_instrument_oracle_requests": 12863,
+        "algorithmic_oracle_requests": 12858,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 6400,
+        "kernel_calls": 16,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@greedy": {
+        "raw_instrument_oracle_requests": 6,
+        "algorithmic_oracle_requests": 3,
+        "harness_only_requests": 3,
+        "native_oracle_calls": 2,
+        "kernel_calls": 12,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "verified_pref": {
+        "raw_instrument_oracle_requests": 278538,
+        "algorithmic_oracle_requests": 278533,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 150842,
+        "kernel_calls": 353,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@verified": {
+        "raw_instrument_oracle_requests": 118,
+        "algorithmic_oracle_requests": 59,
+        "harness_only_requests": 59,
+        "native_oracle_calls": 46,
+        "kernel_calls": 128,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      }
+    },
+    "8": {
+      "unguided": {
+        "raw_instrument_oracle_requests": 5,
+        "algorithmic_oracle_requests": 0,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 5,
+        "kernel_calls": 13,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "greedy_pref": {
+        "raw_instrument_oracle_requests": 29298,
+        "algorithmic_oracle_requests": 29293,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 12019,
+        "kernel_calls": 13,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@greedy": {
+        "raw_instrument_oracle_requests": 4,
+        "algorithmic_oracle_requests": 2,
+        "harness_only_requests": 2,
+        "native_oracle_calls": 2,
+        "kernel_calls": 4,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "verified_pref": {
+        "raw_instrument_oracle_requests": 564017,
+        "algorithmic_oracle_requests": 564012,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 313079,
+        "kernel_calls": 359,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@verified": {
+        "raw_instrument_oracle_requests": 120,
+        "algorithmic_oracle_requests": 60,
+        "harness_only_requests": 60,
+        "native_oracle_calls": 54,
+        "kernel_calls": 125,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      }
+    },
+    "9": {
+      "unguided": {
+        "raw_instrument_oracle_requests": 5,
+        "algorithmic_oracle_requests": 0,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 5,
+        "kernel_calls": 22,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "greedy_pref": {
+        "raw_instrument_oracle_requests": 16898,
+        "algorithmic_oracle_requests": 16893,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 11476,
+        "kernel_calls": 20,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@greedy": {
+        "raw_instrument_oracle_requests": 6,
+        "algorithmic_oracle_requests": 3,
+        "harness_only_requests": 3,
+        "native_oracle_calls": 3,
+        "kernel_calls": 15,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "verified_pref": {
+        "raw_instrument_oracle_requests": 389176,
+        "algorithmic_oracle_requests": 389171,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 259462,
+        "kernel_calls": 428,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@verified": {
+        "raw_instrument_oracle_requests": 142,
+        "algorithmic_oracle_requests": 71,
+        "harness_only_requests": 71,
+        "native_oracle_calls": 62,
+        "kernel_calls": 214,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      }
+    },
+    "10": {
+      "unguided": {
+        "raw_instrument_oracle_requests": 5,
+        "algorithmic_oracle_requests": 0,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 5,
+        "kernel_calls": 19,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "greedy_pref": {
+        "raw_instrument_oracle_requests": 11534,
+        "algorithmic_oracle_requests": 11529,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 8717,
+        "kernel_calls": 22,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@greedy": {
+        "raw_instrument_oracle_requests": 8,
+        "algorithmic_oracle_requests": 4,
+        "harness_only_requests": 4,
+        "native_oracle_calls": 4,
+        "kernel_calls": 18,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "verified_pref": {
+        "raw_instrument_oracle_requests": 248981,
+        "algorithmic_oracle_requests": 248976,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 173569,
+        "kernel_calls": 456,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@verified": {
+        "raw_instrument_oracle_requests": 152,
+        "algorithmic_oracle_requests": 76,
+        "harness_only_requests": 76,
+        "native_oracle_calls": 71,
+        "kernel_calls": 198,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      }
+    },
+    "11": {
+      "unguided": {
+        "raw_instrument_oracle_requests": 5,
+        "algorithmic_oracle_requests": 0,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 5,
+        "kernel_calls": 20,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "greedy_pref": {
+        "raw_instrument_oracle_requests": 20604,
+        "algorithmic_oracle_requests": 20599,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 15620,
+        "kernel_calls": 23,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@greedy": {
+        "raw_instrument_oracle_requests": 8,
+        "algorithmic_oracle_requests": 4,
+        "harness_only_requests": 4,
+        "native_oracle_calls": 4,
+        "kernel_calls": 17,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "verified_pref": {
+        "raw_instrument_oracle_requests": 444538,
+        "algorithmic_oracle_requests": 444533,
+        "harness_only_requests": 5,
+        "native_oracle_calls": 304972,
+        "kernel_calls": 445,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      },
+      "gen_rank@verified": {
+        "raw_instrument_oracle_requests": 148,
+        "algorithmic_oracle_requests": 74,
+        "harness_only_requests": 74,
+        "native_oracle_calls": 72,
+        "kernel_calls": 215,
+        "correction": "raw minus one post-hoc endpoint scoring per completed trajectory; see pareto_oracle_semantics for the call-graph proof that those requests affect no decision"
+      }
+    }
+  }
+}
