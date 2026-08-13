@@ -130,6 +130,46 @@ rejected, and whether it changes a frozen object.
   the reason externals are `N/A` for C1, C2 and C3.
 - **Changes a frozen object.** No.
 
+## 2026-08-13 (main-lane decisions) — HN-GFN runs native; the retargeting claim becomes operational
+
+- **Decision 1, adopted from this lane's recommendation.** HN-GFN runs under its
+  **native published linear scalarization**. We do not supply a Chebyshev to
+  match Lane 4's. Its official augmented-Tchebycheff mode may appear as a clearly
+  labelled *secondary* configuration, never as a replacement for its default.
+- **Evidence before.** Verified in source: `raw_reward = (weights*score).sum()`
+  under `--scalar WeightedSum`, the argparse default; the MOBO entrypoint ignores
+  `--scalar` and defaults to a linear UCB acquisition; the opt-in `Tchebycheff`
+  branch is an augmented max-min with no ideal point and a hardcoded 0.1, so it
+  is not classical Chebyshev either.
+- **Alternatives rejected.** Supplying a Chebyshev to HN-GFN. Rejected on the
+  principle that modifying a competitor's internal formulation to match ours is
+  not fairness — it is changing the competitor, and a reviewer reads it that way.
+- **What replaces it.** Comparison in a **common outcome space**: hypervolume,
+  Pareto coverage, nondominated-set quality, preference coverage, and oracle
+  usage under all three counters. Objectives and budget are matched; the
+  scalarization is not, and is reported. **Binding reporting rule:** linear
+  scalarization cannot recover concave front regions, so any coverage difference
+  there is a **method property**, never a COMPOSE win.
+
+- **Decision 2.** The phrase **"without retraining" is barred project-wide**, on
+  the strength of this lane's REINVENT 4 source reading. The claim is now
+  operational: *COMPOSE performs inference-time intervention on an explicit
+  realized molecular STATE while all learned parameters remain fixed; changing
+  the goal changes only the control computation. REINVENT carries forward a
+  learned policy and its optimizer state and keeps updating it. COMPOSE carries
+  forward the actual molecule `x_3` and performs zero parameter updates.*
+- **Why the new wording is better.** It is checkable rather than definitional.
+  "Zero parameter updates" is auditable from a code path; "without retraining"
+  is a claim about what counts as training, which REINVENT's warm optimizer
+  makes arguable.
+- **How drift is prevented.** The wording lives in the registry JSON, renders
+  into `COMPARATOR_MATRIX.md`, and `validate_qualification_registry` **rejects a
+  registry whose operational claim contains the barred phrase**
+  (`tests/test_baseline_qualification.py`). The Mol2Mol point — similarity
+  anchor, not a continued state — sits beside it, as does the MARS naming rule.
+- **Changes a frozen object.** Yes, deliberately: it replaces the wording of a
+  paper-bearing claim, and the guard makes the replacement enforceable.
+
 ## 2026-08-13 (later still) — Hold lifted; real implementations, frozen suite, fairness matrix
 
 - **Decision.** Vendored the **real** upstream GB-GA byte-identical, built an

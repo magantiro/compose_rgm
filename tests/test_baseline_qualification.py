@@ -153,3 +153,22 @@ def test_claim_scoped_registry_agrees_with_the_qualification_verdicts() -> None:
         assert row["qualification_record"] == (
             "docs/workstreams/baseline-qualification/comparator_registry_v3.json"
         )
+
+
+def test_barred_phrase_cannot_reappear_in_the_operational_claim() -> None:
+    """'without retraining' is barred project-wide; REINVENT's warm optimizer killed it."""
+    registry = copy.deepcopy(_registry())
+    registry["retargeting_claim_wording"]["operational_claim"] = (
+        "COMPOSE changes goal without retraining."
+    )
+    with pytest.raises(BaselineQualificationError, match="barred phrase"):
+        validate_qualification_registry(registry)
+
+
+def test_retargeting_wording_is_present_and_operational() -> None:
+    wording = _registry()["retargeting_claim_wording"]
+    claim = wording["operational_claim"].lower()
+    assert "zero parameter updates" in claim
+    assert "realized" in claim
+    assert wording["mars_naming_rule"].strip()
+    assert wording["mol2mol_belongs_beside_it"].strip()

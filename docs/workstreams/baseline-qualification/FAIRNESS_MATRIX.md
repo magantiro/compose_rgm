@@ -153,7 +153,7 @@ both directions. Its correct home is the Pareto experiment — see below.
 
 ---
 
-## HN-GFN and Lane 4 — coordination, and a mismatch to settle
+## HN-GFN and Lane 4 — DECIDED 2026-08-13: it runs native
 
 HN-GFN belongs to the **Pareto/preference experiment** (branch
 `codex/compose-pareto-control`), not to this conventional suite. Its adapter
@@ -181,13 +181,43 @@ Two further details that matter for a faithful comparison:
   (`model_pred_hyper.py`); under the default `version='v4'` the message-passing
   trunk is preference-independent.
 
-**Consequence.** Linear scalarization cannot recover concave regions of a Pareto
-front; Chebyshev can. So the choice is not cosmetic and it must not be described
-as "matching". Either (a) run HN-GFN under its native linear scalarization and
-report that the two methods optimize different scalarizations, or (b) run it
-under a Chebyshev we supply and report that as a **method modification**. This
-lane recommends (a) plus an explicit note, and defers the decision to Lane 4 and
-the main lane.
+### The decision — binding
+
+> **HN-GFN runs under its native published preference conditioning and linear
+> scalarization. We do NOT supply a Chebyshev to match Lane 4's.**
+
+Modifying a competitor's internal formulation to match ours is not fairness; it
+is changing the competitor, and a reviewer will read it that way. HN-GFN's
+official optional augmented-Tchebycheff mode may appear as a **clearly labelled
+secondary configuration**, never as a replacement for its default.
+
+### Compare in a common OUTCOME space, not a common scalarization
+
+The fair question is *"given the same objectives and the same evaluation budget,
+what Pareto set does each method produce?"* — not *"can every algorithm be made
+to optimize our internal scalarization?"*. So the comparison is on outcomes both
+methods genuinely produce:
+
+| reported quantity | why it is common ground |
+|---|---|
+| hypervolume | defined on the objective vectors, independent of how either method scalarized to get there |
+| Pareto coverage | ditto |
+| nondominated-set quality | ditto |
+| preference coverage | how much of the requested tradeoff space each method actually reaches |
+| oracle usage under **all three counters** | `unique_valid_canonical_evaluations`, `oracle_requests`, `evaluator_calls` |
+
+Objectives and budget are matched; the scalarization is not, and is reported.
+
+> **Binding reporting rule.** Linear scalarization **cannot recover concave
+> regions of a Pareto front**; Chebyshev can. Therefore **any coverage
+> difference in a concave region is a METHOD PROPERTY of linear scalarization
+> and must be reported as such — never as a COMPOSE win.** If COMPOSE covers a
+> concave region that HN-GFN misses, the correct sentence names the cause:
+> weighted-sum scalarization cannot reach it by construction.
+
+The surrogate asymmetry still applies on top of this: HN-GFN's true-oracle budget
+is spent against a learned proxy inside a Bayesian-optimization loop, so the
+oracle-usage row must disclose the surrogate rather than compare raw totals.
 
 ---
 

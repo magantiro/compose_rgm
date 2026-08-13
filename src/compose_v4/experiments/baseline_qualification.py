@@ -202,6 +202,26 @@ def validate_qualification_registry(registry: dict[str, Any]) -> None:
     # and measured ABSENT on an easy target-free property goal. A registry that
     # does not carry both halves invites a comparison that reads as testing a
     # claim COMPOSE does not make -- in either direction.
+    # The retargeting claim's exact wording is project-wide and binding. It lives
+    # here so the registry and the paper cannot drift; "without retraining" is
+    # barred because REINVENT 4 carries its optimizer state across a stage
+    # boundary, which makes the phrase arguable.
+    wording = registry.get("retargeting_claim_wording") or {}
+    for field in (
+        "operational_claim",
+        "barred_phrase",
+        "mol2mol_belongs_beside_it",
+        "mars_naming_rule",
+    ):
+        _require(
+            bool(wording.get(field)),
+            f"retargeting_claim_wording omits {field}",
+        )
+    _require(
+        "without retraining" not in str(wording.get("operational_claim", "")).lower(),
+        "the operational claim must not reuse the barred phrase 'without retraining'",
+    )
+
     scoping = registry.get("compose_claim_scoping") or {}
     for field in (
         "headline",

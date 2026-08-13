@@ -128,6 +128,22 @@ def render(registry: dict) -> str:
             )
         add("")
 
+    wording = registry["retargeting_claim_wording"]
+    add("## The retargeting claim — exact wording, binding")
+    add("")
+    add(f"*{_escape(wording['status'])}*")
+    add("")
+    add(f"> {_escape(wording['operational_claim'])}")
+    add("")
+    add(f"**Barred.** {_escape(wording['barred_phrase'])}")
+    add("")
+    add(f"**Why this wording.** {_escape(wording['why_this_wording_survives_review'])}")
+    add("")
+    add(f"**Mol2Mol, beside it.** {_escape(wording['mol2mol_belongs_beside_it'])}")
+    add("")
+    add(f"**MARS naming rule.** {_escape(wording['mars_naming_rule'])}")
+    add("")
+
     scoping = registry["compose_claim_scoping"]
     add("## Read this before designing any comparison")
     add("")
