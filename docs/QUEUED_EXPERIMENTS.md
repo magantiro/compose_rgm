@@ -86,3 +86,38 @@ The COMPOSE arms carry the same one-request-per-trajectory harness overhead as
 by `pareto_oracle_semantics` with no re-run. Removing it from the execution path
 would change committed counters and destroy the serial baseline the fan-out
 parity replay must match, so it belongs with a future re-run.
+
+---
+
+## Dynamic lock-and-retarget
+
+**Status: `DYNAMIC_LOCK_AND_RETARGET — QUEUED_CONDITIONAL — NO DESIGN / NO RUN`**
+
+Recorded by the hard-constraints lane (`docs/workstreams/constraints-hard/`) at
+the project lead's instruction. **Nothing has been designed or run.**
+
+**The scenario.** A trajectory has already produced a useful state `x_3`. The
+scientist says: *"I like this core, lock it, now optimize another objective."*
+That combines three things COMPOSE has separately, in one gesture — a persistent
+realized state, a midstream goal change, and inference-time hard-constraint
+injection — with `R_theta` unchanged throughout.
+
+**Why it is queued rather than scheduled.** It is a visualization of a capability,
+not a test of one. It should cost nothing to run once the pieces exist, and it
+should not be built before they do.
+
+**Trigger — all three, not any:**
+
+1. protected-core feasibility and controlled development are strong;
+2. the main paper still benefits from the visualization;
+3. retargeting / Pareto continuation supports the reuse narrative.
+
+**Blocking caveat from the Stage-0 audit.** "Lock this core" must be read as
+**labeled-subgraph presence of the core as it appears in `x_3`**, not as atom
+identity. The executor does not carry a persistent atom correspondence — the
+trajectory is a list of canonical SMILES and is re-parsed at every step, and
+alias collapse merges successors that retain disjoint atom sets. See
+`docs/workstreams/constraints-hard/CONSTRAINT_SEMANTICS.md`. A figure captioned
+"these atoms are locked" would claim more than the executor delivers.
+
+**No launch.**
