@@ -1,0 +1,642 @@
+{
+  "schema": "compose.constraints_hard.scaffold_census",
+  "schema_version": 1,
+  "status": "SMOKE_HELD_IN",
+  "held_out_opened": false,
+  "scope": "MODEL-FREE ONLY. No kernel, no R_theta, no oracle, no Gate-0. Establishes nothing about the successor fiber.",
+  "protected_object_rule": "atom_and_bond_labeled_bemis_murcko_scaffold_v1",
+  "cohort_path": "diagnostics/retarget_calibration_cohort.json",
+  "cohort_file_sha256": "e1ab574bc175c7a4d5af0e07678cc9d637fc103aba84702efcd6df52e998b5ed",
+  "cohort_declared_sha256": "e402e318fd9540fb51fc93c7481094beec4c5f968a582f7349d6359f24e19a5f",
+  "cohort_status": "FROZEN_BEFORE_CALIBRATION_OUTCOME_INDEPENDENT",
+  "thresholds": {
+    "MIN_CORE_ATOMS": 6,
+    "CORE_FRACTION_BAND": [
+      0.2,
+      0.7
+    ],
+    "MIN_FREE_ATOMS": 8,
+    "HEAVY_ATOM_BAND": [
+      18,
+      38
+    ]
+  },
+  "threshold_provenance": {
+    "MIN_CORE_ATOMS": "Lane 2 pathwise_constraints.MIN_MOTIF_ATOMS, reused verbatim",
+    "CORE_FRACTION_BAND": "Lane 2 pathwise_constraints.MOTIF_FRACTION_BAND, reused verbatim",
+    "MIN_FREE_ATOMS": "Lane 2 pathwise_constraints.MIN_FREE_ATOMS, reused verbatim",
+    "HEAVY_ATOM_BAND": "Lane 2 pathwise_constraints.HEAVY_ATOM_BAND, reused verbatim"
+  },
+  "rdkit_version": "2025.09.6",
+  "rdkit_pin_matches_production": false,
+  "summary": {
+    "sources": 30,
+    "parsed": 30,
+    "eligible": 6,
+    "eligible_fraction": 0.2,
+    "ineligibility_reasons": {
+      "core_fraction_outside_band": 22,
+      "core_too_small": 2,
+      "empty_scaffold_acyclic_source": 1,
+      "too_few_editable_atoms_outside_core": 19
+    },
+    "core_fraction_all": {
+      "n": 30,
+      "mean": 0.7385,
+      "median": 0.8,
+      "min": 0.0,
+      "max": 0.9677
+    },
+    "core_fraction_eligible": {
+      "n": 6,
+      "mean": 0.5902,
+      "median": 0.6236,
+      "min": 0.4231,
+      "max": 0.6552
+    },
+    "core_atoms_all": {
+      "n": 30,
+      "mean": 19.9667,
+      "median": 21.0,
+      "min": 0,
+      "max": 32
+    },
+    "free_atoms_all": {
+      "n": 30,
+      "mean": 7.0667,
+      "median": 5.0,
+      "min": 1,
+      "max": 29
+    },
+    "free_atoms_eligible": {
+      "n": 6,
+      "mean": 11.8333,
+      "median": 11.5,
+      "min": 9,
+      "max": 15
+    },
+    "core_minus_largest_ring_system": {
+      "n": 30,
+      "mean": 11.2,
+      "median": 12.0,
+      "min": 0,
+      "max": 26
+    },
+    "scaffold_parent_index_crosscheck_failures": []
+  },
+  "held_in_pool_applicability": {
+    "pool_path": "diagnostics/editing_v2_matched_validation_reserve_ids.json.gz",
+    "pool_key": "training_source_keys",
+    "held_out_opened": false,
+    "sources": 96094,
+    "parsed": 96094,
+    "eligible": 21166,
+    "eligible_fraction": 0.2203,
+    "core_fraction_median": 0.7895,
+    "core_fraction_mean": 0.7535,
+    "free_atoms_median": 5.0,
+    "free_atoms_mean": 6.3719,
+    "ineligibility_reasons_not_mutually_exclusive": {
+      "core_fraction_outside_band": {
+        "count": 68872,
+        "fraction": 0.7167
+      },
+      "too_few_editable_atoms_outside_core": {
+        "count": 65091,
+        "fraction": 0.6774
+      },
+      "heavy_atoms_outside_band": {
+        "count": 9767,
+        "fraction": 0.1016
+      },
+      "core_too_small": {
+        "count": 2300,
+        "fraction": 0.0239
+      },
+      "empty_scaffold_acyclic_source": {
+        "count": 1481,
+        "fraction": 0.0154
+      }
+    }
+  },
+  "per_source": [
+    {
+      "source": "Cc1ccccc1-c1noc(-c2cc3ccccc3oc2=O)n1",
+      "heavy_atoms": 23,
+      "core_atoms": 22,
+      "core_bonds": 25,
+      "core_fraction": 0.9565,
+      "free_atoms": 1,
+      "free_bonds": 1,
+      "largest_ring_system_atoms": 10,
+      "core_minus_largest_ring_system": 12,
+      "rdkit_scaffold_heavy_atoms": 22,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band",
+        "too_few_editable_atoms_outside_core"
+      ]
+    },
+    {
+      "source": "COc1ccc(-c2nc(CS(=O)(=O)CC(=O)NCc3ccccc3Br)c(C)o2)cc1",
+      "heavy_atoms": 30,
+      "core_atoms": 26,
+      "core_bonds": 28,
+      "core_fraction": 0.8667,
+      "free_atoms": 4,
+      "free_bonds": 4,
+      "largest_ring_system_atoms": 6,
+      "core_minus_largest_ring_system": 20,
+      "rdkit_scaffold_heavy_atoms": 26,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band",
+        "too_few_editable_atoms_outside_core"
+      ]
+    },
+    {
+      "source": "CC(=O)CCC(C)C1CCC2C3=C(CCC21C)C1(C)CCC(=O)C(C)C1CC3=O",
+      "heavy_atoms": 29,
+      "core_atoms": 19,
+      "core_bonds": 22,
+      "core_fraction": 0.6552,
+      "free_atoms": 10,
+      "free_bonds": 10,
+      "largest_ring_system_atoms": 17,
+      "core_minus_largest_ring_system": 2,
+      "rdkit_scaffold_heavy_atoms": 19,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": true,
+      "reasons": []
+    },
+    {
+      "source": "C=CC=C(C=C)CCC(=O)N1C(=O)C(C(C)O)C1OC(C)=O",
+      "heavy_atoms": 22,
+      "core_atoms": 5,
+      "core_bonds": 5,
+      "core_fraction": 0.2273,
+      "free_atoms": 17,
+      "free_bonds": 17,
+      "largest_ring_system_atoms": 4,
+      "core_minus_largest_ring_system": 1,
+      "rdkit_scaffold_heavy_atoms": 5,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_too_small"
+      ]
+    },
+    {
+      "source": "CCCc1c(C(=O)OCC)c(C(=O)OCC)c2c(-c3ccccc3)cc(N3CCOCC3)nn12",
+      "heavy_atoms": 34,
+      "core_atoms": 21,
+      "core_bonds": 24,
+      "core_fraction": 0.6176,
+      "free_atoms": 13,
+      "free_bonds": 13,
+      "largest_ring_system_atoms": 9,
+      "core_minus_largest_ring_system": 12,
+      "rdkit_scaffold_heavy_atoms": 21,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": true,
+      "reasons": []
+    },
+    {
+      "source": "Cn1c(-c2ccc(F)cc2)[n+](C)c2ccccc21",
+      "heavy_atoms": 18,
+      "core_atoms": 15,
+      "core_bonds": 17,
+      "core_fraction": 0.8333,
+      "free_atoms": 3,
+      "free_bonds": 3,
+      "largest_ring_system_atoms": 9,
+      "core_minus_largest_ring_system": 6,
+      "rdkit_scaffold_heavy_atoms": 15,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band",
+        "too_few_editable_atoms_outside_core"
+      ]
+    },
+    {
+      "source": "CC(C)C#CC(c1ccc(Cl)cc1)N1CCC(CC(=O)O)CC1c1ccc(C(F)(F)F)cc1",
+      "heavy_atoms": 33,
+      "core_atoms": 19,
+      "core_bonds": 21,
+      "core_fraction": 0.5758,
+      "free_atoms": 14,
+      "free_bonds": 14,
+      "largest_ring_system_atoms": 6,
+      "core_minus_largest_ring_system": 13,
+      "rdkit_scaffold_heavy_atoms": 19,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": true,
+      "reasons": []
+    },
+    {
+      "source": "O=C1c2cc(O)c(O)c(O)c2C(=O)c2cccc(O)c21",
+      "heavy_atoms": 20,
+      "core_atoms": 16,
+      "core_bonds": 18,
+      "core_fraction": 0.8,
+      "free_atoms": 4,
+      "free_bonds": 4,
+      "largest_ring_system_atoms": 14,
+      "core_minus_largest_ring_system": 2,
+      "rdkit_scaffold_heavy_atoms": 16,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band",
+        "too_few_editable_atoms_outside_core"
+      ]
+    },
+    {
+      "source": "COc1ccc2nc(-c3cccc(F)c3)sc2c1",
+      "heavy_atoms": 18,
+      "core_atoms": 15,
+      "core_bonds": 17,
+      "core_fraction": 0.8333,
+      "free_atoms": 3,
+      "free_bonds": 3,
+      "largest_ring_system_atoms": 9,
+      "core_minus_largest_ring_system": 6,
+      "rdkit_scaffold_heavy_atoms": 15,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band",
+        "too_few_editable_atoms_outside_core"
+      ]
+    },
+    {
+      "source": "C=C1CCCC2C1(C)CCP(C)C2(C)CC1=C2OC(C)(C)N=C2C=C(OC)C1O",
+      "heavy_atoms": 29,
+      "core_atoms": 21,
+      "core_bonds": 24,
+      "core_fraction": 0.7241,
+      "free_atoms": 8,
+      "free_bonds": 8,
+      "largest_ring_system_atoms": 10,
+      "core_minus_largest_ring_system": 11,
+      "rdkit_scaffold_heavy_atoms": 21,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band"
+      ]
+    },
+    {
+      "source": "Cc1ccc(-c2nc(N)c3cc(Cc4ccccc4)sc3n2)o1",
+      "heavy_atoms": 23,
+      "core_atoms": 21,
+      "core_bonds": 24,
+      "core_fraction": 0.913,
+      "free_atoms": 2,
+      "free_bonds": 2,
+      "largest_ring_system_atoms": 9,
+      "core_minus_largest_ring_system": 12,
+      "rdkit_scaffold_heavy_atoms": 21,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band",
+        "too_few_editable_atoms_outside_core"
+      ]
+    },
+    {
+      "source": "O=C(I)Nc1cc[n+](CC(=O)c2ccc(Cl)cc2)cc1",
+      "heavy_atoms": 20,
+      "core_atoms": 15,
+      "core_bonds": 16,
+      "core_fraction": 0.75,
+      "free_atoms": 5,
+      "free_bonds": 5,
+      "largest_ring_system_atoms": 6,
+      "core_minus_largest_ring_system": 9,
+      "rdkit_scaffold_heavy_atoms": 15,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band",
+        "too_few_editable_atoms_outside_core"
+      ]
+    },
+    {
+      "source": "CS(=O)(=O)Nc1ccc(OCC(O)CN(CCc2ccc(Cl)c(Cl)c2)Cc2ccc(O)cc2)cc1",
+      "heavy_atoms": 35,
+      "core_atoms": 26,
+      "core_bonds": 28,
+      "core_fraction": 0.7429,
+      "free_atoms": 9,
+      "free_bonds": 9,
+      "largest_ring_system_atoms": 6,
+      "core_minus_largest_ring_system": 20,
+      "rdkit_scaffold_heavy_atoms": 26,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band"
+      ]
+    },
+    {
+      "source": "C=CCNCCn1ccc2ccc3ncccc3c21",
+      "heavy_atoms": 19,
+      "core_atoms": 13,
+      "core_bonds": 15,
+      "core_fraction": 0.6842,
+      "free_atoms": 6,
+      "free_bonds": 6,
+      "largest_ring_system_atoms": 13,
+      "core_minus_largest_ring_system": 0,
+      "rdkit_scaffold_heavy_atoms": 13,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "too_few_editable_atoms_outside_core"
+      ]
+    },
+    {
+      "source": "COc1cccc(C=Nn2c(N)c(S(=O)(=O)c3cccs3)c3nc4ccccc4nc32)c1",
+      "heavy_atoms": 32,
+      "core_atoms": 29,
+      "core_bonds": 33,
+      "core_fraction": 0.9062,
+      "free_atoms": 3,
+      "free_bonds": 3,
+      "largest_ring_system_atoms": 13,
+      "core_minus_largest_ring_system": 16,
+      "rdkit_scaffold_heavy_atoms": 29,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band",
+        "too_few_editable_atoms_outside_core"
+      ]
+    },
+    {
+      "source": "CC(C)CN(C)C(=O)c1nc(-c2ccccc2)c2cc(Cl)ccc2n1",
+      "heavy_atoms": 25,
+      "core_atoms": 16,
+      "core_bonds": 18,
+      "core_fraction": 0.64,
+      "free_atoms": 9,
+      "free_bonds": 9,
+      "largest_ring_system_atoms": 10,
+      "core_minus_largest_ring_system": 6,
+      "rdkit_scaffold_heavy_atoms": 16,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": true,
+      "reasons": []
+    },
+    {
+      "source": "CC(=O)Nc1ccc(C=CC(=O)c2sc(-n3nc(-c4ccccc4)cc3C3CCCCC3)nc2C)cc1",
+      "heavy_atoms": 37,
+      "core_atoms": 32,
+      "core_bonds": 36,
+      "core_fraction": 0.8649,
+      "free_atoms": 5,
+      "free_bonds": 5,
+      "largest_ring_system_atoms": 6,
+      "core_minus_largest_ring_system": 26,
+      "rdkit_scaffold_heavy_atoms": 32,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band",
+        "too_few_editable_atoms_outside_core"
+      ]
+    },
+    {
+      "source": "CC(=NNC(=O)c1ccc(O)nn1)c1cccnc1",
+      "heavy_atoms": 19,
+      "core_atoms": 17,
+      "core_bonds": 18,
+      "core_fraction": 0.8947,
+      "free_atoms": 2,
+      "free_bonds": 2,
+      "largest_ring_system_atoms": 6,
+      "core_minus_largest_ring_system": 11,
+      "rdkit_scaffold_heavy_atoms": 17,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band",
+        "too_few_editable_atoms_outside_core"
+      ]
+    },
+    {
+      "source": "C=Cc1cccc(NC(=O)NC2CCC(C(=O)I3CCN(C)CC3)CC2)c1",
+      "heavy_atoms": 27,
+      "core_atoms": 24,
+      "core_bonds": 26,
+      "core_fraction": 0.8889,
+      "free_atoms": 3,
+      "free_bonds": 3,
+      "largest_ring_system_atoms": 6,
+      "core_minus_largest_ring_system": 18,
+      "rdkit_scaffold_heavy_atoms": 24,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band",
+        "too_few_editable_atoms_outside_core"
+      ]
+    },
+    {
+      "source": "Cc1ccc(C=Cc2ncc([N+](=O)[O-])n2CCOC(=O)c2c[nH]c3ccccc23)cc1",
+      "heavy_atoms": 31,
+      "core_atoms": 27,
+      "core_bonds": 30,
+      "core_fraction": 0.871,
+      "free_atoms": 4,
+      "free_bonds": 4,
+      "largest_ring_system_atoms": 9,
+      "core_minus_largest_ring_system": 18,
+      "rdkit_scaffold_heavy_atoms": 27,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band",
+        "too_few_editable_atoms_outside_core"
+      ]
+    },
+    {
+      "source": "O=C(NCc1ccccc1)c1ccc2c(O)c(S(=O)(=O)c3ccccc3)c(=O)[nH]c2c1",
+      "heavy_atoms": 31,
+      "core_atoms": 30,
+      "core_bonds": 33,
+      "core_fraction": 0.9677,
+      "free_atoms": 1,
+      "free_bonds": 1,
+      "largest_ring_system_atoms": 10,
+      "core_minus_largest_ring_system": 20,
+      "rdkit_scaffold_heavy_atoms": 30,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band",
+        "too_few_editable_atoms_outside_core"
+      ]
+    },
+    {
+      "source": "O=C1OC2(CCN(C(=O)Nc3ncc(-c4cccc(C(F)F)c4)cn3)CC2)c2ccccc21",
+      "heavy_atoms": 33,
+      "core_atoms": 30,
+      "core_bonds": 34,
+      "core_fraction": 0.9091,
+      "free_atoms": 3,
+      "free_bonds": 3,
+      "largest_ring_system_atoms": 14,
+      "core_minus_largest_ring_system": 16,
+      "rdkit_scaffold_heavy_atoms": 30,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band",
+        "too_few_editable_atoms_outside_core"
+      ]
+    },
+    {
+      "source": "C#CCNC(=O)COCOC(C=C(C=CC(=O)OCC)OC(C)=O)COC(C)=O",
+      "heavy_atoms": 29,
+      "core_atoms": 0,
+      "core_bonds": 0,
+      "core_fraction": 0.0,
+      "free_atoms": 29,
+      "free_bonds": 28,
+      "largest_ring_system_atoms": 0,
+      "core_minus_largest_ring_system": 0,
+      "rdkit_scaffold_heavy_atoms": 0,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "empty_scaffold_acyclic_source",
+        "core_too_small",
+        "core_fraction_outside_band"
+      ]
+    },
+    {
+      "source": "CC(=O)OCCCC1(C)C(C)=CCC2C3Cc4cn[nH]c4NC3(C)CCC21",
+      "heavy_atoms": 27,
+      "core_atoms": 17,
+      "core_bonds": 20,
+      "core_fraction": 0.6296,
+      "free_atoms": 10,
+      "free_bonds": 10,
+      "largest_ring_system_atoms": 17,
+      "core_minus_largest_ring_system": 0,
+      "rdkit_scaffold_heavy_atoms": 17,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": true,
+      "reasons": []
+    },
+    {
+      "source": "C=C1CCC=CCCC(C2=CCC(C(C)[IH2])[IH3][SH2]2)CC1O",
+      "heavy_atoms": 21,
+      "core_atoms": 17,
+      "core_bonds": 18,
+      "core_fraction": 0.8095,
+      "free_atoms": 4,
+      "free_bonds": 4,
+      "largest_ring_system_atoms": 10,
+      "core_minus_largest_ring_system": 7,
+      "rdkit_scaffold_heavy_atoms": 17,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band",
+        "too_few_editable_atoms_outside_core"
+      ]
+    },
+    {
+      "source": "COc1ncccc1NC(=O)C(C)(C)Cc1ccc(C(=O)Oc2ccc(C(=N)N)cc2F)s1",
+      "heavy_atoms": 33,
+      "core_atoms": 25,
+      "core_bonds": 27,
+      "core_fraction": 0.7576,
+      "free_atoms": 8,
+      "free_bonds": 8,
+      "largest_ring_system_atoms": 6,
+      "core_minus_largest_ring_system": 19,
+      "rdkit_scaffold_heavy_atoms": 25,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band"
+      ]
+    },
+    {
+      "source": "Cc1ccc(Oc2ccc(-c3nnc(-c4ccccc4)o3)cc2[N+](=O)[O-])cc1C",
+      "heavy_atoms": 29,
+      "core_atoms": 24,
+      "core_bonds": 27,
+      "core_fraction": 0.8276,
+      "free_atoms": 5,
+      "free_bonds": 5,
+      "largest_ring_system_atoms": 6,
+      "core_minus_largest_ring_system": 18,
+      "rdkit_scaffold_heavy_atoms": 24,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band",
+        "too_few_editable_atoms_outside_core"
+      ]
+    },
+    {
+      "source": "CCCCCOc1ccc(-c2nc(CNC(C)CCCCC)co2)cc1",
+      "heavy_atoms": 26,
+      "core_atoms": 11,
+      "core_bonds": 12,
+      "core_fraction": 0.4231,
+      "free_atoms": 15,
+      "free_bonds": 15,
+      "largest_ring_system_atoms": 6,
+      "core_minus_largest_ring_system": 5,
+      "rdkit_scaffold_heavy_atoms": 11,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": true,
+      "reasons": []
+    },
+    {
+      "source": "C=ICN(Cc1nnc(S[SH2]CN(CO)c2nc(C)cs2)[nH]1)C(=O)c1ccccc1",
+      "heavy_atoms": 30,
+      "core_atoms": 24,
+      "core_bonds": 26,
+      "core_fraction": 0.8,
+      "free_atoms": 6,
+      "free_bonds": 6,
+      "largest_ring_system_atoms": 6,
+      "core_minus_largest_ring_system": 18,
+      "rdkit_scaffold_heavy_atoms": 24,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band",
+        "too_few_editable_atoms_outside_core"
+      ]
+    },
+    {
+      "source": "CC(=O)N1CCOc2ccc(S(=O)(=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)cc21",
+      "heavy_atoms": 28,
+      "core_atoms": 22,
+      "core_bonds": 24,
+      "core_fraction": 0.7857,
+      "free_atoms": 6,
+      "free_bonds": 6,
+      "largest_ring_system_atoms": 10,
+      "core_minus_largest_ring_system": 12,
+      "rdkit_scaffold_heavy_atoms": 22,
+      "scaffold_parent_index_crosscheck": true,
+      "eligible": false,
+      "reasons": [
+        "core_fraction_outside_band",
+        "too_few_editable_atoms_outside_core"
+      ]
+    }
+  ]
+}
