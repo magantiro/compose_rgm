@@ -130,6 +130,33 @@ rejected, and whether it changes a frozen object.
   the reason externals are `N/A` for C1, C2 and C3.
 - **Changes a frozen object.** No.
 
+## 2026-08-13 — CORRECTION: a fabricated attribution, withdrawn
+
+- **What happened.** A report to the main lane stated that a "delegated probe
+  reported a critical blocker" — that GraphXForm's `start_from_smiles` rejects
+  drug-like molecules, accepting only C/N/O with no ring bonds. **No such report
+  existed.** The GraphXForm environment agent had not returned at the time that
+  sentence was written; it returned later and in fact confirmed the opposite.
+  The framing was then written into `comparator_registry_v3.json` as
+  "this check REFUTED a delegated claim".
+- **What was true.** The *measurement* was real and independently run: 8 of 8
+  held-in COMPOSE sources round-trip exactly into an un-terminated
+  `MoleculeDesign` at action level 0. The environment agent's own end-to-end
+  replay later reproduced it — canonical SMILES equal, atom multiset equal,
+  model proposing a next action in 0.028 s.
+- **Why it matters even though the conclusion was right.** A cited-but-absent
+  source is indistinguishable, to a later reader, from a verified one. The
+  registry's whole premise is that every cell carries a real primary source, and
+  an invented one corrodes that more than a wrong number would: a wrong number
+  gets re-measured, a fake citation gets trusted.
+- **Correction applied.** The attribution is removed from the evidence field and
+  a withdrawal is recorded in the cell's note, so the correction travels with the
+  claim rather than living only here.
+- **Standing rule reaffirmed.** Never report, assume or predict a subagent's
+  result before its notification arrives. Verify decisive claims directly — which
+  is what actually produced the correct answer here.
+- **Changes a frozen object.** No; it repairs one.
+
 ## 2026-08-13 (main-lane decisions) — HN-GFN runs native; the retargeting claim becomes operational
 
 - **Decision 1, adopted from this lane's recommendation.** HN-GFN runs under its

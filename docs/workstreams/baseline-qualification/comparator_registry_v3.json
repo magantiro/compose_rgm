@@ -245,13 +245,13 @@
         "note": "The cleanest external source-conditioned editor in this set. Its blockers are cost and constraint expressiveness, not fidelity.",
         "status": "environment_verified_not_built",
         "work_items": [
-          "Objective shim into MoleculeObjectiveEvaluator.predict_objective with a counter wrapping every call, including those consumed by dataset generation during fine-tuning.",
-          "Source-panel driver setting start_from_smiles per source, with an outer loop because that branch ignores repeat_start_instances.",
-          "Atom-vocabulary alignment to the COMPOSE element set, or the deviation recorded.",
-          "Trajectory export at level-0 boundaries: molecule.history plus per-state SMILES.",
-          "Guard against data/generated_molecules.pickle merging across runs \u2014 the README states an undeleted file makes the next run continue from it, a silent cross-run contamination hazard.",
-          "Patch guacamol's scipy.histogram import (documented upstream) or avoid importing guacamol at all.",
-          "Resolve the torch pin conflict: Dockerfile pins 2.5.1 while requirements.txt demands >=2.6.0."
+          "Vendor the upstream algorithm byte-identical with a sha256 test, as GB-GA is vendored.",
+          "Objective shim into MoleculeObjectiveEvaluator.predict_objective, routed through the shared 2024.3.5 canonicalizer, counting all three counters INCLUDING the calls consumed by per-objective fine-tuning.",
+          "Source-panel driver setting start_from_smiles per source, with an OUTER LOOP because that branch ignores repeat_start_instances.",
+          "PRE-FILTER the source panel: B, Si, Se, metals, salts/counterions and explicit H raise an UNCAUGHT KeyError at molecule_design.py:649, and >50 heavy atoms raises AssertionError. Strip counterions, take the largest fragment, and leave headroom under 50 so the model can actually extend.",
+          "Trajectory export at action-level-0 boundaries, the only points where a complete connected molecule exists.",
+          "Apply the three known environment fixes and record them: guacamol's scipy.histogram import; empty CUDA_VISIBLE_DEVICES yielding [''] so ray tries to start a raylet with 1 GPU; torch>=2.6 weights_only=True breaking reload of the run's OWN checkpoints (the official weights.pt is unaffected).",
+          "Install-order trap: `pip install guacamol` pulls rdkit-pypi 2022.9.5 which CLOBBERS rdkit 2023.9.6. Uninstall rdkit-pypi and force-reinstall rdkit after."
         ]
       },
       "capabilities": {
@@ -281,8 +281,8 @@
           "verdict": "PARTIAL"
         },
         "source_conditioning": {
-          "evidence": "config.start_from_smiles, dispatched in core/gumbeldore_dataset.py: `elif self.config.start_from_smiles is not None: problem_instances = [MoleculeDesign.from_smiles(self.config, self.config.start_from_smiles)]`. MoleculeDesign.from_smiles(..., do_finish=False) replays the molecule as an action prefix without issuing the terminate action, so the design arrives at action level 0 un-terminated and the model continues modifying it. Paper section 3.3.3 seeds design from 'the best molecule from COSMObase 2020'. RUN-VERIFIED 2026-08-13 against the actual COMPOSE panel, and this check REFUTED a delegated claim that from_smiles cannot accept drug-like molecules. All 8 held-in cohort sources tested (18-34 heavy atoms, every one containing aromatic rings, plus S, Br and fused ring systems) round-tripped EXACTLY: design atom count equals RDKit atom count for 8 of 8, each design lands at current_action_level == 0 with is_terminable() True, i.e. un-terminated and ready for the model to continue editing. from_rdkit_mol kekulizes and rebuilds from the bond-order adjacency matrix, so ring closures are handled. The shipped config.atom_vocabulary is also broad -- C, N, O, F, P, S, Cl, Br, I with formal-charge and chirality variants, max_num_atoms 50 -- not a C/N/O subset.",
-          "note": "The start_from_smiles branch creates exactly ONE root instance and does not honour repeat_start_instances, so multi-seed runs need an outer loop. Note on method: this cell was re-verified by running it rather than by reading a report, precisely because a contrary claim had been made. get_smiles() returns None on an unfinished design, which is easy to mistake for a failed round-trip; the atom-count and action-level check is the one that actually answers the question.",
+          "evidence": "config.start_from_smiles, dispatched in core/gumbeldore_dataset.py: `elif self.config.start_from_smiles is not None: problem_instances = [MoleculeDesign.from_smiles(self.config, self.config.start_from_smiles)]`. MoleculeDesign.from_smiles(..., do_finish=False) replays the molecule as an action prefix without issuing the terminate action, so the design arrives at action level 0 un-terminated and the model continues modifying it. Paper section 3.3.3 seeds design from 'the best molecule from COSMObase 2020'. RUN-VERIFIED 2026-08-13 against the actual COMPOSE panel. All 8 held-in cohort sources tested (18-34 heavy atoms, every one containing aromatic rings, plus S, Br and fused ring systems) round-tripped EXACTLY: design atom count equals RDKit atom count for 8 of 8, each design lands at current_action_level == 0 with is_terminable() True, i.e. un-terminated and ready for the model to continue editing. from_rdkit_mol kekulizes and rebuilds from the bond-order adjacency matrix, so ring closures are handled. INDEPENDENTLY CONFIRMED end-to-end in the built environment: Cc1ccccc1-c1noc(-c2cc3ccccc3oc2=O)n1 replays as 78 actions into 23 real atoms, canonical SMILES of input and design are EQUAL, atom multiset equal (C18 N2 O3, 4 rings both sides), and the pretrained model then proposes a next action from that state in 0.028 s.",
+          "note": "The start_from_smiles branch creates exactly ONE root instance and does not honour repeat_start_instances, so multi-seed runs need an outer loop. Method note: get_smiles() returns None on an UNFINISHED design, which is easy to misread as a failed round-trip; the atom-count and action-level check is the one that actually answers the question. CORRECTION 2026-08-13: an earlier version of this cell said the verification 'refuted a delegated claim'. It did not -- no such claim had been made at the time it was written. The measurement stands; the attribution was wrong and is withdrawn.",
           "verdict": "YES"
         }
       },
@@ -310,10 +310,10 @@
         "training_phase_oracle_calls": "YES, and they dominate. Dataset generation IS the search and runs once per epoch inside train_for_one_epoch before every gradient step. Order of magnitude: beam_width x TASAR rounds x epochs."
       },
       "provenance": {
-        "checkpoints": "Available: https://syncandshare.lrz.de/dl/fiJs7ZHuCFsVskeoab5aZg/graphxform_pretrained.zip, ~347,364,546 bytes, verified reachable (HTTP 200). Not hashed here because the file has not been downloaded; hash on first fetch before any claim-bearing run. The GH-GNN objective surrogate ships in-repo.",
+        "checkpoints": "DOWNLOADED AND VERIFIED 2026-08-13. graphxform_pretrained.zip, 347,364,546 bytes, sha256 3b20bd2ee39d285c1bd33de6f3a5ab991cdc09cf9ccedd75da8bc6db71e6bf65. Contains one file, weights.pt, 378,618,442 bytes, sha256 51aacd54b2656efbade5a1f07713518875fac86fa95646f8a7da37a2978f4697. Loads STRICTLY into MoleculeTransformer: 31,542,218 parameters, 99 state-dict keys, ZERO missing and ZERO unexpected. Metadata says pretrain_epochs_trained=178, best validation loss 1.1404, epochs_trained=0 -- pretrained only, no objective optimization baked in. There is no hardcoded expected location; config.load_checkpoint_from_path points at it. GHGNN.pth (9.95 MB) ships in-repo, so the GH-GNN solvent objectives are usable too, though UNVERIFIED -- only celecoxib_rediscovery was executed.",
         "code_reference": "created 2024-10-16, last push 2026-02-26, not archived, 0 open issues. Journal version: Digital Discovery 4(4) 1052-1065 (2025), DOI 10.1039/D4DD00339J, CC-BY. arXiv 2411.01667 v1 2024-11-03, v2 2025-03-20.",
         "code_repository": "https://github.com/grimmlab/graphxform",
-        "cpu_feasible": "VERIFIED FEASIBLE (2026-08-13 probe), python 3.11. The expected blocker did not occur: torch_scatter 2.1.2 COMPILED successfully against CPU torch with --no-build-isolation. torch_geometric 2.8.0, ray 2.57.0, rdkit 2023.09.6 and guacamol all install; MoleculeTransformer(MoleculeConfig()) instantiates at 31,542,218 parameters. Checkpoint URL returns HTTP 200, Content-Length 347,364,546 (331 MiB), not downloaded. torch_scatter is NOT in requirements.txt and is imported only by the GH-GNN objective predictor, so it is unnecessary unless that objective is used.",
+        "cpu_feasible": "BUILT AND RUN CPU-only 2026-08-13, python 3.11 venv. torch 2.13.0, torch-geometric 2.8.0.post1, torch_scatter 2.1.2 (prebuilt arm64 wheel, no compile), rdkit 2023.9.6, ray 2.57.0, guacamol 0.5.5, numpy 1.26.4. cuda_available False structurally on arm64. MEASURED: one full epoch at beam width 32 on a 23-atom molecule is 15-22 s; a complete main.py process including ray init and the final test search is 48.2 s. A single model forward at batch 1 is 0.028 s. This is comfortably affordable on CPU.",
         "license": "MIT (LICENSE, 'Copyright (c) 2026 Grimm Lab'). Bundled objective_predictor/GH_GNN_IDAC/ and GDI_NN_IDAC/ carry their own separate LICENSE files \u2014 check before redistribution.",
         "paper_url": "https://arxiv.org/abs/2411.01667"
       },
@@ -777,11 +777,12 @@
       "what_it_is": "The REAL vendored upstream GB-GA (commit 4b49f182, byte-identical, MIT) on 5 held-in sources against the frozen COMPOSE developability objective under three-counter accounting. NOT a GraphGA quality measurement and NOT a COMPOSE comparison."
     },
     "graphxform_status": {
-      "adapter": "NOT YET BUILT -- next action",
-      "adapter_shape": "Thin, per the adapter rule: plug the frozen objective into MoleculeObjectiveEvaluator.predict_objective, route every candidate through the shared 2024.3.5 canonicalizer, count all three counters including the calls consumed by per-objective fine-tuning, set start_from_smiles per source with an outer loop because that branch ignores repeat_start_instances, and export the trajectory at action-level-0 boundaries. No algorithm changes.",
-      "environment": "BUILT, CPU-only, python 3.11 venv at /tmp/baseline_envs/graphxform-py311",
-      "source_conditioning": "VERIFIED on the real COMPOSE panel: 8/8 held-in sources round-trip exactly into an un-terminated MoleculeDesign at action level 0.",
-      "vendoring_requirement": "Vendor the upstream algorithm files byte-identical with a sha256 assertion in a test, exactly as baselines/graph_ga/upstream/ is vendored and hash-asserted. That is what makes 'unmodified' checkable rather than claimed."
+      "adapter": "NOT YET BUILT -- next action, and now cheap",
+      "atom_vocabulary": "23 entries, all allowed as shipped: C, C-, C+, C@, C@@, N, N-, N+, O, O-, O+, F, P, P-, P+, S, S-, S+, S@, S@@, Cl, Br, I. Nine distinct elements. max_num_atoms 50, maximum_bond_order 6. Organic drug-like sources including charges and stereocentres are fine; the README's C/N/O restriction applies only to the solvent tasks.",
+      "checkpoint": "downloaded, hashed, strict-loads with zero key mismatches",
+      "environment": "BUILT AND RUN, CPU-only, /tmp/baseline_envs/graphxform-py311",
+      "measured_cost": "one epoch 15-22 s CPU; full main.py process 48.2 s",
+      "source_conditioning": "VERIFIED twice: 8/8 COMPOSE held-in sources round-trip into an un-terminated design at action level 0, and a full end-to-end replay of a 23-atom drug-like molecule is canonical-SMILES equal with the model proposing a next action from that state."
     },
     "hard_constraints_observed": [
       "No Modal run was launched.",
