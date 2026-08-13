@@ -198,3 +198,58 @@ def test_purpose_is_applied_only_after_generation():
     assert endpoints  # pool non-empty
     for traj in result.selected:
         assert traj.name == "gen_rank"
+
+
+# --- the blinded probe firewall -------------------------------------------
+
+def _call_blinded(metered, target, **kw):
+    return generate_then_rank_metered(
+        metered, "root", 6, (0.1, 0.5, 0.9), lambda z, w: z[:, 0] * w,
+        target, seed=3, reference=np.zeros(2), utopia=np.ones(2),
+        unguided_run=_unguided(kw.pop("reachable", 10_000)),
+        hypervolume=None, argmin_stable=None, trajectory_cls=None,
+        runaway_guard=kw.pop("guard", 5000), stall_window=kw.pop("stall", 250))
+
+
+def test_blinded_probe_does_not_COMPUTE_hypervolume_at_all():
+    """Not computed-then-hidden. Structurally absent.
+
+    A feasibility go/no-go must be unable to read the science it would be
+    tempted to condition on, rather than relying on nobody looking.
+    """
+    metered = _Metered(10_000)
+    result = _call_blinded(metered, 150)
+    assert result.blinded is True
+    assert result.selected == []
+    assert all(row["hypervolume"] is None for row in result.prefix)
+    report = result.feasibility_only()
+    flat = repr(report).lower()
+    assert "hypervolume" not in flat and "hv" not in report
+    assert set(report["kernel_prefix"][0]) == {
+        "t", "kernel_calls", "native_oracle_calls", "raw_oracle_calls"}
+
+
+def test_blinded_probe_still_answers_the_feasibility_question():
+    metered = _Metered(10_000)
+    report = _call_blinded(metered, 200).feasibility_only()
+    assert report["status"] == MATCHED
+    assert report["realized_kernel_calls"] >= 200
+    assert report["n_trajectories"] > 0
+    assert report["attainment"] >= 1.0
+
+
+def test_blinded_probe_detects_UNREACHABLE_without_seeing_outcomes():
+    metered = _Metered(10_000)
+    report = _call_blinded(metered, 500, stall=20, reachable=40).feasibility_only()
+    assert report["status"] == MATCHING_UNREACHABLE
+    assert not report["is_scientific"]
+
+
+def test_blinded_probe_wastes_no_compute():
+    """Endpoints and their paid-for scores are retained, so the outcome can be
+    computed offline later for all sources together without re-running."""
+    metered = _Metered(10_000)
+    result = _call_blinded(metered, 150)
+    assert len(result.endpoints) == result.n_trajectories
+    assert len(result.endpoint_z) == result.n_trajectories
+    assert all(len(row) == 2 for row in result.endpoint_z)

@@ -117,12 +117,34 @@ class MatchedGenRank:
     overshoot_kernel_calls: int
     prefix: list[dict[str, Any]] = field(default_factory=list)
     selected: list[Any] = field(default_factory=list)
+    endpoints: list[str] = field(default_factory=list)
+    endpoint_z: list[list[float]] = field(default_factory=list)
+    blinded: bool = False
     note: str = ""
 
     @property
     def is_scientific(self) -> bool:
         """Only a MATCHED source may enter a claim-bearing P3/P4 comparison."""
         return self.status == MATCHED
+
+    def feasibility_only(self) -> dict[str, Any]:
+        """The BLINDED report. Resource axes only -- no HV, no selection.
+
+        This is what a go/no-go on operational feasibility is allowed to see.
+        """
+        return {"status": self.status,
+                "blinded": True,
+                "target_kernel_calls": self.target_kernel_calls,
+                "realized_kernel_calls": self.realized_kernel_calls,
+                "n_trajectories": self.n_trajectories,
+                "overshoot_kernel_calls": self.overshoot_kernel_calls,
+                "attainment": (self.realized_kernel_calls / self.target_kernel_calls
+                               if self.target_kernel_calls else None),
+                "is_scientific": self.is_scientific,
+                "note": self.note,
+                "kernel_prefix": [{k: r[k] for k in
+                                   ("t", "kernel_calls", "native_oracle_calls",
+                                    "raw_oracle_calls")} for r in self.prefix]}
 
     def as_dict(self) -> dict[str, Any]:
         return {"status": self.status,
@@ -149,9 +171,9 @@ def generate_then_rank_metered(
     reference: np.ndarray,
     utopia: np.ndarray,
     unguided_run,
-    hypervolume,
-    argmin_stable,
-    trajectory_cls,
+    hypervolume=None,
+    argmin_stable=None,
+    trajectory_cls=None,
     runaway_guard: int = RUNAWAY_TRAJECTORY_GUARD,
     stall_window: int = STALL_WINDOW,
 ) -> MatchedGenRank:
@@ -202,7 +224,12 @@ def generate_then_rank_metered(
             "kernel_calls": int(metered.ledger.kernel_calls),
             "native_oracle_calls": int(metered.ledger.native_oracle_calls),
             "raw_oracle_calls": int(metered.ledger.raw_oracle_calls),
-            "hypervolume": float(hypervolume(np.stack(z_rows), reference, utopia)),
+            # BLINDED PROBE FIREWALL. With `hypervolume=None` the outcome is
+            # not computed at all -- not computed-then-hidden. A feasibility
+            # go/no-go decision must be structurally unable to read the science
+            # it would otherwise be tempted to condition on.
+            "hypervolume": (None if hypervolume is None
+                            else float(hypervolume(np.stack(z_rows), reference, utopia))),
         })
         if metered.ledger.kernel_calls > last_kernel:
             last_kernel, since_progress = metered.ledger.kernel_calls, 0
@@ -222,6 +249,15 @@ def generate_then_rank_metered(
     if not pool:
         result.status = MATCHING_FAILED
         result.note = "no trajectory completed"
+        return result
+
+    # The endpoints and their already-paid-for scores are always retained, so a
+    # blinded probe wastes no compute: selection and hypervolume can be computed
+    # offline later, for every source together, without re-running anything.
+    result.endpoints = [t.endpoint for t in pool]
+    result.endpoint_z = [list(map(float, row)) for row in z_rows]
+    if hypervolume is None or argmin_stable is None or trajectory_cls is None:
+        result.blinded = True
         return result
 
     # Selection is unchanged from the original arm: rank the pool afterwards,

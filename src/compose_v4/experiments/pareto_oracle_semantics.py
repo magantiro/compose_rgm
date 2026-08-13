@@ -6,13 +6,39 @@
                                      compares, and its value is that it is a
                                      faithful record of an execution.
 
-    algorithmic_oracle_requests      what the METHOD demanded. Harness-only
-                                     requests removed, symmetrically, from every
-                                     affected arm. This is what the paper uses.
+    algorithmic_oracle_requests      objective information the METHOD consumed
+                                     TO MAKE DECISIONS. The main P3 oracle-demand
+                                     axis, and what the paper uses.
 
+    benchmark_eval_requests          evaluations performed ONLY AFTER generation,
+                                     to score and report the produced molecules.
+                                     Ours, not the method's.
+
+THREE CONCEPTS, KEPT APART ON PURPOSE
+--------------------------------------
 Keeping only the first would attribute our bookkeeping to the algorithms.
 Keeping only the second would destroy the exact target a parity replay needs.
-Both are emitted; neither may be substituted for the other.
+Dropping the third would make an HV-vs-oracle plot say something true but easy
+to misread: `unguided` reaches HV > 0 at `algorithmic = 0`. That is correct --
+it never consulted the objective -- but WE still had to evaluate its molecules
+afterwards to know their hypervolume. Without a name, that work vanishes.
+
+So two different cost questions are reported separately, and never merged:
+
+    "how much objective information did the ALGORITHM require?"
+        -> algorithmic_oracle_requests
+
+    "how much evaluator work was required to produce AND assess the returned set?"
+        -> algorithmic + benchmark_eval, with native/cached shown separately
+
+**Post-hoc evaluation is never added back into the algorithmic counter.**
+
+AND A READING RULE, BECAUSE ZERO IS NOT A VICTORY
+--------------------------------------------------
+`unguided` corrects to zero algorithmic requests. That is the correct
+characterisation of a preference-blind floor -- it is not an efficiency win over
+COMPOSE, and may never be presented as one. An arm that ignores the objective
+buys its cheapness by ignoring the objective, which is visible in its HV.
 
 WHY THIS IS A POST-HOC DERIVATION AND NOT A RE-RUN
 ---------------------------------------------------
@@ -125,7 +151,8 @@ def corrected_cost(arm: str, arm_payload: Mapping[str, Any],
     return {
         "raw_instrument_oracle_requests": raw,
         "algorithmic_oracle_requests": algorithmic,
-        "harness_only_requests": harness,
+        "benchmark_eval_requests": harness,
+        "harness_only_requests": harness,   # legacy alias, same quantity
         "native_oracle_calls": int(cost["native_oracle_calls"]),
         "kernel_calls": int(cost["kernel_calls"]),
         "correction": ("raw minus one post-hoc endpoint scoring per completed "
