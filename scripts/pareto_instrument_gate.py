@@ -86,6 +86,17 @@ class Contrast:
     #: vary stated out loud, and may not. The main lane's audit handled its own
     #: confounded Q1 the same way rather than deleting it.
     status: str = "PRIMARY"
+    #: True only where COMPUTE parity is part of what the contrast claims.
+    #:
+    #: Compute is NOT one of the four parity dimensions -- `budget` there means
+    #: the EDIT budget, H=6, which every contrast holds. A lookahead controller
+    #: intrinsically spends more compute than a myopic one, and throttling it to
+    #: greedy's compute would delete the mechanism under test; the honest
+    #: treatment is to hold the edit budget and REPORT the compute ratio. The
+    #: generate-then-rank contrasts are different: giving `gen_rank` the control
+    #: arm's budget is the entire point of them, so there compute parity is
+    #: claimed and is enforced.
+    budget_parity_claimed: bool = False
 
 
 @dataclass
@@ -277,22 +288,34 @@ def check_d6_hv_budget_matched(contrasts: Sequence[Contrast],
         entry = {"endpoint_counts": [na, nb], "equal_endpoint_counts": equal_points,
                  "native_call_gap": round(native_gap, 4),
                  "kernel_call_ratio": round(kernel_ratio, 3),
+                 "budget_parity_claimed": c.budget_parity_claimed,
                  "flag": None}
+        # Equal endpoint counts are enforced for EVERY hypervolume contrast.
+        # That is the structural control on the inflation channel: an arm cannot
+        # win by contributing more points, only by placing them better.
         if not equal_points:
             entry["flag"] = "UNEQUAL_ENDPOINTS"
             ok = False
-        elif native_gap > native_tolerance:
+        elif c.budget_parity_claimed and native_gap > native_tolerance:
             entry["flag"] = "BUDGET_ASYMMETRIC_NATIVE"
             ok = False
-        elif kernel_ratio > kernel_ratio_limit:
+        elif c.budget_parity_claimed and kernel_ratio > kernel_ratio_limit:
             entry["flag"] = "BUDGET_ASYMMETRIC_KERNEL"
             ok = False
+        elif kernel_ratio > kernel_ratio_limit:
+            # Reported, not failed: the compute asymmetry IS the mechanism here.
+            entry["flag"] = "COMPUTE_ASYMMETRIC_BY_DESIGN_REPORT_THE_RATIO"
         detail[c.name] = entry
     report.add("D6_hv_budget_matched", ok,
                {"contrasts": detail,
-                "rule": "HV is only comparable at matched budget and matched "
-                        "endpoint count; otherwise the arm that generated more "
-                        "molecules wins by arithmetic"})
+                "rule": "Equal endpoint counts are required everywhere -- an arm "
+                        "must not win by contributing more points. Compute parity "
+                        "is enforced only where a contrast claims it (the "
+                        "generate-then-rank contrasts, where handing gen_rank the "
+                        "control arm's budget is the whole point). Elsewhere the "
+                        "compute ratio is REPORTED: throttling a lookahead "
+                        "controller to a myopic one's compute would delete the "
+                        "mechanism under test."})
 
 
 # ---------------------------------------------------------------------------
@@ -322,9 +345,10 @@ LANE_CONTRASTS = (
     Contrast("P1_unguided_floor", "greedy_pref", "unguided", "objective",
              status="CONTEXT_ONLY"),
     Contrast("P2_future_awareness", "verified_pref", "greedy_pref", "controller"),
-    Contrast("P3_closed_vs_open_loop", "greedy_pref", "gen_rank@greedy", "controller"),
+    Contrast("P3_closed_vs_open_loop", "greedy_pref", "gen_rank@greedy", "controller",
+             budget_parity_claimed=True),
     Contrast("P4_closed_vs_open_loop_verified", "verified_pref", "gen_rank@verified",
-             "controller"),
+             "controller", budget_parity_claimed=True),
     Contrast("P5_preference_responsiveness", "greedy_pref@w=0.9", "greedy_pref@w=0.1",
              "objective"),
     Contrast("P6_same_prefix_branching", "branch@w_i", "branch@w_j", "objective"),
