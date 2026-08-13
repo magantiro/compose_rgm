@@ -246,7 +246,7 @@ achieved front is.
 | arm | controller | description |
 |---|---|---|
 | `unguided` | none | sample 6 edits from frozen `R_theta`, preference-blind. Five branches from five fixed seeds. The floor: whatever preference coverage this achieves is chance. |
-| `gen_rank@<budget>` | open-loop | generate `K` unguided 6-edit trajectories, then for each preference return the Chebyshev-best endpoint. `K` is set so the **native oracle-call count matches the control arm it is contrasted against**. |
+| `gen_rank@<budget>` | open-loop | generate `K` unguided 6-edit trajectories, then for each preference return the Chebyshev-best endpoint. `K` is **computed from the control arm's own cost ledger at run time**, never chosen by hand, on whichever budget axis the contrast declares. |
 | `greedy_pref` | myopic | at each state, commit the fiber `argmin s(y | w)`. |
 | `verified_pref` | future-aware | shortlist `S` candidates; for each, compute `V_G` = the deterministic greedy-under-`w` continuation of the remaining budget; commit `argmin` under **strict improvement** (ties keep greedy); re-plan from the committed state. |
 
@@ -263,11 +263,15 @@ extra arm type.
 > Matching on **kernel calls** instead gives it far fewer distinct molecules
 > than the closed-loop arms see, which understates it on the axis the
 > multi-objective literature actually budgets. Neither matching is "the fair
-> one." P3 and P4 are therefore reported at **both** matchings, with the
-> kernel-call ratio stated, and the honest reading is that the truth is
-> bracketed between them. Quoting one matching alone would be a reporting choice
-> that decides the winner, which is the same failure as quoting one HV-AUC
-> convention.
+> one." P3 and P4 are therefore declared as a **bracket** — `gen_rank` at both
+> matchings — with the unclaimed axis reported in each case. Quoting one matching
+> alone would be a reporting choice that decides the winner, the same failure as
+> quoting one HV-AUC convention.
+>
+> **Only the kernel-matched end is affordable in the smoke.** A native-matched
+> `gen_rank` needs ~2,600 unguided trajectories per source, ~15,600 kernel calls,
+> ~30 h per source. It is costed and deferred to main, not quietly dropped — and
+> until it runs, **P3 and P4 are one-sided and must be read as such.**
 
 Shortlist for `verified_pref`, frozen: 4 by immediate scalarized score, 2 by
 `R_theta` reference probability, 2 uniformly at random — the same 4/2/2
