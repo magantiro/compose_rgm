@@ -143,8 +143,17 @@ def main() -> int:
     # --- Contrasts, source-level paired bootstrap --------------------------
     print("\nCONTRASTS -- the source is the resampling unit; branches move together")
     contrasts: dict[str, Any] = {}
+    skipped: dict[str, str] = {}
     for contrast in LANE_CONTRASTS:
         if contrast.arm not in arms or contrast.base not in arms:
+            # P5 and P6 are WITHIN-arm preference contrasts, not arm-vs-arm, so
+            # they are computed separately below. Anything else missing is
+            # recorded rather than dropped: a contrast that vanishes silently
+            # from a report is indistinguishable from one that was never run.
+            if not contrast.name.startswith(("P5", "P6")):
+                skipped[contrast.name] = (
+                    f"arm '{contrast.arm}' or base '{contrast.base}' absent from "
+                    f"the shards")
             continue
         entry: dict[str, Any] = {"status": contrast.status,
                                  "varies": contrast.intended_dimension}
@@ -167,9 +176,81 @@ def main() -> int:
               f"[{hv['ci95_low']:>+7.4f}, {hv['ci95_high']:>+7.4f}]  "
               f"{hv['wins']}W/{hv['losses']}L/{hv['ties']}T{flag}")
 
+    # --- P5 and P6: WITHIN-arm preference contrasts -------------------------
+    # These vary the objective ONLY: same controller, same start, same budget,
+    # different preference weight. They are the contrasts that carry "different
+    # preferences produce different futures", and they cannot be computed from
+    # arm-vs-arm differences because both sides live inside one arm.
+    within: dict[str, Any] = {}
+
+    p5_gap, p5_distinct = [], []
+    for row in rows:
+        entry = row.get("arms", {}).get("greedy_pref")
+        if entry is None or len(entry.get("endpoint_z", [])) < 2:
+            continue
+        z = np.asarray(entry["endpoint_z"], dtype=float)
+        # objective-0 coordinate under the highest weight minus the lowest.
+        # A controller that ignored the preference would give ~0 here, and the
+        # value can come out negative, so it is a measurement.
+        p5_gap.append(float(z[-1, 0] - z[0, 0]))
+        p5_distinct.append(len(set(entry["endpoints"])))
+    if p5_gap:
+        within["P5_preference_responsiveness"] = {
+            "status": "PRIMARY", "varies": "objective",
+            "statistic": "objective_0 coordinate at w=0.9 minus at w=0.1",
+            "falsifying_range": "(-inf, +inf); a preference-blind controller gives 0",
+            "objective_0_gap": source_paired_bootstrap(p5_gap),
+            "distinct_endpoints_of_5": {
+                "mean": float(np.mean(p5_distinct)),
+                "all_five_identical_fraction": float(np.mean(
+                    [d == 1 for d in p5_distinct])),
+            },
+        }
+        b = within["P5_preference_responsiveness"]["objective_0_gap"]
+        print(f"  {'P5_preference_responsiveness':<34} "
+              f"obj0 {b['mean']:>+8.4f} [{b['ci95_low']:>+7.4f}, "
+              f"{b['ci95_high']:>+7.4f}]  {b['wins']}W/{b['losses']}L/{b['ties']}T")
+
+    p6_distinct, p6_shared_prefix = [], []
+    for row in rows:
+        fan = row.get("prefix_branching")
+        if not fan:
+            continue
+        endpoints = [b["endpoint"] for b in fan["branches"].values()]
+        p6_distinct.append(len(set(endpoints)))
+        p6_shared_prefix.append(all(b["states"][0] == fan["branch_point"]
+                                    for b in fan["branches"].values()))
+    if p6_distinct:
+        within["P6_same_prefix_branching"] = {
+            "status": "PRIMARY", "varies": "objective",
+            "statistic": "distinct endpoints from the IDENTICAL branch point",
+            "falsifying_range": "[1, 5]; 1 means the prefix determines the future",
+            "n_sources": len(p6_distinct),
+            "mean_distinct_endpoints": float(np.mean(p6_distinct)),
+            "all_five_identical_fraction": float(np.mean(
+                [d == 1 for d in p6_distinct])),
+            # If this is not 1.0 the figure's premise is false and the run is
+            # invalid for P6, whatever the endpoint counts say.
+            "all_branches_started_at_the_branch_point": bool(all(p6_shared_prefix)),
+        }
+        w6 = within["P6_same_prefix_branching"]
+        print(f"  {'P6_same_prefix_branching':<34} "
+              f"{w6['mean_distinct_endpoints']:.2f}/5 distinct endpoints from the "
+              f"identical branch point (n={w6['n_sources']})")
+        if not w6["all_branches_started_at_the_branch_point"]:
+            print("    WARNING: branches did not all start at the branch point; "
+                  "P6 is INVALID for this run")
+
+    if skipped:
+        print("\nSKIPPED CONTRASTS (recorded, not dropped)")
+        for name, why in skipped.items():
+            print(f"  {name}: {why}")
+
     payload = {
         "schema": "compose.pareto.control_analysis",
         "status": "SMOKE_HELD_IN",
+        "within_arm_contrasts": within,
+        "skipped_contrasts": skipped,
         "held_out_opened": False,
         "n_sources": len(rows),
         "pair": rows[0].get("pair"),
