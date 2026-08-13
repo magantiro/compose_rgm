@@ -487,3 +487,51 @@ mechanism into confirmation.
   unit is the source, n=30 within each history.
 - `verified_retarget` vs `greedy_retarget` is not reportable as a claim:
   policy improvement guarantees its direction.
+
+---
+
+# The claim wording, after external qualification
+
+Two phrasings are now **barred**, both killed by verified source reading of
+REINVENT 4 (Lane 3, `COMPARATOR_MATRIX.md`):
+
+- ❌ "no existing method changes objective mid-run" — REINVENT 4's staged
+  learning does exactly that, natively.
+- ❌ "the baseline must retrain / without retraining" — REINVENT's stage
+  boundary is far softer than that implies. The Agent is created once outside
+  the stage loop; the Adam optimizer is constructed once and the *same object*
+  enters every work package, so `exp_avg`, `exp_avg_sq` and the step counter
+  carry across the switch unbroken; there is no LR scheduler in the RL path;
+  and the inception replay buffer is never cleared, carrying stage-N molecules
+  with stale stage-N scores into stage N+1. A stage boundary changes the
+  scoring function and the termination criterion and essentially nothing about
+  the optimizer state.
+
+"Retraining" is additionally a word a reviewer can argue about — whether
+continued RL under a new score counts as retraining is a definitional dispute
+we would lose time on. Drop it.
+
+**The operational distinction, which is sharp and survives:**
+
+> COMPOSE performs inference-time intervention on an explicit realized
+> molecular state while all learned model parameters remain fixed. Changing the
+> goal changes only the control computation.
+
+REINVENT carries forward a **learned policy and its optimizer state**, and
+continues updating that policy under the new score. COMPOSE carries forward the
+**actual molecule `x_3`** and performs zero parameter updates.
+
+The state object is the difference, not the training. Lane 3's Mol2Mol finding
+reinforces it: an input molecule can condition subsequent generation, but
+"the scaffold can change within the limits of the given similarity", so it is a
+**similarity anchor**, not the exact state of one ongoing executable
+trajectory.
+
+**Paper-level wording, preferred:**
+
+> COMPOSE represents molecular design as control of a learned executable
+> stochastic process, allowing goals and trajectory requirements to be changed
+> at inference time without updating the learned reference model.
+
+Avoid "repeatedly training objective-specific generators" as the foil — not
+every baseline does that, and the sentence is not needed for the claim to land.
