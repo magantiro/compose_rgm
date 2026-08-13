@@ -475,6 +475,64 @@ recovery definitions, and rollout law are all carried over unchanged.
 
 ---
 
+## 2026-08-13 — STAGE B EXECUTED, 24/24. Results recorded. Lane stopped.
+
+**Decision.** Run the full 24-source panel as 12 + 12, inspect only instrument
+health between batches, and stop.
+
+**Batch-gate compliance.** Between batches I ran
+`scripts/check_stage_b_instrument_health.py` and nothing else. That script reads
+a fixed allowlist of health fields and raises if any outcome token reaches its
+output, so the gate was enforced by construction rather than by intention.
+
+I also **launched batch 2 while batch 1's last two sources were still running**.
+Batch 2 was going to run regardless, and starting it early removes even the
+theoretical possibility of conditioning it on batch 1's outcomes. It changes no
+total cost — the panel is source-sharded either way.
+
+**Results.** Primary hidden-path rate 16/24 = 0.667 (greedy) and 14/24 = 0.583
+(verified). Terminal cost `Δ^G` −0.105 and `Δ^V` −0.023, both with medians of
+exactly 0.000 and CIs spanning zero. 1 of 24 sources support-tight; 0 sources
+with any mask-empty state; sensitivity excluding the tight source leaves every
+conclusion unchanged.
+
+**Which predeclared outcome this is.** The first: *little or no potency cost*.
+Recorded as such because all three were written down before the run and none
+was a failure.
+
+**Frozen object touched.** None. Corridor, horizon, objective, arms, estimands,
+support-tight threshold and panel are exactly as committed at `abab8ad`.
+
+---
+
+## 2026-08-13 — `--detach` did not survive a client kill; the resume path did
+
+**What happened.** The harness reaped the batch-1 launch client at 10/12
+shards. The Modal app went to `stopped` — `--detach` did **not** protect it,
+exactly as the main lane warned from its own loss. Modal's own output explains
+the mechanism: *"running a local entrypoint in detached mode only keeps the
+last triggered Modal function alive after the parent process has been killed or
+disconnected."*
+
+**I did not cause it.** No client-side `timeout` wrapper was used, per
+instruction. The kill came from the harness's background-task reaper.
+
+**What it cost.** Two sources. Relaunching printed
+`RESUME: skipping 10 committed shards [0,1,2,4,5,6,7,8,9,10]` and dispatched 2
+of 12. The durable per-source shards plus the in-driver resume filter turned a
+total loss into a 2-source loss.
+
+**The fix, applied for both later launches.** Orphan the client:
+`nohup … & disown` from a wrapper script that exits immediately, reparenting it
+to init so no process-group signal reaches it. Both subsequent launches
+survived subsequent reaper events.
+
+**Recommendation for other lanes.** Treat `--detach` as necessary but not
+sufficient, orphan the client, and rely on resumable shard-level checkpoints
+rather than on the client staying alive.
+
+---
+
 ## 2026-08-13 — STAGE B designed and committed. NOT launched.
 
 **Decision.** Build the stage-B protocol, panel, runner, analyser and tests;

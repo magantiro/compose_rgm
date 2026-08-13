@@ -7,7 +7,7 @@
   "head_commit": "39f0ef1cffc1407cd60b426cac6815d12a8f81c9",
   "head_commit_note": "the commit main verified by ref comparison; A2 result commits land on top of it and are listed in commit_trail",
   "working_tree_clean": true,
-  "status": "DESIGN_ONLY_STAGE_B_COMMITTED_NOT_LAUNCHED",
+  "status": "SMOKE_HELD_IN_STAGE_B_COMPLETE_DEVELOPMENTAL",
   "held_out_opened": false,
   "modal_runs_launched": 1,
   "question": "Can COMPOSE require an exact labeled structural motif at every committed state, and does that constraint actually bind, i.e. does endpoint-only filtering return molecules that reached validity through forbidden intermediates?",
@@ -50,6 +50,30 @@
     }
   },
   "artifacts": [
+    {
+      "path": "diagnostics/pathwise_stage_b_shards/",
+      "status": "SMOKE_HELD_IN",
+      "files": 24,
+      "purpose": "raw stage-B per-source shards; aggregate reconstructible offline"
+    },
+    {
+      "path": "scripts/check_stage_b_instrument_health.py",
+      "status": "SMOKE_HELD_IN",
+      "sha256": "f84c49131deb821e19cef7fbfa8294c250358a32e37a81010244013df9a7f5bf",
+      "purpose": "batch-gate health check; raises if an outcome token would be emitted"
+    },
+    {
+      "path": "diagnostics/pathwise_stage_b_instrument_health.json",
+      "status": "SMOKE_HELD_IN",
+      "sha256": "ccc862f8cba3a4a322af8eb9052b4b8f5ec3d1ecc2a098519f4f9c1149825f37",
+      "purpose": "instrument health, outcome-blind"
+    },
+    {
+      "path": "diagnostics/pathwise_stage_b_results.json",
+      "status": "SMOKE_HELD_IN",
+      "sha256": "9f84d128cc8fddad89223beb9b51f2b322dfcb29401159ce0eb04dd1c9d2f92f",
+      "purpose": "stage-B estimands, ITT + sensitivity"
+    },
     {
       "path": "diagnostics/pathwise_a2_corridor_prevalence.json",
       "status": "SMOKE_HELD_IN",
@@ -209,7 +233,7 @@
   },
   "tests": {
     "command": "python3 -m pytest tests/test_pathwise_constraint.py tests/test_pathwise_arms.py tests/test_pathwise_analysis.py tests/test_pathwise_a2_prevalence.py tests/test_pathwise_stage_b.py -q",
-    "count": 109,
+    "count": 111,
     "result": "PASS",
     "key_negative_test": "tests/test_pathwise_analysis.py::test_analyser_FAILS_the_vacuity_gate_when_nothing_ever_violates"
   },
@@ -293,7 +317,7 @@
     },
     "per_source_kernel_call_budget": 360
   },
-  "recommended_next_action": "Authorise the Stage B launch, or its first half. Protocol, panel, runner, analyser and 22 stage-B tests are committed and frozen; nothing is running. At 9-11x the A2 spend the bounded option is --start 0 --sources 12 first; the driver skips committed shards so the second half later costs nothing extra.",
+  "recommended_next_action": "Main lane decides. Stage B is complete on 24 held-in development sources: primary hidden-path rate 16/24 = 0.667 (greedy) and 14/24 = 0.583 (verified), with terminal cost medians of exactly 0.000 and CIs spanning zero. It remains DEVELOPMENTAL because the cLogP family came from the feasibility screen, so the natural next decision is whether to design a held-out confirmation -- explicitly not this lane's call, and none has been designed. This lane has stopped.",
   "not_recommended": [
     "stage B: unauthorised, and greedy is already at ceiling so headroom is 0 by definition",
     "changing the motif rule, horizon, or panel and re-running",
@@ -309,7 +333,10 @@
     "adding a fifth causal arm to stage B",
     "searching objectives: potency was frozen in the retargeting lane",
     "reporting the conditional hidden-path fraction without its denominator",
-    "treating a terminal potency cost as a failed result"
+    "treating a terminal potency cost as a failed result",
+    "stating Stage B as a result without its held-out confirmation",
+    "omitting the feasibility-screen provenance from any write-up",
+    "reopening the future-aware subclaim: pathwise_greedy completed 24/24 so binary headroom is a ceiling"
   ],
   "deviations_from_brief": [
     "eligibility drops 'kernel offers motif-destroying successors' (brief line 207) because it is the numerator of the vacuity gate",
@@ -651,9 +678,9 @@
     }
   ],
   "stage_b_corridor": {
-    "status": "DESIGN_ONLY",
-    "launched": false,
-    "authorised_to_launch": false,
+    "status": "SMOKE_HELD_IN",
+    "launched": true,
+    "authorised_to_launch": true,
     "question": "when terminally acceptable trajectories can pass through forbidden intermediate states, what is the COST and BENEFIT of enforcing the constraint throughout molecular evolution?",
     "not_the_question": "can the mask achieve zero violations -- guaranteed by construction, barred from the results table, checked only as a bug detector",
     "task": "increase DRD2 potency subject to 2.3689 <= cLogP(x_t) <= 4.4522 for all t, H=6",
@@ -766,6 +793,143 @@
       "cpu_only": true,
       "authorised": false
     },
-    "held_out_confirmation_designed": false
+    "held_out_confirmation_designed": false,
+    "protocol_commit_executed": "abab8ad",
+    "anything_adjusted_after_commit": false,
+    "shards": {
+      "committed": 24,
+      "void": 0,
+      "failed": 0
+    },
+    "mask_integrity": "PASS",
+    "developmental_status": "If Stage B is positive it remains DEVELOPMENTAL, not a headline claim, because the cLogP family emerged from the feasibility screen rather than being specified in advance. It would need its own held-out confirmation before it can be stated as a result.",
+    "results": {
+      "PRIMARY_hidden_path_rate": {
+        "endpoint_greedy": {
+          "numerator": 16,
+          "denominator": 24,
+          "estimate": 0.6667,
+          "ci95": [
+            0.4583,
+            0.8333
+          ]
+        },
+        "endpoint_verified": {
+          "numerator": 14,
+          "denominator": 24,
+          "estimate": 0.5833,
+          "ci95": [
+            0.375,
+            0.7917
+          ]
+        }
+      },
+      "SECONDARY_hidden_path_fraction": {
+        "endpoint_greedy": {
+          "numerator": 16,
+          "denominator": 24,
+          "estimate": 0.6667
+        },
+        "endpoint_verified": {
+          "numerator": 14,
+          "denominator": 23,
+          "estimate": 0.6087
+        }
+      },
+      "terminal_cost": {
+        "delta_G_greedy_parity": {
+          "mean": -0.1048,
+          "median": 0.0,
+          "ci95": [
+            -0.3773,
+            0.0987
+          ]
+        },
+        "delta_V_verified_parity": {
+          "mean": -0.0228,
+          "median": 0.0,
+          "ci95": [
+            -0.1823,
+            0.1341
+          ]
+        }
+      },
+      "which_predeclared_outcome": "little or no potency cost (the first of three)",
+      "future_aware": {
+        "effect_size_mean": 0.6608,
+        "effect_size_ci95": [
+          0.4284,
+          0.9441
+        ],
+        "top1_disagreements_mean": 2.25,
+        "binary_headroom": {
+          "denominator_pathwise_greedy_failures": 0,
+          "verified_rescued": 0,
+          "verdict": "CEILING_NOT_A_NULL",
+          "note": "headroom 0 over a denominator of 0 is a ceiling: a real planning advantage had nowhere to show"
+        },
+        "sign_test_computed": false
+      },
+      "definitional_not_a_finding": "pathwise_greedy and pathwise_verified recorded 0 intermediate violations; bug detector only",
+      "descriptive_arm": {
+        "unconstrained_potency_endpoints_in_C": 17,
+        "of_sources": 24,
+        "note": "under pure potency optimisation only 17 of 24 endpoints land in the corridor at all"
+      }
+    },
+    "support_viability": {
+      "sources_tight": 1,
+      "fraction_tight": 0.0417,
+      "threshold": 0.1,
+      "sources_with_any_mask_empty_state": 0,
+      "terminal_failure_attribution": {
+        "endpoint_greedy": {},
+        "endpoint_verified": {
+          "empty_after_mask": 1
+        },
+        "pathwise_greedy": {},
+        "pathwise_verified": {},
+        "unconstrained_potency": {}
+      }
+    },
+    "sensitivity_excluding_support_tight": {
+      "sources": 23,
+      "PRIMARY_rates": {
+        "endpoint_greedy": 0.6522,
+        "endpoint_verified": 0.5652
+      },
+      "terminal_cost_means": {
+        "delta_G_greedy_parity": -0.1205,
+        "delta_V_verified_parity": -0.0409
+      },
+      "conclusions_changed": false
+    },
+    "cost_actual": {
+      "container_hours": 17.414,
+      "kernel_calls_per_source_mean": 182.1667,
+      "estimate_was_container_hours": [
+        12,
+        15
+      ],
+      "over_estimate_pct": 16,
+      "circuit_breaker_margin": 0.465,
+      "breaker_hit": false
+    },
+    "batch_gate_compliance": {
+      "batches": "12 + 12",
+      "between_batch_inspection": "instrument health only",
+      "enforced_by": "scripts/check_stage_b_instrument_health.py raises on any outcome token",
+      "batch_2_launched_before_batch_1_finished": true,
+      "why": "batch 2 was going to run regardless; starting it early removes even the theoretical possibility of conditioning it on batch 1 outcomes"
+    },
+    "operational_incident": {
+      "what": "the harness reaped the batch-1 launch client at 10/12 shards and the Modal app went to stopped: --detach did NOT protect it",
+      "modal_explanation": "running a local entrypoint in detached mode only keeps the LAST triggered Modal function alive after the parent process has been killed or disconnected",
+      "client_side_timeout_wrapper_used": false,
+      "cost": "2 sources of recompute instead of 12",
+      "saved_by": "durable per-source shards plus the in-driver resume filter",
+      "fix_applied": "orphan the client with nohup + disown from a wrapper script that exits immediately; both later launches survived"
+    },
+    "stage_b_authorised": true
   }
 }

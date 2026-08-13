@@ -1,10 +1,91 @@
 # Workstream C — Pathwise Constraints: Status
 
-- **Status:** Stage B **DESIGNED AND COMMITTED — NOT LAUNCHED**
-- **What is running:** **NOTHING.** No Modal run is open.
+- **Status:** Stage B **EXECUTED, 24/24 sources, instrument healthy** (`SMOKE_HELD_IN`)
+- **What is running:** **NOTHING.** All batches finished.
 - **Held-out data opened:** **NO.** No held-out confirmation is designed.
 
-## Stage B — frozen, awaiting launch authorisation
+> **DEVELOPMENTAL, not a headline claim.** The cLogP family emerged from the
+> feasibility screen rather than being specified in advance. Stage B would need
+> its own held-out confirmation before it can be stated as a result. Recorded
+> in `PROTOCOL.md` before the run.
+
+## Stage B results — 24 held-in sources
+
+### Primary: hidden-path RATE `P(x_H ∈ C AND ∃t<H: x_t ∉ C)`
+
+| arm | rate | 95% CI (source-clustered) |
+|---|---:|---|
+| `endpoint_greedy` | **16/24 = 0.667** | [0.458, 0.833] |
+| `endpoint_verified` | **14/24 = 0.583** | [0.375, 0.792] |
+
+**Two-thirds of sources produce an endpoint-only trajectory that lands inside
+the corridor after passing through a state the corridor forbids.** This is the
+estimand that had genuine room to be zero — the ring motif returned exactly
+that — and it is not zero here.
+
+### Secondary: conditional fraction, with denominators
+
+| arm | fraction | denominator |
+|---|---:|---|
+| `endpoint_greedy` | 16/24 = 0.667 | all 24 delivered |
+| `endpoint_verified` | 14/23 = 0.609 | 23 delivered |
+
+The denominators are nearly full, so the small-denominator pathology the
+primary estimand guards against **did not materialise here**. The guard was
+still correct to have.
+
+### Terminal cost, controller parity (sign free)
+
+| | mean | median | 95% CI |
+|---|---:|---:|---|
+| `Δ^G` = pathwise − endpoint, greedy | −0.105 | **0.000** | [−0.377, +0.099] |
+| `Δ^V` = pathwise − endpoint, verified | −0.023 | **0.000** | [−0.182, +0.134] |
+
+**Both CIs include zero and both medians are exactly zero** — on most sources
+the guarantee costs no potency at all; the negative means are carried by a few
+sources (`Δ^G` min −2.49). This is the first of the three predeclared outcomes:
+little or no potency cost.
+
+### Support viability
+
+- **1 of 24 sources support-tight** (4.2%), index 1.
+- Per-source median retention: min 0.084, **median 0.798**, max 0.922 — much
+  tighter spread than A2's 0.048–0.917.
+- **Zero sources had any mask-empty state.**
+- Predeclared sensitivity excluding the tight source: rates 0.652 / 0.565,
+  `Δ^G` −0.121, `Δ^V` −0.041. **Conclusions unchanged.**
+
+### Future-aware — guaranteed sign, magnitude only
+
+Effect size mean +0.661, median +0.559, CI [0.428, 0.944]; top-1 disagreement
+2.25 of 6 steps. **Binary headroom: 0 rescued over a denominator of 0
+`pathwise_greedy` failures — a CEILING, not a null.** The subclaim closes as
+the retargeting lane closed its own.
+
+### Barred from the results table
+
+`pathwise_greedy` and `pathwise_verified` recorded **0** intermediate
+violations. That is the construction, checked only as a bug detector
+(`mask_integrity: PASS`, 0 leaks, 0 void shards).
+
+## Cost
+
+**17.41 container-hours** against a 12–15 estimate (16% over). 182 kernel calls
+per source (estimate 120–150), median 44 min per source. Circuit-breaker margin
+46.5%, never hit.
+
+## Prior stages
+
+| Stage | Verdict | State |
+|---|---|---|
+| Ring-system stage A | **G1 FAIL** | CLOSED, permanently, not revised |
+| Three-family reversibility census | **NO FAMILY PASSES** | CLOSED |
+| Stage A2 — corridor prevalence | **PASS (5/5)** | complete |
+| **Stage B — corridor-constrained potency** | **executed** | complete, developmental |
+
+---
+
+## Stage B design as frozen
 
 **Question:** when terminally acceptable trajectories can pass through
 forbidden intermediate states, what is the cost and benefit of enforcing the
@@ -202,18 +283,20 @@ Well under budget; the 360-call circuit breaker was never approached.
 
 ## Next action
 
-**Await launch authorisation for Stage B.** The protocol, panel, runner,
-analyser and 22 stage-B tests are committed. Nothing is running.
+**None from this lane. Stopped as instructed.** Stage B is complete and the
+main lane decides what follows. No held-out confirmation is designed, and
+designing one is explicitly not this lane's call.
 
-Because Stage B is 9–11× the A2 spend, the lead may prefer to authorise it in
-halves: `--start 0 --sources 12`, inspect, then `--start 12 --sources 12`. The
-driver skips committed shards, so the second half costs nothing extra and an
-outage costs nothing.
+## Operational note worth carrying to other lanes
 
-Two facts from A2 that shaped this design and are already handled:
+The batch-1 client was killed by the harness at 10/12 and **`--detach` did not
+save it** — the app went to `stopped`, exactly as this lane was warned. Modal's
+own message explains why: *"running a local entrypoint in detached mode only
+keeps the last triggered Modal function alive after the parent process has been
+killed or disconnected."*
 
-1. **Retention heterogeneity** (0.048–0.917) is handled by the predeclared
-   support-tight classification with ITT plus frozen-threshold sensitivity.
-2. **Absorption has not disappeared** — a third of A2 sources produced no
-   excursion. The primary estimand's denominator is every eligible source
-   precisely so that this cannot inflate the headline.
+**The resumable driver did save it.** Relaunching skipped the 10 committed
+shards and dispatched only 2, so the outage cost 2 sources of recompute instead
+of 12. The fix for the client itself is to orphan it —
+`nohup … & disown` from a script that exits immediately, so no process-group
+signal from the harness reaches it. Both later launches survived.

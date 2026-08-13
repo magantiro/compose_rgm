@@ -16,7 +16,108 @@
 > i.e. does endpoint-only filtering return molecules that reached validity by
 > passing through forbidden intermediates?
 
-# STAGE B — DESIGNED AND COMMITTED, NOT LAUNCHED
+# STAGE B — EXECUTED, 24/24 SOURCES
+
+> **DEVELOPMENTAL, not a headline claim.** The cLogP family emerged from the
+> feasibility screen rather than being specified in advance. Stage B would need
+> its own held-out confirmation before it can be stated as a result. This was
+> written into `PROTOCOL.md` at `abab8ad`, **before the run**.
+
+`SMOKE_HELD_IN`. 24/24 shards, 0 void, `mask_integrity: PASS` (0 leaks).
+Instrument health: all 24 sources ran all 5 arms, no arms skipped on budget,
+circuit-breaker margin 46.5%, no mask-empty logic errors.
+
+## PRIMARY — hidden-path RATE `P(x_H ∈ C AND ∃t<H: x_t ∉ C)`
+
+| arm | numerator / denominator | rate | 95% CI (source-clustered) |
+|---|---:|---:|---|
+| `endpoint_greedy` | **16 / 24** | **0.667** | [0.458, 0.833] |
+| `endpoint_verified` | **14 / 24** | **0.583** | [0.375, 0.792] |
+
+Denominator is every eligible source and cannot collapse. **Two-thirds of
+sources produce an endpoint-only trajectory that lands inside the corridor
+after passing through a state the corridor forbids.** This estimand had genuine
+room to be zero — the ring motif returned exactly zero — and it is not zero.
+
+## SECONDARY — conditional fraction, denominators attached
+
+| arm | numerator / denominator | fraction | 95% CI |
+|---|---:|---:|---|
+| `endpoint_greedy` | 16 / **24** | 0.667 | [0.458, 0.833] |
+| `endpoint_verified` | 14 / **23** | 0.609 | [0.391, 0.783] |
+
+The denominators are nearly full (0 and 1 undelivered endpoints), so the
+small-denominator pathology the primary estimand exists to prevent **did not
+materialise on this panel**. The guard was still correct to have.
+
+## TERMINAL COST — controller parity, sign free
+
+| | mean | median | 95% CI | range |
+|---|---:|---:|---|---|
+| `Δ^G` greedy parity | −0.105 | **0.000** | [−0.377, +0.099] | [−2.49, +0.77] |
+| `Δ^V` verified parity | −0.023 | **0.000** | [−0.182, +0.134] | [−0.78, +0.71] |
+
+**Both medians are exactly zero and both CIs span zero.** On most sources the
+pathwise guarantee costs no potency at all; the negative means are carried by a
+few sources. Of the three outcomes declared informative in advance, this is the
+first: **little or no potency cost**.
+
+## Per-arm summary
+
+| arm | mean `U_P` | potency gain | completed | endpoint in `C` | mid-path violations |
+|---|---:|---:|---:|---:|---:|
+| `endpoint_greedy` | +0.762 | +3.188 | 24/24 | 24 | 16 |
+| `endpoint_verified` | +1.341 | +3.767 | 23/24 | 23 | 15 |
+| `pathwise_greedy` | +0.657 | +3.084 | 24/24 | 24 | **0** † |
+| `pathwise_verified` | +1.318 | +3.744 | 24/24 | 24 | **0** † |
+| `unconstrained_potency` (descriptive) | +0.798 | +3.224 | 24/24 | **17** | 17 |
+
+† **Definitional, barred from the results table.** Recorded only as a bug
+detector. The descriptive row is informative though: under pure potency
+optimisation only **17 of 24** endpoints land in the corridor at all.
+
+## FUTURE-AWARE — guaranteed sign, magnitude only
+
+Effect size mean +0.661, median +0.559, CI [0.428, 0.944]; top-1 disagreement
+2.25 of 6 steps. **No sign test was computed.**
+
+**Binary headroom: 0 rescued over a denominator of 0 `pathwise_greedy`
+failures — a CEILING, not a null.** `pathwise_greedy` completed on all 24
+sources, so a planning advantage had nowhere to show. The subclaim closes
+exactly as the retargeting lane closed its own.
+
+`constrained_performance_recovered` (mean 2.60 over the 8 sources where the
+mask cost anything) is reported but its numerator has a guaranteed sign, so
+only its magnitude is meaningful.
+
+## Support viability — predeclared handling
+
+| | |
+|---|---|
+| support-tight sources | **1 / 24 = 4.2%** (index 1) |
+| per-source median retention | min 0.084, **median 0.798**, max 0.922 |
+| sources with any mask-empty state | **0** |
+| terminal-failure attribution | 1 event total: `endpoint_verified`, `empty_after_mask` |
+
+Retention is far less heterogeneous than A2's 0.048–0.917, which is why only
+one source trips the frozen 0.10 threshold.
+
+**Predeclared sensitivity excluding the support-tight source (n=23):** rates
+0.652 / 0.565; `Δ^G` −0.121, `Δ^V` −0.041. **Every conclusion unchanged.**
+
+## Cost
+
+| | Estimate | Actual |
+|---|---:|---:|
+| kernel calls / source | 120–150 | **182** (126–214) |
+| container-hours | 12–15 | **17.41** |
+| median wall / source | ~30 min | **44 min** |
+
+16% over estimate. Circuit breaker (400) never approached — 46.5% margin.
+
+---
+
+# Stage B design as frozen (`abab8ad`)
 
 **Question:** when terminally acceptable trajectories can pass through
 forbidden intermediate states, what is the cost and benefit of enforcing the
@@ -743,22 +844,28 @@ terminal filter changes the returned molecule. The capability gap is real; the
 
 # Recommended next action
 
-> **Authorise the Stage B launch, or authorise its first half.** The protocol,
-> panel, runner, analyser and 22 stage-B tests are committed and frozen;
-> nothing is running. Given this is 9–11× the A2 spend, the bounded option is
-> `--start 0 --sources 12` first — the driver skips committed shards, so the
-> second half later costs nothing extra.
+> **Main lane decides.** Stage B is complete on 24 held-in development sources
+> and the result is positive on the primary estimand at essentially no median
+> terminal cost. **It remains developmental** — the cLogP family came from the
+> feasibility screen — so the natural next decision is whether to design a
+> held-out confirmation. **That decision is explicitly not this lane's, and no
+> held-out confirmation has been designed.** This lane has stopped.
 
-All three concerns raised from A2 are now handled inside the frozen design:
+If a held-out confirmation is designed, four things should carry into it:
 
-1. **Powered on sources, not trajectories** — the source is the independent
-   unit and every interval is a source-clustered bootstrap.
-2. **Per-source retention floor pre-registered** — SUPPORT_TIGHT at `< 0.10`,
-   measured on the descriptive arm, ITT keeps all 24, sensitivity is secondary,
-   threshold frozen.
-3. **Mixed population handled by the denominator** — the primary estimand is
-   unconditional, so sources that never leave the corridor stay in the
-   denominator instead of inflating a conditional rate.
+1. **The provenance sentence travels with the result.** Any write-up of Stage B
+   that omits "the cLogP family emerged from the feasibility screen" overstates
+   it. The sentence is in `PROTOCOL.md`, `handoff.json`, and the analysis JSON.
+2. **The descriptive arm is the strongest single number for the paper.** Under
+   pure potency optimisation only **17 of 24** endpoints land in the corridor —
+   endpoint-only filtering discards nearly a third of the work outright, before
+   any question of hidden intermediate excursions.
+3. **The future-aware subclaim is closed on this panel** — `pathwise_greedy`
+   completed 24/24, so binary headroom is a ceiling. Do not reopen it without a
+   harder task where greedy actually fails.
+4. **Budget realistically.** Stage B ran 16% over estimate at 17.4
+   container-hours for 24 sources; a 60–80 source confirmatory panel is
+   therefore roughly 44–58 container-hours.
 
 # Actions explicitly not recommended
 

@@ -1,0 +1,811 @@
+{
+  "schema": "compose.pathwise.stage_b_results",
+  "status": "SMOKE_HELD_IN",
+  "held_out_opened": false,
+  "panel_sha256": "2d9935085f7e19975660d04230036cc62151cfb7a22ebc1ea799f02ff1d2425c",
+  "shards": 24,
+  "shards_void": 0,
+  "void_reasons": null,
+  "objective": "DRD2 potency alone (goal P)",
+  "independent_unit": "source",
+  "mask_integrity": {
+    "verdict": "PASS",
+    "kind": "BUG_DETECTOR_NOT_A_FINDING",
+    "leaks": null
+  },
+  "support_tight": {
+    "threshold": 0.1,
+    "predeclared": true,
+    "measured_on": "states visited by the DESCRIPTIVE unconstrained arm",
+    "sources_tight": 1,
+    "fraction_tight": 0.0417,
+    "tight_indices": [
+      1
+    ],
+    "median_retention_by_source": {
+      "0": 0.6296774193548387,
+      "1": 0.08373205741626795,
+      "2": 0.42616033755274263,
+      "3": 0.9135618479880775,
+      "4": 0.7815126050420168,
+      "5": 0.3907407407407407,
+      "6": 0.383008356545961,
+      "7": 0.28356605800214824,
+      "8": 0.635036496350365,
+      "9": 0.16463414634146342,
+      "10": 0.58147512864494,
+      "11": 0.9221635883905013,
+      "12": 0.9016393442622951,
+      "13": 0.8279816513761468,
+      "14": 0.8937875751503006,
+      "15": 0.888045540796964,
+      "16": 0.8075060532687651,
+      "17": 0.7979651162790697,
+      "18": 0.8843373493975903,
+      "19": 0.46204620462046203,
+      "20": 0.5988805970149254,
+      "21": 0.850828729281768,
+      "22": 0.8125984251968504,
+      "23": 0.9192825112107623
+    }
+  },
+  "mask_empty_by_source": {
+    "0": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "1": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "2": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "3": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "4": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "5": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "6": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "7": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "8": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "9": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "10": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "11": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "12": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "13": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "14": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "15": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "16": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "17": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "18": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "19": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "20": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "21": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "22": {
+      "empty_states": 0,
+      "fraction": 0.0
+    },
+    "23": {
+      "empty_states": 0,
+      "fraction": 0.0
+    }
+  },
+  "primary_analysis_ITT": {
+    "label": "intention-to-treat (all sources)",
+    "sources": 24,
+    "pathwise_estimands": {
+      "endpoint_greedy": {
+        "PRIMARY_hidden_path_rate": {
+          "definition": "P(x_H in C AND exists t<H: x_t not in C)",
+          "numerator": 16,
+          "denominator_all_eligible_sources": 24,
+          "estimate": 0.6667,
+          "bootstrap": {
+            "n_sources": 24,
+            "point": 0.6667,
+            "ci95_low": 0.4583,
+            "ci95_high": 0.8333,
+            "draws": 10000,
+            "unit": "source"
+          },
+          "denominator_is_controller_independent": true,
+          "can_be_zero": true
+        },
+        "SECONDARY_hidden_path_fraction": {
+          "definition": "P(exists t<H: x_t not in C | x_H in C)",
+          "numerator": 16,
+          "denominator_accepted_endpoints": 24,
+          "estimate": 0.6667,
+          "bootstrap": {
+            "n_sources": 24,
+            "point": 0.6667,
+            "ci95_low": 0.4583,
+            "ci95_high": 0.8333,
+            "draws": 10000,
+            "unit": "source"
+          },
+          "DENOMINATOR_IS_CONTROLLER_DEPENDENT": true,
+          "warning": "read only with the denominator: a small denominator can make this look dramatic"
+        },
+        "endpoints_not_in_C": 0
+      },
+      "endpoint_verified": {
+        "PRIMARY_hidden_path_rate": {
+          "definition": "P(x_H in C AND exists t<H: x_t not in C)",
+          "numerator": 14,
+          "denominator_all_eligible_sources": 24,
+          "estimate": 0.5833,
+          "bootstrap": {
+            "n_sources": 24,
+            "point": 0.5833,
+            "ci95_low": 0.375,
+            "ci95_high": 0.7917,
+            "draws": 10000,
+            "unit": "source"
+          },
+          "denominator_is_controller_independent": true,
+          "can_be_zero": true
+        },
+        "SECONDARY_hidden_path_fraction": {
+          "definition": "P(exists t<H: x_t not in C | x_H in C)",
+          "numerator": 14,
+          "denominator_accepted_endpoints": 23,
+          "estimate": 0.6087,
+          "bootstrap": {
+            "n_sources": 23,
+            "point": 0.6087,
+            "ci95_low": 0.3913,
+            "ci95_high": 0.7826,
+            "draws": 10000,
+            "unit": "source"
+          },
+          "DENOMINATOR_IS_CONTROLLER_DEPENDENT": true,
+          "warning": "read only with the denominator: a small denominator can make this look dramatic"
+        },
+        "endpoints_not_in_C": 1
+      }
+    },
+    "terminal_cost": {
+      "delta_G_greedy_parity": {
+        "pairs": 24,
+        "summary": {
+          "n": 24,
+          "mean": -0.1048,
+          "median": 0.0,
+          "min": -2.4923,
+          "max": 0.7658
+        },
+        "bootstrap": {
+          "n_sources": 24,
+          "point": -0.1048,
+          "ci95_low": -0.3773,
+          "ci95_high": 0.0987,
+          "draws": 10000,
+          "unit": "source"
+        },
+        "sign_is_free": true,
+        "note": "controller parity: the two arms differ only in where the constraint is enforced"
+      },
+      "delta_V_verified_parity": {
+        "pairs": 24,
+        "summary": {
+          "n": 24,
+          "mean": -0.0228,
+          "median": 0.0,
+          "min": -0.7782,
+          "max": 0.71
+        },
+        "bootstrap": {
+          "n_sources": 24,
+          "point": -0.0228,
+          "ci95_low": -0.1823,
+          "ci95_high": 0.1341,
+          "draws": 10000,
+          "unit": "source"
+        },
+        "sign_is_free": true,
+        "note": "controller parity: the two arms differ only in where the constraint is enforced"
+      }
+    },
+    "terminal_cost_interpretation": {
+      "no_expectation_that_pathwise_beats_endpoint_only": true,
+      "reason": "the mask can only shrink the reachable set, so framing a potency win as the goal would be suspicious",
+      "declared_informative_in_advance": [
+        "little or no potency cost -> strongest pathwise result",
+        "moderate potency cost -> still meaningful; the constraint genuinely restricts molecular evolution",
+        "large cost or frequent support collapse -> pathwise control works formally but is practically too restrictive for this corridor, which is a real finding"
+      ],
+      "none_of_these_is_a_failure": true
+    },
+    "future_aware": {
+      "GUARANTEED_SIGN_WARNING": "verified contains greedy's action and overrides only on strict improvement, so U_P(pathwise verified) >= U_P(pathwise greedy) holds by policy improvement. No sign test is computed. Only effect size, top-1 disagreement and headroom over the greedy-failure denominator are admissible.",
+      "effect_size": {
+        "n": 24,
+        "mean": 0.6608,
+        "median": 0.5593,
+        "min": 0.0,
+        "max": 2.925
+      },
+      "effect_size_bootstrap": {
+        "n_sources": 24,
+        "point": 0.6608,
+        "ci95_low": 0.4284,
+        "ci95_high": 0.9441,
+        "draws": 10000,
+        "unit": "source"
+      },
+      "top1_disagreements": {
+        "n": 24,
+        "mean": 2.25,
+        "median": 2.0,
+        "min": 1.0,
+        "max": 4.0
+      },
+      "constrained_performance_recovered": {
+        "definition": "planning gain inside the mask as a fraction of the terminal potency the mask cost under greedy parity",
+        "summary": {
+          "n": 8,
+          "mean": 2.6006,
+          "median": 1.8445,
+          "min": 0.0,
+          "max": 5.8483
+        },
+        "sources_with_a_positive_mask_cost": 8,
+        "note": "undefined where the mask cost nothing; those sources are omitted"
+      },
+      "binary_headroom": {
+        "denominator_pathwise_greedy_failures": 0,
+        "verified_rescued": 0,
+        "verdict": "CEILING_NOT_A_NULL",
+        "note": "headroom 0 over a denominator of 0 is a ceiling: a real planning advantage had nowhere to show"
+      }
+    },
+    "terminal_failure_attribution": {
+      "endpoint_greedy": {},
+      "endpoint_verified": {
+        "empty_after_mask": 1
+      },
+      "pathwise_greedy": {},
+      "pathwise_verified": {},
+      "unconstrained_potency": {}
+    },
+    "per_arm": {
+      "endpoint_greedy": {
+        "sources": 24,
+        "U_P": {
+          "n": 24,
+          "mean": 0.7619,
+          "median": 1.0964,
+          "min": -1.366,
+          "max": 2.1896
+        },
+        "potency_gain_over_source": {
+          "n": 24,
+          "mean": 3.1885,
+          "median": 3.0681,
+          "min": 0.9252,
+          "max": 5.7878
+        },
+        "completed": 24,
+        "endpoint_in_C": 24,
+        "endpoint_terminal_infeasible": 0,
+        "any_intermediate_violation_DEFINITIONAL_IF_PATHWISE": 16,
+        "marginal_kernel_calls": {
+          "n": 24,
+          "mean": 0.2917,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 1.0
+        }
+      },
+      "endpoint_verified": {
+        "sources": 24,
+        "U_P": {
+          "n": 24,
+          "mean": 1.3407,
+          "median": 1.2572,
+          "min": -1.3633,
+          "max": 2.7676
+        },
+        "potency_gain_over_source": {
+          "n": 24,
+          "mean": 3.7673,
+          "median": 3.4773,
+          "min": 0.928,
+          "max": 6.22
+        },
+        "completed": 23,
+        "endpoint_in_C": 23,
+        "endpoint_terminal_infeasible": 1,
+        "any_intermediate_violation_DEFINITIONAL_IF_PATHWISE": 15,
+        "marginal_kernel_calls": {
+          "n": 24,
+          "mean": 94.25,
+          "median": 96.0,
+          "min": 76.0,
+          "max": 103.0
+        }
+      },
+      "pathwise_greedy": {
+        "sources": 24,
+        "U_P": {
+          "n": 24,
+          "mean": 0.657,
+          "median": 0.9349,
+          "min": -1.3799,
+          "max": 2.1896
+        },
+        "potency_gain_over_source": {
+          "n": 24,
+          "mean": 3.0837,
+          "median": 2.9543,
+          "min": 0.9261,
+          "max": 5.7878
+        },
+        "completed": 24,
+        "endpoint_in_C": 24,
+        "endpoint_terminal_infeasible": 0,
+        "any_intermediate_violation_DEFINITIONAL_IF_PATHWISE": 0,
+        "marginal_kernel_calls": {
+          "n": 24,
+          "mean": 3.0417,
+          "median": 3.0,
+          "min": 0.0,
+          "max": 6.0
+        }
+      },
+      "pathwise_verified": {
+        "sources": 24,
+        "U_P": {
+          "n": 24,
+          "mean": 1.3178,
+          "median": 1.3375,
+          "min": -1.3591,
+          "max": 3.1593
+        },
+        "potency_gain_over_source": {
+          "n": 24,
+          "mean": 3.7444,
+          "median": 3.722,
+          "min": 0.9322,
+          "max": 5.9167
+        },
+        "completed": 24,
+        "endpoint_in_C": 24,
+        "endpoint_terminal_infeasible": 0,
+        "any_intermediate_violation_DEFINITIONAL_IF_PATHWISE": 0,
+        "marginal_kernel_calls": {
+          "n": 24,
+          "mean": 77.5833,
+          "median": 78.0,
+          "min": 34.0,
+          "max": 100.0
+        }
+      },
+      "unconstrained_potency": {
+        "sources": 24,
+        "U_P": {
+          "n": 24,
+          "mean": 0.7977,
+          "median": 1.0964,
+          "min": -1.3658,
+          "max": 2.1896
+        },
+        "potency_gain_over_source": {
+          "n": 24,
+          "mean": 3.2243,
+          "median": 3.0681,
+          "min": 0.9255,
+          "max": 5.7878
+        },
+        "completed": 24,
+        "endpoint_in_C": 17,
+        "endpoint_terminal_infeasible": 0,
+        "any_intermediate_violation_DEFINITIONAL_IF_PATHWISE": 17,
+        "marginal_kernel_calls": {
+          "n": 24,
+          "mean": 7.0,
+          "median": 7.0,
+          "min": 7.0,
+          "max": 7.0
+        }
+      }
+    }
+  },
+  "sensitivity_excluding_support_tight": {
+    "label": "predeclared sensitivity: support-tight excluded",
+    "sources": 23,
+    "pathwise_estimands": {
+      "endpoint_greedy": {
+        "PRIMARY_hidden_path_rate": {
+          "definition": "P(x_H in C AND exists t<H: x_t not in C)",
+          "numerator": 15,
+          "denominator_all_eligible_sources": 23,
+          "estimate": 0.6522,
+          "bootstrap": {
+            "n_sources": 23,
+            "point": 0.6522,
+            "ci95_low": 0.4348,
+            "ci95_high": 0.8261,
+            "draws": 10000,
+            "unit": "source"
+          },
+          "denominator_is_controller_independent": true,
+          "can_be_zero": true
+        },
+        "SECONDARY_hidden_path_fraction": {
+          "definition": "P(exists t<H: x_t not in C | x_H in C)",
+          "numerator": 15,
+          "denominator_accepted_endpoints": 23,
+          "estimate": 0.6522,
+          "bootstrap": {
+            "n_sources": 23,
+            "point": 0.6522,
+            "ci95_low": 0.4348,
+            "ci95_high": 0.8261,
+            "draws": 10000,
+            "unit": "source"
+          },
+          "DENOMINATOR_IS_CONTROLLER_DEPENDENT": true,
+          "warning": "read only with the denominator: a small denominator can make this look dramatic"
+        },
+        "endpoints_not_in_C": 0
+      },
+      "endpoint_verified": {
+        "PRIMARY_hidden_path_rate": {
+          "definition": "P(x_H in C AND exists t<H: x_t not in C)",
+          "numerator": 13,
+          "denominator_all_eligible_sources": 23,
+          "estimate": 0.5652,
+          "bootstrap": {
+            "n_sources": 23,
+            "point": 0.5652,
+            "ci95_low": 0.3478,
+            "ci95_high": 0.7391,
+            "draws": 10000,
+            "unit": "source"
+          },
+          "denominator_is_controller_independent": true,
+          "can_be_zero": true
+        },
+        "SECONDARY_hidden_path_fraction": {
+          "definition": "P(exists t<H: x_t not in C | x_H in C)",
+          "numerator": 13,
+          "denominator_accepted_endpoints": 22,
+          "estimate": 0.5909,
+          "bootstrap": {
+            "n_sources": 22,
+            "point": 0.5909,
+            "ci95_low": 0.3636,
+            "ci95_high": 0.7727,
+            "draws": 10000,
+            "unit": "source"
+          },
+          "DENOMINATOR_IS_CONTROLLER_DEPENDENT": true,
+          "warning": "read only with the denominator: a small denominator can make this look dramatic"
+        },
+        "endpoints_not_in_C": 1
+      }
+    },
+    "terminal_cost": {
+      "delta_G_greedy_parity": {
+        "pairs": 23,
+        "summary": {
+          "n": 23,
+          "mean": -0.1205,
+          "median": 0.0,
+          "min": -2.4923,
+          "max": 0.7658
+        },
+        "bootstrap": {
+          "n_sources": 23,
+          "point": -0.1205,
+          "ci95_low": -0.3937,
+          "ci95_high": 0.0903,
+          "draws": 10000,
+          "unit": "source"
+        },
+        "sign_is_free": true,
+        "note": "controller parity: the two arms differ only in where the constraint is enforced"
+      },
+      "delta_V_verified_parity": {
+        "pairs": 23,
+        "summary": {
+          "n": 23,
+          "mean": -0.0409,
+          "median": 0.0,
+          "min": -0.7782,
+          "max": 0.71
+        },
+        "bootstrap": {
+          "n_sources": 23,
+          "point": -0.0409,
+          "ci95_low": -0.2047,
+          "ci95_high": 0.1184,
+          "draws": 10000,
+          "unit": "source"
+        },
+        "sign_is_free": true,
+        "note": "controller parity: the two arms differ only in where the constraint is enforced"
+      }
+    },
+    "terminal_cost_interpretation": {
+      "no_expectation_that_pathwise_beats_endpoint_only": true,
+      "reason": "the mask can only shrink the reachable set, so framing a potency win as the goal would be suspicious",
+      "declared_informative_in_advance": [
+        "little or no potency cost -> strongest pathwise result",
+        "moderate potency cost -> still meaningful; the constraint genuinely restricts molecular evolution",
+        "large cost or frequent support collapse -> pathwise control works formally but is practically too restrictive for this corridor, which is a real finding"
+      ],
+      "none_of_these_is_a_failure": true
+    },
+    "future_aware": {
+      "GUARANTEED_SIGN_WARNING": "verified contains greedy's action and overrides only on strict improvement, so U_P(pathwise verified) >= U_P(pathwise greedy) holds by policy improvement. No sign test is computed. Only effect size, top-1 disagreement and headroom over the greedy-failure denominator are admissible.",
+      "effect_size": {
+        "n": 23,
+        "mean": 0.633,
+        "median": 0.5323,
+        "min": 0.0,
+        "max": 2.925
+      },
+      "effect_size_bootstrap": {
+        "n_sources": 23,
+        "point": 0.633,
+        "ci95_low": 0.3962,
+        "ci95_high": 0.9216,
+        "draws": 10000,
+        "unit": "source"
+      },
+      "top1_disagreements": {
+        "n": 23,
+        "mean": 2.2609,
+        "median": 2.0,
+        "min": 1.0,
+        "max": 4.0
+      },
+      "constrained_performance_recovered": {
+        "definition": "planning gain inside the mask as a fraction of the terminal potency the mask cost under greedy parity",
+        "summary": {
+          "n": 8,
+          "mean": 2.6006,
+          "median": 1.8445,
+          "min": 0.0,
+          "max": 5.8483
+        },
+        "sources_with_a_positive_mask_cost": 8,
+        "note": "undefined where the mask cost nothing; those sources are omitted"
+      },
+      "binary_headroom": {
+        "denominator_pathwise_greedy_failures": 0,
+        "verified_rescued": 0,
+        "verdict": "CEILING_NOT_A_NULL",
+        "note": "headroom 0 over a denominator of 0 is a ceiling: a real planning advantage had nowhere to show"
+      }
+    },
+    "terminal_failure_attribution": {
+      "endpoint_greedy": {},
+      "endpoint_verified": {
+        "empty_after_mask": 1
+      },
+      "pathwise_greedy": {},
+      "pathwise_verified": {},
+      "unconstrained_potency": {}
+    },
+    "per_arm": {
+      "endpoint_greedy": {
+        "sources": 23,
+        "U_P": {
+          "n": 23,
+          "mean": 0.7253,
+          "median": 1.0805,
+          "min": -1.366,
+          "max": 2.1896
+        },
+        "potency_gain_over_source": {
+          "n": 23,
+          "mean": 3.2364,
+          "median": 3.0705,
+          "min": 0.9252,
+          "max": 5.7878
+        },
+        "completed": 23,
+        "endpoint_in_C": 23,
+        "endpoint_terminal_infeasible": 0,
+        "any_intermediate_violation_DEFINITIONAL_IF_PATHWISE": 15,
+        "marginal_kernel_calls": {
+          "n": 23,
+          "mean": 0.2609,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 1.0
+        }
+      },
+      "endpoint_verified": {
+        "sources": 23,
+        "U_P": {
+          "n": 23,
+          "mean": 1.2786,
+          "median": 1.218,
+          "min": -1.3633,
+          "max": 2.6218
+        },
+        "potency_gain_over_source": {
+          "n": 23,
+          "mean": 3.7897,
+          "median": 3.478,
+          "min": 0.928,
+          "max": 6.22
+        },
+        "completed": 22,
+        "endpoint_in_C": 22,
+        "endpoint_terminal_infeasible": 1,
+        "any_intermediate_violation_DEFINITIONAL_IF_PATHWISE": 14,
+        "marginal_kernel_calls": {
+          "n": 23,
+          "mean": 94.0,
+          "median": 96.0,
+          "min": 76.0,
+          "max": 103.0
+        }
+      },
+      "pathwise_greedy": {
+        "sources": 23,
+        "U_P": {
+          "n": 23,
+          "mean": 0.6048,
+          "median": 0.8817,
+          "min": -1.3799,
+          "max": 2.1896
+        },
+        "potency_gain_over_source": {
+          "n": 23,
+          "mean": 3.1159,
+          "median": 2.9887,
+          "min": 0.9261,
+          "max": 5.7878
+        },
+        "completed": 23,
+        "endpoint_in_C": 23,
+        "endpoint_terminal_infeasible": 0,
+        "any_intermediate_violation_DEFINITIONAL_IF_PATHWISE": 0,
+        "marginal_kernel_calls": {
+          "n": 23,
+          "mean": 2.913,
+          "median": 3.0,
+          "min": 0.0,
+          "max": 6.0
+        }
+      },
+      "pathwise_verified": {
+        "sources": 23,
+        "U_P": {
+          "n": 23,
+          "mean": 1.2377,
+          "median": 1.3184,
+          "min": -1.3591,
+          "max": 2.3876
+        },
+        "potency_gain_over_source": {
+          "n": 23,
+          "mean": 3.7489,
+          "median": 3.801,
+          "min": 0.9322,
+          "max": 5.9167
+        },
+        "completed": 23,
+        "endpoint_in_C": 23,
+        "endpoint_terminal_infeasible": 0,
+        "any_intermediate_violation_DEFINITIONAL_IF_PATHWISE": 0,
+        "marginal_kernel_calls": {
+          "n": 23,
+          "mean": 76.6087,
+          "median": 78.0,
+          "min": 34.0,
+          "max": 100.0
+        }
+      },
+      "unconstrained_potency": {
+        "sources": 23,
+        "U_P": {
+          "n": 23,
+          "mean": 0.7572,
+          "median": 1.0805,
+          "min": -1.3658,
+          "max": 2.1896
+        },
+        "potency_gain_over_source": {
+          "n": 23,
+          "mean": 3.2683,
+          "median": 3.0705,
+          "min": 0.9255,
+          "max": 5.7878
+        },
+        "completed": 23,
+        "endpoint_in_C": 17,
+        "endpoint_terminal_infeasible": 0,
+        "any_intermediate_violation_DEFINITIONAL_IF_PATHWISE": 16,
+        "marginal_kernel_calls": {
+          "n": 23,
+          "mean": 7.0,
+          "median": 7.0,
+          "min": 7.0,
+          "max": 7.0
+        }
+      }
+    }
+  },
+  "cost": {
+    "kernel_calls": {
+      "n": 24,
+      "mean": 182.1667,
+      "median": 181.5,
+      "min": 126.0,
+      "max": 214.0
+    },
+    "seconds": {
+      "n": 24,
+      "mean": 2612.125,
+      "median": 2640.9,
+      "min": 758.2,
+      "max": 5016.9
+    }
+  },
+  "results_sha256": "9fdcb1a1540ee168be44887e82d844a7e1ba6dafc446d3e1eb8940918bbf7f0a"
+}

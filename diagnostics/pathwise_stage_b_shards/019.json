@@ -1,0 +1,476 @@
+{
+  "schema": "compose.pathwise.stage_b_source",
+  "status": "SMOKE_HELD_IN",
+  "mask_leak": null,
+  "index": 19,
+  "source": "COc1cc(C2C(Cl)C(=O)N2NC(=O)c2ccccc2)cc(OC)c1OC",
+  "start_key": "COc1cc(C2C(Cl)C(=O)N2NC(=O)c2ccccc2)cc(OC)c1OC",
+  "start_clogp": 2.5481,
+  "corridor": [
+    2.3688650000000004,
+    4.452222500000002
+  ],
+  "horizon": 6,
+  "goal": "P",
+  "arm_run_order": [
+    "unconstrained_potency",
+    "endpoint_greedy",
+    "pathwise_greedy",
+    "endpoint_verified",
+    "pathwise_verified"
+  ],
+  "arms_skipped_on_budget": null,
+  "kernel_call_budget": 400,
+  "support_census": [
+    {
+      "step": 0,
+      "candidates": 422,
+      "kept": 275,
+      "retention": 0.6516587677725119,
+      "empty_after_mask": false
+    },
+    {
+      "step": 1,
+      "candidates": 581,
+      "kept": 178,
+      "retention": 0.306368330464716,
+      "empty_after_mask": false
+    },
+    {
+      "step": 2,
+      "candidates": 632,
+      "kept": 138,
+      "retention": 0.21835443037974683,
+      "empty_after_mask": false
+    },
+    {
+      "step": 3,
+      "candidates": 574,
+      "kept": 95,
+      "retention": 0.16550522648083624,
+      "empty_after_mask": false
+    },
+    {
+      "step": 4,
+      "candidates": 606,
+      "kept": 280,
+      "retention": 0.46204620462046203,
+      "empty_after_mask": false
+    },
+    {
+      "step": 5,
+      "candidates": 637,
+      "kept": 300,
+      "retention": 0.47095761381475665,
+      "empty_after_mask": false
+    },
+    {
+      "step": 6,
+      "candidates": 659,
+      "kept": 461,
+      "retention": 0.6995447647951442,
+      "empty_after_mask": false
+    }
+  ],
+  "median_retention": 0.46204620462046203,
+  "support_tight": false,
+  "support_tight_threshold": 0.1,
+  "mask_empty_states": 0,
+  "mask_empty_fraction_this_source": 0.0,
+  "arms": {
+    "unconstrained_potency": {
+      "landing": "CNc1c(OC)c(OC)c([IH4])c2c1[SH2]C21C(Cl)C(=N)N1NC(=O)c1ccc(S)cc1",
+      "trajectory": [
+        "COc1cc(C2C(Cl)C(=O)N2NC(=O)c2ccccc2)cc(OC)c1OC",
+        "COc1cc(C2C(Cl)C(=O)N2NC(=O)c2ccccc2)c([IH4])c(OC)c1OC",
+        "COc1c([SH3])c(C2C(Cl)C(=O)N2NC(=O)c2ccccc2)c([IH4])c(OC)c1OC",
+        "COc1c([IH4])c2c(c(OC)c1OC)[SH2]C21C(Cl)C(=O)N1NC(=O)c1ccccc1",
+        "COc1c([IH4])c2c(c(OC)c1OC)[SH2]C21C(Cl)C(=N)N1NC(=O)c1ccccc1",
+        "CNc1c(OC)c(OC)c([IH4])c2c1[SH2]C21C(Cl)C(=N)N1NC(=O)c1ccccc1",
+        "CNc1c(OC)c(OC)c([IH4])c2c1[SH2]C21C(Cl)C(=N)N1NC(=O)c1ccc(S)cc1"
+      ],
+      "clogp": [
+        2.5481,
+        2.0819,
+        1.8352,
+        1.7639,
+        2.2146,
+        2.2477,
+        2.5364
+      ],
+      "edits": 6,
+      "dead_end_step": null,
+      "completed": true,
+      "endpoint_terminal_infeasible": false,
+      "feasible_actions_by_step": [
+        {
+          "step": 0,
+          "candidates": 422,
+          "feasible": 275
+        },
+        {
+          "step": 1,
+          "candidates": 581,
+          "feasible": 178
+        },
+        {
+          "step": 2,
+          "candidates": 632,
+          "feasible": 138
+        },
+        {
+          "step": 3,
+          "candidates": 574,
+          "feasible": 95
+        },
+        {
+          "step": 4,
+          "candidates": 606,
+          "feasible": 280
+        },
+        {
+          "step": 5,
+          "candidates": 637,
+          "feasible": 300
+        },
+        {
+          "step": 6,
+          "candidates": 659,
+          "feasible": 461
+        }
+      ],
+      "terminal_failure_attribution": null,
+      "overrides": null,
+      "top1_disagreements": null,
+      "U_P": 0.6110192160397165,
+      "U_P_at_source": -2.037228566611319,
+      "potency_gain": 2.6482477826510356,
+      "endpoint_in_C": true,
+      "any_intermediate_violation": true,
+      "intermediate_violation_count": 5,
+      "first_violation_index": 1,
+      "excursions": [
+        {
+          "start_index": 1,
+          "duration": 5,
+          "max_depth": 0.605,
+          "returned": true
+        }
+      ],
+      "marginal_kernel_calls": 7
+    },
+    "endpoint_greedy": {
+      "landing": "CNc1c(OC)c(OC)c([IH4])c2c1[SH2]C21C(Cl)C(=N)N1NC(=O)c1ccc(S)cc1",
+      "trajectory": [
+        "COc1cc(C2C(Cl)C(=O)N2NC(=O)c2ccccc2)cc(OC)c1OC",
+        "COc1cc(C2C(Cl)C(=O)N2NC(=O)c2ccccc2)c([IH4])c(OC)c1OC",
+        "COc1c([SH3])c(C2C(Cl)C(=O)N2NC(=O)c2ccccc2)c([IH4])c(OC)c1OC",
+        "COc1c([IH4])c2c(c(OC)c1OC)[SH2]C21C(Cl)C(=O)N1NC(=O)c1ccccc1",
+        "COc1c([IH4])c2c(c(OC)c1OC)[SH2]C21C(Cl)C(=N)N1NC(=O)c1ccccc1",
+        "CNc1c(OC)c(OC)c([IH4])c2c1[SH2]C21C(Cl)C(=N)N1NC(=O)c1ccccc1",
+        "CNc1c(OC)c(OC)c([IH4])c2c1[SH2]C21C(Cl)C(=N)N1NC(=O)c1ccc(S)cc1"
+      ],
+      "clogp": [
+        2.5481,
+        2.0819,
+        1.8352,
+        1.7639,
+        2.2146,
+        2.2477,
+        2.5364
+      ],
+      "edits": 6,
+      "dead_end_step": null,
+      "completed": true,
+      "endpoint_terminal_infeasible": false,
+      "feasible_actions_by_step": [
+        {
+          "step": 0,
+          "candidates": 422,
+          "feasible": 275
+        },
+        {
+          "step": 1,
+          "candidates": 581,
+          "feasible": 178
+        },
+        {
+          "step": 2,
+          "candidates": 632,
+          "feasible": 138
+        },
+        {
+          "step": 3,
+          "candidates": 574,
+          "feasible": 95
+        },
+        {
+          "step": 4,
+          "candidates": 606,
+          "feasible": 280
+        },
+        {
+          "step": 5,
+          "candidates": 637,
+          "feasible": 300
+        },
+        {
+          "step": 6,
+          "candidates": 659,
+          "feasible": 461
+        }
+      ],
+      "terminal_failure_attribution": null,
+      "overrides": null,
+      "top1_disagreements": null,
+      "U_P": 0.6110192160397165,
+      "U_P_at_source": -2.037228566611319,
+      "potency_gain": 2.6482477826510356,
+      "endpoint_in_C": true,
+      "any_intermediate_violation": true,
+      "intermediate_violation_count": 5,
+      "first_violation_index": 1,
+      "excursions": [
+        {
+          "start_index": 1,
+          "duration": 5,
+          "max_depth": 0.605,
+          "returned": true
+        }
+      ],
+      "marginal_kernel_calls": 0
+    },
+    "pathwise_greedy": {
+      "landing": "CNc1c(OC)c(OC)c([IH2])c2c1[SH2]C21C(Cl)C(=[SH2])N1NC(=O)c1ccc([IH2])cc1",
+      "trajectory": [
+        "COc1cc(C2C(Cl)C(=O)N2NC(=O)c2ccccc2)cc(OC)c1OC",
+        "COc1cc(C2C(Cl)C(=O)N2NC(=O)c2ccccc2)c([IH2])c(OC)c1OC",
+        "COc1c([SH3])c(C2C(Cl)C(=O)N2NC(=O)c2ccccc2)c([IH2])c(OC)c1OC",
+        "COc1c([SH3])c(C2C(Cl)C(=O)N2NC(=O)c2ccc([IH2])cc2)c([IH2])c(OC)c1OC",
+        "COc1c([SH3])c(C2C(Cl)C(=[SH2])N2NC(=O)c2ccc([IH2])cc2)c([IH2])c(OC)c1OC",
+        "COc1c([IH2])c2c(c(OC)c1OC)[SH2]C21C(Cl)C(=[SH2])N1NC(=O)c1ccc([IH2])cc1",
+        "CNc1c(OC)c(OC)c([IH2])c2c1[SH2]C21C(Cl)C(=[SH2])N1NC(=O)c1ccc([IH2])cc1"
+      ],
+      "clogp": [
+        2.5481,
+        2.6173,
+        2.3706,
+        2.4398,
+        2.7052,
+        2.6339,
+        2.667
+      ],
+      "edits": 6,
+      "dead_end_step": null,
+      "completed": true,
+      "endpoint_terminal_infeasible": false,
+      "feasible_actions_by_step": [
+        {
+          "step": 0,
+          "candidates": 422,
+          "feasible": 275
+        },
+        {
+          "step": 1,
+          "candidates": 569,
+          "feasible": 411
+        },
+        {
+          "step": 2,
+          "candidates": 619,
+          "feasible": 354
+        },
+        {
+          "step": 3,
+          "candidates": 656,
+          "feasible": 449
+        },
+        {
+          "step": 4,
+          "candidates": 708,
+          "feasible": 591
+        },
+        {
+          "step": 5,
+          "candidates": 648,
+          "feasible": 507
+        },
+        {
+          "step": 6,
+          "candidates": 680,
+          "feasible": 542
+        }
+      ],
+      "terminal_failure_attribution": null,
+      "overrides": null,
+      "top1_disagreements": null,
+      "U_P": 0.5836213121696879,
+      "U_P_at_source": -2.037228566611319,
+      "potency_gain": 2.620849878781007,
+      "endpoint_in_C": true,
+      "any_intermediate_violation": false,
+      "intermediate_violation_count": 0,
+      "first_violation_index": null,
+      "excursions": [],
+      "marginal_kernel_calls": 6
+    },
+    "endpoint_verified": {
+      "landing": "CCc1c([SH2]CN)cc(C2N3NC(=O)c4ccc(cc4)C2(Cl)C3=N)c([IH4])c1OC",
+      "trajectory": [
+        "COc1cc(C2C(Cl)C(=O)N2NC(=O)c2ccccc2)cc(OC)c1OC",
+        "COc1cc(C2C(Cl)C(=O)N2NC(=O)c2ccccc2)c([IH4])c(OC)c1OC",
+        "COc1c([SH2]C)cc(C2C(Cl)C(=O)N2NC(=O)c2ccccc2)c([IH4])c1OC",
+        "COc1c([SH2]C)cc(C2N3NC(=O)c4ccc(cc4)C2(Cl)C3=O)c([IH4])c1OC",
+        "COc1c([SH2]CN)cc(C2N3NC(=O)c4ccc(cc4)C2(Cl)C3=O)c([IH4])c1OC",
+        "COc1c([SH2]CN)cc(C2N3NC(=O)c4ccc(cc4)C2(Cl)C3=N)c([IH4])c1OC",
+        "CCc1c([SH2]CN)cc(C2N3NC(=O)c4ccc(cc4)C2(Cl)C3=N)c([IH4])c1OC"
+      ],
+      "clogp": [
+        2.5481,
+        2.0819,
+        2.2598,
+        2.1001,
+        1.3865,
+        1.8372,
+        2.391
+      ],
+      "edits": 6,
+      "dead_end_step": null,
+      "completed": true,
+      "endpoint_terminal_infeasible": false,
+      "feasible_actions_by_step": [
+        {
+          "step": 0,
+          "candidates": 422,
+          "feasible": 275
+        },
+        {
+          "step": 1,
+          "candidates": 581,
+          "feasible": 178
+        },
+        {
+          "step": 2,
+          "candidates": 629,
+          "feasible": 293
+        },
+        {
+          "step": 3,
+          "candidates": 565,
+          "feasible": 187
+        },
+        {
+          "step": 4,
+          "candidates": 618,
+          "feasible": 36
+        },
+        {
+          "step": 5,
+          "candidates": 652,
+          "feasible": 134
+        },
+        {
+          "step": 6,
+          "candidates": 702,
+          "feasible": 409
+        }
+      ],
+      "terminal_failure_attribution": null,
+      "overrides": 1,
+      "top1_disagreements": 2,
+      "U_P": 0.7351041266717013,
+      "U_P_at_source": -2.037228566611319,
+      "potency_gain": 2.7723326932830203,
+      "endpoint_in_C": true,
+      "any_intermediate_violation": true,
+      "intermediate_violation_count": 5,
+      "first_violation_index": 1,
+      "excursions": [
+        {
+          "start_index": 1,
+          "duration": 5,
+          "max_depth": 0.9824,
+          "returned": true
+        }
+      ],
+      "marginal_kernel_calls": 96
+    },
+    "pathwise_verified": {
+      "landing": "COc1c(I)c2c(c([SH4]C)c1OC)[SH2]C21CC(=N)N1NC(=O)c1ccc(Cl)cc1",
+      "trajectory": [
+        "COc1cc(C2C(Cl)C(=O)N2NC(=O)c2ccccc2)cc(OC)c1OC",
+        "COc1cc(C2C(Cl)C(=O)N2NC(=O)c2ccccc2)c(I)c(OC)c1OC",
+        "COc1c([SH3])c(C2C(Cl)C(=O)N2NC(=O)c2ccccc2)c(I)c(OC)c1OC",
+        "COc1c(I)c2c(c(OC)c1OC)[SH2]C21C(Cl)C(=O)N1NC(=O)c1ccccc1",
+        "COc1c(I)c2c(c(OC)c1OC)[SH2]C21C(Cl)C(=N)N1NC(=O)c1ccccc1",
+        "COc1c(I)c2c(c(OC)c1OC)[SH2]C21CC(=N)N1NC(=O)c1ccc(Cl)cc1",
+        "COc1c(I)c2c(c([SH4]C)c1OC)[SH2]C21CC(=N)N1NC(=O)c1ccc(Cl)cc1"
+      ],
+      "clogp": [
+        2.5481,
+        3.1527,
+        2.906,
+        2.8347,
+        3.2854,
+        3.7215,
+        3.364
+      ],
+      "edits": 6,
+      "dead_end_step": null,
+      "completed": true,
+      "endpoint_terminal_infeasible": false,
+      "feasible_actions_by_step": [
+        {
+          "step": 0,
+          "candidates": 422,
+          "feasible": 275
+        },
+        {
+          "step": 1,
+          "candidates": 524,
+          "feasible": 482
+        },
+        {
+          "step": 2,
+          "candidates": 572,
+          "feasible": 490
+        },
+        {
+          "step": 3,
+          "candidates": 517,
+          "feasible": 432
+        },
+        {
+          "step": 4,
+          "candidates": 548,
+          "feasible": 516
+        },
+        {
+          "step": 5,
+          "candidates": 533,
+          "feasible": 506
+        },
+        {
+          "step": 6,
+          "candidates": 580,
+          "feasible": 534
+        }
+      ],
+      "terminal_failure_attribution": null,
+      "overrides": 2,
+      "top1_disagreements": 2,
+      "U_P": 0.6946122085772282,
+      "U_P_at_source": -2.037228566611319,
+      "potency_gain": 2.731840775188547,
+      "endpoint_in_C": true,
+      "any_intermediate_violation": false,
+      "intermediate_violation_count": 0,
+      "first_violation_index": null,
+      "excursions": [],
+      "marginal_kernel_calls": 80
+    }
+  },
+  "distinct_landings": 4,
+  "kernel_calls": 189,
+  "seconds": 2614.4
+}
