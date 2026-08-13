@@ -281,8 +281,8 @@
           "verdict": "PARTIAL"
         },
         "source_conditioning": {
-          "evidence": "config.start_from_smiles, dispatched in core/gumbeldore_dataset.py: `elif self.config.start_from_smiles is not None: problem_instances = [MoleculeDesign.from_smiles(self.config, self.config.start_from_smiles)]`. MoleculeDesign.from_smiles(..., do_finish=False) replays the molecule as an action prefix without issuing the terminate action, so the design arrives at action level 0 un-terminated and the model continues modifying it. Paper section 3.3.3 seeds design from 'the best molecule from COSMObase 2020'.",
-          "note": "The start_from_smiles branch creates exactly ONE root instance and does not honour repeat_start_instances, so multi-seed runs need an outer loop.",
+          "evidence": "config.start_from_smiles, dispatched in core/gumbeldore_dataset.py: `elif self.config.start_from_smiles is not None: problem_instances = [MoleculeDesign.from_smiles(self.config, self.config.start_from_smiles)]`. MoleculeDesign.from_smiles(..., do_finish=False) replays the molecule as an action prefix without issuing the terminate action, so the design arrives at action level 0 un-terminated and the model continues modifying it. Paper section 3.3.3 seeds design from 'the best molecule from COSMObase 2020'. RUN-VERIFIED 2026-08-13 against the actual COMPOSE panel, and this check REFUTED a delegated claim that from_smiles cannot accept drug-like molecules. All 8 held-in cohort sources tested (18-34 heavy atoms, every one containing aromatic rings, plus S, Br and fused ring systems) round-tripped EXACTLY: design atom count equals RDKit atom count for 8 of 8, each design lands at current_action_level == 0 with is_terminable() True, i.e. un-terminated and ready for the model to continue editing. from_rdkit_mol kekulizes and rebuilds from the bond-order adjacency matrix, so ring closures are handled. The shipped config.atom_vocabulary is also broad -- C, N, O, F, P, S, Cl, Br, I with formal-charge and chirality variants, max_num_atoms 50 -- not a C/N/O subset.",
+          "note": "The start_from_smiles branch creates exactly ONE root instance and does not honour repeat_start_instances, so multi-seed runs need an outer loop. Note on method: this cell was re-verified by running it rather than by reading a report, precisely because a contrary claim had been made. get_smiles() returns None on an unfinished design, which is easy to mistake for a failed round-trip; the atom-count and action-level check is the one that actually answers the question.",
           "verdict": "YES"
         }
       },
@@ -775,6 +775,13 @@
       "reproduced_published_behaviour": "Upstream's accounting identity oracle_requests == population_size*(generations+1) reproduced exactly (120 = 20*6). The paper's claim that molecules found 'bear little resemblance to the molecules used to construct the initial mating pool' reproduced: median nearest-seed ECFP4 Tanimoto 0.236 against the paper's reported 0.27.",
       "status": "PASS, SMOKE_HELD_IN, executed 2026-08-13",
       "what_it_is": "The REAL vendored upstream GB-GA (commit 4b49f182, byte-identical, MIT) on 5 held-in sources against the frozen COMPOSE developability objective under three-counter accounting. NOT a GraphGA quality measurement and NOT a COMPOSE comparison."
+    },
+    "graphxform_status": {
+      "adapter": "NOT YET BUILT -- next action",
+      "adapter_shape": "Thin, per the adapter rule: plug the frozen objective into MoleculeObjectiveEvaluator.predict_objective, route every candidate through the shared 2024.3.5 canonicalizer, count all three counters including the calls consumed by per-objective fine-tuning, set start_from_smiles per source with an outer loop because that branch ignores repeat_start_instances, and export the trajectory at action-level-0 boundaries. No algorithm changes.",
+      "environment": "BUILT, CPU-only, python 3.11 venv at /tmp/baseline_envs/graphxform-py311",
+      "source_conditioning": "VERIFIED on the real COMPOSE panel: 8/8 held-in sources round-trip exactly into an un-terminated MoleculeDesign at action level 0.",
+      "vendoring_requirement": "Vendor the upstream algorithm files byte-identical with a sha256 assertion in a test, exactly as baselines/graph_ga/upstream/ is vendored and hash-asserted. That is what makes 'unmodified' checkable rather than claimed."
     },
     "hard_constraints_observed": [
       "No Modal run was launched.",
