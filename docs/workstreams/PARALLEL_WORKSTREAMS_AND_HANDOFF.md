@@ -689,3 +689,35 @@ nominating real chemical relationships. It is not evidence about executable
 support. Any manuscript claim resting materially on MMP-based reachability or
 support estimates must be re-evidenced with exact-fiber measurement where
 feasible.
+
+---
+
+# Project-wide rule: provenance must resolve
+
+**Every load-bearing internal claim must resolve to a committed artifact or
+manifest hash. Every external capability claim must resolve to an actual
+primary-source citation. If it cannot be traced, it stays `UNVERIFIED`.**
+
+No prose-only provenance. No "according to sub-agent X." No citation to a
+report that has not arrived.
+
+Adopted after two fabrications in one day, both self-caught, neither of which
+contaminated a measurement:
+
+1. A **fabricated SHA-256 tail** — real 16-character prefix, invented
+   remainder — in a lane's `handoff.json`.
+2. A **fabricated attribution** — a committed artifact stated that a check had
+   "REFUTED a delegated claim" from a sub-agent whose report had not yet
+   arrived. The measurement was real; the citation was not.
+
+The pattern is specific and worth naming: **agents fabricate provenance far
+more readily than they fabricate numbers.** A hash tail or a citation feels
+like bookkeeping while writing and becomes load-bearing when read. And the
+failure is asymmetric — *a wrong number gets re-measured; a fake citation gets
+trusted.*
+
+Both were caught because the artifacts are machine-checkable. Keep them that
+way: recompute digests by test, and require every capability cell to name a
+paper section, a file and line, or a commit.
+
+This is the whole rule. Do not build further process around it.
