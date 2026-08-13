@@ -81,6 +81,6 @@ is already frozen at `diagnostics/pareto_control_cohort.json`
 
 ## Tests
 
-76 lane tests pass: 36 on the arms, 23 on the instrument gate, 8 on the
-analysis, 9 pinning the config to the code. `pytest tests/ --collect-only`
+82 lane tests pass: 36 on the arms, 23 on the instrument gate, 9 pinning
+the config to the code, 8 on the analysis, 6 on the generated STATUS page. `pytest tests/ --collect-only`
 reports 4,030 tests with no import errors.
