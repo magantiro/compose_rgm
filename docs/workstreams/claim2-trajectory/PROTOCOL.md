@@ -402,6 +402,34 @@ before evaluation, with reading thresholds ≥ 0.33 → `inherited`,
 ≤ 0.10 → `model_specific`, and anything between — or a missing census —
 `inconclusive` rather than guessed.
 
+### `mutual_edge_fraction` — the definition
+
+$$\text{mutual\_edge\_fraction} = \frac{2 \times \text{mutual\_pairs}}{\text{distinct\_directed\_edges}} = \frac{2 \times 53{,}118}{144{,}870} = 0.733320$$
+
+It is **the fraction of distinct directed edges that participate in a mutual
+pair**. The factor of two is because `mutual_pairs` counts *unordered* pairs
+while the denominator counts *directed* edges, and one mutual pair contributes
+two of them.
+
+**Why the distinct-edge denominator is the right one.** Local reversibility is
+a property of the transition **graph** — whether `y → x` exists when `x → y`
+does — not of how often the compiler happened to emit each transition.
+Observation multiplicity therefore does not belong in the denominator: a corpus
+that emitted one transition a thousand times is not thereby less reversible.
+The same argument is why `reversibility_census` deduplicates before counting.
+
+**Robustness — the verdict does not hinge on this choice.** Charging every
+observation to the occurrence denominator instead gives a bracket of
+**[0.7033, 0.7442]** (a bracket, not a point, because per-edge multiplicities
+were not retained; the lower end charges all 6,189 repeated observations to
+non-mutual edges). Every one of these — 0.7033, 0.7333, 0.7442 — sits far above
+the preregistered `inherited` threshold of 0.33. **No denominator choice
+changes the verdict.**
+
+`tests/test_claim2_cycle_attribution.py` asserts the reported fraction equals
+`2 * mutual_pairs / distinct_directed_edges`, both for a synthetic case and for
+the committed artifact, so the definition and the number cannot drift apart.
+
 **One-step likelihood not composing into usable dynamics is precisely the
 failure this lane exists to detect**, so a good NLL is never a reason to
 dismiss a bad trajectory result. The corpus census is what licensed the

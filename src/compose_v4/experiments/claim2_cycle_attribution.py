@@ -235,6 +235,26 @@ def net_displacement_efficiency(
 # ---- the central causal question ------------------------------------------
 
 
+#: The headline statistic, written out so it reconstructs from the reported
+#: fields without a reader having to guess the denominator.
+MUTUAL_EDGE_FRACTION_FORMULA = (
+    "mutual_edge_fraction = 2 * mutual_pairs / distinct_directed_edges; "
+    "the fraction of DISTINCT DIRECTED EDGES that participate in a mutual pair"
+)
+
+#: Why the distinct-edge denominator is the right one. Local reversibility is a
+#: property of the transition GRAPH -- whether y -> x exists when x -> y does --
+#: not of how often the compiler happened to sample each transition. Observation
+#: multiplicity therefore does not belong in the denominator; a corpus that
+#: emitted one transition a thousand times is not thereby less reversible.
+MUTUAL_EDGE_FRACTION_DENOMINATOR_RATIONALE = (
+    "Local reversibility is a property of the transition graph, not of sampling "
+    "frequency, so distinct directed edges -- not occurrences -- are the "
+    "denominator. Multiplicity would let one heavily repeated transition move a "
+    "statistic that is meant to describe the graph's structure."
+)
+
+
 @dataclass(frozen=True)
 class ReversibilityCensus:
     """How reversible a set of directed transitions is.
@@ -243,6 +263,17 @@ class ReversibilityCensus:
     its reversibility or invented it. Applied to controlled trajectories it
     answers whether goal control suppresses the backtracking that the
     uncontrolled reference law exhibits.
+
+    ``mutual_edge_fraction`` is ``2 * mutual_pairs / distinct_directed_edges``.
+    The factor of two is because ``mutual_pairs`` counts unordered pairs while
+    the denominator counts directed edges: a mutual pair contributes two edges.
+
+    ``mutual_fraction_occurrence_denominator_lower_bound`` is the same numerator
+    over total occurrences. It is a conservative LOWER bound on the true
+    occurrence-weighted fraction, not that fraction itself, because per-edge
+    multiplicities are not retained; every extra occurrence is charged to a
+    non-mutual edge. It exists so a reader can see the verdict does not depend
+    on the denominator choice.
     """
 
     directed_edges: int
@@ -252,8 +283,37 @@ class ReversibilityCensus:
     source_states: int
     label: str = ""
 
+    @property
+    def mutual_fraction_occurrence_denominator_lower_bound(self) -> float:
+        if not self.directed_edges:
+            return 0.0
+        return 2 * self.mutual_pairs / self.directed_edges
+
+    @property
+    def mutual_fraction_occurrence_denominator_upper_bound(self) -> float:
+        """Every extra occurrence charged to a MUTUAL edge instead."""
+        if not self.directed_edges:
+            return 0.0
+        extra = self.directed_edges - self.distinct_directed_edges
+        return (2 * self.mutual_pairs + extra) / self.directed_edges
+
     def to_json(self) -> dict[str, Any]:
-        return dict(self.__dict__)
+        payload = dict(self.__dict__)
+        payload.update(
+            {
+                "mutual_edge_fraction_formula": MUTUAL_EDGE_FRACTION_FORMULA,
+                "mutual_edge_fraction_denominator_rationale": (
+                    MUTUAL_EDGE_FRACTION_DENOMINATOR_RATIONALE
+                ),
+                "mutual_fraction_occurrence_denominator_lower_bound": (
+                    self.mutual_fraction_occurrence_denominator_lower_bound
+                ),
+                "mutual_fraction_occurrence_denominator_upper_bound": (
+                    self.mutual_fraction_occurrence_denominator_upper_bound
+                ),
+            }
+        )
+        return payload
 
 
 def reversibility_census(
@@ -347,6 +407,8 @@ def summarize(attributions: Sequence[CycleAttribution]) -> dict[str, float]:
 
 
 __all__ = [
+    "MUTUAL_EDGE_FRACTION_DENOMINATOR_RATIONALE",
+    "MUTUAL_EDGE_FRACTION_FORMULA",
     "CycleAttribution",
     "CycleAttributionError",
     "DIRECTIONAL_CORPUS_THRESHOLD",

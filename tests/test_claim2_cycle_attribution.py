@@ -232,6 +232,83 @@ def test_self_loops_are_excluded_from_the_census():
     assert census.distinct_directed_edges == 1
 
 
+def test_reported_fraction_equals_its_stated_formula():
+    """The number must reconstruct from the reported fields.
+
+    Without the formula in the artifact a reader cannot tell which denominator
+    was used, and the plausible alternatives differ enough to matter: the main
+    lane arrived at 0.352 and 0.703 before the definition was written down.
+    """
+    census = reversibility_census(
+        [("a", "b"), ("b", "a"), ("b", "c"), ("c", "d"), ("d", "c")]
+    )
+    payload = census.to_json()
+    assert payload["mutual_edge_fraction"] == pytest.approx(
+        2 * payload["mutual_pairs"] / payload["distinct_directed_edges"]
+    )
+    assert "2 * mutual_pairs / distinct_directed_edges" in payload[
+        "mutual_edge_fraction_formula"
+    ]
+
+
+def test_the_committed_corpus_artifact_matches_the_formula():
+    """The real measurement, checked against its own stated definition."""
+    import json
+    from pathlib import Path
+
+    path = (
+        Path(__file__).resolve().parent.parent
+        / "diagnostics/claim2_corpus_reversibility.json"
+    )
+    if not path.exists():
+        pytest.skip("corpus census not present")
+    payload = json.loads(path.read_text())
+    assert payload["mutual_edge_fraction"] == pytest.approx(
+        2 * payload["mutual_pairs"] / payload["distinct_directed_edges"], abs=1e-12
+    )
+    assert payload["mutual_edge_fraction"] == pytest.approx(0.733320, abs=1e-6)
+    assert "2 * mutual_pairs / distinct_directed_edges" in payload[
+        "mutual_edge_fraction_formula"
+    ]
+
+
+def test_the_verdict_survives_either_denominator():
+    """The reassuring part: no denominator choice changes the conclusion."""
+    import json
+    from pathlib import Path
+
+    path = (
+        Path(__file__).resolve().parent.parent
+        / "diagnostics/claim2_corpus_reversibility.json"
+    )
+    if not path.exists():
+        pytest.skip("corpus census not present")
+    payload = json.loads(path.read_text())
+    lower = payload["mutual_fraction_occurrence_denominator_lower_bound"]
+    assert lower == pytest.approx(
+        2 * payload["mutual_pairs"] / payload["directed_edges"], abs=1e-12
+    )
+    assert lower == pytest.approx(0.703275, abs=1e-6)
+    # Both denominators sit far above the INHERITED threshold, so the verdict
+    # never hinged on the choice.
+    assert lower > INHERITED_CORPUS_THRESHOLD
+    assert payload["mutual_edge_fraction"] > INHERITED_CORPUS_THRESHOLD
+    assert attribution_verdict(lower, 0.292) == INHERITED
+    assert attribution_verdict(payload["mutual_edge_fraction"], 0.292) == INHERITED
+
+
+def test_occurrence_bounds_bracket_the_unretained_true_value():
+    """Per-edge multiplicities were not kept, so the occurrence-weighted figure
+    is a bracket rather than a point. Both ends must clear the threshold."""
+    census = reversibility_census(
+        [("a", "b")] * 5 + [("b", "a"), ("b", "c")]
+    )
+    lower = census.mutual_fraction_occurrence_denominator_lower_bound
+    upper = census.mutual_fraction_occurrence_denominator_upper_bound
+    assert lower <= upper
+    assert lower == pytest.approx(2 * census.mutual_pairs / census.directed_edges)
+
+
 def test_edges_from_trajectory_round_trips():
     assert edges_from_trajectory(["a", "b", "c"]) == [("a", "b"), ("b", "c")]
 
