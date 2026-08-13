@@ -254,6 +254,22 @@ def topup_source(task: dict[str, Any]) -> dict[str, Any]:
 
     metered = MeteredProcess(_Process(), _Objectives())
     scalarize = Scalarization(utopia)
+    partial = out / f"{tag}.partial.json"
+
+    def _checkpoint(n: int, realized: int, tgt: int, prefix: list) -> None:
+        """Durable partial. The loop is unbounded, so this is not optional."""
+        partial.write_text(json.dumps({
+            "index": index, "compose_arm": compose_arm, "in_progress": True,
+            "committed_target_kernel_calls": tgt,
+            "n_trajectories_so_far": n, "realized_kernel_calls": realized,
+            "seconds": round(time.perf_counter() - started, 1),
+            "kernel_prefix": [{k: r[k] for k in
+                               ("t", "kernel_calls", "native_oracle_calls",
+                                "raw_oracle_calls")} for r in prefix],
+        }, indent=2) + "\n")
+        artifact_volume.commit()
+        print(f"[{tag}] checkpoint t={n} kernel {realized}/{tgt} "
+              f"{time.perf_counter() - started:.0f}s", flush=True)
 
     result = generate_then_rank_metered(
         metered, start, BUDGET, PREFERENCES, scalarize, target,
@@ -263,6 +279,7 @@ def topup_source(task: dict[str, Any]) -> dict[str, Any]:
         hypervolume=None if probe else normalized_hypervolume,
         argmin_stable=None if probe else _argmin_stable,
         trajectory_cls=None if probe else Trajectory,
+        on_progress=_checkpoint, progress_every=CHECKPOINT_EVERY,
     )
 
     payload: dict[str, Any] = {
@@ -288,6 +305,7 @@ def topup_source(task: dict[str, Any]) -> dict[str, Any]:
                                           for t in result.selected]
 
     shard_path.write_text(json.dumps(payload, indent=2, default=float) + "\n")
+    partial.unlink(missing_ok=True)
     artifact_volume.commit()
     report = result.feasibility_only()
     print(f"[{tag}] {report['status']}  trajectories={report['n_trajectories']}  "
@@ -321,4 +339,11 @@ def main(sources: str = "0", compose_arm: str = "verified_pref",
     print(f"BLINDED PROBE: {probe}  "
           f"({'no hypervolume or selection is computed' if probe else 'full outcome computed'})")
     print("COMPOSE is NOT rerun. Targets are read from the committed smoke shards.")
-    print(f"completed {drive.remote(tasks)}")
+    # SPAWN, not remote(). `--detach` did not survive a client-side DNS failure
+    # here -- the third time this project has hit that -- so the client must not
+    # need to stay alive at all. It fires the driver and exits; progress is read
+    # from the VOLUME, never from this process.
+    call = drive.spawn(tasks)
+    print(f"driver spawned: {call.object_id}")
+    print("watch the VOLUME, not this log: "
+          "modal volume ls compose-v4-artifacts editing_v2/r_theta_run/pareto_gen_rank_topup")

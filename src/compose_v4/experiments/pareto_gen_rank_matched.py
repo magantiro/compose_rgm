@@ -176,6 +176,8 @@ def generate_then_rank_metered(
     trajectory_cls=None,
     runaway_guard: int = RUNAWAY_TRAJECTORY_GUARD,
     stall_window: int = STALL_WINDOW,
+    on_progress=None,
+    progress_every: int = 50,
 ) -> MatchedGenRank:
     """Generate until the METERED ledger reaches `target_kernel_calls`.
 
@@ -235,6 +237,14 @@ def generate_then_rank_metered(
             last_kernel, since_progress = metered.ledger.kernel_calls, 0
         else:
             since_progress += 1
+
+        # DURABILITY. This loop's length is unbounded by construction, so a
+        # preemption or a client death partway through would otherwise cost the
+        # whole source. The callback commits a partial record; the caller owns
+        # what durable means.
+        if on_progress is not None and len(pool) % progress_every == 0:
+            on_progress(len(pool), int(metered.ledger.kernel_calls),
+                        int(target_kernel_calls), list(prefix))
 
     realized = int(metered.ledger.kernel_calls)
     result = MatchedGenRank(

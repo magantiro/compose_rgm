@@ -253,3 +253,23 @@ def test_blinded_probe_wastes_no_compute():
     assert len(result.endpoints) == result.n_trajectories
     assert len(result.endpoint_z) == result.n_trajectories
     assert all(len(row) == 2 for row in result.endpoint_z)
+
+
+def test_progress_callback_actually_fires_during_the_unbounded_loop():
+    """The loop's length is unbounded, so a claimed checkpoint must exist.
+
+    Regression for a docstring that promised 'a checkpoint every 50
+    trajectories' while the constant was declared and never used.
+    """
+    seen = []
+    metered = _Metered(10_000)
+    generate_then_rank_metered(
+        metered, "root", 6, (0.1,), lambda z, w: z[:, 0] * w,
+        300, seed=3, reference=np.zeros(2), utopia=np.ones(2),
+        unguided_run=_unguided(10_000), hypervolume=None,
+        on_progress=lambda n, k, tgt, pfx: seen.append((n, k, tgt, len(pfx))),
+        progress_every=10)
+    assert seen, "no checkpoint fired in an unbounded loop"
+    assert [s[0] for s in seen] == list(range(10, seen[-1][0] + 1, 10))
+    for n, k, tgt, npfx in seen:
+        assert npfx == n and tgt == 300 and k <= 300 + 6
