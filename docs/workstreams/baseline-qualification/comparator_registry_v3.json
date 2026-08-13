@@ -94,8 +94,8 @@
   "methods": [
     {
       "adapter": {
-        "note": "No blocking scientific incompatibility. The execution risks are the 2021 dependency stack and the non-commercial license.",
-        "status": "environment_verified_not_built",
+        "note": "REAL upstream MARS built and smoked 2026-08-13 under a python-3.11 venv (torch 2.1.2 / dgl 2.2.0 / pydantic / rdkit). The COMPOSE objective is injected by patching MARS.estimator.estimator.get_scores -- patching the scorer module alone does NOT work, because estimator.py binds the name at import time. Upstream source is unmodified except one line: estimator/scorer/sa_scorer.py's 'from rdkit.six import iteritems'. See smoke_plan.mars_held_in_smoke.",
+        "status": "built_and_smoked",
         "work_items": [
           "Objective shim replacing Estimator with a caller of the COMPOSE frozen goal language and src/compose_v4/drd2_oracle.py, wrapping every call in a counter. estimator/scorer/scorer.py has drd2_scorer commented out of its imports while still dispatching to it and ships no DRD2 model (repo issue #2), so the DRD2 objective must come from our side regardless.",
           "Chain-count reduction driver: MARS's native regime is 1000-5000 chains, and any budget-matched comparison runs it far outside that regime.",
@@ -132,7 +132,7 @@
           "verdict": "PARTIAL"
         },
         "source_conditioning": {
-          "evidence": "main.py: `if config['mols_init']: mols = load_mols(...); mols = random.choices(mols, k=config['num_mols'])`. A one-line SMILES file therefore replicates one exact molecule into every chain. Sampler.sample(run_dir, mols_init) also accepts a per-chain list directly. Default with no flag is ethane 'CC' for every chain (paper section 4.1: 'The sampling paths are all starting with an identical molecule \"C-C\"').",
+          "evidence": "main.py: `if config['mols_init']: mols = load_mols(...); mols = random.choices(mols, k=config['num_mols'])`. A one-line SMILES file therefore replicates one exact molecule into every chain. Sampler.sample(run_dir, mols_init) also accepts a per-chain list directly. Default with no flag is ethane 'CC' for every chain (paper section 4.1: 'The sampling paths are all starting with an identical molecule \"C-C\"'). RUN-VERIFIED 2026-08-13: the mols_init branch of main.py was executed against a 5-molecule held-in source file with 40 chains; every one of the 40 initial states was one of the 5 supplied held-in sources. The capability is real, not just present in source.",
           "note": "Works with stock code but is undocumented and untested by the authors; the README ships no init file and describes no such usage.",
           "verdict": "YES"
         }
@@ -161,10 +161,10 @@
         "training_phase_oracle_calls": "Not separable. The online proposal training is driven by the same score comparisons, so every training signal is already inside the per-step scoring count. There is no separate training phase."
       },
       "provenance": {
-        "checkpoints": "NONE for the proposal, and no shipped code path writes one: sampler.py calls train(...) without save_dir, so the only torch.save in common/train.py is unreachable. Shipped binaries are oracles only (kinase_rf/gsk3b.pkl, kinase_rf/jnk3.pkl, fpscores.pkl.gz). The fragment vocabulary is also not shipped (data/vocab_* is gitignored).",
+        "checkpoints": "NONE for the proposal, and no shipped code path writes one: sampler.py calls train(...) without save_dir, so the only torch.save in common/train.py is unreachable. Shipped binaries are oracles only (kinase_rf/gsk3b.pkl, kinase_rf/jnk3.pkl, fpscores.pkl.gz). The fragment vocabulary is also not shipped (data/vocab_* is gitignored). SHIPPED ORACLES DO NOT LOAD: unpickling estimator/scorer/kinase_rf/gsk3b.pkl on scikit-learn 1.9.0 raises ModuleNotFoundError: No module named 'sklearn.ensemble.forest' -- a path removed after sklearn 0.21, so the pickles predate even the environment.yml pin of 0.23.2. CONSEQUENCE: MARS cannot be run on its OWN published objectives without sklearn archaeology, so the fairness contract's required 'native-regime MARS row' cannot be produced from the shipped artifacts. Either rebuild the pickles from the shipped data/kinase.tsv, or take the native-regime row from the literature and label it context-only. Does NOT block a COMPOSE comparison, which supplies its own frozen oracle by design.",
         "code_reference": "master @ 1a68d2a; repository ARCHIVED read-only, last push 2022-02-03, 2 commits. The URL printed in the paper (github.com/yutxie/mars) is a README-only pointer to this repo. OpenReview kHSu4ebxFXY; ICLR 2021 Spotlight; arXiv DOI 10.48550/arXiv.2103.10432 (ICLR mints no proceedings DOI).",
         "code_repository": "https://github.com/bytedance/markov-molecular-sampling",
-        "cpu_feasible": "VERIFIED FEASIBLE-WITH-WORK on python 3.11 ONLY (2026-08-13 probe). DGL publishes no wheel for python 3.14. Working set: torch 2.1.2 + torchdata 0.7.1 + dgl 2.2.0 from https://data.dgl.ai/wheels/torch-2.4/repo.html, setuptools<71, numpy<2. DGL's arm64 wheel ships graphbolt dylibs only for torch 2.1.0-2.3.0, and torchdata 0.7.1 is the only release matching, so torch 2.1.2 is forced. The feared API drift did NOT occur: dgl.nn.pytorch.glob.Set2Set imports and runs a forward pass, g.number_of_edges() still exists, and no np.bool appears in MARS source. BasicEditor instantiates at 2,618,026 parameters. First remaining blocker is ONE LINE: estimator/scorer/sa_scorer.py:27 'from rdkit.six import iteritems', removed from modern RDKit. Est. 1-2 h to a running sampler. UNVERIFIED: whether the sklearn 0.23.2-era kinase/DRD2 pickles still load.",
+        "cpu_feasible": "VERIFIED AND RUN 2026-08-13, CPU-only, python 3.11 (DGL has no 3.14 wheel). Working stack: torch==2.1.2, torchdata==0.7.1, dgl==2.2.0 from data.dgl.ai, setuptools<71, numpy<2, PLUS pydantic which is undocumented but required -- dgl.graphbolt imports it, so 'import dgl' fails without it. Verified: torch 2.1.2, dgl 2.2.0, rdkit 2026.03.5, numpy 1.26.4, sklearn 1.9.0; Set2Set imports and runs; the sampler completes 6 steps over 40 chains in 7.8 s.",
         "license": "CC BY-NC 4.0 \u2014 NON-COMMERCIAL. LICENSE file first line is the Creative Commons Attribution-NonCommercial 4.0 text; GitHub's detector reports NOASSERTION. estimator/scorer/sa_scorer.py carries a separate BSD-style Novartis notice.",
         "paper_url": "https://arxiv.org/abs/2103.10432"
       },
@@ -689,6 +689,19 @@
       "No held-out or sealed data were opened.",
       "No COMPOSE task, goal language, panel or budget was altered."
     ],
+    "mars_held_in_smoke": {
+      "artifact": "diagnostics/baselines/mars_held_in_smoke.json",
+      "environment_caveat": "rdkit 2026.03.5 in the MARS venv, NOT the production pin 2024.3.5, and the fragment vocabulary is REDUCED -- built from the first 60,000 of 1,488,640 ChEMBL SMILES, yielding 15,641 arms of which the top 1,000 are used. This is NOT the paper's vocabulary. Both must be fixed before any claim-bearing comparison.",
+      "headline_measurement": "MARS demand ratio 3.73 -- 280 oracle_requests for only 75 unique valid canonical evaluations, with 205 duplicate requests and no cache anywhere in upstream. GraphGA on the same accounting measured 1.30. This is the strongest empirical vindication of the three-counter freeze: reporting MARS's 75 beside GraphGA's 92 as if they were the same quantity would understate MARS's actual demand by 3.7x.",
+      "measured_findings": [
+        "Source initialisation VERIFIED BY RUNNING: all 40 chains started from the 5 supplied held-in sources via main.py's mols_init branch.",
+        "SMALL-REGIME CRASH: at 5 chains the run died with 'ValueError: not enough values to unpack (expected 2, got 0)' in ImitationDataset.collate_fn, because no proposal improved the score in the first step and the imitation dataset was empty. It ran at 40 chains. MARS trains its proposal online on improving edits only, so below some chain count it does not run AT ALL -- a second, independent reason a budget-matched comparison cannot simply shrink MARS.",
+        "The monkeypatch point matters: MARS/estimator/estimator.py binds get_scores at import time, so patching the scorer module alone is silently ineffective and the run fails with a bare NotImplementedError from the unpatched dispatcher.",
+        "Objective scale is a deviation: MARS sums per-objective scores its own objectives keep in [0, 1] and its acceptance ratio is scale-sensitive, so the raw COMPOSE margin is logistically squashed into (0, 1). Ordering preserved, scale not."
+      ],
+      "status": "PASS, SMOKE_HELD_IN, executed 2026-08-13",
+      "what_it_is": "The REAL upstream MARS sampler on 5 held-in sources, 40 chains, 6 steps, CPU-only, against the frozen COMPOSE developability objective under three-counter accounting. NOT a measurement of MARS's optimization quality: its designed regime is 1000-5000 chains for 550-1000 steps."
+    },
     "oracle_accounting_harness_stress_test": {
       "THIS_IS_NOT_A_GRAPHGA_RESULT": "Upstream GB-GA was never vendored and nothing external was installed. The candidate stream is GA-SHAPED and adversarial by construction (BRICS recombination, survivor rescores, alternate SMILES spellings, malformed strings) and exists only to drive the accountant. Do not cite this as a GraphGA smoke, a GraphGA result, or evidence about GraphGA's behaviour.",
       "artifact": "diagnostics/baselines/oracle_accounting_harness_stress_test.json",

@@ -31,7 +31,7 @@ canonical keys out of any scientific result.
 | method | environment | adapter | evidence |
 |---|---|---|---|
 | **GraphGA** | native, RDKit-only | **BUILT AND SMOKED** — real upstream vendored byte-identical | `diagnostics/baselines/graph_ga_held_in_smoke.json`, PASS 9/9 |
-| **MARS** | **FEASIBLE-WITH-WORK, python 3.11 only** — DGL 2.2.0 + torch 2.1.2 works, `Set2Set` and `number_of_edges()` intact, editor instantiates (2.6 M params) | designed | one-line `rdkit.six` blocker; ~1–2 h |
+| **MARS** | **BUILT AND RUN**, python 3.11 CPU venv | **BUILT AND SMOKED** | `diagnostics/baselines/mars_held_in_smoke.json`, PASS 4/4 |
 | **REINVENT 4** | **FEASIBLE**, installs on python 3.14 CPU | designed | undeclared `scipy` is the only packaging bug |
 | **GraphXForm** | **FEASIBLE** — `torch_scatter` compiled, transformer instantiates (31.5 M params), checkpoint 331 MiB verified | designed | expected blocker did not occur |
 | **DDSBM** | **BLOCKED** — no LICENSE (legal, not technical), python 3.9 pin, `graph-tool` conda-only, `orca/` missing from the clone | none | days, needs Linux |
@@ -136,6 +136,20 @@ Full scoping with artifacts: `FAIRNESS_CONTRACT.md` §0a.
 
 Under USD 1 of compute at a nominal CPU rate. **The cost of this lane is
 engineering time on dependency rot, not credits.**
+
+## The number that vindicates the three-counter freeze
+
+Measured on real upstream code, same objective, same accounting:
+
+| method | `oracle_requests` | `unique_valid_canonical_evaluations` | demand ratio |
+|---|---:|---:|---:|
+| GraphGA | 120 | 92 | **1.30** |
+| MARS | 280 | 75 | **3.73** |
+
+MARS has no cache anywhere and rescores its current molecule whenever a proposal
+is rejected. Reporting its 75 beside GraphGA's 92 as if they were the same
+quantity would understate its actual demand by 3.7×. This is exactly the
+substitution the freeze exists to prevent, now measured rather than argued.
 
 ## Two findings that change what the paper may claim
 

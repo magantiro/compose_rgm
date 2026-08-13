@@ -7,8 +7,10 @@
 # Source of truth: https://github.com/bytedance/markov-molecular-sampling
 # environment.yml and README.md, read 2026-08-12. Repository is ARCHIVED.
 #
-# STATUS: UNRESOLVED
-# CPU-ONLY: yes, upstream documents a CPU install path
+# STATUS: RESOLVED AND BUILT 2026-08-13. The recipe below is VERIFIED on
+#         macOS arm64; it is NOT upstream's pinned stack, which cannot be
+#         installed on a current machine.
+# CPU-ONLY: yes, verified (torch CPU build, --device cpu)
 # LICENSE: CC BY-NC 4.0 (non-commercial) -- see README.md in this directory
 
 python==3.9.6
@@ -54,3 +56,50 @@ tensorboard==2.5.0
 # --- Checkpoint --------------------------------------------------------------
 # NONE. No proposal/editor checkpoint exists upstream and no shipped code path
 # writes one. Every run starts from a randomly initialised editor.
+
+
+# ============================================================================
+# VERIFIED WORKING RECIPE — macOS arm64, 2026-08-13
+# ============================================================================
+# Upstream's own pins (python 3.9.6 / torch 1.9.0 / dgl 0.7.0) are NOT
+# installable here. This is what actually works.
+#
+#   python3.11 -m venv /tmp/baseline_envs/mars-py311
+#   pip install torch==2.1.2 torchdata==0.7.1 "setuptools<71" "numpy<2"
+#   pip install dgl==2.2.0 -f https://data.dgl.ai/wheels/torch-2.4/repo.html
+#   pip install pydantic rdkit scikit-learn
+#
+# Verified installed: torch 2.1.2, dgl 2.2.0, rdkit 2026.03.5, numpy 1.26.4,
+# scikit-learn 1.9.0. `from dgl.nn.pytorch.glob import Set2Set` imports and runs.
+#
+# PYTHON 3.11 IS MANDATORY. DGL publishes no wheel for python 3.14.
+# TORCH 2.1.2 IS FORCED: DGL's arm64 wheel ships graphbolt dylibs only for
+# torch 2.1.0-2.3.0, and torchdata 0.7.1 is the only release matching.
+# PYDANTIC IS REQUIRED but undocumented: dgl.graphbolt imports it, so
+# `import dgl` fails with ModuleNotFoundError without it.
+#
+# --- Source patch required ---------------------------------------------------
+# estimator/scorer/sa_scorer.py: `from rdkit.six import iteritems` -- rdkit.six
+# was removed from modern RDKit. Replace with a local
+# `iteritems = lambda d: iter(d.items())`.
+#
+# --- THE SHIPPED ORACLES DO NOT LOAD -----------------------------------------
+# MEASURED 2026-08-13: unpickling estimator/scorer/kinase_rf/gsk3b.pkl on
+# scikit-learn 1.9.0 raises
+#     ModuleNotFoundError: No module named 'sklearn.ensemble.forest'
+# That module path was removed after scikit-learn 0.21, so the shipped pickles
+# predate even the environment.yml pin of 0.23.2.
+#
+# CONSEQUENCE FOR THE FAIRNESS CONTRACT: MARS cannot be run on its OWN published
+# objectives (gsk3b, jnk3) without scikit-learn archaeology. The contract's
+# requirement of a "native-regime MARS row" alongside the matched-budget row
+# therefore cannot be satisfied from the shipped artifacts. Either the pickles
+# are rebuilt from the shipped data/kinase.tsv, or the native-regime row is
+# taken from the literature and labelled context-only. This does NOT block a
+# COMPOSE comparison, which supplies its own frozen oracle by design.
+#
+# --- Vocabulary --------------------------------------------------------------
+# data/vocab_* is gitignored upstream and must be rebuilt from data/chembl.txt
+# (1,488,640 SMILES). A REDUCED vocabulary from a truncated chembl file is
+# adequate for a smoke and MUST be labelled as such -- it is not the paper's
+# 1000-fragment vocabulary.
