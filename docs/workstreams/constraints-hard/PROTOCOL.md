@@ -1,7 +1,45 @@
 # Protocol — hard structural constraints (Experiment A)
 
-**Status: `DESIGN_ONLY`. Nothing here has been run.** No Modal launch, no GPU,
-no claim-bearing compute. Held-out never opened.
+> # ⛔ `SUPERSEDED` — 2026-08-13
+>
+> **This internal experiment design is withdrawn and must not be implemented.**
+> It is retained, not deleted, because its negative result is real and recorded.
+>
+> **Two independent reasons:**
+>
+> 1. **The yield contrast was folded into Lane 2.** The lead accepted this lane's
+>    own §13 recommendation. Lane 2 already has the right causal structure and
+>    had already measured the contrast at n = 6. Building a parallel harness
+>    would have been a second broad optimization lane.
+> 2. **The protected object failed its feasibility census.** The Bemis–Murcko
+>    scaffold is a median **78.95%** of heavy atoms across the 96,094-source
+>    held-in pool, leaving a median **5** editable atoms; **22.03%** of sources
+>    are eligible. See `SCAFFOLD_FEASIBILITY.md`, which **stands as a result**.
+>
+> ### The scaffold stop is binding
+>
+> **No smaller core may be substituted.** Not a "Bemis–Murcko-lite", not a
+> reduced ring core, not a pharmacophore, not a hand-tuned protected core mined
+> from the held-in corpus. Having learned that the full scaffold is too
+> restrictive, *any* smaller core would be chosen precisely because it leaves
+> enough room to act — selection on the outcome, and task shopping in the
+> project's own vocabulary.
+>
+> **No new constraint may be invented from our own failed scaffold result.**
+>
+> ### What remains live
+>
+> `CONSTRAINT_SEMANTICS.md` (project record), `SCAFFOLD_FEASIBILITY.md` (a
+> standing negative), and this lane's only remaining job:
+> **`EXTERNAL_HARD_CONSTRAINT_AUDIT.md`**.
+>
+> Sections 1–13 below are historical. Read them for the semantics freeze in §4
+> and the sign-guarantee handling in §8; do not read them as a plan.
+
+---
+
+**Status: `SUPERSEDED` (was `DESIGN_ONLY`). Nothing here was ever run.** No Modal
+launch, no GPU, no claim-bearing compute. Held-out never opened.
 
 **Base commit:** `f6146d7`. **Branch:** `codex/compose-constraints-hard`.
 

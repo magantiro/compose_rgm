@@ -1,5 +1,23 @@
 # External baseline task matrix — hard structural constraints
 
+> **2026-08-13 — comparator placement, recorded not acted on.** The lane was
+> reframed to an external audit. The methods below keep their verified
+> capability cells, but they no longer all belong to the same table. **Do not
+> force every baseline into every experiment.**
+>
+> | method | where it now belongs | why |
+> |---|---|---|
+> | **GraphXForm** | general source-conditioned editing | hard-constraint cell is `N/A` — §0 is project record |
+> | **Prompt-MolOpt^P** | general editing table — *"is COMPOSE a competent molecular editor?"* | **must not drive the methods narrative** on hard-support control |
+> | **MolEditRL** | general editing table (if it ever ships code) | same; and its preservation is soft |
+> | **DDSBM** | **general source-conditioned editing** — a major COMPOSE comparator | it is a comparator for the *editing* question, **not** because it has hard constraints. Not a hard-scaffold baseline |
+> | **InVirtuoGen** | fragment-constrained generation | unchanged, `CONDITIONAL` |
+> | **ConStruct** | **the hard-constraint audit** — see `EXTERNAL_HARD_CONSTRAINT_AUDIT.md` | promoted out of `CONTEXT_ONLY` into the audit's scope |
+> | **Edit Flows** (NeurIPS 2025) | **related work only** | prominent conceptual lineage — edit-based CTMC with insert/delete/substitute — but its published state space is variable-length **sequences**. A molecular-graph port would mean solving the support/executor problem that is *part of COMPOSE's own contribution*: inventing a competitor for ourselves |
+>
+> The intellectual baseline for **exact hard-support control** is the audit of
+> CDD / PRODIGY / ConStruct, not any editor in this file.
+
 **Status: `DESIGN_ONLY`.** No baseline was run by this lane. No external
 dependency was installed. Every capability cell cites a paper section, a repo
 file, or a flag name; anything not confirmed against a primary source is marked

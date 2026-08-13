@@ -1,5 +1,16 @@
 # Stage 1 — protected-core feasibility census
 
+> **This document STANDS. Its census is a recorded result, not a withdrawn
+> plan.** 2026-08-13: the lead accepted the feasibility stop. The *experiment*
+> it was feeding (`PROTOCOL.md`) is `SUPERSEDED`; this *measurement* is not.
+>
+> **What it established, and what it now forbids:** the Bemis–Murcko scaffold is
+> too large to protect on the median source. That is a real negative about the
+> protected object, and it is binding in one direction — **no smaller core may
+> be substituted in response to it.** A core chosen after learning that the full
+> one is too restrictive would be selected to leave enough room to act. §5's
+> "recommended next action" is resolved; read §2 and §3, not §5.
+
 **Status: `SMOKE_HELD_IN` for the model-free half; `DESIGN_ONLY` for the
 fiber-dependent half (BLOCKED — see §4).** Held-out never opened.
 
