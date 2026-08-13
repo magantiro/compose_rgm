@@ -407,3 +407,83 @@ control**, never unverified direct action selection.
 - restart always wins → the prefixes are not reusable under these switches.
   Weakens history reuse, not retargetability. Report it.
 - only qualitative examples work → retargeting is not a headline claim.
+
+---
+
+# Frozen interpretation of the development result
+
+The development panel is complete: 30 sources x 2 histories, H=6, switch at 3,
+`B = P AND D`, max-min goal language, controller parity audited. The
+interpretation below is frozen. Further descriptor exploration on these 30
+sources has rapidly diminishing scientific value and is not authorised.
+
+## Three levels, in order
+
+**1. Primary — intervention.** Changing the objective at the realized switch
+state redirects the trajectory. Greedy-matched contrast, so the comparison
+varies only the objective:
+
+| | paired difference | wins |
+|---|---|---|
+| P-first | +0.716 [+0.512, +0.922] | 23 / 1 |
+| D-first | +1.406 [+1.181, +1.620] | 30 / 0 |
+
+**2. Stateful — the value of history.** Retaining the realized molecular state
+has positive average value against restarting with the same remaining budget,
+and this survives a change of controller class:
+
+| | greedy-matched (sensitivity) | verified-matched (primary) |
+|---|---|---|
+| P-first | +0.513 [+0.423, +0.610] 30W/0L | +0.444 [+0.348, +0.550] 30W/0L |
+| D-first | +0.246 [+0.044, +0.442] 20W/10L | +0.290 [+0.104, +0.484] 22W/8L |
+
+Only 4 of 60 source-history observations disagree in sign between controller
+classes, so this measures a property of the history rather than of the
+controller that exploits it.
+
+**3. Heterogeneity — and its explicit limit.** The value of history depends on
+what the history accomplished: uniformly positive for potency-first, which
+pursued the eventual bottleneck, and heterogeneous for developability-first,
+which solved the already-easy requirement. Seven D-first sources are hurt under
+BOTH controller classes.
+
+> **The present development panel does not establish what molecular feature
+> predicts when history becomes harmful.**
+
+That sentence is load-bearing and must survive into the paper.
+
+## The explanation that was attempted and failed
+
+Potency margin at the switch state was examined as a candidate mechanism. It is
+**recorded as exploratory and unsuccessful**, and is NOT frozen as a held-out
+hypothesis.
+
+- Split by outcome, it looked suggestive: median −2.163 for the seven harmful
+  sources against −1.702 for the other 23, with prefix displacement, heavy-atom
+  count and cLogP essentially identical.
+- Measured correctly, as a continuous association across all 30 D-first
+  sources: **Spearman rho = +0.119, p = 0.53**, OLS slope +0.156.
+
+The median split looked convincing only because it dichotomised on the outcome
+being explained, which inflates a near-zero continuous relationship. Once the
+seven are *defined* by having a negative history effect, asking what
+distinguishes them is outcome-conditioned: it can suggest a hypothesis, it
+cannot establish one. The all-source correlation is the appropriate check and
+it erased the signal.
+
+**No further descriptor search on these sources.** No fingerprint scans, no
+RDKit descriptor panels, no operator-frequency sweeps, no classifiers. If a
+mechanism falls out naturally from the reference-dynamics or preference-control
+work, it can be revisited there with a fresh panel. Until then this is
+unexplained heterogeneity, and saying so is stronger than carrying a weak
+mechanism into confirmation.
+
+## What is barred from the write-up
+
+- Calling the seven an *outcome-defined subset* is correct; calling them a
+  *subgroup* is not, because a subgroup must be recognisable from a
+  pre-existing feature.
+- Pooled "x/60" counts describe source-history OBSERVATIONS. The independent
+  unit is the source, n=30 within each history.
+- `verified_retarget` vs `greedy_retarget` is not reportable as a claim:
+  policy improvement guarantees its direction.
