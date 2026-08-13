@@ -85,7 +85,24 @@ def verify_upstream_unmodified(source_dir: Path) -> dict[str, Any]:
 
 
 def _greedy_action(network, design, device) -> int:
-    """One greedy action from upstream's own batching path.
+    """WITHDRAWN. Diagnostic only -- not the comparison route.
+
+    Kept so the smoke's diagnostic history stays reproducible, and marked so it
+    cannot be mistaken for the adapter's job. Hand-driving per-action decisions
+    means building our own GraphXForm-like algorithm, which would be a bad
+    baseline: two successive shape/semantics mismatches were the signal. The
+    comparison route is
+
+        official pretrained checkpoint
+          -> native objective-specific fine-tuning / self-improvement
+          -> native beam / TASAR search
+          -> thin common evaluation adapter
+
+    The adapter canonicalises, evaluates, counts, and connects the frozen
+    oracle. It does NOT choose actions, rewrite masks, disable TERMINATE, or
+    alter the proposal distribution.
+
+    One greedy action from upstream's own batching path.
 
     `MoleculeTransformer.forward` takes a batched dict, not a list of designs,
     so the design is collated through `MoleculeDesign.list_to_batch` -- the
@@ -177,9 +194,9 @@ def run_graphxform_from_source(
     endpoints: list[dict[str, Any]] = []
     budget_exhausted = False
 
-    # One greedy extension pass. Deliberately minimal: the reporting bar is a
-    # smoke proving the adapter drives the real model under the real counters,
-    # not a GraphXForm experiment suite.
+    # WITHDRAWN PATH -- diagnostic only. See _greedy_action. A claim-bearing
+    # GraphXForm run must go through the native fine-tuning + search pipeline,
+    # not this loop.
     try:
         for _ in range(beam_width):
             if accountant.exhausted:

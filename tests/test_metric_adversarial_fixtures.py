@@ -114,7 +114,7 @@ def test_applicability_rejects_what_the_method_genuinely_cannot_represent() -> N
     assert result["n_applicable"] == 0
     assert set(result["inapplicable_reasons"]) == {
         "unsupported_element_or_charge_state",
-        "exceeds_heavy_atom_ceiling_42",
+        "exceeds_heavy_atom_ceiling_50",
     }
 
 
@@ -128,14 +128,25 @@ def test_applicability_never_silently_drops_a_molecule() -> None:
     assert len(result["inapplicable"]) == result["n_inapplicable"]
 
 
-def test_headroom_is_labelled_as_a_choice_not_a_derivation() -> None:
-    """The adversarial reading a reviewer will apply to the 42-atom ceiling."""
+def test_applicability_uses_only_the_native_ceiling_with_no_margin() -> None:
+    """The adversarial case: a margin that quietly makes the panel convenient.
+
+    An undervable margin whose only observable effect is to admit our own cohort
+    is exactly what a reviewer would attack, so there must be none. A molecule
+    between the old margin (42) and the native ceiling (50) must be ADMITTED.
+    """
     from compose_v4.experiments.graphxform_applicability import (
         HEADROOM_BASIS,
-        partition_panel,
+        HEAVY_ATOM_CEILING,
+        MAX_NUM_ATOMS,
+        REQUIRED_HEADROOM,
+        check_applicability,
     )
 
-    assert HEADROOM_BASIS == "CHOSEN_SAFETY_MARGIN"
-    domain = partition_panel(["CCO"])["domain"]
-    assert domain["headroom_basis"] == "CHOSEN_SAFETY_MARGIN"
-    assert "not structurally derived" in domain["headroom_audit"].lower()
+    assert REQUIRED_HEADROOM == 0
+    assert HEAVY_ATOM_CEILING == MAX_NUM_ATOMS == 50
+    assert HEADROOM_BASIS == "NONE_NATIVE_CEILING_ONLY"
+    # 45 heavy atoms sits in the band the withdrawn margin would have excluded.
+    admitted = check_applicability("C" * 45)
+    assert admitted.applicable and admitted.heavy_atoms == 45
+    assert not check_applicability("C" * 55).applicable

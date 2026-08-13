@@ -142,18 +142,16 @@ def main() -> int:
             "requires anyway. Recorded rather than worked around; the smoke does not pass "
             "until it is fixed."
         ),
-        "pretrained_model_terminates_immediately": (
-            "MEASURED, and it is CORRECT BEHAVIOUR rather than a defect. Greedy argmax from "
-            "the un-fine-tuned pretrained checkpoint selects TERMINATE on the first decision "
-            "for every held-in source, because the model is looking at an already-valid "
-            "drug-like molecule (P(terminate) ~ 0.99 in an independent probe). GraphXForm's "
-            "published protocol reaches extensions through per-objective SELF-IMPROVEMENT "
-            "FINE-TUNING plus beam search, not greedy argmax on the pretrained weights. "
-            "Masking the terminate action to force extension would ALTER THE PROPOSAL "
-            "DISTRIBUTION, which the adapter rule bars, so it was not done. The consequence "
-            "is that a meaningful GraphXForm comparison must include its fine-tuning loop, "
-            "and the oracle calls that loop consumes must be counted -- which the fairness "
-            "contract already requires."
+        "ADAPTER_DIAGNOSTIC_NOT_A_BASELINE_RESULT": (
+            "NOT A FINDING ABOUT GRAPHXFORM'S CAPABILITY, and it must never be reported as "
+            "one. Greedy argmax from the un-fine-tuned pretrained checkpoint selects "
+            "TERMINATE on the first decision for every held-in source. Its ONLY meaning is "
+            "diagnostic: it showed that greedy pretrained inference is not GraphXForm's "
+            "intended optimization procedure. The published method reaches extensions "
+            "through per-objective self-improvement fine-tuning plus beam/TASAR search. "
+            "Masking TERMINATE to force extension would alter the proposal distribution, "
+            "which the adapter rule bars, so it was not done. This line stays in the "
+            "implementation log and does not travel into any capability claim."
         ),
         "what_this_is_not": (
             "A measurement of GraphXForm's optimization quality, and not a "

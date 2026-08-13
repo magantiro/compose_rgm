@@ -60,32 +60,34 @@ ALLOWED_CHARGE_STATES = frozenset(
 #: config.max_num_atoms as shipped.
 MAX_NUM_ATOMS = 50
 
-#: CHOSEN SAFETY MARGIN, NOT A STRUCTURAL DERIVATION. Audited 2026-08-13 and
-#: downgraded after that audit.
+#: DROPPED 2026-08-13. There is no headroom margin.
 #:
-#: A structural derivation would need a native bound on maximum growth over a
-#: registered optimization horizon. GraphXForm has NO such bound: the search
-#: runs until the policy emits TERMINATE or a wall-clock limit expires
-#: (`wall_clock_limit`, 8 h in the paper), and `num_epochs` bounds fine-tuning
-#: epochs rather than atoms added. So maximum growth is not derivable from the
-#: action semantics, and any headroom number is a judgement call.
+#: A margin was briefly set at 8 atoms. It could not be derived from native
+#: action semantics -- GraphXForm bounds its search by TERMINATE or wall clock,
+#: not by a maximum atom count over a registered horizon -- and its only
+#: observable property was that it comfortably admitted our own cohort. A margin
+#: that cannot be derived, and whose only visible effect is to make the panel
+#: convenient for the baseline, cannot survive in a fairness contract, so it is
+#: removed rather than relabelled.
 #:
-#: 8 was chosen as a round margin allowing a small substituent. It is honest to
-#: record that it also comfortably admits the COMPOSE cohort (max 34 heavy
-#: atoms), which is exactly the reasoning that would be illegitimate if it were
-#: the *justification* rather than an observation about the consequence. It is
-#: not presented as structural, and the ceiling must not be retuned after any
-#: comparative outcome exists.
-REQUIRED_HEADROOM = 8
-HEADROOM_BASIS = "CHOSEN_SAFETY_MARGIN"
+#: Applicability now reflects ONLY native, externally determined limitations:
+#: the supported atom vocabulary and charge states, salt and explicit-H handling
+#: where genuinely unsupported, and the actual hard ceiling. A molecule outside
+#: that domain is reported INAPPLICABLE; a task is never silently prefiltered to
+#: make GraphXForm comfortable.
+REQUIRED_HEADROOM = 0
+HEADROOM_BASIS = "NONE_NATIVE_CEILING_ONLY"
 HEADROOM_AUDIT = (
-    "Not structurally derived. GraphXForm bounds its search by TERMINATE or "
-    "wall clock, not by a maximum atom count over a registered horizon, so no "
-    "native maximum-growth bound exists to derive 8 from. Recorded as a chosen "
-    "margin. Frozen 2026-08-13 before any COMPOSE-versus-GraphXForm number."
+    "No margin. The earlier 8-atom margin was withdrawn because it was not "
+    "structurally derivable and its only observable effect was to admit our own "
+    "cohort comfortably. The ceiling is now GraphXForm's native hard limit, "
+    "config.max_num_atoms = 50, at which take_action raises AssertionError. "
+    "Current sources max at 34 heavy atoms, so this changes no cohort; it fixes "
+    "the rule going forward."
 )
 
-#: Molecules with at most this many heavy atoms are eligible.
+#: GraphXForm's native hard ceiling, with nothing subtracted. Molecules with at
+#: most this many heavy atoms are eligible.
 HEAVY_ATOM_CEILING = MAX_NUM_ATOMS - REQUIRED_HEADROOM
 
 #: Multi-fragment inputs are reduced to the largest fragment first, matching the

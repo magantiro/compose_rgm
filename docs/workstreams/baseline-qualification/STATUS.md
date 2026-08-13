@@ -171,6 +171,19 @@ substitution the freeze exists to prevent, now measured rather than argued.
    concave front regions. This must be reported as a difference, not described
    as matching. See `FAIRNESS_MATRIX.md`.
 
+## The one remaining bounded job
+
+Implement **exactly one** native GraphXForm adapter on the frozen route —
+official pretrained checkpoint → native objective-specific fine-tuning →
+native beam/TASAR search → thin common evaluation adapter — run **one** held-in
+smoke under all three counters, document applicability, and **stop before any
+benchmark sweep**. The set is closed; do not add a baseline because this one is
+involved.
+
+The adapter canonicalises, evaluates, counts and connects the frozen oracle. It
+does **not** choose actions, rewrite masks, disable TERMINATE, or alter the
+proposal distribution.
+
 ## Next action
 
 **None. Deliverables A–C are complete; stopping before expensive sweeps.** The lane's work is complete and the harness gate passed.

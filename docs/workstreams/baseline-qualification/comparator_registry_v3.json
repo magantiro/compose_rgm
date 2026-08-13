@@ -101,6 +101,12 @@
     "C4c_retargeting": "same-prefix dynamic retargeting: the goal changes mid-trajectory and the process continues from the realized molecule under a finite remaining budget, with the reference process frozen; IN FLIGHT",
     "C4d_pathwise": "pathwise constraints: a labeled motif preserved at every committed intermediate state, on a support that includes deletions and topology changes; PLANNED"
   },
+  "cost_ledgers": {
+    "generic_offline_pretraining": "Reported DESCRIPTIVELY, outside the per-task oracle budget, for every method. GraphXForm's pretrained checkpoint, REINVENT's ChEMBL/PubChem prior and COMPOSE's R_theta training all sit here.",
+    "objective_specific_adaptation_and_search": "COUNTED IN FULL in the task budget. For GraphXForm that is its self-improvement fine-tuning plus beam/TASAR search and every property-oracle evaluation either consumes; for REINVENT the RL fine-tuning, which is its entire budget; for COMPOSE the control computation and verified rollout.",
+    "status": "FROZEN 2026-08-13, confirmed",
+    "why_the_split_matters": "It is what makes the comparison clean. GraphXForm may be excellent after objective-specific adaptation; COMPOSE changes purpose by recomputing control over a frozen reference process. That distinction is a claim about the SECOND ledger, and it does not require GraphXForm to lose."
+  },
   "evidence_standard": {
     "not_admissible": "Secondary sources as sole evidence; a capability the official code could be modified to support; plausible inference from method family.",
     "openreview_gap": "OpenReview forums for MARS (kHSu4ebxFXY), DDSBM (tQyh0gnfqW), HN-GFN (uoG1fLIK2s) and PMO (yCZRdI0Y7G) are behind a bot challenge and returned HTTP 403. No reviewer discussion was read for any method. Venues were confirmed from proceedings pages and paper footers instead.",
@@ -123,6 +129,15 @@
     "Use published defaults where they exist and record every deviation. PMO's own caution applies: REINVENT's performance is highly dependent on sigma and should be re-tuned whenever the environment changes, so using PMO's tuned sigma on a COMPOSE objective is itself a recorded deviation.",
     "Non-commercial and unlicensed code is a provenance blocker, not a footnote. MARS is CC BY-NC 4.0 and DDSBM has no license at all."
   ],
+  "graphxform_comparison_route": {
+    "adapter_diagnostic_not_a_result": "'Pretrained GraphXForm terminates immediately on valid drug-like molecules' is an ADAPTER DIAGNOSTIC and MUST NOT be reported as a finding about GraphXForm's capability. Its only meaning is that greedy pretrained inference is not GraphXForm's intended optimization procedure. It stays in the implementation log.",
+    "greedy_path_withdrawn": "A hand-rolled greedy extension loop was built and is WITHDRAWN. Two successive shape/semantics mismatches showed it was becoming our own GraphXForm-like algorithm, which would be a bad baseline: any gap would be attributed to our reconstruction rather than to the method. The function survives marked diagnostic-only so the smoke's history stays reproducible.",
+    "route": "official pretrained checkpoint -> native objective-specific fine-tuning / self-improvement -> native beam / TASAR search -> thin common evaluation adapter",
+    "status": "FROZEN 2026-08-13",
+    "the_adapter_does": "canonicalise, evaluate, count, and connect the frozen oracle",
+    "the_adapter_does_not": "choose actions, rewrite masks, disable TERMINATE, or alter the proposal distribution in any way",
+    "why_this_makes_it_a_better_comparator": "We will run the real strong version rather than a weakened one. If GraphXForm beats COMPOSE on conventional optimization that is acceptable and expected; the burden is that COMPOSE stays competitive while providing an explicit persistent molecular state supporting finite-horizon recovery, same-state retargeting and preference control."
+  },
   "held_out_data_opened": false,
   "manuscript_presentation": {
     "barred_claim": "'outperforms state of the art' and its paraphrases are barred from every artifact. There will be no broad apples-to-apples sweep and the claim is not needed. Enforced by validate_qualification_registry over the whole registry, not one field.",
@@ -777,12 +792,11 @@
       "what_it_is": "The REAL vendored upstream GB-GA (commit 4b49f182, byte-identical, MIT) on 5 held-in sources against the frozen COMPOSE developability objective under three-counter accounting. NOT a GraphGA quality measurement and NOT a COMPOSE comparison."
     },
     "graphxform_status": {
-      "adapter": "NOT YET BUILT -- next action, and now cheap",
-      "atom_vocabulary": "23 entries, all allowed as shipped: C, C-, C+, C@, C@@, N, N-, N+, O, O-, O+, F, P, P-, P+, S, S-, S+, S@, S@@, Cl, Br, I. Nine distinct elements. max_num_atoms 50, maximum_bond_order 6. Organic drug-like sources including charges and stereocentres are fine; the README's C/N/O restriction applies only to the solvent tasks.",
-      "checkpoint": "downloaded, hashed, strict-loads with zero key mismatches",
+      "applicability": "FROZEN and now NATIVE-ONLY: supported atom vocabulary and charge states, largest-fragment reduction for salts, explicit H unsupported, and GraphXForm's own hard ceiling of 50 heavy atoms with NO margin subtracted. The earlier 8-atom headroom is WITHDRAWN -- it was not structurally derivable and its only observable effect was to admit our own cohort comfortably. Current sources max at 34 heavy atoms, so no cohort changes; the rule is fixed going forward. Inapplicable molecules are REPORTED, never silently prefiltered.",
       "environment": "BUILT AND RUN, CPU-only, /tmp/baseline_envs/graphxform-py311",
-      "measured_cost": "one epoch 15-22 s CPU; full main.py process 48.2 s",
-      "source_conditioning": "VERIFIED twice: 8/8 COMPOSE held-in sources round-trip into an un-terminated design at action level 0, and a full end-to-end replay of a 23-atom drug-like molecule is canonical-SMILES equal with the model proposing a next action from that state."
+      "smoke_verdict": "FAIL, and honestly so. Passing: upstream unmodified, applicability applied and reported, all three counters wired, counter identity holds, sources scored through the pinned 2024.3.5 evaluator. Failing: the withdrawn greedy path cannot drive extension, which is the expected consequence of abandoning it rather than a new defect.",
+      "the_one_remaining_bounded_job": "Implement EXACTLY ONE native GraphXForm adapter on the frozen route above, run ONE held-in known-good smoke under all three counters, document applicability, and STOP before any benchmark sweep. Do not add a baseline because this one is involved. The set is closed.",
+      "upstream_integrity": "41 upstream .py files hash-pinned at commit 867bdcf9 in baselines/graphxform/upstream/UPSTREAM_SHA256.json; verify_upstream_unmodified checks the LIVE checkout at run time, with two recorded diffs and their reasons."
     },
     "hard_constraints_observed": [
       "No Modal run was launched.",
