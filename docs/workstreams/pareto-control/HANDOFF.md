@@ -80,7 +80,7 @@ Full contract in `PROTOCOL.md`. Summary:
 - **Arms:** `unguided` · `gen_rank@greedy` · `gen_rank@verified` · `greedy_pref`
   · `verified_pref`, plus a common-prefix branching mode for contrast P6. No
   learned `h_phi`.
-- **Primary metric:** normalized hypervolume over **committed endpoints only**,
+- **Primary metric:** **held-in-scaled** hypervolume (scaled by the held-in p99 vector `z*`, **not bounded by 1**) over **committed endpoints only**,
   exactly five per arm per source, at matched budget.
 - **Secondary metrics:** HV-AUC against **both** oracle-call conventions
   (benchmark-native = distinct molecules scored; raw = every scoring

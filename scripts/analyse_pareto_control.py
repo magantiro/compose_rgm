@@ -34,6 +34,7 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
 from compose_v4.experiments.pareto_control import (  # noqa: E402
+    Scalarization,
     INTERNAL_METHOD_UNIVERSE,
     budget_to_ninety,
     check_method_universe,
@@ -50,8 +51,25 @@ from pareto_instrument_gate import (  # noqa: E402
     run_gate,
 )
 
-#: Statistics whose sign a theorem fixes. Magnitude only; never a p-value.
-GUARANTEED_SIGN = {("verified_pref", "greedy_pref")}
+#: Statistics whose sign a theorem fixes -- keyed by (contrast, METRIC), never
+#: by contrast alone.
+#:
+#: POINTWISE POLICY IMPROVEMENT AND SET-LEVEL PARETO IMPROVEMENT ARE DIFFERENT
+#: CLAIMS. Verified control guarantees the scalarized continuation value FOR
+#: EACH requested preference. It does NOT guarantee that the five resulting
+#: endpoints enclose more dominated area AS A SET: a verified action can improve
+#: an individual preference while moving endpoints closer together and reducing
+#: complementary coverage, so five individually better points can enclose less
+#: area than five worse but better-spread ones.
+#:
+#: An earlier version of this file keyed the registry on the contrast alone,
+#: which silently marked HV_verified - HV_greedy as sign-guaranteed and would
+#: have suppressed a scientifically valid comparison. Smoke source 000 returned
+#: verified 1.0060 against greedy 1.0074 -- verified LOWER -- which is the
+#: falsifying value that registry claimed could not exist.
+GUARANTEED_SIGN = {
+    ("verified_pref", "greedy_pref"): {"per_preference_scalarized_value"},
+}
 
 METRICS = ("normalized_hypervolume", "preference_coverage",
            "nondominated_set_size", "endpoint_diversity")
@@ -170,7 +188,8 @@ def main() -> int:
             b = per_source_metric(rows, contrast.base, metric)
             shared = sorted(set(a) & set(b))
             boot = source_paired_bootstrap([a[s] - b[s] for s in shared])
-            guaranteed = (contrast.arm, contrast.base) in GUARANTEED_SIGN
+            guaranteed = metric in GUARANTEED_SIGN.get(
+                (contrast.arm, contrast.base), set())
             if guaranteed:
                 boot["sign_is_guaranteed"] = True
                 boot["pvalue_NOT_REPORTED"] = (
@@ -183,6 +202,85 @@ def main() -> int:
         print(f"  {contrast.name:<34} HV {hv['mean']:>+8.4f} "
               f"[{hv['ci95_low']:>+7.4f}, {hv['ci95_high']:>+7.4f}]  "
               f"{hv['wins']}W/{hv['losses']}L/{hv['ties']}T{flag}")
+
+    # --- TWO SEPARATED QUESTIONS, and p99 exceedance -----------------------
+    # PER-PREFERENCE: does verified control improve the registered scalarized
+    #   objective for each requested preference? Sign guaranteed by policy
+    #   improvement; magnitude only.
+    # SET-LEVEL: does that translate into a better endpoint SET -- HV, HV-AUC,
+    #   coverage? NOT guaranteed, and it can come out negative.
+    # They need not agree, and disagreement is informative: it distinguishes
+    # optimising five preference-conditioned trajectories individually from
+    # constructing a globally complementary Pareto set.
+    scales0 = json.loads((REPO / "diagnostics/pareto_tradeoff_census.json").read_text())
+    ka = rows[0].get("objective_a", "P")
+    kb = rows[0].get("objective_b", "D")
+    nadir0 = np.array([scales0["frozen_scales"]["reference_p5"][ka],
+                       scales0["frozen_scales"]["reference_p5"][kb]])
+    utopia0 = np.array([scales0["frozen_scales"]["utopia_p99"][ka],
+                        scales0["frozen_scales"]["utopia_p99"][kb]])
+    scalarize = Scalarization(utopia0)
+    prefs0 = rows[0].get("preferences", [0.1, 0.3, 0.5, 0.7, 0.9])
+
+    per_pref_delta, exceed_counts, exceed_mag = [], [], []
+    for row in rows:
+        arms_here = row.get("arms", {})
+        g, v = arms_here.get("greedy_pref"), arms_here.get("verified_pref")
+        if g and v and g.get("endpoint_z") and v.get("endpoint_z"):
+            zg = np.asarray(g["endpoint_z"], dtype=float)
+            zv = np.asarray(v["endpoint_z"], dtype=float)
+            # Chebyshev is MINIMISED, so improvement is greedy minus verified.
+            deltas = [float(scalarize(zg[i], w)[0] - scalarize(zv[i], w)[0])
+                      for i, w in enumerate(prefs0)]
+            per_pref_delta.append(float(np.mean(deltas)))
+        for a in arms_here.values():
+            z = np.asarray(a.get("endpoint_z") or [], dtype=float)
+            if z.size == 0:
+                continue
+            over = z > utopia0[None, :]
+            exceed_counts.append(float(over.any(axis=1).mean()))
+            if over.any():
+                exceed_mag.append(float(np.max((z - utopia0[None, :])[over])))
+
+    two_questions = {
+        "framing": ("pointwise policy improvement and set-level Pareto "
+                    "improvement are DIFFERENT claims; they need not agree and "
+                    "disagreement is informative"),
+        "per_preference_scalarized_value": {
+            "statistic": ("mean over the five preferences of "
+                          "s(greedy endpoint | w) - s(verified endpoint | w); "
+                          "Chebyshev is minimised so positive favours verified"),
+            "sign_is_guaranteed": True,
+            "pvalue_NOT_REPORTED": ("policy improvement fixes the sign for each "
+                                    "requested preference; magnitude only"),
+            **source_paired_bootstrap(per_pref_delta),
+        },
+        "set_level_hypervolume": {
+            "statistic": "HV(verified endpoint set) - HV(greedy endpoint set)",
+            "sign_is_guaranteed": False,
+            "why_not": ("a verified action can improve an individual preference "
+                        "while moving endpoints closer together and reducing "
+                        "complementary coverage, so five individually better "
+                        "points can enclose less dominated area than five worse "
+                        "but better-spread ones"),
+            "falsifying_range": "(-inf, +inf); negative values are real and live",
+            "see": "contrasts.P2_future_awareness.normalized_hypervolume",
+        },
+    }
+
+    exceedance = {
+        "statistic": ("descriptive only -- fraction of endpoints exceeding the "
+                      "held-in p99 scale vector z*, and the largest excess"),
+        "fraction_of_endpoints_beyond_z_star": (float(np.mean(exceed_counts))
+                                                if exceed_counts else None),
+        "max_excess_in_iqr_units": float(np.max(exceed_mag)) if exceed_mag else 0.0,
+        "interpretation": ("z* is a NORMALISATION SCALE, not an attainable "
+                           "ceiling. Exceedance is legitimate achievement beyond "
+                           "the held-in p99 and is NOT clipped."),
+        "no_clipped_variant": ("introducing a clipped or robust HV after seeing "
+                               "these results is exactly what the freeze exists "
+                               "to prevent"),
+    }
 
     # --- Efficiency: HV_ref, N_90, and region coverage ----------------------
     # HV_ref is the UNION nondominated front across every arm -- never one arm's
@@ -358,6 +456,8 @@ def main() -> int:
         "schema": "compose.pareto.control_analysis",
         "status": "SMOKE_HELD_IN",
         "within_arm_contrasts": within,
+        "two_separated_questions": two_questions,
+        "p99_exceedance": exceedance,
         "efficiency": efficiency,
         "skipped_contrasts": skipped,
         "held_out_opened": False,

@@ -137,15 +137,48 @@ def test_a_missing_fan_is_recorded_not_silently_dropped(tmp_path):
     assert "P5_preference_responsiveness" in data["within_arm_contrasts"]
 
 
-def test_the_guaranteed_sign_contrast_reports_no_pvalue(tmp_path):
+def test_set_level_hypervolume_is_NOT_marked_sign_guaranteed(tmp_path):
+    """This test previously asserted the opposite, and in doing so it ENFORCED a
+    defect: the registry was keyed on the contrast alone, so HV_verified -
+    HV_greedy was marked sign-guaranteed and its comparison suppressed.
+
+    Pointwise policy improvement guarantees the scalarized value FOR EACH
+    preference. It does not guarantee that the five endpoints enclose more
+    dominated area AS A SET -- a verified action can improve one preference while
+    moving endpoints closer together and reducing complementary coverage. Smoke
+    source 000 returned verified 1.0060 against greedy 1.0074, the falsifying
+    value the old registry claimed could not exist.
+    """
     shards, out = tmp_path / "shards", tmp_path / "analysis.json"
     write_shards(shards)
     run(shards, out)
-    entry = json.loads(out.read_text())["contrasts"]["P2_future_awareness"]
-    hv = entry["normalized_hypervolume"]
-    assert hv["sign_is_guaranteed"] is True
-    assert "pvalue_NOT_REPORTED" in hv
-    assert not any(k.startswith("p_value") or k == "pvalue" for k in hv)
+    hv = json.loads(out.read_text())["contrasts"]["P2_future_awareness"][
+        "normalized_hypervolume"]
+    assert "sign_is_guaranteed" not in hv
+    assert "pvalue_NOT_REPORTED" not in hv
+
+
+def test_the_two_questions_are_reported_separately(tmp_path):
+    """Per-preference and set-level must both appear, with opposite sign status,
+    so neither can stand in for the other."""
+    shards, out = tmp_path / "shards", tmp_path / "analysis.json"
+    write_shards(shards)
+    run(shards, out)
+    q = json.loads(out.read_text())["two_separated_questions"]
+    assert q["per_preference_scalarized_value"]["sign_is_guaranteed"] is True
+    assert "pvalue_NOT_REPORTED" in q["per_preference_scalarized_value"]
+    assert q["set_level_hypervolume"]["sign_is_guaranteed"] is False
+    assert "falsifying_range" in q["set_level_hypervolume"]
+
+
+def test_p99_exceedance_is_descriptive_and_nothing_is_clipped(tmp_path):
+    shards, out = tmp_path / "shards", tmp_path / "analysis.json"
+    write_shards(shards)
+    run(shards, out)
+    e = json.loads(out.read_text())["p99_exceedance"]
+    assert "descriptive" in e["statistic"]
+    assert "no_clipped_variant" in e
+    assert e["fraction_of_endpoints_beyond_z_star"] is not None
 
 
 def test_withdrawn_statistics_travel_with_the_report(tmp_path):

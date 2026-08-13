@@ -306,12 +306,12 @@ show that a non-greedy action was worth taking.
 
 ### 7.3 Metrics — frozen before any result
 
-1. **Normalized hypervolume (HV).** 2-D, per source, over that arm's committed
+1. **Held-in-scaled hypervolume (HV).** 2-D, per source, over that arm's committed
    **endpoints only** — exactly one endpoint per preference branch, so every
    arm contributes exactly 5 points. Reference point `r` (held-in p5), utopia
    `z*` (held-in p99); HV expressed in units of the box `[r, z*]`.
 
-   > **HV is NOT bounded by 1, and is never clipped to be.** An earlier version
+   > **HV is SCALED, not bounded — and is never clipped.** `z*` is a **normalisation scale**, not a hard attainable utopia. An earlier version
    > of this line claimed `HV in [0, 1]`. **That was false.** `z*` is the held-in
    > **p99**, not a maximum, and controlled trajectories pass it — the census's
    > G4 potency reach of **0.700** already said a single-objective greedy rollout
@@ -435,6 +435,40 @@ show that a non-greedy action was worth taking.
    evaluations, is a **good** result and is reported as such — not as a loss.
    Nothing is tuned to win final HV. **If COMPOSE is worse on both, that is
    reported.**
+
+1g. **Pointwise policy improvement and set-level Pareto improvement are
+   DIFFERENT claims.** Report both; never let one stand in for the other.
+
+   | question | statistic | sign |
+   |---|---|---|
+   | **PER-PREFERENCE** — does verified control improve the registered scalarized objective for each requested preference? | `s(greedy_w) - s(verified_w)`, averaged over the five `w` | **GUARANTEED** by policy improvement — magnitude only, no p-value |
+   | **SET-LEVEL** — does that translate into a better endpoint SET? | `HV`, `HV-AUC`, coverage of the five endpoints | **NOT guaranteed** — genuinely two-sided |
+
+   > **Why the set-level sign is free.** A verified action can improve an
+   > individual preference *while moving endpoints closer together and reducing
+   > complementary coverage*. Five individually better points can enclose **less**
+   > dominated area than five worse but better-spread ones.
+   >
+   > So `HV_verified - HV_greedy` **has a genuine falsifying range and is a valid
+   > comparison.** It must **not** be barred by analogy with the exact-target
+   > utility comparison, where the sign genuinely was guaranteed. The two cases
+   > differ, and the difference is the point.
+   >
+   > Smoke source 000 returned verified **1.0060** against greedy **1.0074** —
+   > verified lower. That is the falsifying value, observed.
+
+   **They need not agree, and disagreement is informative:** it distinguishes
+   *optimising five preference-conditioned trajectories individually* from
+   *constructing a globally complementary Pareto set*. If the run shows better
+   per-preference values with slightly worse set HV, the finding is stated
+   plainly — **finite-horizon control optimises individual preference-conditioned
+   trajectories without explicitly coordinating the archive** — and **no
+   archive-aware controller is invented in this paper.**
+
+1h. **p99 exceedance is reported DESCRIPTIVELY.** Frequency and magnitude of
+   endpoints beyond `z*`, and nothing more. **No clipped or robust-HV variant is
+   introduced** — inventing a metric after seeing source 000 is exactly the move
+   the freeze exists to prevent.
 
 2. **HV-AUC — two conventions, reported together, never substituted.**
    - `HV-AUC@native`: x-axis = **distinct molecules scored** by the property

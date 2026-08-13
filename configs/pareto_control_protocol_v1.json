@@ -284,6 +284,24 @@
       "why": "z* is the held-in p99, not a maximum; controlled trajectories pass it (census G4 potency reach 0.700; first completed smoke source HV 1.0074). The box is a normalizer, never a cap -- clipping would suppress real achievement and hide ceiling effects.",
       "corrected": "an earlier line claimed HV in [0,1]; that was FALSE. The metric is unchanged, only the description.",
       "ratios_unaffected": "HV_star carries the identical normalizer, so B_90 and N_90 are invariant to the box constant"
-    }
+    },
+    "hv_name": "held-in-scaled hypervolume, or hypervolume under held-in p99 scaling; NEVER 'normalized HV in [0,1]'",
+    "p99_exceedance": "reported DESCRIPTIVELY -- frequency and magnitude only. No clipped or robust-HV variant is introduced."
+  },
+  "two_separated_questions": {
+    "per_preference": {
+      "statistic": "s(greedy_w) - s(verified_w) averaged over the five w",
+      "sign_is_guaranteed": true,
+      "reporting": "magnitude only, no p-value"
+    },
+    "set_level": {
+      "statistic": "HV / HV-AUC / coverage of the five-endpoint set",
+      "sign_is_guaranteed": false,
+      "why": "a verified action can improve an individual preference while moving endpoints closer together and reducing complementary coverage; five individually better points can enclose less dominated area than five worse but better-spread ones",
+      "must_not_be_barred": "do NOT bar it by analogy with the exact-target utility comparison, where the sign genuinely was guaranteed",
+      "observed_falsifying_value": "smoke source 000: verified 1.0060 vs greedy 1.0074"
+    },
+    "disagreement_is_informative": "it distinguishes optimising five preference-conditioned trajectories individually from constructing a globally complementary Pareto set",
+    "if_they_disagree": "report plainly that finite-horizon control optimises individual preference-conditioned trajectories without explicitly coordinating the archive; do NOT invent an archive-aware controller in this paper"
   }
 }
