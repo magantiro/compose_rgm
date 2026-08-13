@@ -305,9 +305,37 @@ def test_hypervolume_ignores_points_below_the_reference():
     assert hypervolume(z, REFERENCE) == pytest.approx(12.0)
 
 
-def test_normalized_hypervolume_is_bounded_by_one():
+def test_normalized_hypervolume_is_one_at_the_utopia_corner():
     z = np.array([[10.0, 10.0]])
     assert normalized_hypervolume(z, REFERENCE, UTOPIA) == pytest.approx(1.0)
+
+
+def test_normalized_hypervolume_may_EXCEED_one_and_is_not_clipped():
+    """The box is a NORMALIZER, not a cap.
+
+    `z*` is the held-in p99, not a maximum, and controlled trajectories do pass
+    it -- the census's G4 potency reach of 0.700 says so. Clipping at `z*` would
+    suppress real achievement and make ceiling effects invisible.
+
+    An earlier docstring claimed HV lands in [0, 1]. That claim was false, and
+    the first completed smoke source returned 1.0074. The METRIC is unchanged;
+    only the false description was.
+    """
+    beyond = np.array([[12.0, 11.0]])
+    assert normalized_hypervolume(beyond, REFERENCE, UTOPIA) > 1.0
+
+
+def test_ratios_to_hv_star_are_invariant_to_the_box_constant():
+    """Why the false bound did not corrupt B_90 or N_90: HV_star carries the
+    same normalizer, so the ratio cancels it."""
+    fronts = {"a": np.array([[12.0, 2.0]]), "b": np.array([[2.0, 11.0]])}
+    z = np.array([[12.0, 2.0]])
+    wide = np.array([20.0, 20.0])
+    r1 = (normalized_hypervolume(z, REFERENCE, UTOPIA)
+          / pooled_attainable_hypervolume(fronts, REFERENCE, UTOPIA))
+    r2 = (normalized_hypervolume(z, REFERENCE, wide)
+          / pooled_attainable_hypervolume(fronts, REFERENCE, wide))
+    assert r1 == pytest.approx(r2)
 
 
 def test_hypervolume_cannot_be_inflated_by_adding_dominated_points():

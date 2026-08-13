@@ -309,8 +309,20 @@ show that a non-greedy action was worth taking.
 1. **Normalized hypervolume (HV).** 2-D, per source, over that arm's committed
    **endpoints only** — exactly one endpoint per preference branch, so every
    arm contributes exactly 5 points. Reference point `r` (held-in p5), utopia
-   `z*` (held-in p99); HV divided by the HV of the box `[r, z*]`, so
-   HV in [0, 1].
+   `z*` (held-in p99); HV expressed in units of the box `[r, z*]`.
+
+   > **HV is NOT bounded by 1, and is never clipped to be.** An earlier version
+   > of this line claimed `HV in [0, 1]`. **That was false.** `z*` is the held-in
+   > **p99**, not a maximum, and controlled trajectories pass it — the census's
+   > G4 potency reach of **0.700** already said a single-objective greedy rollout
+   > exceeds `z*_P` on 14 of 20 sources, and the first completed smoke source
+   > returned **1.0074**. Values above 1 are real achievement beyond the
+   > reference box. Clipping at `z*` would suppress that signal and make ceiling
+   > effects invisible, so the box is a **normalizer, never a cap**.
+   >
+   > **The metric is unchanged** — only the false description of its range.
+   > `B_90` and `N_90` are unaffected, because `HV_star` carries the identical
+   > normalizer and the ratio cancels the box constant.
 
    > **The HV inflation channel, and how it is closed.** An arm that simply
    > generates more molecules inflates HV without better control. The control is

@@ -4,7 +4,7 @@
   "title": "Target-free Pareto / preference control",
   "status": "DESIGN_ONLY_PLUS_HELD_IN_CENSUS",
   "branch": "codex/compose-pareto-control",
-  "commit": "aac867be5293a8907101ab20045a7f80b94c8a5f",
+  "commit": "c5aeb7a2a8bc914930310679ef9bba9a2380301f",
   "working_tree_dirty_at_write_time": true,
   "base_commit": "a0e680d",
   "held_out_opened": false,
@@ -20,7 +20,7 @@
     "scripts/build_analogue_trace_pool.py": "05a7326365c1102110d6ba582960f20e89b4f0a02964008475ec9d65a4981ad9"
   },
   "lane_artifacts": {
-    "docs/workstreams/pareto-control/PROTOCOL.md": "de53748460fe3eb2c1833493ce00803b68ef24d08893804a161ddb295af4fa51",
+    "docs/workstreams/pareto-control/PROTOCOL.md": "c8e9b211c6a30eae38ad763ddaf6d370e38039758c5f01c75b59f6ba33fe678a",
     "docs/workstreams/pareto-control/STATUS.md": "8ba70763f8c7fb2469dc678e0f17e7f588d25dc51427bf668543d4d4900aa1bc",
     "docs/workstreams/pareto-control/DECISION_LOG.md": "ae32dd900b0d94be1c8bb266e79e1362abbcbe5bb040d0d976a83a4e67f967d1",
     "docs/workstreams/pareto-control/FIGURE_DESIGN.md": "64e7130690fc949df455057968d8cc5fc3cf9d316036e6104c2c650aace360eb",
@@ -28,8 +28,8 @@
     "scripts/pareto_instrument_gate.py": "a0f74025ef80f0117231db7bd6271c4bd755854a5c200a51bc993b6c0f3607b6",
     "scripts/pareto_select_cohort.py": "defb69c258a864b0bb08ce886cee96a51c502e9158e4daf7356c6bf1fb97f6a5",
     "scripts/analyse_pareto_control.py": "0b673938b62707124abef4376107f9fc7c48ab7bca0806dc9fe3ddd7d83fb4aa",
-    "src/compose_v4/experiments/pareto_control.py": "e7ba5a387852199cce6c2bf80d68abdd80dec3b36a83ca5484784ffd4543bfe9",
-    "tests/test_pareto_control.py": "868b4f1cdd8ce832b0d24b1235ea87de601cb9ecd38a430c9ac231a18915ebc2",
+    "src/compose_v4/experiments/pareto_control.py": "9c5b331d76ededcee3e87239d8e2cef19a6c87fcf7f765363d4c5f61302f3922",
+    "tests/test_pareto_control.py": "6966f659cd207ab9870403e49ef41a1a8f444081cba731c75db99aa4b755eed0",
     "modal_apps/pareto_control_app.py": "87c77e1b8210d2b80dc753d4c0939add934bf553d6eb2e0f57d5b1798be82d29",
     "tests/test_pareto_instrument_gate.py": "42921f49169c87d88f3f0ff3a49eab34d9a24af0b2d91234397ee62dbb4a0314",
     "diagnostics/pareto_tradeoff_census.json": "5b1fc96b4ceb3a757da0e5f036fec59356ef135ddc4d2a3f285fb933f4c636a1",

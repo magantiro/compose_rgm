@@ -462,6 +462,22 @@ def hypervolume(z: np.ndarray, reference: np.ndarray) -> float:
 
 def normalized_hypervolume(z: np.ndarray, reference: np.ndarray,
                            utopia: np.ndarray) -> float:
+    """Hypervolume expressed in units of the frozen reference box `[r, z*]`.
+
+    NOT BOUNDED BY 1, and it must not be clipped to be.
+
+    `z*` is the held-in **p99**, not a maximum. A controlled trajectory can
+    exceed the 99th percentile of the held-in pool, and on this task it does:
+    the census's G4 potency reach fraction of 0.700 says a single-objective
+    greedy rollout passes `z*_P` on 14 of 20 sources. So values above 1.0 are
+    real achievement beyond the reference box, not error.
+
+    Clipping endpoints at `z*` would suppress exactly that signal and would make
+    ceiling effects invisible, so the box is a NORMALIZER and never a cap.
+
+    Ratios are unaffected: `HV_star` uses the identical normalizer, so
+    `HV(b) / HV_star`, `B_90` and `N_90` are invariant to the box constant.
+    """
     box = float(np.prod(utopia - reference))
     return hypervolume(z, reference) / box if box > 0 else 0.0
 
