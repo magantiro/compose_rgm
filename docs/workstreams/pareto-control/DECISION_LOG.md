@@ -516,3 +516,77 @@ frozen protocol does not require them here.
 
 **Changes a frozen object:** no — it discharges a conditional one.
 
+---
+
+## D-016 · 2026-08-13 · The oracle-demand ratio is WITHDRAWN as a cost claim; the counter is sound
+
+**Decision.** Withdraw the oracle-demand ratio as a **cost** claim. Report raw
+counts with the caveat attached. `diagnostics/pareto_oracle_accounting_audit.json`,
+run on committed shards with **no new kernel work**.
+
+**What was wrong with the claim, not the counts.** At matched kernel budget,
+preference control is charged for **interrogating the whole legal successor
+fiber at every decision**; generate-and-rank is charged only for **the terminal
+molecules it produced**. Those are different acts. The ratio conflated
+*property evaluations per unit of kernel work* with *cost of optimizing a
+molecule*, and only the first was measured. I compounded it by reporting a
+round "~3,000x" as though it characterised efficiency.
+
+**The counter is sound — this was the thing to establish.**
+
+| arm | requests | unique evaluations | cache hit | kernel | eval/kernel |
+|---|---:|---:|---:|---:|---:|
+| `greedy_pref` | 17,726 | 10,352 | 0.476 | 16 | **596.6** |
+| `verified_pref` | 273,854 | 174,294 | 0.364 | 398 | **437.9** |
+| `gen_rank@greedy` | 6 | 2 | 0.500 | 11 | **0.2** |
+| `unguided` | 5 | 5 | 0.000 | 20 | 0.2 |
+
+`greedy_pref`'s **596.6** evaluations per enumeration sits essentially on the
+census's mean distinct fiber width of **586**. The increments track distinct
+candidate molecules; there is no counter bug. `verified_pref`'s 437.9 is lower
+because lookahead rollouts revisit states whose candidates are already cached.
+
+### The four separations
+
+1. **Batch or invocation? SEPARATE INVOCATIONS.** `objective_vector()` calls
+   `oracle.margin_many([key])` with a list of **exactly one** molecule. Every
+   evaluation is its own scorer invocation, so the counter is **not** hiding
+   vectorisation. The counts are honest — and the implementation is leaving
+   batching on the table, at ~10k one-molecule SVM calls per source for
+   `greedy_pref` alone.
+2. **DRD2 versus cheap descriptors? NOT SEPARABLE AS INSTRUMENTED.**
+   `objective_vector()` computes DRD2, QED and cLogP together on every
+   evaluation, so `N_drd2 == N_descriptor == N_all_objective` **by
+   construction**. Today the biologically meaningful count happens to equal the
+   total — but only because nothing short-circuits. Any future version that
+   skipped DRD2 when developability binds would make them diverge while the
+   counter kept reporting one number. **Separating the increment sites is a
+   prerequisite for any cost claim.**
+3. **Requests versus post-cache? SEPARABLE AND REPORTED.** Roughly half of
+   `greedy_pref`'s requests resolve from cache (17,726 → 10,352), so the two
+   tell materially different efficiency stories, exactly as Lane 3 found on real
+   baselines.
+4. **Marks versus distinct successors? PARTIALLY ANSWERED.**
+   `canonical_successor_result()` returns `batch.successors` **after** alias
+   collapse, so the census's 586 is already a distinct-canonical-successor
+   count, not a marked-action count. The pre-collapse marked-action count is
+   **not recorded anywhere**, and establishing the collapse ratio needs one
+   instrumented enumeration — new kernel work, **not done here**.
+
+### The finding this exposes, stated as a weakness
+
+Exhaustive preference control **genuinely scores essentially every distinct
+legal successor at every edit** — 596.6 of a 586-wide fiber. Against a real
+black-box oracle that is a **genuine computational weakness of the exhaustive
+implementation**, not an artifact of accounting.
+
+It is also a conspicuous place where COMPOSE's own structure should help: it is
+strange for the scalable algorithm to score all ~600 legal moves equally when a
+learned reference distribution is already available, and goal-aware
+shortlisting is the same shape that already worked in exact-target recovery.
+**That follow-up is NOT authorised, is not designed here, and does not touch
+this smoke.** It is recorded so the observation is not lost.
+
+**Changes a frozen object:** no. Withdraws an interpretation, changes no metric,
+no threshold and no arm.
+

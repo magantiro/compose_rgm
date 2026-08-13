@@ -331,8 +331,13 @@ thresholds were committed at `d206d55`, before the census had ever been run.
 
 **4. Budget-axis ambiguity for generate-then-rank (design finding, not a bug).**
 One kernel call yields ~600 candidates, so matching `gen_rank` on native oracle
-calls hands it ~600x the closed-loop arms' kernel budget, while matching on
-kernel calls starves it of molecules. P3/P4 are declared as a bracket at both
+calls hands it far more kernel work than the closed-loop arms, while matching on
+kernel calls starves it of molecules.
+
+**WITHDRAWN AS A COST CLAIM, pending audit (main lane, `2cc6fc3`).** The counts are real; the *interpretation* is not established. At matched kernel budget, preference control is charged for interrogating the ~600-wide legal successor fiber at every decision, while generate-and-rank is charged only for the terminal molecules it produced. **Those are different acts.** The ratio therefore conflates *property evaluations per unit of kernel work* with *cost of optimizing a molecule*, and only the first was measured. Until the audit lands, this appears as a **raw count with this caveat attached** and never as a cost ratio.
+
+The audit is `diagnostics/pareto_oracle_accounting_audit.json`; see
+`DECISION_LOG.md` D-016. P3/P4 are declared as a bracket at both
 matchings — but **only the kernel-matched end is affordable in the smoke** (the
 native-matched end needs ~2,600 trajectories and ~30 h per source), so P3/P4
 will be **one-sided** until main authorizes the other end. See `DECISION_LOG.md`

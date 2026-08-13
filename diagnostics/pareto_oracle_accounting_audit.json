@@ -1,0 +1,724 @@
+{
+  "schema": "compose.pareto.oracle_accounting_audit",
+  "status": "SMOKE_HELD_IN",
+  "no_new_kernel_work": true,
+  "source": "committed shards plus the frozen census; nothing re-run",
+  "withdrawn_claim": "The oracle-demand ratio between preference control and generate-and-rank at matched kernel budget is WITHDRAWN as a COST claim. At matched kernel budget preference control is charged for interrogating the whole legal fiber at every decision while generate-and-rank is charged only for the terminal molecules it produced -- different acts. The counts are real; the interpretation is not established.",
+  "counter_semantics_from_code": {
+    "raw_oracle_calls": "every z() request, including cache hits",
+    "native_oracle_calls": "cache misses only -- distinct molecules actually evaluated",
+    "kernel_calls": "distinct states enumerated (successor cache misses)",
+    "drd2_batch_size": 1,
+    "drd2_call_form": "oracle.margin_many([key]) -- a list of exactly one molecule",
+    "descriptors_computed_with_every_drd2_call": [
+      "QED",
+      "Crippen.MolLogP"
+    ]
+  },
+  "separations": {
+    "1_batch_vs_invocation": {
+      "answer": "SEPARATE INVOCATIONS. objective_vector() calls oracle.margin_many([key]) with a list of exactly one molecule, so every evaluation is its own scorer invocation. The counter is NOT hiding vectorisation.",
+      "consequence": "the counts are honest, but the implementation is leaving batching on the table -- thousands of one-molecule SVM calls per source"
+    },
+    "2_drd2_vs_descriptors": {
+      "answer": "NOT SEPARABLE AS INSTRUMENTED. objective_vector() computes DRD2, QED and cLogP together on every evaluation, so N_drd2 == N_descriptor == N_all_objective BY CONSTRUCTION.",
+      "consequence": "today the biologically meaningful count happens to equal the total, but only because nothing short-circuits. Any future version that skips DRD2 when developability binds would make these diverge while the counter kept reporting one number.",
+      "required_fix_before_any_cost_claim": "increment N_drd2 and N_descriptor at their own call sites"
+    },
+    "3_requests_vs_post_cache": {
+      "answer": "SEPARABLE AND REPORTED -- see cache_hit_rate per arm"
+    },
+    "4_marks_vs_distinct_successors": {
+      "answer": "PARTIALLY ANSWERED. canonical_successor_result() returns batch.successors AFTER alias collapse, so the census's mean fiber width of 586 is already a DISTINCT-CANONICAL-SUCCESSOR count, not a marked-action count.",
+      "not_answerable_from_artifacts": "the marked-action count before collapse is not recorded in the shards or the census. Establishing the collapse ratio needs one instrumented enumeration, which is new kernel work and is NOT done here."
+    }
+  },
+  "mechanical_checks": [
+    {
+      "arm": "greedy_pref",
+      "n_sources": 12,
+      "evaluations_per_kernel_call": {
+        "min": 396.22727272727275,
+        "median": 596.6050420168067,
+        "max": 1403.2
+      },
+      "census_mean_distinct_successors_per_state": 585.7166666666667,
+      "consistent_with_fiber_width": true,
+      "verdict": "CONSISTENT -- increments track distinct candidates",
+      "note": "fiber width varies by molecule, so a per-source ratio above the census MEAN is expected; a ratio far above the observed maximum would not be"
+    },
+    {
+      "arm": "verified_pref",
+      "n_sources": 1,
+      "evaluations_per_kernel_call": {
+        "min": 437.9246231155779,
+        "median": 437.9246231155779,
+        "max": 437.9246231155779
+      },
+      "census_mean_distinct_successors_per_state": 585.7166666666667,
+      "consistent_with_fiber_width": true,
+      "verdict": "CONSISTENT -- increments track distinct candidates",
+      "note": "fiber width varies by molecule, so a per-source ratio above the census MEAN is expected; a ratio far above the observed maximum would not be"
+    }
+  ],
+  "per_arm_medians": {
+    "gen_rank@greedy": {
+      "oracle_requests": 6.0,
+      "unique_valid_canonical_evaluations": 2.5,
+      "cache_hit_rate": 0.5,
+      "evaluations_per_kernel_call": 0.2222222222222222,
+      "kernel_calls": 11.0
+    },
+    "greedy_pref": {
+      "oracle_requests": 17726.5,
+      "unique_valid_canonical_evaluations": 10352.0,
+      "cache_hit_rate": 0.4756247330399094,
+      "evaluations_per_kernel_call": 596.6050420168067,
+      "kernel_calls": 16.0
+    },
+    "unguided": {
+      "oracle_requests": 5.0,
+      "unique_valid_canonical_evaluations": 5.0,
+      "cache_hit_rate": 0.0,
+      "evaluations_per_kernel_call": 0.25,
+      "kernel_calls": 20.0
+    },
+    "verified_pref": {
+      "oracle_requests": 273854.0,
+      "unique_valid_canonical_evaluations": 174294.0,
+      "cache_hit_rate": 0.363551381393005,
+      "evaluations_per_kernel_call": 437.9246231155779,
+      "kernel_calls": 398.0
+    }
+  },
+  "per_source": {
+    "0": {
+      "complete": false,
+      "stage": "gen_rank@greedy",
+      "arms": {
+        "unguided": {
+          "kernel_calls": 10.0,
+          "oracle_requests": 5.0,
+          "unique_valid_canonical_evaluations": 5.0,
+          "cache_hits": 0.0,
+          "cache_hit_rate": 0.0,
+          "N_drd2": 5.0,
+          "N_descriptor": 5.0,
+          "N_all_objective": 5.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 5.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.5
+        },
+        "greedy_pref": {
+          "kernel_calls": 9.0,
+          "oracle_requests": 15917.0,
+          "unique_valid_canonical_evaluations": 4932.0,
+          "cache_hits": 10985.0,
+          "cache_hit_rate": 0.6901426148143495,
+          "N_drd2": 4932.0,
+          "N_descriptor": 4932.0,
+          "N_all_objective": 4932.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 4932.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 548.0
+        },
+        "gen_rank@greedy": {
+          "kernel_calls": 4.0,
+          "oracle_requests": 4.0,
+          "unique_valid_canonical_evaluations": 2.0,
+          "cache_hits": 2.0,
+          "cache_hit_rate": 0.5,
+          "N_drd2": 2.0,
+          "N_descriptor": 2.0,
+          "N_all_objective": 2.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 2.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.5
+        }
+      }
+    },
+    "1": {
+      "complete": false,
+      "stage": "gen_rank@greedy",
+      "arms": {
+        "unguided": {
+          "kernel_calls": 22.0,
+          "oracle_requests": 5.0,
+          "unique_valid_canonical_evaluations": 5.0,
+          "cache_hits": 0.0,
+          "cache_hit_rate": 0.0,
+          "N_drd2": 5.0,
+          "N_descriptor": 5.0,
+          "N_all_objective": 5.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 5.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.22727272727272727
+        },
+        "greedy_pref": {
+          "kernel_calls": 16.0,
+          "oracle_requests": 19300.0,
+          "unique_valid_canonical_evaluations": 10447.0,
+          "cache_hits": 8853.0,
+          "cache_hit_rate": 0.45870466321243525,
+          "N_drd2": 10447.0,
+          "N_descriptor": 10447.0,
+          "N_all_objective": 10447.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 10447.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 652.9375
+        },
+        "gen_rank@greedy": {
+          "kernel_calls": 14.0,
+          "oracle_requests": 6.0,
+          "unique_valid_canonical_evaluations": 3.0,
+          "cache_hits": 3.0,
+          "cache_hit_rate": 0.5,
+          "N_drd2": 3.0,
+          "N_descriptor": 3.0,
+          "N_all_objective": 3.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 3.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.21428571428571427
+        }
+      }
+    },
+    "2": {
+      "complete": false,
+      "stage": "verified_pref",
+      "arms": {
+        "unguided": {
+          "kernel_calls": 15.0,
+          "oracle_requests": 5.0,
+          "unique_valid_canonical_evaluations": 5.0,
+          "cache_hits": 0.0,
+          "cache_hit_rate": 0.0,
+          "N_drd2": 5.0,
+          "N_descriptor": 5.0,
+          "N_all_objective": 5.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 5.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.3333333333333333
+        },
+        "greedy_pref": {
+          "kernel_calls": 16.0,
+          "oracle_requests": 13950.0,
+          "unique_valid_canonical_evaluations": 7079.0,
+          "cache_hits": 6871.0,
+          "cache_hit_rate": 0.4925448028673835,
+          "N_drd2": 7079.0,
+          "N_descriptor": 7079.0,
+          "N_all_objective": 7079.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 7079.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 442.4375
+        },
+        "gen_rank@greedy": {
+          "kernel_calls": 11.0,
+          "oracle_requests": 6.0,
+          "unique_valid_canonical_evaluations": 3.0,
+          "cache_hits": 3.0,
+          "cache_hit_rate": 0.5,
+          "N_drd2": 3.0,
+          "N_descriptor": 3.0,
+          "N_all_objective": 3.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 3.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.2727272727272727
+        },
+        "verified_pref": {
+          "kernel_calls": 398.0,
+          "oracle_requests": 273854.0,
+          "unique_valid_canonical_evaluations": 174294.0,
+          "cache_hits": 99560.0,
+          "cache_hit_rate": 0.363551381393005,
+          "N_drd2": 174294.0,
+          "N_descriptor": 174294.0,
+          "N_all_objective": 174294.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 174294.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 437.9246231155779
+        }
+      }
+    },
+    "3": {
+      "complete": false,
+      "stage": "gen_rank@greedy",
+      "arms": {
+        "unguided": {
+          "kernel_calls": 20.0,
+          "oracle_requests": 5.0,
+          "unique_valid_canonical_evaluations": 5.0,
+          "cache_hits": 0.0,
+          "cache_hit_rate": 0.0,
+          "N_drd2": 5.0,
+          "N_descriptor": 5.0,
+          "N_all_objective": 5.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 5.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.25
+        },
+        "greedy_pref": {
+          "kernel_calls": 20.0,
+          "oracle_requests": 29139.0,
+          "unique_valid_canonical_evaluations": 19112.0,
+          "cache_hits": 10027.0,
+          "cache_hit_rate": 0.3441092693640825,
+          "N_drd2": 19112.0,
+          "N_descriptor": 19112.0,
+          "N_all_objective": 19112.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 19112.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 955.6
+        },
+        "gen_rank@greedy": {
+          "kernel_calls": 9.0,
+          "oracle_requests": 6.0,
+          "unique_valid_canonical_evaluations": 2.0,
+          "cache_hits": 4.0,
+          "cache_hit_rate": 0.6666666666666666,
+          "N_drd2": 2.0,
+          "N_descriptor": 2.0,
+          "N_all_objective": 2.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 2.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.2222222222222222
+        }
+      }
+    },
+    "4": {
+      "complete": false,
+      "stage": "gen_rank@greedy",
+      "arms": {
+        "unguided": {
+          "kernel_calls": 20.0,
+          "oracle_requests": 5.0,
+          "unique_valid_canonical_evaluations": 5.0,
+          "cache_hits": 0.0,
+          "cache_hit_rate": 0.0,
+          "N_drd2": 5.0,
+          "N_descriptor": 5.0,
+          "N_all_objective": 5.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 5.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.25
+        },
+        "greedy_pref": {
+          "kernel_calls": 15.0,
+          "oracle_requests": 47092.0,
+          "unique_valid_canonical_evaluations": 21048.0,
+          "cache_hits": 26044.0,
+          "cache_hit_rate": 0.5530451032022424,
+          "N_drd2": 21048.0,
+          "N_descriptor": 21048.0,
+          "N_all_objective": 21048.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 21048.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 1403.2
+        },
+        "gen_rank@greedy": {
+          "kernel_calls": 11.0,
+          "oracle_requests": 4.0,
+          "unique_valid_canonical_evaluations": 2.0,
+          "cache_hits": 2.0,
+          "cache_hit_rate": 0.5,
+          "N_drd2": 2.0,
+          "N_descriptor": 2.0,
+          "N_all_objective": 2.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 2.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.18181818181818182
+        }
+      }
+    },
+    "5": {
+      "complete": false,
+      "stage": "gen_rank@greedy",
+      "arms": {
+        "unguided": {
+          "kernel_calls": 20.0,
+          "oracle_requests": 5.0,
+          "unique_valid_canonical_evaluations": 5.0,
+          "cache_hits": 0.0,
+          "cache_hit_rate": 0.0,
+          "N_drd2": 5.0,
+          "N_descriptor": 5.0,
+          "N_all_objective": 5.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 5.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.25
+        },
+        "greedy_pref": {
+          "kernel_calls": 17.0,
+          "oracle_requests": 17421.0,
+          "unique_valid_canonical_evaluations": 10257.0,
+          "cache_hits": 7164.0,
+          "cache_hit_rate": 0.4112278284828655,
+          "N_drd2": 10257.0,
+          "N_descriptor": 10257.0,
+          "N_all_objective": 10257.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 10257.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 603.3529411764706
+        },
+        "gen_rank@greedy": {
+          "kernel_calls": 10.0,
+          "oracle_requests": 6.0,
+          "unique_valid_canonical_evaluations": 3.0,
+          "cache_hits": 3.0,
+          "cache_hit_rate": 0.5,
+          "N_drd2": 3.0,
+          "N_descriptor": 3.0,
+          "N_all_objective": 3.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 3.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.3
+        }
+      }
+    },
+    "6": {
+      "complete": false,
+      "stage": "gen_rank@greedy",
+      "arms": {
+        "unguided": {
+          "kernel_calls": 21.0,
+          "oracle_requests": 5.0,
+          "unique_valid_canonical_evaluations": 5.0,
+          "cache_hits": 0.0,
+          "cache_hit_rate": 0.0,
+          "N_drd2": 5.0,
+          "N_descriptor": 5.0,
+          "N_all_objective": 5.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 5.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.23809523809523808
+        },
+        "greedy_pref": {
+          "kernel_calls": 7.0,
+          "oracle_requests": 18032.0,
+          "unique_valid_canonical_evaluations": 4129.0,
+          "cache_hits": 13903.0,
+          "cache_hit_rate": 0.7710181898846495,
+          "N_drd2": 4129.0,
+          "N_descriptor": 4129.0,
+          "N_all_objective": 4129.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 4129.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 589.8571428571429
+        },
+        "gen_rank@greedy": {
+          "kernel_calls": 5.0,
+          "oracle_requests": 2.0,
+          "unique_valid_canonical_evaluations": 1.0,
+          "cache_hits": 1.0,
+          "cache_hit_rate": 0.5,
+          "N_drd2": 1.0,
+          "N_descriptor": 1.0,
+          "N_all_objective": 1.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 1.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.2
+        }
+      }
+    },
+    "7": {
+      "complete": false,
+      "stage": "gen_rank@greedy",
+      "arms": {
+        "unguided": {
+          "kernel_calls": 21.0,
+          "oracle_requests": 5.0,
+          "unique_valid_canonical_evaluations": 5.0,
+          "cache_hits": 0.0,
+          "cache_hit_rate": 0.0,
+          "N_drd2": 5.0,
+          "N_descriptor": 5.0,
+          "N_all_objective": 5.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 5.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.23809523809523808
+        },
+        "greedy_pref": {
+          "kernel_calls": 16.0,
+          "oracle_requests": 12863.0,
+          "unique_valid_canonical_evaluations": 6400.0,
+          "cache_hits": 6463.0,
+          "cache_hit_rate": 0.502448884397108,
+          "N_drd2": 6400.0,
+          "N_descriptor": 6400.0,
+          "N_all_objective": 6400.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 6400.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 400.0
+        },
+        "gen_rank@greedy": {
+          "kernel_calls": 12.0,
+          "oracle_requests": 6.0,
+          "unique_valid_canonical_evaluations": 2.0,
+          "cache_hits": 4.0,
+          "cache_hit_rate": 0.6666666666666666,
+          "N_drd2": 2.0,
+          "N_descriptor": 2.0,
+          "N_all_objective": 2.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 2.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.16666666666666666
+        }
+      }
+    },
+    "8": {
+      "complete": false,
+      "stage": "gen_rank@greedy",
+      "arms": {
+        "unguided": {
+          "kernel_calls": 13.0,
+          "oracle_requests": 5.0,
+          "unique_valid_canonical_evaluations": 5.0,
+          "cache_hits": 0.0,
+          "cache_hit_rate": 0.0,
+          "N_drd2": 5.0,
+          "N_descriptor": 5.0,
+          "N_all_objective": 5.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 5.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.38461538461538464
+        },
+        "greedy_pref": {
+          "kernel_calls": 13.0,
+          "oracle_requests": 29298.0,
+          "unique_valid_canonical_evaluations": 12019.0,
+          "cache_hits": 17279.0,
+          "cache_hit_rate": 0.5897672196054338,
+          "N_drd2": 12019.0,
+          "N_descriptor": 12019.0,
+          "N_all_objective": 12019.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 12019.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 924.5384615384615
+        },
+        "gen_rank@greedy": {
+          "kernel_calls": 4.0,
+          "oracle_requests": 4.0,
+          "unique_valid_canonical_evaluations": 2.0,
+          "cache_hits": 2.0,
+          "cache_hit_rate": 0.5,
+          "N_drd2": 2.0,
+          "N_descriptor": 2.0,
+          "N_all_objective": 2.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 2.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.5
+        }
+      }
+    },
+    "9": {
+      "complete": false,
+      "stage": "gen_rank@greedy",
+      "arms": {
+        "unguided": {
+          "kernel_calls": 22.0,
+          "oracle_requests": 5.0,
+          "unique_valid_canonical_evaluations": 5.0,
+          "cache_hits": 0.0,
+          "cache_hit_rate": 0.0,
+          "N_drd2": 5.0,
+          "N_descriptor": 5.0,
+          "N_all_objective": 5.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 5.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.22727272727272727
+        },
+        "greedy_pref": {
+          "kernel_calls": 20.0,
+          "oracle_requests": 16898.0,
+          "unique_valid_canonical_evaluations": 11476.0,
+          "cache_hits": 5422.0,
+          "cache_hit_rate": 0.32086637471890167,
+          "N_drd2": 11476.0,
+          "N_descriptor": 11476.0,
+          "N_all_objective": 11476.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 11476.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 573.8
+        },
+        "gen_rank@greedy": {
+          "kernel_calls": 15.0,
+          "oracle_requests": 6.0,
+          "unique_valid_canonical_evaluations": 3.0,
+          "cache_hits": 3.0,
+          "cache_hit_rate": 0.5,
+          "N_drd2": 3.0,
+          "N_descriptor": 3.0,
+          "N_all_objective": 3.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 3.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.2
+        }
+      }
+    },
+    "10": {
+      "complete": false,
+      "stage": "gen_rank@greedy",
+      "arms": {
+        "unguided": {
+          "kernel_calls": 19.0,
+          "oracle_requests": 5.0,
+          "unique_valid_canonical_evaluations": 5.0,
+          "cache_hits": 0.0,
+          "cache_hit_rate": 0.0,
+          "N_drd2": 5.0,
+          "N_descriptor": 5.0,
+          "N_all_objective": 5.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 5.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.2631578947368421
+        },
+        "greedy_pref": {
+          "kernel_calls": 22.0,
+          "oracle_requests": 11534.0,
+          "unique_valid_canonical_evaluations": 8717.0,
+          "cache_hits": 2817.0,
+          "cache_hit_rate": 0.24423443731576208,
+          "N_drd2": 8717.0,
+          "N_descriptor": 8717.0,
+          "N_all_objective": 8717.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 8717.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 396.22727272727275
+        },
+        "gen_rank@greedy": {
+          "kernel_calls": 18.0,
+          "oracle_requests": 8.0,
+          "unique_valid_canonical_evaluations": 4.0,
+          "cache_hits": 4.0,
+          "cache_hit_rate": 0.5,
+          "N_drd2": 4.0,
+          "N_descriptor": 4.0,
+          "N_all_objective": 4.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 4.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.2222222222222222
+        }
+      }
+    },
+    "11": {
+      "complete": false,
+      "stage": "gen_rank@greedy",
+      "arms": {
+        "unguided": {
+          "kernel_calls": 20.0,
+          "oracle_requests": 5.0,
+          "unique_valid_canonical_evaluations": 5.0,
+          "cache_hits": 0.0,
+          "cache_hit_rate": 0.0,
+          "N_drd2": 5.0,
+          "N_descriptor": 5.0,
+          "N_all_objective": 5.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 5.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.25
+        },
+        "greedy_pref": {
+          "kernel_calls": 23.0,
+          "oracle_requests": 20604.0,
+          "unique_valid_canonical_evaluations": 15620.0,
+          "cache_hits": 4984.0,
+          "cache_hit_rate": 0.24189477771306542,
+          "N_drd2": 15620.0,
+          "N_descriptor": 15620.0,
+          "N_all_objective": 15620.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 15620.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 679.1304347826087
+        },
+        "gen_rank@greedy": {
+          "kernel_calls": 17.0,
+          "oracle_requests": 8.0,
+          "unique_valid_canonical_evaluations": 4.0,
+          "cache_hits": 4.0,
+          "cache_hit_rate": 0.5,
+          "N_drd2": 4.0,
+          "N_descriptor": 4.0,
+          "N_all_objective": 4.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 4.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.23529411764705882
+        }
+      }
+    }
+  },
+  "reporting_rule": "Until the marked-action collapse ratio and the separated DRD2 counter exist, these appear as RAW COUNTS with the withdrawal caveat attached, never as a cost ratio."
+}

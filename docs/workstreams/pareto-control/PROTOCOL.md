@@ -278,11 +278,13 @@ extra arm type.
 > the closed-loop arms; that makes it a strong baseline **in one resource
 > dimension**, which is how it must be described.
 >
-> **The two budget axes buy ~600x different amounts of search, and the contrast
-> must be reported as a bracket.** One kernel call yields ~600 candidate
-> molecules on this process, measured. So matching `gen_rank` on **native oracle
-> calls** hands it roughly 600x the closed-loop arms' kernel budget — that is
-> the hypervolume inflation channel wearing a benchmark convention's clothes.
+> **The two budget axes are not interchangeable, and the contrast must be
+> reported as a bracket.** One kernel call yields ~600 candidate molecules on
+> this process. Matching `gen_rank` on **native oracle calls** therefore hands
+> it far more kernel work than the closed-loop arms — the hypervolume inflation
+> channel wearing a benchmark convention's clothes.
+>
+> **WITHDRAWN AS A COST CLAIM, pending audit (main lane, `2cc6fc3`).** The counts are real; the *interpretation* is not established. At matched kernel budget, preference control is charged for interrogating the ~600-wide legal successor fiber at every decision, while generate-and-rank is charged only for the terminal molecules it produced. **Those are different acts.** The ratio therefore conflates *property evaluations per unit of kernel work* with *cost of optimizing a molecule*, and only the first was measured. Until the audit lands, this appears as a **raw count with this caveat attached** and never as a cost ratio.
 > Matching on **kernel calls** instead gives it far fewer distinct molecules
 > than the closed-loop arms see, which understates it on the axis the
 > multi-objective literature actually budgets. Neither matching is "the fair
