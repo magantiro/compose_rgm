@@ -86,13 +86,16 @@ conservative direction, rather than presented as the same rule.
 lower bound of the 95% source-clustered bootstrap CI on mean Δ^V  >  −δ
 ```
 
-### δ = 0.25 held-in DRD2 IQR units — justified on the ODDS RATIO
+### δ = 0.25 held-in DRD2 IQR units — a TOLERANCE, and only that
 
-**An earlier draft justified this as "a quarter of the held-in IQR". That was
-the wrong justification** — an arbitrary fraction of a spread carries no
-scientific meaning, and "smaller margins are unaffordable" is a planning fact,
-never a justification. The margin is re-derived here on the raw scale, from
-quantities all fixed before Stage B.
+**Two earlier justifications have been withdrawn.** "A quarter of the held-in
+IQR" is an arbitrary fraction of a spread and carries no scientific meaning.
+"Smaller margins are unaffordable" is a planning fact and may never serve as a
+justification. The third attempt — a medicinal-chemistry fold-change convention
+— is withdrawn below for a subtler reason.
+
+What survives is the raw-scale *interpretation*, which is worth having even
+though it is not a justification. All quantities below were fixed before Stage B.
 
 **The scale is a log-odds.** `src/compose_v4/drd2_oracle.py` emits
 `margin = A·d + B = logit P(active)` under Platt scaling, with the orientation
@@ -111,37 +114,64 @@ right invariant on a logit scale:
 | **0.25** | **0.654** | **1.92×** | **0.500 → 0.342** | **15.8 pp** |
 | 0.30 | 0.785 | 2.19× | 0.500 → 0.313 | 18.7 pp |
 
-**The justification: δ = 0.25 permits at most a 1.92-fold reduction in the odds
-of predicted activity — just under the two-fold line that medicinal chemistry
-conventionally treats as the threshold of experimental significance.** A
-noninferiority claim that survives this margin is a claim that pathwise
-enforcement costs less than a two-fold odds loss.
+#### δ is a TOLERANCE on a measurement scale, not a biological margin
 
-**Two limitations of that justification, stated rather than buried.**
+An earlier draft justified δ = 0.25 as "just under the two-fold line medicinal
+chemistry conventionally treats as the threshold of experimental significance."
+**That justification is withdrawn.**
 
-1. **The two-fold convention is an analogy, not an identity.** The oracle emits
-   a *classifier's* log-odds of activity, not a measured IC50 or Ki. A 1.92×
-   odds ratio on `P(active)` is **not** a 1.92× potency shift, and must never be
-   written as one.
-2. **At the success threshold this margin is not small.** A molecule sitting
-   exactly at P = 0.5 would be pushed to P = 0.342 — from passing to clearly
-   failing. The logit is steepest at 0.5, so this is the worst case rather than
-   the typical one, but it is real and a reviewer will find it.
+The two-fold convention is real — experimental IC50/EC50 measurements commonly
+carry two- to three-fold reproducibility limits, and assay-specific minimum
+significant ratios are estimated from replicates. But **our quantity is not an
+experimental IC50.** It is the odds emitted by a classifier. Importing an
+experimental fold-change convention onto a QSAR classifier's output does not
+solve the scientific-margin problem; it relabels it, and it would give the
+number more biological authority than the oracle can support.
 
-**Why not tighter.** Measured, not asserted: tightening to δ = 0.20 (odds ratio
-1.69×) drops joint power at n = 48 from 0.892 to 0.788 and requires **n ≈ 64**
-to recover it — a 33% larger panel. That price is recorded here so the choice is
-visible; it is **not** the reason for the choice.
+**So δ = 0.25 is retained, and what it licenses is narrowed.** It is a
+prespecified **tolerance on the frozen held-in DRD2 score scale** — nothing more.
+The odds-ratio table above is retained as the honest *interpretation* of that
+tolerance's size, not as its justification.
 
-**Two consequences, binding on the report.**
+**Barred claim:**
+> ~~"pathwise control removes hidden excursions with no meaningful potency
+> loss"~~ — this asserts biological negligibility the oracle cannot license.
 
-- **δ = 0.20 is a preregistered secondary sensitivity.** It costs no additional
-  compute and lets a skeptical reader see the stricter bar. It is reported
-  always, whichever way it comes out, and never substituted for the primary.
-- **The number of sources whose endpoint-only terminal utility sits within δ of
-  the success threshold is reported.** Those are the sources where the margin's
-  leniency actually bites, and their count is the honest measure of how much
-  work the worst case is doing.
+**Licensed claim, if P2 clears:**
+> Terminal performance under pathwise enforcement remained **within a
+> prespecified tolerance of 0.25 held-in DRD2-score IQR** of endpoint-only
+> control.
+
+**One limitation still stated rather than buried.** At the success threshold the
+tolerance is not small: a molecule sitting exactly at P = 0.5 would be pushed to
+P = 0.342, from passing to clearly failing. The logit is steepest at 0.5, so
+this is the worst case rather than the typical one, but it is real.
+
+#### What must be reported together — all four, always
+
+1. **Continuous `Δ^V` with its 95% CI.** The estimate itself, never replaced by
+   a pass/fail verdict.
+2. **The primary δ = 0.25 tolerance result.**
+3. **The δ = 0.20 sensitivity — MANDATORY, not optional.** It costs no
+   additional outcomes to compute and is materially stricter.
+4. **The number of sources near the activity threshold**, where the tolerance
+   could change pass/fail status.
+
+**The escalation of language is governed by the sensitivity, not by the
+primary:**
+
+| result | what may be said |
+|---|---|
+| **both 0.25 and 0.20 clear** | the cost may be described as **small** |
+| **only 0.25 clears** | report exactly that. Do **not** translate it into biological noninferiority |
+| **neither clears** | the cost is reported as measured |
+
+**Why 0.20 is a mandatory sensitivity rather than the primary.** Measured, not
+asserted: making δ = 0.20 primary would drop joint power at n = 48 from 0.892 to
+0.788 and require **n ≈ 64** to recover it — a 33% larger panel. Running it as a
+sensitivity on the same panel costs nothing and is materially stricter, so the
+n = 48 design is **not** redesigned over this. The price is recorded so the
+choice is visible; it is not the reason for the choice.
 
 ### Disclosure, so the margin can be audited rather than trusted
 

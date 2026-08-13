@@ -52,3 +52,5 @@ diagnostics/.v2_successor_cache.pkl
 # their sha256, so the blanket *.pt rule above would leave a frozen model
 # unreproducible. Tracked deliberately.
 !artifacts/h_phi_frozen_v1/*.pt
+local_runtime/
+runs/run_v2_01/
