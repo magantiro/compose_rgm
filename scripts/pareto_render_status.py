@@ -40,13 +40,14 @@ measurement uses `training_source_keys`.
 Thresholds were committed at `d206d55`, **before** the census existed. Adoption
 is positional: the first pair in the predeclared order clearing all five gates.
 
-**Adopted pair: `{adopted}`**
+**Adopted pair: `{adopted}`**  — positional: the FIRST pair in the predeclared
+order clearing all five gates, not the best-scoring one.
 
 | pair | Spearman rho | verdict | failed gates |
 |---|---:|---|---|
 {pair_rows}
 
-### The adopted pair, gate by gate
+### {gate_heading}
 
 | gate | statistic | value | threshold | pass |
 |---|---|---:|---|---|
@@ -100,8 +101,15 @@ def main() -> int:
         pair_rows.append(f"| `{entry['pair']}`{mark} | {entry['spearman_rho']:+.3f} "
                          f"| {entry['gate']['verdict']} | {failed} |")
 
-    chosen = next((e for e in census["pairs"]
-                   if e["pair"] == census.get("adopted_pair")), census["pairs"][0])
+    # If NO pair passed, show the FIRST pair in the predeclared order and say so.
+    # Labelling a failing pair "the adopted pair" would misread the whole census.
+    adopted_name = census.get("adopted_pair")
+    chosen = next((e for e in census["pairs"] if e["pair"] == adopted_name),
+                  census["pairs"][0])
+    gate_heading = (f"The adopted pair `{chosen['pair']}`, gate by gate"
+                    if adopted_name else
+                    f"NO PAIR PASSED. First in the predeclared order, "
+                    f"`{chosen['pair']}`, gate by gate")
     ia = chosen["I_A"]
     gates = chosen["gate"]["gates"]
     gate_rows = [
@@ -185,6 +193,7 @@ def main() -> int:
         ib_pairs=census["instruments"]["I_B"]["n_pairs"],
         ib_states=census["instruments"]["I_B"]["n_states"],
         reach_n=reach["n_sources"], reach_rows="\n".join(reach_rows),
+        gate_heading=gate_heading,
         cohort_sha=cohort_sha, artifact_rows="\n".join(artifact_rows)))
     print(f"wrote {args.out}  (adopted pair: {adopted})")
     return 0
