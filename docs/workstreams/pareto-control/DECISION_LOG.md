@@ -714,3 +714,45 @@ numbers.
 *scope* of a check from run-wide to contrast-wide, and it withholds two
 contrasts that the check correctly rejected.
 
+---
+
+## D-019 · 2026-08-13 · EXPLORATORY observation at n=4, recorded before the rest of the data
+
+**Status: `EXPLORATORY`. Not preregistered, not a frozen metric, not a result.**
+Recorded at **05:16 EDT with 4 of 12 sources complete**, deliberately before the
+remaining eight land, so the record shows it was generated *during* the run
+rather than discovered afterwards.
+
+**The observation.** The sign of the set-level HV difference separates perfectly
+by whether the source saturated the held-in p99 scale:
+
+| source | greedy HV | verified HV | verified - greedy | HV level |
+|---|---:|---:|---:|---|
+| 002 | 0.4407 | 0.7077 | **+0.267** | < 1, headroom |
+| 008 | 0.6838 | 0.8952 | **+0.211** | < 1, headroom |
+| 000 | 1.0074 | 1.0060 | -0.001 | **> 1, past `z*`** |
+| 010 | 1.1356 | 1.0631 | **-0.073** | **> 1, past `z*`** |
+
+**The hypothesis it suggests.** Future-aware control helps substantially where
+the front has room, and slightly hurts once the source has already saturated the
+objective scale — plausibly because at the ceiling the lookahead concentrates
+endpoints on a nearly-attained optimum, trading front spread for per-preference
+value. That is the same trade the set-versus-pointwise separation predicts, and
+it connects directly to the G4 potency reach fraction of 0.700 that was recorded
+as the live risk.
+
+**Why it is written down now, and what would be wrong.** With four sources the
+separation could be coincidence -- two-versus-two splits perfectly by chance
+often enough that this is not evidence. Recording it now costs nothing and
+prevents the far worse move of presenting it as a preregistered finding once
+twelve sources are in.
+
+**What will NOT be done.** No new metric is frozen for it. No arm is added. The
+frozen p99-exceedance statistic is descriptive and already reported; if this
+pattern survives to twelve sources it is reported as an **exploratory
+observation, generated at n=4**, and as a candidate hypothesis for the
+development experiment -- never as a preregistered test. If it dissolves, this
+entry stands as the record that it was looked at.
+
+**Changes a frozen object:** no.
+

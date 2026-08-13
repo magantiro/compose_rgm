@@ -120,5 +120,15 @@
     "raw_ratio": "FORBIDDEN as a headline; the scientific object is HV vs unique potency evaluations",
     "efficiency_experiment": "CONDITIONAL on Pareto control being strong with oracle demand the only ugly axis",
     "no_k_search": "one operating point pre-registered from a desired reduction in oracle demand; a sweep followed by a choice is a K-search with the selection hidden in the write-up"
+  },
+  "exploratory_observations": {
+    "hv_sign_vs_saturation": {
+      "status": "EXPLORATORY -- not preregistered, not a frozen metric",
+      "recorded_at": "2026-08-13T05:16-04:00, 4 of 12 sources complete",
+      "observation": "the sign of verified minus greedy set-level HV separates by whether the source exceeded the held-in p99 scale: +0.267 and +0.211 where HV < 1, -0.001 and -0.073 where HV > 1",
+      "hypothesis": "future-aware control helps where the front has room and slightly hurts once the source has saturated the objective scale, trading front spread for per-preference value",
+      "caveat": "n=4; a two-versus-two split occurs by chance often enough that this is not evidence",
+      "reporting_rule": "if it survives to twelve sources it is reported as an exploratory observation GENERATED AT n=4, never as a preregistered test"
+    }
   }
 }
