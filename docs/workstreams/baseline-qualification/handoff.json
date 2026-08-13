@@ -57,7 +57,7 @@
       "subcapability": "C4c_retargeting"
     }
   ],
-  "content_commit": "49af6c2",
+  "content_commit": "5e7a375842f7708230a045820ee2939375f7ba16",
   "content_commit_note": "The commit at which every sha256 in durable_artifacts was computed. This manifest is committed immediately after it, so branch HEAD is one commit ahead of content_commit and differs from it only by this file. The manifest cannot name its own commit, which is why the two are separate.",
   "conventional_suite": "docs/workstreams/baseline-qualification/CONVENTIONAL_SUITE.md -- five tasks, all nine fields frozen per task, frozen before any COMPOSE-versus-baseline outcome",
   "durable_artifacts": {
@@ -83,15 +83,15 @@
     "diagnostics/baselines/oracle_accounting_harness_stress_test.json": "f5c317fe9cd2ec384989c41961a56f02ebcbc3bdc7c0dca7d3fae88ed7708c28",
     "diagnostics/baselines/shared_evaluator_validation.json": "62d1c7df83cb73141c56d92c37230ce9ff6317a019d1b452c761fac288cf6414",
     "docs/RELATED_WORK_MATRIX.md": "aaf2a41d64b84dad3e084a0d8841a5579862ee78ccc2f32675ccfbd0c2c911e5",
-    "docs/workstreams/baseline-qualification/COMPARATOR_MATRIX.md": "13e3204b370eb37345e6782ff4c37603396ccc433331502e0f6e3012151a476b",
+    "docs/workstreams/baseline-qualification/COMPARATOR_MATRIX.md": "8bb7521e3635e94de083a84d93a0af9cdeee4f3fd97c284bfa53e393004ac890",
     "docs/workstreams/baseline-qualification/CONVENTIONAL_SUITE.md": "e50e0109cb9ead2bc8ab32c4be57d4a0cc5c382557bbe1f7caebca142dcf2b87",
-    "docs/workstreams/baseline-qualification/DECISION_LOG.md": "a06d82f5ef332ce05c961e8aa24c92c95df597dbb10e3a69011c22fd365fc754",
+    "docs/workstreams/baseline-qualification/DECISION_LOG.md": "54296b519974c5d4b061b64fbed43c39605eca17df982d2ef447dc28ed435800",
     "docs/workstreams/baseline-qualification/FAIRNESS_CONTRACT.md": "126705324257d6ec01c115bd33fcd8e2c92b23c3e391fda97f34c1d63702dd92",
     "docs/workstreams/baseline-qualification/FAIRNESS_MATRIX.md": "c6dc36eb8ab3bb35ae3a69067a27ab02575b9daaf1c3919ae541372a2a6a1b5b",
     "docs/workstreams/baseline-qualification/HANDOFF.md": "734505428ac11213ee00998997d4e7cd38e8be462a151f61b70477ad9c9cf15c",
     "docs/workstreams/baseline-qualification/PROTOCOL.md": "1a5870c06000a507eed4387747ab73a5eae08c9862d942f6964530616ed7c083",
     "docs/workstreams/baseline-qualification/STATUS.md": "c98aaa41a38bfc59625a25e187b456f6e45cd8ec971927b257542c9720c47fad",
-    "docs/workstreams/baseline-qualification/comparator_registry_v3.json": "7c98c6c32bb2dee03de6791784158f385f4d6a73b6d2aa87bc9b4b3d45e92577",
+    "docs/workstreams/baseline-qualification/comparator_registry_v3.json": "a102c8ab6b1478d359132b9ece587f0aa31f69cfdbf4974c256704d1a75114a7",
     "paper_iclr_stochastic_rewriting/references.bib": "5aad478f512110ce4d8dbe1119ec57bd1ce67a8a88eac3b41d8b23f726ac5bc9",
     "scripts/compose_shared_evaluator_server.py": "e7cd472629347acf2b0e764b0c99ddbdddf15cb01156dd0a7633082f7a78a496",
     "scripts/graph_ga_held_in_smoke.py": "33083d9b7e56b8cfde0b7f2f1d72af6fa8721013f189e4804f12ff1e7995ccae",
@@ -180,7 +180,7 @@
     "REINVENT": "PROJECTION, NOT MEASURED. Adapter A: an Olivecrona-style RNN sampling 64 SMILES of ~60 tokens per step on CPU, order seconds per step; ~20 steps per source gives a few minutes each, so budget 0.3 CPU-core-hours for 5 sources plus a small prior download. Adapter B: transformer priors are larger; budget 0.5-1.0 CPU-core-hours plus the Zenodo prior downloads. Total 1.0-1.5 CPU-core-hours."
   },
   "pushed_head_note": "The SHA verified present on origin/codex/compose-baseline-qualification by `git ls-remote origin refs/heads/codex/compose-baseline-qualification` at the time this manifest was written. Branch HEAD moves one commit past it when this manifest is itself committed; re-push after that to advance the remote.",
-  "pushed_head_sha": "49af6c2",
+  "pushed_head_sha": "5e7a375842f7708230a045820ee2939375f7ba16",
   "recommended_next_action": "NONE. HOLD. The harness gate passed and the main workstream's instruction is to stop there: do not run external baseline sweeps and do not launch anything on Modal, because Lane 1 may reopen the base process and every external comparison would have to be repeated. Local adapter preparation is permitted and was NOT started, deliberately. When the hold lifts: vendor upstream GB-GA (MIT), reconcile canonicalization against the production RDKit pin 2024.3.5, and run the real GraphGA adapter on 3-5 held-in sources under the frozen three-counter accounting, projected 0.1 CPU-core-hours.",
   "remote": "https://github.com/KoshaTx/compose_rgm.git",
   "resolved_since_last_handoff": [
