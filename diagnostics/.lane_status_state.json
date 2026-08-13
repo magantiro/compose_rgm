@@ -1,6 +1,6 @@
 {
   "retargeting held-out": 80,
   "pathwise stage B": 24,
-  "pareto smoke": 5,
+  "pareto smoke": 10,
   "retargeting development": 60
 }
