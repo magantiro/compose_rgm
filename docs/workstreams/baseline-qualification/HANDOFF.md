@@ -13,8 +13,25 @@
   it only by `handoff.json`, which must be written after the content commit in
   order to hash it.
 - **Working tree clean:** yes
-- **Status:** `DESIGN_ONLY`
+- **Status:** `DESIGN_ONLY`, plus one `SMOKE_HELD_IN` instrument check
+  (`diagnostics/baselines/graph_ga_accounting_smoke.json`). **HOLDING** by
+  instruction from the main workstream.
 - **Held-out data opened:** **no**
+
+# ⚠ Manuscript lane: two files need merging
+
+1. **`docs/RELATED_WORK_MATRIX.md`** was amended on this branch **with lead
+   approval**: DDSBM `var-card`/`birth/death` corrected `✗ → ~`; new rows for
+   **GraphXForm** (`pathwise ~`, `complete ~`, `birth/death ✗`) and **REINVENT 4**
+   (`retarget ~`); a sentence for every new `~` under a new subsection; an
+   amendment banner at the top; verification debt items 3 and 4 added.
+   **The MARS `pathwise ✓` cell was deliberately left unchanged** — item 4
+   records why and notes that MARS, MIMOSA, Graph GA and Kappa-style rewriting
+   all sit on the same column ambiguity and must be decided together.
+2. **`paper_iclr_stochastic_rewriting/references.bib`** gained one entry,
+   `loeffler2024reinvent4` (J. Cheminform. 2024, doi 10.1186/s13321-024-00812-5),
+   because the new REINVENT 4 matrix row cites it and no entry existed.
+   `gao2022pmo` is PMO and must not stand in for it.
 
 # One-sentence scientific question
 
@@ -99,10 +116,26 @@ to the right objects later.
 
 | Test | Result | Artifact |
 |---|---|---|
-| `tests/test_baseline_qualification.py` (10 tests) | PASS | — |
+| `tests/test_baseline_qualification.py` (12 tests) | PASS | — |
+| `tests/test_oracle_accounting.py` (9 tests) | PASS | — |
 | `tests/test_comparator_registry.py` (14 tests, pre-existing) | PASS — unaffected | — |
 | `scripts/render_comparator_registry.py --check` | PASS (in-sync) | `COMPARATOR_MATRIX.md` |
-| Held-in smoke, any method | **NOT RUN** — categorically forbidden by the lane's instructions | — |
+| **Accounting instrument check, 5 held-in sources** | **PASS**, 7/7 checks, 0.22 s CPU | `diagnostics/baselines/graph_ga_accounting_smoke.json` |
+| Held-in smoke of any baseline **method** | **NOT RUN** — nothing external was installed; upstream GB-GA is not vendored | — |
+
+The instrument check verified: canonicalization collapses equivalent SMILES
+spellings; duplicates charge `raw_compute` and not `benchmark_native`; invalids
+are counted as failed proposals and never reach the evaluator; the evaluator only
+ever saw canonical SMILES; both budget conventions terminate; the two conventions
+disagree in the predicted direction; and the counter identity
+`raw_compute == benchmark_native + cache_hits + failed_proposals` holds.
+
+**It is not a measurement of GraphGA.** The candidate stream is GA-*shaped*
+(BRICS recombination, survivor rescores, alternate spellings, malformed strings)
+and exists only to drive the accountant against an adversarial stream. It also
+ran on **rdkit 2025.09.6, not the production pin 2024.3.5** — recorded in the
+artifact with `pin_matches_production: false`; its canonical keys must not be
+reused for a claim-bearing comparison.
 
 # Results
 
@@ -193,7 +226,12 @@ python scripts/render_comparator_registry.py
 pytest tests/test_baseline_qualification.py -q
 pytest tests/test_comparator_registry.py -q      # pre-existing, must stay green
 
-# smoke — NONE. No comparator smoke was run and none is authorised by this lane.
+# accounting instrument check — held-in, ~0.2 s CPU, writes a durable artifact
+python scripts/baseline_accounting_smoke.py --sources 5
+pytest tests/test_oracle_accounting.py -q
+
+# baseline METHOD smoke — NONE. Upstream code is not vendored and the lane is
+# on HOLD; do not run one without an explicit instruction.
 ```
 
 # Durable artifacts
@@ -219,6 +257,12 @@ two cannot disagree.
 # Files changed
 
 ```text
+diagnostics/baselines/graph_ga_accounting_smoke.json
+docs/RELATED_WORK_MATRIX.md
+paper_iclr_stochastic_rewriting/references.bib
+scripts/baseline_accounting_smoke.py
+src/compose_v4/experiments/oracle_accounting.py
+tests/test_oracle_accounting.py
 baselines/ddsbm/README.md
 baselines/ddsbm/environment.lock
 baselines/graph_ga/README.md
@@ -247,18 +291,26 @@ tests/test_baseline_qualification.py
 
 # Recommended next action
 
-One bounded action only:
+> **None. HOLD.** The instrument gate passed and the main workstream's
+> instruction is to stop there. Lane 1 is investigating whether `R_theta`'s
+> iterated dynamics are pathological; if that forces a retrain, every downstream
+> comparison would have to be repeated, so no expensive adapter should be built
+> against a model that might be replaced.
 
-> **Build and smoke the GraphGA adapter on 3–5 held-in sources** — wrap the
-> frozen COMPOSE goal language and `src/compose_v4/drd2_oracle.py` as a
-> `scoring_function`, count oracle calls under **one explicitly declared
-> convention**, and record the per-source cost. Projected 0.1 CPU-core-hours,
-> HIGH confidence, MIT-licensed, RDKit-only, and it can share the COMPOSE rdkit
-> pin exactly. It is the cheapest end-to-end proof that the oracle shim and the
-> counting convention work, and §0 of `FAIRNESS_CONTRACT.md` shows that
-> convention must be fixed before any other comparator runs.
+When the hold lifts, the first bounded action is: **vendor upstream GB-GA (MIT)
+and run the real GraphGA adapter on 3–5 held-in sources under the frozen dual
+accounting**, projected 0.1 CPU-core-hours. The accountant it plugs into is
+already built, tested and smoked; only the GB-GA crossover/mutation code is
+missing.
 
 # Actions explicitly not recommended
+
+- **Do not build the MARS, REINVENT, GraphXForm, DDSBM or HN-GFN adapters.**
+  Explicit HOLD from the main workstream.
+- **Do not report the accounting smoke as a GraphGA result.** It measures the
+  accountant, on a stream that is not GB-GA, under a non-production rdkit.
+- **Do not report `benchmark_native` and `raw_compute` in the same column, or
+  either one without naming it.** On a benign stream they differed by 2×.
 
 - **Do not build the MARS or GraphXForm adapter first.** Both are 10–40× the
   compute and carry the environment risk; neither tests anything GraphGA does not

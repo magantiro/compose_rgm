@@ -1,12 +1,45 @@
 # Workstream D — status
 
-**Status:** `DESIGN_ONLY` — qualification complete, ready for handoff.
+**Status:** `DESIGN_ONLY`, plus one `SMOKE_HELD_IN` instrument check. **HOLDING**
+by instruction.
 **Branch:** `codex/compose-baseline-qualification` (base `04f1c46`).
 **Held-out data opened:** **no.** No sealed panel, no confirmatory reserve, no
 matched reserve was touched.
-**Running now:** nothing. No Modal job was launched; no dependency was installed.
-**Last completed gate:** all six priority methods qualified against primary
-sources, with per-cell evidence.
+**Running now:** nothing. **No Modal job was launched; nothing external was
+installed.** The accounting smoke ran locally in 0.22 s of CPU.
+**Last completed gate:** dual oracle accounting frozen and its instrument check
+**PASS** (`diagnostics/baselines/graph_ga_accounting_smoke.json`).
+
+## HOLD
+
+Per the main workstream: the accounting smoke passed, so **stop**. Do not
+proceed to MARS, REINVENT, GraphXForm, DDSBM or HN-GFN. Lane 1 is investigating
+whether `R_theta`'s iterated dynamics are pathological; if that forces a retrain,
+every downstream comparison would have to be repeated, so no expensive adapter
+should be built against a model that might be replaced.
+
+## Frozen this round: dual oracle accounting
+
+Both counters, always logged, never substituted:
+
+| counter | definition | used for |
+|---|---|---|
+| `benchmark_native` | unique valid canonical molecules scored | **only** comparison against published PMO numbers |
+| `raw_compute` | every invocation incl. duplicates, rejects, invalids, rescores | **all** efficiency claims |
+
+The instrument check shows why this is not a formality: **the same candidate
+stream under a budget of 120 bought 120 distinct molecules under
+`benchmark_native` (288 invocations) and 59 under `raw_compute` (120
+invocations)** — a 2× misstatement on a benign stream, and far more on MARS,
+which has no cache anywhere. Implemented in
+`src/compose_v4/experiments/oracle_accounting.py`.
+
+## Naming rule that must not slip
+
+The MARS arm is **"restart at `x_τ` under a new objective"** — a new optimization
+launched from the current molecule. **Never** call it same-prefix retargeting or
+continuation. The molecule is preserved; the proposal, imitation dataset and
+temperature are not.
 
 ## The finding to read first
 
@@ -74,19 +107,30 @@ engineering time on dependency rot, not credits.**
 
 ## Next action
 
-One bounded action: **build and smoke the GraphGA adapter** (0.1 CPU-core-hours),
-because it is the cheapest end-to-end proof that the frozen-oracle shim and the
-chosen oracle-counting convention work — and because §0 of `FAIRNESS_CONTRACT.md`
-shows the counting convention must be decided before any comparator runs, and
-GraphGA is where that decision is cheapest to test.
+**None. HOLDING.** The lane's work is complete and the instrument gate passed.
+Resume only on an explicit instruction from the main workstream, and only after
+Lane 1 resolves whether `R_theta` is being retrained.
+
+When it resumes, the first bounded action is: **vendor upstream GB-GA (MIT) and
+run the real GraphGA adapter on 3–5 held-in sources**, 0.1 CPU-core-hours. The
+accountant it plugs into is already built and tested.
+
+## Manuscript-lane merge request
+
+`docs/RELATED_WORK_MATRIX.md` was amended on this branch with lead approval:
+DDSBM `var-card`/`birth/death` corrected `✗ → ~`; new rows for GraphXForm and
+REINVENT 4; per-cell sentences for every new `~`; `loeffler2024reinvent4` added
+to `paper_iclr_stochastic_rewriting/references.bib`. **The MARS `pathwise` cell
+was deliberately left unchanged** — see verification-debt item 4 in that file.
 
 ## Open decisions this lane deliberately did not make
 
-- **The oracle-counting convention.** COMPOSE's rule (count everything) and
-  PMO's rule (unique valid canonical SMILES) disagree, and the choice changes the
-  ranking. It is claim-level and belongs to the main workstream.
 - **How to report HN-GFN's surrogate.** Its 1000-call budget is spent against a
   learned proxy, not the true oracle.
-- **The two `RELATED_WORK_MATRIX.md` cells** (MARS `pathwise`, DDSBM
-  `var-card`/`birth/death`). Evidence recorded, file not edited — see
-  `DECISION_LOG.md` for why the asymmetry is deliberate.
+- **The intended reading of the matrix's `pathwise` column** (affordance vs
+  released code). It decides MARS, MIMOSA, Graph GA and Kappa-style rewriting
+  together, and a change there would flatter COMPOSE, so it is not ours to make.
+
+## Resolved since the last handoff
+
+- **The oracle-counting convention** — now frozen as dual accounting, above.

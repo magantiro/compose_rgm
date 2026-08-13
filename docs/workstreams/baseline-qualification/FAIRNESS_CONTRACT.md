@@ -54,35 +54,68 @@ much as to goal selection.
 
 ---
 
-## 0. The one decision that must be made first
+## 0. Dual oracle accounting — FROZEN 2026-08-13
 
-**Declare the oracle-counting convention before any run, and apply it to every
-method.** Two live conventions disagree, and the disagreement changes the
-ranking:
+**Decided by the main workstream. Not open for reinterpretation at run time.**
 
-| | (a) COMPOSE's rule | (b) PMO's rule |
+Every run logs **both** counters. Neither may ever be substituted for the other,
+and no table may report one without naming which it is.
+
+| counter | definition | used for |
 |---|---|---|
-| source | `configs/comparator_registry_v3.json` `global_fairness_rules` | `main/optimizer.py::Oracle.score_smi` in `wenhao-gao/mol_opt` |
-| counts | every property-oracle evaluation, including rejected candidates, particles, prescreened candidates and reranked endpoints | unique valid canonical SMILES only |
-| duplicates | charged | not charged (buffer hit, no evaluator call) |
-| invalid | charged as a failed proposal | not charged (returns 0, never enters the buffer) |
+| **`benchmark_native`** | unique **valid canonical** molecules scored. A repeat of a canonical SMILES already scored in this run does not increment. An invalid or unparseable molecule does not increment. | **only** comparison against published PMO numbers |
+| **`raw_compute`** | **every** oracle invocation: duplicates, rejected proposals, invalids, particles, prescreened candidates, reranked endpoints, and rescores. | **all** actual efficiency claims |
 
-Under (a), MARS's cost explodes: it scores every proposal including rejections
-and has no cache anywhere. Under (b), REINVENT looks cheapest: it caches per
-scoring component by design and its diversity filter zero-scores repeats. Under
-(a) GraphGA is charged for duplicate offspring; under (b) it is not.
+The two exist because they answer different questions, and each one alone is
+misleading in a predictable direction:
 
-**Published PMO numbers are only comparable under (b).** If the program wants
-convention (a) — which is the stricter and more defensible one — then PMO's
-leaderboard cannot appear in the same table, and that must be said in the
-caption rather than discovered by a reviewer.
+- `benchmark_native` is the only quantity comparable to the literature, and it
+  **understates** the cost of a method that re-evaluates. MARS has no cache
+  anywhere and rescores its current molecule whenever a proposal is invalid;
+  under `benchmark_native` alone that work is invisible.
+- `raw_compute` is the honest efficiency number, and it **overstates** a method
+  relative to published results. REINVENT caches per scoring component by design
+  and its diversity filter zero-scores repeats; GraphGA natively charges for
+  duplicate offspring. Reporting `raw_compute` beside a PMO leaderboard number
+  would be comparing two different quantities.
 
-This lane does not choose. The choice is claim-level and belongs to the main
-workstream.
+**The rule this freeze exists to prevent:** a later run picking whichever
+convention flatters us. Both numbers are always logged, so the choice is made
+once, in the caption, and is visible.
+
+### Binding consequences
+
+1. A results table states its counter in the caption. `benchmark_native` and
+   `raw_compute` never appear in the same column.
+2. A PMO-comparable row uses `benchmark_native` **and** may not carry a
+   REINVENT 4 capability claim (PMO wraps a REINVENT 2.0-era reimplementation).
+3. An efficiency claim — "COMPOSE reaches X at fewer oracle calls" — uses
+   `raw_compute`, for every method including COMPOSE.
+4. The ratio `raw_compute / benchmark_native` is itself reported per method. It
+   is the cache-and-duplicate rate, it differs by orders of magnitude across
+   these methods, and hiding it is how an unfair comparison survives review.
+5. Caching is allowed for every method with identical semantics (same canonical
+   SMILES ⇒ same score). A cache hit increments `raw_compute` and does not
+   increment `benchmark_native`.
+6. Invalid or unscorable molecules increment `raw_compute` only, and are
+   additionally reported as `failed_proposals`.
+
+Implemented and enforced by `src/compose_v4/experiments/oracle_accounting.py`;
+instrument check in `diagnostics/baselines/graph_ga_accounting_smoke.json`.
 
 ---
 
 ## 1. MARS
+
+> **Naming rule, binding.** The MARS arm is **"restart at `x_τ` under a new
+> objective"**. It must **never** be described as native same-prefix retargeting,
+> mid-trajectory goal switching, or continuation. **It is a new optimization run
+> launched from the current molecule.** The realized molecule is preserved as an
+> initial state and nothing else is: the editor is randomly re-initialised
+> because no shipped code path saves it, the imitation dataset starts empty, and
+> the temperature counter resets. Use the phrase "restart at the switch molecule"
+> in every table, caption and sentence, because "continue from" and "restart at"
+> are the exact pair a reader will conflate.
 
 **Matched quantity.** Property-oracle calls, counting every scored candidate
 including rejected proposals and including the redundant re-scoring MARS

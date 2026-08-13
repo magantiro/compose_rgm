@@ -130,6 +130,75 @@ rejected, and whether it changes a frozen object.
   the reason externals are `N/A` for C1, C2 and C3.
 - **Changes a frozen object.** No.
 
+## 2026-08-13 — Dual oracle accounting frozen; the blocker is resolved
+
+- **Decision.** The main workstream froze **both** counters:
+  `benchmark_native` (unique valid canonical molecules scored, used **only**
+  against published PMO numbers) and `raw_compute` (every invocation including
+  duplicates, rejects, invalids and rescores, used for **all** efficiency
+  claims). Neither may be substituted for the other. Implemented and enforced in
+  `src/compose_v4/experiments/oracle_accounting.py`.
+- **Evidence before.** This lane had recorded the two conventions as
+  incompatible and declined to choose, because the choice changes the ranking and
+  is claim-level. The instrument check then quantified it: on one benign
+  candidate stream a nominal budget of 120 bought 120 distinct molecules under
+  `benchmark_native` (288 invocations) and 59 under `raw_compute` (120
+  invocations).
+- **Alternatives rejected.** Picking one convention. Rejected by the main lane
+  for the reason this lane flagged — either single number is misleading in a
+  predictable direction, and logging both removes the opportunity to pick the
+  flattering one after seeing results.
+- **Design consequence.** A duplicate *request* increments `raw_compute` even
+  though the cached evaluator is not called. That is deliberate: `raw_compute`
+  measures what a method *demands*, so adding a cache to a wasteful method does
+  not silently improve its efficiency number. `evaluator_calls` records actual
+  CPU separately.
+- **Changes a frozen object.** No. It creates one.
+
+## 2026-08-13 — Matrix corrections merged after lead approval; MARS still untouched
+
+- **Decision.** `docs/RELATED_WORK_MATRIX.md` amended on this branch: DDSBM
+  `var-card` and `birth/death` `✗ → ~`; new rows for GraphXForm (`pathwise ~`,
+  `complete ~`, `birth/death ✗`) and REINVENT 4 (`retarget ~`); a sentence for
+  every new `~`; `loeffler2024reinvent4` appended to
+  `paper_iclr_stochastic_rewriting/references.bib`. **The MARS `pathwise ✓` cell
+  was not changed.**
+- **Evidence before.** The per-cell evidence recorded in the qualification
+  registry, plus explicit lead approval to merge, which removes the
+  parallel-branch-ownership objection that blocked this on 2026-08-12.
+- **Why MARS still stands.** The earlier reasoning is unchanged and was
+  re-confirmed by the lead: the released MARS code has no masking, no SMARTS and
+  no atom freezing, so under a *released-code* reading the cell is `✗`; but every
+  MARS state is a complete molecule, so under an *affordance* reading it is `✓`.
+  The change would flatter COMPOSE on an ambiguous column definition. Verification
+  debt item 4 now records the ambiguity and notes that MARS, MIMOSA, Graph GA and
+  Kappa-style rewriting all sit on it and must be decided together.
+- **Changes a frozen object.** Yes — a manuscript-bearing file, with approval.
+  Flagged in `STATUS.md` and `HANDOFF.md` for the manuscript lane to merge.
+
+## 2026-08-13 — The accounting smoke is an instrument check, not a GraphGA measurement
+
+- **Decision.** The authorised "GraphGA accounting smoke" was run as an
+  instrument check on the shared accountant, driven by a GA-*shaped* candidate
+  stream (BRICS recombination, survivor rescores, alternate SMILES spellings,
+  malformed strings) over 5 held-in sources. **Upstream GB-GA was not vendored
+  and nothing external was installed.** Verdict PASS on all seven checks, 0.22 s
+  of CPU.
+- **Evidence before.** The instruction was explicit that the smoke's job is the
+  plumbing — oracle wrapper, canonicalization, duplicate treatment, both
+  conventions, budget termination — and *not* to measure GraphGA; combined with
+  the standing prohibition on installing external dependencies.
+- **Alternatives rejected.** Downloading GB-GA to make it a real GraphGA run.
+  Rejected: it would install external code this lane is not authorised to
+  install, and it would not test anything more about the accountant. The cost of
+  the omission is that the GB-GA *algorithm* remains unexercised, which is
+  recorded rather than glossed.
+- **Honest limitation recorded in the artifact.** The run used rdkit 2025.09.6,
+  **not** the production pin 2024.3.5, so its canonical keys must not be reused
+  for a claim-bearing comparison. The artifact carries
+  `pin_matches_production: false` and a warning.
+- **Changes a frozen object.** No.
+
 ## 2026-08-12 — C4a demoted to a competitiveness sanity check after the main lane's calibration result
 
 - **Decision.** The static-optimization comparison (C4a) against MARS,

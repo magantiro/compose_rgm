@@ -423,7 +423,8 @@ Consequences that bind every comparison below:
 ## Fairness rules that bind every method
 
 - Property-oracle calls are the primary matched quantity. Wall time is reported, never matched, because the accelerator classes differ.
-- DECLARE THE COUNTING CONVENTION BEFORE ANY RUN, and use one convention for every method. The two live conventions differ materially and the choice is not neutral: (a) COMPOSE's own rule from configs/comparator_registry_v3.json counts every property-oracle evaluation including rejected candidates, particles, prescreened candidates and reranked endpoints; (b) PMO's Oracle.score_smi counts UNIQUE VALID CANONICAL SMILES only — duplicates hit a buffer and invalid SMILES return 0 without incrementing. Under (a) MARS's cost explodes and REINVENT's shrinks; under (b) the reverse. Published PMO numbers are only comparable under (b).
+- DUAL ORACLE ACCOUNTING IS FROZEN (2026-08-13, main workstream). Every run logs BOTH counters and neither may ever be substituted for the other. benchmark_native = unique valid canonical molecules scored; used ONLY for comparison against published PMO numbers. raw_compute = every oracle invocation including duplicates, rejects, invalids and rescores; used for ALL actual efficiency claims. A table names its counter in the caption and never mixes them in one column. The ratio raw_compute/benchmark_native is reported per method — it is the cache-and-duplicate rate and hiding it is how an unfair comparison survives review. Enforced by src/compose_v4/experiments/oracle_accounting.py; instrument check in diagnostics/baselines/graph_ga_accounting_smoke.json.
+- The two counters are not a formality: on the held-in instrument check the SAME candidate stream under a budget of 120 bought 120 distinct molecules under benchmark_native (288 invocations) and only 59 distinct molecules under raw_compute (120 invocations). Reporting one number as if it were the other misstates the work done by roughly 2x on a benign stream, and by far more on MARS, which has no cache anywhere.
 - Objective-specific training oracle calls are counted. Report two totals for every method that trains per objective — with and without the training phase — because a reviewer may reasonably object to either convention.
 - A surrogate in the loop must be disclosed as a separate column. HN-GFN's 1000-call budget is spent against a learned proxy, not the true oracle; placing that beside a method that queries honestly is invalid in both directions.
 - Caching is allowed for every method, must use identical semantics (identical canonical SMILES implies identical score), and cache hits are reported separately.
@@ -443,7 +444,8 @@ A held-in smoke is 3-5 held-in source molecules, one objective, and the smallest
 
 Recommended order:
 
-1. GraphGA — 0.1 CPU-core-hours, HIGH confidence, RDKit-only. Do this one first: it is the cheapest end-to-end proof that the COMPOSE oracle shim and the counting convention work at all.
+1. DONE — accounting instrument check, PASS, 0.22 s. See accounting_instrument_check above. HOLD HERE.
+1. GraphGA proper — 0.1 CPU-core-hours, HIGH confidence, RDKit-only. BLOCKED ON HOLD: requires vendoring upstream GB-GA, which was not authorised.
 1. REINVENT adapter A (PMO-wrapped) — 0.3 CPU-core-hours, reuses the same shared-counter pattern.
 1. MARS — 1.5 CPU-core-hours including the one-time ChEMBL vocabulary build; LOW confidence on the 2021 environment.
 1. GraphXForm — 2-4 CPU-core-hours plus a 347 MB checkpoint; MEDIUM confidence.

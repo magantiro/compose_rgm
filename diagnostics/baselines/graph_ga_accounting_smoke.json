@@ -1,0 +1,110 @@
+{
+  "artifact_status": "SMOKE_HELD_IN",
+  "checks": {
+    "both_budgets_terminate": true,
+    "canonicalization_collapses_spellings": true,
+    "conventions_disagree_as_predicted": true,
+    "counter_identity_holds_in_both_runs": true,
+    "duplicates_charged_to_raw_compute_only": true,
+    "evaluator_only_ever_saw_canonical_smiles": true,
+    "invalids_counted_and_not_scored": true
+  },
+  "determinism": "Counters, checks and verdict are deterministic under a fixed seed and rdkit version; only wall_seconds varies between runs, so the artifact is not byte-identical across reruns by design.",
+  "environment": {
+    "pin_matches_production": false,
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "production_pin": "rdkit 2024.3.5",
+    "python": "3.14.2",
+    "rdkit": "2025.09.6",
+    "warning": "If pin_matches_production is false this run is an instrument check only and its canonical keys must not be reused for any claim-bearing comparison; see CLAUDE.md on catalog drift."
+  },
+  "held_out_data_opened": false,
+  "not_a_measurement_of": "GraphGA. Upstream GB-GA is not vendored and nothing external was installed. The candidate stream is GA-shaped (BRICS recombination plus survivor rescores, alternate spellings and malformed strings) and exists only to drive the accountant.",
+  "purpose": "Instrument check on the frozen dual oracle accounting: oracle wrapper, canonicalization, duplicate treatment, both counting conventions, budget termination.",
+  "runs": {
+    "benchmark_native": {
+      "budget": 120,
+      "budget_counter": "benchmark_native",
+      "budget_exhausted": true,
+      "cache_enabled": true,
+      "candidates_offered": 400,
+      "counters": {
+        "benchmark_native": 120,
+        "cache_hits": 142,
+        "evaluator_calls": 120,
+        "failed_proposals": 26,
+        "raw_compute": 288
+      },
+      "demand_ratio_raw_over_benchmark_native": 2.4,
+      "distinct_valid_molecules": 120,
+      "evaluator_saw_only_canonical_input": true,
+      "goal": {
+        "clogp_box_held_in_p25_p75": [
+          2.3688650000000004,
+          4.452222500000002
+        ],
+        "goal": "target-free developability: QED floor and cLogP box",
+        "normalizers": "diagnostics/retarget_goal_language_normalizers.json",
+        "note": "no threshold is selected by this smoke; the box is the held-in IQR",
+        "qed_floor_held_in_median": 0.56676118212139
+      },
+      "invariants": {
+        "evaluator_calls == benchmark_native": true,
+        "raw_compute == benchmark_native + cache_hits + failed_proposals": true,
+        "raw_compute >= benchmark_native": true
+      },
+      "underlying_evaluator_invocations": 120,
+      "wall_seconds": 0.1462
+    },
+    "raw_compute": {
+      "budget": 120,
+      "budget_counter": "raw_compute",
+      "budget_exhausted": true,
+      "cache_enabled": true,
+      "candidates_offered": 400,
+      "counters": {
+        "benchmark_native": 59,
+        "cache_hits": 53,
+        "evaluator_calls": 59,
+        "failed_proposals": 8,
+        "raw_compute": 120
+      },
+      "demand_ratio_raw_over_benchmark_native": 2.0338983050847457,
+      "distinct_valid_molecules": 59,
+      "evaluator_saw_only_canonical_input": true,
+      "goal": {
+        "clogp_box_held_in_p25_p75": [
+          2.3688650000000004,
+          4.452222500000002
+        ],
+        "goal": "target-free developability: QED floor and cLogP box",
+        "normalizers": "diagnostics/retarget_goal_language_normalizers.json",
+        "note": "no threshold is selected by this smoke; the box is the held-in IQR",
+        "qed_floor_held_in_median": 0.56676118212139
+      },
+      "invariants": {
+        "evaluator_calls == benchmark_native": true,
+        "raw_compute == benchmark_native + cache_hits + failed_proposals": true,
+        "raw_compute >= benchmark_native": true
+      },
+      "underlying_evaluator_invocations": 59,
+      "wall_seconds": 0.0714
+    }
+  },
+  "schema": "compose.baselines.accounting_smoke",
+  "seed": 20260813,
+  "sources": {
+    "cohort": "diagnostics/retarget_calibration_cohort.json",
+    "cohort_sha256": "e402e318fd9540fb51fc93c7481094beec4c5f968a582f7349d6359f24e19a5f",
+    "count": 5,
+    "pool": "held-in training sources only",
+    "smiles": [
+      "Cc1ccccc1-c1noc(-c2cc3ccccc3oc2=O)n1",
+      "COc1ccc(-c2nc(CS(=O)(=O)CC(=O)NCc3ccccc3Br)c(C)o2)cc1",
+      "CC(=O)CCC(C)C1CCC2C3=C(CCC21C)C1(C)CCC(=O)C(C)C1CC3=O",
+      "C=CC=C(C=C)CCC(=O)N1C(=O)C(C(C)O)C1OC(C)=O",
+      "CCCc1c(C(=O)OCC)c(C(=O)OCC)c2c(-c3ccccc3)cc(N3CCOCC3)nn12"
+    ]
+  },
+  "verdict": "PASS"
+}
