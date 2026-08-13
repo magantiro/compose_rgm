@@ -94,6 +94,43 @@ def main() -> int:
             "audit", {}).get("endpoint_valid_path_invalid"))
     endpoint_only_present = sum(1 for s in good if "endpoint_only" in s["arms"])
 
+    # ABSORPTION. The mechanism behind whichever way G1 lands. Over every
+    # rollout that ran on the UNCONSTRAINED support: how many broke the motif,
+    # and how many of those were back inside it by the end? A "restore" is the
+    # event the whole endpoint-only-is-insufficient argument depends on. If
+    # `recovered` is 0 while `broke` is large, motif destruction is absorbing
+    # at this horizon and endpoint validity IMPLIES path validity -- which
+    # makes endpoint-only filtering sufficient as a matter of dynamics, not of
+    # luck.
+    unconstrained_arms = ("unconstrained_greedy", "unconstrained_verified",
+                          "endpoint_only")
+    broke = recovered = rollout_total = ended_valid = 0
+    for shard in good:
+        for name, body in shard["arms"].items():
+            if name not in unconstrained_arms:
+                continue
+            pool = body.get("rollout_audits") or [{"audit": body["audit"]}]
+            for roll in pool:
+                rollout_total += 1
+                audit = roll["audit"]
+                ended_valid += int(audit["endpoint_valid"])
+                if audit["any_violation"]:
+                    broke += 1
+                    recovered += int(audit["endpoint_valid"])
+    absorption = {
+        "rollouts_on_unconstrained_support": rollout_total,
+        "broke_the_motif": broke,
+        "ended_motif_valid": ended_valid,
+        "broke_AND_recovered_by_the_end": recovered,
+        "recovery_rate": round(recovered / broke, 4) if broke else None,
+        "interpretation": (
+            "recovery_rate 0 with a large `broke_the_motif` means motif "
+            "destruction is ABSORBING at this horizon: endpoint validity "
+            "implies path validity, so endpoint-only filtering is sufficient "
+            "by dynamics rather than by luck"
+        ),
+    }
+
     # -------------------------------------------- G2 how much support is left
     removed = [c["removed_fraction"] for s in good for c in s["mask_census"]]
     removed_mass = [
@@ -202,6 +239,7 @@ def main() -> int:
             "threshold": VACUITY_FLOOR,
             "note": ("this is the headline measurement: it is 0 whenever "
                      "endpoint-only filtering is already sufficient"),
+            "absorption": absorption,
         },
         "G2_mask_leaves_room_to_act": {
             "verdict": verdict(
@@ -246,6 +284,28 @@ def main() -> int:
             "why_admissible": ("identical rollout budget, identical policy; the "
                                "mask is the only difference, so the sign is free"),
             "paired_delta": summarise(paired_mask_price),
+            "denominator_note": (
+                "restricted to sources where endpoint_only returned anything at "
+                "all; sources where it failed outright have no utility to pair"
+            ),
+        },
+        "endpoint_only_return_failure": {
+            "question": ("does endpoint-only handling fail to RETURN a "
+                         "motif-valid molecule where masking succeeds?"),
+            "why_admissible": (
+                "free sign: endpoint_only could have matched the masked arms on "
+                "every source. Nothing in the construction prevents it -- it "
+                "fails only when its unconstrained policy spends the whole "
+                "budget outside the feasible set"
+            ),
+            "endpoint_only_selection_failed": sum(
+                1 for s in good
+                if s["arms"].get("endpoint_only", {}).get("selection_failed")),
+            "b_success_by_arm": {
+                name: f"{f['b_success']}/{f['sources']}"
+                for name, f in feasibility.items()
+            },
+            "caveat": "6 sources; treat any count here as an existence proof, not a rate",
         },
         "planning_inside_the_mask": planning,
         "per_arm": feasibility,

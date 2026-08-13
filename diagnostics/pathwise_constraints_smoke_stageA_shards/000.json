@@ -1,0 +1,718 @@
+{
+  "schema": "compose.pathwise.source_result",
+  "status": "SMOKE_HELD_IN",
+  "mask_leak": null,
+  "index": 0,
+  "source": "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+  "start_key": "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+  "motif_smarts": "[#6;a;+0]:1:[#6;a;+0]:[#6;a;+0]:[#6;a;+0]:[#6;a;+0]:[#7;a;+0]:1",
+  "motif_atoms": 6,
+  "motif_fraction": 0.3,
+  "motif_rederived_smarts": "[#6;a;+0]:1:[#6;a;+0]:[#6;a;+0]:[#6;a;+0]:[#6;a;+0]:[#7;a;+0]:1",
+  "motif_rederived_atoms": 6,
+  "horizon": 6,
+  "goal": "B",
+  "rollouts": 6,
+  "shortlist": 3,
+  "arm_run_order": [
+    "unconstrained_greedy",
+    "endpoint_only",
+    "pathwise_greedy",
+    "pathwise_stochastic",
+    "mask_only_sampling"
+  ],
+  "arms_skipped_on_budget": null,
+  "kernel_call_budget": 360,
+  "b_worst_at_source": -3.408703589337349,
+  "b_success_at_source": false,
+  "arms": {
+    "unconstrained_greedy": {
+      "landing": "Cc1cc2c(c([SH2]C(=[PH3])C3c4ccc(O)cc43)n1)CC2",
+      "trajectory": [
+        "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+        "Cc1cc(C)c(C)c(NC(=S)Nc2ccc(O)cc2)n1",
+        "Cc1cc(C)c(C)c(NC(=S)N2c3ccc(O)cc32)n1",
+        "Cc1cc2c(c(NC(=S)N3c4ccc(O)cc43)n1)CC2",
+        "Cc1cc2c(c(NC(=[PH3])N3c4ccc(O)cc43)n1)CC2",
+        "Cc1cc2c(c([SH2]C(=[PH3])N3c4ccc(O)cc43)n1)CC2",
+        "Cc1cc2c(c([SH2]C(=[PH3])C3c4ccc(O)cc43)n1)CC2"
+      ],
+      "edits": 6,
+      "dead_end_step": null,
+      "completed": true,
+      "selection_failed": null,
+      "rollouts_offered": null,
+      "rollouts_admissible": null,
+      "overrides": null,
+      "top1_disagreements": null,
+      "b_worst_margin": 0.413590900006212,
+      "b_mean_margin": 0.6584214406984907,
+      "b_success": true,
+      "p_success": true,
+      "d_success": true,
+      "audit": {
+        "states": 7,
+        "endpoint_valid": true,
+        "any_violation": false,
+        "first_violation_index": null,
+        "violation_count": 0,
+        "endpoint_valid_path_invalid": false,
+        "source_violates_own_motif": false
+      },
+      "marginal_kernel_calls": 6
+    },
+    "endpoint_only": {
+      "landing": "CCc1cccnc1[SH2]CN(C)C1CCC(O)CC1",
+      "trajectory": [
+        "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+        "COC1CCC(NC(=S)Nc2cc(C)cc(C)n2)CC1",
+        "COC1CCC(NCNc2cc(C)cc(C)n2)CC1",
+        "CCc1cc(C)nc(NCNC2CCC(O)CC2)c1",
+        "CCc1ccnc(NCN(C)C2CCC(O)CC2)c1",
+        "CCc1ccnc([SH2]CN(C)C2CCC(O)CC2)c1",
+        "CCc1cccnc1[SH2]CN(C)C1CCC(O)CC1"
+      ],
+      "edits": 6,
+      "dead_end_step": null,
+      "completed": true,
+      "selection_failed": false,
+      "rollouts_offered": 6,
+      "rollouts_admissible": 6,
+      "overrides": null,
+      "top1_disagreements": null,
+      "b_worst_margin": 0.668872241082003,
+      "b_mean_margin": 0.8128786280152319,
+      "b_success": true,
+      "p_success": true,
+      "d_success": true,
+      "audit": {
+        "states": 7,
+        "endpoint_valid": true,
+        "any_violation": false,
+        "first_violation_index": null,
+        "violation_count": 0,
+        "endpoint_valid_path_invalid": false,
+        "source_violates_own_motif": false
+      },
+      "marginal_kernel_calls": 17,
+      "rollout_audits": [
+        {
+          "audit": {
+            "states": 7,
+            "endpoint_valid": true,
+            "any_violation": false,
+            "first_violation_index": null,
+            "violation_count": 0,
+            "endpoint_valid_path_invalid": false,
+            "source_violates_own_motif": false
+          },
+          "utility": [
+            0.668872241082003,
+            0.8128786280152319
+          ],
+          "trajectory": [
+            "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "COC1CCC(NC(=S)Nc2cc(C)cc(C)n2)CC1",
+            "COC1CCC(NCNc2cc(C)cc(C)n2)CC1",
+            "CCc1cc(C)nc(NCNC2CCC(O)CC2)c1",
+            "CCc1ccnc(NCN(C)C2CCC(O)CC2)c1",
+            "CCc1ccnc([SH2]CN(C)C2CCC(O)CC2)c1",
+            "CCc1cccnc1[SH2]CN(C)C1CCC(O)CC1"
+          ]
+        },
+        {
+          "audit": {
+            "states": 7,
+            "endpoint_valid": true,
+            "any_violation": false,
+            "first_violation_index": null,
+            "violation_count": 0,
+            "endpoint_valid_path_invalid": false,
+            "source_violates_own_motif": false
+          },
+          "utility": [
+            0.1513219795239479,
+            0.23350238416352753
+          ],
+          "trajectory": [
+            "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "Cc1cc(C)c(C)c(NC(=S)Nc2ccc(O)cc2)n1",
+            "Cc1c(C)c2c(C)nc1[nH]c(=S)[nH]c1ccc(O)cc12",
+            "CCc1c(C)c2ncc1c1cc(O)ccc1[nH]c(=S)[nH]2",
+            "CCc1c(C)c2ncc1c1cc(O)ccc1[nH]c(=[SH4])[nH]2",
+            "CCc1c(CC)c2cnc1[nH]c(=[SH4])[nH]c1ccc(O)cc12",
+            "CCCc1c(CC)c2cnc1[nH]c(=[SH4])[nH]c1ccc(O)cc12"
+          ]
+        },
+        {
+          "audit": {
+            "states": 7,
+            "endpoint_valid": true,
+            "any_violation": false,
+            "first_violation_index": null,
+            "violation_count": 0,
+            "endpoint_valid_path_invalid": false,
+            "source_violates_own_motif": false
+          },
+          "utility": [
+            0.4950468025626895,
+            0.571861619164094
+          ],
+          "trajectory": [
+            "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "Cc1cc(C)c(C)c(NC(=S)Nc2ccc(O)cc2)n1",
+            "Cc1cc2c(C)c(n1)NC(=S)N(c1ccc(O)cc1)C2",
+            "Cc1cc2c(C)c(n1)NC(=[PH3])N(c1ccc(O)cc1)C2",
+            "CCc1c2ccnc1NC(=[PH3])N(c1ccc(O)cc1)C2",
+            "NCCc1c2ccnc1NC(=[PH3])N(c1ccc(O)cc1)C2",
+            "NCCc1c2ccnc1NC(=[PH2]F)N(c1ccc(O)cc1)C2"
+          ]
+        },
+        {
+          "audit": {
+            "states": 7,
+            "endpoint_valid": true,
+            "any_violation": false,
+            "first_violation_index": null,
+            "violation_count": 0,
+            "endpoint_valid_path_invalid": false,
+            "source_violates_own_motif": false
+          },
+          "utility": [
+            0.1408990148421559,
+            0.2087141297136721
+          ],
+          "trajectory": [
+            "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "Cc1cc(C)c(C)c(NC(=S)Nc2ccc(O)cc2)n1",
+            "Cc1c(C)c2c(C)nc1[nH]c(=S)[nH]c1ccc(O)cc12",
+            "CCc1c(C)c2cnc1[nH]c(=S)[nH]c1ccc(O)cc12",
+            "Cc1c(CCN)c2ncc1c1cc(O)ccc1[nH]c(=S)[nH]2",
+            "CNCCc1c(C)c2cnc1[nH]c(=S)[nH]c1ccc(O)cc12",
+            "Cc1c(CCN(C)C)c2ncc1c1cc(O)ccc1[nH]c(=S)[nH]2"
+          ]
+        },
+        {
+          "audit": {
+            "states": 7,
+            "endpoint_valid": true,
+            "any_violation": false,
+            "first_violation_index": null,
+            "violation_count": 0,
+            "endpoint_valid_path_invalid": false,
+            "source_violates_own_motif": false
+          },
+          "utility": [
+            0.668872241082003,
+            0.8128786280152319
+          ],
+          "trajectory": [
+            "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "COC1CCC(NC(=S)Nc2cc(C)cc(C)n2)CC1",
+            "COC1CCC(NCNc2cc(C)cc(C)n2)CC1",
+            "COC1CCC(N(C)CNc2cc(C)ccn2)CC1",
+            "CCc1ccnc(NCN(C)C2CCC(O)CC2)c1",
+            "CCc1ccnc([SH2]CN(C)C2CCC(O)CC2)c1",
+            "CCc1cccnc1[SH2]CN(C)C1CCC(O)CC1"
+          ]
+        },
+        {
+          "audit": {
+            "states": 7,
+            "endpoint_valid": true,
+            "any_violation": false,
+            "first_violation_index": null,
+            "violation_count": 0,
+            "endpoint_valid_path_invalid": false,
+            "source_violates_own_motif": false
+          },
+          "utility": [
+            0.668872241082003,
+            0.8128786280152319
+          ],
+          "trajectory": [
+            "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "COC1CCC(NC(=S)Nc2cc(C)cc(C)n2)CC1",
+            "COC1CCC(NCNc2cc(C)cc(C)n2)CC1",
+            "COC1CCC(N(C)CNc2cc(C)ccn2)CC1",
+            "CCc1ccnc(NCN(C)C2CCC(O)CC2)c1",
+            "CCc1ccnc([SH2]CN(C)C2CCC(O)CC2)c1",
+            "CCc1cccnc1[SH2]CN(C)C1CCC(O)CC1"
+          ]
+        }
+      ]
+    },
+    "pathwise_greedy": {
+      "landing": "Cc1cc2c(c([SH2]C(=[PH3])C3c4ccc(O)cc43)n1)CC2",
+      "trajectory": [
+        "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+        "Cc1cc(C)c(C)c(NC(=S)Nc2ccc(O)cc2)n1",
+        "Cc1cc(C)c(C)c(NC(=S)N2c3ccc(O)cc32)n1",
+        "Cc1cc2c(c(NC(=S)N3c4ccc(O)cc43)n1)CC2",
+        "Cc1cc2c(c(NC(=[PH3])N3c4ccc(O)cc43)n1)CC2",
+        "Cc1cc2c(c([SH2]C(=[PH3])N3c4ccc(O)cc43)n1)CC2",
+        "Cc1cc2c(c([SH2]C(=[PH3])C3c4ccc(O)cc43)n1)CC2"
+      ],
+      "edits": 6,
+      "dead_end_step": null,
+      "completed": true,
+      "selection_failed": null,
+      "rollouts_offered": null,
+      "rollouts_admissible": null,
+      "overrides": null,
+      "top1_disagreements": null,
+      "b_worst_margin": 0.413590900006212,
+      "b_mean_margin": 0.6584214406984907,
+      "b_success": true,
+      "p_success": true,
+      "d_success": true,
+      "audit": {
+        "states": 7,
+        "endpoint_valid": true,
+        "any_violation": false,
+        "first_violation_index": null,
+        "violation_count": 0,
+        "endpoint_valid_path_invalid": false,
+        "source_violates_own_motif": false
+      },
+      "marginal_kernel_calls": 0
+    },
+    "pathwise_stochastic": {
+      "landing": "CCCN(C[SH2]c1ccccn1)C1CCC(O)CC1",
+      "trajectory": [
+        "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+        "COC1CCC(NC(=S)Nc2cc(C)cc(C)n2)CC1",
+        "COC1CCC(NCNc2cc(C)cc(C)n2)CC1",
+        "CCc1cc(C)nc(NCNC2CCC(O)CC2)c1",
+        "CCc1ccnc(NCN(C)C2CCC(O)CC2)c1",
+        "CCc1ccnc([SH2]CN(C)C2CCC(O)CC2)c1",
+        "CCCN(C[SH2]c1ccccn1)C1CCC(O)CC1"
+      ],
+      "edits": 6,
+      "dead_end_step": null,
+      "completed": true,
+      "selection_failed": false,
+      "rollouts_offered": 6,
+      "rollouts_admissible": 6,
+      "overrides": null,
+      "top1_disagreements": null,
+      "b_worst_margin": 0.6665682678080924,
+      "b_mean_margin": 0.8683482955260472,
+      "b_success": true,
+      "p_success": true,
+      "d_success": true,
+      "audit": {
+        "states": 7,
+        "endpoint_valid": true,
+        "any_violation": false,
+        "first_violation_index": null,
+        "violation_count": 0,
+        "endpoint_valid_path_invalid": false,
+        "source_violates_own_motif": false
+      },
+      "marginal_kernel_calls": 2,
+      "rollout_audits": [
+        {
+          "audit": {
+            "states": 7,
+            "endpoint_valid": true,
+            "any_violation": false,
+            "first_violation_index": null,
+            "violation_count": 0,
+            "endpoint_valid_path_invalid": false,
+            "source_violates_own_motif": false
+          },
+          "utility": [
+            0.14089901484215553,
+            0.20272905107416947
+          ],
+          "trajectory": [
+            "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "Cc1cc(C)c(C)c(NC(=S)Nc2ccc(O)cc2)n1",
+            "Cc1c(C)c2c(C)nc1[nH]c(=S)[nH]c1ccc(O)cc12",
+            "CCc1c(C)c2ncc1c1cc(O)ccc1[nH]c(=S)[nH]2",
+            "Cc1c(CCN)c2cnc1[nH]c(=S)[nH]c1ccc(O)cc12",
+            "CNCCc1c(C)c2ncc1c1cc(O)ccc1[nH]c(=S)[nH]2",
+            "Cc1c(CCN(C)C)c2cnc1[nH]c(=S)[nH]c1ccc(O)cc12"
+          ]
+        },
+        {
+          "audit": {
+            "states": 7,
+            "endpoint_valid": true,
+            "any_violation": false,
+            "first_violation_index": null,
+            "violation_count": 0,
+            "endpoint_valid_path_invalid": false,
+            "source_violates_own_motif": false
+          },
+          "utility": [
+            0.6665682678080924,
+            0.8683482955260472
+          ],
+          "trajectory": [
+            "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "COC1CCC(NC(=S)Nc2cc(C)cc(C)n2)CC1",
+            "COC1CCC(NCNc2cc(C)cc(C)n2)CC1",
+            "CCc1cc(C)nc(NCNC2CCC(O)CC2)c1",
+            "CCc1ccnc(NCN(C)C2CCC(O)CC2)c1",
+            "CCc1ccnc([SH2]CN(C)C2CCC(O)CC2)c1",
+            "CCCN(C[SH2]c1ccccn1)C1CCC(O)CC1"
+          ]
+        },
+        {
+          "audit": {
+            "states": 7,
+            "endpoint_valid": true,
+            "any_violation": false,
+            "first_violation_index": null,
+            "violation_count": 0,
+            "endpoint_valid_path_invalid": false,
+            "source_violates_own_motif": false
+          },
+          "utility": [
+            0.4950468025626895,
+            0.571861619164094
+          ],
+          "trajectory": [
+            "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "Cc1cc(C)c(C)c(NC(=S)Nc2ccc(O)cc2)n1",
+            "Cc1cc2c(C)c(n1)NC(=S)N(c1ccc(O)cc1)C2",
+            "Cc1cc2c(C)c(n1)NC(=[PH3])N(c1ccc(O)cc1)C2",
+            "CCc1c2ccnc1NC(=[PH3])N(c1ccc(O)cc1)C2",
+            "NCCc1c2ccnc1NC(=[PH3])N(c1ccc(O)cc1)C2",
+            "NCCc1c2ccnc1NC(=[PH2]F)N(c1ccc(O)cc1)C2"
+          ]
+        },
+        {
+          "audit": {
+            "states": 7,
+            "endpoint_valid": true,
+            "any_violation": false,
+            "first_violation_index": null,
+            "violation_count": 0,
+            "endpoint_valid_path_invalid": false,
+            "source_violates_own_motif": false
+          },
+          "utility": [
+            0.4950468025626895,
+            0.571861619164094
+          ],
+          "trajectory": [
+            "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "Cc1cc(C)c(C)c(NC(=S)Nc2ccc(O)cc2)n1",
+            "Cc1cc2c(C)c(n1)NC(=S)N(c1ccc(O)cc1)C2",
+            "Cc1cc2c(C)c(n1)NC(=[PH3])N(c1ccc(O)cc1)C2",
+            "CCc1c2ccnc1NC(=[PH3])N(c1ccc(O)cc1)C2",
+            "NCCc1c2ccnc1NC(=[PH3])N(c1ccc(O)cc1)C2",
+            "NCCc1c2ccnc1NC(=[PH2]F)N(c1ccc(O)cc1)C2"
+          ]
+        },
+        {
+          "audit": {
+            "states": 7,
+            "endpoint_valid": true,
+            "any_violation": false,
+            "first_violation_index": null,
+            "violation_count": 0,
+            "endpoint_valid_path_invalid": false,
+            "source_violates_own_motif": false
+          },
+          "utility": [
+            0.14089901484215553,
+            0.20272905107416947
+          ],
+          "trajectory": [
+            "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "Cc1cc(C)c(C)c(NC(=S)Nc2ccc(O)cc2)n1",
+            "Cc1c(C)c2c(C)nc1[nH]c(=S)[nH]c1ccc(O)cc12",
+            "CCc1c(C)c2ncc1c1cc(O)ccc1[nH]c(=S)[nH]2",
+            "Cc1c(CCN)c2cnc1[nH]c(=S)[nH]c1ccc(O)cc12",
+            "CNCCc1c(C)c2ncc1c1cc(O)ccc1[nH]c(=S)[nH]2",
+            "Cc1c(CCN(C)C)c2cnc1[nH]c(=S)[nH]c1ccc(O)cc12"
+          ]
+        },
+        {
+          "audit": {
+            "states": 7,
+            "endpoint_valid": true,
+            "any_violation": false,
+            "first_violation_index": null,
+            "violation_count": 0,
+            "endpoint_valid_path_invalid": false,
+            "source_violates_own_motif": false
+          },
+          "utility": [
+            0.1408990148421559,
+            0.2087141297136721
+          ],
+          "trajectory": [
+            "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "Cc1cc(C)c(C)c(NC(=S)Nc2ccc(O)cc2)n1",
+            "Cc1c(C)c2c(C)nc1[nH]c(=S)[nH]c1ccc(O)cc12",
+            "CCc1c(C)c2cnc1[nH]c(=S)[nH]c1ccc(O)cc12",
+            "Cc1c(CCN)c2ncc1c1cc(O)ccc1[nH]c(=S)[nH]2",
+            "CNCCc1c(C)c2cnc1[nH]c(=S)[nH]c1ccc(O)cc12",
+            "Cc1c(CCN(C)C)c2ncc1c1cc(O)ccc1[nH]c(=S)[nH]2"
+          ]
+        }
+      ]
+    },
+    "mask_only_sampling": {
+      "landing": "Cc1cc(Cl)cc(NC(=S)Nc2ccc(F)cc2)n1",
+      "trajectory": [
+        "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+        "Cc1cc(C)nc(NC(=S)Nc2ccc(O)cc2)c1",
+        "Cc1cc(C)nc(NC(=S)Nc2ccccc2)c1",
+        "Cc1cc(Cl)cc(NC(=S)Nc2ccccc2)n1",
+        "Cc1cc(Cl)cc(NC(=S)Nc2ccc(F)cc2)n1",
+        "Cc1cc(F)cc(NC(=S)Nc2ccc(F)cc2)n1",
+        "Cc1cc(Cl)cc(NC(=S)Nc2ccc(F)cc2)n1"
+      ],
+      "edits": 6,
+      "dead_end_step": null,
+      "completed": true,
+      "selection_failed": false,
+      "rollouts_offered": 6,
+      "rollouts_admissible": 6,
+      "overrides": null,
+      "top1_disagreements": null,
+      "b_worst_margin": -2.6284354166643755,
+      "b_mean_margin": -0.6395522145606948,
+      "b_success": false,
+      "p_success": false,
+      "d_success": true,
+      "audit": {
+        "states": 7,
+        "endpoint_valid": true,
+        "any_violation": false,
+        "first_violation_index": null,
+        "violation_count": 0,
+        "endpoint_valid_path_invalid": false,
+        "source_violates_own_motif": false
+      },
+      "marginal_kernel_calls": 24,
+      "rollout_audits": [
+        {
+          "audit": {
+            "states": 7,
+            "endpoint_valid": true,
+            "any_violation": false,
+            "first_violation_index": null,
+            "violation_count": 0,
+            "endpoint_valid_path_invalid": false,
+            "source_violates_own_motif": false
+          },
+          "utility": [
+            -2.726005855863444,
+            -0.5701802531829354
+          ],
+          "trajectory": [
+            "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "COc1cccc(NC(=S)Nc2cc(C)cc(C)n2)c1",
+            "COc1ccc(C)c(NC(=S)Nc2cc(C)cc(C)n2)c1",
+            "COc1cccc(NC(=S)Nc2cc(C)cc(C)n2)c1C",
+            "CCOc1cccc(NC(=S)Nc2cccc(C)n2)c1C",
+            "COc1ccc(C)c(NC(=S)Nc2cccc(C)n2)c1C",
+            "COc1ccc(C)c(NC(=S)Nc2ccccn2)c1C"
+          ]
+        },
+        {
+          "audit": {
+            "states": 7,
+            "endpoint_valid": true,
+            "any_violation": false,
+            "first_violation_index": null,
+            "violation_count": 0,
+            "endpoint_valid_path_invalid": false,
+            "source_violates_own_motif": false
+          },
+          "utility": [
+            -3.408703589337349,
+            -0.797746164340904
+          ],
+          "trajectory": [
+            "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "CNc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "CCNc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "CNc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "Cc1cc(C)nc(NC(=S)Nc2ccc(N(C)C)cc2)c1",
+            "CNc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1"
+          ]
+        },
+        {
+          "audit": {
+            "states": 7,
+            "endpoint_valid": true,
+            "any_violation": false,
+            "first_violation_index": null,
+            "violation_count": 0,
+            "endpoint_valid_path_invalid": false,
+            "source_violates_own_motif": false
+          },
+          "utility": [
+            -3.0509892147746114,
+            -0.7350795965440842
+          ],
+          "trajectory": [
+            "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "COc1ccccc1NC(=S)Nc1cc(C)cc(C)n1",
+            "COc1cc(C)ccc1NC(=S)Nc1cccc(C)n1",
+            "CCc1ccc(NC(=S)Nc2cccc(C)n2)c(OC)c1",
+            "COc1cc(C)c(C)cc1NC(=S)Nc1cccc(C)n1",
+            "COc1cc(C)c(F)cc1NC(=S)Nc1cccc(C)n1",
+            "COc1cc(C)c(F)cc1NC(=S)Nc1cccc(CF)n1"
+          ]
+        },
+        {
+          "audit": {
+            "states": 7,
+            "endpoint_valid": true,
+            "any_violation": false,
+            "first_violation_index": null,
+            "violation_count": 0,
+            "endpoint_valid_path_invalid": false,
+            "source_violates_own_motif": false
+          },
+          "utility": [
+            -2.6999014485183985,
+            -0.5655380365479084
+          ],
+          "trajectory": [
+            "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "COc1ccc(NC(=S)Nc2cc(C)c(C)cn2)cc1",
+            "COc1ccccc1NC(=S)Nc1cc(C)c(C)cn1",
+            "COc1ccc(NC(=S)Nc2cc(C)c(C)cn2)cc1",
+            "COc1cccc(NC(=S)Nc2cc(C)c(C)cn2)c1",
+            "COc1cccc(NC(=S)Nc2ccc(C)cn2)c1",
+            "COc1cccc(NC(=S)Nc2ccc(Cl)cn2)c1"
+          ]
+        },
+        {
+          "audit": {
+            "states": 7,
+            "endpoint_valid": true,
+            "any_violation": false,
+            "first_violation_index": null,
+            "violation_count": 0,
+            "endpoint_valid_path_invalid": false,
+            "source_violates_own_motif": false
+          },
+          "utility": [
+            -2.6284354166643755,
+            -0.6395522145606948
+          ],
+          "trajectory": [
+            "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "Cc1cc(C)nc(NC(=S)Nc2ccc(O)cc2)c1",
+            "Cc1cc(C)nc(NC(=S)Nc2ccccc2)c1",
+            "Cc1cc(Cl)cc(NC(=S)Nc2ccccc2)n1",
+            "Cc1cc(Cl)cc(NC(=S)Nc2ccc(F)cc2)n1",
+            "Cc1cc(F)cc(NC(=S)Nc2ccc(F)cc2)n1",
+            "Cc1cc(Cl)cc(NC(=S)Nc2ccc(F)cc2)n1"
+          ]
+        },
+        {
+          "audit": {
+            "states": 7,
+            "endpoint_valid": true,
+            "any_violation": false,
+            "first_violation_index": null,
+            "violation_count": 0,
+            "endpoint_valid_path_invalid": false,
+            "source_violates_own_motif": false
+          },
+          "utility": [
+            -2.782966067397678,
+            -0.8238071310410997
+          ],
+          "trajectory": [
+            "COc1ccc(NC(=S)Nc2cc(C)cc(C)n2)cc1",
+            "Cc1cc(C)nc(NC(=S)Nc2ccc(O)cc2)c1",
+            "Cc1cc(C)nc(NC(=S)Nc2ccccc2O)c1",
+            "Cc1cc(C)nc(NC(=S)Nc2ccccc2)c1",
+            "Cc1cc(C)nc(NC(=S)Nc2cccc(F)c2)c1",
+            "Cc1cc(C)nc(NC(=S)Nc2ccccc2)c1",
+            "Cc1cc(C)nc(NC(=S)Nc2ccccc2O)c1"
+          ]
+        }
+      ]
+    }
+  },
+  "mask_census": [
+    {
+      "step": 0,
+      "where": "unconstrained_greedy",
+      "candidates": 383,
+      "kept": 367,
+      "removed": 16,
+      "removed_fraction": 0.04177545691906005,
+      "kept_reference_mass": 0.9999274245841001,
+      "removed_reference_mass": 7.257541590055538e-05
+    },
+    {
+      "step": 1,
+      "where": "unconstrained_greedy",
+      "candidates": 384,
+      "kept": 371,
+      "removed": 13,
+      "removed_fraction": 0.033854166666666664,
+      "kept_reference_mass": 0.9999094954489015,
+      "removed_reference_mass": 9.050455109893552e-05
+    },
+    {
+      "step": 2,
+      "where": "unconstrained_greedy",
+      "candidates": 378,
+      "kept": 365,
+      "removed": 13,
+      "removed_fraction": 0.03439153439153439,
+      "kept_reference_mass": 0.9997620415842656,
+      "removed_reference_mass": 0.00023795841573437393
+    },
+    {
+      "step": 3,
+      "where": "unconstrained_greedy",
+      "candidates": 336,
+      "kept": 323,
+      "removed": 13,
+      "removed_fraction": 0.03869047619047619,
+      "kept_reference_mass": 0.999115087650462,
+      "removed_reference_mass": 0.0008849123495386912
+    },
+    {
+      "step": 4,
+      "where": "unconstrained_greedy",
+      "candidates": 385,
+      "kept": 372,
+      "removed": 13,
+      "removed_fraction": 0.033766233766233764,
+      "kept_reference_mass": 0.7564100268816258,
+      "removed_reference_mass": 0.24358997311837483
+    },
+    {
+      "step": 5,
+      "where": "unconstrained_greedy",
+      "candidates": 399,
+      "kept": 386,
+      "removed": 13,
+      "removed_fraction": 0.03258145363408521,
+      "kept_reference_mass": 0.7265867429053054,
+      "removed_reference_mass": 0.2734132570946938
+    },
+    {
+      "step": 6,
+      "where": "unconstrained_greedy",
+      "candidates": 429,
+      "kept": 416,
+      "removed": 13,
+      "removed_fraction": 0.030303030303030304,
+      "kept_reference_mass": 0.938627651622465,
+      "removed_reference_mass": 0.06137234837753591
+    }
+  ],
+  "distinct_landings": 4,
+  "kernel_calls": 50,
+  "seconds": 734.8
+}

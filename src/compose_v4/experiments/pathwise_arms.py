@@ -24,10 +24,27 @@ import random
 from dataclasses import dataclass
 from typing import Callable
 
+from compose_v4.experiments.pathwise_arm_names import (
+    ALL_ARMS,
+    STAGE_A,
+    STAGE_B,
+)
 from compose_v4.experiments.pathwise_constraints import (
     mask_successors,
     path_violation_summary,
 )
+
+__all__ = [
+    "ALL_ARMS",
+    "ARM_BUILDERS",
+    "STAGE_A",
+    "STAGE_B",
+    "ArmContext",
+    "best_of_n",
+    "greedy_path",
+    "stochastic_path",
+    "verified_path",
+]
 
 Rows = list[tuple[str, float]]
 
@@ -177,15 +194,9 @@ def best_of_n(ctx: ArmContext, start: str, *, mask: bool, goal_aware: bool,
             "rollouts_offered": len(rolls), "rollouts_admissible": len(pool)}
 
 
-#: Arm name -> builder. Stage A is every arm without lookahead rollouts; it
-#: resolves the vacuity gate, the support-removal rate and the budget-matched
-#: price of the mask. Stage B buys the two verified arms and is worth paying
-#: for only once stage A's gate has passed.
-STAGE_A = ("unconstrained_greedy", "endpoint_only", "pathwise_greedy",
-           "pathwise_stochastic", "mask_only_sampling")
-STAGE_B = ("unconstrained_verified", "pathwise_verified")
-ALL_ARMS = STAGE_A + STAGE_B
-
+#: Arm name -> builder. The names and the stage partition live in
+#: `pathwise_arm_names`, which has no RDKit dependency, because `modal run`
+#: imports the app module in the launcher's interpreter.
 ARM_BUILDERS: dict[str, Callable[[ArmContext, str], dict]] = {
     "unconstrained_greedy":
         lambda ctx, s: greedy_path(ctx, s, mask=False),

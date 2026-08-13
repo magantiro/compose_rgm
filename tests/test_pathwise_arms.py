@@ -93,6 +93,63 @@ def test_stage_partition_covers_every_arm_exactly_once():
     assert set(ARM_BUILDERS) == set(ALL_ARMS)
 
 
+def test_arm_names_module_is_dependency_free():
+    """`modal run` imports the app in the LAUNCHER's interpreter, which has no
+    RDKit. The app reads its arm names from this module, so the module must
+    import nothing. A launch-time ModuleNotFoundError costs a failed run.
+    """
+    import ast
+    from pathlib import Path
+
+    source = Path(
+        "src/compose_v4/experiments/pathwise_arm_names.py"
+    ).resolve()
+    if not source.exists():
+        source = (Path(__file__).resolve().parents[1]
+                  / "src/compose_v4/experiments/pathwise_arm_names.py")
+    tree = ast.parse(source.read_text())
+    imports = [
+        node for node in ast.walk(tree)
+        if isinstance(node, (ast.Import, ast.ImportFrom))
+        and not (isinstance(node, ast.ImportFrom) and node.module == "__future__")
+    ]
+    assert imports == [], f"pathwise_arm_names must import nothing, found {imports}"
+
+
+def test_app_module_scope_touches_no_chemistry():
+    """The launcher interpreter has no RDKit, numpy or torch. Anything the app
+    imports at module scope must be importable without them."""
+    import ast
+    from pathlib import Path
+
+    app = (Path(__file__).resolve().parents[1]
+           / "modal_apps/pathwise_constraints_app.py")
+    tree = ast.parse(app.read_text())
+    top_level = [
+        node for node in tree.body
+        if isinstance(node, (ast.Import, ast.ImportFrom))
+    ]
+    names = []
+    for node in top_level:
+        if isinstance(node, ast.Import):
+            names += [alias.name for alias in node.names]
+        elif node.module:
+            names.append(node.module)
+    banned = {"rdkit", "torch", "numpy", "scipy"}
+    for name in names:
+        assert name.split(".")[0] not in banned, f"{name} imported at app scope"
+    # and the only compose_v4 module it may touch is the dependency-free one
+    compose = [n for n in names if n.startswith("compose_v4")]
+    assert compose == ["compose_v4.experiments"], compose
+
+
+def test_stage_names_have_a_single_source_of_truth():
+    from compose_v4.experiments import pathwise_arm_names
+
+    assert pathwise_arm_names.STAGE_A is STAGE_A
+    assert pathwise_arm_names.ALL_ARMS is ALL_ARMS
+
+
 def test_masking_costs_no_extra_kernel_calls():
     """A masked and an unconstrained arm visiting a state share one call."""
     calls: list[str] = []

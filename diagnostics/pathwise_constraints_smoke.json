@@ -1,0 +1,302 @@
+{
+  "schema": "compose.pathwise.smoke_analysis",
+  "status": "SMOKE_HELD_IN",
+  "held_out_opened": false,
+  "shards": 6,
+  "shards_void": 0,
+  "void_reasons": null,
+  "panel_sha256": "8b47a0e417dc1403863e2ec3b592cde50f942ebb1e5de81b560278e57e72fabd",
+  "arms": [
+    "endpoint_only",
+    "mask_only_sampling",
+    "pathwise_greedy",
+    "pathwise_stochastic",
+    "unconstrained_greedy"
+  ],
+  "gates": {
+    "G0_mask_integrity": {
+      "verdict": "PASS",
+      "kind": "BUG_DETECTOR_NOT_A_FINDING",
+      "leaks": null
+    },
+    "G1_constraint_non_vacuous": {
+      "verdict": "FAIL",
+      "unconstrained_any_violation": "2/6",
+      "unconstrained_endpoint_valid_path_invalid": "0/6",
+      "endpoint_only_selected_path_invalid": "0/6",
+      "endpoint_valid_rollouts_that_are_path_invalid": "0/19",
+      "threshold": 0.1,
+      "note": "this is the headline measurement: it is 0 whenever endpoint-only filtering is already sufficient",
+      "absorption": {
+        "rollouts_on_unconstrained_support": 42,
+        "broke_the_motif": 19,
+        "ended_motif_valid": 23,
+        "broke_AND_recovered_by_the_end": 0,
+        "recovery_rate": 0.0,
+        "interpretation": "recovery_rate 0 with a large `broke_the_motif` means motif destruction is ABSORBING at this horizon: endpoint validity implies path validity, so endpoint-only filtering is sufficient by dynamics rather than by luck"
+      }
+    },
+    "G2_mask_leaves_room_to_act": {
+      "verdict": "PASS",
+      "removed_fraction_along_unconstrained_states": {
+        "n": 42,
+        "mean": 0.2257,
+        "median": 0.055,
+        "min": 0.0,
+        "max": 0.9988
+      },
+      "removed_reference_mass_fraction": {
+        "n": 42,
+        "mean": 0.3444,
+        "median": 0.1908,
+        "min": 0.0,
+        "max": 1.0
+      },
+      "states_with_empty_masked_support": "0/42",
+      "thresholds": {
+        "vacuous_at_or_below": 0.02,
+        "infeasible_at_or_above": 0.95
+      }
+    },
+    "G3_feasible_paths_can_improve_the_objective": {
+      "verdict": "PASS",
+      "per_arm": {
+        "endpoint_only": {
+          "n": 6,
+          "mean": 2.3525,
+          "median": 3.1476,
+          "min": 0.0,
+          "max": 4.0776
+        },
+        "mask_only_sampling": {
+          "n": 6,
+          "mean": 0.6387,
+          "median": 0.7699,
+          "min": 0.0,
+          "max": 1.0239
+        },
+        "pathwise_greedy": {
+          "n": 6,
+          "mean": 3.0958,
+          "median": 3.4203,
+          "min": 1.7492,
+          "max": 3.8223
+        },
+        "pathwise_stochastic": {
+          "n": 6,
+          "mean": 3.0876,
+          "median": 3.1733,
+          "min": 1.8514,
+          "max": 4.0753
+        },
+        "unconstrained_greedy": {
+          "n": 6,
+          "mean": 3.1321,
+          "median": 3.5034,
+          "min": 1.7492,
+          "max": 3.8223
+        }
+      }
+    },
+    "G4_endpoint_only_and_pathwise_are_distinguishable": {
+      "verdict": "PASS",
+      "landings_differ": "6/6",
+      "distinct_landings_per_source": {
+        "n": 6,
+        "mean": 4.3333,
+        "median": 4.0,
+        "min": 4.0,
+        "max": 5.0
+      }
+    }
+  },
+  "price_of_the_guarantee": {
+    "comparison": "pathwise_stochastic minus endpoint_only, terminal worst margin",
+    "why_admissible": "identical rollout budget, identical policy; the mask is the only difference, so the sign is free",
+    "paired_delta": {
+      "n": 4,
+      "mean": 0.0119,
+      "median": -0.0019,
+      "min": -0.0367,
+      "max": 0.088
+    },
+    "denominator_note": "restricted to sources where endpoint_only returned anything at all; sources where it failed outright have no utility to pair"
+  },
+  "endpoint_only_return_failure": {
+    "question": "does endpoint-only handling fail to RETURN a motif-valid molecule where masking succeeds?",
+    "why_admissible": "free sign: endpoint_only could have matched the masked arms on every source. Nothing in the construction prevents it -- it fails only when its unconstrained policy spends the whole budget outside the feasible set",
+    "endpoint_only_selection_failed": 2,
+    "b_success_by_arm": {
+      "endpoint_only": "4/6",
+      "mask_only_sampling": "0/6",
+      "pathwise_greedy": "6/6",
+      "pathwise_stochastic": "6/6",
+      "unconstrained_greedy": "6/6"
+    },
+    "caveat": "6 sources; treat any count here as an existence proof, not a rate"
+  },
+  "planning_inside_the_mask": null,
+  "per_arm": {
+    "endpoint_only": {
+      "sources": 6,
+      "completed": 4,
+      "selection_failed": 2,
+      "b_success": 4,
+      "endpoint_motif_valid": 6,
+      "b_worst_margin": {
+        "n": 6,
+        "mean": -0.1661,
+        "median": 0.3392,
+        "min": -1.8284,
+        "max": 0.717
+      },
+      "improvement_over_source": {
+        "n": 6,
+        "mean": 2.3525,
+        "median": 3.1476,
+        "min": 0.0,
+        "max": 4.0776
+      },
+      "marginal_kernel_calls": {
+        "n": 6,
+        "mean": 13.3333,
+        "median": 15.0,
+        "min": 7.0,
+        "max": 17.0
+      },
+      "any_violation_DEFINITIONAL_IF_MASKED": 0
+    },
+    "mask_only_sampling": {
+      "sources": 6,
+      "completed": 6,
+      "selection_failed": 0,
+      "b_success": 0,
+      "endpoint_motif_valid": 6,
+      "b_worst_margin": {
+        "n": 6,
+        "mean": -1.88,
+        "median": -1.8076,
+        "min": -2.9799,
+        "max": -0.9873
+      },
+      "improvement_over_source": {
+        "n": 6,
+        "mean": 0.6387,
+        "median": 0.7699,
+        "min": 0.0,
+        "max": 1.0239
+      },
+      "marginal_kernel_calls": {
+        "n": 6,
+        "mean": 21.1667,
+        "median": 23.5,
+        "min": 8.0,
+        "max": 26.0
+      },
+      "any_violation_DEFINITIONAL_IF_MASKED": 0
+    },
+    "pathwise_greedy": {
+      "sources": 6,
+      "completed": 6,
+      "selection_failed": 0,
+      "b_success": 6,
+      "endpoint_motif_valid": 6,
+      "b_worst_margin": {
+        "n": 6,
+        "mean": 0.5772,
+        "median": 0.5696,
+        "min": 0.4136,
+        "max": 0.7149
+      },
+      "improvement_over_source": {
+        "n": 6,
+        "mean": 3.0958,
+        "median": 3.4203,
+        "min": 1.7492,
+        "max": 3.8223
+      },
+      "marginal_kernel_calls": {
+        "n": 6,
+        "mean": 0.8333,
+        "median": 0.0,
+        "min": 0.0,
+        "max": 3.0
+      },
+      "any_violation_DEFINITIONAL_IF_MASKED": 0
+    },
+    "pathwise_stochastic": {
+      "sources": 6,
+      "completed": 6,
+      "selection_failed": 0,
+      "b_success": 6,
+      "endpoint_motif_valid": 6,
+      "b_worst_margin": {
+        "n": 6,
+        "mean": 0.5689,
+        "median": 0.6427,
+        "min": 0.1931,
+        "max": 0.7155
+      },
+      "improvement_over_source": {
+        "n": 6,
+        "mean": 3.0876,
+        "median": 3.1733,
+        "min": 1.8514,
+        "max": 4.0753
+      },
+      "marginal_kernel_calls": {
+        "n": 6,
+        "mean": 8.6667,
+        "median": 10.0,
+        "min": 2.0,
+        "max": 16.0
+      },
+      "any_violation_DEFINITIONAL_IF_MASKED": 0
+    },
+    "unconstrained_greedy": {
+      "sources": 6,
+      "completed": 6,
+      "selection_failed": 0,
+      "b_success": 6,
+      "endpoint_motif_valid": 4,
+      "b_worst_margin": {
+        "n": 6,
+        "mean": 0.6134,
+        "median": 0.6622,
+        "min": 0.4136,
+        "max": 0.7149
+      },
+      "improvement_over_source": {
+        "n": 6,
+        "mean": 3.1321,
+        "median": 3.5034,
+        "min": 1.7492,
+        "max": 3.8223
+      },
+      "marginal_kernel_calls": {
+        "n": 6,
+        "mean": 6.0,
+        "median": 6.0,
+        "min": 6.0,
+        "max": 6.0
+      },
+      "any_violation_DEFINITIONAL_IF_MASKED": 2
+    }
+  },
+  "cost": {
+    "kernel_calls": {
+      "n": 6,
+      "mean": 51.0,
+      "median": 52.5,
+      "min": 43.0,
+      "max": 58.0
+    },
+    "seconds": {
+      "n": 6,
+      "mean": 852.6167,
+      "median": 831.95,
+      "min": 619.9,
+      "max": 1163.3
+    }
+  }
+}

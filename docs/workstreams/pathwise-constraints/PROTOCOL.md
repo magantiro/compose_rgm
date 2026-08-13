@@ -1,8 +1,20 @@
 # Workstream C — Pathwise Constraints: Protocol
 
-**Status:** `DESIGN_ONLY` (no Modal run has been launched)
+**Status:** `SMOKE_HELD_IN` — stage A executed, **G1 FAILED**, lane stopped
 **Branch:** `codex/compose-pathwise-constraints`
 **Held-out data opened:** NO
+
+> **OUTCOME (2026-08-12).** The premise gate failed. Of 42 rollouts on the
+> unconstrained support, 19 broke the protected motif and **0 recovered**;
+> `endpoint_valid_path_invalid` was **0/6** sources and **0/19** endpoint-valid
+> rollouts against a preregistered 0.10 threshold. Motif destruction is
+> absorbing at H = 6, so endpoint validity implies path validity and
+> endpoint-only filtering is sufficient here.
+>
+> **The protocol below was NOT modified after seeing that result.** The motif
+> rule, horizon, label semantics and panel are exactly as frozen before the
+> run. See `DECISION_LOG.md` for the explicit list of tuning moves considered
+> and rejected. Full numbers in `HANDOFF.md`.
 
 ---
 
@@ -262,10 +274,33 @@ its legal support largely preserves ring systems — not a prompt to re-roll.
 
 ## Known instrument risks and their detectors
 
-| Risk | Detector |
-|---|---|
-| Local RDKit (2025.09.6) perceives aromaticity differently from the Modal image (2024.3.5), silently widening or narrowing the protected pattern | the app re-derives the motif from the canonical start key and voids the shard if the geometry disagrees with the frozen panel |
-| Canonicalisation moves the source out of its own motif | `preserves_motif(smarts, start_key)` asserted before any arm runs |
-| The mask leaks | G0, checked on every masked arm's realised trajectory |
-| An arm is truncated mid-run by the cost cap | the cap is checked **between** arms only, so an arm is complete or absent |
-| Two panel sources carry unusual valences (`[PH]`, `[SH4]`) | they came from the training corpus under an outcome-independent rule and are **not** removed; flagged as a limitation |
+| Risk | Detector | Outcome on the stage-A run |
+|---|---|---|
+| Local RDKit (2025.09.6) perceives aromaticity differently from the Modal image (2024.3.5), silently widening or narrowing the protected pattern | the app re-derives the motif from the canonical start key and voids the shard if the geometry disagrees with the frozen panel | **PASS on 6/6** — no drift |
+| Canonicalisation moves the source out of its own motif | `preserves_motif(smarts, start_key)` asserted before any arm runs | PASS on 6/6 |
+| The mask leaks | G0, checked on every masked arm's realised trajectory | **PASS — 0 leaks** |
+| An arm is truncated mid-run by the cost cap | the cap is checked **between** arms only, so an arm is complete or absent | never approached (max 58 of 360) |
+| The app cannot be launched because `modal run` uses an interpreter without RDKit | two AST tests forbid chemistry imports at app module scope | caught before any spend; fixed |
+| Two panel sources carry unusual valences (`[PH]`, `[SH4]`) | not removed — outcome-independent rule | source 5 (`[SH4]`) is one of the two violators |
+
+---
+
+## External comparator evidence (from the baseline-qualification lane)
+
+**GraphXForm's action masking is genuinely pathwise, but only over valence,
+atom type, atom count and bonding legality. Its ring-size and bonding-pattern
+constraints are a TERMINAL filter
+(`molecule_evaluator.py::infeasible_by_special_constraints`, asserted on
+`mol.synthesis_done`), and there is no SMARTS or substructure matching anywhere
+in that repository.**
+
+The strongest published graph-editing comparator therefore instantiates this
+lane's `endpoint_only` arm, not its pathwise arm. COMPOSE's capability is real
+and unmatched.
+
+**This raises the importance of G1 rather than lowering it.** With G1 failing,
+the capability distinction is **academic in this regime**: if trajectories that
+break the motif never come back, neither COMPOSE's pathwise mask nor
+GraphXForm's terminal filter changes the returned molecule. The honest framing
+separates *capability* (COMPOSE has it, GraphXForm does not) from *consequence*
+(on this panel at this horizon, it does not change the answer).

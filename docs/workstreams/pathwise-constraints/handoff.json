@@ -7,9 +7,9 @@
   "head_commit": "3abe0fdc3e2fd616766862774665c553ca2ee9fc",
   "head_commit_note": "the commit that introduced this workstream; handoff.json itself is amended into it",
   "working_tree_clean": true,
-  "status": "DESIGN_ONLY",
+  "status": "SMOKE_HELD_IN",
   "held_out_opened": false,
-  "modal_runs_launched": 0,
+  "modal_runs_launched": 1,
   "question": "Can COMPOSE require an exact labeled structural motif at every committed state, and does that constraint actually bind, i.e. does endpoint-only filtering return molecules that reached validity through forbidden intermediates?",
   "frozen_inputs": {
     "held_in_pool": {
@@ -43,10 +43,25 @@
       "source": "modal_apps/retarget_intervention_app.py",
       "potency_threshold": 0.5,
       "qed_floor": 0.6,
-      "logp_box": [1.0, 4.0]
+      "logp_box": [
+        1.0,
+        4.0
+      ]
     }
   },
   "artifacts": [
+    {
+      "path": "diagnostics/pathwise_constraints_smoke.json",
+      "status": "SMOKE_HELD_IN",
+      "sha256": "435e45e78a7b2a17be3b9462135d62f13433fa05005abb5c5dab896baf4a07cb",
+      "purpose": "stage A gate verdicts"
+    },
+    {
+      "path": "diagnostics/pathwise_constraints_smoke_stageA_shards/",
+      "status": "SMOKE_HELD_IN",
+      "files": 6,
+      "purpose": "raw per-source shards; aggregate reconstructible with no Modal access"
+    },
     {
       "path": "configs/pathwise_constraints_protocol_v1.json",
       "status": "DESIGN_ONLY",
@@ -75,19 +90,25 @@
     {
       "path": "src/compose_v4/experiments/pathwise_arms.py",
       "status": "DESIGN_ONLY",
-      "sha256": "d6eb1a8b454ad8ac11b4a656fdc719d1666008126671c74ae8c46c77fe278faa",
+      "sha256": "3640787bb3f4fc33ed8ff27e1a72bf81ac4825d0da5382eddc84b9b758edfa6f",
       "purpose": "all seven arm policies as pure functions"
     },
     {
       "path": "modal_apps/pathwise_constraints_app.py",
       "status": "DESIGN_ONLY",
-      "sha256": "0d27f0e85bce58ba5a8dba010e9754fb9ed40d4b1c3b479b2fb90d855ea71e8c",
+      "sha256": "5869f8b063a327553668d0d35ed1994ce340040f5d336b321285c3a173a2a39d",
       "purpose": "CPU-only runner with durable per-source shards"
     },
     {
       "path": "scripts/analyse_pathwise_constraints.py",
       "status": "DESIGN_ONLY",
       "purpose": "shard aggregation and gate verdicts"
+    },
+    {
+      "path": "src/compose_v4/experiments/pathwise_arm_names.py",
+      "status": "SMOKE_HELD_IN",
+      "sha256": "4d09aeab948a9af6c32e721cea3e3bce70a8b6f0fda810c045cc2b48a2561629",
+      "purpose": "dependency-free arm names; keeps the modal launcher RDKit-free"
     }
   ],
   "motif_rule": {
@@ -103,11 +124,14 @@
       "pathwise_stochastic",
       "mask_only_sampling"
     ],
-    "stage_B": ["unconstrained_verified", "pathwise_verified"]
+    "stage_B": [
+      "unconstrained_verified",
+      "pathwise_verified"
+    ]
   },
   "tests": {
     "command": "python3 -m pytest tests/test_pathwise_constraint.py tests/test_pathwise_arms.py tests/test_pathwise_analysis.py -q",
-    "count": 64,
+    "count": 67,
     "result": "PASS",
     "key_negative_test": "tests/test_pathwise_analysis.py::test_analyser_FAILS_the_vacuity_gate_when_nothing_ever_violates"
   },
@@ -127,12 +151,12 @@
     "pathwise_verified_minus_pathwise_greedy": "sign guaranteed by policy improvement on utility AND binary success; only magnitude, top-1 disagreement, and headroom over the greedy-failure denominator are admissible"
   },
   "gate_status": {
-    "G0_mask_integrity": "NOT_ASSESSED",
-    "G1_constraint_non_vacuous": "INCONCLUSIVE_REQUIRES_STAGE_A",
-    "G2_mask_leaves_room_to_act": "INCONCLUSIVE_REQUIRES_STAGE_A",
-    "G3_feasible_paths_can_improve": "INCONCLUSIVE_REQUIRES_STAGE_A",
-    "G4_distinguishable": "INCONCLUSIVE_REQUIRES_STAGE_A",
-    "G5_planning_subclaim": "NOT_ASSESSED_STAGE_B"
+    "G0_mask_integrity": "PASS_BUG_DETECTOR_NOT_A_FINDING",
+    "G1_constraint_non_vacuous": "FAIL",
+    "G2_mask_leaves_room_to_act": "PASS",
+    "G3_feasible_paths_can_improve": "PASS",
+    "G4_distinguishable": "PASS",
+    "G5_planning_subclaim": "NOT_ASSESSED_STAGE_B_NOT_RUN"
   },
   "cost_model": {
     "fitted_from": [
@@ -150,11 +174,22 @@
       "sources": 6,
       "arms": 5,
       "estimated_kernel_calls_per_source": 85,
-      "estimated_kernel_calls_range": [65, 110],
+      "estimated_kernel_calls_range": [
+        65,
+        110
+      ],
       "estimated_container_hours": 2.5,
-      "estimated_container_hours_range": [1.9, 3.1],
+      "estimated_container_hours_range": [
+        1.9,
+        3.1
+      ],
       "estimated_wall_minutes": 30,
-      "resolves": ["G1", "G2", "G3", "G4"],
+      "resolves": [
+        "G1",
+        "G2",
+        "G3",
+        "G4"
+      ],
       "authorised": false
     },
     "stage_B": {
@@ -162,26 +197,84 @@
       "sources": 6,
       "arms": 2,
       "estimated_kernel_calls_per_source": 155,
-      "estimated_kernel_calls_range": [120, 200],
+      "estimated_kernel_calls_range": [
+        120,
+        200
+      ],
       "estimated_container_hours": 4.3,
-      "estimated_container_hours_range": [3.3, 5.4],
+      "estimated_container_hours_range": [
+        3.3,
+        5.4
+      ],
       "estimated_wall_minutes": 55,
-      "resolves": ["G5"],
+      "resolves": [
+        "G5"
+      ],
       "authorised": false,
       "precondition": "G1 PASS"
     },
     "per_source_kernel_call_budget": 360
   },
-  "recommended_next_action": "Authorise stage A only: 6 held-in sources, CPU only, ~2.5 container-hours, ~30 min wall. It resolves the vacuity gate G1, which decides whether this workstream has a claim at all.",
+  "recommended_next_action": "Accept the negative and stop this lane. The premise gate failed cleanly on a frozen protocol with the anti-tuning rule honoured. Fold the capability/consequence distinction into the paper's limitations or related-work framing and spend the remaining budget on lanes whose premise held.",
   "not_recommended": [
-    "stage B before G1 passes",
+    "stage B: unauthorised, and greedy is already at ceiling so headroom is 0 by definition",
+    "changing the motif rule, horizon, or panel and re-running",
     "opening any held-out panel",
-    "changing the motif rule if G1 fails",
-    "citing any number in this handoff as claim-bearing"
+    "reporting 'masked arms had zero violations' as a finding",
+    "promoting the secondary finding to the lane headline"
   ],
   "deviations_from_brief": [
     "eligibility drops 'kernel offers motif-destroying successors' (brief line 207) because it is the numerator of the vacuity gate",
     "two arms added beyond the brief's five to remove budget and controller confounds",
     "docs directory uses the hyphenated name per the lead's mission; all other paths use the underscored form"
-  ]
+  ],
+  "modal_app_id": "ap-QJiLH8rlpGNGySTMLjOMPH",
+  "modal_app_state_verified": "ephemeral (detached)",
+  "stage_b_run": false,
+  "headline_result": {
+    "gate": "G1_constraint_non_vacuous",
+    "verdict": "FAIL",
+    "statement": "motif destruction is ABSORBING under the frozen kernel at H=6: 19 of 42 unconstrained-support rollouts broke the protected motif and 0 recovered, so endpoint validity implies path validity and endpoint-only filtering is sufficient by dynamics, not luck",
+    "endpoint_valid_path_invalid_sources": "0/6",
+    "endpoint_valid_path_invalid_rollouts": "0/19",
+    "unconstrained_any_violation_sources": "2/6",
+    "threshold": 0.1,
+    "motif_rule_changed_after_failure": false,
+    "horizon_changed_after_failure": false,
+    "panel_changed_after_failure": false
+  },
+  "binary_headroom": {
+    "pathwise_greedy_b_success": "6/6",
+    "denominator_greedy_failures": 0,
+    "verdict": "CEILING_NOT_A_NULL",
+    "note": "greedy is already at ceiling, so any stage-B planning headroom would have been 0 BY DEFINITION"
+  },
+  "secondary_finding": {
+    "statement": "endpoint_only failed to RETURN anything on 2/6 sources (all rollouts ended motif-invalid) while the masked arms succeeded 6/6",
+    "sign": "free",
+    "caveat": "n=6 with 2 events; existence proof, not a rate",
+    "is_the_lane_headline": false,
+    "why_not": "different and weaker claim: absorption plus wasted budget, not excursion and return"
+  },
+  "price_of_the_guarantee": {
+    "paired_delta_mean": 0.0119,
+    "paired_delta_median": -0.0019,
+    "n": 4,
+    "note": "essentially free where endpoint_only returns anything at all"
+  },
+  "external_evidence": {
+    "source": "baseline-qualification lane",
+    "finding": "GraphXForm action masking is pathwise only over valence/atom type/atom count/bonding legality; ring-size and bonding-pattern constraints are a TERMINAL filter (molecule_evaluator.py::infeasible_by_special_constraints on mol.synthesis_done); no SMARTS or substructure matching in the repo",
+    "consequence": "the strongest published graph-editing comparator instantiates this lane's endpoint_only arm, so the capability gap is real; but with G1 failing the consequence of that gap is academic in this regime"
+  },
+  "cost_actual": {
+    "stage_A_container_hours": 1.4,
+    "kernel_calls_per_source_mean": 51.0,
+    "seconds_per_source_mean": 852.6,
+    "estimate_was": {
+      "container_hours": 2.5,
+      "kernel_calls_per_source": 85
+    },
+    "circuit_breaker_approached": false
+  }
 }

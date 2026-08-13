@@ -205,12 +205,163 @@ case the lead wants them unified.
 
 ---
 
-## 2026-08-12 — NO MODAL RUN LAUNCHED
+## 2026-08-12 — NO MODAL RUN LAUNCHED (superseded by the authorisation below)
 
 **Decision.** Stop at a costed plan and hand back for authorisation.
 
 **Evidence.** Explicit standing instruction from the lead: build everything,
 produce a costed smoke plan, report estimated container-hours, and wait.
 
-**State.** Zero Modal invocations. Every artifact in this lane is
-`DESIGN_ONLY` or a local source-only census.
+**State at the time.** Zero Modal invocations.
+
+---
+
+## 2026-08-12 — Launch-time RDKit dependency removed from the app module
+
+**Decision.** Move the arm names and stage partition into a dependency-free
+`src/compose_v4/experiments/pathwise_arm_names.py`, imported by both the app
+and `pathwise_arms.py`.
+
+**Evidence before the decision.** The first launch attempt died locally with
+`ModuleNotFoundError: No module named 'rdkit'`. `modal run` imports the app in
+the LAUNCHER's interpreter (`/Users/rmaganti/.local/pipx/venvs/modal/bin/python`),
+which has no chemistry stack; the app's module-scope
+`from compose_v4.experiments import pathwise_arms` pulled RDKit in transitively
+just to read five strings. **No Modal resources were consumed** — the failure
+was local, before dispatch.
+
+**Alternatives rejected.** Installing RDKit into the modal CLI venv — fixes one
+machine, not the pattern. Restating the tuples in the app — silent drift
+between the app and the tests.
+
+**Verification.** The app now imports cleanly under the exact interpreter that
+failed, with RDKit confirmed absent. Two new tests pin it:
+`test_arm_names_module_is_dependency_free` (AST: the names module imports
+nothing) and `test_app_module_scope_touches_no_chemistry` (AST: no rdkit /
+torch / numpy / scipy at app module scope).
+
+**Note.** The entrypoint already read a committed JSON panel rather than
+computing molecules at launch, which is the pattern the main lane recommends;
+the defect was narrower than that and is now closed.
+
+**Frozen object touched.** None.
+
+---
+
+## 2026-08-12 — Resume-by-shard filtering placed in the on-Modal driver
+
+**Decision.** `drive()` reloads the volume, skips indices whose shard already
+exists, and reports what it skipped.
+
+**Evidence before the decision.** Main lane lost work to a client-side DNS
+failure at launch and warned that `--detach` is necessary but not sufficient.
+Filtering inside `run_source` would make a resume pay a container start plus a
+full checkpoint load per already-finished task — the expensive half — just to
+discover it had nothing to do.
+
+**Frozen object touched.** None.
+
+---
+
+## 2026-08-12 — STAGE A RUN, AUTHORISED AND EXECUTED
+
+**Decision.** Launch stage A only: 6 held-in sources, 5 cheap arms, CPU only,
+`modal run --detach`.
+
+**Evidence before the decision.** Explicit authorisation from main lane after
+review of PROTOCOL → DECISION_LOG → handoff.json → results, with stage B
+withheld pending the G1 result.
+
+**Execution.** App `ap-QJiLH8rlpGNGySTMLjOMPH`, verified `ephemeral (detached)`
+in `modal app list` before proceeding. All 6 shards committed to the volume.
+One container was preempted mid-run and Modal restarted it with the same
+input; the shard landed normally. Actual cost **51 kernel calls / source**
+(estimate 85) and **853 s / source** (estimate ~1 475), ≈ **1.4
+container-hours** against a 2.5 h estimate. The 360-call circuit breaker was
+never approached.
+
+**Frozen object touched.** None. `R_theta`, kernel, operators, goal language
+all unmodified.
+
+---
+
+## 2026-08-12 — G1 FAILED. Motif rule NOT changed. Lane stopped.
+
+**Decision.** Record the failure, stop the lane, and change nothing.
+
+**Evidence.** `diagnostics/pathwise_constraints_smoke.json`:
+
+- `endpoint_valid_path_invalid` = **0/6** sources, **0/19** endpoint-valid
+  rollouts. Preregistered threshold 0.10. **FAIL.**
+- Absorption: of **42** rollouts on the unconstrained support, **19 broke** the
+  protected motif and **0 recovered** by the end. Recovery rate **0.0**.
+
+**Interpretation.** Motif destruction is *absorbing* under the frozen kernel at
+H = 6. The operators can open a labeled ring system but effectively cannot
+reconstruct one within the horizon. Endpoint validity therefore **implies**
+path validity, which makes endpoint-only filtering sufficient as a matter of
+dynamics rather than luck. The premise the lane rests on — that endpoint-only
+handling returns molecules which traversed forbidden intermediates — is
+empirically false in this regime.
+
+**Alternatives rejected, explicitly and per the pre-committed anti-tuning
+rule.** Enlarging the horizon; loosening the motif to a smaller or more
+permissive pattern; switching to a different ring system; relaxing the label
+semantics; re-drawing the panel. Every one of these would be searching for a
+motif that makes the desired arm win. The protocol names this and forbids it,
+and main lane reconfirmed it at authorisation.
+
+**What this does NOT show.** That pathwise masking is useless in general — only
+that at H = 6, on this panel, under this kernel, it changes nothing that
+endpoint filtering would have caught. A kernel with reversible ring
+open/close, or a longer horizon, could give a different answer. That is a
+future question, not a repair to this run.
+
+**Frozen object touched.** None.
+
+---
+
+## 2026-08-12 — The one positive finding, and why it is reported separately
+
+**Decision.** Report "`endpoint_only` failed to return anything on 2/6 sources
+while the masked arms succeeded 6/6" as a *distinct and weaker* claim, not as a
+rescue of G1.
+
+**Evidence.** `endpoint_only` `selection_failed` on sources 1 and 3: all 6 of
+its rollouts ended motif-invalid, so the filter had nothing to select.
+`pathwise_greedy` and `pathwise_stochastic` both reached `b_success` 6/6.
+
+**Why it is admissible.** Free sign — nothing in the construction forced those
+failures; `endpoint_only` could have matched the masked arms everywhere.
+
+**Why it is not the lane's claim.** The designed claim was *excursion and
+return*. This is *absorption plus wasted budget*: endpoint-only handling spends
+its whole allowance outside the feasible set and returns nothing. Real, but
+different and weaker. With 6 sources and 2 events it is an existence proof, not
+a rate.
+
+**Frozen object touched.** None.
+
+---
+
+## 2026-08-12 — External evidence folded in: GraphXForm is an endpoint-only comparator
+
+**Decision.** Record the baseline lane's finding in `PROTOCOL.md` and
+`HANDOFF.md` as context that raises, not lowers, the importance of G1.
+
+**Evidence, from the baseline-qualification lane.** GraphXForm's action masking
+is genuinely pathwise but covers only valence, atom type, atom count and
+bonding legality. Its ring-size and bonding-pattern constraints are a
+**terminal** filter (`molecule_evaluator.py::infeasible_by_special_constraints`,
+asserted on `mol.synthesis_done`), and there is no SMARTS or substructure
+matching anywhere in that repository.
+
+**Consequence.** The strongest published graph-editing comparator instantiates
+this lane's `endpoint_only` arm, not its pathwise arm. That makes the *design*
+question well-posed and well-motivated. But it also means that with G1 failing,
+the distinction between the two approaches is **academic in this regime**: if
+unconstrained trajectories that break the motif never come back, then neither
+COMPOSE's mask nor GraphXForm's terminal filter changes the returned molecule.
+The comparator finding strengthens the framing and does not soften the gate.
+
+**Frozen object touched.** None.

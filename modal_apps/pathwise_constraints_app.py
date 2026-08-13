@@ -84,7 +84,7 @@ from typing import Any
 
 import modal
 
-from compose_v4.experiments import pathwise_arms as _arms
+from compose_v4.experiments import pathwise_arm_names as _names
 from modal_apps.run_process_v2_p50_app import (
     ARTIFACT_ROOT,
     REMOTE_ROOT,
@@ -139,11 +139,14 @@ POTENCY_THRESHOLD = 0.5
 QED_FLOOR = 0.6
 LOGP_BOX = (1.0, 4.0)
 
-#: Single source of truth, shared with the local test suite. Importing rather
-#: than restating them means the app and the tests cannot drift apart.
-STAGE_A = _arms.STAGE_A
-STAGE_B = _arms.STAGE_B
-ALL_ARMS = _arms.ALL_ARMS
+#: Single source of truth, shared with the local test suite. Imported from the
+#: DEPENDENCY-FREE names module rather than from `pathwise_arms`, because
+#: `modal run` imports this file in the LAUNCHER's interpreter, which has no
+#: RDKit. Nothing at module scope here may touch the chemistry stack; the arm
+#: BUILDERS are imported inside `run_source`, which runs in the image.
+STAGE_A = _names.STAGE_A
+STAGE_B = _names.STAGE_B
+ALL_ARMS = _names.ALL_ARMS
 
 
 def _runtime():
@@ -448,20 +451,66 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
 
 @app.function(image=image, cpu=0.25, memory=2048, timeout=10 * 60 * 60,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
-def drive(tasks: list[dict[str, Any]]) -> int:
-    """Fan out ON MODAL so a client disconnect cannot stall the run."""
-    done = 0
-    for _ in run_source.map(tasks, order_outputs=False, return_exceptions=True,
-                            wrap_returned_exceptions=False):
+def drive(tasks: list[dict[str, Any]], force: bool = False) -> dict[str, Any]:
+    """Fan out ON MODAL so a client disconnect cannot stall the run.
+
+    RESUME. Already-committed shards are filtered out HERE, in the driver,
+    where the volume is already mounted. Doing it inside `run_source` would
+    make a resume pay a container start plus a full checkpoint load for every
+    task that was already finished -- the expensive half of the work -- just to
+    discover it had nothing to do.
+
+    `drive` itself must still be launched under `modal run --detach`: a
+    server-side fan-out stops `.map()` stalling when the client stops
+    iterating, but only `--detach` stops the whole app being torn down when the
+    client disconnects.
+    """
+    artifact_volume.reload()
+    pending, skipped = [], []
+    for task in tasks:
+        shard = (Path(RUN_ROOT) / task.get("out_dir", "pathwise_constraints_smoke")
+                 / f"{task['index']:03d}.json")
+        if not force and shard.exists():
+            try:
+                status = json.loads(shard.read_text()).get("status")
+            except Exception:  # noqa: BLE001
+                status = None
+            if status:
+                skipped.append({"index": task["index"], "status": status})
+                continue
+        pending.append(task)
+
+    if skipped:
+        print(f"RESUME: skipping {len(skipped)} committed shards "
+              f"{[s['index'] for s in skipped]}", flush=True)
+    print(f"dispatching {len(pending)} of {len(tasks)} tasks", flush=True)
+
+    done, failed = 0, []
+    for task, result in zip(
+            pending,
+            run_source.map(pending, order_outputs=True, return_exceptions=True,
+                           wrap_returned_exceptions=False),
+            strict=True):
+        if isinstance(result, BaseException):
+            failed.append({"index": task["index"], "error": repr(result)})
+            print(f"[{task['index']:03d}] FAILED {result!r}", flush=True)
+            continue
         done += 1
-    return done
+    artifact_volume.commit()
+    return {"completed": done, "skipped": skipped, "failed": failed,
+            "dispatched": len(pending)}
 
 
 @app.local_entrypoint()
-def main(stage: str = "A", sources: int = 6) -> None:
+def main(stage: str = "A", sources: int = 6, force: bool = False) -> None:
     """stage A = the five cheap arms and the vacuity gate.
     stage B = add the two lookahead arms. Only worth paying for if A passes.
-    stage AB = everything in one pass."""
+    stage AB = everything in one pass.
+
+    LAUNCH WITH `modal run --detach`. Without it the app stays `ephemeral` and
+    is torn down when the local process disconnects, taking the run with it.
+    Verify `modal app list` shows `ephemeral (detached)` before walking away.
+    """
     panel_path = ROOT / "diagnostics/pathwise_constraints_smoke_panel.json"
     panel = json.loads(panel_path.read_text())
     digest = hashlib.sha256(
@@ -482,4 +531,5 @@ def main(stage: str = "A", sources: int = 6) -> None:
     print(f"horizon {HORIZON}, goal {GOAL}, rollouts {ROLLOUTS}, "
           f"shortlist {SHORTLIST}")
     print("HELD-OUT: not opened. Pool is training_source_keys only.")
-    print(f"completed {drive.remote(tasks)}")
+    print(f"per-source kernel-call budget {KERNEL_CALL_BUDGET}; CPU only.")
+    print(json.dumps(drive.remote(tasks, force), indent=2))
