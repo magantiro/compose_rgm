@@ -806,3 +806,45 @@ whole curve, not its maximum.
 The same applies to comparisons defined by a resource: report **fraction of
 quality retained against fraction of resource spent**, which is a curve with a
 meaning, rather than a single ratio at a chosen point.
+
+---
+
+# Interpretation rule: pointwise improvement is not set-level improvement
+
+**A guarantee on each element of a set does not transfer to a property of the
+set.** Check which one your metric measures before deciding whether its sign is
+fixed.
+
+Concretely, and the reason this rule exists:
+
+- In **exact-target recovery**, verified control's advantage over greedy IS
+  sign-fixed. Greedy's action is always in the candidate set and strict
+  improvement never commits a lower `V_G`, so the landing value cannot be worse.
+  That comparison was correctly barred as a claim.
+- In **Pareto control**, verified control guarantees the scalarized continuation
+  value *for each requested preference* — but hypervolume is a property of the
+  **endpoint set**. Five individually better points can enclose less dominated
+  area than five worse but better-spread ones. So `HV_verified − HV_greedy` has
+  a genuine falsifying range and **is** a valid comparison.
+
+Measured: source 000 returned verified HV **below** greedy (1.0060 vs 1.0074)
+while per-preference values improved.
+
+**Do not bar a comparison by analogy.** The two cases look identical and are
+not. Report the two questions separately — per-preference scalarized improvement,
+and set-level frontier quality — and treat disagreement between them as a
+finding rather than an error: it distinguishes optimising trajectories
+individually from constructing a complementary set.
+
+# Interpretation rule: a normalizer is not a bound
+
+A scale frozen from data (a p99, an IQR, a held-in quantile) **normalizes**; it
+does not **cap**. Values may legitimately exceed it.
+
+Held-in-scaled hypervolume can exceed 1 because `z*` is the held-in p99, not an
+attainable utopia. The fix when this is discovered is to **correct the prose**,
+never to clip the metric — clipping suppresses exactly the signal the excess
+carries and hides ceiling effects. Report exceedance descriptively; do not
+introduce a robust or clipped variant after seeing a result.
+
+Ratios built on the same normalizer are unaffected, since the constant cancels.
