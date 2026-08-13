@@ -721,3 +721,55 @@ way: recompute digests by test, and require every capability cell to name a
 paper section, a file and line, or a commit.
 
 This is the whole rule. Do not build further process around it.
+
+---
+
+# Project-wide rule: every efficiency claim must name its resource axis
+
+**A reduction in complete molecular trajectories does not imply a reduction in
+oracle evaluations or in kernel calls. Never write "sample efficient" without
+saying which sample.**
+
+Three distinct axes, never substituted:
+
+| axis | quantity | scope |
+|---|---|---|
+| **trajectory efficiency** | HV vs complete molecular trajectories | COMPOSE-internal ONLY |
+| **process-compute efficiency** | HV vs kernel / reference-process calls | COMPOSE-internal |
+| **oracle efficiency** | HV vs `oracle_requests` and unique valid evaluations | **the common currency for external comparison** |
+
+Trajectories are not a shared object — HN-GFN, GraphXForm and GraphGA do not
+have one — so external methods are never plotted on that axis.
+
+**Why this rule exists, measured before the results were opened.** In the Pareto
+smoke, `greedy_pref` spends **6,400–15,620** native oracle calls at **13–23**
+kernel calls, while kernel-matched `gen_rank@greedy` spends **1–4**. That is a
+roughly **3,000×** gap in oracle demand at matched kernel budget. So both of
+these can be simultaneously true:
+
+> COMPOSE covers the Pareto front with far fewer molecular trajectories.
+> COMPOSE covers the Pareto front with *more* oracle evaluations.
+
+The internal result table must therefore carry all of it per arm — final HV,
+HV-AUC, trajectories, kernel calls, oracle requests — so a universal efficiency
+win cannot be claimed by selecting an axis.
+
+"Explicit control is trajectory-efficient but oracle-intensive" is a legitimate
+and informative outcome, not a failure. It would also identify the single
+follow-up worth doing — goal-aware allocation of expensive computation, which
+is the role the exact-target work already established for prioritisation. That
+follow-up is justified ONLY if the completed experiment shows the preference
+capability is real, exhaustive scoring is materially oracle-inefficient, and
+reducing it is necessary for the claim.
+
+# Project-wide rule: every new metric needs an adversarial fixture
+
+**Knowing the anti-tautology rule is not sufficient.** Seven statistics with
+signs fixed by construction have now been caught here, and the seventh appeared
+in *new* code written by an agent who had already internalised the rule — a
+potency-watch statistic using `argmin`, which always returns something and so
+could never report "neither axis dominates".
+
+So: every new analysis metric ships with a fixture in which its intended
+conclusion is **false**, and a test asserting the metric says so. This is the
+whole rule; do not build more process around it.
