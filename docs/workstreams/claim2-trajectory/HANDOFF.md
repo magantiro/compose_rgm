@@ -80,8 +80,46 @@
 
 # Results
 
-**None.** No trajectory exists. The only measured quantities are calibration
-facts, and they are `DESIGN_ONLY`:
+**`DEVELOPMENT`** — held-in only. The matched reserve was never opened.
+264 trajectories: an 8-source instrument smoke plus a 36-source development run.
+
+## The central causal question
+
+| Metric | Value | Denominator |
+|---|---:|---|
+| corpus mutual-edge fraction | **0.7333** | 144,870 distinct directed teacher transitions |
+| mutual pairs | 53,118 | of 151,059 teacher transitions |
+| preregistered `inherited` threshold | 0.33 | frozen at `5c81818` before the census |
+| **verdict** | **`inherited_reversibility`** | not near the line |
+
+## 36-source frontier (paired over sources)
+
+| Metric | `r_theta` | `uniform_canonical` | `empirical_family` |
+|---|---:|---:|---:|
+| mobility (endpoint Tanimoto distance) | 0.5515 | **0.7755** | 0.7635 |
+| fidelity (envelope retention) | **0.9676** | 0.8310 | 0.9213 |
+| net edits of 6 | 4.25 | 5.97 | 5.81 |
+| cancelled fraction | 29.2% | 0.5% | 3.2% |
+| immediate two-cycles / trajectory | 0.90 | 0.01 | 0.08 |
+| longer revisits / trajectory | 0.26 | 0.00 | 0.01 |
+| displacement per net edit | 0.1477 | 0.1286 | 0.1351 |
+| reverse-edge probability | **0.1630** | 0.0242 | 0.0535 |
+| families committed | 8/8 | 8/8 | 8/8 |
+
+| Comparison | mobility | fidelity | verdict |
+|---|---|---|---|
+| vs `uniform_canonical` | −0.2439 [−0.3085, −0.1762] resolved | +0.1366 [+0.0718, +0.2199] resolved | **`incomparable`** |
+| vs `empirical_family` | −0.2457 [−0.3093, −0.1819] resolved | +0.0463 [+0.0046, +0.0972] resolved | **`incomparable`** |
+
+## Reversal by operator family (`r_theta`)
+
+`cycle_attach` 0.43 (21) · `ring_system_restate` 0.33 (48) · `bond_reorder`
+0.23 (48) · `atom_insert` 0.17 (65) · `atom_restate` 0.14 (66) · `bond_reroute`
+0.09 (74) · `cycle_insert` 0.03 (34) · `atom_delete` 0.01 (76).
+
+The cycling concentrates where the operator algebra makes undoing cheapest.
+
+## Calibration facts (`DESIGN_ONLY`)
 
 | Metric | Arm / condition | Value | Uncertainty / denominator |
 |---|---|---:|---|
@@ -241,18 +279,41 @@ tests/test_claim2_transport_laws.py
 **No existing file was modified.** Everything is additive; `R_theta`, the
 kernel, the corpus and every other lane's code are untouched.
 
+# Decision-rule branch
+
+**KEEP AND REFRAME. Do not reopen `R_theta`.**
+
+`REOPEN` required **all three** of: cycling model-specific · worse on both net
+mobility and fidelity · controlled trajectories also cyclic. All three fail —
+the reversibility is inherited (0.7333), fidelity is resolvedly *better*, and
+controlled trajectories show zero cancellation.
+
+The reframing: `R_theta` is **learned local reference dynamics**, not
+goal-directed transport. It supplies plausible local molecular motion; control
+supplies purpose. That is the layer the paper's causal chain needs it to
+occupy.
+
+# Findings that did NOT replicate, recorded not buried
+
+| Finding | n=8 | n=36 | Status |
+|---|---|---|---|
+| displacement per net edit favours `r_theta` | 0.213 vs 0.120 / 0.131 | 0.148 vs 0.129 / 0.135 | **unresolved**, +0.0194 [−0.0051, +0.0459] |
+| `r_theta` cancelled fraction | 43.8% | 29.2% | — |
+
+The first was the most flattering number in the lane. It was carried as
+`diagnostic_only_axes` and never promoted into the verdict, which is why it did
+not become a claim. The 20-source floor earned its keep.
+
 # Recommended next action
 
 One bounded action:
 
-> Authorize the 8-source held-in smoke —
-> `modal run --detach modal_apps/claim2_trajectory_characterization_app.py --sources 8
-> --seeds 2 --horizon 6 --kernel-budget 40` — at an expected **1.5
-> container-hours** (worst case 3.8), CPU only. It resolves the three
-> `INCONCLUSIVE` gates above: whether the three arms genuinely diverge on real
-> molecular supports, whether this lane's kernel agrees with
-> `canonical_successor_result`, and the true per-enumeration cost that every
-> later estimate depends on.
+> Main-lane review of this handoff, and a decision on whether matched-reserve
+> confirmation (~27 container-hours) is warranted **given that the frontier
+> lands on `incomparable` rather than `dominates`**. Do not reopen `R_theta`:
+> its local reversibility is inherited from a reference process whose distinct
+> teacher transitions are 73.3% mutual, so the behaviour the smoke flagged is
+> faithful modelling rather than a defect.
 
 # Actions explicitly not recommended
 
