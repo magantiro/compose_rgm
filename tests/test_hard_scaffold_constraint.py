@@ -212,3 +212,70 @@ def test_acyclic_source_has_an_empty_protected_core() -> None:
     """An acyclic source is INELIGIBLE, not silently given a whole-molecule core."""
     mol = Chem.MolFromSmiles("CCCCCCO")
     assert len(_murcko_atom_indices(mol)) == 0
+
+
+# --------------------------------------------------------------------------
+# Provenance: every digest in handoff.json must recompute.
+#
+# "Agents fabricate provenance far more readily than they fabricate numbers...
+# a wrong number gets re-measured; a fake citation gets trusted." The
+# countermeasure is to keep the manifest machine-checkable.
+# --------------------------------------------------------------------------
+
+
+def _manifest():
+    import json
+    from pathlib import Path
+
+    path = Path(__file__).resolve().parents[1] / (
+        "docs/workstreams/constraints-hard/handoff.json"
+    )
+    if not path.is_file():
+        pytest.skip("handoff.json not present")
+    return Path(__file__).resolve().parents[1], json.loads(path.read_text())
+
+
+def test_handoff_manifest_digests_recompute() -> None:
+    import hashlib
+
+    root, manifest = _manifest()
+
+    recorded = dict(manifest["artifact_sha256"])
+    recorded.update(
+        {
+            manifest["frozen_input_paths"][key]: digest
+            for key, digest in manifest["frozen_input_sha256"].items()
+        }
+    )
+
+    mismatched: list[str] = []
+    for relative, digest in recorded.items():
+        path = root / relative
+        if not path.is_file():
+            mismatched.append(f"{relative}: MISSING on disk")
+            continue
+        actual = hashlib.sha256(path.read_bytes()).hexdigest()
+        if actual != digest:
+            mismatched.append(
+                f"{relative}: recorded {digest[:12]}, actual {actual[:12]}"
+            )
+
+    assert not mismatched, "handoff.json digests do not recompute:\n" + "\n".join(
+        mismatched
+    )
+
+
+def test_handoff_manifest_declares_no_claim_bearing_compute() -> None:
+    """The lane's operational constraints are asserted, not merely written down."""
+    _root, manifest = _manifest()
+
+    assert manifest["held_out_opened"] is False
+    assert manifest["claim_bearing_compute_run"] is False
+    assert manifest["modal_launched"] is False
+    assert manifest["gpu_used"] is False
+    assert manifest["external_dependencies_installed"] == []
+    assert manifest["identity_invariant_provable"] is False
+    assert (
+        manifest["executor_semantics_verdict"] == "LABELED_SUBGRAPH_PRESENCE_INVARIANT"
+    )
+    assert manifest["files_modified_belonging_to_other_lanes"] == []
