@@ -35,6 +35,8 @@ sys.path.insert(0, str(REPO / "scripts"))
 
 from compose_v4.experiments.pareto_control import (  # noqa: E402
     Scalarization,
+    is_sign_guaranteed,
+    preference_ordering,
     INTERNAL_METHOD_UNIVERSE,
     budget_to_ninety,
     check_method_universe,
@@ -51,25 +53,10 @@ from pareto_instrument_gate import (  # noqa: E402
     run_gate,
 )
 
-#: Statistics whose sign a theorem fixes -- keyed by (contrast, METRIC), never
-#: by contrast alone.
-#:
-#: POINTWISE POLICY IMPROVEMENT AND SET-LEVEL PARETO IMPROVEMENT ARE DIFFERENT
-#: CLAIMS. Verified control guarantees the scalarized continuation value FOR
-#: EACH requested preference. It does NOT guarantee that the five resulting
-#: endpoints enclose more dominated area AS A SET: a verified action can improve
-#: an individual preference while moving endpoints closer together and reducing
-#: complementary coverage, so five individually better points can enclose less
-#: area than five worse but better-spread ones.
-#:
-#: An earlier version of this file keyed the registry on the contrast alone,
-#: which silently marked HV_verified - HV_greedy as sign-guaranteed and would
-#: have suppressed a scientifically valid comparison. Smoke source 000 returned
-#: verified 1.0060 against greedy 1.0074 -- verified LOWER -- which is the
-#: falsifying value that registry claimed could not exist.
-GUARANTEED_SIGN = {
-    ("verified_pref", "greedy_pref"): {"per_preference_scalarized_value"},
-}
+#: Sign guarantees come from the SHARED REGISTRY, keyed by (arm, base, METRIC).
+#: Every declaration there carries a written mathematical reason naming its
+#: estimand, and an adversarial metric on the same arm pair demonstrated to move
+#: the opposite way. See src/compose_v4/experiments/pareto_control.py.
 
 METRICS = ("normalized_hypervolume", "preference_coverage",
            "nondominated_set_size", "endpoint_diversity")
@@ -188,8 +175,7 @@ def main() -> int:
             b = per_source_metric(rows, contrast.base, metric)
             shared = sorted(set(a) & set(b))
             boot = source_paired_bootstrap([a[s] - b[s] for s in shared])
-            guaranteed = metric in GUARANTEED_SIGN.get(
-                (contrast.arm, contrast.base), set())
+            guaranteed = is_sign_guaranteed(contrast.arm, contrast.base, metric)
             if guaranteed:
                 boot["sign_is_guaranteed"] = True
                 boot["pvalue_NOT_REPORTED"] = (
@@ -202,6 +188,44 @@ def main() -> int:
         print(f"  {contrast.name:<34} HV {hv['mean']:>+8.4f} "
               f"[{hv['ci95_low']:>+7.4f}, {hv['ci95_high']:>+7.4f}]  "
               f"{hv['wins']}W/{hv['losses']}L/{hv['ties']}T{flag}")
+
+    # === HIERARCHY ITEM 1 -- PREFERENCE RESPONSIVENESS, reported FIRST ======
+    # Deliberately ahead of hypervolume. High HV with all five preferences
+    # landing in one region would not be preference control at all, and only the
+    # ORDERING test separates the two: five distinct SMILES arranged arbitrarily
+    # is a controller responding to something, but not to the preference.
+    prefs_h = rows[0].get("preferences", [0.1, 0.3, 0.5, 0.7, 0.9])
+    ordering: dict[str, Any] = {}
+    for arm in arms:
+        per = [preference_ordering(
+                   np.asarray(row["arms"][arm]["endpoint_z"], dtype=float), prefs_h)
+               for row in rows
+               if arm in row.get("arms", {}) and row["arms"][arm].get("endpoint_z")]
+        rhos = [o["spearman_rho"] for o in per if o["spearman_rho"] is not None]
+        adj = [o["correct_adjacent_fraction"] for o in per
+               if o["correct_adjacent_fraction"] is not None]
+        ordering[arm] = {
+            "n_sources": len(per),
+            "median_spearman_rho": float(np.median(rhos)) if rhos else None,
+            "mean_correct_adjacent_fraction": float(np.mean(adj)) if adj else None,
+            "monotone_fraction": float(np.mean(
+                [o["monotone_non_decreasing"] for o in per])) if per else None,
+            "mean_distinct_values": float(np.mean(
+                [o["distinct_values"] for o in per])) if per else None,
+            "preference_blind": arm == "unguided",
+        }
+
+    print("\n1. PREFERENCE RESPONSIVENESS -- ordered distinct regions, not just "
+          "different SMILES")
+    print(f"  {'arm':<20}{'rho(w, obj0)':>14}{'adj correct':>13}"
+          f"{'monotone':>10}{'distinct':>10}")
+    for arm in arms:
+        o = ordering[arm]
+        blind = "  (seeds, not preferences)" if o["preference_blind"] else ""
+        rho = "n/a" if o["median_spearman_rho"] is None else f"{o['median_spearman_rho']:+.3f}"
+        adj = "n/a" if o["mean_correct_adjacent_fraction"] is None else f"{o['mean_correct_adjacent_fraction']:.3f}"
+        print(f"  {arm:<20}{rho:>14}{adj:>13}"
+              f"{o['monotone_fraction']:>10.3f}{o['mean_distinct_values']:>10.2f}{blind}")
 
     # --- TWO SEPARATED QUESTIONS, and p99 exceedance -----------------------
     # PER-PREFERENCE: does verified control improve the registered scalarized
@@ -455,6 +479,16 @@ def main() -> int:
     payload = {
         "schema": "compose.pareto.control_analysis",
         "status": "SMOKE_HELD_IN",
+        "analysis_hierarchy": [
+            "1. preference responsiveness -- ordered, distinct regions",
+            "2. final HV and HV-AUC",
+            "3. verified vs greedy PER-PREFERENCE scalarized value "
+            "(magnitude only; sign guaranteed)",
+            "4. verified vs greedy SET-LEVEL HV, independent, two-sided",
+            "5. trajectory and oracle resource curves, separately, never "
+            "merged",
+        ],
+        "preference_responsiveness": ordering,
         "within_arm_contrasts": within,
         "two_separated_questions": two_questions,
         "p99_exceedance": exceedance,

@@ -759,3 +759,117 @@ def check_method_universe(fronts_by_method: dict[str, np.ndarray],
             f"universe deliberately, or fix the inputs -- do not let the union "
             f"drift.")
     return {"label": label, "members": sorted(want), "n_members": len(want)}
+
+
+# ---------------------------------------------------------------------------
+# GUARANTEED-SIGN REGISTRY
+#
+# A declaration is not admissible unless it carries BOTH:
+#   (a) a written mathematical reason, naming the ESTIMAND it applies to;
+#   (b) an ADVERSARIAL METRIC -- a neighbouring quantity on the SAME arm pair
+#       that lacks the guarantee and can move the opposite way.
+#
+# (b) exists because a green test must establish the SCOPE of a guarantee, not
+# merely perpetuate the declaration. This lane had a passing test that asserted
+# the suppression of a comparison instead of its boundary, so machinery built to
+# prevent sign-fixed claims was holding one in place.
+# ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class GuaranteedSign:
+    """One sign guarantee, scoped to a single estimand."""
+
+    estimand: str
+    reason: str
+    adversarial_metric: str
+    adversarial_reason: str
+
+    def __post_init__(self) -> None:
+        if not self.reason.strip():
+            raise ValueError(f"{self.estimand}: a guarantee needs a written reason")
+        if not self.adversarial_metric.strip():
+            raise ValueError(
+                f"{self.estimand}: a guarantee needs an adversarial metric -- a "
+                f"neighbouring quantity on the same arm pair that can move the "
+                f"opposite way. Without one the declaration cannot be scoped.")
+
+
+#: Keyed by (arm, base) -> {metric: GuaranteedSign}. Never by contrast alone.
+GUARANTEED_SIGN_REGISTRY: dict[tuple[str, str], dict[str, GuaranteedSign]] = {
+    ("verified_pref", "greedy_pref"): {
+        "per_preference_scalarized_value": GuaranteedSign(
+            estimand=("E[ s(greedy endpoint | w) - s(verified endpoint | w) ] "
+                      "for each requested preference w, separately"),
+            reason=(
+                "Policy improvement. At every decision the greedy action is a "
+                "member of the verified shortlist, and the strict-improvement "
+                "rule commits an alternative only when its greedy-continuation "
+                "value V_G is strictly better. By induction over the remaining "
+                "budget the committed landing value is therefore no worse than "
+                "greedy's for that same w. The guarantee is POINTWISE IN w and "
+                "says nothing about any function of the five endpoints jointly."),
+            adversarial_metric="set_level_hypervolume",
+            adversarial_reason=(
+                "Hypervolume is a function of the five endpoints AS A SET. A "
+                "verified action can improve an individual preference while "
+                "moving endpoints closer together and reducing complementary "
+                "coverage, so five individually better points can enclose LESS "
+                "dominated area than five worse but better-spread ones. Observed: "
+                "smoke source 000, verified better on all five preferences yet "
+                "HV 1.0060 against greedy 1.0074."),
+        ),
+    },
+}
+
+
+def is_sign_guaranteed(arm: str, base: str, metric: str) -> bool:
+    return metric in GUARANTEED_SIGN_REGISTRY.get((arm, base), {})
+
+
+# ---------------------------------------------------------------------------
+# Preference responsiveness -- ORDERING, not merely difference
+# ---------------------------------------------------------------------------
+
+def preference_ordering(endpoints_z: np.ndarray,
+                        preferences: Sequence[float]) -> dict[str, Any]:
+    """Do rising weights on objective 0 produce RISING objective-0 values?
+
+    Distinct SMILES are not preference control. Five endpoints could all differ
+    and still be arranged arbitrarily with respect to the requested tradeoff,
+    which would be a controller responding to *something* but not to the
+    preference. Ordering is what separates the two.
+
+    Reports Spearman rho between `w` and objective 0 across the endpoints, the
+    fraction of adjacent pairs that are correctly ordered, and whether the
+    sequence is monotone non-decreasing. Ties count as neither correct nor
+    incorrect adjacencies -- a collapsed arm should not score as well ordered.
+    """
+    z = np.atleast_2d(endpoints_z)
+    w = np.asarray(preferences, dtype=float)
+    ok = np.all(np.isfinite(z), axis=1)
+    z, w = z[ok], w[ok]
+    if len(z) < 2:
+        return {"spearman_rho": None, "correct_adjacent_fraction": None,
+                "monotone_non_decreasing": None, "n": int(len(z)),
+                "distinct_values": 0}
+
+    order = np.argsort(w, kind="stable")
+    values = z[order, 0]
+    diffs = np.diff(values)
+    strict = np.abs(diffs) > 1e-9
+    correct = float(np.mean(diffs[strict] > 0)) if strict.any() else 0.0
+
+    from scipy.stats import spearmanr
+    rho = spearmanr(w, z[:, 0]).statistic if len(set(values.tolist())) > 1 else 0.0
+
+    return {
+        "spearman_rho": float(rho),
+        "correct_adjacent_fraction": correct,
+        "n_strict_adjacencies": int(strict.sum()),
+        "monotone_non_decreasing": bool(np.all(diffs >= -1e-9)),
+        "distinct_values": int(len(set(np.round(values, 9).tolist()))),
+        "n": int(len(z)),
+        "note": ("ties are neither correct nor incorrect adjacencies, so an arm "
+                 "that collapses several preferences onto one endpoint cannot "
+                 "score as well ordered"),
+    }

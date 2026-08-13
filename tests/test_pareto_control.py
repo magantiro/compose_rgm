@@ -23,6 +23,10 @@ from compose_v4.experiments.pareto_control import (  # noqa: E402
     CostLedger,
     branch_from_common_prefix,
     ReferenceFrontError,
+    GUARANTEED_SIGN_REGISTRY,
+    GuaranteedSign,
+    is_sign_guaranteed,
+    preference_ordering,
     INTERNAL_METHOD_UNIVERSE,
     MethodUniverseError,
     budget_to_ninety,
@@ -641,3 +645,142 @@ def test_region_coverage_flags_a_degenerate_front_instead_of_scoring_it():
     out = preference_region_coverage(np.array([[5.0, 5.0]]), front)
     assert out["degenerate_front"] is True
     assert out["coverage"] == 0.0
+
+
+# ---------------------------------------------------------------------------
+# SMOKE SOURCE 000 -- the permanent regression case
+#
+# Real endpoints from the first completed held-in smoke source. Verified control
+# improved the scalarized value for EVERY requested preference while the
+# set-level hypervolume came out LOWER than greedy's. If a future refactor
+# starts suppressing that comparison again, these fail loudly.
+# ---------------------------------------------------------------------------
+
+SRC000_NADIR = np.array([-1.26891193, -1.35472576])
+SRC000_UTOPIA = np.array([2.73150485, 0.55541982])
+SRC000_W = (0.1, 0.3, 0.5, 0.7, 0.9)
+SRC000_GREEDY = np.array([[2.2626, 0.5925], [2.3472, 0.3812], [2.7389, 0.3673],
+                          [2.7389, 0.3673], [2.7389, 0.3673]])
+SRC000_VERIFIED = np.array([[2.7113, 0.5588], [2.6189, 0.5268], [2.6043, 0.5454],
+                            [2.7525, 0.3673], [2.7525, 0.3673]])
+
+
+def test_src000_verified_wins_every_per_preference_scalarized_value():
+    """The guaranteed half. Policy improvement is pointwise in w."""
+    sc = Scalarization(SRC000_UTOPIA)
+    for w, g, v in zip(SRC000_W, SRC000_GREEDY, SRC000_VERIFIED):
+        assert float(sc(v, w)[0]) <= float(sc(g, w)[0]) + 1e-9, f"w={w}"
+
+
+def test_src000_verified_LOSES_on_set_level_hypervolume():
+    """The falsifying half, and the whole point of the fixture.
+
+    Five individually better points enclosed LESS dominated area than five worse
+    but better-spread ones. A registry that marked this comparison sign-
+    guaranteed would be asserting that this observed value cannot exist.
+    """
+    hv_g = normalized_hypervolume(SRC000_GREEDY, SRC000_NADIR, SRC000_UTOPIA)
+    hv_v = normalized_hypervolume(SRC000_VERIFIED, SRC000_NADIR, SRC000_UTOPIA)
+    assert hv_g == pytest.approx(1.0074, abs=5e-4)
+    assert hv_v == pytest.approx(1.0060, abs=5e-4)
+    assert hv_v < hv_g
+
+
+def test_src000_forbids_suppressing_the_set_level_comparison():
+    """The loud failure a future refactor must trip over."""
+    assert not is_sign_guaranteed("verified_pref", "greedy_pref",
+                                  "normalized_hypervolume")
+    assert not is_sign_guaranteed("verified_pref", "greedy_pref",
+                                  "set_level_hypervolume")
+    assert is_sign_guaranteed("verified_pref", "greedy_pref",
+                              "per_preference_scalarized_value")
+
+
+def test_src000_also_exceeds_the_p99_scale_and_is_not_clipped():
+    """Both arms put endpoints past z*, which is why HV lands above 1. The
+    fixture pins that this is left alone."""
+    assert (SRC000_GREEDY > SRC000_UTOPIA[None, :]).any()
+    assert normalized_hypervolume(SRC000_GREEDY, SRC000_NADIR, SRC000_UTOPIA) > 1.0
+
+
+# ---------------------------------------------------------------------------
+# A guarantee must declare its SCOPE, not merely its existence
+# ---------------------------------------------------------------------------
+
+def test_every_guarantee_carries_a_written_reason_and_an_adversarial_metric():
+    assert GUARANTEED_SIGN_REGISTRY, "registry must not be empty"
+    for (arm, base), metrics in GUARANTEED_SIGN_REGISTRY.items():
+        for metric, decl in metrics.items():
+            assert decl.estimand.strip(), f"{arm} vs {base}: {metric}"
+            assert len(decl.reason.split()) >= 20, (
+                f"{arm} vs {base}: {metric} -- the reason must be a written "
+                f"mathematical argument, not a label")
+            assert decl.adversarial_metric.strip()
+            assert decl.adversarial_reason.strip()
+            # The adversarial metric must NOT itself be guaranteed on this pair.
+            assert decl.adversarial_metric not in metrics, (
+                f"{decl.adversarial_metric} cannot be both the adversarial "
+                f"example and a guaranteed metric on the same arm pair")
+
+
+def test_a_guarantee_without_an_adversarial_metric_is_rejected():
+    with pytest.raises(ValueError):
+        GuaranteedSign(estimand="x", reason="because " * 25,
+                       adversarial_metric="  ", adversarial_reason="y")
+
+
+def test_a_guarantee_without_a_reason_is_rejected():
+    with pytest.raises(ValueError):
+        GuaranteedSign(estimand="x", reason="   ",
+                       adversarial_metric="m", adversarial_reason="y")
+
+
+def test_the_declared_adversarial_metric_really_can_move_the_other_way():
+    """Not a claim in a docstring -- demonstrated on the registered fixture."""
+    decl = GUARANTEED_SIGN_REGISTRY[("verified_pref", "greedy_pref")][
+        "per_preference_scalarized_value"]
+    assert decl.adversarial_metric == "set_level_hypervolume"
+    hv_g = normalized_hypervolume(SRC000_GREEDY, SRC000_NADIR, SRC000_UTOPIA)
+    hv_v = normalized_hypervolume(SRC000_VERIFIED, SRC000_NADIR, SRC000_UTOPIA)
+    assert hv_v < hv_g, "the adversarial metric must be shown moving the other way"
+
+
+# ---------------------------------------------------------------------------
+# Preference responsiveness -- ORDERED regions, not merely different SMILES
+# ---------------------------------------------------------------------------
+
+def test_ordering_rewards_a_correctly_ordered_fan():
+    z = np.array([[1.0, 9.0], [3.0, 7.0], [5.0, 5.0], [7.0, 3.0], [9.0, 1.0]])
+    out = preference_ordering(z, (0.1, 0.3, 0.5, 0.7, 0.9))
+    assert out["spearman_rho"] == pytest.approx(1.0)
+    assert out["correct_adjacent_fraction"] == pytest.approx(1.0)
+    assert out["monotone_non_decreasing"] is True
+
+
+def test_ordering_punishes_distinct_but_UNORDERED_endpoints():
+    """Five different molecules arranged arbitrarily is a controller responding
+    to something, but not to the preference."""
+    z = np.array([[5.0, 5.0], [9.0, 1.0], [1.0, 9.0], [7.0, 3.0], [3.0, 7.0]])
+    out = preference_ordering(z, (0.1, 0.3, 0.5, 0.7, 0.9))
+    assert out["distinct_values"] == 5
+    assert out["correct_adjacent_fraction"] < 0.75
+    assert out["monotone_non_decreasing"] is False
+
+
+def test_ordering_does_not_credit_a_collapsed_arm():
+    """Ties are neither correct nor incorrect adjacencies, so collapse cannot
+    masquerade as perfect ordering."""
+    z = np.repeat(np.array([[5.0, 5.0]]), 5, axis=0)
+    out = preference_ordering(z, (0.1, 0.3, 0.5, 0.7, 0.9))
+    assert out["distinct_values"] == 1
+    assert out["correct_adjacent_fraction"] == pytest.approx(0.0)
+    assert out["n_strict_adjacencies"] == 0
+
+
+def test_src000_greedy_is_ordered_but_partially_collapsed():
+    """The real fixture: correctly ordered where it moves, collapsed at the
+    potency-heavy end -- which is the W4 watch item, visible in one source."""
+    out = preference_ordering(SRC000_GREEDY, SRC000_W)
+    assert out["monotone_non_decreasing"] is True
+    assert out["distinct_values"] == 3
+    assert out["n_strict_adjacencies"] == 2

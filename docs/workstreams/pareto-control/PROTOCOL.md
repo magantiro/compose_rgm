@@ -518,6 +518,48 @@ scalarized landing value follows from policy improvement, so only the
 **magnitude** of that difference is admissible, and it must be read against the
 scale of the total post-start movement.
 
+## 7.5 Analysis hierarchy when the run completes — in this order
+
+| # | question | note |
+|---|---|---|
+| **1** | **preference responsiveness** — do the five `w` produce **ordered, distinct regions**, not merely different SMILES? | **first, deliberately** |
+| 2 | final HV and HV-AUC | held-in-scaled |
+| 3 | verified vs greedy **per-preference** scalarized-value effect | magnitude only; sign guaranteed |
+| 4 | verified vs greedy **set-level** HV effect | **independent** empirical contrast, two-sided reading |
+| 5 | trajectory and oracle resource curves | **separately, never merged** |
+
+> **Why ordering comes first.** High HV with all five preferences landing in one
+> region **would not be preference control**. Five distinct molecules arranged
+> arbitrarily with respect to the requested tradeoff is a controller responding
+> to *something*, but not to the preference. Only the ordering test separates
+> the two, so it is reported before any hypervolume number.
+>
+> `preference_ordering()` reports Spearman `rho` between `w` and objective 0,
+> the fraction of correctly ordered adjacent pairs, and monotonicity. **Ties
+> count as neither correct nor incorrect**, so an arm that collapses several
+> preferences onto one endpoint cannot score as well ordered.
+
+## 7.6 What smoke source 000 does and does not show
+
+It **proves falsifiability** — the HV comparison *can* go against verified. It
+is now a permanent regression fixture: verified improved the scalarized value
+for **all five** preferences (mean +0.0329) while set-level HV came out
+**1.0060 against greedy's 1.0074**.
+
+It does **not** show verified is systematically worse for HV. **n = 1 of 12.**
+Direction is determined by the larger development experiment, and **this smoke
+does not settle it.**
+
+If the completed data do show better scalarized values with worse set HV, the
+plain reading is already fixed: **COMPOSE's controller operates per-trajectory
+and per-preference, not as a jointly archive-coordinated Pareto optimiser.**
+Individual endpoints improving while front spread shrinks is **not a bug in
+hypervolume and not necessarily a control failure**. It is reported as such, and
+**no archive-aware coupling is added to this paper to make verified win HV.**
+
+If verified improves **both**, that is a genuinely strong result *precisely
+because* the HV gain was demonstrably capable of going the other way.
+
 ## 8. Contrast parity table — every contrast varies exactly one dimension
 
 Parity is mandatory. A parity audit in the main lane found a contrast
@@ -561,7 +603,7 @@ data existed:
 |---|---|---|
 | **D1** | an action selected by `argmax V_G` then scored by `V_G` | the selection function and the scoring function of any reported advantage statistic must be distinct registered objects |
 | **D2** | a "verified" arm that was secretly greedy | the two arms' committed action sequences must differ on at least one source, else the run is `INVALID_INSTRUMENT` |
-| **D3** | a sign test against a null that a theorem makes false | statistics on the guaranteed-sign registry may report magnitude only; requesting a p-value for one is an error |
+| **D3** | a sign test against a null that a theorem makes false | the guaranteed-sign registry is keyed by **(arm, base, metric)**, never by contrast alone. Every declaration carries a **written mathematical reason naming its estimand** and an **adversarial metric on the same arm pair, demonstrated to move the opposite way**. A green test must establish a guarantee's **scope**, not perpetuate it. |
 | **D4** | a fabricated SHA-256 in a manifest | every hash in `handoff.json` is recomputed from the file on disk |
 | **D5** | the parity confound | every declared contrast must vary exactly one of {controller, start, budget, objective} |
 | **D6** | hypervolume inflated by generating more molecules | endpoint counts must be equal across the two arms of **every** HV contrast; compute parity is enforced only on the **one axis** a contrast claims (`kernel` ratio <= 1.25, or `native` gap <= 10%), and the unclaimed axis is reported |

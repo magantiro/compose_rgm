@@ -303,5 +303,26 @@
     },
     "disagreement_is_informative": "it distinguishes optimising five preference-conditioned trajectories individually from constructing a globally complementary Pareto set",
     "if_they_disagree": "report plainly that finite-horizon control optimises individual preference-conditioned trajectories without explicitly coordinating the archive; do NOT invent an archive-aware controller in this paper"
+  },
+  "analysis_hierarchy": [
+    "1. preference responsiveness -- ordered, distinct regions, not merely different SMILES",
+    "2. final HV and HV-AUC",
+    "3. verified vs greedy PER-PREFERENCE scalarized value (magnitude only; sign guaranteed)",
+    "4. verified vs greedy SET-LEVEL HV, independent empirical contrast, two-sided",
+    "5. trajectory and oracle resource curves, separately, never merged"
+  ],
+  "guaranteed_sign_declaration_requirements": {
+    "keyed_by": "(arm, base, metric) -- never by contrast alone",
+    "requires_written_reason": "a mathematical argument naming the estimand",
+    "requires_adversarial_metric": "a neighbouring metric on the SAME arm pair, lacking the guarantee, demonstrated to move the opposite direction",
+    "why": "a green test must establish the SCOPE of a guarantee, not merely perpetuate the declaration; this lane had a passing test asserting a suppression rather than its boundary",
+    "permanent_regression_case": "smoke source 000 -- verified better on all five preferences, HV 1.0060 vs greedy 1.0074"
+  },
+  "source_000_interpretation": {
+    "proves": "falsifiability -- the HV comparison can go against verified",
+    "does_not_prove": "that verified is systematically worse for HV; n = 1 of 12",
+    "direction_determined_by": "the larger development experiment, not this smoke",
+    "if_better_per_preference_but_worse_set_hv": "COMPOSE's controller operates per-trajectory and per-preference, not as a jointly archive-coordinated Pareto optimiser. Not a bug in hypervolume and not necessarily a control failure. Report it; do NOT add archive-aware coupling to make verified win HV.",
+    "if_verified_improves_both": "a genuinely strong result precisely because the HV gain was demonstrably capable of going the other way"
   }
 }
