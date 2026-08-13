@@ -201,6 +201,16 @@ at both matchings. See `DECISION_LOG.md` D-009.
 - **`gen_rank` cost model is projected, not measured.** Its trajectory count is
   computed from the control arms' observed ledgers at run time, but no `gen_rank`
   arm has yet run against a real fiber.
+- **The census writes only at the end — it violates this project's own
+  durability rule.** `scripts/pareto_tradeoff_census.py` holds ~75 minutes of
+  work in memory and emits one file at completion; a crash at minute 70 loses
+  everything. The workstream contract says *"every expensive job writes per-task
+  durable shards before returning"*, and this job does not. It was not changed
+  mid-run, because editing the script that is producing an artifact breaks the
+  provenance between the two. **Fix before any rerun:** write a per-source shard
+  after each source's enumeration and after each reach rollout, and make the
+  driver skip sources whose shard exists — the same pattern
+  `modal_apps/pareto_control_app.py` already implements.
 - **Local run environment depends on paths outside the repo** (Active8 root,
   gate-zero decision, materialized scorer). All three are arguments or
   environment variables with documented defaults; none is a session directory.
