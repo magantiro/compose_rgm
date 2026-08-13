@@ -33,14 +33,20 @@ materialise. The guard was still correct to have.
 
 ## TERMINAL COST — controller parity, sign free
 
-| | mean | median | 95% CI |
-|---|---:|---:|---|
-| `Δ^G` greedy parity | −0.105 | **0.000** | [−0.377, +0.099] |
-| `Δ^V` verified parity | −0.023 | **0.000** | [−0.182, +0.134] |
+| | mean | median | 95% CI | W/L/tied |
+|---|---:|---:|---|---|
+| `Δ^G` greedy parity | −0.105 | **0.000** | [−0.377, +0.099] | 5/8/11 |
+| `Δ^V` verified parity | −0.023 | **0.000** | [−0.182, +0.134] | 9/10/5 |
 
-**Both medians exactly zero, both intervals spanning zero.** This is the first
-of the three predeclared outcomes — little or no potency cost. The negative
-means come from a few sources, not a systematic tax.
+Both medians are exactly zero and both intervals span zero. The negative means
+come from a few sources, not a systematic tax.
+
+**An interval spanning zero is not evidence of equivalence.** It says the data
+do not resolve the sign; it does not say the cost is small. `Δ^G` in particular
+still permits a potency loss of −0.377 held-in IQR units, which would be a
+material penalty. This section therefore reads as *unresolved*, not as *free*,
+and the confirmation replaces it with a noninferiority test against a margin
+fixed in advance — see `docs/PATHWISE_HELDOUT_CONFIRMATION_PREREGISTRATION.md`.
 
 ## Support viability
 
@@ -57,22 +63,47 @@ sensitivity analysis excluding the tight source gives rates 0.652 / 0.565 and
   test. Binary headroom is 0 over a denominator of 0 — a **CEILING, not a
   null**, since `pathwise_greedy` completed 24/24.
 
-## The claim this would license, if confirmed
+## The claim this licenses NOW, and the one it does not
 
-> Endpoint-only filtering accepts molecules that reached an acceptable state by
-> an unacceptable route in two thirds of cases, and enforcing the requirement
-> throughout the trajectory costs no terminal objective on the median source.
+Banked, as the development record:
+
+> Pathwise enforcement eliminated a common hidden-trajectory failure mode, while
+> development showed **no median potency loss and only a small estimated mean
+> penalty** under verified control.
+
+**Not** banked, and barred until the held-out noninferiority test clears:
+
+> ~~"…at no cost."~~ / ~~"…essentially free."~~ / ~~"…costs no terminal
+> objective."~~
+
+The distinction is the whole reason the confirmation exists. Zero median plus a
+wide interval motivates a noninferiority test; it does not substitute for one.
 
 Also quotable, from the descriptive arm: under pure potency optimisation only
 **17 of 24** endpoints land in the corridor at all — endpoint-only filtering
 discards nearly a third of the work before hidden excursions even arise.
 
-## OPEN DECISION — does this earn a main-text figure?
+## DECIDED — this earns a held-out confirmation, and figure space is conditional
 
 Passing a gate earns interpretation, not figure space. The bar set in advance
-was whether the result is *memorable on its own terms*. Two-thirds hidden-path
-rate at zero median cost plausibly clears it. Against that: it is developmental,
-the corridor was screen-selected, and the paper's spine — known target, target
-changes, no target — is already complete without it.
+was whether the result is *memorable on its own terms*. The prevalence finding
+clears it:
 
-Not decided here.
+> Endpoint-only inspection misses forbidden intermediate states on roughly
+> 60–70% of sources even though the final molecule looks acceptable — and A2
+> measured those excursions at median depth 0.69 cLogP and median duration 4 of
+> 6 steps, so they are not boundary jitter.
+
+Against that: it is developmental, and the corridor family was selected *after*
+the feasibility screen. So the confirmation is authorised and figure space is
+decided by its outcome, not here:
+
+| held-out outcome | consequence |
+|---|---|
+| prevalence replicates **and** cost clears −δ | **main Figure 6** |
+| prevalence replicates, cost does not clear −δ | secondary; a main-text paragraph reporting the cost honestly |
+| prevalence collapses | supplement; the pillar is not forced |
+
+Design frozen in `docs/PATHWISE_HELDOUT_CONFIRMATION_PREREGISTRATION.md`.
+**Pathwise remains an orthogonal capstone, not a fourth co-equal pillar** — the
+main escalation stays known target → changed target → no target.

@@ -55,6 +55,14 @@ until it was rekeyed on (contrast, metric).
 > five individually better points can enclose less dominated area — so this is a
 > real result precisely because it could have come out negative.
 
+**This contrast is NOT a pass condition for Pareto.** Exact-target recovery
+already establishes that future-aware reasoning can matter; Pareto's job is
+target-free reuse across preferences. If a larger development finds that greedy
+preference control already covers the front and verified improves individual
+scalarized outcomes without improving the set, that is a coherent scientific
+outcome and not a failure. Figure 5 does not carry a second "planning beats
+greedy" claim unless the data volunteer one.
+
 ## 5. Resources — three axes, never merged
 
 `N_90`, trajectories to reach 90% of **pooled attainable** HV:

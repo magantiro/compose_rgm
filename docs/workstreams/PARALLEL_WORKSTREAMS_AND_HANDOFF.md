@@ -895,3 +895,76 @@ this is a cost and visibility gap rather than a correctness risk.
 **Fix it before any Stage B rerun or held-out confirmation, and not before the
 current run finishes** — touching a live app to add durability would create more
 risk than it removes.
+
+**Status: the run has finished, so this is now UNBLOCKED and BLOCKING.** It must
+land before the held-out pathwise confirmation launches (n = 48, roughly twice
+Stage B's exposure to preemption).
+
+---
+
+# Rule: an interval spanning zero is not evidence of equivalence
+
+A confidence interval that spans zero says the data **do not resolve the sign**.
+It does not say the effect is small, and it never licenses "no cost",
+"essentially free", or "at no charge".
+
+**Why.** Stage B's `Δ^G` was reported as "little or no potency cost" on the
+strength of a zero median and an interval spanning zero. That interval reaches
+**−0.377 held-in IQR units** — a material penalty entirely consistent with the
+data. The permitted wording is the measurement: *no median loss and a small
+estimated mean penalty*. The stronger claim requires its own test.
+
+**To claim equivalence, run a noninferiority test** against a margin fixed
+before the panel opens: pass iff the CI lower bound clears `−δ`. Note this is
+the correct frame precisely *because* the null of zero is not the interesting
+hypothesis — which is also why it does not fall foul of the false-null rule.
+
+## Corollary: where a noninferiority margin may come from
+
+`δ` must be justified from a **frozen, outcome-independent scale** — the
+property normalisation, a held-in quantile, a preregistered corridor width.
+
+`δ` may **never** be reverse-engineered from what makes the development result
+pass. Development data has exactly one legitimate role in a power calculation:
+supplying the **variance** and the planning values. It does not supply `δ`.
+
+Two disclosures make the choice auditable rather than merely asserted: state
+which development contrasts **would** and **would not** have cleared the chosen
+margin, and report power at the alternative margins that were rejected.
+
+# Rule: reuse a frozen threshold; do not mint one from the result
+
+When an earlier stage already froze a criterion for "broad enough to matter",
+**reuse it verbatim**. A threshold minted after seeing the number it must clear
+is a threshold chosen to be cleared.
+
+Stage A2's `V5a_source_spread > 1/3` was fixed before Stage B ran, so the
+held-out prevalence criterion is `1/3` — not a value derived from 14/24.
+
+Strengthening a reused threshold (here: applying it to the CI lower bound rather
+than the point estimate) is allowed, but must be **declared as a change**, in
+the conservative direction, and never presented as the same rule.
+
+# Rule: effect strength decides figure space, not narrative position
+
+Do not lock figure order to the elegance of the arc. A pillar that confirms
+spectacularly outranks one that merely occupies the tidy slot in
+known target → changed target → no target.
+
+Equally: do not force a result to be stronger than it is because the narrative
+wants it there. Let the frozen results choose the story.
+
+# Rule: measure the bottleneck before optimizing it
+
+Profile before attributing cost. An optimization justified by the wrong
+bottleneck wastes effort and misleads whoever reads the justification later.
+
+**Why.** The Pareto scorer's batch-size-1 SVM calls were the obvious target and
+are a genuine 4.2× on that call — but measurement put scoring at ~12 min of a
+~58 min source against ~46 min of kernel enumeration, so the fix is worth **~7%
+of wall time**. It is required for **counter honesty**; it is not the speed
+lever, and must not be reported as one.
+
+Separately: **wall time and cost are different axes.** Fanning independent work
+across more containers buys wall time at identical dollars. Say which one an
+optimization buys.

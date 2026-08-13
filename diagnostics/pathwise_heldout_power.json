@@ -1,0 +1,81 @@
+{
+  "schema": "compose.pathwise.heldout_power",
+  "status": "DESIGN_ONLY_NO_HELDOUT_SOURCE_OPENED",
+  "plugin_population": {
+    "commit": "bcc4a40",
+    "sources": 24,
+    "p_hidden_endpoint_verified": 0.5833333333333334,
+    "dV_mean": -0.022849178604610196,
+    "dV_sd": 0.39729741887506276,
+    "dV_exact_ties": 5,
+    "corr_hidden_dV": -0.3186554421058447,
+    "role": "supplies VARIANCE and planning values only; delta comes from the frozen held-in normalisation, not from here"
+  },
+  "criteria": {
+    "prevalence_floor": 0.3333333333333333,
+    "prevalence_floor_provenance": "Stage A2 V5a_source_spread, frozen before Stage B ran",
+    "noninferiority_margin": 0.25,
+    "test_form": "95% source-clustered bootstrap CI lower bound",
+    "multiplicity": "intersection-union: the main-figure verdict requires BOTH, so each is tested at full alpha and the panel is sized on the joint"
+  },
+  "grid": [
+    {
+      "n": 24,
+      "p1": 0.599,
+      "p2": 0.7983333333333333,
+      "joint": 0.43766666666666665
+    },
+    {
+      "n": 36,
+      "p1": 0.8043333333333333,
+      "p2": 0.9241666666666667,
+      "joint": 0.731
+    },
+    {
+      "n": 40,
+      "p1": 0.8896666666666667,
+      "p2": 0.9476666666666667,
+      "joint": 0.8378333333333333
+    },
+    {
+      "n": 44,
+      "p1": 0.9271666666666667,
+      "p2": 0.9638333333333333,
+      "joint": 0.891
+    },
+    {
+      "n": 48,
+      "p1": 0.9121666666666667,
+      "p2": 0.9761666666666666,
+      "joint": 0.8883333333333333
+    },
+    {
+      "n": 52,
+      "p1": 0.9505,
+      "p2": 0.9843333333333333,
+      "joint": 0.9348333333333333
+    },
+    {
+      "n": 56,
+      "p1": 0.9753333333333334,
+      "p2": 0.989,
+      "joint": 0.9643333333333334
+    }
+  ],
+  "chosen_n": 48,
+  "binding_constraint": "P1",
+  "p2_by_margin_at_n48": {
+    "0.1": 0.2906666666666667,
+    "0.15": 0.6171666666666666,
+    "0.2": 0.8741666666666666,
+    "0.25": 0.9761666666666666,
+    "0.3": 0.9958333333333333
+  },
+  "p2_sensitivity_to_true_cost_at_n48": {
+    "0.0": 0.9903333333333333,
+    "-0.023": 0.976,
+    "-0.05": 0.9386666666666666,
+    "-0.105": 0.7225
+  },
+  "caveat": "the plug-in population is 24 sources, so its tails are coarse; these are planning numbers, not guarantees"
+}
