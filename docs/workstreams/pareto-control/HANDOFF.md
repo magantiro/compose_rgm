@@ -129,6 +129,8 @@ Full contract in `PROTOCOL.md`. Summary:
 | Test | Result | Artifact |
 |---|---|---|
 | `pytest tests/test_pareto_control.py` | **36 passed** | toy-graph suite, no kernel needed |
+| `pytest tests/test_pareto_protocol_config.py` | **9 passed** | the config and the code cannot drift apart |
+| `pytest tests/test_analyse_pareto_control.py` | **8 passed** | a failing gate yields NO statistics |
 | Chebyshev selects a point no weighted sum can | pass | proves why weighted-sum-only would understate the front |
 | verified and greedy commit different actions | pass | the D2 defect, as a unit test |
 | verified never worse than greedy | pass | asserts the *theorem*, so no report may present it as evidence |
