@@ -284,12 +284,28 @@ show that a non-greedy action was worth taking.
    HV in [0, 1].
 
    > **The HV inflation channel, and how it is closed.** An arm that simply
-   > generates more molecules inflates HV without better control. Two structural
-   > controls, not statistical ones: (a) HV is computed over committed endpoints
-   > only and every arm has exactly 5, so point count cannot differ; (b) HV is
-   > only ever compared at matched native oracle budget, and any contrast whose
-   > kernel-call ratio exceeds 1.25 is flagged `BUDGET_ASYMMETRIC` by the
-   > instrument gate and may not carry a headline.
+   > generates more molecules inflates HV without better control. The control is
+   > structural, not statistical, and it separates two things that are easy to
+   > conflate:
+   >
+   > - **Equal endpoint counts, enforced on every HV contrast.** HV is computed
+   >   over committed endpoints only and every arm contributes exactly 5. An arm
+   >   may cost more; it may never contribute more points.
+   > - **Compute parity, enforced only where a contrast claims it.** Compute is
+   >   *not* one of the four parity dimensions — `budget` there means the **edit**
+   >   budget `H = 6`, which every contrast holds. P3 and P4 do claim compute
+   >   parity, because handing `gen_rank` the control arm's budget is the entire
+   >   point of them, and the gate fails them if the native-call gap exceeds 10%
+   >   or the kernel ratio exceeds 1.25. **P2 does not.** A lookahead controller
+   >   intrinsically spends more compute than a myopic one, and throttling it to
+   >   greedy's compute would delete the mechanism under test; so P2 holds the
+   >   edit budget, holds the endpoint count, and **reports** the compute ratio,
+   >   flagged `COMPUTE_ASYMMETRIC_BY_DESIGN_REPORT_THE_RATIO`.
+   >
+   > An earlier version of the gate failed P2 for its compute asymmetry, which
+   > would have made verified-vs-greedy unrunnable. That is recorded rather than
+   > silently corrected: a check that forbids the experiment is as wrong as one
+   > that permits a confound.
 
 2. **HV-AUC — two conventions, reported together, never substituted.**
    - `HV-AUC@native`: x-axis = **distinct molecules scored** by the property
@@ -385,7 +401,7 @@ data existed:
 | **D3** | a sign test against a null that a theorem makes false | statistics on the guaranteed-sign registry may report magnitude only; requesting a p-value for one is an error |
 | **D4** | a fabricated SHA-256 in a manifest | every hash in `handoff.json` is recomputed from the file on disk |
 | **D5** | the parity confound | every declared contrast must vary exactly one of {controller, start, budget, objective} |
-| **D6** | hypervolume inflated by generating more molecules | endpoint counts must be equal across the two arms of an HV contrast, and the kernel-call ratio must be <= 1.25 |
+| **D6** | hypervolume inflated by generating more molecules | endpoint counts must be equal across the two arms of **every** HV contrast; compute parity (native gap <= 10%, kernel ratio <= 1.25) is enforced only on contrasts that **claim** it, and reported elsewhere |
 
 Additionally, every reported statistic must declare its **falsifying range** —
 the values it could take if the hypothesis were false. A statistic with an empty

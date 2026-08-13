@@ -250,6 +250,39 @@ chosen decides the winner, which makes the choice a result rather than a method.
 
 ---
 
+## D-010 · 2026-08-13 · The gate forbade the experiment; the gate was wrong, not the experiment
+
+**Decision.** Split D6 into two checks. **Equal endpoint counts** are required
+on every hypervolume contrast. **Compute parity** is enforced only on contrasts
+that claim it (P3, P4) and is *reported* elsewhere (P2), with the flag
+`COMPUTE_ASYMMETRIC_BY_DESIGN_REPORT_THE_RATIO`.
+
+**Evidence before the decision.** Running the analysis pipeline end to end on
+synthetic shards, the gate failed `D6_hv_budget_matched` on **P2** — with
+`verified_pref` at ~300 kernel calls against `greedy_pref` at ~26, a ratio of
+11.5. Under the original rule, verified-vs-greedy could never be reported at
+all.
+
+**Why the gate was wrong.** Compute is not one of the four parity dimensions.
+`budget` in the parity table means the **edit** budget `H = 6`, which P2 holds
+exactly. A lookahead controller intrinsically spends more compute than a myopic
+one — that *is* the mechanism — and throttling it to greedy's compute would
+delete what is being tested. The hypervolume inflation risk P2 actually carries
+is that the more expensive arm contributes more *points*, and that is closed by
+the equal-endpoint-count rule, which still applies.
+
+**Alternatives rejected.** Dropping P2 (it is the future-awareness question, the
+whole reason the verified arm exists); throttling `verified_pref` (deletes the
+mechanism); leaving the gate failing and overriding it by hand (an override that
+becomes routine is not a gate).
+
+**Changes a frozen object:** yes — `PROTOCOL.md` §7.3 and §9. Before any run.
+Recorded rather than silently corrected, because **a check that forbids the
+experiment is as wrong as one that permits a confound**, and only the log shows
+which kind of error was made.
+
+---
+
 ## D-006 · 2026-08-13 · Census verdict
 
 *(Recorded after the census ran; see `diagnostics/pareto_tradeoff_census.json`.)*
