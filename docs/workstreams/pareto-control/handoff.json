@@ -4,8 +4,8 @@
   "title": "Target-free Pareto / preference control",
   "status": "DESIGN_ONLY_PLUS_HELD_IN_CENSUS",
   "branch": "codex/compose-pareto-control",
-  "commit": "bd28e555749e4a76377b0a2d1d42f72ef344f8c8",
-  "working_tree_dirty_at_write_time": false,
+  "commit": "5e74228e5db4cbf7792fa05a818e577d45c20438",
+  "working_tree_dirty_at_write_time": true,
   "base_commit": "a0e680d",
   "held_out_opened": false,
   "held_out_statement": "reserve_source_keys has NOT been read in this lane. Every measurement uses training_source_keys. No Modal run has been launched.",
@@ -20,9 +20,9 @@
     "scripts/build_analogue_trace_pool.py": "05a7326365c1102110d6ba582960f20e89b4f0a02964008475ec9d65a4981ad9"
   },
   "lane_artifacts": {
-    "docs/workstreams/pareto-control/PROTOCOL.md": "f7e9c7964095be70346d1155e3358dc7b59524a0b8b20347395accf2b35d2830",
-    "docs/workstreams/pareto-control/STATUS.md": "e921d0583aed1b40dc700c47c3f10c7192cf76a6d376180e6953369b86634b08",
-    "docs/workstreams/pareto-control/DECISION_LOG.md": "920d42f5cb52d4964a3c34f8c3318abc291cba1970074e0711e14d0767681eeb",
+    "docs/workstreams/pareto-control/PROTOCOL.md": "ae4f15610c9a320081621a04654873f832e0ede5d5ae9212703bcda8aeab29e7",
+    "docs/workstreams/pareto-control/STATUS.md": "2144bdf43b608f05c34a48def4646f5a44ef302ac9a5b47ea8a556898edf0fa3",
+    "docs/workstreams/pareto-control/DECISION_LOG.md": "6096952b3e0935f1c1b5a672f7ecb8270bfc2299ab9c356027791f153571bc66",
     "docs/workstreams/pareto-control/FIGURE_DESIGN.md": "64e7130690fc949df455057968d8cc5fc3cf9d316036e6104c2c650aace360eb",
     "scripts/pareto_tradeoff_census.py": "ae0b5098baea9f9a9b71a7c46eefc129e64e096e4a573838ec5ad713a9b1f449",
     "scripts/pareto_instrument_gate.py": "a0f74025ef80f0117231db7bd6271c4bd755854a5c200a51bc993b6c0f3607b6",
@@ -32,17 +32,77 @@
     "tests/test_pareto_control.py": "72e9ba179cd2901dbc7d8b5fa88781125565472713829d5a4bf8dc0fbd87253b",
     "modal_apps/pareto_control_app.py": "87c77e1b8210d2b80dc753d4c0939add934bf553d6eb2e0f57d5b1798be82d29",
     "tests/test_pareto_instrument_gate.py": "42921f49169c87d88f3f0ff3a49eab34d9a24af0b2d91234397ee62dbb4a0314",
-    "diagnostics/pareto_tradeoff_census.json": null,
+    "diagnostics/pareto_tradeoff_census.json": "5b1fc96b4ceb3a757da0e5f036fec59356ef135ddc4d2a3f285fb933f4c636a1",
     "diagnostics/pareto_control_cohort.json": "80080eefb4007fb9cd83f46db8783dcaff95c8be47a9ab9251d8f23cdb7d33db"
   },
   "census": {
-    "adopted_pair": null,
-    "predeclared_pair_order": null,
-    "gate_thresholds": null,
-    "verdicts": {},
-    "failed_gates": {},
-    "instruments": null,
-    "frozen_scales": null
+    "adopted_pair": "potency_vs_developability",
+    "predeclared_pair_order": [
+      "potency_vs_developability",
+      "potency_vs_source_similarity",
+      "developability_vs_source_similarity"
+    ],
+    "gate_thresholds": {
+      "G1_max_rho": 0.7,
+      "G2_min_tradeoff_fraction": 0.2,
+      "G2_min_each_direction": 0.05,
+      "G2_min_state_availability": 0.25,
+      "G3_max_binding_share": 0.9,
+      "G4_max_reach_fraction": 0.85,
+      "G5_min_distinct_selections": 2.0,
+      "G5_max_unanimous_fraction": 0.5
+    },
+    "verdicts": {
+      "potency_vs_developability": "PASS",
+      "potency_vs_source_similarity": "FAIL",
+      "developability_vs_source_similarity": "FAIL"
+    },
+    "failed_gates": {
+      "potency_vs_developability": [],
+      "potency_vs_source_similarity": [
+        "G2_local_tradeoff",
+        "G3_no_domination",
+        "G4_no_saturation"
+      ],
+      "developability_vs_source_similarity": [
+        "G2_local_tradeoff",
+        "G4_no_saturation"
+      ]
+    },
+    "instruments": {
+      "I_A": {
+        "kind": "model-gated canonical successor fiber",
+        "n_states": 120,
+        "mean_fiber_width": 585.7166666666667,
+        "depths": [
+          0,
+          1
+        ],
+        "reads_transition_probabilities": false,
+        "gate_zero": "/Users/rmaganti/compose_trainset_backup/localprep/artifacts/editing_v2/process_v2_gate_zero_v7/DECISION.json",
+        "support_identical_to_v6": true
+      },
+      "I_B": {
+        "kind": "one-cut matched molecular pairs",
+        "n_states": 5592,
+        "n_pairs": 81500
+      }
+    },
+    "frozen_scales": {
+      "utopia_p99": {
+        "P": 2.7315048451066857,
+        "D": 0.555419816046901,
+        "S": 1.0653266331658295
+      },
+      "reference_p5": {
+        "P": -1.2689119285385548,
+        "D": -1.3547257562637012,
+        "S": -1.2144210280427081
+      },
+      "similarity_centre": 0.6,
+      "similarity_iqr": 0.250314465408805,
+      "recipe": "held-in median and held-in IQR, the same recipe as the frozen goal-language normalizers, applied to the one property they did not cover"
+    }
   },
   "artifact_status_by_file": {
     "docs/workstreams/pareto-control/PROTOCOL.md": "DESIGN_ONLY",

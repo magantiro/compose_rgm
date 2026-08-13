@@ -317,12 +317,130 @@ and deferred, not quietly dropped — and until it is run, P3/P4 are one-sided.
 
 ---
 
-## D-012 · 2026-08-13 · Census verdict
+## D-012 · 2026-08-13 · Census verdict — pair 1 adopted, and it is the FIRST that passed
 
-*(Recorded AFTER the census ran; see `diagnostics/pareto_tradeoff_census.json`
-and the generated `STATUS.md`.)*
+*(Recorded AFTER the census ran. `diagnostics/pareto_tradeoff_census.json`,
+sha256 `5b1fc96b4ceb3a75…`, 60 held-in sources / 120 real-fiber decision states /
+mean fiber 586, plus 81,500 MMP pairs. 4,515 s local, CPU only, no Modal.)*
 
 Deliberately a separate commit from D-001..D-005, so the git history shows the
-predeclaration preceded the measurement rather than merely claiming it: the
-gate thresholds and the pair order landed at `d206d55`, before
+predeclaration preceded the measurement rather than merely claiming it: the gate
+thresholds and the pair order landed at `d206d55`, before
 `scripts/pareto_tradeoff_census.py` had ever been run.
+
+**Adopted: `potency_vs_developability`.** All five gates pass. It is the first
+pair in the predeclared order, so the positional rule and the outcome agree —
+which is worth stating precisely *because* they agree: had pair 2 or 3 scored
+better on some statistic, the rule would still have taken pair 1.
+
+| gate | value | threshold | verdict |
+|---|---:|---|---|
+| G1 alignment | rho **−0.274** | `< +0.70` | PASS |
+| G2 local tradeoff | tradeoff moves **0.512**; both directions available at **100%** of states | `>= 0.20`, `>= 0.25` | PASS, **both instruments agree** |
+| G3 no domination | binding share **0.76 / 0.24** | `<= 0.90` | PASS |
+| G4 no saturation | P **0.700**, D **0.000** | `<= 0.85` | PASS |
+| G5 front richness | **2.34** of 5 distinct, **10%** unanimous | `>= 2.0`, `<= 0.50` | PASS, **`OPERATOR_SET_DEPENDENT`** |
+
+### Three things a reader should not miss
+
+**1. G5 carries a caveat, and the paper must carry it too.** I-A passes (2.34 of
+5 distinct Chebyshev selections) but I-B fails (1.66). Per §6.2 that is
+`OPERATOR_SET_DEPENDENT`: preference distinguishability is present in the
+*executable support* and not visible in real one-cut analogue pairs. Both
+instruments were declared in advance precisely so this could be seen rather than
+assumed, and the direction is the expected one — I-B's median neighbourhood is
+degree 1 against I-A's 586.
+
+**2. D-007's correction changed the verdict, and the committed shards show it.**
+The same artifact reports developability reaching the *binary region* on
+**0.933** of committed 3-edit rollouts but the *clipped continuous ceiling* on
+**0.000** — median endpoint 0.627 against a ceiling of 1.327. Reaching the
+region is not exhausting the axis. Under the withdrawn statistic, or under the
+binary reading, pair 1 would have been rejected for the wrong reason.
+
+**3. Potency has real but limited headroom, and this is the live risk.** P's
+reach fraction is **0.700** — 14 of 20 sources reach the held-in p99 within six
+greedy edits, against a 0.85 rejection threshold. It passed, but not
+comfortably. If the smoke shows arms clustering at the top of the potency axis,
+that is this number materializing, not a surprise.
+
+### Why pairs 2 and 3 failed, mechanically
+
+Both fail G4 because **source similarity is inert**: across 20 sources, the
+similarity-maximizing 6-edit rollout ended at ECFP4 Tanimoto **exactly 1.000**
+to the source, every time. There is always a legal successor whose fingerprint
+is identical to the source, so "stay similar" is free.
+
+The same fact explains their G2 failures. The source *starts* at maximal
+similarity, so a move can only hold or reduce it — the "other objective down,
+similarity **up**" quadrant is nearly empty: **0.005** of moves for P-vs-S and
+**0.006** for D-vs-S, against a `>= 0.05` floor. A Pareto axis you cannot
+improve is not an axis.
+
+Pair 2 additionally fails G3 at **0.907**: potency is the binding Chebyshev term
+in 90.7% of decisions, just over the 0.90 line. That is the asymmetry
+`RETARGETING_SAME_PREFIX_DESIGN.md` already documented — potency is 4–5x harder
+in normalized units — showing up as goal domination, exactly what G3 exists to
+catch.
+
+**No fallback pair was needed, and none was invented.** The predeclared order
+was not consulted after the fact.
+
+> **What a reviewer should take from this, stated plainly.** The similarity-inert
+> finding means the predeclared order effectively had **one viable entry** — both
+> fallback pairs are killed by construction, not by a marginal statistic. That is
+> a discovery, not a convenience. It was not knowable before the census: the
+> obvious prior is that "stay close to the starting molecule" trades against any
+> potency or property objective, and it does not, because the executor always
+> offers a fingerprint-identical successor. Adopting the first pair in the order
+> is therefore the *only* outcome the gate could have produced, and the honest
+> way to present it is that we measured why, not that we got lucky with the
+> ordering.
+
+---
+
+## D-013 · 2026-08-13 · I-A is the instrument of record; I-B is corroborative only
+
+**Decision.** State explicitly, in `PROTOCOL.md` and `HANDOFF.md`, that the real
+model-gated successor fiber (**I-A**) is the instrument of record for this
+census, and that one-cut matched pairs (**I-B**) corroborate but never decide.
+
+**Evidence, from the completed census.** On the adopted pair the two instruments
+disagree by a wide margin on exactly the statistic that matters most:
+
+| | I-A (real fiber) | I-B (MMP pairs) |
+|---|---:|---:|
+| decision states | 120 | 5,592 |
+| moves scored | 70,286 | 22,865 |
+| **mean distinct selections of 5** | **2.342** | **1.656** |
+| **unanimous states** | **0.100** | **0.412** |
+| mean front size | 5.90 | 2.15 |
+| distinct front points, 101-weight grid | 4.77 | 2.07 |
+| tradeoff-move fraction | 0.512 | 0.535 |
+
+**A proxy-only census would have read borderline where the executable support is
+comfortable.** I-B's 1.656 sits *below* the predeclared G5 floor of 2.0 and its
+41.2% unanimous rate approaches the 50% ceiling; I-A clears both. Note that the
+two agree closely on the *sign* statistics — tradeoff-move fraction 0.512 vs
+0.535 — and diverge on the *selection* statistics, which is exactly what a
+neighbourhood of median degree 1 versus 586 predicts.
+
+**This project has already been misled by a matched-pair proxy once.** The
+movability census read single-edit DRD2 gains off 972 MMP pairs and implied the
+potency threshold was out of reach in four edits; the real fiber then climbed
+**+4.42 log-odds in three**. `RETARGETING_SAME_PREFIX_DESIGN.md` records that
+the matched-pair pessimism was wrong and the position-independent best-of-N
+reading was right. The same asymmetry appears here on a different statistic, in
+the same direction.
+
+**Consequence for the paper.** G5 on the adopted pair is flagged
+`OPERATOR_SET_DEPENDENT`: preference distinguishability is a property of the
+executable support and is *not* visible in real one-cut analogue pairs. That
+caveat belongs in the text, not in a footnote.
+
+**Alternatives rejected.** Dropping I-B as uninformative — its disagreement is
+itself the finding, and running both instruments was declared in advance
+precisely so that a disagreement could be seen rather than assumed.
+
+**Changes a frozen object:** no. It makes §6.2's existing precedence rule
+explicit rather than implicit.

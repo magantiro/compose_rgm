@@ -180,8 +180,23 @@ Decision rule, predeclared:
   through I-A, so a tradeoff invisible to the executor is not actionable.
 
 G1 (pool correlation) and G4 (saturation) do not use either neighbourhood
-instrument: G1 is a pool statistic and G4 is read from **committed real-fiber
-rollouts**, so both are conclusive on their own.
+instrument: G1 is a pool statistic and G4 is read from **real-fiber rollouts**,
+so both are conclusive on their own.
+
+> **I-A is the instrument of record. I-B corroborates and never decides.**
+> Measured on the adopted pair: I-A gives **2.342** mean distinct selections and
+> **0.100** unanimous states; I-B gives **1.656** and **0.412**. I-B's value sits
+> *below* the predeclared G5 floor of 2.0 — a proxy-only census would have read
+> borderline where the executable support is comfortable. The two agree closely
+> on sign statistics (tradeoff-move fraction 0.512 vs 0.535) and diverge on
+> selection statistics, exactly as a neighbourhood of median degree 1 versus 586
+> predicts.
+>
+> This project has already been misled by a matched-pair proxy once: the
+> movability census implied the DRD2 threshold was out of reach in four edits,
+> and the real fiber then climbed **+4.42 log-odds in three**. The asymmetry
+> here runs the same way. A controller can only act through the executable
+> support, so that is what the gate is judged on.
 
 ### 6.3 The five measurements
 

@@ -7,8 +7,8 @@
 - **Base commit:** `a0e680d`
 - **HEAD commit:** see `handoff.json` (`commit`)
 - **Working tree clean:** yes at handoff
-- **Status:** `DESIGN_ONLY` for everything except the census, which is
-  `SMOKE_HELD_IN`
+- **Status:** `DESIGN_ONLY` for the arms and the smoke plan; **`SMOKE_HELD_IN`**
+  for the completed Stage 0 census
 - **Held-out data opened:** **NO.** `reserve_source_keys` was never read.
   No Modal run was launched.
 
@@ -21,10 +21,15 @@
 # Claim this work can support
 
 > The Stage 0 headroom gate, with thresholds fixed before any number existed,
-> selects an objective pair on which different preferences can produce genuinely
-> different optimal futures; and a four-arm preference-control experiment is
-> implemented, locally tested, budget-matched and parity-audited, ready for a
-> costed held-in smoke.
+> **selects `potency vs developability`** as an objective pair on which
+> different preferences select genuinely different candidates from the real
+> executable support — 2.342 of 5 distinct Chebyshev selections across 120
+> decision states, only 10% of states unanimous, and a front of 5.90
+> nondominated candidates spanning 4.77 distinct weight-selected points. Both
+> fallback pairs are ruled out structurally, because source similarity is inert
+> under this executor. A four-arm preference-control experiment is implemented,
+> locally tested, budget-matched and parity-audited, ready for a costed held-in
+> smoke that this lane did **not** launch.
 
 # Claims this work cannot support
 
@@ -148,13 +153,84 @@ Full contract in `PROTOCOL.md`. Summary:
 **These are `SMOKE_HELD_IN` census results. They are not a controller result and
 there is no controller result in this lane.**
 
-See `diagnostics/pareto_tradeoff_census.json` and the summary in `STATUS.md`.
+`diagnostics/pareto_tradeoff_census.json` — 60 held-in sources, **120 real-fiber
+decision states, mean fiber 586, 70,286 scored moves**, plus 81,500 MMP pairs
+over 5,592 states. 4,515 s local, CPU only. **No Modal run.**
+
+**Adopted pair: `potency_vs_developability`** — the first in the predeclared
+order, all five gates passed.
+
+| gate | value | threshold | verdict |
+|---|---:|---|---|
+| G1 alignment | rho **−0.274** | `< +0.70` | PASS |
+| G2 local tradeoff | tradeoff moves **0.512**; both directions available at **1.00 / 1.00** of states | `>= 0.20`; `>= 0.25` | PASS, both instruments agree |
+| G3 no domination | binding share **0.76 / 0.24** | `<= 0.90` | PASS |
+| G4 no saturation | P **0.700**, D **0.000** | `<= 0.85` | PASS |
+| G5 front richness | **2.342** of 5 distinct, **0.100** unanimous | `>= 2.0`; `<= 0.50` | PASS, **`OPERATOR_SET_DEPENDENT`** |
+
+Front geometry: mean **5.90** nondominated of ~586 candidates per state, and
+**4.77** distinct front points selected across a 101-weight Chebyshev grid —
+i.e. the achievable front is a curve, not a point. Quadrant split: potency-up /
+developability-down **0.390**, the converse **0.122**.
+
+| rejected pair | rho | failed |
+|---|---:|---|
+| `potency_vs_source_similarity` | −0.060 | G2 (`P−/S+` **0.005** < 0.05), G3 (**0.907** > 0.90), G4 (S inert) |
+| `developability_vs_source_similarity` | −0.119 | G2 (`D−/S+` **0.006** < 0.05), G4 (S inert) |
+
+## SOURCE SIMILARITY IS INERT — a structural fact, not a statistical one
+
+Across 20 sources, the similarity-maximizing 6-edit rollout ended at ECFP4
+Tanimoto **exactly 1.000** to the source, **every time**; median movement in
+`z_S` was **0.000**. At every step the executor offers a legal successor whose
+fingerprint is identical to the source, so **"stay similar" costs nothing** and
+exerts no tradeoff pressure. The source also *starts* at maximal similarity, so
+a move can only hold or reduce it — which is why the "improve similarity" side
+of the tradeoff is essentially empty (0.005 / 0.006 of moves).
+
+**This kills both fallback pairs by construction**, which means the predeclared
+order effectively had **one viable entry**. That is a discovery, not a
+convenience: the obvious prior is that staying close to the starting molecule
+trades against a property objective, and it does not. Adopting the first pair
+was the only outcome the gate could produce, and the honest presentation is that
+we measured why.
+
+## I-A IS THE INSTRUMENT OF RECORD; I-B CORROBORATES ONLY
+
+| | I-A (real fiber) | I-B (MMP pairs) |
+|---|---:|---:|
+| mean distinct selections of 5 | **2.342** | **1.656** |
+| unanimous states | **0.100** | **0.412** |
+| mean front size | 5.90 | 2.15 |
+| tradeoff-move fraction | 0.512 | 0.535 |
+
+I-B's 1.656 sits **below** the predeclared G5 floor of 2.0: a proxy-only census
+would have read borderline where the executable support is comfortable. The two
+agree on sign statistics and diverge on selection statistics, as a neighbourhood
+of median degree 1 versus 586 predicts. **This project has been misled by a
+matched-pair proxy before** — the movability census implied DRD2 was out of
+reach in four edits and the real fiber climbed +4.42 log-odds in three. G5's
+`OPERATOR_SET_DEPENDENT` flag belongs in the paper text, not a footnote.
+
+## The live risk in the adopted pair
+
+**Potency headroom is real but limited: G4 reach fraction 0.700**, i.e. 14 of 20
+sources reach the held-in p99 within six greedy edits, against a 0.85 rejection
+threshold. It passed, but not comfortably. If the smoke shows arms clustering at
+the top of the potency axis, that is this number materializing.
+
+By contrast developability has ample continuous headroom — **0.000** of
+rollouts reach the clipped ceiling (median endpoint 0.627 against 1.327) — even
+though the same committed shards show the *binary* developability region reached
+on **0.933** of 3-edit rollouts. Reaching the region is not exhausting the axis;
+see `DECISION_LOG.md` D-007.
 
 # Gate verdicts
 
-See `diagnostics/pareto_tradeoff_census.json` → `pairs[].gate` and `STATUS.md`.
-Adoption is **positional**: the first pair in the predeclared order clearing all
-five gates, not the best-scoring pair.
+See the table above, `diagnostics/pareto_tradeoff_census.json` → `pairs[].gate`,
+and the generated `STATUS.md`. Adoption is **positional**: the first pair in the
+predeclared order clearing all five gates, not the best-scoring pair. The
+thresholds were committed at `d206d55`, before the census had ever been run.
 
 # Bugs, invalid instruments, and superseded runs
 
@@ -242,16 +318,22 @@ recorded in `skipped_contrasts`. Corrective commit `d442c2e`.
 - **`gen_rank` cost model is projected, not measured.** Its trajectory count is
   computed from the control arms' observed ledgers at run time, but no `gen_rank`
   arm has yet run against a real fiber.
-- **The census writes only at the end — it violates this project's own
-  durability rule.** `scripts/pareto_tradeoff_census.py` holds ~75 minutes of
-  work in memory and emits one file at completion; a crash at minute 70 loses
-  everything. The workstream contract says *"every expensive job writes per-task
-  durable shards before returning"*, and this job does not. It was not changed
-  mid-run, because editing the script that is producing an artifact breaks the
-  provenance between the two. **Fix before any rerun:** write a per-source shard
-  after each source's enumeration and after each reach rollout, and make the
-  driver skip sources whose shard exists — the same pattern
-  `modal_apps/pareto_control_app.py` already implements.
+- **REQUIRED FIX BEFORE ANY RERUN — the census violates this project's own
+  durability rule.** `scripts/pareto_tradeoff_census.py` held **75 minutes**
+  (4,515 s) of work in memory and wrote one file at completion. A crash at
+  minute 70 would have lost all of it. The workstream contract says *"every
+  expensive job writes per-task durable shards before returning"*, and this job
+  does not. **It survived only because the process outlived the agent that
+  launched it** — the main lane verified PID 55513 still running at 98% CPU
+  after this agent had stopped polling. That is luck, not durability.
+
+  It was not changed mid-run, because editing the script that is producing an
+  artifact breaks the provenance between the two. **The fix, required before the
+  script is run again:** write a per-source shard after each source's
+  enumeration and after each reach rollout; make the driver skip sources whose
+  shard already exists; reconstruct the aggregate from shards. That is exactly
+  the pattern `modal_apps/pareto_control_app.py` already implements, and it
+  should not have been omitted here.
 - **Local run environment depends on paths outside the repo** (Active8 root,
   gate-zero decision, materialized scorer). All three are arguments or
   environment variables with documented defaults; none is a session directory.
@@ -328,20 +410,34 @@ diagnostics/pareto_control_cohort.json
 
 One bounded action only:
 
-> **Authorize the 12-source held-in smoke** in
-> `modal_apps/pareto_control_app.py`, after freezing
-> `diagnostics/pareto_control_cohort.json` from held-in sources under the same
-> outcome-independent eligibility rule the retargeting cohort used. Held-in only,
-> five arms, five preferences, budget 6, no `h_phi`, no held-out panel. Costed
-> below.
+> **Decide whether to authorize the 12-source held-in smoke** in
+> `modal_apps/pareto_control_app.py`. The cohort is already frozen at
+> `diagnostics/pareto_control_cohort.json` (sha256 `adea8e5510852d69`), disjoint
+> from the census sources. Held-in only, five arms, five preferences, budget 6,
+> no `h_phi`, no held-out panel.
+>
+> **NOT LAUNCHED, and not this lane's decision.** At ~134 core-hours this is a
+> step change over anything the project has run, so the authorization belongs to
+> Rohin, not to an agent. Both cost points are given below so the choice is
+> between two concrete options rather than one.
 
-**Cost.** ~700 kernel calls per source after the ~2x enumeration caching the
-committed calibration shows. At `cpu=8.0` with `OMP_NUM_THREADS=4` (an
-enumeration measured 5.2–8 s locally versus 22 s on the calibration's
-`cpu=2.0, OMP_NUM_THREADS=1`), that is **~1.4 h per source**; 12 sources in 12
-containers is **~1.4 h wall and roughly $18** of CPU. Halving the shortlist from
-8 to 4 gives ~0.8 h and ~$10. A local-only alternative is ~1.6 h **per source**
-sequentially, so only 1–2 sources are practical without Modal.
+**Cost, two options.** ~700 kernel calls per source after the ~2x enumeration
+caching the committed calibration shows. The census measured **~9 s per
+enumeration locally** at `OMP_NUM_THREADS=4`, against 22 s on the calibration's
+`cpu=2.0, OMP_NUM_THREADS=1`.
+
+| variant | shortlist | per source | 12 sources, 12 containers | ~core-hours | ~cost |
+|---|---:|---:|---|---:|---:|
+| as specified | 8 | ~1.4 h | ~1.4 h wall | ~134 | **~$18** |
+| **halved shortlist** | 4 | ~0.8 h | ~0.8 h wall | ~77 | **~$10** |
+
+The shortlist-4 variant halves the lookahead breadth. That is a real reduction
+in the `verified_pref` arm's search, not a free saving, and it should be an
+explicit choice rather than a default.
+
+A local-only alternative runs ~1.6 h **per source** sequentially, so only 1–2
+sources are practical without Modal — enough to smoke the plumbing, not enough
+for a source-level bootstrap.
 
 # Actions explicitly not recommended
 
@@ -355,6 +451,25 @@ sequentially, so only 1–2 sources are practical without Modal.
   the choice returns to main.
 - Do **not** quote a single HV-AUC convention or a single `gen_rank` budget
   matching. Both are reporting choices that can decide the winner.
+- Do **not** rerun `scripts/pareto_tradeoff_census.py` before adding per-source
+  durable shards to it.
+
+## P3 and P4 will be ONE-SIDED — this belongs in the paper, not a footnote
+
+`gen_rank` can be budget-matched to the closed-loop arms on **one** compute axis
+only. One kernel call yields ~586 candidates, so:
+
+- **kernel-matched** (affordable, and what the smoke runs): `gen_rank` gets ~4
+  trajectories against `greedy_pref`'s ~15,600 scored candidates. It is
+  disadvantaged on the axis the multi-objective literature actually budgets.
+- **native-oracle-matched** (not affordable): ~2,600 unguided trajectories per
+  source, ~15,600 kernel calls, **~30 h per source**.
+
+So the smoke can only produce the kernel-matched end of the declared bracket.
+**Any P3/P4 result is therefore one-sided**, and a reviewer who assumes
+oracle-call parity — the standard convention — will read it as more favourable
+to COMPOSE than it is. This is a limitation of the comparison itself and must be
+stated in the text where the comparison appears.
 
 # Main-session pickup checklist
 
