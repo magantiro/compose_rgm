@@ -1,0 +1,208 @@
+<title>COMPOSE — Four-Lane Research Status</title>
+<style>
+  :root{
+    --ground:#f7f6f3; --panel:#ffffff; --sunk:#efece6;
+    --ink:#1a1c1a; --mid:#5c615c; --faint:#8b918a;
+    --rule:#e0ddd5; --rule-soft:#eae7e0;
+    --accent:#2f5d50; --accent-ink:#1f4438; --accent-wash:#e6efeb;
+    --against:#8c3a2b; --against-wash:#f6e9e6;
+    --hold:#7a5c1f; --hold-wash:#f5eeda;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#141615; --panel:#1c1f1d; --sunk:#232725;
+      --ink:#eceee9; --mid:#a8aea6; --faint:#767c74;
+      --rule:#2d322f; --rule-soft:#242927;
+      --accent:#6bb39c; --accent-ink:#8ac9b3; --accent-wash:#1a2723;
+      --against:#d98874; --against-wash:#2a1c18;
+      --hold:#d4ac5e; --hold-wash:#2a2418;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#141615; --panel:#1c1f1d; --sunk:#232725;
+    --ink:#eceee9; --mid:#a8aea6; --faint:#767c74;
+    --rule:#2d322f; --rule-soft:#242927;
+    --accent:#6bb39c; --accent-ink:#8ac9b3; --accent-wash:#1a2723;
+    --against:#d98874; --against-wash:#2a1c18;
+    --hold:#d4ac5e; --hold-wash:#2a2418;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
+    font-size:16.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:78ch;margin:0 auto;padding:clamp(26px,5vw,56px) clamp(18px,4vw,26px) 90px}
+  header{border-bottom:2px solid var(--ink);padding-bottom:20px;margin-bottom:14px}
+  .kick{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--accent-ink);margin:0 0 12px}
+  h1{font-family:var(--serif);font-size:clamp(28px,5vw,40px);line-height:1.06;margin:0 0 12px;
+    letter-spacing:-.015em;text-wrap:balance}
+  .dek{font-family:var(--serif);font-size:19px;font-style:italic;color:var(--mid);margin:0;max-width:58ch}
+  .stamp{margin-top:18px;font-family:var(--mono);font-size:12px;color:var(--faint);
+    display:flex;flex-wrap:wrap;gap:6px 20px}
+  .stamp b{color:var(--mid);font-weight:600}
+  section{margin-top:44px}
+  h2{font-family:var(--serif);font-size:clamp(20px,3vw,25px);margin:0 0 4px;letter-spacing:-.01em}
+  .sub{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--faint);margin:0 0 16px}
+  h3{font-size:15px;font-weight:660;margin:26px 0 6px}
+  p{margin:0 0 13px}
+  ul{margin:0 0 14px;padding-left:1.15em} li{margin:0 0 6px} li::marker{color:var(--faint)}
+  code{font-family:var(--mono);font-size:.88em;background:var(--sunk);padding:1px 5px;border-radius:3px}
+  .tw{overflow-x:auto;margin:14px 0;border:1px solid var(--rule);border-radius:7px;background:var(--panel)}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:460px;
+    font-variant-numeric:tabular-nums}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--rule-soft)}
+  thead th{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--mid);background:var(--sunk);border-bottom:1px solid var(--rule)}
+  tbody tr:last-child td{border-bottom:none}
+  td.n{text-align:right}
+  .lane{border:1px solid var(--rule);border-left:4px solid var(--accent);border-radius:7px;
+    background:var(--panel);padding:18px 20px;margin:16px 0}
+  .lane.against{border-left-color:var(--against)}
+  .lane.hold{border-left-color:var(--hold)}
+  .lane .top{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;margin-bottom:8px}
+  .lane .name{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--accent-ink);font-weight:600}
+  .lane.against .name{color:var(--against)} .lane.hold .name{color:var(--hold)}
+  .pill{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;
+    padding:2px 8px;border-radius:20px;background:var(--accent-wash);color:var(--accent-ink)}
+  .pill.against{background:var(--against-wash);color:var(--against)}
+  .pill.hold{background:var(--hold-wash);color:var(--hold)}
+  .lane p:last-child{margin-bottom:0}
+  blockquote{margin:14px 0;padding:12px 18px;border-left:3px solid var(--accent);
+    background:var(--accent-wash);border-radius:0 6px 6px 0;font-family:var(--serif);font-size:17px}
+  blockquote.against{border-left-color:var(--against);background:var(--against-wash)}
+  blockquote p:last-child{margin-bottom:0}
+  .note{font-size:14px;color:var(--mid);border-top:1px solid var(--rule-soft);padding-top:10px;margin-top:14px}
+  .ask{border:1px solid var(--rule);border-radius:7px;background:var(--sunk);padding:16px 20px;margin:14px 0}
+  .ask h3{margin-top:0}
+  footer{margin-top:54px;padding-top:18px;border-top:1px solid var(--rule);
+    font-family:var(--mono);font-size:11.5px;color:var(--faint)}
+</style>
+
+<div class="wrap">
+<header>
+  <p class="kick">Internal status · for external review</p>
+  <h1>COMPOSE: four parallel lanes, one frozen process</h1>
+  <p class="dek">Two results banked, one lane closed on a clean negative, and two findings that cut against the project — surfaced deliberately.</p>
+  <div class="stamp">
+    <span><b>Date</b> 13 Aug 2026</span>
+    <span><b>Reference process</b> R<sub>θ</sub>, frozen, never retrained</span>
+    <span><b>Compute</b> Modal, CPU only</span>
+  </div>
+</header>
+
+<section>
+  <h2>The thesis under test</h2>
+  <p class="sub">What the whole program is arguing</p>
+  <blockquote><p>One learned molecular process, frozen, supports exact target recovery, mid-trajectory goal change, and pathwise structural constraints through <em>different control operations</em> — with no retraining between them.</p></blockquote>
+  <p>The layers, in order: <strong>legality</strong> (the rewrite executor defines what is executable) → <strong>plausibility</strong> (R<sub>θ</sub> learns which molecular continuation is likely) → <strong>purpose</strong> (finite-horizon control picks which plausible continuation is useful). All four layers now have evidence. The fourth — intervening on a trajectory already underway — is the result reported below; the fifth capability we hoped to add, pathwise constraints, closed on a negative.</p>
+</section>
+
+<section>
+  <h2>Banked: sealed target-recovery panel</h2>
+  <p class="sub">Preregistered · one-shot · 65 endpoint-clean held-out pairs</p>
+  <p>Panel sealed at commit <code>571ec9d</code> before any of the learned-prioritisation work existed. Protocol and arms frozen in advance; the two-pair exclusion was committed before any outcome was evaluated.</p>
+  <div class="tw"><table>
+    <thead><tr><th>arm</th><th class="n">recovered</th><th class="n">gain retained</th><th class="n">rescue overlap</th><th class="n">continuations</th></tr></thead>
+    <tbody>
+      <tr><td>greedy</td><td class="n">26 / 65</td><td class="n">—</td><td class="n">—</td><td class="n">0%</td></tr>
+      <tr><td>verified rollout, full set</td><td class="n">40 / 65</td><td class="n">100%</td><td class="n">14 / 14</td><td class="n">100%</td></tr>
+      <tr><td>learned top-1 + verify</td><td class="n">40 / 65</td><td class="n">100%</td><td class="n">13 / 14</td><td class="n">35%</td></tr>
+      <tr><td>similarity top-2 + verify</td><td class="n">37 / 65</td><td class="n">79%</td><td class="n">11 / 14</td><td class="n">52%</td></tr>
+      <tr><td>R<sub>θ</sub> top-1 + verify</td><td class="n">33 / 65</td><td class="n">50%</td><td class="n">7 / 14</td><td class="n">35%</td></tr>
+    </tbody>
+  </table></div>
+  <p>Paired difference greedy → verified: <strong>+21.5 pp [12.3, 33.5]</strong>, exact, rescuing 35.9% of greedy's 39 failures. Reported as an effect size rather than a p-value: the controller always keeps greedy's action in the shortlist and overrides only on strict improvement, so greedy-only wins are impossible by construction and a p-value would dress a design property as a finding.</p>
+  <p>Two claims deliberately <em>not</em> made. Learned prioritisation is not claimed to beat similarity — that was never preregistered, and exact-target recovery privileges Tanimoto-to-the-answer, so this test bed cannot settle it. And it does not <em>reproduce</em> full rollout: it matches the count but not the rescue set, missing one of full's rescues and finding one full misses.</p>
+  <p class="note">The most load-bearing row is the last one. R<sub>θ</sub> is the model we trained, applied to its own successor distribution, and it is the <em>weakest</em> of the three prioritisers. That is the cleanest evidence that the control layer is a separate object rather than a readout of the reference process.</p>
+</section>
+
+<section>
+  <h2>The four lanes</h2>
+  <p class="sub">Main lane owns all claim-bearing decisions; side lanes stop at held-in gates</p>
+
+  <div class="lane">
+    <div class="top"><span class="name">Main · dynamic retargeting</span><span class="pill">complete · 60/60</span></div>
+    <p>Build a molecule for 3 edits under goal A, then reveal a previously unknown goal B = potency ∧ developability, and continue from the exact molecule in hand. Five arms branch from an identical switch state. Prefixes were generated in a physically separate phase and hashed before B was ever constructed — that is what proves the history was not steered by knowledge of the future goal.</p>
+    <p>Two histories lead to the <em>same</em> final requirement, so any difference is attributable to what was pursued first. Potency-first arrives with partial progress on the hard term. Developability-first arrives with the easy term banked and the bottleneck untouched.</p>
+    <div class="tw"><table>
+      <thead><tr><th>question</th><th class="n">P-first</th><th class="n">D-first</th></tr></thead>
+      <tbody>
+        <tr><td>Q1 · does retargeting redirect the trajectory?</td><td class="n">+0.806 <span style="color:var(--faint)">(28/30)</span></td><td class="n">+1.586 <span style="color:var(--faint)">(30/30)</span></td></tr>
+        <tr><td>Q2 · is the realized history worth keeping?</td><td class="n">+0.444 <span style="color:var(--faint)">(30/30)</span></td><td class="n">+0.290 <span style="color:var(--faint)">(22/30, 8 losses)</span></td></tr>
+        <tr><td>Q3 · price of surprise vs knowing all along</td><td class="n">−0.289 <span style="color:var(--faint)">(3/30, 26 losses)</span></td><td class="n">−0.481 <span style="color:var(--faint)">(6/30, 24 losses)</span></td></tr>
+      </tbody>
+    </table></div>
+    <p><strong>Q1 — the intervention works.</strong> Twice as large for D-first, which is what it should be: continuing to optimise developability that is already solved does nothing for the conjunction. The clearest single row in the panel is D-first's ignore-the-switch arm — it holds developability <strong>30/30</strong>, reaches potency <strong>1/30</strong>, and satisfies the conjunction <strong>1/30</strong>. It perfectly maintains the requirement it was given and never touches the one that arrived.</p>
+    <p><strong>Q2 is the stateful claim, and it holds in both histories.</strong> Continuing from the realized molecule beats discarding it and restarting with the same remaining budget — unanimously for potency-first. For developability-first it survives at 22/30 <em>with 8 genuine losses</em>, which makes it a real effect rather than a structural one, and it holds even though that prefix solved only the easy half of the eventual goal.</p>
+    <p><strong>Q3 — there is a real price of surprise.</strong> The clairvoyant reference wins both, and by more for D-first. Knowing the goal from step zero is worth something we do not fully recover. That is the honest version, and a better result than "retargeting always wins".</p>
+    <p class="note">A smoke on 2 sources suggested D-first would <em>beat</em> clairvoyant. It was recorded as a phenomenon to test rather than a hypothesis; at n=30 it reverses cleanly, with clairvoyant winning 24/30.</p>
+  </div>
+
+  <div class="lane against">
+    <div class="top"><span class="name">Lane 1 · what did R<sub>θ</sub> learn?</span><span class="pill against">cuts against</span></div>
+    <p>Compares R<sub>θ</sub> against two unlearned laws on the <em>same</em> executable support, on a mobility–fidelity frontier. Held-in smoke, 8 sources, explicitly emitted as <code>UNDERPOWERED_NO_VERDICT</code>.</p>
+    <div class="tw"><table>
+      <thead><tr><th>law</th><th class="n">mobility</th><th class="n">fidelity</th><th class="n">revisit</th><th class="n">reversal</th><th class="n">heavy-atom Δ</th></tr></thead>
+      <tbody>
+        <tr><td>R<sub>θ</sub></td><td class="n">0.623</td><td class="n">1.000</td><td class="n">0.281</td><td class="n">0.300</td><td class="n">+0.06</td></tr>
+        <tr><td>uniform canonical</td><td class="n">0.750</td><td class="n">0.781</td><td class="n">0.000</td><td class="n">0.000</td><td class="n">+2.31</td></tr>
+        <tr><td>empirical family</td><td class="n">0.766</td><td class="n">0.979</td><td class="n">0.010</td><td class="n">0.013</td><td class="n">+0.06</td></tr>
+      </tbody>
+    </table></div>
+    <p><strong>R<sub>θ</sub> moved the least and cycled the most.</strong> Perfect envelope retention — but a process that barely moves wins fidelity trivially, which is precisely why mobility had to be a co-equal axis rather than a footnote. The number to interrogate is cycling: <strong>0.281 revisit / 0.300 reversal against ~0.01</strong> for the unlearned family baseline. R<sub>θ</sub> returns to states it has already visited, and undoes its own edits, roughly 25× more often.</p>
+    <p>Two mitigating facts. Uniform's higher mobility comes with <strong>+2.31 heavy atoms versus +0.06</strong> — it is mostly just growing molecules, which is cheap movement the suite reports heavy-atom change specifically to expose. And this is <em>not</em> operator collapse: R<sub>θ</sub> used all 8 edit families, uniform only 6.</p>
+    <p class="note">At n=8 this settles nothing. It does suggest the eventual frontier is more likely <em>incomparable</em> than a clean win, and it is the direction a pathological-cycling stop rule would watch.</p>
+  </div>
+
+  <div class="lane against">
+    <div class="top"><span class="name">Lane 2 · pathwise constraints</span><span class="pill against">closed · premise false</span></div>
+    <p>Can a structural motif be required to survive at <em>every</em> committed state, not merely in the endpoint? Exact atom- and bond-labeled subgraph preservation, not fingerprint similarity. The premise: endpoint-only filtering can return a valid final molecule after traversing states the requirement forbids.</p>
+    <p><strong>The premise gate failed, and the mechanism is the interesting part.</strong> Of 42 rollouts on the unconstrained support, <strong>19 broke the protected motif and 0 recovered</strong> by the end. The two sets are disjoint — every trajectory that broke the motif stayed broken. The frozen kernel can open a labeled ring system but effectively cannot rebuild one within 6 edits.</p>
+    <blockquote class="against"><p>Motif destruction is <strong>absorbing</strong> at this horizon, so endpoint validity implies path validity. Endpoint-only filtering is sufficient here by dynamics, not by luck.</p></blockquote>
+    <p>The gate that fired is the one that matters: 0 of 19 endpoint-valid rollouts were path-invalid, against a preregistered threshold of 0.10. Every other gate passed — the mask leaves room to act (removing 22.6% of legal successors on average, never emptying the support) and the arms land differently 6/6. <strong>A mask that genuinely restricts the support but never changes what endpoint-only returns</strong> is precisely the result.</p>
+    <p>Nothing was tuned in response. The motif rule, horizon, label semantics and panel are unchanged, and the five tuning moves considered were rejected by name in the decision log.</p>
+    <p class="note">Secondary, deliberately not promoted: endpoint-only returned <em>nothing</em> on 2 of 6 sources because every rollout ended motif-invalid, while masked arms succeeded 6/6. That is a different and weaker claim — absorption plus wasted budget, not excursion-and-return — on 2 events.</p>
+  </div>
+
+  <div class="lane against">
+    <div class="top"><span class="name">Lane 3 · external baselines</span><span class="pill against">cuts against</span></div>
+    <p>Verified capability registry built from official papers and code, with every claim cited or marked unverified. The finding that matters:</p>
+    <blockquote class="against"><p><strong>REINVENT 4 changes the objective mid-run, natively.</strong> Staged/curriculum learning is a first-class run mode, with per-stage scoring functions and a checkpoint carried into the next stage.</p></blockquote>
+    <p>We therefore cannot write "no existing method changes objective mid-run." What survives is narrower and, I think, still the interesting claim: REINVENT re-targets a <em>policy</em>. There is no in-flight molecule to continue from, switching happens at stage boundaries rather than an arbitrary chosen step, and the agent re-adapts by further RL — which is retraining. The defensible claim is <strong>continuation from a realized in-flight molecule under a newly revealed objective, with no retraining</strong>.</p>
+    <p>Every other method verified negative on mid-run switching with specific code evidence. Separately, <strong>GraphXForm's masking is genuinely pathwise but only over valence and bonding legality</strong> — its ring and bonding-pattern constraints are a terminal filter, and there is no substructure matching in the repository at all. The strongest published graph-editing comparator therefore instantiates Lane 2's <em>endpoint-only</em> arm, not its pathwise arm.</p>
+    <p class="note">One correction against us: DDSBM does support effective atom birth/death via a padded dummy atom type; our related-work matrix marks it as unsupported and should be amended.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Open decisions</h2>
+  <p class="sub">Where outside judgement would help most</p>
+  <div class="ask">
+    <h3>1 · The oracle-counting convention</h3>
+    <p>Undecided and not neutral. Our rule counts every oracle evaluation including rejects; the PMO benchmark counts unique valid canonical SMILES only. Under the first, MCMC-style baselines look expensive and policy-gradient ones cheap; under the second, the reverse — and published PMO numbers are only comparable under the second. This is a claim-level choice that blocks every external comparison.</p>
+  </div>
+  <div class="ask">
+    <h3>2 · How hard to push on R<sub>θ</sub>'s cycling</h3>
+    <p>If the cycling result survives to a larger panel, does it weaken the middle layer of the thesis enough to warrant reopening the base-process question — or is a process that stays inside the chemical envelope while exploring locally exactly what a well-behaved reference law should look like? Note this sits oddly beside Lane 2's finding that motif destruction is irreversible: the same process apparently cycles among states it can reach, yet cannot return across a ring-system boundary once crossed.</p>
+  </div>
+  <div class="ask">
+    <h3>3 · Whether the narrowed novelty claim is enough</h3>
+    <p>Given REINVENT 4, the retargeting claim narrows to in-flight molecular continuation without retraining — now supported by a clean development result. But the pathwise-constraint lane, which was to be the second pillar, has closed on a negative. Does exact target recovery plus dynamic retargeting carry the "one frozen process, many controls" thesis on its own?</p>
+  </div>
+</section>
+
+<section>
+  <h2>Method notes</h2>
+  <p class="sub">Practices adopted after three failures in one day</p>
+  <p>Three statistics were reported and withdrawn today, all the same shape — a quantity whose sign was fixed before any data existed. An action selected by <code>argmax V<sub>G</sub></code> and then scored by <code>V<sub>G</sub></code>. A "verified" arm that was secretly greedy, making headroom zero by construction. A sign test against a null that policy improvement makes false.</p>
+  <blockquote><p>Before reporting any statistic, ask what value it could take if the hypothesis were false. If the answer is "none", it is not a measurement.</p></blockquote>
+  <p>This is now enforced in each lane by executable gates rather than prose — including a test that a gate can return FAIL, on the principle that a gate which can only say PASS is not a gate.</p>
+  <p class="note">Operationally: three network outages cost zero completed work, because every task commits a durable shard and every relaunch skips what exists. Notably, Modal's <code>--detach</code> flag did <em>not</em> survive client-side DNS failure — twice. Durable shards plus resume is the mechanism that actually holds.</p>
+</section>
+
+<footer>Development-stage results. Nothing here except the sealed panel is confirmatory. Held-out data unopened in all three side lanes.</footer>
+</div>
