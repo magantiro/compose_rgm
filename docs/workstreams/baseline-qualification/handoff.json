@@ -1,4 +1,13 @@
 {
+  "accounting_instrument_check": {
+    "artifact": "diagnostics/baselines/graph_ga_accounting_smoke.json",
+    "checks_passed": 7,
+    "cpu_seconds": 0.22,
+    "environment_caveat": "rdkit 2025.09.6, not the production pin 2024.3.5",
+    "not_a_measurement_of": "GraphGA. Upstream GB-GA is not vendored; the stream is GA-shaped only.",
+    "sources": "5 held-in, cohort e402e318",
+    "verdict": "PASS"
+  },
   "adapter_status": {
     "DDSBM": "blocked",
     "GraphGA": "designed_not_built",
@@ -7,13 +16,12 @@
     "MARS": "designed_not_built",
     "REINVENT": "designed_not_built"
   },
-  "artifact_status": "DESIGN_ONLY",
+  "artifact_status": "DESIGN_ONLY plus one SMOKE_HELD_IN instrument check",
   "base_commit": "04f1c46",
+  "baseline_method_smoke_executed": false,
   "blocking_decisions_for_the_main_workstream": [
-    "Declare the oracle-counting convention (FAIRNESS_CONTRACT.md section 0). COMPOSE's rule counts every evaluation including rejects; PMO's counts unique valid canonical SMILES only. The choice changes the ranking and blocks every comparator run.",
     "Decide how HN-GFN's surrogate-in-the-loop is reported; its 1000-call budget is not spent on the true oracle.",
-    "Review the two docs/RELATED_WORK_MATRIX.md cells flagged in DECISION_LOG.md (MARS pathwise; DDSBM var-card / birth-death).",
-    "Add a references.bib entry for REINVENT 4 (Loeffler et al. 2024, doi 10.1186/s13321-024-00812-5); gao2022pmo is PMO and must not stand in for it."
+    "Decide the intended reading of the matrix's pathwise column (affordance vs released code). It settles MARS, MIMOSA, Graph GA and Kappa-style rewriting together, and a change there would flatter COMPOSE, so this lane did not make it."
   ],
   "branch": "codex/compose-baseline-qualification",
   "claim_id": "C4",
@@ -51,7 +59,7 @@
       "subcapability": "C4c_retargeting"
     }
   ],
-  "content_commit": "e8df8c6ee4d3a4b77210bef53f04926ae2647106",
+  "content_commit": "a63c24d266e6174083f8562b8e4634c39d81fd2b",
   "content_commit_note": "The commit at which every sha256 in durable_artifacts was computed. This manifest is committed immediately after it, so branch HEAD is one commit ahead of content_commit and differs from it only by this file. The manifest cannot name its own commit, which is why the two are separate.",
   "durable_artifacts": {
     "baselines/ddsbm/README.md": "332526fb54423db36bb49319796514a7b9d57740abc3b4a374fb63db03bb8c4a",
@@ -67,16 +75,22 @@
     "baselines/reinvent/README.md": "a7ce7d7a0d21bc0cdd6948e3cd4d2af7af7574a6e7350365b622f7526f31a306",
     "baselines/reinvent/environment.lock": "7a42319e9fc5f72ddfa29e995a4226eecd2393ba45e2533ef2b93eafdc2428f2",
     "configs/comparator_registry_v3.json": "672ae90f8e2e938f19b3d5013e70deaaa127302c62e605bbee185bc5bc0e3147",
-    "docs/workstreams/baseline-qualification/COMPARATOR_MATRIX.md": "77b6baa774fd9a41213b6f5ecc53bb584260263c1a67f7eb6ecb0e4b46c55349",
-    "docs/workstreams/baseline-qualification/DECISION_LOG.md": "f403b0fab497ed77112c76a364613cf95e7fad4a10678445883de78c0ae6684b",
-    "docs/workstreams/baseline-qualification/FAIRNESS_CONTRACT.md": "74ead737fd94751ad08da12a38ebfddb6732886e2dd9a5c070f21984cafd6c8c",
-    "docs/workstreams/baseline-qualification/HANDOFF.md": "0ac9d99a17e2c0ff8fc7d0bdc433d0f21542671ba55406bdacbdf27b54bf00f1",
+    "diagnostics/baselines/graph_ga_accounting_smoke.json": "eb65843876cd45f04c84044b2d9f3ad48259923702985ea8a7b1252107ff9268",
+    "docs/RELATED_WORK_MATRIX.md": "aaf2a41d64b84dad3e084a0d8841a5579862ee78ccc2f32675ccfbd0c2c911e5",
+    "docs/workstreams/baseline-qualification/COMPARATOR_MATRIX.md": "afe9f1cec8dd0d2c699819d39159895fa69ef02781ade9a6b8e1c835b5d96318",
+    "docs/workstreams/baseline-qualification/DECISION_LOG.md": "6aa5ebc8851a105d558e3896465ab1f1331e11c536d256aef66e636a713aaafd",
+    "docs/workstreams/baseline-qualification/FAIRNESS_CONTRACT.md": "f09096a14cc9ea75fbfd010cb42ebf28d25a3ee59e9a52e8b93a46b808ee8419",
+    "docs/workstreams/baseline-qualification/HANDOFF.md": "a5985b2e056e8d80a4b7ccc87e06cf929bc37758138123012371544290e3aabf",
     "docs/workstreams/baseline-qualification/PROTOCOL.md": "b72a2ada441806d87da0a82703530b9e445451d73d66922778d7113dea6e45b4",
-    "docs/workstreams/baseline-qualification/STATUS.md": "54ba415edff700b91de6b82e385a609124896c6d92dc548c8a0615f4658eac7b",
-    "docs/workstreams/baseline-qualification/comparator_registry_v3.json": "01c60206ba271e56b25b49db7ef0e37563ca7fd51672f8ee498f04acf240691e",
+    "docs/workstreams/baseline-qualification/STATUS.md": "0fc73b834b43330921c817d2dc081832d4c79852585313c8ab4f13fc52d36ac8",
+    "docs/workstreams/baseline-qualification/comparator_registry_v3.json": "1d5f4ba39fab63f71310f5f3f68c7e093880f2a7bd5366713e35d9fdbdbe6340",
+    "paper_iclr_stochastic_rewriting/references.bib": "5aad478f512110ce4d8dbe1119ec57bd1ce67a8a88eac3b41d8b23f726ac5bc9",
+    "scripts/baseline_accounting_smoke.py": "325b52cbf123fb6dd4dd1d69601f8b126e2d06eeadc54bca2155ff90d3085ac2",
     "scripts/render_comparator_registry.py": "3c9d5d7fcfa47a155fd6c4b5fd9f6388c124bb03deec51a812ce0ad431e1e19c",
     "src/compose_v4/experiments/baseline_qualification.py": "4fb5a744e24beb37919f0dcf7f64f60c63f1f1b9d81901e131358da644ed31b1",
-    "tests/test_baseline_qualification.py": "adf47db62598c71695869bbb54a95e3117e32187a343981a0089bccfb5d0c923"
+    "src/compose_v4/experiments/oracle_accounting.py": "da9bb9bbc7d546efbfdc7777a8fc31e3108cf93a5edb9433c2b3a260af4c2d5d",
+    "tests/test_baseline_qualification.py": "adf47db62598c71695869bbb54a95e3117e32187a343981a0089bccfb5d0c923",
+    "tests/test_oracle_accounting.py": "52234bbd5f84037405f972ea46abfb86fecf37702566e71fbeae9b060515eea7"
   },
   "external_dependencies_installed": 0,
   "frozen_inputs": {
@@ -98,7 +112,23 @@
     }
   },
   "held_out_data_opened": false,
+  "lane_state": "HOLDING by instruction from the main workstream",
+  "manuscript_lane_merge_request": [
+    "docs/RELATED_WORK_MATRIX.md",
+    "paper_iclr_stochastic_rewriting/references.bib"
+  ],
   "modal_runs_launched": 0,
+  "naming_rule": "The MARS arm is 'restart at x_tau under a new objective' -- a NEW optimization launched from the current molecule. It must never be described as native same-prefix retargeting or continuation. The molecule is preserved; the proposal, imitation dataset and temperature are not.",
+  "oracle_accounting": {
+    "counters": {
+      "benchmark_native": "unique valid canonical molecules scored; ONLY for comparison against published PMO numbers",
+      "raw_compute": "every invocation incl. duplicates, rejects, invalids, rescores; for ALL efficiency claims"
+    },
+    "implementation": "src/compose_v4/experiments/oracle_accounting.py",
+    "measured_gap": "same stream, budget 120: benchmark_native bought 120 distinct molecules over 288 invocations; raw_compute bought 59 over 120",
+    "rule": "both always logged, never substituted, counter named in every caption",
+    "status": "FROZEN 2026-08-13"
+  },
   "projected_smoke_cpu_core_hours": {
     "DDSBM": "N/A",
     "GraphGA": "PROJECTION, NOT MEASURED. About 820 oracle calls per source, 4100 total. The frozen DRD2 oracle is a numpy RBF-SVM over folded count fingerprints, order milliseconds per molecule; RDKit crossover and mutation dominate at order 10 ms per child. Expect a few minutes wall on one core. Budget 0.1 CPU-core-hours.",
@@ -107,10 +137,14 @@
     "MARS": "PROJECTION, NOT MEASURED. Sampler ~0.2 CPU-core-hours. Dominant cost is the one-time vocabulary build over 1,488,640 ChEMBL SMILES with RDKit bond-breaking enumeration, ~0.5-1.0 CPU-core-hours, cacheable to the artifact volume and paid once. Budget 1.5 CPU-core-hours for the first smoke, 0.2 thereafter.",
     "REINVENT": "PROJECTION, NOT MEASURED. Adapter A: an Olivecrona-style RNN sampling 64 SMILES of ~60 tokens per step on CPU, order seconds per step; ~20 steps per source gives a few minutes each, so budget 0.3 CPU-core-hours for 5 sources plus a small prior download. Adapter B: transformer priors are larger; budget 0.5-1.0 CPU-core-hours plus the Zenodo prior downloads. Total 1.0-1.5 CPU-core-hours."
   },
-  "recommended_next_action": "Build and smoke the GraphGA adapter on 3-5 held-in sources under one declared oracle-counting convention. Projected 0.1 CPU-core-hours, HIGH confidence.",
+  "recommended_next_action": "NONE. HOLD. The instrument gate passed and the main workstream's instruction is to stop there; Lane 1 may force an R_theta retrain, which would invalidate any adapter built now. When the hold lifts: vendor upstream GB-GA (MIT) and run the real GraphGA adapter on 3-5 held-in sources under the frozen dual accounting, projected 0.1 CPU-core-hours.",
+  "resolved_since_last_handoff": [
+    "Oracle-counting convention: FROZEN as dual accounting, see oracle_accounting.",
+    "docs/RELATED_WORK_MATRIX.md corrections: MERGED on this branch with lead approval (DDSBM var-card/birth-death to partial; new GraphXForm and REINVENT 4 rows; per-cell sentences). MARS pathwise deliberately unchanged.",
+    "references.bib: loeffler2024reinvent4 added."
+  ],
   "schema": "compose.workstream_handoff",
   "schema_version": 1,
-  "smoke_executed": false,
   "verdicts": {
     "DDSBM": "CONTEXT_ONLY",
     "GraphGA": "MUST_RUN",
