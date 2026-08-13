@@ -295,6 +295,40 @@ def test_pipeline_detects_a_cycling_arm_through_the_health_metrics(tmp_path, env
     assert comparison["verdict"] in {"dominated_by", "incomparable"}
 
 
+def test_net_mobility_is_a_diagnostic_and_never_a_verdict_axis(tmp_path, envelope):
+    """The frontier decision rule was declared before any data existed.
+
+    Cycle attribution arrived later and revealed cancelled edits, so net
+    mobility is reported beside the frontier -- but promoting a third axis into
+    the verdict after seeing the numbers is precisely the retrofit the protocol
+    forbids.
+    """
+    _code, result = _run(tmp_path, [make_shard(i) for i in range(24)], envelope)
+    for comparison in result["comparisons"].values():
+        assert comparison["verdict_axes"] == ["mobility", "fidelity"]
+        assert comparison["diagnostic_only_axes"] == ["net_mobility_per_edit"]
+        assert "net_mobility_per_edit" in comparison
+
+
+def test_an_axis_undefined_for_one_arm_is_unresolved_not_a_crash(tmp_path, envelope):
+    """A fully cancelling arm has zero net edits, so displacement per net edit
+    is genuinely undefined. That state must reach the artifact, not raise."""
+    shards = [make_shard(i, cycling_arm="r_theta") for i in range(24)]
+    _code, result = _run(tmp_path, shards, envelope)
+    axis = result["comparisons"]["r_theta_vs_uniform_canonical"]["net_mobility_per_edit"]
+    assert axis["resolved"] is False
+    assert axis["difference"] is None
+    assert axis["undefined_for"] == "r_theta"
+
+
+def test_cycle_attribution_fields_reach_the_per_source_table(tmp_path, envelope):
+    _code, result = _run(tmp_path, [make_shard(i) for i in range(8)], envelope)
+    row = next(iter(result["per_source"]["r_theta"].values()))
+    for field in ("net_edits", "cancelled_fraction", "immediate_two_cycles",
+                  "longer_revisits", "displacement_per_net_edit"):
+        assert field in row
+
+
 def test_pipeline_stratifies_by_support_band(tmp_path, envelope):
     _code, result = _run(tmp_path, [make_shard(i) for i in range(24)], envelope)
     assert set(result["by_support_band"]) == {"0", "1-4", "5-24", "25+"}

@@ -29,6 +29,10 @@ import statistics
 from pathlib import Path
 from typing import Any
 
+from compose_v4.experiments.claim2_cycle_attribution import (
+    attribute_cycles,
+    net_displacement_efficiency,
+)
 from compose_v4.experiments.claim2_trajectory_metrics import (
     BANNED_STATISTICS,
     DescriptorEnvelope,
@@ -154,6 +158,15 @@ def trajectory_metrics(
         if source_vector is not None:
             drifts.append(envelope.drift(source_vector, vector))
 
+    # Cycle attribution, so mobility can be reported per NET edit as well as per
+    # committed edit. A trajectory that makes six edits and cancels four has not
+    # moved six units, and the gross number would say it had.
+    attribution = attribute_cycles(states, trajectory["families"])
+    endpoint_distance = tanimoto_distance(source, endpoint)
+    efficiency = net_displacement_efficiency(endpoint_distance, attribution)
+    reverse = [p for p in trajectory.get("reverse_probabilities", []) if p is not None]
+    forward = [p for p in trajectory.get("forward_probabilities", []) if p is not None]
+
     source_rings = ring_system_count(source)
     endpoint_rings = ring_system_count(endpoint)
     source_heavy = None if source_vector is None else int(source_vector[8])
@@ -165,7 +178,20 @@ def trajectory_metrics(
         "seed": trajectory["seed"],
         "endpoint": endpoint,
         "committed_edits": health.committed_edits,
-        "endpoint_tanimoto_distance": tanimoto_distance(source, endpoint),
+        "endpoint_tanimoto_distance": endpoint_distance,
+        "net_edits": attribution.net_edits,
+        "cancelled_fraction": attribution.cancelled_fraction,
+        "immediate_two_cycles": attribution.immediate_two_cycles,
+        "longer_revisits": attribution.longer_revisits,
+        "inverse_family_pairs": attribution.inverse_family_pairs,
+        "displacement_per_committed_edit": efficiency["per_committed_edit"],
+        "displacement_per_net_edit": efficiency["per_net_edit"],
+        "mean_reverse_edge_probability": (
+            statistics.mean(reverse) if reverse else None
+        ),
+        "mean_forward_edge_probability": (
+            statistics.mean(forward) if forward else None
+        ),
         "heavy_atom_change": (
             None if source_heavy is None or endpoint_heavy is None
             else endpoint_heavy - source_heavy
@@ -220,6 +246,24 @@ def per_source_by_arm(
                 "seeds": len(arm_rows),
                 "endpoint_tanimoto_distance": _mean(
                     [row["endpoint_tanimoto_distance"] for row in arm_rows]
+                ),
+                "net_edits": _mean([float(row["net_edits"]) for row in arm_rows]),
+                "cancelled_fraction": _mean([row["cancelled_fraction"] for row in arm_rows]),
+                "immediate_two_cycles": _mean(
+                    [float(row["immediate_two_cycles"]) for row in arm_rows]
+                ),
+                "longer_revisits": _mean([float(row["longer_revisits"]) for row in arm_rows]),
+                "displacement_per_net_edit": _mean(
+                    [row["displacement_per_net_edit"] for row in arm_rows]
+                ),
+                "displacement_per_committed_edit": _mean(
+                    [row["displacement_per_committed_edit"] for row in arm_rows]
+                ),
+                "mean_reverse_edge_probability": _mean(
+                    [row["mean_reverse_edge_probability"] for row in arm_rows]
+                ),
+                "mean_forward_edge_probability": _mean(
+                    [row["mean_forward_edge_probability"] for row in arm_rows]
                 ),
                 "heavy_atom_change": _mean([row["heavy_atom_change"] for row in arm_rows]),
                 "ring_system_change": _mean([row["ring_system_change"] for row in arm_rows]),
@@ -331,6 +375,28 @@ def main() -> int:
             f"{point.source_count:>8} {point.trajectory_count:>7}"
         )
 
+    print(
+        f"\n{'arm':>20} {'net_edits':>10} {'cancelled':>8}  {'2cyc':>6} "
+        f"{'disp/commit':>12} {'disp/net':>10} {'revP':>8}"
+    )
+    def cell(value: float | None, width: int, decimals: int = 4) -> str:
+        """A trajectory that cancels everything has zero net edits, so
+        displacement per net edit is genuinely undefined rather than zero."""
+        return f"{value:>{width}.{decimals}f}" if value is not None else f"{'n/a':>{width}}"
+
+    for arm in ARMS:
+        rows = list(by_arm.get(arm, {}).values())
+        if not rows:
+            continue
+        print(
+            f"{arm:>20} {cell(_mean([r['net_edits'] for r in rows]), 10, 2)} "
+            f"{cell(_mean([r['cancelled_fraction'] for r in rows]), 8, 3)}  "
+            f"{cell(_mean([r['immediate_two_cycles'] for r in rows]), 6, 2)} "
+            f"{cell(_mean([r['displacement_per_committed_edit'] for r in rows]), 12)} "
+            f"{cell(_mean([r['displacement_per_net_edit'] for r in rows]), 10)} "
+            f"{cell(_mean([r['mean_reverse_edge_probability'] for r in rows]), 8)}"
+        )
+
     comparisons: dict[str, Any] = {}
     powered = source_count >= MIN_SOURCES_FOR_VERDICT and not invalid
     for arm in ARMS:
@@ -340,11 +406,28 @@ def main() -> int:
         for axis, key, better in (
             ("mobility", "endpoint_tanimoto_distance", "higher"),
             ("fidelity", "envelope_retention", "higher"),
+            ("net_mobility_per_edit", "displacement_per_net_edit", "higher"),
         ):
             left = {
                 s: r[key] for s, r in by_arm[ARM_REFERENCE].items() if r[key] is not None
             }
             right = {s: r[key] for s, r in by_arm[arm].items() if r[key] is not None}
+            if not set(left) & set(right):
+                # An axis that cannot be computed for one arm -- for instance
+                # displacement per net edit when every trajectory cancelled
+                # completely -- is UNRESOLVED, not zero and not a crash. That
+                # state is itself informative and must reach the artifact.
+                record[axis] = {
+                    "difference": None,
+                    "ci_low": None,
+                    "ci_high": None,
+                    "resolved": False,
+                    "undefined_for": (
+                        ARM_REFERENCE if not left else arm
+                    ),
+                    "direction_meaning": f"{better} is more {axis}",
+                }
+                continue
             interval = paired_bootstrap_interval(left, right)
             record[axis] = {
                 "difference": interval[0],
@@ -353,6 +436,12 @@ def main() -> int:
                 "resolved": resolved(interval),
                 "direction_meaning": f"{better} is more {axis}",
             }
+        # The frontier verdict uses ONLY the two axes declared before any data:
+        # gross mobility and envelope fidelity. net_mobility_per_edit is
+        # reported beside them as a diagnostic because the cycle attribution
+        # showed edits being cancelled -- it is NOT folded into the decision
+        # rule. Promoting a third axis into the verdict after seeing the
+        # numbers is exactly the retrofit the protocol forbids.
         record["verdict"] = (
             frontier_verdict(
                 points[ARM_REFERENCE],
@@ -363,17 +452,24 @@ def main() -> int:
             if powered
             else "UNDERPOWERED_NO_VERDICT"
         )
+        record["verdict_axes"] = ["mobility", "fidelity"]
+        record["diagnostic_only_axes"] = ["net_mobility_per_edit"]
         comparisons[f"{ARM_REFERENCE}_vs_{arm}"] = record
 
     print("\nr_theta versus each unlearned arm (paired over sources):")
     for name, record in comparisons.items():
         print(f"  {name}: {record['verdict']}")
-        for axis in ("mobility", "fidelity"):
+        for axis in ("mobility", "fidelity", "net_mobility_per_edit"):
             entry = record[axis]
+            if entry["difference"] is None:
+                print(f"    {axis:>21} undefined for {entry['undefined_for']}")
+                continue
             print(
-                f"    {axis:>8} {entry['difference']:+.4f} "
+                f"    {axis:>21} {entry['difference']:+.4f} "
                 f"[{entry['ci_low']:+.4f}, {entry['ci_high']:+.4f}] "
                 f"{'resolved' if entry['resolved'] else 'unresolved'}"
+                + ("  (diagnostic, not a verdict axis)"
+                   if axis == "net_mobility_per_edit" else "")
             )
     if not powered and not invalid:
         print(
