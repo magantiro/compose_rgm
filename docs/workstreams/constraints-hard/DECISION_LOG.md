@@ -203,16 +203,19 @@ That is selection on the outcome and task shopping under another name.
 ## D13 — CDD classified contextual, non-head-to-head
 
 **Evidence:** five independent mismatches, in `EXTERNAL_HARD_CONSTRAINT_AUDIT.md`
-§4. The decisive two: CDD's molecular experiment is **de novo QM9 SMILES
-generation** against COMPOSE's source-conditioned editing; and CDD's operative
-constraint during sampling is a **differentiable ML surrogate**, not RDKit
-`sascorer`, with measured satisfaction **21.3% at τ = 3.0**.
+§4. The decisive ones: CDD's molecular experiment is **de novo, unconditional
+QM9 SMILES generation** against COMPOSE's source-conditioned editing; its
+optimised predicate is a **GPT-2 (124M) surrogate**, not `sascorer`; and its
+reported **0.0% violations** are computed **over valid molecules only**, with
+validity collapsing **895 to 353** at tau = 3.0.
 
 **Alternatives rejected:** (a) quoting CDD's QED numbers head-to-head — the task,
-the dataset and the predicate all differ; (b) reconstructing CDD to run it — no
-code, and the surrogate is unreleased, so this is `BASELINE_IMPLEMENTATION_POLICY`
-option 3; (c) reporting "COMPOSE 100% vs CDD 21.3%" — comparing a construction
-guarantee to an empirical rate, barred by the sign-guarantee rule.
+the dataset and the predicate all differ; (b) reconstructing CDD to run it — the
+official repo is a placeholder README and the surrogate is unreleased, so this is
+`BASELINE_IMPLEMENTATION_POLICY` option 3; (c) using either third-party
+reimplementation as "the published method"; (d) reporting COMPOSE's 100% against
+CDD's rate — comparing a construction guarantee to an empirical measurement,
+barred by the sign-guarantee rule.
 
 **Changes a frozen object:** no.
 
@@ -230,14 +233,29 @@ false.
 
 **Changes a frozen object:** no.
 
-## D15 — CDD's venue is UNVERIFIED and must not be cited yet
+## D15 — Two of this lane's own claims corrected against the camera-ready
 
-**Evidence:** the charter described CDD as NeurIPS 2025. The arXiv HTML comment
-(arXiv:2503.09790) is consistent with an **ICML 2025 submission**. Acceptance at
-NeurIPS 2025 could not be confirmed either way.
+A first-pass search produced two errors that a full-PDF reading overturned. Both
+had already been reported upward, so both are recorded here rather than quietly
+edited.
 
-**Decision:** flag as `UNVERIFIED`; **do not cite a venue** until someone checks
-the proceedings. Recorded rather than guessed, per the provenance rule — a
-fabricated citation gets trusted where a wrong number gets re-measured.
+1. **"CDD's venue is unverified, possibly ICML 2025."** **Wrong.** It is
+   **NeurIPS 2025** — camera-ready footer, DOI `10.52202/085713-0415`. My doubt
+   came from the **v1** arXiv comment; the paper was also renamed between
+   versions (v1: *"Constrained Language Generation with Discrete Diffusion
+   Models"*). The charter was right.
+2. **"CDD reports 21.3% satisfaction at tau = 3.0 and 63.9% at tau = 4.5."**
+   **Wrong — those numbers are not in the paper.** CDD reports **0.0%
+   violations at every tau**. The real critique is the denominator: violations
+   are computed over valid molecules only, and validity drops 895 to 353.
+
+**Why this is logged rather than fixed silently:** the project rule is that
+agents fabricate provenance more readily than numbers, and that a wrong number
+gets re-measured while a bad citation gets trusted. A correction that leaves no
+trace is the failure mode the rule exists to prevent.
+
+**Consequence:** the audit's substance survives — CDD is still not a structural
+guarantee, and it is still not head-to-head comparable — but on different and
+better-evidenced grounds.
 
 **Changes a frozen object:** no.

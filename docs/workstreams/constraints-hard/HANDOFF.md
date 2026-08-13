@@ -198,12 +198,16 @@ No file belonging to Lane 2, Lane 3, Lane 4 or Lane 5 was modified.
 
 # Recommended next action
 
-> **Check CDD's venue and full threshold set against the proceedings before any
-> citation.** The charter described it as NeurIPS 2025; the arXiv comment on
-> 2503.09790 is consistent with an ICML 2025 submission, and acceptance could not
-> be confirmed. Until that is resolved, cite no venue. Then decide whether the
-> related-work paragraph in `EXTERNAL_HARD_CONSTRAINT_AUDIT.md` §5 goes into the
-> paper as drafted.
+> **Decide whether the related-work paragraph in
+> `EXTERNAL_HARD_CONSTRAINT_AUDIT.md` §5 goes into the paper as drafted**, and
+> whether to cite ConStruct's Appendix G.2 as the nearest published analogue to
+> COMPOSE's setup — a frozen pretrained model, a hard constraint imposed at
+> sampling time only, 100% satisfaction by construction.
+
+**Note two corrections this lane made to its own earlier report** (`DECISION_LOG.md`
+D15): CDD **is** NeurIPS 2025, and the "21.3% / 63.9%" satisfaction figures it
+previously reported **do not appear in the paper**. If either travelled into
+another document, fix it there.
 
 # Actions explicitly not recommended
 
@@ -214,12 +218,18 @@ No file belonging to Lane 2, Lane 3, Lane 4 or Lane 5 was modified.
 - Do **not** widen `CORE_FRACTION_BAND` to raise the 22.03% applicability.
 - Do **not** design or build the internal post-hoc / soft-guidance / hard-mask
   contrast here — it belongs to Lane 2.
-- Do **not** present any CDD number as a rerun, or quote a CDD SA number without
-  its satisfaction rate.
+- Do **not** present any CDD number as a rerun, and do **not** quote its 0.0%
+  violation rate without the valid-molecule denominator (353 at τ = 3.0 against
+  an unconstrained base of 895).
+- Do **not** propagate CDD's "203.4% increase" headline — it is a cross-paper
+  comparison copied from Schiff et al., against a different base model.
 - Do **not** report COMPOSE's 100% constraint satisfaction as an empirical win
-  against CDD's 21.3% — that compares a construction guarantee to a measurement.
+  over CDD — that compares a construction guarantee to a measurement.
+- Do **not** use either unofficial third-party CDD reimplementation as "the
+  published method".
 - Do **not** attempt a de novo head-to-head: there is no de novo `R_theta` in the
-  frozen chain and CDD's operative surrogate was never released.
+  frozen chain and CDD's surrogate was never released.
+- Do **not** build on PRODIGY's repo — it carries **no licence at all**.
 - Do **not** patch the Gate-0 decision to unblock a local fiber census.
 - Do **not** revive the withdrawn hand-driven GraphXForm action loop, or add a
   deletion action to GraphXForm.

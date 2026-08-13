@@ -89,10 +89,14 @@ payload = {
         "mechanism_instantiable": False,
         "head_to_head_comparable": False,
         "classification": "external hard-constraint competence benchmark - contextual, non-head-to-head",
-        "decisive_finding": "CDD enforces a differentiable ML surrogate of SA, not RDKit sascorer; measured satisfaction 21.3% at tau=3.0, 63.9% at tau=4.5 - it is not a hard constraint",
-        "cdd_venue": "UNVERIFIED - charter said NeurIPS 2025; arXiv:2503.09790 comment suggests ICML 2025 submission; DO NOT CITE A VENUE YET",
-        "cdd_thresholds_confirmed": [3.0, 4.5],
-        "cdd_thresholds_unverified": [3.5, 4.0],
+        "decisive_finding": "CDD reports 0.0% violations at every tau, but over VALID MOLECULES ONLY, and validity collapses 895->353 (~60%) at tau=3.0. Thm 4.1 is a contraction bound assuming beta-prox-regular C with guarantees claimed only for convex C, so the 0% is empirical not structural. Gradients come from a GPT-2 (124M) surrogate, not sascorer.",
+        "cdd_official_code_status": "PLACEHOLDER - repo jacobchristopher/CDD is a 59-byte README saying code will be added; two unofficial third-party reimplementations exist and must NOT be used as the published method",
+        "cdd_protocol_unstated": ["sample count", "seeds", "variance/error bars", "train/val/test split", "canonicalization/dedup", "RDKit and sascorer version pin"],
+        "cdd_companion_workshop_paper": "Constrained Molecular Generation with Discrete Diffusion for Drug Discovery (AI4D3 2025) adds a 3-membered-heterocycle ABSENCE constraint via RDKit substructure matching, CDD 0.0% violations - the closest any audited method comes to an arbitrary boolean structural predicate, achieved by a bespoke hand-written operator rather than the ALM projection",
+        "prodigy_license": "NONE - no LICENSE file; same blocker class as DDSBM",
+        "construct_nearest_analogue": "Appendix G.2 applies the projector at sampling time to an unconstrained QM9 model without constraint-specific training: 100.0 acyclicity at 99.8 validity. Appendix G.1 planarity is the authors own NEGATIVE result - too loose a constraint, slightly harming performance.",
+        "cdd_venue": "NeurIPS 2025 - CONFIRMED from camera-ready footer, DOI 10.52202/085713-0415",
+        "cdd_thresholds_confirmed": [3.0, 3.5, 4.0, 4.5],
         "cdd_official_code": None,
     },
     "held_out_opened": False,
@@ -197,11 +201,15 @@ payload = {
     "frozen_input_paths": FROZEN_INPUTS,
     "files_modified_belonging_to_other_lanes": [],
     "recommended_next_action": (
-        "Check CDD's venue and full threshold set against the proceedings before "
-        "any citation. The charter said NeurIPS 2025; the arXiv comment suggests "
-        "an ICML 2025 submission. Then decide whether the related-work paragraph "
-        "in EXTERNAL_HARD_CONSTRAINT_AUDIT.md section 5 goes into the paper."
+        "Decide whether the related-work paragraph in "
+        "EXTERNAL_HARD_CONSTRAINT_AUDIT.md section 5 goes into the paper as "
+        "drafted, and whether to cite ConStruct Appendix G.2 as the nearest "
+        "published analogue to COMPOSE's setup."
     ),
+    "self_corrections": [
+        "earlier report said CDD's venue was unverified/possibly ICML 2025; it is NeurIPS 2025",
+        "earlier report said CDD reports 21.3%/63.9% satisfaction; those numbers are not in the paper - CDD reports 0.0% violations on a valid-only denominator",
+    ],
     "superseded": {
         "docs/workstreams/constraints-hard/PROTOCOL.md": (
             "yield contrast folded into Lane 2 (this lane's own accepted "
@@ -213,6 +221,8 @@ payload = {
         "no new constraint may be invented from our own failed scaffold result",
         "COMPOSE's 100% constraint satisfaction is a construction check, never an empirical win",
         "no CDD number may be presented as a rerun; cite as reported or not at all",
+        "no CDD violation rate may be quoted without its valid-only denominator",
+        "the 203.4% CFG/CBG headline is a cross-paper comparison copied from Schiff et al.; do not propagate it",
     ],
 }
 
