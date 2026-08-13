@@ -252,6 +252,18 @@ def main() -> int:
                 preference_region_coverage(z, union)["coverage"])
 
     efficiency["N_90_trajectories"] = {arm: summarize_b90(v) for arm, v in n90.items()}
+    # GUARD. `unguided` has no preference: its five branches are five SEEDS, so
+    # any per-preference statistic computed on it measures sampling spread, not
+    # preference response. Its endpoints are distinct almost by construction,
+    # and reading that as differentiation would invert the comparison it exists
+    # to anchor. Flagged in the artifact so the number cannot be misread.
+    efficiency["preference_blind_arms"] = ["unguided"]
+    efficiency["preference_blind_warning"] = (
+        "unguided branches are seeds, not preferences. Its distinct-endpoint "
+        "count and region coverage measure SAMPLING SPREAD and are the floor "
+        "for comparison; they are not preference differentiation. Preference "
+        "coverage (unique Chebyshev argmin within an arm's own endpoint set) is "
+        "the statistic that treats it correctly.")
     efficiency["preference_region_coverage"] = {
         arm: {"mean": (float(np.mean(v)) if v else None), "n": len(v)}
         for arm, v in region_cov.items()}
@@ -269,6 +281,8 @@ def main() -> int:
         print(f"  {arm:<20}{med:>14}{e['n_uncensored']:>9}"
               f"{e['n_censored']:>10}{cov:>13}")
     print("  censored sources are counted, never imputed at N_max")
+    print("  NOTE: unguided branches are SEEDS, not preferences -- its region "
+          "coverage is sampling spread, the floor, not differentiation")
 
     # --- P5 and P6: WITHIN-arm preference contrasts -------------------------
     # These vary the objective ONLY: same controller, same start, same budget,
