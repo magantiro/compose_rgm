@@ -39,9 +39,15 @@ from pathlib import Path
 import numpy as np
 from scipy import stats
 
+#: Six arms for the held-out confirmation. greedy_restart carries H2's
+#: controller-matched sensitivity in the same run.
 ARMS = ("continue_A", "greedy_retarget", "verified_retarget",
-        "restart", "clairvoyant")
-PAIRS = (("Q1 responsiveness", "verified_retarget", "continue_A"),
+        "greedy_restart", "restart", "clairvoyant")
+PAIRS_H2_SENSITIVITY = ("H2 sensitivity (greedy-matched)",
+                        "greedy_retarget", "greedy_restart")
+PAIRS = (("Q1 responsiveness", "greedy_retarget", "continue_A"),
+         ("Q1 responsiveness (confounded, superseded)", "verified_retarget", "continue_A"),
+         ("H2 sensitivity (greedy-matched)", "greedy_retarget", "greedy_restart"),
          ("Q2 value of history", "verified_retarget", "restart"),
          ("Q3 price of surprise", "verified_retarget", "clairvoyant"))
 
@@ -136,6 +142,19 @@ def main() -> int:
     rows = [json.loads(Path(f).read_text())
             for f in glob.glob(str(args.shards / "*.json"))
             if not f.endswith(".partial.json")]
+
+    # COMPLETENESS GUARD. A source-history pair counts only when EVERY arm is
+    # present. Excluding *.partial.json is not sufficient: a finished shard from
+    # an earlier five-arm run, or any shard missing an arm, would otherwise
+    # enter the aggregate and silently shift a paired contrast that assumes the
+    # same sources on both sides.
+    incomplete = [(r["history"], r["index"], sorted(set(ARMS) - set(r["arms"])))
+                  for r in rows if not set(ARMS).issubset(r["arms"])]
+    if incomplete:
+        for history, index, missing in incomplete[:8]:
+            print(f"  INCOMPLETE {history}/{index:03d} missing {missing}")
+        raise SystemExit(f"{len(incomplete)} source-history pairs are missing arms. "
+                         "A partially completed pair must never enter an aggregate.")
     if not rows:
         raise SystemExit(f"no shards under {args.shards}")
     prefixes = json.loads(args.prefixes.read_text())
