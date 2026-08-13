@@ -34,7 +34,12 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
 from compose_v4.experiments.pareto_control import (  # noqa: E402
+    budget_to_fraction,
+    hv_reference_value,
+    normalized_hypervolume,
+    preference_region_coverage,
     source_paired_bootstrap,
+    union_reference_front,
 )
 from pareto_instrument_gate import (  # noqa: E402
     LANE_CONTRASTS,
@@ -176,6 +181,82 @@ def main() -> int:
               f"[{hv['ci95_low']:>+7.4f}, {hv['ci95_high']:>+7.4f}]  "
               f"{hv['wins']}W/{hv['losses']}L/{hv['ties']}T{flag}")
 
+    # --- Efficiency: HV_ref, N_90, and region coverage ----------------------
+    # HV_ref is the UNION nondominated front across every arm -- never one arm's
+    # own front. If it were COMPOSE's best front, "reached 90% of the attainable
+    # front" would be partly a statement about COMPOSE's own ceiling and every
+    # efficiency curve would inherit the bias. `union_reference_front` raises if
+    # handed a single method, so this cannot be got wrong silently.
+    scales = json.loads((REPO / "diagnostics/pareto_tradeoff_census.json").read_text())
+    pair_key_a = rows[0].get("objective_a", "P")
+    pair_key_b = rows[0].get("objective_b", "D")
+    reference = np.array([scales["frozen_scales"]["reference_p5"][pair_key_a],
+                          scales["frozen_scales"]["reference_p5"][pair_key_b]])
+    utopia = np.array([scales["frozen_scales"]["utopia_p99"][pair_key_a],
+                       scales["frozen_scales"]["utopia_p99"][pair_key_b]])
+
+    efficiency: dict[str, Any] = {
+        "hv_ref_definition": ("union nondominated front across ALL arms (and all "
+                              "external methods when present); never one arm's "
+                              "own front"),
+        "reference_corner": "held-in p5, frozen; never read off results",
+        "utopia": "held-in p99, frozen",
+        "frozen_before_any_hv_number": True,
+        "internal_axis": "completed controlled trajectories -- COMPOSE arms only",
+        "external_axis": ("unique valid canonical evaluations, and oracle "
+                          "requests; external methods are NEVER placed on the "
+                          "trajectory axis"),
+        "per_source": {},
+    }
+
+    n90: dict[str, list[float]] = {arm: [] for arm in arms}
+    n90_unreached: dict[str, int] = {arm: 0 for arm in arms}
+    region_cov: dict[str, list[float]] = {arm: [] for arm in arms}
+
+    for row in rows:
+        fronts = {arm: np.asarray(row["arms"][arm]["endpoint_z"], dtype=float)
+                  for arm in arms if arm in row.get("arms", {})
+                  and row["arms"][arm].get("endpoint_z")}
+        if len(fronts) < 2:
+            continue
+        union = union_reference_front(fronts)
+        hv_ref = hv_reference_value(fronts, reference, utopia)
+        efficiency["per_source"][str(row["index"])] = {
+            "hv_ref": hv_ref, "union_front_size": int(len(union))}
+        for arm, z in fronts.items():
+            # Internal axis: one committed trajectory per preference branch, so
+            # best-so-far HV after k trajectories over k = 1..5.
+            trace = [normalized_hypervolume(z[: k + 1], reference, utopia)
+                     for k in range(len(z))]
+            hit = budget_to_fraction(trace, list(range(1, len(z) + 1)), hv_ref)
+            if hit is None:
+                n90_unreached[arm] += 1
+            else:
+                n90[arm].append(hit)
+            region_cov[arm].append(
+                preference_region_coverage(z, union)["coverage"])
+
+    efficiency["N_90_trajectories"] = {
+        arm: {"median": (float(np.median(v)) if v else None),
+              "n_reached": len(v), "n_never_reached": n90_unreached[arm],
+              "note": ("sources that never reach 0.9*HV_ref are reported as "
+                       "n_never_reached, not as the maximum budget")}
+        for arm, v in n90.items()}
+    efficiency["preference_region_coverage"] = {
+        arm: {"mean": (float(np.mean(v)) if v else None), "n": len(v)}
+        for arm, v in region_cov.items()}
+
+    print("\nEFFICIENCY -- internal axis (trajectories), COMPOSE arms only")
+    print(f"  {'arm':<20}{'N_90 median':>14}{'reached':>10}{'never':>8}"
+          f"{'region cov':>13}")
+    for arm in arms:
+        e = efficiency["N_90_trajectories"][arm]
+        c = efficiency["preference_region_coverage"][arm]
+        med = "n/a" if e["median"] is None else f"{e['median']:.2f}"
+        cov = "n/a" if c["mean"] is None else f"{c['mean']:.3f}"
+        print(f"  {arm:<20}{med:>14}{e['n_reached']:>10}"
+              f"{e['n_never_reached']:>8}{cov:>13}")
+
     # --- P5 and P6: WITHIN-arm preference contrasts -------------------------
     # These vary the objective ONLY: same controller, same start, same budget,
     # different preference weight. They are the contrasts that carry "different
@@ -250,6 +331,7 @@ def main() -> int:
         "schema": "compose.pareto.control_analysis",
         "status": "SMOKE_HELD_IN",
         "within_arm_contrasts": within,
+        "efficiency": efficiency,
         "skipped_contrasts": skipped,
         "held_out_opened": False,
         "n_sources": len(rows),
@@ -266,6 +348,12 @@ def main() -> int:
                         "differ by orders of magnitude",
             "P1": "CONTEXT_ONLY -- varies controller AND objective, may not carry "
                   "a headline",
+            "hv_ref": "union front across all arms; NEVER one arm's own front",
+            "efficiency_is_primary": ("the question is how efficiently the process "
+                                      "sweeps useful front regions, not whether "
+                                      "final HV is 0.83 vs 0.79"),
+            "axes_never_mixed": ("trajectory counts are internal-only; external "
+                                 "methods appear only on evaluation/oracle axes"),
         },
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

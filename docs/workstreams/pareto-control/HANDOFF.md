@@ -239,6 +239,43 @@ though the same committed shards show the *binary* developability region reached
 on **0.933** of 3-edit rollouts. Reaching the region is not exhausting the axis;
 see `DECISION_LOG.md` D-007.
 
+# Were the efficiency metrics frozen before or after the numbers? BEFORE.
+
+**Stated plainly because it was asked plainly.** The `HV_ref` rule and the
+efficiency metric definitions were committed at **`c97571d`, 2026-08-13 02:30:36
+EDT**. At that moment the authorized smoke had emitted **6 arm checkpoints and
+ZERO `DONE` lines**, and `DONE` is the only place `modal_apps/
+pareto_control_app.py` prints a hypervolume. **No HV number existed anywhere
+when the definitions landed** — checked at the time, not reconstructed
+afterwards, and nothing is backdated.
+
+Frozen in that commit:
+
+- **Reference corner (nadir)** = held-in **p5** from the frozen scales;
+  **utopia** = held-in **p99**. Both are frozen inputs, never corners read off
+  observed results.
+- **`HV_ref`** = the **union nondominated front across ALL methods and ALL
+  arms** on the frozen evaluation set. Where only internal arms exist, the
+  **fixed box normalisation** `[r, z*]` established in advance. **Never
+  COMPOSE's own front.** `union_reference_front()` raises
+  `ReferenceFrontError` on a single method; three tests assert it, including
+  that an external method extending the front *raises* the bar.
+- **Efficiency is the primary axis**, not final HV: `HV(b)`, `HV-AUC` over a
+  fixed budget, **`B_90`** (`None` when never reached, never the max budget),
+  and **preference region coverage**, which scores one excellent potency-heavy
+  cluster at **0.2** however good its hypervolume.
+- **Two axes, never mixed.** Internal: HV vs completed controlled
+  **trajectories**, COMPOSE arms only, headline **`N_90`**. External: HV vs
+  **unique valid canonical evaluations** and vs **oracle requests**. External
+  methods are **never** plotted on the trajectory axis — HN-GFN, GraphGA and
+  REINVENT do not share a trajectory object.
+
+**The framing this lane will use.** An external method reaching slightly higher
+*final* HV while COMPOSE has substantially better HV-AUC, or reaches 90% front
+coverage with several times fewer oracle evaluations, is a **good** result and
+will be reported as such. Nothing will be tuned to win final HV. **If COMPOSE is
+worse on both, that will be reported.**
+
 # Gate verdicts
 
 See the table above, `diagnostics/pareto_tradeoff_census.json` → `pairs[].gate`,
