@@ -167,3 +167,77 @@ broad optimization lane.
 **This is a recommendation, not an action.** No lane's files were modified.
 
 **Changes a frozen object:** no. **Commit:** this one.
+
+---
+
+# Reframe — 2026-08-13: lane narrowed to an external audit
+
+## D11 — Scaffold protocol marked `SUPERSEDED`, not deleted
+
+**Evidence before the decision:** the lead accepted (a) this lane's own §13
+recommendation to fold the yield contrast into Lane 2, and (b) the Bemis–Murcko
+feasibility stop.
+
+**Decision:** `PROTOCOL.md` carries a `SUPERSEDED` header with both reasons.
+`SCAFFOLD_FEASIBILITY.md` keeps `SMOKE_HELD_IN` and gains a header stating that
+the measurement stands while the experiment it fed does not.
+
+**Alternatives rejected:** deleting the protocol — the negative cost a
+96,094-source census and is a real recorded result.
+
+**Changes a frozen object:** yes — withdraws this lane's experiment design.
+
+## D12 — The scaffold stop binds against substituting a smaller core
+
+**Decision:** no Bemis–Murcko-lite, no reduced ring core, no pharmacophore
+substitute, no hand-tuned protected core mined from the held-in corpus. **No new
+constraint may be invented from our own failed scaffold result.**
+
+**Reason, written out so it survives a future reader:** we now know the full
+scaffold leaves a median of ~5 editable atoms. Any smaller core proposed *after*
+that measurement would be chosen precisely because it leaves enough room to act.
+That is selection on the outcome and task shopping under another name.
+
+**Changes a frozen object:** no — it forecloses a move that was never frozen.
+
+## D13 — CDD classified contextual, non-head-to-head
+
+**Evidence:** five independent mismatches, in `EXTERNAL_HARD_CONSTRAINT_AUDIT.md`
+§4. The decisive two: CDD's molecular experiment is **de novo QM9 SMILES
+generation** against COMPOSE's source-conditioned editing; and CDD's operative
+constraint during sampling is a **differentiable ML surrogate**, not RDKit
+`sascorer`, with measured satisfaction **21.3% at τ = 3.0**.
+
+**Alternatives rejected:** (a) quoting CDD's QED numbers head-to-head — the task,
+the dataset and the predicate all differ; (b) reconstructing CDD to run it — no
+code, and the surrogate is unreleased, so this is `BASELINE_IMPLEMENTATION_POLICY`
+option 3; (c) reporting "COMPOSE 100% vs CDD 21.3%" — comparing a construction
+guarantee to an empirical rate, barred by the sign-guarantee rule.
+
+**Changes a frozen object:** no.
+
+## D14 — The SA predicate is instantiable verbatim; the mechanism is not
+
+**Evidence:** `src/compose_v4/eval/molecular_quality.py:13` already imports
+`rdkit.Contrib.SA_Score.sascorer` and exposes `sa_score`. `SA(y) ≤ τ` is a
+boolean function of a complete molecule, and `F_C(x)` accepts any decidable
+predicate — no differentiability required.
+
+**Decision:** record that the *predicate* transfers with zero new scoring code,
+and that this is **not** the same as instantiating CDD's *method*. Saying "we ran
+CDD's constraint" while enforcing the true scorer they could not use would be
+false.
+
+**Changes a frozen object:** no.
+
+## D15 — CDD's venue is UNVERIFIED and must not be cited yet
+
+**Evidence:** the charter described CDD as NeurIPS 2025. The arXiv HTML comment
+(arXiv:2503.09790) is consistent with an **ICML 2025 submission**. Acceptance at
+NeurIPS 2025 could not be confirmed either way.
+
+**Decision:** flag as `UNVERIFIED`; **do not cite a venue** until someone checks
+the proceedings. Recorded rather than guessed, per the provenance rule — a
+fabricated citation gets trusted where a wrong number gets re-measured.
+
+**Changes a frozen object:** no.

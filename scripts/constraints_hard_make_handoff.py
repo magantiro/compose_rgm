@@ -31,6 +31,7 @@ def git(*args: str) -> str:
 
 ARTIFACTS = [
     "docs/workstreams/constraints-hard/STATUS.md",
+    "docs/workstreams/constraints-hard/EXTERNAL_HARD_CONSTRAINT_AUDIT.md",
     "docs/workstreams/constraints-hard/PROTOCOL.md",
     "docs/workstreams/constraints-hard/CONSTRAINT_SEMANTICS.md",
     "docs/workstreams/constraints-hard/SCAFFOLD_FEASIBILITY.md",
@@ -72,9 +73,27 @@ payload = {
     ]
     == [],
     "status": "DESIGN_ONLY",
+    "lane_scope": "EXTERNAL_AUDIT_ONLY (narrowed 2026-08-13)",
     "artifact_statuses": {
         "diagnostics/constraints_hard_scaffold_census.json": "SMOKE_HELD_IN",
+        "docs/workstreams/constraints-hard/PROTOCOL.md": "SUPERSEDED",
+        "docs/workstreams/constraints-hard/EXTERNAL_HARD_CONSTRAINT_AUDIT.md": "DESIGN_ONLY",
         "_all_other_deliverables": "DESIGN_ONLY",
+    },
+    "internal_experiment_designed": False,
+    "scaffold_stop_honored": True,
+    "smaller_core_substituted": False,
+    "external_audit": {
+        "methods": ["CDD", "PRODIGY", "ConStruct"],
+        "predicate_instantiable_verbatim": "SA(y) <= tau, via rdkit.Contrib.SA_Score.sascorer already in molecular_quality.py",
+        "mechanism_instantiable": False,
+        "head_to_head_comparable": False,
+        "classification": "external hard-constraint competence benchmark - contextual, non-head-to-head",
+        "decisive_finding": "CDD enforces a differentiable ML surrogate of SA, not RDKit sascorer; measured satisfaction 21.3% at tau=3.0, 63.9% at tau=4.5 - it is not a hard constraint",
+        "cdd_venue": "UNVERIFIED - charter said NeurIPS 2025; arXiv:2503.09790 comment suggests ICML 2025 submission; DO NOT CITE A VENUE YET",
+        "cdd_thresholds_confirmed": [3.0, 4.5],
+        "cdd_thresholds_unverified": [3.5, 4.0],
+        "cdd_official_code": None,
     },
     "held_out_opened": False,
     "held_out_note": (
@@ -178,10 +197,23 @@ payload = {
     "frozen_input_paths": FROZEN_INPUTS,
     "files_modified_belonging_to_other_lanes": [],
     "recommended_next_action": (
-        "Answer PROTOCOL.md section 13: is Experiment A's overlap with Lane 2's "
-        "Stage A the intended division of labour? This lane recommends folding "
-        "the yield contrast into Lane 2's existing harness."
+        "Check CDD's venue and full threshold set against the proceedings before "
+        "any citation. The charter said NeurIPS 2025; the arXiv comment suggests "
+        "an ICML 2025 submission. Then decide whether the related-work paragraph "
+        "in EXTERNAL_HARD_CONSTRAINT_AUDIT.md section 5 goes into the paper."
     ),
+    "superseded": {
+        "docs/workstreams/constraints-hard/PROTOCOL.md": (
+            "yield contrast folded into Lane 2 (this lane's own accepted "
+            "recommendation); protected object failed its feasibility census"
+        )
+    },
+    "binding_prohibitions": [
+        "no smaller protected core may be substituted for the Bemis-Murcko scaffold",
+        "no new constraint may be invented from our own failed scaffold result",
+        "COMPOSE's 100% constraint satisfaction is a construction check, never an empirical win",
+        "no CDD number may be presented as a rerun; cite as reported or not at all",
+    ],
 }
 
 out = ROOT / "docs/workstreams/constraints-hard/handoff.json"

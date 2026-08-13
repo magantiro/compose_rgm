@@ -1,70 +1,78 @@
 # STATUS — hard structural constraints (Lane 6)
 
-**Status:** Stage 0 complete. Stage 1 half complete, half blocked. Stage 2 design
-frozen, **not run**. Ready for handoff.
+**Status: COMPLETE.** Scope narrowed 2026-08-13 to an external audit; the audit
+is delivered. Nothing internal was designed. Nothing was run.
 
 **Branch:** `codex/compose-constraints-hard` **Base commit:** `f6146d7`
 
-**Held-out data opened:** **NO.** Held-in `training_source_keys` only;
-`reserve_source_keys` is deleted from the loaded payload before any sweep.
-
-**Currently running:** nothing. No Modal launch, no GPU, no claim-bearing
-compute. Nothing installed into the project environment.
+**Held-out data opened:** **NO.** **Modal launched:** no. **GPU:** no.
+**Installed into the project environment:** nothing.
 
 ---
 
-## Last completed gate
+## Accepted into project record
 
-**Stage 0 — executor semantics.** Verdict:
-**`LABELED_SUBGRAPH_PRESENCE_INVARIANT`**. `IDENTITY_INVARIANT` is not provable
-and is barred. Four probes, all reproducible on CPU without the checkpoint:
-`docs/workstreams/constraints-hard/probes/identity_probe.py`.
+1. **`LABELED_SUBGRAPH_PRESENCE_INVARIANT`** — the executor gives exact
+   labeled-subgraph presence, not atom identity. `CONSTRAINT_SEMANTICS.md`.
+2. **GraphXForm hard-constraint `N/A`** — `include_structural_constraints` is a
+   hard-coded solvent filter over an add-only action space.
+   `BASELINE_TASK_MATRIX.md` §0.
+3. **The Bemis–Murcko feasibility stop** — median 78.95% core, ~5 editable
+   atoms, 22.03% applicable. `SCAFFOLD_FEASIBILITY.md`.
 
-**Stage 1a — model-free protected-core census.** `SMOKE_HELD_IN`. Across the
-full 96,094-source held-in pool the Bemis–Murcko core is a **median 78.95%** of
-heavy atoms, leaving a **median 5** editable heavy atoms; **22.03%** of sources
-are eligible under Lane 2's reused bands.
+## Superseded
 
-## Blocked
+**`PROTOCOL.md` — the internal scaffold experiment.** Withdrawn on two grounds:
+the yield contrast folded into Lane 2 (this lane's own recommendation, accepted),
+and the protected object failed its census. Retained, not deleted.
 
-**Stage 1b — fiber census.** Gate-0 authentication fails locally on the
-already-diagnosed non-portable `source_index_sha256`, and the model is
-constructed *from* the authenticated source, so there is no partial local path.
-Reproduced with `probes/gate0_local_authentication_repro.py`; **not** routed
-around. Needs a Modal run and the lead's per-run authorization.
+**The scaffold stop is binding and one-directional: no smaller core may be
+substituted.** No Bemis–Murcko-lite, no pharmacophore, no hand-tuned core. Any
+smaller core would be chosen *because* it leaves room to act — selection on the
+outcome. **No new constraint may be invented from our own failed result.**
 
-## Next action — a scope decision, not more work
+## Delivered — the audit
 
-**The lead must decide whether Experiment A's overlap with Lane 2's Stage A is
-the intended division of labour.** Lane 2 already ran this arm structure at
-n = 6 and recorded the primary contrast under `endpoint_only_return_failure`.
-This lane's recommendation is in `PROTOCOL.md` §13: fold the yield contrast into
-Lane 2's existing harness rather than standing up a parallel one, and keep this
-lane's distinct contribution to the semantics freeze, the census, and the
-baseline matrix.
+**`EXTERNAL_HARD_CONSTRAINT_AUDIT.md`.** CDD / PRODIGY / ConStruct, from primary
+sources.
+
+**Verdict:** the constraint *predicate* `SA(y) ≤ τ` is instantiable in COMPOSE
+verbatim with zero new scoring code. **No mechanism is, and no published number
+is head-to-head comparable.** Classification: **external hard-constraint
+competence benchmark — contextual, non-head-to-head.**
+
+Decisive finding: **CDD's constraint is not hard.** It enforces a differentiable
+ML surrogate of SA, not RDKit `sascorer`, and reports **21.3% satisfaction at
+τ = 3.0**, 63.9% at τ = 4.5.
+
+## Next action
+
+**None from this lane.** Two items belong to whoever picks this up:
+
+1. **Check CDD's venue and full threshold set against the proceedings.** The
+   charter said NeurIPS 2025; the arXiv comment suggests an ICML 2025
+   submission. **Do not cite a venue until this is resolved.**
+2. Decide whether the related-work paragraph in `EXTERNAL_HARD_CONSTRAINT_AUDIT.md`
+   §5 goes into the paper as drafted.
 
 ## Deliverables
 
 | file | status |
 |---|---|
-| `CONSTRAINT_SEMANTICS.md` | Stage 0 verdict + evidence |
-| `SCAFFOLD_FEASIBILITY.md` | Stage 1a results, Stage 1b blocker |
-| `PROTOCOL.md` | Stage 2 design + costed plan |
-| `BASELINE_TASK_MATRIX.md` | primary-source qualification |
+| `EXTERNAL_HARD_CONSTRAINT_AUDIT.md` | **the lane's final product** |
+| `CONSTRAINT_SEMANTICS.md` | project record |
+| `SCAFFOLD_FEASIBILITY.md` | standing negative result |
+| `BASELINE_TASK_MATRIX.md` | verified; comparator placement recorded |
+| `PROTOCOL.md` | **`SUPERSEDED`** |
 | `SAME_LAB_LINEAGE.md` | framing freeze |
-| `DECISION_LOG.md` | every material decision |
-| `HANDOFF.md` / `handoff.json` | handoff packet |
-| `probes/` | 2 reproducible probes |
-| `scripts/constraints_hard_scaffold_census.py` | census producer |
-| `src/compose_v4/experiments/constraints_hard_mask.py` | injection point, `DESIGN_ONLY` |
-| `tests/test_hard_scaffold_constraint.py` | 13 tests, all passing |
-| `diagnostics/constraints_hard_scaffold_census.json` | `SMOKE_HELD_IN` |
+| `DECISION_LOG.md` / `HANDOFF.md` / `handoff.json` | handoff packet |
+| `probes/`, `scripts/`, `tests/` | 15 tests passing |
 
-## Top risks
+## Unresolved risks
 
-1. **Overlap with Lane 2** — needs a lead decision (HIGH).
-2. **Only trivial edits outside the core** — median 5 editable atoms (HIGH).
-3. **Applicability is 22.03%** — stop rule already triggered; disclosed, not
-   hidden.
-4. **`fragment_smarts` reuse** depends on the unmerged
-   `codex/compose-pathwise-constraints`.
+1. **CDD venue and thresholds unverified** — blocks any citation (HIGH).
+2. **No CDD code exists** — a rerun is impossible, permanently.
+3. **No de novo `R_theta` in the frozen chain** — the kernel dispatches to a de
+   novo runtime, but no checkpoint trains it; blocks any de novo head-to-head.
+4. The fiber half of the scaffold census was never measured (Gate-0 blocked) and
+   now never will be under this lane.

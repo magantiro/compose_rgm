@@ -1,7 +1,22 @@
+> **2026-08-13 — the lane was narrowed to an external audit and is now COMPLETE.**
+> Three findings were accepted into project record: the
+> `LABELED_SUBGRAPH_PRESENCE_INVARIANT` verdict, the GraphXForm hard-constraint
+> `N/A`, and the Bemis–Murcko feasibility stop. The internal experiment
+> (`PROTOCOL.md`) is **`SUPERSEDED`** — its yield contrast was folded into Lane 2
+> on this lane's own recommendation.
+>
+> **The lane's final product is `EXTERNAL_HARD_CONSTRAINT_AUDIT.md`.** Sections
+> below describing Stage-2 arms, panels and costs are **historical**; no internal
+> experiment was designed after the reframe and none should be.
+>
+> **Binding:** no smaller protected core may be substituted for the Bemis–Murcko
+> scaffold, and no new constraint may be invented from our own failed scaffold
+> result.
+
 # Workstream
 
 - **Name:** Hard structural constraints (Lane 6, `constraints-hard`)
-- **Claim ID:** Experiment A — hard structural invariant via exact successor-support restriction
+- **Claim ID:** external hard-constraint audit (was: Experiment A — withdrawn)
 - **Branch:** `codex/compose-constraints-hard`
 - **Base commit:** `f6146d7`
 - **HEAD commit:** see `handoff.json.head_commit`
@@ -183,21 +198,31 @@ No file belonging to Lane 2, Lane 3, Lane 4 or Lane 5 was modified.
 
 # Recommended next action
 
-> **Decide the scope question in `PROTOCOL.md` §13 before authorizing any run:**
-> whether Experiment A's overlap with Lane 2's Stage A is the intended division
-> of labour. This lane recommends folding the yield contrast into Lane 2's
-> existing arm harness and keeping Lane 6's contribution to the Stage-0 semantics
-> freeze, the protected-core census, and the baseline matrix.
+> **Check CDD's venue and full threshold set against the proceedings before any
+> citation.** The charter described it as NeurIPS 2025; the arXiv comment on
+> 2503.09790 is consistent with an ICML 2025 submission, and acceptance could not
+> be confirmed. Until that is resolved, cite no venue. Then decide whether the
+> related-work paragraph in `EXTERNAL_HARD_CONSTRAINT_AUDIT.md` §5 goes into the
+> paper as drafted.
 
 # Actions explicitly not recommended
 
+- Do **not** substitute a smaller protected core — no Bemis–Murcko-lite, no
+  pharmacophore, no hand-tuned core. Any smaller core would be chosen *because*
+  it leaves room to act.
+- Do **not** invent a new constraint from our own failed scaffold result.
 - Do **not** widen `CORE_FRACTION_BAND` to raise the 22.03% applicability.
-- Do **not** hand-pick a smaller sub-scaffold per source.
+- Do **not** design or build the internal post-hoc / soft-guidance / hard-mask
+  contrast here — it belongs to Lane 2.
+- Do **not** present any CDD number as a rerun, or quote a CDD SA number without
+  its satisfaction rate.
+- Do **not** report COMPOSE's 100% constraint satisfaction as an empirical win
+  against CDD's 21.3% — that compares a construction guarantee to a measurement.
+- Do **not** attempt a de novo head-to-head: there is no de novo `R_theta` in the
+  frozen chain and CDD's operative surrogate was never released.
 - Do **not** patch the Gate-0 decision to unblock a local fiber census.
 - Do **not** revive the withdrawn hand-driven GraphXForm action loop, or add a
   deletion action to GraphXForm.
-- Do **not** report the hard arm's 100% core retention as an empirical result.
-- Do **not** launch Stage 1b or Stage 2 without a per-run authorization.
 
 # Main-session pickup checklist
 
