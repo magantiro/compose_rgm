@@ -57,7 +57,7 @@
       "subcapability": "C4c_retargeting"
     }
   ],
-  "content_commit": "a3910f0cce9965e07bf5196ae8ebcf5772836b5c",
+  "content_commit": "6a72cd3",
   "content_commit_note": "The commit at which every sha256 in durable_artifacts was computed. This manifest is committed immediately after it, so branch HEAD is one commit ahead of content_commit and differs from it only by this file. The manifest cannot name its own commit, which is why the two are separate.",
   "conventional_suite": "docs/workstreams/baseline-qualification/CONVENTIONAL_SUITE.md -- five tasks, all nine fields frozen per task, frozen before any COMPOSE-versus-baseline outcome",
   "durable_artifacts": {
@@ -180,7 +180,7 @@
     "REINVENT": "PROJECTION, NOT MEASURED. Adapter A: an Olivecrona-style RNN sampling 64 SMILES of ~60 tokens per step on CPU, order seconds per step; ~20 steps per source gives a few minutes each, so budget 0.3 CPU-core-hours for 5 sources plus a small prior download. Adapter B: transformer priors are larger; budget 0.5-1.0 CPU-core-hours plus the Zenodo prior downloads. Total 1.0-1.5 CPU-core-hours."
   },
   "pushed_head_note": "The SHA verified present on origin/codex/compose-baseline-qualification by `git ls-remote origin refs/heads/codex/compose-baseline-qualification` at the time this manifest was written. Branch HEAD moves one commit past it when this manifest is itself committed; re-push after that to advance the remote.",
-  "pushed_head_sha": "a3910f0cce9965e07bf5196ae8ebcf5772836b5c",
+  "pushed_head_sha": "6a72cd3",
   "recommended_next_action": "NONE. HOLD. The harness gate passed and the main workstream's instruction is to stop there: do not run external baseline sweeps and do not launch anything on Modal, because Lane 1 may reopen the base process and every external comparison would have to be repeated. Local adapter preparation is permitted and was NOT started, deliberately. When the hold lifts: vendor upstream GB-GA (MIT), reconcile canonicalization against the production RDKit pin 2024.3.5, and run the real GraphGA adapter on 3-5 held-in sources under the frozen three-counter accounting, projected 0.1 CPU-core-hours.",
   "remote": "https://github.com/KoshaTx/compose_rgm.git",
   "resolved_since_last_handoff": [
