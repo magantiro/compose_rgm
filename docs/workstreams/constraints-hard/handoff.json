@@ -1,0 +1,204 @@
+{
+  "schema": "compose.workstream.handoff",
+  "schema_version": 1,
+  "workstream": "constraints-hard",
+  "lane": 6,
+  "claim_id": "experiment_a_hard_structural_invariant",
+  "branch": "codex/compose-constraints-hard",
+  "base_commit": "f6146d7",
+  "head_commit": "ded46b0769149425d8b63b18d991a3c2eb0ec685",
+  "head_commit_note": "the commit containing every deliverable; handoff.json itself is committed in the immediately following commit, since it records this hash",
+  "working_tree_clean_excluding_this_manifest": true,
+  "status": "DESIGN_ONLY",
+  "lane_scope": "EXTERNAL_AUDIT_ONLY (narrowed 2026-08-13)",
+  "artifact_statuses": {
+    "diagnostics/constraints_hard_scaffold_census.json": "SMOKE_HELD_IN",
+    "docs/workstreams/constraints-hard/PROTOCOL.md": "SUPERSEDED",
+    "docs/workstreams/constraints-hard/EXTERNAL_HARD_CONSTRAINT_AUDIT.md": "DESIGN_ONLY",
+    "_all_other_deliverables": "DESIGN_ONLY"
+  },
+  "internal_experiment_designed": false,
+  "scaffold_stop_honored": true,
+  "smaller_core_substituted": false,
+  "external_audit": {
+    "methods": [
+      "CDD",
+      "PRODIGY",
+      "ConStruct"
+    ],
+    "predicate_instantiable_verbatim": "SA(y) <= tau, via rdkit.Contrib.SA_Score.sascorer already in molecular_quality.py",
+    "mechanism_instantiable": false,
+    "head_to_head_comparable": false,
+    "classification": "external hard-constraint competence benchmark - contextual, non-head-to-head",
+    "decisive_finding": "CDD reports 0.0% violations at every tau, but over VALID MOLECULES ONLY, and validity collapses 895->353 (~60%) at tau=3.0. Thm 4.1 is a contraction bound assuming beta-prox-regular C with guarantees claimed only for convex C, so the 0% is empirical not structural. Gradients come from a GPT-2 (124M) surrogate, not sascorer.",
+    "cdd_official_code_status": "PLACEHOLDER - repo jacobchristopher/CDD is a 59-byte README saying code will be added; two unofficial third-party reimplementations exist and must NOT be used as the published method",
+    "cdd_protocol_unstated": [
+      "sample count",
+      "seeds",
+      "variance/error bars",
+      "train/val/test split",
+      "canonicalization/dedup",
+      "RDKit and sascorer version pin"
+    ],
+    "cdd_companion_workshop_paper": "Constrained Molecular Generation with Discrete Diffusion for Drug Discovery (AI4D3 2025) adds a 3-membered-heterocycle ABSENCE constraint via RDKit substructure matching, CDD 0.0% violations - the closest any audited method comes to an arbitrary boolean structural predicate, achieved by a bespoke hand-written operator rather than the ALM projection",
+    "prodigy_license": "NONE - no LICENSE file; same blocker class as DDSBM",
+    "construct_nearest_analogue": "Appendix G.2 applies the projector at sampling time to an unconstrained QM9 model without constraint-specific training: 100.0 acyclicity at 99.8 validity. Appendix G.1 planarity is the authors own NEGATIVE result - too loose a constraint, slightly harming performance.",
+    "cdd_venue": "NeurIPS 2025 - CONFIRMED from camera-ready footer, DOI 10.52202/085713-0415",
+    "cdd_thresholds_confirmed": [
+      3.0,
+      3.5,
+      4.0,
+      4.5
+    ],
+    "cdd_official_code": null
+  },
+  "held_out_opened": false,
+  "held_out_note": "held-in training_source_keys only; reserve_source_keys is deleted from the loaded payload before any sweep",
+  "claim_bearing_compute_run": false,
+  "modal_launched": false,
+  "gpu_used": false,
+  "external_dependencies_installed": [],
+  "executor_semantics_verdict": "LABELED_SUBGRAPH_PRESENCE_INVARIANT",
+  "identity_invariant_provable": false,
+  "protected_object_rule": "atom_and_bond_labeled_bemis_murcko_scaffold_v1",
+  "thresholds_reused_verbatim_from": {
+    "lane": "codex/compose-pathwise-constraints",
+    "tip": "bcc4a40",
+    "file": "src/compose_v4/experiments/pathwise_constraints.py",
+    "constants": {
+      "MIN_CORE_ATOMS": 6,
+      "CORE_FRACTION_BAND": [
+        0.2,
+        0.7
+      ],
+      "MIN_FREE_ATOMS": 8,
+      "HEAVY_ATOM_BAND": [
+        18,
+        38
+      ]
+    },
+    "viability_criteria": {
+      "V3_min_events": 20,
+      "V4a_pooled_median_support_retention_floor": 0.1,
+      "V4b_mask_empty_ceiling": 0.05,
+      "V5a_source_spread_floor": 0.3333333333333333,
+      "V5b_single_source_share_ceiling": 0.5
+    },
+    "note": "reused, not minted; applied to a strictly larger protected object, which is the conservative direction"
+  },
+  "results": {
+    "held_in_pool_applicability": {
+      "sources": 96094,
+      "eligible": 21166,
+      "eligible_fraction": 0.2203,
+      "core_fraction_median": 0.7895,
+      "free_atoms_median": 5.0
+    },
+    "cohort_applicability": {
+      "sources": 30,
+      "eligible": 6
+    },
+    "fiber_quantities_measured": null
+  },
+  "blockers": [
+    {
+      "id": "gate0_local_authentication",
+      "blocks": "Stage 1b fiber census and all Stage 2 runs",
+      "cause": "source_index_sha256 embeds the absolute Active8 mount path",
+      "reference": "docs/PARETO_PARITY_ENVIRONMENT_STATUS.md",
+      "code": "src/compose_v4/data/editing_v2_process_v2_gate_zero.py:593",
+      "reproduced_by": "docs/workstreams/constraints-hard/probes/gate0_local_authentication_repro.py",
+      "bypassed": false
+    }
+  ],
+  "unmet_prerequisites": [
+    {
+      "what": "pathwise_constraints.fragment_smarts / preserves_motif",
+      "why": "the predicate must reuse Lane 2's exact-label matcher, not reimplement it",
+      "where": "branch codex/compose-pathwise-constraints (unmerged)"
+    },
+    {
+      "what": "Lane 3 comparator registry + oracle_accounting + shared_evaluator",
+      "why": "reuse mandated; this lane rebuilt none of it",
+      "where": "branch codex/compose-baseline-qualification (unmerged)"
+    }
+  ],
+  "baseline_status": {
+    "GraphXForm": "MUST_RUN as source-conditioned editor; N/A for the hard-constraint cell (no user-specified preservation, add-only action space)",
+    "Prompt-MolOpt^P": "MUST_RUN - the one direct structure-preserving editor",
+    "MolEditRL": "OFFICIAL_CODE_UNAVAILABLE",
+    "InVirtuoGen": "CONDITIONAL - token-level clamp, CC-BY-NC-SA",
+    "ConStruct": "CONTEXT_ONLY - cite, do not port",
+    "DDSBM": "CONTEXT_ONLY - no LICENSE file, no checkpoints"
+  },
+  "costed_stage_2": {
+    "basis": "measured from diagnostics/pathwise_constraints_smoke.json cost block",
+    "per_arm_source_seconds": 170,
+    "arms": 4,
+    "sources": 24,
+    "serial_cpu_hours": 4.5,
+    "plus_stage_1b_fiber_census_cpu_hours": 1.1,
+    "total_cpu_hours": 5.6,
+    "wall_minutes_at_24_way_fanout": "12-25",
+    "uncertainty_band": "0.7x-2.5x",
+    "authorization_required": true
+  },
+  "tests": {
+    "tests/test_hard_scaffold_constraint.py": {
+      "passed": 13,
+      "failed": 0
+    }
+  },
+  "reproduction_commands": [
+    "PYTHONPATH=src python3 docs/workstreams/constraints-hard/probes/identity_probe.py",
+    "PYTHONPATH=src python3 -m pytest tests/test_hard_scaffold_constraint.py -q",
+    "python3 scripts/constraints_hard_scaffold_census.py --cohort diagnostics/retarget_calibration_cohort.json --pool diagnostics/editing_v2_matched_validation_reserve_ids.json.gz --out diagnostics/constraints_hard_scaffold_census.json",
+    "python3 docs/workstreams/constraints-hard/probes/gate0_local_authentication_repro.py --local-runtime <local_runtime>"
+  ],
+  "rdkit_version_used": "2025.09.6",
+  "rdkit_production_pin": "2024.03.5",
+  "rdkit_pin_matches_production": false,
+  "artifact_sha256": {
+    "docs/workstreams/constraints-hard/STATUS.md": "f27e1df125b405db834f97c889be8411bd17353a1c4fad5b383861ceb96d7d62",
+    "docs/workstreams/constraints-hard/EXTERNAL_HARD_CONSTRAINT_AUDIT.md": "4eb7955d1d6f4b40b6b42cd0b4de041ef32bad0ee459912179acce2fd121a56a",
+    "docs/workstreams/constraints-hard/PROTOCOL.md": "82e2173bd0bee6c83d8a43b12c5f3e40d3481bc16349d8ce367c4624528829ee",
+    "docs/workstreams/constraints-hard/CONSTRAINT_SEMANTICS.md": "d26b80b12f5d1a2a1a9c05043b6909a3e184d72278d966815977427f0fa3c27e",
+    "docs/workstreams/constraints-hard/SCAFFOLD_FEASIBILITY.md": "29a27c839b811fba1d60bc7582b74ace537fe570a8608d39390adf86368c9757",
+    "docs/workstreams/constraints-hard/BASELINE_TASK_MATRIX.md": "db5827e4168190c13aa25d2a877cda3c115f8be4a2de731ac30a1bda10f26fcb",
+    "docs/workstreams/constraints-hard/SAME_LAB_LINEAGE.md": "6b3c5b6f54af236dfb3ad2953de956ca42b9b0cf493b8114f660f98f1dbe56bf",
+    "docs/workstreams/constraints-hard/DECISION_LOG.md": "e2b750002af1ba80fe985212c3044a3baf36f735da96acc8f69241f90c964292",
+    "docs/workstreams/constraints-hard/HANDOFF.md": "f6ad94423581187f39eff2572deb2ae2fd9ec529d872e62a99cffcddbc479103",
+    "docs/workstreams/constraints-hard/probes/identity_probe.py": "b5d8712119d7c1f66d3179f153d6503587a1e4dfa9fb10c08cd4276eb93ffd6a",
+    "docs/workstreams/constraints-hard/probes/gate0_local_authentication_repro.py": "7021100b2e4b55731cc8a0483a6c4567067b6448df38176b7753f287f4064edf",
+    "scripts/constraints_hard_scaffold_census.py": "bd90c87b1f9260eeb5a896db5df10c8061de067b2e31e7ce08f536303c7a7898",
+    "scripts/constraints_hard_make_handoff.py": "19ddf0941c99aef0b29b3e990cd9b3ece721d43759f8fe64a4909c222b4b6681",
+    "src/compose_v4/experiments/constraints_hard_mask.py": "7bdceb48d92c1a74691ade73d7ea0f15d3be50df978e104d845a704e90607a95",
+    "tests/test_hard_scaffold_constraint.py": "69cd7a2c7c3cac507259c1e5f5f7f46ce567f99256e6b19bd9ea5e8bbd208356",
+    "diagnostics/constraints_hard_scaffold_census.json": "b9b1412351bd20b470f77737e79e882bde8523d60cf4fcae14ecb32f5284c7e5"
+  },
+  "frozen_input_sha256": {
+    "held_in_pool": "ba9270faf8bea1a67ad103c6da887efeef257a66fcb9ca1c3faf088f770994a1",
+    "held_in_cohort": "e1ab574bc175c7a4d5af0e07678cc9d637fc103aba84702efcd6df52e998b5ed"
+  },
+  "frozen_input_paths": {
+    "held_in_pool": "diagnostics/editing_v2_matched_validation_reserve_ids.json.gz",
+    "held_in_cohort": "diagnostics/retarget_calibration_cohort.json"
+  },
+  "files_modified_belonging_to_other_lanes": [],
+  "recommended_next_action": "Decide whether the related-work paragraph in EXTERNAL_HARD_CONSTRAINT_AUDIT.md section 5 goes into the paper as drafted, and whether to cite ConStruct Appendix G.2 as the nearest published analogue to COMPOSE's setup.",
+  "self_corrections": [
+    "earlier report said CDD's venue was unverified/possibly ICML 2025; it is NeurIPS 2025",
+    "earlier report said CDD reports 21.3%/63.9% satisfaction; those numbers are not in the paper - CDD reports 0.0% violations on a valid-only denominator"
+  ],
+  "superseded": {
+    "docs/workstreams/constraints-hard/PROTOCOL.md": "yield contrast folded into Lane 2 (this lane's own accepted recommendation); protected object failed its feasibility census"
+  },
+  "binding_prohibitions": [
+    "no smaller protected core may be substituted for the Bemis-Murcko scaffold",
+    "no new constraint may be invented from our own failed scaffold result",
+    "COMPOSE's 100% constraint satisfaction is a construction check, never an empirical win",
+    "no CDD number may be presented as a rerun; cite as reported or not at all",
+    "no CDD violation rate may be quoted without its valid-only denominator",
+    "the 203.4% CFG/CBG headline is a cross-paper comparison copied from Schiff et al.; do not propagate it"
+  ]
+}
