@@ -89,7 +89,39 @@ is what makes the favourable ones worth anything.
 - Running it on exact-target recovery. That panel is sealed and closed, and its
   Tanimoto-to-the-answer heuristic would confound the comparison.
 - Any statistic whose sign is fixed by construction — the project-wide rule, and
-  five instances have already been caught here. Note the specific hazard for
-  this ablation: `R_theta` is the law the descriptor envelope was calibrated
-  against, so envelope-retention comparisons must use Lane 1's held-in
-  self-retention ceiling as the reference point, not 1.0.
+  five instances have already been caught here.
+
+## The fidelity ceiling is 0.9639, not 1.0
+
+The descriptor envelope was calibrated on the **held-in molecular population**
+(`training_source_keys`, 96,094 molecules, 0.5%–99.5% quantiles, envelope
+`fb369161`). It was **not** calibrated against `R_theta` or any arm.
+
+The point is simpler and applies symmetrically:
+
+> Even molecules drawn from the population that *defines* the envelope achieve
+> only **0.9639** retention. 1.0 is not the attainable reference baseline for
+> any arm.
+
+So an arm at 0.95 is close to the empirical reference ceiling, not "5% drift
+from perfect". Report the **raw retention fraction** always; a normalized
+`F_arm / 0.9639` may accompany it where useful, but normalization must never
+replace the absolute number. The same envelope and the same ceiling apply to
+both reference-law arms.
+
+## The verdict is two-dimensional, and its categories are fixed here
+
+Objective attainment and chemical fidelity are both primary and must **not** be
+collapsed into a weighted scalar invented after the results are visible.
+Mirroring Lane 1's frontier, the four verdicts are declared now:
+
+| verdict | condition |
+|---|---|
+| **dominates** | better on one primary axis, no worse on the other |
+| **dominated** | the converse |
+| **incomparable** | one arm trades objective attainment for fidelity — both differences resolved, in opposite directions |
+| **unresolved** | intervals do not support a meaningful difference on either axis |
+
+`incomparable` is a real, publishable outcome and must not be presented as a win
+for either law. Lane 1 already returned it once; there is no reason to assume
+this ablation cannot.
