@@ -469,10 +469,20 @@ corridor mask, and mask-empty frequency, measured on every state the
 
 ### Justifying V5a from downstream feasibility, not from current numbers
 
-The eventual causal experiment is source-level: per source, endpoint-only
-handling versus pathwise masking. A source with no possible endpoint-valid /
-path-invalid excursion is **non-informative** — both arms return the same
-molecule and it contributes nothing to the contrast.
+**The rule, before the derivation:**
+
+> **Stage A and Stage A2 do not share an eligibility denominator. Stage A2
+> restricts to sources for which excursion-and-return is logically observable;
+> therefore Stage-A source prevalence must not be used as an estimate of the A2
+> pass criterion.**
+
+Anyone comparing "2 of 6" against "1/3" is comparing two different
+denominators. The threshold below is derived without reference to either.
+
+**Derivation.** The eventual causal experiment is source-level: per source,
+endpoint-only handling versus pathwise masking. A source with no possible
+endpoint-valid / path-invalid excursion is **non-informative** — both arms
+return the same molecule and it contributes nothing to the contrast.
 
 Using this project's own panel sizing (`RETARGETING_SAME_PREFIX_DESIGN.md`:
 20–24 development, 60–80 held-out confirmatory), and requiring ~20 informative
@@ -481,15 +491,17 @@ sources for a stable paired estimate:
 - 60-source confirmatory panel → `p ≥ 20/60 = 1/3`;
 - 24-source development panel → `p ≥ 8/24 = 1/3`.
 
-Both routes land on **1/3**, so that is the threshold.
+Both routes land on **1/3**, so that is the threshold. Neither consults a
+stage-A number.
 
-**Disclosure, because a reviewer will check.** Stage A's family-B events came
-from 2 of 6 panel sources = 0.333, numerically equal to this threshold. The
-denominators are **not** comparable: stage A did not require `x_0` inside the
-corridor and only 3 of its 6 sources were source-feasible. Under A2's own
-definition — where every source is source-feasible by construction — the
-stage-A analogue is **2/3 = 0.667**, twice the threshold. V5a is set at half
-the previously observed value, not at it.
+**Disclosure, because a reviewer will check the coincidence.** Stage A's
+family-B events came from 2 of 6 panel sources = 0.333, numerically equal to
+this threshold. Per the rule above the two are not comparable: stage A did not
+require `x_0` inside the corridor and only 3 of its 6 sources were
+source-feasible, so half its panel could never have exhibited the phenomenon.
+Under A2's own definition — where every source is source-feasible by
+construction — the stage-A analogue is **2/3 = 0.667**, twice the threshold.
+V5a is set at half the previously observed value, not at it.
 
 ### V5b
 

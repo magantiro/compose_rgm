@@ -186,6 +186,60 @@ def test_definitional_zero_is_recorded_but_never_a_gate(tmp_path):
         "any_violation", "")
 
 
+def test_reversibility_census_verdicts_survive_later_refactors(tmp_path):
+    """Regression guard on the shared rollout law and the families module.
+
+    `ArmContext` gained an injected feasibility predicate so the corridor family
+    reuses the same policies instead of forking them -- the duplication that let
+    the retargeting lane's "verified arm was secretly greedy" defect survive two
+    full runs. Injecting rather than forking is right, but it edits code the
+    already-published census depends on.
+
+    So: re-derive the census from the committed shards and require the published
+    verdicts back, unchanged. A refactor that quietly moves a verdict fails here
+    instead of silently rewriting a recorded result.
+    """
+    shards = REPO / "diagnostics/pathwise_constraints_smoke_stageA_shards"
+    committed = REPO / "diagnostics/pathwise_reversibility_census.json"
+    if not shards.exists() or not committed.exists():
+        pytest.skip("stage-A shards or committed census not available")
+
+    out = tmp_path / "recomputed.json"
+    proc = subprocess.run(
+        [sys.executable, str(REPO / "scripts/pathwise_reversibility_census.py"),
+         "--shards", str(shards), "--out", str(out)],
+        capture_output=True, text=True, cwd=str(REPO), check=False)
+    assert proc.returncode == 0, proc.stderr
+
+    fresh = {f["family"]: f for f in json.loads(out.read_text())["families"]}
+    published = {f["family"]: f for f in json.loads(committed.read_text())["families"]}
+    assert set(fresh) == set(published)
+
+    load_bearing = (
+        "verdict", "violating_trajectories", "denominator_source_feasible",
+        "returned_to_feasible_endpoint", "RETURN_RATE_among_violators",
+        "endpoint_valid_path_invalid_events", "failure_mode",
+    )
+    for name, was in published.items():
+        for key in load_bearing:
+            assert fresh[name][key] == was[key], (
+                f"{name}.{key} moved: {was[key]} -> {fresh[name][key]}")
+
+    # and the headline verdict itself
+    assert all(f["verdict"] == "FAIL" for f in fresh.values())
+
+
+def test_stage_a_verdict_is_recorded_as_fail_everywhere_it_appears():
+    """Stage A2 must not read as reopening or softening stage A."""
+    handoff = json.loads(
+        (REPO / "docs/workstreams/pathwise-constraints/handoff.json").read_text())
+    assert handoff["gate_status"]["G1_constraint_non_vacuous"] == "FAIL"
+    assert handoff["headline_result"]["verdict"] == "FAIL"
+    assert handoff["reversibility_census"]["outcome"] == "NO_FAMILY_PASSES"
+    assert handoff["stage_a2"]["stage_a_verdict_unchanged"] == "FAIL"
+    assert handoff["stage_a2"]["launched"] is False
+
+
 def test_analyser_refuses_an_all_void_run(tmp_path):
     shards = tmp_path / "shards"
     shards.mkdir()
