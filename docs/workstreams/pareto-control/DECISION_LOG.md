@@ -793,3 +793,87 @@ outcome the labelling existed to make cheap.
 
 **Changes a frozen object:** no. Supersedes an exploratory note, nothing else.
 
+---
+
+## D-020 · 2026-08-13 · Smoke complete, 12/12. Results against the frozen instruments
+
+`diagnostics/pareto_control_analysis.json`, `pareto_potency_watch.json`,
+`pareto_oracle_accounting_audit.json`. Status **`SMOKE_HELD_IN`**. Held-out never
+opened. Feasibility **1.000 on every arm** — no dead ends, nothing truncated.
+
+### The hierarchy, in order
+
+**1. Preference responsiveness — real, but imperfectly ORDERED.**
+
+| arm | rho(w, obj0) | adjacent correct | monotone | distinct of 5 |
+|---|---:|---:|---:|---:|
+| `verified_pref` | +0.564 | 0.556 | **0.167** | 4.17 |
+| `greedy_pref` | +0.636 | 0.639 | **0.167** | 3.83 |
+| `unguided` (floor) | +0.432 | 0.507 | 0.000 | 4.92 |
+
+Distinctness is unambiguous: **3.83 of 5** distinct endpoints for `greedy_pref`,
+**zero** sources where all five collapse, and **P6 gives 3.75 of 5 distinct
+endpoints from the byte-identical branch point** with every branch verified to
+start there. **Ordering is weaker.** Monotone on only **1 source in 6**, and the
+guided `rho` of +0.636 sits above the preference-blind floor of +0.432 but not
+dramatically — and that floor is itself noisy at 12 sources x 5 points.
+
+**So: preferences produce different futures, and they are positively but
+loosely ordered by the requested tradeoff.** The strong reading — five cleanly
+ordered regions — is **not** supported.
+
+**2. Held-in-scaled HV.** `verified_pref` **0.938**, `greedy_pref` **0.849**,
+`gen_rank@verified` 0.308, `unguided` 0.191, `gen_rank@greedy` 0.149.
+**12.7%** of endpoints exceed `z*`, max excess **0.909** IQR units — reported
+descriptively, unclipped.
+
+**3. PER-PREFERENCE (sign guaranteed — magnitude only).** mean **+0.1431**,
+median +0.0763, **12W/0L**. The 12-0 is definitional, not evidence; only the
+magnitude is admissible.
+
+**4. SET-LEVEL HV (NOT guaranteed — the real test).** mean **+0.0890**, 95% CI
+**[+0.0379, +0.1449]**, **10W/2L**.
+
+> **This is the result that could have failed and did not.** The sign was free:
+> sources 000 (-0.001) and 010 (-0.073) went the other way, and source 000 is
+> the registered regression fixture proving it. Verified control improves the
+> endpoint SET, not merely each preference-conditioned trajectory — and per the
+> pre-recorded rule, that is strong **precisely because** it was demonstrably
+> capable of going the other way.
+
+**5. Resource curves, separately.** `N_90` on the internal trajectory axis:
+`verified_pref` **2.00 with 0 of 12 censored**; `greedy_pref` **2.00 but 5 of 12
+CENSORED**; `unguided`, `gen_rank@greedy`, `gen_rank@verified` **12 of 12
+censored — none ever reached 90% of pooled attainable HV.** Region coverage:
+verified 0.433, greedy 0.367, gen_rank@verified 0.167, unguided 0.150.
+
+### P3 and P4 remain WITHHELD
+
+Kernel ratios **1.492** and **2.388** against the 1.25 limit. **This smoke
+contains no admissible closed-loop versus generate-and-rank comparison**, and
+`gen_rank`'s poor numbers must not be read as a defeat of that baseline — it was
+underfunded by my own matcher.
+
+### The five potency watch-items — the risk did not materialise
+
+| | statistic | reading |
+|---|---|---|
+| W1 | extreme weights give different endpoints | **1.00** of sources |
+| W2 | last productive potency step | **5.0 of 6** — does not stall early |
+| W3 | spread ratio, 1 = both axes sweep | **0.427** — neither axis flat |
+| W4 | distinct endpoints | **3.83 of 5**, none collapsed |
+| W5 | fraction of horizon still moving | **1.00** — HV does not stall on saturation |
+
+G3's 0.76 and G4's 0.700 were live risks. **Neither bit.**
+
+### Accounting audit — counter sound
+
+`verified_pref` **612.2** unique evaluations per kernel call against the census
+fiber width of **586**; `greedy_pref` 596.6. Increments track distinct
+candidates. Cost is real and large: **249,640 unique evaluations and 393 kernel
+calls per source** for verified. The oracle-demand ratio stays **withdrawn as a
+cost claim**.
+
+**Changes a frozen object:** no. Every instrument was frozen before these numbers
+existed.
+

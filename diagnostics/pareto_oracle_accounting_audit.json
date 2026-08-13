@@ -49,11 +49,11 @@
     },
     {
       "arm": "verified_pref",
-      "n_sources": 1,
+      "n_sources": 12,
       "evaluations_per_kernel_call": {
-        "min": 437.9246231155779,
-        "median": 437.9246231155779,
-        "max": 437.9246231155779
+        "min": 380.63377192982455,
+        "median": 612.1549161768957,
+        "max": 1431.4690026954179
       },
       "census_mean_distinct_successors_per_state": 585.7166666666667,
       "consistent_with_fiber_width": true,
@@ -68,6 +68,13 @@
       "cache_hit_rate": 0.5,
       "evaluations_per_kernel_call": 0.2222222222222222,
       "kernel_calls": 11.0
+    },
+    "gen_rank@verified": {
+      "oracle_requests": 131.0,
+      "unique_valid_canonical_evaluations": 59.0,
+      "cache_hit_rate": 0.5491935483870968,
+      "evaluations_per_kernel_call": 0.3565978938319364,
+      "kernel_calls": 174.5
     },
     "greedy_pref": {
       "oracle_requests": 17726.5,
@@ -84,17 +91,17 @@
       "kernel_calls": 20.0
     },
     "verified_pref": {
-      "oracle_requests": 273854.0,
-      "unique_valid_canonical_evaluations": 174294.0,
-      "cache_hit_rate": 0.363551381393005,
-      "evaluations_per_kernel_call": 437.9246231155779,
-      "kernel_calls": 398.0
+      "oracle_requests": 397711.5,
+      "unique_valid_canonical_evaluations": 249640.5,
+      "cache_hit_rate": 0.39444785371757607,
+      "evaluations_per_kernel_call": 612.1549161768957,
+      "kernel_calls": 393.0
     }
   },
   "per_source": {
     "0": {
-      "complete": false,
-      "stage": "gen_rank@greedy",
+      "complete": true,
+      "stage": "prefix_branching",
       "arms": {
         "unguided": {
           "kernel_calls": 10.0,
@@ -140,12 +147,42 @@
           "drd2_rows_per_invocation": 1,
           "is_vectorised_batch": false,
           "evaluations_per_kernel_call": 0.5
+        },
+        "verified_pref": {
+          "kernel_calls": 368.0,
+          "oracle_requests": 345338.0,
+          "unique_valid_canonical_evaluations": 197818.0,
+          "cache_hits": 147520.0,
+          "cache_hit_rate": 0.4271756945369464,
+          "N_drd2": 197818.0,
+          "N_descriptor": 197818.0,
+          "N_all_objective": 197818.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 197818.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 537.5489130434783
+        },
+        "gen_rank@verified": {
+          "kernel_calls": 60.0,
+          "oracle_requests": 122.0,
+          "unique_valid_canonical_evaluations": 30.0,
+          "cache_hits": 92.0,
+          "cache_hit_rate": 0.7540983606557377,
+          "N_drd2": 30.0,
+          "N_descriptor": 30.0,
+          "N_all_objective": 30.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 30.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.5
         }
       }
     },
     "1": {
-      "complete": false,
-      "stage": "gen_rank@greedy",
+      "complete": true,
+      "stage": "prefix_branching",
       "arms": {
         "unguided": {
           "kernel_calls": 22.0,
@@ -191,12 +228,42 @@
           "drd2_rows_per_invocation": 1,
           "is_vectorised_batch": false,
           "evaluations_per_kernel_call": 0.21428571428571427
+        },
+        "verified_pref": {
+          "kernel_calls": 388.0,
+          "oracle_requests": 406629.0,
+          "unique_valid_canonical_evaluations": 239819.0,
+          "cache_hits": 166810.0,
+          "cache_hit_rate": 0.4102265209810417,
+          "N_drd2": 239819.0,
+          "N_descriptor": 239819.0,
+          "N_all_objective": 239819.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 239819.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 618.090206185567
+        },
+        "gen_rank@verified": {
+          "kernel_calls": 173.0,
+          "oracle_requests": 130.0,
+          "unique_valid_canonical_evaluations": 60.0,
+          "cache_hits": 70.0,
+          "cache_hit_rate": 0.5384615384615384,
+          "N_drd2": 60.0,
+          "N_descriptor": 60.0,
+          "N_all_objective": 60.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 60.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.3468208092485549
         }
       }
     },
     "2": {
-      "complete": false,
-      "stage": "verified_pref",
+      "complete": true,
+      "stage": "prefix_branching",
       "arms": {
         "unguided": {
           "kernel_calls": 15.0,
@@ -257,12 +324,27 @@
           "drd2_rows_per_invocation": 1,
           "is_vectorised_batch": false,
           "evaluations_per_kernel_call": 437.9246231155779
+        },
+        "gen_rank@verified": {
+          "kernel_calls": 145.0,
+          "oracle_requests": 132.0,
+          "unique_valid_canonical_evaluations": 58.0,
+          "cache_hits": 74.0,
+          "cache_hit_rate": 0.5606060606060606,
+          "N_drd2": 58.0,
+          "N_descriptor": 58.0,
+          "N_all_objective": 58.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 58.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.4
         }
       }
     },
     "3": {
-      "complete": false,
-      "stage": "gen_rank@greedy",
+      "complete": true,
+      "stage": "prefix_branching",
       "arms": {
         "unguided": {
           "kernel_calls": 20.0,
@@ -308,12 +390,42 @@
           "drd2_rows_per_invocation": 1,
           "is_vectorised_batch": false,
           "evaluations_per_kernel_call": 0.2222222222222222
+        },
+        "verified_pref": {
+          "kernel_calls": 402.0,
+          "oracle_requests": 623333.0,
+          "unique_valid_canonical_evaluations": 387296.0,
+          "cache_hits": 236037.0,
+          "cache_hit_rate": 0.3786691864541104,
+          "N_drd2": 387296.0,
+          "N_descriptor": 387296.0,
+          "N_all_objective": 387296.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 387296.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 963.4228855721393
+        },
+        "gen_rank@verified": {
+          "kernel_calls": 141.0,
+          "oracle_requests": 134.0,
+          "unique_valid_canonical_evaluations": 50.0,
+          "cache_hits": 84.0,
+          "cache_hit_rate": 0.6268656716417911,
+          "N_drd2": 50.0,
+          "N_descriptor": 50.0,
+          "N_all_objective": 50.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 50.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.3546099290780142
         }
       }
     },
     "4": {
-      "complete": false,
-      "stage": "gen_rank@greedy",
+      "complete": true,
+      "stage": "prefix_branching",
       "arms": {
         "unguided": {
           "kernel_calls": 20.0,
@@ -359,12 +471,42 @@
           "drd2_rows_per_invocation": 1,
           "is_vectorised_batch": false,
           "evaluations_per_kernel_call": 0.18181818181818182
+        },
+        "verified_pref": {
+          "kernel_calls": 371.0,
+          "oracle_requests": 960207.0,
+          "unique_valid_canonical_evaluations": 531075.0,
+          "cache_hits": 429132.0,
+          "cache_hit_rate": 0.44691613370866906,
+          "N_drd2": 531075.0,
+          "N_descriptor": 531075.0,
+          "N_all_objective": 531075.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 531075.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 1431.4690026954179
+        },
+        "gen_rank@verified": {
+          "kernel_calls": 242.0,
+          "oracle_requests": 124.0,
+          "unique_valid_canonical_evaluations": 62.0,
+          "cache_hits": 62.0,
+          "cache_hit_rate": 0.5,
+          "N_drd2": 62.0,
+          "N_descriptor": 62.0,
+          "N_all_objective": 62.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 62.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.256198347107438
         }
       }
     },
     "5": {
-      "complete": false,
-      "stage": "gen_rank@greedy",
+      "complete": true,
+      "stage": "prefix_branching",
       "arms": {
         "unguided": {
           "kernel_calls": 20.0,
@@ -410,12 +552,42 @@
           "drd2_rows_per_invocation": 1,
           "is_vectorised_batch": false,
           "evaluations_per_kernel_call": 0.3
+        },
+        "verified_pref": {
+          "kernel_calls": 450.0,
+          "oracle_requests": 406247.0,
+          "unique_valid_canonical_evaluations": 287051.0,
+          "cache_hits": 119196.0,
+          "cache_hit_rate": 0.29340770516459197,
+          "N_drd2": 287051.0,
+          "N_descriptor": 287051.0,
+          "N_all_objective": 287051.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 287051.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 637.8911111111111
+        },
+        "gen_rank@verified": {
+          "kernel_calls": 188.0,
+          "oracle_requests": 150.0,
+          "unique_valid_canonical_evaluations": 69.0,
+          "cache_hits": 81.0,
+          "cache_hit_rate": 0.54,
+          "N_drd2": 69.0,
+          "N_descriptor": 69.0,
+          "N_all_objective": 69.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 69.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.3670212765957447
         }
       }
     },
     "6": {
-      "complete": false,
-      "stage": "gen_rank@greedy",
+      "complete": true,
+      "stage": "prefix_branching",
       "arms": {
         "unguided": {
           "kernel_calls": 21.0,
@@ -461,12 +633,42 @@
           "drd2_rows_per_invocation": 1,
           "is_vectorised_batch": false,
           "evaluations_per_kernel_call": 0.2
+        },
+        "verified_pref": {
+          "kernel_calls": 369.0,
+          "oracle_requests": 378028.0,
+          "unique_valid_canonical_evaluations": 219329.0,
+          "cache_hits": 158699.0,
+          "cache_hit_rate": 0.4198075274847366,
+          "N_drd2": 219329.0,
+          "N_descriptor": 219329.0,
+          "N_all_objective": 219329.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 219329.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 594.3875338753387
+        },
+        "gen_rank@verified": {
+          "kernel_calls": 176.0,
+          "oracle_requests": 124.0,
+          "unique_valid_canonical_evaluations": 56.0,
+          "cache_hits": 68.0,
+          "cache_hit_rate": 0.5483870967741935,
+          "N_drd2": 56.0,
+          "N_descriptor": 56.0,
+          "N_all_objective": 56.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 56.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.3181818181818182
         }
       }
     },
     "7": {
-      "complete": false,
-      "stage": "gen_rank@greedy",
+      "complete": true,
+      "stage": "prefix_branching",
       "arms": {
         "unguided": {
           "kernel_calls": 21.0,
@@ -512,12 +714,42 @@
           "drd2_rows_per_invocation": 1,
           "is_vectorised_batch": false,
           "evaluations_per_kernel_call": 0.16666666666666666
+        },
+        "verified_pref": {
+          "kernel_calls": 353.0,
+          "oracle_requests": 278538.0,
+          "unique_valid_canonical_evaluations": 150842.0,
+          "cache_hits": 127696.0,
+          "cache_hit_rate": 0.4584509115452829,
+          "N_drd2": 150842.0,
+          "N_descriptor": 150842.0,
+          "N_all_objective": 150842.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 150842.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 427.314447592068
+        },
+        "gen_rank@verified": {
+          "kernel_calls": 128.0,
+          "oracle_requests": 118.0,
+          "unique_valid_canonical_evaluations": 46.0,
+          "cache_hits": 72.0,
+          "cache_hit_rate": 0.6101694915254238,
+          "N_drd2": 46.0,
+          "N_descriptor": 46.0,
+          "N_all_objective": 46.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 46.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.359375
         }
       }
     },
     "8": {
-      "complete": false,
-      "stage": "gen_rank@greedy",
+      "complete": true,
+      "stage": "prefix_branching",
       "arms": {
         "unguided": {
           "kernel_calls": 13.0,
@@ -563,12 +795,42 @@
           "drd2_rows_per_invocation": 1,
           "is_vectorised_batch": false,
           "evaluations_per_kernel_call": 0.5
+        },
+        "verified_pref": {
+          "kernel_calls": 359.0,
+          "oracle_requests": 564017.0,
+          "unique_valid_canonical_evaluations": 313079.0,
+          "cache_hits": 250938.0,
+          "cache_hit_rate": 0.444912121443148,
+          "N_drd2": 313079.0,
+          "N_descriptor": 313079.0,
+          "N_all_objective": 313079.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 313079.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 872.0863509749304
+        },
+        "gen_rank@verified": {
+          "kernel_calls": 125.0,
+          "oracle_requests": 120.0,
+          "unique_valid_canonical_evaluations": 54.0,
+          "cache_hits": 66.0,
+          "cache_hit_rate": 0.55,
+          "N_drd2": 54.0,
+          "N_descriptor": 54.0,
+          "N_all_objective": 54.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 54.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.432
         }
       }
     },
     "9": {
-      "complete": false,
-      "stage": "gen_rank@greedy",
+      "complete": true,
+      "stage": "prefix_branching",
       "arms": {
         "unguided": {
           "kernel_calls": 22.0,
@@ -614,12 +876,42 @@
           "drd2_rows_per_invocation": 1,
           "is_vectorised_batch": false,
           "evaluations_per_kernel_call": 0.2
+        },
+        "verified_pref": {
+          "kernel_calls": 428.0,
+          "oracle_requests": 389176.0,
+          "unique_valid_canonical_evaluations": 259462.0,
+          "cache_hits": 129714.0,
+          "cache_hit_rate": 0.3333042119760725,
+          "N_drd2": 259462.0,
+          "N_descriptor": 259462.0,
+          "N_all_objective": 259462.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 259462.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 606.2196261682243
+        },
+        "gen_rank@verified": {
+          "kernel_calls": 214.0,
+          "oracle_requests": 142.0,
+          "unique_valid_canonical_evaluations": 62.0,
+          "cache_hits": 80.0,
+          "cache_hit_rate": 0.5633802816901409,
+          "N_drd2": 62.0,
+          "N_descriptor": 62.0,
+          "N_all_objective": 62.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 62.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.2897196261682243
         }
       }
     },
     "10": {
-      "complete": false,
-      "stage": "gen_rank@greedy",
+      "complete": true,
+      "stage": "prefix_branching",
       "arms": {
         "unguided": {
           "kernel_calls": 19.0,
@@ -665,12 +957,42 @@
           "drd2_rows_per_invocation": 1,
           "is_vectorised_batch": false,
           "evaluations_per_kernel_call": 0.2222222222222222
+        },
+        "verified_pref": {
+          "kernel_calls": 456.0,
+          "oracle_requests": 248981.0,
+          "unique_valid_canonical_evaluations": 173569.0,
+          "cache_hits": 75412.0,
+          "cache_hit_rate": 0.3028825492708279,
+          "N_drd2": 173569.0,
+          "N_descriptor": 173569.0,
+          "N_all_objective": 173569.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 173569.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 380.63377192982455
+        },
+        "gen_rank@verified": {
+          "kernel_calls": 198.0,
+          "oracle_requests": 152.0,
+          "unique_valid_canonical_evaluations": 71.0,
+          "cache_hits": 81.0,
+          "cache_hit_rate": 0.5328947368421053,
+          "N_drd2": 71.0,
+          "N_descriptor": 71.0,
+          "N_all_objective": 71.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 71.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.35858585858585856
         }
       }
     },
     "11": {
-      "complete": false,
-      "stage": "gen_rank@greedy",
+      "complete": true,
+      "stage": "prefix_branching",
       "arms": {
         "unguided": {
           "kernel_calls": 20.0,
@@ -716,6 +1038,36 @@
           "drd2_rows_per_invocation": 1,
           "is_vectorised_batch": false,
           "evaluations_per_kernel_call": 0.23529411764705882
+        },
+        "verified_pref": {
+          "kernel_calls": 445.0,
+          "oracle_requests": 444538.0,
+          "unique_valid_canonical_evaluations": 304972.0,
+          "cache_hits": 139566.0,
+          "cache_hit_rate": 0.31395741196478144,
+          "N_drd2": 304972.0,
+          "N_descriptor": 304972.0,
+          "N_all_objective": 304972.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 304972.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 685.3303370786517
+        },
+        "gen_rank@verified": {
+          "kernel_calls": 215.0,
+          "oracle_requests": 148.0,
+          "unique_valid_canonical_evaluations": 72.0,
+          "cache_hits": 76.0,
+          "cache_hit_rate": 0.5135135135135135,
+          "N_drd2": 72.0,
+          "N_descriptor": 72.0,
+          "N_all_objective": 72.0,
+          "drd2_equals_total_by_construction": true,
+          "drd2_invocations": 72.0,
+          "drd2_rows_per_invocation": 1,
+          "is_vectorised_batch": false,
+          "evaluations_per_kernel_call": 0.33488372093023255
         }
       }
     }

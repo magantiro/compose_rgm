@@ -1,0 +1,1175 @@
+{
+  "schema": "compose.pareto.control_analysis",
+  "status": "SMOKE_HELD_IN",
+  "analysis_hierarchy": [
+    "1. preference responsiveness -- ordered, distinct regions",
+    "2. final HV and HV-AUC",
+    "3. verified vs greedy PER-PREFERENCE scalarized value (magnitude only; sign guaranteed)",
+    "4. verified vs greedy SET-LEVEL HV, independent, two-sided",
+    "5. trajectory and oracle resource curves, separately, never merged"
+  ],
+  "preference_responsiveness": {
+    "gen_rank@greedy": {
+      "n_sources": 12,
+      "median_spearman_rho": 0.7071067811865475,
+      "mean_correct_adjacent_fraction": 0.5833333333333334,
+      "monotone_fraction": 1.0,
+      "mean_distinct_values": 1.6666666666666667,
+      "preference_blind": false
+    },
+    "gen_rank@verified": {
+      "n_sources": 12,
+      "median_spearman_rho": 0.8944271909999157,
+      "mean_correct_adjacent_fraction": 1.0,
+      "monotone_fraction": 1.0,
+      "mean_distinct_values": 2.5833333333333335,
+      "preference_blind": false
+    },
+    "greedy_pref": {
+      "n_sources": 12,
+      "median_spearman_rho": 0.635697437416691,
+      "mean_correct_adjacent_fraction": 0.6388888888888888,
+      "monotone_fraction": 0.16666666666666666,
+      "mean_distinct_values": 3.8333333333333335,
+      "preference_blind": false
+    },
+    "unguided": {
+      "n_sources": 12,
+      "median_spearman_rho": 0.43214404682341734,
+      "mean_correct_adjacent_fraction": 0.5069444444444444,
+      "monotone_fraction": 0.0,
+      "mean_distinct_values": 4.916666666666667,
+      "preference_blind": true
+    },
+    "verified_pref": {
+      "n_sources": 12,
+      "median_spearman_rho": 0.5642880936468347,
+      "mean_correct_adjacent_fraction": 0.5555555555555555,
+      "monotone_fraction": 0.16666666666666666,
+      "mean_distinct_values": 4.166666666666667,
+      "preference_blind": false
+    }
+  },
+  "within_arm_contrasts": {
+    "P5_preference_responsiveness": {
+      "status": "PRIMARY",
+      "varies": "objective",
+      "statistic": "objective_0 coordinate at w=0.9 minus at w=0.1",
+      "falsifying_range": "(-inf, +inf); a preference-blind controller gives 0",
+      "objective_0_gap": {
+        "n": 12,
+        "mean": 0.5782271982082764,
+        "median": 0.5169111742209425,
+        "ci95_low": 0.16587707486786793,
+        "ci95_high": 0.9897599016995053,
+        "wins": 10,
+        "losses": 2,
+        "ties": 0
+      },
+      "distinct_endpoints_of_5": {
+        "mean": 3.8333333333333335,
+        "all_five_identical_fraction": 0.0
+      }
+    },
+    "P6_same_prefix_branching": {
+      "status": "PRIMARY",
+      "varies": "objective",
+      "statistic": "distinct endpoints from the IDENTICAL branch point",
+      "falsifying_range": "[1, 5]; 1 means the prefix determines the future",
+      "n_sources": 12,
+      "mean_distinct_endpoints": 3.75,
+      "all_five_identical_fraction": 0.0,
+      "all_branches_started_at_the_branch_point": true
+    }
+  },
+  "two_separated_questions": {
+    "framing": "pointwise policy improvement and set-level Pareto improvement are DIFFERENT claims; they need not agree and disagreement is informative",
+    "per_preference_scalarized_value": {
+      "statistic": "mean over the five preferences of s(greedy endpoint | w) - s(verified endpoint | w); Chebyshev is minimised so positive favours verified",
+      "sign_is_guaranteed": true,
+      "pvalue_NOT_REPORTED": "policy improvement fixes the sign for each requested preference; magnitude only",
+      "n": 12,
+      "mean": 0.143124014764752,
+      "median": 0.07634745767192208,
+      "ci95_low": 0.0576114788173515,
+      "ci95_high": 0.2768395603022745,
+      "wins": 12,
+      "losses": 0,
+      "ties": 0
+    },
+    "set_level_hypervolume": {
+      "statistic": "HV(verified endpoint set) - HV(greedy endpoint set)",
+      "sign_is_guaranteed": false,
+      "why_not": "a verified action can improve an individual preference while moving endpoints closer together and reducing complementary coverage, so five individually better points can enclose less dominated area than five worse but better-spread ones",
+      "falsifying_range": "(-inf, +inf); negative values are real and live",
+      "see": "contrasts.P2_future_awareness.normalized_hypervolume"
+    }
+  },
+  "p99_exceedance": {
+    "statistic": "descriptive only -- fraction of endpoints exceeding the held-in p99 scale vector z*, and the largest excess",
+    "fraction_of_endpoints_beyond_z_star": 0.12666666666666668,
+    "max_excess_in_iqr_units": 0.9093425105805846,
+    "interpretation": "z* is a NORMALISATION SCALE, not an attainable ceiling. Exceedance is legitimate achievement beyond the held-in p99 and is NOT clipped.",
+    "no_clipped_variant": "introducing a clipped or robust HV after seeing these results is exactly what the freeze exists to prevent"
+  },
+  "efficiency": {
+    "nadir_r": "held-in p5 from the frozen scales -- the corner used to COMPUTE hypervolume, frozen before any outcome",
+    "utopia": "held-in p99, frozen",
+    "HV_star_internal": "pooled terminal nondominated union of the PREDECLARED INTERNAL ARMS at the fixed maximum number of trajectories. Never one arm's own front. Its value is known only after every arm runs, but the RULE is preregistered and METHOD-SYMMETRIC: a strong arm that expands the pooled frontier raises the bar for everyone including itself.",
+    "threshold_name": "90% of POOLED ATTAINABLE hypervolume",
+    "name_discipline": "never 'reference HV' and never '90% of COMPOSE's front' -- the name is where this bias survives review",
+    "frozen_before_any_hv_number": true,
+    "internal_axis": "completed controlled trajectories -- COMPOSE arms only",
+    "external_axis": "unique valid canonical evaluations, and oracle requests; external methods are NEVER placed on the trajectory axis",
+    "declared_internal_universe": [
+      "unguided",
+      "gen_rank@greedy",
+      "gen_rank@verified",
+      "greedy_pref",
+      "verified_pref"
+    ],
+    "universe_present_in_shards": [
+      "unguided",
+      "gen_rank@greedy",
+      "gen_rank@verified",
+      "greedy_pref",
+      "verified_pref"
+    ],
+    "per_source": {
+      "0": {
+        "HV_star_internal": 1.0215711620201806,
+        "union_front_size": 4,
+        "membership": {
+          "label": "internal",
+          "members": [
+            "gen_rank@greedy",
+            "gen_rank@verified",
+            "greedy_pref",
+            "unguided",
+            "verified_pref"
+          ],
+          "n_members": 5
+        }
+      },
+      "1": {
+        "HV_star_internal": 1.2565983360781598,
+        "union_front_size": 1,
+        "membership": {
+          "label": "internal",
+          "members": [
+            "gen_rank@greedy",
+            "gen_rank@verified",
+            "greedy_pref",
+            "unguided",
+            "verified_pref"
+          ],
+          "n_members": 5
+        }
+      },
+      "2": {
+        "HV_star_internal": 0.7077168113519009,
+        "union_front_size": 1,
+        "membership": {
+          "label": "internal",
+          "members": [
+            "gen_rank@greedy",
+            "gen_rank@verified",
+            "greedy_pref",
+            "unguided",
+            "verified_pref"
+          ],
+          "n_members": 5
+        }
+      },
+      "3": {
+        "HV_star_internal": 0.8196610914756967,
+        "union_front_size": 4,
+        "membership": {
+          "label": "internal",
+          "members": [
+            "gen_rank@greedy",
+            "gen_rank@verified",
+            "greedy_pref",
+            "unguided",
+            "verified_pref"
+          ],
+          "n_members": 5
+        }
+      },
+      "4": {
+        "HV_star_internal": 0.5181617975558066,
+        "union_front_size": 3,
+        "membership": {
+          "label": "internal",
+          "members": [
+            "gen_rank@greedy",
+            "gen_rank@verified",
+            "greedy_pref",
+            "unguided",
+            "verified_pref"
+          ],
+          "n_members": 5
+        }
+      },
+      "5": {
+        "HV_star_internal": 0.8198561138503748,
+        "union_front_size": 3,
+        "membership": {
+          "label": "internal",
+          "members": [
+            "gen_rank@greedy",
+            "gen_rank@verified",
+            "greedy_pref",
+            "unguided",
+            "verified_pref"
+          ],
+          "n_members": 5
+        }
+      },
+      "6": {
+        "HV_star_internal": 1.2880396904959395,
+        "union_front_size": 8,
+        "membership": {
+          "label": "internal",
+          "members": [
+            "gen_rank@greedy",
+            "gen_rank@verified",
+            "greedy_pref",
+            "unguided",
+            "verified_pref"
+          ],
+          "n_members": 5
+        }
+      },
+      "7": {
+        "HV_star_internal": 0.9179294501944709,
+        "union_front_size": 1,
+        "membership": {
+          "label": "internal",
+          "members": [
+            "gen_rank@greedy",
+            "gen_rank@verified",
+            "greedy_pref",
+            "unguided",
+            "verified_pref"
+          ],
+          "n_members": 5
+        }
+      },
+      "8": {
+        "HV_star_internal": 0.8951654503148065,
+        "union_front_size": 5,
+        "membership": {
+          "label": "internal",
+          "members": [
+            "gen_rank@greedy",
+            "gen_rank@verified",
+            "greedy_pref",
+            "unguided",
+            "verified_pref"
+          ],
+          "n_members": 5
+        }
+      },
+      "9": {
+        "HV_star_internal": 0.9684372346813127,
+        "union_front_size": 2,
+        "membership": {
+          "label": "internal",
+          "members": [
+            "gen_rank@greedy",
+            "gen_rank@verified",
+            "greedy_pref",
+            "unguided",
+            "verified_pref"
+          ],
+          "n_members": 5
+        }
+      },
+      "10": {
+        "HV_star_internal": 1.1559630203314126,
+        "union_front_size": 4,
+        "membership": {
+          "label": "internal",
+          "members": [
+            "gen_rank@greedy",
+            "gen_rank@verified",
+            "greedy_pref",
+            "unguided",
+            "verified_pref"
+          ],
+          "n_members": 5
+        }
+      },
+      "11": {
+        "HV_star_internal": 0.998621606612933,
+        "union_front_size": 4,
+        "membership": {
+          "label": "internal",
+          "members": [
+            "gen_rank@greedy",
+            "gen_rank@verified",
+            "greedy_pref",
+            "unguided",
+            "verified_pref"
+          ],
+          "n_members": 5
+        }
+      }
+    },
+    "N_90_trajectories": {
+      "unguided": {
+        "median_uncensored": null,
+        "n_uncensored": 0,
+        "n_censored": 12,
+        "censoring_rate": 1.0,
+        "note": "censored sources are counted, never imputed at B_max; a median over uncensored sources alone is meaningless without the censoring rate beside it"
+      },
+      "gen_rank@greedy": {
+        "median_uncensored": null,
+        "n_uncensored": 0,
+        "n_censored": 12,
+        "censoring_rate": 1.0,
+        "note": "censored sources are counted, never imputed at B_max; a median over uncensored sources alone is meaningless without the censoring rate beside it"
+      },
+      "gen_rank@verified": {
+        "median_uncensored": null,
+        "n_uncensored": 0,
+        "n_censored": 12,
+        "censoring_rate": 1.0,
+        "note": "censored sources are counted, never imputed at B_max; a median over uncensored sources alone is meaningless without the censoring rate beside it"
+      },
+      "greedy_pref": {
+        "median_uncensored": 2.0,
+        "n_uncensored": 7,
+        "n_censored": 5,
+        "censoring_rate": 0.4166666666666667,
+        "note": "censored sources are counted, never imputed at B_max; a median over uncensored sources alone is meaningless without the censoring rate beside it"
+      },
+      "verified_pref": {
+        "median_uncensored": 2.0,
+        "n_uncensored": 12,
+        "n_censored": 0,
+        "censoring_rate": 0.0,
+        "note": "censored sources are counted, never imputed at B_max; a median over uncensored sources alone is meaningless without the censoring rate beside it"
+      }
+    },
+    "preference_blind_arms": [
+      "unguided"
+    ],
+    "preference_blind_warning": "unguided branches are seeds, not preferences. Its distinct-endpoint count and region coverage measure SAMPLING SPREAD and are the floor for comparison; they are not preference differentiation. Preference coverage (unique Chebyshev argmin within an arm's own endpoint set) is the statistic that treats it correctly.",
+    "preference_region_coverage": {
+      "unguided": {
+        "mean": 0.15,
+        "n": 12
+      },
+      "gen_rank@greedy": {
+        "mean": 0.15,
+        "n": 12
+      },
+      "gen_rank@verified": {
+        "mean": 0.16666666666666666,
+        "n": 12
+      },
+      "greedy_pref": {
+        "mean": 0.3666666666666667,
+        "n": 12
+      },
+      "verified_pref": {
+        "mean": 0.43333333333333335,
+        "n": 12
+      }
+    }
+  },
+  "skipped_contrasts": {},
+  "held_out_opened": false,
+  "n_sources": 12,
+  "pair": "potency_vs_developability",
+  "gate": {
+    "global_checks_passed": true,
+    "barred_contrasts": [
+      "P3_closed_vs_open_loop",
+      "P4_closed_vs_open_loop_verified"
+    ],
+    "checks": [
+      {
+        "check": "D1_selection_scoring_distinct",
+        "pass": true,
+        "detail": {
+          "circular_statistics": [],
+          "rule": "a statistic selected and scored by the same function has no falsifying range; score on an independent continuation or compare endpoints"
+        }
+      },
+      {
+        "check": "D1b_falsifying_range_declared",
+        "pass": true,
+        "detail": {
+          "statistics_without_a_falsifying_range": []
+        }
+      },
+      {
+        "check": "D3_no_false_null",
+        "pass": true,
+        "detail": {
+          "guaranteed_sign_statistics_reporting_a_pvalue": [],
+          "rule": "report magnitude only, and say the direction is guaranteed"
+        }
+      },
+      {
+        "check": "D5_contrast_parity",
+        "pass": true,
+        "detail": {
+          "contrasts": {
+            "P1_unguided_floor": {
+              "arm": "greedy_pref",
+              "base": "unguided",
+              "varies": [
+                "controller",
+                "objective"
+              ],
+              "intended": "objective",
+              "status": "CONTEXT_ONLY",
+              "isolates_one_mechanism": false
+            },
+            "P2_future_awareness": {
+              "arm": "verified_pref",
+              "base": "greedy_pref",
+              "varies": [
+                "controller"
+              ],
+              "intended": "controller",
+              "status": "PRIMARY",
+              "isolates_one_mechanism": true
+            },
+            "P3_closed_vs_open_loop": {
+              "arm": "greedy_pref",
+              "base": "gen_rank@greedy",
+              "varies": [
+                "controller"
+              ],
+              "intended": "controller",
+              "status": "PRIMARY",
+              "isolates_one_mechanism": true
+            },
+            "P4_closed_vs_open_loop_verified": {
+              "arm": "verified_pref",
+              "base": "gen_rank@verified",
+              "varies": [
+                "controller"
+              ],
+              "intended": "controller",
+              "status": "PRIMARY",
+              "isolates_one_mechanism": true
+            },
+            "P5_preference_responsiveness": {
+              "arm": "greedy_pref@w=0.9",
+              "base": "greedy_pref@w=0.1",
+              "varies": [
+                "objective"
+              ],
+              "intended": "objective",
+              "status": "PRIMARY",
+              "isolates_one_mechanism": true
+            },
+            "P6_same_prefix_branching": {
+              "arm": "branch@w_i",
+              "base": "branch@w_j",
+              "varies": [
+                "objective"
+              ],
+              "intended": "objective",
+              "status": "PRIMARY",
+              "isolates_one_mechanism": true
+            }
+          },
+          "rule": "a paired difference isolates the mechanism it is named after only if the two arms differ in exactly that mechanism. PRIMARY contrasts must; CONTEXT_ONLY contrasts must state what else they vary and may not carry a headline."
+        }
+      },
+      {
+        "check": "D4_manifest_hashes",
+        "pass": true,
+        "detail": {
+          "verified": 7,
+          "mismatched": {},
+          "missing": []
+        }
+      },
+      {
+        "check": "D2_arms_are_distinct",
+        "pass": true,
+        "detail": {
+          "comparisons": {
+            "verified_pref_vs_greedy_pref": {
+              "sources": 12,
+              "sources_with_different_actions": 12
+            },
+            "greedy_pref_vs_unguided": {
+              "sources": 12,
+              "sources_with_different_actions": 12
+            }
+          },
+          "rule": "identical committed action sequences on every source means the two arms are the same arm; the run is INVALID_INSTRUMENT"
+        }
+      },
+      {
+        "check": "D6_hv_budget_matched",
+        "pass": false,
+        "detail": {
+          "contrasts": {
+            "P1_unguided_floor": {
+              "endpoint_counts": [
+                5,
+                5
+              ],
+              "equal_endpoint_counts": true,
+              "native_call_gap": 2186.2667,
+              "kernel_call_ratio": 1.149,
+              "budget_parity_axis": null,
+              "flag": "COMPUTE_ASYMMETRIC_ON_AN_UNCLAIMED_AXIS_REPORT_THE_RATIO"
+            },
+            "P2_future_awareness": {
+              "endpoint_counts": [
+                5,
+                5
+              ],
+              "equal_endpoint_counts": true,
+              "native_call_gap": 23.6777,
+              "kernel_call_ratio": 24.675,
+              "budget_parity_axis": null,
+              "flag": "COMPUTE_ASYMMETRIC_ON_AN_UNCLAIMED_AXIS_REPORT_THE_RATIO"
+            },
+            "P3_closed_vs_open_loop": {
+              "endpoint_counts": [
+                5,
+                5
+              ],
+              "equal_endpoint_counts": true,
+              "native_call_gap": 4232.4194,
+              "kernel_call_ratio": 1.492,
+              "budget_parity_axis": "kernel",
+              "flag": "BUDGET_ASYMMETRIC_KERNEL"
+            },
+            "P4_closed_vs_open_loop_verified": {
+              "endpoint_counts": [
+                5,
+                5
+              ],
+              "equal_endpoint_counts": true,
+              "native_call_gap": 4692.6319,
+              "kernel_call_ratio": 2.388,
+              "budget_parity_axis": "kernel",
+              "flag": "BUDGET_ASYMMETRIC_KERNEL"
+            }
+          },
+          "invalidated_contrasts": [
+            "P3_closed_vs_open_loop",
+            "P4_closed_vs_open_loop_verified"
+          ],
+          "scope": "per-contrast: these contrasts are barred, the rest of the analysis stands",
+          "rule": "Equal endpoint counts are required everywhere -- an arm must not win by contributing more points. Compute parity is enforced only where a contrast claims it (the generate-then-rank contrasts, where handing gen_rank the control arm's budget is the whole point). Elsewhere the compute ratio is REPORTED: throttling a lookahead controller to a myopic one's compute would delete the mechanism under test."
+        }
+      }
+    ]
+  },
+  "withdrawn_statistics": {
+    "sacrifice_to_win": "circular: action chosen as argmax V_G, then scored by V_G",
+    "verified_vs_greedy_sign_test": "policy improvement makes the null of 0.5 false",
+    "best_candidate_reaches_pooled_p99": "with a ~589-wide fiber this fires with probability 0.997 whatever the truth is; withdrawn from census gate G4 before any pair verdict was read"
+  },
+  "arms": {
+    "gen_rank@greedy": {
+      "normalized_hypervolume": {
+        "mean": 0.14884945503631777,
+        "per_source": {
+          "0": 0.0,
+          "1": 0.11226981090942709,
+          "2": 0.13660662391206574,
+          "3": 0.05859871551460265,
+          "4": 0.3296671285150855,
+          "5": 0.050302208398399,
+          "6": 0.26356771214703634,
+          "7": 0.1330717923265434,
+          "8": 0.147210357206543,
+          "9": 0.1289350752343367,
+          "10": 0.2150840474647528,
+          "11": 0.21087998880702097
+        }
+      },
+      "preference_coverage": {
+        "mean": 0.08333333333333333,
+        "per_source": {
+          "0": 0.0,
+          "1": 0.0,
+          "2": 0.2,
+          "3": 0.0,
+          "4": 0.2,
+          "5": 0.0,
+          "6": 0.0,
+          "7": 0.0,
+          "8": 0.0,
+          "9": 0.0,
+          "10": 0.4,
+          "11": 0.2
+        }
+      },
+      "nondominated_set_size": {
+        "mean": 5.0,
+        "per_source": {
+          "0": 5.0,
+          "1": 5.0,
+          "2": 5.0,
+          "3": 5.0,
+          "4": 5.0,
+          "5": 5.0,
+          "6": 5.0,
+          "7": 5.0,
+          "8": 5.0,
+          "9": 5.0,
+          "10": 5.0,
+          "11": 5.0
+        }
+      },
+      "endpoint_diversity": {
+        "mean": 0.17536964050008616,
+        "per_source": {
+          "0": 0.0,
+          "1": 0.37941176470588234,
+          "2": 0.31641791044776124,
+          "3": 0.2785714285714287,
+          "4": 0.32380952380952377,
+          "5": 0.2828571428571429,
+          "6": 0.0,
+          "7": 0.0,
+          "8": 0.0,
+          "9": 0.0,
+          "10": 0.27968975468975477,
+          "11": 0.2436781609195402
+        }
+      },
+      "feasibility": {
+        "mean": 1.0,
+        "per_source": {
+          "0": 1.0,
+          "1": 1.0,
+          "2": 1.0,
+          "3": 1.0,
+          "4": 1.0,
+          "5": 1.0,
+          "6": 1.0,
+          "7": 1.0,
+          "8": 1.0,
+          "9": 1.0,
+          "10": 1.0,
+          "11": 1.0
+        }
+      },
+      "cost": {
+        "native_oracle_calls": 2.5833333333333335,
+        "raw_oracle_calls": 5.5,
+        "kernel_calls": 10.833333333333334
+      }
+    },
+    "gen_rank@verified": {
+      "normalized_hypervolume": {
+        "mean": 0.3083401412456956,
+        "per_source": {
+          "0": 0.16273367208778353,
+          "1": 0.3117084115897845,
+          "2": 0.18475275443856223,
+          "3": 0.3440187755232726,
+          "4": 0.35647023477390066,
+          "5": 0.20621801124256053,
+          "6": 0.6224509707476279,
+          "7": 0.3215522908277522,
+          "8": 0.31838683661563644,
+          "9": 0.22711508220766313,
+          "10": 0.3228318466150249,
+          "11": 0.3218428082787778
+        }
+      },
+      "preference_coverage": {
+        "mean": 0.26666666666666666,
+        "per_source": {
+          "0": 0.2,
+          "1": 0.2,
+          "2": 0.2,
+          "3": 0.4,
+          "4": 0.0,
+          "5": 0.4,
+          "6": 0.2,
+          "7": 0.2,
+          "8": 0.4,
+          "9": 0.4,
+          "10": 0.2,
+          "11": 0.4
+        }
+      },
+      "nondominated_set_size": {
+        "mean": 5.0,
+        "per_source": {
+          "0": 5.0,
+          "1": 5.0,
+          "2": 5.0,
+          "3": 5.0,
+          "4": 5.0,
+          "5": 5.0,
+          "6": 5.0,
+          "7": 5.0,
+          "8": 5.0,
+          "9": 5.0,
+          "10": 5.0,
+          "11": 5.0
+        }
+      },
+      "endpoint_diversity": {
+        "mean": 0.41400925481826084,
+        "per_source": {
+          "0": 0.16716417910447756,
+          "1": 0.6521726851145793,
+          "2": 0.33066666666666666,
+          "3": 0.34198087734053384,
+          "4": 0.47058823529411753,
+          "5": 0.44876503297555925,
+          "6": 0.5653847392893321,
+          "7": 0.30447761194029854,
+          "8": 0.5656840713813616,
+          "9": 0.3254272744895321,
+          "10": 0.3287671232876712,
+          "11": 0.467032560935
+        }
+      },
+      "feasibility": {
+        "mean": 1.0,
+        "per_source": {
+          "0": 1.0,
+          "1": 1.0,
+          "2": 1.0,
+          "3": 1.0,
+          "4": 1.0,
+          "5": 1.0,
+          "6": 1.0,
+          "7": 1.0,
+          "8": 1.0,
+          "9": 1.0,
+          "10": 1.0,
+          "11": 1.0
+        }
+      },
+      "cost": {
+        "native_oracle_calls": 57.5,
+        "raw_oracle_calls": 133.0,
+        "kernel_calls": 167.08333333333334
+      }
+    },
+    "greedy_pref": {
+      "normalized_hypervolume": {
+        "mean": 0.8488095858832277,
+        "per_source": {
+          "0": 1.0074300820040876,
+          "1": 1.1591583644583705,
+          "2": 0.4406669637645058,
+          "3": 0.7123341115226134,
+          "4": 0.5112710014521368,
+          "5": 0.6816890951650216,
+          "6": 1.2687840232256815,
+          "7": 0.8653326521720025,
+          "8": 0.6837781492098373,
+          "9": 0.7737887674043803,
+          "10": 1.135620004151964,
+          "11": 0.9458618160681317
+        }
+      },
+      "preference_coverage": {
+        "mean": 0.3666666666666667,
+        "per_source": {
+          "0": 0.4,
+          "1": 0.0,
+          "2": 0.4,
+          "3": 0.8,
+          "4": 0.4,
+          "5": 0.4,
+          "6": 0.0,
+          "7": 0.2,
+          "8": 0.2,
+          "9": 0.8,
+          "10": 0.2,
+          "11": 0.6
+        }
+      },
+      "nondominated_set_size": {
+        "mean": 2.75,
+        "per_source": {
+          "0": 5.0,
+          "1": 3.0,
+          "2": 2.0,
+          "3": 4.0,
+          "4": 2.0,
+          "5": 2.0,
+          "6": 4.0,
+          "7": 1.0,
+          "8": 1.0,
+          "9": 4.0,
+          "10": 2.0,
+          "11": 3.0
+        }
+      },
+      "endpoint_diversity": {
+        "mean": 0.6594445102803236,
+        "per_source": {
+          "0": 0.5461436561672064,
+          "1": 0.670970344424455,
+          "2": 0.655287100904992,
+          "3": 0.7677325398195335,
+          "4": 0.6960296109950503,
+          "5": 0.6957903742692232,
+          "6": 0.22702702702702704,
+          "7": 0.643783542039356,
+          "8": 0.5941013409354456,
+          "9": 0.7504929636334392,
+          "10": 0.843610208197096,
+          "11": 0.822365414951058
+        }
+      },
+      "feasibility": {
+        "mean": 1.0,
+        "per_source": {
+          "0": 1.0,
+          "1": 1.0,
+          "2": 1.0,
+          "3": 1.0,
+          "4": 1.0,
+          "5": 1.0,
+          "6": 1.0,
+          "7": 1.0,
+          "8": 1.0,
+          "9": 1.0,
+          "10": 1.0,
+          "11": 1.0
+        }
+      },
+      "cost": {
+        "native_oracle_calls": 10936.333333333334,
+        "raw_oracle_calls": 21004.0,
+        "kernel_calls": 16.166666666666668
+      }
+    },
+    "unguided": {
+      "normalized_hypervolume": {
+        "mean": 0.19116710219305352,
+        "per_source": {
+          "0": 0.10188569131757874,
+          "1": 0.09847558930951608,
+          "2": 0.1345555567701806,
+          "3": 0.15267185495690924,
+          "4": 0.23187968169237824,
+          "5": 0.10097730747739501,
+          "6": 0.5050087728205072,
+          "7": 0.16006271769394256,
+          "8": 0.15988606122065707,
+          "9": 0.17748290356343155,
+          "10": 0.26157131737179157,
+          "11": 0.20954777212235443
+        }
+      },
+      "preference_coverage": {
+        "mean": 0.2166666666666667,
+        "per_source": {
+          "0": 0.2,
+          "1": 0.4,
+          "2": 0.2,
+          "3": 0.0,
+          "4": 0.4,
+          "5": 0.0,
+          "6": 0.4,
+          "7": 0.4,
+          "8": 0.2,
+          "9": 0.0,
+          "10": 0.2,
+          "11": 0.2
+        }
+      },
+      "nondominated_set_size": {
+        "mean": 2.6666666666666665,
+        "per_source": {
+          "0": 3.0,
+          "1": 3.0,
+          "2": 1.0,
+          "3": 3.0,
+          "4": 2.0,
+          "5": 3.0,
+          "6": 3.0,
+          "7": 3.0,
+          "8": 3.0,
+          "9": 3.0,
+          "10": 2.0,
+          "11": 3.0
+        }
+      },
+      "endpoint_diversity": {
+        "mean": 0.5579897783702947,
+        "per_source": {
+          "0": 0.5922450987574435,
+          "1": 0.5654923857648778,
+          "2": 0.6988146421692452,
+          "3": 0.6637353994692263,
+          "4": 0.6940512755130607,
+          "5": 0.4282325043719377,
+          "6": 0.7160081019520291,
+          "7": 0.41048601563787146,
+          "8": 0.5668244822374382,
+          "9": 0.46874702396893675,
+          "10": 0.4406633897579343,
+          "11": 0.4505770208435367
+        }
+      },
+      "feasibility": {
+        "mean": 1.0,
+        "per_source": {
+          "0": 1.0,
+          "1": 1.0,
+          "2": 1.0,
+          "3": 1.0,
+          "4": 1.0,
+          "5": 1.0,
+          "6": 1.0,
+          "7": 1.0,
+          "8": 1.0,
+          "9": 1.0,
+          "10": 1.0,
+          "11": 1.0
+        }
+      },
+      "cost": {
+        "native_oracle_calls": 5.0,
+        "raw_oracle_calls": 5.0,
+        "kernel_calls": 18.583333333333332
+      }
+    },
+    "verified_pref": {
+      "normalized_hypervolume": {
+        "mean": 0.9377712040795502,
+        "per_source": {
+          "0": 1.0059910596462103,
+          "1": 1.2565983360781598,
+          "2": 0.7077168113519009,
+          "3": 0.8196610914756967,
+          "4": 0.514638596531761,
+          "5": 0.8198561138503748,
+          "6": 1.2868805118039779,
+          "7": 0.9179294501944709,
+          "8": 0.8951654503148065,
+          "9": 0.9684372346813127,
+          "10": 1.0631059725323941,
+          "11": 0.9972738204935362
+        }
+      },
+      "preference_coverage": {
+        "mean": 0.4000000000000001,
+        "per_source": {
+          "0": 0.2,
+          "1": 0.2,
+          "2": 0.2,
+          "3": 0.8,
+          "4": 0.4,
+          "5": 0.6,
+          "6": 0.2,
+          "7": 0.2,
+          "8": 1.0,
+          "9": 0.4,
+          "10": 0.2,
+          "11": 0.4
+        }
+      },
+      "nondominated_set_size": {
+        "mean": 2.5833333333333335,
+        "per_source": {
+          "0": 3.0,
+          "1": 1.0,
+          "2": 1.0,
+          "3": 4.0,
+          "4": 2.0,
+          "5": 3.0,
+          "6": 4.0,
+          "7": 1.0,
+          "8": 5.0,
+          "9": 2.0,
+          "10": 2.0,
+          "11": 3.0
+        }
+      },
+      "endpoint_diversity": {
+        "mean": 0.7021930631357945,
+        "per_source": {
+          "0": 0.7431620661282201,
+          "1": 0.6168519803641754,
+          "2": 0.7571789490090707,
+          "3": 0.6477654560738954,
+          "4": 0.7350692251887727,
+          "5": 0.8464916629609645,
+          "6": 0.4910254586829754,
+          "7": 0.6302197802197802,
+          "8": 0.6918219119717609,
+          "9": 0.7452923092506456,
+          "10": 0.737379373461722,
+          "11": 0.7840585843175524
+        }
+      },
+      "feasibility": {
+        "mean": 1.0,
+        "per_source": {
+          "0": 1.0,
+          "1": 1.0,
+          "2": 1.0,
+          "3": 1.0,
+          "4": 1.0,
+          "5": 1.0,
+          "6": 1.0,
+          "7": 1.0,
+          "8": 1.0,
+          "9": 1.0,
+          "10": 1.0,
+          "11": 1.0
+        }
+      },
+      "cost": {
+        "native_oracle_calls": 269883.8333333333,
+        "raw_oracle_calls": 443240.5,
+        "kernel_calls": 398.9166666666667
+      }
+    }
+  },
+  "contrasts": {
+    "P1_unguided_floor": {
+      "status": "CONTEXT_ONLY",
+      "varies": "objective",
+      "normalized_hypervolume": {
+        "n": 12,
+        "mean": 0.6576424836901743,
+        "median": 0.6507878991595044,
+        "ci95_low": 0.5286300881762841,
+        "ci95_high": 0.7816741146789518,
+        "wins": 12,
+        "losses": 0,
+        "ties": 0
+      },
+      "preference_coverage": {
+        "n": 12,
+        "mean": 0.15,
+        "median": 0.1,
+        "ci95_low": -0.06666666666666667,
+        "ci95_high": 0.3666666666666667,
+        "wins": 6,
+        "losses": 3,
+        "ties": 3
+      },
+      "nondominated_set_size": {
+        "n": 12,
+        "mean": 0.08333333333333333,
+        "median": 0.0,
+        "ci95_low": -0.5833333333333334,
+        "ci95_high": 0.75,
+        "wins": 5,
+        "losses": 3,
+        "ties": 4
+      },
+      "endpoint_diversity": {
+        "n": 12,
+        "mean": 0.1014547319100287,
+        "median": 0.10473754950494218,
+        "ci95_low": -0.04361412915555069,
+        "ci95_high": 0.2213354306546279,
+        "wins": 9,
+        "losses": 3,
+        "ties": 0
+      }
+    },
+    "P2_future_awareness": {
+      "status": "PRIMARY",
+      "varies": "controller",
+      "normalized_hypervolume": {
+        "n": 12,
+        "mean": 0.08896161819632242,
+        "median": 0.07501838482112888,
+        "ci95_low": 0.037930730258453525,
+        "ci95_high": 0.1448976739879477,
+        "wins": 10,
+        "losses": 2,
+        "ties": 0
+      },
+      "preference_coverage": {
+        "n": 12,
+        "mean": 0.03333333333333333,
+        "median": 0.0,
+        "ci95_low": -0.11666666666666665,
+        "ci95_high": 0.20000000000000004,
+        "wins": 4,
+        "losses": 4,
+        "ties": 4
+      },
+      "nondominated_set_size": {
+        "n": 12,
+        "mean": -0.16666666666666666,
+        "median": 0.0,
+        "ci95_low": -1.0,
+        "ci95_high": 0.75,
+        "wins": 2,
+        "losses": 4,
+        "ties": 6
+      },
+      "endpoint_diversity": {
+        "n": 12,
+        "mean": 0.042748552855471085,
+        "median": 0.016919479905464385,
+        "ci95_low": -0.022069008589134288,
+        "ci95_high": 0.10816958307683805,
+        "wins": 6,
+        "losses": 6,
+        "ties": 0
+      }
+    },
+    "P3_closed_vs_open_loop": {
+      "status": "INVALID_CONTRAST",
+      "varies": "controller",
+      "normalized_hypervolume": {
+        "WITHHELD": "barred by D6; the arms did not hold the budget parity this contrast claims"
+      },
+      "preference_coverage": {
+        "WITHHELD": "barred by D6; the arms did not hold the budget parity this contrast claims"
+      },
+      "nondominated_set_size": {
+        "WITHHELD": "barred by D6; the arms did not hold the budget parity this contrast claims"
+      },
+      "endpoint_diversity": {
+        "WITHHELD": "barred by D6; the arms did not hold the budget parity this contrast claims"
+      },
+      "barred_by": "D6_hv_budget_matched",
+      "reason": "BUDGET_ASYMMETRIC_KERNEL"
+    },
+    "P4_closed_vs_open_loop_verified": {
+      "status": "INVALID_CONTRAST",
+      "varies": "controller",
+      "normalized_hypervolume": {
+        "WITHHELD": "barred by D6; the arms did not hold the budget parity this contrast claims"
+      },
+      "preference_coverage": {
+        "WITHHELD": "barred by D6; the arms did not hold the budget parity this contrast claims"
+      },
+      "nondominated_set_size": {
+        "WITHHELD": "barred by D6; the arms did not hold the budget parity this contrast claims"
+      },
+      "endpoint_diversity": {
+        "WITHHELD": "barred by D6; the arms did not hold the budget parity this contrast claims"
+      },
+      "barred_by": "D6_hv_budget_matched",
+      "reason": "BUDGET_ASYMMETRIC_KERNEL"
+    }
+  },
+  "reporting_rules": {
+    "hv_auc": "both native and raw conventions are reported; neither may be substituted for the other",
+    "gen_rank": "reported at BOTH budget matchings as a bracket; one kernel call yields ~600 candidates, so the two axes differ by orders of magnitude",
+    "P1": "CONTEXT_ONLY -- varies controller AND objective, may not carry a headline",
+    "hv_ref": "union front across all arms; NEVER one arm's own front",
+    "efficiency_is_primary": "the question is how efficiently the process sweeps useful front regions, not whether final HV is 0.83 vs 0.79",
+    "axes_never_mixed": "trajectory counts are internal-only; external methods appear only on evaluation/oracle axes"
+  }
+}

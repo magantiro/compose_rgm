@@ -6,7 +6,7 @@
 **Status:** `DESIGN_ONLY` for the arms and the smoke plan; `SMOKE_HELD_IN` for
 the Stage 0 census.
 
-**Branch / commit:** `codex/compose-pareto-control` @ `69a96ff` (base `a0e680d`).
+**Branch / commit:** `codex/compose-pareto-control` @ `d3d6610` (base `a0e680d`).
 
 **Running:** the held-in smoke, **authorized by main** after the census passed.
 
@@ -81,9 +81,9 @@ the census sources. Costed in `HANDOFF.md`: ~700 kernel calls per source,
 
 | file | status | sha256 |
 |---|---|---|
-| `docs/workstreams/pareto-control/PROTOCOL.md` | `DESIGN_ONLY` | `07750b255cecb40e` |
-| `configs/pareto_control_protocol_v1.json` | `DESIGN_ONLY` | `91d8a466a54b1ca7` |
-| `src/compose_v4/experiments/pareto_control.py` | `DESIGN_ONLY` | `608a11f74ef22101` |
+| `docs/workstreams/pareto-control/PROTOCOL.md` | `DESIGN_ONLY` | `9b1ee42fc959c5c8` |
+| `configs/pareto_control_protocol_v1.json` | `DESIGN_ONLY` | `8b1acfeeac32d062` |
+| `src/compose_v4/experiments/pareto_control.py` | `DESIGN_ONLY` | `939a8c57e3dacced` |
 | `modal_apps/pareto_control_app.py` | `DESIGN_ONLY (not launched)` | `87c77e1b8210d2b8` |
 | `diagnostics/pareto_control_cohort.json` | `DESIGN_ONLY` | `80080eefb4007fb9` |
 | `diagnostics/pareto_tradeoff_census.json` | `SMOKE_HELD_IN` | `5b1fc96b4ceb3a75` |

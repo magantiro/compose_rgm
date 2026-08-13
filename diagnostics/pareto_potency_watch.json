@@ -1,0 +1,110 @@
+{
+  "schema": "compose.pareto.potency_watch",
+  "status": "SMOKE_HELD_IN",
+  "framing": "WATCH ONLY. The census lines are NOT moved. G3 binding share 0.76 faced the 0.90 line and G4 potency reach 0.700 faced the 0.85 line; both passed, and both stay where they were frozen at d206d55.",
+  "arm_examined": "greedy_pref",
+  "n_sources": 12,
+  "movement_eps": 0.001,
+  "W1_extreme_weights_give_different_endpoints": {
+    "fraction": 1.0,
+    "falsifying_range": "[0, 1]; 0 means the preference changed nothing",
+    "question": "different ENDPOINTS, not merely different one-step choices"
+  },
+  "W2_potency_heavy_side_stops_early": {
+    "median_last_productive_step": 5.0,
+    "horizon": 6,
+    "fraction_stalling_before_half_horizon": 0.0,
+    "falsifying_range": "[0, 6]; 6 means it moved to the end"
+  },
+  "W3_one_objective_dominates_final_points": {
+    "median_spread_ratio": 0.4271433068702091,
+    "fraction_below_quarter": 0.25,
+    "statistic": "min(spread) / max(spread) of the two objectives across each source's final endpoint set",
+    "falsifying_range": "[0, 1]; 1 means both axes sweep equally, near 0 means one axis is effectively flat and the front is really one-dimensional",
+    "why_not_argmin": "naming the smaller axis alone has no falsifying range -- argmin always returns something, even when the two vary identically"
+  },
+  "W4_selections_stay_differentiated": {
+    "mean_distinct_endpoints_of_5": 3.8333333333333335,
+    "all_five_identical_fraction": 0.0,
+    "falsifying_range": "[1, 5]; 1 means the preference is inert"
+  },
+  "W5_hv_stalls_on_potency_saturation": {
+    "median_fraction_of_horizon_still_moving": 1.0,
+    "note": "low values mean potency stops improving well before the budget is spent, which is the saturation the G4 reach fraction warned about"
+  },
+  "per_source": {
+    "0": {
+      "extreme_endpoints_differ": true,
+      "potency_heavy_last_productive_step": 5,
+      "horizon": 5,
+      "distinct_endpoints": 3
+    },
+    "1": {
+      "extreme_endpoints_differ": true,
+      "potency_heavy_last_productive_step": 5,
+      "horizon": 5,
+      "distinct_endpoints": 4
+    },
+    "2": {
+      "extreme_endpoints_differ": true,
+      "potency_heavy_last_productive_step": 5,
+      "horizon": 5,
+      "distinct_endpoints": 3
+    },
+    "3": {
+      "extreme_endpoints_differ": true,
+      "potency_heavy_last_productive_step": 5,
+      "horizon": 5,
+      "distinct_endpoints": 5
+    },
+    "4": {
+      "extreme_endpoints_differ": true,
+      "potency_heavy_last_productive_step": 5,
+      "horizon": 5,
+      "distinct_endpoints": 4
+    },
+    "5": {
+      "extreme_endpoints_differ": true,
+      "potency_heavy_last_productive_step": 5,
+      "horizon": 5,
+      "distinct_endpoints": 4
+    },
+    "6": {
+      "extreme_endpoints_differ": true,
+      "potency_heavy_last_productive_step": 5,
+      "horizon": 5,
+      "distinct_endpoints": 2
+    },
+    "7": {
+      "extreme_endpoints_differ": true,
+      "potency_heavy_last_productive_step": 5,
+      "horizon": 5,
+      "distinct_endpoints": 3
+    },
+    "8": {
+      "extreme_endpoints_differ": true,
+      "potency_heavy_last_productive_step": 5,
+      "horizon": 5,
+      "distinct_endpoints": 3
+    },
+    "9": {
+      "extreme_endpoints_differ": true,
+      "potency_heavy_last_productive_step": 5,
+      "horizon": 5,
+      "distinct_endpoints": 5
+    },
+    "10": {
+      "extreme_endpoints_differ": true,
+      "potency_heavy_last_productive_step": 5,
+      "horizon": 5,
+      "distinct_endpoints": 5
+    },
+    "11": {
+      "extreme_endpoints_differ": true,
+      "potency_heavy_last_productive_step": 5,
+      "horizon": 5,
+      "distinct_endpoints": 5
+    }
+  },
+  "verdict_rule": "These do not adjust any threshold. If they come back badly the smoke may legitimately FAIL the Pareto experiment despite Stage 0 passing, and that is reported as a failure rather than repaired."
+}
