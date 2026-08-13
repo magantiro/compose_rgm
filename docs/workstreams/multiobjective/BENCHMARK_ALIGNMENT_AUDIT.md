@@ -192,6 +192,14 @@ which is the one comparable to a benchmark's oracle budget:
 A full five-preference COMPOSE front costs **270× the entire published budget**
 on the primary arm, and **11×** on the cheapest guided arm.
 
+**The per-trajectory column is a conservative lower bound, and the direction is
+worth stating.** `native_oracle_calls` counts *distinct* molecules scored, and
+distinctness is measured per arm across all five preference trajectories. Where
+two preferences visit the same molecule, that molecule is counted once. So
+dividing by five *under*-states what a single standalone trajectory would cost,
+and the true figure is somewhat higher. The finding is therefore reported
+against the number that flatters COMPOSE.
+
 ### Why this is structural, not an implementation inefficiency
 
 COMPOSE's control interrogates the **exact legal successor fiber at every
@@ -228,10 +236,22 @@ here as a dependency and is not designed, scoped or run.**
 
 ## Dimension 5 — the scored set is not the same set
 
-HN-GFN, `oracle/scorer/scorer.py:36`:
+HN-GFN canonicalizes by a SMILES round-trip, `utils/chem.py:37-43`:
 
 ```
-36: scores = [scores.pop(0) if mol is not None else 0. for mol in mols]
+37: def standardize_smiles(mol):
+38:     try:
+39:         smiles = Chem.MolToSmiles(mol)
+40:         mol = Chem.MolFromSmiles(smiles)
+41:         return mol
+42:     except Exception:
+43:         return None
+```
+
+applied at `oracle/scorer/scorer.py:23`, and then, at `scorer.py:35`:
+
+```
+35: scores = [scores.pop(0) if mol is not None else 0. for mol in mols]
 ```
 
 An unparseable molecule receives **0.0 and stays in the batch**. It counts

@@ -246,7 +246,7 @@
       },
       "5_validity_and_canonicalization": {
         "verdict": "FAIL_CONTRIBUTORY",
-        "evidence": "HN-GFN oracle/scorer/scorer.py:36 scores unparseable molecules as 0. and keeps them in the batch; COMPOSE's support is legal by construction, so the top-K sets are drawn from populations with different validity semantics"
+        "evidence": "HN-GFN canonicalizes by SMILES round-trip (utils/chem.py:37-43) applied at oracle/scorer/scorer.py:23, then scorer.py:35 scores unparseable molecules as 0. and keeps them in the batch; COMPOSE's support is legal by construction, so the top-K sets are drawn from populations with different validity semantics"
       },
       "6_seeds_and_reporting_convention": {
         "verdict": "PENDING"
