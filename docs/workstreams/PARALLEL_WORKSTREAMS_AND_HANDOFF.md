@@ -961,10 +961,40 @@ bottleneck wastes effort and misleads whoever reads the justification later.
 
 **Why.** The Pareto scorer's batch-size-1 SVM calls were the obvious target and
 are a genuine 4.2× on that call — but measurement put scoring at ~12 min of a
-~58 min source against ~46 min of kernel enumeration, so the fix is worth **~7%
-of wall time**. It is required for **counter honesty**; it is not the speed
-lever, and must not be reported as one.
+~58 min source against ~46 min of kernel enumeration, so the fix was worth **~7%
+of wall time** even before fidelity was considered.
+
+Then the fidelity gate was actually run, and it **failed**: batched scoring is
+not bit-identical to one-at-a-time (537/2000 exact, perturbation 2.6e-14),
+because BLAS accumulates a GEMM in a different order than single-row dot
+products. Downstream is an `argmax` over a ~586-wide fiber containing exact
+ties, so a last-bit perturbation can override a deterministic tiebreak and
+diverge a trajectory. The optimization was rejected.
+
+The companion change — fusing `QED.qed` and `Crippen.MolLogP` into one
+`QED.properties()` call — *is* bit-identical (2000/2000) and buys **nothing**
+(727.2 → 725.3 µs). Also rejected: a change with no benefit is still a change.
+
+# Rule: fidelity-preserving speedup comes from scheduling, not arithmetic
+
+**Parallelism changes when work happens; it never changes what a number is.**
+Prefer it over any change to the arithmetic in a claim-bearing pipeline.
+
+**But parallelism is not automatically neutral.** Any counter derived from
+*cache behaviour* becomes non-deterministic under concurrency: two workers
+missing the same key both do the work. In the Pareto app `kernel_calls` is such
+a counter, and it is consumed by `trajectories_for_kernel_budget(...)` to set the
+generate-and-rank budget — so naive fan-out would leave every trajectory
+identical while silently moving the P3/P4 comparison.
+
+Any shared cache crossed by a fan-out must be **compute-once** (per-key lock or
+future), and the acceptance test must assert exact equality on the **counters**,
+not only on trajectories and scores.
 
 Separately: **wall time and cost are different axes.** Fanning independent work
-across more containers buys wall time at identical dollars. Say which one an
+across more workers buys wall time at identical dollars. Say which one an
 optimization buys.
+
+**Barred as "optimization":** anything that changes the algorithm — shortlist
+size, horizon, number of preferences, an approximate kernel, rollout depth. A
+slow overnight run is not a reason to make a scientific change.

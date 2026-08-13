@@ -158,34 +158,46 @@ Censored sources are reported as censored and never assigned the maximum budget.
 **The controller is not redesigned.** Only the three defects the smoke itself
 demonstrated are repaired.
 
-### 1. Exact batching, gated on identical trajectories
+### 1. Exact batching — TESTED AND REJECTED
 
-`objective_vector()` calls `oracle.margin_many([key])` with a list of exactly
-one molecule. Measured locally, per molecule:
+The plan was to replace `oracle.margin_many([key])` (batch size 1) with exact
+vectorized scoring, gated on a regression test asserting identical scores,
+actions and trajectories. **The gate was run locally and batching FAILS it.**
 
-| step, as currently run | µs |
-|---|---:|
-| `oracle.margin_many([key])` at **batch 1** | 1258 |
-| `QED.qed` | 1158 |
-| `Crippen.MolLogP` | 275 |
-| `MolFromSmiles` ×2 (the oracle re-parses internally) | 200 |
-| Morgan FP ×2 + Tanimoto | 68 |
+| test, 2,000 held-out molecules | result |
+|---|---|
+| `margin_many` batched vs one-at-a-time, bit-identical? | **NO — 537/2000 exact** |
+| perturbation magnitude | **2.62 × 10⁻¹⁴** |
+| `QED.properties().ALOGP` == `Crippen.MolLogP`? | yes — 2000/2000 exact |
+| fusing both into one `QED.properties()` call — speedup? | **none: 727.2 → 725.3 µs** |
 
-Batched, the SVM call drops to **303 µs (4.2×)**.
+**Why batching is not bit-safe.** Batched scoring is a B×S GEMM; one-at-a-time
+is a sequence of single-row dot products. Floating-point addition is not
+associative, so BLAS accumulates in a different order and the results differ in
+the last bits. The controller then takes an `argmax` over a ~586-wide fiber.
 
-**Honest accounting of what that buys.** At 249,640 unique evaluations per
-source, scoring is ~12 min of a ~58 min source; the 393 kernel enumerations at
-~7 s each are ~46 min. So batching is **~7% of wall time**. It is required for
-*counter honesty*, not for speed, and must not be sold as the optimization.
+A 2.62e-14 perturbation looks harmless, and in 200,000 simulated 586-wide fibers
+drawn from a diverse pool the argmax never flipped. **That test is not
+sufficient, and must not be cited as clearance.** It sampled random library
+molecules; the real fiber contains *successors of one molecule*, which are far
+more likely to be near-degenerate. The pool already contains **8 exactly-tied
+adjacent pairs**, and an exact tie is the dangerous case: ties are currently
+broken deterministically by canonical key, and a 1e-14 perturbation converts a
+tie into a non-tie, overriding the tiebreak and diverging the trajectory.
 
-Two further free wins, both gated: `QED.qed` already computes Crippen ALOGP
-internally, so `QED.properties(mol)` yields both and removes the separate
-`MolLogP` call — **only** if ALOGP is asserted bit-identical, since otherwise
-trajectories move. And `objective_vector` computes all three of P/D/S while
-returning two.
+**Decision: do not batch the scorer.** The 4.2× on that call is real and is not
+worth a controller that silently takes different actions.
 
-Every change here is gated on a regression test asserting **identical
-trajectories, scores, actions and `N_drd2`** against the smoke.
+**The QED fusion is bit-identical but buys nothing** (727.2 → 725.3 µs), so it
+is not shipped either — a change with no benefit is still a change.
+
+> **Consequence, and it is the useful finding here: fidelity-preserving speedup
+> must come from PARALLEL EXECUTION, not from arithmetic. Parallelism changes
+> when work happens, never what any number is.** See §5.
+
+`objective_vector` computing all three of P/D/S while returning two remains a
+real ~35 µs/molecule waste and is safe to fix, but it is ~1% and is not a
+priority.
 
 ### 2. Separate counters
 
@@ -211,6 +223,70 @@ ledger reaches target, and **top up only the missing `gen_rank` computation**.
 
 > **Do not change COMPOSE because the baseline was underfunded**, and do not
 > read the smoke's `gen_rank` numbers as defeating that baseline.
+
+### 4. Compute the missing HV-AUC from existing smoke artifacts
+
+Preregistered as item 2 of the analysis hierarchy and never computed, so the
+smoke is half-delivered on that axis. **No rerun.** Both native and raw
+conventions are reported; neither may be substituted for the other.
+
+### 5. Parallel fan-out — the only fidelity-preserving speed lever
+
+Profiling attributes ~80% of wall time to the successor kernel (393
+enumerations × ~7 s ≈ 46 min per source) and ~20% to scoring (~12 min). §1
+established that the scoring arithmetic cannot be changed safely. Parallelism
+can, because it changes only *when* work happens.
+
+Two independent axes exist, both currently serial:
+
+```
+outer:  5 preference runs      verified = [verified_preference_run(...) for w in PREFERENCES]
+inner:  8 rollout continuations per decision   8 x (5+4+3+2+1+0) = 120 kernel calls per preference
+```
+
+Neither shares state with itself. At `cpu=8.0` the realistic ceiling is ~8-way,
+for a **~4–8× wall-time reduction at identical total CPU-seconds and identical
+dollars.**
+
+#### THE TRAP: a shared enumeration cache makes `kernel_calls` non-deterministic
+
+This is the specific way a naive fan-out would corrupt the experiment, and it
+would not be obvious from the results.
+
+The arms share a `MeteredProcess` whose enumeration cache is what turns ~1,350
+raw kernel calls into ~700. Under concurrency, **two workers that miss on the
+same state at the same time both call the kernel**, so `kernel_calls` *inflates*
+and varies run to run. That counter is not merely reported — it is consumed:
+
+```python
+k_verified = trajectories_for_kernel_budget(verified_cost["kernel_calls"], BUDGET)
+```
+
+So a non-deterministic `kernel_calls` silently changes the generate-and-rank
+budget matching, and therefore changes **P3 and P4 — the very contrasts being
+repaired.** Trajectories would be identical while the comparison moved.
+
+**Required: a compute-once cache.** Per-key locking (or a future/promise per
+key) so concurrent misses on the same key collapse to exactly one kernel call.
+Then `kernel_calls` is identical to the serial run, not merely similar.
+
+#### Acceptance test, binding before any fan-out ships
+
+Re-run the 12 smoke sources with fan-out enabled and assert, per source and per
+arm, **exact equality** against the committed smoke artifacts:
+
+| must match exactly | why |
+|---|---|
+| `action_sequences` | the committed action sequences are the D2 evidence |
+| `endpoints` and `endpoint_z` | the objective values themselves |
+| `overrode_greedy`, `decisions` | the controller's internal choices |
+| **`kernel_calls`, `oracle_requests`, `native_oracle_calls`** | the trap above |
+
+Any inequality — including in a counter — means the fan-out does not ship.
+
+**Barred as "optimization":** K = 8 → 4, a shorter horizon, fewer preferences, a
+cheaper approximate kernel, a different rollout depth. Those are scientific
+changes. A slow overnight run is not a reason to make one.
 
 ---
 
