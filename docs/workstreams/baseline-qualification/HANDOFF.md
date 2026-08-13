@@ -18,6 +18,26 @@
   adapter smoke. **ACTIVE**; deliverables A–C complete; stopped before sweeps.
 - **Held-out data opened:** **no**
 
+# Two binding decisions this lane now carries
+
+1. **HN-GFN runs native.** Under its published linear scalarization; we do not
+   supply a Chebyshev to match Lane 4's. Comparison happens in a **common
+   outcome space** — hypervolume, Pareto coverage, nondominated-set quality,
+   preference coverage, oracle usage under all three counters. **Any coverage
+   difference in a concave front region is a method property of linear
+   scalarization, never a COMPOSE win.** See `FAIRNESS_MATRIX.md`.
+2. **"Without retraining" is barred project-wide.** The claim is operational:
+   *COMPOSE performs inference-time intervention on an explicit realized
+   molecular STATE while all learned parameters remain fixed; changing the goal
+   changes only the control computation. REINVENT carries forward a learned
+   policy and its optimizer state and keeps updating it. COMPOSE carries forward
+   the actual molecule `x_3` and performs zero parameter updates.*
+   The wording lives in the registry JSON, renders into `COMPARATOR_MATRIX.md`,
+   and the validator **rejects** a registry whose operational claim contains the
+   barred phrase. The main lane holds the other half in
+   `docs/RETARGETING_SAME_PREFIX_DESIGN.md`; that edit is on their branch, not
+   this one, so neither copy conflicts.
+
 # ⚠ What has and has not been run
 
 **Run:** (1) the oracle-accounting harness stress test, on a GA-*shaped*
