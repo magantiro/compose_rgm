@@ -1,83 +1,112 @@
 # STATUS — multiobjective workstream (Lane 5)
 
-**Status:** Stage 0 and Stage 1 complete. **STOPPED at the Stage 2 boundary as
-instructed.** Awaiting main.
+**Status:** redirected 2026-08-13. Stage 0/1 accepted. The published-protocol
+alignment audit is complete on the dimensions that decide the verdict.
 
 **Branch:** `codex/compose-multiobjective-package`, based on
 `codex/editing-v2-successor-fiber-fastpath` @ `f6146d7`.
 
-**What is running:** nothing. **Compute spent: zero.** No Modal run, no GPU, no
+**What is running:** nothing. **Compute spent: zero.** No Modal, no GPU, no
 baseline execution, nothing installed into any project environment.
 
-**Held-out data opened:** **no.** This lane opened no data at all — it read
-committed artifacts and public repositories.
+**Held-out data opened:** **no.** This lane opened no data at all.
 
-**Last completed gate:** Stage 1 local qualification. 23 known-answer and
-adversarial tests pass (`tests/test_multiobjective_qualification.py`).
+**Last completed gate:** GSK3β/JNK3 alignment audit — **freeze declined**.
 
-**Next action:** main decides two open freezes (below), then authorizes or
-declines Stage 2. **Stage 2 requires explicit per-run launch approval, and the
-HN-GFN smoke additionally requires GPU authorization.**
+**Next action:** the lead chooses between fallback option 1 (contextual citation
+only, recommended) and option 2 (resource frontier, which needs an oracle
+extraction that does not exist).
 
 ---
 
-## The one-line answer per method
+## The headline
 
-| method | runnable | panel | blocker |
-|---|---|---|---|
-| HN-GFN | yes, on GPU | **B** | no released checkpoint; 10–13 GPU-h per run; BoTorch import broken upstream |
-| InversionGNN | **no, as shipped** | **B**, conditional | no checkpoint; call/def arity mismatch; **no licence** |
-| OP-GFN | n/a | — | **excluded**: not preference-conditioned; CC BY-NC-**ND** |
-| MOG-DFM / AReUReDi / PepTune | n/a | — | related work; sequence state spaces |
-| pCoMole | unknown | — | **primary document not read** |
+> **GSK3β/JNK3 cannot be frozen as a head-to-head Panel B.** Two dimensions fail
+> independently. The published values are **contextual, non-head-to-head**.
 
-## The recommended minimum defensible baseline set
+| # | dimension | verdict |
+|---|---|---|
+| 1 | oracle files / score definitions | **FAIL** |
+| 2 | allowed query / oracle budget | **FAIL** |
+| 3 | hypervolume reference point | `PENDING` |
+| 4 | top-K and preference weighting | `PENDING` |
+| 5 | validity and canonicalization | **FAIL (contributory)** |
+| 6 | seeds and reporting convention | `PENDING` |
 
-**HN-GFN in Panel B, plus the internal generate-and-rank P3/P4 in Panel A.**
-That is the whole set. Adding InversionGNN is worthwhile only if its two
-conditions clear; adding OP-GFN is barred by licence; adding a same-lab method
-is neither approved nor useful.
+**Dimension 1.** HN-GFN scores GSK3β/JNK3 with a **1024-bit** ECFP4 against its
+own RandomForest pickles (`utils/chem.py:63`, `kinase_scorer.py:18`). TDC — which
+InversionGNN calls (`molecular/denovo.py:9,25-26`) — uses a **2048-bit** ECFP4
+(`tdc/.../oracle.py:682,710`). A model trained on 1,024 features cannot consume
+2,048. **The two papers are already not head-to-head with each other**, before
+COMPOSE enters. TDC additionally swaps model file by installed sklearn version,
+so "the TDC GSK3β oracle" is itself two objects.
 
-The internal comparator is the more mechanistically important of the two, and it
-is Lane 4's to run.
+**Dimension 2.** Published budget: **1,000** true-oracle evaluations
+(`main_mobo.py:50-52`). COMPOSE per single preference trajectory, computed from
+`diagnostics/pareto_semantic_oracle_accounting.json`: `greedy_pref` **2,187**,
+`verified_pref` **53,977**. COMPOSE cannot finish one trajectory inside the
+entire published budget; a full five-preference front is **270×** it.
 
-## The three things most likely to be got wrong later
+**This generalizes.** Oracle-budget benchmarks live at 10³–10⁴; PMO uses 10,000.
+COMPOSE's primary arm needs ~5.4 × 10⁴ *per trajectory*. **Changing benchmark
+does not fix this** — the mismatch is with the benchmark class.
 
-1. **HN-GFN's 1,000-call budget is spent against a surrogate.** Reported on an
-   oracle axis alone it would look two orders of magnitude cheaper than COMPOSE
-   while measuring amortization, not efficiency. `surrogate_calls` now exists as
-   an axis and `oracle_efficiency_verdict` refuses the comparison outright.
-2. **HN-GFN's front is global; COMPOSE's are per-source.** Never put them in one
-   table as though they were one task. `assert_not_cross_panel` raises.
-3. **HV-AUC's 12W/0L is not a cleaner 10W/2L.** It is a mixture whose early
-   points are near-definitional; at `k = 5`, the only set-level point, the same
-   committed trace is 10W/2L.
+## Cost of running COMPOSE alone under it
 
-## Open freezes — main's decisions, not this lane's
+**Compute is not the obstacle:** ~58 min per source on 8 CPUs for all five arms,
+so a 12-source panel is roughly **12 core-hours, CPU-only**.
 
-- **Panel B's objective pair.** `{DRD2, QED}` admits HN-GFN but excludes
-  InversionGNN; `{GSK3β, JNK3}` admits both externals but is not COMPOSE's
-  frozen axis. Recommendation: `{GSK3β, JNK3}`. Must be frozen before any
-  outcome exists.
-- **Whether COMPOSE can enter Panel B at all**, given that its process is
-  defined as editing from a supplied source.
+**The blocker is an artifact that does not exist.** COMPOSE cannot call
+`tdc.Oracle` — installing PyTDC is barred, and TDC's sklearn-dependent model
+selection is exactly the drift `artifacts/oracles/drd2_svm_v1` was built to
+prevent. It would need a version-independent extraction of two large
+RandomForests (97 MB, 38 MB), hash-bound with a parity panel: **1–2 days of
+engineering, zero GPU**. Since dimensions 1 and 2 fail regardless, **that
+extraction should not be built to serve this comparison.**
 
-## Escalation
+## Fallback, in preference order
 
-**pCoMole (ICLR 2026 workshop, same lab, "Pareto-Constrained Molecule Editing
-with Discrete Flows") has not been read.** OpenReview is not machine-reachable
-and the paper is not on arXiv. Two fields — its state space and its guidance
-horizon — decide whether it is a lineage citation or a prior-art question. A
-human with an OpenReview login or an author contact must obtain it. Do not let a
-submission go out with this cell unread.
+1. **No Panel B numeric row; contextual citation only.** Recommended. Consistent
+   with `N/A` being preferable to a distorted adaptation. The Pareto claim rests
+   on Panel A, which is where the content is.
+2. **A resource frontier instead of a point** — COMPOSE's HV against oracle
+   evaluations, with published external results as labelled reference markers at
+   their own budgets and oracles. Needs the extraction above.
+3. **Wait for reference-prioritized shortlisting** (already
+   `QUEUED_CONDITIONAL — NO DESIGN / NO RUN`). Named as the blocking dependency;
+   not designed, not scoped, not run.
+
+## Where the argument now rests
+
+With Panel B unable to carry a head-to-head row, the multiobjective argument
+rests on **Panel A and the Ring 3 COMPOSE causal controls**. That is where the
+scientific content was anyway; the audit removes the option of leaning on an
+external row instead.
+
+## Standing findings from Stage 0/1 (unchanged, now project record)
+
+- HN-GFN is GPU-only with no released checkpoint — **now moot**, since we cite
+  rather than rerun.
+- InversionGNN is not runnable as shipped and has **no LICENSE**.
+- OP-GFN is excluded on CC BY-NC-**ND** NoDerivatives.
+- `main.py:145` opens every HN-GFN rollout with an empty
+  `BlockMoleculeDataExtended()`; no qualified external method is
+  source-conditioned, so none may enter Panel A.
+- `surrogate_calls` axis and `INCOMPARABLE_SURROGATE_ASYMMETRY` verdict adopted.
+
+## Escalation — unchanged, and still the highest-priority human task
+
+**pCoMole has not been read.** OpenReview is not machine-reachable; not on arXiv.
+All ten schema fields remain `UNVERIFIED`, deliberately not filled from search
+summaries. The lead has an OpenReview login.
 
 ## Deliverables in this directory
 
 `STATUS.md` · `PROTOCOL.md` · `BASELINE_TASK_MATRIX.md` ·
-`SOURCE_CONDITIONING_AUDIT.md` · `SAME_LAB_LINEAGE.md` · `DECISION_LOG.md` ·
-`HANDOFF.md` · `handoff.json`
+`SOURCE_CONDITIONING_AUDIT.md` · `BENCHMARK_ALIGNMENT_AUDIT.md` ·
+`SAME_LAB_LINEAGE.md` · `DECISION_LOG.md` · `HANDOFF.md` · `handoff.json`
 
 Code: `src/compose_v4/experiments/multiobjective_qualification.py`,
-`tests/test_multiobjective_qualification.py`.
+`tests/test_multiobjective_qualification.py` (23 tests, all passing).
 
 Every artifact carries `DESIGN_ONLY`.

@@ -208,6 +208,76 @@ rejected, and whether it changes a frozen object.
   It must be frozen before any Panel B outcome exists, by whoever owns the
   claim.
 
+## 2026-08-13 — LANE REDIRECTED: cite published numbers, do not rerun baselines
+
+- **Decision (lead's, recorded here).** Stop dependency archaeology. Panel B
+  becomes: pick ONE standardized published multiobjective molecular benchmark,
+  run **COMPOSE only** under it, and cite external numbers **as reported**,
+  labelled that way and never presented as a rerun.
+- **Consequence.** The GPU-authorization question dissolves — COMPOSE is CPU.
+  The HN-GFN environment work (BoTorch bisection, checkpoint absence) is
+  **abandoned as unnecessary**, not solved.
+- **Changes a frozen object.** No.
+
+## 2026-08-13 — GSK3β/JNK3 freeze DECLINED on external protocol overlap
+
+- **Decision.** GSK3β/JNK3 is **not** frozen as a head-to-head Panel B. The
+  published values are labelled **contextual, non-head-to-head**.
+- **Criterion applied.** External protocol overlap alone. No COMPOSE outcome
+  entered the decision, and the in-flight P3/P4 repair was neither consulted nor
+  waited for — its verdict can change how much emphasis Panel B needs, never
+  which benchmark Panel B uses.
+- **Evidence — dimension 1, oracle identity, FAIL.** TDC's `Oracle('GSK3B')` and
+  `Oracle('JNK3')`, which InversionGNN calls (`molecular/denovo.py:9,25-26`),
+  score with `AllChem.GetMorganFingerprintAsBitVect(molecule, 2, nBits=2048)`
+  (`tdc/chem_utils/oracle/oracle.py:682,710`). HN-GFN scores with
+  `AllChem.GetMorganFingerprintAsBitVect(mol, 2, 1024)` (`utils/chem.py:63`)
+  against its own RandomForest pickles (`kinase_scorer.py:18`; sha256
+  `60b2e6eb…` and `a03dd44a…`). A model trained on 1,024 features cannot consume
+  2,048; these are different functions. **The two papers' GSK3β/JNK3 numbers are
+  already not head-to-head with each other, before COMPOSE is mentioned.**
+- **Evidence — dimension 2, budget, FAIL.** The published budget is 1,000
+  true-oracle evaluations (`main_mobo.py:50-52`). Computed from
+  `diagnostics/pareto_semantic_oracle_accounting.json`, COMPOSE spends 2,187
+  `native_oracle_calls` per preference trajectory on `greedy_pref` and 53,977 on
+  `verified_pref`. COMPOSE cannot complete one trajectory inside the entire
+  published budget.
+- **Evidence — dimension 5, validity, contributory FAIL.** HN-GFN scores
+  unparseable molecules as `0.` and keeps them in the batch
+  (`oracle/scorer/scorer.py:36`); COMPOSE's support is legal by construction. The
+  top-K sets are drawn from populations with different validity semantics.
+- **Alternatives rejected.** (a) Rerunning HN-GFN under TDC oracles to
+  manufacture alignment — forbidden by the redirect, and it would substitute our
+  numbers for the authors'. (b) Reducing COMPOSE's `BUDGET`, shortlist or fiber
+  interrogation to fit the benchmark — changing the method to fit the table, and
+  the frozen objects are not this lane's. (c) Trying a different objective pair —
+  the budget gap is with oracle-budget benchmarking as a class, not with
+  GSK3β/JNK3.
+- **Changes a frozen object.** No. It declines to create one.
+
+## 2026-08-13 — The budget finding generalizes, and names an existing queued item
+
+- **Observation.** Standard molecular-optimization benchmarks budget oracle calls
+  at 10³–10⁴; PMO's convention is 10,000. COMPOSE's primary arm needs ~5.4 × 10⁴
+  **per trajectory**. Changing benchmark does not fix this.
+- **The only recorded idea that would change the arithmetic** is
+  reference-prioritized shortlisting, already in `docs/QUEUED_EXPERIMENTS.md` as
+  `QUEUED_CONDITIONAL — NO DESIGN / NO RUN`. This audit **names it as the
+  blocking dependency** for any head-to-head oracle-budget comparison and does
+  not design, scope or run it.
+- **Changes a frozen object.** No.
+
+## 2026-08-13 — PepTune expanded to the full ten-field schema
+
+- **Decision.** PepTune now carries the same schema as MOG-DFM and AReUReDi.
+- **Newly verified at `6f5f7cb`.** Its preference mechanism is **Pareto
+  dominance filtering**, not scalarization (`pareto_mcts.py:143
+  updateParetoFront`), so PepTune is **not preference-conditioned** — the mirror
+  image of MOG-DFM and AReUReDi, which scalarize. Its feasibility handling is a
+  soft `invalid_penalty * invalid` subtraction from reward
+  (`pareto_mcts.py:446-455`), not a constructive guarantee. Licence Apache-2.0.
+- **Changes a frozen object.** No.
+
 ## 2026-08-13 — OPEN: whether COMPOSE can enter Panel B at all
 
 - **Status: OPEN.**

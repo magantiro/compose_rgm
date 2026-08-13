@@ -153,6 +153,44 @@ the decision is main's.
 
 ---
 
+## Where the methods sit — three rings
+
+Recorded from the lead's redirect of 2026-08-13. The purpose of the rings is to
+**answer scientific objections, not to beat task specialists**. Placement only;
+this is not an audit of Ring 1 or Ring 2, and nothing below is asserted beyond
+what has been verified elsewhere in this directory.
+
+### Ring 1 — same methodological realm
+
+| method | placement | status here |
+|---|---|---|
+| DDSBM | graph CTMC / source-conditioned transformation | not audited by this lane; `baselines/ddsbm/` exists on `codex/compose-baseline-qualification` |
+| Edit Flows | edit-based CTMC lineage | **related work only** — its published state space is variable-length *sequences*, and a homemade molecular-graph port would mean solving the support/executor problem that is part of COMPOSE's own contribution |
+| GraphXForm | source-conditioned graph editing | not audited by this lane; qualified by the predecessor lane |
+| InVirtuoGen | named in the redirect | **not audited, no primary source read by this lane — `UNVERIFIED`** |
+
+### Ring 2 — hard-constraint control
+
+CDD, PRODIGY, ConStruct. **Lane 6 owns this audit. Not duplicated here**, and no
+claim about these methods appears anywhere in this workstream.
+
+### Ring 3 — COMPOSE causal controls
+
+Possibly more important than either external ring: hard mask versus post-hoc;
+frozen `R_θ` versus empirical family; closed-loop versus generate-and-rank;
+continuation versus restart; endpoint versus trajectory constraint.
+
+These are Category 2 comparators under `docs/BASELINE_IMPLEMENTATION_POLICY.md` —
+scientific controls we implement ourselves because they exist only as
+counterfactuals to COMPOSE. They are Panel A members. Lane 4 owns the runs.
+
+**The audit's practical consequence for emphasis.** With Panel B unable to carry
+a head-to-head row (see `BENCHMARK_ALIGNMENT_AUDIT.md`), the multiobjective
+argument rests on Ring 3 and Panel A. That is where the scientific content was
+anyway; the audit removes the option of leaning on an external row instead.
+
+---
+
 ## Cost summary
 
 | item | cost | basis |

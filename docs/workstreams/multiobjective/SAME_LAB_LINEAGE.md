@@ -150,14 +150,20 @@ inference-time multi-objective guidance algorithm that balances exploration and
 exploitation to iteratively refine Pareto-optimal sequences. MCTG integrates
 classifier-based rewards with search-tree expansion."*
 
+Code read at commit `6f5f7cb4c005834d4cfd995ecd90f8b012d32d24` (2026-04-15).
+
 | field | finding |
 |---|---|
-| native state space | therapeutic peptide **SMILES**, under a Masked Discrete Language Model |
-| source conditioning | **NO** — de novo generation, per the title |
-| base generator fixed | guidance is inference-time; the diffusion model supplies the base process |
-| guidance horizon | **ROLLOUT / TREE SEARCH** — the only one of the four with a future-aware guidance mechanism |
-| preference mechanism | multi-objective classifier rewards with Pareto-optimal refinement over a search tree |
-| official code | Apache-2.0, permissive — the only same-lab code here we could legally vendor |
+| `native_state_space` | therapeutic peptide **SMILES as a token sequence**, under a Masked Discrete Language Model. The repo ships `src/tokenizer/`; there is no molecular-graph object. |
+| `transition_object` | masked-token unmasking step of a discrete diffusion process (`src/diffusion.py`), expanded as a node in a search tree (`src/pareto_mcts.py`) |
+| `source_conditioning` | **NO** — de novo, per the title. The entry point is `src/generate_mcts.py`; there is no supplied-source argument. |
+| `base_generator_fixed` | **YES, frozen** — MCTG is described in the abstract as "an **inference-time** multi-objective guidance algorithm"; the MDLM supplies the base process |
+| `guidance_horizon` | **ROLLOUT / TREE SEARCH** — the only one of the four that is future-aware. `pareto_mcts.py:56 selectNode`, `:87 addChildNode`, `:102 updateNode` are the standard MCTS select/expand/backup cycle. |
+| `preference_mechanism` | **Pareto dominance filtering, not scalarization.** `pareto_mcts.py:143 updateParetoFront` "Removes sequences that are dominated by scoreVector / adds the SMILES sequence if it is non-dominated". No weight vector is requested at inference — this is the mirror image of MOG-DFM's and AReUReDi's scalarization, and it means PepTune is **not preference-conditioned** either. |
+| `feasibility_semantics` | **soft penalty, not a constructive guarantee.** `pareto_mcts.py:446-455` computes the fraction of invalid child sequences and subtracts `invalid_penalty * invalid` from the reward. Invalid states are discouraged, not excluded. |
+| `official_code` | `github.com/programmablebio/peptune`, **Apache-2.0** (`LICENSE.md`) — the only same-lab code here we could legally vendor |
+| `small_molecule_graph_support` | **NO** — peptide SMILES token sequences only; no graph state space and no supplied source |
+| `reported_compute` | `UNVERIFIED` — not extracted from the paper |
 
 **Status: `CONCEPTUAL_LINEAGE`.** It is de novo, it is peptide SMILES as token
 sequences, and it is not portable to source-conditioned molecular graph editing
