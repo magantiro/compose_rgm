@@ -3,7 +3,7 @@
   "status": "VERIFIED_BY_COMPARING_REFS_NOT_BY_PUSH_EXIT_CODE",
   "note": "A push loop reporting success is not proof the remote holds the commit. Each entry below was verified by comparing `git rev-parse <branch>` against `git ls-remote --heads origin <branch>`.",
   "lane_state": {
-    "codex/compose-claim2-trajectory": "RUNNING -- head is live and will move",
+    "codex/compose-claim2-trajectory": "COMPLETE -- verdict KEEP AND REFRAME, frontier INCOMPARABLE. R_theta NOT reopened.",
     "codex/compose-pathwise-constraints": "DONE through protocol A2, DORMANT",
     "codex/compose-baseline-qualification": "INFRASTRUCTURE QUALIFIED -- not an experimental result",
     "codex/compose-pareto-control": "RUNNING -- head is live and will move"
@@ -34,5 +34,34 @@
       "tracking_ref": "refs/heads/codex/compose-pareto-control"
     }
   },
-  "why_central": "Recorded here rather than in each lane's handoff.json because two lanes are still committing; editing a running agent's worktree invites a conflict. Each lane should also stamp its own pushed head when it next reports, at which point its head is stable."
+  "why_central": "Recorded here rather than in each lane's handoff.json because two lanes are still committing; editing a running agent's worktree invites a conflict. Each lane should also stamp its own pushed head when it next reports, at which point its head is stable.",
+  "gate_outcome": {
+    "gate": "Lane 1: are R_theta's iterated dynamics a pathology?",
+    "verdict": "KEEP AND REFRAME",
+    "frontier": "incomparable",
+    "attribution": {
+      "mutual_edge_fraction_of_training_corpus": 0.7333195278525575,
+      "threshold_for_INHERITED": 0.33,
+      "threshold_for_MODEL_SPECIFIC": 0.1,
+      "frozen_before_the_census_existed": true,
+      "reading": "the training reference process is itself locally reversible, so R_theta reproducing that is faithful modelling, not a compositional pathology"
+    },
+    "resolved_axes": {
+      "mobility": "-0.246 [-0.309, -0.182] -- resolved AGAINST R_theta",
+      "fidelity": "+0.046 [+0.005, +0.097] -- resolved FOR R_theta"
+    },
+    "reopen_required_all_three_and_all_three_fail": [
+      "cycling model-specific",
+      "worse on BOTH net mobility and fidelity",
+      "controlled trajectories also cyclic"
+    ],
+    "claim_2_language": "R_theta learns locally reversible reference dynamics with materially better envelope retention and lower displacement. It does NOT dominate unlearned same-support transport when iterated; the honest word is incomparable.",
+    "my_error_corrected": "I relayed 'displacement per net edit favours R_theta' (0.213 vs 0.120/0.131) from the n=8 smoke as though it were a finding. It did NOT replicate: 0.148 vs 0.129/0.135 at n=36, interval spanning zero. The lane had quarantined it as diagnostic_only_axes before running, which is the only reason it never entered a verdict.",
+    "unlocks": [
+      "held-out retargeting confirmation",
+      "Lane 2 Stage A2 (~2.1 ch)",
+      "Pareto development (still gated on Lane 4 Stage 0)",
+      "real external-baseline qualification (Lane 3 already resumed)"
+    ]
+  }
 }
