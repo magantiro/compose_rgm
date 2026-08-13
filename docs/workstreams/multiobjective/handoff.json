@@ -5,7 +5,7 @@
   "branch": "codex/compose-multiobjective-package",
   "base_commit": "f6146d7",
   "base_branch": "codex/editing-v2-successor-fiber-fastpath",
-  "content_commit": "d3f978c",
+  "content_commit": "STAMPED_BY_FOLLOWUP_COMMIT",
   "artifact_status": "DESIGN_ONLY",
   "held_out_data_opened": false,
   "compute_spent": {
@@ -74,7 +74,19 @@
       "secondary": "CONCEPTUAL_LINEAGE"
     },
     "PepTune": {
-      "status": "CONCEPTUAL_LINEAGE"
+      "status": "CONCEPTUAL_LINEAGE",
+      "upstream": "github.com/programmablebio/peptune",
+      "upstream_commit": "6f5f7cb4c005834d4cfd995ecd90f8b012d32d24",
+      "license": "Apache-2.0",
+      "native_state_space": "peptide SMILES as token sequence under a Masked Discrete Language Model",
+      "source_conditioning": "NO -- de novo",
+      "base_generator_fixed": "YES -- inference-time guidance",
+      "guidance_horizon": "ROLLOUT / MCTS (pareto_mcts.py:56,87,102)",
+      "preference_mechanism": "Pareto dominance filtering (pareto_mcts.py:143 updateParetoFront), NOT scalarization -- therefore NOT preference-conditioned",
+      "feasibility_semantics": "soft: invalid_penalty * invalid subtracted from reward (pareto_mcts.py:446-455), not a constructive guarantee",
+      "small_molecule_graph_support": "NO",
+      "reported_compute": "UNVERIFIED",
+      "why_it_matters": "this lab's own prior work already establishes inference-time tree-search multiobjective guidance over a frozen discrete generative process, independently closing off 'planning beats greedy' as a Pareto headline"
     },
     "pCoMole": {
       "status": "UNVERIFIED",
@@ -137,17 +149,21 @@
     }
   },
   "open_decisions": [
-    "Panel B objective pair is not frozen. {DRD2,QED} admits HN-GFN and excludes InversionGNN; {GSK3b,JNK3} admits both externals and is not COMPOSE's frozen axis. Recommendation: {GSK3b,JNK3}. Must be frozen before any outcome exists.",
-    "Whether COMPOSE has a legitimate global de novo arm and can enter Panel B at all."
+    "RESOLVED 2026-08-13: Panel B objective pair. GSK3b/JNK3 freeze DECLINED; no head-to-head numeric row. See benchmark_alignment_audit.",
+    "OPEN: whether COMPOSE has a legitimate global de novo arm and can enter Panel B at all -- now largely moot, since Panel B carries no numeric COMPOSE row.",
+    "OPEN (lead's choice): fallback option 1 (contextual citation, recommended) vs option 2 (resource frontier, needs an oracle extraction that does not exist)."
   ],
   "recommended_minimum_baseline_set": [
-    "HN-GFN in Panel B",
-    "internal generate-and-rank P3/P4 in Panel A (Lane 4 owns the run)"
+    "NO external numeric row in Panel B; published values cited as contextual, non-head-to-head",
+    "internal generate-and-rank P3/P4 in Panel A (Lane 4 owns the run)",
+    "Ring 3 COMPOSE causal controls -- where the multiobjective argument now rests"
   ],
   "unresolved_fairness_risks": [
+    "HN-GFN and InversionGNN do not share a GSK3b/JNK3 oracle; their published numbers are not head-to-head with each other",
+    "TDC's GSK3b/JNK3 oracle is sklearn-version-dependent and neither paper states which pickle it used",
+    "COMPOSE's per-trajectory oracle demand exceeds standard benchmark budgets by 1-2 orders of magnitude; this is a property of exhaustive-fiber control, not a defect, but it forecloses head-to-head oracle-budget comparison",
     "surrogate-versus-direct oracle asymmetry; mitigated by an axis and a refusal, not eliminated",
     "HN-GFN's linear weighted sum cannot express nonconvex front regions a Chebyshev can reach; a method property, never a COMPOSE win",
-    "Panel B's objective pair choice is not neutral between the two externals",
     "local environment is rdkit 2025.09.6, not the production pin 2024.03.5; no canonical key produced locally is claim-bearing",
     "pCoMole unread"
   ],
@@ -158,12 +174,13 @@
     "command": "python3 -m pytest tests/test_multiobjective_qualification.py -q"
   },
   "durable_artifacts": {
-    "docs/workstreams/multiobjective/STATUS.md": "9d3eb485f5424b1faf9131115dc8f26e32016c3185394849a097eb1a221ce73c",
-    "docs/workstreams/multiobjective/PROTOCOL.md": "c91dd25ab3950a34394a110266c096720307ee22897a1cbda5192747708ff53e",
-    "docs/workstreams/multiobjective/BASELINE_TASK_MATRIX.md": "28bb4a404a9610181890ff551861b96578cd62ef8460eb4ec1540690f539983a",
+    "docs/workstreams/multiobjective/STATUS.md": "d7ad8ccc8faf7468ee90767b8fde0432754b7dac5e23cd2bcfee9729b708e037",
+    "docs/workstreams/multiobjective/PROTOCOL.md": "407821e08ba52121d3bca286a63f0cb1b4f6b78268c373cbc8889d6379eee705",
+    "docs/workstreams/multiobjective/BASELINE_TASK_MATRIX.md": "334614114cbd12313b27fc5462c4f9da987e7f3a2c572f58b1e936b694eed838",
     "docs/workstreams/multiobjective/SOURCE_CONDITIONING_AUDIT.md": "c81a9a22afbfec223b8577bab46106f1b1fb724747212652359b609038cebbc6",
-    "docs/workstreams/multiobjective/SAME_LAB_LINEAGE.md": "d681c6b42e5ce7d086d5c64aa280fbd0ba3fd1f6dbde12e838ed1da413f5af8b",
-    "docs/workstreams/multiobjective/DECISION_LOG.md": "d5c4e943bb3b68ecf07c0eb35e2da94b3721fc27493c049e2a6789691eda67db",
+    "docs/workstreams/multiobjective/BENCHMARK_ALIGNMENT_AUDIT.md": "4330637c1e3ff3e3a4ecb645af41edf44536d9ade5fffbd69da3d64fbcf8cbec",
+    "docs/workstreams/multiobjective/SAME_LAB_LINEAGE.md": "7c9c496b742c985073ab127e1a2c101e3fb96f14b218a212cb1f5ec999493b10",
+    "docs/workstreams/multiobjective/DECISION_LOG.md": "5e78c78c40709944a0e7eb25a3e27ff527d92fdac2c3a71007cc0b9415aba21d",
     "docs/workstreams/multiobjective/HANDOFF.md": "1396b2f568ecdc083adeaaa0107c5f09abfbcbc6b2eaca4304d6ef1e6a6b463c",
     "src/compose_v4/experiments/multiobjective_qualification.py": "243511659c504e34a11e6009e2a19bed9e922f0f088e52daa4bf513cd35359ae",
     "tests/test_multiobjective_qualification.py": "c22804b1c3e4c1c6a5644da1fc845ee09fcd19a6bf61d8e61695f3bc7432ee35"
@@ -178,5 +195,83 @@
   "reproduction": {
     "tests": "python3 -m pytest tests/test_multiobjective_qualification.py -q",
     "drd2_identity": "git clone https://github.com/violet-sto/HN-GFN.git && git checkout 90078b8ceeee3e907deeced9b096a6e395b71177 && shasum -a 256 oracle/scorer/drd2/clf_py36.pkl"
+  },
+  "lane_redirect": {
+    "date": "2026-08-13",
+    "instruction": "Stop dependency archaeology. Do not rerun external baselines whose published numbers are comparable. Panel B: pick ONE standardized published multiobjective benchmark, run COMPOSE only, cite external numbers as reported.",
+    "consequence": "GPU-authorization question dissolved; COMPOSE is CPU. HN-GFN environment work abandoned as unnecessary rather than solved."
+  },
+  "benchmark_alignment_audit": {
+    "candidate": "GSK3b + JNK3",
+    "verdict": "FREEZE_DECLINED",
+    "published_values_label": "CONTEXTUAL_NON_HEAD_TO_HEAD",
+    "criterion_applied": "external protocol overlap alone; no COMPOSE outcome entered the decision; the in-flight P3/P4 repair was neither consulted nor waited for",
+    "dimensions": {
+      "1_oracle_files_or_score_definitions": {
+        "verdict": "FAIL",
+        "evidence": {
+          "tdc_used_by_inversiongnn": "tdc/chem_utils/oracle/oracle.py:682,710 AllChem.GetMorganFingerprintAsBitVect(molecule, 2, nBits=2048); predict_proba[0,1]",
+          "inversiongnn_calls_tdc": "molecular/denovo.py:9,25-26 from tdc import Oracle; Oracle('JNK3'); Oracle('GSK3B')",
+          "hn_gfn": "utils/chem.py:63 AllChem.GetMorganFingerprintAsBitVect(mol, 2, 1024); oracle/scorer/kinase_scorer.py:18 loads kinase_rf/{task}.pkl",
+          "hn_gfn_model_sha256": {
+            "gsk3b": "60b2e6ebafd151d0c4e50ef6363eeba9d971c6467383e8dae51a6bf0b53be28c",
+            "jnk3": "a03dd44a89e922250bd0827c44f480be8e8685c93d43b17557d1dcd42e9b775c"
+          },
+          "why_fatal": "a RandomForest trained on 1024 features cannot consume a 2048-feature vector; these are different functions, not two implementations of one",
+          "secondary_hazard": "TDC selects gsk3b.pkl or gsk3b_current.pkl by installed sklearn version (oracle.py:661-664,703-706); neither paper states which it used"
+        },
+        "open_sub_question": "whether InversionGNN reran HN-GFN inside its own harness under TDC oracles. If yes, cite InversionGNN's single table; if no, cite each paper separately and state the oracle difference. Does NOT change the verdict, because dimension 2 fails independently."
+      },
+      "2_oracle_budget": {
+        "verdict": "FAIL",
+        "published_budget_true_oracle_evaluations": 1000,
+        "published_budget_source": "HN-GFN main_mobo.py:50-52 (num_init_examples=200 + num_outer_loop_iters=8 x num_samples=100); true oracle called at main_mobo.py:393",
+        "compose_native_oracle_calls_per_preference_trajectory": {
+          "unguided": 1.0,
+          "gen_rank_at_greedy": 0.5,
+          "gen_rank_at_verified": 11.5,
+          "greedy_pref": 2187.3,
+          "verified_pref": 53976.8
+        },
+        "computed_from": "diagnostics/pareto_semantic_oracle_accounting.json, 12 sources, K=5 preferences, BUDGET=6",
+        "why_structural": "exhaustive legal-successor-fiber interrogation against a ~586-wide fiber; a budget-6 trajectory necessarily touches ~3500 candidates before rollout",
+        "generalization": "oracle-budget benchmarks sit at 1e3-1e4 (PMO uses 10000); COMPOSE's primary arm needs ~5.4e4 per trajectory, so changing benchmark does not fix this",
+        "blocking_dependency_named_not_designed": "reference-prioritized shortlisting, docs/QUEUED_EXPERIMENTS.md, QUEUED_CONDITIONAL -- NO DESIGN / NO RUN"
+      },
+      "3_hypervolume_reference_point": {
+        "verdict": "PENDING"
+      },
+      "4_top_k_and_preference_weighting": {
+        "verdict": "PENDING"
+      },
+      "5_validity_and_canonicalization": {
+        "verdict": "FAIL_CONTRIBUTORY",
+        "evidence": "HN-GFN oracle/scorer/scorer.py:36 scores unparseable molecules as 0. and keeps them in the batch; COMPOSE's support is legal by construction, so the top-K sets are drawn from populations with different validity semantics"
+      },
+      "6_seeds_and_reporting_convention": {
+        "verdict": "PENDING"
+      }
+    },
+    "fallback_in_preference_order": [
+      "1 (RECOMMENDED) no Panel B numeric row; contextual citation only",
+      "2 resource frontier: COMPOSE HV vs oracle evaluations as a curve, external results as labelled reference markers at their own budgets and oracles; requires an oracle extraction that does not exist",
+      "3 wait for reference-prioritized shortlisting; named as blocking dependency, not designed"
+    ],
+    "cost_of_running_compose_alone": {
+      "compute": "~58 min per source on 8 CPUs for all five arms; ~12 core-hours for a 12-source panel; CPU-only; compute is NOT the obstacle",
+      "oracle_work": "~270,000 unique evaluations per source on the primary arm; ~3.2M across 12 sources",
+      "actual_blocker": "COMPOSE cannot call tdc.Oracle. Installing PyTDC is barred and TDC's sklearn-dependent model selection is the exact drift artifacts/oracles/drd2_svm_v1 exists to prevent. Needs a version-independent extraction of two RandomForests (97MB, 38MB), hash-bound with a parity panel: 1-2 days engineering, zero GPU. NOT AUTHORIZED, NOT STARTED, and should not be built to serve this comparison since dimensions 1 and 2 fail regardless."
+    }
+  },
+  "rings": {
+    "ring_1_same_methodological_realm": {
+      "DDSBM": "graph CTMC / source-conditioned transformation; not audited by this lane",
+      "Edit Flows": "RELATED WORK ONLY -- published state space is variable-length sequences; a molecular-graph port would mean solving the support/executor problem that is part of COMPOSE's own contribution",
+      "GraphXForm": "source-conditioned graph editing; not audited by this lane",
+      "InVirtuoGen": "UNVERIFIED -- no primary source read by this lane"
+    },
+    "ring_2_hard_constraint_control": "CDD, PRODIGY, ConStruct -- LANE 6 OWNS THIS AUDIT; not duplicated here and no claim about them appears in this workstream",
+    "ring_3_compose_causal_controls": "hard mask vs post-hoc; frozen R_theta vs empirical family; closed-loop vs generate-and-rank; continuation vs restart; endpoint vs trajectory constraint. Panel A members, Lane 4 owns the runs.",
+    "consequence": "with Panel B unable to carry a head-to-head row, the multiobjective argument rests on Panel A and Ring 3"
   }
 }

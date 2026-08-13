@@ -124,9 +124,32 @@ GSK3β/JNK3.
 
 ### Could alignment be manufactured?
 
-Only by rerunning HN-GFN under TDC oracles — which is precisely the 10-13
-V100-hour rerun the redirect forbids, and which would produce numbers that are
-ours rather than the authors'. **Declined.**
+Not by us. Rerunning HN-GFN under TDC oracles is precisely the 10-13 V100-hour
+rerun the redirect forbids, and it would produce numbers that are ours rather
+than the authors'. **Declined.**
+
+### But one repair may already exist, and it changes what we cite
+
+There is a distinction worth keeping sharp:
+
+- **Combining HN-GFN's own reported numbers with InversionGNN's own reported
+  numbers is invalid**, for the reason above. That is settled.
+- **If InversionGNN reran HN-GFN inside its own harness, under TDC oracles**,
+  then InversionGNN's table is *internally* oracle-consistent, and citing **that
+  single table** — rather than two papers — would be a legitimate "as reported"
+  source with one oracle behind every row.
+
+Which of these holds is `PENDING` extraction. It does **not** change the verdict,
+because dimension 2 fails independently and by one to two orders of magnitude.
+It changes only **what the contextual citation should point at**:
+
+> If InversionGNN reran HN-GFN: cite InversionGNN's table as the single source,
+> naming TDC's oracle and the budget.
+> If it did not: cite each paper separately, and state that they used different
+> GSK3β/JNK3 implementations.
+
+Recording the distinction now, before the answer arrives, so the citation is not
+chosen after the fact.
 
 ---
 
@@ -134,12 +157,22 @@ ours rather than the authors'. **Declined.**
 
 ### The published budget
 
-HN-GFN, `main_mobo.py:50-52`: `num_init_examples=200`,
+**HN-GFN**, verified in code — `main_mobo.py:50-52`: `num_init_examples=200`,
 `num_outer_loop_iters=8`, `num_samples=100`. The true oracle is called once per
 outer round at `main_mobo.py:393`. Total: **1,000 true-oracle evaluations.**
 
 The paper frames the setting as "an evaluation budget of N rounds with fixed
 batches of size b", starting from "a random initial dataset".
+
+**InversionGNN's** stated budget for the two-objective setting is `PENDING`
+extraction; the paper describes surrogate pretraining calls plus
+`N_weight × 1,000` optimization calls, so its total is larger than HN-GFN's.
+
+**This does not soften the verdict, and the arithmetic says why.** Even against
+PMO's far more generous 10,000-call convention, COMPOSE's primary arm spends
+**5.4× the entire budget per trajectory**. The conclusion is stable across every
+budget any of these benchmarks uses, which is precisely why it is reported as a
+property of the benchmark *class*.
 
 ### What COMPOSE spends
 

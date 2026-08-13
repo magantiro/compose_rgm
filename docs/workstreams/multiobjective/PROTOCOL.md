@@ -224,25 +224,42 @@ post-hoc weighted score**. Allowed verdicts: `R_θ dominates`;
 
 ---
 
-## 8. Open freeze — Panel B's objective pair
+## 8. Panel B — RESOLVED 2026-08-13: no head-to-head row
 
-Panel B needs a pair both externals compute natively. There is a genuine tension
-and it must be settled **before** any outcome exists:
+**Superseding the earlier recommendation of `{GSK3β, JNK3}` in this section.**
+That recommendation was made on the reasonable assumption that a pair both
+external papers report is a pair they report *comparably*. The alignment audit
+tested that assumption and it failed.
 
-| option | admits | excludes | cost |
-|---|---|---|---|
-| `{DRD2, QED}` | HN-GFN natively; COMPOSE's frozen `P` axis | InversionGNN, which has no DRD2 | one external row |
-| `{GSK3β, JNK3}` | HN-GFN and InversionGNN natively, both papers' own benchmark | COMPOSE's frozen potency axis; COMPOSE would need an objective it does not use | COMPOSE may be absent from B1 |
-| `{QED, SA}` | all three natively | nothing, but it is a weak task with a well-known degenerate optimum | scientific weight |
+**Verdict: `{GSK3β, JNK3}` is not frozen.** Full evidence in
+`BENCHMARK_ALIGNMENT_AUDIT.md`; the two decisive dimensions:
 
-**Recommendation:** `{GSK3β, JNK3}`, the pair both external papers actually
-report, with Panel B stated as a competence comparison **among externals** and
-COMPOSE entering only if a legitimate global arm exists. That keeps each method
-on its own published ground and avoids the worst failure mode — building a
-COMPOSE-flavoured task and calling it common.
+- **Oracle identity.** HN-GFN uses a 1024-bit ECFP4 with its own RandomForests;
+  TDC — which InversionGNN calls — uses a 2048-bit ECFP4. Different feature
+  dimension, therefore different models. The two papers' published numbers were
+  not produced by the same oracle.
+- **Budget.** The published budget is 1,000 true-oracle evaluations. COMPOSE
+  spends 2,187 per preference trajectory on its cheapest guided arm and 53,977
+  on its primary arm. It cannot complete one trajectory inside the whole budget.
 
-**This is main's decision, not this lane's.** Recorded as open in
-`DECISION_LOG.md`.
+The budget finding **generalizes to oracle-budget benchmarking as a class**
+(10³–10⁴ conventional; COMPOSE's primary arm ~5.4 × 10⁴ per trajectory), so no
+substitute benchmark repairs it.
+
+**Consequently, Panel B carries no numeric COMPOSE-versus-external row.**
+Published external values appear as **contextual, non-head-to-head**, each
+carrying its oracle provenance and its budget, never in a shared-header column
+with a COMPOSE number, with a caption naming the failed dimension.
+
+**The freeze criterion actually applied** was external protocol overlap alone. No
+COMPOSE outcome entered the decision, and the in-flight P3/P4 repair was neither
+consulted nor waited for — a P3/P4 verdict may change how much emphasis Panel B
+needs, and may never change which benchmark Panel B uses.
+
+**What this costs and what it does not.** It removes the option of leaning on an
+external row. It does not weaken the multiobjective claim, which was always
+carried by Panel A and the Ring 3 causal controls — a global competence row was
+context, not evidence for the claim in §1.
 
 ---
 
