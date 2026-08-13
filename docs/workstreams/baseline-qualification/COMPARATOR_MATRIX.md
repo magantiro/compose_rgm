@@ -17,7 +17,7 @@ Read the third and fourth columns together. Neither column is the finding on its
 **1. REINVENT — `C4c_retargeting`**
 
 - *What it natively does.* Changes the objective within a single run and carries the adapted agent across the change. Staged (curriculum) learning is a first-class run mode whose stated purpose is 'to allow the user to optimize a prior model conditioned on a calculated target profile by varying the scoring function in stages', with a checkpoint written after each stage and reusable as the next stage's agent. This is the strongest overlap with COMPOSE's mid-run goal-change claim in the whole registry, and the paper must not say that no existing method changes objective mid-run.
-- *What COMPOSE still has.* REINVENT re-targets a POLICY, not a realized molecule: there is no in-flight molecular state to continue from, the switch fires at a stage boundary set by max_score or max_steps rather than at an arbitrary chosen step, and the agent must re-adapt by further RL after the switch. COMPOSE's claim is a goal change at an arbitrary step of a realized molecular history, continuing from the exact current molecule under a finite remaining budget, with the reference process frozen and only the control law recomputed.
+- *What COMPOSE still has.* REINVENT re-targets a POLICY, not a realized molecule: there is no in-flight molecular state to continue from, and the switch fires at a stage boundary set by max_score or max_steps rather than at an arbitrary chosen step. BUT THE BOUNDARY IS SOFTER THAN PREVIOUSLY RECORDED, verified in source 2026-08-13: the Agent network is created once OUTSIDE the stage loop and never reloaded; the Adam optimizer is constructed ONCE (RL/setup/reward_strategy.py:41-42) and the SAME object is placed into every WorkPackage (RL/setup/create_packages.py:57-66), so exp_avg, exp_avg_sq and the step counter carry across the boundary unbroken; there is NO learning-rate scheduler in the RL path at all, so the rate is constant across all stages; the inception replay buffer is created once and NEVER cleared, carrying stage-N molecules with their STALE stage-N scores into stage N+1, since only the scoring function is swapped (run_staged_learning.py:192-193). Only the diversity-filter memories are purged, and only because purge_memories defaults True. A stage boundary therefore changes the scoring function and the termination criterion and essentially NOTHING about the optimizer state. COMPOSE's remaining distinction is narrower than 'the baseline must retrain': it is that the goal changes at an arbitrary step of a realized MOLECULAR history, continuing from the exact current molecule under a finite remaining budget, with the reference process frozen and only the control law recomputed.
 - *Evidence.* REINVENT 4, Loeffler et al., J. Cheminform. 2024 (PMC10882833), section 'Staged learning', verbatim quoted; and https://github.com/MolecularAI/REINVENT4/blob/main/configs/staged_learning.toml, which ships two [[stage]] blocks each with its own [stage.scoring] and chkpt_file.
 
 **2. REINVENT — `C4c_retargeting`**
@@ -126,7 +126,7 @@ Consequences that bind every comparison below:
 | code_reference | master @ 1a68d2a; repository ARCHIVED read-only, last push 2022-02-03, 2 commits. The URL printed in the paper (github.com/yutxie/mars) is a README-only pointer to this repo. OpenReview kHSu4ebxFXY; ICLR 2021 Spotlight; arXiv DOI 10.48550/arXiv.2103.10432 (ICLR mints no proceedings DOI). |
 | license | CC BY-NC 4.0 — NON-COMMERCIAL. LICENSE file first line is the Creative Commons Attribution-NonCommercial 4.0 text; GitHub's detector reports NOASSERTION. estimator/scorer/sa_scorer.py carries a separate BSD-style Novartis notice. |
 | checkpoints | NONE for the proposal, and no shipped code path writes one: sampler.py calls train(...) without save_dir, so the only torch.save in common/train.py is unreachable. Shipped binaries are oracles only (kinase_rf/gsk3b.pkl, kinase_rf/jnk3.pkl, fpscores.pkl.gz). The fragment vocabulary is also not shipped (data/vocab_* is gitignored). |
-| cpu_feasible | Documented yes — README gives a CPU install (conda install pytorch cpuonly; conda install -c dglteam dgl) and --device accepts cpu. Whether the 2021 stack (python 3.9.6 / torch 1.9.0 / DGL 0.7.0 / sklearn 0.23.2) still resolves is UNVERIFIED; nothing was installed. |
+| cpu_feasible | VERIFIED FEASIBLE-WITH-WORK on python 3.11 ONLY (2026-08-13 probe). DGL publishes no wheel for python 3.14. Working set: torch 2.1.2 + torchdata 0.7.1 + dgl 2.2.0 from https://data.dgl.ai/wheels/torch-2.4/repo.html, setuptools<71, numpy<2. DGL's arm64 wheel ships graphbolt dylibs only for torch 2.1.0-2.3.0, and torchdata 0.7.1 is the only release matching, so torch 2.1.2 is forced. The feared API drift did NOT occur: dgl.nn.pytorch.glob.Set2Set imports and runs a forward pass, g.number_of_edges() still exists, and no np.bool appears in MARS source. BasicEditor instantiates at 2,618,026 parameters. First remaining blocker is ONE LINE: estimator/scorer/sa_scorer.py:27 'from rdkit.six import iteritems', removed from modern RDKit. Est. 1-2 h to a running sampler. UNVERIFIED: whether the sklearn 0.23.2-era kinase/DRD2 pickles still load. |
 
 | capability | verdict | evidence |
 |---|---|---|
@@ -146,7 +146,7 @@ Consequences that bind every comparison below:
 
 **Edit / generation budget.** One edit attempt per chain per step. Code defaults give ~10^6 attempted edits per run; paper settings ~2.75x10^6. Early stopping via PATIENCE=100 when neither the PM product nor the average score improves by 0.01.
 
-**Adapter status.** `designed_not_built` — No blocking scientific incompatibility. The execution risks are the 2021 dependency stack and the non-commercial license.
+**Adapter status.** `environment_verified_not_built` — No blocking scientific incompatibility. The execution risks are the 2021 dependency stack and the non-commercial license.
 
 - Objective shim replacing Estimator with a caller of the COMPOSE frozen goal language and src/compose_v4/drd2_oracle.py, wrapping every call in a counter. estimator/scorer/scorer.py has drd2_scorer commented out of its imports while still dispatching to it and ships no DRD2 model (repo issue #2), so the DRD2 objective must come from our side regardless.
 - Chain-count reduction driver: MARS's native regime is 1000-5000 chains, and any budget-matched comparison runs it far outside that regime.
@@ -178,7 +178,7 @@ Consequences that bind every comparison below:
 | code_reference | created 2024-10-16, last push 2026-02-26, not archived, 0 open issues. Journal version: Digital Discovery 4(4) 1052-1065 (2025), DOI 10.1039/D4DD00339J, CC-BY. arXiv 2411.01667 v1 2024-11-03, v2 2025-03-20. |
 | license | MIT (LICENSE, 'Copyright (c) 2026 Grimm Lab'). Bundled objective_predictor/GH_GNN_IDAC/ and GDI_NN_IDAC/ carry their own separate LICENSE files — check before redistribution. |
 | checkpoints | Available: https://syncandshare.lrz.de/dl/fiJs7ZHuCFsVskeoab5aZg/graphxform_pretrained.zip, ~347,364,546 bytes, verified reachable (HTTP 200). Not hashed here because the file has not been downloaded; hash on first fetch before any claim-bearing run. The GH-GNN objective surrogate ships in-repo. |
-| cpu_feasible | YES by configuration — shipped config.py already defaults training_device, objective_gnn_device and devices_for_workers to 'cpu', and the README says to set 'cpu' if no CUDA is available. The paper ran one H100 at beam width 512 and publishes no CPU runtime, so any CPU estimate is a projection. main.py derives num_gpus from CUDA_VISIBLE_DEVICES before ray.init and it must be set explicitly in a CPU container. |
+| cpu_feasible | VERIFIED FEASIBLE (2026-08-13 probe), python 3.11. The expected blocker did not occur: torch_scatter 2.1.2 COMPILED successfully against CPU torch with --no-build-isolation. torch_geometric 2.8.0, ray 2.57.0, rdkit 2023.09.6 and guacamol all install; MoleculeTransformer(MoleculeConfig()) instantiates at 31,542,218 parameters. Checkpoint URL returns HTTP 200, Content-Length 347,364,546 (331 MiB), not downloaded. torch_scatter is NOT in requirements.txt and is imported only by the GH-GNN objective predictor, so it is unnecessary unless that objective is used. |
 
 | capability | verdict | evidence |
 |---|---|---|
@@ -198,7 +198,7 @@ Consequences that bind every comparison below:
 
 **Edit / generation budget.** Beam width 512 in the paper, 32 in shipped config.py, 16 per the README — a documented three-way discrepancy. Replan step sigma = 12. Top s = 100 molecules retained. 20 batches of size 64 per fine-tuning epoch; num_epochs 1000. Max atoms 25 for the solvent tasks, 50 in shipped config. The number of molecules generated is emergent, not a parameter.
 
-**Adapter status.** `designed_not_built` — The cleanest external source-conditioned editor in this set. Its blockers are cost and constraint expressiveness, not fidelity.
+**Adapter status.** `environment_verified_not_built` — The cleanest external source-conditioned editor in this set. Its blockers are cost and constraint expressiveness, not fidelity.
 
 - Objective shim into MoleculeObjectiveEvaluator.predict_objective with a counter wrapping every call, including those consumed by dataset generation during fine-tuning.
 - Source-panel driver setting start_from_smiles per source, with an outer loop because that branch ignores repeat_start_instances.
@@ -229,9 +229,9 @@ Consequences that bind every comparison below:
 | paper_url | https://arxiv.org/abs/2410.01500 |
 | code_repository | https://github.com/junhkim1226/DDSBM |
 | code_reference | main @ b7787042, 2025-04-15, 5 commits, 0 releases. OpenReview tQyh0gnfqW; ICLR 2025. arXiv v1 2024-10-02, v2 2025-02-28; DOI 10.48550/arXiv.2410.01500. |
-| license | NONE. There is no LICENSE file and the GitHub API reports license: null, so it is all-rights-reserved by default. This must be resolved with the authors before any use beyond reading the code. |
+| license | NONE. Re-verified exhaustively 2026-08-13: no LICENSE or COPYING file, zero matches for licen[cs]e\|copyright repo-wide, no license field in pyproject.toml, GitHub API reports license: null. All rights reserved by default. Upstream DiGress is MIT but that does not transfer. A legal blocker, not a technical one. |
 | checkpoints | NOT AVAILABLE. The README TODO 'Checkpoints update using Zenodo' is unchecked; open issue #1 requested them and the author reply did not supply them. |
-| cpu_feasible | NO. Training used four RTX A4000 GPUs (section E.3) and no checkpoints exist, so there is no inference-only CPU path. Under this lane's CPU-only constraint DDSBM cannot be run at all. |
+| cpu_feasible | BLOCKED, re-confirmed 2026-08-13. pyproject.toml pins requires-python ==3.9.* exactly. graph-tool 2.45 is conda-only and imported unconditionally at analysis/spectre_utils.py:17. The orca C++ source directory src/ddsbm/analysis/orca/ DOES NOT EXIST in the clone, so the README's build line cannot run as written. Install path is CUDA-11.8/torch-2.0.1 only, with no CPU or macOS path documented. Days of effort and a Linux box. |
 
 | capability | verdict | evidence |
 |---|---|---|
@@ -280,7 +280,7 @@ Consequences that bind every comparison below:
 | code_reference | main, last push 2023-12-24. NeurIPS 2023 main track (arXiv v2 footer and the NeurIPS proceedings page); OpenReview uoG1fLIK2s. |
 | license | MIT (LICENSE, 'Copyright (c) 2023 YH-Zhu'). |
 | checkpoints | No HN-GFN/GFlowNet checkpoint is released. Bundled artifacts are oracles and proxies only: oracle/gsk3b.pkl 27 MB, oracle/jnk3.pkl 11 MB, oracle/scorer/kinase_rf/{gsk3b,jnk3}.pkl 97/37 MB, data/docked_mols.h5 98 MB, data/pretrained_proxy/*, data/blocks_105.json. Training writes its own per-round checkpoints. |
-| cpu_feasible | NO usable path. Code defaults to --device cuda; published cost is 10 h (13 h with hindsight) on one Tesla V100 for the 8-round loop (Appendix B.4); no checkpoint is released, so inference-only CPU use is impossible. |
+| cpu_feasible | BLOCKED, re-confirmed 2026-08-13. No requirements.txt, environment.yml, setup.py or pyproject.toml exists, so no dependency is pinned at all. Ten files import botorch and the authors already vendored their own qUpperConfidenceBound/qExpectedImprovement after abandoning upstream imports. Expected breakage against modern botorch: botorch.sampling.samplers renamed, Posterior moved, FullyBayesianPosterior removed, fit_gpytorch_model removed. Est. ~1 day of version archaeology. There is still no CPU path: --device cuda default, 10-13 h on one V100, no released checkpoint. |
 
 | capability | verdict | evidence |
 |---|---|---|
@@ -350,7 +350,7 @@ Consequences that bind every comparison below:
 
 **Edit / generation budget.** N/A as a per-molecule quantity. Each generation applies one crossover of two parents plus one mutation per offspring; offspring_size 70 under PMO defaults. There is no notion of a bounded edit distance from a designated source.
 
-**Adapter status.** `designed_not_built` — By far the lowest-risk adapter in the set: RDKit-only, MIT, CPU-native, no checkpoints, no training. Preferred first target.
+**Adapter status.** `built_and_smoked` — REAL upstream vendored byte-identical at baselines/graph_ga/upstream/ (commit 4b49f182, MIT), driven by src/compose_v4/experiments/graph_ga_adapter.py under three-counter accounting, held-in smoke PASS 9/9. See smoke_plan.graph_ga_held_in_smoke.
 
 - Wrap the COMPOSE frozen goal language and src/compose_v4/drd2_oracle.py as a scoring_function.
 - Decide and record which oracle-counting convention is used — GB-GA's native one (duplicates count) or PMO's (unique valid canonical SMILES only). They differ and the choice is not neutral.
@@ -380,7 +380,7 @@ Consequences that bind every comparison below:
 | code_reference | REINVENT 4: Loeffler et al., J. Cheminform. 2024, PMC10882833. REINVENT 2.0: Blaschke et al., JCIM 2020, DOI 10.1021/acs.jcim.0c00915, repo https://github.com/MolecularAI/Reinvent (license UNVERIFIED). CRITICAL: the PMO benchmark's main/reinvent is a REINVENT 2.0-era Olivecrona-style RNN reimplementation and does NOT wrap REINVENT 4, so the staged-learning and Mol2Mol capabilities below are absent from the PMO-benchmarked configuration. |
 | license | Apache-2.0 for REINVENT 4 (paper: 'released under the permissive Apache 2.0 license'; GitHub API spdx_id Apache-2.0). REINVENT 2.0 repository license UNVERIFIED. |
 | checkpoints | Public priors on Zenodo, DOI 10.5281/zenodo.15641296 (latest-version DOI 10.5281/zenodo.20701824, license apache2.0): libinvent.prior, linkinvent.prior, pepinvent.prior, reinvent_pubchem.prior, libinvent_transformer_pubchem.prior, linkinvent_transformer_pubchem.prior. Priors are trained on ChEMBL 25/27/28 and PubChem; the Mol2Mol PubChem prior is reported as trained on over 200 billion pairs. PMO ships its own data/Prior.ckpt for the 2.0-era model. |
-| cpu_feasible | YES. Paper: 'All run modes can either run on a GPU or a CPU.' README: 'A GPU is not strictly necessary but strongly recommended ... For Reinforcement learning (RL) a GPU is less important because most scoring components run on the CPU. Note that if no GPU is installed in your computer the code will run on the CPU automatically.' CLI flag -d/--device. |
+| cpu_feasible | VERIFIED FEASIBLE (2026-08-13 probe). requires-python >=3.11; installs and imports on python 3.14 with torch 2.12.0, cuda_available False. All staged-learning modules import. One packaging bug: scipy is undeclared but imported at reinvent/runmodes/utils/plot.py:3, so a clean install raises ModuleNotFoundError until scipy is added. |
 
 | capability | verdict | evidence |
 |---|---|---|
@@ -400,7 +400,7 @@ Consequences that bind every comparison below:
 
 **Edit / generation budget.** N/A. There are no molecule-to-molecule edits; a generation is a full SMILES decode. Steps and batch size are the only budget knobs.
 
-**Adapter status.** `designed_not_built` — Two distinct adapters are needed and must not be conflated: the PMO-wrapped 2.0-era model for oracle-efficiency parity, and REINVENT 4 for the staged-learning arm.
+**Adapter status.** `environment_verified_not_built` — Two distinct adapters are needed and must not be conflated: the PMO-wrapped 2.0-era model for oracle-efficiency parity, and REINVENT 4 for the staged-learning arm.
 
 - Adapter A (oracle efficiency): use PMO's main/reinvent through BaseOptimizer so the shared Oracle counter applies, with the COMPOSE goal language assigned via self.oracle.assign_evaluator. This gives comparability to published PMO numbers but is REINVENT 2.0 semantics.
 - Adapter B (staged learning): REINVENT 4 with a two-stage staged_learning.toml, Mol2Mol or LibInvent input, and the COMPOSE objective as a custom scoring component. This is the only external arm that natively changes objective mid-run and it must be run to be honest about the C4c claim.

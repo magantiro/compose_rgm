@@ -1,0 +1,185 @@
+{
+  "adapter_findings": {
+    "oracle_budget_does_not_bound_runtime": "Failed crossovers and mutations consume no oracle calls, so a budget-matched comparison bounds calls but not wall time. The adapter imposes a wall-clock guard.",
+    "size_prior_is_a_fairness_parameter": "Those globals impose a soft Gaussian size prior on offspring. Running a COMPOSE panel under upstream's ZINC values asks the baseline to build ZINC-sized molecules. Both runs are reported.",
+    "undocumented_required_globals": "crossover.average_size and crossover.size_stdev must be set by the caller. Unset, mol_OK raises NameError into a bare except, every candidate is rejected, crossover always returns None, and reproduce()'s unbounded while loop spins forever with no error. Upstream sets them only in GA_logP.py (39.15 / 3.50, ZINC)."
+  },
+  "artifact_status": "SMOKE_HELD_IN",
+  "checks": {
+    "all_three_counters_wired": true,
+    "counter_identity_holds": true,
+    "declared_shift_was_adequate": true,
+    "graph_ga_natively_requests_duplicates": true,
+    "no_wall_clock_deadlock": true,
+    "published_behaviour_source_not_preserved": true,
+    "size_prior_materially_changes_offspring_size": true,
+    "upstream_accounting_identity_reproduced": true,
+    "upstream_own_transform_is_inapplicable_here": true
+  },
+  "environment": {
+    "pin_matches_production": false,
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "production_pin": "rdkit 2024.3.5",
+    "python": "3.14.2",
+    "rdkit": "2025.09.6",
+    "warning": "If pin_matches_production is false this run is an adapter check only and its canonical keys must not be reused for any claim-bearing comparison; see CLAUDE.md on catalog drift."
+  },
+  "held_out_data_opened": false,
+  "objective": {
+    "clogp_box_held_in_p25_p75": [
+      2.3688650000000004,
+      4.452222500000002
+    ],
+    "goal": "target-free developability: QED floor and cLogP box",
+    "normalizers": "diagnostics/retarget_goal_language_normalizers.json",
+    "qed_floor_held_in_median": 0.56676118212139
+  },
+  "runs": {
+    "panel_size_prior": {
+      "best_score": 5.4949,
+      "budget_exhausted": false,
+      "counters": {
+        "cache_hits": 28,
+        "duplicate_requests": 28,
+        "evaluator_calls": 92,
+        "failed_proposals": 0,
+        "oracle_requests": 120,
+        "unique_valid_canonical_evaluations": 92
+      },
+      "demand_ratio_requests_over_unique": 1.3043478260869565,
+      "endpoint_heavy_atoms": {
+        "max": 29,
+        "mean": 14.65,
+        "min": 8,
+        "n": 20
+      },
+      "generations_run": 5,
+      "invariants": {
+        "caching cannot erase a wasteful request": true,
+        "evaluator_calls matches the cache setting": true,
+        "oracle_requests == unique + duplicate_requests + failed_proposals": true,
+        "oracle_requests >= unique_valid_canonical_evaluations": true
+      },
+      "nearest_seed_tanimoto": {
+        "fraction_above_0.4": 0.25,
+        "max": 0.6716,
+        "mean": 0.2882,
+        "median": 0.2361,
+        "min": 0.1127,
+        "n": 20
+      },
+      "settings": {
+        "constant_shift": 5.0,
+        "deviation_note": "GB-GA's roulette-wheel selection requires a non-negative objective; upstream clamps its own objective for the same reason. The transform is applied only to the value handed to selection, never to the recorded oracle values.",
+        "generations": 5,
+        "mating_pool_size": 20,
+        "max_wall_seconds": 300.0,
+        "mutation_rate": 0.05,
+        "nonnegative_transform": "constant_shift",
+        "population_size": 20,
+        "prune_population": true,
+        "seed": 20260813,
+        "upstream_commit": "4b49f1822c5190e8b2bbb8b7403eed30af9e50fd"
+      },
+      "shift_floor_hits": 0,
+      "size_prior": {
+        "average_size": 27.6,
+        "size_stdev": 5.0299
+      },
+      "wall_clock_exceeded": false,
+      "wall_seconds": 1.1899
+    },
+    "upstream_zinc_size_prior": {
+      "best_score": 5.4949,
+      "budget_exhausted": false,
+      "counters": {
+        "cache_hits": 21,
+        "duplicate_requests": 21,
+        "evaluator_calls": 99,
+        "failed_proposals": 0,
+        "oracle_requests": 120,
+        "unique_valid_canonical_evaluations": 99
+      },
+      "demand_ratio_requests_over_unique": 1.2121212121212122,
+      "endpoint_heavy_atoms": {
+        "max": 29,
+        "mean": 16.25,
+        "min": 9,
+        "n": 20
+      },
+      "generations_run": 5,
+      "invariants": {
+        "caching cannot erase a wasteful request": true,
+        "evaluator_calls matches the cache setting": true,
+        "oracle_requests == unique + duplicate_requests + failed_proposals": true,
+        "oracle_requests >= unique_valid_canonical_evaluations": true
+      },
+      "nearest_seed_tanimoto": {
+        "fraction_above_0.4": 0.15,
+        "max": 0.5775,
+        "mean": 0.2744,
+        "median": 0.2243,
+        "min": 0.1389,
+        "n": 20
+      },
+      "settings": {
+        "constant_shift": 5.0,
+        "deviation_note": "GB-GA's roulette-wheel selection requires a non-negative objective; upstream clamps its own objective for the same reason. The transform is applied only to the value handed to selection, never to the recorded oracle values.",
+        "generations": 5,
+        "mating_pool_size": 20,
+        "max_wall_seconds": 300.0,
+        "mutation_rate": 0.05,
+        "nonnegative_transform": "constant_shift",
+        "population_size": 20,
+        "prune_population": true,
+        "seed": 20260813,
+        "upstream_commit": "4b49f1822c5190e8b2bbb8b7403eed30af9e50fd"
+      },
+      "shift_floor_hits": 0,
+      "size_prior": {
+        "average_size": 39.15,
+        "size_stdev": 3.5
+      },
+      "wall_clock_exceeded": false,
+      "wall_seconds": 1.3615
+    }
+  },
+  "schema": "compose.baselines.graph_ga_held_in_smoke",
+  "sources": {
+    "cohort": "diagnostics/retarget_calibration_cohort.json",
+    "cohort_sha256": "e402e318fd9540fb51fc93c7481094beec4c5f968a582f7349d6359f24e19a5f",
+    "count": 5,
+    "heavy_atoms": {
+      "max": 34,
+      "mean": 27.6,
+      "min": 22,
+      "n": 5
+    },
+    "pool": "held-in training sources only",
+    "smiles": [
+      "Cc1ccccc1-c1noc(-c2cc3ccccc3oc2=O)n1",
+      "COc1ccc(-c2nc(CS(=O)(=O)CC(=O)NCc3ccccc3Br)c(C)o2)cc1",
+      "CC(=O)CCC(C)C1CCC2C3=C(CCC21C)C1(C)CCC(=O)C(C)C1CC3=O",
+      "C=CC=C(C=C)CCC(=O)N1C(=O)C(C(C)O)C1OC(C)=O",
+      "CCCc1c(C(=O)OCC)c(C(=O)OCC)c2c(-c3ccccc3)cc(N3CCOCC3)nn12"
+    ]
+  },
+  "title": "GRAPH GA (real upstream GB-GA) \u2014 HELD-IN ADAPTER SMOKE",
+  "total_wall_seconds": 2.734,
+  "upstream": {
+    "commit": "4b49f1822c5190e8b2bbb8b7403eed30af9e50fd",
+    "license": "MIT",
+    "modified": false,
+    "repository": "https://github.com/jensengroup/GB_GA",
+    "vendored_at": "baselines/graph_ga/upstream/"
+  },
+  "upstream_clamp_probe": {
+    "error": "division by zero",
+    "error_type": "ZeroDivisionError",
+    "outcome": "FAILED",
+    "why": "Every held-in source starts OUTSIDE the developability box, so the margin objective is negative for the whole initial population. Upstream's clamp (max(0.0, score), as in scoring_functions.logP_max) maps all of them to 0.0, the fitness sum is 0, and calculate_normalized_fitness divides by zero. Upstream never hits this because penalized logP is positive for some molecules by construction."
+  },
+  "verdict": "PASS",
+  "what_this_is": "The actual vendored upstream GB-GA algorithm, commit 4b49f182, byte-identical to GitHub, driven on held-in COMPOSE sources against the frozen COMPOSE developability objective under the three-counter oracle accounting.",
+  "what_this_is_not": "A measurement of GraphGA's optimization quality, and not a COMPOSE-versus-GraphGA comparison. No COMPOSE arm was run. Budgets here are smoke-sized, not the frozen suite budgets."
+}

@@ -1,653 +1,86 @@
 {
-  "schema": "compose.baseline_qualification",
-  "schema_version": 3,
-  "registry_id": "compose-external-baseline-qualification-v3",
   "artifact_status": "DESIGN_ONLY",
-  "held_out_data_opened": false,
-  "compiled_utc": "2026-08-12",
-  "workstream": "D — external-baseline qualification and adapter readiness",
   "branch": "codex/compose-baseline-qualification",
-  "purpose": "Records, for each external method, which COMPOSE Claim-4 sub-capability it is a valid comparator for, what matched budget means for it, and where the comparison stops being fair. Every capability cell carries a primary source or is marked UNVERIFIED. This registry contains no results and authorises no run.",
-  "evidence_standard": {
-    "rule": "A capability cell asserting YES, NO or PARTIAL must cite a primary source: the paper with a section, or the official repository with a file or symbol. UNVERIFIED is a legitimate value and must record what was searched.",
-    "not_admissible": "Secondary sources as sole evidence; a capability the official code could be modified to support; plausible inference from method family.",
-    "openreview_gap": "OpenReview forums for MARS (kHSu4ebxFXY), DDSBM (tQyh0gnfqW), HN-GFN (uoG1fLIK2s) and PMO (yCZRdI0Y7G) are behind a bot challenge and returned HTTP 403. No reviewer discussion was read for any method. Venues were confirmed from proceedings pages and paper footers instead."
-  },
-  "compose_subcapabilities": {
-    "C4a_static_optimization": "source-conditioned static property optimization under a matched oracle budget; a competitive result is wanted, not a novelty claim",
-    "C4b_exact_target": "exact-target recovery from a source under a finite edit budget; DONE, SEALED AND CLOSED (greedy 26/65, verified remaining-budget rollout 40/65, learned top-1 + verification 40/65 at ~35% of continuation evaluations)",
-    "C4c_retargeting": "same-prefix dynamic retargeting: the goal changes mid-trajectory and the process continues from the realized molecule under a finite remaining budget, with the reference process frozen; IN FLIGHT",
-    "C4d_pathwise": "pathwise constraints: a labeled motif preserved at every committed intermediate state, on a support that includes deletions and topology changes; PLANNED"
-  },
-  "frozen_process_claim": "R_theta is not retrained between C4a, C4b, C4c and C4d. A baseline that reaches C4c or C4d only by retraining per objective does not refute that claim; a baseline that reaches them without retraining does. That is why objective_specific_retraining is a required column and why the escalation list below matters more than any table of results.",
+  "compiled_utc": "2026-08-12",
   "compose_claim_scoping": {
-    "headline": "'Future-aware control helps' is NOT a universal COMPOSE claim. It is ESTABLISHED on hard exact-target recovery and MEASURED ABSENT on an easy target-free property goal. Every fairness contract below is written against that scoping, and a comparison that ignores it will be read as testing a claim COMPOSE does not make.",
-    "where_it_is_established": {
-      "task": "C4b exact-target recovery from a source under a finite edit budget, sealed panel, 65 endpoint-clean pairs",
-      "result": "greedy 26/65 (40%) vs verified remaining-budget rollout 40/65 (62%); paired difference +21.5 pp [12.3, 33.5], rescuing 35.9% [21.2, 52.8] of greedy's 39 failures. Learned top-1 prioritisation matches the recovery count at ~35% of the continuation evaluations.",
-      "artifact": "diagnostics/editing_v2_sealed67_result.json; preregistration diagnostics/editing_v2_sealed67_preregistration.json",
-      "status": "CONFIRMATORY_HELD_OUT, sealed, branch closed"
-    },
-    "where_it_is_measured_absent": {
-      "task": "target-free bounded developability goal (cLogP box + QED floor) after a same-prefix goal switch, 3+3 horizon",
-      "result": "greedy 28/30 vs verified 28/30, binary headroom 0. Continuous utility favours verified (mean +0.0361, higher on 23/30, lower on 0) but the DIRECTION is guaranteed by the policy-improvement theorem and only the magnitude is admissible: +3.2% of typical post-switch movement, never enough to flip a success. Gate CLOSED; subclaim B dropped for this goal under the pre-committed anti-tuning rule.",
-      "artifact": "diagnostics/retarget_calibration_result_3plus3_fixed.json, cohort e402e318; design and gate in docs/RETARGETING_SAME_PREFIX_DESIGN.md",
-      "corroborating": "The earlier C0 planning-signal probe on DRD2 was also negative: 8/14 sacrificial actions won against a null of 0.5, mean fresh regret -0.021 (diagnostics/editing_v2_experiment_c0_planning_signal_preregistered.json).",
-      "status": "held-in calibration, ran once"
-    },
     "consequences_for_every_comparison_in_this_registry": [
       "C4a static optimization on easy target-free property goals -- which is what PMO's DRD2/GSK3b/JNK3 tasks and the developability box are -- is a COMPETITIVENESS SANITY CHECK, not a claim-bearing test. A baseline winning there refutes nothing about future-aware control, because COMPOSE does not claim future-aware control helps there. A COMPOSE win there supports 'the substrate plus ordinary control is competitive', which is a weaker and different sentence.",
       "The regime where a baseline would actually have to beat COMPOSE is hard, bounded-feasibility, finite-remaining-budget search where myopic control provably fails -- i.e. C4b. On that regime none of the six methods is even applicable: GraphXForm cannot delete an atom, MARS has no remaining-budget concept, GraphGA does not preserve the source, REINVENT and HN-GFN have no intermediate molecular states, and DDSBM has no oracle in the loop. That is a scope fact and must be reported as N/A, not as a COMPOSE win.",
       "C4c retargeting is therefore about INTERVENTION RESPONSIVENESS and PREFIX REUSE, not about post-switch planning quality. The comparison against REINVENT staged learning and MARS-restart is on post-switch oracle cost and whether a restart was required -- exactly what docs/EXPERIMENT_PLAN.md Experiment 6 already says: 'A strong result is not merely a higher endpoint score. It is comparable or better final quality with substantially lower post-switch oracle cost and no restart.'",
       "Do not choose a comparison task because it makes greedy fail. The anti-tuning rule in docs/RETARGETING_SAME_PREFIX_DESIGN.md is binding on this lane too: the goal is fixed once, and a goal on which future-aware control shows no advantage is reported, not replaced."
     ],
-    "what_this_does_not_weaken": "The frozen-process property is untouched by this scoping. One R_theta serves C4a, C4b, C4c and C4d with no retraining between them, and that is the claim the escalation list tests. Whether the controller on top of it is future-aware or myopic on a given goal is a separate, per-goal question that has now been answered in both directions."
-  },
-  "methods": [
-    {
-      "id": "MARS",
-      "citation_key": "xie2021mars",
-      "native_task": "Annealed MCMC sampling from a fixed unnormalized multi-objective target pi(x) = sum_k s_k(x) over molecules, with an adaptive fragment-edit proposal trained online during the run. Paper section 3.1: 'given K properties of interest, the desired molecular distribution can be formulated as a combination of all objectives'. Each Markov-chain state is a complete molecule.",
-      "provenance": {
-        "paper_url": "https://arxiv.org/abs/2103.10432",
-        "code_repository": "https://github.com/bytedance/markov-molecular-sampling",
-        "code_reference": "master @ 1a68d2a; repository ARCHIVED read-only, last push 2022-02-03, 2 commits. The URL printed in the paper (github.com/yutxie/mars) is a README-only pointer to this repo. OpenReview kHSu4ebxFXY; ICLR 2021 Spotlight; arXiv DOI 10.48550/arXiv.2103.10432 (ICLR mints no proceedings DOI).",
-        "license": "CC BY-NC 4.0 — NON-COMMERCIAL. LICENSE file first line is the Creative Commons Attribution-NonCommercial 4.0 text; GitHub's detector reports NOASSERTION. estimator/scorer/sa_scorer.py carries a separate BSD-style Novartis notice.",
-        "checkpoints": "NONE for the proposal, and no shipped code path writes one: sampler.py calls train(...) without save_dir, so the only torch.save in common/train.py is unreachable. Shipped binaries are oracles only (kinase_rf/gsk3b.pkl, kinase_rf/jnk3.pkl, fpscores.pkl.gz). The fragment vocabulary is also not shipped (data/vocab_* is gitignored).",
-        "cpu_feasible": "Documented yes — README gives a CPU install (conda install pytorch cpuonly; conda install -c dglteam dgl) and --device accepts cpu. Whether the 2021 stack (python 3.9.6 / torch 1.9.0 / DGL 0.7.0 / sklearn 0.23.2) still resolves is UNVERIFIED; nothing was installed."
-      },
-      "capabilities": {
-        "source_conditioning": {
-          "verdict": "YES",
-          "evidence": "main.py: `if config['mols_init']: mols = load_mols(...); mols = random.choices(mols, k=config['num_mols'])`. A one-line SMILES file therefore replicates one exact molecule into every chain. Sampler.sample(run_dir, mols_init) also accepts a per-chain list directly. Default with no flag is ethane 'CC' for every chain (paper section 4.1: 'The sampling paths are all starting with an identical molecule \"C-C\"').",
-          "note": "Works with stock code but is undocumented and untested by the authors; the README ships no init file and describes no such usage."
-        },
-        "objective_specific_retraining": {
-          "verdict": "NO",
-          "evidence": "There is no pretraining stage at all. The proposal is trained online during the run on edits that improved the score — paper section 3.2 'we propose to train the model on-the-fly during the sampling process in an adaptive manner'; sampler.py computes `indices = [i for i in range(len(old_mols)) if new_scores[i] > old_scores[i]]` and takes at most 25 gradient steps per MCMC step. Every run starts from a randomly initialised editor (main.py, inside the per-run loop).",
-          "note": "No offline retraining is needed for a new objective, but the online adaptation cost is paid inside every run and is funded by oracle calls."
-        },
-        "intermediate_states_exposed": {
-          "verdict": "YES",
-          "evidence": "Every chain state is a complete valid molecule: proposals are checked by common/chem.py::check_validity (Chem.SanitizeMol) and an invalid proposal leaves the chain on its current molecule (proposal.py sets new_mols[i] = mols[i]). Adds are capped at 40 atoms; deletes are rejected if the skeleton would have no bonds.",
-          "note": "The states exist but MARS keeps no trajectory record; the accepted-state sequence must be logged by an adapter."
-        },
-        "pathwise_constraints_native": {
-          "verdict": "NO",
-          "evidence": "Exhaustive grep of the official repository for mask|constrain|scaffold|substruct|motif|frozen|freeze|protect|MolFromSmarts returns only training-loss masks in proposal/models/editor_basic.py (mask_del, mask_add, mask_arm), which select which nodes and edges contribute to the cross-entropy. No GetSubstructMatch, no SMARTS, no atom freezing. break_bond (common/chem.py) may delete any single-bond-attached fragment, including a motif we wanted preserved.",
-          "note": "Enforcing a motif would mean modifying Proposal.propose. That is our work, not a native capability, and would be a reported deviation. See near_misses: MARS AFFORDS pathwise enforcement because all its states are molecules, which is a weaker and different statement."
-        },
-        "dynamic_goal_switching_native": {
-          "verdict": "NO",
-          "evidence": "Objectives are parsed once (main.py: config['objectives'] = config['objectives'].split(',')), consumed at Estimator and Sampler construction (estimator.py: self.objectives = config['objectives']; sampler.py builds score_wght/score_succ/score_clip), and the sampling loop contains no hook to swap the estimator, the weights or the clips. A full-text search of the paper for switch|warm-start|resume|restart|retrain|transfer|mid-run|new objective returns only an unrelated citation title. There is also no resume or checkpoint machinery.",
-          "note": "Zero support in both paper and code. This is a hard NO and it directly answers the lead's question."
-        },
-        "restart_at_supplied_state_under_new_objective": {
-          "verdict": "PARTIAL",
-          "evidence": "Achievable with stock code: construct a new Estimator with the new objectives and call Sampler.sample(run_dir, mols_init=[switch_molecule] * num_mols). Both entry points exist (main.py, sampler.py) and no patch is required. But it is a RESTART, not a continuation: the editor is randomly re-initialised because no checkpoint path exists, the imitation dataset D starts empty, and the temperature counter resets.",
-          "note": "This is the arm EXPERIMENT_PLAN Experiment 6 already names as 'MARS restarted at the switch state where technically possible'. It is technically possible."
-        }
-      },
-      "oracle_accounting": {
-        "definition": "One molecule scoring per chain per step, expanding to K property evaluations (estimator.py loops over self.objectives).",
-        "counts_rejected_proposals": "YES — all candidates are scored at sampler.py before the accept/reject loop and rejected scores are discarded. When a proposal is invalid the current molecule is substituted and redundantly re-scored.",
-        "training_phase_oracle_calls": "Not separable. The online proposal training is driven by the same score comparisons, so every training signal is already inside the per-step scoring count. There is no separate training phase.",
-        "default_total_budget": "Code defaults: 1000 chains x (1 + 1000 steps) = 1,001,000 molecule scorings per run = 4,004,000 property evaluations at 4 objectives, x10 runs. Paper settings N=5000 chains and ~550 steps = 2,755,000 molecule scorings per run. There is no cache anywhere (grep for cache|memo|lru_cache|seen returns only torch.cuda.empty_cache).",
-        "caching_note": "MARS re-evaluates revisited molecules. An adapter must add the shared-semantics cache the fairness contract requires, and must report cache hits separately so the comparison is not silently changed."
-      },
-      "edit_budget": "One edit attempt per chain per step. Code defaults give ~10^6 attempted edits per run; paper settings ~2.75x10^6. Early stopping via PATIENCE=100 when neither the PM product nor the average score improves by 0.01.",
-      "adapter": {
-        "status": "designed_not_built",
-        "note": "No blocking scientific incompatibility. The execution risks are the 2021 dependency stack and the non-commercial license.",
-        "work_items": [
-          "Objective shim replacing Estimator with a caller of the COMPOSE frozen goal language and src/compose_v4/drd2_oracle.py, wrapping every call in a counter. estimator/scorer/scorer.py has drd2_scorer commented out of its imports while still dispatching to it and ships no DRD2 model (repo issue #2), so the DRD2 objective must come from our side regardless.",
-          "Chain-count reduction driver: MARS's native regime is 1000-5000 chains, and any budget-matched comparison runs it far outside that regime.",
-          "mols_init driver from a source panel, one molecule per chain.",
-          "Accepted-state trajectory logger, because MARS keeps no history.",
-          "Vocabulary regeneration prerequisite: python -m MARS.datasets.prepro_vocab over data/chembl.txt (1,488,640 SMILES), run from outside a directory literally named MARS because of hardcoded MARS/... paths.",
-          "Shared-semantics oracle cache, reported separately."
-        ]
-      },
-      "classification": {
-        "C4a_static_optimization": "MUST_RUN",
-        "C4b_exact_target": "CONTEXT_ONLY",
-        "C4c_retargeting": "CONDITIONAL",
-        "C4d_pathwise": "CONTEXT_ONLY"
-      },
-      "method_verdict": "MUST_RUN",
-      "fairness_contract": {
-        "matched_quantity": "Property-oracle calls, counting every scored candidate including rejected proposals and including the redundant re-scoring MARS performs on invalid proposals. Edits are the secondary matched quantity: one attempted edit per chain per step against one committed COMPOSE edit. Wall time reported, never matched.",
-        "not_fair_because": "MARS's designed regime is ~10^6 molecule scorings per run. A COMPOSE-matched budget of hundreds to thousands puts it three orders of magnitude below the setting its adaptive proposal was built to exploit, because that proposal only becomes useful after online training on many accepted edits. Reporting only the matched-budget number would misrepresent the method, so BOTH a matched-budget row AND MARS's native-regime row are required, with the gap stated. Support also differs: MARS edits at fragment granularity from a ChEMBL-derived 1000-fragment vocabulary, COMPOSE at canonical-successor granularity of the frozen rewrite kernel. Equal support must never be claimed.",
-        "n_a_metrics": "All pathwise metrics are N/A: MARS has no constraint mechanism, and a motif-preserving filter added by us would be a deviation, not the method."
-      },
-      "smoke_cost": {
-        "plan": "5 held-in sources, one chain per source, 50 MCMC steps, one COMPOSE objective, --device cpu. Purpose: prove the adapter runs and the oracle counter is wired. NOT executed.",
-        "estimate": "PROJECTION, NOT MEASURED. Sampler ~0.2 CPU-core-hours. Dominant cost is the one-time vocabulary build over 1,488,640 ChEMBL SMILES with RDKit bond-breaking enumeration, ~0.5-1.0 CPU-core-hours, cacheable to the artifact volume and paid once. Budget 1.5 CPU-core-hours for the first smoke, 0.2 thereafter.",
-        "confidence": "LOW on the environment build (torch 1.9.0 + DGL 0.7.0 from 2021 may not resolve); MEDIUM on sampler runtime, since the model is small."
-      }
+    "headline": "'Future-aware control helps' is NOT a universal COMPOSE claim. It is ESTABLISHED on hard exact-target recovery and MEASURED ABSENT on an easy target-free property goal. Every fairness contract below is written against that scoping, and a comparison that ignores it will be read as testing a claim COMPOSE does not make.",
+    "what_this_does_not_weaken": "The frozen-process property is untouched by this scoping. One R_theta serves C4a, C4b, C4c and C4d with no retraining between them, and that is the claim the escalation list tests. Whether the controller on top of it is future-aware or myopic on a given goal is a separate, per-goal question that has now been answered in both directions.",
+    "where_it_is_established": {
+      "artifact": "diagnostics/editing_v2_sealed67_result.json; preregistration diagnostics/editing_v2_sealed67_preregistration.json",
+      "result": "greedy 26/65 (40%) vs verified remaining-budget rollout 40/65 (62%); paired difference +21.5 pp [12.3, 33.5], rescuing 35.9% [21.2, 52.8] of greedy's 39 failures. Learned top-1 prioritisation matches the recovery count at ~35% of the continuation evaluations.",
+      "status": "CONFIRMATORY_HELD_OUT, sealed, branch closed",
+      "task": "C4b exact-target recovery from a source under a finite edit budget, sealed panel, 65 endpoint-clean pairs"
     },
-    {
-      "id": "GraphXForm",
-      "citation_key": "pirnay2025graphxform",
-      "native_task": "Single-objective de-novo molecular graph design by a pretrained graph transformer that iteratively adds atoms and bonds, fine-tuned per objective by self-improvement. Abstract: 'Our approach iteratively modifies a molecular graph by adding atoms and bonds, which ensures chemical validity and facilitates the incorporation of structural constraints.' Demonstrated on 20 GuacaMol goal-directed tasks and two liquid-liquid-extraction solvent-design tasks.",
-      "provenance": {
-        "paper_url": "https://arxiv.org/abs/2411.01667",
-        "code_repository": "https://github.com/grimmlab/graphxform",
-        "code_reference": "created 2024-10-16, last push 2026-02-26, not archived, 0 open issues. Journal version: Digital Discovery 4(4) 1052-1065 (2025), DOI 10.1039/D4DD00339J, CC-BY. arXiv 2411.01667 v1 2024-11-03, v2 2025-03-20.",
-        "license": "MIT (LICENSE, 'Copyright (c) 2026 Grimm Lab'). Bundled objective_predictor/GH_GNN_IDAC/ and GDI_NN_IDAC/ carry their own separate LICENSE files — check before redistribution.",
-        "checkpoints": "Available: https://syncandshare.lrz.de/dl/fiJs7ZHuCFsVskeoab5aZg/graphxform_pretrained.zip, ~347,364,546 bytes, verified reachable (HTTP 200). Not hashed here because the file has not been downloaded; hash on first fetch before any claim-bearing run. The GH-GNN objective surrogate ships in-repo.",
-        "cpu_feasible": "YES by configuration — shipped config.py already defaults training_device, objective_gnn_device and devices_for_workers to 'cpu', and the README says to set 'cpu' if no CUDA is available. The paper ran one H100 at beam width 512 and publishes no CPU runtime, so any CPU estimate is a projection. main.py derives num_gpus from CUDA_VISIBLE_DEVICES before ray.init and it must be set explicitly in a CPU container."
-      },
-      "capabilities": {
-        "source_conditioning": {
-          "verdict": "YES",
-          "evidence": "config.start_from_smiles, dispatched in core/gumbeldore_dataset.py: `elif self.config.start_from_smiles is not None: problem_instances = [MoleculeDesign.from_smiles(self.config, self.config.start_from_smiles)]`. MoleculeDesign.from_smiles(..., do_finish=False) replays the molecule as an action prefix without issuing the terminate action, so the design arrives at action level 0 un-terminated and the model continues modifying it. Paper section 3.3.3 seeds design from 'the best molecule from COSMObase 2020'.",
-          "note": "The start_from_smiles branch creates exactly ONE root instance and does not honour repeat_start_instances, so multi-seed runs need an outer loop."
-        },
-        "objective_specific_retraining": {
-          "verdict": "YES",
-          "evidence": "Required for the paper's reported results. Section 2.2: 'In each epoch, the current policy is used to generate a set of action sequences, from which the best sequences are selected as pseudo-labels to serve as the dataset for supervised training'; 'we sample batches of intermediate molecules and train the network with a cross-entropy loss to predict the next action'. main.py freezes all parameters, unfreezes only virtual_atom_linear and bond_atom_linear, and runs loss.backward(); optimizer.step(). objective_type is a single global config field consumed by the evaluator, so it is one fine-tuning run per objective.",
-          "note": "Head-only fine-tuning, but it IS a gradient update per objective. A pure-search path exists (num_epochs = 0) and is not what the paper reports; main.py warns if no checkpoint is supplied on that path."
-        },
-        "intermediate_states_exposed": {
-          "verdict": "PARTIAL",
-          "evidence": "Full action history is retained (self.history in molecule_design.py) and persisted per molecule as action_seq alongside SMILES and objective (core/gumbeldore_dataset.py); keep_intermediate_trajectories defaults True so intermediate terminable nodes enter the candidate set. BUT a complete terminable molecule exists only at action level 0 — is_terminable() returns `self.current_action_level == 0 and not self.synthesis_done`, and assert_feasible enforces full connectivity only at level 0. Between levels 0->1->2 the graph carries a dangling unbonded atom.",
-          "note": "Valid molecule at every atom/bond-completion boundary, not at every raw action index. Usable for pathwise metrics only if scored at level-0 boundaries."
-        },
-        "pathwise_constraints_native": {
-          "verdict": "PARTIAL",
-          "evidence": "Genuine per-step masking exists: update_action_mask() is recomputed after every action (take_action ends with it) and masked_log_probs_for_current_action_level sets logits[mask] = -inf before softmax. Section 2.1: 'we mask any action in the policy that would lead to a violation of valence constraints ... we set the corresponding probability to zero in the distribution predicted by the policy (before re-normalizing the distribution).' BUT the exhaustive maskable set in the released code is: atom type allowed/disallowed, max_num_atoms, remaining valence per atom, no self-bonding, no re-bonding an already-bonded pair, bond order at most the minimum free valence. The paper's ring-size and disallowed-bonding-pattern constraints are implemented instead as a TERMINAL filter in molecule_evaluator.py::infeasible_by_special_constraints, asserted on mol.synthesis_done and returning -inf. There is no SMARTS or substructure matching anywhere in the repository.",
-          "note": "The mechanism is pathwise; the expressible constraint class does not include labeled subgraphs. This is the single most important correction to the Workstream C assumption that GraphXForm is already a native pathwise-constraint baseline."
-        },
-        "dynamic_goal_switching_native": {
-          "verdict": "NO",
-          "evidence": "objective_type is a single immutable config string (config.py) read once when MoleculeObjectiveEvaluator is constructed (main.py, and per worker in core/gumbeldore_dataset.py). No code path re-targets the objective mid-trajectory; a repo-wide search returns only the config comment. No discussion of mid-trajectory objective change appears in any retrieved section of the paper.",
-          "note": "The code absence is verified; the paper silence is an absence of evidence, recorded as such."
-        },
-        "restart_at_supplied_state_under_new_objective": {
-          "verdict": "PARTIAL",
-          "evidence": "Mechanically possible: stop, set start_from_smiles to the realized molecule, set the new objective_type, rerun. But that rerun requires a fresh per-objective fine-tuning loop (see objective_specific_retraining), so it is not a cheap continuation.",
-          "note": "This is the arm EXPERIMENT_PLAN Experiment 6 names as 'GraphXForm restarted at the switch state'. It works, but the post-switch cost includes retraining and must be reported as such."
-        }
-      },
-      "oracle_accounting": {
-        "definition": "Every leaf of every TASAR beam round is scored: core/incremental_sbs.py calls batch_leaf_evaluation_fn on all beam leaves, wired to objective_evaluator.predict_objective. With keep_intermediate_trajectories True, intermediate terminable nodes also enter the leaf set and are scored.",
-        "counts_rejected_proposals": "YES — every beam candidate is scored, not only the retained top-s.",
-        "training_phase_oracle_calls": "YES, and they dominate. Dataset generation IS the search and runs once per epoch inside train_for_one_epoch before every gradient step. Order of magnitude: beam_width x TASAR rounds x epochs.",
-        "default_total_budget": "None numeric. The paper explicitly rejects an oracle-call budget (section 3.1: 'to provide a practical comparison between our method and competing approaches, each design run is executed until convergence or until a maximum wall-clock time of eight hours is reached'). Governed by wall_clock_limit (8 h in the paper, None in shipped config) and num_epochs = 1000.",
-        "caching_note": "No published cache policy. An adapter must add a shared-semantics cache and report hits."
-      },
-      "edit_budget": "Beam width 512 in the paper, 32 in shipped config.py, 16 per the README — a documented three-way discrepancy. Replan step sigma = 12. Top s = 100 molecules retained. 20 batches of size 64 per fine-tuning epoch; num_epochs 1000. Max atoms 25 for the solvent tasks, 50 in shipped config. The number of molecules generated is emergent, not a parameter.",
-      "adapter": {
-        "status": "designed_not_built",
-        "note": "The cleanest external source-conditioned editor in this set. Its blockers are cost and constraint expressiveness, not fidelity.",
-        "work_items": [
-          "Objective shim into MoleculeObjectiveEvaluator.predict_objective with a counter wrapping every call, including those consumed by dataset generation during fine-tuning.",
-          "Source-panel driver setting start_from_smiles per source, with an outer loop because that branch ignores repeat_start_instances.",
-          "Atom-vocabulary alignment to the COMPOSE element set, or the deviation recorded.",
-          "Trajectory export at level-0 boundaries: molecule.history plus per-state SMILES.",
-          "Guard against data/generated_molecules.pickle merging across runs — the README states an undeleted file makes the next run continue from it, a silent cross-run contamination hazard.",
-          "Patch guacamol's scipy.histogram import (documented upstream) or avoid importing guacamol at all.",
-          "Resolve the torch pin conflict: Dockerfile pins 2.5.1 while requirements.txt demands >=2.6.0."
-        ]
-      },
-      "classification": {
-        "C4a_static_optimization": "MUST_RUN",
-        "C4b_exact_target": "CONTEXT_ONLY",
-        "C4c_retargeting": "CONDITIONAL",
-        "C4d_pathwise": "CONDITIONAL"
-      },
-      "method_verdict": "MUST_RUN",
-      "fairness_contract": {
-        "matched_quantity": "Property-oracle calls, counting every beam leaf scored AND every call consumed by per-objective fine-tuning. TWO totals must be reported — with and without the fine-tuning phase — because the choice changes which method looks efficient and a reviewer may reasonably object to either convention. Edit budget is N/A and must be printed as N/A: GraphXForm's actions are atom and bond additions, not molecule-to-molecule edits.",
-        "not_fair_because": "Three asymmetries. (1) The action space is strictly constructive — no atom or bond removal exists and the paper defers removal to future work (section 3.3.3) — so on any task requiring a deletion it cannot reach the answer at all. That is a scope difference, not a quality result, and must be stated wherever it binds. (2) The paper deliberately does not operate under an oracle budget and argues its objectives are cheap; imposing one runs it outside its designed protocol. (3) Its per-objective fine-tuning has no COMPOSE counterpart because R_theta is frozen, so the comparison is between a method that pays a training cost per objective and one that does not — which is the claim under test, not a nuisance to normalise away.",
-        "n_a_metrics": "Edit budget N/A. Labeled-motif pathwise metrics are measurable but must be reported as the OUTCOME of an unconstrained run, never as a constrained arm, because the released code cannot mask on substructures."
-      },
-      "smoke_cost": {
-        "plan": "5 held-in sources via start_from_smiles, 2-3 fine-tuning epochs at the shipped beam width 32, one COMPOSE objective, all devices 'cpu', CUDA_VISIBLE_DEVICES cleared. Purpose: prove start_from_smiles round-trips a COMPOSE source, the objective shim is called, and the counter is wired. NOT executed.",
-        "estimate": "PROJECTION, NOT MEASURED. 347 MB checkpoint download once. The unit cost is a d=512, 10-block transformer forward for beam 32 on ~25-atom graphs; at roughly 1000 forwards plus 1280 training samples per epoch, expect order 5-10 minutes per epoch per source on a few CPU cores. Budget 2-4 CPU-core-hours for the whole 5-source, 3-epoch smoke, and treat anything beyond 6 as the signal to stop and request GPU authorisation.",
-        "confidence": "MEDIUM. The environment is modern and the repo is maintained; the uncertainty is CPU transformer throughput, for which no published figure exists."
-      }
-    },
-    {
-      "id": "DDSBM",
-      "citation_key": "kim2025ddsbm",
-      "native_task": "A discrete Schrodinger bridge between two graph DISTRIBUTIONS, solved by iterative Markovian fitting. Only the two marginals are prescribed; the coupling is what the method solves for. Section F.2.2 states the contrast explicitly: 'except for DDSBM, all of them assume that suitable molecule pairs have already been identified to be provided.' At sampling time a specific source graph is transported, but the network never sees a target — the target is baked into the weights.",
-      "provenance": {
-        "paper_url": "https://arxiv.org/abs/2410.01500",
-        "code_repository": "https://github.com/junhkim1226/DDSBM",
-        "code_reference": "main @ b7787042, 2025-04-15, 5 commits, 0 releases. OpenReview tQyh0gnfqW; ICLR 2025. arXiv v1 2024-10-02, v2 2025-02-28; DOI 10.48550/arXiv.2410.01500.",
-        "license": "NONE. There is no LICENSE file and the GitHub API reports license: null, so it is all-rights-reserved by default. This must be resolved with the authors before any use beyond reading the code.",
-        "checkpoints": "NOT AVAILABLE. The README TODO 'Checkpoints update using Zenodo' is unchecked; open issue #1 requested them and the author reply did not supply them.",
-        "cpu_feasible": "NO. Training used four RTX A4000 GPUs (section E.3) and no checkpoints exist, so there is no inference-only CPU path. Under this lane's CPU-only constraint DDSBM cannot be run at all."
-      },
-      "capabilities": {
-        "source_conditioning": {
-          "verdict": "PARTIAL",
-          "evidence": "predict_step calls sample_forward_bridge_batch(X_0=X_0, E_0=E_0, ...), so a specific source graph is transported. But the only network inputs are {X_t, E_t, y_t, t, node_mask} and y is a zero-width tensor in every dataset file (y = torch.zeros(size=(1, 0))). Conditioning exists on the source endpoint only; the target lives in the weights.",
-          "note": "Distribution-level transport with a learned coupling, not per-molecule pairing. Section 5.1: 'We randomly coupled the data of initial and terminal distributions to obtain paired data.'"
-        },
-        "objective_specific_retraining": {
-          "verdict": "YES",
-          "evidence": "The objective IS the terminal distribution. For ZINC the only encoding of the objective is the logP-2 versus logP-4 split (section 5.2), and the paper states DDSBM is 'trained solely to optimize graph transformations with minimal structural alterations, without explicit knowledge on molecular properties'. A new objective means a new terminal dataset and a full retrain: 300 epochs x 6 IMF iterations on four GPUs for ZINC (Table 4).",
-          "note": "There is no conditioning channel to exploit for zero-shot retargeting; y is zero-width."
-        },
-        "intermediate_states_exposed": {
-          "verdict": "NO",
-          "evidence": "The sampler independently resamples every node and edge category at each step (sample_discrete_features then one-hot, inside `for t_int in range(0, self.T - 1)`) with no valency check, no connectivity check, no sanitisation and no rejection anywhere in the loop. Molecules are assembled only from the final state. Even the final state is not guaranteed connected: compute_validity keeps the largest fragment. Reported DBM validity on Polymer is 43.4% (Table 2). Section E.2 admits 'occasional failures in decoding into molecules'.",
-          "note": "Intermediates are noisy categorical graphs, not molecules. Every pathwise metric is N/A by construction."
-        },
-        "pathwise_constraints_native": {
-          "verdict": "NO",
-          "evidence": "Repo-wide search for inpaint|freeze|fixed subgraph|preserve|constraint|guidance|reward|oracle|substructure|classifier-free returns no implementation. 'scaffold' appears only in data/couple_zinc250k.py for dataset pairing analysis. The only preservation pressure is the GED-shaped reference process (sections 4.3, D.6), which is an average-case bias, not a per-path guarantee.",
-          "note": ""
-        },
-        "dynamic_goal_switching_native": {
-          "verdict": "NO",
-          "evidence": "Three independent grounds. (1) Formulation: the object is a fixed pair of boundary distributions with a static optimal coupling, so retargeting means changing the terminal marginal, i.e. a different optimization problem. (2) API: sample_forward_bridge_batch hard-starts at t=0 from the supplied X_0 and runs the full loop; there is no start-time parameter, no way to inject a realized intermediate state, and no way to swap the model mid-loop (number_chain_steps only controls how many frames are saved for visualisation). (3) Theory: the learned generator is time-inhomogeneous and conditioned on remaining time to tau, so splicing a differently-trained model at t=k evaluates it at a time index whose bridge geometry was fitted to a different terminal distribution.",
-          "note": "The lead's position is confirmed. Do not force DDSBM into retargeting."
-        },
-        "restart_at_supplied_state_under_new_objective": {
-          "verdict": "NO",
-          "evidence": "Restarting from a supplied molecule is possible only in the trivial sense that X_0 is user-supplied; 'under a new objective' requires a differently-trained model, and none exists because no checkpoints are released and the objective is the terminal dataset (see objective_specific_retraining).",
-          "note": ""
-        }
-      },
-      "oracle_accounting": {
-        "definition": "Zero property-oracle calls at sampling time. The property signal exists only in how the two training datasets were split. Property predictors appear only in evaluation (MolCLR for GAP, RDKit Crippen/QED/sascorer), and MolCLR is not in the repository.",
-        "counts_rejected_proposals": "N/A — there are no scored proposals.",
-        "training_phase_oracle_calls": "|D_source| + |D_target|, paid once at dataset-construction time; approximately 29,920 pairs for their ZINC subset.",
-        "default_total_budget": "0 per generated sample. The per-sample cost is instead 100 network forward passes (diffusion_steps: 100).",
-        "caching_note": "N/A."
-      },
-      "edit_budget": "N/A. There is no notion of a molecule-to-molecule edit. Diffusion steps are 100 for the molecular tasks, 500 for Community-20, 1000 for Planar. The node tensor is padded to the dataset-wide maximum (37 slots on their ZINC subset, mean molecule 23.7 heavy atoms).",
-      "adapter": {
-        "status": "blocked",
-        "note": "Blocked by license absence and missing checkpoints, not by adapter difficulty. There is no cheap adapter: a faithful comparison means reproducing the native protocol, i.e. building two marginal datasets under a COMPOSE property split and training 6 IMF iterations x 300 epochs on GPUs.",
-        "work_items": [
-          "Resolve the license question with the authors before anything else.",
-          "Only if that is resolved and GPU is authorised: build two marginal datasets under a COMPOSE property split, train from scratch, and evaluate both DDSBM and COMPOSE with the same evaluator on the same data.",
-          "Do NOT attempt a matched source-conditioned adaptation; the native object is distribution transport."
-        ]
-      },
-      "classification": {
-        "C4a_static_optimization": "CONTEXT_ONLY",
-        "C4b_exact_target": "CONTEXT_ONLY",
-        "C4c_retargeting": "CONTEXT_ONLY",
-        "C4d_pathwise": "CONTEXT_ONLY"
-      },
-      "method_verdict": "CONTEXT_ONLY",
-      "fairness_contract": {
-        "matched_quantity": "None is definable. DDSBM makes zero oracle calls at sampling time, so an oracle-budget comparison has no shared axis. The only honest comparison is a native-protocol reproduction: run DDSBM's own ZINC logP-2 to logP-4 task, add COMPOSE under the same data and the same evaluator, and compare on DDSBM's own metrics.",
-        "not_fair_because": "Its scientific object is a bridge between two distributions; COMPOSE's is a controlled process from one source under a goal. Putting them in one budget-matched table would require inventing a budget for a method that has none. Intermediate states are also not molecules, so every pathwise and trajectory metric is N/A rather than zero.",
-        "n_a_metrics": "All oracle-budget metrics, all pathwise metrics, all edit-count metrics."
-      },
-      "smoke_cost": {
-        "plan": "NONE. No smoke is planned or possible under the CPU-only constraint, and none should be attempted before the license question is resolved.",
-        "estimate": "N/A",
-        "confidence": "N/A"
-      }
-    },
-    {
-      "id": "HN_GFN",
-      "citation_key": "zhu2023hngfn",
-      "native_task": "Target-free multi-objective molecular optimization with Pareto coverage. HN-GFN proper is the acquisition-function optimizer inside a multi-objective Bayesian-optimization loop, not a standalone method: 'we propose a multi-objective Bayesian optimization algorithm leveraging the hypernetwork-based GFlowNets as an acquisition function optimizer, with the purpose of sampling a diverse batch of candidate molecular graphs from an approximate Pareto front.' The standalone use in section 5.1 is explicitly labelled a synthetic scenario.",
-      "provenance": {
-        "paper_url": "https://arxiv.org/abs/2302.04040",
-        "code_repository": "https://github.com/violet-sto/HN-GFN",
-        "code_reference": "main, last push 2023-12-24. NeurIPS 2023 main track (arXiv v2 footer and the NeurIPS proceedings page); OpenReview uoG1fLIK2s.",
-        "license": "MIT (LICENSE, 'Copyright (c) 2023 YH-Zhu').",
-        "checkpoints": "No HN-GFN/GFlowNet checkpoint is released. Bundled artifacts are oracles and proxies only: oracle/gsk3b.pkl 27 MB, oracle/jnk3.pkl 11 MB, oracle/scorer/kinase_rf/{gsk3b,jnk3}.pkl 97/37 MB, data/docked_mols.h5 98 MB, data/pretrained_proxy/*, data/blocks_105.json. Training writes its own per-round checkpoints.",
-        "cpu_feasible": "NO usable path. Code defaults to --device cuda; published cost is 10 h (13 h with hindsight) on one Tesla V100 for the 8-round loop (Appendix B.4); no checkpoint is released, so inference-only CPU use is impossible."
-      },
-      "capabilities": {
-        "source_conditioning": {
-          "verdict": "NO",
-          "evidence": "rollout() unconditionally begins at the empty molecule (m = BlockMoleculeDataExtended(); mol_mdp_ext.py reset() likewise) with no seed parameter; the only policy conditioning input is the preference vector (generator(s, vec_data=weights, ...)); no CLI flag for a starting, seed or scaffold molecule exists in main.py or main_mobo.py. The nearest machinery is backward trajectory construction from an already-block-decomposed molecule for offline replay training, which is training data, not a conditioning input.",
-          "note": "Arbitrary user SMILES would first have to be decomposable into the 105-block vocabulary; UNVERIFIED whether any such decomposition path is provided."
-        },
-        "objective_specific_retraining": {
-          "verdict": "YES",
-          "evidence": "For a new OBJECTIVE (as opposed to new weights): n_objectives is the first linear layer's input width in model_pred_hyper.py (torch.nn.Linear(n_objectives, ray_hidden_dim)), args.n_objectives = len(args.objectives) in main_mobo.py, and the surrogate is built with num_out_per_mol=len(args.objectives) in proxy/proxy.py. Changing the objective set changes M, the hypernetwork input dimension and the surrogate output dimension. Supported objective names are a closed enum in oracle/scorer/scorer.py. It is also retrained every BO round regardless: main_mobo.py re-instantiates FMGFlowNet inside the outer loop with no checkpoint reload, and section 4.2.2 says 'In principle, we retrain HN-GFN after every round.'",
-          "note": "For new PREFERENCE WEIGHTS over the fixed objective set, no retraining is needed. That distinction is escalated below and is the whole point of the method."
-        },
-        "intermediate_states_exposed": {
-          "verdict": "PARTIAL",
-          "evidence": "Generation is fragment-based, append-only, from an empty graph, max 8 blocks, with 'no fragment removal actions' (section 4.1). Non-terminal states are called 'partially constructed molecules' and receive reward 0 ('F(s) = R(s) = 0 for non-terminal state'). Code-level, any state does have a well-defined RDKit molecule via mol_mdp_ext.py's mol property, but with open attachment stems.",
-          "note": "Chemically assembled but not terminal molecules; the trajectory is a construction sequence, not a source-to-target edit path."
-        },
-        "pathwise_constraints_native": {
-          "verdict": "NO",
-          "evidence": "No masking or constraint mechanism on intermediate states is described in the paper or present in the released code; the action space is the fragment-attachment set from data/blocks_105.json and reward is terminal-only (section 4.1).",
-          "note": ""
-        },
-        "dynamic_goal_switching_native": {
-          "verdict": "NO",
-          "evidence": "The preference vector is sampled once per rollout and held fixed for every step: main.py samples weights = Dirichlet(...).sample_n(1) before the loop and passes the same weights to generator(...) at every t, with reward computed only at termination under those weights. The 'hindsight' strategy re-scores COMPLETE TERMINAL molecules under other preferences and files them in the replay buffer (main_mobo.py::_add_mol_to_replay loops over self.test_weights) — relabelling, not mid-trajectory intervention.",
-          "note": "The lead's position is confirmed: appropriate for target-free multiobjective and Pareto experiments, not automatically a same-prefix intervention baseline."
-        },
-        "restart_at_supplied_state_under_new_objective": {
-          "verdict": "NO",
-          "evidence": "There is no supplied-state entry point at all (see source_conditioning), so there is nothing to restart from.",
-          "note": ""
-        }
-      },
-      "oracle_accounting": {
-        "definition": "In the MOBO setting the true oracle is queried only at the batch-evaluation points; GFlowNet training inside each round is rewarded by the SURROGATE (main_mobo.py::_get_reward -> self.proxy, acquisition = UCB with beta 0.1). In the synthetic scenario of section 5.1 the true oracle is queried at every training step (main.py -> self.proxy.get_score, where proxy is the Oracle object, --num_iterations 30000).",
-        "counts_rejected_proposals": "N/A in MOBO — candidates are scored by the surrogate, not the oracle. In the synthetic scenario every sampled terminal molecule is scored.",
-        "training_phase_oracle_calls": "ZERO true-oracle calls during GFlowNet training in the MOBO setting. This is the source of its reported sample efficiency and the single largest fairness hazard in this registry.",
-        "default_total_budget": "1000 true-oracle calls: |D_0| = 200 initial molecules plus N = 8 rounds at batch size b = 100. Code defaults match (--num_init_examples 200, --num_outer_loop_iters 8, --num_samples 100). Per-round GFlowNet training is 5000 steps; the surrogate is fit for 10000 iterations.",
-        "caching_note": "The 'oracles' are themselves cheap ML predictors (random forests for GSK3b/JNK3 from Xie et al., RDKit QED/SA), so the budget simulates expense rather than measuring it."
-      },
-      "edit_budget": "N/A — there are no edits. Trajectories are fragment attachments from an empty graph: min_blocks 2, max_blocks 8, vocabulary data/blocks_105.json (105 blocks), 100-2000 actions available per state.",
-      "adapter": {
-        "status": "blocked_cpu",
-        "note": "Not blocked scientifically for a Pareto-coverage comparison, but there is no CPU path and the upstream environment is currently broken.",
-        "work_items": [
-          "Bisect the last BoTorch version exporting AnalyticMultiOutputObjective and IdentityAnalyticMultiOutputObjective — proxy/regression.py imports both and they are removed from modern BoTorch. This is open issue #1 upstream and is unresolved.",
-          "Pin numpy < 1.24: dataset.py, mol_mdp_ext.py and utils/chem.py use np.bool and np.int.",
-          "Objective shim replacing the closed enum in oracle/scorer/scorer.py with the COMPOSE frozen goals; use src/compose_v4/drd2_oracle.py rather than the bundled python-3.6 sklearn DRD2 pickle.",
-          "GPU authorisation, or drop the method to CONTEXT_ONLY. There is no CPU alternative."
-        ]
-      },
-      "classification": {
-        "C4a_static_optimization": "CONDITIONAL",
-        "C4b_exact_target": "CONTEXT_ONLY",
-        "C4c_retargeting": "CONTEXT_ONLY",
-        "C4d_pathwise": "CONTEXT_ONLY"
-      },
-      "method_verdict": "CONDITIONAL",
-      "fairness_contract": {
-        "matched_quantity": "True-oracle calls, with the surrogate's role reported as a separate column. If HN-GFN's 1000 true-oracle calls are placed beside a COMPOSE budget that queries the true oracle for every candidate, the comparison is invalid in BOTH directions: HN-GFN looks efficient because a learned proxy absorbs the search, and COMPOSE looks expensive for querying honestly. Either both methods get a surrogate, or the surrogate's training and query cost becomes a reported column. This must be settled before any number enters a table.",
-        "not_fair_because": "Beyond the surrogate asymmetry: HN-GFN generates from scratch over a 105-fragment vocabulary and cannot be conditioned on a source molecule at all, so it cannot enter any source-conditioned panel. Its Pareto-coverage metric (hypervolume) is the natural shared axis and the only one on which the comparison is meaningful.",
-        "n_a_metrics": "All source-conditioned metrics, all pathwise metrics, all same-prefix metrics, endpoint Tanimoto to a source."
-      },
-      "smoke_cost": {
-        "plan": "NONE under the CPU-only constraint. If GPU is later authorised, the minimal smoke is the synthetic scenario at reduced --num_iterations with two COMPOSE objectives, purely to prove the objective shim and the counter. NOT executed.",
-        "estimate": "N/A on CPU. On one V100 the published full loop is 10-13 h; a reduced smoke would be a small fraction of that but is not costable without a run.",
-        "confidence": "N/A"
-      }
-    },
-    {
-      "id": "GraphGA",
-      "citation_key": "jensen2019graphga",
-      "native_task": "A graph-based genetic algorithm (GB-GA) maximizing a scalar black-box score over molecules by crossover and mutation on RDKit graphs. The paper's own task is penalized logP: 'the goal is to maximize J(m): J(m) = log P(m) - SA(m) - RingPenalty(m)'. The scoring function is an argument, so it is a generic scalar maximizer.",
-      "provenance": {
-        "paper_url": "https://doi.org/10.1039/c8sc05372c",
-        "code_repository": "https://github.com/jensengroup/GB_GA",
-        "code_reference": "master. Paper ESI cites github.com/jensengroup/GB-GA/tree/v0.0. Jensen, Chem. Sci. 10(12) 3567-3572 (2019), PMID 30996948, PMC6438151, CC BY 3.0. The benchmark-standard wrapper is main/graph_ga/ in https://github.com/wenhao-gao/mol_opt (PMO, MIT).",
-        "license": "MIT ('MIT License / Copyright (c) 2018 Jensen Group'; GitHub API spdx_id MIT). PMO wrapper also MIT.",
-        "checkpoints": "None — there is no trained model.",
-        "cpu_feasible": "YES, and it is the only method here with no GPU story at all. No torch/tensorflow/CUDA imports anywhere; parallelism is multiprocessing.Pool. Paper: 'the GB-GA calculations took 30 seconds each on a laptop.'"
-      },
-      "capabilities": {
-        "source_conditioning": {
-          "verdict": "PARTIAL",
-          "evidence": "The only seeding interface is a SMILES file: GB_GA.py::make_initial_population does `population.append(random.choice(mol_list))` per individual, sampling with replacement, so a one-line SMILES file yields population_size identical copies of that molecule. There is no native source-molecule concept, flag or API. PMO's variant differs: main/graph_ga/run.py uses `starting_population = self.all_smiles[:config['population_size']]`.",
-          "note": "Crucially the source is NOT preserved. Abstract: 'The molecules found by the GB-GA bear little resemblance to the molecules used to construct the initial mating pool'; the Results report nearest-ZINC Tanimoto of 0.27 and 0.12."
-        },
-        "objective_specific_retraining": {
-          "verdict": "NO",
-          "evidence": "There is no model and no training. Paper conclusion: 'Both the GB-GA and GB-GM-MCTS codes used in this study are freely available with the open source RDKit toolkit as the only dependence.' Changing the objective means passing a different scoring_function. Verified by import audit: no torch, tensorflow or cuda imports in GB_GA.py, crossover.py, mutate.py, scoring_functions.py or GA_logP.py.",
-          "note": "Zero warm-up oracle cost. This makes GraphGA the cleanest budget-matched comparator in the set."
-        },
-        "intermediate_states_exposed": {
-          "verdict": "PARTIAL",
-          "evidence": "Every individual is a complete RDKit-sanitized molecule and invalid products are discarded rather than carried. But the structure is a branching two-parent genealogy, not a path: reproduce() returns only the child and parentage is not persisted (the debug print of parent_A/parent_B is commented out). The only logged trajectory is high_scores — one (best_score, best_smiles) tuple per generation, a best-so-far curve, not an edit path.",
-          "note": "Any source-to-final lineage is a DAG with two in-edges per node. Synthesising a 'trajectory' from it and scoring pathwise metrics on it is a forbidden adaptation under this protocol."
-        },
-        "pathwise_constraints_native": {
-          "verdict": "NO",
-          "evidence": "No substructure or scaffold preservation mechanism exists at any level. The only per-step filters are structural sanity checks (paper: 'Molecules with macrocycles (seven atoms or more), allene centers in rings, fewer than five heavy atoms, incorrect valences as determined by RDKit, and more non-H atoms than the target size are discarded'). Crossover actively destroys invariants: 'a crossover can occur both at non-ring and ring bonds, with equal probability and the positions of the cuts are chosen randomly', and mutate.py includes delete_atom() with SMARTS such as '[*:1]~[D1]>>[*:1]'.",
-          "note": ""
-        },
-        "dynamic_goal_switching_native": {
-          "verdict": "NO",
-          "evidence": "GB_GA.GA(args) unpacks a single scoring_function fixed for the whole run and `for generation in range(generations)` never re-reads it. There is no stage or phase concept.",
-          "note": ""
-        },
-        "restart_at_supplied_state_under_new_objective": {
-          "verdict": "PARTIAL",
-          "evidence": "Restarting with a new scoring_function and the final population written out as the seed file is mechanically possible with stock entry points, but it is not a provided feature and nothing in the paper or repository describes it.",
-          "note": "Because GraphGA carries no learned state, a restart loses nothing except the population — which makes it the cleanest 'restart at the switch state' control arm in the set."
-        }
-      },
-      "oracle_accounting": {
-        "definition": "population_size x generations, plus the initial population. Paper: 'The population size is 20 and 50 generations are used (i.e. 1000 J(m) evaluations per run).' The code also scores the initial population, giving 20 x 51 = 1020; the paper rounds to 1000.",
-        "counts_rejected_proposals": "YES natively — reproduce() fills new_population to exactly population_size and calculate_scores scores all of them with no dedup before scoring, so duplicates DO consume oracle calls. Invalid children do NOT: the while loop only appends non-None children, so failed crossover or mutation is retried at zero oracle cost. Survivors are never re-scored. NOTE: under the PMO wrapper this changes — see the global fairness rules.",
-        "training_phase_oracle_calls": "ZERO. There is no training phase.",
-        "default_total_budget": "1020 in the paper's reference config. Under PMO the budget is 10,000 unique valid canonical SMILES with hyperparameters population_size 120, offspring_size 70, mutation_rate 0.067.",
-        "caching_note": "No native cache. PMO's Oracle.score_smi provides one via mol_buffer keyed on canonical SMILES."
-      },
-      "edit_budget": "N/A as a per-molecule quantity. Each generation applies one crossover of two parents plus one mutation per offspring; offspring_size 70 under PMO defaults. There is no notion of a bounded edit distance from a designated source.",
-      "adapter": {
-        "status": "designed_not_built",
-        "note": "By far the lowest-risk adapter in the set: RDKit-only, MIT, CPU-native, no checkpoints, no training. Preferred first target.",
-        "work_items": [
-          "Wrap the COMPOSE frozen goal language and src/compose_v4/drd2_oracle.py as a scoring_function.",
-          "Decide and record which oracle-counting convention is used — GB-GA's native one (duplicates count) or PMO's (unique valid canonical SMILES only). They differ and the choice is not neutral.",
-          "Seed driver: one-line SMILES file per source for exact seeding, or PMO's first-N-lines behaviour, chosen explicitly and recorded.",
-          "Element-set and size-bound alignment to the COMPOSE kernel, or the deviation recorded."
-        ]
-      },
-      "classification": {
-        "C4a_static_optimization": "MUST_RUN",
-        "C4b_exact_target": "CONTEXT_ONLY",
-        "C4c_retargeting": "CONDITIONAL",
-        "C4d_pathwise": "CONTEXT_ONLY"
-      },
-      "method_verdict": "MUST_RUN",
-      "fairness_contract": {
-        "matched_quantity": "Property-oracle calls, under ONE explicitly declared convention. GraphGA is the method where the convention matters most, because natively it charges duplicates and under the PMO wrapper it does not. Edits are N/A: a GA offspring is not one edit from a designated source.",
-        "not_fair_because": "GraphGA does not preserve the source — the paper says so explicitly — so on any similarity-constrained or source-conditioned panel it either fails the constraint or must have the constraint folded into its scoring function, which changes the method's task. Its lineage is a two-parent DAG, so no pathwise metric applies. Its strength is exactly the thing PMO found: under a controlled budget a simple search is extremely hard to beat, and COMPOSE should expect to be compared against it on equal footing rather than to win by default.",
-        "n_a_metrics": "All pathwise metrics; all same-prefix metrics; edit-count metrics."
-      },
-      "smoke_cost": {
-        "plan": "5 held-in sources, one-line seed file per source, population 120, offspring 70, 10 generations, one COMPOSE objective. Purpose: prove the scoring shim and the counter. NOT executed.",
-        "estimate": "PROJECTION, NOT MEASURED. About 820 oracle calls per source, 4100 total. The frozen DRD2 oracle is a numpy RBF-SVM over folded count fingerprints, order milliseconds per molecule; RDKit crossover and mutation dominate at order 10 ms per child. Expect a few minutes wall on one core. Budget 0.1 CPU-core-hours.",
-        "confidence": "HIGH. RDKit-only, no checkpoints, no training, no version risk beyond RDKit itself."
-      }
-    },
-    {
-      "id": "REINVENT",
-      "citation_key": "NOT_IN_BIB — REINVENT 4 (Loeffler et al. 2024, doi 10.1186/s13321-024-00812-5) has no entry in paper_iclr_stochastic_rewriting/references.bib and must be added before it is cited. The PMO wrapper is gao2022pmo, which IS in the bib; do not use gao2022pmo as the citation for REINVENT 4 capabilities.",
-      "native_task": "Policy-gradient reinforcement learning that biases a generative SMILES policy toward a user-defined aggregation of scoring functions. REINVENT 4 paper, Methods: 'Reinforcement Learning (RL) is the main molecule optimization method in REINVENT'; 'a molecule is optimized with respect to a user defined aggregation of scoring functions'. It optimizes a distribution over molecules (the agent weights), not a designated molecule.",
-      "provenance": {
-        "paper_url": "https://doi.org/10.1186/s13321-024-00812-5",
-        "code_repository": "https://github.com/MolecularAI/REINVENT4",
-        "code_reference": "REINVENT 4: Loeffler et al., J. Cheminform. 2024, PMC10882833. REINVENT 2.0: Blaschke et al., JCIM 2020, DOI 10.1021/acs.jcim.0c00915, repo https://github.com/MolecularAI/Reinvent (license UNVERIFIED). CRITICAL: the PMO benchmark's main/reinvent is a REINVENT 2.0-era Olivecrona-style RNN reimplementation and does NOT wrap REINVENT 4, so the staged-learning and Mol2Mol capabilities below are absent from the PMO-benchmarked configuration.",
-        "license": "Apache-2.0 for REINVENT 4 (paper: 'released under the permissive Apache 2.0 license'; GitHub API spdx_id Apache-2.0). REINVENT 2.0 repository license UNVERIFIED.",
-        "checkpoints": "Public priors on Zenodo, DOI 10.5281/zenodo.15641296 (latest-version DOI 10.5281/zenodo.20701824, license apache2.0): libinvent.prior, linkinvent.prior, pepinvent.prior, reinvent_pubchem.prior, libinvent_transformer_pubchem.prior, linkinvent_transformer_pubchem.prior. Priors are trained on ChEMBL 25/27/28 and PubChem; the Mol2Mol PubChem prior is reported as trained on over 200 billion pairs. PMO ships its own data/Prior.ckpt for the 2.0-era model.",
-        "cpu_feasible": "YES. Paper: 'All run modes can either run on a GPU or a CPU.' README: 'A GPU is not strictly necessary but strongly recommended ... For Reinforcement learning (RL) a GPU is less important because most scoring components run on the CPU. Note that if no GPU is installed in your computer the code will run on the CPU automatically.' CLI flag -d/--device."
-      },
-      "capabilities": {
-        "source_conditioning": {
-          "verdict": "YES",
-          "evidence": "REINVENT 4 has four generators. Paper Fig. 4: 'Reinvent creates new molecules de novo i.e. from scratch, Libinvent decorates a scaffold, Linkinvent identifies a linker between two fragments and Mol2Mol optimizes molecules within a user defined similarity'; 'No input SMILES are needed for Reinvent, a scaffold is needed for Libinvent, two warheads for Linkinvent and an input molecule for Mol2Mol.'",
-          "note": "Important scope limits. LibInvent requires a scaffold WITH EXPLICIT ATTACHMENT POINTS, not an arbitrary complete molecule. Mol2Mol accepts a complete molecule but does not preserve it: 'importantly, the scaffold can change within the limits of the given similarity'. So exact single-molecule input exists, but only LibInvent and LinkInvent preserve the supplied fragment by construction."
-        },
-        "objective_specific_retraining": {
-          "verdict": "YES",
-          "evidence": "RL fine-tuning per objective is the method. Paper, Staged learning: 'Staged learning requires both a prior and an agent model. The prior is only being used as a reference ... The agent is the model that is being trained in the run.' Cost is batch_size x steps: the shipped configs/staged_learning.toml uses batch_size 64 with min_steps 25 and max_steps 100, i.e. at most 6400 scored molecules per stage. Under PMO the entire 10,000-call budget is consumed by RL fine-tuning (main/reinvent/run.py samples config['batch_size'] per step and calls self.oracle(smiles) until self.finish).",
-          "note": "The prior itself costs zero oracle calls — it is unsupervised likelihood pretraining on ChEMBL/PubChem. There is no zero-shot mode. An exact fixed fine-tuning cost is UNVERIFIED because it is whatever budget the user allocates."
-        },
-        "intermediate_states_exposed": {
-          "verdict": "NO",
-          "evidence": "Generation is autoregressive over SMILES tokens: paper, Theory: 'All REINVENT 4 models consist of sequence-based neural network models that are parameterized to capture the probability of generating tokens t in an auto-regressive manner ... SMILES strings are generated iteratively by feeding the transformer with n-1 tokens to obtain the n-th token.' Intermediate states are token prefixes and are generally not parseable molecules. The only per-run trajectory is batch-level: a CSV written per RL epoch.",
-          "note": "Every pathwise metric is N/A. Treating a partially decoded SMILES prefix as an intermediate molecule is a forbidden adaptation under this protocol."
-        },
-        "pathwise_constraints_native": {
-          "verdict": "NO",
-          "evidence": "Two mechanisms, neither pathwise. (a) LibInvent's scaffold and LinkInvent's warheads are held fixed as the generator template, guaranteeing the fragment in the FINAL molecule; but generation is a single input-to-output step, so 'every intermediate state' has no referent, and this does not apply to the Reinvent or Mol2Mol modes. (b) The MatchingSubstructure component is a SOFT penalty, not a constraint: reinvent_plugins/components/RDKit/comp_matching_substructure.py is tagged @add_tag('__component', 'penalty') and returns 0.5 * (1.0 + match), i.e. 0.5 when the SMARTS is absent and 1.0 when present. Molecules lacking the substructure are still generated and still score nonzero. Custom alerts run the opposite direction: a SMARTS blocklist multiplying the score by 0 or 1.",
-          "note": ""
-        },
-        "dynamic_goal_switching_native": {
-          "verdict": "PARTIAL",
-          "evidence": "REINVENT 4 has native staged (curriculum) learning that varies the scoring function within one run. Paper, Staged learning, verbatim: 'This is basically curriculum learning (CL) which in REINVENT 4 is implemented as a multi-stage RL. The main purpose is to allow the user to optimize a prior model conditioned on a calculated target profile by varying the scoring function in stages. ... Multiple stages can be provided at once (automatic CL). After each stage a checkpoint file is written to disk which can be used for the next stage (manual CL).' configs/staged_learning.toml ships [[stage]] blocks each with its own [stage.scoring] and chkpt_file.",
-          "note": "ESCALATED. This is the closest published thing to COMPOSE's mid-run goal change and a reviewer will raise it. It is PARTIAL rather than YES because (i) switching happens at stage boundaries triggered by max_score or max_steps, not at an arbitrary chosen step, (ii) what carries across the switch is the AGENT POLICY, not a realized molecular history — there is no in-flight molecule to continue from, and (iii) the agent must re-adapt by further RL steps after the switch, which is retraining."
-        },
-        "restart_at_supplied_state_under_new_objective": {
-          "verdict": "YES",
-          "evidence": "Both halves exist natively and compose. A supplied molecule enters via Mol2Mol (or a scaffold via LibInvent), and a new objective is applied by writing a new [[stage]] scoring block and resuming from the checkpoint: paper, 'When a run terminates ... a checkpoint file representing the current state of the agent will be written to disk. This checkpoint can be reused as the agent later'; configs/staged_learning.toml: 'it is also possible to continue a run from any checkpoint file that is generated during the run (manual CL).'",
-          "note": "ESCALATED. Unlike MARS and GraphXForm, the restart is warm: the adapted policy survives the objective change."
-        }
-      },
-      "oracle_accounting": {
-        "definition": "REINVENT counts STEPS, not oracle calls. Molecules scored per step equals batch_size. The scoring component is invoked only on valid, non-duplicate, non-filtered, non-cached SMILES: reinvent/scoring/scorer.py computes valid_mask = np.logical_and(invalid_mask, duplicate_mask), and compute_scores.py documents 'get the smiles that need to be scored in this call — this is all inputs except for masked smiles or those in cache'.",
-        "counts_rejected_proposals": "NO natively. Paper: 'Scores for each SMILES string will be cached on a per-component basis to avoid the re-computation of scores. ... Duplicates are marked as such and handled by the caching mechanism', and 'SMILES that do not pass those filters will not be subjected to score evaluation and consequently all component scores will be zero.' Every sampled molecule occupies a batch slot and receives a score value, but the oracle is not invoked for it. Under PMO the same effective rule applies from the other side (Oracle.score_smi counts unique valid canonical SMILES).",
-        "training_phase_oracle_calls": "ALL of them. There is no separate search phase: the RL fine-tuning IS the optimization, so the entire budget is training-phase.",
-        "default_total_budget": "No native budget concept. Shipped example: batch_size 64, min_steps 25, max_steps 100 per stage, so at most 6400 scored molecules per stage, summed over stages. Under PMO: 10,000 unique valid canonical SMILES, hyperparameters learning_rate 0.0005, batch_size 64, sigma 500, experience_replay 24.",
-        "caching_note": "REINVENT caches per scoring component by design. Its diversity filter additionally zero-scores every repeat of a canonical SMILES globally, which is a behaviour change, not just an accounting one."
-      },
-      "edit_budget": "N/A. There are no molecule-to-molecule edits; a generation is a full SMILES decode. Steps and batch size are the only budget knobs.",
-      "adapter": {
-        "status": "designed_not_built",
-        "note": "Two distinct adapters are needed and must not be conflated: the PMO-wrapped 2.0-era model for oracle-efficiency parity, and REINVENT 4 for the staged-learning arm.",
-        "work_items": [
-          "Adapter A (oracle efficiency): use PMO's main/reinvent through BaseOptimizer so the shared Oracle counter applies, with the COMPOSE goal language assigned via self.oracle.assign_evaluator. This gives comparability to published PMO numbers but is REINVENT 2.0 semantics.",
-          "Adapter B (staged learning): REINVENT 4 with a two-stage staged_learning.toml, Mol2Mol or LibInvent input, and the COMPOSE objective as a custom scoring component. This is the only external arm that natively changes objective mid-run and it must be run to be honest about the C4c claim.",
-          "Declare and record the oracle convention. REINVENT's native caching means its raw call count is not comparable to MARS's without adjustment.",
-          "Download and hash the Zenodo priors before any claim-bearing run.",
-          "Record which prior is used; the six Mol2Mol similarity variants are materially different models."
-        ]
-      },
-      "classification": {
-        "C4a_static_optimization": "MUST_RUN",
-        "C4b_exact_target": "CONTEXT_ONLY",
-        "C4c_retargeting": "MUST_RUN",
-        "C4d_pathwise": "CONTEXT_ONLY"
-      },
-      "method_verdict": "MUST_RUN",
-      "fairness_contract": {
-        "matched_quantity": "Property-oracle calls under one declared convention, plus the step count. REINVENT is the method where the convention is most consequential: it natively caches and its diversity filter zero-scores repeats, so its raw oracle count is systematically lower than MARS's for the same amount of work. Reporting both methods' raw counts side by side without stating the convention would be misleading. Edit budget is N/A.",
-        "not_fair_because": "Three things. (1) The whole budget is objective-specific RL fine-tuning, which COMPOSE does not pay because R_theta is frozen; that asymmetry is the claim under test and must not be normalised away. (2) It has no intermediate molecular states, so every pathwise and same-prefix metric is N/A rather than zero. (3) PMO ranks REINVENT first of 25 methods by summed AUC top-10 (14.196), so this is a strong baseline and COMPOSE should not expect to win C4a by default. PMO's own caution applies: 'REINVENT's performance is highly dependent on sigma ... we suggest reoptimizing the hyper-parameters whenever the testing environment is changed' — so using PMO's tuned sigma on a COMPOSE objective is itself a deviation to record.",
-        "n_a_metrics": "All pathwise metrics; all intermediate-state metrics; edit-count metrics. Same-prefix metrics are N/A at the molecular level but MEASURABLE at the policy level, and the distinction must be printed rather than elided."
-      },
-      "smoke_cost": {
-        "plan": "Two smokes. (A) PMO-wrapped REINVENT on 5 held-in sources at a reduced budget (~1000 oracle calls each), device cpu, to prove the shared counter and the goal shim. (B) REINVENT 4 two-stage staged_learning.toml on 2-3 sources, batch 64, 25 steps per stage, device cpu, to prove the mid-run objective switch executes and to measure the post-switch re-adaptation cost. NOT executed.",
-        "estimate": "PROJECTION, NOT MEASURED. Adapter A: an Olivecrona-style RNN sampling 64 SMILES of ~60 tokens per step on CPU, order seconds per step; ~20 steps per source gives a few minutes each, so budget 0.3 CPU-core-hours for 5 sources plus a small prior download. Adapter B: transformer priors are larger; budget 0.5-1.0 CPU-core-hours plus the Zenodo prior downloads. Total 1.0-1.5 CPU-core-hours.",
-        "confidence": "MEDIUM-HIGH for adapter A (PMO's runner is self-contained and CPU-native). MEDIUM for adapter B (REINVENT 4 is a larger modern stack; the CPU path is documented but not benchmarked)."
-      }
+    "where_it_is_measured_absent": {
+      "artifact": "diagnostics/retarget_calibration_result_3plus3_fixed.json, cohort e402e318; design and gate in docs/RETARGETING_SAME_PREFIX_DESIGN.md",
+      "corroborating": "The earlier C0 planning-signal probe on DRD2 was also negative: 8/14 sacrificial actions won against a null of 0.5, mean fresh regret -0.021 (diagnostics/editing_v2_experiment_c0_planning_signal_preregistered.json).",
+      "result": "greedy 28/30 vs verified 28/30, binary headroom 0. Continuous utility favours verified (mean +0.0361, higher on 23/30, lower on 0) but the DIRECTION is guaranteed by the policy-improvement theorem and only the magnitude is admissible: +3.2% of typical post-switch movement, never enough to flip a success. Gate CLOSED; subclaim B dropped for this goal under the pre-committed anti-tuning rule.",
+      "status": "held-in calibration, ran once",
+      "task": "target-free bounded developability goal (cLogP box + QED floor) after a same-prefix goal switch, 3+3 horizon"
     }
-  ],
+  },
   "compose_claims_a_baseline_does_natively": [
     {
+      "evidence": "REINVENT 4, Loeffler et al., J. Cheminform. 2024 (PMC10882833), section 'Staged learning', verbatim quoted; and https://github.com/MolecularAI/REINVENT4/blob/main/configs/staged_learning.toml, which ships two [[stage]] blocks each with its own [stage.scoring] and chkpt_file.",
       "method": "REINVENT",
       "subcapability": "C4c_retargeting",
       "what": "Changes the objective within a single run and carries the adapted agent across the change. Staged (curriculum) learning is a first-class run mode whose stated purpose is 'to allow the user to optimize a prior model conditioned on a calculated target profile by varying the scoring function in stages', with a checkpoint written after each stage and reusable as the next stage's agent. This is the strongest overlap with COMPOSE's mid-run goal-change claim in the whole registry, and the paper must not say that no existing method changes objective mid-run.",
-      "evidence": "REINVENT 4, Loeffler et al., J. Cheminform. 2024 (PMC10882833), section 'Staged learning', verbatim quoted; and https://github.com/MolecularAI/REINVENT4/blob/main/configs/staged_learning.toml, which ships two [[stage]] blocks each with its own [stage.scoring] and chkpt_file.",
-      "what_compose_still_has": "REINVENT re-targets a POLICY, not a realized molecule: there is no in-flight molecular state to continue from, the switch fires at a stage boundary set by max_score or max_steps rather than at an arbitrary chosen step, and the agent must re-adapt by further RL after the switch. COMPOSE's claim is a goal change at an arbitrary step of a realized molecular history, continuing from the exact current molecule under a finite remaining budget, with the reference process frozen and only the control law recomputed."
+      "what_compose_still_has": "REINVENT re-targets a POLICY, not a realized molecule: there is no in-flight molecular state to continue from, and the switch fires at a stage boundary set by max_score or max_steps rather than at an arbitrary chosen step. BUT THE BOUNDARY IS SOFTER THAN PREVIOUSLY RECORDED, verified in source 2026-08-13: the Agent network is created once OUTSIDE the stage loop and never reloaded; the Adam optimizer is constructed ONCE (RL/setup/reward_strategy.py:41-42) and the SAME object is placed into every WorkPackage (RL/setup/create_packages.py:57-66), so exp_avg, exp_avg_sq and the step counter carry across the boundary unbroken; there is NO learning-rate scheduler in the RL path at all, so the rate is constant across all stages; the inception replay buffer is created once and NEVER cleared, carrying stage-N molecules with their STALE stage-N scores into stage N+1, since only the scoring function is swapped (run_staged_learning.py:192-193). Only the diversity-filter memories are purged, and only because purge_memories defaults True. A stage boundary therefore changes the scoring function and the termination criterion and essentially NOTHING about the optimizer state. COMPOSE's remaining distinction is narrower than 'the baseline must retrain': it is that the goal changes at an arbitrary step of a realized MOLECULAR history, continuing from the exact current molecule under a finite remaining budget, with the reference process frozen and only the control law recomputed."
     },
     {
+      "evidence": "REINVENT 4 paper Fig. 4 ('an input molecule for Mol2Mol') and section 'Staged learning' ('This checkpoint can be reused as the agent later'); configs/staged_learning.toml header ('it is also possible to continue a run from any checkpoint file that is generated during the run').",
       "method": "REINVENT",
       "subcapability": "C4c_retargeting",
       "what": "Warm restart from a supplied molecule under a new objective. A complete molecule enters via Mol2Mol (or a scaffold via LibInvent), and the run resumes from a written checkpoint with a new scoring block, so unlike MARS and GraphXForm the adapted policy survives the objective change.",
-      "evidence": "REINVENT 4 paper Fig. 4 ('an input molecule for Mol2Mol') and section 'Staged learning' ('This checkpoint can be reused as the agent later'); configs/staged_learning.toml header ('it is also possible to continue a run from any checkpoint file that is generated during the run').",
-      "what_compose_still_has": "Mol2Mol does not preserve the input molecule — 'the scaffold can change within the limits of the given similarity' — so the supplied molecule is a similarity anchor, not a state that is continued from. There is still no realized molecular history and no finite remaining-budget notion."
+      "what_compose_still_has": "Mol2Mol does not preserve the input molecule \u2014 'the scaffold can change within the limits of the given similarity' \u2014 so the supplied molecule is a similarity anchor, not a state that is continued from. There is still no realized molecular history and no finite remaining-budget notion."
     },
     {
+      "evidence": "arXiv:2302.04040v2 section 4.2: 'the hypernetwork h(.; phi) takes the preference vector lambda as inputs and outputs the weights theta_pred of prediction heads'; 'we propose only to condition the weights of prediction heads with hypernetworks, while sharing the weights of MPNN'; 'Our key motivation is to design a unified GFlowNet to sample candidates according to different reward functions, even ones not seen during training.' Code: model_pred_hyper.py::forward(self, ray); main.py generator(s, vec_data=weights, ...).",
       "method": "HN_GFN",
       "subcapability": "C4c_retargeting",
       "what": "One trained model samples under any preference vector over its objective set with no retraining. A hypernetwork emits the prediction-head weights from the preference vector while the MPNN trunk is shared, and preferences are drawn from a Dirichlet during training so the model generalises across the simplex at inference. This is a genuine instance of 'goal information reshapes the model without retraining the molecular machinery', which is the shape of the COMPOSE frozen-process claim.",
-      "evidence": "arXiv:2302.04040v2 section 4.2: 'the hypernetwork h(.; phi) takes the preference vector lambda as inputs and outputs the weights theta_pred of prediction heads'; 'we propose only to condition the weights of prediction heads with hypernetworks, while sharing the weights of MPNN'; 'Our key motivation is to design a unified GFlowNet to sample candidates according to different reward functions, even ones not seen during training.' Code: model_pred_hyper.py::forward(self, ray); main.py generator(s, vec_data=weights, ...).",
       "what_compose_still_has": "Only the scalarization WEIGHTS vary; the objective SET is fixed at training time and is architecturally baked in (n_objectives is the hypernetwork's input width and the surrogate's output width). A genuinely new objective requires a full retrain. Generation also starts from the empty molecule every time, so there is no source conditioning and no realized prefix."
     },
     {
+      "evidence": "arXiv:2411.01667 section 2.1: 'To ensure chemical validity at every step of the molecule design process, we mask any action in the policy that would lead to a violation of valence constraints', implemented by 'we set the corresponding probability to zero in the distribution predicted by the policy (before re-normalizing the distribution)'; code molecule_design.py::update_action_mask, called at the end of take_action, and masked_log_probs_for_current_action_level setting logits[mask] = -inf.",
       "method": "GraphXForm",
       "subcapability": "C4d_pathwise",
       "what": "Applies structural action masking at every action step, pre-softmax, recomputed after every action. This is a real pathwise constraint mechanism, not endpoint filtering, and the paper argues for it explicitly against the alternative of assigning minus infinity to violating endpoints.",
-      "evidence": "arXiv:2411.01667 section 2.1: 'To ensure chemical validity at every step of the molecule design process, we mask any action in the policy that would lead to a violation of valence constraints', implemented by 'we set the corresponding probability to zero in the distribution predicted by the policy (before re-normalizing the distribution)'; code molecule_design.py::update_action_mask, called at the end of take_action, and masked_log_probs_for_current_action_level setting logits[mask] = -inf.",
       "what_compose_still_has": "The maskable class in the released code is valence, atom type, atom count, no self-bonding, no re-bonding, and bond-order bounds. It does NOT include labeled subgraphs: the paper's ring-size and disallowed-bonding-pattern constraints are enforced instead by a TERMINAL minus-infinity filter in molecule_evaluator.py::infeasible_by_special_constraints on finished molecules, and there is no SMARTS or substructure matching anywhere in the repository. GraphXForm's action space is also strictly constructive, so a seed structure's atoms and bonds persist because nothing can be deleted rather than because a constraint holds. COMPOSE's C4d claim is a labeled motif preserved on a support that includes deletions and topology changes."
     },
     {
+      "evidence": "https://github.com/bytedance/markov-molecular-sampling main.py (mols_init loading and the else-branch default 'CC') and sampler.py (Sampler.sample(run_dir, mols_init) signature). Verified absence of any mid-run switch hook in the same files.",
       "method": "MARS",
       "subcapability": "C4c_retargeting",
       "what": "A new run can be launched from the exact realized molecule under a new objective using stock entry points: construct a new Estimator with the new objectives and call Sampler.sample(run_dir, mols_init=[switch_molecule] * num_mols). No patch is required, and the realized molecule is preserved as the starting state.",
-      "evidence": "https://github.com/bytedance/markov-molecular-sampling main.py (mols_init loading and the else-branch default 'CC') and sampler.py (Sampler.sample(run_dir, mols_init) signature). Verified absence of any mid-run switch hook in the same files.",
-      "what_compose_still_has": "It is a restart, not a continuation. The adapted proposal cannot be carried across a process boundary because no shipped code path saves it, so the editor is randomly re-initialised; the imitation dataset starts empty; and the temperature counter resets. MARS also has no remaining-budget concept at all — it is an infinite-horizon annealed sampler whose temperature is pinned at a 1e-2 floor from roughly step 450 onward. COMPOSE's claim is continuation with a finite remaining budget on a frozen process, not a fresh run."
+      "what_compose_still_has": "It is a restart, not a continuation. The adapted proposal cannot be carried across a process boundary because no shipped code path saves it, so the editor is randomly re-initialised; the imitation dataset starts empty; and the temperature counter resets. MARS also has no remaining-budget concept at all \u2014 it is an infinite-horizon annealed sampler whose temperature is pinned at a 1e-2 floor from roughly step 450 onward. COMPOSE's claim is continuation with a finite remaining budget on a frozen process, not a fresh run."
     }
   ],
-  "near_misses": [
-    {
-      "method": "MARS",
-      "axis": "restart_at_supplied_state_under_new_objective",
-      "why_not": "Stock code restarts from the supplied molecule but resets the proposal, the imitation dataset and the annealing counter; there is no remaining-budget notion.",
-      "evidence": "main.py mols_init path; sampler.py Sampler.sample signature; no torch.save reachable for the editor; sampler.py T = max(T, 1e-2) floor."
-    },
-    {
-      "method": "MARS",
-      "axis": "pathwise_constraints_native",
-      "why_not": "MARS AFFORDS pathwise enforcement, because every chain state is a complete molecule and a proposal filter could reject motif-breaking edits. But no such mechanism exists in the official code, so enforcing one is our modification and must be reported as a deviation. docs/RELATED_WORK_MATRIX.md currently marks MARS pathwise as yes; that cell is defensible under an affordance reading and not under a released-code reading. It was deliberately NOT changed here — see DECISION_LOG.",
-      "evidence": "Exhaustive grep for mask|constrain|scaffold|substruct|motif|MolFromSmarts over the official repo returns only training-loss masks in editor_basic.py; common/chem.py check_validity is the only per-proposal filter."
-    },
-    {
-      "method": "GraphXForm",
-      "axis": "pathwise_constraints_native",
-      "why_not": "Per-step masking is genuine but cannot express a labeled subgraph; the paper's structural constraints are a terminal minus-infinity filter in the shipped code, and no SMARTS or substructure matching exists in the repository.",
-      "evidence": "molecule_design.py::update_action_mask exhaustive mask list; molecule_evaluator.py::infeasible_by_special_constraints asserted on mol.synthesis_done."
-    },
-    {
-      "method": "GraphXForm",
-      "axis": "restart_at_supplied_state_under_new_objective",
-      "why_not": "start_from_smiles plus a new objective_type works, but the rerun needs a fresh per-objective fine-tuning loop, so the post-switch cost includes retraining.",
-      "evidence": "config.start_from_smiles dispatch in core/gumbeldore_dataset.py; main.py train_for_one_epoch gradient loop; objective_type read once at evaluator construction."
-    },
-    {
-      "method": "GraphXForm",
-      "axis": "constructive_only_action_space",
-      "why_not": "Because no atom or bond can ever be removed, a seed structure's atoms and bonds persist in every subsequent state automatically. That LOOKS like motif preservation but is a consequence of a restricted action space, not a constraint; and it is only topological — a seed hydroxyl oxygen with free valence can acquire a second bond and become an ether, so the moiety's chemical identity is not guaranteed.",
-      "evidence": "Action space is AddAtom, AddBond, DontChange (arXiv:2411.01667 section 2.1); section 3.3.3 defers removal to future work; molecule_design.py::update_action_mask permits new bonds to any seed atom retaining free valence."
-    },
-    {
-      "method": "DDSBM",
-      "axis": "source_conditioning",
-      "why_not": "A specific source graph is transported, but the network never sees a target and the conditioning channel y is a zero-width tensor; the target lives in the weights, so this is distribution transport, not per-molecule conditioning.",
-      "evidence": "sample_forward_bridge_batch(X_0=X_0, E_0=E_0, ...); y = torch.zeros(size=(1, 0)) in every dataset file; section F.2.2 on learned coupling."
-    },
-    {
-      "method": "DDSBM",
-      "axis": "variable_cardinality",
-      "why_not": "Not a COMPOSE-claim near miss but a correction that goes AGAINST a COMPOSE framing, recorded here so it is not lost. Atom addition and deletion ARE effectively supported: molecules are padded to the dataset-wide maximum with a first-class dummy atom type X and the uniform CTMC flips slots C->X and X->C, so effective molecule size varies inside a fixed tensor. docs/RELATED_WORK_MATRIX.md marks DDSBM var-card and birth/death as no; on this evidence both should be partial with the padded-array caveat.",
-      "evidence": "jointmol_dataset.py padding loop with types['X'] and the comment 'since we pad all atoms, n_nodes distribution is 1 at max_num_nodes'; atom_decoder = ['X'] + ...; configs/model/discrete.yaml transition: uniform; rdkit_functions.py::delete_dummy_atoms."
-    },
-    {
-      "method": "HN_GFN",
-      "axis": "intermediate_states_exposed",
-      "why_not": "States are chemically assembled but non-terminal with open attachment stems, reward is terminal-only, and the sequence is a construction path from an empty graph rather than an edit path from a source.",
-      "evidence": "arXiv:2302.04040 section 4.1 'no fragment removal actions' and 'F(s) = R(s) = 0 for non-terminal state'; mol_mdp_ext.py mol property."
-    },
-    {
-      "method": "GraphGA",
-      "axis": "source_conditioning",
-      "why_not": "A one-line SMILES file seeds every individual with the same molecule, but there is no source concept in the method and the source is explicitly not preserved.",
-      "evidence": "GB_GA.py::make_initial_population random.choice with replacement; abstract 'The molecules found by the GB-GA bear little resemblance to the molecules used to construct the initial mating pool'; nearest-ZINC Tanimoto 0.27 and 0.12."
-    },
-    {
-      "method": "GraphGA",
-      "axis": "intermediate_states_exposed",
-      "why_not": "Every individual is a complete molecule, but the lineage is a two-parent DAG that the code does not persist, and the only logged trajectory is a best-so-far curve. There is no molecule-to-molecule edit path to score pathwise metrics on.",
-      "evidence": "GB_GA.py::reproduce returns only the child, the parent debug print is commented out, and high_scores stores one (best_score, best_smiles) tuple per generation."
-    },
-    {
-      "method": "GraphGA",
-      "axis": "restart_at_supplied_state_under_new_objective",
-      "why_not": "Mechanically possible by writing the final population out as a seed file and passing a new scoring_function, but it is not a provided feature and nothing in the paper or repository describes it.",
-      "evidence": "GB_GA.GA(args) unpacks a single scoring_function; make_initial_population reads a SMILES file."
-    },
-    {
-      "method": "REINVENT",
-      "axis": "dynamic_goal_switching_native",
-      "why_not": "Staged learning is a genuine native mid-run objective change, but it re-targets a policy rather than a realized molecule, fires at stage boundaries set by max_score or max_steps rather than at an arbitrary step, and requires further RL adaptation after the switch.",
-      "evidence": "REINVENT 4 paper section 'Staged learning'; configs/staged_learning.toml [[stage]] blocks with per-stage max_score and chkpt_file."
-    }
-  ],
+  "compose_subcapabilities": {
+    "C4a_static_optimization": "source-conditioned static property optimization under a matched oracle budget; a competitive result is wanted, not a novelty claim",
+    "C4b_exact_target": "exact-target recovery from a source under a finite edit budget; DONE, SEALED AND CLOSED (greedy 26/65, verified remaining-budget rollout 40/65, learned top-1 + verification 40/65 at ~35% of continuation evaluations)",
+    "C4c_retargeting": "same-prefix dynamic retargeting: the goal changes mid-trajectory and the process continues from the realized molecule under a finite remaining budget, with the reference process frozen; IN FLIGHT",
+    "C4d_pathwise": "pathwise constraints: a labeled motif preserved at every committed intermediate state, on a support that includes deletions and topology changes; PLANNED"
+  },
+  "evidence_standard": {
+    "not_admissible": "Secondary sources as sole evidence; a capability the official code could be modified to support; plausible inference from method family.",
+    "openreview_gap": "OpenReview forums for MARS (kHSu4ebxFXY), DDSBM (tQyh0gnfqW), HN-GFN (uoG1fLIK2s) and PMO (yCZRdI0Y7G) are behind a bot challenge and returned HTTP 403. No reviewer discussion was read for any method. Venues were confirmed from proceedings pages and paper footers instead.",
+    "rule": "A capability cell asserting YES, NO or PARTIAL must cite a primary source: the paper with a section, or the official repository with a file or symbol. UNVERIFIED is a legitimate value and must record what was searched."
+  },
+  "frozen_process_claim": "R_theta is not retrained between C4a, C4b, C4c and C4d. A baseline that reaches C4c or C4d only by retraining per objective does not refute that claim; a baseline that reaches them without retraining does. That is why objective_specific_retraining is a required column and why the escalation list below matters more than any table of results.",
   "global_fairness_rules": [
     "Property-oracle calls are the primary matched quantity. Wall time is reported, never matched, because the accelerator classes differ.",
     "THREE-COUNTER ORACLE ACCOUNTING IS FROZEN (2026-08-13, main workstream). Every run logs all three and none may ever be substituted for another. unique_valid_canonical_evaluations = distinct valid canonical molecules evaluated; the benchmark-native number, used ONLY against published PMO numbers. oracle_requests = every scoring request the algorithm makes including duplicates, rejects and invalids; this is ALGORITHMIC DEMAND, NOT CPU. evaluator_calls = expensive oracle executions actually performed after caching; real work. A table names its counter in the caption and never mixes them in one column. For a literal-compute number report wall and core time separately. Enforced by src/compose_v4/experiments/oracle_accounting.py; harness stress test in diagnostics/baselines/oracle_accounting_harness_stress_test.json.",
-    "THE CONCEPTUAL INVARIANT: caching may reduce evaluator work, but it cannot erase wasteful algorithmic requests. That is why a cache hit still increments oracle_requests — otherwise bolting a cache onto a method that re-proposes the same molecule a thousand times would make it look efficient and its search behaviour would become invisible. The saving legitimately appears in evaluator_calls and nowhere else.",
+    "THE CONCEPTUAL INVARIANT: caching may reduce evaluator work, but it cannot erase wasteful algorithmic requests. That is why a cache hit still increments oracle_requests \u2014 otherwise bolting a cache onto a method that re-proposes the same molecule a thousand times would make it look efficient and its search behaviour would become invisible. The saving legitimately appears in evaluator_calls and nowhere else.",
     "Report oracle_requests / unique_valid_canonical_evaluations per method. It is the cache-and-duplicate rate and hiding it is how an unfair comparison survives review.",
-    "The counters are not a formality. On the harness stress test the SAME candidate stream under a budget of 120 bought 120 distinct molecules under unique_valid_canonical_evaluations (288 requests) and only 59 under oracle_requests (120 requests) — a 2x misstatement on a benign stream, and far more on MARS, which has no cache anywhere. Disabling the cache on that identical stream left oracle_requests at 288 and unique_valid_canonical_evaluations at 120 while moving evaluator_calls from 120 to 262, which is the separation the three counters exist to preserve.",
-    "Objective-specific training oracle calls are counted. Report two totals for every method that trains per objective — with and without the training phase — because a reviewer may reasonably object to either convention.",
+    "The counters are not a formality. On the harness stress test the SAME candidate stream under a budget of 120 bought 120 distinct molecules under unique_valid_canonical_evaluations (288 requests) and only 59 under oracle_requests (120 requests) \u2014 a 2x misstatement on a benign stream, and far more on MARS, which has no cache anywhere. Disabling the cache on that identical stream left oracle_requests at 288 and unique_valid_canonical_evaluations at 120 while moving evaluator_calls from 120 to 262, which is the separation the three counters exist to preserve.",
+    "Objective-specific training oracle calls are counted. Report two totals for every method that trains per objective \u2014 with and without the training phase \u2014 because a reviewer may reasonably object to either convention.",
     "A surrogate in the loop must be disclosed as a separate column. HN-GFN's 1000-call budget is spent against a learned proxy, not the true oracle; placing that beside a method that queries honestly is invalid in both directions.",
     "Caching is allowed for every method, must use identical semantics (identical canonical SMILES implies identical score), and cache hits are reported separately.",
     "Invalid or unscorable molecules are failed oracle proposals, not free actions.",
@@ -657,16 +90,600 @@
     "Use published defaults where they exist and record every deviation. PMO's own caution applies: REINVENT's performance is highly dependent on sigma and should be re-tuned whenever the environment changes, so using PMO's tuned sigma on a COMPOSE objective is itself a recorded deviation.",
     "Non-commercial and unlicensed code is a provenance blocker, not a footnote. MARS is CC BY-NC 4.0 and DDSBM has no license at all."
   ],
+  "held_out_data_opened": false,
+  "methods": [
+    {
+      "adapter": {
+        "note": "No blocking scientific incompatibility. The execution risks are the 2021 dependency stack and the non-commercial license.",
+        "status": "environment_verified_not_built",
+        "work_items": [
+          "Objective shim replacing Estimator with a caller of the COMPOSE frozen goal language and src/compose_v4/drd2_oracle.py, wrapping every call in a counter. estimator/scorer/scorer.py has drd2_scorer commented out of its imports while still dispatching to it and ships no DRD2 model (repo issue #2), so the DRD2 objective must come from our side regardless.",
+          "Chain-count reduction driver: MARS's native regime is 1000-5000 chains, and any budget-matched comparison runs it far outside that regime.",
+          "mols_init driver from a source panel, one molecule per chain.",
+          "Accepted-state trajectory logger, because MARS keeps no history.",
+          "Vocabulary regeneration prerequisite: python -m MARS.datasets.prepro_vocab over data/chembl.txt (1,488,640 SMILES), run from outside a directory literally named MARS because of hardcoded MARS/... paths.",
+          "Shared-semantics oracle cache, reported separately."
+        ]
+      },
+      "capabilities": {
+        "dynamic_goal_switching_native": {
+          "evidence": "Objectives are parsed once (main.py: config['objectives'] = config['objectives'].split(',')), consumed at Estimator and Sampler construction (estimator.py: self.objectives = config['objectives']; sampler.py builds score_wght/score_succ/score_clip), and the sampling loop contains no hook to swap the estimator, the weights or the clips. A full-text search of the paper for switch|warm-start|resume|restart|retrain|transfer|mid-run|new objective returns only an unrelated citation title. There is also no resume or checkpoint machinery.",
+          "note": "Zero support in both paper and code. This is a hard NO and it directly answers the lead's question.",
+          "verdict": "NO"
+        },
+        "intermediate_states_exposed": {
+          "evidence": "Every chain state is a complete valid molecule: proposals are checked by common/chem.py::check_validity (Chem.SanitizeMol) and an invalid proposal leaves the chain on its current molecule (proposal.py sets new_mols[i] = mols[i]). Adds are capped at 40 atoms; deletes are rejected if the skeleton would have no bonds.",
+          "note": "The states exist but MARS keeps no trajectory record; the accepted-state sequence must be logged by an adapter.",
+          "verdict": "YES"
+        },
+        "objective_specific_retraining": {
+          "evidence": "There is no pretraining stage at all. The proposal is trained online during the run on edits that improved the score \u2014 paper section 3.2 'we propose to train the model on-the-fly during the sampling process in an adaptive manner'; sampler.py computes `indices = [i for i in range(len(old_mols)) if new_scores[i] > old_scores[i]]` and takes at most 25 gradient steps per MCMC step. Every run starts from a randomly initialised editor (main.py, inside the per-run loop).",
+          "note": "No offline retraining is needed for a new objective, but the online adaptation cost is paid inside every run and is funded by oracle calls.",
+          "verdict": "NO"
+        },
+        "pathwise_constraints_native": {
+          "evidence": "Exhaustive grep of the official repository for mask|constrain|scaffold|substruct|motif|frozen|freeze|protect|MolFromSmarts returns only training-loss masks in proposal/models/editor_basic.py (mask_del, mask_add, mask_arm), which select which nodes and edges contribute to the cross-entropy. No GetSubstructMatch, no SMARTS, no atom freezing. break_bond (common/chem.py) may delete any single-bond-attached fragment, including a motif we wanted preserved.",
+          "note": "Enforcing a motif would mean modifying Proposal.propose. That is our work, not a native capability, and would be a reported deviation. See near_misses: MARS AFFORDS pathwise enforcement because all its states are molecules, which is a weaker and different statement.",
+          "verdict": "NO"
+        },
+        "restart_at_supplied_state_under_new_objective": {
+          "evidence": "Achievable with stock code: construct a new Estimator with the new objectives and call Sampler.sample(run_dir, mols_init=[switch_molecule] * num_mols). Both entry points exist (main.py, sampler.py) and no patch is required. But it is a RESTART, not a continuation: the editor is randomly re-initialised because no checkpoint path exists, the imitation dataset D starts empty, and the temperature counter resets.",
+          "note": "This is the arm EXPERIMENT_PLAN Experiment 6 already names as 'MARS restarted at the switch state where technically possible'. It is technically possible.",
+          "verdict": "PARTIAL"
+        },
+        "source_conditioning": {
+          "evidence": "main.py: `if config['mols_init']: mols = load_mols(...); mols = random.choices(mols, k=config['num_mols'])`. A one-line SMILES file therefore replicates one exact molecule into every chain. Sampler.sample(run_dir, mols_init) also accepts a per-chain list directly. Default with no flag is ethane 'CC' for every chain (paper section 4.1: 'The sampling paths are all starting with an identical molecule \"C-C\"').",
+          "note": "Works with stock code but is undocumented and untested by the authors; the README ships no init file and describes no such usage.",
+          "verdict": "YES"
+        }
+      },
+      "citation_key": "xie2021mars",
+      "classification": {
+        "C4a_static_optimization": "MUST_RUN",
+        "C4b_exact_target": "CONTEXT_ONLY",
+        "C4c_retargeting": "CONDITIONAL",
+        "C4d_pathwise": "CONTEXT_ONLY"
+      },
+      "edit_budget": "One edit attempt per chain per step. Code defaults give ~10^6 attempted edits per run; paper settings ~2.75x10^6. Early stopping via PATIENCE=100 when neither the PM product nor the average score improves by 0.01.",
+      "fairness_contract": {
+        "matched_quantity": "Property-oracle calls, counting every scored candidate including rejected proposals and including the redundant re-scoring MARS performs on invalid proposals. Edits are the secondary matched quantity: one attempted edit per chain per step against one committed COMPOSE edit. Wall time reported, never matched.",
+        "n_a_metrics": "All pathwise metrics are N/A: MARS has no constraint mechanism, and a motif-preserving filter added by us would be a deviation, not the method.",
+        "not_fair_because": "MARS's designed regime is ~10^6 molecule scorings per run. A COMPOSE-matched budget of hundreds to thousands puts it three orders of magnitude below the setting its adaptive proposal was built to exploit, because that proposal only becomes useful after online training on many accepted edits. Reporting only the matched-budget number would misrepresent the method, so BOTH a matched-budget row AND MARS's native-regime row are required, with the gap stated. Support also differs: MARS edits at fragment granularity from a ChEMBL-derived 1000-fragment vocabulary, COMPOSE at canonical-successor granularity of the frozen rewrite kernel. Equal support must never be claimed."
+      },
+      "id": "MARS",
+      "method_verdict": "MUST_RUN",
+      "native_task": "Annealed MCMC sampling from a fixed unnormalized multi-objective target pi(x) = sum_k s_k(x) over molecules, with an adaptive fragment-edit proposal trained online during the run. Paper section 3.1: 'given K properties of interest, the desired molecular distribution can be formulated as a combination of all objectives'. Each Markov-chain state is a complete molecule.",
+      "oracle_accounting": {
+        "caching_note": "MARS re-evaluates revisited molecules. An adapter must add the shared-semantics cache the fairness contract requires, and must report cache hits separately so the comparison is not silently changed.",
+        "counts_rejected_proposals": "YES \u2014 all candidates are scored at sampler.py before the accept/reject loop and rejected scores are discarded. When a proposal is invalid the current molecule is substituted and redundantly re-scored.",
+        "default_total_budget": "Code defaults: 1000 chains x (1 + 1000 steps) = 1,001,000 molecule scorings per run = 4,004,000 property evaluations at 4 objectives, x10 runs. Paper settings N=5000 chains and ~550 steps = 2,755,000 molecule scorings per run. There is no cache anywhere (grep for cache|memo|lru_cache|seen returns only torch.cuda.empty_cache).",
+        "definition": "One molecule scoring per chain per step, expanding to K property evaluations (estimator.py loops over self.objectives).",
+        "training_phase_oracle_calls": "Not separable. The online proposal training is driven by the same score comparisons, so every training signal is already inside the per-step scoring count. There is no separate training phase."
+      },
+      "provenance": {
+        "checkpoints": "NONE for the proposal, and no shipped code path writes one: sampler.py calls train(...) without save_dir, so the only torch.save in common/train.py is unreachable. Shipped binaries are oracles only (kinase_rf/gsk3b.pkl, kinase_rf/jnk3.pkl, fpscores.pkl.gz). The fragment vocabulary is also not shipped (data/vocab_* is gitignored).",
+        "code_reference": "master @ 1a68d2a; repository ARCHIVED read-only, last push 2022-02-03, 2 commits. The URL printed in the paper (github.com/yutxie/mars) is a README-only pointer to this repo. OpenReview kHSu4ebxFXY; ICLR 2021 Spotlight; arXiv DOI 10.48550/arXiv.2103.10432 (ICLR mints no proceedings DOI).",
+        "code_repository": "https://github.com/bytedance/markov-molecular-sampling",
+        "cpu_feasible": "VERIFIED FEASIBLE-WITH-WORK on python 3.11 ONLY (2026-08-13 probe). DGL publishes no wheel for python 3.14. Working set: torch 2.1.2 + torchdata 0.7.1 + dgl 2.2.0 from https://data.dgl.ai/wheels/torch-2.4/repo.html, setuptools<71, numpy<2. DGL's arm64 wheel ships graphbolt dylibs only for torch 2.1.0-2.3.0, and torchdata 0.7.1 is the only release matching, so torch 2.1.2 is forced. The feared API drift did NOT occur: dgl.nn.pytorch.glob.Set2Set imports and runs a forward pass, g.number_of_edges() still exists, and no np.bool appears in MARS source. BasicEditor instantiates at 2,618,026 parameters. First remaining blocker is ONE LINE: estimator/scorer/sa_scorer.py:27 'from rdkit.six import iteritems', removed from modern RDKit. Est. 1-2 h to a running sampler. UNVERIFIED: whether the sklearn 0.23.2-era kinase/DRD2 pickles still load.",
+        "license": "CC BY-NC 4.0 \u2014 NON-COMMERCIAL. LICENSE file first line is the Creative Commons Attribution-NonCommercial 4.0 text; GitHub's detector reports NOASSERTION. estimator/scorer/sa_scorer.py carries a separate BSD-style Novartis notice.",
+        "paper_url": "https://arxiv.org/abs/2103.10432"
+      },
+      "smoke_cost": {
+        "confidence": "LOW on the environment build (torch 1.9.0 + DGL 0.7.0 from 2021 may not resolve); MEDIUM on sampler runtime, since the model is small.",
+        "estimate": "PROJECTION, NOT MEASURED. Sampler ~0.2 CPU-core-hours. Dominant cost is the one-time vocabulary build over 1,488,640 ChEMBL SMILES with RDKit bond-breaking enumeration, ~0.5-1.0 CPU-core-hours, cacheable to the artifact volume and paid once. Budget 1.5 CPU-core-hours for the first smoke, 0.2 thereafter.",
+        "plan": "5 held-in sources, one chain per source, 50 MCMC steps, one COMPOSE objective, --device cpu. Purpose: prove the adapter runs and the oracle counter is wired. NOT executed."
+      }
+    },
+    {
+      "adapter": {
+        "note": "The cleanest external source-conditioned editor in this set. Its blockers are cost and constraint expressiveness, not fidelity.",
+        "status": "environment_verified_not_built",
+        "work_items": [
+          "Objective shim into MoleculeObjectiveEvaluator.predict_objective with a counter wrapping every call, including those consumed by dataset generation during fine-tuning.",
+          "Source-panel driver setting start_from_smiles per source, with an outer loop because that branch ignores repeat_start_instances.",
+          "Atom-vocabulary alignment to the COMPOSE element set, or the deviation recorded.",
+          "Trajectory export at level-0 boundaries: molecule.history plus per-state SMILES.",
+          "Guard against data/generated_molecules.pickle merging across runs \u2014 the README states an undeleted file makes the next run continue from it, a silent cross-run contamination hazard.",
+          "Patch guacamol's scipy.histogram import (documented upstream) or avoid importing guacamol at all.",
+          "Resolve the torch pin conflict: Dockerfile pins 2.5.1 while requirements.txt demands >=2.6.0."
+        ]
+      },
+      "capabilities": {
+        "dynamic_goal_switching_native": {
+          "evidence": "objective_type is a single immutable config string (config.py) read once when MoleculeObjectiveEvaluator is constructed (main.py, and per worker in core/gumbeldore_dataset.py). No code path re-targets the objective mid-trajectory; a repo-wide search returns only the config comment. No discussion of mid-trajectory objective change appears in any retrieved section of the paper.",
+          "note": "The code absence is verified; the paper silence is an absence of evidence, recorded as such.",
+          "verdict": "NO"
+        },
+        "intermediate_states_exposed": {
+          "evidence": "Full action history is retained (self.history in molecule_design.py) and persisted per molecule as action_seq alongside SMILES and objective (core/gumbeldore_dataset.py); keep_intermediate_trajectories defaults True so intermediate terminable nodes enter the candidate set. BUT a complete terminable molecule exists only at action level 0 \u2014 is_terminable() returns `self.current_action_level == 0 and not self.synthesis_done`, and assert_feasible enforces full connectivity only at level 0. Between levels 0->1->2 the graph carries a dangling unbonded atom.",
+          "note": "Valid molecule at every atom/bond-completion boundary, not at every raw action index. Usable for pathwise metrics only if scored at level-0 boundaries.",
+          "verdict": "PARTIAL"
+        },
+        "objective_specific_retraining": {
+          "evidence": "Required for the paper's reported results. Section 2.2: 'In each epoch, the current policy is used to generate a set of action sequences, from which the best sequences are selected as pseudo-labels to serve as the dataset for supervised training'; 'we sample batches of intermediate molecules and train the network with a cross-entropy loss to predict the next action'. main.py freezes all parameters, unfreezes only virtual_atom_linear and bond_atom_linear, and runs loss.backward(); optimizer.step(). objective_type is a single global config field consumed by the evaluator, so it is one fine-tuning run per objective.",
+          "note": "Head-only fine-tuning, but it IS a gradient update per objective. A pure-search path exists (num_epochs = 0) and is not what the paper reports; main.py warns if no checkpoint is supplied on that path.",
+          "verdict": "YES"
+        },
+        "pathwise_constraints_native": {
+          "evidence": "Genuine per-step masking exists: update_action_mask() is recomputed after every action (take_action ends with it) and masked_log_probs_for_current_action_level sets logits[mask] = -inf before softmax. Section 2.1: 'we mask any action in the policy that would lead to a violation of valence constraints ... we set the corresponding probability to zero in the distribution predicted by the policy (before re-normalizing the distribution).' BUT the exhaustive maskable set in the released code is: atom type allowed/disallowed, max_num_atoms, remaining valence per atom, no self-bonding, no re-bonding an already-bonded pair, bond order at most the minimum free valence. The paper's ring-size and disallowed-bonding-pattern constraints are implemented instead as a TERMINAL filter in molecule_evaluator.py::infeasible_by_special_constraints, asserted on mol.synthesis_done and returning -inf. There is no SMARTS or substructure matching anywhere in the repository.",
+          "note": "The mechanism is pathwise; the expressible constraint class does not include labeled subgraphs. This is the single most important correction to the Workstream C assumption that GraphXForm is already a native pathwise-constraint baseline.",
+          "verdict": "PARTIAL"
+        },
+        "restart_at_supplied_state_under_new_objective": {
+          "evidence": "Mechanically possible: stop, set start_from_smiles to the realized molecule, set the new objective_type, rerun. But that rerun requires a fresh per-objective fine-tuning loop (see objective_specific_retraining), so it is not a cheap continuation.",
+          "note": "This is the arm EXPERIMENT_PLAN Experiment 6 names as 'GraphXForm restarted at the switch state'. It works, but the post-switch cost includes retraining and must be reported as such.",
+          "verdict": "PARTIAL"
+        },
+        "source_conditioning": {
+          "evidence": "config.start_from_smiles, dispatched in core/gumbeldore_dataset.py: `elif self.config.start_from_smiles is not None: problem_instances = [MoleculeDesign.from_smiles(self.config, self.config.start_from_smiles)]`. MoleculeDesign.from_smiles(..., do_finish=False) replays the molecule as an action prefix without issuing the terminate action, so the design arrives at action level 0 un-terminated and the model continues modifying it. Paper section 3.3.3 seeds design from 'the best molecule from COSMObase 2020'.",
+          "note": "The start_from_smiles branch creates exactly ONE root instance and does not honour repeat_start_instances, so multi-seed runs need an outer loop.",
+          "verdict": "YES"
+        }
+      },
+      "citation_key": "pirnay2025graphxform",
+      "classification": {
+        "C4a_static_optimization": "MUST_RUN",
+        "C4b_exact_target": "CONTEXT_ONLY",
+        "C4c_retargeting": "CONDITIONAL",
+        "C4d_pathwise": "CONDITIONAL"
+      },
+      "edit_budget": "Beam width 512 in the paper, 32 in shipped config.py, 16 per the README \u2014 a documented three-way discrepancy. Replan step sigma = 12. Top s = 100 molecules retained. 20 batches of size 64 per fine-tuning epoch; num_epochs 1000. Max atoms 25 for the solvent tasks, 50 in shipped config. The number of molecules generated is emergent, not a parameter.",
+      "fairness_contract": {
+        "matched_quantity": "Property-oracle calls, counting every beam leaf scored AND every call consumed by per-objective fine-tuning. TWO totals must be reported \u2014 with and without the fine-tuning phase \u2014 because the choice changes which method looks efficient and a reviewer may reasonably object to either convention. Edit budget is N/A and must be printed as N/A: GraphXForm's actions are atom and bond additions, not molecule-to-molecule edits.",
+        "n_a_metrics": "Edit budget N/A. Labeled-motif pathwise metrics are measurable but must be reported as the OUTCOME of an unconstrained run, never as a constrained arm, because the released code cannot mask on substructures.",
+        "not_fair_because": "Three asymmetries. (1) The action space is strictly constructive \u2014 no atom or bond removal exists and the paper defers removal to future work (section 3.3.3) \u2014 so on any task requiring a deletion it cannot reach the answer at all. That is a scope difference, not a quality result, and must be stated wherever it binds. (2) The paper deliberately does not operate under an oracle budget and argues its objectives are cheap; imposing one runs it outside its designed protocol. (3) Its per-objective fine-tuning has no COMPOSE counterpart because R_theta is frozen, so the comparison is between a method that pays a training cost per objective and one that does not \u2014 which is the claim under test, not a nuisance to normalise away."
+      },
+      "id": "GraphXForm",
+      "method_verdict": "MUST_RUN",
+      "native_task": "Single-objective de-novo molecular graph design by a pretrained graph transformer that iteratively adds atoms and bonds, fine-tuned per objective by self-improvement. Abstract: 'Our approach iteratively modifies a molecular graph by adding atoms and bonds, which ensures chemical validity and facilitates the incorporation of structural constraints.' Demonstrated on 20 GuacaMol goal-directed tasks and two liquid-liquid-extraction solvent-design tasks.",
+      "oracle_accounting": {
+        "caching_note": "No published cache policy. An adapter must add a shared-semantics cache and report hits.",
+        "counts_rejected_proposals": "YES \u2014 every beam candidate is scored, not only the retained top-s.",
+        "default_total_budget": "None numeric. The paper explicitly rejects an oracle-call budget (section 3.1: 'to provide a practical comparison between our method and competing approaches, each design run is executed until convergence or until a maximum wall-clock time of eight hours is reached'). Governed by wall_clock_limit (8 h in the paper, None in shipped config) and num_epochs = 1000.",
+        "definition": "Every leaf of every TASAR beam round is scored: core/incremental_sbs.py calls batch_leaf_evaluation_fn on all beam leaves, wired to objective_evaluator.predict_objective. With keep_intermediate_trajectories True, intermediate terminable nodes also enter the leaf set and are scored.",
+        "training_phase_oracle_calls": "YES, and they dominate. Dataset generation IS the search and runs once per epoch inside train_for_one_epoch before every gradient step. Order of magnitude: beam_width x TASAR rounds x epochs."
+      },
+      "provenance": {
+        "checkpoints": "Available: https://syncandshare.lrz.de/dl/fiJs7ZHuCFsVskeoab5aZg/graphxform_pretrained.zip, ~347,364,546 bytes, verified reachable (HTTP 200). Not hashed here because the file has not been downloaded; hash on first fetch before any claim-bearing run. The GH-GNN objective surrogate ships in-repo.",
+        "code_reference": "created 2024-10-16, last push 2026-02-26, not archived, 0 open issues. Journal version: Digital Discovery 4(4) 1052-1065 (2025), DOI 10.1039/D4DD00339J, CC-BY. arXiv 2411.01667 v1 2024-11-03, v2 2025-03-20.",
+        "code_repository": "https://github.com/grimmlab/graphxform",
+        "cpu_feasible": "VERIFIED FEASIBLE (2026-08-13 probe), python 3.11. The expected blocker did not occur: torch_scatter 2.1.2 COMPILED successfully against CPU torch with --no-build-isolation. torch_geometric 2.8.0, ray 2.57.0, rdkit 2023.09.6 and guacamol all install; MoleculeTransformer(MoleculeConfig()) instantiates at 31,542,218 parameters. Checkpoint URL returns HTTP 200, Content-Length 347,364,546 (331 MiB), not downloaded. torch_scatter is NOT in requirements.txt and is imported only by the GH-GNN objective predictor, so it is unnecessary unless that objective is used.",
+        "license": "MIT (LICENSE, 'Copyright (c) 2026 Grimm Lab'). Bundled objective_predictor/GH_GNN_IDAC/ and GDI_NN_IDAC/ carry their own separate LICENSE files \u2014 check before redistribution.",
+        "paper_url": "https://arxiv.org/abs/2411.01667"
+      },
+      "smoke_cost": {
+        "confidence": "MEDIUM. The environment is modern and the repo is maintained; the uncertainty is CPU transformer throughput, for which no published figure exists.",
+        "estimate": "PROJECTION, NOT MEASURED. 347 MB checkpoint download once. The unit cost is a d=512, 10-block transformer forward for beam 32 on ~25-atom graphs; at roughly 1000 forwards plus 1280 training samples per epoch, expect order 5-10 minutes per epoch per source on a few CPU cores. Budget 2-4 CPU-core-hours for the whole 5-source, 3-epoch smoke, and treat anything beyond 6 as the signal to stop and request GPU authorisation.",
+        "plan": "5 held-in sources via start_from_smiles, 2-3 fine-tuning epochs at the shipped beam width 32, one COMPOSE objective, all devices 'cpu', CUDA_VISIBLE_DEVICES cleared. Purpose: prove start_from_smiles round-trips a COMPOSE source, the objective shim is called, and the counter is wired. NOT executed."
+      }
+    },
+    {
+      "adapter": {
+        "note": "Blocked by license absence and missing checkpoints, not by adapter difficulty. There is no cheap adapter: a faithful comparison means reproducing the native protocol, i.e. building two marginal datasets under a COMPOSE property split and training 6 IMF iterations x 300 epochs on GPUs.",
+        "status": "blocked",
+        "work_items": [
+          "Resolve the license question with the authors before anything else.",
+          "Only if that is resolved and GPU is authorised: build two marginal datasets under a COMPOSE property split, train from scratch, and evaluate both DDSBM and COMPOSE with the same evaluator on the same data.",
+          "Do NOT attempt a matched source-conditioned adaptation; the native object is distribution transport."
+        ]
+      },
+      "capabilities": {
+        "dynamic_goal_switching_native": {
+          "evidence": "Three independent grounds. (1) Formulation: the object is a fixed pair of boundary distributions with a static optimal coupling, so retargeting means changing the terminal marginal, i.e. a different optimization problem. (2) API: sample_forward_bridge_batch hard-starts at t=0 from the supplied X_0 and runs the full loop; there is no start-time parameter, no way to inject a realized intermediate state, and no way to swap the model mid-loop (number_chain_steps only controls how many frames are saved for visualisation). (3) Theory: the learned generator is time-inhomogeneous and conditioned on remaining time to tau, so splicing a differently-trained model at t=k evaluates it at a time index whose bridge geometry was fitted to a different terminal distribution.",
+          "note": "The lead's position is confirmed. Do not force DDSBM into retargeting.",
+          "verdict": "NO"
+        },
+        "intermediate_states_exposed": {
+          "evidence": "The sampler independently resamples every node and edge category at each step (sample_discrete_features then one-hot, inside `for t_int in range(0, self.T - 1)`) with no valency check, no connectivity check, no sanitisation and no rejection anywhere in the loop. Molecules are assembled only from the final state. Even the final state is not guaranteed connected: compute_validity keeps the largest fragment. Reported DBM validity on Polymer is 43.4% (Table 2). Section E.2 admits 'occasional failures in decoding into molecules'.",
+          "note": "Intermediates are noisy categorical graphs, not molecules. Every pathwise metric is N/A by construction. Dummy-atom birth/death RE-VERIFIED 2026-08-13, confirming the RELATED_WORK_MATRIX correction: 'X' is prepended at index 0 (jointmol_dataset.py:103-111); padding happens inside the PyG Data object so node_mask is all-True and dummies diffuse as ordinary nodes (jointmol_dataset.py:48-51); the uniform transition (noise_schedule.py:92-118) makes 'X' an ORDINARY NON-ABSORBING class, so C->X (death) and X->C (birth) both carry positive probability; no AbsorbingStateTransition class exists anywhere in the repo; dummies are stripped at decode (rdkit_functions.py:61-73). Latent upstream bug: rdkit_functions.py:456-458 hardcodes dummy index 12 where the correct index is 0 -- dead code under the shipped ZINC config but wrong if enabled.",
+          "verdict": "NO"
+        },
+        "objective_specific_retraining": {
+          "evidence": "The objective IS the terminal distribution. For ZINC the only encoding of the objective is the logP-2 versus logP-4 split (section 5.2), and the paper states DDSBM is 'trained solely to optimize graph transformations with minimal structural alterations, without explicit knowledge on molecular properties'. A new objective means a new terminal dataset and a full retrain: 300 epochs x 6 IMF iterations on four GPUs for ZINC (Table 4).",
+          "note": "There is no conditioning channel to exploit for zero-shot retargeting; y is zero-width.",
+          "verdict": "YES"
+        },
+        "pathwise_constraints_native": {
+          "evidence": "Repo-wide search for inpaint|freeze|fixed subgraph|preserve|constraint|guidance|reward|oracle|substructure|classifier-free returns no implementation. 'scaffold' appears only in data/couple_zinc250k.py for dataset pairing analysis. The only preservation pressure is the GED-shaped reference process (sections 4.3, D.6), which is an average-case bias, not a per-path guarantee.",
+          "note": "",
+          "verdict": "NO"
+        },
+        "restart_at_supplied_state_under_new_objective": {
+          "evidence": "Restarting from a supplied molecule is possible only in the trivial sense that X_0 is user-supplied; 'under a new objective' requires a differently-trained model, and none exists because no checkpoints are released and the objective is the terminal dataset (see objective_specific_retraining).",
+          "note": "",
+          "verdict": "NO"
+        },
+        "source_conditioning": {
+          "evidence": "predict_step calls sample_forward_bridge_batch(X_0=X_0, E_0=E_0, ...), so a specific source graph is transported. But the only network inputs are {X_t, E_t, y_t, t, node_mask} and y is a zero-width tensor in every dataset file (y = torch.zeros(size=(1, 0))). Conditioning exists on the source endpoint only; the target lives in the weights.",
+          "note": "Distribution-level transport with a learned coupling, not per-molecule pairing. Section 5.1: 'We randomly coupled the data of initial and terminal distributions to obtain paired data.'",
+          "verdict": "PARTIAL"
+        }
+      },
+      "citation_key": "kim2025ddsbm",
+      "classification": {
+        "C4a_static_optimization": "CONTEXT_ONLY",
+        "C4b_exact_target": "CONTEXT_ONLY",
+        "C4c_retargeting": "CONTEXT_ONLY",
+        "C4d_pathwise": "CONTEXT_ONLY"
+      },
+      "edit_budget": "N/A. There is no notion of a molecule-to-molecule edit. Diffusion steps are 100 for the molecular tasks, 500 for Community-20, 1000 for Planar. The node tensor is padded to the dataset-wide maximum (37 slots on their ZINC subset, mean molecule 23.7 heavy atoms).",
+      "fairness_contract": {
+        "matched_quantity": "None is definable. DDSBM makes zero oracle calls at sampling time, so an oracle-budget comparison has no shared axis. The only honest comparison is a native-protocol reproduction: run DDSBM's own ZINC logP-2 to logP-4 task, add COMPOSE under the same data and the same evaluator, and compare on DDSBM's own metrics.",
+        "n_a_metrics": "All oracle-budget metrics, all pathwise metrics, all edit-count metrics.",
+        "not_fair_because": "Its scientific object is a bridge between two distributions; COMPOSE's is a controlled process from one source under a goal. Putting them in one budget-matched table would require inventing a budget for a method that has none. Intermediate states are also not molecules, so every pathwise and trajectory metric is N/A rather than zero."
+      },
+      "id": "DDSBM",
+      "method_verdict": "CONTEXT_ONLY",
+      "native_task": "A discrete Schrodinger bridge between two graph DISTRIBUTIONS, solved by iterative Markovian fitting. Only the two marginals are prescribed; the coupling is what the method solves for. Section F.2.2 states the contrast explicitly: 'except for DDSBM, all of them assume that suitable molecule pairs have already been identified to be provided.' At sampling time a specific source graph is transported, but the network never sees a target \u2014 the target is baked into the weights.",
+      "oracle_accounting": {
+        "caching_note": "N/A.",
+        "counts_rejected_proposals": "N/A \u2014 there are no scored proposals.",
+        "default_total_budget": "0 per generated sample. The per-sample cost is instead 100 network forward passes (diffusion_steps: 100).",
+        "definition": "Zero property-oracle calls at sampling time. The property signal exists only in how the two training datasets were split. Property predictors appear only in evaluation (MolCLR for GAP, RDKit Crippen/QED/sascorer), and MolCLR is not in the repository.",
+        "training_phase_oracle_calls": "|D_source| + |D_target|, paid once at dataset-construction time; approximately 29,920 pairs for their ZINC subset."
+      },
+      "provenance": {
+        "checkpoints": "NOT AVAILABLE. The README TODO 'Checkpoints update using Zenodo' is unchecked; open issue #1 requested them and the author reply did not supply them.",
+        "code_reference": "main @ b7787042, 2025-04-15, 5 commits, 0 releases. OpenReview tQyh0gnfqW; ICLR 2025. arXiv v1 2024-10-02, v2 2025-02-28; DOI 10.48550/arXiv.2410.01500.",
+        "code_repository": "https://github.com/junhkim1226/DDSBM",
+        "cpu_feasible": "BLOCKED, re-confirmed 2026-08-13. pyproject.toml pins requires-python ==3.9.* exactly. graph-tool 2.45 is conda-only and imported unconditionally at analysis/spectre_utils.py:17. The orca C++ source directory src/ddsbm/analysis/orca/ DOES NOT EXIST in the clone, so the README's build line cannot run as written. Install path is CUDA-11.8/torch-2.0.1 only, with no CPU or macOS path documented. Days of effort and a Linux box.",
+        "license": "NONE. Re-verified exhaustively 2026-08-13: no LICENSE or COPYING file, zero matches for licen[cs]e|copyright repo-wide, no license field in pyproject.toml, GitHub API reports license: null. All rights reserved by default. Upstream DiGress is MIT but that does not transfer. A legal blocker, not a technical one.",
+        "paper_url": "https://arxiv.org/abs/2410.01500"
+      },
+      "smoke_cost": {
+        "confidence": "N/A",
+        "estimate": "N/A",
+        "plan": "NONE. No smoke is planned or possible under the CPU-only constraint, and none should be attempted before the license question is resolved."
+      }
+    },
+    {
+      "adapter": {
+        "note": "Not blocked scientifically for a Pareto-coverage comparison, but there is no CPU path and the upstream environment is currently broken.",
+        "status": "blocked_cpu",
+        "work_items": [
+          "Bisect the last BoTorch version exporting AnalyticMultiOutputObjective and IdentityAnalyticMultiOutputObjective \u2014 proxy/regression.py imports both and they are removed from modern BoTorch. This is open issue #1 upstream and is unresolved.",
+          "Pin numpy < 1.24: dataset.py, mol_mdp_ext.py and utils/chem.py use np.bool and np.int.",
+          "Objective shim replacing the closed enum in oracle/scorer/scorer.py with the COMPOSE frozen goals; use src/compose_v4/drd2_oracle.py rather than the bundled python-3.6 sklearn DRD2 pickle.",
+          "GPU authorisation, or drop the method to CONTEXT_ONLY. There is no CPU alternative."
+        ]
+      },
+      "capabilities": {
+        "dynamic_goal_switching_native": {
+          "evidence": "The preference vector is sampled once per rollout and held fixed for every step: main.py samples weights = Dirichlet(...).sample_n(1) before the loop and passes the same weights to generator(...) at every t, with reward computed only at termination under those weights. The 'hindsight' strategy re-scores COMPLETE TERMINAL molecules under other preferences and files them in the replay buffer (main_mobo.py::_add_mol_to_replay loops over self.test_weights) \u2014 relabelling, not mid-trajectory intervention.",
+          "note": "The lead's position is confirmed: appropriate for target-free multiobjective and Pareto experiments, not automatically a same-prefix intervention baseline.",
+          "verdict": "NO"
+        },
+        "intermediate_states_exposed": {
+          "evidence": "Generation is fragment-based, append-only, from an empty graph, max 8 blocks, with 'no fragment removal actions' (section 4.1). Non-terminal states are called 'partially constructed molecules' and receive reward 0 ('F(s) = R(s) = 0 for non-terminal state'). Code-level, any state does have a well-defined RDKit molecule via mol_mdp_ext.py's mol property, but with open attachment stems.",
+          "note": "Chemically assembled but not terminal molecules; the trajectory is a construction sequence, not a source-to-target edit path.",
+          "verdict": "PARTIAL"
+        },
+        "objective_specific_retraining": {
+          "evidence": "For a new OBJECTIVE (as opposed to new weights): n_objectives is the first linear layer's input width in model_pred_hyper.py (torch.nn.Linear(n_objectives, ray_hidden_dim)), args.n_objectives = len(args.objectives) in main_mobo.py, and the surrogate is built with num_out_per_mol=len(args.objectives) in proxy/proxy.py. Changing the objective set changes M, the hypernetwork input dimension and the surrogate output dimension. Supported objective names are a closed enum in oracle/scorer/scorer.py. It is also retrained every BO round regardless: main_mobo.py re-instantiates FMGFlowNet inside the outer loop with no checkpoint reload, and section 4.2.2 says 'In principle, we retrain HN-GFN after every round.'",
+          "note": "For new PREFERENCE WEIGHTS over the fixed objective set, no retraining is needed. That distinction is escalated below and is the whole point of the method. SCALARIZATION VERIFIED 2026-08-13: HN-GFN is natively a LINEAR WEIGHTED SUM, raw_reward = (weights*score).sum(), under --scalar WeightedSum which is the argparse default (main.py:54, main.py:226-232). The MOBO entrypoint ignores --scalar and selects by --acq_fn, default UCB, also linear (proxy/proxy.py:198-199, with the author's own comment 'weighted_sum scalarization'). Its opt-in 'Tchebycheff' branch is NOT classical Chebyshev: it is an augmented max-min min_i(w_i*r_i) + 0.1*sum_i(w_i*r_i) with no ideal point and no absolute deviation, hardcoded alpha 0.1. Preference weights are Dirichlet(alpha_vector * alpha), default uniform on the simplex. The hypernetwork conditions ONLY the output heads; under default version='v4' the message-passing trunk is preference-independent. CONSEQUENCE FOR LANE 4, which has frozen a Chebyshev scalarization: linear scalarization cannot recover concave regions of a Pareto front, so the two do not match and the difference must be reported rather than described as equivalent.",
+          "verdict": "YES"
+        },
+        "pathwise_constraints_native": {
+          "evidence": "No masking or constraint mechanism on intermediate states is described in the paper or present in the released code; the action space is the fragment-attachment set from data/blocks_105.json and reward is terminal-only (section 4.1).",
+          "note": "",
+          "verdict": "NO"
+        },
+        "restart_at_supplied_state_under_new_objective": {
+          "evidence": "There is no supplied-state entry point at all (see source_conditioning), so there is nothing to restart from.",
+          "note": "",
+          "verdict": "NO"
+        },
+        "source_conditioning": {
+          "evidence": "rollout() unconditionally begins at the empty molecule (m = BlockMoleculeDataExtended(); mol_mdp_ext.py reset() likewise) with no seed parameter; the only policy conditioning input is the preference vector (generator(s, vec_data=weights, ...)); no CLI flag for a starting, seed or scaffold molecule exists in main.py or main_mobo.py. The nearest machinery is backward trajectory construction from an already-block-decomposed molecule for offline replay training, which is training data, not a conditioning input.",
+          "note": "Arbitrary user SMILES would first have to be decomposable into the 105-block vocabulary; UNVERIFIED whether any such decomposition path is provided.",
+          "verdict": "NO"
+        }
+      },
+      "citation_key": "zhu2023hngfn",
+      "classification": {
+        "C4a_static_optimization": "CONDITIONAL",
+        "C4b_exact_target": "CONTEXT_ONLY",
+        "C4c_retargeting": "CONTEXT_ONLY",
+        "C4d_pathwise": "CONTEXT_ONLY"
+      },
+      "edit_budget": "N/A \u2014 there are no edits. Trajectories are fragment attachments from an empty graph: min_blocks 2, max_blocks 8, vocabulary data/blocks_105.json (105 blocks), 100-2000 actions available per state.",
+      "fairness_contract": {
+        "matched_quantity": "True-oracle calls, with the surrogate's role reported as a separate column. If HN-GFN's 1000 true-oracle calls are placed beside a COMPOSE budget that queries the true oracle for every candidate, the comparison is invalid in BOTH directions: HN-GFN looks efficient because a learned proxy absorbs the search, and COMPOSE looks expensive for querying honestly. Either both methods get a surrogate, or the surrogate's training and query cost becomes a reported column. This must be settled before any number enters a table.",
+        "n_a_metrics": "All source-conditioned metrics, all pathwise metrics, all same-prefix metrics, endpoint Tanimoto to a source.",
+        "not_fair_because": "Beyond the surrogate asymmetry: HN-GFN generates from scratch over a 105-fragment vocabulary and cannot be conditioned on a source molecule at all, so it cannot enter any source-conditioned panel. Its Pareto-coverage metric (hypervolume) is the natural shared axis and the only one on which the comparison is meaningful."
+      },
+      "id": "HN_GFN",
+      "method_verdict": "CONDITIONAL",
+      "native_task": "Target-free multi-objective molecular optimization with Pareto coverage. HN-GFN proper is the acquisition-function optimizer inside a multi-objective Bayesian-optimization loop, not a standalone method: 'we propose a multi-objective Bayesian optimization algorithm leveraging the hypernetwork-based GFlowNets as an acquisition function optimizer, with the purpose of sampling a diverse batch of candidate molecular graphs from an approximate Pareto front.' The standalone use in section 5.1 is explicitly labelled a synthetic scenario.",
+      "oracle_accounting": {
+        "caching_note": "The 'oracles' are themselves cheap ML predictors (random forests for GSK3b/JNK3 from Xie et al., RDKit QED/SA), so the budget simulates expense rather than measuring it.",
+        "counts_rejected_proposals": "N/A in MOBO \u2014 candidates are scored by the surrogate, not the oracle. In the synthetic scenario every sampled terminal molecule is scored.",
+        "default_total_budget": "1000 true-oracle calls: |D_0| = 200 initial molecules plus N = 8 rounds at batch size b = 100. Code defaults match (--num_init_examples 200, --num_outer_loop_iters 8, --num_samples 100). Per-round GFlowNet training is 5000 steps; the surrogate is fit for 10000 iterations.",
+        "definition": "In the MOBO setting the true oracle is queried only at the batch-evaluation points; GFlowNet training inside each round is rewarded by the SURROGATE (main_mobo.py::_get_reward -> self.proxy, acquisition = UCB with beta 0.1). In the synthetic scenario of section 5.1 the true oracle is queried at every training step (main.py -> self.proxy.get_score, where proxy is the Oracle object, --num_iterations 30000).",
+        "training_phase_oracle_calls": "ZERO true-oracle calls during GFlowNet training in the MOBO setting. This is the source of its reported sample efficiency and the single largest fairness hazard in this registry."
+      },
+      "provenance": {
+        "checkpoints": "No HN-GFN/GFlowNet checkpoint is released. Bundled artifacts are oracles and proxies only: oracle/gsk3b.pkl 27 MB, oracle/jnk3.pkl 11 MB, oracle/scorer/kinase_rf/{gsk3b,jnk3}.pkl 97/37 MB, data/docked_mols.h5 98 MB, data/pretrained_proxy/*, data/blocks_105.json. Training writes its own per-round checkpoints.",
+        "code_reference": "main, last push 2023-12-24. NeurIPS 2023 main track (arXiv v2 footer and the NeurIPS proceedings page); OpenReview uoG1fLIK2s.",
+        "code_repository": "https://github.com/violet-sto/HN-GFN",
+        "cpu_feasible": "BLOCKED, re-confirmed 2026-08-13. No requirements.txt, environment.yml, setup.py or pyproject.toml exists, so no dependency is pinned at all. Ten files import botorch and the authors already vendored their own qUpperConfidenceBound/qExpectedImprovement after abandoning upstream imports. Expected breakage against modern botorch: botorch.sampling.samplers renamed, Posterior moved, FullyBayesianPosterior removed, fit_gpytorch_model removed. Est. ~1 day of version archaeology. There is still no CPU path: --device cuda default, 10-13 h on one V100, no released checkpoint.",
+        "license": "MIT (LICENSE, 'Copyright (c) 2023 YH-Zhu').",
+        "paper_url": "https://arxiv.org/abs/2302.04040"
+      },
+      "smoke_cost": {
+        "confidence": "N/A",
+        "estimate": "N/A on CPU. On one V100 the published full loop is 10-13 h; a reduced smoke would be a small fraction of that but is not costable without a run.",
+        "plan": "NONE under the CPU-only constraint. If GPU is later authorised, the minimal smoke is the synthetic scenario at reduced --num_iterations with two COMPOSE objectives, purely to prove the objective shim and the counter. NOT executed."
+      }
+    },
+    {
+      "adapter": {
+        "note": "REAL upstream vendored byte-identical at baselines/graph_ga/upstream/ (commit 4b49f182, MIT), driven by src/compose_v4/experiments/graph_ga_adapter.py under three-counter accounting, held-in smoke PASS 9/9. See smoke_plan.graph_ga_held_in_smoke.",
+        "status": "built_and_smoked",
+        "work_items": [
+          "Wrap the COMPOSE frozen goal language and src/compose_v4/drd2_oracle.py as a scoring_function.",
+          "Decide and record which oracle-counting convention is used \u2014 GB-GA's native one (duplicates count) or PMO's (unique valid canonical SMILES only). They differ and the choice is not neutral.",
+          "Seed driver: one-line SMILES file per source for exact seeding, or PMO's first-N-lines behaviour, chosen explicitly and recorded.",
+          "Element-set and size-bound alignment to the COMPOSE kernel, or the deviation recorded."
+        ]
+      },
+      "capabilities": {
+        "dynamic_goal_switching_native": {
+          "evidence": "GB_GA.GA(args) unpacks a single scoring_function fixed for the whole run and `for generation in range(generations)` never re-reads it. There is no stage or phase concept.",
+          "note": "",
+          "verdict": "NO"
+        },
+        "intermediate_states_exposed": {
+          "evidence": "Every individual is a complete RDKit-sanitized molecule and invalid products are discarded rather than carried. But the structure is a branching two-parent genealogy, not a path: reproduce() returns only the child and parentage is not persisted (the debug print of parent_A/parent_B is commented out). The only logged trajectory is high_scores \u2014 one (best_score, best_smiles) tuple per generation, a best-so-far curve, not an edit path.",
+          "note": "Any source-to-final lineage is a DAG with two in-edges per node. Synthesising a 'trajectory' from it and scoring pathwise metrics on it is a forbidden adaptation under this protocol.",
+          "verdict": "PARTIAL"
+        },
+        "objective_specific_retraining": {
+          "evidence": "There is no model and no training. Paper conclusion: 'Both the GB-GA and GB-GM-MCTS codes used in this study are freely available with the open source RDKit toolkit as the only dependence.' Changing the objective means passing a different scoring_function. Verified by import audit: no torch, tensorflow or cuda imports in GB_GA.py, crossover.py, mutate.py, scoring_functions.py or GA_logP.py.",
+          "note": "Zero warm-up oracle cost. This makes GraphGA the cleanest budget-matched comparator in the set.",
+          "verdict": "NO"
+        },
+        "pathwise_constraints_native": {
+          "evidence": "No substructure or scaffold preservation mechanism exists at any level. The only per-step filters are structural sanity checks (paper: 'Molecules with macrocycles (seven atoms or more), allene centers in rings, fewer than five heavy atoms, incorrect valences as determined by RDKit, and more non-H atoms than the target size are discarded'). Crossover actively destroys invariants: 'a crossover can occur both at non-ring and ring bonds, with equal probability and the positions of the cuts are chosen randomly', and mutate.py includes delete_atom() with SMARTS such as '[*:1]~[D1]>>[*:1]'.",
+          "note": "",
+          "verdict": "NO"
+        },
+        "restart_at_supplied_state_under_new_objective": {
+          "evidence": "Restarting with a new scoring_function and the final population written out as the seed file is mechanically possible with stock entry points, but it is not a provided feature and nothing in the paper or repository describes it.",
+          "note": "Because GraphGA carries no learned state, a restart loses nothing except the population \u2014 which makes it the cleanest 'restart at the switch state' control arm in the set.",
+          "verdict": "PARTIAL"
+        },
+        "source_conditioning": {
+          "evidence": "The only seeding interface is a SMILES file: GB_GA.py::make_initial_population does `population.append(random.choice(mol_list))` per individual, sampling with replacement, so a one-line SMILES file yields population_size identical copies of that molecule. There is no native source-molecule concept, flag or API. PMO's variant differs: main/graph_ga/run.py uses `starting_population = self.all_smiles[:config['population_size']]`.",
+          "note": "Crucially the source is NOT preserved. Abstract: 'The molecules found by the GB-GA bear little resemblance to the molecules used to construct the initial mating pool'; the Results report nearest-ZINC Tanimoto of 0.27 and 0.12.",
+          "verdict": "PARTIAL"
+        }
+      },
+      "citation_key": "jensen2019graphga",
+      "classification": {
+        "C4a_static_optimization": "MUST_RUN",
+        "C4b_exact_target": "CONTEXT_ONLY",
+        "C4c_retargeting": "CONDITIONAL",
+        "C4d_pathwise": "CONTEXT_ONLY"
+      },
+      "edit_budget": "N/A as a per-molecule quantity. Each generation applies one crossover of two parents plus one mutation per offspring; offspring_size 70 under PMO defaults. There is no notion of a bounded edit distance from a designated source.",
+      "fairness_contract": {
+        "matched_quantity": "Property-oracle calls, under ONE explicitly declared convention. GraphGA is the method where the convention matters most, because natively it charges duplicates and under the PMO wrapper it does not. Edits are N/A: a GA offspring is not one edit from a designated source.",
+        "n_a_metrics": "All pathwise metrics; all same-prefix metrics; edit-count metrics.",
+        "not_fair_because": "GraphGA does not preserve the source \u2014 the paper says so explicitly \u2014 so on any similarity-constrained or source-conditioned panel it either fails the constraint or must have the constraint folded into its scoring function, which changes the method's task. Its lineage is a two-parent DAG, so no pathwise metric applies. Its strength is exactly the thing PMO found: under a controlled budget a simple search is extremely hard to beat, and COMPOSE should expect to be compared against it on equal footing rather than to win by default."
+      },
+      "id": "GraphGA",
+      "method_verdict": "MUST_RUN",
+      "native_task": "A graph-based genetic algorithm (GB-GA) maximizing a scalar black-box score over molecules by crossover and mutation on RDKit graphs. The paper's own task is penalized logP: 'the goal is to maximize J(m): J(m) = log P(m) - SA(m) - RingPenalty(m)'. The scoring function is an argument, so it is a generic scalar maximizer.",
+      "oracle_accounting": {
+        "caching_note": "No native cache. PMO's Oracle.score_smi provides one via mol_buffer keyed on canonical SMILES.",
+        "counts_rejected_proposals": "YES natively \u2014 reproduce() fills new_population to exactly population_size and calculate_scores scores all of them with no dedup before scoring, so duplicates DO consume oracle calls. Invalid children do NOT: the while loop only appends non-None children, so failed crossover or mutation is retried at zero oracle cost. Survivors are never re-scored. NOTE: under the PMO wrapper this changes \u2014 see the global fairness rules.",
+        "default_total_budget": "1020 in the paper's reference config. Under PMO the budget is 10,000 unique valid canonical SMILES with hyperparameters population_size 120, offspring_size 70, mutation_rate 0.067.",
+        "definition": "population_size x generations, plus the initial population. Paper: 'The population size is 20 and 50 generations are used (i.e. 1000 J(m) evaluations per run).' The code also scores the initial population, giving 20 x 51 = 1020; the paper rounds to 1000.",
+        "training_phase_oracle_calls": "ZERO. There is no training phase."
+      },
+      "provenance": {
+        "checkpoints": "None \u2014 there is no trained model.",
+        "code_reference": "master. Paper ESI cites github.com/jensengroup/GB-GA/tree/v0.0. Jensen, Chem. Sci. 10(12) 3567-3572 (2019), PMID 30996948, PMC6438151, CC BY 3.0. The benchmark-standard wrapper is main/graph_ga/ in https://github.com/wenhao-gao/mol_opt (PMO, MIT).",
+        "code_repository": "https://github.com/jensengroup/GB_GA",
+        "cpu_feasible": "YES, and it is the only method here with no GPU story at all. No torch/tensorflow/CUDA imports anywhere; parallelism is multiprocessing.Pool. Paper: 'the GB-GA calculations took 30 seconds each on a laptop.'",
+        "license": "MIT ('MIT License / Copyright (c) 2018 Jensen Group'; GitHub API spdx_id MIT). PMO wrapper also MIT.",
+        "paper_url": "https://doi.org/10.1039/c8sc05372c"
+      },
+      "smoke_cost": {
+        "confidence": "HIGH. RDKit-only, no checkpoints, no training, no version risk beyond RDKit itself.",
+        "estimate": "PROJECTION, NOT MEASURED. About 820 oracle calls per source, 4100 total. The frozen DRD2 oracle is a numpy RBF-SVM over folded count fingerprints, order milliseconds per molecule; RDKit crossover and mutation dominate at order 10 ms per child. Expect a few minutes wall on one core. Budget 0.1 CPU-core-hours.",
+        "plan": "5 held-in sources, one-line seed file per source, population 120, offspring 70, 10 generations, one COMPOSE objective. Purpose: prove the scoring shim and the counter. NOT executed."
+      }
+    },
+    {
+      "adapter": {
+        "note": "Two distinct adapters are needed and must not be conflated: the PMO-wrapped 2.0-era model for oracle-efficiency parity, and REINVENT 4 for the staged-learning arm.",
+        "status": "environment_verified_not_built",
+        "work_items": [
+          "Adapter A (oracle efficiency): use PMO's main/reinvent through BaseOptimizer so the shared Oracle counter applies, with the COMPOSE goal language assigned via self.oracle.assign_evaluator. This gives comparability to published PMO numbers but is REINVENT 2.0 semantics.",
+          "Adapter B (staged learning): REINVENT 4 with a two-stage staged_learning.toml, Mol2Mol or LibInvent input, and the COMPOSE objective as a custom scoring component. This is the only external arm that natively changes objective mid-run and it must be run to be honest about the C4c claim.",
+          "Declare and record the oracle convention. REINVENT's native caching means its raw call count is not comparable to MARS's without adjustment.",
+          "Download and hash the Zenodo priors before any claim-bearing run.",
+          "Record which prior is used; the six Mol2Mol similarity variants are materially different models."
+        ]
+      },
+      "capabilities": {
+        "dynamic_goal_switching_native": {
+          "evidence": "REINVENT 4 has native staged (curriculum) learning that varies the scoring function within one run. Paper, Staged learning, verbatim: 'This is basically curriculum learning (CL) which in REINVENT 4 is implemented as a multi-stage RL. The main purpose is to allow the user to optimize a prior model conditioned on a calculated target profile by varying the scoring function in stages. ... Multiple stages can be provided at once (automatic CL). After each stage a checkpoint file is written to disk which can be used for the next stage (manual CL).' configs/staged_learning.toml ships [[stage]] blocks each with its own [stage.scoring] and chkpt_file.",
+          "note": "ESCALATED. This is the closest published thing to COMPOSE's mid-run goal change and a reviewer will raise it. It is PARTIAL rather than YES because (i) switching happens at stage boundaries triggered by max_score or max_steps, not at an arbitrary chosen step, (ii) what carries across the switch is the AGENT POLICY, not a realized molecular history \u2014 there is no in-flight molecule to continue from, and (iii) the agent must re-adapt by further RL steps after the switch, which is retraining.",
+          "verdict": "PARTIAL"
+        },
+        "intermediate_states_exposed": {
+          "evidence": "Generation is autoregressive over SMILES tokens: paper, Theory: 'All REINVENT 4 models consist of sequence-based neural network models that are parameterized to capture the probability of generating tokens t in an auto-regressive manner ... SMILES strings are generated iteratively by feeding the transformer with n-1 tokens to obtain the n-th token.' Intermediate states are token prefixes and are generally not parseable molecules. The only per-run trajectory is batch-level: a CSV written per RL epoch.",
+          "note": "Every pathwise metric is N/A. Treating a partially decoded SMILES prefix as an intermediate molecule is a forbidden adaptation under this protocol.",
+          "verdict": "NO"
+        },
+        "objective_specific_retraining": {
+          "evidence": "RL fine-tuning per objective is the method. Paper, Staged learning: 'Staged learning requires both a prior and an agent model. The prior is only being used as a reference ... The agent is the model that is being trained in the run.' Cost is batch_size x steps: the shipped configs/staged_learning.toml uses batch_size 64 with min_steps 25 and max_steps 100, i.e. at most 6400 scored molecules per stage. Under PMO the entire 10,000-call budget is consumed by RL fine-tuning (main/reinvent/run.py samples config['batch_size'] per step and calls self.oracle(smiles) until self.finish).",
+          "note": "The prior itself costs zero oracle calls \u2014 it is unsupervised likelihood pretraining on ChEMBL/PubChem. There is no zero-shot mode. An exact fixed fine-tuning cost is UNVERIFIED because it is whatever budget the user allocates.",
+          "verdict": "YES"
+        },
+        "pathwise_constraints_native": {
+          "evidence": "Two mechanisms, neither pathwise. (a) LibInvent's scaffold and LinkInvent's warheads are held fixed as the generator template, guaranteeing the fragment in the FINAL molecule; but generation is a single input-to-output step, so 'every intermediate state' has no referent, and this does not apply to the Reinvent or Mol2Mol modes. (b) The MatchingSubstructure component is a SOFT penalty, not a constraint: reinvent_plugins/components/RDKit/comp_matching_substructure.py is tagged @add_tag('__component', 'penalty') and returns 0.5 * (1.0 + match), i.e. 0.5 when the SMARTS is absent and 1.0 when present. Molecules lacking the substructure are still generated and still score nonzero. Custom alerts run the opposite direction: a SMARTS blocklist multiplying the score by 0 or 1.",
+          "note": "",
+          "verdict": "NO"
+        },
+        "restart_at_supplied_state_under_new_objective": {
+          "evidence": "Both halves exist natively and compose. A supplied molecule enters via Mol2Mol (or a scaffold via LibInvent), and a new objective is applied by writing a new [[stage]] scoring block and resuming from the checkpoint: paper, 'When a run terminates ... a checkpoint file representing the current state of the agent will be written to disk. This checkpoint can be reused as the agent later'; configs/staged_learning.toml: 'it is also possible to continue a run from any checkpoint file that is generated during the run (manual CL).'",
+          "note": "ESCALATED. Unlike MARS and GraphXForm, the restart is warm: the adapted policy survives the objective change.",
+          "verdict": "YES"
+        },
+        "source_conditioning": {
+          "evidence": "REINVENT 4 has four generators. Paper Fig. 4: 'Reinvent creates new molecules de novo i.e. from scratch, Libinvent decorates a scaffold, Linkinvent identifies a linker between two fragments and Mol2Mol optimizes molecules within a user defined similarity'; 'No input SMILES are needed for Reinvent, a scaffold is needed for Libinvent, two warheads for Linkinvent and an input molecule for Mol2Mol.'",
+          "note": "Important scope limits. LibInvent requires a scaffold WITH EXPLICIT ATTACHMENT POINTS, not an arbitrary complete molecule. Mol2Mol accepts a complete molecule but does not preserve it: 'importantly, the scaffold can change within the limits of the given similarity'. So exact single-molecule input exists, but only LibInvent and LinkInvent preserve the supplied fragment by construction.",
+          "verdict": "YES"
+        }
+      },
+      "citation_key": "NOT_IN_BIB \u2014 REINVENT 4 (Loeffler et al. 2024, doi 10.1186/s13321-024-00812-5) has no entry in paper_iclr_stochastic_rewriting/references.bib and must be added before it is cited. The PMO wrapper is gao2022pmo, which IS in the bib; do not use gao2022pmo as the citation for REINVENT 4 capabilities.",
+      "classification": {
+        "C4a_static_optimization": "MUST_RUN",
+        "C4b_exact_target": "CONTEXT_ONLY",
+        "C4c_retargeting": "MUST_RUN",
+        "C4d_pathwise": "CONTEXT_ONLY"
+      },
+      "edit_budget": "N/A. There are no molecule-to-molecule edits; a generation is a full SMILES decode. Steps and batch size are the only budget knobs.",
+      "fairness_contract": {
+        "matched_quantity": "Property-oracle calls under one declared convention, plus the step count. REINVENT is the method where the convention is most consequential: it natively caches and its diversity filter zero-scores repeats, so its raw oracle count is systematically lower than MARS's for the same amount of work. Reporting both methods' raw counts side by side without stating the convention would be misleading. Edit budget is N/A.",
+        "n_a_metrics": "All pathwise metrics; all intermediate-state metrics; edit-count metrics. Same-prefix metrics are N/A at the molecular level but MEASURABLE at the policy level, and the distinction must be printed rather than elided.",
+        "not_fair_because": "Three things. (1) The whole budget is objective-specific RL fine-tuning, which COMPOSE does not pay because R_theta is frozen; that asymmetry is the claim under test and must not be normalised away. (2) It has no intermediate molecular states, so every pathwise and same-prefix metric is N/A rather than zero. (3) PMO ranks REINVENT first of 25 methods by summed AUC top-10 (14.196), so this is a strong baseline and COMPOSE should not expect to win C4a by default. PMO's own caution applies: 'REINVENT's performance is highly dependent on sigma ... we suggest reoptimizing the hyper-parameters whenever the testing environment is changed' \u2014 so using PMO's tuned sigma on a COMPOSE objective is itself a deviation to record."
+      },
+      "id": "REINVENT",
+      "method_verdict": "MUST_RUN",
+      "native_task": "Policy-gradient reinforcement learning that biases a generative SMILES policy toward a user-defined aggregation of scoring functions. REINVENT 4 paper, Methods: 'Reinforcement Learning (RL) is the main molecule optimization method in REINVENT'; 'a molecule is optimized with respect to a user defined aggregation of scoring functions'. It optimizes a distribution over molecules (the agent weights), not a designated molecule.",
+      "oracle_accounting": {
+        "caching_note": "REINVENT caches per scoring component by design. Its diversity filter additionally zero-scores every repeat of a canonical SMILES globally, which is a behaviour change, not just an accounting one.",
+        "counts_rejected_proposals": "NO natively. Paper: 'Scores for each SMILES string will be cached on a per-component basis to avoid the re-computation of scores. ... Duplicates are marked as such and handled by the caching mechanism', and 'SMILES that do not pass those filters will not be subjected to score evaluation and consequently all component scores will be zero.' Every sampled molecule occupies a batch slot and receives a score value, but the oracle is not invoked for it. Under PMO the same effective rule applies from the other side (Oracle.score_smi counts unique valid canonical SMILES).",
+        "default_total_budget": "No native budget concept. Shipped example: batch_size 64, min_steps 25, max_steps 100 per stage, so at most 6400 scored molecules per stage, summed over stages. Under PMO: 10,000 unique valid canonical SMILES, hyperparameters learning_rate 0.0005, batch_size 64, sigma 500, experience_replay 24.",
+        "definition": "REINVENT counts STEPS, not oracle calls. Molecules scored per step equals batch_size. The scoring component is invoked only on valid, non-duplicate, non-filtered, non-cached SMILES: reinvent/scoring/scorer.py computes valid_mask = np.logical_and(invalid_mask, duplicate_mask), and compute_scores.py documents 'get the smiles that need to be scored in this call \u2014 this is all inputs except for masked smiles or those in cache'.",
+        "training_phase_oracle_calls": "ALL of them. There is no separate search phase: the RL fine-tuning IS the optimization, so the entire budget is training-phase."
+      },
+      "provenance": {
+        "checkpoints": "Public priors on Zenodo, DOI 10.5281/zenodo.15641296 (latest-version DOI 10.5281/zenodo.20701824, license apache2.0): libinvent.prior, linkinvent.prior, pepinvent.prior, reinvent_pubchem.prior, libinvent_transformer_pubchem.prior, linkinvent_transformer_pubchem.prior. Priors are trained on ChEMBL 25/27/28 and PubChem; the Mol2Mol PubChem prior is reported as trained on over 200 billion pairs. PMO ships its own data/Prior.ckpt for the 2.0-era model.",
+        "code_reference": "REINVENT 4: Loeffler et al., J. Cheminform. 2024, PMC10882833. REINVENT 2.0: Blaschke et al., JCIM 2020, DOI 10.1021/acs.jcim.0c00915, repo https://github.com/MolecularAI/Reinvent (license UNVERIFIED). CRITICAL: the PMO benchmark's main/reinvent is a REINVENT 2.0-era Olivecrona-style RNN reimplementation and does NOT wrap REINVENT 4, so the staged-learning and Mol2Mol capabilities below are absent from the PMO-benchmarked configuration.",
+        "code_repository": "https://github.com/MolecularAI/REINVENT4",
+        "cpu_feasible": "VERIFIED FEASIBLE (2026-08-13 probe). requires-python >=3.11; installs and imports on python 3.14 with torch 2.12.0, cuda_available False. All staged-learning modules import. One packaging bug: scipy is undeclared but imported at reinvent/runmodes/utils/plot.py:3, so a clean install raises ModuleNotFoundError until scipy is added.",
+        "license": "Apache-2.0 for REINVENT 4 (paper: 'released under the permissive Apache 2.0 license'; GitHub API spdx_id Apache-2.0). REINVENT 2.0 repository license UNVERIFIED.",
+        "paper_url": "https://doi.org/10.1186/s13321-024-00812-5"
+      },
+      "smoke_cost": {
+        "confidence": "MEDIUM-HIGH for adapter A (PMO's runner is self-contained and CPU-native). MEDIUM for adapter B (REINVENT 4 is a larger modern stack; the CPU path is documented but not benchmarked).",
+        "estimate": "PROJECTION, NOT MEASURED. Adapter A: an Olivecrona-style RNN sampling 64 SMILES of ~60 tokens per step on CPU, order seconds per step; ~20 steps per source gives a few minutes each, so budget 0.3 CPU-core-hours for 5 sources plus a small prior download. Adapter B: transformer priors are larger; budget 0.5-1.0 CPU-core-hours plus the Zenodo prior downloads. Total 1.0-1.5 CPU-core-hours.",
+        "plan": "Two smokes. (A) PMO-wrapped REINVENT on 5 held-in sources at a reduced budget (~1000 oracle calls each), device cpu, to prove the shared counter and the goal shim. (B) REINVENT 4 two-stage staged_learning.toml on 2-3 sources, batch 64, 25 steps per stage, device cpu, to prove the mid-run objective switch executes and to measure the post-switch re-adaptation cost. NOT executed."
+      }
+    }
+  ],
+  "near_misses": [
+    {
+      "axis": "restart_at_supplied_state_under_new_objective",
+      "evidence": "main.py mols_init path; sampler.py Sampler.sample signature; no torch.save reachable for the editor; sampler.py T = max(T, 1e-2) floor.",
+      "method": "MARS",
+      "why_not": "Stock code restarts from the supplied molecule but resets the proposal, the imitation dataset and the annealing counter; there is no remaining-budget notion."
+    },
+    {
+      "axis": "pathwise_constraints_native",
+      "evidence": "Exhaustive grep for mask|constrain|scaffold|substruct|motif|MolFromSmarts over the official repo returns only training-loss masks in editor_basic.py; common/chem.py check_validity is the only per-proposal filter.",
+      "method": "MARS",
+      "why_not": "MARS AFFORDS pathwise enforcement, because every chain state is a complete molecule and a proposal filter could reject motif-breaking edits. But no such mechanism exists in the official code, so enforcing one is our modification and must be reported as a deviation. docs/RELATED_WORK_MATRIX.md currently marks MARS pathwise as yes; that cell is defensible under an affordance reading and not under a released-code reading. It was deliberately NOT changed here \u2014 see DECISION_LOG."
+    },
+    {
+      "axis": "pathwise_constraints_native",
+      "evidence": "molecule_design.py::update_action_mask exhaustive mask list; molecule_evaluator.py::infeasible_by_special_constraints asserted on mol.synthesis_done.",
+      "method": "GraphXForm",
+      "why_not": "Per-step masking is genuine but cannot express a labeled subgraph; the paper's structural constraints are a terminal minus-infinity filter in the shipped code, and no SMARTS or substructure matching exists in the repository."
+    },
+    {
+      "axis": "restart_at_supplied_state_under_new_objective",
+      "evidence": "config.start_from_smiles dispatch in core/gumbeldore_dataset.py; main.py train_for_one_epoch gradient loop; objective_type read once at evaluator construction.",
+      "method": "GraphXForm",
+      "why_not": "start_from_smiles plus a new objective_type works, but the rerun needs a fresh per-objective fine-tuning loop, so the post-switch cost includes retraining."
+    },
+    {
+      "axis": "constructive_only_action_space",
+      "evidence": "Action space is AddAtom, AddBond, DontChange (arXiv:2411.01667 section 2.1); section 3.3.3 defers removal to future work; molecule_design.py::update_action_mask permits new bonds to any seed atom retaining free valence.",
+      "method": "GraphXForm",
+      "why_not": "Because no atom or bond can ever be removed, a seed structure's atoms and bonds persist in every subsequent state automatically. That LOOKS like motif preservation but is a consequence of a restricted action space, not a constraint; and it is only topological \u2014 a seed hydroxyl oxygen with free valence can acquire a second bond and become an ether, so the moiety's chemical identity is not guaranteed."
+    },
+    {
+      "axis": "source_conditioning",
+      "evidence": "sample_forward_bridge_batch(X_0=X_0, E_0=E_0, ...); y = torch.zeros(size=(1, 0)) in every dataset file; section F.2.2 on learned coupling.",
+      "method": "DDSBM",
+      "why_not": "A specific source graph is transported, but the network never sees a target and the conditioning channel y is a zero-width tensor; the target lives in the weights, so this is distribution transport, not per-molecule conditioning."
+    },
+    {
+      "axis": "variable_cardinality",
+      "evidence": "jointmol_dataset.py padding loop with types['X'] and the comment 'since we pad all atoms, n_nodes distribution is 1 at max_num_nodes'; atom_decoder = ['X'] + ...; configs/model/discrete.yaml transition: uniform; rdkit_functions.py::delete_dummy_atoms.",
+      "method": "DDSBM",
+      "why_not": "Not a COMPOSE-claim near miss but a correction that goes AGAINST a COMPOSE framing, recorded here so it is not lost. Atom addition and deletion ARE effectively supported: molecules are padded to the dataset-wide maximum with a first-class dummy atom type X and the uniform CTMC flips slots C->X and X->C, so effective molecule size varies inside a fixed tensor. docs/RELATED_WORK_MATRIX.md marks DDSBM var-card and birth/death as no; on this evidence both should be partial with the padded-array caveat."
+    },
+    {
+      "axis": "intermediate_states_exposed",
+      "evidence": "arXiv:2302.04040 section 4.1 'no fragment removal actions' and 'F(s) = R(s) = 0 for non-terminal state'; mol_mdp_ext.py mol property.",
+      "method": "HN_GFN",
+      "why_not": "States are chemically assembled but non-terminal with open attachment stems, reward is terminal-only, and the sequence is a construction path from an empty graph rather than an edit path from a source."
+    },
+    {
+      "axis": "source_conditioning",
+      "evidence": "GB_GA.py::make_initial_population random.choice with replacement; abstract 'The molecules found by the GB-GA bear little resemblance to the molecules used to construct the initial mating pool'; nearest-ZINC Tanimoto 0.27 and 0.12.",
+      "method": "GraphGA",
+      "why_not": "A one-line SMILES file seeds every individual with the same molecule, but there is no source concept in the method and the source is explicitly not preserved."
+    },
+    {
+      "axis": "intermediate_states_exposed",
+      "evidence": "GB_GA.py::reproduce returns only the child, the parent debug print is commented out, and high_scores stores one (best_score, best_smiles) tuple per generation.",
+      "method": "GraphGA",
+      "why_not": "Every individual is a complete molecule, but the lineage is a two-parent DAG that the code does not persist, and the only logged trajectory is a best-so-far curve. There is no molecule-to-molecule edit path to score pathwise metrics on."
+    },
+    {
+      "axis": "restart_at_supplied_state_under_new_objective",
+      "evidence": "GB_GA.GA(args) unpacks a single scoring_function; make_initial_population reads a SMILES file.",
+      "method": "GraphGA",
+      "why_not": "Mechanically possible by writing the final population out as a seed file and passing a new scoring_function, but it is not a provided feature and nothing in the paper or repository describes it."
+    },
+    {
+      "axis": "dynamic_goal_switching_native",
+      "evidence": "REINVENT 4 paper section 'Staged learning'; configs/staged_learning.toml [[stage]] blocks with per-stage max_score and chkpt_file.",
+      "method": "REINVENT",
+      "why_not": "Staged learning is a genuine native mid-run objective change, but it re-targets a policy rather than a realized molecule, fires at stage boundaries set by max_score or max_steps rather than at an arbitrary step, and requires further RL adaptation after the switch."
+    }
+  ],
+  "purpose": "Records, for each external method, which COMPOSE Claim-4 sub-capability it is a valid comparator for, what matched budget means for it, and where the comparison stops being fair. Every capability cell carries a primary source or is marked UNVERIFIED. This registry contains no results and authorises no run.",
+  "registry_id": "compose-external-baseline-qualification-v3",
+  "schema": "compose.baseline_qualification",
+  "schema_version": 3,
   "smoke_plan": {
+    "conventional_suite": "docs/workstreams/baseline-qualification/CONVENTIONAL_SUITE.md -- five tasks frozen 2026-08-13 before any COMPOSE-versus-baseline outcome",
     "definition": "A held-in smoke is 3-5 held-in source molecules, one objective, and the smallest budget at which the method's own loop runs end to end. Its only purpose is to prove the adapter executes, the frozen COMPOSE oracle is being called, and the oracle counter is wired. A smoke result is SMOKE_HELD_IN and can never be cited for or against any claim. NOTHING BELOW HAS BEEN EXECUTED; every figure is a projection.",
-    "sources": "3-5 held-in sources per method, drawn from held-in data only, never from the sealed panel or any confirmatory reserve",
     "executed": false,
-    "oracle_accounting_harness_stress_test": {
-      "title": "ORACLE-ACCOUNTING HARNESS STRESS TEST — PASS",
+    "fairness_matrix": "docs/workstreams/baseline-qualification/FAIRNESS_MATRIX.md -- method x task, native/adapted/inappropriate; 6 of 35 cells are native and 6 are inappropriate",
+    "graph_ga_held_in_smoke": {
+      "artifact": "diagnostics/baselines/graph_ga_held_in_smoke.json",
+      "decisive_incompatibility": "GB-GA's roulette selection computes score/sum(scores) and feeds it to np.random.choice(p=...), so the objective MUST be non-negative; upstream's own logP_max clamps for exactly this reason. The COMPOSE developability margin is negative for the ENTIRE initial population -- which is why headroom exists -- so the clamp maps every individual to 0.0 and calculate_normalized_fitness raises ZeroDivisionError. MEASURED, not inferred. GraphGA is therefore classified INAPPROPRIATE for task T2.",
+      "measured_findings": [
+        "GB-GA natively requests ~30% duplicates: 120 oracle_requests for 92 unique valid canonical evaluations, demand ratio 1.30.",
+        "Two undocumented globals crossover.average_size and crossover.size_stdev are REQUIRED. Unset, mol_OK raises NameError into a bare except, every candidate is rejected, crossover always returns None, and reproduce()'s unbounded while loop spins forever with no error message. Upstream sets them only in its GA_logP.py driver.",
+        "Those globals impose a soft Gaussian size prior on offspring and are therefore a FAIRNESS PARAMETER: panel-derived (25.0/4.36) versus upstream ZINC (39.15/3.50) moved mean endpoint heavy-atom count from 14.65 to 16.25.",
+        "An oracle budget does NOT bound GB-GA's runtime: failed crossovers and mutations cost no oracle calls, so a wall-clock guard is required.",
+        "GB-GA shrank molecules from a source mean of 27.6 heavy atoms to an endpoint mean of 14.65 on the developability objective."
+      ],
+      "reproduced_published_behaviour": "Upstream's accounting identity oracle_requests == population_size*(generations+1) reproduced exactly (120 = 20*6). The paper's claim that molecules found 'bear little resemblance to the molecules used to construct the initial mating pool' reproduced: median nearest-seed ECFP4 Tanimoto 0.236 against the paper's reported 0.27.",
       "status": "PASS, SMOKE_HELD_IN, executed 2026-08-13",
-      "artifact": "diagnostics/baselines/oracle_accounting_harness_stress_test.json",
+      "what_it_is": "The REAL vendored upstream GB-GA (commit 4b49f182, byte-identical, MIT) on 5 held-in sources against the frozen COMPOSE developability objective under three-counter accounting. NOT a GraphGA quality measurement and NOT a COMPOSE comparison."
+    },
+    "hard_constraints_observed": [
+      "No Modal run was launched.",
+      "No heavy or GPU dependency was installed.",
+      "No held-out or sealed data were opened.",
+      "No COMPOSE task, goal language, panel or budget was altered."
+    ],
+    "oracle_accounting_harness_stress_test": {
       "THIS_IS_NOT_A_GRAPHGA_RESULT": "Upstream GB-GA was never vendored and nothing external was installed. The candidate stream is GA-SHAPED and adversarial by construction (BRICS recombination, survivor rescores, alternate SMILES spellings, malformed strings) and exists only to drive the accountant. Do not cite this as a GraphGA smoke, a GraphGA result, or evidence about GraphGA's behaviour.",
-      "sources": "5 held-in sources from diagnostics/retarget_calibration_cohort.json, cohort e402e318fd9540fb51fc93c7481094beec4c5f968a582f7349d6359f24e19a5f, pool 'held-in training sources only'",
+      "artifact": "diagnostics/baselines/oracle_accounting_harness_stress_test.json",
       "checks_passed": [
         "canonicalization collapses equivalent SMILES spellings to one key",
         "duplicates charge oracle_requests and not unique_valid_canonical_evaluations",
@@ -678,30 +695,29 @@
         "the counting conventions disagree in the predicted direction",
         "the counter identity oracle_requests == unique_valid_canonical_evaluations + duplicate_requests + failed_proposals holds in every run"
       ],
-      "measured_cost": "well under one CPU-second for all three runs combined, against a 0.1 CPU-core-hour envelope. The plumbing is free; the cost of this lane remains dependency rot.",
       "environment_caveat": "Run on rdkit 2025.09.6, NOT the production pin 2024.3.5. Recorded in the artifact as pin_matches_production false. Its canonical keys must not be reused for any claim-bearing comparison; see CLAUDE.md on catalog drift.",
+      "measured_cost": "well under one CPU-second for all three runs combined, against a 0.1 CPU-core-hour envelope. The plumbing is free; the cost of this lane remains dependency rot.",
+      "next": "HOLD. Per the main workstream, do not run external baseline sweeps and do not launch anything on Modal. Local adapter preparation \u2014 vendoring, environment files, wrapper code, local tests \u2014 is permitted but was not started, because Lane 1 may reopen the base process.",
       "required_before_any_claim_bearing_graphga_comparison": [
         "the actual upstream GB-GA implementation vendored",
         "the production RDKit pin 2024.3.5, or an explicitly isolated environment whose canonicalization is reconciled against it",
         "the real algorithm terminating against every counter"
       ],
-      "next": "HOLD. Per the main workstream, do not run external baseline sweeps and do not launch anything on Modal. Local adapter preparation — vendoring, environment files, wrapper code, local tests — is permitted but was not started, because Lane 1 may reopen the base process."
+      "sources": "5 held-in sources from diagnostics/retarget_calibration_cohort.json, cohort e402e318fd9540fb51fc93c7481094beec4c5f968a582f7349d6359f24e19a5f, pool 'held-in training sources only'",
+      "status": "PASS, SMOKE_HELD_IN, executed 2026-08-13",
+      "title": "ORACLE-ACCOUNTING HARNESS STRESS TEST \u2014 PASS"
     },
     "recommended_order": [
-      "DONE — ORACLE-ACCOUNTING HARNESS STRESS TEST, PASS. See oracle_accounting_harness_stress_test above. This is NOT a GraphGA result. HOLD HERE.",
-      "GraphGA proper — 0.1 CPU-core-hours, HIGH confidence, RDKit-only. NOT STARTED: needs upstream GB-GA vendored and the production RDKit pin reconciled, and the lane is on HOLD.",
-      "REINVENT adapter A (PMO-wrapped) — 0.3 CPU-core-hours, reuses the same shared-counter pattern.",
-      "MARS — 1.5 CPU-core-hours including the one-time ChEMBL vocabulary build; LOW confidence on the 2021 environment.",
-      "GraphXForm — 2-4 CPU-core-hours plus a 347 MB checkpoint; MEDIUM confidence.",
-      "REINVENT adapter B (REINVENT 4 staged learning) — 0.5-1.0 CPU-core-hours; this is the arm that tests the C4c escalation and is worth more than the other four combined.",
-      "DDSBM and HN-GFN — NOT RUNNABLE CPU-only. No smoke planned."
+      "DONE \u2014 ORACLE-ACCOUNTING HARNESS STRESS TEST, PASS. See oracle_accounting_harness_stress_test above. This is NOT a GraphGA result. HOLD HERE.",
+      "GraphGA proper \u2014 0.1 CPU-core-hours, HIGH confidence, RDKit-only. NOT STARTED: needs upstream GB-GA vendored and the production RDKit pin reconciled, and the lane is on HOLD.",
+      "REINVENT adapter A (PMO-wrapped) \u2014 0.3 CPU-core-hours, reuses the same shared-counter pattern.",
+      "MARS \u2014 1.5 CPU-core-hours including the one-time ChEMBL vocabulary build; LOW confidence on the 2021 environment.",
+      "GraphXForm \u2014 2-4 CPU-core-hours plus a 347 MB checkpoint; MEDIUM confidence.",
+      "REINVENT adapter B (REINVENT 4 staged learning) \u2014 0.5-1.0 CPU-core-hours; this is the arm that tests the C4c escalation and is worth more than the other four combined.",
+      "DDSBM and HN-GFN \u2014 NOT RUNNABLE CPU-only. No smoke planned."
     ],
-    "total_estimate": "~4.4-6.9 CPU-core-hours of compute across the four runnable methods, plus one-off downloads of roughly 350-500 MB. At a nominal Modal CPU rate of about USD 0.135 per core-hour — AN ASSUMPTION, not a figure verified from this repository — that is under USD 1 of compute. The real cost of this lane is not compute: it is container-build and dependency-rot debugging, concentrated in MARS (2021 torch/DGL stack) and HN-GFN (broken BoTorch import). Budget engineering time, not credits.",
-    "hard_constraints_observed": [
-      "No Modal run was launched.",
-      "No heavy or GPU dependency was installed.",
-      "No held-out or sealed data were opened.",
-      "No COMPOSE task, goal language, panel or budget was altered."
-    ]
-  }
+    "sources": "3-5 held-in sources per method, drawn from held-in data only, never from the sealed panel or any confirmatory reserve",
+    "total_estimate": "~4.4-6.9 CPU-core-hours of compute across the four runnable methods, plus one-off downloads of roughly 350-500 MB. At a nominal Modal CPU rate of about USD 0.135 per core-hour \u2014 AN ASSUMPTION, not a figure verified from this repository \u2014 that is under USD 1 of compute. The real cost of this lane is not compute: it is container-build and dependency-rot debugging, concentrated in MARS (2021 torch/DGL stack) and HN-GFN (broken BoTorch import). Budget engineering time, not credits."
+  },
+  "workstream": "D \u2014 external-baseline qualification and adapter readiness"
 }
