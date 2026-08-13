@@ -1,0 +1,93 @@
+{
+  "index": 17,
+  "history": "D",
+  "source": "CC(=NNC(=O)c1ccc(O)nn1)c1cccnc1",
+  "start_key": "CC(=NNC(=O)c1ccc(O)nn1)c1cccnc1",
+  "switch_state": "CC(=PNC(=O)c1nnccc1Br)c1cccnc1",
+  "b_worst_at_switch": -2.690086962366025,
+  "b_mean_at_switch": -0.37119968995501806,
+  "b_success_at_switch": false,
+  "arms": {
+    "continue_A": {
+      "landing": "CC(=PNC(=O)c1cccnn1)c1cnccc1Br",
+      "b_worst_margin": -2.3911020663347258,
+      "b_mean_margin": -0.27153805794458497,
+      "b_success": false,
+      "p_success": false,
+      "d_success": true,
+      "overrides": null,
+      "trajectory": [
+        "CC(=PNC(=O)c1nnccc1Br)c1cccnc1",
+        "CC(=PNC(=O)c1cccnn1)c1cnccc1Br",
+        "CC(=PNC(=O)c1nnccc1Br)c1cccnc1",
+        "CC(=PNC(=O)c1cccnn1)c1cnccc1Br"
+      ]
+    },
+    "greedy_retarget": {
+      "landing": "[SH4]=c1[nH]pc2c3cncc(c3C2)c2cnnc1c2Br",
+      "b_worst_margin": -1.114729799899937,
+      "b_mean_margin": -0.319141763238387,
+      "b_success": false,
+      "p_success": false,
+      "d_success": false,
+      "overrides": null,
+      "trajectory": [
+        "CC(=PNC(=O)c1nnccc1Br)c1cccnc1",
+        "Cc1p[nH]c(=O)c2nncc(c2Br)c2cncc1c2",
+        "O=c1[nH]pc2c3cncc(c3C2)c2cnnc1c2Br",
+        "[SH4]=c1[nH]pc2c3cncc(c3C2)c2cnnc1c2Br"
+      ]
+    },
+    "verified_retarget": {
+      "landing": "O=C(NP=C1CN2CCCC1C2)c1cnccc1Br",
+      "b_worst_margin": -0.3536786949934592,
+      "b_mean_margin": 0.3512143653647987,
+      "b_success": false,
+      "p_success": false,
+      "d_success": true,
+      "overrides": 1,
+      "trajectory": [
+        "CC(=PNC(=O)c1nnccc1Br)c1cccnc1",
+        "CC(=PNC(=O)c1nnccc1Br)C1CCCNC1",
+        "O=C(NP=C1CN2CCCC1C2)c1nnccc1Br",
+        "O=C(NP=C1CN2CCCC1C2)c1cnccc1Br"
+      ]
+    },
+    "restart": {
+      "landing": "CC1=NNC(=O)c2npc(O)cc2C2CCNCC12",
+      "b_worst_margin": -0.7701642158146229,
+      "b_mean_margin": -0.15916557099528453,
+      "b_success": false,
+      "p_success": false,
+      "d_success": true,
+      "overrides": 1,
+      "trajectory": [
+        "CC(=NNC(=O)c1ccc(O)nn1)c1cccnc1",
+        "CC(=NNC(=O)c1ccc(O)nn1)C1CCCNC1",
+        "CC1=NNC(=O)c2nnc(O)cc2C2CCNCC12",
+        "CC1=NNC(=O)c2npc(O)cc2C2CCNCC12"
+      ]
+    },
+    "clairvoyant": {
+      "landing": "CCC1CN(C)CCC1c1cc(O)pnc1CN",
+      "b_worst_margin": 0.556348028021956,
+      "b_mean_margin": 0.6878262847540609,
+      "b_success": true,
+      "p_success": true,
+      "d_success": true,
+      "overrides": 2,
+      "trajectory": [
+        "CC(=NNC(=O)c1ccc(O)nn1)c1cccnc1",
+        "CC(=NNC(=O)c1ccc(O)nn1)C1CCCNC1",
+        "CC1=NNC(=O)c2nnc(O)cc2C2CCNCC12",
+        "CC1=NNC(=O)c2npc(O)cc2C2CCNCC12",
+        "CCC1CNCCC1c1cc(O)pnc1C(N)=O",
+        "CCC1CNCCC1c1cc(O)pnc1CN",
+        "CCC1CN(C)CCC1c1cc(O)pnc1CN"
+      ]
+    }
+  },
+  "distinct_landings": 5,
+  "kernel_calls": 117,
+  "seconds": 823.4
+}

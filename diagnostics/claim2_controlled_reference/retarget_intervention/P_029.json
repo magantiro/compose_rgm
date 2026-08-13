@@ -1,0 +1,93 @@
+{
+  "index": 29,
+  "history": "P",
+  "source": "CC(=O)N1CCOc2ccc(S(=O)(=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)cc21",
+  "start_key": "CC(=O)N1CCOc2ccc(S(=O)(=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)cc21",
+  "switch_state": "CC(=O)N1CCOc2c([IH4])cc([SH2](=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)c([IH4])c21",
+  "b_worst_at_switch": -1.3345636908144554,
+  "b_mean_at_switch": -1.018070864338293,
+  "b_success_at_switch": false,
+  "arms": {
+    "continue_A": {
+      "landing": "CC(=[SH4])N1CCOc2c([IH4])cc([SH2](=[PH3])NCC[SH2]3=CC=[IH]([SH](=O)=O)C=[IH2]3)c([IH4])c21",
+      "b_worst_margin": -1.512006943780747,
+      "b_mean_margin": -0.9819610562394353,
+      "b_success": false,
+      "p_success": false,
+      "d_success": false,
+      "overrides": null,
+      "trajectory": [
+        "CC(=O)N1CCOc2c([IH4])cc([SH2](=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)c([IH4])c21",
+        "CC(=O)N1CCOc2c([IH4])cc([SH2](=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=[IH2]3)c([IH4])c21",
+        "CC(=[SH4])N1CCOc2c([IH4])cc([SH2](=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=[IH2]3)c([IH4])c21",
+        "CC(=[SH4])N1CCOc2c([IH4])cc([SH2](=[PH3])NCC[SH2]3=CC=[IH]([SH](=O)=O)C=[IH2]3)c([IH4])c21"
+      ]
+    },
+    "greedy_retarget": {
+      "landing": "O=C1CC(C[SH2]2=IC=C(I(=O)=O)C=C2)N[SH2](=[PH3])c2cc([IH4])c3c(c2[IH4])N1CCO3",
+      "b_worst_margin": -0.7410398746417797,
+      "b_mean_margin": -0.3448677256563177,
+      "b_success": false,
+      "p_success": false,
+      "d_success": false,
+      "overrides": null,
+      "trajectory": [
+        "CC(=O)N1CCOc2c([IH4])cc([SH2](=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)c([IH4])c21",
+        "CC(=O)N1CCOc2c([IH4])cc([SH2](=[PH3])NCC[SH2]3=CC=C(I(=O)=O)C=C3)c([IH4])c21",
+        "CC(=O)N1CCOc2c([IH4])cc([SH2](=[PH3])NCC[SH2]3=IC=C(I(=O)=O)C=C3)c([IH4])c21",
+        "O=C1CC(C[SH2]2=IC=C(I(=O)=O)C=C2)N[SH2](=[PH3])c2cc([IH4])c3c(c2[IH4])N1CCO3"
+      ]
+    },
+    "verified_retarget": {
+      "landing": "O=C1CC(C[SH2]2=IC=C(I(=O)=O)C=C2)N[SH2](=[PH3])c2cc([IH4])c3c(c2[IH4])N1CCO3",
+      "b_worst_margin": -0.7410398746417797,
+      "b_mean_margin": -0.3448677256563177,
+      "b_success": false,
+      "p_success": false,
+      "d_success": false,
+      "overrides": 0,
+      "trajectory": [
+        "CC(=O)N1CCOc2c([IH4])cc([SH2](=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)c([IH4])c21",
+        "CC(=O)N1CCOc2c([IH4])cc([SH2](=[PH3])NCC[SH2]3=CC=C(I(=O)=O)C=C3)c([IH4])c21",
+        "CC(=O)N1CCOc2c([IH4])cc([SH2](=[PH3])NCC[SH2]3=IC=C(I(=O)=O)C=C3)c([IH4])c21",
+        "O=C1CC(C[SH2]2=IC=C(I(=O)=O)C=C2)N[SH2](=[PH3])c2cc([IH4])c3c(c2[IH4])N1CCO3"
+      ]
+    },
+    "restart": {
+      "landing": "CC(=O)N1CCOc2c(Cl)cc([SH2](=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)c(Cl)c21",
+      "b_worst_margin": -1.0124251059964602,
+      "b_mean_margin": -0.49033794330700414,
+      "b_success": false,
+      "p_success": false,
+      "d_success": false,
+      "overrides": 0,
+      "trajectory": [
+        "CC(=O)N1CCOc2ccc(S(=O)(=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)cc21",
+        "CC(=O)N1CCOc2c(Cl)cc(S(=O)(=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)cc21",
+        "CC(=O)N1CCOc2c(Cl)cc(S(=O)(=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)c(Cl)c21",
+        "CC(=O)N1CCOc2c(Cl)cc([SH2](=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)c(Cl)c21"
+      ]
+    },
+    "clairvoyant": {
+      "landing": "C=C(C)N1CCCC2CCC3(CC21)C(Cc1ccc([SH](=O)=O)c(F)c1)NS3(=O)=[PH3]",
+      "b_worst_margin": -0.2085366133448731,
+      "b_mean_margin": 0.09101291640304265,
+      "b_success": false,
+      "p_success": false,
+      "d_success": false,
+      "overrides": 2,
+      "trajectory": [
+        "CC(=O)N1CCOc2ccc(S(=O)(=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)cc21",
+        "CC(=O)N1CCOC2CCC(S(=O)(=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)CC21",
+        "C=C(C)N1CCOC2CCC(S(=O)(=[PH3])NCC[SH2]3=CC=C([SH](=O)=O)C=C3)CC21",
+        "C=C(C)N1CCOC2CCC(S(=O)(=[PH3])NCCc3ccc([SH](=O)=O)cc3)CC21",
+        "C=C(C)N1CCOC2CCC(S(=O)(=[PH3])NCCc3ccc([SH](=O)=O)c(F)c3)CC21",
+        "C=C(C)N1CCCC2CCC(S(=O)(=[PH3])NCCc3ccc([SH](=O)=O)c(F)c3)CC21",
+        "C=C(C)N1CCCC2CCC3(CC21)C(Cc1ccc([SH](=O)=O)c(F)c1)NS3(=O)=[PH3]"
+      ]
+    }
+  },
+  "distinct_landings": 4,
+  "kernel_calls": 139,
+  "seconds": 3601.8
+}

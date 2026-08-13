@@ -1,0 +1,12 @@
+{
+  "directed_edges": 151059,
+  "distinct_directed_edges": 144870,
+  "entries": 151059,
+  "label": "training_corpus_teacher_transitions",
+  "mutual_edge_fraction": 0.7333195278525575,
+  "mutual_pairs": 53118,
+  "schema": "compose.claim2.corpus_reversibility",
+  "seconds": 24.2,
+  "source_states": 106747,
+  "status": "DEVELOPMENT"
+}

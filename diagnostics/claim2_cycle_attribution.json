@@ -1,0 +1,411 @@
+{
+  "by_arm": {
+    "controlled_clairvoyant": {
+      "mean": {
+        "cancelled_edits": 0.0,
+        "cancelled_fraction": 0.0,
+        "committed_edits": 6.0,
+        "immediate_two_cycle_rate": 0.0,
+        "immediate_two_cycles": 0.0,
+        "inverse_family_pair_rate": 0.0,
+        "inverse_family_pairs": 0.0,
+        "inverse_family_pairs_that_cancelled": 0.0,
+        "longer_revisit_rate": 0.0,
+        "longer_revisits": 0.0,
+        "net_edits": 6.0
+      },
+      "net_displacement": {
+        "per_committed_edit": 0.13881919744382143,
+        "per_net_edit": 0.13881919744382143
+      },
+      "own_trajectory_reversibility": {
+        "directed_edges": 360,
+        "distinct_directed_edges": 242,
+        "label": "controlled_clairvoyant",
+        "mutual_edge_fraction": 0.0,
+        "mutual_pairs": 0,
+        "source_states": 231
+      },
+      "reversal_by_family": {},
+      "sources": 30,
+      "trajectories": 60
+    },
+    "controlled_continue_A": {
+      "mean": {
+        "cancelled_edits": 0.3,
+        "cancelled_fraction": 0.1,
+        "committed_edits": 3.0,
+        "immediate_two_cycle_rate": 0.09166666666666666,
+        "immediate_two_cycles": 0.18333333333333332,
+        "inverse_family_pair_rate": 0.0,
+        "inverse_family_pairs": 0.0,
+        "inverse_family_pairs_that_cancelled": 0.0,
+        "longer_revisit_rate": 0.0,
+        "longer_revisits": 0.0,
+        "net_edits": 2.7
+      },
+      "net_displacement": {
+        "per_committed_edit": 0.19563853658378205,
+        "per_net_edit": 0.23866821268105606
+      },
+      "own_trajectory_reversibility": {
+        "directed_edges": 180,
+        "distinct_directed_edges": 178,
+        "label": "controlled_continue_A",
+        "mutual_edge_fraction": 0.10112359550561797,
+        "mutual_pairs": 9,
+        "source_states": 178
+      },
+      "reversal_by_family": {},
+      "sources": 30,
+      "trajectories": 60
+    },
+    "controlled_greedy_prefix": {
+      "mean": {
+        "cancelled_edits": 0.0,
+        "cancelled_fraction": 0.0,
+        "committed_edits": 3.0,
+        "immediate_two_cycle_rate": 0.0,
+        "immediate_two_cycles": 0.0,
+        "inverse_family_pair_rate": 0.0,
+        "inverse_family_pairs": 0.0,
+        "inverse_family_pairs_that_cancelled": 0.0,
+        "longer_revisit_rate": 0.0,
+        "longer_revisits": 0.0,
+        "net_edits": 3.0
+      },
+      "net_displacement": {
+        "per_committed_edit": 0.2386558803740797,
+        "per_net_edit": 0.2386558803740797
+      },
+      "own_trajectory_reversibility": {
+        "directed_edges": 180,
+        "distinct_directed_edges": 178,
+        "label": "controlled_greedy_prefix",
+        "mutual_edge_fraction": 0.0,
+        "mutual_pairs": 0,
+        "source_states": 148
+      },
+      "reversal_by_family": {},
+      "sources": 30,
+      "trajectories": 60
+    },
+    "controlled_greedy_retarget": {
+      "mean": {
+        "cancelled_edits": 0.0,
+        "cancelled_fraction": 0.0,
+        "committed_edits": 3.0,
+        "immediate_two_cycle_rate": 0.0,
+        "immediate_two_cycles": 0.0,
+        "inverse_family_pair_rate": 0.0,
+        "inverse_family_pairs": 0.0,
+        "inverse_family_pairs_that_cancelled": 0.0,
+        "longer_revisit_rate": 0.0,
+        "longer_revisits": 0.0,
+        "net_edits": 3.0
+      },
+      "net_displacement": {
+        "per_committed_edit": 0.22299342189992527,
+        "per_net_edit": 0.22299342189992527
+      },
+      "own_trajectory_reversibility": {
+        "directed_edges": 180,
+        "distinct_directed_edges": 180,
+        "label": "controlled_greedy_retarget",
+        "mutual_edge_fraction": 0.0,
+        "mutual_pairs": 0,
+        "source_states": 180
+      },
+      "reversal_by_family": {},
+      "sources": 30,
+      "trajectories": 60
+    },
+    "controlled_restart": {
+      "mean": {
+        "cancelled_edits": 0.0,
+        "cancelled_fraction": 0.0,
+        "committed_edits": 3.0,
+        "immediate_two_cycle_rate": 0.0,
+        "immediate_two_cycles": 0.0,
+        "inverse_family_pair_rate": 0.0,
+        "inverse_family_pairs": 0.0,
+        "inverse_family_pairs_that_cancelled": 0.0,
+        "longer_revisit_rate": 0.0,
+        "longer_revisits": 0.0,
+        "net_edits": 3.0
+      },
+      "net_displacement": {
+        "per_committed_edit": 0.23473367937543255,
+        "per_net_edit": 0.23473367937543255
+      },
+      "own_trajectory_reversibility": {
+        "directed_edges": 180,
+        "distinct_directed_edges": 98,
+        "label": "controlled_restart",
+        "mutual_edge_fraction": 0.0,
+        "mutual_pairs": 0,
+        "source_states": 95
+      },
+      "reversal_by_family": {},
+      "sources": 30,
+      "trajectories": 60
+    },
+    "controlled_verified_retarget": {
+      "mean": {
+        "cancelled_edits": 0.0,
+        "cancelled_fraction": 0.0,
+        "committed_edits": 3.0,
+        "immediate_two_cycle_rate": 0.0,
+        "immediate_two_cycles": 0.0,
+        "inverse_family_pair_rate": 0.0,
+        "inverse_family_pairs": 0.0,
+        "inverse_family_pairs_that_cancelled": 0.0,
+        "longer_revisit_rate": 0.0,
+        "longer_revisits": 0.0,
+        "net_edits": 3.0
+      },
+      "net_displacement": {
+        "per_committed_edit": 0.22292340674804745,
+        "per_net_edit": 0.22292340674804745
+      },
+      "own_trajectory_reversibility": {
+        "directed_edges": 180,
+        "distinct_directed_edges": 180,
+        "label": "controlled_verified_retarget",
+        "mutual_edge_fraction": 0.0,
+        "mutual_pairs": 0,
+        "source_states": 180
+      },
+      "reversal_by_family": {},
+      "sources": 30,
+      "trajectories": 60
+    },
+    "empirical_family": {
+      "mean": {
+        "cancelled_edits": 0.125,
+        "cancelled_fraction": 0.020833333333333332,
+        "committed_edits": 6.0,
+        "immediate_two_cycle_rate": 0.0125,
+        "immediate_two_cycles": 0.0625,
+        "inverse_family_pair_rate": 0.2,
+        "inverse_family_pairs": 1.0,
+        "inverse_family_pairs_that_cancelled": 0.0625,
+        "longer_revisit_rate": 0.0,
+        "longer_revisits": 0.0,
+        "net_edits": 5.875
+      },
+      "net_displacement": {
+        "per_committed_edit": 0.12649431073748574,
+        "per_net_edit": 0.130901362019537
+      },
+      "own_trajectory_reversibility": {
+        "directed_edges": 96,
+        "distinct_directed_edges": 96,
+        "label": "empirical_family",
+        "mutual_edge_fraction": 0.020833333333333332,
+        "mutual_pairs": 1,
+        "source_states": 87
+      },
+      "reversal_by_family": {
+        "atom_delete": {
+          "committed": 16,
+          "rate": 0.0,
+          "undone_next_step": 0
+        },
+        "atom_insert": {
+          "committed": 17,
+          "rate": 0.0,
+          "undone_next_step": 0
+        },
+        "atom_restate": {
+          "committed": 30,
+          "rate": 0.0,
+          "undone_next_step": 0
+        },
+        "bond_reorder": {
+          "committed": 6,
+          "rate": 0.0,
+          "undone_next_step": 0
+        },
+        "bond_reroute": {
+          "committed": 14,
+          "rate": 0.0,
+          "undone_next_step": 0
+        },
+        "cycle_attach": {
+          "committed": 1,
+          "rate": 0.0,
+          "undone_next_step": 0
+        },
+        "cycle_insert": {
+          "committed": 8,
+          "rate": 0.0,
+          "undone_next_step": 0
+        },
+        "ring_system_restate": {
+          "committed": 4,
+          "rate": 0.25,
+          "undone_next_step": 1
+        }
+      },
+      "sources": 8,
+      "trajectories": 16
+    },
+    "r_theta": {
+      "mean": {
+        "cancelled_edits": 2.625,
+        "cancelled_fraction": 0.4375,
+        "committed_edits": 6.0,
+        "immediate_two_cycle_rate": 0.3,
+        "immediate_two_cycles": 1.5,
+        "inverse_family_pair_rate": 0.5625,
+        "inverse_family_pairs": 2.8125,
+        "inverse_family_pairs_that_cancelled": 1.5,
+        "longer_revisit_rate": 0.03125,
+        "longer_revisits": 0.1875,
+        "net_edits": 3.375
+      },
+      "net_displacement": {
+        "per_committed_edit": 0.0972727509562713,
+        "per_net_edit": 0.21289482245339722
+      },
+      "own_trajectory_reversibility": {
+        "directed_edges": 96,
+        "distinct_directed_edges": 85,
+        "label": "r_theta",
+        "mutual_edge_fraction": 0.4235294117647059,
+        "mutual_pairs": 18,
+        "source_states": 64
+      },
+      "reversal_by_family": {
+        "atom_delete": {
+          "committed": 4,
+          "rate": 0.25,
+          "undone_next_step": 1
+        },
+        "atom_insert": {
+          "committed": 5,
+          "rate": 0.4,
+          "undone_next_step": 2
+        },
+        "atom_restate": {
+          "committed": 4,
+          "rate": 0.0,
+          "undone_next_step": 0
+        },
+        "bond_reorder": {
+          "committed": 32,
+          "rate": 0.3125,
+          "undone_next_step": 10
+        },
+        "bond_reroute": {
+          "committed": 6,
+          "rate": 0.0,
+          "undone_next_step": 0
+        },
+        "cycle_attach": {
+          "committed": 5,
+          "rate": 0.2,
+          "undone_next_step": 1
+        },
+        "cycle_insert": {
+          "committed": 5,
+          "rate": 0.0,
+          "undone_next_step": 0
+        },
+        "ring_system_restate": {
+          "committed": 35,
+          "rate": 0.2857142857142857,
+          "undone_next_step": 10
+        }
+      },
+      "sources": 8,
+      "trajectories": 16
+    },
+    "uniform_canonical": {
+      "mean": {
+        "cancelled_edits": 0.0,
+        "cancelled_fraction": 0.0,
+        "committed_edits": 6.0,
+        "immediate_two_cycle_rate": 0.0,
+        "immediate_two_cycles": 0.0,
+        "inverse_family_pair_rate": 0.08750000000000001,
+        "inverse_family_pairs": 0.4375,
+        "inverse_family_pairs_that_cancelled": 0.0,
+        "longer_revisit_rate": 0.0,
+        "longer_revisits": 0.0,
+        "net_edits": 6.0
+      },
+      "net_displacement": {
+        "per_committed_edit": 0.12025579760481116,
+        "per_net_edit": 0.12025579760481116
+      },
+      "own_trajectory_reversibility": {
+        "directed_edges": 96,
+        "distinct_directed_edges": 96,
+        "label": "uniform_canonical",
+        "mutual_edge_fraction": 0.0,
+        "mutual_pairs": 0,
+        "source_states": 88
+      },
+      "reversal_by_family": {
+        "atom_delete": {
+          "committed": 3,
+          "rate": 0.0,
+          "undone_next_step": 0
+        },
+        "atom_insert": {
+          "committed": 40,
+          "rate": 0.0,
+          "undone_next_step": 0
+        },
+        "atom_restate": {
+          "committed": 30,
+          "rate": 0.0,
+          "undone_next_step": 0
+        },
+        "bond_reroute": {
+          "committed": 10,
+          "rate": 0.0,
+          "undone_next_step": 0
+        },
+        "cycle_attach": {
+          "committed": 2,
+          "rate": 0.0,
+          "undone_next_step": 0
+        },
+        "cycle_insert": {
+          "committed": 11,
+          "rate": 0.0,
+          "undone_next_step": 0
+        }
+      },
+      "sources": 8,
+      "trajectories": 16
+    }
+  },
+  "controlled_comparison_has_a_near_fixed_sign": "The controlled arms are DETERMINISTIC argmax-utility policies, which are monotone non-decreasing in utility, so an immediate two-cycle requires an exact utility tie and is close to structurally excluded. 'Control has less cycling than a stochastic sampler' is therefore largely definitional and is NOT clean evidence that control suppresses cycling. It is reported as context. The falsifiable comparison is r_theta versus empirical_family: both are stochastic samplers over the identical support, so a difference between them could have come out either way.",
+  "controlled_family_labels_unavailable": "controller runs do not record operator families, so controlled arms support state-level diagnostics only",
+  "corpus_census": {
+    "directed_edges": 151059,
+    "distinct_directed_edges": 144870,
+    "entries": 151059,
+    "label": "training_corpus_teacher_transitions",
+    "mutual_edge_fraction": 0.7333195278525575,
+    "mutual_pairs": 53118,
+    "schema": "compose.claim2.corpus_reversibility",
+    "seconds": 24.2,
+    "source_states": 106747,
+    "status": "DEVELOPMENT"
+  },
+  "corpus_mutual_edge_fraction": 0.7333195278525575,
+  "definitions_frozen_at_commit": "5c81818",
+  "not_computable_from_these_traces": [
+    "reverse_edge_probability R_theta(x|y): needs the successor row at y, which the smoke shards do not carry; recorded by the rollout app from the 36-source run onward"
+  ],
+  "preregistered_verdict": "inherited_reversibility",
+  "reference_cancelled_fraction": 0.4375,
+  "schema": "compose.claim2.cycle_attribution",
+  "shard_directory": "diagnostics/claim2_trajectory_smoke_shards/claim2_trajectory_smoke",
+  "status": "SMOKE_HELD_IN"
+}

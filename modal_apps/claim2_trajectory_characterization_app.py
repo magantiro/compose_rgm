@@ -192,7 +192,16 @@ def _runtime():
             model, state_of(key), TIME_POINT, row
         )
 
-    return row_for, cross_check, counter, failed, checkpoint.get("selected_step")
+    def cached(key: str) -> SuccessorRow | None:
+        """Row for ``key`` ONLY if already enumerated. Never spends a call.
+
+        This is what makes reverse-edge probability cost-neutral: after
+        committing x -> y, the row at y is already in the cache for every step
+        but the last, because the next step enumerates it anyway.
+        """
+        return cache.get(key)
+
+    return row_for, cross_check, cached, counter, failed, checkpoint.get("selected_step")
 
 
 @app.function(
@@ -219,7 +228,7 @@ def roll_source(task: dict[str, Any]) -> dict[str, Any]:
     from compose_v4.rewrite.kernel import canonical_state_key
 
     started = time.perf_counter()
-    row_for, cross_check, counter, failed, selected_step = _runtime()
+    row_for, cross_check, cached, counter, failed, selected_step = _runtime()
     horizon = int(task.get("horizon", HORIZON))
     seeds = tuple(task.get("seeds", SEEDS))
     budget = int(task.get("kernel_budget", DEFAULT_KERNEL_BUDGET))
@@ -260,6 +269,7 @@ def roll_source(task: dict[str, Any]) -> dict[str, Any]:
             families: list[list[str]] = []
             cells: list[list[str]] = []
             supports: list[int] = []
+            forward_probabilities: list[float] = []
             stop = "horizon"
             for step in range(horizon):
                 row = row_for(states[-1], budget)
@@ -283,6 +293,31 @@ def roll_source(task: dict[str, Any]) -> dict[str, Any]:
                 states.append(row.successor_keys[index])
                 families.append(list(row.families[index]))
                 cells.append(list(row.cells[index]) if row.cells else [])
+                # R_theta's own forward mass on the committed successor, for
+                # every arm. Needed to interpret the reverse edge below; on its
+                # own it is a BANNED comparison for the r_theta arm, where
+                # selector and scorer would be the same object.
+                forward_probabilities.append(float(row.reference_probabilities[index]))
+
+            # Reverse-edge probability R_theta(x_t | x_{t+1}): how much mass the
+            # learned law puts on going straight back. Read from the enumeration
+            # cache only, so it costs no extra kernel call; the final step has no
+            # cached successor row and is recorded as null rather than imputed.
+            reverse_probabilities: list[float | None] = []
+            for index in range(len(states) - 1):
+                successor_row = cached(states[index + 1])
+                if successor_row is None or successor_row.is_terminal:
+                    reverse_probabilities.append(None)
+                    continue
+                back = {
+                    key: probability
+                    for key, probability in zip(
+                        successor_row.successor_keys,
+                        successor_row.reference_probabilities,
+                    )
+                }
+                reverse_probabilities.append(back.get(states[index]))
+
             trajectories.append(
                 {
                     "arm": arm,
@@ -291,6 +326,8 @@ def roll_source(task: dict[str, Any]) -> dict[str, Any]:
                     "families": families,
                     "cells": cells,
                     "support_sizes": supports,
+                    "forward_probabilities": forward_probabilities,
+                    "reverse_probabilities": reverse_probabilities,
                     "committed_edits": len(states) - 1,
                     "stop_reason": stop,
                 }
@@ -363,6 +400,73 @@ def roll_source(task: dict[str, Any]) -> dict[str, Any]:
         "enumeration_failures": len(failed),
         "kernel_agrees": None if kernel_agreement is None else kernel_agreement["agrees"],
     }
+
+
+@app.function(
+    image=image,
+    cpu=4.0,
+    memory=32 * 1024,
+    timeout=2 * 60 * 60,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def corpus_reversibility() -> dict[str, Any]:
+    """Is the TRAINING REFERENCE PROCESS itself locally reversible?
+
+    This is the central causal question of the cycle attribution, and it costs
+    no kernel enumeration at all -- it reads the committed teacher transitions
+    and counts how often both ``x -> y`` and ``y -> x`` occur.
+
+    The two readings have opposite consequences:
+
+    * a highly mutual corpus means ``R_theta`` learned a locally reversible
+      reference process and its cycling is INHERITED, not pathological;
+    * a directional corpus means ``R_theta`` invented the reversibility, and
+      one-step likelihood is failing to compose into usable dynamics.
+
+    Counting is over DISTINCT directed edges so one heavily repeated transition
+    cannot dominate the statistic, and the held-out reserve sources are excluded
+    so this describes the training reference only.
+    """
+    import json as _json
+
+    from compose_v4.data.corpus_training_library import load_corpus_training_library
+    from compose_v4.experiments.claim2_cycle_attribution import reversibility_census
+
+    started = time.perf_counter()
+    artifact_volume.reload()
+    inputs = Path(RUN_ROOT) / "run_inputs"
+    paths = _json.loads((inputs / "RUN_PATHS.json").read_text())
+    resolution = _json.loads(
+        (inputs / "editing_v2_split_precedence_resolution.json").read_text()
+    )
+    library = load_corpus_training_library(
+        [Path(root) for root in paths["corpus_roots"]],
+        excluded_sources=resolution["excluded_source_keys"]["train"],
+        verify_state_roundtrip=False,
+    )
+    edges = [
+        (entry.teacher_fiber.source_key, entry.teacher_fiber.target_key)
+        for entry in library.entries
+    ]
+    census = reversibility_census(edges, label="training_corpus_teacher_transitions")
+    payload = {
+        "schema": "compose.claim2.corpus_reversibility",
+        "status": "DEVELOPMENT",
+        **census.to_json(),
+        "entries": len(library.entries),
+        "seconds": round(time.perf_counter() - started, 1),
+    }
+    out = Path(RUN_ROOT) / "claim2_corpus_reversibility.json"
+    out.write_text(_json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    artifact_volume.commit()
+    print(
+        f"corpus: {payload['entries']:,} entries, "
+        f"{payload['distinct_directed_edges']:,} distinct directed edges, "
+        f"{payload['mutual_pairs']:,} mutual pairs, "
+        f"mutual fraction {payload['mutual_edge_fraction']:.4f}",
+        flush=True,
+    )
+    return payload
 
 
 #: Fields that must match for an already-committed shard to be reused. A shard
@@ -466,9 +570,23 @@ def main(
     kernel_budget: int = DEFAULT_KERNEL_BUDGET,
     out_dir: str = "claim2_trajectory_smoke",
     status: str = "SMOKE_HELD_IN",
+    corpus_census: bool = False,
 ) -> None:
     """Launch the held-in characterization. Defaults are the 8-source smoke."""
     import subprocess
+
+    if corpus_census:
+        # No kernel enumeration, so this is cheap next to the rollout, and it is
+        # the measurement that decides whether R_theta's cycling is inherited
+        # from the reference process or invented by the model.
+        print("CORPUS REVERSIBILITY CENSUS -- the central causal question")
+        census = corpus_reversibility.remote()
+        print(
+            f"  {census['entries']:,} teacher transitions, "
+            f"{census['distinct_directed_edges']:,} distinct directed edges\n"
+            f"  mutual-edge fraction {census['mutual_edge_fraction']:.4f} "
+            f"({census['mutual_pairs']:,} mutual pairs)"
+        )
 
     panel = json.loads((ROOT / PANEL_FILE).read_text())
     law = json.loads((ROOT / SAMPLING_LAW_FILE).read_text())

@@ -1,0 +1,93 @@
+{
+  "index": 2,
+  "history": "P",
+  "source": "CC(=O)CCC(C)C1CCC2C3=C(CCC21C)C1(C)CCC(=O)C(C)C1CC3=O",
+  "start_key": "CC(=O)CCC(C)C1CCC2C3=C(CCC21C)C1(C)CCC(=O)C(C)C1CC3=O",
+  "switch_state": "CC1C(=O)CCC23CCC(Cc4cc4=O)C45CCC6C(=C2CCC64C)C(=O)CC135",
+  "b_worst_at_switch": -1.240708070758823,
+  "b_mean_at_switch": -0.3008009161433966,
+  "b_success_at_switch": false,
+  "arms": {
+    "continue_A": {
+      "landing": "CC12CCC34C(Cc5cc5=O)CCC56Cc7c(c7=O)C53CC(=[IH])C1=C6CCC24C",
+      "b_worst_margin": -0.9340902513021552,
+      "b_mean_margin": -0.3681699052089966,
+      "b_success": false,
+      "p_success": false,
+      "d_success": false,
+      "overrides": null,
+      "trajectory": [
+        "CC1C(=O)CCC23CCC(Cc4cc4=O)C45CCC6C(=C2CCC64C)C(=O)CC135",
+        "CC12CCC34C(Cc5cc5=O)CCC56CCC(=O)CC53CC(=O)C1=C6CCC24C",
+        "CC12CCC34C(Cc5cc5=O)CCC56Cc7c(c7=O)C53CC(=O)C1=C6CCC24C",
+        "CC12CCC34C(Cc5cc5=O)CCC56Cc7c(c7=O)C53CC(=[IH])C1=C6CCC24C"
+      ]
+    },
+    "greedy_retarget": {
+      "landing": "CC12CCC34C(Cc5cc5=O)CCC56Cc7c(c7=O)C53CC(=[IH3])C1=C6CCC24C",
+      "b_worst_margin": -0.9340902513021552,
+      "b_mean_margin": -0.2733012394624131,
+      "b_success": false,
+      "p_success": false,
+      "d_success": false,
+      "overrides": null,
+      "trajectory": [
+        "CC1C(=O)CCC23CCC(Cc4cc4=O)C45CCC6C(=C2CCC64C)C(=O)CC135",
+        "CC12CCC34C(Cc5cc5=O)CCC56CCC(=O)CC53CC(=O)C1=C6CCC24C",
+        "CC12CCC34C(Cc5cc5=O)CCC56Cc7c(c7=O)C53CC(=O)C1=C6CCC24C",
+        "CC12CCC34C(Cc5cc5=O)CCC56Cc7c(c7=O)C53CC(=[IH3])C1=C6CCC24C"
+      ]
+    },
+    "verified_retarget": {
+      "landing": "CC12CCC3=C4C(=O)CC56c7c(c7=O)CC35CCC(Cc3cc3=O)C16CCN42",
+      "b_worst_margin": -0.7581955330441805,
+      "b_mean_margin": 0.14122478162244403,
+      "b_success": false,
+      "p_success": false,
+      "d_success": true,
+      "overrides": 1,
+      "trajectory": [
+        "CC1C(=O)CCC23CCC(Cc4cc4=O)C45CCC6C(=C2CCC64C)C(=O)CC135",
+        "CC12CCC3=C4C(=O)CC56CC(=O)CCC35CCC(Cc3cc3=O)C16CCC42",
+        "CC12CCC3=C4C(=O)CC56c7c(c7=O)CC35CCC(Cc3cc3=O)C16CCC42",
+        "CC12CCC3=C4C(=O)CC56c7c(c7=O)CC35CCC(Cc3cc3=O)C16CCN42"
+      ]
+    },
+    "restart": {
+      "landing": "CC1C(=O)CCC23CCC(Cc4cc4=O)C45CCC6C(=C2CCC64C)C(=O)CC135",
+      "b_worst_margin": -1.240708070758823,
+      "b_mean_margin": -0.3008009161433966,
+      "b_success": false,
+      "p_success": false,
+      "d_success": false,
+      "overrides": 0,
+      "trajectory": [
+        "CC(=O)CCC(C)C1CCC2C3=C(CCC21C)C1(C)CCC(=O)C(C)C1CC3=O",
+        "CC(=O)CCC(C)C12CCC3C4=C(CCC31C)C1(C)CCC(=O)C(C)C12CC4=O",
+        "CC1C(=O)CCC2(C)C3=C4C(=O)CC12C1(C(C)Cc2cc2=O)CCC4C1(C)CC3",
+        "CC1C(=O)CCC23CCC(Cc4cc4=O)C45CCC6C(=C2CCC64C)C(=O)CC135"
+      ]
+    },
+    "clairvoyant": {
+      "landing": "CC(Cc1cc1=O)C1(C)CCN2C3=C4CCC21C=C1c2c(c2=O)C(CC3)C14C",
+      "b_worst_margin": -0.8255596654096827,
+      "b_mean_margin": -0.013790458535404329,
+      "b_success": false,
+      "p_success": false,
+      "d_success": true,
+      "overrides": 1,
+      "trajectory": [
+        "CC(=O)CCC(C)C1CCC2C3=C(CCC21C)C1(C)CCC(=O)C(C)C1CC3=O",
+        "CC(=O)CCC(C)C1CCC2C3=C4CCC21C=C1CC(=O)C(C)C(CC3=O)C14C",
+        "CC(=O)CCC(C)C1(C)CCC2C3=C4CCC21C=C1CC(=O)CC(CC3=O)C14C",
+        "CC(Cc1cc1=O)C1(C)CCC2C3=C4CCC21C=C1CC(=O)CC(CC3=O)C14C",
+        "CC(Cc1cc1=O)C1(C)CCC2C3=C4CCC21C=C1CC(=O)CC(CC3)C14C",
+        "CC(Cc1cc1=O)C1(C)CCC2C3=C4CCC21C=C1c2c(c2=O)C(CC3)C14C",
+        "CC(Cc1cc1=O)C1(C)CCN2C3=C4CCC21C=C1c2c(c2=O)C(CC3)C14C"
+      ]
+    }
+  },
+  "distinct_landings": 5,
+  "kernel_calls": 136,
+  "seconds": 2085.8
+}

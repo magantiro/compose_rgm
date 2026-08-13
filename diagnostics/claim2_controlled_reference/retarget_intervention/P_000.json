@@ -1,0 +1,93 @@
+{
+  "index": 0,
+  "history": "P",
+  "source": "Cc1ccccc1-c1noc(-c2cc3ccccc3oc2=O)n1",
+  "start_key": "Cc1ccccc1-c1noc(-c2cc3ccccc3oc2=O)n1",
+  "switch_state": "Cc1cc2c3ccc4[nH]c(=O)c5cc4c3c2cc1c1noc5n1",
+  "b_worst_at_switch": -1.412767414836416,
+  "b_mean_at_switch": -0.5687094161578518,
+  "b_success_at_switch": false,
+  "arms": {
+    "continue_A": {
+      "landing": "C=C1C2=c3cc(c(=O)[nH]c3=C)C(O)=NC(=N)c3cc2c1cc3C[SH3]",
+      "b_worst_margin": -0.3196882818069413,
+      "b_mean_margin": -0.06265109698865037,
+      "b_success": false,
+      "p_success": false,
+      "d_success": false,
+      "overrides": null,
+      "trajectory": [
+        "Cc1cc2c3ccc4[nH]c(=O)c5cc4c3c2cc1c1noc5n1",
+        "O=c1[nH]c2ccc3c4cc(C[SH3])c5cc4c3c2cc1c1nc5no1",
+        "C=C1c2cc(C[SH3])c3cc2c1c1cc(c(=O)[nH]c1=C)c1nc3no1",
+        "C=C1C2=c3cc(c(=O)[nH]c3=C)C(O)=NC(=N)c3cc2c1cc3C[SH3]"
+      ]
+    },
+    "greedy_retarget": {
+      "landing": "BCc1cc2c3cc1C(=N)N=C(O)c1cc(c(=C)[nH]c1=O)=C3C2=C",
+      "b_worst_margin": -0.5819116498248618,
+      "b_mean_margin": -0.2626209092075096,
+      "b_success": false,
+      "p_success": false,
+      "d_success": false,
+      "overrides": null,
+      "trajectory": [
+        "Cc1cc2c3ccc4[nH]c(=O)c5cc4c3c2cc1c1noc5n1",
+        "BCc1cc2c3ccc4[nH]c(=O)c5cc4c3c2cc1c1noc5n1",
+        "BCc1cc2c3cc1c1noc(n1)c1cc(c3C2=C)c(=C)[nH]c1=O",
+        "BCc1cc2c3cc1C(=N)N=C(O)c1cc(c(=C)[nH]c1=O)=C3C2=C"
+      ]
+    },
+    "verified_retarget": {
+      "landing": "C=C1C2=c3cc(c(=O)[nH]c3=C)C(O)=NC(=N)c3cc2c1cc3CC",
+      "b_worst_margin": -0.3196882818069413,
+      "b_mean_margin": 0.07469038808783322,
+      "b_success": false,
+      "p_success": false,
+      "d_success": true,
+      "overrides": 1,
+      "trajectory": [
+        "Cc1cc2c3ccc4[nH]c(=O)c5cc4c3c2cc1c1noc5n1",
+        "CCc1cc2c3ccc4[nH]c(=O)c5cc4c3c2cc1c1noc5n1",
+        "C=C1c2cc(CC)c3cc2c1c1cc(c(=O)[nH]c1=C)c1nc3no1",
+        "C=C1C2=c3cc(c(=O)[nH]c3=C)C(O)=NC(=N)c3cc2c1cc3CC"
+      ]
+    },
+    "restart": {
+      "landing": "B=C1Oc2cccc3c2C=C1C1=NC(=NC1)c1ccccc1C3",
+      "b_worst_margin": -0.6577514174898643,
+      "b_mean_margin": 0.08073270665101955,
+      "b_success": false,
+      "p_success": false,
+      "d_success": true,
+      "overrides": 1,
+      "trajectory": [
+        "Cc1ccccc1-c1noc(-c2cc3ccccc3oc2=O)n1",
+        "Cc1ccccc1C1=NCC(c2cc3ccccc3oc2=O)=N1",
+        "O=c1oc2cccc3c2cc1C1=NC(=NC1)c1ccccc1C3",
+        "B=C1Oc2cccc3c2C=C1C1=NC(=NC1)c1ccccc1C3"
+      ]
+    },
+    "clairvoyant": {
+      "landing": "NCCc1cccc2c1C=CC1=NC(=N[IH3]1)c1ccccc1C2",
+      "b_worst_margin": 0.45757869208717034,
+      "b_mean_margin": 0.4903582862071343,
+      "b_success": true,
+      "p_success": true,
+      "d_success": true,
+      "overrides": 2,
+      "trajectory": [
+        "Cc1ccccc1-c1noc(-c2cc3ccccc3oc2=O)n1",
+        "Cc1ccccc1C1=N[IH3]C(c2cc3ccccc3oc2=O)=N1",
+        "Cc1ccccc1C1=N[IH3]C(C2=Cc3ccccc3CC2=O)=N1",
+        "O=C1Cc2cccc3c2C=C1C1=NC(=N[IH3]1)c1ccccc1C3",
+        "C1=C2CCc3cccc(c31)Cc1ccccc1C1=N[IH3]C2=N1",
+        "NC1Cc2cccc3c2C=C1C1=NC(=N[IH3]1)c1ccccc1C3",
+        "NCCc1cccc2c1C=CC1=NC(=N[IH3]1)c1ccccc1C2"
+      ]
+    }
+  },
+  "distinct_landings": 5,
+  "kernel_calls": 139,
+  "seconds": 2635.1
+}

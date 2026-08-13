@@ -1,0 +1,93 @@
+{
+  "index": 26,
+  "history": "P",
+  "source": "Cc1ccc(Oc2ccc(-c3nnc(-c4ccccc4)o3)cc2[N+](=O)[O-])cc1C",
+  "start_key": "Cc1ccc(Oc2ccc(-c3nnc(-c4ccccc4)o3)cc2[N+](=O)[O-])cc1C",
+  "switch_state": "Cc1ccc2oc3ccc4c5nnc(o5)c5cc6c(c4c3[N+](=O)[O-])c6c5c2c1C",
+  "b_worst_at_switch": -1.478037680737184,
+  "b_mean_at_switch": -1.174884980059361,
+  "b_success_at_switch": false,
+  "arms": {
+    "continue_A": {
+      "landing": "[O-][N+](=[SH4])c1c2cc3c4c5nnc(o5)c5c3c3c(c14)c3c5c1c3c(ccc1o2)CC3",
+      "b_worst_margin": -1.3291854224124404,
+      "b_mean_margin": -0.819940455113409,
+      "b_success": false,
+      "p_success": false,
+      "d_success": false,
+      "overrides": null,
+      "trajectory": [
+        "Cc1ccc2oc3ccc4c5nnc(o5)c5cc6c(c4c3[N+](=O)[O-])c6c5c2c1C",
+        "Cc1ccc2oc3cc4c5c6nnc(o6)c6c4c4c(c5c3[N+](=O)[O-])c4c6c2c1C",
+        "O=[N+]([O-])c1c2cc3c4c5nnc(o5)c5c3c3c(c14)c3c5c1c3c(ccc1o2)CC3",
+        "[O-][N+](=[SH4])c1c2cc3c4c5nnc(o5)c5c3c3c(c14)c3c5c1c3c(ccc1o2)CC3"
+      ]
+    },
+    "greedy_retarget": {
+      "landing": "[O-][N+](=[SH4])c1c2cc3c4c5nnc(o5)c5c3c3c(c14)c3c5c1c3c(ccc1o2)CC3",
+      "b_worst_margin": -1.3291854224124404,
+      "b_mean_margin": -0.819940455113409,
+      "b_success": false,
+      "p_success": false,
+      "d_success": false,
+      "overrides": null,
+      "trajectory": [
+        "Cc1ccc2oc3ccc4c5nnc(o5)c5cc6c(c4c3[N+](=O)[O-])c6c5c2c1C",
+        "Cc1ccc2oc3cc4c5c6nnc(o6)c6c4c4c(c5c3[N+](=O)[O-])c4c6c2c1C",
+        "O=[N+]([O-])c1c2cc3c4c5nnc(o5)c5c3c3c(c14)c3c5c1c3c(ccc1o2)CC3",
+        "[O-][N+](=[SH4])c1c2cc3c4c5nnc(o5)c5c3c3c(c14)c3c5c1c3c(ccc1o2)CC3"
+      ]
+    },
+    "verified_retarget": {
+      "landing": "B=[N+]([O-])c1c2ccc3c4nnc(o4)c(=C)c(c4c(c13)=C4)c1c3c(ccc1o2)CC3",
+      "b_worst_margin": -1.2316818381467578,
+      "b_mean_margin": -0.4966187852572002,
+      "b_success": false,
+      "p_success": false,
+      "d_success": false,
+      "overrides": 2,
+      "trajectory": [
+        "Cc1ccc2oc3ccc4c5nnc(o5)c5cc6c(c4c3[N+](=O)[O-])c6c5c2c1C",
+        "O=[N+]([O-])c1c2ccc3c4nnc(o4)c4cc5c(c13)c5c4c1c3c(ccc1o2)CC3",
+        "B=[N+]([O-])c1c2ccc3c4nnc(o4)c4cc5c(c13)c5c4c1c3c(ccc1o2)CC3",
+        "B=[N+]([O-])c1c2ccc3c4nnc(o4)c(=C)c(c4c(c13)=C4)c1c3c(ccc1o2)CC3"
+      ]
+    },
+    "restart": {
+      "landing": "O=[N+]([O-])c1cc2ccc1[pH]c1ccc3ccc3c1c1ccc(cc1)c1nnc2o1",
+      "b_worst_margin": -1.4129494801725277,
+      "b_mean_margin": -1.2283934869202808,
+      "b_success": false,
+      "p_success": false,
+      "d_success": false,
+      "overrides": 1,
+      "trajectory": [
+        "Cc1ccc(Oc2ccc(-c3nnc(-c4ccccc4)o3)cc2[N+](=O)[O-])cc1C",
+        "Cc1ccc2c(c1C)-c1ccc(cc1)-c1nnc(o1)-c1ccc(c([N+](=O)[O-])c1)-o-2",
+        "O=[N+]([O-])c1cc2ccc1oc1ccc3ccc3c1c1ccc(cc1)c1nnc2o1",
+        "O=[N+]([O-])c1cc2ccc1[pH]c1ccc3ccc3c1c1ccc(cc1)c1nnc2o1"
+      ]
+    },
+    "clairvoyant": {
+      "landing": "O=[N+]([O-])C1CC2(C3OC(c4ccccc4)NP3)CCC1Oc1ccc(F)cc12",
+      "b_worst_margin": -0.4336748388069411,
+      "b_mean_margin": -0.255661106032478,
+      "b_success": false,
+      "p_success": false,
+      "d_success": false,
+      "overrides": 3,
+      "trajectory": [
+        "Cc1ccc(Oc2ccc(-c3nnc(-c4ccccc4)o3)cc2[N+](=O)[O-])cc1C",
+        "Cc1ccc(Oc2ccc(-c3nnc(-c4ccccc4)o3)cc2[N+](=O)[O-])cc1",
+        "O=[N+]([O-])c1cc(-c2nnc(-c3ccccc3)o2)ccc1Oc1ccc(F)cc1",
+        "O=[N+]([O-])c1cc(-c2oc(-c3ccccc3)np2)ccc1Oc1ccc(F)cc1",
+        "O=[N+]([O-])C1CC(c2oc(-c3ccccc3)np2)CCC1Oc1ccc(F)cc1",
+        "O=[N+]([O-])C1CC2(c3oc(-c4ccccc4)np3)CCC1Oc1ccc(F)cc12",
+        "O=[N+]([O-])C1CC2(C3OC(c4ccccc4)NP3)CCC1Oc1ccc(F)cc12"
+      ]
+    }
+  },
+  "distinct_landings": 4,
+  "kernel_calls": 131,
+  "seconds": 2751.9
+}

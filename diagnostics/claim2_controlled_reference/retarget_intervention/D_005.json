@@ -1,0 +1,93 @@
+{
+  "index": 5,
+  "history": "D",
+  "source": "Cn1c(-c2ccc(F)cc2)[n+](C)c2ccccc21",
+  "start_key": "Cn1c(-c2ccc(F)cc2)[n+](C)c2ccccc21",
+  "switch_state": "C=CC1=C(C=C)[N+](C)=[PH](c2ccc(O)cc2)N1C",
+  "b_worst_at_switch": -1.5074525616431145,
+  "b_mean_at_switch": -0.0013614737805824155,
+  "b_success_at_switch": false,
+  "arms": {
+    "continue_A": {
+      "landing": "C=CC1=C(C=C)[N+](C)=[PH](c2ccccc2O)N1C",
+      "b_worst_margin": -1.7668740036714639,
+      "b_mean_margin": -0.0878352877900322,
+      "b_success": false,
+      "p_success": false,
+      "d_success": true,
+      "overrides": null,
+      "trajectory": [
+        "C=CC1=C(C=C)[N+](C)=[PH](c2ccc(O)cc2)N1C",
+        "C=CC1=C(C=C)[N+](C)=[PH](c2ccccc2O)N1C",
+        "C=CC1=C(C=C)[N+](C)=[PH](c2cccc(O)c2)N1C",
+        "C=CC1=C(C=C)[N+](C)=[PH](c2ccccc2O)N1C"
+      ]
+    },
+    "greedy_retarget": {
+      "landing": "C=CC1=C(CC)N2Cc3cc(O)cc4c3P42=[N+]1C",
+      "b_worst_margin": -0.05137088596659404,
+      "b_mean_margin": 0.3876934139495714,
+      "b_success": false,
+      "p_success": false,
+      "d_success": true,
+      "overrides": null,
+      "trajectory": [
+        "C=CC1=C(C=C)[N+](C)=[PH](c2ccc(O)cc2)N1C",
+        "C=CC1=C(C=C)[N+](C)=[PH]2c3ccc(O)cc3CN12",
+        "C=CC1=C(C=C)[N+](C)=P23c4cc(O)cc(c42)CN13",
+        "C=CC1=C(CC)N2Cc3cc(O)cc4c3P42=[N+]1C"
+      ]
+    },
+    "verified_retarget": {
+      "landing": "C=CC(NC)=C1CCc2cc(O)ccc2[PH2]=[N+]1C",
+      "b_worst_margin": 0.22489249174881898,
+      "b_mean_margin": 0.41632097815926733,
+      "b_success": true,
+      "p_success": true,
+      "d_success": true,
+      "overrides": 1,
+      "trajectory": [
+        "C=CC1=C(C=C)[N+](C)=[PH](c2ccc(O)cc2)N1C",
+        "C=CC1=C(CC)[N+](C)=[PH](c2ccc(O)cc2)N1C",
+        "C=CC1=C2CCc3cc(O)ccc3[PH](=[N+]2C)N1C",
+        "C=CC(NC)=C1CCc2cc(O)ccc2[PH2]=[N+]1C"
+      ]
+    },
+    "restart": {
+      "landing": "C[n+]1c(C2CCC(F)CC2)n2c3c(O)ccc(c31)C2",
+      "b_worst_margin": 0.11044470023617425,
+      "b_mean_margin": 0.3465900944469775,
+      "b_success": true,
+      "p_success": true,
+      "d_success": true,
+      "overrides": 1,
+      "trajectory": [
+        "Cn1c(-c2ccc(F)cc2)[n+](C)c2ccccc21",
+        "Cn1c(C2CCC(F)CC2)[n+](C)c2ccccc21",
+        "Cn1c(C2CCC(F)CC2)[n+](C)c2cccc(O)c21",
+        "C[n+]1c(C2CCC(F)CC2)n2c3c(O)ccc(c31)C2"
+      ]
+    },
+    "clairvoyant": {
+      "landing": "CNCn1c2[n+](P)c3cccc(c31)CCC(F)CCC2",
+      "b_worst_margin": 0.6484244782760515,
+      "b_mean_margin": 0.7007913442680623,
+      "b_success": true,
+      "p_success": true,
+      "d_success": true,
+      "overrides": 0,
+      "trajectory": [
+        "Cn1c(-c2ccc(F)cc2)[n+](C)c2ccccc21",
+        "Cn1c(C2CCC(F)CC2)[n+](C)c2ccccc21",
+        "Cn1c2[n+](C)c3cccc(c31)C1CC(F)CCC21",
+        "Cn1c2[n+](C)c3cccc(c31)CCC(F)CCC2",
+        "C[n+]1c2n(CN)c3c(cccc31)CCC(F)CCC2",
+        "CNCn1c2[n+](C)c3cccc(c31)CCC(F)CCC2",
+        "CNCn1c2[n+](P)c3cccc(c31)CCC(F)CCC2"
+      ]
+    }
+  },
+  "distinct_landings": 5,
+  "kernel_calls": 129,
+  "seconds": 1230.4
+}
