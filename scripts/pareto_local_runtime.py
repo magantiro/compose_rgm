@@ -33,17 +33,24 @@ Layout produced by the download step:
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "src"))
 
-LOCAL = REPO / "local_runtime"
+#: The 884 MB of volume-sourced runtime is gitignored and lives in ONE place, so
+#: a git worktree running this script must be told where. Set COMPOSE_RUNTIME_HOME
+#: rather than editing a path in, which is what created a worktree-local variant
+#: of this file that then drifted from the committed one.
+HOME = Path(os.environ.get("COMPOSE_RUNTIME_HOME", REPO))
+
+LOCAL = HOME / "local_runtime"
 ACTIVE8 = LOCAL / "active8" / "8ecc0e5e825a15200560c58960d4f662c9ca23be785c825c9c24aa73308144bb"
 GATE_ZERO = LOCAL / "gate_zero_v6" / "DECISION.json"
 MATERIALIZED = LOCAL / "materialized_scorer"
-CHECKPOINT = REPO / "runs" / "run_v2_01" / "R_THETA_CHECKPOINT.pt"
+CHECKPOINT = HOME / "runs" / "run_v2_01" / "R_THETA_CHECKPOINT.pt"
 SERIAL_BASELINE = LOCAL / "pareto_control_smoke"
 
 
