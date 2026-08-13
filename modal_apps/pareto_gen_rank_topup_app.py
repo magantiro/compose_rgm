@@ -51,6 +51,7 @@ the expensive failure.
 
 from __future__ import annotations
 
+import gzip
 import json
 import time
 from pathlib import Path
@@ -116,7 +117,7 @@ def _committed_target(shard: dict[str, Any], compose_arm: str) -> int:
 
 @app.function(
     image=image, cpu=8.0, memory=16 * 1024, timeout=6 * 60 * 60,
-    max_containers=12, retries=1,
+    max_containers=12, retries=5,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
 def topup_source(task: dict[str, Any]) -> dict[str, Any]:
@@ -255,9 +256,62 @@ def topup_source(task: dict[str, Any]) -> dict[str, Any]:
     metered = MeteredProcess(_Process(), _Objectives())
     scalarize = Scalarization(utopia)
     partial = out / f"{tag}.partial.json"
+    # THE RESUMABLE CHECKPOINT. The expensive state is the ENUMERATION CACHE --
+    # one entry is a ~7 s kernel call -- so a checkpoint that stores only counts
+    # is a progress log, not a checkpoint. A Modal preemption at t=800 restarted
+    # this source at zero and cost 76 minutes, which is exactly what this file
+    # exists to prevent.
+    resume_path = out / f"{tag}.resume.json.gz"
 
-    def _checkpoint(n: int, realized: int, tgt: int, prefix: list) -> None:
-        """Durable partial. The loop is unbounded, so this is not optional."""
+    class _Run:
+        """Rehydrated trajectory. Same duck-type the matcher and selection use."""
+
+        def __init__(self, states, endpoint, endpoint_z, complete):
+            self.states, self.endpoint = states, endpoint
+            self.endpoint_z, self.complete = endpoint_z, complete
+
+    resume = None
+    if resume_path.exists():
+        blob = json.loads(gzip.decompress(resume_path.read_bytes()))
+        metered._successors = {k: [(a, float(b)) for a, b in v]
+                               for k, v in blob["successors"].items()}
+        metered._z = {k: np.asarray(v, dtype=float) for k, v in blob["z"].items()}
+        metered.ledger.kernel_calls = int(blob["ledger"]["kernel_calls"])
+        metered.ledger.raw_oracle_calls = int(blob["ledger"]["raw_oracle_calls"])
+        metered.ledger.native_oracle_calls = int(blob["ledger"]["native_oracle_calls"])
+        resume = {
+            "pool": [_Run(tuple(r["states"]), r["endpoint"],
+                          np.asarray(r["endpoint_z"], dtype=float), r["complete"])
+                     for r in blob["runs"]],
+            "prefix": blob["prefix"],
+            "endpoint_z": [r["endpoint_z"] for r in blob["runs"]],
+            "detector": blob.get("detector"),
+        }
+        print(f"[{tag}] RESUMED from checkpoint: t={len(resume['pool'])} "
+              f"kernel {metered.ledger.kernel_calls}/{target} "
+              f"({len(metered._successors)} cached enumerations)", flush=True)
+
+    def _checkpoint(n: int, realized: int, tgt: int, prefix: list,
+                    pool_now: list, detector: dict) -> None:
+        """Durable AND RESUMABLE AND LOSSLESS.
+
+        Persists the ENUMERATION CACHE (one entry = a ~7 s kernel call), the
+        objective cache, the ledger, every completed trajectory, and the stall
+        detector's loop-carried state. Everything the matcher reads across an
+        iteration boundary is here; the RNG is not, because seeds are derived
+        from pool position rather than from an advancing stream.
+        """
+        resume_path.write_bytes(gzip.compress(json.dumps({
+            "successors": {k: [[a, b] for a, b in v]
+                           for k, v in metered._successors.items()},
+            "z": {k: list(map(float, v)) for k, v in metered._z.items()},
+            "ledger": metered.ledger.as_dict(),
+            "prefix": prefix,
+            "runs": [{"states": list(r.states), "endpoint": r.endpoint,
+                      "endpoint_z": list(map(float, r.endpoint_z)),
+                      "complete": bool(r.complete)} for r in pool_now],
+            "detector": detector,
+        }).encode()))
         partial.write_text(json.dumps({
             "index": index, "compose_arm": compose_arm, "in_progress": True,
             "committed_target_kernel_calls": tgt,
@@ -280,6 +334,7 @@ def topup_source(task: dict[str, Any]) -> dict[str, Any]:
         argmin_stable=None if probe else _argmin_stable,
         trajectory_cls=None if probe else Trajectory,
         on_progress=_checkpoint, progress_every=CHECKPOINT_EVERY,
+        resume=resume,
     )
 
     payload: dict[str, Any] = {
@@ -306,6 +361,7 @@ def topup_source(task: dict[str, Any]) -> dict[str, Any]:
 
     shard_path.write_text(json.dumps(payload, indent=2, default=float) + "\n")
     partial.unlink(missing_ok=True)
+    resume_path.unlink(missing_ok=True)
     artifact_volume.commit()
     report = result.feasibility_only()
     print(f"[{tag}] {report['status']}  trajectories={report['n_trajectories']}  "

@@ -267,9 +267,147 @@ def test_progress_callback_actually_fires_during_the_unbounded_loop():
         metered, "root", 6, (0.1,), lambda z, w: z[:, 0] * w,
         300, seed=3, reference=np.zeros(2), utopia=np.ones(2),
         unguided_run=_unguided(10_000), hypervolume=None,
-        on_progress=lambda n, k, tgt, pfx: seen.append((n, k, tgt, len(pfx))),
+        on_progress=lambda n, k, tgt, pfx, pool, det: seen.append((n, k, tgt, len(pfx))),
         progress_every=10)
     assert seen, "no checkpoint fired in an unbounded loop"
     assert [s[0] for s in seen] == list(range(10, seen[-1][0] + 1, 10))
     for n, k, tgt, npfx in seen:
         assert npfx == n and tgt == 300 and k <= 300 + 6
+
+
+def test_resume_continues_instead_of_restarting():
+    """A preemption must cost the time since the last checkpoint, not the source.
+
+    Regression for a checkpoint that WROTE progress but could not be resumed
+    from, so a Modal preemption at 86% restarted the source at zero.
+    """
+    saved = {}
+    m1 = _Metered(10_000)
+
+    def cap(n, k, tgt, pfx, pool, det):
+        if n == 100 and "n" not in saved:
+            saved.update(n=n, kernel=k, prefix=list(pfx),
+                         seen=set(m1._seen), z=dict(m1._z), detector=dict(det))
+
+    generate_then_rank_metered(
+        m1, "root", 6, (0.1,), lambda z, w: z[:, 0] * w, 1200, seed=3,
+        reference=np.zeros(2), utopia=np.ones(2), unguided_run=_unguided(10_000),
+        hypervolume=None, on_progress=cap, progress_every=100)
+    assert saved, "checkpoint never fired"
+
+    # Restore a metered process to the checkpoint's CACHE state, then continue.
+    m2 = _Metered(10_000)
+    m2._seen = set(saved["seen"])
+    m2._z = dict(saved["z"])
+    m2.ledger.kernel_calls = saved["kernel"]
+    pool = [_Run(("root",), f"e{i}", np.zeros(2)) for i in range(saved["n"])]
+    r2 = generate_then_rank_metered(
+        m2, "root", 6, (0.1,), lambda z, w: z[:, 0] * w, 1200, seed=3,
+        reference=np.zeros(2), utopia=np.ones(2), unguided_run=_unguided(10_000),
+        hypervolume=None,
+        resume={"pool": pool, "prefix": saved["prefix"],
+                "endpoint_z": [[0.0, 0.0]] * saved["n"],
+                "detector": saved["detector"]})
+    assert r2.status == MATCHED
+    assert r2.n_trajectories > saved["n"], "resume did not continue past the checkpoint"
+    # The restored cache means the resumed run does not re-pay for kernel calls
+    # the checkpoint already bought.
+    assert m2.ledger.kernel_calls >= saved["kernel"]
+    assert r2.prefix[: saved["n"]] == saved["prefix"], "prefix history was lost"
+
+
+def test_resume_refuses_an_inconsistent_checkpoint():
+    m = _Metered(10_000)
+    with pytest.raises(ValueError, match="inconsistent"):
+        generate_then_rank_metered(
+            m, "root", 6, (0.1,), lambda z, w: z[:, 0] * w, 100, seed=3,
+            reference=np.zeros(2), utopia=np.ones(2),
+            unguided_run=_unguided(10_000), hypervolume=None,
+            resume={"pool": [1, 2, 3], "prefix": [{}], "endpoint_z": [[0.0, 0.0]]})
+
+
+# --- LOSSLESSNESS: a resumed run must be INDISTINGUISHABLE from an uninterrupted one
+
+def _serialise_cache(m):
+    return ({k: list(v) for k, v in m._seen and {} .items()} if False else set(m._seen),
+            {k: list(map(float, v)) for k, v in m._z.items()},
+            dict(m.ledger.__dict__))
+
+
+def test_resume_is_LOSSLESS_not_merely_safe():
+    """Run to target uninterrupted; run again with a forced restart mid-way.
+
+    Every observable must be identical: the trajectory count, the whole resource
+    prefix, the endpoints, and every counter. 'Resumable' only means work is not
+    lost; LOSSLESS means the interruption left no trace in the result.
+    """
+    TARGET, CUT = 1800, 100
+
+    # (a) uninterrupted
+    ma = _Metered(10_000)
+    ra = generate_then_rank_metered(
+        ma, "root", 6, (0.1, 0.5), lambda z, w: z[:, 0] * w, TARGET, seed=3,
+        reference=np.zeros(2), utopia=np.ones(2), unguided_run=_unguided(10_000),
+        hypervolume=None)
+
+    # (b) interrupted at CUT, state captured, then resumed in a FRESH process
+    snap = {}
+    mb = _Metered(10_000)
+
+    def grab(n, k, tgt, pfx, pool, det):
+        if n == CUT and not snap:
+            snap.update(seen=set(mb._seen), z=dict(mb._z),
+                        ledger=dict(mb.ledger.__dict__), prefix=list(pfx),
+                        pool=list(pool), det=dict(det))
+            raise _Stop()
+
+    class _Stop(Exception):
+        pass
+
+    try:
+        generate_then_rank_metered(
+            mb, "root", 6, (0.1, 0.5), lambda z, w: z[:, 0] * w, TARGET, seed=3,
+            reference=np.zeros(2), utopia=np.ones(2),
+            unguided_run=_unguided(10_000), hypervolume=None,
+            on_progress=grab, progress_every=CUT)
+    except _Stop:
+        pass
+    assert snap, "the interruption never fired"
+
+    mc = _Metered(10_000)
+    mc._seen = set(snap["seen"])
+    mc._z = dict(snap["z"])
+    for key, value in snap["ledger"].items():
+        setattr(mc.ledger, key, value)
+    rc = generate_then_rank_metered(
+        mc, "root", 6, (0.1, 0.5), lambda z, w: z[:, 0] * w, TARGET, seed=3,
+        reference=np.zeros(2), utopia=np.ones(2), unguided_run=_unguided(10_000),
+        hypervolume=None,
+        resume={"pool": snap["pool"], "prefix": snap["prefix"],
+                "endpoint_z": [list(map(float, r.endpoint_z)) for r in snap["pool"]],
+                "detector": snap["det"]})
+
+    assert rc.status == ra.status
+    assert rc.n_trajectories == ra.n_trajectories, "trajectory count differs"
+    assert rc.realized_kernel_calls == ra.realized_kernel_calls, "kernel calls differ"
+    assert rc.overshoot_kernel_calls == ra.overshoot_kernel_calls
+    assert rc.prefix == ra.prefix, "the resource prefix differs"
+    assert rc.endpoints == ra.endpoints, "endpoints differ"
+    assert rc.endpoint_z == ra.endpoint_z, "objective vectors differ"
+    assert mc.ledger.__dict__ == ma.ledger.__dict__, "counters differ"
+
+
+def test_the_stall_detector_state_survives_the_checkpoint():
+    """Loop-carried state, so restarting it at zero would make UNREACHABLE
+    harder to declare after a preemption than without one."""
+    seen = []
+    m = _Metered(10_000)
+    generate_then_rank_metered(
+        m, "root", 6, (0.1,), lambda z, w: z[:, 0] * w, 10**9, seed=3,
+        reference=np.zeros(2), utopia=np.ones(2), unguided_run=_unguided(40),
+        hypervolume=None, stall_window=120,
+        on_progress=lambda n, k, tgt, pfx, pool, det: seen.append(det),
+        progress_every=25)
+    assert seen, "no checkpoint fired"
+    assert all({"since_progress", "last_kernel"} <= set(d) for d in seen)
+    assert max(d["since_progress"] for d in seen) > 0, "detector never advanced"

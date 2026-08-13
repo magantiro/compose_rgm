@@ -178,6 +178,7 @@ def generate_then_rank_metered(
     stall_window: int = STALL_WINDOW,
     on_progress=None,
     progress_every: int = 50,
+    resume=None,
 ) -> MatchedGenRank:
     """Generate until the METERED ledger reaches `target_kernel_calls`.
 
@@ -187,11 +188,29 @@ def generate_then_rank_metered(
     if target_kernel_calls <= 0:
         raise ValueError("target_kernel_calls must be positive")
 
-    pool: list[Any] = []
-    prefix: list[dict[str, Any]] = []
-    z_rows: list[np.ndarray] = []
-    since_progress = 0
-    last_kernel = metered.ledger.kernel_calls
+    # RESUME. A preemption in an unbounded loop must cost the time since the
+    # last checkpoint, not the whole source. `resume` carries the completed
+    # trajectories and their prefix; the caller is responsible for having
+    # restored the METERED CACHES and the LEDGER before calling, because the
+    # enumeration cache is the expensive state -- the trajectory records are
+    # cheap and the kernel calls are not.
+    pool: list[Any] = list(resume["pool"]) if resume else []
+    # NOTE ON DETERMINISM, which is what makes losslessness possible at all:
+    # each trajectory's seed is `seed * 1000 + len(pool)`, derived from POSITION
+    # rather than from a running RNG. So there is no generator state to persist
+    # -- trajectory N+1 draws the same sequence whether or not the process was
+    # restarted. Had the seed been a single advancing stream, an exact resume
+    # would have required checkpointing the RNG itself.
+    prefix: list[dict[str, Any]] = list(resume["prefix"]) if resume else []
+    z_rows: list[np.ndarray] = ([np.asarray(r, dtype=float)
+                                 for r in resume["endpoint_z"]] if resume else [])
+    if resume and not (len(pool) == len(prefix) == len(z_rows)):
+        raise ValueError(
+            f"resume state is inconsistent: {len(pool)} pool, {len(prefix)} "
+            f"prefix, {len(z_rows)} scores. Refusing to continue from it.")
+    detector = (resume or {}).get("detector") or {}
+    since_progress = int(detector.get("since_progress", 0))
+    last_kernel = int(detector.get("last_kernel", metered.ledger.kernel_calls))
     status = MATCHED
     note = ""
 
@@ -244,7 +263,9 @@ def generate_then_rank_metered(
         # what durable means.
         if on_progress is not None and len(pool) % progress_every == 0:
             on_progress(len(pool), int(metered.ledger.kernel_calls),
-                        int(target_kernel_calls), list(prefix))
+                        int(target_kernel_calls), list(prefix), list(pool),
+                        {"since_progress": since_progress,
+                         "last_kernel": int(last_kernel)})
 
     realized = int(metered.ledger.kernel_calls)
     result = MatchedGenRank(
