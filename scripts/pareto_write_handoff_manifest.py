@@ -38,10 +38,14 @@ LANE_ARTIFACTS = (
     "docs/workstreams/pareto-control/FIGURE_DESIGN.md",
     "scripts/pareto_tradeoff_census.py",
     "scripts/pareto_instrument_gate.py",
+    "scripts/pareto_select_cohort.py",
+    "scripts/analyse_pareto_control.py",
     "src/compose_v4/experiments/pareto_control.py",
     "tests/test_pareto_control.py",
     "modal_apps/pareto_control_app.py",
+    "tests/test_pareto_instrument_gate.py",
     "diagnostics/pareto_tradeoff_census.json",
+    "diagnostics/pareto_control_cohort.json",
 )
 
 
@@ -99,6 +103,9 @@ def main() -> int:
             "tests/test_pareto_control.py": "DESIGN_ONLY",
             "modal_apps/pareto_control_app.py": "DESIGN_ONLY",
             "scripts/pareto_instrument_gate.py": "DESIGN_ONLY",
+            "scripts/analyse_pareto_control.py": "DESIGN_ONLY",
+            "tests/test_pareto_instrument_gate.py": "DESIGN_ONLY",
+            "diagnostics/pareto_control_cohort.json": "DESIGN_ONLY",
             "diagnostics/pareto_tradeoff_census.json": "SMOKE_HELD_IN",
         },
         "reproduction_commands": [
@@ -106,6 +113,9 @@ def main() -> int:
             "python3 scripts/pareto_instrument_gate.py",
             "OMP_NUM_THREADS=4 python3 scripts/pareto_tradeoff_census.py "
             "--sources 60 --reach-sources 20 --out diagnostics/pareto_tradeoff_census.json",
+            "python3 scripts/pareto_select_cohort.py --size 12",
+            "python3 scripts/analyse_pareto_control.py --shards <shard dir> "
+            "--out diagnostics/pareto_control_analysis.json",
         ],
         "census_external_inputs": {
             "note": ("The census needs the local Active8 root, a gate-zero DECISION.json "
@@ -136,9 +146,10 @@ def main() -> int:
                 "the first thing the held-in smoke will show."),
         },
         "recommended_next_action": (
-            "Authorize the 12-source held-in smoke in modal_apps/pareto_control_app.py "
-            "after freezing diagnostics/pareto_control_cohort.json. Bounded: held-in "
-            "only, five arms, no h_phi, no held-out panel."),
+            "Authorize the 12-source held-in smoke in modal_apps/pareto_control_app.py. "
+            "The cohort is already frozen at diagnostics/pareto_control_cohort.json, "
+            "disjoint from the census sources. Bounded: held-in only, five arms, "
+            "no h_phi, no held-out panel."),
         "not_authorized_without_main_approval": [
             "any Modal run",
             "opening reserve_source_keys",
