@@ -5,7 +5,7 @@
   "branch": "codex/compose-multiobjective-package",
   "base_commit": "f6146d7",
   "base_branch": "codex/editing-v2-successor-fiber-fastpath",
-  "content_commit": "STAMPED_BY_FOLLOWUP_COMMIT",
+  "content_commit": "5630ec9",
   "artifact_status": "DESIGN_ONLY",
   "held_out_data_opened": false,
   "compute_spent": {
