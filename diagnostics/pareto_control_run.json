@@ -94,5 +94,31 @@
       "Does HV stop improving because potency effectively saturates?"
     ],
     "acceptable_outcome": "If these come back badly the smoke can legitimately FAIL the Pareto experiment despite Stage 0 passing. That is an acceptable outcome and will be reported as a failure, not repaired."
+  },
+  "post_smoke_plan": {
+    "document": "docs/workstreams/pareto-control/POST_SMOKE_PLAN.md",
+    "status": "DESIGN_ONLY -- NOT AUTHORISED, none implemented",
+    "recorded_when": "1 of 12 sources complete, no aggregate existed",
+    "why_recorded_early": "the decision tree says what happens if Pareto control is weak; writing that after seeing the numbers would be worthless",
+    "batch_scorer_gate": [
+      "identical canonical candidate set",
+      "identical potency scores to tolerance",
+      "identical selected action",
+      "identical complete trajectory",
+      "identical N_drd2",
+      "lower scorer invocation/batch count"
+    ],
+    "counters_to_split": [
+      "N_drd2_requests",
+      "N_drd2_unique",
+      "N_drd2_evaluator_calls",
+      "N_descriptor_requests",
+      "N_scorer_batches"
+    ],
+    "smoke_counts_reconstructible": "nothing short-circuited: DRD2, QED and cLogP were computed together on every evaluation, so N_drd2 = N_descriptor = N_all_objective = native_oracle_calls exactly",
+    "pre_alias_mark_count": "CLOSED -- will not be measured, no kernel instrumentation",
+    "raw_ratio": "FORBIDDEN as a headline; the scientific object is HV vs unique potency evaluations",
+    "efficiency_experiment": "CONDITIONAL on Pareto control being strong with oracle demand the only ugly axis",
+    "no_k_search": "one operating point pre-registered from a desired reduction in oracle demand; a sweep followed by a choice is a K-search with the selection hidden in the write-up"
   }
 }

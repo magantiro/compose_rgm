@@ -4,7 +4,7 @@
   "title": "Target-free Pareto / preference control",
   "status": "DESIGN_ONLY_PLUS_HELD_IN_CENSUS",
   "branch": "codex/compose-pareto-control",
-  "commit": "da1242f4a2a11346af69635eece2e721d57c36b5",
+  "commit": "aac867be5293a8907101ab20045a7f80b94c8a5f",
   "working_tree_dirty_at_write_time": true,
   "base_commit": "a0e680d",
   "held_out_opened": false,
@@ -22,7 +22,7 @@
   "lane_artifacts": {
     "docs/workstreams/pareto-control/PROTOCOL.md": "de53748460fe3eb2c1833493ce00803b68ef24d08893804a161ddb295af4fa51",
     "docs/workstreams/pareto-control/STATUS.md": "8ba70763f8c7fb2469dc678e0f17e7f588d25dc51427bf668543d4d4900aa1bc",
-    "docs/workstreams/pareto-control/DECISION_LOG.md": "c14dbd22d342b910c6a2f65964b366df62f07bfe1963fefaa759a74ca9a3c546",
+    "docs/workstreams/pareto-control/DECISION_LOG.md": "ae32dd900b0d94be1c8bb266e79e1362abbcbe5bb040d0d976a83a4e67f967d1",
     "docs/workstreams/pareto-control/FIGURE_DESIGN.md": "64e7130690fc949df455057968d8cc5fc3cf9d316036e6104c2c650aace360eb",
     "scripts/pareto_tradeoff_census.py": "ae0b5098baea9f9a9b71a7c46eefc129e64e096e4a573838ec5ad713a9b1f449",
     "scripts/pareto_instrument_gate.py": "a0f74025ef80f0117231db7bd6271c4bd755854a5c200a51bc993b6c0f3607b6",

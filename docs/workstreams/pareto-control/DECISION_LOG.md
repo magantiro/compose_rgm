@@ -590,3 +590,67 @@ this smoke.** It is recorded so the observation is not lost.
 **Changes a frozen object:** no. Withdraws an interpretation, changes no metric,
 no threshold and no arm.
 
+---
+
+## D-017 · 2026-08-13 · Post-smoke plan recorded BEFORE results; nothing authorised
+
+**Decision.** Commit `POST_SMOKE_PLAN.md` while **1 of 12 sources** had finished
+and no aggregate existed. Implement none of it. Touch nothing in the running
+experiment.
+
+**Why now rather than after.** The decision tree in §5 says what happens if
+Pareto control turns out weak. Writing that down *after* seeing the numbers
+would be worthless — the value is entirely in it being fixed first. Everything
+else in the document rides along for the same reason.
+
+**The four items.**
+
+1. **Batch the scorer.** `oracle.margin_many([key])` on a one-element list is an
+   implementation defect. Batching is an **exact vectorisation**, gated by six
+   conditions: identical candidate set, identical potency scores to tolerance,
+   identical selected action, identical complete trajectory, identical `N_drd2`,
+   and a lower batch count. **If any of the first five differ it is a change of
+   computation wearing a performance label and it does not land.**
+2. **Split the counters** into `N_drd2_requests`, `N_drd2_unique`,
+   `N_drd2_evaluator_calls`, `N_descriptor_requests`, `N_scorer_batches` — even
+   though several coincide today. It makes future accounting *incapable* of
+   conflating them.
+3. **Do not measure the pre-alias mark count.** ~586 distinct canonical
+   successors is the quantity relevant to expensive scoring; the collapse ratio
+   is a kernel-efficiency curiosity and does not change the oracle-demand
+   conclusion. **Closed, not deferred** — no kernel instrumentation will be added
+   for a number we do not need.
+4. **Do not headline the raw ratio.** "Exhaustive control uses vastly more
+   objective information at matched kernel computation" is correct. *"COMPOSE
+   needs 3,000x more oracle evaluations for the same Pareto quality"* is not the
+   same statement, and **we have not seen Pareto quality yet.**
+
+**The completed smoke stays reconstructible.** Nothing short-circuited in the
+code that produced these shards — `objective_vector()` computed DRD2, QED and
+cLogP together on every evaluation, unconditionally — so
+`N_drd2 = N_descriptor = N_all_objective = native_oracle_calls` exactly, and the
+split counters can be back-filled from the existing artifact without rerunning
+anything. That is why item 2 can be a pure instrumentation change rather than a
+re-run.
+
+**Why the counters are NOT split today.** Editing `pareto_control.py` now would
+break the provenance between the shards and the code that produced them — the
+same reason the census script was not fixed mid-run. Instrumentation lands after
+the artifact is closed.
+
+**The finding that survives the fix.** Even perfectly batched, the algorithm
+still requests ~586 x (13-23) distinct potency evaluations per source. If
+potency were a docking workflow or a wet-lab assay, batching would save
+**nothing conceptually**. Exhaustive full-fiber preference control is genuinely
+objective-query-intensive, and that is an algorithmic property rather than an
+implementation artifact.
+
+**Binding, and worth naming because it is the tempting move.** **NO K-SEARCH.**
+Running `K in {4, 8, 16, 32, 64, 128}` and reporting the attractive point is a
+selection step hidden in the write-up. One operating point is pre-registered from
+a desired reduction in oracle demand, and the report gives fraction of HV
+retained against fraction of potency evaluations retained.
+
+**Changes a frozen object:** no. Nothing implemented, nothing authorised, no
+metric, threshold or arm touched.
+
