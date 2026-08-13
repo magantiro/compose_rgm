@@ -1,34 +1,42 @@
-"""Dual oracle accounting for external-baseline comparisons.
+"""Three-counter oracle accounting for external-baseline comparisons.
 
-Every comparator run logs **two** counters and never substitutes one for the
-other:
+Every comparator run logs **three** counters and never substitutes one for
+another:
 
-``benchmark_native``
-    Unique **valid canonical** molecules scored. A repeat of a canonical SMILES
-    already scored in this run does not increment; an unparseable molecule does
-    not increment. This is the only quantity comparable to published PMO
-    numbers, because ``Oracle.score_smi`` in ``wenhao-gao/mol_opt`` keys its
-    buffer on canonical SMILES and returns 0 for invalid input without charging.
+``unique_valid_canonical_evaluations``
+    Distinct valid canonical molecules evaluated in this run. A repeat of a
+    canonical SMILES already seen does not increment; an unparseable molecule
+    does not increment. This is the **benchmark-native** number and the only
+    quantity comparable to published PMO results, because ``Oracle.score_smi``
+    in ``wenhao-gao/mol_opt`` keys its buffer on canonical SMILES and returns 0
+    for invalid input without charging.
 
-``raw_compute``
-    Every oracle **invocation**: duplicates, rejected proposals, invalids,
-    particles, prescreened candidates, reranked endpoints and rescores. This is
-    the honest efficiency number.
+``oracle_requests``
+    Every scoring request the algorithm makes, including duplicates, rejected
+    proposals and invalids. This is **algorithmic demand, not CPU.** A duplicate
+    request increments it even when the cache serves it.
 
-The two differ by orders of magnitude across the methods in the comparator
-registry -- MARS has no cache anywhere and rescores its current molecule
-whenever a proposal is invalid, while REINVENT caches per scoring component by
-design -- so a table that reports one without naming it is misleading in a
-predictable direction. Both are always logged; the choice of which to report is
-made once, in a caption, and is visible.
+``evaluator_calls``
+    Actual expensive oracle executions after caching. **Real work.**
 
-A duplicate **request** increments ``raw_compute`` even though the underlying
-evaluator is not called. That is deliberate: ``raw_compute`` measures what the
-method *demands*, so bolting a cache onto a wasteful method does not silently
-improve its efficiency number. ``evaluator_calls`` records the underlying calls
-separately, which is what actually costs CPU.
+The conceptual invariant these three exist to encode:
 
-The accountant is the only thing every baseline adapter shares, so it is also
+    Caching may reduce evaluator work, but it cannot erase wasteful algorithmic
+    requests.
+
+That is why a cache hit still increments ``oracle_requests``. If it did not,
+bolting a cache onto a method that re-proposes the same molecule a thousand
+times would make it look efficient, and the method's actual search behaviour
+would become invisible. ``evaluator_calls`` is where the saving legitimately
+shows up. Neither number is "compute" in the literal sense -- for that, report
+wall and core time separately.
+
+The three differ by orders of magnitude across the comparator registry: MARS has
+no cache anywhere and rescores its current molecule whenever a proposal is
+invalid, while REINVENT caches per scoring component by design. A table that
+reports one counter without naming it is misleading in a predictable direction.
+
+The accountant is the only object every baseline adapter shares, so it is also
 the only place a fairness rule can be enforced rather than merely documented.
 """
 
@@ -42,10 +50,18 @@ from rdkit import Chem
 from rdkit import RDLogger
 
 
-#: The two frozen counters. A budget must be declared against one of them by
-#: name -- there is deliberately no default, because picking the counter after
-#: seeing results is the exact failure this module exists to prevent.
-BUDGET_COUNTERS = ("benchmark_native", "raw_compute")
+#: Counters a budget may be declared against, by name. There is deliberately no
+#: default: picking the counter after seeing results is the exact failure this
+#: module exists to prevent. The first two are the reporting conventions; the
+#: third is available for budgeting genuine evaluator work.
+BUDGET_COUNTERS = (
+    "unique_valid_canonical_evaluations",
+    "oracle_requests",
+    "evaluator_calls",
+)
+
+#: The PMO-compatible convention. Use only this against published PMO numbers.
+BENCHMARK_NATIVE_COUNTER = "unique_valid_canonical_evaluations"
 
 
 class BudgetExhausted(RuntimeError):
@@ -69,17 +85,27 @@ def canonical_smiles(smiles: str) -> str | None:
 
 @dataclass
 class OracleCounts:
-    raw_compute: int = 0
-    benchmark_native: int = 0
+    #: Every scoring request the algorithm makes. Algorithmic demand, not CPU.
+    oracle_requests: int = 0
+    #: Distinct valid canonical molecules. The benchmark-native number.
+    unique_valid_canonical_evaluations: int = 0
+    #: Expensive oracle executions actually performed. Real work.
     evaluator_calls: int = 0
+    #: Requests for a canonical molecule already seen this run.
+    duplicate_requests: int = 0
+    #: Duplicate requests served from the cache without an evaluator call.
     cache_hits: int = 0
+    #: Requests RDKit could not parse.
     failed_proposals: int = 0
 
     def as_dict(self) -> dict[str, int]:
         return {
-            "raw_compute": self.raw_compute,
-            "benchmark_native": self.benchmark_native,
+            "oracle_requests": self.oracle_requests,
+            "unique_valid_canonical_evaluations": (
+                self.unique_valid_canonical_evaluations
+            ),
             "evaluator_calls": self.evaluator_calls,
+            "duplicate_requests": self.duplicate_requests,
             "cache_hits": self.cache_hits,
             "failed_proposals": self.failed_proposals,
         }
@@ -87,18 +113,18 @@ class OracleCounts:
 
 @dataclass
 class OracleAccountant:
-    """Wraps a molecule objective and counts it two ways.
+    """Wraps a molecule objective and counts it three ways.
 
     Args:
-        evaluate: the frozen objective, ``canonical SMILES -> float``. It is
-            called at most once per distinct valid canonical molecule while
-            caching is enabled.
+        evaluate: the frozen objective, ``canonical SMILES -> float``. Called at
+            most once per distinct valid canonical molecule while caching is on.
         budget: maximum value of the counter named by ``budget_counter``.
-        budget_counter: which counter the budget binds. Must be named
-            explicitly.
+        budget_counter: which counter the budget binds. Named explicitly.
         cache: whether repeated canonical molecules reuse the stored score.
             Allowed for every method by the fairness contract, and required to
-            use identical semantics across methods.
+            use identical semantics across methods. Disabling it changes
+            ``evaluator_calls`` and leaves the benchmark-native counter alone --
+            which is the point of separating them.
         invalid_score: what an unparseable molecule scores. PMO returns 0.0.
     """
 
@@ -109,6 +135,7 @@ class OracleAccountant:
     invalid_score: float = 0.0
     counts: OracleCounts = field(default_factory=OracleCounts)
     _scores: dict[str, float] = field(default_factory=dict, repr=False)
+    _seen: set[str] = field(default_factory=set, repr=False)
 
     def __post_init__(self) -> None:
         if self.budget_counter not in BUDGET_COUNTERS:
@@ -136,7 +163,7 @@ class OracleAccountant:
     # ---- Scoring ----
 
     def score(self, smiles: str) -> float:
-        """Score one candidate, charging both counters.
+        """Score one candidate, charging every counter it is due.
 
         Raises:
             BudgetExhausted: if the declared budget is already spent. Callers
@@ -148,19 +175,24 @@ class OracleAccountant:
                 f"{self.budget_counter} budget of {self.budget} is spent"
             )
 
-        # Every request is an invocation, cached or not.
-        self.counts.raw_compute += 1
+        # Every request is demand, cached or not. This is the line that stops a
+        # cache from erasing wasteful search behaviour.
+        self.counts.oracle_requests += 1
 
         key = canonical_smiles(smiles)
         if key is None:
             self.counts.failed_proposals += 1
             return self.invalid_score
 
-        if self.cache and key in self._scores:
-            self.counts.cache_hits += 1
-            return self._scores[key]
+        if key in self._seen:
+            self.counts.duplicate_requests += 1
+            if self.cache:
+                self.counts.cache_hits += 1
+                return self._scores[key]
+        else:
+            self._seen.add(key)
+            self.counts.unique_valid_canonical_evaluations += 1
 
-        self.counts.benchmark_native += 1
         self.counts.evaluator_calls += 1
         value = float(self.evaluate(key))
         if self.cache:
@@ -179,39 +211,61 @@ class OracleAccountant:
     # ---- Reporting ----
 
     @property
-    def demand_ratio(self) -> float:
-        """``raw_compute / benchmark_native`` -- the cache-and-duplicate rate.
+    def demand_ratio_requests_over_unique(self) -> float:
+        """``oracle_requests / unique_valid_canonical_evaluations``.
 
-        Reported per method by the fairness contract. It differs by orders of
-        magnitude across these baselines, and hiding it is how an unfair
-        comparison survives review.
+        The cache-and-duplicate rate, required per method by the fairness
+        contract. It differs by orders of magnitude across these baselines, and
+        hiding it is how an unfair comparison survives review.
         """
-        if self.counts.benchmark_native == 0:
+        unique = self.counts.unique_valid_canonical_evaluations
+        if unique == 0:
             return float("nan")
-        return self.counts.raw_compute / self.counts.benchmark_native
+        return self.counts.oracle_requests / unique
 
     def manifest(self) -> dict[str, Any]:
         counts = self.counts.as_dict()
+        unique = counts["unique_valid_canonical_evaluations"]
+        expected_evaluator_calls = (
+            unique if self.cache else unique + counts["duplicate_requests"]
+        )
         return {
             "counters": counts,
+            "counter_semantics": {
+                "unique_valid_canonical_evaluations": (
+                    "benchmark-native; the only PMO-comparable number"
+                ),
+                "oracle_requests": "algorithmic demand, NOT CPU",
+                "evaluator_calls": "expensive oracle executions after caching; real work",
+            },
             "budget": self.budget,
             "budget_counter": self.budget_counter,
             "budget_exhausted": self.exhausted,
             "cache_enabled": self.cache,
-            "demand_ratio_raw_over_benchmark_native": self.demand_ratio,
-            "distinct_valid_molecules": len(self._scores) if self.cache else None,
+            "demand_ratio_requests_over_unique": (
+                self.demand_ratio_requests_over_unique
+            ),
+            "distinct_valid_molecules": len(self._seen),
             "invariants": {
-                "raw_compute >= benchmark_native": (
-                    counts["raw_compute"] >= counts["benchmark_native"]
+                "oracle_requests >= unique_valid_canonical_evaluations": (
+                    counts["oracle_requests"] >= unique
                 ),
-                "raw_compute == benchmark_native + cache_hits + failed_proposals": (
-                    counts["raw_compute"]
-                    == counts["benchmark_native"]
-                    + counts["cache_hits"]
+                (
+                    "oracle_requests == unique + duplicate_requests "
+                    "+ failed_proposals"
+                ): (
+                    counts["oracle_requests"]
+                    == unique
+                    + counts["duplicate_requests"]
                     + counts["failed_proposals"]
                 ),
-                "evaluator_calls == benchmark_native": (
-                    counts["evaluator_calls"] == counts["benchmark_native"]
+                "evaluator_calls matches the cache setting": (
+                    counts["evaluator_calls"] == expected_evaluator_calls
+                ),
+                "caching cannot erase a wasteful request": (
+                    counts["oracle_requests"]
+                    >= counts["evaluator_calls"] + counts["failed_proposals"]
+                    or counts["failed_proposals"] == 0
                 ),
             },
         }

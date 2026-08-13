@@ -6,33 +6,62 @@ by instruction.
 **Held-out data opened:** **no.** No sealed panel, no confirmatory reserve, no
 matched reserve was touched.
 **Running now:** nothing. **No Modal job was launched; nothing external was
-installed.** The accounting smoke ran locally in 0.22 s of CPU.
-**Last completed gate:** dual oracle accounting frozen and its instrument check
-**PASS** (`diagnostics/baselines/graph_ga_accounting_smoke.json`).
+installed.** The harness stress test ran locally in under a CPU-second.
+**Last completed gate:** three-counter oracle accounting frozen, and the
+**ORACLE-ACCOUNTING HARNESS STRESS TEST — PASS**
+(`diagnostics/baselines/oracle_accounting_harness_stress_test.json`).
+
+## That stress test is NOT a GraphGA result
+
+**No GraphGA run has happened.** Upstream GB-GA was never vendored and nothing
+external was installed. The stress test drives the shared accountant with a
+GA-*shaped*, adversarial-by-construction candidate stream (BRICS recombination,
+survivor rescores, alternate SMILES spellings, malformed strings). It says
+nothing whatever about GraphGA's behaviour.
+
+Before any claim-bearing GraphGA comparison we still need: the actual upstream
+implementation vendored; the production RDKit pin **2024.3.5**, or an explicitly
+isolated environment whose canonicalization is reconciled against it; and the
+real algorithm terminating against every counter. The stress test ran on rdkit
+2025.09.6 and is stamped `pin_matches_production: false`, which keeps its
+canonical keys out of any scientific result.
 
 ## HOLD
 
-Per the main workstream: the accounting smoke passed, so **stop**. Do not
-proceed to MARS, REINVENT, GraphXForm, DDSBM or HN-GFN. Lane 1 is investigating
-whether `R_theta`'s iterated dynamics are pathological; if that forces a retrain,
-every downstream comparison would have to be repeated, so no expensive adapter
-should be built against a model that might be replaced.
+Per the main workstream: **do not run external baseline sweeps and do not launch
+anything on Modal.** Lane 1 is still deciding whether `R_theta`'s iterated
+dynamics force reopening the base process; every external comparison would have
+to be repeated if it does.
 
-## Frozen this round: dual oracle accounting
+Local adapter preparation — vendoring, environment files, wrapper code, local
+tests — is permitted. **It has not been started**, deliberately: the budget is
+tight and the base process may change.
 
-Both counters, always logged, never substituted:
+## Frozen this round: three-counter oracle accounting
+
+All three always logged, never substituted:
 
 | counter | definition | used for |
 |---|---|---|
-| `benchmark_native` | unique valid canonical molecules scored | **only** comparison against published PMO numbers |
-| `raw_compute` | every invocation incl. duplicates, rejects, invalids, rescores | **all** efficiency claims |
+| `unique_valid_canonical_evaluations` | distinct valid canonical molecules evaluated | **only** comparison against published PMO numbers |
+| `oracle_requests` | every scoring request incl. duplicates, rejects, invalids — **algorithmic demand, not CPU** | efficiency claims about search behaviour |
+| `evaluator_calls` | expensive oracle executions after caching — **real work** | what the objective genuinely cost |
 
-The instrument check shows why this is not a formality: **the same candidate
-stream under a budget of 120 bought 120 distinct molecules under
-`benchmark_native` (288 invocations) and 59 under `raw_compute` (120
-invocations)** — a 2× misstatement on a benign stream, and far more on MARS,
-which has no cache anywhere. Implemented in
-`src/compose_v4/experiments/oracle_accounting.py`.
+> **Conceptual invariant: caching may reduce evaluator work, but it cannot erase
+> wasteful algorithmic requests.**
+
+That is why a cache hit still increments `oracle_requests`. For a literal-compute
+number, report wall and core time separately.
+
+The stress test shows why this is not a formality. Same candidate stream, budget
+120: **120 distinct molecules under `unique_valid_canonical_evaluations` (288
+requests) versus 59 under `oracle_requests` (120 requests)** — a 2× misstatement
+on a benign stream, and far more on MARS, which has no cache anywhere. Disabling
+the cache on that identical stream left requests at 288 and unique at 120 while
+moving `evaluator_calls` from 120 to 262.
+
+Required per-method ratio: **`oracle_requests / unique_valid_canonical_evaluations`**.
+Implemented in `src/compose_v4/experiments/oracle_accounting.py`.
 
 ## Naming rule that must not slip
 
@@ -107,13 +136,14 @@ engineering time on dependency rot, not credits.**
 
 ## Next action
 
-**None. HOLDING.** The lane's work is complete and the instrument gate passed.
+**None. HOLDING.** The lane's work is complete and the harness gate passed.
 Resume only on an explicit instruction from the main workstream, and only after
 Lane 1 resolves whether `R_theta` is being retrained.
 
-When it resumes, the first bounded action is: **vendor upstream GB-GA (MIT) and
-run the real GraphGA adapter on 3–5 held-in sources**, 0.1 CPU-core-hours. The
-accountant it plugs into is already built and tested.
+When it resumes, the first bounded action is: **vendor upstream GB-GA (MIT),
+reconcile canonicalization against the production RDKit pin 2024.3.5, and run
+the real GraphGA adapter on 3–5 held-in sources**, 0.1 CPU-core-hours. The
+accountant it plugs into is already built, tested and stress-tested.
 
 ## Manuscript-lane merge request
 

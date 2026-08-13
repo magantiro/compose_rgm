@@ -1,0 +1,173 @@
+{
+  "THIS_IS_NOT_A_GRAPHGA_RESULT": "Upstream GB-GA was never vendored and nothing external was installed. The candidate stream is GA-SHAPED and adversarial by construction (BRICS recombination, survivor rescores, alternate SMILES spellings, malformed strings). It exists only to drive the accountant. Do not cite this as a GraphGA smoke, a GraphGA result, or evidence about GraphGA's behaviour.",
+  "artifact_status": "SMOKE_HELD_IN",
+  "cache_disabled_control_run": {
+    "budget": 120,
+    "budget_counter": "unique_valid_canonical_evaluations",
+    "budget_exhausted": true,
+    "cache_enabled": false,
+    "candidates_offered": 400,
+    "counter_semantics": {
+      "evaluator_calls": "expensive oracle executions after caching; real work",
+      "oracle_requests": "algorithmic demand, NOT CPU",
+      "unique_valid_canonical_evaluations": "benchmark-native; the only PMO-comparable number"
+    },
+    "counters": {
+      "cache_hits": 0,
+      "duplicate_requests": 142,
+      "evaluator_calls": 262,
+      "failed_proposals": 26,
+      "oracle_requests": 288,
+      "unique_valid_canonical_evaluations": 120
+    },
+    "demand_ratio_requests_over_unique": 2.4,
+    "distinct_valid_molecules": 120,
+    "evaluator_saw_only_canonical_input": true,
+    "goal": {
+      "clogp_box_held_in_p25_p75": [
+        2.3688650000000004,
+        4.452222500000002
+      ],
+      "goal": "target-free developability: QED floor and cLogP box",
+      "normalizers": "diagnostics/retarget_goal_language_normalizers.json",
+      "note": "no threshold is selected by this smoke; the box is the held-in IQR",
+      "qed_floor_held_in_median": 0.56676118212139
+    },
+    "invariants": {
+      "caching cannot erase a wasteful request": true,
+      "evaluator_calls matches the cache setting": true,
+      "oracle_requests == unique + duplicate_requests + failed_proposals": true,
+      "oracle_requests >= unique_valid_canonical_evaluations": true
+    },
+    "underlying_evaluator_invocations": 262,
+    "wall_seconds": 0.2834
+  },
+  "checks": {
+    "caching_cannot_erase_a_wasteful_request": true,
+    "caching_reduces_evaluator_calls": true,
+    "canonicalization_collapses_spellings": true,
+    "conventions_disagree_as_predicted": true,
+    "counter_identity_holds_in_every_run": true,
+    "duplicates_charge_requests_not_unique_evaluations": true,
+    "evaluator_only_ever_saw_canonical_smiles": true,
+    "every_budget_convention_terminates": true,
+    "invalids_counted_and_never_reach_the_evaluator": true
+  },
+  "determinism": "Counters, checks and verdict are deterministic under a fixed seed and rdkit version; only wall_seconds varies between runs, so the artifact is not byte-identical across reruns by design.",
+  "environment": {
+    "pin_matches_production": false,
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "production_pin": "rdkit 2024.3.5",
+    "python": "3.14.2",
+    "rdkit": "2025.09.6",
+    "warning": "If pin_matches_production is false this run is an instrument check only and its canonical keys must not be reused for any claim-bearing comparison; see CLAUDE.md on catalog drift."
+  },
+  "held_out_data_opened": false,
+  "purpose": "Instrument check on the frozen three-counter oracle accounting: oracle wrapper, canonicalization, duplicate treatment, cache semantics, every counting convention, budget termination.",
+  "required_before_any_claim_bearing_graphga_comparison": [
+    "the actual upstream GB-GA implementation vendored",
+    "the production RDKit pin 2024.3.5, or an explicitly isolated environment whose canonicalization is reconciled against it",
+    "the real algorithm terminating against every counter"
+  ],
+  "runs": {
+    "oracle_requests": {
+      "budget": 120,
+      "budget_counter": "oracle_requests",
+      "budget_exhausted": true,
+      "cache_enabled": true,
+      "candidates_offered": 400,
+      "counter_semantics": {
+        "evaluator_calls": "expensive oracle executions after caching; real work",
+        "oracle_requests": "algorithmic demand, NOT CPU",
+        "unique_valid_canonical_evaluations": "benchmark-native; the only PMO-comparable number"
+      },
+      "counters": {
+        "cache_hits": 53,
+        "duplicate_requests": 53,
+        "evaluator_calls": 59,
+        "failed_proposals": 8,
+        "oracle_requests": 120,
+        "unique_valid_canonical_evaluations": 59
+      },
+      "demand_ratio_requests_over_unique": 2.0338983050847457,
+      "distinct_valid_molecules": 59,
+      "evaluator_saw_only_canonical_input": true,
+      "goal": {
+        "clogp_box_held_in_p25_p75": [
+          2.3688650000000004,
+          4.452222500000002
+        ],
+        "goal": "target-free developability: QED floor and cLogP box",
+        "normalizers": "diagnostics/retarget_goal_language_normalizers.json",
+        "note": "no threshold is selected by this smoke; the box is the held-in IQR",
+        "qed_floor_held_in_median": 0.56676118212139
+      },
+      "invariants": {
+        "caching cannot erase a wasteful request": true,
+        "evaluator_calls matches the cache setting": true,
+        "oracle_requests == unique + duplicate_requests + failed_proposals": true,
+        "oracle_requests >= unique_valid_canonical_evaluations": true
+      },
+      "underlying_evaluator_invocations": 59,
+      "wall_seconds": 0.0687
+    },
+    "unique_valid_canonical_evaluations": {
+      "budget": 120,
+      "budget_counter": "unique_valid_canonical_evaluations",
+      "budget_exhausted": true,
+      "cache_enabled": true,
+      "candidates_offered": 400,
+      "counter_semantics": {
+        "evaluator_calls": "expensive oracle executions after caching; real work",
+        "oracle_requests": "algorithmic demand, NOT CPU",
+        "unique_valid_canonical_evaluations": "benchmark-native; the only PMO-comparable number"
+      },
+      "counters": {
+        "cache_hits": 142,
+        "duplicate_requests": 142,
+        "evaluator_calls": 120,
+        "failed_proposals": 26,
+        "oracle_requests": 288,
+        "unique_valid_canonical_evaluations": 120
+      },
+      "demand_ratio_requests_over_unique": 2.4,
+      "distinct_valid_molecules": 120,
+      "evaluator_saw_only_canonical_input": true,
+      "goal": {
+        "clogp_box_held_in_p25_p75": [
+          2.3688650000000004,
+          4.452222500000002
+        ],
+        "goal": "target-free developability: QED floor and cLogP box",
+        "normalizers": "diagnostics/retarget_goal_language_normalizers.json",
+        "note": "no threshold is selected by this smoke; the box is the held-in IQR",
+        "qed_floor_held_in_median": 0.56676118212139
+      },
+      "invariants": {
+        "caching cannot erase a wasteful request": true,
+        "evaluator_calls matches the cache setting": true,
+        "oracle_requests == unique + duplicate_requests + failed_proposals": true,
+        "oracle_requests >= unique_valid_canonical_evaluations": true
+      },
+      "underlying_evaluator_invocations": 120,
+      "wall_seconds": 0.1455
+    }
+  },
+  "schema": "compose.baselines.oracle_accounting_harness_stress_test",
+  "seed": 20260813,
+  "sources": {
+    "cohort": "diagnostics/retarget_calibration_cohort.json",
+    "cohort_sha256": "e402e318fd9540fb51fc93c7481094beec4c5f968a582f7349d6359f24e19a5f",
+    "count": 5,
+    "pool": "held-in training sources only",
+    "smiles": [
+      "Cc1ccccc1-c1noc(-c2cc3ccccc3oc2=O)n1",
+      "COc1ccc(-c2nc(CS(=O)(=O)CC(=O)NCc3ccccc3Br)c(C)o2)cc1",
+      "CC(=O)CCC(C)C1CCC2C3=C(CCC21C)C1(C)CCC(=O)C(C)C1CC3=O",
+      "C=CC=C(C=C)CCC(=O)N1C(=O)C(C(C)O)C1OC(C)=O",
+      "CCCc1c(C(=O)OCC)c(C(=O)OCC)c2c(-c3ccccc3)cc(N3CCOCC3)nn12"
+    ]
+  },
+  "title": "ORACLE-ACCOUNTING HARNESS STRESS TEST",
+  "verdict": "PASS"
+}

@@ -13,10 +13,23 @@
   it only by `handoff.json`, which must be written after the content commit in
   order to hash it.
 - **Working tree clean:** yes
-- **Status:** `DESIGN_ONLY`, plus one `SMOKE_HELD_IN` instrument check
-  (`diagnostics/baselines/graph_ga_accounting_smoke.json`). **HOLDING** by
-  instruction from the main workstream.
+- **Status:** `DESIGN_ONLY`, plus one `SMOKE_HELD_IN` harness stress test
+  (`diagnostics/baselines/oracle_accounting_harness_stress_test.json`).
+  **HOLDING** by instruction from the main workstream.
 - **Held-out data opened:** **no**
+
+# ⚠ No baseline has been run. There is no GraphGA result.
+
+The one execution in this lane is an **ORACLE-ACCOUNTING HARNESS STRESS TEST**.
+It exercises the shared accountant with a GA-*shaped*, adversarial-by-construction
+candidate stream. **Upstream GB-GA was never vendored, nothing external was
+installed, and nothing here is evidence about GraphGA's behaviour.** A reader who
+carries away "GraphGA smoke passed" has the wrong belief.
+
+Before any claim-bearing GraphGA comparison: the actual upstream implementation
+vendored; the production RDKit pin **2024.3.5**, or an explicitly isolated
+environment whose canonicalization is reconciled against it; and the real
+algorithm terminating against every counter.
 
 # ⚠ Manuscript lane: two files need merging
 
@@ -117,25 +130,27 @@ to the right objects later.
 | Test | Result | Artifact |
 |---|---|---|
 | `tests/test_baseline_qualification.py` (12 tests) | PASS | — |
-| `tests/test_oracle_accounting.py` (9 tests) | PASS | — |
+| `tests/test_oracle_accounting.py` (10 tests) | PASS | — |
 | `tests/test_comparator_registry.py` (14 tests, pre-existing) | PASS — unaffected | — |
 | `scripts/render_comparator_registry.py --check` | PASS (in-sync) | `COMPARATOR_MATRIX.md` |
-| **Accounting instrument check, 5 held-in sources** | **PASS**, 7/7 checks, 0.22 s CPU | `diagnostics/baselines/graph_ga_accounting_smoke.json` |
+| **ORACLE-ACCOUNTING HARNESS STRESS TEST**, 5 held-in sources | **PASS**, 9/9 checks, under one CPU-second | `diagnostics/baselines/oracle_accounting_harness_stress_test.json` |
 | Held-in smoke of any baseline **method** | **NOT RUN** — nothing external was installed; upstream GB-GA is not vendored | — |
 
-The instrument check verified: canonicalization collapses equivalent SMILES
-spellings; duplicates charge `raw_compute` and not `benchmark_native`; invalids
-are counted as failed proposals and never reach the evaluator; the evaluator only
-ever saw canonical SMILES; both budget conventions terminate; the two conventions
-disagree in the predicted direction; and the counter identity
-`raw_compute == benchmark_native + cache_hits + failed_proposals` holds.
+The stress test verified: canonicalization collapses equivalent SMILES
+spellings; duplicates charge `oracle_requests` and not
+`unique_valid_canonical_evaluations`; invalids are counted as failed proposals
+and never reach the evaluator; caching reduces `evaluator_calls`; **caching
+cannot erase a wasteful request** — disabling the cache on an identical stream
+left `oracle_requests` at 288 and `unique_valid_canonical_evaluations` at 120
+while moving `evaluator_calls` from 120 to 262; the evaluator only ever saw
+canonical SMILES; every budget convention terminates; the conventions disagree in
+the predicted direction; and the counter identity
+`oracle_requests == unique_valid_canonical_evaluations + duplicate_requests + failed_proposals`
+holds in every run.
 
-**It is not a measurement of GraphGA.** The candidate stream is GA-*shaped*
-(BRICS recombination, survivor rescores, alternate spellings, malformed strings)
-and exists only to drive the accountant against an adversarial stream. It also
-ran on **rdkit 2025.09.6, not the production pin 2024.3.5** — recorded in the
-artifact with `pin_matches_production: false`; its canonical keys must not be
-reused for a claim-bearing comparison.
+It ran on **rdkit 2025.09.6, not the production pin 2024.3.5** — stamped in the
+artifact as `pin_matches_production: false`, which keeps its canonical keys out
+of any scientific result.
 
 # Results
 
@@ -226,8 +241,9 @@ python scripts/render_comparator_registry.py
 pytest tests/test_baseline_qualification.py -q
 pytest tests/test_comparator_registry.py -q      # pre-existing, must stay green
 
-# accounting instrument check — held-in, ~0.2 s CPU, writes a durable artifact
-python scripts/baseline_accounting_smoke.py --sources 5
+# ORACLE-ACCOUNTING HARNESS STRESS TEST — held-in, <1 s CPU, durable artifact.
+# NOT a GraphGA run.
+python scripts/oracle_accounting_stress_test.py --sources 5
 pytest tests/test_oracle_accounting.py -q
 
 # baseline METHOD smoke — NONE. Upstream code is not vendored and the lane is
@@ -257,10 +273,10 @@ two cannot disagree.
 # Files changed
 
 ```text
-diagnostics/baselines/graph_ga_accounting_smoke.json
+diagnostics/baselines/oracle_accounting_harness_stress_test.json
 docs/RELATED_WORK_MATRIX.md
 paper_iclr_stochastic_rewriting/references.bib
-scripts/baseline_accounting_smoke.py
+scripts/oracle_accounting_stress_test.py
 src/compose_v4/experiments/oracle_accounting.py
 tests/test_oracle_accounting.py
 baselines/ddsbm/README.md
@@ -297,20 +313,29 @@ tests/test_baseline_qualification.py
 > comparison would have to be repeated, so no expensive adapter should be built
 > against a model that might be replaced.
 
-When the hold lifts, the first bounded action is: **vendor upstream GB-GA (MIT)
-and run the real GraphGA adapter on 3–5 held-in sources under the frozen dual
+Local adapter preparation — vendoring, environment files, wrapper code, local
+tests — **is** permitted by the current instruction. It was **not started**,
+deliberately: the budget is tight and the base process may change.
+
+When the hold lifts, the first bounded action is: **vendor upstream GB-GA (MIT),
+reconcile canonicalization against the production RDKit pin 2024.3.5, and run
+the real GraphGA adapter on 3–5 held-in sources under the frozen three-counter
 accounting**, projected 0.1 CPU-core-hours. The accountant it plugs into is
-already built, tested and smoked; only the GB-GA crossover/mutation code is
-missing.
+already built, tested and stress-tested; the GB-GA crossover/mutation code and
+the pin reconciliation are what is missing.
 
 # Actions explicitly not recommended
 
 - **Do not build the MARS, REINVENT, GraphXForm, DDSBM or HN-GFN adapters.**
   Explicit HOLD from the main workstream.
-- **Do not report the accounting smoke as a GraphGA result.** It measures the
-  accountant, on a stream that is not GB-GA, under a non-production rdkit.
-- **Do not report `benchmark_native` and `raw_compute` in the same column, or
-  either one without naming it.** On a benign stream they differed by 2×.
+- **Do not call the harness stress test a "GraphGA smoke", and do not report it
+  as a GraphGA result.** It measures the accountant, on a stream that is not
+  GB-GA, under a non-production rdkit.
+- **Do not report two counters in the same column, or any counter without naming
+  it.** On a benign stream `unique_valid_canonical_evaluations` and
+  `oracle_requests` differed by 2×.
+- **Do not describe `oracle_requests` as compute.** It is algorithmic demand. For
+  literal compute, report wall and core time.
 
 - **Do not build the MARS or GraphXForm adapter first.** Both are 10–40× the
   compute and carry the environment risk; neither tests anything GraphGA does not

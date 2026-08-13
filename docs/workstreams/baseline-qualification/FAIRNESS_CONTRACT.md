@@ -54,54 +54,73 @@ much as to goal selection.
 
 ---
 
-## 0. Dual oracle accounting — FROZEN 2026-08-13
+## 0. Three-counter oracle accounting — FROZEN 2026-08-13
 
 **Decided by the main workstream. Not open for reinterpretation at run time.**
 
-Every run logs **both** counters. Neither may ever be substituted for the other,
+Every run logs **all three** counters. None may ever be substituted for another,
 and no table may report one without naming which it is.
 
 | counter | definition | used for |
 |---|---|---|
-| **`benchmark_native`** | unique **valid canonical** molecules scored. A repeat of a canonical SMILES already scored in this run does not increment. An invalid or unparseable molecule does not increment. | **only** comparison against published PMO numbers |
-| **`raw_compute`** | **every** oracle invocation: duplicates, rejected proposals, invalids, particles, prescreened candidates, reranked endpoints, and rescores. | **all** actual efficiency claims |
+| **`unique_valid_canonical_evaluations`** | distinct **valid canonical** molecules evaluated. A repeat of a canonical SMILES already seen does not increment; an unparseable molecule does not increment. | **only** comparison against published PMO numbers — this is the benchmark-native number |
+| **`oracle_requests`** | every scoring request the algorithm makes, including duplicates, rejected proposals and invalids. **This is algorithmic demand, not CPU.** | **all** efficiency claims about search behaviour |
+| **`evaluator_calls`** | expensive oracle executions actually performed, after caching. **Real work.** | what the objective genuinely cost |
 
-The two exist because they answer different questions, and each one alone is
-misleading in a predictable direction:
+### The conceptual invariant
 
-- `benchmark_native` is the only quantity comparable to the literature, and it
-  **understates** the cost of a method that re-evaluates. MARS has no cache
-  anywhere and rescores its current molecule whenever a proposal is invalid;
-  under `benchmark_native` alone that work is invisible.
-- `raw_compute` is the honest efficiency number, and it **overstates** a method
-  relative to published results. REINVENT caches per scoring component by design
-  and its diversity filter zero-scores repeats; GraphGA natively charges for
-  duplicate offspring. Reporting `raw_compute` beside a PMO leaderboard number
-  would be comparing two different quantities.
+> **Caching may reduce evaluator work, but it cannot erase wasteful algorithmic
+> requests.**
 
-**The rule this freeze exists to prevent:** a later run picking whichever
-convention flatters us. Both numbers are always logged, so the choice is made
-once, in the caption, and is visible.
+This is why a cache hit still increments `oracle_requests`. If it did not,
+bolting a cache onto a method that re-proposes the same molecule a thousand
+times would make it look efficient, and the method's actual search behaviour
+would become invisible. The saving legitimately shows up in `evaluator_calls`
+and nowhere else.
+
+Neither `oracle_requests` nor `evaluator_calls` is "compute" in the literal
+sense. **For a literal-compute number, report wall and core time separately.**
+
+The harness stress test demonstrates the separation directly: disabling the
+cache on an identical stream left `oracle_requests` at 288 and
+`unique_valid_canonical_evaluations` at 120, and moved `evaluator_calls` from
+120 to 262.
+
+### Why each counter alone is misleading
+
+- `unique_valid_canonical_evaluations` is the only quantity comparable to the
+  literature, and it **understates** a method that re-evaluates. MARS has no
+  cache anywhere and rescores its current molecule whenever a proposal is
+  invalid; under this counter alone that behaviour is invisible.
+- `oracle_requests` is the honest search-behaviour number and **overstates** a
+  method relative to published results. REINVENT caches per scoring component by
+  design; GraphGA natively charges for duplicate offspring. Placing it beside a
+  PMO leaderboard number compares two different quantities.
+- `evaluator_calls` **flatters whichever method caches hardest** and says
+  nothing about whether the search was wasteful.
 
 ### Binding consequences
 
-1. A results table states its counter in the caption. `benchmark_native` and
-   `raw_compute` never appear in the same column.
-2. A PMO-comparable row uses `benchmark_native` **and** may not carry a
-   REINVENT 4 capability claim (PMO wraps a REINVENT 2.0-era reimplementation).
-3. An efficiency claim — "COMPOSE reaches X at fewer oracle calls" — uses
-   `raw_compute`, for every method including COMPOSE.
-4. The ratio `raw_compute / benchmark_native` is itself reported per method. It
-   is the cache-and-duplicate rate, it differs by orders of magnitude across
-   these methods, and hiding it is how an unfair comparison survives review.
+1. A results table states its counter in the caption. The three never appear in
+   the same column.
+2. A PMO-comparable row uses `unique_valid_canonical_evaluations` **and** may not
+   carry a REINVENT 4 capability claim (PMO wraps a REINVENT 2.0-era
+   reimplementation).
+3. An efficiency claim — "COMPOSE reaches X at fewer oracle calls" — names which
+   counter it means, for every method including COMPOSE.
+4. The ratio **`oracle_requests / unique_valid_canonical_evaluations`** is
+   reported per method. It is the cache-and-duplicate rate, it differs by orders
+   of magnitude across these methods, and hiding it is how an unfair comparison
+   survives review.
 5. Caching is allowed for every method with identical semantics (same canonical
-   SMILES ⇒ same score). A cache hit increments `raw_compute` and does not
-   increment `benchmark_native`.
-6. Invalid or unscorable molecules increment `raw_compute` only, and are
+   SMILES ⇒ same score). A cache hit increments `oracle_requests` and
+   `duplicate_requests`, and increments neither of the other two counters.
+6. Invalid or unscorable molecules increment `oracle_requests` only, and are
    additionally reported as `failed_proposals`.
 
 Implemented and enforced by `src/compose_v4/experiments/oracle_accounting.py`;
-instrument check in `diagnostics/baselines/graph_ga_accounting_smoke.json`.
+harness stress test in
+`diagnostics/baselines/oracle_accounting_harness_stress_test.json`.
 
 ---
 

@@ -130,7 +130,41 @@ rejected, and whether it changes a frozen object.
   the reason externals are `N/A` for C1, C2 and C3.
 - **Changes a frozen object.** No.
 
+## 2026-08-13 (later) — Counters renamed and split three ways; the naming was misleading
+
+- **Decision.** The two-counter scheme below is **SUPERSEDED**. `raw_compute` was
+  a misleading name, because a duplicated request increments it even when the
+  cache serves it — that is *demand*, not compute. The frozen scheme is now:
+  - `unique_valid_canonical_evaluations` — the PMO-compatible, benchmark-native
+    number (was `benchmark_native`);
+  - `oracle_requests` — every scoring request the algorithm makes, including
+    duplicates and rejects. **Algorithmic demand, not CPU** (was `raw_compute`);
+  - `evaluator_calls` — expensive oracle executions actually performed after
+    caching. **Real work.**
+- **Evidence before.** The lead's reading of the shipped harness: the counter
+  named "compute" was not measuring compute, and a reader would take it as CPU.
+- **What was kept.** The design call that a cache hit still increments the demand
+  counter, which the lead confirmed was correct and is precisely why the counter
+  needed an honest name. It is now stated as a conceptual invariant in the
+  fairness contract: *caching may reduce evaluator work, but it cannot erase
+  wasteful algorithmic requests.* The required per-method ratio is kept and
+  renamed to match what it divides:
+  `oracle_requests / unique_valid_canonical_evaluations`.
+- **What the rename forced beyond a find-and-replace.** With the old code,
+  disabling the cache made `benchmark_native` count every *valid* request rather
+  than every *distinct* one, so under the new name it would no longer have been
+  counting unique molecules. Uniqueness is now tracked in a `_seen` set
+  independent of the score cache, and a cache-disabled control run is part of the
+  stress test: same stream, `oracle_requests` 288 and
+  `unique_valid_canonical_evaluations` 120 unchanged, `evaluator_calls` 120 → 262.
+- **Changes a frozen object.** Yes — it replaces a scheme frozen the same day,
+  before any comparator consumed it.
+
 ## 2026-08-13 — Dual oracle accounting frozen; the blocker is resolved
+
+> **SUPERSEDED** by the entry above. The decision to freeze and dual-log stands;
+> only the counter names and the split into three changed. Names below are
+> historical.
 
 - **Decision.** The main workstream froze **both** counters:
   `benchmark_native` (unique valid canonical molecules scored, used **only**
@@ -176,14 +210,35 @@ rejected, and whether it changes a frozen object.
 - **Changes a frozen object.** Yes — a manuscript-bearing file, with approval.
   Flagged in `STATUS.md` and `HANDOFF.md` for the manuscript lane to merge.
 
+## 2026-08-13 (later) — The artifact is renamed so its headline cannot mislead
+
+- **Decision.** The run is titled **ORACLE-ACCOUNTING HARNESS STRESS TEST**, not
+  "GraphGA smoke", and the rename was applied at the **file** level:
+  `scripts/baseline_accounting_smoke.py` → `scripts/oracle_accounting_stress_test.py`,
+  and `diagnostics/baselines/graph_ga_accounting_smoke.json` →
+  `diagnostics/baselines/oracle_accounting_harness_stress_test.json`.
+- **Evidence before.** The lead's point, which the earlier version got wrong: the
+  artifact disclaimed the GraphGA reading internally, but a reader who sees
+  "GraphGA smoke — PASS" in a status file carries the wrong belief regardless of
+  what the JSON says three levels down. A filename is a headline.
+- **Alternatives rejected.** Keeping the filename and strengthening the internal
+  disclaimer. Rejected for exactly the reason above.
+- **Also recorded.** The three preconditions for any claim-bearing GraphGA
+  comparison now appear in the artifact, the registry, `STATUS.md` and
+  `HANDOFF.md`: upstream implementation vendored; production RDKit pin 2024.3.5
+  or an isolated environment reconciled against it; the real algorithm
+  terminating against every counter.
+- **Changes a frozen object.** No.
+
 ## 2026-08-13 — The accounting smoke is an instrument check, not a GraphGA measurement
+
+> Superseded in **naming only** by the entry above; the reasoning stands.
 
 - **Decision.** The authorised "GraphGA accounting smoke" was run as an
   instrument check on the shared accountant, driven by a GA-*shaped* candidate
   stream (BRICS recombination, survivor rescores, alternate SMILES spellings,
   malformed strings) over 5 held-in sources. **Upstream GB-GA was not vendored
-  and nothing external was installed.** Verdict PASS on all seven checks, 0.22 s
-  of CPU.
+  and nothing external was installed.** Verdict PASS, well under a CPU-second.
 - **Evidence before.** The instruction was explicit that the smoke's job is the
   plumbing — oracle wrapper, canonicalization, duplicate treatment, both
   conventions, budget termination — and *not* to measure GraphGA; combined with

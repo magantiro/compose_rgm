@@ -643,8 +643,10 @@
   ],
   "global_fairness_rules": [
     "Property-oracle calls are the primary matched quantity. Wall time is reported, never matched, because the accelerator classes differ.",
-    "DUAL ORACLE ACCOUNTING IS FROZEN (2026-08-13, main workstream). Every run logs BOTH counters and neither may ever be substituted for the other. benchmark_native = unique valid canonical molecules scored; used ONLY for comparison against published PMO numbers. raw_compute = every oracle invocation including duplicates, rejects, invalids and rescores; used for ALL actual efficiency claims. A table names its counter in the caption and never mixes them in one column. The ratio raw_compute/benchmark_native is reported per method — it is the cache-and-duplicate rate and hiding it is how an unfair comparison survives review. Enforced by src/compose_v4/experiments/oracle_accounting.py; instrument check in diagnostics/baselines/graph_ga_accounting_smoke.json.",
-    "The two counters are not a formality: on the held-in instrument check the SAME candidate stream under a budget of 120 bought 120 distinct molecules under benchmark_native (288 invocations) and only 59 distinct molecules under raw_compute (120 invocations). Reporting one number as if it were the other misstates the work done by roughly 2x on a benign stream, and by far more on MARS, which has no cache anywhere.",
+    "THREE-COUNTER ORACLE ACCOUNTING IS FROZEN (2026-08-13, main workstream). Every run logs all three and none may ever be substituted for another. unique_valid_canonical_evaluations = distinct valid canonical molecules evaluated; the benchmark-native number, used ONLY against published PMO numbers. oracle_requests = every scoring request the algorithm makes including duplicates, rejects and invalids; this is ALGORITHMIC DEMAND, NOT CPU. evaluator_calls = expensive oracle executions actually performed after caching; real work. A table names its counter in the caption and never mixes them in one column. For a literal-compute number report wall and core time separately. Enforced by src/compose_v4/experiments/oracle_accounting.py; harness stress test in diagnostics/baselines/oracle_accounting_harness_stress_test.json.",
+    "THE CONCEPTUAL INVARIANT: caching may reduce evaluator work, but it cannot erase wasteful algorithmic requests. That is why a cache hit still increments oracle_requests — otherwise bolting a cache onto a method that re-proposes the same molecule a thousand times would make it look efficient and its search behaviour would become invisible. The saving legitimately appears in evaluator_calls and nowhere else.",
+    "Report oracle_requests / unique_valid_canonical_evaluations per method. It is the cache-and-duplicate rate and hiding it is how an unfair comparison survives review.",
+    "The counters are not a formality. On the harness stress test the SAME candidate stream under a budget of 120 bought 120 distinct molecules under unique_valid_canonical_evaluations (288 requests) and only 59 under oracle_requests (120 requests) — a 2x misstatement on a benign stream, and far more on MARS, which has no cache anywhere. Disabling the cache on that identical stream left oracle_requests at 288 and unique_valid_canonical_evaluations at 120 while moving evaluator_calls from 120 to 262, which is the separation the three counters exist to preserve.",
     "Objective-specific training oracle calls are counted. Report two totals for every method that trains per objective — with and without the training phase — because a reviewer may reasonably object to either convention.",
     "A surrogate in the loop must be disclosed as a separate column. HN-GFN's 1000-call budget is spent against a learned proxy, not the true oracle; placing that beside a method that queries honestly is invalid in both directions.",
     "Caching is allowed for every method, must use identical semantics (identical canonical SMILES implies identical score), and cache hits are reported separately.",
@@ -659,27 +661,35 @@
     "definition": "A held-in smoke is 3-5 held-in source molecules, one objective, and the smallest budget at which the method's own loop runs end to end. Its only purpose is to prove the adapter executes, the frozen COMPOSE oracle is being called, and the oracle counter is wired. A smoke result is SMOKE_HELD_IN and can never be cited for or against any claim. NOTHING BELOW HAS BEEN EXECUTED; every figure is a projection.",
     "sources": "3-5 held-in sources per method, drawn from held-in data only, never from the sealed panel or any confirmatory reserve",
     "executed": false,
-    "accounting_instrument_check": {
+    "oracle_accounting_harness_stress_test": {
+      "title": "ORACLE-ACCOUNTING HARNESS STRESS TEST — PASS",
       "status": "PASS, SMOKE_HELD_IN, executed 2026-08-13",
-      "artifact": "diagnostics/baselines/graph_ga_accounting_smoke.json",
-      "what_it_is": "An instrument check on the shared accountant, NOT a measurement of GraphGA. Upstream GB-GA is not vendored and nothing external was installed; the candidate stream is GA-shaped (BRICS recombination plus survivor rescores, alternate SMILES spellings and malformed strings) and exists only to drive the accountant against an adversarial stream.",
+      "artifact": "diagnostics/baselines/oracle_accounting_harness_stress_test.json",
+      "THIS_IS_NOT_A_GRAPHGA_RESULT": "Upstream GB-GA was never vendored and nothing external was installed. The candidate stream is GA-SHAPED and adversarial by construction (BRICS recombination, survivor rescores, alternate SMILES spellings, malformed strings) and exists only to drive the accountant. Do not cite this as a GraphGA smoke, a GraphGA result, or evidence about GraphGA's behaviour.",
       "sources": "5 held-in sources from diagnostics/retarget_calibration_cohort.json, cohort e402e318fd9540fb51fc93c7481094beec4c5f968a582f7349d6359f24e19a5f, pool 'held-in training sources only'",
       "checks_passed": [
         "canonicalization collapses equivalent SMILES spellings to one key",
-        "duplicates charged to raw_compute and not to benchmark_native",
+        "duplicates charge oracle_requests and not unique_valid_canonical_evaluations",
         "invalids counted as failed proposals and never reach the evaluator",
+        "caching reduces evaluator_calls",
+        "caching cannot erase a wasteful request: disabling the cache left oracle_requests and unique_valid_canonical_evaluations unchanged",
         "the evaluator only ever saw canonical SMILES",
-        "both budget conventions terminate a run",
-        "the two conventions disagree in the predicted direction",
-        "the counter identity raw_compute == benchmark_native + cache_hits + failed_proposals holds in both runs"
+        "every budget convention terminates a run",
+        "the counting conventions disagree in the predicted direction",
+        "the counter identity oracle_requests == unique_valid_canonical_evaluations + duplicate_requests + failed_proposals holds in every run"
       ],
-      "measured_cost": "0.22 s wall for both runs combined on one CPU core, against a 0.1 CPU-core-hour envelope. The plumbing is free; the cost of this lane remains dependency rot.",
-      "environment_caveat": "Run on rdkit 2025.09.6, NOT the production pin 2024.3.5. Recorded in the artifact. Its canonical keys must not be reused for any claim-bearing comparison; see CLAUDE.md on catalog drift.",
-      "next": "HOLD. Per the main workstream, do not proceed to MARS, REINVENT, GraphXForm, DDSBM or HN-GFN."
+      "measured_cost": "well under one CPU-second for all three runs combined, against a 0.1 CPU-core-hour envelope. The plumbing is free; the cost of this lane remains dependency rot.",
+      "environment_caveat": "Run on rdkit 2025.09.6, NOT the production pin 2024.3.5. Recorded in the artifact as pin_matches_production false. Its canonical keys must not be reused for any claim-bearing comparison; see CLAUDE.md on catalog drift.",
+      "required_before_any_claim_bearing_graphga_comparison": [
+        "the actual upstream GB-GA implementation vendored",
+        "the production RDKit pin 2024.3.5, or an explicitly isolated environment whose canonicalization is reconciled against it",
+        "the real algorithm terminating against every counter"
+      ],
+      "next": "HOLD. Per the main workstream, do not run external baseline sweeps and do not launch anything on Modal. Local adapter preparation — vendoring, environment files, wrapper code, local tests — is permitted but was not started, because Lane 1 may reopen the base process."
     },
     "recommended_order": [
-      "DONE — accounting instrument check, PASS, 0.22 s. See accounting_instrument_check above. HOLD HERE.",
-      "GraphGA proper — 0.1 CPU-core-hours, HIGH confidence, RDKit-only. BLOCKED ON HOLD: requires vendoring upstream GB-GA, which was not authorised.",
+      "DONE — ORACLE-ACCOUNTING HARNESS STRESS TEST, PASS. See oracle_accounting_harness_stress_test above. This is NOT a GraphGA result. HOLD HERE.",
+      "GraphGA proper — 0.1 CPU-core-hours, HIGH confidence, RDKit-only. NOT STARTED: needs upstream GB-GA vendored and the production RDKit pin reconciled, and the lane is on HOLD.",
       "REINVENT adapter A (PMO-wrapped) — 0.3 CPU-core-hours, reuses the same shared-counter pattern.",
       "MARS — 1.5 CPU-core-hours including the one-time ChEMBL vocabulary build; LOW confidence on the 2021 environment.",
       "GraphXForm — 2-4 CPU-core-hours plus a 347 MB checkpoint; MEDIUM confidence.",

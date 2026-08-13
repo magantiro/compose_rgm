@@ -1,25 +1,33 @@
-"""Held-in instrument check for the frozen dual oracle accounting.
+"""ORACLE-ACCOUNTING HARNESS STRESS TEST.
 
-**This does not measure GraphGA.** The upstream GB-GA crossover/mutation code is
-not vendored in this repository and nothing external was installed. What runs
-here is a GA-*shaped* candidate stream -- BRICS fragment recombination plus two
-point mutations over held-in sources -- whose only job is to drive the shared
-accountant hard enough to prove the plumbing:
+**This is not a GraphGA run and produces no GraphGA result.** The upstream GB-GA
+crossover/mutation code is not vendored in this repository and nothing external
+was installed. What runs here is a GA-*shaped*, deliberately adversarial
+candidate stream -- BRICS fragment recombination, survivor rescores, alternate
+SMILES spellings and malformed strings over held-in sources -- whose only job is
+to drive the shared accountant hard enough to prove the plumbing:
 
 * the frozen COMPOSE objective is reached through the wrapper and nowhere else;
 * canonicalization collapses equivalent SMILES spellings to one key;
-* duplicates are charged to ``raw_compute`` and not to ``benchmark_native``;
-* invalid candidates are charged to ``raw_compute`` and counted as failures;
-* both counting conventions terminate a run at their declared budget.
+* duplicates charge ``oracle_requests`` and not
+  ``unique_valid_canonical_evaluations``;
+* a cache reduces ``evaluator_calls`` and cannot erase a wasteful request;
+* invalid candidates charge ``oracle_requests`` and are counted as failures;
+* every counting convention terminates a run at its declared budget.
 
-The candidate stream deliberately injects duplicates, alternate spellings and
-malformed strings, because an accountant that is never shown an adversarial
-stream has not been tested.
+An accountant that has never been shown an adversarial stream has not been
+tested, which is why the stream is built to be hostile rather than realistic.
 
-Artifact status: ``SMOKE_HELD_IN``. It is an instrument check and can never be
-cited for or against any scientific claim.
+Artifact status: ``SMOKE_HELD_IN``. It is an instrument check on the harness and
+can never be cited for or against any scientific claim, about GraphGA or
+anything else.
 
-    python scripts/baseline_accounting_smoke.py --sources 5
+Before any claim-bearing GraphGA comparison, three things are still required:
+the actual upstream implementation vendored; the production RDKit pin 2024.3.5,
+or an explicitly isolated environment whose canonicalization is reconciled
+against it; and the real algorithm terminating against every counter.
+
+    python scripts/oracle_accounting_stress_test.py --sources 5
 """
 
 from __future__ import annotations
@@ -46,7 +54,9 @@ from compose_v4.experiments.oracle_accounting import (  # noqa: E402
 
 COHORT = ROOT / "diagnostics" / "retarget_calibration_cohort.json"
 NORMALIZERS = ROOT / "diagnostics" / "retarget_goal_language_normalizers.json"
-OUTPUT = ROOT / "diagnostics" / "baselines" / "graph_ga_accounting_smoke.json"
+OUTPUT = (
+    ROOT / "diagnostics" / "baselines" / "oracle_accounting_harness_stress_test.json"
+)
 
 #: Deliberately malformed strings mixed into the stream so the invalid path is
 #: exercised rather than assumed.
@@ -136,7 +146,14 @@ def ga_shaped_stream(sources: list[str], rng: random.Random, length: int) -> lis
     return stream
 
 
-def run(sources: list[str], stream: list[str], budget: int, counter: str) -> dict:
+def run(
+    sources: list[str],
+    stream: list[str],
+    budget: int,
+    counter: str,
+    *,
+    cache: bool = True,
+) -> dict:
     evaluate, goal = developability_objective()
     calls: list[str] = []
 
@@ -145,7 +162,7 @@ def run(sources: list[str], stream: list[str], budget: int, counter: str) -> dic
         return evaluate(canonical)
 
     accountant = OracleAccountant(
-        evaluate=counted, budget=budget, budget_counter=counter
+        evaluate=counted, budget=budget, budget_counter=counter, cache=cache
     )
     started = time.perf_counter()
     accountant.score_many(stream)
@@ -179,55 +196,84 @@ def main() -> int:
     rng = random.Random(args.seed)
     stream = ga_shaped_stream(sources, rng, args.stream)
 
-    # The same stream under both frozen conventions. The point of the smoke is
-    # that these two runs disagree in a predictable direction.
+    # The same stream under every counting convention. The point of the stress
+    # test is that these runs disagree in a predictable direction.
     by_counter = {
         counter: run(sources, stream, args.budget, counter)
-        for counter in ("benchmark_native", "raw_compute")
+        for counter in ("unique_valid_canonical_evaluations", "oracle_requests")
     }
+    # A cache-disabled run isolates the third counter: the same stream must move
+    # evaluator_calls and leave the other two alone.
+    uncached = run(
+        sources,
+        stream,
+        args.budget,
+        "unique_valid_canonical_evaluations",
+        cache=False,
+    )
 
-    native = by_counter["benchmark_native"]["counters"]
-    raw = by_counter["raw_compute"]["counters"]
+    unique_run = by_counter["unique_valid_canonical_evaluations"]["counters"]
+    demand_run = by_counter["oracle_requests"]["counters"]
     checks = {
-        "canonicalization_collapses_spellings": (
-            native["cache_hits"] > 0
+        "canonicalization_collapses_spellings": unique_run["duplicate_requests"] > 0,
+        "duplicates_charge_requests_not_unique_evaluations": (
+            unique_run["oracle_requests"]
+            > unique_run["unique_valid_canonical_evaluations"]
         ),
-        "duplicates_charged_to_raw_compute_only": (
-            native["raw_compute"] > native["benchmark_native"]
+        "invalids_counted_and_never_reach_the_evaluator": (
+            unique_run["failed_proposals"] > 0
+            and unique_run["evaluator_calls"]
+            == unique_run["unique_valid_canonical_evaluations"]
         ),
-        "invalids_counted_and_not_scored": (
-            native["failed_proposals"] > 0
-            and native["evaluator_calls"] == native["benchmark_native"]
+        "caching_reduces_evaluator_calls": (
+            uncached["counters"]["evaluator_calls"] > unique_run["evaluator_calls"]
+        ),
+        "caching_cannot_erase_a_wasteful_request": (
+            uncached["counters"]["oracle_requests"] == unique_run["oracle_requests"]
+            and uncached["counters"]["unique_valid_canonical_evaluations"]
+            == unique_run["unique_valid_canonical_evaluations"]
         ),
         "evaluator_only_ever_saw_canonical_smiles": (
-            by_counter["benchmark_native"]["evaluator_saw_only_canonical_input"]
+            by_counter["unique_valid_canonical_evaluations"][
+                "evaluator_saw_only_canonical_input"
+            ]
         ),
-        "both_budgets_terminate": (
-            by_counter["benchmark_native"]["budget_exhausted"]
-            and by_counter["raw_compute"]["budget_exhausted"]
+        "every_budget_convention_terminates": all(
+            run_report["budget_exhausted"] for run_report in by_counter.values()
         ),
         "conventions_disagree_as_predicted": (
-            raw["benchmark_native"] < native["benchmark_native"]
+            demand_run["unique_valid_canonical_evaluations"]
+            < unique_run["unique_valid_canonical_evaluations"]
         ),
-        "counter_identity_holds_in_both_runs": all(
-            all(by_counter[c]["invariants"].values()) for c in by_counter
+        "counter_identity_holds_in_every_run": all(
+            all(report["invariants"].values())
+            for report in (*by_counter.values(), uncached)
         ),
     }
 
     report = {
-        "schema": "compose.baselines.accounting_smoke",
+        "schema": "compose.baselines.oracle_accounting_harness_stress_test",
+        "title": "ORACLE-ACCOUNTING HARNESS STRESS TEST",
         "artifact_status": "SMOKE_HELD_IN",
-        "not_a_measurement_of": (
-            "GraphGA. Upstream GB-GA is not vendored and nothing external was "
-            "installed. The candidate stream is GA-shaped (BRICS recombination "
-            "plus survivor rescores, alternate spellings and malformed strings) "
-            "and exists only to drive the accountant."
+        "THIS_IS_NOT_A_GRAPHGA_RESULT": (
+            "Upstream GB-GA was never vendored and nothing external was "
+            "installed. The candidate stream is GA-SHAPED and adversarial by "
+            "construction (BRICS recombination, survivor rescores, alternate "
+            "SMILES spellings, malformed strings). It exists only to drive the "
+            "accountant. Do not cite this as a GraphGA smoke, a GraphGA result, "
+            "or evidence about GraphGA's behaviour."
         ),
         "purpose": (
-            "Instrument check on the frozen dual oracle accounting: oracle "
-            "wrapper, canonicalization, duplicate treatment, both counting "
-            "conventions, budget termination."
+            "Instrument check on the frozen three-counter oracle accounting: "
+            "oracle wrapper, canonicalization, duplicate treatment, cache "
+            "semantics, every counting convention, budget termination."
         ),
+        "required_before_any_claim_bearing_graphga_comparison": [
+            "the actual upstream GB-GA implementation vendored",
+            "the production RDKit pin 2024.3.5, or an explicitly isolated "
+            "environment whose canonicalization is reconciled against it",
+            "the real algorithm terminating against every counter",
+        ],
         "held_out_data_opened": False,
         "sources": {
             "cohort": "diagnostics/retarget_calibration_cohort.json",
@@ -255,6 +301,7 @@ def main() -> int:
             ),
         },
         "runs": by_counter,
+        "cache_disabled_control_run": uncached,
         "checks": checks,
         "verdict": "PASS" if all(checks.values()) else "FAIL",
     }

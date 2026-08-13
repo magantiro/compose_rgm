@@ -111,7 +111,24 @@ from `docs/workstreams/PARALLEL_WORKSTREAMS_AND_HANDOFF.md` § Workstream D.
 Wall time is never the primary matched quantity: hardware differs, and several
 of these methods are GPU-native while COMPOSE evaluation here is CPU-only.
 
-### Primary matched quantity: **property-oracle calls**
+### Primary matched quantity: **property-oracle calls, counted three ways**
+
+**FROZEN 2026-08-13.** Every run logs all three counters, none substitutes for
+another, and every table names the counter it reports:
+
+- `unique_valid_canonical_evaluations` — distinct valid canonical molecules
+  evaluated. The **benchmark-native** number and the only one comparable to
+  published PMO results.
+- `oracle_requests` — every scoring request the algorithm makes, including
+  duplicates, rejects and invalids. **Algorithmic demand, not CPU.**
+- `evaluator_calls` — expensive oracle executions after caching. **Real work.**
+
+> **Conceptual invariant: caching may reduce evaluator work, but it cannot erase
+> wasteful algorithmic requests.**
+
+For a literal-compute number, report wall and core time separately. Full contract
+in `FAIRNESS_CONTRACT.md` §0; implementation in
+`src/compose_v4/experiments/oracle_accounting.py`.
 
 An *oracle call* is one evaluation of the frozen objective on one molecule.
 Counted for every method:
