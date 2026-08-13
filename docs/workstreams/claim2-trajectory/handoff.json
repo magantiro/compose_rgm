@@ -687,5 +687,8 @@
     },
     "frontier_result": "incomparable",
     "reframing": "learned local reference dynamics, not goal-directed transport: R_theta supplies plausible local molecular motion and control supplies purpose"
-  }
+  },
+  "pushed_head": "00f0bdd62145e06f9b998ea85335014a016fdc6e",
+  "remote": "https://github.com/KoshaTx/compose_rgm.git",
+  "pushed_head_verification": "pushed_head is the CONTENT head: the commit carrying all lane work. The stamp commit that records it sits one above, so verify with `git rev-parse origin/codex/compose-claim2-trajectory^` == pushed_head. A manifest cannot contain its own hash without changing it."
 }
