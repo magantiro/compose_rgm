@@ -29,7 +29,7 @@ Read the third and fourth columns together. Neither column is the finding on its
 **3. HN_GFN — `C4c_retargeting`**
 
 - *What it natively does.* One trained model samples under any preference vector over its objective set with no retraining. A hypernetwork emits the prediction-head weights from the preference vector while the MPNN trunk is shared, and preferences are drawn from a Dirichlet during training so the model generalises across the simplex at inference. This is a genuine instance of 'goal information reshapes the model without retraining the molecular machinery', which is the shape of the COMPOSE frozen-process claim.
-- *What COMPOSE still has.* Only the scalarization WEIGHTS vary; the objective SET is fixed at training time and is architecturally baked in (n_objectives is the hypernetwork's input width and the surrogate's output width). A genuinely new objective requires a full retrain. Generation also starts from the empty molecule every time, so there is no source conditioning and no realized prefix.
+- *What COMPOSE still has.* PREFERENCE CONTROL IS NOT CLAIMED AS NOVEL BY COMPOSE -- see pareto_control_is_not_claimed_as_novel. HN-GFN is a preference-conditioned Pareto specialist and pCoMole (2026) does preference-tilted Doob control for Pareto-constrained biomolecular sequence editing. What differs is the substrate, not the idea: only the scalarization WEIGHTS vary for HN-GFN, its objective SET is architecturally fixed at training time, and generation starts from the empty molecule every time, so there is no source conditioning and no realized prefix. COMPOSE's distinct content is the executable molecular graph process -- a complete valid molecule at every state, an exact rewrite kernel, canonical successor pushforward, exact bounded-space verification, continuation from a realized graph after the goal changes, and trajectory-level constraints.
 - *Evidence.* arXiv:2302.04040v2 section 4.2: 'the hypernetwork h(.; phi) takes the preference vector lambda as inputs and outputs the weights theta_pred of prediction heads'; 'we propose only to condition the weights of prediction heads with hypernetworks, while sharing the weights of MPNN'; 'Our key motivation is to design a unified GFlowNet to sample candidates according to different reward functions, even ones not seen during training.' Code: model_pred_hyper.py::forward(self, ray); main.py generator(s, vec_data=weights, ...).
 
 **4. GraphXForm — `C4d_pathwise`**
@@ -77,6 +77,47 @@ Read the third and fourth columns together. Neither column is the finding on its
 **Mol2Mol, beside it.** REINVENT 4's Mol2Mol accepts a complete input molecule, but the paper states 'the scaffold can change within the limits of the given similarity'. The supplied molecule is therefore a SIMILARITY ANCHOR, not a continued state. There is no realized molecular history to carry forward and no finite remaining-budget notion. This is the difference the operational wording makes precise.
 
 **MARS naming rule.** The MARS arm is 'restart at x_tau under a new objective' -- a NEW optimization launched from the current molecule. Never 'continuation' and never 'same-prefix retargeting'. The molecule is preserved as an initial state; the proposal, the imitation dataset and the temperature counter are all reset.
+
+## The baseline set is CLOSED
+
+*CLOSED 2026-08-13. Nothing gets added.* — Do not evaluate further candidates. Qualifying more names is no longer risk reduction; it is scope. The set above answers every question the paper needs answered.
+
+| method | role |
+|---|---|
+| **DDSBM** | modern stochastic graph transformation; licence-blocked, CONTEXT_ONLY |
+| **GraphXForm** | modern learned graph editor/generator |
+| **HN_GFN** | Pareto/preference specialist |
+| **MARS** | sequential-edit anchor; extended table or supplement |
+| **REINVENT_or_GraphGA** | ONE mature conventional anchor |
+
+**Not a baseline: Edit Flows (NeurIPS 2025).** RELATED WORK ONLY, and must not become an engineering branch. It is a CTMC over variable-length SEQUENCES, with published experiments on text, code and image captioning, and NO public molecular implementation. Building 'Edit Flows over molecular graphs with chemical legality' would mean inventing the method on their behalf and then comparing against our own construction of it -- which is worth LESS than no comparison at all, because a reviewer would correctly attribute any gap to our reconstruction rather than to the method. Positioning is written in docs/RELATED_WORK_POSITIONING.md.
+
+## Preference and Pareto control are NOT claimed as novel
+
+**COMPOSE DOES NOT CLAIM PREFERENCE OR PARETO CONTROL AS NOVEL. HN-GFN is a preference-conditioned Pareto specialist. pCoMole (2026) does preference-tilted Doob control with Monte Carlo rollouts for Pareto-constrained biomolecular sequence editing -- conceptually close to part of this project and from the same broader lineage. We are explicit about that rather than distancing from it.**
+
+What actually differentiates COMPOSE:
+
+- the executable molecular GRAPH process: a complete valid molecule at EVERY state
+- an exact rewrite kernel
+- canonical successor pushforward
+- exact bounded-space verification
+- continuation from a realized graph after the goal changes
+- trajectory-level constraints
+
+The novelty is the substrate and the control operations it makes available, not the idea of tilting a process toward a preference. Claiming the latter would be both wrong and easy for a reviewer to disprove with two citations.
+
+## Adapter rule — native implementation, thin adapter
+
+**official method, unmodified  +  thin COMPOSE evaluation adapter**
+
+The adapter does only: plug in the frozen oracle/objectives; route molecules through the shared 2024.3.5 canonicalizer; count unique_valid_canonical_evaluations / oracle_requests / evaluator_calls; translate outputs into the common metrics; supply a starting molecule ONLY where the method natively supports one.
+
+The adapter never: reimplements the algorithm; substitutes a scalarization; alters a proposal distribution; reconstructs a model that could have been downloaded.
+
+*Why.* A REIMPLEMENTED BASELINE IS THE SINGLE MOST ATTACKABLE THING IN A COMPARISON TABLE. Any gap is attributed to our reconstruction rather than to the method, and the comparison stops being evidence.
+
+*Precedent.* GB-GA is vendored byte-identical at baselines/graph_ga/upstream/ (commit 4b49f182) and tests/test_graph_ga_adapter.py HASH-ASSERTS the three algorithm files against upstream. Do the same for every remaining method: the hash assertion is what makes 'unmodified' checkable rather than claimed.
 
 ## Manuscript rule — qualify broadly, present narrowly
 

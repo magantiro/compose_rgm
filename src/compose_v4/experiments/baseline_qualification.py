@@ -237,6 +237,29 @@ def validate_qualification_registry(registry: dict[str, Any]) -> None:
     # broad apples-to-apples sweep, and the claim is not needed. Checked over
     # the WHOLE registry, not one field, because the phrase is most likely to
     # appear in a method note written in passing.
+    # The set is closed. A new method row means someone added a comparator, and
+    # that is a main-lane decision, not an adapter decision.
+    closed = registry.get("baseline_set_closed") or {}
+    _require(bool(closed.get("status")), "baseline_set_closed must declare its status")
+    _require(
+        bool(closed.get("explicitly_not_a_baseline")),
+        "baseline_set_closed must record what was considered and REJECTED, so a "
+        "future reader cannot mistake omission for oversight",
+    )
+
+    _require(
+        bool((registry.get("adapter_rule") or {}).get("the_adapter_never")),
+        "adapter_rule must state what a thin adapter never does; a reimplemented "
+        "baseline is the most attackable thing in a comparison table",
+    )
+
+    novelty = registry.get("pareto_control_is_not_claimed_as_novel") or {}
+    _require(
+        bool(novelty.get("statement")),
+        "the registry must state that preference/Pareto control is NOT claimed as "
+        "novel; HN-GFN and pCoMole occupy that ground",
+    )
+
     presentation = registry.get("manuscript_presentation") or {}
     # The field that DECLARES the ban has to quote the phrase, so exempt it --
     # otherwise the guard fires on its own prohibition. Everything else is
@@ -284,6 +307,13 @@ def validate_qualification_registry(registry: dict[str, Any]) -> None:
     _require(len(ids) == len(set(ids)), "duplicate method identifiers")
     missing_methods = REQUIRED_METHODS - set(ids)
     _require(not missing_methods, f"registry omits required methods {sorted(missing_methods)}")
+    # The set is closed: an EXTRA method row means someone added a comparator,
+    # which is a main-lane decision rather than an adapter decision.
+    _require(
+        set(ids) == set(REQUIRED_METHODS),
+        f"the baseline set is CLOSED: expected exactly {sorted(REQUIRED_METHODS)}, "
+        f"observed {sorted(ids)}",
+    )
 
     escalated = {
         (str(row.get("method")), str(row.get("subcapability")))

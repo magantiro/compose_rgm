@@ -146,6 +146,47 @@ def render(registry: dict) -> str:
     add(f"**MARS naming rule.** {_escape(wording['mars_naming_rule'])}")
     add("")
 
+    closed = registry["baseline_set_closed"]
+    add("## The baseline set is CLOSED")
+    add("")
+    add(f"*{_escape(closed['status'])}* — {_escape(closed['rule'])}")
+    add("")
+    add("| method | role |")
+    add("|---|---|")
+    for method, role in closed["final_set"].items():
+        add(f"| **{_escape(method)}** | {_escape(role)} |")
+    add("")
+    for name, reason in closed["explicitly_not_a_baseline"].items():
+        add(f"**Not a baseline: {_escape(name)}.** {_escape(reason)}")
+        add("")
+
+    novelty = registry["pareto_control_is_not_claimed_as_novel"]
+    add("## Preference and Pareto control are NOT claimed as novel")
+    add("")
+    add(f"**{_escape(novelty['statement'])}**")
+    add("")
+    add("What actually differentiates COMPOSE:")
+    add("")
+    for item in novelty["what_actually_differentiates_compose"]:
+        add(f"- {item}")
+    add("")
+    add(f"{_escape(novelty['how_to_phrase_it'])}")
+    add("")
+
+    rule = registry["adapter_rule"]
+    add("## Adapter rule — native implementation, thin adapter")
+    add("")
+    add(f"**{_escape(rule['form'])}**")
+    add("")
+    add("The adapter does only: " + "; ".join(rule["the_adapter_does_only"]) + ".")
+    add("")
+    add("The adapter never: " + "; ".join(rule["the_adapter_never"]) + ".")
+    add("")
+    add(f"*Why.* {_escape(rule['why'])}")
+    add("")
+    add(f"*Precedent.* {_escape(rule['precedent_to_follow'])}")
+    add("")
+
     pres = registry["manuscript_presentation"]
     add("## Manuscript rule — qualify broadly, present narrowly")
     add("")

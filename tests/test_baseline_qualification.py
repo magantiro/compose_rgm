@@ -205,3 +205,30 @@ def test_manuscript_presentation_is_present() -> None:
     assert "sunk engineering effort" in pres["rule"].lower()
     assert pres["reviewer_facing_hierarchy"]["MARS"].startswith("DEMOTED")
     assert "does not need to win" in pres["success_criterion"].lower()
+
+
+def test_the_baseline_set_is_closed_against_additions() -> None:
+    """An extra comparator is a main-lane decision, not an adapter decision."""
+    registry = copy.deepcopy(_registry())
+    extra = copy.deepcopy(registry["methods"][0])
+    extra["id"] = "EditFlows"
+    registry["methods"].append(extra)
+    with pytest.raises(BaselineQualificationError, match="CLOSED"):
+        validate_qualification_registry(registry)
+
+
+def test_rejected_candidates_are_recorded_not_merely_omitted() -> None:
+    rejected = _registry()["baseline_set_closed"]["explicitly_not_a_baseline"]
+    assert any("Edit Flows" in name for name in rejected), (
+        "Edit Flows must be recorded as considered-and-rejected, so a future "
+        "reader cannot mistake its absence for oversight"
+    )
+    reason = next(v for k, v in rejected.items() if "Edit Flows" in k)
+    assert "no public molecular implementation" in reason.lower()
+
+
+def test_pareto_control_is_not_claimed_as_novel() -> None:
+    novelty = _registry()["pareto_control_is_not_claimed_as_novel"]
+    assert "pCoMole" in novelty["statement"]
+    assert "HN-GFN" in novelty["statement"]
+    assert novelty["what_actually_differentiates_compose"]
