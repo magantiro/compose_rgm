@@ -91,6 +91,10 @@ image = (
         str(REMOTE_ROOT / "diagnostics/retarget_calibration_cohort.json"),
         copy=True)
     .add_local_file(
+        ROOT / "diagnostics/retarget_heldout_prefixes_committed.json",
+        str(REMOTE_ROOT / "diagnostics/retarget_heldout_prefixes_committed.json"),
+        copy=True)
+    .add_local_file(
         ROOT / "diagnostics/retarget_heldout_panel.json",
         str(REMOTE_ROOT / "diagnostics/retarget_heldout_panel.json"),
         copy=True)
