@@ -374,10 +374,17 @@ OMP_NUM_THREADS=4 python3 scripts/pareto_tradeoff_census.py \
 # manifest -- hashes recomputed from disk
 python3 scripts/pareto_write_handoff_manifest.py
 
-# the held-in smoke -- NOT RUN, requires main-lane authorization
-# 1. freeze diagnostics/pareto_control_cohort.json first
-# 2. modal run --detach modal_apps/pareto_control_app.py --sources 12
-# 3. modal app list   # MUST show `ephemeral (detached)`
+# the held-in smoke -- AUTHORIZED by main and LAUNCHED 2026-08-13 02:20:53 EDT
+# app compose-v4-pareto-control / ap-YJkZtmnhwS8i7RTWNq0Br9, state verified
+# `ephemeral (detached)`, 13 tasks. NO client-side timeout wrapper.
+modal run --detach modal_apps/pareto_control_app.py --sources 12
+modal app list --json    # State MUST read `ephemeral (detached)`
+
+# retrieve the durable per-source shards, then analyse
+modal volume get compose-v4-artifacts \
+    editing_v2/r_theta_run/pareto_control_smoke <local dir>
+python3 scripts/analyse_pareto_control.py --shards <local dir> \
+    --out diagnostics/pareto_control_analysis.json
 ```
 
 # Durable artifacts

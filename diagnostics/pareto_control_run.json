@@ -16,21 +16,39 @@
   "profile": "rahul-94866",
   "hardware": "CPU only, cpu=8.0, OMP_NUM_THREADS=4, memory 16 GiB",
   "max_containers": 12,
-
   "cohort": "diagnostics/pareto_control_cohort.json",
   "cohort_sha256_prefix": "adea8e5510852d69",
   "n_sources": 12,
   "pair": "potency_vs_developability",
   "budget_edits": 6,
-  "preferences": [0.1, 0.3, 0.5, 0.7, 0.9],
-  "shortlist": {"top_immediate": 4, "top_reference": 2, "n_random": 2, "K": 8},
+  "preferences": [
+    0.1,
+    0.3,
+    0.5,
+    0.7,
+    0.9
+  ],
+  "shortlist": {
+    "top_immediate": 4,
+    "top_reference": 2,
+    "n_random": 2,
+    "K": 8
+  },
   "shortlist_note": "K=8 unchanged. Main declined the shortlist-4 variant: the ~$9 saving is a cost consideration, not a scientific one, and narrowing the lookahead right after establishing the task has genuine geometry would undercut the reason the smoke exists.",
-
-  "arms": ["unguided", "greedy_pref", "gen_rank@greedy", "verified_pref",
-           "gen_rank@verified", "prefix_branching"],
-  "not_in_this_run": ["h_phi", "R_theta-vs-empirical-family ablation arms",
-                      "held-out panel", "development panel"],
-
+  "arms": [
+    "unguided",
+    "greedy_pref",
+    "gen_rank@greedy",
+    "verified_pref",
+    "gen_rank@verified",
+    "prefix_branching"
+  ],
+  "not_in_this_run": [
+    "h_phi",
+    "R_theta-vs-empirical-family ablation arms",
+    "held-out panel",
+    "development panel"
+  ],
   "durability": {
     "per_source_durable_shard": true,
     "checkpoint_after_every_arm": true,
@@ -39,7 +57,6 @@
     "shard_dir": "/artifacts/editing_v2/r_theta_run/pareto_control_smoke",
     "contrast_with_census": "scripts/pareto_tradeoff_census.py held 75 minutes in memory and wrote once at the end; that pattern is deliberately not repeated here."
   },
-
   "questions_this_smoke_must_answer": [
     "Do requested preferences yield distinct CLOSED-LOOP molecular outcomes, not merely distinct one-step choices?",
     "Does greedy preference control beat unguided and generate-then-rank meaningfully?",
@@ -49,10 +66,16 @@
     "Does anything collapse from candidate-set size or computational mechanics?"
   ],
   "framing": "Instrument work, not a paper result.",
-
   "reporting_rules": {
     "no_arm_is_globally_budget_matched": "With a ~600-successor fiber there is no single notion of matched compute. Pareto quality is reported against BOTH unique valid oracle evaluations AND kernel/reference-process calls, with each arm's position on both stated.",
     "gen_rank_is_one_sided": "Only the kernel-matched end of the P3/P4 bracket is affordable. A kernel-matched generate-then-rank may be vastly oracle-richer than the closed-loop arms; that makes it a strong baseline IN ONE RESOURCE DIMENSION and it must be described that way, never as globally budget matched.",
     "no_pvalue_for_guaranteed_signs": "verified >= greedy follows from policy improvement; magnitude only."
+  },
+  "retrieve_shards": {
+    "volume": "compose-v4-artifacts",
+    "remote_path": "editing_v2/r_theta_run/pareto_control_smoke",
+    "command": "modal volume get compose-v4-artifacts editing_v2/r_theta_run/pareto_control_smoke <local dir>",
+    "then": "python3 scripts/analyse_pareto_control.py --shards <local dir> --out diagnostics/pareto_control_analysis.json",
+    "note": "The analysis runs the instrument gate on the shards BEFORE computing any contrast, and on failure writes INVALID_INSTRUMENT with no numbers at all."
   }
 }

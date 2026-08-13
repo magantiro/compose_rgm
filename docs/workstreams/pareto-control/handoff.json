@@ -4,7 +4,7 @@
   "title": "Target-free Pareto / preference control",
   "status": "DESIGN_ONLY_PLUS_HELD_IN_CENSUS",
   "branch": "codex/compose-pareto-control",
-  "commit": "69a96ff35a77864b6bd0f2f93d91e3b96fdae0a9",
+  "commit": "d51c1819805d87d16ec9b699d4db51edeeacd4fc",
   "working_tree_dirty_at_write_time": true,
   "base_commit": "a0e680d",
   "held_out_opened": false,
