@@ -12,6 +12,72 @@ table.
 
 ---
 
+## 0-pre. Two cost ledgers — FROZEN 2026-08-13
+
+Every method keeps **two separate ledgers**. Conflating them is what makes
+learned baselines look either free or ruinous depending on which side you hide.
+
+| ledger | contents | in the per-task oracle budget? |
+|---|---|---|
+| **generic offline pretraining** | training that is not specific to the task's objective | **NO** — reported descriptively |
+| **objective-specific adaptation and search** | everything done because *this* objective was chosen | **YES — counted in full** |
+
+Assignments:
+
+| method | generic offline | objective-specific, counted |
+|---|---|---|
+| **COMPOSE** | `R_theta` training on the editing corpus | control computation; verified rollout; every oracle call at inference |
+| **GraphXForm** | the pretrained checkpoint (178 pretrain epochs, val loss 1.1404) | **self-improvement fine-tuning + beam/TASAR search, and every property-oracle evaluation either consumes** |
+| **REINVENT 4** | the ChEMBL/PubChem prior | RL fine-tuning — which is its entire budget |
+| **MARS** | none — no pretraining stage exists | online proposal adaptation, inseparable from sampling |
+| **GraphGA** | none | the whole search |
+| **HN-GFN** | none released | per-objective-set retraining; surrogate disclosed separately |
+
+### Why this split decides the GraphXForm comparison
+
+The pretrained checkpoint selects **TERMINATE** on an already-valid drug-like
+molecule (P ≈ 0.99, measured). **That is not evidence GraphXForm is weak.** It
+means greedy inference from the generic checkpoint is *not how the published
+method optimizes a property*. The fair comparison is:
+
+> native pretrained GraphXForm **+** its objective-specific self-improvement
+> fine-tuning **+** its native search procedure, with **every** property-oracle
+> evaluation consumed during that adaptation counted in the task budget.
+
+Masking TERMINATE to force extension would alter the proposal distribution and
+is barred; that rescue was available here and was refused.
+
+**We do not need GraphXForm to lose.** A GraphXForm that is strong on
+conventional optimization makes "competitive despite a more general control
+abstraction" a *stronger* sentence, not a weaker one. COMPOSE's distinction is
+that it changes purpose by recomputing control over a frozen reference process —
+which is a claim about the second ledger, not the first.
+
+## 0b. Applicability is reported, never silently dropped
+
+Where method domains differ, the final table reports **applicable / total per
+method**. A method scoring well on 70% of a panel is not equivalent to one that
+can attempt 100%.
+
+GraphXForm's domain is frozen in
+`src/compose_v4/experiments/graphxform_applicability.py`. Its heavy-atom ceiling
+of 42 = 50 − 8 carries `headroom_basis: CHOSEN_SAFETY_MARGIN` — **audited and
+found not to be structurally derivable**, because GraphXForm bounds its search
+by TERMINATE or wall clock rather than by a maximum atom count over a registered
+horizon. It is a judgement call, labelled as one, and must not be retuned after
+any comparative outcome exists.
+
+## 0c. Every efficiency claim names its resource axis
+
+Barred: **"sample efficient"** without saying which sample. A reduction in
+trajectories does not imply a reduction in oracle evaluations or kernel calls.
+
+- **Oracle demand is the common currency** for cross-method comparison, under
+  the three named counters.
+- **Trajectories are COMPOSE-internal only** and may never be compared across
+  methods.
+- Kernel calls, model calls and wall time are reported on their own axes.
+
 ## 0a. What each comparison is actually testing
 
 **"Future-aware control helps" is not a universal COMPOSE claim.** It is

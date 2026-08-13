@@ -96,6 +96,8 @@ def _greedy_action(network, design, device) -> int:
 
     from molecule_design import MoleculeDesign
 
+    import numpy as np
+
     batch = MoleculeDesign.list_to_batch([design], device=torch.device(device))
     with torch.no_grad():
         output = network(batch)
@@ -103,10 +105,13 @@ def _greedy_action(network, design, device) -> int:
     logits = output[0] if isinstance(output, tuple) else output
     if hasattr(logits, "dim") and logits.dim() > 1:
         logits = logits[0]
-    mask = design.get_action_mask() if hasattr(design, "get_action_mask") else None
-    if mask is not None:
-        logits = logits.masked_fill(torch.as_tensor(mask, device=logits.device), -torch.inf)
-    return int(torch.argmax(logits).item())
+    # Upstream's OWN mask, not a hand-rolled one. An earlier version of this
+    # function took a raw argmax and selected an infeasible action at level 1,
+    # which is exactly the class of bug the adapter rule exists to prevent.
+    log_probs = design.masked_log_probs_for_current_action_level(
+        logits.detach().cpu().numpy().astype(np.float64)
+    )
+    return int(np.argmax(log_probs))
 
 
 @dataclass

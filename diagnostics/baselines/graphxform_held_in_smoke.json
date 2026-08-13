@@ -1,4 +1,5 @@
 {
+  "GREEDY_PATH_ABANDONED": "The hand-rolled greedy extension path in graphxform_adapter._greedy_action is WITHDRAWN as the route to a comparison. Routing through upstream's own masked_log_probs_for_current_action_level fixed the infeasible-action selection but then surfaced a logits/mask width mismatch (54 vs the network's padded output) on a larger source. Each fix exposing the next mismatch is the signal that hand-driving per-action decisions is the wrong construction: the adapter rule says use the method's own machinery, and GraphXForm's own machinery is its self-improvement fine-tuning loop plus TASAR/beam search, not greedy argmax. The remaining work is to drive upstream's search rather than to keep repairing a bespoke decision loop.",
   "KNOWN_ADAPTER_DEFECT": "VERDICT IS FAIL, and the defect is in OUR ADAPTER, not in GraphXForm. On 1 of 3 sources the run raised 'AssertionError: Trying to take action 1 on level 1, but it is set to infeasible'. Cause: _greedy_action in graphxform_adapter.py takes an argmax over raw logits with an ad-hoc mask lookup that does not exist on MoleculeDesign, so upstream's OWN masking is bypassed and an infeasible action can be selected at action level 1. The fix is to route the decision through upstream's masked_log_probs_for_current_action_level rather than a hand-rolled argmax -- i.e. to use the method's own machinery, which is what the adapter rule requires anyway. Recorded rather than worked around; the smoke does not pass until it is fixed.",
   "applicability": {
     "domain": {
@@ -13,6 +14,8 @@
         35,
         53
       ],
+      "headroom_audit": "Not structurally derived. GraphXForm bounds its search by TERMINATE or wall clock, not by a maximum atom count over a registered horizon, so no native maximum-growth bound exists to derive 8 from. Recorded as a chosen margin. Frozen 2026-08-13 before any COMPOSE-versus-GraphXForm number.",
+      "headroom_basis": "CHOSEN_SAFETY_MARGIN",
       "heavy_atom_ceiling": 42,
       "max_num_atoms": 50,
       "required_headroom": 8,
@@ -83,7 +86,7 @@
       "trajectory_states": [
         "CC1=CC=CC=C1C1=NOC(C2=CC3=CC=CC=C3OC2=O)=N1"
       ],
-      "wall_seconds": 0.019
+      "wall_seconds": 0.028
     },
     {
       "best_score": -0.16606310818729517,
@@ -117,7 +120,7 @@
       "trajectory_states": [
         "COC1=CC=C(C2=NC(CS(=O)(=O)CC(=O)NCC3=CC=CC=C3Br)=C(C)O2)C=C1"
       ],
-      "wall_seconds": 0.019
+      "wall_seconds": 0.023
     },
     {
       "best_score": -0.6031982029008477,
@@ -133,7 +136,7 @@
       "demand_ratio_requests_over_unique": 1.0,
       "errors": [
         {
-          "error": "AssertionError: Trying to take action 1 on level 1, but it is set to infeasible"
+          "error": "IndexError: boolean index did not match indexed array along dimension 0; dimension is 54 but corresponding boolean dimension is 30"
         }
       ],
       "invariants": {
@@ -155,7 +158,7 @@
       "trajectory_states": [
         "CC(=O)CCC(C)C1CCC2C3=C(CCC21C)C1(C)CCC(=O)C(C)C1CC3=O"
       ],
-      "wall_seconds": 0.031
+      "wall_seconds": 0.038
     }
   ],
   "schema": "compose.baselines.graphxform_held_in_smoke",
@@ -172,7 +175,7 @@
     "CC(=O)CCC(C)C1CCC2C3=C(CCC21C)C1(C)CCC(=O)C(C)C1CC3=O"
   ],
   "title": "GRAPHXFORM (real upstream) \u2014 HELD-IN ADAPTER SMOKE",
-  "total_wall_seconds": 1.56,
+  "total_wall_seconds": 2.26,
   "upstream": {
     "commit": "867bdcf9d9a8d4a6bfe29a93106b62b383b1a232",
     "files_checked": 41,

@@ -118,6 +118,18 @@ def main() -> int:
         "schema": "compose.baselines.graphxform_held_in_smoke",
         "title": "GRAPHXFORM (real upstream) — HELD-IN ADAPTER SMOKE",
         "artifact_status": "SMOKE_HELD_IN",
+        "GREEDY_PATH_ABANDONED": (
+            "The hand-rolled greedy extension path in graphxform_adapter._greedy_action is "
+            "WITHDRAWN as the route to a comparison. Routing through upstream's own "
+            "masked_log_probs_for_current_action_level fixed the infeasible-action selection "
+            "but then surfaced a logits/mask width mismatch (54 vs the network's padded "
+            "output) on a larger source. Each fix exposing the next mismatch is the signal "
+            "that hand-driving per-action decisions is the wrong construction: the adapter "
+            "rule says use the method's own machinery, and GraphXForm's own machinery is its "
+            "self-improvement fine-tuning loop plus TASAR/beam search, not greedy argmax. "
+            "The remaining work is to drive upstream's search rather than to keep repairing "
+            "a bespoke decision loop."
+        ),
         "KNOWN_ADAPTER_DEFECT": (
             "VERDICT IS FAIL, and the defect is in OUR ADAPTER, not in GraphXForm. On 1 of 3 "
             "sources the run raised 'AssertionError: Trying to take action 1 on level 1, but "

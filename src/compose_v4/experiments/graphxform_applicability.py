@@ -60,11 +60,30 @@ ALLOWED_CHARGE_STATES = frozenset(
 #: config.max_num_atoms as shipped.
 MAX_NUM_ATOMS = 50
 
-#: Reserved so a source can actually be extended. GraphXForm cannot delete, so a
-#: molecule at the ceiling has no productive action available. Frozen at 8:
-#: enough for a small substituent, and it keeps the eligible band comfortably
-#: above the COMPOSE cohort's own size range.
+#: CHOSEN SAFETY MARGIN, NOT A STRUCTURAL DERIVATION. Audited 2026-08-13 and
+#: downgraded after that audit.
+#:
+#: A structural derivation would need a native bound on maximum growth over a
+#: registered optimization horizon. GraphXForm has NO such bound: the search
+#: runs until the policy emits TERMINATE or a wall-clock limit expires
+#: (`wall_clock_limit`, 8 h in the paper), and `num_epochs` bounds fine-tuning
+#: epochs rather than atoms added. So maximum growth is not derivable from the
+#: action semantics, and any headroom number is a judgement call.
+#:
+#: 8 was chosen as a round margin allowing a small substituent. It is honest to
+#: record that it also comfortably admits the COMPOSE cohort (max 34 heavy
+#: atoms), which is exactly the reasoning that would be illegitimate if it were
+#: the *justification* rather than an observation about the consequence. It is
+#: not presented as structural, and the ceiling must not be retuned after any
+#: comparative outcome exists.
 REQUIRED_HEADROOM = 8
+HEADROOM_BASIS = "CHOSEN_SAFETY_MARGIN"
+HEADROOM_AUDIT = (
+    "Not structurally derived. GraphXForm bounds its search by TERMINATE or "
+    "wall clock, not by a maximum atom count over a registered horizon, so no "
+    "native maximum-growth bound exists to derive 8 from. Recorded as a chosen "
+    "margin. Frozen 2026-08-13 before any COMPOSE-versus-GraphXForm number."
+)
 
 #: Molecules with at most this many heavy atoms are eligible.
 HEAVY_ATOM_CEILING = MAX_NUM_ATOMS - REQUIRED_HEADROOM
@@ -189,6 +208,8 @@ def partition_panel(smiles: list[str]) -> dict[str, Any]:
             "heavy_atom_ceiling": HEAVY_ATOM_CEILING,
             "max_num_atoms": MAX_NUM_ATOMS,
             "required_headroom": REQUIRED_HEADROOM,
+            "headroom_basis": HEADROOM_BASIS,
+            "headroom_audit": HEADROOM_AUDIT,
             "strip_to_largest_fragment": STRIP_TO_LARGEST_FRAGMENT,
         },
         "frozen": "2026-08-13, before any COMPOSE-versus-GraphXForm number existed",
