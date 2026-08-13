@@ -741,11 +741,24 @@ Three distinct axes, never substituted:
 Trajectories are not a shared object — HN-GFN, GraphXForm and GraphGA do not
 have one — so external methods are never plotted on that axis.
 
-**Why this rule exists, measured before the results were opened.** In the Pareto
-smoke, `greedy_pref` spends **6,400–15,620** native oracle calls at **13–23**
-kernel calls, while kernel-matched `gen_rank@greedy` spends **1–4**. That is a
-roughly **3,000×** gap in oracle demand at matched kernel budget. So both of
-these can be simultaneously true:
+**Why this rule exists.** In the Pareto smoke, `greedy_pref` records
+**6,400–15,620** oracle requests at **13–23** kernel calls, while kernel-matched
+`gen_rank@greedy` records **1–4**.
+
+> **THAT RATIO IS NOT YET INTERPRETABLE AND MUST NOT BE QUOTED AS A COST
+> COMPARISON.** It is pending an accounting audit. At matched *kernel* budget,
+> preference control is charged for interrogating the ~600-wide legal successor
+> fiber at every decision, while generate-and-rank is charged only for the
+> terminal molecules it produced. Those are different acts, so the ratio
+> currently mixes "property evaluations per unit of kernel work" with
+> "cost of optimizing a molecule". Four things must be separated before any
+> number is quoted: whether a request is a distinct evaluator invocation or a
+> row in a vectorised batch; expensive DRD2 evaluations versus cheap
+> deterministic QED/cLogP descriptors; requests versus post-cache evaluator
+> calls; and marked actions versus distinct canonical successors after alias
+> collapse.
+
+Whatever the audit finds, both of these can be simultaneously true:
 
 > COMPOSE covers the Pareto front with far fewer molecular trajectories.
 > COMPOSE covers the Pareto front with *more* oracle evaluations.
