@@ -178,22 +178,28 @@ developability-down **0.390**, the converse **0.122**.
 | `potency_vs_source_similarity` | −0.060 | G2 (`P−/S+` **0.005** < 0.05), G3 (**0.907** > 0.90), G4 (S inert) |
 | `developability_vs_source_similarity` | −0.119 | G2 (`D−/S+` **0.006** < 0.05), G4 (S inert) |
 
-## SOURCE SIMILARITY IS INERT — a structural fact, not a statistical one
+## Why source similarity was rejected as a Pareto axis
 
-Across 20 sources, the similarity-maximizing 6-edit rollout ended at ECFP4
-Tanimoto **exactly 1.000** to the source, **every time**; median movement in
-`z_S` was **0.000**. At every step the executor offers a legal successor whose
-fingerprint is identical to the source, so **"stay similar" costs nothing** and
-exerts no tradeoff pressure. The source also *starts* at maximal similarity, so
-a move can only hold or reduce it — which is why the "improve similarity" side
-of the tradeoff is essentially empty (0.005 / 0.006 of moves).
+**ECFP4 source similarity was rejected as a Pareto axis because legal graph
+edits frequently leave the fingerprint unchanged, making the objective locally
+non-discriminative.** Across 20 sources, the similarity-maximizing 6-edit
+rollout ended at ECFP4 Tanimoto **exactly 1.000** to the source every time;
+median movement in `z_S` was **0.000**. Because the source also starts at
+maximal similarity, the improve-similarity side of the tradeoff is essentially
+empty — **0.005** of moves for P-vs-S and **0.006** for D-vs-S.
 
-**This kills both fallback pairs by construction**, which means the predeclared
-order effectively had **one viable entry**. That is a discovery, not a
-convenience: the obvious prior is that staying close to the starting molecule
-trades against a property objective, and it does not. Adopting the first pair
-was the only outcome the gate could produce, and the honest presentation is that
-we measured why.
+**This is an interaction, not a free lunch.** The degeneracy sits between the
+**executor support** and the **ECFP4 representation**: it is not a claim that
+source preservation is costless in general, nor a claim about this chemistry
+independent of how similarity is measured. A different fingerprint, or a
+different operator inventory, could behave differently.
+
+It does mean both fallback pairs are ruled out here, so the predeclared order
+had one viable entry — a measured outcome rather than a lucky ordering.
+**No search for a better similarity metric was or will be undertaken in this
+lane:** the fallback order was preregistered, potency/developability passed
+strongly, and hunting for a metric that manufactures a second viable pair is
+exactly the post-hoc tuning the preregistration exists to prevent.
 
 ## I-A IS THE INSTRUMENT OF RECORD; I-B CORROBORATES ONLY
 
@@ -207,10 +213,18 @@ we measured why.
 I-B's 1.656 sits **below** the predeclared G5 floor of 2.0: a proxy-only census
 would have read borderline where the executable support is comfortable. The two
 agree on sign statistics and diverge on selection statistics, as a neighbourhood
-of median degree 1 versus 586 predicts. **This project has been misled by a
-matched-pair proxy before** — the movability census implied DRD2 was out of
-reach in four edits and the real fiber climbed +4.42 log-odds in three. G5's
-`OPERATOR_SET_DEPENDENT` flag belongs in the paper text, not a footnote.
+of median degree 1 versus 586 predicts.
+
+This is now a **project-wide rule** — *"MMP proxies are diagnostics, not
+authorities"*, `docs/workstreams/PARALLEL_WORKSTREAMS_AND_HANDOFF.md` — and this
+census is one of its two cited cases, alongside the movability census that
+wrongly suggested DRD2 was unreachable in four edits when the real fiber climbed
+**+4.42 log-odds in three**. Per that rule, MMP mining remains a cheap
+diagnostic and is not evidence about executable support; any manuscript claim
+resting materially on MMP-based reachability or support estimates must be
+re-evidenced with exact-fiber measurement.
+
+G5's `OPERATOR_SET_DEPENDENT` flag belongs in the paper text, not a footnote.
 
 ## The live risk in the adopted pair
 
@@ -465,11 +479,18 @@ only. One kernel call yields ~586 candidates, so:
 - **native-oracle-matched** (not affordable): ~2,600 unguided trajectories per
   source, ~15,600 kernel calls, **~30 h per source**.
 
-So the smoke can only produce the kernel-matched end of the declared bracket.
-**Any P3/P4 result is therefore one-sided**, and a reviewer who assumes
-oracle-call parity — the standard convention — will read it as more favourable
-to COMPOSE than it is. This is a limitation of the comparison itself and must be
-stated in the text where the comparison appears.
+**With a ~600-successor fiber there is no single notion of matched compute, so
+no arm may ever be described as globally "budget matched".** Pareto quality is
+reported against **both** counters — unique valid oracle evaluations **and**
+kernel / reference-process calls — and each arm's position on both is stated. A
+kernel-matched generate-then-rank baseline may be vastly oracle-richer than the
+closed-loop arms; that is fine, and it makes it a strong baseline **in one
+resource dimension**, which is how it must be described.
+
+The smoke produces only the kernel-matched end of the declared bracket, so
+**any P3/P4 result is one-sided**. A reviewer who assumes oracle-call parity —
+the standard convention — will read it as more favourable to COMPOSE than it is.
+This belongs in the text where the comparison appears, not in a footnote.
 
 # Main-session pickup checklist
 

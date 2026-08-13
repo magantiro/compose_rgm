@@ -270,6 +270,14 @@ achieved front is.
 two control arms with different costs. This is a parity requirement, not an
 extra arm type.
 
+> **No arm may be described as globally "budget matched".** With a ~600-successor
+> fiber there is no single notion of matched compute, so Pareto quality is
+> reported against **both** counters — unique valid oracle evaluations and
+> kernel / reference-process calls — and each arm's position on both is stated.
+> A kernel-matched generate-then-rank baseline may be vastly oracle-richer than
+> the closed-loop arms; that makes it a strong baseline **in one resource
+> dimension**, which is how it must be described.
+>
 > **The two budget axes buy ~600x different amounts of search, and the contrast
 > must be reported as a bracket.** One kernel call yields ~600 candidate
 > molecules on this process, measured. So matching `gen_rank` on **native oracle

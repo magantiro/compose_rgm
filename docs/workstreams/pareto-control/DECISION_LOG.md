@@ -97,8 +97,6 @@ the census ran.
 
 ---
 
----
-
 ## D-003 · 2026-08-13 · Objective-pair order predeclared and committed BEFORE the census ran
 
 **Decision.** The order is (1) potency vs developability, (2) potency vs source
@@ -366,10 +364,13 @@ that is this number materializing, not a surprise.
 
 ### Why pairs 2 and 3 failed, mechanically
 
-Both fail G4 because **source similarity is inert**: across 20 sources, the
-similarity-maximizing 6-edit rollout ended at ECFP4 Tanimoto **exactly 1.000**
-to the source, every time. There is always a legal successor whose fingerprint
-is identical to the source, so "stay similar" is free.
+Both fail G4 because **ECFP4 source similarity is locally non-discriminative**:
+legal graph edits frequently leave the fingerprint unchanged, so across 20
+sources the similarity-maximizing 6-edit rollout ended at ECFP4 Tanimoto
+**exactly 1.000** to the source, every time. This is an **interaction between
+the executor support and the ECFP4 representation** — not a claim that source
+preservation is costless in general, and not a claim about this chemistry
+independent of how similarity is measured.
 
 The same fact explains their G2 failures. The source *starts* at maximal
 similarity, so a move can only hold or reduce it — the "other objective down,
@@ -391,11 +392,15 @@ was not consulted after the fact.
 > fallback pairs are killed by construction, not by a marginal statistic. That is
 > a discovery, not a convenience. It was not knowable before the census: the
 > obvious prior is that "stay close to the starting molecule" trades against any
-> potency or property objective, and it does not, because the executor always
-> offers a fingerprint-identical successor. Adopting the first pair in the order
-> is therefore the *only* outcome the gate could have produced, and the honest
-> way to present it is that we measured why, not that we got lucky with the
-> ordering.
+> potency or property objective, and under this executor-plus-fingerprint pairing
+> it does not. Adopting the first pair in the order is therefore the *only*
+> outcome the gate could have produced, and the honest way to present it is that
+> we measured why, not that we got lucky with the ordering.
+>
+> **No search for a better similarity metric will be undertaken in this lane.**
+> The fallback order was preregistered and potency/developability passed
+> strongly; hunting for a metric that manufactures a second viable pair is the
+> post-hoc tuning the preregistration exists to prevent.
 
 ---
 
