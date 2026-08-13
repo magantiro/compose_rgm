@@ -1,0 +1,687 @@
+{
+  "schema": "compose.pareto.tradeoff_census",
+  "status": "SMOKE_HELD_IN",
+  "held_out_opened": false,
+  "protocol": "docs/workstreams/pareto-control/PROTOCOL.md",
+  "predeclared_pair_order": [
+    "potency_vs_developability",
+    "potency_vs_source_similarity",
+    "developability_vs_source_similarity"
+  ],
+  "predeclared_gate_thresholds": {
+    "G1_max_rho": 0.7,
+    "G2_min_tradeoff_fraction": 0.2,
+    "G2_min_each_direction": 0.05,
+    "G2_min_state_availability": 0.25,
+    "G3_max_binding_share": 0.9,
+    "G4_max_reach_fraction": 0.85,
+    "G5_min_distinct_selections": 2.0,
+    "G5_max_unanimous_fraction": 0.5
+  },
+  "seed": 20260813,
+  "budget": 6,
+  "preference_grid": [
+    0.1,
+    0.3,
+    0.5,
+    0.7,
+    0.9
+  ],
+  "instruments": {
+    "I_A": {
+      "kind": "model-gated canonical successor fiber",
+      "n_states": 120,
+      "mean_fiber_width": 585.7166666666667,
+      "depths": [
+        0,
+        1
+      ],
+      "reads_transition_probabilities": false,
+      "gate_zero": "/Users/rmaganti/compose_trainset_backup/localprep/artifacts/editing_v2/process_v2_gate_zero_v7/DECISION.json",
+      "support_identical_to_v6": true
+    },
+    "I_B": {
+      "kind": "one-cut matched molecular pairs",
+      "n_states": 5592,
+      "n_pairs": 81500
+    }
+  },
+  "frozen_scales": {
+    "utopia_p99": {
+      "P": 2.7315048451066857,
+      "D": 0.555419816046901,
+      "S": 1.0653266331658295
+    },
+    "reference_p5": {
+      "P": -1.2689119285385548,
+      "D": -1.3547257562637012,
+      "S": -1.2144210280427081
+    },
+    "similarity_centre": 0.6,
+    "similarity_iqr": 0.250314465408805,
+    "recipe": "held-in median and held-in IQR, the same recipe as the frozen goal-language normalizers, applied to the one property they did not cover"
+  },
+  "C5_reachability": {
+    "instrument": "single-objective greedy rollouts at the full 6-edit budget",
+    "n_sources": 20,
+    "ceilings": {
+      "D": 1.3257132048600138,
+      "P": 2.7315048451066857
+    },
+    "P": {
+      "reach_fraction": 0.7,
+      "median_end": 3.0470017098494635,
+      "median_movement": 3.3197939240826737
+    },
+    "D": {
+      "reach_fraction": 0.0,
+      "median_end": 0.6273651527463074,
+      "median_movement": 0.7728883970156157,
+      "analytic_clip_ceiling": 1.3267132048600137
+    },
+    "S": {
+      "inert": true,
+      "median_abs_movement": 0.0,
+      "rule": "no ceiling is reachable (T=1 needs zero edits); the axis is tested for inertness instead, threshold 0.05 in z_S units",
+      "reach_fraction_assigned": 1.0,
+      "endpoint_tanimoto_to_source": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "traces": [
+        [
+          1.5979899497487442,
+          1.027279253409907,
+          1.5979899497487442,
+          1.027279253409907,
+          1.5979899497487442,
+          1.027279253409907,
+          1.5979899497487442
+        ],
+        [
+          1.5979899497487442,
+          1.1088093528868836,
+          1.5979899497487442,
+          1.1088093528868836,
+          1.5979899497487442,
+          1.1088093528868836,
+          1.5979899497487442
+        ],
+        [
+          1.5979899497487442,
+          1.0180742421786355,
+          1.5979899497487442,
+          1.0180742421786355,
+          1.5979899497487442,
+          1.0180742421786355,
+          1.5979899497487442
+        ],
+        [
+          1.5979899497487442,
+          1.2348104157149387,
+          1.5979899497487442,
+          1.2348104157149387,
+          1.5979899497487442,
+          1.2348104157149387,
+          1.5979899497487442
+        ],
+        [
+          1.5979899497487442,
+          0.8929943836831217,
+          1.5979899497487442,
+          0.8929943836831217,
+          1.5979899497487442,
+          0.8929943836831217,
+          1.5979899497487442
+        ],
+        [
+          1.5979899497487442,
+          1.0703517587939704,
+          1.5979899497487442,
+          1.0703517587939704,
+          1.5979899497487442,
+          1.0703517587939704,
+          1.5979899497487442
+        ],
+        [
+          1.5979899497487442,
+          1.0825093207975365,
+          1.5979899497487442,
+          1.0825093207975365,
+          1.5979899497487442,
+          1.0825093207975365,
+          1.5979899497487442
+        ],
+        [
+          1.5979899497487442,
+          1.124009879908015,
+          1.5979899497487442,
+          1.124009879908015,
+          1.5979899497487442,
+          1.124009879908015,
+          1.5979899497487442
+        ],
+        [
+          1.5979899497487442,
+          1.0386934673366837,
+          1.5979899497487442,
+          1.0386934673366837,
+          1.5979899497487442,
+          1.0386934673366837,
+          1.5979899497487442
+        ],
+        [
+          1.5979899497487442,
+          1.0469589325940045,
+          1.5979899497487442,
+          1.0469589325940045,
+          1.5979899497487442,
+          1.0469589325940045,
+          1.5979899497487442
+        ],
+        [
+          1.5979899497487442,
+          1.0562984413593395,
+          1.5979899497487442,
+          1.0562984413593395,
+          1.5979899497487442,
+          1.0562984413593395,
+          1.5979899497487442
+        ],
+        [
+          1.5979899497487442,
+          1.1621745089081774,
+          1.5979899497487442,
+          1.1621745089081774,
+          1.5979899497487442,
+          1.1621745089081774,
+          1.5979899497487442
+        ],
+        [
+          1.5979899497487442,
+          1.2113794780353382,
+          1.5979899497487442,
+          1.2113794780353382,
+          1.5979899497487442,
+          1.2113794780353382,
+          1.5979899497487442
+        ],
+        [
+          1.5979899497487442,
+          0.8929943836831217,
+          1.5979899497487442,
+          0.8929943836831217,
+          1.5979899497487442,
+          0.8929943836831217,
+          1.5979899497487442
+        ],
+        [
+          1.5979899497487442,
+          1.2650753768844223,
+          1.5979899497487442,
+          1.2650753768844223,
+          1.5979899497487442,
+          1.2650753768844223,
+          1.5979899497487442
+        ],
+        [
+          1.5979899497487442,
+          0.8547388103307236,
+          1.5979899497487442,
+          0.8547388103307236,
+          1.5979899497487442,
+          0.8547388103307236,
+          1.5979899497487442
+        ],
+        [
+          1.5979899497487442,
+          1.2263643800397337,
+          1.5979899497487442,
+          1.2263643800397337,
+          1.5979899497487442,
+          1.2263643800397337,
+          1.5979899497487442
+        ],
+        [
+          1.5979899497487442,
+          1.1185929648241209,
+          1.5979899497487442,
+          1.1185929648241209,
+          1.5979899497487442,
+          1.1185929648241209,
+          1.5979899497487442
+        ],
+        [
+          1.5979899497487442,
+          1.0653266331658295,
+          1.5979899497487442,
+          1.0653266331658295,
+          1.5979899497487442,
+          1.0653266331658295,
+          1.5979899497487442
+        ],
+        [
+          1.5979899497487442,
+          0.9321608040201009,
+          1.5979899497487442,
+          0.9321608040201009,
+          1.5979899497487442,
+          0.9321608040201009,
+          1.5979899497487442
+        ]
+      ]
+    },
+    "withdrawn_statistic": "An earlier draft used 'the best candidate at a state reaches the pooled p99'. With a ~589-wide fiber that fires with probability 0.997 whatever the truth is -- no falsifying range, so not a measurement. Withdrawn before any pair verdict was read; see DECISION_LOG D-007.",
+    "corroboration_3_edit_committed": {
+      "source": "/Users/rmaganti/Documents/Codex/2026-07-14/ok-so/compose_rgm/.claude/worktrees/agent-adf154717b57770ba/diagnostics/retarget_calibration_result_3plus3_fixed.json",
+      "n_sources": 30,
+      "edits_potency": 3,
+      "edits_developability": 3,
+      "P_reach_fraction_vs_utopia_p99": 0.16666666666666666,
+      "D_reach_fraction_binary_region": 0.9333333333333333,
+      "D_reach_fraction_clip_ceiling": 0.0,
+      "z_D_clip_ceiling": 1.3267132048600137,
+      "note": "Both are measured at 3 edits, not 6. A 6-edit budget can only increase a reach fraction, so a value already above the G4 threshold at 3 edits is conclusive; a value below it at 3 edits is not conclusive for 6 and is reported as such."
+    }
+  },
+  "G4_reach_by_objective": {
+    "P": 0.7,
+    "D": 0.0,
+    "S": 1.0
+  },
+  "pairs": [
+    {
+      "pair": "potency_vs_developability",
+      "objective_a": "P",
+      "objective_b": "D",
+      "spearman_rho": -0.27357543037712906,
+      "I_A": {
+        "n_states": 120,
+        "n_moves": 70286,
+        "quadrant_fractions": {
+          "pp": 0.16693224824289332,
+          "pm": 0.39003499985772416,
+          "mp": 0.12235722619013743,
+          "mm": 0.22204991036621802,
+          "zero": 0.09862561534302706
+        },
+        "tradeoff_move_fraction": 0.5123922260478616,
+        "state_offers_a_up_b_down": 1.0,
+        "state_offers_a_down_b_up": 1.0,
+        "mean_front_size": 5.9,
+        "mean_front_extent_a": 0.8111762869010104,
+        "mean_front_extent_b": 0.5993233990052388,
+        "mean_fine_grid_distinct": 4.766666666666667,
+        "mean_distinct_selections": 2.341666666666667,
+        "unanimous_fraction": 0.1,
+        "binding_share": [
+          0.76,
+          0.24
+        ],
+        "max_binding_share": 0.76
+      },
+      "I_B": {
+        "n_states": 5592,
+        "n_moves": 22865,
+        "quadrant_fractions": {
+          "pp": 0.18023179532035863,
+          "pm": 0.27111305488738247,
+          "mp": 0.26350317078504265,
+          "mm": 0.18460529193089875,
+          "zero": 0.10054668707631752
+        },
+        "tradeoff_move_fraction": 0.5346162256724251,
+        "state_offers_a_up_b_down": 0.49320457796852646,
+        "state_offers_a_down_b_up": 0.4780042918454936,
+        "mean_front_size": 2.146101573676681,
+        "mean_front_extent_a": 0.25603891902716297,
+        "mean_front_extent_b": 0.18637474086216188,
+        "mean_fine_grid_distinct": 2.0684907010014304,
+        "mean_distinct_selections": 1.655758226037196,
+        "unanimous_fraction": 0.41219599427753933,
+        "binding_share": [
+          0.7565450643776824,
+          0.2434549356223176
+        ],
+        "max_binding_share": 0.7565450643776824
+      },
+      "gate": {
+        "pair": "potency_vs_developability",
+        "gates": {
+          "G1_alignment": {
+            "pass": true,
+            "statistic": "spearman_rho_pool",
+            "value": -0.27357543037712906,
+            "reject_if": ">= 0.7",
+            "falsifying_range": "[-1, +1]; rho >= 0.70 rejects"
+          },
+          "G2_local_tradeoff": {
+            "pass": true,
+            "note": "both instruments agree",
+            "I_A": {
+              "pass": true,
+              "why_failed": []
+            },
+            "I_B": {
+              "pass": true,
+              "why_failed": []
+            },
+            "falsifying_range": "[0, 1] per component"
+          },
+          "G3_no_domination": {
+            "pass": true,
+            "statistic": "max_binding_share",
+            "value": 0.76,
+            "reject_if": "> 0.9",
+            "falsifying_range": "[0.5, 1.0]; 0.5 is perfectly balanced"
+          },
+          "G4_no_saturation": {
+            "pass": true,
+            "reach_fractions": {
+              "P": 0.7,
+              "D": 0.0
+            },
+            "failing_axes": [],
+            "reject_if": "any > 0.85",
+            "falsifying_range": "[0, 1] per axis"
+          },
+          "G5_front_richness": {
+            "pass": true,
+            "note": "OPERATOR_SET_DEPENDENT: present in the fiber, absent in MMP pairs",
+            "I_A": {
+              "pass": true,
+              "why_failed": [],
+              "mean_distinct_selections": 2.341666666666667,
+              "unanimous_fraction": 0.1
+            },
+            "I_B": {
+              "pass": false,
+              "why_failed": [
+                "mean distinct selections 1.66 < 2.0"
+              ]
+            },
+            "falsifying_range": "[1, 5] distinct selections; 1 means preferences collapse"
+          }
+        },
+        "verdict": "PASS",
+        "failed": []
+      }
+    },
+    {
+      "pair": "potency_vs_source_similarity",
+      "objective_a": "P",
+      "objective_b": "S",
+      "spearman_rho": -0.05959692436378506,
+      "I_A": {
+        "n_states": 120,
+        "n_moves": 70286,
+        "quadrant_fractions": {
+          "pp": 0.004439006345502661,
+          "pm": 0.557194889451669,
+          "mp": 0.004837378709842643,
+          "mm": 0.34440713655635546,
+          "zero": 0.08912158893663034
+        },
+        "tradeoff_move_fraction": 0.5620322681615115,
+        "state_offers_a_up_b_down": 1.0,
+        "state_offers_a_down_b_up": 0.4,
+        "mean_front_size": 7.741666666666666,
+        "mean_front_extent_a": 0.8658999164358767,
+        "mean_front_extent_b": 1.7225639282657161,
+        "mean_fine_grid_distinct": 6.291666666666667,
+        "mean_distinct_selections": 2.7916666666666665,
+        "unanimous_fraction": 0.041666666666666664,
+        "binding_share": [
+          0.9066666666666666,
+          0.09333333333333334
+        ],
+        "max_binding_share": 0.9066666666666666
+      },
+      "I_B": {
+        "n_states": 5592,
+        "n_moves": 22865,
+        "quadrant_fractions": {
+          "pp": 0.0,
+          "pm": 0.4860266783293243,
+          "mp": 0.0,
+          "mm": 0.48357752022742184,
+          "zero": 0.03039580144325388
+        },
+        "tradeoff_move_fraction": 0.4860266783293243,
+        "state_offers_a_up_b_down": 0.7467811158798283,
+        "state_offers_a_down_b_up": 0.0,
+        "mean_front_size": 1.9298998569384835,
+        "mean_front_extent_a": 0.20450492329516298,
+        "mean_front_extent_b": 0.2750374138220603,
+        "mean_fine_grid_distinct": 1.896280400572246,
+        "mean_distinct_selections": 1.5906652360515021,
+        "unanimous_fraction": 0.4570815450643777,
+        "binding_share": [
+          0.8403433476394849,
+          0.15965665236051502
+        ],
+        "max_binding_share": 0.8403433476394849
+      },
+      "gate": {
+        "pair": "potency_vs_source_similarity",
+        "gates": {
+          "G1_alignment": {
+            "pass": true,
+            "statistic": "spearman_rho_pool",
+            "value": -0.05959692436378506,
+            "reject_if": ">= 0.7",
+            "falsifying_range": "[-1, +1]; rho >= 0.70 rejects"
+          },
+          "G2_local_tradeoff": {
+            "pass": false,
+            "note": "both instruments agree",
+            "I_A": {
+              "pass": false,
+              "why_failed": [
+                "P-/S+ 0.005 < 0.05"
+              ]
+            },
+            "I_B": {
+              "pass": false,
+              "why_failed": [
+                "P-/S+ 0.000 < 0.05",
+                "states offering P-/S+ 0.000 < 0.25"
+              ]
+            },
+            "falsifying_range": "[0, 1] per component"
+          },
+          "G3_no_domination": {
+            "pass": false,
+            "statistic": "max_binding_share",
+            "value": 0.9066666666666666,
+            "reject_if": "> 0.9",
+            "falsifying_range": "[0.5, 1.0]; 0.5 is perfectly balanced"
+          },
+          "G4_no_saturation": {
+            "pass": false,
+            "reach_fractions": {
+              "P": 0.7,
+              "S": 1.0
+            },
+            "failing_axes": [
+              "S"
+            ],
+            "reject_if": "any > 0.85",
+            "falsifying_range": "[0, 1] per axis"
+          },
+          "G5_front_richness": {
+            "pass": true,
+            "note": "OPERATOR_SET_DEPENDENT: present in the fiber, absent in MMP pairs",
+            "I_A": {
+              "pass": true,
+              "why_failed": [],
+              "mean_distinct_selections": 2.7916666666666665,
+              "unanimous_fraction": 0.041666666666666664
+            },
+            "I_B": {
+              "pass": false,
+              "why_failed": [
+                "mean distinct selections 1.59 < 2.0"
+              ]
+            },
+            "falsifying_range": "[1, 5] distinct selections; 1 means preferences collapse"
+          }
+        },
+        "verdict": "FAIL",
+        "failed": [
+          "G2_local_tradeoff",
+          "G3_no_domination",
+          "G4_no_saturation"
+        ]
+      }
+    },
+    {
+      "pair": "developability_vs_source_similarity",
+      "objective_a": "D",
+      "objective_b": "S",
+      "spearman_rho": -0.11947350008288678,
+      "I_A": {
+        "n_states": 120,
+        "n_moves": 70286,
+        "quadrant_fractions": {
+          "pp": 0.003628034032381982,
+          "pm": 0.3112284096406112,
+          "mp": 0.0057763992829297445,
+          "mm": 0.6559912358079846,
+          "zero": 0.023375921236092535
+        },
+        "tradeoff_move_fraction": 0.31700480892354094,
+        "state_offers_a_up_b_down": 1.0,
+        "state_offers_a_down_b_up": 0.4583333333333333,
+        "mean_front_size": 5.958333333333333,
+        "mean_front_extent_a": 0.47350473894139616,
+        "mean_front_extent_b": 1.4925274335836771,
+        "mean_fine_grid_distinct": 5.216666666666667,
+        "mean_distinct_selections": 2.941666666666667,
+        "unanimous_fraction": 0.10833333333333334,
+        "binding_share": [
+          0.7833333333333333,
+          0.21666666666666667
+        ],
+        "max_binding_share": 0.7833333333333333
+      },
+      "I_B": {
+        "n_states": 5592,
+        "n_moves": 22865,
+        "quadrant_fractions": {
+          "pp": 0.0,
+          "pm": 0.45650557620817844,
+          "mp": 0.0,
+          "mm": 0.4692324513448502,
+          "zero": 0.07426197244697136
+        },
+        "tradeoff_move_fraction": 0.45650557620817844,
+        "state_offers_a_up_b_down": 0.7052932761087267,
+        "state_offers_a_down_b_up": 0.0,
+        "mean_front_size": 1.8025751072961373,
+        "mean_front_extent_a": 0.1340203390848315,
+        "mean_front_extent_b": 0.2629346567198219,
+        "mean_fine_grid_distinct": 1.7714592274678111,
+        "mean_distinct_selections": 1.6353719599427754,
+        "unanimous_fraction": 0.46924177396280403,
+        "binding_share": [
+          0.6066165951359085,
+          0.39338340486409157
+        ],
+        "max_binding_share": 0.6066165951359085
+      },
+      "gate": {
+        "pair": "developability_vs_source_similarity",
+        "gates": {
+          "G1_alignment": {
+            "pass": true,
+            "statistic": "spearman_rho_pool",
+            "value": -0.11947350008288678,
+            "reject_if": ">= 0.7",
+            "falsifying_range": "[-1, +1]; rho >= 0.70 rejects"
+          },
+          "G2_local_tradeoff": {
+            "pass": false,
+            "note": "both instruments agree",
+            "I_A": {
+              "pass": false,
+              "why_failed": [
+                "D-/S+ 0.006 < 0.05"
+              ]
+            },
+            "I_B": {
+              "pass": false,
+              "why_failed": [
+                "D-/S+ 0.000 < 0.05",
+                "states offering D-/S+ 0.000 < 0.25"
+              ]
+            },
+            "falsifying_range": "[0, 1] per component"
+          },
+          "G3_no_domination": {
+            "pass": true,
+            "statistic": "max_binding_share",
+            "value": 0.7833333333333333,
+            "reject_if": "> 0.9",
+            "falsifying_range": "[0.5, 1.0]; 0.5 is perfectly balanced"
+          },
+          "G4_no_saturation": {
+            "pass": false,
+            "reach_fractions": {
+              "D": 0.0,
+              "S": 1.0
+            },
+            "failing_axes": [
+              "S"
+            ],
+            "reject_if": "any > 0.85",
+            "falsifying_range": "[0, 1] per axis"
+          },
+          "G5_front_richness": {
+            "pass": true,
+            "note": "OPERATOR_SET_DEPENDENT: present in the fiber, absent in MMP pairs",
+            "I_A": {
+              "pass": true,
+              "why_failed": [],
+              "mean_distinct_selections": 2.941666666666667,
+              "unanimous_fraction": 0.10833333333333334
+            },
+            "I_B": {
+              "pass": false,
+              "why_failed": [
+                "mean distinct selections 1.64 < 2.0"
+              ]
+            },
+            "falsifying_range": "[1, 5] distinct selections; 1 means preferences collapse"
+          }
+        },
+        "verdict": "FAIL",
+        "failed": [
+          "G2_local_tradeoff",
+          "G4_no_saturation"
+        ]
+      }
+    }
+  ],
+  "adopted_pair": "potency_vs_developability",
+  "adoption_rule": "FIRST pair in the predeclared order clearing all five gates. Positional, not best-of.",
+  "seconds": 4515.1
+}
