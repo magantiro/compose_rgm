@@ -1,0 +1,144 @@
+{
+  "schema": "compose.pareto.control_cohort",
+  "status": "FROZEN_BEFORE_ANY_CONTROLLER_RUN_OUTCOME_INDEPENDENT",
+  "pool": "held-in training sources only",
+  "criteria": {
+    "heavy_atoms": [
+      18,
+      38
+    ],
+    "exclude_already_developable": {
+      "qed_floor": 0.6,
+      "logp_box": [
+        1.0,
+        4.0
+      ]
+    },
+    "exclude_already_potent": {
+      "drd2_logodds_ceiling": 0.0,
+      "equivalent_p_active": 0.5
+    },
+    "disjoint_from_stage0_census": true,
+    "rule": "a source with no headroom on an axis cannot show preference-dependent movement along it; no source is excluded for a controller outcome, because no controller has run"
+  },
+  "seed": 20260814,
+  "scanned": 18,
+  "rejected": {
+    "unparseable": 0,
+    "size_band": 1,
+    "already_developable": 5,
+    "already_potent": 0
+  },
+  "census_sources_excluded": 60,
+  "cohort_sha256": "adea8e5510852d694288449c937219ed8caf0ade7a8dc99ef1eedd76cac3583a",
+  "sources": [
+    {
+      "index": 0,
+      "source": "C=C(COc1ccc(C(C)=O)cc1)ON=CC(=O)N(C)Cc1ccon1",
+      "slots": 48,
+      "heavy_atoms": 26,
+      "qed": 0.296,
+      "clogp": 2.4307,
+      "drd2_logodds": -8.094
+    },
+    {
+      "index": 1,
+      "source": "Brc1ccc(C2=NN(C3CCCCC3)C(c3ccc(Br)cc3)C2n2ccnc2)cc1",
+      "slots": 48,
+      "heavy_atoms": 30,
+      "qed": 0.376,
+      "clogp": 6.7431,
+      "drd2_logodds": -3.3319
+    },
+    {
+      "index": 2,
+      "source": "CC(=O)Oc1ccc(C(=O)C(C(C)=O)=C(C)O)c(OC(C)=O)c1",
+      "slots": 48,
+      "heavy_atoms": 23,
+      "qed": 0.1684,
+      "clogp": 2.1409,
+      "drd2_logodds": -7.5121
+    },
+    {
+      "index": 3,
+      "source": "C=C1CCC2C(CCC3OC(C(C)(C)O)=C(O)CC32C)C1Cc1c(OC)oc(I)c([SH3])c1=O",
+      "slots": 48,
+      "heavy_atoms": 33,
+      "qed": 0.3843,
+      "clogp": 4.8769,
+      "drd2_logodds": -3.8686
+    },
+    {
+      "index": 4,
+      "source": "CC(=CCCC(C)(C)O)C1CCC2(O)C3=CC(=O)C(CC(O)C(O)CO)C(C)C3CCC12C",
+      "slots": 48,
+      "heavy_atoms": 33,
+      "qed": 0.3526,
+      "clogp": 2.9068,
+      "drd2_logodds": -3.9697
+    },
+    {
+      "index": 5,
+      "source": "CC(C)C(NC(=O)c1cc(-c2ccc(NC(=O)Nc3ccccc3)cc2)no1)C(=O)O",
+      "slots": 48,
+      "heavy_atoms": 31,
+      "qed": 0.4573,
+      "clogp": 3.8246,
+      "drd2_logodds": -7.426
+    },
+    {
+      "index": 6,
+      "source": "Brc1cnc(NCCCC2CCCCC2)nc1Nc1cc(C2CC2)[nH]n1",
+      "slots": 48,
+      "heavy_atoms": 26,
+      "qed": 0.5026,
+      "clogp": 5.3556,
+      "drd2_logodds": -3.1761
+    },
+    {
+      "index": 7,
+      "source": "O=C(Nc1ccccc1)Nc1ccc(N=C2C(=O)Nc3ccccc32)cc1",
+      "slots": 48,
+      "heavy_atoms": 27,
+      "qed": 0.6497,
+      "clogp": 4.4035,
+      "drd2_logodds": -6.1867
+    },
+    {
+      "index": 8,
+      "source": "C=C1C=CC(C)(C)C(OC(=O)C2CCC(O)C(OC)C2)CCC(C)=CCC1",
+      "slots": 48,
+      "heavy_atoms": 27,
+      "qed": 0.5712,
+      "clogp": 4.7331,
+      "drd2_logodds": -5.0153
+    },
+    {
+      "index": 9,
+      "source": "O=C(Nc1ccc(F)cc1)N1N=C(c2ccccc2)CC1(CCO)c1ccccc1",
+      "slots": 48,
+      "heavy_atoms": 30,
+      "qed": 0.646,
+      "clogp": 4.7455,
+      "drd2_logodds": -5.5877
+    },
+    {
+      "index": 10,
+      "source": "Cc1nc2c(I)cc(I)cc2c(=O)n1Cc1ccc(I)cc1",
+      "slots": 48,
+      "heavy_atoms": 22,
+      "qed": 0.3907,
+      "clogp": 4.567,
+      "drd2_logodds": -5.049
+    },
+    {
+      "index": 11,
+      "source": "CCN(Cc1cc(C(F)(F)F)ccc1-c1nn(CC(=O)O)c2ccc(Cl)cc12)C(=O)C1CC1",
+      "slots": 48,
+      "heavy_atoms": 33,
+      "qed": 0.5039,
+      "clogp": 5.2186,
+      "drd2_logodds": -5.1386
+    }
+  ]
+}
