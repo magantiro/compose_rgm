@@ -1,0 +1,87 @@
+{
+  "schema": "compose.workstream.handoff",
+  "workstream": "pareto-control",
+  "title": "Target-free Pareto / preference control",
+  "status": "DESIGN_ONLY_PLUS_HELD_IN_CENSUS",
+  "branch": "codex/compose-pareto-control",
+  "commit": "bd28e555749e4a76377b0a2d1d42f72ef344f8c8",
+  "working_tree_dirty_at_write_time": false,
+  "base_commit": "a0e680d",
+  "held_out_opened": false,
+  "held_out_statement": "reserve_source_keys has NOT been read in this lane. Every measurement uses training_source_keys. No Modal run has been launched.",
+  "r_theta": "FROZEN. No retraining. No h_phi exists or was trained in this lane.",
+  "frozen_inputs": {
+    "diagnostics/editing_v2_matched_validation_reserve_ids.json.gz": "ba9270faf8bea1a67ad103c6da887efeef257a66fcb9ca1c3faf088f770994a1",
+    "diagnostics/retarget_goal_language_normalizers.json": "187d1ccc60b00c858f0f54f729a99ea91e06d33a913287886c80080889a76cc8",
+    "diagnostics/retarget_calibration_result_3plus3_fixed.json": "5fdca52fcba5e281fd2f544877b3c4f0f6dfa5e83d10a20c6215b67eb896af1a",
+    "diagnostics/retarget_calibration_cohort.json": "e1ab574bc175c7a4d5af0e07678cc9d637fc103aba84702efcd6df52e998b5ed",
+    "artifacts/oracles/drd2_svm_v1/drd2_oracle_manifest.json": "423737efb6e4c942bf2b207b5c92c2ad6c5856ca0d4d301aa796f799cc8acbfc",
+    "artifacts/oracles/drd2_svm_v1/drd2_svm_parameters.npz": "7c9224c12c423ba24cce7d15715409eb4dee26af40ab64fb621b3336079f0815",
+    "scripts/build_analogue_trace_pool.py": "05a7326365c1102110d6ba582960f20e89b4f0a02964008475ec9d65a4981ad9"
+  },
+  "lane_artifacts": {
+    "docs/workstreams/pareto-control/PROTOCOL.md": "f7e9c7964095be70346d1155e3358dc7b59524a0b8b20347395accf2b35d2830",
+    "docs/workstreams/pareto-control/STATUS.md": "e921d0583aed1b40dc700c47c3f10c7192cf76a6d376180e6953369b86634b08",
+    "docs/workstreams/pareto-control/DECISION_LOG.md": "920d42f5cb52d4964a3c34f8c3318abc291cba1970074e0711e14d0767681eeb",
+    "docs/workstreams/pareto-control/FIGURE_DESIGN.md": "64e7130690fc949df455057968d8cc5fc3cf9d316036e6104c2c650aace360eb",
+    "scripts/pareto_tradeoff_census.py": "ae0b5098baea9f9a9b71a7c46eefc129e64e096e4a573838ec5ad713a9b1f449",
+    "scripts/pareto_instrument_gate.py": "a0f74025ef80f0117231db7bd6271c4bd755854a5c200a51bc993b6c0f3607b6",
+    "scripts/pareto_select_cohort.py": "defb69c258a864b0bb08ce886cee96a51c502e9158e4daf7356c6bf1fb97f6a5",
+    "scripts/analyse_pareto_control.py": "e208cb021f8755453bcb0b02a3a42d72b76e87285b4ad22bf069505f8eb01b2e",
+    "src/compose_v4/experiments/pareto_control.py": "608a11f74ef221019b42aa19e39d99b9465b44eba62205382a37462885630429",
+    "tests/test_pareto_control.py": "72e9ba179cd2901dbc7d8b5fa88781125565472713829d5a4bf8dc0fbd87253b",
+    "modal_apps/pareto_control_app.py": "87c77e1b8210d2b80dc753d4c0939add934bf553d6eb2e0f57d5b1798be82d29",
+    "tests/test_pareto_instrument_gate.py": "42921f49169c87d88f3f0ff3a49eab34d9a24af0b2d91234397ee62dbb4a0314",
+    "diagnostics/pareto_tradeoff_census.json": null,
+    "diagnostics/pareto_control_cohort.json": "80080eefb4007fb9cd83f46db8783dcaff95c8be47a9ab9251d8f23cdb7d33db"
+  },
+  "census": {
+    "adopted_pair": null,
+    "predeclared_pair_order": null,
+    "gate_thresholds": null,
+    "verdicts": {},
+    "failed_gates": {},
+    "instruments": null,
+    "frozen_scales": null
+  },
+  "artifact_status_by_file": {
+    "docs/workstreams/pareto-control/PROTOCOL.md": "DESIGN_ONLY",
+    "docs/workstreams/pareto-control/FIGURE_DESIGN.md": "DESIGN_ONLY",
+    "src/compose_v4/experiments/pareto_control.py": "DESIGN_ONLY",
+    "tests/test_pareto_control.py": "DESIGN_ONLY",
+    "modal_apps/pareto_control_app.py": "DESIGN_ONLY",
+    "scripts/pareto_instrument_gate.py": "DESIGN_ONLY",
+    "scripts/analyse_pareto_control.py": "DESIGN_ONLY",
+    "tests/test_pareto_instrument_gate.py": "DESIGN_ONLY",
+    "diagnostics/pareto_control_cohort.json": "DESIGN_ONLY",
+    "diagnostics/pareto_tradeoff_census.json": "SMOKE_HELD_IN"
+  },
+  "reproduction_commands": [
+    "python3 -m pytest tests/test_pareto_control.py -q",
+    "python3 scripts/pareto_instrument_gate.py",
+    "OMP_NUM_THREADS=4 python3 scripts/pareto_tradeoff_census.py --sources 60 --reach-sources 20 --out diagnostics/pareto_tradeoff_census.json",
+    "python3 scripts/pareto_select_cohort.py --size 12",
+    "python3 scripts/analyse_pareto_control.py --shards <shard dir> --out diagnostics/pareto_control_analysis.json"
+  ],
+  "census_external_inputs": {
+    "note": "The census needs the local Active8 root, a gate-zero DECISION.json and the materialized scorer. All three are outside the repo and are passed as arguments or environment variables, never hardcoded to a session directory.",
+    "COMPOSE_ACTIVE8": "<active8 root>",
+    "COMPOSE_GATE_ZERO": "<gate_zero DECISION.json>",
+    "COMPOSE_MATSCORER": "<materialized_scorer dir>",
+    "defaults_point_at": "/Users/rmaganti/compose_trainset_backup/localprep/..."
+  },
+  "known_defects_and_withdrawn_statistics": {
+    "best_candidate_reaches_pooled_p99": "WITHDRAWN before any pair verdict. With a ~600-wide fiber it fires with probability 0.997 whatever the truth is. Replaced by 6-edit single-objective greedy rollouts. See DECISION_LOG D-007.",
+    "P1_parity": "P1 (greedy_pref vs unguided) varies controller AND objective and is labelled CONTEXT_ONLY. Caught by the executable gate at design stage. See DECISION_LOG D-008.",
+    "budget_axis_ambiguity": "One kernel call yields ~600 candidates, so native-oracle matching and kernel matching differ ~600x for gen_rank. P3/P4 are reported as a bracket. See DECISION_LOG D-009.",
+    "census_depth": "The census measures decision states at depths 0 and 1 only. Whether tradeoff structure persists at depths 2-5 is NOT measured and is the first thing the held-in smoke will show."
+  },
+  "recommended_next_action": "Authorize the 12-source held-in smoke in modal_apps/pareto_control_app.py. The cohort is already frozen at diagnostics/pareto_control_cohort.json, disjoint from the census sources. Bounded: held-in only, five arms, no h_phi, no held-out panel.",
+  "not_authorized_without_main_approval": [
+    "any Modal run",
+    "opening reserve_source_keys",
+    "training an h_phi",
+    "changing any frozen objective constant",
+    "adding a fourth objective pair"
+  ]
+}
