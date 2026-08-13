@@ -16,6 +16,84 @@
 > i.e. does endpoint-only filtering return molecules that reached validity by
 > passing through forbidden intermediates?
 
+# STAGE A2 — committed, NOT LAUNCHED, awaiting lane 1
+
+> **Family B was selected for follow-up AFTER the three-family feasibility
+> census because it alone exhibited the intended reversible-excursion
+> mechanism. Stage A2 is developmental follow-up, not independent confirmation
+> of the phenomenon.**
+
+The stage-A verdict remains **FAIL** and is not retroactively revised.
+
+**Deferred on purpose.** Every A2 trajectory would be generated under the
+frozen `R_theta` that lane 1 is deciding whether to discard. Pathwise is
+upside; lane 1 is load-bearing. The protocol and runner are committed ready to
+execute.
+
+## Design
+
+| | |
+|---|---|
+| panel | `diagnostics/pathwise_a2_panel.json`, `panel_sha256 79845e8d…`, seed 20260814 |
+| sources | **12 NEW** held-in, disjoint from the stage-A 6, the retargeting 30, and the held-out reserve (asserted in code and tests) |
+| rollouts | 6 per source — **72 trajectories, 12 observations** |
+| corridor | `[2.3689, 4.4522]` — **unchanged**, read at runtime from the frozen normalizers |
+| horizon / `R_theta` / rollout law | **unchanged** from stage A |
+| new eligibility | `cLogP(x_0)` inside the corridor — applicability, not tuning |
+
+**The source is the independent unit.** All headline figures carry a
+source-clustered bootstrap; trajectory-level incidence is reported but never
+given an interval of its own.
+
+## Criteria, fixed before the run
+
+| # | Criterion | Threshold | Justification |
+|---|---|---:|---|
+| **V3** | event yield | ≥ 20 | retained verbatim from the census |
+| **V4a** | mask leaves a choice set | median retention ≥ 0.10 | no cLogP-mask data exists anywhere in this lane, so it cannot be fitted |
+| **V4b** | mask rarely empties | ≤ 5% of states | as above |
+| **V5a** | **source spread** | ≥ 1/3 of sources | downstream sizing: 60-source panel needing ~20 informative → 1/3 |
+| **V5b** | no molecule dominates | ≤ 50% of events from one source | keeps the clustered bootstrap from collapsing to n≈1 |
+
+### V5a disclosure
+
+Stage A's family-B events came from 2 of 6 panel sources = 0.333, numerically
+equal to V5a. **The denominators are not comparable.** Stage A did not require
+`x_0` inside the corridor and only 3 of its 6 sources were source-feasible;
+under A2's definition the stage-A analogue is **2/3 = 0.667**. V5a is set at
+half the previously observed value, not at it.
+
+## A2 can fail cleanly — and each way is tested
+
+Too few excursions (V3) · events on one or two molecules (V5a/V5b) · a mask
+that strangles (V4a) or empties (V4b) the support. Any one closes pathwise
+constraints for good. `tests/test_pathwise_a2_prevalence.py` drives the
+analyser to a FAIL verdict on each criterion separately, plus a PASS case, plus
+a test that the clustered bootstrap widens when sources disagree.
+
+## Cost — NOT AUTHORISED
+
+| | Estimate |
+|---|---:|
+| kernel calls / source | ~35 (range 25–50) |
+| cost basis | measured stage A: 123 s startup + 14.3 s/call |
+| **container-hours** | **≈ 2.1** (range 1.6–2.8) |
+| wall | ~11 min at 12 parallel containers |
+| circuit breaker | 200 calls/source |
+
+Cheaper per source than stage A because A2 has no lookahead arms; the mask
+census is free, reading states the rollouts already enumerated.
+
+```bash
+PYTHONPATH=src:. MODAL_PROFILE=rahul-94866 \
+  modal run --detach modal_apps/pathwise_corridor_prevalence_app.py --sources 12
+# verify `modal app list` shows `ephemeral (detached)`
+python3 scripts/analyse_pathwise_corridor_prevalence.py \
+    --shards <dir with pathwise_a2_corridor_prevalence/*.json>
+```
+
+---
+
 # Salvage lane — reversibility census: NO FAMILY PASSES
 
 Families, thresholds, rank order and pass criteria were sealed in commit
@@ -474,32 +552,18 @@ terminal filter changes the returned molecule. The capability gap is real; the
 
 # Recommended next action
 
-> **Accept both negatives and close the lane.** Under frozen criteria applied
-> as written, the ring-system premise failed on reversibility and no
-> replacement family cleared the bar. Move pathwise constraints out of the main
-> paper, keep the ring-system absorption finding as an appendix result about
-> the frozen kernel's legal support, and spend the remaining budget on lanes
-> whose premise held.
-
-## The one decision that is the lead's, not this lane's
-
-Family B (cLogP corridor) is **reversible** — 6 of 7 violators returned, with
-excursions a third of the corridor wide — and failed **only** the 20-event bar,
-on a 42-trajectory pool inherited from a 6-source smoke panel.
-
-If the lead judges that the reversibility question deserves a powered answer
-rather than an underpowered one, the bounded run that would settle it:
-
-- **~12 held-in sources × 6 rollouts ≈ 72 unconstrained trajectories**, which
-  clears V3 at the observed rate (~71 needed).
-- Stage-A cost basis: 51 kernel calls and 853 s per source ⇒ **≈ 2.8
-  container-hours**, CPU only, `--detach`, resumable driver.
-- It would also produce the successor sets needed for **V4**, which the current
-  shards cannot answer.
-
-This lane does **not** recommend it and does not consider it authorised. It is
-recorded because the alternative — reporting "all three failed" without noting
-that two failed on power and one on science — would misinform the decision.
+> **Hold.** Stage A2 is committed and ready to run. Do **not** launch it until
+> lane 1 resolves whether the frozen `R_theta` survives — every A2 trajectory
+> would be generated under that model, and ~2.1 container-hours spent now could
+> be measuring something about to be discarded.
+>
+> If lane 1 keeps `R_theta`: authorise A2 as a single bounded run. It either
+> opens a causal source-level pathwise experiment or closes pathwise
+> constraints for good, and it is instrumented to do either.
+>
+> If lane 1 replaces `R_theta`: A2 as written is void. The corridor, criteria
+> and analysis carry over, but the panel and any results must be regenerated
+> under the new process — do not reuse stage-A shards across a model change.
 
 # Actions explicitly not recommended
 

@@ -65,11 +65,17 @@ class ArmContext:
     candidates_top_immediate: int = 4
     candidates_top_reference: int = 2
     candidates_random: int = 2
+    feasible: Callable[[str], bool] | None = None
+    """Per-state feasibility predicate. Defaults to exact labeled-subgraph
+    preservation of `motif_smarts`. Stage A2 injects the cLogP corridor here so
+    the same arm policies serve a corridor family without being rewritten."""
 
     def support(self, key: str, *, mask: bool) -> Rows:
         rows = self.successors(key)
         if not mask:
             return rows
+        if self.feasible is not None:
+            return [row for row in rows if self.feasible(row[0])]
         return mask_successors(self.motif_smarts, rows)[0]
 
     def ranked(self, rows: Rows) -> Rows:

@@ -1,7 +1,46 @@
 # Workstream C — Pathwise Constraints: Status
 
-- **Status:** `SMOKE_HELD_IN` — ring-system G1 FAILED (closed); reversibility census **NO FAMILY PASSES**; lane complete
-- **Salvage-lane verdict:** none of the three predeclared families clears the frozen criteria. **Pathwise constraints leave the main paper.** The ring-system negative goes to the appendix. No fourth predicate was searched.
+- **Status:** Stage A2 `DESIGN_ONLY` — **committed, NOT LAUNCHED, awaiting lane 1**
+- **What is running:** **NOTHING.** Zero Modal invocations since stage A.
+- **Held-out data opened:** **NO.**
+
+## Current position
+
+| Stage | Verdict | State |
+|---|---|---|
+| Ring-system stage A | **G1 FAIL** | CLOSED, not revised |
+| Three-family reversibility census | **NO FAMILY PASSES** | CLOSED |
+| **Stage A2 — cLogP corridor prevalence** | — | **protocol + runner committed, deferred** |
+
+**Stage A2 is drafted and committed but deliberately not launched.** Every A2
+trajectory would be generated under the frozen `R_theta` that lane 1 is
+deciding whether to discard; spending ~2.1 container-hours now risks measuring
+a model about to be replaced. Pathwise is upside, lane 1 is load-bearing.
+
+### A2 in one line
+
+12 **new** held-in sources × 6 rollouts, cLogP corridor `[2.3689, 4.4522]`
+**unchanged**, H=6, same `R_theta`, same rollout law. **The source is the
+independent unit** — 72 trajectories, 12 observations, source-clustered
+bootstrap on everything.
+
+Criteria fixed before the run: **V3** ≥20 events (retained) · **V4a** median
+support retention ≥0.10 · **V4b** mask-empty ≤5% · **V5a** ≥1/3 of sources have
+an event · **V5b** largest source ≤50% of events.
+
+**Cost if authorised: ≈2.1 container-hours** (range 1.6–2.8), ~11 min wall,
+CPU only, `--detach`, resumable driver, 200-call circuit breaker.
+
+### Honest framing, carried in the protocol and in the analysis output
+
+> Family B was selected for follow-up AFTER the three-family feasibility census
+> because it alone exhibited the intended reversible-excursion mechanism. Stage
+> A2 is developmental follow-up, not independent confirmation of the
+> phenomenon.
+
+---
+
+## Closed: reversibility census — no family passes
 
 ## Reversibility census (2026-08-13, no new compute)
 
@@ -96,8 +135,11 @@ Well under budget; the 360-call circuit breaker was never approached.
 
 ## Next action
 
-**None from this lane.** Both gates failed under frozen criteria. Handing back
-to main. This lane recommends **not** paying for stage B and **not** searching
-a fourth predicate; the one open question — whether family B's underpowered
-result warrants a larger trajectory pool — is explicitly the lead's to decide,
-and is costed in `HANDOFF.md`.
+**Wait for lane 1.** Stage A2 is committed and ready. Do not launch it until
+lane 1 resolves whether the frozen `R_theta` survives — otherwise the run
+measures a model that may be discarded.
+
+This lane recommends **not** paying for stage B and **not** searching a fourth
+predicate. If lane 1 keeps `R_theta`, A2 is a single bounded ~2.1
+container-hour run that either opens a causal source-level experiment or closes
+pathwise constraints for good.

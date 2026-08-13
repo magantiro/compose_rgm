@@ -451,6 +451,114 @@ trajectory (source 1, unconstrained greedy): cLogP 3.01 → 2.40 → 2.57 → **
 
 ---
 
+## 2026-08-13 — Stage A2 authorised, drafted, committed, and NOT launched
+
+**Decision.** Build the A2 protocol, panel, runner, analyser and tests; commit
+them; launch nothing.
+
+**Evidence before the decision.** Main lane's distinction between the three
+failures: the ring motif and family C failed on the *scientific property*
+(absorbing or never occurring), while family B failed an *absolute event-count*
+requirement with the causal mechanism plainly present (7/21 violated, 6/7
+returned, excursions 33.6% of corridor width, none boundary jitter). With 21
+relevant trajectories a 20-event bar demanded the phenomenon in nearly every
+one, which is not the question the bar was standing in for.
+
+**Deferral rationale, from main lane.** Every A2 trajectory would be generated
+under the frozen `R_theta` that lane 1 may discard. Spending ~2.1
+container-hours now risks measuring a model about to be replaced.
+
+**Stage A verdict.** Unchanged: FAIL. Not retroactively revised.
+
+**Frozen object touched.** None. Corridor, horizon, `R_theta`, violation and
+recovery definitions, and rollout law are all carried over unchanged.
+
+---
+
+## 2026-08-13 — V5a source-spread threshold set at 1/3, from downstream sizing
+
+**Decision.** Require ≥1/3 of A2 sources to show at least one endpoint-valid /
+path-invalid event, plus a companion cap (V5b) of ≤50% of events from any
+single source.
+
+**Derivation, deliberately not from the current numbers.** The eventual causal
+experiment is source-level; a source with no possible excursion is
+non-informative because both arms return the same molecule. Using this
+project's own panel sizing (`RETARGETING_SAME_PREFIX_DESIGN.md`: 20–24
+development, 60–80 confirmatory) and requiring ~20 informative sources for a
+stable paired estimate: 60-source panel → `p ≥ 20/60 = 1/3`; 24-source panel →
+`p ≥ 8/24 = 1/3`. Both routes land on the same number.
+
+**Disclosure, because it would otherwise look fitted.** Stage A's family-B
+events came from 2 of 6 panel sources = 0.333, numerically equal to this
+threshold. The denominators are not comparable: stage A did not require `x_0`
+inside the corridor and only 3 of its 6 sources were source-feasible. Under
+A2's own definition — all sources source-feasible by construction — the
+stage-A analogue is 2/3 = 0.667. **V5a is set at half the previously observed
+value, not at it.**
+
+**V5b rationale.** With ≥4 event-sources, one molecule supplying more than half
+the events would leave the clustered bootstrap effectively at `n ≈ 1`.
+
+**Frozen object touched.** None; new criteria for a new stage.
+
+---
+
+## 2026-08-13 — V4 thresholds set with no corresponding data in hand
+
+**Decision.** Median support retention ≥0.10; mask-empty states ≤5%.
+
+**Why these cannot have been fitted.** No cLogP-mask measurement exists
+anywhere in this lane — stage A masked on the ring motif, not the corridor. The
+thresholds come from what a downstream controller needs: a median state that
+still offers a real choice set, and a dead-end rate low enough that the
+experiment measures control rather than dead-end accounting.
+
+**Frozen object touched.** None.
+
+---
+
+## 2026-08-13 — A2 requires the source to start inside the corridor
+
+**Decision.** Add `cLogP(x_0)` inside the corridor to A2 eligibility.
+
+**Evidence before the decision.** Stage A did not require it and lost half its
+sample to it: 21 of 42 trajectories, and 3 of 6 sources, started outside the
+corridor and dropped out of the denominator after the fact.
+
+**Why this is applicability, not tuning.** A source that starts outside the
+corridor can never leave and return, so it cannot produce the event being
+counted. The corridor itself is unchanged. The criterion reads `x_0` only, so
+it is outcome-independent. It makes every A2 source contribute.
+
+**Direction of any residual bias.** Requiring `x_0` inside does not select for
+proximity to the boundary, so it does not bias toward violation; if anything a
+mid-corridor source is less likely to exit. Panel headroom is reported
+(0.01–1.86 below, 0.23–2.07 above, corridor width 2.083) so the panel can be
+checked for edge-stacking.
+
+**Frozen object touched.** None.
+
+---
+
+## 2026-08-13 — `ArmContext` generalised to an injected feasibility predicate
+
+**Decision.** Add an optional `feasible` callable to `ArmContext`, defaulting to
+the existing SMARTS motif check.
+
+**Evidence before the decision.** A2 needs the same rollout law under a
+corridor predicate. The alternatives were to pass a dummy SMARTS (dishonest) or
+to fork the policy code (which is how the retargeting lane's "no verified arm"
+defect survived two runs).
+
+**Verification.** All 30 pre-existing arm tests pass unchanged, and the
+reversibility census output is byte-identical after the edit, so no earlier
+verdict moved.
+
+**Frozen object touched.** None; additive and backwards compatible.
+
+---
+
 ## 2026-08-12 — External evidence folded in: GraphXForm is an endpoint-only comparator
 
 **Decision.** Record the baseline lane's finding in `PROTOCOL.md` and

@@ -378,6 +378,180 @@ bound is the point of this lane.
 
 ---
 
+# ADDENDUM 2 — Stage A2: cLogP corridor prevalence / viability
+
+**Status:** `DESIGN_ONLY`. **Committed, NOT LAUNCHED.**
+**Scope:** family B only. No other family. If A2 fails, no fourth predicate.
+
+> **Family B was selected for follow-up AFTER the three-family feasibility
+> census because it alone exhibited the intended reversible-excursion
+> mechanism. Stage A2 is developmental follow-up, not independent confirmation
+> of the phenomenon.**
+
+The stage-A verdict remains **FAIL** and is not retroactively revised.
+
+## What A2 asks, and why it is a different question
+
+The 20-event bar answered "did this pool yield 20 events". With only 21
+source-feasible trajectories it demanded the phenomenon appear in nearly every
+one. The scientific question behind it was:
+
+> are recoverable excursions frequent enough **and spread across enough
+> distinct molecules** to support a causal, source-level pathwise-control
+> experiment — and does the corridor mask leave a controller anything to act on?
+
+## Frozen, unchanged from stage A
+
+| Object | Value |
+|---|---|
+| corridor | `[2.3689, 4.4522]` — held-in cLogP IQR, **read at runtime**, never transcribed |
+| horizon | `H = 6` |
+| `R_theta` | the same frozen checkpoint |
+| violation / recovery | the same definitions (`state_is_feasible`, `audit_trajectory`) |
+| rollout law | sample `R_theta` within the top-3 by `u_B`, goal `B = P AND D` |
+
+**No threshold is adjusted.**
+
+## Sample design — the source is the independent unit
+
+**12 NEW held-in sources × 6 stochastic rollouts.** New sources, not more
+rollouts on the same six: `diagnostics/pathwise_a2_panel.json`,
+`panel_sha256 79845e8d…`, seed 20260814, disjoint from the stage-A 6, the
+retargeting 30, and the held-out reserve (all asserted in code and in tests).
+
+**72 trajectories are 12 observations.** Rollouts from one molecule are
+repeated measures. Every headline figure is reported per source with a
+**source-clustered bootstrap** (resample sources, keep their rollouts
+together). Trajectory-level incidence is reported because the criteria are
+stated in those terms, but it is **never given an interval of its own** — a
+trajectory-level interval would be about √6 too narrow and would make a
+phenomenon carried by two molecules look like a population fact.
+
+### One eligibility criterion is new, and it is applicability, not tuning
+
+A2 requires `cLogP(x_0)` **inside** the corridor. A source starting outside can
+never "leave and return", so it cannot produce the event being counted. In
+stage A this was not required and it cost half the sample: **21 of 42
+trajectories, and 3 of 6 sources, started outside the corridor** and dropped
+out of the denominator after the fact. The corridor itself is unchanged; this
+reads `x_0` only; it makes every A2 source contribute.
+
+Panel headroom is reported so a reviewer can see the panel is not stacked
+against the corridor edges (observed range: 0.01–1.86 below, 0.23–2.07 above,
+on a corridor 2.083 wide).
+
+## Metrics
+
+Trajectory level: violation incidence; return rate among violators; total
+endpoint-valid / path-invalid events.
+
+**Source level (primary):** number and fraction of sources with ≥1 event;
+events per source; largest single-source share; all with clustered bootstrap.
+
+Excursion geometry: **depth and duration**. Duration is the count of
+consecutive states outside the corridor — a multi-step excursion is budget
+spent inside a forbidden region, which is exactly what endpoint-only filtering
+cannot see.
+
+**V4, which stage A could never evaluate:** legal-support retention under the
+corridor mask, and mask-empty frequency, measured on every state the
+*unconstrained* rollouts visited.
+
+## Criteria, fixed before the run
+
+| # | Criterion | Threshold |
+|---|---|---|
+| **V3** | event yield | ≥ **20** endpoint-valid / path-invalid events (retained verbatim) |
+| **V4a** | mask leaves a choice set | median support retention ≥ **0.10** |
+| **V4b** | mask rarely empties | mask-empty states ≤ **5%** of visited states |
+| **V5a** | **source spread** | ≥ **1/3** of sources (≥ 4 of 12) have ≥ 1 event |
+| **V5b** | no single molecule dominates | largest source ≤ **50%** of all events |
+
+### Justifying V5a from downstream feasibility, not from current numbers
+
+The eventual causal experiment is source-level: per source, endpoint-only
+handling versus pathwise masking. A source with no possible endpoint-valid /
+path-invalid excursion is **non-informative** — both arms return the same
+molecule and it contributes nothing to the contrast.
+
+Using this project's own panel sizing (`RETARGETING_SAME_PREFIX_DESIGN.md`:
+20–24 development, 60–80 held-out confirmatory), and requiring ~20 informative
+sources for a stable paired estimate:
+
+- 60-source confirmatory panel → `p ≥ 20/60 = 1/3`;
+- 24-source development panel → `p ≥ 8/24 = 1/3`.
+
+Both routes land on **1/3**, so that is the threshold.
+
+**Disclosure, because a reviewer will check.** Stage A's family-B events came
+from 2 of 6 panel sources = 0.333, numerically equal to this threshold. The
+denominators are **not** comparable: stage A did not require `x_0` inside the
+corridor and only 3 of its 6 sources were source-feasible. Under A2's own
+definition — where every source is source-feasible by construction — the
+stage-A analogue is **2/3 = 0.667**, twice the threshold. V5a is set at half
+the previously observed value, not at it.
+
+### V5b
+
+With ≥ 4 event-sources, one molecule supplying more than half the events would
+mean the clustered bootstrap is effectively driven by `n ≈ 1`. The cap makes
+V5a robust to a single hyper-productive outlier. (Stage A's top source held
+exactly 0.500, but with only 2 event-sources that statistic carries no
+information.)
+
+### V4a / V4b cannot have been fitted
+
+**No cLogP-mask measurement exists anywhere in this lane.** Stage A masked on
+the ring motif, not the corridor. These two thresholds were therefore set with
+no corresponding data in hand, from what a downstream controller needs: a
+median state that still offers a real choice set, and a dead-end rate low
+enough that the experiment measures control rather than dead-end accounting.
+
+## A2 must be able to fail cleanly, and here is how it does
+
+Any one of these closes pathwise constraints **for good**:
+
+- **too few excursions** → V3 fails;
+- **excursions concentrated on one or two molecules** → V5a or V5b fails;
+- **a mask that strangles the support** → V4a fails;
+- **a mask that empties the support** → V4b fails.
+
+Each failure mode is exercised by a test in
+`tests/test_pathwise_a2_prevalence.py`, which drives the analysis script to a
+FAIL verdict on synthetic shards for every criterion separately. A gate that
+can only say PASS is not a gate.
+
+## Costed plan — NOT AUTHORISED TO RUN
+
+```bash
+PYTHONPATH=src:. MODAL_PROFILE=rahul-94866 \
+  modal run --detach modal_apps/pathwise_corridor_prevalence_app.py --sources 12
+# verify `modal app list` shows `ephemeral (detached)` before walking away
+```
+
+| | Estimate |
+|---|---:|
+| sources | 12 |
+| rollouts | 6 per source (72 trajectories, **12 observations**) |
+| kernel calls / source | ~35 (range 25–50) |
+| cost basis | measured stage A: 123 s startup + 14.3 s per call |
+| **container-hours** | **≈ 2.1** (range 1.6–2.8) |
+| wall time | ~11 min at 12 parallel containers |
+| per-source circuit breaker | 200 kernel calls |
+
+Cheaper than stage A per source because A2 has no lookahead arms. The mask
+census is free: it reads states the rollouts already enumerated.
+
+## Why this run is deferred
+
+Every A2 trajectory would be generated under the frozen `R_theta` that lane 1
+is currently deciding whether to discard. Spending ~2 container-hours now risks
+measuring a model that is about to be replaced. **Pathwise is upside; lane 1 is
+load-bearing.** The protocol and runner are committed ready to execute and are
+not launched.
+
+---
+
 ## External comparator evidence (from the baseline-qualification lane)
 
 **GraphXForm's action masking is genuinely pathwise, but only over valence,

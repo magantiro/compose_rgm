@@ -7,7 +7,7 @@
   "head_commit": "3abe0fdc3e2fd616766862774665c553ca2ee9fc",
   "head_commit_note": "the commit that introduced this workstream; handoff.json itself is amended into it",
   "working_tree_clean": true,
-  "status": "SMOKE_HELD_IN",
+  "status": "DESIGN_ONLY_STAGE_A2_COMMITTED_NOT_LAUNCHED",
   "held_out_opened": false,
   "modal_runs_launched": 1,
   "question": "Can COMPOSE require an exact labeled structural motif at every committed state, and does that constraint actually bind, i.e. does endpoint-only filtering return molecules that reached validity through forbidden intermediates?",
@@ -127,6 +127,30 @@
       "status": "SMOKE_HELD_IN",
       "sha256": "c21c20739c37988e8b8dfdb9637e6a8838f958d1103623b1e1f443b218c413a5",
       "purpose": "census over committed shards; no Modal access required"
+    },
+    {
+      "path": "diagnostics/pathwise_a2_panel.json",
+      "status": "DESIGN_ONLY",
+      "sha256": "55db98fda1ddfbe577232fea7f0300038cc21ce671b9c5b3b5b8194d22831790",
+      "purpose": "frozen A2 panel, 12 new held-in sources"
+    },
+    {
+      "path": "modal_apps/pathwise_corridor_prevalence_app.py",
+      "status": "DESIGN_ONLY",
+      "sha256": "4edf772cb2926819d5508966ce7f1a061eaf99b49319b09f8d2f2ba2a81a0f22",
+      "purpose": "A2 runner (NOT launched)"
+    },
+    {
+      "path": "scripts/pathwise_select_a2_panel.py",
+      "status": "DESIGN_ONLY",
+      "sha256": "9cec40deb7521ed8bd4adf80f8f8cbb78443800757986e4ad343024b839b2aff",
+      "purpose": "A2 panel selector"
+    },
+    {
+      "path": "scripts/analyse_pathwise_corridor_prevalence.py",
+      "status": "DESIGN_ONLY",
+      "sha256": "afe04fa937cf0aaf0640f9c96a4827cf9f2ca2b66a1cfdc0d2071b75ad7d6128",
+      "purpose": "A2 gate verdicts with source-clustered bootstrap"
     }
   ],
   "motif_rule": {
@@ -148,8 +172,8 @@
     ]
   },
   "tests": {
-    "command": "python3 -m pytest tests/test_pathwise_constraint.py tests/test_pathwise_arms.py tests/test_pathwise_analysis.py -q",
-    "count": 67,
+    "command": "python3 -m pytest tests/test_pathwise_constraint.py tests/test_pathwise_arms.py tests/test_pathwise_analysis.py tests/test_pathwise_a2_prevalence.py -q",
+    "count": 84,
     "result": "PASS",
     "key_negative_test": "tests/test_pathwise_analysis.py::test_analyser_FAILS_the_vacuity_gate_when_nothing_ever_violates"
   },
@@ -233,7 +257,7 @@
     },
     "per_source_kernel_call_budget": 360
   },
-  "recommended_next_action": "Accept both negatives and close the lane. Move pathwise constraints out of the main paper, keep the ring-system absorption finding as an appendix result about the frozen kernel's legal support, and spend the remaining budget on lanes whose premise held. The one open question -- whether family B's underpowered reversibility result deserves a powered answer -- is escalated to the lead, costed, and NOT recommended by this lane.",
+  "recommended_next_action": "HOLD. Stage A2 is committed and ready. Do not launch until lane 1 resolves whether the frozen R_theta survives. If it does, authorise A2 as a single bounded ~2.1 container-hour run that either opens a causal source-level pathwise experiment or closes pathwise constraints for good. If R_theta is replaced, A2 as written is void and must be regenerated.",
   "not_recommended": [
     "stage B: unauthorised, and greedy is already at ceiling so headroom is 0 by definition",
     "changing the motif rule, horizon, or panel and re-running",
@@ -241,7 +265,9 @@
     "reporting 'masked arms had zero violations' as a finding",
     "promoting the secondary finding to the lane headline",
     "searching a fourth or fifth constraint predicate",
-    "lowering the 20-event bar to convert family B into a pass"
+    "lowering the 20-event bar to convert family B into a pass",
+    "launching stage A2 before lane 1 resolves R_theta",
+    "reusing stage-A shards across a model change"
   ],
   "deviations_from_brief": [
     "eligibility drops 'kernel offers motif-destroying successors' (brief line 207) because it is the numerator of the vacuity gate",
@@ -367,5 +393,91 @@
     "this_lane_recommends_it": false,
     "authorised": false,
     "explicitly_forbidden": "lowering the 20-event bar to convert B into a pass"
+  },
+  "stage_a2": {
+    "status": "DESIGN_ONLY",
+    "launched": false,
+    "deferred_reason": "every A2 trajectory would be generated under the frozen R_theta that lane 1 is deciding whether to discard; spending ~2.1 container-hours now risks measuring a model about to be replaced",
+    "framing_verbatim": "Family B was selected for follow-up AFTER the three-family feasibility census because it alone exhibited the intended reversible-excursion mechanism. Stage A2 is developmental follow-up, not independent confirmation of the phenomenon.",
+    "stage_a_verdict_unchanged": "FAIL",
+    "frozen_unchanged": {
+      "clogp_corridor": [
+        2.3688650000000004,
+        4.452222500000002
+      ],
+      "horizon": 6,
+      "goal": "B",
+      "rollouts": 6,
+      "shortlist": 3,
+      "r_theta": "same frozen checkpoint",
+      "violation_and_recovery_definitions": "unchanged",
+      "rollout_law": "unchanged"
+    },
+    "panel": {
+      "path": "diagnostics/pathwise_a2_panel.json",
+      "panel_sha256": "79845e8d985bf7a2676ebd4d75b6fc8626159a021106e24089ef0366f003b600",
+      "sources": 12,
+      "seed": 20260814,
+      "new_sources_not_more_rollouts": true,
+      "disjoint_from": [
+        "stage-A 6 sources",
+        "retargeting 30",
+        "held-out reserve"
+      ],
+      "new_eligibility": "cLogP(x_0) inside the corridor -- applicability, not tuning"
+    },
+    "independent_unit": "source",
+    "sample": "12 sources x 6 rollouts = 72 trajectories, 12 observations",
+    "uncertainty": "source-clustered bootstrap; trajectory level carries no interval",
+    "criteria": {
+      "V3_event_yield": {
+        "threshold": 20,
+        "provenance": "retained verbatim from the census"
+      },
+      "V4a_median_retention": {
+        "threshold": 0.1,
+        "provenance": "no cLogP-mask data exists in this lane, so it cannot be fitted"
+      },
+      "V4b_mask_empty_fraction": {
+        "threshold": 0.05,
+        "provenance": "as above"
+      },
+      "V5a_source_spread": {
+        "threshold": 0.3333333333333333,
+        "provenance": "downstream sizing: 60-source confirmatory panel needing ~20 informative sources -> 1/3; 24-source development panel needing ~8 -> 1/3"
+      },
+      "V5b_max_single_source_share": {
+        "threshold": 0.5,
+        "provenance": "keeps the clustered bootstrap from collapsing to n~1"
+      }
+    },
+    "v5a_disclosure": "stage A's family-B events came from 2/6 panel sources = 0.333, numerically equal to V5a. The denominators are NOT comparable: stage A did not require x_0 inside the corridor and only 3 of 6 sources were source-feasible. Under A2's definition the stage-A analogue is 2/3 = 0.667, so V5a sits at HALF the previously observed value.",
+    "can_fail_cleanly": [
+      "too few excursions -> V3",
+      "events concentrated on one or two molecules -> V5a / V5b",
+      "mask strangles the support -> V4a",
+      "mask empties the support -> V4b"
+    ],
+    "costed_plan": {
+      "command": "PYTHONPATH=src:. MODAL_PROFILE=rahul-94866 modal run --detach modal_apps/pathwise_corridor_prevalence_app.py --sources 12",
+      "estimated_kernel_calls_per_source": 35,
+      "estimated_kernel_calls_range": [
+        25,
+        50
+      ],
+      "cost_basis": "measured stage A: 123 s startup + 14.3 s per kernel call",
+      "estimated_container_hours": 2.1,
+      "estimated_container_hours_range": [
+        1.6,
+        2.8
+      ],
+      "estimated_wall_minutes": 11,
+      "per_source_kernel_call_budget": 200,
+      "cpu_only": true,
+      "detach_required": true,
+      "resumable": true,
+      "authorised": false
+    },
+    "if_r_theta_is_replaced": "A2 as written is void; corridor, criteria and analysis carry over but the panel and any results must be regenerated. Do not reuse stage-A shards across a model change."
   }
 }

@@ -214,6 +214,51 @@ def state_is_feasible(family: str, smiles: str) -> bool:
     raise KeyError(f"unknown family {family}")
 
 
+def corridor_excursions(family: str, trajectory: list[str]) -> list[dict]:
+    """Maximal runs of consecutive states outside a corridor.
+
+    Depth AND duration. Duration matters for the pathwise claim in a way depth
+    does not: a one-step excursion is a state the controller passes through,
+    while a multi-step excursion is a region it spends real budget inside. Both
+    are invisible to endpoint-only filtering, which is the point.
+
+    Added for stage A2; changes no threshold and no predicate. `state_is_feasible`
+    remains the sole definition of violation.
+    """
+    if family == "B_physchem_corridor":
+        low, high = clogp_corridor()
+        values = [clogp_of(key) for key in trajectory]
+    elif family == "C_size_corridor":
+        low, high = float(HEAVY_ATOM_CORRIDOR[0]), float(HEAVY_ATOM_CORRIDOR[1])
+        values = [float(heavy_atoms_of(key)) for key in trajectory]
+    else:
+        return []
+
+    runs: list[dict] = []
+    current: list[tuple[int, float]] = []
+    for index, value in enumerate(values):
+        outside = not (low <= value <= high) if value == value else True
+        if outside:
+            current.append((index, value))
+            continue
+        if current:
+            runs.append(current)
+            current = []
+    if current:
+        runs.append(current)
+
+    out = []
+    for run in runs:
+        depths = [max(v - high, low - v, 0.0) for _, v in run if v == v]
+        out.append({
+            "start_index": run[0][0],
+            "duration": len(run),
+            "max_depth": round(max(depths), 4) if depths else None,
+            "returned": run[-1][0] < len(values) - 1,
+        })
+    return out
+
+
 def audit_trajectory(family: str, trajectory: list[str]) -> dict:
     """Pathwise audit for one realised trajectory under one family.
 
