@@ -317,10 +317,12 @@ and deferred, not quietly dropped — and until it is run, P3/P4 are one-sided.
 
 ---
 
-## D-006 · 2026-08-13 · Census verdict
+## D-012 · 2026-08-13 · Census verdict
 
-*(Recorded after the census ran; see `diagnostics/pareto_tradeoff_census.json`.)*
+*(Recorded AFTER the census ran; see `diagnostics/pareto_tradeoff_census.json`
+and the generated `STATUS.md`.)*
 
-Entry appended below once the census completed — deliberately left as a separate
-commit from D-001..D-005 so the git history shows the predeclaration preceded
-the measurement.
+Deliberately a separate commit from D-001..D-005, so the git history shows the
+predeclaration preceded the measurement rather than merely claiming it: the
+gate thresholds and the pair order landed at `d206d55`, before
+`scripts/pareto_tradeoff_census.py` had ever been run.
