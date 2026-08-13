@@ -71,24 +71,82 @@ own provenance is the weakest link in the claim it exists to protect. The fix is
 to obtain the Gate-0 decision that matches this stream — or to determine why the
 index walk diverges — not to route around the check.
 
-## What unblocks it
+## RESOLVED — the diagnosis, with no guard bypassed
 
-One of:
+**The Gate-0 `source_index_sha256` embeds the absolute mount path.**
 
-1. **The matching Gate-0 decision.** `source_index_sha256 = b5d042a0…` was
-   computed somewhere; if a v6-equivalent decision exists on the volume for this
-   exact stream, fetch it and the chain closes with no code change.
-2. **The index walk diagnosed.** Compare the local per-shard
-   `(task_identity_sha256, decision_shard_sha256)` list against the reduction
-   the decision was built from. A single differing or extra shard is enough, and
-   this is a cheap comparison once the expected list is in hand.
-3. **Run the parity replay on Modal instead**, where the chain already
-   authenticates, and pull only the resulting shards for comparison. This costs
-   compute but requires no bypass.
+`src/compose_v4/data/editing_v2_process_v2_gate_zero.py:593` hashes a body whose
+first field is the run root as a *string*:
 
-**Recommendation: (2), then (1).** Both are cheap and neither weakens the chain.
-(3) is the fallback and should be chosen deliberately, not as a way of avoiding
-the diagnosis.
+```python
+body = {
+    "active8_run_root": str(root),          # <-- absolute filesystem path
+    "active8_completion_sha256": ...,
+    "shards": shards,
+    "eligible_task_identities": sorted(eligible),
+    ...
+}
+index_sha256 = canonical_sha256(body)
+```
+
+Confirmed by direct reconstruction — every other field held at its locally
+computed value, only the root string swapped:
+
+| root string used | index hash |
+|---|---|
+| `/Users/rmaganti/.../local_runtime/active8/<sha>` | `adb02a19…` |
+| `/artifacts/editing_v2/process_v2_active8/<sha>` | **`b5d042a0…` — EXACT MATCH** |
+
+So the content is **identical**: all 328 shards, every eligible task identity,
+the role census, the completion and the sentinel. The tree is simply mounted
+somewhere else, and the index hash is not content-addressed.
+
+### This is a real portability defect, and it should be recorded as one
+
+A "source index" digest that changes with **where you mounted the tree** cannot
+verify content across environments — which is the one job that digest exists to
+do. The design already anticipated relocation *for the plan*:
+
+```python
+mounted_root = mounted_process_v2_artifact_path(
+    str(plan["run_artifact_root"]), artifact_root=artifact_root, ...)
+```
+
+`artifact_root` remaps the plan's recorded root onto a local mount. **The same
+remap is not applied to the index body.** That asymmetry is the defect, and it
+means any future attempt to verify these artifacts off Modal hits this same wall.
+
+Fixing it properly means either dropping `active8_run_root` from the hashed body
+or routing it through the same remap — both of which change the semantics of a
+**frozen verification artifact** and would invalidate the recorded decision
+hash. That is a deliberate change requiring its own review, not something to do
+in passing while chasing a speedup.
+
+## Consequence: parity replay runs on Modal
+
+Not as a fallback guess — as the informed choice. The content is verified
+identical, the sole obstacle is a non-portable path embedding, and Modal is
+where the tree lives at the path the digest names. Running it there satisfies
+the check **as written** rather than around it.
+
+The local runtime stays: it is a working environment for everything that does
+not need the authenticated chain, including scorer benchmarks and fixture-level
+race testing of the compute-once cache.
+
+## What this was NOT
+
+Three hypotheses were on the table before the diagnosis. Recording which failed
+matters, because each would have implied a different and more alarming problem:
+
+| hypothesis | verdict |
+|---|---|
+| a truncated or partial download | **wrong** — 1,641 files, none empty, 4 per task dir exactly as the volume lists |
+| a repo-commit dependency in the eligibility rule | **wrong** — the `7deee51` worktree and main compute the *same* local index |
+| a differing or extra Active8 shard | **wrong** — the completion and sentinel digests both match; content is identical |
+
+None of them was the answer, and the real cause was benign. That is worth
+stating plainly: the chain did not detect corruption. It detected relocation,
+and it could not tell the difference — which is exactly the defect above.
 
 ## Unchanged by any of this
 
