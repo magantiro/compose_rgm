@@ -1,0 +1,114 @@
+{
+  "schema": "compose.pareto.control_protocol",
+  "version": "v1",
+  "status": "DESIGN_ONLY",
+  "document": "docs/workstreams/pareto-control/PROTOCOL.md",
+  "held_out_opened": false,
+  "r_theta": "FROZEN -- no retraining, and no h_phi exists in this lane",
+
+  "objectives": {
+    "P": {
+      "name": "potency",
+      "property": "drd2_logodds",
+      "centre": -5.521657630461303,
+      "scale_iqr": 2.6160788815821414,
+      "maximize": true,
+      "note": "log-odds, never P(active): the pool sits at median P(active)=0.004 where probability is saturated"
+    },
+    "D": {
+      "name": "developability",
+      "form": "clipped soft-min over a QED floor and a cLogP box",
+      "qed_floor": 0.6,
+      "qed_scale_iqr": 0.3139245718923388,
+      "logp_box": [1.0, 4.0],
+      "logp_scale_iqr": 2.0833575000000017,
+      "margin_clip": 1.5,
+      "softmin_tau": 0.25,
+      "analytic_ceiling": 1.3267132048600137,
+      "maximize": true,
+      "frozen_from": "modal_apps/retarget_goal_calibration_app.py",
+      "escape_hatch_closed": "if O-D fails the saturation gate, this lane may NOT substitute an unclipped soft-min or QED alone; that is a main-lane decision"
+    },
+    "S": {
+      "name": "source_similarity",
+      "property": "ecfp4_tanimoto_to_x0",
+      "fingerprint": {"type": "morgan", "radius": 2, "bits": 2048},
+      "centre_recipe": "held-in median over the census candidate set",
+      "scale_recipe": "held-in IQR over the census candidate set",
+      "maximize": true,
+      "note": "the recipe is predeclared; the numbers are written into diagnostics/pareto_tradeoff_census.json at Phase 0, before any gate statistic is evaluated"
+    }
+  },
+
+  "predeclared_pair_order": [
+    "potency_vs_developability",
+    "potency_vs_source_similarity",
+    "developability_vs_source_similarity"
+  ],
+  "adoption_rule": "FIRST pair clearing all five gates. Positional, not best-of. Not reordered after results.",
+
+  "headroom_gate": {
+    "G1_max_spearman_rho": 0.70,
+    "G2_min_tradeoff_move_fraction": 0.20,
+    "G2_min_each_direction": 0.05,
+    "G2_min_state_availability": 0.25,
+    "G3_max_binding_share": 0.90,
+    "G4_max_reach_fraction": 0.85,
+    "G5_min_distinct_selections": 2.0,
+    "G5_max_unanimous_fraction": 0.50
+  },
+
+  "scalarization": {
+    "primary": "augmented_weighted_chebyshev",
+    "rho": 0.001,
+    "secondary_for_diagnosis_only": "weighted_sum",
+    "why_not_weighted_sum_alone": "a weighted sum can only select points on the convex hull of the front, so it systematically misses nonconvex regions and reports a smaller achievable front than exists",
+    "utopia_recipe": "held-in p99 of each objective",
+    "reference_recipe": "held-in p5 of each objective"
+  },
+
+  "preference_grid": [0.1, 0.3, 0.5, 0.7, 0.9],
+  "budget_edits": 6,
+
+  "arms": {
+    "unguided": {"controller": "none", "start": "x_0", "objective": "none"},
+    "gen_rank@greedy": {"controller": "open_loop", "start": "x_0", "objective": "chebyshev_w", "budget_matched_on": "kernel"},
+    "gen_rank@verified": {"controller": "open_loop", "start": "x_0", "objective": "chebyshev_w", "budget_matched_on": "kernel"},
+    "greedy_pref": {"controller": "greedy", "start": "x_0", "objective": "chebyshev_w"},
+    "verified_pref": {
+      "controller": "verified", "start": "x_0", "objective": "chebyshev_w",
+      "shortlist": {"top_immediate": 4, "top_reference": 2, "n_random": 2},
+      "override_rule": "strict improvement; ties keep greedy",
+      "why_a_random_stratum": "a candidate universe defined entirely by the greedy score cannot show that a non-greedy action was worth taking"
+    },
+    "prefix_branching": {"prefix_steps": 3, "prefix_weight": 0.5, "branch_steps": 3}
+  },
+
+  "contrasts": [
+    {"id": "P1", "arm": "greedy_pref", "base": "unguided", "varies": ["controller", "objective"], "status": "CONTEXT_ONLY"},
+    {"id": "P2", "arm": "verified_pref", "base": "greedy_pref", "varies": ["controller"], "status": "PRIMARY", "budget_parity_axis": null},
+    {"id": "P3", "arm": "greedy_pref", "base": "gen_rank@greedy", "varies": ["controller"], "status": "PRIMARY", "budget_parity_axis": "kernel"},
+    {"id": "P4", "arm": "verified_pref", "base": "gen_rank@verified", "varies": ["controller"], "status": "PRIMARY", "budget_parity_axis": "kernel"},
+    {"id": "P5", "arm": "greedy_pref@w=0.9", "base": "greedy_pref@w=0.1", "varies": ["objective"], "status": "PRIMARY"},
+    {"id": "P6", "arm": "branch@w_i", "base": "branch@w_j", "varies": ["objective"], "status": "PRIMARY"}
+  ],
+
+  "metrics": {
+    "primary": "normalized_hypervolume over committed endpoints only, exactly five per arm per source",
+    "hv_auc_conventions": ["native_oracle_calls", "raw_oracle_calls"],
+    "hv_auc_rule": "both are reported together; neither may be substituted for the other",
+    "secondary": ["preference_coverage", "nondominated_set_size", "feasibility", "source_similarity", "endpoint_structural_diversity"],
+    "independent_unit": "source",
+    "bootstrap": {"resamples": 2000, "seed": 20260813, "interval": "95% percentile"},
+    "no_pvalue_for": ["verified_minus_greedy_endpoint_scalarized_loss"],
+    "no_pvalue_reason": "policy improvement fixes the sign; only the magnitude is admissible"
+  },
+
+  "withdrawn_statistics": {
+    "sacrifice_to_win": "action chosen as argmax V_G, then scored by V_G",
+    "verified_vs_greedy_sign_test": "policy improvement makes the null of 0.5 false",
+    "best_candidate_reaches_pooled_p99": "with a ~600-wide fiber this fires with probability 0.997 whatever the truth is"
+  },
+
+  "seeds": {"census": 20260813, "cohort": 20260814, "bootstrap": 20260813}
+}

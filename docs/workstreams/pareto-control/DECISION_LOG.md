@@ -180,7 +180,7 @@ project caught in its own instrument *before* the run rather than after.
 **The replacement, and why it is two-sided.** Reach fraction is now the fraction
 of held-in sources whose 6-edit single-objective greedy rollout attains the
 objective's ceiling, where the ceiling is analytic for O-D (the clipped soft-min
-cannot exceed `1.32669`) and the held-in pool p99 for O-P. Both can plainly come
+cannot exceed `1.326713`) and the held-in pool p99 for O-P. Both can plainly come
 out anywhere in [0, 1]. O-S has no reachable ceiling at all — `T = 1` requires
 zero edits — so it is tested for **inertness** instead: an objective that six
 real edits cannot move is not controllable and degenerates the pair. Inertness
