@@ -259,7 +259,7 @@ requests** at matched kernel calls. All four costs stay separate; the oracle
 denominator is **unique canonical molecules actually evaluated**, never raw
 requests.
 
-#### 4b · P0c — does a preference continuum exist at all? ✅ 12/12 COMPLETE
+#### 4b · P0c — does a preference continuum exist at all? ✅ RESOLVED — it does NOT collapse
 
 A feasibility question that must be answered before any front-construction
 branch is chosen. Exact preference partition via Chebyshev scalarization,
@@ -271,10 +271,31 @@ the front is the lower envelope of 2N line segments with breakpoints
 1,025 candidates → **2 regions**. A frozen **three-way rule** decides what
 happens next.
 
-**All 12 shards landed 2026-08-14** (source 004, the one preempted earlier, was
-last). The app went to `stopped` on completion, not on failure. **Outcomes have
-not been read** — the three-way rule is applied to the full set, once, and that
-verdict selects the single earned front-construction branch.
+**All 12 shards landed 2026-08-14** and the rule was applied once. **See
+`docs/P0C_VERDICT.md`.**
+
+> ### ✅ VERDICT: OUTCOME 2 — the exact preference sweep is sufficient.
+> **The aspiration branch is CLOSED, not deferred.**
+
+**The result reverses the early signal.** The endpoint pool predicted collapse;
+the real successor fibers show the opposite. One-step sparsity does not imply
+trajectory-level collapse over H=6 — here it actively misleads, which is exactly
+why the probe was run on the real object.
+
+| | continuum | at the frozen 5 weights | gain |
+|---|---|---|---|
+| distinct endpoints | median **69.5** | median **3.5** | **+66.0**, positive 12/12 |
+| nondominated size | median 11.5 | median 3 | **+8.0**, positive 12/12 |
+| hypervolume | — | — | **+64.2 %**, positive 12/12 |
+
+11/12 completed inside the 240-expansion guard (median 136). Source 004 hit it
+at 241 and is classified under outcome 3 from its partial tree — ND +16, HV
++5.3 %, both lower bounds.
+
+**This settles the P3/P4 asymmetry as hypothesis (a):** the nondominated-
+cardinality loss (P3 −2.250, P4 −2.417) was a **sampling artifact of the
+five-weight grid**, not a structural weakness in closed-loop control. A +8
+median ND gain swamps a ~2.3 deficit. **No new algorithm is needed.**
 
 #### 4c · The external comparator matrix — frozen *before* the panel launches
 
