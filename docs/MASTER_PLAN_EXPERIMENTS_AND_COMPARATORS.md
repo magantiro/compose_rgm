@@ -761,6 +761,24 @@ law cannot move a bounded objective. DDSBM said the same thing from the other
 side — it optimized hard and left the chemistry. **The finite-horizon question
 set aside on cost grounds is now the actual scientific obstacle, not a nicety.**
 
+### ➡️ The response: build the controller the theory already specifies
+
+**B was not a GPS.** It had the road network and the driving prior and no
+destination-awareness. So 0/320 does not show COMPOSE cannot optimize — it
+shows we were not using COMPOSE's control object.
+
+The answer is **not another heuristic**. It is
+`h_φ(b,x;x_src,z) ≈ Pr_{R_θ}(X_K ∈ B_z | X_{K−b} = x)`, giving
+`P^φ_b(y|x,z) ∝ R_θ(y|x)·h_φ(b−1,y;z)`, sampled by an **exact rejection
+sampler** — exact because `h_φ ∈ [0,1]`, and alias-correct for free because
+`h_φ` is a function of the canonical state, so alias masses sum exactly under
+the pushforward. Batched proposals preserve the law exactly by fixing proposal
+order and uniforms in advance.
+
+Full design and the frozen A→B→C→D validation ladder:
+**`docs/LEARNED_REACHABILITY_CONTROLLER.md`**. Stage A checks against **exact**
+`h` on the enumerable 967-state system and is not optional.
+
 ## C · MOLLEO Task 3 — the five-objective external MOO benchmark
 
 **We do not invent a five-objective molecular task.** One already exists, from
