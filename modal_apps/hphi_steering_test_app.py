@@ -21,12 +21,29 @@ PASS is a COHERENT DIRECTIONAL EFFECT, not an arbitrary percentage: controlled
 above unguided on 0.80 and 0.85, preferably earlier first hits, no similarity
 collapse, no support or validity violation.
 
-THE DECISION-LEVEL DIAGNOSTIC, and it is free
-----------------------------------------------
-The rejection sampler's proposals ARE draws from R_theta, so the rejected ones
-give the base expectation at no extra cost:
+THE DECISION-LEVEL DIAGNOSTIC -- and why the obvious version is WRONG
+----------------------------------------------------------------------
+The tempting version compares the ACCEPTED proposal against the REJECTED ones.
+That is biased and self-confirming: rejection probability is 1 - h, so rejected
+proposals are skewed toward low h by construction and the accepted one would
+look better automatically.
 
-    h_phi(y_chosen)   vs   E_{y ~ R_theta}[ h_phi(y) ]
+The correct version draws a FIXED BATCH of proposals from R_theta in advance,
+scores ALL of them, consumes them in that fixed order under the exact rejection
+rule, and averages over EVERY pre-drawn proposal including those never
+consumed. Stage-A1 already proved that pre-drawing leaves the law unchanged;
+the unconsumed proposals are prefetched DIAGNOSTICS.
+
+    h_phi(y_chosen)   vs   (1/B) * sum_i h_phi(y_i)   over ALL B drawn
+
+And there is an exact identity to check against:
+
+    E_{R*h}[h] = E_R[h^2] / E_R[h]  >=  E_R[h]
+
+with a STRICT gap precisely when h has variance across successors -- i.e. when
+the GPS actually sees different roads. `h_base_sq_over_mean` records the
+right-hand side per decision, so the comparison is against a principled target
+rather than a vibe.
 
 If the chosen successor beats the base expectation at a substantial fraction of
 decisions, the sampler is genuinely taking edits the learned GPS considers more
@@ -73,9 +90,11 @@ CORPUS = "hphi_rollout_corpus/pilot_0064x04_H24.json.gz"
 OUT_DIR = "hphi_steering"
 TIME_POINT, CANONICAL_SLOTS = 0.5, 48
 HORIZON = 6
-TRAJ_PER_SOURCE = 6
+TRAJ_PER_SOURCE = 4
 #: Bounds the rejection loop. Hitting it is RECORDED, never silently patched.
-MAX_PROPOSALS = 40
+MAX_PROPOSALS = 32
+#: Pre-drawn batch size; the diagnostic averages over ALL of these.
+BATCH = 16
 REGION = (0.80, 0.40)          # the primary qualification region
 
 _RT: dict[str, Any] = {}
@@ -203,6 +222,7 @@ def steer_source(task: dict[str, Any]) -> dict[str, Any]:
             pad_molecular_graph(smiles_to_molecular_graph(source), CANONICAL_SLOTS))
         path = [cur]
         decisions, cap_hits, encodes0 = [], 0, len(enc_cache)
+        h_chosen = None
         stopped = False
         for step in range(HORIZON):
             q, s = props(cur)
@@ -215,29 +235,52 @@ def steer_source(task: dict[str, Any]) -> dict[str, Any]:
                 break
             p = np.array([m.probability for m in law.marks], float); p /= p.sum()
             b_rem = HORIZON - step - 1
-            chosen, hs = None, []
-            for _ in range(MAX_PROPOSALS):
-                i = int(rng.choice(len(p), p=p))
-                mk = law.marks[i]
-                y = canonical_state_key(system.apply(st, mk.executor_rule_name,
-                                                     mk.action))
-                if y == key:
-                    continue                      # virtual
+            # FIXED PRE-DRAWN BATCH. Draw marks and uniforms in advance, then
+            # consume them in that order -- the Stage-A1 batching result says
+            # this leaves the law unchanged. The proposals AFTER the accepted
+            # one are prefetched DIAGNOSTICS only.
+            #
+            # This replaces a biased diagnostic: rejected proposals are skewed
+            # toward low h by construction (rejection probability is 1-h), so
+            # accepted-vs-rejected would look favourable automatically. The
+            # unbiased R_theta expectation must average over ALL pre-drawn
+            # proposals, including unconsumed ones.
+            chosen = None
+            for _batch in range(MAX_PROPOSALS // BATCH):
+                idx = rng.choice(len(p), size=BATCH, p=p)
+                us = rng.random(BATCH)
+                ys = []
+                for i in idx:
+                    mk = law.marks[int(i)]
+                    ys.append(canonical_state_key(
+                        system.apply(st, mk.executor_rule_name, mk.action)))
                 if not controlled:
-                    chosen = y
-                    break
-                hv = h_of(y, b_rem)
-                hs.append(hv)                     # proposals ARE R_theta draws
-                if rng.random() <= hv:
-                    chosen = y
+                    nz = [y for y in ys if y != key]
+                    if nz:
+                        chosen = nz[0]
+                        break
+                    continue
+                hs = [(0.0 if y == key else h_of(y, b_rem)) for y in ys]
+                for y, u, hv in zip(ys, us, hs):
+                    if y != key and u <= hv:
+                        chosen = y
+                        h_chosen = hv
+                        break
+                valid = [h for y, h in zip(ys, hs) if y != key]
+                if valid:
+                    decisions.append({
+                        "h_base_mean": float(np.mean(valid)),   # over ALL drawn
+                        "h_base_sq_over_mean": (float(np.mean(np.square(valid))
+                                                      / np.mean(valid))
+                                                if np.mean(valid) > 0 else None),
+                        "h_chosen": (float(h_chosen) if chosen is not None
+                                     else None),
+                        "batch": len(valid)})
+                if chosen is not None:
                     break
             if chosen is None:
                 cap_hits += 1
                 break
-            if controlled and hs:
-                decisions.append({"h_chosen": hs[-1],
-                                  "h_base_mean": float(np.mean(hs)),
-                                  "n_proposals": len(hs)})
             cur = chosen
             key = chosen
             path.append(cur)
