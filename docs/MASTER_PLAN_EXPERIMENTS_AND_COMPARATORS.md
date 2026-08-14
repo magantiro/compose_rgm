@@ -732,7 +732,12 @@ ordinary multiobjective  →  MOLLEO Task 3 (five objectives)
 unique COMPOSE claims    →  matched internal controls
 ```
 
-## B · Policy B is REFUTED on the development panel
+## B · The LOCAL ONE-STEP TILT is refuted on the development panel
+
+> ⛔ **Never call this "COMPOSE."** It is the **myopic-control ablation** —
+> COMPOSE's first trivial controller approximation, not COMPOSE's optimization
+> method. The claim-bearing method is the finite-horizon learned controller.
+> See `docs/PLAUSIBILITY_AND_PURPOSE.md`.
 
 Read once, under the criterion frozen before any number existed.
 64 disjoint sources × 5 replicates = **320 trajectories**, ~$0.18.
@@ -762,6 +767,13 @@ side — it optimized hard and left the chemistry. **The finite-horizon question
 set aside on cost grounds is now the actual scientific obstacle, not a nicety.**
 
 ### ➡️ The response: build the controller the theory already specifies
+
+**Framing, canonical:** the controller is **part of COMPOSE, not an add-on**.
+COMPOSE separates **plausibility** (`R_θ`, goal-independent) from **purpose**
+(`h_φ`, inference-time). Evaluating bare `R_θ` on an optimization benchmark is
+the *unnatural* evaluation — GrIDDD does not run an unconditional diffusion
+model either; it denoises **conditioned on the property vector** with
+classifier-free guidance. `docs/PLAUSIBILITY_AND_PURPOSE.md`.
 
 **B was not a GPS.** It had the road network and the driving prior and no
 destination-awareness. So 0/320 does not show COMPOSE cannot optimize — it
