@@ -169,3 +169,83 @@ the same architecture then transfers to new regions and objectives.
 That demonstrates the claim the whole paper rests on:
 
 > ### **The molecular prior supplies plausible dynamics; future-aware control supplies purpose.**
+
+---
+
+## What the steering test showed, and what it does NOT forecast
+
+### The steering test PASSED
+
+| arm | hit rate `0.80/0.40` | median first hit | end similarity |
+|---|---|---|---|
+| unguided `R_θ` | 12/64 = **0.188** | 2.5 | 0.476 |
+| **`R_θ·h_φ`** | **25/64 = 0.391** | **1.0** | 0.785 |
+
+**~2.1× amplification, and faster.** Crucially it is **not** an endpoint
+coincidence — the de-biased decision diagnostic over 110 audited decisions:
+
+```
+h_chosen                  0.5892
+E_R[h] (fixed batch)      0.3063        ->  ~1.9x
+predicted E_R[h²]/E_R[h]  0.5632        <-  the identity HOLDS
+h_chosen > E_R[h] on      80.0% of decisions
+```
+
+The identity can only hold with a strict gap when `h_φ` has genuine variance
+across successors. **The mechanism we need is functioning.**
+
+### The scale of what is actually being asked
+
+GrIDDD reports **45.1 % source-level success with 20 candidates.** Under a
+homogeneous approximation, `1 − (1−p)²⁰ = 0.451` needs only
+
+```
+p ≈ 2.95 % per trajectory
+```
+
+Against unguided `1.2 %` at H24, that is **~2.46× amplification** — and the
+steering test already achieved **2.1×** on an easier region with a deliberately
+primitive controller.
+
+> **We are not asking the controller for a 40× miracle.**
+
+### ⚠️ But that arithmetic is NOT a forecast — heterogeneity dominates
+
+Same mean per-trajectory probability, different spread across sources:
+
+| distribution over sources | mean `p` | source-level success |
+|---|---|---|
+| all sources equal, 2.95 % | 0.0295 | **0.451** |
+| half zero, half 5.9 % | 0.0295 | 0.352 |
+| 90 % zero, 10 % at 29.5 % | 0.0295 | **0.100** |
+
+**Identical mean, 4.5× spread in the benchmark number.** If many official
+sources have essentially zero reachable `0.90/0.40` probability, averaging 3 %
+over trajectories does **not** produce 45 % source success. **The distribution
+ACROSS sources decides the benchmark**, which is exactly why the 64 / 128 / 800
+source-level runs are the real test and this arithmetic is orientation only.
+
+### Do NOT extrapolate 2.1× to `0.90`
+
+The smoke controller was deliberately primitive: trained on the tiny excluded
+pilot, almost no `0.90` supervision, tested at H6, already hitting its proposal
+cap (32 cap hits), no targeted continuation labels for the tail, and no SMC
+despite the rare-event regime. **The architecture was shown to work before being
+given the machinery built for the hard region.** That is precisely when to
+scale.
+
+### What would make this pessimistic
+
+1. the full `h_φ` calibrates well but moves `0.90/0.40` only from ~1.2 % to ~1.4 %
+2. many official-like sources turn out to have **zero** reachable probability
+3. `h_φ` cannot distinguish successors in hard-tail states **even with** targeted
+   continuation labels
+
+**None of these has been observed.** What has: rare-but-real `0.90`
+reachability, clean difficulty ordering, strong budget dependence, real
+state-conditional value variation, ~2× controlled amplification on a held-out
+easier goal, earlier hitting, and a frozen rare-event escalation.
+
+> **The position has moved from "maybe the controller idea does not work" to
+> "the controller works — the question is how much tail amplification it gets
+> when properly trained."**
