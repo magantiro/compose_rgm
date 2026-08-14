@@ -126,10 +126,36 @@ the distinct terminal trajectories and endpoints induced by the **complete
 preference continuum**. Development/design evidence only; no fresh panel, no new
 claim.
 
-| outcome | consequence |
-|---|---|
-| the continuum **materially expands** the endpoint/front set | retain the exact preference sweep as the set-level controller |
-| it **adds little breadth** over the five-weight grid | **scalarization — not weight-grid density — is the limiting factor**, and the aspiration/gap-filling branch is *earned* |
+### The gate is THREE-way, not two-way
+
+An earlier framing said a guard hit means "the continuum sweep is unaffordable,
+which argues for aspiration just as directly as a collapsed partition." **That is
+wrong, and it would have biased the branch toward aspiration.** A guard hit
+establishes only that the exact preference tree is substantially richer than the
+five-weight controller — and *rich* can mean two opposite things.
+
+| # | outcome | consequence |
+|---|---|---|
+| 1 | **sparse tree, little extra breadth** | the scalarized controller effectively collapses the continuum → **aspiration branch earned** |
+| 2 | **manageable tree, materially more breadth** | the **exact preference sweep is sufficient** → no aspiration controller |
+| 3 | **tree exceeds the 240-expansion guard** | **do not decide yet.** Classify using the branches already generated |
+
+For outcome 3, measure against cumulative expansions and unique-oracle cost:
+
+```
+k ↦ HV(A_k)        k ↦ |ND(A_k)|        k ↦ spread(A_k)
+```
+
+- **continued strong front gain** → the continuum is genuinely rich; use a
+  **budgeted traversal of the existing tree**, not a new algorithm.
+- **rapid saturation or redundancy** → scalarization-induced branching is
+  inefficient → **aspiration earned**.
+
+**Do not change the frozen traversal to make that curve look better, and do not
+add another algorithm on the strength of this diagnostic.** The running probe
+persists every fiber, every objective vector, and every leaf path in DFS
+completion order, so all three curves are reconstructible **offline** from the
+shard — no change to the running app is needed or permitted.
 
 The endpoint-pool result makes the second outcome the likelier one.
 
