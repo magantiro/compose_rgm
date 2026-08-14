@@ -169,6 +169,38 @@ filling, and path constraints **by masking support**.
 only place the sampler and the learned value can be checked against truth rather
 than against each other.
 
+## The optimization invariant — frozen
+
+> **Optimization may change how equivalent computations are scheduled, batched,
+> cached, or vectorized. It may NOT change the legal support, the canonical
+> quotient, the controller equation, the random law, or the accepted trajectory
+> distribution.**
+
+| permitted | barred |
+|---|---|
+| batch `h_φ` evaluation | shortlisting successors because it is faster |
+| share the frozen graph encoder | replacing `R_θ·h_φ` with top-k |
+| cache source representations | approximating aliases separately |
+| deduplicate canonical successors before value evaluation | changing acceptance semantics |
+| vectorize goal heads across states/goals | silently substituting an argmax policy |
+| prefetch rejection proposals **retaining proposal order** | |
+| batch label-generation rollouts | |
+
+## The escalation ladder — do not jump to SMC
+
+**One `h_φ`, two inference mechanisms.** They are not competing methods.
+
+```
+Level 1   learned h_φ + exact rejection sampler   →  MEASURE ACCEPTANCE RATE
+          works and optimization improves?  STOP. Simplicity wins.
+
+Level 2   twisted SMC, same h_φ as the twist      →  only if the value model is
+          good but acceptance collapses on rare regions
+```
+
+SMC is the **escalation for rare events**, which is exactly what it is for.
+Escalate on a **measured** acceptance rate, never on assumption.
+
 ## What is NOT promised
 
 **This is a principled architecture with bounded-state precedent, not a result.**

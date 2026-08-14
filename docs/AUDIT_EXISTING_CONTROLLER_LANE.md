@@ -99,7 +99,7 @@ bound. It should be called the **best-first search reference**, nothing more.
 
 | | |
 |---|---|
-| success | **0.5000** (6/12) |
+| success | **0.5000** (6/12) — same success EVENT, different protocol |
 | mean best feasible QED | 0.8869 |
 | population diversity | 0.6186 |
 | target / similarity floor | QED 0.9 / Tanimoto 0.4 — **our task** |
@@ -124,10 +124,23 @@ bound. It should be called the **best-first search reference**, nothing more.
 
 ## What this tells us, net
 
-**The good.** Value-guided control on this exact task is **not hopeless** —
-something reached 0.5 where policy B reached 0.0, with mean best-feasible QED
-0.887 and healthy diversity. Even at 50× budget on 12 leads with no learned
-twist, that is a real signal that the failure was the *controller*, not COMPOSE.
+**The good — stated at the strength the evidence actually supports.**
+
+An earlier draft of this audit said *"the failure was the controller, not
+COMPOSE."* **That overstates it**, because the run used Lineage B rather than
+frozen `R_θ` and a 1000-evaluation budget rather than 20 candidates. The
+rigorous statement is:
+
+> **The QED target is demonstrably reachable by existing COMPOSE-family search
+> machinery. Policy B's 0/320 should therefore NOT be read as evidence that the
+> executable rewrite space lacks QED-improving trajectories.**
+
+That is enough, and it is all we need. We are **not** claiming our current
+`R_θ` can already attain 50 %.
+
+**Same event, not the same protocol.** The old SMC run shares our *property
+target and success event* — QED ≥ 0.9 at Tanimoto ≥ 0.4 — but **not** our
+evaluation protocol. Never describe it as "the same task" unqualified.
 
 **The gap.** Nothing existing gives us a **region-conditioned, frozen-`R_θ`,
 budget-honest** controller:
