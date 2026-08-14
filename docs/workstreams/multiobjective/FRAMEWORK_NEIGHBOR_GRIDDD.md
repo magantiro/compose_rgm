@@ -106,10 +106,150 @@ the plan.
 
 ---
 
-## External qualification — the four decisive axes
+## External qualification — RESOLVED
 
-`PENDING` primary-source sweep. The bar, stated before the evidence arrives so it
-cannot be adjusted to fit:
+Paper: *Graph Diffusion that can Insert and Delete*, NeurIPS 2025. Official code
+cloned at commit `cc3dc31ac341216a0bbcc62f63ae6831581ff40b` (2025-09-28, a single
+commit). All citations below were read directly in that tree or in the paper text.
+
+### The three axes
+
+| axis | verdict | evidence |
+|---|---|---|
+| **(a) supplied source** | **YES** | `griddd/freegress.py:311` `original_smile = data.smiles[0]`; `:334` `z_t = dense_data.copy()`; `:337` `corrupt_data(z_t, corruption_step=self.corruption_step)`. An SDEdit-style corrupt-then-denoise loop starting from a real input molecule, and it is the paper's evaluated optimization mode — not an afterthought. |
+| **(b) edit budget** | **NO** | the similarity constraint is a **post-hoc rejection filter**. `freegress.py:393-397` generates candidates, *then* computes `sim = similarity(sample_smiles[i], original_smile)` and applies `keep_mask[i] &= (sim >= self.cfg.guidance.similarity_threshold)`. `corruption_step` is a stochastic noise depth, not a count of edits, and nothing bounds how far a trajectory travels. |
+| **(c) preference-conditioned** | **PARTIAL** | target property *values* are supplied at inference (`freegress.py:319-324`, `improvement_type` free/fixed), but the property **set** is baked in at training through classifier-free guidance. A new objective requires retraining. |
+
+**(a) is a genuine first.** Every other external method this lane audited begins
+from nothing — HN-GFN at `main.py:145` with an empty `BlockMoleculeDataExtended()`,
+OP-GFN at `graph_sampling.py:79` with `self.env.new()`. GrIDDD actually starts
+from a molecule you hand it. That is why it deserved a real look.
+
+### The line that settles it — and it is the authors' own ablation
+
+GrIDDD's insert/delete mechanism is the *entire* reason it was nominated as a
+framework neighbor: variable-size graph dynamics closer to COMPOSE's fiber
+process than any RL optimizer. The authors tested whether that mechanism matters,
+and reported (paper §5.3, Ablation, line 561 of the text extraction):
+
+> "we performed the same experiments with GrIDDD but disabling insertions and
+> deletions. The results show that while **the success rate remains relatively
+> unchanged in the LogP and DRD2 experiments**, it significantly drops to 33.8%
+> when optimizing QED, likely because the QED score is a function of the
+> molecular weight (and thus, it correlates with the number of atoms)."
+
+So on the **potency-type task nearest COMPOSE's DRD2 objective, insert/delete
+changes nothing measurable.** Its effect is confined to QED, where the objective
+is itself a function of molecular weight, so size control is close to being the
+objective.
+
+This is careful science by the authors, and it is exactly the single source-level
+fact that decides a role question. The variable-size dynamics that motivated the
+`FRAMEWORK_NEIGHBOR` candidacy are, by the authors' own measurement, **not
+load-bearing on the task closest to ours.** Nominating GrIDDD for that role and
+then citing its DRD2 numbers would be citing a configuration whose distinguishing
+mechanism its own paper reports as inert there.
+
+### Reported numbers — Table 3, verified
+
+Protocol (paper §5.2, text line 376): *"selecting 800 molecules from the test set
+with DRD2 activity score ≤ 0.05. For each molecule, we sample 20 candidates from
+different latents. We consider the optimization successful if at least one among
+the candidates has a DRD2 score ≥ 0.5 and a fingerprint Tanimoto similarity with
+the starting molecule ≥ 0.4."*
+
+| method | LogP improv (sim ≥ 0.4) | QED succ (sim ≥ 0.4) | **DRD2 succ (sim ≥ 0.4)** |
+|---|---|---|---|
+| JT-VAE | 1.03 ± 1.39 | 8.8% | 3.4% |
+| CG-VAE | 0.61 ± 1.09 | 4.8% | — |
+| GCPN | 2.49 ± 1.30 | 9.4% | 4.4% |
+| **GrIDDD** | **2.70 ± 0.94** | **45.1%** | **5.0%** |
+
+Note the baseline set: **JT-VAE, CG-VAE, GCPN** — de novo and RL methods.
+
+### A defect in one of our own committed artifacts
+
+`artifacts/oracles/drd2_svm_v1/drd2_oracle_manifest.json`, `provenance.lineage`,
+states the pickle is
+
+> "the oracle behind the classic similarity-constrained DRD2 benchmark and the
+> **VJTNN/GrIDDD success numbers**"
+
+**VJTNN and GrIDDD do not have joint success numbers.** VJTNN appears exactly
+once in the entire GrIDDD paper — text line 208, a related-work paragraph that
+explicitly sets it aside:
+
+> "VJTNNs (Jin et al. 2018b), Seq2Seq models (He et al. 2021), and HierG2G (Jin
+> et al. 2020) all work by translating between different types of molecular
+> representations … they require a dataset of pairs of similar molecules with
+> specific properties, which are of limited availability."
+
+GrIDDD reports **no VJTNN number** and does not compare against it. Its DRD2
+success is **5.0%**; a paired-translation model on this benchmark is a different
+class of method with a very different success rate. Pairing the two as "the
+VJTNN/GrIDDD success numbers" invites a reader to treat them as one comparable
+figure.
+
+**VJTNN's own DRD2 number is `UNVERIFIED` by this lane** and is deliberately not
+quoted here — the point is the pairing, not either value.
+
+**Not fixed, and deliberately.** That manifest is a frozen oracle artifact whose
+`parameters_npz_sha256` and `pickle_sha256` are hash-bound and consumed by
+claim-bearing code; editing its text changes the file digest. The defect is prose
+provenance, not a number, and no measurement depends on it. **Reported for main
+to correct in a future artifact version** — the same disposition the project gave
+the `source_index_sha256` portability defect.
+
+### Convergence worth recording
+
+GrIDDD ships `griddd/metrics/drd2_scorer.py` with `gamma=0.015625`, `C=128`,
+2048-dimensional features and `AllChem.GetMorganFingerprint(mol, 3,
+useCounts=True, useFeatures=True)` folded to 2048 — and it repackages the
+Python-3.6 pickle's parameters into `clf_py36_weights.npz`.
+
+COMPOSE's manifest records `gamma: 0.015625`, `n_features: 2048` and the
+identical fingerprint definition, and extracted the same pickle into an npz for
+the same reason. **Two groups independently hit the same Python-3.6 sklearn
+pickle problem and solved it the same way.** Byte-level agreement is `UNVERIFIED`,
+but the oracle lineage is genuinely shared, which makes GrIDDD's published DRD2
+numbers a meaningful *contextual* reference even at tier 4.
+
+Its protocol also matches the frozen internal `GridDDProtocol` on the two fields
+that matter — 20 candidates per start, Tanimoto ≥ 0.40 — which is presumably why
+those constants are there.
+
+### Blockers independent of the role question
+
+| blocker | evidence |
+|---|---|
+| **no licence** | zero licence files anywhere in the tree. Default all-rights-reserved: **not vendorable**, same stop that excluded OP-GFN and blocks InversionGNN |
+| **no checkpoints** | none released; the model would have to be trained |
+| **single dormant commit** | `cc3dc31`, 2025-09-28, one commit |
+
+### Adapter complexity — the fourth axis
+
+**Substantial adaptation, not a thin adapter.** Concretely, we would have to
+supply:
+
+- **an edit budget** — none exists; the similarity filter is post-hoc and
+  `corruption_step` is noise depth;
+- **a successor-fiber notion** — GrIDDD draws each node and edge from a
+  factorized mean-field categorical (its Eq. 8 assumes independence across
+  components), so there is no enumerable one-step support to restrict or count;
+- **a separable frozen reference law** — classifier-free guidance bakes the
+  conditioning into the weights, so there is no frozen `R_θ` plus detachable
+  control layer to compare against ours;
+- **a checkpoint**, which the authors never released.
+
+That is the disqualifying answer. Under the rule stated before the evidence
+arrived, an adapter that supplies mechanism makes the comparison test our
+engineering rather than their abstraction.
+
+---
+
+## The bar, as stated in advance
+
+Recorded before the sweep returned, and reproduced unchanged:
 
 | axis | what qualifies | what disqualifies |
 |---|---|---|
@@ -123,22 +263,63 @@ same rule that bars a homemade Edit Flows port, and it applies here identically 
 a framework neighbor we had to complete ourselves would be a competitor we
 invented, and it would test our engineering rather than their abstraction.
 
-The prior on this is not neutral. A **discrete graph diffusion** model denoises
-toward a data distribution; COMPOSE's process executes legal rewrites from an
-exact realized state. Insert/delete brings the *size* dynamics closer without
-necessarily bringing the *conditioning* closer, and those are separable. The
-sweep is what settles it.
+The prior recorded in advance was that insert/delete brings the *size* dynamics
+closer without necessarily bringing the *conditioning* closer, and that those are
+separable. **That is what the evidence found**, in a sharper form than expected:
+the authors' own ablation shows the size dynamics do not move the DRD2 result at
+all.
 
 ---
 
-## Verdict
+## VERDICT — `CONCEPTUAL_LINEAGE_ONLY`, tier 4
 
-`PENDING` — external evidence not yet in. What is already settled:
+**Not a `FRAMEWORK_NEIGHBOR` main row.** Four independent reasons, any one
+sufficient:
 
-1. **No GrIDDD code exists in this repository**, and the GrIDDD-named modules are
+1. **The fourth axis fails.** A working comparison would require us to supply an
+   edit budget, a successor-fiber notion, a separable frozen reference law and a
+   checkpoint. That is method invention, not an adapter.
+2. **The authors' own ablation removes the motivation for the role.** Disabling
+   insertions and deletions leaves DRD2 and LogP success *"relatively
+   unchanged"*. The mechanism that made it a candidate is inert on the task
+   nearest ours.
+3. **No licence.** All-rights-reserved by default; not vendorable. The same stop
+   that excluded OP-GFN.
+4. **No checkpoints**, and one dormant commit.
+
+### What it is instead, and this is not a consolation prize
+
+**The closest external method to COMPOSE's task semantics that this lane has
+found.** It genuinely starts from a supplied molecule, it is
+similarity-constrained, it shares the DRD2 oracle's lineage and repackaged the
+same pickle the same way, and its 20-candidates / Tanimoto-0.40 protocol is the
+one already frozen in our own `GridDDProtocol`.
+
+That makes it a **strong contextual citation** — tier 2 in citation terms even
+though execution is tier 4 — and the natural reference point for the
+similarity-constrained DRD2 setting. Cite its 5.0% DRD2 and 45.1% QED as
+*reported*, with its protocol stated, and never as a head-to-head against a
+COMPOSE number.
+
+### Consequence for the package
+
+**DDSBM remains the only `FRAMEWORK_NEIGHBOR` candidate**, and E1's framework
+counterfactual is still unfilled. That is now the single largest gap in the
+multiobjective evidence package, and it is a gap in *novelty* evidence rather
+than competence evidence.
+
+Two candidates have now been examined for that slot and both fell to the same
+rule — the adapter would have had to supply the mechanism under test. That is
+worth noticing: it is a pattern, not a coincidence, and it suggests the framework
+counterfactual may be genuinely hard to source externally rather than merely
+unsourced so far.
+
+### Also settled, from the internal half
+
+1. **No GrIDDD code exists in this repository**; the GrIDDD-named modules are
    COMPOSE arms on a GrIDDD-shaped task.
-2. **A task-competence row is blocked** on an unresolved official lead set, and
-   the README already declines that comparison on record.
-3. **The framework-neighbor question is open** and is decided on process
-   semantics — supplied source, variable-size chemical graph dynamics, frozen-base
-   conditioning, and whether our adapter would have to supply mechanism.
+2. **A task-competence row is blocked** on an unresolved official lead set
+   (`exact_griddd_leads_available = False`), and `README.md:43` already declines
+   that comparison on record.
+3. **One committed artifact carries a provenance defect** — the DRD2 manifest's
+   "VJTNN/GrIDDD success numbers" pairing. Reported, not fixed.
