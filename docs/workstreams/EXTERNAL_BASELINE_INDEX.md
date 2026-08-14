@@ -20,10 +20,10 @@ record existed.
 
 | method | verdict | primary-source record |
 |---|---|---|
-| **DDSBM** | `FRAMEWORK_NEIGHBOR`; **tier 1** on ZINC logP 2→4, tier 4 on DRD2 | `multiobjective/EDITING_COMPETENCE_AUDIT.md` |
+| **DDSBM** | ⬇️ **REMOVED FROM THE MANUSCRIPT** — developmental transport stress test. Executed 5,984/5,984; result preserved unrescued in `DDSBM_FROZEN_RESULT.json`. Native question is distribution transport, not source-conditioned editing | `AMENDMENT_EDITFLOWS_GRIDDD_HEADLINE.md` |
 | **HN-GFN** | `TASK_COMPETENCE`; GPU-only, no checkpoint, empty-molecule start, surrogate asymmetry | `multiobjective/BENCHMARK_ALIGNMENT_AUDIT.md` |
 | **InversionGNN** | not runnable as shipped; no LICENSE; 70× budget disagreement with HN-GFN | `multiobjective/BENCHMARK_ALIGNMENT_AUDIT.md` |
-| **GrIDDD** | `CONCEPTUAL_LINEAGE_ONLY`; its own ablation shows insert/delete inert on DRD2 | `multiobjective/FRAMEWORK_NEIGHBOR_GRIDDD.md` |
+| **GrIDDD** | ⬆️ **PROMOTED — primary numerical external comparator** on the Jin/ZINC **QED** task. The old `CONCEPTUAL_LINEAGE_ONLY` demotion cited insert/delete being inert on DRD2; that is true for DRD2/logP and **false for QED (45.1 %→33.8 %)**. See `AMENDMENT_EDITFLOWS_GRIDDD_HEADLINE.md` | `multiobjective/FRAMEWORK_NEIGHBOR_GRIDDD.md` |
 | **GraphXForm** | `TASK_COMPETENCE`; **capability-disqualified — cannot delete** | `multiobjective/EDITING_COMPETENCE_AUDIT.md` |
 | **InVirtuoGen** | selected editor; **output may never become `R_θ` training data** | `multiobjective/EDITING_COMPETENCE_AUDIT.md` |
 | **OP-GFN** | excluded — CC BY-NC-**ND** | `multiobjective/BASELINE_TASK_MATRIX.md` |

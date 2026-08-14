@@ -93,7 +93,17 @@ its own experiment.
 
 ---
 
-### 2 · DDSBM conventional endpoint competence
+### 2 · ~~DDSBM~~ → **GrIDDD** conventional editing competence
+
+> ⬇️ **AMENDED.** DDSBM ran to completion (5,984/5,984) and is **out of the
+> manuscript** — its native question is distribution-to-distribution transport,
+> not source-conditioned editing, and with Edit Flows and GrIDDD seated it
+> fills no remaining role. The slot is now **GrIDDD on the Jin/ZINC QED task**.
+> The DDSBM result is preserved unrescued; the removal is recorded with the
+> fact that it was proposed *after* an unflattering FCD, so a later reader can
+> judge that themselves. See `AMENDMENT_EDITFLOWS_GRIDDD_HEADLINE.md`.
+
+#### The completed DDSBM stress test, kept for the record
 
 **Question.** Can frozen COMPOSE solve an established external task set by
 someone else, without any objective-specific retraining?
@@ -107,7 +117,7 @@ someone else, without any objective-specific retraining?
 | **We run** | COMPOSE alone. DDSBM's published table is cited *as reported*. |
 | **Metrics** | benchmark-native only: logP `W₁`, QED MAD, SA MAD, validity — plus trajectory-wide validity and edit expressivity, which **no row in their table can report** |
 | **Stop rule** | none; this is a competence demonstration, not a superiority claim |
-| **State** | 🟡 protocol frozen, gate 5,984/5,984 passed, pilot clean — **first full launch FAILED 100%; defect fixed; awaiting relaunch** |
+| **State** | ⬇️ **EXECUTED 5,984/5,984, then REMOVED FROM THE MANUSCRIPT.** Developmental transport stress test; result preserved. See `AMENDMENT_EDITFLOWS_GRIDDD_HEADLINE.md` |
 
 **The frozen objective, in full** — this is the authoritative statement; the
 table cell above abbreviates it:
