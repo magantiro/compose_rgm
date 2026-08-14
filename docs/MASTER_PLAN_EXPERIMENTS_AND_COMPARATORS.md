@@ -890,3 +890,127 @@ archive.
 ```
 disjoint development  →  freeze ONE policy  →  MOLLEO Task 3 protocol, ONCE
 ```
+
+---
+
+## E · The paper-wide invariant: `R_θ` is never retrained
+
+> ### **Do not retrain `R_θ` because the downstream question changed.**
+
+This is close to being *the* architectural experiment of the paper, so it must
+be a **visible methodological fact**, not something reviewers infer from methods.
+
+### The pinned checkpoint
+
+```
+runs/run_v2_01/R_THETA_CHECKPOINT.pt
+sha256  c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8
+bytes   87,804,652
+```
+
+**Every claim-bearing table carries a permanent column:**
+
+> **Base molecular process: same frozen `R_θ` checkpoint — YES**
+
+with **this identical hash across the entire paper**. Pinning the hash makes the
+invariant *checkable* rather than asserted.
+
+### What may change, per experiment
+
+| experiment | frozen `R_θ`? | what may change | why |
+|---|---|---|---|
+| GrIDDD QED | **Yes** | goal `z`, controller inference | new single-objective task |
+| another single property | **same checkpoint** | new goal / oracle | objective reuse |
+| conjunction | **same checkpoint** | goal becomes region/intersection | compositional control |
+| Pareto preferences | **same checkpoint** | objective-space region/preference | recontrol, not retraining |
+| **5-objective MOO** | **same checkpoint** | many-objective regions + Pareto acquisition | **strongest general optimization test** |
+| mid-run preference switch | **same checkpoint** | `z_A → z_B` during the trajectory | dynamic recontrol |
+| hard support | **same checkpoint** | legal-support restriction + controller | constraint injection |
+| pathwise constraint | **same checkpoint** | support condition at every step | trajectory-level control |
+| map reuse | **same checkpoint** | starting realized state + new goal | reuse of prior search |
+
+### Baseline fairness follows from this, not despite it
+
+**Do NOT handicap COMPOSE by retraining it task-by-task merely because a
+comparator was trained task-specifically.** On a shared external task:
+
+- GrIDDD runs exactly as published
+- Graph-GA / MOLLEO use their native search
+- NSGA-III and friends use their native algorithms
+- **COMPOSE uses the same frozen `R_θ` it uses everywhere else**, plus its
+  proper controller
+
+Then report the training/adaptation distinction **separately**.
+
+**This is more impressive if they beat us somewhere.** They may be specialized;
+the question we are asking is whether a *single reusable molecular process* can
+be competitive across all of them.
+
+## F · Build `h_φ` as a GENERAL controller, not a QED controller
+
+QED is the development vehicle because it gives a standard external benchmark
+and an immediate test of whether the GPS works. **The object being built is
+not a QED controller.**
+
+```
+h_φ(b, x; x_src, z, m)          z = a general goal-REGION descriptor
+```
+
+`QED ≥ 0.9 ∧ sim ≥ 0.4` is merely **one value of `z`** — which is exactly why
+the registered goal family was frozen as a 5×4 grid rather than a single
+threshold.
+
+**The design target, stated as a target and not a claim:**
+
+> **One `R_θ`. One universal goal-conditioned `h_φ`. Many design problems.**
+
+If that holds, we do not train another controller network for the five-objective
+experiment either — the same `h_φ` receives a different objective-region
+descriptor. **We do not yet know whether one `h_φ` generalizes from simple QED
+regions to a five-dimensional objective space, and we must not claim it before
+testing it.**
+
+If it does hold, the paper's claim rises from *"we don't retrain the generator"*
+to:
+
+> **The learned molecular process AND its amortized control machinery are both
+> reused; a new design problem is specified predominantly through its objective
+> functions and goal descriptor.**
+
+## G · MOG-DFM — precedent, not competitor
+
+**MOG-DFM's five-objective experiment is peptide design.** It is presented as
+guidance placed on a *pretrained discrete flow-matching generator*, demonstrated
+on peptide and enhancer-DNA generation — **not small-molecule graph editing.**
+
+**Acknowledge honestly:** "separate reusable base generation from
+objective-specific guidance" is **not uniquely ours** as a philosophy. MOG-DFM
+is serious precedent that modular guidance is a real idea rather than a
+convenient evaluation choice of ours.
+
+**The structural difference:**
+
+```
+MOG-DFM   pretrained sequence DFM              →  multiobjective guidance
+COMPOSE   learned stochastic process on an     →  finite-horizon STATEWISE control
+          exact executable molecular rewrite
+          graph
+```
+
+Our leverage is that **every state is a valid molecule and every edge an
+executable legal rewrite.** That is what makes remaining-budget reachability,
+exact continuation from a realized molecule, support restriction, and pathwise
+constraints *consequences of the framework* rather than bolted-on property
+guidance.
+
+> **Position: strong conceptual precedent for reusable inference-time
+> multiobjective guidance, in biological sequence generation rather than
+> executable molecular graph rewriting. NOT a competitor to beat numerically on
+> QED.**
+
+### The punchline
+
+Not "COMPOSE has six tricks." It is:
+
+> **One learned molecular world model; many objectives, preferences and
+> constraints supplied at inference.**
