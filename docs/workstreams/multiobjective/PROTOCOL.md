@@ -408,3 +408,27 @@ evidence; one argument restated three times is not.
 for a better benchmark; `BLOCKED_ON_QUERY_EFFICIENT_COMPOSE` names the actual
 obstruction and stops that search. The earlier framing here was correct in
 substance and pointed at the wrong object.
+
+### E4 — source-conditioned editing competence
+
+**Status: audit complete, experiment not designed and not authorized.** Full
+evidence in `EDITING_COMPETENCE_AUDIT.md`. This is **reviewer insurance, not a
+scientific pillar**, and it is deliberately not built like one.
+
+| question | answer |
+|---|---|
+| **methodological axis** | **none, and that is the honest answer.** This experiment establishes conventional competence. If it is ever written up as a novelty claim, something has gone wrong. |
+| **framework counterfactual** | DDSBM, `PENDING` its audit — the same slot that is empty for E1 |
+| **matched causal control** | an **unguided / random-legal-edit floor at the same candidate allowance**. Without it a success rate is uninterpretable: nobody knows whether *n*% is good until they know what the process does with no objective at all. |
+| **competence comparator** | GrIDDD at **5.0%** DRD2 / 45.1% QED, plus JT-VAE 3.4% / GCPN 4.4%, all **contextual** and carrying their zero-test-time-oracle-access provenance; plus one practical editor, `PENDING` |
+| **falsifier** | **COMPOSE fails to reach a success rate comparable to published editors on the same protocol.** That is a real possible outcome, it is reported if it occurs, and it would bound the claim to "COMPOSE is a control framework, not a competitive lead optimizer" rather than being explained away. |
+
+**The falsifier here is unusually live**, and worth saying plainly: COMPOSE has
+never been run on this benchmark, its edit budget is small (6), and its reachable
+set from a source in 6 edits may simply not contain a DRD2 ≥ 0.5 molecule for
+most sources. A poor number is a legitimate scope finding.
+
+**The disclosure that must travel with any COMPOSE row**, per the audit: COMPOSE
+consumes thousands of `algorithmic_oracle_requests` per source where every native
+method on this benchmark consumes **zero**. The row is reported with that column
+or it is not reported.
