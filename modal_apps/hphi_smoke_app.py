@@ -315,7 +315,18 @@ def drive(max_unique: int = MAX_UNIQUE_MOLECULES) -> dict[str, Any]:
     print(f"CHECK boundary exact={checks['boundary_exact']}  "
           f"sampler ok={checks['sampler_accepts_valid_probabilities']}")
 
-    out = {"schema": "compose.hphi.smoke", "status": "THROWAWAY_WEIGHTS_DISCARDED",
+    # PERSIST the head + normalizers so the STEERING TEST plugs in THIS exact
+    # checkpoint rather than a retrained lookalike.
+    p_out = Path(RUN_ROOT) / "hphi_steering"
+    p_out.mkdir(parents=True, exist_ok=True)
+    head.eval()
+    torch.jit.save(torch.jit.script(head), str(p_out / "head.pt"))
+    (p_out / "norm.json").write_text(json.dumps(
+        {"mu": mu.squeeze(0).tolist(), "sd": sd.squeeze(0).tolist()}))
+    artifact_volume.commit()
+    print(f"persisted head.pt + norm.json for the steering test", flush=True)
+
+    out = {"schema": "compose.hphi.smoke", "status": "QUALIFICATION_HEAD_PERSISTED",
            "purpose": "engineering only; no QED-success gate; not a result",
            "encoded": len(emb), "checks": checks, "losses": losses}
     p = Path(RUN_ROOT) / OUT_DIR
