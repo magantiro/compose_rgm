@@ -1,0 +1,188 @@
+{
+  "schema": "compose.constraints_hard.sa_applicability",
+  "schema_version": 1,
+  "status": "SMOKE_HELD_IN",
+  "held_out_opened": false,
+  "scope": "MODEL-FREE ONLY. Source applicability for SA(x_0) <= tau. Establishes NOTHING about the successor fiber: not violation prevalence, not retained support, not mask-empty rate, not headroom.",
+  "predicate": "SA(y) <= tau",
+  "taus": [
+    3.0,
+    3.5,
+    4.0,
+    4.5
+  ],
+  "primary_tau": 3.0,
+  "tau_rule_fixed_before_measurement": true,
+  "tau_rule_document": "docs/workstreams/constraints-hard/SA_CENSUS_PROTOCOL.md",
+  "provenance": {
+    "thresholds": "CDD (NeurIPS 2025, arXiv:2503.09790) section 5.2, verbatim",
+    "primary_tau": "CDD Figure 4 caption defines novelty at 'no violation (tau <= 3.0)'",
+    "HEAVY_ATOM_BAND": "Lane 2 pathwise_constraints.HEAVY_ATOM_BAND, reused verbatim",
+    "scorer": "rdkit.Contrib.SA_Score.sascorer (Ertl & Schuffenhauer), as already used by molecular_quality.py"
+  },
+  "rdkit_version": "2025.09.6",
+  "rdkit_production_pin": "2024.03.5",
+  "rdkit_pin_matches_production": false,
+  "rdkit_pin_warning": "CDD pins no RDKit version; SA shifts with the fragment-contribution tables, so a tau boundary is not version-portable. Any claim-bearing run must use the pinned shared evaluator.",
+  "cohort_path": "diagnostics/retarget_calibration_cohort.json",
+  "cohort_file_sha256": "e1ab574bc175c7a4d5af0e07678cc9d637fc103aba84702efcd6df52e998b5ed",
+  "pool_path": "diagnostics/editing_v2_matched_validation_reserve_ids.json.gz",
+  "blocks": [
+    {
+      "label": "held_in_developability_cohort",
+      "sources": 30,
+      "parsed": 30,
+      "unparseable": 0,
+      "sa_distribution": {
+        "n": 30,
+        "mean": 3.2015,
+        "median": 2.6724,
+        "p10": 2.2038,
+        "p90": 5.3174,
+        "min": 1.7995,
+        "max": 6.3987
+      },
+      "heavy_atoms_in_frozen_band": 30,
+      "per_tau": {
+        "3.0": {
+          "sources_satisfying_predicate": 19,
+          "fraction_satisfying_predicate": 0.6333,
+          "eligible_with_size_band": 19,
+          "eligible_fraction": 0.6333,
+          "slack_tau_minus_sa": {
+            "n": 30,
+            "mean": -0.2015,
+            "median": 0.3276,
+            "p10": -1.7713,
+            "p90": 0.8717,
+            "min": -3.3987,
+            "max": 1.2005
+          }
+        },
+        "3.5": {
+          "sources_satisfying_predicate": 21,
+          "fraction_satisfying_predicate": 0.7,
+          "eligible_with_size_band": 21,
+          "eligible_fraction": 0.7,
+          "slack_tau_minus_sa": {
+            "n": 30,
+            "mean": 0.2985,
+            "median": 0.8276,
+            "p10": -1.2713,
+            "p90": 1.3717,
+            "min": -2.8987,
+            "max": 1.7005
+          }
+        },
+        "4.0": {
+          "sources_satisfying_predicate": 23,
+          "fraction_satisfying_predicate": 0.7667,
+          "eligible_with_size_band": 23,
+          "eligible_fraction": 0.7667,
+          "slack_tau_minus_sa": {
+            "n": 30,
+            "mean": 0.7985,
+            "median": 1.3276,
+            "p10": -0.7713,
+            "p90": 1.8717,
+            "min": -2.3987,
+            "max": 2.2005
+          }
+        },
+        "4.5": {
+          "sources_satisfying_predicate": 25,
+          "fraction_satisfying_predicate": 0.8333,
+          "eligible_with_size_band": 25,
+          "eligible_fraction": 0.8333,
+          "slack_tau_minus_sa": {
+            "n": 30,
+            "mean": 1.2985,
+            "median": 1.8276,
+            "p10": -0.2713,
+            "p90": 2.3717,
+            "min": -1.8987,
+            "max": 2.7005
+          }
+        }
+      }
+    },
+    {
+      "label": "held_in_pool",
+      "sources": 96094,
+      "parsed": 96094,
+      "unparseable": 0,
+      "sa_distribution": {
+        "n": 96094,
+        "mean": 3.1591,
+        "median": 2.8903,
+        "p10": 2.0987,
+        "p90": 4.6829,
+        "min": 1.0687,
+        "max": 8.5187
+      },
+      "heavy_atoms_in_frozen_band": 86327,
+      "per_tau": {
+        "3.0": {
+          "sources_satisfying_predicate": 52243,
+          "fraction_satisfying_predicate": 0.5437,
+          "eligible_with_size_band": 47843,
+          "eligible_fraction": 0.4979,
+          "slack_tau_minus_sa": {
+            "n": 96094,
+            "mean": -0.1591,
+            "median": 0.1097,
+            "p10": -1.6829,
+            "p90": 0.9013,
+            "min": -5.5187,
+            "max": 1.9313
+          }
+        },
+        "3.5": {
+          "sources_satisfying_predicate": 67406,
+          "fraction_satisfying_predicate": 0.7015,
+          "eligible_with_size_band": 61613,
+          "eligible_fraction": 0.6412,
+          "slack_tau_minus_sa": {
+            "n": 96094,
+            "mean": 0.3409,
+            "median": 0.6097,
+            "p10": -1.1829,
+            "p90": 1.4013,
+            "min": -5.0187,
+            "max": 2.4313
+          }
+        },
+        "4.0": {
+          "sources_satisfying_predicate": 77774,
+          "fraction_satisfying_predicate": 0.8094,
+          "eligible_with_size_band": 70722,
+          "eligible_fraction": 0.736,
+          "slack_tau_minus_sa": {
+            "n": 96094,
+            "mean": 0.8409,
+            "median": 1.1097,
+            "p10": -0.6829,
+            "p90": 1.9013,
+            "min": -4.5187,
+            "max": 2.9313
+          }
+        },
+        "4.5": {
+          "sources_satisfying_predicate": 84599,
+          "fraction_satisfying_predicate": 0.8804,
+          "eligible_with_size_band": 76632,
+          "eligible_fraction": 0.7975,
+          "slack_tau_minus_sa": {
+            "n": 96094,
+            "mean": 1.3409,
+            "median": 1.6097,
+            "p10": -0.1829,
+            "p90": 2.4013,
+            "min": -4.0187,
+            "max": 3.4313
+          }
+        }
+      }
+    }
+  ]
+}
