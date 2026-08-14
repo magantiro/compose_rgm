@@ -172,15 +172,24 @@ def drive(max_unique: int = MAX_UNIQUE_MOLECULES) -> dict[str, Any]:
     print(f"throwaway split: {len(train_src)} train / {len(eval_src)} eval sources")
 
     # --- bounded unique-molecule set, distributed encode -----------------
-    need: list[str] = []
-    seen: set[str] = set()
-    for r in train_src + eval_src:
-        for t in r["trajectories"]:
-            for s in t["path"]:
-                if s not in seen:
-                    seen.add(s)
-                    need.append(s)
-    need = need[:max_unique]
+    # The cap MUST cover both splits. A naive `need[:max_unique]` over the
+    # concatenated sources takes only the earliest ones, which are all train --
+    # that produced eval=0 on the first run.
+    def unique_states(rows):
+        out, seen = [], set()
+        for r in rows:
+            for t in r["trajectories"]:
+                for s in t["path"]:
+                    if s not in seen:
+                        seen.add(s)
+                        out.append(s)
+        return out
+
+    tr_u, ev_u = unique_states(train_src), unique_states(eval_src)
+    share = max(1, max_unique // 4)                  # eval gets a real share
+    need = list(dict.fromkeys(tr_u[: max_unique - share] + ev_u[:share]))
+    print(f"unique states: train {len(tr_u)} eval {len(ev_u)}; "
+          f"encoding {len(need)} (eval share {share})", flush=True)
     print(f"encoding {len(need)} unique molecules across containers", flush=True)
     shards = [need[i::60] for i in range(60)]
     emb: dict[str, list[float]] = {}
@@ -225,6 +234,10 @@ def drive(max_unique: int = MAX_UNIQUE_MOLECULES) -> dict[str, Any]:
 
     Xtr, Ytr, Mtr = examples(train_src)
     Xev, Yev, Mev = examples(eval_src)
+    if len(Xev) == 0:
+        raise RuntimeError(
+            "eval split produced 0 examples -- the bounded encode set does not "
+            "cover the eval sources. This is a wiring bug, not a data fact.")
     checks: dict[str, Any] = {}
     checks["n_train_examples"] = int(len(Xtr))
     checks["n_eval_examples"] = int(len(Xev))

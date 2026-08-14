@@ -76,6 +76,50 @@ ablation.
 reward shaping.** None is motivated by a measured failure. **`0.95` is an
 auxiliary rare-tail fact, not a problem to solve.**
 
+## ⭐ STAGED CONTROLLER GATES — A, B, C before D
+
+**The full corpus is justified only after the controller stack earns it.** We
+know the rollout generator works. We do **not** know whether region-`h_φ` can
+learn a useful GPS from those labels, so generating 49,152 transitions first is
+backwards.
+
+| stage | data | question | gate |
+|---|---|---|---|
+| **A · engineering** | existing excluded H24 pilot | does the feature/label/train/sampler pipeline run correctly? | **hard correctness only** |
+| **B · learning** | the SAME 256 H24 trajectories | can `h_φ` actually learn reachability on `0.80`/`0.85`? | **must beat a trivial/constant value predictor**, and show sensible budget and goal ordering |
+| **C · tiny controlled** | held-out subset of those pilot sources | does `R_θ·h_φ` steer better than unguided `R_θ` on `0.80`/`0.85`? | **directional improvement. NO `0.90` requirement** |
+| **D · full corpus** | 1,024 × 2 × H24 | tail coverage and generalization for `0.90` | **launch only after A–C pass** |
+
+### Do NOT demand `0.90` in the tiny smokes
+
+Unguided `0.90/0.40` is ~**1.2 %** at H24, so a 64-source panel is **badly
+underpowered** for it. Judge the learner on `0.80` and `0.85`, where the event
+counts are real.
+
+A convincing tiny result looks like:
+
+```
+h_φ(x, b, 0.80)  >  h_φ(x, b, 0.85)  >  h_φ(x, b, 0.90)     in sensible states
+predictions rise with remaining budget where they should
+calibration is nontrivial (beats a constant)
+and R_θ·h_φ finds 0.80/0.85 MORE OFTEN or FASTER than unguided R_θ
+```
+
+> **If it cannot do that on the easy regions, do NOT generate 49,000
+> transitions hoping more data fixes the implementation. Diagnose the learner.**
+
+If it can, the full corpus is then bought for a specific reason — **tail
+coverage and generalization**, not hope.
+
+```
+prove the GPS can learn on the roads we already mapped
+        ↓
+then map 1,024 sources to make the GPS good enough for the hard destination
+```
+
+**Note on the encode budget:** the ~900 molecules in stage A are *encodings of
+already-generated pilot states*. No new molecules, no new sources, no scale-up.
+
 ## The remaining ladder — no further design
 
 ```
