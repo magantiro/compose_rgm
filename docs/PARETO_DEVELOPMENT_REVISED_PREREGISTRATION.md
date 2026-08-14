@@ -83,11 +83,15 @@ scalable development is wasteful. Per fresh source:
 | arm | role |
 |---|---|
 | **A — full-fiber greedy** | the reference ceiling |
+| *full-fiber verified* | **NOT RUN on this panel** |
 | **B — budgeted `R_θ`-shortlisted greedy, K=333** | **primary scalable COMPOSE** |
 | **C — budgeted `R_θ`-shortlisted verified, K=15** | secondary future-aware operating point |
 
-Full verified across the whole panel is **questioned, not assumed** — its
-scientific role is now secondary and it costs 22× arm A.
+**SETTLED: full-fiber verified does NOT run on this panel.** It already did its
+job in the 12-source smoke; paying ~22× again on 24 fresh sources would mostly
+re-establish a ceiling we no longer need. Arm C is therefore measured against
+arm A (full greedy) and against arm B at matched budget — never against a
+full-verified ceiling, which is why C carries no noninferiority requirement.
 
 The two budgeted arms share approximately the same query ceiling, which makes a
 genuinely useful algorithmic question available:
@@ -103,11 +107,59 @@ Preference responsiveness; final HV; HV-AUC; nondominated count and front spread
 **HV retention versus full-fiber greedy**; query reduction; chemical-envelope
 fidelity; and kernel / trajectory / query resources **separately**.
 
-### What would convince us
+### The two arms answer DIFFERENT questions — do not conflate them
 
-For budgeted greedy: **≥90% of full-greedy HV** while moving 17.7k → ≤10k
-queries. 95–100% would be better. **It does not need a 42× reduction, because
-greedy already removed most of verified's computational disaster.**
+**Budgeted greedy is not a "42× efficiency" result. Its win is BUDGET
+COMPLIANCE**: 17.7k → ≤10k with little or no loss of front quality. **The
+dramatic scaling test is budgeted verified**: 397k → ~9.5k.
+
+**SETTLED: full-fiber greedy is the correct ceiling, and the benchmark will NOT
+be made stricter to create room for a win.** If K=333 retains 56% of the fiber
+and performs almost identically to full greedy, that is not a boring null — it is
+the production result:
+
+> **Almost half of expensive successor scoring was unnecessary for preserving
+> Pareto performance.**
+
+`K_G = 333` came from an external 10,000-query budget *before outcomes*. That is
+what makes the experiment defensible, and harshening it because 333 "looks easy"
+would destroy exactly that property.
+
+### Preregistered success criteria
+
+**Primary — budgeted greedy (arm B vs arm A):**
+
+> the lower bound of the source-level 95% CI on mean HV retention
+> `HV_B / HV_A` remains **above 0.90**, while staying within the 10k-query budget.
+
+Retention rather than absolute HV, because full-greedy difficulty varies by
+source (smoke sd 0.261 across sources). Also required: **preference
+responsiveness does not materially collapse**, and **chemical fidelity does not
+worsen unexpectedly**.
+
+**Secondary — budgeted verified (arm C vs arm B), at matched ≤10k budget:**
+
+> `HV_verified@15 − HV_greedy@333`, plus preference response and resource use.
+
+**No noninferiority-to-full-verified requirement**, because that ceiling is
+deliberately not run here. Arm C's question is a practical operating-point one:
+*at the same oracle budget, is mildly pruned greedy or aggressively pruned
+future-aware control better?* Either answer is informative.
+
+### Panel size: n = 24, from variance planning on the existing 12
+
+Planning used the paired controller HV difference (verified − greedy, sd 0.100)
+over mean full-greedy HV 0.849, giving an implied retention-ratio sd of **0.118**
+— conservative, since a shortlist retaining 56% of the fiber should perturb less
+than swapping the controller entirely.
+
+| true retention | n=20 | **n=24** | n=30 |
+|---|---|---|---|
+| 0.95 | 0.8984 fail | **0.9029 PASS** | 0.9078 PASS |
+| 0.97 | 0.9184 PASS | 0.9229 PASS | 0.9278 PASS |
+
+**n = 24 is the smallest tested size clearing 0.90 when true retention is 0.95** —
+the good-but-not-perfect case, which is the one worth sizing for.
 
 ### If it fails
 
