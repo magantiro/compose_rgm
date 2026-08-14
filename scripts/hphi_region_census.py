@@ -73,28 +73,40 @@ def main() -> int:
     rows = []
     for region in registered_regions():
         q, s = region
-        n_term = n_hit = n_lost = 0
+        # THREE DISTINCT EVENTS, never mixed:
+        #   qualified@0   the SOURCE already satisfies the region
+        #   new_hit       source did NOT qualify; editing first enters at t>=1
+        #   lost_after_new_hit   a genuine new hit that no longer qualifies at H
+        n_qual0 = n_new_hit = n_retained = n_lost_after = n_term = 0
         hit_steps: list[int] = []
         for t in trajs:
             qed, sim = t["qed"], t["similarity_to_source"]
             complete = t["termination"]["kind"] == "complete"
-            hit = first_hit_step(qed, sim, region)
             terminal = int(complete and qed[-1] >= q and sim[-1] >= s)
             n_term += terminal
+            if qed[0] >= q and sim[0] >= s:
+                n_qual0 += 1
+                continue                    # boundary case, NOT navigation
+            hit = first_hit_step(qed, sim, region)
             if hit is not None:
-                n_hit += 1
-                hit_steps.append(hit)
-                if not terminal:
-                    n_lost += 1                # reached it, then fell back out
+                n_new_hit += 1
+                hit_steps.append(hit)       # conditional on a GENUINE new hit
+                if terminal:
+                    n_retained += 1
+                else:
+                    n_lost_after += 1
         rows.append({
             "region": f"QED>={q:.2f} & sim>={s:.2f}",
             "qed_threshold": q, "similarity_floor": s,
-            "terminal_at_H6": n_term,
-            "hit_by_H6": n_hit,
-            "hits_lost_by_H6": n_lost,
-            "terminal_prevalence": n_term / max(1, len(trajs)),
-            "hit_prevalence": n_hit / max(1, len(trajs)),
-            "fraction_of_hits_lost": (n_lost / n_hit) if n_hit else None,
+            "qualified_at_0": n_qual0,
+            "new_hit_by_H": n_new_hit,
+            "retained_at_H": n_retained,
+            "lost_after_new_hit": n_lost_after,
+            "terminal_at_H": n_term,
+            "new_hit_prevalence": n_new_hit / max(1, len(trajs)),
+            # THE LOAD-BEARING QUANTITY for the anytime claim.
+            "fraction_of_new_hits_lost": (n_lost_after / n_new_hit)
+                                         if n_new_hit else None,
             "first_hit_step_median": (float(np.median(hit_steps))
                                       if hit_steps else None),
             "first_hit_step_counts": dict(Counter(hit_steps)),
@@ -103,20 +115,30 @@ def main() -> int:
 
     print(f"\nCENSUS over {len(trajs)} trajectories "
           f"({len(registered_regions())} frozen regions)")
-    print(f"{'region':<26}{'terminal':>9}{'hit':>7}{'lost':>7}"
-          f"{'hit%':>8}{'lost/hit':>10}{'med step':>9}")
+    print(f"{'region':<26}{'qual@0':>7}{'NEWhit':>7}{'kept':>6}{'LOST':>6}"
+          f"{'newhit%':>9}{'lost/new':>9}{'medstep':>8}")
     for r in rows:
-        lost = f"{r['fraction_of_hits_lost']:.3f}" if r["fraction_of_hits_lost"] is not None else "—"
-        step = f"{r['first_hit_step_median']:.1f}" if r["first_hit_step_median"] is not None else "—"
+        lost = (f"{r['fraction_of_new_hits_lost']:.3f}"
+                if r["fraction_of_new_hits_lost"] is not None else "—")
+        step = (f"{r['first_hit_step_median']:.1f}"
+                if r["first_hit_step_median"] is not None else "—")
         mark = " *" if r["is_benchmark_region"] else ""
-        print(f"{r['region']:<26}{r['terminal_at_H6']:>9}{r['hit_by_H6']:>7}"
-              f"{r['hits_lost_by_H6']:>7}{r['hit_prevalence']:>8.4f}"
-              f"{lost:>10}{step:>9}{mark}")
+        print(f"{r['region']:<26}{r['qualified_at_0']:>7}{r['new_hit_by_H']:>7}"
+              f"{r['retained_at_H']:>6}{r['lost_after_new_hit']:>6}"
+              f"{r['new_hit_prevalence']:>9.4f}{lost:>9}{step:>8}{mark}")
+    print("\n  qual@0  = the SOURCE already satisfied the region; a boundary")
+    print("            case for h_hit (= 1 exactly), NOT evidence of navigation")
+    print("  NEWhit  = source did NOT qualify and editing found the region")
+    print("  LOST    = genuine new hit that no longer qualifies at the horizon")
+    print("            <- the load-bearing quantity for the anytime claim")
 
     bench = next(r for r in rows if r["is_benchmark_region"])
-    print(f"\n* benchmark region QED>=0.90 & sim>=0.40:")
-    print(f"    terminal {bench['terminal_at_H6']}  hit {bench['hit_by_H6']}"
-          f"  of {len(trajs)} trajectories")
+    print(f"\n* benchmark region QED>=0.90 & sim>=0.40: "
+          f"qual@0 {bench['qualified_at_0']}  NEW hits {bench['new_hit_by_H']} "
+          f"of {len(trajs)}")
+    print("  NOTE: on the OFFICIAL benchmark this confound cannot occur -- "
+          "sources are QED [0.70,0.80]\n  and success begins at 0.90, so no "
+          "benchmark source qualifies at step 0.")
 
     out = {"schema": "compose.hphi.region_census",
            "note": "READ-ONLY. The 20 regions do not move in response to this.",

@@ -1,0 +1,403 @@
+{
+  "schema": "compose.hphi.region_census",
+  "note": "READ-ONLY. The 20 regions do not move in response to this.",
+  "n_sources": 64,
+  "n_trajectories": 256,
+  "mechanics": {
+    "termination": {
+      "complete": 256
+    },
+    "median_edits": 6.0,
+    "kernel_calls": 1536
+  },
+  "regions": [
+    {
+      "region": "QED>=0.75 & sim>=0.30",
+      "qed_threshold": 0.75,
+      "similarity_floor": 0.3,
+      "qualified_at_0": 140,
+      "new_hit_by_H": 54,
+      "retained_at_H": 30,
+      "lost_after_new_hit": 24,
+      "terminal_at_H": 85,
+      "new_hit_prevalence": 0.2109375,
+      "fraction_of_new_hits_lost": 0.4444444444444444,
+      "first_hit_step_median": 2.0,
+      "first_hit_step_counts": {
+        "2": 12,
+        "1": 21,
+        "3": 7,
+        "4": 10,
+        "5": 3,
+        "6": 1
+      },
+      "is_benchmark_region": false
+    },
+    {
+      "region": "QED>=0.75 & sim>=0.40",
+      "qed_threshold": 0.75,
+      "similarity_floor": 0.4,
+      "qualified_at_0": 140,
+      "new_hit_by_H": 50,
+      "retained_at_H": 26,
+      "lost_after_new_hit": 24,
+      "terminal_at_H": 70,
+      "new_hit_prevalence": 0.1953125,
+      "fraction_of_new_hits_lost": 0.48,
+      "first_hit_step_median": 2.0,
+      "first_hit_step_counts": {
+        "4": 10,
+        "1": 19,
+        "3": 8,
+        "5": 3,
+        "2": 9,
+        "6": 1
+      },
+      "is_benchmark_region": false
+    },
+    {
+      "region": "QED>=0.75 & sim>=0.50",
+      "qed_threshold": 0.75,
+      "similarity_floor": 0.5,
+      "qualified_at_0": 140,
+      "new_hit_by_H": 46,
+      "retained_at_H": 18,
+      "lost_after_new_hit": 28,
+      "terminal_at_H": 49,
+      "new_hit_prevalence": 0.1796875,
+      "fraction_of_new_hits_lost": 0.6086956521739131,
+      "first_hit_step_median": 2.0,
+      "first_hit_step_counts": {
+        "1": 18,
+        "3": 8,
+        "4": 8,
+        "5": 1,
+        "2": 9,
+        "6": 2
+      },
+      "is_benchmark_region": false
+    },
+    {
+      "region": "QED>=0.75 & sim>=0.60",
+      "qed_threshold": 0.75,
+      "similarity_floor": 0.6,
+      "qualified_at_0": 140,
+      "new_hit_by_H": 34,
+      "retained_at_H": 9,
+      "lost_after_new_hit": 25,
+      "terminal_at_H": 32,
+      "new_hit_prevalence": 0.1328125,
+      "fraction_of_new_hits_lost": 0.7352941176470589,
+      "first_hit_step_median": 1.5,
+      "first_hit_step_counts": {
+        "1": 17,
+        "4": 7,
+        "3": 3,
+        "2": 6,
+        "6": 1
+      },
+      "is_benchmark_region": false
+    },
+    {
+      "region": "QED>=0.80 & sim>=0.30",
+      "qed_threshold": 0.8,
+      "similarity_floor": 0.3,
+      "qualified_at_0": 0,
+      "new_hit_by_H": 65,
+      "retained_at_H": 30,
+      "lost_after_new_hit": 35,
+      "terminal_at_H": 30,
+      "new_hit_prevalence": 0.25390625,
+      "fraction_of_new_hits_lost": 0.5384615384615384,
+      "first_hit_step_median": 2.0,
+      "first_hit_step_counts": {
+        "2": 11,
+        "3": 10,
+        "1": 24,
+        "4": 11,
+        "6": 6,
+        "5": 3
+      },
+      "is_benchmark_region": false
+    },
+    {
+      "region": "QED>=0.80 & sim>=0.40",
+      "qed_threshold": 0.8,
+      "similarity_floor": 0.4,
+      "qualified_at_0": 0,
+      "new_hit_by_H": 58,
+      "retained_at_H": 25,
+      "lost_after_new_hit": 33,
+      "terminal_at_H": 25,
+      "new_hit_prevalence": 0.2265625,
+      "fraction_of_new_hits_lost": 0.5689655172413793,
+      "first_hit_step_median": 2.0,
+      "first_hit_step_counts": {
+        "2": 10,
+        "1": 23,
+        "3": 9,
+        "4": 9,
+        "6": 5,
+        "5": 2
+      },
+      "is_benchmark_region": false
+    },
+    {
+      "region": "QED>=0.80 & sim>=0.50",
+      "qed_threshold": 0.8,
+      "similarity_floor": 0.5,
+      "qualified_at_0": 0,
+      "new_hit_by_H": 49,
+      "retained_at_H": 15,
+      "lost_after_new_hit": 34,
+      "terminal_at_H": 15,
+      "new_hit_prevalence": 0.19140625,
+      "fraction_of_new_hits_lost": 0.6938775510204082,
+      "first_hit_step_median": 2.0,
+      "first_hit_step_counts": {
+        "1": 19,
+        "3": 8,
+        "4": 8,
+        "2": 9,
+        "6": 4,
+        "5": 1
+      },
+      "is_benchmark_region": false
+    },
+    {
+      "region": "QED>=0.80 & sim>=0.60",
+      "qed_threshold": 0.8,
+      "similarity_floor": 0.6,
+      "qualified_at_0": 0,
+      "new_hit_by_H": 42,
+      "retained_at_H": 9,
+      "lost_after_new_hit": 33,
+      "terminal_at_H": 9,
+      "new_hit_prevalence": 0.1640625,
+      "fraction_of_new_hits_lost": 0.7857142857142857,
+      "first_hit_step_median": 2.0,
+      "first_hit_step_counts": {
+        "1": 19,
+        "4": 6,
+        "6": 4,
+        "2": 6,
+        "3": 6,
+        "5": 1
+      },
+      "is_benchmark_region": false
+    },
+    {
+      "region": "QED>=0.85 & sim>=0.30",
+      "qed_threshold": 0.85,
+      "similarity_floor": 0.3,
+      "qualified_at_0": 0,
+      "new_hit_by_H": 14,
+      "retained_at_H": 6,
+      "lost_after_new_hit": 8,
+      "terminal_at_H": 6,
+      "new_hit_prevalence": 0.0546875,
+      "fraction_of_new_hits_lost": 0.5714285714285714,
+      "first_hit_step_median": 3.0,
+      "first_hit_step_counts": {
+        "1": 3,
+        "3": 4,
+        "5": 3,
+        "2": 2,
+        "6": 1,
+        "4": 1
+      },
+      "is_benchmark_region": false
+    },
+    {
+      "region": "QED>=0.85 & sim>=0.40",
+      "qed_threshold": 0.85,
+      "similarity_floor": 0.4,
+      "qualified_at_0": 0,
+      "new_hit_by_H": 12,
+      "retained_at_H": 3,
+      "lost_after_new_hit": 9,
+      "terminal_at_H": 3,
+      "new_hit_prevalence": 0.046875,
+      "fraction_of_new_hits_lost": 0.75,
+      "first_hit_step_median": 3.0,
+      "first_hit_step_counts": {
+        "1": 3,
+        "3": 4,
+        "5": 2,
+        "2": 2,
+        "6": 1
+      },
+      "is_benchmark_region": false
+    },
+    {
+      "region": "QED>=0.85 & sim>=0.50",
+      "qed_threshold": 0.85,
+      "similarity_floor": 0.5,
+      "qualified_at_0": 0,
+      "new_hit_by_H": 9,
+      "retained_at_H": 1,
+      "lost_after_new_hit": 8,
+      "terminal_at_H": 1,
+      "new_hit_prevalence": 0.03515625,
+      "fraction_of_new_hits_lost": 0.8888888888888888,
+      "first_hit_step_median": 3.0,
+      "first_hit_step_counts": {
+        "1": 2,
+        "3": 3,
+        "5": 2,
+        "2": 1,
+        "6": 1
+      },
+      "is_benchmark_region": false
+    },
+    {
+      "region": "QED>=0.85 & sim>=0.60",
+      "qed_threshold": 0.85,
+      "similarity_floor": 0.6,
+      "qualified_at_0": 0,
+      "new_hit_by_H": 7,
+      "retained_at_H": 1,
+      "lost_after_new_hit": 6,
+      "terminal_at_H": 1,
+      "new_hit_prevalence": 0.02734375,
+      "fraction_of_new_hits_lost": 0.8571428571428571,
+      "first_hit_step_median": 3.0,
+      "first_hit_step_counts": {
+        "1": 2,
+        "4": 1,
+        "2": 1,
+        "3": 2,
+        "6": 1
+      },
+      "is_benchmark_region": false
+    },
+    {
+      "region": "QED>=0.90 & sim>=0.30",
+      "qed_threshold": 0.9,
+      "similarity_floor": 0.3,
+      "qualified_at_0": 0,
+      "new_hit_by_H": 1,
+      "retained_at_H": 0,
+      "lost_after_new_hit": 1,
+      "terminal_at_H": 0,
+      "new_hit_prevalence": 0.00390625,
+      "fraction_of_new_hits_lost": 1.0,
+      "first_hit_step_median": 2.0,
+      "first_hit_step_counts": {
+        "2": 1
+      },
+      "is_benchmark_region": false
+    },
+    {
+      "region": "QED>=0.90 & sim>=0.40",
+      "qed_threshold": 0.9,
+      "similarity_floor": 0.4,
+      "qualified_at_0": 0,
+      "new_hit_by_H": 1,
+      "retained_at_H": 0,
+      "lost_after_new_hit": 1,
+      "terminal_at_H": 0,
+      "new_hit_prevalence": 0.00390625,
+      "fraction_of_new_hits_lost": 1.0,
+      "first_hit_step_median": 2.0,
+      "first_hit_step_counts": {
+        "2": 1
+      },
+      "is_benchmark_region": true
+    },
+    {
+      "region": "QED>=0.90 & sim>=0.50",
+      "qed_threshold": 0.9,
+      "similarity_floor": 0.5,
+      "qualified_at_0": 0,
+      "new_hit_by_H": 1,
+      "retained_at_H": 0,
+      "lost_after_new_hit": 1,
+      "terminal_at_H": 0,
+      "new_hit_prevalence": 0.00390625,
+      "fraction_of_new_hits_lost": 1.0,
+      "first_hit_step_median": 2.0,
+      "first_hit_step_counts": {
+        "2": 1
+      },
+      "is_benchmark_region": false
+    },
+    {
+      "region": "QED>=0.90 & sim>=0.60",
+      "qed_threshold": 0.9,
+      "similarity_floor": 0.6,
+      "qualified_at_0": 0,
+      "new_hit_by_H": 1,
+      "retained_at_H": 0,
+      "lost_after_new_hit": 1,
+      "terminal_at_H": 0,
+      "new_hit_prevalence": 0.00390625,
+      "fraction_of_new_hits_lost": 1.0,
+      "first_hit_step_median": 2.0,
+      "first_hit_step_counts": {
+        "2": 1
+      },
+      "is_benchmark_region": false
+    },
+    {
+      "region": "QED>=0.95 & sim>=0.30",
+      "qed_threshold": 0.95,
+      "similarity_floor": 0.3,
+      "qualified_at_0": 0,
+      "new_hit_by_H": 0,
+      "retained_at_H": 0,
+      "lost_after_new_hit": 0,
+      "terminal_at_H": 0,
+      "new_hit_prevalence": 0.0,
+      "fraction_of_new_hits_lost": null,
+      "first_hit_step_median": null,
+      "first_hit_step_counts": {},
+      "is_benchmark_region": false
+    },
+    {
+      "region": "QED>=0.95 & sim>=0.40",
+      "qed_threshold": 0.95,
+      "similarity_floor": 0.4,
+      "qualified_at_0": 0,
+      "new_hit_by_H": 0,
+      "retained_at_H": 0,
+      "lost_after_new_hit": 0,
+      "terminal_at_H": 0,
+      "new_hit_prevalence": 0.0,
+      "fraction_of_new_hits_lost": null,
+      "first_hit_step_median": null,
+      "first_hit_step_counts": {},
+      "is_benchmark_region": false
+    },
+    {
+      "region": "QED>=0.95 & sim>=0.50",
+      "qed_threshold": 0.95,
+      "similarity_floor": 0.5,
+      "qualified_at_0": 0,
+      "new_hit_by_H": 0,
+      "retained_at_H": 0,
+      "lost_after_new_hit": 0,
+      "terminal_at_H": 0,
+      "new_hit_prevalence": 0.0,
+      "fraction_of_new_hits_lost": null,
+      "first_hit_step_median": null,
+      "first_hit_step_counts": {},
+      "is_benchmark_region": false
+    },
+    {
+      "region": "QED>=0.95 & sim>=0.60",
+      "qed_threshold": 0.95,
+      "similarity_floor": 0.6,
+      "qualified_at_0": 0,
+      "new_hit_by_H": 0,
+      "retained_at_H": 0,
+      "lost_after_new_hit": 0,
+      "terminal_at_H": 0,
+      "new_hit_prevalence": 0.0,
+      "fraction_of_new_hits_lost": null,
+      "first_hit_step_median": null,
+      "first_hit_step_counts": {},
+      "is_benchmark_region": false
+    }
+  ]
+}

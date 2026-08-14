@@ -256,6 +256,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         return (float(QED.qed(m)),
                 float(DataStructs.TanimotoSimilarity(fp0, gen.GetFingerprint(m))))
 
+    horizon = int(task.get("horizon", HORIZON))
     trajectories = []
     kernel_calls = 0
     for rep in range(int(task.get("replicates", TRAJECTORIES_PER_SOURCE))):
@@ -265,7 +266,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         key = canonical_state_key(state)
         path, marks = [source], []
         kind, reason, edits = "complete", None, 0
-        for _ in range(HORIZON):
+        for _ in range(horizon):
             succ, succ_key, mark, err = _direct_mark_step(
                 model, system, state, key, rng, np)
             kernel_calls += 1
@@ -293,6 +294,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         "canonical_source": canonical_source,
         "source_qed": round(float(QED.qed(mol0)), 6),
         "trajectories": trajectories,
+        "horizon": horizon,
         "kernel_calls": kernel_calls,
         "seconds": round(time.perf_counter() - t0, 2),
         "status": "OK",
@@ -361,7 +363,7 @@ def drive(tasks: list[dict[str, Any]], out_name: str) -> dict[str, Any]:
 
 @app.local_entrypoint()
 def main(parity_only: bool = False, limit: int = 0, valid: bool = False,
-         pilot: bool = False) -> None:
+         pilot: bool = False, horizon: int = 0) -> None:
     """`--pilot` runs the PERMANENTLY EXCLUDED 64-source staged-compute gate."""
     src_file = ("data/jin/hphi_pilot_64.txt" if pilot else
                 "data/jin/hphi_valid_128.txt" if valid else
@@ -382,11 +384,17 @@ def main(parity_only: bool = False, limit: int = 0, valid: bool = False,
     if limit:
         smis = smis[:limit]
     n_rep = 4 if pilot else TRAJECTORIES_PER_SOURCE
-    tasks = [{"index": i, "smiles": s, "replicates": n_rep}
+    H = horizon or HORIZON
+    tasks = [{"index": i, "smiles": s, "replicates": n_rep, "horizon": H}
              for i, s in enumerate(smis)]
     print(f"h_phi rollout corpus: {len(tasks)} sources x {n_rep} "
-          f"trajectories x H{HORIZON}")
+          f"trajectories x H{H}")
+    if H != HORIZON:
+        print(f"HORIZON QUALIFICATION at H{H}. Same sources, same seeds, so the "
+              f"first {HORIZON} steps MUST reproduce the pilot exactly -- that "
+              f"nesting is verified offline before any curve is read.")
     print("FROZEN R_theta, unguided. Raw trajectories only -- NO census here.")
     tag = "pilot" if pilot else ("valid" if valid else "train")
-    call = drive.spawn(tasks, f"{tag}_{len(tasks):04d}x{n_rep:02d}")
+    suffix = f"_H{H}" if H != HORIZON else ""
+    call = drive.spawn(tasks, f"{tag}_{len(tasks):04d}x{n_rep:02d}{suffix}")
     print(f"driver spawned: {call.object_id}")
