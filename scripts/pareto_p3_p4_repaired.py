@@ -86,6 +86,8 @@ def main() -> int:
     args = ap.parse_args()
 
     from compose_v4.experiments.pareto_control import (
+        Scalarization,
+        _argmin_stable,
         endpoint_diversity,
         normalized_hypervolume,
         pareto_front_indices,
@@ -124,7 +126,23 @@ def main() -> int:
                 continue
             s = smoke[idx]
             zc = np.asarray(s["arms"][compose_arm]["endpoint_z"], float)
-            zg = np.asarray(t["selected_endpoint_z"], float)
+            if "selected_endpoint_z" in t:
+                zg = np.asarray(t["selected_endpoint_z"], float)
+            else:
+                # SOURCE 000 IS THE BLINDED PROBE: no selection was computed, by
+                # design, so the go/no-go could not read the science. The pool
+                # and its already-paid-for scores were retained precisely so the
+                # outcome could be reconstructed offline with nothing re-run.
+                # This is the SAME frozen selection the app performs -- pool-wide
+                # Chebyshev argmin per preference -- applied here rather than
+                # there. It is not a new convention.
+                pool_z = np.asarray(t["endpoint_z"], float)
+                pool_keys = list(t["endpoints"])
+                scal = Scalarization(utopia)
+                zg = np.stack([pool_z[_argmin_stable(scal(pool_z, w), pool_keys)]
+                               for w in s["preferences"]])
+                print(f"  [src {idx}] selection reconstructed offline from the "
+                      f"blinded probe's {len(pool_keys)} retained endpoints")
 
             hv_c = normalized_hypervolume(zc, reference, utopia)
             hv_g = normalized_hypervolume(zg, reference, utopia)

@@ -1,0 +1,698 @@
+{
+  "schema": "compose.pareto.p3_p4_repaired",
+  "status": "SMOKE_HELD_IN",
+  "held_out_opened": false,
+  "pair": "potency_vs_developability",
+  "matcher": "closed-loop metered; 12/12 MATCHED, 9 kernel calls total overshoot",
+  "superseded": "the original P3/P4 used an open-loop matcher that funded gen_rank to 65.5% (@greedy) and 41.7% (@verified) of the intended kernel budget; those numbers stay withdrawn",
+  "conventions": "frozen census scales and frozen pareto_control metrics; nothing new",
+  "resource_axes_rule": "reported separately; never merged into one efficiency scalar",
+  "results": {
+    "P3": {
+      "status": "COMPUTED",
+      "n_sources": 12,
+      "excluded_unmatched": [],
+      "hypervolume": {
+        "n": 12,
+        "mean": 0.6678033262843912,
+        "median": 0.681591768757082,
+        "ci95": [
+          0.5169319354159577,
+          0.8094103553229712
+        ],
+        "wins": 12,
+        "losses": 0,
+        "ties": 0
+      },
+      "nondominated_set_size": {
+        "n": 12,
+        "mean": -2.25,
+        "median": -2.5,
+        "ci95": [
+          -2.9166666666666665,
+          -1.5833333333333333
+        ],
+        "wins": 0,
+        "losses": 11,
+        "ties": 1
+      },
+      "per_source": [
+        {
+          "index": 0,
+          "hv_compose": 1.0074300820040876,
+          "hv_genrank": 0.0716563743893453,
+          "hv_diff": 0.9357737076147423,
+          "nondominated_compose": 5,
+          "nondominated_genrank": 5,
+          "target": 9,
+          "realized": 10,
+          "genrank_trajectories": 10
+        },
+        {
+          "index": 1,
+          "hv_compose": 1.1591583644583705,
+          "hv_genrank": 0.11226981090942709,
+          "hv_diff": 1.0468885535489434,
+          "nondominated_compose": 3,
+          "nondominated_genrank": 5,
+          "target": 16,
+          "realized": 18,
+          "genrank_trajectories": 4
+        },
+        {
+          "index": 2,
+          "hv_compose": 0.4406669637645058,
+          "hv_genrank": 0.13660662391206574,
+          "hv_diff": 0.3040603398524401,
+          "nondominated_compose": 2,
+          "nondominated_genrank": 5,
+          "target": 16,
+          "realized": 19,
+          "genrank_trajectories": 6
+        },
+        {
+          "index": 3,
+          "hv_compose": 0.7123341115226134,
+          "hv_genrank": 0.17255402993201263,
+          "hv_diff": 0.5397800815906008,
+          "nondominated_compose": 4,
+          "nondominated_genrank": 5,
+          "target": 20,
+          "realized": 20,
+          "genrank_trajectories": 7
+        },
+        {
+          "index": 4,
+          "hv_compose": 0.5112710014521368,
+          "hv_genrank": 0.33090381638719807,
+          "hv_diff": 0.1803671850649387,
+          "nondominated_compose": 2,
+          "nondominated_genrank": 5,
+          "target": 15,
+          "realized": 15,
+          "genrank_trajectories": 3
+        },
+        {
+          "index": 5,
+          "hv_compose": 0.6816890951650216,
+          "hv_genrank": 0.09522903620637353,
+          "hv_diff": 0.5864600589586481,
+          "nondominated_compose": 2,
+          "nondominated_genrank": 5,
+          "target": 17,
+          "realized": 19,
+          "genrank_trajectories": 6
+        },
+        {
+          "index": 6,
+          "hv_compose": 1.2687840232256815,
+          "hv_genrank": 0.2922668126774236,
+          "hv_diff": 0.9765172105482579,
+          "nondominated_compose": 4,
+          "nondominated_genrank": 5,
+          "target": 7,
+          "realized": 9,
+          "genrank_trajectories": 2
+        },
+        {
+          "index": 7,
+          "hv_compose": 0.8653326521720025,
+          "hv_genrank": 0.14399723627683056,
+          "hv_diff": 0.7213354158951719,
+          "nondominated_compose": 1,
+          "nondominated_genrank": 5,
+          "target": 16,
+          "realized": 16,
+          "genrank_trajectories": 6
+        },
+        {
+          "index": 8,
+          "hv_compose": 0.6837781492098373,
+          "hv_genrank": 0.23493632240546078,
+          "hv_diff": 0.44884182680437645,
+          "nondominated_compose": 1,
+          "nondominated_genrank": 5,
+          "target": 13,
+          "realized": 13,
+          "genrank_trajectories": 6
+        },
+        {
+          "index": 9,
+          "hv_compose": 0.7737887674043803,
+          "hv_genrank": 0.1319406457853881,
+          "hv_diff": 0.6418481216189922,
+          "nondominated_compose": 4,
+          "nondominated_genrank": 5,
+          "target": 20,
+          "realized": 20,
+          "genrank_trajectories": 5
+        },
+        {
+          "index": 10,
+          "hv_compose": 1.135620004151964,
+          "hv_genrank": 0.2320996444309487,
+          "hv_diff": 0.9035203597210153,
+          "nondominated_compose": 2,
+          "nondominated_genrank": 5,
+          "target": 22,
+          "realized": 22,
+          "genrank_trajectories": 5
+        },
+        {
+          "index": 11,
+          "hv_compose": 0.9458618160681317,
+          "hv_genrank": 0.2176147618735644,
+          "hv_diff": 0.7282470541945673,
+          "nondominated_compose": 3,
+          "nondominated_genrank": 5,
+          "target": 23,
+          "realized": 25,
+          "genrank_trajectories": 6
+        }
+      ],
+      "resource_rows": [
+        {
+          "index": 0,
+          "kernel_compose": 9,
+          "kernel_genrank": 10,
+          "algo_oracle_compose": 15912,
+          "algo_oracle_genrank": 10,
+          "traj_compose": 5,
+          "traj_genrank": 10,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 4932,
+          "evaluator_genrank": 8
+        },
+        {
+          "index": 1,
+          "kernel_compose": 16,
+          "kernel_genrank": 18,
+          "algo_oracle_compose": 19295,
+          "algo_oracle_genrank": 4,
+          "traj_compose": 5,
+          "traj_genrank": 4,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 10447,
+          "evaluator_genrank": 4
+        },
+        {
+          "index": 2,
+          "kernel_compose": 16,
+          "kernel_genrank": 19,
+          "algo_oracle_compose": 13945,
+          "algo_oracle_genrank": 6,
+          "traj_compose": 5,
+          "traj_genrank": 6,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 7079,
+          "evaluator_genrank": 6
+        },
+        {
+          "index": 3,
+          "kernel_compose": 20,
+          "kernel_genrank": 20,
+          "algo_oracle_compose": 29134,
+          "algo_oracle_genrank": 7,
+          "traj_compose": 5,
+          "traj_genrank": 7,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 19112,
+          "evaluator_genrank": 6
+        },
+        {
+          "index": 4,
+          "kernel_compose": 15,
+          "kernel_genrank": 15,
+          "algo_oracle_compose": 47087,
+          "algo_oracle_genrank": 3,
+          "traj_compose": 5,
+          "traj_genrank": 3,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 21048,
+          "evaluator_genrank": 3
+        },
+        {
+          "index": 5,
+          "kernel_compose": 17,
+          "kernel_genrank": 19,
+          "algo_oracle_compose": 17416,
+          "algo_oracle_genrank": 6,
+          "traj_compose": 5,
+          "traj_genrank": 6,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 10257,
+          "evaluator_genrank": 6
+        },
+        {
+          "index": 6,
+          "kernel_compose": 7,
+          "kernel_genrank": 9,
+          "algo_oracle_compose": 18027,
+          "algo_oracle_genrank": 2,
+          "traj_compose": 5,
+          "traj_genrank": 2,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 4129,
+          "evaluator_genrank": 2
+        },
+        {
+          "index": 7,
+          "kernel_compose": 16,
+          "kernel_genrank": 16,
+          "algo_oracle_compose": 12858,
+          "algo_oracle_genrank": 6,
+          "traj_compose": 5,
+          "traj_genrank": 6,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 6400,
+          "evaluator_genrank": 5
+        },
+        {
+          "index": 8,
+          "kernel_compose": 13,
+          "kernel_genrank": 13,
+          "algo_oracle_compose": 29293,
+          "algo_oracle_genrank": 6,
+          "traj_compose": 5,
+          "traj_genrank": 6,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 12019,
+          "evaluator_genrank": 6
+        },
+        {
+          "index": 9,
+          "kernel_compose": 20,
+          "kernel_genrank": 20,
+          "algo_oracle_compose": 16893,
+          "algo_oracle_genrank": 5,
+          "traj_compose": 5,
+          "traj_genrank": 5,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 11476,
+          "evaluator_genrank": 5
+        },
+        {
+          "index": 10,
+          "kernel_compose": 22,
+          "kernel_genrank": 22,
+          "algo_oracle_compose": 11529,
+          "algo_oracle_genrank": 5,
+          "traj_compose": 5,
+          "traj_genrank": 5,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 8717,
+          "evaluator_genrank": 5
+        },
+        {
+          "index": 11,
+          "kernel_compose": 23,
+          "kernel_genrank": 25,
+          "algo_oracle_compose": 20599,
+          "algo_oracle_genrank": 6,
+          "traj_compose": 5,
+          "traj_genrank": 6,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 15620,
+          "evaluator_genrank": 6
+        }
+      ],
+      "resource_axes": {
+        "kernel_calls": {
+          "compose_median": 16.0,
+          "genrank_median": 18.5,
+          "ratio_compose_over_genrank_median": 0.96
+        },
+        "algorithmic_oracle_requests": {
+          "compose_median": 17721.5,
+          "genrank_median": 6.0,
+          "ratio_compose_over_genrank_median": 3405.883333333333
+        },
+        "completed_trajectories": {
+          "compose_median": 5.0,
+          "genrank_median": 6.0,
+          "ratio_compose_over_genrank_median": 0.8333333333333334
+        },
+        "evaluator_calls": {
+          "compose_median": 10352.0,
+          "genrank_median": 5.5,
+          "ratio_compose_over_genrank_median": 2033.8333333333335
+        }
+      }
+    },
+    "P4": {
+      "status": "COMPUTED",
+      "n_sources": 12,
+      "excluded_unmatched": [],
+      "hypervolume": {
+        "n": 12,
+        "mean": 0.5668449938732317,
+        "median": 0.5988664196708329,
+        "ci95": [
+          0.4762709261871036,
+          0.6389716092019042
+        ],
+        "wins": 12,
+        "losses": 0,
+        "ties": 0
+      },
+      "nondominated_set_size": {
+        "n": 12,
+        "mean": -2.4166666666666665,
+        "median": -2.5,
+        "ci95": [
+          -3.0833333333333335,
+          -1.6666666666666667
+        ],
+        "wins": 0,
+        "losses": 11,
+        "ties": 1
+      },
+      "per_source": [
+        {
+          "index": 0,
+          "hv_compose": 1.0059910596462103,
+          "hv_genrank": 0.3941641765898348,
+          "hv_diff": 0.6118268830563754,
+          "nondominated_compose": 3,
+          "nondominated_genrank": 5,
+          "target": 368,
+          "realized": 369,
+          "genrank_trajectories": 1025
+        },
+        {
+          "index": 1,
+          "hv_compose": 1.2565983360781598,
+          "hv_genrank": 0.5611823285847369,
+          "hv_diff": 0.6954160074934229,
+          "nondominated_compose": 1,
+          "nondominated_genrank": 5,
+          "target": 388,
+          "realized": 388,
+          "genrank_trajectories": 199
+        },
+        {
+          "index": 2,
+          "hv_compose": 0.7077168113519009,
+          "hv_genrank": 0.2221189656292823,
+          "hv_diff": 0.4855978457226186,
+          "nondominated_compose": 1,
+          "nondominated_genrank": 5,
+          "target": 398,
+          "realized": 398,
+          "genrank_trajectories": 270
+        },
+        {
+          "index": 3,
+          "hv_compose": 0.8196610914756967,
+          "hv_genrank": 0.3602849118540661,
+          "hv_diff": 0.4593761796216306,
+          "nondominated_compose": 4,
+          "nondominated_genrank": 5,
+          "target": 402,
+          "realized": 402,
+          "genrank_trajectories": 234
+        },
+        {
+          "index": 4,
+          "hv_compose": 0.514638596531761,
+          "hv_genrank": 0.3564702347739006,
+          "hv_diff": 0.15816836175786042,
+          "nondominated_compose": 2,
+          "nondominated_genrank": 5,
+          "target": 371,
+          "realized": 371,
+          "genrank_trajectories": 101
+        },
+        {
+          "index": 5,
+          "hv_compose": 0.8198561138503748,
+          "hv_genrank": 0.24720241722738445,
+          "hv_diff": 0.5726536966229904,
+          "nondominated_compose": 3,
+          "nondominated_genrank": 5,
+          "target": 450,
+          "realized": 453,
+          "genrank_trajectories": 231
+        },
+        {
+          "index": 6,
+          "hv_compose": 1.2868805118039779,
+          "hv_genrank": 0.6337610935854003,
+          "hv_diff": 0.6531194182185776,
+          "nondominated_compose": 4,
+          "nondominated_genrank": 5,
+          "target": 369,
+          "realized": 372,
+          "genrank_trajectories": 158
+        },
+        {
+          "index": 7,
+          "hv_compose": 0.9179294501944709,
+          "hv_genrank": 0.25847382481762704,
+          "hv_diff": 0.6594556253768439,
+          "nondominated_compose": 1,
+          "nondominated_genrank": 5,
+          "target": 353,
+          "realized": 354,
+          "genrank_trajectories": 230
+        },
+        {
+          "index": 8,
+          "hv_compose": 0.8951654503148065,
+          "hv_genrank": 0.3677454885199224,
+          "hv_diff": 0.5274199617948842,
+          "nondominated_compose": 5,
+          "nondominated_genrank": 5,
+          "target": 359,
+          "realized": 360,
+          "genrank_trajectories": 211
+        },
+        {
+          "index": 9,
+          "hv_compose": 0.9684372346813127,
+          "hv_genrank": 0.24719575376076058,
+          "hv_diff": 0.7212414809205521,
+          "nondominated_compose": 2,
+          "nondominated_genrank": 5,
+          "target": 428,
+          "realized": 428,
+          "genrank_trajectories": 168
+        },
+        {
+          "index": 10,
+          "hv_compose": 1.0631059725323941,
+          "hv_genrank": 0.39114746292465874,
+          "hv_diff": 0.6719585096077354,
+          "nondominated_compose": 2,
+          "nondominated_genrank": 5,
+          "target": 456,
+          "realized": 456,
+          "genrank_trajectories": 276
+        },
+        {
+          "index": 11,
+          "hv_compose": 0.9972738204935362,
+          "hv_genrank": 0.4113678642082458,
+          "hv_diff": 0.5859059562852904,
+          "nondominated_compose": 3,
+          "nondominated_genrank": 5,
+          "target": 445,
+          "realized": 445,
+          "genrank_trajectories": 200
+        }
+      ],
+      "resource_rows": [
+        {
+          "index": 0,
+          "kernel_compose": 368,
+          "kernel_genrank": 369,
+          "algo_oracle_compose": 345333,
+          "algo_oracle_genrank": 1025,
+          "traj_compose": 5,
+          "traj_genrank": 1025,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 197818,
+          "evaluator_genrank": 224
+        },
+        {
+          "index": 1,
+          "kernel_compose": 388,
+          "kernel_genrank": 388,
+          "algo_oracle_compose": 406624,
+          "algo_oracle_genrank": 199,
+          "traj_compose": 5,
+          "traj_genrank": 199,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 239819,
+          "evaluator_genrank": 160
+        },
+        {
+          "index": 2,
+          "kernel_compose": 398,
+          "kernel_genrank": 398,
+          "algo_oracle_compose": 273849,
+          "algo_oracle_genrank": 270,
+          "traj_compose": 5,
+          "traj_genrank": 270,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 174294,
+          "evaluator_genrank": 196
+        },
+        {
+          "index": 3,
+          "kernel_compose": 402,
+          "kernel_genrank": 402,
+          "algo_oracle_compose": 623328,
+          "algo_oracle_genrank": 234,
+          "traj_compose": 5,
+          "traj_genrank": 234,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 387296,
+          "evaluator_genrank": 156
+        },
+        {
+          "index": 4,
+          "kernel_compose": 371,
+          "kernel_genrank": 371,
+          "algo_oracle_compose": 960202,
+          "algo_oracle_genrank": 101,
+          "traj_compose": 5,
+          "traj_genrank": 101,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 531075,
+          "evaluator_genrank": 101
+        },
+        {
+          "index": 5,
+          "kernel_compose": 450,
+          "kernel_genrank": 453,
+          "algo_oracle_compose": 406242,
+          "algo_oracle_genrank": 231,
+          "traj_compose": 5,
+          "traj_genrank": 231,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 287051,
+          "evaluator_genrank": 187
+        },
+        {
+          "index": 6,
+          "kernel_compose": 369,
+          "kernel_genrank": 372,
+          "algo_oracle_compose": 378023,
+          "algo_oracle_genrank": 158,
+          "traj_compose": 5,
+          "traj_genrank": 158,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 219329,
+          "evaluator_genrank": 133
+        },
+        {
+          "index": 7,
+          "kernel_compose": 353,
+          "kernel_genrank": 354,
+          "algo_oracle_compose": 278533,
+          "algo_oracle_genrank": 230,
+          "traj_compose": 5,
+          "traj_genrank": 230,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 150842,
+          "evaluator_genrank": 139
+        },
+        {
+          "index": 8,
+          "kernel_compose": 359,
+          "kernel_genrank": 360,
+          "algo_oracle_compose": 564012,
+          "algo_oracle_genrank": 211,
+          "traj_compose": 5,
+          "traj_genrank": 211,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 313079,
+          "evaluator_genrank": 161
+        },
+        {
+          "index": 9,
+          "kernel_compose": 428,
+          "kernel_genrank": 428,
+          "algo_oracle_compose": 389171,
+          "algo_oracle_genrank": 168,
+          "traj_compose": 5,
+          "traj_genrank": 168,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 259462,
+          "evaluator_genrank": 143
+        },
+        {
+          "index": 10,
+          "kernel_compose": 456,
+          "kernel_genrank": 456,
+          "algo_oracle_compose": 248976,
+          "algo_oracle_genrank": 276,
+          "traj_compose": 5,
+          "traj_genrank": 276,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 173569,
+          "evaluator_genrank": 210
+        },
+        {
+          "index": 11,
+          "kernel_compose": 445,
+          "kernel_genrank": 445,
+          "algo_oracle_compose": 444533,
+          "algo_oracle_genrank": 200,
+          "traj_compose": 5,
+          "traj_genrank": 200,
+          "bench_compose": 5,
+          "bench_genrank": 0,
+          "evaluator_compose": 304972,
+          "evaluator_genrank": 177
+        }
+      ],
+      "resource_axes": {
+        "kernel_calls": {
+          "compose_median": 393.0,
+          "genrank_median": 393.0,
+          "ratio_compose_over_genrank_median": 1.0
+        },
+        "algorithmic_oracle_requests": {
+          "compose_median": 397706.5,
+          "genrank_median": 220.5,
+          "ratio_compose_over_genrank_median": 2133.000841708543
+        },
+        "completed_trajectories": {
+          "compose_median": 5.0,
+          "genrank_median": 220.5,
+          "ratio_compose_over_genrank_median": 0.02271790644961879
+        },
+        "evaluator_calls": {
+          "compose_median": 249640.5,
+          "genrank_median": 160.5,
+          "ratio_compose_over_genrank_median": 1592.0611555627036
+        }
+      }
+    }
+  }
+}
