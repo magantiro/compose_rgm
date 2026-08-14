@@ -1014,3 +1014,86 @@ Not "COMPOSE has six tricks." It is:
 
 > **One learned molecular world model; many objectives, preferences and
 > constraints supplied at inference.**
+
+---
+
+## H · THE SYNTHESIS TABLE — native COMPOSE, its ablation, and the frozen spine
+
+> ### **Do not cripple COMPOSE to imitate a baseline's internal mechanics.**
+> Match the externally defined task and output budget, let each method use its
+> **native** inference procedure, and add a **restricted COMPOSE ablation** to
+> isolate what the unique affordance buys.
+
+**The one binding condition: native affordances are preregistered BEFORE
+outcomes.** We exploit what COMPOSE was engineered to do — we never notice a
+result afterwards and invent a favourable interpretation.
+
+### The three frozen layers
+
+| layer | rule |
+|---|---|
+| **1 · external fairness = TASK-level parity** | match source cohort, objectives, feasibility criterion, returned candidates / evaluation budget *where genuinely specified*, and metrics. **Do not manufacture equality of internal algorithms.** |
+| **2 · COMPOSE primary = NATIVE inference** | stopping · continuation · branching · support restriction · adaptive goal changes · archive reuse · future-aware value control |
+| **3 · internal ablation = remove EXACTLY that affordance** | the gap says whether the architecture earned its complexity |
+
+### The recurring three-row figure
+
+```
+external method        COMPOSE-native        COMPOSE minus capability
+      ↓                      ↓                          ↓
+Is COMPOSE          What can COMPOSE       Is the architectural
+competitive?        natively do?           distinction responsible?
+```
+
+**And through every row of every table: `same frozen R_θ` —**
+`sha256 c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8`.
+That is the spine reviewers should remember.
+
+### The full experiment map
+
+| experiment | frozen `R_θ` | **native COMPOSE (primary)** | **restricted ablation** | what the gap means | external |
+|---|:---:|---|---|---|---|
+| **QED / GrIDDD** | ✅ | 20 trajectories, each may **STOP on the first qualifying molecule**, max H6 | force every trajectory to H6 | value of **every-state-evaluable / anytime** optimization | GrIDDD 45.1 % |
+| **trans-dimensionality** | ✅ | complete legal fiber **including insert/delete** | remove every size-changing successor | value of genuine **variable-size execution** | GrIDDD's own ablation as context |
+| **exact target** | ✅ | remaining-budget **future-aware** control | myopic greedy | value of **planning** over local reward | none — no native task |
+| **retargeting** | ✅ | change the goal **at the realized intermediate** and continue | discard history, restart from `x₀` | value of **stateful reusable trajectories** | none — matched causal is better |
+| **Pareto** | ✅ | adaptive **objective-region targeting**, archive growth, branching/reuse | fixed weights · generate-and-rank · no reuse | value of **closed-loop recontrol + reusable exploration** | matched generate-and-rank |
+| **5-objective MOO** | ✅ | same frozen `R_θ`, native region controller + adaptive front construction | standard external MOO on the same task | ordinary MOO competence **plus** no task-specific molecular retraining | MOLLEO Task 3, Graph-GA |
+| **hard support** | ✅ | remove forbidden transitions from the **legal controlled support** | soft guidance · post-hoc filtering | value of constraints being **part of execution** | CDD/PRODIGY/ConStruct lineage |
+| **pathwise constraints** | ✅ | enforce the predicate on **every committed state** | endpoint-only requirement | value of intermediates being **actual molecules** | none |
+| **map reuse** | ✅ | branch from useful **previously realized** states | restart from the original source | value of accumulated search being **reusable** | none |
+| **preference switch** | ✅ | swap `z_A → z_B` **mid-run** | restart / reoptimize from scratch | value of **purpose separable from dynamics** | none |
+
+### Three worked cases where the rule bites
+
+**Pareto — do not reduce COMPOSE to the ablation.** Picking five weights
+independently, launching from `x₀` every time, discarding every intermediate and
+returning endpoints is a **useful ablation**; it must not *define* COMPOSE.
+Native COMPOSE is allowed to say: *"the archive is missing this objective-space
+region, I have a realized molecule near it, branch from there and control toward
+the gap."* That is what an executable state space buys. Burying it because
+NSGA-III cannot operate that way would delete the contribution.
+
+**Pathwise — the fair-looking move destroys the experiment.** *"Other generators
+only provide endpoints, so we'll evaluate COMPOSE only at endpoints to be
+fair"* defeats the entire point. Instead: **shared task** = produce a successful
+final molecule; **COMPOSE-native stronger task** = additionally guarantee
+forbidden chemistry never appears along the executable path. Methods without
+meaningful intermediates get **`N/A`** on the pathwise metric — **not zero**, and
+not a reason to discard the capability.
+
+**Retargeting — the purest case.** A static generator may need to restart when
+the goal changes. COMPOSE has a molecule **literally in hand at step 3**. Making
+it restart because another model would restart is bizarre; **restart is the
+counterfactual baseline** that quantifies statefulness.
+
+### The standing question
+
+Whenever we catch ourselves saying *"but baseline X can't do that, so maybe
+COMPOSE shouldn't either"* — ask instead:
+
+> **Is this a legitimate, prospectively specified consequence of COMPOSE's
+> architecture?**
+
+If yes: **use it as the native method and ablate it separately.** Do not engineer
+away the contribution in the name of superficial fairness.
