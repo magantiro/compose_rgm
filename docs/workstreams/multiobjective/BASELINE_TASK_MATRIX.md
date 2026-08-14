@@ -1,198 +1,237 @@
-# Method / task matrix — multiobjective external baselines
+# Comparator matrix — organized by ROLE
 
 **Artifact status: `DESIGN_ONLY`.** Nothing installed, nothing run, no compute
-spent. Every cost figure below is a **projection or a published figure**, never a
-measurement made by this lane. Where a published figure exists it is quoted with
-its source; where it does not, the cell says `UNVERIFIED` rather than carrying an
-estimate.
+spent. Every cost figure is a **published figure or a projection**, never a
+measurement by this lane. Cells that cannot be resolved to a primary source say
+`UNVERIFIED` rather than carrying an estimate.
+
+**Governed by `docs/COMPARATOR_ROLES_CANONICAL.md`**, which supersedes the
+comparator-selection guidance in
+`docs/BASELINE_PHILOSOPHY_AND_MAIN_LANE_DECISIONS.md` (whose four main-lane
+decisions and stop rules remain in force).
+
+> **Comparator selection is framework-first.** A method does not become a primary
+> baseline merely because it optimizes the same property. Framework-neighbor
+> comparisons establish methodological novelty; matched internal controls
+> establish causality; task-specialist baselines establish practical competence.
+
+**This document was reorganized from a task matrix into a role matrix.** The
+previous organization sorted methods by which experiment they could enter, which
+silently encoded the assumption that entering more experiments made a method more
+important. It does not. A method may hold different roles in different
+experiments, and the role is recorded per method with its reason.
 
 ---
 
-## The tasks
+## Role assignments at a glance
 
-**Q1 capability**, **Q2 frontier quality**, **Q3 structural value of closed-loop
-control**, **Q4 why learn `R_θ`** are the four burdens the Pareto block must
-carry. External methods can only address a subset, and saying which is the point
-of this matrix.
-
-| task | what it is | who can enter |
+| method | role | one-line reason |
 |---|---|---|
-| **A1** per-source preference redirection from a supplied molecule at `BUDGET = 6` | Q1 | Panel A only |
-| **A2** per-source front quality: HV, HV-AUC, coverage, spread, envelope fidelity | Q2 | Panel A only |
-| **A3** closed-loop versus generate-and-rank at matched resources | Q3 | Panel A only, internal |
-| **A4** `R_θ` versus empirical-family under identical control | Q4 | Panel A only, internal |
-| **B1** global multiobjective competence on a separately frozen common benchmark | ordinary competence | Panel B |
-
-Panel A and Panel B never appear in the same comparison. See
-`SOURCE_CONDITIONING_AUDIT.md`; the rule is enforced by
-`multiobjective_qualification.assert_not_cross_panel`.
-
----
-
-## The matrix
-
-`native` = the authors' own algorithm runs the task unmodified.
-`adapter` = runs natively, with only our evaluation/accounting adapter.
-`inappropriate` = the method's native scientific object is not this task.
-
-| method | A1 | A2 | A3 | A4 | B1 | admissible as |
-|---|---|---|---|---|---|---|
-| COMPOSE fixed-preference control | native | native | native | native | see note | Panel A primary |
-| generate-and-rank P3/P4 | native | native | native | — | inappropriate | Panel A, internal control |
-| empirical-family reference ablation | native | native | — | native | inappropriate | Panel A, internal control |
-| preference-blind floor (`unguided`) | native | native | — | — | inappropriate | Panel A, floor |
-| **HN-GFN** | inappropriate | inappropriate | inappropriate | inappropriate | **adapter** | **Panel B** |
-| **InversionGNN** | inappropriate | inappropriate | inappropriate | inappropriate | **adapter, conditional** | **Panel B, conditional** |
-| OP-GFN | inappropriate | inappropriate | inappropriate | inappropriate | inappropriate | excluded |
-| MOG-DFM / AReUReDi / pCoMole / PepTune | inappropriate | inappropriate | inappropriate | inappropriate | inappropriate | related work |
-
-**Note on COMPOSE in B1.** COMPOSE's process is defined as editing from a
-supplied source. Whether a global de novo COMPOSE arm exists at all is an open
-question recorded in `DECISION_LOG.md`. If it does not, B1 is a competence
-comparison **among external methods** with COMPOSE absent, and the caption says
-so. Inventing a de novo COMPOSE to fill the cell would be building a new method.
-
-**Every `inappropriate` in the A columns has the same single cause**, and it is
-not a judgement about method quality: A1–A4 require starting from a molecule we
-supply. HN-GFN begins every rollout at `main.py:145`
-`m = BlockMoleculeDataExtended()`, an empty block molecule. OP-GFN begins at
-`graph_sampling.py:79` `self.env.new()`, an empty `Graph()`. InversionGNN can
-begin from a supplied molecule but cannot be held to an edit budget from it.
+| **DDSBM** | `FRAMEWORK_NEIGHBOR` | source-conditioned stochastic graph transformation — the nearest alternative graph-CTMC/bridge abstraction |
+| **GrIDDD** | `FRAMEWORK_NEIGHBOR` *(qualification in progress)* | discrete graph diffusion with node insertion **and deletion** — the nearest alternative variable-size graph dynamics |
+| **generate-and-rank P3/P4** | `MATCHED_CAUSAL_CONTROL` | same executor, same budget, purpose applied only after generation |
+| **empirical-family reference ablation** | `MATCHED_CAUSAL_CONTROL` | same control, `R_θ` replaced — isolates what the learned reference law buys |
+| **preference-blind floor (`unguided`)** | `MATCHED_CAUSAL_CONTROL` | same process, no objective consulted — the floor Q1 must clear |
+| **greedy vs verified control** | `MATCHED_CAUSAL_CONTROL` | same everything, lookahead removed |
+| **HN-GFN** | `TASK_COMPETENCE` | global multiobjective competence only; **never substitutes for source-conditioned P3/P5/P6** |
+| **InversionGNN** | `TASK_COMPETENCE` | same; conditional on unresolved code defects |
+| **GraphXForm / InVirtuoGen / MolEditRL** | `TASK_COMPETENCE` | strong native editors; not the novelty question |
+| **OP-GFN** | **excluded entirely** | not preference-conditioned; CC BY-NC-**ND** forbids the adapter |
+| **Edit Flows** | `CONCEPTUAL_LINEAGE_ONLY` | edit-based CTMC over variable-length **sequences** |
+| **Expanding Flow Maps** | `CONCEPTUAL_LINEAGE_ONLY` | variable-size **de novo** generation, not source-conditioned legal rewriting |
+| **MOG-DFM** | `CONCEPTUAL_LINEAGE_ONLY` | fixed-length token sequences; uniform init; local one-step guidance |
+| **PepTune** | `CONCEPTUAL_LINEAGE_ONLY` | peptide SMILES tokens; de novo; **Pareto dominance filtering, so not preference-conditioned** |
+| **pCoMole** | `UNVERIFIED` | primary document not read — see escalation |
+| **AReUReDi** | `CONCEPTUAL_LINEAGE_ONLY`, *conditionally reassessable* | the **only** same-lab candidate for direct numerical comparison, under four conditions below |
+| **CDD / PRODIGY / ConStruct** | hard-constraint lineage — **Lane 6 owns** | not audited here; no claim about them appears in this workstream |
 
 ---
 
-## Per-method qualification record
+## `FRAMEWORK_NEIGHBOR` — primary external evidence for novelty
 
-### HN-GFN — the required external row
+These answer the question closest to what COMPOSE actually contributes: *why an
+executable graph CTMC over canonical legal-rewrite fibers, rather than another
+graph-CTMC or bridge abstraction?*
+
+### DDSBM
+
+Promoted to the principal numerical external process comparator. **Not audited by
+this lane** — `baselines/ddsbm/README.md` and `environment.lock` exist on branch
+`codex/compose-baseline-qualification`, and the comparator map in
+`PARALLEL_WORKSTREAMS_AND_HANDOFF.md` already records its qualification
+questions. Recorded here for role completeness only.
+
+The standing constraint from the baseline policy still binds: *"the official
+graph-transformation implementation. Molecular input/objective adaptation may be
+unavoidable; the learned bridge/process stays their algorithm."* And from the
+philosophy doc: if it cannot natively say "this labeled core must remain present
+at every state", **we do not invent that mechanism for it.**
+
+### GrIDDD
+
+**Qualification in progress.** Verdict and evidence recorded in
+`FRAMEWORK_NEIGHBOR_GRIDDD.md` when the primary-source sweep completes. Main row
+only if its native task and conditioning semantics align **without substantial
+adaptation**.
+
+The bar it must clear is the same one that excluded HN-GFN from Panel A, applied
+to a different question. For a `FRAMEWORK_NEIGHBOR` the decisive axes are:
+
+- does it natively accept a **supplied source molecule** as the starting state?
+- are its **insert/delete** operations over chemical graph states, and is the node
+  count genuinely variable along a trajectory?
+- can objective conditioning attach **without retraining** the base process?
+- would our adapter only evaluate and count, or would it have to supply
+  mechanism?
+
+If the last answer is "supply mechanism", it drops to `CONCEPTUAL_LINEAGE_ONLY`
+by the same rule that bars a homemade Edit Flows port.
+
+---
+
+## `MATCHED_CAUSAL_CONTROL` — primary evidence for why each component matters
+
+Often more informative than adding a named model, because these hold executor,
+state, objective and budget fixed and change exactly one thing. They are
+Category 2 comparators under `docs/BASELINE_IMPLEMENTATION_POLICY.md` — *"we
+implement these ourselves, because they are defined relative to COMPOSE"* — and
+they are Panel A members. **Lane 4 owns the runs.**
+
+| control | the one thing it changes | what it isolates |
+|---|---|---|
+| generate-and-rank P3/P4 | *when* purpose is applied | closed-loop control vs endpoint ranking |
+| empirical-family ablation | the reference law `R_θ` | what learning the reference process buys |
+| `unguided` floor | whether the objective is consulted at all | that preference response is not chance |
+| greedy vs verified | lookahead depth | future-awareness, **already claimed elsewhere** |
+| hard mask vs post-hoc vs soft guidance | how constraints are imposed | exact support restriction vs ordinary guidance (**Lane 2**) |
+
+**A standing caution that the role rename does not repeal.** The greedy-vs-verified
+control carries a *structural sign guarantee* on per-preference scalarized value
+and **no guarantee** on set-level hypervolume. The two must stay separate, and
+Pareto does not carry a second "planning beats greedy" headline.
+
+---
+
+## `TASK_COMPETENCE` — credibility, not novelty
+
+> These establish that COMPOSE performs credibly on ordinary molecular design.
+> **They do not define the novelty claim, and they never substitute for a
+> source-conditioned control.**
+
+The Panel A/B separation this lane built already enforced exactly this. The
+amendment makes it project-wide; the separation is unchanged and
+`assert_not_cross_panel` still holds it.
+
+### HN-GFN — `TASK_COMPETENCE`, and Panel B carries no numeric row
 
 | field | value | source |
 |---|---|---|
-| paper | Zhu, Wu, Hu, Yan, Hsieh, Hou, Wu, *Sample-efficient Multi-objective Molecular Optimization with GFlowNets*, NeurIPS 2023 | arXiv:2302.04040 |
-| code | `github.com/violet-sto/HN-GFN` @ `90078b8ceeee3e907deeced9b096a6e395b71177` (2023-12-25) | clone, verified |
+| paper | Zhu et al., NeurIPS 2023 | arXiv:2302.04040 |
+| code | `github.com/violet-sto/HN-GFN` @ `90078b8ceeee3e907deeced9b096a6e395b71177` | clone, verified |
 | licence | MIT | `LICENSE` |
-| checkpoints | none for the GFlowNet; a pretrained *proxy* is shipped at `data/pretrained_proxy/` | tree listing |
-| assets shipped | `data/blocks_105.json` fragment vocabulary; `data/docked_mols.h5` (93 MB); `oracle/scorer/drd2/clf_py36.pkl`; `oracle/scorer/kinase_rf/{gsk3b,jnk3}.pkl` | tree listing |
+| checkpoints | none for the GFlowNet; a pretrained **proxy** at `data/pretrained_proxy/` | tree listing |
 | native scalarization | linear weighted sum, `--scalar` default `WeightedSum` | `main.py:54`, `main_mobo.py:62`, `main.py:226-227` |
-| preference conditioning | hypernetwork on the output heads; weights drawn per batch from a Dirichlet | `model_pred_hyper.py`, `main.py:239` |
-| native objectives | `drd2`, `jnk3`, `gsk3b`, `seh`, `qed`, `sa`, `mw`, `logp`, `penalized_logp` | `oracle/scorer/scorer.py:26-52` |
-| true-oracle budget | 200 initial + 8 rounds × 100 = **1,000** | `main_mobo.py:50-52` |
-| surrogate in the loop | yes — the GFlowNet's reward is the proxy; the true oracle is called once per outer round | `main_mobo.py:211`, `main_mobo.py:393` |
-| device default | `cuda` | `main_mobo.py:39` |
-| **published runtime** | **"our proposed HN-GFN costs 10 hours"** on **"1 Tesla V100 GPU"**; "with the hindsight-like training strategy, the running time will increase roughly by 33%" | paper Appendix B.4, quoted verbatim |
-| environment | upstream ships **no** requirements.txt, environment.yml, setup.py or pyproject.toml | tree listing |
-| known environment blocker | `proxy/regression.py` imports `AnalyticMultiOutputObjective` / `IdentityAnalyticMultiOutputObjective`, removed from modern BoTorch; the last working version is not pinned anywhere and must be bisected | `baselines/hn_gfn/environment.lock` on branch `codex/compose-baseline-qualification`, and upstream issue #1 |
+| starting state | **empty block molecule, every rollout** | `main.py:145` |
+| true-oracle budget | 200 + 8×100 = **1,000** | `main_mobo.py:50-52` |
+| surrogate in loop | yes — GFlowNet reward is the proxy | `main_mobo.py:211`, `main_mobo.py:393` |
+| published runtime | *"our proposed HN-GFN costs 10 hours"* on *"1 Tesla V100 GPU"*, +33% with hindsight training | paper Appendix B.4 |
+| environment blocker | BoTorch symbols removed upstream; no dependency pins ship at all | upstream issue #1 |
 
-**Cost to run one held-in smoke: `10–13 GPU-hours on a V100-class device`,
-from the authors' own figure.** There is no released GFlowNet checkpoint, so
-there is no inference-only path and no CPU path. A CPU run is not a slower
-version of this; it is not a run.
+**The GPU cost is now moot** — under the redirect we cite rather than rerun. And
+the alignment audit found **all six protocol dimensions fail**, so Panel B
+carries no numeric row at all. See `BENCHMARK_ALIGNMENT_AUDIT.md`.
 
-> **This collides with a standing lane instruction.** Lane 5 is CPU-only and
-> no-compute. An HN-GFN smoke therefore requires an explicit, separate GPU
-> authorization from the lead, on top of Stage 2 launch approval. It is the only
-> item in this lane that does.
-
-### InversionGNN — conditional
+### InversionGNN — `TASK_COMPETENCE`, conditional
 
 | field | value | source |
 |---|---|---|
-| paper | Niu, Gao, Xu, Liu, Bian, Rong, Huang, Li, *InversionGNN: A Dual Path Network for Multi-Property Molecular Optimization*, ICLR 2025 | arXiv:2503.01488 |
-| code | `github.com/ivanniu/InversionGNN` @ `cfdf1d9a981ca4ce5dd7293dc38373ddf9377718` (2025-08-29) | clone, verified |
-| licence | **none — no `LICENSE` file in the tree**; default all-rights-reserved | `find -iname '*licen*'` returns 0 |
+| paper | Niu et al., ICLR 2025 | arXiv:2503.01488 |
+| code | `github.com/ivanniu/InversionGNN` @ `cfdf1d9a981ca4ce5dd7293dc38373ddf9377718` | clone, verified |
+| licence | **none in tree** — default all-rights-reserved; **not vendorable** | `find -iname '*licen*'` → 0 |
 | checkpoints | **none**; `model_ckpt = ""` then `torch.load(model_ckpt)` | `molecular/denovo.py:75-76` |
-| device | `cpu` | `molecular/denovo.py:74` |
-| Pareto mechanism | non-dominating gradient direction plus an Exact-Pareto-Optimal LP | `molecular/epo_lp.py` |
-| objectives | GSK3β, JNK3, QED, SA (`logp` in code). **No DRD2.** | paper §5.2; repo grep |
-| oracle budget | paper allocates 10K calls for surrogate pretraining (2-objective) plus `N_weight × 1K` for optimization | paper §5.3 |
-| **blocking defect 1** | no checkpoint and no shipped training labels (`data/zinc_label.txt` absent) | tree listing |
-| **blocking defect 2** | call/definition arity mismatch: call at `molecular/denovo.py:107` passes six arguments to a four-parameter function defined at `molecular/inference_utils.py:153` | both lines read directly |
-| reported hardware | **UNVERIFIED** — the paper reports no GPU, no hours, no wall clock | paper grep |
+| blocking defect | six arguments passed to a four-parameter function | `denovo.py:107` vs `inference_utils.py:153` |
+| objectives | GSK3β, JNK3, QED, SA. **No DRD2.** | paper §5.2 |
 
-**Cost to run one held-in smoke: `UNVERIFIED`.** The paper's oracle unit maps
-cleanly onto ours — 1,000 oracle calls is roughly one weight vector, one run —
-but no timing is reported anywhere, and the repo cannot complete a run as
-shipped. A cost figure would be invention.
+### OP-GFN — excluded entirely
 
-### OP-GFN — excluded
-
-| field | value | source |
-|---|---|---|
-| paper | Chen, Mauch, *Order-Preserving GFlowNets*, ICLR 2024 | arXiv:2310.00386 |
-| code | `github.com/yhangchen/OP-GFN` @ `369e910891d3c9e20b8272d8291310fb9cc11c4d` (2024-03-11) | clone, verified |
-| licence | **CC BY-NC-ND 4.0** — NonCommercial **and NoDerivatives** | `LICENSE.md:1` |
-| preference conditioning | **absent in OP-GFN's own mode**: `preference_type` is `None` unless `--type pref`, and `--type pref` is the PC-GFN baseline | `multi/gflownet/tasks/seh_frag_moo.py:388,398,414` |
-| objectives | asserted closed to `{seh, qed, sa, mw}` | `seh_frag_moo.py:62` |
-| training | 20,000 steps at batch 64, `"device": "cuda"` | `seh_frag_moo.py:371-380` |
-
-**Excluded, on three independent grounds, any one sufficient.** It is not
-preference-conditioned, which is the property under study. Its objective set is
-closed and excludes any COMPOSE-compatible potency axis. And **NoDerivatives**
-means the thin adapter that would make it runnable here is the thing the licence
-does not permit us to distribute — an engineering-proof stop.
+Not preference-conditioned in its own mode (`seh_frag_moo.py:398,414`);
+objectives asserted closed to `{seh, qed, sa, mw}` (`:62`); and **CC BY-NC-ND**
+(`LICENSE.md:1`) — NoDerivatives forbids distributing the adapter that would make
+it runnable. No engineering resolves the third.
 
 ---
 
-## What Panel B needs before it can be frozen
+## `CONCEPTUAL_LINEAGE_ONLY`
 
-Panel B requires an objective pair both methods compute **natively**, under a
-budget both can spend, with a reference point frozen before any outcome.
+Scientifically close; a faithful common numerical task would require substantial
+adaptation. **Prominent in related work. Never a numerical baseline built by us.**
 
-The one verified asset that makes this cheap: **HN-GFN's DRD2 model file is the
-same file COMPOSE's frozen oracle was extracted from** — sha256
-`dbc473fca922c834dbaee6eaba832caaff26d4f891734078fb1af359a111100f`,
-35,417,609 bytes, matching `pickle_sha256` and `pickle_bytes` in
-`artifacts/oracles/drd2_svm_v1/drd2_oracle_manifest.json`, with the same
-fingerprint definition. So a DRD2 axis is shared without adaptation.
+Full ten-field schema records for MOG-DFM, AReUReDi, pCoMole and PepTune are in
+`SAME_LAB_LINEAGE.md`. Summary of why each sits here:
 
-The one gap: InversionGNN has no DRD2. A Panel B pair of `{DRD2, QED}` admits
-HN-GFN natively and excludes InversionGNN; a pair of `{GSK3β, JNK3}` admits both
-externals and excludes COMPOSE's frozen potency axis. **This is a real design
-tension and it must be resolved by a freeze made before outcomes exist**, not by
-whichever choice reads better afterwards. Options are laid out in `PROTOCOL.md`;
-the decision is main's.
+| method | the blocking axis |
+|---|---|
+| Edit Flows | published state space is variable-length **sequences**; a graph port would mean inventing the chemical-support machinery COMPOSE contributes |
+| Expanding Flow Maps | variable-size **de novo** generation, not source-conditioned legal rewriting |
+| MOG-DFM | fixed-length token sequences, uniform initialization, local one-step guidance |
+| PepTune | peptide SMILES tokens, de novo, and **Pareto dominance filtering rather than scalarization — so not preference-conditioned** |
+| AReUReDi | fixed-length token strings, substitution-only, no supplied source — but see the conditional reassessment below |
+| pCoMole | `UNVERIFIED`; the paper has not been read |
+
+### The same-lab policy, applied
+
+> **Scientific proximity determines comparison. Not shared authorship, in either
+> direction.**
+
+Avoiding the closest prior work *because* it shares a lab is riskier than a
+careful comparison — a reviewer may reasonably suspect easier baselines were
+chosen. This lane's placements were made on state space, source conditioning and
+guidance horizon, and none of them turned on authorship.
+
+**AReUReDi is the only same-lab method to seriously assess for direct numerical
+comparison.** Its status may be revised from `CONCEPTUAL_LINEAGE_ONLY` **only if
+all four hold**:
+
+1. official code runs ordinary small-molecule SMILES;
+2. objectives attach through a **thin wrapper**;
+3. **no redesign** of its proposal, backbone or scalarization is needed;
+4. **the original authors validate the configuration.**
+
+On current evidence condition 1 already fails: its SMILES instantiation is
+*peptide* SMILES over a 586-token vocabulary, handled as a **fixed-length token
+string**, and single-token substitution at fixed length cannot express bond or
+atom graph edits. Recorded as a conditional so the assessment is auditable rather
+than merely asserted — and it is an assessment this lane cannot complete alone,
+because condition 4 requires contacting authors.
+
+**Framing, binding and non-negotiable.** Cumulative, never adversarial. Prior
+work developed powerful guidance and control for discrete diffusion, flow and
+edit processes; COMPOSE contributes a new executable molecular graph substrate,
+and matched experiments determine what that substrate enables beyond prior
+guidance formulations. **Never "COMPOSE defeats prior lab work."**
 
 ---
 
-## Where the methods sit — three rings
+## What the roles changed, and what they did not
 
-Now governed by `docs/BASELINE_PHILOSOPHY_AND_MAIN_LANE_DECISIONS.md`, committed
-to the base branch at `7039cd1` and explicitly binding on this lane. The purpose
-of the rings is to **answer scientific objections, not to beat task
-specialists**; the question a methods paper asks is *"what is the closest
-alternative way to BUILD or CONTROL the generative process, and what does
-COMPOSE's representation buy over it?"*
+**Changed.** HN-GFN and InversionGNN were previously the two named external rows
+this lane was organized around, on the reasoning that they are the purpose-built
+preference-conditioned molecular Pareto generators a reviewer would ask about.
+Under framework-first selection they are `TASK_COMPETENCE`: they optimize the
+same properties, which is not the same as instantiating the same scientific
+question. The nearest framework comparison is DDSBM and possibly GrIDDD.
 
-Placement only; this is not an audit of Ring 1 or Ring 2, and nothing below is
-asserted beyond what has been verified elsewhere in this directory.
+**Not changed.** Every verified fact survives the reorganization — the licences,
+the commit SHAs, the code defects, the empty-start finding, the oracle
+mismatches, the budget arithmetic. A role is an assignment of evidentiary
+purpose; it is not a re-reading of what the code does.
 
-### Ring 1 — same methodological realm
-
-| method | placement | status here |
-|---|---|---|
-| DDSBM | graph CTMC / source-conditioned transformation | not audited by this lane; `baselines/ddsbm/` exists on `codex/compose-baseline-qualification` |
-| Edit Flows | edit-based CTMC lineage | **related work only** — its published state space is variable-length *sequences*, and a homemade molecular-graph port would mean solving the support/executor problem that is part of COMPOSE's own contribution |
-| GraphXForm | source-conditioned graph editing | not audited by this lane; qualified by the predecessor lane |
-| InVirtuoGen | named in the redirect | **not audited, no primary source read by this lane — `UNVERIFIED`** |
-
-### Ring 2 — hard-constraint control
-
-CDD, PRODIGY, ConStruct. **Lane 6 owns this audit. Not duplicated here**, and no
-claim about these methods appears anywhere in this workstream.
-
-### Ring 3 — COMPOSE causal controls
-
-Possibly more important than either external ring: hard mask versus post-hoc;
-frozen `R_θ` versus empirical family; closed-loop versus generate-and-rank;
-continuation versus restart; endpoint versus trajectory constraint.
-
-These are Category 2 comparators under `docs/BASELINE_IMPLEMENTATION_POLICY.md` —
-scientific controls we implement ourselves because they exist only as
-counterfactuals to COMPOSE. They are Panel A members. Lane 4 owns the runs.
-
-**The audit's practical consequence for emphasis.** With Panel B unable to carry
-a head-to-head row (see `BENCHMARK_ALIGNMENT_AUDIT.md`), the multiobjective
-argument rests on Ring 3 and Panel A. That is where the scientific content was
-anyway; the audit removes the option of leaning on an external row instead.
+**Worth stating plainly:** the alignment audit found that Panel B carries no
+numeric row, and the role amendment independently demotes Panel B's occupants
+from primary evidence. Those two conclusions arrived from different directions —
+one from protocol forensics, one from framework-first selection — and agree. The
+multiobjective argument rests on `MATCHED_CAUSAL_CONTROL` arms and, if it
+qualifies, one `FRAMEWORK_NEIGHBOR`.
 
 ---
 
@@ -200,12 +239,9 @@ anyway; the audit removes the option of leaning on an external row instead.
 
 | item | cost | basis |
 |---|---|---|
-| Stage 0 and Stage 1 (this deliverable) | **0 compute** | local reads, four clones, one test file |
-| HN-GFN, one held-in smoke | **10–13 GPU-hours, V100-class** | authors' Appendix B.4 |
-| HN-GFN environment resolution | ~1 day of engineering, BoTorch version bisection, no compute | upstream issue #1 |
-| InversionGNN, one held-in smoke | **UNVERIFIED**; CPU-capable by `device='cpu'`, blocked by two code defects | repo |
-| InversionGNN surrogate pretraining | 10K oracle calls (2-objective), hardware `UNVERIFIED` | paper §5.3 |
+| Stage 0, Stage 1, alignment audit, this restructure | **0 compute** | local reads, five clones, one test file |
+| HN-GFN, one held-in smoke | 10–13 GPU-hours, V100-class | authors' Appendix B.4 — **moot; we cite, not rerun** |
+| InversionGNN, one held-in smoke | `UNVERIFIED`; CPU-capable, blocked by two defects | repo |
 | OP-GFN | not applicable — excluded | licence |
-
-The real cost of this lane is not compute. It is environment archaeology, and it
-is concentrated entirely in HN-GFN.
+| COMPOSE alone on a GSK3β/JNK3 benchmark | ~12 CPU core-hours, **but blocked** on a RandomForest oracle extraction (1–2 days, no GPU) that should not be built for a declined comparison | `BENCHMARK_ALIGNMENT_AUDIT.md` |
+| GrIDDD qualification | `PENDING` | — |

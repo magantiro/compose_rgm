@@ -278,3 +278,66 @@ context, not evidence for the claim in §1.
 4. **Three integrity guards deep is a signal to stop, not to patch the fourth.**
 5. If Panel B cannot be frozen without giving one method a task shaped to suit
    it, run no Panel B and say why. `N/A` is preferable to a distorted adaptation.
+
+---
+
+## 10. The five-question block, per recommended experiment
+
+Required by `docs/COMPARATOR_ROLES_CANONICAL.md`. Every experiment this lane
+still recommends answers all five, and an experiment that cannot name a
+**falsifier** is not an experiment.
+
+**This lane recommends two experiments and declines one.** None of the three is
+designed here — E1 exists and is Lane 4's; E2 is conditional on a qualification
+that is not finished; E3 is declined outright.
+
+### E1 — source-conditioned fixed-preference Pareto control (Panel A)
+
+**Status: exists, frozen, Lane 4 owns the runs. This lane owns its framing.**
+
+| question | answer |
+|---|---|
+| **methodological axis** | can one frozen executable process be re-purposed across target-free preferences by inference-time control alone, with **zero parameter updates**, from an exact supplied source state? |
+| **framework counterfactual** | `PENDING` — DDSBM, and GrIDDD if it qualifies. **Currently unfilled**, and that is the single largest gap in the multiobjective package. |
+| **matched causal control** | generate-and-rank P3/P4 (when purpose is applied); empirical-family ablation (what `R_θ` buys); `unguided` floor (that response is not chance); greedy vs verified (lookahead) |
+| **competence comparator** | HN-GFN and InversionGNN as **contextual, non-head-to-head** published values only. **No numeric row** — all six alignment dimensions failed. |
+| **falsifier** | preference response indistinguishable from the preference-blind floor; or set-level HV at `k = K` failing to separate arms; or per-source fronts collapsing to one objective region. **Partly fired already:** the smoke returned monotone ordering on only 1 source in 6, guided ρ = +0.636 against a floor of +0.432 — "five cleanly ordered Pareto regions" is barred as unsupported. |
+
+The falsifier has already bitten once and the claim was narrowed rather than the
+test loosened. That is the record this block exists to preserve.
+
+### E2 — framework-neighbor process comparison
+
+**Status: conditional. Not designed, not scoped, not authorized.**
+
+| question | answer |
+|---|---|
+| **methodological axis** | why an executable graph CTMC over **canonical legal-rewrite fibers**, rather than another graph-CTMC, bridge, or insert/delete diffusion abstraction? |
+| **framework counterfactual** | this *is* the framework counterfactual — DDSBM, and GrIDDD if it qualifies |
+| **matched causal control** | the same Panel A controls, since the executor is held fixed on the COMPOSE side |
+| **competence comparator** | not applicable; this experiment is not about task performance |
+| **falsifier** | an alternative graph process reaching comparable frontier quality **from the same supplied source at the same edit budget** would show the exact-fiber substrate is not what carries the result. That is a real possible outcome and it is reported if it occurs. |
+
+**Precondition.** It runs only if a framework neighbor qualifies **without
+substantial adaptation**. If our adapter would have to supply mechanism —
+source conditioning, an edit budget, chemical support — the method drops to
+`CONCEPTUAL_LINEAGE_ONLY` and this experiment does not exist. That is the same
+rule that bars a homemade Edit Flows port, and it applies to GrIDDD and DDSBM
+equally.
+
+### E3 — Panel B head-to-head global multiobjective row
+
+**Status: DECLINED. Recorded so the decline is auditable, not silent.**
+
+| question | answer |
+|---|---|
+| **methodological axis** | none — it tests competence, not novelty |
+| **framework counterfactual** | none; HN-GFN and InversionGNN are `TASK_COMPETENCE` |
+| **matched causal control** | none available; neither method is source-conditioned |
+| **competence comparator** | would have been HN-GFN and InversionGNN |
+| **falsifier** | **already fired, before any COMPOSE number existed.** All six protocol dimensions fail, and the two papers disagree by 70× on HN-GFN's own oracle budget. |
+
+Two independent lines of reasoning reached this decline — protocol forensics
+(the alignment audit) and framework-first selection (the role amendment) — from
+different directions. Recording both matters: agreement between independent
+arguments is evidence; a single argument reused twice is not.
