@@ -218,9 +218,32 @@ core-hours**, no dataset acquisition.
 
 | method | role | tier |
 |---|---|---|
-| **DDSBM** | `FRAMEWORK_NEIGHBOR` | **`PENDING` audit** |
+| **DDSBM** | `FRAMEWORK_NEIGHBOR` | **1 on its own ZINC logP-shift task; 4 on anything DRD2** |
 | **one practical editor** (GraphXForm or InVirtuoGen) | `TASK_COMPETENCE` | **`PENDING` audit** |
 | GrIDDD, JT-VAE, CG-VAE, GCPN | contextual competence numbers | **2** |
+
+### DDSBM — the first tier-1 path this workstream has found
+
+**Source-conditioned: YES**, verified in code — `predict_step` uses `target="0"`,
+*"using original data to generate new data"*, then `sample_forward_bridge_batch(X_0,
+E_0)`. (Trap: `on_test_epoch_end` discards the source for prior noise, but only
+for the unconditional datasets. Reading one function would have called it de novo.)
+
+**Tier 1 on its own task.** The ZINC logP 2→4 paired CSV is shipped in its repo,
+so the 23,936 / 5,984 split is exactly reproducible and its metrics are
+model-agnostic. **COMPOSE runs alone; DDSBM's Table 1 is cited as reported** on
+validity, uniqueness, novelty, NSPDK, logP $W_1$, QED MAD, SA MAD, FCD.
+**NLL excluded** — model-relative, defined against DDSBM's own reference process,
+and it is the column carrying its headline win.
+
+**This fills the framework-counterfactual slot** that has been empty since the
+role amendment — on a distribution-shift task, not on DRD2.
+
+**Tier 4 for anything DRD2:** `DRD2` occurs zero times in the paper; no budget, no
+success criterion, no similarity gate. Requires a new paired dataset and full
+retraining. **No checkpoints** (README TODO unchecked; Zenodo returns 0 records —
+a search summary claiming otherwise is false), **no licence** (GitHub API `null`,
+`/license` 404), 4× RTX A4000 × 3 seeds, wall-clock `UNVERIFIED`.
 
 ### A conflict surfaced, not resolved
 
