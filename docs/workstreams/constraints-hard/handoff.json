@@ -6,7 +6,7 @@
   "claim_id": "experiment_a_hard_structural_invariant",
   "branch": "codex/compose-constraints-hard",
   "base_commit": "f6146d7",
-  "head_commit": "0b1f761bab8b9b05569ffe09c97f6e1b6cff1fda",
+  "head_commit": "3c94d085684376a727ecedfdf47a0fde89bdc460",
   "head_commit_note": "the commit containing every deliverable; handoff.json itself is committed in the immediately following commit, since it records this hash",
   "working_tree_clean_excluding_this_manifest": true,
   "status": "DESIGN_ONLY",
@@ -85,6 +85,24 @@
     ],
     "why": "an externally fixed threshold cannot be selected on our outcome, which is the defect that killed the Bemis-Murcko branch",
     "note": "the task travels; the numbers do not - CDD stays contextual, non-head-to-head"
+  },
+  "lane2_open_decisions": {
+    "owner": "Lane 2",
+    "artifact": "docs/workstreams/constraints-hard/LANE2_FIVE_QUESTIONS.md",
+    "handoff_self_sufficient": false,
+    "O1_soft_guidance_arm_undefined": {
+      "severity": "LOAD_BEARING - the experiment cannot be built without it",
+      "needs": "functional form of the reweighting, registered as LAW_ONLY",
+      "binding_constraint": "ONE pre-registered lambda from a stated requirement; no sweep-and-pick. A lambda chosen to make soft guidance LOSE is as invalid as one chosen to make it win"
+    },
+    "O2_predicate_choice": {
+      "recommended": "CDD SA(y) <= tau, exogenous",
+      "alternative": "Lane 2's own frozen corridor, endogenous",
+      "reason": "an externally fixed threshold structurally cannot repeat the outcome-selection defect that killed Bemis-Murcko",
+      "easy_to_miss": "pin our own RDKit version and state it; CDD pins none and SA is not version-portable"
+    },
+    "O3_gate_thresholds": "reuse Lane 2's frozen A2 criteria verbatim (V3>=20, V4a>=0.10, V4b<=0.05, V5a>1/3, V5b<=0.50); do not widen if a predicate fails",
+    "O4_panel_horizon_budget": "entirely Lane 2's; Lane 6's ~170 s per arm-source anchor was measured for a different predicate and should be re-derived"
   },
   "open_questions_for_lead": [
     "confirm FRAMEWORK_NEIGHBOR vs CONCEPTUAL_LINEAGE_ONLY for CDD/PRODIGY/ConStruct under a strict reading of the four role definitions",
@@ -253,7 +271,7 @@
     "docs/workstreams/constraints-hard/probes/identity_probe.py": "b5d8712119d7c1f66d3179f153d6503587a1e4dfa9fb10c08cd4276eb93ffd6a",
     "docs/workstreams/constraints-hard/probes/gate0_local_authentication_repro.py": "7021100b2e4b55731cc8a0483a6c4567067b6448df38176b7753f287f4064edf",
     "scripts/constraints_hard_scaffold_census.py": "bd90c87b1f9260eeb5a896db5df10c8061de067b2e31e7ce08f536303c7a7898",
-    "scripts/constraints_hard_make_handoff.py": "e347cb97d966944d6131cda1aee1dc66ae0ec980a9ea4853c03a9f5e7e0d2695",
+    "scripts/constraints_hard_make_handoff.py": "6432d5e66a3d60c50c5a3ffd311f6a815923d6b78aea374b4b1aad348f31be31",
     "src/compose_v4/experiments/constraints_hard_mask.py": "7bdceb48d92c1a74691ade73d7ea0f15d3be50df978e104d845a704e90607a95",
     "tests/test_hard_scaffold_constraint.py": "69cd7a2c7c3cac507259c1e5f5f7f46ce567f99256e6b19bd9ea5e8bbd208356",
     "diagnostics/constraints_hard_scaffold_census.json": "b9b1412351bd20b470f77737e79e882bde8523d60cf4fcae14ecb32f5284c7e5"
