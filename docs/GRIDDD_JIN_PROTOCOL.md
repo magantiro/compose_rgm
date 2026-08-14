@@ -13,9 +13,106 @@ cited as reported.** Authorized by `AMENDMENT_EDITFLOWS_GRIDDD_HEADLINE.md`.
 `R_θ` is frozen. **Nothing is retrained between the two tasks** — only the
 inference-time objective changes. That modularity *is* the claim.
 
-## Why two tasks and not one
+## THE INFERENCE POLICY — frozen before any QED outcome exists
 
-QED alone would demonstrate competence. **QED + LogP demonstrates modularity**,
+COMPOSE's banked controller is greedy and deterministic; GrIDDD samples 20
+candidates. The gap is closed by sampling from a **stochastic recontrol of the
+frozen process**:
+
+```
+pi(y|x) = R_theta(y|x) * QED(y) / sum_z R_theta(z|x) * QED(z)      z in F(x)
+```
+
+applied in **receding fashion at each of the six committed edits**.
+
+**Name it honestly: `stochastic one-step COMPOSE control` — a receding one-step
+QED tilt of the frozen process.** It is an *exact* one-step terminal tilt
+(`h_0(y) = QED(y)`, `P^g(x,y) ∝ R_θ(x,y) g(y)`), **not** the exact `H=6` Doob
+controller, and must never be described as such.
+
+Properties that made this the choice:
+
+- **full legal successor fiber** — no support truncation
+- frozen learned `R_θ` remains the reference law
+- **parameter-free** — no temperature, no `β`, no beam width, no shortlist size
+- stochastic, so 20 independent outputs are native
+- cheap enough to run all 800 authoritative sources
+
+### Why NOT the rollout `ĥ`, recorded with the measurement
+
+The finite-horizon rollout `ĥ_{b-1}(y) = QED(greedy landing from y)` over the
+full fiber was specified first and **measured infeasible**, at 12.8 s per kernel
+call (measured, P0c source 000: 60 expansions in 766 s) and a median fiber of
+606:
+
+| `ĥ` variant | kernel calls | cost | wall @ 80 |
+|---|---:|---:|---:|
+| rollout, full fiber | 145,440,000 | $24,241 | **0.7 years** |
+| rollout, 4/2/2 shortlist | 2,016,000 | $336 | 89 h |
+| **one-step tilt (adopted)** | **96,000** | **$16** | ~4 h |
+
+**~1,500× more kernel work** than the adopted policy. It was not casually
+abandoned.
+
+The 8-candidate shortlist variant was **rejected on scientific grounds, not
+cost**: the 4/2/2 composition is an algorithmic hyperparameter designed for
+*argmax search*, never as a probability-support approximation, and candidate
+inclusion is already influenced by the quantity being optimized. Sampling over
+it would let a reviewer ask whether the result came from COMPOSE's process or
+from the shortlist construction — ambiguity we would have paid $336 to buy.
+
+### This experiment does NOT carry the finite-horizon claim
+
+One experiment, one question. GrIDDD asks only whether the frozen process,
+recontrolled at inference, solves a standard editing task competitively.
+Finite-horizon reachability is proven by exact-target/verified control; closed-
+loop vs generate-and-rank by P3/P4. **GrIDDD is not asked to prove external
+competence AND stochastic sampling AND planning simultaneously.**
+
+### Frozen sampling details
+
+1. **20 independent rollouts**, each reset to the original source, same frozen
+   horizon. No continuation from another candidate.
+2. **Terminal endpoints only.** No intermediate molecule enters the candidate
+   set.
+3. **Frozen seed manifest**, committed before outcomes:
+   `seed = uint64(sha256(protocol_version + task + canonical_source + replicate)[:8])`.
+   **Never Python's process-salted `hash()`.**
+4. **Replicates 0–19, duplicates consume attempts.** No resampling until 20
+   unique molecules appear.
+5. **One panel. No seed shopping.** Uncertainty by bootstrapping the 800
+   source-level outcomes, never by raising the output budget.
+6. **Similarity is evaluation-only** — `≥0.4` is not part of `π`.
+7. **No success-triggered early stopping.**
+8. **Failures remain failures** — dead ends, invalid, duplicate, and
+   below-threshold candidates stay in the denominator.
+9. **Zero-denominator fallback, preregistered:** if `Σ R_θ·QED == 0`, fall back
+   to `R_θ` itself. Not a constant invented after it happens.
+
+### The size-fixed ablation
+
+**Identical policy and identical seeds.** The only intervention: successors
+changing heavy-atom count are removed **before** normalization.
+
+## ⬇️ AMENDED — penalized LogP is PARKED, not failed
+
+The two-task plan is **withdrawn**. QED is a bounded non-negative terminal
+potential, which is exactly what makes the parameter-free law above possible.
+Penalized logP is unbounded real and would need `g_β(y) = exp(β·f(y))` — **a new
+controller hyperparameter introduced solely to obtain a second table row.**
+
+> The published benchmark contains additional objectives; the primary
+> comparison uses QED because it admits a parameter-free stochastic terminal
+> potential under the frozen COMPOSE controller. Extending to unbounded
+> utilities requires a separately specified utility-to-potential map and is
+> outside this benchmark.
+
+If a **general** utility-to-positive-potential calibration is ever developed for
+the method, logP returns naturally. It must not be invented to fill Table 3.
+
+### (superseded) the original two-task rationale
+
+QED alone would demonstrate competence. QED + LogP would have demonstrated modularity,
 at almost no extra conceptual cost: same benchmark, same data, same evaluation
 machinery, same 800×20 structure. The two properties are chemically different
 and both are **cheap deterministic RDKit calculations**.
