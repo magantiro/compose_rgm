@@ -122,11 +122,31 @@ def harness_only_requests(arm: str, arm_payload: Mapping[str, Any],
                           n_preferences: int) -> int:
     """Completed trajectories that were scored at a `Trajectory` return site.
 
-    For a generate-and-rank arm this is the POOL size -- every pooled run came
-    from `unguided_run` and was scored on its way out. For the preference-branched
-    arms it is one per preference.
+    IMPLEMENTATION-AWARE, and it has to be. The correction subtracts the
+    post-hoc endpoint scoring, which only exists as a SEPARATE request in the
+    original arm:
+
+        original `generate_then_rank`   raw = 2n   (unguided_run scored the
+                                                    endpoint, then z_many
+                                                    re-requested it for ranking)
+        metered `generate_then_rank_metered`
+                                        raw = n    (reads endpoint_z; the single
+                                                    request serves BOTH purposes)
+
+    Both must yield `algorithmic = n` -- generate-and-rank genuinely needs each
+    candidate scored once to rank it. Subtracting `n` from the metered arm would
+    report its algorithmic oracle demand as ZERO, which is false: what the fix
+    removed was the double-billing, not the demand.
+
+    Detected from the payload rather than inferred from arithmetic, because
+    inferring "is raw == 2n?" would silently mis-handle any source where the
+    pool happens to satisfy it by coincidence.
     """
     if arm.startswith("gen_rank"):
+        if arm_payload.get("shares_scoring_with_ranking"):
+            # One physical request per candidate, algorithmically necessary for
+            # ranking; the benchmark evaluation reuses it at no extra cost.
+            return 0
         n = arm_payload.get("n_trajectories")
         if n is None:
             raise ValueError(f"{arm} payload has no n_trajectories; the "
@@ -159,6 +179,11 @@ def corrected_cost(arm: str, arm_payload: Mapping[str, Any],
                        "trajectory; see pareto_oracle_semantics for the call-graph "
                        "proof that those requests affect no decision"),
     }
+
+
+#: Shards written by `pareto_gen_rank_topup_app`, whose matcher reads
+#: `endpoint_z` rather than re-metering it.
+METERED_TOPUP_SCHEMA = "compose.pareto.gen_rank_topup"
 
 
 def corrected_shard(shard: Mapping[str, Any]) -> dict[str, dict[str, Any]]:

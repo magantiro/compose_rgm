@@ -179,3 +179,31 @@ def test_corrected_shard_covers_every_arm_and_does_not_mutate():
     assert out["unguided"]["algorithmic_oracle_requests"] == 0
     assert out["gen_rank@verified"]["algorithmic_oracle_requests"] == 61
     assert {a: dict(p["cost"]) for a, p in shard["arms"].items()} == snapshot
+
+
+# --- the metered top-up arm scores ONCE, so the correction must not double-count
+
+def test_metered_topup_arm_keeps_its_ranking_demand():
+    """Regression for a real miscount caught by source 000's ledger.
+
+    The metered matcher reads `endpoint_z` instead of re-requesting it, so
+    raw == n rather than 2n. Subtracting n as harness overhead would report
+    generate-and-rank's algorithmic demand as ZERO. The double-billing went
+    away; the demand -- one ranking read per candidate -- did not.
+    """
+    n = 1025
+    old = {"cost": {"raw_oracle_calls": 2 * n, "native_oracle_calls": 224,
+                    "kernel_calls": 369}, "n_trajectories": n}
+    new = {"cost": {"raw_oracle_calls": n, "native_oracle_calls": 224,
+                    "kernel_calls": 369}, "n_trajectories": n,
+           "shares_scoring_with_ranking": True}
+    a_old = corrected_cost("gen_rank@verified", old, N_PREF)
+    a_new = corrected_cost("gen_rank@verified", new, N_PREF)
+    assert a_old["algorithmic_oracle_requests"] == n
+    assert a_new["algorithmic_oracle_requests"] == n, "the metered arm lost its demand"
+    assert a_old["raw_instrument_oracle_requests"] == 2 * n
+    assert a_new["raw_instrument_oracle_requests"] == n
+    # The benchmark evaluation is free in the metered arm because it shares the
+    # ranking's request, and is a separate request in the original.
+    assert a_old["benchmark_eval_requests"] == n
+    assert a_new["benchmark_eval_requests"] == 0

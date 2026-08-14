@@ -345,6 +345,10 @@ def topup_source(task: dict[str, Any]) -> dict[str, Any]:
         "target_provenance": f"READ from {SMOKE_DIR}/{index:03d}.json "
                              f"arms.{compose_arm}.cost.kernel_calls",
         "compose_was_not_rerun": True,
+        # Tells pareto_oracle_semantics that ONE request per candidate serves
+        # both the ranking and the benchmark evaluation here, so the post-hoc
+        # scoring must NOT be subtracted again. See that module's docstring.
+        "shares_scoring_with_ranking": True,
         "blinded_probe": probe,
         "status": "SMOKE_HELD_IN", "held_out_opened": False,
         "seconds": round(time.perf_counter() - started, 1),
