@@ -168,48 +168,63 @@
       "support_relation": "identical"
     },
     {
-      "adapter_status": "not_yet_qualified",
+      "adapter_status": "designed_not_built",
       "claim_id": "C4_DYNAMIC_CONTROL",
       "comparator_type": "external",
       "id": "MARS",
-      "note": "has nothing to say about whether R_theta learned the declared successor law -- it does not share that law, support or training target. Relevant only for optimization. DO NOT implement during the C1 work.",
+      "note": "Qualified 2026-08-12 by workstream D. This row carries the VERDICT only; every capability fact, its primary source, and the fairness contract live in docs/workstreams/baseline-qualification/comparator_registry_v3.json. It has nothing to say about whether R_theta learned the declared successor law -- it does not share that law, support or training target.",
+      "qualification_record": "docs/workstreams/baseline-qualification/comparator_registry_v3.json",
       "required_status": "must_run",
       "support_relation": "external"
     },
     {
-      "adapter_status": "not_yet_qualified",
+      "adapter_status": "blocked",
       "claim_id": "C4_DYNAMIC_CONTROL",
       "comparator_type": "external",
       "id": "DDSBM",
-      "note": "has nothing to say about whether R_theta learned the declared successor law -- it does not share that law, support or training target. Relevant only for optimization. DO NOT implement during the C1 work.",
-      "required_status": "must_run",
+      "note": "Qualified 2026-08-12 by workstream D. This row carries the VERDICT only; every capability fact, its primary source, and the fairness contract live in docs/workstreams/baseline-qualification/comparator_registry_v3.json. It has nothing to say about whether R_theta learned the declared successor law -- it does not share that law, support or training target.",
+      "qualification_record": "docs/workstreams/baseline-qualification/comparator_registry_v3.json",
+      "required_status": "context_only",
       "support_relation": "external"
     },
     {
-      "adapter_status": "not_yet_qualified",
+      "adapter_status": "designed_not_built",
       "claim_id": "C4_DYNAMIC_CONTROL",
       "comparator_type": "external",
       "id": "GraphXForm",
-      "note": "has nothing to say about whether R_theta learned the declared successor law -- it does not share that law, support or training target. Relevant only for optimization. DO NOT implement during the C1 work.",
+      "note": "Qualified 2026-08-12 by workstream D. This row carries the VERDICT only; every capability fact, its primary source, and the fairness contract live in docs/workstreams/baseline-qualification/comparator_registry_v3.json. It has nothing to say about whether R_theta learned the declared successor law -- it does not share that law, support or training target.",
+      "qualification_record": "docs/workstreams/baseline-qualification/comparator_registry_v3.json",
       "required_status": "must_run",
       "support_relation": "external"
     },
     {
-      "adapter_status": "not_yet_qualified",
+      "adapter_status": "designed_not_built",
       "claim_id": "C4_DYNAMIC_CONTROL",
       "comparator_type": "external",
       "id": "GraphGA",
-      "note": "has nothing to say about whether R_theta learned the declared successor law -- it does not share that law, support or training target. Relevant only for optimization. DO NOT implement during the C1 work.",
+      "note": "Qualified 2026-08-12 by workstream D. This row carries the VERDICT only; every capability fact, its primary source, and the fairness contract live in docs/workstreams/baseline-qualification/comparator_registry_v3.json. It has nothing to say about whether R_theta learned the declared successor law -- it does not share that law, support or training target.",
+      "qualification_record": "docs/workstreams/baseline-qualification/comparator_registry_v3.json",
       "required_status": "must_run",
       "support_relation": "external"
     },
     {
-      "adapter_status": "not_yet_qualified",
+      "adapter_status": "designed_not_built",
       "claim_id": "C4_DYNAMIC_CONTROL",
       "comparator_type": "external",
       "id": "REINVENT",
-      "note": "has nothing to say about whether R_theta learned the declared successor law -- it does not share that law, support or training target. Relevant only for optimization. DO NOT implement during the C1 work.",
+      "note": "Qualified 2026-08-12 by workstream D. This row carries the VERDICT only; every capability fact, its primary source, and the fairness contract live in docs/workstreams/baseline-qualification/comparator_registry_v3.json. It has nothing to say about whether R_theta learned the declared successor law -- it does not share that law, support or training target.",
+      "qualification_record": "docs/workstreams/baseline-qualification/comparator_registry_v3.json",
       "required_status": "must_run",
+      "support_relation": "external"
+    },
+    {
+      "adapter_status": "blocked_cpu",
+      "claim_id": "C4_DYNAMIC_CONTROL",
+      "comparator_type": "external",
+      "id": "HN_GFN",
+      "note": "Qualified 2026-08-12 by workstream D. This row carries the VERDICT only; every capability fact, its primary source, and the fairness contract live in docs/workstreams/baseline-qualification/comparator_registry_v3.json. It has nothing to say about whether R_theta learned the declared successor law -- it does not share that law, support or training target.",
+      "qualification_record": "docs/workstreams/baseline-qualification/comparator_registry_v3.json",
+      "required_status": "conditional",
       "support_relation": "external"
     }
   ],
@@ -231,6 +246,7 @@
       "failure_handling"
     ]
   },
+  "external_qualification_registry": "docs/workstreams/baseline-qualification/comparator_registry_v3.json",
   "frozen_definitions": {
     "state_independent_empirical_family_prior": {
       "formula": "P_emp(y|x) proportional to sum over k with y in N_k(x) of q(k)/|N_k(x)|, normalized over families legal at x",

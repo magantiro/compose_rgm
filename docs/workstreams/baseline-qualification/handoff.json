@@ -1,0 +1,210 @@
+{
+  "adapter_status": {
+    "DDSBM": "blocked",
+    "GraphGA": "built_and_smoked",
+    "GraphXForm": "environment_verified_not_built",
+    "HN_GFN": "blocked_cpu",
+    "MARS": "built_and_smoked",
+    "REINVENT": "environment_verified_not_built"
+  },
+  "artifact_status": "DESIGN_ONLY design artifacts plus two SMOKE_HELD_IN runs",
+  "base_commit": "04f1c46",
+  "baseline_method_smoke_executed": {
+    "DDSBM": "no - BLOCKED, no LICENSE file exists",
+    "GraphGA": "YES - real upstream GB-GA, vendored byte-identical, held-in smoke PASS",
+    "GraphXForm": "PARTIAL - real upstream runs and is hash-verified unmodified, applicability domain frozen and applied, all three counters wired through the pinned evaluator; smoke verdict FAIL on 1 of 3 sources due to a defect in OUR adapter (bypasses upstream action masking), recorded not worked around",
+    "HN_GFN": "no - BLOCKED, zero dependency pins and botorch API drift",
+    "MARS": "YES - real upstream sampler, python 3.11 CPU venv, held-in smoke PASS",
+    "REINVENT": "no - environment verified FEASIBLE on python 3.14 CPU"
+  },
+  "blocking_decisions_for_the_main_workstream": [
+    "Decide how HN-GFN's surrogate-in-the-loop is reported; its 1000-call budget is not spent on the true oracle.",
+    "Decide the intended reading of the matrix's pathwise column (affordance vs released code). It settles MARS, MIMOSA, Graph GA and Kappa-style rewriting together, and a change there would flatter COMPOSE, so this lane did not make it."
+  ],
+  "branch": "codex/compose-baseline-qualification",
+  "claim_id": "C4",
+  "commands": {
+    "regenerate_rendering": "PYTHONPATH=src python scripts/render_comparator_registry.py",
+    "smoke": null,
+    "tests": "PYTHONPATH=src pytest tests/test_baseline_qualification.py tests/test_comparator_registry.py -q",
+    "validate_and_check_rendering": "PYTHONPATH=src python scripts/render_comparator_registry.py --check",
+    "verify_hashes": "shasum -a 256 <each path in durable_artifacts> and compare"
+  },
+  "compose_claims_a_baseline_does_natively": [
+    {
+      "method": "REINVENT",
+      "one_line": "Changes the objective within a single run and carries the adapted agent across the change.",
+      "subcapability": "C4c_retargeting"
+    },
+    {
+      "method": "REINVENT",
+      "one_line": "Warm restart from a supplied molecule under a new objective.",
+      "subcapability": "C4c_retargeting"
+    },
+    {
+      "method": "HN_GFN",
+      "one_line": "One trained model samples under any preference vector over its objective set with no retraining.",
+      "subcapability": "C4c_retargeting"
+    },
+    {
+      "method": "GraphXForm",
+      "one_line": "Applies structural action masking at every action step, pre-softmax, recomputed after every action.",
+      "subcapability": "C4d_pathwise"
+    },
+    {
+      "method": "MARS",
+      "one_line": "A new run can be launched from the exact realized molecule under a new objective using stock entry points: construct a new Estimator with the new objectives and call Sampler.",
+      "subcapability": "C4c_retargeting"
+    }
+  ],
+  "content_commit": "1febb7a",
+  "content_commit_note": "The commit at which every sha256 in durable_artifacts was computed. This manifest is committed immediately after it, so branch HEAD is one commit ahead of content_commit and differs from it only by this file. The manifest cannot name its own commit, which is why the two are separate.",
+  "conventional_suite": "docs/workstreams/baseline-qualification/CONVENTIONAL_SUITE.md -- five tasks, all nine fields frozen per task, frozen before any COMPOSE-versus-baseline outcome",
+  "durable_artifacts": {
+    "baselines/ddsbm/README.md": "332526fb54423db36bb49319796514a7b9d57740abc3b4a374fb63db03bb8c4a",
+    "baselines/ddsbm/environment.lock": "7e1712fe95bcfc366fd72916cb0730e2c163404bdee81be3ec8877109682f4b7",
+    "baselines/graph_ga/README.md": "572190555991b0d9ce4bd467b56c1d8b55b717d292abc8997b05741425ee90e1",
+    "baselines/graph_ga/environment.lock": "346358817e6af9987d34f33a9a1d35a1889c5f04ba4d52f81b2370f66145876e",
+    "baselines/graph_ga/upstream/GB_GA.py": "fd4adcd40523263abb3be38a7ee70e0766be5326048c812f157cabd949f7a71e",
+    "baselines/graph_ga/upstream/PROVENANCE.md": "d173ffda27ab50409d39575b91be20044cac3e853bace92f7d9b636796579cac",
+    "baselines/graph_ga/upstream/crossover.py": "6f1e84da39ce270d2a8981041eb6227ac1557d029f6b0290b1c95d8cda7d91ea",
+    "baselines/graph_ga/upstream/mutate.py": "0839dd392ae0c38022b3df0b742037ae76a704d9c72a058a33bd1e3f9fe17e54",
+    "baselines/graphxform/README.md": "b40d9be21a9244cef0e81179de190625ccd838cd7f205a9cbda568c8513e1743",
+    "baselines/graphxform/environment.lock": "2b50e573c0849d68bf653c297ba5c769b2853928bf34d8c7c567545e3425762a",
+    "baselines/graphxform/upstream/UPSTREAM_SHA256.json": "88c1e664b1a0bea77f8648f4577d2430c37e45c181d6ed101f520df6cd3903b8",
+    "baselines/hn_gfn/README.md": "66c97cab1155beceba7381f57f279ca986c2ddfee4fc3e0e743f0c839d3a4298",
+    "baselines/hn_gfn/environment.lock": "a5612ebcc670ae72e3ddce5a08b7540f20edddbd5bad433ee21b7a76a292ce42",
+    "baselines/mars/README.md": "66ad87505c50b037e03d2a7ecab36ef1f44b74a00e9e7568a62436ba7567e1ea",
+    "baselines/mars/environment.lock": "209a5bfec72cb3467b3ec6b96911f603e9312ef037927ec771d987e6009c3f5e",
+    "baselines/reinvent/README.md": "a7ce7d7a0d21bc0cdd6948e3cd4d2af7af7574a6e7350365b622f7526f31a306",
+    "baselines/reinvent/environment.lock": "7a42319e9fc5f72ddfa29e995a4226eecd2393ba45e2533ef2b93eafdc2428f2",
+    "configs/comparator_registry_v3.json": "672ae90f8e2e938f19b3d5013e70deaaa127302c62e605bbee185bc5bc0e3147",
+    "diagnostics/baselines/graph_ga_held_in_smoke.json": "bd7b1fb1a9779f19ec8545dc89c3d8cb28203cc6a55b0bf29b5b02051674b57e",
+    "diagnostics/baselines/graphxform_held_in_smoke.json": "a86381734f73cdf4f72fdbd56576469cee073802bffd2da5c9bdd32b01d0c552",
+    "diagnostics/baselines/mars_held_in_smoke.json": "a3419aec1ebafe8af00a2d574299f84a0ed38eb3b7983b1b06ce3d5a6bcbe02d",
+    "diagnostics/baselines/oracle_accounting_harness_stress_test.json": "f5c317fe9cd2ec384989c41961a56f02ebcbc3bdc7c0dca7d3fae88ed7708c28",
+    "diagnostics/baselines/shared_evaluator_validation.json": "62d1c7df83cb73141c56d92c37230ce9ff6317a019d1b452c761fac288cf6414",
+    "docs/RELATED_WORK_MATRIX.md": "aaf2a41d64b84dad3e084a0d8841a5579862ee78ccc2f32675ccfbd0c2c911e5",
+    "docs/workstreams/baseline-qualification/COMPARATOR_MATRIX.md": "8bb7521e3635e94de083a84d93a0af9cdeee4f3fd97c284bfa53e393004ac890",
+    "docs/workstreams/baseline-qualification/CONVENTIONAL_SUITE.md": "e50e0109cb9ead2bc8ab32c4be57d4a0cc5c382557bbe1f7caebca142dcf2b87",
+    "docs/workstreams/baseline-qualification/DECISION_LOG.md": "54296b519974c5d4b061b64fbed43c39605eca17df982d2ef447dc28ed435800",
+    "docs/workstreams/baseline-qualification/FAIRNESS_CONTRACT.md": "2515511fbcd5244eaa7de9d3179eebdcec9877c358c8f18988c56ad0675cbbec",
+    "docs/workstreams/baseline-qualification/FAIRNESS_MATRIX.md": "c6dc36eb8ab3bb35ae3a69067a27ab02575b9daaf1c3919ae541372a2a6a1b5b",
+    "docs/workstreams/baseline-qualification/HANDOFF.md": "734505428ac11213ee00998997d4e7cd38e8be462a151f61b70477ad9c9cf15c",
+    "docs/workstreams/baseline-qualification/PROTOCOL.md": "1a5870c06000a507eed4387747ab73a5eae08c9862d942f6964530616ed7c083",
+    "docs/workstreams/baseline-qualification/STATUS.md": "a97a198dd251e493d22648b1dd935393d5d860b706336d5d17f6512d4ba154c2",
+    "docs/workstreams/baseline-qualification/comparator_registry_v3.json": "1433ba1052561eea358f0ad2c97196d641a9eabca6a4734adaa932be886c6047",
+    "paper_iclr_stochastic_rewriting/references.bib": "5aad478f512110ce4d8dbe1119ec57bd1ce67a8a88eac3b41d8b23f726ac5bc9",
+    "scripts/compose_shared_evaluator_server.py": "e7cd472629347acf2b0e764b0c99ddbdddf15cb01156dd0a7633082f7a78a496",
+    "scripts/graph_ga_held_in_smoke.py": "33083d9b7e56b8cfde0b7f2f1d72af6fa8721013f189e4804f12ff1e7995ccae",
+    "scripts/graphxform_held_in_smoke.py": "63800037ec8110cf6fb448bd9f58381e6a65b244fbce9ad321d0b9976ab8d151",
+    "scripts/mars_held_in_smoke.py": "e08a75cb07d72a8a790e6f97e37130e30b7eecf26ea3bf74d8b5a6900150f51e",
+    "scripts/oracle_accounting_stress_test.py": "6cf37cf2e97e76377efc5640521dcb6a8b23401af7eb7caf44520ea97e0ab767",
+    "scripts/render_comparator_registry.py": "3d19f6ccbf9fea4d756e7e012796c3b0777de31105065dc6649288f891a20c2f",
+    "scripts/validate_shared_evaluator.py": "d963f0104a3c2fce79b98e153d54e34fcf128ea4f3f4994aea259d6244c1cea6",
+    "src/compose_v4/experiments/baseline_qualification.py": "ac768d2fe0d5dded01ab440ce71c6217e5931eb1043faf7aa85c0159d4063c58",
+    "src/compose_v4/experiments/graph_ga_adapter.py": "e64b0b6a64583fda4bfc8adbad329b1c104ea050b6eb4d8b79e85e0fcec2a6bc",
+    "src/compose_v4/experiments/graphxform_adapter.py": "ed6966ae9164143ec76ac6ca30d8c20d2df8fe58b0db92a8cbc0646e8ad67074",
+    "src/compose_v4/experiments/graphxform_applicability.py": "5d45e086d68479ce372f0ee69520aa0763435da6b5103936ce6ea74747fd32bb",
+    "src/compose_v4/experiments/mars_oracle_preflight.py": "fcf9c710fb746aad097df96019ea9deaab2a2b977d754fc95a2b57f1a6ffe0fb",
+    "src/compose_v4/experiments/oracle_accounting.py": "e53ad480967fc6fc61bfd74442139225dd453e4e406aca538fb794fef2139982",
+    "src/compose_v4/experiments/shared_evaluator.py": "da00642af63d14b519447e2775ae8e27958bd384a6224778c866432e799e0923",
+    "tests/test_baseline_qualification.py": "18f966d64b4b84cc63a1900a372773f02ea311507defe896312ad56ee4d7a6fc",
+    "tests/test_graph_ga_adapter.py": "3ef2ff39b4c788cdc8ff71bf718375710b78a642e57cb6dbab85706749586bc5",
+    "tests/test_metric_adversarial_fixtures.py": "42063790500dac4fc1bb49fafb36f32a4944c6643eef1441ec85256413758470",
+    "tests/test_oracle_accounting.py": "e7ffe2626304f0f0ef4a5e1cca53c4fd486c101ebc25ff86d1cb465739d104d8"
+  },
+  "external_dependencies_installed": 0,
+  "fairness_matrix": "docs/workstreams/baseline-qualification/FAIRNESS_MATRIX.md -- method x task, native/adapted/inappropriate; 6 of 35 cells native, 6 inappropriate",
+  "frozen_inputs": {
+    "drd2_oracle": {
+      "exercised": false,
+      "note": "designated shared oracle for every adapter; numpy-only so it cannot drift",
+      "path": "src/compose_v4/drd2_oracle.py",
+      "sha256": "318cc812b3a5c591ee4bcb8c2cd2da004ff5b147856c9b0375e7fe81a3bf1a44"
+    },
+    "goal_language_normalizers": {
+      "exercised": false,
+      "path": "diagnostics/retarget_goal_language_normalizers.json",
+      "sha256": "187d1ccc60b00c858f0f54f729a99ea91e06d33a913287886c80080889a76cc8"
+    },
+    "ringcore_catalog_fingerprint": {
+      "exercised": false,
+      "note": "named for the adapters to bind to; no chemistry was run in this lane",
+      "value": "639ff6078c32d43c"
+    }
+  },
+  "graph_ga_held_in_smoke": {
+    "artifact": "diagnostics/baselines/graph_ga_held_in_smoke.json",
+    "decisive_incompatibility": "GB-GA's roulette selection needs a non-negative objective; the COMPOSE developability margin is negative for the entire initial population, so upstream's own clamp zeroes everything and calculate_normalized_fitness raises ZeroDivisionError. GraphGA is therefore INAPPROPRIATE for task T2.",
+    "reproduced_published_behaviour": "accounting identity oracle_requests == population_size*(generations+1) (120 == 20*6); and the paper's 'bear little resemblance to the molecules used to construct the initial mating pool' -- measured median nearest-seed ECFP4 Tanimoto 0.236 against the paper's reported 0.27",
+    "upstream": "github.com/jensengroup/GB_GA commit 4b49f182, MIT, vendored byte-identical",
+    "verdict": "PASS, 9/9 checks, 2.7 s"
+  },
+  "held_out_data_opened": false,
+  "lane_state": "ACTIVE; deliverables A-C complete; stopped before expensive sweeps",
+  "manuscript_lane_merge_request": [
+    "docs/RELATED_WORK_MATRIX.md",
+    "paper_iclr_stochastic_rewriting/references.bib"
+  ],
+  "modal_runs_launched": 0,
+  "naming_rule": "The MARS arm is 'restart at x_tau under a new objective' -- a NEW optimization launched from the current molecule. It must never be described as native same-prefix retargeting or continuation. The molecule is preserved; the proposal, imitation dataset and temperature are not.",
+  "oracle_accounting": {
+    "conceptual_invariant": "Caching may reduce evaluator work, but it cannot erase wasteful algorithmic requests. That is why a cache hit still increments oracle_requests.",
+    "counters": {
+      "evaluator_calls": "expensive oracle executions after caching; real work",
+      "oracle_requests": "every scoring request incl. duplicates, rejects and invalids; ALGORITHMIC DEMAND, NOT CPU",
+      "unique_valid_canonical_evaluations": "distinct valid canonical molecules evaluated; benchmark-native, ONLY for comparison against published PMO numbers"
+    },
+    "implementation": "src/compose_v4/experiments/oracle_accounting.py",
+    "measured_gap": "same stream, budget 120: unique_valid_canonical_evaluations bought 120 distinct molecules over 288 requests; oracle_requests bought 59 over 120. Disabling the cache left requests at 288 and unique at 120 while moving evaluator_calls from 120 to 262.",
+    "required_ratio": "oracle_requests / unique_valid_canonical_evaluations",
+    "rule": "all three always logged, never substituted, counter named in every caption; for a literal-compute number report wall and core time",
+    "status": "FROZEN 2026-08-13, three counters"
+  },
+  "oracle_accounting_harness_stress_test": {
+    "THIS_IS_NOT_A_GRAPHGA_RESULT": "Do not cite it as a GraphGA smoke, a GraphGA result, or evidence about GraphGA's behaviour.",
+    "artifact": "diagnostics/baselines/oracle_accounting_harness_stress_test.json",
+    "checks_passed": 9,
+    "cpu_seconds": "<1",
+    "environment_caveat": "rdkit 2025.09.6, not the production pin 2024.3.5",
+    "required_before_any_claim_bearing_graphga_comparison": [
+      "the actual upstream GB-GA implementation vendored",
+      "the production RDKit pin 2024.3.5, or an explicitly isolated environment whose canonicalization is reconciled against it",
+      "the real algorithm terminating against every counter"
+    ],
+    "sources": "5 held-in, cohort e402e318",
+    "title": "ORACLE-ACCOUNTING HARNESS STRESS TEST",
+    "verdict": "PASS"
+  },
+  "projected_smoke_cpu_core_hours": {
+    "DDSBM": "N/A",
+    "GraphGA": "PROJECTION, NOT MEASURED. About 820 oracle calls per source, 4100 total. The frozen DRD2 oracle is a numpy RBF-SVM over folded count fingerprints, order milliseconds per molecule; RDKit crossover and mutation dominate at order 10 ms per child. Expect a few minutes wall on one core. Budget 0.1 CPU-core-hours.",
+    "GraphXForm": "PROJECTION, NOT MEASURED. 347 MB checkpoint download once. The unit cost is a d=512, 10-block transformer forward for beam 32 on ~25-atom graphs; at roughly 1000 forwards plus 1280 training samples per epoch, expect order 5-10 minutes per epoch per source on a few CPU cores. Budget 2-4 CPU-core-hours for the whole 5-source, 3-epoch smoke, and treat anything beyond 6 as the signal to stop and request GPU authorisation.",
+    "HN_GFN": "N/A on CPU. On one V100 the published full loop is 10-13 h; a reduced smoke would be a small fraction of that but is not costable without a run.",
+    "MARS": "PROJECTION, NOT MEASURED. Sampler ~0.2 CPU-core-hours. Dominant cost is the one-time vocabulary build over 1,488,640 ChEMBL SMILES with RDKit bond-breaking enumeration, ~0.5-1.0 CPU-core-hours, cacheable to the artifact volume and paid once. Budget 1.5 CPU-core-hours for the first smoke, 0.2 thereafter.",
+    "REINVENT": "PROJECTION, NOT MEASURED. Adapter A: an Olivecrona-style RNN sampling 64 SMILES of ~60 tokens per step on CPU, order seconds per step; ~20 steps per source gives a few minutes each, so budget 0.3 CPU-core-hours for 5 sources plus a small prior download. Adapter B: transformer priors are larger; budget 0.5-1.0 CPU-core-hours plus the Zenodo prior downloads. Total 1.0-1.5 CPU-core-hours."
+  },
+  "pushed_head_note": "The SHA verified present on origin/codex/compose-baseline-qualification by `git ls-remote origin refs/heads/codex/compose-baseline-qualification` at the time this manifest was written. Branch HEAD moves one commit past it when this manifest is itself committed; re-push after that to advance the remote.",
+  "pushed_head_sha": "1febb7a",
+  "recommended_next_action": "NONE. HOLD. The harness gate passed and the main workstream's instruction is to stop there: do not run external baseline sweeps and do not launch anything on Modal, because Lane 1 may reopen the base process and every external comparison would have to be repeated. Local adapter preparation is permitted and was NOT started, deliberately. When the hold lifts: vendor upstream GB-GA (MIT), reconcile canonicalization against the production RDKit pin 2024.3.5, and run the real GraphGA adapter on 3-5 held-in sources under the frozen three-counter accounting, projected 0.1 CPU-core-hours.",
+  "remote": "https://github.com/KoshaTx/compose_rgm.git",
+  "resolved_since_last_handoff": [
+    "Oracle-counting convention: FROZEN as dual accounting, see oracle_accounting.",
+    "docs/RELATED_WORK_MATRIX.md corrections: MERGED on this branch with lead approval (DDSBM var-card/birth-death to partial; new GraphXForm and REINVENT 4 rows; per-cell sentences). MARS pathwise deliberately unchanged.",
+    "references.bib: loeffler2024reinvent4 added."
+  ],
+  "schema": "compose.workstream_handoff",
+  "schema_version": 1,
+  "verdicts": {
+    "DDSBM": "CONTEXT_ONLY",
+    "GraphGA": "MUST_RUN",
+    "GraphXForm": "MUST_RUN",
+    "HN_GFN": "CONDITIONAL",
+    "MARS": "MUST_RUN",
+    "REINVENT": "MUST_RUN"
+  },
+  "what_has_not_been_run": "No COMPOSE-versus-baseline comparison, no sweep, no Modal job, and no baseline other than GraphGA. Nothing was installed into the project environment; the environment probes used throwaway venvs under /tmp. Both smokes ran on rdkit 2025.09.6, NOT the production pin 2024.3.5, and are stamped pin_matches_production false, which keeps their canonical keys out of any scientific result.",
+  "working_tree_clean_at_handoff": true,
+  "workstream": "D \u2014 external-baseline qualification and adapter readiness"
+}
