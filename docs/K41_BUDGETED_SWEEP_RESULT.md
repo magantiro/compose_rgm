@@ -26,7 +26,33 @@ This part is unambiguous and worth keeping regardless of the verdict.
 - `R_θ` shortlisting cut oracle spend from a median **75,910 → 4,113**, about
   **18×**, with no budget violation anywhere.
 
-## R1 "passes" for the wrong reason — the ceiling is not a ceiling
+## Terminology, corrected — and NOT over-corrected
+
+**Retire this identification only:** *the current full-information sweep = the
+Pareto ceiling.* Call the P0c object what it is:
+
+> **the full-information preference sweep** — the complete set of behaviours
+> induced by varying `w` under **one particular** full-information expansion
+> procedure.
+
+**Do not over-correct into "COMPOSE has no ceiling."** A meaningful ceiling
+object is perfectly sensible; we simply have not computed it. Three distinct
+objects, only two of which exist:
+
+| # | object | status |
+|---|---|---|
+| 1 | **full-information preference sweep** — fixed search procedure, budget ignored, vary `w` continuously | ✅ **have it** (P0c). Establishes latent preference richness |
+| 2 | **budgeted deployable controller** — ≤10k evals | five-weight works; **K41 compression failed its breadth gate** |
+| 3 | **best-search Pareto ceiling** — best attainable front under the frozen process when the *search procedure itself* is optimized and budget is ignored | ❌ **never attempted.** Legitimate, unmeasured, **parked** |
+
+K41 was emphatically **not** experiment 3. It was a cheap compression mechanism
+built to fit under the guard. If object 3 is ever formulated and solved,
+*"Pareto ceiling"* becomes the right name for **that** object — not for P0c's.
+
+**Parked, not barred.** Not chasing it now is a scheduling call, not a claim
+that it is illegitimate.
+
+## R1 "passes" for the wrong reason — the sweep is not an upper bound
 
 **`mean(r_HV) = 5.018`. A retention ratio cannot exceed 1 if the denominator is
 an upper bound.** It does here, on 10 of 12 sources, reaching **40.0× on source
@@ -46,9 +72,11 @@ land on endpoints the full sweep never visited — and to expand *more* states:
 | 008 | 109 | 131 |
 
 Source 006's full sweep terminated after 14 expansions; the budgeted sweep ran
-76. Calling the former a "full-information **ceiling**" is simply wrong: it is
-the full-information *preference partition*, and the greedy trajectory it
-induces is **not an upper bound on attainable hypervolume**.
+76. Calling the former a "full-information **ceiling**" is wrong: it is the
+full-information *preference partition*, and the trajectory it induces is
+**not an upper bound on attainable hypervolume**. Changing the search policy
+can reach regions that traversal never visited — which is itself evidence that
+object 3 above is a real, open, unsolved question.
 
 **This does not convert the FAIL into a PASS.** R2 is measured on the same
 ratio scale and fails on its own terms — the budgeted sweep genuinely produces
