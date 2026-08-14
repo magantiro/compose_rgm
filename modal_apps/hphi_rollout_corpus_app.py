@@ -360,12 +360,20 @@ def drive(tasks: list[dict[str, Any]], out_name: str) -> dict[str, Any]:
 
 
 @app.local_entrypoint()
-def main(parity_only: bool = False, limit: int = 0, valid: bool = False) -> None:
-    src_file = ("data/jin/hphi_valid_128.txt" if valid
-                else "data/jin/hphi_train_1024.txt")
+def main(parity_only: bool = False, limit: int = 0, valid: bool = False,
+         pilot: bool = False) -> None:
+    """`--pilot` runs the PERMANENTLY EXCLUDED 64-source staged-compute gate."""
+    src_file = ("data/jin/hphi_pilot_64.txt" if pilot else
+                "data/jin/hphi_valid_128.txt" if valid else
+                "data/jin/hphi_train_1024.txt")
     smis = [l.strip() for l in (ROOT / src_file).read_text().splitlines() if l.strip()]
-    expect = 128 if valid else 1024
+    expect = 64 if pilot else (128 if valid else 1024)
     assert len(smis) == expect, f"expected {expect} sources, got {len(smis)}"
+    if pilot:
+        print("STAGED-COMPUTE PILOT -- 64 permanently excluded sources x 4 "
+              "trajectories (~3% of the full corpus).")
+        print("Answers only: does the 1,024x8 run deserve to be bought?")
+        print("The 20-region grid does NOT move in response to this pilot.")
     if parity_only:
         print("PARITY GATE: direct-mark sampling vs the canonical successor law")
         call = parity_check.spawn(6, 4000)
@@ -373,9 +381,12 @@ def main(parity_only: bool = False, limit: int = 0, valid: bool = False) -> None
         return
     if limit:
         smis = smis[:limit]
-    tasks = [{"index": i, "smiles": s} for i, s in enumerate(smis)]
-    print(f"h_phi rollout corpus: {len(tasks)} sources x "
-          f"{TRAJECTORIES_PER_SOURCE} trajectories x H{HORIZON}")
+    n_rep = 4 if pilot else TRAJECTORIES_PER_SOURCE
+    tasks = [{"index": i, "smiles": s, "replicates": n_rep}
+             for i, s in enumerate(smis)]
+    print(f"h_phi rollout corpus: {len(tasks)} sources x {n_rep} "
+          f"trajectories x H{HORIZON}")
     print("FROZEN R_theta, unguided. Raw trajectories only -- NO census here.")
-    call = drive.spawn(tasks, f"{'valid' if valid else 'train'}_{len(tasks):04d}")
+    tag = "pilot" if pilot else ("valid" if valid else "train")
+    call = drive.spawn(tasks, f"{tag}_{len(tasks):04d}x{n_rep:02d}")
     print(f"driver spawned: {call.object_id}")
