@@ -107,7 +107,7 @@ someone else, without any objective-specific retraining?
 | **We run** | COMPOSE alone. DDSBM's published table is cited *as reported*. |
 | **Metrics** | benchmark-native only: logP `W₁`, QED MAD, SA MAD, validity — plus trajectory-wide validity and edit expressivity, which **no row in their table can report** |
 | **Stop rule** | none; this is a competence demonstration, not a superiority claim |
-| **State** | 🟢 protocol frozen, gate 5,984/5,984 passed, pilot clean — **full run LAUNCHED** |
+| **State** | 🟡 protocol frozen, gate 5,984/5,984 passed, pilot clean — **first full launch FAILED 100%; defect fixed; awaiting relaunch** |
 
 **The frozen objective, in full** — this is the authoritative statement; the
 table cell above abbreviates it:
@@ -163,6 +163,48 @@ tier-1 claim **only if frozen before launch** — a subsample chosen after seein
 results would not be. Taking the full split removes that hazard entirely, which
 is worth more than the $4 saved.
 
+#### The first full launch failed 100%. Why, and what it exposed
+
+**Every one of the 5,984 sources died** with
+
+```
+ModuleNotFoundError: No module named 'compose_v4.experiments.pareto_control'
+```
+
+**The pilot had passed 16/16 on the same code path minutes earlier.** The
+difference was never the code — it was the *launch directory*.
+
+| | pilot | full run |
+|---|---|---|
+| launched from | the `/private/tmp` scratchpad worktree | `/Users/rmaganti/compose_v2_work` |
+| `pareto_control.py` in mounted `src/` | **present** | **absent** |
+| result | 16/16 OK | 0/5,984 |
+
+The module is committed on `codex/compose-pareto-control` and was present in the
+worktree; it was simply not on the branch the full run mounted. Modal mounts the
+launch directory's `src/`, so the workers imported a tree that had never
+contained the file.
+
+**Three lessons, all recorded rather than smoothed over:**
+
+1. **A green pilot proves nothing unless it ran from the same tree the full run
+   will mount.** This pilot's clean 16/16 actively created false confidence.
+2. **A load-bearing source file for a launched experiment existed only in
+   `/private/tmp`.** Nothing was lost — it was on origin via the lane branch —
+   but the scratchpad was on the critical path for a real experiment.
+3. **`retries=3` turned one defect into thousands of paid container inits**
+   (~160 s each) before it was caught.
+
+**Fixed in `7020dc3`:** the module is committed to this branch unmodified
+(39,193 bytes, purely additive). All seven `compose_v4` imports the app needs
+were checked to resolve, and then the chain was **actually imported** rather than
+statically checked — `_argmin_stable` returns index 2 for values `[3,1,1,2]` over
+keys `[d,b,a,c]`, i.e. the lexicographically smallest key among tied minima, so
+the frozen deterministic tie-break is intact.
+
+**Standing rule going forward: launch from the committed working tree, and
+verify imports resolve in the tree that will actually be mounted.**
+
 ---
 
 ### 3 · Exact-target control and mid-trajectory retargeting
@@ -217,7 +259,7 @@ requests** at matched kernel calls. All four costs stay separate; the oracle
 denominator is **unique canonical molecules actually evaluated**, never raw
 requests.
 
-#### 4b · P0c — does a preference continuum exist at all? 🟡 11/12
+#### 4b · P0c — does a preference continuum exist at all? ✅ 12/12 COMPLETE
 
 A feasibility question that must be answered before any front-construction
 branch is chosen. Exact preference partition via Chebyshev scalarization,
@@ -227,7 +269,12 @@ the front is the lower envelope of 2N line segments with breakpoints
 
 **Early signal:** the endpoint pool suggests the continuum **collapses** —
 1,025 candidates → **2 regions**. A frozen **three-way rule** decides what
-happens next; I remain blinded to outcomes until source **004** lands.
+happens next.
+
+**All 12 shards landed 2026-08-14** (source 004, the one preempted earlier, was
+last). The app went to `stopped` on completion, not on failure. **Outcomes have
+not been read** — the three-way rule is applied to the full set, once, and that
+verdict selects the single earned front-construction branch.
 
 #### 4c · The external comparator matrix — frozen *before* the panel launches
 
@@ -466,7 +513,7 @@ arm answers this; nine do not answer it nine times.**
 | **pCoMole** OpenReview login | 🧑 **human** | the Pareto matrix cannot be frozen with an `UNVERIFIED` row |
 | **ParetoFlow / A-GPS** audits | lane | same |
 | ~~**DDSBM cost** — $5.65 vs the $2 cap~~ | ✅ resolved 2026-08-14 | cap raised, full run launched |
-| **P0c source 004** | running | the whole Pareto chain |
+| ~~**P0c source 004**~~ | ✅ landed 2026-08-14; 12/12 complete | unblocked — verdict not yet read |
 | **cLogP checkpoint** — forced real-kill + torn-write | agent | piece 6 |
 | **SA census** — Gate-0 mount-path defect | agent | piece 5 |
 | **Bounded kernel profile** | agent | ~80% of remaining cost is unmeasured |
