@@ -1,0 +1,12 @@
+{
+  "schema": "compose.griddd.dev_panel",
+  "version": "devpanel-v1",
+  "n": 64,
+  "criterion": "ZINC-250k, RDKit-computed QED in [0.700,0.800] -- the SAME criterion the official Jin qed set satisfies 800/800",
+  "note": "an earlier draft filtered on the CSV's stored qed column and produced 0.691-0.826, which does NOT match the official criterion; corrected to RDKit",
+  "excluded": "all official Jin qed/logp04/logp06 test sources, canonicalized",
+  "n_excluded": 1452,
+  "eligible_pool": 66696,
+  "selection": "deterministic sha256 rank over 'devpanel-v1|'+canonical_smiles; no RNG",
+  "purpose": "policy development ONLY; never reported as a benchmark result"
+}

@@ -58,8 +58,7 @@ from modal_apps.run_process_v2_p50_app import image as _base_image
 
 image = _base_image.env(
     {"PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}", "OMP_NUM_THREADS": "1"}
-).add_local_file(ROOT / "data/jin/qed_test.txt",
-                 str(REMOTE_ROOT / "qed_test.txt"), copy=True)
+).add_local_dir(ROOT / "data/jin", str(REMOTE_ROOT / "data/jin"), copy=True)
 
 app = modal.App("griddd-qed")
 
@@ -178,7 +177,8 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     per_replicate: list[dict[str, Any]] = []
     zero_denominator_events = 0
 
-    for rep in range(N_REPLICATES):
+    n_rep = int(task.get("replicates", N_REPLICATES))
+    for rep in range(n_rep):
         rng = np.random.default_rng(replicate_seed("qed", canonical_source, rep))
         cur, dead = source, None
         for _ in range(HORIZON):
@@ -211,7 +211,24 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                     break
             cur = keys[int(rng.choice(len(keys), p=w / total))]
         candidates.append(cur)                      # TERMINAL endpoint only
-        per_replicate.append({"replicate": rep, "endpoint": cur, "dead_end": dead})
+        # Per-trajectory diagnostics. Paired and low-variance, so policy
+        # development never has to optimize the noisy best-of-N statistic.
+        mc = Chem.MolFromSmiles(cur)
+        q_end = float(QED.qed(mc)) if mc is not None else 0.0
+        sim = 0.0
+        if mc is not None:
+            from rdkit import DataStructs
+            from rdkit.Chem import rdFingerprintGenerator
+            g = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
+            sim = float(DataStructs.TanimotoSimilarity(
+                g.GetFingerprint(mol0), g.GetFingerprint(mc)))
+        per_replicate.append({
+            "replicate": rep, "endpoint": cur, "dead_end": dead,
+            "terminal_qed": round(q_end, 4),
+            "delta_qed": round(q_end - float(QED.qed(mol0)), 4),
+            "similarity": round(sim, 4),
+            "qualifies": bool(q_end >= 0.9 and sim >= 0.4),
+        })
 
     return {
         "index": task["index"], "source": source,
@@ -291,17 +308,26 @@ def drive(tasks: list[dict[str, Any]], out_name: str) -> dict[str, Any]:
 
 
 @app.local_entrypoint()
-def main(limit: int = 0, size_fixed: bool = False) -> None:
+def main(limit: int = 0, size_fixed: bool = False, dev: bool = False,
+         replicates: int = 0) -> None:
+    """`--dev` runs the DISJOINT development panel, never the official sources."""
+    src_file = "data/jin/dev_panel_qed_64.txt" if dev else "data/jin/qed_test.txt"
     smis = [l.strip() for l in
-            (ROOT / "data/jin/qed_test.txt").read_text().splitlines() if l.strip()]
-    assert len(smis) == 800, f"expected 800 Jin QED sources, got {len(smis)}"
+            (ROOT / src_file).read_text().splitlines() if l.strip()]
+    if dev:
+        assert len(smis) == 64, f"expected the 64-source dev panel, got {len(smis)}"
+        print("DEVELOPMENT PANEL -- disjoint from all official Jin sources.")
+        print("Policy development only. NEVER reported as a benchmark result.")
+    else:
+        assert len(smis) == 800, f"expected 800 Jin QED sources, got {len(smis)}"
     if limit:
         smis = smis[:limit]
-    tasks = [{"index": i, "smiles": s, "size_fixed": size_fixed}
-             for i, s in enumerate(smis)]
+    n_rep = replicates or N_REPLICATES
+    tasks = [{"index": i, "smiles": s, "size_fixed": size_fixed,
+              "replicates": n_rep} for i, s in enumerate(smis)]
     arm = "size_fixed" if size_fixed else "full"
-    out_name = f"{arm}_{len(tasks):04d}"
-    print(f"GrIDDD/Jin QED -- {len(tasks)} sources x {N_REPLICATES} replicates, arm={arm}")
+    out_name = f"{'dev' if dev else arm}_{len(tasks):04d}x{n_rep:02d}"
+    print(f"GrIDDD/Jin QED -- {len(tasks)} sources x {n_rep} replicates, arm={arm}")
     print("policy: pi ∝ R_theta(y|x)*QED(y) over the COMPLETE fiber, receding, H=6")
     print("frozen sha256 seeds; terminal endpoints only; duplicates consume attempts")
     call = drive.spawn(tasks, out_name)
