@@ -787,6 +787,18 @@ sampler** — exact because `h_φ ∈ [0,1]`, and alias-correct for free because
 the pushforward. Batched proposals preserve the law exactly by fixing proposal
 order and uniforms in advance.
 
+> ### 🧭 HORIZON AMENDED — `1,024 × 2 × H24`, same 49,152-transition budget
+> The saturation criterion **returned "no saturation ≤ 24" and therefore did
+> not choose a horizon** (decay ratio 1.00 at `≥0.85`). H6 captured only 43 %
+> of the `0.85` reachability and 33 % of `0.90`. **H48 is NOT run** — unguided
+> base-process saturation is not the meaningful control criterion. Native
+> controller: **max H24 with online first-hit STOP**, H6/H12 reported as
+> shorter operating points. `docs/HORIZON_AMENDMENT_H24.md`.
+>
+> The unguided geometry is the ideal setup: `0.80` 32 %, `0.85` 10.9 %,
+> **`0.90` 1.2 % — rare but NONZERO**, `0.95` absent. **The roads exist and the
+> destination requires navigation.**
+
 Full design and the frozen A→B→C→D validation ladder:
 **`docs/LEARNED_REACHABILITY_CONTROLLER.md`**. Stage A checks against **exact**
 `h` on the enumerable 967-state system and is not optional. **Stage A1 is
