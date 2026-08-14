@@ -215,3 +215,56 @@ will produce **bit-identical** endpoints whenever the official run happens;
 reading it now versus reading the official run later is the same information.
 The file is superseded by `full_0800x20.json.gz` when that exists, and must
 never be reported.
+
+### Correction to the record above
+
+Only **one** source completed, not four — the stop caught the other three
+mid-flight. Established by reading the record **count only**; no endpoint, QED,
+similarity or qualification value was inspected.
+
+So precisely: **1 of 800 official sources was executed, 799 were never run, and
+the official set is INFERENTIALLY UNCONSUMED — not literally never executed.**
+Quarantined at `docs/QUARANTINE_PRE_FREEZE_SMOKE.json`, sha256
+`8545840839389b7e6156ecdce1a250d075f6f808fe6a0c3fd06fdd6f88294840`, marked
+`PRE_FREEZE_SMOKE_DO_NOT_USE`. Never read, never merged; rerun from scratch
+with all 800 once the policy freezes.
+
+## How development policies are judged — frozen before reading the dev panel
+
+**Primary development endpoint: the exact per-trajectory benchmark event.**
+
+```
+1[ QED(y) >= 0.9  AND  Tanimoto(y, x0) >= 0.4 ]
+```
+
+over all **320** trajectories (64 sources × 5 replicates), analysed with
+**source clustering**, and **paired on (source, seed)** when two policies are
+compared. Identical seeds make that pairing exact.
+
+**Secondary, always shown SEPARATELY: terminal QED and Tanimoto.** Reporting
+them apart is what stops a policy from "improving" by raising QED while
+quietly destroying similarity.
+
+> **No combined scalar score is invented.** Not `QED − λ·(1−sim)`, not a
+> weighted product. The benchmark event is a conjunction; keep it one.
+
+**The best-of-5 source success rate is DESCRIPTIVE ONLY.** It may be reported;
+policy selection must not be driven by 64 noisy binary source outcomes when
+320 paired per-trajectory observations are available.
+
+### The path to the official set
+
+```
+64 x 5 dev  →  iterate principled variants  →  choose ONE
+            →  128 x 20 FRESH disjoint validation panel
+            →  freeze  →  official 800 x 20, ONCE
+```
+
+The second panel must be **freshly drawn and disjoint from both the first panel
+and the official sources**. That is what licenses aggressive learning from
+these 64 molecules without overfitting the final controller to them. The
+eligible pool is **66,696**, so untouched development material is not scarce.
+
+**Barred during iteration:** `QED^α` sweeps, temperatures, arbitrary shortlist
+sizes, or any knob tuned until the benchmark-shaped metric rises. Permitted:
+controller variants statable independently of their result.
