@@ -13,7 +13,9 @@ protocol genuinely aligns, plus **one** practical editor. No third.
 
 ## Headline
 
-> **COMPOSE could physically enter the classic similarity-constrained DRD2
+Two findings, pointing opposite ways.
+
+> **1. COMPOSE could physically enter the classic similarity-constrained DRD2
 > benchmark tomorrow — it already holds every frozen component — and it should
 > not be entered as tier 1.** The protocol carries no oracle-call budget because
 > its native methods do not query the oracle at inference. COMPOSE queries it at
@@ -23,6 +25,15 @@ protocol genuinely aligns, plus **one** practical editor. No third.
 That is the mirror image of the HN-GFN finding, pointed at us. There, the
 baseline had a hidden amortization advantage and I refused to let it look cheap.
 Here COMPOSE would have the hidden advantage, and the same refusal applies.
+
+> **2. There is nevertheless a tier-1 path, and it is the first this workstream
+> has found.** DDSBM is genuinely source-conditioned, its ZINC logP-shift split is
+> shipped in its own repo and therefore exactly reproducible, and its metrics are
+> model-agnostic apart from NLL. **COMPOSE can be run alone on DDSBM's own task
+> and DDSBM's Table 1 cited as reported.**
+
+So the framework-counterfactual slot — empty since the role amendment — **can be
+filled at tier 1**, on a distribution-shift task rather than on DRD2.
 
 ---
 
@@ -110,20 +121,84 @@ option; not designed here.
 
 ## Part 2 — per-method tier verdicts
 
-### DDSBM — `FRAMEWORK_NEIGHBOR`
+### DDSBM — `FRAMEWORK_NEIGHBOR`, and the tier **splits by task**
 
-`PENDING` primary-source audit. The bar, stated before the evidence lands:
+*Discrete Diffusion Schrödinger Bridge Matching for Graph Transformation*,
+Kim et al., **ICLR 2025** (OpenReview `tQyh0gnfqW`, arXiv:2410.01500). Code
+`github.com/junhkim1226/DDSBM`, last push 2025-04-15.
 
-- is it **per-molecule source-conditioned** at inference, or only
-  distribution-to-distribution between two datasets?
-- is its published molecular protocol the classic similarity-constrained task, or
-  its own?
-- are checkpoints released, or is training required?
+**It is genuinely source-conditioned. YES, verified in code, not inferred.**
+`diffusion_model_discrete.py:720 predict_step` → `:727-731` uses `target="0"`
+with the comment *"using original data to generate new data"* → `:740` `X_0, E_0
+= dense_data_0.X, dense_data_0.E` → `:750 sample_forward_bridge_batch(X_0=X_0,
+E_0=E_0, …)`.
 
-If its published protocol is one COMPOSE can reproduce exactly, it is tier 1 for
-citation. If it is source-conditioned but published on a task we cannot
-reproduce, it is tier 3 — and it is the **one** rerun this lane would ever
-endorse, because it is the framework counterfactual and that slot is still empty.
+> **A trap worth recording**, because reading one function would have given the
+> wrong answer: `on_test_epoch_end` (`:629-633`) *discards* the source and
+> substitutes prior noise. That path is reachable **only** for the unconditional
+> datasets (`train_helper.py:310-311`). A shallower audit would have called
+> DDSBM de novo and been wrong.
+
+So the conceptual placement holds: DDSBM is the nearest alternative
+source-conditioned graph-transformation abstraction, exactly as the role
+amendment assigned.
+
+#### But its published protocol is not an optimization benchmark
+
+| dimension | DDSBM's published value |
+|---|---|
+| task | ZINC250k **logP distribution shift**, Gaussians centred at 2 and 4 (§5.2) |
+| oracle | **pure RDKit** — `Crippen.MolLogP`, `QED.qed`, `sascorer` (`analysis/prop_diff.py:24,81,89`). No learned model, no pickle, **no DRD2** |
+| budget | **neither candidates nor oracle calls** — there is no budget because there is **no oracle in the loop**. `predict_step` emits exactly **one** output per input, keyed by index (`:767-787`, `:828`) |
+| success criterion | **none defined or reported anywhere** |
+| similarity constraint | **none enforced**, during generation or post-hoc. Structure retention is *measured* (NLL, QED/SA MAD), never gated. Tanimoto appears only to build a training coupling for an ablation |
+| seeds | *"average of three independent training runs with different random seeds"* (§5.1) — three **training** runs, so error bars carry full retraining cost |
+
+**`DRD2` occurs zero times in the paper.** DDSBM shares no evaluation surface
+with the similarity-constrained benchmark: different oracle, no budget concept, no
+success criterion, no similarity gate.
+
+#### Verdict — tier 1 on its own task, tier 4 on ours
+
+**Tier 1, for the ZINC logP-shift task, on the model-agnostic metrics.** The
+paired CSV `data/raw/ZINC250k_logp_2_4_random_matched_no_nH.csv` is **shipped in
+the repo**, so the 23,936 / 5,984 split is exactly reproducible. COMPOSE could be
+run alone and DDSBM's Table 1 cited **as reported** on: validity, uniqueness,
+novelty, NSPDK, **logP $W_1$**, QED MAD, SAscore MAD, FCD.
+
+**NLL is excluded, and this matters.** It is defined against DDSBM's *own*
+reference process (§4.3, §D.6) — model-relative, not protocol-neutral. It is also
+the column carrying DDSBM's headline win (160.461 vs DBM's 288.572). Quoting it
+beside a COMPOSE number would be comparing each method to a different yardstick.
+
+**Tier 4 for anything DRD2 or similarity-constrained.** Getting a DRD2 number
+requires constructing a new paired dataset (inactive ↔ active, Hungarian-matched)
+and **full retraining** — DDSBM has no conditioning knob to retarget a trained
+model at a new property. Verified blockers:
+
+- **No checkpoints.** README TODO line 14, `- [ ] Checkpoints update using
+  Zenodo` — **unchecked**; Zenodo API `q=DDSBM` returns **0 records** (I ran both
+  checks directly). A search summary claiming checkpoints exist on Zenodo is
+  **false** — it misread the unchecked box.
+- **No licence.** GitHub API `license: null`; `/license` endpoint returns
+  **404**. Default copyright: not vendorable, same stop as GrIDDD and OP-GFN.
+- **4× RTX A4000**, 300 epochs × 6 IMF iterations, ×3 seeds. Wall-clock
+  GPU-hours **`UNVERIFIED`** — the paper reports no timing figure, so no number
+  goes in the table.
+- GPU training is barred for this lane regardless.
+
+**So the framework-counterfactual slot can be filled at tier 1 — but on a
+distribution-shift task, not on DRD2.** That is a real and useful finding: it is
+the first tier-1 path this workstream has produced.
+
+#### The same asymmetry, much weaker
+
+COMPOSE would consult `Crippen.MolLogP` while editing; DDSBM consults it zero
+times at inference. Structurally identical to the DRD2 problem above — but far
+weaker in force, because logP is a **free deterministic descriptor**, not a costly
+oracle, and the benchmark measures distribution match rather than oracle
+efficiency. The disclosure still travels with the row; it simply does not
+disqualify it.
 
 ### One practical editor — GraphXForm or InVirtuoGen
 

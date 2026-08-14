@@ -170,6 +170,67 @@ GrIDDD-shaped task. A naming hazard, flagged. And `GridDDBenchmarkFairnessContra
 already records `exact_griddd_leads_available = False`, so a task-competence row
 was already blocked before this lane looked.
 
+## Editing-competence lane (E4) — opened 2026-08-14
+
+**Question:** ignoring Pareto, is COMPOSE a credible source-conditioned editor?
+Reviewer insurance, **not** a scientific pillar. Full audit in
+`EDITING_COMPETENCE_AUDIT.md`.
+
+### Can COMPOSE enter a published protocol directly? Yes physically, no as tier 1
+
+The classic Jin et al. similarity-constrained DRD2 task is the closest anything
+in this workstream has come to tier 1. **COMPOSE already holds every frozen
+component**, verified in `artifacts/oracles/drd2_svm_v1/`:
+
+- the **same** DRD2 oracle, parity to **2.19e-14** against the original estimator;
+- the **exact** success threshold — `drd2_oracle.py:274-282` documents
+  `margin ≥ 0 ⟺ P = 0.5`, no conversion ambiguity;
+- the **exact** ECFP4 Tanimoto similarity;
+- **200 of the 800 source molecules**, probabilities 0.000037–0.048158, all under
+  the benchmark's ≤ 0.05 criterion.
+
+**And it is still tier 2.** The protocol budgets *candidates*, not oracle calls —
+because its native methods never query the oracle at inference. GrIDDD's DRD2
+calls are dataset labelling, post-hoc metrics and success evaluation, **none
+inside the sampling loop**; its `algorithmic_oracle_requests` are **zero**, as are
+JT-VAE's, CG-VAE's and GCPN's. COMPOSE's would be thousands per source.
+
+> The absence of an oracle budget is an unstated assumption, not permission.
+
+This is the HN-GFN surrogate finding pointed at us. There the baseline had the
+hidden advantage; here COMPOSE would. The same refusal applies in the direction
+that costs us.
+
+**Any COMPOSE row on this benchmark carries its `algorithmic_oracle_requests`
+column or is not reported.**
+
+### Costed, if ever authorized — CPU only, no GPU
+
+| arm | 200 sources | 800 sources |
+|---|---:|---:|
+| greedy control | **~190 core-h** | ~750 core-h |
+| verified control | ~3,200 core-h | ~12,800 core-h |
+
+Cheapest useful first move: the 200 manifest sources, greedy arm, **~190
+core-hours**, no dataset acquisition.
+
+### Per-method tier verdicts
+
+| method | role | tier |
+|---|---|---|
+| **DDSBM** | `FRAMEWORK_NEIGHBOR` | **`PENDING` audit** |
+| **one practical editor** (GraphXForm or InVirtuoGen) | `TASK_COMPETENCE` | **`PENDING` audit** |
+| GrIDDD, JT-VAE, CG-VAE, GCPN | contextual competence numbers | **2** |
+
+### A conflict surfaced, not resolved
+
+The predecessor lane's frozen **T3** imposes a **1,000-evaluation budget** on a
+similar-sounding similarity-constrained task; the published benchmark imposes
+none. Two different tasks with similar descriptions — captioning one as the other
+is the failure the audit exists to prevent. And a single budget-6 trajectory
+touches ~3,500 candidates, so **T3's 1,000 does not cover two edit steps**.
+Whether T3 is runnable as frozen belongs to whoever owns that suite.
+
 ## Defect found in a committed artifact — reported, not fixed
 
 `artifacts/oracles/drd2_svm_v1/drd2_oracle_manifest.json` describes the pickle as
