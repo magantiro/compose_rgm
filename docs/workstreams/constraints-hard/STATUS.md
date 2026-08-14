@@ -86,6 +86,33 @@ verbatim-reproduction conditions in `BASELINE_TASK_MATRIX.md` §3a, including
 pinning our own RDKit version since CDD pins none. **The task travels; the
 numbers do not.**
 
+## Delivered — the SA census design (2026-08-14)
+
+The externally defined constraint `SA(y) ≤ τ` at CDD's published thresholds.
+
+- **`SA_CENSUS_PROTOCOL.md`** — the census design, gates, kill rule, costed plan,
+  Gate-0 blocker, and the five-question block for the **two-arm** experiment.
+  **The τ rule was committed at `034c294`, before any measurement existed.**
+- **`SA_CENSUS_APPLICABILITY.md`** — the model-free half, `SMOKE_HELD_IN`.
+
+**Predicate is instantiable exactly as published**, zero new scoring code.
+**Primary τ = 3.0** on CDD's authority (their Figure 4 novelty metric); all four
+reported as a predeclared constraint-strength curve, which costs ~nothing since
+the fiber is enumerated once and masked four times.
+
+**Applicability: 49.79%** of the held-in pool at the primary τ, against **22.03%**
+for the scaffold. **Median slack `τ − SA(x₀)` is 0.1097** — the median eligible
+source sits on the boundary, which is what will make the constraint bite *and*
+what threatens the retention floor.
+
+**Declared in advance:** it is possible that **no τ passes all gates
+simultaneously**. If so the constraint dies — no rescue predicate, no threshold
+shopping.
+
+**The fiber half is BLOCKED** on Gate-0, as before. The highest-value quantity it
+would return is the **distribution of ΔSA per legal rewrite**, deliberately not
+proxied per the MMP rule.
+
 ## Next action
 
 **None from this lane.** Three items belong to whoever picks this up:

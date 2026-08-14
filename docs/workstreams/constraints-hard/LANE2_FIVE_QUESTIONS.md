@@ -1,4 +1,31 @@
-# Five questions — internal three-arm hard-constraint comparison
+> # ⚠️ SUPERSEDED IN PART — 2026-08-14
+>
+> **The experiment is now TWO arms, not three, and the predicate is decided.**
+> The authoritative version is **`SA_CENSUS_PROTOCOL.md` §7 and §10**; read this
+> file only for the material it still uniquely carries (§3 injection-point
+> requirements, §5 guard rails, the efficiency-axis discipline).
+>
+> **What changed:**
+>
+> - **The soft-guidance arm is dropped.** No external method supplies a natively
+>   calibrated guidance prescription for this predicate, so λ would be ours to
+>   choose — and a λ chosen to make soft guidance *lose* is as invalid as one
+>   chosen to make it win. A two-arm causal experiment is stronger than a
+>   three-arm one with an arbitrary middle arm. **This resolves O1**, which was
+>   flagged here as the load-bearing gap. It was resolved by deletion, which is
+>   the better answer.
+> - **The predicate is decided: `SA(y) ≤ τ`**, CDD's published thresholds
+>   τ ∈ {3.0, 3.5, 4.0, 4.5}, primary **3.0**. **This resolves O2** in favour of
+>   the exogenous option this file recommended.
+> - **O3 and O4 stand** — reuse Lane 2's frozen A2 gates verbatim; panel, horizon
+>   and budget remain Lane 2's.
+>
+> The two arms are **optimize-then-filter** vs **exact support-constrained
+> COMPOSE**. Primary outcome: **feasible property improvement at fixed
+> resources** — not constraint satisfaction, which is definitional on the hard
+> arm and stays barred as a result.
+
+# Five questions — internal hard-constraint comparison *(three-arm version — historical)*
 
 **Handoff artifact for Lane 2.** Lane 2 **builds** this experiment; Lane 6
 supplies the framing and does not design or run it.
@@ -148,7 +175,14 @@ a builder would otherwise have to come back and ask. Each is Lane 2's to settle,
 but the constraints on settling them are recorded here so the answer does not
 have to be renegotiated.
 
-### O1 — The soft-guidance arm has no definition yet. **This is the biggest gap.**
+### O1 — ~~The soft-guidance arm has no definition yet~~ — **RESOLVED BY DELETION**
+
+> **The arm is dropped.** See the header. The reasoning below is retained because
+> it is *why* it was dropped: the λ could not be chosen without choosing the
+> result. Deleting the arm was the right resolution of a gap that had no
+> principled fix.
+
+<details><summary>Original O1 text</summary>
 
 The arm is named in §1 but its functional form is not specified. It needs:
 
@@ -169,7 +203,13 @@ is genuinely the object of study, say so in advance and report the whole curve.
 A λ chosen to make soft guidance lose would be as invalid as one chosen to make
 it win, and it is the more likely error here.
 
-### O2 — Which predicate `C`?
+</details>
+
+### O2 — ~~Which predicate `C`?~~ — **RESOLVED: the exogenous one**
+
+> **`SA(y) ≤ τ` at CDD's published thresholds**, primary τ = 3.0. The
+> recommendation below was accepted. Applicability measured at **49.79%** of the
+> held-in pool at the primary threshold (`SA_CENSUS_APPLICABILITY.md`).
 
 Two options, and they are **not** equivalent in evidential value:
 
