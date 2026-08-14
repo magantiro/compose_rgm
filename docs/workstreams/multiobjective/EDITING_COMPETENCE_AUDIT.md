@@ -142,7 +142,50 @@ practical editor without saying so would misdescribe the field.
 
 ---
 
-## Part 3 — what the project has already frozen, and a conflict
+## Part 3 — costed plan for the COMPOSE-only run
+
+**A projection, not a measurement, and not a recommendation to run.** Assumptions
+are stated so the arithmetic can be checked rather than trusted.
+
+**Basis.** The Pareto smoke measured ~58 min per source on 8 CPUs for all five
+arms, of which ~46 min was kernel enumeration and ~12 min scoring. Summing the
+committed per-source kernel calls across arms gives ~612, so **one kernel call
+costs roughly 4.5 s**. Per-trajectory costs from
+`diagnostics/pareto_semantic_oracle_accounting.json` at `BUDGET = 6`:
+
+| arm | kernel calls / trajectory | oracle evals / trajectory |
+|---|---:|---:|
+| `greedy_pref` | **3.2** | 2,187 |
+| `verified_pref` | **79.8** | 53,977 |
+
+The 25× kernel gap between the arms dominates everything below, so a single
+average would be misleading in both directions.
+
+**Projection at 20 candidates per source** (the protocol's allowance), treating
+one candidate as one trajectory:
+
+| arm | per source | **200 sources** | **800 sources** |
+|---|---:|---:|---:|
+| greedy control | ~7 min (8 CPUs) | **~190 core-h** | **~750 core-h** |
+| verified control | ~2 h (8 CPUs) | **~3,200 core-h** | **~12,800 core-h** |
+
+**All CPU-only. No GPU anywhere.** Compute is not the blocker; the spread is the
+decision.
+
+**What is not costed, because it is not this lane's to choose.** How COMPOSE
+produces 20 candidates — 20 independent trajectories, one trajectory yielding 20
+endpoints, or a shortlist — is a design choice that changes the cost by an order
+of magnitude and changes what the number means. The projection above assumes the
+most expensive reading (20 independent trajectories) so it cannot flatter.
+
+**The cheap first move**, if the lead ever authorizes anything here: the 200
+sources already embedded in the frozen manifest, greedy arm, **~190 core-hours**.
+That answers "is COMPOSE in the right range at all?" before anyone spends the
+800-source figure, and it needs no new dataset acquisition.
+
+---
+
+## Part 4 — what the project has already frozen, and a conflict
 
 The predecessor lane's `CONVENTIONAL_SUITE.md` (branch
 `codex/compose-baseline-qualification`) already froze **T3 — similarity-constrained
