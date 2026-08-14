@@ -164,6 +164,45 @@ trajectories and endpoints induced by the frozen COMPOSE preference controller
 over the continuous preference range"* — **never "the true Pareto front."** Take
 its nondominated subset and measure how well that covers the attainable front.
 
+## 4b. OPERATIONAL GUARDRAILS while these lanes run
+
+**P0c is BLINDED until all 12 sources finish.** Source 006 landing first tells us
+only that the pipeline works. **Do not inspect accumulating source-level outcomes
+and do not modify the guard, traversal, metrics or branch rule.** Let all 12 land,
+reconstruct the frozen HV / ND / spread-vs-expansion curves, then apply the
+three-way rule. This is what keeps P0c **diagnostic rather than adaptive** — a
+probe whose stopping rule moves in response to its own partial results is not a
+gate, it is a search.
+
+**cLogP n=48 requires an ADVERSARIAL resume regression, not "it resumes."** On one
+development source, deliberately kill the job mid-arm and require
+interrupted-then-resumed execution to reproduce uninterrupted execution
+**exactly**: same actions, endpoints, oracle values, counters, cache contents and
+statistics. If RNG state matters, persist it. Only once equality passes is the
+checkpoint code frozen and the n=48 protocol launched **unchanged**.
+
+**SA branch — what is and is not evidence.** Constraint satisfaction under exact
+support is **construction, not a result**. The claim-bearing contrast is
+**feasible optimization and yield** against the *identical* underlying controller
+run without the restriction and then filtered by the *same* externally fixed
+predicate. Match resources on the scientifically relevant axis. **No τ shopping
+after the census.** If the census misses its frozen feasibility gates, **kill the
+branch.**
+
+**Ordinary editing competence stays deliberately boring.** It is reviewer defence,
+not an invention project. If DDSBM's native source-conditioned protocol aligns
+faithfully, good. If it does not, **do not manufacture a port to create a
+numerical comparison.** One strong framework neighbour plus one practical task
+method is the whole set.
+
+### Why this shape
+
+All three lanes are buying **negative information cheaply before inventing
+algorithms**: P0c can show five weights do not undersample the controller before
+aspiration control is built; the SA census can show the constraint lacks usable
+support before a claim-bearing panel; checkpointing gets proven before n=48 is
+exposed to failure. **Once these resolve, consolidate — do not expand.**
+
 ## 5. The escalation, in order
 
 ```
