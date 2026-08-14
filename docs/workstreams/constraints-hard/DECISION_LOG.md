@@ -259,3 +259,133 @@ guarantee, and it is still not head-to-head comparable — but on different and
 better-evidenced grounds.
 
 **Changes a frozen object:** no.
+
+---
+
+# Canonical comparator-roles amendment — 2026-08-13
+
+## D16 — Matrix relabelled by role; runnability kept orthogonal
+
+**Evidence before the decision:** `docs/COMPARATOR_ROLES_CANONICAL.md` —
+comparators have roles, not rankings; selection is framework-first; a method does
+not become a primary baseline merely because it optimizes the same property.
+
+**Decision:** `BASELINE_TASK_MATRIX.md` carries a role table
+(`FRAMEWORK_NEIGHBOR` / `MATCHED_CAUSAL_CONTROL` / `TASK_COMPETENCE` /
+`CONCEPTUAL_LINEAGE_ONLY`) scoped explicitly to the **hard-constraint block**,
+plus a **separate** runnability table.
+
+**Why the two are separate:** collapsing them would imply an unrunnable method is
+a weak comparator. CDD is unrunnable and is still the closest framework
+neighbour; GraphXForm is fully runnable and is only `TASK_COMPETENCE`. Keeping
+one axis for *what a comparator is for* and another for *whether it can be run*
+is what stops a task-SOTA number standing in for the framework comparison.
+
+**Alternatives rejected:** one merged status column — the failure the canonical
+policy exists to prevent.
+
+**Changes a frozen object:** yes — supersedes this lane's earlier
+`MUST_RUN`/`CONDITIONAL`/`CONTEXT_ONLY` vocabulary.
+
+## D17 — CDD / PRODIGY / ConStruct kept `FRAMEWORK_NEIGHBOR`, evidence conceptual
+
+**Evidence:** the canonical doc names them the constraints block's *methodological
+lineage* and lists them separately from Edit Flows and Expanding Flow Maps, which
+it labels `CONCEPTUAL_LINEAGE_ONLY` outright. It makes their numerical role
+conditional: *"Numerical only under a native common protocol."* This lane's audit
+**tested that condition and found none**.
+
+**Decision:** `FRAMEWORK_NEIGHBOR` with `evidence mode: conceptual only`,
+discharged via the trilemma and a feature table — the policy's "compare
+conceptually" branch.
+
+**Alternatives rejected:** relabelling them `CONCEPTUAL_LINEAGE_ONLY` — defensible
+under a strict reading, but it would demote the section's own methodological
+lineage and leave the constraints block with no framework layer at all.
+
+**Flagged, not decided:** the strict reading is recorded in
+`BASELINE_TASK_MATRIX.md` as an open question for the lead. If they prefer it,
+the label changes and nothing else does.
+
+**Changes a frozen object:** no.
+
+## D18 — MolEditRL and Prompt-MolOpt^P demoted to `TASK_COMPETENCE`
+
+**Evidence:** they answer *can a specialized editor preserve structure while
+improving properties?* — a different question from *how should a hard constraint
+be integrated into a generative process?*
+
+**Consequence recorded:** the constraints section is **no longer organized around
+editors**. A scaffold-specific RL paper does not define it, and neither does a
+fragment-preserving seq2seq model. GraphXForm's earlier billing as the core
+intellectual opponent is withdrawn.
+
+**Changes a frozen object:** yes — supersedes the "minimum defensible constraint
+table" in `BASELINE_TASK_MATRIX.md` §4, now restructured into three separately
+reported layers.
+
+## D19 — Five-question block recorded before implementation, handed to Lane 2
+
+**Evidence:** the canonical doc requires the five questions be recorded **before
+any experiment is implemented**. Lane 2 owns building the three-arm comparison;
+Lane 6 holds the framing from its Stage-0 audit.
+
+**Decision:** `LANE2_FIVE_QUESTIONS.md`, carrying the methodological axis, the
+framework counterfactual (discharged conceptually, with the reason), the matched
+control, the competence comparators, and five falsifiers — plus the three
+injection-point requirements Lane 2 would otherwise have to rediscover, and the
+denominator guard rail.
+
+**Explicitly NOT handed over:** panel, arms implementation, cost model, launch
+plan. The scaffold protocol that would have supplied those is `SUPERSEDED` and
+**the Bemis–Murcko branch stays killed — no "smaller scaffold" rescue.**
+
+**Changes a frozen object:** no.
+
+## D20 — Tier labels added; the constraints block has no tier-1 or tier-2 method
+
+**Evidence:** `docs/AMENDMENT_PUBLISHED_NUMBER_FIRST.md` — use published results
+whenever COMPOSE can be run under the exact published protocol; rerun only when
+a direct comparison genuinely requires it.
+
+**Assignment:** CDD, PRODIGY, ConStruct, MolEditRL, InVirtuoGen, DDSBM and Edit
+Flows are **tier 4**; GraphXForm and Prompt-MolOpt^P are **tier 3**.
+
+**The consequence worth stating plainly:** no method in this block is tier 1 or
+tier 2, so **the constraints section cannot be carried by published numbers.**
+Its causal weight falls entirely on the internal matched control, which is why
+that control is the primary comparison rather than a supporting ablation.
+
+**Not discharged, and flagged as such:** the amendment requires auditing whether
+COMPOSE can run under a baseline's published protocol *before* authorizing a
+rerun. That audit has not been done for the two tier-3 methods and is not this
+lane's to do. If either aligns, it drops to tier 1 and needs no external run.
+
+**Changes a frozen object:** no — adds an orthogonal axis to D16's tables.
+
+## D21 — CDD's task is reused; CDD is not
+
+**Evidence:** amendment §5 — *"Do not rebuild CDD. Do not invent another
+endogenous scaffold."* CDD's published `SA(y) <= tau` predicate and thresholds
+may be reused as an externally defined task if reproduced verbatim.
+
+**Why this is the useful move within tier 4:** the constraint definition becomes
+**independent of our corpus**. An externally fixed threshold cannot be selected
+on our outcome — it was fixed by other people, for their reasons, before they
+had heard of us. That is the precise defect that killed the Bemis-Murcko branch,
+and reusing an exogenous constraint structurally cannot repeat it.
+
+**Three verbatim-reproduction conditions recorded** (`BASELINE_TASK_MATRIX.md`
+§3a): the four published thresholds and no others; RDKit `sascorer` with **our
+own version pinned and stated**, since CDD pins none and SA is not
+version-portable; and no re-tuning of tau to suit our fiber. If none of the four
+thresholds is workable, that is a reportable result, not licence to pick a fifth.
+
+**Alternatives rejected:** (a) rebuilding CDD from either unofficial third-party
+reimplementation — tier 4, and neither is the published method; (b) treating
+reuse of the task as licence for a head-to-head — their numbers are de novo QM9
+under an unreleased surrogate, ours would be source-conditioned editing under the
+true scorer. **The task travels; the numbers do not.**
+
+**Changes a frozen object:** no. The CDD conclusion and the scaffold stop both
+stand.

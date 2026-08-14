@@ -1,27 +1,86 @@
 # External baseline task matrix — hard structural constraints
 
-> **2026-08-13 — comparator placement, recorded not acted on.** The lane was
-> reframed to an external audit. The methods below keep their verified
-> capability cells, but they no longer all belong to the same table. **Do not
-> force every baseline into every experiment.**
->
-> | method | where it now belongs | why |
-> |---|---|---|
-> | **GraphXForm** | general source-conditioned editing | hard-constraint cell is `N/A` — §0 is project record |
-> | **Prompt-MolOpt^P** | general editing table — *"is COMPOSE a competent molecular editor?"* | **must not drive the methods narrative** on hard-support control |
-> | **MolEditRL** | general editing table (if it ever ships code) | same; and its preservation is soft |
-> | **DDSBM** | **general source-conditioned editing** — a major COMPOSE comparator | it is a comparator for the *editing* question, **not** because it has hard constraints. Not a hard-scaffold baseline |
-> | **InVirtuoGen** | fragment-constrained generation | unchanged, `CONDITIONAL` |
-> | **ConStruct** | **the hard-constraint audit** — see `EXTERNAL_HARD_CONSTRAINT_AUDIT.md` | promoted out of `CONTEXT_ONLY` into the audit's scope |
-> | **Edit Flows** (NeurIPS 2025) | **related work only** | prominent conceptual lineage — edit-based CTMC with insert/delete/substitute — but its published state space is variable-length **sequences**. A molecular-graph port would mean solving the support/executor problem that is *part of COMPOSE's own contribution*: inventing a competitor for ourselves |
->
-> The intellectual baseline for **exact hard-support control** is the audit of
-> CDD / PRODIGY / ConStruct, not any editor in this file.
-
 **Status: `DESIGN_ONLY`.** No baseline was run by this lane. No external
 dependency was installed. Every capability cell cites a paper section, a repo
 file, or a flag name; anything not confirmed against a primary source is marked
 `UNVERIFIED` rather than guessed.
+
+---
+
+## Role assignment (canonical)
+
+**Governed by `docs/COMPARATOR_ROLES_CANONICAL.md`.** Comparators have **roles,
+not rankings**, and selection is **framework-first**: a method does not become a
+primary baseline merely because it optimizes the same property.
+
+**Roles are per-experiment.** Everything below is scoped to the **hard-constraint
+block**. The same method may hold a different role elsewhere — GraphXForm is
+`TASK_COMPETENCE` here and remains a source-conditioned editor in the general
+editing table.
+
+| method | **role (constraints block)** | **tier** | evidence mode | why it holds this role |
+|---|---|:---:|---|---|
+| **CDD** | **`FRAMEWORK_NEIGHBOR`** | **4** | **conceptual only** | Asks *how should a hard constraint be integrated into a pretrained generative process?* — the section's own question. Numerical comparison **tested and refused**: no native common protocol, no released code (placeholder README), de novo vs source-conditioned. **Its published `SA(y) ≤ τ` task is reusable — see §3a** |
+| **PRODIGY** | **`FRAMEWORK_NEIGHBOR`** | **4** | **conceptual only** | Same axis, graph-native projection. Constraint class is aggregate scalars, so it cannot state our predicate; **repo carries no licence** |
+| **ConStruct** | **`FRAMEWORK_NEIGHBOR`** | **4** | **conceptual only** | Closest lineage — guarantees structure *throughout the trajectory*. Appendix G.2 is the nearest published analogue to our setup. Still de novo, still unlabeled-structural |
+| **post-hoc vs soft guidance vs exact support** | **`MATCHED_CAUSAL_CONTROL`** | — | numerical, internal | **The primary comparison.** Same `R_θ`, source, objective, controller, budget; the constraint mechanism is the only thing that varies. **Lane 2 builds it** — `LANE2_FIVE_QUESTIONS.md` |
+| **GraphXForm** | **`TASK_COMPETENCE`** | **3** | numerical where native | Demoted from "core intellectual opponent". Our custom task + a native thin adapter exists (Lane 3). **Audit tier 1 first.** Hard-constraint cell is **`N/A`** — §0 |
+| **Prompt-MolOpt^P** | **`TASK_COMPETENCE`** | **3** | numerical where native | Asks *can a specialized editor preserve structure while improving properties?* — a different question. **Must not drive the methods narrative.** MIT, released ^P checkpoint, thin adapter feasible. **Audit tier 1 first.** |
+| **MolEditRL** | **`TASK_COMPETENCE`** | **4** | **none available** | Same demotion. `OFFICIAL_CODE_UNAVAILABLE`; preservation is soft (KL-to-prior) even if released |
+| **InVirtuoGen** | **`TASK_COMPETENCE`** | **4** *(licence)* | conditional | Fragment-constrained generation. Token-level clamp, not graph-level. **CC-BY-NC-SA 4.0 non-commercial** — a licence decision for the lead, not for this lane |
+| **DDSBM** | **`FRAMEWORK_NEIGHBOR`** — *general editing block, **not** here* | **4** | — | *Why COMPOSE's executable graph CTMC rather than another graph CTMC/bridge?* **Not a hard-constraint baseline.** **Lane 5 owns qualification — do not duplicate.** No LICENSE, no checkpoints |
+| **GrIDDD** | **`FRAMEWORK_NEIGHBOR`** — *general editing block* | **UNVERIFIED** | — | Discrete graph diffusion with node insertion **and deletion**, closer to COMPOSE's variable-size dynamics than any RL optimizer. **Lane 5 owns qualification**; this lane did not audit it |
+| **Edit Flows** | **`CONCEPTUAL_LINEAGE_ONLY`** | **4** | related work | Edit-based CTMC with insert/delete/substitute, but over variable-length **sequences**. A molecular-graph port would mean inventing the chemical-support machinery COMPOSE contributes — building a competitor for ourselves |
+
+**Tiers** (`docs/AMENDMENT_PUBLISHED_NUMBER_FIRST.md`): **1** exact alignment →
+run COMPOSE only, cite baselines as *"reported"*; **2** partial alignment →
+contextual literature numbers, never head-to-head; **3** rerun, smallest
+necessary set, only when the question is on our custom task **and** a native thin
+adapter exists; **4** do not reconstruct — cite and discuss.
+
+> **No method in the constraints block is tier 1 or tier 2.** Every framework
+> neighbour is tier 4, and the two competence comparators are tier 3. That is
+> the concrete consequence of the audit: **the constraints section cannot be
+> carried by published numbers**, so its causal weight falls entirely on the
+> internal matched control.
+
+### The tier-1 audit obligation, not yet discharged
+
+> *"Before implementing or rerunning any external baseline, audit whether COMPOSE
+> can instead be run under that baseline's published protocol."*
+
+For the two tier-3 methods this audit has **not** been done and is **not** this
+lane's to do. Whoever owns the competence table should check whether COMPOSE can
+be run under GraphXForm's or Prompt-MolOpt^P's published evaluation protocol
+before authorizing any rerun. If either aligns, it drops to tier 1 and no
+external execution is needed at all.
+
+### Two things this assignment fixes
+
+**The section is no longer organized around editors.** The intellectual baseline
+for exact hard-support control is CDD / PRODIGY / ConStruct. **A
+scaffold-specific RL paper does not define this section**, and neither does a
+fragment-preserving seq2seq model.
+
+**"Framework neighbour" does not imply "numerical row".** All three neighbours
+are conceptual-evidence-only, and that is a *finding*, not an omission: the
+canonical policy makes their numerical role conditional on a native common
+protocol, and `EXTERNAL_HARD_CONSTRAINT_AUDIT.md` §4 tested that condition and
+found none. The framework evidence is delivered as the trilemma —
+`CONSTRAINTS_SECTION_TRILEMMA.md` — plus a feature table, which is exactly the
+"compare conceptually" branch the policy provides for.
+
+> **Open question for the lead, flagged rather than decided.** Under a strict
+> reading of the four definitions, a neighbour that can never supply a number is
+> `CONCEPTUAL_LINEAGE_ONLY`. I have kept CDD / PRODIGY / ConStruct as
+> `FRAMEWORK_NEIGHBOR` with `evidence mode: conceptual only`, because the
+> canonical doc names them the constraints block's *methodological lineage* and
+> lists them separately from Edit Flows and Expanding Flow Maps. If you prefer
+> the strict reading, the label changes and nothing else in this lane does.
+
+---
+
+## Capability findings (unchanged, verified)
 
 **Binding policy:** `docs/BASELINE_IMPLEMENTATION_POLICY.md` — published methods
 run the **authors' native algorithm** with only a thin evaluation/accounting
@@ -132,38 +191,89 @@ MolEditRL venue verified at `iclr.cc/virtual/2026/poster/10011588` (Poster,
   CSV with `REF-SMI` (`X_0`) and `PRB-SMI` (`X_T`) columns; a single user source
   cannot be dropped in without a bridge already trained for that transformation.
 
-## 3. Status decisions
+## 3. Runnability status (orthogonal to role)
 
-| method | status | rationale |
-|---|---|---|
-| **GraphXForm** | **`MUST_RUN` as a source-conditioned editor; `N/A` for the hard-constraint cell** | Native start-from-SMILES is real, so it belongs in the source-conditioned comparison. It has no user-specified preservation and no deletion, so its hard-constraint cell is `N/A — not natively supported`, with the §0 reason stated. **Reuse Lane 3's artifacts; do not rebuild.** |
-| **MolEditRL** | **`OFFICIAL_CODE_UNAVAILABLE`** | GitHub search for `MolEditRL` returns 0 repos; the paper's only release statement covers the MolEdit-Instruct dataset, not code; the ICLR poster page carries no code link. **No reimplementation** (charter). Note it would be a *soft* preserver even if released, so it is not a hard-constraint comparator. Related work. |
-| **Prompt-MolOpt^P** | **`MUST_RUN` — the one direct structure-preserving editor** | Official code, MIT, committed ^P checkpoint, hard-by-construction user-specified preservation, native source conditioning. This is the correct third row. |
-| **InVirtuoGen** | **`CONDITIONAL` — coordinate before running** | Task semantics align for scaffold decoration / motif extension. Two blockers: the clamp is token-level not atom-level, and the licence is **CC-BY-NC-SA 4.0 (non-commercial)**. Charter: do not run it twice to add a row — check with whichever lane evaluates its native fragment-constrained protocol first. |
-| **ConStruct** | **`CONTEXT_ONLY` — cite, do not port** | General graph method, no source conditioning, no released molecular config. Charter is explicit. |
-| **DDSBM** | **`CONTEXT_ONLY` — blocked** | **No LICENSE file at all** (default all-rights-reserved) and no released checkpoints. Legal blocker before technical. Matches Lane 3's independent `blocked` / `CONTEXT_ONLY`. |
+**Role says what a comparator is *for*; this table says whether it *can be run*.**
+A `FRAMEWORK_NEIGHBOR` may be unrunnable and still carry the section, and a
+runnable method may be only `TASK_COMPETENCE`.
+
+| method | role | runnability | rationale |
+|---|---|---|---|
+| **CDD** | `FRAMEWORK_NEIGHBOR` | **`NOT_RUNNABLE`** | Official repo is a 59-byte placeholder README; the differentiable surrogate is unreleased. Two unofficial third-party reimplementations exist and **must not** be used as "the published method". |
+| **PRODIGY** | `FRAMEWORK_NEIGHBOR` | **`BLOCKED — no licence`** | Repo carries **no LICENSE file**; no licence is no grant of rights. Same blocker class as DDSBM. Also not a standalone library — integration is a manual per-model patch. |
+| **ConStruct** | `FRAMEWORK_NEIGHBOR` | **`RUNNABLE_BUT_OFF_TASK`** | MIT, maintained, but **no checkpoints shipped** and no molecular Hydra config (`configs/dataset/` holds exactly `high_tls`, `lobster`, `low_tls`, `planar`, `tree`). De novo only. |
+| **GraphXForm** | `TASK_COMPETENCE` | **`RUNNABLE`** | Native `start_from_smiles` is real. Hard-constraint cell is **`N/A`** — no user-specified preservation, add-only action space (§0). **Reuse Lane 3's artifacts; do not rebuild.** |
+| **Prompt-MolOpt^P** | `TASK_COMPETENCE` | **`RUNNABLE`** | Official code, MIT, committed ^P checkpoint, hard-by-construction preservation, native source conditioning. |
+| **InVirtuoGen** | `TASK_COMPETENCE` | **`CONDITIONAL`** | Token-level clamp, not graph-level; **CC-BY-NC-SA 4.0 (non-commercial)**. Coordinate before running — do not run it twice to add a row. |
+| **MolEditRL** | `TASK_COMPETENCE` | **`OFFICIAL_CODE_UNAVAILABLE`** | No repo found; the release statement covers the MolEdit-Instruct dataset, not code. **No reimplementation.** Soft preserver regardless. |
+| **DDSBM** | `FRAMEWORK_NEIGHBOR` *(general editing block)* | **`BLOCKED — no licence`** | No LICENSE file, no released checkpoints. **Lane 5 owns qualification.** |
+
+## 3a. Tier 4 does not mean useless — reuse CDD's TASK, not CDD
+
+**The distinction the amendment draws, applied here:** a method can be
+unreconstructable while its **published task definition** remains valuable.
+
+**Reusable:** CDD's constraint predicate `SA(y) ≤ τ` with its published
+thresholds **τ ∈ {3.0, 3.5, 4.0, 4.5}** (§5.2, confirmed verbatim), as an
+**externally defined task**.
+
+**Why this is worth having, and it is not a consolation prize.** The constraint
+definition is then **independent of our corpus**. We are not shopping our own
+data for a constraint that happens to leave enough room to act — which is
+*exactly* what killed the Bemis–Murcko branch. An externally fixed threshold
+cannot be selected on our outcome, because it was fixed by someone else, for
+their reasons, before they had ever heard of us.
+
+**Reproduce it verbatim or not at all.** Three conditions:
+
+1. `SA ≤ τ` in that direction, at those four thresholds, no others;
+2. RDKit's `sascorer` (`molecular_quality.py:13` already exposes it) — **and we
+   pin our own RDKit version and say so**, because CDD pins none and SA values
+   shift with the fragment-contribution tables, so a τ = 3.0 boundary is not
+   version-portable;
+3. no re-tuning of τ to suit our fiber. If none of the four thresholds is
+   workable on our sources, that is a reportable result, not a reason to pick a
+   fifth.
+
+**CDD itself remains contextual, non-head-to-head.** Reusing the task is not
+reusing the comparison: their numbers are de novo QM9 under an unreleased
+surrogate, and ours would be source-conditioned editing under the true scorer.
+**The task travels; the numbers do not.**
 
 ## 4. The minimum defensible constraint table
 
-Three rows. Two groups, reported separately per the baseline policy.
+**The framework layer carries no numerical rows.** That is the audit's finding,
+not a gap: all three neighbours are de novo, none is source-conditioned, and none
+shares a protocol with source-conditioned editing.
 
-**Group 1 — external published methods (native algorithm, thin adapter):**
+**Layer 1 — framework novelty (`FRAMEWORK_NEIGHBOR`, conceptual):** the trilemma
+plus a feature table. CDD, PRODIGY, ConStruct. See
+`CONSTRAINTS_SECTION_TRILEMMA.md`. **No numbers.**
+
+**Layer 2 — causality (`MATCHED_CAUSAL_CONTROL`) — the primary comparison:**
+
+| row | what it establishes |
+|---|---|
+| **post-hoc filtering vs soft guidance vs exact support restriction** | whether keeping the process inside the admissible state space beats generating and discarding, or penalizing |
+
+Same `R_θ`, source, objective, controller class and budget; the constraint
+mechanism is the only thing that varies. **Lane 2 owns building it** —
+`LANE2_FIVE_QUESTIONS.md`. This lane does not design or run it.
+
+**Layer 3 — competence (`TASK_COMPETENCE`), at most one or two rows:**
 
 | row | what it establishes | hard-constraint cell |
 |---|---|---|
 | **GraphXForm** | a strong source-conditioned graph editor with native fine-tuning + search | **`N/A` — no user-specified preservation; add-only action space** |
 | **Prompt-MolOpt^P** | a genuine hard, user-specified fragment/pharmacophore preserver | **YES — hard by construction** |
 
-**Group 2 — controlled internal comparator (we implement it, because it is
-defined relative to COMPOSE):**
+**Do not add a fourth competence row.** InVirtuoGen would make the same point as
+Prompt-MolOpt^P at the cost of a non-commercial licence and a
+graph-vs-string-granularity caveat.
 
-| row | what it establishes |
-|---|---|
-| **COMPOSE `posthoc_scaffold_filter_verified` vs `hard_scaffold_mask_verified`** | whether keeping the process inside the admissible state space beats generating and discarding |
-
-**Do not add a fourth row.** InVirtuoGen would be a fourth structure-preserving
-generator making the same point as Prompt-MolOpt^P, at the cost of a
-non-commercial licence and a graph-vs-string-granularity caveat.
+> **The layers are reported separately and never merged into one leaderboard.**
+> Merging them is exactly the failure the canonical policy exists to prevent: it
+> lets a task-SOTA number stand in for the framework comparison.
 
 ## 5. What must NOT be claimed
 

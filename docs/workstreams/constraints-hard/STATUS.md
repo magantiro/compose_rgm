@@ -53,13 +53,52 @@ repo is a 59-byte placeholder README.
 *is* NeurIPS 2025 (I doubted it from a v1 arXiv comment), and the "21.3% / 63.9%
 satisfaction" figures I reported **do not appear in the paper**.
 
+## Delivered — the role relabel and the trilemma
+
+Under `docs/COMPARATOR_ROLES_CANONICAL.md` (comparators have **roles, not
+rankings**; selection is **framework-first**):
+
+- **`BASELINE_TASK_MATRIX.md`** relabelled by the four roles, with runnability
+  kept **orthogonal** to role — a `FRAMEWORK_NEIGHBOR` can be unrunnable and
+  still carry the section.
+- **`CONSTRAINTS_SECTION_TRILEMMA.md`** — the section's organizing claim, every
+  cell sourced, every satisfaction rate carrying its denominator.
+- **`LANE2_FIVE_QUESTIONS.md`** — the five-question block for the internal
+  three-arm comparison, recorded before implementation, handed to Lane 2.
+
+**The framework layer carries no numerical rows**, and that is a finding rather
+than a gap: the canonical policy makes CDD/PRODIGY/ConStruct numerical *only
+under a native common protocol*, and the audit tested that condition and found
+none.
+
+Under `docs/AMENDMENT_PUBLISHED_NUMBER_FIRST.md`, each method also carries a
+**tier**. The result is stark and worth flagging: **no method in this block is
+tier 1 or tier 2.** All three framework neighbours are tier 4 (*cite and discuss,
+do not reconstruct*); the two competence comparators are tier 3. **The
+constraints section cannot be carried by published numbers**, which is precisely
+why the internal matched control is the primary comparison.
+
+**The useful move within tier 4:** CDD's `SA(y) ≤ τ` predicate at
+τ ∈ {3.0, 3.5, 4.0, 4.5} is reusable as an **externally defined task**, because
+the constraint is then independent of our corpus — structurally unable to repeat
+the outcome-selection defect that killed the Bemis–Murcko branch. Three
+verbatim-reproduction conditions in `BASELINE_TASK_MATRIX.md` §3a, including
+pinning our own RDKit version since CDD pins none. **The task travels; the
+numbers do not.**
+
 ## Next action
 
-**None from this lane.** One item belongs to whoever picks this up:
+**None from this lane.** Three items belong to whoever picks this up:
 
-> Decide whether the related-work paragraph in
-> `EXTERNAL_HARD_CONSTRAINT_AUDIT.md` §5 goes into the paper as drafted, and
-> whether to cite ConStruct's Appendix G.2 as the nearest published analogue.
+1. **Confirm the role label for CDD / PRODIGY / ConStruct.** Kept as
+   `FRAMEWORK_NEIGHBOR` with `evidence mode: conceptual only`. A strict reading
+   of the four definitions would make them `CONCEPTUAL_LINEAGE_ONLY`. Flagged in
+   `BASELINE_TASK_MATRIX.md`, not decided.
+2. Decide whether the related-work paragraph in
+   `EXTERNAL_HARD_CONSTRAINT_AUDIT.md` §5 goes into the paper as drafted, and
+   whether to cite ConStruct's Appendix G.2 as the nearest published analogue.
+3. **Lane 2** picks up `LANE2_FIVE_QUESTIONS.md` and builds the three-arm
+   comparison.
 
 ## Deliverables
 
