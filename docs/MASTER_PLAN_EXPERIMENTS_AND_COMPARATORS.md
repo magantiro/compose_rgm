@@ -274,8 +274,14 @@ happens next.
 **All 12 shards landed 2026-08-14** and the rule was applied once. **See
 `docs/P0C_VERDICT.md`.**
 
-> ### ✅ VERDICT: OUTCOME 2 — the exact preference sweep is sufficient.
-> **The aspiration branch is CLOSED, not deferred.**
+> ### ✅ VERDICT: OUTCOME 2 — the continuum is rich; aspiration is CLOSED.
+>
+> **Amended after the cost measurement:** the exact sweep is the
+> **`FULL_INFORMATION_PARETO_CEILING`**, *not* the deployable controller — it
+> costs a median **75,910** unique oracle evaluations/source against the frozen
+> **≤10,000** rule (over budget on 11/12). One bounded compression step remains:
+> **`BUDGETED_PREFERENCE_SWEEP`**, `K_sweep = 41`, frozen `R_θ` ranking only.
+> See `docs/BUDGETED_PREFERENCE_SWEEP_PREREGISTRATION.md`.
 
 **The result reverses the early signal.** The endpoint pool predicted collapse;
 the real successor fibers show the opposite. One-step sparsity does not imply
@@ -324,11 +330,26 @@ which tests the COMPOSE-specific claim more directly than any external row. That
 is a reason the external count may honestly end up small; it is **not** a licence
 to stop auditing. Three rows are still open.
 
-#### 4d · The scalable operating points — forward-looking, not yet run
+#### 4d · The scalable operating points — RECLASSIFIED after P0c
 
-Distinct from P3/P4 above. Both `K` values come from the **same external
-10,000-query-per-source rule** applied to scoring-event counts read from the
-frozen implementation. Neither was chosen by looking at an outcome, and `K_V`
+> ### ⚠️ `K_G = 333` / `K_V = 15` are now HISTORICAL, not a scheduled experiment
+>
+> These were derived for the **five-weight, 30-scoring-event** controller. P0c
+> replaced that structure: the continuum tree expands a **median 136 states**,
+> not 5 weights × 6 steps. **The scoring-event arithmetic they came from no
+> longer describes the object**, so they cannot be reused mechanically for
+> continuum control.
+>
+> **Do not launch a K333/K15 panel alongside the K41 work** merely because an
+> older plan lists them. `K_sweep = 41` now answers the more important final
+> scalability question. If K41 passes it becomes the **production controller**,
+> and K333/K15 remain **recorded development designs** — preregistered honestly,
+> superseded honestly. Whether they still support a *distinct* claim is a
+> question to ask **after** K41 resolves, not before.
+
+Recorded as originally preregistered. Both `K` values come from the **same
+external 10,000-query-per-source rule** applied to scoring-event counts read from
+the frozen implementation. Neither was chosen by looking at an outcome, and `K_V`
 was fixed **before P3 existed**.
 
 ```

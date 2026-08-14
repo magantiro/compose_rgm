@@ -104,12 +104,41 @@ Reported outcomes:
 - **unique true-oracle evaluations** — must be **≤10,000 on every source,
   not on average**
 
-## The stop rule, frozen now
+## The stop rule — NUMERICALLY EXPLICIT, frozen now
 
-| outcome | consequence |
+"Retention → freeze / collapse → stop" was too vague to be a gate. Made exact
+here, **before the K=41 run**, by **reusing the already-frozen standard** rather
+than minting a threshold:
+
+`RETENTION_FLOOR = 0.90` and the source-level paired bootstrap 2.5th percentile
+are taken **verbatim** from `scripts/pareto_scalable_power.py`, where they were
+frozen for the K333 study.
+
+Two ratios per source, against the full-information ceiling:
+
+```
+r^HV_i = HV_i(budgeted)      / HV_i(ceiling)
+r^ND_i = |ND_i(budgeted)|    / |ND_i(ceiling)|
+```
+
+| test | criterion |
 |---|---|
-| budgeted sweep **retains strong front quality** | **freeze it as the final Pareto controller**; proceed to the fresh panel |
-| budgeted sweep **collapses** | **close the compression branch.** No second algorithm. |
+| **R1 — quality** | bootstrap 95 % CI lower bound on `mean(r^HV_i)` **> 0.90** |
+| **R2 — breadth** | bootstrap 95 % CI lower bound on `mean(r^ND_i)` **> 0.90** |
+| **B — budget** | `unique_oracle_evals ≤ 10,000` on **every** source, not on average |
+
+**Success requires R1 ∧ R2 ∧ B** — intersection–union, the same structure as the
+cLogP `P1 ∧ P2` design, no multiplicity correction.
+
+**R2 is not optional and does not get relaxed.** The entire P0c discovery is that
+five weights collapsed breadth. A budgeted controller that preserves hypervolume
+while losing nondominated breadth would **recreate exactly the problem P0c
+diagnosed**, and must be recorded as a failure even if its HV looks excellent.
+
+**This is a demanding gate and that is deliberate.** The ceiling reaches a median
+of 11.5 nondominated endpoints, so R2 requires roughly 10 of them to survive a
+~15× cut in oracle spend. **We accept a clean failure here.** Stating that before
+the run is what stops a later "0.85 is basically 0.90" argument.
 
 On collapse the paper still separates honestly, and this is stated *before*
 seeing the result so it cannot read as a consolation:
@@ -119,6 +148,29 @@ seeing the result so it cannot read as a consolation:
 > what is achievable at contemporary sample budgets.
 
 That is a publishable pair, not a failure.
+
+## Implementation qualification — passes BEFORE any K=41 outcome is opened
+
+This is potentially the **final** Pareto algorithm, so the code is qualified
+first. All three must pass before a single quality number is computed.
+
+| # | test | what it protects |
+|---|---|---|
+| **Q1** | **full-fiber equivalence** — with `K ≥ |F(x)|`, the budgeted code reproduces the full continuum sweep **exactly**: same partition, same leaves, same endpoints, same order | proves budgeting is the *only* difference; any divergence is a bug, not a finding |
+| **Q2** | **ranking correctness** — the shortlist is taken **after** canonical successor/alias construction, scored by frozen `R_θ`, with the same deterministic tie semantics | prevents shortlisting a pre-canonical or aliased fiber, which would silently change the candidate set |
+| **Q3** | **worst-case budget fixture** — synthetic 240-expansion tree, **zero** cache overlap, 41 unseen successors at every state → the ledger must read **exactly 9,840** | proves the ≤10k guarantee holds at the worst case the guard permits |
+
+### The headroom audit — Q3's real point
+
+`10,000 − 9,840 = 160`. The formula is a true ≤10k guarantee **only if no other
+true-oracle calls exist anywhere else in the controller.** Q3 therefore also
+asserts that every algorithmic oracle call outside the shortlist path fits inside
+that **160-query headroom**, and the ledger is checked against the frozen oracle
+semantics — where **cached values are free** and the denominator is **unique
+canonical molecules actually evaluated**, never raw requests.
+
+If any hidden call path is found, it is reported — not absorbed into the
+headroom silently.
 
 ## What this does NOT touch
 
