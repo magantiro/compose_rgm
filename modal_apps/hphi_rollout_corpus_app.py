@@ -173,12 +173,30 @@ def parity_check(n_states: int = 6, draws: int = 4000) -> dict[str, Any]:
         tot = sum(exact.values())
         exact = {k: v / tot for k, v in exact.items()}
 
+        # The law is a property of the STATE, so compute it ONCE and draw from
+        # it `draws` times. Recomputing it per draw would make this gate take
+        # hours while measuring exactly the same distribution.
+        from compose_v4.experiments.production_successor_kernel import (
+            enumerate_factorized_marked_law,
+        )
+        law = enumerate_factorized_marked_law(model, state, float(TIME_POINT))
+        p_marks = np.array([m.probability for m in law.marks], dtype=float)
+        p_marks = p_marks / p_marks.sum()
+        # Executing a mark is deterministic, so cache mark -> canonical key and
+        # pay each rewrite at most once instead of `draws` times.
+        mark_key: dict[int, str] = {}
         rng = np.random.default_rng(0)
         counts: dict[str, int] = {}
         for _ in range(draws):
-            _s, k, _m, err = _direct_mark_step(model, system, state, key, rng, np)
-            if err:
-                continue
+            i = int(rng.choice(len(p_marks), p=p_marks))
+            k = mark_key.get(i)
+            if k is None:
+                mk = law.marks[i]
+                k = canonical_state_key(
+                    system.apply(state, mk.executor_rule_name, mk.action))
+                mark_key[i] = k
+            if k == key:
+                continue                  # VIRTUAL: excluded, as in the chain
             counts[k] = counts.get(k, 0) + 1
         n = sum(counts.values())
         emp = {k: c / n for k, c in counts.items()}

@@ -268,3 +268,103 @@ eligible pool is **66,696**, so untouched development material is not scarce.
 **Barred during iteration:** `QED^α` sweeps, temperatures, arbitrary shortlist
 sizes, or any knob tuned until the benchmark-shaped metric rises. Permitted:
 controller variants statable independently of their result.
+
+## ⭐ REVISION — the anytime stopping time is the headline, not fixed-H6
+
+**Earlier framing was over-anchored on mimicking GrIDDD's inference.** The
+correct principle:
+
+> **Match the task and the number of returned candidates. Do NOT force different
+> methods to share internal trajectory semantics.**
+
+The published task says: per source, generate **20 candidates**; the source
+succeeds if **at least one** has QED ≥ 0.9 and Tanimoto ≥ 0.4. Nothing in that
+definition requires another method's candidate to be the state after a fixed
+number of *its own* internal operations.
+
+### The native COMPOSE policy — an online stopping time
+
+```
+τ_z = min{ t ≤ H : g_z(X_t) = 1 }          return X_τ if reached, else X_H
+```
+
+One source → one stochastic trajectory → **one returned molecule**, max six
+edits, stopping as soon as the predeclared region is reached. Run it 20 times →
+**20 candidates. Not 120.**
+
+**This is a policy, not retrospective selection**, and the distinction is the
+whole argument:
+
+| | |
+|---|---|
+| ⛔ **questionable** | run six edits, inspect all six afterwards, return whichever scored best |
+| ✅ **clean** | at `x_t`, observe the predeclared goal is satisfied, execute `STOP` |
+
+The clean version never consults a future state to decide whether an earlier one
+was better. **First qualifying state. Period.** *"Step 3 had QED 0.889 but was
+prettier"* is barred, and so is any use of later states to re-rank earlier ones.
+
+**`STOP` belongs in an executable molecular controller.** Why would a
+lead-optimization algorithm be required to keep modifying a molecule that
+already satisfies the requested specification?
+
+### Why this is exploiting the representation, not gaming it
+
+GrIDDD's internal states are noisy diffusion intermediates — part of its
+denoising computation, not candidate molecules. **COMPOSE was engineered so that
+every committed state is already a complete candidate.** Discarding a successful
+intermediate purely because another method cannot expose one would remove a real
+COMPOSE advantage to make the algorithms look superficially alike.
+
+### The three-row presentation — the objection becomes evidence
+
+| method | inference | returned/source | QED success |
+|---|---|---|---|
+| **GrIDDD** | property-conditioned diffusion | 20 | **45.1 % reported** |
+| **COMPOSE — fixed H6** *(ablation)* | region `h_φ`, forced six edits | 20 | — |
+| **COMPOSE — native anytime** *(headline)* | region `h_φ`, STOP on first hit, max H6 | 20 | — |
+
+**The native number is the primary COMPOSE result.** Fixed-H6 is the
+conservative ablation answering *how much comes specifically from anytime
+execution?*
+
+If anytime ≫ fixed-H6, the conclusion is **not** "COMPOSE peeked at
+intermediates." It is: *because COMPOSE evolves through evaluable molecules, it
+can terminate once the specification is satisfied; forcing it to continue
+editing destroys successful leads.* **That is a result about the architecture.**
+If they are close, stopping did not matter here. Either outcome is informative.
+
+### The only wording that changes
+
+> same Jin/GrIDDD source cohort, same QED/similarity success criterion, same
+> allowance of **20 returned candidates per source**; **inference algorithms
+> differ natively by method.**
+
+**Not** "identical inference protocol."
+
+### Consequence for `h_φ`
+
+The claim-bearing native controller targets **first-passage** reachability:
+
+```
+h_hit_b(x,z) = P_{R_θ}( ∃ t ≤ b : X_t ∈ B_z | X_0 = x )     with h = 1 on B_z
+```
+
+More natural for optimization than *"what is the probability I am inside the
+region exactly six edits from now?"* Equivalently, terminal-Doob on an
+**absorbed** chain.
+
+**The corpus stores both**, so no rerun is needed: `terminal_success`,
+`ever_hit`, and the **first-hit step**. Fixed-horizon terminal remains the
+matched ablation target.
+
+### What the census must therefore report, per region
+
+- terminal-at-H6 prevalence
+- **hit-by-H6 prevalence**
+- distribution of **first-hit step**
+- **fraction of hits subsequently LOST by H6**
+
+That last number is the scientifically interesting one: if many trajectories
+reach `0.90/0.40` and then fall back out, forced fixed-H6 semantics are actively
+wasting COMPOSE's strongest structural feature.

@@ -17,6 +17,7 @@ from compose_v4.experiments.hphi_rollout import (
     SIMILARITY_FLOORS,
     Termination,
     ever_hit_label,
+    first_hit_step,
     prefix_examples,
     registered_regions,
     terminal_label,
@@ -144,3 +145,60 @@ def test_misaligned_sequences_raise_rather_than_silently_truncate():
 
 def test_horizon_is_six():
     assert HORIZON == 6
+
+
+# --------------------------------------------------------------------------
+# BOTH value definitions -- the corpus must support either controller
+# --------------------------------------------------------------------------
+
+def test_both_label_families_are_emitted_for_every_region():
+    qed = [0.75, 0.79, 0.84, 0.88, 0.93, 0.90, 0.86]
+    sim = [1.00, 0.92, 0.85, 0.78, 0.71, 0.66, 0.62]
+    exs = prefix_examples(list("abcdefg"), qed, sim,
+                          Termination(kind="complete", edits=6))
+    for e in exs:
+        assert len(e["labels"]) == 20 and len(e["labels_hit"]) == 20
+
+
+def test_terminal_and_hit_DISAGREE_on_the_crossing_trajectory():
+    """The whole point of storing both: they are different objects."""
+    qed = [0.75, 0.79, 0.84, 0.88, 0.93, 0.90, 0.86]
+    sim = [1.00, 0.92, 0.85, 0.78, 0.71, 0.66, 0.62]
+    exs = prefix_examples(list("abcdefg"), qed, sim,
+                          Termination(kind="complete", edits=6))
+    assert exs[0]["labels"]["0.90_0.40"] == 0        # fixed-horizon: missed
+    assert exs[0]["labels_hit"]["0.90_0.40"] == 1    # first-passage: reached
+
+
+def test_hit_label_is_relative_to_the_PREFIX_not_the_whole_trajectory():
+    """Hit is evaluated from the prefix forward, so it can flip to 0 late.
+
+    Note the threshold is INCLUSIVE: qed[5] = 0.90 still qualifies at
+    `>= 0.90`. The region is occupied at steps 4 and 5 and left at step 6.
+    """
+    qed = [0.75, 0.79, 0.84, 0.88, 0.93, 0.90, 0.86]
+    sim = [1.00, 0.92, 0.85, 0.78, 0.71, 0.66, 0.62]
+    exs = prefix_examples(list("abcdefg"), qed, sim,
+                          Termination(kind="complete", edits=6))
+    assert exs[4]["labels_hit"]["0.90_0.40"] == 1    # step 4 is in the region
+    assert exs[5]["labels_hit"]["0.90_0.40"] == 1    # 0.90 >= 0.90, inclusive
+    assert exs[6]["labels_hit"]["0.90_0.40"] == 0    # 0.86 -- left, unreachable
+
+
+def test_first_hit_step_is_the_stopping_time_not_the_best_state():
+    """STOP at the FIRST qualifying state, even if a later one scores higher."""
+    qed = [0.70, 0.91, 0.99, 0.99]
+    sim = [1.00, 0.55, 0.50, 0.45]
+    assert first_hit_step(qed, sim, BENCHMARK_REGION) == 1, (
+        "must return the first qualifying index, never the highest-QED index")
+
+
+def test_first_hit_step_is_None_when_the_region_is_never_entered():
+    assert first_hit_step([0.7] * 7, [1.0] * 7, BENCHMARK_REGION) is None
+
+
+def test_first_hit_requires_BOTH_constraints_simultaneously():
+    """A state passing QED and a later state passing similarity is not a hit."""
+    qed = [0.95, 0.70, 0.70]
+    sim = [0.20, 0.90, 0.90]
+    assert first_hit_step(qed, sim, BENCHMARK_REGION) is None

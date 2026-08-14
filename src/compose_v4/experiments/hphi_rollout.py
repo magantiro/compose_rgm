@@ -89,6 +89,24 @@ def terminal_label(
     return int(terminal_qed >= q_min and terminal_similarity >= s_min)
 
 
+def first_hit_step(
+    qed_of: Sequence[float],
+    similarity_to_source: Sequence[float],
+    region: tuple[float, float],
+) -> int | None:
+    """The stopping time `tau_z = min{t : g_z(x_t) = 1}`, or None.
+
+    This is a POLICY, not retrospective selection: at `x_t` the controller sees
+    that the predeclared region is satisfied and executes STOP. It never
+    consults a future state to decide whether an earlier one was better.
+    """
+    q_min, s_min = region
+    for t, (q, s) in enumerate(zip(qed_of, similarity_to_source)):
+        if q >= q_min and s >= s_min:
+            return t
+    return None
+
+
 def prefix_examples(
     trajectory: Sequence[str],
     qed_of: Sequence[float],
@@ -117,8 +135,15 @@ def prefix_examples(
             "budget_remaining": b,
             "state_qed": float(qed_of[t]),
             "state_similarity_to_source": float(similarity_to_source[t]),
+            # BOTH label definitions are stored. Terminal is the fixed-horizon
+            # Doob object; hit is first-passage for the anytime controller.
             "labels": {
                 f"{q:.2f}_{s:.2f}": terminal_label(term_q, term_s, (q, s), termination)
+                for q, s in registered_regions()
+            },
+            "labels_hit": {
+                f"{q:.2f}_{s:.2f}": ever_hit_label(
+                    qed_of, similarity_to_source, (q, s), start=t)
                 for q, s in registered_regions()
             },
             "termination": termination.kind,
@@ -132,9 +157,23 @@ def ever_hit_label(
     region: tuple[float, float],
     start: int = 0,
 ) -> int:
-    """The WRONG label, implemented ONLY so a test can prove it differs.
+    """`1[exists k >= start : x_k in B_z]` — FIRST-PASSAGE reachability.
 
-    `1[exists k >= start : x_k in B_z]`. Never call this from the runner.
+    PROMOTED TO FIRST-CLASS. An earlier version of this module called this "the
+    wrong label." That was too narrow: it is the wrong label for the FIXED-
+    HORIZON Doob object, and the RIGHT one for the anytime controller.
+
+        h_terminal_b(x) = P( X_b in B_z )                fixed horizon
+        h_hit_b(x)      = P( exists t <= b : X_t in B_z )  first passage
+
+    with the clean recursion `h_hit_0 = g_z` and, for `b > 0`,
+    `h_hit_b(x) = 1` if `x in B_z`, else `sum_y R(y|x) h_hit_{b-1}(y)`.
+
+    Equivalently: the same terminal-Doob framework on an ABSORBED chain — once
+    a state enters `B_z`, stop there, and "hit within b" becomes "the terminal
+    state lies in `B_z`."
+
+    Both labels are stored. The same corpus trains either value definition.
     """
     q_min, s_min = region
     return int(any(
