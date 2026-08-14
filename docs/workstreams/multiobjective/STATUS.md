@@ -219,8 +219,44 @@ core-hours**, no dataset acquisition.
 | method | role | tier |
 |---|---|---|
 | **DDSBM** | `FRAMEWORK_NEIGHBOR` | **1 on its own ZINC logP-shift task; 4 on anything DRD2** |
-| **one practical editor** (GraphXForm or InVirtuoGen) | `TASK_COMPETENCE` | **`PENDING` audit** |
+| **InVirtuoGen** — *selected practical editor* | `TASK_COMPETENCE` | **2** |
+| GraphXForm | `TASK_COMPETENCE` | **4 — capability-disqualified** |
 | GrIDDD, JT-VAE, CG-VAE, GCPN | contextual competence numbers | **2** |
+
+### The practical editor — InVirtuoGen, on criteria fixed in advance
+
+**GraphXForm is capability-disqualified: it cannot delete.** `grep` for
+`RemoveAtom|RemoveBond|delete_atom|delete_bond` returns **zero hits**; the action
+space is terminate / create atom / pick atom / bond order. The authors name atom
+and bond removal as future work **twice**. It also budgets **8 h of H100
+wall-clock** and explicitly rejects the oracle-call convention, so its numbers are
+not citable across labs. Otherwise the best-licensed thing here (MIT, live
+checkpoint, peer-reviewed *Digital Discovery*) — none of which repairs an
+append-only action space.
+
+**InVirtuoGen wins the three pre-registered criteria**: source-conditioned lead
+optimization under a Tanimoto floor; real `delete_atom` / `delete_cyclic_bond`
+operators; budget in **oracle calls (10,000)**, our currency. It is also unusually
+honest about budget, flagging that GenMol and f-RAG prescreen ZINC250k so their
+effective budget is ~260k, not 10k.
+
+**Selected, but tier 2, and the caveats travel:**
+
+- its citable `drd2` number (0.985 / 0.995) is **de novo PMO**, not our task;
+- its one structurally matching experiment **does not run** — the shipped
+  `ppo_docking.py` is a results-aggregation script with zero `torch`/`vina`/`ckpt`
+  references, and 3 of 5 receptors are missing;
+- its delete operators are lifted verbatim from **jensengroup/GB_GA**, so the
+  honest attribution for its editing power is Graph GA, not the flow model;
+- **licence, actionable:** `LICENSE` contradicts itself (CC BY-NC-SA 4.0 vs
+  Attribution-NonCommercial 4.0), GitHub reports `NOASSERTION`, and the weights
+  terms forbid using its output to train molecular-generation models.
+  **No InVirtuoGen output may ever become `R_θ` training data.** For main to
+  decide deliberately, not assume.
+
+> **Neither practical editor's native benchmark aligns** with source-conditioned
+> DRD2-style editing. InVirtuoGen is chosen because it wins criteria fixed before
+> the evidence, not because it fits.
 
 ### DDSBM — the first tier-1 path this workstream has found
 

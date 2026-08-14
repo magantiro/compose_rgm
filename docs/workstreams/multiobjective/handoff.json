@@ -5,7 +5,7 @@
   "branch": "codex/compose-multiobjective-package",
   "base_commit": "f6146d7",
   "base_branch": "codex/editing-v2-successor-fiber-fastpath",
-  "content_commit": "1988cdd",
+  "content_commit": "STAMPED_BY_FOLLOWUP_COMMIT",
   "artifact_status": "DESIGN_ONLY",
   "held_out_data_opened": false,
   "compute_spent": {
@@ -175,11 +175,12 @@
     "command": "python3 -m pytest tests/test_multiobjective_qualification.py -q"
   },
   "durable_artifacts": {
-    "docs/workstreams/multiobjective/STATUS.md": "e9a448cc8ac45b6c3e4ee65ad556ce5a701db8db691f72373bf2696ebfe9ca7f",
-    "docs/workstreams/multiobjective/PROTOCOL.md": "52bb864b056ba93d61fea4fdb7b0184f91af7c5ba1ecc8546199c064dfabdde6",
+    "docs/workstreams/multiobjective/STATUS.md": "ade3618b2a4376c84e4e1afd8b22be38082bc0cb39fb1df25e4d7e443a094c8b",
+    "docs/workstreams/multiobjective/PROTOCOL.md": "e23b08b556620f269af67f35ffe58ec7c3caf675cf0901e6a3f79617522259b2",
     "docs/workstreams/multiobjective/BASELINE_TASK_MATRIX.md": "52ece0c33e25a712299a0f4536d5ef886c0b9fd3cf5f5cf880393ae71951eea1",
     "docs/workstreams/multiobjective/SOURCE_CONDITIONING_AUDIT.md": "a8633ecb4fe5492c6c5ccc20c625eeb74a130539c432e1c5e483cb37f5e50daa",
     "docs/workstreams/multiobjective/BENCHMARK_ALIGNMENT_AUDIT.md": "82fe7cef4360980589076829630ac24387b50367d299b8b65ac42de1e1506f18",
+    "docs/workstreams/multiobjective/EDITING_COMPETENCE_AUDIT.md": "b7d281749568aa7697c2818ce2243b4048546b9f65cc9865d69ed5cb87613483",
     "docs/workstreams/multiobjective/FRAMEWORK_NEIGHBOR_GRIDDD.md": "5cb8d4f7507705d657f985b16bca12816abc6a9d9f0cd5939afc8496c6b5bef6",
     "docs/workstreams/multiobjective/SAME_LAB_LINEAGE.md": "19de7e1914e49caf8a447dbcf989747063e5fbcd4027e2c28b5337c7d136130f",
     "docs/workstreams/multiobjective/DECISION_LOG.md": "50d42815f6ecd3132e8003e8a73982a35480f917c65a67b2f2432f69879d93bf",
@@ -476,5 +477,120 @@
     ],
     "only_remaining_candidate": "DDSBM",
     "pattern_worth_noting": "two candidates have now fallen to the same rule -- the adapter would have had to supply the mechanism under test. A pattern rather than a coincidence; the framework counterfactual may be genuinely hard to source externally."
+  },
+  "editing_competence_lane": {
+    "opened": "2026-08-14",
+    "question": "ignoring Pareto, is COMPOSE a credible source-conditioned molecular editor? Reviewer insurance, NOT a scientific pillar.",
+    "audit": "docs/workstreams/multiobjective/EDITING_COMPETENCE_AUDIT.md",
+    "can_compose_enter_a_published_protocol_directly": {
+      "answer": "YES -- one tier-1 path found, the first in this workstream",
+      "tier_1_path": {
+        "method": "DDSBM",
+        "task": "ZINC250k logP 2->4 distribution shift",
+        "why_reproducible": "the paired CSV data/raw/ZINC250k_logp_2_4_random_matched_no_nH.csv is shipped in the repo, so the 23,936 / 5,984 split is exactly reproducible",
+        "citable_metrics": [
+          "validity",
+          "uniqueness",
+          "novelty",
+          "NSPDK",
+          "logP W1",
+          "QED MAD",
+          "SAscore MAD",
+          "FCD"
+        ],
+        "excluded_metric": "NLL -- defined against DDSBM's OWN reference process (sections 4.3, D.6), so model-relative not protocol-neutral; and it is the column carrying DDSBM's headline win (160.461 vs DBM 288.572)",
+        "action": "run COMPOSE alone, cite DDSBM Table 1 as reported"
+      },
+      "tier_2_path": {
+        "task": "classic Jin et al. similarity-constrained DRD2",
+        "why_not_tier_1": "the protocol budgets CANDIDATES (20 per source), not oracle calls, because its native methods never query the oracle at inference. GrIDDD's DRD2 calls are dataset labelling (zinc250k_dataset.py:62,128), post-hoc metrics (freegress.py:803-805) and success evaluation (freegress.py:1018-1020) -- NONE inside the sampling loop. Its algorithmic_oracle_requests are zero, as are JT-VAE's, CG-VAE's and GCPN's. COMPOSE's would be thousands per source. The absence of an oracle budget is an unstated assumption, not permission.",
+        "mirror_of": "the HN-GFN surrogate finding, pointed at us -- there the baseline had the hidden advantage and we refused to let it look cheap; here COMPOSE has it and the same refusal applies",
+        "mandatory_disclosure": "any COMPOSE row on this benchmark carries its algorithmic_oracle_requests column or is not reported"
+      },
+      "compose_already_holds": {
+        "oracle": "same clf_py36.pkl extracted to drd2_svm_parameters.npz; parity verdict 'numpy reimplementation reproduces the original estimator', max probability gap 2.19e-14",
+        "success_threshold": "drd2_oracle.py:274-282 -- 'Zero is a perfectly good margin, it is exactly P = 0.5, the success threshold'. margin >= 0 <=> P >= 0.5, no conversion ambiguity",
+        "similarity": "manifest similarity.definition = GetMorganFingerprintAsBitVect(mol, 2, nBits=2048, useChirality=False) with Tanimoto -- the classic definition exactly",
+        "sources": "200 of the 800, embedded in the manifest with reference scores, probabilities 0.000037-0.048158, all under the benchmark's <= 0.05 criterion"
+      }
+    },
+    "method_verdicts": {
+      "DDSBM": {
+        "role": "FRAMEWORK_NEIGHBOR",
+        "tier": "1 on its own ZINC logP-shift task; 4 on anything DRD2",
+        "venue": "ICLR 2025, OpenReview tQyh0gnfqW, arXiv:2410.01500",
+        "source_conditioned": "YES -- verified in code: diffusion_model_discrete.py:720 predict_step, :727-731 target='0' 'using original data to generate new data', :750 sample_forward_bridge_batch(X_0=X_0, E_0=E_0)",
+        "trap_recorded": "on_test_epoch_end (:629-633) DISCARDS the source for prior noise, but that path is reachable only for the unconditional datasets (train_helper.py:310-311). Reading one function would have called DDSBM de novo and been wrong.",
+        "why_tier_4_on_drd2": "DRD2 occurs zero times in the paper; no budget concept, no success criterion, no similarity gate. Requires a new paired dataset and full retraining; no knob retargets a trained model at a new property.",
+        "blockers_verified_directly": {
+          "license": "GitHub API license: null; /license endpoint returns 404. Not vendorable.",
+          "checkpoints": "README TODO line 14 '- [ ] Checkpoints update using Zenodo' is UNCHECKED; Zenodo API q=DDSBM returns 0 records. A search summary claiming Zenodo checkpoints exist is FALSE -- it misread the unchecked box.",
+          "compute": "4x RTX A4000, 300 epochs x 6 IMF iterations, x3 seeds. Wall-clock GPU-hours UNVERIFIED -- the paper reports no timing figure."
+        },
+        "fills": "the framework-counterfactual slot, empty since the role amendment -- on a distribution-shift task, not on DRD2"
+      },
+      "InVirtuoGen": {
+        "role": "TASK_COMPETENCE -- SELECTED practical editor",
+        "tier": 2,
+        "paper": "arXiv:2509.26405, NeurIPS 2025 AI4D3 WORKSHOP; main-conference/journal venue UNVERIFIED",
+        "code": "github.com/invirtuolabs/InVirtuoGen_results @ b50bb3ae",
+        "won_on_pre_registered_criteria": [
+          "source-conditioned lead optimization under Tanimoto >= delta in {0.4,0.6}",
+          "real delete_atom and delete_cyclic_bond operators",
+          "budget denominated in oracle calls (10,000) -- our currency"
+        ],
+        "caveats": [
+          "citable drd2 number (0.985 no-prescreen / 0.995 with) is DE NOVO PMO, not our task",
+          "its one structurally matching experiment DOES NOT RUN: shipped ppo_docking.py is a results-aggregation script whose argparse accepts only --results_root/--reference_table/--exclude_prescreen/--include_std/--ablation_mode/--results_paths/--model_names, with zero occurrences of torch, vina or ckpt; 3 of 5 receptors missing",
+          "delete operators lifted verbatim from jensengroup/GB_GA (ga/mutate.py:1-10) -- honest attribution for its editing power is Graph GA, not the flow model",
+          "fragmented SMILES discards stereochemistry (their own Limitations)"
+        ],
+        "license_actionable": {
+          "code": "LICENSE is INTERNALLY INCONSISTENT -- line 3 CC BY-NC-SA 4.0, line 5 'Attribution-NonCommercial 4.0'; GitHub API reports NOASSERTION",
+          "weights": "WEIGHTS_TERMS_OF_USE.md restricts to non-commercial use, states 'You must not use nor allow others to use' the output to train models for molecular generation, and 'You must not publish or share InVirtuoGEN model parameters'",
+          "concrete_consequence": "NO InVirtuoGen output may ever become R_theta training data. Running it as a baseline appears fine for non-commercial academic work; training on anything it emits is barred. For main to decide deliberately, not assume."
+        }
+      },
+      "GraphXForm": {
+        "role": "TASK_COMPETENCE",
+        "tier": "4 -- CAPABILITY-DISQUALIFIED for source-conditioned editing",
+        "venue": "Digital Discovery 4:1052-1065 (2025), DOI 10.1039/d4dd00339j; arXiv:2411.01667",
+        "license": "MIT -- the best-licensed method in this audit",
+        "checkpoints": "pretrained checkpoint released, 347,364,546 bytes, verified live",
+        "disqualifier": "CANNOT DELETE. grep for RemoveAtom|RemoveBond|delete_atom|delete_bond returns ZERO hits; action space (molecule_design.py:18-26) is terminate / create atom / pick atom / pick second atom / bond order. Authors name atom and bond removal as future work TWICE (section 3.3.3 and Conclusion).",
+        "second_disqualifier": "budget is 8h wall-clock on one H100; section 3.1 explicitly REJECTS the oracle-call convention. Not citable across labs, and GPU-bound.",
+        "confirms": "the predecessor lane's finding that GraphXForm is 'inappropriate' for the deletion arm of frozen T4"
+      }
+    },
+    "costed_plan_compose_only": {
+      "note": "projection, not measurement; not a recommendation to run. Assumes the MOST expensive reading (20 independent trajectories) so it cannot flatter.",
+      "basis": "smoke measured ~58 min/source on 8 CPUs, ~46 min kernel enumeration, against ~612 kernel calls/source summed across arms => ~4.5 s per kernel call",
+      "per_trajectory": {
+        "greedy_pref": {
+          "kernel_calls": 3.2,
+          "oracle_evals": 2187
+        },
+        "verified_pref": {
+          "kernel_calls": 79.8,
+          "oracle_evals": 53977
+        }
+      },
+      "projection_core_hours": {
+        "greedy_200_sources": 190,
+        "greedy_800_sources": 750,
+        "verified_200_sources": 3200,
+        "verified_800_sources": 12800
+      },
+      "hardware": "CPU only, no GPU anywhere",
+      "cheapest_useful_first_move": "the 200 sources already embedded in the frozen manifest, greedy arm, ~190 core-hours, no dataset acquisition needed",
+      "not_costed": "how COMPOSE produces 20 candidates (20 independent trajectories vs one trajectory yielding 20 endpoints vs a shortlist) changes cost by an order of magnitude and changes what the number means. Not this lane's design choice."
+    },
+    "conflict_surfaced_not_resolved": {
+      "what": "the predecessor lane's frozen T3 imposes a 1,000 unique_valid_canonical_evaluations budget on a similarity-constrained task; the published classic benchmark imposes none",
+      "why_it_matters": "two different tasks with similar descriptions; running one and captioning it as the other is the failure the audit exists to prevent",
+      "arithmetic_problem": "a single budget-6 trajectory over a ~586-wide fiber touches ~3,500 candidates, so T3's 1,000 does not cover two edit steps of exhaustive-fiber control. Whether T3 is runnable as frozen is a real question.",
+      "owner": "whoever owns the conventional suite, not this lane"
+    },
+    "honest_summary": "Neither practical editor's native benchmark aligns with source-conditioned DRD2-style editing. InVirtuoGen is selected because it wins criteria fixed before the evidence arrived, not because it fits."
   }
 }
