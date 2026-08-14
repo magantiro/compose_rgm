@@ -87,6 +87,9 @@ TIME_POINT = 0.5
 CANONICAL_SLOTS = 48
 HORIZON = 6
 TRAIN_ROWS = 23936          #: DDSBM's split; the last 5,984 are test.
+#: Commit a partial this often. 100 keeps worst-case loss ~2 min of the run
+#: while staying cheap against a 5,984-source map.
+CHECKPOINT_EVERY = 100
 LOGP_SHIFT = 2.0
 
 #: Built once per container, reused across every warm input.
@@ -198,19 +201,74 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
             "status": "OK"}
 
 
+def resume_from_partial(
+    tasks: list[dict[str, Any]], partial: Path,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Split `tasks` into (already-done results, still-pending tasks).
+
+    Pure and importable so it can be tested without Modal. Returns recovered
+    results first so the caller can seed its accumulator.
+
+    A torn or truncated partial is treated as ABSENT, not as corruption to
+    propagate: gzip/JSON failures fall back to a full run. Losing a checkpoint
+    costs time; trusting a torn one would corrupt the benchmark payload.
+
+    Only records carrying an integer `index` count as complete, so a partial
+    written mid-append cannot mask a source as done.
+    """
+    if not partial.exists():
+        return [], list(tasks)
+    try:
+        blob = json.loads(gzip.decompress(partial.read_bytes()).decode())
+        recovered = [r for r in blob.get("results", [])
+                     if isinstance(r, dict) and isinstance(r.get("index"), int)]
+    except Exception as exc:  # noqa: BLE001
+        print(f"partial unreadable ({type(exc).__name__}); starting fresh", flush=True)
+        return [], list(tasks)
+    done = {int(r["index"]) for r in recovered}
+    # Deduplicate by index in case a partial was written twice.
+    seen: set[int] = set()
+    unique: list[dict[str, Any]] = []
+    for r in recovered:
+        if int(r["index"]) not in seen:
+            seen.add(int(r["index"]))
+            unique.append(r)
+    pending = [t for t in tasks if int(t["index"]) not in done]
+    return unique, pending
+
+
 @app.function(image=image, cpu=(1.0, 1.0), memory=4096, timeout=12 * 60 * 60,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
 def drive(tasks: list[dict[str, Any]], out_name: str) -> dict[str, Any]:
-    """Aggregate mapped results, checkpointing so a driver loss is not total."""
+    """Aggregate mapped results, RESUMING from a partial rather than restarting.
+
+    The previous version was WRITE-ONLY: it committed a partial every 250
+    results but nothing ever read it back, so a driver loss preserved the data
+    and threw away the work. That is the same defect that cost 76 minutes on
+    pathwise Stage B. Resume is now real -- completed source indices are read
+    from the partial and removed from the work list, so a relaunch continues
+    instead of recomputing.
+    """
     artifact_volume.reload()
     out = Path(RUN_ROOT) / OUT_DIR
     out.mkdir(parents=True, exist_ok=True)
     path, partial = out / f"{out_name}.json.gz", out / f"{out_name}.partial.json.gz"
-    started, results = time.perf_counter(), []
-    for r in run_source.map(tasks, order_outputs=False, return_exceptions=True):
+    started = time.perf_counter()
+
+    results, pending = resume_from_partial(tasks, partial)
+    if len(results):
+        print(f"RESUMED {len(results)} completed sources from {partial.name}; "
+              f"{len(pending)} remain", flush=True)
+    if not pending:
+        print("nothing left to compute; finalizing from the partial", flush=True)
+
+    #: Checkpoint on TOTAL completed, so the cadence does not restart on resume.
+    last_ckpt = len(results)
+    for r in run_source.map(pending, order_outputs=False, return_exceptions=True):
         if isinstance(r, dict):
             results.append(r)
-        if len(results) % 250 == 0:
+        if len(results) - last_ckpt >= CHECKPOINT_EVERY:
+            last_ckpt = len(results)
             partial.write_bytes(gzip.compress(json.dumps(
                 {"results": results}, default=float).encode()))
             artifact_volume.commit()
@@ -228,6 +286,7 @@ def drive(tasks: list[dict[str, Any]], out_name: str) -> dict[str, Any]:
         "r_theta": "frozen; no objective-specific update",
         "paired_target_used": False,
         "n": len(results),
+        "resumed": len(tasks) != len(results) and partial.exists(),
         "seconds": round(time.perf_counter() - started, 1),
         "results": results,
     }
