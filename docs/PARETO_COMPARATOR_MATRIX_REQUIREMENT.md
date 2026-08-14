@@ -103,8 +103,12 @@ work. `pCoMole` still needs a login someone has and the lane does not.
 
 ## Target
 
-**1–2 genuine external numerical Pareto comparators**, and only if an exact
-published or native protocol aligns.
+**AMENDED.** Include **every** method that achieves tier-1 exact alignment as a
+*reported* numerical row — one COMPOSE run on a shared benchmark can buy several
+legitimate rows at no retraining cost. **Cap only reruns: at most 1–2**
+official-native reruns, and only where published numbers are unavailable and a
+thin adapter suffices. Partial alignment stays contextual. Standards are never
+lowered to add a row.
 
 **Barred:** manufacturing ports; mixing incompatible published protocols. The
 70× HN-GFN budget disagreement is the standing example — two papers reporting the

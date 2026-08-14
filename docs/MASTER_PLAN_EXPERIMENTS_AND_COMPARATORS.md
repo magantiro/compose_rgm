@@ -321,14 +321,59 @@ endpoint transformation, not target-free front construction.
 
 Six carry prior findings to be **reused, not re-derived**. Two are new work.
 
-> **Aim for 1–2 genuine external numerical comparators. Zero is acceptable ONLY
-> after the preregistered qualification audit demonstrates that no faithful
-> numerical common protocol exists** — never as an early exit.
+> ### ⚠️ AMENDED — the ceiling applies to RERUNS, not to published rows
+>
+> An earlier version capped this at *"1–2 genuine external numerical
+> comparators."* **That was too restrictive and is retracted.** The correct rule
+> separates two very different costs:
+>
+> **Include EVERY method for which an exact published-number comparison is
+> possible.** If four papers report on the same task, oracle, budget, HV
+> normalization, canonicalization and seed aggregation, then **one COMPOSE run
+> buys four legitimate rows** and we retrain nothing. That is
+> published-number-first at its best.
+>
+> **Cap only what we rerun ourselves: at most 1–2 official-native reruns**, and
+> only when a load-bearing comparator lacks compatible published numbers *and*
+> supports the common task through a thin adapter. **No manufactured ports.**
+>
+> Standards do not drop to fill rows: if only one method survives the audit,
+> only one gets a head-to-head row. Partial alignment stays **contextual**.
+
+### The audit's real job: find benchmark INTERSECTIONS
+
+The instruction to the audit is **not** "find a baseline for COMPOSE." It is
+**find clusters of papers already sharing a protocol.** For each Pareto method
+record:
+
+molecular dataset/task · exact objectives · exact oracle implementation and
+version · source-conditioned vs de novo · oracle-evaluation count *and what
+counts as one* · number of generated candidates · hypervolume reference point
+and normalization · ND/spread metrics · seed aggregation ·
+validity/canonicalization · the published numerical values.
+
+Then look for where those coincide. A single shared benchmark carrying several
+prior methods is worth far more than several separately-argued near-matches.
+
+**We do not yet know that these methods share a task** — that is precisely what
+is unfinished. Do not assume it.
 
 The block already carries a fair matched causal baseline in repaired P3/P4,
 which tests the COMPOSE-specific claim more directly than any external row. That
-is a reason the external count may honestly end up small; it is **not** a licence
-to stop auditing. Three rows are still open.
+is a reason the *rerun* count stays near zero; it is **not** a licence to stop
+auditing. Four rows are still open.
+
+### External methods belong in the FINAL panel, not in every subexperiment
+
+Each Pareto subexperiment isolates one mechanism, and an external model would
+answer none of them:
+
+| subexperiment | question | correct contrast | external methods? |
+|---|---|---|---|
+| **P3/P4** | does closed-loop state feedback matter? | COMPOSE vs fair generate-and-rank | **no** — they don't isolate feedback |
+| **P0c** | was five-weight sampling hiding richness? | 5 weights vs complete sweep | **no** |
+| **K41** | can `R_θ` expose that front under 10k? | full-information ceiling vs budgeted sweep | **no** |
+| **fresh final panel** | is COMPOSE competitive? | COMPOSE final vs all exact-alignment published methods | **yes — this is where they go** |
 
 #### 4d · The scalable operating points — RECLASSIFIED after P0c
 
