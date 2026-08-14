@@ -777,7 +777,27 @@ order and uniforms in advance.
 
 Full design and the frozen A→B→C→D validation ladder:
 **`docs/LEARNED_REACHABILITY_CONTROLLER.md`**. Stage A checks against **exact**
-`h` on the enumerable 967-state system and is not optional.
+`h` on the enumerable 967-state system and is not optional. **Stage A1 is
+DONE** — the rejection sampler is proven to reproduce the exact Doob kernel,
+with aliases aggregating for free and batching provably law-preserving (6/6).
+
+> ### 🔍 AUDIT FIRST — much of this already exists
+> `docs/AUDIT_EXISTING_CONTROLLER_LANE.md`. A trained 4-seed `h_φ` ensemble, a
+> value-guided SMC controller, an RTB trainer and a best-first reference were
+> found **after** this design was written.
+>
+> **Reuse the pattern, not the weights.** The existing `h_φ` conditions on a
+> target **molecule** (`e_z`, `sim(y,z)`) — the banked exact-target controller —
+> where QED needs an objective **region**. SMC ran on **Lineage B**, not frozen
+> `R_θ`, and its 0.5 success used **budget 1000 per lead** against the
+> protocol's 20 candidates, so it is **not** comparable to GrIDDD's 45.1 %.
+> Its `value_twist` was `None` — V0, no learned twist at all.
+>
+> **Two words to stop using:** the "33 % ceiling" is not a ceiling — SMC beat it
+> at 0.5. Call it the best-first search reference.
+>
+> **The signal that matters:** something reached 0.5 where policy B reached 0.0.
+> The failure was the controller, not COMPOSE.
 
 ## C · MOLLEO Task 3 — the five-objective external MOO benchmark
 
