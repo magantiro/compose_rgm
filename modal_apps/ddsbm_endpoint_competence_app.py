@@ -1,4 +1,4 @@
-"""COMPOSE on DDSBM's ZINC logP 2->4 task. TIER-1: COMPOSE runs alone.
+"""COMPOSE on DDSBM's ZINC logP 2->4 benchmark. TIER-1: COMPOSE runs alone.
 
 Protocol frozen in `docs/DDSBM_ENDPOINT_COMPETENCE_PROTOCOL.md` before any
 outcome existed. Nothing here may be tuned against DDSBM's published table.
@@ -8,32 +8,47 @@ THE OBJECTIVE IS A TRANSPORT ADAPTER, NOT A POINT TARGET
     tau(x0)   = logP(x0) + 2
     u(y; x0)  = -|logP(y) - tau(x0)|
 
-DDSBM's ZINC experiment moves a source marginal at logP~N(2, 0.5) to a target at
-N(4, 0.5) and scores Wasserstein-1 between MARGINALS. A point objective at 4
-would collapse the generated spread toward the mode and inflate W1 against a
-target whose sd is 0.5. Verified on the frozen test split before launch: source
-mean 2.015 sd 0.499, tau mean 4.015 sd 0.499 -- the +2 shift reproduces the
-prescribed target in BOTH moments. Absolute error, not squared, because W1 is an
-L1 transport metric.
+DDSBM moves a source marginal at logP~N(2, 0.5) to a target at N(4, 0.5) and
+scores Wasserstein-1 between MARGINALS. A point objective at 4 would collapse the
+generated spread toward the mode and inflate W1 against a target whose sd is 0.5.
+Verified on the frozen test split before launch: source mean 2.015 sd 0.499, tau
+mean 4.015 sd 0.499. Absolute error, not squared, because W1 is an L1 metric.
 
-BARRED: the CSV's randomly paired PRB-SMI target. That coupling exists for
-DDSBM's training; the scientific task is transport between marginals, and the
-pair would inject per-source information not intrinsic to it. This app reads
-REF-SMI and REF-LOGP only.
+BARRED: the CSV's randomly paired PRB-SMI. That coupling exists for DDSBM's
+training; the task is transport between marginals. Only REF-SMI is read.
 
-FROZEN, NO SWEEP: H = 6, COMPOSE's native horizon, taken from our framework
-rather than optimised against their table. Greedy closed-loop only -- P3 showed
-greedy carries the mechanism at ~22x lower cost, and a competence experiment does
-not deploy the expensive controller to chase a benchmark. R_theta frozen; no
-objective-specific parameter update anywhere.
+EXECUTION: HORIZONTAL, ONE CORE PER WORKER
+------------------------------------------
+The kernel's mark loop is PURE PYTHON and single-threaded. An earlier version
+requested `cpu=8.0` per container, reserving eight cores while ~seven idled
+through every expansion -- the cost was cores held, not compute done. The actual
+work is ~50 core-hours whatever the shape.
 
-REPRESENTABILITY GATE PASSED BEFORE LAUNCH: 5984/5984 = 100.00%, zero exclusions,
-so this is a true head-to-head against DDSBM's published full-test numbers.
+So: `cpu=(1.0, 1.0)` hard request+limit so a worker cannot quietly burst,
+`max_containers=80`, and **one source per mapped work item** rather than fixed
+250-source shards -- `.map()` then feeds the next source to whichever worker frees
+up, so one slow molecule cannot hold a shard hostage and determine wall time.
 
-PERSIST EVERYTHING, ONCE. The P0c probe had to re-derive fibers the committed
-Pareto runs had paid for and discarded. Not repeating that: every trajectory,
-endpoint, property triple, counter and failure is written, so FCD/NSPDK and any
-later analysis are computable WITHOUT another generation run.
+The runtime is built **once per container** and reused across warm inputs. Loading
+`R_theta` per molecule would dominate everything else.
+
+NOTHING IS COMPUTED IN THE TRAJECTORY LOOP except what the controller needs:
+logP of each successor. QED, SA, ring counts and edit expressivity are derived
+afterwards from the persisted trajectory.
+
+METRICS: TASK-ALIGNED ONLY
+--------------------------
+FCD and NSPDK are **deliberately not computed**. They ask whether an aggregate
+bag of molecules resembles a target dataset -- DDSBM's question as a
+distribution-generative model, not ours. Including them would invite the reader
+to think COMPOSE is imitating a distribution rather than demonstrating controlled
+source-conditioned editing.
+
+This is therefore **not** "a reproduction of DDSBM Table 1". It is evaluation on
+DDSBM's held-out benchmark under shared task-aligned metrics: logP W1, source->
+endpoint QED and SA drift, structural change, endpoint validity, and -- uniquely
+for COMPOSE -- trajectory-wide validity and edit expressivity, which no row in
+their table can report.
 """
 
 from __future__ import annotations
@@ -59,7 +74,8 @@ DDSBM_CSV = "local_runtime/ddsbm/DDSBM-main/data/raw/ZINC250k_logp_2_4_random_ma
 
 image = (
     _base_image
-    .env({"PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}", "OMP_NUM_THREADS": "4"})
+    # One core per worker, so OMP must not oversubscribe it.
+    .env({"PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}", "OMP_NUM_THREADS": "1"})
     .add_local_file(ROOT / DDSBM_CSV, str(REMOTE_ROOT / "ddsbm_pairs.csv"), copy=True)
 )
 
@@ -70,30 +86,22 @@ OUT_DIR = "ddsbm_endpoint_competence"
 TIME_POINT = 0.5
 CANONICAL_SLOTS = 48
 HORIZON = 6
-#: DDSBM's split: 29,920 pairs, last 20% is the 5,984-molecule test set.
-TRAIN_ROWS = 23936
+TRAIN_ROWS = 23936          #: DDSBM's split; the last 5,984 are test.
 LOGP_SHIFT = 2.0
-CHECKPOINT_EVERY = 25
+
+#: Built once per container, reused across every warm input.
+_RT: dict[str, Any] = {}
 
 
-@app.function(
-    image=image, cpu=8.0, memory=16 * 1024, timeout=6 * 60 * 60,
-    max_containers=24, retries=5,
-    volumes={str(ARTIFACT_ROOT): artifact_volume},
-)
-def run_batch(task: dict[str, Any]) -> dict[str, Any]:
+def _runtime():
+    """Load R_theta and the executor ONCE per container."""
+    if "model" in _RT:
+        return _RT
     import sys
 
-    import numpy as np
     import torch
-    from rdkit import Chem, RDLogger
-    from rdkit.Chem import Crippen, QED
 
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
-    from rdkit.Contrib.SA_Score import sascorer  # noqa: E402
-
-    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
-    from compose_v4.chem.state import pad_molecular_graph
     from compose_v4.experiments.editing_v2_process_v2_t1_panel import (
         open_process_v2_t1_source,
     )
@@ -104,28 +112,8 @@ def run_batch(task: dict[str, Any]) -> dict[str, Any]:
     from compose_v4.experiments.editing_v2_r_theta_corpus_training import (
         CHECKPOINT_FILENAME,
     )
-    from compose_v4.experiments.pareto_control import _argmin_stable
-    from compose_v4.experiments.production_successor_kernel import (
-        canonical_successor_result,
-    )
 
-    RDLogger.DisableLog("rdApp.*")
-    started = time.perf_counter()
-    artifact_volume.reload()
-
-    shard_id = int(task["shard"])
-    out = Path(RUN_ROOT) / task.get("out_dir", OUT_DIR)
-    out.mkdir(parents=True, exist_ok=True)
-    shard_path = out / f"{shard_id:03d}.json.gz"
-    partial = out / f"{shard_id:03d}.partial.json.gz"
-    if shard_path.exists():
-        print(f"[{shard_id:03d}] exists, skipping", flush=True)
-        return {"shard": shard_id, "skipped": True}
-
-    rows = list(csv.DictReader(open(REMOTE_ROOT / "ddsbm_pairs.csv")))[TRAIN_ROWS:]
-    mine = rows[task["lo"]:task["hi"]]
-    print(f"[{shard_id:03d}] {len(mine)} sources", flush=True)
-
+    t0 = time.perf_counter()
     paths = json.loads((Path(RUN_ROOT) / "run_inputs" / "RUN_PATHS.json").read_text())
     source_obj = open_process_v2_t1_source(
         Path(paths["active8_root"]),
@@ -140,116 +128,136 @@ def run_batch(task: dict[str, Any]) -> dict[str, Any]:
     model.load_state_dict(ckpt["selected_model_state"], strict=True)
     model.eval()
     torch.set_grad_enabled(False)
+    torch.set_num_threads(1)
+    _RT["model"] = model
+    _RT["init_seconds"] = round(time.perf_counter() - t0, 1)
+    print(f"container runtime built in {_RT['init_seconds']}s", flush=True)
+    return _RT
 
-    def props(smi: str) -> dict[str, float] | None:
-        mol = Chem.MolFromSmiles(smi)
-        if mol is None:
-            return None
-        return {"logp": float(Crippen.MolLogP(mol)),
-                "qed": float(QED.qed(mol)),
-                "sa": float(sascorer.calculateScore(mol)),
-                "heavy": int(mol.GetNumHeavyAtoms())}
 
-    results, resumed = [], 0
-    if partial.exists():
-        results = json.loads(gzip.decompress(partial.read_bytes()))["results"]
-        resumed = len(results)
-        print(f"[{shard_id:03d}] RESUMED at {resumed}", flush=True)
+@app.function(
+    image=image, cpu=(1.0, 1.0), memory=4096, timeout=60 * 60,
+    max_containers=80, retries=3,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def run_source(task: dict[str, Any]) -> dict[str, Any]:
+    """One source molecule. Returns a small record; the driver aggregates."""
+    import numpy as np
+    from rdkit import Chem, RDLogger
+    from rdkit.Chem import Crippen
 
-    kernel_calls = 0
-    for i, row in enumerate(mine[resumed:], start=resumed):
-        src = row["REF-SMI"]
-        p0 = props(src)
-        if p0 is None:
-            results.append({"source": src, "status": "SOURCE_UNPARSEABLE"})
-            continue
-        tau = p0["logp"] + LOGP_SHIFT
+    RDLogger.DisableLog("rdApp.*")
+    rt = _runtime()
+    model = rt["model"]
 
-        # Greedy closed-loop: commit the fiber argmin of |logP - tau| each step.
-        cur, traj, valid_all, dead = src, [src], True, None
-        cache: dict[str, float] = {}
-        for step in range(HORIZON):
-            try:
-                state = pad_molecular_graph(smiles_to_molecular_graph(cur), CANONICAL_SLOTS)
-                res = canonical_successor_result(model, state, float(TIME_POINT))
-                kernel_calls += 1
-            except Exception as e:  # noqa: BLE001
-                dead = f"kernel:{type(e).__name__}"
-                break
-            keys = [s.key for s in res.batch.successors]
-            if not keys:
-                dead = "empty_fiber"
-                break
-            scores = []
-            for k in keys:
-                if k not in cache:
-                    m = Chem.MolFromSmiles(k)
-                    cache[k] = (abs(float(Crippen.MolLogP(m)) - tau)
-                                if m is not None else 1e9)
-                scores.append(cache[k])
-            cur = keys[_argmin_stable(np.asarray(scores, float), keys)]
-            traj.append(cur)
-            if Chem.MolFromSmiles(cur) is None:
-                valid_all = False
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.experiments.pareto_control import _argmin_stable
+    from compose_v4.experiments.production_successor_kernel import (
+        canonical_successor_result,
+    )
 
-        pH = props(cur)
-        results.append({
-            "source": src, "endpoint": cur, "trajectory": traj,
-            "tau": tau, "edits": len(traj) - 1, "dead_end": dead,
-            "all_states_valid": valid_all,
-            "endpoint_valid": pH is not None,
-            "source_props": p0, "endpoint_props": pH,
-            "ddsbm_ref_logp": float(row["REF-LOGP"]),
-            "size_change": (pH["heavy"] - p0["heavy"]) if pH else None,
-            "candidates_scored": len(cache),
-        })
-        if (i + 1) % CHECKPOINT_EVERY == 0:
+    t0 = time.perf_counter()
+    src = task["smiles"]
+    mol0 = Chem.MolFromSmiles(src)
+    if mol0 is None:
+        return {"index": task["index"], "source": src, "status": "SOURCE_UNPARSEABLE"}
+    tau = float(Crippen.MolLogP(mol0)) + LOGP_SHIFT
+
+    cur, traj, dead, kernel_calls = src, [src], None, 0
+    logp_cache: dict[str, float] = {}
+    for _ in range(HORIZON):
+        try:
+            state = pad_molecular_graph(smiles_to_molecular_graph(cur), CANONICAL_SLOTS)
+            res = canonical_successor_result(model, state, float(TIME_POINT))
+            kernel_calls += 1
+        except Exception as e:  # noqa: BLE001
+            dead = f"kernel:{type(e).__name__}"
+            break
+        keys = [s.key for s in res.batch.successors]
+        if not keys:
+            dead = "empty_fiber"
+            break
+        # The ONLY per-candidate work in the loop: the controller's objective.
+        scores = []
+        for k in keys:
+            v = logp_cache.get(k)
+            if v is None:
+                m = Chem.MolFromSmiles(k)
+                v = abs(float(Crippen.MolLogP(m)) - tau) if m is not None else 1e9
+                logp_cache[k] = v
+            scores.append(v)
+        cur = keys[_argmin_stable(np.asarray(scores, float), keys)]
+        traj.append(cur)
+
+    return {"index": task["index"], "source": src, "endpoint": cur,
+            "trajectory": traj, "tau": tau, "edits": len(traj) - 1,
+            "dead_end": dead, "kernel_calls": kernel_calls,
+            "candidates_scored": len(logp_cache),
+            "seconds": round(time.perf_counter() - t0, 2),
+            "status": "OK"}
+
+
+@app.function(image=image, cpu=(1.0, 1.0), memory=4096, timeout=12 * 60 * 60,
+              volumes={str(ARTIFACT_ROOT): artifact_volume})
+def drive(tasks: list[dict[str, Any]], out_name: str) -> dict[str, Any]:
+    """Aggregate mapped results, checkpointing so a driver loss is not total."""
+    artifact_volume.reload()
+    out = Path(RUN_ROOT) / OUT_DIR
+    out.mkdir(parents=True, exist_ok=True)
+    path, partial = out / f"{out_name}.json.gz", out / f"{out_name}.partial.json.gz"
+    started, results = time.perf_counter(), []
+    for r in run_source.map(tasks, order_outputs=False, return_exceptions=True):
+        if isinstance(r, dict):
+            results.append(r)
+        if len(results) % 250 == 0:
             partial.write_bytes(gzip.compress(json.dumps(
                 {"results": results}, default=float).encode()))
             artifact_volume.commit()
-            print(f"[{shard_id:03d}] {i+1}/{len(mine)} kernel={kernel_calls} "
-                  f"{time.perf_counter()-started:.0f}s", flush=True)
-
+            print(f"{len(results)}/{len(tasks)} {time.perf_counter()-started:.0f}s",
+                  flush=True)
     payload = {
         "schema": "compose.ddsbm.endpoint_competence",
-        "status": "TIER1_EXTERNAL_PROTOCOL", "shard": shard_id,
+        "status": "EXTERNAL_BENCHMARK_TASK_ALIGNED_METRICS",
+        "not_a_reproduction_of": ("DDSBM Table 1 -- FCD and NSPDK are "
+                                  "deliberately omitted as distribution-model "
+                                  "diagnostics, not task-aligned metrics"),
         "protocol": "docs/DDSBM_ENDPOINT_COMPETENCE_PROTOCOL.md",
         "objective": "u(y;x0) = -|logP(y) - (logP(x0) + 2)|",
         "horizon": HORIZON, "controller": "greedy_closed_loop",
         "r_theta": "frozen; no objective-specific update",
         "paired_target_used": False,
-        "kernel_calls": kernel_calls,
+        "n": len(results),
         "seconds": round(time.perf_counter() - started, 1),
         "results": results,
     }
-    shard_path.write_bytes(gzip.compress(json.dumps(payload, default=float).encode()))
+    path.write_bytes(gzip.compress(json.dumps(payload, default=float).encode()))
     partial.unlink(missing_ok=True)
     artifact_volume.commit()
-    print(f"[{shard_id:03d}] DONE {len(results)} kernel={kernel_calls} "
-          f"{payload['seconds']:.0f}s", flush=True)
-    return {"shard": shard_id, "n": len(results)}
+    print(f"DONE {len(results)} in {payload['seconds']:.0f}s", flush=True)
+    return {"n": len(results), "seconds": payload["seconds"]}
 
 
-@app.function(image=image, cpu=0.25, memory=2048, timeout=12 * 60 * 60,
-              volumes={str(ARTIFACT_ROOT): artifact_volume})
-def drive(tasks: list[dict[str, Any]]) -> int:
-    artifact_volume.reload()
-    done = 0
-    for _ in run_batch.map(tasks, order_outputs=False, return_exceptions=True):
-        done += 1
-    return done
+def _test_sources() -> list[dict[str, Any]]:
+    rows = list(csv.DictReader(open(ROOT / DDSBM_CSV)))
+    test = rows[TRAIN_ROWS:]
+    assert len(test) == 5984, f"expected DDSBM's 5,984 test sources, got {len(test)}"
+    return [{"index": i, "smiles": r["REF-SMI"]} for i, r in enumerate(test)]
 
 
 @app.local_entrypoint()
-def main(shards: int = 24) -> None:
-    rows = list(csv.DictReader(open(ROOT / DDSBM_CSV)))
-    n = len(rows) - TRAIN_ROWS
-    assert n == 5984, f"expected DDSBM's 5,984 test sources, got {n}"
-    step = (n + shards - 1) // shards
-    tasks = [{"shard": s, "lo": s * step, "hi": min((s + 1) * step, n),
-              "out_dir": OUT_DIR} for s in range(shards)]
-    print(f"DDSBM ZINC logP 2->4, TIER-1: COMPOSE alone on {n} test sources")
+def main(pilot: int = 0) -> None:
+    """`--pilot N` runs N sources for TIMING ONLY. No metric is inspected."""
+    tasks = _test_sources()
+    if pilot:
+        tasks = tasks[:pilot]
+        print(f"RUNTIME-ONLY PILOT: {pilot} sources, one core per worker.")
+        print("Verifying per-expansion latency at cpu=1.0. No outcome inspected.")
+        out_name = f"pilot_{pilot:04d}"
+    else:
+        print(f"FULL RUN: {len(tasks)} DDSBM test sources")
+        out_name = "full"
     print(f"objective u = -|logP(y) - (logP(x0)+2)|  H={HORIZON}  greedy  frozen R_theta")
-    print(f"{shards} shards of ~{step}; representability gate passed 5984/5984")
-    call = drive.spawn(tasks)
+    print("cpu=(1.0,1.0), max_containers=80, one source per work item")
+    call = drive.spawn(tasks, out_name)
     print(f"driver spawned: {call.object_id}")
