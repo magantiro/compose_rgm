@@ -54,3 +54,4 @@ diagnostics/.v2_successor_cache.pkl
 !artifacts/h_phi_frozen_v1/*.pt
 local_runtime/
 runs/run_v2_01/
+local_runtime/zinc250k/
