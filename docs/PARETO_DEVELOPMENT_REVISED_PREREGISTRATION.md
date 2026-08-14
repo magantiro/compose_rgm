@@ -146,20 +146,55 @@ deliberately not run here. Arm C's question is a practical operating-point one:
 *at the same oracle budget, is mildly pruned greedy or aggressively pruned
 future-aware control better?* Either answer is informative.
 
-### Panel size: n = 24, from variance planning on the existing 12
+### Panel size — the first calculation was WRONG and n is NOT yet fixed
 
-Planning used the paired controller HV difference (verified − greedy, sd 0.100)
-over mean full-greedy HV 0.849, giving an implied retention-ratio sd of **0.118**
-— conservative, since a shortlist retaining 56% of the fiber should perturb less
-than swapping the controller entirely.
+**Withdrawn.** The initial planning computed the lower CI *at* the true value:
+`lower = r − 1.96·sd/√n`. That asks *"if the sample mean lands exactly on the
+truth, does the interval clear?"* — a **~50%-power question by construction**,
+because it ignores sampling variation in the mean itself. It also used a normal
+approximation while the final analysis reports a **source-level bootstrap**, and
+the two do not agree: the bootstrap of a ratio is skewed, the normal
+approximation symmetric.
 
-| true retention | n=20 | **n=24** | n=30 |
-|---|---|---|---|
-| 0.95 | 0.8984 fail | **0.9029 PASS** | 0.9078 PASS |
-| 0.97 | 0.9184 PASS | 0.9229 PASS | 0.9278 PASS |
+Redone with the actual estimand and the actual interval
+(`scripts/pareto_scalable_power.py`, log-normal so a simulated retention cannot
+go negative):
 
-**n = 24 is the smallest tested size clearing 0.90 when true retention is 0.95** —
-the good-but-not-perfect case, which is the one worth sizing for.
+| true retention | n=16 | n=20 | **n=24** | n=30 |
+|---|---|---|---|---|
+| 0.95 | 0.437 | 0.515 | **0.604** | 0.667 |
+| 0.97 | 0.708 | 0.804 | **0.867** | 0.923 |
+| 1.00 | 0.948 | 0.981 | **0.992** | 0.998 |
+
+**n=24 gives 60% power at a true retention of 0.95** — not the ~50% the bad
+calculation implied it was clearing, but nowhere near adequate. The stated intent
+was to size for the good-but-not-perfect case, and n=24 does not meet it.
+
+**n required for 80% power**, across the true retention and the retention-ratio
+sd:
+
+| sd | ret=0.95 | ret=0.97 | ret=0.99 |
+|---:|---:|---:|---:|
+| **0.118** (conservative proxy) | **40** | 24 | 16 |
+| 0.080 | 24 | 16 | 16 |
+| 0.050 | 16 | 16 | 16 |
+
+**The answer hinges entirely on a variance we are guessing.** The 0.118 proxy
+comes from swapping *controllers* (verified vs greedy) — a far larger
+perturbation than shortlisting to 56% of the fiber — so the true retention sd is
+plausibly much smaller, and at sd ≤ 0.08 n=24 is already sufficient.
+
+### Resolution: MEASURE the variance on the existing 12 first
+
+The 12 are already designated for variance/power planning and implementation
+checks, and never as the load-bearing estimate. Running arms A and B there is
+**cheap** — full and budgeted greedy are ~16 kernel calls per source, against
+arm C's ~393 — and it converts the guessed sd into a measured one.
+
+**Then fix n from the measured sd, and only then select the fresh cohort.**
+
+This costs little, removes the largest remaining uncertainty in the design, and
+uses the 12 for exactly what they were sanctioned for.
 
 ### If it fails
 

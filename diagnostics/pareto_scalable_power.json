@@ -1,0 +1,41 @@
+{
+  "schema": "compose.pareto.scalable_power",
+  "status": "DESIGN_ONLY",
+  "estimand": "r_i = HV_i(budgeted greedy) / HV_i(full greedy), source-level",
+  "interval": "source-level paired bootstrap, 2.5th percentile of the mean",
+  "criterion": "lower bound > 0.9",
+  "supersedes": "the initial normal-approximation planning; planning and reporting must use the same procedure",
+  "variance_proxy": {
+    "paired_controller_hv_diff_sd": 0.10001397816131727,
+    "mean_full_greedy_hv": 0.8488095858832277,
+    "implied_retention_ratio_sd": 0.11782852105428081,
+    "why_conservative": "a shortlist retaining 56% of the fiber should perturb less than swapping the controller"
+  },
+  "power_grid": {
+    "0.93": {
+      "16": 0.206,
+      "20": 0.2405,
+      "24": 0.27225,
+      "30": 0.293
+    },
+    "0.95": {
+      "16": 0.43725,
+      "20": 0.515,
+      "24": 0.604,
+      "30": 0.6675
+    },
+    "0.97": {
+      "16": 0.70825,
+      "20": 0.80375,
+      "24": 0.86675,
+      "30": 0.92325
+    },
+    "1.0": {
+      "16": 0.948,
+      "20": 0.9805,
+      "24": 0.99175,
+      "30": 0.998
+    }
+  },
+  "chosen_n": 24
+}
