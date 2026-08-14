@@ -200,20 +200,113 @@ oracle, and the benchmark measures distribution match rather than oracle
 efficiency. The disclosure still travels with the row; it simply does not
 disqualify it.
 
-### One practical editor — GraphXForm or InVirtuoGen
+### One practical editor — **InVirtuoGen selected**, on the criteria fixed in advance
 
-`PENDING`. Selection criteria, fixed in advance:
+The criteria were recorded before the evidence arrived:
 
 1. natively **source-conditioned**;
-2. an action space that can **delete**, not only append — the predecessor lane
-   already recorded GraphXForm as `inappropriate` for the deletion arm of its
-   frozen T4, *"its action space is strictly constructive and cannot remove an
-   atom or bond"*;
+2. an action space that can **delete**, not only append;
 3. a published protocol we can either reproduce or cite cleanly.
 
-Criterion 2 is not a tiebreak. A comparator that cannot delete cannot express
-half of what a source-conditioned editor does, and reporting it as *the*
-practical editor without saying so would misdescribe the field.
+**GraphXForm fails criterion 2 outright, and the failure is a capability, not a
+fit.** Verified directly in the clone at `867bdcf9`:
+
+- `grep -rniE "RemoveAtom|RemoveBond|delete_atom|delete_bond" --include=*.py`
+  returns **zero hits** across the repository.
+- The action space (`molecule_design.py:18-26`) is Level 0 terminate / create
+  atom / pick atom, Level 1 pick second atom, Level 2 bond order. Purely
+  constructive.
+- The authors say so twice. §3.3.3: *"Extending the action space to include atom
+  and bond removal is straightforward within our framework; however, we leave the
+  exploration of this possibility for future work."* And in the Conclusion:
+  *"we aim to extend the action space by allowing the agent to remove bonds and
+  atoms."*
+
+This independently confirms the predecessor lane's finding, which recorded
+GraphXForm as `inappropriate` for the deletion arm of frozen T4.
+
+**GraphXForm also fails criterion 3 on budget currency.** Its headline numbers are
+GuacaMol goal-directed best-of-run under an **8-hour wall-clock cap on one H100**,
+and §3.1 explicitly *rejects* the oracle-call convention: *"While this is useful
+for comparing sample efficiency, it offers limited insight into overall
+efficiency when objective evaluations are inexpensive."* A wall-clock budget on
+named hardware is not citable across labs, and this lane is CPU-only regardless.
+
+It is otherwise the best-licensed and best-published thing in this audit — **MIT**
+(`LICENSE:1`), a live 347 MB pretrained checkpoint, peer-reviewed in *Digital
+Discovery* 4:1052–1065 (2025), DOI `10.1039/d4dd00339j`. None of that repairs an
+append-only action space.
+
+> **GraphXForm: tier 4, capability-disqualified for source-conditioned editing.**
+> Cite in related work as a strong de novo constructive designer. Do not report it
+> as a source-conditioned editing comparator.
+
+#### InVirtuoGen — selected, tier 2, with real caveats
+
+*Refine Drugs, Don't Complete Them: Uniform-Source Discrete Flows for
+Fragment-Based Drug Discovery*, Kaech, Wyss, Borgwardt, Grasso. **arXiv:2509.26405**,
+NeurIPS 2025 **workshop** (AI4D3) — main-conference or journal venue `UNVERIFIED`.
+Code `github.com/invirtuolabs/InVirtuoGen_results` @ `b50bb3ae`.
+
+It wins on the pre-registered criteria:
+
+| criterion | InVirtuoGen |
+|---|---|
+| source-conditioned | **YES** for lead optimization — seed molecule, QED ≥ 0.6, SA ≤ 4, **Tanimoto ≥ δ ∈ {0.4, 0.6}** — structurally the same shape as ours |
+| can delete | **YES** — `delete_atom` and `delete_cyclic_bond` in `in_virtuo_reinforce/ga/mutate.py` |
+| budget currency | **oracle calls, 10,000** — the same currency we use |
+
+And it is unusually disciplined about budget honesty, publicly noting that GenMol
+and f-RAG prescreen all of ZINC250k — *"while they nominally report results with
+10k oracle calls, the effective budget is closer to 260,000"* — and reporting
+both regimes.
+
+**But every caveat below must travel with it.**
+
+1. **Its citable numbers are on the wrong task.** The PMO `drd2` value (0.985
+   no-prescreen, 0.995 with) is **de novo** — no source molecule, no edit budget,
+   no similarity constraint. Citing it says nothing about source-conditioned
+   editing.
+2. **Its one matching experiment is unreproducible in the release.** `README.md:302`
+   documents `python -m in_virtuo_reinforce.ppo_docking --max_oracle_calls 1000
+   …`, but the shipped `ppo_docking.py` is a **results-aggregation script**: its
+   argparse accepts only `--results_root`, `--reference_table`,
+   `--exclude_prescreen`, `--include_std`, `--ablation_mode`, `--results_paths`,
+   `--model_names`, and it contains **zero** occurrences of `torch`, `vina` or
+   `ckpt`. Only **2 of 5 receptors** ship (`jak2`, `parp1`; `fa7`, `5ht1b`,
+   `braf` missing). The lead-optimization objective is **QuickVina2 docking**, not
+   DRD2, in any case.
+3. **Its editing power is Graph GA's, not its own.** `ga/mutate.py:1-10` states
+   *"This file has been taken from jensengroup/GB_GA"*. The neural component is a
+   discrete flow over fragmented-SMILES tokens; the delete operators are
+   SMARTS-based GA mutations. Attributing editing competence to the flow model
+   would be wrong, and the honest citation for those operators is GB-GA.
+4. **Licence, and this one is actionable.** `LICENSE` is **internally
+   inconsistent** — line 3 says CC BY-NC-**SA** 4.0, line 5 says
+   "Attribution-NonCommercial 4.0"; the GitHub API reports `NOASSERTION`. A
+   separate `WEIGHTS_TERMS_OF_USE.md` restricts the weights to non-commercial use
+   and states *"You **must not** use nor allow others to use"* the output to train
+   models for molecular generation, and *"You **must not** publish or share
+   InVirtuoGEN model parameters"*.
+
+   > **Concrete consequence: no InVirtuoGen output may ever become `R_θ`
+   > training data.** Running it as a baseline appears fine for non-commercial
+   > academic work; training on anything it emits is barred. Recorded as a
+   > decision for main, not an assumption.
+5. Fragmented SMILES **discards stereochemistry** (their own Limitations).
+
+> **InVirtuoGen: tier 2.** Cite its PMO `drd2` number as *reported*, labelled de
+> novo, never as a source-conditioned editing comparison. A tier-3 rerun on our
+> task would need a new oracle function in its intact PMO harness plus a
+> from-scratch rewrite of the lead-optimization path — not recommended.
+
+#### The honest summary of Part 2
+
+**Neither practical editor's native benchmark aligns with source-conditioned
+DRD2-style editing.** GraphXForm cannot delete and budgets wall-clock;
+InVirtuoGen budgets oracle calls and can delete, but its citable numbers are de
+novo and its matching experiment does not run. InVirtuoGen is selected because it
+wins on criteria fixed before the evidence, not because it aligns.
 
 ---
 
