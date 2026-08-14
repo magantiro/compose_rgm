@@ -249,3 +249,78 @@ easier goal, earlier hitting, and a frozen rare-event escalation.
 > **The position has moved from "maybe the controller idea does not work" to
 > "the controller works — the question is how much tail amplification it gets
 > when properly trained."**
+
+### Correction: the identity check is de-biased, NOT independent
+
+I called the predicted-vs-observed agreement "independent confirmation." **That
+overstates it** — both quantities are evaluations of the *same* `h_φ` under the
+*same* sampling mechanism. It is a clean, **de-biased mechanistic validation**,
+which is what it was designed to be, and it should be described that way.
+
+**What it does establish, exactly.** For positive `h`:
+
+```
+E_R[h²]/E_R[h] − E_R[h]  =  Var_R(h) / E_R[h]
+```
+
+so a strict gap means `h_φ` has **within-state variance across legal
+successors**. Measured:
+
+```
+0.5632 − 0.3063 = 0.2569   →   Var_R(h) = 0.0787,  sd = 0.281
+```
+
+**Mean 0.306 with sd 0.281 on [0,1] — substantial within-state spread.** A model
+that had learned only *"0.90 is globally harder than 0.80"* would assign
+near-identical value to every road from a state, give `sd ≈ 0`, and **could not
+steer at all.** Successor discrimination is the one thing control requires, and
+it is present.
+
+### The heterogeneity table is a WARNING, not a measurement
+
+Those three rows are **hypothetical distributions with the same mean**. They
+establish *sensitivity* to heterogeneity. **They do not show that COMPOSE has
+the "90 % of sources unreachable" shape** — that has not been measured.
+
+What *has* been established, weaker but favourable: across the development
+population, `0.90/0.40` routes exist under an **unguided, goal-blind** `R_θ`.
+How broadly they are distributed across sources is what the full controller
+must tell us.
+
+### Therefore: track INTENSITY and COVERAGE separately
+
+**Do not optimize or celebrate pooled trajectory hit rate alone.** The
+benchmark gives each source **one binary success** regardless of how many times
+an easy source succeeds.
+
+| axis | question |
+|---|---|
+| **intensity** | on sources where success is possible, how much does control raise the probability? |
+| **coverage** | across how many *different* sources does control create a meaningful chance? |
+
+> The dream is **not** *"ten sources become incredibly easy."* It is **"a broad
+> fraction of sources move from low-but-nonzero reachability into useful success
+> probability."** Then best-of-20 becomes powerful.
+
+**The 64-source dev experiment must therefore report the source-level
+distribution**, not only pooled trajectories:
+
+```
+fraction of sources with   0/20   ·   1+/20   ·   5+/20   successes
+```
+
+That distinguishes **broad amplification** from **hammering a few easy
+molecules** — and a coverage failure is not something twenty candidates can
+rescue, because a source with essentially zero reachable probability stays at
+zero however often it is sampled.
+
+**This is why the dev → validation → official sequence is source-based rather
+than pooled.**
+
+### Net
+
+**Nothing here downgraded the project.** It killed one overly simple forecast —
+*"3 % mean trajectory success = 45 % benchmark success"* — which is good,
+because we now know the actual thing the controller must accomplish: **broad
+amplification across sources, not merely higher pooled hit probability.** The
+steering result is a legitimate reason to think that is achievable.
