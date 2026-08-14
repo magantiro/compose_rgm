@@ -695,3 +695,148 @@ spanning zero is not evidence of equivalence.
 
 **Provenance.** No InVirtuoGen-generated output may ever become `R_θ` training
 data.
+
+---
+---
+
+# ⭐ CURRENT AMENDMENT — reference THIS section, not the blocks above
+
+**Everything above remains the historical record. Where it conflicts with this
+section, this section governs.** Two things changed: policy B was refuted on
+the development panel, and the vague custom MOEA block is replaced by a real
+published five-objective molecular benchmark.
+
+## A · The self-contained experiment / comparator table
+
+| Block | Experiment / question | What we claim | Correct comparison | External numerical? | Status |
+|---|---|---|---|---|---|
+| **1A** | **Every-state executable validity** — are all realized states complete valid molecules? | support/execution property of COMPOSE | trajectory-wide validity, dead ends, operator usage | **No** — external *endpoint* validity is not the same object | harvest from all runs; no standalone benchmark |
+| **1B/C** | **Trans-dimensional utility** — do size-changing edits matter? | insert/delete is empirically useful, not padded-slot bookkeeping | **full COMPOSE vs identical size-fixed COMPOSE** | context only — GrIDDD runs the analogous ablation | nested inside the GrIDDD QED benchmark |
+| **2** | **Standard molecular editing** — can frozen COMPOSE solve a normal source-conditioned task? | ordinary editing competence | Jin QED task, 800 sources × 20 outputs | **GrIDDD**; JT-VAE/CG-VAE/GCPN as reported context | primary external editing benchmark |
+| **3A** | **Finite-horizon control** — does future reachability beat local decisions? | remaining-budget reasoning matters | verified/lookahead vs greedy, same `R_θ`/kernel/source/goal | **No** | ✅ banked |
+| **3B** | **Mid-trajectory retargeting** — after goal B appears, keep the realized `x₃`? | stateful recontrol from a realized molecule | continue-`x₃` vs restart-`x₀` vs clairvoyant | **No** | ✅ banked |
+| **4A** | **Closed-loop Pareto control** — does purpose *during* generation beat generate-and-rank? | closed-loop feedback matters | COMPOSE closed-loop vs **matched** generate-and-rank | **No**, for the causal claim | ✅ banked (P3/P4) |
+| **4B** | **Preference richness (P0c)** — does the controller produce a continuum? | one frozen process supports meaningfully different preferences | continuous sweep vs frozen 5-weight grid | **No** | ✅ positive |
+| **4C** | **K41 compression** — can continuum richness be recovered cheaply? | efficient approximation of the full sweep | K41 vs its frozen retention gates | **No** | ❌ failed, closed, no rescue |
+| **4D** | **Standard high-dimensional MOO competence** | COMPOSE produces a strong molecular Pareto set, not just mechanism | **MOLLEO Task 3** (5 objectives) | **YES** | ⬆️ **replaces the vague custom MOEA block** |
+| **5** | **Hard-support control** — exact constraint vs encouraging/filtering | restricting feasible support itself buys something | post-hoc filter vs fixed soft guidance vs hard support | **No** | internal three-arm test |
+| **6** | **Pathwise constraint** — does the whole route matter, not just the endpoint? | executable intermediates enable genuinely pathwise constraints | endpoint-only vs pathwise, same process | **No** | internal causal test |
+| **Queued** | **Map reuse / navigation** — reuse explored states when preference changes? | search effort becomes reusable and stateful | continue from best saved state vs restart | no, unless a native same-task method appears | only after a usable map exists |
+
+### The external structure, entire
+
+```
+framework level          →  Edit Flows + GrIDDD
+ordinary source editing  →  GrIDDD QED (Jin ZINC-250k)
+ordinary multiobjective  →  MOLLEO Task 3 (five objectives)
+unique COMPOSE claims    →  matched internal controls
+```
+
+## B · Policy B is REFUTED on the development panel
+
+Read once, under the criterion frozen before any number existed.
+64 disjoint sources × 5 replicates = **320 trajectories**, ~$0.18.
+
+| | |
+|---|---|
+| **PRIMARY** `1[QED≥0.9 ∧ sim≥0.4]` | **0 / 320**, source-clustered CI [0.0000, 0.0000] |
+| best-of-5 source success *(descriptive)* | 0 / 64 |
+| Tanimoto ≥ 0.4 alone | **0.6719** ✅ |
+| **QED ≥ 0.9 alone** | **0.0063** ❌ |
+| terminal QED | median **0.7470** vs source median ~0.7576 |
+| mechanics | 0 dead ends, 0 zero-denominator fallbacks, 31.4 % kernel work saved |
+
+**Similarity is not the problem; optimization is.** `π ∝ R_θ(y|x)·QED(y)` does
+not move QED at all — with QED clustered in 0.6–0.8 across a ~600-wide fiber,
+the multiplicative factor barely reweights `R_θ`, the reference law dominates,
+and the walk is effectively unguided. GrIDDD reports **45.1 %**.
+
+**Nothing failed mechanically.** The policy simply does not optimize.
+
+**Barred response:** `QED^α`, temperatures, shortlist sizes — any knob fitted to
+this number. Permitted: a controller variant statable independently of it.
+
+**What it tells us structurally:** a one-step tilt against a strong reference
+law cannot move a bounded objective. DDSBM said the same thing from the other
+side — it optimized hard and left the chemistry. **The finite-horizon question
+set aside on cost grounds is now the actual scientific obstacle, not a nicety.**
+
+## C · MOLLEO Task 3 — the five-objective external MOO benchmark
+
+**We do not invent a five-objective molecular task.** One already exists, from
+**MOLLEO (ICLR 2025)**, and it is far better suited than copying MOG-DFM's five
+*peptide* objectives — affinity, hemolysis, non-fouling and so on are
+peptide-specific and COMPOSE cannot run them fairly.
+
+```
+max QED      max JNK3      min SA      min GSK3β      min DRD2
+```
+
+Minimization objectives are transformed higher-is-better; all five normalized
+to [0, 1]. Chemically this is a real design problem: **a drug-like,
+synthesizable, JNK3-selective molecule that avoids GSK3β and DRD2.**
+
+| protocol field | value |
+|---|---|
+| initialization | **120 random ZINC-250k molecules** |
+| budget | **≤10,000 oracle calls** |
+| seeds | **5** |
+| metric | **hypervolume** (Pareto-set selection variant) |
+| published baselines | **Graph-GA** + three MOLLEO variants |
+
+This lets us say *"here is an established ICLR five-objective molecular task; we
+run COMPOSE under its exact oracles, initialization, budget, normalization and
+metric"* — instead of *"we invented DRD2 + QED and bolted NSGA-II onto our
+executor."*
+
+### Classical many-objective algorithms — secondary, with a real caveat
+
+NSGA-III, SMS-EMOA, SPEA2 and MOPSO are useful, and **NSGA-III now fits better
+than NSGA-II** because five objectives is genuinely many-objective.
+
+> ⚠️ **The selection algorithms need no reimplementation. The molecular
+> proposal layer does.** NSGA-III knows how to select nondominated individuals;
+> it does **not** know how to mutate a molecular graph. Any such arm requires a
+> **single frozen common variation operator**, and that design choice is
+> load-bearing.
+
+**Priority: Graph-GA → MOLLEO → COMPOSE**, with classical MOO optional and only
+under one frozen common operator. **Not mandatory** before we know whether the
+published MOLLEO comparison already supplies the competence evidence.
+
+Later work reuses this five-property setting at a 5,000-call budget, so the task
+is recognizable rather than a one-off — **audit protocol differences before
+mixing any numbers.**
+
+## D · The Pareto policy gets its own development pipeline
+
+The bi-objective work answered *mechanistic* questions — does preference
+recontrol exist, does closed-loop beat generate-and-rank. It was **never
+designed to produce the best five-dimensional front.**
+
+> **Do not point the existing five-weight Chebyshev controller at five
+> objectives and call the output "COMPOSE."**
+
+The development question is: *given frozen `R_θ`, what is the best scalable
+inference policy for constructing a high-quality many-objective front under a
+fixed oracle budget?*
+
+Candidate **families** — compared on a disjoint development task, a small number
+of principled options, never 50 scalarization weights until HV rises:
+
+- the current preference-conditioned controller
+- region / reference-point targeting
+- archive-aware hypervolume expansion
+- a population/particle realization of the controller
+
+The last three are more COMPOSE-native than sweeping fixed weights: the theory
+already frames goal-conditioned value as **reachability to a region in objective
+space**, which supports a loop that identifies an under-covered high-contribution
+region, targets it, steers there, and folds the result into the nondominated
+archive.
+
+**P3/P4/P0c stay untouched as mechanistic validations.**
+
+```
+disjoint development  →  freeze ONE policy  →  MOLLEO Task 3 protocol, ONCE
+```
