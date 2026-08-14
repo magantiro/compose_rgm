@@ -4,16 +4,27 @@
 `ORACLE_BUDGET_SEMANTICS_AND_P0.md` §"The gate is THREE-way, not two-way".**
 The rule was re-read before any shard was opened.
 
-## Verdict: OUTCOME 2 — the exact preference sweep is sufficient
+## Verdict: OUTCOME 2 — the continuum is rich; aspiration is closed
 
 > **manageable tree, materially more breadth → the exact preference sweep is
 > sufficient → no aspiration controller**
 
 **The aspiration branch is CLOSED. It is not earned and will not be built.**
 
-The single earned front-construction branch is the **exact preference sweep over
-the continuum** — a traversal of machinery that already exists, not a new
-algorithm.
+> ### ⚠️ AMENDED — this document originally overreached
+>
+> It first said *"the single earned front-construction branch is the exact
+> preference sweep."* **That is wrong and is retracted.** The exact sweep is a
+> **full-information ceiling**, not a deployable controller: it consumes a
+> median **75,910** unique true-oracle evaluations per source against the frozen
+> **≤10,000** budget — 7.6× over on median, over budget on **11/12**.
+>
+> The scientific diagnosis below stands unchanged. The *controller* still needs
+> one bounded compression step, preregistered in
+> **`docs/BUDGETED_PREFERENCE_SWEEP_PREREGISTRATION.md`** — frozen `R_θ`
+> successor ranking as the sole pre-oracle prioritizer, `K_sweep = 41`, derived
+> from constants that predate P0c. **One mechanism, one comparison, one stop
+> rule.** If it collapses, the compression branch closes with no second rescue.
 
 ## The result reverses the early signal
 
@@ -113,12 +124,34 @@ sets, for the sole purpose of answering "is the extra breadth useful?" They are
 
 1. **Aspiration control is not built.** Not deferred, not queued — **closed**,
    because the gate it depended on returned the opposite of what it needed.
-2. The earned branch is the **exact preference sweep**, using the existing
-   traversal.
-3. The Pareto chain advances to: freeze the final controller **and** the
+2. The exact sweep becomes the **full-information ceiling / reference**, against
+   which a budgeted controller is measured. It is **not** itself deployable.
+3. **Exactly one** compression mechanism is authorized —
+   `BUDGETED_PREFERENCE_SWEEP`, frozen `R_θ` ranking only, `K_sweep = 41`. If it
+   collapses, the branch closes; no second algorithm.
+4. The Pareto chain then advances to: freeze the final controller **and** the
    comparator matrix together, then power and launch the fresh panel.
-4. Fresh-panel `n` is still computed **after** that freeze, from the sanctioned
-   Pareto sources, against the actual source-level paired bootstrap.
+5. Fresh-panel `n` is computed **after** that freeze, from the sanctioned Pareto
+   sources, against the actual source-level paired bootstrap. **The old K333
+   retention `n` is a different estimand and must not be reused.**
+
+### The oracle-budget conflict, stated plainly
+
+| | |
+|---|---|
+| full sweep, unique oracle evals/source | median **75,910**, max 328,071 |
+| frozen fairness budget | **≤10,000** |
+| sources over budget | **11 / 12** (median 7.6×, worst 32.8×) |
+
+Compute was never the obstacle — a 24-source panel is ~18.5 core-hours, about
+**$0.87**. The binding constraint is the **query ceiling**, which exists to keep
+the comparison against contemporary methods fair, and therefore cannot be
+quietly raised.
+
+**Truncating the DFS at 10,000 is not an acceptable algorithm.** At ~613 unique
+evaluations per expansion, a flat cap would expand only a small fraction of the
+tree and make the answer depend on traversal order. The real bottleneck is
+**cost per state**, which is what `R_θ` shortlisting addresses.
 
 ## Provenance
 
