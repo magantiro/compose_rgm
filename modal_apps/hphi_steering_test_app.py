@@ -92,8 +92,10 @@ TIME_POINT, CANONICAL_SLOTS = 0.5, 48
 HORIZON = 6
 TRAJ_PER_SOURCE = 4
 #: Bounds the rejection loop. Hitting it is RECORDED, never silently patched.
-MAX_PROPOSALS = 32
-#: Pre-drawn batch size; the diagnostic averages over ALL of these.
+MAX_PROPOSALS = 40
+#: Pre-drawn batch size for the UNBIASED diagnostic. This is an observation
+#: window, NOT the proposal cap -- an earlier version set the cap to 32 so it
+#: would divide by 16, which let the diagnostic modify the inference law.
 BATCH = 16
 REGION = (0.80, 0.40)          # the primary qualification region
 
@@ -235,6 +237,7 @@ def steer_source(task: dict[str, Any]) -> dict[str, Any]:
                 break
             p = np.array([m.probability for m in law.marks], float); p /= p.sum()
             b_rem = HORIZON - step - 1
+            decisions_this_step: list[int] = []
             # FIXED PRE-DRAWN BATCH. Draw marks and uniforms in advance, then
             # consume them in that order -- the Stage-A1 batching result says
             # this leaves the law unchanged. The proposals AFTER the accepted
@@ -246,9 +249,12 @@ def steer_source(task: dict[str, Any]) -> dict[str, Any]:
             # unbiased R_theta expectation must average over ALL pre-drawn
             # proposals, including unconsumed ones.
             chosen = None
-            for _batch in range(MAX_PROPOSALS // BATCH):
-                idx = rng.choice(len(p), size=BATCH, p=p)
-                us = rng.random(BATCH)
+            drawn = 0
+            while drawn < MAX_PROPOSALS:            # the cap is 40, unchanged
+                take = min(BATCH, MAX_PROPOSALS - drawn)
+                drawn += take
+                idx = rng.choice(len(p), size=take, p=p)
+                us = rng.random(take)
                 ys = []
                 for i in idx:
                     mk = law.marks[int(i)]
@@ -267,7 +273,11 @@ def steer_source(task: dict[str, Any]) -> dict[str, Any]:
                         h_chosen = hv
                         break
                 valid = [h for y, h in zip(ys, hs) if y != key]
-                if valid:
+                # Only the FIRST window is recorded, so the diagnostic is an
+                # unbiased R_theta sample rather than one conditioned on
+                # earlier rejection.
+                if valid and not decisions_this_step:
+                    decisions_this_step.append(1)
                     decisions.append({
                         "h_base_mean": float(np.mean(valid)),   # over ALL drawn
                         "h_base_sq_over_mean": (float(np.mean(np.square(valid))
@@ -297,10 +307,45 @@ def steer_source(task: dict[str, Any]) -> dict[str, Any]:
             "seconds": round(time.perf_counter() - t0, 1), "status": "OK"}
 
 
+@app.function(image=image, cpu=(1.0, 1.0), memory=4096, timeout=8 * 60 * 60,
+              volumes={str(ARTIFACT_ROOT): artifact_volume})
+def drive(tasks: list[dict[str, Any]]) -> dict[str, Any]:
+    artifact_volume.reload()
+    out = Path(RUN_ROOT) / OUT_DIR
+    out.mkdir(parents=True, exist_ok=True)
+    started, results = time.perf_counter(), []
+    for r in steer_source.map(tasks, order_outputs=False, return_exceptions=True):
+        if isinstance(r, dict):
+            results.append(r)
+            print(f"{len(results)}/{len(tasks)} "
+                  f"{time.perf_counter()-started:.0f}s", flush=True)
+    payload = {"schema": "compose.hphi.steering", "region": list(REGION),
+               "horizon": HORIZON, "traj_per_source": TRAJ_PER_SOURCE,
+               "max_proposals": MAX_PROPOSALS, "diagnostic_batch": BATCH,
+               "n": len(results),
+               "seconds": round(time.perf_counter() - started, 1),
+               "results": results}
+    (out / "STEERING.json.gz").write_bytes(
+        gzip.compress(json.dumps(payload, default=float).encode()))
+    artifact_volume.commit()
+    print(f"DONE {len(results)} in {payload['seconds']:.0f}s", flush=True)
+    return {"n": len(results)}
+
+
 @app.local_entrypoint()
-def main() -> None:
+def main(sources: int = 16) -> None:
+    """Held-out pilot sources -- indices 48..63, the smoke's eval split."""
+    blob = json.loads(gzip.decompress(
+        (ROOT / "local_runtime/hphi_pilot_h24.json.gz").read_bytes()).decode()) \
+        if (ROOT / "local_runtime/hphi_pilot_h24.json.gz").exists() else None
+    smis = [l.strip() for l in
+            (ROOT / "data/jin/hphi_pilot_64.txt").read_text().splitlines() if l.strip()]
+    held_out = smis[48:48 + sources]
+    tasks = [{"index": 48 + i, "smiles": s} for i, s in enumerate(held_out)]
     print("STEERING TEST -- does R_theta * h_phi turn the car?")
-    print(f"held-out pilot sources, PAIRED seeds, H{HORIZON}, region {REGION}")
+    print(f"{len(tasks)} HELD-OUT pilot sources x {TRAJ_PER_SOURCE} traj, "
+          f"PAIRED seeds, H{HORIZON}, region {REGION}")
+    print(f"proposal cap {MAX_PROPOSALS} (unchanged); diagnostic window {BATCH}")
     print("0.90 reported descriptively; no tuning of any kind")
-    print("NOTE: requires head.pt + norm.json written by the qualification "
-          "trainer; run that first.")
+    call = drive.spawn(tasks)
+    print(f"driver spawned: {call.object_id}")
