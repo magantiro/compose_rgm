@@ -48,7 +48,7 @@ orthogonal, and both are recorded.
 | method | role | **tier** | one-line reason |
 |---|---|---|---|
 | **DDSBM** | `FRAMEWORK_NEIGHBOR` | **3** | nearest alternative graph-CTMC/bridge abstraction; a native rerun on our exact sources is meaningful because no published result covers them |
-| **GrIDDD** | `FRAMEWORK_NEIGHBOR` *(qualification pending)* | **4 for task, framework tier pending** | discrete graph diffusion with node insertion **and deletion**. Its task row is tier 4: the official lead set is `exact_unresolved` in our own frozen contract |
+| **GrIDDD** | `CONCEPTUAL_LINEAGE_ONLY` — **qualification complete, role declined** | **4 to run, 2 to cite** | genuinely source-conditioned, but the authors' **own ablation** reports insert/delete leaves DRD2 and LogP *"relatively unchanged"* — the mechanism that motivated the role is inert on the task nearest ours. No licence, no checkpoints, post-hoc similarity filter. Closest external method to our task semantics; strong contextual citation |
 | **generate-and-rank P3/P4** | `MATCHED_CAUSAL_CONTROL` | **n/a — internal** | same executor, same budget, purpose applied only after generation |
 | **empirical-family reference ablation** | `MATCHED_CAUSAL_CONTROL` | **n/a — internal** | same control, `R_θ` replaced — isolates what the learned reference law buys |
 | **preference-blind floor (`unguided`)** | `MATCHED_CAUSAL_CONTROL` | **n/a — internal** | same process, no objective consulted — the floor Q1 must clear |
@@ -95,25 +95,33 @@ unavoidable; the learned bridge/process stays their algorithm."* And from the
 philosophy doc: if it cannot natively say "this labeled core must remain present
 at every state", **we do not invent that mechanism for it.**
 
-### GrIDDD
+### GrIDDD — qualified, and the role is declined
 
-**Qualification in progress.** Verdict and evidence recorded in
-`FRAMEWORK_NEIGHBOR_GRIDDD.md` when the primary-source sweep completes. Main row
-only if its native task and conditioning semantics align **without substantial
-adaptation**.
+**Full evidence in `FRAMEWORK_NEIGHBOR_GRIDDD.md`.** Verdict:
+`CONCEPTUAL_LINEAGE_ONLY`, tier 4 to run and tier 2 to cite.
 
-The bar it must clear is the same one that excluded HN-GFN from Panel A, applied
-to a different question. For a `FRAMEWORK_NEIGHBOR` the decisive axes are:
+It cleared the axis nothing else cleared — it genuinely starts from a supplied
+molecule (`freegress.py:311,334-337`). It failed on four independent grounds, and
+the sharpest is the authors' own: **disabling insertions and deletions leaves
+DRD2 and LogP success "relatively unchanged"**, so the variable-size dynamics that
+motivated the nomination are inert on the task nearest ours. Plus no licence
+(not vendorable), no checkpoints, and a similarity constraint that is a post-hoc
+rejection filter rather than a trust region.
 
-- does it natively accept a **supplied source molecule** as the starting state?
-- are its **insert/delete** operations over chemical graph states, and is the node
-  count genuinely variable along a trajectory?
-- can objective conditioning attach **without retraining** the base process?
-- would our adapter only evaluate and count, or would it have to supply
-  mechanism?
+**It remains the closest external method to COMPOSE's task semantics found so
+far**, shares the DRD2 oracle lineage, and its protocol is the one already frozen
+in our internal `GridDDProtocol`. Cite its 5.0% DRD2 and 45.1% QED as *reported*,
+with protocol stated, never head-to-head.
 
-If the last answer is "supply mechanism", it drops to `CONCEPTUAL_LINEAGE_ONLY`
-by the same rule that bars a homemade Edit Flows port.
+### The framework-counterfactual slot is still empty
+
+**DDSBM is the only remaining candidate.** Two methods have now been examined for
+this slot and both fell to the same rule — the adapter would have had to supply
+the mechanism under test. That is a pattern rather than a coincidence, and it
+suggests the framework counterfactual may be genuinely hard to source externally.
+
+This is the largest remaining gap in the package, and it is a gap in **novelty**
+evidence, not competence evidence.
 
 ---
 

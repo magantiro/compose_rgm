@@ -5,7 +5,7 @@
   "branch": "codex/compose-multiobjective-package",
   "base_commit": "f6146d7",
   "base_branch": "codex/editing-v2-successor-fiber-fastpath",
-  "content_commit": "09d2e65",
+  "content_commit": "STAMPED_BY_FOLLOWUP_COMMIT",
   "artifact_status": "DESIGN_ONLY",
   "held_out_data_opened": false,
   "compute_spent": {
@@ -175,12 +175,13 @@
     "command": "python3 -m pytest tests/test_multiobjective_qualification.py -q"
   },
   "durable_artifacts": {
-    "docs/workstreams/multiobjective/STATUS.md": "b8cd0755e039dd68fba5dcdafb98a2fdddc3de46dd93223b22b5e782ff4c5fbd",
-    "docs/workstreams/multiobjective/PROTOCOL.md": "407821e08ba52121d3bca286a63f0cb1b4f6b78268c373cbc8889d6379eee705",
-    "docs/workstreams/multiobjective/BASELINE_TASK_MATRIX.md": "a0740f74cb2f160ff7c08aca491c888c3e30fe44ada0fa3da5d4bda19be3a5f7",
+    "docs/workstreams/multiobjective/STATUS.md": "e9a448cc8ac45b6c3e4ee65ad556ce5a701db8db691f72373bf2696ebfe9ca7f",
+    "docs/workstreams/multiobjective/PROTOCOL.md": "52bb864b056ba93d61fea4fdb7b0184f91af7c5ba1ecc8546199c064dfabdde6",
+    "docs/workstreams/multiobjective/BASELINE_TASK_MATRIX.md": "52ece0c33e25a712299a0f4536d5ef886c0b9fd3cf5f5cf880393ae71951eea1",
     "docs/workstreams/multiobjective/SOURCE_CONDITIONING_AUDIT.md": "a8633ecb4fe5492c6c5ccc20c625eeb74a130539c432e1c5e483cb37f5e50daa",
     "docs/workstreams/multiobjective/BENCHMARK_ALIGNMENT_AUDIT.md": "82fe7cef4360980589076829630ac24387b50367d299b8b65ac42de1e1506f18",
-    "docs/workstreams/multiobjective/SAME_LAB_LINEAGE.md": "7c9c496b742c985073ab127e1a2c101e3fb96f14b218a212cb1f5ec999493b10",
+    "docs/workstreams/multiobjective/FRAMEWORK_NEIGHBOR_GRIDDD.md": "5cb8d4f7507705d657f985b16bca12816abc6a9d9f0cd5939afc8496c6b5bef6",
+    "docs/workstreams/multiobjective/SAME_LAB_LINEAGE.md": "19de7e1914e49caf8a447dbcf989747063e5fbcd4027e2c28b5337c7d136130f",
     "docs/workstreams/multiobjective/DECISION_LOG.md": "50d42815f6ecd3132e8003e8a73982a35480f917c65a67b2f2432f69879d93bf",
     "docs/workstreams/multiobjective/HANDOFF.md": "1396b2f568ecdc083adeaaa0107c5f09abfbcbc6b2eaca4304d6ef1e6a6b463c",
     "src/compose_v4/experiments/multiobjective_qualification.py": "243511659c504e34a11e6009e2a19bed9e922f0f088e52daa4bf513cd35359ae",
@@ -322,5 +323,158 @@
     "files_changed_by_this_lane": 11,
     "verified_with": "git diff --name-only f6146d7..HEAD",
     "lane_4_files_modified": 0
+  },
+  "comparator_roles": {
+    "governing_document": "docs/COMPARATOR_ROLES_CANONICAL.md",
+    "extended_by": "docs/AMENDMENT_PUBLISHED_NUMBER_FIRST.md",
+    "FRAMEWORK_NEIGHBOR": {
+      "DDSBM": {
+        "tier": 3,
+        "status": "the ONLY remaining candidate; not audited by this lane"
+      }
+    },
+    "MATCHED_CAUSAL_CONTROL": {
+      "generate_and_rank_P3_P4": {
+        "tier": "n/a internal",
+        "note": "source 000 MATCHED at 369 vs a 368 target after 1,025 trajectories"
+      },
+      "empirical_family_reference_ablation": {
+        "tier": "n/a internal"
+      },
+      "unguided_preference_blind_floor": {
+        "tier": "n/a internal"
+      },
+      "greedy_vs_verified": {
+        "tier": "n/a internal"
+      }
+    },
+    "TASK_COMPETENCE": {
+      "HN_GFN": {
+        "tier": 2,
+        "note": "all six protocol dimensions fail; contextual only"
+      },
+      "InversionGNN": {
+        "tier": "2 to cite, 4 to run",
+        "note": "no checkpoint, arity defect, no licence"
+      },
+      "GraphXForm": {
+        "tier": 3
+      },
+      "InVirtuoGen": {
+        "tier": "UNVERIFIED"
+      },
+      "MolEditRL": {
+        "tier": "UNVERIFIED"
+      }
+    },
+    "CONCEPTUAL_LINEAGE_ONLY": {
+      "GrIDDD": {
+        "tier": "4 to run, 2 to cite",
+        "note": "role declined; see griddd_qualification"
+      },
+      "Edit_Flows": {
+        "tier": 4
+      },
+      "Expanding_Flow_Maps": {
+        "tier": 4
+      },
+      "MOG_DFM": {
+        "tier": 4
+      },
+      "PepTune": {
+        "tier": 4
+      },
+      "AReUReDi": {
+        "tier": "4, conditionally 3",
+        "note": "only same-lab numerical candidate; condition 1 already fails"
+      },
+      "pCoMole": {
+        "tier": 4,
+        "note": "UNVERIFIED, paper unread"
+      }
+    },
+    "EXCLUDED": {
+      "OP_GFN": {
+        "tier": 4,
+        "note": "not preference-conditioned; CC BY-NC-ND"
+      }
+    },
+    "LANE_6_OWNS": {
+      "CDD": {
+        "tier": 2,
+        "note": "reuse its published SA(y)<=tau task definition; do not rebuild"
+      },
+      "PRODIGY": {},
+      "ConStruct": {}
+    },
+    "tier_summary": "No method reaches tier 1, because tier 1 requires exact protocol alignment and the audit found none. Only DDSBM and GraphXForm reach tier 3."
+  },
+  "griddd_qualification": {
+    "verdict": "CONCEPTUAL_LINEAGE_ONLY",
+    "role_declined": "FRAMEWORK_NEIGHBOR",
+    "tier": "4 to run, 2 to cite",
+    "upstream": "official code cloned at commit cc3dc31ac341216a0bbcc62f63ae6831581ff40b (2025-09-28, a single commit)",
+    "license": "NONE_DECLARED_ALL_RIGHTS_RESERVED -- zero licence files in the tree; not vendorable",
+    "checkpoints": "none released",
+    "axes": {
+      "a_supplied_source": {
+        "verdict": "YES",
+        "evidence": "griddd/freegress.py:311 original_smile = data.smiles[0]; :334 z_t = dense_data.copy(); :337 corrupt_data(z_t, corruption_step=...). SDEdit-style corrupt-then-denoise from a real input molecule. The ONLY external method audited by this lane that clears this axis."
+      },
+      "b_edit_budget": {
+        "verdict": "NO",
+        "evidence": "griddd/freegress.py:393-397 -- candidates are generated, THEN sim = similarity(sample_smiles[i], original_smile) and keep_mask[i] &= (sim >= similarity_threshold). A post-hoc rejection filter, not a trust region. corruption_step is stochastic noise depth, not an edit count."
+      },
+      "c_preference_conditioned": {
+        "verdict": "PARTIAL",
+        "evidence": "target property VALUES supplied at inference (freegress.py:319-324); the property SET is baked in at training via classifier-free guidance, so a new objective requires retraining"
+      }
+    },
+    "deciding_fact_authors_own_ablation": {
+      "quote": "we performed the same experiments with GrIDDD but disabling insertions and deletions. The results show that while the success rate remains relatively unchanged in the LogP and DRD2 experiments, it significantly drops to 33.8% when optimizing QED, likely because the QED score is a function of the molecular weight (and thus, it correlates with the number of atoms).",
+      "source": "paper section 5.3 Ablation",
+      "consequence": "insert/delete -- the entire reason GrIDDD was nominated as FRAMEWORK_NEIGHBOR -- is inert on the task nearest COMPOSE's DRD2 objective. Citing its DRD2 numbers under that role would cite a configuration whose distinguishing mechanism its own paper reports as doing nothing there."
+    },
+    "adapter_complexity": "SUBSTANTIAL -- we would have to supply an edit budget, a successor-fiber notion (GrIDDD draws nodes and edges from a factorized mean-field categorical, so there is no enumerable one-step support), a separable frozen reference law (CFG bakes conditioning into the weights), and a checkpoint. That is method invention, not an adapter.",
+    "reported_numbers_table_3": {
+      "protocol": "800 test molecules with DRD2 activity <= 0.05; 20 candidates per molecule; success if at least one candidate has DRD2 >= 0.5 AND Tanimoto >= 0.4",
+      "GrIDDD": {
+        "DRD2_succ": "5.0%",
+        "QED_succ": "45.1%",
+        "LogP_improv_sim0.4": "2.70 +/- 0.94"
+      },
+      "GCPN": {
+        "DRD2_succ": "4.4%",
+        "QED_succ": "9.4%"
+      },
+      "JT_VAE": {
+        "DRD2_succ": "3.4%",
+        "QED_succ": "8.8%"
+      },
+      "CG_VAE": {
+        "QED_succ": "4.8%"
+      }
+    },
+    "why_still_valuable": "the closest external method to COMPOSE's task semantics found by this lane. Shares the DRD2 oracle lineage -- griddd/metrics/drd2_scorer.py repackages the same Python-3.6 pickle into clf_py36_weights.npz with gamma=0.015625 and the same 2048-fold count fingerprint COMPOSE extracted. Its 20-candidate / Tanimoto-0.40 protocol is the one already frozen in our internal GridDDProtocol. Strong CONTEXTUAL citation.",
+    "internal_finding": "GrIDDD is already in this repository and not as GrIDDD. src/compose_v4/experiments/griddd_conditional.py (93 KB) imports only numpy, rdkit and compose_v4 -- no GrIDDD code, no GrIDDD checkpoint. It is COMPOSE arms on a GrIDDD-shaped task. NAMING HAZARD flagged: a reviewer with repo access could believe a GrIDDD baseline exists. GridDDBenchmarkFairnessContract already records exact_griddd_leads_available=False, so a task-competence row was already blocked."
+  },
+  "defect_reported_not_fixed": {
+    "artifact": "artifacts/oracles/drd2_svm_v1/drd2_oracle_manifest.json",
+    "field": "provenance.lineage",
+    "text": "the oracle behind the classic similarity-constrained DRD2 benchmark and the VJTNN/GrIDDD success numbers",
+    "defect": "VJTNN and GrIDDD have no joint success numbers. VJTNN appears exactly once in the GrIDDD paper, in a related-work paragraph setting it aside as requiring paired data. GrIDDD reports no VJTNN number; its baselines are JT-VAE, CG-VAE and GCPN, and its DRD2 success is 5.0%.",
+    "vjtnn_own_number": "UNVERIFIED by this lane and deliberately not quoted -- the pairing is the defect, not either value",
+    "why_not_fixed": "the manifest is hash-bound (pickle_sha256, parameters_npz_sha256) and consumed by claim-bearing code; editing its text changes the file digest. This is prose provenance and no measurement depends on it.",
+    "disposition": "for main to correct in a future artifact version, as with the source_index_sha256 portability defect"
+  },
+  "framework_counterfactual_gap": {
+    "status": "OPEN -- the largest remaining gap in the package",
+    "kind": "novelty evidence, not competence evidence",
+    "candidates_examined": [
+      "GrIDDD -- declined",
+      "HN-GFN -- TASK_COMPETENCE, never a framework neighbour"
+    ],
+    "only_remaining_candidate": "DDSBM",
+    "pattern_worth_noting": "two candidates have now fallen to the same rule -- the adapter would have had to supply the mechanism under test. A pattern rather than a coincidence; the framework counterfactual may be genuinely hard to source externally."
   }
 }

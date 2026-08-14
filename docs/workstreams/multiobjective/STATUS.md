@@ -130,10 +130,57 @@ it. The fair closed-loop-versus-open-loop comparison now exists. The
 preregistered `MATCHING_UNREACHABLE` fallback did not fire for that source, which
 is why writing it down before the outcome was worth doing.
 
-**The one gap that remains open** is E1's framework counterfactual: no
-`FRAMEWORK_NEIGHBOR` has yet been qualified. DDSBM is the principal candidate and
-GrIDDD's qualification is in progress. That is the largest hole in the package,
-and it is a hole in *novelty* evidence, not competence evidence.
+**The one gap that remains open** is E1's framework counterfactual: **no
+`FRAMEWORK_NEIGHBOR` has been qualified.** GrIDDD was examined and declined;
+**DDSBM is the only remaining candidate.** That is the largest hole in the
+package, and it is a hole in *novelty* evidence, not competence evidence.
+
+Two candidates have now fallen to the same rule — the adapter would have had to
+supply the mechanism under test. A pattern, not a coincidence.
+
+## GrIDDD verdict — `CONCEPTUAL_LINEAGE_ONLY`, tier 4 to run / tier 2 to cite
+
+Official code at `cc3dc31` (2025-09-28, one commit). Full evidence in
+`FRAMEWORK_NEIGHBOR_GRIDDD.md`.
+
+| axis | verdict |
+|---|---|
+| (a) supplied source | **YES** — `freegress.py:311,334-337`. The **only** external method audited here that clears this. |
+| (b) edit budget | **NO** — similarity is a post-hoc rejection filter, `freegress.py:393-397` |
+| (c) preference-conditioned | **PARTIAL** — target values at inference; property set baked in by CFG at training |
+
+**The deciding fact is the authors' own ablation:** disabling insertions and
+deletions leaves DRD2 and LogP success *"relatively unchanged"* (only QED drops,
+to 33.8%, where the objective is a function of molecular weight). The mechanism
+that motivated the `FRAMEWORK_NEIGHBOR` nomination is inert on the task nearest
+ours. Plus: **no licence** anywhere in the tree (not vendorable), no checkpoints,
+and an adapter that would have to supply an edit budget, a successor-fiber
+notion, a separable frozen reference law and a checkpoint.
+
+**But it is the closest external method to our task semantics found so far**, and
+a strong contextual citation: same DRD2 oracle lineage — it repackaged the same
+Python-3.6 pickle into an npz with the same `gamma=0.015625` and 2048-fold count
+fingerprint COMPOSE extracted — and its 20-candidate / Tanimoto-0.40 protocol is
+the one already frozen in our internal `GridDDProtocol`. Reported: **5.0% DRD2**,
+**45.1% QED**.
+
+**Also: GrIDDD is already in this repository, and not as GrIDDD.**
+`griddd_conditional.py` (93 KB) imports no GrIDDD code — it is COMPOSE arms on a
+GrIDDD-shaped task. A naming hazard, flagged. And `GridDDBenchmarkFairnessContract`
+already records `exact_griddd_leads_available = False`, so a task-competence row
+was already blocked before this lane looked.
+
+## Defect found in a committed artifact — reported, not fixed
+
+`artifacts/oracles/drd2_svm_v1/drd2_oracle_manifest.json` describes the pickle as
+the oracle behind *"the VJTNN/GrIDDD success numbers"*. **GrIDDD reports no VJTNN
+number** — VJTNN appears exactly once in that paper, in a related-work paragraph
+setting it aside as requiring paired data. GrIDDD's baselines are JT-VAE, CG-VAE
+and GCPN.
+
+Not fixed: the manifest is hash-bound and consumed by claim-bearing code, this is
+prose provenance, and no measurement depends on it. **For main to correct in a
+future artifact version.**
 
 ## Standing findings from Stage 0/1 (unchanged, now project record)
 
