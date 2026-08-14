@@ -1,0 +1,18 @@
+{
+  "schema": "compose.hphi.corpus",
+  "version": "hphi-corpus-v1",
+  "train_n": 1024,
+  "valid_n": 128,
+  "trajectories_per_source": 8,
+  "horizon": 6,
+  "total_trajectories": 8192,
+  "total_transitions": 49152,
+  "selection": "QED-stratified into 10 strata of width 0.01 over [0.70,0.80]; deterministic sha256 rank within each stratum; no RNG",
+  "stratification_rationale": "equal allocation per stratum guarantees coverage across the QED range, including the harder low-QED sources, rather than following the population skew",
+  "excluded": "official Jin qed/logp04/logp06 test sources AND the 64-source controller dev panel",
+  "n_excluded": 1516,
+  "eligible_pool": 66632,
+  "r_theta": "FROZEN",
+  "no_automatic_scale_up": true,
+  "purpose": "h_phi V1 controller training corpus; never a benchmark result"
+}
