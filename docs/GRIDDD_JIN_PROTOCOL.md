@@ -200,3 +200,18 @@ A 12-model suite would look *less* like the accepted precedent, not more.
 Retraining or reimplementing GrIDDD, JT-VAE, CG-VAE or GCPN · adding baselines
 to lengthen the table · DRD2 · describing this benchmark as multiobjective ·
 claiming matched oracle budgets · tuning the objective after seeing a result.
+
+## Record: one stray artifact, unread
+
+`griddd_qed/full_0004.json.gz` exists on the volume. It is the 4-source
+mechanical smoke that completed before its stop took effect, and it contains
+**official test sources 0–3**.
+
+**It has not been read and will not be.** It is left in place rather than
+deleted — removing data to tidy a record is worse than labelling it.
+
+It consumes nothing. Seeds are frozen and deterministic, so those four sources
+will produce **bit-identical** endpoints whenever the official run happens;
+reading it now versus reading the official run later is the same information.
+The file is superseded by `full_0800x20.json.gz` when that exists, and must
+never be reported.
