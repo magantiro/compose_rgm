@@ -385,6 +385,40 @@ answer none of them:
 | **K41** | can `R_θ` expose that front under 10k? | full-information ceiling vs budgeted sweep | **no** |
 | **fresh final panel** | is COMPOSE competitive? | COMPOSE final vs all exact-alignment published methods | **yes — this is where they go** |
 
+#### 4c-bis · K41 budgeted sweep — **FAILED**, branch closed
+
+> ### ❌ `R1 ∧ R2 ∧ B` → **FAIL.** The compression branch is closed. No second
+> algorithm, no re-specification, no rescue. See `K41_BUDGETED_SWEEP_RESULT.md`.
+
+| test | criterion | observed | |
+|---|---|---|---|
+| **B** budget | ≤10,000 on every source | max **6,888**, cap never binding, 12/12 | ✅ |
+| **R1** quality | CI lower on `mean(r_HV)` > 0.90 | 1.425 | ⚠️ see below |
+| **R2** breadth | CI lower on `mean(r_ND)` > 0.90 | **0.737** | ❌ |
+
+**The budget mechanism itself worked.** `R_θ` shortlisting cut oracle spend
+from a median **75,910 → 4,113** (~18×) with no violation anywhere, and
+`cap_was_binding` was false on all 12 — so nothing is a DFS-order artifact.
+That vindicates deriving `K_sweep` from the guard.
+
+**R1 "passes" for the wrong reason.** `mean(r_HV) = 5.018`, exceeding 1 on 10
+of 12 sources and reaching **40×** on source 006 — impossible for a genuine
+retention ratio. The budgeted sweep is **not a sub-traversal** of the full
+sweep: it scores a different subset, partitions differently, and descends a
+different tree, sometimes expanding *more* states (source 006: **14 → 76**).
+The "ceiling" is the full-information *partition*, **not** an upper bound on
+attainable hypervolume.
+
+**That does not rescue the verdict.** R2 fails on its own terms — genuinely
+fewer nondominated points on 6/12 sources, as low as 0.515 — and
+intersection–union fails regardless of R1.
+
+**What stands:** P0c is untouched. What K41 does *not* establish is that the
+richness can be exposed at a 10k budget with breadth preserved. The
+preregistered fallback, written before the result, applies: the full sweep
+demonstrates latent controller richness; the five-weight/budgeted controller
+demonstrates what is achievable at contemporary budgets.
+
 #### 4d · The scalable operating points — RECLASSIFIED after P0c
 
 > ### ⚠️ `K_G = 333` / `K_V = 15` are now HISTORICAL, not a scheduled experiment
