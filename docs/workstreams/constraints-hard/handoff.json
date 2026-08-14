@@ -6,9 +6,9 @@
   "claim_id": "experiment_a_hard_structural_invariant",
   "branch": "codex/compose-constraints-hard",
   "base_commit": "f6146d7",
-  "head_commit": "46120749ab929b9aa9017849663abe6f9d0c8e1d",
+  "head_commit": "0b1f761bab8b9b05569ffe09c97f6e1b6cff1fda",
   "head_commit_note": "the commit containing every deliverable; handoff.json itself is committed in the immediately following commit, since it records this hash",
-  "working_tree_clean_excluding_this_manifest": false,
+  "working_tree_clean_excluding_this_manifest": true,
   "status": "DESIGN_ONLY",
   "lane_scope": "EXTERNAL_AUDIT_ONLY (narrowed 2026-08-13)",
   "governed_by": [
