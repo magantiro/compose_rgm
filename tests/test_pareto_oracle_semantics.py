@@ -207,3 +207,18 @@ def test_metered_topup_arm_keeps_its_ranking_demand():
     # ranking's request, and is a separate request in the original.
     assert a_old["benchmark_eval_requests"] == n
     assert a_new["benchmark_eval_requests"] == 0
+
+
+def test_schema_alone_identifies_a_topup_shard_without_the_flag():
+    """The 11-source top-up launched BEFORE the explicit flag existed.
+
+    A correction that depends only on a field added mid-run would be wrong for
+    exactly one batch of data -- the batch that matters.
+    """
+    n = 400
+    no_flag = {"cost": {"raw_oracle_calls": n, "native_oracle_calls": 90,
+                        "kernel_calls": 400}, "n_trajectories": n,
+               "schema": "compose.pareto.gen_rank_topup"}
+    out = corrected_cost("gen_rank@verified", no_flag, N_PREF)
+    assert out["algorithmic_oracle_requests"] == n
+    assert out["benchmark_eval_requests"] == 0

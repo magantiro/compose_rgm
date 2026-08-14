@@ -117,6 +117,11 @@ from typing import Any, Mapping
 #: Arms whose five branches are one trajectory per preference.
 _PREFERENCE_BRANCHED = ("unguided", "greedy_pref", "verified_pref")
 
+#: Shards written by `pareto_gen_rank_topup_app`, whose matcher reads
+#: `endpoint_z` rather than re-metering it, so one request serves both the
+#: ranking and the benchmark evaluation.
+METERED_TOPUP_SCHEMA = "compose.pareto.gen_rank_topup"
+
 
 def harness_only_requests(arm: str, arm_payload: Mapping[str, Any],
                           n_preferences: int) -> int:
@@ -143,7 +148,13 @@ def harness_only_requests(arm: str, arm_payload: Mapping[str, Any],
     pool happens to satisfy it by coincidence.
     """
     if arm.startswith("gen_rank"):
-        if arm_payload.get("shares_scoring_with_ranking"):
+        # Schema is checked too, because the eleven-source top-up LAUNCHED
+        # BEFORE the explicit flag existed and its shards will not carry it.
+        # A correction that silently depends on a field added mid-run is a
+        # correction that will be wrong for exactly one batch of data.
+        shares = (arm_payload.get("shares_scoring_with_ranking")
+                  or arm_payload.get("schema") == METERED_TOPUP_SCHEMA)
+        if shares:
             # One physical request per candidate, algorithmically necessary for
             # ranking; the benchmark evaluation reuses it at no extra cost.
             return 0
@@ -179,11 +190,6 @@ def corrected_cost(arm: str, arm_payload: Mapping[str, Any],
                        "trajectory; see pareto_oracle_semantics for the call-graph "
                        "proof that those requests affect no decision"),
     }
-
-
-#: Shards written by `pareto_gen_rank_topup_app`, whose matcher reads
-#: `endpoint_z` rather than re-metering it.
-METERED_TOPUP_SCHEMA = "compose.pareto.gen_rank_topup"
 
 
 def corrected_shard(shard: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
