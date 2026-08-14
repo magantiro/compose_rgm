@@ -1054,6 +1054,40 @@ universal `h_φ` generalizes with nothing but a new goal descriptor is an
 **empirical result to earn**, never an assumption. Reviewers must not be able to
 say we hid controller training.
 
+### ⚠️ How resource cost is reported — NOT as a trade
+
+**Do NOT write, or imply, "the extra oracle calls are fair because we don't
+retrain."** That compensates one resource with another and invites exactly the
+attack it is trying to deflect.
+
+**Three axes. All reported. None traded against another.**
+
+| axis | question | who wins is a separate question |
+|---|---|---|
+| **task performance** | how good are the molecules / fronts? | the benchmark metric |
+| **training / adaptation** | what must be retrained for a new objective? | COMPOSE's structural claim |
+| **inference / oracle cost** | how much computation does control require? | reported honestly, wherever it falls |
+
+A finished comparison therefore looks like:
+
+| method | QED success | dynamics trained WITH the objective? | new-objective adaptation | property evals |
+|---|---|---|---|---|
+| GrIDDD | 45.1 % | property-conditioned training + guidance | native protocol | — |
+| COMPOSE | — | **No** | inference-time controller | — |
+
+**The conclusion to draw is NOT** *"250 evaluations is acceptable because
+training is expensive."* **It is:**
+
+> **COMPOSE obtains its performance from a reusable goal-independent molecular
+> process; this comes with a particular inference cost, which we report
+> separately.**
+
+A reader then values the tradeoff themselves. In many real settings — docking,
+QM, synthesis, wet-lab — training a new molecular model is far more consequential
+than evaluating a cheap QED function a few hundred times, and that is a
+legitimate practical point **to discuss**. It is **not** needed as an excuse for
+fairness, and using it as one makes the argument weaker, not stronger.
+
 ### The three layers
 
 | layer | rule |
