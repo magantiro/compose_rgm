@@ -46,9 +46,21 @@ A method that only samples endpoints has no realized state to continue *from*.
 
 ---
 
-## Reference-prioritized shortlisting (`R_θ` plausibility shortlist)
+## Gap-filling aspiration control (outer Pareto allocation)
 
 **Status: `QUEUED_CONDITIONAL — NO DESIGN / NO RUN`**
+
+Designed in `docs/PARETO_DEVELOPMENT_REVISED_PREREGISTRATION.md`. Trigger: the
+fresh Pareto panel reproduces high HV *and* lower nondominated cardinality. The
+deficit is a diagnosis of a primitive fixed grid, not a COMPOSE ceiling — the
+inner controller is excellent (P3, 12/0) while the outer allocation never
+optimizes the set at all. Barred: optimizing ND count directly.
+
+## Reference-prioritized shortlisting (`R_θ` plausibility shortlist)
+
+**Status: PROMOTED — now the immediate next experiment, at two budget-derived
+operating points (K_G = 333 greedy, K_V = 15 verified), on a fresh panel.**
+See `docs/PARETO_DEVELOPMENT_REVISED_PREREGISTRATION.md`. No longer conditional.
 
 Already recorded in `docs/PARETO_DEVELOPMENT_PREREGISTRATION.md`. Repeated here
 so the queue is in one place.
