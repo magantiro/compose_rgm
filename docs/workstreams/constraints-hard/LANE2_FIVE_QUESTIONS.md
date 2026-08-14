@@ -136,6 +136,83 @@ protocol that would have supplied those is **`SUPERSEDED`**, and its protected
 object failed its feasibility census. **The Bemis–Murcko branch stays killed —
 no "smaller scaffold" rescue**, per the canonical policy's frozen decisions.
 
-Lane 2 chooses the constraint predicate from its own frozen work. Lane 6's
-contribution is the framing above, the injection-point requirements in §3, and
-the reporting guard rails in §5.
+Lane 6's contribution is the framing above, the injection-point requirements in
+§3, and the reporting guard rails in §5.
+
+---
+
+## Open decisions Lane 2 must make — named, not papered over
+
+This handoff is **not** self-sufficient. Four things are genuinely undecided, and
+a builder would otherwise have to come back and ask. Each is Lane 2's to settle,
+but the constraints on settling them are recorded here so the answer does not
+have to be renegotiated.
+
+### O1 — The soft-guidance arm has no definition yet. **This is the biggest gap.**
+
+The arm is named in §1 but its functional form is not specified. It needs:
+
+- a **reweighting of `R_θ` over the full legal support** — the natural family is
+  `R_θ(y|x) · exp(−λ · penalty(y))` renormalized, with `penalty(y) = 0` when
+  `C(y) = 1`, but the exact form is Lane 2's call;
+- registration as **`LAW_ONLY`** (`successor_kernel.py:308`) — same support,
+  different law. This is what makes it the correct middle arm: it differs from
+  the hard arm in *mechanism*, not in support.
+
+**Binding constraint on λ.** The project rule *"no hyperparameter search for a
+favourable operating point"* applies with full force. **Pre-register ONE λ from a
+stated requirement** — a target violation rate, a target KL from the unguided
+law, a structural argument. Running `λ ∈ {0.1, 1, 10, 100}` and reporting the
+best is choosing the result and then naming a configuration for it. If the curve
+is genuinely the object of study, say so in advance and report the whole curve.
+
+A λ chosen to make soft guidance lose would be as invalid as one chosen to make
+it win, and it is the more likely error here.
+
+### O2 — Which predicate `C`?
+
+Two options, and they are **not** equivalent in evidential value:
+
+| option | provenance | risk |
+|---|---|---|
+| **CDD's `SA(y) ≤ τ`**, τ ∈ {3.0, 3.5, 4.0, 4.5} | **exogenous** — fixed by other authors before they had heard of us | **none of the outcome-selection kind** |
+| Lane 2's own frozen corridor | endogenous | the predicate was chosen against our own corpus |
+
+**Recommend the exogenous one.** An externally fixed threshold structurally
+cannot repeat the defect that killed the Bemis–Murcko branch — a constraint
+selected, however innocently, because it leaves enough room to act. The three
+verbatim-reproduction conditions are in `BASELINE_TASK_MATRIX.md` §3a; the one
+easy to miss is **pin our own RDKit version and state it**, because CDD pins none
+and SA is not version-portable.
+
+If none of the four thresholds is workable on our fiber, **that is a reportable
+result**, not licence to pick a fifth.
+
+### O3 — Gate thresholds
+
+Reuse Lane 2's own frozen Stage-A2 criteria verbatim — V3 ≥ 20 events, V4a pooled
+median retention ≥ 0.10, V4b mask-empty ≤ 0.05, V5a source spread > 1/3, V5b
+single-source share ≤ 0.50. **Do not mint new ones**, and do not widen them
+because a chosen predicate fails.
+
+### O4 — Panel, horizon, budget, cost model
+
+Entirely Lane 2's. Lane 6's cost anchor (~170 s per arm-source, from Lane 2's own
+Stage A shard) is in the superseded `PROTOCOL.md` §11 if it is useful, but it was
+measured for a different predicate and should be re-derived.
+
+---
+
+## Self-assessment of this handoff
+
+**Sufficient without further questions:** the methodological axis; why the
+framework counterfactual is discharged conceptually; the three injection-point
+requirements; the arm-registration vocabulary (`SUPPORT_ABLATION` vs `LAW_ONLY`);
+the five falsifiers; the construction-check rule; the denominator rule; the
+three-counter efficiency discipline.
+
+**Requires a Lane 2 decision before implementation:** O1–O4 above. **O1 is
+load-bearing** — the soft-guidance arm is one of the three arms and one of the
+named falsifiers (*"soft guidance matches hard support on feasible
+performance"*), so the experiment cannot be built without it, and a badly chosen
+λ would void the comparison rather than merely weaken it.
