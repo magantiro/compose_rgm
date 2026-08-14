@@ -23,27 +23,55 @@ experiments, and the role is recorded per method with its reason.
 
 ---
 
-## Role assignments at a glance
+## The execution tiers
 
-| method | role | one-line reason |
+From `docs/AMENDMENT_PUBLISHED_NUMBER_FIRST.md`, which extends the role taxonomy:
+
+> **Use published baseline results whenever we can reproduce the exact published
+> evaluation protocol on COMPOSE. Rerun an external method only when a direct
+> comparison genuinely requires it.** Baseline execution is the exception
+> justified by the scientific question, never the default reflex.
+
+| tier | condition | action |
 |---|---|---|
-| **DDSBM** | `FRAMEWORK_NEIGHBOR` | source-conditioned stochastic graph transformation — the nearest alternative graph-CTMC/bridge abstraction |
-| **GrIDDD** | `FRAMEWORK_NEIGHBOR` *(qualification in progress)* | discrete graph diffusion with node insertion **and deletion** — the nearest alternative variable-size graph dynamics |
-| **generate-and-rank P3/P4** | `MATCHED_CAUSAL_CONTROL` | same executor, same budget, purpose applied only after generation |
-| **empirical-family reference ablation** | `MATCHED_CAUSAL_CONTROL` | same control, `R_θ` replaced — isolates what the learned reference law buys |
-| **preference-blind floor (`unguided`)** | `MATCHED_CAUSAL_CONTROL` | same process, no objective consulted — the floor Q1 must clear |
-| **greedy vs verified control** | `MATCHED_CAUSAL_CONTROL` | same everything, lookahead removed |
-| **HN-GFN** | `TASK_COMPETENCE` | global multiobjective competence only; **never substitutes for source-conditioned P3/P5/P6** |
-| **InversionGNN** | `TASK_COMPETENCE` | same; conditional on unresolved code defects |
-| **GraphXForm / InVirtuoGen / MolEditRL** | `TASK_COMPETENCE` | strong native editors; not the novelty question |
-| **OP-GFN** | **excluded entirely** | not preference-conditioned; CC BY-NC-**ND** forbids the adapter |
-| **Edit Flows** | `CONCEPTUAL_LINEAGE_ONLY` | edit-based CTMC over variable-length **sequences** |
-| **Expanding Flow Maps** | `CONCEPTUAL_LINEAGE_ONLY` | variable-size **de novo** generation, not source-conditioned legal rewriting |
-| **MOG-DFM** | `CONCEPTUAL_LINEAGE_ONLY` | fixed-length token sequences; uniform init; local one-step guidance |
-| **PepTune** | `CONCEPTUAL_LINEAGE_ONLY` | peptide SMILES tokens; de novo; **Pareto dominance filtering, so not preference-conditioned** |
-| **pCoMole** | `UNVERIFIED` | primary document not read — see escalation |
-| **AReUReDi** | `CONCEPTUAL_LINEAGE_ONLY`, *conditionally reassessable* | the **only** same-lab candidate for direct numerical comparison, under four conditions below |
-| **CDD / PRODIGY / ConStruct** | hard-constraint lineage — **Lane 6 owns** | not audited here; no claim about them appears in this workstream |
+| **1** | exact alignment on every protocol dimension | run **COMPOSE only**; cite baselines as **"reported"**, never "our rerun" |
+| **2** | partial alignment | **contextual literature numbers**, never head-to-head |
+| **3** | question is on our custom task **and** a thin native adapter exists | authorize a rerun of the **smallest necessary set** |
+| **4** | code broken, checkpoints absent, licence restrictive, or adaptation requires method invention | **cite and discuss; do not reconstruct** |
+
+The **role** says what a method would establish. The **tier** says whether we
+could ever get it from publication or would have to execute it. They are
+orthogonal, and both are recorded.
+
+## Role and tier assignments at a glance
+
+| method | role | **tier** | one-line reason |
+|---|---|---|---|
+| **DDSBM** | `FRAMEWORK_NEIGHBOR` | **3** | nearest alternative graph-CTMC/bridge abstraction; a native rerun on our exact sources is meaningful because no published result covers them |
+| **GrIDDD** | `FRAMEWORK_NEIGHBOR` *(qualification pending)* | **4 for task, framework tier pending** | discrete graph diffusion with node insertion **and deletion**. Its task row is tier 4: the official lead set is `exact_unresolved` in our own frozen contract |
+| **generate-and-rank P3/P4** | `MATCHED_CAUSAL_CONTROL` | **n/a — internal** | same executor, same budget, purpose applied only after generation |
+| **empirical-family reference ablation** | `MATCHED_CAUSAL_CONTROL` | **n/a — internal** | same control, `R_θ` replaced — isolates what the learned reference law buys |
+| **preference-blind floor (`unguided`)** | `MATCHED_CAUSAL_CONTROL` | **n/a — internal** | same process, no objective consulted — the floor Q1 must clear |
+| **greedy vs verified control** | `MATCHED_CAUSAL_CONTROL` | **n/a — internal** | same everything, lookahead removed |
+| **HN-GFN** | `TASK_COMPETENCE` | **2** | all six protocol dimensions fail → contextual only. Never substitutes for source-conditioned P3/P5/P6 |
+| **InversionGNN** | `TASK_COMPETENCE` | **2 to cite, 4 to run** | numbers usable as context; no checkpoint, an arity defect and **no licence** put execution in tier 4 |
+| **GraphXForm** | `TASK_COMPETENCE` | **3** | named in the amendment: a native rerun on our exact sources is meaningful if no published result covers them |
+| **InVirtuoGen / MolEditRL** | `TASK_COMPETENCE` | `UNVERIFIED` | no primary source read by this lane |
+| **OP-GFN** | **excluded entirely** | **4** | not preference-conditioned; CC BY-NC-**ND** forbids distributing the adapter |
+| **Edit Flows** | `CONCEPTUAL_LINEAGE_ONLY` | **4** | edit-based CTMC over variable-length **sequences**; a graph port is method invention |
+| **Expanding Flow Maps** | `CONCEPTUAL_LINEAGE_ONLY` | **4** | variable-size **de novo** generation, not source-conditioned legal rewriting |
+| **MOG-DFM** | `CONCEPTUAL_LINEAGE_ONLY` | **4** | fixed-length token sequences; uniform init; local one-step guidance |
+| **PepTune** | `CONCEPTUAL_LINEAGE_ONLY` | **4** | peptide SMILES tokens; de novo; **Pareto dominance filtering, so not preference-conditioned** |
+| **pCoMole** | `UNVERIFIED` | **4** | primary document not read — see escalation |
+| **AReUReDi** | `CONCEPTUAL_LINEAGE_ONLY`, *conditionally reassessable* | **4**, conditionally **3** | the only same-lab candidate for direct numerical comparison, under four conditions below |
+| **CDD** | hard-constraint lineage — **Lane 6 owns** | **2**, with its **task definition** reusable | reuse CDD's published `SA(y) ≤ τ` predicate as an externally defined task; **do not rebuild CDD** |
+| **PRODIGY / ConStruct** | hard-constraint lineage — **Lane 6 owns** | **Lane 6's call** | not audited here; no claim about them appears in this workstream |
+
+**Reading the tiers.** Only DDSBM and GraphXForm sit at tier 3 — the only two
+methods this lane would ever expect to see executed, and only on our exact
+sources where no published result exists. Everything else is cited or discussed.
+**No method in this workstream is tier 1**, because tier 1 requires exact
+protocol alignment and the alignment audit found none.
 
 ---
 

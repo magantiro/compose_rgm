@@ -181,9 +181,21 @@ is unreachable for a source, report `MATCHING_UNREACHABLE` for **that source**
 and do not alter generate-and-rank until it matches.
 
 Barred generalization, verbatim from the top-up preregistration:
-~~"generate-and-rank cannot be kernel matched."~~ What is licensed is only:
-"kernel matching is unreachable for source 000 under the frozen generate-and-rank
-process."
+~~"generate-and-rank cannot be kernel matched."~~
+
+**Source 000 has since MATCHED** (`AMENDMENT_PUBLISHED_NUMBER_FIRST.md` §2): the
+committed 368-kernel-call target was reached at **369**, after **1,025**
+generate-and-rank trajectories — **16.8× more search** than the broken open-loop
+matcher had given it. So the fallback wording above is now not merely
+unlicensed as a generalization; its specific instance is **false**, and the
+barred sentence would have been false too.
+
+This is worth recording rather than quietly deleting. The preregistered fallback
+existed because matching *might* have proved unreachable; the discipline of
+writing it down before the outcome is what makes the actual outcome
+interpretable. **A fair P3/P4 comparison now exists** — genuinely fair, not
+merely less unfair — and `MATCHING_UNREACHABLE` is reported per source only where
+it actually occurs.
 
 ### Q4 verdicts
 
@@ -258,8 +270,55 @@ needs, and may never change which benchmark Panel B uses.
 
 **What this costs and what it does not.** It removes the option of leaning on an
 external row. It does not weaken the multiobjective claim, which was always
-carried by Panel A and the Ring 3 causal controls — a global competence row was
+carried by Panel A and the matched causal controls — a global competence row was
 context, not evidence for the claim in §1.
+
+### Panel B status: `BLOCKED_ON_QUERY_EFFICIENT_COMPOSE`
+
+**Not `BASELINE_UNAVAILABLE`. The distinction is the whole point: the blocker is
+ours.** Per `docs/AMENDMENT_PUBLISHED_NUMBER_FIRST.md` §3.
+
+The earlier framing here — that no benchmark aligns — was true but pointed at the
+wrong object. The audit's own numbers say why: full-fiber COMPOSE spends **~2,187
+oracle evaluations per preference trajectory on its cheapest guided arm and
+~53,977 on its primary**, against a benchmark class living at **10³–10⁴**.
+
+> **Stop looking for a benchmark that aligns.** No choice of benchmark fixes a
+> 5–50× budget-class mismatch.
+
+The workstream is therefore **paused, not impossible** — and it is paused on a
+COMPOSE capability rather than on anything a baseline lane could fix. External
+baseline execution and dependency archaeology stop here.
+
+### The named unblock condition
+
+**`R_θ` plausibility shortlisting**, upgraded to
+`CONDITIONAL_LOAD_BEARING_FOR_ORACLE_BENCHMARKS`
+(`AMENDMENT_PUBLISHED_NUMBER_FIRST.md` §4). Previously an optional scaling
+upside; it is now the single named condition that would unblock Panel B.
+
+```
+exact legal canonical fiber → R_θ-prioritized shortlist → expensive objective evaluation → same control
+```
+
+**It is not needed for the core scientific capability** — that one frozen process
+can be recontrolled across preferences. It is needed only for the *separate*
+claim that COMPOSE is a credible ordinary multiobjective optimizer under
+contemporary oracle-budget evaluation.
+
+Recorded terms, from the amendment, so that a later run cannot drift:
+
+- **Ordering unchanged:** repaired P3/P4 → full-fiber Pareto development
+  sufficient to establish capability → **then** this, and not before.
+- **One preregistered operating point**, chosen before outcomes from a target
+  query reduction of **~10×**. **No `K` sweep** — that is the prohibited
+  sweep-and-select pattern by name.
+- **Primary result: HV retained per oracle query retained.**
+- A failure is informative: COMPOSE remains a rich control framework and we
+  simply do not market it as oracle-efficient MOO.
+
+**This lane does not design it, scope it, or estimate it.** It is recorded here
+as Panel B's unblock condition and nothing more.
 
 ---
 
@@ -327,17 +386,25 @@ equally.
 
 ### E3 — Panel B head-to-head global multiobjective row
 
-**Status: DECLINED. Recorded so the decline is auditable, not silent.**
+**Status: `BLOCKED_ON_QUERY_EFFICIENT_COMPOSE`.** Paused, not impossible, and
+**blocked on us** rather than on a missing baseline.
 
 | question | answer |
 |---|---|
 | **methodological axis** | none — it tests competence, not novelty |
 | **framework counterfactual** | none; HN-GFN and InversionGNN are `TASK_COMPETENCE` |
 | **matched causal control** | none available; neither method is source-conditioned |
-| **competence comparator** | would have been HN-GFN and InversionGNN |
-| **falsifier** | **already fired, before any COMPOSE number existed.** All six protocol dimensions fail, and the two papers disagree by 70× on HN-GFN's own oracle budget. |
+| **competence comparator** | HN-GFN and InversionGNN, at **tier 2** — contextual literature numbers, never head-to-head |
+| **falsifier** | **already fired, twice, before any COMPOSE number existed.** All six protocol dimensions fail; the two papers disagree by 70× on HN-GFN's own oracle budget; and COMPOSE's per-trajectory query demand sits 5–50× outside the benchmark class. |
+| **unblock condition** | `R_θ` plausibility shortlisting reaching ~10× query reduction while retaining front quality — §8. **Not designed here.** |
 
-Two independent lines of reasoning reached this decline — protocol forensics
-(the alignment audit) and framework-first selection (the role amendment) — from
-different directions. Recording both matters: agreement between independent
-arguments is evidence; a single argument reused twice is not.
+Three independent lines reached this same place from different directions:
+protocol forensics (the alignment audit), framework-first selection (the role
+amendment), and budget-class arithmetic (the published-number-first amendment).
+Recording all three matters — agreement between independent arguments is
+evidence; one argument restated three times is not.
+
+**The relabel is not cosmetic.** "Declined" invited a later reader to go looking
+for a better benchmark; `BLOCKED_ON_QUERY_EFFICIENT_COMPOSE` names the actual
+obstruction and stops that search. The earlier framing here was correct in
+substance and pointed at the wrong object.

@@ -89,24 +89,51 @@ RandomForests (97 MB, 38 MB), hash-bound with a parity panel: **1–2 days of
 engineering, zero GPU**. Since dimensions 1 and 2 fail regardless, **that
 extraction should not be built to serve this comparison.**
 
-## Fallback, in preference order
+## Panel B status: `BLOCKED_ON_QUERY_EFFICIENT_COMPOSE`
 
-1. **No Panel B numeric row; contextual citation only.** Recommended. Consistent
-   with `N/A` being preferable to a distorted adaptation. The Pareto claim rests
-   on Panel A, which is where the content is.
-2. **A resource frontier instead of a point** — COMPOSE's HV against oracle
-   evaluations, with published external results as labelled reference markers at
-   their own budgets and oracles. Needs the extraction above.
-3. **Wait for reference-prioritized shortlisting** (already
-   `QUEUED_CONDITIONAL — NO DESIGN / NO RUN`). Named as the blocking dependency;
-   not designed, not scoped, not run.
+**Not `BASELINE_UNAVAILABLE` — the blocker is ours.** Relabelled per
+`docs/AMENDMENT_PUBLISHED_NUMBER_FIRST.md` §3.
+
+> **Stop looking for a benchmark that aligns.** No choice of benchmark fixes a
+> 5–50× budget-class mismatch.
+
+Paused, not impossible. External baseline execution and dependency archaeology
+stop here.
+
+**Named unblock condition:** `R_θ` plausibility shortlisting, upgraded to
+`CONDITIONAL_LOAD_BEARING_FOR_ORACLE_BENCHMARKS`. One preregistered operating
+point at ~10× query reduction, **no `K` sweep**, primary result **HV retained per
+oracle query retained**. Ordering unchanged: repaired P3/P4 → full-fiber Pareto
+capability → then this. **Not designed here, and this lane does not scope it.**
+
+It is not needed for the core capability claim. It is needed only for the
+separate claim that COMPOSE competes in ordinary oracle-budget MOO.
+
+## Execution tiers — what could ever be cited vs what needs running
+
+| tier | methods here |
+|---|---|
+| **1** exact alignment → run COMPOSE only, cite as "reported" | **none** — tier 1 needs exact protocol alignment and the audit found none |
+| **2** partial → contextual only, never head-to-head | HN-GFN; InversionGNN (to cite); CDD (Lane 6) |
+| **3** rerun smallest necessary set on our custom task | **DDSBM, GraphXForm** — the only two this lane would ever expect executed |
+| **4** cite and discuss; do not reconstruct | OP-GFN, Edit Flows, Expanding Flow Maps, MOG-DFM, PepTune, pCoMole, AReUReDi, InversionGNN (to run), GrIDDD's task row |
 
 ## Where the argument now rests
 
-With Panel B unable to carry a head-to-head row, the multiobjective argument
-rests on **Panel A and the Ring 3 COMPOSE causal controls**. That is where the
-scientific content was anyway; the audit removes the option of leaning on an
-external row instead.
+With Panel B blocked, the multiobjective argument rests on **Panel A and the
+`MATCHED_CAUSAL_CONTROL` arms**. That is where the scientific content was anyway.
+
+**And that evidence just got stronger, from another lane.** P3/P4 source 000 has
+**MATCHED** — the committed 368-kernel target reached at 369 after 1,025
+generate-and-rank trajectories, 16.8× more search than the broken matcher gave
+it. The fair closed-loop-versus-open-loop comparison now exists. The
+preregistered `MATCHING_UNREACHABLE` fallback did not fire for that source, which
+is why writing it down before the outcome was worth doing.
+
+**The one gap that remains open** is E1's framework counterfactual: no
+`FRAMEWORK_NEIGHBOR` has yet been qualified. DDSBM is the principal candidate and
+GrIDDD's qualification is in progress. That is the largest hole in the package,
+and it is a hole in *novelty* evidence, not competence evidence.
 
 ## Standing findings from Stage 0/1 (unchanged, now project record)
 
