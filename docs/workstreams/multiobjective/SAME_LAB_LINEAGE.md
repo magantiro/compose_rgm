@@ -192,12 +192,61 @@ source*. Tree search is not one of them.
 
 ## Statuses at a glance
 
-| method | status | numeric baseline? |
-|---|---|---|
-| MOG-DFM | `NOT_FAITHFULLY_PORTABLE` (secondary `CONCEPTUAL_LINEAGE`; possible `REDUNDANT_WITH_INTERNAL_ARM`) | no |
-| AReUReDi | `NOT_FAITHFULLY_PORTABLE` (secondary `CONCEPTUAL_LINEAGE`) | no — recommend related work |
-| pCoMole | `UNVERIFIED` — primary document not read | undecidable until the PDF is obtained |
-| PepTune | `CONCEPTUAL_LINEAGE` | no |
+Two vocabularies are in play and they answer different questions. The **lineage
+status** describes *portability* — could this method be run faithfully on our
+task? The **role** from `docs/COMPARATOR_ROLES_CANONICAL.md` describes
+*evidentiary purpose* — what would it establish if it were run? They are recorded
+side by side rather than one replacing the other, because a method can be
+unportable for one reason and uninformative for a different one.
 
-No same-lab method is recommended for implementation or execution. The one
+| method | lineage status (portability) | role (evidentiary purpose) | numeric baseline? |
+|---|---|---|---|
+| MOG-DFM | `NOT_FAITHFULLY_PORTABLE` (secondary `CONCEPTUAL_LINEAGE`; possible `REDUNDANT_WITH_INTERNAL_ARM`) | `CONCEPTUAL_LINEAGE_ONLY` | no |
+| AReUReDi | `NOT_FAITHFULLY_PORTABLE` (secondary `CONCEPTUAL_LINEAGE`) | `CONCEPTUAL_LINEAGE_ONLY`, **conditionally reassessable** | no on current evidence — see the four conditions |
+| pCoMole | `UNVERIFIED` — primary document not read | `UNVERIFIED` | undecidable until the PDF is obtained |
+| PepTune | `CONCEPTUAL_LINEAGE` | `CONCEPTUAL_LINEAGE_ONLY` | no |
+
+Where the two disagree is informative. MOG-DFM's possible
+`REDUNDANT_WITH_INTERNAL_ARM` reading says its causal role is *already occupied*
+by `greedy_preference_run` — which is a stronger reason not to run it than
+unportability, because it would remain true even if it were portable.
+
+## The same-lab policy, applied
+
+> **Scientific proximity determines comparison. Not shared authorship, in either
+> direction.**
+
+Avoiding the closest prior work *because* it shares a lab is riskier than a
+careful comparison — a reviewer may reasonably suspect easier baselines were
+chosen. Every placement above was made on state space, source conditioning and
+guidance horizon. **None turned on authorship**, and each would be unchanged if
+these four papers came from four different groups.
+
+### AReUReDi — the only candidate for direct numerical comparison
+
+Its status may move off `CONCEPTUAL_LINEAGE_ONLY` **only if all four hold**:
+
+| # | condition | current evidence |
+|---|---|---|
+| 1 | official code runs **ordinary small-molecule SMILES** | **FAILS.** Its SMILES instantiation is *peptide* SMILES over a 586-token vocabulary, handled as a **fixed-length token string**. Single-token substitution at fixed length cannot express bond or atom graph edits. |
+| 2 | objectives attach through a **thin wrapper** | plausible — objectives are scalar scores over sequences |
+| 3 | **no redesign** of proposal, backbone or scalarization | `UNVERIFIED` — untestable while 1 fails |
+| 4 | **original authors validate** the configuration | **not attempted.** Requires contacting authors; outside this lane's scope. |
+
+Condition 1 is the binding one and it fails on the method's native object, not on
+effort. Recorded as a conditional rather than a verdict so a future reader can
+check the reasoning instead of taking the conclusion.
+
+### Framing — binding and non-negotiable
+
+**Cumulative, never adversarial.** Prior work developed powerful guidance and
+control for discrete diffusion, flow and edit processes; COMPOSE contributes a
+new executable molecular graph substrate, and matched experiments determine what
+that substrate enables beyond prior guidance formulations.
+
+**Barred:** *"here is why every earlier model from the group was inadequate"*, and
+*"COMPOSE defeats prior lab work."*
+
+No same-lab method is recommended for implementation or execution, and **pCoMole
+and PepTune are never ported onto the COMPOSE executor by us.** The one
 outstanding obligation is to read pCoMole.
