@@ -101,13 +101,21 @@ someone else, without any objective-specific retraining?
 | | |
 |---|---|
 | **Task** | DDSBM's ZINC250k logP 2→4, their exact held-out split, all **5,984** test sources |
-| **Objective** | transport adapter `τ(x₀) = logP(x₀) + 2`, `u(y;x₀) = −|logP(y) − τ(x₀)|` |
+| **Objective** | transport adapter `τ(x₀) = logP(x₀) + 2`, then `u(y;x₀) = −\|logP(y) − τ(x₀)\|` — i.e. **negative absolute deviation** from the shifted source, written out in full below |
 | **Controller** | greedy closed-loop, horizon 6, frozen `R_θ`, no objective-specific update |
 | **Comparator** | **DDSBM** — `FRAMEWORK_NEIGHBOR`, **tier 1** |
 | **We run** | COMPOSE alone. DDSBM's published table is cited *as reported*. |
 | **Metrics** | benchmark-native only: logP `W₁`, QED MAD, SA MAD, validity — plus trajectory-wide validity and edit expressivity, which **no row in their table can report** |
 | **Stop rule** | none; this is a competence demonstration, not a superiority claim |
 | **State** | 🟢 protocol frozen, gate 5,984/5,984 passed, pilot clean — **full run LAUNCHED** |
+
+**The frozen objective, in full** — this is the authoritative statement; the
+table cell above abbreviates it:
+
+```
+tau(x0)  = logP(x0) + 2
+u(y; x0) = -| logP(y) - tau(x0) |
+```
 
 **Why DDSBM and not GraphXForm.** GraphXForm asks *is COMPOSE competitive with a
 powerful sequential graph model?* DDSBM asks *why COMPOSE's executable graph CTMC
@@ -191,7 +199,16 @@ The primary conceptual comparison. **Not** a fairness footnote.
 | **Role** | `MATCHED_CAUSAL_CONTROL` |
 | **Result** | **P3 +0.6678 [+0.5169, +0.8094], 12W/0L · P4 +0.5668 [+0.4763, +0.6390], 12W/0L** on hypervolume |
 | **Integrity check** | the repair **lifted** the baseline 0.308 → 0.371 — exactly what a *broken* matcher would have failed to do |
-| **Budgets** | `K_G = 333`, `K_V = 15`, both derived from the frozen ≤10k rule |
+| **Arms as run** | `greedy_pref` and `verified_pref` on the **full fiber**, against fairly funded `gen_rank@greedy` / `gen_rank@verified` |
+| **How matched** | **kernel calls matched by construction** by the metered matcher — not by any shortlist budget |
+
+> ⚠️ **`K_G = 333` and `K_V = 15` are NOT part of this banked result.** They are
+> the budgeted shortlist sizes for arms **B** and **C** of the *fresh scalable
+> panel* — the ≤10k-query operating points defined per fresh source in
+> `PARETO_DEVELOPMENT_REVISED_PREREGISTRATION.md`, whose own estimand is
+> `HV_verified@15 − HV_greedy@333`, a different contrast entirely. P3/P4 ran the
+> **full fiber**. Attaching those budgets here would retroactively rewrite what
+> was actually executed. See §4d.
 
 **Reported against us, unrescued:** nondominated set size favours the baseline
 (**P3 −2.250, P4 −2.417, 0W/11L**). Resource axes disagree by ~10³ in opposite
@@ -230,10 +247,42 @@ endpoint transformation, not target-free front construction.
 
 Six carry prior findings to be **reused, not re-derived**. Two are new work.
 
-**Target: 1–2 genuine external numerical comparators, and only on exact
-alignment. One or zero is an acceptable outcome** — the block already carries a
-fair matched causal baseline in repaired P3/P4, which tests the claim more
-directly than any external row.
+> **Aim for 1–2 genuine external numerical comparators. Zero is acceptable ONLY
+> after the preregistered qualification audit demonstrates that no faithful
+> numerical common protocol exists** — never as an early exit.
+
+The block already carries a fair matched causal baseline in repaired P3/P4,
+which tests the COMPOSE-specific claim more directly than any external row. That
+is a reason the external count may honestly end up small; it is **not** a licence
+to stop auditing. Three rows are still open.
+
+#### 4d · The scalable operating points — forward-looking, not yet run
+
+Distinct from P3/P4 above. Both `K` values come from the **same external
+10,000-query-per-source rule** applied to scoring-event counts read from the
+frozen implementation. Neither was chosen by looking at an outcome, and `K_V`
+was fixed **before P3 existed**.
+
+```
+greedy    E_G = 5 prefs × 6 steps                     =  30 events
+verified  E_V = 5 prefs × (6 + 8 rollouts × 15 steps) = 630 events
+```
+
+| arm | K | retains | predicted req | reduction |
+|---|---:|---:|---:|---:|
+| **B — budgeted `R_θ`-shortlisted greedy** | **333** | 56.4% of fiber | 9,990 | 1.8× |
+| **C — budgeted `R_θ`-shortlisted verified** | **15** | 2.4% of fiber | 9,450 | 42.1× |
+
+**The asymmetry is the point.** Greedy needs only a mild cut to reach the
+contemporary budget regime; verified needs 42×. **Settled: full-fiber verified
+does not run on the fresh panel** — it did its job in the 12-source smoke, and
+paying ~22× again would re-establish a ceiling we no longer need. Arm C is
+therefore measured against arm A and against arm B at matched budget, never
+against a full-verified ceiling, which is why C carries no noninferiority
+requirement.
+
+**`K_G` came from a budget rule before outcomes existed. It is not to be
+harshened because 333 later "looks easy."**
 
 ---
 
@@ -387,17 +436,26 @@ model would be a *worse* control.
 
 ### The internal arms — the most important comparators we have
 
-Every full-scale control task compares the **same frozen `R_θ`** under: unguided
-· hard-mask-only · greedy one-step · local Boltzmann tilt · beam/best-first ·
-untwisted SMC · immediate-potential SMC · learned bridge controller · Monte
-Carlo value/MPC (small subset).
+> **Each claim-bearing task uses the smallest matched-control set required to
+> isolate its mechanism. The exact arms are frozen in that experiment's own
+> section above, and nothing here adds to them.**
+
+This replaces an earlier formulation that read as though *every* full-scale task
+must carry all nine candidate arms — unguided, hard-mask-only, greedy one-step,
+local Boltzmann tilt, beam/best-first, untwisted SMC, immediate-potential SMC,
+learned bridge controller, Monte Carlo value/MPC. **That list is a menu of
+available controls, not a required set**, and reading it as required would
+authorize exactly the internal baseline zoo the scope lock bars.
+
+Whichever arms a task does carry, they exist to answer one question:
 
 > Does future-aware bridge control outperform ordinary generation plus
 > ranking/search under the same legal kernel, reference model, oracle budget and
 > source molecules?
 
-Without that, a reviewer can attribute gains to the rewrite kernel or the oracle
-rather than the bridge.
+Without a matched control of that shape, a reviewer can attribute gains to the
+rewrite kernel or the oracle rather than the bridge. **One well-chosen matched
+arm answers this; nine do not answer it nine times.**
 
 ---
 
@@ -412,7 +470,32 @@ rather than the bridge.
 | **cLogP checkpoint** — forced real-kill + torn-write | agent | piece 6 |
 | **SA census** — Gate-0 mount-path defect | agent | piece 5 |
 | **Bounded kernel profile** | agent | ~80% of remaining cost is unmeasured |
-| **Fresh Pareto panel `n`** | open | powered from Stage B variance, not from the 14/24 result |
+| **Fresh Pareto panel `n`** | open | **power AFTER the final Pareto algorithm and estimand freeze** — see below |
+
+---
+
+### How the fresh Pareto `n` gets set — and a conflation to avoid
+
+**There is no Pareto "Stage B."** Stage A2 and Stage B belong to the **cLogP
+pathwise** line only. An earlier draft of this document said the Pareto panel
+would be "powered from Stage B variance"; that was a conflation of two separate
+experimental lines and is **struck**.
+
+The correct procedure:
+
+1. **Freeze the final Pareto algorithm and estimand first** — `n` cannot be
+   computed against an estimand that does not exist yet.
+2. Draw the variance from the **sanctioned Pareto development sources** — the 12
+   smoke sources supply the spread, and nothing else about them is used.
+3. Power against **the actual final source-level paired bootstrap**, the same
+   procedure the final analysis will report.
+
+Step 3 is not a formality. **The earlier n = 24 was withdrawn precisely because
+planning used a normal approximation while the analysis used a bootstrap** — the
+two do not agree in general, the bootstrap of a ratio is skewed, and the real
+power turned out to be 0.604 where 24 had implied adequacy. `scripts/
+pareto_scalable_power.py` was rewritten to run the actual bootstrap for this
+reason. **Do not re-introduce a closed-form shortcut.**
 
 ---
 
