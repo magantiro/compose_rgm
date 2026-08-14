@@ -107,6 +107,24 @@ payload = {
         "why": "an externally fixed threshold cannot be selected on our outcome, which is the defect that killed the Bemis-Murcko branch",
         "note": "the task travels; the numbers do not - CDD stays contextual, non-head-to-head",
     },
+    "lane2_open_decisions": {
+        "owner": "Lane 2",
+        "artifact": "docs/workstreams/constraints-hard/LANE2_FIVE_QUESTIONS.md",
+        "handoff_self_sufficient": False,
+        "O1_soft_guidance_arm_undefined": {
+            "severity": "LOAD_BEARING - the experiment cannot be built without it",
+            "needs": "functional form of the reweighting, registered as LAW_ONLY",
+            "binding_constraint": "ONE pre-registered lambda from a stated requirement; no sweep-and-pick. A lambda chosen to make soft guidance LOSE is as invalid as one chosen to make it win",
+        },
+        "O2_predicate_choice": {
+            "recommended": "CDD SA(y) <= tau, exogenous",
+            "alternative": "Lane 2's own frozen corridor, endogenous",
+            "reason": "an externally fixed threshold structurally cannot repeat the outcome-selection defect that killed Bemis-Murcko",
+            "easy_to_miss": "pin our own RDKit version and state it; CDD pins none and SA is not version-portable",
+        },
+        "O3_gate_thresholds": "reuse Lane 2's frozen A2 criteria verbatim (V3>=20, V4a>=0.10, V4b<=0.05, V5a>1/3, V5b<=0.50); do not widen if a predicate fails",
+        "O4_panel_horizon_budget": "entirely Lane 2's; Lane 6's ~170 s per arm-source anchor was measured for a different predicate and should be re-derived",
+    },
     "open_questions_for_lead": [
         "confirm FRAMEWORK_NEIGHBOR vs CONCEPTUAL_LINEAGE_ONLY for CDD/PRODIGY/ConStruct under a strict reading of the four role definitions",
         "tier-1 audit for GraphXForm and Prompt-MolOpt^P not discharged - check whether COMPOSE can run under their published protocols before authorizing any rerun",
