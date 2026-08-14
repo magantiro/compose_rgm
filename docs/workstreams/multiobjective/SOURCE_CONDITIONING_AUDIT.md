@@ -110,10 +110,27 @@ report nonconvex front regions that a Chebyshev scalarization can reach. That is
    **What this licenses:** the potency objective can be the same object for both
    methods, so a reviewer cannot object that COMPOSE and HN-GFN were scored by
    different DRD2 models.
+
    **What it does not license:** a claim that the two produce bit-identical
    scores. COMPOSE consumes extracted numpy parameters, HN-GFN calls sklearn
    `predict_proba`. Bit-level parity is `UNVERIFIED` and would need its own
    known-answer test against the manifest's committed `reference_scores`.
+
+   **And the gap is now known to be wider than "different implementations".**
+   `docs/ORACLE_BATCH_INVARIANCE_DEFECT.md` records that COMPOSE's *own* DRD2
+   oracle is **batch-size dependent**: `drd2_oracle.py:213`
+   `kernel @ self.dual_coef + self.intercept` matches across batch shapes on only
+   13/512 molecules, max |d| 1.82e-14, because `(1,N) @ (N,)` dispatches to a dot
+   product and `(B,N) @ (N,)` to GEMV with a different accumulation order. So the
+   same molecule scores differently depending on how many were asked about at
+   once — and main-lane Decision 1 responds by **pinning all claim-bearing
+   COMPOSE decision code to the legacy `B=1` path**.
+
+   HN-GFN scores in batches (`drd2_scorer.get_scores` takes a list). Any future
+   parity test must therefore fix the batch shape before it can mean anything,
+   and "same model file" is further from "same scores" than it first appears.
+   The magnitude is chemically meaningless and is *exactly* the size that flips
+   an `argmax` tie over a ~586-wide fiber, which is why the pinning exists.
 
 2. **Objective availability.** `oracle/scorer/scorer.py:38-52` natively supports
    `qed`, `sa`, `mw`, `logp`, `penalized_logp`, plus `drd2`, `jnk3`, `gsk3b`,

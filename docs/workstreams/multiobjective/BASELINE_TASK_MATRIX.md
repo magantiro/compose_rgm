@@ -155,10 +155,15 @@ the decision is main's.
 
 ## Where the methods sit — three rings
 
-Recorded from the lead's redirect of 2026-08-13. The purpose of the rings is to
-**answer scientific objections, not to beat task specialists**. Placement only;
-this is not an audit of Ring 1 or Ring 2, and nothing below is asserted beyond
-what has been verified elsewhere in this directory.
+Now governed by `docs/BASELINE_PHILOSOPHY_AND_MAIN_LANE_DECISIONS.md`, committed
+to the base branch at `7039cd1` and explicitly binding on this lane. The purpose
+of the rings is to **answer scientific objections, not to beat task
+specialists**; the question a methods paper asks is *"what is the closest
+alternative way to BUILD or CONTROL the generative process, and what does
+COMPOSE's representation buy over it?"*
+
+Placement only; this is not an audit of Ring 1 or Ring 2, and nothing below is
+asserted beyond what has been verified elsewhere in this directory.
 
 ### Ring 1 — same methodological realm
 

@@ -4,7 +4,19 @@
 alignment audit is complete on the dimensions that decide the verdict.
 
 **Branch:** `codex/compose-multiobjective-package`, based on
-`codex/editing-v2-successor-fiber-fastpath` @ `f6146d7`.
+`codex/editing-v2-successor-fiber-fastpath` @ **`f6146d7`**.
+
+**The base has since advanced to `667c5ec`** (five commits: Lane 4's top-up
+work, the main-lane baseline philosophy, and the DRD2 batch-invariance defect).
+This branch is **behind, not divergent** — it modifies **11 files, all its own**,
+and touches nothing those commits touched. Verified with
+`git diff --name-only f6146d7..HEAD`. Rebasing is a trivial fast-forward merge
+whenever main wants it.
+
+**Governing document:** `docs/BASELINE_PHILOSOPHY_AND_MAIN_LANE_DECISIONS.md`
+(`7039cd1`), which binds this lane. This audit executes its Decision 2, and the
+outcome lands on that decision's **"Not aligned → label published values
+contextual, non-head-to-head"** branch.
 
 **What is running:** nothing. **Compute spent: zero.** No Modal, no GPU, no
 baseline execution, nothing installed into any project environment.

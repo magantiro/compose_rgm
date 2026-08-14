@@ -485,6 +485,20 @@ tree structure must reproduce `predict_proba` exactly. Estimate: **1-2 days of
 engineering, zero GPU, plus a parity test.** It is not authorized and not
 started.
 
+**And it now inherits a constraint that did not exist when this section was
+first written.** `docs/ORACLE_BATCH_INVARIANCE_DEFECT.md` records that COMPOSE's
+DRD2 oracle is batch-size dependent at 1.82e-14 — the magnitude that flips an
+`argmax` tie over a ~586-wide fiber — and main-lane Decision 1 responds by
+**pinning all claim-bearing COMPOSE decision code to the legacy `B=1` path**. A
+GSK3β/JNK3 extraction would have to declare and hold its own batch shape under
+the same rule. `predict_proba` on a RandomForest is a mean over per-tree
+probabilities, so it has the same accumulation-order exposure the SVM's final
+GEMV had.
+
+That is another reason not to build it for this comparison: it would add a second
+oracle with the same reproducibility hazard, to serve a table the audit has
+already declined.
+
 Given that dimensions 1 and 2 fail regardless, **that extraction should not be
 built to serve this comparison.** It would only be worth building if COMPOSE
 needs TDC oracles for some independent reason.

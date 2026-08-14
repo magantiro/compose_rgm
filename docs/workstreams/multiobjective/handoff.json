@@ -5,7 +5,7 @@
   "branch": "codex/compose-multiobjective-package",
   "base_commit": "f6146d7",
   "base_branch": "codex/editing-v2-successor-fiber-fastpath",
-  "content_commit": "5630ec9",
+  "content_commit": "STAMPED_BY_FOLLOWUP_COMMIT",
   "artifact_status": "DESIGN_ONLY",
   "held_out_data_opened": false,
   "compute_spent": {
@@ -175,11 +175,11 @@
     "command": "python3 -m pytest tests/test_multiobjective_qualification.py -q"
   },
   "durable_artifacts": {
-    "docs/workstreams/multiobjective/STATUS.md": "30124b2374491cf1ef699cd1c199cf73620219f3f47b1e367a3ab924e48a9b6f",
+    "docs/workstreams/multiobjective/STATUS.md": "b8cd0755e039dd68fba5dcdafb98a2fdddc3de46dd93223b22b5e782ff4c5fbd",
     "docs/workstreams/multiobjective/PROTOCOL.md": "407821e08ba52121d3bca286a63f0cb1b4f6b78268c373cbc8889d6379eee705",
-    "docs/workstreams/multiobjective/BASELINE_TASK_MATRIX.md": "334614114cbd12313b27fc5462c4f9da987e7f3a2c572f58b1e936b694eed838",
-    "docs/workstreams/multiobjective/SOURCE_CONDITIONING_AUDIT.md": "c81a9a22afbfec223b8577bab46106f1b1fb724747212652359b609038cebbc6",
-    "docs/workstreams/multiobjective/BENCHMARK_ALIGNMENT_AUDIT.md": "6b04aa4165c0b732f5432ff742aa6b09a3860c200990596b9eec76cac7e2dab1",
+    "docs/workstreams/multiobjective/BASELINE_TASK_MATRIX.md": "a0740f74cb2f160ff7c08aca491c888c3e30fe44ada0fa3da5d4bda19be3a5f7",
+    "docs/workstreams/multiobjective/SOURCE_CONDITIONING_AUDIT.md": "a8633ecb4fe5492c6c5ccc20c625eeb74a130539c432e1c5e483cb37f5e50daa",
+    "docs/workstreams/multiobjective/BENCHMARK_ALIGNMENT_AUDIT.md": "82fe7cef4360980589076829630ac24387b50367d299b8b65ac42de1e1506f18",
     "docs/workstreams/multiobjective/SAME_LAB_LINEAGE.md": "7c9c496b742c985073ab127e1a2c101e3fb96f14b218a212cb1f5ec999493b10",
     "docs/workstreams/multiobjective/DECISION_LOG.md": "50d42815f6ecd3132e8003e8a73982a35480f917c65a67b2f2432f69879d93bf",
     "docs/workstreams/multiobjective/HANDOFF.md": "1396b2f568ecdc083adeaaa0107c5f09abfbcbc6b2eaca4304d6ef1e6a6b463c",
@@ -279,7 +279,8 @@
     "cost_of_running_compose_alone": {
       "compute": "~58 min per source on 8 CPUs for all five arms; ~12 core-hours for a 12-source panel; CPU-only; compute is NOT the obstacle",
       "oracle_work": "~270,000 unique evaluations per source on the primary arm; ~3.2M across 12 sources",
-      "actual_blocker": "COMPOSE cannot call tdc.Oracle. Installing PyTDC is barred and TDC's sklearn-dependent model selection is the exact drift artifacts/oracles/drd2_svm_v1 exists to prevent. Needs a version-independent extraction of two RandomForests (97MB, 38MB), hash-bound with a parity panel: 1-2 days engineering, zero GPU. NOT AUTHORIZED, NOT STARTED, and should not be built to serve this comparison since dimensions 1 and 2 fail regardless."
+      "actual_blocker": "COMPOSE cannot call tdc.Oracle. Installing PyTDC is barred and TDC's sklearn-dependent model selection is the exact drift artifacts/oracles/drd2_svm_v1 exists to prevent. Needs a version-independent extraction of two RandomForests (97MB, 38MB), hash-bound with a parity panel: 1-2 days engineering, zero GPU. NOT AUTHORIZED, NOT STARTED, and should not be built to serve this comparison since dimensions 1 and 2 fail regardless.",
+      "new_constraint": "docs/ORACLE_BATCH_INVARIANCE_DEFECT.md records COMPOSE DRD2 batch-size dependence at 1.82e-14 (drd2_oracle.py:213), the magnitude that flips an argmax tie over a ~586-wide fiber; main-lane Decision 1 pins all claim-bearing decision code to the legacy B=1 path. A GSK3b/JNK3 extraction would inherit the same rule, and RandomForest predict_proba (a mean over per-tree probabilities) has the same accumulation-order exposure. Another reason not to build it for this comparison."
     },
     "decisive_finding_budget_disagreement_between_papers": {
       "claim": "The two published papers disagree by 70x about how many oracle calls HN-GFN spends",
@@ -306,5 +307,20 @@
     "ring_2_hard_constraint_control": "CDD, PRODIGY, ConStruct -- LANE 6 OWNS THIS AUDIT; not duplicated here and no claim about them appears in this workstream",
     "ring_3_compose_causal_controls": "hard mask vs post-hoc; frozen R_theta vs empirical family; closed-loop vs generate-and-rank; continuation vs restart; endpoint vs trajectory constraint. Panel A members, Lane 4 owns the runs.",
     "consequence": "with Panel B unable to carry a head-to-head row, the multiobjective argument rests on Panel A and Ring 3"
+  },
+  "governing_document": {
+    "path": "docs/BASELINE_PHILOSOPHY_AND_MAIN_LANE_DECISIONS.md",
+    "commit": "7039cd1",
+    "binds": "Lanes 2, 3, 5 and 6",
+    "this_audit_executes": "Decision 2",
+    "outcome_branch": "Not aligned -> label published values contextual, non-head-to-head"
+  },
+  "base_branch_advanced": {
+    "branched_from": "f6146d7",
+    "base_now": "667c5ec",
+    "relationship": "behind, not divergent",
+    "files_changed_by_this_lane": 11,
+    "verified_with": "git diff --name-only f6146d7..HEAD",
+    "lane_4_files_modified": 0
   }
 }
