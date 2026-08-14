@@ -76,49 +76,54 @@ ablation.
 reward shaping.** None is motivated by a measured failure. **`0.95` is an
 auxiliary rare-tail fact, not a problem to solve.**
 
-## ⭐ STAGED CONTROLLER GATES — A, B, C before D
+## ⭐ ONE CONTROLLER QUALIFICATION — then the full corpus
 
-**The full corpus is justified only after the controller stack earns it.** We
-know the rollout generator works. We do **not** know whether region-`h_φ` can
-learn a useful GPS from those labels, so generating 49,152 transitions first is
-backwards.
+**Superseded an A/B/C/D ladder. That was caution turning into bureaucracy.**
 
-| stage | data | question | gate |
-|---|---|---|---|
-| **A · engineering** | existing excluded H24 pilot | does the feature/label/train/sampler pipeline run correctly? | **hard correctness only** |
-| **B · learning** | the SAME 256 H24 trajectories | can `h_φ` actually learn reachability on `0.80`/`0.85`? | **must beat a trivial/constant value predictor**, and show sensible budget and goal ordering |
-| **C · tiny controlled** | held-out subset of those pilot sources | does `R_θ·h_φ` steer better than unguided `R_θ` on `0.80`/`0.85`? | **directional improvement. NO `0.90` requirement** |
-| **D · full corpus** | 1,024 × 2 × H24 | tail coverage and generalization for `0.90` | **launch only after A–C pass** |
+We have already paid for the pilot trajectories and already established: H24
+rollout mechanics, exact nesting, sensible region geometry, green feature tests,
+the sampler parity gate, and the boundary condition. **We do not need another
+ladder of mini-experiments.**
 
-### Do NOT demand `0.90` in the tiny smokes
-
-Unguided `0.90/0.40` is ~**1.2 %** at H24, so a 64-source panel is **badly
-underpowered** for it. Judge the learner on `0.80` and `0.85`, where the event
-counts are real.
-
-A convincing tiny result looks like:
+The **one** thing never yet shown: **that the new region-conditioned `h_φ` can
+steer anything.** So one end-to-end qualification, on data we already own:
 
 ```
-h_φ(x, b, 0.80)  >  h_φ(x, b, 0.85)  >  h_φ(x, b, 0.90)     in sensible states
-predictions rise with remaining budget where they should
-calibration is nontrivial (beats a constant)
-and R_θ·h_φ finds 0.80/0.85 MORE OFTEN or FASTER than unguided R_θ
+1  split the existing pilot BY SOURCE into throwaway train / held-out
+2  train a small region-h_φ
+3  verify on HELD-OUT sources that it learns nontrivial reachability --
+   not a constant, and not a current-QED shortcut
+4  plug that exact checkpoint into the Stage-A1 controlled sampler
+5  test whether guidance improves the well-powered 0.80 / 0.85 regions
+   over unguided R_θ
 ```
 
-> **If it cannot do that on the easy regions, do NOT generate 49,000
-> transitions hoping more data fixes the implementation. Diagnose the learner.**
+### The GO criterion
 
-If it can, the full corpus is then bought for a specific reason — **tail
-coverage and generalization**, not hope.
+> **GO to the full 1,024 × 2 × H24 corpus if the learned value is demonstrably
+> informative on held-out sources AND controlled sampling moves `0.80`/`0.85`
+> in the correct direction.**
+
+**Not** impressive benchmark numbers. **Not** `0.90` success — unguided
+`0.90/0.40` is ~1.2 % at H24, so this scale is badly underpowered for it, and
+demanding it would be measuring noise.
+
+**If it passes: launch the full corpus immediately.** No second 128-source
+pilot, no further architecture smoke, no 256→512→1024 creep.
+
+**If it fails: that is valuable.** Spending more on labels before understanding
+why the value learner cannot navigate the easy regions would be waste.
 
 ```
-prove the GPS can learn on the roads we already mapped
+existing H24 pilot  →  ONE end-to-end h_φ qualification  →  full corpus
         ↓
-then map 1,024 sources to make the GPS good enough for the hard destination
+real h_φ  →  64-source dev  →  128-source validation  →  800 official
 ```
 
-**Note on the encode budget:** the ~900 molecules in stage A are *encodings of
-already-generated pilot states*. No new molecules, no new sources, no scale-up.
+**That is enough staging.**
+
+**Note:** the ~900 molecules being encoded are *already-generated pilot states*.
+No new molecules, no new sources, no scale-up.
 
 ## The remaining ladder — no further design
 
