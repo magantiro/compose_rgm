@@ -1,0 +1,53 @@
+{
+  "schema": "compose.ddsbm.frozen_analysis",
+  "protocol": "docs/DDSBM_ENDPOINT_COMPETENCE_PROTOCOL.md",
+  "n_sources": 5984,
+  "n_ok": 5984,
+  "compose": {
+    "validity": 1.0,
+    "uniqueness": 0.9996657754010695,
+    "novelty": 1.0,
+    "logP_W1": 0.011394684128571026,
+    "QED_MAD": 0.4161281088065633,
+    "QED_MAD_ci95": [
+      0.41122807706320397,
+      0.4212707174005082
+    ],
+    "SA_MAD": 1.6911467009915728,
+    "SA_MAD_ci95": [
+      1.6702446744864357,
+      1.7104411868825367
+    ],
+    "trajectory_wide_validity": 1.0,
+    "mean_edits": 6.0,
+    "FCD": 12.9527
+  },
+  "distributions": {
+    "generated_logP_mean": 4.014894463569522,
+    "generated_logP_sd": 0.49879494427802007,
+    "target_logP_mean": 4.004115596590912,
+    "target_logP_sd": 0.4936427730733691,
+    "source_logP_mean": 2.0148916493983955,
+    "source_logP_sd": 0.498736941528388
+  },
+  "ddsbm_reported": {
+    "W1": 0.139,
+    "QED_MAD": 0.12,
+    "SA_MAD": 0.402,
+    "NSPDK": 0.00073,
+    "FCD": 0.833
+  },
+  "pending_not_dropped": {
+    "NSPDK": "NOT computed: `eden` unavailable and PEP668 blocks a system install. A hand-rolled NSPDK would not be comparable to DDSBM's reported 7.30e-4, so none was written. Endpoints persisted; computable later.",
+    "FCD": "COMPUTED -- see compose.FCD",
+    "authority": "protocol: add from the SAME saved endpoints; never re-run COMPOSE"
+  },
+  "sa_scorer_available": true,
+  "diagnostics_for_interpretation": {
+    "FCD_source_to_target": 5.049,
+    "FCD_compose_to_target": 12.9527,
+    "FCD_ddsbm_to_target": 0.833,
+    "reading": "COMPOSE ended FURTHER from the target distribution than the untouched sources were. Doing nothing would have scored better on FCD than what the controller did.",
+    "note": "diagnostic for attributing the loss, not a new claim metric"
+  }
+}

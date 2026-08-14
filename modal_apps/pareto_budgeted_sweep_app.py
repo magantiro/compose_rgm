@@ -334,9 +334,10 @@ def drive(tasks: list[dict[str, Any]]) -> int:
 def main(sources: str = "0,1,2,3,4,5,6,7,8,9,10,11") -> None:
     idx = [int(s) for s in str(sources).split(",") if s.strip()]
     tasks = [{"index": i, "out_dir": OUT_DIR} for i in idx]
-    print(f"P0c preference-partition probe on {len(idx)} committed sources")
-    print("exact regions at every visited decision state, plus a bounded "
-          f"recursive continuum sweep (guard {MAX_EXPANSIONS} expansions)")
-    print("fibers and objective vectors are PERSISTED this time")
+    print(f"K=41 BUDGETED preference sweep on {len(idx)} development sources")
+    print("preregistered: docs/BUDGETED_PREFERENCE_SWEEP_PREREGISTRATION.md")
+    print("K_sweep = floor(10000/240) = 41; both inputs frozen BEFORE P0c ran")
+    print(f"guard {MAX_EXPANSIONS} expansions; hard cap 10,000 unique oracle evals")
+    print("R_theta likelihood is the ONLY pre-oracle prioritizer")
     call = drive.spawn(tasks)
     print(f"driver spawned: {call.object_id}")
