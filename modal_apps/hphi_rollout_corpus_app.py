@@ -363,7 +363,7 @@ def drive(tasks: list[dict[str, Any]], out_name: str) -> dict[str, Any]:
 
 @app.local_entrypoint()
 def main(parity_only: bool = False, limit: int = 0, valid: bool = False,
-         pilot: bool = False, horizon: int = 0) -> None:
+         pilot: bool = False, horizon: int = 0, trajectories: int = 0) -> None:
     """`--pilot` runs the PERMANENTLY EXCLUDED 64-source staged-compute gate."""
     src_file = ("data/jin/hphi_pilot_64.txt" if pilot else
                 "data/jin/hphi_valid_128.txt" if valid else
@@ -383,8 +383,21 @@ def main(parity_only: bool = False, limit: int = 0, valid: bool = False,
         return
     if limit:
         smis = smis[:limit]
-    n_rep = 4 if pilot else TRAJECTORIES_PER_SOURCE
+    n_rep = trajectories or (4 if pilot else TRAJECTORIES_PER_SOURCE)
     H = horizon or HORIZON
+    # THE FROZEN BUDGET IS 49,152 COMMITTED TRANSITIONS. The H24 amendment
+    # changed DEPTH, not spend: 1,024 x 2 x 24 == 1,024 x 8 x 6. Launching
+    # H24 while leaving trajectories at 8 would silently quadruple it, which
+    # the amendment explicitly rules out -- so it is refused here rather than
+    # left to the operator to remember.
+    FROZEN_TRANSITIONS = 49_152
+    planned = len(smis) * n_rep * H
+    if not (pilot or limit) and planned != FROZEN_TRANSITIONS:
+        raise SystemExit(
+            f"REFUSED: {len(smis)} sources x {n_rep} trajectories x H{H} = "
+            f"{planned:,} transitions, but the frozen budget is "
+            f"{FROZEN_TRANSITIONS:,}. Pass --trajectories to match it "
+            f"(H{H} needs {FROZEN_TRANSITIONS // (len(smis) * H)}).")
     tasks = [{"index": i, "smiles": s, "replicates": n_rep, "horizon": H}
              for i, s in enumerate(smis)]
     print(f"h_phi rollout corpus: {len(tasks)} sources x {n_rep} "
