@@ -15,9 +15,28 @@ WHAT CHANGED, AND WHY IT IS STILL THE SAME EXPERIMENT
 Seeds are UNCHANGED: seed_for() never saw the arm, so splitting by arm cannot
 move a single random draw. Cap is UNCHANGED at 40, chunked [16,16,8].
 
-THIS FILE MAY NOT BE USED FOR A CLAIM-BEARING RUN until its output is diffed
-against the reference implementation on the same source, per HPHI_QED
-PREREGISTRATION section 11b.
+STATUS: PARKED -- UNQUALIFIED ENGINEERING CANDIDATE. DO NOT RUN.
+----------------------------------------------------------------
+Not production, not qualified, and deliberately idle until the frozen 64-source
+panel selects an inference branch. What it established is worth keeping:
+batched scoring can preserve the accepted-index and draw sequence; [16,16,8] is
+chunking under a cap of 40; and (source, arm) sharding is separable from RNG
+semantics.
+
+It also shipped a real defect -- eagerly materialising all 16 successors on the
+unguided arm, ~16x the RDKit work for an identical result -- which is the point:
+"semantics-preserving" is NOT "engineering-risk free."
+
+What happens next is CONDITIONAL on the 64:
+
+  rejection survives  ->  profile the reference, finish this, qualify at
+                          trajectory level against the reference, then 128
+  SMC trigger fires   ->  ABANDON this. Do not spend another minute optimising
+                          capped rejection; build and qualify the SMC path.
+
+Its instrumentation must NOT be migrated into the frozen panel, since that
+would change the frozen code path. Better instrumentation belongs in whatever
+production implementation follows branch selection.
 
 --- original header follows ---
 
