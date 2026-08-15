@@ -372,6 +372,13 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
 
         qs = [props(x) for x in path]
         term_q, term_s = qs[-1]
+        # NOTE on `proposals`: n_prop counts PROPOSAL SLOTS TAKEN FROM CHUNKS,
+        # not successor applications. The frozen loop does `n_prop += take` for
+        # the whole chunk before breaking at the first acceptance, so unguided
+        # reports 16*24 = 384 while effectively accepting the first proposal
+        # each step. It is a valid internal diagnostic with THAT specific
+        # meaning; it must never be reported as an inference-cost measure or as
+        # a count of successor applications.
         return {"replicate": rep, "arm": arm, "path_len": len(path) - 1,
                 "terminal": path[-1], "stopped_at_region": stopped,
                 "first_hit_step": (len(path) - 1) if stopped else None,
