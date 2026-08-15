@@ -1163,3 +1163,105 @@ affordance."** It is:
 If yes: use it natively and ablate it separately. That single test blocks **both**
 failure modes — artificially handicapping COMPOSE to resemble a comparator, and
 retrospectively inventing a convenient capability after seeing an outcome.
+
+---
+
+## I · COMPUTE, ADAPTATION AND FAIRNESS DOCTRINE
+
+**Most of the plan does not change.** This governs **QED external competence**,
+**five-objective external competence**, and **map-reuse amortization
+reporting**. The tightly controlled internal ablations stay exactly as they are.
+
+### The governing statement
+
+> **Training cost, objective-specific adaptation cost, and inference cost are
+> distinct resource axes and are NEVER traded against one another to manufacture
+> "fairness."**
+>
+> **External methods** are compared under the same scientific task and any
+> genuinely specified task-level resource constraint, using their **native**
+> inference procedures. COMPOSE is not required to mimic another method's
+> internal step count, oracle-query pattern, or sampling structure.
+>
+> **Internal COMPOSE ablations remain resource-matched** whenever the estimand
+> is causal: the arms differ only in the affordance being tested.
+>
+> Every claim-bearing task separately reports (i) one-time molecular-dynamics
+> training cost, (ii) controller training/adaptation cost, (iii) inference cost,
+> with the same frozen `R_θ` checkpoint identified across tasks. **Higher
+> inference cost may support a performance or reusability claim, but NEVER an
+> efficiency claim unless the measured resource frontier supports it.**
+
+### The two arguments this bars — both of them
+
+| ⛔ bad argument | why it fails |
+|---|---|
+| *"COMPOSE must use the same internal steps as GrIDDD."* | forces us to imitate a different architecture's inference shape and deletes the contribution |
+| *"COMPOSE can use arbitrary inference because its training is cheaper."* | compensates one resource with another instead of measuring both |
+
+**We measure both separately.** That is the whole answer.
+
+> ### ⛔ NEVER WRITE
+> *"COMPOSE is allowed more oracle calls because it requires less training."*
+>
+> ### ✅ WRITE
+> **"COMPOSE may occupy a different point on the training–adaptation–inference
+> tradeoff. We report those axes separately."**
+
+### Which blocks this actually changes
+
+| block | change |
+|---|---|
+| **QED / GrIDDD** | **MAJOR.** Native inference permitted: region `h_φ`, STOP, max H24, SMC if the frozen trigger fires. Match the **20 returned candidates** and the success definition — **not** GrIDDD's internal denoising shape. Report H6/H12/H24 as cost–performance operating points where already generated. Separately report `R_θ` training, `h_φ` training, kernel calls, objective evaluations, the **actual STOP/edit distribution**, and wall time. |
+| **Trans-dimensional (Exp. C)** | **none.** Internal causal ablation — full vs size-fixed stays tightly matched on controller, seeds, horizon and output budget. |
+| **Exact-target future awareness** | **none.** Greedy vs verified is mechanistic. The native-inference doctrine does **not** apply here. |
+| **Retargeting** | **small.** At the switch, continuation and restart get the **same remaining budget**; the realized prefix is sunk state for the causal question. Report total end-to-end compute **only if** an efficiency claim is made. |
+| **P3/P4 closed-loop Pareto** | **none — do NOT touch the matched-kernel-call design.** Resource matching is scientifically necessary precisely because we claim closed-loop control *caused* the improvement. The doctrine applies to the separate external MOO experiment. |
+| **P0c / K41** | **none.** Internal characterization and compression, not compute competitions. |
+| **5-objective MOO** | **MAJOR.** COMPOSE uses native region targeting, archive growth, branching and reuse; external algorithms use their native search. ⚠️ **But where the published benchmark specifies a fixed oracle/evaluation budget, that budget is BINDING** — it cannot be waved away with the reuse argument. Report one-time `R_θ`/`h_φ` cost and per-task inference separately. |
+| **Hard support** | **none to the causal design.** Post-hoc / soft / hard arms stay resource-matched. Report constraint-checking overhead **separately** rather than "compensating" the other arms. |
+| **Pathwise** | identical process and edit allowance; endpoint-only vs pathwise is the intervention. Report path-verification overhead separately. **Do not force equal wall-clock** if checking the constraint legitimately costs something. |
+| **Map reuse** | **IMPORTANT addition.** **Never hide the map-building cost.** Report one-time map construction **plus** marginal cost per new objective, and if amortization is claimed, show cost after 1, 2, … reused goals. |
+| **Validity / reference-law characterization** | none beyond ordinary throughput accounting. Not leaderboard experiments. |
+
+### The resource panel — on every external-task table
+
+| column |
+|---|
+| molecular dynamics retrained? |
+| controller retrained / adapted? |
+| one-time training compute |
+| task-specific adaptation compute |
+| inference compute per source |
+| returned candidates |
+| **actual edits / STOP distribution** |
+| objective evaluations |
+| kernel calls |
+| SMC particles / ESS, if applicable |
+
+And above every COMPOSE row:
+
+> ### **Same frozen `R_θ`: `c979cdb3…c4e53de8`**
+
+**`actual edits / STOP distribution` is not bookkeeping.** H24 does **not** mean
+every trajectory costs 24 edits — native STOP makes the compute *distribution*
+part of the result. The steering test already showed median first hit at step
+**1** versus 2.5 unguided. Report median and p90 committed edits, fraction
+finishing by H6/H12, and compute conditional on success versus failure.
+
+### The claim this licenses — empirical, not rhetorical
+
+> **COMPOSE separates learning molecular plausibility from specifying molecular
+> purpose. The same goal-independent molecular dynamics are reused across all
+> downstream design problems; task dependence enters through the controller and
+> inference.**
+
+**This is NOT "zero retraining."** If `h_φ` needs adaptation, we show it. If a
+universal `h_φ` later works unchanged on conjunctions or five-objective regions,
+**that becomes an additional result** — earned, not assumed.
+
+If we beat GrIDDD at 3× inference cost, the paper says: **better task
+performance, heavier inference, same objective-agnostic molecular dynamics
+reused across tasks.** That is a legitimate result. If inference also turns out
+cheap, better — **but the architecture does not need that fact to be
+legitimate.**
