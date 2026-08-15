@@ -1,0 +1,68 @@
+{
+ "phase": "r_theta_expansion_timing",
+ "lineage": "validated on the volume, unmodified",
+ "runtime_build_seconds": 127.694681802,
+ "expansions": [
+  {
+   "smiles": "CC(C)[C@@H](NC(=O)N1CCC[C@H]1C[NH+]1CCC[C@@H]1CO)c1ccccc1",
+   "atoms": 26,
+   "successors": 814,
+   "seconds": 19.23440090700001
+  },
+  {
+   "smiles": "Cc1cc(CC(=O)N[C@H](C)c2nc(-c3ccc(Cl)cc3)no2)no1",
+   "atoms": 24,
+   "successors": 398,
+   "seconds": 12.277828427000003
+  },
+  {
+   "smiles": "C[C@@H]1CCCN(C(=O)N[C@@H]2CC[C@H]([NH+](C)C)C2)[C@@H]1C",
+   "atoms": 19,
+   "successors": 650,
+   "seconds": 7.754247724999999
+  },
+  {
+   "smiles": "CC1(C)CCC[C@H]1NC(=O)NC[C@H](CCO)c1ccccc1",
+   "atoms": 22,
+   "successors": 646,
+   "seconds": 12.865710684999982
+  },
+  {
+   "smiles": "C[NH+](C)[C@H](CNS(=O)(=O)c1ccc(C#N)cc1)c1ccccc1",
+   "atoms": 23,
+   "successors": 317,
+   "seconds": 12.794313725999984
+  },
+  {
+   "smiles": "Cc1cc(C[S@](=O)Cc2csc(C3CCCCC3)n2)no1",
+   "atoms": 21,
+   "successors": 432,
+   "seconds": 9.500671135000005
+  },
+  {
+   "smiles": "COC(=O)[C@H]1CCCCC[C@H]1NC(=O)[C@@H](C)NC(=O)C1CCC1",
+   "atoms": 23,
+   "successors": 732,
+   "seconds": 10.36542757800001
+  },
+  {
+   "smiles": "c1ccc(C[C@@H]2CCC[C@@H]2[NH2+][C@@H]2CCc3n[nH]cc3C2)cc1",
+   "atoms": 22,
+   "successors": 580,
+   "seconds": 13.926556868000006
+  }
+ ],
+ "median_seconds": 12.536071076499994,
+ "mean_seconds": 12.339894631375,
+ "max_seconds": 19.23440090700001,
+ "median_successors": 613.0,
+ "cpu_reserved": 2.0,
+ "pricing": {
+  "cpu_reserved": 2.0,
+  "memory_gib": 8,
+  "assumed_rate_usd_per_second": 4.396e-05,
+  "rate_note": "Modal on-demand CPU+memory; CONFIRM against the invoice before quoting",
+  "this_probe_usd_estimate": 0.02,
+  "note": "Each expansion yields ~600 legal successors, so a policy should expand a state ONCE and choose among its successors rather than walk. Priced that way, 300 charged calls is ~75 expansions."
+ }
+}

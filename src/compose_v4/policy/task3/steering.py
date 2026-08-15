@@ -97,3 +97,68 @@ class AdaptiveRegion:
         shortfall = np.maximum(target.as_array()[None, :] - predicted,
                                0.0).sum(axis=1)
         return -shortfall
+
+
+@dataclass
+class ConstrainedAdaptiveRegion:
+    """Arm B'. Aim at the missing region WITHOUT trading away what we already have.
+
+    WHY THIS EXISTS. The first adaptive rule lost the mechanism test on its own
+    criterion. It climbed JNK3 hard -- 65-72% of its charged molecules reached
+    JNK3 >= 0.4, against 26-37% for the fixed sum -- but the molecules it found
+    were promiscuous: mean GSK3B activity 0.25-0.29 among them, against
+    0.03-0.15 for the fixed sum, and it produced 7 selective molecules against
+    188.
+
+    The defect is in how the aspiration is SHAPED, not in adaptivity. Aspirations
+    are built by improving ONE axis of a realized molecule, and ranked by SUMMED
+    shortfall. A summed shortfall lets a large gain on the targeted axis pay for
+    a loss on another, so "more JNK3, everything else as it was" is satisfied by
+    a molecule that raises JNK3 and quietly gives up GSK3B -- which, on this
+    task's chemistry, is most of what is reachable.
+
+    So the aspiration becomes a JOINT demand: make progress on the targeted axis
+    AND do not fall below where the origin already was on any other. The
+    non-targeted axes are a constraint, not a term to be traded off. That is the
+    difference between "fill the missing part of the front" and "climb the
+    biggest axis".
+    """
+
+    name: str = "constrained-adaptive-region"
+    regions: MarginalGainRegions = field(default_factory=MarginalGainRegions)
+    #: Weight on violating the hold-what-you-have constraint. Large enough that
+    #: no gain on the targeted axis can buy a regression elsewhere.
+    violation_weight: float = 10.0
+    _origin: np.ndarray | None = field(default=None, init=False, repr=False)
+    _axis: int | None = field(default=None, init=False, repr=False)
+
+    def target(self, archive: ParetoArchive,
+               rng: np.random.Generator) -> Region | None:
+        region = self.regions.select(archive, rng)
+        if region is None:
+            return None
+        origin = archive.values.get(region.origin) if region.origin else None
+        self._origin = np.asarray(origin, dtype=float) if origin else None
+        # `note` is written by MarginalGainRegions as "axis {i} +{step}".
+        try:
+            self._axis = int(region.note.split()[1])
+        except (IndexError, ValueError):
+            self._axis = None
+        return region
+
+    def start(self, archive: ParetoArchive, target: Region,
+              rng: np.random.Generator) -> str | None:
+        return AdaptiveRegion(regions=self.regions).start(archive, target, rng)
+
+    def rank(self, predicted: np.ndarray, target: Region) -> np.ndarray:
+        aspiration = target.as_array()
+        if self._origin is None or self._axis is None:
+            shortfall = np.maximum(aspiration[None, :] - predicted, 0.0).sum(axis=1)
+            return -shortfall
+        # Progress on the axis the aspiration is actually about.
+        progress = np.maximum(aspiration[self._axis] - predicted[:, self._axis], 0.0)
+        # Regression anywhere else, measured against what the origin ALREADY had.
+        floor = self._origin.copy()
+        floor[self._axis] = 0.0
+        violation = np.maximum(floor[None, :] - predicted, 0.0).sum(axis=1)
+        return -(progress + self.violation_weight * violation)

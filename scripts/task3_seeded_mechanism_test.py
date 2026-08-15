@@ -53,6 +53,7 @@ from compose_v4.policy.task3 import ParetoArchive, RandomEditNavigator  # noqa: 
 from compose_v4.policy.task3.interfaces import NavigationBudget  # noqa: E402
 from compose_v4.policy.task3.steering import (  # noqa: E402
     AdaptiveRegion,
+    ConstrainedAdaptiveRegion,
     FixedScalarization,
 )
 from compose_v4.policy.task3.surrogate import TanimotoKNN  # noqa: E402
@@ -226,7 +227,8 @@ def main() -> int:
         average_size, size_stdev = size_prior(list(seeded))
         print(f"\n=== seed {seed}: archive {len(seeded)} molecules "
               f"({args.archive_actives} actives), sha {digest[:12]} ===")
-        for steering in (FixedScalarization(), AdaptiveRegion()):
+        for steering in (FixedScalarization(), AdaptiveRegion(),
+                         ConstrainedAdaptiveRegion()):
             navigator = RandomEditNavigator(average_size=average_size,
                                             size_stdev=size_stdev)
             result = run_arm(
