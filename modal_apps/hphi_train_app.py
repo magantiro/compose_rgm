@@ -244,8 +244,15 @@ def assemble() -> dict[str, Any]:
 
     out_m = Path(RUN_ROOT) / MATRICES
     out_m.parent.mkdir(parents=True, exist_ok=True)
+    # Mva entries are ((q, s), b) -- NESTED, so a plain asarray is ragged.
+    # Flatten to a clean (N, 3) matrix of [q, s, budget].
+    # float64 deliberately: the calibration report matches thresholds with
+    # abs(reg[1] - 0.40) < 1e-9, and a float32 round-trip is off by ~6e-9,
+    # which would silently return an EMPTY by-threshold breakdown.
+    Mva_flat = np.asarray([[q, s, b] for (q, s), b in Mva], dtype=np.float64) \
+        if Mva else np.zeros((0, 3), dtype=np.float64)
     np.savez_compressed(out_m, Xtr=Xtr, Ytr=Ytr, Xva=Xva, Yva=Yva, Btr=Btr,
-                        Mva=np.asarray(Mva, dtype=np.float32))
+                        Mva=Mva_flat)
     artifact_volume.commit()             # FLUSHED before this worker exits
     print(f"persisted {out_m.name} in {time.perf_counter()-t_start:.0f}s",
           flush=True)
@@ -275,7 +282,8 @@ def train() -> dict[str, Any]:
         raise SystemExit(f"no {MATRICES}. Run assemble first (CPU only).")
     z = np.load(mp)
     Xtr, Ytr, Xva, Yva, Btr = z["Xtr"], z["Ytr"], z["Xva"], z["Yva"], z["Btr"]
-    Mva = [(float(a), float(b)) for a, b in z["Mva"][:, :2]] if len(z["Mva"]) else []
+    # Rebuild ((q, s), b): the calibration code below unpacks it that way.
+    Mva = [((float(q), float(s)), float(b)) for q, s, b in z["Mva"]]
     enc_seconds = 0.0
     print(f"loaded matrices in {time.perf_counter()-t_start:.0f}s: "
           f"train {len(Xtr):,}  val {len(Xva):,}  bellman {len(Btr):,}",
