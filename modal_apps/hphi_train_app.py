@@ -396,6 +396,30 @@ def train() -> dict[str, Any]:
     return rec
 
 
+@app.function(image=image, cpu=(0.25, 0.25), memory=2048, timeout=8 * 60 * 60,
+              volumes={str(ARTIFACT_ROOT): artifact_volume})
+def drive(stage: str = "both") -> dict[str, Any]:
+    """Server-side staging so the whole chain survives a client disconnect.
+
+    A local entrypoint calling .remote() would die with the laptop; only the
+    LAST spawned function is kept alive by --detach. This driver holds a
+    quarter CPU and no GPU while assembly runs.
+    """
+    out: dict[str, Any] = {}
+    if stage in ("assemble", "both"):
+        artifact_volume.reload()
+        if (Path(RUN_ROOT) / MATRICES).exists():
+            print(f"{MATRICES} already present -- skipping assembly", flush=True)
+            out["assemble"] = "CACHED"
+        else:
+            print("stage 1/2: assembling features on CPU (no GPU held)", flush=True)
+            out["assemble"] = assemble.remote()
+    if stage in ("train", "both"):
+        print("stage 2/2: training on A10G from the cached matrices", flush=True)
+        out["train"] = train.remote()
+    return out
+
+
 @app.local_entrypoint()
 def main(stage: str = "both") -> None:
     """stage: assemble (CPU) | train (GPU) | both. No GPU is held during CPU work."""
@@ -405,12 +429,7 @@ def main(stage: str = "both") -> None:
     if stage not in ("assemble", "train", "both"):
         raise SystemExit(f"stage must be assemble|train|both, got {stage!r}")
 
-    if stage in ("assemble", "both"):
-        # CPU only. The GPU is NOT allocated while this runs.
-        print("stage 1/2: assembling features on CPU (no GPU held)...")
-        info = assemble.remote()
-        print(f"  assembled: {info}")
-    if stage in ("train", "both"):
-        print("stage 2/2: training on A10G from the cached matrices")
-        call = train.spawn()
-        print(f"spawned: {call.object_id}")
+    print("Assembly is CPU-only and is cached; the A10G is allocated only for")
+    print("the gradient steps, and only after assembly has finished.")
+    call = drive.spawn(stage)
+    print(f"spawned: {call.object_id}")
