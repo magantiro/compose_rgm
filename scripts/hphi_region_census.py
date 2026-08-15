@@ -140,7 +140,52 @@ def main() -> int:
           "sources are QED [0.70,0.80]\n  and success begins at 0.90, so no "
           "benchmark source qualifies at step 0.")
 
+    # --- what TRAINING needs: budget coverage, unique states, gateways -----
+    from collections import defaultdict
+    by_budget = Counter()
+    uniq = set()
+    for tj in trajs:
+        H = len(tj["path"]) - 1
+        for i, s in enumerate(tj["path"]):
+            by_budget[H - i] += 1
+            uniq.add(s)
+    print(f"\nTRAINING SUPPORT")
+    print(f"  unique states {len(uniq):,}   prefix examples {sum(by_budget.values()):,}")
+    bs = sorted(by_budget)
+    print(f"  budgets {bs[0]}..{bs[-1]}; counts at b=0,1,6,12,24: "
+          + ", ".join(f"{b}:{by_budget.get(b,0):,}" for b in (0,1,6,12,24)))
+
+    # GATEWAYS: prefixes from which the BENCHMARK region is later reached.
+    # These are where conditional continuations should be spent if the tail is
+    # starved -- the frozen rule, not a new idea.
+    q_b, s_b = BENCHMARK_REGION
+    gate = []
+    for tj in trajs:
+        qed, sim = tj["qed"], tj["similarity_to_source"]
+        fh = first_hit_step(qed, sim, BENCHMARK_REGION)
+        if fh is None or fh == 0:
+            continue
+        for i in range(fh):                       # every prefix BEFORE the hit
+            gate.append((qed[i], sim[i], fh - i))
+    print(f"\nGATEWAYS to {q_b:.2f}/{s_b:.2f}: {len(gate)} prefixes on "
+          f"{sum(1 for t in trajs if first_hit_step(t['qed'], t['similarity_to_source'], BENCHMARK_REGION) not in (None,0))} trajectories")
+    if gate:
+        gq = np.array([g[0] for g in gate]); gs = np.array([g[1] for g in gate])
+        gd = np.array([g[2] for g in gate])
+        print(f"  QED at gateway  median {np.median(gq):.3f}  "
+              f"p10 {np.percentile(gq,10):.3f}  p90 {np.percentile(gq,90):.3f}")
+        print(f"  sim at gateway  median {np.median(gs):.3f}")
+        print(f"  edits remaining to the hit  median {np.median(gd):.1f}  max {gd.max()}")
+
     out = {"schema": "compose.hphi.region_census",
+           "training_support": {"unique_states": len(uniq),
+                                "prefix_examples": sum(by_budget.values()),
+                                "by_budget": {str(k): v for k, v in sorted(by_budget.items())}},
+           "gateways_to_benchmark": {
+               "n_prefixes": len(gate),
+               "qed_median": float(np.median([g[0] for g in gate])) if gate else None,
+               "sim_median": float(np.median([g[1] for g in gate])) if gate else None,
+               "edits_to_hit_median": float(np.median([g[2] for g in gate])) if gate else None},
            "note": "READ-ONLY. The 20 regions do not move in response to this.",
            "n_sources": len(sources), "n_trajectories": len(trajs),
            "mechanics": {"termination": dict(term),
