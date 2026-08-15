@@ -32,16 +32,53 @@ optimization -- charging two spellings of one molecule twice would be wrong.
 
 PER_OBJECTIVE is retained only so the stricter reading stays expressible.
 
-⚠️ OPEN -- DO NOT YET CALL THIS "EXACT MOLLEO TASK 3"
--------------------------------------------------------
-The released `select_pareto_front()` calls the objective evaluators directly,
-bypassing the metered `score_smi()` path, and the loop evaluates the whole
-offspring population that way BEFORE passing only the Pareto survivors through
-the metered oracle. That appears to let new molecules be screened for Pareto
-membership without being charged to the nominal 10k counter -- which is not what
-the paper describes. Until a small released-code run establishes
-`N_metered` vs `N_unique molecules actually evaluated`, this harness is
-"strict-10k semantics", not "exact released-code semantics".
+⚠️ SETTLED, AND THE ANSWER IS WHY THIS IS "STRICT-10k", NOT "MOLLEO TASK 3"
+---------------------------------------------------------------------------
+The suspicion was right, and it was measured by running the released code
+(github.com/zoom-wang112358/MOLLEO @ fd138a7) with the five objectives stubbed
+and every evaluator wrapped in a recorder.
+
+`multi_objective/main/pareto_optimizer.py:223-243` -- `select_pareto_front()`
+calls the five `tdc.Oracle` objects DIRECTLY (`:229`, `:232`, `:235`). No
+`score_smi`, no `mol_buffer`, no budget check. The Task 3 loop
+(`main/molleo_multi_pareto/run.py:158-165`) concatenates parents + all offspring,
+screens the whole population through that unmetered path, and passes only the
+Pareto survivors to the metered oracle. So most molecules that get all five
+objectives computed are never charged:
+
+    budget   N_metered   N_evaluated   ratio    evaluated but never charged
+       300         319           814    2.55            495  (60.8%)
+       500         519         1,786    3.44          1,267  (70.9%)
+     1,000       1,015         4,804    4.73          3,789  (78.9%)
+     2,000       1,337         7,256    5.43          5,919  (81.6%)
+
+The ratio GROWS with the budget -- the marginal ratio over the last ten
+generations of the 2,000 run was 9.3 -- because the population is never
+truncated to `population_size`, so the Pareto front (and the screen) keeps
+growing. A 10,000-call run would be well above 6x. Two further leaks compound
+it: `clean_buffer()` empties `mol_buffer` every generation, so the `score_smi`
+budget guard at `:186` is a PER-GENERATION guard that never fires (the run
+actually stops on `storing_buffer` at the END of a generation, overshooting the
+nominal budget by 4-6%), and every survivor is re-evaluated in full each
+generation without being re-charged: 50,848 molecule-evaluations behind a
+counter reading 1,007.
+
+CONSEQUENCES, WHICH ARE BINDING:
+
+* This harness charges every molecule that receives the objective vector. That
+  is STRICT-10k SEMANTICS. It is NOT "exact MOLLEO Task 3" and must not be
+  relabelled as such.
+* We do not copy the leak. A screened-but-uncharged path would make the budget
+  meaningless and is precisely the thing this meter exists to prevent.
+* A strict-10k number must NOT be placed beside MOLLEO's published number as if
+  the protocols matched. Under strict-10k a method sees ~10,000 evaluated
+  molecules; under theirs it sees several times that. Any comparison to their
+  published figures states the difference, and any head-to-head we run puts
+  every method through THIS meter.
+
+The counting rule itself, though, is theirs: `score_smi` (`:190-198`)
+canonicalises before consulting the buffer, so one molecule written two ways
+costs one unit. That part is reproduced faithfully.
 """
 
 from __future__ import annotations

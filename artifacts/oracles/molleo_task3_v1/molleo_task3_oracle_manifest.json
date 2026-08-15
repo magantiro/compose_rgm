@@ -3888,5 +3888,32 @@
       },
       "potential_stereocentres_changed": 37
     }
+  },
+  "tdc_provenance": {
+    "status": "PROVENANCE PROBABLE, PARITY PENDING",
+    "what_is_established": "These artifacts match TDC's oracle contract on every checkable structural detail -- 2048 input features, classes_ [0., 1.], 100 trees, sklearn 0.21.3, sitting at TDC's own relative path oracle/<name>.pkl -- and the frozen numpy evaluators reproduce them bit-for-bit.",
+    "what_is_NOT_established": "That these pickle files are byte-identical to the files TDC serves. Until that is checked against the host, do not describe this bundle as 'verified TDC oracles'.",
+    "download_attempts": {
+      "host": "dataverse.harvard.edu/api/access/datafile/<id>",
+      "date": "2026-08-15",
+      "files": [
+        "jnk3",
+        "gsk3b",
+        "jnk3_current",
+        "gsk3b_current",
+        "drd2",
+        "drd2_current"
+      ],
+      "requests": 156,
+      "outcomes": [
+        {
+          "status": 202,
+          "x_amzn_waf_action": "challenge",
+          "count": 156
+        }
+      ],
+      "diagnosis": "The host is reachable but answers every non-browser request with an AWS WAF challenge: HTTP 202, empty body. Not maintenance -- a bot filter. A browser session or a mirror would settle it."
+    },
+    "how_to_settle_it": "Download oracle/jnk3.pkl and oracle/gsk3b.pkl from Harvard Dataverse (datafile ids 4170293 and 4170295) through a browser, sha256 them, and compare with the pickle_sha256 recorded here."
   }
 }
