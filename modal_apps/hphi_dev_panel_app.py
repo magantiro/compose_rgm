@@ -276,11 +276,11 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
 
 @app.function(image=image, cpu=(1.0, 1.0), memory=4096, timeout=12 * 60 * 60,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
-def drive(tasks: list[dict[str, Any]]) -> dict[str, Any]:
+def drive(tasks: list[dict[str, Any]], out_dir: str = OUT_DIR) -> dict[str, Any]:
     import numpy as np
 
     artifact_volume.reload()
-    out_p = Path(RUN_ROOT) / OUT_DIR
+    out_p = Path(RUN_ROOT) / out_dir
     out_p.mkdir(parents=True, exist_ok=True)
     partial = out_p / "partial.json.gz"
 
@@ -352,12 +352,13 @@ def main(limit: int = 0) -> None:
     if len(srcs) != 64:
         raise SystemExit(f"REFUSED: expected 64 dev sources, got {len(srcs)}")
     tasks = [{"index": i, "source": s} for i, s in enumerate(srcs)]
+    out_dir = OUT_DIR
     if limit:
-        # PILOT ONLY. Writes to a separate output dir so it can never be
-        # mistaken for, or overwrite, the frozen panel result.
-        global OUT_DIR
-        OUT_DIR = "hphi_dev_panel_pilot"
+        # PILOT ONLY. A separate output dir so it can never be mistaken for,
+        # or overwrite, the frozen panel result. Passed as an ARGUMENT: a
+        # module global set here would never reach the remote container.
+        out_dir = "hphi_dev_panel_pilot"
         tasks = tasks[:limit]
-        print(f"*** PILOT: {limit} source(s), output -> {OUT_DIR} ***")
-    call = drive.spawn(tasks)
+        print(f"*** PILOT: {limit} source(s), output -> {out_dir} ***")
+    call = drive.spawn(tasks, out_dir)
     print(f"spawned: {call.object_id}")
