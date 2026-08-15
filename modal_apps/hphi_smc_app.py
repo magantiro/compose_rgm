@@ -187,7 +187,10 @@ def _valid_records(out_p) -> dict[tuple[int, str, int], dict[str, Any]]:
     return keep
 
 
-@app.function(image=image, cpu=(8.0, 8.0), memory=32768, timeout=6 * 60 * 60,
+# cpu=(request, limit): reserve ONE core, burst to 8. A hard (8, 8)
+# reservation bills 8 cores even when only one slot has work.
+@app.function(image=image, cpu=(1.0, 8.0), memory=32768,
+              timeout=6 * 60 * 60,
               max_containers=64, retries=2,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
 def run_source(task: dict[str, Any]) -> dict[str, Any]:
@@ -410,7 +413,10 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     _G["run_smc"] = run_smc
     done = 0
     ctx = mp.get_context("fork")
-    with ctx.Pool(int(task.get("workers", 8))) as pool:
+    n_workers = max(1, min(int(task.get("workers", 8)), len(slots)))
+    print(f"src{idx}: {len(slots)} slots -> {n_workers} workers "
+          f"(never more workers than work)", flush=True)
+    with ctx.Pool(n_workers) as pool:
         for rec in pool.imap_unordered(_slot_unit, slots):
             rec["arm"] = "smc"
             rec["replicate"] = rec["slot"]
