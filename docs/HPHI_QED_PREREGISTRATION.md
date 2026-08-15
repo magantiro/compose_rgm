@@ -333,18 +333,20 @@ is **choosing which compute budgets to showcase after seeing performance**. That
 is cherry-picking, and freezing the operating points below removes the
 opportunity before any result exists.
 
-### 12.2 The compute frontier — three operating points, frozen
+### 12.2 ⬇️ DEMOTED by master-plan AMENDMENT II — no compute-frontier study
 
-| | |
-|---|---|
-| **operating points** | `b_max ∈ {6, 12, 24}` — **exactly these three**, no others added later |
-| **held identical across all three** | frozen `R_θ` · frozen `h_φ` · same sources · same 20-candidate budget · same seeds · same STOP rule |
-| **what varies** | only the controller's starting budget |
+An earlier version of this section preregistered `b_max ∈ {6, 12, 24}` as a
+**frozen compute-frontier study**. **AMENDMENT II supersedes that.** Inference
+cost is **logged prospectively** (§12.1) and reported; it is **not** a pillar of
+the paper, and no frontier study is preregistered or required.
 
-**No horizon may be added after seeing results**, and none of the three may be
-dropped from the report because it is unflattering.
+The claim-bearing runs use **max H24 with native anytime STOP**, per AMENDMENT
+II §3. Nothing else about the protocol changes.
 
-### 12.3 ⚠️ Why these MUST be separate runs, not truncated H24 trajectories
+**If** inference cost later becomes an important result, a small prespecified
+frontier may be added — and if it is, the method note in §12.3 binds.
+
+### 12.3 Method note (binding IF a frontier is ever run)
 
 `h_φ(x, z, b)` **conditions on remaining budget**. An H24 trajectory truncated
 at step 6 is therefore **not** the same object as a controller actually started
@@ -353,15 +355,11 @@ with `b = 6`:
 * the truncated run was steered at every step by `h_φ(·, ·, b)` for `b` counting
   down from **24** — a controller that believed it had budget to spare and could
   afford an excursion away from the region;
-* a genuine H6 run is steered by `h_φ(·, ·, b)` for `b` counting down from **6**
-  — a controller under pressure, which is a **different policy**, not the same
+* a genuine H6 run is steered by `h_φ(·, ·, b)` counting down from **6** — a
+  controller under pressure, which is a **different policy**, not the same
   policy observed earlier.
 
 Truncation would report the cheap operating point using the expensive
-controller's decisions, and would systematically misstate the frontier — most
-likely flattering H6, since those trajectories were selected by a controller
-that never had to commit early.
-
-**Therefore: three independent controller runs.** This is a genuine additional
-inference cost, and it is reported as such rather than hidden by reusing
-trajectories we already have.
+controller's decisions and would systematically misstate the frontier, most
+likely flattering H6. **Any frontier must therefore be separate controller
+runs**, never reconstructed from H24 prefixes.

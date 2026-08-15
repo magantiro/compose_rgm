@@ -1241,7 +1241,7 @@ reporting**. The tightly controlled internal ablations stay exactly as they are.
 
 | block | change |
 |---|---|
-| **QED / GrIDDD** | **MAJOR.** Native inference permitted: region `h_φ`, STOP, max H24, SMC if the frozen trigger fires. Match the **20 returned candidates** and the success definition — **not** GrIDDD's internal denoising shape. Report H6/H12/H24 as cost–performance operating points from **separate prespecified controller runs** — **never** reconstructed by truncating H24 trajectories, since `h_φ` conditions on remaining budget and a truncated H24 run is a different policy (see `HPHI_QED_PREREGISTRATION.md` §12). Separately report `R_θ` training, `h_φ` training, kernel calls, objective evaluations, the **actual STOP/edit distribution**, and wall time. |
+| **QED / GrIDDD** | **MAJOR.** Native inference permitted: region `h_φ`, STOP, max H24, SMC if the frozen trigger fires. Match the **20 returned candidates** and the success definition — **not** GrIDDD's internal denoising shape. Log inference cost prospectively (AMENDMENT II §4); **no H6/H12/H24 frontier study is preregistered**. If one is ever added it must be separate controller runs, never truncated H24 prefixes — see `HPHI_QED_PREREGISTRATION.md` §12.3. Separately report `R_θ` training, `h_φ` training, kernel calls, objective evaluations, the **actual STOP/edit distribution**, and wall time. |
 | **Trans-dimensional (Exp. C)** | **none.** Internal causal ablation — full vs size-fixed stays tightly matched on controller, seeds, horizon and output budget. |
 | **Exact-target future awareness** | **none.** Greedy vs verified is mechanistic. The native-inference doctrine does **not** apply here. |
 | **Retargeting** | **small.** At the switch, continuation and restart get the **same remaining budget**; the realized prefix is sunk state for the causal question. Report total end-to-end compute **only if** an efficiency claim is made. |
@@ -1294,3 +1294,108 @@ performance, heavier inference, same objective-agnostic molecular dynamics
 reused across tasks.** That is a legitimate result. If inference also turns out
 cheap, better — **but the architecture does not need that fact to be
 legitimate.**
+
+
+---
+
+# ⭐⭐ CURRENT AMENDMENT II — native inference, controller freeze, and resource accounting
+
+**This is now the governing section.** It supersedes CURRENT AMENDMENT I where
+they conflict, and both supersede the historical body. Appended rather than
+rewritten: the history stays readable as history.
+
+### 1. External fairness is task-level parity, not internal-compute parity
+
+For external competence experiments, match the published task: source cohort,
+objective, feasibility/success definition, returned-candidate budget,
+benchmark-defined oracle budget where one exists, and metrics. Each method uses
+its **native inference procedure**. COMPOSE is not forced to discard STOP,
+intermediate valid states, future-aware control, or other prospectively
+specified native affordances merely because a comparator lacks them.
+
+### 2. Internal causal comparisons remain resource-matched where required
+
+When the question is whether a COMPOSE-specific capability *causes* an
+improvement, compare native COMPOSE against COMPOSE with exactly that capability
+removed while holding the common process, sources, objectives, and relevant
+resources fixed. **External methods establish competence; internal controls
+establish mechanism.**
+
+### 3. QED controller amendment
+
+Policy B remains a banked developmental negative result. The final GrIDDD/Jin
+QED controller path is the preregistered finite-horizon region-`h_φ` controller
+over frozen `R_θ`. Native execution is **anytime**: each controlled trajectory
+returns one molecule and may prospectively STOP at the first qualifying
+intermediate state. The development sequence is:
+
+```
+train region-h_φ  →  64-source development  →  128-source fresh validation
+                  →  800-source official test
+```
+
+The official comparison remains **20 returned candidates per source**;
+intermediate states are **not** retrospectively harvested as additional
+candidates.
+
+### 4. Training, adaptation, and inference are separate resource axes
+
+Report `R_θ` training cost, controller/adaptation cost, inference wall time,
+kernel/support evaluations, objective/oracle evaluations, committed edits, STOP
+distribution, returned candidates, and SMC particle/ESS quantities where
+applicable. **Training cost is not used to "offset" greater inference cost.** A
+method may legitimately achieve higher performance at higher inference cost; in
+that case the claim is *improved performance/flexibility at a measured
+inference-time cost*, **not greater efficiency**.
+
+### 5. Benchmark-defined budgets still bind
+
+Where the external benchmark itself specifies a resource budget, that budget is
+part of task parity. **MOLLEO Task 3 remains capped at ≤ 10,000 oracle calls
+exactly as specified.**
+
+### 6. Reuse claim
+
+The invariant across experiments is the same frozen, goal-independent molecular
+dynamics `R_θ`. The paper claims **no objective-specific retraining of molecular
+dynamics** — *not* necessarily zero task-specific learning anywhere.
+Controller/adaptation cost and controller-weight reuse are reported explicitly.
+
+### 7. Sequencing
+
+No new controller-dependent scientific branch begins before the QED controller
+is frozen. Hard-support and pathwise experiments may share the exact
+support-restriction implementation primitive, but remain **separate estimands
+and separate experiments**. Five-objective policy development follows the QED
+controller decision point. A negative QED region-`h_φ` result closes **that
+controller path** under its preregistered rules; it does **not** invalidate
+banked COMPOSE findings or establish that no other multi-objective controller
+can exist.
+
+### 8. P0c terminology correction
+
+P0c is the **full-information continuous-preference analysis / preference-
+partition result**. It is **not a Pareto ceiling** or an upper bound on
+attainable hypervolume. K41 remains a failed approximate compression branch and
+is closed.
+
+---
+
+## The one sentence this explicitly supersedes
+
+Line ~631 of the historical body reads:
+
+> *"Does future-aware bridge control outperform ordinary generation plus
+> ranking/search under the same legal kernel, reference model, **oracle budget**
+> and source molecules?"*
+
+That remains correct **for an internal causal experiment**. It must **not** be
+read as the fairness requirement for GrIDDD or any other external comparison:
+
+| comparison | requirement |
+|---|---|
+| **external** | **task parity + native inference** |
+| **internal causal** | **matched resources + remove exactly one capability** |
+
+**MOLLEO is the special case where oracle parity *is* external task parity**,
+because the benchmark itself fixes ≤ 10,000 calls (§5).
