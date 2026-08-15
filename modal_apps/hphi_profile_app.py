@@ -239,13 +239,12 @@ def batch_test(smiles: list[str]) -> dict[str, Any]:
 
 
 @app.local_entrypoint()
-def main() -> None:
+def main(batch: bool = False) -> None:
     src = [s.strip() for s in
            (Path(__file__).resolve().parents[1] / "data/jin/dev_panel_qed_64.txt"
             ).read_text().split("\n") if s.strip()][0]
     print(f"profiling {STEPS} steps on dev source 0 at 1 / 4 / 8 torch threads")
-    import sys
-    if "--batch" in sys.argv:
+    if batch:
         pool = [s.strip() for s in
                 (Path(__file__).resolve().parents[1] / "data/jin/hphi_valid_128.txt"
                  ).read_text().split("\n") if s.strip()][:64]
