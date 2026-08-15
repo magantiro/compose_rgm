@@ -251,3 +251,51 @@ Per the paper-wide doctrine (master plan section I), three axes are reported and
 The conclusion drawn is only: *COMPOSE obtains its performance from a reusable
 goal-independent molecular process, which carries a particular inference cost,
 reported separately.*
+
+---
+
+## 11 · Execution budget ledger
+
+**Run-level compute authorizations live here, not in the master plan.** The
+master plan carries the scientific ruling; this section carries what was
+authorized to spend executing it. The two are deliberately kept apart.
+
+### Amendment 1 — encode authorization $2 → $5 (2026-08-14)
+
+| | |
+|---|---|
+| **job** | `modal_apps/hphi_encode_app.py` — frozen `R_θ` embeddings for the 39,663 unique corpus states |
+| **prior authorization** | **$2**, a hard ceiling |
+| **measured cost** | ~70 min × 80 containers × 1 CPU = **93.5 core-hours ≈ $4.39** |
+| **amended authorization** | **$5** — margin over the measured figure, not a blank check |
+
+**Why this is preprocessing, not an experiment.** The corpus is already frozen
+(`sha256 647f8265…41602581`) and `R_θ` is frozen
+(`sha256 c979cdb3…4e53de8`). The encode is therefore a **deterministic
+function of two frozen inputs**: it has exactly one correct answer, produces no
+scientific result, and admits no researcher choice. It is computed once and
+reused forever.
+
+**What happened, recorded plainly.** A first attempt was launched at $4.39
+against the $2 ceiling. It was stopped ~8 minutes in, before any shard had
+persisted, at a cost of roughly **$0.50** and with **nothing recoverable**. The
+cap was exceeded because the cost was not priced before launch — an earlier
+estimate of ~21 min / ~$1.35 was wrong by more than 3×. **This is not recorded
+as having been under cap.**
+
+**What changed so this cannot repeat destructively.** Encoding is now its own
+job (`encode → persist → exit`), and **every shard writes and commits its own
+file the moment it finishes** rather than one merged write at the end. The job
+is idempotent: a shard whose file exists returns without loading the model, and
+the driver skips persisted shards. An interruption now costs at most one shard,
+not the whole run.
+
+> Prior to this split, the same encode was destroyed **twice** by stopping a
+> trainer that held completed embeddings in memory — 93.5 core-hours each time.
+> See the `persist-expensive-deterministic-artifacts` rule.
+
+### Standing rule
+
+Price a run **before** launching it and state the figure. If it would exceed the
+standing authorization, do not launch — request an amendment to a specific
+number and record the reason here first.
