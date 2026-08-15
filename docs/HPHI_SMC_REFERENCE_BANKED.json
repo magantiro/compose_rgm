@@ -1,0 +1,45 @@
+{
+  "schema": "compose.hphi.smc_reference.banked",
+  "status": "TRUSTED EXECUTABLE SPECIFICATION of the SMC primitive",
+  "artifact_sha256": "d0d52eee3e9ee62d3c6e47129fd95ef6a8254026fec851244850bae5d002ba18",
+  "record_sha256": "83d821fa8544f8fbfb9ea0ffe2e77b8a90a03cb3988131b289a013b2201a7732",
+  "provenance": {
+    "protocol": "hphi-smc-ref-v1",
+    "region": [
+      0.9,
+      0.4
+    ],
+    "horizon": 24,
+    "n_particles": 32,
+    "git_commit": "528292fc9d5c",
+    "output_rule": "sampled from the normalized terminal particle measure; NOT best-of-population",
+    "proposal_law": "frozen R_theta ALONE; h_phi enters only via the Feynman-Kac incremental weight"
+  },
+  "mechanical_qualification": {
+    "checks": 10,
+    "result": "PASSED",
+    "script": "scripts/audit_smc_reference.py"
+  },
+  "outcome": {
+    "status": "EXTINCT_NO_HIT",
+    "seconds": 6950.65,
+    "transitions": 768,
+    "absorbed": 0,
+    "resamples": 0,
+    "ess_min": 20.76813835982451,
+    "ess_max": 30.00774686944437,
+    "terminal_qed": 0.7593221900038128,
+    "terminal_sim": 1.0
+  },
+  "profile": {
+    "seconds_per_transition": 9.05,
+    "h_phi_calls": 1536,
+    "proposals": 768
+  },
+  "optimisation_verdict": {
+    "carried_h": "QUALIFIED OFFLINE \u2014 736/736 consecutive pairs exactly equal; removes 48% of h_phi calls with zero value change",
+    "duplicate_state_reuse": "CLOSED \u2014 0 resamples in 23 synchronisations, so no cloned states existed to deduplicate",
+    "particle_parallelism": "DEFERRED \u2014 not built until SMC earns scaling"
+  },
+  "efficacy": "UNKNOWN. One EXTINCT_NO_HIT slot on one source says nothing about benchmark performance. Do NOT rerun this reference for reassurance."
+}
