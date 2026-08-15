@@ -1,0 +1,345 @@
+{
+ "log2_samples": 17,
+ "runs": {
+  "adaptive-marginal-gain-region-origin_seed100": {
+   "evaluated": 10000,
+   "front_size": 143,
+   "hypervolume": 0.20149993896484375,
+   "hv_of_best_jnk3_alone": 0.11993408203125,
+   "fraction_from_one_molecule": 0.5952065427284087,
+   "hv_gain_if_axis_were_free": {
+    "qed": 0.01241302490234375,
+    "jnk3": 0.03322601318359375,
+    "sa": 0.01528167724609375,
+    "gsk3b": 0.00353240966796875,
+    "drd2": 7.62939453125e-05
+   },
+   "front_members_worth_over_1pct": 2,
+   "front_members_worth_over_0.1pct": 143
+  },
+  "graph-ga_seed100": {
+   "evaluated": 10000,
+   "front_size": 615,
+   "hypervolume": 0.6121749877929688,
+   "hv_of_best_jnk3_alone": 0.12978363037109375,
+   "fraction_from_one_molecule": 0.21200413763880407,
+   "hv_gain_if_axis_were_free": {
+    "qed": 0.02159881591796875,
+    "jnk3": 0.132659912109375,
+    "sa": 0.04559326171875,
+    "gsk3b": 0.06658935546875,
+    "drd2": 0.0002593994140625
+   },
+   "front_members_worth_over_1pct": null,
+   "front_members_worth_over_0.1pct": null
+  },
+  "graph-ga_seed101": {
+   "evaluated": 10000,
+   "front_size": 231,
+   "hypervolume": 0.2034759521484375,
+   "hv_of_best_jnk3_alone": 0.1448211669921875,
+   "fraction_from_one_molecule": 0.7117360329958755,
+   "hv_gain_if_axis_were_free": {
+    "qed": 0.02637481689453125,
+    "jnk3": 0.04175567626953125,
+    "sa": 0.01275634765625,
+    "gsk3b": 0.00162506103515625,
+    "drd2": 0.00012969970703125
+   },
+   "front_members_worth_over_1pct": 2,
+   "front_members_worth_over_0.1pct": 231
+  },
+  "graph-ga_seed102": {
+   "evaluated": 10000,
+   "front_size": 238,
+   "hypervolume": 0.5003128051757812,
+   "hv_of_best_jnk3_alone": 0.35240936279296875,
+   "fraction_from_one_molecule": 0.7043780593805755,
+   "hv_gain_if_axis_were_free": {
+    "qed": 0.02086639404296875,
+    "jnk3": 0.0467071533203125,
+    "sa": 0.03192901611328125,
+    "gsk3b": 0.00064849853515625,
+    "drd2": 6.103515625e-05
+   },
+   "front_members_worth_over_1pct": 1,
+   "front_members_worth_over_0.1pct": 6
+  },
+  "graph-ga_seed103": {
+   "evaluated": 10000,
+   "front_size": 215,
+   "hypervolume": 0.2349395751953125,
+   "hv_of_best_jnk3_alone": 0.14189910888671875,
+   "fraction_from_one_molecule": 0.6039812950574788,
+   "hv_gain_if_axis_were_free": {
+    "qed": 0.02935028076171875,
+    "jnk3": 0.05747222900390625,
+    "sa": 0.01410675048828125,
+    "gsk3b": 0.0089111328125,
+    "drd2": 0.00020599365234375
+   },
+   "front_members_worth_over_1pct": 1,
+   "front_members_worth_over_0.1pct": 3
+  },
+  "graph-ga_seed104": {
+   "evaluated": 10000,
+   "front_size": 346,
+   "hypervolume": 0.38434600830078125,
+   "hv_of_best_jnk3_alone": 0.241119384765625,
+   "fraction_from_one_molecule": 0.6273497826389026,
+   "hv_gain_if_axis_were_free": {
+    "qed": 0.0233001708984375,
+    "jnk3": 0.05776214599609375,
+    "sa": 0.0288848876953125,
+    "gsk3b": 0.005584716796875,
+    "drd2": 0.00020599365234375
+   },
+   "front_members_worth_over_1pct": null,
+   "front_members_worth_over_0.1pct": null
+  },
+  "graph-ga_seed105": {
+   "evaluated": 10000,
+   "front_size": 569,
+   "hypervolume": 0.61346435546875,
+   "hv_of_best_jnk3_alone": 0.184234619140625,
+   "fraction_from_one_molecule": 0.3003183762809671,
+   "hv_gain_if_axis_were_free": {
+    "qed": 0.03885650634765625,
+    "jnk3": 0.1595458984375,
+    "sa": 0.0441131591796875,
+    "gsk3b": 0.06829071044921875,
+    "drd2": 0.00030517578125
+   },
+   "front_members_worth_over_1pct": null,
+   "front_members_worth_over_0.1pct": null
+  },
+  "graph-ga_seed106": {
+   "evaluated": 10000,
+   "front_size": 286,
+   "hypervolume": 0.21126556396484375,
+   "hv_of_best_jnk3_alone": 0.11476898193359375,
+   "fraction_from_one_molecule": 0.5432450976851685,
+   "hv_gain_if_axis_were_free": {
+    "qed": 0.0190887451171875,
+    "jnk3": 0.03383636474609375,
+    "sa": 0.0128021240234375,
+    "gsk3b": 0.0012359619140625,
+    "drd2": 9.1552734375e-05
+   },
+   "front_members_worth_over_1pct": null,
+   "front_members_worth_over_0.1pct": null
+  },
+  "graph-ga_seed107": {
+   "evaluated": 10000,
+   "front_size": 468,
+   "hypervolume": 0.5957107543945312,
+   "hv_of_best_jnk3_alone": 0.1263580322265625,
+   "fraction_from_one_molecule": 0.21211306207656153,
+   "hv_gain_if_axis_were_free": {
+    "qed": 0.04767608642578125,
+    "jnk3": 0.16794586181640625,
+    "sa": 0.048248291015625,
+    "gsk3b": 0.0601348876953125,
+    "drd2": 0.00054931640625
+   },
+   "front_members_worth_over_1pct": null,
+   "front_members_worth_over_0.1pct": null
+  },
+  "random-zinc_seed100": {
+   "evaluated": 10000,
+   "front_size": 195,
+   "hypervolume": 0.39119720458984375,
+   "hv_of_best_jnk3_alone": 0.08403778076171875,
+   "fraction_from_one_molecule": 0.21482203803022915,
+   "hv_gain_if_axis_were_free": {
+    "qed": 0.034393310546875,
+    "jnk3": 0.2259521484375,
+    "sa": 0.0294342041015625,
+    "gsk3b": 0.144256591796875,
+    "drd2": 0.0001983642578125
+   },
+   "front_members_worth_over_1pct": 2,
+   "front_members_worth_over_0.1pct": 4
+  },
+  "random-zinc_seed101": {
+   "evaluated": 10000,
+   "front_size": 158,
+   "hypervolume": 0.36962127685546875,
+   "hv_of_best_jnk3_alone": 0.317474365234375,
+   "fraction_from_one_molecule": 0.8589179928581749,
+   "hv_gain_if_axis_were_free": {
+    "qed": 0.0547332763671875,
+    "jnk3": 0.07411956787109375,
+    "sa": 0.02014923095703125,
+    "gsk3b": 0.00829315185546875,
+    "drd2": 0.00017547607421875
+   },
+   "front_members_worth_over_1pct": 4,
+   "front_members_worth_over_0.1pct": 5
+  },
+  "random-zinc_seed102": {
+   "evaluated": 10000,
+   "front_size": 165,
+   "hypervolume": 0.29671478271484375,
+   "hv_of_best_jnk3_alone": 0.140899658203125,
+   "fraction_from_one_molecule": 0.4748656501504204,
+   "hv_gain_if_axis_were_free": {
+    "qed": 0.0397796630859375,
+    "jnk3": 0.0845794677734375,
+    "sa": 0.02977752685546875,
+    "gsk3b": 0.02640533447265625,
+    "drd2": 0.00031280517578125
+   },
+   "front_members_worth_over_1pct": 3,
+   "front_members_worth_over_0.1pct": 13
+  },
+  "random-zinc_seed103": {
+   "evaluated": 10000,
+   "front_size": 203,
+   "hypervolume": 0.2900390625,
+   "hv_of_best_jnk3_alone": 0.1750030517578125,
+   "fraction_from_one_molecule": 0.6033775252525253,
+   "hv_gain_if_axis_were_free": {
+    "qed": 0.0449066162109375,
+    "jnk3": 0.10176849365234375,
+    "sa": 0.02854156494140625,
+    "gsk3b": 0.01849365234375,
+    "drd2": 0.00041961669921875
+   },
+   "front_members_worth_over_1pct": 3,
+   "front_members_worth_over_0.1pct": 21
+  },
+  "random-zinc_seed104": {
+   "evaluated": 10000,
+   "front_size": 163,
+   "hypervolume": 0.416717529296875,
+   "hv_of_best_jnk3_alone": 0.10260009765625,
+   "fraction_from_one_molecule": 0.24621017942145734,
+   "hv_gain_if_axis_were_free": {
+    "qed": 0.0639801025390625,
+    "jnk3": 0.195556640625,
+    "sa": 0.02285003662109375,
+    "gsk3b": 0.079437255859375,
+    "drd2": 0.00018310546875
+   },
+   "front_members_worth_over_1pct": 3,
+   "front_members_worth_over_0.1pct": 6
+  },
+  "random-zinc_seed105": {
+   "evaluated": 10000,
+   "front_size": 191,
+   "hypervolume": 0.27359771728515625,
+   "hv_of_best_jnk3_alone": 0.140899658203125,
+   "fraction_from_one_molecule": 0.514988427539667,
+   "hv_gain_if_axis_were_free": {
+    "qed": 0.03366851806640625,
+    "jnk3": 0.11395263671875,
+    "sa": 0.0402374267578125,
+    "gsk3b": 0.031646728515625,
+    "drd2": 0.0001678466796875
+   },
+   "front_members_worth_over_1pct": 2,
+   "front_members_worth_over_0.1pct": 12
+  },
+  "random-zinc_seed106": {
+   "evaluated": 10000,
+   "front_size": 190,
+   "hypervolume": 0.26097869873046875,
+   "hv_of_best_jnk3_alone": 0.08403778076171875,
+   "fraction_from_one_molecule": 0.32201011488876546,
+   "hv_gain_if_axis_were_free": {
+    "qed": 0.0259246826171875,
+    "jnk3": 0.3577728271484375,
+    "sa": 0.02196502685546875,
+    "gsk3b": 0.2626190185546875,
+    "drd2": 0.00046539306640625
+   },
+   "front_members_worth_over_1pct": 3,
+   "front_members_worth_over_0.1pct": 190
+  },
+  "random-zinc_seed107": {
+   "evaluated": 10000,
+   "front_size": 176,
+   "hypervolume": 0.36545562744140625,
+   "hv_of_best_jnk3_alone": 0.3423614501953125,
+   "fraction_from_one_molecule": 0.9368071647773533,
+   "hv_gain_if_axis_were_free": {
+    "qed": 0.0259857177734375,
+    "jnk3": 0.055877685546875,
+    "sa": 0.02548980712890625,
+    "gsk3b": 0.004364013671875,
+    "drd2": 0.00020599365234375
+   },
+   "front_members_worth_over_1pct": 1,
+   "front_members_worth_over_0.1pct": 2
+  }
+ },
+ "fraction_from_one_molecule_mean": 0.5107253811412551,
+ "mean_gain_if_free": {
+  "qed": 0.033111572265625,
+  "jnk3": 0.11414651309742647,
+  "sa": 0.02777413760914522,
+  "gsk3b": 0.04659226361443015,
+  "drd2": 0.00023606244255514706
+ },
+ "front_members_worth_over_0.1pct_mean": 53.0,
+ "selectivity": {
+  "jnk3_at_gsk3b_ceiling": {
+   "0.02": {
+    "molecules": 91678,
+    "best_jnk3": 0.58
+   },
+   "0.05": {
+    "molecules": 136044,
+    "best_jnk3": 0.58
+   },
+   "0.1": {
+    "molecules": 158874,
+    "best_jnk3": 0.58
+   },
+   "0.2": {
+    "molecules": 167283,
+    "best_jnk3": 0.7
+   },
+   "0.5": {
+    "molecules": 169956,
+    "best_jnk3": 0.82
+   },
+   "1.01": {
+    "molecules": 170000,
+    "best_jnk3": 0.82
+   }
+  },
+  "gsk3b_activity_by_jnk3_band": {
+   "[0.0,0.05)": {
+    "molecules": 139060,
+    "mean_gsk3b_activity": 0.019955347640278617,
+    "fraction_gsk3b_over_0.3": 0.0006400115058248238
+   },
+   "[0.05,0.2)": {
+    "molecules": 23453,
+    "mean_gsk3b_activity": 0.05087958896516439,
+    "fraction_gsk3b_over_0.3": 0.007419093506161259
+   },
+   "[0.2,0.4)": {
+    "molecules": 4615,
+    "mean_gsk3b_activity": 0.11059841097869269,
+    "fraction_gsk3b_over_0.3": 0.010400866738894909
+   },
+   "[0.4,0.6)": {
+    "molecules": 2061,
+    "mean_gsk3b_activity": 0.16121947274785703,
+    "fraction_gsk3b_over_0.3": 0.057738961669092675
+   },
+   "[0.6,1.01)": {
+    "molecules": 811,
+    "mean_gsk3b_activity": 0.2881381011097411,
+    "fraction_gsk3b_over_0.3": 0.43896424167694204
+   }
+  },
+  "corr_jnk3_gsk3b": 0.6197485430919724,
+  "corr_jnk3_drd2": 0.004158166858531482,
+  "corr_jnk3_qed": 0.03576097745182729,
+  "pooled_molecules": 170000
+ }
+}

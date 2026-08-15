@@ -21,6 +21,12 @@ Three measurements, all on the durable ledgers:
 3. HOW MANY MOLECULES CARRY THE FRONT. Marginal contribution of each front
    member (HV(front) - HV(front minus it)). A genuine multi-objective problem has
    many molecules each holding a piece; a disguised single-objective one has one.
+
+4. WHERE THE CONFLICT ACTUALLY IS. JNK3 and GSK3B are both kinases, so "maximise
+   JNK3, minimise GSK3B" is a selectivity requirement and may be a real conflict
+   rather than two independent axes. This measures the attainable JNK3 at each
+   GSK3B ceiling, pooled over every molecule ever evaluated -- which is a
+   trade-off curve if there is one, and a flat line if there is not.
 """
 
 from __future__ import annotations
@@ -69,13 +75,14 @@ def analyse(points: np.ndarray) -> dict:
         lifted[:, axis] = front[:, axis].max()
         freed[name] = hypervolume_qmc(lifted, log2_samples=LOG2) - total
 
-    # Marginal contribution per front member, on the fronts small enough to
-    # afford it; the leave-one-out sweep is O(front) hypervolumes.
+    # Marginal contribution per front member. The leave-one-out sweep is
+    # O(front) hypervolumes, so it is capped -- and the cap is small, because
+    # this quantity is a shape check, not a headline.
     marginal = []
-    if len(front) <= 400:
+    if len(front) <= 250:
         for i in range(len(front)):
             rest = np.delete(front, i, axis=0)
-            marginal.append(total - hypervolume_qmc(rest, log2_samples=LOG2))
+            marginal.append(total - hypervolume_qmc(rest, log2_samples=14))
     return {
         "evaluated": int(len(points)),
         "front_size": int(len(front)),
@@ -87,6 +94,42 @@ def analyse(points: np.ndarray) -> dict:
             int(sum(1 for m in marginal if m > 0.01 * total)) if marginal else None),
         "front_members_worth_over_0.1pct": (
             int(sum(1 for m in marginal if m > 0.001 * total)) if marginal else None),
+    }
+
+
+def selectivity(points: np.ndarray) -> dict:
+    """Attainable JNK3 at each GSK3B ceiling, and how the two co-vary.
+
+    Columns 3 and 4 are ALREADY transformed to higher-is-better, so the raw
+    activity that has to be kept LOW is `1 - column`.
+    """
+
+    jnk3 = points[:, 1]
+    gsk3b_raw = 1.0 - points[:, 3]
+    drd2_raw = 1.0 - points[:, 4]
+    frontier = {}
+    for ceiling in (0.02, 0.05, 0.1, 0.2, 0.5, 1.01):
+        mask = gsk3b_raw <= ceiling
+        frontier[str(ceiling)] = {
+            "molecules": int(mask.sum()),
+            "best_jnk3": float(jnk3[mask].max()) if mask.any() else 0.0,
+        }
+    bands = {}
+    for low, high in ((0.0, 0.05), (0.05, 0.2), (0.2, 0.4), (0.4, 0.6), (0.6, 1.01)):
+        mask = (jnk3 >= low) & (jnk3 < high)
+        if mask.sum() < 20:
+            continue
+        bands[f"[{low},{high})"] = {
+            "molecules": int(mask.sum()),
+            "mean_gsk3b_activity": float(gsk3b_raw[mask].mean()),
+            "fraction_gsk3b_over_0.3": float((gsk3b_raw[mask] > 0.3).mean()),
+        }
+    return {
+        "jnk3_at_gsk3b_ceiling": frontier,
+        "gsk3b_activity_by_jnk3_band": bands,
+        "corr_jnk3_gsk3b": float(np.corrcoef(jnk3, gsk3b_raw)[0, 1]),
+        "corr_jnk3_drd2": float(np.corrcoef(jnk3, drd2_raw)[0, 1]),
+        "corr_jnk3_qed": float(np.corrcoef(jnk3, points[:, 0])[0, 1]),
     }
 
 
@@ -128,6 +171,16 @@ def main() -> int:
             report["front_members_worth_over_0.1pct_mean"] = statistics.fmean(carried)
             print(f"\nfront members individually worth >0.1% of HV: "
                   f"mean {statistics.fmean(carried):.1f}")
+
+    pooled = np.vstack([load(p) for p in sorted(args.runs.glob("*/evaluations.jsonl"))
+                        if len(load(p)) >= 1000])
+    report["selectivity"] = selectivity(pooled)
+    report["selectivity"]["pooled_molecules"] = int(len(pooled))
+    print(f"\nSELECTIVITY, pooled over {len(pooled):,} molecules "
+          f"(corr jnk3/gsk3b = {report['selectivity']['corr_jnk3_gsk3b']:+.3f}):")
+    for ceiling, row in report["selectivity"]["jnk3_at_gsk3b_ceiling"].items():
+        print(f"  gsk3b <= {ceiling:<5} n={row['molecules']:>7,}   "
+              f"best jnk3 = {row['best_jnk3']:.2f}")
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=1) + "\n")
