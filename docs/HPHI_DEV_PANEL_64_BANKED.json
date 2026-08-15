@@ -1,0 +1,509 @@
+{
+  "schema": "compose.hphi.dev_panel.banked",
+  "protocol": "hphi-dev-panel-v1",
+  "status": "CLOSED FOR CONTROLLER TUNING",
+  "region": [
+    0.9,
+    0.4
+  ],
+  "horizon": 24,
+  "replicates": 20,
+  "max_proposals": 40,
+  "n_sources": 64,
+  "n_records": 3840,
+  "records_rejected_by_checksum": 0,
+  "records_sha256": "19aeb370ff6989fabb6683b495dc50b5d4b8158cc6dd3ea7ec51195b821e5911",
+  "per_arm": {
+    "unguided": {
+      "source_coverage": 0.15625,
+      "sources_solved": 10,
+      "trajectory_hit_rate": 0.02109375,
+      "n_trajectories": 1280,
+      "cap_hit_rate": 0.0,
+      "died_at_step_0": 0.0,
+      "mean_edits": 23.71484375,
+      "mean_terminal_qed": 0.667881319629179,
+      "mean_terminal_sim": 0.34006569462699293,
+      "mean_first_hit_step": 9.961538461538462,
+      "stop_fired": 26,
+      "solved_sources": [
+        3,
+        9,
+        10,
+        15,
+        17,
+        19,
+        25,
+        42,
+        49,
+        52
+      ]
+    },
+    "policy_b": {
+      "source_coverage": 0.171875,
+      "sources_solved": 11,
+      "trajectory_hit_rate": 0.02578125,
+      "n_trajectories": 1280,
+      "cap_hit_rate": 0.0,
+      "died_at_step_0": 0.0,
+      "mean_edits": 23.6546875,
+      "mean_terminal_qed": 0.7014675667576408,
+      "mean_terminal_sim": 0.3531614904685114,
+      "mean_first_hit_step": 10.606060606060606,
+      "stop_fired": 33,
+      "solved_sources": [
+        3,
+        9,
+        15,
+        17,
+        20,
+        28,
+        29,
+        50,
+        51,
+        52,
+        54
+      ]
+    },
+    "hphi": {
+      "source_coverage": 0.28125,
+      "sources_solved": 18,
+      "trajectory_hit_rate": 0.05703125,
+      "n_trajectories": 1280,
+      "cap_hit_rate": 0.94296875,
+      "died_at_step_0": 0.3421875,
+      "mean_edits": 2.43203125,
+      "mean_terminal_qed": 0.7511429615335373,
+      "mean_terminal_sim": 0.7449387405563552,
+      "mean_first_hit_step": 3.4383561643835616,
+      "stop_fired": 73,
+      "solved_sources": [
+        2,
+        3,
+        5,
+        8,
+        9,
+        15,
+        19,
+        27,
+        29,
+        34,
+        36,
+        39,
+        41,
+        43,
+        50,
+        52,
+        53,
+        60
+      ]
+    }
+  },
+  "paired_source_level": {
+    "hphi_vs_unguided": {
+      "hphi_only": 13,
+      "baseline_only": 5,
+      "both": 5,
+      "exact_paired_two_sided_p": 0.0963
+    },
+    "hphi_vs_policy_b": {
+      "hphi_only": 12,
+      "baseline_only": 5,
+      "both": 6,
+      "exact_paired_two_sided_p": 0.1435
+    }
+  },
+  "source_table": [
+    {
+      "index": 0,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 1,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 2,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": true
+    },
+    {
+      "index": 3,
+      "unguided": true,
+      "policy_b": true,
+      "hphi": true
+    },
+    {
+      "index": 4,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 5,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": true
+    },
+    {
+      "index": 6,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 7,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 8,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": true
+    },
+    {
+      "index": 9,
+      "unguided": true,
+      "policy_b": true,
+      "hphi": true
+    },
+    {
+      "index": 10,
+      "unguided": true,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 11,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 12,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 13,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 14,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 15,
+      "unguided": true,
+      "policy_b": true,
+      "hphi": true
+    },
+    {
+      "index": 16,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 17,
+      "unguided": true,
+      "policy_b": true,
+      "hphi": false
+    },
+    {
+      "index": 18,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 19,
+      "unguided": true,
+      "policy_b": false,
+      "hphi": true
+    },
+    {
+      "index": 20,
+      "unguided": false,
+      "policy_b": true,
+      "hphi": false
+    },
+    {
+      "index": 21,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 22,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 23,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 24,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 25,
+      "unguided": true,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 26,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 27,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": true
+    },
+    {
+      "index": 28,
+      "unguided": false,
+      "policy_b": true,
+      "hphi": false
+    },
+    {
+      "index": 29,
+      "unguided": false,
+      "policy_b": true,
+      "hphi": true
+    },
+    {
+      "index": 30,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 31,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 32,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 33,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 34,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": true
+    },
+    {
+      "index": 35,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 36,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": true
+    },
+    {
+      "index": 37,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 38,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 39,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": true
+    },
+    {
+      "index": 40,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 41,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": true
+    },
+    {
+      "index": 42,
+      "unguided": true,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 43,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": true
+    },
+    {
+      "index": 44,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 45,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 46,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 47,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 48,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 49,
+      "unguided": true,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 50,
+      "unguided": false,
+      "policy_b": true,
+      "hphi": true
+    },
+    {
+      "index": 51,
+      "unguided": false,
+      "policy_b": true,
+      "hphi": false
+    },
+    {
+      "index": 52,
+      "unguided": true,
+      "policy_b": true,
+      "hphi": true
+    },
+    {
+      "index": 53,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": true
+    },
+    {
+      "index": 54,
+      "unguided": false,
+      "policy_b": true,
+      "hphi": false
+    },
+    {
+      "index": 55,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 56,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 57,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 58,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 59,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 60,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": true
+    },
+    {
+      "index": 61,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 62,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    },
+    {
+      "index": 63,
+      "unguided": false,
+      "policy_b": false,
+      "hphi": false
+    }
+  ],
+  "decision": {
+    "frozen_criterion": "HORIZON_AMENDMENT_H24.md step 7 -- healthy acceptance -> stop; calibrated but COLLAPSED acceptance -> frozen twisted-SMC escalation",
+    "cap_hit_rate_hphi": 0.94296875,
+    "TRIGGER_FIRED": true,
+    "outcome": "TWISTED SMC EARNED. Rejection is not the production sampler. h_phi is unchanged; only the inference realisation changes.",
+    "wording": "Region-h_phi showed a STRONG DEVELOPMENTAL NAVIGATION SIGNAL, nearly doubling source coverage and more than doubling trajectory hit rate, while the preregistered rejection-cap criterion overwhelmingly fired. NOT to be described as decisively beating the baselines -- the paired source-level tests do not support that, and the 64 was never an efficacy test."
+  }
+}
