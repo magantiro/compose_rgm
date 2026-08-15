@@ -1,0 +1,365 @@
+"""SLOW REFERENCE molecular twisted-SMC. Correctness only -- NO optimization.
+
+THE TWO RULES THAT MAKE THIS THE INTENDED ALGORITHM
+----------------------------------------------------
+1. Every particle proposal comes from the frozen R_theta law ALONE. h_phi is
+   NOT used to select proposals.
+2. h_phi enters ONLY through the Feynman-Kac incremental weight
+
+       G_b(x, y) = h_phi(y, b-1) / h_phi(x, b)
+
+Using h_phi to both select AND weight would double-count control and silently
+sample a different process. Because the product telescopes to
+h_0(x_H)/h_H(x_0), and the terminal boundary h_0(x) = 1[x in B] is EXACT, an
+approximate h_phi steers particle allocation WITHOUT redefining what counts as
+success. That is why a learned twist is safe here, not merely tolerable.
+
+FROZEN (preregistration section 13): N = 32 particles, H = 24, region
+(0.90, 0.40), absorbing STOP, systematic resampling at strict ESS < N/2, one
+molecule sampled from the terminal normalized particle measure, 20 INDEPENDENT
+runs per source. The 32 particles are inference state, never candidates.
+
+Records per-transition h values, per-step ESS/resample decisions and the
+resampling indices so the mechanical checks run OFFLINE against the artifact
+rather than trusting this code.
+"""
+
+from __future__ import annotations
+
+import gzip
+import hashlib
+import json
+import time
+from pathlib import Path
+from typing import Any
+
+import modal
+
+from modal_apps.run_process_v2_p50_app import (
+    ARTIFACT_ROOT,
+    REMOTE_ROOT,
+    artifact_volume,
+)
+from modal_apps.run_process_v2_p50_app import image as _base_image
+
+image = _base_image.env(
+    {"PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}", "OMP_NUM_THREADS": "1"}
+)
+
+app = modal.App("hphi-smc")
+RUN_ROOT = "/artifacts/editing_v2/r_theta_run"
+OUT_DIR = "hphi_smc_ref"
+TIME_POINT, CANONICAL_SLOTS = 0.5, 48
+
+# ---- FROZEN. Every value below is copied from the preregistration. ----
+HORIZON = 24                    # max H24, native anytime STOP
+N_REPLICATES = 20               # 20 returned candidates per source
+REGION = (0.90, 0.40)           # benchmark qualification region
+MAX_PROPOSALS = 40              # frozen rejection cap -- NOT retuned here
+PROTOCOL = "hphi-smc-ref-v1"
+ARMS = ("unguided", "policy_b", "hphi")
+
+_RT: dict[str, Any] = {}
+
+
+def seed_for(arm: str, src: str, rep: int) -> int:
+    """PAIRED across arms: the arm name is deliberately NOT in the seed."""
+    return int.from_bytes(
+        hashlib.sha256(f"{PROTOCOL}|{src}|{rep}".encode()).digest()[:8], "big")
+
+
+def _runtime():
+    if "model" in _RT:
+        return _RT
+    import sys
+
+    import torch
+
+    sys.path.insert(0, str(REMOTE_ROOT / "src"))
+    from compose_v4.experiments.editing_v2_process_v2_t1_panel import (
+        open_process_v2_t1_source,
+    )
+    from compose_v4.experiments.editing_v2_process_v2_t1_runtime import (
+        build_process_v2_score_revised_scratch_runtime,
+        load_materialized_scorer_state,
+    )
+    from compose_v4.experiments.editing_v2_r_theta_corpus_training import (
+        CHECKPOINT_FILENAME,
+    )
+    from compose_v4.experiments.production_successor_kernel import (
+        _default_rewrite_system,
+    )
+
+    paths = json.loads((Path(RUN_ROOT) / "run_inputs" / "RUN_PATHS.json").read_text())
+    src = open_process_v2_t1_source(
+        Path(paths["active8_root"]),
+        gate_zero_decision_path=Path(paths["gate_zero"]),
+        artifact_root=Path(paths["artifact_root"]), repo_root=REMOTE_ROOT)
+    bundle = load_materialized_scorer_state(Path(paths["materialized_scorer"]))
+    runtime, _b, _c = build_process_v2_score_revised_scratch_runtime(
+        src, materialized_state=bundle)
+    model = runtime.model
+    ck = torch.load(Path(RUN_ROOT) / "runs" / "run_v2_01" / CHECKPOINT_FILENAME,
+                    map_location="cpu", weights_only=False)
+    model.load_state_dict(ck["selected_model_state"], strict=True)
+    model.eval(); torch.set_grad_enabled(False); torch.set_num_threads(1)
+
+    head = torch.jit.load(str(Path(RUN_ROOT) / "hphi_v2" / "head.pt"),
+                          map_location="cpu")
+    head.eval()
+    norm = json.loads((Path(RUN_ROOT) / "hphi_v2" / "norm.json").read_text())
+    _RT.update({"model": model, "system": _default_rewrite_system(model),
+                "head": head, "mu": norm["mu"], "sd": norm["sd"]})
+    return _RT
+
+
+
+_G: dict[str, Any] = {}
+
+
+def _slot_unit(slot: int) -> dict[str, Any]:
+    """One independent SMC run = one returned candidate."""
+    import torch
+
+    torch.set_num_threads(1)
+    t0 = time.perf_counter()
+    rec = _G["run_smc"](slot)
+    rec["seconds"] = round(time.perf_counter() - t0, 2)
+    return rec
+
+
+@app.function(image=image, cpu=(8.0, 8.0), memory=32768, timeout=6 * 60 * 60,
+              max_containers=64, retries=2,
+              volumes={str(ARTIFACT_ROOT): artifact_volume})
+def run_source(task: dict[str, Any]) -> dict[str, Any]:
+    """20 independent SMC runs for one source."""
+    import multiprocessing as mp
+    import sys
+
+    import numpy as np
+    import torch
+
+    sys.path.insert(0, str(REMOTE_ROOT / "src"))
+    from rdkit import RDLogger
+
+    RDLogger.DisableLog("rdApp.*")
+    from rdkit import Chem, DataStructs
+    from rdkit.Chem import QED, rdFingerprintGenerator
+
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.experiments.hphi_region_features import (
+        build_features, in_region,
+    )
+    from compose_v4.experiments.hphi_smc import (
+        N_PARTICLES, effective_sample_size, normalized_weights,
+        sample_terminal_particle, should_resample, systematic_resample,
+    )
+    from compose_v4.experiments.production_successor_kernel import (
+        _one_state_batch, canonical_state_key, enumerate_factorized_marked_law,
+    )
+
+    rt = _runtime()
+    model, system, head = rt["model"], rt["system"], rt["head"]
+    mu = np.asarray(rt["mu"], dtype=np.float64)
+    sd = np.asarray(rt["sd"], dtype=np.float64)
+    source = task["source"]
+    idx = int(task["index"])
+    out_p = Path(RUN_ROOT) / task.get("out_dir", OUT_DIR)
+    t0 = time.perf_counter()
+
+    gen = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
+    src_fp = gen.GetFingerprint(Chem.MolFromSmiles(source))
+    prop_cache: dict[str, tuple[float, float]] = {}
+    enc_cache: dict[str, np.ndarray] = {}
+
+    def props(smi: str) -> tuple[float, float]:
+        if smi not in prop_cache:
+            m = Chem.MolFromSmiles(smi)
+            prop_cache[smi] = (0.0, 0.0) if m is None else (
+                float(QED.qed(m)),
+                float(DataStructs.TanimotoSimilarity(
+                    src_fp, gen.GetFingerprint(m))))
+        return prop_cache[smi]
+
+    def encode(smi: str) -> np.ndarray:
+        if smi not in enc_cache:
+            st = pad_molecular_graph(smiles_to_molecular_graph(smi),
+                                     CANONICAL_SLOTS)
+            b = _one_state_batch(model, st, float(TIME_POINT),
+                                 prepared_batch=None)
+            with torch.no_grad():
+                _n, g, _p = model._encode_batch(b)
+            enc_cache[smi] = g[0].detach().cpu().numpy().astype(np.float64)
+        return enc_cache[smi]
+
+    e_src = encode(source)
+
+    def h_phi(smi: str, budget: int) -> float:
+        """The twist. EXACT boundary h = 1 in-region, matching h_0 = 1[x in B]."""
+        q, s = props(smi)
+        if in_region(q, s, REGION):
+            return 1.0
+        if budget <= 0:
+            return 0.0
+        f = build_features(encode(smi), e_src, q, s, REGION,
+                           max(0, min(int(budget), 24)))
+        x = torch.tensor(((f - mu) / sd).astype(np.float32)).unsqueeze(0)
+        with torch.no_grad():
+            return float(torch.sigmoid(head(x)).item())
+
+    def propose(smi: str, rng) -> str:
+        """Sample ONE successor from the frozen R_theta law. NO h_phi here."""
+        st = pad_molecular_graph(smiles_to_molecular_graph(smi), CANONICAL_SLOTS)
+        law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
+        if not law.marks:
+            return ""
+        p = np.array([m.probability for m in law.marks], float)
+        p /= p.sum()
+        mk = law.marks[int(rng.choice(len(p), p=p))]
+        y = canonical_state_key(system.apply(st, mk.executor_rule_name,
+                                             mk.action))
+        return "" if y == smi else y
+
+    def run_smc(slot: int) -> dict[str, Any]:
+        rng = np.random.default_rng(seed_for("smc", source, slot))
+        q0, s0 = props(source)
+        states = [source] * N_PARTICLES
+        absorbed = [in_region(q0, s0, REGION)] * N_PARTICLES
+        log_w = np.zeros(N_PARTICLES)
+        transitions: list[dict[str, Any]] = []
+        sync: list[dict[str, Any]] = []
+
+        for step in range(HORIZON):
+            b = HORIZON - step
+            for i in range(N_PARTICLES):
+                if absorbed[i]:
+                    continue
+                x = states[i]
+                hx = h_phi(x, b)
+                if hx <= 0.0:
+                    log_w[i] = -np.inf
+                    absorbed[i] = True
+                    continue
+                y = propose(x, rng)
+                if not y:
+                    log_w[i] = -np.inf
+                    absorbed[i] = True
+                    continue
+                hy = h_phi(y, b - 1)
+                inc = (np.log(hy) if hy > 0 else -np.inf) - np.log(hx)
+                log_w[i] += inc
+                states[i] = y
+                qy, sy = props(y)
+                if in_region(qy, sy, REGION):
+                    absorbed[i] = True
+                transitions.append({
+                    "step": step, "particle": i, "budget": b, "x": x, "y": y,
+                    "h_x_b": hx, "h_y_bm1": hy,
+                    "log_G": (float(inc) if np.isfinite(inc) else None),
+                    "absorbed_after": absorbed[i]})
+            if np.all(np.isneginf(log_w)):
+                break
+            w = normalized_weights(log_w)
+            entry: dict[str, Any] = {
+                "step": step, "ess": float(effective_sample_size(w)),
+                "resampled": bool(should_resample(w, N_PARTICLES)),
+                "n_absorbed": int(sum(absorbed))}
+            if entry["resampled"]:
+                ridx = systematic_resample(w, rng)
+                states = [states[j] for j in ridx]
+                absorbed = [absorbed[j] for j in ridx]
+                log_w = np.zeros(N_PARTICLES)
+                entry["indices"] = [int(v) for v in ridx]
+                entry["n_unique"] = len({int(v) for v in ridx})
+                entry["n_unique_states"] = len(set(states))
+            sync.append(entry)
+            if all(absorbed):
+                break
+
+        w = normalized_weights(log_w)
+        j = sample_terminal_particle(w, rng)
+        ret = states[j]
+        rq, rs = props(ret)
+        return {"slot": slot, "returned": ret, "returned_index": int(j),
+                "terminal_qed": rq, "terminal_sim": rs,
+                "success": bool(in_region(rq, rs, REGION)),
+                "final_weights": [float(v) for v in w],
+                "final_ess": float(effective_sample_size(w)),
+                "final_states": states, "final_absorbed": absorbed,
+                "n_absorbed": int(sum(absorbed)),
+                "sync": sync, "transitions": transitions,
+                "seed": seed_for("smc", source, slot),
+                "n_particles": N_PARTICLES, "horizon": HORIZON}
+
+    provenance = {
+        "protocol": PROTOCOL, "region": list(REGION), "horizon": HORIZON,
+        "n_particles": N_PARTICLES, "git_commit": task.get("git_commit", "?"),
+        "output_rule": "sampled from the normalized terminal particle measure; "
+                       "NOT best-of-population",
+        "proposal_law": "frozen R_theta ALONE; h_phi enters only via the "
+                        "Feynman-Kac incremental weight"}
+
+    artifact_volume.reload()
+    have = _valid_records(out_p)
+    n_slots = int(task.get("n_slots", 20))
+    slots = [s for s in range(n_slots) if (idx, "smc", s) not in have]
+    if not slots:
+        print(f"src{idx:>3}: all {n_slots} slots already persisted", flush=True)
+        return {"index": idx, "source": source, "status": "OK", "slots_run": 0}
+
+    _G["run_smc"] = run_smc
+    done = 0
+    ctx = mp.get_context("fork")
+    with ctx.Pool(int(task.get("workers", 8))) as pool:
+        for rec in pool.imap_unordered(_slot_unit, slots):
+            rec["arm"] = "smc"
+            rec["replicate"] = rec["slot"]
+            _persist(out_p, idx, source, rec, provenance)
+            artifact_volume.commit()
+            done += 1
+            nres = sum(e["resampled"] for e in rec["sync"])
+            print(f"  src{idx:>3} slot {rec['slot']:>2} -> "
+                  f"QED {rec['terminal_qed']:.3f} sim {rec['terminal_sim']:.3f} "
+                  f"{'HIT' if rec['success'] else '---'} "
+                  f"absorbed {rec['n_absorbed']:>2}/32 resample {nres:>2} "
+                  f"{rec['seconds']:7.1f}s [{done}/{len(slots)}]", flush=True)
+    return {"index": idx, "source": source, "status": "OK",
+            "slots_run": done, "seconds": round(time.perf_counter() - t0, 1)}
+
+
+@app.function(image=image, cpu=(2.0, 2.0), memory=8192, timeout=12 * 60 * 60,
+              volumes={str(ARTIFACT_ROOT): artifact_volume})
+def drive(tasks: list[dict[str, Any]], out_dir: str = OUT_DIR) -> dict[str, Any]:
+    artifact_volume.reload()
+    (Path(RUN_ROOT) / out_dir).mkdir(parents=True, exist_ok=True)
+    for t in tasks:
+        t["out_dir"] = out_dir
+    started = time.perf_counter()
+    for r in run_source.map(tasks, order_outputs=False, return_exceptions=True):
+        if isinstance(r, dict) and r.get("status") == "OK":
+            print(f"  source {r['index']} done ({r.get('slots_run')} slots)",
+                  flush=True)
+    return {"seconds": round(time.perf_counter() - started, 1),
+            "n_sources": len(tasks)}
+
+
+@app.local_entrypoint()
+def main(limit: int = 1, out_dir: str = OUT_DIR, workers: int = 8,
+         n_slots: int = 20) -> None:
+    import subprocess
+
+    commit = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
+                            text=True).stdout.strip()[:12]
+    srcs = [s.strip() for s in
+            (Path(__file__).resolve().parents[1]
+             / "data/jin/dev_panel_qed_64.txt").read_text().split("\n")
+            if s.strip()]
+    tasks = [{"index": i, "source": s, "workers": workers, "n_slots": n_slots,
+              "git_commit": commit} for i, s in enumerate(srcs)][:limit]
+    print(f"SLOW REFERENCE molecular SMC: {len(tasks)} source(s) x {n_slots} "
+          f"independent runs x N=32 particles, H={HORIZON}, region {REGION}")
+    print("proposals from frozen R_theta ALONE; h_phi enters only via the "
+          "Feynman-Kac weight")
+    call = drive.spawn(tasks, out_dir)
+    print(f"spawned: {call.object_id}")
