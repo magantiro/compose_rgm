@@ -18,6 +18,22 @@ from pathlib import Path
 OBJECTIVES = ("qed", "jnk3", "sa", "gsk3b", "drd2")
 
 
+def best_from_ledger(path: Path) -> dict[str, float]:
+    """Per-objective maxima, read back off the durable ledger."""
+
+    if not path.exists():
+        return {}
+    best = [0.0] * len(OBJECTIVES)
+    with open(path) as handle:
+        for line in handle:
+            line = line.strip()
+            if not line:
+                continue
+            values = json.loads(line)["v"]
+            best = [max(a, b) for a, b in zip(best, values)]
+    return dict(zip(OBJECTIVES, best))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--runs", type=Path, default=Path("runs/task3_dev"))
@@ -27,7 +43,13 @@ def main() -> int:
 
     summaries = []
     for path in sorted(args.runs.glob("*/summary.json")):
-        summaries.append(json.loads(path.read_text()))
+        summary = json.loads(path.read_text())
+        if "best_per_objective_normalised" not in summary:
+            # Older runs predate the field. The ledger is the record of what was
+            # actually evaluated, so recompute rather than leave a hole.
+            summary["best_per_objective_normalised"] = best_from_ledger(
+                path.with_name("evaluations.jsonl"))
+        summaries.append(summary)
     if not summaries:
         raise SystemExit(f"no summary.json under {args.runs}")
 
@@ -46,6 +68,10 @@ def main() -> int:
         hvs = [r["hypervolume"] for r in runs]
         jnk3 = [r.get("best_per_objective_normalised", {}).get("jnk3")
                 for r in runs]
+        paired = [(r["hypervolume"],
+                   r.get("best_per_objective_normalised", {}).get("jnk3"))
+                  for r in runs]
+        paired = [(h, j) for h, j in paired if j is not None]
         jnk3 = [value for value in jnk3 if value is not None]
         entry = {
             "seeds": [r["seed"] for r in runs],
@@ -56,6 +82,13 @@ def main() -> int:
             "seconds": [round(r["seconds"], 1) for r in runs],
             "best_jnk3": jnk3,
             "budget": runs[0]["budget"],
+            # HV on this task is dominated by the JNK3 axis -- the other four
+            # objectives are nearly saturated by ordinary drug-like molecules --
+            # so this correlation is the single most useful diagnostic here.
+            "hv_vs_best_jnk3_correlation":
+                (statistics.correlation([h for h, _ in paired],
+                                        [j for _, j in paired])
+                 if len(paired) > 2 else None),
         }
         report["policies"][policy] = entry
         print(f"{policy:<14}{len(runs):<8}{entry['hypervolume_mean']:<12.4f}"
