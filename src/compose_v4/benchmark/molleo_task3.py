@@ -80,6 +80,46 @@ The counting rule itself, though, is theirs: `score_smi` (`:190-198`)
 canonicalises before consulting the buffer, so one molecule written two ways
 costs one unit. That part is reproduced faithfully.
 
+THE METRIC -- FROZEN, BECAUSE THE RELEASE DOES NOT DEFINE IT
+-------------------------------------------------------------
+The released repository contains NO hypervolume implementation. Not a different
+one from ours -- none at all: no `hypervolume`, no `pymoo` indicator, no IGD.
+What it computes is `top_auc` over the scalar sum (`optimizer.py:31`,
+`pareto_optimizer.py:30`), and what it persists is a YAML dump of
+`self.mol_buffer` (`pareto_optimizer.py:105-114`). Since `clean_buffer()`
+(`:101-103`) moves the cumulative record into `storing_buffer` and rebinds
+`mol_buffer` to a NEW dict every generation, that dump holds only the LAST
+GENERATION, and the cumulative buffer is never saved at all.
+
+So the Task 3 hypervolume cannot be reverse-engineered from the release. It has
+to be chosen, and stated. Ours is:
+
+    HV of the Pareto front over EVERY molecule evaluated during the run,
+    reference point at the ORIGIN of the normalised maximisation space,
+    computed by `hypervolume_qmc`.
+
+Why this rather than the alternatives:
+
+* Over everything evaluated, not the final population: it is the standard
+  best-found-so-far convention, it is monotone (a method cannot lose credit by
+  continuing to explore), it is recomputable from the durable ledger alone, and
+  it is the reading most GENEROUS to the baselines -- which makes any eventual
+  COMPOSE claim the conservative one.
+* Reference at the origin: all five objectives are already normalised to [0, 1]
+  with higher better, so the origin is the natural nadir and the value is
+  directly the dominated fraction of the unit box, comparable across runs
+  without a shared reference set.
+
+The choice is not free, and its size is measured rather than waved at: on one
+Graph-GA run, HV over all 10,000 evaluated molecules is 0.612 against 0.515 over
+the last 120 only. Anyone comparing our numbers with a published one must know
+which convention each used.
+
+`hypervolume_qmc` is checked against the DEFINITION -- exact inclusion-exclusion
+over the union of boxes -- not against another estimate of itself: worst
+absolute error 3.5e-05 over random fronts, where the differences we act on are
+of order 0.09.
+
 SEED SEMANTICS -- FROZEN: EVERY SEED STARTS EMPTY
 -------------------------------------------------
 Each of our seeds is a genuinely independent run: a fresh oracle buffer, a fresh

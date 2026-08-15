@@ -186,3 +186,46 @@ def test_restoring_a_meter_does_not_leak_into_a_new_one():
     first.restore({"CCO": tuple(range(N_OBJECTIVES))})
     assert first.spent == 1
     assert OracleMeter(fake_eval, budget=10).spent == 0
+
+
+def _exact_hypervolume(points):
+    """HV of the union of boxes [0, p] by inclusion-exclusion.
+
+    Exponential in the number of points, so this is only usable on tiny fronts
+    -- which is exactly what makes it a good reference: it is the definition,
+    evaluated directly, with no estimation in it at all.
+    """
+    import itertools
+
+    from compose_v4.benchmark.molleo_task3 import _pareto_mask
+
+    pts = np.asarray(points, dtype=float)
+    pts = pts[_pareto_mask(pts)]
+    total = 0.0
+    for k in range(1, len(pts) + 1):
+        for subset in itertools.combinations(range(len(pts)), k):
+            total += (-1) ** (k + 1) * float(np.prod(pts[list(subset)].min(axis=0)))
+    return total
+
+
+def test_the_reported_hypervolume_matches_exact_arithmetic():
+    """The metric is the number every claim rests on, so it is checked against
+    the definition rather than against another estimate of itself."""
+    from compose_v4.benchmark.molleo_task3 import hypervolume_qmc
+
+    rng = np.random.default_rng(0)
+    for _ in range(8):
+        points = rng.random((int(rng.integers(1, 9)), 5))
+        assert hypervolume_qmc(points) == pytest.approx(
+            _exact_hypervolume(points), abs=1e-4)
+
+
+def test_hypervolume_does_not_depend_on_evaluation_order():
+    """It is a function of the SET of molecules found. If it depended on order,
+    it would depend on scheduling, and two runs of one policy would disagree."""
+    from compose_v4.benchmark.molleo_task3 import hypervolume_qmc
+
+    rng = np.random.default_rng(5)
+    points = rng.random((40, 5))
+    shuffled = points[rng.permutation(len(points))]
+    assert hypervolume_qmc(points) == hypervolume_qmc(shuffled)
