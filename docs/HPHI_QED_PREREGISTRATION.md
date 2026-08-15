@@ -227,7 +227,16 @@ operating points.
 1. **The 128-source validation is used exactly ONCE.** If it fails, the result
    is reported as a failure. There is no second validation set.
 2. **There is no QED rescue branch.** If `h_φ` does not qualify, the experiment
-   is reported as negative and the line closes — as K41 did.
+   is reported as negative and **this controller path closes** under its own
+   preregistered rules — no patched variant is tried to rescue it.
+
+   **State the scope precisely.** A negative result closes *the current QED
+   region-`h_φ` controller path*. It does **not** retroactively invalidate
+   COMPOSE, the already-banked Pareto results, or any other frozen finding, and
+   it does **not** establish that no multi-objective controller is possible.
+   What it does mean, given the current paper plan, is **stop and reassess
+   before building any new claim-bearing pipeline on top of it** — in
+   particular, do not respond by inventing a five-objective workaround.
 3. **The official 800 are touched once**, after the ladder completes.
 4. No hyperparameter, region, threshold, or horizon may be re-chosen after
    observing an official-test outcome.

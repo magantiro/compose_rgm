@@ -15,6 +15,27 @@ controller (region-`h_phi`) is injected later, once its weights exist and the
 QED lane has finished the preregistered ladder. Nothing here freezes or presumes
 a controller, and nothing here may be run to produce a claim-bearing result.
 
+ONE ENGINE, TWO PREREGISTERED EXPERIMENTS -- DO NOT MERGE THEM
+---------------------------------------------------------------
+Sharing this module is an implementation decision, NOT a scientific one. Both
+experiments are built on the same primitive, the restricted action set
+
+    A_C(x) = { a in A(x) : C(T_a x) = 1 }
+
+but they ask different questions and are reported as separate rows of the
+authoritative experiment map:
+
+  * HARD SUPPORT -- hard support vs fixed soft guidance vs post-hoc filtering.
+    Estimand: does making feasibility STRUCTURAL improve useful constrained
+    optimization?
+
+  * PATHWISE -- identical endpoint requirement throughout; enforce C only at the
+    end versus C(X_t) at EVERY committed state. Estimand: does ROUTE-LEVEL
+    enforcement matter?
+
+Anyone tempted to collapse these into a single result because they share code
+should stop: the shared code is `A_C`, and that is all they share.
+
 WHAT IS DELIBERATELY ABSENT
 ---------------------------
 No `h_phi`. No five-objective policy. No Modal app. This is mechanics plus the
