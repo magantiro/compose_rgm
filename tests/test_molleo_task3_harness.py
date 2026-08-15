@@ -162,3 +162,27 @@ def test_a_small_sample_request_still_integrates_something(log2_samples):
     from compose_v4.benchmark.molleo_task3 import hypervolume_qmc
 
     assert hypervolume_qmc([[0.5] * 5], log2_samples=log2_samples) > 0.0
+
+
+def test_two_meters_share_no_state_at_all():
+    """The bug this pins is a real one in the released benchmark.
+
+    Their `Oracle.__init__(self, args=None, mol_buffer={})` takes a MUTABLE
+    DEFAULT, so every Oracle built without an explicit buffer shares one dict and
+    a fresh seed can open with molecules already in it. Our seeds are
+    independent by construction; this test is what keeps them that way.
+    """
+    first = OracleMeter(fake_eval, budget=10)
+    first("CCO")
+    second = OracleMeter(fake_eval, budget=10)
+    assert second.spent == 0
+    assert second.n_unique == 0
+    assert second.evaluated() == {}
+
+
+def test_restoring_a_meter_does_not_leak_into_a_new_one():
+    """Resume must reconstitute one run, not seed the next one."""
+    first = OracleMeter(fake_eval, budget=10)
+    first.restore({"CCO": tuple(range(N_OBJECTIVES))})
+    assert first.spent == 1
+    assert OracleMeter(fake_eval, budget=10).spent == 0

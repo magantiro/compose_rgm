@@ -50,10 +50,21 @@ def development_pool(zinc: Path) -> list[str]:
     run starts from, or "development" and "test" stop being disjoint.
     """
 
+    import hashlib
+
     from compose_v4.benchmark.oracles import canonical
 
     official = json.loads(
         (DEFAULT_INIT_DIR / "official_init_sets.json").read_text())
+    # The init sets were drawn from a specific file. A different ZINC release
+    # would quietly give the floor baseline a different pool -- and the holdout
+    # of official molecules would no longer mean what it says.
+    digest = hashlib.sha256(zinc.read_bytes()).hexdigest()
+    if digest != official["pool_sha256"]:
+        raise SystemExit(
+            f"{zinc} hashes to {digest[:16]}... but the initialization sets were "
+            f"drawn from {official['pool_sha256'][:16]}.... Use that file, or "
+            f"re-freeze the init sets against this one.")
     reserved = {smiles for molecules in official["sets"].values()
                 for smiles in molecules}
     with open(zinc, newline="") as handle:

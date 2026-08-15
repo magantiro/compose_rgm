@@ -79,6 +79,36 @@ CONSEQUENCES, WHICH ARE BINDING:
 The counting rule itself, though, is theirs: `score_smi` (`:190-198`)
 canonicalises before consulting the buffer, so one molecule written two ways
 costs one unit. That part is reproduced faithfully.
+
+SEED SEMANTICS -- FROZEN: EVERY SEED STARTS EMPTY
+-------------------------------------------------
+Each of our seeds is a genuinely independent run: a fresh oracle buffer, a fresh
+budget, no state carried from any other seed. The initial 120 molecules are
+charged, exactly as the released implementation charges them
+(`molleo_multi_pareto/run.py:102` puts the starting population through the
+metered oracle).
+
+The released code cannot quite promise the same, and the reason is worth
+recording precisely, because it is easy to overstate. `Oracle.__init__` takes
+`mol_buffer={}` as a MUTABLE DEFAULT (`pareto_optimizer.py:51`, and identically
+`optimizer.py:52`), and `BaseOptimizer.reset()` (`:331-333`) constructs a new
+`Oracle` bound to that same shared dict. But `clean_buffer()` (`:101-103`)
+REBINDS `self.mol_buffer` to a new dict at the top of every generation. So from
+the structure of the code, what the shared default retains is the EARLY,
+PRE-CLEAN contents -- most importantly the initial population -- rather than
+necessarily the whole of a previous seed's search.
+
+This is recorded as an IMPLEMENTATION DEFECT in the released code, not as a
+protocol feature, and it is not reproduced here. Its effect on their published
+five-seed numbers is UNKNOWN: it depends on how the authors actually launched
+those runs, and the README's `--seed 1 2 3` form is suggestive, not proof. No
+claim is made that their published results were contaminated.
+
+Our initialization sets are drawn by us, sealed before any policy existed
+(`artifacts/benchmarks/molleo_task3_init_v1/`), and recorded with the pool's
+sha256. We match the benchmark's stated CONTRACT -- 120 molecules drawn at
+random from ZINC-250k, five independent seeds -- and do not claim
+molecule-for-molecule identity with whatever their RNG produced.
 """
 
 from __future__ import annotations
