@@ -183,8 +183,11 @@ def batch_test(smiles: list[str]) -> dict[str, Any]:
     RDLogger.DisableLog("rdApp.*")
     from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
     from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.experiments.factorized_mark_conditional import (
+        operator_capability_batch_kwargs,
+    )
     from compose_v4.model.factorized_tracelet_rate_model import (
-        operator_capability_batch_kwargs, prepare_factorized_mark_batch,
+        prepare_factorized_mark_batch,
     )
     from compose_v4.experiments.production_successor_kernel import _one_state_batch
 
