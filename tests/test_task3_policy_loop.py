@@ -268,3 +268,26 @@ def test_a_navigator_that_only_repeats_itself_terminates(tmp_path):
         assert run.remaining > 0, "it stopped early, which is the point"
     finally:
         run.close()
+
+
+def test_the_incrementally_maintained_front_equals_the_swept_one():
+    """The archive maintains its front on insertion because recomputing it took
+    4.2 seconds on 10,000 molecules and the region selector wants it every
+    iteration. Equality with the batch sweep is what makes that safe."""
+    rng = np.random.default_rng(7)
+    archive = ParetoArchive()
+    points = np.round(rng.random((400, 5)), 2)      # rounding forces ties
+    for i, point in enumerate(points):
+        archive.add(f"MOL{i}", tuple(point))
+    assert (sorted(k for k, _ in archive.front())
+            == sorted(k for k, _ in archive.front_by_sweep()))
+
+
+def test_a_new_molecule_evicts_only_what_it_dominates():
+    archive = ParetoArchive()
+    archive.add("weak", (0.2,) * 5)
+    archive.add("orthogonal", (1.0, 0.0, 0.0, 0.0, 0.0))
+    archive.add("strong", (0.5,) * 5)
+    front = {k for k, _ in archive.front()}
+    assert front == {"strong", "orthogonal"}, "weak is dominated, orthogonal is not"
+    assert len(archive) == 3, "eviction is from the FRONT, not from the archive"

@@ -29,6 +29,18 @@ import numpy as np
 
 from compose_v4.benchmark.molleo_task3 import _pareto_mask, hypervolume_qmc
 
+
+def _dominates(a: tuple[float, ...], b: tuple[float, ...]) -> bool:
+    """`a` dominates `b`: at least as good everywhere, strictly better somewhere."""
+
+    better_somewhere = False
+    for x, y in zip(a, b):
+        if x < y:
+            return False
+        if x > y:
+            better_somewhere = True
+    return better_somewhere
+
 #: Probes for the policy's internal accounting. 2^14 resolves a gain of ~6e-5,
 #: far finer than any difference the policy acts on.
 PROBE_LOG2 = 14
@@ -50,6 +62,8 @@ class ParetoArchive:
     probes: np.ndarray = field(default_factory=probe_points)
     values: dict[str, tuple[float, ...]] = field(default_factory=dict)
     _covered: np.ndarray | None = field(default=None, init=False, repr=False)
+    _front: dict[str, tuple[float, ...]] = field(default_factory=dict, init=False,
+                                                 repr=False)
 
     def __post_init__(self) -> None:
         if self._covered is None:
@@ -59,13 +73,32 @@ class ParetoArchive:
         return len(self.values)
 
     def add(self, smiles: str, values: tuple[float, ...]) -> bool:
-        """Record an evaluated molecule. Returns whether it was new."""
+        """Record an evaluated molecule, maintaining the front INCREMENTALLY.
+
+        Recomputing the front by an O(n^2) sweep took 4.2 SECONDS on a
+        10,000-molecule archive, and the region selector asks for it every
+        iteration -- which made the policy's own bookkeeping cost far more than
+        its chemistry (46 ms per navigation). Maintaining it on insertion is
+        O(front) per molecule and gives the identical set: a new point is on the
+        front unless something already there dominates it, and if it is, it
+        evicts whatever it dominates.
+
+        Ties are handled the same way the batch computation handles them --
+        equal points do not dominate each other, so both stay.
+        """
 
         if smiles in self.values:
             return False
-        self.values[smiles] = tuple(float(v) for v in values)
-        point = np.asarray(values, dtype=float)
-        self._covered |= np.all(self.probes <= point, axis=1)
+        point = tuple(float(v) for v in values)
+        self.values[smiles] = point
+        self._covered |= np.all(self.probes <= np.asarray(point), axis=1)
+
+        for existing in self._front.values():
+            if _dominates(existing, point):
+                return True                # not on the front; nothing evicted
+        for key in [k for k, v in self._front.items() if _dominates(point, v)]:
+            del self._front[key]
+        self._front[smiles] = point
         return True
 
     def add_many(self, items: dict[str, tuple[float, ...]]) -> int:
@@ -82,11 +115,17 @@ class ParetoArchive:
     def front(self) -> list[tuple[str, tuple[float, ...]]]:
         """Non-dominated members, best-first by summed objectives."""
 
+        members = list(self._front.items())
+        members.sort(key=lambda item: sum(item[1]), reverse=True)
+        return members
+
+    def front_by_sweep(self) -> list[tuple[str, tuple[float, ...]]]:
+        """The same front, recomputed from scratch. Slow; for checking only."""
+
         if not self.values:
             return []
         keys = list(self.values)
-        points = self.points()
-        mask = _pareto_mask(points)
+        mask = _pareto_mask(self.points())
         members = [(keys[i], self.values[keys[i]]) for i in np.flatnonzero(mask)]
         members.sort(key=lambda item: sum(item[1]), reverse=True)
         return members
