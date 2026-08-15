@@ -34,6 +34,53 @@ def best_from_ledger(path: Path) -> dict[str, float]:
     return dict(zip(OBJECTIVES, best))
 
 
+def paired_comparisons(by_policy: dict[str, list[dict]]) -> dict:
+    """Compare policies SEED BY SEED, because the seeds are shared.
+
+    Both policies start a given seed from the identical frozen initialization
+    set, so the seed-to-seed variation -- which is enormous here, sd 0.2 against
+    differences of the same order -- is common to both and cancels in the
+    difference. Comparing two unpaired means over eight seeds would be close to
+    uninformative; comparing eight paired differences is not.
+    """
+
+    names = sorted(by_policy)
+    out: dict = {}
+    for i, first in enumerate(names):
+        for second in names[i + 1:]:
+            left = {r["seed"]: r["hypervolume"] for r in by_policy[first]}
+            right = {r["seed"]: r["hypervolume"] for r in by_policy[second]}
+            seeds = sorted(set(left) & set(right))
+            if len(seeds) < 2:
+                continue
+            differences = [right[s] - left[s] for s in seeds]
+            wins = sum(1 for d in differences if d > 0)
+            entry = {
+                "seeds": seeds,
+                "difference": {str(s): right[s] - left[s] for s in seeds},
+                "mean_difference": statistics.fmean(differences),
+                "stdev_difference": (statistics.stdev(differences)
+                                     if len(differences) > 1 else 0.0),
+                "wins_for_second": wins, "n": len(seeds),
+                "direction": f"{second} minus {first}",
+            }
+            try:
+                from scipy.stats import wilcoxon
+                if len(differences) >= 5:
+                    entry["wilcoxon_p"] = float(
+                        wilcoxon(differences).pvalue)
+            except Exception:  # noqa: BLE001 - a missing test is not a failure
+                pass
+            out[f"{second}_vs_{first}"] = entry
+            print(f"\npaired {second} minus {first} over {len(seeds)} seeds: "
+                  f"mean {entry['mean_difference']:+.4f} "
+                  f"(sd {entry['stdev_difference']:.4f}), "
+                  f"{wins}/{len(seeds)} seeds favour {second}"
+                  + (f", wilcoxon p={entry['wilcoxon_p']:.3f}"
+                     if "wilcoxon_p" in entry else ""))
+    return out
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--runs", type=Path, default=Path("runs/task3_dev"))
@@ -96,6 +143,7 @@ def main() -> int:
               f"{max(entry['spent']):<9,}"
               f"{max(jnk3) if jnk3 else float('nan'):.3f}")
 
+    report["paired"] = paired_comparisons(by_policy)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=1) + "\n")
     print(f"\nwrote {args.out}")
