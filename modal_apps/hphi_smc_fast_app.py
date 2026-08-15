@@ -202,7 +202,7 @@ def _valid_records(out_p) -> dict[tuple[int, str, int], dict[str, Any]]:
 
 # cpu=(request, limit): reserve ONE core, burst to 8. A hard (8, 8)
 # reservation bills 8 cores even when only one slot has work.
-@app.function(image=image, cpu=(1.0, 8.0), memory=32768,
+@app.function(image=image, cpu=(4.0, 8.0), memory=32768,
               timeout=6 * 60 * 60,
               max_containers=64, retries=2,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
@@ -472,7 +472,7 @@ def drive(tasks: list[dict[str, Any]], out_dir: str = OUT_DIR) -> dict[str, Any]
 
 @app.local_entrypoint()
 def main(limit: int = 1, out_dir: str = OUT_DIR, workers: int = 8,
-         n_slots: int = 20) -> None:
+         n_slots: int = 20, subset: str = "") -> None:
     import subprocess
 
     commit = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
@@ -482,7 +482,13 @@ def main(limit: int = 1, out_dir: str = OUT_DIR, workers: int = 8,
              / "data/jin/dev_panel_qed_64.txt").read_text().split("\n")
             if s.strip()]
     tasks = [{"index": i, "source": s, "workers": workers, "n_slots": n_slots,
-              "git_commit": commit} for i, s in enumerate(srcs)][:limit]
+              "git_commit": commit} for i, s in enumerate(srcs)]
+    if subset:
+        keep = {int(v) for v in subset.split(",")}
+        tasks = [t for t in tasks if t["index"] in keep]
+        print(f"SUBSET: {len(tasks)} sources {sorted(keep)}")
+    else:
+        tasks = tasks[:limit]
     print(f"SLOW REFERENCE molecular SMC: {len(tasks)} source(s) x {n_slots} "
           f"independent runs x N=32 particles, H={HORIZON}, region {REGION}")
     print("proposals from frozen R_theta ALONE; h_phi enters only via the "
