@@ -288,18 +288,32 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                     n_prop += take
                     idx = rng.choice(len(p), size=take, p=p)
                     us = rng.random(take)
-                    ys = [canonical_state_key(system.apply(
-                        st, law.marks[int(i)].executor_rule_name,
-                        law.marks[int(i)].action)) for i in idx]
-                    # ONE batched scoring pass, then walk in the SAME order.
-                    hs = ([1.0] * len(ys) if arm == "unguided"
-                          else h_many(ys, b_rem))
-                    for y, u, hv in zip(ys, us, hs):
-                        if y == key:
-                            continue
-                        if u <= hv:
-                            chosen = y
-                            break
+                    if arm == "unguided":
+                        # LAZY. h == 1 always, so the first non-self-loop is
+                        # accepted; applying the rest of the chunk would be
+                        # pure waste. Eagerly materialising all 16 here cost
+                        # ~16x the RDKit work for an identical result.
+                        for i, u in zip(idx, us):
+                            mk = law.marks[int(i)]
+                            y = canonical_state_key(system.apply(
+                                st, mk.executor_rule_name, mk.action))
+                            if y != key:
+                                chosen = y
+                                break
+                    else:
+                        # BATCHED. Acceptance is uncertain and often low, so
+                        # the chunk is usually consumed anyway; one scoring
+                        # pass beats up to 40 batch-size-1 passes.
+                        ys = [canonical_state_key(system.apply(
+                            st, law.marks[int(i)].executor_rule_name,
+                            law.marks[int(i)].action)) for i in idx]
+                        hs = h_many(ys, b_rem)
+                        for y, u, hv in zip(ys, us, hs):
+                            if y == key:
+                                continue
+                            if u <= hv:
+                                chosen = y
+                                break
                     if chosen is not None:
                         break
                 if chosen is None:
