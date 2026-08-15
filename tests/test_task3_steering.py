@@ -139,3 +139,51 @@ def test_both_rules_expose_exactly_the_same_interface():
         assert callable(getattr(FixedScalarization(), method))
         assert callable(getattr(AdaptiveRegion(), method))
     assert FixedScalarization().name != AdaptiveRegion().name
+
+
+# ---- arm B', the rule the first mechanism test called for -------------------
+
+def test_the_constrained_rule_refuses_to_trade_away_what_the_origin_had():
+    """The defect it exists to fix, pinned.
+
+    The unconstrained rule ranks by SUMMED shortfall, so a large gain on the
+    targeted axis pays for a loss elsewhere -- which is how arm B ended up
+    climbing JNK3 promiscuously. Here the other axes are a constraint.
+    """
+    from compose_v4.policy.task3.steering import ConstrainedAdaptiveRegion
+
+    archive = ParetoArchive()
+    archive.add("origin", (0.5, 0.3, 0.5, 0.9, 0.5))     # gsk3b coordinate high
+    arm = ConstrainedAdaptiveRegion()
+    region = arm.target(archive, np.random.default_rng(0))
+    assert region is not None
+
+    # Same gain on the targeted axis; one keeps the origin's other coordinates,
+    # the other gives up the GSK3B coordinate (index 3) to get there.
+    axis = arm._axis
+    assert axis is not None
+    holds = np.array([[0.5, 0.3, 0.5, 0.9, 0.5]])
+    trades = np.array([[0.5, 0.3, 0.5, 0.2, 0.5]])
+    holds[0, axis] = region.target[axis]
+    trades[0, axis] = region.target[axis]
+    if axis == 3:
+        pytest.skip("the targeted axis IS the one being traded; not the case at issue")
+    assert arm.rank(holds, region)[0] > arm.rank(trades, region)[0]
+
+
+def test_the_summed_shortfall_already_refuses_to_be_bought_off():
+    """The test that disproved my diagnosis, kept because it did.
+
+    I claimed the unconstrained rule let a big gain on the targeted axis pay for
+    a loss elsewhere. It does not: being ABOVE the aspiration earns no credit, so
+    there is nothing to pay with. The promiscuity in arm B came from what
+    expansion PROPOSED at that height, not from how proposals were ranked.
+    """
+    region = Region(target=(0.5, 0.65, 0.5, 0.9, 0.5), gain=0.01, origin="o",
+                    note="axis 1 +0.35")
+    arm = AdaptiveRegion()
+    clean = np.array([[0.5, 0.55, 0.5, 0.9, 0.5]])        # modest gain, keeps GSK3B
+    promiscuous = np.array([[0.5, 0.65, 0.5, 0.1, 0.5]])  # full gain, gives it up
+    assert arm.rank(clean, region)[0] == pytest.approx(-0.10)
+    assert arm.rank(promiscuous, region)[0] == pytest.approx(-0.80)
+    assert arm.rank(clean, region)[0] > arm.rank(promiscuous, region)[0]

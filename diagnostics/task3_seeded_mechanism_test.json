@@ -1,0 +1,197 @@
+{
+ "STATUS": "DEVELOPMENT-ONLY MECHANISM TEST -- NOT TASK 3 PERFORMANCE",
+ "question": "conditional on a minimally informative archive, does archive-aware region targeting outperform fixed scalarization at filling high-JNK3 / low-GSK3B regions?",
+ "initialization": "SEEDED, and therefore NOT the benchmark's random-120. Seed labels were paid for by earlier runs and are given, not charged.",
+ "surrogate_caveat": "Morgan-bit k-NN predicting Morgan-RF oracles is an OPTIMISTIC control, not evidence about an R_theta representation controller",
+ "expansion_operator": "shared Graph-GA edit operators (stand-in), held IDENTICAL across arms; R_theta expansion is the next rung, not this one",
+ "held_identical": [
+  "seeded archive",
+  "surrogate",
+  "expansion operator",
+  "additional budget",
+  "candidates per iteration",
+  "seed"
+ ],
+ "varied": "how purpose is specified (fixed scalar sum vs adaptive region)",
+ "attacks_metric_caveat": "'attacks_that_improved_their_target' is only meaningful for the ADAPTIVE arm. The fixed arm's target is the constant (1,1,1,1,1) corner, which dominates every probe, so its 'gain' is just the uncovered fraction and 'improved' degenerates to 'hypervolume went up at all'. Do not read the two columns as like for like.",
+ "arms": {
+  "fixed-scalarization": [
+   {
+    "steering": "fixed-scalarization",
+    "charged": 300,
+    "iterations": 75,
+    "seconds": 5.831963062286377,
+    "hv_seeded_only": 0.5463638305664062,
+    "hv_after": 0.5489349365234375,
+    "front_size": 105,
+    "new_selective": 2,
+    "best_jnk3_new": 0.5,
+    "attacks": 75,
+    "attacks_that_improved_their_target": 10,
+    "archive_sha256": "51425f73b1e433a14f76de9b8aba551cbb92fe08b152dc8d6d5f0d698b17dd9c"
+   },
+   {
+    "steering": "fixed-scalarization",
+    "charged": 300,
+    "iterations": 75,
+    "seconds": 10.122483968734741,
+    "hv_seeded_only": 0.5426712036132812,
+    "hv_after": 0.5776519775390625,
+    "front_size": 105,
+    "new_selective": 78,
+    "best_jnk3_new": 0.58,
+    "attacks": 75,
+    "attacks_that_improved_their_target": 24,
+    "archive_sha256": "b2915d553b60c81137730fcd1600cd133d82dcf22345cd45b578d066554a5152"
+   },
+   {
+    "steering": "fixed-scalarization",
+    "charged": 300,
+    "iterations": 75,
+    "seconds": 10.007814168930054,
+    "hv_seeded_only": 0.5324859619140625,
+    "hv_after": 0.5569992065429688,
+    "front_size": 130,
+    "new_selective": 108,
+    "best_jnk3_new": 0.5,
+    "attacks": 75,
+    "attacks_that_improved_their_target": 20,
+    "archive_sha256": "827cc5ca473afe4c9e4e53114f7f301e1c5881b00c3b2f4a36c2ccbf23fb7121"
+   }
+  ],
+  "adaptive-region": [
+   {
+    "steering": "adaptive-region",
+    "charged": 300,
+    "iterations": 75,
+    "seconds": 19.895854949951172,
+    "hv_seeded_only": 0.5463638305664062,
+    "hv_after": 0.57843017578125,
+    "front_size": 142,
+    "new_selective": 5,
+    "best_jnk3_new": 0.73,
+    "attacks": 75,
+    "attacks_that_improved_their_target": 17,
+    "archive_sha256": "51425f73b1e433a14f76de9b8aba551cbb92fe08b152dc8d6d5f0d698b17dd9c"
+   },
+   {
+    "steering": "adaptive-region",
+    "charged": 300,
+    "iterations": 76,
+    "seconds": 21.36871027946472,
+    "hv_seeded_only": 0.5426712036132812,
+    "hv_after": 0.6464614868164062,
+    "front_size": 111,
+    "new_selective": 1,
+    "best_jnk3_new": 0.83,
+    "attacks": 76,
+    "attacks_that_improved_their_target": 11,
+    "archive_sha256": "b2915d553b60c81137730fcd1600cd133d82dcf22345cd45b578d066554a5152"
+   },
+   {
+    "steering": "adaptive-region",
+    "charged": 300,
+    "iterations": 75,
+    "seconds": 18.481478214263916,
+    "hv_seeded_only": 0.5324859619140625,
+    "hv_after": 0.5663375854492188,
+    "front_size": 184,
+    "new_selective": 1,
+    "best_jnk3_new": 0.74,
+    "attacks": 75,
+    "attacks_that_improved_their_target": 13,
+    "archive_sha256": "827cc5ca473afe4c9e4e53114f7f301e1c5881b00c3b2f4a36c2ccbf23fb7121"
+   }
+  ],
+  "constrained-adaptive-region": [
+   {
+    "steering": "constrained-adaptive-region",
+    "charged": 300,
+    "iterations": 75,
+    "seconds": 18.93034315109253,
+    "hv_seeded_only": 0.5463638305664062,
+    "hv_after": 0.5653610229492188,
+    "front_size": 146,
+    "new_selective": 0,
+    "best_jnk3_new": 0.71,
+    "attacks": 75,
+    "attacks_that_improved_their_target": 13,
+    "archive_sha256": "51425f73b1e433a14f76de9b8aba551cbb92fe08b152dc8d6d5f0d698b17dd9c"
+   },
+   {
+    "steering": "constrained-adaptive-region",
+    "charged": 300,
+    "iterations": 75,
+    "seconds": 18.909871816635132,
+    "hv_seeded_only": 0.5426712036132812,
+    "hv_after": 0.5772552490234375,
+    "front_size": 121,
+    "new_selective": 1,
+    "best_jnk3_new": 0.72,
+    "attacks": 75,
+    "attacks_that_improved_their_target": 3,
+    "archive_sha256": "b2915d553b60c81137730fcd1600cd133d82dcf22345cd45b578d066554a5152"
+   },
+   {
+    "steering": "constrained-adaptive-region",
+    "charged": 300,
+    "iterations": 75,
+    "seconds": 18.588620901107788,
+    "hv_seeded_only": 0.5324859619140625,
+    "hv_after": 0.5715103149414062,
+    "front_size": 178,
+    "new_selective": 2,
+    "best_jnk3_new": 0.75,
+    "attacks": 75,
+    "attacks_that_improved_their_target": 9,
+    "archive_sha256": "827cc5ca473afe4c9e4e53114f7f301e1c5881b00c3b2f4a36c2ccbf23fb7121"
+   }
+  ]
+ },
+ "summary": {
+  "fixed-scalarization": {
+   "hv_lift_mean": 0.020688374837239582,
+   "hv_lift": [
+    0.00257110595703125,
+    0.03498077392578125,
+    0.02451324462890625
+   ],
+   "new_selective_total": 188,
+   "best_jnk3": 0.58
+  },
+  "adaptive-region": {
+   "hv_lift_mean": 0.056569417317708336,
+   "hv_lift": [
+    0.03206634521484375,
+    0.103790283203125,
+    0.03385162353515625
+   ],
+   "new_selective_total": 7,
+   "best_jnk3": 0.83
+  },
+  "constrained-adaptive-region": {
+   "hv_lift_mean": 0.0308685302734375,
+   "hv_lift": [
+    0.0189971923828125,
+    0.03458404541015625,
+    0.03902435302734375
+   ],
+   "new_selective_total": 3,
+   "best_jnk3": 0.75
+  }
+ },
+ "VERDICT": {
+  "on_the_stated_criterion": "NO. Adaptive region targeting did NOT outperform fixed scalarization at filling high-JNK3/low-GSK3B regions: 7 selective molecules against 188 over three seeds, and the constrained repair made it 3.",
+  "on_hypervolume": "YES, and consistently: mean HV lift +0.057 (adaptive) vs +0.021 (fixed), adaptive ahead on 3/3 seeds, with best JNK3 0.73-0.83 vs 0.50-0.58.",
+  "why_both_are_true": "The two criteria point in OPPOSITE directions on this task. Adaptive climbs to JNK3 0.73-0.83, which is only reachable promiscuously -- of all charged molecules at JNK3 >= 0.5, 0.2% have a GSK3B coordinate >= 0.9. Fixed stops at JNK3 ~0.44, on the selective ridge, and exploits it: 98% of ITS high-JNK3 molecules are selective, against 0.5-2.6% of adaptive's. Each arm is coherent; they are operating in different places.",
+  "the_metric_prefers_promiscuity_here": "jnk3 0.83 with GSK3B activity 0.25 contributes 0.83*0.75 = 0.622 across those two axes; jnk3 0.58 with GSK3B activity 0.02 contributes 0.58*0.98 = 0.568. So hypervolume rewards the promiscuous ridge, and 'fills the selective region' is NOT a restatement of 'maximises HV'.",
+  "corrected_diagnosis": "Not a ranking failure. The summed shortfall already prefers clean candidates (-0.10 vs -0.80 on a real aspiration). Selective molecules at that height are not being PROPOSED. Steering cannot select what expansion never offers, which locates the problem in proposal availability rather than in how purpose is specified.",
+  "failed_repair": "ConstrainedAdaptiveRegion was built on the wrong diagnosis and is worse than what it repaired (+0.031 HV, 3 selective). Recorded, not deleted.",
+  "caveats": [
+   "development-only; seeded initialization, NOT Task 3 performance",
+   "three seeds, and every quantity on this task has large seed variance -- fixed's selective count was 2, 78, 108",
+   "surrogate is the optimistic Morgan-bit control, not an R_theta representation",
+   "expansion operator is the Graph-GA stand-in, not R_theta"
+  ]
+ }
+}

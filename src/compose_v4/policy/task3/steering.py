@@ -101,27 +101,32 @@ class AdaptiveRegion:
 
 @dataclass
 class ConstrainedAdaptiveRegion:
-    """Arm B'. Aim at the missing region WITHOUT trading away what we already have.
+    """Arm B'. TESTED AND IT DID NOT WORK. Kept as a recorded negative.
 
-    WHY THIS EXISTS. The first adaptive rule lost the mechanism test on its own
-    criterion. It climbed JNK3 hard -- 65-72% of its charged molecules reached
-    JNK3 >= 0.4, against 26-37% for the fixed sum -- but the molecules it found
-    were promiscuous: mean GSK3B activity 0.25-0.29 among them, against
-    0.03-0.15 for the fixed sum, and it produced 7 selective molecules against
-    188.
+    THE DIAGNOSIS THIS WAS BUILT ON WAS WRONG. I believed the summed shortfall
+    let a large gain on the targeted axis pay for a loss on another, so that
+    "more JNK3, everything else as it was" was being satisfied by molecules that
+    quietly gave up GSK3B. A test disproved it: because being ABOVE the
+    aspiration earns no credit, there is nothing to pay WITH. On a real
+    aspiration, a clean candidate ranks -0.10 and a promiscuous one -0.80. The
+    unconstrained rule already prefers the clean molecule.
 
-    The defect is in how the aspiration is SHAPED, not in adaptivity. Aspirations
-    are built by improving ONE axis of a realized molecule, and ranked by SUMMED
-    shortfall. A summed shortfall lets a large gain on the targeted axis pay for
-    a loss on another, so "more JNK3, everything else as it was" is satisfied by
-    a molecule that raises JNK3 and quietly gives up GSK3B -- which, on this
-    task's chemistry, is most of what is reachable.
+    WHAT IS ACTUALLY HAPPENING. Of the charged molecules reaching JNK3 >= 0.5,
+    0.2% have a GSK3B coordinate >= 0.9. The selective molecules are not being
+    ranked below promiscuous ones -- they are not being PROPOSED, because at that
+    height the reachable chemistry is promiscuous. Steering cannot select what
+    expansion never offers. Constraining against the origin cannot help either,
+    since the high-JNK3 front members the aspirations are built from have already
+    given GSK3B up, so the floor it holds is a floor that was already low.
 
-    So the aspiration becomes a JOINT demand: make progress on the targeted axis
-    AND do not fall below where the origin already was on any other. The
-    non-targeted axes are a constraint, not a term to be traded off. That is the
-    difference between "fill the missing part of the front" and "climb the
-    biggest axis".
+    MEASURED, three seeds, same seeded archive and budget as the other arms:
+    mean HV lift +0.031 against +0.057 unconstrained and +0.021 for the fixed
+    sum, and 3 selective molecules against 7 and 188. It is worse than the rule
+    it was meant to repair.
+
+    Kept rather than deleted because the negative is the useful part: it locates
+    the problem in proposal availability rather than in purpose specification,
+    which is a different thing to fix.
     """
 
     name: str = "constrained-adaptive-region"
