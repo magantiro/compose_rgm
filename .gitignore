@@ -59,3 +59,9 @@ local_runtime/zinc250k/
 # Large run artifacts pulled from the Modal volume. The volume is the source of
 # truth; these are local working copies and must not enter git.
 artifacts/
+
+# Task 3 benchmark run directories: ledgers and checkpoints are working state,
+# regenerable in under a minute per seed. The summaries that matter are copied
+# into diagnostics/ and tracked there.
+runs/task3_dev/
+runs/task3_smoke/

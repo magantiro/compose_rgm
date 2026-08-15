@@ -4,13 +4,18 @@
 This is not the official benchmark and cannot become it by accident: it reads
 development initialization sets only, and the official ones are behind a latch.
 
-The first policy here is deliberately the dumbest one that is still a real
-method -- uniform sampling from ZINC-250k. It exists to establish the FLOOR. A
-learned policy that cannot beat "draw 10,000 random drug-like molecules" has not
-demonstrated anything, and without the floor on record it is easy to mistake a
-respectable-looking hypervolume for a result.
+    random-zinc   the FLOOR. Uniform sampling from ZINC-250k. A learned policy
+                  that cannot beat 10,000 random drug-like molecules has
+                  demonstrated nothing, and without the floor written down it is
+                  easy to mistake a respectable-looking hypervolume for a result.
 
-    python scripts/run_task3_dev_baseline.py --policy random-zinc --seed 100
+    graph-ga      the REFERENCE. Upstream Jensen GB-GA operators, MOLLEO's own
+                  hyperparameters and scalarization, driven under our strict
+                  meter. This is the comparator the plan names.
+
+Both are fully resumable: kill either one and run the same command again.
+
+    python scripts/run_task3_dev_baseline.py --policy graph-ga --seed 100
 """
 
 from __future__ import annotations
@@ -26,6 +31,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 import numpy as np  # noqa: E402
 
+from compose_v4.baselines import task3_graph_ga as ga  # noqa: E402
 from compose_v4.benchmark.init_sets import (  # noqa: E402
     DEFAULT_INIT_DIR,
     development_init_set,
@@ -34,6 +40,7 @@ from compose_v4.benchmark.init_sets import (  # noqa: E402
 from compose_v4.benchmark.task3_run import Task3Run  # noqa: E402
 
 DEFAULT_ZINC = Path("local_runtime/zinc250k/250k_rndm_zinc_drugs_clean_3.csv")
+OBJECTIVE_NAMES = ("qed", "jnk3", "sa", "gsk3b", "drd2")
 
 
 def development_pool(zinc: Path) -> list[str]:
@@ -59,13 +66,88 @@ def development_pool(zinc: Path) -> list[str]:
     return list(pool)
 
 
+def run_random_zinc(run: Task3Run, args) -> dict:
+    pool = development_pool(args.zinc)
+    print(f"development pool: {len(pool):,} molecules (official sets removed)")
+    while run.remaining > 0:
+        size = min(args.generation, run.remaining)
+        index = run.rng.choice(len(pool), size=size, replace=False)
+        proposal = run.affordable([pool[int(i)] for i in index])
+        if not proposal:
+            break
+        run.evaluate(proposal)
+        run.step += 1
+        if run.step % 20 == 0:
+            run.checkpoint(policy_state={"phase": "sampling"})
+            print(f"  step {run.step}: {run.spent:,}/{args.budget:,}", flush=True)
+    run.checkpoint(policy_state={"phase": "finished"})
+    return {}
+
+
+def run_graph_ga(run: Task3Run, args) -> dict:
+    resumed = (run.resumed.policy_state if run.resumed else None) or {}
+    if "population" in resumed:
+        state = ga.GraphGAState.from_dict(resumed)
+        ga.restore(state)                     # the size-prior globals do not persist
+        print(f"resumed a population of {len(state.population)}")
+    else:
+        state = ga.initialize(run, development_init_set(args.seed))
+        run.step = 1
+        print(f"initialized: {run.spent:,} spent, size prior "
+              f"{state.average_size:.1f} +/- {state.size_stdev:.1f} atoms")
+        run.archive = list(state.population)
+        run.checkpoint(policy_state=state.as_dict())
+
+    stalled = 0
+    while run.remaining > 0:
+        before = run.spent
+        state = ga.step(run, state)
+        run.step += 1
+        run.archive = list(state.population)
+        run.checkpoint(policy_state=state.as_dict())
+        if run.spent == before:
+            # Reproduction can fail entirely at zero oracle cost; without this
+            # the loop would spin forever against an unspent budget.
+            stalled += 1
+            if stalled >= 5:
+                print("  reproduction stalled five generations running; stopping")
+                break
+        else:
+            stalled = 0
+        if run.step % 10 == 0:
+            print(f"  generation {run.step}: {run.spent:,}/{args.budget:,}, "
+                  f"best fitness {state.scores[0]:.4f}", flush=True)
+    return {"failed_reproductions": state.failed_reproductions,
+            "best_fitness": state.scores[0] if state.scores else None,
+            "average_size": state.average_size, "size_stdev": state.size_stdev}
+
+
+def summarize(run: Task3Run, args, root: Path, started: float, extra: dict) -> None:
+    hv = run.hypervolume()
+    values = np.array(list(run.meter.evaluated().values()))
+    best = {name: float(values[:, i].max()) for i, name in enumerate(OBJECTIVE_NAMES)}
+    summary = {
+        "policy": args.policy, "seed": args.seed, "budget": args.budget,
+        "spent": run.spent, "steps": run.step, "hypervolume": hv,
+        "best_per_objective_normalised": best,
+        "seconds": time.time() - started, "semantics": "strict-10k",
+        "init": init_provenance(), **extra,
+    }
+    (root / "summary.json").write_text(json.dumps(summary, indent=1) + "\n")
+    print(f"\n{args.policy} seed {args.seed}: spent {run.spent:,}, HV {hv:.6f}, "
+          f"{summary['seconds']:.1f}s")
+    print("per-objective best (normalised, higher better): "
+          + ", ".join(f"{name}={best[name]:.3f}" for name in OBJECTIVE_NAMES))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--policy", default="random-zinc", choices=["random-zinc"])
+    parser.add_argument("--policy", default="random-zinc",
+                        choices=["random-zinc", "graph-ga"])
     parser.add_argument("--seed", type=int, default=100)
     parser.add_argument("--budget", type=int, default=10_000)
     parser.add_argument("--generation", type=int, default=120,
-                        help="molecules proposed per step")
+                        help="molecules proposed per step (random-zinc only)")
     parser.add_argument("--zinc", type=Path, default=DEFAULT_ZINC)
     parser.add_argument("--out", type=Path, default=Path("runs/task3_dev"))
     args = parser.parse_args()
@@ -78,51 +160,21 @@ def main() -> int:
         print(f"resuming at {run.spent:,}/{args.budget:,} spent, step {run.step} "
               f"({run.resumed.uncheckpointed} evaluations arrived after the last "
               f"checkpoint)")
-
-    pool = development_pool(args.zinc)
-    print(f"development pool: {len(pool):,} molecules (official sets removed)")
-
     try:
-        # The initialization set is charged like everything else -- it is 120
-        # molecules receiving the objective vector, which is 120 budget units.
-        if run.step == 0:
-            initial = development_init_set(args.seed)
-            run.evaluate(initial)
-            run.archive = list(initial)
-            run.step = 1
-            run.checkpoint(policy_state={"phase": "initialized"})
-            print(f"initialized: {run.spent:,} spent")
-
-        while run.remaining > 0:
-            size = min(args.generation, run.remaining)
-            index = run.rng.choice(len(pool), size=size, replace=False)
-            proposal = [pool[int(i)] for i in index]
-            proposal = run.affordable(proposal)
-            if not proposal:
-                break
-            run.evaluate(proposal)
-            run.step += 1
-            if run.step % 10 == 0:
-                run.checkpoint(policy_state={"phase": "sampling"})
-                print(f"  step {run.step}: {run.spent:,}/{args.budget:,}", flush=True)
-        run.checkpoint(policy_state={"phase": "finished"})
-
-        hv = run.hypervolume()
-        elapsed = time.time() - started
-        summary = {
-            "policy": args.policy, "seed": args.seed, "budget": args.budget,
-            "spent": run.spent, "steps": run.step, "hypervolume": hv,
-            "seconds": elapsed, "semantics": "strict-10k",
-            "init": init_provenance(),
-        }
-        (root / "summary.json").write_text(json.dumps(summary, indent=1) + "\n")
-        print(f"\n{args.policy} seed {args.seed}: spent {run.spent:,}, "
-              f"HV {hv:.6f}, {elapsed:.1f}s")
-
-        values = np.array(list(run.meter.evaluated().values()))
-        print("per-objective best (normalised, higher better): "
-              + ", ".join(f"{name}={values[:, i].max():.3f}" for i, name in
-                          enumerate(("qed", "jnk3", "sa", "gsk3b", "drd2"))))
+        if args.policy == "graph-ga":
+            extra = run_graph_ga(run, args)
+        else:
+            if run.step == 0:
+                # The initialization set is charged like everything else: 120
+                # molecules receiving the objective vector is 120 budget units.
+                initial = development_init_set(args.seed)
+                run.evaluate(initial)
+                run.archive = list(initial)
+                run.step = 1
+                run.checkpoint(policy_state={"phase": "initialized"})
+                print(f"initialized: {run.spent:,} spent")
+            extra = run_random_zinc(run, args)
+        summarize(run, args, root, started, extra)
     finally:
         run.close()
     return 0

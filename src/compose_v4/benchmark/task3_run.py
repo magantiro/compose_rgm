@@ -102,9 +102,27 @@ class Task3Run:
         return self.meter.spent
 
     def evaluate(self, smiles: list[str]) -> list[tuple[float, ...]]:
-        """Charge, evaluate, ledger. The only way to reach the objectives."""
+        """Charge, evaluate, ledger, FSYNC, and only then hand values back.
 
-        return self.meter.batch(smiles)
+        The flush is the point. Without it a crash could leave the policy having
+        already acted on evaluations that never reached disk -- and on resume
+        those molecules would be re-proposed and charged a SECOND time, so the
+        run would have consumed more real oracle work than its counter admits.
+        That is the exact accounting leak this harness refuses to copy from the
+        released benchmark; it would be indefensible to reintroduce it through
+        the back door of a lost write.
+
+        The guarantee this buys, stated exactly: NO EVALUATION THAT INFLUENCED
+        THE SEARCH IS UNCHARGED. A crash can still lose an in-flight batch, but
+        the policy never saw it, so it gained nothing from it.
+
+        One fsync per generation is ~80 fsyncs in a 10,000-call run. It is not
+        worth optimising.
+        """
+
+        values = self.meter.batch(smiles)
+        self.store.flush()
+        return values
 
     def affordable(self, smiles: list[str]) -> list[str]:
         """The longest prefix of `smiles` that fits in what is left.

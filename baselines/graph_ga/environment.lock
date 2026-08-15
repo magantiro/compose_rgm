@@ -1,0 +1,37 @@
+# Graph GA (GB-GA) environment lock — DECLARATIVE, NOT INSTALLED.
+#
+# Source of truth: https://github.com/jensengroup/GB_GA (upstream ships no
+# requirements file; the paper states RDKit is the only dependency) and
+# https://github.com/wenhao-gao/mol_opt for the PMO wrapper.
+#
+# STATUS: UNRESOLVED, but the lowest-risk environment in this registry.
+# CPU-ONLY: yes, natively. No torch/tensorflow/CUDA import exists anywhere.
+# LICENSE: MIT (both GB_GA and mol_opt)
+
+python==3.11
+
+# Paper, conclusion: "freely available with the open source RDKit toolkit as the
+# only dependence."
+rdkit==2024.3.5       # PINNED TO THE COMPOSE PRODUCTION VERSION ON PURPOSE.
+                      # GB-GA has no rdkit constraint of its own, so this is the
+                      # one baseline that can share the COMPOSE chemistry
+                      # environment exactly. That removes an entire class of
+                      # canonicalisation-drift risk, and it means the RingCore
+                      # catalog fingerprint check (639ff6078c32d43c) remains
+                      # meaningful inside the same container.
+numpy==1.26.4
+
+# Only if the PMO wrapper is used for the shared oracle counter:
+#   pyyaml            main/optimizer.py reads hparams_default.yaml
+#   tdc               PMO's oracles come from Therapeutics Data Commons.
+#                     NOT NEEDED for a COMPOSE comparison -- we supply our own
+#                     frozen oracle via Oracle.assign_evaluator -- and it should
+#                     be omitted so no TDC oracle can be reached by accident.
+#
+# --- Data shipped in the upstream repo ---------------------------------------
+# ZINC_250k.smi, ZINC_first_1000.smi, SA_scores.txt, logP_values.txt,
+# cycle_scores.txt, fpscores.pkl.gz, sascorer.py
+# None of these are needed for a COMPOSE comparison except as a seed-file format
+# reference.
+#
+# --- No checkpoint. There is no trained model. -------------------------------
