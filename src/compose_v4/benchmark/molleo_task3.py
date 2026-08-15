@@ -70,55 +70,49 @@ CONSEQUENCES, WHICH ARE BINDING:
   relabelled as such.
 * We do not copy the leak. A screened-but-uncharged path would make the budget
   meaningless and is precisely the thing this meter exists to prevent.
+* Strict-10k is closer to the benchmark's STATED semantics than reproducing the
+  released path would be: the paper's own justification for the budget is that
+  objective evaluation is the dominant expense and that algorithms are compared
+  at equal call budgets. A path that evaluates several molecules per charged
+  call does not honour that; this meter does.
 * A strict-10k number must NOT be placed beside MOLLEO's published number as if
-  the protocols matched. Under strict-10k a method sees ~10,000 evaluated
-  molecules; under theirs it sees several times that. Any comparison to their
-  published figures states the difference, and any head-to-head we run puts
-  every method through THIS meter.
+  the protocols matched. If the published figures arose under the leaky path,
+  they are PUBLISHED CONTEXT, not head-to-head values. Where a baseline is
+  runnable we rerun it through THIS meter and compare those numbers instead.
 
 The counting rule itself, though, is theirs: `score_smi` (`:190-198`)
 canonicalises before consulting the buffer, so one molecule written two ways
 costs one unit. That part is reproduced faithfully.
 
-THE METRIC -- FROZEN, BECAUSE THE RELEASE DOES NOT DEFINE IT
--------------------------------------------------------------
-The released repository contains NO hypervolume implementation. Not a different
-one from ours -- none at all: no `hypervolume`, no `pymoo` indicator, no IGD.
-What it computes is `top_auc` over the scalar sum (`optimizer.py:31`,
-`pareto_optimizer.py:30`), and what it persists is a YAML dump of
-`self.mol_buffer` (`pareto_optimizer.py:105-114`). Since `clean_buffer()`
-(`:101-103`) moves the cumulative record into `storing_buffer` and rebinds
-`mol_buffer` to a NEW dict every generation, that dump holds only the LAST
-GENERATION, and the cumulative buffer is never saved at all.
+THE METRIC -- THE PAPER'S, IMPLEMENTED AND QUALIFIED
+-----------------------------------------------------
+MOLLEO defines the metric explicitly (Eq. 5): hypervolume is the volume of the
+UNION OF HYPERRECTANGLES measured FROM THE ORIGIN in the normalised [0, 1]^n
+objective space. `hypervolume_qmc` implements exactly that. This is the
+published definition, not a convention of ours.
 
-So the Task 3 hypervolume cannot be reverse-engineered from the release. It has
-to be chosen, and stated. Ours is:
+It is qualified against that definition rather than against another estimate of
+itself: exact inclusion-exclusion over the union of boxes, worst absolute error
+3.5e-05 over random fronts, where the differences we act on are of order 0.09.
+A second test pins that the value is a function of the SET of molecules found --
+order-independent, so it cannot depend on scheduling.
 
-    HV of the Pareto front over EVERY molecule evaluated during the run,
-    reference point at the ORIGIN of the normalised maximisation space,
-    computed by `hypervolume_qmc`.
+The released CODE contains no hypervolume in the optimisation loop -- it
+computes `top_auc` over the scalar sum (`optimizer.py:31`,
+`pareto_optimizer.py:30`) and persists a YAML dump of `self.mol_buffer`
+(`pareto_optimizer.py:105-114`), which after `clean_buffer()` (`:101-103`) holds
+only the LAST GENERATION while the cumulative `storing_buffer` is never saved.
+That is a property of the release, and it does NOT make the metric unknowable;
+the paper states it.
 
-Why this rather than the alternatives:
-
-* Over everything evaluated, not the final population: it is the standard
-  best-found-so-far convention, it is monotone (a method cannot lose credit by
-  continuing to explore), it is recomputable from the durable ledger alone, and
-  it is the reading most GENEROUS to the baselines -- which makes any eventual
-  COMPOSE claim the conservative one.
-* Reference at the origin: all five objectives are already normalised to [0, 1]
-  with higher better, so the origin is the natural nadir and the value is
-  directly the dominated fraction of the unit box, comparable across runs
-  without a shared reference set.
-
-The choice is not free, and its size is measured rather than waved at: on one
-Graph-GA run, HV over all 10,000 evaluated molecules is 0.612 against 0.515 over
-the last 120 only. Anyone comparing our numbers with a published one must know
-which convention each used.
-
-`hypervolume_qmc` is checked against the DEFINITION -- exact inclusion-exclusion
-over the union of boxes -- not against another estimate of itself: worst
-absolute error 3.5e-05 over random fronts, where the differences we act on are
-of order 0.09.
+What the paper's formula does not fix is which SET of molecules the front is
+taken over, so that one is stated here: EVERY molecule evaluated during the run.
+It is the standard best-found-so-far convention, it is monotone, it is
+recomputable from the durable ledger alone, and it is the reading most GENEROUS
+to the baselines -- which makes any eventual COMPOSE claim the conservative one.
+The size of that choice is measured rather than waved at: on one Graph-GA run,
+HV over all 10,000 evaluated molecules is 0.612 against 0.515 over the last 120
+only.
 
 SEED SEMANTICS -- FROZEN: EVERY SEED STARTS EMPTY
 -------------------------------------------------

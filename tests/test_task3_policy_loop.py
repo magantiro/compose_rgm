@@ -239,7 +239,9 @@ def test_a_resumed_run_rebuilds_its_archive_from_the_ledger(tmp_path):
 
 
 def test_the_real_navigator_refuses_rather_than_substituting_another_process():
-    with pytest.raises(NavigatorUnavailable, match="source_index_sha256"):
+    """It must fail loudly, and the message must say what is actually wrong:
+    the corpus is content-identical and the guard is pinning the MOUNT POINT."""
+    with pytest.raises(NavigatorUnavailable, match="CONTENT-IDENTICAL"):
         RThetaNavigator().navigate("CCO", Region(target=(1.0,) * 5, gain=1.0),
                                    NavigationBudget(), np.random.default_rng(0))
 

@@ -17,19 +17,30 @@ What is provided now:
 
   RThetaNavigator       the real one, blocked on runtime provenance (see below).
 
-WHY THE R_THETA NAVIGATOR IS NOT HERE YET
-------------------------------------------
-Driving the frozen R_theta locally needs the volume-authoritative Active8
-stream. This checkout has a copy that differs: `process_identity_sha256`,
-`contracts_binding_sha256` and `gate_zero_structural_contract_sha256` all MATCH
-the Gate-0 PASS, and only `source_index_sha256` differs (decision b5d042a0...
-vs local ed51268a..., same 270 eligible shards). So the model and process
-identity are provably the ones the decision names; what cannot be certified
-locally is that the corpus STREAM is the volume's.
+WHY THE R_THETA NAVIGATOR IS NOT HERE YET, AND WHAT THE BLOCKER ACTUALLY IS
+----------------------------------------------------------------------------
+The local Active8 copy was believed to differ from the volume's. IT DOES NOT.
+`source_index_sha256` is computed over a body whose first field is
+`active8_run_root` -- the absolute filesystem path
+(`editing_v2_process_v2_gate_zero.py:593`). Recomputing the local index with
+that ONE field set to the container path the decision was made under
+(`/artifacts/editing_v2/process_v2_active8/8ecc0e5e...`) reproduces the Gate-0
+PASS's `b5d042a0...` exactly. Every content field -- completion sha, sentinel
+sha, contracts binding, all 270 shard entries, eligible task identities, role
+census, sealed role metadata -- already agreed.
 
-That guard is doing its job and is not something to route around quietly. The
-options are to fetch the authoritative Active8, or to run where the volume is
-mounted -- either way a decision, not a workaround.
+So the corpus is content-identical and no 751 MB fetch is needed. What the check
+actually pins is the MOUNT POINT, in two places: the hashed index body and
+`reduce_gate_zero`'s internal re-derivation. The local corpus lives at
+`local_runtime/active8/...` and therefore cannot reproduce a hash of
+`/artifacts/...`; it fails on location while the content is right.
+
+That is a real property of the guard, not something to route around quietly.
+Where the volume is mounted at its own path the chain validates today with no
+change at all. Making it validate off-volume would mean separating IDENTITY
+(which mount the decision named) from LOCATION (where the bytes are read) --
+a change to shared lineage code, which belongs to whoever owns that guard and
+not to this module.
 """
 
 from __future__ import annotations
@@ -156,8 +167,10 @@ class RThetaNavigator:
                  rng: np.random.Generator, *,
                  evidence: object | None = None) -> Trajectory:
         raise NavigatorUnavailable(
-            "the frozen R_theta runtime cannot be built in this checkout: the "
-            "local Active8 copy's source_index_sha256 does not match the Gate-0 "
-            "PASS (process identity, contracts binding and structural contract "
-            "all DO match). Fetch the volume-authoritative Active8, or run where "
-            "the volume is mounted. Do not bypass the check.")
+            "the frozen R_theta runtime cannot be built in this checkout. The "
+            "local Active8 corpus is CONTENT-IDENTICAL to the authoritative one "
+            "-- its index reproduces the Gate-0 PASS's b5d042a0... exactly once "
+            "active8_run_root is set to the container path -- but the guard "
+            "hashes that path, so an off-volume mirror cannot satisfy it. Run "
+            "where the volume is mounted at its own path, where this works "
+            "unchanged. Do not bypass the check.")

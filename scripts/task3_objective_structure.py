@@ -1,11 +1,19 @@
 #!/usr/bin/env python
 """Does Task 3 actually pose a five-objective problem?
 
+THE TASK DEFINITION IS NOT UP FOR REVISION. MOLLEO Task 3 is five-objective as
+published -- maximise QED and JNK3, minimise GSK3B, DRD2 and SA -- and nothing
+measured here changes that. What this script produces is an EMPIRICAL PROPERTY
+of these oracles over the region our runs actually sampled: how much each axis
+is currently contributing to hypervolume, and where the conflict sits. An axis
+that contributes almost nothing in the sampled region is a diagnostic finding to
+report, not a reason to restate the benchmark.
+
 The question matters before any policy work: hypervolume on this task correlates
 0.99 with the single best JNK3 score, which is consistent either with "the other
-four objectives are real but easy" or with "the benchmark is a one-objective
-search wearing a five-objective costume". Those call for different responses,
-and the difference is measurable from runs already banked -- no new oracle calls.
+four objectives are real but currently easy" or with "the search is effectively
+one-dimensional". Those call for different responses, and the difference is
+measurable from runs already banked -- no new oracle calls.
 
 Three measurements, all on the durable ledgers:
 

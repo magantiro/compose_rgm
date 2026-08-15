@@ -341,5 +341,11 @@
   "corr_jnk3_drd2": 0.004158166858531482,
   "corr_jnk3_qed": 0.03576097745182729,
   "pooled_molecules": 170000
+ },
+ "framing": {
+  "task_definition": "MOLLEO Task 3 is FIVE-objective as published: maximise QED and JNK3, minimise GSK3B, DRD2, SA. Nothing here revises that.",
+  "what_these_numbers_are": "empirical properties of these oracles over the region our development runs sampled, not properties of the task definition",
+  "drd2": "contributes +0.0002 marginal hypervolume in the sampled region -- nearly inactive HERE because almost no drug-like molecule is DRD2-active. Reported diagnostically; the objective remains part of the benchmark and is still charged and scored.",
+  "headline": "the conflict that IS active is JNK3 vs GSK3B selectivity (corr +0.620): both are kinases, so 'maximise JNK3, minimise GSK3B' asks for a selective inhibitor"
  }
 }
