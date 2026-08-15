@@ -4,7 +4,7 @@ WRITTEN BEFORE THE RESULTS WERE LOOKED AT. The checks are derived from the
 frozen specification, not from whatever the artifact happens to contain, and
 they audit the recorded artifact rather than trusting the code that produced it.
 
-Nine checks:
+Ten checks:
 
   1  WEIGHT IDENTITY     log G_t == log h(y, b-1) - log h(x, b), recomputed here
   2  TELESCOPING         sum_t log G_t == log h_0(x_H) - log h_H(x_0)
@@ -16,6 +16,7 @@ Nine checks:
                          demonstrably NOT best-QED / heaviest-weight
   8  NUMERICAL SANITY    no NaN, no undefined ratio, no silent clipping
   9  PROPOSAL LAW        successors are reachable one-step successors of x
+ 10  EXTINCTION RULE     Z_H == 0 iff EXTINCT_NO_HIT, no index, x_0 returned
 
 Nothing here is a performance or efficacy judgement. A source that fails to hit
 the region is not evidence about the benchmark, and low ESS is the behaviour of
@@ -147,15 +148,24 @@ def audit_record(rec: dict) -> list[dict]:
                    f"{n} valid indices each"))
 
     # 7 -- OUTPUT RULE ------------------------------------------------------
-    j = rec["returned_index"]
+    j = rec.get("returned_index")
     w = np.asarray(rec["final_weights"], float)
     problems = []
-    if rec["final_states"][j] != rec["returned"]:
-        problems.append("returned molecule is not the sampled index")
+    if rec.get("extinct"):
+        # Extinct: no index at all, and the returned molecule must be x_0.
+        if j is not None:
+            problems.append("extinct run carries a particle index")
+        detail = "extinct -> x_0 placeholder, no particle sampled"
+    elif j is None:
+        problems.append("non-extinct run has no sampled index")
+        detail = ""
+    else:
+        if rec["final_states"][j] != rec["returned"]:
+            problems.append("returned molecule is not the sampled index")
+        detail = (f"returned = sampled index {j} "
+                  f"(heaviest index is {int(np.argmax(w))})")
     out.append(_fail("output-rule", "; ".join(problems), problems) if problems
-               else _ok("output-rule",
-                        f"returned = sampled index {j} "
-                        f"(heaviest index is {int(np.argmax(w))})"))
+               else _ok("output-rule", detail))
 
     # 8 -- NUMERICAL SANITY -------------------------------------------------
     bad = []
@@ -171,6 +181,26 @@ def audit_record(rec: dict) -> list[dict]:
     out.append(_fail("numerical", f"{len(bad)} non-finite quantities", bad)
                if bad else
                _ok("numerical", "no NaN, no undefined ratio, no silent clipping"))
+
+    # 10 -- EXTINCTION RULE (frozen, section 13.1) --------------------------
+    problems = []
+    extinct = rec.get("extinct", False)
+    z_zero = all(v == 0 for v in rec["final_weights"])
+    if extinct != z_zero:
+        problems.append(f"extinct flag {extinct} but Z_H==0 is {z_zero}")
+    if extinct:
+        if rec.get("returned_index") is not None:
+            problems.append("extinct run returned a particle index")
+        if rec.get("success"):
+            problems.append("extinct run marked successful -- impossible")
+        if rec["n_absorbed"] != 0 and not any(
+                t["absorbed_after"] and t["h_y_bm1"] == 1.0 for t in tr):
+            pass  # absorption by dead-end is allowed; region-absorption is not
+    out.append(_fail("extinction-rule", "; ".join(problems), problems)
+               if problems else
+               _ok("extinction-rule",
+                   f"Z_H==0 iff EXTINCT_NO_HIT (this record: "
+                   f"{'extinct' if extinct else 'normal'})"))
 
     return out
 

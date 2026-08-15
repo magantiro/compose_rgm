@@ -544,3 +544,47 @@ roughly $1.1k. That is worth engineering away before paying for it.
 The rejection arm's mean first-hit step of 3.4 is **not** a valid predictor of
 SMC cost. The SMC population is a different process with different absorption
 dynamics. Absorption must be measured from the SMC run itself.
+
+### 13.1 · SMC population-extinction rule — FROZEN BEFORE ANY SMC EFFICACY
+
+Discovered by the reference implementation **before any molecular SMC efficacy
+result was observed**, which is exactly when a missing output semantic should
+surface.
+
+With the exact terminal potential `h_0(x) = 1[x ∈ B]`, every particle outside
+the region receives weight zero at the final step. If **no** particle entered
+`B`, the whole population dies: `Z_H = 0`, and the target-conditioned
+Feynman–Kac measure has **no sampled support**. "Sample from the normalized
+terminal weights" is then *undefined* — the pre-freeze code produced `NaN` and
+raised. This is the known collapse of particle filters under indicator
+potentials; specialized *alive particle filter* constructions exist, but
+adopting one would be **a materially different SMC algorithm**, not a completion
+of the frozen wrapper.
+
+> **SMC population-extinction rule.** If the terminal normalized particle
+> measure is nondegenerate, one candidate is sampled from it according to the
+> frozen SMC output rule. If all terminal weights are zero because no particle
+> has entered the target region, the run is recorded as `EXTINCT_NO_HIT` and
+> returns the canonical source molecule `x₀` **solely to satisfy the benchmark's
+> fixed 20-output interface**. An extinct slot is **always a benchmark failure**.
+> **No** last-nondegenerate, best-particle, uniform-particle, or reward-ranked
+> fallback is permitted. This rule was frozen before observing any molecular SMC
+> efficacy result.
+
+**Why `x₀` and not the last nondegenerate population.** In an extinct run no
+particle ever reached `B`, so *every* candidate rule yields a failed slot — the
+Jin metric asks only whether at least one of 20 candidates qualifies. Returning
+the molecule the sampler "liked just before failing" would improve **secondary**
+QED statistics while changing nothing primary, and would read as choosing the
+flattering fallback. `x₀` says exactly what happened: this slot failed to
+realize the conditioned event.
+
+**A single surviving particle is NOT extinction** — one particle in `B` is
+sufficient support and is returned normally. That boundary is pinned by test.
+
+**Recorded per slot as diagnostics, not decision knobs:** extinction status,
+whether any particle ever absorbed, first absorption step, and the count of
+nonzero terminal particles.
+
+**Audit check 10:** `Z_H == 0 ⟺ EXTINCT_NO_HIT`, an extinct run carries no
+particle index, and the returned molecule is exactly canonical `x₀`.

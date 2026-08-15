@@ -211,8 +211,9 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         build_features, in_region,
     )
     from compose_v4.experiments.hphi_smc import (
-        N_PARTICLES, effective_sample_size, normalized_weights,
-        sample_terminal_particle, should_resample, systematic_resample,
+        EXTINCT_NO_HIT, N_PARTICLES, effective_sample_size,
+        normalized_weights, should_resample, systematic_resample,
+        terminal_output,
     )
     from compose_v4.experiments.production_successor_kernel import (
         _one_state_batch, canonical_state_key, enumerate_factorized_marked_law,
@@ -280,6 +281,9 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                                              mk.action))
         return "" if y == smi else y
 
+    src_canon = canonical_state_key(
+        pad_molecular_graph(smiles_to_molecular_graph(source), CANONICAL_SLOTS))
+
     def run_smc(slot: int) -> dict[str, Any]:
         # OBSERVATIONAL LOGGING ONLY. Nothing below reads these values back
         # into the algorithm; removing every print would leave the sampler
@@ -288,8 +292,8 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         print(f"    [src{idx} slot{slot:>2}] START N={N_PARTICLES} H={HORIZON}",
               flush=True)
         rng = np.random.default_rng(seed_for("smc", source, slot))
-        q0, s0 = props(source)
-        states = [source] * N_PARTICLES
+        q0, s0 = props(src_canon)
+        states = [src_canon] * N_PARTICLES
         absorbed = [in_region(q0, s0, REGION)] * N_PARTICLES
         log_w = np.zeros(N_PARTICLES)
         transitions: list[dict[str, Any]] = []
@@ -355,15 +359,32 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                       f"at step {step}", flush=True)
                 break
 
-        w = normalized_weights(log_w)
-        j = sample_terminal_particle(w, rng)
-        ret = states[j]
+        j, status = terminal_output(log_w, rng)
+        if status == EXTINCT_NO_HIT:
+            # Z_H == 0: no particle entered B, so the target-conditioned
+            # measure has no sampled support. Return the canonical source
+            # SOLELY to satisfy the benchmark's fixed 20-output interface.
+            # This slot is ALWAYS a benchmark failure.
+            ret = src_canon
+            print(f"    [src{idx} slot{slot:>2}] {EXTINCT_NO_HIT}: no particle "
+                  f"entered the region; returning x_0", flush=True)
+        else:
+            ret = states[j]
+        w = normalized_weights(log_w) if status != EXTINCT_NO_HIT \
+            else np.zeros(N_PARTICLES)
         rq, rs = props(ret)
-        return {"slot": slot, "returned": ret, "returned_index": int(j),
+        return {"slot": slot, "returned": ret,
+                "returned_index": (int(j) if j is not None else None),
+                "status": status, "extinct": status == EXTINCT_NO_HIT,
+                "n_terminal_nonzero": int(np.sum(np.asarray(w) > 0)),
+                "first_absorption_step": next(
+                    (t2["step"] for t2 in transitions if t2["absorbed_after"]),
+                    None),
                 "terminal_qed": rq, "terminal_sim": rs,
                 "success": bool(in_region(rq, rs, REGION)),
                 "final_weights": [float(v) for v in w],
-                "final_ess": float(effective_sample_size(w)),
+                "final_ess": (float(effective_sample_size(w))
+                              if status != EXTINCT_NO_HIT else 0.0),
                 "final_states": states, "final_absorbed": absorbed,
                 "n_absorbed": int(sum(absorbed)),
                 "sync": sync, "transitions": transitions,

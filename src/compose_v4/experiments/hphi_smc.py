@@ -38,6 +38,7 @@ import numpy as np
 
 __all__ = [
     "N_PARTICLES", "ESS_FRACTION", "CANDIDATES_PER_SOURCE",
+    "EXTINCT_NO_HIT", "is_extinct", "terminal_output",
     "systematic_resample", "normalized_weights", "effective_sample_size",
     "should_resample", "sample_terminal_particle", "SMCStepOutcome",
 ]
@@ -49,6 +50,44 @@ N_PARTICLES = 32
 ESS_FRACTION = 0.5
 #: 20 INDEPENDENT SMC runs per source, one returned molecule each.
 CANDIDATES_PER_SOURCE = 20
+
+
+#: Frozen extinction status. See preregistration section 13.1.
+EXTINCT_NO_HIT = "EXTINCT_NO_HIT"
+
+
+def is_extinct(log_weights: np.ndarray) -> bool:
+    """True when the terminal normalizing constant Z_H is exactly zero.
+
+    With the exact terminal potential h_0(x) = 1[x in B], every particle
+    outside the region receives weight zero at the final step. If no particle
+    entered B the whole population dies, and the target-conditioned measure has
+    NO SAMPLED SUPPORT -- so "sample from the normalized terminal weights" is
+    undefined, not merely awkward. This is the known collapse of particle
+    filters under indicator potentials.
+    """
+    lw = np.asarray(log_weights, dtype=float)
+    return bool(np.all(np.isneginf(lw)) or np.all(np.exp(
+        lw - (lw.max() if np.isfinite(lw.max()) else 0.0)) == 0.0))
+
+
+def terminal_output(log_weights: np.ndarray, rng: np.random.Generator):
+    """FROZEN output rule including extinction. Returns (index_or_None, status).
+
+    Z_H > 0  -> sample one particle from the normalized terminal measure.
+    Z_H == 0 -> EXTINCT_NO_HIT. The caller returns the canonical source x_0
+                SOLELY to satisfy the benchmark's fixed 20-output interface.
+
+    An extinct slot is ALWAYS a benchmark failure: no particle ever entered B,
+    so no fallback could have qualified. Deliberately NOT last-nondegenerate,
+    best-particle, uniform-particle, or reward-ranked -- each of those would
+    return the molecule the sampler liked just before failing, which flatters
+    secondary statistics without changing primary success.
+    """
+    if is_extinct(log_weights):
+        return None, EXTINCT_NO_HIT
+    w = normalized_weights(log_weights)
+    return sample_terminal_particle(w, rng), "OK"
 
 
 def systematic_resample(weights: np.ndarray,

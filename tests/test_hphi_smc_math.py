@@ -141,3 +141,51 @@ def test_resampling_collapses_unique_particles():
     lw = np.full(32, -50.0); lw[0] = 0.0
     out = smc_synchronisation(lw, np.random.default_rng(1))
     assert out.resampled and out.n_unique < 32
+
+
+# --- FROZEN EXTINCTION RULE (preregistration section 13.1) -------------------
+
+def test_extinction_detected_when_every_weight_is_zero():
+    from compose_v4.experiments.hphi_smc import (
+        EXTINCT_NO_HIT, is_extinct, terminal_output)
+    lw = np.full(32, -np.inf)
+    assert is_extinct(lw)
+    j, status = terminal_output(lw, np.random.default_rng(0))
+    assert j is None and status == EXTINCT_NO_HIT
+
+
+def test_a_single_surviving_particle_is_NOT_extinction():
+    """One particle in B is enough support; it must be returned, not declared
+    extinct. This is the boundary the rule turns on."""
+    from compose_v4.experiments.hphi_smc import is_extinct, terminal_output
+    lw = np.full(32, -np.inf)
+    lw[7] = 0.0
+    assert not is_extinct(lw)
+    j, status = terminal_output(lw, np.random.default_rng(0))
+    assert j == 7 and status == "OK"
+
+
+def test_healthy_population_samples_normally():
+    from compose_v4.experiments.hphi_smc import is_extinct, terminal_output
+    lw = np.zeros(32)
+    assert not is_extinct(lw)
+    j, status = terminal_output(lw, np.random.default_rng(3))
+    assert status == "OK" and 0 <= j < 32
+
+
+def test_extinction_never_returns_a_particle_index():
+    """Guards against a best-particle / last-nondegenerate fallback creeping in:
+    an extinct run must yield NO index at all, so the caller is forced to use
+    x_0 rather than any molecule the sampler happened to like."""
+    from compose_v4.experiments.hphi_smc import terminal_output
+    for seed in range(50):
+        j, status = terminal_output(np.full(32, -np.inf),
+                                    np.random.default_rng(seed))
+        assert j is None and status == "EXTINCT_NO_HIT"
+
+
+def test_extinction_does_not_raise_or_produce_nan():
+    """The pre-freeze implementation produced NaN and raised ValueError here."""
+    from compose_v4.experiments.hphi_smc import terminal_output
+    j, status = terminal_output(np.full(32, -np.inf), np.random.default_rng(1))
+    assert j is None and isinstance(status, str)
