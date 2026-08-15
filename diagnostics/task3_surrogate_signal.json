@@ -1,0 +1,111 @@
+{
+ "representation": "Morgan bits r=2 2048 (OPTIMISTIC: same feature family as the jnk3/gsk3b oracles themselves)",
+ "model": "Tanimoto-weighted 5-NN",
+ "protocol": "train on the first N of a real ledger, test on the next block",
+ "runs": {
+  "random-zinc_seed100": {
+   "120": {
+    "train_actives_jnk3_over_0.1": 0,
+    "spearman_qed": 0.29472101118025273,
+    "spearman_jnk3": 0.26109582354589694,
+    "spearman_sa": 0.5828007482001871,
+    "spearman_gsk3b": 0.2507524016554964,
+    "spearman_drd2": 0.3554647908661977,
+    "top50_recall_jnk3": 0.12,
+    "top50_recall_gsk3b": 0.04
+   },
+   "250": {
+    "train_actives_jnk3_over_0.1": 2,
+    "spearman_qed": 0.31441825122246964,
+    "spearman_jnk3": 0.2794117325423546,
+    "spearman_sa": 0.6316575709143927,
+    "spearman_gsk3b": 0.26836043803142257,
+    "spearman_drd2": 0.4325684611421152,
+    "top50_recall_jnk3": 0.2,
+    "top50_recall_gsk3b": 0.1
+   },
+   "500": {
+    "train_actives_jnk3_over_0.1": 4,
+    "spearman_qed": 0.3498149330849139,
+    "spearman_jnk3": 0.27855241872940223,
+    "spearman_sa": 0.6620498195124548,
+    "spearman_gsk3b": 0.3197715436722696,
+    "spearman_drd2": 0.4546921781730445,
+    "top50_recall_jnk3": 0.3,
+    "top50_recall_gsk3b": 0.04
+   },
+   "1000": {
+    "train_actives_jnk3_over_0.1": 10,
+    "spearman_qed": 0.44277949277695794,
+    "spearman_jnk3": 0.3166458465882258,
+    "spearman_sa": 0.6818886672278751,
+    "spearman_gsk3b": 0.32413176232214275,
+    "spearman_drd2": 0.5056425366002502,
+    "top50_recall_jnk3": 0.24,
+    "top50_recall_gsk3b": 0.04
+   },
+   "2000": {
+    "train_actives_jnk3_over_0.1": 22,
+    "spearman_qed": 0.4625947510721608,
+    "spearman_jnk3": 0.35150478883550423,
+    "spearman_sa": 0.6949565637391409,
+    "spearman_gsk3b": 0.3956281358331553,
+    "spearman_drd2": 0.5138701734675434,
+    "top50_recall_jnk3": 0.36,
+    "top50_recall_gsk3b": 0.06
+   }
+  },
+  "graph-ga_seed100": {
+   "120": {
+    "train_actives_jnk3_over_0.1": 0,
+    "spearman_qed": 0.029089239276783283,
+    "spearman_jnk3": 0.18080959464912433,
+    "spearman_sa": 0.40406070625856805,
+    "spearman_gsk3b": 0.1837098735343461,
+    "spearman_drd2": 0.24411691620678977,
+    "top50_recall_jnk3": 0.18,
+    "top50_recall_gsk3b": 0.0
+   },
+   "250": {
+    "train_actives_jnk3_over_0.1": 1,
+    "spearman_qed": 0.4890336173808784,
+    "spearman_jnk3": 0.21710177844627485,
+    "spearman_sa": 0.6068779237778084,
+    "spearman_gsk3b": 0.23830988635412007,
+    "spearman_drd2": 0.43480519853863747,
+    "top50_recall_jnk3": 0.14,
+    "top50_recall_gsk3b": 0.0
+   },
+   "500": {
+    "train_actives_jnk3_over_0.1": 1,
+    "spearman_qed": 0.5239865252725204,
+    "spearman_jnk3": 0.30151751139791444,
+    "spearman_sa": 0.6013231212426884,
+    "spearman_gsk3b": 0.22124717637886196,
+    "spearman_drd2": 0.507318916890736,
+    "top50_recall_jnk3": 0.18,
+    "top50_recall_gsk3b": 0.02
+   },
+   "1000": {
+    "train_actives_jnk3_over_0.1": 1,
+    "spearman_qed": 0.5283732927452814,
+    "spearman_jnk3": 0.4576651452803647,
+    "spearman_sa": 0.6500797479515159,
+    "spearman_gsk3b": 0.3465148390140984,
+    "spearman_drd2": 0.569179948674651,
+    "top50_recall_jnk3": 0.14,
+    "top50_recall_gsk3b": 0.04
+   },
+   "2000": {
+    "train_actives_jnk3_over_0.1": 24,
+    "spearman_qed": 0.6180031444813372,
+    "spearman_jnk3": 0.6005018183984843,
+    "spearman_sa": 0.667028338258034,
+    "spearman_gsk3b": 0.564425470625083,
+    "spearman_drd2": 0.6657341010232046,
+    "top50_recall_jnk3": 0.42,
+    "top50_recall_gsk3b": 0.02
+   }
+  }
+ }
+}

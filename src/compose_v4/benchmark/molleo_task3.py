@@ -106,7 +106,11 @@ That is a property of the release, and it does NOT make the metric unknowable;
 the paper states it.
 
 What the paper's formula does not fix is which SET of molecules the front is
-taken over, so that one is stated here: EVERY molecule evaluated during the run.
+taken over. For DEVELOPMENT we use the cumulative all-evaluated non-dominated
+set -- the natural monotone best-found-so-far object. COMPARABILITY OF OUR
+NUMBERS WITH PUBLISHED ONES IS THEREFORE **PENDING**: Eq. 5 fixes the geometry
+and the reference point, not the set, so protocol identity is not something we
+may claim yet.
 It is the standard best-found-so-far convention, it is monotone, it is
 recomputable from the durable ledger alone, and it is the reading most GENEROUS
 to the baselines -- which makes any eventual COMPOSE claim the conservative one.
