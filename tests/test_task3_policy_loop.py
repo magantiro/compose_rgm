@@ -296,3 +296,70 @@ def test_a_new_molecule_evicts_only_what_it_dominates():
     front = {k for k, _ in archive.front()}
     assert front == {"strong", "orthogonal"}, "weak is dominated, orthogonal is not"
     assert len(archive) == 3, "eviction is from the FRONT, not from the archive"
+
+
+# ---- the seam, enforced rather than trusted -------------------------------
+
+class CheatingNavigator:
+    """A navigator that builds its OWN oracle and evaluates an unpaid molecule.
+
+    This is the realistic violation. Withholding a reference does not prevent it
+    -- any code can import the benchmark and construct an oracle -- so the guard
+    has to live at the point of evaluation, not at the point of access.
+    """
+
+    name = "cheating"
+
+    def __init__(self):
+        self.got_away_with_it = False
+
+    def navigate(self, start, region, budget, rng, *, evidence=None):
+        from compose_v4.benchmark.oracles import Task3Objectives
+
+        oracle = Task3Objectives()
+        oracle.raw_many(["CCOCCOCCO"])          # never charged to the meter
+        self.got_away_with_it = True
+        return Trajectory(states=[start], stop=0, region=region)
+
+
+def test_a_navigator_that_evaluates_an_unpaid_molecule_is_caught(tmp_path):
+    """The strict budget is only real if this fails."""
+    from compose_v4.benchmark.oracles.task3 import OracleAccessDuringNavigation
+    from compose_v4.benchmark.task3_run import Task3Run
+
+    navigator = CheatingNavigator()
+    policy = AdaptiveParetoNavigatorPolicy(navigator=navigator)
+    run = Task3Run.open(tmp_path / "run", seed=100, budget=200, policy="test")
+    try:
+        with pytest.raises(OracleAccessDuringNavigation, match="ALREADY.*PAID"):
+            policy.run(run, development_init_set(100))
+    finally:
+        run.close()
+    assert not navigator.got_away_with_it
+
+
+def test_the_lockout_lifts_once_navigation_returns(tmp_path):
+    """It must forbid evaluation DURING navigation only -- the loop still has to
+    be able to charge the candidate it selected."""
+    from compose_v4.benchmark.oracles import Task3Objectives
+    from compose_v4.benchmark.oracles.task3 import (
+        navigation_in_progress,
+        navigation_lockout,
+    )
+
+    assert not navigation_in_progress()
+    with navigation_lockout():
+        assert navigation_in_progress()
+    assert not navigation_in_progress()
+    assert Task3Objectives().raw("CCO") is not None
+
+
+def test_reading_the_paid_archive_during_navigation_is_allowed():
+    """The permitted half of the seam: learn anything from what we bought."""
+    from compose_v4.benchmark.oracles.task3 import navigation_lockout
+
+    archive = ParetoArchive()
+    archive.add("CCO", (0.5,) * 5)
+    with navigation_lockout():
+        assert archive.front()[0][0] == "CCO"
+        assert archive.gain_of((0.6,) * 5) > 0

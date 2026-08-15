@@ -30,6 +30,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -51,6 +52,44 @@ BUNDLE_ENV_VAR = "COMPOSE_MOLLEO_ORACLE_DIR"
 #: Objective order. Must match `molleo_task3.OBJECTIVES` exactly -- the meter,
 #: the hypervolume and the archive all index by position.
 NAMES: tuple[str, ...] = tuple(name for name, _ in OBJECTIVES)
+
+
+class OracleAccessDuringNavigation(RuntimeError):
+    """Raised when anything evaluates objectives while a navigator is running."""
+
+
+#: Nonzero while a policy is navigating. Module-level ON PURPOSE: a navigator
+#: can always construct its own `Task3Objectives`, so a guard living on one
+#: instance would be trivially sidestepped. This one lives in the oracle itself,
+#: so EVERY instance in the process refuses for the duration.
+_NAVIGATION_DEPTH = 0
+
+
+@contextmanager
+def navigation_lockout():
+    """Forbid all objective evaluation for the duration of a navigation.
+
+    A navigator may read the archive of molecules ALREADY PAID FOR and learn
+    whatever it likes from it. It may not evaluate a NEW molecule, because an
+    evaluation that is not charged is exactly the accounting leak this harness
+    refuses to copy from the released benchmark.
+
+    Note what this does and does not catch. Importing the oracle is neither
+    necessary nor sufficient to violate the rule -- what matters is CALLING it --
+    so the check sits at the call and fires no matter who holds the reference or
+    how they obtained it.
+    """
+
+    global _NAVIGATION_DEPTH
+    _NAVIGATION_DEPTH += 1
+    try:
+        yield
+    finally:
+        _NAVIGATION_DEPTH -= 1
+
+
+def navigation_in_progress() -> bool:
+    return _NAVIGATION_DEPTH > 0
 
 
 def canonical(smiles: str) -> str | None:
@@ -148,7 +187,19 @@ class Task3Objectives:
     # ---- evaluation ------------------------------------------------------
 
     def raw_many(self, smiles: list[str]) -> list[RawScores | None]:
-        """Raw scores per SMILES; None where the molecule does not parse."""
+        """Raw scores per SMILES; None where the molecule does not parse.
+
+        Every evaluation path in this class funnels through here, which is why
+        the navigation lockout is checked here and nowhere else.
+        """
+
+        if navigation_in_progress():
+            raise OracleAccessDuringNavigation(
+                "objectives were evaluated while a navigator was running. A "
+                "navigator may learn anything it likes from molecules ALREADY "
+                "PAID FOR, but evaluating a new one outside the meter is the "
+                "accounting leak this harness exists to refuse. Charge it "
+                "through the run instead.")
 
         from rdkit import Chem
         from rdkit.Chem import QED

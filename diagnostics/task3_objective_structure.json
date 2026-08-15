@@ -346,6 +346,7 @@
   "task_definition": "MOLLEO Task 3 is FIVE-objective as published: maximise QED and JNK3, minimise GSK3B, DRD2, SA. Nothing here revises that.",
   "what_these_numbers_are": "empirical properties of these oracles over the region our development runs sampled, not properties of the task definition",
   "drd2": "contributes +0.0002 marginal hypervolume in the sampled region -- nearly inactive HERE because almost no drug-like molecule is DRD2-active. Reported diagnostically; the objective remains part of the benchmark and is still charged and scored.",
-  "headline": "the conflict that IS active is JNK3 vs GSK3B selectivity (corr +0.620): both are kinases, so 'maximise JNK3, minimise GSK3B' asks for a selective inhibitor"
+  "headline": "the conflict that IS active is JNK3 vs GSK3B selectivity (corr +0.620): both are kinases, so 'maximise JNK3, minimise GSK3B' asks for a selective inhibitor",
+  "hypothesis": "NOT that a fixed scalarization has 'no reason' to seek high-JNK3/low-GSK3B -- it does reward both, since both are terms in the sum. The limitation is that a fixed scalarization COMPRESSES THE TRADEOFF INTO ONE NUMBER and has no mechanism to notice that a valuable part of the current Pareto front is missing and deliberately redirect search there. Adaptive region targeting has exactly that mechanism. This is the hypothesis the A/B is designed to test, holding the surrogate and the evaluated data fixed."
  }
 }

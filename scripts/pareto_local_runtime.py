@@ -22,6 +22,28 @@ below points at the volume-sourced copy under `local_runtime/`, and
 plan, Gate-0 PASS, frozen policy) on every construction, so a mismatched
 artifact fails loudly rather than producing a plausible wrong answer.
 
+WHY THIS FAILS OFF-VOLUME, AND WHY THAT IS NOT A CORPUS PROBLEM
+--------------------------------------------------------------
+`source_index_sha256` is computed over a body whose FIRST FIELD is
+`active8_run_root` -- the ABSOLUTE FILESYSTEM PATH
+(`editing_v2_process_v2_gate_zero.py:593`), and the same path is re-derived
+inside `reduce_gate_zero`. So the index pins the MOUNT POINT as well as the
+content, and a byte-identical mirror at a different path cannot reproduce it.
+
+Measured, so nobody rediscovers it the hard way:
+
+    decision                       b5d042a06c27be4a...
+    local mirror, local path       ed51268a155877d4...   <- looks like a mismatch
+    local mirror, container path   b5d042a06c27be4a...   <- MATCH
+
+Every content field already agreed: completion sha, sentinel sha, contracts
+binding, all 270 shard entries, eligible task identities, role census, sealed
+role metadata. The local Active8 is CONTENT-IDENTICAL to the authoritative one.
+There is nothing to fetch and nothing to fix.
+
+Run where the volume is mounted at its own path; the chain validates there
+unchanged. Do not modify the lineage system to accommodate a mirror.
+
 Layout produced by the download step:
 
     runs/run_v2_01/R_THETA_CHECKPOINT.pt      84 MB

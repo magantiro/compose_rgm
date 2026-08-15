@@ -11,6 +11,23 @@ and if it does not, this task can use a different COMPOSE-native expansion.  The
 outer algorithm is independent of that choice, so it is built now and the seam is
 kept open.
 
+THE HYPOTHESIS THIS ARCHITECTURE EXISTS TO TEST
+-----------------------------------------------
+A fixed scalarization is not blind to the objectives it sums -- it rewards high
+JNK3 and low GSK3B alike, because both are terms in it. Its limitation is
+narrower and more interesting: it COMPRESSES THE TRADEOFF INTO ONE NUMBER, and
+so has no mechanism to notice that a valuable part of the current Pareto front
+is MISSING and deliberately redirect search there. Adaptive region targeting has
+exactly that mechanism.
+
+So the causal comparison is between two ways of specifying purpose, holding the
+surrogate and the evaluated data fixed:
+
+    A   fixed scalarization steering
+    B   adaptive region/archive steering
+
+Anything else that differs between them is a confound, not a result.
+
 THE ONE STRUCTURAL GUARANTEE, STATED EXACTLY
 --------------------------------------------
 A navigator may see EVERYTHING WE HAVE ALREADY PAID FOR -- the archive of

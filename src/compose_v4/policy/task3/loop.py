@@ -30,6 +30,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+from compose_v4.benchmark.oracles.task3 import navigation_lockout
 from compose_v4.policy.task3.archive import ParetoArchive
 from compose_v4.policy.task3.interfaces import (
     CandidateSelector,
@@ -135,9 +136,10 @@ class AdaptiveParetoNavigatorPolicy:
             # The archive is everything already paid for. Handing it over lets
             # a navigator learn to steer; it is still the case that nothing here
             # can evaluate a NEW molecule without charging.
-            trajectory = self.navigator.navigate(
-                start, region, self.navigation_budget, run.rng,
-                evidence=archive)
+            with navigation_lockout():
+                trajectory = self.navigator.navigate(
+                    start, region, self.navigation_budget, run.rng,
+                    evidence=archive)
             if not trajectory.states:
                 stats["empty_trajectory"] += 1
                 stalled += 1
