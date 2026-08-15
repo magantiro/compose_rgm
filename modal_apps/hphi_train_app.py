@@ -252,7 +252,12 @@ def assemble() -> dict[str, Any]:
     Mva_flat = np.asarray([[q, s, b] for (q, s), b in Mva], dtype=np.float64) \
         if Mva else np.zeros((0, 3), dtype=np.float64)
     np.savez_compressed(out_m, Xtr=Xtr, Ytr=Ytr, Xva=Xva, Yva=Yva, Btr=Btr,
-                        Mva=Mva_flat)
+                        Mva=Mva_flat,
+                        # Provenance the trainer records but cannot recompute:
+                        # it never opens the corpus or the embedding shards.
+                        n_val_sources=np.int64(len(val_src)),
+                        n_states=np.int64(len(emb)),
+                        n_missing=np.int64(len(missing)))
     artifact_volume.commit()             # FLUSHED before this worker exits
     print(f"persisted {out_m.name} in {time.perf_counter()-t_start:.0f}s",
           flush=True)
@@ -284,6 +289,7 @@ def train() -> dict[str, Any]:
     Xtr, Ytr, Xva, Yva, Btr = z["Xtr"], z["Ytr"], z["Xva"], z["Yva"], z["Btr"]
     # Rebuild ((q, s), b): the calibration code below unpacks it that way.
     Mva = [((float(q), float(s)), float(b)) for q, s, b in z["Mva"]]
+    n_val_sources = int(z["n_val_sources"]); n_states = int(z["n_states"])
     enc_seconds = 0.0
     print(f"loaded matrices in {time.perf_counter()-t_start:.0f}s: "
           f"train {len(Xtr):,}  val {len(Xva):,}  bellman {len(Btr):,}",
@@ -378,7 +384,7 @@ def train() -> dict[str, Any]:
         "r_theta_retrained": False,
         "target": "finite-budget HITTING reachability; boundary h=1 enforced",
         "n_train": len(Xtr), "n_val": len(Xva), "n_bellman": len(Btr),
-        "val_sources": len(val_src), "held_out_by": "source",
+        "val_sources": n_val_sources, "held_out_by": "source",
         "epochs_max": EPOCHS, "patience": PATIENCE,
         "epochs_run": len(hist),
         "selected_epoch": best["epoch"], "selected_val_bce": best["val"],
@@ -392,7 +398,7 @@ def train() -> dict[str, Any]:
             "encode_seconds": round(enc_seconds, 1),
             "train_seconds": round(train_seconds, 1),
             "total_seconds": round(time.perf_counter() - t_start, 1),
-            "unique_states_encoded": len(emb),
+            "unique_states_encoded": n_states,
         },
     }
     (out_p / "HPHI_V2.json").write_text(json.dumps(rec, indent=2))
