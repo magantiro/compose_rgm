@@ -136,3 +136,88 @@ def smc_synchronisation(log_weights: np.ndarray,
                               resampled=True, indices=idx)
     return SMCStepOutcome(weights=w, ess=effective_sample_size(w),
                           resampled=False, indices=np.arange(n))
+
+
+# ---------------------------------------------------------------------------
+# The composed recursion. Generic over the process so it can be qualified
+# END-TO-END against an analytically known controlled law before any molecule
+# is involved. The molecular runner supplies molecular callables; the toy
+# qualification supplies enumerable ones. Same code path either way.
+# ---------------------------------------------------------------------------
+
+
+def run_twisted_smc(
+    x0,
+    *,
+    horizon: int,
+    n_particles: int,
+    propose,          # (x, budget, rng) -> y     sample from the REFERENCE law R
+    twist,            # (x, budget) -> h_b(x)     the learned/known value
+    in_target,        # (x) -> bool               goal region B_z
+    rng: np.random.Generator,
+    resample: bool = True,
+):
+    """Twisted SMC targeting the Doob h-transform of the reference process.
+
+    THE WEIGHT IS THE WHOLE POINT. Proposing from R while targeting R*h makes
+    the incremental weight
+
+        w_t  =  h_{b-1}(y) / h_b(x)
+
+    which telescopes over a path to h_0(x_T) / h_H(x_0). Multiplying h in
+    "somewhere intuitive" instead -- using h(y) alone, or h(y)/h(y), or applying
+    it twice -- yields a sampler that still has a correct ESS and a correct
+    resampler and is confidently wrong. That is the failure mode the end-to-end
+    test exists to catch.
+
+    Absorption: a particle in the target set STOPS and is frozen thereafter, so
+    its state and weight stop evolving. This is the STOP semantics of the
+    controller, not a convergence trick.
+    """
+    states = [x0] * n_particles
+    absorbed = [bool(in_target(x0))] * n_particles
+    log_w = np.zeros(n_particles)
+    n_resamples = 0
+    unique_after_resample: list[int] = []
+
+    for step in range(horizon):
+        b = horizon - step                      # remaining budget BEFORE the move
+        for i in range(n_particles):
+            if absorbed[i]:
+                continue                        # STOP: frozen, weight unchanged
+            x = states[i]
+            hx = twist(x, b)
+            if hx <= 0.0:
+                log_w[i] = -np.inf              # dead end under the target law
+                absorbed[i] = True
+                continue
+            y = propose(x, b, rng)
+            hy = twist(y, b - 1)
+            # incremental Feynman-Kac weight, in log space
+            log_w[i] += (np.log(hy) if hy > 0 else -np.inf) - np.log(hx)
+            states[i] = y
+            if in_target(y):
+                absorbed[i] = True
+        if np.all(np.isneginf(log_w)):
+            break                               # every particle died
+        if resample:
+            out = smc_synchronisation(log_w, rng)
+            if out.resampled:
+                n_resamples += 1
+                unique_after_resample.append(out.n_unique)
+                states = [states[j] for j in out.indices]
+                absorbed = [absorbed[j] for j in out.indices]
+                log_w = np.zeros(n_particles)   # weights reset after resampling
+        if all(absorbed):
+            break
+
+    w = normalized_weights(log_w)
+    j = sample_terminal_particle(w, rng)
+    return {
+        "returned": states[j],                  # THE one candidate for this run
+        "states": states, "weights": w, "absorbed": absorbed,
+        "ess": effective_sample_size(w),
+        "n_resamples": n_resamples,
+        "mean_unique_after_resample": (float(np.mean(unique_after_resample))
+                                       if unique_after_resample else None),
+    }
