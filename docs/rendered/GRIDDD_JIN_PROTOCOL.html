@@ -1,0 +1,165 @@
+<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>GrIDDD / Jin ZINC-250k constrained editing — protocol</title><style>
+:root{--bg:#fbfbfa;--fg:#1a1a19;--muted:#6b6b66;--rule:#e3e2dd;--accent:#7a4a2f;
+--code-bg:#f2f1ed;--th:#f6f5f2;--quote:#f7f6f2;}
+@media (prefers-color-scheme:dark){:root{--bg:#17171a;--fg:#e6e5e1;--muted:#9a998f;
+--rule:#33333a;--accent:#d99a6c;--code-bg:#212127;--th:#1f1f25;--quote:#1d1d23;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;}
+.wrap{max-width:60rem;margin:0 auto;padding:3rem 1.5rem 6rem;}
+h1,h2,h3,h4{line-height:1.25;text-wrap:balance;margin:2.2em 0 .6em;}
+h1{font-size:2rem;letter-spacing:-.02em;border-bottom:2px solid var(--rule);padding-bottom:.4em;}
+h2{font-size:1.45rem;letter-spacing:-.01em;border-bottom:1px solid var(--rule);padding-bottom:.3em;}
+h3{font-size:1.15rem;} h4{font-size:1rem;color:var(--muted);text-transform:uppercase;
+letter-spacing:.06em;}
+h1:first-child{margin-top:0}
+p{margin:.9em 0}
+a{color:var(--accent)}
+code{background:var(--code-bg);padding:.12em .35em;border-radius:4px;
+font:.88em/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}
+pre{background:var(--code-bg);padding:1rem 1.1rem;border-radius:8px;overflow-x:auto;
+border:1px solid var(--rule);}
+pre code{background:none;padding:0;font-size:.85rem;line-height:1.55;}
+blockquote{margin:1.2em 0;padding:.8em 1.1em;background:var(--quote);
+border-left:3px solid var(--accent);border-radius:0 6px 6px 0;}
+blockquote p:first-child{margin-top:0}blockquote p:last-child{margin-bottom:0}
+.tw{overflow-x:auto;margin:1.3em 0;border:1px solid var(--rule);border-radius:8px;}
+table{border-collapse:collapse;width:100%;font-size:.92rem;}
+th,td{padding:.55em .8em;border-bottom:1px solid var(--rule);text-align:left;
+vertical-align:top;}
+th{background:var(--th);font-weight:600;white-space:nowrap;}
+tr:last-child td{border-bottom:none}
+td code{white-space:nowrap}
+hr{border:none;border-top:2px solid var(--rule);margin:2.5em 0}
+ul,ol{padding-left:1.5em;margin:.9em 0}
+li{margin:.3em 0}
+strong{font-weight:650}
+.toc{background:var(--th);border:1px solid var(--rule);border-radius:8px;
+padding:1rem 1.4rem;margin:2rem 0;}
+.toc h4{margin:.2em 0 .6em}
+.toc a{text-decoration:none;display:block;padding:.15em 0;font-size:.93rem}
+.toc a:hover{text-decoration:underline}
+.toc .lvl2{padding-left:1rem}
+</style></head><body><div class='wrap'><div class='toc'><h4>Contents</h4><a class="lvl1" href="#griddd-jin-zinc-250k-constrained-editing-protocol">GrIDDD / Jin ZINC-250k constrained editing — protocol</a><a class="lvl2" href="#the-question">The question</a><a class="lvl2" href="#the-inference-policy-frozen-before-any-qed-outcome-exists">THE INFERENCE POLICY — frozen before any QED outcome exists</a><a class="lvl2" href="#amended-penalized-logp-is-parked-not-failed">⬇️ AMENDED — penalized LogP is PARKED, not failed</a><a class="lvl2" href="#terminology-this-benchmark-is-not-multiobjective">Terminology — this benchmark is NOT multiobjective</a><a class="lvl2" href="#the-protocol-taken-verbatim-from-griddd">The protocol, taken verbatim from GrIDDD</a><a class="lvl2" href="#the-published-table-cited-never-recomputed">The published table — cited, never recomputed</a><a class="lvl2" href="#the-mandatory-caveat-task-performance-not-oracle-efficiency">The mandatory caveat — task performance, not oracle efficiency</a><a class="lvl2" href="#what-counts-as-a-strong-result">What counts as a strong result</a><a class="lvl2" href="#precedent-why-this-table-is-sufficient">Precedent — why this table is sufficient</a><a class="lvl2" href="#barred">Barred</a><a class="lvl2" href="#record-one-stray-artifact-unread">Record: one stray artifact, unread</a><a class="lvl2" href="#how-development-policies-are-judged-frozen-before-reading-the-dev-panel">How development policies are judged — frozen before reading the dev panel</a><a class="lvl2" href="#revision-the-anytime-stopping-time-is-the-headline-not-fixed-h6">⭐ REVISION — the anytime stopping time is the headline, not fixed-H6</a><a class="lvl1" href="#current-amendment-the-claim-bearing-controller-is-region-h-φ">⭐ CURRENT AMENDMENT — the claim-bearing controller is region-`h_φ`</a></div><h1 id="griddd-jin-zinc-250k-constrained-editing-protocol">GrIDDD / Jin ZINC-250k constrained editing — protocol</h1>
+<blockquote><p>## ⛔ SUPERSEDED IN PART — READ THE AMENDMENT AT THE BOTTOM FIRST The section below titled <strong>THE INFERENCE POLICY — frozen before any QED outcome exists</strong> freezes <code>stochastic one-step COMPOSE control</code> (Policy B). <strong>Policy B was refuted on the 64-source development panel (0/320) and is no longer the claim-bearing method.</strong> It is retained here as the historical record and is still reported as the failed developmental approximation. The governing controller is the <strong>⭐ CURRENT AMENDMENT</strong> at the end of this file. The task definition, source cohort, success criterion, 20-candidate budget and size-fixed ablation in the body below all remain in force.</p></blockquote>
+<p><strong>FROZEN before any COMPOSE outcome exists.</strong> Tier-1 under <code>AMENDMENT_PUBLISHED_NUMBER_FIRST.md</code>: <strong>COMPOSE runs alone; GrIDDD's table is cited as reported.</strong> Authorized by <code>AMENDMENT_EDITFLOWS_GRIDDD_HEADLINE.md</code>.</p>
+<h2 id="the-question">The question</h2>
+<blockquote><p>Can a frozen COMPOSE reference process be pointed at <strong>two chemically different</strong> inference-time objectives and perform competitive similarity-constrained molecular editing on an established external benchmark?</p></blockquote>
+<p><code>R_θ</code> is frozen. <strong>Nothing is retrained between the two tasks</strong> — only the inference-time objective changes. That modularity <em>is</em> the claim.</p>
+<h2 id="the-inference-policy-frozen-before-any-qed-outcome-exists">THE INFERENCE POLICY — frozen before any QED outcome exists</h2>
+<p>COMPOSE's banked controller is greedy and deterministic; GrIDDD samples 20 candidates. The gap is closed by sampling from a <strong>stochastic recontrol of the frozen process</strong>:</p>
+<pre><code>pi(y|x) = R_theta(y|x) * QED(y) / sum_z R_theta(z|x) * QED(z)      z in F(x)</code></pre>
+<p>applied in <strong>receding fashion at each of the six committed edits</strong>.</p>
+<p><strong>Name it honestly: <code>stochastic one-step COMPOSE control</code> — a receding one-step QED tilt of the frozen process.</strong> It is an <em>exact</em> one-step terminal tilt (<code>h_0(y) = QED(y)</code>, <code>P^g(x,y) ∝ R_θ(x,y) g(y)</code>), <strong>not</strong> the exact <code>H=6</code> Doob controller, and must never be described as such.</p>
+<p>Properties that made this the choice:</p>
+<ul><li><strong>full legal successor fiber</strong> — no support truncation</li><li>frozen learned <code>R_θ</code> remains the reference law</li><li><strong>parameter-free</strong> — no temperature, no <code>β</code>, no beam width, no shortlist size</li><li>stochastic, so 20 independent outputs are native</li><li>cheap enough to run all 800 authoritative sources</li></ul>
+<h3 id="why-not-the-rollout-ĥ-recorded-with-the-measurement">Why NOT the rollout <code>ĥ</code>, recorded with the measurement</h3>
+<p>The finite-horizon rollout <code>ĥ_{b-1}(y) = QED(greedy landing from y)</code> over the full fiber was specified first and <strong>measured infeasible</strong>, at 12.8 s per kernel call (measured, P0c source 000: 60 expansions in 766 s) and a median fiber of 606:</p>
+<div class='tw'><table><thead><tr><th><code>ĥ</code> variant</th><th>kernel calls</th><th>cost</th><th>wall @ 80</th></tr></thead><tbody><tr><td>rollout, full fiber</td><td>145,440,000</td><td>$24,241</td><td><strong>0.7 years</strong></td></tr><tr><td>rollout, 4/2/2 shortlist</td><td>2,016,000</td><td>$336</td><td>89 h</td></tr><tr><td><strong>one-step tilt (adopted)</strong></td><td><strong>96,000</strong></td><td><strong>$16</strong></td><td>~4 h</td></tr></tbody></table></div>
+<p><strong>~1,500× more kernel work</strong> than the adopted policy. It was not casually abandoned.</p>
+<p>The 8-candidate shortlist variant was <strong>rejected on scientific grounds, not cost</strong>: the 4/2/2 composition is an algorithmic hyperparameter designed for <em>argmax search</em>, never as a probability-support approximation, and candidate inclusion is already influenced by the quantity being optimized. Sampling over it would let a reviewer ask whether the result came from COMPOSE's process or from the shortlist construction — ambiguity we would have paid $336 to buy.</p>
+<h3 id="this-experiment-does-not-carry-the-finite-horizon-claim">This experiment does NOT carry the finite-horizon claim</h3>
+<p>One experiment, one question. GrIDDD asks only whether the frozen process, recontrolled at inference, solves a standard editing task competitively. Finite-horizon reachability is proven by exact-target/verified control; closed- loop vs generate-and-rank by P3/P4. <strong>GrIDDD is not asked to prove external competence AND stochastic sampling AND planning simultaneously.</strong></p>
+<h3 id="frozen-sampling-details">Frozen sampling details</h3>
+<ol><li><strong>20 independent rollouts</strong>, each reset to the original source, same frozen</li></ol>
+<p>horizon. No continuation from another candidate.</p>
+<ol><li><strong>Terminal endpoints only.</strong> No intermediate molecule enters the candidate</li></ol>
+<p>set.</p>
+<ol><li><strong>Frozen seed manifest</strong>, committed before outcomes:</li></ol>
+<p><code>seed = uint64(sha256(protocol_version + task + canonical_source + replicate)[:8])</code>. <strong>Never Python's process-salted <code>hash()</code>.</strong></p>
+<ol><li><strong>Replicates 0–19, duplicates consume attempts.</strong> No resampling until 20</li></ol>
+<p>unique molecules appear.</p>
+<ol><li><strong>One panel. No seed shopping.</strong> Uncertainty by bootstrapping the 800</li></ol>
+<p>source-level outcomes, never by raising the output budget.</p>
+<ol><li><strong>Similarity is evaluation-only</strong> — <code>≥0.4</code> is not part of <code>π</code>.</li><li><strong>No success-triggered early stopping.</strong></li><li><strong>Failures remain failures</strong> — dead ends, invalid, duplicate, and</li></ol>
+<p>below-threshold candidates stay in the denominator.</p>
+<ol><li><strong>Zero-denominator fallback, preregistered:</strong> if <code>Σ R_θ·QED == 0</code>, fall back</li></ol>
+<p>to <code>R_θ</code> itself. Not a constant invented after it happens.</p>
+<h3 id="the-size-fixed-ablation">The size-fixed ablation</h3>
+<p><strong>Identical policy and identical seeds.</strong> The only intervention: successors changing heavy-atom count are removed <strong>before</strong> normalization.</p>
+<h2 id="amended-penalized-logp-is-parked-not-failed">⬇️ AMENDED — penalized LogP is PARKED, not failed</h2>
+<p>The two-task plan is <strong>withdrawn</strong>. QED is a bounded non-negative terminal potential, which is exactly what makes the parameter-free law above possible. Penalized logP is unbounded real and would need <code>g_β(y) = exp(β·f(y))</code> — <strong>a new controller hyperparameter introduced solely to obtain a second table row.</strong></p>
+<blockquote><p>The published benchmark contains additional objectives; the primary comparison uses QED because it admits a parameter-free stochastic terminal potential under the frozen COMPOSE controller. Extending to unbounded utilities requires a separately specified utility-to-potential map and is outside this benchmark.</p></blockquote>
+<p>If a <strong>general</strong> utility-to-positive-potential calibration is ever developed for the method, logP returns naturally. It must not be invented to fill Table 3.</p>
+<h3 id="superseded-the-original-two-task-rationale">(superseded) the original two-task rationale</h3>
+<p>QED alone would demonstrate competence. QED + LogP would have demonstrated modularity, at almost no extra conceptual cost: same benchmark, same data, same evaluation machinery, same 800×20 structure. The two properties are chemically different and both are <strong>cheap deterministic RDKit calculations</strong>.</p>
+<p><strong>DRD2 is excluded, deliberately.</strong> It uses a <em>learned activity oracle</em>, where the budget asymmetry between GrIDDD's 20 sampled candidates and COMPOSE's closed-loop successor inspection becomes a serious fairness problem. QED and LogP avoid that entirely. <strong>This exclusion is frozen now, before any result.</strong></p>
+<h2 id="terminology-this-benchmark-is-not-multiobjective">Terminology — this benchmark is NOT multiobjective</h2>
+<p>GrIDDD's suite is <strong>three separate constrained single-objective editing tasks</strong>, each subject to a similarity floor. It is <em>not</em> simultaneous multi-objective optimization and must never be described as such.</p>
+<ul><li><strong>"general-purpose editor pointed at different objectives"</strong> → yes, this is</li></ul>
+<p>that demonstration.</p>
+<ul><li><strong>"Pareto / several objectives at once"</strong> → <strong>not this benchmark.</strong> That is</li></ul>
+<p>our preference-continuum work, which GrIDDD does not adjudicate.</p>
+<h2 id="the-protocol-taken-verbatim-from-griddd">The protocol, taken verbatim from GrIDDD</h2>
+<div class='tw'><table><thead><tr><th></th><th><strong>LogP</strong></th><th><strong>QED</strong></th></tr></thead><tbody><tr><td>sources</td><td><strong>800</strong> lowest-logP test molecules</td><td><strong>800</strong> test molecules with QED ∈ <strong>[0.7, 0.8]</strong></td></tr><tr><td>candidates per source</td><td><strong>20</strong></td><td><strong>20</strong></td></tr><tr><td>similarity</td><td>Tanimoto <strong>≥ 0.4</strong> and <strong>≥ 0.6</strong> (reported separately)</td><td>Tanimoto <strong>≥ 0.4</strong></td></tr><tr><td>reported quantity</td><td><strong>best improvement</strong> under each threshold</td><td><strong>success rate</strong>: ≥1 candidate reaching QED ∈ <strong>[0.9, 1.0]</strong></td></tr></tbody></table></div>
+<p>Source selection, fingerprints, property calculations, candidate count and aggregation must be <strong>identical</strong> or this is not a tier-1 comparison.</p>
+<h2 id="the-published-table-cited-never-recomputed">The published table — cited, never recomputed</h2>
+<p>GrIDDD, <strong>NeurIPS 2025 poster</strong>. These are their reported values.</p>
+<div class='tw'><table><thead><tr><th>method</th><th>LogP ≥0.4</th><th>LogP ≥0.6</th><th>QED success</th></tr></thead><tbody><tr><td>JT-VAE</td><td>1.03</td><td>0.28</td><td>8.8 %</td></tr><tr><td>CG-VAE</td><td>0.61</td><td>0.25</td><td>4.8 %</td></tr><tr><td>GCPN</td><td>2.49</td><td>0.79</td><td>9.4 %</td></tr><tr><td><strong>GrIDDD</strong></td><td><strong>2.70</strong></td><td><strong>1.33</strong></td><td><strong>45.1 %</strong></td></tr><tr><td><strong>COMPOSE</strong></td><td><em>ours</em></td><td><em>ours</em></td><td><em>ours</em></td></tr></tbody></table></div>
+<p><strong>JT-VAE, CG-VAE and GCPN are inherited benchmark context, not chosen comparators.</strong> They come free with the benchmark. Do <strong>not</strong> spend paper energy on them individually, and do <strong>not</strong> go hunting newer optimizers merely because they appear here. <strong>GrIDDD is the modern row that matters.</strong></p>
+<h2 id="the-mandatory-caveat-task-performance-not-oracle-efficiency">The mandatory caveat — task performance, not oracle efficiency</h2>
+<blockquote><p><strong>This establishes TASK PERFORMANCE on an identical protocol. It is NOT a matched computational or oracle budget.</strong></p></blockquote>
+<p>GrIDDD samples 20 candidates after conditioning; COMPOSE's closed-loop controller may inspect far more successors internally. <strong>Both resource ledgers are reported separately and never pooled</strong>, exactly as in P3/P4. Claiming matched oracle calls here would be false.</p>
+<h2 id="what-counts-as-a-strong-result">What counts as a strong result</h2>
+<p><strong>We do not need to beat GrIDDD.</strong> The bar is credible competitive performance on an externally defined task with <strong>zero objective-specific parameter updates</strong> across two chemically different properties, while every intermediate state stays valid.</p>
+<p>If COMPOSE wins: strong. If comparable: still strong for train-once/control-later. If materially worse: <strong>report it, identify which axis — improvement magnitude or similarity retention — is responsible, and do not modify the objective.</strong></p>
+<h2 id="precedent-why-this-table-is-sufficient">Precedent — why this table is sufficient</h2>
+<p>GrIDDD's own accepted evaluation is disciplined, not a zoo: DiGress and FreeGress for the nearby generative regime, a <strong>three-row</strong> JT-VAE/CG-VAE/GCPN table for standard editing, <strong>one</strong> newer appendix comparator (EDM-SyCo, with its protocol difference explicitly acknowledged), and then internal ablations carrying the actual contribution.</p>
+<p>Our structure matches: <strong>Edit Flows</strong> for the methodological neighbor, <strong>GrIDDD</strong> for native molecular numbers, <strong>matched internal experiments</strong> for the mechanism. A 12-model suite would look <em>less</em> like the accepted precedent, not more.</p>
+<h2 id="barred">Barred</h2>
+<p>Retraining or reimplementing GrIDDD, JT-VAE, CG-VAE or GCPN · adding baselines to lengthen the table · DRD2 · describing this benchmark as multiobjective · claiming matched oracle budgets · tuning the objective after seeing a result.</p>
+<h2 id="record-one-stray-artifact-unread">Record: one stray artifact, unread</h2>
+<p><code>griddd_qed/full_0004.json.gz</code> exists on the volume. It is the 4-source mechanical smoke that completed before its stop took effect, and it contains <strong>official test sources 0–3</strong>.</p>
+<p><strong>It has not been read and will not be.</strong> It is left in place rather than deleted — removing data to tidy a record is worse than labelling it.</p>
+<p>It consumes nothing. Seeds are frozen and deterministic, so those four sources will produce <strong>bit-identical</strong> endpoints whenever the official run happens; reading it now versus reading the official run later is the same information. The file is superseded by <code>full_0800x20.json.gz</code> when that exists, and must never be reported.</p>
+<h3 id="correction-to-the-record-above">Correction to the record above</h3>
+<p>Only <strong>one</strong> source completed, not four — the stop caught the other three mid-flight. Established by reading the record <strong>count only</strong>; no endpoint, QED, similarity or qualification value was inspected.</p>
+<p>So precisely: <strong>1 of 800 official sources was executed, 799 were never run, and the official set is INFERENTIALLY UNCONSUMED — not literally never executed.</strong> Quarantined at <code>docs/QUARANTINE_PRE_FREEZE_SMOKE.json</code>, sha256 <code>8545840839389b7e6156ecdce1a250d075f6f808fe6a0c3fd06fdd6f88294840</code>, marked <code>PRE_FREEZE_SMOKE_DO_NOT_USE</code>. Never read, never merged; rerun from scratch with all 800 once the policy freezes.</p>
+<h2 id="how-development-policies-are-judged-frozen-before-reading-the-dev-panel">How development policies are judged — frozen before reading the dev panel</h2>
+<p><strong>Primary development endpoint: the exact per-trajectory benchmark event.</strong></p>
+<pre><code>1[ QED(y) &gt;= 0.9  AND  Tanimoto(y, x0) &gt;= 0.4 ]</code></pre>
+<p>over all <strong>320</strong> trajectories (64 sources × 5 replicates), analysed with <strong>source clustering</strong>, and <strong>paired on (source, seed)</strong> when two policies are compared. Identical seeds make that pairing exact.</p>
+<p><strong>Secondary, always shown SEPARATELY: terminal QED and Tanimoto.</strong> Reporting them apart is what stops a policy from "improving" by raising QED while quietly destroying similarity.</p>
+<blockquote><p><strong>No combined scalar score is invented.</strong> Not <code>QED − λ·(1−sim)</code>, not a weighted product. The benchmark event is a conjunction; keep it one.</p></blockquote>
+<p><strong>The best-of-5 source success rate is DESCRIPTIVE ONLY.</strong> It may be reported; policy selection must not be driven by 64 noisy binary source outcomes when 320 paired per-trajectory observations are available.</p>
+<h3 id="the-path-to-the-official-set">The path to the official set</h3>
+<pre><code>64 x 5 dev  →  iterate principled variants  →  choose ONE
+            →  128 x 20 FRESH disjoint validation panel
+            →  freeze  →  official 800 x 20, ONCE</code></pre>
+<p>The second panel must be <strong>freshly drawn and disjoint from both the first panel and the official sources</strong>. That is what licenses aggressive learning from these 64 molecules without overfitting the final controller to them. The eligible pool is <strong>66,696</strong>, so untouched development material is not scarce.</p>
+<p><strong>Barred during iteration:</strong> <code>QED^α</code> sweeps, temperatures, arbitrary shortlist sizes, or any knob tuned until the benchmark-shaped metric rises. Permitted: controller variants statable independently of their result.</p>
+<h2 id="revision-the-anytime-stopping-time-is-the-headline-not-fixed-h6">⭐ REVISION — the anytime stopping time is the headline, not fixed-H6</h2>
+<p><strong>Earlier framing was over-anchored on mimicking GrIDDD's inference.</strong> The correct principle:</p>
+<blockquote><p><strong>Match the task and the number of returned candidates. Do NOT force different methods to share internal trajectory semantics.</strong></p></blockquote>
+<p>The published task says: per source, generate <strong>20 candidates</strong>; the source succeeds if <strong>at least one</strong> has QED ≥ 0.9 and Tanimoto ≥ 0.4. Nothing in that definition requires another method's candidate to be the state after a fixed number of <em>its own</em> internal operations.</p>
+<h3 id="the-native-compose-policy-an-online-stopping-time">The native COMPOSE policy — an online stopping time</h3>
+<pre><code>τ_z = min{ t ≤ H : g_z(X_t) = 1 }          return X_τ if reached, else X_H</code></pre>
+<p>One source → one stochastic trajectory → <strong>one returned molecule</strong>, max six edits, stopping as soon as the predeclared region is reached. Run it 20 times → <strong>20 candidates. Not 120.</strong></p>
+<p><strong>This is a policy, not retrospective selection</strong>, and the distinction is the whole argument:</p>
+<div class='tw'><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>⛔ <strong>questionable</strong></td><td>run six edits, inspect all six afterwards, return whichever scored best</td></tr><tr><td>✅ <strong>clean</strong></td><td>at <code>x_t</code>, observe the predeclared goal is satisfied, execute <code>STOP</code></td></tr></tbody></table></div>
+<p>The clean version never consults a future state to decide whether an earlier one was better. <strong>First qualifying state. Period.</strong> <em>"Step 3 had QED 0.889 but was prettier"</em> is barred, and so is any use of later states to re-rank earlier ones.</p>
+<p><strong><code>STOP</code> belongs in an executable molecular controller.</strong> Why would a lead-optimization algorithm be required to keep modifying a molecule that already satisfies the requested specification?</p>
+<h3 id="why-this-is-exploiting-the-representation-not-gaming-it">Why this is exploiting the representation, not gaming it</h3>
+<p>GrIDDD's internal states are noisy diffusion intermediates — part of its denoising computation, not candidate molecules. <strong>COMPOSE was engineered so that every committed state is already a complete candidate.</strong> Discarding a successful intermediate purely because another method cannot expose one would remove a real COMPOSE advantage to make the algorithms look superficially alike.</p>
+<h3 id="the-three-row-presentation-the-objection-becomes-evidence">The three-row presentation — the objection becomes evidence</h3>
+<div class='tw'><table><thead><tr><th>method</th><th>inference</th><th>returned/source</th><th>QED success</th></tr></thead><tbody><tr><td><strong>GrIDDD</strong></td><td>property-conditioned diffusion</td><td>20</td><td><strong>45.1 % reported</strong></td></tr><tr><td><strong>COMPOSE — fixed H6</strong> <em>(ablation)</em></td><td>region <code>h_φ</code>, forced six edits</td><td>20</td><td>—</td></tr><tr><td><strong>COMPOSE — native anytime</strong> <em>(headline)</em></td><td>region <code>h_φ</code>, STOP on first hit, max H6</td><td>20</td><td>—</td></tr></tbody></table></div>
+<p><strong>The native number is the primary COMPOSE result.</strong> Fixed-H6 is the conservative ablation answering <em>how much comes specifically from anytime execution?</em></p>
+<p>If anytime ≫ fixed-H6, the conclusion is <strong>not</strong> "COMPOSE peeked at intermediates." It is: <em>because COMPOSE evolves through evaluable molecules, it can terminate once the specification is satisfied; forcing it to continue editing destroys successful leads.</em> <strong>That is a result about the architecture.</strong> If they are close, stopping did not matter here. Either outcome is informative.</p>
+<h3 id="the-only-wording-that-changes">The only wording that changes</h3>
+<blockquote><p>same Jin/GrIDDD source cohort, same QED/similarity success criterion, same allowance of <strong>20 returned candidates per source</strong>; <strong>inference algorithms differ natively by method.</strong></p></blockquote>
+<p><strong>Not</strong> "identical inference protocol."</p>
+<h3 id="consequence-for-h-φ">Consequence for <code>h_φ</code></h3>
+<p>The claim-bearing native controller targets <strong>first-passage</strong> reachability:</p>
+<pre><code>h_hit_b(x,z) = P_{R_θ}( ∃ t ≤ b : X_t ∈ B_z | X_0 = x )     with h = 1 on B_z</code></pre>
+<p>More natural for optimization than <em>"what is the probability I am inside the region exactly six edits from now?"</em> Equivalently, terminal-Doob on an <strong>absorbed</strong> chain.</p>
+<p><strong>The corpus stores both</strong>, so no rerun is needed: <code>terminal_success</code>, <code>ever_hit</code>, and the <strong>first-hit step</strong>. Fixed-horizon terminal remains the matched ablation target.</p>
+<h3 id="what-the-census-must-therefore-report-per-region">What the census must therefore report, per region</h3>
+<ul><li>terminal-at-H6 prevalence</li><li><strong>hit-by-H6 prevalence</strong></li><li>distribution of <strong>first-hit step</strong></li><li><strong>fraction of hits subsequently LOST by H6</strong></li></ul>
+<p>That last number is the scientifically interesting one: if many trajectories reach <code>0.90/0.40</code> and then fall back out, forced fixed-H6 semantics are actively wasting COMPOSE's strongest structural feature.</p>
+<hr>
+<h1 id="current-amendment-the-claim-bearing-controller-is-region-h-φ">⭐ CURRENT AMENDMENT — the claim-bearing controller is region-<code>h_φ</code></h1>
+<p><strong>Everything above this line is HISTORICAL where it concerns the inference policy.</strong> The section titled <em>THE INFERENCE POLICY — frozen before any QED outcome exists</em> freezes <code>stochastic one-step COMPOSE control</code> (Policy B). <strong>Policy B was refuted 0/320 on the disjoint 64-source development panel, before any official Jin test outcome existed, and is no longer the claim-bearing method.</strong> It is retained as a reported developmental negative control.</p>
+<p><strong>The claim-bearing controller is region-<code>h_φ</code></strong>, and its full implementation contract — Policy B's rejection, exclusions, region goal language, the 1,024 × 2 × H24 corpus, architecture and training contract, STOP semantics, the 64 → 128 → 800 ladder, both escalation triggers, compute accounting and the no-rescue rules — is frozen in:</p>
+<blockquote><p>### 📄 <code>docs/HPHI_QED_PREREGISTRATION.md</code> — the binding implementation protocol</p></blockquote>
+<p>The paper-level ruling is section J of <code>docs/MASTER_PLAN_EXPERIMENTS_AND_COMPARATORS.md</code>.</p>
+<p><strong>Still governed by the body of THIS document, unchanged:</strong> the task definition, source cohort, success criterion, 20 returned candidates per source, and the size-fixed ablation.</p></div></body></html>

@@ -1,0 +1,163 @@
+<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Horizon amendment — pre-controller-outcome</title><style>
+:root{--bg:#fbfbfa;--fg:#1a1a19;--muted:#6b6b66;--rule:#e3e2dd;--accent:#7a4a2f;
+--code-bg:#f2f1ed;--th:#f6f5f2;--quote:#f7f6f2;}
+@media (prefers-color-scheme:dark){:root{--bg:#17171a;--fg:#e6e5e1;--muted:#9a998f;
+--rule:#33333a;--accent:#d99a6c;--code-bg:#212127;--th:#1f1f25;--quote:#1d1d23;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;}
+.wrap{max-width:60rem;margin:0 auto;padding:3rem 1.5rem 6rem;}
+h1,h2,h3,h4{line-height:1.25;text-wrap:balance;margin:2.2em 0 .6em;}
+h1{font-size:2rem;letter-spacing:-.02em;border-bottom:2px solid var(--rule);padding-bottom:.4em;}
+h2{font-size:1.45rem;letter-spacing:-.01em;border-bottom:1px solid var(--rule);padding-bottom:.3em;}
+h3{font-size:1.15rem;} h4{font-size:1rem;color:var(--muted);text-transform:uppercase;
+letter-spacing:.06em;}
+h1:first-child{margin-top:0}
+p{margin:.9em 0}
+a{color:var(--accent)}
+code{background:var(--code-bg);padding:.12em .35em;border-radius:4px;
+font:.88em/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}
+pre{background:var(--code-bg);padding:1rem 1.1rem;border-radius:8px;overflow-x:auto;
+border:1px solid var(--rule);}
+pre code{background:none;padding:0;font-size:.85rem;line-height:1.55;}
+blockquote{margin:1.2em 0;padding:.8em 1.1em;background:var(--quote);
+border-left:3px solid var(--accent);border-radius:0 6px 6px 0;}
+blockquote p:first-child{margin-top:0}blockquote p:last-child{margin-bottom:0}
+.tw{overflow-x:auto;margin:1.3em 0;border:1px solid var(--rule);border-radius:8px;}
+table{border-collapse:collapse;width:100%;font-size:.92rem;}
+th,td{padding:.55em .8em;border-bottom:1px solid var(--rule);text-align:left;
+vertical-align:top;}
+th{background:var(--th);font-weight:600;white-space:nowrap;}
+tr:last-child td{border-bottom:none}
+td code{white-space:nowrap}
+hr{border:none;border-top:2px solid var(--rule);margin:2.5em 0}
+ul,ol{padding-left:1.5em;margin:.9em 0}
+li{margin:.3em 0}
+strong{font-weight:650}
+.toc{background:var(--th);border:1px solid var(--rule);border-radius:8px;
+padding:1rem 1.4rem;margin:2rem 0;}
+.toc h4{margin:.2em 0 .6em}
+.toc a{text-decoration:none;display:block;padding:.15em 0;font-size:.93rem}
+.toc a:hover{text-decoration:underline}
+.toc .lvl2{padding-left:1rem}
+</style></head><body><div class='wrap'><div class='toc'><h4>Contents</h4><a class="lvl1" href="#horizon-amendment-pre-controller-outcome">Horizon amendment — pre-controller-outcome</a><a class="lvl2" href="#what-the-qualification-returned">What the qualification returned</a><a class="lvl2" href="#the-corpus-amendment">The corpus amendment</a><a class="lvl2" href="#the-native-controllers-budget">The native controller&#x27;s budget</a><a class="lvl2" href="#what-is-explicitly-not-authorized">What is explicitly NOT authorized</a><a class="lvl2" href="#one-controller-qualification-then-the-full-corpus">⭐ ONE CONTROLLER QUALIFICATION — then the full corpus</a><a class="lvl2" href="#the-remaining-ladder-no-further-design">The remaining ladder — no further design</a><a class="lvl2" href="#what-counts-as-success-not-merely-beating-451">What counts as success — not merely beating 45.1 %</a><a class="lvl2" href="#what-the-steering-test-showed-and-what-it-does-not-forecast">What the steering test showed, and what it does NOT forecast</a></div><h1 id="horizon-amendment-pre-controller-outcome">Horizon amendment — pre-controller-outcome</h1>
+<p><strong>Amends <code>HPHI_V1_CORPUS_PREREGISTRATION.md</code>. Made BEFORE any controller was trained and BEFORE any controller outcome exists. The original H6 preregistration no longer applies and is not pretended to.</strong></p>
+<h2 id="what-the-qualification-returned">What the qualification returned</h2>
+<p><strong>The frozen selection rule did NOT fire.</strong> It required <em>"the smallest horizon at which the nontrivial reachability curve has essentially saturated."</em></p>
+<div class='tw'><table><thead><tr><th>tier</th><th>H3→H6</th><th>H6→H12</th><th>H12→H24</th><th>decay ratio</th></tr></thead><tbody><tr><td>≥0.80</td><td>+60</td><td>+46</td><td>+40</td><td>0.87</td></tr><tr><td>≥0.85</td><td>+13</td><td>+29</td><td><strong>+29</strong></td><td><strong>1.00</strong></td></tr></tbody></table></div>
+<p>At <code>≥0.85</code> the last doubling bought exactly as much as the previous one. <strong>No horizon in {3, 6, 12, 24} satisfies the criterion.</strong></p>
+<blockquote><p><strong>Recorded verbatim: the saturation criterion returned "no saturation ≤ 24" and therefore did not choose a horizon.</strong></p></blockquote>
+<p><strong>We do NOT run H48 or H96.</strong> Unguided base-process saturation is <strong>not the meaningful control criterion</strong> — the controller's job is to concentrate probability onto rare productive routes, not to wait for an unguided random walk to exhaust them.</p>
+<h2 id="the-corpus-amendment">The corpus amendment</h2>
+<pre><code>    1,024 sources  ×  2 trajectories  ×  H24   =   49,152 committed transitions
+    1,024 sources  ×  8 trajectories  ×  H6    =   49,152      (original)</code></pre>
+<p><strong>Exactly the same transition budget.</strong> The change is depth, not spend.</p>
+<div class='tw'><table><thead><tr><th>property</th><th>why it matters</th></tr></thead><tbody><tr><td>identical transition/compute scale</td><td>the amendment is not a 4× compute grab</td></tr><tr><td><strong>1,024 sources preserved</strong></td><td>chemical diversity untouched</td></tr><tr><td>budgets now cover <code>b = 0 … 24</code></td><td>the controller learns a real budget axis, not one truncated at 6</td></tr><tr><td>far more distinct depth/state structure per trajectory</td><td>richer supervision from the same spend</td></tr><tr><td>no extra root-rollout computation</td><td>root Monte Carlo is the <em>wrong</em> place for precision</td></tr></tbody></table></div>
+<p><strong>Local Monte-Carlo precision comes later from the already-preregistered conditional continuations</strong>, not from more roots.</p>
+<p>At the measured ~1.2 % unguided <code>0.90/0.40</code> rate at H24, 2,048 root trajectories yield on the order of a few dozen hard-region hits. <strong>That is acceptable.</strong> The <code>0.80</code> and <code>0.85</code> tiers supply dense structured supervision, and if <code>0.90</code> needs precision we <strong>branch continuations from informative high-QED / similarity-preserving states</strong> rather than spraying roots.</p>
+<h2 id="the-native-controllers-budget">The native controller's budget</h2>
+<blockquote><p><strong>Maximum budget H24, with online first-hit STOP.</strong> <strong>H6 and H12 remain reported shorter-budget operating points.</strong></p></blockquote>
+<p>The controller's target is <strong>finite-budget hitting reachability</strong>:</p>
+<pre><code>h_b(x, z) = P( ∃ t ≤ b : X_t ∈ B_z | X_0 = x )</code></pre>
+<p>with the <strong>exact boundary condition</strong> <code>h_b(x,z) = 1</code> whenever <code>x ∈ B_z</code> — the network is never asked to learn that from trajectories, and the policy executes <strong>STOP</strong>.</p>
+<p>Both <code>terminal</code> and <code>ever_hit / first_hit</code> labels remain stored; the native controller trains on hitting, and fixed-horizon terminal stays the matched ablation.</p>
+<h2 id="what-is-explicitly-not-authorized">What is explicitly NOT authorized</h2>
+<p><strong>Self-avoidance · novelty bonuses · beam search · QED temperatures or powers · reward shaping.</strong> None is motivated by a measured failure. <strong><code>0.95</code> is an auxiliary rare-tail fact, not a problem to solve.</strong></p>
+<h2 id="one-controller-qualification-then-the-full-corpus">⭐ ONE CONTROLLER QUALIFICATION — then the full corpus</h2>
+<p><strong>Superseded an A/B/C/D ladder. That was caution turning into bureaucracy.</strong></p>
+<p>We have already paid for the pilot trajectories and already established: H24 rollout mechanics, exact nesting, sensible region geometry, green feature tests, the sampler parity gate, and the boundary condition. <strong>We do not need another ladder of mini-experiments.</strong></p>
+<p>The <strong>one</strong> thing never yet shown: <strong>that the new region-conditioned <code>h_φ</code> can steer anything.</strong> So one end-to-end qualification, on data we already own:</p>
+<pre><code>1  split the existing pilot BY SOURCE into throwaway train / held-out
+2  train a small region-h_φ
+3  verify on HELD-OUT sources that it learns nontrivial reachability --
+   not a constant, and not a current-QED shortcut
+4  plug that exact checkpoint into the Stage-A1 controlled sampler
+5  test whether guidance improves the well-powered 0.80 / 0.85 regions
+   over unguided R_θ</code></pre>
+<h3 id="the-go-criterion">The GO criterion</h3>
+<blockquote><p><strong>GO to the full 1,024 × 2 × H24 corpus if the learned value is demonstrably informative on held-out sources AND controlled sampling moves <code>0.80</code>/<code>0.85</code> in the correct direction.</strong></p></blockquote>
+<p><strong>Not</strong> impressive benchmark numbers. <strong>Not</strong> <code>0.90</code> success — unguided <code>0.90/0.40</code> is ~1.2 % at H24, so this scale is badly underpowered for it, and demanding it would be measuring noise.</p>
+<p><strong>If it passes: launch the full corpus immediately.</strong> No second 128-source pilot, no further architecture smoke, no 256→512→1024 creep.</p>
+<p><strong>If it fails: that is valuable.</strong> Spending more on labels before understanding why the value learner cannot navigate the easy regions would be waste.</p>
+<pre><code>existing H24 pilot  →  ONE end-to-end h_φ qualification  →  full corpus
+        ↓
+real h_φ  →  64-source dev  →  128-source validation  →  800 official</code></pre>
+<p><strong>That is enough staging.</strong></p>
+<p><strong>Note:</strong> the ~900 molecules being encoded are <em>already-generated pilot states</em>. No new molecules, no new sources, no scale-up.</p>
+<h2 id="the-remaining-ladder-no-further-design">The remaining ladder — no further design</h2>
+<pre><code>1  amend corpus to 1,024 × 2 × H24                         ← this document
+2  tiny end-to-end h_φ engineering smoke on the EXCLUDED
+   H24 pilot data; verify encoding, b ∈ [0,24], the exact
+   in-region boundary, labels, batching, checkpointing and
+   Stage-A1 sampling — then THROW THE WEIGHTS AWAY
+3  generate the real corpus
+4  train ONE universal region-h_φ: frozen encoder, budget
+   conditioning, goal conditioning, MC reachability target
+   + Bellman consistency. R_θ stays frozen.
+5  if the 0.90 tail is under-labelled → conditional
+   continuations from preregistered informative states
+6  evaluate on the 64-source dev panel:
+       unguided R_θ   vs   Policy B   vs   R_θ·h_φ
+   report success, first-hit step, similarity, QED, value
+   calibration, acceptance rate, and success at H6/H12/H24
+7  ONE measurement decides: healthy acceptance → stop.
+   Calibrated but collapsed acceptance → frozen twisted-SMC
+   escalation. Same h_φ, same R_θ; SMC is inference.
+8  fresh 128-source validation, ONCE → freeze
+9  official 800, 20 native trajectories, max H24, STOP at
+   first 0.90/0.40 → then size-fixed Experiment C, same
+   controller and seeds</code></pre>
+<p><strong>Then move on. There is no QED rescue branch.</strong></p>
+<h2 id="what-counts-as-success-not-merely-beating-451">What counts as success — not merely beating 45.1 %</h2>
+<pre><code>unguided R_θ       rare success
+Policy B           fails
+region h_φ         LARGE AMPLIFICATION</code></pre>
+<p>while <code>R_θ</code> never changes, successful controlled trajectories often <strong>stop well before H24</strong>, H6/H12 performance shows the GPS <strong>compresses search depth</strong>, and the same architecture then transfers to new regions and objectives.</p>
+<p>That demonstrates the claim the whole paper rests on:</p>
+<blockquote><p>### <strong>The molecular prior supplies plausible dynamics; future-aware control supplies purpose.</strong></p></blockquote>
+<hr>
+<h2 id="what-the-steering-test-showed-and-what-it-does-not-forecast">What the steering test showed, and what it does NOT forecast</h2>
+<h3 id="the-steering-test-passed">The steering test PASSED</h3>
+<div class='tw'><table><thead><tr><th>arm</th><th>hit rate <code>0.80/0.40</code></th><th>median first hit</th><th>end similarity</th></tr></thead><tbody><tr><td>unguided <code>R_θ</code></td><td>12/64 = <strong>0.188</strong></td><td>2.5</td><td>0.476</td></tr><tr><td><strong><code>R_θ·h_φ</code></strong></td><td><strong>25/64 = 0.391</strong></td><td><strong>1.0</strong></td><td>0.785</td></tr></tbody></table></div>
+<p><strong>~2.1× amplification, and faster.</strong> Crucially it is <strong>not</strong> an endpoint coincidence — the de-biased decision diagnostic over 110 audited decisions:</p>
+<pre><code>h_chosen                  0.5892
+E_R[h] (fixed batch)      0.3063        -&gt;  ~1.9x
+predicted E_R[h²]/E_R[h]  0.5632        &lt;-  the identity HOLDS
+h_chosen &gt; E_R[h] on      80.0% of decisions</code></pre>
+<p>The identity can only hold with a strict gap when <code>h_φ</code> has genuine variance across successors. <strong>The mechanism we need is functioning.</strong></p>
+<h3 id="the-scale-of-what-is-actually-being-asked">The scale of what is actually being asked</h3>
+<p>GrIDDD reports <strong>45.1 % source-level success with 20 candidates.</strong> Under a homogeneous approximation, <code>1 − (1−p)²⁰ = 0.451</code> needs only</p>
+<pre><code>p ≈ 2.95 % per trajectory</code></pre>
+<p>Against unguided <code>1.2 %</code> at H24, that is <strong>~2.46× amplification</strong> — and the steering test already achieved <strong>2.1×</strong> on an easier region with a deliberately primitive controller.</p>
+<blockquote><p><strong>We are not asking the controller for a 40× miracle.</strong></p></blockquote>
+<h3 id="but-that-arithmetic-is-not-a-forecast-heterogeneity-dominates">⚠️ But that arithmetic is NOT a forecast — heterogeneity dominates</h3>
+<p>Same mean per-trajectory probability, different spread across sources:</p>
+<div class='tw'><table><thead><tr><th>distribution over sources</th><th>mean <code>p</code></th><th>source-level success</th></tr></thead><tbody><tr><td>all sources equal, 2.95 %</td><td>0.0295</td><td><strong>0.451</strong></td></tr><tr><td>half zero, half 5.9 %</td><td>0.0295</td><td>0.352</td></tr><tr><td>90 % zero, 10 % at 29.5 %</td><td>0.0295</td><td><strong>0.100</strong></td></tr></tbody></table></div>
+<p><strong>Identical mean, 4.5× spread in the benchmark number.</strong> If many official sources have essentially zero reachable <code>0.90/0.40</code> probability, averaging 3 % over trajectories does <strong>not</strong> produce 45 % source success. <strong>The distribution ACROSS sources decides the benchmark</strong>, which is exactly why the 64 / 128 / 800 source-level runs are the real test and this arithmetic is orientation only.</p>
+<h3 id="do-not-extrapolate-21-to-090">Do NOT extrapolate 2.1× to <code>0.90</code></h3>
+<p>The smoke controller was deliberately primitive: trained on the tiny excluded pilot, almost no <code>0.90</code> supervision, tested at H6, already hitting its proposal cap (32 cap hits), no targeted continuation labels for the tail, and no SMC despite the rare-event regime. <strong>The architecture was shown to work before being given the machinery built for the hard region.</strong> That is precisely when to scale.</p>
+<h3 id="what-would-make-this-pessimistic">What would make this pessimistic</h3>
+<ol><li>the full <code>h_φ</code> calibrates well but moves <code>0.90/0.40</code> only from ~1.2 % to ~1.4 %</li><li>many official-like sources turn out to have <strong>zero</strong> reachable probability</li><li><code>h_φ</code> cannot distinguish successors in hard-tail states <strong>even with</strong> targeted</li></ol>
+<p>continuation labels</p>
+<p><strong>None of these has been observed.</strong> What has: rare-but-real <code>0.90</code> reachability, clean difficulty ordering, strong budget dependence, real state-conditional value variation, ~2× controlled amplification on a held-out easier goal, earlier hitting, and a frozen rare-event escalation.</p>
+<blockquote><p><strong>The position has moved from "maybe the controller idea does not work" to "the controller works — the question is how much tail amplification it gets when properly trained."</strong></p></blockquote>
+<h3 id="correction-the-identity-check-is-de-biased-not-independent">Correction: the identity check is de-biased, NOT independent</h3>
+<p>I called the predicted-vs-observed agreement "independent confirmation." <strong>That overstates it</strong> — both quantities are evaluations of the <em>same</em> <code>h_φ</code> under the <em>same</em> sampling mechanism. It is a clean, <strong>de-biased mechanistic validation</strong>, which is what it was designed to be, and it should be described that way.</p>
+<p><strong>What it does establish, exactly.</strong> For positive <code>h</code>:</p>
+<pre><code>E_R[h²]/E_R[h] − E_R[h]  =  Var_R(h) / E_R[h]</code></pre>
+<p>so a strict gap means <code>h_φ</code> has <strong>within-state variance across legal successors</strong>. Measured:</p>
+<pre><code>0.5632 − 0.3063 = 0.2569   →   Var_R(h) = 0.0787,  sd = 0.281</code></pre>
+<p><strong>Mean 0.306 with sd 0.281 on [0,1] — substantial within-state spread.</strong> A model that had learned only <em>"0.90 is globally harder than 0.80"</em> would assign near-identical value to every road from a state, give <code>sd ≈ 0</code>, and <strong>could not steer at all.</strong> Successor discrimination is the one thing control requires, and it is present.</p>
+<h3 id="the-heterogeneity-table-is-a-warning-not-a-measurement">The heterogeneity table is a WARNING, not a measurement</h3>
+<p>Those three rows are <strong>hypothetical distributions with the same mean</strong>. They establish <em>sensitivity</em> to heterogeneity. <strong>They do not show that COMPOSE has the "90 % of sources unreachable" shape</strong> — that has not been measured.</p>
+<p>What <em>has</em> been established, weaker but favourable: across the development population, <code>0.90/0.40</code> routes exist under an <strong>unguided, goal-blind</strong> <code>R_θ</code>. How broadly they are distributed across sources is what the full controller must tell us.</p>
+<h3 id="therefore-track-intensity-and-coverage-separately">Therefore: track INTENSITY and COVERAGE separately</h3>
+<p><strong>Do not optimize or celebrate pooled trajectory hit rate alone.</strong> The benchmark gives each source <strong>one binary success</strong> regardless of how many times an easy source succeeds.</p>
+<div class='tw'><table><thead><tr><th>axis</th><th>question</th></tr></thead><tbody><tr><td><strong>intensity</strong></td><td>on sources where success is possible, how much does control raise the probability?</td></tr><tr><td><strong>coverage</strong></td><td>across how many <em>different</em> sources does control create a meaningful chance?</td></tr></tbody></table></div>
+<blockquote><p>The dream is <strong>not</strong> <em>"ten sources become incredibly easy."</em> It is <strong>"a broad fraction of sources move from low-but-nonzero reachability into useful success probability."</strong> Then best-of-20 becomes powerful.</p></blockquote>
+<p><strong>The 64-source dev experiment must therefore report the source-level distribution</strong>, not only pooled trajectories:</p>
+<pre><code>fraction of sources with   0/20   ·   1+/20   ·   5+/20   successes</code></pre>
+<p>That distinguishes <strong>broad amplification</strong> from <strong>hammering a few easy molecules</strong> — and a coverage failure is not something twenty candidates can rescue, because a source with essentially zero reachable probability stays at zero however often it is sampled.</p>
+<p><strong>This is why the dev → validation → official sequence is source-based rather than pooled.</strong></p>
+<h3 id="net">Net</h3>
+<p><strong>Nothing here downgraded the project.</strong> It killed one overly simple forecast — <em>"3 % mean trajectory success = 45 % benchmark success"</em> — which is good, because we now know the actual thing the controller must accomplish: <strong>broad amplification across sources, not merely higher pooled hit probability.</strong> The steering result is a legitimate reason to think that is achievable.</p></div></body></html>

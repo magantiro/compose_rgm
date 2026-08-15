@@ -1,0 +1,189 @@
+<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>QED / GrIDDD region-`h_φ` controller — PREREGISTRATION</title><style>
+:root{--bg:#fbfbfa;--fg:#1a1a19;--muted:#6b6b66;--rule:#e3e2dd;--accent:#7a4a2f;
+--code-bg:#f2f1ed;--th:#f6f5f2;--quote:#f7f6f2;}
+@media (prefers-color-scheme:dark){:root{--bg:#17171a;--fg:#e6e5e1;--muted:#9a998f;
+--rule:#33333a;--accent:#d99a6c;--code-bg:#212127;--th:#1f1f25;--quote:#1d1d23;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;}
+.wrap{max-width:60rem;margin:0 auto;padding:3rem 1.5rem 6rem;}
+h1,h2,h3,h4{line-height:1.25;text-wrap:balance;margin:2.2em 0 .6em;}
+h1{font-size:2rem;letter-spacing:-.02em;border-bottom:2px solid var(--rule);padding-bottom:.4em;}
+h2{font-size:1.45rem;letter-spacing:-.01em;border-bottom:1px solid var(--rule);padding-bottom:.3em;}
+h3{font-size:1.15rem;} h4{font-size:1rem;color:var(--muted);text-transform:uppercase;
+letter-spacing:.06em;}
+h1:first-child{margin-top:0}
+p{margin:.9em 0}
+a{color:var(--accent)}
+code{background:var(--code-bg);padding:.12em .35em;border-radius:4px;
+font:.88em/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}
+pre{background:var(--code-bg);padding:1rem 1.1rem;border-radius:8px;overflow-x:auto;
+border:1px solid var(--rule);}
+pre code{background:none;padding:0;font-size:.85rem;line-height:1.55;}
+blockquote{margin:1.2em 0;padding:.8em 1.1em;background:var(--quote);
+border-left:3px solid var(--accent);border-radius:0 6px 6px 0;}
+blockquote p:first-child{margin-top:0}blockquote p:last-child{margin-bottom:0}
+.tw{overflow-x:auto;margin:1.3em 0;border:1px solid var(--rule);border-radius:8px;}
+table{border-collapse:collapse;width:100%;font-size:.92rem;}
+th,td{padding:.55em .8em;border-bottom:1px solid var(--rule);text-align:left;
+vertical-align:top;}
+th{background:var(--th);font-weight:600;white-space:nowrap;}
+tr:last-child td{border-bottom:none}
+td code{white-space:nowrap}
+hr{border:none;border-top:2px solid var(--rule);margin:2.5em 0}
+ul,ol{padding-left:1.5em;margin:.9em 0}
+li{margin:.3em 0}
+strong{font-weight:650}
+.toc{background:var(--th);border:1px solid var(--rule);border-radius:8px;
+padding:1rem 1.4rem;margin:2rem 0;}
+.toc h4{margin:.2em 0 .6em}
+.toc a{text-decoration:none;display:block;padding:.15em 0;font-size:.93rem}
+.toc a:hover{text-decoration:underline}
+.toc .lvl2{padding-left:1rem}
+</style></head><body><div class='wrap'><div class='toc'><h4>Contents</h4><a class="lvl1" href="#qed-griddd-region-h-φ-controller-preregistration">QED / GrIDDD region-`h_φ` controller — PREREGISTRATION</a><a class="lvl2" href="#1-why-policy-b-was-rejected">1 · Why Policy B was rejected</a><a class="lvl2" href="#2-frozen-r-θ-the-paper-wide-invariant">2 · Frozen `R_θ` — the paper-wide invariant</a><a class="lvl2" href="#3-data-exclusions-and-disjointness">3 · Data — exclusions and disjointness</a><a class="lvl2" href="#4-the-corpus">4 · The corpus</a><a class="lvl2" href="#5-region-goal-language">5 · Region goal language</a><a class="lvl2" href="#6-h-φ-architecture-and-training-contract">6 · `h_φ` — architecture and training contract</a><a class="lvl2" href="#7-inference-the-native-controller">7 · Inference — the native controller</a><a class="lvl2" href="#8-escalations-permitted-only-under-pre-existing-triggers">8 · Escalations — permitted ONLY under pre-existing triggers</a><a class="lvl2" href="#9-the-evaluation-ladder">9 · The evaluation ladder</a><a class="lvl2" href="#10-compute-accounting-this-experiments-instance">10 · Compute accounting — this experiment&#x27;s instance</a><a class="lvl2" href="#11-execution-budget-ledger">11 · Execution budget ledger</a><a class="lvl2" href="#11b-optimization-sequencing-before-the-128-not-after">11b · Optimization sequencing — BEFORE the 128, not after</a><a class="lvl2" href="#12-inference-cost-reporting-and-the-compute-frontier">12 · Inference-cost reporting and the compute frontier</a><a class="lvl2" href="#13-smc-escalation-completion-frozen-before-any-smc-performance-is-observed">13 · SMC escalation completion — FROZEN BEFORE ANY SMC PERFORMANCE IS OBSERVED</a></div><h1 id="qed-griddd-region-h-φ-controller-preregistration">QED / GrIDDD region-<code>h_φ</code> controller — PREREGISTRATION</h1>
+<p><strong>Binding implementation protocol for the GrIDDD/QED experiment.</strong> The paper-level ruling lives in section J of <code>MASTER_PLAN_EXPERIMENTS_AND_COMPARATORS.md</code>; this document is the <em>how</em>. Task definition, source cohort, success criterion, 20-candidate budget and the size-fixed ablation remain governed by <code>GRIDDD_JIN_PROTOCOL.md</code>.</p>
+<blockquote><p><strong>FROZEN 2026-08-14, before any official Jin test outcome exists.</strong> <code>h_φ</code>'s weights do not yet exist at the time of freezing. That is the point: the controller cannot be chosen after seeing the official result.</p></blockquote>
+<hr>
+<h2 id="1-why-policy-b-was-rejected">1 · Why Policy B was rejected</h2>
+<p><code>GRIDDD_JIN_PROTOCOL.md</code> preregistered <strong><code>stochastic one-step COMPOSE control</code></strong> (Policy B) — a receding one-step QED tilt, <code>π(y|x) ∝ R_θ(y|x)·QED(y)</code> over the full legal fiber.</p>
+<p>It was evaluated on the <strong>disjoint 64-source development panel</strong> and produced <strong>0 successes in 320 trajectories</strong>. No official Jin test outcome had been observed at any point.</p>
+<p><strong>Diagnosis, not merely a failure count.</strong> A one-step terminal tilt reweights by the <em>immediate</em> QED of each successor. The benchmark region (QED ≥ 0.90 <strong>and</strong> similarity ≥ 0.40) is typically not reachable in one edit from a source at QED ≈ 0.75, so the quantity Policy B optimizes is nearly uninformative about whether the region is reachable <em>at all</em> within the remaining budget. It is a greedy approximation to a finite-horizon reachability problem, and on this task the approximation carries almost no signal.</p>
+<h3 id="the-wording-rule-binding-on-the-manuscript">The wording rule — binding on the manuscript</h3>
+<p>Region-<code>h_φ</code> is a <strong>pre-outcome amendment consistent with the pre-existing finite-horizon COMPOSE controller</strong>, motivated by a developmental failure of the cheap one-step approximation.</p>
+<p><strong>Do NOT write</strong> that <code>h_φ</code> "restores" an originally-frozen policy, or that compute cost was the only thing ever separating them. <code>GRIDDD_JIN_PROTOCOL.md</code> contains a section explicitly titled <em>"Why NOT the rollout <code>ĥ</code>"</em> — the protocol <strong>declined</strong> it. The stronger phrasing is refutable from our own document and is barred. The amendment's validity rests solely on predating official evaluation, and that is sufficient.</p>
+<p><strong>Policy B is retained as a reported developmental negative control</strong>, not deleted.</p>
+<hr>
+<h2 id="2-frozen-r-θ-the-paper-wide-invariant">2 · Frozen <code>R_θ</code> — the paper-wide invariant</h2>
+<div class='tw'><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>checkpoint</td><td><code>sha256 c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8</code></td></tr><tr><td>retrained for this experiment?</td><td><strong>NO</strong> — and not for any experiment in the paper</td></tr><tr><td>role of <code>R_θ</code> here</td><td>reference transition law <strong>and</strong> frozen feature extractor (encoder used unchanged; gradients never flow into it)</td></tr></tbody></table></div>
+<hr>
+<h2 id="3-data-exclusions-and-disjointness">3 · Data — exclusions and disjointness</h2>
+<div class='tw'><table><thead><tr><th>split</th><th>n</th><th>role</th></tr></thead><tbody><tr><td><code>hphi_train_1024</code></td><td>1,024</td><td><code>h_φ</code> training corpus roots</td></tr><tr><td><code>hphi_valid_128</code></td><td>128</td><td>fresh validation, used <strong>ONCE</strong></td></tr><tr><td><code>dev_panel_qed_64</code></td><td>64</td><td>controller development panel</td></tr><tr><td>official Jin test</td><td>800</td><td><strong>never touched until the final run</strong></td></tr></tbody></table></div>
+<p><strong>Excluded from the eligible pool before sampling:</strong> the official Jin <code>qed</code> / <code>logp04</code> / <code>logp06</code> test sources <strong>and</strong> the 64-source dev panel — <strong>1,516 excluded</strong> from <strong>66,632 eligible</strong>.</p>
+<p><strong>Verified disjoint</strong> (recomputed at freeze time): <code>train ∩ valid = 0</code>, <code>train ∩ dev = 0</code>, <code>valid ∩ dev = 0</code>.</p>
+<p><strong>Root selection:</strong> QED-stratified into 10 strata of width 0.01 over <code>[0.70, 0.80]</code>; deterministic <code>sha256</code> rank within each stratum; <strong>no RNG</strong>. Equal allocation per stratum, deliberately <em>not</em> following the population skew, so the harder low-QED sources are covered.</p>
+<hr>
+<h2 id="4-the-corpus">4 · The corpus</h2>
+<div class='tw'><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>identity</td><td><code>train_1024x02_H24</code>, <code>sha256 647f8265f5143e2b15dc047de42e837203593c42beb7e45e2b94e55e41602581</code></td></tr><tr><td>shape</td><td>1,024 sources × 2 trajectories × H24 = <strong>49,152 transitions</strong></td></tr><tr><td>relation to the original plan</td><td><strong>identical transition count</strong> to the original 1,024 × 8 × H6; depth was bought with replicates, not with new budget</td></tr><tr><td>why</td><td>no reachability saturation was observed at budgets ≤ 24, and H6 captured only <strong>43 %</strong> of QED-0.85 reachability (<code>HORIZON_AMENDMENT_H24.md</code>)</td></tr><tr><td>realized content</td><td>39,663 unique states · 51,200 prefix examples · budgets evenly covered</td></tr><tr><td>benchmark-region incidence</td><td><strong>3.12 %</strong> of trajectories, <strong>5.7 %</strong> of sources, 64 hits, 687 gateway states</td></tr></tbody></table></div>
+<p><strong>This corpus is never a benchmark result.</strong> It is controller training data.</p>
+<hr>
+<h2 id="5-region-goal-language">5 · Region goal language</h2>
+<p>The controller is conditioned on a <strong>region</strong>, not on QED alone — this is what makes it a general controller rather than a QED controller.</p>
+<pre><code>region  = (τ_q, τ_s)          goal set  B = { x : QED(x) ≥ τ_q  AND  sim(x, x₀) ≥ τ_s }
+τ_q ∈ {0.75, 0.80, 0.85, 0.90, 0.95}      τ_s ∈ {0.30, 0.40, 0.50, 0.60}</code></pre>
+<p><strong>20 registered regions</strong>, trained jointly. The GrIDDD benchmark region is <code>(0.90, 0.40)</code> — one member of the family, given no special weight in training. <code>sim</code> is similarity to the trajectory's own source <code>x₀</code>.</p>
+<hr>
+<h2 id="6-h-φ-architecture-and-training-contract">6 · <code>h_φ</code> — architecture and training contract</h2>
+<p><strong>Target: finite-budget HITTING reachability.</strong></p>
+<pre><code>h_φ(x, x₀, region, b)  ≈  P( ∃ t ≤ b : X_t ∈ B_region  |  X_0 = x,  X ~ R_θ )</code></pre>
+<p>First-passage within the remaining budget — <strong>not</strong> terminal occupancy. This is the right object for an anytime controller that STOPs on first qualification.</p>
+<h3 id="features-input-dim-1055">Features — <code>INPUT_DIM = 1055</code></h3>
+<div class='tw'><table><thead><tr><th>block</th><th>dims</th><th>content</th></tr></thead><tbody><tr><td>embeddings</td><td>1024</td><td><code>[e_x, e_x₀, e_x − e_x₀, e_x ⊙ e_x₀]</code>, <code>EMBED_DIM = 256</code></td></tr><tr><td>properties</td><td>4</td><td><code>QED(x)</code>, <code>sim(x, x₀)</code>, <code>τ_q</code>, <code>τ_s</code></td></tr><tr><td><strong>margins</strong></td><td>2</td><td><code>QED(x) − τ_q</code>, <code>sim(x, x₀) − τ_s</code></td></tr><tr><td>budget</td><td>25</td><td>one-hot over <code>b ∈ [0, 24]</code></td></tr></tbody></table></div>
+<p>Embeddings are the frozen <code>R_θ</code> encoder's permutation-invariant graph-level <code>global_state</code> at <code>TIME_POINT = 0.5</code>, <code>CANONICAL_SLOTS = 48</code>.</p>
+<h3 id="head">Head</h3>
+<p><code>Linear(1055→512) · ReLU · Dropout(0.1) · Linear(512→256) · ReLU · Dropout(0.1) · Linear(256→128) · ReLU · Linear(128→1)</code>, sigmoid to <code>[0, 1]</code>.</p>
+<h3 id="boundary-condition-enforced-never-learned">Boundary condition — enforced, never learned</h3>
+<pre><code>h_φ(x, ...) := 1   whenever  x ∈ B_region,  regardless of network output</code></pre>
+<p>In-region states are <strong>excluded from the training set</strong> rather than supervised to 1, and <code>h_with_boundary()</code> enforces it at inference.</p>
+<h3 id="losses">Losses</h3>
+<div class='tw'><table><thead><tr><th>term</th><th>weight</th></tr></thead><tbody><tr><td>cross-entropy against the Monte-Carlo hitting label</td><td>1.0</td></tr><tr><td>Bellman consistency on <strong>observed</strong> transitions</td><td><code>BELLMAN_WEIGHT = 0.3</code></td></tr></tbody></table></div>
+<h3 id="optimization-frozen">Optimization — frozen</h3>
+<p><code>EPOCHS = 40</code> · <code>PATIENCE = 5</code> (early stopping) · <code>VAL_FRACTION = 0.15</code> held out <strong>by source</strong>, never by example · <strong>best-validation checkpoint is selected and saved</strong>, never the last epoch.</p>
+<blockquote><p>The first trainer saved the <em>last</em> model while validation loss rose monotonically from epoch 0 (0.1713 → 0.1821). Best-checkpoint selection is frozen here so that defect cannot recur silently.</p></blockquote>
+<hr>
+<h2 id="7-inference-the-native-controller">7 · Inference — the native controller</h2>
+<h3 id="exact-rejection-sampling-from-r-θh-φ">Exact rejection sampling from <code>R_θ·h_φ</code></h3>
+<pre><code>1. sample a mark from the frozen R_θ         4. reject self-loops
+2. apply one rewrite                          5. accept with probability h_φ(y)
+3. canonicalize                               6. else resample</code></pre>
+<p><strong>Precisely stated</strong> — this matters, and an earlier wording here was loose. <code>h_φ ∈ [0, 1]</code> and <code>h_φ</code> is a <em>state-level</em> function, so aliased successors aggregate correctly, and <strong>conditioned on acceptance the accepted move has exactly the <code>R_θ·h_φ</code> law</strong>.</p>
+<p>But the cap is finite. When all <code>MAX_PROPOSALS</code> are rejected the sampler <strong>fails</strong> and the trajectory ends, so the capped procedure as a whole is <strong>not</strong> an exact realization of the controlled kernel — it carries an explicit sampler-failure event. <strong>Do not describe the capped sampler as exact.</strong></p>
+<p>This is acceptable <em>because</em> the preregistration treats cap pressure as a <strong>diagnostic</strong>, with a frozen SMC escalation for the case where it becomes severe (§8). It is a measured quantity, not a defect to tune away.</p>
+<h3 id="stop-semantics">STOP semantics</h3>
+<p><code>τ = min{ t ≤ H : X_t ∈ B_region }</code> — an <strong>online stopping time</strong>, evaluated on the realized state at each committed edit. The trajectory halts at the first qualifying molecule and returns it.</p>
+<p>This is a <strong>policy, not retrospective selection</strong>: nothing is chosen after seeing the whole trajectory, so it carries no selection advantage. Max <code>H = 24</code>.</p>
+<h3 id="returned-candidates">Returned candidates</h3>
+<p><strong>20 per source</strong>, matching GrIDDD's returned-candidate budget — matching the task interface, <em>not</em> GrIDDD's internal denoising shape.</p>
+<hr>
+<h2 id="8-escalations-permitted-only-under-pre-existing-triggers">8 · Escalations — permitted ONLY under pre-existing triggers</h2>
+<p>Neither may be invoked at discretion. Both are governed by rules frozen <strong>before</strong> this preregistration; nothing here adds latitude.</p>
+<div class='tw'><table><thead><tr><th>escalation</th><th>governing trigger</th></tr></thead><tbody><tr><td>rejection → <strong>twisted-SMC</strong></td><td><code>HORIZON_AMENDMENT_H24.md</code> step 7 — healthy acceptance → <strong>stop, do not escalate</strong>; <em>calibrated but collapsed</em> acceptance → frozen twisted-SMC. Same <code>h_φ</code>, same <code>R_θ</code>. <strong>SMC is inference, not retraining.</strong></td></tr><tr><td><strong>conditional continuation labels</strong></td><td><code>HPHI_V1_CORPUS_PREREGISTRATION.md</code> decision rule — only when goal events are <em>severely tail-starved</em>, and only from preregistered informative prefixes under the same frozen <code>R_θ</code>. <em>"Run more of the same" is explicitly not the default.</em></td></tr></tbody></table></div>
+<hr>
+<h2 id="9-the-evaluation-ladder">9 · The evaluation ladder</h2>
+<pre><code>64-source dev panel  →  128-source fresh validation (ONCE)  →  official 800</code></pre>
+<p>Reported at each rung: success rate, first-hit step, similarity, QED, value calibration, and acceptance rate. The H6 / H12 / H24 compute frontier is a <strong>separate prespecified set of runs</strong>, defined in section 12 — it is <strong>not</strong> reconstructed from this ladder's H24 trajectories.</p>
+<p><strong>Comparators on the dev panel:</strong> unguided <code>R_θ</code> · Policy B · <code>R_θ·h_φ</code>.</p>
+<h3 id="no-rescue-rules-binding">No-rescue rules — binding</h3>
+<ol><li><strong>The 128-source validation is used exactly ONCE.</strong> If it fails, the result</li></ol>
+<p>is reported as a failure. There is no second validation set.</p>
+<ol><li><strong>There is no QED rescue branch.</strong> If <code>h_φ</code> does not qualify, the experiment</li></ol>
+<p>is reported as negative and <strong>this controller path closes</strong> under its own preregistered rules — no patched variant is tried to rescue it.</p>
+<p><strong>State the scope precisely.</strong> A negative result closes <em>the current QED region-<code>h_φ</code> controller path</em>. It does <strong>not</strong> retroactively invalidate COMPOSE, the already-banked Pareto results, or any other frozen finding, and it does <strong>not</strong> establish that no multi-objective controller is possible. What it does mean, given the current paper plan, is <strong>stop and reassess before building any new claim-bearing pipeline on top of it</strong> — in particular, do not respond by inventing a five-objective workaround.</p>
+<ol><li><strong>The official 800 are touched once</strong>, after the ladder completes.</li><li>No hyperparameter, region, threshold, or horizon may be re-chosen after</li></ol>
+<p>observing an official-test outcome.</p>
+<ol><li>Development-panel evidence (steering 0.188 → 0.391; <code>Var_R(h)</code> sd 0.281) is</li></ol>
+<p><strong>developmental</strong>, never reported as a result.</p>
+<hr>
+<h2 id="10-compute-accounting-this-experiments-instance">10 · Compute accounting — this experiment's instance</h2>
+<p>Per the paper-wide doctrine (master plan section I), three axes are reported and <strong>none is traded against another</strong>. Specifically for this experiment:</p>
+<div class='tw'><table><thead><tr><th>axis</th><th>reported quantity</th></tr></thead><tbody><tr><td>training</td><td><code>R_θ</code> training cost (<strong>shared, amortized, unchanged</strong>) + <code>h_φ</code> training cost (<strong>this objective only</strong>)</td></tr><tr><td>adaptation</td><td>what a <em>new</em> objective would require — stated honestly, not assumed to be zero</td></tr><tr><td>inference</td><td>kernel calls · objective (QED/similarity) evaluations · realized STOP/edit distribution · acceptance rate · wall time · SMC particles and ESS <strong>if</strong> the escalation fired</td></tr></tbody></table></div>
+<p><strong>The oracle cost is never offered as compensation for not retraining <code>R_θ</code>.</strong> The conclusion drawn is only: <em>COMPOSE obtains its performance from a reusable goal-independent molecular process, which carries a particular inference cost, reported separately.</em></p>
+<hr>
+<h2 id="11-execution-budget-ledger">11 · Execution budget ledger</h2>
+<p><strong>Run-level compute authorizations live here, not in the master plan.</strong> The master plan carries the scientific ruling; this section carries what was authorized to spend executing it. The two are deliberately kept apart.</p>
+<h3 id="amendment-1-encode-authorization-2-5-2026-08-14">Amendment 1 — encode authorization $2 → $5 (2026-08-14)</h3>
+<div class='tw'><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>job</strong></td><td><code>modal_apps/hphi_encode_app.py</code> — frozen <code>R_θ</code> embeddings for the 39,663 unique corpus states</td></tr><tr><td><strong>prior authorization</strong></td><td><strong>$2</strong>, a hard ceiling</td></tr><tr><td><strong>measured cost</strong></td><td>~70 min × 80 containers × 1 CPU = <strong>93.5 core-hours ≈ $4.39</strong></td></tr><tr><td><strong>amended authorization</strong></td><td><strong>$5</strong> — margin over the measured figure, not a blank check</td></tr></tbody></table></div>
+<p><strong>Why this is preprocessing, not an experiment.</strong> The corpus is already frozen (<code>sha256 647f8265…41602581</code>) and <code>R_θ</code> is frozen (<code>sha256 c979cdb3…4e53de8</code>). The encode is therefore a <strong>deterministic function of two frozen inputs</strong>: it has exactly one correct answer, produces no scientific result, and admits no researcher choice. It is computed once and reused forever.</p>
+<p><strong>What happened, recorded plainly.</strong> A first attempt was launched at $4.39 against the $2 ceiling. It was stopped ~8 minutes in, before any shard had persisted, at a cost of roughly <strong>$0.50</strong> and with <strong>nothing recoverable</strong>. The cap was exceeded because the cost was not priced before launch — an earlier estimate of ~21 min / ~$1.35 was wrong by more than 3×. <strong>This is not recorded as having been under cap.</strong></p>
+<p><strong>What changed so this cannot repeat destructively.</strong> Encoding is now its own job (<code>encode → persist → exit</code>), and <strong>every shard writes and commits its own file the moment it finishes</strong> rather than one merged write at the end. The job is idempotent: a shard whose file exists returns without loading the model, and the driver skips persisted shards. An interruption now costs at most one shard, not the whole run.</p>
+<blockquote><p>Prior to this split, the same encode was destroyed <strong>twice</strong> by stopping a trainer that held completed embeddings in memory — 93.5 core-hours each time. See the <code>persist-expensive-deterministic-artifacts</code> rule.</p></blockquote>
+<h3 id="standing-rule">Standing rule</h3>
+<p>Price a run <strong>before</strong> launching it and state the figure. If it would exceed the standing authorization, do not launch — request an amendment to a specific number and record the reason here first.</p>
+<hr>
+<h2 id="11b-optimization-sequencing-before-the-128-not-after">11b · Optimization sequencing — BEFORE the 128, not after</h2>
+<p><strong>Frozen 2026-08-15.</strong> Engineering optimization has a place in the ladder, and it is <strong>not</strong> between the 128 and the 800.</p>
+<pre><code>64 dev  →  SELECT the frozen inference branch (rejection vs SMC)
+        →  implement + qualify exact optimizations on the SURVIVING branch
+        →  128 fresh validation  →  800 official</code></pre>
+<p><strong>Why not after the 128.</strong> The 128-source validation exists to validate the <strong>actual implementation that will touch the official test set</strong>. Running it on a slow reference implementation and then introducing a faster one for the 800 would mean the official run uses code that no validation rung ever exercised — even if the speedup is mathematically exact.</p>
+<p><strong>Why not before the 64.</strong> The 64 selects which branch is production. Optimizing the rejection path before knowing whether rejection survives may be optimizing code that gets discarded.</p>
+<div class='tw'><table><thead><tr><th>after the 64 says…</th><th>then</th></tr></thead><tbody><tr><td>rejection is <strong>healthy</strong></td><td>keep rejection; implement exact batched scoring if profiling justifies it</td></tr><tr><td>cap pressure fires the <strong>frozen SMC trigger</strong></td><td>move to SMC <strong>first</strong>; do not optimize the rejection path as though it were production</td></tr></tbody></table></div>
+<p>Then, on whichever branch survives: profile it · implement <strong>only</strong> semantics-preserving speedups · <strong>qualify the fast implementation against the reference</strong> · <strong>freeze it</strong> · run the 128 · run the 800 unchanged.</p>
+<p><strong>Batching changes how many <code>h_φ</code> scores are computed per pass. It must never change how many proposals the frozen sampler may draw</strong> (cap = 40, drawn in chunks of 16). Any expected speedup is an engineering hypothesis until profiled.</p>
+<hr>
+<h2 id="12-inference-cost-reporting-and-the-compute-frontier">12 · Inference-cost reporting and the compute frontier</h2>
+<p><strong>Frozen 2026-08-15, before the 64-source development result exists.</strong></p>
+<h3 id="121-resource-logging-descriptive-secondary-and-analyzed-afterwards">12.1 Resource logging — descriptive, secondary, and analyzed afterwards</h3>
+<blockquote><p><strong>Inference-cost reporting.</strong> All claim-bearing runs will record wall-clock inference time, kernel/support evaluations, objective evaluations, committed edits, STOP step, and returned candidates. These resource quantities are <strong>secondary descriptive outcomes</strong> and do not alter the primary task protocol. Performance and resource use will be reported separately; differences in training cost will not be used to offset differences in inference cost.</p></blockquote>
+<p><strong>Why this is preregistered even though it changes nothing.</strong> Measuring cost after the fact is legitimate — these are descriptive quantities, and no analysis choice about them can alter the primary outcome. What would <em>not</em> be legitimate is <strong>choosing which compute budgets to showcase after seeing performance</strong>. That is cherry-picking, and freezing the operating points below removes the opportunity before any result exists.</p>
+<h3 id="122-demoted-by-master-plan-amendment-ii-no-compute-frontier-study">12.2 ⬇️ DEMOTED by master-plan AMENDMENT II — no compute-frontier study</h3>
+<p>An earlier version of this section preregistered <code>b_max ∈ {6, 12, 24}</code> as a <strong>frozen compute-frontier study</strong>. <strong>AMENDMENT II supersedes that.</strong> Inference cost is <strong>logged prospectively</strong> (§12.1) and reported; it is <strong>not</strong> a pillar of the paper, and no frontier study is preregistered or required.</p>
+<p>The claim-bearing runs use <strong>max H24 with native anytime STOP</strong>, per AMENDMENT II §3. Nothing else about the protocol changes.</p>
+<p><strong>If</strong> inference cost later becomes an important result, a small prespecified frontier may be added — and if it is, the method note in §12.3 binds.</p>
+<h3 id="123-method-note-binding-if-a-frontier-is-ever-run">12.3 Method note (binding IF a frontier is ever run)</h3>
+<p><code>h_φ(x, z, b)</code> <strong>conditions on remaining budget</strong>. An H24 trajectory truncated at step 6 is therefore <strong>not</strong> the same object as a controller actually started with <code>b = 6</code>:</p>
+<ul><li>the truncated run was steered at every step by <code>h_φ(·, ·, b)</code> for <code>b</code> counting</li></ul>
+<p>down from <strong>24</strong> — a controller that believed it had budget to spare and could afford an excursion away from the region;</p>
+<ul><li>a genuine H6 run is steered by <code>h_φ(·, ·, b)</code> counting down from <strong>6</strong> — a</li></ul>
+<p>controller under pressure, which is a <strong>different policy</strong>, not the same policy observed earlier.</p>
+<p>Truncation would report the cheap operating point using the expensive controller's decisions and would systematically misstate the frontier, most likely flattering H6. <strong>Any frontier must therefore be separate controller runs</strong>, never reconstructed from H24 prefixes.</p>
+<hr>
+<h2 id="13-smc-escalation-completion-frozen-before-any-smc-performance-is-observed">13 · SMC escalation completion — FROZEN BEFORE ANY SMC PERFORMANCE IS OBSERVED</h2>
+<p>The 64-source development panel triggered the preregistered twisted-SMC escalation: region-<code>h_φ</code> showed useful navigation (coverage 15.6 % → 28.1 %, 13 sources new vs unguided, first hit at step 3.4 vs 10.0) while capped rejection failed mechanically (<strong>94.3 % cap-hit rate</strong>, mean 2.4 edits of 24, 34.2 % of trajectories never committing a single edit).</p>
+<p>The preregistration fixed the SMC <strong>construction</strong> — molecular-state particles, learned-value twist, systematic resampling, ESS <code>&lt; N/2</code> trigger — but did <strong>not</strong> fix the particle count or the mapping from an SMC population to the Jin 20-candidate output contract. <strong>Those two quantities are frozen here, before any SMC performance exists.</strong> The 64 triggered the transition and gave <strong>no</strong> evidence about either.</p>
+<h3 id="particle-count">Particle count</h3>
+<blockquote><p><strong><code>N = 32</code></strong>, inherited as the <strong>single pre-existing SMC operating point already instantiated in the repository</strong> before this gate fired. <strong>No particle-count sweep is permitted.</strong> It was <strong>not</strong> selected using SMC performance on the QED development panel.</p></blockquote>
+<h3 id="candidate-budget-the-load-bearing-rule">Candidate budget — the load-bearing rule</h3>
+<blockquote><p>Each source receives <strong>exactly 20 independent SMC runs</strong>. Each run produces <strong>exactly one</strong> returned molecule.</p><p>``<code> SMC^(j)(x₀; N=32, H=24)  →  1 molecule,   j = 1 … 20 20 independent SMC runs   →  20 returned candidates </code>``</p><p>The 32 internal particles are <strong>inference state</strong>, exactly like the internal steps of any other generative algorithm. They are <strong>not</strong> 32 returned-candidate opportunities.</p></blockquote>
+<p><strong>What one run returns:</strong> one molecule sampled from the <strong>normalized terminal particle measure</strong>, <code>J ~ Categorical(w₁/Σw, …, w₃₂/Σw)</code>, returning <code>x_J</code>. Goal-region hits retain the already-defined absorbing/STOP semantics at the particle level.</p>
+<h3 id="explicitly-barred">Explicitly barred</h3>
+<ul><li>❌ best-of-32 / highest-QED particle</li><li>❌ return-all-particles</li><li>❌ first-successful-particle</li><li>❌ top-20 from one population</li><li>❌ the old <code>budget_per_lead = 1000</code> semantics — <strong>disallowed for GrIDDD/Jin</strong></li></ul>
+<p>Any of these would convert internal particle population into extra candidate budget and break the external contract.</p>
+<h3 id="audit-finding-what-must-be-preserved-vs-replaced">⚠️ AUDIT FINDING — what must be preserved vs replaced</h3>
+<p><code>scripts/griddd_value_guided_smc_controller.py</code> already implements the SMC correctly and <strong>must not be rewritten</strong>:</p>
+<div class='tw'><table><thead><tr><th>component</th><th>status</th></tr></thead><tbody><tr><td><code>ess = 1.0 / np.sum(weights**2)</code>; <code>if ess &lt; n_particles / 2</code></td><td>✅ <strong>matches the frozen spec — preserve</strong></td></tr><tr><td><code>_systematic_resample()</code> (low-variance)</td><td>✅ <strong>preserve</strong></td></tr><tr><td>FK potential / value twist plumbing</td><td>✅ <strong>preserve</strong>, rebind the twist to frozen <code>h_φ</code> (V1; the prior run was V0, <code>value_twist: None</code>)</td></tr><tr><td><strong>output rule: tracks <code>best_qed</code>, <code>best_state</code>, returns <code>best_feasible_qed</code></strong></td><td>❌ <strong>this is best-of-population — REPLACE</strong> per the rule above</td></tr><tr><td><code>budget</code> as distinct oracle calls (the 1000-per-lead path)</td><td>❌ <strong>REPLACE</strong> — 20 independent runs, one molecule each</td></tr></tbody></table></div>
+<p>This is the three-layer architecture (§2 of the governing plan) doing its job: <strong>same molecular dynamics, reusable SMC primitive, new task policy</strong> matching the Jin contract. Separate the inference machinery from the old task-specific wrapper; preserve the former, replace only the latter.</p>
+<h3 id="everything-else-is-unchanged">Everything else is unchanged</h3>
+<p>Frozen <code>R_θ</code>, frozen <code>h_φ</code>, <code>H = 24</code> maximum, region <code>(0.90, 0.40)</code>, hard support semantics, STOP/absorption, weighting rule, ESS threshold, systematic resampling.</p>
+<p><strong>No SMC hyperparameter is selected using the 64-source results.</strong> After mechanical qualification the SMC implementation is frozen and evaluated on the <strong>fresh 128-source validation panel</strong>.</p>
+<h3 id="qualification-is-mechanical-not-parity-with-rejection">Qualification is mechanical, NOT parity with rejection</h3>
+<p>SMC is <em>supposed</em> to produce different trajectories from rejection, so demanding trajectory parity would be incoherent. Qualification establishes that the frozen mathematics is implemented correctly: particle weights and potentials, systematic resampling, ESS trigger, STOP semantics, region, budget accounting, reproducible seeds, deterministic replay where expected, kill/resume losslessness, and exact checks wherever a small enumerable case allows one.</p></div></body></html>

@@ -55,3 +55,7 @@ diagnostics/.v2_successor_cache.pkl
 local_runtime/
 runs/run_v2_01/
 local_runtime/zinc250k/
+
+# Large run artifacts pulled from the Modal volume. The volume is the source of
+# truth; these are local working copies and must not enter git.
+artifacts/
