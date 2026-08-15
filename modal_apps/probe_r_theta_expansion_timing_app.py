@@ -112,8 +112,8 @@ def time_expansions(panel: tuple[str, ...] = PANEL) -> dict[str, Any]:
         mark = time.perf_counter()
         result = canonical_successor_result(model, padded, 0.0)
         elapsed = time.perf_counter() - mark
-        batch = result.batch
-        successors = len(batch.keys()) if hasattr(batch, "keys") else len(batch)
+        # SuccessorBatch carries a `successors` tuple of CanonicalSuccessor.
+        successors = len(result.batch.successors)
         rows.append({"smiles": smiles, "atoms": int(graph.n_atoms),
                      "successors": int(successors), "seconds": elapsed})
         print({"expansion": rows[-1]}, flush=True)
