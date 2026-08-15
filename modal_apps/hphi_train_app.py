@@ -162,35 +162,26 @@ def train() -> dict[str, Any]:
     need = sorted({s for r in srcs for t in r["trajectories"] for s in t["path"]})
     print(f"encoding {len(need):,} unique states across {ENCODE_SHARDS} shards",
           flush=True)
-    # PERSIST AND REUSE. The encode is frozen-R_theta output on frozen corpus
-    # states, so it is deterministic and identical across reruns. The first run
-    # paid 4,206s for it; re-paying that to change a training hyperparameter
-    # would be pure waste.
-    cache_p = Path(RUN_ROOT) / OUT_DIR / "embeddings.json.gz"
+    # Embeddings come from the SEPARATE encode job (hphi_encode_app.py), which
+    # persists per shard. This trainer never encodes -- that coupling is what
+    # destroyed 93.5 core-hours twice.
     t_enc = time.perf_counter()
+    sd = Path(RUN_ROOT) / "hphi_v2/embeddings"
+    parts = sorted(sd.glob("shard_*.json.gz")) if sd.exists() else []
+    if not parts:
+        raise SystemExit(
+            "no persisted embeddings. Run modal_apps/hphi_encode_app.py first; "
+            "it is idempotent and resumable.")
     emb: dict[str, list[float]] = {}
-    if cache_p.exists():
-        try:
-            emb = json.loads(gzip.decompress(cache_p.read_bytes()).decode())
-            print(f"REUSED {len(emb):,} cached embeddings", flush=True)
-        except Exception as exc:  # noqa: BLE001
-            print(f"cache unreadable ({type(exc).__name__}); re-encoding",
-                  flush=True)
-            emb = {}
-    missing = [s for s in need if s not in emb]
-    if missing:
-        print(f"encoding {len(missing):,} states across {ENCODE_SHARDS} shards",
-              flush=True)
-        shards = [missing[i::ENCODE_SHARDS] for i in range(ENCODE_SHARDS)]
-        for part in encode_shard.map([s for s in shards if s]):
-            emb.update(part)
-        cache_p.parent.mkdir(parents=True, exist_ok=True)
-        cache_p.write_bytes(gzip.compress(json.dumps(emb).encode()))
-        artifact_volume.commit()
-        print(f"cached {len(emb):,} embeddings for reuse", flush=True)
+    for f in parts:
+        emb.update(json.loads(gzip.decompress(f.read_bytes()).decode()))
     enc_seconds = time.perf_counter() - t_enc
-    print(f"embeddings ready {len(emb):,}/{len(need):,} in {enc_seconds:.0f}s",
-          flush=True)
+    missing = [s for s in need if s not in emb]
+    print(f"loaded {len(emb):,} embeddings from {len(parts)} shards in "
+          f"{enc_seconds:.0f}s; {len(missing):,} states missing", flush=True)
+    if missing:
+        print("  (states without embeddings are skipped, not re-encoded here)",
+              flush=True)
 
     regions = registered_regions()
     Xtr, Ytr, Xva, Yva, Mva = [], [], [], [], []
