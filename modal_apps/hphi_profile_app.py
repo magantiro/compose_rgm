@@ -241,12 +241,132 @@ def batch_test(smiles: list[str]) -> dict[str, Any]:
     return out
 
 
+_W: dict[str, Any] = {}
+
+
+def _apply_chunk(args):
+    """Worker: apply a slice of marks. Returns (index, canonical_key) pairs."""
+    lo, hi = args
+    from compose_v4.experiments.production_successor_kernel import (
+        canonical_state_key,
+    )
+    st, law, system = _W["st"], _W["law"], _W["system"]
+    out = []
+    for i in range(lo, hi):
+        mk = law.marks[i]
+        out.append((i, canonical_state_key(
+            system.apply(st, mk.executor_rule_name, mk.action))))
+    return out
+
+
+def _encode_chunk(smis):
+    """Worker: encode a slice of molecules. Returns (smiles, embedding) pairs."""
+    import torch
+
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.experiments.production_successor_kernel import _one_state_batch
+
+    torch.set_num_threads(1)
+    model = _W["model"]
+    out = []
+    for s in smis:
+        stt = pad_molecular_graph(smiles_to_molecular_graph(s), CANONICAL_SLOTS)
+        b = _one_state_batch(model, stt, float(TIME_POINT), prepared_batch=None)
+        with torch.no_grad():
+            _n, g, _p = model._encode_batch(b)
+        out.append((s, g[0].detach().cpu().numpy()))
+    return out
+
+
+@app.function(image=image, cpu=(8.0, 8.0), memory=32768, timeout=60 * 60,
+              volumes={str(ARTIFACT_ROOT): artifact_volume})
+def parallel_test(source: str, workers: int = 8) -> dict[str, Any]:
+    """Do the 606 applies and the encodes parallelise across PROCESSES?
+
+    Threads failed because the cost is not BLAS. Batching failed because the
+    cost is per-molecule Python. Per-molecule Python is exactly what forks
+    parallelise -- the GIL is the reason threads could not, and separate
+    processes do not share one. Model is loaded ONCE and inherited
+    copy-on-write, so N workers do not mean N model loads.
+    """
+    import multiprocessing as mp
+    import sys
+
+    import numpy as np
+
+    sys.path.insert(0, str(REMOTE_ROOT / "src"))
+    from rdkit import RDLogger
+
+    RDLogger.DisableLog("rdApp.*")
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.experiments.production_successor_kernel import (
+        canonical_state_key, enumerate_factorized_marked_law,
+    )
+
+    model, system = _load(1)
+    st = pad_molecular_graph(smiles_to_molecular_graph(source), CANONICAL_SLOTS)
+    law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
+    n = len(law.marks)
+    _W.update({"st": st, "law": law, "system": system, "model": model})
+    out: dict[str, Any] = {"n_marks": n, "workers": workers}
+
+    # ---------- APPLIES: 606 of them, one step's worth for policy_b ----------
+    t0 = time.perf_counter()
+    serial = [canonical_state_key(system.apply(
+        st, law.marks[i].executor_rule_name, law.marks[i].action))
+        for i in range(n)]
+    t_ser = time.perf_counter() - t0
+
+    edges = [(i * n // workers, (i + 1) * n // workers) for i in range(workers)]
+    ctx = mp.get_context("fork")          # fork => model shared copy-on-write
+    t0 = time.perf_counter()
+    with ctx.Pool(workers) as pool:
+        par_pairs = [pr for chunk in pool.map(_apply_chunk, edges) for pr in chunk]
+    t_par = time.perf_counter() - t0
+    par = [k for _i, k in sorted(par_pairs)]
+    out["applies"] = {
+        "n": n, "serial_s": round(t_ser, 2), "parallel_s": round(t_par, 2),
+        "speedup": round(t_ser / t_par, 2) if t_par else None,
+        "identical": serial == par,
+    }
+    print(f"  applies  n={n}: serial {t_ser:6.2f}s  parallel {t_par:6.2f}s  "
+          f"speedup {t_ser/max(t_par,1e-9):5.2f}x  identical={serial == par}",
+          flush=True)
+
+    # ---------- ENCODES: 40, one capped h_phi step's worth ----------
+    mols = sorted(set(serial))[:40]
+    t0 = time.perf_counter()
+    ser_e = dict(_encode_chunk(mols))
+    t_ser_e = time.perf_counter() - t0
+    slices = [mols[i::workers] for i in range(workers)]
+    t0 = time.perf_counter()
+    with ctx.Pool(workers) as pool:
+        par_e = dict(pr for ch in pool.map(_encode_chunk, slices) for pr in ch)
+    t_par_e = time.perf_counter() - t0
+    maxdiff = float(max(np.abs(ser_e[k] - par_e[k]).max() for k in ser_e))
+    out["encodes"] = {
+        "n": len(mols), "serial_s": round(t_ser_e, 2),
+        "parallel_s": round(t_par_e, 2),
+        "speedup": round(t_ser_e / t_par_e, 2) if t_par_e else None,
+        "max_abs_diff": maxdiff, "bitwise_identical": maxdiff == 0.0,
+    }
+    print(f"  encodes  n={len(mols)}: serial {t_ser_e:6.2f}s  "
+          f"parallel {t_par_e:6.2f}s  speedup {t_ser_e/max(t_par_e,1e-9):5.2f}x  "
+          f"maxdiff {maxdiff:.3e}", flush=True)
+    return out
+
+
 @app.local_entrypoint()
-def main(batch: bool = False) -> None:
+def main(batch: bool = False, parallel: bool = False) -> None:
     src = [s.strip() for s in
            (Path(__file__).resolve().parents[1] / "data/jin/dev_panel_qed_64.txt"
             ).read_text().split("\n") if s.strip()][0]
     print(f"profiling {STEPS} steps on dev source 0 at 1 / 4 / 8 torch threads")
+    if parallel:
+        print(json.dumps(parallel_test.remote(src), indent=2))
+        return
     if batch:
         pool = [s.strip() for s in
                 (Path(__file__).resolve().parents[1] / "data/jin/hphi_valid_128.txt"
