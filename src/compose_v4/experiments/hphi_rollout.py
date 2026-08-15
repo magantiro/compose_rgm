@@ -44,7 +44,7 @@ from typing import Sequence
 #: The preregistered 5x4 goal grid. Frozen before any census was read.
 QED_THRESHOLDS = (0.75, 0.80, 0.85, 0.90, 0.95)
 SIMILARITY_FLOORS = (0.30, 0.40, 0.50, 0.60)
-HORIZON = 6
+HORIZON = 6  # DEFAULT ONLY. The frozen corpus is H24 -- pass horizon= explicitly.
 
 #: The benchmark region is ONE MEMBER of the grid, not the target it was
 #: designed around.
@@ -112,11 +112,15 @@ def prefix_examples(
     qed_of: Sequence[float],
     similarity_to_source: Sequence[float],
     termination: Termination,
+    horizon: int = HORIZON,
 ) -> list[dict[str, object]]:
     """One training example per prefix, labelled against every registered region.
 
-    `trajectory[0]` is the source. `b = HORIZON - t` is the remaining budget at
+    `trajectory[0]` is the source. `b = horizon - t` is the remaining budget at
     prefix `t`. Every example takes the TERMINAL label, not its own membership.
+
+    `horizon` MUST be passed for any corpus that is not H6. The frozen corpus is
+    H24, and the module default of 6 would raise on every trajectory past step 6.
     """
     n = len(trajectory)
     if n != len(qed_of) or n != len(similarity_to_source):
@@ -127,9 +131,9 @@ def prefix_examples(
 
     out: list[dict[str, object]] = []
     for t, state in enumerate(trajectory):
-        b = HORIZON - t
+        b = horizon - t
         if b < 0:
-            raise ValueError(f"prefix {t} exceeds horizon {HORIZON}")
+            raise ValueError(f"prefix {t} exceeds horizon {horizon}")
         out.append({
             "state": state,
             "budget_remaining": b,

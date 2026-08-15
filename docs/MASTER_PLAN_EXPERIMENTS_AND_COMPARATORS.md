@@ -1166,24 +1166,29 @@ retrospectively inventing a convenient capability after seeing an outcome.
 
 ---
 
-## J · The GrIDDD/QED controller amendment is FROZEN
+## J · GrIDDD/QED controller amendment
 
-`docs/GRIDDD_JIN_PROTOCOL.md` froze Policy B as its claim-bearing inference
-policy. Policy B was then refuted **0/320** on the disjoint 64-source dev panel.
-That document now carries a **⭐ CURRENT AMENDMENT** naming region-`h_φ` as the
-claim-bearing controller, frozen **before any official Jin outcome exists**.
+> **GrIDDD/QED controller amendment.** The preregistered one-step Policy B was
+> evaluated only on disjoint development data and failed before any official Jin
+> test outcome was observed. It is retained as a developmental negative control,
+> not the claim-bearing COMPOSE controller. The final QED evaluation will use
+> COMPOSE's finite-budget region-conditioned control architecture with the same
+> frozen `R_θ`, developed and frozen entirely before official-test evaluation.
+> Native inference, including STOP and any preregistered rare-event escalation,
+> follows the paper-wide native-COMPOSE doctrine.
 
-**The wording rule, because the tempting overstatement is wrong:** region-`h_φ`
+**This changes the authoritative experiment map (section H).** The QED / GrIDDD
+row's native controller is region-`h_φ`, not Policy B.
+
+**Binding implementation protocol:** 📄 `docs/HPHI_QED_PREREGISTRATION.md`.
+Frozen 2026-08-14, before `h_φ`'s weights existed.
+
+**One wording rule, because the tempting overstatement is wrong.** Region-`h_φ`
 is a **pre-outcome amendment consistent with the pre-existing finite-horizon
-COMPOSE controller**, motivated by a developmental failure of the cheap one-step
-approximation. It is **NOT** a restoration of an originally-frozen policy — the
+COMPOSE controller** — **NOT** a restoration of an originally-frozen policy. The
 protocol explicitly declined the rollout `ĥ`. Do not write it the stronger way.
 
-Policy B stays in the manuscript as the failed developmental approximation.
-Source splits verified mutually disjoint; the official 800 are excluded from
-`h_φ` training (1,516 excluded from a 66,632 pool).
-
-**Until `h_φ` is mature, it is the only scientific lane moving.** Pathwise,
+**Until `h_φ` is mature it is the only scientific lane moving.** Pathwise,
 hard-support and MOLLEO may be BUILT against an abstract controller interface,
 but no claim-bearing controller-dependent result may be produced before then,
 and the native five-objective COMPOSE search policy is **not** frozen yet.

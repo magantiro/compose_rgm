@@ -383,78 +383,24 @@ wasting COMPOSE's strongest structural feature.
 
 # ⭐ CURRENT AMENDMENT — the claim-bearing controller is region-`h_φ`
 
-**Everything above this line is HISTORICAL. Where the body of this document
-freezes `stochastic one-step COMPOSE control` (Policy B) as the claim-bearing
-inference policy, THIS SECTION SUPERSEDES IT.** Reference this section only.
+**Everything above this line is HISTORICAL where it concerns the inference
+policy.** The section titled *THE INFERENCE POLICY — frozen before any QED
+outcome exists* freezes `stochastic one-step COMPOSE control` (Policy B).
+**Policy B was refuted 0/320 on the disjoint 64-source development panel, before
+any official Jin test outcome existed, and is no longer the claim-bearing
+method.** It is retained as a reported developmental negative control.
 
-**Status: frozen before any official Jin test outcome exists.**
+**The claim-bearing controller is region-`h_φ`**, and its full implementation
+contract — Policy B's rejection, exclusions, region goal language, the
+1,024 × 2 × H24 corpus, architecture and training contract, STOP semantics, the
+64 → 128 → 800 ladder, both escalation triggers, compute accounting and the
+no-rescue rules — is frozen in:
 
-## Why this amendment is legitimate
+> ### 📄 `docs/HPHI_QED_PREREGISTRATION.md` — the binding implementation protocol
 
-> Policy B was preregistered and evaluated **only** on the disjoint 64-source
-> development panel, where it failed (**0/320**). **No official Jin test outcome
-> had been observed.** The claim-bearing controller is therefore amended
-> **before official evaluation** to the region-conditioned finite-budget value
-> controller that realizes the pre-existing COMPOSE control formulation at scale.
+The paper-level ruling is section J of
+`docs/MASTER_PLAN_EXPERIMENTS_AND_COMPARATORS.md`.
 
-This is what development data are *for*. The amendment is recorded before the
-official evaluation rather than justified after it, which is the only property
-that matters for its validity.
-
-### One claim we do NOT make
-
-We do **not** claim that region-`h_φ` was the originally frozen GrIDDD policy.
-**It was not.** The body of this document explicitly declined the rollout `ĥ`.
-
-The defensible statement, and the only one to use:
-
-> Region-`h_φ` is a **pre-outcome amendment consistent with the pre-existing
-> finite-horizon COMPOSE controller**, motivated by a developmental failure of
-> the cheap one-step approximation.
-
-Any stronger phrasing — that the amendment merely "restores" a
-previously-specified policy, or that cost was the only thing that ever separated
-them — **overstates the case and must not appear in the manuscript.**
-
-## What is frozen
-
-| item | frozen value |
-|---|---|
-| **`R_θ`** | unchanged, `sha256 c979cdb3…4e53de8`. **Never retrained, for any experiment.** |
-| **training corpus** | `train_1024x02_H24`, `sha256 647f8265…41602581`; 1,024 sources × 2 trajectories × H24 = **49,152 transitions** |
-| **corpus exclusions** | official Jin `qed`/`logp04`/`logp06` test sources **and** the 64-source dev panel — **1,516 excluded** from a 66,632 eligible pool. Verified mutually disjoint: train ∩ valid = train ∩ dev = valid ∩ dev = **0** |
-| **horizon / stopping** | max **H24**, with **native STOP** at the first preregistered qualifying molecule |
-| **qualifying region** | QED ≥ 0.90 **and** similarity ≥ 0.40 |
-| **returned candidates** | **20 per source** |
-| **evaluation ladder** | 64-source dev → **128 fresh validation, ONCE** → official 800 |
-
-### Two escalations — permitted ONLY under triggers already defined elsewhere
-
-Neither may be invoked at discretion. Both are governed by rules frozen before
-this amendment, and this section adds no new latitude:
-
-| escalation | governing trigger — **already defined, not restated here** |
-|---|---|
-| rejection → **twisted-SMC** | `docs/HORIZON_AMENDMENT_H24.md` step 7: healthy acceptance → stop; **calibrated but collapsed** acceptance → frozen twisted-SMC escalation. Same `h_φ`, same `R_θ`; **SMC is inference, not retraining.** |
-| **conditional continuation labels** | `docs/HPHI_V1_CORPUS_PREREGISTRATION.md` decision rule: only when the goal events are **severely tail-starved**, and only from preregistered informative prefixes under the same frozen `R_θ`. *"Run more of the same" is explicitly not the default.* |
-
-## Policy B is reported, not deleted
-
-Policy B remains in the manuscript as the **failed developmental approximation**:
-preregistered, evaluated on the development panel, **0/320**, superseded. It is
-a recorded result. Removing it would misrepresent how the controller was chosen.
-
-## Accounting — three axes, none traded against another
-
-Per section I of the master plan, every table carrying this experiment reports
-`R_θ` training cost, `h_φ` training cost, and inference cost (kernel calls,
-objective evaluations, the realized STOP/edit distribution, wall time, and SMC
-particles/ESS where the escalation fired) **separately**. The oracle cost is
-never offered as compensation for not retraining.
-
-## What is NOT frozen by this amendment
-
-Region-`h_φ`'s weights do not yet exist — the encode is unrun. This section
-freezes the **protocol**, so that the controller cannot be chosen after seeing
-the official outcome. Development-panel evidence supporting the approach
-(steering 0.188 → 0.391; `Var_R(h)` sd 0.281) is **developmental**, not a result.
+**Still governed by the body of THIS document, unchanged:** the task definition,
+source cohort, success criterion, 20 returned candidates per source, and the
+size-fixed ablation.
