@@ -19,9 +19,23 @@ committed, checksum-valid replicates, so a killed job reproduces the same final
 artifact as an uninterrupted one. Aggregates are always rebuilt FROM the
 persisted records; they are never the only stored evidence.
 
-NOT QUALIFIED UNTIL exact trajectory-level replay parity against the frozen
-reference plus a forced-kill/resume test. Any unexplained discrepancy: park it
-and run the reference.
+QUALIFIED AND FROZEN 2026-08-15. Three gates, all exact, no tolerances:
+
+  1. REPLAY PARITY   8 records (unguided + hphi, reps 0-3), workers=1 vs
+                     workers=8 -> ALL EXACTLY EQUAL. Worker count was the only
+                     manipulated variable.
+  2. KILL / RESUME   force-killed at 5/8; 6 replicates survived; resume
+                     recomputed only the missing 2; final artifact EXACTLY
+                     EQUAL to the uninterrupted run (which itself matched the
+                     sequential oracle, so the resumed artifact transitively
+                     matches reference semantics).
+  3. POLICY_B PARITY 2 records, workers=1 vs workers=8 -> EXACTLY EQUAL.
+                     Checked separately BECAUSE policy_b takes a different
+                     inner path (full-fiber enumeration, not the capped
+                     proposal walk), so its parity must not be inferred from
+                     the other two arms.
+
+NO FURTHER PERFORMANCE WORK BEFORE THE 64-SOURCE GATE IS READ.
 
 --- derived from ---
 
