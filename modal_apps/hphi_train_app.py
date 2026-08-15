@@ -134,9 +134,24 @@ def encode_shard(smiles: list[str]) -> dict[str, list[float]]:
     return out
 
 
-@app.function(image=image, cpu=(4.0, 4.0), memory=32768, timeout=8 * 60 * 60,
+DESIGN = """Assembly is CPU-bound; training is GPU-bound. They are SEPARATE jobs.
+
+Feature assembly builds ~1M 1055-dim vectors in Python loops -- it gains nothing
+from a GPU, and running it inside the GPU job would leave an A10G idle and
+billed for the whole time. Worse, it would be redone on every hyperparameter
+retry, which is the same coupling that destroyed the encode twice.
+
+So: assemble on CPU -> persist .npz -> exit. Then train on GPU from the cached
+matrices. Retraining at a new setting reloads in seconds and never touches the
+corpus, the embeddings, or a CPU loop again."""
+
+MATRICES = "hphi_v2/features.npz"
+
+
+@app.function(image=image, cpu=(4.0, 4.0), memory=32768, timeout=4 * 60 * 60,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
-def train() -> dict[str, Any]:
+def assemble() -> dict[str, Any]:
+    """CPU ONLY. Build the feature matrices, persist them, exit."""
     import sys
 
     import numpy as np
@@ -227,17 +242,63 @@ def train() -> dict[str, Any]:
     print(f"train {len(Xtr):,}  val {len(Xva):,}  bellman pairs {len(Btr):,}",
           flush=True)
 
+    out_m = Path(RUN_ROOT) / MATRICES
+    out_m.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(out_m, Xtr=Xtr, Ytr=Ytr, Xva=Xva, Yva=Yva, Btr=Btr,
+                        Mva=np.asarray(Mva, dtype=np.float32))
+    artifact_volume.commit()             # FLUSHED before this worker exits
+    print(f"persisted {out_m.name} in {time.perf_counter()-t_start:.0f}s",
+          flush=True)
+    return {"n_train": len(Xtr), "n_val": len(Xva), "n_bellman": len(Btr),
+            "missing_states": len(missing),
+            "seconds": round(time.perf_counter() - t_start, 1)}
+
+
+@app.function(image=image, gpu="A10G", cpu=(2.0, 2.0), memory=32768,
+              timeout=4 * 60 * 60,
+              volumes={str(ARTIFACT_ROOT): artifact_volume})
+def train() -> dict[str, Any]:
+    """GPU. Loads the cached matrices; never rebuilds them, never encodes."""
+    import sys
+
+    import numpy as np
+    import torch
+    import torch.nn as nn
+
+    sys.path.insert(0, str(REMOTE_ROOT / "src"))
+    from compose_v4.experiments.hphi_region_features import INPUT_DIM
+
+    t_start = time.perf_counter()
+    artifact_volume.reload()
+    mp = Path(RUN_ROOT) / MATRICES
+    if not mp.exists():
+        raise SystemExit(f"no {MATRICES}. Run assemble first (CPU only).")
+    z = np.load(mp)
+    Xtr, Ytr, Xva, Yva, Btr = z["Xtr"], z["Ytr"], z["Xva"], z["Yva"], z["Btr"]
+    Mva = [(float(a), float(b)) for a, b in z["Mva"][:, :2]] if len(z["Mva"]) else []
+    enc_seconds = 0.0
+    print(f"loaded matrices in {time.perf_counter()-t_start:.0f}s: "
+          f"train {len(Xtr):,}  val {len(Xva):,}  bellman {len(Btr):,}",
+          flush=True)
+
     torch.manual_seed(0)
+    # GPU is used STRICTLY for the gradient steps. Feature assembly above is
+    # Python-loop bound and gains nothing from it. The model is moved back to
+    # CPU before saving so the inference/eval path stays CPU-only.
+    dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"training device: {dev}", flush=True)
     head = nn.Sequential(nn.Linear(INPUT_DIM, 512), nn.ReLU(), nn.Dropout(0.1),
                          nn.Linear(512, 256), nn.ReLU(), nn.Dropout(0.1),
                          nn.Linear(256, 128), nn.ReLU(), nn.Linear(128, 1))
+    head = head.to(dev)
     opt = torch.optim.Adam(head.parameters(), lr=1e-3, weight_decay=1e-5)
     lossf = nn.BCEWithLogitsLoss()
-    xt = torch.tensor(Xtr); yt = torch.tensor(Ytr).unsqueeze(1)
+    xt = torch.tensor(Xtr).to(dev); yt = torch.tensor(Ytr).unsqueeze(1).to(dev)
     mu, sd = xt.mean(0, keepdim=True), xt.std(0, keepdim=True) + 1e-6
     xt = (xt - mu) / sd
-    bt = (torch.tensor(Btr) - mu) / sd if len(Btr) else None
-    xv = (torch.tensor(Xva) - mu) / sd; yv = torch.tensor(Yva).unsqueeze(1)
+    bt = ((torch.tensor(Btr).to(dev) - mu) / sd) if len(Btr) else None
+    xv = (torch.tensor(Xva).to(dev) - mu) / sd
+    yv = torch.tensor(Yva).unsqueeze(1).to(dev)
 
     t_tr = time.perf_counter()
     hist = []
@@ -285,7 +346,7 @@ def train() -> dict[str, Any]:
     train_seconds = time.perf_counter() - t_tr
 
     with torch.no_grad():
-        pv = torch.sigmoid(head(xv)).squeeze(1).numpy()
+        pv = torch.sigmoid(head(xv)).squeeze(1).cpu().numpy()
     base = float(Yva.mean())
     brier = float(np.mean((pv - Yva) ** 2))
     brier_const = float(np.mean((base - Yva) ** 2))
@@ -297,6 +358,7 @@ def train() -> dict[str, Any]:
 
     out_p = Path(RUN_ROOT) / OUT_DIR
     out_p.mkdir(parents=True, exist_ok=True)
+    head = head.to('cpu')          # saved artifact must load on CPU
     head_s = torch.jit.script(head.eval())
     torch.jit.save(head_s, str(out_p / "head.pt"))
     (out_p / "norm.json").write_text(json.dumps(
@@ -335,9 +397,20 @@ def train() -> dict[str, Any]:
 
 
 @app.local_entrypoint()
-def main() -> None:
+def main(stage: str = "both") -> None:
+    """stage: assemble (CPU) | train (GPU) | both. No GPU is held during CPU work."""
     print("Training the REAL region-h_phi on the frozen 1,024x2xH24 corpus.")
     print("R_theta FROZEN. Target: finite-budget hitting reachability.")
     print("MC future-event + Bellman consistency with stopped-gradient backup.")
-    call = train.spawn()
-    print(f"spawned: {call.object_id}")
+    if stage not in ("assemble", "train", "both"):
+        raise SystemExit(f"stage must be assemble|train|both, got {stage!r}")
+
+    if stage in ("assemble", "both"):
+        # CPU only. The GPU is NOT allocated while this runs.
+        print("stage 1/2: assembling features on CPU (no GPU held)...")
+        info = assemble.remote()
+        print(f"  assembled: {info}")
+    if stage in ("train", "both"):
+        print("stage 2/2: training on A10G from the cached matrices")
+        call = train.spawn()
+        print(f"spawned: {call.object_id}")
