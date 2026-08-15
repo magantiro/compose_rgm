@@ -162,11 +162,94 @@ def profile(source: str) -> dict[str, Any]:
     return out
 
 
+@app.function(image=image, cpu=(8.0, 8.0), memory=32768, timeout=60 * 60,
+              volumes={str(ARTIFACT_ROOT): artifact_volume})
+def batch_test(smiles: list[str]) -> dict[str, Any]:
+    """Does batching the encode help, and is it BITWISE identical?
+
+    The whole h_phi cost is single-molecule encodes that each run 558 lines of
+    mark-space preparation _encode_batch never reads. prepare_factorized_mark_batch
+    already accepts tuples, so the question is purely empirical: how much does
+    batching amortise, and does it change a single number?
+    """
+    import sys
+
+    import numpy as np
+    import torch
+
+    sys.path.insert(0, str(REMOTE_ROOT / "src"))
+    from rdkit import RDLogger
+
+    RDLogger.DisableLog("rdApp.*")
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.model.factorized_tracelet_rate_model import (
+        operator_capability_batch_kwargs, prepare_factorized_mark_batch,
+    )
+    from compose_v4.experiments.production_successor_kernel import _one_state_batch
+
+    model, _system = _load(8)
+    states = [pad_molecular_graph(smiles_to_molecular_graph(s), CANONICAL_SLOTS)
+              for s in smiles]
+    out: dict[str, Any] = {"n": len(states)}
+
+    # --- current path: one molecule at a time ---
+    t0 = time.perf_counter()
+    single = []
+    for st in states:
+        b = _one_state_batch(model, st, float(TIME_POINT), prepared_batch=None)
+        with torch.no_grad():
+            _n, g, _p = model._encode_batch(b)
+        single.append(g[0].detach().cpu().numpy())
+    t_single = time.perf_counter() - t0
+
+    # --- batched path: all molecules in ONE preparation ---
+    res = {}
+    for bs in (8, 32, len(states)):
+        if bs > len(states):
+            continue
+        t0 = time.perf_counter()
+        batched = []
+        for i in range(0, len(states), bs):
+            chunk = states[i:i + bs]
+            pb = prepare_factorized_mark_batch(
+                tuple(chunk), (float(TIME_POINT),) * len(chunk),
+                (None,) * len(chunk), (None,) * len(chunk),
+                (0.0,) * len(chunk), use_aromatic_bond_view=True,
+                ring_catalog=model.ring_catalog,
+                **operator_capability_batch_kwargs(model.operator_capabilities))
+            with torch.no_grad():
+                _n, g, _p = model._encode_batch(pb)
+            batched.extend(g[k].detach().cpu().numpy() for k in range(len(chunk)))
+        dt = time.perf_counter() - t0
+        maxdiff = float(max(np.abs(a - b).max() for a, b in zip(single, batched)))
+        res[bs] = {"seconds": round(dt, 2),
+                   "per_mol_ms": round(1000 * dt / len(states), 1),
+                   "speedup_vs_single": round(t_single / dt, 2),
+                   "max_abs_diff_vs_single": maxdiff,
+                   "bitwise_identical": maxdiff == 0.0}
+        print(f"  batch={bs:>3}: {dt:6.2f}s  {1000*dt/len(states):7.1f} ms/mol  "
+              f"speedup {t_single/dt:5.2f}x  maxdiff {maxdiff:.3e}", flush=True)
+    out["single"] = {"seconds": round(t_single, 2),
+                     "per_mol_ms": round(1000 * t_single / len(states), 1)}
+    out["batched"] = res
+    print(f"  single : {t_single:6.2f}s  {1000*t_single/len(states):7.1f} ms/mol",
+          flush=True)
+    return out
+
+
 @app.local_entrypoint()
 def main() -> None:
     src = [s.strip() for s in
            (Path(__file__).resolve().parents[1] / "data/jin/dev_panel_qed_64.txt"
             ).read_text().split("\n") if s.strip()][0]
     print(f"profiling {STEPS} steps on dev source 0 at 1 / 4 / 8 torch threads")
+    import sys
+    if "--batch" in sys.argv:
+        pool = [s.strip() for s in
+                (Path(__file__).resolve().parents[1] / "data/jin/hphi_valid_128.txt"
+                 ).read_text().split("\n") if s.strip()][:64]
+        print(json.dumps(batch_test.remote(pool), indent=2))
+        return
     r = profile.remote(src)
     print(json.dumps(r, indent=2))
