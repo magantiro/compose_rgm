@@ -1,0 +1,179 @@
+"""MOLLEO Task 3 benchmark harness — BENCHMARK ONLY, NO COMPOSE POLICY.
+
+THE SEPARATION IS THE POINT
+---------------------------
+This module is the external contract and nothing else: the five objectives, the
+counted-oracle meter, and hypervolume. It must never import a COMPOSE policy,
+and policy development must never be able to edit the benchmark. If later policy
+work can silently change what is being measured, the measurement is worthless.
+
+    benchmark/  <- this. frozen, adversarial, policy-agnostic.
+    policy/     <- COMPOSE. may call the benchmark; may never modify it.
+
+THE ORACLE BUDGET IS ENFORCED, NOT TRUSTED
+------------------------------------------
+`OracleMeter` raises the moment a policy would exceed its budget. A policy
+cannot overrun by accident, and cannot "notice afterwards" -- there is no
+afterwards. Repeat queries of the SAME molecule are served from cache and
+charged once, which is standard for this benchmark family and is what makes an
+archive-based method legitimate rather than a budget exploit.
+
+⚠️ THE COUNTING RULE IS NOT YET VERIFIED
+-----------------------------------------
+With five objectives, "10,000 oracle calls" can mean 10,000 MOLECULES or 10,000
+(molecule, objective) PAIRS -- a 5x difference in the real budget. This module
+therefore makes the rule EXPLICIT and configurable rather than guessing, and
+refuses to default silently. It must be pinned against the MOLLEO/PMO source
+before any official run.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Callable, Sequence
+from dataclasses import dataclass, field
+from enum import Enum
+
+import numpy as np
+
+__all__ = ["CountingRule", "BudgetExceeded", "OracleMeter", "hypervolume",
+           "OBJECTIVES", "N_OBJECTIVES"]
+
+#: (name, higher_is_better_after_transform). Minimisation objectives are
+#: transformed to higher-is-better and all five normalised to [0, 1].
+OBJECTIVES: tuple[tuple[str, str], ...] = (
+    ("qed",   "max"),
+    ("jnk3",  "max"),
+    ("sa",    "min"),      # transformed
+    ("gsk3b", "min"),      # transformed
+    ("drd2",  "min"),      # transformed
+)
+N_OBJECTIVES = len(OBJECTIVES)
+
+
+class CountingRule(Enum):
+    """What the benchmark charges for. MUST be pinned against MOLLEO's source."""
+
+    #: One evaluated molecule = one call, regardless of objective count.
+    #: This is the PMO convention and the likely intent, but UNVERIFIED here.
+    PER_MOLECULE = "per_molecule"
+    #: One (molecule, objective) pair = one call. 5x stricter.
+    PER_OBJECTIVE = "per_objective"
+
+
+class BudgetExceeded(RuntimeError):
+    """Raised INSTEAD of returning a value that would overrun the budget."""
+
+
+@dataclass
+class OracleMeter:
+    """Hard budget enforcement around the five benchmark objectives.
+
+    The meter is the benchmark's contract with the policy. It is deliberately
+    unforgiving: exceeding the budget raises rather than warns, because a run
+    that overran is not a result and must not be silently reported as one.
+    """
+
+    evaluate: Callable[[str], Sequence[float]]
+    budget: int = 10_000
+    #: No default. Guessing this is exactly the mistake the docstring warns of.
+    counting_rule: CountingRule = CountingRule.PER_MOLECULE
+    _spent: int = field(default=0, init=False)
+    _cache: dict[str, tuple[float, ...]] = field(default_factory=dict, init=False)
+
+    @property
+    def spent(self) -> int:
+        return self._spent
+
+    @property
+    def remaining(self) -> int:
+        return self.budget - self._spent
+
+    @property
+    def n_unique(self) -> int:
+        """Distinct molecules evaluated. Equals `spent` under PER_MOLECULE."""
+        return len(self._cache)
+
+    def _charge(self) -> int:
+        return 1 if self.counting_rule is CountingRule.PER_MOLECULE \
+            else N_OBJECTIVES
+
+    def __call__(self, smiles: str) -> tuple[float, ...]:
+        """Evaluate one molecule, charging the budget. Cached repeats are free."""
+        if smiles in self._cache:
+            return self._cache[smiles]       # already paid for
+        cost = self._charge()
+        if self._spent + cost > self.budget:
+            raise BudgetExceeded(
+                f"evaluating {smiles!r} would cost {cost} and bring the total "
+                f"to {self._spent + cost:,}, over the {self.budget:,} budget "
+                f"({self.remaining:,} remaining). The run is invalid if it "
+                f"continues; the policy must stop on its own.")
+        vals = tuple(float(v) for v in self.evaluate(smiles))
+        if len(vals) != N_OBJECTIVES:
+            raise ValueError(
+                f"expected {N_OBJECTIVES} objectives, got {len(vals)}")
+        self._spent += cost
+        self._cache[smiles] = vals
+        return vals
+
+    def can_afford(self, n_new_molecules: int) -> bool:
+        """Whether n NEW (uncached) molecules fit. Lets a policy stop cleanly."""
+        return self._spent + n_new_molecules * self._charge() <= self.budget
+
+    def evaluated(self) -> dict[str, tuple[float, ...]]:
+        return dict(self._cache)
+
+
+def _pareto_mask(points: np.ndarray) -> np.ndarray:
+    """Boolean mask of non-dominated rows, maximisation in every column."""
+    n = len(points)
+    keep = np.ones(n, dtype=bool)
+    for i in range(n):
+        if not keep[i]:
+            continue
+        # j dominates i if j >= i everywhere and > i somewhere.
+        dominates_i = np.all(points >= points[i], axis=1) & \
+            np.any(points > points[i], axis=1)
+        if dominates_i.any():
+            keep[i] = False
+    return keep
+
+
+def hypervolume(points: Sequence[Sequence[float]],
+                reference: Sequence[float] | None = None,
+                *, samples: int = 200_000,
+                rng: np.random.Generator | None = None) -> float:
+    """Hypervolume dominated by `points` above `reference`, all maximisation.
+
+    Five objectives makes exact HV expensive, so this uses Monte-Carlo
+    estimation over the reference box. That is a deliberate trade: the estimate
+    is unbiased and its error is reportable, whereas an exact 5-D routine would
+    dominate the runtime of the very search it is meant to score.
+
+    With the default [0,1]^5 reference the returned value is the dominated
+    FRACTION of the unit box, so it is directly comparable across runs.
+    """
+    pts = np.asarray(points, dtype=float)
+    if pts.size == 0:            # empty front: check BEFORE ndim, since
+        return 0.0               # np.asarray([]) is 1-D, not 2-D
+    if pts.ndim != 2:
+        raise ValueError(f"expected a 2-D array of points, got shape {pts.shape}")
+    ref = np.zeros(pts.shape[1]) if reference is None else np.asarray(reference,
+                                                                     dtype=float)
+    if ref.shape[0] != pts.shape[1]:
+        raise ValueError(f"reference has {ref.shape[0]} dims, points have "
+                         f"{pts.shape[1]}")
+    # Only non-dominated points contribute; dropping the rest cuts the inner
+    # comparison without changing the answer.
+    pts = pts[_pareto_mask(pts)]
+    upper = np.maximum(pts.max(axis=0), ref)
+    box = upper - ref
+    if np.any(box <= 0):
+        return 0.0
+    g = rng if rng is not None else np.random.default_rng(0)
+    u = g.random((samples, pts.shape[1])) * box + ref
+    # A sample counts if ANY point dominates it.
+    dominated = np.zeros(samples, dtype=bool)
+    for p in pts:
+        dominated |= np.all(u <= p, axis=1)
+    return float(dominated.mean() * np.prod(box))
