@@ -2,6 +2,27 @@
  "semantics": "strict-10k",
  "note": "development seeds only; the official five-seed run is sealed until the policy is frozen",
  "policies": {
+  "adaptive-marginal-gain-region-origin": {
+   "seeds": [
+    100
+   ],
+   "hypervolume": [
+    0.2015371322631836
+   ],
+   "hypervolume_mean": 0.2015371322631836,
+   "hypervolume_stdev": 0.0,
+   "spent": [
+    10000
+   ],
+   "seconds": [
+    332.7
+   ],
+   "best_jnk3": [
+    0.26
+   ],
+   "budget": 10000,
+   "hv_vs_best_jnk3_correlation": null
+  },
   "graph-ga": {
    "seeds": [
     100,

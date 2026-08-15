@@ -11,18 +11,33 @@ and if it does not, this task can use a different COMPOSE-native expansion.  The
 outer algorithm is independent of that choice, so it is built now and the seam is
 kept open.
 
-THE ONE STRUCTURAL GUARANTEE
-----------------------------
-A navigator is handed a start state, a target region, and a step budget.  IT IS
-NEVER HANDED THE RUN, THE METER, OR THE OBJECTIVES.  The only path from a
-molecule to its five objectives is `select_for_oracle` followed by
-`update_archive`, which charges.
+THE ONE STRUCTURAL GUARANTEE, STATED EXACTLY
+--------------------------------------------
+A navigator may see EVERYTHING WE HAVE ALREADY PAID FOR -- the archive of
+evaluated molecules with their objective vectors.  It is never handed the run,
+the meter, or the evaluator.  So it can fit a surrogate on purchased data, which
+is what every method does, and it cannot obtain the objectives of a NEW molecule
+without that molecule being charged.
 
-This is not a stylistic preference.  The released MOLLEO benchmark evaluates its
-whole offspring population through unmetered evaluators and charges only the
-survivors, which is why its effective budget is several times its nominal one.
-The way to be sure we never do the same thing is to make it unreachable: a
-navigator that cannot see the objectives cannot screen against them.
+That boundary is the whole accounting difference with the released benchmark,
+which screens its entire offspring population through unmetered evaluators and
+charges only the survivors.  Here the leak is unreachable rather than merely
+avoided.
+
+WHY `evidence` EXISTS AT ALL -- IT WAS MEASURED, NOT ASSUMED
+------------------------------------------------------------
+A region is a point in OBJECTIVE space.  A navigator with no way to estimate
+objectives cannot tell whether an edit moved toward it or away, so it cannot
+steer, and region targeting collapses into "choose a good starting molecule".
+That is not a hypothetical: a full 10,000-call development run with a
+steering-blind stand-in navigator reached JNK3 0.26, against 0.68 for uniform
+random sampling on the same seed, because it explored hard in no particular
+direction.
+
+So the seam carries the paid-for archive, and the real navigator's first job is
+a five-objective notion of future value built from it.  That model is this
+task's own -- the QED lane's `h_phi` is a QED/similarity region model and does
+not answer this question.
 """
 
 from __future__ import annotations
@@ -94,13 +109,18 @@ class NavigationBudget:
 
 
 class Navigator(Protocol):
-    """Expand from a realized state toward a region. PLUGGABLE ON PURPOSE."""
+    """Expand from a realized state toward a region. PLUGGABLE ON PURPOSE.
+
+    `evidence` is the archive of molecules already paid for. Read it freely;
+    there is no way to add to it from here.
+    """
 
     name: str
 
     def navigate(self, start: str, region: Region,
                  budget: NavigationBudget,
-                 rng: np.random.Generator) -> Trajectory:
+                 rng: np.random.Generator,
+                 *, evidence: object | None = None) -> Trajectory:
         ...
 
 

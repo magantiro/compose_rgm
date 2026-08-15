@@ -60,9 +60,13 @@ class RandomEditNavigator:
     """DEVELOPMENT STAND-IN. Legal edits, but NOT the COMPOSE process.
 
     A short random walk of Graph-GA mutations from the start state, keeping
-    every realized molecule. STOP is chosen prospectively over the walk by a
-    surrogate that uses ONLY cheap RDKit descriptors and the region -- never the
-    benchmark objectives, which this class cannot reach.
+    every realized molecule and stopping at the end of the walk. It cannot
+    steer: nothing in it consults the region, and that is exactly what makes it
+    a stand-in rather than a policy.
+
+    Note that upstream `mutate` returns the molecule UNCHANGED with probability
+    1 - mutation_rate, so a walk of n steps makes about n * mutation_rate real
+    edits.
     """
 
     name: str = "random-edit-standin"
@@ -82,7 +86,11 @@ class RandomEditNavigator:
         return co, mu
 
     def navigate(self, start: str, region: Region, budget: NavigationBudget,
-                 rng: np.random.Generator) -> Trajectory:
+                 rng: np.random.Generator, *,
+                 evidence: object | None = None) -> Trajectory:
+        # `evidence` is accepted and IGNORED here, which is the point: this
+        # stand-in cannot steer, and the run that proved steering matters is
+        # the one where it did not.
         from rdkit import Chem
 
         _, mu = self._operators()
@@ -145,7 +153,8 @@ class RThetaNavigator:
     name: str = "r-theta"
 
     def navigate(self, start: str, region: Region, budget: NavigationBudget,
-                 rng: np.random.Generator) -> Trajectory:
+                 rng: np.random.Generator, *,
+                 evidence: object | None = None) -> Trajectory:
         raise NavigatorUnavailable(
             "the frozen R_theta runtime cannot be built in this checkout: the "
             "local Active8 copy's source_index_sha256 does not match the Gate-0 "

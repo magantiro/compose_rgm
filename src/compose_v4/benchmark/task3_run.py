@@ -138,7 +138,9 @@ class Task3Run:
         for item in smiles:
             key = canonical(item) or item
             if key not in evaluated and key not in seen:
-                if self.meter.spent + (novel + 1) > self.meter.budget:
+                # Ask the meter rather than reimplementing its arithmetic:
+                # under the per-objective counting rule each molecule costs five.
+                if not self.meter.can_afford(novel + 1):
                     break
                 seen.add(key)
                 novel += 1

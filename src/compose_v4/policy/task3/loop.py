@@ -132,8 +132,12 @@ class AdaptiveParetoNavigatorPolicy:
             if start is None:
                 stats["no_start"] += 1
                 break
+            # The archive is everything already paid for. Handing it over lets
+            # a navigator learn to steer; it is still the case that nothing here
+            # can evaluate a NEW molecule without charging.
             trajectory = self.navigator.navigate(
-                start, region, self.navigation_budget, run.rng)
+                start, region, self.navigation_budget, run.rng,
+                evidence=archive)
             if not trajectory.states:
                 stats["empty_trajectory"] += 1
                 stalled += 1

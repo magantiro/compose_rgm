@@ -161,8 +161,8 @@ class RecordingNavigator:
         self.routes = list(routes)
         self.calls = []
 
-    def navigate(self, start, region, budget, rng):
-        self.calls.append((start, region))
+    def navigate(self, start, region, budget, rng, *, evidence=None):
+        self.calls.append((start, region, evidence))
         states = self.routes[len(self.calls) % len(self.routes)]
         return Trajectory(states=list(states), stop=len(states) - 1,
                           region=region)
@@ -202,12 +202,15 @@ def test_the_navigator_is_never_handed_the_run_or_the_objectives(tmp_path):
         policy.run(run, development_init_set(100))
     finally:
         run.close()
-    for start, region in navigator.calls:
+    for start, region, evidence in navigator.calls:
         assert isinstance(start, str)
         assert isinstance(region, Region)
-    # The signature is (start, region, budget, rng): no run, no meter, no oracle.
-    assert set(RandomEditNavigator.navigate.__code__.co_varnames[:5]) == {
-        "self", "start", "region", "budget", "rng"}
+        # It sees what we have PAID FOR, and only that.
+        assert isinstance(evidence, ParetoArchive)
+        assert not hasattr(evidence, "evaluate")
+    names = set(RandomEditNavigator.navigate.__code__.co_varnames[:6])
+    assert names == {"self", "start", "region", "budget", "rng", "evidence"}, (
+        "a navigator must not be handed the run, the meter or the evaluator")
 
 
 def test_a_resumed_run_rebuilds_its_archive_from_the_ledger(tmp_path):
