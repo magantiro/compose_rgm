@@ -1,0 +1,37 @@
+{
+  "schema": "compose.hphi.corpus_frozen",
+  "status": "FROZEN_NO_SCIENTIFIC_RERUN",
+  "artifact": "editing_v2/r_theta_run/hphi_rollout_corpus/train_1024x02_H24.json.gz",
+  "sha256": "647f8265f5143e2b15dc047de42e837203593c42beb7e45e2b94e55e41602581",
+  "bytes": 692501,
+  "shape": {
+    "sources": 1024,
+    "trajectories_per_source": 2,
+    "horizon": 24,
+    "committed_transitions": 49152,
+    "trajectories": 2048
+  },
+  "budget_check": "1024*2*24 == 49152 == the frozen budget (1024*8*6)",
+  "r_theta": "c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8",
+  "mechanics": {
+    "complete": 2048,
+    "cemetery": 0,
+    "kernel_calls": 49152,
+    "median_edits": 24,
+    "min_edits": 24,
+    "max_edits": 24
+  },
+  "training_support": {
+    "unique_states": 39663,
+    "prefix_examples": 51200,
+    "budgets": "0..24, 2048 examples at each"
+  },
+  "benchmark_region_supervision": {
+    "new_hits": 64,
+    "trajectory_rate": 0.0312,
+    "source_coverage": 0.0566,
+    "sources_with_hits": 58,
+    "gateway_prefixes": 687
+  },
+  "note": "census display previously printed H=6 from a stale module constant; the data was always H24 and is unaffected"
+}

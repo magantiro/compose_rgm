@@ -62,9 +62,12 @@ def main() -> int:
     secs = [float(r.get("seconds", 0.0)) for r in sources]
     print(f"\nMECHANICS")
     print(f"  termination: {dict(term)}")
+    # Read the horizon from the DATA, not the module constant. An earlier
+    # version printed "(H=6)" over an H24 corpus because it used HORIZON.
+    H_obs = max(edits) if edits else 0
     print(f"  committed edits: median {np.median(edits):.1f} "
-          f"min {min(edits)} max {max(edits)}  (H={HORIZON})")
-    print(f"  complete at H{HORIZON}: {term.get('complete',0)}/{len(trajs)} "
+          f"min {min(edits)} max {max(edits)}  (observed H={H_obs})")
+    print(f"  complete at H{H_obs}: {term.get('complete',0)}/{len(trajs)} "
           f"= {term.get('complete',0)/max(1,len(trajs)):.4f}")
     print(f"  kernel calls {kernel:,}   per-source seconds median "
           f"{np.median(secs):.1f}")
