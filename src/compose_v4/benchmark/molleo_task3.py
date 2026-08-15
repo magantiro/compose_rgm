@@ -18,13 +18,30 @@ afterwards. Repeat queries of the SAME molecule are served from cache and
 charged once, which is standard for this benchmark family and is what makes an
 archive-based method legitimate rather than a budget exploit.
 
-⚠️ THE COUNTING RULE IS NOT YET VERIFIED
------------------------------------------
-With five objectives, "10,000 oracle calls" can mean 10,000 MOLECULES or 10,000
-(molecule, objective) PAIRS -- a 5x difference in the real budget. This module
-therefore makes the rule EXPLICIT and configurable rather than guessing, and
-refuses to default silently. It must be pinned against the MOLLEO/PMO source
-before any official run.
+THE COUNTING UNIT -- RESOLVED AGAINST THE RELEASED CODE
+--------------------------------------------------------
+    1 novel CANONICAL molecule receiving the five-objective vector = 1 unit
+
+MOLLEO describes the budget as a maximum number of MOLECULE evaluations, seeds
+with 120 random ZINC-250k molecules, and caps at 10,000. In the released code a
+SMILES is canonicalized first; if that canonical molecule is already in
+`mol_buffer` it is not re-evaluated, and a new one gets its entire
+multi-objective evaluation for a single buffer entry. So it is NOT five separate
+(molecule, objective) charges. CANONICALIZATION IS PART OF THE RULE, not an
+optimization -- charging two spellings of one molecule twice would be wrong.
+
+PER_OBJECTIVE is retained only so the stricter reading stays expressible.
+
+⚠️ OPEN -- DO NOT YET CALL THIS "EXACT MOLLEO TASK 3"
+-------------------------------------------------------
+The released `select_pareto_front()` calls the objective evaluators directly,
+bypassing the metered `score_smi()` path, and the loop evaluates the whole
+offspring population that way BEFORE passing only the Pareto survivors through
+the metered oracle. That appears to let new molecules be screened for Pareto
+membership without being charged to the nominal 10k counter -- which is not what
+the paper describes. Until a small released-code run establishes
+`N_metered` vs `N_unique molecules actually evaluated`, this harness is
+"strict-10k semantics", not "exact released-code semantics".
 """
 
 from __future__ import annotations
@@ -75,6 +92,10 @@ class OracleMeter:
 
     evaluate: Callable[[str], Sequence[float]]
     budget: int = 10_000
+    #: Canonicalizer. Part of the COUNTING RULE, not an optimization: the
+    #: released benchmark canonicalizes before consulting its buffer, so two
+    #: spellings of one molecule must cost ONE unit, not two.
+    canonicalize: Callable[[str], str] | None = None
     #: No default. Guessing this is exactly the mistake the docstring warns of.
     counting_rule: CountingRule = CountingRule.PER_MOLECULE
     _spent: int = field(default=0, init=False)
@@ -97,8 +118,12 @@ class OracleMeter:
         return 1 if self.counting_rule is CountingRule.PER_MOLECULE \
             else N_OBJECTIVES
 
+    def _key(self, smiles: str) -> str:
+        return self.canonicalize(smiles) if self.canonicalize else smiles
+
     def __call__(self, smiles: str) -> tuple[float, ...]:
         """Evaluate one molecule, charging the budget. Cached repeats are free."""
+        smiles = self._key(smiles)           # canonical FIRST, then look up
         if smiles in self._cache:
             return self._cache[smiles]       # already paid for
         cost = self._charge()

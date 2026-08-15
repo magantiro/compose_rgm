@@ -93,3 +93,27 @@ def test_dummy_policy_completes_the_whole_contract():
     assert 0.0 < hv <= 1.0
     with pytest.raises(BudgetExceeded):
         m("one-too-many")
+
+
+def test_two_spellings_of_one_molecule_cost_one_unit():
+    """Canonicalization is part of the COUNTING RULE, not an optimization."""
+    from rdkit import Chem
+
+    def canon(s: str) -> str:
+        m = Chem.MolFromSmiles(s)
+        return Chem.MolToSmiles(m) if m else s
+
+    # Same molecule, different valid SMILES spellings.
+    a, b = "OCC", "CCO"
+    assert canon(a) == canon(b)
+
+    metered = OracleMeter(fake_eval, budget=10, canonicalize=canon)
+    va, vb = metered(a), metered(b)
+    assert va == vb, "same molecule must return the same objective vector"
+    assert metered.spent == 1, "two spellings of one molecule cost ONE unit"
+
+    # Without a canonicalizer the benchmark would overcharge -- this is the
+    # bug the rule exists to prevent, pinned so it cannot silently return.
+    naive = OracleMeter(fake_eval, budget=10)
+    naive(a); naive(b)
+    assert naive.spent == 2
