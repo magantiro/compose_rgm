@@ -31,7 +31,7 @@ from pathlib import Path
 
 import numpy as np
 
-from compose_v4.benchmark.molleo_task3 import OracleMeter, hypervolume
+from compose_v4.benchmark.molleo_task3 import OracleMeter, hypervolume_qmc
 from compose_v4.benchmark.oracles import Task3Objectives, canonical
 from compose_v4.benchmark.run_store import ResumeState, RunStore, restore_rng
 
@@ -132,17 +132,20 @@ class Task3Run:
         self.store.checkpoint(step=self.step, archive=self.archive, rng=self.rng,
                               policy_state=policy_state, arrays=arrays)
 
-    def hypervolume(self, *, samples: int = 200_000) -> float:
+    def hypervolume(self, *, log2_samples: int = 20) -> float:
         """HV of everything evaluated so far, against the origin.
 
         All five objectives are normalised to [0, 1] with higher better, so the
         reference point is the origin and the value is a fraction of the unit
         box -- comparable across runs without a shared reference set.
+
+        Deterministic (Sobol over the fixed unit box), so two policies are
+        measured against the very same sample points and a small real difference
+        is not buried under two independent estimation errors.
         """
 
         points = list(self.meter.evaluated().values())
-        return hypervolume(points, samples=samples,
-                           rng=np.random.default_rng(self.seed))
+        return hypervolume_qmc(points, log2_samples=log2_samples)
 
     def close(self) -> None:
         self.store.close()

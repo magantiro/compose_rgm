@@ -117,3 +117,39 @@ def test_two_spellings_of_one_molecule_cost_one_unit():
     naive = OracleMeter(fake_eval, budget=10)
     naive(a); naive(b)
     assert naive.spent == 2
+
+
+def test_the_reported_hypervolume_is_exact_enough_to_compare_policies():
+    """The QMC estimator is the one runs report, so its error must be far below
+    any difference worth arguing about."""
+    from compose_v4.benchmark.molleo_task3 import hypervolume_qmc
+
+    # One corner point dominates exactly prod(p) of the unit box.
+    assert hypervolume_qmc([[0.5] * 5]) == pytest.approx(0.5 ** 5, abs=1e-5)
+    assert hypervolume_qmc([[1.0] * 5]) == pytest.approx(1.0, abs=1e-9)
+    assert hypervolume_qmc([]) == 0.0
+
+
+def test_the_reported_hypervolume_is_deterministic():
+    """No seed, no variance: the same front always returns the same number, so a
+    result can be recomputed from an archive alone."""
+    from compose_v4.benchmark.molleo_task3 import hypervolume_qmc
+
+    front = np.random.default_rng(3).random((40, 5)) * 0.6
+    assert hypervolume_qmc(front) == hypervolume_qmc(front)
+
+
+def test_the_reported_hypervolume_rejects_unnormalised_objectives():
+    """It integrates the unit box; a raw SA value of 3.2 would silently break it."""
+    from compose_v4.benchmark.molleo_task3 import hypervolume_qmc
+
+    with pytest.raises(ValueError, match="normalised to"):
+        hypervolume_qmc([[0.5, 0.5, 3.2, 0.5, 0.5]])
+
+
+def test_a_dominating_front_reports_more_hypervolume():
+    from compose_v4.benchmark.molleo_task3 import hypervolume_qmc
+
+    worse = [[0.4] * 5, [0.6, 0.2, 0.2, 0.2, 0.2]]
+    better = worse + [[0.7] * 5]
+    assert hypervolume_qmc(better) > hypervolume_qmc(worse)

@@ -294,6 +294,61 @@ def _pareto_mask(points: np.ndarray) -> np.ndarray:
     return keep
 
 
+def hypervolume_qmc(points: Sequence[Sequence[float]], *,
+                    log2_samples: int = 20) -> float:
+    """THE REPORTED HYPERVOLUME: deterministic, and paired across runs.
+
+    Why not the Monte-Carlo estimator below: the benchmark's primary number is a
+    COMPARISON between policies, and two independently-noisy estimates make a
+    small real difference hard to see. This one integrates the FIXED unit box
+    with a fixed Sobol sequence, so every front is measured against the very same
+    sample points. The error is common to both sides of a comparison and largely
+    cancels, and the same front always returns the same number -- no seed, no
+    variance, reproducible from the archive alone.
+
+    Only defined for objectives already normalised to [0, 1] with the origin as
+    the reference point, which is what the Task 3 transforms guarantee.
+
+    Samples outside the front's own bounding box cannot be dominated by
+    anything, so they are dropped before the per-point work. That is an exact
+    algebraic shortcut, not an approximation: the retained sample set is still
+    the same fixed sequence.
+    """
+
+    from scipy.stats import qmc
+
+    pts = np.asarray(points, dtype=float)
+    if pts.size == 0:
+        return 0.0
+    if pts.ndim != 2:
+        raise ValueError(f"expected a 2-D array of points, got shape {pts.shape}")
+    if pts.min() < 0.0 or pts.max() > 1.0:
+        raise ValueError(
+            "hypervolume_qmc integrates the unit box, so every objective must "
+            "already be normalised to [0, 1]")
+    pts = pts[_pareto_mask(pts)]
+    upper = pts.max(axis=0)
+    if np.any(upper <= 0):
+        return 0.0
+
+    total = 1 << log2_samples
+    dominated = 0
+    engine = qmc.Sobol(d=pts.shape[1], scramble=False)
+    chunk = 1 << 17
+    for _ in range(total // chunk):
+        u = engine.random(chunk)
+        # Nothing above the front's own corner can be dominated; dropping those
+        # rows leaves the answer unchanged and does most of the work.
+        candidates = u[np.all(u <= upper, axis=1)]
+        if not len(candidates):
+            continue
+        hit = np.zeros(len(candidates), dtype=bool)
+        for p in pts:
+            hit |= np.all(candidates <= p, axis=1)
+        dominated += int(hit.sum())
+    return dominated / total
+
+
 def hypervolume(points: Sequence[Sequence[float]],
                 reference: Sequence[float] | None = None,
                 *, samples: int = 200_000,
