@@ -233,6 +233,11 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
             else:
                 # unguided and hphi share the proposal loop; they differ ONLY
                 # in the acceptance test, which is what isolates h_phi's effect.
+                # CAP IS MAX_PROPOSALS (40), drawn in chunks of 16 as
+                # [16, 16, 8]. The chunk size is a draw granularity ONLY and
+                # must never be confused with the cap: any batching work
+                # changes how many h_phi scores are computed per pass, NEVER
+                # how many proposals the frozen sampler is allowed to draw.
                 drawn = 0
                 while drawn < MAX_PROPOSALS:
                     take = min(16, MAX_PROPOSALS - drawn)

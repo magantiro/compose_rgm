@@ -178,9 +178,19 @@ saved**, never the last epoch.
 3. canonicalize                               6. else resample
 ```
 
-**This is exact**, not approximate: `h_φ ∈ [0, 1]`, and `h_φ` is a *state-level*
-function, so aliased successors aggregate correctly. The stationary law of the
-accepted chain is exactly the `h`-transformed process.
+**Precisely stated** — this matters, and an earlier wording here was loose.
+`h_φ ∈ [0, 1]` and `h_φ` is a *state-level* function, so aliased successors
+aggregate correctly, and **conditioned on acceptance the accepted move has
+exactly the `R_θ·h_φ` law**.
+
+But the cap is finite. When all `MAX_PROPOSALS` are rejected the sampler
+**fails** and the trajectory ends, so the capped procedure as a whole is **not**
+an exact realization of the controlled kernel — it carries an explicit
+sampler-failure event. **Do not describe the capped sampler as exact.**
+
+This is acceptable *because* the preregistration treats cap pressure as a
+**diagnostic**, with a frozen SMC escalation for the case where it becomes
+severe (§8). It is a measured quantity, not a defect to tune away.
 
 ### STOP semantics
 
@@ -310,6 +320,42 @@ Price a run **before** launching it and state the figure. If it would exceed the
 standing authorization, do not launch — request an amendment to a specific
 number and record the reason here first.
 
+
+---
+
+## 11b · Optimization sequencing — BEFORE the 128, not after
+
+**Frozen 2026-08-15.** Engineering optimization has a place in the ladder, and
+it is **not** between the 128 and the 800.
+
+```
+64 dev  →  SELECT the frozen inference branch (rejection vs SMC)
+        →  implement + qualify exact optimizations on the SURVIVING branch
+        →  128 fresh validation  →  800 official
+```
+
+**Why not after the 128.** The 128-source validation exists to validate the
+**actual implementation that will touch the official test set**. Running it on a
+slow reference implementation and then introducing a faster one for the 800
+would mean the official run uses code that no validation rung ever exercised —
+even if the speedup is mathematically exact.
+
+**Why not before the 64.** The 64 selects which branch is production. Optimizing
+the rejection path before knowing whether rejection survives may be optimizing
+code that gets discarded.
+
+| after the 64 says… | then |
+|---|---|
+| rejection is **healthy** | keep rejection; implement exact batched scoring if profiling justifies it |
+| cap pressure fires the **frozen SMC trigger** | move to SMC **first**; do not optimize the rejection path as though it were production |
+
+Then, on whichever branch survives: profile it · implement **only**
+semantics-preserving speedups · **qualify the fast implementation against the
+reference** · **freeze it** · run the 128 · run the 800 unchanged.
+
+**Batching changes how many `h_φ` scores are computed per pass. It must never
+change how many proposals the frozen sampler may draw** (cap = 40, drawn in
+chunks of 16). Any expected speedup is an engineering hypothesis until profiled.
 
 ---
 
