@@ -409,3 +409,94 @@ Truncation would report the cheap operating point using the expensive
 controller's decisions and would systematically misstate the frontier, most
 likely flattering H6. **Any frontier must therefore be separate controller
 runs**, never reconstructed from H24 prefixes.
+
+---
+
+## 13 · SMC escalation completion — FROZEN BEFORE ANY SMC PERFORMANCE IS OBSERVED
+
+The 64-source development panel triggered the preregistered twisted-SMC
+escalation: region-`h_φ` showed useful navigation (coverage 15.6 % → 28.1 %,
+13 sources new vs unguided, first hit at step 3.4 vs 10.0) while capped
+rejection failed mechanically (**94.3 % cap-hit rate**, mean 2.4 edits of 24,
+34.2 % of trajectories never committing a single edit).
+
+The preregistration fixed the SMC **construction** — molecular-state particles,
+learned-value twist, systematic resampling, ESS `< N/2` trigger — but did **not**
+fix the particle count or the mapping from an SMC population to the Jin
+20-candidate output contract. **Those two quantities are frozen here, before any
+SMC performance exists.** The 64 triggered the transition and gave **no**
+evidence about either.
+
+### Particle count
+
+> **`N = 32`**, inherited as the **single pre-existing SMC operating point
+> already instantiated in the repository** before this gate fired. **No
+> particle-count sweep is permitted.** It was **not** selected using SMC
+> performance on the QED development panel.
+
+### Candidate budget — the load-bearing rule
+
+> Each source receives **exactly 20 independent SMC runs**. Each run produces
+> **exactly one** returned molecule.
+>
+> ```
+> SMC^(j)(x₀; N=32, H=24)  →  1 molecule,   j = 1 … 20
+> 20 independent SMC runs   →  20 returned candidates
+> ```
+>
+> The 32 internal particles are **inference state**, exactly like the internal
+> steps of any other generative algorithm. They are **not** 32 returned-candidate
+> opportunities.
+
+**What one run returns:** one molecule sampled from the **normalized terminal
+particle measure**, `J ~ Categorical(w₁/Σw, …, w₃₂/Σw)`, returning `x_J`.
+Goal-region hits retain the already-defined absorbing/STOP semantics at the
+particle level.
+
+### Explicitly barred
+
+* ❌ best-of-32 / highest-QED particle
+* ❌ return-all-particles
+* ❌ first-successful-particle
+* ❌ top-20 from one population
+* ❌ the old `budget_per_lead = 1000` semantics — **disallowed for GrIDDD/Jin**
+
+Any of these would convert internal particle population into extra candidate
+budget and break the external contract.
+
+### ⚠️ AUDIT FINDING — what must be preserved vs replaced
+
+`scripts/griddd_value_guided_smc_controller.py` already implements the SMC
+correctly and **must not be rewritten**:
+
+| component | status |
+|---|---|
+| `ess = 1.0 / np.sum(weights**2)`; `if ess < n_particles / 2` | ✅ **matches the frozen spec — preserve** |
+| `_systematic_resample()` (low-variance) | ✅ **preserve** |
+| FK potential / value twist plumbing | ✅ **preserve**, rebind the twist to frozen `h_φ` (V1; the prior run was V0, `value_twist: None`) |
+| **output rule: tracks `best_qed`, `best_state`, returns `best_feasible_qed`** | ❌ **this is best-of-population — REPLACE** per the rule above |
+| `budget` as distinct oracle calls (the 1000-per-lead path) | ❌ **REPLACE** — 20 independent runs, one molecule each |
+
+This is the three-layer architecture (§2 of the governing plan) doing its job:
+**same molecular dynamics, reusable SMC primitive, new task policy** matching the
+Jin contract. Separate the inference machinery from the old task-specific
+wrapper; preserve the former, replace only the latter.
+
+### Everything else is unchanged
+
+Frozen `R_θ`, frozen `h_φ`, `H = 24` maximum, region `(0.90, 0.40)`, hard
+support semantics, STOP/absorption, weighting rule, ESS threshold, systematic
+resampling.
+
+**No SMC hyperparameter is selected using the 64-source results.** After
+mechanical qualification the SMC implementation is frozen and evaluated on the
+**fresh 128-source validation panel**.
+
+### Qualification is mechanical, NOT parity with rejection
+
+SMC is *supposed* to produce different trajectories from rejection, so demanding
+trajectory parity would be incoherent. Qualification establishes that the frozen
+mathematics is implemented correctly: particle weights and potentials,
+systematic resampling, ESS trigger, STOP semantics, region, budget accounting,
+reproducible seeds, deterministic replay where expected, kill/resume
+losslessness, and exact checks wherever a small enumerable case allows one.

@@ -271,6 +271,17 @@ training:
 The 64-source panel determines **only** the preregistered controller/sampler
 branches. It is **not a paper benchmark**.
 
+**⭐ THE 64 HAS RUN AND IS CLOSED.** Region-`h_φ` showed a strong developmental
+navigation signal (source coverage 15.6 % → 28.1 %, 13 sources new vs unguided)
+while capped rejection failed mechanically (94.3 % cap-hit rate). **The frozen
+cap-pressure criterion fired: twisted SMC is earned.** Rejection is not the
+production sampler. `h_φ` is unchanged; only the inference realization changes.
+See `HPHI_QED_PREREGISTRATION.md` §13 for the frozen SMC completion (`N = 32`,
+20 independent runs → 20 candidates) and `HPHI_DEV_PANEL_64_BANKED.json` for the
+banked result. **Not** to be described as decisively beating the baselines: the
+paired source-level tests give p = 0.096 and p = 0.144, and the 64 was never an
+efficacy test.
+
 **No temperatures, `QED^α`, top-`k`, cap tuning, or other post-outcome rescue
 knobs.**
 
