@@ -334,7 +334,9 @@ def hypervolume_qmc(points: Sequence[Sequence[float]], *,
     total = 1 << log2_samples
     dominated = 0
     engine = qmc.Sobol(d=pts.shape[1], scramble=False)
-    chunk = 1 << 17
+    # Chunked to bound memory, but never larger than the request -- a chunk
+    # bigger than `total` would silently integrate nothing and return 0.0.
+    chunk = min(1 << 17, total)
     for _ in range(total // chunk):
         u = engine.random(chunk)
         # Nothing above the front's own corner can be dominated; dropping those

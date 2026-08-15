@@ -153,3 +153,12 @@ def test_a_dominating_front_reports_more_hypervolume():
     worse = [[0.4] * 5, [0.6, 0.2, 0.2, 0.2, 0.2]]
     better = worse + [[0.7] * 5]
     assert hypervolume_qmc(better) > hypervolume_qmc(worse)
+
+
+@pytest.mark.parametrize("log2_samples", [10, 14, 17, 18])
+def test_a_small_sample_request_still_integrates_something(log2_samples):
+    """A chunk larger than the request would integrate nothing and return 0.0 --
+    a wrong answer that looks like an empty front."""
+    from compose_v4.benchmark.molleo_task3 import hypervolume_qmc
+
+    assert hypervolume_qmc([[0.5] * 5], log2_samples=log2_samples) > 0.0
