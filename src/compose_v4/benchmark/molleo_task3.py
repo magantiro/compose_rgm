@@ -223,6 +223,24 @@ class OracleMeter:
     def evaluated(self) -> dict[str, tuple[float, ...]]:
         return dict(self._cache)
 
+    def restore(self, evaluations: dict[str, tuple[float, ...]]) -> None:
+        """Re-enter a run's already-paid-for evaluations after a crash.
+
+        The keys must already be canonical -- they come from the ledger, which
+        stores what the meter charged. Spending is recomputed from the count
+        rather than restored from a saved counter, so a run cannot come back
+        from disk believing it has budget it already spent.
+        """
+
+        if self._cache:
+            raise RuntimeError("restore() into a meter that has already scored")
+        self._cache = {k: tuple(float(x) for x in v) for k, v in evaluations.items()}
+        self._spent = len(self._cache) * self._charge()
+        if self._spent > self.budget:
+            raise BudgetExceeded(
+                f"the ledger holds {len(self._cache):,} evaluations costing "
+                f"{self._spent:,}, over this run's {self.budget:,} budget")
+
 
 def _pareto_mask(points: np.ndarray) -> np.ndarray:
     """Boolean mask of non-dominated rows, maximisation in every column."""
