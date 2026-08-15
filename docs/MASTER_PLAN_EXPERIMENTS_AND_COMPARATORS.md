@@ -144,6 +144,51 @@ Controller/value adaptation is a separate quantity and is stated explicitly.
 If the same `h_φ` weights later generalize across several goal regions or tasks,
 that becomes an **additional empirical reuse result** rather than an assumption.
 
+### The three layers — what is shared, and what is allowed to change
+
+COMPOSE is **a generative control framework with a fixed learned molecular
+dynamics layer and task-native control policies** — *not* one universal sampler
+run identically on every problem. Claiming the latter would be an unnatural
+restriction, and it is not the claim.
+
+| layer | content | varies by task? |
+|---|---|:---:|
+| **1 · learned molecular dynamics** | `R_θ` + legal action set `A(x)` + complete-molecule state space | **NEVER** |
+| **2 · control primitives** | reachability control, support restriction `A_C`, anytime STOP, budget conditioning | reused as machinery |
+| **3 · task policy** | how control is deployed for *this* scientific question | **YES — by design** |
+
+`R_θ^(QED)` = `R_θ^(MOLLEO)` = `R_θ^(retargeting)` = `R_θ^(pathwise)`. The
+task layer expresses *what to do with the same learned molecular world*.
+
+**Why layer 3 must vary.** For QED the control problem is hitting one fixed
+region `B_z = {QED ≥ .90 ∧ sim ≥ .40}`, so region reachability plus anytime STOP
+is the natural policy. For MOLLEO the problem is *constructing a diverse
+high-HV archive under 10k evaluations* — adaptively navigating **among** regions
+rather than to one. Forcing a multi-objective optimizer to pretend it is solving
+a fixed-target hitting problem would be worse science, not fairer science.
+
+**What would be concerning, and is not happening:** retraining `R_θ`; inventing
+an unrelated model per task; changing the chemistry kernel or state
+representation; or adding post-hoc heuristics until a benchmark moved.
+
+**The discipline that keeps layer 3 honest.** Per task:
+
+```
+disjoint development data → small principled policy family → FREEZE ONE
+                          → fresh evaluation
+```
+
+Once a task's policy is frozen, **no outcome-driven rescue**. This is exactly
+why MOLLEO gets its own disjoint development → freeze → official pipeline (§5).
+
+**What QED transfers to MOLLEO** is layer 2, not layer 3: whether learned
+future-reachability can steer frozen `R_θ` at realistic molecular scale, whether
+the value function discriminates useful roads, whether rejection or SMC is the
+scalable realization, how budget and STOP should be handled, and whether the
+control can be implemented efficiently without changing the law. Those are
+reusable lessons about the **control substrate** — not a policy to copy
+line-for-line.
+
 ---
 
 ## 3. Current experiment map
