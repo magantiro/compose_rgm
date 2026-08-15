@@ -1,3 +1,386 @@
+# COMPOSE — CURRENT GOVERNING EXPERIMENTAL PLAN
+
+**This section is authoritative. Everything below `ARCHIVED PROVENANCE` records
+how the plan evolved but does not authorize experiments, comparators, rescues,
+budgets, or claims. Where archived text conflicts with this section, this
+section governs.**
+
+## 0. Experimental doctrine
+
+COMPOSE is evaluated with three distinct forms of evidence. They are not
+interchangeable.
+
+### A. External task competence
+
+When COMPOSE is compared with an external method, match the **published
+scientific task**, not the internal mechanics of the algorithms.
+
+Match whatever the benchmark actually specifies:
+
+* source cohort;
+* objective / success criterion;
+* returned-candidate budget;
+* benchmark-defined oracle budget, if one exists;
+* normalization;
+* metrics;
+* seeds / aggregation where required.
+
+Each method uses its **native inference procedure**.
+
+> **COMPOSE uses the strongest prospectively specified native inference
+> procedure permitted by that benchmark. Native capabilities — such as
+> future-aware control, variable-size rewriting, prospective STOP at valid
+> intermediate states, and a preregistered sampling mechanism — are not removed
+> merely because an external comparator lacks them. The benchmark defines the
+> external contract; internal algorithmic differences are the methods being
+> compared.**
+
+Do **not** impose equal internal steps, legal-support evaluations, property
+evaluations, wall-clock time, FLOPs, or search operations unless the benchmark
+itself defines such a resource constraint.
+
+Accordingly:
+
+* **GrIDDD QED:** the relevant budget is **20 returned candidates/source**. It
+  is not an oracle-call benchmark.
+* **MOLLEO Task 3:** the relevant budget includes **≤10,000 oracle
+  evaluations**, because that is explicitly part of the benchmark.
+
+A result may therefore be described as **better benchmark performance** even if
+COMPOSE uses greater inference computation. It may **not** be described as more
+computationally efficient unless that is separately established.
+
+---
+
+### B. Internal causal evidence
+
+When the claim is that a specifically COMPOSE capability matters, compare
+
+**native COMPOSE**  against  **COMPOSE minus exactly that capability**.
+
+Hold the common molecular process, sources, objectives, and relevant resources
+fixed as tightly as required to isolate the mechanism.
+
+**This is where matched compute matters.**
+
+Examples:
+
+* full support vs size-fixed support;
+* future-aware vs local control;
+* closed-loop vs generate-and-rank;
+* hard support vs soft/post-hoc handling;
+* endpoint-only vs pathwise constraints;
+* continuation from a realized state vs restart.
+
+External models are **not required** for experiments whose scientific question
+is uniquely about a COMPOSE capability.
+
+---
+
+### C. Process/property characterization
+
+Some claims are properties of the construction rather than leaderboard
+questions.
+
+Examples:
+
+* every committed state is a complete valid molecule;
+* legal edit families are actually used;
+* variable-size edits occur;
+* dead ends / STOP behavior.
+
+These are characterized from claim-bearing trajectories. They do not require
+manufactured external baselines.
+
+---
+
+## 1. Resource-accounting rule
+
+All claim-bearing runs should **internally log** enough information to
+reconstruct resource use:
+
+* training/adaptation cost;
+* inference wall time;
+* legal-support/kernel work;
+* property evaluations;
+* committed edits;
+* STOP step;
+* particle count / ESS where applicable.
+
+However:
+
+> **The manuscript reports benchmark-defined resource constraints and any
+> additional computational quantity materially necessary to support or interpret
+> a stated claim. It does not automatically foreground every internal counter.**
+
+Training, objective-specific adaptation, and inference are separate resource
+axes. Training cost is **not used to compensate rhetorically for greater
+inference cost**.
+
+Likewise, cheap QED/Tanimoto computations in the GrIDDD benchmark should not be
+redefined as an "oracle budget" simply because MOLLEO uses that terminology.
+
+**No H6/H12/H24 compute-frontier study is currently required.** If a compute
+frontier is later added, its operating points must be prospectively fixed before
+using it for a claim.
+
+---
+
+## 2. Architectural reuse claim
+
+Across all experiments, the reusable object is the same frozen goal-independent
+molecular dynamics **`R_θ`** (`sha256 c979cdb3…4e53de8`).
+
+The paper may claim:
+
+> **No objective-specific retraining of the molecular dynamics.**
+
+It may **not** automatically claim:
+
+> ~~no objective-specific training anywhere.~~
+
+Controller/value adaptation is a separate quantity and is stated explicitly.
+
+If the same `h_φ` weights later generalize across several goal regions or tasks,
+that becomes an **additional empirical reuse result** rather than an assumption.
+
+---
+
+## 3. Current experiment map
+
+| Block | Scientific question | What "better" means | Correct comparison | Resource rule | Status |
+|---|---|---|---|---|---|
+| **1A Every-state validity** | Are realized states executable complete molecules? | validity throughout trajectory, healthy operators, no pathological dead ends | construction/characterization | descriptive | harvest from runs |
+| **1B/C Trans-dimensionality** | Do insertion/deletion capabilities actually matter? | better QED task performance when size changes are available | **full COMPOSE vs identical size-fixed COMPOSE** | matched internal causal | nested in final QED |
+| **2 QED / GrIDDD** | Can COMPOSE compete on ordinary molecular editing? | source success on official Jin criterion | **native COMPOSE vs reported GrIDDD** | **20 returned candidates/source**; native inference | **current critical path** |
+| **3A Finite-horizon control** | Does future reasoning beat local decisions? | target attainment | verified/future-aware vs greedy, same process | matched causal | ✅ banked |
+| **3B Retargeting** | Is a realized molecular state useful after the goal changes? | success after switch | continue-`x₃` vs restart-`x₀` vs clairvoyant | matched causal | ✅ banked |
+| **4A Closed-loop Pareto** | Does controlling during generation beat generate-and-rank? | hypervolume/front quality | closed-loop vs matched generate-and-rank | matched kernel resources | ✅ banked |
+| **4B Preference richness** | Does one process support genuinely different preferences? | distinct endpoints, ND breadth, HV | full continuous preference analysis vs 5-weight grid | full-information diagnostic | ✅ banked |
+| **4C K41** | Can that richness be cheaply compressed by frozen shortlisting? | preregistered retention gates | K41 vs frozen gates | ≤10k development budget | ❌ failed; closed |
+| **4D MOLLEO Task 3** | Can COMPOSE compete on established 5-objective molecular optimization? | benchmark HV | native COMPOSE vs Graph-GA/MOLLEO published methods | **≤10,000 oracle calls**, exact benchmark protocol | future |
+| **5 Hard support** | Does changing feasible support itself matter? | feasibility + retained utility | post-hoc vs fixed soft vs exact hard support | matched internal causal | after controller freeze |
+| **6 Pathwise** | Does constraining the whole molecular route matter beyond endpoint feasibility? | lower pathwise violation while retaining endpoint utility | endpoint-only vs pathwise | matched internal causal; n=48 frozen | after controller freeze |
+| **Queued Map reuse** | Can realized search effort be reused for a newly requested preference? | continuation from useful mapped state vs restarting | best mapped state vs restart | matched causal | only after useful map exists |
+
+---
+
+## 4. QED / GrIDDD — current governing protocol
+
+### Task
+
+Official Jin/ZINC QED editing task:
+
+* **800 official sources**;
+* **20 returned candidates/source**;
+* success if at least one returned molecule satisfies
+  **QED ≥ 0.90 ∧ Tanimoto(x, x₀) ≥ 0.40**.
+
+The comparison is **task-level**: same sources + same 20 output opportunities +
+same success metric. It is **not** a matched-wall-clock, matched-internal-step,
+or matched-QED-evaluation experiment.
+
+### Native COMPOSE inference
+
+One COMPOSE candidate is generated by one controlled executable trajectory
+`x₀ → x₁ → … → x_τ`. Every `x_t` is a complete molecule.
+
+Native COMPOSE may prospectively **STOP** when the target region is first
+reached, `τ = min{t : x_t ∈ B_z}`. That state is the **one returned candidate**
+from that trajectory.
+
+Intermediate states are **not retrospectively harvested** to inflate the
+20-candidate pool. Thus:
+
+> **20 controlled trajectories → 20 returned candidates.**
+
+The ability to use a valid intermediate through prospective STOP is an
+**architectural capability**, not an unfair extra candidate budget.
+
+> **Within that 20-candidate contract, COMPOSE retains its native algorithm:**
+> frozen goal-independent `R_θ`, full legal variable-size support,
+> remaining-budget region-`h_φ` control, prospective STOP, and any sampler
+> transition explicitly earned by the frozen controller preregistration. These
+> are components of COMPOSE inference, **not** additional returned-candidate
+> opportunities.
+
+### Controller
+
+Policy B is a **sealed developmental negative result: 0/320** benchmark
+successes.
+
+The governing controller is finite-horizon region-`h_φ`:
+
+```
+P^φ_b(y | x, z)  ∝  R_θ(y | x) · h_φ(b−1, y, z)
+```
+
+The real region-`h_φ` has now been **trained on the full H24 corpus**.
+
+Current sequence, after the completed corpus generation, encoding and `h_φ`
+training:
+
+> **64-source development → 128-source fresh validation → 800-source official
+> test**
+
+The 64-source panel determines **only** the preregistered controller/sampler
+branches. It is **not a paper benchmark**.
+
+**No temperatures, `QED^α`, top-`k`, cap tuning, or other post-outcome rescue
+knobs.**
+
+Binding implementation protocol: `docs/HPHI_QED_PREREGISTRATION.md`.
+
+---
+
+## 5. External comparisons: what they establish
+
+There are only **two** primary external competence questions currently needed.
+
+### QED / GrIDDD
+
+> Can COMPOSE perform strongly on recognizable source-conditioned molecular
+> editing?
+
+Metric: **source success among 800 sources with 20 returned candidates/source.**
+
+If COMPOSE exceeds **45.1 %**, we may say:
+
+> **COMPOSE outperforms GrIDDD on the published Jin QED benchmark.**
+
+That statement refers to the benchmark metric. It does **not** imply equal
+inference cost or superior computational efficiency.
+
+> **Here and throughout, "outperforms on benchmark X" refers to the benchmark's
+> stated primary metric and protocol; it does not imply superiority on
+> unreported resource axes unless explicitly stated.**
+
+### MOLLEO Task 3
+
+> Can COMPOSE construct a strong Pareto set on an established five-objective
+> molecular optimization benchmark?
+
+Use the published protocol: 120 ZINC-250k initialization; five objectives; five
+seeds; HV; **≤ 10,000 oracle evaluations**. Here, unlike QED, the oracle count
+**is part of the task** and therefore binds COMPOSE.
+
+> **The 10,000-call rule constrains COMPOSE's external resource budget, not its
+> internal search architecture. The final COMPOSE policy *may use* any native
+> control, archive, stopping, or state-reuse mechanism prospectively frozen
+> through the disjoint development pipeline, provided all benchmark-counted
+> oracle evaluations remain within the published budget.**
+
+**The five-objective algorithm is NOT frozen yet.** What is frozen is the
+principle — *build the best native COMPOSE algorithm under 10k* — not what that
+algorithm turns out to be. Development/freeze happens per §8 sequencing.
+
+These two experiments are enough to show that COMPOSE is not merely a formal
+process/control construction.
+
+---
+
+## 6. COMPOSE-specific claims: how each is proved
+
+After ordinary competence, the rest of the paper asks questions created by the
+executable-process formulation itself.
+
+**Anytime execution.** *A useful intermediate can be returned when it is reached
+rather than discarded because a predetermined generation horizon has not
+elapsed.* — native STOP; restricted forced-endpoint COMPOSE where appropriate;
+STOP/first-hit characterization.
+
+**Trans-dimensional execution.** *Variable-size molecular rewriting contributes
+to task performance.* — full support vs size-fixed support.
+
+**Finite-horizon control.** *Future reachability matters beyond local ranking.*
+— ✅ banked.
+
+**Stateful retargeting.** *Molecular progress survives an objective change.* —
+✅ banked: `x₃ → B` vs `x₀ → B`.
+
+**Closed-loop Pareto control.** *Purpose expressed during molecular generation
+produces a better front than generating first and ranking afterward.* — ✅
+banked under matched resources.
+
+**Hard support.** *Changing the set of admissible molecular transitions is
+different from merely rewarding or filtering feasible endpoints.* — post-hoc vs
+fixed soft vs exact hard support.
+
+**Pathwise constraints.** *Because COMPOSE traverses executable molecules,
+feasibility can be required over the entire realized molecular route.* —
+endpoint-only vs pathwise restricted.
+
+> Hard support and pathwise constraints may share the exact implementation
+> primitive `A_C(x) = {a ∈ A(x) : C(T_a x) = 1}`, but they remain **different
+> scientific estimands and different experiments.**
+
+**Map reuse.** Only earned once a useful realized map exists. *Search effort
+itself becomes reusable.* — continue from selected realized state vs restart.
+
+---
+
+## 7. Things that are CLOSED
+
+These do **not** become future experiment ideas merely because they appear in
+the archive:
+
+* DDSBM manuscript branch;
+* Policy B as final QED controller;
+* exact-target branch;
+* retargeting branch;
+* P3/P4;
+* P0c;
+* K41;
+* arbitrary new scalarizations;
+* extra baseline ports;
+* post-outcome controller rescue knobs.
+
+### P0c terminology
+
+P0c is **full-information continuous-preference analysis / exact preference
+partition.** It is **not a "Pareto ceiling."**
+
+K41 changed the search itself and therefore was not a retention approximation to
+an upper bound. Its failed breadth criterion closes that branch.
+
+---
+
+## 8. Sequencing — no parallel scientific branching
+
+The current scientific critical path is:
+
+> **64-source QED dev → 128-source validation → 800-source QED → Experiment C**
+
+then:
+
+> **MOLLEO 5-objective development/freeze → MOLLEO official task**
+
+then:
+
+> **hard support + pathwise**
+
+with **map reuse only if** the Pareto work yields a useful realized map.
+
+A negative result closes **the branch named by its preregistration**. It does
+not retroactively erase banked results or authorize an unrelated rescue.
+
+---
+---
+
+# ARCHIVED PROVENANCE — NOT GOVERNING
+
+> **Everything below this line is retained verbatim as the scientific and
+> decision history of COMPOSE. It explains how the current plan was reached. It
+> does not authorize experiments or override the current governing plan above.**
+>
+> Notably archived rather than governing: the sentence *"Does future-aware bridge
+> control outperform ordinary generation plus ranking/search under the same legal
+> kernel, reference model, **oracle budget** and source molecules?"* — a correct
+> rule for an **internal causal control**, and **not** the universal rule for
+> external comparison. §0A above governs external comparisons.
+
+---
+
 # COMPOSE — master plan: every experiment, every comparator, what each is compared to
 
 **Canonical and consolidating.** This is the single place that answers, for each
