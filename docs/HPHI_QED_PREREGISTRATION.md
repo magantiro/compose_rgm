@@ -500,3 +500,47 @@ mathematics is implemented correctly: particle weights and potentials,
 systematic resampling, ESS trigger, STOP semantics, region, budget accounting,
 reproducible seeds, deterministic replay where expected, kill/resume
 losslessness, and exact checks wherever a small enumerable case allows one.
+
+---
+
+## 14 · SMC production optimization — CANDIDATES ONLY, NOT YET AUTHORIZED
+
+Recorded so the levers are not rediscovered later. **Nothing here may be built
+until the slow reference passes all nine mechanical checks and one careful
+profile of a COMPLETED SMC run exists.** Every item is exact — none changes the
+sampled law — and each must be parity-qualified against the slow reference
+before the 128.
+
+**Measured from the reference run:** ~7 s per particle-step; `h(x_source, b=24)`
+= 0.0126 uniform across particles (correct — all start at the source); `h(y)`
+spans 0.0093–0.0203, so the twist genuinely discriminates successors and the
+incremental weight `G` sits in roughly [0.74, 1.61] — modest variance, not
+immediate degeneracy.
+
+| lever | kind | status |
+|---|---|---|
+| **carried-value reuse** — every `h(x_t)` after step 0 **is** the `h(y)` computed one step earlier, since `b−1` at step `t` equals `b'` at step `t+1`. Survives resampling because the value travels with the copied state. | **exact; halves `h_φ` calls; reduces TOTAL compute** | candidate |
+| **duplicate-state reuse** — after resampling, clones share `(canonical state, b, region, STOP)`. Compute the legal law and `h_φ` once per unique state; each clone draws independently from its own RNG. At step 0 all 32 particles share the source, so duplication is extreme there. | **exact; reduces TOTAL compute**; size depends on measured `n_unique_states` | candidate |
+| **particle-level process parallelism** — the 32 particles are independent until the ESS/resampling synchronisation. | exact; **wall clock only**, not total compute | candidate |
+| **candidate/source sharding** — 20 slots and all sources are independent. | exact; wall clock only | candidate |
+| neural batching | changes reduction order; measured non-bit-exact elsewhere | **last resort** |
+
+### Two framings to keep straight
+
+**Runtime is not a fairness problem.** A benchmark that does not specify a
+compute budget does not require equal inference cost (governing plan §0A).
+MOLLEO reports hours of wall time for its own methods and still makes ordinary
+optimization claims. COMPOSE reasons over executable state-dependent chemistry
+rather than a dense tensor process, and that buys legal intermediates, exact
+support interventions, STOP, retargeting and pathwise constraints. **The reason
+to optimize is operational cost, not fairness.**
+
+**But the first correct implementation is not the production implementation.**
+At the reference rate the 128 is ~3,800 core-hours and the 800 extrapolates to
+roughly $1.1k. That is worth engineering away before paying for it.
+
+### ⚠️ Do NOT forecast SMC runtime from the rejection panel
+
+The rejection arm's mean first-hit step of 3.4 is **not** a valid predictor of
+SMC cost. The SMC population is a different process with different absorption
+dynamics. Absorption must be measured from the SMC run itself.
