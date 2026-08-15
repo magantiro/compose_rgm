@@ -98,6 +98,15 @@ class OracleMeter:
     canonicalize: Callable[[str], str] | None = None
     #: No default. Guessing this is exactly the mistake the docstring warns of.
     counting_rule: CountingRule = CountingRule.PER_MOLECULE
+    #: Optional batched evaluator. The three model-based objectives are far
+    #: cheaper per molecule in a batch (one tree walk, one GEMM), and the
+    #: BUDGET SEMANTICS ARE IDENTICAL either way -- a batch is charged exactly
+    #: the novel canonical molecules it contains.
+    evaluate_many: Callable[[Sequence[str]], Sequence[Sequence[float]]] | None = None
+    #: Called with (canonical_smiles, values) for each NEWLY charged molecule.
+    #: This is how the durable ledger sees every evaluation without the
+    #: benchmark knowing anything about persistence.
+    on_evaluated: Callable[[str, tuple[float, ...]], None] | None = None
     _spent: int = field(default=0, init=False)
     _cache: dict[str, tuple[float, ...]] = field(default_factory=dict, init=False)
 
@@ -119,7 +128,17 @@ class OracleMeter:
             else N_OBJECTIVES
 
     def _key(self, smiles: str) -> str:
-        return self.canonicalize(smiles) if self.canonicalize else smiles
+        """Canonical form, or the raw string when there is no canonical form.
+
+        A canonicalizer signals "this does not parse" with None. Using None as
+        the cache key would collapse EVERY unparseable string into one entry and
+        charge the policy once for unlimited junk; falling back to the raw string
+        charges each distinct one, which is the conservative direction.
+        """
+
+        if self.canonicalize is None:
+            return smiles
+        return self.canonicalize(smiles) or smiles
 
     def __call__(self, smiles: str) -> tuple[float, ...]:
         """Evaluate one molecule, charging the budget. Cached repeats are free."""
@@ -133,17 +152,73 @@ class OracleMeter:
                 f"to {self._spent + cost:,}, over the {self.budget:,} budget "
                 f"({self.remaining:,} remaining). The run is invalid if it "
                 f"continues; the policy must stop on its own.")
-        vals = tuple(float(v) for v in self.evaluate(smiles))
+        vals = self._commit(smiles, self.evaluate(smiles), cost)
+        return vals
+
+    def _commit(self, key: str, raw: Sequence[float], cost: int) -> tuple[float, ...]:
+        vals = tuple(float(v) for v in raw)
         if len(vals) != N_OBJECTIVES:
             raise ValueError(
                 f"expected {N_OBJECTIVES} objectives, got {len(vals)}")
         self._spent += cost
-        self._cache[smiles] = vals
+        self._cache[key] = vals
+        if self.on_evaluated is not None:
+            self.on_evaluated(key, vals)
         return vals
+
+    def batch(self, smiles: Sequence[str]) -> list[tuple[float, ...]]:
+        """Evaluate many molecules at once, charged exactly as one-at-a-time.
+
+        The budget check is made for the WHOLE batch before anything is charged:
+        a batch that does not fit raises without evaluating part of itself, so a
+        policy can never end up in a state where some of its offspring were
+        counted and the rest silently were not. Duplicates inside the batch --
+        two spellings of one molecule, or a molecule already in the archive --
+        cost nothing extra, exactly as in the single-molecule path.
+        """
+
+        keys = [self._key(s) for s in smiles]
+        novel: list[str] = []
+        seen: set[str] = set()
+        for key in keys:
+            if key not in self._cache and key not in seen:
+                seen.add(key)
+                novel.append(key)
+        if novel:
+            cost = len(novel) * self._charge()
+            if self._spent + cost > self.budget:
+                raise BudgetExceeded(
+                    f"this batch contains {len(novel)} novel molecules costing "
+                    f"{cost}, which would bring the total to "
+                    f"{self._spent + cost:,} against a {self.budget:,} budget "
+                    f"({self.remaining:,} remaining). Nothing was charged; trim "
+                    f"the batch or stop.")
+            if self.evaluate_many is not None:
+                values = list(self.evaluate_many(novel))
+                if len(values) != len(novel):
+                    raise ValueError(
+                        f"batched evaluator returned {len(values)} rows for "
+                        f"{len(novel)} molecules")
+            else:
+                values = [self.evaluate(key) for key in novel]
+            for key, row in zip(novel, values):
+                self._commit(key, row, self._charge())
+        return [self._cache[key] for key in keys]
 
     def can_afford(self, n_new_molecules: int) -> bool:
         """Whether n NEW (uncached) molecules fit. Lets a policy stop cleanly."""
         return self._spent + n_new_molecules * self._charge() <= self.budget
+
+    def novel_in(self, smiles: Sequence[str]) -> int:
+        """How many of these would actually be charged. The number a policy needs
+        to decide whether it can afford a generation."""
+
+        seen: set[str] = set()
+        for item in smiles:
+            key = self._key(item)
+            if key not in self._cache:
+                seen.add(key)
+        return len(seen)
 
     def evaluated(self) -> dict[str, tuple[float, ...]]:
         return dict(self._cache)
