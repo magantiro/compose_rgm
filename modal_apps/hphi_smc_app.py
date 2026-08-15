@@ -281,6 +281,12 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         return "" if y == smi else y
 
     def run_smc(slot: int) -> dict[str, Any]:
+        # OBSERVATIONAL LOGGING ONLY. Nothing below reads these values back
+        # into the algorithm; removing every print would leave the sampler
+        # bit-identical.
+        t_slot = time.perf_counter()
+        print(f"    [src{idx} slot{slot:>2}] START N={N_PARTICLES} H={HORIZON}",
+              flush=True)
         rng = np.random.default_rng(seed_for("smc", source, slot))
         q0, s0 = props(source)
         states = [source] * N_PARTICLES
@@ -312,6 +318,11 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                 qy, sy = props(y)
                 if in_region(qy, sy, REGION):
                     absorbed[i] = True
+                if (i + 1) % 8 == 0:
+                    print(f"    [src{idx} slot{slot:>2}] step {step:>2} "
+                          f"particle {i + 1:>2}/{N_PARTICLES} "
+                          f"h(x)={hx:.4f} h(y)={hy:.4f} "
+                          f"{time.perf_counter() - t_slot:6.1f}s", flush=True)
                 transitions.append({
                     "step": step, "particle": i, "budget": b, "x": x, "y": y,
                     "h_x_b": hx, "h_y_bm1": hy,
@@ -333,7 +344,15 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                 entry["n_unique"] = len({int(v) for v in ridx})
                 entry["n_unique_states"] = len(set(states))
             sync.append(entry)
+            print(f"    [src{idx} slot{slot:>2}] step {step:>2}/{HORIZON} "
+                  f"ESS {entry['ess']:5.1f}/{N_PARTICLES} "
+                  f"absorbed {entry['n_absorbed']:>2} "
+                  f"{'RESAMPLE' if entry['resampled'] else '        '} "
+                  f"uniq_states {entry.get('n_unique_states', '-'):>3} "
+                  f"{time.perf_counter() - t_slot:6.1f}s", flush=True)
             if all(absorbed):
+                print(f"    [src{idx} slot{slot:>2}] all particles absorbed "
+                      f"at step {step}", flush=True)
                 break
 
         w = normalized_weights(log_w)
