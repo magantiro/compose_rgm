@@ -164,17 +164,38 @@ def _replicate_unit(unit: tuple[str, int]) -> dict[str, Any]:
     return rec
 
 
+#: Fields that are RUNTIME/PROVENANCE, not science. They are recorded, but are
+#: deliberately EXCLUDED from the scientific checksum because they legitimately
+#: differ between an uninterrupted run and a killed-then-resumed one (wall time,
+#: worker identity, retry count). Hashing them would make the resume-equivalence
+#: test fail for reasons that have nothing to do with the experiment.
+RUNTIME_FIELDS = ("seconds",)
+
+
+def scientific_payload(rec: dict[str, Any]) -> dict[str, Any]:
+    """The canonical scientific object: source, arm, replicate, seed, accepted
+    states/path, proposal counts, cap events, STOP, first hit, and metrics."""
+    return {k: v for k, v in rec.items() if k not in RUNTIME_FIELDS}
+
+
+def scientific_sha256(rec: dict[str, Any]) -> str:
+    import hashlib
+
+    return hashlib.sha256(json.dumps(
+        scientific_payload(rec), sort_keys=True,
+        separators=(",", ":")).encode()).hexdigest()
+
+
 def _persist(out_p, idx: int, source: str, rec: dict[str, Any],
              provenance: dict[str, Any]) -> None:
     """Atomic write-then-rename so an interruption cannot leave a valid-looking
-    partial. The checksum covers the record only, so resume can verify it."""
-    import hashlib
+    partial. The checksum covers the SCIENTIFIC payload only."""
     import os
 
-    payload = json.dumps(rec, sort_keys=True, separators=(",", ":"))
     doc = {"index": idx, "source": source, "arm": rec["arm"],
            "replicate": rec["replicate"], "seed": rec["seed"],
-           "sha256": hashlib.sha256(payload.encode()).hexdigest(),
+           "sha256": scientific_sha256(rec),
+           "runtime": {k: rec.get(k) for k in RUNTIME_FIELDS},
            "provenance": provenance, "record": rec}
     name = f"{idx:03d}_{rec['arm']}_{rec['replicate']:02d}.json"
     final = out_p / "replicates" / name
@@ -186,8 +207,6 @@ def _persist(out_p, idx: int, source: str, rec: dict[str, Any],
 
 def _valid_records(out_p) -> dict[tuple[int, str, int], dict[str, Any]]:
     """Load persisted replicates, keeping only checksum-valid ones."""
-    import hashlib
-
     d = out_p / "replicates"
     keep: dict[tuple[int, str, int], dict[str, Any]] = {}
     if not d.exists():
@@ -195,9 +214,7 @@ def _valid_records(out_p) -> dict[tuple[int, str, int], dict[str, Any]]:
     for f in d.glob("*.json"):
         try:
             doc = json.loads(f.read_text())
-            payload = json.dumps(doc["record"], sort_keys=True,
-                                 separators=(",", ":"))
-            if hashlib.sha256(payload.encode()).hexdigest() != doc["sha256"]:
+            if scientific_sha256(doc["record"]) != doc["sha256"]:
                 print(f"  CHECKSUM MISMATCH, ignoring {f.name}", flush=True)
                 continue
             keep[(doc["index"], doc["arm"], doc["replicate"])] = doc
