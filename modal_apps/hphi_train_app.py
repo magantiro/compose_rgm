@@ -58,7 +58,11 @@ TIME_POINT, CANONICAL_SLOTS = 0.5, 48
 ENCODE_SHARDS = 80
 #: Held out BY SOURCE, so no state of a validation source is ever trained on.
 VAL_FRACTION = 0.15
-EPOCHS = 60
+EPOCHS = 40
+#: Stop when validation has not improved for this many epochs. The first run
+#: overfit from epoch 0 and, having no best-checkpoint tracking, would have
+#: persisted epoch 59 -- strictly worse than epoch 0 on held-out sources.
+PATIENCE = 5
 BELLMAN_WEIGHT = 0.3
 
 _RT: dict[str, Any] = {}
@@ -158,13 +162,35 @@ def train() -> dict[str, Any]:
     need = sorted({s for r in srcs for t in r["trajectories"] for s in t["path"]})
     print(f"encoding {len(need):,} unique states across {ENCODE_SHARDS} shards",
           flush=True)
+    # PERSIST AND REUSE. The encode is frozen-R_theta output on frozen corpus
+    # states, so it is deterministic and identical across reruns. The first run
+    # paid 4,206s for it; re-paying that to change a training hyperparameter
+    # would be pure waste.
+    cache_p = Path(RUN_ROOT) / OUT_DIR / "embeddings.json.gz"
     t_enc = time.perf_counter()
     emb: dict[str, list[float]] = {}
-    shards = [need[i::ENCODE_SHARDS] for i in range(ENCODE_SHARDS)]
-    for part in encode_shard.map([s for s in shards if s]):
-        emb.update(part)
+    if cache_p.exists():
+        try:
+            emb = json.loads(gzip.decompress(cache_p.read_bytes()).decode())
+            print(f"REUSED {len(emb):,} cached embeddings", flush=True)
+        except Exception as exc:  # noqa: BLE001
+            print(f"cache unreadable ({type(exc).__name__}); re-encoding",
+                  flush=True)
+            emb = {}
+    missing = [s for s in need if s not in emb]
+    if missing:
+        print(f"encoding {len(missing):,} states across {ENCODE_SHARDS} shards",
+              flush=True)
+        shards = [missing[i::ENCODE_SHARDS] for i in range(ENCODE_SHARDS)]
+        for part in encode_shard.map([s for s in shards if s]):
+            emb.update(part)
+        cache_p.parent.mkdir(parents=True, exist_ok=True)
+        cache_p.write_bytes(gzip.compress(json.dumps(emb).encode()))
+        artifact_volume.commit()
+        print(f"cached {len(emb):,} embeddings for reuse", flush=True)
     enc_seconds = time.perf_counter() - t_enc
-    print(f"encoded {len(emb):,}/{len(need):,} in {enc_seconds:.0f}s", flush=True)
+    print(f"embeddings ready {len(emb):,}/{len(need):,} in {enc_seconds:.0f}s",
+          flush=True)
 
     regions = registered_regions()
     Xtr, Ytr, Xva, Yva, Mva = [], [], [], [], []
@@ -224,6 +250,7 @@ def train() -> dict[str, Any]:
 
     t_tr = time.perf_counter()
     hist = []
+    best = {"val": float("inf"), "epoch": -1, "state": None}
     torch.set_grad_enabled(True)
     for ep in range(EPOCHS):
         head.train()
@@ -246,9 +273,24 @@ def train() -> dict[str, Any]:
         with torch.no_grad():
             vl = float(lossf(head(xv), yv))
         hist.append({"epoch": ep, "train": tot / len(xt), "val": vl})
-        if ep % 10 == 0 or ep == EPOCHS - 1:
-            print(f"  ep {ep:>3}  train {tot/len(xt):.4f}  val {vl:.4f}", flush=True)
+        if vl < best["val"]:
+            best = {"val": vl, "epoch": ep,
+                    "state": {k: v.detach().clone()
+                              for k, v in head.state_dict().items()}}
+        if ep % 5 == 0 or ep == EPOCHS - 1:
+            print(f"  ep {ep:>3}  train {tot/len(xt):.4f}  val {vl:.4f}"
+                  f"  best {best['val']:.4f}@{best['epoch']}", flush=True)
+        if ep - best["epoch"] >= PATIENCE:
+            print(f"  EARLY STOP at ep {ep}; no val improvement for "
+                  f"{PATIENCE} epochs", flush=True)
+            break
     torch.set_grad_enabled(False)
+    # RESTORE THE BEST-VALIDATION WEIGHTS. The final epoch is not the model.
+    if best["state"] is not None:
+        head.load_state_dict(best["state"])
+        print(f"restored best checkpoint: epoch {best['epoch']}, "
+              f"val {best['val']:.4f}", flush=True)
+    head.eval()
     train_seconds = time.perf_counter() - t_tr
 
     with torch.no_grad():
@@ -276,7 +318,10 @@ def train() -> dict[str, Any]:
         "target": "finite-budget HITTING reachability; boundary h=1 enforced",
         "n_train": len(Xtr), "n_val": len(Xva), "n_bellman": len(Btr),
         "val_sources": len(val_src), "held_out_by": "source",
-        "epochs": EPOCHS, "bellman_weight": BELLMAN_WEIGHT,
+        "epochs_max": EPOCHS, "patience": PATIENCE,
+        "epochs_run": len(hist),
+        "selected_epoch": best["epoch"], "selected_val_bce": best["val"],
+        "bellman_weight": BELLMAN_WEIGHT,
         "history": hist,
         "val_base_rate": base,
         "val_brier": brier, "val_brier_constant": brier_const,
