@@ -3,9 +3,9 @@
   "version": "hphi-corpus-v1",
   "train_n": 1024,
   "valid_n": 128,
-  "trajectories_per_source": 8,
-  "horizon": 6,
-  "total_trajectories": 8192,
+  "trajectories_per_source": 2,
+  "horizon": 24,
+  "total_trajectories": 2048,
   "total_transitions": 49152,
   "selection": "QED-stratified into 10 strata of width 0.01 over [0.70,0.80]; deterministic sha256 rank within each stratum; no RNG",
   "stratification_rationale": "equal allocation per stratum guarantees coverage across the QED range, including the harder low-QED sources, rather than following the population skew",
@@ -14,5 +14,6 @@
   "eligible_pool": 66632,
   "r_theta": "FROZEN",
   "no_automatic_scale_up": true,
-  "purpose": "h_phi V1 controller training corpus; never a benchmark result"
+  "purpose": "h_phi V1 controller training corpus; never a benchmark result",
+  "horizon_amendment": "H24 amendment: 1,024 x 2 x H24 = 49,152 transitions, IDENTICAL to the original 1,024 x 8 x H6. Reallocated from replicates to depth after no reachability saturation was observed at budgets <= 24; H6 captured only 43% of QED-0.85 reachability. See docs/HORIZON_AMENDMENT_H24.md."
 }

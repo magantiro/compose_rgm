@@ -1166,6 +1166,30 @@ retrospectively inventing a convenient capability after seeing an outcome.
 
 ---
 
+## J · The GrIDDD/QED controller amendment is FROZEN
+
+`docs/GRIDDD_JIN_PROTOCOL.md` froze Policy B as its claim-bearing inference
+policy. Policy B was then refuted **0/320** on the disjoint 64-source dev panel.
+That document now carries a **⭐ CURRENT AMENDMENT** naming region-`h_φ` as the
+claim-bearing controller, frozen **before any official Jin outcome exists**.
+
+**The wording rule, because the tempting overstatement is wrong:** region-`h_φ`
+is a **pre-outcome amendment consistent with the pre-existing finite-horizon
+COMPOSE controller**, motivated by a developmental failure of the cheap one-step
+approximation. It is **NOT** a restoration of an originally-frozen policy — the
+protocol explicitly declined the rollout `ĥ`. Do not write it the stronger way.
+
+Policy B stays in the manuscript as the failed developmental approximation.
+Source splits verified mutually disjoint; the official 800 are excluded from
+`h_φ` training (1,516 excluded from a 66,632 pool).
+
+**Until `h_φ` is mature, it is the only scientific lane moving.** Pathwise,
+hard-support and MOLLEO may be BUILT against an abstract controller interface,
+but no claim-bearing controller-dependent result may be produced before then,
+and the native five-objective COMPOSE search policy is **not** frozen yet.
+
+---
+
 ## I · COMPUTE, ADAPTATION AND FAIRNESS DOCTRINE
 
 **Most of the plan does not change.** This governs **QED external competence**,
