@@ -54,8 +54,14 @@ def scaffold(smiles: str) -> str | None:
         return None
 
 
-def analyse(path: Path, init_size: int) -> dict:
+def analyse(path: Path, init_size: int, limit: int | None = None) -> dict:
     rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+    if limit is not None:
+        # Equal-budget truncation. Ledgers are append-only and in charge order,
+        # so taking a prefix is exactly "what this arm had spent by call N" --
+        # which is how an interrupted arm can still be compared fairly against a
+        # complete one instead of being discarded.
+        rows = rows[:limit]
     jnk3 = [row["v"][1] for row in rows]
     result = {"charged": len(rows)}
     for threshold in THRESHOLDS:
@@ -83,9 +89,27 @@ def main() -> int:
     parser.add_argument("--ledgers", type=Path, default=Path("/tmp/phase_a_ledgers"))
     parser.add_argument("--seeds", type=int, nargs="+", default=[100, 101, 102])
     parser.add_argument("--init-size", type=int, default=120)
+    parser.add_argument("--equal-budget", action="store_true",
+                        help="truncate every arm of a seed to the smallest "
+                             "number of calls any of them reached, so an "
+                             "interrupted arm can still be compared fairly")
     parser.add_argument("--out", type=Path,
                         default=Path("diagnostics/task3_phase_a_discovery.json"))
     args = parser.parse_args()
+
+    # Compare at the SMALLEST budget any arm of that seed reached.
+    limits: dict[int, int] = {}
+    if args.equal_budget:
+        for seed in args.seeds:
+            counts = []
+            for arm in ARMS:
+                path = args.ledgers / f"{arm}_seed{seed}.jsonl"
+                if path.exists():
+                    counts.append(sum(1 for line in path.read_text().splitlines()
+                                      if line.strip()))
+            if counts:
+                limits[seed] = min(counts)
+        print(f"equal-budget truncation per seed: {limits}\n")
 
     results: dict[str, list[dict]] = {}
     for arm in ARMS:
@@ -94,7 +118,7 @@ def main() -> int:
             if not path.exists():
                 print(f"missing: {path}")
                 continue
-            row = analyse(path, args.init_size)
+            row = analyse(path, args.init_size, limits.get(seed))
             row.update({"arm": arm, "seed": seed})
             results.setdefault(arm, []).append(row)
 

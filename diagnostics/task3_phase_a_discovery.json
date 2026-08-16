@@ -1,154 +1,204 @@
 {
- "STATUS": "DEVELOPMENT-ONLY -- official protocol, development seeds; official sets remain sealed",
+ "STATUS": "DEVELOPMENT-ONLY -- official protocol, development seeds",
  "objective": "DISCOVERY, not hypervolume",
- "results": [
-  {
-   "arm": "fixed-scalarization",
-   "seed": 100,
-   "charged": 300,
-   "expansions": 3,
-   "cache_hits": 42,
-   "distinct_starts_expanded": 3,
-   "seconds": 191.554744397,
-   "evals_to_first_active_03": null,
-   "actives_03": 0,
-   "active_scaffolds_03": 0,
-   "evals_to_first_active_05": null,
-   "actives_05": 0,
-   "active_scaffolds_05": 0,
-   "early_hv": 0.10355377197265625,
-   "best_jnk3": 0.12
-  },
-  {
-   "arm": "novelty-exploration",
-   "seed": 100,
-   "charged": 300,
-   "expansions": 38,
-   "cache_hits": 7,
-   "distinct_starts_expanded": 38,
-   "seconds": 864.006355292,
-   "evals_to_first_active_03": null,
-   "actives_03": 0,
-   "active_scaffolds_03": 0,
-   "evals_to_first_active_05": null,
-   "actives_05": 0,
-   "active_scaffolds_05": 0,
-   "early_hv": 0.0800628662109375,
-   "best_jnk3": 0.13
-  },
-  {
-   "arm": "fixed-scalarization",
-   "seed": 101,
-   "charged": 300,
-   "expansions": 5,
-   "cache_hits": 40,
-   "distinct_starts_expanded": 5,
-   "seconds": 164.105854822,
-   "evals_to_first_active_03": null,
-   "actives_03": 0,
-   "active_scaffolds_03": 0,
-   "evals_to_first_active_05": null,
-   "actives_05": 0,
-   "active_scaffolds_05": 0,
-   "early_hv": 0.14422607421875,
-   "best_jnk3": 0.18
-  },
-  {
-   "arm": "novelty-exploration",
-   "seed": 101,
-   "charged": 300,
-   "expansions": 8,
-   "cache_hits": 0,
-   "distinct_starts_expanded": 8,
-   "seconds": 268.83922909300003,
-   "evals_to_first_active_03": null,
-   "actives_03": 0,
-   "active_scaffolds_03": 0,
-   "evals_to_first_active_05": null,
-   "actives_05": 0,
-   "active_scaffolds_05": 0,
-   "early_hv": 0.0938568115234375,
-   "best_jnk3": 0.18
-  },
-  {
-   "arm": "fixed-scalarization",
-   "seed": 102,
-   "charged": 300,
-   "expansions": 8,
-   "cache_hits": 37,
-   "distinct_starts_expanded": 8,
-   "seconds": 252.473197065,
-   "evals_to_first_active_03": null,
-   "actives_03": 0,
-   "active_scaffolds_03": 0,
-   "evals_to_first_active_05": null,
-   "actives_05": 0,
-   "active_scaffolds_05": 0,
-   "early_hv": 0.16210174560546875,
-   "best_jnk3": 0.27
-  },
-  {
-   "arm": "novelty-exploration",
-   "seed": 102,
-   "charged": 300,
-   "expansions": 42,
-   "cache_hits": 3,
-   "distinct_starts_expanded": 42,
-   "seconds": 585.7310095270001,
-   "evals_to_first_active_03": null,
-   "actives_03": 0,
-   "active_scaffolds_03": 0,
-   "evals_to_first_active_05": null,
-   "actives_05": 0,
-   "active_scaffolds_05": 0,
-   "early_hv": 0.1605224609375,
-   "best_jnk3": 0.27
-  }
- ],
- "VERDICT": {
-  "headline": "UNDERPOWERED BY CONSTRUCTION. Both arms found ZERO actives on all three seeds, which is exactly the expected outcome, so the test cannot discriminate between exploration and the control.",
-  "base_rate_correction": {
-   "premise_used_to_design_the_test": "actives are ~2% of draws",
-   "measured_in_pure_random_ZINC": {
-    "jnk3>=0.2": 0.001638,
-    "jnk3>=0.3": 0.0004,
-    "jnk3>=0.4": 0.000187,
-    "jnk3>=0.5": 5e-05
+ "search_calls_per_arm": 1720,
+ "base_rate_used_for_power": {
+  "0.3": 0.0004,
+  "0.5": 5e-05
+ },
+ "results": {
+  "fixed-scalarization": [
+   {
+    "charged": 1840,
+    "first_active_03": null,
+    "first_active_by_search_03": null,
+    "actives_03": 0,
+    "actives_by_search_03": 0,
+    "scaffolds_by_search_03": 0,
+    "first_active_05": null,
+    "first_active_by_search_05": null,
+    "actives_05": 0,
+    "actives_by_search_05": 0,
+    "scaffolds_by_search_05": 0,
+    "best_jnk3": 0.21,
+    "best_jnk3_in_init": 0.1,
+    "early_hv": 0.17198944091796875,
+    "arm": "fixed-scalarization",
+    "seed": 100
    },
-   "measured_over": "80,000 random ZINC molecules from banked random-zinc runs",
-   "correction": "the true rate at jnk3>=0.3 is 0.040%, roughly 50x lower than the premise. The ~2% figure describes the ENRICHED pools from earlier GA and adaptive runs, not a random-120 start.",
-   "expected_actives_in_180_search_calls": {
-    "jnk3>=0.3": 0.072,
-    "jnk3>=0.5": 0.009
+   {
+    "charged": 2036,
+    "first_active_03": null,
+    "first_active_by_search_03": null,
+    "actives_03": 0,
+    "actives_by_search_03": 0,
+    "scaffolds_by_search_03": 0,
+    "first_active_05": null,
+    "first_active_by_search_05": null,
+    "actives_05": 0,
+    "actives_by_search_05": 0,
+    "scaffolds_by_search_05": 0,
+    "best_jnk3": 0.24,
+    "best_jnk3_in_init": 0.18,
+    "early_hv": 0.2003326416015625,
+    "arm": "fixed-scalarization",
+    "seed": 101
+   },
+   {
+    "charged": 2160,
+    "first_active_03": null,
+    "first_active_by_search_03": null,
+    "actives_03": 0,
+    "actives_by_search_03": 0,
+    "scaffolds_by_search_03": 0,
+    "first_active_05": null,
+    "first_active_by_search_05": null,
+    "actives_05": 0,
+    "actives_by_search_05": 0,
+    "scaffolds_by_search_05": 0,
+    "best_jnk3": 0.27,
+    "best_jnk3_in_init": 0.27,
+    "early_hv": 0.19219970703125,
+    "arm": "fixed-scalarization",
+    "seed": 102
    }
-  },
-  "the_decisive_check": {
-   "question": "did 180 search calls improve on the initial 120 at all?",
-   "best_jnk3": {
-    "seed_100": {
-     "init": 0.1,
-     "fixed": 0.12,
-     "novelty": 0.13
-    },
-    "seed_101": {
-     "init": 0.18,
-     "fixed": 0.18,
-     "novelty": 0.18
-    },
-    "seed_102": {
-     "init": 0.27,
-     "fixed": 0.27,
-     "novelty": 0.27
-    }
+  ],
+  "novelty-exploration": [
+   {
+    "charged": 1840,
+    "first_active_03": null,
+    "first_active_by_search_03": null,
+    "actives_03": 0,
+    "actives_by_search_03": 0,
+    "scaffolds_by_search_03": 0,
+    "first_active_05": null,
+    "first_active_by_search_05": null,
+    "actives_05": 0,
+    "actives_by_search_05": 0,
+    "scaffolds_by_search_05": 0,
+    "best_jnk3": 0.13,
+    "best_jnk3_in_init": 0.1,
+    "early_hv": 0.0941925048828125,
+    "arm": "novelty-exploration",
+    "seed": 100
    },
-   "reading": "on two of three seeds NEITHER arm improved on its own starting population by any amount. The budget, not the policy, is the binding constraint."
+   {
+    "charged": 2036,
+    "first_active_03": null,
+    "first_active_by_search_03": null,
+    "actives_03": 0,
+    "actives_by_search_03": 0,
+    "scaffolds_by_search_03": 0,
+    "first_active_05": null,
+    "first_active_by_search_05": null,
+    "actives_05": 0,
+    "actives_by_search_05": 0,
+    "scaffolds_by_search_05": 0,
+    "best_jnk3": 0.18,
+    "best_jnk3_in_init": 0.18,
+    "early_hv": 0.11102294921875,
+    "arm": "novelty-exploration",
+    "seed": 101
+   },
+   {
+    "charged": 2160,
+    "first_active_03": null,
+    "first_active_by_search_03": null,
+    "actives_03": 0,
+    "actives_by_search_03": 0,
+    "scaffolds_by_search_03": 0,
+    "first_active_05": null,
+    "first_active_by_search_05": null,
+    "actives_05": 0,
+    "actives_by_search_05": 0,
+    "scaffolds_by_search_05": 0,
+    "best_jnk3": 0.27,
+    "best_jnk3_in_init": 0.27,
+    "early_hv": 0.1657562255859375,
+    "arm": "novelty-exploration",
+    "seed": 102
+   }
+  ]
+ },
+ "VERDICT": {
+  "comparison_basis": "equal achieved budget per seed (1840 / 2036 / 2160 calls), both arms truncated to the smaller. Ledgers are append-only in charge order, so a prefix is exactly 'what this arm had spent by call N'.",
+  "1_evaluations_to_first_active": {
+   "fixed": [
+    null,
+    null,
+    null
+   ],
+   "novelty": [
+    null,
+    null,
+    null
+   ]
   },
-  "budget_required_for_power": {
-   "to_expect_one_active_at_jnk3_0.3": 2500,
-   "to_expect_three": 7500,
-   "note": "7,500 draws is most of the 10,000-call benchmark budget, so 'find an active from random-120' is not a tiny-charged-test question when the metric is a binary activity threshold."
+  "2_actives_found_by_search": {
+   "fixed": [
+    0,
+    0,
+    0
+   ],
+   "novelty": [
+    0,
+    0,
+    0
+   ]
   },
-  "what_is_NOT_concluded": "nothing about whether exploration beats fixed scalarization at discovery. The test had no power to tell, and the offline smoke showed the policies do behave completely differently (100% divergence, 98% vs 22% start-repeat).",
-  "incidental_durability_result": "one container was preempted mid-run and Modal retried it. The replacement RESUMED from the ledger and completed correctly: 300 records, 300 distinct, contiguous sequence 0-299. Per-container counters like `expansions` undercount across a retry (8 reported against 19+ observed before preemption), which is a reporting artifact and not an accounting one -- the charged count and the ledger are correct."
+  "3_distinct_active_scaffolds": {
+   "fixed": [
+    0,
+    0,
+    0
+   ],
+   "novelty": [
+    0,
+    0,
+    0
+   ]
+  },
+  "early_hv_NOT_the_criterion": {
+   "fixed": [
+    0.172,
+    0.2003,
+    0.1922
+   ],
+   "novelty": [
+    0.0942,
+    0.111,
+    0.1658
+   ]
+  },
+  "best_jnk3_init_to_final": {
+   "fixed": [
+    "0.10->0.21",
+    "0.18->0.24",
+    "0.27->0.27"
+   ],
+   "novelty": [
+    "0.10->0.13",
+    "0.18->0.18",
+    "0.27->0.27"
+   ]
+  },
+  "power": {
+   "expected_by_chance_per_arm": 2.06,
+   "observed_each": 0,
+   "poisson_sd_on_difference": 2.03,
+   "reading": "difference 0, NOT distinguishable from noise"
+  },
+  "my_hypothesis_was_WRONG": {
+   "predicted": "the control found 0 against 2.86 expected because it re-expands one state on ~98% of decisions and therefore buys fewer effective independent draws; a spread-out searcher should find more",
+   "observed": "novelty-exploration spreads far more -- 31/40 distinct starts against 1/40, 0.84 scaffolds per pick against 0.21 -- and found exactly as many actives: zero. It also moved best-JNK3 LESS (0.13 vs 0.21 on seed 100) and had lower early HV on all three seeds.",
+   "status": "REFUTED. Concentration was not what suppressed discovery."
+  },
+  "the_stronger_finding_this_exposes": {
+   "observation": "pooled across both arms and three seeds, ~4.1 chance actives were expected and ZERO were found. p(0 | lambda=4.1) = 0.017.",
+   "reading": "R_theta-edit search from a random-120 start appears WORSE than uniform random ZINC sampling at reaching jnk3 >= 0.3, for both policies. The neighbourhood of a random drug-like molecule is active-poorer than a fresh random draw.",
+   "most_likely_mechanism_untested": "the base rate was measured on ZINC molecules; successors are edited molecules that may leave the drug-like manifold the JNK3 oracle was fit on. That would depress activity for reasons of distribution rather than of search.",
+   "consistent_with": "the earlier finding that Graph-GA does not reliably beat uniform random sampling (4/8 seeds)"
+  },
+  "recommendation": "DO NOT spend the ~$0.26 to finish the three novelty arms. The remaining 340-660 calls per arm expect ~0.2 further chance actives and cannot change the reading."
  }
 }
