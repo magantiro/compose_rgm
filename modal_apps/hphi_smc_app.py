@@ -447,6 +447,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                   f"absorbed {rec['n_absorbed']:>2}/32 resample {nres:>2} "
                   f"{rec['seconds']:7.1f}s [{done}/{len(slots)}]", flush=True)
     import resource
+    # ru_maxrss is KILOBYTES on Linux. /1024**2 gives GiB.
     peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / (1024 ** 2)
     print(f"src{idx}: PEAK RSS {peak:.2f} GiB (requested {MEM_GIB} GiB)", flush=True)
     return {"index": idx, "source": source, "status": "OK", "slots_run": done,
