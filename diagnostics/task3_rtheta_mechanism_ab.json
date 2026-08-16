@@ -100,5 +100,31 @@
   "shows": "R_theta CAN expose selective chemistry: the fixed arm found 134 and 178 selective molecules out of 300 charged, drawn from R_theta fibers.",
   "does_NOT_show": "that selective candidates were present in every fiber the ADAPTIVE arm actually saw. The arms visit different states once they diverge, so this does not rule out proposal availability as a local factor for the adaptive arm.",
   "status_of_zero_selective_under_adaptive": "a DIAGNOSTIC CHARACTERIZATION, not a failure criterion. The official benchmark does not require preferring selectivity over higher-HV promiscuous points."
+ },
+ "why_diagnosis_from_existing_artifacts": {
+  "method": "no new evaluations. Recomputed each arm's HV lift with and without its single highest-JNK3 new molecule, counted new molecules on the final front, and counted how many of those individually carry >0.1% of total HV (leave-one-out).",
+  "share_of_lift_from_one_molecule": {
+   "adaptive-region_seed100": 0.172,
+   "adaptive-region_seed101": 0.606,
+   "adaptive-region_seed102": 0.009,
+   "fixed-scalarization_seed101": 0.025,
+   "fixed-scalarization_seed102": 0.045
+  },
+  "new_molecules_on_final_front": {
+   "adaptive-region_seed100": 78,
+   "adaptive-region_seed101": 85,
+   "adaptive-region_seed102": 101,
+   "fixed-scalarization_seed101": 74,
+   "fixed-scalarization_seed102": 53
+  },
+  "new_front_members_individually_worth_over_0.1pct_HV": {
+   "adaptive-region_seed100": 2,
+   "adaptive-region_seed101": 7,
+   "adaptive-region_seed102": 0,
+   "fixed-scalarization_seed101": 74,
+   "fixed-scalarization_seed102": 1
+  },
+  "reading": "CAUTION. Adaptive's large seed-101 win -- the one that carries the mean -- is 60.6% attributable to a SINGLE molecule. Its other two seeds lift +0.036 and +0.032, against the fixed arm's +0.045 and +0.032. And while adaptive puts comparably many new molecules on the front (78-101 vs 53-74), almost none of them are individually load-bearing (0-7 carry >0.1% of HV, against 74 for fixed on seed 101), which is the signature of a clustered, mutually-redundant front rather than gains spread across several nondominated regions.",
+  "verdict_on_the_richer_story": "This looks like ONE LUCKY HIGH-JNK3 POINT more than broad improvement across multiple nondominated regions. It counts for official HV, but it does NOT yet support the adaptive-Pareto-navigation story."
  }
 }
