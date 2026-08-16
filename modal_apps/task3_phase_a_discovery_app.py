@@ -219,11 +219,25 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
 
 
 @app.local_entrypoint()
-def main(budget: int = 300, candidates: int = 4, seeds: str = "100,101,102") -> None:
+def main(budget: int = 300, candidates: int = 4, seeds: str = "100,101,102",
+         arms: str = "fixed-scalarization,novelty-exploration") -> None:
+    """ALWAYS LAUNCH THIS WITH `modal run --detach`.
+
+    Runs of this length outlive the client session. Without --detach the
+    ephemeral app dies with the local process and the containers go with it --
+    which is exactly what happened on the first 2,500-call attempt, at roughly
+    75% completion. The work was recoverable only because every arm persists an
+    append-only ledger to the volume and resumes from it.
+
+    `--arms` exists so a partially-completed sweep resumes only what is
+    unfinished, rather than paying to rebuild R_theta for arms that are done.
+    """
+
     chosen = [int(s) for s in seeds.split(",")]
+    wanted = [a.strip() for a in arms.split(",") if a.strip()]
     specs = [(arm, seed, budget, candidates)
              for seed in chosen
-             for arm in ("fixed-scalarization", "novelty-exploration")]
+             for arm in wanted]
     print(json.dumps({"phase": "launching_phase_a", "runs": len(specs),
                       "budget_per_arm": budget,
                       "note": ("DEVELOPMENT-ONLY. Official PROTOCOL (random-120) "
