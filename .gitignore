@@ -65,3 +65,5 @@ artifacts/
 # into diagnostics/ and tracked there.
 runs/task3_dev/
 runs/task3_smoke/
+runs/task3_mechanism/
+runs/task3_mechanism2/
