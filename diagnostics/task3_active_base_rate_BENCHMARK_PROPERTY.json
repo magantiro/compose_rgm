@@ -1,0 +1,25 @@
+{
+ "finding": "MOLLEO Task 3's entire oracle budget is only ~3x what pure chance needs to stumble on a handful of JNK3 actives",
+ "status": "A PROPERTY OF THE BENCHMARK, independent of any policy or of COMPOSE.",
+ "measured_over": "80,000 random ZINC-250k molecules from banked random-zinc development runs, scored by the frozen Task 3 oracle bundle",
+ "base_rates_in_random_zinc": {
+  "jnk3>=0.2": 0.001638,
+  "jnk3>=0.3": 0.0004,
+  "jnk3>=0.4": 0.000187,
+  "jnk3>=0.5": 5e-05
+ },
+ "draws_needed_by_pure_chance": {
+  "one_active_at_0.3": 2500,
+  "three_actives_at_0.3": 7500
+ },
+ "against_a_benchmark_budget_of": 10000,
+ "implication": "the whole 10,000-call budget buys roughly three chance encounters with a JNK3 active. The task is REACHABILITY-LIMITED rather than search-limited: the difficulty is entering the active basin at all, not choosing well among candidates once inside it. That is consistent with the QED lane reaching the same characterisation independently on a different task.",
+ "explains": [
+  "why hypervolume on this task correlates 0.992 with best-JNK3-found",
+  "why Graph-GA is bimodal -- it either latches onto an active scaffold or never does",
+  "why Graph-GA does not reliably beat uniform random sampling (4/8 seeds)",
+  "why a surrogate trained on an official random-120 start is blind: it contains ~0.05 actives in expectation"
+ ],
+ "correction_recorded": "the figure this lane originally designed against was ~2% of draws. That is right for the ENRICHED pools left by earlier GA and adaptive runs and wrong by ~50x for a random-120 start. Measuring it rather than designing around the asserted value is what surfaced the error.",
+ "consequence_for_experiment_design": "any experiment whose primary metric is a binary activity threshold needs thousands of calls per arm to have power. A 300-call rung cannot see the effect regardless of the policy under test."
+}

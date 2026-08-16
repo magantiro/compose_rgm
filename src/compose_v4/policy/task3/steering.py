@@ -277,20 +277,33 @@ class NoveltyExploration:
     """
 
     name: str = "novelty-exploration"
+    #: Fingerprints are cached per molecule and extended INCREMENTALLY. Rebuilding
+    #: them for the whole archive each decision costs 0.39 s at 120 molecules and
+    #: scales linearly: 8.2 s per decision at 2,500, which is 1.3 HOURS of pure
+    #: fingerprinting over a 595-decision run, on top of expansion. Measured
+    #: before launching rather than discovered inside a two-hour container.
+    _cache: dict = field(default_factory=dict, init=False, repr=False)
     _seen: np.ndarray | None = field(default=None, init=False, repr=False)
     _norms: np.ndarray | None = field(default=None, init=False, repr=False)
+    _n_cached: int = field(default=-1, init=False, repr=False)
 
     def target(self, archive: ParetoArchive,
                rng: np.random.Generator) -> Region | None:
-        # Fingerprints of everything evaluated so far; the "region" being aimed
-        # at is simply whatever is far from all of it.
+        # The "region" aimed at is simply whatever is far from everything
+        # already evaluated, so what is needed is the fingerprints of the
+        # archive -- extended, not recomputed.
         from compose_v4.benchmark.oracles.forest import morgan_bits
 
-        rows = [morgan_bits(s) for s in archive.values]
-        rows = [r for r in rows if r is not None]
-        if rows:
-            self._seen = np.vstack(rows)
-            self._norms = self._seen.sum(axis=1)
+        for smiles in archive.values:
+            if smiles not in self._cache:
+                row = morgan_bits(smiles)
+                if row is not None:
+                    self._cache[smiles] = row
+        if len(self._cache) != self._n_cached:
+            self._seen = (np.vstack(list(self._cache.values()))
+                          if self._cache else None)
+            self._norms = self._seen.sum(axis=1) if self._seen is not None else None
+            self._n_cached = len(self._cache)
         return Region(target=(1.0,) * 5, gain=0.0, origin=None,
                       note="structural coverage")
 

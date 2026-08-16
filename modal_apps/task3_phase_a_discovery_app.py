@@ -61,8 +61,11 @@ ACTIVE_THRESHOLDS = (0.3, 0.5)
 @app.function(
     image=image,
     cpu=2.0,
-    memory=5 * 1024,
-    timeout=90 * 60,
+    # 6 GiB and 3 hours: the archive, surrogate matrix and fiber cache all grow
+    # with a 2,500-call budget, and the measured 3.9 GiB peak was taken with a
+    # small archive. An OOM or timeout two hours into a run costs the whole run.
+    memory=6 * 1024,
+    timeout=3 * 60 * 60,
     max_containers=6,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
