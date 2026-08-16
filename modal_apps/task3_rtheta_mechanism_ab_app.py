@@ -75,6 +75,15 @@ OUTPUT_ROOT = "/artifacts/editing_v2/task3_mechanism_rtheta"
 
 #: Padding slots above the source's atom count, matching the timing probe.
 PAD_SLOTS = 8
+#: KNOWN INEFFICIENCY, recorded rather than fixed mid-flight. R_theta is
+#: deterministic, so expanding the same start twice returns the same fiber at
+#: the same 12.5 s cost. The fixed arm re-selects its best-summed molecule until
+#: a charged candidate displaces it, so it can re-expand one state several times.
+#: A fiber cache keyed on the start molecule removes the waste entirely and is
+#: the first thing to add before this is run at any larger budget. It does not
+#: bias the comparison -- both arms pay the same way for the same behaviour --
+#: and the per-run `expansions` count against distinct starts measures how much
+#: was lost.
 #: How many starts to try before giving up on an iteration. A realized archive
 #: molecule can fail to convert to a graph; that is not a reason to stop.
 START_ATTEMPTS = 5
