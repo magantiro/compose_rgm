@@ -185,7 +185,7 @@
   "on_hypervolume": "YES, and consistently: mean HV lift +0.057 (adaptive) vs +0.021 (fixed), adaptive ahead on 3/3 seeds, with best JNK3 0.73-0.83 vs 0.50-0.58.",
   "why_both_are_true": "The two criteria point in OPPOSITE directions on this task. Adaptive climbs to JNK3 0.73-0.83, which is only reachable promiscuously -- of all charged molecules at JNK3 >= 0.5, 0.2% have a GSK3B coordinate >= 0.9. Fixed stops at JNK3 ~0.44, on the selective ridge, and exploits it: 98% of ITS high-JNK3 molecules are selective, against 0.5-2.6% of adaptive's. Each arm is coherent; they are operating in different places.",
   "the_metric_prefers_promiscuity_here": "jnk3 0.83 with GSK3B activity 0.25 contributes 0.83*0.75 = 0.622 across those two axes; jnk3 0.58 with GSK3B activity 0.02 contributes 0.58*0.98 = 0.568. So hypervolume rewards the promiscuous ridge, and 'fills the selective region' is NOT a restatement of 'maximises HV'.",
-  "corrected_diagnosis": "Not a ranking failure. The summed shortfall already prefers clean candidates (-0.10 vs -0.80 on a real aspiration). Selective molecules at that height are not being PROPOSED. Steering cannot select what expansion never offers, which locates the problem in proposal availability rather than in how purpose is specified.",
+  "corrected_diagnosis": "The first development experiment showed that adaptive targeting improves HV, but did not enrich the originally hypothesized selective region because that region was nearly absent from the proposal set. We therefore test whether executable R_theta expansion changes proposal availability while holding the targeting comparison fixed. That rerun is what tests it; right now it is a HYPOTHESIS, not an established bottleneck.",
   "failed_repair": "ConstrainedAdaptiveRegion was built on the wrong diagnosis and is worse than what it repaired (+0.031 HV, 3 selective). Recorded, not deleted.",
   "caveats": [
    "development-only; seeded initialization, NOT Task 3 performance",
@@ -193,5 +193,17 @@
    "surrogate is the optimistic Morgan-bit control, not an R_theta representation",
    "expansion operator is the Graph-GA stand-in, not R_theta"
   ]
- }
+ },
+ "FINDINGS": {
+  "1_adaptive_targeting_improved_the_hv_proxy": {
+   "result": "mean HV lift +0.057 vs +0.021 for the fixed sum, ahead on 3/3 seeds",
+   "reading": "genuine positive signal for archive-aware purpose specification. It did NOT fail."
+  },
+  "2_the_selectivity_hypothesis_was_wrong_as_stated": {
+   "result": "adaptive found 7 selective molecules against the fixed sum's 188",
+   "reading": "on this Task 3 metric the high-JNK3/promiscuous direction is often more HV-profitable than the lower-JNK3 selective ridge. 'Adaptive wins because it finds selective molecules' is FALSIFIED and is not to be repeated."
+  },
+  "do_not_merge": "These are two separate findings. The first is about purpose specification and is positive; the second is about our hypothesis and is negative."
+ },
+ "task3_property_worth_recording": "'Fills the selective region' and 'maximises hypervolume' DISAGREE on this task at these operating points: jnk3 0.83 with GSK3B activity 0.25 contributes 0.622 across those two axes against 0.568 for jnk3 0.58 with activity 0.02. This is a property of Task 3, independent of any navigator, and it affects how any COMPOSE claim on this benchmark should be phrased."
 }
