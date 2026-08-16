@@ -1,0 +1,29 @@
+{
+ "STATUS": "CLOSED. Archive-aware purpose allocation at these budgets.",
+ "control_going_forward": "fixed scalarization -- the best PROVEN selection rule on this task at these budgets",
+ "attempts": [
+  {
+   "n": 1,
+   "mechanism": "dominance-shaped aspiration",
+   "outcome": "never engaged",
+   "diagnosis": "the aspiration was a front member with one axis raised while the other four were held at that member's values. Molecular edits move several properties at once, so it was practically unreachable: iterations_where_target_was_represented was ZERO on every arm and seed. The mechanism was permanently in fallback and was never actually tested.",
+   "cost_of_finding_out": "two charged experiments"
+  },
+  {
+   "n": 2,
+   "mechanism": "marginal-HVI over a convex-combination surrogate",
+   "outcome": "mathematically inexpressible",
+   "diagnosis": "a weighted average cannot exceed the largest label among its neighbours, and marginal HVI is zero unless the prediction beats the incumbent front. 100% of predicted vectors were interior to the archive box; 0.9% of candidates had any predicted gain. See task3_surrogate_acquisition_kind_mismatch.json.",
+   "cost_of_finding_out": "zero -- caught by the offline smoke"
+  },
+  {
+   "n": 3,
+   "mechanism": "reachable-HVI with optimism (kappa 0.5)",
+   "outcome": "fully engaged and LOST 3/3",
+   "diagnosis": "100% divergence -- the arms differed on every decision -- and still a factor of 3.4 behind on hypervolume lift (+0.0058 against +0.0199). This is the decisive attempt precisely because it fired: the loss is about the acquisition, not its plumbing.",
+   "cost_of_finding_out": "$0.094 of fibers; the comparison itself ran locally"
+  }
+ ],
+ "untested_hypothesis_for_why": "marginal HVI is greedy and myopic -- it buys whatever most improves the front now, typically an isolated extreme on one axis, while a scalar sum buys well-rounded molecules. Since the archive is also the source of START STATES, buying isolated extremes may degrade future expansion. Consistent with the adaptive arm's collapsing front counts (28, 13, 9 against 35, 42, 53) and NOT established.",
+ "what_survives_this_closure": "the surrogate/acquisition kind-mismatch finding and its one-line detector, which are general and are recorded separately so they outlive the mechanism that exposed them"
+}
