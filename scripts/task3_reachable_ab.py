@@ -115,8 +115,12 @@ def run_arm(steering, seeded, fibers, *, seed: int, budget: int, candidates: int
                     exhausted.add(start)
                 if not proposed:
                     break
-                predicted = surrogate.predict(proposed)
-                order = np.argsort(-steering.rank(predicted, target))
+                predicted, spread = surrogate.predict_with_spread(proposed)
+                try:
+                    ranks = steering.rank(predicted, target, spread)
+                except TypeError:   # arms that take no uncertainty signal
+                    ranks = steering.rank(predicted, target)
+                order = np.argsort(-ranks)
             chosen = run.affordable([proposed[int(i)] for i in order[:candidates]])
             if not chosen:
                 break

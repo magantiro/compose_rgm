@@ -193,6 +193,15 @@ class ReachableHVI:
     """
 
     name: str = "reachable-hvi"
+    #: OPTIMISM. A weighted-average surrogate cannot predict above its
+    #: neighbours' labels, so a mean-only HVI acquisition can almost never claim
+    #: a candidate beats the current front: measured on real fibers, 100% of
+    #: predicted vectors were interior to the archive's box and only 0.9% had
+    #: any predicted gain. Scoring the OPTIMISTIC estimate (mean + kappa *
+    #: neighbour spread) lets a candidate whose neighbours disagree be worth
+    #: buying, which is the whole point of spending a real evaluation on it.
+    #: Zero recovers the mean-only behaviour for ablation.
+    optimism: float = 1.0
     #: Predictions are noisy, so ranking on a razor-thin HVI difference is
     #: ranking on surrogate error. Ties inside this band fall back to the sum,
     #: which is a defensible secondary preference rather than an arbitrary one.
@@ -221,9 +230,13 @@ class ReachableHVI:
             return None
         return front[int(rng.integers(len(front)))][0]
 
-    def rank(self, predicted: np.ndarray, target: Region) -> np.ndarray:
+    def rank(self, predicted: np.ndarray, target: Region,
+             spread: np.ndarray | None = None) -> np.ndarray:
         if self._archive is None:
             return predicted.sum(axis=1)
-        gains = self._archive.gains_of(predicted)
+        estimate = predicted
+        if spread is not None and self.optimism:
+            estimate = np.clip(predicted + self.optimism * spread, 0.0, 1.0)
+        gains = self._archive.gains_of(estimate)
         # Break near-ties on the scalar sum instead of on prediction noise.
         return gains + self.tie_band * 1e-3 * predicted.sum(axis=1)

@@ -98,14 +98,17 @@ def main() -> int:
         candidates = [s for s in fibers[start] if s not in archive.values]
         if len(candidates) < TOP_K:
             continue
-        predicted = surrogate.predict(candidates)
+        predicted, spread = surrogate.predict_with_spread(candidates)
 
         chosen: dict[str, set[str]] = {}
         for name, arm in arms.items():
             target = arm.target(archive, rng)
             if target is None:
                 continue
-            ranks = arm.rank(predicted, target)
+            try:
+                ranks = arm.rank(predicted, target, spread)
+            except TypeError:      # arms that take no uncertainty signal
+                ranks = arm.rank(predicted, target)
             order = np.argsort(-ranks)[:TOP_K]
             chosen[name] = {candidates[int(i)] for i in order}
             entry = stats[name]
@@ -113,7 +116,12 @@ def main() -> int:
             entry["top_choice"].append(predicted[int(order[0])].tolist())
             # ENGAGED = the acquisition actually discriminated, rather than
             # every candidate scoring the same and the tie-break deciding.
-            gains = archive.gains_of(predicted)
+            # Engagement is judged on what the ARM actually scores, which for
+            # an optimistic acquisition is the optimistic estimate.
+            estimate = getattr(arm, "optimism", 0.0)
+            scored = (np.clip(predicted + estimate * spread, 0.0, 1.0)
+                      if estimate else predicted)
+            gains = archive.gains_of(scored)
             entry["best_gain"].append(float(gains.max()))
             if float(gains.max()) > 0 and float(np.ptp(ranks)) > 0:
                 entry["engaged"] += 1

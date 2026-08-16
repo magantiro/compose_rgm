@@ -67,6 +67,46 @@ class TanimotoKNN:
             self._norms = self._matrix.sum(axis=1)
         return added
 
+    def predict_with_spread(self, smiles: list[str]) -> tuple[np.ndarray, np.ndarray]:
+        """Predictions AND the spread of the neighbours they were averaged from.
+
+        The spread is the only uncertainty signal a k-NN has, and it is needed
+        because of a structural limit of the mean itself: a weighted average can
+        never exceed the largest label among its neighbours, so a pure-mean
+        surrogate can essentially never say "this beats your current best".
+        Measured on real fibers, 100% of predicted vectors were interior to the
+        archive's box and only 0.9% of candidates had any predicted marginal
+        hypervolume -- not because the chemistry was absent but because the
+        estimator cannot express the claim.
+        """
+
+        from compose_v4.benchmark.oracles.forest import morgan_bits
+
+        mean = np.zeros((len(smiles), 5), dtype=float)
+        spread = np.zeros((len(smiles), 5), dtype=float)
+        if self._matrix is None or not len(self._matrix):
+            return mean, spread
+        rows, keep = [], []
+        for position, item in enumerate(smiles):
+            row = morgan_bits(item)
+            if row is not None:
+                rows.append(row)
+                keep.append(position)
+        if not rows:
+            return mean, spread
+        query = np.vstack(rows)
+        intersection = query @ self._matrix.T
+        union = (query.sum(axis=1)[:, None] + self._norms[None, :] - intersection)
+        similarity = intersection / np.maximum(union, 1e-9)
+        k = min(self.k, similarity.shape[1])
+        top = np.argpartition(-similarity, k - 1, axis=1)[:, :k]
+        weights = np.take_along_axis(similarity, top, axis=1)
+        weights = weights / np.maximum(weights.sum(axis=1, keepdims=True), 1e-9)
+        neighbours = self._targets[top]                  # (n, k, 5)
+        mean[keep] = np.einsum("ij,ijk->ik", weights, neighbours)
+        spread[keep] = neighbours.std(axis=1)
+        return mean, spread
+
     def predict(self, smiles: list[str]) -> np.ndarray:
         """Predicted five-objective vectors, one row per input molecule.
 

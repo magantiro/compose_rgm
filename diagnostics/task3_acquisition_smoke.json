@@ -1,0 +1,34 @@
+{
+ "seed": 100,
+ "fibers": 40,
+ "decisions": 30,
+ "checks": {
+  "reachable-hvi": {
+   "fraction_engaged": 0.9666666666666667,
+   "fraction_with_positive_best_gain": 0.9666666666666667,
+   "region_spread_across_states": 0.06058665870763021
+  },
+  "dominance-aspiration": {
+   "fraction_engaged": 0.26666666666666666,
+   "fraction_with_positive_best_gain": 0.26666666666666666,
+   "region_spread_across_states": 0.05825854862831614
+  },
+  "fixed-scalarization": {
+   "fraction_engaged": 0.26666666666666666,
+   "fraction_with_positive_best_gain": 0.26666666666666666,
+   "region_spread_across_states": 0.06410748197813974
+  }
+ },
+ "arms_diverge": {
+  "mean_top4_overlap_hvi_vs_fixed": 0.25,
+  "divergence": 0.75
+ },
+ "verdict": {
+  "1 nondegenerate": true,
+  "2 represented": true,
+  "3 state-dependent": true,
+  "4 not in fallback": true,
+  "5 arms diverge": true
+ },
+ "all_passed": true
+}
