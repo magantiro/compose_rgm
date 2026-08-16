@@ -161,6 +161,11 @@ def main() -> int:
     parser.add_argument("--seeds", type=int, nargs="+", default=[100])
     parser.add_argument("--budget", type=int, default=80)
     parser.add_argument("--candidates", type=int, default=4)
+    parser.add_argument("--optimism", type=float, default=0.5,
+                        help="kappa. Chosen offline as the SMALLEST value that "
+                             "engages the mechanism (88%% at 0.5, 16%% at 0), on "
+                             "an engagement criterion independent of any HV "
+                             "outcome -- so it is not tuned to the result.")
     parser.add_argument("--out", type=Path, default=Path("runs/task3_reachable"))
     parser.add_argument("--report", type=Path,
                         default=Path("diagnostics/task3_reachable_ab.json"))
@@ -172,13 +177,15 @@ def main() -> int:
         raise SystemExit(f"no cached fibers under {args.fibers}")
     report: dict = {
         "STATUS": "DEVELOPMENT-ONLY -- NOT TASK 3 PERFORMANCE (seeded init)",
-        "cached_fibers": len(fibers), "budget_per_arm": args.budget, "arms": {}}
+        "cached_fibers": len(fibers), "budget_per_arm": args.budget,
+        "optimism": args.optimism, "arms": {}}
 
     for seed in args.seeds:
         seeded = {s: tuple(v) for s, v in
                   fixture["archives"][str(seed)]["molecules"].items()}
         print(f"\n=== seed {seed} ===")
-        for steering in (FixedScalarization(), ReachableHVI()):
+        for steering in (FixedScalarization(),
+                         ReachableHVI(optimism=args.optimism)):
             result = run_arm(steering, seeded, fibers, seed=seed,
                              budget=args.budget, candidates=args.candidates,
                              root=args.out / f"{steering.name}_seed{seed}")

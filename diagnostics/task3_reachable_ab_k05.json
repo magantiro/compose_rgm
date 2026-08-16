@@ -1,0 +1,576 @@
+{
+ "STATUS": "DEVELOPMENT-ONLY -- NOT TASK 3 PERFORMANCE (seeded init)",
+ "cached_fibers": 80,
+ "budget_per_arm": 160,
+ "optimism": 0.5,
+ "arms": {
+  "fixed-scalarization": [
+   {
+    "steering": "fixed-scalarization",
+    "seed": 100,
+    "charged": 160,
+    "decisions": 40,
+    "exhausted_states": 0,
+    "hv_base": 0.5463638305664062,
+    "hv_after": 0.5595932006835938,
+    "lift": 0.0132293701171875,
+    "lift_without_best_point": 0.01172637939453125,
+    "share_from_best_point": 0.11361014994232987,
+    "new_on_front": 35,
+    "seconds": 3.9740138053894043,
+    "picks": [
+     [
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ccc(O)cc23)c1",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ccc([PH4])cc23)c1",
+      "Bc1ccc2cccc(CC(=O)Nc3cccc(C(C)C)c3)c2c1",
+      "CC(C)c1cccc(NC(=O)Cc2cc(F)cc3ccccc23)c1"
+     ],
+     [
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1[IH2]",
+      "CC1(C)c2cccc(NC(=O)Cc3cccc4ccccc34)c21",
+      "CC(C)c1c2ccc(NC(=O)Cc3cccc4ccccc34)c1-2",
+      "CC(C)c1ccccc1NC(=O)Cc1cccc2ccccc12"
+     ],
+     [
+      "CC1Cc2cc(NC(=O)Cc3cccc4ccccc34)cc1c2",
+      "CC1(C)c2cc(NC(=O)Cc3cccc4ccccc34)cc1c2",
+      "CCc1cc(C)cc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC1(C)c2ccc(NC(=O)Cc3cccc4ccccc34)cc21"
+     ],
+     [
+      "CCc1ccc(C)c(NC(=O)Cc2cccc3ccccc23)c1",
+      "CCc1cccc(NC(=O)Cc2cccc3ccccc23)c1C",
+      "CC(C)c1cc(NC(=O)Cc2cccc3ccccc23)ccp1",
+      "C[SH3](C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1"
+     ],
+     [
+      "CCc1cccc(NC(=O)C(C)c2cccc3ccccc23)c1",
+      "CCc1cccc(NC(=O)Cc2ccc(C)c3ccccc23)c1",
+      "CCc1cccc(NC(=O)Cc2c(C)ccc3ccccc23)c1",
+      "CCc1cccc(NC(=O)Cc2cccc3cccc(C)c23)c1"
+     ],
+     [
+      "CCc1cc(NC(=O)Cc2cccc3ccccc23)ccc1C",
+      "Cc1c(NC(=O)Cc2cccc3ccccc23)cccc1C(C)C",
+      "CC1Cc2c(NC(=O)Cc3cccc4ccccc34)cccc21",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1S"
+     ],
+     [
+      "Cc1ccc(C(C)C)cc1NC(=O)Cc1cccc2ccccc12",
+      "CC(C)c1ccc(Cl)c(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC1Cc2ccc1cc2NC(=O)Cc1cccc2ccccc12",
+      "CC(C)c1cc2ccc1n2C(=O)Cc1cccc2ccccc12"
+     ],
+     [
+      "CC(C)c1ccc([SH3])c(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1ccc([IH4])c(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1ccc(O)c(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1ccc(Br)c(NC(=O)Cc2cccc3ccccc23)c1"
+     ],
+     [
+      "CC(C)c1cccc([IH3]C(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cccc(N(Cl)C(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cccc(N([SH3])C(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cccc(N2C(=O)C2c2cccc3ccccc23)c1"
+     ],
+     [
+      "CC(C)c1ccc(NC(=O)Cc2cccc3ccccc23)cc1",
+      "CC(C)c1ccbc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1O",
+      "CC(C)c1cccc2c(CC(=O)Nc3ccccc3)cccc12"
+     ],
+     [
+      "C=C(C=CC=CC(C)C)NC(=O)Cc1cccc2ccccc12",
+      "C=CC=C(C=CC(C)C)NC(=O)Cc1cccc2ccccc12",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ccccc23)n1",
+      "CC(C)C1CCCC(NC(=O)Cc2cccc3ccccc23)C1"
+     ],
+     [
+      "CC(C)c1cc(I)cc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1bc(NC(=O)Cc2cccc3ccccc23)ccc1",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1[SH3]",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1Br"
+     ],
+     [
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1F",
+      "CC(C)c1cc(NC(=O)Cc2cccc3ccccc23)c2cc1-2",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1[IH4]",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1I"
+     ],
+     [
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1Cl",
+      "CC(C)c1cccc2c1-c1ccc3ccccc3c1CC(=O)N2",
+      "CC(C)c1cccc2c1-c1cc(c3ccccc3c1)CC(=O)N2",
+      "CC(C)c1cccc2c1-c1cccc3cccc(c13)CC(=O)N2"
+     ],
+     [
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1[PH4]",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1P",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1N",
+      "Bc1c(NC(=O)Cc2cccc3ccccc23)cccc1C(C)C"
+     ],
+     [
+      "CC(C)c1ccc(S)c(NC(=O)Cc2cccc3ccccc23)c1",
+      "Bc1ccc(NC(=O)Cc2cccc3ccccc23)cc1C(C)C",
+      "CC(C)c1cc(NC(=O)Cc2cccc3ccccc23)ccc1O",
+      "CC(C)c1cc2cc(NC(=O)Cc3cccc4ccccc34)c1-2"
+     ],
+     [
+      "CC(C)c1ccc(I)c(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1ccc(N)c(NC(=O)Cc2cccc3ccccc23)c1",
+      "Bc1ccc(C(C)C)cc1NC(=O)Cc1cccc2ccccc12",
+      "CC(C)c1ccc(F)c(NC(=O)Cc2cccc3ccccc23)c1"
+     ],
+     [
+      "CC(C)c1ccnc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)([SH3])c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)(Cl)c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)(I)c1cccc(NC(=O)Cc2cccc3ccccc23)c1"
+     ],
+     [
+      "CC(C)c1cc(NC(=O)Cc2cccc3ccccc23)ccc1[SH3]",
+      "CC(C)c1cc(NC(=O)Cc2cccc3ccccc23)ccc1[PH4]",
+      "CC(C)c1ccc([PH4])c(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1ccc([IH2])c(NC(=O)Cc2cccc3ccccc23)c1"
+     ],
+     [
+      "CCCc1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1ccc(P)c(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cc(NC(=O)Cc2cccc3ccccc23)ccn1",
+      "CC(C)c1cccc2cccc(CC(=O)Nc3ccccc3)c12"
+     ],
+     [
+      "O=C(Cc1cccc2ccccc12)Nc1cccc(C2C#C2)c1",
+      "O=C(Cc1cccc2ccccc12)Nc1cccc(C2C=C2)c1",
+      "C[SH](C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CN(C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1"
+     ],
+     [
+      "C=C(C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CB(C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "C[PH2](C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CP(C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1"
+     ],
+     [
+      "CI(C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C[IH4])c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC1Cc2ccc(NC(=O)Cc3cccc4ccccc34)cc21",
+      "C[IH2](C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1"
+     ],
+     [
+      "Cc1cc(NC(=O)Cc2cccc3ccccc23)cc(C(C)C)c1",
+      "CC(C)c1ccpc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cncc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ccccc23)p1"
+     ],
+     [
+      "CC(C)c1cpcc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cbcc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cc(Cl)cc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cc([SH3])cc(NC(=O)Cc2cccc3ccccc23)c1"
+     ],
+     [
+      "CC(C)c1cc(NC(=O)Cc2cccc3ccccc23)ccc1P",
+      "CC(C)c1cc(NC(=O)Cc2cccc3ccccc23)ccc1[IH2]",
+      "CC(C)c1cc(NC(=O)Cc2cccc3ccccc23)ccc1[IH4]",
+      "CC(C)c1cc(NC(=O)Cc2cccc3ccccc23)ccc1N"
+     ],
+     [
+      "CC(C)c1cccc(NC(=P)Cc2cccc3ccccc23)c1",
+      "CC(C)c1ccc2c(CC(=O)Nc3ccccc3)cccc2c1",
+      "CC(C)c1cccc(N[PH](=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1ccc2c(NC(=O)Cc3cccc4ccccc34)c1-2"
+     ],
+     [
+      "CC(C)c1ccc2cccc(CC(=O)Nc3ccccc3)c2c1",
+      "Bc1ccc(CC(=O)Nc2cccc(C(C)C)c2)c2ccccc12",
+      "CC(C)c1bccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3cnccc23)c1"
+     ],
+     [
+      "CC(C)c1cccc(NC(=O)Cc2cccc3cbccc23)c1",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3cpccc23)c1",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ccncc23)c1",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3cc([PH4])ccc23)c1"
+     ],
+     [
+      "CC(C)c1cccc(NC(=O)Cc2cncc3ccccc23)c1",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3cccnc23)c1",
+      "CC(C)c1cccc(NC(=O)Cc2nccc3ccccc23)c1",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ncccc23)c1"
+     ],
+     [
+      "CC(C)c1cccc(NC(=O)Cc2cccc3cc(O)ccc23)c1",
+      "Bc1ccc2c(CC(=O)Nc3cccc(C(C)C)c3)cccc2c1",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3cc(N)ccc23)c1",
+      "Cc1ccc2c(CC(=O)Nc3cccc(C(C)C)c3)cccc2c1"
+     ],
+     [
+      "BC(C)(C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)(N)c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)(Br)c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cc(NC(=O)Cc2cccc3ccccc23)ccc1Cl"
+     ],
+     [
+      "CC(C)([IH2])c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3cccpc23)c1",
+      "CC(P)c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "C=CC(=CC(=C)C(C)C)NC(=O)Cc1cccc2ccccc12"
+     ],
+     [
+      "CC(C)(F)c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cc(NC(=O)Cc2cccc3ccccc23)ccc1Br",
+      "CC(C)c1cc(O)cc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cc([IH4])cc(NC(=O)Cc2cccc3ccccc23)c1"
+     ],
+     [
+      "CC(C)c1cc(NC(=O)Cc2cccc3ccccc23)ccc1S",
+      "CC(O)c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cccc2c1N2C(=O)Cc1cccc2ccccc12",
+      "CC(C)c1cc([PH4])cc(NC(=O)Cc2cccc3ccccc23)c1"
+     ],
+     [
+      "CC(C)(S)c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cc([IH2])cc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cc(F)cc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC([IH2])c1cccc(NC(=O)Cc2cccc3ccccc23)c1"
+     ],
+     [
+      "CC(C)([PH4])c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)(O)c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)(C)c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)(P)c1cccc(NC(=O)Cc2cccc3ccccc23)c1"
+     ],
+     [
+      "CC(C)([IH4])c1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cc(S)cc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cc(P)cc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cc(Br)cc(NC(=O)Cc2cccc3ccccc23)c1"
+     ],
+     [
+      "Bc1cc(NC(=O)Cc2cccc3ccccc23)cc(C(C)C)c1",
+      "CC(C)c1cc(NC(=O)Cc2cccc3ccccc23)ccc1I",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3cccc(O)c23)c1",
+      "CC(C)c1cc(N)cc(NC(=O)Cc2cccc3ccccc23)c1"
+     ],
+     [
+      "CCc1cccc(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC(C)c1cc(CC(=O)Nc2ccccc2)c2ccccc2c1",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ccc([SH3])cc23)c1",
+      "CC(C)c1cccc(NC(=O)Cc2cccc3ccc(Br)cc23)c1"
+     ]
+    ]
+   }
+  ],
+  "reachable-hvi": [
+   {
+    "steering": "reachable-hvi",
+    "seed": 100,
+    "charged": 160,
+    "decisions": 40,
+    "exhausted_states": 0,
+    "hv_base": 0.5463638305664062,
+    "hv_after": 0.558624267578125,
+    "lift": 0.01226043701171875,
+    "lift_without_best_point": 0.01226043701171875,
+    "share_from_best_point": 0.0,
+    "new_on_front": 28,
+    "seconds": 8.424531936645508,
+    "picks": [
+     [
+      "CC(=O)c1ccc(Cl)cc1Nc1ccccn1",
+      "CC(=O)c1ncc(Cl)cc1Nc1ccccc1",
+      "CC(=O)c1ccc(Nc2cccc(Cl)c2)cc1",
+      "CC(=O)c1c2cc(Cl)cc1-c1ccc(cc1)N2"
+     ],
+     [
+      "CCOc1ccc(NC(=O)F)cc1",
+      "CCOc1ccc(NC(N)=O)cn1",
+      "CC(Cl)Oc1ccc(NC(N)=O)cc1",
+      "CCOc1ccc(NC(N)=O)cc1N"
+     ],
+     [
+      "O=C(CCl)C(F)(F)c1ccnc(Nc2ccc(F)cc2)c1",
+      "CC(=O)C(F)(F)c1cc(Nc2ccc(F)cc2)nc(Br)c1Cl",
+      "CC(=O)C(F)(F)c1ccnc(Nc2ccc(F)cc2)c1",
+      "CC(=O)C(F)c1cc(Nc2ccc(F)cc2)nc(F)c1Cl"
+     ],
+     [
+      "CCC(C#N)NC(=O)Cc1cccc(OC)c1",
+      "COc1cccc(CC(=O)NCC(C)C#N)c1",
+      "COc1cccc(CC(=O)NCCCC#N)c1",
+      "CCCN(C#N)C(=O)Cc1cccc(OC)c1"
+     ],
+     [
+      "CC(=O)C(F)(F)c1cc(Oc2ccc(Cl)cc2)ncc1F",
+      "CC(=O)C(F)(F)c1cc(Nc2ccc(Cl)cc2)pcc1F",
+      "CC(=O)C(F)(F)c1cc(Nc2ccc(Cl)cc2)bcc1F",
+      "CC(=O)C(F)(F)c1cc(N2c3ccc(Cl)cc32)ncc1F"
+     ],
+     [
+      "CC(=O)c1cc(Nc2cc(Nc3cccc(C)c3)c(F)cn2)ccc1N",
+      "CC(=O)Nc1ccc(Nc2cc(Nc3cccc(Cl)c3)c(F)cn2)cc1",
+      "Cc1ccc(Nc2cc(Nc3ccc(NC=O)cc3)ncc2F)cc1C",
+      "Bc1c(Nc2ccc(NC(C)=O)cc2)ncc(F)c1Nc1cccc(C)c1"
+     ],
+     [
+      "CCOCc1ccc(C(=O)Nc2ccc(O)cc2)cc1C",
+      "CCOCc1ccc(C(=O)Nc2ccc(O)cc2C)cc1",
+      "CCOCc1ccc(C(=O)Nc2ccccc2OC)cc1",
+      "CCOc1cc(OC)ccc1NC(=O)c1ccc(C)cc1"
+     ],
+     [
+      "Bc1ccc(CC(=O)Nc2cccc(C(C)C)c2)c2ccccc12",
+      "CC(C)c1cccc(NC(=O)Cc2ccc([SH3])c3ccccc23)c1",
+      "CC(C)c1cccc(NC(=O)Cc2ccc([IH4])c3ccccc23)c1",
+      "CC(C)c1cccc(NC(=O)Cc2ccc(P)c3ccccc23)c1"
+     ],
+     [
+      "COc1cc(CC(=O)NC2=CC2)ccc1C#N",
+      "B=C(Cc1ccc(C#N)c(OC)c1)NCCC",
+      "CCCNC(=O)c1cc(C#N)c(OC)cc1C",
+      "CCCNC(=O)C(=O)c1ccc(C#N)c(OC)c1"
+     ],
+     [
+      "CC(=O)c1cc(-c2cc(F)ccc2C(C)=O)ccn1",
+      "CC(=O)c1cc(-c2cccc(F)c2)cc(C(C)=O)n1",
+      "CC(=O)c1ccc(-c2cc(F)nc(C(C)=O)c2)cc1",
+      "CC(=O)c1ccc(-c2ccnc(C(=O)I)c2)cc1F"
+     ],
+     [
+      "CC(=O)c1nccc(-c2cccc(F)c2)c1C(C)=O",
+      "CC(=O)c1cc(C2CCC(C(C)=O)C(F)C2)ccn1",
+      "CC(=O)c1cc2c(cc1F)-c1ccnc(C(C)=O)c1-2",
+      "C=NC(=CC(=C)c1ccc(C(C)=O)c(F)c1)C(C)=O"
+     ],
+     [
+      "COc1cc2cc(c1C#N)C(C)CNC(=O)C2",
+      "CC(C)CNC(=O)Cc1ccc(C#N)c(O)c1",
+      "CC1=COc2cc(ccc2C#N)CC(=O)NC1",
+      "CCC(C)NC(=O)Cc1ccc(C#N)c(O)c1"
+     ],
+     [
+      "CCOCc1ccc(C(=O)Nc2ccc(OC)cc2F)cc1",
+      "COCc1ccc(C(=O)Nc2ccc(OC)cc2C)cc1",
+      "CCOCc1ccc(C(=O)Nc2ccc(OC)cc2[IH4])cc1",
+      "CCOCc1ccc(C(=O)Nc2ccc(OC)cc2I)cc1"
+     ],
+     [
+      "CC(=O)Nc1cc(Nc2ccc(C)[pH]2)ncc1C",
+      "CC(=O)Nc1cc(Nc2ccc(C)o2)ncc1C",
+      "CC(=O)Nc1cc(Nc2ccc(C)s2)ncc1C",
+      "CC(=O)Nc1cc(Nc2ccc3cc2-3)ncc1C"
+     ],
+     [
+      "CC(=O)C1=C(C(N)=O)C=CC1Nc1ccc(Cl)cc1Cl",
+      "CC(=O)C1=C(C(N)=O)C(Cl)=CC1Nc1ccc(Cl)cc1Cl",
+      "CC(=O)C1=C2C(=O)NC1(Nc1ccc(Cl)cc1)C=C2Cl",
+      "CC(=O)C1(Nc2ccc(Cl)cc2)C=C(Cl)C(C(N)=O)=C1"
+     ],
+     [
+      "CC(=O)C1=C(C(N)=O)C(Cl)=CC1Nc1ccc(Cl)c(F)c1",
+      "CC(=O)C(=CC(N)=O)C(C=CCl)Nc1ccc(Cl)cc1",
+      "CC(=O)C1=CC(Cl)=CC1Nc1ccc(Cl)c(C(N)=O)c1",
+      "CC(=O)C1=C(C(N)=O)C=CC1Nc1ccc(Cl)c(Cl)c1"
+     ],
+     [
+      "CCc1ccc(C)c(NC(=O)Cc2cccc3ccccc23)c1",
+      "CC1(C)c2cccc(NC(=O)Cc3cccc4ccccc34)c21",
+      "CC1Cc2ccc1cc2NC(=O)Cc1cccc2ccccc12",
+      "CCc1cccc(NC(=O)Cc2cccc3ccccc23)c1C"
+     ],
+     [
+      "CCNC(=O)c1cc(NC2=CC=C(Cl)C2)ccc1N",
+      "CCNC(=O)c1cc(NC2=CC=C(Cl)C2)ccn1",
+      "CCc1ccc(NC2=CC=C(Cl)C2)cc1C(N)=O",
+      "CCNC(=O)c1cccc(NC2=CC(Br)=C(Cl)C2)c1"
+     ],
+     [
+      "CC=C(CCCl)Nc1cccc(C(=O)NCC)c1",
+      "CCNC(=O)C1C(Cl)=CC=C1Nc1ccccc1",
+      "C=C(CCCl)Nc1cccc(C(=O)NCC)c1",
+      "CCNC(=O)c1cccc(NC(C)=CC=CCl)c1"
+     ],
+     [
+      "CCc1cc([SH](=O)=O)ccc1NC(=O)c1cccc(C)n1",
+      "CCS(=O)(=O)c1ccc(NC(=O)c2cccc(C)n2)c(Cl)c1",
+      "CCS(=O)(=O)c1ccc(NC(=O)c2ccccn2)cc1C",
+      "CCS(=O)(=O)c1ccc(NC(=O)c2cccc(C#[SH])n2)cc1"
+     ],
+     [
+      "CCCCC(=O)NC(=O)Cc1ccccc1S",
+      "CCC(=O)NC(=O)Cc1cc(CC)ccc1Cl",
+      "CCC(=O)NC(=O)Cc1ccc(CC)cc1Cl",
+      "CCC(=O)NC(=O)Cc1cccc(CC)c1Cl"
+     ],
+     [
+      "CC(=O)c1cc(-c2ccc(C(C)=O)c(Cl)c2)ccn1",
+      "CC(=O)c1cc(-c2cccc(F)c2)c(C(C)=O)cn1",
+      "CC(=O)c1cc2cc(n1)-c1cc(C(C)=O)c(F)cc1-2",
+      "CC(=O)c1cc(-c2ccc(C=O)c(F)c2)c(C)cn1"
+     ],
+     [
+      "CCn1c2cc([nH]c3cccc(c3)c1=O)CC=2Cl",
+      "CCC1=C(Nc2cccc(C(N)=O)c2)CC(Cl)=C1",
+      "CCC1=C(Cl)CC(Nc2cccc(C(N)=O)c2)=C1",
+      "CC(Cl)NC(=O)c1cccc(NC2=CC=CC2)c1"
+     ],
+     [
+      "O=c1c#cc2cccc(c2)[nH]c2cc(ncc2F)[nH]c2ccc(cc2)[nH]1",
+      "C=CC(C)=CC(=C)Nc1cc(Nc2ccc(NC(C)=O)cc2)ncc1F",
+      "C=C(C=CC=CC)Nc1cc(Nc2ccc(NC(C)=O)cc2)ncc1F",
+      "C=CC(=CC(=C)C)Nc1cc(Nc2ccc(NC(C)=O)cc2)ncc1F"
+     ],
+     [
+      "CC(=O)Nc1ccc(Nc2cc(Nc3cccc(C)c3F)ccn2)cc1",
+      "Cc1cccc(Nc2cc(Nc3ccc(NC=O)cc3)ncc2F)c1C",
+      "Cc1ccc(C)c(Nc2cc(Nc3ccc(NC=O)cc3)ncc2F)c1",
+      "Cc1cc(C)cc(Nc2cc(Nc3ccc(NC=O)cc3)ncc2F)c1"
+     ],
+     [
+      "Fc1ccc(Nc2cccc(Nc3cc(NBr)ccn3)c2)cc1",
+      "BrNc1ccnc(Nc2cccc3c2-c2cccc(c2)N3)c1",
+      "BrNc1ccnc(Nc2cc3ccc2-c2cccc(c2)N3)c1",
+      "BrNc1ccnc(Nc2ccc3c(c2)Nc2cccc-3c2)c1"
+     ],
+     [
+      "CC(=O)C(F)(F)c1cc(Nc2ccc(F)cc2P)ncc1Cl",
+      "CC(=O)C(F)(F)c1cc(Nc2cbc(F)cc2)ncc1Cl",
+      "CC(=O)C(F)(F)c1cc(Nc2bcc(F)cc2)ncc1Cl",
+      "CC(=O)C(F)(F)c1cc(Nc2ccc(F)cn2)ncc1Cl"
+     ],
+     [
+      "CCCNC(=O)Cc1cc(C)c(C#N)c(O)c1",
+      "CCCNC(=O)Cc1ccc(C)c(OC)c1",
+      "COc1cc(CC(=O)NCC(C)Cl)ccc1C#N",
+      "COc1cc(CC(=O)NCC(C)C)ccc1C#N"
+     ],
+     [
+      "COc1cc(CC(=O)NCCC#N)ccc1C#N",
+      "COc1cc(CC(=O)NCCI)ccc1C#N",
+      "COc1cc(CC(=O)NCCCI)ccc1C#N",
+      "C=C(CC)NC(=O)Cc1ccc(C#N)c(OC)c1"
+     ],
+     [
+      "CCNC(=O)Cc1cc(C)c(C#N)c(OC)c1",
+      "CCNNC(=O)Cc1ccc(C#N)c(OC)c1",
+      "CC[PH3]NC(=O)Cc1ccc(C#N)c(OC)c1",
+      "CC[SH4]NC(=O)Cc1ccc(C#N)c(OC)c1"
+     ],
+     [
+      "CC(=O)c1cccc(Nc2cccc(Cl)c2)c1",
+      "CC(=O)c1c(F)cc(Cl)cc1Nc1ccccc1",
+      "CC(=O)c1ccccc1Nc1cccc(Cl)c1",
+      "CC(=O)c1cnc(Cl)cc1Nc1ccccc1"
+     ],
+     [
+      "O=C1CCCCN1C(=O)Cc1ccccc1Cl",
+      "CCCCC(=O)Nc1cccc(CC=O)c1Cl",
+      "O=C(Cc1ccccc1Cl)NC(=O)C1=CCC1",
+      "CC1=C(C(=O)NC(=O)Cc2ccccc2Cl)C1"
+     ],
+     [
+      "CC(=O)c1ccc(Cl)cc1Cc1ccccc1",
+      "Cc1ccc(Nc2cc(Cl)ccc2C=O)cc1",
+      "CC(=O)c1ccc(Cl)cc1Nc1ccccc1F",
+      "CC(=O)c1ccc(Cl)cc1Nc1cccc(F)c1"
+     ],
+     [
+      "CC(=O)c1cc(-c2ccc(C=O)c(F)c2C)ccn1",
+      "C=CC(=CC(F)=CC(C)=O)c1ccnc(C(C)=O)c1",
+      "CC(=O)c1ccc(-c2cc(C(C)=O)ncc2F)cc1",
+      "CC(=O)c1cc(F)cc(-c2ccnc(C(C)=O)c2)c1"
+     ],
+     [
+      "O=C1Cc2c(Nc3ccc(F)cc3)ncc(Cl)c2C1(F)F",
+      "CC(=O)C(F)(F)c1cc(Nc2ccc(F)cc2)ncc1F",
+      "CC(=O)C(F)(F)c1cc(Nc2ccc(F)cc2)ncc1C",
+      "CC(=O)C(F)(F)c1cc(Nc2ccc(F)cc2)ncc1O"
+     ],
+     [
+      "CCC(Cl)CC(=O)NC(=O)Cc1ccccc1",
+      "O=C(CCCCCl)NC(=O)Cc1ccccc1",
+      "CC(Cl)CCC(=O)NC(=O)Cc1ccccc1",
+      "CCCPC(=O)NC(=O)Cc1ccccc1Cl"
+     ],
+     [
+      "CC(=O)C(F)(F)C=CC(=NC=CCl)Nc1ccc(F)cc1",
+      "O=C(CF)C(F)c1cc(Nc2ccc(F)cc2)ncc1Cl",
+      "CC(=O)C(F)(F)c1c(Cl)cnc2c1-c1cc(ccc1F)N2",
+      "CC(=O)C(F)(F)N(c1ccc(F)cc1)c1ccc(Cl)cn1"
+     ],
+     [
+      "CC(=O)c1ccc(Cl)cc1Nc1cccc([SH3])c1",
+      "CC(=O)c1ccc(Cl)cc1Nc1cccc(O)c1",
+      "CC(=O)c1ccc(Cl)cc1Nc1cccc(C)c1",
+      "CC(=O)c1ccc(Cl)cc1Nc1cccc(P)c1"
+     ],
+     [
+      "C=NC(=CC(=CCl)C(F)(F)C(C)=O)Nc1ccc(F)cc1",
+      "CC(=O)C(F)(F)c1cc(Nc2ccc(F)cc2)pcc1Cl",
+      "Cc1nc(Nc2ccc(F)cc2)cc(C(F)(F)C=O)c1Cl",
+      "CC(=O)C(F)(F)C1CC(Nc2ccc(F)cc2)NCC1Cl"
+     ],
+     [
+      "CC(=O)Nc1cccc(CCC(=O)N(C)C)c1C#N",
+      "CCC(=O)Nc1cccc(CC(=O)N(C)C)c1C#N",
+      "CN(C)C(=O)CCCC(=O)Nc1ccc(Cl)cc1C#N",
+      "CN(C)C(=O)CC(F)CC(=O)Nc1ccccc1C#N"
+     ]
+    ]
+   }
+  ]
+ },
+ "decision_divergence": 1.0,
+ "optimism_sweep_offline": {
+  "criterion": "smallest kappa that ENGAGES the mechanism. Engagement is measured offline from fibers and archives and is independent of any hypervolume outcome, so this is not tuning to result.",
+  "sweep": {
+   "0.0": {
+    "engaged": 0.16,
+    "divergence": 0.12,
+    "mean_pick_sum": 3.75
+   },
+   "0.10": {
+    "engaged": 0.24,
+    "divergence": 0.13,
+    "mean_pick_sum": 3.747
+   },
+   "0.25": {
+    "engaged": 0.4,
+    "divergence": 0.16,
+    "mean_pick_sum": 3.744
+   },
+   "0.50": {
+    "engaged": 0.88,
+    "divergence": 0.42,
+    "mean_pick_sum": 3.726
+   },
+   "1.00": {
+    "engaged": 1.0,
+    "divergence": 0.73,
+    "mean_pick_sum": 3.688
+   }
+  },
+  "reading": "engagement rises with optimism and pick quality falls monotonically. 0.5 is the smallest value clearing the engagement threshold."
+ },
+ "charged_comparison_seed100_only": {
+  "kappa_1.0": {
+   "lift": 0.0074,
+   "share_from_one_molecule": 0.67,
+   "diagnosis": "over-exploring: its charged molecules averaged an objective sum of 3.602, BELOW the seeded archive's own mean of 3.635, while the fixed arm averaged 3.875. Not junk -- mediocrity."
+  },
+  "kappa_0.5": {
+   "lift": 0.0123,
+   "share_from_one_molecule": 0.0,
+   "new_on_front": 28
+  },
+  "fixed": {
+   "lift": 0.0132,
+   "share_from_one_molecule": 0.11,
+   "new_on_front": 35
+  },
+  "divergence": 1.0,
+  "reading": "at kappa 0.5 the adaptive arm is at rough parity on hypervolume (+0.0123 vs +0.0132) with a qualitatively different profile: 0% of its lift comes from any single molecule, against 11% for fixed. That is the broad-improvement signature rather than the one-lucky-point signature -- but it is ONE seed.",
+  "status": "AMBIGUOUS at n=1. Seed variance dominates every quantity on this benchmark, so more budget on one seed cannot resolve it; more SEEDS can. Not banked as a result."
+ }
+}
