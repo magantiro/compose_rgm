@@ -262,6 +262,17 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     src_fp = gen.GetFingerprint(Chem.MolFromSmiles(source))
     prop_cache: dict[str, tuple[float, float]] = {}
     enc_cache: dict[str, np.ndarray] = {}
+    # PARKED, NOT PRODUCTION. Measured 1.23x end-to-end (5.78 -> 4.71
+    # s/transition) on source 17 against its Round 1 uncached record -- far less
+    # than the 69.5% hit rate suggested, so the mask machinery is not as
+    # dominant inside the encode path as the profile implied. Parity also came
+    # back non-bitwise (max |delta| 1.5e-06 on h_phi; all 201 states and the
+    # returned molecule identical), and the FIRST difference is on transition 0
+    # which is a cache miss by definition -- so the cache cannot be its cause.
+    # Likely cross-container float nondeterminism. Not worth a 19-minute control
+    # to settle for an 18% saving. Left enabled but not depended on; the real
+    # lever is the graph-only encoder, which attacks the ~79% directly.
+    #
     # CACHE-KEY AUDIT (static, done before relying on this):
     #   key = (id(ring_catalog), use_aromatic_bond_view, compute_cyclic_graft,
     #          compute_ring_opening, compute_ring_system_delete,
