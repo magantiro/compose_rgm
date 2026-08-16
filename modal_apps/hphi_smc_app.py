@@ -50,6 +50,12 @@ app = modal.App("hphi-smc")
 RUN_ROOT = "/artifacts/editing_v2/r_theta_run"
 OUT_DIR = "hphi_smc_ref"
 TIME_POINT, CANONICAL_SLOTS = 0.5, 48
+#: 6 GiB. The MOLLEO lane measured peak RSS on a container doing the SAME
+#: R_theta expansion work and got 3.9 GiB, after correcting a unit error
+#: (ru_maxrss is KILOBYTES on Linux, not MiB). An earlier 3 GiB estimate would
+#: have OOMed. This is measured peak plus ~50%.
+MEM_GIB = 6
+MEM_MIB = MEM_GIB * 1024
 
 # ---- FROZEN. Every value below is copied from the preregistration. ----
 HORIZON = 24                    # max H24, native anytime STOP
