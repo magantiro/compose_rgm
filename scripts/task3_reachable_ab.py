@@ -71,12 +71,8 @@ def restricted_start(steering, archive: ParetoArchive, target, rng,
     eligible = available - exhausted
     if not eligible:
         return None
-    hidden = {k: archive.values.pop(k) for k in list(archive.values)
-              if k not in eligible}
-    try:
+    with archive.restricted_to(eligible):
         return steering.start(archive, target, rng)
-    finally:
-        archive.values.update(hidden)
 
 
 def run_arm(steering, seeded, fibers, *, seed: int, budget: int, candidates: int,

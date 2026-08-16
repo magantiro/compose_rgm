@@ -23,6 +23,7 @@ precision of a result.
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -163,6 +164,40 @@ class ParetoArchive:
         """The metric itself -- for reporting, not for steering."""
 
         return hypervolume_qmc(self.points(), log2_samples=log2_samples)
+
+    @contextmanager
+    def restricted_to(self, keys: set[str]):
+        """Temporarily hide every member outside `keys`, front included.
+
+        Selection rules ask the archive what it holds, so restricting an arm to
+        expandable states means restricting the ARCHIVE, not filtering after the
+        fact -- each arm then still chooses by its own rule over what remains.
+
+        Both `values` AND the incrementally-maintained `_front` are hidden. That
+        second half is not optional: once the front stopped being recomputed
+        from `values` on every call, hiding only `values` left stale front
+        members visible, and a selector happily returned one -- which is exactly
+        how this method came to exist.
+        """
+
+        hidden_values = {k: self.values.pop(k) for k in list(self.values)
+                         if k not in keys}
+        original_front = dict(self._front)
+        # The restricted front is RECOMPUTED, not filtered. Filtering would drop
+        # every eligible state that happens to be dominated by an ineligible
+        # one, so a perfectly good start could never be chosen -- the front of a
+        # subset is not the subset of the front.
+        self._front = {}
+        if self.values:
+            keys_left = list(self.values)
+            mask = _pareto_mask(np.asarray(list(self.values.values()), dtype=float))
+            self._front = {keys_left[i]: self.values[keys_left[i]]
+                           for i in np.flatnonzero(mask)}
+        try:
+            yield self
+        finally:
+            self.values.update(hidden_values)
+            self._front = original_front
 
     # ---- persistence -----------------------------------------------------
 
