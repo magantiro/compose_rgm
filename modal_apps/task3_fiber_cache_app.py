@@ -119,13 +119,16 @@ def cache_fibers(spec: tuple[int, int, int]) -> dict[str, Any]:
         "fibers": cache}))
     artifact_volume.commit()
 
-    peak_mib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / (1 << 20)
+    # ru_maxrss is KILOBYTES on Linux, so this is GiB. Labelling it MiB (as I
+    # first did) understates memory by 1024x, which is exactly the number used
+    # to size the request that gets billed.
+    peak_gib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / (1 << 20)
     report = {"seed": seed, "offset": offset, "cached": len(cache),
               "failed": failures,
               "median_fiber": sorted(len(v) for v in cache.values())[len(cache) // 2]
               if cache else 0,
               "seconds": time.perf_counter() - started,
-              "peak_rss_mib": round(peak_mib, 1)}
+              "peak_rss_gib": round(peak_gib, 2)}
     print(json.dumps(report), flush=True)
     return report
 
