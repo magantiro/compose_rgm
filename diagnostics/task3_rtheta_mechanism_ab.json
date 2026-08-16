@@ -95,5 +95,10 @@
    "seconds": 1023.716722583,
    "runtime_build_seconds": 108.337332455
   }
- ]
+ ],
+ "what_the_selective_counts_do_and_do_not_show": {
+  "shows": "R_theta CAN expose selective chemistry: the fixed arm found 134 and 178 selective molecules out of 300 charged, drawn from R_theta fibers.",
+  "does_NOT_show": "that selective candidates were present in every fiber the ADAPTIVE arm actually saw. The arms visit different states once they diverge, so this does not rule out proposal availability as a local factor for the adaptive arm.",
+  "status_of_zero_selective_under_adaptive": "a DIAGNOSTIC CHARACTERIZATION, not a failure criterion. The official benchmark does not require preferring selectivity over higher-HV promiscuous points."
+ }
 }

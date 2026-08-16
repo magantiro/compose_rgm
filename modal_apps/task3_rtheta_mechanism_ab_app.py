@@ -73,10 +73,19 @@ MATERIALIZED = "/artifacts/editing_v2/r_theta_run/materialized_scorer"
 CHECKPOINT = "/artifacts/editing_v2/r_theta_run/runs/run_v2_01/R_THETA_CHECKPOINT.pt"
 OUTPUT_ROOT = "/artifacts/editing_v2/task3_mechanism_rtheta"
 
-#: Consecutive unproductive iterations before an arm gives up. The local policy
-#: loop has had this since a test caught the same infinite loop there; the Modal
-#: app did not, and it cost one arm of the first R_theta A/B.
-STALL_LIMIT = 8
+#: THE SHARED EXHAUSTED-STATE RULE, identical in both arms.
+#: If every novel successor of a selected start has already been charged, that
+#: state is EXHAUSTED: it can offer nothing further, and a selector that keeps
+#: choosing it would spin forever paying 12.5 s an expansion (which is exactly
+#: how fixed-scalarization seed 100 died). Exhausted states are excluded from
+#: subsequent start selection, so an arm moves to the next eligible archive
+#: state instead of stopping. An arm may only end on budget or on having no
+#: eligible state left -- never because its selector fixated.
+#:
+#: The rule is a NO-OP for the five completed arms: each recorded expansions ==
+#: steps, so no iteration ever failed to produce novel proposals and no state
+#: was ever exhausted. That is what keeps the rerun comparable with them.
+MAX_EXHAUSTED_RETRIES = 12
 #: Padding slots above the source's atom count, matching the timing probe.
 PAD_SLOTS = 8
 #: KNOWN INEFFICIENCY, recorded rather than fixed mid-flight. R_theta is
@@ -101,6 +110,26 @@ PAD_SLOTS = 8
 #: How many starts to try before giving up on an iteration. A realized archive
 #: molecule can fail to convert to a graph; that is not a reason to stop.
 START_ATTEMPTS = 5
+
+
+def _eligible_start(steering, archive, target, rng, exhausted: set[str]):
+    """The arm's own choice of start, skipping states already spent.
+
+    Identical machinery in both arms: each still selects by ITS OWN rule -- the
+    fixed sum or the adaptive aspiration -- and the only thing shared is the
+    refusal to re-pick a state that has nothing novel left. Temporarily hiding
+    exhausted molecules from the archive is what lets each selector answer
+    "given what remains, which state now?" in its own terms.
+    """
+
+    if not exhausted:
+        return steering.start(archive, target, rng)
+    hidden = {key: archive.values.pop(key) for key in list(exhausted)
+              if key in archive.values}
+    try:
+        return steering.start(archive, target, rng)
+    finally:
+        archive.values.update(hidden)
 
 
 def fiber_composition(predicted, target, archive) -> dict[str, Any]:
@@ -218,22 +247,25 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
 
     root = Path(OUTPUT_ROOT) / f"{arm_name}_seed{seed}"
     run = Task3Run.open(root, seed=seed, budget=budget, policy=arm_name)
+    # RESUME CORRECTNESS. Reopening restores the METER from the ledger, so the
+    # budget is right -- but the archive and surrogate are rebuilt from the
+    # seeded fixture alone and would otherwise know nothing about the molecules
+    # this arm already bought. A resumed arm has to keep its knowledge, not just
+    # its bill.
+    if run.resumed is not None:
+        already = run.meter.evaluated()
+        archive.add_many(already)
+        surrogate.update(list(already), list(already.values()))
+        print({"resumed": True, "arm": arm_name, "seed": seed,
+               "charged_already": run.spent,
+               "archive_after_resume": len(archive)}, flush=True)
     expansions = 0
-    stalled = 0
+    exhausted: set[str] = set()
     composition: list[dict[str, Any]] = []
     fiber_sizes: list[int] = []
     proposals_seen = 0
     try:
         while run.remaining > 0:
-            if stalled >= STALL_LIMIT:
-                # An arm whose start never moves re-expands one state forever:
-                # every successor is already charged, nothing new is proposed,
-                # `remaining` never falls, and the container burns 12.5 s an
-                # iteration until the timeout. Found the hard way -- one arm of
-                # the first R_theta A/B died exactly here at step 60 of 75.
-                print({"stalled_out": True, "arm": arm_name, "seed": seed,
-                       "step": run.step, "charged": run.spent}, flush=True)
-                break
             target = steering.target(archive, run.rng)
             if target is None:
                 break
@@ -241,8 +273,10 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
             # it impossible to price any of it against the benchmark budget.
             with navigation_lockout():
                 proposed: list[str] = []
-                for _ in range(START_ATTEMPTS):
-                    start = steering.start(archive, target, run.rng)
+                start = None
+                for _ in range(MAX_EXHAUSTED_RETRIES):
+                    start = _eligible_start(steering, archive, target, run.rng,
+                                            exhausted)
                     if start is None:
                         break
                     try:
@@ -257,17 +291,26 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
                     expansions += 1
                     fiber = result.batch.successors
                     fiber_sizes.append(len(fiber))
+                    raw = []
                     for successor in fiber:
                         smiles = molecular_graph_to_smiles(successor.state)
                         if smiles:
-                            proposed.append(smiles)
-                    break
-                proposed = [s for s in dict.fromkeys(proposed)
-                            if s not in archive.values]
+                            raw.append(smiles)
+                    proposed = [s for s in dict.fromkeys(raw)
+                                if s not in archive.values]
+                    if proposed:
+                        break
+                    # Nothing novel here ever again: this state is spent.
+                    exhausted.add(start)
+                    print({"exhausted_state": start[:60], "arm": arm_name,
+                           "seed": seed, "total_exhausted": len(exhausted)},
+                          flush=True)
                 proposals_seen += len(proposed)
                 if not proposed:
-                    stalled += 1
-                    continue
+                    print({"no_eligible_state": True, "arm": arm_name,
+                           "seed": seed, "step": run.step,
+                           "charged": run.spent}, flush=True)
+                    break
                 predicted = surrogate.predict(proposed)
                 # Logged BEFORE selection, so a null result can be attributed.
                 composition.append(fiber_composition(predicted, target, archive))
@@ -276,7 +319,6 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
             if not chosen:
                 break
             values = run.evaluate(chosen)
-            stalled = 0
             for smiles, value in zip(chosen, values):
                 archive.add(smiles, value)
             surrogate.update(chosen, list(values))
@@ -314,7 +356,7 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
                 for key in ("fiber", "predicted_high_jnk3", "predicted_low_gsk3b",
                             "predicted_jointly_selective", "target_represented")
             } if composition else {},
-            "stalled_out": stalled >= STALL_LIMIT,
+            "exhausted_states": len(exhausted),
             "iterations_where_target_was_represented": int(
                 sum(1 for c in composition if c.get("target_represented", 0) > 0)),
             "fiber_composition_note": (
@@ -336,120 +378,31 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
         run.close()
 
 
-@app.function(
-    image=image,
-    cpu=2.0,
-    memory=8 * 1024,
-    timeout=75 * 60,
-    max_containers=3,
-    volumes={str(ARTIFACT_ROOT): artifact_volume},
-)
-def audit_fiber_composition(spec: tuple[int, int, int]) -> dict[str, Any]:
-    """What does R_theta ACTUALLY expose? Charged, because the answer costs labels.
-
-    The composition logged during the A/B is predicted, so it cannot separate
-    "the fiber lacks the region" from "the surrogate cannot see the region".
-    This spends its budget measuring the fiber instead of optimising over it: it
-    expands a start, charges a RANDOM sample of that fiber, and reports the true
-    composition. Random, not ranked -- a ranked sample would measure the
-    controller again, which is the thing being controlled for.
-
-    It answers the first branch of the decomposition on its own:
-
-        R_theta exposes useful chemistry?  -> if NO, the problem is expansion,
-                                              not archive selection.
-    """
-
-    seed, expansions_wanted, per_fiber = spec
-    import numpy as np
-
-    from compose_v4.benchmark.oracles.task3 import navigation_lockout
-    from compose_v4.benchmark.task3_run import Task3Run
-    from compose_v4.chem.molecular_graph import (
-        molecular_graph_to_smiles,
-        smiles_to_molecular_graph,
-    )
-    from compose_v4.chem.state import pad_molecular_graph
-    from compose_v4.experiments.production_successor_kernel import (
-        canonical_successor_result,
-    )
-
-    fixture = json.loads((REMOTE_ROOT / "archives.json").read_text())
-    entry = fixture["archives"][str(seed)]
-    seeded = {s: tuple(v) for s, v in entry["molecules"].items()}
-    model = _build_r_theta()
-
-    rng = np.random.default_rng(seed)
-    # Start from the archive's own high-JNK3 molecules: the question is what
-    # R_theta exposes AROUND useful chemistry, not around arbitrary molecules.
-    ranked = sorted(seeded.items(), key=lambda kv: -kv[1][1])
-    starts = [s for s, _ in ranked[:expansions_wanted]]
-
-    root = Path(OUTPUT_ROOT) / f"fiber_audit_seed{seed}"
-    run = Task3Run.open(root, seed=seed, budget=expansions_wanted * per_fiber,
-                        policy="fiber-audit")
-    rows = []
-    try:
-        for start in starts:
-            with navigation_lockout():
-                try:
-                    graph = smiles_to_molecular_graph(start)
-                    padded = pad_molecular_graph(graph, graph.n_atoms + PAD_SLOTS)
-                    fiber = canonical_successor_result(model, padded, 0.0).batch.successors
-                except Exception as error:  # noqa: BLE001
-                    print({"expansion_failed": start[:60],
-                           "error": f"{type(error).__name__}: {error}"}, flush=True)
-                    continue
-                smiles = [molecular_graph_to_smiles(s.state) for s in fiber]
-                smiles = [s for s in dict.fromkeys(smiles) if s]
-            if not smiles:
-                continue
-            index = rng.choice(len(smiles), size=min(per_fiber, len(smiles)),
-                               replace=False)
-            sample = run.affordable([smiles[int(i)] for i in index])
-            if not sample:
-                break
-            values = np.asarray(run.evaluate(sample))
-            jnk3 = values[:, 1]
-            gsk3b_activity = 1.0 - values[:, 3]
-            rows.append({
-                "start": start,
-                "start_jnk3": float(seeded[start][1]),
-                "fiber": len(smiles),
-                "sampled": len(sample),
-                "true_high_jnk3": int((jnk3 >= 0.4).sum()),
-                "true_selective": int(((jnk3 >= 0.4) & (gsk3b_activity <= 0.1)).sum()),
-                "max_jnk3": float(jnk3.max()),
-                "median_jnk3": float(np.median(jnk3)),
-            })
-            print(rows[-1], flush=True)
-            artifact_volume.commit()
-
-        sampled = sum(r["sampled"] for r in rows)
-        report = {
-            "phase": "fiber_composition_audit", "seed": seed,
-            "expansions": len(rows), "molecules_sampled": sampled,
-            "fraction_high_jnk3": (sum(r["true_high_jnk3"] for r in rows) / sampled
-                                   if sampled else 0.0),
-            "fraction_selective": (sum(r["true_selective"] for r in rows) / sampled
-                                   if sampled else 0.0),
-            "rows": rows,
-            "note": ("TRUE objectives on a RANDOM sample of each fiber. Charged, "
-                     "development-only, and spent on measuring what expansion "
-                     "offers rather than on optimising."),
-        }
-        print(json.dumps({k: v for k, v in report.items() if k != "rows"}), flush=True)
-        artifact_volume.commit()
-        return report
-    finally:
-        run.close()
-
+# THE CHARGED RANDOM-FIBER AUDIT WAS CANCELLED BEFORE IT RAN.
+# It would have expanded from the archive's high-JNK3 molecules and charged a
+# random sample of each fiber to measure TRUE composition. It was cut because it
+# no longer changes the next algorithmic decision: we already know R_theta CAN
+# expose selective chemistry, and the official benchmark does not require
+# preferring selectivity over higher-HV promiscuous points. Removed rather than
+# left dormant, so nobody runs it believing it is still on the plan.
 
 @app.local_entrypoint()
-def main(budget: int = 300, candidates: int = 4) -> None:
+def main(budget: int = 300, candidates: int = 4, only: str = "") -> None:
+    """`--only fixed-scalarization:100` reruns one arm and nothing else.
+
+    Completed arms are not rerun without cause: their records show 300 charged
+    and expansions == steps, so none was truncated and the exhausted-state rule
+    could not have changed them.
+    """
+
     specs = [(arm, seed, budget, candidates)
              for seed in (100, 101, 102)
              for arm in ("fixed-scalarization", "adaptive-region")]
+    if only:
+        want_arm, want_seed = only.split(":")
+        specs = [s for s in specs if s[0] == want_arm and s[1] == int(want_seed)]
+        if not specs:
+            raise SystemExit(f"no arm matches {only!r}")
     print(json.dumps({"phase": "launching", "runs": len(specs), "budget": budget,
                       "note": "DEVELOPMENT-ONLY -- not Task 3 performance"}))
     results = list(run_arm.map(specs))
