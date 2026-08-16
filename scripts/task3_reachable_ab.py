@@ -157,7 +157,11 @@ def run_arm(steering, seeded, fibers, *, seed: int, budget: int, candidates: int
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--fibers", type=Path, default=Path("/tmp/fiber_cache/seed100"))
+    parser.add_argument("--fibers", type=Path, default=Path("/tmp/fiber_cache"),
+                        help="ROOT holding seed<N>/ subdirectories. Each seed has "
+                             "its own archive and therefore its own fibers; using "
+                             "one seed's fibers with another's archive leaves no "
+                             "expandable state at all.")
     parser.add_argument("--seeds", type=int, nargs="+", default=[100])
     parser.add_argument("--budget", type=int, default=80)
     parser.add_argument("--candidates", type=int, default=4)
@@ -172,18 +176,25 @@ def main() -> int:
     args = parser.parse_args()
 
     fixture = json.loads(FIXTURE.read_text())
-    fibers = load_fibers(args.fibers)
-    if not fibers:
-        raise SystemExit(f"no cached fibers under {args.fibers}")
     report: dict = {
         "STATUS": "DEVELOPMENT-ONLY -- NOT TASK 3 PERFORMANCE (seeded init)",
-        "cached_fibers": len(fibers), "budget_per_arm": args.budget,
+        "budget_per_arm": args.budget,
         "optimism": args.optimism, "arms": {}}
 
     for seed in args.seeds:
         seeded = {s: tuple(v) for s, v in
                   fixture["archives"][str(seed)]["molecules"].items()}
-        print(f"\n=== seed {seed} ===")
+        directory = (args.fibers / f"seed{seed}" if (args.fibers / f"seed{seed}").is_dir()
+                     else args.fibers)
+        fibers = load_fibers(directory)
+        if not fibers:
+            raise SystemExit(f"no cached fibers for seed {seed} under {directory}")
+        expandable = len(set(fibers) & set(seeded))
+        if not expandable:
+            raise SystemExit(
+                f"seed {seed}: none of the {len(fibers)} cached fibers belong to "
+                f"its archive -- these are another seed's fibers")
+        print(f"\n=== seed {seed} ({expandable} expandable states) ===")
         for steering in (FixedScalarization(),
                          ReachableHVI(optimism=args.optimism)):
             result = run_arm(steering, seeded, fibers, seed=seed,
