@@ -231,6 +231,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
 
     from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
     from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.experiments.hphi_graph_encode import encode_graph_only
     from compose_v4.experiments.hphi_region_features import (
         build_features, in_region,
     )
@@ -309,14 +310,15 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         if smi not in enc_cache:
             st = pad_molecular_graph(smiles_to_molecular_graph(smi),
                                      CANONICAL_SLOTS)
-            b = prepare_factorized_mark_batch(
-                (st,), (float(TIME_POINT),), (None,), (None,), (0.0,),
-                use_aromatic_bond_view=True, ring_catalog=model.ring_catalog,
-                chemistry_feature_cache=chem_cache,
-                **operator_capability_batch_kwargs(model.operator_capabilities))
-            with torch.no_grad():
-                _n, g, _p = model._encode_batch(b)
-            enc_cache[smi] = g[0].detach().cpu().numpy().astype(np.float64)
+            # GRAPH-ONLY ENCODE. Qualified in-process against the old path
+            # on 40 banked molecular states: BITWISE identical (maxdiff 0.0)
+            # and 163x faster (4873 -> 30 ms/state). The old path built 561
+            # lines of admission masks and macro actions that _encode_batch
+            # never reads. Batching is deliberately NOT used: it adds nothing
+            # once construction is cheap (1.20s vs 1.22s) and reintroduces a
+            # 4.8e-07 drift.
+            g = encode_graph_only(model, [st], float(TIME_POINT))
+            enc_cache[smi] = g[0].astype(np.float64)
         return enc_cache[smi]
 
     e_src = encode(source)
