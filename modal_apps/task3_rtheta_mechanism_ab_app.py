@@ -75,15 +75,13 @@ OUTPUT_ROOT = "/artifacts/editing_v2/task3_mechanism_rtheta"
 
 #: Padding slots above the source's atom count, matching the timing probe.
 PAD_SLOTS = 8
-#: KNOWN INEFFICIENCY, recorded rather than fixed mid-flight. R_theta is
-#: deterministic, so expanding the same start twice returns the same fiber at
-#: the same 12.5 s cost. The fixed arm re-selects its best-summed molecule until
-#: a charged candidate displaces it, so it can re-expand one state several times.
-#: A fiber cache keyed on the start molecule removes the waste entirely and is
-#: the first thing to add before this is run at any larger budget. It does not
-#: bias the comparison -- both arms pay the same way for the same behaviour --
-#: and the per-run `expansions` count against distinct starts measures how much
-#: was lost.
+#: R_theta is DETERMINISTIC, so expanding the same start twice returns the same
+#: ~613 successors at the same 12.5 s cost. The fixed arm re-selects its
+#: best-summed molecule until a charged candidate displaces it, so without a
+#: cache it re-expands one state repeatedly. The cache below is keyed on the
+#: start molecule and is exact rather than an approximation: it returns what a
+#: recomputation would have returned. Both arms share it, so it cannot bias the
+#: comparison -- it only stops the experiment paying twice for one answer.
 #: How many starts to try before giving up on an iteration. A realized archive
 #: molecule can fail to convert to a graph; that is not a reason to stop.
 START_ATTEMPTS = 5
@@ -161,6 +159,8 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
     root = Path(OUTPUT_ROOT) / f"{arm_name}_seed{seed}"
     run = Task3Run.open(root, seed=seed, budget=budget, policy=arm_name)
     expansions = 0
+    cache_hits = 0
+    fiber_cache: dict[str, list[str]] = {}
     fiber_sizes: list[int] = []
     proposals_seen = 0
     try:
@@ -175,6 +175,10 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
                 for _ in range(START_ATTEMPTS):
                     start = steering.start(archive, target, run.rng)
                     if start is None:
+                        break
+                    if start in fiber_cache:
+                        proposed = list(fiber_cache[start])
+                        cache_hits += 1
                         break
                     try:
                         graph = smiles_to_molecular_graph(start)
@@ -192,6 +196,7 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
                         smiles = molecular_graph_to_smiles(successor.state)
                         if smiles:
                             proposed.append(smiles)
+                    fiber_cache[start] = list(proposed)
                     break
                 proposed = [s for s in dict.fromkeys(proposed)
                             if s not in archive.values]
@@ -234,6 +239,8 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
             "archive_sha256": entry["sha256"],
             "charged": int(run.spent),
             "expansions": expansions,
+            "distinct_starts_expanded": len(fiber_cache),
+            "fiber_cache_hits": cache_hits,
             "median_fiber": float(np.median(fiber_sizes)) if fiber_sizes else 0.0,
             "proposals_scored_internally": proposals_seen,
             "hv_seeded_only": hypervolume_qmc(seeded_values, log2_samples=17),
