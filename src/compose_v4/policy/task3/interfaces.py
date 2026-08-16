@@ -11,6 +11,26 @@ and if it does not, this task can use a different COMPOSE-native expansion.  The
 outer algorithm is independent of that choice, so it is built now and the seam is
 kept open.
 
+WHAT THE POLICY OPTIMISES -- AND WHAT SELECTIVITY IS FOR
+--------------------------------------------------------
+The objective is the OFFICIAL TASK 3 HYPERVOLUME. The question the policy asks
+itself is:
+
+    "What region would most improve the current official Pareto archive?"
+
+It is NOT:
+
+    "How do I force everything toward selectivity?"
+
+The JNK3/GSK3B selective ridge is a DIAGNOSTIC PROBE -- an unusually legible
+place to check whether purposeful region targeting works, because the chemistry
+makes the tradeoff real. It is not the goal. Measurement showed the two can
+disagree: on this metric a high-JNK3 but promiscuous molecule can be worth more
+hypervolume than a lower-JNK3 selective one (0.622 against 0.568 across those
+two axes). Where they disagree, the official hypervolume wins, and a final
+optimiser should exploit the promiscuous region when that is what the metric
+rewards.
+
 THE HYPOTHESIS THIS ARCHITECTURE EXISTS TO TEST
 -----------------------------------------------
 A fixed scalarization is not blind to the objectives it sums -- it rewards high

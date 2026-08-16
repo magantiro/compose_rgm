@@ -205,5 +205,9 @@
   },
   "do_not_merge": "These are two separate findings. The first is about purpose specification and is positive; the second is about our hypothesis and is negative."
  },
- "task3_property_worth_recording": "'Fills the selective region' and 'maximises hypervolume' DISAGREE on this task at these operating points: jnk3 0.83 with GSK3B activity 0.25 contributes 0.622 across those two axes against 0.568 for jnk3 0.58 with activity 0.02. This is a property of Task 3, independent of any navigator, and it affects how any COMPOSE claim on this benchmark should be phrased."
+ "task3_property_worth_recording": "'Fills the selective region' and 'maximises hypervolume' DISAGREE on this task at these operating points: jnk3 0.83 with GSK3B activity 0.25 contributes 0.622 across those two axes against 0.568 for jnk3 0.58 with activity 0.02. This is a property of Task 3, independent of any navigator, and it affects how any COMPOSE claim on this benchmark should be phrased.",
+ "OBJECTIVE": {
+  "what_is_optimised": "the OFFICIAL Task 3 hypervolume. The policy's question is 'what region would most improve the current official Pareto archive?', NOT 'how do I force everything toward selectivity?'",
+  "what_selectivity_is": "a DIAGNOSTIC PROBE for whether purposeful region targeting works, chosen because the JNK3/GSK3B tradeoff is chemically real and legible. It is not the goal, and where it disagrees with the official hypervolume the hypervolume wins."
+ }
 }
