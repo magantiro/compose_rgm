@@ -256,6 +256,20 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     src_fp = gen.GetFingerprint(Chem.MolFromSmiles(source))
     prop_cache: dict[str, tuple[float, float]] = {}
     enc_cache: dict[str, np.ndarray] = {}
+    # CACHE-KEY AUDIT (static, done before relying on this):
+    #   key = (id(ring_catalog), use_aromatic_bond_view, compute_cyclic_graft,
+    #          compute_ring_opening, compute_ring_system_delete,
+    #          5 semantics strings, molecular_state_cache_key(state))
+    # Two gaps, both SAFE HERE but conditionally so:
+    #   * `compute_ring_restates` is NOT in the key though it gates
+    #     macro_system. Safe only because our capability flags come from
+    #     operator_capability_batch_kwargs(model.operator_capabilities) and are
+    #     constant for a given model.
+    #   * id(ring_catalog) is object identity, so a collected-and-reallocated
+    #     catalog could false-hit. Safe only because we hold the model for the
+    #     container's lifetime.
+    # If either assumption changes, this cache stops being exact.
+    #
     # CHEMISTRY FEATURE CACHE. The 561-line batch builder puts every expensive
     # call -- admission masks, macro actions, ring-system deletes -- behind a
     # single `if features is None` guard, so a cache hit skips ALL of it. It is
