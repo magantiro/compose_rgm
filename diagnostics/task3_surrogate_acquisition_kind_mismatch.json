@@ -1,0 +1,50 @@
+{
+ "finding": "A weighted-average surrogate cannot express the quantity a marginal-hypervolume acquisition scores on",
+ "status": "GENERAL. Not specific to Task 3, to k-NN, or to this codebase.",
+ "one_sentence": "If the acquisition asks 'does this candidate beat my current front?' and the surrogate is any weighted average of observed labels, the surrogate is mathematically incapable of answering yes, because a convex combination of neighbours cannot exceed the largest neighbour.",
+
+ "how_it_presented": {
+  "symptom": "the adaptive arm engaged on only 26.7% of decisions; in 73% of them NO successor in a ~350-member R_theta fiber was predicted to add any hypervolume",
+  "what_it_looked_like": "a third consecutive null, readable as 'archive-aware region targeting does not work'",
+  "what_it_actually_was": "the acquisition and the surrogate were incompatible in KIND, so the mechanism was never tested at all"
+ },
+
+ "the_measurement_that_settled_it": {
+  "cost": "zero oracle calls, zero Modal, about two minutes",
+  "predicted_vectors_interior_to_the_archive_box": 1.0,
+  "candidates_with_predicted_gain_above_zero": 0.0095,
+  "per_objective": {
+   "qed":   {"archive_std": 0.1318, "predicted_std": 0.0808, "archive_max": 0.947, "predicted_max": 0.914},
+   "jnk3":  {"archive_std": 0.1322, "predicted_std": 0.1855, "archive_max": 0.720, "predicted_max": 0.539},
+   "sa":    {"archive_std": 0.0802, "predicted_std": 0.0557, "archive_max": 0.986, "predicted_max": 0.900},
+   "gsk3b": {"archive_std": 0.0555, "predicted_std": 0.0667, "archive_max": 1.000, "predicted_max": 1.000},
+   "drd2":  {"archive_std": 0.0165, "predicted_std": 0.0112, "archive_max": 1.000, "predicted_max": 1.000}
+  },
+  "why_shrinkage_is_the_wrong_diagnosis": "variance shrinkage is mild and even inverted on two axes (jnk3 1.40x, gsk3b 1.20x). The decisive number is not spread but CEILING: predicted max JNK3 was 0.539 against an archive max of 0.720, and every predicted vector sat inside the archive's box on all five axes. A mean cannot exceed its inputs."
+ },
+
+ "the_general_rule": {
+  "incompatible_pairs": "any convex-combination estimator (k-NN mean, kernel regression, bagged average, attention-weighted retrieval) paired with any acquisition whose value is zero unless the prediction exceeds the incumbent frontier (marginal hypervolume, probability of improvement, expected improvement over the max)",
+  "why_it_hides": "the acquisition still returns numbers and still ranks candidates, so nothing errors and nothing looks broken. It simply returns near-zero for almost everything and the mechanism silently degrades into its tie-break.",
+  "how_to_detect_it_in_one_line": "compute the fraction of predictions that exceed the incumbent front on at least one axis. If it is near zero, the acquisition cannot fire, and no amount of tuning the acquisition will change that.",
+  "fixes": [
+   "score an OPTIMISTIC estimate (mean + kappa * dispersion) so a candidate whose neighbours disagree can clear the frontier -- what was done here",
+   "use an estimator that extrapolates (linear/ridge, gradient boosting, a GP with a non-degenerate mean)",
+   "change the acquisition to a relative one (improvement over the local neighbourhood) rather than an absolute frontier test"
+  ]
+ },
+
+ "what_it_cost_and_what_it_would_have_cost": {
+  "actual": "caught offline by the pre-spend smoke, ~2 minutes, $0",
+  "counterfactual": "a charged paired A/B reading as a null, and a likely conclusion that region targeting had failed on its third attempt",
+  "lesson": "two earlier mechanism failures in this lane were diagnosed AFTER the money was spent. This one was diagnosed before, because the smoke checks whether the mechanism ENGAGES separately from whether it WINS."
+ },
+
+ "provenance_of_the_fix": {
+  "parameter": "optimism kappa = 0.5",
+  "chosen_by": "an offline sweep on ENGAGEMENT -- the fraction of decisions on which the acquisition can discriminate at all -- measured from cached fibers and archives",
+  "critically": "engagement is independent of any hypervolume outcome, so kappa was NOT selected after seeing performance. The sweep was run before any charged comparison at kappa=0.5 existed.",
+  "sweep": {"0.0": 0.16, "0.10": 0.24, "0.25": 0.40, "0.50": 0.88, "1.00": 1.00},
+  "rule_applied": "smallest kappa clearing the engagement threshold, since pick quality falls monotonically as kappa rises"
+ }
+}

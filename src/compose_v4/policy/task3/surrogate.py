@@ -6,6 +6,18 @@ when it was acquired; nothing here can obtain a new one. The oracle's
 `navigation_lockout` enforces that at the point of evaluation, so this class does
 not have to be trusted -- it has to be correct.
 
+⚠️ A WEIGHTED AVERAGE CANNOT EXCEED ITS INPUTS, WHICH BREAKS FRONTIER
+ACQUISITIONS. `predict` returns a convex combination of neighbour labels, so it
+can never predict above the largest label among them. Paired with an acquisition
+whose value is zero unless the prediction beats the incumbent front -- marginal
+hypervolume, probability of improvement -- the surrogate is mathematically unable
+to say yes, and the mechanism silently degrades into its tie-break while still
+returning plausible numbers. Measured here: 100% of predicted vectors interior to
+the archive box, 0.9% of candidates with any predicted gain, predicted max JNK3
+0.539 against an archive max of 0.720. Use `predict_with_spread` and an
+optimistic estimate for any frontier-based acquisition. Full write-up in
+diagnostics/task3_surrogate_acquisition_kind_mismatch.json.
+
 ⚠️ THE REPRESENTATION IS AN OPTIMISTIC CONTROL, NOT THE ONE WE PLAN TO DEPLOY.
 Morgan bits are free, and they are also exactly what the JNK3 and GSK3B oracles
 are random forests over -- so this surrogate is fitting the same function class

@@ -201,7 +201,17 @@ class ReachableHVI:
     #: neighbour spread) lets a candidate whose neighbours disagree be worth
     #: buying, which is the whole point of spending a real evaluation on it.
     #: Zero recovers the mean-only behaviour for ablation.
-    optimism: float = 1.0
+    #:
+    #: PROVENANCE OF 0.5, so it does not later read as a hyperparameter chosen
+    #: after seeing performance: it was selected by an OFFLINE sweep on
+    #: ENGAGEMENT -- the fraction of decisions on which the acquisition can
+    #: discriminate at all -- measured from cached fibers and archives, which is
+    #: independent of any hypervolume outcome. The sweep ran BEFORE any charged
+    #: comparison at 0.5 existed. Engagement was 16% / 24% / 40% / 88% / 100% at
+    #: kappa 0 / 0.1 / 0.25 / 0.5 / 1.0 while pick quality fell monotonically,
+    #: so the rule applied was "smallest kappa that engages", not "kappa that
+    #: won". See diagnostics/task3_surrogate_acquisition_kind_mismatch.json.
+    optimism: float = 0.5
     #: Predictions are noisy, so ranking on a razor-thin HVI difference is
     #: ranking on surrogate error. Ties inside this band fall back to the sum,
     #: which is a defensible secondary preference rather than an arbitrary one.
