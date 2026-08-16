@@ -387,16 +387,19 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
 # left dormant, so nobody runs it believing it is still on the plan.
 
 @app.local_entrypoint()
-def main(budget: int = 300, candidates: int = 4, only: str = "") -> None:
-    """`--only fixed-scalarization:100` reruns one arm and nothing else.
+def main(budget: int = 300, candidates: int = 4, only: str = "",
+         seeds: str = "") -> None:
+    """`--seeds 103,104` runs new pairs; `--only arm:seed` reruns one arm.
 
     Completed arms are not rerun without cause: their records show 300 charged
     and expansions == steps, so none was truncated and the exhausted-state rule
     could not have changed them.
     """
 
+    chosen_seeds = ([int(s) for s in seeds.split(",")] if seeds
+                    else [100, 101, 102])
     specs = [(arm, seed, budget, candidates)
-             for seed in (100, 101, 102)
+             for seed in chosen_seeds
              for arm in ("fixed-scalarization", "adaptive-region")]
     if only:
         want_arm, want_seed = only.split(":")
