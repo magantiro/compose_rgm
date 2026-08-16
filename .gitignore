@@ -67,3 +67,5 @@ runs/task3_dev/
 runs/task3_smoke/
 runs/task3_mechanism/
 runs/task3_mechanism2/
+runs/task3_reachable/
+runs/task3_reachable_k05/
