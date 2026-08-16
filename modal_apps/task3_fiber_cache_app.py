@@ -54,7 +54,11 @@ EQUALITY_SAMPLE = 3
 @app.function(
     image=image,
     cpu=2.0,
-    memory=4 * 1024,
+    # 5 GiB, not 4: the seed-100 run peaked at 3.9 GiB against a 4 GiB request,
+    # which is 97% and leaves nothing for a molecule whose fiber runs larger.
+    # Billing takes the greater of requested and actual, so the extra GiB costs
+    # ~$0.008/container-hour and buys the run not dying.
+    memory=5 * 1024,
     timeout=60 * 60,
     max_containers=4,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
