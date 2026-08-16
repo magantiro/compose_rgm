@@ -204,7 +204,7 @@ def _valid_records(out_p) -> dict[tuple[int, str, int], dict[str, Any]]:
 # reservation bills 8 cores even when only one slot has work.
 # ONE CPU PER SLOT. Each slot is an independent serial SMC run; there is
 # no particle parallelism, so a second core would sit idle and billed.
-@app.function(image=image, cpu=(1.0, 1.0), memory=16384,
+@app.function(image=image, cpu=(1.0, 1.0), memory=MEM_MIB,
               timeout=6 * 60 * 60,
               max_containers=64, retries=2,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
@@ -452,11 +452,15 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                   f"{'HIT' if rec['success'] else '---'} "
                   f"absorbed {rec['n_absorbed']:>2}/32 resample {nres:>2} "
                   f"{rec['seconds']:7.1f}s [{done}/{len(slots)}]", flush=True)
-    return {"index": idx, "source": source, "status": "OK",
-            "slots_run": done, "seconds": round(time.perf_counter() - t0, 1)}
+    import resource
+    peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / (1024 ** 2)
+    print(f"src{idx}: PEAK RSS {peak:.2f} GiB (requested {MEM_GIB} GiB)", flush=True)
+    return {"index": idx, "source": source, "status": "OK", "slots_run": done,
+            "peak_rss_gib": round(peak, 2),
+            "seconds": round(time.perf_counter() - t0, 1)}
 
 
-@app.function(image=image, cpu=(2.0, 2.0), memory=8192, timeout=12 * 60 * 60,
+@app.function(image=image, cpu=(0.25, 0.25), memory=768, timeout=12 * 60 * 60,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
 def drive(tasks: list[dict[str, Any]], out_dir: str = OUT_DIR) -> dict[str, Any]:
     artifact_volume.reload()
