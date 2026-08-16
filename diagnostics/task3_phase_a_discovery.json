@@ -1,0 +1,154 @@
+{
+ "STATUS": "DEVELOPMENT-ONLY -- official protocol, development seeds; official sets remain sealed",
+ "objective": "DISCOVERY, not hypervolume",
+ "results": [
+  {
+   "arm": "fixed-scalarization",
+   "seed": 100,
+   "charged": 300,
+   "expansions": 3,
+   "cache_hits": 42,
+   "distinct_starts_expanded": 3,
+   "seconds": 191.554744397,
+   "evals_to_first_active_03": null,
+   "actives_03": 0,
+   "active_scaffolds_03": 0,
+   "evals_to_first_active_05": null,
+   "actives_05": 0,
+   "active_scaffolds_05": 0,
+   "early_hv": 0.10355377197265625,
+   "best_jnk3": 0.12
+  },
+  {
+   "arm": "novelty-exploration",
+   "seed": 100,
+   "charged": 300,
+   "expansions": 38,
+   "cache_hits": 7,
+   "distinct_starts_expanded": 38,
+   "seconds": 864.006355292,
+   "evals_to_first_active_03": null,
+   "actives_03": 0,
+   "active_scaffolds_03": 0,
+   "evals_to_first_active_05": null,
+   "actives_05": 0,
+   "active_scaffolds_05": 0,
+   "early_hv": 0.0800628662109375,
+   "best_jnk3": 0.13
+  },
+  {
+   "arm": "fixed-scalarization",
+   "seed": 101,
+   "charged": 300,
+   "expansions": 5,
+   "cache_hits": 40,
+   "distinct_starts_expanded": 5,
+   "seconds": 164.105854822,
+   "evals_to_first_active_03": null,
+   "actives_03": 0,
+   "active_scaffolds_03": 0,
+   "evals_to_first_active_05": null,
+   "actives_05": 0,
+   "active_scaffolds_05": 0,
+   "early_hv": 0.14422607421875,
+   "best_jnk3": 0.18
+  },
+  {
+   "arm": "novelty-exploration",
+   "seed": 101,
+   "charged": 300,
+   "expansions": 8,
+   "cache_hits": 0,
+   "distinct_starts_expanded": 8,
+   "seconds": 268.83922909300003,
+   "evals_to_first_active_03": null,
+   "actives_03": 0,
+   "active_scaffolds_03": 0,
+   "evals_to_first_active_05": null,
+   "actives_05": 0,
+   "active_scaffolds_05": 0,
+   "early_hv": 0.0938568115234375,
+   "best_jnk3": 0.18
+  },
+  {
+   "arm": "fixed-scalarization",
+   "seed": 102,
+   "charged": 300,
+   "expansions": 8,
+   "cache_hits": 37,
+   "distinct_starts_expanded": 8,
+   "seconds": 252.473197065,
+   "evals_to_first_active_03": null,
+   "actives_03": 0,
+   "active_scaffolds_03": 0,
+   "evals_to_first_active_05": null,
+   "actives_05": 0,
+   "active_scaffolds_05": 0,
+   "early_hv": 0.16210174560546875,
+   "best_jnk3": 0.27
+  },
+  {
+   "arm": "novelty-exploration",
+   "seed": 102,
+   "charged": 300,
+   "expansions": 42,
+   "cache_hits": 3,
+   "distinct_starts_expanded": 42,
+   "seconds": 585.7310095270001,
+   "evals_to_first_active_03": null,
+   "actives_03": 0,
+   "active_scaffolds_03": 0,
+   "evals_to_first_active_05": null,
+   "actives_05": 0,
+   "active_scaffolds_05": 0,
+   "early_hv": 0.1605224609375,
+   "best_jnk3": 0.27
+  }
+ ],
+ "VERDICT": {
+  "headline": "UNDERPOWERED BY CONSTRUCTION. Both arms found ZERO actives on all three seeds, which is exactly the expected outcome, so the test cannot discriminate between exploration and the control.",
+  "base_rate_correction": {
+   "premise_used_to_design_the_test": "actives are ~2% of draws",
+   "measured_in_pure_random_ZINC": {
+    "jnk3>=0.2": 0.001638,
+    "jnk3>=0.3": 0.0004,
+    "jnk3>=0.4": 0.000187,
+    "jnk3>=0.5": 5e-05
+   },
+   "measured_over": "80,000 random ZINC molecules from banked random-zinc runs",
+   "correction": "the true rate at jnk3>=0.3 is 0.040%, roughly 50x lower than the premise. The ~2% figure describes the ENRICHED pools from earlier GA and adaptive runs, not a random-120 start.",
+   "expected_actives_in_180_search_calls": {
+    "jnk3>=0.3": 0.072,
+    "jnk3>=0.5": 0.009
+   }
+  },
+  "the_decisive_check": {
+   "question": "did 180 search calls improve on the initial 120 at all?",
+   "best_jnk3": {
+    "seed_100": {
+     "init": 0.1,
+     "fixed": 0.12,
+     "novelty": 0.13
+    },
+    "seed_101": {
+     "init": 0.18,
+     "fixed": 0.18,
+     "novelty": 0.18
+    },
+    "seed_102": {
+     "init": 0.27,
+     "fixed": 0.27,
+     "novelty": 0.27
+    }
+   },
+   "reading": "on two of three seeds NEITHER arm improved on its own starting population by any amount. The budget, not the policy, is the binding constraint."
+  },
+  "budget_required_for_power": {
+   "to_expect_one_active_at_jnk3_0.3": 2500,
+   "to_expect_three": 7500,
+   "note": "7,500 draws is most of the 10,000-call benchmark budget, so 'find an active from random-120' is not a tiny-charged-test question when the metric is a binary activity threshold."
+  },
+  "what_is_NOT_concluded": "nothing about whether exploration beats fixed scalarization at discovery. The test had no power to tell, and the offline smoke showed the policies do behave completely differently (100% divergence, 98% vs 22% start-repeat).",
+  "incidental_durability_result": "one container was preempted mid-run and Modal retried it. The replacement RESUMED from the ledger and completed correctly: 300 records, 300 distinct, contiguous sequence 0-299. Per-container counters like `expansions` undercount across a retry (8 reported against 19+ observed before preemption), which is a reporting artifact and not an accounting one -- the charged count and the ledger are correct."
+ }
+}
