@@ -1,0 +1,43 @@
+{
+  "schema": "compose.hphi.smc_probe.banked",
+  "status": "CLOSED \u2014 SMC EARNED SCALING",
+  "statement": "Twisted SMC showed a strong developmental efficacy signal and earned scaling. On the deterministic 16-source probe at MATCHED four-slot budget it increased source coverage from 4/16 under rejection-h_phi to 11/16, solving seven sources rejection did not and losing none.",
+  "not_a_claim": "This is a DEVELOPMENT GATE, not the official efficacy experiment. Do not call it a statistically definitive benchmark win. The 16-source subset is easier than panel average (that is why only matched baselines on these same sources are used). 60.9% of slots still went extinct \u2014 success is heterogeneous across sources.",
+  "n_records": 64,
+  "all_checksums_valid": true,
+  "mechanical_qualification": {
+    "checks": 9,
+    "result": "PASSED",
+    "note": "absorption check was fixed to be epoch-aware: resampling permutes particle indices, so index identity holds only within an epoch. The reference run had zero resamples so the flaw was invisible there."
+  },
+  "matched_4slot": {
+    "smc": {
+      "coverage": "11/16",
+      "slot_hit_rate": 0.390625
+    },
+    "baselines": {
+      "unguided": "4/16",
+      "policy_b": "2/16",
+      "hphi": "4/16"
+    },
+    "exact_paired_p": {
+      "vs_hphi": 0.0156,
+      "vs_unguided": 0.0156,
+      "vs_policy_b": 0.0039
+    },
+    "discordance_vs_hphi": {
+      "smc_only": 7,
+      "baseline_only": 0
+    }
+  },
+  "mechanism": {
+    "mean_absorbed_of_32": 9.4375,
+    "mean_resamples": 1.515625,
+    "min_ess_seen": 1.4542451646041297,
+    "extinction_rate": 0.609375,
+    "mean_first_absorption_step": 5.56,
+    "contrast_with_reference": "reference: 0/32 absorbed, 0 resamples, min ESS 20.8. The SMC machinery simply never engaged on that single source."
+  },
+  "records_sha256": "040545264f67f040aefedc969d061ff55b95f7fd4852270951b3bca9c4804ff0",
+  "next": "Build particle-level process parallelism. Do NOT change N=32, weights, ESS threshold, resampler, output rule, extinction rule, R_theta or h_phi. Qualify by EXACT same-seed parity, then run all 64 development sources at four slots before considering 128x20."
+}

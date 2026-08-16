@@ -105,19 +105,31 @@ def audit_record(rec: dict) -> list[dict]:
                    "sum of log G equals log h(x_H) - log h(x_0) on every lineage"))
 
     # 3 -- ABSORPTION / STOP ------------------------------------------------
-    absorbed_at = {}
+    # Particle INDEX identity is stable only WITHIN a resampling epoch:
+    # resampling permutes indices, so particle i afterwards is a copy of some
+    # other particle. Checking across a resample would flag correct behaviour
+    # as a violation -- which it did until this was fixed. Same epoch-splitting
+    # the telescoping check uses.
     bad = []
+    n_absorbed_seen = 0
+    epoch_bounds = sorted(s["step"] for s in sync if s["resampled"])
+    def epoch_of(step):
+        return sum(1 for b in epoch_bounds if step > b)
+    seen: dict[tuple[int, int], int] = {}      # (epoch, particle) -> step
     for t in sorted(tr, key=lambda z: (z["particle"], z["step"])):
-        p = t["particle"]
-        if p in absorbed_at and t["step"] > absorbed_at[p]:
-            bad.append({"particle": p, "absorbed_step": absorbed_at[p],
-                        "moved_again_at": t["step"]})
-        if t["absorbed_after"] and p not in absorbed_at:
-            absorbed_at[p] = t["step"]
-    out.append(_fail("absorption", f"{len(bad)} particles moved after STOP", bad)
+        key = (epoch_of(t["step"]), t["particle"])
+        if key in seen and t["step"] > seen[key]:
+            bad.append({"particle": t["particle"], "epoch": key[0],
+                        "absorbed_step": seen[key], "moved_again_at": t["step"]})
+        if t["absorbed_after"] and key not in seen:
+            seen[key] = t["step"]
+            n_absorbed_seen += 1
+    out.append(_fail("absorption",
+                     f"{len(bad)} particles moved after STOP within an epoch", bad)
                if bad else
                _ok("absorption",
-                   f"{len(absorbed_at)} absorbed particles never moved again"))
+                   f"{n_absorbed_seen} absorptions; none moved again within its "
+                   f"epoch ({len(epoch_bounds)} resamples)"))
 
     # 4 -- BOUNDARY ---------------------------------------------------------
     bad = [t for t in tr if t["absorbed_after"] and t["h_y_bm1"] != 1.0
