@@ -1,0 +1,29 @@
+{
+ "novelty-exploration": {
+  "decisions": 40,
+  "distinct_starts": 31,
+  "repeat_rate": 0.22499999999999998,
+  "selected": 160,
+  "distinct_scaffolds": 135,
+  "scaffolds_per_selection": 0.84375,
+  "mean_pairwise_distance": 0.9010716776766423
+ },
+ "fixed-scalarization": {
+  "decisions": 40,
+  "distinct_starts": 1,
+  "repeat_rate": 0.975,
+  "selected": 160,
+  "distinct_scaffolds": 34,
+  "scaffolds_per_selection": 0.2125,
+  "mean_pairwise_distance": 0.411510233029187
+ },
+ "divergence_from_control": 1.0,
+ "checks": {
+  "1 different regions": true,
+  "2 no repeated expansion": true,
+  "3 diverse candidates": true,
+  "4 differs from control": true
+ },
+ "all_passed": true,
+ "universe_caveat": "cached seeded-fixture fibers, not fibers from a random-120 start; behaviour only, never discovery rates"
+}

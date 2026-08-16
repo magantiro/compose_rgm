@@ -250,3 +250,84 @@ class ReachableHVI:
         gains = self._archive.gains_of(estimate)
         # Break near-ties on the scalar sum instead of on prediction noise.
         return gains + self.tie_band * 1e-3 * predicted.sum(axis=1)
+
+
+@dataclass
+class NoveltyExploration:
+    """PHASE A. Find the rare active basin, not the best hypervolume.
+
+    A deliberate change of objective. Early Phase A is judged on DISCOVERY --
+    evaluations to first active, actives found, distinct active regions -- and
+    not on hypervolume, because the whole later pipeline is gated on having
+    actives at all. A policy that finds actives faster with worse early HV is
+    the right thing at this stage.
+
+    WHY PURE STRUCTURAL NOVELTY, AND NO SURROGATE. From an official random-120
+    start, JNK3 actives are roughly 2% of draws and a surrogate fit on 120
+    inactive molecules has nothing to say about where actives are -- measured
+    earlier at rho 0.28 on JNK3 with zero to four actives in the training
+    window. An acquisition that leans on such a surrogate is leaning on noise.
+    Structural coverage needs no labels to be well defined, which is exactly the
+    property the blind regime demands.
+
+    Candidates are scored by distance to the NEAREST already-evaluated molecule,
+    so the policy buys the successor least like anything it has seen. That is
+    coverage, not curiosity about predicted value, and it is one mechanism
+    rather than a blend.
+    """
+
+    name: str = "novelty-exploration"
+    _seen: np.ndarray | None = field(default=None, init=False, repr=False)
+    _norms: np.ndarray | None = field(default=None, init=False, repr=False)
+
+    def target(self, archive: ParetoArchive,
+               rng: np.random.Generator) -> Region | None:
+        # Fingerprints of everything evaluated so far; the "region" being aimed
+        # at is simply whatever is far from all of it.
+        from compose_v4.benchmark.oracles.forest import morgan_bits
+
+        rows = [morgan_bits(s) for s in archive.values]
+        rows = [r for r in rows if r is not None]
+        if rows:
+            self._seen = np.vstack(rows)
+            self._norms = self._seen.sum(axis=1)
+        return Region(target=(1.0,) * 5, gain=0.0, origin=None,
+                      note="structural coverage")
+
+    def start(self, archive: ParetoArchive, target: Region,
+              rng: np.random.Generator) -> str | None:
+        """Uniform over the whole archive, front or not.
+
+        Exploration has no reason to prefer good molecules as launch points, and
+        preferring them would quietly reintroduce exploitation through the back
+        door.
+        """
+
+        if not archive.values:
+            return None
+        keys = list(archive.values)
+        return keys[int(rng.integers(len(keys)))]
+
+    def rank(self, predicted: np.ndarray, target: Region,
+             spread: np.ndarray | None = None,
+             candidates: list[str] | None = None) -> np.ndarray:
+        if candidates is None or self._seen is None:
+            return np.zeros(len(predicted))
+        from compose_v4.benchmark.oracles.forest import morgan_bits
+
+        rows, keep = [], []
+        for position, smiles in enumerate(candidates):
+            row = morgan_bits(smiles)
+            if row is not None:
+                rows.append(row)
+                keep.append(position)
+        scores = np.zeros(len(candidates))
+        if not rows:
+            return scores
+        query = np.vstack(rows)
+        intersection = query @ self._seen.T
+        union = query.sum(axis=1)[:, None] + self._norms[None, :] - intersection
+        similarity = intersection / np.maximum(union, 1e-9)
+        # Distance to the NEAREST thing already evaluated.
+        scores[keep] = 1.0 - similarity.max(axis=1)
+        return scores
