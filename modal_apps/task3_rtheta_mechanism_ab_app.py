@@ -99,6 +99,50 @@ PAD_SLOTS = 8
 START_ATTEMPTS = 5
 
 
+def fiber_composition(predicted, target, archive) -> dict[str, Any]:
+    """What is IN the shared fiber, before anything is selected.
+
+    This is what makes a null result diagnosable rather than ambiguous. If the
+    region the adaptive arm is aiming at is simply not present among the ~613
+    successors, that is a fact about expansion, and the controller must not be
+    blamed for failing to select it.
+
+    ⚠️ THESE ARE PREDICTED VALUES, so they answer "what could the controller
+    SEE in this fiber", which is fiber composition CONVOLVED with surrogate
+    error. The unconfounded question -- what is actually in the fiber -- needs
+    true objectives on fiber members, which costs budget and is measured
+    separately by `audit_fiber_composition`. Do not read this as ground truth
+    about what R_theta exposes.
+    """
+
+    import numpy as np
+
+    if not len(predicted):
+        return {"fiber": 0}
+    jnk3 = predicted[:, 1]
+    gsk3b_coordinate = predicted[:, 3]
+    aspiration = target.as_array()
+    # "Represented" = at least one successor is predicted to meet the aspiration
+    # on every axis. If this is 0 for the adaptive arm, the target was not on
+    # offer and the selection had nothing to find.
+    meets = np.all(predicted >= aspiration[None, :] - 1e-9, axis=1)
+    return {
+        "fiber": int(len(predicted)),
+        "predicted_high_jnk3": int((jnk3 >= 0.4).sum()),
+        "predicted_low_gsk3b": int((gsk3b_coordinate >= 0.9).sum()),
+        "predicted_jointly_selective": int(
+            ((jnk3 >= 0.4) & (gsk3b_coordinate >= 0.9)).sum()),
+        "predicted_beats_archive_gain": int(
+            sum(1 for row in predicted[:64] if archive.gain_of(row) > 0)),
+        "target_represented": int(meets.sum()),
+        "quantiles": {
+            name: [round(float(q), 4) for q in
+                   np.quantile(predicted[:, axis], [0.5, 0.9, 0.99, 1.0])]
+            for axis, name in enumerate(("qed", "jnk3", "sa", "gsk3b", "drd2"))
+        },
+    }
+
+
 def _build_r_theta():
     import torch
 
@@ -171,6 +215,7 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
     root = Path(OUTPUT_ROOT) / f"{arm_name}_seed{seed}"
     run = Task3Run.open(root, seed=seed, budget=budget, policy=arm_name)
     expansions = 0
+    composition: list[dict[str, Any]] = []
     fiber_sizes: list[int] = []
     proposals_seen = 0
     try:
@@ -209,6 +254,8 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
                 if not proposed:
                     continue
                 predicted = surrogate.predict(proposed)
+                # Logged BEFORE selection, so a null result can be attributed.
+                composition.append(fiber_composition(predicted, target, archive))
                 order = np.argsort(-steering.rank(predicted, target))
             chosen = run.affordable([proposed[int(i)] for i in order[:candidates]])
             if not chosen:
@@ -246,6 +293,16 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
             "expansions": expansions,
             "median_fiber": float(np.median(fiber_sizes)) if fiber_sizes else 0.0,
             "proposals_scored_internally": proposals_seen,
+            "fiber_composition_mean": {
+                key: float(np.mean([c[key] for c in composition if key in c]))
+                for key in ("fiber", "predicted_high_jnk3", "predicted_low_gsk3b",
+                            "predicted_jointly_selective", "target_represented")
+            } if composition else {},
+            "iterations_where_target_was_represented": int(
+                sum(1 for c in composition if c.get("target_represented", 0) > 0)),
+            "fiber_composition_note": (
+                "PREDICTED values: fiber composition convolved with surrogate "
+                "error, not ground truth about what R_theta exposes"),
             "hv_seeded_only": hypervolume_qmc(seeded_values, log2_samples=17),
             "hv_after": hypervolume_qmc(combined, log2_samples=17),
             "front_size": len(archive.front()),
@@ -256,6 +313,115 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
             "runtime_build_seconds": build_seconds,
         }
         print(json.dumps(report), flush=True)
+        artifact_volume.commit()
+        return report
+    finally:
+        run.close()
+
+
+@app.function(
+    image=image,
+    cpu=2.0,
+    memory=8 * 1024,
+    timeout=75 * 60,
+    max_containers=3,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def audit_fiber_composition(spec: tuple[int, int, int]) -> dict[str, Any]:
+    """What does R_theta ACTUALLY expose? Charged, because the answer costs labels.
+
+    The composition logged during the A/B is predicted, so it cannot separate
+    "the fiber lacks the region" from "the surrogate cannot see the region".
+    This spends its budget measuring the fiber instead of optimising over it: it
+    expands a start, charges a RANDOM sample of that fiber, and reports the true
+    composition. Random, not ranked -- a ranked sample would measure the
+    controller again, which is the thing being controlled for.
+
+    It answers the first branch of the decomposition on its own:
+
+        R_theta exposes useful chemistry?  -> if NO, the problem is expansion,
+                                              not archive selection.
+    """
+
+    seed, expansions_wanted, per_fiber = spec
+    import numpy as np
+
+    from compose_v4.benchmark.oracles.task3 import navigation_lockout
+    from compose_v4.benchmark.task3_run import Task3Run
+    from compose_v4.chem.molecular_graph import (
+        molecular_graph_to_smiles,
+        smiles_to_molecular_graph,
+    )
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.experiments.production_successor_kernel import (
+        canonical_successor_result,
+    )
+
+    fixture = json.loads((REMOTE_ROOT / "archives.json").read_text())
+    entry = fixture["archives"][str(seed)]
+    seeded = {s: tuple(v) for s, v in entry["molecules"].items()}
+    model = _build_r_theta()
+
+    rng = np.random.default_rng(seed)
+    # Start from the archive's own high-JNK3 molecules: the question is what
+    # R_theta exposes AROUND useful chemistry, not around arbitrary molecules.
+    ranked = sorted(seeded.items(), key=lambda kv: -kv[1][1])
+    starts = [s for s, _ in ranked[:expansions_wanted]]
+
+    root = Path(OUTPUT_ROOT) / f"fiber_audit_seed{seed}"
+    run = Task3Run.open(root, seed=seed, budget=expansions_wanted * per_fiber,
+                        policy="fiber-audit")
+    rows = []
+    try:
+        for start in starts:
+            with navigation_lockout():
+                try:
+                    graph = smiles_to_molecular_graph(start)
+                    padded = pad_molecular_graph(graph, graph.n_atoms + PAD_SLOTS)
+                    fiber = canonical_successor_result(model, padded, 0.0).batch.successors
+                except Exception as error:  # noqa: BLE001
+                    print({"expansion_failed": start[:60],
+                           "error": f"{type(error).__name__}: {error}"}, flush=True)
+                    continue
+                smiles = [molecular_graph_to_smiles(s.state) for s in fiber]
+                smiles = [s for s in dict.fromkeys(smiles) if s]
+            if not smiles:
+                continue
+            index = rng.choice(len(smiles), size=min(per_fiber, len(smiles)),
+                               replace=False)
+            sample = run.affordable([smiles[int(i)] for i in index])
+            if not sample:
+                break
+            values = np.asarray(run.evaluate(sample))
+            jnk3 = values[:, 1]
+            gsk3b_activity = 1.0 - values[:, 3]
+            rows.append({
+                "start": start,
+                "start_jnk3": float(seeded[start][1]),
+                "fiber": len(smiles),
+                "sampled": len(sample),
+                "true_high_jnk3": int((jnk3 >= 0.4).sum()),
+                "true_selective": int(((jnk3 >= 0.4) & (gsk3b_activity <= 0.1)).sum()),
+                "max_jnk3": float(jnk3.max()),
+                "median_jnk3": float(np.median(jnk3)),
+            })
+            print(rows[-1], flush=True)
+            artifact_volume.commit()
+
+        sampled = sum(r["sampled"] for r in rows)
+        report = {
+            "phase": "fiber_composition_audit", "seed": seed,
+            "expansions": len(rows), "molecules_sampled": sampled,
+            "fraction_high_jnk3": (sum(r["true_high_jnk3"] for r in rows) / sampled
+                                   if sampled else 0.0),
+            "fraction_selective": (sum(r["true_selective"] for r in rows) / sampled
+                                   if sampled else 0.0),
+            "rows": rows,
+            "note": ("TRUE objectives on a RANDOM sample of each fiber. Charged, "
+                     "development-only, and spent on measuring what expansion "
+                     "offers rather than on optimising."),
+        }
+        print(json.dumps({k: v for k, v in report.items() if k != "rows"}), flush=True)
         artifact_volume.commit()
         return report
     finally:
