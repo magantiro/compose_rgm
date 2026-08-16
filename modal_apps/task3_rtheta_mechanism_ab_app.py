@@ -73,6 +73,10 @@ MATERIALIZED = "/artifacts/editing_v2/r_theta_run/materialized_scorer"
 CHECKPOINT = "/artifacts/editing_v2/r_theta_run/runs/run_v2_01/R_THETA_CHECKPOINT.pt"
 OUTPUT_ROOT = "/artifacts/editing_v2/task3_mechanism_rtheta"
 
+#: Consecutive unproductive iterations before an arm gives up. The local policy
+#: loop has had this since a test caught the same infinite loop there; the Modal
+#: app did not, and it cost one arm of the first R_theta A/B.
+STALL_LIMIT = 8
 #: Padding slots above the source's atom count, matching the timing probe.
 PAD_SLOTS = 8
 #: KNOWN INEFFICIENCY, recorded rather than fixed mid-flight. R_theta is
@@ -215,11 +219,21 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
     root = Path(OUTPUT_ROOT) / f"{arm_name}_seed{seed}"
     run = Task3Run.open(root, seed=seed, budget=budget, policy=arm_name)
     expansions = 0
+    stalled = 0
     composition: list[dict[str, Any]] = []
     fiber_sizes: list[int] = []
     proposals_seen = 0
     try:
         while run.remaining > 0:
+            if stalled >= STALL_LIMIT:
+                # An arm whose start never moves re-expands one state forever:
+                # every successor is already charged, nothing new is proposed,
+                # `remaining` never falls, and the container burns 12.5 s an
+                # iteration until the timeout. Found the hard way -- one arm of
+                # the first R_theta A/B died exactly here at step 60 of 75.
+                print({"stalled_out": True, "arm": arm_name, "seed": seed,
+                       "step": run.step, "charged": run.spent}, flush=True)
+                break
             target = steering.target(archive, run.rng)
             if target is None:
                 break
@@ -252,6 +266,7 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
                             if s not in archive.values]
                 proposals_seen += len(proposed)
                 if not proposed:
+                    stalled += 1
                     continue
                 predicted = surrogate.predict(proposed)
                 # Logged BEFORE selection, so a null result can be attributed.
@@ -261,6 +276,7 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
             if not chosen:
                 break
             values = run.evaluate(chosen)
+            stalled = 0
             for smiles, value in zip(chosen, values):
                 archive.add(smiles, value)
             surrogate.update(chosen, list(values))
@@ -298,6 +314,7 @@ def run_arm(spec: tuple[str, int, int, int]) -> dict[str, Any]:
                 for key in ("fiber", "predicted_high_jnk3", "predicted_low_gsk3b",
                             "predicted_jointly_selective", "target_represented")
             } if composition else {},
+            "stalled_out": stalled >= STALL_LIMIT,
             "iterations_where_target_was_represented": int(
                 sum(1 for c in composition if c.get("target_represented", 0) > 0)),
             "fiber_composition_note": (
