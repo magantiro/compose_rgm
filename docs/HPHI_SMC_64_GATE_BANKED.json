@@ -1,0 +1,67 @@
+{
+  "schema": "compose.hphi.smc_64_broad_gate.banked",
+  "status": "PASSED \u2014 SMC strictly dominates at matched budget on the full cohort",
+  "design": "64 development sources x 1 SMC attempt, matched to replicate 0 of each baseline arm",
+  "coverage": {
+    "unguided": "1/64",
+    "policy_b": "0/64",
+    "hphi_rejection": "4/64",
+    "smc": "19/64"
+  },
+  "exact_paired_p": {
+    "vs_unguided": 1e-05,
+    "vs_policy_b": 0.0,
+    "vs_hphi": 6e-05
+  },
+  "discordance": {
+    "vs_unguided": [
+      18,
+      0
+    ],
+    "vs_policy_b": [
+      19,
+      0
+    ],
+    "vs_hphi": [
+      15,
+      0
+    ]
+  },
+  "union_of_all_arms": "19/64 \u2014 SMC solves EVERY source any arm solves, plus 15 more",
+  "solved_sources": [
+    3,
+    7,
+    9,
+    10,
+    11,
+    14,
+    15,
+    17,
+    19,
+    26,
+    27,
+    28,
+    29,
+    50,
+    51,
+    52,
+    53,
+    54,
+    60
+  ],
+  "extinction_rate": 0.703125,
+  "mean_absorbed_of_32": 6.796875,
+  "mechanical_qualification": {
+    "checks": 10,
+    "result": "PASSED",
+    "records": 64
+  },
+  "records_sha256": "60a9f955afbb30ae03673d1f8b555769a25d2cdca43cf4d4a15e714a3cdec501",
+  "caveats": [
+    "Development cohort, not the official 800.",
+    "One attempt per source \u2014 this is a coverage FLOOR, not the 20-candidate figure.",
+    "70.3% extinction is the complement of the 29.7% hit rate, not a separate pathology.",
+    "Not comparable to GrIDDD's 45.1% (20 candidates, 800 official sources)."
+  ],
+  "next": "Coverage ladder: add candidate 2 only for the 45 unsolved sources. The whole projection uncertainty (69%-99% at 20 attempts) lives there."
+}
