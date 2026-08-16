@@ -336,10 +336,25 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         with torch.no_grad():
             return float(torch.sigmoid(head(x)).item())
 
+    # LAW CACHE. enumerate_factorized_marked_law is deterministic in
+    # (state, time), and TIME_POINT is constant, so the law for a canonical
+    # state never changes. Measured 54.5% hit rate on banked runs -- and at
+    # step 0 it is 32 calls for 1 distinct state, since every particle starts
+    # at the source. Law enumeration is ~97% of a transition now that the
+    # encode is cheap, so this is the dominant remaining term.
+    # Bounded because a law holds ~613 marks; oldest entries are dropped.
+    law_cache: dict[str, Any] = {}
+    LAW_CACHE_MAX = 256
+
     def propose(smi: str, rng) -> str:
         """Sample ONE successor from the frozen R_theta law. NO h_phi here."""
         st = pad_molecular_graph(smiles_to_molecular_graph(smi), CANONICAL_SLOTS)
-        law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
+        law = law_cache.get(smi)
+        if law is None:
+            law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
+            if len(law_cache) >= LAW_CACHE_MAX:
+                law_cache.pop(next(iter(law_cache)))
+            law_cache[smi] = law
         if not law.marks:
             return ""
         p = np.array([m.probability for m in law.marks], float)
