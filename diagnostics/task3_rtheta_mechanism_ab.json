@@ -1,14 +1,5 @@
 {
- "STATUS": "DEVELOPMENT-ONLY -- NOT TASK 3 PERFORMANCE (seeded initialization)",
- "objective": "official Task 3 hypervolume; selectivity is a diagnostic probe only",
- "completed_arms": 5,
- "expected_arms": 6,
- "incomplete": {
-  "arm": "fixed-scalarization",
-  "seed": 100,
-  "reason": "stalled at step 60/75 (240/300 charged): start never moved, all successors already charged, no stall guard in the Modal app. Guard added afterwards.",
-  "charged_before_stall": 240
- },
+ "STATUS": "DEVELOPMENT-ONLY -- NOT TASK 3 PERFORMANCE",
  "results": [
   {
    "arm": "adaptive-region",
@@ -94,37 +85,68 @@
    "n_selective": 0,
    "seconds": 1023.716722583,
    "runtime_build_seconds": 108.337332455
+  },
+  {
+   "arm": "fixed-scalarization",
+   "seed": 100,
+   "archive_sha256": "51425f73b1e433a14f76de9b8aba551cbb92fe08b152dc8d6d5f0d698b17dd9c",
+   "charged": 300,
+   "expansions": 11,
+   "median_fiber": 334.0,
+   "proposals_scored_internally": 3160,
+   "fiber_composition_mean": {
+    "fiber": 316.0,
+    "predicted_high_jnk3": 251.3,
+    "predicted_low_gsk3b": 2.1,
+    "predicted_jointly_selective": 0.0,
+    "target_represented": 0.0
+   },
+   "exhausted_states": 1,
+   "iterations_where_target_was_represented": 0,
+   "fiber_composition_note": "PREDICTED values: fiber composition convolved with surrogate error, not ground truth about what R_theta exposes",
+   "hv_seeded_only": 0.5463638305664062,
+   "hv_after": 0.5558929443359375,
+   "front_size": 130,
+   "best_jnk3": 0.68,
+   "n_jnk3_over_0.4": 118,
+   "n_selective": 2,
+   "seconds": 250.956621615,
+   "runtime_build_seconds": 146.53475136100002
   }
  ],
- "what_the_selective_counts_do_and_do_not_show": {
-  "shows": "R_theta CAN expose selective chemistry: the fixed arm found 134 and 178 selective molecules out of 300 charged, drawn from R_theta fibers.",
-  "does_NOT_show": "that selective candidates were present in every fiber the ADAPTIVE arm actually saw. The arms visit different states once they diverge, so this does not rule out proposal availability as a local factor for the adaptive arm.",
-  "status_of_zero_selective_under_adaptive": "a DIAGNOSTIC CHARACTERIZATION, not a failure criterion. The official benchmark does not require preferring selectivity over higher-HV promiscuous points."
+ "completed_arms": 6,
+ "paired_official_hv": {
+  "note": "the ONLY criterion this A/B is judged by",
+  "per_seed": {
+   "100": {
+    "adaptive": 0.036,
+    "fixed": 0.0095,
+    "difference": 0.0265
+   },
+   "101": {
+    "adaptive": 0.1134,
+    "fixed": 0.0447,
+    "difference": 0.0687
+   },
+   "102": {
+    "adaptive": 0.0315,
+    "fixed": 0.0322,
+    "difference": -0.0007
+   }
+  },
+  "mean_paired_difference": 0.0315,
+  "adaptive_ahead": "2/3 seeds, 1 tie",
+  "after_removing_seed_101s_single_carrying_molecule": {
+   "seed_101_difference": 0.0,
+   "mean_paired_difference": 0.0086,
+   "why_this_matters": "60.6% of adaptive's seed-101 lift came from one molecule; strip it and that seed is an exact tie at +0.0447 each. The headline mean rests on it."
+  }
  },
- "why_diagnosis_from_existing_artifacts": {
-  "method": "no new evaluations. Recomputed each arm's HV lift with and without its single highest-JNK3 new molecule, counted new molecules on the final front, and counted how many of those individually carry >0.1% of total HV (leave-one-out).",
-  "share_of_lift_from_one_molecule": {
-   "adaptive-region_seed100": 0.172,
-   "adaptive-region_seed101": 0.606,
-   "adaptive-region_seed102": 0.009,
-   "fixed-scalarization_seed101": 0.025,
-   "fixed-scalarization_seed102": 0.045
-  },
-  "new_molecules_on_final_front": {
-   "adaptive-region_seed100": 78,
-   "adaptive-region_seed101": 85,
-   "adaptive-region_seed102": 101,
-   "fixed-scalarization_seed101": 74,
-   "fixed-scalarization_seed102": 53
-  },
-  "new_front_members_individually_worth_over_0.1pct_HV": {
-   "adaptive-region_seed100": 2,
-   "adaptive-region_seed101": 7,
-   "adaptive-region_seed102": 0,
-   "fixed-scalarization_seed101": 74,
-   "fixed-scalarization_seed102": 1
-  },
-  "reading": "CAUTION. Adaptive's large seed-101 win -- the one that carries the mean -- is 60.6% attributable to a SINGLE molecule. Its other two seeds lift +0.036 and +0.032, against the fixed arm's +0.045 and +0.032. And while adaptive puts comparably many new molecules on the front (78-101 vs 53-74), almost none of them are individually load-bearing (0-7 carry >0.1% of HV, against 74 for fixed on seed 101), which is the signature of a clustered, mutually-redundant front rather than gains spread across several nondominated regions.",
-  "verdict_on_the_richer_story": "This looks like ONE LUCKY HIGH-JNK3 POINT more than broad improvement across multiple nondominated regions. It counts for official HV, but it does NOT yet support the adaptive-Pareto-navigation story."
- }
+ "ROUTING": {
+  "branch_taken": "MIDDLE: one broad win (seed 100), one win that is mostly a single lucky point (seed 101), one dead tie (seed 102). That is 'one win plus ties/noise', not a coherent positive pattern across three seeds.",
+  "action": "run TWO additional paired seeds to reach five total, before adding branching, state reuse or multi-step navigation",
+  "not_yet_earned": "archive-aware region targeting is not yet an earned development mechanism; it is also not refuted"
+ },
+ "rerun_comparability_caveat": "fixed-scalarization seed 100 is the ONLY arm that ran with the exhausted-state rule active, and the rule fired once, on CNc1cc(Nc2ccc(Br)cc2)ncc1F -- the state it had been fixating on. Without the rule that arm does not terminate at all, so there is no alternative version of it to compare against. The audit showed the rule would have been a no-op for the other five arms (expansions == steps everywhere), which is what keeps the pair meaningful.",
+ "fiber_composition_first_observation": "Only the rerun arm carries the new logging, and for the FIXED arm the 'target_represented' figure is degenerate by construction -- its target is the (1,1,1,1,1) corner, which no successor can meet, so 0 is expected and uninformative. Worth noting anyway: mean predicted_jointly_selective was 0.0 across its fibers while the arm actually charged 2 selective molecules, so the surrogate under-predicts selectivity, consistent with its weak GSK3B ranking (rho 0.22-0.32)."
 }
