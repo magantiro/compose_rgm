@@ -59,9 +59,9 @@ image = _base_image.env(
     {"PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}", "OMP_NUM_THREADS": "1"}
 )
 
-app = modal.App("hphi-smc-fast")
+app = modal.App("hphi-smc-par")
 RUN_ROOT = "/artifacts/editing_v2/r_theta_run"
-OUT_DIR = "hphi_smc_fast"
+OUT_DIR = "hphi_smc_par"
 TIME_POINT, CANONICAL_SLOTS = 0.5, 48
 
 # ---- FROZEN. Every value below is copied from the preregistration. ----
@@ -69,7 +69,7 @@ HORIZON = 24                    # max H24, native anytime STOP
 N_REPLICATES = 20               # 20 returned candidates per source
 REGION = (0.90, 0.40)           # benchmark qualification region
 MAX_PROPOSALS = 40              # frozen rejection cap -- NOT retuned here
-PROTOCOL = "hphi-smc-fast-v1"
+PROTOCOL = "hphi-smc-par-v1"
 ARMS = ("unguided", "policy_b", "hphi")
 
 _RT: dict[str, Any] = {}
@@ -202,9 +202,7 @@ def _valid_records(out_p) -> dict[tuple[int, str, int], dict[str, Any]]:
 
 # cpu=(request, limit): reserve ONE core, burst to 8. A hard (8, 8)
 # reservation bills 8 cores even when only one slot has work.
-# ONE CPU PER SLOT. Each slot is an independent serial SMC run; there is
-# no particle parallelism, so a second core would sit idle and billed.
-@app.function(image=image, cpu=(1.0, 1.0), memory=16384,
+@app.function(image=image, cpu=(4.0, 8.0), memory=32768,
               timeout=6 * 60 * 60,
               max_containers=64, retries=2,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
@@ -323,6 +321,11 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         carried: list[float | None] = [None] * N_PARTICLES
         for step in range(HORIZON):
             b = HORIZON - step
+            # PARTICLES ARE INDEPENDENT UNTIL SYNCHRONISATION. Each one's
+            # RNG is derived deterministically from (slot, step, particle), so
+            # concurrency cannot reorder any draw. Results are gathered in
+            # FIXED PARTICLE-INDEX ORDER before weights/ESS/resampling, so the
+            # coupling step sees exactly what the serial loop would see.
             for i in range(N_PARTICLES):
                 if absorbed[i]:
                     continue
