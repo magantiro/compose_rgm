@@ -112,29 +112,131 @@
    "n_selective": 2,
    "seconds": 250.956621615,
    "runtime_build_seconds": 146.53475136100002
+  },
+  {
+   "arm": "fixed-scalarization",
+   "seed": 103,
+   "archive_sha256": "50445087c54f4884629aca409c9b2045b4b8b0db5957a6a34a03ecf3baf63137",
+   "charged": 300,
+   "expansions": 75,
+   "median_fiber": 329.0,
+   "proposals_scored_internally": 20808,
+   "fiber_composition_mean": {
+    "fiber": 277.44,
+    "predicted_high_jnk3": 256.46666666666664,
+    "predicted_low_gsk3b": 0.02666666666666667,
+    "predicted_jointly_selective": 0.0,
+    "target_represented": 0.0
+   },
+   "exhausted_states": 0,
+   "iterations_where_target_was_represented": 0,
+   "fiber_composition_note": "PREDICTED values: fiber composition convolved with surrogate error, not ground truth about what R_theta exposes",
+   "hv_seeded_only": 0.5674285888671875,
+   "hv_after": 0.6060867309570312,
+   "front_size": 151,
+   "best_jnk3": 0.79,
+   "n_jnk3_over_0.4": 272,
+   "n_selective": 0,
+   "seconds": 661.987863017,
+   "runtime_build_seconds": 103.619635086
+  },
+  {
+   "arm": "fixed-scalarization",
+   "seed": 104,
+   "archive_sha256": "ad529168b6760586366ef146afd438fe752ba8d51f39b9df8b62cd0c165b682a",
+   "charged": 300,
+   "expansions": 75,
+   "median_fiber": 439.0,
+   "proposals_scored_internally": 22291,
+   "fiber_composition_mean": {
+    "fiber": 297.2133333333333,
+    "predicted_high_jnk3": 108.78666666666666,
+    "predicted_low_gsk3b": 296.81333333333333,
+    "predicted_jointly_selective": 108.78666666666666,
+    "target_represented": 0.0
+   },
+   "exhausted_states": 0,
+   "iterations_where_target_was_represented": 0,
+   "fiber_composition_note": "PREDICTED values: fiber composition convolved with surrogate error, not ground truth about what R_theta exposes",
+   "hv_seeded_only": 0.5250396728515625,
+   "hv_after": 0.5520858764648438,
+   "front_size": 141,
+   "best_jnk3": 0.61,
+   "n_jnk3_over_0.4": 162,
+   "n_selective": 160,
+   "seconds": 901.243537944,
+   "runtime_build_seconds": 105.12847033
+  },
+  {
+   "arm": "adaptive-region",
+   "seed": 103,
+   "archive_sha256": "50445087c54f4884629aca409c9b2045b4b8b0db5957a6a34a03ecf3baf63137",
+   "charged": 300,
+   "expansions": 75,
+   "median_fiber": 414.0,
+   "proposals_scored_internally": 28408,
+   "fiber_composition_mean": {
+    "fiber": 378.7733333333333,
+    "predicted_high_jnk3": 330.37333333333333,
+    "predicted_low_gsk3b": 7.293333333333333,
+    "predicted_jointly_selective": 0.013333333333333334,
+    "target_represented": 0.0
+   },
+   "exhausted_states": 0,
+   "iterations_where_target_was_represented": 0,
+   "fiber_composition_note": "PREDICTED values: fiber composition convolved with surrogate error, not ground truth about what R_theta exposes",
+   "hv_seeded_only": 0.5674285888671875,
+   "hv_after": 0.585235595703125,
+   "front_size": 156,
+   "best_jnk3": 0.71,
+   "n_jnk3_over_0.4": 253,
+   "n_selective": 3,
+   "seconds": 916.051710038,
+   "runtime_build_seconds": 105.112586506
+  },
+  {
+   "arm": "adaptive-region",
+   "seed": 104,
+   "archive_sha256": "ad529168b6760586366ef146afd438fe752ba8d51f39b9df8b62cd0c165b682a",
+   "charged": 300,
+   "expansions": 75,
+   "median_fiber": 344.0,
+   "proposals_scored_internally": 19907,
+   "fiber_composition_mean": {
+    "fiber": 265.4266666666667,
+    "predicted_high_jnk3": 196.86666666666667,
+    "predicted_low_gsk3b": 9.0,
+    "predicted_jointly_selective": 0.0,
+    "target_represented": 0.0
+   },
+   "exhausted_states": 0,
+   "iterations_where_target_was_represented": 0,
+   "fiber_composition_note": "PREDICTED values: fiber composition convolved with surrogate error, not ground truth about what R_theta exposes",
+   "hv_seeded_only": 0.5250396728515625,
+   "hv_after": 0.5747146606445312,
+   "front_size": 159,
+   "best_jnk3": 0.77,
+   "n_jnk3_over_0.4": 253,
+   "n_selective": 4,
+   "seconds": 948.1567213,
+   "runtime_build_seconds": 127.24568885000001
   }
  ],
- "completed_arms": 6,
  "paired_official_hv": {
   "per_seed_difference": {
    "100": 0.02645111083984375,
    "101": 0.06865692138671875,
-   "102": -0.0006866455078125
+   "102": -0.0006866455078125,
+   "103": -0.02085113525390625,
+   "104": 0.0226287841796875
   },
-  "mean_paired_difference": 0.031473795572916664,
-  "seeds": 3,
-  "adaptive_ahead": 2,
-  "adaptive_behind": 0,
+  "mean_paired_difference": 0.01923980712890625,
+  "seeds": 5,
+  "adaptive_ahead": 3,
+  "adaptive_behind": 1,
   "tied_within_band": 1,
   "tie_band": 0.001
  },
- "ROUTING": {
-  "branch_taken": "MIDDLE: one broad win (seed 100), one win that is mostly a single lucky point (seed 101), one dead tie (seed 102). That is 'one win plus ties/noise', not a coherent positive pattern across three seeds.",
-  "action": "run TWO additional paired seeds to reach five total, before adding branching, state reuse or multi-step navigation",
-  "not_yet_earned": "archive-aware region targeting is not yet an earned development mechanism; it is also not refuted"
- },
- "rerun_comparability_caveat": "fixed-scalarization seed 100 is the ONLY arm that ran with the exhausted-state rule active, and the rule fired once, on CNc1cc(Nc2ccc(Br)cc2)ncc1F -- the state it had been fixating on. Without the rule that arm does not terminate at all, so there is no alternative version of it to compare against. The audit showed the rule would have been a no-op for the other five arms (expansions == steps everywhere), which is what keeps the pair meaningful.",
- "fiber_composition_first_observation": "Only the rerun arm carries the new logging, and for the FIXED arm the 'target_represented' figure is degenerate by construction -- its target is the (1,1,1,1,1) corner, which no successor can meet, so 0 is expected and uninformative. Worth noting anyway: mean predicted_jointly_selective was 0.0 across its fibers while the arm actually charged 2 selective molecules, so the surrogate under-predicts selectivity, consistent with its weak GSK3B ranking (rho 0.22-0.32).",
  "why": {
   "adaptive-region_seed100": {
    "lift": 0.035980224609375,
@@ -142,6 +244,13 @@
    "share_from_best_point": 0.1717557251908397,
    "new_on_front": 78,
    "new_front_members_load_bearing": 2
+  },
+  "fixed-scalarization_seed100": {
+   "lift": 0.00952911376953125,
+   "lift_without_best_point": 0.00936126708984375,
+   "share_from_best_point": 0.017614091273018415,
+   "new_on_front": 67,
+   "new_front_members_load_bearing": 67
   },
   "adaptive-region_seed101": {
    "lift": 0.1134033203125,
@@ -170,6 +279,67 @@
    "share_from_best_point": 0.04529286222433009,
    "new_on_front": 53,
    "new_front_members_load_bearing": 1
+  },
+  "adaptive-region_seed103": {
+   "lift": 0.0178070068359375,
+   "lift_without_best_point": 0.0176544189453125,
+   "share_from_best_point": 0.00856898029134533,
+   "new_on_front": 83,
+   "new_front_members_load_bearing": 7
+  },
+  "fixed-scalarization_seed103": {
+   "lift": 0.03865814208984375,
+   "lift_without_best_point": 0.02887725830078125,
+   "share_from_best_point": 0.25300967041642,
+   "new_on_front": 79,
+   "new_front_members_load_bearing": 5
+  },
+  "adaptive-region_seed104": {
+   "lift": 0.04967498779296875,
+   "lift_without_best_point": 0.04871368408203125,
+   "share_from_best_point": 0.019351866072799876,
+   "new_on_front": 76,
+   "new_front_members_load_bearing": 13
+  },
+  "fixed-scalarization_seed104": {
+   "lift": 0.02704620361328125,
+   "lift_without_best_point": 0.024688720703125,
+   "share_from_best_point": 0.08716502115655854,
+   "new_on_front": 57,
+   "new_front_members_load_bearing": 9
   }
+ },
+ "VERDICT_AT_FIVE_SEEDS": {
+  "paired_differences": {
+   "100": 0.0265,
+   "101": 0.0687,
+   "102": -0.0007,
+   "103": -0.0209,
+   "104": 0.0226
+  },
+  "mean": 0.0192,
+  "sd": 0.0336,
+  "se": 0.015,
+  "t": 1.28,
+  "p_ttest": 0.27,
+  "p_wilcoxon": 0.312,
+  "sign": "3 wins, 1 loss, 1 tie",
+  "ci95": [
+   -0.0225,
+   0.061
+  ],
+  "after_removing_seed_101s_single_carrying_molecule": {
+   "mean": 0.0055,
+   "t": 0.64,
+   "p": 0.56
+  },
+  "reading": "NOT ESTABLISHED. Adaptive is ahead on average but the interval spans zero, and most of the mean comes from one molecule on one seed: strip it and the mean falls from +0.0192 to +0.0055 with p = 0.56. Three wins, one loss and a tie over five paired seeds is not a coherent positive pattern.",
+  "routing": "Per the decision tree this is not 'earned' and not 'consistently no better' either. The honest branch is RETHINK THE TARGET-REGION POLICY rather than add branching, state reuse or multi-step navigation around a mechanism that has not yet shown it works."
+ },
+ "mechanism_finding_from_the_new_fiber_logging": {
+  "observation": "iterations_where_target_was_represented = 0 for EVERY arm and every seed that carried the logging, adaptive included.",
+  "what_it_means": "the adaptive aspiration is essentially never fully met by any successor, so the arm is permanently in 'minimise shortfall' mode and never in 'hit the target' mode.",
+  "why": "an aspiration is built as a front member with ONE axis raised while the other four are held at that member's values. A molecular edit moves several properties at once, so matching-or-exceeding on four axes while improving the fifth is rare. This is a property of how the aspiration is SHAPED, and it is a concrete thing to change in the rethink.",
+  "caveat": "predicted values, and a strict all-five-axes criterion, so this diagnoses the aspiration's shape rather than proving the region is unreachable."
  }
 }
