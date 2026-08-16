@@ -69,40 +69,34 @@ def audit_record(rec: dict) -> list[dict]:
                    f"all {len(tr)} transitions match log h(y,b-1) - log h(x,b)"))
 
     # 2 -- TELESCOPING ------------------------------------------------------
-    # Per particle lineage WITHIN a resampling epoch: weights reset at each
-    # resample, so the identity holds between synchronisation points.
-    epochs, cur = [], {}
-    resample_steps = {s["step"] for s in sync if s["resampled"]}
-    for t in tr:
-        cur.setdefault(t["particle"], []).append(t)
-        if t["step"] in resample_steps:
-            pass
+    # Split by EPOCH, not by "this step is a resample step". A particle that
+    # absorbs before a resample has no transition AT the boundary step, so a
+    # membership test never fires and two unrelated lineages -- the absorbed
+    # one, and the copy resampling wrote into the same index -- get chained
+    # together. Same failure the absorption check had.
     bad = []
-    for pid, seq in cur.items():
-        seq = [s for s in seq if s["log_G"] is not None]
-        if not seq:
+    epoch_bounds = sorted(s["step"] for s in sync if s["resampled"])
+
+    def _epoch(step):
+        return sum(1 for b in epoch_bounds if step > b)
+
+    lineages: dict[tuple[int, int], list] = {}
+    for t in tr:
+        if t["log_G"] is None:
             continue
-        # split at resample boundaries
-        chunk = []
-        for s in seq:
-            chunk.append(s)
-            if s["step"] in resample_steps:
-                if chunk:
-                    total = sum(c["log_G"] for c in chunk)
-                    want = (math.log(chunk[-1]["h_y_bm1"])
-                            - math.log(chunk[0]["h_x_b"]))
-                    if abs(total - want) > 1e-6:
-                        bad.append({"particle": pid, "sum": total, "telescoped": want})
-                chunk = []
-        if chunk:
-            total = sum(c["log_G"] for c in chunk)
-            want = math.log(chunk[-1]["h_y_bm1"]) - math.log(chunk[0]["h_x_b"])
-            if abs(total - want) > 1e-6:
-                bad.append({"particle": pid, "sum": total, "telescoped": want})
+        lineages.setdefault((_epoch(t["step"]), t["particle"]), []).append(t)
+    for (ep, pid), seq in lineages.items():
+        seq.sort(key=lambda z: z["step"])
+        total = sum(c["log_G"] for c in seq)
+        want = math.log(seq[-1]["h_y_bm1"]) - math.log(seq[0]["h_x_b"])
+        if abs(total - want) > 1e-6:
+            bad.append({"particle": pid, "epoch": ep, "sum": total,
+                        "telescoped": want, "steps": [c["step"] for c in seq]})
     out.append(_fail("telescoping", f"{len(bad)} lineages break the identity", bad)
                if bad else
                _ok("telescoping",
-                   "sum of log G equals log h(x_H) - log h(x_0) on every lineage"))
+                   f"sum of log G equals log h(x_H) - log h(x_0) on all "
+                   f"{len(lineages)} lineages across {len(epoch_bounds)+1} epochs"))
 
     # 3 -- ABSORPTION / STOP ------------------------------------------------
     # Particle INDEX identity is stable only WITHIN a resampling epoch:

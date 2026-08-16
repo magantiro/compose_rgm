@@ -1,0 +1,44 @@
+{
+  "schema": "compose.hphi.coverage_ladder.banked",
+  "design": "append-only ladder: attempt 2 run ONLY on sources unsolved after attempt 1, because a second success cannot change source-level coverage",
+  "n_records": 109,
+  "mechanical_qualification": {
+    "checks": 9,
+    "result": "PASSED"
+  },
+  "rung1": {
+    "coverage": "19/64",
+    "rate": 0.296875
+  },
+  "rung2": {
+    "attempted": 45,
+    "new": 7,
+    "conversion_rate": 0.15555555555555556,
+    "new_sources": [
+      5,
+      22,
+      24,
+      36,
+      46,
+      47,
+      49
+    ]
+  },
+  "cumulative": {
+    "coverage": "26/64",
+    "rate": 0.40625
+  },
+  "per_source_after_2": {
+    "0_of_2": 38,
+    "1_of_2": 7,
+    "2_of_2": 0
+  },
+  "projection_20_attempts": {
+    "floor_empirical": 0.40624989569187164,
+    "jeffreys": 0.9845124890420021,
+    "note": "range remains wide because 38 sources are still 0/2 and two samples cannot distinguish unreachable from hard"
+  },
+  "reading": "MIDDLING. 15.6% conversion is neither the near-zero that would prove reachability-limited nor the high rate that would prove attempts multiply. That NO source went 2/2 says the newly-solved are marginal, converted by luck of the draw rather than reliably reachable.",
+  "context": "40.6% at TWO attempts on 64 DEVELOPMENT sources. GrIDDD reports 45.1% at TWENTY candidates on 800 OFFICIAL sources. Not a comparison: different cohort, different budget, official set untouched. But 40.6% is a hard floor that must rise, since attempt 2 alone converted 7.",
+  "records_sha256": "cd224c23721d93361238f8d22ae7ee6304f721c69f8f98caa42000c7d2fa4c08"
+}
