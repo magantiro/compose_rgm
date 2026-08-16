@@ -36,14 +36,7 @@ import modal
 
 from modal_apps.run_process_v2_p50_app import ARTIFACT_ROOT, REMOTE_ROOT, ROOT, artifact_volume
 from modal_apps.run_process_v2_p50_app import image as _base_image
-from modal_apps.task3_rtheta_mechanism_ab_app import (
-    ACTIVE8,
-    CHECKPOINT,
-    GATE_ZERO,
-    MATERIALIZED,
-    PAD_SLOTS,
-    _build_r_theta,
-)
+
 
 image = (
     _base_image.env({"PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}"})
@@ -72,13 +65,9 @@ def cache_fibers(spec: tuple[int, int, int]) -> dict[str, Any]:
     seed, offset, count = spec
     import resource
 
-    from compose_v4.chem.molecular_graph import (
-        molecular_graph_to_smiles,
-        smiles_to_molecular_graph,
-    )
-    from compose_v4.chem.state import pad_molecular_graph
-    from compose_v4.experiments.production_successor_kernel import (
-        canonical_successor_result,
+    from compose_v4.experiments.task3_rtheta_runtime import (
+        build_r_theta,
+        expand_fiber,
     )
 
     started = time.perf_counter()
@@ -86,18 +75,10 @@ def cache_fibers(spec: tuple[int, int, int]) -> dict[str, Any]:
     entry = fixture["archives"][str(seed)]
     # Deterministic slice: sorted molecules, so slices never overlap or gap.
     molecules = sorted(entry["molecules"])[offset:offset + count]
-    model = _build_r_theta()
+    model = build_r_theta(ARTIFACT_ROOT, REMOTE_ROOT)
 
     def expand(smiles: str):
-        graph = smiles_to_molecular_graph(smiles)
-        padded = pad_molecular_graph(graph, graph.n_atoms + PAD_SLOTS)
-        fiber = canonical_successor_result(model, padded, 0.0).batch.successors
-        rows = []
-        for successor in fiber:
-            child = molecular_graph_to_smiles(successor.state)
-            if child:
-                rows.append([child, float(successor.probability)])
-        return rows
+        return expand_fiber(model, smiles)
 
     # ---- determinism gate, before anything is written --------------------
     for smiles in molecules[:EQUALITY_SAMPLE]:
