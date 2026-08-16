@@ -1,0 +1,27 @@
+{
+ "scope": "a statement about TASK 3's FITTED oracles and edit-based search under them; NOT about COMPOSE or R_theta generally, and NOT about the QED lane, whose QED and Tanimoto are computed properties that cannot go off-manifold",
+ "general_drift": {
+  "zinc_to_zinc_median": 0.4057970941066742,
+  "successors_to_zinc_median": 0.29411765933036804,
+  "gap": 0.11167943477630615
+ },
+ "training_set_drift": {
+  "zinc_to_train_median": 0.34545454382896423,
+  "successors_to_train_median": 0.2857142984867096,
+  "gap": 0.05974024534225464
+ },
+ "distance_to_actives": {
+  "zinc_to_actives_median": 0.25,
+  "successors_to_actives_median": 0.23636363446712494,
+  "gap": 0.013636365532875061,
+  "successors_closest": 0.6944444179534912,
+  "zinc_closest": 0.6333333253860474
+ },
+ "verdict": "THE EXPLANATORY FORM IS REFUTED. Successors do drift off the ZINC manifold generally (0.294 against 0.406, a 28% relative drop), but they are NOT further from the JNK3 actives -- 0.236 against ZINC's 0.250, and their closest approach is actually nearer (0.694 against 0.633). Drift that does not move search away from the active region cannot explain a failure to reach it. AND THE ANOMALY MAY NOT NEED A CHEMICAL EXPLANATION AT ALL: the p = 0.017 assumed INDEPENDENT draws, which edit-based search plainly violates -- its calls are correlated neighbours of a few states. With a realistically smaller effective sample size the expected count falls well below one and observing zero is unremarkable. The honest position is that we do not have an established mechanism, and that the surprise itself was probably overstated by a power calculation that assumed independence.",
+ "scope_boundary": {
+  "what_this_is_about": "Task 3's FITTED oracles -- JNK3, GSK3B, DRD2 are random forests and an SVM over Morgan bits -- and edit-based search under them",
+  "what_this_is_NOT_about": "COMPOSE or R_theta generally, and NOT the QED lane. QED and Tanimoto similarity are COMPUTED properties: defined for any valid molecule, so they cannot go off-manifold and no analogous failure mode exists there. The boundary is between computing a property and predicting one.",
+  "sentence_to_avoid": "'R_theta edits look worse than random sampling' -- true only of this oracle family, at this budget, on this metric, and the measured drift does not even explain it."
+ },
+ "methodological_error_found_and_fixed": "the first run of this check used the FIRST 8,000 rows of kinase.tsv as the 'kinase training set'. The file is ordered by target then activity, so that sample was 2,668 GSK3B actives and 5,332 GSK3B inactives with ZERO JNK3 molecules -- it answered a question about the wrong target while appearing to answer the right one. Fixed by filtering on the target column and sampling randomly."
+}
