@@ -1,5 +1,5 @@
 {
- "STATUS": "DEVELOPMENT-ONLY -- NOT TASK 3 PERFORMANCE",
+ "STATUS": "DEVELOPMENT-ONLY -- NOT TASK 3 PERFORMANCE (seeded init)",
  "results": [
   {
    "arm": "adaptive-region",
@@ -116,31 +116,17 @@
  ],
  "completed_arms": 6,
  "paired_official_hv": {
-  "note": "the ONLY criterion this A/B is judged by",
-  "per_seed": {
-   "100": {
-    "adaptive": 0.036,
-    "fixed": 0.0095,
-    "difference": 0.0265
-   },
-   "101": {
-    "adaptive": 0.1134,
-    "fixed": 0.0447,
-    "difference": 0.0687
-   },
-   "102": {
-    "adaptive": 0.0315,
-    "fixed": 0.0322,
-    "difference": -0.0007
-   }
+  "per_seed_difference": {
+   "100": 0.02645111083984375,
+   "101": 0.06865692138671875,
+   "102": -0.0006866455078125
   },
-  "mean_paired_difference": 0.0315,
-  "adaptive_ahead": "2/3 seeds, 1 tie",
-  "after_removing_seed_101s_single_carrying_molecule": {
-   "seed_101_difference": 0.0,
-   "mean_paired_difference": 0.0086,
-   "why_this_matters": "60.6% of adaptive's seed-101 lift came from one molecule; strip it and that seed is an exact tie at +0.0447 each. The headline mean rests on it."
-  }
+  "mean_paired_difference": 0.031473795572916664,
+  "seeds": 3,
+  "adaptive_ahead": 2,
+  "adaptive_behind": 0,
+  "tied_within_band": 1,
+  "tie_band": 0.001
  },
  "ROUTING": {
   "branch_taken": "MIDDLE: one broad win (seed 100), one win that is mostly a single lucky point (seed 101), one dead tie (seed 102). That is 'one win plus ties/noise', not a coherent positive pattern across three seeds.",
@@ -148,5 +134,42 @@
   "not_yet_earned": "archive-aware region targeting is not yet an earned development mechanism; it is also not refuted"
  },
  "rerun_comparability_caveat": "fixed-scalarization seed 100 is the ONLY arm that ran with the exhausted-state rule active, and the rule fired once, on CNc1cc(Nc2ccc(Br)cc2)ncc1F -- the state it had been fixating on. Without the rule that arm does not terminate at all, so there is no alternative version of it to compare against. The audit showed the rule would have been a no-op for the other five arms (expansions == steps everywhere), which is what keeps the pair meaningful.",
- "fiber_composition_first_observation": "Only the rerun arm carries the new logging, and for the FIXED arm the 'target_represented' figure is degenerate by construction -- its target is the (1,1,1,1,1) corner, which no successor can meet, so 0 is expected and uninformative. Worth noting anyway: mean predicted_jointly_selective was 0.0 across its fibers while the arm actually charged 2 selective molecules, so the surrogate under-predicts selectivity, consistent with its weak GSK3B ranking (rho 0.22-0.32)."
+ "fiber_composition_first_observation": "Only the rerun arm carries the new logging, and for the FIXED arm the 'target_represented' figure is degenerate by construction -- its target is the (1,1,1,1,1) corner, which no successor can meet, so 0 is expected and uninformative. Worth noting anyway: mean predicted_jointly_selective was 0.0 across its fibers while the arm actually charged 2 selective molecules, so the surrogate under-predicts selectivity, consistent with its weak GSK3B ranking (rho 0.22-0.32).",
+ "why": {
+  "adaptive-region_seed100": {
+   "lift": 0.035980224609375,
+   "lift_without_best_point": 0.0298004150390625,
+   "share_from_best_point": 0.1717557251908397,
+   "new_on_front": 78,
+   "new_front_members_load_bearing": 2
+  },
+  "adaptive-region_seed101": {
+   "lift": 0.1134033203125,
+   "lift_without_best_point": 0.044708251953125,
+   "share_from_best_point": 0.6057588805166846,
+   "new_on_front": 85,
+   "new_front_members_load_bearing": 7
+  },
+  "fixed-scalarization_seed101": {
+   "lift": 0.04474639892578125,
+   "lift_without_best_point": 0.043609619140625,
+   "share_from_best_point": 0.025404944586530264,
+   "new_on_front": 74,
+   "new_front_members_load_bearing": 74
+  },
+  "adaptive-region_seed102": {
+   "lift": 0.03148651123046875,
+   "lift_without_best_point": 0.0312042236328125,
+   "share_from_best_point": 0.008965350133268718,
+   "new_on_front": 101,
+   "new_front_members_load_bearing": 0
+  },
+  "fixed-scalarization_seed102": {
+   "lift": 0.03217315673828125,
+   "lift_without_best_point": 0.0307159423828125,
+   "share_from_best_point": 0.04529286222433009,
+   "new_on_front": 53,
+   "new_front_members_load_bearing": 1
+  }
+ }
 }
