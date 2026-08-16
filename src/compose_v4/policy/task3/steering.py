@@ -167,3 +167,63 @@ class ConstrainedAdaptiveRegion:
         floor[self._axis] = 0.0
         violation = np.maximum(floor[None, :] - predicted, 0.0).sum(axis=1)
         return -(progress + self.violation_weight * violation)
+
+
+@dataclass
+class ReachableHVI:
+    """Arm B-v2. Aim at what the CURRENT fiber can actually deliver.
+
+    WHY THE PREVIOUS ADAPTIVE RULE NEVER TURNED ON. Its aspiration was a front
+    member with one axis raised while the other four were held at that member's
+    values -- a DOMINANCE-SHAPED demand. A molecular edit moves several
+    properties at once, so matching-or-exceeding on four axes while improving
+    the fifth is rare, and the logging showed the consequence starkly:
+    `iterations_where_target_was_represented` was ZERO for every arm and every
+    seed. The mechanism was permanently in fallback, minimising shortfall to a
+    target nothing could reach. It was never really tested.
+
+    So this version does not invent a target at all. It scores each successor by
+    the hypervolume it would ACTUALLY add to the current archive, and prefers the
+    largest. The "region" is then whatever the best-scoring reachable successors
+    occupy -- defined by the fiber and the archive, never by a wish.
+
+    This is deliberately the simplest reachable acquisition rather than a clever
+    one. A clever aspiration built on top of an unreachable one would have been
+    the same mistake twice.
+    """
+
+    name: str = "reachable-hvi"
+    #: Predictions are noisy, so ranking on a razor-thin HVI difference is
+    #: ranking on surrogate error. Ties inside this band fall back to the sum,
+    #: which is a defensible secondary preference rather than an arbitrary one.
+    tie_band: float = 1e-5
+    _archive: object | None = field(default=None, init=False, repr=False)
+
+    def target(self, archive: ParetoArchive,
+               rng: np.random.Generator) -> Region | None:
+        # The archive IS the target: what counts as valuable is "whatever adds
+        # hypervolume to this", which moves as the archive fills.
+        self._archive = archive
+        return Region(target=(1.0,) * 5, gain=float(1.0 - archive.covered_fraction),
+                      origin=None, note="reachable marginal hypervolume")
+
+    def start(self, archive: ParetoArchive, target: Region,
+              rng: np.random.Generator) -> str | None:
+        """Expand from a front member, sampled by how much room it still has.
+
+        Uniform over the front rather than argmax of anything: the acquisition
+        does the discriminating, and biasing the start as well would make it
+        impossible to tell which part was doing the work.
+        """
+
+        front = archive.front()
+        if not front:
+            return None
+        return front[int(rng.integers(len(front)))][0]
+
+    def rank(self, predicted: np.ndarray, target: Region) -> np.ndarray:
+        if self._archive is None:
+            return predicted.sum(axis=1)
+        gains = self._archive.gains_of(predicted)
+        # Break near-ties on the scalar sum instead of on prediction noise.
+        return gains + self.tie_band * 1e-3 * predicted.sum(axis=1)
