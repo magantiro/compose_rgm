@@ -1,0 +1,55 @@
+{
+ "families": {
+  "bond_reroute": {
+   "realised": 0.2748926328495145,
+   "raw": 0.2651387955686949,
+   "cumulative": 0.2748926328495145
+  },
+  "atom_insert": {
+   "realised": 0.25929951543609303,
+   "raw": 0.24791263050394055,
+   "cumulative": 0.5341921482856076
+  },
+  "atom_delete": {
+   "realised": 0.22930959379300475,
+   "raw": 0.22033643361577315,
+   "cumulative": 0.7635017420786123
+  },
+  "atom_restate": {
+   "realised": 0.15916169077778855,
+   "raw": 0.1519024101331579,
+   "cumulative": 0.9226634328564008
+  },
+  "ring_system_restate": {
+   "realised": 0.031079423901701375,
+   "raw": 0.026883052073531203,
+   "cumulative": 0.9537428567581022
+  },
+  "cycle_attach": {
+   "realised": 0.023750330938489512,
+   "raw": 0.020305277234691853,
+   "cumulative": 0.9774931876965918
+  },
+  "bond_reorder": {
+   "realised": 0.017236794774362352,
+   "raw": 0.015334898212046649,
+   "cumulative": 0.9947299824709541
+  },
+  "cycle_insert": {
+   "realised": 0.005270015585305525,
+   "raw": 0.004520231999182321,
+   "cumulative": 0.9999999980562596
+  },
+  "ring_system_grow": {
+   "realised": 0.0,
+   "raw": 0.02533596117247577,
+   "cumulative": 0.9999999980562596
+  },
+  "ring_system_delete": {
+   "realised": 0.0,
+   "raw": 0.022330309486505717,
+   "cumulative": 0.9999999980562596
+  }
+ },
+ "n_states": 12
+}

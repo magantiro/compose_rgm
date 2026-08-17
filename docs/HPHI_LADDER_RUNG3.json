@@ -1,0 +1,395 @@
+{
+ "n_reported": 38,
+ "n_targets": 38,
+ "conversions": [
+  18
+ ],
+ "conversion_rate": 0.02631578947368421,
+ "n_failures": 37,
+ "never_in_region": 37,
+ "zero_absorbed": 37,
+ "cumulative_solved": 27,
+ "rows": [
+  {
+   "index": 0,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7593221900038128,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 1,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7050731893041615,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 2,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.724140106800068,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 4,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7175137497453218,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 6,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7380313804402664,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 8,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7959458810014339,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 12,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7641923089844538,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 13,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7428903421817055,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 16,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7460064463528572,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 18,
+   "success": true,
+   "ever_in_region": true,
+   "n_absorbed": 20,
+   "terminal_qed": 0.9008708912421443,
+   "terminal_sim": 0.4,
+   "n_transitions": 388,
+   "n_particles": 32
+  },
+  {
+   "index": 20,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7801385770493388,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 21,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7647244791423864,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 23,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7696734404679548,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 25,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7947506801061793,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 30,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7346536477232264,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 31,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7546998773027646,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 32,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7137474490497323,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 33,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7468986179625215,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 34,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7806357218295117,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 35,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.76178561779717,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 37,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7867044308102865,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 38,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7275330828541129,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 39,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7851884232825651,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 40,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7035688200654646,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 41,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7812322561722846,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 42,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7768198617032734,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 43,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7599537488690138,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 44,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7976320641513408,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 45,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7987568934990288,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 48,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7336507428096521,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 55,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7471009510434182,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 56,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.776544932176748,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 57,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7606871923760504,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 58,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7164750138209273,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 59,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7859594511598879,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 61,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7571496017800233,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 62,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7421159936383094,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  },
+  {
+   "index": 63,
+   "success": false,
+   "ever_in_region": false,
+   "n_absorbed": 0,
+   "terminal_qed": 0.7601806931401254,
+   "terminal_sim": 1.0,
+   "n_transitions": 768,
+   "n_particles": 32
+  }
+ ],
+ "reading_caveat": "Under the CURRENT H=24, N=32 frozen controller and three independent attempts, 37 of 37 remaining sources produced zero target hits across all particles. That is strong evidence of a controller/horizon reachability bottleneck. It is NOT proof that these molecules are unreachable under the underlying rewrite process: a longer horizon or a different search strategy could still reach them, and that remains open."
+}
