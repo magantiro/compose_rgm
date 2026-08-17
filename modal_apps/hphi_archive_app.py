@@ -3,11 +3,23 @@
 Tests one hypothesis: does remembering a promising valid intermediate beat
 forgetting everything and restarting from x0?
 
-    BASELINE   4 independent SMC runs from x0
-    ARCHIVE    candidate 1 from x0, then 3 branches from archived intermediates
+    RESTART   every candidate from x0, as today
+    RANDOM    branch from a UNIFORMLY chosen reusable archived state
+    HPHI      branch from the reusable archived state maximising h_phi(x, H-d)
 
-Same R_theta, same h_phi, same legal kernel, same N=32, same region, four
-returned candidates each.
+Same R_theta, same h_phi, same legal kernel, same N=32, same region, same
+number of returned candidates.
+
+RANDOM is the control that decides WHICH claim the v1 result supports. If
+hphi > random > restart, then remembering intermediates helps AND h_phi
+identifies which ones are worth remembering. If random is level with hphi, the
+finding is the simpler "stop restarting from x0", which is still useful but a
+different mechanism.
+
+x0 IS ITSELF AN ARCHIVE STATE. A persistent archive means never FORGET, not
+never restart: if x0 remains the best launch point the policy should choose it.
+v1 forced a branch every candidate and lost a reliable source (4 -> 3) for
+exactly that reason.
 
 FROZEN BEFORE ANY DATA IS READ
 ------------------------------
@@ -59,13 +71,13 @@ image = _base_image.env(
     {"PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}", "OMP_NUM_THREADS": "1"})
 app = modal.App("hphi-archive")
 RUN_ROOT = "/artifacts/editing_v2/r_theta_run"
-OUT_DIR = "hphi_archive_v1"
+OUT_DIR = "hphi_archive_v2"
 TIME_POINT, CANONICAL_SLOTS = 0.5, 48
 HORIZON = 24
 N_PARTICLES = 32
 REGION = (0.90, 0.40)
-N_CANDIDATES = 4
-PROTOCOL = "hphi-archive-v1"
+N_CANDIDATES = 8
+PROTOCOL = "hphi-archive-v2"
 MEM_MIB = int(4.5 * 1024)
 
 _RT: dict[str, Any] = {}
@@ -297,41 +309,63 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                 "start_depth": int(start_depth), "budget": budget0,
                 "final_ess": ess}
 
+    # RESUMABLE. A driver crash cost eleven sources of finished compute once;
+    # an already-written source is never recomputed.
+    done_path = Path(RUN_ROOT) / task.get("out_dir", OUT_DIR) / f"{idx:03d}.json"
+    if done_path.exists():
+        try:
+            prior = json.loads(done_path.read_text())
+            if len(prior.get("arms", {})) == 3:
+                print(f"  src{idx}: already complete, skipping", flush=True)
+                return prior
+        except Exception:  # noqa: BLE001
+            pass
+
     out: dict[str, Any] = {"index": idx, "source": source,
                            "stratum": task.get("stratum"), "arms": {}}
     t_all = time.perf_counter()
 
-    for arm in ("baseline", "archive"):
+    for arm in ("restart", "random", "hphi"):
         t0 = time.perf_counter()
         cands, work, archive = [], 0, {}
-        branch_log, used_branches = [], set()
+        branch_log = []
+        # x0 IS AN ARCHIVE STATE. "Persistent archive" means never FORGET, not
+        # never restart: if x0 is still the best launch point the policy should
+        # be free to choose it. v1 forced a branch every time and lost a
+        # reliable source (4 -> 3) for exactly that reason.
+        archive[source] = (0, h_phi(source, HORIZON))
+        arm_rng = np.random.default_rng(seed_for(arm, source, 99))
         for k in range(N_CANDIDATES):
-            if arm == "baseline" or k == 0:
+            if arm == "restart" or k == 0:
                 start, depth = source, 0
             else:
-                # FROZEN RULE: highest h_phi(x, H - d) among archived states
-                # that leave budget, are NOT already in the region, and have not
-                # already been branched from.
+                # POOL: archived states with budget left that are not already
+                # in the region. An in-region state has h_phi = 1.0 by the exact
+                # terminal boundary, so it would dominate forever once any
+                # candidate succeeded -- v1's smoke showed later candidates
+                # branching from the hit itself, doing ZERO transitions and
+                # returning copies. A solution is not a frontier.
                 #
-                # Both exclusions are mechanical, not tuning. An in-region state
-                # has h_phi = 1.0 by the exact terminal boundary, so once any
-                # candidate succeeds it dominates the pool forever -- the smoke
-                # showed candidates 2-4 branching from the hit itself, doing
-                # ZERO transitions and returning copies of candidate 1, for a
-                # diversity of 1 out of 4. An in-region state is a solution, not
-                # a frontier. Re-using a branch point likewise re-runs the same
-                # subtree and buys no independent chance at a benchmark event
-                # defined as "at least one of N succeeds".
+                # REPEATS ARE ALLOWED. v1 also excluded already-used branch
+                # points, which was a diversity heuristic rather than a
+                # principle: the same state under a different seed gives a
+                # different trajectory, and excluding repeats would stop the
+                # policy restarting from x0 more than once, which is the whole
+                # point of keeping x0 in the archive.
                 pool = [(h, s, d) for s, (d, h) in archive.items()
-                        if d < HORIZON and s not in used_branches
-                        and not in_region(*props(s), REGION)]
+                        if d < HORIZON and not in_region(*props(s), REGION)]
                 if not pool:
                     start, depth = source, 0
                 else:
-                    h, start, depth = max(pool)
-                    used_branches.add(start)
+                    if arm == "random":
+                        # CONTROL: is the gain just "do not restart from x0", or
+                        # does h_phi actually identify good frontiers?
+                        h, start, depth = pool[int(arm_rng.integers(len(pool)))]
+                    else:
+                        h, start, depth = max(pool)
                     branch_log.append({"candidate": k, "depth": depth,
-                                       "h_phi": h, "from_source": False})
+                                       "h_phi": h,
+                                       "from_source": start == source})
                 if not pool:
                     branch_log.append({"candidate": k, "depth": 0,
                                        "h_phi": None, "from_source": True})
@@ -373,14 +407,21 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
 def drive(tasks: list[dict[str, Any]]) -> dict[str, Any]:
     artifact_volume.reload()
     done = 0
-    for r in run_source.map(tasks, order_outputs=False, return_exceptions=True):
+    # wrap_returned_exceptions=False is what the deprecation warning asks for,
+    # and the driver previously died mid-map with "aclose(): asynchronous
+    # generator is already running", taking eleven in-flight sources with it.
+    for r in run_source.map(tasks, order_outputs=False, return_exceptions=True,
+                            wrap_returned_exceptions=False):
+        if isinstance(r, BaseException):
+            print(f"  source failed: {type(r).__name__}: {r}", flush=True)
+            continue
         if isinstance(r, dict):
             done += 1
-            b, a = r["arms"]["baseline"], r["arms"]["archive"]
-            print(f"src{r['index']} [{r['stratum']}] baseline "
-                  f"{'HIT' if b['success'] else '---'} work {b['work_transitions']}"
-                  f" | archive {'HIT' if a['success'] else '---'} "
-                  f"work {a['work_transitions']}", flush=True)
+            bits = "  ".join(
+                f"{k}={'HIT' if r['arms'][k]['success'] else '---'}"
+                f"/{r['arms'][k]['work_transitions']}"
+                for k in ("restart", "random", "hphi"))
+            print(f"src{r['index']} [{r['stratum']}] {bits}", flush=True)
     return {"done": done}
 
 
@@ -399,7 +440,8 @@ def main(smoke: bool = False, out_dir: str = OUT_DIR) -> None:
         out_dir = out_dir + "_smoke"
     tasks = [{"index": i, "source": srcs[i], "stratum": strat[i],
               "out_dir": out_dir} for i in keep]
-    print(f"{'SMOKE' if smoke else 'PANEL'}: {len(tasks)} sources x 2 arms x "
-          f"{N_CANDIDATES} candidates, N={N_PARTICLES}, H={HORIZON}")
+    print(f"{'SMOKE' if smoke else 'PANEL'}: {len(tasks)} sources x 3 arms "
+          f"(restart/random/hphi) x {N_CANDIDATES} candidates, "
+          f"N={N_PARTICLES}, H={HORIZON}")
     call = drive.spawn(tasks)
     print(f"spawned: {call.object_id}")
