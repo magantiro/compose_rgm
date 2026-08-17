@@ -1,0 +1,106 @@
+{
+ "tables": {
+  "atom_delete": {
+   "legal_median": 8,
+   "padded": 48,
+   "superset_median": 25,
+   "alpha_padded": 0.12587094807174556,
+   "alpha_superset": 0.49679199661383233,
+   "superset_contains_all_legal": "YES",
+   "empty_states": 0
+  },
+  "atom_restate": {
+   "legal_median": 171,
+   "padded": 720,
+   "superset_median": 375,
+   "alpha_padded": 0.23986198535906836,
+   "alpha_superset": 0.4574935431804926,
+   "superset_contains_all_legal": "YES",
+   "empty_states": 0
+  },
+  "bond_reorder": {
+   "legal_median": 4,
+   "padded": 6912,
+   "superset_median": 15,
+   "alpha_padded": 0.0002288384282301452,
+   "alpha_superset": 0.2705978557746294,
+   "superset_contains_all_legal": "YES",
+   "empty_states": 0
+  },
+  "bond_reroute": {
+   "legal_median": 40,
+   "padded": 2304,
+   "superset_median": 300,
+   "alpha_padded": 0.031816511207083106,
+   "alpha_superset": 0.23443329969348675,
+   "superset_contains_all_legal": "NO",
+   "empty_states": 0
+  },
+  "cycle_attach": {
+   "legal_median": 14,
+   "padded": 2304,
+   "superset_median": 27,
+   "alpha_padded": 0.006477324920677432,
+   "alpha_superset": 0.4741732824714565,
+   "superset_contains_all_legal": "YES",
+   "empty_states": 0
+  },
+  "cycle_insert": {
+   "legal_median": 100,
+   "padded": 6912,
+   "superset_median": 115,
+   "alpha_padded": 0.0006015364684393769,
+   "alpha_superset": 0.9999392647793439,
+   "superset_contains_all_legal": "YES",
+   "empty_states": 0
+  },
+  "grow_connected": {
+   "legal_median": 269,
+   "padded": 2160,
+   "superset_median": 1125,
+   "alpha_padded": 0.0951744135061144,
+   "alpha_superset": 0.12943441723628699,
+   "superset_contains_all_legal": "YES",
+   "empty_states": 0
+  },
+  "grow_root": {
+   "legal_median": 0,
+   "padded": 15,
+   "superset_median": NaN,
+   "alpha_padded": NaN,
+   "alpha_superset": NaN,
+   "superset_contains_all_legal": "-",
+   "empty_states": 12
+  },
+  "ring_system_delete": {
+   "legal_median": 0,
+   "padded": 1,
+   "superset_median": NaN,
+   "alpha_padded": NaN,
+   "alpha_superset": NaN,
+   "superset_contains_all_legal": "-",
+   "empty_states": 12
+  },
+  "ring_system_grow": {
+   "legal_median": 0,
+   "padded": 3,
+   "superset_median": NaN,
+   "alpha_padded": NaN,
+   "alpha_superset": NaN,
+   "superset_contains_all_legal": "-",
+   "empty_states": 12
+  },
+  "ring_system_restate": {
+   "legal_median": 2,
+   "padded": 2,
+   "superset_median": NaN,
+   "alpha_padded": 1.0,
+   "alpha_superset": NaN,
+   "superset_contains_all_legal": "-",
+   "empty_states": 0
+  }
+ },
+ "empty_mass_median": 0.0455015713242355,
+ "empty_mass_max": 0.14566661365791467,
+ "n_states": 12
+}
