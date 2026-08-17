@@ -27,6 +27,7 @@ Omitting it would admit no-op restatements that the frozen law excludes.
 
 from __future__ import annotations
 
+from collections import OrderedDict
 from typing import Any
 
 import numpy as np
@@ -258,8 +259,49 @@ def make_helpers(model, *, time_point: float, canonical_slots: int) -> dict[str,
         mk = marks[int(rng.choice(len(pr), p=pr / pr.sum()))]
         return (mk.table_name, tuple(int(v) for v in mk.coordinate))
 
+    # STATE-CONTEXT CACHE, the lazy equivalent of the old law cache.
+    #
+    # A lazy draw produces no law, so the law cache stops being populated. What
+    # IS reusable is the encoder output: ~55 ms of a ~79 ms transition, and a
+    # pure function of the state. A revisited state should therefore cost ~24 ms.
+    #
+    # Sized in STATES, not megabytes: the pair tensor is 48*48*256 floats, about
+    # 2.4 MB, so 64 entries is ~154 MB against a 4.5 GiB container.
+    #
+    # 12 entries was tried first and returned only 7% (98.7 -> 91.7 s on the
+    # extinction sentinel) although the eager law cache hits 425 of 768
+    # transitions on the same source. So the repeats are NOT clustered enough
+    # for a handful of slots -- particles revisit states many steps after first
+    # seeing them -- and the cache has to span the working set rather than the
+    # recent burst.
+    ENCODE_CACHE_MAX = 64
+    enc_cache: OrderedDict[Any, Any] = OrderedDict()
+
+    def encode(st, t):
+        from compose_v4.model.factorized_tracelet_rate_model import (
+            molecular_state_cache_key,
+        )
+
+        key = molecular_state_cache_key(st)
+        hit = enc_cache.get(key)
+        if hit is not None:
+            enc_cache.move_to_end(key)
+            batch, node, glob, pair = hit
+            # The batch carries per-family fields attached during a previous
+            # draw. They are pure functions of the same state, so reusing them
+            # is correct and is most of the point.
+            return batch, node, glob, pair, True
+        batch = build_batch(st, t)
+        with torch.no_grad():
+            node, glob, pair = model._encode_batch(batch)
+        enc_cache[key] = (batch, node, glob, pair)
+        if len(enc_cache) > ENCODE_CACHE_MAX:
+            enc_cache.popitem(last=False)
+        return batch, node, glob, pair, False
+
     return {
         "build_batch": build_batch,
+        "encode": encode,
         "family_names": list(MARK_RULE_NAMES),
         "family_mask": family_mask,
         "legality": {"atom_restate": legal_atom_restate,

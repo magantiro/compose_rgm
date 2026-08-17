@@ -1,0 +1,96 @@
+{
+ "results": [
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "n_legal": 585,
+   "draws": 120000,
+   "total_variation": 0.013256643051291346,
+   "chi2": 273.16190147735335,
+   "dof": 291,
+   "illegal_draws": 0,
+   "no_mark_draws": 0,
+   "family_analytic": {
+    "grow_connected": 0.7909690872585571,
+    "atom_delete": 0.08650746353874124,
+    "atom_restate": 0.037488591330776096,
+    "bond_reorder": 0.0025507122235540543,
+    "bond_reroute": 0.0756295451320133,
+    "cycle_insert": 6.431873978485054e-05,
+    "cycle_attach": 0.00028982214016740255,
+    "ring_system_restate": 0.006500459636405842
+   },
+   "family_empirical": {
+    "atom_delete": 0.087575,
+    "grow_connected": 0.7894583333333334,
+    "bond_reroute": 0.07551666666666666,
+    "atom_restate": 0.03799166666666667,
+    "cycle_insert": 0.0001,
+    "bond_reorder": 0.0024916666666666668,
+    "ring_system_restate": 0.006533333333333334,
+    "cycle_attach": 0.0003333333333333333
+   }
+  },
+  {
+   "smiles": "COCCN1C(=O)N(C)C(=O)C12CC[NH+](Cc1cnn(C)c1C)CC2",
+   "n_legal": 755,
+   "draws": 120000,
+   "total_variation": 0.009760153551223187,
+   "chi2": 236.6735632897415,
+   "dof": 234,
+   "illegal_draws": 0,
+   "no_mark_draws": 0,
+   "family_analytic": {
+    "grow_connected": 0.38746429728333726,
+    "atom_delete": 0.361828001911767,
+    "atom_restate": 0.09254374799440662,
+    "bond_reorder": 0.0042193951824557475,
+    "bond_reroute": 0.1533948970712942,
+    "cycle_insert": 1.6785256101008496e-05,
+    "cycle_attach": 1.0109673930706956e-06,
+    "ring_system_restate": 0.0005318643332446085
+   },
+   "family_empirical": {
+    "atom_restate": 0.09301666666666666,
+    "grow_connected": 0.38698333333333335,
+    "atom_delete": 0.36264166666666664,
+    "bond_reroute": 0.15248333333333333,
+    "bond_reorder": 0.004341666666666666,
+    "ring_system_restate": 0.0005166666666666667,
+    "cycle_insert": 1.6666666666666667e-05
+   }
+  },
+  {
+   "smiles": "N#Cc1ccccc1N1CCN(C(=O)c2ccc(-n3ncc(C#N)c3N)cc2)CC1",
+   "n_legal": 591,
+   "draws": 120000,
+   "total_variation": 0.011138211215776586,
+   "chi2": 350.7232629547915,
+   "dof": 328,
+   "illegal_draws": 0,
+   "no_mark_draws": 0,
+   "family_analytic": {
+    "grow_connected": 0.3518844069141579,
+    "atom_delete": 0.24865640884264503,
+    "atom_restate": 0.19866761535562194,
+    "bond_reorder": 0.009034583665675755,
+    "bond_reroute": 0.18201048121978672,
+    "cycle_insert": 8.690856189244622e-05,
+    "cycle_attach": 0.00016500740282013147,
+    "ring_system_restate": 0.00949458803740105
+   },
+   "family_empirical": {
+    "bond_reroute": 0.18361666666666668,
+    "grow_connected": 0.35291666666666666,
+    "atom_delete": 0.248725,
+    "atom_restate": 0.19626666666666667,
+    "bond_reorder": 0.008975,
+    "cycle_attach": 0.00025833333333333334,
+    "ring_system_restate": 0.009166666666666667,
+    "cycle_insert": 7.5e-05
+   }
+  }
+ ],
+ "worst_total_variation": 0.013256643051291346,
+ "any_illegal": false,
+ "n_draws": 120000
+}

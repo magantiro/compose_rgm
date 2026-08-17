@@ -102,6 +102,7 @@ class LazyDraw:
     seconds_resolver: float = 0.0
     seconds_total: float = 0.0
     used_fallback: bool = False
+    encode_cached: bool = False
     empty_families: list = field(default_factory=list)
 
 
@@ -135,9 +136,14 @@ def sample_one_transition(model, state, time, rng, *, helpers) -> LazyDraw:
 
     # ---- encode once ---------------------------------------------------
     t0 = _t.perf_counter()
-    batch = helpers["build_batch"](state, time)
-    with torch.no_grad():
-        node, glob, pair = model._encode_batch(batch)
+    enc = helpers.get("encode")
+    if enc is not None:
+        batch, node, glob, pair, cached = enc(state, time)
+        out.encode_cached = cached
+    else:
+        batch = helpers["build_batch"](state, time)
+        with torch.no_grad():
+            node, glob, pair = model._encode_batch(batch)
     out.seconds_encode = _t.perf_counter() - t0
 
     # ---- family draw, with EXACT empty-family rejection -----------------
