@@ -1,0 +1,245 @@
+{
+ "states": {
+  "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1": {
+   "n_marks": 585,
+   "marks_sha256": "b33e839c6cc693ce4ab4f1c24d748c7b66770085273fc4ba479fc87bd65fdd5f",
+   "probs_sha256": "8bcaa6857427718f15cba1250d94aa90df96a68f1b975ba0597486a1fc7a9d1a",
+   "seconds": 4.785064604999988
+  },
+  "COCCN1C(=O)N(C)C(=O)C12CC[NH+](Cc1cnn(C)c1C)CC2": {
+   "n_marks": 755,
+   "marks_sha256": "55e1440d3d794a07c3710fa5bada7175c23d8ebd674aef8c943f87230ce38bb8",
+   "probs_sha256": "5405f98ab652ab915c54ebf1758603f44b6817e500510014899ddab8d2edd499",
+   "seconds": 3.9641559380000047
+  },
+  "N#Cc1ccccc1N1CCN(C(=O)c2ccc(-n3ncc(C#N)c3N)cc2)CC1": {
+   "n_marks": 591,
+   "marks_sha256": "fe900ff11cb195fe76dfdc2a1cc692848fc17becc10f7180e0e8312ebd14ab93",
+   "probs_sha256": "97267dd1ec9da83cb49cda122fff8ae64406c76af714052c0e502a76f2b93710",
+   "seconds": 6.983976600000005
+  },
+  "CCCCNC(=O)C1CCN(S(=O)(=O)c2ccc(OC)cc2)CC1": {
+   "n_marks": 765,
+   "marks_sha256": "ef506b5aa238a454dd547b6b764793a2c80232c1cb94b41da366659520cb1dc0",
+   "probs_sha256": "f3b8c17745b0cda0aec792f4d87c887ba7e24de5a82ae2b49e7014cde2b51317",
+   "seconds": 3.8897691810000197
+  },
+  "CC(C)CCNC(=O)CC1CCN(C(=O)[C@H]2C=c3cc(Cl)ccc3=[NH+]2)CC1": {
+   "n_marks": 883,
+   "marks_sha256": "f6c0516a43343428430631513b9cdce88a693e0194bdb9c4d351e14787aeb570",
+   "probs_sha256": "23fbde78f6a6fad6e7d1c9b78e05cbbc673333128c5d57cb6bf96580661e1ebb",
+   "seconds": 5.126941187999989
+  },
+  "CC(C)[C@H](NC(=O)c1ccco1)C(=O)NNC(=O)C(C)(C)C": {
+   "n_marks": 705,
+   "marks_sha256": "c776a2f8281bb9cb2616e4e75a34788134da635c85e91150b028b46d9c5b8be5",
+   "probs_sha256": "f532c8e1d4dfe0d83ec75e07774375eaa3a74ee40daaa67f14ede6d7807e8705",
+   "seconds": 2.8809804189999966
+  },
+  "CNS(=O)(=O)c1cccc(C(=O)OCC(=O)Nc2c(F)cccc2F)c1": {
+   "n_marks": 465,
+   "marks_sha256": "54ddbf0097b0823abe9edae860985217057931d03171df4c87af4c8c565a74db",
+   "probs_sha256": "a7d1041db82285ec85cf0495f76f3798c035a3abb2a7167ec859c3a2d2b87f44",
+   "seconds": 4.731731990000014
+  },
+  "Clc1cccc(-c2nc(N[C@H]3CCC[NH2+]C3)cc(-c3cccnc3)n2)c1": {
+   "n_marks": 504,
+   "marks_sha256": "fbb7478814557201ea66e254fc7b8d64e124298f2c037f7678dfe1e497def434",
+   "probs_sha256": "0a91abc9eb5fe3f71fefba9d69e3fe7d7f318b5a41b54251ac12e26c573098d9",
+   "seconds": 5.648152718000006
+  },
+  "O=C(Cc1c(F)cccc1F)OCc1ccccn1": {
+   "n_marks": 315,
+   "marks_sha256": "8c360971660b75af5aae78caa4a01d62d3bc064efe1d4311983ae160ee06d94a",
+   "probs_sha256": "eb2c1f6b8e3d0f81fb32ffed97e826857b52e3b6e9b1281949c390a72d6fafe4",
+   "seconds": 2.633163494999991
+  },
+  "CC(C)=C1Oc2c3c(cc(C)c2C1=O)OCN(Cc1ccccc1)C3": {
+   "n_marks": 553,
+   "marks_sha256": "2325440f86574b7410f9f404754dff25a6c083a54dbc8392a49f4cc6dc514e34",
+   "probs_sha256": "a3d42cb43bfbd4d7bf19464773455375f1a6b57e0c4bdbe94567208108e8c3bf",
+   "seconds": 4.809148093999994
+  },
+  "COC(=O)c1ccccc1Cc1nc2ccccc2c(=O)[nH]1": {
+   "n_marks": 393,
+   "marks_sha256": "0da9b09312e0cfe1775b31d0c3ecac4befad39202e5c67cec594fc9ab1cab63b",
+   "probs_sha256": "b8f7b5d3b2e2caeb565db0cc7d579d41caa909ad5d9ddca3072215414ef83ffa",
+   "seconds": 3.8093904090000024
+  },
+  "COCC[NH2+]Cc1cn([C@H]2CCO[C@@]3(CCOC3)C2)nn1": {
+   "n_marks": 635,
+   "marks_sha256": "6f2573f489bbcbb335d1c752406a254bdbb6ae01a1b2404f3845560e53f19480",
+   "probs_sha256": "9fa208cd84380559dad4af22fc5af28edbec613594e82edb5ce952edc10c1f2b",
+   "seconds": 2.7533530020000114
+  },
+  "COc1cccc2cc(C(=O)NCC3CCN(S(C)(=O)=O)CC3)c(=O)oc12": {
+   "n_marks": 638,
+   "marks_sha256": "8f915fa662f0945b6bdea258e346a1ca512f625a2dd0d00b2fa73188d7d7a087",
+   "probs_sha256": "ee9de44fc96b8ecc809f25c2aaba2c92e09177e61447721872dadd927cea4ccb",
+   "seconds": 5.023724594999976
+  },
+  "COCc1nc2cc(NC(=O)c3cccnc3N3CCCCC3)ccc2o1": {
+   "n_marks": 609,
+   "marks_sha256": "a78b6c6ecf12b39ccce6b7e05dc4a6af2683844262ac2f62c5d527c420e778db",
+   "probs_sha256": "da694ebcaf25f9bb828d6be744afb61bac93c26157bc0115bc3daa44ed21e478",
+   "seconds": 5.660942718999991
+  },
+  "Cc1ccc(C)c(NC(=O)Nc2ccc3c(c2)CC(=O)N3)c1": {
+   "n_marks": 445,
+   "marks_sha256": "fa4e43780ae3710c77c4e28a80ecee74d306e387f510b6f4d3dd29b246c09d81",
+   "probs_sha256": "3c53301b8ab412e4526c1fb37ae5e692ed36bd801098bdfdbdd79c57c35db330",
+   "seconds": 3.653616391000014
+  },
+  "C[C@H]1CC[C@@H](C(C)(C)C[C@@H]2CSc3ccccc32)C(=O)C1": {
+   "n_marks": 673,
+   "marks_sha256": "09360700ce1ae3969e8bb08c3cb0d6f7ea4ea6678755e984937d6304211fa831",
+   "probs_sha256": "84de8983a0aac9535de6ed124675fd9e68c6e5d2f550477fc1661f6a21dba613",
+   "seconds": 3.169875275999999
+  },
+  "CO[C@H]1CCC[C@H](OC(=O)[C@H]2CCCN2C(=O)C(C)C)C1": {
+   "n_marks": 754,
+   "marks_sha256": "321ffbd9a1a12334e01f5a8361ae890317b4c7292eb71f05f06499773e111e17",
+   "probs_sha256": "6e4d193c8204150d24cdd243656b231ab102427607958420d5412b6e5ab49a1e",
+   "seconds": 2.6799040209999987
+  },
+  "O=C(Cc1ccc[nH]1)N[C@H](c1ccc(Cl)cc1)c1cccs1": {
+   "n_marks": 476,
+   "marks_sha256": "ca4fb5bc0f21dcefcc04cd1c8700de4e9e2ebf2ce107dbc00dbcd40778b9ff8c",
+   "probs_sha256": "9385cd2dd471933ec0a70cc095ca33c5ebe786dd3961c8177b554ea0b98112c8",
+   "seconds": 3.471992196000002
+  },
+  "Cc1cc(C)c(NC(=O)CNC(=O)c2ccc3c(c2)NC(=O)CS3)c(C)c1": {
+   "n_marks": 583,
+   "marks_sha256": "b61b788cb5ca95ed3883a0799a42edd318a99ca802cf73bc32eacba755f5a60e",
+   "probs_sha256": "dd7f0d2123e879263820f85e7c3b9d1a67bcc7858eea46492b2e36c87c9d6364",
+   "seconds": 5.304950633000004
+  },
+  "Cc1ccc([C@H]2CSCCN2Cc2noc(-c3ccoc3)n2)o1": {
+   "n_marks": 496,
+   "marks_sha256": "76ff6d0670fbc915ebe1ecc9935f0cf06f25952868c4d49f7dc8bae5e4eb1e1f",
+   "probs_sha256": "38bd8d25f1ab25fef676b5b51f8ba3cdfb23ed6c2919016169dbbe72510ddf63",
+   "seconds": 3.4379036799999767
+  },
+  "COc1ccc(CNC(=O)N[C@H](C)[C@H]2CCCO2)c(OC2CCCC2)c1": {
+   "n_marks": 848,
+   "marks_sha256": "c8da3aebe6076f27e980a810e04df527d82e14df069be22b25bbb238a1a37a4a",
+   "probs_sha256": "c5c2907cd06870aec5b640e78ae124801a3137ebcdeac1fcf8b8d572a2e4c3d9",
+   "seconds": 4.795864551999983
+  },
+  "O=C(NCCCOC1CCCCC1)c1cc(Cl)ccc1-n1cnnn1": {
+   "n_marks": 617,
+   "marks_sha256": "000b863fbf980718b5e887a99452aca60fce2a495f036fa43e79a0a1c0be0891",
+   "probs_sha256": "32fb0bb343bbbbe830e2e813ad6a4a2f01c91b20dfeabee2794dff6a80759a8e",
+   "seconds": 4.269289169000018
+  },
+  "COc1cccc(OCCN2CC[NH+](C[C@@H]3CC=CCC3)CC2)c1": {
+   "n_marks": 814,
+   "marks_sha256": "fa6af27de502e93c4592b42c4f527ba94c4f7abb75aa1cb22ffd6722f5e25043",
+   "probs_sha256": "913d1b37021b12ae98741350497112b45d3e748925ace3f48a0464a6a707cb5c",
+   "seconds": 4.208642402999999
+  },
+  "O=C(NCc1ccccn1)[C@H]1CCCN(C2CC[NH+](CC3CCCCC3)CC2)C1": {
+   "n_marks": 1077,
+   "marks_sha256": "08ed14b86837018be8d7c4aafad9de7a47ffa59a06c12833ed1d12187466d9cc",
+   "probs_sha256": "0c4119c6fb24be238125e3e772509b51b7e6f7af6fb751023d62df558e299a7e",
+   "seconds": 6.564513720000008
+  },
+  "O=C([O-])/C=C\\c1ccc(OCc2ccc(Br)cc2)cc1": {
+   "n_marks": 365,
+   "marks_sha256": "3ffc38af102ba1a29e8f302bba0cb0a5a7da39b4a6c20016a955ce61ade829fd",
+   "probs_sha256": "3c2ddb20033ee062405a30d441534eb1f9e81f02acbd3fb8bc02341bd9ef1a0a",
+   "seconds": 2.9744433609999987
+  },
+  "CC(C)Oc1ccc(C(=O)NC(=S)NC(C)(C)C)cc1Br": {
+   "n_marks": 608,
+   "marks_sha256": "3ce903dac312922e9eb32dadde2dd33c33a26edcf13e8f458f44b757f731a8b2",
+   "probs_sha256": "84129824a7325d0e6df75e0a1cb24c90d9bda66eec4b61219457c045657397b9",
+   "seconds": 2.8297490100000005
+  },
+  "COc1cccc(OCCNC(=O)c2c(C)nc(C(C)(C)C)[nH]c2=O)c1": {
+   "n_marks": 702,
+   "marks_sha256": "114584e156a2c8a4852583ccc34feeac31d5ddee020e0f7dce5bda44350be03e",
+   "probs_sha256": "f1de40fdd411fd8f5a9ee5ae779d91d9f142baa61af832e04f57c7cb1cce99ee",
+   "seconds": 4.556544461000016
+  },
+  "COc1ccc(-c2n[nH]c(NCc3ccco3)nc2=O)cc1": {
+   "n_marks": 425,
+   "marks_sha256": "7491c2bd3d399f568cec69dd8fdd7eb3e5d71b5086a5fc935c5543c705fc66a7",
+   "probs_sha256": "4bb86604a0bd37085cfb97f1fdc1f42cf6dc27989697e7b843a0419f3ef1a052",
+   "seconds": 3.3872245289999796
+  },
+  "C[C@@H]1Oc2ccccc2O[C@@H]1C(=O)Nc1nc2c(F)cccc2s1": {
+   "n_marks": 400,
+   "marks_sha256": "1f57713a23d57e3be530a1b9a4c31cc1a69212d89506b6bad6553c45e1df8203",
+   "probs_sha256": "2f623affad8d94c4965ad11db0c0ba87f51dd6493696fb39baaef8574c11a57e",
+   "seconds": 4.513189084000004
+  },
+  "C[C@H]1[C@@H](c2ccccc2)CCN1Cc1ncn(-c2ccccc2)n1": {
+   "n_marks": 614,
+   "marks_sha256": "1078d19606003ba42f83d72001faf8e02ae3c531fc7b15201cd0716f965b470b",
+   "probs_sha256": "25acd6bc704368b7773b02b78aecbdebeb86a0e1be2090304edbffeeea687997",
+   "seconds": 4.868472244000003
+  },
+  "O=C1CN(CC(=O)N2CCC(c3[nH+]ccn3Cc3ccncc3)CC2)C(=O)N1": {
+   "n_marks": 632,
+   "marks_sha256": "e92565eb1581533bde429929d817f220f7b1011137d00ac6bf039cccb83db7e5",
+   "probs_sha256": "07c9df8e05a70a8f68fb5b4fb57af13d08e8c0c37c2330f792640f074d3e4da1",
+   "seconds": 5.566235689999985
+  },
+  "COc1cccc(C(=O)Nc2c3c(nn2-c2ccc(F)cc2)CSC3)c1": {
+   "n_marks": 487,
+   "marks_sha256": "c66b8676283a50506e8a68c21956730c5d754bed8e18f7227ad12c3ee4add956",
+   "probs_sha256": "ea4576539f82440f2c75b7294d3320441f00803d58743d731b4223f2b16c944c",
+   "seconds": 5.075406980999986
+  },
+  "COCCn1nc([C@@H]2CCCN(C(=O)c3cn(C)nn3)C2)n(C2CC2)c1=O": {
+   "n_marks": 740,
+   "marks_sha256": "7d3b7a8bc9075e97840bd553d57e5329083e5329e62e636f56dbff9355f4c861",
+   "probs_sha256": "9612c22ffdfa652886f37ffcc23a1e100c9f09403abae728761cf09a099d7b52",
+   "seconds": 4.842697622000003
+  },
+  "N#C[C@H](C(=O)c1ccc(OCC2CC2)cc1)c1nnc2n1CCCCC2": {
+   "n_marks": 618,
+   "marks_sha256": "6b2c72f9a1f86f3e7fcee1e0aded726dc056a871ad2f7d492342eae178bfb0da",
+   "probs_sha256": "442b002e1a3a26e9c6164842dbce2198138fbec3c3e4f2775ee00e209d236a5f",
+   "seconds": 4.6840373040000145
+  },
+  "C[C@@H](Sc1ccccc1)C(=O)N(C)[C@@H](C)c1ccco1": {
+   "n_marks": 519,
+   "marks_sha256": "492275c3926f48968c7d8f54ebdc73a6af222cff786989921effdca17a58fa33",
+   "probs_sha256": "848704b0e814d2aab3aa270a69c99627da4a15ba1e5c185da92f10d9327287cd",
+   "seconds": 2.7712110769999754
+  },
+  "Clc1cccc(C[NH+]2CCC(C[NH+]3CCCC3)CC2)n1": {
+   "n_marks": 593,
+   "marks_sha256": "b00bbf16f3149c3854a5e4eab598940c7ae017469b38acf073f649b376150522",
+   "probs_sha256": "4650e57cc84f8c11890ae9dab8ef88aff53ec4e7374ead3b3ad86ba3433e0fb3",
+   "seconds": 2.91782108700005
+  },
+  "COCCn1c(S)nnc1Cc1ccc(OC)c(OC)c1": {
+   "n_marks": 537,
+   "marks_sha256": "8743e06222c4ea5ec698477a2325fd7f446c93686193b45cce1ea9602fab1fe5",
+   "probs_sha256": "f756c6580f9b21d76fdc252e223185156b64c73c318e9296df632ad767b88ef8",
+   "seconds": 2.955286913000009
+  },
+  "C[C@@H]1C[NH+]=C(N2CCN(C(=O)CNc3ccc(C#N)cc3)CC2)S1": {
+   "n_marks": 576,
+   "marks_sha256": "04e50853abbb2812ed230941f370075b8b3de3338b9dc90d21a71af98d71cbff",
+   "probs_sha256": "9d71060a9d6e45aa1cf65b81b1a795e2122c708b37c197372143834dfcabc8db",
+   "seconds": 3.9200478299999872
+  },
+  "CN(C(=O)CCSc1ccccc1F)[C@H]1CCN(C(=O)OC(C)(C)C)C1": {
+   "n_marks": 783,
+   "marks_sha256": "fa664f0754ce98cbe54128c96bca67226fa24bc0340c82f9152db7e6b35e7094",
+   "probs_sha256": "0f9becc54646235b0f25de440b1a3700423c9e3e4024730acc1495c7e7cd0758",
+   "seconds": 4.534385018000023
+  },
+  "Cc1cc(NC(=O)Cc2ccon2)nc2nc(C(F)(F)F)nn12": {
+   "n_marks": 360,
+   "marks_sha256": "91b89f5ad9ab60d8dd613f7f3f483afa77384c66e141fdb350b10556eba0246e",
+   "probs_sha256": "01edc4848004972569f4ecbf2fdb840f64a64060b9e492013f7a6b81288557e8",
+   "seconds": 3.3868086039999525
+  }
+ },
+ "mean_seconds": 4.201015195224999
+}
