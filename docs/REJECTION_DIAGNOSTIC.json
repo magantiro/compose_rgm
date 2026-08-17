@@ -1,0 +1,70 @@
+{
+ "rate_factorization": "hierarchical",
+ "tables": {
+  "grow_connected": {
+   "alpha_median": 0.0951744135061144,
+   "n_legal_mean": 281.0,
+   "n_total_mean": 2160.0,
+   "alpha_p10": 0.023034758860305798,
+   "alpha_p90": 0.25833981756721486,
+   "alpha_cheap_median": 0.12943441723628699
+  },
+  "atom_delete": {
+   "alpha_median": 0.19383473763168352,
+   "n_legal_mean": 6.875,
+   "n_total_mean": 48.0,
+   "alpha_p10": 0.09827248213416712,
+   "alpha_p90": 0.4165587660702203,
+   "alpha_cheap_median": 0.5983810826266628
+  },
+  "atom_restate": {
+   "alpha_median": 0.3888704471815093,
+   "n_legal_mean": 175.25,
+   "n_total_mean": 720.0,
+   "alpha_p10": 0.023251339657910344,
+   "alpha_p90": 0.46552167071068745,
+   "alpha_cheap_median": 0.4574935431804926
+  },
+  "bond_reorder": {
+   "alpha_median": 0.0004961844013089588,
+   "n_legal_mean": 5.75,
+   "n_total_mean": 6912.0,
+   "alpha_p10": 6.89603942851818e-05,
+   "alpha_p90": 0.0009292345530396451,
+   "alpha_cheap_median": NaN
+  },
+  "bond_reroute": {
+   "alpha_median": 0.04733088860061469,
+   "n_legal_mean": 64.0,
+   "n_total_mean": 2304.0,
+   "alpha_p10": 0.017805313952885943,
+   "alpha_p90": 0.14290326165898606,
+   "alpha_cheap_median": 0.2458547928241173
+  },
+  "cycle_insert": {
+   "alpha_median": 0.0007502315710864962,
+   "n_legal_mean": 108.0,
+   "n_total_mean": 6912.0,
+   "alpha_p10": 0.00021186339118566474,
+   "alpha_p90": 0.07717194956886976,
+   "alpha_cheap_median": 0.008287280451698062
+  },
+  "cycle_attach": {
+   "alpha_median": 0.006477324920677432,
+   "n_legal_mean": 13.625,
+   "n_total_mean": 2304.0,
+   "alpha_p10": 0.0015583549095677647,
+   "alpha_p90": 0.008831988813027353,
+   "alpha_cheap_median": NaN
+  },
+  "ring_system_restate": {
+   "alpha_median": 1.0,
+   "n_legal_mean": 2.125,
+   "n_total_mean": 2.125,
+   "alpha_p10": 1.0,
+   "alpha_p90": 1.0,
+   "alpha_cheap_median": 1.0
+  }
+ },
+ "n_states": 8
+}
