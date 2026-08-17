@@ -1,0 +1,57 @@
+{
+  "purpose": "fast exact-parity set for implementation optimizations; replaces replaying the 109-slot cohort after every edit",
+  "rule": "cheapest record that exercises each property, so parity stays minutes",
+  "sentinels": {
+    "fast_success": {
+      "source": 46,
+      "slot": 1,
+      "seconds_at_current_speed": 258,
+      "transitions": 400,
+      "resamples": 1,
+      "absorbed": 23,
+      "success": true,
+      "extinct": false
+    },
+    "resample_heavy": {
+      "source": 51,
+      "slot": 0,
+      "seconds_at_current_speed": 649,
+      "transitions": 428,
+      "resamples": 11,
+      "absorbed": 22,
+      "success": true,
+      "extinct": false
+    },
+    "extinct": {
+      "source": 43,
+      "slot": 1,
+      "seconds_at_current_speed": 261,
+      "transitions": 768,
+      "resamples": 3,
+      "absorbed": 0,
+      "success": false,
+      "extinct": true
+    },
+    "rung2_conversion": {
+      "source": 46,
+      "slot": 1,
+      "seconds_at_current_speed": 258,
+      "transitions": 400,
+      "resamples": 1,
+      "absorbed": 23,
+      "success": true,
+      "extinct": false
+    },
+    "ordinary_success": {
+      "source": 53,
+      "slot": 0,
+      "seconds_at_current_speed": 459,
+      "transitions": 464,
+      "resamples": 1,
+      "absorbed": 19,
+      "success": true,
+      "extinct": false
+    }
+  },
+  "subset_arg": "46,51,43,46,53"
+}
