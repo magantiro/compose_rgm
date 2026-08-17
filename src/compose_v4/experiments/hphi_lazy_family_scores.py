@@ -47,6 +47,11 @@ __all__ = [
     "lazy_atom_delete_logits",
     "lazy_atom_restate_logits",
     "lazy_grow_connected_logits",
+    "lazy_bond_reorder_logits",
+    "lazy_cycle_insert_logits",
+    "lazy_cycle_attach_logits",
+    "lazy_ring_system_restate_logits",
+    "lazy_grow_root_logits",
     "LAZY_SCORERS",
 ]
 
@@ -124,11 +129,82 @@ def lazy_grow_connected_logits(model, node: Tensor, global_state: Tensor,
     return logits + model.connected_atom_order_log_prior.unsqueeze(0).unsqueeze(0)
 
 
+def lazy_bond_reorder_logits(model, node: Tensor, global_state: Tensor,
+                             pair: Tensor, batch) -> Tensor:
+    """Reorder head over PAIR features, plus the per-order log prior.
+
+    Takes `pair`, not `node` -- a detail invisible from the family's name and
+    another way a base-class-only reading goes wrong. The prior carries three
+    leading unsqueezes to broadcast over batch and both slot axes.
+    """
+    return model.reorder_head(pair) + model.bond_reorder_log_prior.unsqueeze(
+        0
+    ).unsqueeze(0).unsqueeze(0)
+
+
+def lazy_cycle_insert_logits(model, node: Tensor, global_state: Tensor,
+                             pair: Tensor, batch) -> Tensor:
+    """Cycle-close head over pair features. No prior, no residual."""
+    return model.cycle_close_head(pair)
+
+
+def lazy_cycle_attach_logits(model, node: Tensor, global_state: Tensor,
+                             pair: Tensor, batch) -> Tensor:
+    """Cycle-open head, whose SIGNATURE depends on the scorer mode.
+
+    `pair_linear` is a plain projection of the pair features; the exact
+    bond-contextual scorer additionally consumes the global state and the stored
+    bond orders. Choosing the wrong branch produces a finite, wrong score.
+    """
+    if model.cycle_open_scorer_mode == "pair_linear":
+        return model.cycle_open_head(pair).squeeze(-1)
+    return model.cycle_open_head(pair, global_state, batch.bonds)
+
+
+def lazy_ring_system_restate_logits(model, node: Tensor, global_state: Tensor,
+                                    pair: Tensor, batch) -> Tensor:
+    """Base ring-restate logits PLUS the contextual residual.
+
+    The runtime class is ContextualRingRestateFactorizedTraceletRateModel, which
+    overrides `_action_tables` and adds
+
+        logits["ring_system_restate"] += ring_restate_context_head(context)
+
+    This is the SECOND residual of its kind, after bond_reroute's. Both are
+    invisible from the base class, and both were found only by auditing the
+    runtime MRO rather than reading the base implementation.
+    """
+    base, _mask = model._ring_restate_logits(batch, pair, global_state)
+    if not hasattr(model, "ring_restate_context_head"):
+        return base
+    context = model._ring_restate_context_features(batch, node, pair)
+    return base + model.ring_restate_context_head(context).squeeze(-1)
+
+
+def lazy_grow_root_logits(model, node: Tensor, global_state: Tensor,
+                          pair: Tensor, batch) -> Tensor:
+    """Root-insertion head over the global state, plus the per-class prior."""
+    return model.grow_root_head(global_state) + model.root_atom_log_prior.unsqueeze(0)
+
+
 #: table name -> scorer. Keyed by the `_action_tables` table name so parity can
 #: be checked by direct dictionary lookup rather than by a hand-maintained map.
+#:
+#: Covers every family that carries realized probability mass. Two of them --
+#: bond_reroute and ring_system_restate -- require residuals added by subclasses
+#: in the runtime MRO:
+#:
+#:     ContextualRingRestateFactorizedTraceletRateModel   <- runtime builds this
+#:       -> RelationalRerouteFactorizedTraceletRateModel      + reroute residual
+#:            -> FactorizedTraceletRateModel                   base, all families
 LAZY_SCORERS = {
     "bond_reroute": lazy_bond_reroute_logits,
     "atom_delete": lazy_atom_delete_logits,
     "atom_restate": lazy_atom_restate_logits,
     "grow_connected": lazy_grow_connected_logits,
+    "bond_reorder": lazy_bond_reorder_logits,
+    "cycle_insert": lazy_cycle_insert_logits,
+    "cycle_attach": lazy_cycle_attach_logits,
+    "ring_system_restate": lazy_ring_system_restate_logits,
+    "grow_root": lazy_grow_root_logits,
 }

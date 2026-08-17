@@ -130,7 +130,14 @@ def parity(srcs: list[str]) -> dict[str, Any]:
                 if mk is not None and tuple(mk.shape) == tuple(ref.shape):
                     mk = mk.bool()
                     s["support_elements"] = s.get("support_elements", 0) + int(mk.sum())
-                    if bool(mk.any()):
+                    if not bool(mk.any()):
+                        # An EMPTY support is vacuously identical: there are no
+                        # coordinates to disagree on, and a family with no legal
+                        # action can never be sampled. grow_root is empty on
+                        # every non-null state, so counting it as a failure
+                        # would be a defect in the criterion, not the scorer.
+                        s["support_identical"] = s.get("support_identical", 0) + 1
+                    else:
                         d_sup = float((got[mk] - ref[mk]).abs().max())
                         s["worst_on_support"] = max(
                             s.get("worst_on_support", 0.0), d_sup)

@@ -40,6 +40,56 @@
    "worst_on_support": 0.0,
    "support_identical": 16,
    "support_elements": 4232
+  },
+  "bond_reorder": {
+   "states": 16,
+   "identical": 16,
+   "elements": 110592,
+   "worst": 0.0,
+   "shape_mismatch": 0,
+   "worst_on_support": 0.0,
+   "support_identical": 16,
+   "support_elements": 65
+  },
+  "cycle_insert": {
+   "states": 16,
+   "identical": 16,
+   "elements": 110592,
+   "worst": 0.0,
+   "shape_mismatch": 0,
+   "worst_on_support": 0.0,
+   "support_identical": 16,
+   "support_elements": 1504
+  },
+  "cycle_attach": {
+   "states": 16,
+   "identical": 16,
+   "elements": 36864,
+   "worst": 0.0,
+   "shape_mismatch": 0,
+   "worst_on_support": 0.0,
+   "support_identical": 16,
+   "support_elements": 241
+  },
+  "ring_system_restate": {
+   "states": 16,
+   "identical": 16,
+   "elements": 31,
+   "worst": 0.0,
+   "shape_mismatch": 0,
+   "worst_on_support": 0.0,
+   "support_identical": 16,
+   "support_elements": 31
+  },
+  "grow_root": {
+   "states": 16,
+   "identical": 16,
+   "elements": 240,
+   "worst": 0.0,
+   "shape_mismatch": 0,
+   "worst_on_support": 0.0,
+   "support_identical": 16,
+   "support_elements": 0
   }
  }
 }
