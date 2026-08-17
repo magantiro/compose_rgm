@@ -360,7 +360,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         build_features, in_region,
     )
     from compose_v4.experiments.hphi_smc import (
-        EXTINCT_NO_HIT, N_PARTICLES, effective_sample_size,
+        EXTINCT_NO_HIT, N_PARTICLES as N_PARTICLES_FROZEN, effective_sample_size,
         normalized_weights, should_resample, systematic_resample,
         terminal_output,
     )
@@ -381,6 +381,16 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     source = task["source"]
     idx = int(task["index"])
     out_p = Path(RUN_ROOT) / task.get("out_dir", OUT_DIR)
+    # The particle count DEFAULTS to the frozen 32 and is only overridden by a
+    # task that explicitly asks. Preregistration section 13 freezes N = 32 and
+    # states that no particle-count sweep is permitted, so any run passing this
+    # is an amended, declared efficiency study and says so in its provenance --
+    # never a silent retune of the operating point.
+    n_particles = int(task.get("n_particles", N_PARTICLES_FROZEN))
+    if n_particles != N_PARTICLES_FROZEN:
+        print(f"src{idx}: NON-FROZEN N={n_particles} "
+              f"(frozen default is {N_PARTICLES_FROZEN}); "
+              f"declared efficiency study", flush=True)
     t0 = time.perf_counter()
 
     gen = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
@@ -511,23 +521,23 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         # into the algorithm; removing every print would leave the sampler
         # bit-identical.
         t_slot = time.perf_counter()
-        print(f"    [src{idx} slot{slot:>2}] START N={N_PARTICLES} H={HORIZON}",
+        print(f"    [src{idx} slot{slot:>2}] START N={n_particles} H={HORIZON}",
               flush=True)
         rng = np.random.default_rng(seed_for("smc", source, slot))
         q0, s0 = props(src_canon)
-        states = [src_canon] * N_PARTICLES
-        absorbed = [in_region(q0, s0, REGION)] * N_PARTICLES
-        log_w = np.zeros(N_PARTICLES)
+        states = [src_canon] * n_particles
+        absorbed = [in_region(q0, s0, REGION)] * n_particles
+        log_w = np.zeros(n_particles)
         transitions: list[dict[str, Any]] = []
         sync: list[dict[str, Any]] = []
 
         # CARRIED h. carried[i] holds h(states[i], current budget) when known.
         # At step t+1 the needed h(x_{t+1}, b') is EXACTLY the h(y, b-1) already
         # computed at step t, since b-1 == b'. Exact, not an approximation.
-        carried: list[float | None] = [None] * N_PARTICLES
+        carried: list[float | None] = [None] * n_particles
         for step in range(HORIZON):
             b = HORIZON - step
-            for i in range(N_PARTICLES):
+            for i in range(n_particles):
                 if absorbed[i]:
                     continue
                 x = states[i]
@@ -553,7 +563,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                     absorbed[i] = True
                 if (i + 1) % 8 == 0:
                     print(f"    [src{idx} slot{slot:>2}] step {step:>2} "
-                          f"particle {i + 1:>2}/{N_PARTICLES} "
+                          f"particle {i + 1:>2}/{n_particles} "
                           f"h(x)={hx:.4f} h(y)={hy:.4f} "
                           f"{time.perf_counter() - t_slot:6.1f}s", flush=True)
                 transitions.append({
@@ -566,20 +576,20 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
             w = normalized_weights(log_w)
             entry: dict[str, Any] = {
                 "step": step, "ess": float(effective_sample_size(w)),
-                "resampled": bool(should_resample(w, N_PARTICLES)),
+                "resampled": bool(should_resample(w, n_particles)),
                 "n_absorbed": int(sum(absorbed))}
             if entry["resampled"]:
                 ridx = systematic_resample(w, rng)
                 states = [states[j] for j in ridx]
                 absorbed = [absorbed[j] for j in ridx]
                 carried = [carried[j] for j in ridx]   # travels with the state
-                log_w = np.zeros(N_PARTICLES)
+                log_w = np.zeros(n_particles)
                 entry["indices"] = [int(v) for v in ridx]
                 entry["n_unique"] = len({int(v) for v in ridx})
                 entry["n_unique_states"] = len(set(states))
             sync.append(entry)
             print(f"    [src{idx} slot{slot:>2}] step {step:>2}/{HORIZON} "
-                  f"ESS {entry['ess']:5.1f}/{N_PARTICLES} "
+                  f"ESS {entry['ess']:5.1f}/{n_particles} "
                   f"absorbed {entry['n_absorbed']:>2} "
                   f"{'RESAMPLE' if entry['resampled'] else '        '} "
                   f"uniq_states {entry.get('n_unique_states', '-'):>3} "
@@ -601,7 +611,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         else:
             ret = states[j]
         w = normalized_weights(log_w) if status != EXTINCT_NO_HIT \
-            else np.zeros(N_PARTICLES)
+            else np.zeros(n_particles)
         rq, rs = props(ret)
         return {"slot": slot, "returned": ret,
                 "returned_index": (int(j) if j is not None else None),
@@ -619,11 +629,11 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                 "n_absorbed": int(sum(absorbed)),
                 "sync": sync, "transitions": transitions,
                 "seed": seed_for("smc", source, slot),
-                "n_particles": N_PARTICLES, "horizon": HORIZON}
+                "n_particles": n_particles, "horizon": HORIZON}
 
     provenance = {
         "protocol": PROTOCOL, "region": list(REGION), "horizon": HORIZON,
-        "n_particles": N_PARTICLES, "git_commit": task.get("git_commit", "?"),
+        "n_particles": n_particles, "git_commit": task.get("git_commit", "?"),
         "output_rule": "sampled from the normalized terminal particle measure; "
                        "NOT best-of-population",
         "proposal_law": "frozen R_theta ALONE; h_phi enters only via the "
@@ -712,7 +722,7 @@ def drive(tasks: list[dict[str, Any]], out_dir: str = OUT_DIR) -> dict[str, Any]
 
 @app.local_entrypoint()
 def main(limit: int = 1, out_dir: str = OUT_DIR, workers: int = 8,
-         n_slots: int = 20, subset: str = "") -> None:
+         n_slots: int = 20, subset: str = "", n_particles: int = 0) -> None:
     import subprocess
 
     commit = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
@@ -723,6 +733,18 @@ def main(limit: int = 1, out_dir: str = OUT_DIR, workers: int = 8,
             if s.strip()]
     tasks = [{"index": i, "source": s, "workers": workers, "n_slots": n_slots,
               "git_commit": commit} for i, s in enumerate(srcs)]
+    # 0 means "use the frozen 32". A non-zero value is a DECLARED efficiency
+    # study under an amendment to preregistration section 13, which otherwise
+    # freezes N = 32 and forbids a particle-count sweep. It is refused into the
+    # default output directory so an amended arm can never be silently mixed
+    # into the frozen cohort.
+    if n_particles:
+        if out_dir == OUT_DIR:
+            raise SystemExit(
+                "a non-frozen particle count needs its own --out-dir; refusing "
+                "to write an amended arm into the frozen cohort")
+        for t in tasks:
+            t["n_particles"] = int(n_particles)
     if subset:
         keep = {int(v) for v in subset.split(",")}
         tasks = [t for t in tasks if t["index"] in keep]
@@ -730,7 +752,8 @@ def main(limit: int = 1, out_dir: str = OUT_DIR, workers: int = 8,
     else:
         tasks = tasks[:limit]
     print(f"SLOW REFERENCE molecular SMC: {len(tasks)} source(s) x {n_slots} "
-          f"independent runs x N=32 particles, H={HORIZON}, region {REGION}")
+          f"independent runs x N={n_particles or 32} particles, "
+          f"H={HORIZON}, region {REGION}")
     print("proposals from frozen R_theta ALONE; h_phi enters only via the "
           "Feynman-Kac weight")
     call = drive.spawn(tasks, out_dir)
