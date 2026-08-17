@@ -1,0 +1,92 @@
+{
+ "n": 45,
+ "by_stratum": {
+  "ALL": {
+   "24": {
+    "contact_runs": 12,
+    "n_runs": 90,
+    "contact_particles": 12,
+    "sources_with_contact": 10,
+    "n_sources": 45,
+    "success": 10,
+    "work": 66615
+   },
+   "32": {
+    "contact_runs": 16,
+    "n_runs": 90,
+    "contact_particles": 24,
+    "sources_with_contact": 12,
+    "n_sources": 45,
+    "success": 12,
+    "work": 87579
+   },
+   "40": {
+    "contact_runs": 19,
+    "n_runs": 90,
+    "contact_particles": 26,
+    "sources_with_contact": 14,
+    "n_sources": 45,
+    "success": 14,
+    "work": 107519
+   }
+  },
+  "marginal": {
+   "24": {
+    "contact_runs": 2,
+    "n_runs": 16,
+    "contact_particles": 2,
+    "sources_with_contact": 2,
+    "n_sources": 8,
+    "success": 2,
+    "work": 12017
+   },
+   "32": {
+    "contact_runs": 3,
+    "n_runs": 16,
+    "contact_particles": 5,
+    "sources_with_contact": 3,
+    "n_sources": 8,
+    "success": 3,
+    "work": 15710
+   },
+   "40": {
+    "contact_runs": 4,
+    "n_runs": 16,
+    "contact_particles": 5,
+    "sources_with_contact": 3,
+    "n_sources": 8,
+    "success": 3,
+    "work": 19270
+   }
+  },
+  "hard": {
+   "24": {
+    "contact_runs": 10,
+    "n_runs": 74,
+    "contact_particles": 10,
+    "sources_with_contact": 8,
+    "n_sources": 37,
+    "success": 8,
+    "work": 54598
+   },
+   "32": {
+    "contact_runs": 13,
+    "n_runs": 74,
+    "contact_particles": 19,
+    "sources_with_contact": 9,
+    "n_sources": 37,
+    "success": 9,
+    "work": 71869
+   },
+   "40": {
+    "contact_runs": 15,
+    "n_runs": 74,
+    "contact_particles": 21,
+    "sources_with_contact": 11,
+    "n_sources": 37,
+    "success": 11,
+    "work": 88249
+   }
+  }
+ }
+}
