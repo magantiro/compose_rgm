@@ -71,13 +71,13 @@ image = _base_image.env(
     {"PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}", "OMP_NUM_THREADS": "1"})
 app = modal.App("hphi-archive")
 RUN_ROOT = "/artifacts/editing_v2/r_theta_run"
-OUT_DIR = "hphi_we_v8"
+OUT_DIR = "hphi_slackwe_v9"
 TIME_POINT, CANONICAL_SLOTS = 0.5, 48
 HORIZON = 24
 N_PARTICLES = 32
 REGION = (0.90, 0.40)
 N_CANDIDATES = 4
-PROTOCOL = "hphi-we-v8"
+PROTOCOL = "hphi-slackwe-v9"
 MEM_MIB = int(4.5 * 1024)
 
 _RT: dict[str, Any] = {}
@@ -179,6 +179,10 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     idx = int(task["index"])
     horizon = int(task.get("horizon", HORIZON))
     use_we = bool(task.get("we"))
+    # FIXED-SCHEDULE resampling budgets. The ESS trigger is NOT used: 108 of 111
+    # hard runs never crossed ESS < N/2, so a trigger-driven resampler is a
+    # no-op exactly where it is needed.
+    WE_BUDGETS = (12, 8, 4)
     helpers = make_helpers(model, time_point=float(TIME_POINT),
                            canonical_slots=CANONICAL_SLOTS)
     _TABLE_FAMILY = {"grow_connected": "atom_insert"}
@@ -286,7 +290,10 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
             if np.all(np.isneginf(log_w)):
                 break
             w = normalized_weights(log_w)
-            if should_resample(w, N_PARTICLES):
+            remaining = budget0 - step - 1
+            fire = (remaining in WE_BUDGETS) if use_we else should_resample(
+                w, N_PARTICLES)
+            if fire:
                 if use_we:
                     # WE: resample WITHIN committor strata. Absorbed particles
                     # keep their slots and weights untouched -- they are not
@@ -299,9 +306,19 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                     lw = np.where(live_mask, np.exp(log_w - shift), 0.0)
                     n_live = int(live_mask.sum())
                     if n_live >= 2:
+                        # PROGRESS COORDINATE IS TARGET SLACK, not h_phi.
+                        # Mining gave AUC 0.812 for slack at 12 steps out
+                        # against 0.556 for h_phi: h_phi is a short-range
+                        # committor that flattens at range, which is why
+                        # stratifying on it would be arbitrary. Identical
+                        # scalar to the analysis, deliberately not redefined.
+                        def slack_score(smi):
+                            q, sm = props(smi)
+                            return -(max(0.0, REGION[0] - q)
+                                     + max(0.0, REGION[1] - sm))
+
                         parents, new_w, diag = we_resample(
-                            list(states), lw,
-                            lambda k: cur_h.get(k, 0.0), rng, n_slots=n_live)
+                            list(states), lw, slack_score, rng, n_slots=n_live)
                         if parents:
                             ns, na = list(states), list(absorbed)
                             nl = log_w.copy()
@@ -496,10 +513,6 @@ def main(smoke: bool = False, out_dir: str = OUT_DIR) -> None:
     panel = json.loads((root / "docs/TREE_PANEL_12.json").read_text())
     keep = [i for i in keep if i in set(panel["all"])]
     if smoke:
-        # Smoke on sources that RESAMPLE. Source 0 never drops below ESS < N/2,
-        # so the WE branch never executed and the first smoke passed trivially
-        # -- a clean result from code that never ran. Marginal sources resample
-        # heavily, which is the only way to exercise the new path.
         keep = panel["panel"]["marginal"][:2]
     tasks = [{"index": i, "source": srcs[i], "stratum": strat[i],
               "arm": "restart", "horizon": 24, "we": we, "out_dir": out_dir}
