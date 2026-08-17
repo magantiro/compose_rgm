@@ -19,5 +19,7 @@
   "resamples": 14,
   "runs_with_zero": 7,
   "succ": 8
- }
+ },
+ "_reading": "CORRECTION. An earlier note said two independent signals showed 'no route'. That was overstated. Zero observed hits means our SEARCH did not find a route; flat h_phi means our learned ESTIMATOR does not distinguish routes. Both are equally consistent with an inadequate controller, and H=40 produced new hard-source contacts (8/37 -> 11/37), which is direct evidence that some supposedly hopeless sources DID have routes once the space widened.",
+ "_we_scope": "The refutation applies to the v1 design -- ESS-triggered, h_phi-stratified WE -- not to weighted ensemble generally. Classic WE can resample on a fixed schedule. The binding problem is the PROGRESS SIGNAL: stratifying particles whose h_phi are nearly identical is arbitrary whenever it is done."
 }
