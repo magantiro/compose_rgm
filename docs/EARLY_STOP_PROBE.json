@@ -1,0 +1,1180 @@
+{
+ "equivalence_holds": true,
+ "mismatches": [],
+ "n_records": 130,
+ "n_success": 27,
+ "cohort_saving": 0.049355823855862124,
+ "success_saving": 0.3679915122827063,
+ "rows": [
+  {
+   "file": "000_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "000_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "001_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "001_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "002_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "002_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "003_smc_00.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 259,
+   "n_to_first_hit": 128,
+   "first_hit_step": 3,
+   "horizon": 24
+  },
+  {
+   "file": "004_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "004_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "005_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "005_smc_01.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 479,
+   "n_to_first_hit": 224,
+   "first_hit_step": 6,
+   "horizon": 24
+  },
+  {
+   "file": "006_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "006_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "007_smc_00.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 744,
+   "n_to_first_hit": 736,
+   "first_hit_step": 22,
+   "horizon": 24
+  },
+  {
+   "file": "008_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "008_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "008_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "009_smc_00.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 300,
+   "n_to_first_hit": 128,
+   "first_hit_step": 3,
+   "horizon": 24
+  },
+  {
+   "file": "010_smc_00.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 438,
+   "n_to_first_hit": 288,
+   "first_hit_step": 8,
+   "horizon": 24
+  },
+  {
+   "file": "011_smc_00.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 445,
+   "n_to_first_hit": 160,
+   "first_hit_step": 4,
+   "horizon": 24
+  },
+  {
+   "file": "012_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "012_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "013_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "013_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "014_smc_00.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 448,
+   "n_to_first_hit": 256,
+   "first_hit_step": 7,
+   "horizon": 24
+  },
+  {
+   "file": "015_smc_00.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 262,
+   "n_to_first_hit": 32,
+   "first_hit_step": 0,
+   "horizon": 24
+  },
+  {
+   "file": "016_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "016_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "016_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "017_smc_00.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 201,
+   "n_to_first_hit": 96,
+   "first_hit_step": 2,
+   "horizon": 24
+  },
+  {
+   "file": "018_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "018_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "018_smc_02.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 388,
+   "n_to_first_hit": 160,
+   "first_hit_step": 4,
+   "horizon": 24
+  },
+  {
+   "file": "019_smc_00.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 479,
+   "n_to_first_hit": 320,
+   "first_hit_step": 9,
+   "horizon": 24
+  },
+  {
+   "file": "020_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "020_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "021_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "021_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "021_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "022_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "022_smc_01.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 593,
+   "n_to_first_hit": 544,
+   "first_hit_step": 16,
+   "horizon": 24
+  },
+  {
+   "file": "023_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "023_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "024_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "024_smc_01.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 743,
+   "n_to_first_hit": 736,
+   "first_hit_step": 22,
+   "horizon": 24
+  },
+  {
+   "file": "025_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "025_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "025_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "026_smc_00.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 483,
+   "n_to_first_hit": 288,
+   "first_hit_step": 8,
+   "horizon": 24
+  },
+  {
+   "file": "027_smc_00.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 465,
+   "n_to_first_hit": 288,
+   "first_hit_step": 8,
+   "horizon": 24
+  },
+  {
+   "file": "028_smc_00.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 504,
+   "n_to_first_hit": 384,
+   "first_hit_step": 11,
+   "horizon": 24
+  },
+  {
+   "file": "029_smc_00.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 400,
+   "n_to_first_hit": 32,
+   "first_hit_step": 0,
+   "horizon": 24
+  },
+  {
+   "file": "030_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "030_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "031_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "031_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "031_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "032_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "032_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "032_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "033_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "033_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "033_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "034_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "034_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "034_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "035_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "035_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "035_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "036_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "036_smc_01.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 498,
+   "n_to_first_hit": 192,
+   "first_hit_step": 5,
+   "horizon": 24
+  },
+  {
+   "file": "037_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "037_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "037_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "038_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "038_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "039_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "039_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "039_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "040_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "040_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "041_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "041_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "042_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "042_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "042_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "043_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "043_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "043_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "044_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "044_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "044_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "045_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "045_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "045_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "046_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "046_smc_01.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 400,
+   "n_to_first_hit": 256,
+   "first_hit_step": 7,
+   "horizon": 24
+  },
+  {
+   "file": "047_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "047_smc_01.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 658,
+   "n_to_first_hit": 608,
+   "first_hit_step": 18,
+   "horizon": 24
+  },
+  {
+   "file": "048_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "048_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "048_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "049_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "049_smc_01.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 552,
+   "n_to_first_hit": 384,
+   "first_hit_step": 11,
+   "horizon": 24
+  },
+  {
+   "file": "050_smc_00.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 549,
+   "n_to_first_hit": 384,
+   "first_hit_step": 11,
+   "horizon": 24
+  },
+  {
+   "file": "051_smc_00.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 428,
+   "n_to_first_hit": 224,
+   "first_hit_step": 6,
+   "horizon": 24
+  },
+  {
+   "file": "052_smc_00.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 140,
+   "n_to_first_hit": 96,
+   "first_hit_step": 2,
+   "horizon": 24
+  },
+  {
+   "file": "053_smc_00.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 464,
+   "n_to_first_hit": 256,
+   "first_hit_step": 7,
+   "horizon": 24
+  },
+  {
+   "file": "054_smc_00.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 488,
+   "n_to_first_hit": 320,
+   "first_hit_step": 9,
+   "horizon": 24
+  },
+  {
+   "file": "055_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "055_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "055_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "056_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "056_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "056_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "057_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "057_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "058_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "058_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "059_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "059_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "059_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "060_smc_00.json",
+   "success": true,
+   "reached": true,
+   "n_transitions": 445,
+   "n_to_first_hit": 224,
+   "first_hit_step": 6,
+   "horizon": 24
+  },
+  {
+   "file": "061_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "061_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "062_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "062_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "063_smc_00.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "063_smc_01.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  },
+  {
+   "file": "063_smc_02.json",
+   "success": false,
+   "reached": false,
+   "n_transitions": 768,
+   "n_to_first_hit": 768,
+   "first_hit_step": null,
+   "horizon": 24
+  }
+ ]
+}
