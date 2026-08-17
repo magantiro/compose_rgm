@@ -1,0 +1,7 @@
+{
+ "before_mean_s": 4.458171038199995,
+ "after_mean_s": 1.3178154480999922,
+ "speedup": 3.383001045121852,
+ "law_parity": true,
+ "n_states": 10
+}
