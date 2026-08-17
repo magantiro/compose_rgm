@@ -1,0 +1,53 @@
+{
+ "n_states": 120,
+ "n_lazy_ok": 114,
+ "n_failures": 6,
+ "n_returned_edit": 114,
+ "eager_median_ms": 7664.774719000007,
+ "eager_n": 8,
+ "lazy_median_ms": 85.03195099999061,
+ "lazy_p90_ms": 172.96968200002993,
+ "lazy_max_ms": 17815.598437000004,
+ "fallback_fraction": 0.06140350877192982,
+ "resolver_calls_mean": 0.45614035087719296,
+ "family_redraws_mean": 0.008771929824561403,
+ "coordinate_rejections_mean": 0.24561403508771928,
+ "encode_ms_mean": 52.3176613859629,
+ "family_ms_mean": 0.5125132456125732,
+ "mask_ms_mean": 25.034390403510095,
+ "resolver_ms_mean": 4.907812385966824,
+ "by_family": {
+  "grow_connected": {
+   "n": 29,
+   "median_ms": 53.23145300002352
+  },
+  "bond_reroute": {
+   "n": 30,
+   "median_ms": 109.06274100000246
+  },
+  "atom_restate": {
+   "n": 23,
+   "median_ms": 71.23380400000201
+  },
+  "atom_delete": {
+   "n": 20,
+   "median_ms": 100.38986899996871
+  },
+  "cycle_attach": {
+   "n": 5,
+   "median_ms": 197.90002499996717
+  },
+  "bond_reorder": {
+   "n": 4,
+   "median_ms": 73.9412199999947
+  },
+  "ring_system_restate": {
+   "n": 2,
+   "median_ms": 9172.932627000024
+  },
+  "cycle_insert": {
+   "n": 1,
+   "median_ms": 64.70971800001735
+  }
+ }
+}
