@@ -1,0 +1,15 @@
+{
+ "ok": true,
+ "checked": 48,
+ "families": {
+  "atom_insert": 6,
+  "atom_delete": 6,
+  "atom_restate": 6,
+  "bond_reorder": 6,
+  "bond_reroute": 6,
+  "cycle_insert": 6,
+  "cycle_attach": 6,
+  "ring_system_restate": 6
+ },
+ "mismatches": []
+}
