@@ -1,0 +1,124 @@
+{
+ "ok": true,
+ "trajectory_mismatches": [],
+ "checksum_mismatches": [
+  [
+   51,
+   0
+  ],
+  [
+   51,
+   1
+  ],
+  [
+   53,
+   0
+  ],
+  [
+   53,
+   1
+  ]
+ ],
+ "rows": [
+  {
+   "key": [
+    43,
+    0
+   ],
+   "match": true,
+   "cold_seconds": 981.2,
+   "warm_seconds": 43.36,
+   "cross_attempt_hits": 343,
+   "law_calls": 768,
+   "hit_rate": 0.4466145833333333
+  },
+  {
+   "key": [
+    43,
+    1
+   ],
+   "match": true,
+   "cold_seconds": 967.76,
+   "warm_seconds": 43.35,
+   "cross_attempt_hits": 338,
+   "law_calls": 768,
+   "hit_rate": 0.4401041666666667
+  },
+  {
+   "key": [
+    46,
+    0
+   ],
+   "match": true,
+   "cold_seconds": 2431.26,
+   "warm_seconds": 44.68,
+   "cross_attempt_hits": 525,
+   "law_calls": 768,
+   "hit_rate": 0.68359375
+  },
+  {
+   "key": [
+    46,
+    1
+   ],
+   "match": true,
+   "cold_seconds": 1627.05,
+   "warm_seconds": 32.09,
+   "cross_attempt_hits": 266,
+   "law_calls": 400,
+   "hit_rate": 0.665
+  },
+  {
+   "key": [
+    51,
+    0
+   ],
+   "match": false,
+   "cold_seconds": 531.18,
+   "warm_seconds": 25.71,
+   "cross_attempt_hits": 62,
+   "law_calls": 428,
+   "hit_rate": 0.14485981308411214
+  },
+  {
+   "key": [
+    51,
+    1
+   ],
+   "match": false,
+   "cold_seconds": 516.16,
+   "warm_seconds": 28.06,
+   "cross_attempt_hits": 58,
+   "law_calls": 511,
+   "hit_rate": 0.11350293542074363
+  },
+  {
+   "key": [
+    53,
+    0
+   ],
+   "match": false,
+   "cold_seconds": 1081.38,
+   "warm_seconds": 41.24,
+   "cross_attempt_hits": 309,
+   "law_calls": 464,
+   "hit_rate": 0.665948275862069
+  },
+  {
+   "key": [
+    53,
+    1
+   ],
+   "match": false,
+   "cold_seconds": 1502.56,
+   "warm_seconds": 57.74,
+   "cross_attempt_hits": 583,
+   "law_calls": 768,
+   "hit_rate": 0.7591145833333334
+  }
+ ],
+ "cold_seconds": 9638.550000000001,
+ "warm_seconds": 316.23,
+ "cross_attempt_hits": 2484,
+ "law_calls": 4875
+}

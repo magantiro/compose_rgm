@@ -1,0 +1,56 @@
+{
+ "index": 51,
+ "slot": 0,
+ "differing": [
+  {
+   "field": "sync",
+   "len": [
+    24,
+    24
+   ],
+   "first_differing_index": 0,
+   "cold": {
+    "step": 0,
+    "ess": 23.501740360517392,
+    "resampled": false,
+    "n_absorbed": 0
+   },
+   "warm": {
+    "step": 0,
+    "ess": 23.501738704093583,
+    "resampled": false,
+    "n_absorbed": 0
+   }
+  },
+  {
+   "field": "transitions",
+   "len": [
+    428,
+    428
+   ],
+   "first_differing_index": 0,
+   "cold": {
+    "step": 0,
+    "particle": 0,
+    "budget": 24,
+    "x": "CC(C)(CNC(=O)NC(c1ccc(Cl)cc1)c1ccsc1)C(N)=O",
+    "y": "CC(C)(CNC(=O)NC(c1ccc(F)cc1)c1ccsc1)C(N)=O",
+    "h_x_b": 0.01211925595998764,
+    "h_y_bm1": 0.01296973880380392,
+    "log_G": 0.0678232703202557,
+    "absorbed_after": false
+   },
+   "warm": {
+    "step": 0,
+    "particle": 0,
+    "budget": 24,
+    "x": "CC(C)(CNC(=O)NC(c1ccc(Cl)cc1)c1ccsc1)C(N)=O",
+    "y": "CC(C)(CNC(=O)NC(c1ccc(F)cc1)c1ccsc1)C(N)=O",
+    "h_x_b": 0.012119250372052193,
+    "h_y_bm1": 0.012969721108675003,
+    "log_G": 0.06782236705886557,
+    "absorbed_after": false
+   }
+  }
+ ]
+}
