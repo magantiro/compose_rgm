@@ -71,12 +71,12 @@ image = _base_image.env(
     {"PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}", "OMP_NUM_THREADS": "1"})
 app = modal.App("hphi-archive")
 RUN_ROOT = "/artifacts/editing_v2/r_theta_run"
-OUT_DIR = "hphi_horizon_v4"
+OUT_DIR = "hphi_recede_v5"
 TIME_POINT, CANONICAL_SLOTS = 0.5, 48
 HORIZON = 24
 N_PARTICLES = 32
 REGION = (0.90, 0.40)
-N_CANDIDATES = 2
+N_CANDIDATES = 4
 PROTOCOL = "hphi-horizon-v4"
 MEM_MIB = int(4.5 * 1024)
 
@@ -453,14 +453,16 @@ def main(smoke: bool = False, out_dir: str = OUT_DIR) -> None:
     if smoke:
         keep = keep[:2]
         out_dir = out_dir + "_smoke"
-    keep = [i for i in keep if strat[i] in ("marginal", "hard")]
+    # Full 64-source development panel, both horizons, PAIRED: seed_for keys on
+    # (arm, source, candidate) and NOT on horizon, so candidate k gets the same
+    # seed in both arms and the comparison is source-paired by construction.
     tasks = [{"index": i, "source": srcs[i], "stratum": strat[i],
               "arm": "restart", "horizon": H, "out_dir": out_dir}
-             for i in keep for H in (24, 32, 40)]
-    print(f"HORIZON DIAGNOSTIC: {len(tasks)} units = {len(keep)} marginal+hard "
-          f"sources x H in (24, 32, 40) x {N_CANDIDATES} candidates, "
-          f"N={N_PARTICLES}. h_phi budget stays clamped at 24 -- its input is a "
-          f"25-slot one-hot -- so the extended arms run a MISCALIBRATED twist "
-          f"and a null is confounded while a positive is conclusive.")
+             for i in keep for H in (24, 40)]
+    print(f"RECEDING-HORIZON A/B: {len(tasks)} units = {len(keep)} sources x "
+          f"H in (24, 40) x {N_CANDIDATES} candidates, N={N_PARTICLES}. "
+          f"H=40 is a RECEDING-HORIZON controller with b_eff = min(24, b): "
+          f"a rolling 24-edit lookahead until 24 actually remain, then the "
+          f"calibrated countdown. Nothing is retrained.")
     call = drive.spawn(tasks)
     print(f"spawned: {call.object_id}")
