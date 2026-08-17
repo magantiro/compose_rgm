@@ -1,0 +1,45 @@
+{
+ "ok": true,
+ "stats": {
+  "bond_reroute": {
+   "states": 16,
+   "identical": 16,
+   "elements": 36864,
+   "worst": 0.0,
+   "shape_mismatch": 0,
+   "worst_on_support": 0.0,
+   "support_identical": 16,
+   "support_elements": 778
+  },
+  "atom_delete": {
+   "states": 16,
+   "identical": 16,
+   "elements": 768,
+   "worst": 0.0,
+   "shape_mismatch": 0,
+   "worst_on_support": 0.0,
+   "support_identical": 16,
+   "support_elements": 110
+  },
+  "atom_restate": {
+   "states": 16,
+   "identical": 16,
+   "elements": 11520,
+   "worst": 0.0,
+   "shape_mismatch": 0,
+   "worst_on_support": 0.0,
+   "support_identical": 16,
+   "support_elements": 2553
+  },
+  "grow_connected": {
+   "states": 16,
+   "identical": 16,
+   "elements": 34560,
+   "worst": 0.0,
+   "shape_mismatch": 0,
+   "worst_on_support": 0.0,
+   "support_identical": 16,
+   "support_elements": 4232
+  }
+ }
+}
