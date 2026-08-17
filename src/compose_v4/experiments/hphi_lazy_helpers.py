@@ -99,14 +99,26 @@ def make_helpers(model, *, time_point: float, canonical_slots: int) -> dict[str,
     ctxs: dict[int, Ctx] = {}
 
     def ctx_for(st):
-        c = ctxs.get(id(st))
+        """Per-state scaffolding, keyed by CONTENT.
+
+        Keyed by IDENTITY, which requires the caller to reuse one state object
+        per distinct molecule -- the controller does, via its own state cache.
+        Content keying was tried and is a REGRESSION: `molecular_state_cache_key`
+        is not cheap, `ctx_for` runs several times per draw, and hashing on that
+        path cost more than the graph masks it saved (61.8 -> 75.4 s on the
+        extinction sentinel). Make the caller supply a stable object instead of
+        hashing in the inner loop.
+
+        Bounded, because a long run would otherwise hold one Ctx per state
+        visited for the life of the process. These entries are small; the LRU on
+        encoder outputs is the one that is memory-bound.
+        """
+        key = id(st)
+        c = ctxs.get(key)
         if c is None:
-            # Keyed by object identity and bounded, because a long SMC run would
-            # otherwise accumulate one Ctx per visited state for the life of the
-            # process. The scaffolding is cheap to rebuild; the leak is not.
             if len(ctxs) > 256:
                 ctxs.clear()
-            c = ctxs[id(st)] = Ctx(st)
+            c = ctxs[key] = Ctx(st)
         return c
 
     def build_batch(st, t):
@@ -278,11 +290,9 @@ def make_helpers(model, *, time_point: float, canonical_slots: int) -> dict[str,
     enc_cache: OrderedDict[Any, Any] = OrderedDict()
 
     def encode(st, t):
-        from compose_v4.model.factorized_tracelet_rate_model import (
-            molecular_state_cache_key,
-        )
-
-        key = molecular_state_cache_key(st)
+        # Identity, for the same reason as `ctx_for`: content hashing on this
+        # path cost more than it saved.
+        key = id(st)
         hit = enc_cache.get(key)
         if hit is not None:
             enc_cache.move_to_end(key)

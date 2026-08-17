@@ -446,19 +446,73 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                     src_fp, gen.GetFingerprint(m))))
         return prop_cache[smi]
 
+    # ONE state object per distinct molecule. `propose` used to re-parse and
+    # re-pad on every call, so the lazy sampler's per-state caches -- keyed by
+    # object identity -- never saw the same object twice and cached nothing
+    # across transitions. Caching the object makes identity keying work and
+    # also removes the repeated parse. Bounded for the same reason as the rest.
+    state_cache: dict[str, Any] = {}
+
+    def _state(smi: str):
+        st = state_cache.get(smi)
+        if st is None:
+            if len(state_cache) > 512:
+                state_cache.clear()
+            st = state_cache[smi] = pad_molecular_graph(
+                smiles_to_molecular_graph(smi), CANONICAL_SLOTS)
+        return st
+
+    # LAZY SAMPLER, opt-in. The eager path below is byte-identical to the one
+    # that produced the banked ladder results; `sampler="lazy"` swaps ONLY the
+    # fresh-state branch. A cached law still serves its hit at ~1.5 ms and never
+    # enters the sampler.
+    #
+    # A fresh state under the lazy path produces a SAMPLE, not a law, so there
+    # is nothing to put in the law cache. That is not a regression: a fresh
+    # eager law costs seconds, while a fresh lazy draw is ~79 ms, of which ~55 ms
+    # is the encode -- so the cache that matters moves down a level, to the
+    # encoder outputs, which ARE a pure function of the state.
+    use_lazy = str(task.get("sampler", "eager")).lower() == "lazy"
+    lazy_helpers = None
+    if use_lazy:
+        from compose_v4.experiments.hphi_lazy_helpers import make_helpers
+        from compose_v4.experiments.hphi_lazy_sampler import sample_one_transition
+        from compose_v4.experiments.production_successor_kernel import (
+            _coordinate_action,
+        )
+
+        lazy_helpers = make_helpers(
+            model, time_point=float(TIME_POINT), canonical_slots=CANONICAL_SLOTS)
+        print(f"src{idx}: LAZY exact sampler enabled "
+              f"(cache hits unchanged; fresh states use the lazy path)",
+              flush=True)
+
     def encode(smi: str) -> np.ndarray:
+        """Graph embedding for h_phi.
+
+        SHARED WITH THE LAZY SAMPLER. `_encode_batch` returns (node, glob, pair)
+        and h_phi needs only `glob`, so the old path computed all three and threw
+        two away -- and the sampler, needing exactly those two, recomputed them.
+        Every state was encoded twice. When the lazy sampler is active the two
+        now share one call: the sampler's per-state context is built here if it
+        is missing, and its `glob` is what h_phi keeps.
+
+        The two caches stay separate on purpose. This one is unbounded but holds
+        a single small vector per state; the sampler's holds ~2.4 MB of pair
+        tensor per state and must stay bounded.
+        """
         if smi not in enc_cache:
-            st = pad_molecular_graph(smiles_to_molecular_graph(smi),
-                                     CANONICAL_SLOTS)
-            # GRAPH-ONLY ENCODE. Qualified in-process against the old path
-            # on 40 banked molecular states: BITWISE identical (maxdiff 0.0)
-            # and 163x faster (4873 -> 30 ms/state). The old path built 561
-            # lines of admission masks and macro actions that _encode_batch
-            # never reads. Batching is deliberately NOT used: it adds nothing
-            # once construction is cheap (1.20s vs 1.22s) and reintroduces a
-            # 4.8e-07 drift.
-            g = encode_graph_only(model, [st], float(TIME_POINT))
-            enc_cache[smi] = g[0].astype(np.float64)
+            st = _state(smi)
+            if use_lazy and lazy_helpers is not None:
+                _b, _node, glob, _pair, _hit = lazy_helpers["encode"](
+                    st, float(TIME_POINT))
+                enc_cache[smi] = glob[0].detach().cpu().numpy().astype(np.float64)
+            else:
+                # GRAPH-ONLY ENCODE. Qualified in-process against the old path
+                # on 40 banked molecular states: BITWISE identical (maxdiff 0.0)
+                # and 163x faster (4873 -> 30 ms/state).
+                g = encode_graph_only(model, [st], float(TIME_POINT))
+                enc_cache[smi] = g[0].astype(np.float64)
         return enc_cache[smi]
 
     e_src = encode(source)
@@ -498,34 +552,9 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     new_laws: dict[str, Any] = {}
     stats = {"hit_mem": 0, "hit_disk": 0, "miss": 0}
 
-    # LAZY SAMPLER, opt-in. The eager path below is byte-identical to the one
-    # that produced the banked ladder results; `sampler="lazy"` swaps ONLY the
-    # fresh-state branch. A cached law still serves its hit at ~1.5 ms and never
-    # enters the sampler.
-    #
-    # A fresh state under the lazy path produces a SAMPLE, not a law, so there
-    # is nothing to put in the law cache. That is not a regression: a fresh
-    # eager law costs seconds, while a fresh lazy draw is ~79 ms, of which ~55 ms
-    # is the encode -- so the cache that matters moves down a level, to the
-    # encoder outputs, which ARE a pure function of the state.
-    use_lazy = str(task.get("sampler", "eager")).lower() == "lazy"
-    lazy_helpers = None
-    if use_lazy:
-        from compose_v4.experiments.hphi_lazy_helpers import make_helpers
-        from compose_v4.experiments.hphi_lazy_sampler import sample_one_transition
-        from compose_v4.experiments.production_successor_kernel import (
-            _coordinate_action,
-        )
-
-        lazy_helpers = make_helpers(
-            model, time_point=float(TIME_POINT), canonical_slots=CANONICAL_SLOTS)
-        print(f"src{idx}: LAZY exact sampler enabled "
-              f"(cache hits unchanged; fresh states use the lazy path)",
-              flush=True)
-
     def propose(smi: str, rng) -> str:
         """Sample ONE successor from the frozen R_theta law. NO h_phi here."""
-        st = pad_molecular_graph(smiles_to_molecular_graph(smi), CANONICAL_SLOTS)
+        st = _state(smi)
         law = law_cache.get(smi)
         if law is None:
             law = disk_laws.get(smi)
