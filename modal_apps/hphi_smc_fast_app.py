@@ -63,12 +63,27 @@ app = modal.App("hphi-smc-fast")
 RUN_ROOT = "/artifacts/editing_v2/r_theta_run"
 OUT_DIR = "hphi_smc_fast"
 TIME_POINT, CANONICAL_SLOTS = 0.5, 48
-#: 6 GiB. The MOLLEO lane measured peak RSS on a container doing the SAME
-#: R_theta expansion work and got 3.9 GiB, after correcting a unit error
-#: (ru_maxrss is KILOBYTES on Linux, not MiB). An earlier 3 GiB estimate would
-#: have OOMed. This is measured peak plus ~50%.
-MEM_GIB = 6
-MEM_MIB = MEM_GIB * 1024
+#: Staged RSS measurement (docs/MEMORY_PROBE.json), on a container doing the
+#: real work:
+#:
+#:     imports (torch + RDKit)                 3.01 GiB
+#:     + open_process_v2_t1_source             3.64
+#:     + checkpoint and system                 3.73   <- peak
+#:     after releasing startup scaffolding     3.36
+#:     steady, after a real law call           3.42
+#:
+#: Two things follow. Three quarters of the footprint is the torch and RDKit
+#: import itself, before any model or corpus exists, so it is a FIXED per
+#: container cost that does not shrink with less work; and 4.5 GiB covers the
+#: 3.73 GiB peak with ~20% headroom, where 6 GiB was measured-plus-50%.
+#:
+#: Memory is about half the bill -- 1 core is $0.04716/hour and 6 GiB is
+#: $0.047952/hour -- and because the floor is fixed, the only large saving is
+#: MORE SLOTS PER CONTAINER, not a smaller request. One slot per container, the
+#: shape used when a rung runs one replicate per source, pays the whole 3.4 GiB
+#: for a single trajectory.
+MEM_GIB = 4.5
+MEM_MIB = int(MEM_GIB * 1024)
 
 # ---- FROZEN. Every value below is copied from the preregistration. ----
 HORIZON = 24                    # max H24, native anytime STOP
@@ -129,6 +144,16 @@ def _runtime():
     norm = json.loads((Path(RUN_ROOT) / "hphi_v2" / "norm.json").read_text())
     _RT.update({"model": model, "system": _default_rewrite_system(model),
                 "head": head, "mu": norm["mu"], "sd": norm["sd"]})
+
+    # Release the startup scaffolding. The Active8 authentication reads 751 MB
+    # across 1641 files and the scorer bundle another 49 MB; none of it is
+    # needed once the model carries the checkpoint. Measured at 0.37 GiB
+    # recovered, and a law call after the release returns the same 585 marks,
+    # so this frees memory without touching inference.
+    import gc
+
+    del ck, bundle, src, runtime, _b, _c
+    gc.collect()
     return _RT
 
 
@@ -228,7 +253,16 @@ def _slot_unit(slot: int) -> dict[str, Any]:
     rec["seconds"] = round(time.perf_counter() - t0, 2)
     flush = _G.get("flush_laws")
     if flush is not None:
-        rec["law_cache"] = flush(slot)
+        # NEVER let a cache write destroy a finished slot. The record is
+        # complete by this point and represents ~15 minutes of computation;
+        # persisting the cache is bookkeeping for the NEXT run. A full volume
+        # or a rename failure must cost the optimisation, not the science.
+        try:
+            rec["law_cache"] = flush(slot)
+        except Exception as error:  # noqa: BLE001
+            rec["law_cache"] = {"error": f"{type(error).__name__}: {error}"}
+            print(f"  law-cache: flush failed for slot {slot} "
+                  f"({type(error).__name__}); record kept", flush=True)
     return rec
 
 

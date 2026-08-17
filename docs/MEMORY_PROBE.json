@@ -1,0 +1,36 @@
+{
+ "stages": [
+  [
+   "imports",
+   3.0142860412597656
+  ],
+  [
+   "after open_process_v2_t1_source",
+   3.6381759643554688
+  ],
+  [
+   "after load_materialized_scorer_state",
+   3.6440353393554688
+  ],
+  [
+   "after build_runtime",
+   3.674297332763672
+  ],
+  [
+   "after checkpoint + system",
+   3.7320632934570312
+  ],
+  [
+   "after del + gc.collect",
+   3.3634071350097656
+  ],
+  [
+   "after a real law call",
+   3.4198265075683594
+  ]
+ ],
+ "peak_gib": 3.7320632934570312,
+ "steady_gib": 3.4198265075683594,
+ "law_ok": true,
+ "n_marks": 585
+}
