@@ -1,0 +1,16 @@
+{
+ "full_law_s": 7.0707197557000026,
+ "components": {
+  "graph encode + _encode_batch": 0.051637081799998444,
+  "compute_topology_features": 0.003224779300003888,
+  "_graph_application_masks": 0.04092669390000481,
+  "process_v2_atom_delete_mask": 0.044415770199992724,
+  "enumerate_ring_restate_semantic_groups": 0.26085401590000573,
+  "_semantic_cycle_open_admission_mask": 0.22610700949999796,
+  "8 exact cycle-close resolutions": 0.05054293220000261
+ },
+ "floor_s": 0.6777082828000062,
+ "floor_no_open_s": 0.4516012733000082,
+ "speedup": 10.433279237029177,
+ "speedup_no_open": 15.656996943413786
+}
