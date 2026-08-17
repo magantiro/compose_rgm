@@ -71,13 +71,13 @@ image = _base_image.env(
     {"PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}", "OMP_NUM_THREADS": "1"})
 app = modal.App("hphi-archive")
 RUN_ROOT = "/artifacts/editing_v2/r_theta_run"
-OUT_DIR = "hphi_archive_v2"
+OUT_DIR = "hphi_diverse_v3"
 TIME_POINT, CANONICAL_SLOTS = 0.5, 48
 HORIZON = 24
 N_PARTICLES = 32
 REGION = (0.90, 0.40)
-N_CANDIDATES = 8
-PROTOCOL = "hphi-archive-v2"
+N_CANDIDATES = 4
+PROTOCOL = "hphi-diverse-v3"
 MEM_MIB = int(4.5 * 1024)
 
 _RT: dict[str, Any] = {}
@@ -142,7 +142,7 @@ def _runtime():
 
 
 @app.function(image=image, cpu=(1.0, 1.0), memory=MEM_MIB, timeout=6 * 60 * 60,
-              max_containers=32, retries=1,
+              max_containers=128, retries=1,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
 def run_source(task: dict[str, Any]) -> dict[str, Any]:
     import sys
@@ -311,11 +311,12 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
 
     # RESUMABLE. A driver crash cost eleven sources of finished compute once;
     # an already-written source is never recomputed.
-    done_path = Path(RUN_ROOT) / task.get("out_dir", OUT_DIR) / f"{idx:03d}.json"
+    done_path = (Path(RUN_ROOT) / task.get("out_dir", OUT_DIR)
+                 / f"{idx:03d}_{task['arm']}.json")
     if done_path.exists():
         try:
             prior = json.loads(done_path.read_text())
-            if len(prior.get("arms", {})) == 3:
+            if prior.get("arms", {}).get(task["arm"]):
                 print(f"  src{idx}: already complete, skipping", flush=True)
                 return prior
         except Exception:  # noqa: BLE001
@@ -325,10 +326,10 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                            "stratum": task.get("stratum"), "arms": {}}
     t_all = time.perf_counter()
 
-    for arm in ("restart", "random", "hphi"):
+    for arm in [task["arm"]]:
         t0 = time.perf_counter()
         cands, work, archive = [], 0, {}
-        branch_log = []
+        branch_log, used_branches = [], set()
         # x0 IS AN ARCHIVE STATE. "Persistent archive" means never FORGET, not
         # never restart: if x0 is still the best launch point the policy should
         # be free to choose it. v1 forced a branch every time and lost a
@@ -352,17 +353,22 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                 # different trajectory, and excluding repeats would stop the
                 # policy restarting from x0 more than once, which is the whole
                 # point of keeping x0 in the archive.
+                # FORCED-DIVERSE BRANCH POINTS. This is the single ingredient
+                # that differed between the positive v1 and the negative v2: v1
+                # required each candidate to launch from a DISTINCT archived
+                # state, v2 allowed repeats and collapsed onto one basin
+                # (depth histogram d1:15, d11:13) with diversity falling below
+                # plain restart's. The claim under test is therefore about
+                # covering distinct search basins, not about intermediates
+                # being intrinsically valuable.
                 pool = [(h, s, d) for s, (d, h) in archive.items()
-                        if d < HORIZON and not in_region(*props(s), REGION)]
+                        if d < HORIZON and s not in used_branches
+                        and not in_region(*props(s), REGION)]
                 if not pool:
                     start, depth = source, 0
                 else:
-                    if arm == "random":
-                        # CONTROL: is the gain just "do not restart from x0", or
-                        # does h_phi actually identify good frontiers?
-                        h, start, depth = pool[int(arm_rng.integers(len(pool)))]
-                    else:
-                        h, start, depth = max(pool)
+                    h, start, depth = max(pool)
+                    used_branches.add(start)
                     branch_log.append({"candidate": k, "depth": depth,
                                        "h_phi": h,
                                        "from_source": start == source})
@@ -397,7 +403,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     out["seconds"] = round(time.perf_counter() - t_all, 1)
     p = Path(RUN_ROOT) / task.get("out_dir", OUT_DIR)
     p.mkdir(parents=True, exist_ok=True)
-    (p / f"{idx:03d}.json").write_text(json.dumps(out))
+    (p / f"{idx:03d}_{task['arm']}.json").write_text(json.dumps(out))
     artifact_volume.commit()
     return out
 
@@ -417,31 +423,36 @@ def drive(tasks: list[dict[str, Any]]) -> dict[str, Any]:
             continue
         if isinstance(r, dict):
             done += 1
-            bits = "  ".join(
-                f"{k}={'HIT' if r['arms'][k]['success'] else '---'}"
-                f"/{r['arms'][k]['work_transitions']}"
-                for k in ("restart", "random", "hphi"))
-            print(f"src{r['index']} [{r['stratum']}] {bits}", flush=True)
+            k = next(iter(r["arms"]))
+            a = r["arms"][k]
+            print(f"src{r['index']} [{r['stratum']}] {k}="
+                  f"{'HIT' if a['success'] else '---'}/{a['work_transitions']}",
+                  flush=True)
     return {"done": done}
 
 
 @app.local_entrypoint()
 def main(smoke: bool = False, out_dir: str = OUT_DIR) -> None:
-    panel = json.loads(
-        (Path(__file__).resolve().parents[1] / "docs/TREE_PANEL_12.json").read_text())
+    root = Path(__file__).resolve().parents[1]
     srcs = [s.strip() for s in
-            (Path(__file__).resolve().parents[1]
-             / "data/jin/dev_panel_qed_64.txt").read_text().split("\n") if s.strip()]
-    strat = {i: k for k, v in panel["panel"].items() for i in v}
-    keep = panel["all"]
+            (root / "data/jin/dev_panel_qed_64.txt").read_text().split("\n")
+            if s.strip()]
+    g = json.loads((root / "docs/HPHI_SMC_64_GATE_BANKED.json").read_text())
+    l = json.loads((root / "docs/HPHI_COVERAGE_LADDER_BANKED.json").read_text())
+    r3 = json.loads((root / "docs/HPHI_LADDER_RUNG3.json").read_text())
+    rel = set(g["solved_sources"])
+    marg = set(l["rung2"]["new_sources"]) | set(r3["conversions"])
+    strat = {i: ("reliable" if i in rel else
+                 "marginal" if i in marg else "hard") for i in range(len(srcs))}
+    keep = list(range(len(srcs)))
     if smoke:
-        # MECHANICS ONLY: one marginal, one hard. Efficacy is NOT read from this.
-        keep = [panel["panel"]["marginal"][0], panel["panel"]["hard"][0]]
+        keep = keep[:2]
         out_dir = out_dir + "_smoke"
     tasks = [{"index": i, "source": srcs[i], "stratum": strat[i],
-              "out_dir": out_dir} for i in keep]
-    print(f"{'SMOKE' if smoke else 'PANEL'}: {len(tasks)} sources x 3 arms "
-          f"(restart/random/hphi) x {N_CANDIDATES} candidates, "
-          f"N={N_PARTICLES}, H={HORIZON}")
+              "arm": arm, "out_dir": out_dir}
+             for i in keep for arm in ("restart", "diverse")]
+    print(f"{'SMOKE' if smoke else 'PANEL'}: {len(tasks)} (source, arm) units "
+          f"= {len(keep)} sources x 2 arms (restart/diverse) x {N_CANDIDATES} "
+          f"candidates, N={N_PARTICLES}, H={HORIZON}")
     call = drive.spawn(tasks)
     print(f"spawned: {call.object_id}")
