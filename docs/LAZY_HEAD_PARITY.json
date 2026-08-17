@@ -90,6 +90,18 @@
    "worst_on_support": 0.0,
    "support_identical": 16,
    "support_elements": 0
+  },
+  "_family_base": {
+   "states": 16,
+   "identical": 16,
+   "elements": 0,
+   "worst": 0.0,
+   "shape_mismatch": 0,
+   "support_identical": 16,
+   "support_elements": 0,
+   "ms_with_field": 1.5582580000170765,
+   "ms_recomputed": 0.7862439999541948,
+   "field_present": 0
   }
  }
 }

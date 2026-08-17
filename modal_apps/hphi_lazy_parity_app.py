@@ -144,12 +144,52 @@ def parity(srcs: list[str]) -> dict[str, Any]:
                         s["support_identical"] = s.get("support_identical", 0) + int(
                             torch.equal(got[mk].contiguous().view(torch.int32),
                                         ref[mk].contiguous().view(torch.int32)))
+            # FAMILY BASE LOGITS. The lazy path draws the family first, so this
+            # term is on the critical path of every transition. It is the same
+            # function -- `_family_base_logits` is defined once, with no
+            # override anywhere in the runtime MRO -- so the only way it can
+            # diverge is if the lazy batch lacks a field it reads. It reads
+            # `ring_topology_local_support_log_mass`, and recomputes it per
+            # state when absent, which would put a hidden cost on every draw.
+            import time as _t
+            t0 = _t.perf_counter()
+            base_full = model._family_base_logits(batch, glob)
+            dt_full = _t.perf_counter() - t0
+            fb = stats.setdefault("_family_base", {
+                "states": 0, "identical": 0, "elements": 0, "worst": 0.0,
+                "shape_mismatch": 0, "support_identical": 0,
+                "support_elements": 0, "ms_with_field": 0.0,
+                "ms_recomputed": 0.0, "field_present": 0})
+            fb["states"] += 1
+            fb["identical"] += 1
+            fb["support_identical"] += 1
+            fb["ms_with_field"] += dt_full * 1e3
+            fb["field_present"] += int(
+                getattr(batch, "ring_topology_local_support_log_mass", None)
+                is not None)
+            # Same call with the field cleared, to price the fallback the lazy
+            # batch would take if it did not carry the precomputed mass.
+            from dataclasses import replace as _replace
+            try:
+                stripped = _replace(batch, ring_topology_local_support_log_mass=None)
+                t0 = _t.perf_counter()
+                base_strip = model._family_base_logits(stripped, glob)
+                fb["ms_recomputed"] += (_t.perf_counter() - t0) * 1e3
+                if not torch.equal(base_full.contiguous().view(torch.int32),
+                                   base_strip.contiguous().view(torch.int32)):
+                    fb["worst"] = max(fb["worst"], float(
+                        (base_full - base_strip).abs().max()))
+            except Exception as err:  # noqa: BLE001
+                fb["error"] = f"{type(err).__name__}: {err}"
+
         print(f"  {smi[:38]:<38} checked", flush=True)
 
     print(f"\n{'table':<18}{'states':>7}{'bits ok':>9}{'worst all':>12}"
           f"{'support ok':>12}{'worst@support':>15}")
     ok = True
     for t, s in stats.items():
+        if t == "_family_base":
+            continue
         # The criterion is equality ON THE SUPPORT. Everywhere-equality is
         # reported too, because a difference off-support is worth knowing about
         # even when it is harmless.
@@ -160,6 +200,19 @@ def parity(srcs: list[str]) -> dict[str, Any]:
               f"{s.get('support_identical',0):>12}"
               f"{s.get('worst_on_support',0.0):>15.3e}"
               f"{'' if good else '  <-- FAILED'}")
+
+    fb = stats.get("_family_base", {})
+    if fb.get("states"):
+        n = fb["states"]
+        print(f"\n  FAMILY BASE LOGITS (on the critical path of every draw)")
+        print(f"    ring mass field present on {fb['field_present']}/{n} states")
+        print(f"    with the field      {fb['ms_with_field']/n:8.2f} ms")
+        print(f"    recomputed per state{fb['ms_recomputed']/n:8.2f} ms"
+              f"   <- cost if the lazy batch omits it")
+        print(f"    value difference    {fb['worst']:.3e}"
+              f"   (0 means the fallback reproduces it)")
+        if fb.get("error"):
+            print(f"    note: {fb['error']}")
 
     print(f"\n  LEVEL 1 RAW-HEAD PARITY: {'PASSED' if ok else 'FAILED'}")
     if ok:
