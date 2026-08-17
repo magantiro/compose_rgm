@@ -1,0 +1,140 @@
+{
+ "rows": [
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "n_marks": 585,
+   "bytes": 49346,
+   "enum_s": 4.889284948999986,
+   "dump_s": 0.001237574999976232,
+   "load_s": 0.00144962500002066,
+   "bits_equal": true,
+   "index_equal": true,
+   "successor_equal": true
+  },
+  {
+   "smiles": "COCCN1C(=O)N(C)C(=O)C12CC[NH+](Cc1cnn(C)c1C)CC2",
+   "n_marks": 755,
+   "bytes": 63806,
+   "enum_s": 3.957464880999993,
+   "dump_s": 0.0014536550000059378,
+   "load_s": 0.0015623090000076445,
+   "bits_equal": true,
+   "index_equal": true,
+   "successor_equal": true
+  },
+  {
+   "smiles": "N#Cc1ccccc1N1CCN(C(=O)c2ccc(-n3ncc(C#N)c3N)cc2)CC1",
+   "n_marks": 591,
+   "bytes": 49965,
+   "enum_s": 7.0372476770000105,
+   "dump_s": 0.0011808819999998832,
+   "load_s": 0.0013064980000194737,
+   "bits_equal": true,
+   "index_equal": true,
+   "successor_equal": true
+  },
+  {
+   "smiles": "CCCCNC(=O)C1CCN(S(=O)(=O)c2ccc(OC)cc2)CC1",
+   "n_marks": 765,
+   "bytes": 65167,
+   "enum_s": 3.865442234999989,
+   "dump_s": 0.0014895559999956731,
+   "load_s": 0.0020003999999858024,
+   "bits_equal": true,
+   "index_equal": true,
+   "successor_equal": true
+  },
+  {
+   "smiles": "CC(C)CCNC(=O)CC1CCN(C(=O)[C@H]2C=c3cc(Cl)ccc3=[NH+]2)CC1",
+   "n_marks": 883,
+   "bytes": 75533,
+   "enum_s": 5.044508156000006,
+   "dump_s": 0.0017074659999991582,
+   "load_s": 0.0021131740000157606,
+   "bits_equal": true,
+   "index_equal": true,
+   "successor_equal": true
+  },
+  {
+   "smiles": "CC(C)[C@H](NC(=O)c1ccco1)C(=O)NNC(=O)C(C)(C)C",
+   "n_marks": 705,
+   "bytes": 60475,
+   "enum_s": 2.937170961999982,
+   "dump_s": 0.0013750209999727758,
+   "load_s": 0.0021600359999922603,
+   "bits_equal": true,
+   "index_equal": true,
+   "successor_equal": true
+  },
+  {
+   "smiles": "CNS(=O)(=O)c1cccc(C(=O)OCC(=O)Nc2c(F)cccc2F)c1",
+   "n_marks": 465,
+   "bytes": 39608,
+   "enum_s": 4.750547676999986,
+   "dump_s": 0.0012327950000212695,
+   "load_s": 0.001219095000010384,
+   "bits_equal": true,
+   "index_equal": true,
+   "successor_equal": true
+  },
+  {
+   "smiles": "Clc1cccc(-c2nc(N[C@H]3CCC[NH2+]C3)cc(-c3cccnc3)n2)c1",
+   "n_marks": 504,
+   "bytes": 42670,
+   "enum_s": 5.687429949999995,
+   "dump_s": 0.0010618569999962801,
+   "load_s": 0.0011191699999812954,
+   "bits_equal": true,
+   "index_equal": true,
+   "successor_equal": true
+  },
+  {
+   "smiles": "O=C(Cc1c(F)cccc1F)OCc1ccccn1",
+   "n_marks": 315,
+   "bytes": 26851,
+   "enum_s": 2.6695043870000177,
+   "dump_s": 0.0006315080000263151,
+   "load_s": 0.0009382020000145985,
+   "bits_equal": true,
+   "index_equal": true,
+   "successor_equal": true
+  },
+  {
+   "smiles": "CC(C)=C1Oc2c3c(cc(C)c2C1=O)OCN(Cc1ccccc1)C3",
+   "n_marks": 553,
+   "bytes": 46636,
+   "enum_s": 4.87023238499998,
+   "dump_s": 0.0011551210000106948,
+   "load_s": 0.0016323429999829386,
+   "bits_equal": true,
+   "index_equal": true,
+   "successor_equal": true
+  },
+  {
+   "smiles": "COC(=O)c1ccccc1Cc1nc2ccccc2c(=O)[nH]1",
+   "n_marks": 393,
+   "bytes": 33560,
+   "enum_s": 3.8277389010000036,
+   "dump_s": 0.0008755789999952412,
+   "load_s": 0.0009264109999946868,
+   "bits_equal": true,
+   "index_equal": true,
+   "successor_equal": true
+  },
+  {
+   "smiles": "COCC[NH2+]Cc1cn([C@H]2CCO[C@@]3(CCOC3)C2)nn1",
+   "n_marks": 635,
+   "bytes": 53335,
+   "enum_s": 2.787555380999976,
+   "dump_s": 0.001271817000002784,
+   "load_s": 0.001569590000002563,
+   "bits_equal": true,
+   "index_equal": true,
+   "successor_equal": true
+  }
+ ],
+ "exact": true,
+ "mean_bytes": 50579.333333333336,
+ "mean_enum_s": 4.360343961749994,
+ "mean_load_s": 0.001499737750002339
+}

@@ -136,6 +136,88 @@ def _runtime():
 _G: dict[str, Any] = {}
 
 
+#: PERSISTENT CROSS-ATTEMPT LAW CACHE.
+#:
+#: The in-process cache dies with the container, so each of the 20 benchmark
+#: attempts re-derives laws the earlier attempts already paid for. Cross-attempt
+#: state overlap was measured at 34% between attempts 1 and 2 and grows as more
+#: attempts accumulate. Measured on the container: a law pickles to 49.4 KiB and
+#: loads in 1.50 ms against a 4360 ms enumeration -- 0.03% -- and a round-tripped
+#: law reproduces the float64 probability bits, the sampled index under the same
+#: RNG state, and the successor SMILES exactly (docs/LAW_CACHE_PROBE.json).
+#:
+#: This changes NO science. The law for a canonical state at the frozen
+#: TIME_POINT is deterministic, so a cached law IS the law that would have been
+#: enumerated. Path: fixed and independent of out_dir, so attempts share it.
+LAW_CACHE_ROOT = "law_cache"
+#: zlib level 1: laws are highly repetitive, and decompression must stay far
+#: below the 4.4 s it is displacing. Level 9 would trade real write time for
+#: bytes that do not matter here.
+_ZLIB_LEVEL = 1
+
+
+def _law_shard_dir(idx: int) -> Path:
+    return Path(RUN_ROOT) / LAW_CACHE_ROOT / f"src{int(idx):03d}"
+
+
+def _load_law_shards(idx: int) -> dict[str, Any]:
+    """Load every persisted law for one source. Called in the PARENT.
+
+    Loaded before the fork so all workers share one copy through copy-on-write
+    rather than each paying the memory and the load. A corrupt or partial shard
+    is skipped rather than fatal: the cache is an optimisation, and its failure
+    must degrade to recomputation, never to a wrong law or a dead run.
+    """
+    import pickle
+    import zlib
+
+    out: dict[str, Any] = {}
+    d = _law_shard_dir(idx)
+    if not d.exists():
+        return out
+    for f in sorted(d.glob("*.pkl.z")):
+        try:
+            out.update(pickle.loads(zlib.decompress(f.read_bytes())))
+        except Exception as error:  # noqa: BLE001
+            print(f"  law-cache: skipping unreadable shard {f.name} "
+                  f"({type(error).__name__})", flush=True)
+    return out
+
+
+def _write_law_shard(idx: int, slot: int, tag: str,
+                     entries: dict[str, Any]) -> int:
+    """Persist this slot's NEWLY enumerated laws. Called in the WORKER.
+
+    The name carries the ATTEMPT (`tag`, the run's out_dir) as well as the slot.
+    Naming by slot alone is a cache-destroying bug: `entries` holds only this
+    run's cache MISSES, so attempt 2 -- which mostly hits -- would overwrite
+    attempt 1's full shard with a nearly empty one, and the cache would shrink
+    with every attempt instead of accumulating. Shards are additive and the
+    loader globs all of them.
+
+    Slot- and attempt-specific also means concurrent workers never contend for
+    one file.
+    """
+    import pickle
+    import re
+    import zlib
+
+    if not entries:
+        return 0
+    d = _law_shard_dir(idx)
+    d.mkdir(parents=True, exist_ok=True)
+    blob = zlib.compress(
+        pickle.dumps(entries, protocol=pickle.HIGHEST_PROTOCOL), _ZLIB_LEVEL)
+    safe = re.sub(r"[^A-Za-z0-9_.-]", "_", str(tag))[:48] or "run"
+    name = f"{safe}_slot{int(slot):02d}.pkl.z"
+    # Write-then-rename: a container killed mid-write leaves the old shard
+    # intact rather than a truncated one that the loader would have to skip.
+    tmp = d / (name + ".tmp")
+    tmp.write_bytes(blob)
+    tmp.rename(d / name)
+    return len(blob)
+
+
 def _slot_unit(slot: int) -> dict[str, Any]:
     """One independent SMC run = one returned candidate."""
     import torch
@@ -144,6 +226,9 @@ def _slot_unit(slot: int) -> dict[str, Any]:
     t0 = time.perf_counter()
     rec = _G["run_smc"](slot)
     rec["seconds"] = round(time.perf_counter() - t0, 2)
+    flush = _G.get("flush_laws")
+    if flush is not None:
+        rec["law_cache"] = flush(slot)
     return rec
 
 
@@ -152,7 +237,12 @@ def _slot_unit(slot: int) -> dict[str, Any]:
 #: differ between an uninterrupted run and a killed-then-resumed one (wall time,
 #: worker identity, retry count). Hashing them would make the resume-equivalence
 #: test fail for reasons that have nothing to do with the experiment.
-RUNTIME_FIELDS = ("seconds",)
+#: `law_cache` is here for the same reason: how many laws came from the
+#: persistent cache versus fresh enumeration depends on what earlier attempts
+#: happened to have run, so it differs between a first run and a resumed or
+#: re-ordered one while the trajectory it accompanies is identical. The cache is
+#: an optimisation and must never enter the scientific identity of a record.
+RUNTIME_FIELDS = ("seconds", "law_cache")
 
 
 def scientific_payload(rec: dict[str, Any]) -> dict[str, Any]:
@@ -346,15 +436,30 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     law_cache: dict[str, Any] = {}
     LAW_CACHE_MAX = 256
 
+    # Loaded ONCE in the parent, before the fork, so the workers share it
+    # copy-on-write. Read-only in the workers; misses accumulate in `new_laws`
+    # and are persisted per slot.
+    disk_laws: dict[str, Any] = _load_law_shards(idx)
+    new_laws: dict[str, Any] = {}
+    stats = {"hit_mem": 0, "hit_disk": 0, "miss": 0}
+
     def propose(smi: str, rng) -> str:
         """Sample ONE successor from the frozen R_theta law. NO h_phi here."""
         st = pad_molecular_graph(smiles_to_molecular_graph(smi), CANONICAL_SLOTS)
         law = law_cache.get(smi)
         if law is None:
-            law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
+            law = disk_laws.get(smi)
+            if law is None:
+                law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
+                new_laws[smi] = law
+                stats["miss"] += 1
+            else:
+                stats["hit_disk"] += 1
             if len(law_cache) >= LAW_CACHE_MAX:
                 law_cache.pop(next(iter(law_cache)))
             law_cache[smi] = law
+        else:
+            stats["hit_mem"] += 1
         if not law.marks:
             return ""
         p = np.array([m.probability for m in law.marks], float)
@@ -498,7 +603,29 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         print(f"src{idx:>3}: all {n_slots} slots already persisted", flush=True)
         return {"index": idx, "source": source, "status": "OK", "slots_run": 0}
 
+    def flush_laws(slot: int) -> dict[str, Any]:
+        """Persist this slot's new laws and report the hit accounting.
+
+        Runs in the WORKER, after the slot's record is complete, so a slot that
+        crashes cannot leave a half-written shard claiming laws it never
+        verified. `new_laws` is cleared because the pool reuses workers across
+        slots and the next slot must not rewrite this slot's entries.
+        """
+        written = _write_law_shard(idx, slot, task.get("out_dir", OUT_DIR),
+                                   new_laws)
+        book = {**stats, "n_new": len(new_laws), "shard_bytes": written,
+                "n_loaded": len(disk_laws)}
+        new_laws.clear()
+        for k in stats:
+            stats[k] = 0
+        return book
+
     _G["run_smc"] = run_smc
+    _G["flush_laws"] = flush_laws
+    if disk_laws:
+        print(f"src{idx}: law cache loaded {len(disk_laws)} states "
+              f"from {len(list(_law_shard_dir(idx).glob('*.pkl.z')))} shards",
+              flush=True)
     done = 0
     ctx = mp.get_context("fork")
     n_workers = max(1, min(int(task.get("workers", 8)), len(slots)))
@@ -512,6 +639,13 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
             artifact_volume.commit()
             done += 1
             nres = sum(e["resampled"] for e in rec["sync"])
+            lc = rec.get("law_cache")
+            if lc:
+                tot = lc["hit_mem"] + lc["hit_disk"] + lc["miss"]
+                print(f"      law cache: {lc['hit_disk']}/{tot} cross-attempt "
+                      f"hits ({lc['hit_disk']/max(tot,1)*100:.1f}%), "
+                      f"{lc['hit_mem']} in-process, {lc['n_new']} new "
+                      f"-> {lc['shard_bytes']/1024:.0f} KiB", flush=True)
             print(f"  src{idx:>3} slot {rec['slot']:>2} -> "
                   f"QED {rec['terminal_qed']:.3f} sim {rec['terminal_sim']:.3f} "
                   f"{'HIT' if rec['success'] else '---'} "
