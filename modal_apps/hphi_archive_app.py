@@ -71,13 +71,13 @@ image = _base_image.env(
     {"PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}", "OMP_NUM_THREADS": "1"})
 app = modal.App("hphi-archive")
 RUN_ROOT = "/artifacts/editing_v2/r_theta_run"
-OUT_DIR = "hphi_diverse_v3"
+OUT_DIR = "hphi_horizon_v4"
 TIME_POINT, CANONICAL_SLOTS = 0.5, 48
 HORIZON = 24
 N_PARTICLES = 32
 REGION = (0.90, 0.40)
-N_CANDIDATES = 4
-PROTOCOL = "hphi-diverse-v3"
+N_CANDIDATES = 2
+PROTOCOL = "hphi-horizon-v4"
 MEM_MIB = int(4.5 * 1024)
 
 _RT: dict[str, Any] = {}
@@ -176,6 +176,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     sd = np.asarray(rt["sd"], dtype=np.float64)
     source = task["source"]
     idx = int(task["index"])
+    horizon = int(task.get("horizon", HORIZON))
     helpers = make_helpers(model, time_point=float(TIME_POINT),
                            canonical_slots=CANONICAL_SLOTS)
     _TABLE_FAMILY = {"grow_connected": "atom_insert"}
@@ -244,12 +245,13 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     def run_smc(start_smi: str, start_depth: int, seed: int) -> dict[str, Any]:
         """SMC from `start_smi` with H - start_depth remaining steps."""
         rng = np.random.default_rng(seed)
-        budget0 = HORIZON - int(start_depth)
+        budget0 = horizon - int(start_depth)
         q0, s0 = props(start_smi)
         states = [start_smi] * N_PARTICLES
         absorbed = [in_region(q0, s0, REGION)] * N_PARTICLES
         log_w = np.zeros(N_PARTICLES)
         seen: list[tuple[str, int, float]] = []
+        contact = [0]          # particles that ENTERED the region, exact
         n_trans = 0
 
         for step in range(budget0):
@@ -275,6 +277,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                 qy, sy = props(y)
                 if in_region(qy, sy, REGION):
                     absorbed[i] = True
+                    contact[0] += 1
             if np.all(np.isneginf(log_w)):
                 break
             w = normalized_weights(log_w)
@@ -302,7 +305,8 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
             ret = states[j]
             ess = float(effective_sample_size(normalized_weights(log_w)))
         rq, rs = props(ret)
-        return {"returned": ret, "terminal_qed": rq, "terminal_sim": rs,
+        return {"contact": contact[0], "returned": ret,
+                "terminal_qed": rq, "terminal_sim": rs,
                 "success": bool(in_region(rq, rs, REGION)),
                 "extinct": j is None, "status": status,
                 "n_transitions": n_trans, "archive": seen,
@@ -312,7 +316,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     # RESUMABLE. A driver crash cost eleven sources of finished compute once;
     # an already-written source is never recomputed.
     done_path = (Path(RUN_ROOT) / task.get("out_dir", OUT_DIR)
-                 / f"{idx:03d}_{task['arm']}.json")
+                 / f"{idx:03d}_H{task.get('horizon', HORIZON)}.json")
     if done_path.exists():
         try:
             prior = json.loads(done_path.read_text())
@@ -322,7 +326,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         except Exception:  # noqa: BLE001
             pass
 
-    out: dict[str, Any] = {"index": idx, "source": source,
+    out: dict[str, Any] = {"index": idx, "source": source, "horizon": horizon,
                            "stratum": task.get("stratum"), "arms": {}}
     t_all = time.perf_counter()
 
@@ -334,7 +338,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         # never restart: if x0 is still the best launch point the policy should
         # be free to choose it. v1 forced a branch every time and lost a
         # reliable source (4 -> 3) for exactly that reason.
-        archive[source] = (0, h_phi(source, HORIZON))
+        archive[source] = (0, h_phi(source, horizon))
         arm_rng = np.random.default_rng(seed_for(arm, source, 99))
         for k in range(N_CANDIDATES):
             if arm == "restart" or k == 0:
@@ -362,7 +366,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                 # covering distinct search basins, not about intermediates
                 # being intrinsically valuable.
                 pool = [(h, s, d) for s, (d, h) in archive.items()
-                        if d < HORIZON and s not in used_branches
+                        if d < horizon and s not in used_branches
                         and not in_region(*props(s), REGION)]
                 if not pool:
                     start, depth = source, 0
@@ -383,7 +387,8 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                     archive[smi] = (d, h)
             cands.append({k2: r[k2] for k2 in
                           ("returned", "terminal_qed", "terminal_sim", "success",
-                           "extinct", "n_transitions", "start_depth", "budget")})
+                           "extinct", "contact", "n_transitions", "start_depth",
+                           "budget")})
             print(f"  src{idx} {arm} cand{k} depth{r['start_depth']} "
                   f"QED {r['terminal_qed']:.3f} sim {r['terminal_sim']:.3f} "
                   f"{'HIT' if r['success'] else ('EXT' if r['extinct'] else '---')} "
@@ -403,7 +408,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     out["seconds"] = round(time.perf_counter() - t_all, 1)
     p = Path(RUN_ROOT) / task.get("out_dir", OUT_DIR)
     p.mkdir(parents=True, exist_ok=True)
-    (p / f"{idx:03d}_{task['arm']}.json").write_text(json.dumps(out))
+    (p / f"{idx:03d}_H{horizon}.json").write_text(json.dumps(out))
     artifact_volume.commit()
     return out
 
@@ -448,11 +453,14 @@ def main(smoke: bool = False, out_dir: str = OUT_DIR) -> None:
     if smoke:
         keep = keep[:2]
         out_dir = out_dir + "_smoke"
+    keep = [i for i in keep if strat[i] in ("marginal", "hard")]
     tasks = [{"index": i, "source": srcs[i], "stratum": strat[i],
-              "arm": arm, "out_dir": out_dir}
-             for i in keep for arm in ("restart", "diverse")]
-    print(f"{'SMOKE' if smoke else 'PANEL'}: {len(tasks)} (source, arm) units "
-          f"= {len(keep)} sources x 2 arms (restart/diverse) x {N_CANDIDATES} "
-          f"candidates, N={N_PARTICLES}, H={HORIZON}")
+              "arm": "restart", "horizon": H, "out_dir": out_dir}
+             for i in keep for H in (24, 32, 40)]
+    print(f"HORIZON DIAGNOSTIC: {len(tasks)} units = {len(keep)} marginal+hard "
+          f"sources x H in (24, 32, 40) x {N_CANDIDATES} candidates, "
+          f"N={N_PARTICLES}. h_phi budget stays clamped at 24 -- its input is a "
+          f"25-slot one-hot -- so the extended arms run a MISCALIBRATED twist "
+          f"and a null is confounded while a positive is conclusive.")
     call = drive.spawn(tasks)
     print(f"spawned: {call.object_id}")
