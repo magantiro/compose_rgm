@@ -160,6 +160,12 @@ def _runtime():
 
 _G: dict[str, Any] = {}
 
+#: TABLE name -> FAMILY name, the inverse of the sampler's map.
+#: `_coordinate_action` is keyed by FAMILY, and the two names differ for
+#: atom_insert / grow_connected -- the mismatch that raised on 25.9% of draws
+#: when it was missing from the forward map.
+_TABLE_FAMILY = {"grow_connected": "atom_insert"}
+
 
 #: PERSISTENT CROSS-ATTEMPT LAW CACHE.
 #:
@@ -483,9 +489,39 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     # Loaded ONCE in the parent, before the fork, so the workers share it
     # copy-on-write. Read-only in the workers; misses accumulate in `new_laws`
     # and are persisted per slot.
-    disk_laws: dict[str, Any] = _load_law_shards(idx)
+    # `fresh=True` skips the persistent shards so a run measures the FRESH-law
+    # path. Every dev-panel source now has shards -- the N=8/N=4 sweep populated
+    # all 64 -- so without this a sentinel serves 100% cache hits and measures
+    # nothing about the sampler.
+    disk_laws: dict[str, Any] = (
+        {} if bool(task.get("fresh")) else _load_law_shards(idx))
     new_laws: dict[str, Any] = {}
     stats = {"hit_mem": 0, "hit_disk": 0, "miss": 0}
+
+    # LAZY SAMPLER, opt-in. The eager path below is byte-identical to the one
+    # that produced the banked ladder results; `sampler="lazy"` swaps ONLY the
+    # fresh-state branch. A cached law still serves its hit at ~1.5 ms and never
+    # enters the sampler.
+    #
+    # A fresh state under the lazy path produces a SAMPLE, not a law, so there
+    # is nothing to put in the law cache. That is not a regression: a fresh
+    # eager law costs seconds, while a fresh lazy draw is ~79 ms, of which ~55 ms
+    # is the encode -- so the cache that matters moves down a level, to the
+    # encoder outputs, which ARE a pure function of the state.
+    use_lazy = str(task.get("sampler", "eager")).lower() == "lazy"
+    lazy_helpers = None
+    if use_lazy:
+        from compose_v4.experiments.hphi_lazy_helpers import make_helpers
+        from compose_v4.experiments.hphi_lazy_sampler import sample_one_transition
+        from compose_v4.experiments.production_successor_kernel import (
+            _coordinate_action,
+        )
+
+        lazy_helpers = make_helpers(
+            model, time_point=float(TIME_POINT), canonical_slots=CANONICAL_SLOTS)
+        print(f"src{idx}: LAZY exact sampler enabled "
+              f"(cache hits unchanged; fresh states use the lazy path)",
+              flush=True)
 
     def propose(smi: str, rng) -> str:
         """Sample ONE successor from the frozen R_theta law. NO h_phi here."""
@@ -493,17 +529,38 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         law = law_cache.get(smi)
         if law is None:
             law = disk_laws.get(smi)
-            if law is None:
-                law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
-                new_laws[smi] = law
-                stats["miss"] += 1
-            else:
+            if law is not None:
                 stats["hit_disk"] += 1
+                if len(law_cache) >= LAW_CACHE_MAX:
+                    law_cache.pop(next(iter(law_cache)))
+                law_cache[smi] = law
+        else:
+            stats["hit_mem"] += 1
+
+        if law is None:
+            stats["miss"] += 1
+            if use_lazy:
+                d = sample_one_transition(
+                    model, st, float(TIME_POINT), rng, helpers=lazy_helpers)
+                stats["lazy_resolver"] = stats.get("lazy_resolver", 0) + d.resolver_calls
+                stats["lazy_redraw"] = stats.get("lazy_redraw", 0) + d.family_redraws
+                if d.table is None or d.coordinate is None:
+                    return ""
+                fam = _TABLE_FAMILY.get(d.table, d.table)
+                batch = lazy_helpers["build_batch"](st, float(TIME_POINT))
+                lazy_helpers["family_mask"](
+                    model, d.table, st, batch, None, None, None)
+                rule, action = _coordinate_action(
+                    model, st, batch, family_name=fam,
+                    table_name=d.table, coordinate=d.coordinate)
+                y = canonical_state_key(system.apply(st, rule, action))
+                return "" if y == smi else y
+            law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
+            new_laws[smi] = law
             if len(law_cache) >= LAW_CACHE_MAX:
                 law_cache.pop(next(iter(law_cache)))
             law_cache[smi] = law
-        else:
-            stats["hit_mem"] += 1
+
         if not law.marks:
             return ""
         p = np.array([m.probability for m in law.marks], float)
@@ -722,7 +779,8 @@ def drive(tasks: list[dict[str, Any]], out_dir: str = OUT_DIR) -> dict[str, Any]
 
 @app.local_entrypoint()
 def main(limit: int = 1, out_dir: str = OUT_DIR, workers: int = 8,
-         n_slots: int = 20, subset: str = "", n_particles: int = 0) -> None:
+         n_slots: int = 20, subset: str = "", n_particles: int = 0,
+         sampler: str = "eager", fresh: bool = False) -> None:
     import subprocess
 
     commit = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
@@ -732,7 +790,12 @@ def main(limit: int = 1, out_dir: str = OUT_DIR, workers: int = 8,
              / "data/jin/dev_panel_qed_64.txt").read_text().split("\n")
             if s.strip()]
     tasks = [{"index": i, "source": s, "workers": workers, "n_slots": n_slots,
-              "git_commit": commit} for i, s in enumerate(srcs)]
+              "git_commit": commit, "sampler": sampler, "fresh": fresh}
+             for i, s in enumerate(srcs)]
+    if sampler != "eager" and out_dir == OUT_DIR:
+        raise SystemExit(
+            "a non-default sampler needs its own --out-dir; refusing to write "
+            "lazy-sampler records into the frozen cohort")
     # 0 means "use the frozen 32". A non-zero value is a DECLARED efficiency
     # study under an amendment to preregistration section 13, which otherwise
     # freezes N = 32 and forbids a particle-count sweep. It is refused into the

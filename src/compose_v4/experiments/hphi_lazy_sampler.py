@@ -159,10 +159,22 @@ def sample_one_transition(model, state, time, rng, *, helpers) -> LazyDraw:
         family = names[fi]
         table = _FAMILY_TABLE.get(family)
         scorer = LAZY_SCORERS.get(table)
-        if table is None or scorer is None:
-            # Never silently treat an unscored family as empty: that would
-            # remove real probability mass and change the law.
-            raise RuntimeError(f"no lazy scorer registered for family {family!r}")
+        if table is None:
+            raise RuntimeError(f"no table registered for family {family!r}")
+        if scorer is None:
+            # No scorer: ask the helper whether the family is empty. It may
+            # legitimately be structurally disabled. Never assume either way --
+            # assuming empty removes probability mass, assuming non-empty
+            # crashes mid-trajectory as ring_system_grow did.
+            probe = helpers["family_mask"](
+                model, table, state, batch, pair, glob, node)
+            if probe is None or (probe is not _FALLBACK and not bool(probe.any())):
+                alive[fi] = False
+                out.family_redraws += 1
+                out.empty_families.append(family)
+                continue
+            raise RuntimeError(
+                f"family {family!r} has legal actions but no lazy scorer")
 
         # ---- build ONLY this family ------------------------------------
         t0 = _t.perf_counter()
@@ -174,7 +186,16 @@ def sample_one_transition(model, state, time, rng, *, helpers) -> LazyDraw:
             # HAS legal actions would remove real probability mass and silently
             # change the law. Slow and correct beats fast and wrong.
             out.used_fallback = True
-            fb = helpers["eager_fallback"](state, table)
+            fb = helpers["eager_fallback"](state, table, rng)
+            if fb[0] is None:
+                # No legal mark in this family: it is EMPTY, so reject the
+                # family and redraw. Returning "no mark" here would instead be
+                # read by the controller as a dead end and would kill the
+                # particle -- a silent trajectory change, far worse than a raise.
+                alive[fi] = False
+                out.family_redraws += 1
+                out.empty_families.append(family)
+                continue
             out.table, out.coordinate = fb
             break
         if mask is None or not bool(mask.any()):
