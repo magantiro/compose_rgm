@@ -1,0 +1,149 @@
+{
+ "ok": true,
+ "worst_within_family_spread": 1.7763568394002505e-15,
+ "worst_abs_log_diff": 4.1300043207570525e-07,
+ "n_marks": 15179,
+ "n_states": 24,
+ "mismatches": [
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 0, 0))",
+   "law": -4.285488694906235,
+   "recomputed": -4.285488447230424,
+   "abs_diff": 2.476758105274257e-07
+  },
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 0, 1))",
+   "law": -5.433281987905502,
+   "recomputed": -5.433281740229692,
+   "abs_diff": 2.476758105274257e-07
+  },
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 0, 2))",
+   "law": -3.258272022008896,
+   "recomputed": -3.2582717743330853,
+   "abs_diff": 2.476758105274257e-07
+  },
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 0, 3))",
+   "law": -5.895847409963608,
+   "recomputed": -5.895847162287797,
+   "abs_diff": 2.476758105274257e-07
+  },
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 0, 4))",
+   "law": -8.505265325307846,
+   "recomputed": -8.505265077632036,
+   "abs_diff": 2.476758105274257e-07
+  },
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 0, 5))",
+   "law": -13.941013664007187,
+   "recomputed": -13.941013416331376,
+   "abs_diff": 2.476758105274257e-07
+  },
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 0, 7))",
+   "law": -14.30773863196373,
+   "recomputed": -14.30773838428792,
+   "abs_diff": 2.476758105274257e-07
+  },
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 0, 8))",
+   "law": -11.428053230047226,
+   "recomputed": -11.428052982371415,
+   "abs_diff": 2.476758105274257e-07
+  },
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 0, 9))",
+   "law": -6.637115448713303,
+   "recomputed": -6.637115201037492,
+   "abs_diff": 2.476758105274257e-07
+  },
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 0, 10))",
+   "law": -7.926775127649307,
+   "recomputed": -7.926774879973497,
+   "abs_diff": 2.476758105274257e-07
+  },
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 0, 11))",
+   "law": -9.733856052160263,
+   "recomputed": -9.733855804484453,
+   "abs_diff": 2.476758105274257e-07
+  },
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 0, 12))",
+   "law": -14.251474231481552,
+   "recomputed": -14.251473983805742,
+   "abs_diff": 2.476758105274257e-07
+  },
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 0, 13))",
+   "law": -14.623049587011337,
+   "recomputed": -14.623049339335527,
+   "abs_diff": 2.476758105274257e-07
+  },
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 0, 14))",
+   "law": -14.202323287725449,
+   "recomputed": -14.202323040049638,
+   "abs_diff": 2.476758105274257e-07
+  },
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 1, 0))",
+   "law": -7.274306632578373,
+   "recomputed": -7.274306384902562,
+   "abs_diff": 2.476758105274257e-07
+  },
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 1, 1))",
+   "law": -9.15621230006218,
+   "recomputed": -9.156212052386369,
+   "abs_diff": 2.476758105274257e-07
+  },
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 1, 2))",
+   "law": -6.510398775339127,
+   "recomputed": -6.510398527663316,
+   "abs_diff": 2.476758105274257e-07
+  },
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 1, 4))",
+   "law": -10.657979816198349,
+   "recomputed": -10.657979568522538,
+   "abs_diff": 2.476758105274257e-07
+  },
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 1, 5))",
+   "law": -15.77353224158287,
+   "recomputed": -15.77353199390706,
+   "abs_diff": 2.476758105274257e-07
+  },
+  {
+   "smiles": "C[C@@H](Cn1cncn1)NC(=O)C(c1ccccc1)c1ccccc1",
+   "mark": "('grow_connected', (0, 1, 6))",
+   "law": -14.341097682714462,
+   "recomputed": -14.341097435038652,
+   "abs_diff": 2.476758105274257e-07
+  }
+ ]
+}
