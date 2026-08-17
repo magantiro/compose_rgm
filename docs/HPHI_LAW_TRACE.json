@@ -1,0 +1,218 @@
+{
+  "config": {
+    "ring_catalog_is_none": false,
+    "capabilities": {
+      "compute_cyclic_graft": true,
+      "compute_ring_grow_support": false,
+      "compute_ring_opening": true,
+      "compute_ring_restates": true,
+      "compute_ring_system_delete": false
+    },
+    "editing_process_semantics": "semantic_editing_v2_v2",
+    "atom_restate_action_semantics": "semantic_atom_restate_v1",
+    "ring_restate_scorer_mode": "semantic_successor_group_v1",
+    "enable_heteroatom_scan": true,
+    "enable_cycle_ops": true
+  },
+  "mean_law_seconds": 4.860350583400003,
+  "producers": {
+    "de_novo_rewrite_system": 2.339700000106859e-05,
+    "molecular_state_cache_key": 3.4382000052346483e-06,
+    "compute_topology_features": 0.03437378320000448,
+    "_graph_application_masks": 0.030156040199997847,
+    "process_v2_atom_delete_mask": 0.029916946199998053,
+    "_semantic_cycle_close_admission_mask": 2.7474412216000017,
+    "_semantic_atom_restate_admission_mask": 1.6263984726000018,
+    "_semantic_cycle_open_admission_mask": 0.1427479770000019,
+    "resonance_invariant_bond_classes": 0.00032621399999754885,
+    "enumerate_ring_restate_semantic_groups": 0.165015729000001
+  },
+  "read": {
+    "batch_size": {
+      "_one_state_batch": 5,
+      "_ring_grow_template_logits": 5,
+      "_ring_delete_action_logits": 5,
+      "_ring_restate_logits": 25,
+      "_apply_charge_policy_to_action_masks": 2
+    },
+    "atom_types": {
+      "batch_size": 42,
+      "_one_state_batch": 10,
+      "_encode_batch": 5,
+      "_action_tables": 25,
+      "_ring_restate_context_features": 10,
+      "_apply_charge_policy_to_action_masks": 2
+    },
+    "states": {
+      "_one_state_batch": 15
+    },
+    "times": {
+      "_one_state_batch": 10,
+      "_encode_batch": 5
+    },
+    "formal_charges": {
+      "_one_state_batch": 10,
+      "_encode_batch": 5,
+      "_action_tables": 5,
+      "_apply_charge_policy_to_action_masks": 5
+    },
+    "implicit_h_counts": {
+      "_one_state_batch": 10,
+      "_encode_batch": 5,
+      "_action_tables": 10
+    },
+    "bonds": {
+      "_one_state_batch": 10,
+      "_action_tables": 35,
+      "_ring_restate_context_features": 33,
+      "_apply_charge_policy_to_action_masks": 2
+    },
+    "neural_bonds": {
+      "_one_state_batch": 10,
+      "_encode_batch": 5
+    },
+    "atom_topology": {
+      "_one_state_batch": 10,
+      "_encode_batch": 5
+    },
+    "closure_topology": {
+      "_one_state_batch": 10,
+      "_encode_batch": 5
+    },
+    "ring_system_topology": {
+      "_one_state_batch": 10,
+      "_encode_batch": 5
+    },
+    "atom_delete_mask": {
+      "_one_state_batch": 10,
+      "_action_tables": 5
+    },
+    "cycle_edge_mask": {
+      "_one_state_batch": 10,
+      "_action_tables": 5
+    },
+    "cyclic_pair_mask": {
+      "_one_state_batch": 10
+    },
+    "graft_mask": {
+      "_one_state_batch": 10,
+      "_action_tables": 5,
+      "_graft_relation_features": 10
+    },
+    "graft_remove_neighbors": {
+      "_one_state_batch": 10,
+      "_graft_relation_features": 5,
+      "_coordinate_action": 333,
+      "_apply_charge_policy_to_action_masks": 2
+    },
+    "graft_successor_groups": {
+      "_one_state_batch": 10
+    },
+    "teacher_actions": {
+      "_one_state_batch": 10
+    },
+    "teacher_rule_names": {
+      "_one_state_batch": 10
+    },
+    "teacher_rates": {
+      "_one_state_batch": 10
+    },
+    "importance_weights": {
+      "_one_state_batch": 10
+    },
+    "ring_restate_actions": {
+      "_one_state_batch": 10,
+      "_ring_restate_logits": 10,
+      "_ring_restate_context_features": 10,
+      "_coordinate_action": 22
+    },
+    "ring_restate_scorer_mode": {
+      "_one_state_batch": 10,
+      "_action_tables": 5
+    },
+    "ring_restate_successor_group_ids": {
+      "_one_state_batch": 10,
+      "_ring_restate_logits": 5,
+      "_ring_restate_context_features": 5
+    },
+    "ring_restate_successor_group_descriptors": {
+      "_one_state_batch": 10,
+      "_ring_restate_logits": 5
+    },
+    "ring_restate_successor_group_multiplicities": {
+      "_one_state_batch": 10,
+      "_ring_restate_logits": 5,
+      "_ring_restate_context_features": 5
+    },
+    "editing_process_semantics": {
+      "_one_state_batch": 10,
+      "_action_tables": 5
+    },
+    "atom_delete_admission_mask": {
+      "_one_state_batch": 15,
+      "_action_tables": 15
+    },
+    "atom_delete_action_semantics": {
+      "_one_state_batch": 10,
+      "_action_tables": 5
+    },
+    "atom_restate_admission_mask": {
+      "_one_state_batch": 15,
+      "_action_tables": 15
+    },
+    "atom_restate_action_semantics": {
+      "_one_state_batch": 10,
+      "_action_tables": 5
+    },
+    "cycle_close_admission_mask": {
+      "_one_state_batch": 15,
+      "_action_tables": 15
+    },
+    "cycle_close_action_semantics": {
+      "_one_state_batch": 10,
+      "_action_tables": 5
+    },
+    "cycle_open_admission_mask": {
+      "_one_state_batch": 15,
+      "_action_tables": 15
+    },
+    "cycle_open_action_semantics": {
+      "_one_state_batch": 10,
+      "_action_tables": 5
+    },
+    "ring_grow_support_mask": {
+      "_one_state_batch": 10
+    },
+    "ring_grow_support_sparse": {
+      "_one_state_batch": 10
+    },
+    "ring_delete_actions": {
+      "_one_state_batch": 10
+    },
+    "ring_grow_support_is_exact": {
+      "_one_state_batch": 10
+    },
+    "ring_grow_enablement_is_exact": {
+      "_one_state_batch": 10
+    },
+    "ring_topology_local_support_log_mass": {
+      "_one_state_batch": 10
+    },
+    "ring_teacher_semantic_certificates": {
+      "_one_state_batch": 10
+    },
+    "property_condition_values": {
+      "_one_state_batch": 10,
+      "_encode_batch": 5
+    },
+    "property_condition_mask": {
+      "_one_state_batch": 10,
+      "_encode_batch": 5
+    },
+    "to": {
+      "_one_state_batch": 5
+    }
+  },
+  "unread": [],
+  "n_fields": 43
+}
