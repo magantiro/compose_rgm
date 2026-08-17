@@ -71,13 +71,13 @@ image = _base_image.env(
     {"PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}", "OMP_NUM_THREADS": "1"})
 app = modal.App("hphi-archive")
 RUN_ROOT = "/artifacts/editing_v2/r_theta_run"
-OUT_DIR = "hphi_recede_v5"
+OUT_DIR = "hphi_we_v8"
 TIME_POINT, CANONICAL_SLOTS = 0.5, 48
 HORIZON = 24
 N_PARTICLES = 32
 REGION = (0.90, 0.40)
 N_CANDIDATES = 4
-PROTOCOL = "hphi-horizon-v4"
+PROTOCOL = "hphi-we-v8"
 MEM_MIB = int(4.5 * 1024)
 
 _RT: dict[str, Any] = {}
@@ -162,6 +162,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     from compose_v4.experiments.hphi_lazy_helpers import make_helpers
     from compose_v4.experiments.hphi_lazy_sampler import sample_one_transition
     from compose_v4.experiments.hphi_region_features import build_features, in_region
+    from compose_v4.experiments.hphi_we_resample import we_resample
     from compose_v4.experiments.hphi_smc import (
         effective_sample_size, normalized_weights, should_resample,
         systematic_resample, terminal_output,
@@ -177,6 +178,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     source = task["source"]
     idx = int(task["index"])
     horizon = int(task.get("horizon", HORIZON))
+    use_we = bool(task.get("we"))
     helpers = make_helpers(model, time_point=float(TIME_POINT),
                            canonical_slots=CANONICAL_SLOTS)
     _TABLE_FAMILY = {"grow_connected": "atom_insert"}
@@ -253,6 +255,8 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         seen: list[tuple[str, int, float]] = []
         contact = [0]          # particles that ENTERED the region, exact
         n_trans = 0
+        cur_h: dict[str, float] = {start_smi: h_phi(start_smi, budget0)}
+        we_events = [0]
 
         for step in range(budget0):
             b = budget0 - step
@@ -274,6 +278,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                 # ARCHIVE ENTRY. h_phi(y, b-1) is exactly h_phi(y, H - depth),
                 # which is the frozen branch score -- no extra evaluation.
                 seen.append((y, depth, float(hy)))
+                cur_h[y] = float(hy)
                 qy, sy = props(y)
                 if in_region(qy, sy, REGION):
                     absorbed[i] = True
@@ -282,10 +287,39 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                 break
             w = normalized_weights(log_w)
             if should_resample(w, N_PARTICLES):
-                ridx = systematic_resample(w, rng)
-                states = [states[j] for j in ridx]
-                absorbed = [absorbed[j] for j in ridx]
-                log_w = np.zeros(N_PARTICLES)
+                if use_we:
+                    # WE: resample WITHIN committor strata. Absorbed particles
+                    # keep their slots and weights untouched -- they are not
+                    # searching -- so only the live population is reallocated,
+                    # which preserves the absorbed/live weight ratio exactly.
+                    fin = np.isfinite(log_w)
+                    shift = float(log_w[fin].max()) if fin.any() else 0.0
+                    live_mask = np.array(
+                        [(not absorbed[i]) and fin[i] for i in range(N_PARTICLES)])
+                    lw = np.where(live_mask, np.exp(log_w - shift), 0.0)
+                    n_live = int(live_mask.sum())
+                    if n_live >= 2:
+                        parents, new_w, diag = we_resample(
+                            list(states), lw,
+                            lambda k: cur_h.get(k, 0.0), rng, n_slots=n_live)
+                        if parents:
+                            ns, na = list(states), list(absorbed)
+                            nl = log_w.copy()
+                            slots = [i for i in range(N_PARTICLES) if live_mask[i]]
+                            for slot, par, wt in zip(slots, parents, new_w):
+                                ns[slot] = states[par]
+                                na[slot] = absorbed[par]
+                                # W_s/n_s, carried back into log space with the
+                                # same shift, so weights stay comparable with
+                                # the untouched absorbed particles.
+                                nl[slot] = float(np.log(wt)) + shift
+                            states, absorbed, log_w = ns, na, nl
+                            we_events[0] += 1
+                else:
+                    ridx = systematic_resample(w, rng)
+                    states = [states[j] for j in ridx]
+                    absorbed = [absorbed[j] for j in ridx]
+                    log_w = np.zeros(N_PARTICLES)
             if all(absorbed):
                 break
 
@@ -305,7 +339,8 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
             ret = states[j]
             ess = float(effective_sample_size(normalized_weights(log_w)))
         rq, rs = props(ret)
-        return {"contact": contact[0], "returned": ret,
+        return {"contact": contact[0], "we_events": we_events[0],
+                "unique_live": len(set(states)), "returned": ret,
                 "terminal_qed": rq, "terminal_sim": rs,
                 "success": bool(in_region(rq, rs, REGION)),
                 "extinct": j is None, "status": status,
@@ -316,7 +351,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     # RESUMABLE. A driver crash cost eleven sources of finished compute once;
     # an already-written source is never recomputed.
     done_path = (Path(RUN_ROOT) / task.get("out_dir", OUT_DIR)
-                 / f"{idx:03d}_H{task.get('horizon', HORIZON)}.json")
+                 / f"{idx:03d}_{'we' if task.get('we') else 'smc'}.json")
     if done_path.exists():
         try:
             prior = json.loads(done_path.read_text())
@@ -327,6 +362,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
             pass
 
     out: dict[str, Any] = {"index": idx, "source": source, "horizon": horizon,
+                           "we": use_we,
                            "stratum": task.get("stratum"), "arms": {}}
     t_all = time.perf_counter()
 
@@ -387,8 +423,8 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                     archive[smi] = (d, h)
             cands.append({k2: r[k2] for k2 in
                           ("returned", "terminal_qed", "terminal_sim", "success",
-                           "extinct", "contact", "n_transitions", "start_depth",
-                           "budget")})
+                           "extinct", "contact", "we_events", "unique_live",
+                           "n_transitions", "start_depth", "budget")})
             print(f"  src{idx} {arm} cand{k} depth{r['start_depth']} "
                   f"QED {r['terminal_qed']:.3f} sim {r['terminal_sim']:.3f} "
                   f"{'HIT' if r['success'] else ('EXT' if r['extinct'] else '---')} "
@@ -408,7 +444,8 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     out["seconds"] = round(time.perf_counter() - t_all, 1)
     p = Path(RUN_ROOT) / task.get("out_dir", OUT_DIR)
     p.mkdir(parents=True, exist_ok=True)
-    (p / f"{idx:03d}_H{horizon}.json").write_text(json.dumps(out))
+    (p / f"{idx:03d}_{'we' if use_we else 'smc'}.json").write_text(
+        json.dumps(out))
     artifact_volume.commit()
     return out
 
@@ -456,11 +493,21 @@ def main(smoke: bool = False, out_dir: str = OUT_DIR) -> None:
     # Full 64-source development panel, both horizons, PAIRED: seed_for keys on
     # (arm, source, candidate) and NOT on horizon, so candidate k gets the same
     # seed in both arms and the comparison is source-paired by construction.
+    panel = json.loads((root / "docs/TREE_PANEL_12.json").read_text())
+    keep = [i for i in keep if i in set(panel["all"])]
+    if smoke:
+        # Smoke on sources that RESAMPLE. Source 0 never drops below ESS < N/2,
+        # so the WE branch never executed and the first smoke passed trivially
+        # -- a clean result from code that never ran. Marginal sources resample
+        # heavily, which is the only way to exercise the new path.
+        keep = panel["panel"]["marginal"][:2]
     tasks = [{"index": i, "source": srcs[i], "stratum": strat[i],
-              "arm": "restart", "horizon": H, "out_dir": out_dir}
-             for i in keep for H in (24, 40)]
-    print(f"RECEDING-HORIZON A/B: {len(tasks)} units = {len(keep)} sources x "
-          f"H in (24, 40) x {N_CANDIDATES} candidates, N={N_PARTICLES}. "
+              "arm": "restart", "horizon": 24, "we": we, "out_dir": out_dir}
+             for i in keep for we in ((True,) if smoke else (False, True))]
+    print(f"WE MECHANISM TEST: {len(tasks)} units on {len(keep)} panel sources, "
+          f"H={HORIZON}, N={N_PARTICLES}, {N_CANDIDATES} candidates. Only the "
+          f"RESAMPLER differs: global vs committor-stratified with W_s/n_s "
+          f"descendant weights. "
           f"H=40 is a RECEDING-HORIZON controller with b_eff = min(24, b): "
           f"a rolling 24-edit lookahead until 24 actually remain, then the "
           f"calibrated countdown. Nothing is retrained.")

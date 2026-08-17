@@ -1,0 +1,23 @@
+{
+ "hard": {
+  "runs": 111,
+  "steps": 2553,
+  "resamples": 9,
+  "runs_with_zero": 108,
+  "succ": 0
+ },
+ "reliable": {
+  "runs": 19,
+  "steps": 448,
+  "resamples": 41,
+  "runs_with_zero": 0,
+  "succ": 19
+ },
+ "marginal": {
+  "runs": 17,
+  "steps": 399,
+  "resamples": 14,
+  "runs_with_zero": 7,
+  "succ": 8
+ }
+}
