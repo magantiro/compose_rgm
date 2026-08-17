@@ -9,10 +9,12 @@ rewrite cannot silently mutate a remote persistent-slot state.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from itertools import product
 from math import prod
+
+import numpy as np
 
 from compose_v4.chem.molecular_graph import MolecularGraph, is_element
 from compose_v4.chem.state import is_connected_or_null, is_valid_state
@@ -61,6 +63,43 @@ class SemanticCycleCloseContext:
     source_key: str
     components: tuple[AromaticComponentAssignments, ...]
     source_orders: tuple[tuple[int, ...], ...]
+    #: Snapshot of the source arrays, so the per-candidate identity guard does
+    #: not have to rebuild `_exact_state_identity`. COPIES, because the tuples in
+    #: `exact_source_identity` are immutable snapshots and this must behave the
+    #: same: a later mutation of the caller's state must not make a stale
+    #: context look current.
+    source_arrays: tuple[np.ndarray, ...] = ()
+    #: selections -> (alias, alias_is_admissible). The enumerator resolves ~960
+    #: candidates per state against only ~2.4 DISTINCT Kekule selections, so
+    #: without this the alias validity / connectivity / canonical-key triple is
+    #: recomputed roughly 400x per distinct alias. Excluded from equality and
+    #: repr: a memo of pure functions carries no identity of its own.
+    alias_cache: dict = field(default_factory=dict, compare=False, repr=False)
+
+
+def _context_matches(
+    context: SemanticCycleCloseContext,
+    state: MolecularGraph,
+) -> bool:
+    """Exactly `context.exact_source_identity == _exact_state_identity(state)`.
+
+    Same predicate, without materializing four Python tuples per call -- for a
+    48-slot state the bond block alone is 2304 elements and the enumerator hits
+    this once per candidate. Both forms test VALUE equality, so differing integer
+    dtypes compare equal under each and a shape difference is unequal under each.
+    Falls back to the original comparison for a context built before this field
+    existed, so an unpickled or hand-built context still resolves correctly.
+    """
+
+    if not context.source_arrays:
+        return context.exact_source_identity == _exact_state_identity(state)
+    stored = context.source_arrays
+    return bool(
+        np.array_equal(stored[0], state.atom_types)
+        and np.array_equal(stored[1], state.formal_charges)
+        and np.array_equal(stored[2], state.implicit_h_counts)
+        and np.array_equal(stored[3], state.bonds)
+    )
 
 
 def _exact_state_identity(state: MolecularGraph) -> tuple[tuple[int, ...], ...]:
@@ -87,6 +126,12 @@ def prepare_semantic_cycle_close_context(
         source_orders=tuple(
             tuple(int(state.bonds[edge]) for edge in component.edges)
             for component in components
+        ),
+        source_arrays=(
+            state.atom_types.copy(),
+            state.formal_charges.copy(),
+            state.implicit_h_counts.copy(),
+            state.bonds.copy(),
         ),
     )
 
@@ -127,13 +172,28 @@ def resolve_semantic_cycle_close(
         max(int(action.a), int(action.b)),
         int(action.order),
     )
-    if not is_valid_state(state) or not is_connected_or_null(state):
-        return _rejected(
-            normalized,
-            SemanticCycleCloseRejectionCode.INVALID_SOURCE,
-            source_key=None,
-        )
-    source_key = canonical_state_key(state)
+    # SOURCE-GLOBAL HOIST. `prepare_semantic_cycle_close_context` REFUSES to
+    # build a context unless `is_valid_state` and `is_connected_or_null` both
+    # hold, so a context that belongs to this exact state already certifies
+    # both; and `canonical_state_key` is a pure function of the state, so
+    # `context.source_key` IS `canonical_state_key(state)`. Recomputing all
+    # three per candidate was 46.4% of `enumerate_cycle_close_edges`.
+    #
+    # This changes no legality decision. If the context does not belong to this
+    # state the original path runs unchanged, and the mismatch still raises
+    # below -- AFTER the action gate, so an invalid action against a mismatched
+    # context still returns INVALID_ACTION exactly as before.
+    matched = context is not None and _context_matches(context, state)
+    if matched:
+        source_key = context.source_key
+    else:
+        if not is_valid_state(state) or not is_connected_or_null(state):
+            return _rejected(
+                normalized,
+                SemanticCycleCloseRejectionCode.INVALID_SOURCE,
+                source_key=None,
+            )
+        source_key = canonical_state_key(state)
     if (
         type(action) is not BondInsert
         or int(action.a) >= int(action.b)
@@ -151,10 +211,7 @@ def resolve_semantic_cycle_close(
         )
     if context is None:
         context = prepare_semantic_cycle_close_context(state)
-    elif (
-        context.exact_source_identity != _exact_state_identity(state)
-        or context.source_key != source_key
-    ):
+    elif not matched or context.source_key != source_key:
         raise ValueError("semantic cycle-close context belongs to another exact source")
 
     components = context.components
@@ -189,17 +246,33 @@ def resolve_semantic_cycle_close(
         selections = list(context.source_orders)
         for component_index, orders in zip(affected, choices, strict=True):
             selections[component_index] = orders
-        alias = instantiate_component_factored_kekule_alias(
-            state,
-            components,
-            tuple(selections),
-        )
-        if (
-            not is_valid_state(alias)
-            or not is_connected_or_null(alias)
-            or canonical_state_key(alias) != source_key
-            or not is_valid_bond_insert(alias, normalized)
-        ):
+        # ALIAS MEMO. The alias and the first three checks depend ONLY on the
+        # selection tuple -- not on the candidate bond -- so they are shared by
+        # every candidate whose endpoints touch the same components. Only
+        # `is_valid_bond_insert` is candidate-specific and stays per candidate.
+        # The `and` chain reproduces the original `or` short-circuit exactly:
+        # each predicate is evaluated only when all earlier ones passed.
+        # `apply_bond_insert` and `is_valid_bond_insert` copy rather than
+        # mutate, so a shared alias cannot be corrupted by a later candidate.
+        selection_key = tuple(selections)
+        cached = context.alias_cache.get(selection_key)
+        if cached is None:
+            alias = instantiate_component_factored_kekule_alias(
+                state,
+                components,
+                selection_key,
+            )
+            cached = (
+                alias,
+                bool(
+                    is_valid_state(alias)
+                    and is_connected_or_null(alias)
+                    and canonical_state_key(alias) == source_key
+                ),
+            )
+            context.alias_cache[selection_key] = cached
+        alias, alias_admissible = cached
+        if not alias_admissible or not is_valid_bond_insert(alias, normalized):
             return _rejected(
                 normalized,
                 SemanticCycleCloseRejectionCode.ALIAS_EXECUTION_DISAGREEMENT,

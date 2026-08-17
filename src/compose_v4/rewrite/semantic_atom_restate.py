@@ -15,7 +15,7 @@ remains an independent bounded audit oracle; it is not used by the executor.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 import numpy as np
@@ -66,6 +66,40 @@ class SemanticAtomRestateContext:
     source_exact_state_key: tuple[tuple[int, ...], ...]
     components: tuple[AromaticComponentAssignments, ...]
     component_index_by_vertex: tuple[int, ...]
+    #: Snapshot of the source arrays, so the per-action identity guard does not
+    #: rebuild `_exact_state_key`. COPIES, matching the immutable-snapshot
+    #: behaviour of `source_exact_state_key`.
+    source_arrays: tuple[np.ndarray, ...] = ()
+    #: `resonance_invariant_bond_classes(state)`, which depends only on the
+    #: source and was recomputed once per (vertex, target class) -- 15 classes
+    #: times every real slot, so ~375 times per state.
+    perceived: np.ndarray | None = None
+    #: component_index -> (aliases, aliases_agree). The alias tuple and its
+    #: validity / connectivity / canonical-key screen depend only on the
+    #: vertex's component, never on the target class, so they were recomputed
+    #: for all 15 classes at every vertex.
+    alias_cache: dict = field(default_factory=dict, compare=False, repr=False)
+
+
+def _restate_context_matches(
+    context: SemanticAtomRestateContext,
+    state: MolecularGraph,
+) -> bool:
+    """Exactly `context.source_exact_state_key == _exact_state_key(state)`.
+
+    Value equality either way, without materializing four Python tuples per
+    action. Falls back to the original comparison when the snapshot is absent.
+    """
+
+    if not context.source_arrays:
+        return context.source_exact_state_key == _exact_state_key(state)
+    stored = context.source_arrays
+    return bool(
+        np.array_equal(stored[0], state.atom_types)
+        and np.array_equal(stored[1], state.formal_charges)
+        and np.array_equal(stored[2], state.implicit_h_counts)
+        and np.array_equal(stored[3], state.bonds)
+    )
 
 
 @dataclass(frozen=True)
@@ -136,6 +170,13 @@ def prepare_semantic_atom_restate_context(
         source_exact_state_key=_exact_state_key(state),
         components=components,
         component_index_by_vertex=tuple(component_index_by_vertex),
+        source_arrays=(
+            state.atom_types.copy(),
+            state.formal_charges.copy(),
+            state.implicit_h_counts.copy(),
+            state.bonds.copy(),
+        ),
+        perceived=resonance_invariant_bond_classes(state),
     )
 
 
@@ -201,14 +242,25 @@ def resolve_semantic_atom_restate(
 
     vertex = int(vertex)
     target_class_index = int(target_class_index)
-    if not is_valid_state(state) or not is_connected_or_null(state):
+    # SOURCE-GLOBAL HOIST. `prepare_semantic_atom_restate_context` REFUSES to
+    # build a context unless `is_valid_state` and `is_connected_or_null` both
+    # hold, so a context belonging to this exact state certifies both, and
+    # `canonical_state_key` is a pure function of the state. Recomputing these
+    # per action meant ~375 repetitions per state (15 target classes x every
+    # real slot). A non-matching context falls through to the original path and
+    # still raises below, after the action gate, exactly as before.
+    matched = context is not None and _restate_context_matches(context, state)
+    if matched:
+        source_key = context.source_key
+    elif not is_valid_state(state) or not is_connected_or_null(state):
         return _rejected(
             code=SemanticAtomRestateRejectionCode.INVALID_SOURCE,
             source_key=None,
             vertex=vertex,
             target_class_index=target_class_index,
         )
-    source_key = canonical_state_key(state)
+    else:
+        source_key = canonical_state_key(state)
     if (
         vertex < 0
         or vertex >= state.n_atoms
@@ -232,17 +284,19 @@ def resolve_semantic_atom_restate(
 
     if context is None:
         context = prepare_semantic_atom_restate_context(state)
-    if (
-        context.source_key != source_key
-        or context.source_exact_state_key != _exact_state_key(state)
-    ):
+        matched = True
+    if context.source_key != source_key or not matched:
         raise ValueError("semantic atom-restatement context belongs to another source")
     if len(context.component_index_by_vertex) != state.n_atoms:
         raise ValueError(
             "semantic atom-restatement context has the wrong slot capacity"
         )
 
-    perceived = resonance_invariant_bond_classes(state)
+    perceived = (
+        context.perceived
+        if context.perceived is not None
+        else resonance_invariant_bond_classes(state)
+    )
     semantic_aromatic_site = bool(np.any(perceived[vertex] == BOND_AROMATIC))
     component_index = int(context.component_index_by_vertex[vertex])
     if semantic_aromatic_site != (component_index >= 0):
@@ -254,34 +308,53 @@ def resolve_semantic_atom_restate(
             semantic_aromatic_site=semantic_aromatic_site,
         )
 
-    if component_index < 0:
-        aliases = (state,)
-    else:
-        component = context.components[component_index]
-        if not component.bond_orders:
-            return _rejected(
-                code=(
-                    SemanticAtomRestateRejectionCode.COMPONENT_CONTAINS_NO_KEKULE_ASSIGNMENT
-                ),
-                source_key=source_key,
-                vertex=vertex,
-                target_class_index=target_class_index,
-                semantic_aromatic_site=True,
+    # ALIAS MEMO. Both the alias tuple and the screen below depend ONLY on the
+    # vertex's aromatic component -- never on the target class -- so all 15
+    # classes at a vertex rebuilt and rescreened the same aliases. The screen is
+    # cached PER ALIAS rather than as one verdict, because the early return
+    # carries `target_compatible_alias_count`, which accumulates across the
+    # loop; collapsing it would change that count when a later alias fails.
+    # The empty-bond_orders rejection stays outside the memo and is re-derived
+    # identically on every call, since it returns before anything is cached.
+    cached = context.alias_cache.get(component_index)
+    if cached is None:
+        if component_index < 0:
+            aliases = (state,)
+        else:
+            component = context.components[component_index]
+            if not component.bond_orders:
+                return _rejected(
+                    code=(
+                        SemanticAtomRestateRejectionCode.COMPONENT_CONTAINS_NO_KEKULE_ASSIGNMENT
+                    ),
+                    source_key=source_key,
+                    vertex=vertex,
+                    target_class_index=target_class_index,
+                    semantic_aromatic_site=True,
+                )
+            aliases = tuple(
+                _state_with_component_orders(state, component, orders)
+                for orders in component.bond_orders
             )
-        aliases = tuple(
-            _state_with_component_orders(state, component, orders)
-            for orders in component.bond_orders
+        cached = (
+            aliases,
+            tuple(
+                bool(
+                    is_valid_state(alias)
+                    and is_connected_or_null(alias)
+                    and canonical_state_key(alias) == source_key
+                )
+                for alias in aliases
+            ),
         )
+        context.alias_cache[component_index] = cached
+    aliases, alias_screen = cached
 
     product_groups: dict[str, dict[tuple[tuple[int, ...], ...], MolecularGraph]] = {}
     compatible_count = 0
     charge_preserving_count = 0
-    for alias in aliases:
-        if (
-            not is_valid_state(alias)
-            or not is_connected_or_null(alias)
-            or canonical_state_key(alias) != source_key
-        ):
+    for alias_index, alias in enumerate(aliases):
+        if not alias_screen[alias_index]:
             return _rejected(
                 code=SemanticAtomRestateRejectionCode.COMPONENT_ASSIGNMENT_DISAGREEMENT,
                 source_key=source_key,
