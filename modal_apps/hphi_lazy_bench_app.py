@@ -103,6 +103,7 @@ def bench(srcs: list[str], n_eager: int) -> dict[str, Any]:
     model.eval(); torch.set_grad_enabled(False); torch.set_num_threads(1)
 
     MAXH = 4
+    macro_system = F.de_novo_rewrite_system()
 
     class Ctx:
         """Per-state lazily filled scaffolding. Nothing is built until asked."""
@@ -250,11 +251,26 @@ def bench(srcs: list[str], n_eager: int) -> dict[str, Any]:
             return m.unsqueeze(0)
 
         if table == "ring_system_restate":
-            # No lazy construction yet: its logits need the ring successor-group
-            # enumeration. Ask for the exact eager law instead of reporting the
-            # family empty, which would delete 3.1% of probability mass.
-            from compose_v4.experiments.hphi_lazy_sampler import FALLBACK
-            return FALLBACK
+            # Build ONLY this family's batch fields, then let the model compute
+            # its own logits and mask. The enumeration is ~261 ms and is paid on
+            # the ~3% of draws that select this family rather than on every one.
+            try:
+                groups = F.enumerate_ring_restate_semantic_groups(
+                    st, system=macro_system)
+                batch.ring_restate_actions = (groups.actions,)
+                batch.ring_restate_successor_group_ids = (
+                    groups.successor_group_ids,)
+                batch.ring_restate_successor_group_descriptors = (
+                    groups.group_descriptors,)
+                batch.ring_restate_successor_group_multiplicities = (
+                    groups.group_multiplicities,)
+                _lg, rm = model._ring_restate_logits(batch, pair, glob)
+                return rm
+            except Exception:
+                # Any gap in the lazy construction falls back to the exact
+                # family-conditioned law rather than to an empty verdict.
+                from compose_v4.experiments.hphi_lazy_sampler import FALLBACK
+                return FALLBACK
 
         return None
 
@@ -271,13 +287,22 @@ def bench(srcs: list[str], n_eager: int) -> dict[str, Any]:
             st, CycleCloseEdge(a, b, k + 1), context=ctx_for(st).cc_context)
         return bool(r is not None and r.admitted)
 
-    def eager_fallback(st):
-        """Exact law, sampled directly. Correct, slow, and counted."""
+    def eager_fallback(st, table):
+        """Exact law restricted to the ALREADY-CHOSEN family.
+
+        Must be family-CONDITIONED. Sampling the global law here would redraw
+        the family that was already drawn, biasing every fallback toward
+        whichever families dominate the global law -- a real distribution
+        change, not a slow path. Restricting to the chosen family and sampling
+        proportional to those marks' probabilities IS p(a | f), because
+        p(a | f) is proportional to p(f, a) restricted to f.
+        """
         law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
-        if not law.marks:
+        marks = [m for m in law.marks if m.table_name == table]
+        if not marks:
             return (None, None)
-        pr = np.array([float(np.exp(m.log_probability)) for m in law.marks])
-        mk = law.marks[int(rng_fb.choice(len(pr), p=pr / pr.sum()))]
+        pr = np.array([float(np.exp(m.log_probability)) for m in marks])
+        mk = marks[int(rng_fb.choice(len(pr), p=pr / pr.sum()))]
         return (mk.table_name, tuple(int(v) for v in mk.coordinate))
 
     rng_fb = np.random.default_rng(7)
@@ -333,7 +358,9 @@ def bench(srcs: list[str], n_eager: int) -> dict[str, Any]:
         "n_returned_edit": len(got),
         "eager_median_ms": pct(eager_ms, 0.5) if eager_ms else None,
         "eager_n": len(eager_ms),
+        "lazy_mean_ms": (sum(lazy_ms) / len(lazy_ms)) if lazy_ms else None,
         "lazy_median_ms": pct(lazy_ms, 0.5), "lazy_p90_ms": pct(lazy_ms, 0.9),
+        "lazy_p95_ms": pct(lazy_ms, 0.95), "lazy_p99_ms": pct(lazy_ms, 0.99),
         "lazy_max_ms": max(lazy_ms) if lazy_ms else None,
         "fallback_fraction": sum(
             1 for r in rows if r.used_fallback) / max(len(rows), 1),
@@ -354,7 +381,10 @@ def bench(srcs: list[str], n_eager: int) -> dict[str, Any]:
     print(f"  {'median transition ms':<30}"
           f"{(out['eager_median_ms'] or float('nan')):>12.1f}"
           f"{out['lazy_median_ms']:>12.1f}")
+    print(f"  {'mean ms':<30}{'':>12}{out['lazy_mean_ms']:>12.1f}")
     print(f"  {'p90 ms':<30}{'':>12}{out['lazy_p90_ms']:>12.1f}")
+    print(f"  {'p95 ms':<30}{'':>12}{out['lazy_p95_ms']:>12.1f}")
+    print(f"  {'p99 ms':<30}{'':>12}{out['lazy_p99_ms']:>12.1f}")
     print(f"  {'max ms':<30}{'':>12}{out['lazy_max_ms']:>12.1f}")
     print(f"  {'resolver calls / draw':<30}{'~1300':>12}"
           f"{out['resolver_calls_mean']:>12.2f}")

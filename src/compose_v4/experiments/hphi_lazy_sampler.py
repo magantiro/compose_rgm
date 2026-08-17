@@ -174,7 +174,7 @@ def sample_one_transition(model, state, time, rng, *, helpers) -> LazyDraw:
             # HAS legal actions would remove real probability mass and silently
             # change the law. Slow and correct beats fast and wrong.
             out.used_fallback = True
-            fb = helpers["eager_fallback"](state)
+            fb = helpers["eager_fallback"](state, table)
             out.table, out.coordinate = fb
             break
         if mask is None or not bool(mask.any()):

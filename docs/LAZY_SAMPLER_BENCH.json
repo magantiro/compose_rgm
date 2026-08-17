@@ -1,53 +1,52 @@
 {
  "n_states": 120,
- "n_lazy_ok": 114,
- "n_failures": 6,
- "n_returned_edit": 114,
- "eager_median_ms": 7664.774719000007,
- "eager_n": 8,
- "lazy_median_ms": 85.03195099999061,
- "lazy_p90_ms": 172.96968200002993,
- "lazy_max_ms": 17815.598437000004,
- "fallback_fraction": 0.06140350877192982,
- "resolver_calls_mean": 0.45614035087719296,
- "family_redraws_mean": 0.008771929824561403,
- "coordinate_rejections_mean": 0.24561403508771928,
- "encode_ms_mean": 52.3176613859629,
- "family_ms_mean": 0.5125132456125732,
- "mask_ms_mean": 25.034390403510095,
- "resolver_ms_mean": 4.907812385966824,
+ "n_lazy_ok": 115,
+ "n_failures": 5,
+ "n_returned_edit": 115,
+ "eager_median_ms": 5376.0918339999935,
+ "eager_n": 6,
+ "lazy_mean_ms": 91.06380459130436,
+ "lazy_median_ms": 78.61310999999205,
+ "lazy_p90_ms": 134.0253890000156,
+ "lazy_p95_ms": 173.20598000000587,
+ "lazy_p99_ms": 391.73824699997795,
+ "lazy_max_ms": 403.5858350000012,
+ "fallback_fraction": 0.0,
+ "resolver_calls_mean": 0.3652173913043478,
+ "family_redraws_mean": 0.017391304347826087,
+ "coordinate_rejections_mean": 0.16521739130434782,
+ "encode_ms_mean": 55.53218936521786,
+ "family_ms_mean": 0.5269617304350049,
+ "mask_ms_mean": 28.01075604347889,
+ "resolver_ms_mean": 3.032352252174435,
  "by_family": {
   "grow_connected": {
-   "n": 29,
-   "median_ms": 53.23145300002352
+   "n": 28,
+   "median_ms": 54.90274400000317
   },
   "bond_reroute": {
    "n": 30,
-   "median_ms": 109.06274100000246
+   "median_ms": 96.66662800000836
   },
   "atom_restate": {
-   "n": 23,
-   "median_ms": 71.23380400000201
+   "n": 22,
+   "median_ms": 71.45581000000334
   },
   "atom_delete": {
-   "n": 20,
-   "median_ms": 100.38986899996871
-  },
-  "cycle_attach": {
-   "n": 5,
-   "median_ms": 197.90002499996717
-  },
-  "bond_reorder": {
-   "n": 4,
-   "median_ms": 73.9412199999947
+   "n": 26,
+   "median_ms": 82.39296700000409
   },
   "ring_system_restate": {
-   "n": 2,
-   "median_ms": 9172.932627000024
+   "n": 5,
+   "median_ms": 314.7826219999956
+  },
+  "cycle_attach": {
+   "n": 3,
+   "median_ms": 162.86885100001314
   },
   "cycle_insert": {
    "n": 1,
-   "median_ms": 64.70971800001735
+   "median_ms": 66.32214499998668
   }
  }
 }
