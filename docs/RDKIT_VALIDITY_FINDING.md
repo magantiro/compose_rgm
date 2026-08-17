@@ -1,5 +1,13 @@
 # The validity check rebuilds the whole molecule per candidate: 52.9x available
 
+> **SUPERSEDED IN PART.** Everything measured here remains true of the EAGER
+> path. It no longer describes the runtime: the lazy family-first sampler
+> (`docs/LAZY_SAMPLER_RESULT.md`) cut a fresh transition to ~79 ms, of which
+> the resolver is 3.0 ms and the encode 55.5 ms. Any ceiling derived from the
+> profile below -- including the 1.08% vectorizable share and the 1.08x
+> vectorization ceiling recorded elsewhere -- must be re-measured against the
+> new profile, not reused.
+
 **Measured, with identical verdicts. Blocked by the same provenance hash as the
 admission-mask memoization.**
 
