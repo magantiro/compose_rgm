@@ -144,8 +144,11 @@ def _record_name(task: dict) -> str:
     a run against itself. The resume check and the write MUST use this same
     name, or resume looks for a file the writer never creates.
     """
-    return (f"{int(task['index']):03d}_H{task.get('horizon', HORIZON)}"
-            f"_{task.get('head_dir', 'hphi_v2').replace('/', '-')}.json")
+    base = (f"{int(task['index']):03d}_H{task.get('horizon', HORIZON)}"
+            f"_{task.get('head_dir', 'hphi_v2').replace('/', '-')}")
+    if "k_start" in task or "k_end" in task:
+        base += f"_k{int(task.get('k_start', 0))}-{int(task.get('k_end', 0))}"
+    return base + ".json"
 
 
 def _load_head(head_dir: str):
@@ -370,7 +373,14 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         # reliable source (4 -> 3) for exactly that reason.
         archive[source] = (0, h_phi(source, horizon))
         arm_rng = np.random.default_rng(seed_for(arm, source, 99))
-        for k in range(N_CANDIDATES):
+        # CANDIDATE RANGE. For arm="restart" every candidate launches from
+        # (source, depth 0) with its own default_rng(seed_for(arm, src, k)) and
+        # the loop never breaks on success, so candidates are independent and a
+        # later slice reproduces exactly what a full run would have produced at
+        # those k. That is what lets candidates 5-6 be generated alone and
+        # merged with the banked 1-4 instead of paying to redo them.
+        for k in range(int(task.get("k_start", 0)),
+                       int(task.get("k_end", N_CANDIDATES))):
             if arm == "restart" or k == 0:
                 start, depth = source, 0
             else:
@@ -415,7 +425,7 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
                 prev = archive.get(smi)
                 if prev is None or d < prev[0]:
                     archive[smi] = (d, h)
-            cands.append({k2: r[k2] for k2 in
+            cands.append({"k": k} | {k2: r[k2] for k2 in
                           ("returned", "terminal_qed", "terminal_sim", "success",
                            "extinct", "contact", "n_transitions", "start_depth",
                            "budget")})
@@ -467,7 +477,8 @@ def drive(tasks: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 @app.local_entrypoint()
-def main(parity_only: bool = False, out_dir: str = OUT_DIR) -> None:
+def main(parity_only: bool = False, out_dir: str = OUT_DIR,
+         k_start: int = -1, k_end: int = -1) -> None:
     """H=40 controller, old clamped h_phi vs pilot H40-aware h_phi.
 
     The old-head H40 arm is ALREADY BANKED in hphi_recede_v5, produced by this
@@ -484,6 +495,30 @@ def main(parity_only: bool = False, out_dir: str = OUT_DIR) -> None:
     srcs = [s.strip() for s in
             (root / "data/jin/dev_panel_qed_64.txt").read_text().split("\n")
             if s.strip()]
+    if k_start >= 0:
+        # EXTEND the banked frozen-controller curve. Same protocol, same arm,
+        # same seeds; only the candidate indices are new. Nothing from 1-4 is
+        # recomputed.
+        g = json.loads((root / "docs/HPHI_SMC_64_GATE_BANKED.json").read_text())
+        l = json.loads((root / "docs/HPHI_COVERAGE_LADDER_BANKED.json").read_text())
+        r3 = json.loads((root / "docs/HPHI_LADDER_RUNG3.json").read_text())
+        rel = set(g["solved_sources"])
+        marg = set(l["rung2"]["new_sources"]) | set(r3["conversions"])
+        st = {i: ("reliable" if i in rel else
+                  "marginal" if i in marg else "hard") for i in range(len(srcs))}
+        tasks = [{"index": i, "source": srcs[i], "stratum": st[i],
+                  "arm": "restart", "horizon": 40, "out_dir": out_dir,
+                  "head_dir": "hphi_v2", "budget_max": 24,
+                  "k_start": k_start, "k_end": k_end}
+                 for i in range(len(srcs))]
+        print(f"EXTENDING the frozen controller: {len(tasks)} sources x "
+              f"candidates k={k_start}..{k_end-1} (1-indexed "
+              f"{k_start+1}..{k_end}), H=40, N={N_PARTICLES}, frozen h_phi "
+              f"clamped to budget 24.\nCandidates 1-4 are banked in "
+              f"hphi_recede_v5 and are NOT recomputed.")
+        call = drive.spawn(tasks)
+        print(f"spawned: {call.object_id}")
+        return
     # The 12-source mechanism panel, stratified (EXPERIMENT_PERSISTENT_TREE.md).
     PANEL = {"reliable": [3, 15, 29, 60], "marginal": [5, 22, 46, 49],
              "hard": [0, 25, 42, 63]}
