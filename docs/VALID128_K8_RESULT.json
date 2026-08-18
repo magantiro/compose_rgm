@@ -1,0 +1,27 @@
+{
+ "n_sources": 126,
+ "k": 8,
+ "cumulative": [
+  31,
+  40,
+  44,
+  48,
+  51,
+  56,
+  61,
+  62
+ ],
+ "coverage_at_8": 0.49206349206349204,
+ "extinct_runs": 761,
+ "runs": 1008,
+ "mean_distinct_returned": 2.5952380952380953,
+ "work_transitions": 1147373,
+ "core_hours": 38.154111111111106,
+ "comparator": {
+  "griddd_qed_success": 0.451,
+  "griddd_candidates": 20,
+  "vjtnn_qed_success": 0.606,
+  "note": "VJTNN is Tier A must-cite and is higher; this is not SOTA"
+ },
+ "panel": "hphi_valid_128, prospective, disjoint from train/dev, source QED in [0.700,0.800]"
+}

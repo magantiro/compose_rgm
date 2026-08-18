@@ -482,7 +482,7 @@ def drive(tasks: list[dict[str, Any]]) -> dict[str, Any]:
 @app.local_entrypoint()
 def main(parity_only: bool = False, out_dir: str = OUT_DIR,
          k_start: int = -1, k_end: int = -1, valid: bool = False,
-         k: int = 8) -> None:
+         k: int = 8, valid_from: int = 0) -> None:
     """H=40 controller, old clamped h_phi vs pilot H40-aware h_phi.
 
     The old-head H40 arm is ALREADY BANKED in hphi_recede_v5, produced by this
@@ -514,12 +514,19 @@ def main(parity_only: bool = False, out_dir: str = OUT_DIR,
               if x.strip()}
         overlap = (set(vs) & dev) | (set(vs) & tr)
         assert not overlap, f"validation panel is contaminated: {len(overlap)}"
+        # valid_from lets an EXTENSION run only the new candidate indices.
+        # Candidates are independent for arm="restart" and seeds key on
+        # (arm, source, k), so slice [valid_from, k) is exactly what a single
+        # longer run would have produced there -- verified 64/64 by slice
+        # parity. Re-running 0..valid_from would burn compute reproducing
+        # records we already hold.
         tasks = [{"index": i, "source": vs[i], "stratum": "prospective",
                   "arm": "restart", "horizon": 40, "out_dir": out_dir,
                   "head_dir": "hphi_v2", "budget_max": 24,
-                  "k_start": 0, "k_end": int(k)}
+                  "k_start": int(valid_from), "k_end": int(k)}
                  for i in range(len(vs))]
-        print(f"PROSPECTIVE VALIDATION: {len(tasks)} fresh sources x k={k}, "
+        print(f"PROSPECTIVE VALIDATION: {len(tasks)} fresh sources x "
+              f"k={valid_from}..{k}, "
               f"H=40 receding horizon (b_eff=min(24,b)), N={N_PARTICLES}, "
               f"FROZEN h_phi.\nPanel verified disjoint from the development "
               f"and training sets. Banked whatever it returns; this is NOT the "
