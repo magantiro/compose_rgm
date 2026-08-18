@@ -26,7 +26,8 @@ for i in range(64):
     # a slice reproduces what a full run would have produced at those k, so the
     # glued curve is the curve of a single long run.
     for tag, sub, suf in (("k56", "hphi_recede_v5_k56", "k4-6"),
-                          ("k710", "hphi_recede_v5_k710", "k6-10")):
+                          ("k710", "hphi_recede_v5_k710", "k6-10"),
+                          ("k1120", "hphi_recede_v5_k1120", "k10-20")):
         dst = D / f'{i:03d}_{tag}.json'
         if get(f'editing_v2/r_theta_run/{sub}/{i:03d}_H40_hphi_v2_{suf}.json', dst):
             c += json.load(open(dst))['arms']['restart']['candidates']

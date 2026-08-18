@@ -18,11 +18,16 @@ the FROZEN H24 `h_phi` head (`hphi_v2/head.pt`, sha256 `9ea51ec4...`), arm
 
 Selected exclusively on the consumed 64-source development panel:
 
-    candidates      1    2    3    4    5    6    7    8    9   10
-    ALL /64        28   32   35   36   37   40   40   41   42   43
-    reliable /19   18   18   18   18   18   18   18   18   18   18
-    marginal /8     2    3    5    5    6    6    6    6    6    6
-    hard /37        8   11   12   13   13   16   16   17   18   19
+    candidates      1    2    3    4    5    6    7    8   10   20
+    ALL /64        28   32   35   36   37   40   40   41   43   47
+    reliable /19   18   18   18   18   18   18   18   18   18   19
+    marginal /8     2    3    5    5    6    6    6    6    6    7
+    hard /37        8   11   12   13   13   16   16   17   19   21
+
+Full development curve @1..@20 (ALL): 28 32 35 36 37 40 40 41 42 43 44 44 44
+44 44 44 44 46 46 47. Note candidates 12-17 added exactly zero and 18 added
+two, so the tail is lumpy rather than smoothly decaying: a "stop after two
+quiet candidates" rule would have stopped at 12 and lost 3 sources.
 
 H = 40 beats H = 24 at k = 4 on the same seeds: 36/64 against 32/64, paired
 5 sources won to 1 lost, with contact rising on both decision strata (marginal
@@ -63,6 +68,20 @@ validation tests.
   development ladder. The panel is spent the moment it is looked at.
 - **No hyperparameter selection afterwards.** Whatever comes back is banked as
   the prospective number, including a disappointing one.
+- **k = 8 is the PREREGISTERED point.** Extending the panel to k = 20 later is
+  permitted -- candidates are independent for the `restart` arm and seeds key on
+  (arm, source, candidate), so a later slice is exactly what a single longer run
+  would have produced (slice parity: 64/64 on the development panel). But it is
+  permitted ONLY under this rule:
+
+      the full candidate-efficiency curve is reported for whatever k is run,
+      and k = 8 remains the preregistered operating point.
+
+  The danger of extending is not the extra compute, it is choosing the headline
+  k after seeing which k reads better. Publishing every k removes that freedom:
+  there is nothing to select. A later extension therefore adds information
+  without moving the goalpost, and the development curve is reported the same
+  way (@1..@20) rather than at a flattering point.
 - **Reported by stratum is NOT possible here** -- the 128 have no banked
   solvability strata, since nothing has ever been run on them. That is the
   point of a prospective panel, and it means the headline is a single coverage

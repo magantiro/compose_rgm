@@ -170,7 +170,10 @@ def _load_head(head_dir: str):
 
 
 @app.function(image=image, cpu=(1.0, 1.0), memory=MEM_MIB, timeout=6 * 60 * 60,
-              max_containers=128, retries=1,
+              # 64 concurrent containers, not one per source: the 128-source
+              # validation runs in two waves rather than demanding 128 slots.
+              # Same total core-hours, roughly twice the wall clock.
+              max_containers=64, retries=1,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
 def run_source(task: dict[str, Any]) -> dict[str, Any]:
     import sys
@@ -478,7 +481,8 @@ def drive(tasks: list[dict[str, Any]]) -> dict[str, Any]:
 
 @app.local_entrypoint()
 def main(parity_only: bool = False, out_dir: str = OUT_DIR,
-         k_start: int = -1, k_end: int = -1) -> None:
+         k_start: int = -1, k_end: int = -1, valid: bool = False,
+         k: int = 8) -> None:
     """H=40 controller, old clamped h_phi vs pilot H40-aware h_phi.
 
     The old-head H40 arm is ALREADY BANKED in hphi_recede_v5, produced by this
@@ -495,6 +499,34 @@ def main(parity_only: bool = False, out_dir: str = OUT_DIR,
     srcs = [s.strip() for s in
             (root / "data/jin/dev_panel_qed_64.txt").read_text().split("\n")
             if s.strip()]
+    if valid:
+        # THE ONE PROSPECTIVE VALIDATION. Preregistered in
+        # docs/AMENDMENT_VALIDATION_128.md: all 128 at once, k frozen before
+        # the data, no selection afterwards. Running a subset and then deciding
+        # about the rest would make this a second development ladder.
+        vs = [x.strip() for x in
+              (root / "data/jin/hphi_valid_128.txt").read_text().split("\n")
+              if x.strip()]
+        assert len(vs) == 128, f"expected 128 validation sources, got {len(vs)}"
+        dev = set(srcs)
+        tr = {x.strip() for x in
+              (root / "data/jin/hphi_train_1024.txt").read_text().split("\n")
+              if x.strip()}
+        overlap = (set(vs) & dev) | (set(vs) & tr)
+        assert not overlap, f"validation panel is contaminated: {len(overlap)}"
+        tasks = [{"index": i, "source": vs[i], "stratum": "prospective",
+                  "arm": "restart", "horizon": 40, "out_dir": out_dir,
+                  "head_dir": "hphi_v2", "budget_max": 24,
+                  "k_start": 0, "k_end": int(k)}
+                 for i in range(len(vs))]
+        print(f"PROSPECTIVE VALIDATION: {len(tasks)} fresh sources x k={k}, "
+              f"H=40 receding horizon (b_eff=min(24,b)), N={N_PARTICLES}, "
+              f"FROZEN h_phi.\nPanel verified disjoint from the development "
+              f"and training sets. Banked whatever it returns; this is NOT the "
+              f"official 800x20 benchmark.")
+        call = drive.spawn(tasks)
+        print(f"spawned: {call.object_id}")
+        return
     if k_start >= 0:
         # EXTEND the banked frozen-controller curve. Same protocol, same arm,
         # same seeds; only the candidate indices are new. Nothing from 1-4 is
