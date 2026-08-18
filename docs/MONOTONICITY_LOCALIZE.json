@@ -1,0 +1,32 @@
+{
+ "by_group": {
+  "hard|miss": {
+   "n_states": 14208,
+   "frac_states_violating": 0.04039977477477477,
+   "frac_pairs_violating": 0.0019431795926361144,
+   "worst_drop": 0.06721445918083191
+  },
+  "marginal|hit": {
+   "n_states": 576,
+   "frac_states_violating": 0.08854166666666667,
+   "frac_pairs_violating": 0.006265096618357488,
+   "worst_drop": 0.12242858111858368
+  },
+  "marginal|miss": {
+   "n_states": 1152,
+   "frac_states_violating": 0.0998263888888889,
+   "frac_pairs_violating": 0.006453804347826087,
+   "worst_drop": 0.12242858111858368
+  }
+ },
+ "n_states": 15936,
+ "ranking": {
+  "n_groups": 498,
+  "spearman_mean": 0.996304867564098,
+  "spearman_min": 0.971407624633431,
+  "discordant_frac_mean": 0.012161549423500452,
+  "discordant_frac_max": 0.05241935483870968,
+  "frac_groups_top_half_changed": 0.2570281124497992,
+  "mean_top_half_swaps": 0.28313253012048195
+ }
+}
