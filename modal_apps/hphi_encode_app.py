@@ -104,7 +104,8 @@ def encode_shard(task: dict[str, Any]) -> dict[str, Any]:
 
     RDLogger.DisableLog("rdApp.*")
     shard_id = int(task["shard"])
-    out_p = Path(RUN_ROOT) / SHARD_DIR / f"shard_{shard_id:03d}.json.gz"
+    out_p = (Path(RUN_ROOT) / task.get("dir", SHARD_DIR)
+             / f"shard_{shard_id:03d}.json.gz")
 
     artifact_volume.reload()
     if out_p.exists():                      # IDEMPOTENT: never redo paid work
@@ -140,24 +141,39 @@ def encode_shard(task: dict[str, Any]) -> dict[str, Any]:
 
 @app.function(image=image, cpu=(1.0, 1.0), memory=4096, timeout=8 * 60 * 60,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
-def drive() -> dict[str, Any]:
+def drive(corpus: str = CORPUS, shard_dir: str = SHARD_DIR,
+          n_shards: int = N_SHARDS, reuse_dir: str = "") -> dict[str, Any]:
     artifact_volume.reload()
     blob = json.loads(gzip.decompress(
-        (Path(RUN_ROOT) / CORPUS).read_bytes()).decode())
+        (Path(RUN_ROOT) / corpus).read_bytes()).decode())
     srcs = [r for r in blob["results"] if r.get("status") == "OK"]
     need = sorted({s for r in srcs for t in r["trajectories"] for s in t["path"]})
     print(f"{len(need):,} unique states over {len(srcs)} sources", flush=True)
 
+    # A state already embedded by an earlier corpus is NOT re-encoded. This is
+    # cost, but it is mainly correctness: encoding the same SMILES twice in two
+    # containers gives float32 answers differing at ~1e-9, so a duplicated key
+    # would make the trainer's union depend on directory load order.
+    if reuse_dir:
+        rd = Path(RUN_ROOT) / reuse_dir
+        seen: set[str] = set()
+        for f in sorted(rd.glob("shard_*.json.gz")):
+            seen |= set(json.loads(gzip.decompress(f.read_bytes()).decode()))
+        before = len(need)
+        need = [s for s in need if s not in seen]
+        print(f"reusing {reuse_dir}: {len(seen):,} already embedded; "
+              f"{before:,} -> {len(need):,} to encode", flush=True)
+
     done = set()
-    sd = Path(RUN_ROOT) / SHARD_DIR
+    sd = Path(RUN_ROOT) / shard_dir
     if sd.exists():
         done = {int(p.stem.split("_")[1]) for p in sd.glob("shard_*.json.gz")}
         if done:
-            print(f"RESUMING: {len(done)}/{N_SHARDS} shards already persisted",
+            print(f"RESUMING: {len(done)}/{n_shards} shards already persisted",
                   flush=True)
 
-    tasks = [{"shard": i, "smiles": need[i::N_SHARDS]}
-             for i in range(N_SHARDS) if i not in done]
+    tasks = [{"shard": i, "smiles": need[i::n_shards], "dir": shard_dir}
+             for i in range(n_shards) if i not in done]
     started, ok = time.perf_counter(), 0
     for r in encode_shard.map(tasks, order_outputs=False, return_exceptions=True):
         if isinstance(r, dict):
@@ -165,15 +181,18 @@ def drive() -> dict[str, Any]:
             print(f"  {ok}/{len(tasks)} shards  "
                   f"{time.perf_counter()-started:.0f}s", flush=True)
     total = len({int(p.stem.split('_')[1])
-                 for p in (Path(RUN_ROOT) / SHARD_DIR).glob("shard_*.json.gz")})
-    print(f"DONE {total}/{N_SHARDS} shards persisted in "
+                 for p in (Path(RUN_ROOT) / shard_dir).glob("shard_*.json.gz")})
+    print(f"DONE {total}/{n_shards} shards persisted in "
           f"{time.perf_counter()-started:.0f}s", flush=True)
-    return {"shards_persisted": total, "of": N_SHARDS}
+    return {"shards_persisted": total, "of": n_shards}
 
 
 @app.local_entrypoint()
-def main() -> None:
+def main(corpus: str = CORPUS, shard_dir: str = SHARD_DIR,
+         n_shards: int = N_SHARDS, reuse_dir: str = "") -> None:
     print("ENCODE ONLY. Every shard persists itself, then the job exits.")
     print("Idempotent and resumable: completed shards are never re-encoded.")
-    call = drive.spawn()
+    print(f"corpus={corpus}\nshard_dir={shard_dir}  n_shards={n_shards}"
+          f"  reuse_dir={reuse_dir or '(none)'}")
+    call = drive.spawn(corpus, shard_dir, n_shards, reuse_dir)
     print(f"spawned: {call.object_id}")

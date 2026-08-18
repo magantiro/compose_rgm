@@ -150,8 +150,16 @@ MATRICES = "hphi_v2/features.npz"
 
 @app.function(image=image, cpu=(4.0, 4.0), memory=32768, timeout=4 * 60 * 60,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
-def assemble() -> dict[str, Any]:
-    """CPU ONLY. Build the feature matrices, persist them, exit."""
+def assemble(corpus: str = CORPUS, budget_max: int = 24,
+             emb_dirs: str = "hphi_v2/embeddings",
+             matrices: str = MATRICES) -> dict[str, Any]:
+    """CPU ONLY. Build the feature matrices, persist them, exit.
+
+    `budget_max` sets the one-hot width AND the budget clamp. It is threaded
+    rather than read from the module so an H40 head can be built without
+    touching the frozen H24 path; at the default 24 every line below is
+    byte-identical to the frozen behaviour.
+    """
     import sys
 
     import numpy as np
@@ -160,14 +168,20 @@ def assemble() -> dict[str, Any]:
 
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
     from compose_v4.experiments.hphi_region_features import (
-        BUDGET_MAX, INPUT_DIM, build_features, in_region,
+        build_features, in_region, input_dim,
     )
     from compose_v4.experiments.hphi_rollout import registered_regions
 
+    budget_max = int(budget_max)
+    INPUT_DIM = input_dim(budget_max)
+    print(f"budget_max={budget_max}  INPUT_DIM={INPUT_DIM}", flush=True)
+
     t_start = time.perf_counter()
     artifact_volume.reload()
-    blob = json.loads(gzip.decompress(
-        (Path(RUN_ROOT) / CORPUS).read_bytes()).decode())
+    import hashlib
+    raw = (Path(RUN_ROOT) / corpus).read_bytes()
+    corpus_file_sha = hashlib.sha256(raw).hexdigest()
+    blob = json.loads(gzip.decompress(raw).decode())
     srcs = [r for r in blob["results"] if r.get("status") == "OK"]
     srcs.sort(key=lambda r: r["index"])
     n_val = int(len(srcs) * VAL_FRACTION)
@@ -181,8 +195,10 @@ def assemble() -> dict[str, Any]:
     # persists per shard. This trainer never encodes -- that coupling is what
     # destroyed 93.5 core-hours twice.
     t_enc = time.perf_counter()
-    sd = Path(RUN_ROOT) / "hphi_v2/embeddings"
-    parts = sorted(sd.glob("shard_*.json.gz")) if sd.exists() else []
+    parts = []
+    for d in [p.strip() for p in emb_dirs.split(",") if p.strip()]:
+        sd = Path(RUN_ROOT) / d
+        parts.extend(sorted(sd.glob("shard_*.json.gz")) if sd.exists() else [])
     if not parts:
         raise SystemExit(
             "no persisted embeddings. Run modal_apps/hphi_encode_app.py first; "
@@ -215,7 +231,7 @@ def assemble() -> dict[str, Any]:
             H = len(path) - 1
             for i, s in enumerate(path):
                 b = H - i
-                if b > BUDGET_MAX:
+                if b > budget_max:
                     continue
                 for reg in regions:
                     if in_region(qed[i], sim[i], reg):
@@ -226,7 +242,7 @@ def assemble() -> dict[str, Any]:
                             hit = 1
                             break
                     f = build_features(np.asarray(emb[s]), e_src,
-                                       qed[i], sim[i], reg, b)
+                                       qed[i], sim[i], reg, b, budget_max)
                     if is_val:
                         Xva.append(f); Yva.append(hit); Mva.append((reg, b))
                     else:
@@ -235,14 +251,15 @@ def assemble() -> dict[str, Any]:
                                 qed[i + 1], sim[i + 1], reg):
                             Btr.append(build_features(
                                 np.asarray(emb[path[i + 1]]), e_src,
-                                qed[i + 1], sim[i + 1], reg, b - 1))
+                                qed[i + 1], sim[i + 1], reg, b - 1,
+                                budget_max))
     Xtr = np.asarray(Xtr, dtype=np.float32); Ytr = np.asarray(Ytr, dtype=np.float32)
     Xva = np.asarray(Xva, dtype=np.float32); Yva = np.asarray(Yva, dtype=np.float32)
     Btr = np.asarray(Btr, dtype=np.float32)
     print(f"train {len(Xtr):,}  val {len(Xva):,}  bellman pairs {len(Btr):,}",
           flush=True)
 
-    out_m = Path(RUN_ROOT) / MATRICES
+    out_m = Path(RUN_ROOT) / matrices
     out_m.parent.mkdir(parents=True, exist_ok=True)
     # Mva entries are ((q, s), b) -- NESTED, so a plain asarray is ragged.
     # Flatten to a clean (N, 3) matrix of [q, s, budget].
@@ -257,7 +274,12 @@ def assemble() -> dict[str, Any]:
                         # it never opens the corpus or the embedding shards.
                         n_val_sources=np.int64(len(val_src)),
                         n_states=np.int64(len(emb)),
-                        n_missing=np.int64(len(missing)))
+                        n_missing=np.int64(len(missing)),
+                        # Carried so train() cannot silently build a head of a
+                        # different one-hot width than the features it loads.
+                        budget_max=np.int64(budget_max),
+                        corpus=np.str_(corpus),
+                        corpus_file_sha256=np.str_(corpus_file_sha))
     artifact_volume.commit()             # FLUSHED before this worker exits
     print(f"persisted {out_m.name} in {time.perf_counter()-t_start:.0f}s",
           flush=True)
@@ -269,7 +291,7 @@ def assemble() -> dict[str, Any]:
 @app.function(image=image, gpu="A10G", cpu=(2.0, 2.0), memory=32768,
               timeout=4 * 60 * 60,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
-def train() -> dict[str, Any]:
+def train(matrices: str = MATRICES, out_dir: str = OUT_DIR) -> dict[str, Any]:
     """GPU. Loads the cached matrices; never rebuilds them, never encodes."""
     import sys
 
@@ -278,15 +300,27 @@ def train() -> dict[str, Any]:
     import torch.nn as nn
 
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
-    from compose_v4.experiments.hphi_region_features import INPUT_DIM
+    from compose_v4.experiments.hphi_region_features import input_dim
 
     t_start = time.perf_counter()
     artifact_volume.reload()
-    mp = Path(RUN_ROOT) / MATRICES
+    mp = Path(RUN_ROOT) / matrices
     if not mp.exists():
-        raise SystemExit(f"no {MATRICES}. Run assemble first (CPU only).")
+        raise SystemExit(f"no {matrices}. Run assemble first (CPU only).")
     z = np.load(mp)
     Xtr, Ytr, Xva, Yva, Btr = z["Xtr"], z["Ytr"], z["Xva"], z["Yva"], z["Btr"]
+    # The head's width comes from the FEATURES, not from a module constant, so
+    # a budget_max mismatch is impossible rather than merely unlikely.
+    budget_max = int(z["budget_max"]) if "budget_max" in z.files else 24
+    corpus_name = str(z["corpus"]) if "corpus" in z.files else CORPUS
+    corpus_file_sha = (str(z["corpus_file_sha256"])
+                       if "corpus_file_sha256" in z.files else None)
+    INPUT_DIM = input_dim(budget_max)
+    if Xtr.shape[1] != INPUT_DIM:
+        raise SystemExit(f"feature width {Xtr.shape[1]} != input_dim("
+                         f"{budget_max})={INPUT_DIM}")
+    print(f"budget_max={budget_max}  INPUT_DIM={INPUT_DIM}  -> {out_dir}",
+          flush=True)
     # Rebuild ((q, s), b): the calibration code below unpacks it that way.
     Mva = [((float(q), float(s)), float(b)) for q, s, b in z["Mva"]]
     n_val_sources = int(z["n_val_sources"]); n_states = int(z["n_states"])
@@ -370,16 +404,24 @@ def train() -> dict[str, Any]:
             by_q.setdefault(reg[0], []).append(float(p))
     means = {f"{q:.2f}": float(np.mean(v)) for q, v in sorted(by_q.items())}
 
-    out_p = Path(RUN_ROOT) / OUT_DIR
+    out_p = Path(RUN_ROOT) / out_dir
     out_p.mkdir(parents=True, exist_ok=True)
     head = head.to('cpu')          # saved artifact must load on CPU
     head_s = torch.jit.script(head.eval())
     torch.jit.save(head_s, str(out_p / "head.pt"))
     (out_p / "norm.json").write_text(json.dumps(
         {"mu": mu.squeeze(0).tolist(), "sd": sd.squeeze(0).tolist()}))
+    # The frozen 647f82.. sha names the H24 corpus ONLY. Asserting it for any
+    # other corpus would be a false provenance claim, so it is carried only
+    # when the assembled corpus actually is that one; the file hash recorded by
+    # assemble() is always reported alongside.
     rec = {
         "schema": "compose.hphi.v2",
-        "corpus_sha256": "647f8265f5143e2b15dc047de42e837203593c42beb7e45e2b94e55e41602581",
+        "corpus": corpus_name,
+        "budget_max": budget_max,
+        "corpus_sha256": ("647f8265f5143e2b15dc047de42e837203593c42beb7e45e2b94e55e41602581"
+                          if corpus_name == CORPUS else None),
+        "corpus_file_sha256": corpus_file_sha,
         "r_theta_sha256": "c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8",
         "r_theta_retrained": False,
         "target": "finite-budget HITTING reachability; boundary h=1 enforced",
@@ -412,7 +454,9 @@ def train() -> dict[str, Any]:
 
 @app.function(image=image, cpu=(0.25, 0.25), memory=2048, timeout=8 * 60 * 60,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
-def drive(stage: str = "both") -> dict[str, Any]:
+def drive(stage: str = "both", corpus: str = CORPUS, budget_max: int = 24,
+          emb_dirs: str = "hphi_v2/embeddings", out_dir: str = OUT_DIR,
+          matrices: str = MATRICES) -> dict[str, Any]:
     """Server-side staging so the whole chain survives a client disconnect.
 
     A local entrypoint calling .remote() would die with the laptop; only the
@@ -422,28 +466,37 @@ def drive(stage: str = "both") -> dict[str, Any]:
     out: dict[str, Any] = {}
     if stage in ("assemble", "both"):
         artifact_volume.reload()
-        if (Path(RUN_ROOT) / MATRICES).exists():
-            print(f"{MATRICES} already present -- skipping assembly", flush=True)
+        if (Path(RUN_ROOT) / matrices).exists():
+            print(f"{matrices} already present -- skipping assembly", flush=True)
             out["assemble"] = "CACHED"
         else:
             print("stage 1/2: assembling features on CPU (no GPU held)", flush=True)
-            out["assemble"] = assemble.remote()
+            out["assemble"] = assemble.remote(corpus, budget_max, emb_dirs,
+                                              matrices)
     if stage in ("train", "both"):
         print("stage 2/2: training on A10G from the cached matrices", flush=True)
-        out["train"] = train.remote()
+        out["train"] = train.remote(matrices, out_dir)
     return out
 
 
 @app.local_entrypoint()
-def main(stage: str = "both") -> None:
+def main(stage: str = "both", corpus: str = CORPUS, budget_max: int = 24,
+         emb_dirs: str = "hphi_v2/embeddings", out_dir: str = OUT_DIR,
+         matrices: str = MATRICES) -> None:
     """stage: assemble (CPU) | train (GPU) | both. No GPU is held during CPU work."""
-    print("Training the REAL region-h_phi on the frozen 1,024x2xH24 corpus.")
-    print("R_theta FROZEN. Target: finite-budget hitting reachability.")
+    print("Training the REAL region-h_phi. R_theta FROZEN.")
+    print("Target: finite-budget hitting reachability.")
     print("MC future-event + Bellman consistency with stopped-gradient backup.")
     if stage not in ("assemble", "train", "both"):
         raise SystemExit(f"stage must be assemble|train|both, got {stage!r}")
+    if out_dir == OUT_DIR and int(budget_max) != 24:
+        raise SystemExit(
+            f"refusing to write a budget_max={budget_max} head into {OUT_DIR}, "
+            "which holds the frozen H24 head.pt/norm.json. Pass --out-dir.")
+    print(f"corpus={corpus}\nbudget_max={budget_max}  emb_dirs={emb_dirs}")
+    print(f"out_dir={out_dir}  matrices={matrices}")
 
     print("Assembly is CPU-only and is cached; the A10G is allocated only for")
     print("the gradient steps, and only after assembly has finished.")
-    call = drive.spawn(stage)
+    call = drive.spawn(stage, corpus, budget_max, emb_dirs, out_dir, matrices)
     print(f"spawned: {call.object_id}")
