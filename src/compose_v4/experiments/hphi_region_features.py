@@ -38,12 +38,27 @@ from typing import Sequence
 
 import numpy as np
 
-#: Frozen by `docs/HORIZON_AMENDMENT_H24.md`.
+#: Frozen by `docs/HORIZON_AMENDMENT_H24.md`. This stays 24 FOREVER: the frozen
+#: `head.pt` was trained against a 25-slot budget one-hot, so changing this
+#: constant would change INPUT_DIM from 1055 to something else and every
+#: controller loading that checkpoint would fail on a shape mismatch. A longer
+#: horizon is expressed by PASSING `budget_max`, never by editing this.
 BUDGET_MAX = 24
 #: `R_θ` global-state embedding width, from the frozen feature contract.
 EMBED_DIM = 256
 #: 4 embedding blocks + 2 state props + 2 thresholds + 2 margins + budget one-hot
 INPUT_DIM = 4 * EMBED_DIM + 2 + 2 + 2 + (BUDGET_MAX + 1)
+
+
+def input_dim(budget_max: int = BUDGET_MAX) -> int:
+    """Feature width for a given budget ceiling.
+
+    A budget-extended h_phi needs a wider one-hot and therefore a wider first
+    layer. Deriving the width here keeps the trainer and the runtime from
+    disagreeing about it, which is the failure that produces a checkpoint no
+    controller can load.
+    """
+    return 4 * EMBED_DIM + 2 + 2 + 2 + (int(budget_max) + 1)
 
 CANONICAL_SLOTS = 48
 TIME_POINT = 0.5
@@ -62,14 +77,20 @@ def build_features(
     similarity_to_source: float,
     region: tuple[float, float],
     budget: int,
+    budget_max: int = BUDGET_MAX,
 ) -> np.ndarray:
-    """The 1,055-dim region-conditioned feature vector."""
+    """Region-conditioned features; 1,055-dim at the frozen budget_max = 24.
+
+    `budget_max` is a PARAMETER so a longer-horizon model can be trained without
+    touching the module constant the frozen checkpoint depends on. Callers that
+    omit it get byte-identical behaviour to before.
+    """
     if e_state.shape != (EMBED_DIM,) or e_source.shape != (EMBED_DIM,):
         raise ValueError(f"embeddings must be ({EMBED_DIM},)")
-    if not 0 <= budget <= BUDGET_MAX:
-        raise ValueError(f"budget {budget} outside [0, {BUDGET_MAX}]")
+    if not 0 <= budget <= int(budget_max):
+        raise ValueError(f"budget {budget} outside [0, {int(budget_max)}]")
     q_min, s_min = region
-    one_hot = np.zeros(BUDGET_MAX + 1, dtype=np.float64)
+    one_hot = np.zeros(int(budget_max) + 1, dtype=np.float64)
     one_hot[budget] = 1.0
     return np.concatenate([
         e_state, e_source, e_state - e_source, e_state * e_source,
