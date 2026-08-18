@@ -101,9 +101,61 @@ def _runtime():
     return _RT
 
 
+@app.function(image=image, cpu=(2.0, 2.0), memory=16384, timeout=4 * 60 * 60,
+              volumes={str(ARTIFACT_ROOT): artifact_volume})
+def extract(strata: dict) -> dict[str, Any]:
+    """Write the states this comparison needs, in the encode job's schema.
+
+    Encoding in-process was the original design and it was wrong twice over: a
+    single container encodes at ~4.5 s/state, which is ~20 h for this panel,
+    and everything it built would die with the container. So states are
+    enumerated here, encoded by the SEPARATE persisted parallel encode job,
+    and only then scored. Same lesson as the corpus encode.
+    """
+    import gzip
+
+    artifact_volume.reload()
+    d = Path(RUN_ROOT) / "hphi_smc_64" / "replicates"
+    files = sorted(d.glob("*.json"))
+    results = []
+    for f in files:
+        doc = json.loads(f.read_text())
+        idx, rec = doc["index"], doc["record"]
+        if strata.get(str(idx), "hard") == "reliable":
+            continue
+        tr = rec["transitions"]
+        if not tr:
+            continue
+        hit_steps = [t["step"] for t in tr if t.get("h_y_bm1") == 1.0]
+        end = (min(hit_steps) if hit_steps
+               else max(t["step"] for t in tr))
+        source = tr[0]["x"]
+        want = {source}                    # the source embedding is needed too
+        for L in LOOKAHEADS:
+            s_step = end - L
+            if s_step < 0:
+                continue
+            for t in tr:
+                if t["step"] == s_step and t.get("h_y_bm1") is not None:
+                    want.add(t["y"])
+        results.append({"index": len(results), "status": "OK",
+                        "source": source,
+                        "trajectories": [{"path": sorted(want)}]})
+    uniq = {s for r in results for t in r["trajectories"] for s in t["path"]}
+    out = Path(RUN_ROOT) / "hphi_rollout_corpus" / "banked_eval_states.json.gz"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_bytes(gzip.compress(json.dumps({"results": results}).encode()))
+    artifact_volume.commit()
+    print(f"{len(results)} runs -> {len(uniq):,} unique states -> {out.name}",
+          flush=True)
+    return {"n_runs": len(results), "n_states": len(uniq), "path": out.name}
+
+
 @app.function(image=image, cpu=(4.0, 4.0), memory=16384, timeout=4 * 60 * 60,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
-def compare(strata: dict, new_dir: str, new_budget_max: int) -> dict[str, Any]:
+def compare(strata: dict, new_dir: str, new_budget_max: int,
+            emb_dirs: str) -> dict[str, Any]:
+    import gzip
     import sys
     import time
 
@@ -125,7 +177,6 @@ def compare(strata: dict, new_dir: str, new_budget_max: int) -> dict[str, Any]:
     from compose_v4.experiments.production_successor_kernel import _one_state_batch
 
     artifact_volume.reload()
-    model = _runtime()["model"]
 
     def load_head(d: str):
         h = torch.jit.load(str(Path(RUN_ROOT) / d / "head.pt"), map_location="cpu")
@@ -139,16 +190,20 @@ def compare(strata: dict, new_dir: str, new_budget_max: int) -> dict[str, Any]:
           f"{new_mu.shape[0]} ({new_dir}, budget_max={new_budget_max})",
           flush=True)
 
-    _emb: dict[str, np.ndarray] = {}
+    _emb: dict[str, Any] = {}
+    for dn in [p.strip() for p in emb_dirs.split(",") if p.strip()]:
+        sd_ = Path(RUN_ROOT) / dn
+        for fp in sorted(sd_.glob("shard_*.json.gz")):
+            _emb.update(json.loads(gzip.decompress(fp.read_bytes()).decode()))
+    print(f"{len(_emb):,} persisted embeddings loaded", flush=True)
+    missing: set = set()
 
-    def encode(smi: str) -> np.ndarray:
-        if smi not in _emb:
-            st = pad_molecular_graph(smiles_to_molecular_graph(smi), CANONICAL_SLOTS)
-            b = _one_state_batch(model, st, float(TIME_POINT), prepared_batch=None)
-            with torch.no_grad():
-                _n, g, _p = model._encode_batch(b)
-            _emb[smi] = g[0].detach().cpu().numpy()
-        return _emb[smi]
+    def encode(smi: str):
+        v = _emb.get(smi)
+        if v is None:
+            missing.add(smi)
+            return None
+        return np.asarray(v)
 
     def score(head, mu, sd, budget_max, e_y, e_src, q, s, budget) -> float:
         """The frozen twist, with only the one-hot width parameterised."""
@@ -194,6 +249,8 @@ def compare(strata: dict, new_dir: str, new_budget_max: int) -> dict[str, Any]:
             continue
         src_fp = gen.GetFingerprint(src_mol)
         e_src = encode(source)
+        if e_src is None:
+            continue
         cache: dict = {}
 
         def props(smi):
@@ -216,6 +273,8 @@ def compare(strata: dict, new_dir: str, new_budget_max: int) -> dict[str, Any]:
                 q, sm = props(t["y"])
                 b = int(t["budget"]) - 1          # h_y_bm1 is h(y, b-1)
                 e_y = encode(t["y"])
+                if e_y is None:
+                    continue
                 h_old = score(old_head, old_mu, old_sd, 24, e_y, e_src, q, sm, b)
                 h_new = score(new_head, new_mu, new_sd, new_budget_max,
                               e_y, e_src, q, sm, b)
@@ -230,6 +289,9 @@ def compare(strata: dict, new_dir: str, new_budget_max: int) -> dict[str, Any]:
         print(f"  {f.name} {'HIT' if is_hit else 'miss'}  "
               f"{len(_emb):,} encoded  {time.perf_counter()-t0:.0f}s", flush=True)
 
+    if missing:
+        print(f"WARNING: {len(missing):,} states had no persisted embedding "
+              f"and were skipped", flush=True)
     worst_parity = max(parity) if parity else float("nan")
     print(f"\nruns: {n_hit} hit, {n_miss} miss (marginal+hard only)")
     print(f"states encoded: {len(_emb):,}")
@@ -244,7 +306,7 @@ def compare(strata: dict, new_dir: str, new_budget_max: int) -> dict[str, Any]:
         "n_hit": n_hit, "n_miss": n_miss, "auc": {},
         "worst_parity": worst_parity, "n_scored": len(parity),
         "new_dir": new_dir, "new_budget_max": new_budget_max,
-        "n_states_encoded": len(_emb),
+        "n_states_available": len(_emb), "n_missing": len(missing),
     }
     for L in LOOKAHEADS:
         row = {k: auc(pos[L][k], neg[L][k]) for k in feats}
@@ -259,7 +321,11 @@ def compare(strata: dict, new_dir: str, new_budget_max: int) -> dict[str, Any]:
 
 
 @app.local_entrypoint()
-def main(new_dir: str = "hphi_v2_h40", new_budget_max: int = 40) -> None:
+def main(stage: str = "extract", new_dir: str = "hphi_v2_h40",
+         new_budget_max: int = 40,
+         emb_dirs: str = "hphi_v2/embeddings,hphi_v2/embeddings_h40,"
+                         "hphi_v2/embeddings_banked") -> None:
+    """stage: extract (list states) | score (needs the encode job to have run)."""
     # Strata built EXACTLY as the banked baseline built them, so the run set
     # being compared is the same one that produced 0.796 / 0.667 / 0.556.
     root = Path(__file__).resolve().parents[1]
@@ -275,6 +341,11 @@ def main(new_dir: str = "hphi_v2_h40", new_budget_max: int = 40) -> None:
     print(f"strata: {sum(v=='reliable' for v in strata.values())} reliable, "
           f"{sum(v=='marginal' for v in strata.values())} marginal, "
           f"{sum(v=='hard' for v in strata.values())} hard")
-    out = compare.remote(strata, new_dir, new_budget_max)
+    if stage == "extract":
+        o = extract.remote(strata)
+        print(f"\n{o['n_states']:,} states -> {o['path']}")
+        print("Now run hphi_encode_app on it, THEN this app with --stage score.")
+        return
+    out = compare.remote(strata, new_dir, new_budget_max, emb_dirs)
     Path("docs/PROSPECTIVE_TWO_HEAD.json").write_text(json.dumps(out, indent=1))
     print(f"\nworst parity {out['worst_parity']:.3e}")
