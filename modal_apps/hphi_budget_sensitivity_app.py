@@ -17,10 +17,21 @@ TWO MEASUREMENTS, on real states at the benchmark region:
                the resulting spread to the spread ACROSS states at fixed b. A
                ratio near zero means the budget input is nearly inert.
 
+               Measured in BOTH probability and logit space. A head saturated
+               near 0 or 1 can barely move in probability while using the budget
+               input heavily, so probability-space insensitivity alone proves
+               nothing; near-zero LOGIT sensitivity is the strong evidence.
+
   MONOTONICITY h_b(x) is non-decreasing in b BY DEFINITION -- more budget cannot
                reduce a hitting probability. This is not a fit-quality
                question; a head that violates it is wrong about the quantity it
                names, so the violation rate is reported as its own number.
+
+               Counted against a TOLERANCE, not at float resolution, so
+               fitting wiggle is not confused with a genuinely backwards value
+               function: the fraction of adjacent budget pairs that fall by
+               more than TOL, the median and worst such fall, and the fraction
+               of states showing any violation at all.
 
 CPU ONLY. Inference on persisted embeddings; nothing is encoded here.
 """
@@ -48,6 +59,8 @@ image = _base_image.env(
 app = modal.App("hphi-budget-sensitivity")
 RUN_ROOT = "/artifacts/editing_v2/r_theta_run"
 REGION = (0.90, 0.40)
+#: A drop smaller than this is fitting noise, not a backwards value function.
+MONO_TOL = 0.01
 
 
 @app.function(image=image, cpu=(2.0, 2.0), memory=16384, timeout=60 * 60,
@@ -122,28 +135,52 @@ def probe(emb_dirs: str, states_blob: str, n_states: int,
                             for b in budgets])
             x = torch.tensor(((F - mu) / sd).astype(np.float32))
             with torch.no_grad():
-                curves.append(torch.sigmoid(head(x)).squeeze(-1).numpy())
-        C = np.asarray(curves)                       # (states, budgets)
-        within = float(np.mean(C.max(1) - C.min(1)))  # spread from b alone
-        across = float(np.mean(C.std(0)))             # spread from x at fixed b
-        # Non-decreasing in b is a DEFINITIONAL property, not a fit target.
-        diffs = np.diff(C, axis=1)
-        viol = float((diffs < -1e-6).mean())
-        drop = float(np.mean(np.minimum(diffs, 0).sum(1)))
-        out[name] = {"budget_max": bmax,
-                     "mean_range_over_budget": within,
-                     "mean_std_across_states": across,
-                     "ratio_budget_to_state": within / across if across else None,
-                     "frac_decreasing_steps": viol,
-                     "mean_total_decrease": drop,
-                     "mean_h_at_b1": float(C[:, 0].mean()),
-                     "mean_h_at_bmax": float(C[:, -1].mean())}
-        print(f"{name}: b sweeps h by {within:.4f} on average; states differ by "
-              f"{across:.4f} at fixed b  (ratio {within/across:.3f})")
-        print(f"    h(b=1)={C[:,0].mean():.4f} -> h(b={bmax})="
-              f"{C[:,-1].mean():.4f}")
-        print(f"    steps DECREASING in b: {viol*100:.1f}%  "
-              f"(should be 0 -- more budget cannot lower a hitting prob)\n")
+                z = head(x).squeeze(-1)
+                curves.append((torch.sigmoid(z).numpy(), z.numpy()))
+        P = np.asarray([c[0] for c in curves])       # (states, budgets) probs
+        Z = np.asarray([c[1] for c in curves])       # (states, budgets) logits
+
+        def spread(M):
+            within = float(np.mean(M.max(1) - M.min(1)))   # from b alone
+            across = float(np.mean(M.std(0)))              # from x at fixed b
+            return within, across, (within / across if across else None)
+
+        wp, ap, rp = spread(P)
+        wz, az, rz = spread(Z)
+
+        # Non-decreasing in b is DEFINITIONAL. Count real drops, not wiggle.
+        diffs = np.diff(P, axis=1)
+        bad = diffs < -MONO_TOL
+        falls = -diffs[bad]
+        out[name] = {
+            "budget_max": bmax,
+            "prob": {"mean_range_over_budget": wp,
+                     "mean_std_across_states": ap, "ratio": rp},
+            "logit": {"mean_range_over_budget": wz,
+                      "mean_std_across_states": az, "ratio": rz},
+            "monotonicity": {
+                "tol": MONO_TOL,
+                "frac_adjacent_pairs_decreasing": float(bad.mean()),
+                "frac_states_with_any_violation": float(bad.any(1).mean()),
+                "median_decrease": (float(np.median(falls)) if falls.size else 0.0),
+                "worst_decrease": (float(falls.max()) if falls.size else 0.0),
+                "frac_pairs_decreasing_any_amount":
+                    float((diffs < -1e-9).mean())},
+            "mean_h_at_b1": float(P[:, 0].mean()),
+            "mean_h_at_bmax": float(P[:, -1].mean())}
+        print(f"{name}:")
+        print(f"    prob : b sweeps {wp:.4f}, states differ {ap:.4f} "
+              f"-> ratio {rp:.3f}")
+        print(f"    logit: b sweeps {wz:.4f}, states differ {az:.4f} "
+              f"-> ratio {rz:.3f}   <- the one that decides inertness")
+        print(f"    h(b=1)={P[:,0].mean():.4f} -> h(b={bmax})="
+              f"{P[:,-1].mean():.4f}")
+        print(f"    decreasing by >{MONO_TOL}: {bad.mean()*100:.2f}% of pairs, "
+              f"{bad.any(1).mean()*100:.1f}% of states affected")
+        if falls.size:
+            print(f"    median drop {np.median(falls):.4f}, "
+                  f"worst {falls.max():.4f}")
+        print()
     return out
 
 
