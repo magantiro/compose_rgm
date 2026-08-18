@@ -228,6 +228,11 @@ def compare(strata: dict, new_dir: str, new_budget_max: int,
     neg: dict = {L: defaultdict(list) for L in LOOKAHEADS}
     n_hit = n_miss = 0
     parity: list[float] = []
+    # RUN-LEVEL aggregates. The 32 particles scored at one step of one
+    # trajectory are not 32 independent observations -- they share a lineage,
+    # a source and a step. The trajectory is the independent unit, so each run
+    # contributes ONE number per lookahead per feature.
+    runlvl: dict = {L: [] for L in LOOKAHEADS}
     t0 = time.perf_counter()
 
     for f in files:
@@ -267,6 +272,7 @@ def compare(strata: dict, new_dir: str, new_budget_max: int,
             s_step = end - L
             if s_step < 0:
                 continue
+            run_acc: dict = defaultdict(list)
             for t in tr:
                 if t["step"] != s_step or t.get("h_y_bm1") is None:
                     continue
@@ -284,8 +290,17 @@ def compare(strata: dict, new_dir: str, new_budget_max: int,
                 bucket[L]["h_phi_new"].append(h_new)
                 bucket[L]["qed"].append(q)
                 bucket[L]["sim"].append(sm)
-                bucket[L]["slack"].append(-(max(0.0, 0.90 - q)
-                                            + max(0.0, 0.40 - sm)))
+                slack_v = -(max(0.0, 0.90 - q) + max(0.0, 0.40 - sm))
+                bucket[L]["slack"].append(slack_v)
+                run_acc["h_phi_old"].append(h_old)
+                run_acc["h_phi_new"].append(h_new)
+                run_acc["qed"].append(q); run_acc["sim"].append(sm)
+                run_acc["slack"].append(slack_v)
+            if run_acc:
+                runlvl[L].append((
+                    is_hit,
+                    {k: float(np.mean(v)) for k, v in run_acc.items()},
+                    {k: float(np.max(v)) for k, v in run_acc.items()}))
         print(f"  {f.name} {'HIT' if is_hit else 'miss'}  "
               f"{len(_emb):,} encoded  {time.perf_counter()-t0:.0f}s", flush=True)
 
@@ -317,6 +332,50 @@ def compare(strata: dict, new_dir: str, new_budget_max: int,
               + f"   (n+ {row['n_pos']}, n- {row['n_neg']})")
     print("\nAUC is over TRANSITIONS at the fixed lookahead, pooled across "
           "runs, exactly as the banked baseline computed it.")
+
+    # ---- RUN-LEVEL, the honest unit ---------------------------------------
+    rng = np.random.default_rng(0)
+    B = 4000
+    out["run_level"] = {}
+    for agg_i, agg_name in ((1, "mean"), (2, "max")):
+        print(f"\n{'='*74}\nRUN-LEVEL ({agg_name} over particles) -- the "
+              f"trajectory is the independent unit")
+        print(f"{'lookahead':<10}{'n+':>4}{'n-':>5}{'old':>9}{'new':>9}"
+              f"{'delta':>9}{'  95% CI on delta':>22}{'P(new>old)':>12}")
+        out["run_level"][agg_name] = {}
+        for L in LOOKAHEADS:
+            rows = runlvl[L]
+            P_ = [r[agg_i] for r in rows if r[0]]
+            N_ = [r[agg_i] for r in rows if not r[0]]
+            if not P_ or not N_:
+                continue
+            a_o = auc([d["h_phi_old"] for d in P_], [d["h_phi_old"] for d in N_])
+            a_n = auc([d["h_phi_new"] for d in P_], [d["h_phi_new"] for d in N_])
+            a_s = auc([d["slack"] for d in P_], [d["slack"] for d in N_])
+            # PAIRED bootstrap: resample RUNS, recompute both AUCs on the same
+            # resample, so the delta's CI is not inflated by shared run noise.
+            deltas = []
+            for _ in range(B):
+                pi = rng.integers(0, len(P_), len(P_))
+                ni = rng.integers(0, len(N_), len(N_))
+                pp = [P_[i] for i in pi]; nn = [N_[i] for i in ni]
+                deltas.append(
+                    auc([d["h_phi_new"] for d in pp], [d["h_phi_new"] for d in nn])
+                    - auc([d["h_phi_old"] for d in pp], [d["h_phi_old"] for d in nn]))
+            deltas = np.asarray(deltas)
+            lo, hi = np.percentile(deltas, [2.5, 97.5])
+            pwin = float((deltas > 0).mean())
+            out["run_level"][agg_name][L] = {
+                "n_pos": len(P_), "n_neg": len(N_), "auc_old": a_o,
+                "auc_new": a_n, "auc_slack": a_s, "delta": a_n - a_o,
+                "delta_ci95": [float(lo), float(hi)], "p_new_gt_old": pwin}
+            print(f"{L:<10}{len(P_):>4}{len(N_):>5}{a_o:>9.3f}{a_n:>9.3f}"
+                  f"{a_n-a_o:>9.3f}   [{lo:>+6.3f}, {hi:>+6.3f}]{pwin:>12.3f}")
+        print(f"  (slack, run level: " + ", ".join(
+            f"L{L}={out['run_level'][agg_name][L]['auc_slack']:.3f}"
+            for L in LOOKAHEADS if L in out["run_level"][agg_name]) + ")")
+    print("\nCI is a PAIRED bootstrap over runs, 4,000 resamples. With only "
+          "8 hit runs it will be wide; that width IS the result.")
     return out
 
 
