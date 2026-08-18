@@ -82,10 +82,37 @@ validation tests.
   there is nothing to select. A later extension therefore adds information
   without moving the goalpost, and the development curve is reported the same
   way (@1..@20) rather than at a flattering point.
+- **EXTENSION TO k = 20 IS INTENDED, DECIDED NOW.** It is not contingent on the
+  k = 8 result. Recording the intent before the data is what makes it
+  preregistration rather than a forking path: had it been left conditional, a
+  disappointing @8 followed by an extension would be indistinguishable from
+  shopping for a better k. k = 8 is run first only because of the budget
+  ceiling, not because it is a decision point.
 - **Reported by stratum is NOT possible here** -- the 128 have no banked
   solvability strata, since nothing has ever been run on them. That is the
   point of a prospective panel, and it means the headline is a single coverage
   number plus per-source detail.
+
+## THE COMPARATOR, AND THE RULE ALREADY ON THE BOOKS
+
+GrIDDD reports **45.1%** at QED >= 0.90 / Tanimoto >= 0.40 -- our exact success
+event. `AUDIT_EXISTING_CONTROLLER_LANE.md` records a standing ruling about it:
+an earlier 0.5000 obtained at `budget_per_lead = 1000` against the protocol's 20
+candidates was a 50x budget advantage and "must never be placed beside 45.1%".
+
+This run does not repeat that error: it returns exactly k candidates per source,
+which is the protocol's interface. Two mismatches remain and must travel with
+any number quoted from it:
+
+1. **Different panel.** 128 held-out validation sources, not the official 800.
+2. **Different per-candidate compute.** One returned candidate here is a full
+   SMC run -- 32 particles x 40 steps = 1,280 internal molecule evaluations --
+   so the interface matches while the compute behind each returned molecule does
+   not. Disclose it; do not let "same number of candidates" imply same cost.
+
+One mismatch runs in the CONSERVATIVE direction and should be stated as such:
+k = 8 is fewer returned candidates than GrIDDD's 20, so a favourable number at
+k = 8 is achieved with a smaller candidate budget than the comparator.
 
 ## What this does NOT license
 
