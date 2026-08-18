@@ -1,0 +1,53 @@
+{
+ "n_states": 128,
+ "region": [
+  0.9,
+  0.4
+ ],
+ "H24_old": {
+  "budget_max": 24,
+  "prob": {
+   "mean_range_over_budget": 0.01101024728268385,
+   "mean_std_across_states": 0.015994304791092873,
+   "ratio": 0.6883854863648332
+  },
+  "logit": {
+   "mean_range_over_budget": 0.5677345991134644,
+   "mean_std_across_states": 0.6081870198249817,
+   "ratio": 0.9334868726347393
+  },
+  "monotonicity": {
+   "tol": 0.01,
+   "frac_adjacent_pairs_decreasing": 0.0030570652173913045,
+   "frac_states_with_any_violation": 0.046875,
+   "median_decrease": 0.01493394747376442,
+   "worst_decrease": 0.10050491243600845,
+   "frac_pairs_decreasing_any_amount": 0.4127038043478261
+  },
+  "mean_h_at_b1": 0.012805389240384102,
+  "mean_h_at_bmax": 0.01857897639274597
+ },
+ "H40_new": {
+  "budget_max": 40,
+  "prob": {
+   "mean_range_over_budget": 0.037450894713401794,
+   "mean_std_across_states": 0.03780050948262215,
+   "ratio": 0.9907510566919454
+  },
+  "logit": {
+   "mean_range_over_budget": 1.0591158866882324,
+   "mean_std_across_states": 0.8629125356674194,
+   "ratio": 1.2273733929117852
+  },
+  "monotonicity": {
+   "tol": 0.01,
+   "frac_adjacent_pairs_decreasing": 0.029847756410256412,
+   "frac_states_with_any_violation": 0.2890625,
+   "median_decrease": 0.019689619541168213,
+   "worst_decrease": 0.15824156999588013,
+   "frac_pairs_decreasing_any_amount": 0.4437099358974359
+  },
+  "mean_h_at_b1": 0.01478666439652443,
+  "mean_h_at_bmax": 0.03212825953960419
+ }
+}

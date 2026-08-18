@@ -1,0 +1,21 @@
+stratum    src   OLD success NEW success  OLD contact  NEW contact OLD first NEW first
+reliable     3          True        True         4/4         4/4         0         0
+reliable    15          True        True         4/4         4/4         0         0
+reliable    29          True        True         3/4         4/4         0         0
+reliable    60          True        True         2/4         2/4         0         0
+marginal     5          True        True         1/4         1/4         0         0
+marginal    22         False       False         0/4         0/4      None      None
+marginal    46          True        True         1/4         1/4         2         2
+marginal    49          True        True         2/4         2/4         2         2
+hard         0         False       False         0/4         0/4      None      None
+hard        25         False       False         0/4         0/4      None      None
+hard        42          True       False         1/4         0/4         3      None
+hard        63         False       False         0/4         0/4      None      None
+
+stratum    sources  OLD succ  NEW succ   OLD contact   NEW contact
+reliable         4         4         4         13/16         14/16
+marginal         4         3         3          4/16          4/16
+hard             4         1         0          1/16          0/16
+TOTAL           12         8         7         18/48         18/48
+
+DECISION STRATA (marginal+hard): old 4/8 sources, new 3/8
