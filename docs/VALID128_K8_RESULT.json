@@ -1,5 +1,4 @@
 {
- "n_sources": 126,
  "k": 8,
  "cumulative": [
   31,
@@ -9,19 +8,34 @@
   51,
   56,
   61,
-  62
+  63
  ],
- "coverage_at_8": 0.49206349206349204,
- "extinct_runs": 761,
- "runs": 1008,
- "mean_distinct_returned": 2.5952380952380953,
- "work_transitions": 1147373,
- "core_hours": 38.154111111111106,
+ "increments": [
+  31,
+  9,
+  4,
+  4,
+  3,
+  5,
+  5,
+  2
+ ],
+ "n": 128,
+ "coverage": 0.4921875,
+ "contact_runs": 248,
+ "runs": 1024,
+ "sources_any_contact": 63,
+ "extinct_runs": 776,
+ "mean_distinct_returned": 2.578125,
+ "work_transitions": 1167787,
+ "n_sources": 128,
  "comparator": {
   "griddd_qed_success": 0.451,
   "griddd_candidates": 20,
   "vjtnn_qed_success": 0.606,
-  "note": "VJTNN is Tier A must-cite and is higher; this is not SOTA"
+  "note": "VJTNN reports 0.606 on the same delta>=0.4 task and is listed Tier A must-cite in PAPER_REFRAME_CONTROL_SUBSTRATE.md. It EXCEEDS both GrIDDD's 0.451 and COMPOSE's 0.547 @k=12. This result beats the closest per-step editor; it is NOT state of the art and must never be presented as such.",
+  "provenance_caveat": "VJTNN's protocol/initialization has not been audited to our standard; carried as reported context, not as a matched comparison."
  },
- "panel": "hphi_valid_128, prospective, disjoint from train/dev, source QED in [0.700,0.800]"
+ "panel": "hphi_valid_128, prospective, disjoint from train/dev, source QED in [0.700,0.800]",
+ "revision_note": "Counts are the COMPLETE 128-source run. An earlier committed revision recorded 126 sources / 62 solved because it was generated before the final two landed; that revision is superseded, and its comparator block is restored here."
 }
