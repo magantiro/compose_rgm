@@ -179,3 +179,91 @@ it; do not repair it by moving the threshold.
 this lane as training data, initialization, seed or filter. It was used once
 here, legitimately, as an oracle-orientation panel. The task-training regime is
 ZINC plus oracle labels on a fixed budget.
+
+---
+
+# ADDENDUM II — SUPERSEDES the `B_lambda` construction above
+
+Recorded 2026-08-19, before any controller is trained and before any
+optimization outcome exists. Addendum I's top-10% region construction is
+WITHDRAWN, for a reason its own diagnostic established rather than a preference.
+
+## Why the first construction was wrong
+
+Addendum I trained `h_phi` from **observed true-oracle hits along R_theta
+trajectories**. The diagnostic showed two failures, and the second is fatal:
+
+1. With every objective near zero, `d_lambda = max_i lambda_i (1 - F_i)` is
+   dominated by the larger lambda component regardless of x, so five preferences
+   collapsed to three regions (`B0 = B1` and `B3 = B4`, Jaccard 1.000).
+2. More fundamentally: R_theta trajectories from random ZINC top out at
+   JNK3 = 0.22. A controller trained on observed hits can only learn to reach
+   regions the rollouts VISITED, while InversionGNN's property GNN
+   **extrapolates** — its gradient points toward higher predicted activity in
+   chemistry it never saw. That is not a fair contest, and it is an artifact of
+   our construction, not of COMPOSE.
+
+## The corrected design: same task supervision, different inference
+
+The benchmark's 10K is a **task-oracle supervision budget**, not a requirement
+that 10K molecules also encode the optimization trajectory. So both methods take
+the same supervision and diverge only in what they build from it:
+
+    10,000 random ZINC molecules --true JNK3/GSK3b-->  F_psi_hat
+        (identical sampling law to InversionGNN's; ideally the identical molecules)
+
+    R_theta trajectories, NO oracle calls, scored by F_psi_hat  -->  h_phi
+
+    5,000 true endpoint evaluations  -->  the benchmark number
+
+COMPOSE's need for trajectories is met with **oracle-free computation**: once
+`F_psi_hat` exists, arbitrarily many R_theta rollouts can be scored by the
+surrogate at zero budget. The three objects separate cleanly:
+
+    F_psi_hat   WHAT is desirable
+    R_theta     HOW molecules can plausibly move
+    h_phi       WHAT is desirable in the FUTURE, given how molecules move
+
+## The terminal desirability, pinned now
+
+No binary region and no threshold. Inherit the benchmark's preference objective
+as a **positive terminal desirability**:
+
+    L_lambda(x) = max_i lambda_i * (1 - F_psi_hat_i(x))        Chebyshev shortfall
+    g_lambda(x) = exp( - L_lambda(x) / tau_lambda )
+
+    tau_lambda = standard deviation of L_lambda over the 10,000 TRAINING
+                 molecules -- a scale set by the supervision distribution, never
+                 by an optimization outcome.
+
+and the controller target is an expectation, not a hitting probability:
+
+    h_phi(x, lambda, b) ~ E_{R_theta}[ g_lambda(X_b) | X_0 = x ]
+
+This needs no positive examples, has no tunable threshold, and remains a proper
+finite-horizon h-transform. Any state-independent constant in `g` cancels in the
+normalised controlled kernel, so only `tau_lambda` carries scale -- which is why
+it is the one quantity fixed here.
+
+## The causal ablation this buys
+
+Same 10K labels, same `F_psi_hat`, same frozen R_theta, same exact legal fibers,
+same initialization bank, same five preferences, same candidate budget. Compare:
+
+    immediate    R_theta(y|x) * g_lambda(y)                 current predicted value
+    future-aware R_theta(y|x) * h_phi(y, lambda, b-1)       predicted value propagated
+                                                            through the process
+
+Both arms know the **identical predicted landscape**. If future-aware wins there
+is almost nowhere for the explanation to hide: it wins because it propagates that
+landscape through the learned transition process rather than reading it locally.
+
+## Status of the corpus built under Addendum I
+
+`invgnn_v1/corpus_10k.json.gz` (10,000 R_theta-trajectory states with true
+labels) is **quarantined as development evidence** and is NOT the task
+supervision for the benchmark. It established two things worth keeping: that
+objective-blind R_theta neighbourhoods around ordinary ZINC are genuinely low in
+JNK3 (max 0.220), and that observed-hit supervision degenerates there. It cost
+10,000 oracle calls, which are development spend and are not charged against the
+benchmark's budget.
