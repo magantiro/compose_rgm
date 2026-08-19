@@ -267,3 +267,79 @@ objective-blind R_theta neighbourhoods around ordinary ZINC are genuinely low in
 JNK3 (max 0.220), and that observed-hit supervision degenerates there. It cost
 10,000 oracle calls, which are development spend and are not charged against the
 benchmark's budget.
+
+---
+
+# ADDENDUM III — three corrections to how this must be described
+
+Recorded before the surrogate is trained.
+
+## 1. The supervision corpus is MATCHED, not identical
+
+Correct phrasing, to be used everywhere including the paper:
+
+> **InversionGNN-matched random-ZINC supervision, with the common evaluation
+> initialization bank explicitly held out.**
+
+An earlier commit message called it "InversionGNN's own construction". That is
+false: their released routine shuffles ZINC with no such exclusion, so a reviewer
+comparing the two would find the word "exact" unsupportable. The exclusion is
+better hygiene AND a deviation; both are true and both are stated.
+
+This yields two distinct comparisons that must never be blended:
+
+| | what it is | what it supports |
+|---|---|---|
+| published 0.841 | their protocol, their run, their initialization | inherited CONTEXT |
+| our matched rerun | shared init bank, shared supervision, shared accounting | the causal head-to-head |
+
+## 2. "Same surrogate" means two different things
+
+- **Within-COMPOSE attribution:** literally the SAME trained `F_psi_hat`
+  WEIGHTS in both arms. The comparison is airtight because the predicted
+  landscape is bit-identical.
+- **COMPOSE vs published InversionGNN:** we may NOT claim an identical predicted
+  landscape. Their number came from their own predictor and their own run.
+  Claiming otherwise would assert a match we never performed.
+
+So the paper separates them explicitly:
+
+> We first isolate planning from property estimation by comparing local and
+> future-aware control under an identical frozen property surrogate.
+
+and, separately:
+
+> We compare the full method against InversionGNN under its benchmark task and
+> oracle accounting.
+
+The external comparison does NOT isolate `h_phi`; only the internal one does.
+
+## 3. The mechanism, stated correctly
+
+10,000 random ZINC labels reach JNK3 max 0.400, with 2 molecules above 0.3 and
+none above 0.5, while benchmark outputs reach APS ~0.84. **Every method playing
+this benchmark therefore depends on extrapolation beyond its label range.**
+
+We must NOT write "COMPOSE discovers high-activity regions from trajectory
+evidence." It does not. The mechanism is:
+
+    F_psi_hat   extrapolates WHERE desirability may lie
+    h_phi       propagates that desirability through R_theta futures
+
+or, compactly: **property learning says where value may be; molecular-process
+control says how to get there.** Extrapolation quality is a shared dependency of
+both arms, not a COMPOSE differentiator -- which is precisely why the claim rests
+on the propagation step.
+
+## Gate sequence, fixed now
+
+1. does `F_psi_hat` train sensibly on the frozen 10K supervision?
+2. does `h_phi` satisfy held-out Bellman / future-value diagnostics?
+3. on identical held-out decision fibers, does `h_phi` rank decisions better than
+   immediate `F_psi_hat`?
+4. only then spend the 5K optimization budget.
+
+**If 2 or 3 fails, troubleshoot the VALUE-LEARNING IMPLEMENTATION** -- not the
+corpus, not R_theta, not the operator set, not the benchmark, not the preference
+family. The design is settled; further failures are implementation until proven
+otherwise.
