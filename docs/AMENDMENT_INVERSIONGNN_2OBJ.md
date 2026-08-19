@@ -343,3 +343,42 @@ on the propagation step.
 corpus, not R_theta, not the operator set, not the benchmark, not the preference
 family. The design is settled; further failures are implementation until proven
 otherwise.
+
+---
+
+# ADDENDUM IV — Gate-2 numerical correction (authorised, not a redesign)
+
+The preregistered terminal desirability `g = exp(-L/tau)` produced numerically
+degenerate targets. Its computational representative is replaced by
+
+    g~_lambda(x) = exp( -(L_lambda(x) - L*_lambda) / tau_lambda )
+    L*_lambda    = mean of L_lambda over the FROZEN training supervision
+
+For fixed lambda this multiplies `g` by the positive constant
+`exp(L*/tau)`, which does not depend on x, so the normalised controlled kernel
+is unchanged. `L_lambda`, `tau_lambda`, the 10K corpus, R_theta, F_psi_hat, the
+preferences, the horizon and the architecture are all UNCHANGED. This is the
+softmax-max-subtraction manoeuvre, not a tuning knob.
+
+**Verified, not asserted** (600 states x 5 preferences):
+- `log g~ - log g` constant across x to 7.1e-15;
+- normalised successor probabilities from the uncentered and centered forms
+  agree to 1.8e-15 in stable log-space.
+
+**Correction to my own diagnosis.** I first reported the targets had "collapsed
+to zero". They had not: 0 of 600 values were exactly zero, they ranged 1e-14 to
+1e-26, and float32's minimum normal is 1.2e-38. There was NO underflow. A
+4-decimal print rendered ~1e-20 as `0.0000` and I read that as zero. The actual
+failure is dynamic-range collapse relative to the network's output scale,
+together with an R2 whose variance denominator is ~0. Recorded properly because
+"underflow" would have sent a future reader after the wrong bug.
+
+**Consequence to watch, reported not patched.** Centering leaves a heavy right
+tail (per-preference median ~0.77, max 634 / 953 / 23005). Plain MSE on such
+targets is dominated by a handful of states, so rank correlation is reported
+alongside R2; if the tail turns out to dominate, that is a finding to rule on,
+not something to silently transform away.
+
+The failed run is retained as a numerical diagnostic and is NOT a scientific
+result. It says nothing about Morgan features, `h_phi`, or future-aware control:
+the target had no usable dynamic range before the model could learn anything.
