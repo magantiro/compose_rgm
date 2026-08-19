@@ -101,3 +101,81 @@ conversion is a parity check, not an assumption.
   objectives at 20K+5K.
 - Clearly worse -> troubleshoot the multiobjective `h_phi` before adding
   objectives. Do not escalate to hide a 2-objective deficit.
+
+---
+
+# ADDENDUM — the preference regions `B_lambda`, fixed before any label is spent
+
+Recorded 2026-08-19, before the 10K corpus exists. This is the piece most
+vulnerable to unconscious tuning, so it is written down first and deliberately
+made boring.
+
+## The success region
+
+Both objectives are raw higher-is-better here: `F(x) = (J(x), G(x))` with
+`J = jnk3` and `G = gsk3b` **after undoing the bundle's `1 - gsk3b` minimisation
+transform** (orientation verified: actives 0.880 above inactives).
+
+For each published preference `lambda`, define the **Chebyshev shortfall from
+the ideal point**:
+
+    d_lambda(x) = max_i  lambda_i * (1 - F_i(x))            smaller is better
+
+Chebyshev rather than a linear weighted sum, deliberately: a weighted sum
+collapses every preference toward one convex compromise, whereas Chebyshev
+targeting can represent genuinely different points on the front -- which is the
+entire reason the benchmark specifies five preferences.
+
+    B_lambda = { x : d_lambda(x) <= q_lambda }
+
+where `q_lambda` is the **10th percentile of d_lambda over the 10,000 training
+labels ONLY**.
+
+In words: for each desired JNK3/GSK3b tradeoff, "success" is reaching the best
+10% of the training distribution *in that direction*.
+
+Properties this buys, and why each matters:
+- no optimization or test result enters the definition;
+- every preference receives the same nominal positive count (~1,000), so no
+  preference is starved by construction;
+- monotone -- improving either objective can never move a molecule out of
+  `B_lambda`;
+- **one fixed number, 10%**, chosen now rather than discovered later.
+
+## The training target
+
+For a trajectory `x_0 -> x_1 -> ... -> x_T`, each state, budget and preference:
+
+    Y(x_t, lambda, b) = 1[ exists k <= b : x_{t+k} in B_lambda ]
+
+and `h_phi(x_t, lambda, b) ~ P(Y = 1)`. That is the QED region-`h_phi` logic
+generalised to a preference-conditioned multiobjective region: *from this
+molecule, with b edits left and this desired tradeoff, what is the probability
+of reaching the elite region?*
+
+## THE RULE THAT MAKES THIS PREREGISTRATION RATHER THAN A KNOB
+
+**The 10% threshold does not move.** Not after seeing the diagnostic below, not
+after seeing `h_phi`'s validation, not after seeing APS. If the corpus turns out
+degenerate, the response is to revisit DATA GENERATION and say so -- never to
+slide to 20% because it reads better. A threshold that moves after seeing
+outcomes is a fitted hyperparameter wearing a preregistration's clothes.
+
+## Diagnostic to report after `B_lambda` is computed, before training
+
+Purely descriptive, changes nothing:
+1. positives per preference (~1,000 by construction -- confirm, do not assume);
+2. **number of distinct source trajectories containing at least one positive**;
+3. pairwise overlap of the five `B_lambda`.
+
+Item 2 is the one that matters. If 900 of 1,000 positives come from six
+trajectories, the value-learning problem is badly undersampled even though the
+molecule count looks healthy -- a failure mode invisible in (1) alone. Report
+it; do not repair it by moving the threshold.
+
+## Quarantine, restated
+
+`data/diagnostic_kinase_rf/kinase.tsv` is diagnostic-only and MUST NOT enter
+this lane as training data, initialization, seed or filter. It was used once
+here, legitimately, as an oracle-orientation panel. The task-training regime is
+ZINC plus oracle labels on a fixed budget.
