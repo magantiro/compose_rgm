@@ -1,0 +1,77 @@
+{
+ "note": "each random-ZINC start paired with its MOST similar held-out active - the easiest target available",
+ "pairs": [
+  {
+   "start": "CC(C)[C@@H](NC(=O)N1CCC[C@H]1C[NH+]1CCC[C@@H]1CO)c1ccccc1",
+   "target": "CNC(=O)CN1CCCC(Nc2ncc(Cl)c(-c3c[nH]c4ccccc34)n2)C1",
+   "sim0": 0.21052631578947367,
+   "target_jnk3": 0.97
+  },
+  {
+   "start": "Cc1cc(CC(=O)N[C@H](C)c2nc(-c3ccc(Cl)cc3)no2)no1",
+   "target": "COc1ccc(Cl)cc1NC(=O)Nc1cc(C)nc2ccccc12",
+   "sim0": 0.21052631578947367,
+   "target_jnk3": 0.64
+  },
+  {
+   "start": "C[C@@H]1CCCN(C(=O)N[C@@H]2CC[C@H]([NH+](C)C)C2)[C@@H]1C",
+   "target": "CNC(=O)CN1CCCC(Nc2ncc(Cl)c(-c3c[nH]c4ccccc34)n2)C1",
+   "sim0": 0.16470588235294117,
+   "target_jnk3": 0.97
+  },
+  {
+   "start": "CC1(C)CCC[C@H]1NC(=O)NC[C@H](CCO)c1ccccc1",
+   "target": "CNC(=O)CN1CCCC(Nc2ncc(Cl)c(-c3c[nH]c4ccccc34)n2)C1",
+   "sim0": 0.17391304347826086,
+   "target_jnk3": 0.97
+  },
+  {
+   "start": "C[NH+](C)[C@H](CNS(=O)(=O)c1ccc(C#N)cc1)c1ccccc1",
+   "target": "CS(=O)(=O)c1ccc(CN2CCCc3c2sc(NC(=O)c2cccc4ccccc24)c3C#N)cc1",
+   "sim0": 0.21176470588235294,
+   "target_jnk3": 0.91
+  },
+  {
+   "start": "Cc1cc(C[S@](=O)Cc2csc(C3CCCCC3)n2)no1",
+   "target": "CCOC(=O)c1c(C2CC2)csc1NC(=O)Cc1ccc(OC)cc1",
+   "sim0": 0.16666666666666666,
+   "target_jnk3": 0.86
+  },
+  {
+   "start": "COC(=O)[C@H]1CCCCC[C@H]1NC(=O)[C@@H](C)NC(=O)C1CCC1",
+   "target": "COC1CCC(C(=O)Nc2cc(-c3ccnc(Nc4ccc(F)cc4)c3)ccn2)CC1",
+   "sim0": 0.18309859154929578,
+   "target_jnk3": 0.99
+  },
+  {
+   "start": "c1ccc(C[C@@H]2CCC[C@@H]2[NH2+][C@@H]2CCc3n[nH]cc3C2)cc1",
+   "target": "c1ccc(-c2c[nH]c3ncnc(N4CCCCC4)c23)cc1",
+   "sim0": 0.17647058823529413,
+   "target_jnk3": 0.58
+  },
+  {
+   "start": "Cc1ccc(C)c(NC(=O)CNc2ccc(C(=O)N3CCCC3)cc2)c1",
+   "target": "Cc1cc(Nc2ncc(Cl)c(Nc3ccccc3C(N)=O)n2)ccc1N1CCOCC1",
+   "sim0": 0.20930232558139536,
+   "target_jnk3": 0.96
+  },
+  {
+   "start": "O=[N+]([O-])c1ccccc1SN[C@H](N1CCOCC1)C(Cl)(Cl)Cl",
+   "target": "Cn1cc(-c2ccnn2C)c(-c2ccnc(Nc3ccc(N4CCOCC4)cc3)c2)n1",
+   "sim0": 0.20253164556962025,
+   "target_jnk3": 0.99
+  },
+  {
+   "start": "CCC[C@@H]1CCCN(C(=O)Nc2ccc3c(c2)COC3)C1",
+   "target": "O=C(Nc1ccc2n[nH]c(-c3cc4ccccc4s3)c2c1)C1CCOC1",
+   "sim0": 0.21176470588235294,
+   "target_jnk3": 0.7
+  },
+  {
+   "start": "CN(C)c1ncc(CN2CCN(C(=O)c3ccc(Cl)cc3F)CC2)s1",
+   "target": "CC(=O)c1ccc(N2CCOCC2)cc1O",
+   "sim0": 0.22058823529411764,
+   "target_jnk3": 0.58
+  }
+ ]
+}
