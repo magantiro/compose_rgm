@@ -1,0 +1,43 @@
+{
+ "Lstar": [
+  0.9717972874641418,
+  0.8766710162162781,
+  0.6995245814323425,
+  0.8621695041656494,
+  0.9557061791419983
+ ],
+ "taus": [
+  0.02518238904392557,
+  0.022717361348284625,
+  0.011953679628163788,
+  0.04006733007558212,
+  0.044596031081392484
+ ],
+ "panel": [
+  "C#CCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+  "O=C(C=C1CCSCC1)NCC(O)C[NH+]1CCc2ccccc2C1",
+  "CNC(=O)NCC(=O)N1CCCC1c1cccc(Br)c1",
+  "O=C(Nc1cccs1)N1CCOC(c2cc(Cl)cc(Cl)c2)C1",
+  "CCOC(=O)c1sc(-c2ccc(OC)c(OC)c2)nc1O",
+  "CC(Oc1ccccc1Cl)C(=O)N1CCC(C(=O)[O-])C1C",
+  "CCN1C(=O)CC([NH3+])C1c1ccccc1C1CC1",
+  "Cc1ccc(-c2n[nH]cc2C[NH2+]C2CCCN(c3ccc(C#N)cc3F)C2)o1",
+  "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1",
+  "COC(=O)C1=C(C=C(C#N)C2=NC(=O)C3=C(C)C(C)SC3=N2)CCO1",
+  "COc1ccccc1N1CCN(C(=O)c2ccc(COC(C)C)cc2)CC1",
+  "O=C(NCc1cccc(Cl)c1)c1ccc(Cl)c(S(=O)(=O)NC2CC2)c1",
+  "Cc1cccc(C(C)NC(=O)C(C)Sc2ccccn2)c1C",
+  "Cc1n[nH]c(-c2ccccc2[N-]S(=O)(=O)c2cnn(C(C)C)c2)n1",
+  "CCc1ccccc1Cn1c(N)nc2cc(Br)cnc21",
+  "COC(=O)CC(NC(=O)c1ccc(C=O)cc1)C1CC1",
+  "CCC(CC#N)Nc1ccc(Br)cc1F",
+  "O=C1CCCC2=C1C(c1ccc(Br)cc1)NC(=S)N2",
+  "Cn1c(SCC(=O)Nc2ccc3c(c2)OCCO3)nnc1-c1c[nH]c2ccccc12",
+  "CC1(C(=O)[O-])CCCN(C(=O)C2(C)CCCO2)C1",
+  "CCOC(=O)c1ccsc1NC(=O)C(=O)NCc1ccc(C)cc1C",
+  "Cc1ccc(C(=O)N2CCCC2)cc1NC1=NC2CS(=O)(=O)CC2S1",
+  "CCC(NC(=O)C1CCOCC1)c1c(C)nn(C)c1C",
+  "Cc1nnc(Cc2ccc(NC(=O)c3ccc(N4CCOCC4)cc3)cc2)o1"
+ ],
+ "panel_rule": "held-out rollout sources (index%10==0); never used for any fit"
+}

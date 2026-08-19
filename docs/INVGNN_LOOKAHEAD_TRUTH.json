@@ -1,0 +1,26 @@
+{
+ "4": {
+  "n_decisions": 120,
+  "spearman_med": 0.5179621848739495,
+  "flip": 82,
+  "flip_frac": 0.6833333333333333,
+  "gain_abs_med": 0.18628713488578796,
+  "gain_rel_med": 0.19258152057929018
+ },
+ "8": {
+  "n_decisions": 120,
+  "spearman_med": 0.34705882352941175,
+  "flip": 101,
+  "flip_frac": 0.8416666666666667,
+  "gain_abs_med": 0.22339046001434326,
+  "gain_rel_med": 0.21361555221961304
+ },
+ "design": {
+  "n_states": 24,
+  "n_candidates": 16,
+  "m_rollouts": 32,
+  "dynamics": "R_theta (NOT randomised)",
+  "scoring": "frozen surrogate F_psi_hat; zero oracle calls",
+  "panel": "held-out rollout sources, index%10==0"
+ }
+}
