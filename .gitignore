@@ -82,3 +82,6 @@ paper_iclr2027/*.fdb_latexmk
 
 # isolated PyTDC benchmark env; never mix with the pinned chemistry env
 .venv_tdc/
+
+# 74MB of upstream TDC oracle pickles, kept for the parity gate only
+artifacts/tdc_originals/
