@@ -26,7 +26,7 @@ Cardinality is a property of the active molecular graph rather than of a fixed t
 \subsection{Rewrite operators}
 \label{app:operators}
 
-The main text depends only on the legal edit set \eqref{eq:fiber} and never on which families populate it; this section records the families used, so that the edit set is reproducible. We use paper-facing operator names for executable rewrite semantics and model-family names when reporting learned-family statistics; \cref{tab:operators} gives the fixed mapping between them.
+The main text depends only on the legal edit set \eqref{eq:editset} and never on which families populate it; this section records the families used, so that the edit set is reproducible. We use paper-facing operator names for executable rewrite semantics and model-family names when reporting learned-family statistics; \cref{tab:operators} gives the fixed mapping between them.
 
 \begin{table}[h]
 \centering
@@ -75,7 +75,7 @@ Membership in $\X$ requires exactly four conditions: node and edge attributes li
 \end{proposition}
 
 \begin{proof}
-Induct on committed events. The initial state lies in $\X$. If $x_n\in\X$, the process has support only on $a\in\A(x_n)$, and by \eqref{eq:fiber} every such mark executes to a state that passed the executor's guards. Those guards are exactly the four membership conditions above, checked before the edit is committed, so the successor lies in $\X$. The same induction applies verbatim to the controlled process of \eqref{eq:central}, because the controlled off-diagonal mass is a pointwise product of a nonnegative factor with a base probability and therefore vanishes wherever the base probability vanishes: no controller creates support.
+Induct on committed events. The initial state lies in $\X$. If $x_n\in\X$, the process has support only on $a\in\A(x_n)$, and by \eqref{eq:editset} every such mark executes to a state that passed the executor's guards. Those guards are exactly the four membership conditions above, checked before the edit is committed, so the successor lies in $\X$. The same induction applies verbatim to the controlled process of \eqref{eq:central}, because the controlled off-diagonal mass is a pointwise product of a nonnegative factor with a base probability and therefore vanishes wherever the base probability vanishes: no controller creates support.
 \end{proof}
 
 \subsection{Canonical successor representation}
