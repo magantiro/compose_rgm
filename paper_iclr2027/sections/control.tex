@@ -25,7 +25,7 @@ For $h_b(x,z)>0$, the finite-horizon $h$-transform defines
 R^{z,b}_\theta(y\mid x)=R_\theta(y\mid x)\,\frac{h_{b-1}(y,z)}{h_b(x,z)}.
 \label{eq:doob}
 \end{equation}
-The controlled kernel therefore reweights the same canonical molecular successors according to their remaining future value, so a transition may be preferred despite little immediate improvement if it preserves access to desirable states later in the trajectory. If $h_b(x,z)=0$, no state with positive terminal desirability is reachable within the remaining budget under the reference process, and we leave the controlled row undefined rather than introduce probability outside its support.
+The controlled kernel therefore reweights the same canonical molecular successors according to their remaining future value: a transition may be preferred despite little immediate improvement if it preserves access to desirable states later in the trajectory. If $h_b(x,z)=0$, no state with positive terminal desirability is reachable within the remaining budget under the reference process, and we leave the controlled row undefined rather than introduce probability outside its support.
 
 \begin{theorem}[Finite-horizon molecular control]
 \label{thm:doob}
@@ -38,7 +38,7 @@ Let $R_\theta$ define the reference path measure over $K$ committed transitions 
 
 Thus exact backward values realize the $g_z$-tilted terminal law without introducing transitions outside the executable reference support. The proof is given in \cref{app:proofs}.
 
-The guarantee is horizon-specific. Before the terminal step, the controlled marginal is determined by the remaining backward value rather than directly by $g_z$, so early stopping does not in general realize the terminal tilt. Because every state of $R_\theta$ is a complete molecule and every transition an executable rewrite, $h_b(x,z)$ has a direct interpretation as future desirability from a realized molecular intermediate through its remaining executable continuations. Exact backward evaluation is tractable only when the relevant state graph can be enumerated. \Cref{sec:hphi} therefore replaces $h_b$ with a learned goal- and budget-conditioned approximation $h_\phi(x,z,b)$, retaining the same finite-horizon control interface at molecular scale.
+The guarantee is horizon-specific: before the terminal step, the controlled marginal is determined by the remaining backward value rather than directly by $g_z$, so early stopping does not in general realize the terminal tilt. Because every state of $R_\theta$ is a complete molecule and every transition an executable rewrite, $h_b(x,z)$ has a direct interpretation as future desirability from a realized molecular intermediate through its remaining executable continuations. Exact backward evaluation is tractable only when the relevant state graph can be enumerated. \Cref{sec:hphi} therefore replaces $h_b$ with a learned goal- and budget-conditioned approximation $h_\phi(x,z,b)$, retaining the same finite-horizon control interface at molecular scale.
 
 \subsection{Learning goal- and budget-conditioned future value}
 \label{sec:hphi}
@@ -48,7 +48,7 @@ Exact evaluation of the backward values in \cref{sec:control} requires propagati
 h_\phi(x,z,b)\approx h_b(x,z)=\E_{R_\theta}\!\left[g_z(X_b)\mid X_0=x\right].
 \label{eq:hphi}
 \end{equation}
-The remaining budget is part of the prediction problem, because the same molecule can have different future value under the same objective depending on how many executable transitions remain.
+The remaining budget is part of the prediction problem: the same molecule can have different future value under the same objective depending on how many executable transitions remain.
 
 We construct supervision directly from the frozen reference process. From a molecular state $x$, $M$ independent $b$-step continuations give the Monte Carlo target
 \begin{equation}
@@ -57,11 +57,11 @@ We construct supervision directly from the frozen reference process. From a mole
 X_b^{(m)}\sim R_\theta^{\,b}(\cdot\mid x).
 \label{eq:mctarget}
 \end{equation}
-When $g_z$ is an indicator, this target estimates finite-budget reachability. For a general nonnegative desirability, it estimates expected future value. Training and validation are partitioned by molecular source so that states descended from the same source do not cross splits.
+When $g_z$ is an indicator, this target estimates finite-budget reachability; for a general nonnegative desirability, it estimates expected future value. Training and validation are partitioned by molecular source so that states descended from the same source do not cross splits.
 
 The exact backward values also satisfy the Bellman recursion in \cref{eq:backward}, which provides an additional source of supervision when adjacent-budget trajectory pairs are available. We use this consistency relation as an auxiliary training signal for the reachability-valued controller, while controllers trained on soft expected-desirability targets are fit directly to their Monte Carlo future-value estimates. In both cases, $h_\phi$ is trained to approximate the backward quantity defining the exact controller rather than an independent task-specific score. Architecture and training details for the respective future-value models are given in \cref{app:controller,app:mo-controller}.
 
-This distinction is important when terminal desirability is derived from a learned property model $\widehat F_\psi$. The property model $\widehat F_\psi(x)$ estimates properties of the current molecule, whereas $h_\phi(x,z,b)$ estimates the desirability reachable from that molecule after $b$ further transitions of $R_\theta$. Property learning therefore estimates where value may lie, while future-value learning propagates that value through the molecular process.
+This distinction is important when terminal desirability is derived from a learned property model $\widehat F_\psi$. The property model $\widehat F_\psi(x)$ estimates properties of the current molecule, whereas $h_\phi(x,z,b)$ estimates the desirability reachable from that molecule after $b$ further transitions of $R_\theta$. Property learning therefore estimates where value may lie; future-value learning propagates that value through the molecular process.
 
 Replacing the exact backward value in \cref{eq:doob} yields the scalable controlled kernel
 \begin{equation}
@@ -74,21 +74,21 @@ whenever the denominator is positive. If $h_\phi=h$, \cref{eq:central} recovers 
 \subsection{Sampling the controlled molecular process}
 \label{sec:sampling}
 
-At inference, \method{} applies the controlled kernel in \cref{eq:central} recursively over realized molecular states. Given the current molecule $x$, objective $z$, and remaining budget $b$, the executor enumerates the canonical successor set $\Sset(x)$. Then $R_\theta$ assigns goal-independent reference probability to these successors, and $h_\phi$ reweights them by their predicted remaining future value. After sampling and committing a successor, the resulting molecule becomes the next state and the budget is decremented. Recomputing the controlled law after every committed edit therefore yields a closed-loop molecular trajectory whose decisions depend on the state actually reached rather than on a trajectory fixed in advance.
+At inference, \method{} applies the controlled kernel in \cref{eq:central} recursively over realized molecular states. Given the current molecule $x$, objective $z$, and remaining budget $b$, the executor enumerates the canonical successor set $\Sset(x)$; $R_\theta$ assigns goal-independent reference probability to these successors, and $h_\phi$ reweights them by their predicted remaining future value. After sampling and committing a successor, the resulting molecule becomes the next state and the budget is decremented. Recomputing the controlled law after every committed edit therefore yields a closed-loop molecular trajectory whose decisions depend on the state actually reached rather than on a trajectory fixed in advance.
 
-When $\Sset(x)$ can be evaluated directly, we sample from the normalized kernel in \cref{eq:central}. The same row can alternatively be sampled by rejection whenever $h_\phi$ admits a finite envelope, since proposing from $R_\theta(\cdot\mid x)$ and accepting in proportion to $h_\phi$ recovers the controlled distribution conditional on acceptance. For objectives whose desirable futures carry little reference mass, direct sampling can allocate insufficient computation to useful trajectories. We instead use a Feynman--Kac sequential Monte Carlo construction. Particles propagate under the frozen reference process $R_\theta$, and a transition $x\to y$ with $b$ remaining steps receives incremental potential
+When $\Sset(x)$ can be evaluated directly, we sample from the normalized kernel in \cref{eq:central}. The same row can alternatively be sampled by rejection whenever $h_\phi$ admits a finite envelope: proposing from $R_\theta(\cdot\mid x)$ and accepting in proportion to $h_\phi$ recovers the controlled distribution conditional on acceptance. For objectives whose desirable futures carry little reference mass, direct sampling can allocate insufficient computation to useful trajectories. We instead use a Feynman--Kac sequential Monte Carlo construction. Particles propagate under the frozen reference process $R_\theta$, and a transition $x\to y$ with $b$ remaining steps receives incremental potential
 \begin{equation}
 G_b(x,y)=\frac{h_\phi(y,z,b-1)}{h_\phi(x,z,b)}.
 \label{eq:fk}
 \end{equation}
-Particles are resampled when effective sample size falls below $N/2$. When $h_\phi$ equals the exact backward value, these potentials recover the finite-horizon Doob-controlled path law of \cref{sec:control}. With learned $h_\phi$, the same value approximation acts as a twisting function for the reference particle system, and the resulting finite-particle procedure is an approximation whose target and boundary conditions are detailed in \cref{app:sampling}.
+Particles are resampled when effective sample size falls below $N/2$. When $h_\phi$ equals the exact backward value, these potentials recover the finite-horizon Doob-controlled path law of \cref{sec:control}. With learned $h_\phi$, the same value approximation acts as a twisting function for the reference particle system; the resulting finite-particle procedure is an approximation whose target and boundary conditions are detailed in \cref{app:sampling}.
 
 For objectives defined by a target region $\Bset_z$, we stop prospectively at the first realized hit,
 \begin{equation}
 \tau=\min\!\left(\{t\le K:X_t\in\Bset_z\}\cup\{K\}\right).
 \label{eq:stop}
 \end{equation}
-A reached molecule is returned when the target region is entered. If no hit occurs, the trajectory continues to its declared budget. Intermediate states are not retrospectively collected as additional samples, and one controlled trajectory produces one returned candidate. Objectives without a first-hit interpretation are sampled to the declared horizon.
+A reached molecule is returned when the target region is entered; if no hit occurs, the trajectory continues to its declared budget. Intermediate states are not retrospectively collected as additional samples: one controlled trajectory produces one returned candidate. Objectives without a first-hit interpretation are sampled to the declared horizon.
 
 \subsection{Preference-conditioned multi-objective control}
 \label{sec:preferences}
@@ -113,7 +113,7 @@ Setting $z=\lambda$ in \cref{sec:hphi} gives
 \[
 h_\phi(x,\lambda,b)\approx\E_{R_\theta}\bigl[g_\lambda(X_b)\mid X_0=x\bigr],
 \]
-and \cref{eq:central} then defines the corresponding preference-conditioned molecular process. Different values of $\lambda$ therefore alter the desired tradeoff through the controller while leaving the learned molecular reference process $R_\theta$ fixed. Running the controller under multiple preferences yields preference-conditioned candidate sets, from which we report the nondominated subset. The scalarization itself carries no claim of Pareto optimality.
+and \cref{eq:central} then defines the corresponding preference-conditioned molecular process. Different values of $\lambda$ therefore alter the desired tradeoff through the controller while leaving the learned molecular reference process $R_\theta$ fixed. Running the controller under multiple preferences yields preference-conditioned candidate sets, from which we report the nondominated subset; the scalarization itself carries no claim of Pareto optimality.
 
 The same state-level formulation also permits objectives and admissibility requirements to change after generation has begun, as we describe next.
 
@@ -125,7 +125,7 @@ Because control is conditioned on the current molecular state, \method{} can cha
 
 \begin{corollary}[Exact continuation after a goal change]
 \label{cor:retarget}
-With exact backward values, applying \cref{thm:doob} from $(x_\tau,b)$ with terminal desirability $g_{z'}$ realizes the $g_{z'}$-tilted $b$-step terminal law of the reference process started at $x_\tau$. This generally differs from specifying $z'$ at the original source $x_0$, because continuation preserves the molecular state actually reached, whereas restarting discards it. With learned $h_\phi$, the same operation gives the corresponding approximate continuation.
+With exact backward values, applying \cref{thm:doob} from $(x_\tau,b)$ with terminal desirability $g_{z'}$ realizes the $g_{z'}$-tilted $b$-step terminal law of the reference process started at $x_\tau$. This generally differs from specifying $z'$ at the original source $x_0$: continuation preserves the molecular state actually reached, whereas restarting discards it. With learned $h_\phi$, the same operation gives the corresponding approximate continuation.
 \end{corollary}
 
 Hard statewise requirements can instead be enforced through executable support. Let $C:\X\to\{0,1\}$ be a molecular predicate with $C(x_0)=1$, and define the restricted edit set
@@ -133,12 +133,12 @@ Hard statewise requirements can instead be enforced through executable support. 
 \A_C(x)=\bigl\{\,a\in\A(x):\ C(\T(x,a))=1\,\bigr\}.
 \label{eq:constrained}
 \end{equation}
-Applying the canonicalization and normalization of \cref{sec:canonical} to $\A_C(x)$ gives the constrained reference kernel $R^{C}_\theta$. If $\A_C(x)=\emptyset$, the state is terminal under the constrained process. Otherwise every committed successor satisfies $C$ by construction. Finite-horizon control then proceeds with $R^{C}_\theta$ in place of $R_\theta$. Approximation error in $h_\phi$ may therefore misallocate probability among admissible successors, but cannot violate a constraint enforced through the support itself.
+Applying the canonicalization and normalization of \cref{sec:canonical} to $\A_C(x)$ gives the constrained reference kernel $R^{C}_\theta$. If $\A_C(x)=\emptyset$, the state is terminal under the constrained process; otherwise every committed successor satisfies $C$ by construction. Finite-horizon control then proceeds with $R^{C}_\theta$ in place of $R_\theta$. Approximation error in $h_\phi$ may therefore misallocate probability among admissible successors, but cannot violate a constraint enforced through the support itself.
 
-This construction applies to state predicates whose admissibility can be determined from the proposed molecular successor, and we refer to such constraints as \emph{rule-closed}. Examples include protected scaffolds, forbidden substructures, and size or charge restrictions. Requirements that depend on accumulated history require an augmented state. For a sufficient statistic $\xi_k$, define
+This construction applies to state predicates whose admissibility can be determined from the proposed molecular successor; we refer to such constraints as \emph{rule-closed}. Examples include protected scaffolds, forbidden substructures, and size or charge restrictions. Requirements that depend on accumulated history require an augmented state. For a sufficient statistic $\xi_k$, define
 \[
 \widetilde X_k=(X_k,\xi_k),\qquad \xi_{k+1}=\Phi(\xi_k,X_{k+1}),
 \]
 so that the augmented process remains Markov. Cumulative edit costs or other history-dependent requirements can then be represented explicitly rather than imposed through a non-Markov rejection rule.
 
-Retargeting and pathwise restriction therefore modify different parts of the same frozen process. Retargeting changes the control context, whereas hard constraints change executable support. In both cases, the parameters of the learned molecular reference process remain fixed.
+Retargeting and pathwise restriction therefore modify different parts of the same frozen process: retargeting changes the control context, whereas hard constraints change executable support. In both cases, the parameters of the learned molecular reference process remain fixed.

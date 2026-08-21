@@ -35,7 +35,7 @@ Let $\X$ be a discrete state space and $P_0,\dots,P_{K-1}$ a sequence of transit
 P(X_{1:K}=x_{1:K}\mid X_0=x_0)=\prod_{k=0}^{K-1}P_k(x_{k+1}\mid x_k).
 \label{eq:chain}
 \end{equation}
-Thus each transition depends only on the current state and the step of the process, while the sequence of kernels determines a distribution over complete trajectories. In \method{}, fixed-budget molecular editing takes this form, with each state a complete molecular graph and each committed transition one molecular edit.
+Thus each transition depends only on the current state and the step of the process, while the sequence of kernels determines a distribution over complete trajectories. In \method{}, fixed-budget molecular editing takes this form: each state is a complete molecular graph and each committed transition corresponds to one molecular edit.
 
 \subsection{Finite-horizon Doob control}
 \label{sec:prelim-ctrl}
