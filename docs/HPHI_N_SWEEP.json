@@ -1,0 +1,67 @@
+{
+ "summary": {
+  "N=32": {
+   "n": 64,
+   "success": 19,
+   "transitions": 42502
+  },
+  "N=8": {
+   "n": 62,
+   "success": 7,
+   "transitions": 11091,
+   "retained": 6,
+   "lost": [
+    3,
+    7,
+    10,
+    11,
+    14,
+    17,
+    26,
+    27,
+    28,
+    29,
+    51,
+    53,
+    54
+   ],
+   "gained": [
+    59
+   ],
+   "n32_successes": 19,
+   "seeds_paired": true
+  },
+  "N=4": {
+   "n": 64,
+   "success": 3,
+   "transitions": 5944,
+   "retained": 3,
+   "lost": [
+    7,
+    10,
+    11,
+    14,
+    15,
+    17,
+    19,
+    26,
+    27,
+    28,
+    29,
+    50,
+    51,
+    53,
+    54,
+    60
+   ],
+   "gained": [],
+   "n32_successes": 19,
+   "seeds_paired": true
+  }
+ },
+ "arms": {
+  "N=32": 64,
+  "N=8": 62,
+  "N=4": 64
+ }
+}

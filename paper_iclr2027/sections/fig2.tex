@@ -1,0 +1,29 @@
+% FIGURE 2 --- four panels: learn the process -> see why futures matter ->
+% show it happens repeatedly -> show learned value can prioritise it.
+% Panel (b) example is selected DETERMINISTICALLY: among the 14 rescues, the
+% lowest sealed pair index at the median certified path length (5 edits).
+% NOTE: per-pair records bank source/target/outcome but NOT the intermediate
+% states, so drawing the two branches requires re-deriving that single pair's
+% trajectory. Everything else on this figure is already measured.
+\begin{figure}[t]
+\centering
+\fbox{\parbox{0.97\textwidth}{\centering\vspace{6pt}\footnotesize
+{\color{red}[Panels to be drawn. All values below are measured.]}\\[8pt]
+\textbf{(a) $R_\theta$ learns which successor, not just which family}\quad successor NLL $\downarrow$, four bars\\[3pt]
+uniform $6.25$ \ $\rightarrow$ \ empirical family $5.37$ \ $\rightarrow$ \ {}$+${}learned successor identity $4.10$ \ $\rightarrow$ \ \method{} $3.90$\\[2pt]
+annotate the middle-to-identity step: \textbf{$86.7\%$ of the $-1.46$ nat gain}\\[7pt]
+\textbf{(b) one rescued molecular decision}\quad sealed pair $10$, budget $5$ edits, one override\\[2pt]
+both policies commit \op{CCC(C)NC(=O)c1ccc(CSCc2ccccc2)o1} $\rightarrow$ \op{CCC(C)c1ccc(CSCc2ccc(C(N)=O)o2)cc1},
+then diverge on the second edit with four of the five remaining\\[2pt]
+\emph{local} (maximizes target similarity) takes \op{CCCc1ccc(...)}, similarity $0.737$ $\rightarrow$ wanders into a thioether, revisits a state, target never reached\\[1pt]
+\emph{rollout} takes \op{CC(C)c1ccc(...)}, similarity $0.718$ $\rightarrow$ \op{CCc1ccc(...)} $\rightarrow$ \op{Cc1ccc(CSCc2ccc(C(N)=O)o2)cc1} $=$ target, after four committed edits with one of the five unused\\[1pt]
+draw the shared prefix once, branch at the divergent edit, highlight the changed substituent, label remaining budget\\[7pt]
+\textbf{(c) the same effect across the panel}\quad $65$ held-out pairs, stacked\\[2pt]
+local $26$ \ $+$ \ rescued by remaining-budget rollout $14$ \ $+$ \ unresolved $25$
+\hfill $+21.5$ pp $[12.3,33.5]$\\[7pt]
+\textbf{(d) recovery vs.\ continuation work}\quad recovery against fraction of all-candidate work\\[2pt]
+local $40\%$/--- \quad $R_\theta$ top-1 $51\%$/$34.7\%$ \quad similarity top-2 $57\%$/$52.1\%$ \quad $h_\phi$ top-1 $62\%$/$34.6\%$ \quad all-candidate $62\%$/$100\%$
+\vspace{6pt}}}
+\caption{\small\textbf{Learning and controlling an executable molecular process.} \textbf{(a)}~On the same canonical successor support, the learned reference law assigns higher probability to the realized successor than either unlearned law, and most of that gain is recovered by learning successor identity while retaining empirical family frequencies. \textbf{(b)}~A single rescued decision, selected deterministically as the lowest-index rescue at the median certified path length. The local policy here selects the successor most similar to the target, and the two policies agree until four of the five edits remain. The rollout policy then declines that locally preferred successor in favour of a less similar one whose continuation reaches the target with an edit to spare, while the local branch does not recover it. One override changes the endpoint. \textbf{(c)}~Across the panel, remaining-budget evaluation rescues $14$ of the $39$ targets local selection misses. Because the local action is retained by construction, regressions are excluded and the rescue count is the informative quantity. \textbf{(d)}~Goal-aware prioritization concentrates continuation work. $h_\phi$ top-1 matches all-candidate recovery at about a third of the continuations. The recovered sets differ, and exact-target similarity has privileged information unavailable in ordinary property optimization.}
+\label{fig:mechanism}
+\end{figure}

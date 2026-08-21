@@ -1,0 +1,286 @@
+% ============================================================================
+% APPENDIX.  Everything the 9-page main text cannot carry: the operator
+% registry, the proofs, the invariance statement, the controller specification
+% and its hyperparameters, the frozen-artifact and panel audit, the reported
+% developmental negatives, the positioning ledger, the reproducibility
+% hazards, and the gap register.
+%
+% PROVENANCE RULE, RESTATED FOR THIS FILE.
+%   * MEASURED quantities may be quoted only from the seven verified sources
+%     listed at the top of main.tex.  Anything else measured is \XXX inside a
+%     "GAP: NUMBER NOT IN VERIFIED SOURCE SET" block.
+%   * DESIGN CONSTANTS (architecture, schedule, thresholds fixed before data)
+%     are transcribed from frozen preregistration documents and are labelled
+%     inline with the document they come from.  They are not measurements and
+%     are not presented as any.
+% ============================================================================
+
+\section{Operator registry, scope, and application conditions}
+\label{app:operators}
+
+The main text depends only on the legal edit fiber \eqref{eq:fiber} and never on which families populate it; this appendix records the families used, so that the fiber is reproducible.
+The registry classifies each family by its action on the cardinality strata of \cref{sec:support}.
+
+\begin{table}[h]
+\centering
+\small
+\caption{The rewrite families, by action on the strata. Each family is a typed graph rewrite with structural and chemical application conditions; the executor follows a propose--validate--commit discipline and exposes no transition whose successor fails a guard.}
+\label{tab:operators}
+\begin{tabularx}{\textwidth}{@{}llY@{}}
+\toprule
+Family & Cardinality & Structural / chemical condition\\
+\midrule
+$\op{atom\_insert}$ & birth $\X_n\!\to\!\X_{n+1}$ & empty capacity; a null source or exactly one occupied anchor; allowed atom state; for a bonded birth, allowed bond order and feasible endpoint valence\\
+$\op{atom\_delete}$ & death $\X_n\!\to\!\X_{n-1}$ & removable atom with connected remainder; neighbour hydrogen compensation; successor sanitizes\\
+$\op{atom\_restate}$ & same & occupied site; joint element, valence-class and implicit-hydrogen state allowed; successor differs from the source\\
+$\op{bond\_reorder}$ & same & existing edge; joint bond-order and hydrogen update feasible\\
+$\op{graft}$ & same (reroute) & the cut edge is a bridge; the relocated fragment is a pendant subtree; the new endpoint lies outside it; cut and attach commit in one transaction so no disconnected state is ever exposed\\
+$\op{cycle\_close}$ & same (cyclize) & absent edge between two occupied atoms with valence headroom; admitted insertion raises graph cycle rank by one\\
+$\op{cycle\_open}$ & same (decyclize) & existing edge that is not a bridge; endpoint hydrogen compensation; successor sanitizes\\
+$\op{ring\_restate}$ & same & a matched cyclic system; a coordinated set of bond-order changes validated by the executor as one transaction\\
+\midrule
+whole-ring growth, whole-ring deletion & multi-atom macros & \textbf{disabled}; a macro must earn its place by a measured path-efficiency gain, never by assumption\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Declared scope.}
+% ===== GAP: NUMBER NOT IN VERIFIED SOURCE SET =====  [U2] declared scope constants
+% The heavy-atom cap, the count of neutral (element, valence) classes, the
+% element list, and the fraction of benchmark leads the vocabulary admits are
+% recorded in the project's scope documents and in the prior manuscripts'
+% \ScopeMaxAtoms / \ScopeClasses / \LeadCoverageBroad macros.  They are NOT in
+% this draft's verified source set and are therefore not transcribed here.
+% TO CLOSE: transcribe from the scope fingerprint artifact with its hash.
+States carry at most \XXX{} heavy atoms over \XXX{} neutral (element, valence) classes drawn from a declared organic element set, a vocabulary admitting \XXX{} of the benchmark lead molecules.
+Formal charge is an input but not an output dimension, so charge is carried rather than designed; stereochemistry, isotopes and radicals are not represented.
+
+\paragraph{Why ring topology is compositional rather than catalogued.}
+$\op{cycle\_close}$ inserts one bond between two nonbonded atoms and, because every non-null state is connected, raises graph cycle rank by one; $\op{cycle\_open}$ deletes one non-bridge cycle edge and lowers it by one.
+At the untyped graph level every connected graph is a spanning tree plus its non-tree edges, so inserting those edges one at a time realizes the abstract cyclic topology while preserving connectivity.
+This is a statement about graphs.
+It does not prove that the molecular grammar admits a valence-valid path to every chemically labelled ring system, nor that such a path fits a finite edit budget; both are measured questions and neither is assumed anywhere in the main text.
+
+\section{The canonical successor quotient and its invariance}
+\label{app:quotient}
+
+\begin{definition}[Successor-preserving, rate-preserving re-encoding]
+\label{def:reencoding}
+Two mark systems on the same state space are so related if for every $x$ there is a surjection $\varphi_x$ from the marks of one onto the marks of the other with matching executed successors --- so marks may be split or merged only \emph{within} a successor fiber, never across fibers --- and if the aggregate rate of every successor fiber agrees.
+\end{definition}
+
+\begin{proposition}[Encoding invariance, and its exact scope]
+\label{prop:encoding}
+Under \cref{def:reencoding} and a common state-level productive-commit predicate:
+\emph{(i)} the state-level generators coincide, hence so do the total hazards, the molecular laws, the reference edit law $R_\theta$ of \eqref{eq:rtheta} wherever defined, and every time marginal;
+\emph{(ii)} for any controller that is \emph{fiber-constant} --- a function of $(x,y)$ rather than of the mark --- the controlled kernels coincide;
+\emph{(iii)} hard state predicates and the transform of \cref{thm:doob} are fiber-constant by construction, so the values $h_b$ and the controlled kernels are identical under any such re-encoding.
+\end{proposition}
+
+\begin{proof}[Proof]
+\emph{(i)} The fibers correspond under $\varphi_x$ and partition the applicable set, so fiber sums agree successor by successor; summing over successors gives equality of total hazards without further hypothesis, which answers the natural worry that a refinement, which renormalizes the mark law over a larger set, could perturb the hazard --- it cannot, because the hazard is the sum of the aggregates. Equality of generators plus uniqueness of the finite-state forward solution gives equality of all marginals, and dividing the aggregate by the hazard gives equality of $R_\theta$ on every row with positive mass.
+\emph{(ii)} A fiber-constant controller is a function $\Psi(x,y)$, so it multiplies two equal aggregates and yields equal controlled rates; the diagonal is determined by the row.
+\emph{(iii)} $h_b$ is built by backward recursion from kernels that are invariant by \emph{(i)}, so $h_b$ is invariant by induction, and the ratio $h_{b-1}(y)/h_b(x)$ is fiber-constant.
+\end{proof}
+
+\paragraph{The boundary, which is load-bearing rather than pedantic.}
+Merging marks \emph{across} successor fibers is excluded by \cref{def:reencoding} and is ill-posed rather than merely lossy: it would stop the executor being a function of the merged mark.
+And mark-level controllers are not invariant in general.
+If a successor is reachable by four symmetric aliases of rate $1/4$ under one encoding and by a single mark of rate $1$ under another, a mark-level power tilt $\Psi\propto q(a)^{\beta-1}$ assigns it controlled mass $4\cdot(1/4)^\beta$ versus $1$, which differ for every $\beta\ne1$.
+Top-$k$ and nucleus truncation over marks, and per-family multipliers, fail for the same reason; a family multiplier is invariant exactly when it is constant across every alias of every successor fiber it touches.
+Every controller in this paper is written over molecules.
+The proposition concerns the pushed-forward process, not the training representation: mark-level supervision is generally not invariant to within-fiber refinement, which is why teacher supervision aggregates the successor fiber.
+
+\section{Proofs}
+\label{app:proofs}
+
+\begin{proof}[Proof of \cref{prop:closure}]
+Induct on committed events. The initial state lies in $\X$. If $x_n\in\X$, the process has support only on $a\in\A(x_n)$, and by \eqref{eq:fiber} every such mark executes to a state that passed the executor's guards, hence lies in $\X$. The same induction applies verbatim to the controlled process of \eqref{eq:central}, because the controlled off-diagonal mass is a pointwise product of a nonnegative factor with a base probability and therefore vanishes wherever the base probability vanishes: no controller creates support.
+\end{proof}
+
+\begin{proof}[Proof of \cref{thm:doob}]
+\emph{(i)} $\sum_y R_{\theta,b}(x,y)h_{b-1}(y)=h_b(x)$ by \eqref{eq:backward}, so the ratios in \eqref{eq:doob} sum to one.
+\emph{(ii)} Multiplication by $h_{b-1}(y)$ cannot make a zero base probability positive; the supports are equal at a row exactly when no base-supported successor has zero value.
+\emph{(iii)} For a path $x_0,\dots,x_K$ of positive base probability, the controlled path probability is the base path probability times $\prod_{k}h_{K-k-1}(x_{k+1})/h_{K-k}(x_k)$, and the interior factors telescope, leaving $h_0(x_K)/h_K(x_0)=g_z(x_K)/h_K(x_0)$. Every path to a fixed endpoint is therefore reweighted by the same factor, and summing over paths gives \eqref{eq:tilt}. The normalizer is the full-budget value at the start.
+Finally, for the continuation and horizon-specificity claims stated after \cref{thm:doob}, apply the same telescoping to the chain started at $x$ with horizon $b'$ and desirability $g_{z'}$. The marginal at $j<K$ is an $h_{K-j}$-tilt rather than a $g_z$-tilt, which is why early stopping does not inherit \eqref{eq:tilt} and why continuation is not the same law as using $g_{z'}$ from the first edit.
+\end{proof}
+
+\section{Controller specification}
+\label{app:controller}
+
+The following are \emph{design constants}, fixed in frozen preregistration documents before the corresponding data existed; they are transcribed here and are not measurements.
+The region-goal controller conditions on the region's own coordinates, the signed margins of the current molecule to each of them, the remaining budget as a one-hot index, and a graph embedding of the current molecule together with the source lead and their difference and product, produced by the frozen reference-law encoder used unchanged with gradients never flowing into it.
+The head is a small multilayer perceptron with dropout, ending in a sigmoid, so the output lies in $[0,1]$ and is directly usable as the multiplicative factor in \eqref{eq:central}.
+The boundary condition $h_\phi\equiv1$ on the goal region is enforced at inference and in-region states are excluded from training rather than supervised toward it.
+The loss is cross-entropy against the Monte-Carlo hitting label plus a down-weighted Bellman consistency term on observed transitions.
+Optimization uses early stopping on a validation fraction held out \emph{by source molecule}, and the best-validation checkpoint is selected rather than the last epoch.
+
+% ===== GAP: NUMBER NOT IN VERIFIED SOURCE SET =====  [U3] controller hyperparameters
+% Exact hyperparameter values -- input dimension, embedding width, layer widths,
+% dropout rate, Bellman weight, epochs, patience, validation fraction, the
+% region grid, the corpus shape and its hash -- are recorded in the frozen
+% controller preregistration in the repository.  They are design constants, not
+% measurements, but they are outside this draft's verified source set and are
+% therefore left \XXX rather than transcribed from memory.
+% TO CLOSE: transcribe each value from the preregistration in one pass and cite
+% the document and its hash beside the table.
+Concretely: input dimension \XXX{}, embedding width \XXX{}, hidden widths \XXX{}, dropout \XXX{}, Bellman weight \XXX{}, epochs \XXX{} with patience \XXX{}, validation fraction \XXX{} held out by source, and \XXX{} jointly trained goal regions of which the benchmark's is one, given no special weight.
+
+\paragraph{Inference.}
+The deployed sampler realizes \eqref{eq:central} by proposing from the frozen reference law, executing, canonicalizing, rejecting self-transitions, and accepting with probability $h_\phi$; conditioned on acceptance the accepted move has exactly the $R_\theta\cdot h_\phi$ law, because $h_\phi\in[0,1]$ and is a state-level function so that aliased successors aggregate correctly.
+The proposal cap is finite, however, and when every proposal is rejected the sampler fails and the trajectory ends, so the \emph{capped} procedure as a whole is not an exact realization of the controlled kernel and must not be described as one.
+Cap pressure is a measured diagnostic with a preregistered escalation to a twisted sequential-Monte-Carlo realization using the same $h_\phi$ and the same $R_\theta$; that escalation is inference, not retraining.
+The controller stops at the first committed molecule inside the goal region --- an online stopping time evaluated on the realized state, not a retrospective choice among inspected states --- which is available precisely because every committed state is a complete candidate.
+
+\section{Frozen artifacts, panels, and disjointness}
+\label{app:audit}
+
+Every result in \cref{sec:experiments} is bound to artifacts frozen before it.
+The reference edit law was never retrained for any experiment in this paper, and the controller head evaluated on the prospective panel was verified byte-identical by hash before and after an unrelated training session.
+% source: docs/SESSION_RUN_MANIFEST_2026-08-18.md, "Frozen assets used throughout"
+The three source panels --- development, prospective validation, and the official cohort --- were verified pairwise disjoint, with the official cohort and the development panel excluded from the eligible pool before the training corpus was sampled.
+% source: docs/AMENDMENT_VALIDATION_128.md ("verified pairwise disjoint from hphi_train_1024, dev_panel_qed_64 and hphi_pilot_64 (zero overlap)")
+The evaluation ladder and its no-rescue rules were recorded before the data: the validation panel is opened once, whatever it returns is banked including a disappointing result, no hyperparameter is re-chosen afterwards, and the extension of the candidate curve beyond the preregistered operating point was decided in advance rather than after seeing the result at that point.
+% source: docs/AMENDMENT_VALIDATION_128.md, "The design, and the thing that would invalidate it"
+
+\paragraph{One artifact, quarantined.}
+A pre-freeze mechanical smoke test executed exactly one of the $800$ official sources before its stop took effect.
+Its output was never read, was quarantined under a hash, and is barred from any report; seeds are deterministic, so that source will produce an identical endpoint whenever the official run happens.
+The official cohort is therefore inferentially unconsumed rather than literally never executed, and we state it that way.
+% source: docs/GRIDDD_JIN_PROTOCOL.md, "Record: one stray artifact, unread" and its correction
+
+\section{Reported developmental negatives}
+\label{app:negatives}
+
+Two negative developmental results bear on how the main text should be read and are recorded rather than omitted.
+
+\paragraph{The one-step policy.}
+A receding one-step terminal tilt of the frozen reference law by the immediate property value of each successor was preregistered as the inference policy and was refuted on the disjoint development panel, $0$ successes in $320$ trajectories, before any official-cohort outcome existed.
+% source: docs/GRIDDD_JIN_PROTOCOL.md, CURRENT AMENDMENT
+It is retained as a reported developmental negative control.
+The wording that this licenses is narrow: the finite-horizon controller is a pre-outcome amendment consistent with the paper's finite-horizon construction, motivated by a developmental failure of a cheap one-step approximation.
+It must \emph{not} be described as restoring an originally frozen policy, nor as though compute cost was the only thing that ever separated the two, because the earlier protocol declined the expensive alternative on stated scientific grounds as well as on cost.
+
+\paragraph{A budget-extended value head that was not adopted.}
+A value head retrained to be aware of the longer horizon was built, evaluated, and rejected on four separate measurements, and it is \emph{not} the head used anywhere in \cref{sec:experiments}.
+% source: docs/AMENDMENT_VALIDATION_128.md, "Why the retrained twist is NOT in this configuration"; docs/SESSION_RUN_MANIFEST_2026-08-18.md rows 6-8
+The consequence for the main text is a claim boundary: the gain from the longer horizon comes from giving the \emph{frozen} process more edit opportunities, not from a better budget-conditioned value model, and no sentence in this paper attributes it to the latter.
+
+\section{Designs for the capability experiments}
+\label{app:capdesign}
+
+None of the three has been run. Each design is given in full so the eventual numbers can be checked against a claim written before them.
+
+\paragraph{Retargeting mid-trajectory.}
+At a fixed fraction of the budget the goal $z$ is replaced by $z'$, and four arms are compared on identical sources and seeds: \textbf{(a)}~continue under \cref{cor:retarget}, re-solving the remaining budget for $z'$; \textbf{(b)}~restart from the source lead under $z'$; \textbf{(c)}~restart from the switch molecule with a fresh sampler; \textbf{(d)}~a static compromise goal fixed at the outset.
+Reported: committed edits after the switch; oracle calls after the switch; retention of the property gains made before the switch; per-source paired differences with a bootstrap interval resampled over sources.
+The claim it would support is that budget-conditioned control adapts to a replaced objective without discarding committed work.
+Limitation to state with it: regret is measured against the archive at switch time, not against long-run optimality.
+
+\paragraph{Pathwise constraints.}
+With a rule-closed predicate $P$ --- a protected scaffold, a forbidden substructure, a size or charge window, a similarity floor --- support restriction is compared against endpoint rejection and a terminal penalty on identical sources and seeds.
+Reported: the fraction of trajectories feasible at \emph{every} committed state, which under support restriction is $1$ by construction and is therefore an implementation check rather than a finding; oracle calls spent on trajectories that end infeasible; and final quality among feasible candidates.
+A cumulative constraint under state augmentation is a different mechanism and is reported separately, never pooled with the rule-closed case.
+The claim it would support is that a rule-closed requirement holds at every committed molecule at no loss of final quality and at a measured saving in oracle calls.
+
+\paragraph{The Pareto fan.}
+From one saved trajectory prefix, several preference-conditioned continuations are launched under \eqref{eq:cheby} with the budget that prefix left, and compared against independent restarts from the source lead at the \emph{same total} oracle budget.
+Reported: hypervolume of the fan against oracle calls; distinct nondominated molecules contributed per oracle call; and the accounting itself, with the shared-prefix cost counted once for the fan and once per branch for the restart arm.
+The claim it would support is that shared-prefix branching covers the front more cheaply than independent restarts.
+Limitation to state with it: hypervolume is computed under a preregistered reference point and is a computational quantity, not experimental efficacy.
+
+\section{Positioning ledger}
+\label{app:positioning}
+
+\begin{table}[h]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\caption{Property-by-property positioning. No single column is claimed as new; the claim is that one object carries all of them. \emph{Var.\ card.}: cardinality changes within one trajectory. \emph{Birth/death}: entities both created and destroyed. \emph{Topol.}: operators that change cycle structure. \emph{Compl.}: every committed state is a complete molecule. \emph{Learned law}: a learned reference path distribution rather than a search heuristic. \emph{Quot.}: probability defined on canonical molecular successors rather than on edit encodings. \emph{Exact ctrl.}: exact terminal reweighting under an exact value. \emph{Retgt.}: objective may change mid-trajectory without restarting. \emph{Pathwise}: requirements enforced at every committed state.}
+\label{tab:positioning}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lccccccccc}
+\toprule
+Family & Var.\ card. & Birth/death & Topol. & Compl. & Learned law & Quot. & Exact ctrl. & Retgt. & Pathwise\\
+\midrule
+Graph diffusion / flow        & no  & no  & yes & no      & yes & no      & no  & partial & no\\
+Trans-dim.\ jump diffusion    & yes & yes & partial & no  & yes & no      & no  & no      & no\\
+Insert/delete graph diffusion & yes & partial & partial & no & yes & no  & no  & no      & no\\
+Constrained graph diffusion   & no  & no  & yes & partial & yes & no      & no  & no      & partial\\
+Molecular grammars            & yes & yes & yes & partial & yes & no      & no  & no      & partial\\
+Valid-state editors           & yes & yes & yes & yes     & no  & no      & no  & partial & yes\\
+Stochastic graph rewriting    & yes & yes & yes & yes     & no  & partial & no  & no      & yes\\
+\midrule
+\method{} (this work)         & yes & yes & yes & yes     & yes & yes     & yes & yes     & yes\\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\section{Training-pipeline figure}
+\label{app:fig2}
+
+\input{sections/fig2}
+
+\section{Process-level consequences figure}
+\label{app:fig4}
+
+\input{sections/fig4}
+
+This figure sits in the appendix rather than the main text only because every one of its panels is blocked on an experiment that has not been run (\cref{sec:exp-capabilities}); it moves to the main text when those runs land.
+
+\section{Extended related work}
+\label{app:related}
+
+\paragraph{Generator matching and jump processes.}
+Generator matching unifies flow, diffusion and jump models by regressing a marginal generator from tractable conditional generators \citep{holderrieth2025generator}. Our instantiation is a jump one in which the mark alphabet is state-dependent, guarded and executable, and in which several marks may map to one successor --- the last of these is what forces the aggregation of \cref{sec:canonical}.
+
+\paragraph{Discrete graph diffusion and flows.}
+DiGress and related models corrupt node and edge categories and learn a denoiser \citep{vignac2023digress,austin2021d3pm,campbell2022ctdd}; DeFoG formulates graph generation by discrete flow matching \citep{qin2025defog}. Their intermediates are graphs but need not be connected or valence-admissible, so a computational property oracle applied to one is not chemically defined and a pathwise constraint is not expressible.
+
+\paragraph{Variable cardinality.}
+Trans-dimensional generative modelling by jump diffusion learns processes moving between spaces of different dimension \citep{campbell2023jump}, the closest formal precedent for our state space and the reason we claim no novelty for variable-dimension generation. Monotone insertion/deletion graph diffusion \citep{ninniri2025griddd}, edit flows for variable-length objects \citep{havasi2025editflows} and CTMC bridges for graph transformation \citep{kim2025ddsbm} change cardinality within a trajectory. The distinction here is that one jump is a guarded chemical rewrite between two complete molecules, in both directions of cardinality, alongside topology-changing operators.
+
+\paragraph{Grammars, constrained diffusion, rewriting.}
+Molecular grammars make validity structural \citep{kajino2019mhg,guo2022grammar}. Constrained graph diffusion projects onto restricted classes --- edge-deletion-invariant topology, aggregate counts, fixed formula and degree \citep{madeira2024construct,sharma2024prodigy,ruizbotella2026cocograph} --- classes that do not include a designated labelled substructure, which is edge-\emph{insertion}-invariant instead. Reaction-based traversal generates through executable transformations \citep{koziarski2024rgfn}. Stochastic graph rewriting supplies the rule, match and application-condition ontology and CTMC semantics from contextual propensities \citep{danos2015thermodynamic,behr2021rewriting}; we import that rule/rate separation and replace fixed propensities with a learned generator.
+
+\paragraph{Editors, optimizers, controllers.}
+Fragment MCMC with learned proposals, constrained iterative editing, graph genetic algorithms and the standard sample-efficiency benchmark \citep{xie2021mars,fu2021mimosa,jensen2019graphga,gao2022pmo} couple edit proposals to a task-conditioned target or search objective. \method{} instead learns an objective-independent reference transport and applies swappable control at inference; we claim no novelty for valid-state molecular editing itself. Doob $h$-transforms are classical, and inference-time controllers such as twisted sequential Monte Carlo and Feynman--Kac correctors \citep{wu2023twisted,skreta2025feynman} are instances of the reweighting in \eqref{eq:central} rather than alternatives to it.
+
+\section{Two-objective benchmark table}
+\label{app:multiobjtable}
+
+\begin{table}[h]
+\centering
+\caption{\small\textbf{Two-objective molecular optimization at a matched oracle-label budget.} The estimand is the average score of the top-100 molecules (APS) with novelty and top-$K$ diversity; the independent statistical unit is the run, replicated over the frozen initialization bank. The comparator's published row is \emph{reported context} under an unspecified initialization and an unstated hypervolume reference point, and is never the quantity a \method{} number is described as beating; the matched rerun is the row that adjudicates. Every \method{} cell and every matched-rerun cell is unmeasured.}
+\label{tab:multiobj}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}lY r r r@{}}
+\toprule
+Arm & Initialization & APS & Novelty & Diversity\\
+\midrule
+Comparator, as published \emph{(reported context)} & unspecified & $0.841$ & $100\%$ & $0.768$\\
+% source: docs/AMENDMENT_INVERSIONGNN_2OBJ.md ("reported: APS 0.841, novelty 100%, diversity 0.768, HV 0.763 +/- 0.031")
+Comparator, matched rerun & frozen common bank & \XXX{} & \XXX{} & \XXX{}\\
+\method{}, future-aware \eqref{eq:central} & frozen common bank & \XXX{} & \XXX{} & \XXX{}\\
+\method{}, immediate & frozen common bank & \XXX{} & \XXX{} & \XXX{}\\
+Four-objective escalation & frozen common bank & \XXX{} & \XXX{} & \XXX{}\\
+\bottomrule
+\end{tabularx}
+\end{table}
+\section{Reproducibility}
+\label{app:repro}
+
+Results in this paper are produced by containerized jobs whose bulk artifacts --- corpora, embeddings, per-run records and trained heads --- live on a persistent volume rather than in the source repository, while small result summaries are versioned alongside the code.
+A fresh checkout can therefore re-run every job but cannot read a banked result without the volume, and we state that rather than implying the summaries are self-contained.
+Three hazards are known and recorded rather than repaired silently: several of the summary files carry no producing script, git commit or input hash and their producer is recoverable only by searching the tree for the output filename; a small number of analysis steps ran as ad-hoc invocations rather than committed scripts; and one input used by a development probe came from an ephemeral scratch path rather than from the repository.
+% source: docs/SESSION_RUN_MANIFEST_2026-08-18.md, "Known reproducibility gaps in this session's own work"
+Closing these is a precondition for the camera-ready version and is tracked in the accompanying gap register.
+
+\section{Gap register}
+\label{app:gaps}
+
+Every unmeasured quantity in this paper is printed \XXX{} and sits inside a source-level comment block naming exactly what must be run.
+The two marker classes are distinct and are searched separately:
+\texttt{GAP: NOT YET RUN} marks an experiment that has not been executed, and
+\texttt{GAP: NUMBER NOT IN VERIFIED SOURCE SET} marks a quantity that exists in the repository but outside the seven sources this draft is permitted to quote.
+The complete inventory, with the run that closes each item, is in the accompanying \texttt{README.md}.
+No cell anywhere in this paper contains an estimate, a projection, or a placeholder that could be mistaken for a measurement.

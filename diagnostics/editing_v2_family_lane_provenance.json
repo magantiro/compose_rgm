@@ -1,0 +1,305 @@
+{
+ "schema": "compose.editing_v2.family_lane_provenance",
+ "schema_version": 1,
+ "status": "PROVENANCE_ARTIFACT",
+ "rule": "synthetic_only(F) iff n_F(reversible_synthetic_walk) > 0 and sum over data-backed lanes of n_F(lane) == 0",
+ "partition_role_scanned": "train",
+ "train_chunks_scanned": 270,
+ "lanes_observed": [
+  "linker_positional_topology_analogue",
+  "observed_local_analogue",
+  "operator_aware_real_endpoint",
+  "real_endpoint_multistep_path",
+  "reversible_synthetic_walk"
+ ],
+ "data_backed_lanes": [
+  "linker_positional_topology_analogue",
+  "observed_local_analogue",
+  "operator_aware_real_endpoint",
+  "real_endpoint_multistep_path"
+ ],
+ "synthetic_lane": "reversible_synthetic_walk",
+ "active8_run_identity_sha256": [
+  "8ecc0e5e825a15200560c58960d4f662c9ca23be785c825c9c24aa73308144bb"
+ ],
+ "input_summary_sha256_digest": "24004e8e4c598d5de2c46507a2dbd97127ae28bd4f44d996040472a732c78528",
+ "n_input_summaries": 270,
+ "generator": "scripts/emit_family_lane_provenance.py",
+ "generator_git_commit": "0a219a0b312adfff1e7bb29b65ba5847206b5618",
+ "families": {
+  "atom_delete": {
+   "public_name": "atom_delete",
+   "by_lane": {
+    "observed_local_analogue": 21234,
+    "real_endpoint_multistep_path": 681255,
+    "reversible_synthetic_walk": 23197
+   },
+   "transitions_total": 725686,
+   "transitions_synthetic": 23197,
+   "transitions_data_backed": 702489,
+   "chunks": 146,
+   "synthetic_only": false
+  },
+  "atom_insert": {
+   "public_name": "atom_insert",
+   "by_lane": {
+    "observed_local_analogue": 21234,
+    "real_endpoint_multistep_path": 681695,
+    "reversible_synthetic_walk": 24214
+   },
+   "transitions_total": 727143,
+   "transitions_synthetic": 24214,
+   "transitions_data_backed": 702929,
+   "chunks": 146,
+   "synthetic_only": false
+  },
+  "atom_restate": {
+   "public_name": "atom_restate",
+   "by_lane": {
+    "operator_aware_real_endpoint": 19615,
+    "reversible_synthetic_walk": 48565
+   },
+   "transitions_total": 68180,
+   "transitions_synthetic": 48565,
+   "transitions_data_backed": 19615,
+   "chunks": 40,
+   "synthetic_only": false
+  },
+  "bond_reorder": {
+   "public_name": "bond_reorder",
+   "by_lane": {
+    "operator_aware_real_endpoint": 919,
+    "reversible_synthetic_walk": 24082
+   },
+   "transitions_total": 25001,
+   "transitions_synthetic": 24082,
+   "transitions_data_backed": 919,
+   "chunks": 40,
+   "synthetic_only": false
+  },
+  "bond_reroute": {
+   "public_name": "bond_reroute",
+   "by_lane": {
+    "linker_positional_topology_analogue": 23349,
+    "reversible_synthetic_walk": 23252
+   },
+   "transitions_total": 46601,
+   "transitions_synthetic": 23252,
+   "transitions_data_backed": 23349,
+   "chunks": 41,
+   "synthetic_only": false
+  },
+  "cycle_attach": {
+   "public_name": "cycle_open",
+   "by_lane": {
+    "reversible_synthetic_walk": 84940
+   },
+   "transitions_total": 84940,
+   "transitions_synthetic": 84940,
+   "transitions_data_backed": 0,
+   "chunks": 102,
+   "synthetic_only": true
+  },
+  "cycle_insert": {
+   "public_name": "cycle_close",
+   "by_lane": {
+    "reversible_synthetic_walk": 122183
+   },
+   "transitions_total": 122183,
+   "transitions_synthetic": 122183,
+   "transitions_data_backed": 0,
+   "chunks": 102,
+   "synthetic_only": true
+  },
+  "ring_system_restate": {
+   "public_name": "ring_aromaticity_restate",
+   "by_lane": {
+    "reversible_synthetic_walk": 17067
+   },
+   "transitions_total": 17067,
+   "transitions_synthetic": 17067,
+   "transitions_data_backed": 0,
+   "chunks": 29,
+   "synthetic_only": true
+  }
+ },
+ "capability_cells": {
+  "editing_v2_active8_v1:atom_delete:connected_nonleaf_death": {
+   "family": "atom_delete",
+   "by_lane": {
+    "reversible_synthetic_walk": 2
+   },
+   "synthetic_only": false
+  },
+  "editing_v2_active8_v1:atom_delete:leaf_death": {
+   "family": "atom_delete",
+   "by_lane": {
+    "observed_local_analogue": 21234,
+    "real_endpoint_multistep_path": 681255,
+    "reversible_synthetic_walk": 23194
+   },
+   "synthetic_only": false
+  },
+  "editing_v2_active8_v1:atom_delete:singleton_to_null_death": {
+   "family": "atom_delete",
+   "by_lane": {
+    "reversible_synthetic_walk": 1
+   },
+   "synthetic_only": false
+  },
+  "editing_v2_active8_v1:atom_insert:one_neighbor_birth": {
+   "family": "atom_insert",
+   "by_lane": {
+    "observed_local_analogue": 21234,
+    "real_endpoint_multistep_path": 681695,
+    "reversible_synthetic_walk": 16041
+   },
+   "synthetic_only": false
+  },
+  "editing_v2_active8_v1:atom_restate:element_identity_change": {
+   "family": "atom_restate",
+   "by_lane": {
+    "operator_aware_real_endpoint": 19615,
+    "reversible_synthetic_walk": 45744
+   },
+   "synthetic_only": false
+  },
+  "editing_v2_active8_v1:atom_restate:valence_state_change": {
+   "family": "atom_restate",
+   "by_lane": {
+    "reversible_synthetic_walk": 220
+   },
+   "synthetic_only": false
+  },
+  "editing_v2_active8_v1:bond_reorder:bond_order_decrease": {
+   "family": "bond_reorder",
+   "by_lane": {
+    "operator_aware_real_endpoint": 460,
+    "reversible_synthetic_walk": 11356
+   },
+   "synthetic_only": false
+  },
+  "editing_v2_active8_v1:bond_reorder:bond_order_increase": {
+   "family": "bond_reorder",
+   "by_lane": {
+    "operator_aware_real_endpoint": 459,
+    "reversible_synthetic_walk": 11532
+   },
+   "synthetic_only": false
+  },
+  "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_acyclic_source": {
+   "family": "bond_reroute",
+   "by_lane": {
+    "linker_positional_topology_analogue": 106,
+    "reversible_synthetic_walk": 669
+   },
+   "synthetic_only": false
+  },
+  "editing_v2_active8_v1:bond_reroute:multi_atom_pendant_cyclic_source": {
+   "family": "bond_reroute",
+   "by_lane": {
+    "linker_positional_topology_analogue": 6344,
+    "reversible_synthetic_walk": 9644
+   },
+   "synthetic_only": false
+  },
+  "editing_v2_active8_v1:bond_reroute:single_atom_pendant_acyclic_source": {
+   "family": "bond_reroute",
+   "by_lane": {
+    "linker_positional_topology_analogue": 127,
+    "reversible_synthetic_walk": 309
+   },
+   "synthetic_only": false
+  },
+  "editing_v2_active8_v1:bond_reroute:single_atom_pendant_cyclic_source": {
+   "family": "bond_reroute",
+   "by_lane": {
+    "linker_positional_topology_analogue": 16772,
+    "reversible_synthetic_walk": 11516
+   },
+   "synthetic_only": false
+  },
+  "editing_v2_active8_v1:cycle_attach:open_from_articulated_polycyclic_ring_system": {
+   "family": "cycle_attach",
+   "by_lane": {
+    "reversible_synthetic_walk": 2589
+   },
+   "synthetic_only": true
+  },
+  "editing_v2_active8_v1:cycle_attach:open_from_monocyclic_ring_system": {
+   "family": "cycle_attach",
+   "by_lane": {
+    "reversible_synthetic_walk": 47415
+   },
+   "synthetic_only": true
+  },
+  "editing_v2_active8_v1:cycle_attach:open_from_nonarticulated_polycyclic_ring_system": {
+   "family": "cycle_attach",
+   "by_lane": {
+    "reversible_synthetic_walk": 34936
+   },
+   "synthetic_only": true
+  },
+  "editing_v2_active8_v1:cycle_insert:close_to_articulated_polycyclic_ring_system": {
+   "family": "cycle_insert",
+   "by_lane": {
+    "reversible_synthetic_walk": 2802
+   },
+   "synthetic_only": true
+  },
+  "editing_v2_active8_v1:cycle_insert:close_to_monocyclic_ring_system": {
+   "family": "cycle_insert",
+   "by_lane": {
+    "reversible_synthetic_walk": 73359
+   },
+   "synthetic_only": true
+  },
+  "editing_v2_active8_v1:cycle_insert:close_to_nonarticulated_polycyclic_ring_system": {
+   "family": "cycle_insert",
+   "by_lane": {
+    "reversible_synthetic_walk": 46022
+   },
+   "synthetic_only": true
+  },
+  "editing_v2_active8_v1:ring_system_restate:aromatization": {
+   "family": "ring_system_restate",
+   "by_lane": {
+    "reversible_synthetic_walk": 7192
+   },
+   "synthetic_only": true
+  },
+  "editing_v2_active8_v1:ring_system_restate:coordinated_ring_bond_state_change": {
+   "family": "ring_system_restate",
+   "by_lane": {
+    "reversible_synthetic_walk": 681
+   },
+   "synthetic_only": true
+  },
+  "editing_v2_active8_v1:ring_system_restate:dearomatization": {
+   "family": "ring_system_restate",
+   "by_lane": {
+    "reversible_synthetic_walk": 8507
+   },
+   "synthetic_only": true
+  }
+ },
+ "reconciliation_problems": [],
+ "count_reconciliation_notes": [
+  "ring_system_restate: histogram 17,067 vs recorded census 16,380 (delta +687); classification unaffected"
+ ],
+ "recorded_census_compared_against": {
+  "cycle_insert": {
+   "transitions": 122183,
+   "chunks": 102
+  },
+  "cycle_attach": {
+   "transitions": 84940,
+   "chunks": 102
+  },
+  "ring_system_restate": {
+   "transitions": 16380,
+   "chunks": 29
+  }
+ },
+ "counting_boundary": "summary histograms count teacher actions before per-entry Active8 exclusions; a post-exclusion census can therefore be smaller"
+}

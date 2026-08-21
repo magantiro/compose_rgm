@@ -1,0 +1,162 @@
+{
+ "schema": "compose.editing_v2.pair_trace",
+ "status": "FIGURE_SUPPORT",
+ "pair_index": 10,
+ "source": "CCC(C)NC(=O)c1ccc(CSCc2ccccc2)o1",
+ "target": "Cc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+ "reproduces_banked_outcome": true,
+ "selection_rule": "deterministically selected illustrative rescue: lowest sealed pair index among the 14 rescues at the median certified path length",
+ "result": {
+  "index": 10,
+  "source": "CCC(C)NC(=O)c1ccc(CSCc2ccccc2)o1",
+  "target": "Cc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+  "verified_steps": 5,
+  "arms": {
+   "greedy": {
+    "recovered": false,
+    "best": 0.7777777777777778,
+    "continuation_evaluations": 0,
+    "overrides": 0,
+    "universe_candidates_seen": 27,
+    "trace": [
+     "CCC(C)NC(=O)c1ccc(CSCc2ccccc2)o1",
+     "CCC(C)c1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "CCCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "CSCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "CCSCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "CSCc1ccc(CSCc2ccc(C(N)=O)o2)cc1"
+    ],
+    "override_steps": []
+   },
+   "full": {
+    "recovered": true,
+    "best": 1.0,
+    "continuation_evaluations": 20,
+    "overrides": 1,
+    "universe_candidates_seen": 20,
+    "trace": [
+     "CCC(C)NC(=O)c1ccc(CSCc2ccccc2)o1",
+     "CCC(C)c1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "CC(C)c1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "CCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "Cc1ccc(CSCc2ccc(C(N)=O)o2)cc1"
+    ],
+    "override_steps": [
+     {
+      "step": 1,
+      "remaining": 4,
+      "greedy_key": "CCCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+      "chosen_key": "CC(C)c1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+      "greedy_similarity": 0.7368421052631579,
+      "chosen_similarity": 0.717948717948718,
+      "shortlist_size": 4
+     }
+    ]
+   },
+   "sim1": {
+    "recovered": true,
+    "best": 1.0,
+    "continuation_evaluations": 8,
+    "overrides": 1,
+    "universe_candidates_seen": 21,
+    "trace": [
+     "CCC(C)NC(=O)c1ccc(CSCc2ccccc2)o1",
+     "CCC(C)c1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "CCCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "CCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "Cc1ccc(CSCc2ccc(C(N)=O)o2)cc1"
+    ],
+    "override_steps": [
+     {
+      "step": 2,
+      "remaining": 3,
+      "greedy_key": "CSCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+      "chosen_key": "CCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+      "greedy_similarity": 0.7777777777777778,
+      "chosen_similarity": 0.7777777777777778,
+      "shortlist_size": 2
+     }
+    ]
+   },
+   "sim2": {
+    "recovered": true,
+    "best": 1.0,
+    "continuation_evaluations": 12,
+    "overrides": 1,
+    "universe_candidates_seen": 21,
+    "trace": [
+     "CCC(C)NC(=O)c1ccc(CSCc2ccccc2)o1",
+     "CCC(C)c1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "CCCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "CCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "Cc1ccc(CSCc2ccc(C(N)=O)o2)cc1"
+    ],
+    "override_steps": [
+     {
+      "step": 2,
+      "remaining": 3,
+      "greedy_key": "CSCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+      "chosen_key": "CCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+      "greedy_similarity": 0.7777777777777778,
+      "chosen_similarity": 0.7777777777777778,
+      "shortlist_size": 3
+     }
+    ]
+   },
+   "hphi1": {
+    "recovered": true,
+    "best": 1.0,
+    "continuation_evaluations": 8,
+    "overrides": 1,
+    "universe_candidates_seen": 21,
+    "trace": [
+     "CCC(C)NC(=O)c1ccc(CSCc2ccccc2)o1",
+     "CCC(C)c1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "CCCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "CCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "Cc1ccc(CSCc2ccc(C(N)=O)o2)cc1"
+    ],
+    "override_steps": [
+     {
+      "step": 2,
+      "remaining": 3,
+      "greedy_key": "CSCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+      "chosen_key": "CCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+      "greedy_similarity": 0.7777777777777778,
+      "chosen_similarity": 0.7777777777777778,
+      "shortlist_size": 2
+     }
+    ]
+   },
+   "ref1": {
+    "recovered": true,
+    "best": 1.0,
+    "continuation_evaluations": 10,
+    "overrides": 1,
+    "universe_candidates_seen": 26,
+    "trace": [
+     "CCC(C)NC(=O)c1ccc(CSCc2ccccc2)o1",
+     "CCC(C)c1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "CCCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "CC(C)c1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "CCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+     "Cc1ccc(CSCc2ccc(C(N)=O)o2)cc1"
+    ],
+    "override_steps": [
+     {
+      "step": 2,
+      "remaining": 3,
+      "greedy_key": "CSCc1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+      "chosen_key": "CC(C)c1ccc(CSCc2ccc(C(N)=O)o2)cc1",
+      "greedy_similarity": 0.7777777777777778,
+      "chosen_similarity": 0.717948717948718,
+      "shortlist_size": 2
+     }
+    ]
+   }
+  },
+  "excluded_from_primary": false,
+  "kernel_calls": 26,
+  "seconds": 487.4
+ }
+}

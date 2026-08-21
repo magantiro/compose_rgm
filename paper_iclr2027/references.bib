@@ -1,0 +1,391 @@
+%% ===========================================================================
+%% BIBLIOGRAPHY AUDIT --- 2026-08-19
+%% VERIFIED against arXiv abstract pages or an authoritative listing:
+%%   jin2018jtvae, gomezbombarelli2018chemvae (all 10 authors), jin2019vjtnn,
+%%   zhou2019moldqn (Sci Rep 9:10752 confirmed), campbell2024multiflow,
+%%   tang2025peptune (ICML 2025), goel2026madsbm (2 authors), chen2025areuredi,
+%%   yoon2026routing, niu2025inversiongnn, chen2025mogdfm.
+%% CORRECTED in this pass:
+%%   goel2026madsbm  first author Sanjeev -> Shrey Goel
+%%   jin2019vjtnn    title "Molecule Optimization" -> "Molecular Optimization"
+%%   tang2025peptune arXiv preprint -> ICML 2025
+%% STILL UNVERIFIED:
+%%   pcomole2026              author list unobtainable; OpenReview blocks the
+%%                            forum, the PDF and api2. Renders as "Anonymous".
+%%   jensen2026valuematching  authors verified from the NeurIPS 2025 virtual
+%%                            listing; VENUE recorded as ICLR 2026 per request
+%%                            but the paper also appears under NeurIPS 2025.
+%%   the 24 entries inherited from the previous draft have not been re-audited
+%%   in this pass.
+%% ===========================================================================
+
+% ============================================================================
+%  references.bib -- COMPOSE ICLR 2027 draft.
+%
+%  Entries below the marker line were transcribed verbatim from the existing
+%  bibliographies in paper_iclr_stochastic_rewriting/references.bib,
+%  paper/references.bib and paper_arxiv/references.bib, which are unmodified.
+%
+%  NOTHING in this file is invented.  If a comparator needs a citation whose
+%  bibliographic fields are not already in one of those files, it is listed in
+%  README.md under "Bibliography entries still needed" rather than guessed.
+% ============================================================================
+
+@inproceedings{holderrieth2025generator,
+  title        = {Generator Matching: Generative Modeling with Arbitrary Markov Processes},
+  author       = {Holderrieth, Peter and Havasi, Marton and Yim, Jason and Shaul, Neta and Gat, Itai and Jaakkola, Tommi and Karrer, Brian and Chen, Ricky T. Q. and Lipman, Yaron},
+  booktitle    = {International Conference on Learning Representations},
+  year         = {2025},
+  eprint       = {2410.20587},
+  archivePrefix= {arXiv}
+}
+
+@inproceedings{vignac2023digress,
+  title        = {DiGress: Discrete Denoising Diffusion for Graph Generation},
+  author       = {Vignac, Cl{\'e}ment and Krawczuk, Igor and Siraudin, Antoine and Wang, Bohan and Cevher, Volkan and Frossard, Pascal},
+  booktitle    = {International Conference on Learning Representations},
+  year         = {2023},
+  eprint       = {2209.14734},
+  archivePrefix= {arXiv}
+}
+
+@inproceedings{austin2021d3pm,
+  title        = {Structured Denoising Diffusion Models in Discrete State-Spaces},
+  author       = {Austin, Jacob and Johnson, Daniel D. and Ho, Jonathan and Tarlow, Daniel and van den Berg, Rianne},
+  booktitle    = {Advances in Neural Information Processing Systems},
+  volume       = {34},
+  pages        = {17981--17993},
+  year         = {2021}
+}
+
+@inproceedings{campbell2022ctdd,
+  title        = {A Continuous Time Framework for Discrete Denoising Models},
+  author       = {Campbell, Andrew and Benton, Joe and De Bortoli, Valentin and Rainforth, Tom and Deligiannidis, George and Doucet, Arnaud},
+  booktitle    = {Advances in Neural Information Processing Systems},
+  volume       = {35},
+  pages        = {28266--28279},
+  year         = {2022}
+}
+
+@inproceedings{qin2025defog,
+  title        = {DeFoG: Discrete Flow Matching for Graph Generation},
+  author       = {Qin, Yiming and Madeira, Manuel and Thanou, Dorina and Frossard, Pascal},
+  booktitle    = {Proceedings of the 42nd International Conference on Machine Learning},
+  series       = {Proceedings of Machine Learning Research},
+  volume       = {267},
+  year         = {2025},
+  eprint       = {2410.04263},
+  archivePrefix= {arXiv}
+}
+
+@inproceedings{lee2025genmol,
+  title        = {{GenMol}: A Drug Discovery Generalist with Discrete Diffusion},
+  author       = {Lee, Seul and Kreis, Karsten and Veccham, Srimukh Prasad and Liu, Meng and Reidenbach, Danny and Peng, Yuxing and Paliwal, Saee Gopal and Nie, Weili and Vahdat, Arash},
+  booktitle    = {Proceedings of the 42nd International Conference on Machine Learning},
+  series       = {Proceedings of Machine Learning Research},
+  volume       = {267},
+  pages        = {33205--33226},
+  year         = {2025},
+  url          = {https://proceedings.mlr.press/v267/lee25o.html}
+}
+
+@inproceedings{xie2021mars,
+  title={{MARS}: Markov Molecular Sampling for Multi-objective Drug Discovery},
+  author={Xie, Yutong and Shi, Chence and Zhou, Hao and Yang, Yuwei and Zhang, Weinan and Yu, Yong and Li, Lei},
+  booktitle={International Conference on Learning Representations (ICLR)},
+  year={2021}
+}
+
+@inproceedings{fu2021mimosa,
+  title={{MIMOSA}: Multi-constraint Molecule Sampling for Molecule Optimization},
+  author={Fu, Tianfan and Xiao, Cao and Li, Xinhao and Glass, Lucas M. and Sun, Jimeng},
+  booktitle={AAAI Conference on Artificial Intelligence},
+  year={2021}
+}
+
+@article{jensen2019graphga,
+  title={A graph-based genetic algorithm and generative model/Monte Carlo tree search for the exploration of chemical space},
+  author={Jensen, Jan H.},
+  journal={Chemical Science},
+  volume={10},
+  number={12},
+  pages={3567--3572},
+  year={2019},
+  publisher={Royal Society of Chemistry}
+}
+
+@inproceedings{gao2022pmo,
+  title={Sample Efficiency Matters: A Benchmark for Practical Molecular Optimization},
+  author={Gao, Wenhao and Fu, Tianfan and Sun, Jimeng and Coley, Connor W.},
+  booktitle={Advances in Neural Information Processing Systems (NeurIPS)},
+  year={2022}
+}
+
+@inproceedings{campbell2023jump,
+  title        = {Trans-Dimensional Generative Modeling via Jump Diffusion Models},
+  author       = {Campbell, Andrew and Harvey, William and Weilbach, Christian and De Bortoli, Valentin and Rainforth, Thomas and Doucet, Arnaud},
+  booktitle    = {Advances in Neural Information Processing Systems},
+  volume       = {36},
+  year         = {2023},
+  url          = {https://proceedings.neurips.cc/paper_files/paper/2023/hash/83a10a480fbec91c88f6a9293b4d2b05-Abstract-Conference.html}
+}
+
+@inproceedings{ninniri2025griddd,
+  title        = {Graph Diffusion that can Insert and Delete},
+  author       = {Ninniri, Matteo and Podda, Marco and Bacciu, Davide},
+  booktitle    = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year         = {2025},
+  note         = {arXiv:2506.15725}
+}
+
+@inproceedings{liu2018cgvae,
+  title     = {Constrained Graph Variational Autoencoders for Molecule Design},
+  author    = {Liu, Qi and Allamanis, Miltiadis and Brockschmidt, Marc and Gaunt, Alexander L.},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  pages     = {7806--7815},
+  year      = {2018}
+}
+
+@inproceedings{you2018gcpn,
+  title     = {Graph Convolutional Policy Network for Goal-Directed Molecular Graph Generation},
+  author    = {You, Jiaxuan and Liu, Bowen and Ying, Rex and Pande, Vijay and Leskovec, Jure},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  pages     = {6410--6421},
+  year      = {2018},
+  note      = {arXiv:1806.02473}
+}
+
+@inproceedings{jin2020hierg2g,
+  title     = {Hierarchical Generation of Molecular Graphs using Structural Motifs},
+  author    = {Jin, Wengong and Barzilay, Regina and Jaakkola, Tommi},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {119},
+  pages     = {4839--4848},
+  year      = {2020}
+}
+
+@article{havasi2025editflows,
+  title        = {Edit Flows: Flow Matching with Edit Operations},
+  author       = {Havasi, Marton and Karrer, Brian and Gat, Itai and Chen, Ricky T. Q.},
+  journal      = {arXiv preprint arXiv:2506.09018},
+  year         = {2025}
+}
+
+@article{kim2025ddsbm,
+  title        = {Discrete Diffusion Schr{\"o}dinger Bridge Matching for Graph Transformation},
+  author       = {Kim, Jun Hyeong and Kim, Seonghwan and Moon, Seokhyun and Kim, Hyeongwoo and Woo, Jeheon and Kim, Woo Youn},
+  journal      = {arXiv preprint arXiv:2410.01500},
+  year         = {2024},
+  eprint       = {2410.01500},
+  archivePrefix= {arXiv}
+}
+
+@inproceedings{kajino2019mhg,
+  title={Molecular Hypergraph Grammar with Its Application to Molecular Optimization},
+  author={Kajino, Hiroshi},
+  booktitle={Proceedings of the 36th International Conference on Machine Learning},
+  pages={3183--3191},
+  volume={97},
+  series={Proceedings of Machine Learning Research},
+  year={2019},
+  publisher={PMLR},
+  url={https://proceedings.mlr.press/v97/kajino19a.html}
+}
+
+@inproceedings{guo2022grammar,
+  title={Data-Efficient Graph Grammar Learning for Molecular Generation},
+  author={Guo, Minghao and Thost, Veronika and Li, Beichen and Das, Payel and Chen, Jie and Matusik, Wojciech},
+  booktitle={International Conference on Learning Representations},
+  year={2022},
+  url={https://openreview.net/forum?id=l4IHywGq6a}
+}
+
+@inproceedings{madeira2024construct,
+  title        = {Generative Modelling of Structurally Constrained Graphs},
+  author       = {Madeira, Manuel and Vignac, Cl{\'e}ment and Thanou, Dorina and Frossard, Pascal},
+  booktitle    = {Advances in Neural Information Processing Systems},
+  year         = {2024},
+  eprint       = {2406.17341},
+  archivePrefix= {arXiv}
+}
+
+@inproceedings{sharma2024prodigy,
+  title        = {Diffuse, Sample, Project: Plug-and-Play Controllable Graph Generation},
+  author       = {Sharma, Kartik and Kumar, Srijan and Trivedi, Rakshit},
+  booktitle    = {International Conference on Machine Learning (ICML)},
+  year         = {2024},
+  note         = {PMLR v235; verify final title/pages before submission}
+}
+
+@article{ruizbotella2026cocograph,
+  title        = {A Collaborative Constrained Graph Diffusion Model for the Generation of Realistic Synthetic Molecules},
+  author       = {Ruiz-Botella, Manuel and Sales-Pardo, Marta and Guimer{\`a}, Roger},
+  journal      = {Nature Machine Intelligence},
+  year         = {2026},
+  doi          = {10.1038/s42256-026-01229-5}
+}
+
+@article{koziarski2024rgfn,
+  title        = {{RGFN}: Synthesizable Molecular Generation Using {GFlowNets}},
+  author       = {Koziarski, Micha{\l} and Rekesh, Andrei and Shevchuk, Dmytro and van der Sloot, Almer and Gai{\'n}ski, Piotr and Bengio, Yoshua and Liu, Cheng-Hao and Tyers, Mike and Batey, Robert A.},
+  journal      = {arXiv preprint arXiv:2406.08506},
+  year         = {2024}
+}
+
+@article{danos2015thermodynamic,
+  title={Thermodynamic graph-rewriting},
+  author={Danos, Vincent and Harmer, Russell and Honorato-Zimmer, Ricardo},
+  journal={arXiv preprint arXiv:1503.06022},
+  year={2015},
+  url={https://arxiv.org/abs/1503.06022}
+}
+
+@article{behr2021rewriting,
+  title={Rewriting Theory for the Life Sciences: A Unifying Theory of {CTMC} Semantics},
+  author={Behr, Nicolas and Krivine, Jean and Andersen, Jakob L. and Merkle, Daniel},
+  journal={arXiv preprint arXiv:2106.02573},
+  year={2021},
+  url={https://arxiv.org/abs/2106.02573}
+}
+
+@inproceedings{wu2023twisted,
+  title     = {Practical and Asymptotically Exact Conditional Sampling in Diffusion Models},
+  author    = {Wu, Luhuan and Trippe, Brian L. and Naesseth, Christian A. and Blei, David M. and Cunningham, John P.},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2023},
+  note      = {arXiv:2306.17775}
+}
+
+@inproceedings{skreta2025feynman,
+  title     = {Feynman-Kac Correctors in Diffusion: Annealing, Guidance, and Product of Experts},
+  author    = {Skreta, Marta and Akhound-Sadegh, Tara and Ohanesian, Viktor and Bondesan, Roberto and Aspuru-Guzik, Al\'an and Doucet, Arnaud and Brekelmans, Rob and Tong, Alexander and Neklyudov, Kirill},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year      = {2025},
+  note      = {arXiv:2503.02819}
+}
+
+
+@inproceedings{jin2018jtvae,
+  title     = {Junction Tree Variational Autoencoder for Molecular Graph Generation},
+  author    = {Jin, Wengong and Barzilay, Regina and Jaakkola, Tommi},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year      = {2018}
+}
+
+@article{gomezbombarelli2018chemvae,
+  title   = {Automatic Chemical Design Using a Data-Driven Continuous Representation of Molecules},
+  author  = {G{\'o}mez-Bombarelli, Rafael and Wei, Jennifer N. and Duvenaud, David and
+             Hern{\'a}ndez-Lobato, Jos{\'e} Miguel and S{\'a}nchez-Lengeling, Benjam{\'\i}n and
+             Sheberla, Dennis and Aguilera-Iparraguirre, Jorge and Hirzel, Timothy D. and
+             Adams, Ryan P. and Aspuru-Guzik, Al{\'a}n},
+  journal = {ACS Central Science},
+  volume  = {4},
+  number  = {2},
+  pages   = {268--276},
+  year    = {2018}
+}
+
+@inproceedings{jin2019vjtnn,
+  title     = {Learning Multimodal Graph-to-Graph Translation for Molecular Optimization},
+  author    = {Jin, Wengong and Yang, Kevin and Barzilay, Regina and Jaakkola, Tommi},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2019},
+  note      = {arXiv:1812.01070}
+}
+
+@article{zhou2019moldqn,
+  title   = {Optimization of Molecules via Deep Reinforcement Learning},
+  author  = {Zhou, Zhenpeng and Kearnes, Steven and Li, Li and Zare, Richard N. and Riley, Patrick},
+  journal = {Scientific Reports},
+  volume  = {9},
+  number  = {1},
+  pages   = {10752},
+  year    = {2019}
+}
+
+@inproceedings{campbell2024multiflow,
+  title     = {Generative Flows on Discrete State-Spaces: Enabling Multimodal Flows with Applications to Protein Co-Design},
+  author    = {Campbell, Andrew and Yim, Jason and Barzilay, Regina and Rainforth, Tom and Jaakkola, Tommi},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year      = {2024}
+}
+
+@inproceedings{nisonoff2025guidance,
+  title     = {Unlocking Guidance for Discrete State-Space Diffusion and Flow Models},
+  author    = {Nisonoff, Hunter and Xiong, Junhao and Allenspach, Stephan and Listgarten, Jennifer},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2025}
+}
+
+@article{chen2025areuredi,
+  title   = {{AReUReDi}: Annealed Rectified Updates for Refining Discrete Flows with Multi-Objective Guidance},
+  author  = {Chen, Tong and Zhang, Yinuo and Chatterjee, Pranam},
+  journal = {arXiv preprint arXiv:2510.00352},
+  year    = {2025}
+}
+
+@misc{pcomole2026,
+  title  = {{pCoMole}: Pareto-Constrained Molecule Editing with Discrete Flows},
+  author = {{Anonymous}},
+  year   = {2026},
+  note   = {OpenReview submission \url{https://openreview.net/forum?id=LpttbUObQL}},
+  howpublished = {OpenReview}
+}
+%% ^^ AUTHOR LIST UNVERIFIED. OpenReview blocks automated access (Cloudflare
+%% challenge on forum, PDF and api2 endpoints alike). A social-media reference
+%% names Hanqun Cao, ... Pal and Sophia Tang, but that was NOT confirmed against
+%% the paper itself. Replace with the real BibTeX before submission.
+
+@article{chen2025mogdfm,
+  title   = {Multi-Objective-Guided Discrete Flow Matching for Controllable Biological Sequence Design},
+  author  = {Chen, Tong and Zhang, Yinuo and Tang, Sophia and Chatterjee, Pranam},
+  journal = {arXiv preprint arXiv:2505.07086},
+  note    = {ICML 2025 GenBio Workshop (spotlight)},
+  year    = {2025}
+}
+
+@inproceedings{niu2025inversiongnn,
+  title     = {{InversionGNN}: A Dual Path Network for Multi-Property Molecular Optimization},
+  author    = {Niu, Yifan and Gao, Ziqi and Xu, Tingyang and Liu, Yang and Bian, Yatao and Rong, Yu and Huang, Junzhou and Li, Jia},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2025},
+  note      = {arXiv:2503.01488}
+}
+
+@inproceedings{tang2025peptune,
+  title     = {{PepTune}: De Novo Generation of Therapeutic Peptides with Multi-Objective-Guided Discrete Diffusion},
+  author    = {Tang, Sophia and Zhang, Yinuo and Chatterjee, Pranam},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year      = {2025},
+  note      = {arXiv:2412.17780}
+}
+
+@article{goel2026madsbm,
+  title   = {Minimal-Action Discrete {Schr\"odinger} Bridge Matching for Peptide Sequence Design},
+  author  = {Goel, Shrey and Chatterjee, Pranam},
+  journal = {arXiv preprint arXiv:2601.22408},
+  year    = {2026}
+}
+
+%% ^^ VERIFIED 2026-08-19 against arXiv abstract pages:
+%%   tang2025peptune  -- Tang, Zhang, Chatterjee; ICML 2025 (arXiv:2412.17780)
+%%   goel2026madsbm   -- Goel, Chatterjee (two authors only); arXiv:2601.22408
+
+@inproceedings{jensen2026valuematching,
+  title     = {Value Matching: Scalable and Gradient-Free Reward-Guided Flow Adaptation},
+  author    = {Jensen, Cristian and Schaufelberger, Luca and De Santi, Riccardo and Jorner, Kjell and Krause, Andreas},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2026},
+  note      = {OpenReview \url{https://openreview.net/forum?id=7iXt44Actj}}
+}
+%% ^^ VENUE CHECK: also listed on neurips.cc/virtual/2025/125426. Author list
+%% verified from that listing; venue recorded as ICLR 2026 per the request.
+
+@inproceedings{yoon2026routing,
+  title     = {Routing by Reaching: Composition of Pre-trained {GFlowNets} for Multi-Objective Generation},
+  author    = {Yoon, Seokwon and Choi, Youngbin and Cho, Seunghyuk and Lee, Seungbeom and Park, MoonJeong and Kim, Dongwoo},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year      = {2026},
+  note      = {arXiv:2602.21565}
+}

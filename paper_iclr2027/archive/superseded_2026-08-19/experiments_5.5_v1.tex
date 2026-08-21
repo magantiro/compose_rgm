@@ -1,0 +1,139 @@
+% ============================================================================
+% SECTION 5 --- Experiments.  Order: Correctness -> Competence -> Attribution
+%               -> Capabilities.  Declarative subsection titles.
+%
+% EVERY NUMBER HERE CARRIES A "% source:" COMMENT.  The verified set is the
+% seven files listed at the top of main.tex and nothing else.
+% EVERY UNMEASURED QUANTITY IS \XXX INSIDE A "GAP" BLOCK.  Do not replace an
+% \XXX with a plausible value; replace it with a measurement or leave it.
+% Compressed to the ICLR 9-page limit.  Full parity list -> app:audit; full
+% experimental designs -> app:capdesign; the 2-objective table ->
+% app:multiobjtable.  The GAP blocks are load-bearing and must NOT be
+% shortened to save space.
+% ============================================================================
+\section{Experiments}
+\label{sec:experiments}
+
+We evaluate \method{} from the learned molecular reference process through finite-horizon control, standard molecular editing, multi-objective design, and trajectory-level intervention.
+
+\subsection{Generator matching learns state-dependent molecular transition preferences}
+\label{sec:exp-rtheta}
+
+The executable rewrite system determines which molecular transitions are possible, but not how probability should be distributed among them. We isolate the contribution of the learned reference process by comparing the frozen $R_\theta$ against two unlearned laws on the \emph{same canonical molecular successor support}. The uniform law assigns equal probability to each distinct successor, whereas the empirical-family law uses edit-family frequencies estimated from the training corpus, renormalized over the families available at the current state, and distributes each family's mass over its available successors. Thus all three laws share the same molecules, executable transitions, and canonical aggregation; only their transition probabilities differ.
+
+We evaluate the negative log-probability assigned to the realized molecular successor on the frozen matched-reserve transitions. $R_\theta$ reduces canonical-successor NLL by \textbf{1.46 nats relative to the empirical-family law}, with the uniform canonical law also performing worse. The empirical-family baseline is a strong control for this question: it already contains the global prevalence of each edit family, respects state-dependent action availability, and uses the same canonical successor normalization. The remaining gain therefore reflects molecular-state-dependent preferences over \emph{which legal transition to take}, rather than the legality structure or global operator frequencies alone.
+
+%% TODO(rohin): the family- and provenance-resolved appendix table referenced in
+%% the next sentence does not exist yet; no \cref target was available to wire.
+The learned signal is heterogeneous across the edit space. Within-family identity NLL improves across all eight supervised edit families during fitting, but their evidence bases are not equivalent; in particular, the current ring-edit supervision is derived from synthetic corruption rather than observed real-data transition paths. We therefore report family- and provenance-resolved likelihoods in the appendix and do not interpret the aggregate improvement as evidence of physical molecular kinetics or synthetic-route likelihood. This experiment establishes the narrower object required downstream: \textbf{$R_\theta$ is a learned, state-dependent plausibility law over an otherwise fixed executable molecular support.}
+
+\subsection{Future reachability improves molecular decisions beyond local scoring}
+\label{sec:exp-lookahead}
+
+%% TODO(rohin): the "(Appendix X)" target below does not exist yet -- the exact
+%% registered TV/support numbers go there once U1 is closed. No \cref wired.
+The reference law $R_\theta$ ranks molecular transitions by learned plausibility, but it does not account for whether a successor preserves access to a desired endpoint several edits later. We first verify the finite-horizon construction on an enumerable molecular state graph, where the exact backward value can be computed by dynamic programming. The resulting Doob transform reproduces the analytically tilted terminal distribution to numerical precision while introducing no transitions outside the reference support. This establishes a controlled setting in which future value is known exactly before asking whether remaining-budget reasoning changes molecular decisions at realistic branching factors.
+
+We then evaluate this distinction on \textbf{65 held-out source--target molecular pairs} whose targets are reachable under the frozen executable process. All methods use the same $R_\theta$, legal successor fibers, target molecule, and edit budget. A myopic policy greedily selects the locally preferred edit, whereas the future-aware policy evaluates candidate successors by whether the target remains recoverable within the remaining budget. Greedy control recovers \textbf{26/65 (40.0\%)} targets, while verified remaining-budget lookahead recovers \textbf{40/65 (61.5\%)}, a paired improvement of \textbf{21.5 percentage points} $[12.3,33.5]$. Equivalently, future-aware control rescues \textbf{35.9\%} $[21.2,52.8]$ of the 39 targets missed by greedy.
+
+\begin{center}
+{\small
+\begin{tabular}{lrr}
+\toprule
+Controller & Target recovery & Relative continuation work \\
+\midrule
+Greedy local decision & 26/65 (40\%) & --- \\
+$R_\theta$ top-1 + lookahead & 33/65 (51\%) & 35\% \\
+Similarity top-2 + lookahead & 37/65 (57\%) & 52\% \\
+Goal-aware $h_\phi$ top-1 + lookahead & \textbf{40/65 (62\%)} & \textbf{35\%} \\
+Full verified lookahead & \textbf{40/65 (62\%)} & 100\% \\
+\bottomrule
+\end{tabular}}
+\end{center}
+
+The comparison also separates \emph{plausibility} from \emph{purpose}. Using the reference probability itself to prioritize one successor retains only half of the full lookahead gain, whereas a goal-aware value prioritizer matches the full method's recovery count while evaluating 35\% of the candidate continuations. The two methods do not recover exactly the same targets, so we do not claim that the learned value reproduces explicit lookahead. Nor do we claim that $h_\phi$ outperforms molecular similarity: exact-target recovery gives similarity to the known answer privileged information that is unavailable in ordinary property optimization.
+
+These results establish the narrower mechanism we require: \textbf{an edit can be valuable because of what remains reachable after it, even when a locally informed policy would choose differently.} \Cref{sec:exp-pareto} tests the same distinction in target-free multi-objective design, where both immediate and future-aware controllers are given the identical learned property landscape.
+
+\subsection{\method{} performs source-conditioned molecular editing on the Jin benchmark}
+\label{sec:exp-jin}
+
+We next evaluate whether the frozen \method{} molecular process supports competitive source-conditioned editing on an established task. We use the Jin/ZINC-250k QED benchmark adopted by GrIDDD: 800 source molecules with initial QED in $[0.7,0.8]$, with 20 returned candidates allowed per source. A source is solved if at least one candidate reaches $\mathrm{QED}\ge0.9$ while retaining Morgan-fingerprint Tanimoto similarity of at least $0.4$ to the source. Each \method{} candidate is the output of one controlled trajectory; when the target region is reached, the trajectory terminates prospectively as described in \cref{sec:sampling}. The molecular reference law $R_\theta$ is unchanged from \cref{sec:exp-rtheta}, while the QED future-value controller is trained and frozen using data disjoint from the official benchmark sources.
+
+\begin{table}[t]
+\centering
+{\small
+\begin{tabular}{lr}
+\toprule
+Method & QED success ($\uparrow$) \\
+\midrule
+JT-VAE & 8.8\% \\
+CG-VAE & 4.8\% \\
+GCPN & 9.4\% \\
+GrIDDD & 45.1\% \\
+VJTNN & 60.6\%$^{\dagger}$ \\
+\textbf{\method{}} & \textbf{54.7\%}$^{*}$ \\
+\bottomrule
+\end{tabular}}
+\caption{\small Source-level success on the Jin QED optimization task with similarity threshold $\delta=0.4$ and 20 returned candidates per source. Prior-method values are reported results under the corresponding published protocol; $^{\dagger}$the VJTNN row is retained only after final protocol-alignment verification. \method{} is evaluated once on the official 800-source cohort using the controller frozen before that cohort is opened; $^{*}$the entry shown is the $128$-source prospective held-out panel at $12$ of the $20$ permitted candidates, not the official cohort.}
+\label{tab:jin}
+\end{table}
+
+On the official benchmark, \method{} solves \textbf{\XXX{}/800 (\XXX{})} sources within 20 returned candidates. Pending that run, \cref{tab:jin} reports the $128$-source prospective panel result of $70/128$ ($54.7\%$) at $12$ candidates, above the $45.1\%$ reported for GrIDDD at $20$ but below the audited VJTNN row. \Cref{fig:competence}(a) reports the complete success curve as the candidate allowance increases from 1 to 20, rather than only the terminal value. This comparison evaluates \emph{task performance}, not matched inference cost: competing methods use their native inference procedures, and the benchmark constrains the number of returned molecules rather than internal successor evaluations. We therefore interpret the result as evidence of source-conditioned editing competence, without making a claim of superior computational efficiency.
+
+We additionally test whether \method{}'s trans-dimensional support contributes to this performance. Starting from the identical frozen controller, reference law, sources, seeds, and candidate allowance, we remove every successor that changes the current heavy-atom count. Full \method{} solves \textbf{\XXX{}} of sources compared with \textbf{\XXX{}} under this size-fixed support, a paired difference of \textbf{\XXX{}} percentage points. \gap{Run the size-fixed arm from the identical frozen controller, reference law, sources, seeds and candidate allowance. If the paired difference is positive, it isolates the contribution of allowing molecular cardinality to change during the controlled trajectory; if negligible, the empirical trans-dimensionality claim is limited to the availability of such transitions rather than their necessity for QED optimization.}
+
+\subsection{Multi-objective Pareto exploration with a frozen molecular reference process}
+\label{sec:exp-pareto}
+
+We next test whether the same goal-independent molecular process can be redirected across competing property preferences without retraining $R_\theta$. We use a two-objective molecular optimization task over JNK3 and GSK3$\beta$, both oriented so that larger values are preferred, following the experimental setting of InversionGNN \citep{niu2025inversiongnn}. A common, objective-blind initialization bank of 100 molecules is fixed before either method is evaluated. Both methods receive an InversionGNN-matched random-ZINC supervision set of $10{,}000$ property labels and are evaluated over the same five preference vectors and a $5{,}000$-evaluation optimization budget. Average Pareto score (APS) is the primary endpoint; hypervolume, molecular novelty, and top-$K$ diversity provide complementary views of front quality.
+
+\begin{table}[t]
+\centering
+{\small
+\begin{tabular}{lrrrr}
+\toprule
+Method & APS ($\uparrow$) & HV ($\uparrow$) & Novelty ($\uparrow$) & Top-$K$ diversity ($\uparrow$) \\
+\midrule
+InversionGNN, matched rerun & \XXX{} & \XXX{} & \XXX{} & \XXX{} \\
+\method{}, immediate preference & \XXX{} & \XXX{} & \XXX{} & \XXX{} \\
+\textbf{\method{}, future-aware} & \textbf{\XXX{}} & \textbf{\XXX{}} & \textbf{\XXX{}} & \textbf{\XXX{}} \\
+\bottomrule
+\end{tabular}}
+\caption{\small Two-objective JNK3/GSK3$\beta$ optimization from the common frozen initialization bank. All rows use the same evaluation budget and preference set. Published InversionGNN results obtained under a different initialization protocol are reported separately as context and are not pooled with the matched rerun.}
+\label{tab:pareto}
+\end{table}
+
+Under this protocol, future-aware \method{} obtains an APS of \textbf{\XXX{}}, compared with \textbf{\XXX{}} for the matched InversionGNN rerun and \textbf{\XXX{}} for immediate \method{} control. The corresponding Pareto fronts are shown in \cref{fig:competence}. Across the five preferences, the controlled trajectories populate \XXX{}, indicating {\color{red}[\textbf{if supported:} distinct trade-offs rather than repeated convergence to a single region of objective space]}. Hypervolume, novelty, and diversity provide a separate check that improved scalar performance is not obtained by collapsing onto a narrow set of molecules.
+
+The immediate and future-aware \method{} arms provide the cleaner causal comparison. Both use the \textbf{same frozen $R_\theta$, identical legal successor fibers, initialization molecules, property model $\widehat F_\psi$, preference vectors, and candidate budget}. The immediate controller reweights each successor by $g_\lambda(y)$, whereas the future-aware controller uses $h_\phi(y,\lambda,b-1)$. Thus both methods are given exactly the same predicted property landscape; the only difference is whether desirability is evaluated at the next molecule or propagated through futures reachable under $R_\theta$. {\color{red}[\textbf{If positive:} Future-aware control improves APS by \textbf{\XXX{}} and HV by \textbf{\XXX{}}, showing that propagating preference through the molecular process improves Pareto exploration beyond local property scoring.] [\textbf{If neutral:} The two arms are statistically indistinguishable, indicating that learned future propagation provides no measurable benefit on this two-objective task.]}
+
+This distinction does \emph{not} extend to the external comparison: \method{} and InversionGNN do not share the same learned property predictor, so differences between them cannot be attributed solely to the search procedure. The experiment instead supports two separate conclusions: the matched InversionGNN comparison measures multi-objective task competence, while the immediate-versus-future-aware \method{} comparison isolates the contribution of molecular-process control.
+
+\subsection{Retargeting from realized molecular states}
+\label{sec:exp-retarget}
+
+A molecular-design objective may change after generation has already begun. We test whether progress accumulated under an initial objective remains useful when the objective is changed, rather than asking the model to anticipate the change from the outset. For each source, \method{} first follows a frozen preference $z_A$ until a preregistered switch point, producing the realized molecular state $x_s$. Only then is the new preference $z_B$ applied. The prefix is therefore identical across all post-switch comparisons, and $R_\theta$ remains fixed throughout; retargeting changes only the control context applied to the molecular state already reached.
+
+We compare four post-switch strategies under matched sources, random seeds, and remaining budget. \textbf{Continuation} applies the $z_B$-conditioned controller directly from $x_s$. \textbf{Source restart} discards the realized trajectory and allocates the same remaining budget to $z_B$ from $x_0$. \textbf{State restart} retains $x_s$ but initializes a fresh sampler, separating the value of the molecule itself from any inference state carried across the switch. Finally, a \textbf{static-compromise} arm optimizes the prespecified joint preference from the beginning, providing a reference for the cost of learning the eventual objective only after the prefix has been generated.
+
+\begin{table}[t]
+\centering
+{\small
+\begin{tabular}{lrrr}
+\toprule
+Post-switch strategy & Prior progress retained ($\uparrow$) & Post-switch cost ($\downarrow$) & Final $z_B$ achievement ($\uparrow$) \\
+\midrule
+Restart from source $x_0$ & \XXX{} & \XXX{} & \XXX{} \\
+Restart from realized $x_s$ & \XXX{} & \XXX{} & \XXX{} \\
+Static compromise from step 0 & \XXX{} & \XXX{} & \XXX{} \\
+\textbf{Continue from realized $x_s$} & \textbf{\XXX{}} & \textbf{\XXX{}} & \textbf{\XXX{}} \\
+\bottomrule
+\end{tabular}}
+\caption{\small Post-switch outcomes under matched sources, seeds, and remaining budget. All arms share the identical pre-switch prefix and the same frozen $R_\theta$.}
+\label{tab:retarget}
+\end{table}
+
+Continuation from the realized state achieves \textbf{\XXX{}} under the new objective, compared with \textbf{\XXX{}} when the same remaining budget is spent restarting from the source. It additionally preserves \textbf{\XXX{}} of the progress accumulated before the switch and requires \textbf{\XXX{}} post-switch evaluations/edits to reach the final objective. {\color{red}[\textbf{If positive:} Thus the molecular trajectory is not merely computation spent before the new objective was known: the state it produced remains a useful starting point after the objective changes.]} The fresh-sampler comparison further shows \XXX{}, distinguishing reuse of the realized molecule from reuse of sampler-specific state.
+
+The static-compromise arm provides an important boundary on this result. {\color{red}[\textbf{If it wins:} Knowing the eventual trade-off from the beginning remains advantageous; retargeting recovers useful prior progress but does not erase the cost of surprise.] [\textbf{If comparable:} Retargeting reaches comparable final performance despite receiving $z_B$ only after the switch.]} We therefore interpret retargeting as \textbf{stateful continuation under a changed objective}, not as globally optimal replanning. This is precisely the empirical claim required by \cref{sec:retarget}: the learned reference process is reusable because control can be recomputed with respect to the molecular state that was actually reached.

@@ -1,0 +1,327 @@
+{
+ "n_seeds": 15,
+ "replicates": 5,
+ "exhaustiveness": 1,
+ "mean_abs_delta": 0.6933333333333331,
+ "median_abs_delta": 0.3000000000000007,
+ "max_abs_delta": 3.3,
+ "mean_replicate_spread": 1.4733333333333334,
+ "max_replicate_spread": 9.3,
+ "rows": [
+  {
+   "idx": 0,
+   "target": "parp1",
+   "smiles": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+   "published_ds": 7.3,
+   "qed": 0.8879035012540928,
+   "sa": 0.8211991202351676,
+   "scores": [
+    -7.3,
+    -7.3,
+    -7.3,
+    -7.3,
+    -7.1
+   ],
+   "seconds": 7.5,
+   "n_ok": 5,
+   "mean": -7.26,
+   "sd": 0.08944271909999167,
+   "best": -7.3,
+   "delta_best_vs_published": 0.0
+  },
+  {
+   "idx": 1,
+   "target": "parp1",
+   "smiles": "COc1[nH]c3cccc2C(=O)NCCc1c23",
+   "published_ds": 7.8,
+   "qed": 0.7578932450471935,
+   "sa": 0.8062678951582493,
+   "scores": [
+    -8.1,
+    -7.9,
+    -7.9,
+    -7.8,
+    -7.7
+   ],
+   "seconds": 6.1,
+   "n_ok": 5,
+   "mean": -7.88,
+   "sd": 0.14832396974191311,
+   "best": -8.1,
+   "delta_best_vs_published": 0.2999999999999998
+  },
+  {
+   "idx": 2,
+   "target": "parp1",
+   "smiles": "O/N=C/c1cn3CCNC(=O)c2cccc1c23",
+   "published_ds": 8.2,
+   "qed": 0.43799664534359267,
+   "sa": 0.7873811594919877,
+   "scores": [
+    -8.2,
+    -7.5,
+    -8.2,
+    -8.1,
+    -7.5
+   ],
+   "seconds": 9.5,
+   "n_ok": 5,
+   "mean": -7.9,
+   "sd": 0.36742346141747634,
+   "best": -8.2,
+   "delta_best_vs_published": 0.0
+  },
+  {
+   "idx": 3,
+   "target": "fa7",
+   "smiles": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34",
+   "published_ds": 6.4,
+   "qed": 0.2841010843907377,
+   "sa": 0.8569741578609568,
+   "scores": [
+    -8.7,
+    -7.0,
+    -6.7,
+    -8.3,
+    -6.8
+   ],
+   "seconds": 25.4,
+   "n_ok": 5,
+   "mean": -7.5,
+   "sd": 0.9300537618869137,
+   "best": -8.7,
+   "delta_best_vs_published": 2.299999999999999
+  },
+  {
+   "idx": 4,
+   "target": "fa7",
+   "smiles": "N[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)N[C@H](CCl)CCCN=C(N)N",
+   "published_ds": 6.7,
+   "qed": 0.18594708431296125,
+   "sa": 0.7344538324661792,
+   "scores": [
+    -7.0,
+    -7.2,
+    -7.2,
+    -7.3,
+    -7.2
+   ],
+   "seconds": 20.6,
+   "n_ok": 5,
+   "mean": -7.18,
+   "sd": 0.1095445115010332,
+   "best": -7.3,
+   "delta_best_vs_published": 0.5999999999999996
+  },
+  {
+   "idx": 5,
+   "target": "fa7",
+   "smiles": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+   "published_ds": 8.5,
+   "qed": 0.1557307563790212,
+   "sa": 0.8158946447328099,
+   "scores": [
+    -8.3,
+    -8.6,
+    -8.4,
+    -7.8,
+    -8.2
+   ],
+   "seconds": 24.0,
+   "n_ok": 5,
+   "mean": -8.26,
+   "sd": 0.29664793948382656,
+   "best": -8.6,
+   "delta_best_vs_published": 0.09999999999999964
+  },
+  {
+   "idx": 6,
+   "target": "5ht1b",
+   "smiles": "Cc1nc(-c2ccc(-c3ccc(C(=O)N4CCc5cc6c(cc54)[C@]4(CC[N@H+](C)CC4)CO6)cc3)c(C)c2)no1",
+   "published_ds": 4.5,
+   "qed": 0.4384069556977493,
+   "sa": 0.6745206483524381,
+   "scores": [
+    1.5,
+    -5.7,
+    -3.5,
+    -7.8,
+    -6.8
+   ],
+   "seconds": 21.4,
+   "n_ok": 5,
+   "mean": -4.46,
+   "sd": 3.6949966170485187,
+   "best": -7.8,
+   "delta_best_vs_published": 3.3
+  },
+  {
+   "idx": 7,
+   "target": "5ht1b",
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+   "published_ds": 7.6,
+   "qed": 0.7665856993035065,
+   "sa": 0.7458867506023221,
+   "scores": [
+    -7.6,
+    -7.5,
+    -7.6,
+    -7.6,
+    -7.5
+   ],
+   "seconds": 8.5,
+   "n_ok": 5,
+   "mean": -7.56,
+   "sd": 0.05477225575051641,
+   "best": -7.6,
+   "delta_best_vs_published": 0.0
+  },
+  {
+   "idx": 8,
+   "target": "5ht1b",
+   "smiles": "C1=CC2=NC=C(CCCN3CC[NH+](CCc4ccccc4)CC3)[C@H]2C=C1n1cnnc1",
+   "published_ds": 9.8,
+   "qed": 0.7161970317582854,
+   "sa": 0.5903110200903591,
+   "scores": [
+    -9.4,
+    -9.8,
+    -6.6,
+    -9.5,
+    -9.3
+   ],
+   "seconds": 37.2,
+   "n_ok": 5,
+   "mean": -8.920000000000002,
+   "sd": 1.3103434664239757,
+   "best": -9.8,
+   "delta_best_vs_published": 0.0
+  },
+  {
+   "idx": 9,
+   "target": "braf",
+   "smiles": "CCN(CC)CCNC(=O)c3cnn4c(c2cccc(NC(=O)Nc1ccc(Cl)c(C(F)(F)F)c1)c2)ccnc34",
+   "published_ds": 9.3,
+   "qed": 0.23531558009202885,
+   "sa": 0.812044458750464,
+   "scores": [
+    -8.8,
+    -8.7,
+    -9.0,
+    -8.5,
+    -8.4
+   ],
+   "seconds": 26.0,
+   "n_ok": 5,
+   "mean": -8.68,
+   "sd": 0.23874672772626643,
+   "best": -9.0,
+   "delta_best_vs_published": -0.3000000000000007
+  },
+  {
+   "idx": 10,
+   "target": "braf",
+   "smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)NCCN1CCOCC1)c2)cc3)ccc4Cl",
+   "published_ds": 9.4,
+   "qed": 0.3456468594892582,
+   "sa": 0.8339810195752876,
+   "scores": [
+    -10.3,
+    -9.5,
+    -10.1,
+    -9.6,
+    -9.2
+   ],
+   "seconds": 31.2,
+   "n_ok": 5,
+   "mean": -9.74,
+   "sd": 0.45055521304275276,
+   "best": -10.3,
+   "delta_best_vs_published": 0.9000000000000004
+  },
+  {
+   "idx": 11,
+   "target": "braf",
+   "smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)Nc1cccnc1)c2)cc3)ccc4Cl",
+   "published_ds": 9.8,
+   "qed": 0.25453669243368654,
+   "sa": 0.8464021465685074,
+   "scores": [
+    -10.3,
+    -10.5,
+    -9.9,
+    -9.9,
+    -10.5
+   ],
+   "seconds": 31.8,
+   "n_ok": 5,
+   "mean": -10.22,
+   "sd": 0.3033150177620619,
+   "best": -10.5,
+   "delta_best_vs_published": 0.6999999999999993
+  },
+  {
+   "idx": 12,
+   "target": "jak2",
+   "smiles": "OCCCCc2nc1ccccc1c4ncnc3[nH]cc2c34",
+   "published_ds": 7.7,
+   "qed": 0.7249797842530725,
+   "sa": 0.7900985355920039,
+   "scores": [
+    -8.0,
+    -7.8,
+    -7.0,
+    -7.0,
+    -7.6
+   ],
+   "seconds": 12.3,
+   "n_ok": 5,
+   "mean": -7.4799999999999995,
+   "sd": 0.46043457732885346,
+   "best": -8.0,
+   "delta_best_vs_published": 0.2999999999999998
+  },
+  {
+   "idx": 13,
+   "target": "jak2",
+   "smiles": "COC(=O)CC2Nc1ccccc1c3ccnc4[nH]cc2c34",
+   "published_ds": 8.0,
+   "qed": 0.711669858205952,
+   "sa": 0.7677824267916282,
+   "scores": [
+    -7.8,
+    -8.3,
+    -8.5,
+    -7.9,
+    -7.9
+   ],
+   "seconds": 10.7,
+   "n_ok": 5,
+   "mean": -8.08,
+   "sd": 0.30331501776206204,
+   "best": -8.5,
+   "delta_best_vs_published": 0.5
+  },
+  {
+   "idx": 14,
+   "target": "jak2",
+   "smiles": "Oc5ccc(C2NC(=O)c1ccccc1c3ccnc4[nH]cc2c34)c(F)c5",
+   "published_ds": 8.6,
+   "qed": 0.4821753448006556,
+   "sa": 0.7669268859066423,
+   "scores": [
+    -8.6,
+    -8.6,
+    -9.7,
+    -8.6,
+    -8.6
+   ],
+   "seconds": 12.8,
+   "n_ok": 5,
+   "mean": -8.82,
+   "sd": 0.4919349550499536,
+   "best": -9.7,
+   "delta_best_vs_published": 1.0999999999999996
+  }
+ ]
+}

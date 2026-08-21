@@ -1,0 +1,62 @@
+{
+ "cells": [
+  {
+   "target": "braf",
+   "smiles": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+   "chembl": "CHEMBL498468",
+   "heavy": 24,
+   "qed": 0.6245,
+   "sa": 2.634,
+   "idx": 0,
+   "delta": 0.6,
+   "rounds": 3,
+   "per_round": 8,
+   "parents": 3,
+   "rule": "tilt",
+   "seed_rng": 20260820,
+   "n_docked": 24,
+   "n_archive": 25,
+   "n_feasible": 7,
+   "best_ds": -10.3,
+   "best_smiles": "Cn1cc(-c2ccc(-c3n[nH]cc3Cl)cc2)c(-c2ccncc2)n1",
+   "best_round": 1,
+   "timing": {
+    "fiber": 53.9,
+    "props": 1.9,
+    "dock": 50.2
+   },
+   "seconds": 106.3
+  },
+  {
+   "target": "braf",
+   "smiles": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+   "chembl": "CHEMBL78779",
+   "heavy": 26,
+   "qed": 0.6689,
+   "sa": 2.251,
+   "idx": 1,
+   "delta": 0.6,
+   "rounds": 3,
+   "per_round": 8,
+   "parents": 3,
+   "rule": "tilt",
+   "seed_rng": 20260821,
+   "n_docked": 24,
+   "n_archive": 25,
+   "n_feasible": 17,
+   "best_ds": -10.1,
+   "best_smiles": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(NC(=O)N(C)C)ccc12",
+   "best_round": 1,
+   "timing": {
+    "fiber": 59.7,
+    "props": 2.4,
+    "dock": 73.7
+   },
+   "seconds": 136.2
+  }
+ ],
+ "rule": "tilt",
+ "rounds": 3,
+ "per_round": 8,
+ "parents": 3
+}

@@ -1,0 +1,101 @@
+{
+ "schema": "compose.editing_v2.reference_law_data_backed",
+ "schema_version": 1,
+ "status": "PAPER_BEARING_DERIVED",
+ "derivation": "entries-weighted aggregate of the per-capability-cell reference-law NLLs, partitioned by the synthetic_only flag emitted in the family-lane provenance artifact. No model evaluation; no family named in this script.",
+ "inputs": {
+  "scores_artifact": "diagnostics/editing_v2_experiment1_reference_law.json",
+  "scores_sha256": "b9777735ae5f7e659591182469daa678f8b3cbd198528ae4192e86c448038602",
+  "scores_status": "DEVELOPMENT_RESULT_NOT_PAPER_BEARING",
+  "provenance_artifact": "diagnostics/editing_v2_family_lane_provenance.json",
+  "provenance_sha256": "38beae18b5b3ade826aa75113912d527d8af25b80cf39a76799cb7b8ee647a7b",
+  "provenance_rule": "synthetic_only(F) iff n_F(reversible_synthetic_walk) > 0 and sum over data-backed lanes of n_F(lane) == 0",
+  "synthetic_lane": "reversible_synthetic_walk",
+  "data_backed_lanes": [
+   "linker_positional_topology_analogue",
+   "observed_local_analogue",
+   "operator_aware_real_endpoint",
+   "real_endpoint_multistep_path"
+  ]
+ },
+ "coverage": {
+  "entries_scored_total": 3545,
+  "entries_in_reported_cells": 3503,
+  "minimum_cell": 20,
+  "note": "cells below minimum_cell are unreported, not unscored"
+ },
+ "groups": {
+  "data_backed": {
+   "n_scored_transitions": 2744,
+   "n_capability_cells": 7,
+   "families": [
+    "atom_delete",
+    "atom_insert",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute"
+   ],
+   "nll": {
+    "uniform_canonical": 6.217246,
+    "empirical_family": 5.547653,
+    "learned_family_uniform_id": 5.792217,
+    "empirical_family_learned_id": 4.246173,
+    "r_theta": 4.490738
+   },
+   "improvement_empirical_to_full": 1.056915,
+   "improvement_empirical_to_identity_only": 1.30148
+  },
+  "synthetic_only": {
+   "n_scored_transitions": 759,
+   "n_capability_cells": 6,
+   "families": [
+    "cycle_attach",
+    "cycle_insert",
+    "ring_system_restate"
+   ],
+   "nll": {
+    "uniform_canonical": 6.381267,
+    "empirical_family": 4.716039,
+    "learned_family_uniform_id": 2.963862,
+    "empirical_family_learned_id": 3.544305,
+    "r_theta": 1.792129
+   },
+   "improvement_empirical_to_full": 2.92391,
+   "improvement_empirical_to_identity_only": 1.171734
+  }
+ },
+ "reproduction_checks": [
+  {
+   "quantity": "n",
+   "expected": 2744,
+   "got": 2744,
+   "pass": true
+  },
+  {
+   "quantity": "empirical_family",
+   "expected": 5.5477,
+   "got": 5.547653,
+   "pass": true
+  },
+  {
+   "quantity": "empirical_family_learned_id",
+   "expected": 4.2462,
+   "got": 4.246173,
+   "pass": true
+  },
+  {
+   "quantity": "r_theta",
+   "expected": 4.4907,
+   "got": 4.490738,
+   "pass": true
+  },
+  {
+   "quantity": "improvement_empirical_to_full",
+   "expected": 1.0569,
+   "got": 1.056915,
+   "pass": true
+  }
+ ],
+ "generator": "scripts/emit_reference_law_data_backed.py",
+ "generator_git_commit": "0a219a0b312adfff1e7bb29b65ba5847206b5618"
+}

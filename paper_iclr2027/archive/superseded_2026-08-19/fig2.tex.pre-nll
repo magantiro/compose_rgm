@@ -1,0 +1,32 @@
+% ============================================================================
+% FIGURE 2 --- panel (a) carries the 5.1 comparison; remaining panels are still
+% placeholder frames.  Absolute NLLs are \XXX{} until transcribed from the
+% single authoritative comparison artifact; do NOT derive them by combining the
+% frozen-checkpoint training NLL with the 1.46-nat comparison result.
+% ============================================================================
+\begin{figure}[t]
+\centering
+\textbf{(a) Learning beyond executable support}\\[3pt]
+{\small
+\begin{tabular}{llcr}
+\toprule
+Law & Molecular-state preferences & Same canonical support & Successor NLL $\downarrow$ \\
+\midrule
+Uniform canonical & No & \checkmark & \XXX{} \\
+Empirical family & Global family frequencies only & \checkmark & \XXX{} \\
+\textbf{\method{} ($R_\theta$)} & \textbf{Learned state-dependent} & \checkmark & \textbf{\XXX{}} \\
+\bottomrule
+\end{tabular}\\[2pt]
+empirical family $\rightarrow$ \method{}: $\mathbf{-1.46}$ \textbf{nats}
+}\\[8pt]
+\fbox{\begin{minipage}{0.95\linewidth}\centering\footnotesize
+{\color{red}\textbf{[Remaining panels to be drawn. No data plotted.]}}\\[1pt]
+\textbf{1.} pairs $\to$ certified edit programs $\to$ generator matching $\to R_\theta$ \emph{(frozen)}
+\quad
+\textbf{2.} frozen-$R_\theta$ rollouts $+\,z\to$ future-value labels $+$ Bellman $\to h_\phi$
+\quad
+\textbf{3.} $\widehat F_\psi$ read at the successor \emph{vs.} $\widehat F_\psi$ propagated through $R_\theta$
+\end{minipage}}
+\caption{\small\textbf{What is trained, and what each trained object is asked to know.} Panel (a) compares the frozen reference edit law against two unlearned laws on the same canonical molecular successor support. The remaining rows are placeholders: the reference edit law is fitted from certified programs of executable edits and frozen thereafter, reading neither the source lead nor the objective; the goal-conditioned value is fitted from rollouts of that frozen law, with the budget axis explicit and validation held out by source molecule; the third row is the immediate-versus-future-aware contrast.}
+\label{fig:trained}
+\end{figure}

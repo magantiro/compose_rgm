@@ -1,0 +1,58 @@
+% ============================================================================
+% PRELIMINARIES --- background only.  Nothing here is a contribution.
+%
+% Two subsections, deliberately.  The only external mathematics a reader needs
+% before COMPOSE is a discrete-step Markov chain and the finite-horizon Doob
+% h-transform.
+%
+% Deliberately excluded, because each is COMPOSE rather than background:
+%   the executable rewrite space A(x); the trans-dimensional molecular state
+%   space; canonical molecular successors; the reference-law training objective;
+%   the h_phi amortization; and Pareto machinery.
+%
+% Generator matching was removed as a preliminary on 2026-08-20.  Giving it a
+% subsection told the reader it is the training framework, which the shipped
+% objective is not: R_theta is fitted by the productive canonical-successor
+% identity likelihood and the exit rate is never optimized.  The exact relation
+% to the corresponding block of Poisson generator matching is stated in Sec. 4.2
+% AFTER the actual objective is defined, which is where it informs rather than
+% misleads.  Do not reinstate it here.
+%
+% NOTE, notation: 3.2 indexes value by forward step (h_K = g, h_k = P_k h_{k+1})
+% while Sec. 4.4 uses remaining budget (h_0 = g, h_b = R_theta h_{b-1}).  The
+% paper emphasises remaining budget throughout, so both should be unified on the
+% remaining-budget convention in the same pass that revises 4.4.  Left
+% inconsistent here deliberately rather than creating a second mismatch.
+% ============================================================================
+\section{Preliminaries}
+\label{sec:prelim}
+
+\subsection{Markov chains}
+\label{sec:prelim-chain}
+
+Let $\X$ be a discrete state space and $P_0,\dots,P_{K-1}$ a sequence of transition kernels defining a possibly time-inhomogeneous Markov chain over $K$ steps. Starting from $X_0=x_0$, the probability of a trajectory $x_{1:K}$ is
+\begin{equation}
+P(X_{1:K}=x_{1:K}\mid X_0=x_0)=\prod_{k=0}^{K-1}P_k(x_{k+1}\mid x_k).
+\label{eq:chain}
+\end{equation}
+Thus each transition depends only on the current state and the step of the process, while the sequence of kernels determines a distribution over complete trajectories. In \method{}, fixed-budget molecular editing takes this form, with each state a complete molecular graph and each committed transition one molecular edit.
+
+\subsection{Finite-horizon Doob control}
+\label{sec:prelim-ctrl}
+
+We also recall finite-horizon control of a reference Markov chain. Let $g_z(x)\ge 0$ assign terminal desirability under goal $z$. Defining the backward value $h_K(x,z)=g_z(x)$ and
+\begin{equation}
+h_k(x,z)=\sum_{y} P_k(y\mid x)\,h_{k+1}(y,z),
+\qquad
+P^z_k(y\mid x)=P_k(y\mid x)\,\frac{h_{k+1}(y,z)}{h_k(x,z)},
+\label{eq:doobprelim}
+\end{equation}
+gives the finite-horizon Doob $h$-transform wherever $h_k(x,z)>0$. Writing $P^z$ for the law of the chain run under these controlled kernels, the resulting terminal distribution is
+\begin{equation}
+P^{z}(X_K=y\mid X_0=x_0)
+=\frac{P(X_K=y\mid X_0=x_0)\,g_z(y)}{\E_P\!\left[g_z(X_K)\mid X_0=x_0\right]}.
+\label{eq:terminaltilt}
+\end{equation}
+The transform therefore reweights only transitions already present in the reference chain and introduces no new support. With exact backward values, it realizes the reference terminal distribution tilted by $g_z$. In \method{}, this construction provides the control law for molecular editing, with an amortized future-value model replacing exact backward computation in large molecular spaces.
+
+\method{} instantiates these generative and control primitives on a state-dependent, trans-dimensional molecular rewrite space.

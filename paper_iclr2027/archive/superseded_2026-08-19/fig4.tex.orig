@@ -1,0 +1,16 @@
+% ============================================================================
+% FIGURE 4 --- process-level consequences.  Placeholder frame, NO plotted data.
+% EVERY panel is blocked on an unrun experiment; panels in app:figplan.
+% ============================================================================
+\begin{figure}[t]
+\centering
+\fbox{\begin{minipage}{0.95\linewidth}\centering\footnotesize
+{\color{red}\textbf{[Figure to be drawn. EVERY panel is blocked on an experiment that has NOT been run; all values \XXX{}. Panels in \cref{app:figplan}.]}}\\[1pt]
+\textbf{(a)} goal replaced at $b'$: continue vs.\ restart \quad
+\textbf{(b)} pathwise feasibility vs.\ endpoint filtering \quad
+\textbf{(c)} one prefix, several preference branches \quad
+\textbf{(d)} immediate vs.\ future-aware
+\end{minipage}}
+\caption{\small\textbf{Consequences of controlling a process whose every committed state is a molecule.} Goal replacement with the four registered arms in objective space \emph{and} cost; feasibility at every committed state under support restriction against endpoint rejection, where the informative quantity is the wasted oracle budget and not the feasibility trace, which is flat by construction; one shared prefix fanned into several preference-conditioned continuations against restarts at matched budget; and both arms of \eqref{eq:ablation} on one shared landscape. Panels in \cref{app:figplan}.}
+\label{fig:consequences}
+\end{figure}

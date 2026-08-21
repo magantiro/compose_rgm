@@ -1,0 +1,16 @@
+% ============================================================================
+% FIGURE 3 --- standard-task competence.  Placeholder frame, NO plotted data.
+% Panel specification archived with the old figure plan.
+% ============================================================================
+\begin{figure}[t]
+\centering
+\fbox{\begin{minipage}{0.95\linewidth}\centering\footnotesize
+{\color{red}\textbf{[Figure to be drawn; no data plotted.]}}\\[1pt]
+\textbf{(a)} candidate-efficiency curves \quad
+\textbf{(b)} panel ladder and disjointness \quad
+\textbf{(c)} comparator table as context \quad
+\textbf{(d)} three unpooled resource ledgers
+\end{minipage}}
+\caption{\small\textbf{Competence on the standard similarity-constrained editing task.} Candidate-efficiency curves per panel, the preregistered operating point marked and the comparator's published rate drawn as a reference line annotated with \emph{its} candidate budget so the axis mismatch is visible; the panel ladder with its verified disjointness; and three resource ledgers side by side and never summed. Panels (a)--(c) are drawable now; the training columns of (d) are \XXX{}.}
+\label{fig:competence}
+\end{figure}

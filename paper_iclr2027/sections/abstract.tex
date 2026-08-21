@@ -1,0 +1,34 @@
+% ============================================================================
+% ABSTRACT --- supplied verbatim by the author, 2026-08-19.
+%
+% ===== GAP: CLAIMS AHEAD OF EVIDENCE =====
+% Three sentences below assert results this paper currently marks XXX. They are
+% kept because the author supplied this text, but they must be reconciled before
+% submission -- an abstract asserting what the results section marks unmeasured
+% is the one inconsistency a reviewer is guaranteed to find.
+%
+%   (a) "competitive with specialized methods on ... multi-objective
+%       optimization benchmarks under fixed oracle budgets"
+%       -> gaps G3 (JNK3+GSK3b 2-obj) and G4 (4-obj). NOT RUN. The single-
+%          objective half IS supported (VALID128_CURVE.json, 54.7% @k=12).
+%   (b) "improves molecular optimization by reasoning over the futures each edit
+%       makes reachable"
+%       -> gap G2, the matched immediate-vs-future ablation. NOT RUN.
+%          Supporting evidence exists but is development-only: the oracle-free
+%          high-MC probe (INVGNN_LOOKAHEAD_TRUTH.json) shows true future value
+%          disagrees with immediate scoring on 68-84% of within-fiber decisions
+%          with ~+20% median realized gain. That is a property of the TRUE
+%          value, not of a trained controller, and is not the benchmark claim.
+%   (c) "reusing reached states to adaptively target underexplored regions of
+%       the Pareto front" -> gap G7 (Pareto fan). NOT RUN.
+%
+% Terminology, 2026-08-20: "molecular dynamics model" -> the explicit reference
+% law R_theta, and "chemically valid" -> "complete molecular graphs", which
+% avoids a broader chemistry claim than the executor's admissibility semantics
+% support.  One deviation remains, retained as author wording:
+%   "one reusable molecular world" (safer formal claim: "one reusable
+%       executable molecular process")
+% ============================================================================
+\begin{abstract}
+Controllable molecular design requires both a representation of how molecules can change and a mechanism for steering those changes toward a desired outcome. Yet molecular generation and optimization are typically built around fixed endpoint distributions or task objectives, rather than a reusable representation of molecular transitions that can be learned once and controlled across changing design goals. We introduce \method, a generative framework for molecular design that represents generation as a stochastic sequence of executable edits between complete molecular graphs. We learn a goal-independent reference law $R_\theta(y\mid x)$ that assigns probability across the legal, trans-dimensional successors of each molecule, including atom insertion/deletion, bond changes, and ring operations. Iterating this law defines a stochastic molecular reference process. This reference process is learned once and held fixed, while a separate finite-horizon controller supplies task-specific purpose by steering the same learned transition process toward different objectives. With the same frozen reference process across objectives, \method{} is competitive with specialized methods on established single-objective editing and multi-objective optimization benchmarks under fixed oracle budgets. Beyond these benchmark settings, we show that the same formulation enables richer trajectory-level control. By representing every intermediate as a complete molecule with an explicit set of legal successors, \method{} improves molecular optimization by reasoning over the futures each edit makes reachable and by reusing reached states to adaptively target underexplored regions of the Pareto front. The same process supports mid-trajectory retargeting and constraints that hold throughout generation. \method{} learns one reusable molecular world and then lets us control, redirect, constrain, and reuse molecular trajectories in ways that ordinary endpoint-generation frameworks do not naturally expose.
+\end{abstract}

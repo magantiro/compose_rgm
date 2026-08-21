@@ -1,0 +1,37 @@
+{
+ "n_molecules": 15,
+ "n_successors": 10199,
+ "families": {
+  "atom_insert": {
+   "1": 4140
+  },
+  "atom_delete": {
+   "-1": 95
+  },
+  "atom_restate_semantic": {
+   "0": 2496
+  },
+  "bond_reorder": {
+   "0": 64
+  },
+  "bond_reroute": {
+   "0": 1119
+  },
+  "cycle_close": {
+   "0": 1892
+  },
+  "cycle_open": {
+   "0": 287
+  },
+  "ring_system_restate": {
+   "0": 106
+  }
+ },
+ "delta_histogram": {
+  "1": 4140,
+  "-1": 95,
+  "0": 5964
+ },
+ "violations": [],
+ "pass": true
+}

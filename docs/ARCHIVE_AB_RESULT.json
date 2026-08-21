@@ -1,50 +1,21 @@
 {
  "strata": {
   "reliable": {
-   "n": 4,
-   "baseline": 4,
-   "archive": 3,
-   "baseline_work": 6411,
-   "archive_work": 5179,
-   "baseline_diversity": 3.75,
-   "archive_diversity": 3.0,
-   "rescued": [],
-   "lost": [
-    15
-   ]
-  },
-  "marginal": {
-   "n": 4,
-   "baseline": 0,
-   "archive": 3,
-   "baseline_work": 12288,
-   "archive_work": 8853,
-   "baseline_diversity": 1.0,
-   "archive_diversity": 2.25,
-   "rescued": [
-    5,
-    46,
-    49
-   ],
-   "lost": []
-  },
-  "hard": {
-   "n": 4,
+   "n": 1,
    "baseline": 1,
-   "archive": 2,
-   "baseline_work": 11928,
-   "archive_work": 9661,
-   "baseline_diversity": 1.25,
-   "archive_diversity": 1.75,
-   "rescued": [
-    0
-   ],
-   "lost": []
+   "archive": 1,
+   "baseline_work": 2175,
+   "archive_work": 957,
+   "baseline_diversity": 8.0,
+   "archive_diversity": 5.0,
+   "rescued": [],
+   "lost": [],
+   "random": 1
   }
  },
  "totals": {
-  "baseline_work": 30627,
-  "archive_work": 23693,
-  "n_sources": 12
+  "baseline_work": 2175,
+  "archive_work": 957,
+  "n_sources": 1
  }
 }

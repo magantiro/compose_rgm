@@ -1,0 +1,13 @@
+\begin{figure}[t]
+\centering
+\fbox{\parbox{0.97\textwidth}{\centering\vspace{18pt}\small\itshape
+[Figure to be drawn; no data plotted.]\\[6pt]
+\normalfont
+(a) \textbf{possible}\quad $x\mapsto\A(x)\to\SS(x)$ \hfill
+(b) \textbf{plausible}\quad $R_\theta(y\mid x)$ \hfill
+(c) \textbf{purposeful}\quad $h_\phi(y,z,b{-}1)$ \hfill
+(d) inset\quad $z\to z'$
+\vspace{18pt}}}
+\caption{\small\textbf{Possible, plausible, purposeful.} An exact executor defines the legal molecular successors of a state; the goal-independent reference process $R_\theta$ learns probability over those transitions; and a finite-horizon controller reweights the same process toward the current design objective. When the objective changes, only the controller changes.}
+\label{fig:ppp}
+\end{figure}

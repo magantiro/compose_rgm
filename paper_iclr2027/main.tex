@@ -1,0 +1,187 @@
+% ============================================================================
+%  COMPOSE: Generative Stochastic Rewriting for Trans-Dimensional Molecular
+%           and Control
+%
+%  ICLR 2027 main text.  NEW DRAFT.  This directory does not modify, replace or
+%  supersede paper/, paper_arxiv/, paper_iclr_control_substrate/ or
+%  paper_iclr_stochastic_rewriting/, which are preserved deliberately.
+%
+%  ---------------------------------------------------------------------------
+%  STYLE FILES: OFFICIAL ICLR 2027 AUTHOR KIT, IN USE.  NOT A STAND-IN.
+%  ---------------------------------------------------------------------------
+%  iclr2027_conference.sty  sha256 797deef41724e93761426ac0cbcca46279a91cc650dd1f0ce76a4f08d2098ea6
+%  iclr2027_conference.bst  sha256 2d67552db7ed38ccfccb5957b52f95656e25c249724761d3cf5f7922ad1844c5
+%  Retrieved from https://media.iclr.cc/Conferences/ICLR2027/iclr-2027-style-files.zip
+%  No earlier year's style file is used anywhere in this directory.
+%
+%  FORMAL CONSTRAINTS THE BODY MUST RESPECT:
+%    * 9-page strict limit on the MAIN TEXT of the initial submission
+%      (references unlimited; the appendix carries the operator registry,
+%      proofs, audits, hashes, hyperparameters and seed-level results).
+%    * Double-blind.  \iclrfinalcopy stays COMMENTED OUT: the style file then
+%      replaces the author block with "Anonymous authors / Paper under
+%      double-blind review" on its own.  No author names, no acknowledgements,
+%      and no identifying repository URLs in the main text.
+%
+%  ---------------------------------------------------------------------------
+%  TWO CONVENTIONS THAT MUST BE PRESERVED BY EVERY LATER EDITOR
+%  ---------------------------------------------------------------------------
+%  1.  NO NUMBER APPEARS IN THIS DRAFT THAT IS NOT IN A VERIFIED SOURCE.
+%      The verified sources are, exhaustively:
+%          docs/SESSION_RUN_MANIFEST_2026-08-18.md
+%          docs/VALID128_K8_RESULT.json
+%          docs/VALID128_CURVE.json
+%          docs/EXTENDED_CURVE_64.json
+%          docs/AMENDMENT_VALIDATION_128.md
+%          docs/GRIDDD_JIN_PROTOCOL.md
+%          docs/AMENDMENT_INVERSIONGNN_2OBJ.md
+%      Every numeric claim below carries a "% source:" comment naming one of
+%      them.  If a number is not in one of those files, it does not go in.
+%
+%  2.  UNMEASURED QUANTITIES ARE WRITTEN \XXX AND NEVER GUESSED.
+%      \XXX renders as a red XXX in the PDF, so an unmeasured cell is visible
+%      at a glance.  Every \XXX sits inside a source-level block
+%          % ===== GAP: NOT YET RUN =====
+%      naming exactly what must be measured to remove it.  Two independent
+%      ways to find them:
+%          grep -n 'GAP: NOT YET RUN' sections/*.tex
+%          grep -n 'XXX'              sections/*.tex
+%      The inventory is in README.md.
+%
+%      One further marker class exists for a distinct situation:
+%          % ===== GAP: NUMBER NOT IN VERIFIED SOURCE SET =====
+%      The experiment RAN and an artifact exists, but its value is outside the
+%      seven files above and so may not be quoted in this draft.  These are
+%      promotions waiting on provenance, not experiments waiting on compute.
+% ============================================================================
+
+\documentclass{article}
+
+\usepackage{iclr2027_conference,times}
+
+%% The ICLR style sets \flushbottom, which forces every page to a fixed depth
+%% by stretching whatever vertical glue the page happens to contain.  On a page
+%% whose only stretchable glue is a single section heading, the entire shortfall
+%% lands there: p.14 showed 44pt above and 30pt below "Discussion and
+%% limitations" against an 8pt paragraph gap.  \raggedbottom lets pages end
+%% naturally instead.  Margins, font and type block are untouched.  Re-check
+%% once the real figures replace the placeholder boxes; the page composition
+%% changes and this may no longer be needed.
+\raggedbottom
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{amsthm}
+\usepackage{booktabs,tabularx,array}
+\usepackage{xspace}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage[capitalize,noabbrev]{cleveref}
+
+\hypersetup{colorlinks=true,citecolor=blue!55!black,linkcolor=blue!55!black,urlcolor=blue!55!black}
+
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.75}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.55}
+
+% ---------------------------------------------------------------- gap markers
+% \XXX  : an unmeasured quantity.  Never replace with a plausible value.
+% \gap  : a visible one-line statement of what would remove the adjacent \XXX.
+%% ===========================================================================
+%% DEVELOPMENTAL VALUES FOR PROSE LAYOUT ONLY.  NOT CLAIM-BEARING.
+%% These are the n=24 DEVELOPMENT panel, verified/future-aware arm.  They MUST
+%% be replaced by the frozen n=48 confirmation before submission.  The corridor
+%% was chosen after a feasibility screen, which is why a separate panel exists.
+%% scripts/check_submission.sh FAILS while \DEVELOPMENTALPATHWISE is defined.
+%% When the n=48 panel opens, replace the values, set \PwEvalPhrase to
+%% "On the 48-source held-out evaluation", and DELETE the sentinel line.
+%% ===========================================================================
+\newcommand{\DEVELOPMENTALPATHWISE}{}
+\newcommand{\PwEvalPhrase}{On the current evaluation}
+\newcommand{\PwPrevN}{14}
+\newcommand{\PwPrevD}{24}
+\newcommand{\PwPrevPct}{58.3}
+\newcommand{\PwDepth}{0.69}
+\newcommand{\PwDuration}{four}
+\newcommand{\PwHorizon}{six}
+\newcommand{\PwDelta}{-0.023}
+\newcommand{\PwCI}{[-0.182,0.134]}
+\newcommand{\PwMargin}{-0.25}
+
+\newcommand{\KL}{\mathrm{KL}}
+\newcommand{\XXX}{{\color{red}\textbf{XXX}}}
+\newcommand{\gap}[1]{\par\noindent{\color{red}\small\textbf{[GAP --- NOT YET RUN.]} #1}\par}
+\newcommand{\gapunverified}[1]{\par\noindent{\color{red}\small\textbf{[GAP --- MEASURED, VALUE NOT IN THE VERIFIED SOURCE SET.]} #1}\par}
+
+% -------------------------------------------------------------------- macros
+\newcommand{\method}{\textsc{Compose}\xspace}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\Sset}{\mathcal{S}}
+\newcommand{\Gset}{\mathcal{G}}
+\newcommand{\Bset}{\mathcal{B}}
+\newcommand{\T}{\mathsf{T}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\one}{\mathbf{1}}
+\newcommand{\op}[1]{\texttt{#1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\crefname{assumption}{assumption}{assumptions}
+\Crefname{assumption}{Assumption}{Assumptions}
+
+% TITLE: fixed by the owner.  Do not alter.
+%% Title at 15.5pt rather than the style's 17.28pt: the full title needs two
+%% lines, and 16pt+ hyphenates ``Con-trol''. 15.5pt is the largest size that
+%% fits two clean lines with Trans-Dimensional Molecular intact.
+\title{\fontsize{15.9}{18.8}\selectfont \method: Generative Stochastic Rewriting for\\ Trans-Dimensional Molecular Design and Control}
+
+% DOUBLE-BLIND: this block is IGNORED while \iclrfinalcopy is commented out --
+% iclr2027_conference.sty substitutes the anonymous block automatically.  Do
+% not uncomment \iclrfinalcopy for a submission build.
+\author{Anonymous authors}
+
+%\iclrfinalcopy   % camera-ready ONLY; must stay commented out for submission.
+
+\begin{document}
+\maketitle
+
+\input{sections/abstract}
+\input{sections/intro}
+\input{sections/fig1}
+\input{sections/related}
+\input{sections/preliminaries}
+\input{sections/process}
+\input{sections/control}
+%% sections/trajectories.tex absorbed into Method 4.7-4.8; file retained, not input.
+\input{sections/experiments}
+\input{sections/fig2}
+\input{sections/fig3}
+\input{sections/discussion}
+
+\bibliography{references}
+\bibliographystyle{iclr2027_conference}
+
+\appendix
+\input{sections/appendix}
+
+\end{document}

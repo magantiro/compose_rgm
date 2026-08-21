@@ -70,3 +70,12 @@ runs/task3_mechanism2/
 runs/task3_reachable/
 runs/task3_reachable_k05/
 runs/task3_reachable_3seed/
+
+# LaTeX build intermediates for the ICLR 2027 paper (PDF and sources stay tracked)
+paper_iclr2027/*.aux
+paper_iclr2027/*.bbl
+paper_iclr2027/*.blg
+paper_iclr2027/*.log
+paper_iclr2027/*.out
+paper_iclr2027/*.fls
+paper_iclr2027/*.fdb_latexmk

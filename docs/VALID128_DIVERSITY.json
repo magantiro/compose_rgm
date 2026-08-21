@@ -1,0 +1,21 @@
+{
+ "panel": "hphi_valid_128 prospective, k=1..12",
+ "definition": "Jin et al. ICLR 2019 released scripts/diversity.py, audited 2026-08-20: admits candidates with sim>=0.4 and prop>=0.9; deduplicates via set(); sources with zero valid molecules are EXCLUDED; sources with exactly one contribute 0.0; similarity = Morgan r=2, nBits=2048, useChirality=False.",
+ "diversity": 0.3929,
+ "sd": 0.2568,
+ "ci95": [
+  0.3313,
+  0.4519
+ ],
+ "n_sources_averaged": 70,
+ "sources_contributing_zero": 19,
+ "sources_with_ge2_distinct": 51,
+ "distinct_per_solved_source": 4.34,
+ "comparators": {
+  "GCPN": 0.216,
+  "GrIDDD": 0.283,
+  "VSeq2Seq": 0.331,
+  "VJTNN": 0.373,
+  "HierG2G": 0.477
+ }
+}

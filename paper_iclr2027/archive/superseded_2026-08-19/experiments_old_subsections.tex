@@ -1,0 +1,201 @@
+% ARCHIVED 2026-08-19 -- superseded by the section rewrite.
+% Old 5.6-5.9: correctness / 128-source competence / one-step tilt / designed-not-measured. Held eq:ablation, tab:qed, sec:exp-{correctness,competence,attribution,multiobj,capabilities}.
+% Verbatim; not \input by main.tex.
+
+\subsection{The implemented process reproduces its own frozen artifacts}
+\label{sec:exp-correctness}
+
+Reruns reproduce banked artifacts exactly, which is what makes every seed-paired comparison below meaningful: the frozen training assembly is reproduced \emph{bitwise}, an extraction path agrees with its reference to $1.49\times10^{-7}$, a candidate-index slice reproduces the banked first candidate on all $64$ development sources with $4$ of $4$ re-executed molecules identical as SMILES, and the frozen controller head was byte-identical by hash across a session that trained a different head, so ``frozen in advance'' is checkable rather than asserted.
+% source: docs/SESSION_RUN_MANIFEST_2026-08-18.md rows 1, 5, 13-14, "Parity checks that gate these numbers", "Frozen assets used throughout"
+\Cref{app:audit} adds oracle and environment portability; these bound reproduction error, not quality.
+
+% ===== GAP: NUMBER NOT IN VERIFIED SOURCE SET =====  [U1] exact-DP verification
+% The exact-dynamic-programming verification of Theorem 1 HAS been run on an
+% enumerable verification slice and an artifact exists in the repository
+% (diagnostics/exactness/editing_v2_experiment_b_exact_control.json).  Its
+% values are deliberately NOT quoted: that artifact is outside the seven
+% verified sources this draft may quote from, and it self-labels
+% DEVELOPMENT_RESULT_NOT_PAPER_BEARING on a carbon-only slice.
+% TO CLOSE: either (a) promote it into the verified source set with provenance
+% (producing script, git commit, input hashes) and quote it, or (b) rebuild the
+% enumerable slice on the current operator registry over the preregistered
+% goal/budget grid.  Quantities needed: total-variation residual between the
+% exactly-controlled terminal law and the analytic tilt; support-violation
+% count (must be 0); backward-equation residual; and the same three after a
+% mid-trajectory goal replacement.
+The remaining question is whether the exact backward recursion of \cref{thm:doob} reproduces the analytic terminal tilt on an enumerable state space with zero transitions outside the executor's support. On that slice the total-variation residual, support-violation count, backward-equation residual, and the same three after a mid-trajectory goal replacement are \XXX{}, \XXX{}, \XXX{} and \XXX{}.
+\gapunverified{Promote the existing enumerable-slice artifact with provenance, or re-run it on the current registry over the preregistered goal/budget grid.}
+
+\subsection{A controller frozen before the panel was opened transfers to prospectively held-out sources}
+\label{sec:exp-competence}
+
+\input{sections/fig3}
+
+The task is the standard similarity-constrained editing benchmark: from a source with drug-likeness in $[0.7,0.8]$, return $k$ candidates; the source is solved if at least one has drug-likeness in $[0.9,1.0]$ and Tanimoto similarity $\ge0.40$.
+% source: docs/GRIDDD_JIN_PROTOCOL.md, "The protocol, taken verbatim from GrIDDD" (QED column)
+A preregistration written before the panel was opened fixed the controller --- a receding-horizon particle realization of \eqref{eq:central} with goal region $(\ge0.90,\ \ge0.40)$, the frozen value head, horizon $40$, budget index capped at $24$, $32$ particles --- and fixed that the panel is used once and nothing is re-chosen afterwards.
+% source: docs/AMENDMENT_VALIDATION_128.md, "What is selected, and on what evidence" and "The design, and the thing that would invalidate it"
+
+\begin{table}[t]
+\centering
+\caption{\small\textbf{Similarity-constrained editing: success rate by source.} Estimand: the probability a source is solved; independent statistical unit: the source molecule. \emph{Reported context} rows are transcribed from the comparator's published table and are \emph{not} a matched rerun --- different panel, different candidate budget, no compute matched. $^\dagger$consumed in controller selection; $^\ddagger$prospective, opened once; $^\S$untouched. The \method{} panels are disjoint from each other and from the official cohort. The last block gives the candidate-efficiency curve, which the preregistration binds us to publish at every $k$ so the headline cannot be chosen after the fact. Row 3 is a further published method on this task, recorded in our comparator notes as must-cite and \emph{higher} than any row here but absent from the protocol's table; its value is outside this draft's verified source set and is \XXX{}.}
+\label{tab:qed}
+\small
+\begin{tabular}{@{}llrr@{}}
+\toprule
+Method & Source panel & $k$ & Solved\\
+\midrule
+\multicolumn{4}{@{}l}{\emph{Reported context --- transcribed from the comparator's published table, not rerun here}}\\
+% source: docs/GRIDDD_JIN_PROTOCOL.md published table (JT-VAE 8.8, CG-VAE 4.8, GCPN 9.4, GrIDDD 45.1)
+JT-VAE / CG-VAE / GCPN & $800$ official & $20$ & $8.8$ / $4.8$ / $9.4\%$\\
+GrIDDD & $800$ official & $20$ & $\mathbf{45.1\%}$\\
+% ===== GAP: MISSING COMPARATOR ROW =====  [G8] a stronger published comparator is absent
+% docs/GRIDDD_JIN_PROTOCOL.md's published table -- the only verified source for
+% comparator numbers -- lists JT-VAE, CG-VAE, GCPN and GrIDDD and NOTHING ELSE.
+% The project's own comparator audit records at least one further published
+% method on the same constrained-ZINC QED task at delta >= 0.4 whose reported
+% QED success rate is HIGHER than both GrIDDD's and this paper's, and labels it
+% "Tier A - must-cite".  It survives in two places only:
+%   docs/PAPER_REFRAME_CONTROL_SUBSTRATE.md:445  (a SUPERSEDED / ARCHIVED doc)
+%   the committed revision of docs/VALID128_K8_RESULT.json, whose `comparator`
+%   block carried it with the note "Tier A must-cite and is higher; this is not
+%   SOTA" -- a block DELETED in the current uncommitted working-tree revision.
+% Its value is therefore outside this draft's verified source set and is left
+% \XXX rather than transcribed.
+% THIS IS A CLAIM-DISCIPLINE HAZARD, NOT A COSMETIC GAP.  Publishing Table 1 as
+% it stands presents a comparator table from which a stronger published row has
+% been dropped.
+% TO CLOSE: verify the value and its protocol against the published record,
+% confirm the source cohort and similarity threshold match this task, promote it
+% into the verified source set, and add the row.  If its protocol does NOT
+% match, say so explicitly in the caption instead of omitting it silently.
+Further published, off-table & $800$ official & $20$ & \XXX{}\\
+\midrule
+% source: docs/EXTENDED_CURVE_64.json ALL.curve[19]=47; percentage in docs/SESSION_RUN_MANIFEST_2026-08-18.md
+\method{} & $64$ development$^\dagger$ & $20$ & $47/64=73.4\%$\\
+% source: docs/VALID128_K8_RESULT.json cumulative[7]=63, coverage=0.4921875
+\method{} & $128$ held-out$^\ddagger$ & $8$  & $63/128=\mathbf{49.2\%}$\\
+% source: docs/VALID128_CURVE.json cumulative[11]=70, coverage["12"]=0.546875
+\method{} & $128$ held-out$^\ddagger$ & $12$ & $70/128=\mathbf{54.7\%}$\\
+% ===== GAP: NOT YET RUN =====  [G1] official 800 x 20 cohort
+% The official 800-source x 20-candidate run has NOT been executed.  One of the
+% 800 sources was executed by a pre-freeze mechanical smoke test whose output
+% was quarantined unread, so the cohort is inferentially unconsumed.
+% TO CLOSE: run all 800 official sources x 20 candidates ONCE with the frozen
+% controller; bank per-source outcomes and the curve at every k from 1 to 20.
+\method{} & $800$ official$^\S$ & $20$ & \XXX{}\\
+\midrule
+% source: docs/VALID128_CURVE.json cumulative = [31,40,44,48,51,56,61,63,65,67,68,70], n=128, K=12
+\multicolumn{4}{@{}l}{\scriptsize Cumulative solved at $k{=}1,2,\ldots$\ \ $128$ held-out: $31\,40\,44\,48\,51\,56\,61\,\mathbf{63}\,65\,67\,68\,70$ (not run beyond $k{=}12$).}\\
+% source: docs/EXTENDED_CURVE_64.json ALL.curve, of=64
+\multicolumn{4}{@{}l}{\scriptsize $64$ development: $28\,32\,35\,36\,37\,40\,40\,41\,42\,43\,44\,44\,44\,44\,44\,44\,44\,46\,46\,47$.}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Three qualifications belong with \cref{tab:qed} rather than after it.
+The comparison against the published $45.1\%$ at $20$ candidates is \emph{not} matched: a different source panel, so the numbers estimate the same quantity on different populations of sources.
+The candidate budget differs conservatively, $8$ and $12$ being fewer than $20$, while the per-candidate compute differs the other way --- one returned candidate here is a particle run of $32\times40=1{,}280$ internal molecule evaluations, so the returned-candidate \emph{interface} matches while the compute behind each returned molecule does not.
+% source: docs/AMENDMENT_VALIDATION_128.md ("k = 8 is fewer returned candidates than GrIDDD's 20 ..."; "32 particles x 40 steps = 1,280 internal molecule evaluations")
+We state the claim as improved task performance at a measured inference-time cost, never as greater efficiency, and never offer the absence of objective-specific retraining as compensation; the inference ledger is $1{,}024$ runs consuming $1{,}167{,}787$ committed transitions, $248$ contacting the goal region and $776$ ending with no surviving particle, returning $2.58$ distinct molecules per run.
+% source: docs/VALID128_K8_RESULT.json runs=1024, work_transitions=1167787, contact_runs=248, extinct_runs=776, mean_distinct_returned=2.578125
+This establishes that a controller selected on development sources reproduced its behaviour on a panel never looked at --- not that \method{} outperforms the comparator on its own benchmark: the published contract is $800$ official sources at $20$ candidates, untouched until the last \method{} row exists.
+\emph{Limitations.} The development panel is consumed and its curve is selection evidence only; the validation panel carries no solvability strata, which is what makes it prospective; and the resampling unit is the source ($n=128$).
+
+\subsection{An exact one-step tilt of the same process finds nothing where future-aware control succeeds}
+\label{sec:exp-attribution}
+
+A sharp developmental answer exists for the strongest cheap alternative: the one-step policy tilts the frozen reference law by the \emph{immediate} property value of each successor over the full legal fiber, $\pi(y\mid x)\propto R_\theta(y\mid x)\,\mathrm{QED}(y)$ --- an exact one-step terminal tilt, parameter-free, preregistered before any outcome existed.
+% source: docs/GRIDDD_JIN_PROTOCOL.md, "THE INFERENCE POLICY" (an *exact* one-step terminal tilt)
+On the disjoint $64$-source development panel it produced $0$ successes in $320$ trajectories
+% source: docs/GRIDDD_JIN_PROTOCOL.md, CURRENT AMENDMENT ("Policy B was refuted 0/320 on the disjoint 64-source development panel"); 320 = 64 sources x 5 replicates, same document
+for the expected reason: the target region is typically not reachable in one edit from a source at the low end of the property range, so what a one-step tilt optimizes is nearly uninformative about reachability within the remaining budget.
+
+That is evidence for the necessity of a forward-looking value, not the matched ablation: the arms differ in more than horizon, since the one-step arm reads the true objective of each successor while the deployed controller reads a learned value, and attribution needs both arms to share the landscape exactly --- the design of \eqref{eq:ablation}.
+With $\widehat F_\psi$ a property predictor trained on a fixed oracle-label budget and $g_z$ the terminal desirability built from it, the matched arms are
+\begin{equation}
+\underbrace{\;R_\theta(y\mid x)\;g_z(y)\;}_{\text{immediate}}
+\qquad\text{versus}\qquad
+\underbrace{\;R_\theta(y\mid x)\;h_\phi(y,z,b-1)\;}_{\text{future-aware}},
+\label{eq:ablation}
+\end{equation}
+run with the same frozen $R_\theta$, legal fibers, $\widehat F_\psi$, $g_z$, sources, seeds and returned-candidate budget.
+
+% ===== GAP: NOT YET RUN =====  [G2] matched immediate-vs-future ablation
+% The matched immediate-vs-future ablation of Eq. (ablation) has NOT been run.
+% Specified in docs/AMENDMENT_INVERSIONGNN_2OBJ.md, ADDENDUM II, "The causal
+% ablation this buys".  This paper's mechanism claim depends on it.
+% TO CLOSE: with F_psi_hat fixed and R_theta frozen, run both arms of Eq.
+% (ablation) from the frozen common initialization bank, same 5 preferences,
+% same seeds, same returned-candidate budget.  Quantities needed: per-source
+% paired outcome for each arm; the paired difference with a bootstrap interval
+% resampled over sources; and both inference ledgers (kernel calls, oracle
+% calls, committed edits, wall time) reported separately and never pooled.
+Under those conditions the matched paired difference between the immediate and future-aware arms is \XXX{}, on \XXX{} independent sources, with inference ledgers \XXX{} and \XXX{}.
+\gap{Both arms of \eqref{eq:ablation} from the frozen bank, shared $\widehat F_\psi$ and $R_\theta$, identical seeds and candidate budget; report the per-source paired difference with a bootstrap interval over sources, and both inference ledgers separately.}
+\emph{Limitation.} The $0/320$ figure is development-panel evidence about a policy rejected on it: a cheap one-step approximation fails here, which is not evidence that the learned value we deploy is why the deployed controller succeeds.
+
+\subsection{Designed but not measured: multi-objective control and process-level capabilities}
+\label{sec:exp-multiobj}
+\label{sec:exp-capabilities}
+
+The second benchmark asks whether the construction transfers to simultaneous multi-objective optimization; its published protocol includes task-specific training, which is what makes a matched-supervision comparison possible.
+It fixes $10{,}000$ oracle labels for training plus $5{,}000$ for optimization on two objectives ($20{,}000$ plus $5{,}000$ on four), five preference vectors and ten molecules per generation, so both methods receive identical supervision and diverge only in what they build from it: the comparator follows the gradient of a fitted property predictor, while \method{} fits the same predictor, scores oracle-free rollouts of the frozen $R_\theta$ with it, and learns the finite-horizon value \eqref{eq:cheby}.
+% source: docs/AMENDMENT_INVERSIONGNN_2OBJ.md, "Pinned by the paper"
+The starting molecules and the hypervolume reference point are not pinned by the published paper, so we rerun the comparator from a common, objective-blind initialization bank frozen by hash beforehand; its published APS $0.841$, novelty $100\%$ and diversity $0.768$ are \emph{reported context} under an unspecified initialization, and hypervolume under our preregistered reference point is not comparable to theirs.
+% source: docs/AMENDMENT_INVERSIONGNN_2OBJ.md, "NOT pinned ...", "THE DESIGN: rerun the comparator rather than quote it", and the reported values
+
+% ===== GAP: NOT YET RUN =====  [G3] JNK3+GSK3b, TWO objectives
+% NO RESULT EXISTS.  The protocol audit, the frozen initialization bank, the
+% five preference vectors and the controller design are settled in
+% docs/AMENDMENT_INVERSIONGNN_2OBJ.md -- follow ADDENDUM II, which SUPERSEDES
+% the earlier B_lambda region construction.  Nothing has produced an APS,
+% novelty, diversity or hypervolume value.
+% TO CLOSE: (1) train F_psi_hat on 10,000 random-ZINC labels drawn under the
+% comparator's sampling law; (2) score oracle-free R_theta rollouts with
+% F_psi_hat and train h_phi to E[g_lambda(X_b)] per Eq. (cheby); (3) run BOTH
+% methods from the frozen initialization bank, same 5 preferences, same
+% 5,000-evaluation budget; (4) report APS (mean of top-100), novelty and
+% top-K diversity for every arm, plus hypervolume under the preregistered
+% origin reference point computed identically for all arms.  Never pool the
+% published row with the matched rerun.
+%
+% ===== GAP: NOT YET RUN =====  [G4] JNK3+GSK3b, FOUR objectives
+% NO RESULT EXISTS, and this task is gated: it runs only after the 2-objective
+% decision rule in docs/AMENDMENT_INVERSIONGNN_2OBJ.md is met.
+% TO CLOSE: the same procedure as [G3] at 20,000 + 5,000 oracle calls.
+%
+% ===== GAP: NOT YET RUN =====  [G5] dynamic retargeting
+% NOT RUN.  TO CLOSE: at a fixed fraction of the budget replace goal z by z'
+% and compare four arms on identical sources and seeds -- continue under
+% Corollary 3 with the remaining budget re-solved for z'; restart from the
+% source lead under z'; restart from the switch molecule with a fresh sampler;
+% a static compromise goal fixed at the start.  Report post-switch committed
+% edits and oracle calls, retention of pre-switch gains, and per-source paired
+% differences with a bootstrap interval over sources.  Design: app:capdesign.
+%
+% ===== GAP: NOT YET RUN =====  [G6] pathwise constraints
+% NOT RUN.  TO CLOSE: with a rule-closed predicate P (protected scaffold;
+% forbidden substructure; size/charge window; similarity floor), compare
+% support restriction against endpoint rejection and a terminal penalty on
+% identical sources and seeds.  Report the fraction of trajectories feasible at
+% EVERY committed state (1 by construction under support restriction -- an
+% implementation check, not a finding), oracle calls spent on trajectories that
+% end infeasible, and final quality among feasible candidates.  A CUMULATIVE
+% constraint under state augmentation is a different mechanism and is reported
+% separately, never pooled.  Design: app:capdesign.
+%
+% ===== GAP: NOT YET RUN =====  [G7] the Pareto fan
+% NOT RUN.  TO CLOSE: from one saved trajectory prefix launch several
+% preference-conditioned continuations under Eq. (cheby) with the budget that
+% prefix left, and compare against independent restarts from the source lead at
+% the SAME total oracle budget.  Report hypervolume against oracle calls,
+% distinct nondominated molecules per oracle call, and the accounting itself --
+% shared-prefix cost counted ONCE for the fan and once per branch for the
+% restart arm.  Design: app:capdesign.  Figure: app:fig4.
+Every \method{} and matched-rerun quantity is unmeasured: APS \XXX{}, novelty \XXX{}, top-$K$ diversity \XXX{} and hypervolume \XXX{} for the future-aware arm, the immediate arm of \eqref{eq:ablation} and the comparator rerun alike, and likewise \XXX{} for the four-objective escalation (\cref{app:multiobjtable}).
+So are three process-level capabilities, designed in \cref{app:capdesign} with their figure in \cref{app:fig4}.
+\emph{Retargeting} --- \cref{cor:retarget} fixes what continuation and restart compute, not which is cheaper: post-switch cost \XXX{} against restart, retention of pre-switch gains \XXX{}, on \XXX{} paired sources.
+\emph{Pathwise constraints} --- complete feasibility is a construction for a rule-closed predicate (\cref{sec:pathwise}), so what is measurable is the budget endpoint filtering wastes: feasibility fraction \XXX{} against \XXX{}, wasted oracle calls \XXX{} against \XXX{}, final quality \XXX{}.
+\emph{The Pareto fan} --- branching from a shared prefix is exact continuation: hypervolume at matched oracle budget \XXX{} against independent restarts \XXX{}, nondominated molecules per oracle call \XXX{} against \XXX{}.
+\gap{Train $\widehat F_\psi$ on the $10{,}000$-label budget and $h_\phi$ per \eqref{eq:cheby}; run both methods and both arms of \eqref{eq:ablation} from the frozen bank under the $5{,}000$-evaluation budget, reporting APS, novelty, diversity and hypervolume identically for every arm. Then the four switch arms; support restriction against endpoint rejection; one prefix fanned against independent restarts at matched oracle budget.}

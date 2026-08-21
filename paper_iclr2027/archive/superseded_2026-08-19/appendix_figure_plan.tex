@@ -1,0 +1,35 @@
+% ARCHIVED 2026-08-19 -- superseded by the section rewrite.
+% Old app:figplan. Referenced sec:exp-attribution, sec:exp-capabilities, eq:ablation, tab:qed -- all archived.
+% Verbatim; not \input by main.tex.
+
+\section{Figure plan}
+\label{app:figplan}
+
+Each main-text figure is specified panel by panel so that a plotting script can be written against it without further instruction. Nothing below authorizes drawing a value that has not been measured.
+
+\paragraph{\Cref{fig:ppp} --- possible, plausible, purposeful.}
+\textbf{(a)}~At a molecule $x$, the executor enumerates $\A(x)$ and pushes it forward to $\Sset(x)$; draw several distinct edit marks converging on one successor molecule, since that convergence is why the learned law is defined on molecules (\cref{sec:canonical}). Group successors by their effect on heavy-atom count --- one fewer, the same, one more --- so trans-dimensionality is visible rather than asserted. Draw illegal edits \emph{absent}, never drawn-and-crossed-out: they are outside the support, not penalized inside it.
+\textbf{(b)}~$R_\theta(\cdot\mid x)$ as bar heights over exactly the successors of (a) and no others, annotated with the two inputs the network does not receive --- the source lead and the objective.
+\textbf{(c)}~The same bars multiplied by $h_\phi(y,z,b-1)$. Show one successor whose immediate property score is unremarkable but whose future value is high, and label it: this is the move that is useful for what it makes reachable.
+\textbf{(d)}~Inset: the goal is replaced at $b'$ edits remaining. Panels (a) and (b) are unchanged; only the third factor is recomputed. Contrast the continuation of \cref{cor:retarget} against discarding the trajectory and restarting from the source lead.
+Molecules and edit marks keep distinct glyphs throughout the paper.
+
+\paragraph{\Cref{fig:trained} --- what is trained.}
+\textbf{Row 1:} real molecule pairs, compiled programs of executable edits certified by executor replay, the generator-matching regression, and the resulting $R_\theta$; draw the freeze explicitly, because every later comparison holds it fixed.
+\textbf{Row 2:} rollouts of the frozen $R_\theta$ under no objective at all; future-value labels per state, budget and goal, plus the Bellman consistency term. Draw the budget axis: the same molecule carries different values at different remaining budgets, which is why the controller conditions on $b$. Draw the validation partition as by-source and label it as the leakage control it is.
+\textbf{Row 3:} both arms of \eqref{eq:ablation} given the identical oracle budget and identical $\widehat F_\psi$; one molecule scored differently by the two, with the purpose of the comparison stated on the panel.
+
+\paragraph{\Cref{fig:competence} --- competence.}
+\textbf{(a)}~Cumulative distinct sources solved against $k$: the $128$-source held-out panel over $k=1\ldots12$ and the $64$-source development panel over $k=1\ldots20$, both from the lower block of \cref{tab:qed}. Mark $k=8$ as the preregistered operating point. Draw the comparator's published rate as a horizontal reference line annotated with its own candidate budget, $k=20$. Draw the development curve in a visibly secondary style: it is consumed selection evidence, not a result. \emph{Drawable now.}
+\textbf{(b)}~The panel ladder --- development, prospective validation, official cohort --- with verified disjointness and the official cohort drawn unopened. This is what makes ``prospective'' checkable. \emph{Drawable now.}
+\textbf{(c)}~The comparator's published table as reported context, visually separated from every \method{} quantity, with both mismatches printed on the panel: different source panel, different per-candidate compute. \emph{Drawable now.}
+\textbf{(d)}~Three ledgers side by side and never summed --- process training, controller training, inference --- the inference column giving committed transitions, controlled runs, contact runs, extinct runs and distinct molecules returned per run. Inference column drawable now; the two training columns are \XXX{} until those costs are banked with provenance.
+\textbf{(e)}~The official-cohort row of \cref{tab:qed}, left visibly empty. A blank cell is the intended reading, not an omission.
+
+\paragraph{\Cref{fig:consequences} --- process-level consequences.}
+\textbf{(a)}~Goal replacement at a fixed fraction of the budget, with the four registered arms --- continue on the remaining budget, restart from the source lead, restart from the switch molecule with a fresh sampler, static compromise --- in both objective space and cost. \emph{Blocked: \cref{sec:exp-capabilities}.}
+\textbf{(b)}~Feasibility at every committed state under support restriction against endpoint rejection and a terminal penalty, plus oracle calls each arm spends on trajectories that end infeasible. Under support restriction the feasibility trace is flat by construction and the panel must say so on its face. \emph{Blocked: \cref{sec:exp-capabilities}.}
+\textbf{(c)}~One source lead, one shared prefix, several preference-conditioned continuations, and the front they jointly cover against independent restarts at matched total oracle budget; the shared-prefix cost counted once for the fan and once per branch for the restart arm, with the accounting shown. Every molecule drawn must come from a real run. \emph{Blocked: \cref{sec:exp-capabilities}.}
+\textbf{(d)}~Both arms of \eqref{eq:ablation} on one shared landscape, the paired per-source difference with its bootstrap interval, and the two inference ledgers side by side and unpooled. \emph{Blocked: \cref{sec:exp-attribution}.}
+\textbf{Hero trajectory.} One real trajectory, every displayed state a complete molecule, visibly creating and deleting atoms, changing ring topology, responding to a replaced objective by reorganizing structure it had already built, and ending in the new objective region. It demonstrates what the process exposes; it is not evidence of quality and its caption must say so. \emph{Blocked on the runs above.}
+

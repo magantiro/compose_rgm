@@ -1,0 +1,29 @@
+% FIGURE 1 --- conceptual overview. Three stages acting on THE SAME successor
+% set, so the reader sees three layers on one molecular graph, not three methods.
+% Polish this first: it should carry conceptual load the prose then need not.
+\begin{figure}[t]
+\centering
+\fbox{\parbox{0.97\textwidth}{\centering\vspace{10pt}\small\itshape
+[Figure to be drawn; conceptual, no data plotted.]\\[8pt]
+\normalfont\footnotesize
+\begin{minipage}[t]{0.31\linewidth}\centering
+\textbf{(a) possible}\\[2pt]
+one molecule $x$ with $5$--$6$ representative legal successors;\\
+cardinality- and topology-changing edits visible\\[3pt]
+$x\xrightarrow{\ \A(x)\ }\{y_1,\dots,y_m\}$
+\end{minipage}\hfill
+\begin{minipage}[t]{0.31\linewidth}\centering
+\textbf{(b) plausible}\\[2pt]
+\emph{the same} successors; arrow width $=R_\theta(y\mid x)$\\[3pt]
+learned, goal-blind
+\end{minipage}\hfill
+\begin{minipage}[t]{0.31\linewidth}\centering
+\textbf{(c) purposeful}\\[2pt]
+\emph{the same} successors, reweighted by goal $z$ and budget $b$\\[3pt]
+$P_\phi\propto R_\theta\,h_\phi$;\\ two or three future paths at right
+\end{minipage}\\[6pt]
+\emph{tiny inset, not a fourth panel:}\quad $z_A\rightarrow x_3\rightarrow z_B$ \ (foreshadows retargeting)
+\vspace{8pt}}}
+\caption{\small\textbf{Possible, plausible, purposeful.} An exact executor defines the legal molecular successors of a state, the goal-independent reference process $R_\theta$ learns probability over those transitions, and a finite-horizon controller reweights the same process toward the current design objective. All three panels act on one successor set. When the objective changes, only the controller changes.}
+\label{fig:ppp}
+\end{figure}

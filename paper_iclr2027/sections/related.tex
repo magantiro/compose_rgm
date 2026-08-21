@@ -1,0 +1,20 @@
+% ============================================================================
+% RELATED WORK --- three paragraphs, each closing on the COMPOSE distinction.
+%   P1  molecular generation/editing -> GrIDDD          -> our molecular process
+%   P2  generator matching/Edit Flows -> MadSBM
+%                                     -> Value Matching/pCoMole
+%                                     -> our process/control decomposition
+%   P3  InversionGNN/PepTune/AReUReDi/Routing by Reaching
+%                                     -> our closed-loop multi-objective control
+% No fourth "stochastic control" paragraph: Doob / Feynman-Kac / Schrodinger
+% citations live in the preliminaries and Section 5.  Graph-GRPO is deliberately
+% held for the extended related work unless we compare against it directly.
+% ============================================================================
+\section{Related work}
+\label{sec:related}
+
+Molecular generation spans latent-variable, graph-to-graph, reinforcement-learning, diffusion, and flow-based approaches, while molecular optimization has also been formulated directly through graph edits, fragment proposals, evolutionary operators, and MCMC transitions \citep{gomezbombarelli2018chemvae,jin2018jtvae,jin2019vjtnn,zhou2019moldqn,jensen2019graphga,xie2021mars,fu2021mimosa,vignac2023digress,campbell2024multiflow}. Recent work has begun to relax the fixed-size assumption of graph generation. GrIDDD introduces node insertion and deletion into discrete graph diffusion, allowing molecular graphs to grow and shrink during denoising \citep{ninniri2025griddd}. \method{} instead learns a goal-independent stochastic law over an explicit, state-dependent molecular rewrite space, making the transition process itself the object of subsequent control.
+
+A related line of work treats generation and adaptation directly through stochastic processes. Generator matching provides a general framework for learning Markov generators from tractable conditional processes, while Edit Flows develops insertion, deletion, and substitution dynamics for variable-length discrete generation \citep{holderrieth2025generator,havasi2025editflows}. MadSBM is a close mathematical relative, formulating peptide generation as a controlled Markov process on an amino-acid edit graph, although its learned control constructs the generative transport rather than adapting an already learned molecular process \citep{goel2026madsbm}. Value Matching steers a frozen flow model through a learned value function, and pCoMole studies Pareto-constrained molecular editing with discrete flows \citep{jensen2026valuematching,pcomole2026}. Future-aware generative control is therefore not unique to \method{}. Value-guided flow adaptation and pCoMole likewise use learned or rollout-estimated future value. Our distinction is the substrate on which that control operates. It is a learned canonical transition law over executable molecular graphs, which is what allows realized molecular states to be reused, retargeted, and constrained.
+
+Multi-objective molecular design has been addressed through surrogate-based optimization, evolutionary search, and inference-time guidance of generative models. InversionGNN combines multi-property prediction with gradient-based Pareto search in discrete molecular space \citep{niu2025inversiongnn}, while PepTune and AReUReDi use discrete generative models with multi-objective tree search or Pareto-oriented refinement \citep{tang2025peptune,chen2025areuredi}. Routing by Reaching similarly composes pretrained GFlowNets for multi-objective generation at inference time \citep{yoon2026routing}. \method{} instead places multi-objective control on a reusable molecular transition process, so that future reachability and already-reached molecular states can participate directly in Pareto exploration.

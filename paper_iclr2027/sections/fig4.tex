@@ -1,0 +1,14 @@
+% APPENDIX FIGURE --- training / data-flow schematic.  Deliberately NOT promoted
+% to the main text: Figure 1 plus the Method prose already carry this, and a
+% second schematic before any evidence reads as schematic -> schematic -> results.
+\begin{figure}[h]
+\centering
+\fbox{\begin{minipage}{0.95\linewidth}\centering\footnotesize
+{\color{red}\textbf{[Schematic to be drawn. No data plotted.]}}\\[3pt]
+\textbf{1.} pairs $\to$ certified edit programs $\to$ successor-likelihood training $\to R_\theta$ \emph{(frozen)}\\
+\textbf{2.} frozen-$R_\theta$ rollouts $+\,z\to$ future-value labels $+$ Bellman $\to h_\phi$\\
+\textbf{3.} $\widehat F_\psi$ read at the successor \emph{vs.} $\widehat F_\psi$ propagated through $R_\theta$
+\end{minipage}}
+\caption{\small\textbf{What is trained, and what each trained object is asked to know.} The reference edit law is fitted from certified programs of executable edits and frozen thereafter, reading neither the source lead nor the objective. The goal-conditioned value is fitted from rollouts of that frozen law, with the budget axis explicit and validation held out by source molecule. The third row is the immediate-versus-future-aware contrast. Nothing here is a result.}
+\label{fig:trained}
+\end{figure}
