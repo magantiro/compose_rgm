@@ -79,3 +79,6 @@ paper_iclr2027/*.log
 paper_iclr2027/*.out
 paper_iclr2027/*.fls
 paper_iclr2027/*.fdb_latexmk
+
+# isolated PyTDC benchmark env; never mix with the pinned chemistry env
+.venv_tdc/
