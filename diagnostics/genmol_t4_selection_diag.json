@@ -1,0 +1,105 @@
+{
+ "cells": [
+  {
+   "idx": 2,
+   "target": "braf",
+   "chembl": "CHEMBL410295",
+   "delta": 0.4,
+   "qed": 0.3539,
+   "sa": 2.721,
+   "rounds": 10,
+   "per_round": [
+    {
+     "round": 1,
+     "n_cand": 208,
+     "n_feas_enum": 0,
+     "n_feas_picked": 0,
+     "min_v": 0.2526,
+     "missed_feasible": []
+    },
+    {
+     "round": 2,
+     "n_cand": 685,
+     "n_feas_enum": 0,
+     "n_feas_picked": 0,
+     "min_v": 0.1935,
+     "missed_feasible": []
+    },
+    {
+     "round": 3,
+     "n_cand": 637,
+     "n_feas_enum": 0,
+     "n_feas_picked": 0,
+     "min_v": 0.1435,
+     "missed_feasible": []
+    },
+    {
+     "round": 4,
+     "n_cand": 740,
+     "n_feas_enum": 0,
+     "n_feas_picked": 0,
+     "min_v": 0.115,
+     "missed_feasible": []
+    },
+    {
+     "round": 5,
+     "n_cand": 729,
+     "n_feas_enum": 0,
+     "n_feas_picked": 0,
+     "min_v": 0.0904,
+     "missed_feasible": []
+    },
+    {
+     "round": 6,
+     "n_cand": 725,
+     "n_feas_enum": 0,
+     "n_feas_picked": 0,
+     "min_v": 0.0904,
+     "missed_feasible": []
+    },
+    {
+     "round": 7,
+     "n_cand": 719,
+     "n_feas_enum": 0,
+     "n_feas_picked": 0,
+     "min_v": 0.0904,
+     "missed_feasible": []
+    },
+    {
+     "round": 8,
+     "n_cand": 742,
+     "n_feas_enum": 0,
+     "n_feas_picked": 0,
+     "min_v": 0.0857,
+     "missed_feasible": []
+    },
+    {
+     "round": 9,
+     "n_cand": 722,
+     "n_feas_enum": 0,
+     "n_feas_picked": 0,
+     "min_v": 0.0857,
+     "missed_feasible": []
+    },
+    {
+     "round": 10,
+     "n_cand": 702,
+     "n_feas_enum": 0,
+     "n_feas_picked": 0,
+     "min_v": 0.0857,
+     "missed_feasible": []
+    }
+   ],
+   "parents": 3,
+   "seed_rng": 20260822,
+   "rounds_run": 10,
+   "n_docked": 200,
+   "feasible_enumerated_total": 0,
+   "feasible_docked_total": 0,
+   "returned_feasible": 0,
+   "verdict": "MYOPIA: no feasible candidate was ever enumerated"
+  }
+ ],
+ "rounds": 10,
+ "per_round": 20
+}

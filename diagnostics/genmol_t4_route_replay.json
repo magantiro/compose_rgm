@@ -1,0 +1,167 @@
+{
+ "cells": [
+  {
+   "idx": 18,
+   "target": "parp1",
+   "chembl": "CHEMBL383578",
+   "delta": 0.4,
+   "qed": 0.3618,
+   "sa": 2.417,
+   "route_found": true,
+   "route_depth": 3,
+   "seconds_route": 309.6,
+   "steps": [
+    {
+     "j": 0,
+     "n_fiber": 272,
+     "enumerated": true,
+     "rank": 102,
+     "pct": 37.5,
+     "weight": 0.0005966655375268467,
+     "rtheta": 5.610728128438496e-05,
+     "v": 0.2154,
+     "in_top20": false
+    },
+    {
+     "j": 1,
+     "n_fiber": 274,
+     "enumerated": true,
+     "rank": 0,
+     "pct": 0.0,
+     "weight": 0.1689665825666551,
+     "rtheta": 0.021620254737794567,
+     "v": 0.0455,
+     "in_top20": true
+    },
+    {
+     "j": 2,
+     "n_fiber": 262,
+     "enumerated": true,
+     "rank": 5,
+     "pct": 1.9,
+     "weight": 0.0458124119948938,
+     "rtheta": 0.008463680890675684,
+     "v": 0.0,
+     "in_top20": true
+    }
+   ],
+   "n_steps": 3,
+   "n_not_enumerated": 0,
+   "n_in_top20": 2,
+   "median_rank_pct": 1.9,
+   "verdict": "LINEAGE COLLAPSE: route steps rank well but are not retained -> fix archive diversity"
+  },
+  {
+   "idx": 6,
+   "target": "fa7",
+   "chembl": "CHEMBL379809",
+   "delta": 0.4,
+   "qed": 0.2746,
+   "sa": 3.163,
+   "route_found": true,
+   "route_depth": 7,
+   "seconds_route": 1158.7,
+   "steps": [
+    {
+     "j": 0,
+     "n_fiber": 276,
+     "enumerated": true,
+     "rank": 13,
+     "pct": 4.7,
+     "weight": 0.014029218941205885,
+     "rtheta": 0.00197112441559292,
+     "v": 0.3454,
+     "in_top20": true
+    },
+    {
+     "j": 1,
+     "n_fiber": 278,
+     "enumerated": true,
+     "rank": 20,
+     "pct": 7.2,
+     "weight": 0.007559578706758034,
+     "rtheta": 0.002123558219402693,
+     "v": 0.181,
+     "in_top20": false
+    },
+    {
+     "j": 2,
+     "n_fiber": 274,
+     "enumerated": true,
+     "rank": 2,
+     "pct": 0.7,
+     "weight": 0.08660007058133003,
+     "rtheta": 0.013989154101300715,
+     "v": 0.0636,
+     "in_top20": true
+    },
+    {
+     "j": 3,
+     "n_fiber": 275,
+     "enumerated": true,
+     "rank": 25,
+     "pct": 9.1,
+     "weight": 0.004096293688243917,
+     "rtheta": 0.0005435822580882608,
+     "v": 0.0846,
+     "in_top20": false
+    },
+    {
+     "j": 4,
+     "n_fiber": 277,
+     "enumerated": true,
+     "rank": 76,
+     "pct": 27.4,
+     "weight": 1.0630625677639051e-05,
+     "rtheta": 6.9289170870437794e-06,
+     "v": 0.0635,
+     "in_top20": false
+    },
+    {
+     "j": 5,
+     "n_fiber": 271,
+     "enumerated": true,
+     "rank": 44,
+     "pct": 16.2,
+     "weight": 0.00026805001317021994,
+     "rtheta": 3.831286653464227e-05,
+     "v": 0.0094,
+     "in_top20": false
+    },
+    {
+     "j": 6,
+     "n_fiber": 271,
+     "enumerated": true,
+     "rank": 4,
+     "pct": 1.5,
+     "weight": 0.019053041754462152,
+     "rtheta": 0.0012969559239721159,
+     "v": 0.0,
+     "in_top20": true
+    }
+   ],
+   "n_steps": 7,
+   "n_not_enumerated": 0,
+   "n_in_top20": 3,
+   "median_rank_pct": 7.2,
+   "verdict": "LINEAGE COLLAPSE: route steps rank well but are not retained -> fix archive diversity"
+  },
+  {
+   "idx": 2,
+   "target": "braf",
+   "chembl": "CHEMBL410295",
+   "delta": 0.4,
+   "qed": 0.3539,
+   "sa": 2.721,
+   "route_found": false,
+   "route_depth": null,
+   "seconds_route": 3687.6,
+   "steps": [],
+   "n_steps": 0,
+   "n_not_enumerated": 0,
+   "n_in_top20": 0,
+   "median_rank_pct": null,
+   "verdict": "no route found"
+  }
+ ]
+}
