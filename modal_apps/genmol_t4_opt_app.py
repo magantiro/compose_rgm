@@ -153,7 +153,7 @@ def _dock(smiles: str, target: str, tag: str) -> float | None:
     return None
 
 
-@app.function(image=image, cpu=(4.0, 4.0), memory=int(6 * 1024),
+@app.function(image=image, cpu=(1.0, 1.0), memory=int(6 * 1024),
               timeout=10 * 60 * 60, max_containers=40,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
 def optimize(task: dict[str, Any]) -> dict[str, Any]:

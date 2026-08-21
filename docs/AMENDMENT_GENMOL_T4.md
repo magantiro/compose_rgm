@@ -194,3 +194,91 @@ and genuinely filling one or more of the comparator's missing cells is already
 useful external evidence. Beating aggregate performance would be a strong result.
 Current status: **promising, scientifically clean, not yet demonstrated
 competitive.** Spend to date ~$1.00.
+
+---
+
+## BOOKKEEPING CORRECTIONS 2026-08-21
+
+**The delta-n audit is not a T4 gate.** It is a Methods/executor audit supporting
+the Sec. 4.1 claim that each admitted edit changes heavy-atom count by at most
+one. It is listed here only because it ran in the same window. The T4 substrate
+evidence is: docking parity (Gate 0), reachability and edit-depth regime
+(Gate 0.5b), endpoint-only similarity behaving correctly in smoke, and a
+cost-valid CPU configuration.
+
+**The official cohort is NOT prospectively untouched.** An earlier note in this
+file said the policy would be frozen "before any benchmark seed is touched."
+That is false and is retracted. The published 15 seeds were used for docking
+calibration (Gate 0) and reachability diagnostics (Gate 0.5b), and those results
+informed the horizon choice and the decision not to impose pathwise similarity.
+
+The accurate description, to be used in the paper:
+
+> The published benchmark cohort was used for protocol calibration and
+> task-geometry diagnostics; the optimization policy itself was developed on a
+> separate, seed-disjoint DUD-E/ChEMBL set and frozen before COMPOSE
+> docking-optimization results on the official 30 cells were generated.
+
+The 30-cell run is a faithful external benchmark evaluation with disjoint
+optimizer development. It is NOT a prospectively untouched held-out panel in the
+sense of the Jin 128-source panel, and must not be described as one.
+
+---
+
+## FROZEN LEVEL-1 POLICY CONTRACT. Frozen 2026-08-21, before the dev sweep.
+
+Nothing below may be changed because one target looks bad. Any change voids the
+dev sweep and requires a new amendment.
+
+**Algorithm.** realized molecule -> enumerate executable canonical fiber ->
+R_theta-weighted soft selection -> dock selected endpoints -> continue from
+promising realized molecules.
+
+    fiber enumeration   enumerate_factorized_marked_law at TIME_POINT=0.5,
+                        top APPLY_CAP=300 marks by R_theta probability per
+                        parent, applied and canonicalized
+    parents per round   3, ranked by (v>0, ds if feasible-and-docked else 0.0, v)
+                        so feasible-and-well-docked states are extended first
+    rounds              10
+    dockings per round  20   (dev)      100  (official)
+    evaluation budget   200 per cell (dev), 1000 per run (official)
+    max edit depth      10, one committed edit per round from a realized parent
+    selection rule      "tilt": sample k without replacement with weights
+                        w = R_theta(y|x) * exp(-v(y)/TAU_V), TAU_V = 0.1,
+                        clipped at 1e-30 and renormalized
+    feasibility         ENDPOINT-ONLY, evaluated on the candidate itself:
+                        v = max( (0.6-QED)+/0.6, (SA-4)+/4, (delta-sim)+/delta )
+                        feasible iff v == 0. sim is Morgan/Tanimoto to the SEED.
+                        Intermediates are NOT masked on QED/SA/similarity.
+    hard constraints    only COMPOSE's native executable-state guards
+    deduplication       by canonical SMILES. A candidate is skipped if it equals
+                        its parent, was already docked in this run, or is already
+                        in this round's candidate set.
+    no feasible cand.   the round still docks its k picks; tilt biases toward
+                        low v but does not require v==0. Infeasible molecules can
+                        never become the returned best. If the fiber is empty or
+                        every candidate fails property evaluation, the run stops
+                        early and is banked as-is.
+    returned molecule   argmin docking score over archive entries with v==0 and a
+                        docking score. If none, the cell returns no molecule and
+                        is recorded as a failure, not resampled.
+    RNG                 numpy default_rng(20260820 + cell_index), one stream per
+                        cell, fixed before launch
+    docking             qvina02, MOOD receptors, GenMol boxes, exhaustiveness=1,
+                        num_modes=10, obabel --gen3D, cpu=1 (Gate-0 validated)
+
+**Diagnostics recorded per cell**, independent unit = dev molecule:
+feasibility-acquisition curve, best feasible docking score vs evaluation count,
+docking improvement vs the starting lead, count and distinctness of feasible
+molecules, realized lineage and edit depth of the returned molecule.
+
+**Post-sweep decision hierarchy. Precommitted; no thrashing.**
+
+1. Level 1 behaves sensibly across the dev set -> FREEZE IT. No "let us see if
+   SMC gets another 0.2 kcal/mol." Authorize the official 30-cell run.
+2. A specifically diagnosed myopia failure -> and only then, test Level 2
+   (short explicit R_theta continuation lookahead) on dev molecules. Requires
+   evidence that locally disfavored edits systematically have better downstream
+   outcomes, not merely that performance is mediocre.
+3. Level 1 generally poor -> kill or demote T4. No rescue via h_phi, SMC,
+   weight sweeps, or target-specific rules.
