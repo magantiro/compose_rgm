@@ -1,29 +1,89 @@
 % FIGURE 1 --- conceptual overview. Three stages acting on THE SAME successor
 % set, so the reader sees three layers on one molecular graph, not three methods.
-% Polish this first: it should carry conceptual load the prose then need not.
+%
+% ===================== DRAWING SPEC. READ BEFORE DRAWING. =====================
+%
+% IDENTITY. The formal figure title is "Overview of COMPOSE", not a slogan.
+% POSSIBLE / PLAUSIBLE / PURPOSEFUL stay as the visual organizing motif inside
+% the panels, paired with the technical object each one names, so a reviewer
+% sees immediately what the word refers to. Do not promote the mnemonic to the
+% caption headline.
+%
+% THE ONE MATHEMATICAL CORRECTION. The previous sketch drew
+%     x --A(x)--> {y_1,...,y_m}
+% which conflates Sec. 4.1 with Sec. 4.3. A(x) is a set of EDIT MARKS; the y_i
+% are CANONICAL MOLECULAR SUCCESSORS. Draw the two as distinct layers:
+%     x  ->  A(x) [legal edit marks]  ->  S(x) [distinct molecular successors]
+% and draw at least TWO symmetry-equivalent marks converging on the SAME y_i.
+% That single visual detail explains canonicalization (Sec. 4.3) with no prose,
+% and mirrors the worked example already in the text: deleting any of the three
+% equivalent terminal methyls of 2-methylpropane gives propane once, carrying
+% the combined probability of those marks.
+%
+% CHOICE OF x. Take a real molecule from an audited executor fiber, not an
+% invented schematic. Source: docs/GENMOL_T4_SEEDS.json, whose full fibers were
+% enumerated in diagnostics/compose_delta_n_audit.json (10,199 applied
+% successors, 8 executor families, heavy-atom delta distribution
+% {-1: 95, 0: 5964, +1: 4140}, zero |delta n| > 1). Pick one on the small side
+% so five successors are legible at column width.
+%
+% THE FIVE SUCCESSORS. Representative, not exhaustive. One per row of the
+% audited family table:
+%     +1  atom_insert          (birth)
+%     -1  atom_delete          (death)
+%      0  atom_restate_semantic or bond_reorder   (same cardinality)
+%      0  bond_reroute         (topology change, cardinality fixed)
+%      0  cycle_close or cycle_open               (ring change, if legible)
+% Five is plenty. Do not draw all eight families.
+%
+% PANEL INVARIANCE IS THE WHOLE POINT. Panels (a), (b), (c) must show the SAME
+% x, the SAME y_i, in the SAME screen positions. Only the arrow weights change
+% between them. A reader who glances for five seconds should conclude: COMPOSE
+% did not change what is possible, it learned how probability is distributed
+% over what is possible, and then reweighted that by purpose.
+%
+%   (a) all arrows EQUAL weight. No probabilities yet.
+%   (b) arrow width = R_theta(y|x). Tag the panel "goal-independent".
+%   (c) arrow width = P_phi(y|x,z,b). For two or three successors, faint
+%       continuation trees to the right showing y_i -> ... -> desirable future.
+%       Without those trees h_phi reads as just another local scorer; with them
+%       the picture teaches that a locally ordinary edit is upweighted because
+%       of what remains REACHABLE from it. Draw z and b entering the controller
+%       ONLY, never R_theta.
+%
+% DELIBERATELY OMITTED. No retargeting inset. The old "z_A -> x_3 -> z_B" was
+% also semantically wrong (z_A does not transition into x_3, and x_3 does not
+% transition into z_B). Retargeting lands far better in Sec. 4.8 and Sec. 5.5,
+% once the reader already understands that x_3 is a real reusable molecular
+% state. Figure 1 carries one architecture: executor -> canonical successors ->
+% reference process -> future-aware control. That is enough.
+% ==============================================================================
 \begin{figure}[t]
 \centering
 \fbox{\parbox{0.97\textwidth}{\centering\vspace{10pt}\small\itshape
 [Figure to be drawn; conceptual, no data plotted.]\\[8pt]
 \normalfont\footnotesize
 \begin{minipage}[t]{0.31\linewidth}\centering
-\textbf{(a) possible}\\[2pt]
-one molecule $x$ with $5$--$6$ representative legal successors;\\
-cardinality- and topology-changing edits visible\\[3pt]
-$x\xrightarrow{\ \A(x)\ }\{y_1,\dots,y_m\}$
+\textbf{(a) Executable support: POSSIBLE}\\[2pt]
+one real molecule $x$ from an audited fiber; five representative canonical
+successors: birth, death, same-cardinality, topology, ring\\[3pt]
+$x\rightarrow\A(x)\rightarrow\Sset(x)$\\[2pt]
+\emph{edit marks}, then \emph{molecular successors}\\[3pt]
+two symmetry-equivalent marks merge onto one $y_i$;\\ all arrows equal weight
 \end{minipage}\hfill
 \begin{minipage}[t]{0.31\linewidth}\centering
-\textbf{(b) plausible}\\[2pt]
-\emph{the same} successors; arrow width $=R_\theta(y\mid x)$\\[3pt]
-learned, goal-blind
+\textbf{(b) Learned reference process: PLAUSIBLE}\\[2pt]
+\emph{the same} $x$, \emph{the same} $\Sset(x)$, \emph{the same} positions\\[3pt]
+arrow width $=R_\theta(y\mid x)$\\[3pt]
+goal-independent
 \end{minipage}\hfill
 \begin{minipage}[t]{0.31\linewidth}\centering
-\textbf{(c) purposeful}\\[2pt]
-\emph{the same} successors, reweighted by goal $z$ and budget $b$\\[3pt]
-$P_\phi\propto R_\theta\,h_\phi$;\\ two or three future paths at right
-\end{minipage}\\[6pt]
-\emph{tiny inset, not a fourth panel:}\quad $z_A\rightarrow x_3\rightarrow z_B$ \ (foreshadows retargeting)
+\textbf{(c) Finite-horizon control: PURPOSEFUL}\\[2pt]
+\emph{the same} support again, reweighted\\[3pt]
+$P_\phi\propto R_\theta\,h_\phi$\\[3pt]
+faint continuation trees on two or three successors; $z,b$ enter the controller only
+\end{minipage}
 \vspace{8pt}}}
-\caption{\small\textbf{Possible, plausible, purposeful.} An exact executor defines the legal molecular successors of a state; the goal-independent reference process $R_\theta$ learns probability over those transitions; and a finite-horizon controller reweights the same process toward the current design objective. All three panels act on one successor set. When the objective changes, only the controller changes.}
+\caption{\small\textbf{Overview of \method{}.} \method{} separates executable molecular support, learned molecular plausibility, and task-specific purpose. \textbf{(a)}~An exact graph-rewrite executor defines legal edit marks and their distinct canonical molecular successors $\Sset(x)$, including cardinality- and topology-changing transitions. \textbf{(b)}~The goal-independent reference process $R_\theta(y\mid x)$ assigns learned probability over the same state-dependent successor set. \textbf{(c)}~For objective $z$ and remaining budget $b$, \method{} reweights this frozen process by learned future value, $P_\phi(y\mid x,z,b)\propto R_\theta(y\mid x)\,h_\phi(y,z,b-1)$, favoring edits according to the molecular futures they leave reachable. Across objectives, the executable support and $R_\theta$ remain fixed; purpose enters through the controller.}
 \label{fig:ppp}
 \end{figure}
