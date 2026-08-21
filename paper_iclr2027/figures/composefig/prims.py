@@ -63,3 +63,33 @@ def panel_head(ax, cx, head, word, sub, y=0.935):
             fontsize=S.FS["word"], fontweight="bold")
     ax.text(cx, y-0.077,  sub,  ha="center", va="center", color=S.INK,
             fontsize=S.FS["sub"], alpha=0.75)
+
+
+def glow(ax, x, y, r, color=None, layers=7, a0=0.13, z=0):
+    """Soft radial halo. The references lean on these heavily for depth."""
+    c = color or S.INDIGO
+    for i in range(layers):
+        f = 1 - i/layers
+        ax.add_patch(Circle((x, y), r*(0.35 + 0.65*f),
+                            color=c, alpha=a0*(1-f)*1.6, lw=0, zorder=z))
+
+def wedge(ax, apex, top, bot, color=None, layers=16, a0=0.055, z=0):
+    """Gradient spotlight wedge from a point to a span, fading outward."""
+    from matplotlib.patches import Polygon
+    import numpy as _np
+    c = color or S.INDIGO
+    ax_, ay = apex
+    for i in range(layers):
+        f = (i+1)/layers
+        x = ax_ + (top[0]-ax_)*f
+        yt = ay + (top[1]-ay)*f
+        yb = ay + (bot[1]-ay)*f
+        ax.add_patch(Polygon([[ax_, ay], [x, yt], [x, yb]], closed=True,
+                             color=c, alpha=a0*(1-f*0.75), lw=0, zorder=z))
+
+def chip(ax, x, y, glyph, color=None, r=0.0135, fs=8.5, hot=False, z=3):
+    """Small rounded token carrying an edit glyph. Reads far better than a dot."""
+    c = color or (S.ORCHID if hot else S.MUTE)
+    ax.add_patch(Circle((x, y), r, color=c, alpha=1.0 if hot else 0.55, lw=0, zorder=z))
+    ax.text(x, y, glyph, ha="center", va="center", color="white",
+            fontsize=fs, fontweight="bold", zorder=z+1)

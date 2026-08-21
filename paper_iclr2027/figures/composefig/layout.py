@@ -13,13 +13,16 @@ def canvas(w=16, h=9, dpi=200):
         boxstyle="round,pad=0,rounding_size=0.02", fc=S.GROUND, ec="none", zorder=-1))
     return fig, ax
 
-def columns(ax, n=3, left=0.028, right=0.972, gap=0.034, y=0.045, h=0.912):
-    """n equal cards. Returns [(x, w), ...]."""
-    w = (right - left - gap*(n-1)) / n
-    xs = [left + i*(w+gap) for i in range(n)]
-    for x in xs:
+def columns(ax, n=3, left=0.028, right=0.972, gap=0.030, y=0.045, h=0.912, ratios=None):
+    """n cards. ratios lets one panel carry more content than the others."""
+    ratios = ratios or [1.0]*n
+    avail = right - left - gap*(n-1)
+    ws = [avail*r/sum(ratios) for r in ratios]
+    out, x = [], left
+    for w in ws:
         P.card(ax, x, y, w, h)
-    return [(x, w) for x in xs], y, h
+        out.append((x, w)); x += w + gap
+    return out, y, h
 
 def rows(n, top=0.735, bot=0.175):
     """Shared vertical positions. Draw these in EVERY panel -- that is the point."""
