@@ -1,0 +1,113 @@
+Create a wide landscape scientific figure for a machine-learning paper, in
+exactly the same visual style and colour palette as the COMPOSE Figure 1 we
+already made. Vector-clean, flat, no photorealism, no 3D, no drop shadows.
+
+CANVAS AND CONTAINERS
+Pale warm cream rounded-rectangle background. Inside it, FOUR white rounded
+panel cards in a 2x2 grid with hairline borders and generous padding. 16:9.
+
+PALETTE, identical to Figure 1. Use these and nothing else:
+  ink / headings      deep desaturated navy-teal
+  primary             muted teal, roughly #2E7D8F
+  deep primary        darker teal, roughly #1F5F6E
+  highlight           warm terracotta, roughly #D2694A
+  soft accent         pale sand / apricot
+  ground              warm cream
+  card                near-white
+Teal is the ordinary or baseline condition. Terracotta is reserved for the
+future-aware / rescued condition, and appears only where that is the subject.
+
+Panel headings in bold navy-teal, top-left of each card, in this form:
+  (a) Reference-law decomposition
+  (b) A rescued decision
+  (c) Future reachability rescues local failures
+  (d) Prioritizing continuation evaluations
+
+────────────────────────────────────────────────────────────────────
+PANEL (a), top-left — a five-bar chart
+────────────────────────────────────────────────────────────────────
+Vertical bars, y-axis labelled "canonical-successor NLL (nats)" with a small
+downward arrow meaning lower is better. Five bars, left to right, with these
+EXACT heights and labels beneath them. The heights must be proportional and
+accurate:
+
+  uniform successors            6.25
+  empirical family              5.37
+  learned family / uniform id   5.17
+  empirical family / learned id 4.10
+  COMPOSE                       3.90
+
+Print each value on top of its bar. Bars 1 to 4 in muted teal; the final
+COMPOSE bar in terracotta. Draw a thin horizontal bracket spanning bar 2 to
+bar 4 with the annotation "86.7% of the 1.46 nat gain".
+
+────────────────────────────────────────────────────────────────────
+PANEL (b), top-right — one rescued molecular decision
+────────────────────────────────────────────────────────────────────
+A small branching diagram, drawn with the SAME ball-and-stick cartoon
+molecules as Figure 1: circles of one uniform size joined by bonds of one
+uniform width, every circle bonded, nothing floating.
+
+Top: one molecule labelled "source". A single arrow down to a second molecule
+labelled "shared prefix, 4 edits remaining".
+
+From that molecule the path forks into two branches:
+  LEFT branch, drawn in teal, labelled "local, similarity 0.737". Two more
+  molecules down the branch, then a small circular arrow suggesting it
+  revisits a state, ending in the text "target not reached".
+  RIGHT branch, drawn in terracotta, labelled "future-aware, similarity
+  0.718". Three more molecules down the branch, ending at a molecule with a
+  terracotta star and the text "target reached, 1 edit remaining".
+
+At the fork, a small label reading "one override".
+
+The point the picture must make: the future-aware branch deliberately takes
+the LOWER similarity value and still wins. Draw the two similarity numbers
+prominently at the fork so the comparison is unmissable.
+
+────────────────────────────────────────────────────────────────────
+PANEL (c), bottom-left — two stacked horizontal bars
+────────────────────────────────────────────────────────────────────
+Two horizontal bars of identical total length, both representing 65 held-out
+pairs, one above the other:
+
+  upper bar, labelled "local":
+      teal segment  "26 recovered"    then pale grey segment  "39 unresolved"
+  lower bar, labelled "future-aware":
+      teal segment  "26 retained"     then TERRACOTTA segment "14 rescued"
+      then pale grey segment "25 unresolved"
+
+Segment widths must be proportional to 26, 39, 26, 14 and 25 out of 65.
+Because both bars share the same denominator, the terracotta segment should
+visibly be pure addition, with nothing lost from the teal segment.
+
+To the right, in large text: "+21.5 pp"  and beneath it, smaller,
+"95% CI [12.3, 33.5]". On the terracotta segment itself, small text reading
+"14 of 39 local failures rescued". Do not show a p-value.
+
+────────────────────────────────────────────────────────────────────
+PANEL (d), bottom-right — a scatter plot
+────────────────────────────────────────────────────────────────────
+x-axis "continuation evaluations (% of all-candidate)", 0 to 100.
+y-axis "targets recovered (% of 65)", roughly 35 to 65.
+
+Five labelled points, placed accurately:
+
+  local                 x=0     y=40.0    (26/65)
+  R-theta top-1         x=34.7  y=50.8    (33/65)
+  h-phi top-1           x=34.6  y=61.5    (40/65)     TERRACOTTA
+  similarity top-2      x=52.1  y=56.9    (37/65)
+  all-candidate         x=100   y=61.5    (40/65)
+
+Label each point with its name and its count. Draw a faint dashed horizontal
+guide connecting the h-phi point to the all-candidate point, annotated "same
+recovery, about one third of the evaluations". In small text beneath, note
+"different rescued targets". Mark similarity top-2 with a small dagger and a
+footnote reading "target-informed diagnostic".
+
+Make h-phi top-1 terracotta and clearly the visual subject; the other four
+points teal or grey.
+
+────────────────────────────────────────────────────────────────────
+Clean geometric sans throughout. No gridlines beyond a faint axis, no chart
+junk, no prose sentences inside the panels, no p-values, no SMILES strings.
