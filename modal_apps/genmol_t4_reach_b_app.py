@@ -225,13 +225,32 @@ def drive(which: str = "bench") -> dict[str, Any]:
     if not out:
         raise RuntimeError(f"all {len(tasks)} cells failed; refusing to write empty")
 
+    result = {"depth": DEPTH, "beam": BEAM, "apply_cap": APPLY_CAP,
+              "curve": {str(h): sum(1 for r in out
+                                    if r["first_admissible_depth"] is not None
+                                    and r["first_admissible_depth"] <= h)
+                        for h in CURVE},
+              "n_cells": len(out),
+              "n_reaching": sum(1 for r in out
+                                if r["first_admissible_depth"] is not None),
+              "cells": out}
+    try:
+        _summarise(out, which)
+    except Exception as e:                      # never lose the run to a printf
+        print(f"  (summary print failed: {type(e).__name__}: {e}; "
+              f"results are intact)", flush=True)
+    return result
+
+
+def _summarise(out, which):
     print(f"{'target':8s}{'DS':>6}{'delta':>6}{'seedQED':>8}{'seedSA':>7}"
           f"{'reach@':>8}{'#adm':>6}{'best v':>8}", flush=True)
     for r in sorted(out, key=lambda x: (x["target"], -(x.get("published_ds") or 0.0), x["delta"])):
         fd = r["first_admissible_depth"]
         bv = r["best_v_overall"]
         print(f"  {r['target']:8s}{-(r.get('published_ds') or 0.0):>6.1f}{r['delta']:>6.1f}"
-              f"{r['seed_qed']:>8.3f}{r['seed_sa']:>7.2f}"
+              f"{(r.get('seed_qed', r.get('qed')) or 0.0):>8.3f}"
+              f"{(r.get('seed_sa', r.get('sa')) or 0.0):>7.2f}"
               f"{(str(fd) if fd is not None else 'NONE'):>8}"
               f"{r['n_admissible_found']:>6}"
               f"{(f'{bv:.3f}' if bv is not None else '-'):>8}", flush=True)
@@ -246,12 +265,6 @@ def drive(which: str = "bench") -> dict[str, Any]:
     print(f"\n  total reaching by depth {DEPTH}: {total}/{len(out)}{ref}")
     print("  Cells not reached are cells this search did not find a route to;")
     print("  that is weaker than unreachable. Diagnostic closes here either way.")
-    return {"depth": DEPTH, "beam": BEAM, "apply_cap": APPLY_CAP,
-            "curve": {str(h): sum(1 for r in out
-                                  if r["first_admissible_depth"] is not None
-                                  and r["first_admissible_depth"] <= h)
-                      for h in CURVE},
-            "n_cells": len(out), "n_reaching": total, "cells": out}
 
 
 @app.local_entrypoint()
