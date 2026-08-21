@@ -1,29 +1,83 @@
-% FIGURE 3 --- one dense downstream-results figure covering 5.3-5.6, rather than
-% a separate numbered figure per capability.  (c) is measured today; (a) is
-% partly measured; (b) waits on G3; (d) is developmental pending the n=48 run.
+% FIGURE 3 --- the capabilities figure. Unifying claim: ONE FROZEN R_theta
+% supports multiple downstream design modes. Not a grab-bag of four results.
+%
+% ===================== DRAWING SPEC. READ BEFORE DRAWING. =====================
+%
+% LAYOUT: 2x2, escalating from standard to richer capability:
+%   (a) standard editing -> (b) multi-objective control -> (c) state reuse after
+%   a goal change -> (d) support-enforced admissibility.
+%
+% (a) SOURCE-CONDITIONED EDITING. A simple empirical curve.
+%     x  candidate allowance k, over the MEASURED RANGE k = 1..12 ONLY
+%     y  sources solved (of 128), or success %
+%     cumulative solved: 31,40,44,48,51,56,61,63,65,67,68,70
+%     Endpoint label 70/128 = 54.7% at k=12. (Confirmed against
+%     docs/VALID128_DIVERSITY.json, n_sources_averaged = 70.)
+%     Points connected by line segments.
+%     Comparators as HORIZONTAL DASHED MARKERS at their reported success level,
+%     not a duplicated table, and not a full comparator curve -- we do not have
+%     their success as a function of k, so drawing one would be invented.
+%     DO NOT draw beyond k=12. DO NOT put the pending 800-source extension in
+%     the panel. DO NOT add the full-vs-size-fixed-support inset; it is
+%     auxiliary and would clutter.
+%
+% (b) PREFERENCE-CONDITIONED MULTI-OBJECTIVE DESIGN. Geometric, not scalar.
+%     x  GSK3beta score        y  JNK3 score
+%     faint grey initial bank; matched InversionGNN rerun; immediate COMPOSE;
+%     future-aware COMPOSE. Faint points for all candidates, stronger outline
+%     for each nondominated frontier.
+%     The panel must say "explores a stronger tradeoff surface", not "better
+%     scalar score". No preference labels, no scalarization formula.
+%     *** BLOCKING DEPENDENCY: this panel is NOT MEASURED YET (waits on G3).
+%     It cannot be drawn from anything currently on disk. Figure 3 must not
+%     ship with an invented (b). Either G3 lands first, or Figure 3 ships as
+%     three panels and the caption drops the (b) clause. Do not fabricate. ***
+%
+% (c) RETARGETING FROM REALIZED MOLECULAR STATES.
+%     MAIN VISUAL: forest / effect plot with intervals. Four effects, two
+%     prefix histories each for the two main-text comparisons:
+%         state reuse    +0.302 [0.186, 0.413]   +0.176 [0.069, 0.283]
+%         retargeting    +0.748 [0.608, 0.891]   +1.462 [1.240, 1.691]
+%     State reuse is the primary estimand. The clairvoyant arm stays in the
+%     appendix and must NOT appear here.
+%     INSET, small: x_0 -> x_1 -> x_2 -> x_3, then continue from x_3 under the
+%     new target B, contrasted with restarting from x_0. Tiny. It only reminds
+%     the reader what retargeting means; it is not the result.
+%
+% (d) ENDPOINT VALIDITY IS NOT PATH VALIDITY.
+%     MAIN VISUAL: corridor schematic, conceptual and geometric, not
+%     molecule-heavy. Shaded admissible corridor C = [2.3689, 4.4522]. One
+%     trajectory that leaves the corridor and re-enters, ending endpoint-valid.
+%     One trajectory held inside throughout by support restriction.
+%     SMALL annotation box only: hidden-path prevalence 0.667 / 0.583,
+%     Delta^V = -0.023 [-0.182, 0.134], frozen boundary -0.25.
+%     This is a MECHANISM/VALIDITY panel, not a performance panel. The interval
+%     straddles zero, so no empirical superiority claim may appear.
+%     *** DEVELOPMENTAL: these values await the frozen 48-source confirmation.
+%     The short caption below no longer carries that disclosure, so it must be
+%     stated in the Sec. 5.6 prose and must remain gated by
+%     \DEVELOPMENTALPATHWISE / check_submission.sh until the run lands. ***
+%
+% MOVED OUT OF THE FIGURE, into text or supplement: exact comparator protocols,
+% the 800-source extension, additional multi-objective metrics, and the detailed
+% pathwise-prevalence discussion.
+%
+% CAPTION ~75 words, one clause per panel.
+% ==============================================================================
 \begin{figure}[t]
 \centering
 \fbox{\parbox{0.97\textwidth}{\centering\vspace{6pt}\footnotesize
-{\color{red}[Panels to be drawn.]}\\[8pt]
-\textbf{(a) source-conditioned editing}\quad success vs.\ candidate allowance over the measured
-range $k=1\ldots12$ only, no curve drawn beyond it;
-comparator levels as horizontal markers, \emph{not} a duplicated table\\[2pt]
-\emph{measured:} $128$-source prospective panel, cumulative solved
-$31,40,44,48,51,56,61,63,65,67,68,70$ of $128$ at $k=1\ldots12$, i.e.\ $54.7\%$ at $k{=}12$ \quad
-\emph{pending:} official $800$-source cohort extends the panel to $k=20$ \XXX{} \quad
-\emph{pending inset:} full vs.\ size-fixed support \XXX{}\\[7pt]
-\textbf{(b) multi-objective design}\quad JNK3/GSK3$\beta$ objective space: faint initial bank,
-matched InversionGNN rerun, immediate \method{}, future-aware \method{}, nondominated fronts\\[2pt]
-\emph{pending:} \XXX{}\\[7pt]
-\textbf{(c) retargeting}\quad held-out effects, two prefix histories; effect plot is the
-scientific center, molecular $x_0\!\to\!x_3\!\to\!B$ inset is secondary\\[2pt]
-state reuse $+0.302$ $[0.186,0.413]$ / $+0.176$ $[0.069,0.283]$ \quad
-retargeting $+0.748$ $[0.608,0.891]$ / $+1.462$ $[1.240,1.691]$\\[7pt]
-\textbf{(d) endpoint-valid is not path-valid}\quad shaded corridor $C=[2.3689,4.4522]$;
-an endpoint-valid trajectory leaving and returning, beside the pathwise-restricted one\\[2pt]
-\emph{inset:} hidden-path prevalence $0.667$/$0.583$ \quad
-$\Delta^V=-0.023$ $[-0.182,0.134]$ \quad frozen boundary $-0.25$
+{\color{red}[Panels to be drawn. Panel (b) is not yet measured.]}\\[8pt]
+\textbf{(a) Source-conditioned editing}\quad solved of $128$ vs.\ candidate allowance, measured range $k=1\ldots12$ only\\[2pt]
+$31,40,44,48,51,56,61,63,65,67,68,70$, i.e.\ $54.7\%$ at $k{=}12$; comparators as horizontal markers\\[7pt]
+\textbf{(b) Preference-conditioned multi-objective design}\quad JNK3 vs.\ GSK3$\beta$ objective space\\[2pt]
+faint initial bank, matched rerun, immediate \method{}, future-aware \method{}, nondominated fronts \quad {\color{red}[awaits G3]}\\[7pt]
+\textbf{(c) Retargeting from realized molecular states}\quad effect plot primary, molecular inset secondary\\[2pt]
+state reuse $+0.302$ $[0.186,0.413]$ / $+0.176$ $[0.069,0.283]$ \quad retargeting $+0.748$ $[0.608,0.891]$ / $+1.462$ $[1.240,1.691]$\\[7pt]
+\textbf{(d) Endpoint validity is not path validity}\quad corridor schematic primary, small statistics box\\[2pt]
+$C=[2.3689,4.4522]$; one endpoint-valid trajectory leaving and returning, beside the pathwise-restricted one\\[2pt]
+prevalence $0.667$/$0.583$ \quad $\Delta^V=-0.023$ $[-0.182,0.134]$ \quad frozen boundary $-0.25$
 \vspace{6pt}}}
-\caption{\small\textbf{Molecular design with a frozen reference process.} One reference law across all four panels. \textbf{(a)}~Standard similarity-constrained editing as candidate allowance grows. \textbf{(b)}~Preference-conditioned multi-objective design in the objective space itself rather than as a scalar. \textbf{(c)}~Continuing from the realized molecule is better than restarting from the source once the objective changes. \textbf{(d)}~Endpoint filtering accepts trajectories that left the admissible corridor; support restriction makes those states unreachable by construction, which is definitional and not an empirical superiority statistic. Panel (d) values are developmental pending the frozen $48$-source confirmation.}
+\caption{\small\textbf{Molecular design with a frozen reference process.} \textbf{(a)}~On a $128$-source prospective panel, source-conditioned editing success increases with candidate allowance $k$. \textbf{(b)}~Preference-conditioned \method{} yields stronger tradeoffs in JNK3/GSK3$\beta$ objective space than matched baselines. \textbf{(c)}~After a goal change, continuing from the realized molecular state outperforms restarting from the source. \textbf{(d)}~Endpoint filtering does not enforce path validity, whereas support restriction makes invalid intermediate states unreachable by construction.}
 \label{fig:capabilities}
 \end{figure}
