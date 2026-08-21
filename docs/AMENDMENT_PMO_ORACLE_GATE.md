@@ -70,6 +70,38 @@ QED, the one oracle live on both sides, agrees EXACTLY:
 That validates the wrapper plumbing end to end and shows QED does not suffer
 the RDKit stereo-perception drift that `oracles/task3.py` records for SA.
 
+## Gate 2 PASSED: TDC behind the existing OracleMeter
+
+One generalisation was required and made. The meter hardcoded N_OBJECTIVES = 5
+from MOLLEO Task 3; PMO tasks are single-objective. `n_objectives` is now a
+field defaulting to the MOLLEO value, so MOLLEO behaviour is unchanged.
+
+Verified against a TDC oracle:
+
+    3 distinct molecules        spent 3
+    the same 3 again            spent 3    repeats free, matching PMO's
+                                           mol_buffer, which also does not
+                                           re-charge a seen molecule
+    non-canonical spelling      spent 3    canonicalised BEFORE cache lookup,
+                                           so O=C(C)Oc1ccccc1C(=O)O and
+                                           CC(=O)Oc1ccccc1C(=O)O are one charge
+    budget=2, third molecule    BudgetExceeded raised, not warned
+
+The metering semantics were NOT relaxed to imitate GenMol's uncharged
+evaluations. The MOLLEO audit in benchmark/molleo_task3.py already refused to
+copy that leak and the same refusal carries here.
+
+## Gate 3 PARTIAL: composite objective runs, construction parity unverified
+
+osimertinib_mpo evaluates through the meter and returns values in [0,1]
+(osimertinib 0.133, ibuprofen 0.003, caffeine 0.104). That establishes the
+wrapper handles a composite objective, not merely a single predictor.
+
+It does NOT establish that our wrapper reproduces PMO's objective CONSTRUCTION,
+because we have no published per-molecule reference value to check against.
+Closing that needs either a reference value from the PMO repository or a
+component-wise re-derivation. Do not describe Gate 3 as passed until then.
+
 ## Remaining gates, in order
 
 1. Verify the EXTRACTION, not the oracle. In a Python 3.8 / sklearn 0.21.3

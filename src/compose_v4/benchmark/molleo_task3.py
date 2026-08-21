@@ -197,6 +197,10 @@ class OracleMeter:
 
     evaluate: Callable[[str], Sequence[float]]
     budget: int = 10_000
+    #: Objectives per molecule. Defaults to the five MOLLEO Task 3 objectives.
+    #: PMO tasks are single-objective, so the count is a parameter of the
+    #: benchmark contract rather than a module constant.
+    n_objectives: int = N_OBJECTIVES
     #: Canonicalizer. Part of the COUNTING RULE, not an optimization: the
     #: released benchmark canonicalizes before consulting its buffer, so two
     #: spellings of one molecule must cost ONE unit, not two.
@@ -230,7 +234,7 @@ class OracleMeter:
 
     def _charge(self) -> int:
         return 1 if self.counting_rule is CountingRule.PER_MOLECULE \
-            else N_OBJECTIVES
+            else self.n_objectives
 
     def _key(self, smiles: str) -> str:
         """Canonical form, or the raw string when there is no canonical form.
@@ -262,9 +266,9 @@ class OracleMeter:
 
     def _commit(self, key: str, raw: Sequence[float], cost: int) -> tuple[float, ...]:
         vals = tuple(float(v) for v in raw)
-        if len(vals) != N_OBJECTIVES:
+        if len(vals) != self.n_objectives:
             raise ValueError(
-                f"expected {N_OBJECTIVES} objectives, got {len(vals)}")
+                f"expected {self.n_objectives} objectives, got {len(vals)}")
         self._spent += cost
         self._cache[key] = vals
         if self.on_evaluated is not None:
