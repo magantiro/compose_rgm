@@ -51,6 +51,23 @@
 %       of what remains REACHABLE from it. Draw z and b entering the controller
 %       ONLY, never R_theta.
 %
+% THE CAPTION IS DELIBERATELY SHORT (~65 words), matching the TD3B three-panel
+% overview rather than a five-panel workflow figure. It decodes the mathematical
+% object in each panel and nothing more. Two things were therefore CUT from the
+% caption and are now the DRAWING's job. If the figure does not carry them, the
+% information is lost from the paper entirely:
+%
+%   1. "including cardinality- and topology-changing transitions" -- panel (a)
+%      must make birth (+1), death (-1) and topology change visibly obvious from
+%      the drawn successors themselves.
+%   2. "across objectives the support and R_theta remain fixed; purpose enters
+%      through the controller" -- panel (c) must show z and b entering ONLY the
+%      controller, with R_theta visibly persisting underneath unchanged.
+%
+% Division of labour: the FIGURE tells the conceptual story (possible ->
+% plausible -> purposeful); the PANEL HEADINGS name the sober technical objects;
+% the CAPTION decodes the three panels. The caption is not a mini-abstract.
+%
 % DELIBERATELY OMITTED. No retargeting inset. The old "z_A -> x_3 -> z_B" was
 % also semantically wrong (z_A does not transition into x_3, and x_3 does not
 % transition into z_B). Retargeting lands far better in Sec. 4.8 and Sec. 5.5,
@@ -84,6 +101,6 @@ $P_\phi\propto R_\theta\,h_\phi$\\[3pt]
 faint continuation trees on two or three successors; $z,b$ enter the controller only
 \end{minipage}
 \vspace{8pt}}}
-\caption{\small\textbf{Overview of \method{}.} \method{} separates executable molecular support, learned molecular plausibility, and task-specific purpose. \textbf{(a)}~An exact graph-rewrite executor defines legal edit marks and their distinct canonical molecular successors $\Sset(x)$, including cardinality- and topology-changing transitions. \textbf{(b)}~The goal-independent reference process $R_\theta(y\mid x)$ assigns learned probability over the same state-dependent successor set. \textbf{(c)}~For objective $z$ and remaining budget $b$, \method{} reweights this frozen process by learned future value, $P_\phi(y\mid x,z,b)\propto R_\theta(y\mid x)\,h_\phi(y,z,b-1)$, favoring edits according to the molecular futures they leave reachable. Across objectives, the executable support and $R_\theta$ remain fixed; purpose enters through the controller.}
+\caption{\small\textbf{Overview of \method{}.} \textbf{(a)}~An exact graph-rewrite executor defines legal edits and their distinct canonical molecular successors $\Sset(x)$. \textbf{(b)}~The goal-independent reference process $R_\theta(y\mid x)$ learns probability over this fixed executable support. \textbf{(c)}~Goal- and budget-conditioned future value reweights the same successors toward the current objective, $P_\phi(y\mid x,z,b)\propto R_\theta(y\mid x)\,h_\phi(y,z,b-1)$, favoring edits according to the molecular futures they leave reachable.}
 \label{fig:ppp}
 \end{figure}
