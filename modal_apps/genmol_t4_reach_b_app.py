@@ -64,6 +64,8 @@ from modal_apps.run_process_v2_p50_app import image as _base_image
 image = (_base_image
          .add_local_file(ROOT / "docs/GENMOL_T4_SEEDS.json",
                          str(REMOTE_ROOT / "docs/GENMOL_T4_SEEDS.json"), copy=True)
+         .add_local_file(ROOT / "docs/GENMOL_T4_DEV_SEEDS.json",
+                         str(REMOTE_ROOT / "docs/GENMOL_T4_DEV_SEEDS.json"), copy=True)
          .env({"PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}", "OMP_NUM_THREADS": "1"}))
 
 app = modal.App("genmol-t4-reach-b")
@@ -204,21 +206,31 @@ def reach(task: dict[str, Any]) -> dict[str, Any]:
 
 @app.function(image=image, cpu=(1.0, 1.0), memory=2048, timeout=12 * 60 * 60,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
-def drive() -> dict[str, Any]:
-    seeds = json.loads((REMOTE_ROOT / "docs/GENMOL_T4_SEEDS.json").read_text())
+def drive(which: str = "bench") -> dict[str, Any]:
+    f = "GENMOL_T4_SEEDS.json" if which == "bench" else "GENMOL_T4_DEV_SEEDS.json"
+    raw = json.loads((REMOTE_ROOT / f"docs/{f}").read_text())
+    seeds = raw if isinstance(raw, list) else raw["seeds"]
     tasks = [{**s, "delta": d} for s in seeds for d in (0.4, 0.6)]
     print(f"{len(tasks)} cells  depth<={DEPTH} beam={BEAM} cap={APPLY_CAP}  "
           f"v = max([0.6-QED]+/0.6, [SA-4]+/4)   NO DOCKING\n", flush=True)
-    out = [r for r in reach.map(tasks, order_outputs=True, return_exceptions=True,
-                                wrap_returned_exceptions=False)
-           if isinstance(r, dict)]
+    raw_out = list(reach.map(tasks, order_outputs=True, return_exceptions=True,
+                             wrap_returned_exceptions=False))
+    out = [r for r in raw_out if isinstance(r, dict)]
+    errs = [r for r in raw_out if not isinstance(r, dict)]
+    if errs:
+        from collections import Counter
+        print(f"  !! {len(errs)}/{len(tasks)} cells FAILED", flush=True)
+        for m, k in Counter(f"{type(e).__name__}: {e}"[:180] for e in errs).most_common(5):
+            print(f"     x{k}  {m}", flush=True)
+    if not out:
+        raise RuntimeError(f"all {len(tasks)} cells failed; refusing to write empty")
 
     print(f"{'target':8s}{'DS':>6}{'delta':>6}{'seedQED':>8}{'seedSA':>7}"
           f"{'reach@':>8}{'#adm':>6}{'best v':>8}", flush=True)
-    for r in sorted(out, key=lambda x: (x["target"], -x["published_ds"], x["delta"])):
+    for r in sorted(out, key=lambda x: (x["target"], -(x.get("published_ds") or 0.0), x["delta"])):
         fd = r["first_admissible_depth"]
         bv = r["best_v_overall"]
-        print(f"  {r['target']:8s}{-r['published_ds']:>6.1f}{r['delta']:>6.1f}"
+        print(f"  {r['target']:8s}{-(r.get('published_ds') or 0.0):>6.1f}{r['delta']:>6.1f}"
               f"{r['seed_qed']:>8.3f}{r['seed_sa']:>7.2f}"
               f"{(str(fd) if fd is not None else 'NONE'):>8}"
               f"{r['n_admissible_found']:>6}"
@@ -230,8 +242,8 @@ def drive() -> dict[str, Any]:
                 and r["first_admissible_depth"] <= h)
         print(f"    H <= {h:>2} : {n:>2}/{len(out)}")
     total = sum(1 for r in out if r["first_admissible_depth"] is not None)
-    print(f"\n  total reaching by depth {DEPTH}: {total}/{len(out)}"
-          f"   (GenMol solves 26/30)")
+    ref = "   (GenMol solves 26/30)" if which == "bench" else ""
+    print(f"\n  total reaching by depth {DEPTH}: {total}/{len(out)}{ref}")
     print("  Cells not reached are cells this search did not find a route to;")
     print("  that is weaker than unreachable. Diagnostic closes here either way.")
     return {"depth": DEPTH, "beam": BEAM, "apply_cap": APPLY_CAP,
@@ -243,9 +255,10 @@ def drive() -> dict[str, Any]:
 
 
 @app.local_entrypoint()
-def main() -> None:
-    o = drive.remote()
-    p = Path(__file__).resolve().parents[1] / "diagnostics/genmol_t4_reachability_b.json"
+def main(which: str = "bench", out: str = "") -> None:
+    o = drive.remote(which)
+    p = Path(__file__).resolve().parents[1] / (
+        out or f"diagnostics/genmol_t4_reachability_{'b' if which=='bench' else 'dev'}.json")
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(o, indent=1))
     print(f"\nwrote {p}")
