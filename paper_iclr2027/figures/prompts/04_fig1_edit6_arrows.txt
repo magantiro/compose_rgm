@@ -1,0 +1,47 @@
+EDIT 6 — fix the arrow semantics in panel (c), and the mark count in panel (a)
+
+TWO problems. Change nothing else in the figure.
+
+────────────────────────────────────────────────────────────────────────
+PROBLEM 1, panel (c): the arrow colours currently mean nothing
+────────────────────────────────────────────────────────────────────────
+The legend says teal = "reference (frozen)" and orange = "control". But in the
+panel each successor gets exactly ONE arrow, and the colours are mixed: y1 is
+teal, y2 is orange, y3 is orange, y4 is teal, y5 is teal. As drawn this says
+some successors are governed by the reference law and others by the control
+law, which is wrong. Every successor is governed by both.
+
+Fix it by drawing TWO arrows to each of the five successors instead of one:
+
+  - a THIN TEAL arrow whose width is the reference probability, using the same
+    five widths as the arrows in panel (b);
+  - an ORANGE arrow drawn just beside it or slightly overlapping it, whose
+    width is the controlled probability.
+
+Make the orange widths clearly different from the teal ones, and specifically:
+y3 must have a MUCH thicker orange arrow than its teal one, y5 must have a
+much thinner orange arrow than its teal one, and y1 must be somewhat thinner
+in orange than in teal. y2 and y4 stay roughly the same in both.
+
+The reader should be able to see, successor by successor, that control keeps
+the same set of successors but redistributes weight among them, promoting y3
+and suppressing y5. Keep the legend exactly as it is.
+
+────────────────────────────────────────────────────────────────────────
+PROBLEM 2, panel (a): seven marks cannot map onto five successors this way
+────────────────────────────────────────────────────────────────────────
+Panel (a) shows seven edit marks and five molecular successors, with only one
+merging pair drawn (the two orange marks pointing at y3). Seven marks with one
+merge would give six successors, not five, so the arrows do not add up.
+
+Fix it by REMOVING one of the plain green marks, leaving six marks total: four
+plain green ones and the two orange ones in the rounded outline. Then draw the
+arrows so that each of the four green marks points to exactly one of y1, y2,
+y4 and y5, and the two orange marks both point to y3. Every mark must have
+exactly one outgoing arrow, and every successor must receive at least one.
+
+Re-space the remaining six marks evenly down the column.
+
+────────────────────────────────────────────────────────────────────────
+Do not change the molecules, the badges, the numbers, the headings, the
+legends, the panel backgrounds, or anything in panel (b).

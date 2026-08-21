@@ -1,0 +1,78 @@
+FOUR EDITS TO THE EXISTING FIGURE.
+Send ONE per message, in this order, re-uploading the newest image each time.
+Do not combine them. If an edit drifts something it should not have touched,
+discard that result and resend the same prompt rather than patching on top.
+
+────────────────────────────────────────────────────────────────────────────
+EDIT 1 — make the molecules identical across the three panels
+────────────────────────────────────────────────────────────────────────────
+In this figure the five molecules y1 through y5 are supposed to be the SAME
+five molecules in all three panels. Right now they are not: the molecules in
+panel (a) have more atoms than the ones in panels (b) and (c). For example y2
+has five circles in panel (a) but only four in panels (b) and (c).
+
+Fix this by copying the five molecule drawings from panel (b) into panel (a)
+and panel (c), so that y1 is pixel-identical in all three panels, y2 is
+identical in all three, and so on for y3, y4 and y5. Keep each molecule at the
+same position and the same size it already occupies in its panel.
+
+Change nothing else. Do not alter the arrows, their thicknesses, the numbers,
+the colours, the headings, the legends, or the large molecule x.
+
+────────────────────────────────────────────────────────────────────────────
+EDIT 2 — add the intermediate "edit marks" column to panel (a)
+────────────────────────────────────────────────────────────────────────────
+In panel (a) only, insert a new middle column of small circular tokens between
+the large molecule x on the left and the five molecule tiles on the right.
+
+Place seven small filled circles in a vertical column, evenly spaced, roughly
+one third of the way across the panel. Label this column "edit marks A(x)" in
+small text above it, and label the existing molecule column "molecular
+successors S(x)" in small text above that.
+
+Redraw the arrows in panel (a) as two hops instead of one: thin dashed arrows
+fan from x to the seven small circles, and then thin dashed arrows continue
+from the circles to the five molecule tiles.
+
+Critically: two of the seven circles must both point to the SAME molecule
+tile, y3. Draw those two circles in a stronger accent colour, draw their two
+arrows solid and thicker instead of dashed, and enclose just those two circles
+together inside one rounded outline so they read as a pair. Add small text
+below the column reading "two equivalent marks, one successor".
+
+Change nothing in panels (b) or (c). Do not alter the molecules themselves.
+
+────────────────────────────────────────────────────────────────────────────
+EDIT 3 — tag each successor with how it changes the atom count
+────────────────────────────────────────────────────────────────────────────
+In panel (a) only, add a small rounded badge to the top-left corner of each of
+the five molecule tiles, containing this short text:
+
+  y1 badge: +1
+  y2 badge: -1
+  y3 badge: 0
+  y4 badge: 0
+  y5 badge: ring
+
+Make the badges small and unobtrusive, in a pale tint of the panel accent
+colour with dark text, sitting just inside the tile corner.
+
+Change nothing else anywhere in the figure.
+
+────────────────────────────────────────────────────────────────────────────
+EDIT 4 — unify the colour logic
+────────────────────────────────────────────────────────────────────────────
+Two colour inconsistencies to correct, and nothing else.
+
+First, the three panel background cards are currently tinted differently:
+cream, pale blue, cream. Make all three the same pale neutral cream.
+
+Second, in panel (c) the thin "reference" arrows are cream while the same
+reference process is drawn in teal in panel (b). Recolour the thin reference
+arrows in panel (c), and the thin arrow in the panel (c) legend, to the same
+teal used for the arrows in panel (b). Leave the thick "control" arrows in
+panel (c) terracotta as they are, so the contrast between the two is still
+obvious.
+
+Change nothing else. Keep all layout, text, molecules and arrow thicknesses
+exactly as they are.
