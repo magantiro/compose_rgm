@@ -1,0 +1,78 @@
+{
+ "JNK3": {
+  "pickle_sha256": "5c7548343996a22d9a7aae8a91f34e4bc2e5e6e5a6d9c2decce3b164459af52b",
+  "npz_sha256": "bdfe15dc647d38cd5a7af148feb805df6870918a9ac83b088d1845109923d84a",
+  "n_trees": 100,
+  "original": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.04,
+   0.0
+  ],
+  "frozen": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.04,
+   0.0
+  ],
+  "max_abs_diff": 0.0,
+  "wrong_orientation_max_abs_diff": 1.0,
+  "PASS": true
+ },
+ "GSK3B": {
+  "pickle_sha256": "18d1cc9bb9498e4bae0755842080558cb2d0444ecb51beffa0ef58a6d760b74b",
+  "npz_sha256": "cfba66af235b022e7b2aa6d1fb6ab690f619f2e6b1281371f551526fe6370302",
+  "n_trees": 100,
+  "original": [
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.01,
+   0.04,
+   0.0,
+   0.0,
+   0.17,
+   0.01
+  ],
+  "frozen": [
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.01,
+   0.04,
+   0.0,
+   0.0,
+   0.17,
+   0.01
+  ],
+  "max_abs_diff": 0.0,
+  "wrong_orientation_max_abs_diff": 1.0,
+  "PASS": true
+ },
+ "panel": [
+  "CC(C)Cc1ccc(C(C)C(=O)O)cc1",
+  "CC(=O)Oc1ccccc1C(=O)O",
+  "Cn1c(=O)c2c(ncn2C)n(C)c1=O",
+  "c1ccc2c(c1)ccc1ccccc12",
+  "CC(C)(C)NCC(O)c1ccc(O)c(CO)c1",
+  "COc1cc2c(cc1OC)CC(N)C2",
+  "O=C(Nc1ccccc1)c1ccccc1",
+  "CCN(CC)CCNC(=O)c1ccc(N)cc1",
+  "O=C1CN=C(c2ccccc2Cl)c2cc(Cl)ccc2N1",
+  "Cc1nc(N)sc1C(=O)Nc1ccccc1"
+ ]
+}
