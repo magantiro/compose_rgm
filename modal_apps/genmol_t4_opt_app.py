@@ -291,9 +291,21 @@ def drive(which: str, rounds: int, per_round: int, parents: int,
     print(f"{len(tasks)} cells   rule={rule}  rounds={rounds} x per_round="
           f"{per_round} = {rounds*per_round} dockings/cell   parents={parents}\n",
           flush=True)
-    out = [r for r in optimize.map(tasks, order_outputs=True, return_exceptions=True,
-                                   wrap_returned_exceptions=False)
-           if isinstance(r, dict)]
+    raw_out = list(optimize.map(tasks, order_outputs=True, return_exceptions=True,
+                                wrap_returned_exceptions=False))
+    out = [r for r in raw_out if isinstance(r, dict)]
+    # NEVER silently drop failures. A transient Modal control-plane error once
+    # produced a clean-looking "0 cells" result because the exceptions were
+    # filtered out here without being counted.
+    errs = [r for r in raw_out if not isinstance(r, dict)]
+    if errs:
+        from collections import Counter
+        print(f"  !! {len(errs)}/{len(tasks)} cells FAILED", flush=True)
+        for msg, k in Counter(f"{type(e).__name__}: {e}"[:180] for e in errs).most_common(5):
+            print(f"     x{k}  {msg}", flush=True)
+    if not out:
+        raise RuntimeError(
+            f"all {len(tasks)} cells failed; refusing to write an empty sweep")
     print(f"{'target':8s}{'delta':>6}{'seedDS':>8}{'bestDS':>8}{'gain':>7}"
           f"{'#feas':>7}{'#dock':>7}{'fiber':>8}{'props':>8}{'dock':>8}{'total':>8}",
           flush=True)
