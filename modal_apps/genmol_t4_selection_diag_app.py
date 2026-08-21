@@ -40,8 +40,16 @@ import modal
 
 from modal_apps.genmol_t4_opt_app import (
     APPLY_CAP, CANONICAL_SLOTS, QED_MIN, SA_MAX, TAU_V, TIME_POINT,
-    ARTIFACT_ROOT, REMOTE_ROOT, artifact_volume, image, _dock, _runtime,
+    ARTIFACT_ROOT, REMOTE_ROOT, ROOT, artifact_volume, _dock, _runtime,
 )
+from modal_apps.genmol_t4_opt_app import image as _opt_image
+
+# the optimizer's image does not ship the optimizer module itself, so a job that
+# imports from it fails at container import. Add it, and this file's own package
+# marker, on top of that image.
+image = _opt_image.add_local_file(
+    ROOT / "modal_apps/genmol_t4_opt_app.py",
+    str(REMOTE_ROOT / "modal_apps/genmol_t4_opt_app.py"), copy=True)
 
 app = modal.App("genmol-t4-selection-diag")
 
@@ -157,9 +165,10 @@ def diagnose(task: dict[str, Any]) -> dict[str, Any]:
                 archive.append({"smiles": y, **cand[y], "ds": ds, "round": rd})
 
     feas = [a for a in archive if a["v"] == 0.0 and a["ds"] is not None]
+    del rng
     tot_enum = sum(r["n_feas_enum"] for r in log)
     tot_pick = sum(r["n_feas_picked"] for r in log)
-    return {**{k: v for k, v in task.items() if k != "smiles"},
+    out = {**{k: v for k, v in task.items() if k != "smiles"},
             "rounds_run": len(log), "n_docked": len(docked),
             "feasible_enumerated_total": tot_enum,
             "feasible_docked_total": tot_pick,
@@ -170,19 +179,30 @@ def diagnose(task: dict[str, Any]) -> dict[str, Any]:
                         if tot_enum == 0 else
                         "feasible found and docked"),
             "per_round": log}
+    # PERSIST BEFORE RETURNING. Three runs have now been lost by holding
+    # results in memory until a driver finished. A cell that completes is
+    # written and committed here, so a later crash costs at most one cell.
+    try:
+        d = Path("/artifacts/t4_selection_diag"); d.mkdir(parents=True, exist_ok=True)
+        (d / f"cell_{task['idx']}_{task['target']}.json").write_text(json.dumps(out, indent=1))
+        artifact_volume.commit()
+    except Exception as e:
+        print(f"  !! persist failed for idx {task['idx']}: {e}", flush=True)
+    return out
 
 
 @app.function(image=image, cpu=(1.0, 1.0), memory=2048, timeout=8 * 60 * 60,
               volumes={str(ARTIFACT_ROOT): artifact_volume})
-def drive(rounds: int, per_round: int, parents: int) -> dict[str, Any]:
+def drive(rounds: int, per_round: int, parents: int, only: str = "") -> dict[str, Any]:
     seeds = json.loads((REMOTE_ROOT / "docs/GENMOL_T4_DEV_SEEDS.json").read_text())["seeds"]
+    cells = [c for c in CELLS if not only or c["target"] == only]
     tasks = []
-    for c in CELLS:
+    for c in cells:
         s = seeds[c["idx"]]
         tasks.append({**c, "smiles": s["smiles"], "qed": s["qed"], "sa": s["sa"],
                       "rounds": rounds, "per_round": per_round, "parents": parents,
                       "seed_rng": 20260820 + c["idx"]})
-    print(f"{len(tasks)} Level-1 failure cells, {rounds}x{per_round} dockings each\n", flush=True)
+    print(f"{len(tasks)} Level-1 failure cell(s), {rounds}x{per_round} dockings each\n", flush=True)
     out = []
     for r in diagnose.map(tasks, order_outputs=False, return_exceptions=True,
                           wrap_returned_exceptions=False):
@@ -198,14 +218,34 @@ def drive(rounds: int, per_round: int, parents: int) -> dict[str, Any]:
                 print(f"      round {pr['round']:>2}: {pr['n_feas_enum']} feasible of "
                       f"{pr['n_cand']} enumerated, 0 docked; best missed rank "
                       f"{m.get('rank','?')} weight {m.get('weight',0):.2e}", flush=True)
+    if not out:                       # fall back to whatever cells persisted
+        d = Path("/artifacts/t4_selection_diag")
+        if d.exists():
+            out = [json.loads(f.read_text()) for f in sorted(d.glob("cell_*.json"))]
+            print(f"  driver had nothing; recovered {len(out)} cells from the volume",
+                  flush=True)
     if not out:
-        raise RuntimeError("all cells failed; refusing to write empty")
+        raise RuntimeError("no cells completed")
     return {"cells": out, "rounds": rounds, "per_round": per_round}
 
 
+@app.function(image=image, cpu=(1.0, 1.0), memory=1024, timeout=600,
+              volumes={str(ARTIFACT_ROOT): artifact_volume})
+def salvage() -> dict[str, Any]:
+    """Read back whatever cells persisted, independent of the driver."""
+    d = Path("/artifacts/t4_selection_diag")
+    cells = [json.loads(f.read_text()) for f in sorted(d.glob("cell_*.json"))] if d.exists() else []
+    print(f"  salvaged {len(cells)} cells", flush=True)
+    return {"cells": cells, "salvaged": True}
+
+
 @app.local_entrypoint()
-def main(rounds: int = 10, per_round: int = 20) -> None:
-    o = drive.remote(rounds, per_round, 3)
+def main(rounds: int = 10, per_round: int = 20, only: str = "") -> None:
+    try:
+        o = drive.remote(rounds, per_round, 3, only)
+    except Exception as e:                     # driver died; salvage the volume
+        print(f"  driver failed ({type(e).__name__}); salvaging persisted cells")
+        o = salvage.remote()
     p = Path(__file__).resolve().parents[1] / "diagnostics/genmol_t4_selection_diag.json"
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(o, indent=1))
