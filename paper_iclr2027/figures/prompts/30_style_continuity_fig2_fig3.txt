@@ -1,0 +1,50 @@
+STYLE CONTINUITY WITH FIGURE 1.
+Prepend this block to any Figure 2 or Figure 3 generation prompt.
+
+These colours are sampled from the Figure 1 already in the paper. Use them
+exactly. Do not substitute similar shades.
+
+  page ground          #E1E6DB    sage-tinted, NOT cream
+  card, warm           #F4F4EC
+  card, cool           #EDF1EF
+  card, warmest        #F8F4ED
+  small tile           #FAF7F2
+
+  teal                 #43848B    the ordinary / baseline / local condition
+  terracotta           #CE785E    the future-aware / COMPOSE condition
+  deep terracotta      #C3543B    single strongest highlight, stars only
+  sand                 #FAEDD7    support / pathwise / auxiliary fills
+  heading navy         #1B3A4B
+  body ink             #2B3F4E
+  hairline, axes       #D8D4C8
+
+THE COLOUR RULE, which matters more than the hex values. Teal is the ordinary
+condition. Terracotta marks the future-aware condition and appears ONLY where
+that is the subject of the panel. Keep it scarce, at most one strong accent per
+panel. In Figure 1 terracotta appears in exactly one of three panels.
+
+LAYOUT LANGUAGE inherited from Figure 1:
+  - rounded panel cards with hairline borders and generous internal padding
+  - the cards are DIFFERENT off-whites, not one flat tint
+  - panel letters bold navy, top-left, followed by a short sober heading
+  - one clear message per panel, minimal annotation
+  - flat vector look: no drop shadows, no gradients on data marks, no 3D
+  - clean geometric sans throughout, consistent stroke weights
+  - arrow WIDTH carries magnitude; arrow COLOUR carries which law is acting
+
+HOW FIGURES 2 AND 3 SHOULD DIFFER FROM FIGURE 1. Figure 1 is the conceptual
+anchor and is fully schematic. Figures 2 and 3 must read as EMPIRICAL. If all
+three look like infographics the data starts to feel secondary.
+
+  Figure 2   three real data panels plus ONE polished mechanistic panel.
+             The mechanism panel is the schematic anchor; the other three are
+             genuine charts, not cartoons.
+
+  Figure 3   data-forward throughout. Real plots. At most one small schematic
+             inset, and only where it does actual explanatory work.
+
+WHAT TO AVOID: default plotting-package styling. No heavy black axis frames, no
+saturated primaries, no rainbow palettes, no glossy or 3D markers, no gridlines
+beyond a faint axis line, no legend boxes with heavy borders. Render the data
+cleanly and then restyle it to the palette above so it sits beside Figure 1
+without a visible seam.
