@@ -1,7 +1,16 @@
 % FIGURE 1 --- conceptual overview. Three stages acting on THE SAME successor
 % set, so the reader sees three layers on one molecular graph, not three methods.
 %
-% ===================== DRAWING SPEC. READ BEFORE DRAWING. =====================
+% STATUS: drawn and installed as figures/fig1_overview.png.
+% NOT YET CARRIED BY THE INSTALLED ARTWORK, both flagged deliberately:
+%   - the A(x) -> S(x) two-layer structure and the two-marks-merge-to-one-
+%     successor detail. The installed figure draws x straight to the y_i.
+%   - the +1 / -1 / 0 / ring badges. Since the caption no longer says
+%     "including cardinality- and topology-changing transitions", nothing
+%     in the paper currently states that the edits change atom count.
+% Source at 1672x941 = 304 ppi at \textwidth. Above the 300 print floor but
+% well under the ~600-1100 ppi of the comparison figures.
+% ===================== DRAWING SPEC =====================
 %
 % IDENTITY. The formal figure title is "Overview of COMPOSE", not a slogan.
 % POSSIBLE / PLAUSIBLE / PURPOSEFUL stay as the visual organizing motif inside
@@ -121,30 +130,7 @@
 % ==============================================================================
 \begin{figure}[t]
 \centering
-\fbox{\parbox{0.97\textwidth}{\centering\vspace{10pt}\small\itshape
-[Figure to be drawn; conceptual, no data plotted.]\\[8pt]
-\normalfont\footnotesize
-\begin{minipage}[t]{0.31\linewidth}\centering
-\textbf{(a) Executable support: POSSIBLE}\\[2pt]
-one real molecule $x$ from an audited fiber; five representative canonical
-successors: birth, death, same-cardinality, topology, ring\\[3pt]
-$x\rightarrow\A(x)\rightarrow\Sset(x)$\\[2pt]
-\emph{edit marks}, then \emph{molecular successors}\\[3pt]
-two symmetry-equivalent marks merge onto one $y_i$;\\ all arrows equal weight
-\end{minipage}\hfill
-\begin{minipage}[t]{0.31\linewidth}\centering
-\textbf{(b) Learned reference process: PLAUSIBLE}\\[2pt]
-\emph{the same} $x$, \emph{the same} $\Sset(x)$, \emph{the same} positions\\[3pt]
-arrow width $=R_\theta(y\mid x)$\\[3pt]
-goal-independent
-\end{minipage}\hfill
-\begin{minipage}[t]{0.31\linewidth}\centering
-\textbf{(c) Finite-horizon control: PURPOSEFUL}\\[2pt]
-\emph{the same} support again, reweighted\\[3pt]
-$P_\phi\propto R_\theta\,h_\phi$\\[3pt]
-faint continuation trees on two or three successors; $z,b$ enter the controller only
-\end{minipage}
-\vspace{8pt}}}
+\includegraphics[width=\textwidth]{figures/fig1_overview.png}
 \caption{\small\textbf{Overview of \method{}.} \textbf{(a)}~An exact graph-rewrite executor defines legal edits and their distinct canonical molecular successors $\Sset(x)$. \textbf{(b)}~The goal-independent reference process $R_\theta(y\mid x)$ learns probability over this fixed executable support. \textbf{(c)}~Goal- and budget-conditioned future value reweights the same successors toward the current objective, $P_\phi(y\mid x,z,b)\propto R_\theta(y\mid x)\,h_\phi(y,z,b-1)$, favoring edits according to the molecular futures they leave reachable.}
 \label{fig:ppp}
 \end{figure}
