@@ -71,7 +71,7 @@ Results are ordered as a reader needs them: state-space closure first, then the 
 We restate each result with its assumptions before proving it, so that this appendix can be read independently of the main text.
 
 \begin{proposition}[Closure of executable support; restatement of \cref{prop:closure}]
-Membership in $\X$ requires exactly four conditions: node and edge attributes lie in the declared vocabularies, every atom satisfies its declared valence constraints, the graph is connected, and its heavy-atom count lies in $\{1,\dots,n_{\max}\}$. Suppose each admitted edit keeps every created or modified attribute within the declared vocabularies, preserves the declared valence constraints at every atom it modifies, leaves untouched atoms unchanged, respects the heavy-atom bound $n_{\max}$, and is committed only when its successor is connected. Then $\T(x,a)\in\X$ for every $x\in\X$ and $a\in\A(x)$, and consequently every state reached by any stochastic process supported on $\{\A(x)\}_{x\in\X}$ remains in the declared molecular state space.
+Membership in $\X$ requires exactly four conditions: node and edge attributes lie in the declared vocabularies, every atom satisfies its declared valence constraints, the graph is connected, and its heavy-atom count lies in $\{1,\dots,n_{\max}\}$. Suppose each admitted edit keeps every created or modified attribute within the declared vocabularies, preserves the declared valence constraints at every atom it modifies, leaves untouched atoms unchanged, preserves a heavy-atom count in $\{1,\dots,n_{\max}\}$, and is committed only when its successor is connected. Then $\T(x,a)\in\X$ for every $x\in\X$ and $a\in\A(x)$, and consequently every state reached by any stochastic process supported on $\{\A(x)\}_{x\in\X}$ remains in the declared molecular state space.
 \end{proposition}
 
 \begin{proof}
@@ -81,35 +81,40 @@ Induct on committed events. The initial state lies in $\X$. If $x_n\in\X$, the p
 \subsection{Canonical successor representation}
 \label{app:quotient}
 
-\begin{definition}[Successor-preserving, rate-preserving re-encoding]
+The mark representation used internally by the executor need not be unique: symmetry or alternative rewrite parameterizations may split one molecular transition into several marks. The state-level process should not depend on such representation choices.
+
+\begin{definition}[Successor-mass-preserving re-encoding]
 \label{def:reencoding}
-Two mark systems on the same state space are so related if for every $x$ there is a surjection $\varphi_x$ from the marks of one onto the marks of the other with matching executed successors, so that marks may be split or merged only \emph{within} a successor fiber and never across fibers, and if the aggregate rate of every successor fiber agrees.
+Consider two mark encodings of the same molecular state space, with legal mark sets and normalized laws $(\A,p_\theta,\T)$ and $(\A',p'_\theta,\T')$. They are \emph{successor-mass preserving} if, for every $(x,t)$, they induce the same canonical molecular outcomes and, for every such successor $y$,
+\[
+\sum_{a\in\A(x)\,:\,\T(x,a)\simeq y} p_\theta(a\mid x,t)
+\;=\;
+\sum_{a'\in\A'(x)\,:\,\T'(x,a')\simeq y} p'_\theta(a'\mid x,t),
+\]
+under the same convention for which canonical outcomes count as committed state changes.
 \end{definition}
 
-\begin{proposition}[Encoding invariance, and its exact scope]
+\begin{proposition}[Canonical refinement invariance]
 \label{prop:encoding}
-Under \cref{def:reencoding} and a common state-level productive-commit predicate:
-\emph{(i)} the state-level generators coincide, hence so do the total hazards, the molecular laws, the reference edit law $R_\theta$ of \eqref{eq:rtheta} wherever defined, and every time marginal;
-\emph{(ii)} for any controller that is \emph{fiber-constant}, meaning a function of $(x,y)$ rather than of the mark, the controlled kernels coincide;
-\emph{(iii)} hard state predicates and the transform of \cref{thm:doob} are fiber-constant by construction, so the values $h_b$ and the controlled kernels are identical under any such re-encoding.
+Under a successor-mass-preserving re-encoding, the canonical pushforward $\bar p_{\theta,t}(y\mid x)$ and the committed successor kernel $R_{\theta,t}(y\mid x)$ are identical wherever the latter is defined. Consequently, for any common progress schedule:
+\emph{(i)} the molecular reference path laws induced by $R_{\theta,t}$ coincide;
+\emph{(ii)} for any terminal desirability $g_z$, the exact backward values $h_b(x,z)$ coincide;
+\emph{(iii)} any state-level controller obtained by reweighting $R_{\theta,t}(y\mid x)$ with a nonnegative function of canonical molecular states is invariant to the re-encoding wherever its normalization is positive.
+In particular the finite-horizon $h$-transform of \cref{thm:doob} and support restrictions defined by molecular state predicates are invariant to successor-preserving refinements of the internal mark representation.
 \end{proposition}
 
-\begin{proof}[Proof]
-\emph{(i)} The fibers correspond under $\varphi_x$ and partition the applicable set, so fiber sums agree successor by successor; summing over successors gives equality of total hazards without further hypothesis, which answers the natural worry that a refinement, which renormalizes the mark law over a larger set, could perturb the hazard. It cannot, because the hazard is the sum of the aggregates. Equality of generators plus uniqueness of the finite-state forward solution gives equality of all marginals, and dividing the aggregate by the hazard gives equality of $R_\theta$ on every row with positive mass.
-\emph{(ii)} A fiber-constant controller is a function $\Psi(x,y)$, so it multiplies two equal aggregates and yields equal controlled rates; the diagonal is determined by the row.
-\emph{(iii)} $h_b$ is built by backward recursion from kernels that are invariant by \emph{(i)}, so $h_b$ is invariant by induction, and the ratio $h_{b-1}(y)/h_b(x)$ is fiber-constant.
+\begin{proof}
+The defining equality gives $\bar p_{\theta,t}(y\mid x)=\bar p'_{\theta,t}(y\mid x)$ successor by successor. Summing these equal quantities over the common committed successor set gives the same normalization constant, so \eqref{eq:rtheta} yields $R_{\theta,t}(y\mid x)=R'_{\theta,t}(y\mid x)$.
+\emph{(i)} Equality of the resulting molecular path laws follows by multiplying identical transition kernels along any finite trajectory.
+\emph{(ii)} By induction on $b$: the claim is immediate for $h_0=g_z$, and equality at $b-1$ together with equality of $R_{\theta,t}$ implies equality at $b$ through the backward recursion \eqref{eq:backward}.
+\emph{(iii)} Any normalized controller of the form $K(y\mid x)\propto R_{\theta,t}(y\mid x)\,\Psi(x,y)$, with $\Psi\ge0$ defined on canonical molecular states, has identical numerator and denominator under the two encodings.
 \end{proof}
 
-\begin{remark}[Scope of encoding invariance]
-\Cref{prop:encoding} applies to successor-preserving refinements and to controllers defined on molecular successors. It does not imply invariance of arbitrary mark-level control.
+\begin{remark}[Why control follows canonicalization]
+The result does not extend to arbitrary mark-level control. Suppose a successor carries total mark probability $p$. Representing it by one mark gives a nonlinear mark-level power reweighting proportional to $p^{\beta}$, whereas representing it by four equal aliases gives aggregate reweighted mass $4(p/4)^{\beta}$, which differs from $p^{\beta}$ for $\beta\neq1$. Truncation or nonlinear reweighting applied before successor aggregation can therefore depend on arbitrary alias multiplicity. Top-$k$ and nucleus truncation over marks, and per-family multipliers, fail for the same reason; a family multiplier is invariant exactly when it is constant across every alias of every successor fiber it touches. \method{} instead defines every controller on canonical molecular successors.
 \end{remark}
 
-Merging marks \emph{across} successor fibers is excluded by \cref{def:reencoding} and is ill-posed rather than merely lossy: it would stop the executor being a function of the merged mark.
-And mark-level controllers are not invariant in general.
-If a successor is reachable by four symmetric aliases of rate $1/4$ under one encoding and by a single mark of rate $1$ under another, a mark-level power tilt $\Psi\propto q(a)^{\beta-1}$ assigns it controlled mass $4\cdot(1/4)^\beta$ versus $1$, which differ for every $\beta\ne1$.
-Top-$k$ and nucleus truncation over marks, and per-family multipliers, fail for the same reason; a family multiplier is invariant exactly when it is constant across every alias of every successor fiber it touches.
-Every controller in this paper is written over molecules.
-The proposition concerns the pushed-forward process, not the training representation: mark-level supervision is generally not invariant to within-fiber refinement, which is why teacher supervision aggregates the successor fiber.
+Merging marks \emph{across} successor fibers is excluded by \cref{def:reencoding} and is ill-posed rather than merely lossy: it would stop the executor being a function of the merged mark. The proposition concerns the pushed-forward process, not the training representation: mark-level supervision is generally not invariant to within-fiber refinement, which is why teacher supervision aggregates the successor fiber.
 
 \subsection{Relation to generator matching}
 \label{app:gm}
@@ -125,28 +130,74 @@ D_\varphi\!\left(Q^{+\star},Q^{+}_\theta\right)
 \end{equation}
 where the second term is the same scalar divergence applied to the exit rates. The two blocks are variationally separable: the first depends on $\theta$ only through $R_\theta$, the second only through $\Lambda_\theta$. Minimizing over the successor law therefore leaves the hazard block untouched, and conversely.
 
+For a stored \method{} teacher row $(x_i,t_i,y_i^{\star})$, the compiled supervision records a productive successor identity but no holding time or rate magnitude. Under the unit-intensity representation used for this comparison, $\Lambda^{\star}_i=1$ and $P^{\star}_i=\delta_{y^{\star}_i}$, so the conditional-successor block of that row is
+\[
+\Lambda^{\star}_i\,\KL\!\left(P^{\star}_i\,\middle\|\,R_{\theta,t_i}\right)
+\;=\;-\log R_{\theta,t_i}\!\left(y^{\star}_i\mid x_i\right).
+\]
+The weighted empirical average of these rowwise terms is therefore exactly the productive-successor objective \eqref{eq:refloss}, up to factors independent of $\theta$.
+
 \method{} optimizes an empirical version of the conditional-successor block, and differs from the generator-matching population objective in exactly two respects. First, the hazard block is never optimized. The compiled supervision carries no rate magnitudes: every stored transition is registered with unit teacher rate, which enters training only as a nonterminality indicator, so no target for $\Lambda_\theta$ exists in the corpus. Under that unit-rate convention $\Lambda^{\star}$ is constant and the weight it contributes to the first term is absorbed into a positive constant independent of $\theta$. The reported results never read an exit-rate magnitude; fixed-budget editing consumes only the embedded successor kernel, on which a constant rescaling of $Q^{+}$ has no effect.
 
 Second, the expectation is taken under a different measure. Generator matching integrates the per-state divergence against the state--time marginal of the conditional-process mixture. \method{} instead draws training rows under a declared editing measure that is weighted across operator families by design, so that a family's exposure reflects the reference law the model is meant to estimate rather than the incidental composition of the compiled corpus; some strata are assigned zero draw. No importance correction is applied, and on zero-draw strata none could be. Consequently \eqref{eq:gmsplit} holds pointwise in $(x,t)$, and \eqref{eq:refloss} is the conditional-successor block of that decomposition, but the training functional is not the generator-matching population objective. We therefore describe the relationship as a decomposition that identifies which factor $R_\theta$ estimates, not as an objective identity.
 
 \subsection{Finite-horizon control}
+\label{app:control-proof}
+
+We first make the terminal-state convention explicit. Let the $K$-step reference path measure be \emph{killed} when a state with no committed successor is reached before step $K$; such trajectories carry zero continuation mass. Equivalently, one may adjoin a cemetery state with zero terminal desirability.
 
 \begin{theorem}[Finite-horizon molecular control; restatement of \cref{thm:doob}]
-Let $R_\theta$ define the reference path measure over $K$ committed transitions from an initial molecule $x_0$, with trajectories terminating before $K$ assigned zero continuation mass, let $g_z\ge0$ be a finite terminal desirability, and let $h_b$ be given by the backward recursion \eqref{eq:backward}. Wherever those backward values are positive, the controlled kernels $R^{z,b}_\theta$ of \eqref{eq:doob} are normalized, introduce no transitions outside the support of $R_\theta$, and after $K$ controlled edits realize the terminal law \eqref{eq:tilt}.
+Let $R_\theta$ define the killed reference process from $x_0$, let $g_z:\X\to\mathbb R_{\ge0}$ be finite-valued, and define $h_0(x,z)=g_z(x)$ and $h_b(x,z)=\sum_y R_\theta(y\mid x)h_{b-1}(y,z)$. Suppose $0<h_K(x_0,z)<\infty$. Wherever $h_b(x,z)>0$, define $R^{z,b}_\theta(y\mid x)=R_\theta(y\mid x)h_{b-1}(y,z)/h_b(x,z)$. Then each controlled row is normalized, its support is contained in that of $R_\theta$, and after $K$ controlled transitions the terminal law is the $g_z$-tilt \eqref{eq:tilt} of the killed reference endpoint law.
 \end{theorem}
 
 \begin{proof}
-\emph{(i)} $\sum_y R_{\theta,b}(x,y)h_{b-1}(y)=h_b(x)$ by \eqref{eq:backward}, so the ratios in \eqref{eq:doob} sum to one.
-\emph{(ii)} Multiplication by $h_{b-1}(y)$ cannot make a zero base probability positive; the supports are equal at a row exactly when no base-supported successor has zero value.
-\emph{(iii)} For a path $x_0,\dots,x_K$ of positive base probability, the controlled path probability is the base path probability times $\prod_{k}h_{K-k-1}(x_{k+1})/h_{K-k}(x_k)$, and the interior factors telescope, leaving $h_0(x_K)/h_K(x_0)=g_z(x_K)/h_K(x_0)$. Every path to a fixed endpoint is therefore reweighted by the same factor, and summing over paths gives \eqref{eq:tilt}. The normalizer is the full-budget value at the start.
-Finally, for the continuation and horizon-specificity claims stated after \cref{thm:doob}, apply the same telescoping to the chain started at $x$ with horizon $b'$ and desirability $g_{z'}$. The marginal at $j<K$ is an $h_{K-j}$-tilt rather than a $g_z$-tilt, which is why early stopping does not inherit \eqref{eq:tilt} and why continuation is not the same law as using $g_{z'}$ from the first edit.
+For any $x$ with $h_b(x,z)>0$, $\sum_y R^{z,b}_\theta(y\mid x)=\bigl(\sum_y R_\theta(y\mid x)h_{b-1}(y,z)\bigr)/h_b(x,z)=1$ by the backward recursion \eqref{eq:backward}. Moreover $R_\theta(y\mid x)=0$ implies $R^{z,b}_\theta(y\mid x)=0$, so control cannot create a reference-forbidden transition.
+
+Now take a $K$-step path $x_{0:K}$ of positive reference path mass. Under the controlled process,
+\[
+\mathbb P^{z}(x_{1:K}\mid x_0)
+=\prod_{j=0}^{K-1} R_\theta(x_{j+1}\mid x_j)\,
+\frac{h_{K-j-1}(x_{j+1},z)}{h_{K-j}(x_j,z)}
+=\mathbb P_{R_\theta}(x_{1:K}\mid x_0)\,\frac{h_0(x_K,z)}{h_K(x_0,z)},
+\]
+because the interior $h$-factors telescope, and $h_0(x_K,z)=g_z(x_K)$. Every reference path ending at the same $y$ is thus multiplied by the same factor $g_z(y)/h_K(x_0,z)$, and summing over such paths gives \eqref{eq:tilt}.
 \end{proof}
 
+The same calculation gives the intermediate marginal
+\[
+\mathbb P^{z}(X_j=x\mid X_0=x_0)
+=\frac{\mathbb P_{R_\theta}(X_j=x\mid X_0=x_0)\,h_{K-j}(x,z)}{h_K(x_0,z)},
+\qquad j<K,
+\]
+under the same killed convention. An intermediate marginal is therefore an $h_{K-j}$-tilt, not generally a $g_z$-tilt; stopping before the declared horizon does not inherit the terminal law.
+
 \subsection{Retargeting and pathwise support}
+\label{app:retarget-proof}
 
-Retargeting is \cref{thm:doob} applied from a realized state. Instantiating the theorem at $(x_\tau,b)$ with desirability $g_{z'}$ gives exactly the $g_{z'}$-tilt of the reference law started at $x_\tau$ with budget $b$, which is in general not the law obtained by specifying $z'$ at the source lead; the transform applies because $x_\tau$ is itself a molecule by \cref{prop:closure}, so $g_{z'}$ is decidable on it.
+\begin{corollary}[Exact continuation after a goal change]
+\label{cor:retarget-proof}
+Suppose a realized trajectory reaches $x_\tau$ with $b$ transitions remaining and the objective changes from $z$ to $z'$. If $0<h_b(x_\tau,z')<\infty$, then applying the exact transform from $x_\tau$ with terminal desirability $g_{z'}$ yields
+\[
+\mathbb P^{z'}(X_b=y\mid X_0=x_\tau)
+=\mathbb P_{R_\theta}(X_b=y\mid X_0=x_\tau)\,\frac{g_{z'}(y)}{h_b(x_\tau,z')}.
+\]
+This is the $g_{z'}$-tilted reference law started from the molecular state actually reached. It is generally different from applying $z'$ from the original source $x_0$, because the latter uses a different initial state and discards the realized prefix.
+\end{corollary}
 
-A rule-closed predicate $C$ restricts the legal edit set to $\A_C(x)$ as in \eqref{eq:constrained}. Because the restricted edit set is again a set of executable marks into $\X$, the closure argument above applies unchanged to the restricted process, \cref{thm:doob} holds on it, and $C$ holds at every committed molecule by induction rather than by filtering at the end. Cumulative requirements are not predicates on the current molecule; augmenting the state with a running statistic $\xi_{k+1}=\Phi(\xi_k,X_{k+1})$ restores the Markov property on the augmented chain, and the same results then apply to $\widetilde X_k=(X_k,\xi_k)$.
+\begin{proof}
+Apply \cref{thm:doob} with initial state $x_\tau$, horizon $b$, and desirability $g_{z'}$.
+\end{proof}
+
+\begin{proposition}[Pathwise state constraints]
+\label{prop:pathwise}
+Let $C:\X\to\{0,1\}$ be a predicate on canonical molecular states with $C(x_0)=1$, and let $\A_C(x)$ be the restricted edit set \eqref{eq:constrained}. Let $R^{C}_\theta$ be the corresponding canonical committed-successor kernel obtained by the same pushforward and normalization used to construct $R_\theta$. Then every state committed by the constrained process satisfies $C$. The same holds under any controller whose transition support is contained in that of $R^{C}_\theta$.
+\end{proposition}
+
+\begin{proof}
+The initial state satisfies $C$. If $X_k$ satisfies $C$, every mark admitted to $\A_C(X_k)$ has a successor satisfying $C$ by definition, so every committed $X_{k+1}$ satisfies $C$; induction proves the claim. A controller supported on $R^{C}_\theta$ can only remove or reweight admitted transitions and therefore preserves the same invariant.
+\end{proof}
+
+We call such successor-decidable predicates \emph{rule-closed}. Requirements depending on accumulated history instead require sufficient state augmentation: if the relevant history is summarized by a statistic with deterministic update $\xi_{k+1}=\Phi(\xi_k,X_{k+1})$ and $\widetilde X_k=(X_k,\xi_k)$, the augmented process is Markov, and a history-dependent requirement expressible as a predicate of $\widetilde X_k$ is enforced by the same support-restriction construction on the augmented state space.
 
 
 \section{Data and transition supervision}
