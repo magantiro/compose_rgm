@@ -145,19 +145,26 @@ def run_task(task: dict[str, Any]) -> dict[str, Any]:
         return out
 
     init = json.loads((REMOTE_ROOT / "docs/PMO_INIT_BANK.json").read_text())["smiles"]
-    pop, depth, curve = [], {}, []
+    # POP IS KEYED BY CANONICAL SMILES. A list allowed the same molecule to be
+    # appended twice when reached from two parents, which inflated top-10 into
+    # the mean of one molecule with itself. PMO's metric is the mean of the ten
+    # highest DISTINCT molecules.
+    pop: dict[str, dict] = {}
+    depth, curve = {}, []
     try:
         for s in init:
             c = canon(s)
-            if c:
-                pop.append({"smi": c, "u": meter(c)[0], "d": 0}); depth[c] = 0
+            if c and c not in pop:
+                pop[c] = {"smi": c, "u": meter(c)[0], "d": 0}; depth[c] = 0
     except BudgetExceeded:
         pass
 
     def snapshot():
-        top = sorted((p["u"] for p in pop), reverse=True)[:10]
-        return {"calls": meter.spent, "best": max((p["u"] for p in pop), default=0.0),
+        vals = sorted((p["u"] for p in pop.values()), reverse=True)
+        top = vals[:10]
+        return {"calls": meter.spent, "best": vals[0] if vals else 0.0,
                 "top10_mean": float(np.mean(top)) if top else 0.0,
+                "n_distinct_pop": len(pop),
                 "unique": meter.n_unique, "lineages": len(pop),
                 "max_depth": max(depth.values()) if depth else 0}
     curve.append(snapshot())
@@ -166,16 +173,16 @@ def run_task(task: dict[str, Any]) -> dict[str, Any]:
     rd, stop = 0, False
     while meter.remaining > 0 and not stop:
         rd += 1
-        pop.sort(key=lambda p: -p["u"])
-        elite = pop[:N_LINEAGE // 2]
-        rest = [p for p in pop[N_LINEAGE // 2:]]
+        ranked = sorted(pop.values(), key=lambda p: -p["u"])
+        elite = ranked[:N_LINEAGE // 2]
+        rest = ranked[N_LINEAGE // 2:]
         div = list(rng.choice(rest, size=min(N_LINEAGE - len(elite), len(rest)),
                               replace=False)) if rest else []
         parents = elite + list(div)
         cand: dict[str, float] = {}
         for p in parents:
             for y, r in fiber(p["smi"]).items():
-                if y not in cand:
+                if y not in cand and y not in pop:      # global seen-set
                     cand[y] = r
                     depth.setdefault(y, depth.get(p["smi"], 0) + 1)
         if not cand:
@@ -189,15 +196,17 @@ def run_task(task: dict[str, Any]) -> dict[str, Any]:
                 u = meter(y)[0]
             except BudgetExceeded:
                 stop = True; break
-            pop.append({"smi": y, "u": u, "d": depth.get(y, 0)})
-        pop = sorted(pop, key=lambda p: -p["u"])[:400]
+            pop[y] = {"smi": y, "u": u, "d": depth.get(y, 0)}
+        if len(pop) > 400:                              # keep the best 400 DISTINCT
+            keep = sorted(pop.values(), key=lambda p: -p["u"])[:400]
+            pop = {p["smi"]: p for p in keep}
         while nxt and meter.spent >= nxt[0]:
             curve.append(snapshot()); nxt.pop(0)
     curve.append(snapshot())
 
-    top10 = sorted((p["u"] for p in pop), reverse=True)[:10]
+    top10 = sorted((p["u"] for p in pop.values()), reverse=True)[:10]
     by_depth: dict[int, float] = {}
-    for p in pop:
+    for p in pop.values():
         by_depth[p["d"]] = max(by_depth.get(p["d"], 0.0), p["u"])
     out = {"task": name, "oracle_source": src, "budget": budget,
            "calls_spent": meter.spent, "unique": meter.n_unique,
