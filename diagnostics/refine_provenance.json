@@ -1,0 +1,157 @@
+[
+  {
+    "seed": "OCC1CCCCC1",
+    "built": true,
+    "x": "c1ccc(OCC2CCCCC2)cc1",
+    "R": [
+      8,
+      9,
+      10,
+      11,
+      12,
+      13
+    ],
+    "n_restate": 106,
+    "n_ring_local": 25,
+    "n_off_ring": 81,
+    "partition_exact": true,
+    "admitted_perturb_ring": "25/25",
+    "off_ring_leaks_into_R": "0/60",
+    "fiber_support_subset_of_local": true,
+    "q_sums_to_one": true,
+    "eps0_matches_rtheta_pow_1_over_T": true,
+    "monotone_in_rtheta": true,
+    "refine2_smiles": "c1ccc(OCC2CCCCC2)cc1",
+    "refine2_trace": [
+      "ring_system_restate(r21)@ring",
+      "ring_system_restate(r1)@ring"
+    ],
+    "n_local_applied": 25,
+    "n_local_canonical": 19,
+    "max_fiber_multiplicity": 2
+  },
+  {
+    "seed": "CC(=O)Nc1ccccc1",
+    "built": true,
+    "x": "CC(=O)Nc1ccc(-c2ccccc2)cc1",
+    "R": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "n_restate": 84,
+    "n_ring_local": 25,
+    "n_off_ring": 59,
+    "partition_exact": true,
+    "admitted_perturb_ring": "25/25",
+    "off_ring_leaks_into_R": "0/59",
+    "fiber_support_subset_of_local": true,
+    "q_sums_to_one": true,
+    "eps0_matches_rtheta_pow_1_over_T": true,
+    "monotone_in_rtheta": true,
+    "refine2_smiles": "CC(=O)Nc1ccc(-c2ccccc2)cc1",
+    "refine2_trace": [
+      "ring_system_restate(r1)@ring",
+      "ring_system_restate(r0)@ring"
+    ],
+    "n_local_applied": 25,
+    "n_local_canonical": 19,
+    "max_fiber_multiplicity": 2
+  },
+  {
+    "seed": "Oc1ccccc1",
+    "built": true,
+    "x": "c1ccc(Oc2ccccc2)cc1",
+    "R": [
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "n_restate": 60,
+    "n_ring_local": 25,
+    "n_off_ring": 35,
+    "partition_exact": true,
+    "admitted_perturb_ring": "25/25",
+    "off_ring_leaks_into_R": "0/35",
+    "fiber_support_subset_of_local": true,
+    "q_sums_to_one": true,
+    "eps0_matches_rtheta_pow_1_over_T": true,
+    "monotone_in_rtheta": true,
+    "refine2_smiles": "c1ccc(Oc2ccncn2)cc1",
+    "refine2_trace": [
+      "atom_restate_semantic(r78)@ring",
+      "atom_restate_semantic(r101)@ring"
+    ],
+    "n_local_applied": 25,
+    "n_local_canonical": 19,
+    "max_fiber_multiplicity": 2
+  },
+  {
+    "seed": "c1ccc2[nH]ccc2c1",
+    "built": true,
+    "x": "c1ccc(-c2ccc3[nH]ccc3c2)cc1",
+    "R": [
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "n_restate": 70,
+    "n_ring_local": 25,
+    "n_off_ring": 45,
+    "partition_exact": true,
+    "admitted_perturb_ring": "25/25",
+    "off_ring_leaks_into_R": "0/45",
+    "fiber_support_subset_of_local": true,
+    "q_sums_to_one": true,
+    "eps0_matches_rtheta_pow_1_over_T": true,
+    "monotone_in_rtheta": true,
+    "refine2_smiles": "c1ccc(-c2ccc3[nH]ccc3c2)cc1",
+    "refine2_trace": [
+      "atom_restate_semantic(r72)@ring",
+      "atom_restate_semantic(r16)@ring"
+    ],
+    "n_local_applied": 25,
+    "n_local_canonical": 19,
+    "max_fiber_multiplicity": 2
+  },
+  {
+    "seed": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1",
+    "built": true,
+    "x": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1-c1ccccc1",
+    "R": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21
+    ],
+    "n_restate": 126,
+    "n_ring_local": 25,
+    "n_off_ring": 101,
+    "partition_exact": true,
+    "admitted_perturb_ring": "25/25",
+    "off_ring_leaks_into_R": "0/60",
+    "fiber_support_subset_of_local": true,
+    "q_sums_to_one": true,
+    "eps0_matches_rtheta_pow_1_over_T": true,
+    "monotone_in_rtheta": true,
+    "refine2_smiles": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1S1=CN=CC=C1",
+    "refine2_trace": [
+      "atom_restate_semantic(r124)@ring",
+      "atom_restate_semantic(r23)@ring"
+    ],
+    "n_local_applied": 25,
+    "n_local_canonical": 19,
+    "max_fiber_multiplicity": 2
+  }
+]

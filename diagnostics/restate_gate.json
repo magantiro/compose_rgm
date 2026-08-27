@@ -1,0 +1,67 @@
+{
+  "x0": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1-c1ccccc1",
+  "R": [
+    16,
+    17,
+    18,
+    19,
+    20,
+    21
+  ],
+  "base": {
+    "arom": 2,
+    "sat_n": 1,
+    "pip": 0,
+    "rings": 3
+  },
+  "shards": 40,
+  "arms": {
+    "P": {
+      "n": 2000,
+      "ran": 1998,
+      "halted": 2,
+      "touch_ring_step1": 298,
+      "touch_ring_any": 298,
+      "lost_arom": 533,
+      "gained_sat_n": 32,
+      "gained_pip": 87,
+      "both": 32,
+      "uniq_end": 1605
+    },
+    "U": {
+      "n": 2000,
+      "ran": 2000,
+      "halted": 0,
+      "touch_ring_step1": 308,
+      "touch_ring_any": 557,
+      "lost_arom": 511,
+      "gained_sat_n": 34,
+      "gained_pip": 94,
+      "both": 34,
+      "uniq_end": 1634
+    },
+    "S": {
+      "n": 2000,
+      "ran": 1991,
+      "halted": 9,
+      "touch_ring_step1": 1999,
+      "touch_ring_any": 1999,
+      "lost_arom": 1063,
+      "gained_sat_n": 788,
+      "gained_pip": 596,
+      "both": 788,
+      "uniq_end": 688
+    }
+  },
+  "scoped_sat_n_examples": [
+    "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCCN1",
+    "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCNC1",
+    "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCNCC1",
+    "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1N1CCCCC1",
+    "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1S1=CC=CC=N1",
+    "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1S1=CC=CN=C1",
+    "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1S1=CC=NC=C1",
+    "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1S1=CN=CC=C1",
+    "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1S1=NC=CC=C1"
+  ]
+}
