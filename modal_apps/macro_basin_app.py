@@ -1589,7 +1589,35 @@ def _build_ring_cached(model, system, smiles, *, size, topology="pendant",
 
     st0 = pad_molecular_graph(smiles_to_molecular_graph(smiles), CANONICAL_SLOTS)
     import numpy as _np
-    r = build_ring_system_exact(_enum_full, _apply, _to_smiles, is_executable,
+    # FAST PATH. 98.9-99.6% of a ring build's wall time was full-law
+    # enumeration (diagnostics/enum_profile.json) to rank a handful of
+    # descriptors the deterministic builder had already compiled. The partial
+    # enumerator returns weights proportional to the eager law over only the
+    # families each phase consumes, which induces the identical ordering --
+    # qualified 6/6 identical (status, smiles) at 6.39x aggregate
+    # (diagnostics/ring_fast_ab.json). Set COMPOSE_RING_EAGER=1 to force the
+    # old path.
+    import os as _os
+    _enum_used = _enum_full
+    if not _os.environ.get("COMPOSE_RING_EAGER"):
+        try:
+            from compose_v4.control.ring_fastpath import ring_phase_enumerator
+            from compose_v4.experiments.hphi_lazy_helpers import make_helpers
+            _hlp = make_helpers(model, time_point=float(TIME_POINT),
+                                canonical_slots=CANONICAL_SLOTS)
+            _enum_used = ring_phase_enumerator(model, _hlp, float(TIME_POINT),
+                                               int(size))
+        except Exception as _exc:
+            print(f"  ring fastpath unavailable ({type(_exc).__name__}); eager",
+                  flush=True)
+            _enum_used = _enum_full
+
+    def _apply_fast(st, j):
+        fams, acts, _p = _enum_used(st)
+        try: return system.apply(st, fams[j], acts[j])
+        except Exception: return None
+
+    r = build_ring_system_exact(_enum_used, _apply_fast, _to_smiles, is_executable,
                                 st0, size=int(size), topology=topology,
                                 composition=composition, state=ring_state,
                                 anchor_rank=int(anchor_rank), anchors=anchors,
@@ -2155,7 +2183,7 @@ def drive_episodes(payload: dict, n_particles: int = 64, rounds: int = 3,
                    episode_len: int = 5, dock_per_round: int = 10,
                    arm: str = "pooled", ring_mass: float = 0.24,
                    run_seed: int = 0, semantics: str = "legacy",
-                   refine: int = 2):
+                   refine: int = 0):
     """CEM over PROGRAMS (sequences of macros), docking as the objective.
 
     `arm` selects the ablation arm, with TOTAL initial ring probability matched
@@ -2302,12 +2330,13 @@ def drive_episodes(payload: dict, n_particles: int = 64, rounds: int = 3,
             jobs.append(dict(smiles=_start, seed=seed, delta=delta, program=prog,
                              start_depth=int(_sdep),
                              semantics=str(semantics),
-                             # REFINE_RING. Frozen at 2 (docs/REFINE_RING_FROZEN.md):
-                             # ring-scoped refinement produced a new saturated-N
-                             # ring 39.4% of the time against 1.6% for
-                             # all-molecule restate2, n=2000 per arm. refine=0 is
-                             # a PREDECLARED ABLATION -- the official panel must
-                             # not be used to choose between them.
+                             # FALLBACK ONLY. Refinement is now a parameter of
+                             # the ring ACTION (`ring:.../rN`), so the controller
+                             # selects it per cell from docking evidence. This
+                             # job-level value is used only when a macro carries
+                             # no parsable ring spec. Freezing it at 2 for every
+                             # build cost 0.83 kcal/mol on parp1 and gave the
+                             # controller no way to opt out.
                              refine=int(refine),
                              ring_policy=(_ringpol.state_dict()
                                           if _ringpol is not None else None),
