@@ -2072,7 +2072,16 @@ def search_episode(job: dict) -> dict:
             if rr.get("status") == "OK" and rr.get("smiles"):
                 cur = rr["smiles"]
                 trace.append(f"{macro}:ok(adm{len(_adm)})")
-                ring_exec.append(dict(key=str(macro), ok=True, stage="ok"))
+                # AUDITABILITY. The builder's own trace carries the REFINE_RING
+                # steps, tagged @ring, and the episode used to discard it -- so
+                # a checkpoint could not show whether refinement ever fired.
+                # For a claim-bearing panel that has to be visible in the
+                # artifact, not inferred from the config flag.
+                _rf = [str(t) for t in (rr.get("trace") or []) if "@ring" in str(t)]
+                if _rf:
+                    trace.append("refine[" + str(len(_rf)) + "]:" + ",".join(_rf))
+                ring_exec.append(dict(key=str(macro), ok=True, stage="ok",
+                                      refine_steps=len(_rf)))
             else:
                 trace.append(f"{macro}:UNSAT@{rr.get('stage')}")
                 ring_exec.append(dict(key=str(macro), ok=False, stage=str(rr.get("stage"))))
@@ -2454,8 +2463,13 @@ def drive_episodes(payload: dict, n_particles: int = 64, rounds: int = 3,
         print(f"round {rd}: feasible={len(archive)} docked={len(docked_smi)} "
               f"best={best} median_heavy={int(np.median(heavy)) if heavy else 0} "
               f"max_heavy={max(heavy) if heavy else 0}", flush=True)
+        # `refine` is part of the frozen interface, so it must appear in the
+        # PATH as well as in the config hash. Without it a refine=0 ablation
+        # overwrites the refine=2 checkpoint for the same cell/arm/seed --
+        # exactly the stale-checkpoint failure described just below.
         _suffix = ((f"_{arm}" if arm else "")
                    + ("" if semantics == "legacy" else f"_{semantics}")
+                   + ("" if int(refine) == 2 else f"_rf{int(refine)}")
                    + f"_r{int(run_seed)}")
         ck = Path("/artifacts/macro_basin") / f"episodes_{payload['cell']}{_suffix}.json"
         ck.parent.mkdir(parents=True, exist_ok=True)
@@ -2472,6 +2486,7 @@ def drive_episodes(payload: dict, n_particles: int = 64, rounds: int = 3,
             n_particles=int(n_particles), rounds=int(rounds),
             episode_len=int(episode_len), dock_per_round=int(dock_per_round),
             delta=float(delta), seed_smiles=seed, cell=payload["cell"],
+            refine=int(refine),
         )
         _cfg["config_sha256"] = _hl.sha256(
             json.dumps(_cfg, sort_keys=True).encode()).hexdigest()[:16]

@@ -114,3 +114,59 @@ seedless key would freeze one draw and hand every particle the identical ring.
   `kekule_missing`.
 - The `refine=0` parity check needs the archived builder staged back:
   `cp archive/macro_engine.pre_refine_ring.py src/compose_v4/control/_macro_engine_prerefine.py`
+
+---
+
+## FINAL FREEZE (supersedes the hash discipline above)
+
+`788419b` froze the ring mechanism but `drive_episodes` did not pass `refine`
+into the `search_episode` job payload, so that commit points at code where
+REFINE_RING cannot reach T4 at all. It is NOT the frozen hash.
+
+Post-788419b work required before the freeze is real:
+
+1. `drive_episodes(refine=2)` -> `job["refine"]` -> `search_episode` ->
+   `_build_ring_cached` -> `build_ring_system_exact` / `build_fused_ring_exact`.
+2. `refine` added to the checkpoint PATH suffix and to `config_sha256`. Without
+   it a `refine=0` ablation silently overwrites the `refine=2` checkpoint for
+   the same cell/arm/seed -- the exact stale-checkpoint failure that once
+   produced a fictitious result from a decoded stale ACTION_SPACE.
+3. The builder's `@ring` trace is propagated into the episode trace and
+   `ring_exec[].refine_steps`. It was being discarded, so a checkpoint could not
+   show whether refinement fired; for a claim-bearing panel that must be visible
+   in the artifact, not inferred from a config flag.
+
+### End-to-end evidence (5ht1b_s7_d0.4, 8 particles, 1 round, both arms)
+
+    refine=2  provenance.refine=2  sha 2c684db7590f2c4c
+              refine[2]:atom_restate_semantic(r77)@ring,ring_system_restate(r14)@ring
+    refine=0  provenance.refine=0  sha 3f0b1803fec92add   zero @ring markers
+
+Distinct paths, distinct config hashes, refinement visibly firing on one arm and
+absent on the other.
+
+### Runtime cost of REFINE_RING: none
+
+6 episodes, 5ht1b_s7_d0.6, `modal run ::smoke`:
+
+    refine=0   215.1 s wall
+    refine=2   197.6 s wall
+
+Same within noise. Do NOT read the endpoint scores from that cell -- it was run
+for plumbing and cost only.
+
+### The official T4 panel must be run fresh
+
+The 33 existing T4 runs were produced by the PRE-REFINE_RING controller. Mixing
+them with new `refine=2` runs and calling the aggregate one frozen method would
+undo the provenance discipline this project has otherwise held. The
+claim-bearing result is:
+
+    30 cells x 3 independent runs = 90 fresh runs from call zero, refine=2
+
+Old runs remain development evidence and diagnostics. They are not part of the
+official aggregate.
+
+### NO CONTROLLER CHANGES AFTER THIS HASH
+
+regardless of how any single T4 target reads.
