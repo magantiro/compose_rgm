@@ -2145,7 +2145,8 @@ def search_episode(job: dict) -> dict:
 def drive_episodes(payload: dict, n_particles: int = 64, rounds: int = 3,
                    episode_len: int = 5, dock_per_round: int = 10,
                    arm: str = "pooled", ring_mass: float = 0.24,
-                   run_seed: int = 0, semantics: str = "legacy"):
+                   run_seed: int = 0, semantics: str = "legacy",
+                   refine: int = 2):
     """CEM over PROGRAMS (sequences of macros), docking as the objective.
 
     `arm` selects the ablation arm, with TOTAL initial ring probability matched
@@ -2292,6 +2293,13 @@ def drive_episodes(payload: dict, n_particles: int = 64, rounds: int = 3,
             jobs.append(dict(smiles=_start, seed=seed, delta=delta, program=prog,
                              start_depth=int(_sdep),
                              semantics=str(semantics),
+                             # REFINE_RING. Frozen at 2 (docs/REFINE_RING_FROZEN.md):
+                             # ring-scoped refinement produced a new saturated-N
+                             # ring 39.4% of the time against 1.6% for
+                             # all-molecule restate2, n=2000 per arm. refine=0 is
+                             # a PREDECLARED ABLATION -- the official panel must
+                             # not be used to choose between them.
+                             refine=int(refine),
                              ring_policy=(_ringpol.state_dict()
                                           if _ringpol is not None else None),
                              seed_rng=int(rng.integers(0, 2**31))))
@@ -2504,7 +2512,7 @@ def episodes(cell: str = "5ht1b_s7_d0.4", n_particles: int = 64, rounds: int = 3
 
 
 @app.local_entrypoint()
-def smoke(cell: str = "5ht1b_s7_d0.6", n: int = 6):
+def smoke(cell: str = "5ht1b_s7_d0.6", n: int = 6, refine: int = 2):
     """1%-scale timing/smoke check before the sentinel.
 
     Times the ONE loop the sentinel newly depends on: build_ring_system inside
@@ -2528,11 +2536,12 @@ def smoke(cell: str = "5ht1b_s7_d0.6", n: int = 6):
         [("build_ring_system", 6), ("decorate", 1)],
     ][: int(n)]
     jobs = [dict(smiles=seed, seed=seed, delta=delta, program=p,
-                 seed_rng=1000 + i) for i, p in enumerate(programs)]
+                 refine=int(refine), seed_rng=1000 + i)
+            for i, p in enumerate(programs)]
     t0 = time.time()
     res = list(search_episode.map(jobs))
     el = time.time() - t0
-    print(f"\n{len(jobs)} episodes in {el:.1f}s wall "
+    print(f"\n[refine={int(refine)}] {len(jobs)} episodes in {el:.1f}s wall "
           f"({el / max(len(jobs), 1):.1f}s/episode at this concurrency)\n")
     nfeas = 0
     for p, r in zip(programs, res):
