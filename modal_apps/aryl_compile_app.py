@@ -2030,3 +2030,150 @@ def ring_type_smoke(job: dict) -> dict:
         max_fiber_multiplicity=(max(prods.count(x) for x in set(prods)) if prods else 0),
     )
     return out
+
+
+# ============ WHERE DOES EPISODE TIME ACTUALLY GO? =========================
+# Hypothesis: the macro path pays for FULL R_theta law enumeration at every
+# construction step, while the deterministic ring builder only ever needs the
+# ranking of a handful of candidate marks inside ONE family.
+# Measures, on real production payloads: enumerations per ring build, ms per
+# enumeration, and the share of build wall time spent inside enumeration.
+
+@app.function(image=image, cpu=(1.0, 1.0), memory=int(4 * 1024), timeout=60 * 60,
+              retries=0, max_containers=4,
+              volumes={str(ARTIFACT_ROOT): artifact_volume})
+def enum_profile(job: dict) -> dict:
+    import time
+    import numpy as np
+    from rdkit import RDLogger
+    RDLogger.DisableLog("rdApp.*")
+    from compose_v4.chem.molecular_graph import (molecular_graph_to_smiles,
+                                                 smiles_to_molecular_graph)
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.control.macro_engine import build_ring_system_exact
+    from compose_v4.experiments.production_successor_kernel import (
+        enumerate_factorized_marked_law)
+    from compose_v4.gates.med_chem_gate import is_executable
+
+    rt = _runtime(); model, system = rt["model"], rt["system"]
+    seed = job["seed"]
+
+    stats = dict(n_enum=0, enum_ms=0.0, marks=[], by_call=[])
+    _c = {}
+
+    def to_sm(st):
+        try: return molecular_graph_to_smiles(st)
+        except Exception: return None
+
+    def enum_full(st):
+        k = to_sm(st)
+        if k in _c:                      # memo hits are free; count them apart
+            stats.setdefault("memo_hits", 0)
+            stats["memo_hits"] += 1
+            return _c[k]
+        t = time.time()
+        law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
+        dt = (time.time() - t) * 1000
+        stats["n_enum"] += 1; stats["enum_ms"] += dt
+        stats["marks"].append(len(law.marks))
+        stats["by_call"].append(round(dt, 1))
+        _c[k] = ([m.executor_rule_name for m in law.marks],
+                 [m.action for m in law.marks],
+                 np.array([m.probability for m in law.marks], float))
+        return _c[k]
+
+    def apply_j(st, j):
+        f, a, _ = enum_full(st)
+        try: return system.apply(st, f[j], a[j])
+        except Exception: return None
+
+    st0 = pad_molecular_graph(smiles_to_molecular_graph(seed), CANONICAL_SLOTS)
+    t0 = time.time()
+    r = build_ring_system_exact(enum_full, apply_j, to_sm, is_executable, st0,
+                                size=6, topology="pendant",
+                                composition="carbon_rich", state="aromatic",
+                                anchor_rank=0, refine=int(job.get("refine", 2)),
+                                refine_rng=np.random.default_rng(5))
+    wall = (time.time() - t0) * 1000
+    return dict(seed=seed, status=r.get("status"), smiles=r.get("smiles"),
+                refine=int(job.get("refine", 2)),
+                build_wall_ms=round(wall, 1),
+                n_full_enumerations=stats["n_enum"],
+                memo_hits=stats.get("memo_hits", 0),
+                enum_ms_total=round(stats["enum_ms"], 1),
+                enum_share=round(stats["enum_ms"] / max(wall, 1e-9), 4),
+                ms_per_enumeration=round(stats["enum_ms"] / max(stats["n_enum"], 1), 1),
+                marks_per_enumeration=stats["marks"],
+                per_call_ms=stats["by_call"])
+
+
+# ============ FAST RING PATH: PARITY + SPEEDUP =============================
+# Eager vs exact-partial enumeration on the SAME payloads. Requires identical
+# (status, smiles); trace rank integers legitimately differ because eager ranks
+# against the full law and the partial path ranks against the requested subset.
+
+@app.function(image=image, cpu=(1.0, 1.0), memory=int(4 * 1024), timeout=60 * 60,
+              retries=0, max_containers=6,
+              volumes={str(ARTIFACT_ROOT): artifact_volume})
+def ring_fast_ab(job: dict) -> dict:
+    import time
+    import numpy as np
+    from rdkit import RDLogger
+    RDLogger.DisableLog("rdApp.*")
+    from compose_v4.chem.molecular_graph import (molecular_graph_to_smiles,
+                                                 smiles_to_molecular_graph)
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.control.macro_engine import build_ring_system_exact
+    from compose_v4.control.ring_fastpath import ring_phase_enumerator
+    from compose_v4.experiments.hphi_lazy_helpers import make_helpers
+    from compose_v4.experiments.production_successor_kernel import (
+        enumerate_factorized_marked_law)
+    from compose_v4.gates.med_chem_gate import is_executable
+
+    rt = _runtime(); model, system = rt["model"], rt["system"]
+    seed = job["seed"]; size = int(job.get("size", 6))
+    st0 = pad_molecular_graph(smiles_to_molecular_graph(seed), CANONICAL_SLOTS)
+
+    def to_sm(st):
+        try: return molecular_graph_to_smiles(st)
+        except Exception: return None
+
+    def build(enum_fn, tag):
+        def apply_j(st, j):
+            f, a, _ = enum_fn(st)
+            try: return system.apply(st, f[j], a[j])
+            except Exception: return None
+        t = time.time()
+        r = build_ring_system_exact(enum_fn, apply_j, to_sm, is_executable, st0,
+                                    size=size, topology="pendant",
+                                    composition="carbon_rich", state="aromatic",
+                                    anchor_rank=0, refine=0)
+        return r, (time.time() - t) * 1000
+
+    # ---- eager ----
+    _ce = {}
+    def eager_enum(st):
+        k = to_sm(st)
+        if k not in _ce:
+            law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
+            _ce[k] = ([m.executor_rule_name for m in law.marks],
+                      [m.action for m in law.marks],
+                      np.array([m.probability for m in law.marks], float))
+        return _ce[k]
+    r_eager, ms_eager = build(eager_enum, "eager")
+
+    # ---- fast ----
+    helpers = make_helpers(model, time_point=float(TIME_POINT),
+                           canonical_slots=CANONICAL_SLOTS)
+    fast_enum = ring_phase_enumerator(model, helpers, float(TIME_POINT), size)
+    r_fast, ms_fast = build(fast_enum, "fast")
+
+    same = (r_eager.get("status") == r_fast.get("status")
+            and r_eager.get("smiles") == r_fast.get("smiles"))
+    return dict(seed=seed, size=size,
+                eager_status=r_eager.get("status"), eager_smiles=r_eager.get("smiles"),
+                fast_status=r_fast.get("status"), fast_smiles=r_fast.get("smiles"),
+                identical=bool(same),
+                eager_ms=round(ms_eager, 1), fast_ms=round(ms_fast, 1),
+                speedup=round(ms_eager / max(ms_fast, 1e-9), 2),
+                eager_stage=r_eager.get("stage"), fast_stage=r_fast.get("stage"))

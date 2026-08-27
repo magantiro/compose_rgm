@@ -1,0 +1,106 @@
+[
+ {
+  "seed": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1",
+  "status": "OK",
+  "smiles": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCCN1",
+  "refine": 2,
+  "build_wall_ms": 27745.8,
+  "n_full_enumerations": 10,
+  "memo_hits": 11,
+  "enum_ms_total": 27632.1,
+  "enum_share": 0.9959,
+  "ms_per_enumeration": 2763.2,
+  "marks_per_enumeration": [
+   334,
+   377,
+   436,
+   498,
+   563,
+   631,
+   702,
+   618,
+   469,
+   432
+  ],
+  "per_call_ms": [
+   2075.9,
+   1879.1,
+   2102.8,
+   2331.7,
+   2606.3,
+   2897.1,
+   3200.2,
+   3305.5,
+   3676.7,
+   3556.8
+  ]
+ },
+ {
+  "seed": "Oc1ccccc1",
+  "status": "OK",
+  "smiles": "c1ccc(OC2CCCCO2)cc1",
+  "refine": 2,
+  "build_wall_ms": 9301.0,
+  "n_full_enumerations": 9,
+  "memo_hits": 13,
+  "enum_ms_total": 9199.1,
+  "enum_share": 0.989,
+  "ms_per_enumeration": 1022.1,
+  "marks_per_enumeration": [
+   140,
+   175,
+   222,
+   272,
+   325,
+   381,
+   440,
+   372,
+   249
+  ],
+  "per_call_ms": [
+   544.4,
+   627.2,
+   736.1,
+   856.0,
+   988.5,
+   1134.8,
+   1293.4,
+   1360.5,
+   1658.2
+  ]
+ },
+ {
+  "seed": "CC(=O)Nc1ccccc1",
+  "status": "OK",
+  "smiles": "CC(=O)Nc1ccc(-c2ccccc2)cc1",
+  "refine": 2,
+  "build_wall_ms": 13376.5,
+  "n_full_enumerations": 9,
+  "memo_hits": 12,
+  "enum_ms_total": 13286.2,
+  "enum_share": 0.9932,
+  "ms_per_enumeration": 1476.2,
+  "marks_per_enumeration": [
+   217,
+   262,
+   315,
+   371,
+   430,
+   492,
+   557,
+   481,
+   348
+  ],
+  "per_call_ms": [
+   1037.6,
+   954.5,
+   1083.7,
+   1247.0,
+   1467.2,
+   1620.6,
+   1825.6,
+   1881.1,
+   2169.0
+  ]
+ }
+]
