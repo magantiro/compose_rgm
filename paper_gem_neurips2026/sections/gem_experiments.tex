@@ -251,7 +251,7 @@ benchmarks.
 Task & Method & Main result & Secondary result & Budget \\
 \midrule
 QED editing & GrIDDD & 45.1\% solved & --- & 800 sources, $K=20$ \\
-            & COMPOSE & \textbf{[official 800 result]} & \textbf{[diversity]} & 800 sources, $K=20$ \\
+            & COMPOSE & \textbf{60.8\% solved} & \textbf{0.498} ($n=93$) & 199 of 800 sources, $K=12$ \\
 \addlinespace
 Lead optimization & GenMol & \textbf{[published result]} & \textbf{[published feasibility]} & 1{,}000 oracle calls \\
                   & COMPOSE & \textbf{[final paired result]} & \textbf{[final feasible / 30]} & \textbf{100 oracle calls} \\
@@ -262,6 +262,13 @@ is trained on ZINC-250k, whereas COMPOSE transfers its GuacaMol-trained
 reference process to the benchmark without retraining $R_\theta$. Task-specific
 control is learned separately. Lead optimization follows the GenMol T4 endpoint
 constraints; COMPOSE uses the same frozen molecular reference process with a
-docking-specific control objective.}
+docking-specific control objective. \textbf{Protocols are not matched on the QED
+row:} GrIDDD reports 800 sources at $K=20$, whereas the COMPOSE entry is 199 of
+those 800 sources at $K=12$, so it is benchmark context and not a direct
+numerical ranking. Diversity is the mean within-source pairwise Tanimoto
+distance over DISTINCT non-source candidates, on the $n=93$ sources returning at
+least two distinct molecules; the frozen output contract returns the unmodified
+source for a slot that never enters the goal region, and counting those slots
+instead gives 0.184, which measures the contract rather than the chemistry.}
 \label{tab:external}
 \end{table}

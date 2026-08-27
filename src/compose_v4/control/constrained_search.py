@@ -66,32 +66,26 @@ ACTION_SPACE: tuple[tuple[str, int], ...] = tuple(
     # score the candidate molecules directly once one exists. What is dropped
     # is only splitting 30 docking observations across six unrelated global
     # parameters.
-    # REFINEMENT IS A PARAMETER OF THE RING, NOT A GLOBAL CONSTANT.
-    # It was frozen at refine=2 for every ring build on REACHABILITY evidence
-    # (a ring-scoped restate reaches a new saturated-N ring 39.4% of the time
-    # against 1.6% for all-molecule restate2). That measured whether the
-    # chemistry is REACHABLE; it never measured whether reaching it HELPS the
-    # objective, and made it mandatory besides -- the controller had no action
-    # meaning "build this ring and do not refine it".
+    # THE FROZEN NARROW VOCABULARY. Three carbon ring specs, exactly as used
+    # for the 30 banked runs across 10 cells. Do not change this without
+    # re-running every cell: a table mixing vocabularies is two methods under
+    # one name.
     #
-    # Measured consequence on parp1 at matched budget (100 calls, 64 particles,
-    # same cells): refine=2 lost 0.83 kcal/mol, and the top binders carried
-    # 0.44 saturated-N rings against 0.00 and ~1 fewer ring overall. parp1
-    # rewards aromatic ring systems, so mandatory refinement destroyed the
-    # winning chemistry and the controller could not opt out.
-    #
-    # 0.83 exceeds the 0.70 kcal/mol docking noise floor, so this is a real
-    # chemical decision and belongs at the TOP level beside size and electronic
-    # state -- not pooled as a shrunken realization the way attachment sites
-    # are, since sites measured as pure noise-chasing.
-    #
-    # matched_prior holds TOTAL ring mass at 0.24 across however many variants
-    # exist, so going from 3 to 6 does not silently raise ring sampling.
-    + [(f"ring:{t}/{k}/{c}/{st}/r{rf}", k)
+    # KNOWN LIMITATION, measured 2026-08-27, stated rather than hidden.
+    # Heteroatom ring specs (ring:*/C5N1/*) are the right chemistry for 5ht1b:
+    # our winners and IVG's match on heavy atoms (28-30 vs 31), ring count
+    # (5 vs 5) and aromatic count (2-3 vs 3), and differ ONLY in saturated-N
+    # rings (1 vs 2). We add saturated carbocycles where IVG adds a piperidine.
+    # semantic_actions.realize() finds 40 legal piperidine realizations on the
+    # 5ht1b seed, so the chemistry is reachable -- but build_ring_system_exact
+    # UNSATs at grow2 when N enters the quota, because growth commits to the
+    # top-ranked descriptor and cannot backtrack from an N placement it fails to
+    # complete. Exposing the spec without fixing that would only produce UNSAT
+    # macros. The fix is backtracking in the builder, not a wider vocabulary.
+    + [(f"ring:{t}/{k}/{c}/{st}", k)
        for (t, k, c, st) in (("linked", 6, "C", "aromatic"),
                              ("fused", 6, "C", "aromatic"),
-                             ("fused", 6, "C", "saturated"))
-       for rf in (0, 2)]
+                             ("fused", 6, "C", "saturated"))]
     + [("STOP", 0)]
 )
 

@@ -1538,7 +1538,8 @@ def _macro_memo():
 
 def _build_ring_cached(model, system, smiles, *, size, topology="pendant",
                        composition="carbon_rich", ring_state="aromatic",
-                       anchor_rank=0, anchors=None, refine=0, refine_seed=0):
+                       anchor_rank=0, anchors=None, refine=0, refine_seed=0,
+                       stoich=None):
     """Memoised BUILD_RING_SYSTEM. Returns the macro's result dict.
 
     `refine` is REFINE_RING: that many ring-scoped restate steps applied to the
@@ -1558,7 +1559,8 @@ def _build_ring_cached(model, system, smiles, *, size, topology="pendant",
 
     akey = "" if anchors is None else ",".join(str(int(a)) for a in sorted(anchors))
     key = (f"{smiles}|{size}|{topology}|{composition}|{ring_state}|{anchor_rank}"
-           f"|{akey}|rf{int(refine)}s{int(refine_seed)}")
+           f"|{akey}|rf{int(refine)}s{int(refine_seed)}"
+           f"|st{'' if stoich is None else stoich}")
     memo = _macro_memo()
     try:
         hit = memo.get(key)
@@ -1599,7 +1601,14 @@ def _build_ring_cached(model, system, smiles, *, size, topology="pendant",
     # old path.
     import os as _os
     _enum_used = _enum_full
-    if not _os.environ.get("COMPOSE_RING_EAGER"):
+    # OPT-IN, not opt-out. The 6.39x A/B hoisted make_helpers out of the timed
+    # block and used 7-15 atom seeds. make_helpers turned out to be free (19 ms
+    # once, then cached), but the partial enumerator converts EVERY masked
+    # coordinate to an action in a Python loop, and episode states reach 48
+    # slots where grow_connected has ~1200 coordinates. The speedup is not
+    # established at production molecule size, so eager stays the default until
+    # it is measured there.
+    if _os.environ.get("COMPOSE_RING_FAST"):
         try:
             from compose_v4.control.ring_fastpath import ring_phase_enumerator
             from compose_v4.experiments.hphi_lazy_helpers import make_helpers
@@ -1621,7 +1630,7 @@ def _build_ring_cached(model, system, smiles, *, size, topology="pendant",
                                 st0, size=int(size), topology=topology,
                                 composition=composition, state=ring_state,
                                 anchor_rank=int(anchor_rank), anchors=anchors,
-                                refine=int(refine),
+                                stoich=stoich, refine=int(refine),
                                 refine_rng=_np.random.default_rng(int(refine_seed)))
     r = {k: v for k, v in r.items() if isinstance(v, (str, int, float, bool, list, type(None)))}
     try:
@@ -2011,6 +2020,15 @@ def search_episode(job: dict) -> dict:
                     specs=_ringcache["_specs"])
                 if _rq3 is not None:
                     macro = _rq3.key
+            # STOICH FOR BOTH BRANCHES. build_ring_system_exact resolves
+            # `composition` through COMPOSITION_CODES, which has no key for an
+            # exact label like "C5N1" and SILENTLY falls back to carbon_rich.
+            # Without this the heteroatom specs would build all-carbon rings and
+            # report "N rings do not help" from a run that never made one.
+            from compose_v4.control import semantic_actions as _sa0
+            _comp0 = spec.get("composition", "carbon_rich")
+            _stoi0 = (None if _comp0 in ("carbon_rich", "C")
+                      else _sa0.parse_stoich_label(_comp0, _sz))
             if _sem == "legacy":
                 if spec.get("topology") == "fused":
                     _adm = admissible_fused_edges(_st, job["seed"], float(job["delta"]),
@@ -2080,6 +2098,7 @@ def search_episode(job: dict) -> dict:
                                             state=spec.get("state", "aromatic"),
                                             anchor_rank=0,
                                             candidate_edges=[e for e, *_ in _adm],
+                                            stoich=_stoi0,
                                             refine=int(spec.get("refine",
                                                                 job.get("refine", 0))),
                                             refine_rng=np.random.default_rng(
@@ -2091,6 +2110,7 @@ def search_episode(job: dict) -> dict:
                                         ring_state=spec.get("state", "aromatic"),
                                         anchor_rank=0,
                                         anchors=[a for a, *_ in _adm],
+                                        stoich=_stoi0,
                                         refine=int(spec.get("refine",
                                                             job.get("refine", 0))),
                                         # per-particle, per-position: a shared
@@ -2498,7 +2518,12 @@ def drive_episodes(payload: dict, n_particles: int = 64, rounds: int = 3,
         # exactly the stale-checkpoint failure described just below.
         _suffix = ((f"_{arm}" if arm else "")
                    + ("" if semantics == "legacy" else f"_{semantics}")
-                   + ("" if int(refine) == 2 else f"_rf{int(refine)}")
+                   # refine=0 IS the banked narrow behaviour, so it must write
+                   # the banked filename (episodes_<cell>_pooled_r<seed>.json).
+                   # The condition used to key on refine==2, which was right when
+                   # 2 was the default; now that 0 is, it renamed every narrow run
+                   # to _rf0_ and broke both the resume glob and the table reader.
+                   + ("" if int(refine) == 0 else f"_rf{int(refine)}")
                    + f"_r{int(run_seed)}")
         ck = Path("/artifacts/macro_basin") / f"episodes_{payload['cell']}{_suffix}.json"
         ck.parent.mkdir(parents=True, exist_ok=True)

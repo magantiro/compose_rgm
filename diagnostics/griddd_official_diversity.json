@@ -1,0 +1,31 @@
+{
+ "benchmark": "GrIDDD/Jin ZINC-250k QED editing, official 800 file, sources 0-199",
+ "n_sources": 199,
+ "solved_at_K12": 121,
+ "solved_rate_K12": 0.608,
+ "fingerprint": "Morgan radius=2, 2048 bits; distance = 1 - Tanimoto",
+ "note": "'distinct' excludes candidates identical to the source. The frozen output contract returns the UNMODIFIED SOURCE for a slot whose trajectory never entered the goal region, so those slots contribute distance 0 to every pair and drag the all-slots figure down. 'distinct' and 'successful only' coincide exactly, because any returned molecule differing from the source is by definition a success.",
+ "caveat": "The 0.393 quoted in the paper is from the 128-source held-out panel. No script or artifact computing it exists in the repo, so the convention it used could not be identified and 0.393 is NOT reproduced by either convention here. Recompute consistently before pairing it with these numbers.",
+ "results": {
+  "K8_all": {
+   "mean_pairwise_tanimoto_distance": 0.1818,
+   "n_sources": 199,
+   "mean_distinct_per_source": null
+  },
+  "K8_distinct": {
+   "mean_pairwise_tanimoto_distance": 0.4887,
+   "n_sources": 84,
+   "mean_distinct_per_source": 1.889
+  },
+  "K12_all": {
+   "mean_pairwise_tanimoto_distance": 0.1836,
+   "n_sources": 199,
+   "mean_distinct_per_source": null
+  },
+  "K12_distinct": {
+   "mean_pairwise_tanimoto_distance": 0.4977,
+   "n_sources": 93,
+   "mean_distinct_per_source": 2.668
+  }
+ }
+}
