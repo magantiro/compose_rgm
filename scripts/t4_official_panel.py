@@ -85,9 +85,54 @@ def report(done, t_start):
     print("=" * 68 + "\n", flush=True)
 
 
+def completed_on_volume():
+    """Runs whose checkpoint already shows the final round.
+
+    The driver loop is a LOCAL process; the runs themselves are server-side
+    spawns and survive it. So a laptop sleep kills the queue, not the work --
+    and without this a restart would redo all 90. drive_episodes has no
+    mid-run resume, so a partially finished run is correctly re-run whole.
+    """
+    import subprocess, re
+    dst = Path("/tmp/t4_panel_ck")
+    dst.mkdir(parents=True, exist_ok=True)
+    subprocess.run(["modal", "volume", "get", "compose-v4-artifacts",
+                    "macro_basin", str(dst), "--force"],
+                   capture_output=True, text=True)
+    d = dst / "macro_basin"
+    pat = re.compile(r"episodes_(.+)_pooled_r(\d+)\.json$")
+    out = set()
+    for f in (d.glob("episodes_*_pooled_r*.json") if d.exists() else []):
+        m = pat.search(f.name)
+        if not m:
+            continue
+        cell, rs = m.group(1), int(m.group(2))
+        if rs not in RUN_SEEDS:
+            continue
+        try:
+            j = json.loads(f.read_text())
+        except Exception:
+            continue
+        pr = j.get("provenance", {}) or {}
+        # A checkpoint only counts as done if it is the FINAL round AND was
+        # produced by this frozen configuration. Anything else is re-run.
+        if (int(j.get("round", -1)) + 1 >= ROUNDS
+                and int(pr.get("refine", -1)) == 2
+                and int(pr.get("rounds", -1)) == ROUNDS
+                and int(pr.get("dock_per_round", -1)) == DOCK_PER_ROUND):
+            out.add((cell, rs))
+    return out
+
+
 def main():
     t_start = time.time()
     pending = list(jobs)
+    if "--resume" in sys.argv:
+        have = completed_on_volume()
+        before = len(pending)
+        pending = [j for j in pending if (j[0], j[1]) not in have]
+        print(f"resume: {len(have)} runs already complete at this config, "
+              f"{before} -> {len(pending)} to run", flush=True)
     inflight, done = {}, []
     reported = False
     while pending or inflight:
