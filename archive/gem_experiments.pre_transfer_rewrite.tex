@@ -1,0 +1,82 @@
+% ============================================================================
+% GEM SECTION 3 --- Experiments.
+%
+% EDITS APPLIED HERE ARE ONLY THOSE THE ABRIDGMENT MAP SPECIFIES.  Retained
+% prose is VERBATIM from paper_iclr2027/sections/{experiments,lead_optimization}
+% .tex.  No sentence has been reworded to save space.
+%
+%   overview <- supplied verbatim by the map ("We evaluate three claims...").
+%   3.1 <- 5.1.  Map: "Delete the final sentence about the separate
+%          data-backed-family restriction from the main text; move it to the
+%          appendix."  Applied; everything else verbatim.
+%   3.2 <- 5.2.  Map: "Only cut the detailed caveat about the exact mismatch
+%          between rescue sets; put that in the appendix."  Applied;
+%          everything else verbatim.
+%   3.3 <- replaces 5.3 and 5.4, as two bold inline labels (map's instruction:
+%          "not separate numbered subsections").
+%   MOVED WHOLE: 5.5 multi-objective, 5.6 retargeting, 5.7 pathwise, all 30 T4
+%          cell rows, the chemistry-validity audit, the full QED comparator set.
+%   Closing pointer sentence <- supplied verbatim by the map.
+%
+% ===== DEVIATION FROM THE MAP.  READ BEFORE EDITING. =====
+% The map instructs 3.3 to carry "the final matched official evaluation" for
+% GrIDDD.  THAT RUN DOES NOT EXIST YET.  We hold a 128-source held-out panel at
+% K=12; GrIDDD publishes 800 sources at K=20.  The map's interpretation
+% sentence ("COMPOSE improves source-conditioned editing success under the
+% matched protocol") is therefore NOT written below, and the claim that
+% COMPOSE beats GrIDDD is barred until the official 800 adjudicates it.  The
+% starred row and its caveat are carried over from the full paper unchanged.
+% The GenMol half IS measured and is written from the banked 30-cell result.
+% SWAP POINT and full status: see RESULTS_STATUS.md in this directory.
+% ============================================================================
+\section{Experiments}
+\label{sec:gem-experiments}
+
+We evaluate three claims. First, does the frozen reference law learn state-dependent preferences beyond global edit-family frequencies? Second, does future reachability change which multi-step molecular edits succeed? Third, is the resulting system competitive on established molecular-editing and lead-optimization benchmarks?
+
+\subsection{The reference process learns state-dependent edit preferences}
+\label{sec:gem-exp-rtheta}
+
+The executable rewrite system determines which molecular edits are possible, but not which should be preferred in a given molecular state. We therefore test whether the frozen reference law $R_\theta$ learns state-dependent transition structure beyond corpus-wide edit-family frequencies. On $3{,}545$ held-out transitions with source molecules disjoint from reference-law training, we compare $R_\theta$ with an empirical-family baseline that uses training-set family frequencies while operating over the same canonical molecular successors. This holds executable support fixed and asks only whether learning improves how probability is distributed among the available next molecules.
+
+$R_\theta$ reduces canonical-successor NLL from $5.37$ to $3.90$ nats relative to the empirical-family baseline (\cref{fig:mechanism}(a)). A matched decomposition shows that $86.7\%$ of this improvement is recovered by retaining empirical family frequencies and learning only which successor is preferred within the current state. Thus most of the learned signal is not which kinds of edits occur globally, but which executable molecular edit is appropriate for the molecule at hand. The rewrite system therefore defines what is possible, while $R_\theta$ supplies a learned, state-dependent preference over those possibilities. We use $R_\theta$ throughout the remaining experiments as a goal-independent reference law over fixed executable support, without interpreting its probabilities as physical kinetics or synthetic-route likelihood. The restriction to edit families with data-backed transition supervision is reported in \cref{app:exp-rtheta}.
+
+\subsection{Future reachability improves multi-step editing}
+\label{sec:gem-exp-lookahead}
+
+\method{} can evaluate a molecular edit by the futures it leaves reachable, rather than only by the molecule it produces immediately. Because control acts on canonical molecular successors and every committed successor is itself a complete molecule, each candidate edit defines a realized molecular intermediate from which the frozen reference process can be continued over the remaining budget. We isolate this capability through exact target recovery on $65$ held-out source--target pairs with source molecules disjoint from development, each admitting a certified executable edit path within budget. Both policies operate over the same frozen $R_\theta$, target, edit budget, and candidate successors. The local policy greedily selects the successor most similar to the target, whereas the future-aware rollout policy evaluates the continuations reachable over the remaining budget and overrides the local choice only when doing so yields a strict improvement.
+
+Accounting for future reachability changes which molecular edits succeed. Remaining-budget rollout recovers $40/65$ targets, compared with $26/65$ under local selection, rescuing $14$ of the $39$ local failures ($+21.5$ percentage points, $[12.3,33.5]$; \cref{fig:mechanism}(b--c)). A deterministically selected rescue in \cref{fig:mechanism}(b) illustrates the mechanism: the local policy chooses the higher-similarity successor, whereas a single future-aware override takes a lower-similarity edit that preserves a successful continuation and reaches the target within budget. Across the full panel, these rescues show that the value of an edit depends not only on the molecule it produces immediately, but on the molecular futures it leaves reachable.
+
+At molecular scale, exhaustive evaluation of these continuations is expensive, so we use $h_\phi$ to prioritize which successors receive rollout evaluation. This retains the same aggregate recovery using only $34.6\%$ of the continuation evaluations required by all-candidate lookahead (\cref{fig:mechanism}(d)). We treat this result as a prioritization diagnostic rather than a standalone evaluation of $h_\phi$ (\cref{app:exp-lookahead}).
+
+\subsection{One frozen process is competitive across molecular editing and lead optimization}
+\label{sec:gem-exp-external}
+
+\textbf{Similarity-constrained QED editing.} We use the ZINC-250k similarity-constrained QED benchmark reported by GrIDDD \citep{ninniri2025griddd}: source molecules begin with QED in $[0.7,0.8]$, and a source is solved if at least one returned molecule reaches $\mathrm{QED}\ge0.9$ while retaining Morgan-fingerprint Tanimoto similarity of at least $0.4$. The reference law $R_\theta$ is unchanged from \cref{sec:gem-exp-rtheta,sec:gem-exp-lookahead}; only the QED future-value controller is trained for this task, using sources disjoint from evaluation. Each candidate slot corresponds to one controlled trajectory. Successful trajectories terminate prospectively upon first entering the target region, while trajectories that never reach the region remain failures rather than being resampled. \method{} solves $70/128$ sources ($54.7\%$) within $12$ returned candidates and maintains substantial within-source molecular diversity ($0.393$ mean pairwise Tanimoto distance), indicating that benchmark success is not driven by collapse to a narrow set of edits. Because the current \method{} evaluation uses a different source cohort and candidate allowance, these values are reported as benchmark context rather than a direct numerical ranking (\cref{tab:external}).
+
+\textbf{Similarity-constrained lead optimization.} We evaluate the same frozen process on the lead-optimization protocol introduced by GenMol \citep{lee2025genmol}, comprising five protein targets, three seed molecules per target, and similarity thresholds $\delta\in\{0.4,0.6\}$. A returned molecule must satisfy QED $\geq0.6$, synthetic accessibility (SA) $\leq4$, and Morgan-fingerprint Tanimoto similarity $\geq\delta$ to its seed; among molecules satisfying these endpoint constraints, performance is measured by QuickVina2 docking score (lower is better). Importantly, the constraints apply only to the returned molecule rather than to intermediate states. Under the published benchmark criterion, \method{} returns a constraint-satisfying molecule in $26/30$ cells. Across the $23$ cells for which both \method{} and GenMol report a feasible molecule, \method{} obtains the lower docking score in $10$ cells and GenMol in $13$. The mean paired difference is $+0.07$ kcal/mol in GenMol's favor, compared with a median replicate variation of $0.70$ kcal/mol under our QuickVina2 pipeline. We therefore interpret the aggregate result as \textbf{performance near GenMol rather than evidence for a significant advantage of either method}.
+
+Finally, the separation between inexpensive endpoint constraints and the expensive docking objective enables \method{} to allocate oracle evaluations selectively. QED, SA, similarity, and chemical validity can all be evaluated before docking, so only feasible candidate endpoints need reach the protein oracle. On PARP1 seed 1 at $\delta=0.4$, filtering the proposal distribution in this way reaches a QuickVina2 score of $-10.4$ kcal/mol after only ten docking evaluations, compared with $-10.5$ after a $1{,}000$-evaluation search; the difference is smaller than measured docking replicate variation. Per-cell results, the chemistry-validity audit and the full protocol audit are given in \cref{app:medchem-gate}.
+
+\begin{table}[!ht]
+\centering
+{\small
+\begin{tabular}{llrrl}
+\toprule
+Task & Method & Main metric & Secondary metric & Budget \\
+\midrule
+QED editing
+ & GrIDDD \citep{ninniri2025griddd} & 45.1\% solved & 0.283 diversity$^{\dagger}$ & 800 sources, $K{=}20$ \\
+ & \textbf{\method{}} & 54.7\%$^{*}$ solved & 0.393$^{*}$ diversity & 128 sources$^{*}$, $K{=}12^{*}$ \\
+\midrule
+Lead optimization
+ & GenMol \citep{lee2025genmol} & 13/23 paired wins & --- & $1{,}000$ oracle calls \\
+ & \textbf{\method{}} & 10/23 paired wins & 26/30 feasible cells & $1{,}000$ oracle calls \\
+\bottomrule
+\end{tabular}}
+\caption{\small\textbf{External competence of one frozen molecular process.} QED editing: a source is solved if any of $K$ returned candidates reaches $\mathrm{QED}\ge0.9$ at Tanimoto $\ge0.4$; diversity is mean pairwise Tanimoto distance among a source's valid candidates. $^{*}$\method{} is evaluated on a separate $128$-source held-out panel with $K=12$, whereas the published row uses the official $800$ sources with $K=20$; the starred values are therefore benchmark context, not a direct ranking. $^{\dagger}$GrIDDD reports diversity without specifying its evaluator; \method{} uses the released Jin evaluator. Lead optimization: paired wins are counted over the $23$ cells where both methods return a feasible molecule; the mean paired difference is $+0.07$ kcal/mol in GenMol's favor, below the $0.70$ kcal/mol median replicate variation.}
+\label{tab:external}
+\end{table}
+
+Because every intermediate remains a complete molecule, the same frozen process can also be retargeted after an objective change and restricted by pathwise molecular constraints; we report these trajectory-level capabilities in \cref{app:capabilities}.

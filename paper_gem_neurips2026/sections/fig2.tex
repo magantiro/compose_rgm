@@ -1,0 +1,113 @@
+% FIGURE 2 --- the empirical argument, in order:
+%   did R_theta learn anything? -> why can future reachability help? ->
+%   does it help systematically? -> can we prioritise the expensive lookahead?
+%
+% ===================== DRAWING SPEC. READ BEFORE DRAWING. =====================
+%
+% LAYOUT: now FIVE panels (a)-(e); (e) is dynamic retargeting, added 2026-08-27
+% with the supplied caption. Previous layout note (2x2) is superseded.
+% LAYOUT: (a) top-left, (b) top-right, (c) bottom-left, (d) bottom-right, (e) full-width row.
+% Panel (b) is the visual centrepiece and should get the most area.
+%
+% DATA PROVENANCE. Panel (a) values are exact from
+% diagnostics/editing_v2_experiment1_reference_law_paper.json -> "overall":
+%     uniform_canonical            6.253653
+%     empirical_family             5.366552
+%     learned_family_uniform_id    5.172268
+%     empirical_family_learned_id  4.099230
+%     r_theta                      3.904945
+% Full gain 5.366552 - 3.904945 = 1.4616 nats (prints as 1.46, NOT 1.47).
+% Identity share (5.366552 - 4.099230)/1.4616 = 86.707% -> 86.7%.
+%
+% (a) REFERENCE-LAW DECOMPOSITION. All FIVE arms, as bars, y-axis
+%     "Canonical-successor NLL (nats), lower is better".
+%     The fifth bar (learned family / uniform identity, 5.17) is what forecloses
+%     "but what if you learn family frequency and not within-family identity?"
+%     We measured exactly that control, so show it.
+%     Visually emphasise 5.37 -> 4.10 and annotate "86.7% of full gain".
+%     Do NOT write a sentence like "R_theta learns which successor, not just
+%     which family" inside the graphic. The five bars establish it.
+%
+% (b) A RESCUED DECISION. RENDER MOLECULAR STRUCTURES. NO SMILES IN THE FIGURE.
+%     Sealed pair 10, budget 5 edits, one override. Selected deterministically:
+%     lowest sealed pair index at the median certified path length (5 edits).
+%     Do not print that selection rule in the figure; it is caption/appendix
+%     material.
+%     Structures to render (source of truth, keep here, never typeset):
+%       x_0     CCC(C)NC(=O)c1ccc(CSCc2ccccc2)o1
+%       x_1     CCC(C)c1ccc(CSCc2ccc(C(N)=O)o2)cc1   (shared, 4 edits remain)
+%       local   CCCc1ccc(...)        sim 0.737   -> thioether, revisits a state,
+%                                                   target never reached
+%       rollout CC(C)c1ccc(...)      sim 0.718   -> CCc1ccc(...) ->
+%               Cc1ccc(CSCc2ccc(C(N)=O)o2)o2 = target, 4 committed edits, 1 spare
+%     Draw the shared prefix ONCE, branch at the divergent edit, highlight the
+%     changed substituent consistently across both branches, label remaining
+%     budget. Show only sim 0.737 vs 0.718 at the split: future-aware
+%     deliberately takes the locally WORSE successor, and that is the whole
+%     point. Terminate local with "target not reached" and rollout with
+%     "target reached, 1 edit remaining". Tiny annotation at the split:
+%     "one override".
+%     CONSTRAINT: per-pair records bank source/target/outcome but NOT the
+%     intermediate states, so the two branches require re-deriving this single
+%     pair's trajectory. Everything else on this figure is already measured.
+%
+% (c) AGGREGATE. NOT one stacked bar. TWO horizontal bars, same denominator 65:
+%       Local        26 recovered            | 39 unresolved
+%       Future-aware 26 retained | 14 rescued | 25 unresolved
+%     Sharing the denominator makes the causal structure visible: the
+%     future-aware policy cannot lose a local success by construction.
+%     Annotate "+21.5 pp, 95% CI [12.3, 33.5]" and, on the rescued segment,
+%     "14 / 39 local failures rescued". NO p-value.
+%
+% (d) PRIORITISATION. x-y SCATTER, not bars.
+%       x  Continuation evaluations (% of all-candidate)
+%       y  Targets recovered (% of 65)
+%       Local             0.0  , 40.0   (26/65)
+%       R_theta top-1    34.7  , 50.8   (33/65)
+%       h_phi top-1      34.6  , 61.5   (40/65)
+%       similarity top-2 52.1  , 56.9   (37/65)
+%       all-candidate   100.0  , 61.5   (40/65)
+%     The striking fact is that h_phi top-1 sits at the SAME y as all-candidate
+%     at about a third of the evaluations. A light horizontal guide between
+%     those two points may carry "same aggregate recovery", with a small (not
+%     headline) note "different rescued targets" -- matching 40/65 is not
+%     reproducing the all-candidate rescue set.
+%     Label similarity top-2 as a TARGET-INFORMED diagnostic in the legend.
+%     Avoid the word "efficiency": this axis is continuation evaluations, not
+%     matched total compute.
+%
+% CAPTION IS ~65 WORDS, one short clause per panel. It does NOT restate the
+% numbers the figure already shows. Four caveats were deliberately kept out of
+% the caption; all four are already carried in prose, so nothing is lost:
+%   - deterministic selection rule for pair 10 ......... this comment block
+%   - local cannot regress by construction ............. appendix, Sec. G
+%   - h_phi and all-candidate rescue sets differ ....... appendix, Sec. G
+%   - exact-target similarity is privileged information  Sec. 5.2 prose
+%
+% DO NOT PUT IN THE FIGURE: prose sentences, SMILES, p-values, "h_phi is
+% efficient" language, or paragraph-sized caveat boxes.
+% ==============================================================================
+\begin{figure}[t]
+\centering
+\fbox{\parbox{0.97\textwidth}{\centering\vspace{6pt}\footnotesize
+{\color{red}[Panels to be drawn. All values below are measured.]}\\[8pt]
+\textbf{(a) Reference-law decomposition}\quad canonical-successor NLL $\downarrow$, five bars\\[2pt]
+uniform $6.25$ \quad empirical family $5.37$ \quad learned family\,/\,uniform id $5.17$ \quad empirical family\,/\,learned id $4.10$ \quad \method{} $3.90$\\[2pt]
+annotate $5.37\rightarrow4.10$: \textbf{$86.7\%$ of the $1.46$ nat gain}\\[7pt]
+\textbf{(b) A rescued decision}\quad rendered structures, no \textsc{smiles}; shared prefix drawn once, then one override\\[2pt]
+at the split show only similarity $0.737$ (local) vs.\ $0.718$ (future-aware); local ends \emph{target not reached}, future-aware ends \emph{target reached, $1$ edit remaining}\\[7pt]
+\textbf{(c) Future reachability rescues local failures}\quad two horizontal bars, denominator $65$\\[2pt]
+local $26$ recovered $|$ $39$ unresolved \quad future-aware $26$ retained $|$ $14$ rescued $|$ $25$ unresolved \hfill $+21.5$ pp $[12.3,33.5]$\\[7pt]
+\textbf{(d) Prioritizing continuation evaluations}\quad scatter, recovery vs.\ evaluations\\[2pt]
+local $(0.0,40.0)$ \quad $R_\theta$ top-1 $(34.7,50.8)$ \quad $h_\phi$ top-1 $(34.6,61.5)$ \quad similarity top-2 $(52.1,56.9)$ \quad all-candidate $(100.0,61.5)$\\[7pt]
+\textbf{(e) Dynamic retargeting}\quad paired post-switch utility, continue from $x_3$ vs.\ restart from $x_0$, same remaining budget\\[2pt]
+potency-first $+0.302$ $[0.186,0.413]$ \quad developability-first $+0.176$ $[0.069,0.283]$ \quad $n=40$ held-out molecules
+\vspace{6pt}}}
+\caption{\small\textbf{Learning and intervening on the \method{} molecular process.}
+\textbf{(a)}~Canonical-successor NLL decomposition. $R_\theta$ improves over empirical edit-family frequencies, and $86.7\%$ of the gain is recovered by learning successor identity within the current state.
+\textbf{(b)}~A future-aware rescue. The locally preferred edit has higher immediate similarity but removes the successful continuation; a lower-similarity edit preserves a path to the target.
+\textbf{(c)}~Across $65$ held-out pairs, local control reaches $26$ targets and remaining-budget control reaches $40$, rescuing $14$ local failures.
+\textbf{(d)}~$h_\phi$-prioritized lookahead matches all-candidate recovery using $34.6\%$ of the continuation evaluations.
+\textbf{(e)}~Dynamic retargeting. After an objective switch, continuing from the realized molecular state outperforms restarting from the original source under the same remaining budget.}
+\label{fig:mechanism}
+\end{figure}
