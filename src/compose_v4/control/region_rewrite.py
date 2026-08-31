@@ -290,6 +290,91 @@ def handoff_satisfied(state, ctx: RewriteContext, lineage: Lineage,
     return ctx_slots <= seen
 
 
+def old_dependence(state, ctx: RewriteContext, lineage: Lineage,
+                   original_region_ids: frozenset) -> int:
+    """How many SURVIVING old-region atoms the preserved components still need.
+
+        d_old(x) = min over paths C_i ~> C_j of the number of surviving
+                   old-region atoms the path must pass through
+
+    Zero exactly when a genuine handoff exists, so it strictly generalises the
+    boolean handoff test by supplying a gradient. Crucially it covers BOTH ways
+    to establish alternative connectivity inside one formulation:
+
+      constructive  new material creates an old-free path   -> d_old falls
+      rewiring      reroute/cycle ops move an existing path  -> d_old falls
+
+    The second route is what saturated terminals need, where no atom_insert is
+    offered and a potential that only rewards new material is blind.
+
+    Computed by 0-1 BFS: entering a surviving old-region atom costs 1, every
+    other atom costs 0. k-general -- the cost is the worst component still
+    depending on the old region.
+    """
+    from collections import deque
+    import numpy as np
+    b = np.asarray(state.bonds)
+    types = np.asarray(state.atom_types)
+    n = int(b.shape[0])
+    old = {lineage.slot_of[i] for i in original_region_ids if i in lineage.slot_of}
+    live = {i for i in range(n) if int(types[i]) != 0}
+    ctx_slots = {int(c) for c in ctx.frozen} & live
+    if not ctx_slots:
+        return 0
+    # preserved components, in the FULL graph (old region included)
+    seen, comps = set(), []
+    for start in sorted(ctx_slots):
+        if start in seen:
+            continue
+        comp, stack = set(), [start]
+        while stack:
+            v = stack.pop()
+            if v in comp:
+                continue
+            comp.add(v); seen.add(v)
+            for w in range(n):
+                if w in ctx_slots and w not in comp and b[v][w] > 0:
+                    stack.append(w)
+        comps.append(comp)
+    if len(comps) <= 1:
+        return 0
+    source = comps[0]
+    INF = 10 ** 6
+    dist = {v: INF for v in live}
+    dq = deque()
+    for v in source:
+        dist[v] = 0
+        dq.appendleft(v)
+    while dq:
+        v = dq.popleft()
+        for w in range(n):
+            if w not in live or b[v][w] <= 0:
+                continue
+            cost = 1 if w in old else 0
+            if dist[v] + cost < dist[w]:
+                dist[w] = dist[v] + cost
+                (dq.appendleft if cost == 0 else dq.append)(w)
+    worst = 0
+    for comp in comps[1:]:
+        worst = max(worst, min((dist[v] for v in comp), default=INF))
+    return int(worst)
+
+
+def prune_potential(state, ctx: RewriteContext, lineage: Lineage,
+                    original_region_ids: frozenset) -> float:
+    """Phi_prune(x) = -(surviving old-region atoms), with handoff held intact.
+
+    Applied only after establishment. If a step would reintroduce dependence on
+    the superseded region -- d_old back above zero -- it is scored as
+    catastrophic rather than merely worse, so removal can never undo the
+    connection it was predicated on.
+    """
+    surviving = sum(1 for i in original_region_ids if i in lineage.slot_of)
+    if old_dependence(state, ctx, lineage, original_region_ids) > 0:
+        return -1e6
+    return -float(surviving)
+
+
 def connectivity_diagnostics(state, ctx: RewriteContext, lineage: Lineage,
                              original_region_ids: frozenset) -> dict:
     """Instrumentation for the appendage failure mode.
@@ -372,12 +457,11 @@ def connectivity_potential(state, ctx: RewriteContext, lineage: Lineage,
     if not ctx_slots:
         return -deficit_weight * 4.0
 
-    seen, groups = set(), 0
+    seen = set()
     attached = 0
     for start in sorted(ctx_slots):
         if start in seen:
             continue
-        groups += 1
         stack, comp = [start], set()
         while stack:
             v = stack.pop()
@@ -389,7 +473,11 @@ def connectivity_potential(state, ctx: RewriteContext, lineage: Lineage,
                     stack.append(w)
         # new material (not original, not preserved context) riding on this group
         attached += len(comp - ctx_slots)
-    return -deficit_weight * (groups - 1) + float(attached)
+    # d_old replaces a raw group count: it is zero exactly at handoff and it
+    # falls for REWIRING as well as growth, so saturated terminals are not
+    # invisible to the potential.
+    d_old = old_dependence(state, ctx, lineage, original_region_ids)
+    return -deficit_weight * float(d_old) + float(attached)
 
 
 # ------------------------------------------------------------------- proposal
@@ -414,7 +502,8 @@ class Proposal:
 def propose(enum_fn, apply_fn, ctx: RewriteContext, start_state, *,
             schedule, rng, gate_fn=None, lineage=None,
             original_region_ids=frozenset(), max_handoff_steps=24,
-            potential_fn=None, beta: float = 0.0, epsilon: float = 0.1):
+            potential_fn=None, beta: float = 0.0, epsilon: float = 0.1,
+            potentials=None, betas=None):
     """Run one region-local trajectory under an explicit phase schedule.
 
     `schedule` is a list of (phase, n_steps). `enum_fn(state) -> (fams, acts,
@@ -434,6 +523,12 @@ def propose(enum_fn, apply_fn, ctx: RewriteContext, start_state, *,
     p.lineage = lineage
     for phase, n_steps in schedule:
         ctx = ctx.with_phase(phase)
+        # Establishment and removal optimise DIFFERENT objectives, so the
+        # potential is selected per phase rather than shared. Sharing one
+        # potential is what left prune_old undirected and the superseded region
+        # in place after a successful handoff.
+        phase_pot = (potentials or {}).get(phase, potential_fn)
+        phase_beta = float((betas or {}).get(phase, beta))
         until_handoff = (n_steps == "until_handoff")
         budget = int(max_handoff_steps) if until_handoff else int(n_steps)
         for _i in range(budget):
@@ -457,17 +552,17 @@ def propose(enum_fn, apply_fn, ctx: RewriteContext, start_state, *,
                 p.status, p.stage = "UNSAT", f"{phase}:zero_mass"
                 return p
             w = w / w.sum()
-            if potential_fn is not None and beta > 0.0:
+            if phase_pot is not None and phase_beta > 0.0:
                 # q_directed(y) proportional to R_theta(y|x) exp[beta (Phi(y) - Phi(x))].
                 # Phi is evaluated on the APPLIED successor, i.e. after canonical
                 # aggregation, so no edit-alias multiplicity is reintroduced.
-                phi0 = potential_fn(st, ctx, lineage)
+                phi0 = phase_pot(st, ctx, lineage)
                 gain = np.zeros(len(idx), float)
                 for k_i, j_i in enumerate(idx):
                     y_i = apply_fn(st, j_i)
                     gain[k_i] = (-1e9 if y_i is None
-                                 else potential_fn(y_i, ctx, lineage) - phi0)
-                shaped = w * np.exp(beta * np.clip(gain, -60.0, 60.0))
+                                 else phase_pot(y_i, ctx, lineage) - phi0)
+                shaped = w * np.exp(phase_beta * np.clip(gain, -60.0, 60.0))
                 if shaped.sum() > 0:
                     shaped = shaped / shaped.sum()
                     # A small region-local floor keeps every executable path in

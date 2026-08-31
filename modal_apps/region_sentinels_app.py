@@ -171,8 +171,12 @@ def sentinels(job: dict) -> dict:
 
         # Splitting regions get the task-independent connectivity-progress
         # proposal; pendant does not need it.
-        pot = (None if name == "pendant"
-               else (lambda s_, c_, l_: RR.connectivity_potential(s_, c_, l_, old_ids)))
+        # Establishment uses d_old (covers growth AND rewiring); removal uses
+        # the prune potential, which is guarded so it can never undo the handoff.
+        pots = ({} if name == "pendant" else {
+            "grow_new": (lambda s_, c_, l_: RR.connectivity_potential(s_, c_, l_, old_ids)),
+            "prune_old": (lambda s_, c_, l_: RR.prune_potential(s_, c_, l_, old_ids)),
+        })
         # MATCHED ABLATION, same horizon and same kernel budget:
         #   beta = 0  -> q_base(y|x,M) proportional to R_theta(y|x)   (undirected)
         #   beta > 0  -> q_conn = R_theta * exp[beta dPhi_conn]        (directed)
@@ -186,7 +190,8 @@ def sentinels(job: dict) -> dict:
                            rng=np.random.default_rng(100 + trial),
                            lineage=lin0, original_region_ids=old_ids,
                            max_handoff_steps=int(job.get("max_handoff", 16)),
-                           potential_fn=(pot if arm_beta > 0 else None),
+                           potentials=(pots if arm_beta > 0 else None),
+                           betas=({k: arm_beta for k in pots} if arm_beta > 0 else None),
                            beta=arm_beta,
                            epsilon=float(job.get("epsilon", 0.1)))
             diag = RR.connectivity_diagnostics(

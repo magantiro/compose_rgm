@@ -449,3 +449,56 @@ def test_first_handoff_step_is_recorded_without_changing_policy():
                 original_region_ids=old, max_handoff_steps=5)
     assert p.status == "OK"
     assert p.first_handoff_step == 0, "handoff held immediately; no steps needed"
+
+
+# --------------------------------------------- old-dependence and pruning
+from compose_v4.control.region_rewrite import old_dependence, prune_potential
+
+
+def _split_ctx():
+    ctx = _ctx(frozen={0, 3}, locus={1, 2}, terminals=((0, 1, 1.0), (3, 2, 1.0)),
+               interface="splitting", k=2)
+    lin = Lineage.initial([0, 1, 2, 3])
+    return ctx, lin, frozenset({lin.id_of[1], lin.id_of[2]})
+
+
+def test_old_dependence_is_zero_exactly_at_handoff():
+    ctx, lin, old = _split_ctx()
+    st = _chain(4)                                   # only route uses 1 and 2
+    assert old_dependence(st, ctx, lin, old) > 0
+    assert not handoff_satisfied(st, ctx, lin, old)
+    st2 = _chain(4)
+    st2.bonds[0][3] = st2.bonds[3][0] = 1            # old-free route appears
+    assert old_dependence(st2, ctx, lin, old) == 0
+    assert handoff_satisfied(st2, ctx, lin, old)
+
+
+def test_old_dependence_falls_for_rewiring_not_only_growth():
+    """The saturated regime: no new atoms, connectivity moved by rerouting."""
+    ctx, lin, old = _split_ctx()
+    st = _chain(4)
+    before = old_dependence(st, ctx, lin, old)
+    rewired = _chain(4)
+    rewired.bonds[1][2] = rewired.bonds[2][1] = 0     # drop an old-region edge
+    rewired.bonds[0][3] = rewired.bonds[3][0] = 1     # reroute around it
+    assert old_dependence(rewired, ctx, lin, old) < before
+
+
+def test_prune_potential_rewards_removing_old_atoms():
+    ctx, lin, old = _split_ctx()
+    st = _chain(4)
+    st.bonds[0][3] = st.bonds[3][0] = 1               # handoff established
+    both = prune_potential(st, ctx, lin, old)
+    lin2 = lin.observe("atom_delete", _Del(1))
+    st2 = _chain(4)
+    st2.bonds[0][3] = st2.bonds[3][0] = 1
+    st2.atom_types[1] = 0
+    st2.bonds[1][:] = 0; st2.bonds[:, 1] = 0
+    assert prune_potential(st2, ctx, lin2, old) > both
+
+
+def test_prune_never_undoes_the_handoff_it_depends_on():
+    """A removal that reintroduces old-region dependence is catastrophic."""
+    ctx, lin, old = _split_ctx()
+    still_dependent = _chain(4)                       # no old-free route
+    assert prune_potential(still_dependent, ctx, lin, old) <= -1e5
