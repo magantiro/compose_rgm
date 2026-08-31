@@ -23,11 +23,11 @@ Interface classes need different phase schedules:
 
     pendant  C connected, one boundary  -> prune_old then grow_new is safe
     segment  C connected, two boundaries -> same, the rest of C joins the anchors
-    bridge   C SPLITS into two           -> MAKE BEFORE BREAK. The old region is
+    splitting C SPLITS into two          -> MAKE BEFORE BREAK. The old region is
              holding the molecule together, so a new connection must be
              established before the old one is relinquished.
 
-Bridge is the k=2 case of connectivity-preserving k-terminal replacement; the
+Splitting is the k=2 case of connectivity-preserving k-terminal replacement; the
 representation is deliberately k-general so k>2 needs no new compiler.
 """
 
@@ -126,7 +126,7 @@ class RewriteContext:
     frozen: frozenset            # slots of C = x \ M, immutable
     locus: frozenset             # slots currently mutable (M + new descendants)
     terminals: tuple             # ((context_slot, region_slot, order), ...)
-    interface: str               # 'pendant' | 'segment' | 'bridge' | 'multi'
+    interface: str               # 'pendant' | 'segment' | 'splitting' | 'multi'
     k_components: int            # connected components of C
     phase: str = "grow_new"
 
@@ -146,7 +146,7 @@ def context_from_region(region) -> RewriteContext:
     frozen = frozenset(range(region.n_atoms_total)) - frozenset(region.atoms)
     terminals = tuple((int(out), int(ins), float(o))
                       for (ins, out, o) in region.boundary)
-    phase = "grow_new" if region.interface == "bridge" else "prune_old"
+    phase = "grow_new" if region.interface == "splitting" else "prune_old"
     return RewriteContext(frozen=frozen, locus=frozenset(region.atoms),
                           terminals=terminals, interface=region.interface,
                           k_components=region.n_context_components, phase=phase)
@@ -218,7 +218,7 @@ def context_preserved(before, after, frozen: frozenset,
     """The INDUCED graph on C is preserved; boundary terminals may rewire.
 
     Requiring every attribute of every context atom to be byte-identical would
-    make make-before-break impossible: attaching a new bridge necessarily
+    make make-before-break impossible: attaching a new connector necessarily
     changes a terminal's implicit-H count. So:
 
       interior context atoms  identity AND their entire bond row are frozen

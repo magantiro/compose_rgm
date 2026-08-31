@@ -101,21 +101,21 @@ def test_interface_agrees_with_context_connectivity(smi):
             assert r.interface == "pendant"
         elif r.arity == 2:
             assert r.interface == ("segment" if r.n_context_components <= 1
-                                   else "bridge")
+                                   else "splitting")
         elif r.arity >= 3:
             assert r.interface == "multi"
 
 
-def test_bridge_regions_really_would_disconnect():
-    """A 'bridge' must be one whose removal splits the preserved context."""
+def test_splitting_regions_really_would_disconnect():
+    """A 'splitting' must be one whose removal splits the preserved context."""
     smi = SEEDS[0]
     mol = _mol(smi)
     n = mol.GetNumAtoms()
-    seen_bridge = False
+    seen_splitting = False
     for r in enumerate_regions(smi):
-        if r.interface != "bridge":
+        if r.interface != "splitting":
             continue
-        seen_bridge = True
+        seen_splitting = True
         context = set(range(n)) - set(r.atoms)
         start = next(iter(context))
         reach, stack = set(), [start]
@@ -127,8 +127,8 @@ def test_bridge_regions_really_would_disconnect():
             for nb in mol.GetAtomWithIdx(v).GetNeighbors():
                 if nb.GetIdx() in context:
                     stack.append(nb.GetIdx())
-        assert reach != context, "labelled bridge but context stays connected"
-    assert seen_bridge, "no bridge regions found to check"
+        assert reach != context, "labelled splitting but context stays connected"
+    assert seen_splitting, "no splitting regions found to check"
 
 
 def test_changed_fraction_is_zero_for_identity():

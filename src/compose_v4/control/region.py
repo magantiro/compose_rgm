@@ -13,9 +13,9 @@ classified by arity together with the connectivity of the preserved context:
     segment   |dM| = 2, C still connected           open/restructure then regrow;
                                                     the rest of the molecule
                                                     already joins the anchors
-    bridge    |dM| = 2, C splits in two             CANNOT delete first without
+    splitting |dM| = 2, C splits in two             CANNOT delete first without
                                                     disconnecting -- needs a
-                                                    bridge-first or coupled
+                                                    connect-first or coupled
                                                     schedule
     multi     |dM| >= 3                             deferred
 
@@ -30,6 +30,20 @@ importance-corrected story cannot be told later.
 
 Nothing here proposes chemistry or touches the executor. It only says WHICH part
 of the molecule a replacement is allowed to rewrite.
+
+RING-TOPOLOGY POLICY. "splitting" is graph-theoretic -- removing the region
+splits the preserved context -- and has NOTHING to do with a chemically bridged
+bicyclic ring. Those are low priority and get no dedicated compiler: the 22-cell
+development panel carries zero bridgehead and zero spiro atoms, matching zero in
+the 25 IVG T4 winners, and in the approved-drug landscape fused systems appear in
+roughly 59% of recent EMA heterocyclic approvals against roughly 5% bridged.
+They are NOT banned, however: if a generic region rewrite legally produces a
+spiro or bridged system through ordinary primitive support, it stands. We simply
+do not build a proposal whose only purpose is to find one. A spiro or bridged
+shortcut earns its way in later only if held-out geometry shows it recurs among
+strong molecules AND generic region resampling cannot reach it efficiently.
+Ordinary pendant, linked and fused systems, segment replacement, expansion and
+contraction, and composition refinement remain core.
 """
 
 from __future__ import annotations
@@ -48,7 +62,7 @@ class Region:
     generator: str            # generators that produced it, "a+b" (provenance)
     n_atoms_total: int
     n_context_components: int = 1   # connected components of C = x \ M
-    interface: str = "pendant"      # 'whole'|'pendant'|'segment'|'bridge'|'multi'
+    interface: str = "pendant"      # 'whole'|'pendant'|'segment'|'splitting'|'multi'
     n_ring_boundary_bonds: int = 0  # boundary bonds that are ring bonds
     region_has_ring: bool = False
 
@@ -90,7 +104,7 @@ def _interface(arity: int, n_context_components: int) -> str:
         return "multi"
     if arity == 1:
         return "pendant"
-    return "segment" if n_context_components <= 1 else "bridge"
+    return "segment" if n_context_components <= 1 else "splitting"
 
 
 def _components(mol, removed_bonds: set) -> list:

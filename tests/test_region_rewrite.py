@@ -213,10 +213,10 @@ def test_handoff_fires_only_when_context_joins_without_old_region():
     """Make-before-break: the trigger is topological, not a step count."""
     st = _chain(4)                       # 0-1-2-3, region = {1,2}, context {0,3}
     ctx = _ctx(frozen={0, 3}, locus={1, 2}, terminals=((0, 1, 1.0), (3, 2, 1.0)),
-               interface="bridge", k=2)
+               interface="splitting", k=2)
     lin = Lineage.initial([0, 1, 2, 3])
     old = frozenset({lin.id_of[1], lin.id_of[2]})
-    assert not handoff_satisfied(st, ctx, lin, old), "old bridge must not count"
+    assert not handoff_satisfied(st, ctx, lin, old), "the old connector must not count"
     st2 = _chain(4)
     st2.bonds[0][3] = st2.bonds[3][0] = 1   # a new direct connection appears
     assert handoff_satisfied(st2, ctx, lin, old)
@@ -225,7 +225,7 @@ def test_handoff_fires_only_when_context_joins_without_old_region():
 def test_missing_handoff_is_an_explicit_failure_label():
     st = _chain(4)
     ctx = _ctx(frozen={0, 3}, locus={1, 2}, terminals=((0, 1, 1.0), (3, 2, 1.0)),
-               interface="bridge", k=2)
+               interface="splitting", k=2)
     lin = Lineage.initial([0, 1, 2, 3])
     old = frozenset({lin.id_of[1], lin.id_of[2]})
 
@@ -254,7 +254,7 @@ def test_action_entirely_inside_context_is_refused_even_between_terminals():
     """Both endpoints being boundary terminals does not license rewriting a
     context-context bond; this was half the first sentinel run's failures."""
     ctx = _ctx(frozen={0, 1, 2}, locus={3},
-               terminals=((0, 3, 1.0), (2, 3, 1.0)), interface="bridge", k=2)
+               terminals=((0, 3, 1.0), (2, 3, 1.0)), interface="splitting", k=2)
     fams = ["bond_insert", "bond_insert"]
     acts = [_Bond(0, 2), _Bond(0, 3)]      # terminal-terminal vs terminal-locus
     idx, why = admissible_indices(fams, acts, ctx)
@@ -267,7 +267,7 @@ def test_new_atom_on_a_terminal_is_admissible():
     slot is just the terminal, which lies inside the frozen context -- the
     context-only guard must not swallow it."""
     ctx = _ctx(frozen={0, 9}, locus={4, 5},
-               terminals=((0, 4, 1.0), (9, 5, 1.0)), interface="bridge", k=2)
+               terminals=((0, 4, 1.0), (9, 5, 1.0)), interface="splitting", k=2)
     fams = ["atom_insert", "bond_insert"]
     acts = [_Insert(20, 2, neighbors=((0, 1),)), _Bond(0, 9)]
     idx, why = admissible_indices(fams, acts, ctx)

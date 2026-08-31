@@ -3,10 +3,10 @@
   1 pendant            end-to-end plumbing: context frozen, every intermediate
                        valid and connected, finite conditional_path_logq,
                        nonzero lineage-changed fraction
-  2 easy bridge        the first real algorithm test: an alternative connection
+  2 easy splitting region        the first real algorithm test: an alternative connection
                        must be built BEFORE the old one is removed, and the
                        preserved components must never separate
-  3 saturated bridge   the decisive primitive-grammar test. Both terminals carry
+  3 saturated split    the decisive primitive-grammar test. Both terminals carry
                        no free hydrogen, so a new bond cannot simply be added
                        and make-before-break needs reroute/cycle operations.
                        If the grammar cannot do it, this returns
@@ -77,10 +77,10 @@ def _runtime():
 
 
 def _pick_cases(smiles_list, max_region=8):
-    """Choose one pendant, one free-valence bridge, one saturated bridge."""
+    """One pendant, one free-valence splitting region, one saturated splitting region."""
     from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
     from compose_v4.control.region import enumerate_regions
-    out = {"pendant": None, "bridge_free": None, "bridge_saturated": None}
+    out = {"pendant": None, "splitting_free": None, "splitting_saturated": None}
     for smi in smiles_list:
         try:
             g = smiles_to_molecular_graph(smi)
@@ -100,10 +100,10 @@ def _pick_cases(smiles_list, max_region=8):
                    "terminal_h": [h[t] for t in terms]}
             if r.interface == "pendant" and out["pendant"] is None and r.size >= 1:
                 out["pendant"] = rec
-            if r.interface == "bridge" and free and out["bridge_free"] is None:
-                out["bridge_free"] = rec
-            if r.interface == "bridge" and sat and out["bridge_saturated"] is None:
-                out["bridge_saturated"] = rec
+            if r.interface == "splitting" and free and out["splitting_free"] is None:
+                out["splitting_free"] = rec
+            if r.interface == "splitting" and sat and out["splitting_saturated"] is None:
+                out["splitting_saturated"] = rec
         if all(out.values()):
             break
     return out
@@ -139,7 +139,7 @@ def sentinels(job: dict) -> dict:
         region = Region(atoms=frozenset(rec["atoms"]),
                         boundary=tuple((i, j, o) for i, j, o in rec["boundary"]),
                         kind="", generator="sentinel", n_atoms_total=n_real,
-                        n_context_components=(2 if "bridge" in name else 1),
+                        n_context_components=(2 if "splitting" in name else 1),
                         interface=rec["interface"])
         ctx = RR.context_from_region(region)
         lin0 = RR.Lineage.initial(range(n_real))
