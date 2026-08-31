@@ -1,0 +1,19 @@
+{
+  "panel": "GrIDDD/Jin official 800, K=8 (k=0..7)",
+  "scored": 797,
+  "solved": 446,
+  "rate": 0.5596,
+  "ci95": [
+    0.5251,
+    0.5941
+  ],
+  "griddd_published": {
+    "rate": 0.451,
+    "K": 20
+  },
+  "missing_shards": [
+    135,
+    408,
+    538
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "9": {
+    "decomposes": false,
+    "via": null,
+    "n_candidate_mids": 0
+  },
+  "10": {
+    "decomposes": true,
+    "via": "Cn1cccc1C(=O)NCc1cccc(CCCc2ccccc2)c1",
+    "n_candidate_mids": 1
+  },
+  "14": {
+    "decomposes": true,
+    "via": "CNCc1ccc(CCCc2ccc3c(c2)CNC(=O)c2cccn2C3=O)cc1",
+    "n_candidate_mids": 2
+  },
+  "17": {
+    "decomposes": true,
+    "via": "CCC(c1ccc2c(c1)CNC2)C(C)Cc1ccc2c(c1)CNC(=O)c1cccn1C2=O",
+    "n_candidate_mids": 2
+  }
+}

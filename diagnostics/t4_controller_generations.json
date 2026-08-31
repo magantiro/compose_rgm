@@ -1,0 +1,40 @@
+{
+  "note": "old official panel (2026-08-23) vs current frozen narrow controller",
+  "old_source": "diagnostics/genmol_t4_official_s1.json (200 calls, 1 trajectory/cell)",
+  "new_source": "diagnostics/t4_all_runs.json (100 calls, mean of 3 runs/cell)",
+  "old_panel_no_plateau": "wins 5@100 -> 12@200; median cell reaches best at call 105",
+  "matched_vs_genmol": {
+    "new_at_100": {
+      "n": 13,
+      "mean_diff": -0.051,
+      "ci": [
+        -0.429,
+        0.327
+      ]
+    },
+    "old_at_100": {
+      "n": 13,
+      "mean_diff": 1.546,
+      "ci": [
+        0.79,
+        2.303
+      ]
+    },
+    "old_at_200": {
+      "n": 13,
+      "mean_diff": 1.138,
+      "ci": [
+        0.298,
+        1.979
+      ]
+    }
+  },
+  "new100_vs_old200": {
+    "n": 13,
+    "mean_diff": -1.19,
+    "ci": [
+      -1.992,
+      -0.387
+    ]
+  }
+}

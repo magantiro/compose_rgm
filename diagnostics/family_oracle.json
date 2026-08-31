@@ -1,0 +1,342 @@
+{
+ "forced": [
+  {
+   "step": 0,
+   "reachable": true,
+   "family": "cycle_close",
+   "global_rank": 414,
+   "within_family_rank": 18,
+   "family_n": 57,
+   "prob": 6.055719711506113e-07,
+   "in_cap": false,
+   "in_floor": true
+  },
+  {
+   "step": 1,
+   "reachable": true,
+   "family": "cycle_open",
+   "global_rank": 215,
+   "within_family_rank": 3,
+   "family_n": 17,
+   "prob": 0.0003820114192621882,
+   "in_cap": true,
+   "in_floor": true
+  },
+  {
+   "step": 2,
+   "reachable": true,
+   "family": "cycle_open",
+   "global_rank": 206,
+   "within_family_rank": 2,
+   "family_n": 12,
+   "prob": 0.000253273806123863,
+   "in_cap": true,
+   "in_floor": true
+  },
+  {
+   "step": 3,
+   "reachable": true,
+   "family": "atom_restate_semantic",
+   "global_rank": 19,
+   "within_family_rank": 0,
+   "family_n": 127,
+   "prob": 0.007677057100597101,
+   "in_cap": true,
+   "in_floor": true
+  },
+  {
+   "step": 4,
+   "reachable": true,
+   "family": "atom_insert",
+   "global_rank": 10,
+   "within_family_rank": 1,
+   "family_n": 260,
+   "prob": 0.015065250550352616,
+   "in_cap": true,
+   "in_floor": true
+  },
+  {
+   "step": 5,
+   "reachable": true,
+   "family": "atom_insert",
+   "global_rank": 87,
+   "within_family_rank": 29,
+   "family_n": 285,
+   "prob": 0.0009226923159371034,
+   "in_cap": true,
+   "in_floor": true
+  },
+  {
+   "step": 6,
+   "reachable": true,
+   "family": "atom_insert",
+   "global_rank": 20,
+   "within_family_rank": 0,
+   "family_n": 290,
+   "prob": 0.003637525121460664,
+   "in_cap": true,
+   "in_floor": true
+  },
+  {
+   "step": 7,
+   "reachable": true,
+   "family": "atom_insert",
+   "global_rank": 82,
+   "within_family_rank": 20,
+   "family_n": 313,
+   "prob": 0.0005266764168968889,
+   "in_cap": true,
+   "in_floor": true
+  },
+  {
+   "step": 8,
+   "reachable": false
+  },
+  {
+   "step": 9,
+   "reachable": false
+  },
+  {
+   "step": 10,
+   "reachable": true,
+   "family": "atom_insert",
+   "global_rank": 311,
+   "within_family_rank": 137,
+   "family_n": 293,
+   "prob": 5.621104566420036e-05,
+   "in_cap": false,
+   "in_floor": false
+  },
+  {
+   "step": 11,
+   "reachable": true,
+   "family": "atom_insert",
+   "global_rank": 2,
+   "within_family_rank": 2,
+   "family_n": 268,
+   "prob": 0.06836781013485098,
+   "in_cap": true,
+   "in_floor": true
+  },
+  {
+   "step": 12,
+   "reachable": true,
+   "family": "atom_insert",
+   "global_rank": 18,
+   "within_family_rank": 5,
+   "family_n": 288,
+   "prob": 0.0034842473674857126,
+   "in_cap": true,
+   "in_floor": true
+  },
+  {
+   "step": 13,
+   "reachable": false
+  },
+  {
+   "step": 14,
+   "reachable": true,
+   "family": "atom_insert",
+   "global_rank": 27,
+   "within_family_rank": 7,
+   "family_n": 304,
+   "prob": 0.00954934770756396,
+   "in_cap": true,
+   "in_floor": true
+  },
+  {
+   "step": 15,
+   "reachable": true,
+   "family": "atom_insert",
+   "global_rank": 3,
+   "within_family_rank": 0,
+   "family_n": 327,
+   "prob": 0.04837242290853554,
+   "in_cap": true,
+   "in_floor": true
+  },
+  {
+   "step": 16,
+   "reachable": false
+  },
+  {
+   "step": 17,
+   "reachable": true,
+   "family": "atom_insert",
+   "global_rank": 293,
+   "within_family_rank": 109,
+   "family_n": 357,
+   "prob": 0.0003185309944510896,
+   "in_cap": true,
+   "in_floor": true
+  }
+ ],
+ "sanity": [
+  {
+   "step": 0,
+   "added": 34,
+   "clean_frac": 0.941
+  },
+  {
+   "step": 1,
+   "added": 17,
+   "clean_frac": 1.0
+  },
+  {
+   "step": 2,
+   "added": 14,
+   "clean_frac": 1.0
+  },
+  {
+   "step": 3,
+   "added": 16,
+   "clean_frac": 1.0
+  },
+  {
+   "step": 4,
+   "added": 21,
+   "clean_frac": 1.0
+  },
+  {
+   "step": 5,
+   "added": 24,
+   "clean_frac": 0.833
+  },
+  {
+   "step": 6,
+   "added": 10,
+   "clean_frac": 0.9
+  },
+  {
+   "step": 7,
+   "added": 0,
+   "clean_frac": null
+  },
+  {
+   "step": 10,
+   "added": 22,
+   "clean_frac": 1.0
+  },
+  {
+   "step": 11,
+   "added": 34,
+   "clean_frac": 0.971
+  },
+  {
+   "step": 12,
+   "added": 39,
+   "clean_frac": 0.949
+  },
+  {
+   "step": 14,
+   "added": 20,
+   "clean_frac": 1.0
+  },
+  {
+   "step": 15,
+   "added": 14,
+   "clean_frac": 1.0
+  },
+  {
+   "step": 17,
+   "added": 21,
+   "clean_frac": 0.952
+  }
+ ],
+ "trajectory": [
+  {
+   "step": -1,
+   "smi": "CN(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+   "sim": 0.424
+  },
+  {
+   "step": 0,
+   "family": "cycle_close",
+   "smi": "CN(C)Cc1ccc2c(c1)Cn1c(=O)c3ccc1n3-2",
+   "prob": 2.4892766134966884e-05,
+   "sim": 0.165,
+   "exact": false
+  },
+  {
+   "step": 1,
+   "family": "cycle_open",
+   "smi": "CN(C)Cc1cccc(Cn2c(=O)c3ccc2[nH]3)c1",
+   "prob": 2.9136911448860157e-06,
+   "sim": 0.139,
+   "exact": false
+  },
+  {
+   "step": 2,
+   "family": "cycle_open",
+   "smi": "C=c1[nH]c(=C)n(Cc2cccc(CN(C)C)c2)c1=O",
+   "prob": 2.2982073667090696e-06,
+   "sim": 0.141,
+   "exact": false
+  },
+  {
+   "step": 3,
+   "family": "atom_restate_semantic",
+   "smi": "C=c1[nH]c(=C)n(Cc2cccc(CC(C)C)c2)c1=O",
+   "prob": 0.014729852576667776,
+   "sim": 0.141,
+   "exact": false
+  },
+  {
+   "step": 4,
+   "family": "atom_insert",
+   "smi": "C=c1[nH]c(=CC)n(Cc2cccc(CC(C)C)c2)c1=O",
+   "prob": 0.005166788913322879,
+   "sim": 0.133,
+   "exact": false
+  },
+  {
+   "step": 5,
+   "family": "atom_insert",
+   "smi": "CC=c1[nH]c(=CC)n(Cc2cccc(CC(C)C)c2)c1=O",
+   "prob": 0.001436704968483512,
+   "sim": 0.134,
+   "exact": false
+  },
+  {
+   "step": 6,
+   "family": "atom_insert",
+   "smi": "CC=c1[nH]c(=C(C)C)n(Cc2cccc(CC(C)C)c2)c1=O",
+   "prob": 0.0006437682795525603,
+   "sim": 0.129,
+   "exact": false
+  },
+  {
+   "step": 7,
+   "family": "atom_insert",
+   "smi": "CC(C)=c1[nH]c(=CCN)c(=O)n1Cc1cccc(CC(C)C)c1",
+   "prob": 0.0001259087887208843,
+   "sim": 0.125,
+   "exact": false
+  },
+  {
+   "step": 8,
+   "halted": "route step not legal forward"
+  }
+ ],
+ "target": "O=C1NCc2cc(C3CCCC3Cc3ccc4c(c3)CNC(=O)c3cccn3C4=O)ccc21",
+ "families": [
+  "cycle_close",
+  "cycle_open",
+  "cycle_open",
+  "atom_restate_semantic",
+  "atom_insert",
+  "atom_insert",
+  "atom_insert",
+  "atom_insert",
+  null,
+  null,
+  "atom_insert",
+  "atom_insert",
+  "atom_insert",
+  null,
+  "atom_insert",
+  "atom_insert",
+  null,
+  "atom_insert"
+ ]
+}

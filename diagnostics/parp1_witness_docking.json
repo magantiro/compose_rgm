@@ -1,0 +1,29 @@
+{
+  "depths": [
+    0,
+    3,
+    6,
+    9,
+    12,
+    15,
+    18
+  ],
+  "smiles": [
+    "CN(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+    "CCNCc1cccc(CNC(=O)c2ccc[nH]2)c1",
+    "C=CCCCCc1cccc(CNC(=O)c2ccc[nH]2)c1",
+    "O=C(NCc1cccc(CCCc2ccccc2)c1)c1ccc[nH]1",
+    "Cc1ccc(CCCc2ccc3c(c2)CNC(=O)c2cccn2C3=O)cc1",
+    "CC(CCc1ccc2c(c1)CNC(=O)c1cccn1C2=O)c1ccc2c(c1)CNC2",
+    "O=C1NCc2cc(C3CCCC3Cc3ccc4c(c3)CNC(=O)c3cccn3C4=O)ccc21"
+  ],
+  "ds": [
+    -7.2,
+    -7.5,
+    -7.6,
+    -8.8,
+    -10.8,
+    -11.7,
+    -13.6
+  ]
+}

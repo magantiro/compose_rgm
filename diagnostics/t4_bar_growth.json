@@ -1,0 +1,7108 @@
+[
+  {
+    "target": "parp1",
+    "idx": 0,
+    "delta": 0.4,
+    "beta": 0.0,
+    "tag": "barG",
+    "seed": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+    "per_depth": [
+      {
+        "stage": 0,
+        "depth": 1,
+        "n": 48,
+        "ess": 9.599999999999998,
+        "min_v": 0.0,
+        "n_feas": 48,
+        "mean_dheavy": 0.14583333333333334,
+        "max_dheavy": 1,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.6727702146153639,
+        "mean_qed": 0.8607340088355461,
+        "mean_sa": 2.702783060166764,
+        "n_lineage": 48,
+        "n_unique_smi": 22,
+        "n_resample": 0
+      },
+      {
+        "stage": 0,
+        "depth": 2,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 43,
+        "mean_dheavy": 0.041666666666666664,
+        "max_dheavy": 2,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.6230669363910034,
+        "mean_qed": 0.8419209264101962,
+        "mean_sa": 2.78177142122,
+        "n_lineage": 48,
+        "n_unique_smi": 33,
+        "n_resample": 0
+      },
+      {
+        "stage": 0,
+        "depth": 3,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 38,
+        "mean_dheavy": 0.08333333333333333,
+        "max_dheavy": 3,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.5257661425259271,
+        "mean_qed": 0.8219815262587954,
+        "mean_sa": 2.8542264607453594,
+        "n_lineage": 48,
+        "n_unique_smi": 40,
+        "n_resample": 0
+      },
+      {
+        "stage": 0,
+        "depth": 4,
+        "n": 48,
+        "ess": 9.600000000000001,
+        "min_v": 0.0,
+        "n_feas": 32,
+        "mean_dheavy": 0.08333333333333333,
+        "max_dheavy": 4,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 0,
+        "mean_sim": 0.46964335839557075,
+        "mean_qed": 0.7995912756963274,
+        "mean_sa": 2.8933997934288604,
+        "n_lineage": 48,
+        "n_unique_smi": 43,
+        "n_resample": 0
+      },
+      {
+        "stage": 0,
+        "depth": 5,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 28,
+        "mean_dheavy": 0.125,
+        "max_dheavy": 4,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.44458894769934215,
+        "mean_qed": 0.8103200168363226,
+        "mean_sa": 2.945967684448528,
+        "n_lineage": 48,
+        "n_unique_smi": 44,
+        "n_resample": 0
+      },
+      {
+        "stage": 0,
+        "depth": 6,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 25,
+        "mean_dheavy": 0.10416666666666667,
+        "max_dheavy": 4,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 0,
+        "mean_sim": 0.41057919336085175,
+        "mean_qed": 0.7937775428348605,
+        "mean_sa": 3.009755879969529,
+        "n_lineage": 48,
+        "n_unique_smi": 45,
+        "n_resample": 0
+      },
+      {
+        "stage": 0,
+        "depth": 7,
+        "n": 48,
+        "ess": 9.600000000000001,
+        "min_v": 0.0,
+        "n_feas": 20,
+        "mean_dheavy": 0.16666666666666666,
+        "max_dheavy": 4,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 0,
+        "mean_sim": 0.37361901868748326,
+        "mean_qed": 0.7897768386354308,
+        "mean_sa": 3.077088436314772,
+        "n_lineage": 48,
+        "n_unique_smi": 45,
+        "n_resample": 0
+      },
+      {
+        "stage": 0,
+        "depth": 8,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 16,
+        "mean_dheavy": 0.16666666666666666,
+        "max_dheavy": 5,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 0,
+        "mean_sim": 0.33182065203685124,
+        "mean_qed": 0.7663630609052201,
+        "mean_sa": 3.1650093715011773,
+        "n_lineage": 48,
+        "n_unique_smi": 46,
+        "n_resample": 0
+      },
+      {
+        "stage": 1,
+        "depth": 9,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 34,
+        "mean_dheavy": 0.9791666666666666,
+        "max_dheavy": 6,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 0,
+        "mean_sim": 0.4290179935215492,
+        "mean_qed": 0.8053523202189702,
+        "mean_sa": 2.9050498958664446,
+        "n_lineage": 48,
+        "n_unique_smi": 42,
+        "n_resample": 0
+      },
+      {
+        "stage": 1,
+        "depth": 10,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 29,
+        "mean_dheavy": 1.0625,
+        "max_dheavy": 5,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.41529811684835255,
+        "mean_qed": 0.7971502834906893,
+        "mean_sa": 2.905336824344884,
+        "n_lineage": 48,
+        "n_unique_smi": 45,
+        "n_resample": 0
+      },
+      {
+        "stage": 1,
+        "depth": 11,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 24,
+        "mean_dheavy": 0.9583333333333334,
+        "max_dheavy": 6,
+        "mean_drings": -0.041666666666666664,
+        "max_drings": 0,
+        "mean_sim": 0.39499500451012254,
+        "mean_qed": 0.790484736989217,
+        "mean_sa": 3.011538415721578,
+        "n_lineage": 48,
+        "n_unique_smi": 48,
+        "n_resample": 0
+      },
+      {
+        "stage": 1,
+        "depth": 12,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 20,
+        "mean_dheavy": 0.9166666666666666,
+        "max_dheavy": 7,
+        "mean_drings": -0.041666666666666664,
+        "max_drings": 0,
+        "mean_sim": 0.33952131531211655,
+        "mean_qed": 0.7712165666641254,
+        "mean_sa": 3.2385141408617577,
+        "n_lineage": 48,
+        "n_unique_smi": 48,
+        "n_resample": 0
+      },
+      {
+        "stage": 1,
+        "depth": 13,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 19,
+        "mean_dheavy": 0.9791666666666666,
+        "max_dheavy": 7,
+        "mean_drings": -0.041666666666666664,
+        "max_drings": 0,
+        "mean_sim": 0.34199210134191455,
+        "mean_qed": 0.7608324978439548,
+        "mean_sa": 3.225026249077819,
+        "n_lineage": 48,
+        "n_unique_smi": 47,
+        "n_resample": 0
+      },
+      {
+        "stage": 1,
+        "depth": 14,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 16,
+        "mean_dheavy": 0.9375,
+        "max_dheavy": 7,
+        "mean_drings": -0.041666666666666664,
+        "max_drings": 0,
+        "mean_sim": 0.3165742280226391,
+        "mean_qed": 0.7634294028080806,
+        "mean_sa": 3.264760907482811,
+        "n_lineage": 48,
+        "n_unique_smi": 48,
+        "n_resample": 0
+      },
+      {
+        "stage": 1,
+        "depth": 15,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 15,
+        "mean_dheavy": 0.9583333333333334,
+        "max_dheavy": 7,
+        "mean_drings": -0.041666666666666664,
+        "max_drings": 0,
+        "mean_sim": 0.29533718818560145,
+        "mean_qed": 0.7593454723060047,
+        "mean_sa": 3.298591078953407,
+        "n_lineage": 48,
+        "n_unique_smi": 48,
+        "n_resample": 0
+      },
+      {
+        "stage": 1,
+        "depth": 16,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 12,
+        "mean_dheavy": 1.0416666666666667,
+        "max_dheavy": 6,
+        "mean_drings": 0.0,
+        "max_drings": 1,
+        "mean_sim": 0.2909799513104298,
+        "mean_qed": 0.7537120587274139,
+        "mean_sa": 3.3636662955214605,
+        "n_lineage": 48,
+        "n_unique_smi": 48,
+        "n_resample": 0
+      },
+      {
+        "stage": 2,
+        "depth": 17,
+        "n": 48,
+        "ess": 9.599999999999998,
+        "min_v": 0.0,
+        "n_feas": 35,
+        "mean_dheavy": 2.0,
+        "max_dheavy": 8,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 0,
+        "mean_sim": 0.41665858920914484,
+        "mean_qed": 0.78332879024448,
+        "mean_sa": 3.035371603845492,
+        "n_lineage": 48,
+        "n_unique_smi": 42,
+        "n_resample": 0
+      },
+      {
+        "stage": 2,
+        "depth": 18,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 31,
+        "mean_dheavy": 1.9375,
+        "max_dheavy": 8,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 0,
+        "mean_sim": 0.41512877274975163,
+        "mean_qed": 0.7846258281737887,
+        "mean_sa": 3.0263787198501713,
+        "n_lineage": 48,
+        "n_unique_smi": 47,
+        "n_resample": 0
+      },
+      {
+        "stage": 2,
+        "depth": 19,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 28,
+        "mean_dheavy": 1.9791666666666667,
+        "max_dheavy": 8,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 0,
+        "mean_sim": 0.4072280058025564,
+        "mean_qed": 0.7811016237860188,
+        "mean_sa": 3.0345797984122966,
+        "n_lineage": 48,
+        "n_unique_smi": 47,
+        "n_resample": 0
+      },
+      {
+        "stage": 2,
+        "depth": 20,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 22,
+        "mean_dheavy": 1.8125,
+        "max_dheavy": 8,
+        "mean_drings": 0.0,
+        "max_drings": 1,
+        "mean_sim": 0.374993647724174,
+        "mean_qed": 0.7704084856449899,
+        "mean_sa": 3.1145040998888427,
+        "n_lineage": 48,
+        "n_unique_smi": 45,
+        "n_resample": 0
+      },
+      {
+        "stage": 2,
+        "depth": 21,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 20,
+        "mean_dheavy": 2.0,
+        "max_dheavy": 8,
+        "mean_drings": 0.0,
+        "max_drings": 1,
+        "mean_sim": 0.37402936434035156,
+        "mean_qed": 0.7605301210953,
+        "mean_sa": 3.105829015977836,
+        "n_lineage": 48,
+        "n_unique_smi": 45,
+        "n_resample": 0
+      },
+      {
+        "stage": 2,
+        "depth": 22,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 20,
+        "mean_dheavy": 2.0416666666666665,
+        "max_dheavy": 9,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 1,
+        "mean_sim": 0.34432012197166467,
+        "mean_qed": 0.7604661495988837,
+        "mean_sa": 3.116745861571587,
+        "n_lineage": 48,
+        "n_unique_smi": 46,
+        "n_resample": 0
+      },
+      {
+        "stage": 2,
+        "depth": 23,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 17,
+        "mean_dheavy": 1.8958333333333333,
+        "max_dheavy": 9,
+        "mean_drings": -0.041666666666666664,
+        "max_drings": 1,
+        "mean_sim": 0.35282247284379037,
+        "mean_qed": 0.7479130270242429,
+        "mean_sa": 3.136739127285113,
+        "n_lineage": 48,
+        "n_unique_smi": 48,
+        "n_resample": 0
+      },
+      {
+        "stage": 2,
+        "depth": 24,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 17,
+        "mean_dheavy": 1.7916666666666667,
+        "max_dheavy": 10,
+        "mean_drings": -0.08333333333333333,
+        "max_drings": 1,
+        "mean_sim": 0.3464643751608946,
+        "mean_qed": 0.7477930951950414,
+        "mean_sa": 3.1886217669646153,
+        "n_lineage": 48,
+        "n_unique_smi": 47,
+        "n_resample": 0
+      },
+      {
+        "stage": 3,
+        "depth": 25,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 36,
+        "mean_dheavy": 2.4791666666666665,
+        "max_dheavy": 9,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 0,
+        "mean_sim": 0.4232492832647501,
+        "mean_qed": 0.7884335689731315,
+        "mean_sa": 3.0780662886564207,
+        "n_lineage": 48,
+        "n_unique_smi": 42,
+        "n_resample": 0
+      },
+      {
+        "stage": 3,
+        "depth": 26,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 31,
+        "mean_dheavy": 2.5625,
+        "max_dheavy": 9,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 0,
+        "mean_sim": 0.42524144916602785,
+        "mean_qed": 0.7891552011931399,
+        "mean_sa": 3.024882761487008,
+        "n_lineage": 48,
+        "n_unique_smi": 45,
+        "n_resample": 0
+      },
+      {
+        "stage": 3,
+        "depth": 27,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 23,
+        "mean_dheavy": 2.5625,
+        "max_dheavy": 9,
+        "mean_drings": -0.0625,
+        "max_drings": 0,
+        "mean_sim": 0.38485073482097665,
+        "mean_qed": 0.7502255392265246,
+        "mean_sa": 3.077992691866079,
+        "n_lineage": 48,
+        "n_unique_smi": 47,
+        "n_resample": 0
+      },
+      {
+        "stage": 3,
+        "depth": 28,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 20,
+        "mean_dheavy": 2.5416666666666665,
+        "max_dheavy": 10,
+        "mean_drings": -0.08333333333333333,
+        "max_drings": 0,
+        "mean_sim": 0.37321088144027215,
+        "mean_qed": 0.7668003060119117,
+        "mean_sa": 3.1274727383655923,
+        "n_lineage": 48,
+        "n_unique_smi": 47,
+        "n_resample": 0
+      },
+      {
+        "stage": 3,
+        "depth": 29,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 18,
+        "mean_dheavy": 2.5416666666666665,
+        "max_dheavy": 11,
+        "mean_drings": -0.125,
+        "max_drings": 0,
+        "mean_sim": 0.3624520786072494,
+        "mean_qed": 0.7536768771983248,
+        "mean_sa": 3.108160944519176,
+        "n_lineage": 48,
+        "n_unique_smi": 48,
+        "n_resample": 0
+      },
+      {
+        "stage": 3,
+        "depth": 30,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 17,
+        "mean_dheavy": 2.5416666666666665,
+        "max_dheavy": 10,
+        "mean_drings": -0.14583333333333334,
+        "max_drings": 0,
+        "mean_sim": 0.33766738149554326,
+        "mean_qed": 0.7446276129372843,
+        "mean_sa": 3.2023474113588435,
+        "n_lineage": 48,
+        "n_unique_smi": 48,
+        "n_resample": 0
+      },
+      {
+        "stage": 3,
+        "depth": 31,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 17,
+        "mean_dheavy": 2.5208333333333335,
+        "max_dheavy": 10,
+        "mean_drings": -0.041666666666666664,
+        "max_drings": 2,
+        "mean_sim": 0.3363861144031344,
+        "mean_qed": 0.76018150157606,
+        "mean_sa": 3.2370943069025473,
+        "n_lineage": 48,
+        "n_unique_smi": 48,
+        "n_resample": 0
+      },
+      {
+        "stage": 3,
+        "depth": 32,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 18,
+        "mean_dheavy": 2.5,
+        "max_dheavy": 9,
+        "mean_drings": -0.10416666666666667,
+        "max_drings": 2,
+        "mean_sim": 0.3194419597154405,
+        "mean_qed": 0.7488130549932964,
+        "mean_sa": 3.2820683361751484,
+        "n_lineage": 48,
+        "n_unique_smi": 48,
+        "n_resample": 0
+      }
+    ],
+    "best": {
+      "v": 0.0,
+      "smi": "CN(C)C(=O)c1ccc2c(c1)CNC(=O)c1cccn1-2",
+      "depth": 1
+    },
+    "n_feasible_states": 789,
+    "ladder": [
+      0,
+      4,
+      8,
+      12,
+      16
+    ],
+    "ladder_reach": {
+      "0": 451,
+      "4": 169,
+      "8": 20,
+      "12": 0,
+      "16": 0
+    },
+    "ladder_reach_signed": {
+      "0": {
+        "grow": 367,
+        "shrink": 119
+      },
+      "4": {
+        "grow": 167,
+        "shrink": 2
+      },
+      "8": {
+        "grow": 20,
+        "shrink": 0
+      },
+      "12": {
+        "grow": 0,
+        "shrink": 0
+      },
+      "16": {
+        "grow": 0,
+        "shrink": 0
+      }
+    },
+    "frontier_top": [
+      [
+        "CN(C)C(CCCCC(F)(F)F)c1ccc2c(c1)-n1cccc1C(=O)N(C)C2CN",
+        {
+          "v": 0.3670886075949367,
+          "d": 4,
+          "depth": 29,
+          "dh": 11,
+          "dr": 0,
+          "dist": 0.7468354430379747
+        }
+      ],
+      [
+        "Cc1cc(Br)n2c1C(=O)N(C)Cc1ccc(C(N)CCCCCC(F)(F)F)cc1-2",
+        {
+          "v": 0.6470588235294118,
+          "d": 4,
+          "depth": 24,
+          "dh": 10,
+          "dr": 0,
+          "dist": 0.8588235294117648
+        }
+      ],
+      [
+        "CC1c2ccc(C(CCCCC(F)(F)F)N(C)C)cc2-n2cccc2C(=O)N1C",
+        {
+          "v": 0.3421052631578948,
+          "d": 4,
+          "depth": 30,
+          "dh": 10,
+          "dr": 0,
+          "dist": 0.736842105263158
+        }
+      ],
+      [
+        "CN(C)C(CCCOCC(F)(F)F)c1cc2c(cc1O)CNC(=O)c1cccn1-2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 28,
+          "dh": 10,
+          "dr": 0,
+          "dist": 0.5633802816901409
+        }
+      ],
+      [
+        "CN(C)C(CCC(O)CC(F)(F)F)c1cc2c(cc1O)CNC(=O)c1cccn1-2",
+        {
+          "v": 0.0015646296527895842,
+          "d": 4,
+          "depth": 29,
+          "dh": 10,
+          "dr": 0,
+          "dist": 0.5373134328358209
+        }
+      ],
+      [
+        "CN(C)C(CC(O)CC(O)C(F)(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.03464756136092029,
+          "d": 4,
+          "depth": 29,
+          "dh": 10,
+          "dr": 0,
+          "dist": 0.5522388059701493
+        }
+      ],
+      [
+        "CN(C)C(CCC(O)CC(F)(F)F)c1cc2c(cc1O)CNC(O)c1cccn1-2",
+        {
+          "v": 0.3589743589743591,
+          "d": 4,
+          "depth": 30,
+          "dh": 10,
+          "dr": 0,
+          "dist": 0.7435897435897436
+        }
+      ],
+      [
+        "CC1c2ccc(CN(C)C)cc2-n2cccc2C(=O)N1CCCCCC(F)(F)F",
+        {
+          "v": 0.013308761284228643,
+          "d": 4,
+          "depth": 31,
+          "dh": 10,
+          "dr": 0,
+          "dist": 0.6029411764705883
+        }
+      ],
+      [
+        "CN(C)C(CC(CO)CC(F)(F)F)c1cc2c(cc1O)CNC(O)c1cccn1-2",
+        {
+          "v": 0.37500000000000006,
+          "d": 4,
+          "depth": 31,
+          "dh": 10,
+          "dr": 0,
+          "dist": 0.75
+        }
+      ],
+      [
+        "CN1Cc2ccc(C(N)CCCCCC(F)(F)F)cc2-n2c(Cl)ccc2C1=O",
+        {
+          "v": 0.6036585365853658,
+          "d": 4,
+          "depth": 22,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.8414634146341463
+        }
+      ],
+      [
+        "CN(C)C(CCCC(N)C(F)(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 22,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.5522388059701493
+        }
+      ],
+      [
+        "CN1Cc2ccc(C(N)CCCCCC(F)(F)F)cc2-n2c(Br)ccc2C1=O",
+        {
+          "v": 0.5987654320987654,
+          "d": 4,
+          "depth": 23,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.8395061728395061
+        }
+      ],
+      [
+        "CN(C)C(CCC(N)CC(F)(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 26,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.5522388059701493
+        }
+      ],
+      [
+        "CNC(C)(CCC(N)CC(F)(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.01277258023196226,
+          "d": 4,
+          "depth": 25,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.6
+        }
+      ],
+      [
+        "CN(C)C(CCCCCC(F)(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 26,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.5454545454545454
+        }
+      ],
+      [
+        "CC1NC(=O)c2cccn2-c2cc(C(CCCCC(F)(F)F)N(C)C)ccc21",
+        {
+          "v": 0.21232876712328777,
+          "d": 4,
+          "depth": 27,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.6849315068493151
+        }
+      ],
+      [
+        "CN(C)C(CCCOCC(F)(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 27,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.5652173913043479
+        }
+      ],
+      [
+        "CN(C)C(CC(O)CCC(F)(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 28,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.5522388059701493
+        }
+      ],
+      [
+        "CCCCCCCN1CCCC1",
+        {
+          "v": 0.8214285714285715,
+          "d": 8,
+          "depth": 29,
+          "dh": -7,
+          "dr": -2,
+          "dist": 0.9285714285714286
+        }
+      ],
+      [
+        "CCC#CCCCN1CCCC1",
+        {
+          "v": 0.8333333333333334,
+          "d": 8,
+          "depth": 30,
+          "dh": -7,
+          "dr": -2,
+          "dist": 0.9333333333333333
+        }
+      ],
+      [
+        "CN(C)C(CC(O)CC(O)C(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.04688843661035991,
+          "d": 4,
+          "depth": 30,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.5454545454545454
+        }
+      ],
+      [
+        "NC(=O)C(Cc1ccc2c(c1)-n1cccc1C(=O)NC2)CC(N)CC(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 32,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.5797101449275363
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)-n1cccc1C(=O)N(CCCCCC(F)(F)F)C2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 32,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.5538461538461539
+        }
+      ],
+      [
+        "CC(CC(c1cc2c(cc1O)CNC(O)c1cccn1-2)N(C)C)CC(F)(F)F",
+        {
+          "v": 0.35064935064935077,
+          "d": 4,
+          "depth": 32,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.7402597402597403
+        }
+      ],
+      [
+        "NC(CCCCCC(F)(F)F)c1ccc2c(c1)-n1c(Br)ccc1C(=O)NC2",
+        {
+          "v": 0.35810810810810817,
+          "d": 4,
+          "depth": 17,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.7432432432432432
+        }
+      ],
+      [
+        "NC(c1ccc2c(c1)-n1cccc1C(=O)NC2)C(O)CCCCC(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 17,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5882352941176471
+        }
+      ],
+      [
+        "NC(CCCCCC(F)(F)F)c1ccc2c(c1)-n1ccc(Br)c1C(=O)NC2",
+        {
+          "v": 0.37500000000000006,
+          "d": 4,
+          "depth": 18,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.75
+        }
+      ],
+      [
+        "NC(CC(O)CCCC(F)(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.021739130434782622,
+          "d": 4,
+          "depth": 18,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.6086956521739131
+        }
+      ],
+      [
+        "NC(CCCCCC(F)(F)F)c1ccc2c(c1)-n1ccc(Cl)c1C(=O)NC2",
+        {
+          "v": 0.37500000000000006,
+          "d": 4,
+          "depth": 19,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.75
+        }
+      ],
+      [
+        "COc1cc2c(cc1CN(CCO)CC(F)(F)F)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 19,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5441176470588236
+        }
+      ],
+      [
+        "Cc1cc2n(c1)-c1cc(C(N)COCC(F)C(F)(F)F)ccc1CNC2=O",
+        {
+          "v": 0.28082191780821925,
+          "d": 4,
+          "depth": 19,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.7123287671232876
+        }
+      ],
+      [
+        "NC(CCCCCC(F)(F)F)c1ccc2c(c1)-n1cc(Cl)cc1C(=O)NC2",
+        {
+          "v": 0.33333333333333337,
+          "d": 4,
+          "depth": 20,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.7333333333333334
+        }
+      ],
+      [
+        "CN(O)C(CCCCC(F)(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.029479392374896683,
+          "d": 4,
+          "depth": 20,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5522388059701493
+        }
+      ],
+      [
+        "Cc1cc2n(c1)-c1cc(C(S)COCC(F)C(F)(F)F)ccc1CNC2=O",
+        {
+          "v": 0.2905405405405406,
+          "d": 4,
+          "depth": 20,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.7162162162162162
+        }
+      ],
+      [
+        "Cc1ccc2n1-c1cc(C(N)CCCCCC(F)(F)F)ccc1CNC2=O",
+        {
+          "v": 0.32432432432432434,
+          "d": 4,
+          "depth": 20,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.7297297297297297
+        }
+      ],
+      [
+        "NC(CCCCCC(F)(F)F)c1ccc2c(c1)-n1c(Cl)ccc1C(=O)NC2",
+        {
+          "v": 0.36666666666666664,
+          "d": 4,
+          "depth": 21,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.7466666666666666
+        }
+      ],
+      [
+        "CCN(Cc1cc2c(cc1OC)CNC(=O)c1cccn1-2)C(O)C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 21,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5441176470588236
+        }
+      ],
+      [
+        "CN(C)C(CCCCC(F)(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 27,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5384615384615384
+        }
+      ],
+      [
+        "Cc1ccc2n1-c1cc(CC(N)CCCCC(F)(F)F)ccc1CNC2=O",
+        {
+          "v": 0.24657534246575352,
+          "d": 4,
+          "depth": 21,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.6986301369863014
+        }
+      ],
+      [
+        "CCN(Cc1cc2c(cc1OC)CNC(=O)c1cccn1-2)C(N)C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 22,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5441176470588236
+        }
+      ],
+      [
+        "O=Cc1cc2n(c1)-c1cc(C(S)COCCC(F)(F)F)ccc1CNC2=O",
+        {
+          "v": 0.3181818181818183,
+          "d": 4,
+          "depth": 22,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.7272727272727273
+        }
+      ],
+      [
+        "Cc1ccc2n1-c1cccc(CC(N)CCCCC(F)(F)F)c1CNC2=O",
+        {
+          "v": 0.4155844155844156,
+          "d": 4,
+          "depth": 24,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.7662337662337663
+        }
+      ],
+      [
+        "O=C1NCc2ccc(C(O)C(O)CCCCC(F)(F)F)cc2-n2cccc21",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 25,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5970149253731343
+        }
+      ],
+      [
+        "CNC(CCCCCC(F)(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 25,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5882352941176471
+        }
+      ],
+      [
+        "CN(C)C(CCC(N)CC(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 25,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5454545454545454
+        }
+      ],
+      [
+        "CC(N)(CCC(N)CC(F)(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 26,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5882352941176471
+        }
+      ],
+      [
+        "O=C1NCC2CCC(C(O)C(O)CCCCC(F)(F)F)CC2N2CCCC12",
+        {
+          "v": 0.7647058823529412,
+          "d": 4,
+          "depth": 26,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.9058823529411765
+        }
+      ],
+      [
+        "CC(CC(N)c1ccc2c(c1)-n1cccc1C(=O)NC2)C(N)CC(F)(F)F",
+        {
+          "v": 0.040782766043924834,
+          "d": 4,
+          "depth": 29,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.582089552238806
+        }
+      ],
+      [
+        "CC(CCC(O)C(O)C1CCC2CNC(=O)C3CCCN3C2C1)C(F)(F)F",
+        {
+          "v": 0.7321428571428571,
+          "d": 4,
+          "depth": 27,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.8928571428571429
+        }
+      ],
+      [
+        "CCCCCCCN1CCCC1C",
+        {
+          "v": 0.8387096774193549,
+          "d": 8,
+          "depth": 28,
+          "dh": -6,
+          "dr": -2,
+          "dist": 0.935483870967742
+        }
+      ],
+      [
+        "CC(CCCC(O)C1(O)CCC2CNC(=O)C3CCCN3C2C1)C(F)(F)F",
+        {
+          "v": 0.7413793103448276,
+          "d": 4,
+          "depth": 28,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.896551724137931
+        }
+      ],
+      [
+        "O=C1NCC2CCC(O)(C(O)CCCC(CF)C(F)F)CC2N2CCCC12",
+        {
+          "v": 0.7701149425287357,
+          "d": 4,
+          "depth": 29,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.9080459770114943
+        }
+      ],
+      [
+        "CC(CC(N)CC(F)(F)F)C(N)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.04491369119985,
+          "d": 4,
+          "depth": 30,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5606060606060606
+        }
+      ],
+      [
+        "NCC(Cc1ccc2c(c1)-n1cccc1C(=O)NC2)CC(N)CC(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 31,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5671641791044777
+        }
+      ],
+      [
+        "C1#CC(CCN2CCCC2)CC1",
+        {
+          "v": 0.8809523809523809,
+          "d": 8,
+          "depth": 31,
+          "dh": -7,
+          "dr": -1,
+          "dist": 0.9523809523809523
+        }
+      ],
+      [
+        "NC(COCC(O)CC(F)(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.021739130434782622,
+          "d": 4,
+          "depth": 31,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.6086956521739131
+        }
+      ],
+      [
+        "CCC#CCNC(=O)c1cc2c3c(c1O)NN(C2)C(=O)c1cccn1-3",
+        {
+          "v": 0.33333333333333337,
+          "d": 12,
+          "depth": 31,
+          "dh": 6,
+          "dr": 2,
+          "dist": 0.7333333333333334
+        }
+      ],
+      [
+        "CNC(CC(O)CC(O)C(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.03654179514995404,
+          "d": 4,
+          "depth": 31,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5671641791044777
+        }
+      ],
+      [
+        "C1#CC(CCn2cccc2)CC1",
+        {
+          "v": 0.7540983606557378,
+          "d": 8,
+          "depth": 32,
+          "dh": -7,
+          "dr": -1,
+          "dist": 0.9016393442622951
+        }
+      ],
+      [
+        "CC(COCC(N)c1ccc2c(c1)-n1cccc1C(=O)NC2)CC(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 32,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5882352941176471
+        }
+      ],
+      [
+        "COC#CCNC(=O)c1cc2c3c(c1O)NN(C2)C(=O)c1cccn1-3",
+        {
+          "v": 0.3181818181818183,
+          "d": 12,
+          "depth": 32,
+          "dh": 6,
+          "dr": 2,
+          "dist": 0.7272727272727273
+        }
+      ],
+      [
+        "CNC(CC(O)CC(=O)C(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 32,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5797101449275363
+        }
+      ],
+      [
+        "CCC(NCCCC(F)(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 12,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.5882352941176471
+        }
+      ],
+      [
+        "COCC(CC(F)(F)F)NCc1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 13,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.5303030303030303
+        }
+      ],
+      [
+        "NC(CCCCCC(F)(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 19,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.5909090909090908
+        }
+      ],
+      [
+        "COCCN(Cc1ccc2c(c1)-n1cccc1C(=O)NC2)CC(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 14,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.47619047619047616
+        }
+      ],
+      [
+        "CC(N)(CCCCC(F)(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 14,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.532258064516129
+        }
+      ],
+      [
+        "CCN(Cc1cc2c(cc1OC)CNC(=O)c1cccn1-2)CC(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 20,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.523076923076923
+        }
+      ],
+      [
+        "CN1CC(=O)NCC2CCCCC21",
+        {
+          "v": 0.6666666666666667,
+          "d": 8,
+          "depth": 15,
+          "dh": -6,
+          "dr": -1,
+          "dist": 0.8666666666666667
+        }
+      ],
+      [
+        "O=C1NCc2ccc(C(CCCCC(F)(F)F)NO)cc2-n2cccc21",
+        {
+          "v": 0.10585165157385909,
+          "d": 4,
+          "depth": 17,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.6029411764705883
+        }
+      ],
+      [
+        "CCC(NCc1cc2c(cc1OC)CNC(=O)c1cccn1-2)C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 17,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.5735294117647058
+        }
+      ],
+      [
+        "NC(COCC(O)C(F)(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 17,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.5970149253731343
+        }
+      ],
+      [
+        "NC(COCC(F)C(F)(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 18,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.5909090909090908
+        }
+      ],
+      [
+        "CN(O)C(CCCCC(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.034568452613882125,
+          "d": 4,
+          "depth": 19,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.53125
+        }
+      ],
+      [
+        "Cc1cc2n(c1)-c1cc(C(S)COCCC(F)(F)F)ccc1CNC2=O",
+        {
+          "v": 0.24657534246575352,
+          "d": 4,
+          "depth": 21,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.6986301369863014
+        }
+      ],
+      [
+        "C=CC(NCC1CC2C(CNC(=O)C3CCCN32)CC1OC)C(F)(F)Cl",
+        {
+          "v": 0.7191011235955056,
+          "d": 4,
+          "depth": 21,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.8876404494382022
+        }
+      ],
+      [
+        "Cc1ccc2n1-c1cc(C(N)CCNCC(F)(F)F)ccc1CNC2=O",
+        {
+          "v": 0.33333333333333337,
+          "d": 4,
+          "depth": 21,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.7333333333333334
+        }
+      ],
+      [
+        "CN(C)C(=O)CN(C)C(=O)c1ccc2c(c1)CN(C)C(=O)c1cccn1-2",
+        {
+          "v": 0.09090909090909094,
+          "d": 12,
+          "depth": 21,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.6363636363636364
+        }
+      ],
+      [
+        "CCC(NCC1CC2C(CNC(=O)C3CCCN32)CC1OC)C(F)(F)Cl",
+        {
+          "v": 0.747191011235955,
+          "d": 4,
+          "depth": 22,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.898876404494382
+        }
+      ],
+      [
+        "Cc1ccc2n1-c1cc(C(N)CCOCC(F)(F)F)ccc1CNC2=O",
+        {
+          "v": 0.32432432432432434,
+          "d": 4,
+          "depth": 22,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.7297297297297297
+        }
+      ],
+      [
+        "COc1cc2c(cc1CN(C)C(N)C(F)(F)F)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 23,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.5
+        }
+      ],
+      [
+        "O=Cc1cc2n(c1)-c1cc(CCOCCC(F)(F)F)ccc1CNC2=O",
+        {
+          "v": 0.19014084507042256,
+          "d": 4,
+          "depth": 23,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.676056338028169
+        }
+      ],
+      [
+        "Cc1ccc2n1-c1cccc(CC(N)CCCCC(F)F)c1CNC2=O",
+        {
+          "v": 0.3918918918918919,
+          "d": 4,
+          "depth": 23,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.7567567567567568
+        }
+      ],
+      [
+        "CCC1CC2CNC(=O)C3CCCN3C2CC1CNC(CC)C(F)(F)Cl",
+        {
+          "v": 0.7383720930232558,
+          "d": 4,
+          "depth": 23,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.8953488372093024
+        }
+      ],
+      [
+        "CN1Cc2ccc(CCCCC(=O)C(F)(F)F)cc2-n2cccc2C1=O",
+        {
+          "v": 0.21428571428571436,
+          "d": 4,
+          "depth": 24,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.6857142857142857
+        }
+      ],
+      [
+        "CNC(NCc1cc2c(cc1OC)CNC(=O)c1cccn1-2)C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 24,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.5735294117647058
+        }
+      ],
+      [
+        "C=CC=C(C=C)n1cccc1C(C)=O",
+        {
+          "v": 0.6428571428571429,
+          "d": 16,
+          "depth": 24,
+          "dh": -5,
+          "dr": -2,
+          "dist": 0.8571428571428572
+        }
+      ],
+      [
+        "CC(OCCC(F)(F)F)c1ccc2c(c1)-n1cc(C=O)cc1C(=O)NC2",
+        {
+          "v": 0.24657534246575352,
+          "d": 4,
+          "depth": 24,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.6986301369863014
+        }
+      ],
+      [
+        "C=CC=C(Nc1ccc(C(=O)NC(C)(C)CO)c(Cl)c1)C(=O)NC",
+        {
+          "v": 0.7530864197530864,
+          "d": 12,
+          "depth": 24,
+          "dh": 5,
+          "dr": -2,
+          "dist": 0.9012345679012346
+        }
+      ],
+      [
+        "CCC1CC2CNC(=O)C3CCCN3C2C(CNC(CC)C(F)(F)Cl)C1",
+        {
+          "v": 0.7413793103448276,
+          "d": 4,
+          "depth": 24,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.896551724137931
+        }
+      ],
+      [
+        "CC(CN)CCCNC(=O)c1cc2c(cc1Cl)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 12,
+          "depth": 25,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.5857142857142856
+        }
+      ],
+      [
+        "CN(C)C(CCCCC(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 25,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.5161290322580645
+        }
+      ],
+      [
+        "CC(CO)CCCNC(=O)c1cc2c(cc1Cl)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 12,
+          "depth": 26,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.5797101449275363
+        }
+      ],
+      [
+        "Cc1ccc2n1-c1cc(Cl)c(C(=O)NCCCC(C)C)cc1CNC2=O",
+        {
+          "v": 0.25675675675675674,
+          "d": 12,
+          "depth": 26,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.7027027027027026
+        }
+      ],
+      [
+        "CCN(CCCCF)C(=O)c1cc2c(cc1Br)-n1cccc1C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 12,
+          "depth": 26,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.5454545454545454
+        }
+      ],
+      [
+        "CN(C)CCCNC(=O)c1cc2c(cc1Cl)-n1cc(Cl)cc1C(=O)NC2",
+        {
+          "v": 0.10714285714285718,
+          "d": 12,
+          "depth": 26,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.6428571428571428
+        }
+      ]
+    ],
+    "banked_last": {
+      "0": [
+        "O=C(NCC(O)C(=O)O)c1ccc2c(c1)CNC(=O)c1cccn1-2",
+        "Cc1cc2n(c1)-c1ccc(C(=O)N(C)CCF)cc1CNC2=O",
+        "CCCN(C)C(=O)c1ccc2c(c1)CNC(=O)c1cc(C)cn1-2",
+        "Cc1cc2c(c(C(C)(O)C(C)C)c1)CNC(=O)c1cccn1-2",
+        "Cc1cc2n(c1)-c1ccc(C(=N)N(C)C)cc1CNC2=O",
+        "COC(c1ccc2c(c1)-n1cccc1C(=O)NC2)C(C)C",
+        "CC(C)C(O)c1cccc2c1CNC(=O)c1cccn1-2"
+      ],
+      "4": [
+        "CN(C)C(CCCOCC(F)(F)F)c1cc2c(cc1O)CNC(=O)c1cccn1-2",
+        "NC(=O)C(Cc1ccc2c(c1)-n1cccc1C(=O)NC2)CC(N)CC(F)(F)F",
+        "O=C1NCc2ccc(C(O)C(O)CCCCC(F)(F)F)cc2-n2cccc21",
+        "CC(COCC(N)c1ccc2c(c1)-n1cccc1C(=O)NC2)CC(F)(F)F",
+        "NC(COCC(O)CC(F)F)c1ccc2c(c1)-n1cccc1C(=O)NC2"
+      ],
+      "8": [
+        "[SH4]=C1NCc2ccccc2-n2cccc21",
+        "O=C1NCc2ccccc2-n2cccc21",
+        "O=C1NCc2c(O)cccc2-n2cccc21",
+        "Nc1cccc2c1-n1cccc1C(=O)NC2",
+        "Cc1cc2c(cc1C(=O)NC(C)C)CNC(=O)c1cccn1-2",
+        "Cc1ccn2c1C(=O)NCc1cc(C(=O)N(C)C)ccc1-2",
+        "O=C1NCc2ccc(Cl)c(O)c2-n2cccc21",
+        "CCNCc1ccc2c(c1)CNC(=O)c1ccc(N)n1-2",
+        "C=NCc1ccc2c(c1)CNC(=O)c1ccc(N)n1-2"
+      ],
+      "12": [
+        "CC(CN)CCCNC(=O)c1cc2c(cc1Cl)-n1cccc1C(=O)NC2",
+        "CC(CO)CCCNC(=O)c1cc2c(cc1Cl)-n1cccc1C(=O)NC2",
+        "CC(O)CCCCNC(=O)c1cc2c(cc1Cl)-n1cccc1C(=O)NC2",
+        "O=C(NCCCCCCO)c1cc2c(cc1Cl)-n1cccc1C(=O)NC2",
+        "CC1CCCCN1C(=O)c1cc2c(cc1Br)-n1cccc1C(=O)NC2",
+        "CCCCN(C(=O)c1cc2c(cc1Br)-n1cccc1C(=O)NC2)C(C)C",
+        "O=CCCCCNC(=O)c1cc2c(cc1Cl)-n1cccc1C(=O)NC2",
+        "O=C(NCCCCCO)c1cc2c(cc1Cl)-n1cccc1C(=O)NC2",
+        "O=C1NCc2cc(C(=O)N3CCCCC3)c(Br)cc2-n2cccc21",
+        "CC(C)(CO)NC(=O)c1ccc2c(c1Cl)CNC(=O)c1cccn1-2",
+        "Cc1ccc2c(c1)CN(CCCN(C)C)C(=O)c1cccn1-2"
+      ],
+      "16": [
+        "O=C1NCc2c(F)cccc2-n2cccc21",
+        "CCN(C)N1Cc2cc(F)ccc2-n2cccc2C1=O",
+        "CN(C)N1Cc2cc(Cl)ccc2-n2cccc2C1=O"
+      ]
+    },
+    "w_by_d": {
+      "0": [
+        0.30346751031116503,
+        -0.2875958851314503,
+        2.5945606521105424,
+        -1.2712814535074854,
+        0.0,
+        0.7171714932250869,
+        -0.942085203400717
+      ],
+      "4": [
+        0.8841597815201695,
+        -0.48967239573463917,
+        2.304071262354281,
+        0.31045746911323846,
+        0.0,
+        0.800953115484661,
+        0.1588851453381327
+      ],
+      "8": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "12": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "16": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "wall_s": 1322.8825240135193
+  },
+  {
+    "target": "5ht1b",
+    "idx": 7,
+    "delta": 0.4,
+    "beta": 0.0,
+    "tag": "barG",
+    "seed": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+    "per_depth": [
+      {
+        "stage": 0,
+        "depth": 1,
+        "n": 48,
+        "ess": 9.599999999999998,
+        "min_v": 0.0,
+        "n_feas": 48,
+        "mean_dheavy": 0.08333333333333333,
+        "max_dheavy": 1,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.584956613298827,
+        "mean_qed": 0.7723238652162858,
+        "mean_sa": 3.380262743628169,
+        "n_lineage": 48,
+        "n_unique_smi": 13,
+        "n_resample": 0
+      },
+      {
+        "stage": 0,
+        "depth": 2,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 41,
+        "mean_dheavy": 0.4583333333333333,
+        "max_dheavy": 2,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.6369557137310267,
+        "mean_qed": 0.7774304877578654,
+        "mean_sa": 3.4495007242027995,
+        "n_lineage": 48,
+        "n_unique_smi": 27,
+        "n_resample": 0
+      },
+      {
+        "stage": 0,
+        "depth": 3,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 43,
+        "mean_dheavy": 0.5,
+        "max_dheavy": 3,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.5418660998139897,
+        "mean_qed": 0.7762820470362284,
+        "mean_sa": 3.4777886302031367,
+        "n_lineage": 48,
+        "n_unique_smi": 29,
+        "n_resample": 0
+      },
+      {
+        "stage": 0,
+        "depth": 4,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 37,
+        "mean_dheavy": 0.5,
+        "max_dheavy": 4,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.5388577077320538,
+        "mean_qed": 0.7753818539047553,
+        "mean_sa": 3.491221206188046,
+        "n_lineage": 48,
+        "n_unique_smi": 30,
+        "n_resample": 0
+      },
+      {
+        "stage": 0,
+        "depth": 5,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 41,
+        "mean_dheavy": 0.7291666666666666,
+        "max_dheavy": 5,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 0,
+        "mean_sim": 0.5273323003581321,
+        "mean_qed": 0.7768429101590755,
+        "mean_sa": 3.49571750983959,
+        "n_lineage": 48,
+        "n_unique_smi": 31,
+        "n_resample": 0
+      },
+      {
+        "stage": 0,
+        "depth": 6,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 38,
+        "mean_dheavy": 0.7083333333333334,
+        "max_dheavy": 6,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.48494022155593547,
+        "mean_qed": 0.7813341035647664,
+        "mean_sa": 3.4806881751164305,
+        "n_lineage": 48,
+        "n_unique_smi": 35,
+        "n_resample": 0
+      },
+      {
+        "stage": 0,
+        "depth": 7,
+        "n": 48,
+        "ess": 9.599999999999998,
+        "min_v": 0.0,
+        "n_feas": 34,
+        "mean_dheavy": 0.9375,
+        "max_dheavy": 6,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.4705500034200972,
+        "mean_qed": 0.7766502403670872,
+        "mean_sa": 3.4969511326985363,
+        "n_lineage": 48,
+        "n_unique_smi": 36,
+        "n_resample": 0
+      },
+      {
+        "stage": 0,
+        "depth": 8,
+        "n": 48,
+        "ess": 9.599999999999998,
+        "min_v": 0.0,
+        "n_feas": 37,
+        "mean_dheavy": 0.8333333333333334,
+        "max_dheavy": 7,
+        "mean_drings": 0.020833333333333332,
+        "max_drings": 1,
+        "mean_sim": 0.481916953528813,
+        "mean_qed": 0.7750174040164719,
+        "mean_sa": 3.578334882858824,
+        "n_lineage": 48,
+        "n_unique_smi": 36,
+        "n_resample": 0
+      },
+      {
+        "stage": 1,
+        "depth": 9,
+        "n": 48,
+        "ess": 9.599999999999998,
+        "min_v": 0.0,
+        "n_feas": 28,
+        "mean_dheavy": 1.0416666666666667,
+        "max_dheavy": 6,
+        "mean_drings": -0.125,
+        "max_drings": 0,
+        "mean_sim": 0.38526762566897627,
+        "mean_qed": 0.7537137119619534,
+        "mean_sa": 3.6539536033926816,
+        "n_lineage": 48,
+        "n_unique_smi": 34,
+        "n_resample": 0
+      },
+      {
+        "stage": 1,
+        "depth": 10,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 32,
+        "mean_dheavy": 1.1041666666666667,
+        "max_dheavy": 6,
+        "mean_drings": -0.041666666666666664,
+        "max_drings": 0,
+        "mean_sim": 0.4177596304174747,
+        "mean_qed": 0.7769763979970955,
+        "mean_sa": 3.5453895701433176,
+        "n_lineage": 48,
+        "n_unique_smi": 41,
+        "n_resample": 0
+      },
+      {
+        "stage": 1,
+        "depth": 11,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 24,
+        "mean_dheavy": 1.3125,
+        "max_dheavy": 6,
+        "mean_drings": -0.10416666666666667,
+        "max_drings": 0,
+        "mean_sim": 0.38845774381988624,
+        "mean_qed": 0.7628234014367138,
+        "mean_sa": 3.6622313025579953,
+        "n_lineage": 48,
+        "n_unique_smi": 45,
+        "n_resample": 0
+      },
+      {
+        "stage": 1,
+        "depth": 12,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 32,
+        "mean_dheavy": 1.2916666666666667,
+        "max_dheavy": 6,
+        "mean_drings": -0.041666666666666664,
+        "max_drings": 0,
+        "mean_sim": 0.4160418587906549,
+        "mean_qed": 0.7722560370422217,
+        "mean_sa": 3.5691083534895713,
+        "n_lineage": 48,
+        "n_unique_smi": 40,
+        "n_resample": 0
+      },
+      {
+        "stage": 1,
+        "depth": 13,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 21,
+        "mean_dheavy": 1.2083333333333333,
+        "max_dheavy": 6,
+        "mean_drings": -0.0625,
+        "max_drings": 0,
+        "mean_sim": 0.4057987931602309,
+        "mean_qed": 0.7684928424815886,
+        "mean_sa": 3.5666163589651183,
+        "n_lineage": 48,
+        "n_unique_smi": 45,
+        "n_resample": 0
+      },
+      {
+        "stage": 1,
+        "depth": 14,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 24,
+        "mean_dheavy": 1.0625,
+        "max_dheavy": 6,
+        "mean_drings": -0.08333333333333333,
+        "max_drings": 0,
+        "mean_sim": 0.3832227994826927,
+        "mean_qed": 0.7635127734631307,
+        "mean_sa": 3.6082448979023134,
+        "n_lineage": 48,
+        "n_unique_smi": 41,
+        "n_resample": 0
+      },
+      {
+        "stage": 1,
+        "depth": 15,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 21,
+        "mean_dheavy": 1.0833333333333333,
+        "max_dheavy": 6,
+        "mean_drings": -0.08333333333333333,
+        "max_drings": 0,
+        "mean_sim": 0.4034317807756002,
+        "mean_qed": 0.766728057679546,
+        "mean_sa": 3.6308409694593755,
+        "n_lineage": 48,
+        "n_unique_smi": 44,
+        "n_resample": 0
+      },
+      {
+        "stage": 1,
+        "depth": 16,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 19,
+        "mean_dheavy": 1.2083333333333333,
+        "max_dheavy": 6,
+        "mean_drings": -0.041666666666666664,
+        "max_drings": 1,
+        "mean_sim": 0.38674433421367027,
+        "mean_qed": 0.7633921140603664,
+        "mean_sa": 3.684880377244559,
+        "n_lineage": 48,
+        "n_unique_smi": 45,
+        "n_resample": 0
+      },
+      {
+        "stage": 2,
+        "depth": 17,
+        "n": 48,
+        "ess": 9.599999999999998,
+        "min_v": 0.0,
+        "n_feas": 25,
+        "mean_dheavy": 1.7708333333333333,
+        "max_dheavy": 6,
+        "mean_drings": -0.0625,
+        "max_drings": 0,
+        "mean_sim": 0.3923355304449599,
+        "mean_qed": 0.7663258001866836,
+        "mean_sa": 3.535441609942841,
+        "n_lineage": 48,
+        "n_unique_smi": 41,
+        "n_resample": 0
+      },
+      {
+        "stage": 2,
+        "depth": 18,
+        "n": 48,
+        "ess": 9.599999999999998,
+        "min_v": 0.0,
+        "n_feas": 26,
+        "mean_dheavy": 1.875,
+        "max_dheavy": 6,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 0,
+        "mean_sim": 0.3812075588100776,
+        "mean_qed": 0.7783844132526833,
+        "mean_sa": 3.577123869293674,
+        "n_lineage": 48,
+        "n_unique_smi": 38,
+        "n_resample": 0
+      },
+      {
+        "stage": 2,
+        "depth": 19,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 18,
+        "mean_dheavy": 2.0416666666666665,
+        "max_dheavy": 6,
+        "mean_drings": -0.0625,
+        "max_drings": 0,
+        "mean_sim": 0.35598816656245286,
+        "mean_qed": 0.761986491174098,
+        "mean_sa": 3.78464428875384,
+        "n_lineage": 48,
+        "n_unique_smi": 43,
+        "n_resample": 0
+      },
+      {
+        "stage": 2,
+        "depth": 20,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 21,
+        "mean_dheavy": 2.0,
+        "max_dheavy": 7,
+        "mean_drings": -0.041666666666666664,
+        "max_drings": 0,
+        "mean_sim": 0.3739236161750424,
+        "mean_qed": 0.7785193002830396,
+        "mean_sa": 3.7063002378248933,
+        "n_lineage": 48,
+        "n_unique_smi": 44,
+        "n_resample": 0
+      },
+      {
+        "stage": 2,
+        "depth": 21,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 19,
+        "mean_dheavy": 2.1875,
+        "max_dheavy": 7,
+        "mean_drings": -0.0625,
+        "max_drings": 0,
+        "mean_sim": 0.35286790671332596,
+        "mean_qed": 0.7766759897521158,
+        "mean_sa": 3.711702468783974,
+        "n_lineage": 48,
+        "n_unique_smi": 47,
+        "n_resample": 0
+      },
+      {
+        "stage": 2,
+        "depth": 22,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 15,
+        "mean_dheavy": 2.3125,
+        "max_dheavy": 7,
+        "mean_drings": -0.10416666666666667,
+        "max_drings": 0,
+        "mean_sim": 0.3324955663163402,
+        "mean_qed": 0.7513072581577275,
+        "mean_sa": 3.849167462093689,
+        "n_lineage": 48,
+        "n_unique_smi": 45,
+        "n_resample": 0
+      },
+      {
+        "stage": 2,
+        "depth": 23,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 13,
+        "mean_dheavy": 2.2708333333333335,
+        "max_dheavy": 8,
+        "mean_drings": -0.10416666666666667,
+        "max_drings": 0,
+        "mean_sim": 0.3258981671409728,
+        "mean_qed": 0.7253621461027651,
+        "mean_sa": 3.876616966307118,
+        "n_lineage": 48,
+        "n_unique_smi": 46,
+        "n_resample": 0
+      },
+      {
+        "stage": 2,
+        "depth": 24,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 15,
+        "mean_dheavy": 2.4166666666666665,
+        "max_dheavy": 9,
+        "mean_drings": -0.041666666666666664,
+        "max_drings": 0,
+        "mean_sim": 0.34296168374010155,
+        "mean_qed": 0.7403452057499132,
+        "mean_sa": 3.8065433089026683,
+        "n_lineage": 48,
+        "n_unique_smi": 45,
+        "n_resample": 0
+      },
+      {
+        "stage": 3,
+        "depth": 25,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 27,
+        "mean_dheavy": 1.7916666666666667,
+        "max_dheavy": 9,
+        "mean_drings": -0.0625,
+        "max_drings": 0,
+        "mean_sim": 0.40659223433245134,
+        "mean_qed": 0.7814180071562845,
+        "mean_sa": 3.599416160816194,
+        "n_lineage": 48,
+        "n_unique_smi": 42,
+        "n_resample": 0
+      },
+      {
+        "stage": 3,
+        "depth": 26,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 24,
+        "mean_dheavy": 1.9166666666666667,
+        "max_dheavy": 9,
+        "mean_drings": -0.0625,
+        "max_drings": 0,
+        "mean_sim": 0.3849526309008294,
+        "mean_qed": 0.7760530387329806,
+        "mean_sa": 3.694310593651269,
+        "n_lineage": 48,
+        "n_unique_smi": 46,
+        "n_resample": 0
+      },
+      {
+        "stage": 3,
+        "depth": 27,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 21,
+        "mean_dheavy": 1.8958333333333333,
+        "max_dheavy": 9,
+        "mean_drings": -0.08333333333333333,
+        "max_drings": 0,
+        "mean_sim": 0.3830160820430932,
+        "mean_qed": 0.7673323308127257,
+        "mean_sa": 3.6964819747514746,
+        "n_lineage": 48,
+        "n_unique_smi": 43,
+        "n_resample": 0
+      },
+      {
+        "stage": 3,
+        "depth": 28,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 24,
+        "mean_dheavy": 1.9166666666666667,
+        "max_dheavy": 10,
+        "mean_drings": -0.041666666666666664,
+        "max_drings": 1,
+        "mean_sim": 0.37096844074179636,
+        "mean_qed": 0.7792098663625963,
+        "mean_sa": 3.71521406730168,
+        "n_lineage": 48,
+        "n_unique_smi": 46,
+        "n_resample": 0
+      },
+      {
+        "stage": 3,
+        "depth": 29,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 19,
+        "mean_dheavy": 1.8541666666666667,
+        "max_dheavy": 10,
+        "mean_drings": -0.041666666666666664,
+        "max_drings": 1,
+        "mean_sim": 0.357689973430755,
+        "mean_qed": 0.7728897167616063,
+        "mean_sa": 3.695891841249475,
+        "n_lineage": 48,
+        "n_unique_smi": 47,
+        "n_resample": 0
+      },
+      {
+        "stage": 3,
+        "depth": 30,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 19,
+        "mean_dheavy": 1.8125,
+        "max_dheavy": 10,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 1,
+        "mean_sim": 0.35004841364110484,
+        "mean_qed": 0.7667404843289698,
+        "mean_sa": 3.734601955647198,
+        "n_lineage": 48,
+        "n_unique_smi": 46,
+        "n_resample": 0
+      },
+      {
+        "stage": 3,
+        "depth": 31,
+        "n": 48,
+        "ess": 9.599999999999998,
+        "min_v": 0.0,
+        "n_feas": 16,
+        "mean_dheavy": 1.8958333333333333,
+        "max_dheavy": 11,
+        "mean_drings": 0.0,
+        "max_drings": 2,
+        "mean_sim": 0.34332824970811204,
+        "mean_qed": 0.7648244668264397,
+        "mean_sa": 3.704526908074262,
+        "n_lineage": 48,
+        "n_unique_smi": 46,
+        "n_resample": 0
+      },
+      {
+        "stage": 3,
+        "depth": 32,
+        "n": 48,
+        "ess": 9.6,
+        "min_v": 0.0,
+        "n_feas": 20,
+        "mean_dheavy": 2.0416666666666665,
+        "max_dheavy": 10,
+        "mean_drings": -0.041666666666666664,
+        "max_drings": 1,
+        "mean_sim": 0.3580998601853829,
+        "mean_qed": 0.7553809780382922,
+        "mean_sa": 3.7001941298779983,
+        "n_lineage": 48,
+        "n_unique_smi": 44,
+        "n_resample": 0
+      }
+    ],
+    "best": {
+      "v": 0.0,
+      "smi": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1Cl",
+      "depth": 1
+    },
+    "n_feasible_states": 842,
+    "ladder": [
+      0,
+      4,
+      8,
+      12,
+      16
+    ],
+    "ladder_reach": {
+      "0": 215,
+      "4": 44,
+      "8": 6,
+      "12": 0,
+      "16": 0
+    },
+    "ladder_reach_signed": {
+      "0": {
+        "grow": 173,
+        "shrink": 51
+      },
+      "4": {
+        "grow": 43,
+        "shrink": 1
+      },
+      "8": {
+        "grow": 6,
+        "shrink": 0
+      },
+      "12": {
+        "grow": 0,
+        "shrink": 0
+      },
+      "16": {
+        "grow": 0,
+        "shrink": 0
+      }
+    },
+    "frontier_top": [
+      [
+        "CC1C[NH2+]CCN1c1ccc(C(=O)NN(C)CCN(C)C)c(C(F)(F)F)c1",
+        {
+          "v": 0.4029850746268657,
+          "d": 4,
+          "depth": 31,
+          "dh": 11,
+          "dr": 0,
+          "dist": 0.7611940298507462
+        }
+      ],
+      [
+        "CC(CO)N(C)NC(=O)c1ccc(N2CC[NH2+]CC2C)cc1C(F)(F)F",
+        {
+          "v": 0.4202898550724638,
+          "d": 4,
+          "depth": 28,
+          "dh": 10,
+          "dr": 0,
+          "dist": 0.7681159420289855
+        }
+      ],
+      [
+        "CC(CN)N(C)NC(=O)c1ccc(N2CC[NH2+]CC2C)cc1C(F)(F)F",
+        {
+          "v": 0.4285714285714286,
+          "d": 4,
+          "depth": 29,
+          "dh": 10,
+          "dr": 0,
+          "dist": 0.7714285714285715
+        }
+      ],
+      [
+        "CNCCN(C)NC(=O)c1ccc(N2CC[NH2+]CC2C)cc1C(F)(F)F",
+        {
+          "v": 0.4202898550724638,
+          "d": 4,
+          "depth": 30,
+          "dh": 10,
+          "dr": 0,
+          "dist": 0.7681159420289855
+        }
+      ],
+      [
+        "CC1C[NH2+]CCN1c1ccc(C(=O)NNCCN(C)C)c(C(F)(F)F)c1",
+        {
+          "v": 0.411764705882353,
+          "d": 4,
+          "depth": 32,
+          "dh": 10,
+          "dr": 0,
+          "dist": 0.7647058823529411
+        }
+      ],
+      [
+        "O=C(O)C1C[NH2+]CC(O)N1c1ccc(C(F)(F)F)c(OC(F)(F)F)c1",
+        {
+          "v": 0.46721311475409844,
+          "d": 4,
+          "depth": 24,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.7868852459016393
+        }
+      ],
+      [
+        "CC(C)C(CO)NC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.06250000000000006,
+          "d": 4,
+          "depth": 25,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.625
+        }
+      ],
+      [
+        "CC(C=O)N(C)NC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.07894736842105274,
+          "d": 4,
+          "depth": 26,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.631578947368421
+        }
+      ],
+      [
+        "CCC(C)(CO)NC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.06250000000000006,
+          "d": 4,
+          "depth": 26,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.625
+        }
+      ],
+      [
+        "CC(CO)N(C)NC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.0948275862068966,
+          "d": 4,
+          "depth": 27,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.6379310344827587
+        }
+      ],
+      [
+        "C[NH2+]CCN(C)c1ccc(C(=O)NCC(C)(C)F)c(C(F)(F)F)c1",
+        {
+          "v": 0.6538461538461539,
+          "d": 4,
+          "depth": 29,
+          "dh": 8,
+          "dr": -1,
+          "dist": 0.8615384615384616
+        }
+      ],
+      [
+        "CC(CO)(CCl)NC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.07894736842105274,
+          "d": 4,
+          "depth": 27,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.631578947368421
+        }
+      ],
+      [
+        "O=C(NC(CO)CCCl)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.0948275862068966,
+          "d": 4,
+          "depth": 28,
+          "dh": 9,
+          "dr": 0,
+          "dist": 0.6379310344827587
+        }
+      ],
+      [
+        "CC[NH2+]CCNc1ccc(C(=O)NCC(C)(C)I)c(C(F)(F)F)c1",
+        {
+          "v": 0.6590909090909092,
+          "d": 4,
+          "depth": 32,
+          "dh": 8,
+          "dr": -1,
+          "dist": 0.8636363636363636
+        }
+      ],
+      [
+        "C#CCNC(=O)C(C=C)=C(C=CNCC[NH2+]CC)C(F)(F)F",
+        {
+          "v": 0.8958333333333333,
+          "d": 4,
+          "depth": 14,
+          "dh": 6,
+          "dr": -2,
+          "dist": 0.9583333333333334
+        }
+      ],
+      [
+        "C#CCOC(=O)C(=C)C(=CC(=C)NCC[NH2+]CC)C(F)(F)F",
+        {
+          "v": 0.8591549295774649,
+          "d": 4,
+          "depth": 19,
+          "dh": 6,
+          "dr": -2,
+          "dist": 0.9436619718309859
+        }
+      ],
+      [
+        "CC(C)=C(C)NC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 23,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5882352941176471
+        }
+      ],
+      [
+        "O=CC1C[NH2+]CC(O)N1c1ccc(C(F)(F)F)c(OC(F)(F)F)c1",
+        {
+          "v": 0.46721311475409844,
+          "d": 4,
+          "depth": 23,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.7868852459016393
+        }
+      ],
+      [
+        "CC(C)C(C)NC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 26,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5961538461538461
+        }
+      ],
+      [
+        "CC(C)N(C)NC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.027777777777777818,
+          "d": 4,
+          "depth": 25,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.6111111111111112
+        }
+      ],
+      [
+        "CC(C)(C)CNC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 25,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5686274509803921
+        }
+      ],
+      [
+        "CC(C)(C)NNC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 26,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5882352941176471
+        }
+      ],
+      [
+        "CC(C)(F)CNC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 30,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5686274509803921
+        }
+      ],
+      [
+        "CC(C)CNC(=O)c1ccc(N2CC[NH2+]C(C)C2)cc1C(F)(F)F",
+        {
+          "v": 0.27419354838709675,
+          "d": 4,
+          "depth": 27,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.7096774193548387
+        }
+      ],
+      [
+        "CCC(CO)NC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.06250000000000006,
+          "d": 4,
+          "depth": 31,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.625
+        }
+      ],
+      [
+        "CCC(O)CNC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 30,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5925925925925926
+        }
+      ],
+      [
+        "CC(=O)OC1=C2CCC(C(F)(F)F)(C1)CC2N1CC[NH2+]CC1",
+        {
+          "v": 0.5161290322580645,
+          "d": 8,
+          "depth": 31,
+          "dh": 6,
+          "dr": 2,
+          "dist": 0.8064516129032258
+        }
+      ],
+      [
+        "CC(C)OC(=O)c1ccc(N2CC[NH2+]C(C=O)C2)cc1C(F)(F)F",
+        {
+          "v": 0.32539682539682546,
+          "d": 4,
+          "depth": 31,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.7301587301587302
+        }
+      ],
+      [
+        "CC(C)(I)CNC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.10235024527001166,
+          "d": 4,
+          "depth": 31,
+          "dh": 8,
+          "dr": 0,
+          "dist": 0.5849056603773585
+        }
+      ],
+      [
+        "COc1ccc(N2CC[NH2+]C(C)C2)c(C(F)(F)F)c1C(=O)NO",
+        {
+          "v": 0.45312500000000006,
+          "d": 0,
+          "depth": 8,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.78125
+        }
+      ],
+      [
+        "C#CCNC(=O)c1ccc(NCC[NH2+]CC)cc1C(F)(F)F",
+        {
+          "v": 0.6538461538461539,
+          "d": 4,
+          "depth": 23,
+          "dh": 6,
+          "dr": -1,
+          "dist": 0.8615384615384616
+        }
+      ],
+      [
+        "C#CCNC(=O)c1ccc(N(C)CC[NH2+]C)cc1C(F)(F)F",
+        {
+          "v": 0.6590909090909092,
+          "d": 4,
+          "depth": 21,
+          "dh": 6,
+          "dr": -1,
+          "dist": 0.8636363636363636
+        }
+      ],
+      [
+        "C#CCNC(=O)C=CC=C(C=CC(F)(F)F)N1CC[NH2+]CC1",
+        {
+          "v": 0.5564516129032258,
+          "d": 4,
+          "depth": 23,
+          "dh": 6,
+          "dr": -1,
+          "dist": 0.8225806451612903
+        }
+      ],
+      [
+        "C#CCNC(=O)c1ccc(C(C)CC[NH2+]C)cc1C(F)(F)F",
+        {
+          "v": 0.6590909090909092,
+          "d": 4,
+          "depth": 10,
+          "dh": 6,
+          "dr": -1,
+          "dist": 0.8636363636363636
+        }
+      ],
+      [
+        "C#CCNC(=O)C(=CC=CN1CC[NH2+]CC1)C(=C)C(F)(F)F",
+        {
+          "v": 0.5634920634920635,
+          "d": 4,
+          "depth": 19,
+          "dh": 6,
+          "dr": -1,
+          "dist": 0.8253968253968254
+        }
+      ],
+      [
+        "C#CCNC(=O)C(C=C(C=C)NCC[NH2+]C)=CC(F)(F)F",
+        {
+          "v": 0.8529411764705882,
+          "d": 4,
+          "depth": 12,
+          "dh": 5,
+          "dr": -2,
+          "dist": 0.9411764705882353
+        }
+      ],
+      [
+        "C#CCNC(=O)C1CCC(NCC[NH2+]CC)CC1C(F)(F)F",
+        {
+          "v": 0.818840579710145,
+          "d": 4,
+          "depth": 22,
+          "dh": 6,
+          "dr": -1,
+          "dist": 0.927536231884058
+        }
+      ],
+      [
+        "CC[NH2+]CCNC1CCC(C(=O)NCC#[IH2])C(C(F)(F)F)C1",
+        {
+          "v": 0.818840579710145,
+          "d": 4,
+          "depth": 15,
+          "dh": 6,
+          "dr": -1,
+          "dist": 0.927536231884058
+        }
+      ],
+      [
+        "CC[NH2+]CCNc1ccc(C(=O)NCC#[IH2])c(C(F)(F)F)c1",
+        {
+          "v": 0.6538461538461539,
+          "d": 4,
+          "depth": 16,
+          "dh": 6,
+          "dr": -1,
+          "dist": 0.8615384615384616
+        }
+      ],
+      [
+        "C#CC1NC(=O)C2CCC(N3CC[NH2+]CC3)CC12C(F)(F)F",
+        {
+          "v": 0.5081967213114754,
+          "d": 4,
+          "depth": 16,
+          "dh": 6,
+          "dr": 1,
+          "dist": 0.8032786885245902
+        }
+      ],
+      [
+        "C#CCNC(=O)C(=C)C(=CC(=C)N1CC[NH2+]CC1)C(F)(F)F",
+        {
+          "v": 0.5491803278688525,
+          "d": 4,
+          "depth": 17,
+          "dh": 6,
+          "dr": -1,
+          "dist": 0.819672131147541
+        }
+      ],
+      [
+        "C#CCOC(=O)c1ccc(NCC[NH2+]CC)cc1C(F)(F)F",
+        {
+          "v": 0.7058823529411764,
+          "d": 4,
+          "depth": 22,
+          "dh": 6,
+          "dr": -1,
+          "dist": 0.8823529411764706
+        }
+      ],
+      [
+        "Cc1cc(C(F)(F)F)c(OC(F)(F)F)cc1N1CC[NH2+]C(F)C1",
+        {
+          "v": 0.38596491228070184,
+          "d": 4,
+          "depth": 20,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.7543859649122807
+        }
+      ],
+      [
+        "COC1C[NH2+]CCN1c1ccc(C(F)(F)F)c(OC(F)(F)F)c1",
+        {
+          "v": 0.2727272727272728,
+          "d": 4,
+          "depth": 20,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.7090909090909091
+        }
+      ],
+      [
+        "Cc1cc(C(F)(F)F)c(OC(F)(F)F)cc1N1CC[NH2+]C(C)C1",
+        {
+          "v": 0.38596491228070184,
+          "d": 4,
+          "depth": 21,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.7543859649122807
+        }
+      ],
+      [
+        "CC1(O)C[NH2+]CCN1c1ccc(C(F)(F)F)c(OC(F)(F)F)c1",
+        {
+          "v": 0.2727272727272728,
+          "d": 4,
+          "depth": 21,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.7090909090909091
+        }
+      ],
+      [
+        "C=CC(=C(C=CC(F)(F)F)N1CC[NH2+]CC1)C(C)OC(C)=O",
+        {
+          "v": 0.4915254237288136,
+          "d": 8,
+          "depth": 22,
+          "dh": 6,
+          "dr": -1,
+          "dist": 0.7966101694915254
+        }
+      ],
+      [
+        "CC1CN(c2cc(OC(F)(F)F)c(O)cc2C(F)(F)F)CC[NH2+]1",
+        {
+          "v": 0.39655172413793105,
+          "d": 4,
+          "depth": 22,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.7586206896551724
+        }
+      ],
+      [
+        "CC(C)=CNC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 22,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.5961538461538461
+        }
+      ],
+      [
+        "CC1C[NH2+]CC(O)N1c1ccc(C(F)(F)F)c(OC(F)(F)F)c1",
+        {
+          "v": 0.43965517241379315,
+          "d": 4,
+          "depth": 22,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.7758620689655172
+        }
+      ],
+      [
+        "Oc1cc(C(F)(F)F)c(N2CC[NH2+]C(O)C2)cc1OC(F)(F)F",
+        {
+          "v": 0.38596491228070184,
+          "d": 4,
+          "depth": 23,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.7543859649122807
+        }
+      ],
+      [
+        "C#CCOC(=O)c1ccc(N(C)CC[NH2+]C)cc1C(F)(F)F",
+        {
+          "v": 0.7058823529411764,
+          "d": 4,
+          "depth": 24,
+          "dh": 6,
+          "dr": -1,
+          "dist": 0.8823529411764706
+        }
+      ],
+      [
+        "OCC1C[NH2+]CCN1c1ccc(C(F)(F)F)c(OC(F)(F)F)c1",
+        {
+          "v": 0.2857142857142858,
+          "d": 4,
+          "depth": 24,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.7142857142857143
+        }
+      ],
+      [
+        "CC(=O)OC(C)C=CC=C(C=CN1CC[NH2+]CC1)C(F)(F)F",
+        {
+          "v": 0.5491803278688525,
+          "d": 8,
+          "depth": 25,
+          "dh": 6,
+          "dr": -1,
+          "dist": 0.819672131147541
+        }
+      ],
+      [
+        "CC(C)CNC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 25,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.5769230769230769
+        }
+      ],
+      [
+        "CC(OC(C)(N)O)c1ccc(C(F)(F)F)cc1N1CC[NH2+]CC1",
+        {
+          "v": 0.15055793340076118,
+          "d": 8,
+          "depth": 26,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.5961538461538461
+        }
+      ],
+      [
+        "CC(C)NNC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 27,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.5961538461538461
+        }
+      ],
+      [
+        "CC(OC(C)(N)O)c1cc(C(F)(F)F)ccc1N1CC[NH2+]CC1",
+        {
+          "v": 0.13706574977793218,
+          "d": 8,
+          "depth": 31,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.5961538461538461
+        }
+      ],
+      [
+        "CCCNC(=O)c1ccc(N2CC[NH2+]C(C)C2)cc1C(F)(F)F",
+        {
+          "v": 0.2622950819672132,
+          "d": 4,
+          "depth": 28,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.7049180327868853
+        }
+      ],
+      [
+        "CC(OC(C)(N)O)C1CC(C(F)(F)F)CCC1N1CC[NH2+]CC1",
+        {
+          "v": 0.5491803278688525,
+          "d": 8,
+          "depth": 32,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.819672131147541
+        }
+      ],
+      [
+        "CC(C)NC(=O)c1ccc(N2CC[NH2+]C(C)C2)cc1C(F)(F)F",
+        {
+          "v": 0.29166666666666674,
+          "d": 4,
+          "depth": 29,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.7166666666666667
+        }
+      ],
+      [
+        "CC1CN(c2ccc(C(=O)OC(C)C)c(C(F)(F)F)c2)CC[NH2+]1",
+        {
+          "v": 0.29166666666666674,
+          "d": 4,
+          "depth": 32,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.7166666666666667
+        }
+      ],
+      [
+        "CCC(C)NC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.027777777777777818,
+          "d": 4,
+          "depth": 32,
+          "dh": 7,
+          "dr": 0,
+          "dist": 0.6111111111111112
+        }
+      ],
+      [
+        "CCCNC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 6,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.5686274509803921
+        }
+      ],
+      [
+        "COc1ccc(N2CC[NH2+]CC2)c(C(F)(F)F)c1C(=O)NO",
+        {
+          "v": 0.22727272727272735,
+          "d": 0,
+          "depth": 7,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.6909090909090909
+        }
+      ],
+      [
+        "C=CCNC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 7,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.5769230769230769
+        }
+      ],
+      [
+        "C#CCNC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 24,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.5769230769230769
+        }
+      ],
+      [
+        "C#CCNC(=O)c1ccc(NCC[NH2+]C)cc1C(F)(F)F",
+        {
+          "v": 0.6370967741935485,
+          "d": 4,
+          "depth": 10,
+          "dh": 5,
+          "dr": -1,
+          "dist": 0.8548387096774194
+        }
+      ],
+      [
+        "C#CCNC(=O)c1cc(NCC[NH2+]C)ccc1C(F)(F)F",
+        {
+          "v": 0.6370967741935485,
+          "d": 4,
+          "depth": 13,
+          "dh": 5,
+          "dr": -1,
+          "dist": 0.8548387096774194
+        }
+      ],
+      [
+        "C#CCNC(=O)c1ccc(C2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.4166666666666667,
+          "d": 4,
+          "depth": 11,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.7666666666666666
+        }
+      ],
+      [
+        "C#CCNC(=O)C1CCC(N2CC[NH2+]CC2)CC1C(F)(F)F",
+        {
+          "v": 0.5,
+          "d": 4,
+          "depth": 19,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.8
+        }
+      ],
+      [
+        "CCNC1CN(c2cc(C(F)(F)F)cc(C)c2OC)CC[NH2+]1",
+        {
+          "v": 0.31034482758620696,
+          "d": 8,
+          "depth": 15,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.7241379310344828
+        }
+      ],
+      [
+        "CCNC1CN(C2CC(C(F)(F)F)CC(C)C2OC)CC[NH2+]1",
+        {
+          "v": 0.6538461538461539,
+          "d": 8,
+          "depth": 16,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.8615384615384616
+        }
+      ],
+      [
+        "C#CCOC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.009433962264150941,
+          "d": 4,
+          "depth": 23,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.6037735849056604
+        }
+      ],
+      [
+        "FC(F)(F)Oc1ccc(C(F)(F)F)c(N2CC[NH2+]C(Cl)C2)c1",
+        {
+          "v": 0.3181818181818183,
+          "d": 4,
+          "depth": 17,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.7272727272727273
+        }
+      ],
+      [
+        "OC1CN(c2cc(OC(F)(F)F)ccc2C(F)(F)F)CC[NH2+]1",
+        {
+          "v": 0.3181818181818183,
+          "d": 4,
+          "depth": 17,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.7272727272727273
+        }
+      ],
+      [
+        "Oc1cc(N2CC[NH2+]CC2)c(C(F)(F)F)cc1OC(F)(F)F",
+        {
+          "v": 0.11458333333333334,
+          "d": 4,
+          "depth": 18,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.6458333333333333
+        }
+      ],
+      [
+        "FC(F)(F)Oc1cc(N2CC[NH2+]C(Cl)C2)ccc1C(F)(F)F",
+        {
+          "v": 0.1981132075471699,
+          "d": 4,
+          "depth": 18,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.679245283018868
+        }
+      ],
+      [
+        "OC1C[NH2+]CCN1c1cc(OC(F)(F)F)ccc1C(F)(F)F",
+        {
+          "v": 0.3181818181818183,
+          "d": 4,
+          "depth": 18,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.7272727272727273
+        }
+      ],
+      [
+        "Oc1cc(C(F)(F)F)c(N2CC[NH2+]CC2)cc1OC(F)(F)F",
+        {
+          "v": 0.11458333333333334,
+          "d": 4,
+          "depth": 24,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.6458333333333333
+        }
+      ],
+      [
+        "C#CN(C)C(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 19,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.5882352941176471
+        }
+      ],
+      [
+        "FC1CN(c2ccc(C(F)(F)F)c(OC(F)(F)F)c2)CC[NH2+]1",
+        {
+          "v": 0.18269230769230774,
+          "d": 4,
+          "depth": 19,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.6730769230769231
+        }
+      ],
+      [
+        "OC1C[NH2+]CCN1c1ccc(C(F)(F)F)c(OC(F)(F)F)c1",
+        {
+          "v": 0.2452830188679246,
+          "d": 4,
+          "depth": 19,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.6981132075471699
+        }
+      ],
+      [
+        "CC#CNC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 20,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.5961538461538461
+        }
+      ],
+      [
+        "CC(=O)OC(C)c1ccc(C(F)(F)F)cc1N1CC[NH2+]CC1",
+        {
+          "v": 0.0,
+          "d": 8,
+          "depth": 28,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.5882352941176471
+        }
+      ],
+      [
+        "CC=CNC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 4,
+          "depth": 21,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.5961538461538461
+        }
+      ],
+      [
+        "O=C(O)c1c(O)cc(C(F)(F)F)cc1N1CC[NH2+]CC1CO",
+        {
+          "v": 0.31034482758620696,
+          "d": 8,
+          "depth": 22,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.7241379310344828
+        }
+      ],
+      [
+        "CC1CN(c2ccc(C(F)(F)F)c(OC(F)(F)F)c2)CC[NH2+]1",
+        {
+          "v": 0.1981132075471699,
+          "d": 4,
+          "depth": 22,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.679245283018868
+        }
+      ],
+      [
+        "O=C(O)c1ccc(C(F)(F)F)c(O)c1N1CC[NH2+]CC1CO",
+        {
+          "v": 0.4166666666666667,
+          "d": 8,
+          "depth": 23,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.7666666666666666
+        }
+      ],
+      [
+        "CC1C[NH2+]CCN1c1ccc(C(F)(F)F)c(OC(F)(F)F)c1",
+        {
+          "v": 0.2452830188679246,
+          "d": 4,
+          "depth": 23,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.6981132075471699
+        }
+      ],
+      [
+        "CC(O)OC(C)c1ccc(C(F)(F)F)cc1N1CC[NH2+]CC1",
+        {
+          "v": 0.11146300439195711,
+          "d": 8,
+          "depth": 25,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.5714285714285714
+        }
+      ],
+      [
+        "NCOC1C(N)C(N2CC[NH2+]CC2)CC(O)(C(F)(F)F)C1O",
+        {
+          "v": 0.4736842105263159,
+          "d": 0,
+          "depth": 24,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.7894736842105263
+        }
+      ],
+      [
+        "COCC1C[NH2+]CCN1c1cc(OC)cc(I)c1C(F)(F)F",
+        {
+          "v": 0.42622950819672134,
+          "d": 16,
+          "depth": 24,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.7704918032786885
+        }
+      ],
+      [
+        "O=C(O)c1c(C(F)(F)F)ccc(O)c1N1CC[NH2+]CC1CO",
+        {
+          "v": 0.4166666666666667,
+          "d": 8,
+          "depth": 24,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.7666666666666666
+        }
+      ],
+      [
+        "COc1cc(C=O)c(N2CC(C)[NH2+]C(C)C2)cc1C(F)(F)F",
+        {
+          "v": 0.5338983050847458,
+          "d": 16,
+          "depth": 24,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.8135593220338984
+        }
+      ],
+      [
+        "Cc1c(OC(F)(F)F)ccc(C(F)(F)F)c1N1CC[NH2+]CC1",
+        {
+          "v": 0.11458333333333334,
+          "d": 4,
+          "depth": 30,
+          "dh": 6,
+          "dr": 0,
+          "dist": 0.6458333333333333
+        }
+      ]
+    ],
+    "banked_last": {
+      "0": [
+        "c1ccc(N2CC[NH2+]CC2)cc1",
+        "COc1c(O)cc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        "Brc1ccc(N2CC[NH2+]CC2)cc1",
+        "Fc1ccc(N2CC[NH2+]CC2)cc1",
+        "NCc1ccc(N2CC[NH2+]CC2)c(C(F)(F)F)c1"
+      ],
+      "4": [
+        "CC(C)C(C)NC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        "CCC(O)CNC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        "CC(C)NNC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        "CCNNC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        "FC(F)(F)Oc1ccc(C(F)(F)F)c(N2CC[NH2+]CC2)c1",
+        "FC(F)(F)Oc1cccc(C(F)(F)F)c1N1CC[NH2+]CC1"
+      ],
+      "8": [
+        "CC(=O)OC(C)c1ccc(C(F)(F)F)cc1N1CC[NH2+]CC1",
+        "CCCC#Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        "CCCc1cc(C(F)(F)F)cc(N2CC[NH2+]CC2)c1C",
+        "NCCCc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        "N#Cc1c(N2CC[NH2+]CC2)cccc1C(F)(F)F"
+      ],
+      "12": [
+        "Clc1ccc(N2CC[NH2+]CC2)cc1",
+        "Fc1cc(Cl)cc(N2CC[NH2+]CC2)c1"
+      ],
+      "16": [
+        "CCc1ccc(N2CC[NH2+]CC2)cc1OCCC(F)(F)F",
+        "N#COc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        "FC(F)(F)c1ccccc1N1CC[NH2+]CC1"
+      ]
+    },
+    "w_by_d": {
+      "0": [
+        -0.19567012951242324,
+        -0.41356670794728884,
+        2.8468095984000303,
+        -1.2049876214047575,
+        0.14465213710681166,
+        0.9186387378395363,
+        0.32097877995198226
+      ],
+      "4": [
+        0.4367078497327621,
+        -0.4205365793606052,
+        0.6914681891286265,
+        0.7175390806992265,
+        -0.12225965768784501,
+        1.2446677778779962,
+        -0.37451223903809483
+      ],
+      "8": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "12": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "16": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "wall_s": 782.6070191860199
+  },
+  {
+    "target": "5ht1b",
+    "idx": 7,
+    "delta": 0.4,
+    "beta": 4.0,
+    "tag": "barG",
+    "seed": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+    "per_depth": [
+      {
+        "stage": 0,
+        "depth": 1,
+        "n": 48,
+        "ess": 9.59999999999995,
+        "min_v": 0.0,
+        "n_feas": 48,
+        "mean_dheavy": 0.22916666666666666,
+        "max_dheavy": 1,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.564487823716402,
+        "mean_qed": 0.7781983198488424,
+        "mean_sa": 3.4407455133232077,
+        "n_lineage": 48,
+        "n_unique_smi": 17,
+        "n_resample": 0
+      },
+      {
+        "stage": 0,
+        "depth": 2,
+        "n": 48,
+        "ess": 7.638989000730106,
+        "min_v": 0.0,
+        "n_feas": 48,
+        "mean_dheavy": 0.4375,
+        "max_dheavy": 2,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.5924178536921842,
+        "mean_qed": 0.7825758184506587,
+        "mean_sa": 3.4782868402711813,
+        "n_lineage": 48,
+        "n_unique_smi": 30,
+        "n_resample": 0
+      },
+      {
+        "stage": 0,
+        "depth": 3,
+        "n": 48,
+        "ess": 4.767881840036602,
+        "min_v": 0.0,
+        "n_feas": 48,
+        "mean_dheavy": 0.5208333333333334,
+        "max_dheavy": 3,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.5288862420216067,
+        "mean_qed": 0.7707782775345962,
+        "mean_sa": 3.4616929380405868,
+        "n_lineage": 25,
+        "n_unique_smi": 17,
+        "n_resample": 1
+      },
+      {
+        "stage": 0,
+        "depth": 4,
+        "n": 48,
+        "ess": 8.70982930477329,
+        "min_v": 0.0,
+        "n_feas": 47,
+        "mean_dheavy": -1.0,
+        "max_dheavy": 4,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.5440932305222238,
+        "mean_qed": 0.7080363211290058,
+        "mean_sa": 3.3445706534940407,
+        "n_lineage": 25,
+        "n_unique_smi": 23,
+        "n_resample": 1
+      },
+      {
+        "stage": 0,
+        "depth": 5,
+        "n": 48,
+        "ess": 4.897758094826555,
+        "min_v": 0.0,
+        "n_feas": 47,
+        "mean_dheavy": -0.4791666666666667,
+        "max_dheavy": 5,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.5293652917475864,
+        "mean_qed": 0.7270313718807134,
+        "mean_sa": 3.4052905880630018,
+        "n_lineage": 25,
+        "n_unique_smi": 29,
+        "n_resample": 1
+      },
+      {
+        "stage": 0,
+        "depth": 6,
+        "n": 48,
+        "ess": 4.885240954169555,
+        "min_v": 0.0,
+        "n_feas": 48,
+        "mean_dheavy": -0.7291666666666666,
+        "max_dheavy": 6,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.5423825589419722,
+        "mean_qed": 0.7055233710659604,
+        "mean_sa": 3.351775127528068,
+        "n_lineage": 25,
+        "n_unique_smi": 23,
+        "n_resample": 1
+      },
+      {
+        "stage": 0,
+        "depth": 7,
+        "n": 48,
+        "ess": 3.643041878637989,
+        "min_v": 0.0,
+        "n_feas": 48,
+        "mean_dheavy": -0.25,
+        "max_dheavy": 7,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.5239779011752609,
+        "mean_qed": 0.7058674236738566,
+        "mean_sa": 3.4138187715959156,
+        "n_lineage": 15,
+        "n_unique_smi": 20,
+        "n_resample": 2
+      },
+      {
+        "stage": 0,
+        "depth": 8,
+        "n": 48,
+        "ess": 8.606274681960608,
+        "min_v": 0.0,
+        "n_feas": 44,
+        "mean_dheavy": 2.8958333333333335,
+        "max_dheavy": 8,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.49172638184760825,
+        "mean_qed": 0.7327236696777634,
+        "mean_sa": 3.4045799068774,
+        "n_lineage": 15,
+        "n_unique_smi": 33,
+        "n_resample": 2
+      },
+      {
+        "stage": 1,
+        "depth": 9,
+        "n": 48,
+        "ess": 7.758441619540667,
+        "min_v": 0.0,
+        "n_feas": 46,
+        "mean_dheavy": 3.125,
+        "max_dheavy": 9,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.467019158270388,
+        "mean_qed": 0.7183219469184398,
+        "mean_sa": 3.497099215501496,
+        "n_lineage": 48,
+        "n_unique_smi": 26,
+        "n_resample": 2
+      },
+      {
+        "stage": 1,
+        "depth": 10,
+        "n": 48,
+        "ess": 6.4143537976246225,
+        "min_v": 0.0,
+        "n_feas": 41,
+        "mean_dheavy": 3.3333333333333335,
+        "max_dheavy": 9,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.4706777303268645,
+        "mean_qed": 0.7165220637801809,
+        "mean_sa": 3.4763904784883173,
+        "n_lineage": 48,
+        "n_unique_smi": 34,
+        "n_resample": 2
+      },
+      {
+        "stage": 1,
+        "depth": 11,
+        "n": 48,
+        "ess": 5.09812659832904,
+        "min_v": 0.0,
+        "n_feas": 43,
+        "mean_dheavy": 3.2708333333333335,
+        "max_dheavy": 10,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.47823084667493937,
+        "mean_qed": 0.7221391648501592,
+        "mean_sa": 3.453937338362724,
+        "n_lineage": 48,
+        "n_unique_smi": 37,
+        "n_resample": 2
+      },
+      {
+        "stage": 1,
+        "depth": 12,
+        "n": 48,
+        "ess": 4.070102099882448,
+        "min_v": 0.0,
+        "n_feas": 42,
+        "mean_dheavy": 3.4166666666666665,
+        "max_dheavy": 10,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.48514110446220454,
+        "mean_qed": 0.7015453127702719,
+        "mean_sa": 3.452409695485023,
+        "n_lineage": 24,
+        "n_unique_smi": 19,
+        "n_resample": 3
+      },
+      {
+        "stage": 1,
+        "depth": 13,
+        "n": 48,
+        "ess": 7.663840838202252,
+        "min_v": 0.0,
+        "n_feas": 37,
+        "mean_dheavy": 3.6458333333333335,
+        "max_dheavy": 10,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.4781862277996783,
+        "mean_qed": 0.6478399461089343,
+        "mean_sa": 3.495845944324007,
+        "n_lineage": 24,
+        "n_unique_smi": 29,
+        "n_resample": 3
+      },
+      {
+        "stage": 1,
+        "depth": 14,
+        "n": 48,
+        "ess": 5.764673394471169,
+        "min_v": 0.0,
+        "n_feas": 36,
+        "mean_dheavy": 3.6041666666666665,
+        "max_dheavy": 11,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.4882292548577856,
+        "mean_qed": 0.658079182021399,
+        "mean_sa": 3.4934472862042205,
+        "n_lineage": 24,
+        "n_unique_smi": 33,
+        "n_resample": 3
+      },
+      {
+        "stage": 1,
+        "depth": 15,
+        "n": 48,
+        "ess": 5.06846106530323,
+        "min_v": 0.0,
+        "n_feas": 38,
+        "mean_dheavy": 3.6875,
+        "max_dheavy": 12,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.47660155224483014,
+        "mean_qed": 0.6594147505541944,
+        "mean_sa": 3.4663659219345817,
+        "n_lineage": 24,
+        "n_unique_smi": 32,
+        "n_resample": 3
+      },
+      {
+        "stage": 1,
+        "depth": 16,
+        "n": 48,
+        "ess": 4.8723076567178945,
+        "min_v": 0.0,
+        "n_feas": 38,
+        "mean_dheavy": 3.7291666666666665,
+        "max_dheavy": 13,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.49422092006867263,
+        "mean_qed": 0.6656856559857753,
+        "mean_sa": 3.4979144821793433,
+        "n_lineage": 24,
+        "n_unique_smi": 34,
+        "n_resample": 3
+      },
+      {
+        "stage": 2,
+        "depth": 17,
+        "n": 48,
+        "ess": 7.838730101235501,
+        "min_v": 0.0,
+        "n_feas": 32,
+        "mean_dheavy": 3.9583333333333335,
+        "max_dheavy": 14,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.43322293325191136,
+        "mean_qed": 0.664293707773174,
+        "mean_sa": 3.6299769290577384,
+        "n_lineage": 48,
+        "n_unique_smi": 32,
+        "n_resample": 3
+      },
+      {
+        "stage": 2,
+        "depth": 18,
+        "n": 48,
+        "ess": 7.763209686861821,
+        "min_v": 0.0,
+        "n_feas": 33,
+        "mean_dheavy": 4.020833333333333,
+        "max_dheavy": 15,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.4431115971084478,
+        "mean_qed": 0.6533189125110187,
+        "mean_sa": 3.6130415354710266,
+        "n_lineage": 48,
+        "n_unique_smi": 38,
+        "n_resample": 3
+      },
+      {
+        "stage": 2,
+        "depth": 19,
+        "n": 48,
+        "ess": 6.864932231916265,
+        "min_v": 0.0,
+        "n_feas": 29,
+        "mean_dheavy": 4.25,
+        "max_dheavy": 15,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 0,
+        "mean_sim": 0.4320724088715416,
+        "mean_qed": 0.6341000943513689,
+        "mean_sa": 3.6579534503753592,
+        "n_lineage": 48,
+        "n_unique_smi": 35,
+        "n_resample": 3
+      },
+      {
+        "stage": 2,
+        "depth": 20,
+        "n": 48,
+        "ess": 6.3657716242945765,
+        "min_v": 0.0,
+        "n_feas": 30,
+        "mean_dheavy": 4.4375,
+        "max_dheavy": 16,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.42218365495863663,
+        "mean_qed": 0.6427966849150718,
+        "mean_sa": 3.6696073100235513,
+        "n_lineage": 48,
+        "n_unique_smi": 39,
+        "n_resample": 3
+      },
+      {
+        "stage": 2,
+        "depth": 21,
+        "n": 48,
+        "ess": 5.430552442797696,
+        "min_v": 0.0,
+        "n_feas": 28,
+        "mean_dheavy": 4.395833333333333,
+        "max_dheavy": 16,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 1,
+        "mean_sim": 0.4250563406457702,
+        "mean_qed": 0.6432517223826203,
+        "mean_sa": 3.6765118992158343,
+        "n_lineage": 48,
+        "n_unique_smi": 36,
+        "n_resample": 3
+      },
+      {
+        "stage": 2,
+        "depth": 22,
+        "n": 48,
+        "ess": 5.40514319046584,
+        "min_v": 0.0,
+        "n_feas": 28,
+        "mean_dheavy": 4.583333333333333,
+        "max_dheavy": 16,
+        "mean_drings": 0.020833333333333332,
+        "max_drings": 1,
+        "mean_sim": 0.4352231178344706,
+        "mean_qed": 0.6339114142604255,
+        "mean_sa": 3.6840688033498754,
+        "n_lineage": 48,
+        "n_unique_smi": 38,
+        "n_resample": 3
+      },
+      {
+        "stage": 2,
+        "depth": 23,
+        "n": 48,
+        "ess": 5.277537957326537,
+        "min_v": 0.0,
+        "n_feas": 26,
+        "mean_dheavy": 4.604166666666667,
+        "max_dheavy": 16,
+        "mean_drings": 0.0,
+        "max_drings": 1,
+        "mean_sim": 0.4088101696947619,
+        "mean_qed": 0.6282767881475099,
+        "mean_sa": 3.7607268485312573,
+        "n_lineage": 48,
+        "n_unique_smi": 39,
+        "n_resample": 3
+      },
+      {
+        "stage": 2,
+        "depth": 24,
+        "n": 48,
+        "ess": 4.965021297851826,
+        "min_v": 0.0,
+        "n_feas": 28,
+        "mean_dheavy": 4.75,
+        "max_dheavy": 16,
+        "mean_drings": 0.041666666666666664,
+        "max_drings": 1,
+        "mean_sim": 0.4131478004783052,
+        "mean_qed": 0.6252059319652341,
+        "mean_sa": 3.760134845959614,
+        "n_lineage": 48,
+        "n_unique_smi": 40,
+        "n_resample": 3
+      },
+      {
+        "stage": 3,
+        "depth": 25,
+        "n": 48,
+        "ess": 8.724200775447756,
+        "min_v": 0.0,
+        "n_feas": 35,
+        "mean_dheavy": 5.875,
+        "max_dheavy": 17,
+        "mean_drings": 0.08333333333333333,
+        "max_drings": 1,
+        "mean_sim": 0.4306300940022056,
+        "mean_qed": 0.6806641733148665,
+        "mean_sa": 3.6424701582778902,
+        "n_lineage": 48,
+        "n_unique_smi": 35,
+        "n_resample": 3
+      },
+      {
+        "stage": 3,
+        "depth": 26,
+        "n": 48,
+        "ess": 7.658901012649286,
+        "min_v": 0.0,
+        "n_feas": 31,
+        "mean_dheavy": 6.0625,
+        "max_dheavy": 17,
+        "mean_drings": 0.08333333333333333,
+        "max_drings": 1,
+        "mean_sim": 0.4254813737665268,
+        "mean_qed": 0.6891454177727292,
+        "mean_sa": 3.6732609286855493,
+        "n_lineage": 48,
+        "n_unique_smi": 39,
+        "n_resample": 3
+      },
+      {
+        "stage": 3,
+        "depth": 27,
+        "n": 48,
+        "ess": 7.660491225821573,
+        "min_v": 0.0,
+        "n_feas": 25,
+        "mean_dheavy": 5.9375,
+        "max_dheavy": 17,
+        "mean_drings": 0.0625,
+        "max_drings": 1,
+        "mean_sim": 0.4152562312202726,
+        "mean_qed": 0.6720843351653342,
+        "mean_sa": 3.6871281634924906,
+        "n_lineage": 48,
+        "n_unique_smi": 40,
+        "n_resample": 3
+      },
+      {
+        "stage": 3,
+        "depth": 28,
+        "n": 48,
+        "ess": 6.3462037023678946,
+        "min_v": 0.0,
+        "n_feas": 27,
+        "mean_dheavy": 5.791666666666667,
+        "max_dheavy": 17,
+        "mean_drings": 0.08333333333333333,
+        "max_drings": 1,
+        "mean_sim": 0.41234454544052673,
+        "mean_qed": 0.6844037039362538,
+        "mean_sa": 3.696385330700174,
+        "n_lineage": 48,
+        "n_unique_smi": 45,
+        "n_resample": 3
+      },
+      {
+        "stage": 3,
+        "depth": 29,
+        "n": 48,
+        "ess": 6.420839867927538,
+        "min_v": 0.0,
+        "n_feas": 31,
+        "mean_dheavy": 5.541666666666667,
+        "max_dheavy": 17,
+        "mean_drings": 0.08333333333333333,
+        "max_drings": 1,
+        "mean_sim": 0.420750784954087,
+        "mean_qed": 0.6726056309264856,
+        "mean_sa": 3.6450285090120786,
+        "n_lineage": 48,
+        "n_unique_smi": 39,
+        "n_resample": 3
+      },
+      {
+        "stage": 3,
+        "depth": 30,
+        "n": 48,
+        "ess": 5.190534913001794,
+        "min_v": 0.0,
+        "n_feas": 30,
+        "mean_dheavy": 5.583333333333333,
+        "max_dheavy": 17,
+        "mean_drings": 0.10416666666666667,
+        "max_drings": 2,
+        "mean_sim": 0.4290895295815307,
+        "mean_qed": 0.6753992448816314,
+        "mean_sa": 3.609371350254431,
+        "n_lineage": 48,
+        "n_unique_smi": 42,
+        "n_resample": 3
+      },
+      {
+        "stage": 3,
+        "depth": 31,
+        "n": 48,
+        "ess": 5.555024916102306,
+        "min_v": 0.0,
+        "n_feas": 29,
+        "mean_dheavy": 5.395833333333333,
+        "max_dheavy": 17,
+        "mean_drings": 0.125,
+        "max_drings": 3,
+        "mean_sim": 0.4242667634627759,
+        "mean_qed": 0.6771065138070855,
+        "mean_sa": 3.630998423038225,
+        "n_lineage": 48,
+        "n_unique_smi": 42,
+        "n_resample": 3
+      },
+      {
+        "stage": 3,
+        "depth": 32,
+        "n": 48,
+        "ess": 4.425300623151149,
+        "min_v": 0.0,
+        "n_feas": 27,
+        "mean_dheavy": 5.229166666666667,
+        "max_dheavy": 17,
+        "mean_drings": 0.125,
+        "max_drings": 3,
+        "mean_sim": 0.42247044701441866,
+        "mean_qed": 0.6884850882321069,
+        "mean_sa": 3.6506806135271734,
+        "n_lineage": 29,
+        "n_unique_smi": 26,
+        "n_resample": 4
+      }
+    ],
+    "best": {
+      "v": 0.0,
+      "smi": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1Cl",
+      "depth": 1
+    },
+    "n_feasible_states": 1168,
+    "ladder": [
+      0,
+      4,
+      8,
+      12,
+      16
+    ],
+    "ladder_reach": {
+      "0": 346,
+      "4": 211,
+      "8": 65,
+      "12": 21,
+      "16": 4
+    },
+    "ladder_reach_signed": {
+      "0": {
+        "grow": 320,
+        "shrink": 31
+      },
+      "4": {
+        "grow": 210,
+        "shrink": 1
+      },
+      "8": {
+        "grow": 65,
+        "shrink": 0
+      },
+      "12": {
+        "grow": 21,
+        "shrink": 0
+      },
+      "16": {
+        "grow": 4,
+        "shrink": 0
+      }
+    },
+    "frontier_top": [
+      [
+        "FC(F)=Cc1nc2ccn(Cc3cc(C(F)F)cc(N4CC[NH2+]CC4)c3)cc2c2cccc12",
+        {
+          "v": 0.3214285714285715,
+          "d": 16,
+          "depth": 31,
+          "dh": 17,
+          "dr": 3,
+          "dist": 0.7285714285714286
+        }
+      ],
+      [
+        "FC(F)=Cc1cccccc2cn(Cc3cc(C(F)F)cc(N4CC[NH2+]CC4)c3)ccc-2n1",
+        {
+          "v": 0.35714285714285726,
+          "d": 16,
+          "depth": 30,
+          "dh": 17,
+          "dr": 2,
+          "dist": 0.7428571428571429
+        }
+      ],
+      [
+        "FC=Cc1nc2ccn(Cc3cc(C(F)F)cc(N4CC[NH2+]CC4)c3)cc2c2cccc12",
+        {
+          "v": 0.3115942028985508,
+          "d": 16,
+          "depth": 32,
+          "dh": 16,
+          "dr": 3,
+          "dist": 0.7246376811594203
+        }
+      ],
+      [
+        "CCCN1CCCCCCCCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CCC1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 25,
+          "dh": 17,
+          "dr": 1,
+          "dist": 0.5769230769230769
+        }
+      ],
+      [
+        "CCN1CCCCCCCCN(Cc2cc(N3CC[NH2+]C(C)C3)cc(C(F)(F)F)c2)CCC1",
+        {
+          "v": 0.25000000000000006,
+          "d": 16,
+          "depth": 26,
+          "dh": 17,
+          "dr": 1,
+          "dist": 0.7
+        }
+      ],
+      [
+        "CC1CN(c2cc(CN3CCCCCCCCN(C)CCC3)cc(C(F)(F)F)c2)C(C)C[NH2+]1",
+        {
+          "v": 0.41406250000000006,
+          "d": 16,
+          "depth": 27,
+          "dh": 17,
+          "dr": 1,
+          "dist": 0.765625
+        }
+      ],
+      [
+        "FC(F)CC1CCCCCCCN(Cc2cc(C(F)F)cc(N3CC[NH2+]CC3)c2)CCCN1",
+        {
+          "v": 0.393939393939394,
+          "d": 16,
+          "depth": 27,
+          "dh": 17,
+          "dr": 1,
+          "dist": 0.7575757575757576
+        }
+      ],
+      [
+        "C=C1C[NH2+]C(C)CN1c1cc(CN2CCCCCCCCN(C)CCC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.4318181818181819,
+          "d": 16,
+          "depth": 28,
+          "dh": 17,
+          "dr": 1,
+          "dist": 0.7727272727272727
+        }
+      ],
+      [
+        "FC(F)=CC1CCCCCCCN(Cc2cc(C(F)F)cc(N3CC[NH2+]CC3)c2)CCCN1",
+        {
+          "v": 0.4202898550724638,
+          "d": 16,
+          "depth": 28,
+          "dh": 17,
+          "dr": 1,
+          "dist": 0.7681159420289855
+        }
+      ],
+      [
+        "CC1CN(c2cc(CN3CCCCCCCCN(C)CCC3)cc(C(F)(F)F)c2)C(=N)C[NH2+]1",
+        {
+          "v": 0.4318181818181819,
+          "d": 16,
+          "depth": 29,
+          "dh": 17,
+          "dr": 1,
+          "dist": 0.7727272727272727
+        }
+      ],
+      [
+        "FC(F)=Cc1cccccccn(Cc2cc(C(F)F)cc(N3CC[NH2+]CC3)c2)cccn1",
+        {
+          "v": 0.32835820895522394,
+          "d": 16,
+          "depth": 29,
+          "dh": 17,
+          "dr": 1,
+          "dist": 0.7313432835820896
+        }
+      ],
+      [
+        "CC1CN(c2cc(CN3CCCCCCCCN(C)CCC3)cc(C(F)(F)F)c2)C(N)C[NH2+]1",
+        {
+          "v": 0.4318181818181819,
+          "d": 16,
+          "depth": 30,
+          "dh": 17,
+          "dr": 1,
+          "dist": 0.7727272727272727
+        }
+      ],
+      [
+        "CC1CN(c2cc(CN3CCCCCCCCN(C)CCC3)cc(C(F)(F)F)c2)C(O)C[NH2+]1",
+        {
+          "v": 0.4318181818181819,
+          "d": 16,
+          "depth": 31,
+          "dh": 17,
+          "dr": 1,
+          "dist": 0.7727272727272727
+        }
+      ],
+      [
+        "CC1CN(C2CC(CN3CCCCCCCCN(C)CCC3)CC(C(F)(F)F)C2)C(O)C[NH2+]1",
+        {
+          "v": 0.7535211267605635,
+          "d": 16,
+          "depth": 32,
+          "dh": 17,
+          "dr": 1,
+          "dist": 0.9014084507042254
+        }
+      ],
+      [
+        "CCN1CCCCCCCCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CCC1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 23,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.56
+        }
+      ],
+      [
+        "FC(F)(F)CCN1CCCCCCCCN(Cc2cccc(N3CC[NH2+]CC3)c2)CCC1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 24,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.54
+        }
+      ],
+      [
+        "FC(F)(F)C=CN1CCCCCCCCN(Cc2cccc(N3CC[NH2+]CC3)c2)CCC1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 25,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.5660377358490566
+        }
+      ],
+      [
+        "FCCN1CCCCCCCCN(Cc2cc(C(F)F)cc(N3CC[NH2+]CC3)c2)CCC1",
+        {
+          "v": 0.2982456140350878,
+          "d": 16,
+          "depth": 25,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.7192982456140351
+        }
+      ],
+      [
+        "FC(F)(F)C=CN1CCCCCCCCN(CC2CCCC(N3CC[NH2+]CC3)C2)CCC1",
+        {
+          "v": 0.5634920634920635,
+          "d": 16,
+          "depth": 26,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.8253968253968254
+        }
+      ],
+      [
+        "FCCC1CCCCCCCN(Cc2cc(C(F)F)cc(N3CC[NH2+]CC3)c2)CCCN1",
+        {
+          "v": 0.393939393939394,
+          "d": 16,
+          "depth": 26,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.7575757575757576
+        }
+      ],
+      [
+        "CCN(C=CC(F)(F)F)CCCN(CC1CCCC(N2CC[NH2+]CC2)C1)C1CCCCC1",
+        {
+          "v": 0.5774647887323944,
+          "d": 16,
+          "depth": 28,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.8309859154929577
+        }
+      ],
+      [
+        "CCN(CCCN(CC1CCCC(N2CC[NH2+]CC2)C1)C1CCCCC1)CCC(F)(F)F",
+        {
+          "v": 0.5220588235294118,
+          "d": 16,
+          "depth": 29,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.8088235294117647
+        }
+      ],
+      [
+        "CCN(CCCN(Cc1cccc(N2CC[NH2+]CC2)c1)C1CCCCC1)CCC(F)(F)F",
+        {
+          "v": 0.08539851279209865,
+          "d": 16,
+          "depth": 30,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.6065573770491803
+        }
+      ],
+      [
+        "CC(CN(C)CCC(F)(F)F)CN(Cc1cccc(N2CC[NH2+]CC2)c1)C1CCCCC1",
+        {
+          "v": 0.032258064516129115,
+          "d": 16,
+          "depth": 31,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.6129032258064516
+        }
+      ],
+      [
+        "CC(CCN(Cc1cccc(N2CC[NH2+]CC2)c1)C1CCCCC1)N(C)CCC(F)(F)F",
+        {
+          "v": 0.03290648290113311,
+          "d": 16,
+          "depth": 32,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.6129032258064516
+        }
+      ],
+      [
+        "CCN(CCCN(C)C)CCCN(CC)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.17971575473178839,
+          "d": 16,
+          "depth": 20,
+          "dh": 16,
+          "dr": 0,
+          "dist": 0.5660377358490566
+        }
+      ],
+      [
+        "CCN(CCCC(C)C)CCCN(CC)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.19346200904111666,
+          "d": 16,
+          "depth": 21,
+          "dh": 16,
+          "dr": 0,
+          "dist": 0.5892857142857143
+        }
+      ],
+      [
+        "CCCCCCN(CC)CCCN(CC)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.29295025819211784,
+          "d": 16,
+          "depth": 22,
+          "dh": 16,
+          "dr": 0,
+          "dist": 0.5740740740740741
+        }
+      ],
+      [
+        "CCCCCCN(CCCN(C=CC(F)(F)F)CC)CC1CCCC(N2CC[NH2+]CC2)C1",
+        {
+          "v": 0.6232876712328768,
+          "d": 16,
+          "depth": 27,
+          "dh": 16,
+          "dr": 0,
+          "dist": 0.8493150684931507
+        }
+      ],
+      [
+        "CCN(CCCN(C)C)CCN(CC)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.10777792239631583,
+          "d": 16,
+          "depth": 20,
+          "dh": 15,
+          "dr": 0,
+          "dist": 0.5740740740740741
+        }
+      ],
+      [
+        "CCN(CCCN(C)C)CCCN(C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.10777792239631583,
+          "d": 16,
+          "depth": 19,
+          "dh": 15,
+          "dr": 0,
+          "dist": 0.5818181818181818
+        }
+      ],
+      [
+        "CCCN(CC)CCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.10777792239631583,
+          "d": 16,
+          "depth": 23,
+          "dh": 15,
+          "dr": 0,
+          "dist": 0.5740740740740741
+        }
+      ],
+      [
+        "CCN(CCO)CCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.1719511230731862,
+          "d": 16,
+          "depth": 24,
+          "dh": 15,
+          "dr": 0,
+          "dist": 0.5892857142857143
+        }
+      ],
+      [
+        "CN(C)CCN(CCN(C)C)C(C)(CO)c1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.07510408282874656,
+          "d": 16,
+          "depth": 24,
+          "dh": 15,
+          "dr": 0,
+          "dist": 0.5686274509803921
+        }
+      ],
+      [
+        "CCN(CCCN(C)C)CCN(C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.0335463009106742,
+          "d": 16,
+          "depth": 19,
+          "dh": 14,
+          "dr": 0,
+          "dist": 0.5892857142857143
+        }
+      ],
+      [
+        "OCCN(CCO)CCN(CCO)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.42830848286057044,
+          "d": 16,
+          "depth": 22,
+          "dh": 14,
+          "dr": 0,
+          "dist": 0.5510204081632653
+        }
+      ],
+      [
+        "CCC(c1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1)N(CCN(C)C)CCN(C)C",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 22,
+          "dh": 14,
+          "dr": 0,
+          "dist": 0.5769230769230769
+        }
+      ],
+      [
+        "CN(C)CCN(CCN(C)C)C(C)(C)c1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 23,
+          "dh": 14,
+          "dr": 0,
+          "dist": 0.5319148936170213
+        }
+      ],
+      [
+        "OCCCCCN1CCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CC1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 24,
+          "dh": 13,
+          "dr": 1,
+          "dist": 0.5769230769230769
+        }
+      ],
+      [
+        "CCN(CCO)CCN(CCOC)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.14653635389060155,
+          "d": 16,
+          "depth": 24,
+          "dh": 14,
+          "dr": 0,
+          "dist": 0.6101694915254237
+        }
+      ],
+      [
+        "CC(c1cc(N2CC[NH2+]CC2C)cc(C(F)(F)F)c1)N(CCN(C)C)CCN(C)C",
+        {
+          "v": 0.25000000000000006,
+          "d": 16,
+          "depth": 25,
+          "dh": 14,
+          "dr": 0,
+          "dist": 0.7
+        }
+      ],
+      [
+        "CCCCCCN1CCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CC1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 25,
+          "dh": 13,
+          "dr": 1,
+          "dist": 0.5769230769230769
+        }
+      ],
+      [
+        "CC1CN(c2cc(C(C)N(CCN(C)C)CCN(C)C)cc(C(F)(F)F)c2)CC[NH2+]1",
+        {
+          "v": 0.25000000000000006,
+          "d": 16,
+          "depth": 26,
+          "dh": 14,
+          "dr": 0,
+          "dist": 0.7
+        }
+      ],
+      [
+        "CC(C)CCCN1CCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CC1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 26,
+          "dh": 13,
+          "dr": 1,
+          "dist": 0.5849056603773585
+        }
+      ],
+      [
+        "CNCCCCCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.17227294819594602,
+          "d": 16,
+          "depth": 26,
+          "dh": 14,
+          "dr": 0,
+          "dist": 0.6271186440677966
+        }
+      ],
+      [
+        "CNC(C)CN(CCN(C)C)C(C)c1cc(N2CC[NH2+]C(C)C2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.3382352941176471,
+          "d": 16,
+          "depth": 27,
+          "dh": 14,
+          "dr": 0,
+          "dist": 0.7352941176470589
+        }
+      ],
+      [
+        "C=NCCCCCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.31617594089791073,
+          "d": 16,
+          "depth": 27,
+          "dh": 14,
+          "dr": 0,
+          "dist": 0.6333333333333333
+        }
+      ],
+      [
+        "C=NCCOCCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.3339834392312228,
+          "d": 16,
+          "depth": 28,
+          "dh": 14,
+          "dr": 0,
+          "dist": 0.6451612903225806
+        }
+      ],
+      [
+        "CNCCOCCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.2062937564192662,
+          "d": 16,
+          "depth": 29,
+          "dh": 14,
+          "dr": 0,
+          "dist": 0.639344262295082
+        }
+      ],
+      [
+        "C=CCCCN(C)CCN(COC)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.4758489328965304,
+          "d": 16,
+          "depth": 32,
+          "dh": 14,
+          "dr": 0,
+          "dist": 0.65625
+        }
+      ],
+      [
+        "CN(C)CCCN(C)CCN(C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 18,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.5769230769230769
+        }
+      ],
+      [
+        "COCCNCCCNCCNCc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.4176908807635869,
+          "d": 16,
+          "depth": 16,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.6
+        }
+      ],
+      [
+        "CCCCCN1CCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CC1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 27,
+          "dh": 12,
+          "dr": 1,
+          "dist": 0.5686274509803921
+        }
+      ],
+      [
+        "CCN(CCO)CCN(CCO)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.2028990102142402,
+          "d": 16,
+          "depth": 23,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.5576923076923077
+        }
+      ],
+      [
+        "CC(c1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1)N(CCN(C)C)CCN(C)C",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 21,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.56
+        }
+      ],
+      [
+        "CCC(C)CN1CCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CC1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 22,
+          "dh": 12,
+          "dr": 1,
+          "dist": 0.5769230769230769
+        }
+      ],
+      [
+        "CCCN(CC)CCN(CCC)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 23,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.54
+        }
+      ],
+      [
+        "C#CCN(CCN(CC)CCC)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.0024625099646761557,
+          "d": 16,
+          "depth": 24,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.5818181818181818
+        }
+      ],
+      [
+        "NC1CC(NCCOC(=O)C(F)(F)F)C(C(F)(F)F)CC1N1CC[NH2+]C(CO)C1",
+        {
+          "v": 0.7000000000000001,
+          "d": 8,
+          "depth": 24,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.88
+        }
+      ],
+      [
+        "CN(C)CCN(CCCCCN)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.10312230842798235,
+          "d": 16,
+          "depth": 25,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.6140350877192983
+        }
+      ],
+      [
+        "CCCCCN(C)CCN(C=O)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.25822550548010786,
+          "d": 16,
+          "depth": 27,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.6333333333333333
+        }
+      ],
+      [
+        "CCC=CCN(C)CCN(C=O)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.214876013417681,
+          "d": 16,
+          "depth": 26,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.639344262295082
+        }
+      ],
+      [
+        "CNC(C)CN(CCN(C)C)Cc1cc(N2CC[NH2+]C(C)C2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.3382352941176471,
+          "d": 16,
+          "depth": 28,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.7352941176470589
+        }
+      ],
+      [
+        "C=CCCCN(C)CCN(C=O)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.42892685525402247,
+          "d": 16,
+          "depth": 30,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.6451612903225806
+        }
+      ],
+      [
+        "C=CCCCN(C)CCN(C=O)CC1CC(N2CC[NH2+]CC2)CC(C(F)(F)F)C1",
+        {
+          "v": 0.6180555555555556,
+          "d": 16,
+          "depth": 29,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.8472222222222222
+        }
+      ],
+      [
+        "CN(C)CCN(CCOCCN)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.14898555785903028,
+          "d": 16,
+          "depth": 30,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.6271186440677966
+        }
+      ],
+      [
+        "CC(N)OCCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.08333333333333345,
+          "d": 16,
+          "depth": 31,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.6333333333333333
+        }
+      ],
+      [
+        "C=CCCCN(C)CCN(CO)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.4526345020664016,
+          "d": 16,
+          "depth": 31,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.6451612903225806
+        }
+      ],
+      [
+        "CC(=N)OCCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.2118694395400686,
+          "d": 16,
+          "depth": 32,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.6333333333333333
+        }
+      ],
+      [
+        "OCCNCCCNCCNCc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.482383850975196,
+          "d": 16,
+          "depth": 15,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5769230769230769
+        }
+      ],
+      [
+        "CN(C)CCCN(C)CCNCc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.042653599535640296,
+          "d": 16,
+          "depth": 15,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.6071428571428572
+        }
+      ],
+      [
+        "CN(C)CCCNCCN(C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.042653599535640116,
+          "d": 16,
+          "depth": 15,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.6071428571428572
+        }
+      ],
+      [
+        "OCCNCCCNCCCCc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.34497095227412106,
+          "d": 16,
+          "depth": 16,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5769230769230769
+        }
+      ],
+      [
+        "CCCNCCCNCCNCc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.33908611567827757,
+          "d": 16,
+          "depth": 16,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5769230769230769
+        }
+      ],
+      [
+        "CCOCCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.03508771929824572,
+          "d": 16,
+          "depth": 18,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.6140350877192983
+        }
+      ],
+      [
+        "CN(C)CCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 20,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5416666666666667
+        }
+      ],
+      [
+        "CCCCCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 19,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.6
+        }
+      ],
+      [
+        "CN(C)CCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)ccc1C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 19,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5714285714285714
+        }
+      ],
+      [
+        "CCCCCN(C)CCN(C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 20,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5849056603773585
+        }
+      ],
+      [
+        "CCN(CCO)CCN(CC)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 20,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5576923076923077
+        }
+      ],
+      [
+        "CCCN(CC)CCN(CC)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 22,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.54
+        }
+      ],
+      [
+        "CC1CN(C2CC(C(F)(F)F)C(NCCOC(=O)C(F)(F)F)CC2O)CC[NH2+]1",
+        {
+          "v": 0.6917808219178082,
+          "d": 8,
+          "depth": 22,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.8767123287671232
+        }
+      ],
+      [
+        "CC(C)C(C)(c1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1)N(C)CCN(C)C",
+        {
+          "v": 0.06095473081858249,
+          "d": 16,
+          "depth": 23,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.56
+        }
+      ],
+      [
+        "CC1CN(C2CC(C(F)(F)F)C(NCCOC(=O)C(F)(F)F)CC2N)CC[NH2+]1",
+        {
+          "v": 0.695945945945946,
+          "d": 8,
+          "depth": 23,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.8783783783783784
+        }
+      ],
+      [
+        "CCC(CC)(c1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1)N(C)CCN(C)C",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 24,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5510204081632653
+        }
+      ],
+      [
+        "CCCCN1CCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CC1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 28,
+          "dh": 11,
+          "dr": 1,
+          "dist": 0.56
+        }
+      ],
+      [
+        "CNCCN(CCN(C)C)Cc1cc(N2CC[NH2+]C(C)C2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.3076923076923077,
+          "d": 16,
+          "depth": 29,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.7230769230769231
+        }
+      ],
+      [
+        "CSCCN1CCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CC1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 29,
+          "dh": 11,
+          "dr": 1,
+          "dist": 0.5686274509803921
+        }
+      ],
+      [
+        "CSCCN1CCN(Cc2cccc(N3CC[NH2+]CC3)c2C(F)(F)F)CC1",
+        {
+          "v": 0.1363636363636364,
+          "d": 16,
+          "depth": 30,
+          "dh": 11,
+          "dr": 1,
+          "dist": 0.6545454545454545
+        }
+      ],
+      [
+        "CCN(CCN(C)C)C(CC=O)C1CC(N2CC[NH2+]CC2)CC(C(F)(F)F)C1",
+        {
+          "v": 0.6014492753623188,
+          "d": 16,
+          "depth": 32,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.8405797101449275
+        }
+      ],
+      [
+        "CCNCCCNCCNCc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.29465704725858155,
+          "d": 16,
+          "depth": 16,
+          "dh": 11,
+          "dr": 0,
+          "dist": 0.5769230769230769
+        }
+      ],
+      [
+        "CN(C)CCCNCCNCc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.13794889156868978,
+          "d": 16,
+          "depth": 14,
+          "dh": 11,
+          "dr": 0,
+          "dist": 0.5925925925925926
+        }
+      ],
+      [
+        "COCCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 17,
+          "dh": 11,
+          "dr": 0,
+          "dist": 0.6
+        }
+      ],
+      [
+        "CNCCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 17,
+          "dh": 11,
+          "dr": 0,
+          "dist": 0.6
+        }
+      ],
+      [
+        "CCN(CC)CCN(CC)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 19,
+          "dh": 11,
+          "dr": 0,
+          "dist": 0.5416666666666667
+        }
+      ],
+      [
+        "CCN(CCO)CCN(C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 19,
+          "dh": 11,
+          "dr": 0,
+          "dist": 0.5818181818181818
+        }
+      ]
+    ],
+    "banked_last": {
+      "0": [
+        "CN(C)C(O)=C(O)c1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        "COC(C)C(=O)c1ccc(C(F)(F)F)cc1N1CC[NH2+]CC1",
+        "COC(=C(O)O)c1ccc(C(F)(F)F)cc1N1CC[NH2+]CC1",
+        "CNC(O)=C(O)c1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        "NC(O)=C(O)c1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        "CCC(O)c1ccc(C(F)(F)F)cc1N1CC[NH2+]CC1",
+        "OCCCc1ccc(C(F)(F)F)cc1N1CC[NH2+]CC1",
+        "Brc1ccc(N2CC[NH2+]CC2)cc1"
+      ],
+      "4": [
+        "CC(C)C(C)CNC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        "CC(C)(C)CCNC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        "CCCNC(=O)c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        "CCCNCc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F"
+      ],
+      "8": [
+        "CN(C)CCN(c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F)C(F)(F)F",
+        "CNCCN(c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F)C(F)(F)F",
+        "CCCCN(c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F)C(F)(F)F"
+      ],
+      "12": [
+        "c1ccc(N2CC[NH2+]CC2)cc1",
+        "Clc1ccc(N2CC[NH2+]CC2)cc1"
+      ],
+      "16": [
+        "CCCN1CCCCCCCCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CCC1",
+        "CC(C)CCCN1CCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CC1",
+        "CCCCCN1CCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CC1",
+        "CCCCCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        "CSCCN1CCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CC1",
+        "CCC(c1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1)N(CC)CCN(C)C",
+        "CN(C)CCN(CCN)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        "CN(C)N(C=O)Cc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        "CCN(C)N=Cc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+        "CCN(C)NCc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F"
+      ]
+    },
+    "w_by_d": {
+      "0": [
+        0.8440419260058323,
+        0.5148608115203515,
+        0.782569493397237,
+        0.3691670396500135,
+        0.0,
+        0.44411098200820975,
+        1.4634335173445057
+      ],
+      "4": [
+        0.7043494491330353,
+        0.24291999431461475,
+        0.6375827742203701,
+        0.8203201449345376,
+        0.0,
+        0.4987223092031259,
+        0.8600767010168946
+      ],
+      "8": [
+        0.19843596354633056,
+        0.006760760746337802,
+        0.26326488219673627,
+        0.09303120454577224,
+        0.0,
+        1.2429000750479011,
+        -0.44266799213318203
+      ],
+      "12": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "16": [
+        -0.17615545052724393,
+        -0.7965673275799172,
+        -0.13906379450446232,
+        -1.0826613079249974,
+        0.011686315862761462,
+        0.17202379030545262,
+        -1.7658894313312046
+      ]
+    },
+    "wall_s": 1327.2646179199219
+  },
+  {
+    "target": "parp1",
+    "idx": 0,
+    "delta": 0.4,
+    "beta": 4.0,
+    "tag": "barG",
+    "seed": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+    "per_depth": [
+      {
+        "stage": 0,
+        "depth": 1,
+        "n": 48,
+        "ess": 9.599999999999998,
+        "min_v": 0.0,
+        "n_feas": 48,
+        "mean_dheavy": 0.1875,
+        "max_dheavy": 1,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.6715506642582646,
+        "mean_qed": 0.8588219555027324,
+        "mean_sa": 2.70094795866406,
+        "n_lineage": 48,
+        "n_unique_smi": 20,
+        "n_resample": 0
+      },
+      {
+        "stage": 0,
+        "depth": 2,
+        "n": 48,
+        "ess": 8.685746639582817,
+        "min_v": 0.0,
+        "n_feas": 48,
+        "mean_dheavy": 0.3333333333333333,
+        "max_dheavy": 2,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.6449344208055872,
+        "mean_qed": 0.8446523757800858,
+        "mean_sa": 2.746372563301559,
+        "n_lineage": 48,
+        "n_unique_smi": 31,
+        "n_resample": 0
+      },
+      {
+        "stage": 0,
+        "depth": 3,
+        "n": 48,
+        "ess": 6.414552777235454,
+        "min_v": 0.0,
+        "n_feas": 48,
+        "mean_dheavy": 0.3958333333333333,
+        "max_dheavy": 3,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.5846587159614591,
+        "mean_qed": 0.8118195308901512,
+        "mean_sa": 2.769726573425205,
+        "n_lineage": 48,
+        "n_unique_smi": 38,
+        "n_resample": 0
+      },
+      {
+        "stage": 0,
+        "depth": 4,
+        "n": 48,
+        "ess": 4.416574992692736,
+        "min_v": 0.0,
+        "n_feas": 48,
+        "mean_dheavy": 0.4166666666666667,
+        "max_dheavy": 4,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.5543117332632238,
+        "mean_qed": 0.8059336300106779,
+        "mean_sa": 2.7484869976363804,
+        "n_lineage": 25,
+        "n_unique_smi": 19,
+        "n_resample": 1
+      },
+      {
+        "stage": 0,
+        "depth": 5,
+        "n": 48,
+        "ess": 6.633714419426637,
+        "min_v": 0.0,
+        "n_feas": 47,
+        "mean_dheavy": -0.5,
+        "max_dheavy": 5,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.5452450056319971,
+        "mean_qed": 0.7669291211164087,
+        "mean_sa": 2.7029207716604886,
+        "n_lineage": 25,
+        "n_unique_smi": 33,
+        "n_resample": 1
+      },
+      {
+        "stage": 0,
+        "depth": 6,
+        "n": 48,
+        "ess": 4.7362900646745905,
+        "min_v": 0.0,
+        "n_feas": 47,
+        "mean_dheavy": -0.5208333333333334,
+        "max_dheavy": 6,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.543493562561474,
+        "mean_qed": 0.7461717351168295,
+        "mean_sa": 2.6937900364835023,
+        "n_lineage": 17,
+        "n_unique_smi": 22,
+        "n_resample": 2
+      },
+      {
+        "stage": 0,
+        "depth": 7,
+        "n": 48,
+        "ess": 8.0078728261337,
+        "min_v": 0.0,
+        "n_feas": 43,
+        "mean_dheavy": 2.5208333333333335,
+        "max_dheavy": 7,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.5220543101216785,
+        "mean_qed": 0.7682988540251938,
+        "mean_sa": 2.892255921451382,
+        "n_lineage": 17,
+        "n_unique_smi": 34,
+        "n_resample": 2
+      },
+      {
+        "stage": 0,
+        "depth": 8,
+        "n": 48,
+        "ess": 6.180677054578217,
+        "min_v": 0.0,
+        "n_feas": 42,
+        "mean_dheavy": 2.7291666666666665,
+        "max_dheavy": 8,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.5179041557358429,
+        "mean_qed": 0.7592390437111067,
+        "mean_sa": 2.917427459748381,
+        "n_lineage": 17,
+        "n_unique_smi": 43,
+        "n_resample": 2
+      },
+      {
+        "stage": 1,
+        "depth": 9,
+        "n": 48,
+        "ess": 7.659120104709194,
+        "min_v": 0.0,
+        "n_feas": 42,
+        "mean_dheavy": 3.6875,
+        "max_dheavy": 9,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.4710938320407265,
+        "mean_qed": 0.8101776769846672,
+        "mean_sa": 3.0214087218778523,
+        "n_lineage": 48,
+        "n_unique_smi": 43,
+        "n_resample": 2
+      },
+      {
+        "stage": 1,
+        "depth": 10,
+        "n": 48,
+        "ess": 6.070247657365499,
+        "min_v": 0.0,
+        "n_feas": 42,
+        "mean_dheavy": 3.9375,
+        "max_dheavy": 9,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.45251330989259947,
+        "mean_qed": 0.801955979445386,
+        "mean_sa": 3.0956442529320776,
+        "n_lineage": 48,
+        "n_unique_smi": 45,
+        "n_resample": 2
+      },
+      {
+        "stage": 1,
+        "depth": 11,
+        "n": 48,
+        "ess": 5.18710670350615,
+        "min_v": 0.0,
+        "n_feas": 35,
+        "mean_dheavy": 4.208333333333333,
+        "max_dheavy": 10,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.4364126380384028,
+        "mean_qed": 0.793730140345613,
+        "mean_sa": 3.157368066126562,
+        "n_lineage": 48,
+        "n_unique_smi": 46,
+        "n_resample": 2
+      },
+      {
+        "stage": 1,
+        "depth": 12,
+        "n": 48,
+        "ess": 4.944873095350618,
+        "min_v": 0.0,
+        "n_feas": 39,
+        "mean_dheavy": 4.4375,
+        "max_dheavy": 11,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.4227817545103086,
+        "mean_qed": 0.7813293602669784,
+        "mean_sa": 3.190468764856474,
+        "n_lineage": 48,
+        "n_unique_smi": 46,
+        "n_resample": 2
+      },
+      {
+        "stage": 1,
+        "depth": 13,
+        "n": 48,
+        "ess": 4.509073112856828,
+        "min_v": 0.0,
+        "n_feas": 37,
+        "mean_dheavy": 4.354166666666667,
+        "max_dheavy": 12,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.43781627588554084,
+        "mean_qed": 0.7838808398242755,
+        "mean_sa": 3.1778693186076588,
+        "n_lineage": 23,
+        "n_unique_smi": 23,
+        "n_resample": 3
+      },
+      {
+        "stage": 1,
+        "depth": 14,
+        "n": 48,
+        "ess": 8.234650318962036,
+        "min_v": 0.0,
+        "n_feas": 37,
+        "mean_dheavy": 4.666666666666667,
+        "max_dheavy": 12,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.4537385028976919,
+        "mean_qed": 0.7930636668184979,
+        "mean_sa": 2.980390259787088,
+        "n_lineage": 23,
+        "n_unique_smi": 39,
+        "n_resample": 3
+      },
+      {
+        "stage": 1,
+        "depth": 15,
+        "n": 48,
+        "ess": 6.43911602779796,
+        "min_v": 0.0,
+        "n_feas": 32,
+        "mean_dheavy": 4.8125,
+        "max_dheavy": 12,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.44429154180368574,
+        "mean_qed": 0.7853124008036803,
+        "mean_sa": 2.9693629389109533,
+        "n_lineage": 23,
+        "n_unique_smi": 40,
+        "n_resample": 3
+      },
+      {
+        "stage": 1,
+        "depth": 16,
+        "n": 48,
+        "ess": 6.014425617098067,
+        "min_v": 0.0,
+        "n_feas": 33,
+        "mean_dheavy": 4.958333333333333,
+        "max_dheavy": 12,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.4478179138775234,
+        "mean_qed": 0.7670077872114853,
+        "mean_sa": 3.036366902075058,
+        "n_lineage": 23,
+        "n_unique_smi": 43,
+        "n_resample": 3
+      },
+      {
+        "stage": 2,
+        "depth": 17,
+        "n": 48,
+        "ess": 6.614733176435998,
+        "min_v": 0.0,
+        "n_feas": 38,
+        "mean_dheavy": 5.4375,
+        "max_dheavy": 13,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.4495916289755009,
+        "mean_qed": 0.7544041395008195,
+        "mean_sa": 3.090771181204957,
+        "n_lineage": 48,
+        "n_unique_smi": 42,
+        "n_resample": 3
+      },
+      {
+        "stage": 2,
+        "depth": 18,
+        "n": 48,
+        "ess": 5.254252791534734,
+        "min_v": 0.0,
+        "n_feas": 36,
+        "mean_dheavy": 5.458333333333333,
+        "max_dheavy": 12,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.4507470058380267,
+        "mean_qed": 0.7470877717146429,
+        "mean_sa": 3.0663051372218484,
+        "n_lineage": 48,
+        "n_unique_smi": 46,
+        "n_resample": 3
+      },
+      {
+        "stage": 2,
+        "depth": 19,
+        "n": 48,
+        "ess": 4.266712359362063,
+        "min_v": 0.0,
+        "n_feas": 36,
+        "mean_dheavy": 5.333333333333333,
+        "max_dheavy": 13,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.44668060663786796,
+        "mean_qed": 0.747405622440545,
+        "mean_sa": 3.1203301761833795,
+        "n_lineage": 23,
+        "n_unique_smi": 22,
+        "n_resample": 4
+      },
+      {
+        "stage": 2,
+        "depth": 20,
+        "n": 48,
+        "ess": 8.989768632589062,
+        "min_v": 0.0,
+        "n_feas": 38,
+        "mean_dheavy": 6.166666666666667,
+        "max_dheavy": 12,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.45878416045852005,
+        "mean_qed": 0.7121988096916901,
+        "mean_sa": 3.099954668859356,
+        "n_lineage": 23,
+        "n_unique_smi": 42,
+        "n_resample": 4
+      },
+      {
+        "stage": 2,
+        "depth": 21,
+        "n": 48,
+        "ess": 7.889696842005764,
+        "min_v": 0.0,
+        "n_feas": 34,
+        "mean_dheavy": 6.333333333333333,
+        "max_dheavy": 13,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.4483966483094923,
+        "mean_qed": 0.7108799442791595,
+        "mean_sa": 3.096670586506514,
+        "n_lineage": 23,
+        "n_unique_smi": 45,
+        "n_resample": 4
+      },
+      {
+        "stage": 2,
+        "depth": 22,
+        "n": 48,
+        "ess": 6.396929149965791,
+        "min_v": 0.0,
+        "n_feas": 29,
+        "mean_dheavy": 6.375,
+        "max_dheavy": 13,
+        "mean_drings": 0.0,
+        "max_drings": 1,
+        "mean_sim": 0.4404191263052433,
+        "mean_qed": 0.6920445799866508,
+        "mean_sa": 3.117345597513269,
+        "n_lineage": 23,
+        "n_unique_smi": 43,
+        "n_resample": 4
+      },
+      {
+        "stage": 2,
+        "depth": 23,
+        "n": 48,
+        "ess": 5.456868612135233,
+        "min_v": 0.0,
+        "n_feas": 28,
+        "mean_dheavy": 6.458333333333333,
+        "max_dheavy": 14,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 1,
+        "mean_sim": 0.43013949493563736,
+        "mean_qed": 0.6895325035852021,
+        "mean_sa": 3.1725409384040453,
+        "n_lineage": 23,
+        "n_unique_smi": 47,
+        "n_resample": 4
+      },
+      {
+        "stage": 2,
+        "depth": 24,
+        "n": 48,
+        "ess": 5.068748807865164,
+        "min_v": 0.0,
+        "n_feas": 27,
+        "mean_dheavy": 6.354166666666667,
+        "max_dheavy": 14,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 1,
+        "mean_sim": 0.43239193499413214,
+        "mean_qed": 0.6872155687274066,
+        "mean_sa": 3.1252940367144255,
+        "n_lineage": 23,
+        "n_unique_smi": 45,
+        "n_resample": 4
+      },
+      {
+        "stage": 3,
+        "depth": 25,
+        "n": 48,
+        "ess": 7.937900792633232,
+        "min_v": 0.0,
+        "n_feas": 36,
+        "mean_dheavy": 7.0,
+        "max_dheavy": 14,
+        "mean_drings": 0.10416666666666667,
+        "max_drings": 1,
+        "mean_sim": 0.43127413360534145,
+        "mean_qed": 0.7380277497754241,
+        "mean_sa": 3.1866720323291395,
+        "n_lineage": 48,
+        "n_unique_smi": 41,
+        "n_resample": 4
+      },
+      {
+        "stage": 3,
+        "depth": 26,
+        "n": 48,
+        "ess": 6.952751754931749,
+        "min_v": 0.0,
+        "n_feas": 31,
+        "mean_dheavy": 7.083333333333333,
+        "max_dheavy": 15,
+        "mean_drings": 0.10416666666666667,
+        "max_drings": 1,
+        "mean_sim": 0.41567845861093694,
+        "mean_qed": 0.7199845535226453,
+        "mean_sa": 3.2085834778894307,
+        "n_lineage": 48,
+        "n_unique_smi": 47,
+        "n_resample": 4
+      },
+      {
+        "stage": 3,
+        "depth": 27,
+        "n": 48,
+        "ess": 6.149063256866895,
+        "min_v": 0.0,
+        "n_feas": 29,
+        "mean_dheavy": 7.083333333333333,
+        "max_dheavy": 15,
+        "mean_drings": 0.10416666666666667,
+        "max_drings": 1,
+        "mean_sim": 0.41755519836088295,
+        "mean_qed": 0.7111031120987304,
+        "mean_sa": 3.193084021866616,
+        "n_lineage": 48,
+        "n_unique_smi": 48,
+        "n_resample": 4
+      },
+      {
+        "stage": 3,
+        "depth": 28,
+        "n": 48,
+        "ess": 5.575974158986891,
+        "min_v": 0.0,
+        "n_feas": 27,
+        "mean_dheavy": 7.208333333333333,
+        "max_dheavy": 16,
+        "mean_drings": 0.08333333333333333,
+        "max_drings": 1,
+        "mean_sim": 0.40792611311897203,
+        "mean_qed": 0.7035828729913676,
+        "mean_sa": 3.2348870476271707,
+        "n_lineage": 48,
+        "n_unique_smi": 47,
+        "n_resample": 4
+      },
+      {
+        "stage": 3,
+        "depth": 29,
+        "n": 48,
+        "ess": 5.148736746514351,
+        "min_v": 0.0,
+        "n_feas": 26,
+        "mean_dheavy": 7.25,
+        "max_dheavy": 16,
+        "mean_drings": 0.125,
+        "max_drings": 3,
+        "mean_sim": 0.40028789237286094,
+        "mean_qed": 0.7021294690836398,
+        "mean_sa": 3.2812157478446315,
+        "n_lineage": 48,
+        "n_unique_smi": 47,
+        "n_resample": 4
+      },
+      {
+        "stage": 3,
+        "depth": 30,
+        "n": 48,
+        "ess": 4.9605732040400365,
+        "min_v": 0.0,
+        "n_feas": 25,
+        "mean_dheavy": 7.145833333333333,
+        "max_dheavy": 16,
+        "mean_drings": 0.125,
+        "max_drings": 1,
+        "mean_sim": 0.39496102055344484,
+        "mean_qed": 0.706781538196231,
+        "mean_sa": 3.1996563374306746,
+        "n_lineage": 48,
+        "n_unique_smi": 48,
+        "n_resample": 4
+      },
+      {
+        "stage": 3,
+        "depth": 31,
+        "n": 48,
+        "ess": 4.719031271504652,
+        "min_v": 0.0,
+        "n_feas": 23,
+        "mean_dheavy": 7.166666666666667,
+        "max_dheavy": 16,
+        "mean_drings": 0.14583333333333334,
+        "max_drings": 1,
+        "mean_sim": 0.38700096333149814,
+        "mean_qed": 0.7060646536415534,
+        "mean_sa": 3.29145194627338,
+        "n_lineage": 25,
+        "n_unique_smi": 25,
+        "n_resample": 5
+      },
+      {
+        "stage": 3,
+        "depth": 32,
+        "n": 48,
+        "ess": 9.166182471227588,
+        "min_v": 0.0,
+        "n_feas": 18,
+        "mean_dheavy": 9.333333333333334,
+        "max_dheavy": 16,
+        "mean_drings": 0.14583333333333334,
+        "max_drings": 1,
+        "mean_sim": 0.36920363039518467,
+        "mean_qed": 0.6599666200399951,
+        "mean_sa": 3.4227162127153625,
+        "n_lineage": 25,
+        "n_unique_smi": 42,
+        "n_resample": 5
+      }
+    ],
+    "best": {
+      "v": 0.0,
+      "smi": "CN(C)C(=O)c1ccc2c(c1)CNC(=O)c1cccn1-2",
+      "depth": 1
+    },
+    "n_feasible_states": 1149,
+    "ladder": [
+      0,
+      4,
+      8,
+      12,
+      16
+    ],
+    "ladder_reach": {
+      "0": 665,
+      "4": 436,
+      "8": 213,
+      "12": 37,
+      "16": 3
+    },
+    "ladder_reach_signed": {
+      "0": {
+        "grow": 616,
+        "shrink": 73
+      },
+      "4": {
+        "grow": 434,
+        "shrink": 2
+      },
+      "8": {
+        "grow": 213,
+        "shrink": 0
+      },
+      "12": {
+        "grow": 37,
+        "shrink": 0
+      },
+      "16": {
+        "grow": 3,
+        "shrink": 0
+      }
+    },
+    "frontier_top": [
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CC3N4CCC(CC4)C3(C)C)c(Cl)c(C(C)(C)C)n1-2",
+        {
+          "v": 0.17006560717628583,
+          "d": 16,
+          "depth": 29,
+          "dh": 16,
+          "dr": 3,
+          "dist": 0.6052631578947368
+        }
+      ],
+      [
+        "CC(C)C(Cc1c(Cl)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2)N1CCCCC1",
+        {
+          "v": 0.08685216520812242,
+          "d": 16,
+          "depth": 28,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.589041095890411
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CC(C)(C)N3CCC(O)CC3)c(I)c(C(C)(C)C)n1-2",
+        {
+          "v": 0.16006869552421477,
+          "d": 16,
+          "depth": 30,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.5753424657534247
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CCC(C)(C)C3CCNCC3)c(Cl)c(C(C)(C)C)n1-2",
+        {
+          "v": 0.10439712426489686,
+          "d": 16,
+          "depth": 30,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.589041095890411
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CCC(C)(C)C3CCNCC3)c(I)c(C(C)(C)C)n1-2",
+        {
+          "v": 0.28587830411612586,
+          "d": 16,
+          "depth": 31,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.589041095890411
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CC(C)(C)N3CCC(O)CC3)c(Cl)c(C(C)(C)C)n1-2",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 31,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.5753424657534247
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CC(C)(C)N3CCC(O)CC3)c(Br)c(C(C)(C)C)n1-2",
+        {
+          "v": 0.03993647035162325,
+          "d": 16,
+          "depth": 32,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.5753424657534247
+        }
+      ],
+      [
+        "CC1CCN(C(C)(C)Cc2c(Cl)c(C(C)(C)C)n3c2C(=O)NCc2cc(CN(C)C)ccc2-3)CC1",
+        {
+          "v": 0.05483111672123971,
+          "d": 16,
+          "depth": 32,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.5694444444444444
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CC(C)(C)N3CCC(=O)CC3)c(Cl)c(C(C)(C)C)n1-2",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 32,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.5774647887323944
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CC(C)(C)N3CCC(N)CC3)c(Cl)c(C(C)(C)C)n1-2",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 32,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.5694444444444444
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CC(C)(C)N3CCC(=O)CC3)c(Br)c(C(C)(C)C)n1-2",
+        {
+          "v": 0.020951349128765877,
+          "d": 16,
+          "depth": 32,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.5774647887323944
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CC(C)(C)N3CCC(F)CC3)c(Br)c(C(C)(C)C)n1-2",
+        {
+          "v": 0.11610994143057478,
+          "d": 16,
+          "depth": 32,
+          "dh": 16,
+          "dr": 1,
+          "dist": 0.5694444444444444
+        }
+      ],
+      [
+        "CCC(Cc1c(C)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2)N1CCCCC1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 26,
+          "dh": 15,
+          "dr": 1,
+          "dist": 0.5833333333333333
+        }
+      ],
+      [
+        "CCC(Cc1c(I)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2)N1CCCCC1",
+        {
+          "v": 0.22865788593673858,
+          "d": 16,
+          "depth": 26,
+          "dh": 15,
+          "dr": 1,
+          "dist": 0.5945945945945945
+        }
+      ],
+      [
+        "CCC(Cc1c(Cl)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2)N1CCCCC1",
+        {
+          "v": 0.025437335479779333,
+          "d": 16,
+          "depth": 27,
+          "dh": 15,
+          "dr": 1,
+          "dist": 0.5945945945945945
+        }
+      ],
+      [
+        "Cc1c(CC(C)(C)N2CCCCC2)c2n(c1C(C)(C)C)-c1ccc(CN(C)C)cc1CNC2=O",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 29,
+          "dh": 15,
+          "dr": 1,
+          "dist": 0.5588235294117647
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CC(C)(C)N3CCCCC3)c(I)c(C(C)(C)C)n1-2",
+        {
+          "v": 0.2016094910401739,
+          "d": 16,
+          "depth": 27,
+          "dh": 15,
+          "dr": 1,
+          "dist": 0.5714285714285714
+        }
+      ],
+      [
+        "CC(CN1CCC(F)CC1)c1c(Cl)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 29,
+          "dh": 15,
+          "dr": 1,
+          "dist": 0.6
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)C(=CCC(C)(C)N1CCC(O)CC1)N2C(=CI)C(C)(C)C",
+        {
+          "v": 0.40283554095985147,
+          "d": 16,
+          "depth": 29,
+          "dh": 16,
+          "dr": 0,
+          "dist": 0.5810810810810811
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CC(C)(C)N3CCCCC3)c(Cl)c(C(C)(C)C)n1-2",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 30,
+          "dh": 15,
+          "dr": 1,
+          "dist": 0.5714285714285714
+        }
+      ],
+      [
+        "C=C(CN1CCC(F)CC1)c1c(Cl)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 30,
+          "dh": 15,
+          "dr": 1,
+          "dist": 0.6
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)C(=CCC(C)(C)N1CCC(O)CC1)N2C(=CCl)C(C)(C)C",
+        {
+          "v": 0.08999146825583375,
+          "d": 16,
+          "depth": 32,
+          "dh": 16,
+          "dr": 0,
+          "dist": 0.5810810810810811
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)C(=CCC(C)(C)N1CCC(O)CC1)N2C(=CBr)C(C)(C)C",
+        {
+          "v": 0.1788874235648359,
+          "d": 16,
+          "depth": 32,
+          "dh": 16,
+          "dr": 0,
+          "dist": 0.5810810810810811
+        }
+      ],
+      [
+        "CC(Cc1c(Cl)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2)N1CCCCC1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 26,
+          "dh": 14,
+          "dr": 1,
+          "dist": 0.5833333333333333
+        }
+      ],
+      [
+        "CC(Cc1c(Br)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2)N1CCCCC1",
+        {
+          "v": 0.01511661215948738,
+          "d": 16,
+          "depth": 25,
+          "dh": 14,
+          "dr": 1,
+          "dist": 0.5833333333333333
+        }
+      ],
+      [
+        "Cc1c(CC(C)N2CCCCC2)c2n(c1C(C)(C)C)-c1ccc(CN(C)C)cc1CNC2=O",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 25,
+          "dh": 14,
+          "dr": 1,
+          "dist": 0.5714285714285714
+        }
+      ],
+      [
+        "CC(Cc1c(I)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2)N1CCCCC1",
+        {
+          "v": 0.13993842787380345,
+          "d": 16,
+          "depth": 25,
+          "dh": 14,
+          "dr": 1,
+          "dist": 0.5833333333333333
+        }
+      ],
+      [
+        "CC1CCCN(CCc2c(Cl)c(C(C)(C)C)n3c2C(=O)NCc2cc(CN(C)C)ccc2-3)C1",
+        {
+          "v": 0.025974025974025983,
+          "d": 16,
+          "depth": 26,
+          "dh": 14,
+          "dr": 1,
+          "dist": 0.6103896103896104
+        }
+      ],
+      [
+        "CC1CCN(CCc2c(Cl)c(C(C)(C)C)n3c2C(=O)NCc2cc(CN(C)C)ccc2-3)CC1",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 27,
+          "dh": 14,
+          "dr": 1,
+          "dist": 0.589041095890411
+        }
+      ],
+      [
+        "CCCCN(C)C(C)(C)Cc1c(C)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        {
+          "v": 0.061630385498481766,
+          "d": 16,
+          "depth": 28,
+          "dh": 15,
+          "dr": 0,
+          "dist": 0.5714285714285714
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CCN3CCC(F)CC3)c(Cl)c(C(C)(C)C)n1-2",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 28,
+          "dh": 14,
+          "dr": 1,
+          "dist": 0.589041095890411
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CCN3CCC(O)CC3)c(Br)c(C(C)(C)C)n1-2",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 31,
+          "dh": 14,
+          "dr": 1,
+          "dist": 0.5945945945945945
+        }
+      ],
+      [
+        "C=C(CN1CCCCC1)c1c(Cl)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 31,
+          "dh": 14,
+          "dr": 1,
+          "dist": 0.5833333333333333
+        }
+      ],
+      [
+        "CCN(C)C(=O)CCC(=O)Nc1ccc2n1-c1c(cc(C(=O)N(C)C)cc1OC)CNC2=O",
+        {
+          "v": 0.35975609756097565,
+          "d": 12,
+          "depth": 23,
+          "dh": 14,
+          "dr": 0,
+          "dist": 0.7439024390243902
+        }
+      ],
+      [
+        "C=CC(C)(CNC=CC=C1NC(C(=C)OC)=C(C=CCN(C)C)CNC1=O)C(=O)NC",
+        {
+          "v": 0.6270729802958221,
+          "d": 12,
+          "depth": 23,
+          "dh": 12,
+          "dr": -2,
+          "dist": 0.8461538461538461
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CCN3CCCCC3)c(Cl)c(C(C)(C)C)n1-2",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 27,
+          "dh": 13,
+          "dr": 1,
+          "dist": 0.5714285714285714
+        }
+      ],
+      [
+        "CC(C)c1c(Cl)c(CCN(CCO)CCCO)c2n1-c1ccc(CN(C)C)cc1CNC2=O",
+        {
+          "v": 0.22602969886676105,
+          "d": 16,
+          "depth": 23,
+          "dh": 14,
+          "dr": 0,
+          "dist": 0.5694444444444444
+        }
+      ],
+      [
+        "CCCc1c(Cl)c(CCN(CCO)CCCO)c2n1-c1ccc(CN(C)C)cc1CNC2=O",
+        {
+          "v": 0.269180813853058,
+          "d": 16,
+          "depth": 24,
+          "dh": 14,
+          "dr": 0,
+          "dist": 0.5694444444444444
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(C=CN3CCCCC3)c(Cl)c(C(C)(C)C)n1-2",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 26,
+          "dh": 13,
+          "dr": 1,
+          "dist": 0.5714285714285714
+        }
+      ],
+      [
+        "COc1cc(CN(C)C)cc2c1-n1c(NCCC(C(N)=O)C(=O)N(C)C)ccc1C(=O)NC2",
+        {
+          "v": 0.2005682595371186,
+          "d": 12,
+          "depth": 28,
+          "dh": 14,
+          "dr": 0,
+          "dist": 0.641025641025641
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CCN3CCCCC3)c(Br)c(C(C)(C)C)n1-2",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 30,
+          "dh": 13,
+          "dr": 1,
+          "dist": 0.5714285714285714
+        }
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(C=CN3CCCCC3)c(Br)c(C(C)(C)C)n1-2",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 29,
+          "dh": 13,
+          "dr": 1,
+          "dist": 0.5714285714285714
+        }
+      ],
+      [
+        "CCCN(CC)CCCN(C(=O)c1ccc2c(c1)CNC(=O)c1cccn1-2)C(=O)C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 8,
+          "depth": 32,
+          "dh": 14,
+          "dr": 0,
+          "dist": 0.5492957746478873
+        }
+      ],
+      [
+        "CCN(CCO)CCCN(C(=O)c1ccc2c(c1)CNC(=O)c1cccn1-2)C(=O)C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 8,
+          "depth": 32,
+          "dh": 14,
+          "dr": 0,
+          "dist": 0.5555555555555556
+        }
+      ],
+      [
+        "CCN(CC(C)C(=O)N(C)C)c1ccc2n1-c1c(cc(CN(C)C)cc1OC)CNC2=O",
+        {
+          "v": 0.06666666666666668,
+          "d": 12,
+          "depth": 17,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.6266666666666667
+        }
+      ],
+      [
+        "COc1cc(C(=O)N(C)C)cc2c1-n1c(ccc1N(C)CCCC(=O)N(C)C)C(=O)NC2",
+        {
+          "v": 0.2666666666666667,
+          "d": 12,
+          "depth": 25,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.7066666666666667
+        }
+      ],
+      [
+        "COc1cc(C(=O)N(C)C)cc2c1-n1c(NC(=O)CCC(=O)N(C)C)ccc1C(=O)NC2",
+        {
+          "v": 0.326923076923077,
+          "d": 12,
+          "depth": 21,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.7307692307692308
+        }
+      ],
+      [
+        "CCNC(=O)CCC(=O)Nc1ccc2n1-c1c(cc(C(=O)N(C)C)cc1OC)CNC2=O",
+        {
+          "v": 0.34375,
+          "d": 12,
+          "depth": 24,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.7375
+        }
+      ],
+      [
+        "C=CC(C)(CNC=CC=C1Nc2c(cc(CN(C)C)cc2OC)CNC1=O)C(=O)NC",
+        {
+          "v": 0.40965012666314193,
+          "d": 12,
+          "depth": 24,
+          "dh": 12,
+          "dr": -1,
+          "dist": 0.7228915662650602
+        }
+      ],
+      [
+        "CCCN(CC)CCc1c(Cl)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 22,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.5714285714285714
+        }
+      ],
+      [
+        "CCCN(CCO)CCc1c(Cl)c(C(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        {
+          "v": 0.057175739466953465,
+          "d": 16,
+          "depth": 22,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.5694444444444444
+        }
+      ],
+      [
+        "CC(C)c1c(Cl)c(CCN(C)CCN(C)C)c2n1-c1ccc(CN(C)C)cc1CNC2=O",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 22,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.5522388059701493
+        }
+      ],
+      [
+        "CC(C)CCN(C)CCc1c(Cl)c(C(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        {
+          "v": 0.05130030605626945,
+          "d": 16,
+          "depth": 23,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.5652173913043479
+        }
+      ],
+      [
+        "CCCCN(CC)CCc1c(Cl)c(C(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        {
+          "v": 0.11674918583162386,
+          "d": 16,
+          "depth": 24,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.5833333333333333
+        }
+      ],
+      [
+        "COc1cc(C(=O)N(C)C)cc2c1-n1c(cc(C)c1NCCCC(=O)N(C)C)C(=O)NC2",
+        {
+          "v": 0.38271604938271614,
+          "d": 12,
+          "depth": 26,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.7530864197530864
+        }
+      ],
+      [
+        "COc1cc(CN(C)C)cc2c1-n1c(NCCC(C=O)C(=O)N(C)C)ccc1C(=O)NC2",
+        {
+          "v": 0.2461339803498483,
+          "d": 12,
+          "depth": 27,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.6363636363636364
+        }
+      ],
+      [
+        "COc1cc(C(=O)C(C)C)cc2c1-n1c(cc(C)c1NCCCC(=O)N(C)C)C(=O)NC2",
+        {
+          "v": 0.4047619047619048,
+          "d": 12,
+          "depth": 27,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.7619047619047619
+        }
+      ],
+      [
+        "COc1cc(C(=O)C(C)C)cc2c1-n1c(NCCCC(=O)N(C)C)cc(C)c1C(=O)NC2",
+        {
+          "v": 0.47674418604651164,
+          "d": 12,
+          "depth": 28,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.7906976744186046
+        }
+      ],
+      [
+        "CNCc1cc2c(c(OC)c1)-n1c(NCCC(C(N)=O)C(=O)N(C)C)ccc1C(=O)NC2",
+        {
+          "v": 0.30492335473244286,
+          "d": 12,
+          "depth": 29,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.7108433734939759
+        }
+      ],
+      [
+        "CCN(CC)CCCN(C(=O)c1ccc2c(c1)CNC(=O)c1cccn1-2)C(=O)C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 8,
+          "depth": 31,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.5294117647058824
+        }
+      ],
+      [
+        "CCN(CCO)CCNc1ccc2n1-c1c(O)cccc1CN(CCCCN(C)C)C2=O",
+        {
+          "v": 0.5689655172413793,
+          "d": 12,
+          "depth": 31,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.8275862068965517
+        }
+      ],
+      [
+        "CCCN(C)CCCN(C(=O)c1ccc2c(c1)CNC(=O)c1cccn1-2)C(=O)C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 8,
+          "depth": 32,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.5147058823529411
+        }
+      ],
+      [
+        "CCN(C)C(C)CCN(C(=O)c1ccc2c(c1)CNC(=O)c1cccn1-2)C(=O)C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 8,
+          "depth": 32,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.5352112676056338
+        }
+      ],
+      [
+        "CCN(C)CC(C)CN(C(=O)c1ccc2c(c1)CNC(=O)c1cccn1-2)C(=O)C(F)(F)F",
+        {
+          "v": 0.0,
+          "d": 8,
+          "depth": 32,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.5217391304347826
+        }
+      ],
+      [
+        "CCN(CCO)CCNc1ccc2n1-c1cc(O)ccc1CN(CCCCN(C)C)C2=O",
+        {
+          "v": 0.5348837209302326,
+          "d": 12,
+          "depth": 32,
+          "dh": 13,
+          "dr": 0,
+          "dist": 0.813953488372093
+        }
+      ],
+      [
+        "COc1cc(CN(C)C)cc2c1-n1c(ccc1N(C)CCCC(=O)N(C)C)C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 12,
+          "depth": 18,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.6
+        }
+      ],
+      [
+        "CCc1cc(CN(C)C)cc2c1-n1c(ccc1N(C)CCCC(=O)N(C)C)C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 12,
+          "depth": 14,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5882352941176471
+        }
+      ],
+      [
+        "COc1cc(CN(C)C)cc2c1-n1c(ccc1N(C)CCCC(=O)C(C)C)C(=O)NC2",
+        {
+          "v": 0.04109589041095901,
+          "d": 12,
+          "depth": 14,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.6164383561643836
+        }
+      ],
+      [
+        "CSc1cc(CN(C)C)cc2c1-n1c(ccc1N(C)CCCC(=O)N(C)C)C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 12,
+          "depth": 14,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.6
+        }
+      ],
+      [
+        "CCN(CCCCN(C)C)c1ccc2n1-c1c(cc(CN(C)C)cc1OC)CNC2=O",
+        {
+          "v": 0.035714285714285726,
+          "d": 12,
+          "depth": 15,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.6142857142857143
+        }
+      ],
+      [
+        "CCN(CCCCN(C)C)c1cc(OC)c2n1-c1ccc(CN(C)C)cc1CNC2=O",
+        {
+          "v": 0.014862116467138458,
+          "d": 12,
+          "depth": 16,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5522388059701493
+        }
+      ],
+      [
+        "CC(C)c1cc(CN(C)C)cc2c1-n1c(ccc1N(C)CCCCN(C)C)C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 12,
+          "depth": 16,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5757575757575757
+        }
+      ],
+      [
+        "COc1cc(CN(C)C)cc2c1-n1c(ccc1N(C)CC(C)C(=O)N(C)C)C(=O)NC2",
+        {
+          "v": 0.0,
+          "d": 12,
+          "depth": 16,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5915492957746479
+        }
+      ],
+      [
+        "CCN(C)C(=O)CCCNc1ccc2n1-c1c(cc(CN(C)C)cc1OC)CNC2=O",
+        {
+          "v": 0.12337662337662342,
+          "d": 12,
+          "depth": 17,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.6493506493506493
+        }
+      ],
+      [
+        "CCN(C)C(=O)C(C)CNc1ccc2n1-c1c(cc(CN(C)C)cc1OC)CNC2=O",
+        {
+          "v": 0.12337662337662342,
+          "d": 12,
+          "depth": 18,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.6493506493506493
+        }
+      ],
+      [
+        "CCN(CCC(=O)N(C)C)c1ccc2n1-c1c(cc(CN(C)C)cc1OC)CNC2=O",
+        {
+          "v": 0.07534246575342476,
+          "d": 12,
+          "depth": 18,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.6301369863013699
+        }
+      ],
+      [
+        "CCc1cc(CN(C)C)cc2c1-n1c(NCCCC(=O)N(C)CC)ccc1C(=O)NC2",
+        {
+          "v": 0.08783783783783791,
+          "d": 12,
+          "depth": 18,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.6351351351351351
+        }
+      ],
+      [
+        "COc1cc(C(=O)N(C)C)cc2c1-n1c(NCCCC(=O)N(C)C)ccc1C(=O)NC2",
+        {
+          "v": 0.33544303797468367,
+          "d": 12,
+          "depth": 20,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.7341772151898734
+        }
+      ],
+      [
+        "COc1cc(CN(C)C)cc2c1-n1c(ccc1N(CCCl)CCCN(C)C)C(=O)NC2",
+        {
+          "v": 0.06250000000000006,
+          "d": 12,
+          "depth": 20,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.625
+        }
+      ],
+      [
+        "CCC(C)(CNc1ccc2n1-c1c(cc(CN(C)C)cc1OC)CNC2=O)C(=O)NC",
+        {
+          "v": 0.1346153846153847,
+          "d": 12,
+          "depth": 20,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.6538461538461539
+        }
+      ],
+      [
+        "COc1cc(CN(C)C)cc2c1-n1c(ccc1N(CCO)CCCN(C)C)C(=O)NC2",
+        {
+          "v": 0.06250000000000006,
+          "d": 12,
+          "depth": 21,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.625
+        }
+      ],
+      [
+        "CCC(C)(CNc1ccc2n1-c1c(cc(CN(C)C)c(O)c1OC)CNC2=O)C(=O)O",
+        {
+          "v": 0.25925925925925936,
+          "d": 12,
+          "depth": 21,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.7037037037037037
+        }
+      ],
+      [
+        "C=CC(C)(CNc1ccc2n1-c1c(cc(CN(C)C)cc1OC)CNC2=O)C(=O)NC",
+        {
+          "v": 0.15625,
+          "d": 12,
+          "depth": 21,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.6625
+        }
+      ],
+      [
+        "CCN(CC)CCc1c(Cl)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 21,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5522388059701493
+        }
+      ],
+      [
+        "COCCN(C)CCc1c(Cl)c(C(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 21,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5774647887323944
+        }
+      ],
+      [
+        "CCCN(CC)CCc1c(Cl)c(C(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 23,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5714285714285714
+        }
+      ],
+      [
+        "CNCCN(C)CCc1c(Cl)c(C(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 21,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5774647887323944
+        }
+      ],
+      [
+        "COc1cc(CN(C)C)cc2c1-n1c(ccc1N(CC=O)CCCN(C)C)C(=O)NC2",
+        {
+          "v": 0.06250000000000006,
+          "d": 12,
+          "depth": 22,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.625
+        }
+      ],
+      [
+        "CCCCN(C)CCc1c(Cl)c(C(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        {
+          "v": 0.0,
+          "d": 16,
+          "depth": 22,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5714285714285714
+        }
+      ],
+      [
+        "COc1c(O)c(CN(C)C)cc2c1-n1c(NCC(CCN)C(=O)O)ccc1C(=O)NC2",
+        {
+          "v": 0.3413864028932656,
+          "d": 12,
+          "depth": 23,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.7108433734939759
+        }
+      ],
+      [
+        "CCCCN(C)CCc1c(Br)c(C(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        {
+          "v": 0.09577904306704299,
+          "d": 16,
+          "depth": 23,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5714285714285714
+        }
+      ],
+      [
+        "COc1cc(CN(C)C)cc2c1-n1c(ccc1N(CCCN(C)C)C(C)C)C(=O)NC2",
+        {
+          "v": 0.0492957746478874,
+          "d": 12,
+          "depth": 24,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.619718309859155
+        }
+      ],
+      [
+        "COc1c(O)c(CN(C)C)cc2c1-n1c(NCC(CCO)C(=O)O)ccc1C(=O)NC2",
+        {
+          "v": 0.3403262411402774,
+          "d": 12,
+          "depth": 24,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.7073170731707317
+        }
+      ],
+      [
+        "CC(C)c1c(Br)c(CCN(C)CCCO)c2n1-c1ccc(CN(C)C)cc1CNC2=O",
+        {
+          "v": 0.06029895920576049,
+          "d": 16,
+          "depth": 24,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5774647887323944
+        }
+      ],
+      [
+        "CCN(C)CCc1c(Cl)c(CCCCN)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        {
+          "v": 0.08182790301948795,
+          "d": 16,
+          "depth": 24,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5774647887323944
+        }
+      ],
+      [
+        "CC(C)CCNCCc1c(Cl)c(C(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        {
+          "v": 0.08482401899875536,
+          "d": 16,
+          "depth": 24,
+          "dh": 12,
+          "dr": 0,
+          "dist": 0.5774647887323944
+        }
+      ]
+    ],
+    "banked_last": {
+      "0": [
+        "CNCC(NCc1ccc2c(c1)-n1cccc1C(=O)NC2)C(=O)O",
+        "NC(=O)CN(Cc1ccc2c(c1)-n1cccc1C(=O)NC2)C(=O)O",
+        "COC(=O)c1ccc2c(c1NC(=O)O)CNC(=O)c1cccn1-2",
+        "CN(Cc1ccc2c(c1)-n1c(C=O)ccc1C(=O)NC2)C(=O)O",
+        "CCN1Cc2cc(CN(C)C)ccc2-n2cc(C)cc2C1=S"
+      ],
+      "4": [
+        "Cc1ccc2n1-c1cc(N(C)CCCN(C)C)c(CN(C)C)cc1CNC2=O",
+        "CCN(CC)CC=CNc1cc2c(cc1CN(C)C)CNC(=O)c1cccn1-2",
+        "CCN(CC)CCCNc1cc2c(cc1CN(C)C)CNC(=O)c1cccn1-2",
+        "CN(C)Cc1cc2c(cc1N(C)CCN(C)CCO)-n1cccc1C(=O)NC2",
+        "CCN(C)CC#CNc1cc2c(cc1CC(C)C)CNC(=O)c1cccn1-2",
+        "CCN(C)CCCNc1cc2c(cc1CN(C)C)CNC(=O)c1cccn1-2",
+        "C#CNCc1cc2c(cc1N(C)CC(C)CC)-n1cccc1C(=O)NC2",
+        "CCNCCN(C)c1cc2c(cc1CN(C)C)CNC(=O)c1cccn1-2",
+        "CC(CN(C)C)=Nc1cc2c(cc1C(C)C)CNC(=O)c1cccn1-2",
+        "COc1c(C(=O)NCCN)cc2c(c1C)-n1cccc1C(=O)NC2",
+        "CNC(=O)c1cc2c(c(Cl)c1OC)-n1cccc1C(=O)NC2",
+        "CNC(=O)c1cc2c(c(Cl)c1O)-n1cccc1C(=O)NC2",
+        "NC(=O)c1cc2c(c(Cl)c1O)-n1cccc1C(=O)NC2",
+        "O=C(O)c1cccc2c1CNC(=O)c1cccn1-2",
+        "O=C(O)c1cc(Cl)c2c(c1)CNC(=O)c1cccn1-2"
+      ],
+      "8": [
+        "CCN(CCO)CCCN(C(=O)c1ccc2c(c1)CNC(=O)c1cccn1-2)C(=O)C(F)(F)F",
+        "Cc1cc2c(cc1C(=O)n1c(C(F)(F)F)cnc1C)CNC(=O)c1cccn1-2",
+        "Cc1cc2c(cc1C(=O)N(CC(F)(F)F)C(N)CN)CNC(=O)c1cccn1-2",
+        "CNCCN(CC(F)(F)F)C(=O)c1cc2c(cc1F)-n1cccc1C(=O)NC2",
+        "Cc1ncc(C(F)(F)F)n1C(=O)c1ccc2c(c1)CNC(=O)c1cccn1-2",
+        "CCN(CC(F)(F)F)C(=O)c1ccc2c(c1Br)CNC(=O)c1cccn1-2",
+        "CN(C)Cc1ccc2c(c1)CN(C)C(=O)c1ccc(Cl)n1-2"
+      ],
+      "12": [
+        "COc1cc(CN(C)C)cc2c1-n1c(ccc1N(C)CCCC(=O)N(C)C)C(=O)NC2",
+        "CCN(C)CCN(C)c1ccc2n1-c1c(cc(CN(C)C)cc1OC)CNC2=O",
+        "CCNCCN(C)c1ccc2n1-c1c(cc(CN(C)C)cc1OC)CNC2=O",
+        "COc1cc(CN(C)C)cc2c1-n1c(NCCN(C)C)ccc1C(=O)NC2",
+        "COc1cc(CN(C)C)cc2c1-n1c(NC(C)N(C)C)ccc1C(=O)NC2",
+        "COc1cc(CN(C)C)cc2c1-n1c(ccc1N(C)CN(C)C)C(=O)NC2",
+        "CCNc1ccc2n1-c1c(cc(CN(C)C)cc1OC)CNC2=O",
+        "CCCc1ccc2n1-c1c(cc(CN(C)C)cc1OC)CNC2=O",
+        "COCc1ccc2n1-c1c(cc(CN(C)C)cc1OC)CNC2=O"
+      ],
+      "16": [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CC(C)(C)N3CCC(=O)CC3)c(Cl)c(C(C)(C)C)n1-2",
+        "C=C(CN1CCC(F)CC1)c1c(Cl)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CCN3CCC(O)CC3)c(Br)c(C(C)(C)C)n1-2"
+      ]
+    },
+    "w_by_d": {
+      "0": [
+        -0.05733423379869951,
+        -0.9173153388174466,
+        2.2843662055776726,
+        1.8512918135009893,
+        0.0,
+        1.0985512994568047,
+        -1.1533064869211103
+      ],
+      "4": [
+        0.7343098414112594,
+        -0.42791998552081373,
+        2.1073246168477677,
+        -0.5163837515240013,
+        0.0,
+        1.2095595236391279,
+        -0.2371539399844083
+      ],
+      "8": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "12": [
+        -0.7871844108037241,
+        -0.5794598501436758,
+        -0.44242923406102713,
+        -0.7105234129939,
+        0.047159275447470284,
+        0.04151292285956998,
+        -1.5342871683710184
+      ],
+      "16": [
+        1.8723540664644944,
+        -0.3438994847919745,
+        -0.03898974097680513,
+        -0.6574972875682226,
+        0.010152712038137945,
+        0.2862940494868663,
+        -0.3949237173339334
+      ]
+    },
+    "wall_s": 1417.376026391983
+  }
+]

@@ -1,0 +1,1030 @@
+{
+ "cell": "5ht1b_s7_d0.6",
+ "round": 9,
+ "n_feasible": 47,
+ "docked": {
+  "FC(F)(F)c1cc(-c2ccccc2)cc(N2CC[NH2+]CC2)c1": -9.6,
+  "OC(F)(c1ccc(I)cc1)c1cccc(N2CC[NH2+]CC2)c1": -9.3,
+  "FC(F)(c1ccccc1)c1cccc(N2CC[NH2+]CC2)c1": -9.1,
+  "O=C1CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1": -8.2,
+  "OC(F)(c1ccccc1)c1cccc(N2CC[NH2+]CC2)c1": -8.0,
+  "CC1CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1": -7.8,
+  "CC(F)(F)c1cccc(N2CC[NH2+]CC2)c1": -7.6,
+  "FC(F)(F)c1cc(-c2ccc(-c3ccccc3)cc2)cc(N2CC[NH2+]CC2)c1": -11.3,
+  "FC(Cl)(c1ccc(-c2ccccc2)cc1)c1cccc(N2CC[NH2+]CC2)c1": -10.8,
+  "FC(Cl)(c1ccccc1)c1cccc(N2CC[NH2+]CC2)c1": -9.7,
+  "CC1(C)CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1": -8.2,
+  "OC1CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1": -8.1,
+  "FC(F)(F)c1cccc(N2CC[NH2+]C(Cl)C2)c1": -7.9,
+  "FC(F)(F)c1cccc(N2CC[NH2+]C(S)C2)c1": -7.6,
+  "OC(Cl)(Cl)c1cccc(N2CC[NH2+]CC2)c1": -7.3,
+  "FC(F)(c1cccc(N2CC[NH2+]CC2)c1)c1cccc2ccccc12": -11.2,
+  "NC1CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1": -8.3,
+  "FC(F)(c1ccc(-c2ccccc2)cc1)c1cccc(N2CC[NH2+]CC2)c1": -11.2,
+  "FC(F)(Sc1ccccc1)c1cccc(N2CC[NH2+]CC2)c1": -8.9,
+  "N=C1CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1": -8.5,
+  "O=C1C[NH2+]CCN1c1cccc(C(F)(F)F)c1": -8.2,
+  "N=C1C[NH2+]CCN1c1cccc(C(F)(F)F)c1": -8.1,
+  "FC(F)(F)c1cccc(N2CC[NH2+]C(=[SH4])C2)c1": -7.9,
+  "C=C1C[NH2+]CCN1c1cccc(C(F)(F)F)c1": -7.9,
+  "FC(F)(Br)c1cccc(N2CC[NH2+]CC2)c1": -7.6,
+  "FC(F)(S)c1cccc(N2CC[NH2+]CC2)c1": -7.3,
+  "Oc1cccc(C(F)(F)c2cccc(N3CC[NH2+]CC3)c2)c1": -9.7,
+  "FC(F)(F)c1cccc(N2CC[NH2+]CC2=S)c1": -7.8,
+  "Nc1cccc(C(F)(F)c2cccc(N3CC[NH2+]CC3)c2)c1": -9.9,
+  "Fc1cccc(C(F)(F)c2cccc(N3CC[NH2+]CC3)c2)c1": -7.0,
+  "FC(F)(c1cccc(N2CC[NH2+]CC2)c1)c1ccc2c(c1)CCCC2": -11.2,
+  "FC(F)(F)c1cccc(N2CC[NH2+]C(Br)C2)c1": -7.9,
+  "FC(F)(F)c1cccc(N2CC[NH2+]CC2=[SH2])c1": -7.8,
+  "FC(c1ccccc1)(c1cccc(N2CC[NH2+]CC2)c1)c1ccccc1Cl": -10.7,
+  "FC(c1ccccc1)(c1ccccc1)c1cccc(N2CC[NH2+]CC2)c1": -9.9,
+  "Nc1cccc(-c2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)c1": -9.3,
+  "C=C1CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1": -8.0,
+  "OC(F)(F)c1cccc(N2CC[NH2+]CC2)c1": -7.6,
+  "FC(F)(c1ccc(CCc2ccccc2)cc1)c1cccc(N2CC[NH2+]CC2)c1": -10.3,
+  "CCc1ccc(C(F)(F)c2cccc(N3CC[NH2+]CC3)c2)cc1": -9.9,
+  "CC(F)(Cc1ccccc1)c1cccc(N2CC[NH2+]CC2)c1": -9.4,
+  "FC(F)(F)c1cccc(N2CC[NH2+]C(=S)C2)c1": -7.9,
+  "Fc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1": -7.7,
+  "CC(C)(F)c1cccc(N2CC[NH2+]CC2)c1": -7.6,
+  "FC(F)(c1ccc(Cl)cc1)c1cccc(N2CC[NH2+]CC2)c1": -9.9,
+  "FC(F)(c1cccc(N2CC[NH2+]CC2)c1)c1ccccc1Cl": -9.7,
+  "FC(F)(Cl)c1cccc(N2CC[NH2+]CC2)c1": -7.6
+ },
+ "best_ds": -11.3,
+ "archive": [
+  {
+   "smiles": "CC1CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.025,
+   "qed": 0.194,
+   "sa": 0.3,
+   "_ai": [
+    0
+   ],
+   "trace": [
+    "local_extend1",
+    "local_extend6",
+    "local_extend8",
+    "ring:fused/6/C/saturated:UNSAT(no_admissible_realization)",
+    "shrink1"
+   ]
+  },
+  {
+   "smiles": "FC(F)(F)c1cc(-c2ccccc2)cc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 1,
+   "heavy": 22,
+   "sim": 0.015,
+   "qed": 0.304,
+   "sa": 1.01,
+   "_ai": [
+    18
+   ],
+   "trace": [
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "local_extend3",
+    "restate2",
+    "local_extend4",
+    "ring:fused/6/C/saturated:UNSAT(no_admissible_realization)"
+   ]
+  },
+  {
+   "smiles": "FC(F)(c1ccccc1)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 3,
+   "heavy": 21,
+   "sim": 0.143,
+   "qed": 0.318,
+   "sa": 0.84,
+   "_ai": [
+    16,
+    0,
+    18
+   ],
+   "trace": [
+    "shrink2",
+    "local_extend1",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "restate1",
+    "local_extend1"
+   ]
+  },
+  {
+   "smiles": "OC(F)(c1ccccc1)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 4,
+   "heavy": 21,
+   "sim": 0.103,
+   "qed": 0.291,
+   "sa": 0.29,
+   "_ai": [
+    16,
+    0,
+    18,
+    12
+   ],
+   "trace": [
+    "shrink2",
+    "local_extend1",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "restate1",
+    "local_extend1"
+   ]
+  },
+  {
+   "smiles": "OC(F)(c1ccc(I)cc1)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 5,
+   "heavy": 22,
+   "sim": 0.034,
+   "qed": 0.155,
+   "sa": 0.09,
+   "_ai": [
+    16,
+    0,
+    18,
+    12,
+    0
+   ],
+   "trace": [
+    "shrink2",
+    "local_extend1",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "restate1",
+    "local_extend1"
+   ]
+  },
+  {
+   "smiles": "O=C1CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.041,
+   "qed": 0.187,
+   "sa": 0.71,
+   "_ai": [
+    0
+   ],
+   "trace": [
+    "local_extend1",
+    "local_extend2",
+    "local_extend2",
+    "local_extend8",
+    "ring:fused/6/C/aromatic:UNSAT(no_admissible_realization)"
+   ]
+  },
+  {
+   "smiles": "CC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 1,
+   "heavy": 16,
+   "sim": 0.165,
+   "qed": 0.204,
+   "sa": 0.48,
+   "_ai": [
+    12
+   ],
+   "trace": [
+    "restate1",
+    "local_extend1",
+    "close_disjoint1",
+    "local_extend4",
+    "annulate1"
+   ]
+  },
+  {
+   "smiles": "FC(F)(F)c1cc(-c2ccc(-c3ccccc3)cc2)cc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 2,
+   "heavy": 28,
+   "sim": 0.0,
+   "qed": 0.11,
+   "sa": 1.18,
+   "med_chem": true,
+   "_ai": [
+    18,
+    18
+   ],
+   "trace": [
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "ring:linked/6/C/aromatic:ok(adm3)",
+    "local_extend1",
+    "close_disjoint1",
+    "ring:fused/6/C/saturated:UNSAT(no_admissible_realization)"
+   ]
+  },
+  {
+   "smiles": "FC(Cl)(c1ccccc1)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 3,
+   "heavy": 21,
+   "sim": 0.122,
+   "qed": 0.264,
+   "sa": 0.24,
+   "med_chem": true,
+   "_ai": [
+    16,
+    0,
+    18
+   ],
+   "trace": [
+    "shrink2",
+    "local_extend1",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "ring:linked/6/C/aromatic:ok(adm3)",
+    "grow2"
+   ]
+  },
+  {
+   "smiles": "FC(Cl)(c1ccc(-c2ccccc2)cc1)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 4,
+   "heavy": 27,
+   "sim": 0.034,
+   "qed": 0.073,
+   "sa": 0.5,
+   "med_chem": true,
+   "_ai": [
+    16,
+    0,
+    18,
+    18
+   ],
+   "trace": [
+    "shrink2",
+    "local_extend1",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "ring:linked/6/C/aromatic:ok(adm3)",
+    "grow2"
+   ]
+  },
+  {
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]C(Cl)C2)c1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.025,
+   "qed": 0.005,
+   "sa": 0.23,
+   "med_chem": true,
+   "_ai": [
+    0
+   ],
+   "trace": [
+    "local_extend1",
+    "shrink1",
+    "local_extend2",
+    "restate2",
+    "ring:fused/6/C/saturated:UNSAT(no_admissible_realization)"
+   ]
+  },
+  {
+   "smiles": "OC(Cl)(Cl)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 1,
+   "heavy": 16,
+   "sim": 0.067,
+   "qed": 0.168,
+   "sa": 0.13,
+   "med_chem": true,
+   "_ai": [
+    14
+   ],
+   "trace": [
+    "restate3",
+    "grow4",
+    "shrink2",
+    "shrink2",
+    "local_extend6"
+   ]
+  },
+  {
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]C(S)C2)c1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.041,
+   "qed": 0.133,
+   "sa": 0.15,
+   "med_chem": true,
+   "_ai": [
+    0
+   ],
+   "trace": [
+    "local_extend1",
+    "local_extend4",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)",
+    "ring:fused/6/C/aromatic:UNSAT(no_admissible_realization)",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)"
+   ]
+  },
+  {
+   "smiles": "CC1(C)CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1",
+   "prefix_len": 4,
+   "heavy": 18,
+   "sim": 0.025,
+   "qed": 0.216,
+   "sa": 0.69,
+   "med_chem": true,
+   "_ai": [
+    0,
+    19,
+    18,
+    0
+   ],
+   "trace": [
+    "local_extend1",
+    "ring:fused/6/C/aromatic:UNSAT(no_admissible_realization)",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)",
+    "local_extend1"
+   ]
+  },
+  {
+   "smiles": "OC1CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.025,
+   "qed": 0.154,
+   "sa": 0.27,
+   "med_chem": true,
+   "_ai": [
+    0
+   ],
+   "trace": [
+    "local_extend1",
+    "shrink1",
+    "local_extend8",
+    "local_extend1",
+    "close_disjoint1"
+   ]
+  },
+  {
+   "smiles": "NC1CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.025,
+   "qed": 0.152,
+   "sa": 0.25,
+   "med_chem": true,
+   "_ai": [
+    0
+   ],
+   "trace": [
+    "local_extend1",
+    "local_extend4",
+    "shrink2",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)",
+    "local_extend8"
+   ]
+  },
+  {
+   "smiles": "FC(F)(c1cccc(N2CC[NH2+]CC2)c1)c1cccc2ccccc12",
+   "prefix_len": 4,
+   "heavy": 25,
+   "sim": 0.019,
+   "qed": 0.176,
+   "sa": 0.88,
+   "med_chem": true,
+   "_ai": [
+    0,
+    16,
+    18,
+    19
+   ],
+   "trace": [
+    "local_extend1",
+    "shrink2",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "ring:fused/6/C/aromatic:ok(adm4)",
+    "grow4"
+   ]
+  },
+  {
+   "smiles": "FC(F)(Br)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 2,
+   "heavy": 16,
+   "sim": 0.188,
+   "qed": 0.219,
+   "sa": 0.21,
+   "med_chem": true,
+   "_ai": [
+    19,
+    12
+   ],
+   "trace": [
+    "ring:fused/6/C/aromatic:UNSAT(no_admissible_realization)",
+    "restate1",
+    "shrink2",
+    "annulate1",
+    "shrink2"
+   ]
+  },
+  {
+   "smiles": "FC(F)(c1ccc(-c2ccccc2)cc1)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 3,
+   "heavy": 27,
+   "sim": 0.05,
+   "qed": 0.144,
+   "sa": 1.07,
+   "med_chem": true,
+   "_ai": [
+    15,
+    18,
+    18
+   ],
+   "trace": [
+    "shrink1",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "ring:linked/6/C/aromatic:ok(adm5)",
+    "local_extend1",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)"
+   ]
+  },
+  {
+   "smiles": "FC(F)(S)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 1,
+   "heavy": 16,
+   "sim": 0.165,
+   "qed": 0.146,
+   "sa": 0.1,
+   "med_chem": true,
+   "_ai": [
+    12
+   ],
+   "trace": [
+    "restate1",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "grow1",
+    "cyclize1",
+    "ring:fused/6/C/aromatic:UNSAT(no_admissible_realization)"
+   ]
+  },
+  {
+   "smiles": "FC(F)(Sc1ccccc1)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 2,
+   "heavy": 22,
+   "sim": 0.05,
+   "qed": 0.274,
+   "sa": 0.61,
+   "med_chem": true,
+   "_ai": [
+    12,
+    18
+   ],
+   "trace": [
+    "restate1",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "grow1",
+    "cyclize1",
+    "ring:fused/6/C/aromatic:UNSAT(no_admissible_realization)"
+   ]
+  },
+  {
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]C(=[SH4])C2)c1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.041,
+   "qed": 0.126,
+   "sa": 0.32,
+   "med_chem": true,
+   "_ai": [
+    0
+   ],
+   "trace": [
+    "local_extend1",
+    "ring:fused/6/C/aromatic:UNSAT(no_admissible_realization)",
+    "grow4",
+    "ring:fused/6/C/aromatic:UNSAT(no_admissible_realization)",
+    "local_extend1"
+   ]
+  },
+  {
+   "smiles": "O=C1C[NH2+]CCN1c1cccc(C(F)(F)F)c1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.0,
+   "qed": 0.173,
+   "sa": 0.71,
+   "med_chem": true,
+   "_ai": [
+    0
+   ],
+   "trace": [
+    "local_extend1",
+    "close_disjoint1",
+    "local_extend1",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)",
+    "cyclize1"
+   ]
+  },
+  {
+   "smiles": "N=C1CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.041,
+   "qed": 0.162,
+   "sa": 0.58,
+   "med_chem": true,
+   "_ai": [
+    0
+   ],
+   "trace": [
+    "local_extend1",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)",
+    "local_extend4",
+    "cyclize1",
+    "ring:fused/6/C/saturated:UNSAT(no_admissible_realization)"
+   ]
+  },
+  {
+   "smiles": "C=C1C[NH2+]CCN1c1cccc(C(F)(F)F)c1",
+   "prefix_len": 4,
+   "heavy": 17,
+   "sim": 0.0,
+   "qed": 0.194,
+   "sa": 0.43,
+   "med_chem": true,
+   "_ai": [
+    1,
+    18,
+    16,
+    0
+   ],
+   "trace": [
+    "local_extend2",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)",
+    "shrink2",
+    "local_extend1",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)"
+   ]
+  },
+  {
+   "smiles": "N=C1C[NH2+]CCN1c1cccc(C(F)(F)F)c1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.0,
+   "qed": 0.162,
+   "sa": 0.44,
+   "med_chem": true,
+   "_ai": [
+    0
+   ],
+   "trace": [
+    "local_extend1",
+    "local_extend4",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)",
+    "shrink2",
+    "close_disjoint1"
+   ]
+  },
+  {
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]CC2=S)c1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.0,
+   "qed": 0.171,
+   "sa": 0.43,
+   "med_chem": true,
+   "_ai": [
+    0
+   ],
+   "trace": [
+    "local_extend1",
+    "local_extend1",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)",
+    "local_extend3"
+   ]
+  },
+  {
+   "smiles": "Oc1cccc(C(F)(F)c2cccc(N3CC[NH2+]CC3)c2)c1",
+   "prefix_len": 3,
+   "heavy": 22,
+   "sim": 0.084,
+   "qed": 0.309,
+   "sa": 0.66,
+   "med_chem": true,
+   "_ai": [
+    15,
+    18,
+    0
+   ],
+   "trace": [
+    "shrink1",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "local_extend1",
+    "shrink2",
+    "grow4"
+   ]
+  },
+  {
+   "smiles": "Fc1cccc(C(F)(F)c2cccc(N3CC[NH2+]CC3)c2)c1",
+   "prefix_len": 3,
+   "heavy": 22,
+   "sim": 0.103,
+   "qed": 0.323,
+   "sa": 0.73,
+   "med_chem": true,
+   "_ai": [
+    15,
+    18,
+    0
+   ],
+   "trace": [
+    "shrink1",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "local_extend1",
+    "shrink1",
+    "shrink2"
+   ]
+  },
+  {
+   "smiles": "Nc1cccc(C(F)(F)c2cccc(N3CC[NH2+]CC3)c2)c1",
+   "prefix_len": 3,
+   "heavy": 22,
+   "sim": 0.103,
+   "qed": 0.249,
+   "sa": 0.65,
+   "med_chem": true,
+   "_ai": [
+    15,
+    18,
+    0
+   ],
+   "trace": [
+    "shrink1",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "local_extend1",
+    "local_extend2",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)"
+   ]
+  },
+  {
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]CC2=[SH2])c1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.041,
+   "qed": 0.146,
+   "sa": 0.06,
+   "med_chem": true,
+   "_ai": [
+    6
+   ],
+   "trace": [
+    "grow1",
+    "local_extend4",
+    "ring:fused/6/C/aromatic:UNSAT(no_admissible_realization)",
+    "shrink1",
+    "ring:fused/6/C/aromatic:UNSAT(no_admissible_realization)"
+   ]
+  },
+  {
+   "smiles": "FC(F)(c1cccc(N2CC[NH2+]CC2)c1)c1ccc2c(c1)CCCC2",
+   "prefix_len": 3,
+   "heavy": 25,
+   "sim": 0.019,
+   "qed": 0.308,
+   "sa": 0.73,
+   "med_chem": true,
+   "_ai": [
+    15,
+    18,
+    20
+   ],
+   "trace": [
+    "shrink1",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "ring:fused/6/C/saturated:ok(adm2)",
+    "local_extend2",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)"
+   ]
+  },
+  {
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]C(Br)C2)c1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.025,
+   "qed": 0.019,
+   "sa": 0.21,
+   "med_chem": true,
+   "_ai": [
+    0
+   ],
+   "trace": [
+    "local_extend1",
+    "local_extend1",
+    "local_extend6",
+    "local_extend1",
+    "shrink2"
+   ]
+  },
+  {
+   "smiles": "Nc1cccc(-c2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)c1",
+   "prefix_len": 2,
+   "heavy": 23,
+   "sim": 0.019,
+   "qed": 0.234,
+   "sa": 0.83,
+   "med_chem": true,
+   "_ai": [
+    18,
+    0
+   ],
+   "trace": [
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "local_extend1",
+    "shrink2",
+    "local_extend4",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)"
+   ]
+  },
+  {
+   "smiles": "FC(c1ccccc1)(c1ccccc1)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 4,
+   "heavy": 26,
+   "sim": 0.143,
+   "qed": 0.118,
+   "sa": 0.96,
+   "med_chem": true,
+   "_ai": [
+    15,
+    18,
+    15,
+    18
+   ],
+   "trace": [
+    "shrink1",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "shrink1",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "local_extend1"
+   ]
+  },
+  {
+   "smiles": "FC(c1ccccc1)(c1cccc(N2CC[NH2+]CC2)c1)c1ccccc1Cl",
+   "prefix_len": 5,
+   "heavy": 27,
+   "sim": 0.005,
+   "qed": 0.077,
+   "sa": 0.47,
+   "med_chem": true,
+   "_ai": [
+    15,
+    18,
+    15,
+    18,
+    0
+   ],
+   "trace": [
+    "shrink1",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "shrink1",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "local_extend1"
+   ]
+  },
+  {
+   "smiles": "C=C1CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1",
+   "prefix_len": 5,
+   "heavy": 17,
+   "sim": 0.041,
+   "qed": 0.194,
+   "sa": 0.61,
+   "med_chem": true,
+   "_ai": [
+    0,
+    18,
+    18,
+    18,
+    12
+   ],
+   "trace": [
+    "local_extend1",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)",
+    "restate1"
+   ]
+  },
+  {
+   "smiles": "OC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 3,
+   "heavy": 16,
+   "sim": 0.165,
+   "qed": 0.155,
+   "sa": 0.28,
+   "med_chem": true,
+   "_ai": [
+    16,
+    0,
+    6
+   ],
+   "trace": [
+    "shrink2",
+    "local_extend1",
+    "grow1",
+    "local_extend1",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)"
+   ]
+  },
+  {
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]C(=S)C2)c1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.041,
+   "qed": 0.171,
+   "sa": 0.62,
+   "med_chem": true,
+   "_ai": [
+    0
+   ],
+   "trace": [
+    "local_extend1",
+    "shrink1",
+    "local_extend3",
+    "shrink2",
+    "shrink1"
+   ]
+  },
+  {
+   "smiles": "CCc1ccc(C(F)(F)c2cccc(N3CC[NH2+]CC3)c2)cc1",
+   "prefix_len": 3,
+   "heavy": 23,
+   "sim": 0.019,
+   "qed": 0.319,
+   "sa": 0.84,
+   "med_chem": true,
+   "_ai": [
+    15,
+    18,
+    7
+   ],
+   "trace": [
+    "shrink1",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "grow2",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)"
+   ]
+  },
+  {
+   "smiles": "FC(F)(c1ccc(CCc2ccccc2)cc1)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 4,
+   "heavy": 29,
+   "sim": 0.005,
+   "qed": 0.071,
+   "sa": 1.06,
+   "med_chem": true,
+   "_ai": [
+    15,
+    18,
+    7,
+    18
+   ],
+   "trace": [
+    "shrink1",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "grow2",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)"
+   ]
+  },
+  {
+   "smiles": "Fc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.011,
+   "qed": 0.142,
+   "sa": 0.52,
+   "med_chem": true,
+   "_ai": [
+    17
+   ],
+   "trace": [
+    "decorate1",
+    "ring:fused/6/C/saturated:UNSAT(no_admissible_realization)",
+    "decorate1",
+    "local_extend8",
+    "ring:linked/6/C/aromatic:UNSAT(no_admissible_realization)"
+   ]
+  },
+  {
+   "smiles": "CC(C)(F)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 1,
+   "heavy": 16,
+   "sim": 0.165,
+   "qed": 0.2,
+   "sa": 0.42,
+   "med_chem": true,
+   "_ai": [
+    14
+   ],
+   "trace": [
+    "restate3",
+    "ring:linked/6/C/aromatic:ok(adm2)",
+    "shrink1",
+    "grow4",
+    "shrink2"
+   ]
+  },
+  {
+   "smiles": "CC(F)(Cc1ccccc1)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 2,
+   "heavy": 22,
+   "sim": 0.019,
+   "qed": 0.319,
+   "sa": 0.35,
+   "med_chem": true,
+   "_ai": [
+    14,
+    18
+   ],
+   "trace": [
+    "restate3",
+    "ring:linked/6/C/aromatic:ok(adm2)",
+    "shrink1",
+    "grow4",
+    "shrink2"
+   ]
+  },
+  {
+   "smiles": "FC(F)(c1cccc(N2CC[NH2+]CC2)c1)c1ccccc1Cl",
+   "prefix_len": 5,
+   "heavy": 22,
+   "sim": 0.034,
+   "qed": 0.32,
+   "sa": 0.74,
+   "med_chem": true,
+   "_ai": [
+    16,
+    6,
+    20,
+    18,
+    0
+   ],
+   "trace": [
+    "shrink2",
+    "grow1",
+    "ring:fused/6/C/saturated:UNSAT(no_admissible_realization)",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "local_extend1"
+   ]
+  },
+  {
+   "smiles": "FC(F)(Cl)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 3,
+   "heavy": 16,
+   "sim": 0.165,
+   "qed": 0.183,
+   "sa": 0.27,
+   "med_chem": true,
+   "_ai": [
+    20,
+    19,
+    12
+   ],
+   "trace": [
+    "ring:fused/6/C/saturated:UNSAT(no_admissible_realization)",
+    "ring:fused/6/C/aromatic:UNSAT(no_admissible_realization)",
+    "restate1",
+    "shrink2",
+    "restate3"
+   ]
+  },
+  {
+   "smiles": "FC(F)(c1ccc(Cl)cc1)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 3,
+   "heavy": 22,
+   "sim": 0.067,
+   "qed": 0.32,
+   "sa": 0.81,
+   "med_chem": true,
+   "_ai": [
+    15,
+    18,
+    0
+   ],
+   "trace": [
+    "shrink1",
+    "ring:linked/6/C/aromatic:ok(adm1)",
+    "local_extend1",
+    "shrink2",
+    "local_extend3"
+   ]
+  }
+ ],
+ "action_probs": {
+  "local_extend1": 0.1072160444671047,
+  "local_extend2": 0.014954875035347233,
+  "local_extend3": 0.014954875035347233,
+  "local_extend4": 0.014954875035347233,
+  "local_extend6": 0.014954875035347233,
+  "local_extend8": 0.014954875035347233,
+  "grow1": 0.014954875035347233,
+  "grow2": 0.030468319479791697,
+  "grow4": 0.014954875035347233,
+  "cyclize1": 0.014954875035347233,
+  "close_disjoint1": 0.014954875035347233,
+  "annulate1": 0.014954875035347233,
+  "restate1": 0.014954875035347233,
+  "restate2": 0.014954875035347233,
+  "restate3": 0.014954875035347233,
+  "shrink1": 0.1340831225253464,
+  "shrink2": 0.07080497139314786,
+  "decorate1": 0.014954875035347233,
+  "ring:linked/6/C/aromatic6": 0.3227575433631123,
+  "ring:fused/6/C/aromatic6": 0.05766053401024064,
+  "ring:fused/6/C/saturated6": 0.05268633923104799,
+  "STOP0": 0.014954875035347233
+ }
+}

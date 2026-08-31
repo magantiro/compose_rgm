@@ -1,0 +1,542 @@
+{
+ "provenance": {
+  "action_space": [
+   "local_extend|1",
+   "local_extend|2",
+   "local_extend|3",
+   "local_extend|4",
+   "local_extend|6",
+   "local_extend|8",
+   "grow|1",
+   "grow|2",
+   "grow|4",
+   "cyclize|1",
+   "close_disjoint|1",
+   "annulate|1",
+   "restate|1",
+   "restate|2",
+   "restate|3",
+   "shrink|1",
+   "shrink|2",
+   "decorate|1",
+   "ring:linked/6/C/aromatic|6",
+   "ring:fused/6/C/aromatic|6",
+   "ring:fused/6/C/saturated|6",
+   "STOP|0"
+  ],
+  "arm": "pooled",
+  "ring_mass": 0.24,
+  "run_seed": 10,
+  "n_particles": 64,
+  "rounds": 10,
+  "episode_len": 6,
+  "dock_per_round": 10,
+  "delta": 0.6,
+  "seed_smiles": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+  "cell": "5ht1b_s7_d0.6",
+  "config_sha256": "bff62eef79ecd201",
+  "run_id": "5ht1b_s7_d0.6_pooled_r10_bff62eef79ecd201"
+ },
+ "semantic_log": [
+  {
+   "round": 0,
+   "oracle_calls": 5,
+   "eligibility": [
+    {
+     "round": 0,
+     "sampled": 82,
+     "credited": 7
+    }
+   ],
+   "logit": {
+    "topology": {
+     "linked": 1.2
+    },
+    "size": {
+     "6": 0.6,
+     "5": 0.6
+    },
+    "state": {
+     "saturated": 1.2
+    },
+    "stoich": {
+     "C3N2S1": 0.6,
+     "C4S1": 0.6
+    },
+    "n_hetero": {
+     "3": 0.6,
+     "1": 0.6
+    },
+    "elem:N": {
+     "2": 0.6
+    },
+    "elem:S": {
+     "1": 1.2
+    }
+   },
+   "sampled": [
+    "ring:fused/10/C10/saturated",
+    "ring:fused/10/C7N1O1S1/saturated",
+    "ring:fused/5/C5/saturated",
+    "ring:linked/3/C3/saturated",
+    "ring:linked/10/C9N1/aromatic",
+    "ring:fused/7/C6N1/saturated",
+    "ring:linked/3/C3/saturated",
+    "ring:fused/3/C3/saturated",
+    "ring:fused/10/C10/saturated",
+    "ring:fused/9/C8N1/saturated",
+    "ring:linked/9/C7N1O1/aromatic",
+    "ring:fused/10/C10/aromatic",
+    "ring:linked/6/C6/aromatic",
+    "ring:linked/9/C7N1O1/aromatic",
+    "ring:linked/7/C7/saturated",
+    "ring:fused/10/C10/saturated",
+    "ring:fused/4/C4/saturated",
+    "ring:linked/5/C4S1/saturated",
+    "ring:linked/10/C10/saturated",
+    "ring:fused/10/C9N1/saturated",
+    "ring:linked/7/C7/saturated",
+    "ring:linked/6/C6/aromatic",
+    "ring:linked/5/C4N1/saturated",
+    "ring:linked/10/C8N2/aromatic",
+    "ring:fused/6/C6/aromatic",
+    "ring:fused/9/C6O1S2/saturated",
+    "ring:linked/10/C9N1/saturated",
+    "ring:linked/10/C10/saturated",
+    "ring:linked/5/C4P1/aromatic",
+    "ring:fused/7/C5O2/saturated",
+    "ring:linked/5/C3O1S1/saturated",
+    "ring:fused/10/C10/aromatic",
+    "ring:fused/7/C6O1/saturated",
+    "ring:fused/8/C6N1S1/saturated",
+    "ring:linked/10/C9N1/aromatic",
+    "ring:linked/4/C4/saturated",
+    "ring:linked/9/C9/saturated",
+    "ring:fused/6/C6/aromatic",
+    "ring:fused/10/C10/aromatic",
+    "ring:linked/6/C3N1O2/saturated",
+    "ring:linked/6/C5N1/aromatic",
+    "ring:linked/10/C10/saturated",
+    "ring:fused/5/C5/saturated",
+    "ring:fused/8/C8/saturated",
+    "ring:linked/9/C7N1P1/aromatic",
+    "ring:linked/9/C7N1P1/aromatic",
+    "ring:linked/4/C4/saturated",
+    "ring:fused/10/C9N1/saturated",
+    "ring:fused/7/C7/saturated",
+    "ring:linked/6/C6/saturated",
+    "ring:linked/6/C6/saturated",
+    "ring:linked/7/C7/saturated",
+    "ring:fused/8/C8/saturated",
+    "ring:linked/10/C10/aromatic",
+    "ring:linked/8/C8/saturated",
+    "ring:fused/6/C6/saturated",
+    "ring:fused/6/C6/saturated",
+    "ring:fused/6/C5S1/saturated",
+    "ring:fused/9/C9/saturated",
+    "ring:linked/5/C3N1O1/saturated",
+    "ring:fused/8/C7N1/saturated",
+    "ring:fused/5/C4O1/saturated",
+    "ring:linked/5/C5/saturated",
+    "ring:fused/6/C5N1/aromatic",
+    "ring:linked/4/C4/saturated",
+    "ring:linked/5/C4P1/aromatic",
+    "ring:linked/9/C6N1O1S1/saturated",
+    "ring:linked/6/C3N2S1/saturated",
+    "ring:linked/7/C7/saturated",
+    "ring:linked/7/C5N1S1/saturated",
+    "ring:fused/3/C3/saturated",
+    "ring:fused/6/C5O1/saturated",
+    "ring:fused/10/C10/saturated",
+    "ring:linked/5/C5/saturated",
+    "ring:fused/8/C5N1O1S1/saturated",
+    "ring:linked/6/C6/saturated",
+    "ring:fused/7/C7/saturated",
+    "ring:fused/6/C6/saturated",
+    "ring:linked/9/C8O1/saturated",
+    "ring:linked/3/C2S1/saturated",
+    "ring:linked/10/C9N1/aromatic",
+    "ring:fused/6/C6/aromatic"
+   ]
+  },
+  {
+   "round": 1,
+   "oracle_calls": 11,
+   "eligibility": [
+    {
+     "round": 0,
+     "sampled": 82,
+     "credited": 7
+    },
+    {
+     "round": 1,
+     "sampled": 65,
+     "credited": 9
+    }
+   ],
+   "logit": {
+    "topology": {
+     "linked": 1.2,
+     "fused": 1.2
+    },
+    "size": {
+     "6": 1.02,
+     "5": 1.02
+    },
+    "state": {
+     "saturated": 2.04
+    },
+    "stoich": {
+     "C3N2S1": 0.6,
+     "C4S1": 0.6,
+     "C6": 0.6,
+     "C5": 0.6
+    },
+    "n_hetero": {
+     "3": 0.6,
+     "1": 0.6,
+     "0": 1.2
+    },
+    "elem:N": {
+     "2": 0.6
+    },
+    "elem:S": {
+     "1": 1.2
+    }
+   },
+   "sampled": [
+    "ring:linked/4/C1O1S2/saturated",
+    "ring:linked/6/C4N1O1/saturated",
+    "ring:linked/4/C3O1/saturated",
+    "ring:linked/6/C3O2S1/saturated",
+    "ring:linked/5/C5/saturated",
+    "ring:fused/6/C6/saturated",
+    "ring:fused/5/C5/saturated",
+    "ring:fused/8/C7S1/saturated",
+    "ring:linked/4/C3S1/saturated",
+    "ring:linked/5/C4N1/saturated",
+    "ring:linked/9/C6N1O1S1/saturated",
+    "ring:linked/8/C5N2O1/saturated",
+    "ring:fused/9/C9/saturated",
+    "ring:linked/9/C6N1O2/saturated",
+    "ring:linked/7/C4O1S2/saturated",
+    "ring:linked/8/C7N1/saturated",
+    "ring:linked/3/C1N1S1/saturated",
+    "ring:linked/6/C5N1/saturated",
+    "ring:fused/8/C6N1S1/saturated",
+    "ring:linked/6/C3N2S1/saturated",
+    "ring:linked/3/C2N1/saturated",
+    "ring:linked/5/C4O1/saturated",
+    "ring:fused/5/C3O2/saturated",
+    "ring:linked/5/C5/saturated",
+    "ring:linked/6/C5S1/saturated",
+    "ring:fused/7/C4N1O1S1/saturated",
+    "ring:fused/6/C6/saturated",
+    "ring:fused/3/C2O1/saturated",
+    "ring:linked/5/C5/saturated",
+    "ring:linked/5/C5/saturated",
+    "ring:linked/5/C2S3/saturated",
+    "ring:linked/5/C4O1/saturated",
+    "ring:linked/6/C5S1/saturated",
+    "ring:fused/10/C10/saturated",
+    "ring:fused/9/C9/saturated",
+    "ring:linked/7/C6O1/saturated",
+    "ring:linked/3/C1S2/saturated",
+    "ring:linked/7/C4O2S1/saturated",
+    "ring:linked/3/C2S1/saturated",
+    "ring:linked/8/C8/saturated",
+    "ring:linked/5/C5/saturated",
+    "ring:fused/10/C8O1S1/saturated",
+    "ring:linked/3/C3/saturated",
+    "ring:linked/6/C4P1S1/aromatic",
+    "ring:linked/8/C6N2/saturated",
+    "ring:fused/9/C9/saturated",
+    "ring:linked/5/C5/saturated",
+    "ring:fused/8/C5N1O1S1/saturated",
+    "ring:fused/8/C8/saturated",
+    "ring:linked/5/C2N1O1S1/saturated",
+    "ring:linked/10/C7S3/saturated",
+    "ring:linked/5/C5/saturated",
+    "ring:linked/6/C5N1/saturated",
+    "ring:linked/6/C6/saturated",
+    "ring:linked/8/C6O1S1/saturated",
+    "ring:linked/5/C5/saturated",
+    "ring:linked/10/C9N1/saturated",
+    "ring:linked/6/C5N1/saturated",
+    "ring:linked/10/C10/saturated",
+    "ring:fused/9/C9/saturated",
+    "ring:fused/9/C8N1/saturated",
+    "ring:linked/4/C4/saturated",
+    "ring:fused/6/C6/saturated",
+    "ring:linked/9/C9/saturated",
+    "ring:linked/8/C7O1/saturated"
+   ]
+  }
+ ],
+ "cell": "5ht1b_s7_d0.6",
+ "round": 1,
+ "n_feasible": 11,
+ "docked": {
+  "C=C1C[NH2+]CCN1c1cccc(C(F)(F)F)c1": -7.9,
+  "FC(F)(Cl)c1cccc(N2CC[NH2+]CC2)c1": -7.6,
+  "CC(F)(F)c1cccc(N2CC[NH2+]CC2)c1": -7.6,
+  "FC(F)(F)c1cccc(N2CC[NH2+]SC2)c1": -7.5,
+  "FC(F)(S)c1cccc(N2CC[NH2+]CC2)c1": -7.3,
+  "FC(F)(c1ccccc1)c1cccc(N2CC[NH2+]CC2)c1": -9.3,
+  "OC1CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1": -8.1,
+  "FC(F)(F)c1cccc(N2CC[NH2+]C(Br)C2)c1": -7.9,
+  "CC1CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1": -7.8,
+  "FC(F)(F)c1cccc(N2CC[NH2+]CC2=S)c1": -7.7,
+  "FC(F)(Br)c1cccc(N2CC[NH2+]CC2)c1": -7.6
+ },
+ "best_ds": -9.3,
+ "archive": [
+  {
+   "smiles": "FC(F)(S)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 1,
+   "heavy": 16,
+   "sim": 0.165,
+   "qed": 0.146,
+   "sa": 0.1,
+   "med_chem": true,
+   "_ai": [
+    14
+   ],
+   "trace": [
+    "restate3",
+    "ring:fused/10/C10/saturated:ok(adm6)",
+    "grow4",
+    "grow4",
+    "local_extend6",
+    "local_extend6"
+   ]
+  },
+  {
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]SC2)c1",
+   "prefix_len": 1,
+   "heavy": 16,
+   "sim": 0.058,
+   "qed": 0.164,
+   "sa": 0.5,
+   "med_chem": true,
+   "_ai": [
+    12
+   ],
+   "trace": [
+    "restate1",
+    "grow1",
+    "restate2"
+   ]
+  },
+  {
+   "smiles": "FC(F)(Cl)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 1,
+   "heavy": 16,
+   "sim": 0.165,
+   "qed": 0.183,
+   "sa": 0.27,
+   "med_chem": true,
+   "_ai": [
+    12
+   ],
+   "trace": [
+    "restate1",
+    "ring:linked/5/C4S1/saturated:ok(adm6)",
+    "grow1",
+    "local_extend1",
+    "ring:linked/10/C10/saturated:ok(adm12)",
+    "grow1"
+   ]
+  },
+  {
+   "smiles": "CC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 1,
+   "heavy": 16,
+   "sim": 0.165,
+   "qed": 0.204,
+   "sa": 0.48,
+   "med_chem": true,
+   "_ai": [
+    12
+   ],
+   "trace": [
+    "restate1",
+    "ring:linked/5/C3N1O1/saturated:ok(adm10)"
+   ]
+  },
+  {
+   "smiles": "C=C1C[NH2+]CCN1c1cccc(C(F)(F)F)c1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.0,
+   "qed": 0.194,
+   "sa": 0.43,
+   "med_chem": true,
+   "_ai": [
+    0
+   ],
+   "trace": [
+    "local_extend1",
+    "local_extend8",
+    "ring:linked/6/C3N2S1/saturated:ok(adm5)"
+   ]
+  },
+  {
+   "smiles": "OC1CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.025,
+   "qed": 0.154,
+   "sa": 0.27,
+   "med_chem": true,
+   "_ai": [
+    0
+   ],
+   "trace": [
+    "local_extend1",
+    "ring:linked/6/C3O2S1/saturated:ok(adm10)",
+    "restate2",
+    "local_extend1",
+    "shrink1",
+    "local_extend1"
+   ]
+  },
+  {
+   "smiles": "CC1CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.025,
+   "qed": 0.194,
+   "sa": 0.3,
+   "med_chem": true,
+   "_ai": [
+    0
+   ],
+   "trace": [
+    "local_extend1",
+    "local_extend2",
+    "local_extend1",
+    "local_extend1",
+    "local_extend1",
+    "restate2"
+   ]
+  },
+  {
+   "smiles": "FC(F)(c1ccccc1)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 2,
+   "heavy": 21,
+   "sim": 0.143,
+   "qed": 0.318,
+   "sa": 0.84,
+   "med_chem": true,
+   "_ai": [
+    15,
+    18
+   ],
+   "trace": [
+    "shrink1",
+    "ring:fused/6/C6/saturated:ok(adm10)",
+    "shrink1",
+    "close_disjoint1",
+    "shrink1",
+    "ring:fused/5/C5/saturated:ok(adm7)"
+   ]
+  },
+  {
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]CC2=S)c1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.0,
+   "qed": 0.171,
+   "sa": 0.43,
+   "med_chem": true,
+   "_ai": [
+    0
+   ],
+   "trace": [
+    "local_extend1",
+    "annulate1",
+    "local_extend1",
+    "grow1",
+    "local_extend3",
+    "grow1"
+   ]
+  },
+  {
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]C(Br)C2)c1",
+   "prefix_len": 1,
+   "heavy": 17,
+   "sim": 0.025,
+   "qed": 0.019,
+   "sa": 0.21,
+   "med_chem": true,
+   "_ai": [
+    0
+   ],
+   "trace": [
+    "local_extend1",
+    "local_extend2",
+    "restate3",
+    "local_extend8",
+    "cyclize1",
+    "local_extend2"
+   ]
+  },
+  {
+   "smiles": "FC(F)(Br)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 1,
+   "heavy": 16,
+   "sim": 0.188,
+   "qed": 0.219,
+   "sa": 0.21,
+   "med_chem": true,
+   "_ai": [
+    14
+   ],
+   "trace": [
+    "restate3",
+    "ring:fused/3/C2O1/saturated:ok(adm6)",
+    "restate1",
+    "restate3",
+    "grow2",
+    "local_extend1"
+   ]
+  }
+ ],
+ "budget_curve": [
+  {
+   "round": 0,
+   "oracle_calls": 5,
+   "best": -7.9
+  },
+  {
+   "round": 1,
+   "oracle_calls": 11,
+   "best": -9.3
+  }
+ ],
+ "action_probs": {
+  "local_extend1": 0.26045599999999997,
+  "local_extend2": 0.023731000000000002,
+  "local_extend3": 0.023731000000000002,
+  "local_extend4": 0.023731000000000002,
+  "local_extend6": 0.023731000000000002,
+  "local_extend8": 0.023731000000000002,
+  "grow1": 0.023731000000000002,
+  "grow2": 0.023731000000000002,
+  "grow4": 0.023731000000000002,
+  "cyclize1": 0.023731000000000002,
+  "close_disjoint1": 0.023731000000000002,
+  "annulate1": 0.023731000000000002,
+  "restate1": 0.023731000000000002,
+  "restate2": 0.023731000000000002,
+  "restate3": 0.023731000000000002,
+  "shrink1": 0.10873100000000001,
+  "shrink2": 0.023731000000000002,
+  "decorate1": 0.023731000000000002,
+  "ring:linked/6/C/aromatic6": 0.13246200000000005,
+  "ring:fused/6/C/aromatic6": 0.04746200000000002,
+  "ring:fused/6/C/saturated6": 0.04746200000000002,
+  "STOP0": 0.023731000000000002
+ }
+}

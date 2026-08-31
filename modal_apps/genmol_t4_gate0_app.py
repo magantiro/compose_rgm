@@ -191,3 +191,98 @@ def main() -> None:
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(o, indent=1))
     print(f"\nwrote {p}")
+
+
+@app.local_entrypoint()
+def dock_macro(cell: str = "5ht1b_s7_d0.4", replicates: int = 5) -> None:
+    """Dock the frozen BUILD_RING_SYSTEM products against their seed.
+
+    The seed is docked in the SAME batch, with the same replicate count, so the
+    comparison is matched: docking replicate noise on this stack is 0.70
+    kcal/mol, which is larger than most of the per-cell gaps we are chasing, so
+    an unmatched single-shot number would not mean anything.
+    """
+    import json as _json
+    from pathlib import Path
+
+    import numpy as np
+
+    root = Path(__file__).resolve().parents[1]
+    products = _json.loads((root / "diagnostics/exact_macro.json").read_text())
+    seeds = {f"{s['target']}_s{s['idx']}": s for s in
+             _json.loads((root / "docs/GENMOL_T4_SEEDS.json").read_text())}
+    tgt, si, _delta = cell.rsplit("_", 2)
+    seed = seeds[f"{tgt}_{si}"]["smiles"]
+
+    rows = [dict(label="seed", smiles=seed, anchor=None)]
+    seen = {seed}
+    for r in products:
+        if r.get("status") != "OK" or not r.get("t4"):
+            continue
+        s = r["smiles"]
+        if s in seen:
+            continue                      # a3/a4 and a6/a7 are the same product
+        seen.add(s)
+        rows.append(dict(label=f"a{r['anchor_rank']}", smiles=s,
+                         anchor=r["anchor_rank"], sim=r.get("sim"),
+                         qed=r.get("qed"), sa=r.get("sa")))
+
+    tasks = [dict(smiles=r["smiles"], target=tgt, idx=i)
+             for i, r in enumerate(rows)]
+    print(f"{len(tasks)} molecules x {replicates} replicates on {tgt}", flush=True)
+    out = list(dock_seed.map(tasks))
+
+    for r, o in zip(rows, out):
+        sc = [x for x in (o.get("scores") or []) if x is not None]
+        r["scores"] = sc
+        r["best"] = float(np.min(sc)) if sc else None
+        r["mean"] = float(np.mean(sc)) if sc else None
+        r["sd"] = float(np.std(sc)) if len(sc) > 1 else None
+
+    base = rows[0]["best"]
+    print(f"\n{'':6s} {'best':>7s} {'mean':>7s} {'sd':>5s} {'vs seed':>8s}  smiles")
+    for r in rows:
+        d = ("" if r["best"] is None or base is None
+             else f"{r['best'] - base:+8.2f}")
+        print(f"{r['label']:6s} {r['best'] if r['best'] is not None else float('nan'):7.2f} "
+              f"{r['mean'] if r['mean'] is not None else float('nan'):7.2f} "
+              f"{r['sd'] if r['sd'] is not None else float('nan'):5.2f} {d:>8s}  {r['smiles']}")
+    print("\nreplicate noise on this stack is 0.70 kcal/mol; a gap smaller than "
+          "that is not a result.")
+    p = root / "diagnostics/macro_dock.json"
+    p.write_text(_json.dumps(dict(cell=cell, target=tgt, replicates=replicates,
+                                  rows=rows), indent=1))
+    print(f"wrote {p}")
+
+
+@app.local_entrypoint()
+def dock_list(path: str = "diagnostics/stacked.json", replicates: int = 5) -> None:
+    """Dock an explicit labelled SMILES list against a target. The first row is
+    treated as the baseline for the delta column."""
+    import json as _json
+    from pathlib import Path
+
+    import numpy as np
+
+    root = Path(__file__).resolve().parents[1]
+    spec = _json.loads((root / path).read_text())
+    tgt, rows = spec["target"], spec["rows"]
+    tasks = [dict(smiles=r["smiles"], target=tgt, idx=i) for i, r in enumerate(rows)]
+    print(f"{len(tasks)} molecules x {replicates} replicates on {tgt}", flush=True)
+    out = list(dock_seed.map(tasks))
+    for r, o in zip(rows, out):
+        sc = [x for x in (o.get("scores") or []) if x is not None]
+        r["scores"] = sc
+        r["best"] = float(np.min(sc)) if sc else None
+        r["mean"] = float(np.mean(sc)) if sc else None
+        r["sd"] = float(np.std(sc)) if len(sc) > 1 else None
+    base = rows[0]["best"]
+    print(f"\n{'':16s} {'best':>7s} {'mean':>7s} {'sd':>5s} {'vs seed':>8s}  smiles")
+    for r in rows:
+        d = "" if r["best"] is None or base is None else f"{r['best'] - base:+.2f}"
+        print(f"{r['label']:16s} {r['best'] if r['best'] is not None else float('nan'):7.2f} "
+              f"{r['mean'] if r['mean'] is not None else float('nan'):7.2f} "
+              f"{r['sd'] if r['sd'] is not None else float('nan'):5.2f} {d:>8s}  {r['smiles']}")
+    p = root / "diagnostics/stacked_dock.json"
+    p.write_text(_json.dumps(dict(target=tgt, rows=rows), indent=1))
+    print(f"\nwrote {p}")

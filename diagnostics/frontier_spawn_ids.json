@@ -1,0 +1,34 @@
+[
+ {
+  "cell_base": "parp1_s2",
+  "call_id": "fc-01M10GS430VVMQG5A58H42RR6H"
+ },
+ {
+  "cell_base": "fa7_s3",
+  "call_id": "fc-01M10GS45V9JK67WCFT1FAA6NA"
+ },
+ {
+  "cell_base": "fa7_s4",
+  "call_id": "fc-01M10GS498DK510HBBX18VNHEX"
+ },
+ {
+  "cell_base": "fa7_s5",
+  "call_id": "fc-01M10GS4D5CCBC9NRAGJ7KEN8C"
+ },
+ {
+  "cell_base": "5ht1b_s6",
+  "call_id": "fc-01M10GS4KCFSGT460ENEX4XMFJ"
+ },
+ {
+  "cell_base": "5ht1b_s8",
+  "call_id": "fc-01M10GS4P3WM5JT2Q3MREYNMZX"
+ },
+ {
+  "cell_base": "braf_s10",
+  "call_id": "fc-01M10GS4RH7JXHSH31FPMHRS55"
+ },
+ {
+  "cell_base": "braf_s11",
+  "call_id": "fc-01M10GS4XJ4KH7DP5F866EPTYC"
+ }
+]

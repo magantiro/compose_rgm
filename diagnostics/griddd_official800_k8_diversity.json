@@ -1,0 +1,7 @@
+{
+  "metric": "mean within-source pairwise Tanimoto distance over DISTINCT non-source candidates",
+  "fingerprint": "Morgan radius=2, 2048 bits, chirality off",
+  "K": 8,
+  "diversity": 0.4999,
+  "n_sources": 335
+}

@@ -85,3 +85,17 @@ paper_iclr2027/*.fdb_latexmk
 
 # 74MB of upstream TDC oracle pickles, kept for the parity gate only
 artifacts/tdc_originals/
+
+# LaTeX build artifacts (sources and figures are tracked; build output is not)
+*.aux
+*.log
+*.out
+*.blg
+*.bbl
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.toc
+
+# Distribution bundles rebuilt from sources
+*.zip

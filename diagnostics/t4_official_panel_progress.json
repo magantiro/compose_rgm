@@ -1,0 +1,18 @@
+{
+  "frozen_hash": "5e399bc",
+  "refine": 2,
+  "rounds": 10,
+  "dock_per_round": 10,
+  "n_particles": 64,
+  "budget_calls": 100,
+  "completed": 1,
+  "results": [
+    {
+      "cell": "parp1_s1_d0.4",
+      "rs": 200,
+      "best": -10.9,
+      "wall_s": 3935.807380914688,
+      "error": false
+    }
+  ]
+}

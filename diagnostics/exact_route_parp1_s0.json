@@ -1,0 +1,29 @@
+{
+  "cell": "parp1_s0",
+  "reached_seed": true,
+  "final_excess": 0,
+  "n_states": 19,
+  "obstruction": null,
+  "forward_states": [
+    "CN(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+    "O=C1NCc2cc(CN3CC3)ccc2-n2cccc21",
+    "O=C(NCc1cccc(CN2CC2)c1)c1ccc[nH]1",
+    "CCNCc1cccc(CNC(=O)c2ccc[nH]2)c1",
+    "CCCCc1cccc(CNC(=O)c2ccc[nH]2)c1",
+    "CCCCCc1cccc(CNC(=O)c2ccc[nH]2)c1",
+    "C=CCCCCc1cccc(CNC(=O)c2ccc[nH]2)c1",
+    "CC=CCCCCc1cccc(CNC(=O)c2ccc[nH]2)c1",
+    "C=CC=CCCCCc1cccc(CNC(=O)c2ccc[nH]2)c1",
+    "O=C(NCc1cccc(CCCc2ccccc2)c1)c1ccc[nH]1",
+    "O=C1NCc2cc(CCCc3ccccc3)ccc2Cn2cccc21",
+    "O=C1NCc2cc(CCCc3ccccc3)ccc2C(=O)n2cccc21",
+    "Cc1ccc(CCCc2ccc3c(c2)CNC(=O)c2cccn2C3=O)cc1",
+    "NCc1ccc(CCCc2ccc3c(c2)CNC(=O)c2cccn2C3=O)cc1",
+    "O=C1NCc2cc(CCCc3ccc4c(c3)CNC4)ccc2C(=O)n2cccc21",
+    "CC(CCc1ccc2c(c1)CNC(=O)c1cccn1C2=O)c1ccc2c(c1)CNC2",
+    "CCC(CCc1ccc2c(c1)CNC(=O)c1cccn1C2=O)c1ccc2c(c1)CNC2",
+    "O=C1NCc2cc(CC3CCCC3c3ccc4c(c3)CNC4)ccc2C(=O)n2cccc21",
+    "O=C1NCc2cc(C3CCCC3Cc3ccc4c(c3)CNC(=O)c3cccn3C4=O)ccc21"
+  ],
+  "wall_s": 70.17905712127686
+}

@@ -120,7 +120,11 @@ def _runtime():
     return _RT
 
 
-def _dock(smiles: str, target: str, tag: str) -> float | None:
+def _dock(smiles: str, target: str, tag: str, cpu: int = 4) -> float | None:
+    """`cpu` is QuickVina's own thread count. It defaults to 4, which is what
+    Gate 0 used to establish docking parity, so the default path is unchanged.
+    Batch docking passes cpu=1 because each concurrent docking gets one core."""
+
     import os
     import subprocess
     d = f"/tmp/{tag}"
@@ -143,7 +147,7 @@ def _dock(smiles: str, target: str, tag: str) -> float | None:
              "--ligand", lig, "--out", out,
              "--center_x", str(cx), "--center_y", str(cy), "--center_z", str(cz),
              "--size_x", str(sx), "--size_y", str(sy), "--size_z", str(sz),
-             "--cpu", "4", "--num_modes", "10", "--exhaustiveness", "1"],
+             "--cpu", str(int(cpu)), "--num_modes", "10", "--exhaustiveness", "1"],
             capture_output=True, timeout=300, check=True)
         for line in open(out):
             if line.startswith("REMARK VINA RESULT"):
@@ -151,6 +155,43 @@ def _dock(smiles: str, target: str, tag: str) -> float | None:
     except Exception:
         return None
     return None
+
+
+def _dock_one(args) -> tuple[int, float | None]:
+    """(index, smiles, target, tag, cpu) -> (index, score). Index preserves order."""
+    i, smiles, target, tag, cpu = args
+    return i, _dock(smiles, target, tag, cpu=cpu)
+
+
+def _dock_many(smiles_list, target: str, tag_prefix: str, workers: int = 8,
+               cpu_per_dock: int = 1) -> list:
+    """Dock a round's molecules concurrently. Same molecules, same scores, same count.
+
+    The 20 dockings inside a round are conditionally independent -- the archive is
+    only updated after all of them -- so running them serially wastes most of the
+    round. QuickVina is an external process, so threads are the right tool: the
+    GIL is released across subprocess.run.
+
+    ORDER AND ACCOUNTING ARE PRESERVED EXACTLY. Results come back indexed and are
+    reassembled in the caller's order, every input yields exactly one output
+    (None included), and the caller still charges one budget unit per molecule.
+    Each docking gets its OWN scratch directory; the serial code reused
+    /tmp/{tag}, which concurrent dockings would clobber.
+
+    This is execution parallelism only. No candidate selection, archive rule, or
+    budget semantics changes.
+    """
+
+    from concurrent.futures import ThreadPoolExecutor
+    jobs = [(i, s, target, f"{tag_prefix}_w{i}", cpu_per_dock)
+            for i, s in enumerate(smiles_list)]
+    out: list = [None] * len(jobs)
+    if not jobs:
+        return out
+    with ThreadPoolExecutor(max_workers=max(1, workers)) as ex:
+        for i, r in ex.map(_dock_one, jobs):
+            out[i] = r
+    return out
 
 
 @app.function(image=image, cpu=(1.0, 1.0), memory=int(6 * 1024),

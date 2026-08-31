@@ -479,10 +479,49 @@ def drive(tasks: list[dict[str, Any]]) -> dict[str, Any]:
     return {"done": done}
 
 
+def official_tasks(root: Path, out_dir: str, k_start: int, k_end: int,
+                   index_from: int = 0,
+                   index_to: int = 800) -> list[dict[str, Any]]:
+    """The OFFICIAL GrIDDD/Jin QED test panel: 800 sources, qed_test.txt.
+
+    This builds task dicts and NOTHING else. The generator, run_source,
+    _record_name, _load_head, _runtime, seed_for, the record schema and every
+    frozen hyperparameter are the SAME objects the banked 128-source
+    validation used; the ONLY difference between this panel and that one is
+    which file the SMILES come from. seed_for keys on (arm, source, k) and not
+    on the source list, so a source's record is a function of the source
+    string alone -- which is what makes "same code path" checkable rather than
+    merely asserted.
+
+    Contamination is checked here, at construction, because a task dict that
+    reaches run_source has already left every place the check could be made.
+    """
+    sources = [x.strip() for x in
+               (root / "data/jin/qed_test.txt").read_text().split("\n")
+               if x.strip()]
+    assert len(sources) == 800, f"expected 800 official sources, got {len(sources)}"
+    assert len(set(sources)) == 800, "official panel has duplicate sources"
+    for name in ("hphi_valid_128", "dev_panel_qed_64", "hphi_train_1024"):
+        other = {x.strip() for x in
+                 (root / f"data/jin/{name}.txt").read_text().split("\n")
+                 if x.strip()}
+        overlap = set(sources) & other
+        assert not overlap, f"official panel overlaps {name}: {len(overlap)}"
+    # CONTIGUOUS SLOTS, APPEND-ONLY EXTENSION. Every slot k_start..k_end-1 is
+    # written, so a later k=8..20 run merges by concatenation and never
+    # recomputes a banked slot.
+    return [{"index": i, "source": sources[i], "stratum": "official",
+             "arm": "restart", "horizon": 40, "out_dir": out_dir,
+             "head_dir": "hphi_v2", "budget_max": 24,
+             "k_start": int(k_start), "k_end": int(k_end)}
+            for i in range(int(index_from), int(index_to))]
+
+
 @app.local_entrypoint()
 def main(parity_only: bool = False, out_dir: str = OUT_DIR,
          k_start: int = -1, k_end: int = -1, valid: bool = False,
-         k: int = 8, valid_from: int = 0) -> None:
+         k: int = 8, valid_from: int = 0, official: bool = False,
+         official_from: int = 0, official_to: int = 800) -> None:
     """H=40 controller, old clamped h_phi vs pilot H40-aware h_phi.
 
     The old-head H40 arm is ALREADY BANKED in hphi_recede_v5, produced by this
@@ -531,6 +570,34 @@ def main(parity_only: bool = False, out_dir: str = OUT_DIR,
               f"FROZEN h_phi.\nPanel verified disjoint from the development "
               f"and training sets. Banked whatever it returns; this is NOT the "
               f"official 800x20 benchmark.")
+        call = drive.spawn(tasks)
+        print(f"spawned: {call.object_id}")
+        return
+    if official:
+        # THE OFFICIAL 800 x K. Identical to the --valid branch above in every
+        # respect except the source file: same drive, same run_source, same
+        # arm, same horizon 40 (receding, b_eff = min(24, b)), same
+        # budget_max 24, same head_dir hphi_v2, same N=32, same PROTOCOL, same
+        # record schema. Nothing is retuned for the official panel; doing so
+        # after the 128 result exists would make this a third development
+        # ladder rather than the one prospective measurement.
+        #
+        # official_from/official_to exist ONLY to release the panel in waves
+        # (a mechanical smoke on 0..31 first). The slice is over SOURCES, not
+        # candidates, so every released source still runs the full k range and
+        # a wave is never a partial record.
+        tasks = official_tasks(root, out_dir, valid_from, k,
+                               official_from, official_to)
+        print(f"OFFICIAL GrIDDD/Jin QED BENCHMARK: {len(tasks)} sources "
+              f"[{official_from}..{official_to}) of 800 x k={valid_from}..{k}, "
+              f"H=40 receding horizon (b_eff=min(24,b)), N={N_PARTICLES}, "
+              f"FROZEN h_phi head hphi_v2, budget_max=24, arm=restart.\n"
+              f"Panel verified 800 unique and disjoint from the development, "
+              f"validation and training sets.\n"
+              f"Each source returns EXACTLY k={k - valid_from} slots. A slot "
+              f"whose trajectory never enters the region returns the "
+              f"unmodified source and is a failure. No slot is retried, "
+              f"resampled or filtered.")
         call = drive.spawn(tasks)
         print(f"spawned: {call.object_id}")
         return

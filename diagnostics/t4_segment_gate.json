@@ -1,0 +1,113 @@
+[
+  {
+    "cell": "5ht1b_s7",
+    "k": 2,
+    "budget": 32,
+    "shared_series": [
+      17,
+      17,
+      18,
+      20,
+      21,
+      25,
+      20,
+      25,
+      20,
+      17,
+      20,
+      20,
+      20,
+      17,
+      25,
+      17
+    ],
+    "final_shared": 17,
+    "target_bits": 39,
+    "n_nonpositive_gain": 8,
+    "n_boundaries": 15,
+    "insert_delete_cancellation": 0.357,
+    "n_unique_states": 78,
+    "family_counts": {
+      "bond_reroute": 6,
+      "atom_insert": 5,
+      "atom_restate_semantic": 12,
+      "atom_delete": 9
+    },
+    "wall_s": 308.573205947876
+  },
+  {
+    "cell": "5ht1b_s7",
+    "k": 8,
+    "budget": 32,
+    "shared_series": [
+      16,
+      21,
+      17,
+      19
+    ],
+    "final_shared": 19,
+    "target_bits": 39,
+    "n_nonpositive_gain": 1,
+    "n_boundaries": 3,
+    "insert_delete_cancellation": 0.45,
+    "n_unique_states": 108,
+    "family_counts": {
+      "atom_delete": 11,
+      "atom_insert": 9,
+      "bond_reroute": 6,
+      "atom_restate_semantic": 6
+    },
+    "wall_s": 323.17931842803955
+  },
+  {
+    "cell": "5ht1b_s7",
+    "k": 1,
+    "budget": 32,
+    "shared_series": [
+      17,
+      20,
+      20,
+      21,
+      25,
+      20,
+      25,
+      21,
+      25,
+      20,
+      20,
+      25,
+      21,
+      25,
+      20,
+      25,
+      21,
+      25,
+      20,
+      25,
+      20,
+      20,
+      20,
+      20,
+      20,
+      20,
+      20,
+      25,
+      20,
+      20,
+      20,
+      20
+    ],
+    "final_shared": 20,
+    "target_bits": 39,
+    "n_nonpositive_gain": 20,
+    "n_boundaries": 31,
+    "insert_delete_cancellation": 0.4,
+    "n_unique_states": 54,
+    "family_counts": {
+      "atom_insert": 6,
+      "atom_delete": 9,
+      "atom_restate_semantic": 17
+    },
+    "wall_s": 356.80662751197815
+  }
+]

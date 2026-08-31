@@ -1,0 +1,406 @@
+{
+  "budget": 6,
+  "results": [
+    {
+      "cell": "braf_dev0",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "budget_primitive_edits": 6,
+      "rollouts_per_lane": 4,
+      "lanes": {
+        "k1:local": {
+          "n_endpoints": 3,
+          "n_distinct_s0": 1,
+          "frac_left_s0": 0.0,
+          "frac_left_scaffold": 0.0,
+          "max_tan_dist": 0.2558139534883721,
+          "d0.4": {
+            "n_feasible": 1,
+            "ceiling": true,
+            "best_qed": 0.610296387154644
+          },
+          "d0.6": {
+            "n_feasible": 1,
+            "ceiling": true,
+            "best_qed": 0.610296387154644
+          }
+        },
+        "k1:grow": {
+          "n_endpoints": 4,
+          "n_distinct_s0": 1,
+          "frac_left_s0": 0.0,
+          "frac_left_scaffold": 0.0,
+          "max_tan_dist": 0.8108108108108107,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          }
+        },
+        "k1:cyclize": {
+          "n_endpoints": 3,
+          "n_distinct_s0": 2,
+          "frac_left_s0": 1.0,
+          "frac_left_scaffold": 1.0,
+          "max_tan_dist": 0.9230769230769231,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          }
+        },
+        "k1:aromatize": {
+          "n_endpoints": 3,
+          "n_distinct_s0": 1,
+          "frac_left_s0": 0.0,
+          "frac_left_scaffold": 0.3333333333333333,
+          "max_tan_dist": 0.7301587301587302,
+          "d0.4": {
+            "n_feasible": 1,
+            "ceiling": true,
+            "best_qed": 0.6264810792847937
+          },
+          "d0.6": {
+            "n_feasible": 1,
+            "ceiling": true,
+            "best_qed": 0.6264810792847937
+          }
+        },
+        "k1:rebuild": {
+          "n_endpoints": 4,
+          "n_distinct_s0": 1,
+          "frac_left_s0": 0.0,
+          "frac_left_scaffold": 0.0,
+          "max_tan_dist": 0.7638888888888888,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          }
+        },
+        "k1:restate": {
+          "n_endpoints": 3,
+          "n_distinct_s0": 1,
+          "frac_left_s0": 0.0,
+          "frac_left_scaffold": 0.3333333333333333,
+          "max_tan_dist": 0.44897959183673475,
+          "d0.4": {
+            "n_feasible": 2,
+            "ceiling": true,
+            "best_qed": 0.610296387154644
+          },
+          "d0.6": {
+            "n_feasible": 1,
+            "ceiling": true,
+            "best_qed": 0.610296387154644
+          }
+        },
+        "k1:open": {
+          "n_endpoints": 4,
+          "n_distinct_s0": 2,
+          "frac_left_s0": 0.25,
+          "frac_left_scaffold": 0.25,
+          "max_tan_dist": 0.8,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          }
+        },
+        "k1:append": {
+          "n_endpoints": 4,
+          "n_distinct_s0": 1,
+          "frac_left_s0": 0.0,
+          "frac_left_scaffold": 0.0,
+          "max_tan_dist": 0.625,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          }
+        },
+        "k1:scaffold_extend": {
+          "n_endpoints": 4,
+          "n_distinct_s0": 1,
+          "frac_left_s0": 0.0,
+          "frac_left_scaffold": 0.0,
+          "max_tan_dist": 0.7058823529411764,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          }
+        },
+        "k1:shrink": {
+          "n_endpoints": 4,
+          "n_distinct_s0": 2,
+          "frac_left_s0": 1.0,
+          "frac_left_scaffold": 1.0,
+          "max_tan_dist": 1.0,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          }
+        },
+        "k1:append_system": {
+          "n_endpoints": 4,
+          "n_distinct_s0": 3,
+          "frac_left_s0": 1.0,
+          "frac_left_scaffold": 1.0,
+          "max_tan_dist": 0.9315068493150684,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          }
+        },
+        "k1:annulate": {
+          "n_endpoints": 4,
+          "n_distinct_s0": 4,
+          "frac_left_s0": 1.0,
+          "frac_left_scaffold": 1.0,
+          "max_tan_dist": 0.8636363636363636,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          }
+        },
+        "k1:small_ring": {
+          "n_endpoints": 4,
+          "n_distinct_s0": 4,
+          "frac_left_s0": 1.0,
+          "frac_left_scaffold": 1.0,
+          "max_tan_dist": 0.8695652173913043,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          }
+        },
+        "k1:decorate": {
+          "n_endpoints": 4,
+          "n_distinct_s0": 1,
+          "frac_left_s0": 0.0,
+          "frac_left_scaffold": 0.0,
+          "max_tan_dist": 0.5263157894736843,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          }
+        },
+        "k2:annulate>grow": {
+          "n_endpoints": 4,
+          "n_distinct_s0": 4,
+          "frac_left_s0": 1.0,
+          "frac_left_scaffold": 1.0,
+          "max_tan_dist": 0.7096774193548387,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          }
+        },
+        "k2:cyclize>aromatize": {
+          "n_endpoints": 4,
+          "n_distinct_s0": 4,
+          "frac_left_s0": 1.0,
+          "frac_left_scaffold": 1.0,
+          "max_tan_dist": 0.6779661016949152,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          }
+        },
+        "k2:cyclize>annulate": {
+          "n_endpoints": 4,
+          "n_distinct_s0": 4,
+          "frac_left_s0": 1.0,
+          "frac_left_scaffold": 1.0,
+          "max_tan_dist": 0.7647058823529411,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          }
+        },
+        "k2:small_ring>scaffold_extend": {
+          "n_endpoints": 4,
+          "n_distinct_s0": 3,
+          "frac_left_s0": 1.0,
+          "frac_left_scaffold": 1.0,
+          "max_tan_dist": 0.6226415094339622,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          }
+        },
+        "k3:local>grow>rebuild": {
+          "n_endpoints": 4,
+          "n_distinct_s0": 1,
+          "frac_left_s0": 0.0,
+          "frac_left_scaffold": 0.0,
+          "max_tan_dist": 0.4528301886792453,
+          "d0.4": {
+            "n_feasible": 1,
+            "ceiling": true,
+            "best_qed": 0.6078724292707761
+          },
+          "d0.6": {
+            "n_feasible": 1,
+            "ceiling": true,
+            "best_qed": 0.6078724292707761
+          }
+        },
+        "k3:open>scaffold_extend>open": {
+          "n_endpoints": 4,
+          "n_distinct_s0": 1,
+          "frac_left_s0": 0.0,
+          "frac_left_scaffold": 0.0,
+          "max_tan_dist": 0.6428571428571428,
+          "d0.4": {
+            "n_feasible": 1,
+            "ceiling": true,
+            "best_qed": 0.6245212786917291
+          },
+          "d0.6": {
+            "n_feasible": 1,
+            "ceiling": true,
+            "best_qed": 0.6245212786917291
+          }
+        },
+        "k3:aromatize>cyclize>shrink": {
+          "n_endpoints": 4,
+          "n_distinct_s0": 3,
+          "frac_left_s0": 0.75,
+          "frac_left_scaffold": 1.0,
+          "max_tan_dist": 0.5714285714285714,
+          "d0.4": {
+            "n_feasible": 1,
+            "ceiling": true,
+            "best_qed": 0.7788908381868799
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          }
+        },
+        "k3:append_system>local>grow": {
+          "n_endpoints": 4,
+          "n_distinct_s0": 4,
+          "frac_left_s0": 1.0,
+          "frac_left_scaffold": 1.0,
+          "max_tan_dist": 0.7647058823529411,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          }
+        },
+        "generic_exit": {
+          "n_endpoints": 4,
+          "n_distinct_s0": 1,
+          "frac_left_s0": 0.0,
+          "frac_left_scaffold": 0.5,
+          "max_tan_dist": 0.4807692307692307,
+          "d0.4": {
+            "n_feasible": 1,
+            "ceiling": true,
+            "best_qed": 0.7271768418501159
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling": false,
+            "best_qed": null
+          }
+        }
+      },
+      "distinct_states_enumerated": 150,
+      "sec": 907.7178173065186
+    }
+  ]
+}

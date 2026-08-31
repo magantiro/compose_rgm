@@ -1,0 +1,1304 @@
+{
+ "runs": [
+  {
+   "task": "isomers_c7h8n2o2",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.8996209071170151,
+   "best_counted": 1.0,
+   "corpus_max": 0.9048374180359595,
+   "n_above_corpus_max": 2,
+   "auc_top10_official_10k": 0.8951228025814302,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.7357877586304007,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 121.8
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.8204692361321285,
+     "top10_counted": 0.7818014197941251,
+     "best_counted": 0.8824969025845955,
+     "n_above_corpus_max": 0,
+     "lineages": 140,
+     "t": 150.4
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.8488049725127041,
+     "top10_counted": 0.8188419997298876,
+     "best_counted": 0.8824969025845955,
+     "n_above_corpus_max": 0,
+     "lineages": 160,
+     "t": 160.3
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.9082315736128127,
+     "top10_counted": 0.8996209071170151,
+     "best_counted": 1.0,
+     "n_above_corpus_max": 2,
+     "lineages": 200,
+     "t": 183.9
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.9082315736128127,
+     "top10_counted": 0.8996209071170151,
+     "best_counted": 1.0,
+     "n_above_corpus_max": 2,
+     "lineages": 200,
+     "t": 185.2
+    }
+   ],
+   "seconds": 185.2
+  },
+  {
+   "task": "albuterol_similarity",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.6672447940601375,
+   "best_counted": 0.7757575757575756,
+   "corpus_max": 0.6666666666666666,
+   "n_above_corpus_max": 2,
+   "auc_top10_official_10k": 0.6639085700898367,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.6207027033901676,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 114.5
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.6530432022135858,
+     "top10_counted": 0.6322716434953752,
+     "best_counted": 0.6923076923076923,
+     "n_above_corpus_max": 1,
+     "lineages": 140,
+     "t": 149.1
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.6555099752066745,
+     "top10_counted": 0.6498576601212794,
+     "best_counted": 0.6923076923076923,
+     "n_above_corpus_max": 1,
+     "lineages": 160,
+     "t": 165.5
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.670634624568612,
+     "top10_counted": 0.6672447940601375,
+     "best_counted": 0.7757575757575756,
+     "n_above_corpus_max": 2,
+     "lineages": 200,
+     "t": 191.4
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.670634624568612,
+     "top10_counted": 0.6672447940601375,
+     "best_counted": 0.7757575757575756,
+     "n_above_corpus_max": 2,
+     "lineages": 200,
+     "t": 193.1
+    }
+   ],
+   "seconds": 193.1
+  },
+  {
+   "task": "median1",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.2981524600383795,
+   "best_counted": 0.3202563076101743,
+   "corpus_max": 0.32425739335111103,
+   "n_above_corpus_max": 0,
+   "auc_top10_official_10k": 0.2966616977381876,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.29859250069315346,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 127.6
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.30295289351237525,
+     "top10_counted": 0.26566825901658075,
+     "best_counted": 0.3126943839882287,
+     "n_above_corpus_max": 0,
+     "lineages": 140,
+     "t": 154.3
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.3063100407274855,
+     "top10_counted": 0.28250591356527677,
+     "best_counted": 0.3202563076101743,
+     "n_above_corpus_max": 0,
+     "lineages": 160,
+     "t": 166.5
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.31004935694521263,
+     "top10_counted": 0.2981524600383795,
+     "best_counted": 0.3202563076101743,
+     "n_above_corpus_max": 0,
+     "lineages": 200,
+     "t": 191.3
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.31004935694521263,
+     "top10_counted": 0.2981524600383795,
+     "best_counted": 0.3202563076101743,
+     "n_above_corpus_max": 0,
+     "lineages": 200,
+     "t": 192.6
+    }
+   ],
+   "seconds": 192.6
+  },
+  {
+   "task": "isomers_c9h10n2o2pf2cl",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.44607541111648885,
+   "best_counted": 0.5269629692433709,
+   "corpus_max": 0.3855343441745787,
+   "n_above_corpus_max": 10,
+   "auc_top10_official_10k": 0.4438450340609064,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.34132297510466,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 129.0
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.40971636091935054,
+     "top10_counted": 0.3978683237776536,
+     "best_counted": 0.5269629692433709,
+     "n_above_corpus_max": 4,
+     "lineages": 140,
+     "t": 164.2
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.4346348640832667,
+     "top10_counted": 0.4311038834826394,
+     "best_counted": 0.5269629692433709,
+     "n_above_corpus_max": 7,
+     "lineages": 160,
+     "t": 180.0
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.44607541111648885,
+     "top10_counted": 0.44607541111648885,
+     "best_counted": 0.5269629692433709,
+     "n_above_corpus_max": 10,
+     "lineages": 200,
+     "t": 206.4
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.44607541111648885,
+     "top10_counted": 0.44607541111648885,
+     "best_counted": 0.5269629692433709,
+     "n_above_corpus_max": 10,
+     "lineages": 200,
+     "t": 207.6
+    }
+   ],
+   "seconds": 207.6
+  },
+  {
+   "task": "qed",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.948267069400751,
+   "best_counted": 0.9483312933817938,
+   "corpus_max": 0.948442042791664,
+   "n_above_corpus_max": 0,
+   "auc_top10_official_10k": 0.9435257340537473,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.9481385567914469,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 111.9
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.9482223700062475,
+     "top10_counted": 0.9476796810783087,
+     "best_counted": 0.9483312933817938,
+     "n_above_corpus_max": 0,
+     "lineages": 140,
+     "t": 172.9
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.9482460989719517,
+     "top10_counted": 0.9478933222481916,
+     "best_counted": 0.9483312933817938,
+     "n_above_corpus_max": 0,
+     "lineages": 160,
+     "t": 200.6
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.9483154160594205,
+     "top10_counted": 0.948267069400751,
+     "best_counted": 0.9483312933817938,
+     "n_above_corpus_max": 0,
+     "lineages": 200,
+     "t": 245.1
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.9483154160594205,
+     "top10_counted": 0.948267069400751,
+     "best_counted": 0.9483312933817938,
+     "n_above_corpus_max": 0,
+     "lineages": 200,
+     "t": 246.2
+    }
+   ],
+   "seconds": 246.2
+  },
+  {
+   "task": "mestranol_similarity",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.8572514090518787,
+   "best_counted": 1.0,
+   "corpus_max": 0.8859357696566998,
+   "n_above_corpus_max": 2,
+   "auc_top10_official_10k": 0.8529651520066194,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.6870966195232733,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 113.5
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.8414788473024182,
+     "top10_counted": 0.8217245811198014,
+     "best_counted": 1.0,
+     "n_above_corpus_max": 1,
+     "lineages": 140,
+     "t": 177.4
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.8535201317852129,
+     "top10_counted": 0.8448832686002467,
+     "best_counted": 1.0,
+     "n_above_corpus_max": 1,
+     "lineages": 160,
+     "t": 191.6
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.8634285890380449,
+     "top10_counted": 0.8572514090518787,
+     "best_counted": 1.0,
+     "n_above_corpus_max": 2,
+     "lineages": 200,
+     "t": 246.6
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.8634285890380449,
+     "top10_counted": 0.8572514090518787,
+     "best_counted": 1.0,
+     "n_above_corpus_max": 2,
+     "lineages": 200,
+     "t": 248.1
+    }
+   ],
+   "seconds": 248.1
+  },
+  {
+   "task": "amlodipine_mpo",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.7173626518715321,
+   "best_counted": 0.7423074889580902,
+   "corpus_max": 0.6855654600401044,
+   "n_above_corpus_max": 12,
+   "auc_top10_official_10k": 0.7137758386121745,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.655334415074131,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 111.5
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.6771999992646418,
+     "top10_counted": 0.6486925642928935,
+     "best_counted": 0.7423074889580902,
+     "n_above_corpus_max": 1,
+     "lineages": 140,
+     "t": 195.5
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.696324926607429,
+     "top10_counted": 0.6810937998278437,
+     "best_counted": 0.7423074889580902,
+     "n_above_corpus_max": 4,
+     "lineages": 160,
+     "t": 232.6
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.7173626518715321,
+     "top10_counted": 0.7173626518715321,
+     "best_counted": 0.7423074889580902,
+     "n_above_corpus_max": 12,
+     "lineages": 200,
+     "t": 308.2
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.7173626518715321,
+     "top10_counted": 0.7173626518715321,
+     "best_counted": 0.7423074889580902,
+     "n_above_corpus_max": 12,
+     "lineages": 200,
+     "t": 309.5
+    }
+   ],
+   "seconds": 309.5
+  },
+  {
+   "task": "valsartan_smarts",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.10731327715455348,
+   "best_counted": 0.43746759265221746,
+   "corpus_max": 0.3201308357906798,
+   "n_above_corpus_max": 1,
+   "auc_top10_official_10k": 0.1067767107687807,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.032013295855069054,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 117.4
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.034347305976992884,
+     "top10_counted": 0.0023340982441975174,
+     "best_counted": 0.017576757732261847,
+     "n_above_corpus_max": 0,
+     "lineages": 140,
+     "t": 213.5
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.06798266808899694,
+     "top10_counted": 0.03597517945105235,
+     "best_counted": 0.3201308357906798,
+     "n_above_corpus_max": 0,
+     "lineages": 160,
+     "t": 246.1
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.13898049344832486,
+     "top10_counted": 0.10731327715455348,
+     "best_counted": 0.43746759265221746,
+     "n_above_corpus_max": 1,
+     "lineages": 200,
+     "t": 309.1
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.13898049344832486,
+     "top10_counted": 0.10731327715455348,
+     "best_counted": 0.43746759265221746,
+     "n_above_corpus_max": 1,
+     "lineages": 200,
+     "t": 310.5
+    }
+   ],
+   "seconds": 310.5
+  },
+  {
+   "task": "celecoxib_rediscovery",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.4773786515029369,
+   "best_counted": 0.5730337078651685,
+   "corpus_max": 0.4583333333333333,
+   "n_above_corpus_max": 8,
+   "auc_top10_official_10k": 0.47499175824542217,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.4363080626513677,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 109.8
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.46058613310215,
+     "top10_counted": 0.45520895535535144,
+     "best_counted": 0.5730337078651685,
+     "n_above_corpus_max": 2,
+     "lineages": 140,
+     "t": 204.2
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.46058613310215,
+     "top10_counted": 0.45520895535535144,
+     "best_counted": 0.5730337078651685,
+     "n_above_corpus_max": 2,
+     "lineages": 160,
+     "t": 239.0
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.47940246102674633,
+     "top10_counted": 0.4773786515029369,
+     "best_counted": 0.5730337078651685,
+     "n_above_corpus_max": 8,
+     "lineages": 200,
+     "t": 317.2
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.47940246102674633,
+     "top10_counted": 0.4773786515029369,
+     "best_counted": 0.5730337078651685,
+     "n_above_corpus_max": 8,
+     "lineages": 200,
+     "t": 318.6
+    }
+   ],
+   "seconds": 318.6
+  },
+  {
+   "task": "troglitazone_rediscovery",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.3629494943859448,
+   "best_counted": 0.391304347826087,
+   "corpus_max": 0.391304347826087,
+   "n_above_corpus_max": 0,
+   "auc_top10_official_10k": 0.3611347469140151,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.33061178464083063,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 126.8
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.3490039092146443,
+     "top10_counted": 0.32822687340684903,
+     "best_counted": 0.3559322033898305,
+     "n_above_corpus_max": 0,
+     "lineages": 140,
+     "t": 217.4
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.35643827962877117,
+     "top10_counted": 0.3458920343459486,
+     "best_counted": 0.375,
+     "n_above_corpus_max": 0,
+     "lineages": 160,
+     "t": 241.7
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.3692433983298029,
+     "top10_counted": 0.3629494943859448,
+     "best_counted": 0.391304347826087,
+     "n_above_corpus_max": 0,
+     "lineages": 200,
+     "t": 318.7
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.3692433983298029,
+     "top10_counted": 0.3629494943859448,
+     "best_counted": 0.391304347826087,
+     "n_above_corpus_max": 0,
+     "lineages": 200,
+     "t": 320.3
+    }
+   ],
+   "seconds": 320.3
+  },
+  {
+   "task": "sitagliptin_mpo",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": NaN,
+   "best_counted": 0.16235068276596354,
+   "corpus_max": 0.10533750030756489,
+   "n_above_corpus_max": 4,
+   "auc_top10_official_10k": NaN,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.060308193428238066,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 111.9
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.0835913030651476,
+     "top10_counted": 0.06980747057135195,
+     "best_counted": 0.10821102244881997,
+     "n_above_corpus_max": 1,
+     "lineages": 140,
+     "t": 205.1
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.09617416606147902,
+     "top10_counted": 0.08894799911108325,
+     "best_counted": 0.10821102244881997,
+     "n_above_corpus_max": 1,
+     "lineages": 160,
+     "t": 242.9
+    },
+    {
+     "calls": 100,
+     "top10_all": NaN,
+     "top10_counted": NaN,
+     "best_counted": 0.16235068276596354,
+     "n_above_corpus_max": 4,
+     "lineages": 200,
+     "t": 323.6
+    },
+    {
+     "calls": 100,
+     "top10_all": NaN,
+     "top10_counted": NaN,
+     "best_counted": 0.16235068276596354,
+     "n_above_corpus_max": 4,
+     "lineages": 200,
+     "t": 324.7
+    }
+   ],
+   "seconds": 324.7
+  },
+  {
+   "task": "scaffold_hop",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.5294408576890195,
+   "best_counted": 0.5358195565808023,
+   "corpus_max": 0.5261475514640072,
+   "n_above_corpus_max": 20,
+   "auc_top10_official_10k": 0.5267936534005744,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.5194134047315072,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 105.1
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.5267531230998526,
+     "top10_counted": 0.5262760652876354,
+     "best_counted": 0.5339429204765863,
+     "n_above_corpus_max": 5,
+     "lineages": 140,
+     "t": 225.3
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.5277189380679375,
+     "top10_counted": 0.5277189380679375,
+     "best_counted": 0.5339429204765863,
+     "n_above_corpus_max": 10,
+     "lineages": 160,
+     "t": 254.3
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.5294408576890195,
+     "top10_counted": 0.5294408576890195,
+     "best_counted": 0.5358195565808023,
+     "n_above_corpus_max": 20,
+     "lineages": 200,
+     "t": 362.8
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.5294408576890195,
+     "top10_counted": 0.5294408576890195,
+     "best_counted": 0.5358195565808023,
+     "n_above_corpus_max": 20,
+     "lineages": 200,
+     "t": 365.6
+    }
+   ],
+   "seconds": 365.6
+  },
+  {
+   "task": "zaleplon_mpo",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.3388393738001744,
+   "best_counted": 0.354903886904064,
+   "corpus_max": 0.38831174270074265,
+   "n_above_corpus_max": 0,
+   "auc_top10_official_10k": 0.3371451769311736,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.3140913947925463,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 127.0
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.3313731461380086,
+     "top10_counted": 0.31261165441623673,
+     "best_counted": 0.33130398008295237,
+     "n_above_corpus_max": 0,
+     "lineages": 140,
+     "t": 236.3
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.34039192405402013,
+     "top10_counted": 0.32953315206735617,
+     "best_counted": 0.34559875662192086,
+     "n_above_corpus_max": 0,
+     "lineages": 160,
+     "t": 273.3
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.3466720119365211,
+     "top10_counted": 0.3388393738001744,
+     "best_counted": 0.354903886904064,
+     "n_above_corpus_max": 0,
+     "lineages": 200,
+     "t": 368.8
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.3466720119365211,
+     "top10_counted": 0.3388393738001744,
+     "best_counted": 0.354903886904064,
+     "n_above_corpus_max": 0,
+     "lineages": 200,
+     "t": 369.5
+    }
+   ],
+   "seconds": 369.5
+  },
+  {
+   "task": "median2",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.29225620791315493,
+   "best_counted": 0.3190599354733252,
+   "corpus_max": 0.29132248177299386,
+   "n_above_corpus_max": 4,
+   "auc_top10_official_10k": 0.29079492687358915,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.27199855823832886,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 95.3
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.278300444565018,
+     "top10_counted": 0.27486413629950385,
+     "best_counted": 0.2930505873748041,
+     "n_above_corpus_max": 1,
+     "lineages": 140,
+     "t": 224.6
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.2828592023357728,
+     "top10_counted": 0.28044575810908745,
+     "best_counted": 0.2930505873748041,
+     "n_above_corpus_max": 1,
+     "lineages": 160,
+     "t": 271.6
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.2931013700675217,
+     "top10_counted": 0.29225620791315493,
+     "best_counted": 0.3190599354733252,
+     "n_above_corpus_max": 4,
+     "lineages": 200,
+     "t": 374.0
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.2931013700675217,
+     "top10_counted": 0.29225620791315493,
+     "best_counted": 0.3190599354733252,
+     "n_above_corpus_max": 4,
+     "lineages": 200,
+     "t": 375.1
+    }
+   ],
+   "seconds": 375.1
+  },
+  {
+   "task": "perindopril_mpo",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.5896214529508274,
+   "best_counted": 0.6236095644623235,
+   "corpus_max": 0.5595028849441883,
+   "n_above_corpus_max": 23,
+   "auc_top10_official_10k": 0.5866733456860732,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.5366184196978077,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 128.5
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.561046665667668,
+     "top10_counted": 0.5600257989735044,
+     "best_counted": 0.5853140973807077,
+     "n_above_corpus_max": 3,
+     "lineages": 140,
+     "t": 247.3
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.5722819646333825,
+     "top10_counted": 0.5722819646333825,
+     "best_counted": 0.5853140973807077,
+     "n_above_corpus_max": 7,
+     "lineages": 160,
+     "t": 287.0
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.5896214529508274,
+     "top10_counted": 0.5896214529508274,
+     "best_counted": 0.6236095644623235,
+     "n_above_corpus_max": 23,
+     "lineages": 200,
+     "t": 393.4
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.5896214529508274,
+     "top10_counted": 0.5896214529508274,
+     "best_counted": 0.6236095644623235,
+     "n_above_corpus_max": 23,
+     "lineages": 200,
+     "t": 394.7
+    }
+   ],
+   "seconds": 394.7
+  },
+  {
+   "task": "deco_hop",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 6,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.8867962565794467,
+   "best_counted": 0.8980379102373306,
+   "corpus_max": 0.870790932406718,
+   "n_above_corpus_max": 13,
+   "auc_top10_official_10k": 0.8823622752965495,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.6729461845757958,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 114.3
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.8688004800959988,
+     "top10_counted": 0.8410391953117531,
+     "best_counted": 0.8980379102373306,
+     "n_above_corpus_max": 3,
+     "lineages": 140,
+     "t": 252.0
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.877376413749009,
+     "top10_counted": 0.8756278771512372,
+     "best_counted": 0.8980379102373306,
+     "n_above_corpus_max": 5,
+     "lineages": 160,
+     "t": 301.7
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.8867962565794467,
+     "top10_counted": 0.8867962565794467,
+     "best_counted": 0.8980379102373306,
+     "n_above_corpus_max": 13,
+     "lineages": 200,
+     "t": 408.9
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.8867962565794467,
+     "top10_counted": 0.8867962565794467,
+     "best_counted": 0.8980379102373306,
+     "n_above_corpus_max": 13,
+     "lineages": 200,
+     "t": 410.1
+    }
+   ],
+   "seconds": 410.1
+  },
+  {
+   "task": "osimertinib_mpo",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.8272842538522329,
+   "best_counted": 0.830335979989656,
+   "corpus_max": 0.8288042708674447,
+   "n_above_corpus_max": 1,
+   "auc_top10_official_10k": 0.8231478325829718,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.8165918577491155,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 114.3
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.8246500373199186,
+     "top10_counted": 0.8224062702972166,
+     "best_counted": 0.830335979989656,
+     "n_above_corpus_max": 1,
+     "lineages": 140,
+     "t": 276.9
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.8269241958605049,
+     "top10_counted": 0.8261312026594663,
+     "best_counted": 0.830335979989656,
+     "n_above_corpus_max": 1,
+     "lineages": 160,
+     "t": 363.7
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.8277408373741982,
+     "top10_counted": 0.8272842538522329,
+     "best_counted": 0.830335979989656,
+     "n_above_corpus_max": 1,
+     "lineages": 200,
+     "t": 520.6
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.8277408373741982,
+     "top10_counted": 0.8272842538522329,
+     "best_counted": 0.830335979989656,
+     "n_above_corpus_max": 1,
+     "lineages": 200,
+     "t": 521.8
+    }
+   ],
+   "seconds": 521.8
+  },
+  {
+   "task": "fexofenadine_mpo",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.7457756474655494,
+   "best_counted": 0.7496995087299864,
+   "corpus_max": 0.7563948721762482,
+   "n_above_corpus_max": 0,
+   "auc_top10_official_10k": 0.7420467692282215,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.7380700763373154,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 128.7
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.7448882715658472,
+     "top10_counted": 0.738087963750827,
+     "best_counted": 0.7476206959154725,
+     "n_above_corpus_max": 0,
+     "lineages": 140,
+     "t": 332.3
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.7466743936480061,
+     "top10_counted": 0.7408522689644441,
+     "best_counted": 0.7496995087299864,
+     "n_above_corpus_max": 0,
+     "lineages": 160,
+     "t": 393.7
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.7485569181302869,
+     "top10_counted": 0.7457756474655494,
+     "best_counted": 0.7496995087299864,
+     "n_above_corpus_max": 0,
+     "lineages": 200,
+     "t": 527.2
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.7485569181302869,
+     "top10_counted": 0.7457756474655494,
+     "best_counted": 0.7496995087299864,
+     "n_above_corpus_max": 0,
+     "lineages": 200,
+     "t": 528.4
+    }
+   ],
+   "seconds": 528.4
+  },
+  {
+   "task": "ranolazine_mpo",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.6473221043989434,
+   "best_counted": 0.6682062525737473,
+   "corpus_max": 0.5861130563398868,
+   "n_above_corpus_max": 27,
+   "auc_top10_official_10k": 0.6440854938769487,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.5586440203875774,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 103.4
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.5918462277870677,
+     "top10_counted": 0.5889628345624554,
+     "best_counted": 0.6465944597877312,
+     "n_above_corpus_max": 5,
+     "lineages": 140,
+     "t": 304.4
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.6110065071867476,
+     "top10_counted": 0.6110065071867476,
+     "best_counted": 0.65310302629299,
+     "n_above_corpus_max": 12,
+     "lineages": 160,
+     "t": 385.0
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.6473221043989434,
+     "top10_counted": 0.6473221043989434,
+     "best_counted": 0.6682062525737473,
+     "n_above_corpus_max": 27,
+     "lineages": 200,
+     "t": 568.3
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.6473221043989434,
+     "top10_counted": 0.6473221043989434,
+     "best_counted": 0.6682062525737473,
+     "n_above_corpus_max": 27,
+     "lineages": 200,
+     "t": 570.5
+    }
+   ],
+   "seconds": 570.5
+  },
+  {
+   "task": "thiothixene_rediscovery",
+   "arm": "L1",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.3881582137659755,
+   "best_counted": 0.4132231404958678,
+   "corpus_max": 0.4083333333333333,
+   "n_above_corpus_max": 1,
+   "auc_top10_official_10k": 0.3862174226971456,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.3764678363783412,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 154.8
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.38554893037337035,
+     "top10_counted": 0.3795958000806733,
+     "best_counted": 0.38738738738738737,
+     "n_above_corpus_max": 0,
+     "lineages": 140,
+     "t": 356.0
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.3862733580754857,
+     "top10_counted": 0.38241264534707553,
+     "best_counted": 0.38738738738738737,
+     "n_above_corpus_max": 0,
+     "lineages": 160,
+     "t": 423.7
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.3912449508225652,
+     "top10_counted": 0.3881582137659755,
+     "best_counted": 0.4132231404958678,
+     "n_above_corpus_max": 1,
+     "lineages": 200,
+     "t": 582.4
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.3912449508225652,
+     "top10_counted": 0.3881582137659755,
+     "best_counted": 0.4132231404958678,
+     "n_above_corpus_max": 1,
+     "lineages": 200,
+     "t": 583.1
+    }
+   ],
+   "seconds": 583.1
+  }
+ ]
+}

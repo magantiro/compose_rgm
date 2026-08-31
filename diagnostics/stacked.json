@@ -1,0 +1,21 @@
+{
+ "target": "5ht1b",
+ "rows": [
+  {
+   "label": "seed",
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1"
+  },
+  {
+   "label": "1 macro",
+   "smiles": "FC(F)(F)c1cc(-c2ccccc2)cc(N2CC[NH2+]CC2)c1"
+  },
+  {
+   "label": "2 macros",
+   "smiles": "FC(F)(F)c1cc(-c2cccc(-c3ccccc3)c2)cc(N2CC[NH2+]CC2)c1"
+  },
+  {
+   "label": "3 macros(QEDfail)",
+   "smiles": "FC(F)(F)c1cc(-c2cccc(-c3cccc(-c4ccccc4)c3)c2)cc(N2CC[NH2+]CC2)c1"
+  }
+ ]
+}

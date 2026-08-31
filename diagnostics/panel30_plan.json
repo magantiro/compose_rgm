@@ -1,0 +1,36 @@
+{
+ "direct": [
+  "parp1_s0_d0.4",
+  "parp1_s0_d0.6",
+  "parp1_s1_d0.4",
+  "parp1_s1_d0.6",
+  "5ht1b_s7_d0.4",
+  "5ht1b_s7_d0.6",
+  "jak2_s12_d0.4",
+  "jak2_s12_d0.6",
+  "jak2_s13_d0.4",
+  "jak2_s13_d0.6"
+ ],
+ "phase1": [
+  "parp1_s2_d0.4",
+  "parp1_s2_d0.6",
+  "fa7_s3_d0.4",
+  "fa7_s3_d0.6",
+  "fa7_s4_d0.4",
+  "fa7_s4_d0.6",
+  "fa7_s5_d0.4",
+  "fa7_s5_d0.6",
+  "5ht1b_s6_d0.4",
+  "5ht1b_s6_d0.6",
+  "5ht1b_s8_d0.4",
+  "5ht1b_s8_d0.6",
+  "braf_s9_d0.4",
+  "braf_s9_d0.6",
+  "braf_s10_d0.4",
+  "braf_s10_d0.6",
+  "braf_s11_d0.4",
+  "braf_s11_d0.6",
+  "jak2_s14_d0.4",
+  "jak2_s14_d0.6"
+ ]
+}

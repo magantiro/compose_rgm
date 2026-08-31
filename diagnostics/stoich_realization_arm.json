@@ -1,0 +1,6019 @@
+{
+  "k_per_arm": 8,
+  "results": [
+    {
+      "cell": "parp1_s0",
+      "seed": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+      "size": 6,
+      "topology": "pendant",
+      "n_admissible_stoichs": 35,
+      "admissible_stoichs": [
+        [
+          [
+            "C",
+            6
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "N",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "O",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "O",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "P",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            3
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            2
+          ],
+          [
+            "O",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            2
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            2
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "P",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            3
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            2
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            2
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "S",
+            3
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "P",
+            2
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "P",
+            3
+          ]
+        ]
+      ],
+      "declared_ring_elements": [
+        "C",
+        "N",
+        "O",
+        "S",
+        "P"
+      ],
+      "arms": {
+        "narrow_frozen": [
+          {
+            "k": 0,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CN(C)Cc1ccc2c(c1)CN(c1ccccc1)C(=O)c1cccn1-2",
+            "metrics": {
+              "qed": 0.7320141452351593,
+              "sa": 2.3957300823304877,
+              "sim": 0.6037735849056604,
+              "heavy": 25,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 1,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CN(C)Cc1ccc2c(c1)CNC(=O)c1ccc(-c3ccccc3)n1-2",
+            "metrics": {
+              "qed": 0.7980474629747213,
+              "sa": 2.498491620792027,
+              "sim": 0.6346153846153846,
+              "heavy": 25,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 2,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CN(C)C(c1ccccc1)c1ccc2c(c1)CNC(=O)c1cccn1-2",
+            "metrics": {
+              "qed": 0.7988403497499625,
+              "sa": 3.0924696917113863,
+              "sim": 0.5925925925925926,
+              "heavy": 25,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 3,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(-c3ccccc3)ccn1-2",
+            "metrics": {
+              "qed": 0.7980474629747213,
+              "sa": 2.542258928484335,
+              "sim": 0.6296296296296297,
+              "heavy": 25,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 4,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CN(C)Cc1ccc2c(c1)CNC(=O)c1cc(-c3ccccc3)cn1-2",
+            "metrics": {
+              "qed": 0.7980474629747213,
+              "sa": 2.557295466945872,
+              "sim": 0.6730769230769231,
+              "heavy": 25,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 5,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CN(C)Cc1ccc2c(c1)C(c1ccccc1)NC(=O)c1cccn1-2",
+            "metrics": {
+              "qed": 0.7988403497499625,
+              "sa": 2.963906230172924,
+              "sim": 0.5818181818181818,
+              "heavy": 25,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 6,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CN(Cc1ccccc1)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+            "metrics": {
+              "qed": 0.7959150207038067,
+              "sa": 2.4141190970828603,
+              "sim": 0.8085106382978723,
+              "heavy": 25,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 7,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CN(Cc1ccccc1)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+            "metrics": {
+              "qed": 0.7959150207038067,
+              "sa": 2.4141190970828603,
+              "sim": 0.8085106382978723,
+              "heavy": 25,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          }
+        ],
+        "free_composition": [
+          {
+            "k": 0,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "grow1",
+            "product": "CN(C)C(=O)c1ccc2c(c1)CNC(=O)c1cccn1-2",
+            "metrics": {
+              "qed": 0.8509929436986344,
+              "sa": 2.5562809052815467,
+              "sim": 0.6274509803921569,
+              "heavy": 20,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 1,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "CN(C)Cc1ccc2c(c1)CN(C1COCCO1)C(=O)c1cccn1-2",
+            "metrics": {
+              "qed": 0.8550641791515201,
+              "sa": 3.4509446917113866,
+              "sim": 0.5161290322580645,
+              "heavy": 25,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 2,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "CN(C)Cc1ccc2c(c1)CNC(=O)c1ccc(C3CCOCC3)n1-2",
+            "metrics": {
+              "qed": 0.935143544307348,
+              "sa": 2.9255262361766423,
+              "sim": 0.5423728813559322,
+              "heavy": 25,
+              "added_rings": [
+                "6s:C5O1"
+              ],
+              "added_hetero_rings": [
+                "6s:C5O1"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 3,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(C3CCOCC3)ccn1-2",
+            "metrics": {
+              "qed": 0.9351435443073481,
+              "sa": 2.9041781592535667,
+              "sim": 0.559322033898305,
+              "heavy": 25,
+              "added_rings": [
+                "6s:C5O1"
+              ],
+              "added_hetero_rings": [
+                "6s:C5O1"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 4,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "grow2",
+            "product": "CN(C)Cc1ccc2c(c1)CNC(=O)c1cc(C=O)cn1-2",
+            "metrics": {
+              "qed": 0.8704621203582259,
+              "sa": 2.935242055895012,
+              "sim": 0.6538461538461539,
+              "heavy": 21,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 5,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "closure",
+            "product": "CCOCCOc1cc2c(cc1CN(C)C)CNC(=O)c1cccn1-2",
+            "metrics": {
+              "qed": 0.7832901613195143,
+              "sa": 2.8206215503694914,
+              "sim": 0.5666666666666667,
+              "heavy": 25,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 6,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "CN(C)Cc1ccc2c(c1)C(C1COCCO1)NC(=O)c1cccn1-2",
+            "metrics": {
+              "qed": 0.923930251903333,
+              "sa": 3.7211345119423296,
+              "sim": 0.5079365079365079,
+              "heavy": 25,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 7,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "CN(Cc1ccc2c(c1)CNC(=O)c1cccn1-2)CC1COCCO1",
+            "metrics": {
+              "qed": 0.9171385247406012,
+              "sa": 3.310118690657645,
+              "sim": 0.6551724137931034,
+              "heavy": 25,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          }
+        ],
+        "stoich_enumerated": [
+          {
+            "k": 0,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "P",
+                2
+              ],
+              [
+                "S",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow4_blocked",
+            "product": "CN(C)Cc1ccc2c(c1)CN(CCCS)C(=O)c1cccn1-2",
+            "metrics": {
+              "qed": 0.8546648303483504,
+              "sa": 2.8009532640980943,
+              "sim": 0.5714285714285714,
+              "heavy": 23,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 1,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "N",
+                1
+              ],
+              [
+                "O",
+                1
+              ],
+              [
+                "P",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5_blocked",
+            "product": "CN(C)Cc1ccc2c(c1)CN(CCOCN)C(=O)c1cccn1-2",
+            "metrics": {
+              "qed": 0.6435006118259633,
+              "sa": 2.879209500822597,
+              "sim": 0.5333333333333333,
+              "heavy": 24,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 2,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "N",
+                1
+              ],
+              [
+                "P",
+                1
+              ],
+              [
+                "S",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5",
+            "product": "CN(C)C(CCCN=S)c1ccc2c(c1)CNC(=O)c1cccn1-2",
+            "metrics": {
+              "qed": 0.8214501825152513,
+              "sa": 3.6749060106559828,
+              "sim": 0.5409836065573771,
+              "heavy": 24,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 3,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "S",
+                3
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(C3CCSSS3)ccn1-2",
+            "metrics": {
+              "qed": 0.7916245647717293,
+              "sa": 3.962021614788309,
+              "sim": 0.5238095238095238,
+              "heavy": 25,
+              "added_rings": [
+                "6s:C3S3"
+              ],
+              "added_hetero_rings": [
+                "6s:C3S3"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 4,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "N",
+                1
+              ],
+              [
+                "O",
+                1
+              ],
+              [
+                "S",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow2",
+            "product": "CN(C)Cc1ccc2c(c1)CNC(=O)c1cc(C=O)cn1-2",
+            "metrics": {
+              "qed": 0.8704621203582259,
+              "sa": 2.935242055895012,
+              "sim": 0.6538461538461539,
+              "heavy": 21,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 5,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "O",
+                2
+              ],
+              [
+                "P",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5_blocked",
+            "product": "COCCOc1cc2c(cc1CN(C)C)CNC(=O)c1cccn1-2",
+            "metrics": {
+              "qed": 0.8214088958692718,
+              "sa": 2.7947866501438643,
+              "sim": 0.5862068965517241,
+              "heavy": 24,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 6,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "O",
+                1
+              ],
+              [
+                "P",
+                1
+              ],
+              [
+                "S",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5_blocked",
+            "product": "CN(C)Cc1ccc2c(c1)C(COCCS)NC(=O)c1cccn1-2",
+            "metrics": {
+              "qed": 0.6236342506547207,
+              "sa": 3.5261881373528157,
+              "sim": 0.5081967213114754,
+              "heavy": 24,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 7,
+            "requested_stoich": [
+              [
+                "C",
+                4
+              ],
+              [
+                "N",
+                1
+              ],
+              [
+                "S",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "CN(Cc1ccc2c(c1)CNC(=O)c1cccn1-2)CC1CNCCS1",
+            "metrics": {
+              "qed": 0.877966266956666,
+              "sa": 3.6334131058315124,
+              "sim": 0.6440677966101694,
+              "heavy": 25,
+              "added_rings": [
+                "6s:C4N1S1"
+              ],
+              "added_hetero_rings": [
+                "6s:C4N1S1"
+              ],
+              "n_added_hetero": 1
+            }
+          }
+        ]
+      },
+      "sec": 864.8330099582672
+    },
+    {
+      "cell": "parp1_s1",
+      "seed": "COc1[nH]c3cccc2C(=O)NCCc1c23",
+      "size": 6,
+      "topology": "pendant",
+      "n_admissible_stoichs": 35,
+      "admissible_stoichs": [
+        [
+          [
+            "C",
+            6
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "N",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "O",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "O",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "P",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            3
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            2
+          ],
+          [
+            "O",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            2
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            2
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "P",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            3
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            2
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            2
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "S",
+            3
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "P",
+            2
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "P",
+            3
+          ]
+        ]
+      ],
+      "declared_ring_elements": [
+        "C",
+        "N",
+        "O",
+        "S",
+        "P"
+      ],
+      "arms": {
+        "narrow_frozen": [
+          {
+            "k": 0,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "COc1[nH]c2cccc3c2c1CCN(c1ccccc1)C3=O",
+            "metrics": {
+              "qed": 0.786718000922302,
+              "sa": 2.38823681872522,
+              "sim": 0.56,
+              "heavy": 22,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 1,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "O=C1NCCc2c(OCc3ccccc3)[nH]c3cccc1c23",
+            "metrics": {
+              "qed": 0.7793395579021303,
+              "sa": 2.4821150731630883,
+              "sim": 0.6595744680851063,
+              "heavy": 22,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 2,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "COc1[nH]c2cc(-c3ccccc3)cc3c2c1CCNC3=O",
+            "metrics": {
+              "qed": 0.7621714763506164,
+              "sa": 2.5968723956482958,
+              "sim": 0.6595744680851063,
+              "heavy": 22,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 3,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "COc1[nH]c2c(-c3ccccc3)ccc3c2c1CCNC3=O",
+            "metrics": {
+              "qed": 0.7621714763506164,
+              "sa": 2.678902203340604,
+              "sim": 0.6170212765957447,
+              "heavy": 22,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 4,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "COc1c2c3c(cccc3n1-c1ccccc1)C(=O)NCC2",
+            "metrics": {
+              "qed": 0.7889309696441504,
+              "sa": 2.4772957129559874,
+              "sim": 0.5,
+              "heavy": 22,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 5,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "COc1[nH]c2cccc3c2c1C(c1ccccc1)CNC3=O",
+            "metrics": {
+              "qed": 0.7624725187465741,
+              "sa": 3.1062793127215,
+              "sim": 0.5294117647058824,
+              "heavy": 22,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 6,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "COc1[nH]c2cccc3c2c1CC(c1ccccc1)NC3=O",
+            "metrics": {
+              "qed": 0.7617923726022588,
+              "sa": 2.9977168127215013,
+              "sim": 0.5918367346938775,
+              "heavy": 22,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 7,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "COc1[nH]c2ccc(-c3ccccc3)c3c2c1CCNC3=O",
+            "metrics": {
+              "qed": 0.7621714763506164,
+              "sa": 2.6206921071867573,
+              "sim": 0.625,
+              "heavy": 22,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          }
+        ],
+        "free_composition": [
+          {
+            "k": 0,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "COc1[nH]c2cccc3c2c1CCN(C1COCCO1)C3=O",
+            "metrics": {
+              "qed": 0.9139421553251114,
+              "sa": 3.4562083992599613,
+              "sim": 0.4827586206896552,
+              "heavy": 22,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 1,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "O=C1NCCc2c(OCC3COCCO3)[nH]c3cccc1c23",
+            "metrics": {
+              "qed": 0.8947897317925827,
+              "sa": 3.439724652958187,
+              "sim": 0.5636363636363636,
+              "heavy": 22,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 2,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "COc1[nH]c2cc(C3COCCO3)cc3c2c1CCNC3=O",
+            "metrics": {
+              "qed": 0.8826389861727245,
+              "sa": 3.634445178106116,
+              "sim": 0.5178571428571429,
+              "heavy": 22,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 3,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "grow2",
+            "product": "COc1[nH]c2c(C=O)ccc3c2c1CCNC3=O",
+            "metrics": {
+              "qed": 0.7814790805634341,
+              "sa": 3.193102303819968,
+              "sim": 0.5833333333333334,
+              "heavy": 18,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 4,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "COc1c2c3c(cccc3n1C1COCCO1)C(=O)NCC2",
+            "metrics": {
+              "qed": 0.9126122071972906,
+              "sa": 3.5617182550291915,
+              "sim": 0.43333333333333335,
+              "heavy": 22,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 5,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "closure",
+            "product": "CCOCCOC1CNC(=O)c2cccc3[nH]c(OC)c1c23",
+            "metrics": {
+              "qed": 0.8008502628480417,
+              "sa": 3.5183099445896326,
+              "sim": 0.47368421052631576,
+              "heavy": 22,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 6,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "closure",
+            "product": "CCOCCOc1ccc2[nH]c(OC)c3c2c1C(=O)NCC3",
+            "metrics": {
+              "qed": 0.7992924710425793,
+              "sa": 2.8843057747691745,
+              "sim": 0.509090909090909,
+              "heavy": 22,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 7,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "COc1[nH]c2cccc3c2c1CC(C1COCCO1)NC3=O",
+            "metrics": {
+              "qed": 0.8754488606654802,
+              "sa": 3.8384128829524435,
+              "sim": 0.49122807017543857,
+              "heavy": 22,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          }
+        ],
+        "stoich_enumerated": [
+          {
+            "k": 0,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "O",
+                3
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "COc1[nH]c2cccc3c2c1CCN(C1COCOO1)C3=O",
+            "metrics": {
+              "qed": 0.8499095782617451,
+              "sa": 3.803543495413807,
+              "sim": 0.4745762711864407,
+              "heavy": 22,
+              "added_rings": [
+                "6s:C3O3"
+              ],
+              "added_hetero_rings": [
+                "6s:C3O3"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 1,
+            "requested_stoich": [
+              [
+                "C",
+                4
+              ],
+              [
+                "O",
+                1
+              ],
+              [
+                "P",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5_blocked",
+            "product": "CCCOCCOc1[nH]c2cccc3c2c1CCNC3=O",
+            "metrics": {
+              "qed": 0.8014300392745392,
+              "sa": 2.8004925485532297,
+              "sim": 0.6530612244897959,
+              "heavy": 21,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 2,
+            "requested_stoich": [
+              [
+                "C",
+                4
+              ],
+              [
+                "N",
+                1
+              ],
+              [
+                "P",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5_blocked",
+            "product": "CCCNCc1cc2c3c(c(OC)[nH]c3c1)CCNC2=O",
+            "metrics": {
+              "qed": 0.7365401991058759,
+              "sa": 2.883528235816785,
+              "sim": 0.5370370370370371,
+              "heavy": 21,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 3,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "P",
+                3
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow3_blocked",
+            "product": "CCCc1ccc2c3c(c(OC)[nH]c13)CCNC2=O",
+            "metrics": {
+              "qed": 0.887952471045819,
+              "sa": 2.97492586660144,
+              "sim": 0.56,
+              "heavy": 19,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 4,
+            "requested_stoich": [
+              [
+                "C",
+                4
+              ],
+              [
+                "N",
+                1
+              ],
+              [
+                "O",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "COc1c2c3c(cccc3n1C1COCCN1)C(=O)NCC2",
+            "metrics": {
+              "qed": 0.8702406236126279,
+              "sa": 3.6936721011830382,
+              "sim": 0.43333333333333335,
+              "heavy": 22,
+              "added_rings": [
+                "6s:C4N1O1"
+              ],
+              "added_hetero_rings": [
+                "6s:C4N1O1"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 5,
+            "requested_stoich": [
+              [
+                "C",
+                4
+              ],
+              [
+                "O",
+                1
+              ],
+              [
+                "P",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5_blocked",
+            "product": "CCCCOC1CNC(=O)c2cccc3[nH]c(OC)c1c23",
+            "metrics": {
+              "qed": 0.8315522668375631,
+              "sa": 3.4555497682746044,
+              "sim": 0.48214285714285715,
+              "heavy": 21,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 6,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "N",
+                1
+              ],
+              [
+                "S",
+                2
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "COc1[nH]c2cccc3c2c1CC(C1NCCSS1)NC3=O",
+            "metrics": {
+              "qed": 0.7339943840769682,
+              "sa": 4.263474661798597,
+              "sim": 0.5087719298245614,
+              "heavy": 22,
+              "added_rings": [
+                "6s:C3N1S2"
+              ],
+              "added_hetero_rings": [
+                "6s:C3N1S2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 7,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "O",
+                2
+              ],
+              [
+                "P",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5_blocked",
+            "product": "COc1[nH]c2cccc3c2c1CC(COCCO)NC3=O",
+            "metrics": {
+              "qed": 0.7125644673177292,
+              "sa": 3.418192845197682,
+              "sim": 0.509090909090909,
+              "heavy": 21,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          }
+        ]
+      },
+      "sec": 500.38347244262695
+    },
+    {
+      "cell": "parp1_s2",
+      "seed": "O/N=C/c1cn3CCNC(=O)c2cccc1c23",
+      "size": 6,
+      "topology": "pendant",
+      "n_admissible_stoichs": 35,
+      "admissible_stoichs": [
+        [
+          [
+            "C",
+            6
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "N",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "O",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "O",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "P",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            3
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            2
+          ],
+          [
+            "O",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            2
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            2
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "P",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            3
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            2
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            2
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "S",
+            3
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "P",
+            2
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "P",
+            3
+          ]
+        ]
+      ],
+      "declared_ring_elements": [
+        "C",
+        "N",
+        "O",
+        "S",
+        "P"
+      ],
+      "arms": {
+        "narrow_frozen": [
+          {
+            "k": 0,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "O=C1NCCn2cc(C=NOc3ccccc3)c3cccc1c32",
+            "metrics": {
+              "qed": 0.5973674503960492,
+              "sa": 2.759898822747589,
+              "sim": 0.6862745098039216,
+              "heavy": 23,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 1,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "O=C1NCCn2cc(C(=NO)c3ccccc3)c3cccc1c32",
+            "metrics": {
+              "qed": 0.4340373656993013,
+              "sa": 2.6248036076466246,
+              "sim": 0.5849056603773585,
+              "heavy": 23,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 2,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "O=C1c2cccc3c(C=NO)cn(c23)CCN1c1ccccc1",
+            "metrics": {
+              "qed": 0.44913688738755786,
+              "sa": 2.589210725901502,
+              "sim": 0.5961538461538461,
+              "heavy": 23,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 3,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "O=C1NCCn2c(-c3ccccc3)c(C=NO)c3cccc1c32",
+            "metrics": {
+              "qed": 0.4341734972231078,
+              "sa": 2.6557445950174614,
+              "sim": 0.5454545454545454,
+              "heavy": 23,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 4,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "O=C1NCCn2cc(C=NO)c3cc(-c4ccccc4)cc1c32",
+            "metrics": {
+              "qed": 0.4341734972231078,
+              "sa": 2.8062481541449014,
+              "sim": 0.6862745098039216,
+              "heavy": 23,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 5,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "O=C1NCC(c2ccccc2)n2cc(C=NO)c3cccc1c32",
+            "metrics": {
+              "qed": 0.43417788361322496,
+              "sa": 3.1842710872915845,
+              "sim": 0.5636363636363636,
+              "heavy": 23,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 6,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "O=C1NC(c2ccccc2)Cn2cc(C=NO)c3cccc1c32",
+            "metrics": {
+              "qed": 0.4341272632624543,
+              "sa": 3.2432288370045583,
+              "sim": 0.5925925925925926,
+              "heavy": 23,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 7,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "O=C1NCCn2cc(C=NO)c3ccc(-c4ccccc4)c1c32",
+            "metrics": {
+              "qed": 0.4341734972231078,
+              "sa": 2.7527482689554645,
+              "sim": 0.6538461538461539,
+              "heavy": 23,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          }
+        ],
+        "free_composition": [
+          {
+            "k": 0,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "O=C1NCCn2cc(C=NOC3COCCO3)c3cccc1c32",
+            "metrics": {
+              "qed": 0.6799833465655107,
+              "sa": 3.7228426176488485,
+              "sim": 0.5932203389830508,
+              "heavy": 23,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 1,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "O=C1NCCn2cc(C(=NO)C3CCOCC3)c3cccc1c32",
+            "metrics": {
+              "qed": 0.505616172362898,
+              "sa": 3.04839671901287,
+              "sim": 0.5344827586206896,
+              "heavy": 23,
+              "added_rings": [
+                "6s:C5O1"
+              ],
+              "added_hetero_rings": [
+                "6s:C5O1"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 2,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "O=C1c2cccc3c(C=NO)cn(c23)CCN1C1COCCO1",
+            "metrics": {
+              "qed": 0.5144123189094427,
+              "sa": 3.623460754340954,
+              "sim": 0.5166666666666667,
+              "heavy": 23,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 3,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "O=C1NCCn2c(C3CCOCC3)c(C=NO)c3cccc1c32",
+            "metrics": {
+              "qed": 0.5062336368162403,
+              "sa": 3.100007740826877,
+              "sim": 0.5,
+              "heavy": 23,
+              "added_rings": [
+                "6s:C5O1"
+              ],
+              "added_hetero_rings": [
+                "6s:C5O1"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 4,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "closure",
+            "product": "CCOCCOc1cc2c3c(c1)c(C=NO)cn3CCNC2=O",
+            "metrics": {
+              "qed": 0.3667559291649868,
+              "sa": 3.0621390736731344,
+              "sim": 0.55,
+              "heavy": 23,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 5,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "O=C1NCC(C2COCCO2)n2cc(C=NO)c3cccc1c32",
+            "metrics": {
+              "qed": 0.4944645587049328,
+              "sa": 3.9188015791643185,
+              "sim": 0.5,
+              "heavy": 23,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 6,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "O=C1NC(C2COCCO2)Cn2cc(C=NO)c3cccc1c32",
+            "metrics": {
+              "qed": 0.4913147799550705,
+              "sa": 3.998350832895662,
+              "sim": 0.5245901639344263,
+              "heavy": 23,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 7,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "closure",
+            "product": "CCOCCOc1ccc2c(C=NO)cn3c2c1C(=O)NCC3",
+            "metrics": {
+              "qed": 0.3667559291649868,
+              "sa": 3.0242698429039034,
+              "sim": 0.5245901639344263,
+              "heavy": 23,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          }
+        ],
+        "stoich_enumerated": [
+          {
+            "k": 0,
+            "requested_stoich": [
+              [
+                "C",
+                4
+              ],
+              [
+                "P",
+                2
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow4_blocked",
+            "product": "CCCCON=Cc1cn2c3c(cccc13)C(=O)NCC2",
+            "metrics": {
+              "qed": 0.5212091341117389,
+              "sa": 2.8802100769264953,
+              "sim": 0.6363636363636364,
+              "heavy": 21,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 1,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "O",
+                1
+              ],
+              [
+                "P",
+                2
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow4_blocked",
+            "product": "O=C1NCCn2cc(C(CCCO)=NO)c3cccc1c32",
+            "metrics": {
+              "qed": 0.45029895656809377,
+              "sa": 2.9858928512014007,
+              "sim": 0.5535714285714286,
+              "heavy": 21,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 2,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "P",
+                2
+              ],
+              [
+                "S",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow4_blocked",
+            "product": "O=C1c2cccc3c(C=NO)cn(c23)CCN1CCCS",
+            "metrics": {
+              "qed": 0.39372711095480134,
+              "sa": 3.0778474665860163,
+              "sim": 0.5535714285714286,
+              "heavy": 21,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 3,
+            "requested_stoich": [
+              [
+                "C",
+                4
+              ],
+              [
+                "O",
+                1
+              ],
+              [
+                "S",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "O=C1NCCn2c(C3CCOCS3)c(C=NO)c3cccc1c32",
+            "metrics": {
+              "qed": 0.503074103526381,
+              "sa": 4.038725507498244,
+              "sim": 0.46875,
+              "heavy": 23,
+              "added_rings": [
+                "6s:C4O1S1"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O1S1"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 4,
+            "requested_stoich": [
+              [
+                "C",
+                5
+              ],
+              [
+                "P",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5_blocked",
+            "product": "CCCCCc1cc2c3c(c1)c(C=NO)cn3CCNC2=O",
+            "metrics": {
+              "qed": 0.38567222967567594,
+              "sa": 3.0173805000439,
+              "sim": 0.5789473684210527,
+              "heavy": 22,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 5,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "N",
+                1
+              ],
+              [
+                "O",
+                1
+              ],
+              [
+                "P",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5_blocked",
+            "product": "NCCOCC1CNC(=O)c2cccc3c(C=NO)cn1c23",
+            "metrics": {
+              "qed": 0.3274684532147168,
+              "sa": 3.5813604940401813,
+              "sim": 0.5,
+              "heavy": 22,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 6,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "N",
+                1
+              ],
+              [
+                "P",
+                1
+              ],
+              [
+                "S",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5_blocked",
+            "product": "O=C1NC(CNCCS)Cn2cc(C=NO)c3cccc1c32",
+            "metrics": {
+              "qed": 0.21898227616976176,
+              "sa": 3.8453956588753453,
+              "sim": 0.5245901639344263,
+              "heavy": 22,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 7,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "O",
+                2
+              ],
+              [
+                "P",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5_blocked",
+            "product": "COCCOc1ccc2c(C=NO)cn3c2c1C(=O)NCC3",
+            "metrics": {
+              "qed": 0.3762817972395217,
+              "sa": 3.0117958846592847,
+              "sim": 0.5423728813559322,
+              "heavy": 22,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          }
+        ]
+      },
+      "sec": 796.2145993709564
+    },
+    {
+      "cell": "fa7_s3",
+      "seed": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34",
+      "size": 6,
+      "topology": "pendant",
+      "n_admissible_stoichs": 35,
+      "admissible_stoichs": [
+        [
+          [
+            "C",
+            6
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "N",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "O",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "O",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "P",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            3
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            2
+          ],
+          [
+            "O",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            2
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            2
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "P",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            3
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            2
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            2
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "S",
+            3
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "P",
+            2
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "P",
+            3
+          ]
+        ]
+      ],
+      "declared_ring_elements": [
+        "C",
+        "N",
+        "O",
+        "S",
+        "P"
+      ],
+      "arms": {
+        "narrow_frozen": [
+          {
+            "k": 0,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CC(C)CCN(Cc1ccc2ccc(C(N)=Nc3ccccc3)cc2c1)C(=O)c1cccc2ccccc12",
+            "metrics": {
+              "qed": 0.17547186867637934,
+              "sa": 2.4886286941595497,
+              "sim": 0.7741935483870968,
+              "heavy": 38,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 1,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CC(C)(CCN(Cc1ccc2ccc(C(=N)N)cc2c1)C(=O)c1cccc2ccccc12)c1ccccc1",
+            "metrics": {
+              "qed": 0.17383769312569883,
+              "sa": 2.5148999753554193,
+              "sim": 0.7142857142857143,
+              "heavy": 38,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 2,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CC(C)CCN(Cc1ccc2ccc(C(=N)Nc3ccccc3)cc2c1)C(=O)c1cccc2ccccc12",
+            "metrics": {
+              "qed": 0.16727413062316254,
+              "sa": 2.540725477376334,
+              "sim": 0.7580645161290323,
+              "heavy": 38,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 3,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CC(C)CCN(Cc1ccc2ccc(C(=N)N)cc2c1)C(=O)c1cccc2cc(-c3ccccc3)ccc12",
+            "metrics": {
+              "qed": 0.1701412679950531,
+              "sa": 2.4242851553130755,
+              "sim": 0.85,
+              "heavy": 38,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 4,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CC(C)CCN(Cc1ccc2ccc(C(=N)N)cc2c1)C(=O)c1cccc2ccc(-c3ccccc3)cc12",
+            "metrics": {
+              "qed": 0.1701412679950531,
+              "sa": 2.4333372371761666,
+              "sim": 0.847457627118644,
+              "heavy": 38,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 5,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CC(C)CCN(C(=O)c1cccc2ccccc12)C(c1ccccc1)c1ccc2ccc(C(=N)N)cc2c1",
+            "metrics": {
+              "qed": 0.1708392409278089,
+              "sa": 2.9839056574250957,
+              "sim": 0.6461538461538462,
+              "heavy": 38,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 6,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CC(C)CCN(Cc1ccc2ccc(C(=N)N)cc2c1)C(=O)c1cc(-c2ccccc2)cc2ccccc12",
+            "metrics": {
+              "qed": 0.1701412679950531,
+              "sa": 2.437029968298255,
+              "sim": 0.8333333333333334,
+              "heavy": 38,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 7,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CC(C)CCN(Cc1ccc2ccc(C(=N)N)cc2c1)C(=O)c1cccc2c(-c3ccccc3)cccc12",
+            "metrics": {
+              "qed": 0.1701412679950531,
+              "sa": 2.4195431651931045,
+              "sim": 0.847457627118644,
+              "heavy": 38,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          }
+        ],
+        "free_composition": [
+          {
+            "k": 0,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "CC(C)CCN(Cc1ccc2ccc(C(N)=NC3COCCO3)cc2c1)C(=O)c1cccc2ccccc12",
+            "metrics": {
+              "qed": 0.24201732716722962,
+              "sa": 3.3373500867572305,
+              "sim": 0.6666666666666666,
+              "heavy": 38,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 1,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "CC(C)(CCN(Cc1ccc2ccc(C(=N)N)cc2c1)C(=O)c1cccc2ccccc12)C1COCCO1",
+            "metrics": {
+              "qed": 0.23378082493501118,
+              "sa": 3.336894930537305,
+              "sim": 0.625,
+              "heavy": 38,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 2,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "CC(C)CCN(Cc1ccc2ccc(C(=N)NC3COCCO3)cc2c1)C(=O)c1cccc2ccccc12",
+            "metrics": {
+              "qed": 0.22672040781183206,
+              "sa": 3.386583233610377,
+              "sim": 0.6527777777777778,
+              "heavy": 38,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 3,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "grow2",
+            "product": "CC(C)CCN(Cc1ccc2ccc(C(=N)N)cc2c1)C(=O)c1cccc2cc(C=O)ccc12",
+            "metrics": {
+              "qed": 0.20224613119721976,
+              "sa": 2.5207229193460936,
+              "sim": 0.8064516129032258,
+              "heavy": 34,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 4,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "grow2",
+            "product": "CC(C)CCN(Cc1ccc2ccc(C(=N)N)cc2c1)C(=O)c1cccc2ccc(C=O)cc12",
+            "metrics": {
+              "qed": 0.20224613119721976,
+              "sa": 2.53370801549994,
+              "sim": 0.8032786885245902,
+              "heavy": 34,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 5,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "closure",
+            "product": "CCOCCOc1ccc(C(=O)N(CCC(C)C)Cc2ccc3ccc(C(=N)N)cc3c2)c2ccccc12",
+            "metrics": {
+              "qed": 0.13119395174547688,
+              "sa": 2.564187248938106,
+              "sim": 0.7058823529411765,
+              "heavy": 38,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 6,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "closure",
+            "product": "CCOCCOc1cc(C(=O)N(CCC(C)C)Cc2ccc3ccc(C(=N)N)cc3c2)c2ccccc2c1",
+            "metrics": {
+              "qed": 0.131193951745477,
+              "sa": 2.5864705822714384,
+              "sim": 0.7101449275362319,
+              "heavy": 38,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 7,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "closure",
+            "product": "CCOCCOc1cccc2c(C(=O)N(CCC(C)C)Cc3ccc4ccc(C(=N)N)cc4c3)cccc12",
+            "metrics": {
+              "qed": 0.13119395174547688,
+              "sa": 2.5698436591945164,
+              "sim": 0.7313432835820896,
+              "heavy": 38,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          }
+        ],
+        "stoich_enumerated": [
+          {
+            "k": 0,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "O",
+                2
+              ],
+              [
+                "P",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5_blocked",
+            "product": "CC(C)CCN(Cc1ccc2ccc(C(N)=NCCOCO)cc2c1)C(=O)c1cccc2ccccc12",
+            "metrics": {
+              "qed": 0.12648921952617664,
+              "sa": 2.726930761745967,
+              "sim": 0.7058823529411765,
+              "heavy": 37,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 1,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "P",
+                2
+              ],
+              [
+                "S",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow4_blocked",
+            "product": "CC(C)(CCCS)CCN(Cc1ccc2ccc(C(=N)N)cc2c1)C(=O)c1cccc2ccccc12",
+            "metrics": {
+              "qed": 0.1248313954196599,
+              "sa": 2.718063896793618,
+              "sim": 0.6923076923076923,
+              "heavy": 36,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 2,
+            "requested_stoich": [
+              [
+                "C",
+                4
+              ],
+              [
+                "O",
+                2
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "CC(C)CCN(Cc1ccc2ccc(C(=N)NC3COCCO3)cc2c1)C(=O)c1cccc2ccccc12",
+            "metrics": {
+              "qed": 0.22672040781183206,
+              "sa": 3.386583233610377,
+              "sim": 0.6527777777777778,
+              "heavy": 38,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 3,
+            "requested_stoich": [
+              [
+                "C",
+                4
+              ],
+              [
+                "N",
+                1
+              ],
+              [
+                "S",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow2",
+            "product": "CC(C)CCN(Cc1ccc2ccc(C(=N)N)cc2c1)C(=O)c1cccc2cc(C#N)ccc12",
+            "metrics": {
+              "qed": 0.2747361123470844,
+              "sa": 2.507854650115325,
+              "sim": 0.7936507936507936,
+              "heavy": 34,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 4,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "O",
+                2
+              ],
+              [
+                "P",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow2",
+            "product": "CC(C)CCN(Cc1ccc2ccc(C(=N)N)cc2c1)C(=O)c1cccc2ccc(C=O)cc12",
+            "metrics": {
+              "qed": 0.20224613119721976,
+              "sa": 2.53370801549994,
+              "sim": 0.8032786885245902,
+              "heavy": 34,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 5,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "O",
+                1
+              ],
+              [
+                "S",
+                2
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "closure",
+            "product": "CC(C)CCN(Cc1ccc2ccc(C(=N)N)cc2c1)C(=O)c1ccc(OCCCSS)c2ccccc12",
+            "metrics": {
+              "qed": 0.057318213081390186,
+              "sa": 2.810207761758617,
+              "sim": 0.6857142857142857,
+              "heavy": 38,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 6,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "N",
+                2
+              ],
+              [
+                "P",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5_blocked",
+            "product": "CC(C)CCN(Cc1ccc2ccc(C(=N)N)cc2c1)C(=O)c1cc(CNCCN)cc2ccccc12",
+            "metrics": {
+              "qed": 0.13316153904499636,
+              "sa": 2.618990351213103,
+              "sim": 0.7538461538461538,
+              "heavy": 37,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 7,
+            "requested_stoich": [
+              [
+                "C",
+                4
+              ],
+              [
+                "N",
+                2
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow2",
+            "product": "CC(C)CCN(Cc1ccc2ccc(C(=N)N)cc2c1)C(=O)c1cccc2c(C#N)cccc12",
+            "metrics": {
+              "qed": 0.2747361123470844,
+              "sa": 2.513586380884554,
+              "sim": 0.7903225806451613,
+              "heavy": 34,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          }
+        ]
+      },
+      "sec": 2118.1349716186523
+    },
+    {
+      "cell": "fa7_s4",
+      "seed": "N[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)N[C@H](CCl)CCCN=C(N)N",
+      "size": 6,
+      "topology": "pendant",
+      "n_admissible_stoichs": 35,
+      "admissible_stoichs": [
+        [
+          [
+            "C",
+            6
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "N",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "O",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "O",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "P",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            3
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            2
+          ],
+          [
+            "O",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            2
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            2
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "P",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            3
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            2
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            2
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "S",
+            3
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "P",
+            2
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "P",
+            3
+          ]
+        ]
+      ],
+      "declared_ring_elements": [
+        "C",
+        "N",
+        "O",
+        "S",
+        "P"
+      ],
+      "arms": {
+        "narrow_frozen": [
+          {
+            "k": 0,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "NC(N)=NCCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccc(-c2ccccc2)cc1",
+            "metrics": {
+              "qed": 0.1622107420342354,
+              "sa": 3.4150796451874843,
+              "sim": 0.9047619047619048,
+              "heavy": 35,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 1,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "NC(N)=NCCCC(CCl)NC(=O)C1CCCN1C(=O)C(Cc1ccccc1)Nc1ccccc1",
+            "metrics": {
+              "qed": 0.15469217435233243,
+              "sa": 3.4243857430895837,
+              "sim": 0.7910447761194029,
+              "heavy": 35,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 2,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "NC(N)=NCCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1cccc(-c2ccccc2)c1",
+            "metrics": {
+              "qed": 0.1622107420342354,
+              "sa": 3.456388736096577,
+              "sim": 0.8636363636363636,
+              "heavy": 35,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 3,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "NC(N)=NCCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1cccc(-c2ccccc2)c1",
+            "metrics": {
+              "qed": 0.1622107420342354,
+              "sa": 3.456388736096577,
+              "sim": 0.8636363636363636,
+              "heavy": 35,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 4,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "NC(=NCCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1)Nc1ccccc1",
+            "metrics": {
+              "qed": 0.16377118846388874,
+              "sa": 3.4239468200126604,
+              "sim": 0.8461538461538461,
+              "heavy": 35,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 5,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "NC(=NCCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1)Nc1ccccc1",
+            "metrics": {
+              "qed": 0.16377118846388874,
+              "sa": 3.4239468200126604,
+              "sim": 0.8461538461538461,
+              "heavy": 35,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 6,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "NC(N)=NCCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)C(c1ccccc1)c1ccccc1",
+            "metrics": {
+              "qed": 0.1620328879261844,
+              "sa": 3.557366358474199,
+              "sim": 0.7575757575757576,
+              "heavy": 35,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 7,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "NC(N)=NCCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1-c1ccccc1",
+            "metrics": {
+              "qed": 0.1622107420342354,
+              "sa": 3.487289435397277,
+              "sim": 0.7941176470588235,
+              "heavy": 35,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          }
+        ],
+        "free_composition": [
+          {
+            "k": 0,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "grow2",
+            "product": "N#Cc1ccc(CC(N)C(=O)N2CCCC2C(=O)NC(CCl)CCCN=C(N)N)cc1",
+            "metrics": {
+              "qed": 0.17296160077797945,
+              "sa": 3.5640606504500596,
+              "sim": 0.8059701492537313,
+              "heavy": 31,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 1,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "NC(N)=NCCCC(CCl)NC(=O)C1CCCN1C(=O)C(Cc1ccccc1)NC1COCCO1",
+            "metrics": {
+              "qed": 0.13769262516872605,
+              "sa": 4.053240684177663,
+              "sim": 0.6973684210526315,
+              "heavy": 35,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 2,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "grow2",
+            "product": "N#Cc1cccc(CC(N)C(=O)N2CCCC2C(=O)NC(CCl)CCCN=C(N)N)c1",
+            "metrics": {
+              "qed": 0.17296160077797945,
+              "sa": 3.6067454447255507,
+              "sim": 0.7857142857142857,
+              "heavy": 31,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 3,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "grow2",
+            "product": "N#Cc1cccc(CC(N)C(=O)N2CCCC2C(=O)NC(CCl)CCCN=C(N)N)c1",
+            "metrics": {
+              "qed": 0.17296160077797945,
+              "sa": 3.6067454447255507,
+              "sim": 0.7857142857142857,
+              "heavy": 31,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 4,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "grow1",
+            "product": "NC(N)=NCCCC(NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1)C(=O)Cl",
+            "metrics": {
+              "qed": 0.17274016408570872,
+              "sa": 3.3841014906102718,
+              "sim": 0.7846153846153846,
+              "heavy": 30,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 5,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "NC(=NCCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1)NC1COCCO1",
+            "metrics": {
+              "qed": 0.14577392140881115,
+              "sa": 4.082386838023815,
+              "sim": 0.7432432432432432,
+              "heavy": 35,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 6,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "NC(=NCCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1)NC1COCCO1",
+            "metrics": {
+              "qed": 0.14577392140881115,
+              "sa": 4.082386838023815,
+              "sim": 0.7432432432432432,
+              "heavy": 35,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 7,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "NC(N)=NCCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)C(c1ccccc1)C1COCCO1",
+            "metrics": {
+              "qed": 0.14449550930648117,
+              "sa": 4.24495285702682,
+              "sim": 0.6410256410256411,
+              "heavy": 35,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          }
+        ],
+        "stoich_enumerated": [
+          {
+            "k": 0,
+            "requested_stoich": [
+              [
+                "C",
+                5
+              ],
+              [
+                "P",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5_blocked",
+            "product": "CCCCCc1ccc(CC(N)C(=O)N2CCCC2C(=O)NC(CCl)CCCN=C(N)N)cc1",
+            "metrics": {
+              "qed": 0.13607312822918052,
+              "sa": 3.500762133047159,
+              "sim": 0.8059701492537313,
+              "heavy": 34,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 1,
+            "requested_stoich": [
+              [
+                "C",
+                5
+              ],
+              [
+                "P",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5_blocked",
+            "product": "CCCCCNC(Cc1ccccc1)C(=O)N1CCCC1C(=O)NC(CCl)CCCN=C(N)N",
+            "metrics": {
+              "qed": 0.12906748068153137,
+              "sa": 3.502576176569425,
+              "sim": 0.7361111111111112,
+              "heavy": 34,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 2,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "O",
+                2
+              ],
+              [
+                "P",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5_blocked",
+            "product": "NC(N)=NCCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1cccc(COCCO)c1",
+            "metrics": {
+              "qed": 0.10296364612289462,
+              "sa": 3.66064148527388,
+              "sim": 0.7638888888888888,
+              "heavy": 34,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 3,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "N",
+                2
+              ],
+              [
+                "S",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow2",
+            "product": "N#Cc1cccc(CC(N)C(=O)N2CCCC2C(=O)NC(CCl)CCCN=C(N)N)c1",
+            "metrics": {
+              "qed": 0.17296160077797945,
+              "sa": 3.6067454447255507,
+              "sim": 0.7857142857142857,
+              "heavy": 31,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 4,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "N",
+                1
+              ],
+              [
+                "O",
+                1
+              ],
+              [
+                "S",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow1",
+            "product": "NC(N)=NCCCC(NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1)C(=O)Cl",
+            "metrics": {
+              "qed": 0.17274016408570872,
+              "sa": 3.3841014906102718,
+              "sim": 0.7846153846153846,
+              "heavy": 30,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 5,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "N",
+                1
+              ],
+              [
+                "O",
+                1
+              ],
+              [
+                "P",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5_blocked",
+            "product": "NCOCCNC(N)=NCCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1",
+            "metrics": {
+              "qed": 0.07900121777011469,
+              "sa": 3.7832824265694267,
+              "sim": 0.7638888888888888,
+              "heavy": 34,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 6,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "N",
+                1
+              ],
+              [
+                "P",
+                2
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow4_blocked",
+            "product": "NCCCC(c1ccccc1)C(N)C(=O)N1CCCC1C(=O)NC(CCl)CCCN=C(N)N",
+            "metrics": {
+              "qed": 0.12012902277108985,
+              "sa": 3.882759379161037,
+              "sim": 0.7142857142857143,
+              "heavy": 33,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 7,
+            "requested_stoich": [
+              [
+                "C",
+                5
+              ],
+              [
+                "N",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow2",
+            "product": "N#Cc1ccccc1CC(N)C(=O)N1CCCC1C(=O)NC(CCl)CCCN=C(N)N",
+            "metrics": {
+              "qed": 0.17296160077797945,
+              "sa": 3.6400712050117763,
+              "sim": 0.7571428571428571,
+              "heavy": 31,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          }
+        ]
+      },
+      "sec": 1715.9723854064941
+    },
+    {
+      "cell": "fa7_s5",
+      "seed": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+      "size": 6,
+      "topology": "pendant",
+      "n_admissible_stoichs": 35,
+      "admissible_stoichs": [
+        [
+          [
+            "C",
+            6
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "N",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "O",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            5
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "O",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            4
+          ],
+          [
+            "P",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            3
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            2
+          ],
+          [
+            "O",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            2
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            2
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "N",
+            1
+          ],
+          [
+            "P",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            3
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            2
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            2
+          ],
+          [
+            "P",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "O",
+            1
+          ],
+          [
+            "P",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "S",
+            3
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "P",
+            1
+          ],
+          [
+            "S",
+            2
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "P",
+            2
+          ],
+          [
+            "S",
+            1
+          ]
+        ],
+        [
+          [
+            "C",
+            3
+          ],
+          [
+            "P",
+            3
+          ]
+        ]
+      ],
+      "declared_ring_elements": [
+        "C",
+        "N",
+        "O",
+        "S",
+        "P"
+      ],
+      "arms": {
+        "narrow_frozen": [
+          {
+            "k": 0,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CC(C)Nc1ccc(-c2cc(Nc3ccccc3)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(=N)N)cc2)c1=O",
+            "metrics": {
+              "qed": 0.11880709056343923,
+              "sa": 2.675113177092209,
+              "sim": 0.7857142857142857,
+              "heavy": 41,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 1,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CC(C)N(c1ccccc1)c1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(=N)N)cc2)c1=O",
+            "metrics": {
+              "qed": 0.1127679848991441,
+              "sa": 2.8575045272066237,
+              "sim": 0.7027027027027027,
+              "heavy": 41,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 2,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(N)=Nc3ccccc3)cc2)c1=O",
+            "metrics": {
+              "qed": 0.11279245569896237,
+              "sa": 2.814729364383176,
+              "sim": 0.7746478873239436,
+              "heavy": 41,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 3,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NC(c2ccccc2)c2ccc(C(=N)N)cc2)c1=O",
+            "metrics": {
+              "qed": 0.09841977700323602,
+              "sa": 3.2082934280854953,
+              "sim": 0.7428571428571429,
+              "heavy": 41,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 4,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CC(C)(Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(=N)N)cc2)c1=O)c1ccccc1",
+            "metrics": {
+              "qed": 0.09857789412666539,
+              "sa": 2.8333114097977177,
+              "sim": 0.7361111111111112,
+              "heavy": 41,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 5,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(=N)Nc3ccccc3)cc2)c1=O",
+            "metrics": {
+              "qed": 0.09665820990961084,
+              "sa": 2.85693484933301,
+              "sim": 0.8115942028985508,
+              "heavy": 41,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 6,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)N(Cc2ccc(C(=N)N)cc2)c2ccccc2)c1=O",
+            "metrics": {
+              "qed": 0.11193385198109837,
+              "sa": 2.812860397651967,
+              "sim": 0.7027027027027027,
+              "heavy": 41,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 7,
+            "requested_stoich": null,
+            "status": "OK",
+            "stage": null,
+            "product": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)Oc3ccccc3)c2)n(CC(=O)NCc2ccc(C(=N)N)cc2)c1=O",
+            "metrics": {
+              "qed": 0.06570797011386345,
+              "sa": 2.718482942978495,
+              "sim": 0.8028169014084507,
+              "heavy": 41,
+              "added_rings": [
+                "6a:C6"
+              ],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          }
+        ],
+        "free_composition": [
+          {
+            "k": 0,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "CC(C)Nc1ccc(-c2cc(NC3COCCO3)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(=N)N)cc2)c1=O",
+            "metrics": {
+              "qed": 0.15105321372188732,
+              "sa": 3.534278455369426,
+              "sim": 0.6962025316455697,
+              "heavy": 41,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 1,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "CC(C)N(c1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(=N)N)cc2)c1=O)C1COCCO1",
+            "metrics": {
+              "qed": 0.13991050725739881,
+              "sa": 3.6738460596644433,
+              "sim": 0.6341463414634146,
+              "heavy": 41,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 2,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(N)=NC3COCCO3)cc2)c1=O",
+            "metrics": {
+              "qed": 0.1401133351838138,
+              "sa": 3.644672033964743,
+              "sim": 0.6962025316455697,
+              "heavy": 41,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 3,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NC(c2ccc(C(=N)N)cc2)C2COCCO2)c1=O",
+            "metrics": {
+              "qed": 0.12190468613415292,
+              "sa": 3.8013533900168444,
+              "sim": 0.65,
+              "heavy": 41,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 4,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "CC(C)(Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(=N)N)cc2)c1=O)C1COCCO1",
+            "metrics": {
+              "qed": 0.12166150099109695,
+              "sa": 3.643977233753513,
+              "sim": 0.6708860759493671,
+              "heavy": 41,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 5,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "closure",
+            "product": "CCOCCOCC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(=N)N)cc2)c1=O",
+            "metrics": {
+              "qed": 0.06942772286346674,
+              "sa": 3.3316310799073587,
+              "sim": 0.7702702702702703,
+              "heavy": 41,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 6,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "closure",
+            "product": "CCOCCOCC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(=N)N)cc2)c1=O",
+            "metrics": {
+              "qed": 0.06942772286346674,
+              "sa": 3.3316310799073587,
+              "sim": 0.7702702702702703,
+              "heavy": 41,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 7,
+            "requested_stoich": "free",
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(=N)NC3COCCO3)cc2)c1=O",
+            "metrics": {
+              "qed": 0.12264246186585723,
+              "sa": 3.684138388479793,
+              "sim": 0.717948717948718,
+              "heavy": 41,
+              "added_rings": [
+                "6s:C4O2"
+              ],
+              "added_hetero_rings": [
+                "6s:C4O2"
+              ],
+              "n_added_hetero": 1
+            }
+          }
+        ],
+        "stoich_enumerated": [
+          {
+            "k": 0,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "N",
+                1
+              ],
+              [
+                "O",
+                1
+              ],
+              [
+                "P",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5_blocked",
+            "product": "CC(C)Nc1ccc(-c2cc(NCCOCN)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(=N)N)cc2)c1=O",
+            "metrics": {
+              "qed": 0.06799699583584548,
+              "sa": 2.962496340654793,
+              "sim": 0.7236842105263158,
+              "heavy": 40,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 1,
+            "requested_stoich": [
+              [
+                "C",
+                4
+              ],
+              [
+                "N",
+                1
+              ],
+              [
+                "P",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow5_blocked",
+            "product": "CNCCCN(c1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(=N)N)cc2)c1=O)C(C)C",
+            "metrics": {
+              "qed": 0.08154519109730765,
+              "sa": 2.953014424192876,
+              "sim": 0.6753246753246753,
+              "heavy": 40,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 2,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "P",
+                3
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow3_blocked",
+            "product": "CCCN=C(N)c1ccc(CNC(=O)Cn2c(-c3cc(N)cc(C(=O)O)c3)ccc(NC(C)C)c2=O)cc1",
+            "metrics": {
+              "qed": 0.1478002697144752,
+              "sa": 2.849021241612098,
+              "sim": 0.7746478873239436,
+              "heavy": 38,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 3,
+            "requested_stoich": [
+              [
+                "C",
+                3
+              ],
+              [
+                "P",
+                2
+              ],
+              [
+                "S",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "grow4_blocked",
+            "product": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NC(CCCS)c2ccc(C(=N)N)cc2)c1=O",
+            "metrics": {
+              "qed": 0.0781237373764176,
+              "sa": 3.4362321165149448,
+              "sim": 0.6933333333333334,
+              "heavy": 39,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 4,
+            "requested_stoich": [
+              [
+                "C",
+                5
+              ],
+              [
+                "O",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "CC(C)(Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(=N)N)cc2)c1=O)C1CCCCO1",
+            "metrics": {
+              "qed": 0.12395748158269743,
+              "sa": 3.5520363430652537,
+              "sim": 0.6835443037974683,
+              "heavy": 41,
+              "added_rings": [
+                "6s:C5O1"
+              ],
+              "added_hetero_rings": [
+                "6s:C5O1"
+              ],
+              "n_added_hetero": 1
+            }
+          },
+          {
+            "k": 5,
+            "requested_stoich": [
+              [
+                "C",
+                4
+              ],
+              [
+                "N",
+                1
+              ],
+              [
+                "O",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "closure",
+            "product": "CNCCCOCC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(=N)N)cc2)c1=O",
+            "metrics": {
+              "qed": 0.06238375915606924,
+              "sa": 3.3596901892190996,
+              "sim": 0.7402597402597403,
+              "heavy": 41,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 6,
+            "requested_stoich": [
+              [
+                "C",
+                4
+              ],
+              [
+                "N",
+                1
+              ],
+              [
+                "O",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "closure",
+            "product": "CNCCCOCC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(=N)N)cc2)c1=O",
+            "metrics": {
+              "qed": 0.06238375915606924,
+              "sa": 3.3596901892190996,
+              "sim": 0.7402597402597403,
+              "heavy": 41,
+              "added_rings": [],
+              "added_hetero_rings": [],
+              "n_added_hetero": 0
+            }
+          },
+          {
+            "k": 7,
+            "requested_stoich": [
+              [
+                "C",
+                4
+              ],
+              [
+                "N",
+                1
+              ],
+              [
+                "O",
+                1
+              ]
+            ],
+            "status": "UNSAT",
+            "stage": "aromatise",
+            "product": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(=N)NC3COCCN3)cc2)c1=O",
+            "metrics": {
+              "qed": 0.11016632869468752,
+              "sa": 3.697899057376114,
+              "sim": 0.691358024691358,
+              "heavy": 41,
+              "added_rings": [
+                "6s:C4N1O1"
+              ],
+              "added_hetero_rings": [
+                "6s:C4N1O1"
+              ],
+              "n_added_hetero": 1
+            }
+          }
+        ]
+      },
+      "sec": 2195.3953053951263
+    }
+  ]
+}

@@ -1,0 +1,274 @@
+[
+ {
+  "satisfied": false,
+  "reason": "restate did not aromatise",
+  "trace": [
+   "grow6",
+   "close1",
+   "restate1"
+  ],
+  "smiles": "CC1=C=C2C[NH2+]CC(C(C)C)N2c2cc(C(F)(F)F)ccc21",
+  "heavy": 22,
+  "sys": 1,
+  "arom": 1,
+  "sim": 0.263,
+  "qed": 0.791,
+  "sa": 4.67,
+  "t4": false
+ },
+ {
+  "satisfied": true,
+  "reason": null,
+  "trace": [
+   "grow6",
+   "close1",
+   "restate1"
+  ],
+  "smiles": "Cc1cncc2c(C(F)(F)F)cc(N3CC[NH2+]C(C)C3)cc12",
+  "heavy": 22,
+  "sys": 2,
+  "arom": 2,
+  "sim": 0.259,
+  "qed": 0.877,
+  "sa": 4.05,
+  "t4": false
+ },
+ {
+  "satisfied": true,
+  "reason": null,
+  "trace": [
+   "grow6",
+   "close1",
+   "restate1"
+  ],
+  "smiles": "C=CC=Cc1c2n(c3cc(C(F)(F)F)c(C)cc13)CC[NH2+]C2",
+  "heavy": 22,
+  "sys": 1,
+  "arom": 2,
+  "sim": 0.23,
+  "qed": 0.823,
+  "sa": 4.03,
+  "t4": false
+ },
+ {
+  "satisfied": false,
+  "reason": "restate did not aromatise",
+  "trace": [
+   "grow6",
+   "close1",
+   "restate1"
+  ],
+  "smiles": "COc1cc(N2CC3CC#CC([NH2+]3)S2)c(F)c(C(F)(F)F)c1",
+  "heavy": 22,
+  "sys": 2,
+  "arom": 1,
+  "sim": 0.167,
+  "qed": 0.51,
+  "sa": 5.84,
+  "t4": false
+ },
+ {
+  "satisfied": false,
+  "reason": "restate did not aromatise",
+  "trace": [
+   "grow6",
+   "close1",
+   "restate1"
+  ],
+  "smiles": "CCC1=CC2CN(c3ccc(C)c(C(F)(F)F)c3)CC(C1)[NH2+]2",
+  "heavy": 22,
+  "sys": 2,
+  "arom": 1,
+  "sim": 0.237,
+  "qed": 0.833,
+  "sa": 5.0,
+  "t4": false
+ },
+ {
+  "satisfied": false,
+  "reason": "restate did not aromatise",
+  "trace": [
+   "grow6",
+   "close1",
+   "restate1"
+  ],
+  "smiles": "Cc1c(F)cc(N2CC[NH2+]C3(C=CCC3)C2)cc1C(F)(F)F",
+  "heavy": 22,
+  "sys": 2,
+  "arom": 1,
+  "sim": 0.254,
+  "qed": 0.624,
+  "sa": 4.74,
+  "t4": false
+ },
+ {
+  "satisfied": false,
+  "reason": "restate did not aromatise",
+  "trace": [
+   "grow6",
+   "close1",
+   "restate1"
+  ],
+  "smiles": "CSC1C[NH2+]C(C)C(C)N1c1ccc2c(C(F)(F)F)c1CC2",
+  "heavy": 22,
+  "sys": 2,
+  "arom": 1,
+  "sim": 0.161,
+  "qed": 0.899,
+  "sa": 5.68,
+  "t4": false
+ },
+ {
+  "satisfied": false,
+  "reason": "restate did not aromatise",
+  "trace": [
+   "grow6",
+   "close1",
+   "restate1"
+  ],
+  "smiles": "CC1CN2CC([NH2+]1)C(OC#N)c1ccc(C(F)(F)F)c(Br)c12",
+  "heavy": 22,
+  "sys": 1,
+  "arom": 1,
+  "sim": 0.188,
+  "qed": 0.764,
+  "sa": 5.82,
+  "t4": false
+ },
+ {
+  "satisfied": false,
+  "reason": "restate did not aromatise",
+  "trace": [
+   "grow6",
+   "close1",
+   "restate1"
+  ],
+  "smiles": "CC(=[SH4])C(C)c1cc2c(c(C(F)(F)F)c1)CC1CN2CC[NH2+]1",
+  "heavy": 22,
+  "sys": 1,
+  "arom": 1,
+  "sim": 0.23,
+  "qed": 0.812,
+  "sa": 5.72,
+  "t4": false
+ },
+ {
+  "satisfied": false,
+  "reason": "restate did not aromatise",
+  "trace": [
+   "grow6",
+   "close1",
+   "restate1"
+  ],
+  "smiles": "CC1(C2C[NH2+]CCN2c2cccc(C(F)(F)F)c2Cl)CCC1",
+  "heavy": 22,
+  "sys": 3,
+  "arom": 1,
+  "sim": 0.281,
+  "qed": 0.88,
+  "sa": 4.11,
+  "t4": false
+ },
+ {
+  "satisfied": false,
+  "reason": "restate did not aromatise",
+  "trace": [
+   "grow6",
+   "close1",
+   "restate1"
+  ],
+  "smiles": "C=C1C[NH2+]C(C(C)(C)C)C2Cc3c(cccc3C(F)(F)F)N12",
+  "heavy": 22,
+  "sys": 1,
+  "arom": 1,
+  "sim": 0.203,
+  "qed": 0.781,
+  "sa": 4.5,
+  "t4": false
+ },
+ {
+  "satisfied": false,
+  "reason": "restate did not aromatise",
+  "trace": [
+   "grow6",
+   "close1",
+   "restate1"
+  ],
+  "smiles": "CC1[NH2+]CCN(c2ccc(O)c(C(F)(F)F)c2)C1CC1=CC1",
+  "heavy": 22,
+  "sys": 3,
+  "arom": 1,
+  "sim": 0.233,
+  "qed": 0.841,
+  "sa": 4.51,
+  "t4": false
+ },
+ {
+  "satisfied": false,
+  "reason": "restate did not aromatise",
+  "trace": [
+   "grow6",
+   "close1",
+   "restate1"
+  ],
+  "smiles": "C=C=C1[NH2+]CCN2C3CC(C(F)(F)F)CCC3CCCC12C",
+  "heavy": 22,
+  "sys": 1,
+  "arom": 0,
+  "sim": 0.141,
+  "qed": 0.682,
+  "sa": 5.2,
+  "t4": false
+ },
+ {
+  "satisfied": true,
+  "reason": null,
+  "trace": [
+   "grow6",
+   "close1",
+   "restate1"
+  ],
+  "smiles": "C#CC1Cn2c(cc3ccc(C(F)(F)F)cc32)C(C)(C=C)[NH2+]1",
+  "heavy": 22,
+  "sys": 1,
+  "arom": 2,
+  "sim": 0.242,
+  "qed": 0.618,
+  "sa": 4.68,
+  "t4": false
+ },
+ {
+  "satisfied": true,
+  "reason": null,
+  "trace": [
+   "grow6",
+   "close1",
+   "restate1"
+  ],
+  "smiles": "COCC1Cn2c(nc3c(C(F)(F)F)c(O)c(C)cc32)C[NH2+]1",
+  "heavy": 22,
+  "sys": 1,
+  "arom": 2,
+  "sim": 0.164,
+  "qed": 0.874,
+  "sa": 4.51,
+  "t4": false
+ },
+ {
+  "satisfied": false,
+  "reason": "restate did not aromatise",
+  "trace": [
+   "grow6",
+   "close1",
+   "restate1"
+  ],
+  "smiles": "CN1C=CCCC2CN(CC[NH2+]2)c2ccc1c(C(F)(F)F)c2",
+  "heavy": 22,
+  "sys": 1,
+  "arom": 1,
+  "sim": 0.304,
+  "qed": 0.794,
+  "sa": 5.6,
+  "t4": false
+ }
+]

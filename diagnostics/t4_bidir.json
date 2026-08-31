@@ -1,0 +1,308 @@
+[
+  {
+    "cell": "5ht1b_s7_d0.4",
+    "MET": false,
+    "trace": [
+      {
+        "half": 1,
+        "side": "f",
+        "fresh": 202,
+        "best_sim_to_goal": 0.4583,
+        "seen_f": 203,
+        "seen_b": 1
+      },
+      {
+        "half": 1,
+        "side": "b",
+        "fresh": 650,
+        "best_sim_to_goal": 0.4468,
+        "seen_f": 203,
+        "seen_b": 651
+      },
+      {
+        "half": 2,
+        "side": "f",
+        "fresh": 12810,
+        "best_sim_to_goal": 0.4583,
+        "seen_f": 13013,
+        "seen_b": 651
+      },
+      {
+        "half": 2,
+        "side": "b",
+        "fresh": 38777,
+        "best_sim_to_goal": 0.4565,
+        "seen_f": 13013,
+        "seen_b": 39428
+      },
+      {
+        "half": 3,
+        "side": "f",
+        "fresh": 14933,
+        "best_sim_to_goal": 0.625,
+        "seen_f": 27946,
+        "seen_b": 39428
+      },
+      {
+        "half": 3,
+        "side": "b",
+        "fresh": 36124,
+        "best_sim_to_goal": 0.4651,
+        "seen_f": 27946,
+        "seen_b": 75552
+      },
+      {
+        "half": 4,
+        "side": "f",
+        "fresh": 16473,
+        "best_sim_to_goal": 0.4894,
+        "seen_f": 44419,
+        "seen_b": 75552
+      },
+      {
+        "half": 4,
+        "side": "b",
+        "fresh": 33099,
+        "best_sim_to_goal": 0.5122,
+        "seen_f": 44419,
+        "seen_b": 108651
+      },
+      {
+        "half": 5,
+        "side": "f",
+        "fresh": 18579,
+        "best_sim_to_goal": 0.6047,
+        "seen_f": 62998,
+        "seen_b": 108651
+      },
+      {
+        "half": 5,
+        "side": "b",
+        "fresh": 31571,
+        "best_sim_to_goal": 0.5405,
+        "seen_f": 62998,
+        "seen_b": 140222
+      },
+      {
+        "half": 6,
+        "side": "f",
+        "fresh": 18556,
+        "best_sim_to_goal": 0.5778,
+        "seen_f": 81554,
+        "seen_b": 140222
+      },
+      {
+        "half": 6,
+        "side": "b",
+        "fresh": 30696,
+        "best_sim_to_goal": 0.5405,
+        "seen_f": 81554,
+        "seen_b": 170918
+      },
+      {
+        "half": 7,
+        "side": "f",
+        "fresh": 14641,
+        "best_sim_to_goal": 0.587,
+        "seen_f": 96195,
+        "seen_b": 170918
+      },
+      {
+        "half": 7,
+        "side": "b",
+        "fresh": 28640,
+        "best_sim_to_goal": 0.5405,
+        "seen_f": 96195,
+        "seen_b": 199558
+      },
+      {
+        "half": 8,
+        "side": "f",
+        "fresh": 17179,
+        "best_sim_to_goal": 0.5745,
+        "seen_f": 113374,
+        "seen_b": 199558
+      },
+      {
+        "half": 8,
+        "side": "b",
+        "fresh": 30042,
+        "best_sim_to_goal": 0.5714,
+        "seen_f": 113374,
+        "seen_b": 229600
+      },
+      {
+        "half": 9,
+        "side": "f",
+        "fresh": 19858,
+        "best_sim_to_goal": 0.5532,
+        "seen_f": 133232,
+        "seen_b": 229600
+      },
+      {
+        "half": 9,
+        "side": "b",
+        "fresh": 29686,
+        "best_sim_to_goal": 0.5854,
+        "seen_f": 133232,
+        "seen_b": 259286
+      }
+    ],
+    "n_forward": 133232,
+    "n_backward": 259286,
+    "wall_s": 2487.3538217544556
+  },
+  {
+    "cell": "parp1_s0_d0.4",
+    "MET": false,
+    "trace": [
+      {
+        "half": 1,
+        "side": "f",
+        "fresh": 384,
+        "best_sim_to_goal": 0.4462,
+        "seen_f": 385,
+        "seen_b": 1
+      },
+      {
+        "half": 1,
+        "side": "b",
+        "fresh": 739,
+        "best_sim_to_goal": 0.5091,
+        "seen_f": 385,
+        "seen_b": 740
+      },
+      {
+        "half": 2,
+        "side": "f",
+        "fresh": 24463,
+        "best_sim_to_goal": 0.5161,
+        "seen_f": 24848,
+        "seen_b": 740
+      },
+      {
+        "half": 2,
+        "side": "b",
+        "fresh": 44614,
+        "best_sim_to_goal": 0.5818,
+        "seen_f": 24848,
+        "seen_b": 45354
+      },
+      {
+        "half": 3,
+        "side": "f",
+        "fresh": 25141,
+        "best_sim_to_goal": 0.5484,
+        "seen_f": 49989,
+        "seen_b": 45354
+      },
+      {
+        "half": 3,
+        "side": "b",
+        "fresh": 46148,
+        "best_sim_to_goal": 0.6471,
+        "seen_f": 49989,
+        "seen_b": 91502
+      },
+      {
+        "half": 4,
+        "side": "f",
+        "fresh": 25246,
+        "best_sim_to_goal": 0.5469,
+        "seen_f": 75235,
+        "seen_b": 91502
+      },
+      {
+        "half": 4,
+        "side": "b",
+        "fresh": 42730,
+        "best_sim_to_goal": 0.6226,
+        "seen_f": 75235,
+        "seen_b": 134232
+      },
+      {
+        "half": 5,
+        "side": "f",
+        "fresh": 28530,
+        "best_sim_to_goal": 0.5469,
+        "seen_f": 103765,
+        "seen_b": 134232
+      },
+      {
+        "half": 5,
+        "side": "b",
+        "fresh": 41699,
+        "best_sim_to_goal": 0.6182,
+        "seen_f": 103765,
+        "seen_b": 175931
+      },
+      {
+        "half": 6,
+        "side": "f",
+        "fresh": 32813,
+        "best_sim_to_goal": 0.5455,
+        "seen_f": 136578,
+        "seen_b": 175931
+      },
+      {
+        "half": 6,
+        "side": "b",
+        "fresh": 44334,
+        "best_sim_to_goal": 0.6415,
+        "seen_f": 136578,
+        "seen_b": 220265
+      },
+      {
+        "half": 7,
+        "side": "f",
+        "fresh": 35140,
+        "best_sim_to_goal": 0.5522,
+        "seen_f": 171718,
+        "seen_b": 220265
+      },
+      {
+        "half": 7,
+        "side": "b",
+        "fresh": 43137,
+        "best_sim_to_goal": 0.6296,
+        "seen_f": 171718,
+        "seen_b": 263402
+      },
+      {
+        "half": 8,
+        "side": "f",
+        "fresh": 34948,
+        "best_sim_to_goal": 0.5606,
+        "seen_f": 206666,
+        "seen_b": 263402
+      },
+      {
+        "half": 8,
+        "side": "b",
+        "fresh": 40009,
+        "best_sim_to_goal": 0.625,
+        "seen_f": 206666,
+        "seen_b": 303411
+      },
+      {
+        "half": 9,
+        "side": "f",
+        "fresh": 32805,
+        "best_sim_to_goal": 0.5672,
+        "seen_f": 239471,
+        "seen_b": 303411
+      },
+      {
+        "half": 9,
+        "side": "b",
+        "fresh": 40107,
+        "best_sim_to_goal": 0.6364,
+        "seen_f": 239471,
+        "seen_b": 343518
+      }
+    ],
+    "n_forward": 239471,
+    "n_backward": 343518,
+    "wall_s": 2376.2516434192657
+  }
+]

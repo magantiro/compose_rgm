@@ -1,0 +1,39 @@
+{
+ "eps0": {
+  "n": 30,
+  "dC_median": 2.0,
+  "dC_mean": 2.33,
+  "halogens_median": 5.0,
+  "c_run_median": 7.0,
+  "frac_run_ge4": 1.0,
+  "frac_run_ge6": 1.0,
+  "sa_median": 4.88,
+  "qed_median": 0.406,
+  "dC_dist": {
+   "0": 1,
+   "1": 7,
+   "2": 8,
+   "3": 9,
+   "4": 5
+  }
+ },
+ "eps15": {
+  "n": 30,
+  "dC_median": 2.5,
+  "dC_mean": 2.5,
+  "halogens_median": 5.0,
+  "c_run_median": 7.0,
+  "frac_run_ge4": 1.0,
+  "frac_run_ge6": 1.0,
+  "sa_median": 4.98,
+  "qed_median": 0.428,
+  "dC_dist": {
+   "0": 2,
+   "1": 5,
+   "2": 8,
+   "3": 8,
+   "4": 5,
+   "5": 2
+  }
+ }
+}

@@ -1,0 +1,31 @@
+{
+ "task": "osimertinib_mpo",
+ "n_labels": 249455,
+ "n_train": 50000,
+ "n_test": 10000,
+ "models": [
+  {
+   "model": "ridge",
+   "spearman": 0.8511,
+   "top1pct_recall": 0.19,
+   "top1pct_enrichment": 19.0,
+   "mean_true_score_of_predicted_top1pct": 0.6762,
+   "held_out_mean": 0.1805,
+   "held_out_max": 0.8074,
+   "seconds": 0.8
+  },
+  {
+   "model": "mlp",
+   "spearman": 0.9179,
+   "top1pct_recall": 0.22,
+   "top1pct_enrichment": 22.0,
+   "mean_true_score_of_predicted_top1pct": 0.6846,
+   "held_out_mean": 0.1805,
+   "held_out_max": 0.8074,
+   "seconds": 36.8
+  }
+ ],
+ "chosen": "mlp",
+ "verdict": "USABLE for search guidance",
+ "seconds": 51.5
+}

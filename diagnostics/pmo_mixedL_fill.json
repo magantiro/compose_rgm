@@ -1,0 +1,134 @@
+{
+ "runs": [
+  {
+   "task": "qed",
+   "arm": "mixedL",
+   "seed": 2,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.9482232144163294,
+   "best_counted": 0.948442042791664,
+   "corpus_max": 0.948442042791664,
+   "n_above_corpus_max": 0,
+   "auc_top10_official_10k": 0.9434820983442478,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.9481385567914469,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 122.1
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.9482460989719517,
+     "top10_counted": 0.9475484280896971,
+     "best_counted": 0.9483312933817938,
+     "n_above_corpus_max": 0,
+     "lineages": 140,
+     "t": 546.8
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.9482460989719517,
+     "top10_counted": 0.9478237024176492,
+     "best_counted": 0.9483312933817938,
+     "n_above_corpus_max": 0,
+     "lineages": 160,
+     "t": 703.7
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.9483264910004076,
+     "top10_counted": 0.9482232144163294,
+     "best_counted": 0.948442042791664,
+     "n_above_corpus_max": 0,
+     "lineages": 200,
+     "t": 1126.5
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.9483264910004076,
+     "top10_counted": 0.9482232144163294,
+     "best_counted": 0.948442042791664,
+     "n_above_corpus_max": 0,
+     "lineages": 200,
+     "t": 1127.6
+    }
+   ],
+   "seconds": 1127.6
+  },
+  {
+   "task": "celecoxib_rediscovery",
+   "arm": "mixedL",
+   "seed": 2,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.44216540333901755,
+   "best_counted": 0.46534653465346537,
+   "corpus_max": 0.4583333333333333,
+   "n_above_corpus_max": 1,
+   "auc_top10_official_10k": 0.4399545763223225,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.4363080626513677,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 118.1
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.43819611611836856,
+     "top10_counted": 0.396792795564784,
+     "best_counted": 0.4444444444444444,
+     "n_above_corpus_max": 0,
+     "lineages": 140,
+     "t": 777.8
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.4462996385646781,
+     "top10_counted": 0.4321459828534772,
+     "best_counted": 0.46534653465346537,
+     "n_above_corpus_max": 1,
+     "lineages": 160,
+     "t": 1116.3
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.4488637411287807,
+     "top10_counted": 0.44216540333901755,
+     "best_counted": 0.46534653465346537,
+     "n_above_corpus_max": 1,
+     "lineages": 200,
+     "t": 1774.4
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.4488637411287807,
+     "top10_counted": 0.44216540333901755,
+     "best_counted": 0.46534653465346537,
+     "n_above_corpus_max": 1,
+     "lineages": 200,
+     "t": 1775.1
+    }
+   ],
+   "seconds": 1775.1
+  }
+ ]
+}

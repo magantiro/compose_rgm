@@ -1,168 +1,188 @@
 {
  "tasks": [
   {
-   "task": "albuterol_similarity",
-   "oracle_source": "PyTDC 0.3.6",
-   "budget": 2000,
-   "calls_spent": 2000,
-   "unique": 2000,
-   "rounds": 75,
-   "best": 0.9743589743589742,
-   "top10_mean": 0.9743589743589742,
-   "auc_top10": 0.7415720652326581,
-   "curve": [
-    {
-     "calls": 100,
-     "best": 0.3835616438356164,
-     "top10_mean": 0.3516035335027232,
-     "unique": 100,
-     "lineages": 100,
-     "max_depth": 0
-    },
-    {
-     "calls": 137,
-     "best": 0.3864734299516908,
-     "top10_mean": 0.3700985522489423,
-     "unique": 137,
-     "lineages": 140,
-     "max_depth": 1
-    },
-    {
-     "calls": 275,
-     "best": 0.5423728813559322,
-     "top10_mean": 0.4996277024782527,
-     "unique": 275,
-     "lineages": 300,
-     "max_depth": 4
-    },
-    {
-     "calls": 508,
-     "best": 0.6904761904761905,
-     "top10_mean": 0.6082124998840369,
-     "unique": 508,
-     "lineages": 400,
-     "max_depth": 7
-    },
-    {
-     "calls": 1009,
-     "best": 0.923076923076923,
-     "top10_mean": 0.8653700317851261,
-     "unique": 1009,
-     "lineages": 400,
-     "max_depth": 11
-    },
-    {
-     "calls": 2000,
-     "best": 0.9743589743589742,
-     "top10_mean": 0.9743589743589742,
-     "unique": 2000,
-     "lineages": 400,
-     "max_depth": 17
-    },
-    {
-     "calls": 2000,
-     "best": 0.9743589743589742,
-     "top10_mean": 0.9743589743589742,
-     "unique": 2000,
-     "lineages": 400,
-     "max_depth": 17
-    }
-   ],
-   "best_by_depth": {
-    "8": 0.92308,
-    "9": 0.92308,
-    "10": 0.88095,
-    "11": 0.88095,
-    "12": 0.87273,
-    "13": 0.97436,
-    "14": 0.97436,
-    "15": 0.93827,
-    "16": 0.85714
-   },
-   "max_depth": 17,
-   "seconds": 1119.2
-  },
-  {
    "task": "qed",
    "oracle_source": "PyTDC 0.3.6",
    "budget": 2000,
    "calls_spent": 2000,
    "unique": 2000,
-   "rounds": 115,
-   "best": 0.9478735786355064,
-   "top10_mean": 0.9478735786355065,
-   "auc_top10": 0.8979638988160645,
+   "rounds": 63,
+   "best": 0.9477467280875036,
+   "top10_mean": 0.9476089069636189,
+   "auc_top10": 0.8942638817111269,
    "curve": [
     {
      "calls": 100,
      "best": 0.9284670543053437,
      "top10_mean": 0.910431164196454,
+     "n_distinct_pop": 100,
      "unique": 100,
      "lineages": 100,
      "max_depth": 0
     },
     {
-     "calls": 136,
-     "best": 0.9290001157093131,
-     "top10_mean": 0.9209217744901009,
-     "unique": 136,
+     "calls": 140,
+     "best": 0.9284670543053437,
+     "top10_mean": 0.9180999957991791,
+     "n_distinct_pop": 140,
+     "unique": 140,
      "lineages": 140,
      "max_depth": 1
     },
     {
-     "calls": 270,
-     "best": 0.9472633980553374,
-     "top10_mean": 0.9410630589775133,
-     "unique": 270,
-     "lineages": 300,
-     "max_depth": 5
+     "calls": 260,
+     "best": 0.9448812890317788,
+     "top10_mean": 0.9321971435910026,
+     "n_distinct_pop": 260,
+     "unique": 260,
+     "lineages": 260,
+     "max_depth": 4
     },
     {
-     "calls": 502,
-     "best": 0.9472633980553374,
-     "top10_mean": 0.9468823399131324,
-     "unique": 502,
+     "calls": 500,
+     "best": 0.9448812890317788,
+     "top10_mean": 0.9361057932646087,
+     "n_distinct_pop": 400,
+     "unique": 500,
+     "lineages": 400,
+     "max_depth": 6
+    },
+    {
+     "calls": 1006,
+     "best": 0.9460960054514117,
+     "top10_mean": 0.9452620893058565,
+     "n_distinct_pop": 400,
+     "unique": 1006,
      "lineages": 400,
      "max_depth": 7
     },
     {
-     "calls": 1004,
-     "best": 0.9472633980553374,
-     "top10_mean": 0.9472633980553373,
-     "unique": 1004,
+     "calls": 2000,
+     "best": 0.9477467280875036,
+     "top10_mean": 0.9476089069636189,
+     "n_distinct_pop": 400,
+     "unique": 2000,
+     "lineages": 400,
+     "max_depth": 13
+    },
+    {
+     "calls": 2000,
+     "best": 0.9477467280875036,
+     "top10_mean": 0.9476089069636189,
+     "n_distinct_pop": 400,
+     "unique": 2000,
+     "lineages": 400,
+     "max_depth": 13
+    }
+   ],
+   "best_by_depth": {
+    "0": 0.92847,
+    "1": 0.93208,
+    "2": 0.94488,
+    "3": 0.94488,
+    "4": 0.9461,
+    "5": 0.94726,
+    "6": 0.94726,
+    "7": 0.94726,
+    "8": 0.94726,
+    "9": 0.94768,
+    "10": 0.94768,
+    "11": 0.94775,
+    "12": 0.94775,
+    "13": 0.93285
+   },
+   "max_depth": 13,
+   "seconds": 1438.3
+  },
+  {
+   "task": "albuterol_similarity",
+   "oracle_source": "PyTDC 0.3.6",
+   "budget": 2000,
+   "calls_spent": 2000,
+   "unique": 2000,
+   "rounds": 52,
+   "best": 1.0,
+   "top10_mean": 1.0,
+   "auc_top10": 0.7583329686140189,
+   "curve": [
+    {
+     "calls": 100,
+     "best": 0.3835616438356164,
+     "top10_mean": 0.3516035335027232,
+     "n_distinct_pop": 100,
+     "unique": 100,
+     "lineages": 100,
+     "max_depth": 0
+    },
+    {
+     "calls": 140,
+     "best": 0.38383838383838387,
+     "top10_mean": 0.37303077114772065,
+     "n_distinct_pop": 140,
+     "unique": 140,
+     "lineages": 140,
+     "max_depth": 1
+    },
+    {
+     "calls": 260,
+     "best": 0.5423728813559322,
+     "top10_mean": 0.4848894137877188,
+     "n_distinct_pop": 260,
+     "unique": 260,
+     "lineages": 260,
+     "max_depth": 4
+    },
+    {
+     "calls": 539,
+     "best": 0.7017543859649122,
+     "top10_mean": 0.6567350579839427,
+     "n_distinct_pop": 400,
+     "unique": 539,
      "lineages": 400,
      "max_depth": 10
     },
     {
-     "calls": 2000,
-     "best": 0.9478735786355064,
-     "top10_mean": 0.9478735786355065,
-     "unique": 2000,
+     "calls": 1005,
+     "best": 1.0,
+     "top10_mean": 0.8773746169972585,
+     "n_distinct_pop": 400,
+     "unique": 1005,
      "lineages": 400,
-     "max_depth": 12
+     "max_depth": 15
     },
     {
      "calls": 2000,
-     "best": 0.9478735786355064,
-     "top10_mean": 0.9478735786355065,
+     "best": 1.0,
+     "top10_mean": 1.0,
+     "n_distinct_pop": 400,
      "unique": 2000,
      "lineages": 400,
-     "max_depth": 12
+     "max_depth": 19
+    },
+    {
+     "calls": 2000,
+     "best": 1.0,
+     "top10_mean": 1.0,
+     "n_distinct_pop": 400,
+     "unique": 2000,
+     "lineages": 400,
+     "max_depth": 19
     }
    ],
    "best_by_depth": {
-    "3": 0.9448,
-    "4": 0.94726,
-    "5": 0.94726,
-    "6": 0.94768,
-    "7": 0.94787,
-    "8": 0.94787,
-    "9": 0.94787,
-    "10": 0.94787,
-    "11": 0.94787
+    "10": 0.85535,
+    "11": 0.85535,
+    "12": 1.0,
+    "13": 1.0,
+    "14": 1.0,
+    "15": 1.0,
+    "16": 1.0,
+    "17": 1.0,
+    "18": 1.0,
+    "19": 1.0
    },
-   "max_depth": 12,
-   "seconds": 2160.4
+   "max_depth": 19,
+   "seconds": 1488.6
   },
   {
    "task": "jnk3",
@@ -170,167 +190,98 @@
    "budget": 2000,
    "calls_spent": 2000,
    "unique": 2000,
-   "rounds": 105,
-   "best": 0.43,
-   "top10_mean": 0.38,
-   "auc_top10": 0.2438435,
+   "rounds": 51,
+   "best": 0.39,
+   "top10_mean": 0.369,
+   "auc_top10": 0.23555125000000005,
    "curve": [
     {
      "calls": 100,
      "best": 0.07,
      "top10_mean": 0.038000000000000006,
+     "n_distinct_pop": 100,
      "unique": 100,
      "lineages": 100,
      "max_depth": 0
     },
     {
-     "calls": 137,
-     "best": 0.08,
-     "top10_mean": 0.05700000000000001,
-     "unique": 137,
+     "calls": 140,
+     "best": 0.12,
+     "top10_mean": 0.06600000000000002,
+     "n_distinct_pop": 140,
+     "unique": 140,
      "lineages": 140,
      "max_depth": 1
     },
     {
-     "calls": 272,
-     "best": 0.14,
-     "top10_mean": 0.12300000000000003,
-     "unique": 272,
-     "lineages": 300,
+     "calls": 260,
+     "best": 0.13,
+     "top10_mean": 0.11300000000000002,
+     "n_distinct_pop": 260,
+     "unique": 260,
+     "lineages": 260,
      "max_depth": 4
     },
     {
-     "calls": 518,
-     "best": 0.23,
-     "top10_mean": 0.209,
-     "unique": 518,
+     "calls": 500,
+     "best": 0.19,
+     "top10_mean": 0.154,
+     "n_distinct_pop": 400,
+     "unique": 500,
      "lineages": 400,
-     "max_depth": 8
+     "max_depth": 7
     },
     {
-     "calls": 1001,
-     "best": 0.26,
-     "top10_mean": 0.25999999999999995,
-     "unique": 1001,
-     "lineages": 400,
-     "max_depth": 10
-    },
-    {
-     "calls": 2000,
-     "best": 0.43,
-     "top10_mean": 0.38,
-     "unique": 2000,
+     "calls": 1021,
+     "best": 0.29,
+     "top10_mean": 0.274,
+     "n_distinct_pop": 400,
+     "unique": 1021,
      "lineages": 400,
      "max_depth": 13
     },
     {
      "calls": 2000,
-     "best": 0.43,
-     "top10_mean": 0.38,
+     "best": 0.39,
+     "top10_mean": 0.369,
+     "n_distinct_pop": 400,
      "unique": 2000,
      "lineages": 400,
-     "max_depth": 13
+     "max_depth": 23
+    },
+    {
+     "calls": 2000,
+     "best": 0.39,
+     "top10_mean": 0.369,
+     "n_distinct_pop": 400,
+     "unique": 2000,
+     "lineages": 400,
+     "max_depth": 23
     }
    ],
    "best_by_depth": {
-    "4": 0.28,
-    "5": 0.33,
-    "6": 0.36,
-    "7": 0.36,
-    "8": 0.36,
-    "9": 0.39,
-    "10": 0.38,
-    "11": 0.4,
-    "12": 0.43,
-    "13": 0.29
+    "4": 0.19,
+    "5": 0.2,
+    "6": 0.19,
+    "8": 0.2,
+    "9": 0.26,
+    "10": 0.28,
+    "11": 0.3,
+    "12": 0.29,
+    "13": 0.29,
+    "14": 0.31,
+    "15": 0.37,
+    "16": 0.35,
+    "17": 0.35,
+    "18": 0.36,
+    "19": 0.38,
+    "20": 0.37,
+    "21": 0.39,
+    "22": 0.38,
+    "23": 0.35
    },
-   "max_depth": 13,
-   "seconds": 2264.3
-  },
-  {
-   "task": "osimertinib_mpo",
-   "oracle_source": "PyTDC 0.3.6",
-   "budget": 2000,
-   "calls_spent": 2000,
-   "unique": 2000,
-   "rounds": 94,
-   "best": 0.8608563363770807,
-   "top10_mean": 0.8608563363770807,
-   "auc_top10": 0.7628316058191792,
-   "curve": [
-    {
-     "calls": 100,
-     "best": 0.6616626919250145,
-     "top10_mean": 0.5821870309073567,
-     "unique": 100,
-     "lineages": 100,
-     "max_depth": 0
-    },
-    {
-     "calls": 133,
-     "best": 0.6921621910770276,
-     "top10_mean": 0.6541449490331244,
-     "unique": 133,
-     "lineages": 140,
-     "max_depth": 1
-    },
-    {
-     "calls": 266,
-     "best": 0.7686468650067424,
-     "top10_mean": 0.7446826399523984,
-     "unique": 266,
-     "lineages": 300,
-     "max_depth": 4
-    },
-    {
-     "calls": 524,
-     "best": 0.7870828898642298,
-     "top10_mean": 0.7824730523364444,
-     "unique": 524,
-     "lineages": 400,
-     "max_depth": 8
-    },
-    {
-     "calls": 1006,
-     "best": 0.8114051628781169,
-     "top10_mean": 0.8114051628781169,
-     "unique": 1006,
-     "lineages": 400,
-     "max_depth": 13
-    },
-    {
-     "calls": 2000,
-     "best": 0.8608563363770807,
-     "top10_mean": 0.8608563363770807,
-     "unique": 2000,
-     "lineages": 400,
-     "max_depth": 20
-    },
-    {
-     "calls": 2000,
-     "best": 0.8608563363770807,
-     "top10_mean": 0.8608563363770807,
-     "unique": 2000,
-     "lineages": 400,
-     "max_depth": 20
-    }
-   ],
-   "best_by_depth": {
-    "6": 0.83313,
-    "9": 0.83239,
-    "10": 0.8339,
-    "11": 0.84816,
-    "12": 0.84166,
-    "13": 0.83901,
-    "14": 0.86086,
-    "15": 0.86086,
-    "16": 0.85014,
-    "17": 0.85808,
-    "18": 0.85949,
-    "19": 0.84934
-   },
-   "max_depth": 20,
-   "seconds": 2573.3
+   "max_depth": 23,
+   "seconds": 2304.4
   },
   {
    "task": "celecoxib_rediscovery",
@@ -338,80 +289,189 @@
    "budget": 2000,
    "calls_spent": 2000,
    "unique": 2000,
-   "rounds": 133,
-   "best": 0.33663366336633666,
-   "top10_mean": 0.33531682798601,
-   "auc_top10": 0.2719733515575636,
+   "rounds": 54,
+   "best": 0.30708661417322836,
+   "top10_mean": 0.30708661417322836,
+   "auc_top10": 0.2777363859706363,
    "curve": [
     {
      "calls": 100,
      "best": 0.23387096774193547,
      "top10_mean": 0.1944970759566394,
+     "n_distinct_pop": 100,
      "unique": 100,
      "lineages": 100,
      "max_depth": 0
     },
     {
-     "calls": 136,
+     "calls": 140,
      "best": 0.23529411764705882,
-     "top10_mean": 0.2157683377938336,
-     "unique": 136,
+     "top10_mean": 0.2184701318059441,
+     "n_distinct_pop": 140,
+     "unique": 140,
      "lineages": 140,
      "max_depth": 1
     },
     {
-     "calls": 259,
-     "best": 0.24778761061946902,
-     "top10_mean": 0.24162080263058372,
-     "unique": 259,
-     "lineages": 300,
+     "calls": 260,
+     "best": 0.28,
+     "top10_mean": 0.24471934838848158,
+     "n_distinct_pop": 260,
+     "unique": 260,
+     "lineages": 260,
      "max_depth": 4
     },
     {
-     "calls": 521,
-     "best": 0.27184466019417475,
-     "top10_mean": 0.26595009015464655,
-     "unique": 521,
+     "calls": 500,
+     "best": 0.30158730158730157,
+     "top10_mean": 0.29329573803274583,
+     "n_distinct_pop": 400,
+     "unique": 500,
      "lineages": 400,
-     "max_depth": 9
+     "max_depth": 8
     },
     {
-     "calls": 1002,
-     "best": 0.28865979381443296,
-     "top10_mean": 0.28486357367064286,
-     "unique": 1002,
+     "calls": 1018,
+     "best": 0.30708661417322836,
+     "top10_mean": 0.3041561665256959,
+     "n_distinct_pop": 400,
+     "unique": 1018,
      "lineages": 400,
-     "max_depth": 13
-    },
-    {
-     "calls": 2000,
-     "best": 0.33663366336633666,
-     "top10_mean": 0.33531682798601,
-     "unique": 2000,
-     "lineages": 400,
-     "max_depth": 18
+     "max_depth": 11
     },
     {
      "calls": 2000,
-     "best": 0.33663366336633666,
-     "top10_mean": 0.33531682798601,
+     "best": 0.30708661417322836,
+     "top10_mean": 0.30708661417322836,
+     "n_distinct_pop": 400,
      "unique": 2000,
      "lineages": 400,
-     "max_depth": 18
+     "max_depth": 14
+    },
+    {
+     "calls": 2000,
+     "best": 0.30708661417322836,
+     "top10_mean": 0.30708661417322836,
+     "n_distinct_pop": 400,
+     "unique": 2000,
+     "lineages": 400,
+     "max_depth": 14
     }
    ],
    "best_by_depth": {
-    "10": 0.28,
-    "11": 0.28866,
-    "12": 0.28866,
-    "13": 0.33663,
-    "14": 0.33663,
-    "15": 0.33663,
-    "16": 0.33654,
-    "17": 0.28704
+    "4": 0.296,
+    "5": 0.30159,
+    "6": 0.30159,
+    "7": 0.30709,
+    "8": 0.30709,
+    "9": 0.30709,
+    "10": 0.30709,
+    "11": 0.30709,
+    "12": 0.29688,
+    "13": 0.29231,
+    "14": 0.29231
    },
-   "max_depth": 18,
-   "seconds": 2667.3
+   "max_depth": 14,
+   "seconds": 3007.3
+  },
+  {
+   "task": "osimertinib_mpo",
+   "oracle_source": "PyTDC 0.3.6",
+   "budget": 2000,
+   "calls_spent": 2000,
+   "unique": 2000,
+   "rounds": 52,
+   "best": 0.8256646749435125,
+   "top10_mean": 0.8192071725953672,
+   "auc_top10": 0.7484789907108077,
+   "curve": [
+    {
+     "calls": 100,
+     "best": 0.6616626919250145,
+     "top10_mean": 0.5821870309073568,
+     "n_distinct_pop": 100,
+     "unique": 100,
+     "lineages": 100,
+     "max_depth": 0
+    },
+    {
+     "calls": 140,
+     "best": 0.6815953416888082,
+     "top10_mean": 0.6479364251032327,
+     "n_distinct_pop": 140,
+     "unique": 140,
+     "lineages": 140,
+     "max_depth": 1
+    },
+    {
+     "calls": 260,
+     "best": 0.743705659633177,
+     "top10_mean": 0.7331662355381818,
+     "n_distinct_pop": 260,
+     "unique": 260,
+     "lineages": 260,
+     "max_depth": 4
+    },
+    {
+     "calls": 500,
+     "best": 0.7945493940305621,
+     "top10_mean": 0.7857595212153885,
+     "n_distinct_pop": 400,
+     "unique": 500,
+     "lineages": 400,
+     "max_depth": 8
+    },
+    {
+     "calls": 1012,
+     "best": 0.8075806420645796,
+     "top10_mean": 0.8018339748789858,
+     "n_distinct_pop": 400,
+     "unique": 1012,
+     "lineages": 400,
+     "max_depth": 14
+    },
+    {
+     "calls": 2000,
+     "best": 0.8256646749435125,
+     "top10_mean": 0.8192071725953672,
+     "n_distinct_pop": 400,
+     "unique": 2000,
+     "lineages": 400,
+     "max_depth": 24
+    },
+    {
+     "calls": 2000,
+     "best": 0.8256646749435125,
+     "top10_mean": 0.8192071725953672,
+     "n_distinct_pop": 400,
+     "unique": 2000,
+     "lineages": 400,
+     "max_depth": 24
+    }
+   ],
+   "best_by_depth": {
+    "6": 0.79455,
+    "7": 0.79453,
+    "8": 0.79423,
+    "9": 0.79921,
+    "10": 0.80035,
+    "11": 0.80733,
+    "12": 0.80758,
+    "13": 0.80733,
+    "14": 0.81027,
+    "15": 0.81027,
+    "16": 0.80613,
+    "17": 0.81027,
+    "18": 0.81167,
+    "19": 0.81712,
+    "20": 0.8157,
+    "21": 0.8211,
+    "22": 0.81939,
+    "23": 0.82566,
+    "24": 0.82384
+   },
+   "max_depth": 24,
+   "seconds": 3191.1
   },
   {
    "task": "scaffold_hop",
@@ -419,82 +479,90 @@
    "budget": 2000,
    "calls_spent": 2000,
    "unique": 2000,
-   "rounds": 76,
-   "best": 0.4846846846846847,
-   "top10_mean": 0.48468468468468473,
-   "auc_top10": 0.45097050204306816,
+   "rounds": 51,
+   "best": 0.4851892153306734,
+   "top10_mean": 0.4850629108370878,
+   "auc_top10": 0.45255855759599184,
    "curve": [
     {
      "calls": 100,
      "best": 0.4366088631984586,
      "top10_mean": 0.4208338426380247,
+     "n_distinct_pop": 100,
      "unique": 100,
      "lineages": 100,
      "max_depth": 0
     },
     {
-     "calls": 138,
-     "best": 0.4366088631984586,
-     "top10_mean": 0.43184257537909765,
-     "unique": 138,
+     "calls": 140,
+     "best": 0.44144144144144143,
+     "top10_mean": 0.43411459409977776,
+     "n_distinct_pop": 140,
+     "unique": 140,
      "lineages": 140,
      "max_depth": 1
     },
     {
-     "calls": 261,
-     "best": 0.4573643410852713,
-     "top10_mean": 0.4524971962780703,
-     "unique": 261,
-     "lineages": 300,
-     "max_depth": 5
+     "calls": 260,
+     "best": 0.4624129079574624,
+     "top10_mean": 0.45737319588823555,
+     "n_distinct_pop": 260,
+     "unique": 260,
+     "lineages": 260,
+     "max_depth": 4
     },
     {
-     "calls": 525,
-     "best": 0.47215980024968784,
-     "top10_mean": 0.46847706877599543,
-     "unique": 525,
+     "calls": 500,
+     "best": 0.4758426246315519,
+     "top10_mean": 0.47330455352223433,
+     "n_distinct_pop": 400,
+     "unique": 500,
      "lineages": 400,
-     "max_depth": 10
+     "max_depth": 8
     },
     {
-     "calls": 1011,
-     "best": 0.4831404753017295,
-     "top10_mean": 0.4830754561499864,
-     "unique": 1011,
+     "calls": 1014,
+     "best": 0.4839261703948172,
+     "top10_mean": 0.4827630184410558,
+     "n_distinct_pop": 400,
+     "unique": 1014,
      "lineages": 400,
-     "max_depth": 12
-    },
-    {
-     "calls": 2000,
-     "best": 0.4846846846846847,
-     "top10_mean": 0.48468468468468473,
-     "unique": 2000,
-     "lineages": 400,
-     "max_depth": 18
+     "max_depth": 14
     },
     {
      "calls": 2000,
-     "best": 0.4846846846846847,
-     "top10_mean": 0.48468468468468473,
+     "best": 0.4851892153306734,
+     "top10_mean": 0.4850629108370878,
+     "n_distinct_pop": 400,
      "unique": 2000,
      "lineages": 400,
-     "max_depth": 18
+     "max_depth": 17
+    },
+    {
+     "calls": 2000,
+     "best": 0.4851892153306734,
+     "top10_mean": 0.4850629108370878,
+     "n_distinct_pop": 400,
+     "unique": 2000,
+     "lineages": 400,
+     "max_depth": 17
     }
    ],
    "best_by_depth": {
-    "9": 0.48298,
-    "10": 0.48314,
+    "6": 0.47584,
+    "7": 0.47584,
+    "8": 0.47825,
+    "9": 0.48314,
+    "10": 0.48393,
     "11": 0.48314,
-    "12": 0.48468,
-    "13": 0.48468,
-    "14": 0.48468,
-    "15": 0.48429,
-    "16": 0.48429,
-    "17": 0.48374,
-    "18": 0.48113
+    "12": 0.48519,
+    "13": 0.48519,
+    "14": 0.48519,
+    "15": 0.48519,
+    "16": 0.48098
    },
-   "max_depth": 18,
-   "seconds": 3730.2
+   "max_depth": 17,
+   "seconds": 4313.2
   }
  ]
 }

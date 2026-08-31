@@ -1,0 +1,132 @@
+{
+ "runs": [
+  {
+   "task": "scaffold_hop",
+   "arm": "mixedL",
+   "seed": 1,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.5305763204835519,
+   "best_counted": 0.5349316834235628,
+   "n_above_corpus_max": 13,
+   "auc_top10_official_10k": 0.5279234388811341,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.5194134047315072,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 131.6
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.5242881213651397,
+     "top10_counted": 0.5189645112878886,
+     "best_counted": 0.5288677500330294,
+     "n_above_corpus_max": 3,
+     "lineages": 140,
+     "t": 764.0
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.5276890838082715,
+     "top10_counted": 0.5274999937635922,
+     "best_counted": 0.5349316834235628,
+     "n_above_corpus_max": 7,
+     "lineages": 160,
+     "t": 1085.9
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.5305763204835519,
+     "top10_counted": 0.5305763204835519,
+     "best_counted": 0.5349316834235628,
+     "n_above_corpus_max": 13,
+     "lineages": 200,
+     "t": 1680.4
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.5305763204835519,
+     "top10_counted": 0.5305763204835519,
+     "best_counted": 0.5349316834235628,
+     "n_above_corpus_max": 13,
+     "lineages": 200,
+     "t": 1681.5
+    }
+   ],
+   "seconds": 1681.5
+  },
+  {
+   "task": "scaffold_hop",
+   "arm": "mixedL",
+   "seed": 2,
+   "budget": 100,
+   "complete": true,
+   "rounds": 5,
+   "calls_spent": 100,
+   "primed": 100,
+   "uncounted_prescreen_calls": 249455,
+   "top10_counted": 0.5269543469802362,
+   "best_counted": 0.5339429204765863,
+   "n_above_corpus_max": 4,
+   "auc_top10_official_10k": 0.5243195752453351,
+   "ledger_n": 100,
+   "curve": [
+    {
+     "calls": 0,
+     "top10_all": 0.5194134047315072,
+     "top10_counted": 0.0,
+     "best_counted": 0.0,
+     "n_above_corpus_max": 0,
+     "lineages": 100,
+     "t": 127.7
+    },
+    {
+     "calls": 40,
+     "top10_all": 0.5231845265384943,
+     "top10_counted": 0.517708786204134,
+     "best_counted": 0.5240904621435595,
+     "n_above_corpus_max": 0,
+     "lineages": 140,
+     "t": 925.6
+    },
+    {
+     "calls": 60,
+     "top10_all": 0.5261490009417443,
+     "top10_counted": 0.5256995715028119,
+     "best_counted": 0.5339429204765863,
+     "n_above_corpus_max": 2,
+     "lineages": 160,
+     "t": 1339.8
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.5271766747996468,
+     "top10_counted": 0.5269543469802362,
+     "best_counted": 0.5339429204765863,
+     "n_above_corpus_max": 4,
+     "lineages": 200,
+     "t": 2197.7
+    },
+    {
+     "calls": 100,
+     "top10_all": 0.5271766747996468,
+     "top10_counted": 0.5269543469802362,
+     "best_counted": 0.5339429204765863,
+     "n_above_corpus_max": 4,
+     "lineages": 200,
+     "t": 2198.9
+    }
+   ],
+   "seconds": 2198.9
+  }
+ ]
+}

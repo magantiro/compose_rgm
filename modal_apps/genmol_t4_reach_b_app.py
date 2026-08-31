@@ -213,10 +213,29 @@ def drive(which: str = "bench") -> dict[str, Any]:
     tasks = [{**s, "delta": d} for s in seeds for d in (0.4, 0.6)]
     print(f"{len(tasks)} cells  depth<={DEPTH} beam={BEAM} cap={APPLY_CAP}  "
           f"v = max([0.6-QED]+/0.6, [SA-4]+/4)   NO DOCKING\n", flush=True)
-    raw_out = list(reach.map(tasks, order_outputs=True, return_exceptions=True,
-                             wrap_returned_exceptions=False))
-    out = [r for r in raw_out if isinstance(r, dict)]
-    errs = [r for r in raw_out if not isinstance(r, dict)]
+    # STREAM. order_outputs=False yields each cell the moment it finishes, so a
+    # slow cell no longer hides the 40 that already answered.
+    print(f"{'#':>3} {'target':7s}{'delta':>6}{'QED':>7}{'SA':>6}"
+          f"{'reach@':>8}{'#adm':>6}{'sec':>7}", flush=True)
+    out, errs, done = [], [], 0
+    for r in reach.map(tasks, order_outputs=False, return_exceptions=True,
+                       wrap_returned_exceptions=False):
+        done += 1
+        if not isinstance(r, dict):
+            errs.append(r)
+            print(f"{done:>3} !! {type(r).__name__}: {str(r)[:90]}", flush=True)
+            continue
+        out.append(r)
+        fd = r["first_admissible_depth"]
+        q = r.get("seed_qed", r.get("qed")) or 0.0
+        sa = r.get("seed_sa", r.get("sa")) or 0.0
+        tag = "" if fd is not None else "   <-- NO ROUTE FOUND"
+        print(f"{done:>3} {r['target']:7s}{r['delta']:>6.1f}{q:>7.3f}{sa:>6.2f}"
+              f"{(str(fd) if fd is not None else 'NONE'):>8}"
+              f"{r['n_admissible_found']:>6}{r['seconds']:>7.0f}{tag}", flush=True)
+        if done % 10 == 0 or done == len(tasks):
+            hit = sum(1 for x in out if x["first_admissible_depth"] is not None)
+            print(f"    ... {done}/{len(tasks)} done, {hit} reaching so far", flush=True)
     if errs:
         from collections import Counter
         print(f"  !! {len(errs)}/{len(tasks)} cells FAILED", flush=True)

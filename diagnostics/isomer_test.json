@@ -1,0 +1,21 @@
+{
+ "target": "5ht1b",
+ "rows": [
+  {
+   "label": "seed",
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1"
+  },
+  {
+   "label": "META (ring@0\u2192@0)",
+   "smiles": "FC(F)(F)c1cc(-c2cccc(-c3ccccc3)c2)cc(N2CC[NH2+]CC2)c1"
+  },
+  {
+   "label": "PARA (ring@0\u2192@1)",
+   "smiles": "FC(F)(F)c1cc(-c2ccc(-c3ccccc3)cc2)cc(N2CC[NH2+]CC2)c1"
+  },
+  {
+   "label": "best r1 (27hv)",
+   "smiles": "FC(F)(c1cccc(N2CC[NH2+]CC2)c1)c1ccccc1-c1ccccc1"
+  }
+ ]
+}

@@ -1,0 +1,237 @@
+{
+ "flagged": {
+  "5ht1b_s7_d0.4": [
+   "isolated_ring:13"
+  ],
+  "fa7_s3_d0.4": [
+   "isolated_ring:10"
+  ],
+  "parp1_s2_d0.4": [
+   "hypervalent_halogen:IH2d2"
+  ],
+  "parp1_s2_d0.6": [
+   "hypervalent_halogen:IH4d1"
+  ],
+  "jak2_s14_d0.4": [
+   "non_phosphate_P:H3:CC"
+  ],
+  "fa7_s4_d0.6": [
+   "strained_NN_ring:3"
+  ],
+  "fa7_s5_d0.4": [
+   "isolated_ring:8"
+  ]
+ },
+ "rows": [
+  {
+   "cell": "parp1_s0_d0.4",
+   "ours": -10.5,
+   "gen": -10.6,
+   "ivg": -14.1,
+   "flagged": false
+  },
+  {
+   "cell": "parp1_s0_d0.6",
+   "ours": -8.8,
+   "gen": -10.4,
+   "ivg": -12.3,
+   "flagged": false
+  },
+  {
+   "cell": "parp1_s1_d0.4",
+   "ours": -9.9,
+   "gen": -11.0,
+   "ivg": -13.4,
+   "flagged": false
+  },
+  {
+   "cell": "parp1_s1_d0.6",
+   "ours": -9.4,
+   "gen": -9.7,
+   "ivg": -11.7,
+   "flagged": false
+  },
+  {
+   "cell": "parp1_s2_d0.4",
+   "ours": -11.6,
+   "gen": -11.3,
+   "ivg": -9.0,
+   "flagged": true
+  },
+  {
+   "cell": "parp1_s2_d0.6",
+   "ours": -10.3,
+   "gen": -9.2,
+   "ivg": -10.7,
+   "flagged": true
+  },
+  {
+   "cell": "fa7_s3_d0.4",
+   "ours": -10.2,
+   "gen": -8.4,
+   "ivg": -8.4,
+   "flagged": true
+  },
+  {
+   "cell": "fa7_s3_d0.6",
+   "ours": -8.9,
+   "gen": -7.3,
+   "ivg": -7.7,
+   "flagged": false
+  },
+  {
+   "cell": "fa7_s4_d0.4",
+   "ours": -9.0,
+   "gen": -8.4,
+   "ivg": -8.9,
+   "flagged": false
+  },
+  {
+   "cell": "fa7_s4_d0.6",
+   "ours": -7.2,
+   "gen": -7.6,
+   "ivg": -7.5,
+   "flagged": true
+  },
+  {
+   "cell": "fa7_s5_d0.4",
+   "ours": -9.3,
+   "gen": null,
+   "ivg": null,
+   "flagged": true
+  },
+  {
+   "cell": "fa7_s5_d0.6",
+   "ours": -7.9,
+   "gen": null,
+   "ivg": null,
+   "flagged": false
+  },
+  {
+   "cell": "5ht1b_s6_d0.4",
+   "ours": -12.3,
+   "gen": -12.9,
+   "ivg": -13.3,
+   "flagged": false
+  },
+  {
+   "cell": "5ht1b_s6_d0.6",
+   "ours": -13.4,
+   "gen": -12.1,
+   "ivg": -12.4,
+   "flagged": false
+  },
+  {
+   "cell": "5ht1b_s7_d0.4",
+   "ours": -10.2,
+   "gen": -12.3,
+   "ivg": -12.0,
+   "flagged": true
+  },
+  {
+   "cell": "5ht1b_s7_d0.6",
+   "ours": -8.8,
+   "gen": -12.0,
+   "ivg": -12.0,
+   "flagged": false
+  },
+  {
+   "cell": "5ht1b_s8_d0.4",
+   "ours": -11.4,
+   "gen": -11.6,
+   "ivg": -10.9,
+   "flagged": false
+  },
+  {
+   "cell": "5ht1b_s8_d0.6",
+   "ours": null,
+   "gen": -10.5,
+   "ivg": -10.6,
+   "flagged": false
+  },
+  {
+   "cell": "braf_s9_d0.4",
+   "ours": null,
+   "gen": -10.8,
+   "ivg": -10.1,
+   "flagged": false
+  },
+  {
+   "cell": "braf_s9_d0.6",
+   "ours": null,
+   "gen": null,
+   "ivg": -9.7,
+   "flagged": false
+  },
+  {
+   "cell": "braf_s10_d0.4",
+   "ours": -11.2,
+   "gen": -10.8,
+   "ivg": -10.8,
+   "flagged": false
+  },
+  {
+   "cell": "braf_s10_d0.6",
+   "ours": null,
+   "gen": -9.7,
+   "ivg": -10.4,
+   "flagged": false
+  },
+  {
+   "cell": "braf_s11_d0.4",
+   "ours": -11.7,
+   "gen": -10.6,
+   "ivg": -10.6,
+   "flagged": false
+  },
+  {
+   "cell": "braf_s11_d0.6",
+   "ours": -10.0,
+   "gen": -10.5,
+   "ivg": -10.3,
+   "flagged": false
+  },
+  {
+   "cell": "jak2_s12_d0.4",
+   "ours": -9.8,
+   "gen": -10.2,
+   "ivg": -10.2,
+   "flagged": false
+  },
+  {
+   "cell": "jak2_s12_d0.6",
+   "ours": -9.4,
+   "gen": -9.3,
+   "ivg": -9.7,
+   "flagged": false
+  },
+  {
+   "cell": "jak2_s13_d0.4",
+   "ours": -9.7,
+   "gen": -10.0,
+   "ivg": -10.5,
+   "flagged": false
+  },
+  {
+   "cell": "jak2_s13_d0.6",
+   "ours": -9.4,
+   "gen": -9.4,
+   "ivg": -10.4,
+   "flagged": false
+  },
+  {
+   "cell": "jak2_s14_d0.4",
+   "ours": -10.7,
+   "gen": -9.8,
+   "ivg": -10.2,
+   "flagged": true
+  },
+  {
+   "cell": "jak2_s14_d0.6",
+   "ours": -10.6,
+   "gen": null,
+   "ivg": -10.3,
+   "flagged": false
+  }
+ ]
+}

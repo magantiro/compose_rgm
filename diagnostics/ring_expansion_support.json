@@ -1,0 +1,167 @@
+{
+  "beam": 9,
+  "depth": 3,
+  "results": [
+    {
+      "cell": "parp1_s0",
+      "seed": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+      "seed_ring_sizes": [
+        5,
+        6,
+        7
+      ],
+      "family_histogram": {
+        "atom_insert": 216,
+        "atom_delete": 5,
+        "atom_restate_semantic": 123,
+        "bond_reorder": 1,
+        "bond_reroute": 36,
+        "cycle_close": 57,
+        "cycle_open": 14,
+        "ring_system_restate": 1
+      },
+      "n_expansions_found": 1,
+      "states_explored": 398,
+      "best": {
+        "depth": 2,
+        "smiles": "CN(C)Cc1ccc2c(c1)Cn1cccc(c1=O)N2",
+        "path": [
+          {
+            "family": "cycle_close",
+            "rank": 305,
+            "p": 2.4892800260653383e-05
+          },
+          {
+            "family": "cycle_open",
+            "rank": 352,
+            "p": 1.69021361890683e-06
+          }
+        ],
+        "logp": -23.89158757776022,
+        "ring_sizes": [
+          6,
+          6,
+          7
+        ]
+      },
+      "sec": 46.45055174827576
+    },
+    {
+      "cell": "parp1_s1",
+      "seed": "COc1[nH]c3cccc2C(=O)NCCc1c23",
+      "seed_ring_sizes": [
+        5,
+        6,
+        7
+      ],
+      "family_histogram": {
+        "atom_insert": 154,
+        "atom_delete": 5,
+        "atom_restate_semantic": 94,
+        "bond_reorder": 1,
+        "bond_reroute": 14,
+        "cycle_close": 25,
+        "cycle_open": 14,
+        "ring_system_restate": 1
+      },
+      "n_expansions_found": 1,
+      "states_explored": 923,
+      "best": {
+        "depth": 3,
+        "smiles": "COc1[nH]c2cccc3c2c1CCCNC3=O",
+        "path": [
+          {
+            "family": "cycle_open",
+            "rank": 266,
+            "p": 1.575278554785957e-06
+          },
+          {
+            "family": "atom_insert",
+            "rank": 2,
+            "p": 0.07168836917123693
+          },
+          {
+            "family": "cycle_close",
+            "rank": 359,
+            "p": 6.296902617446193e-07
+          }
+        ],
+        "logp": -30.27454298734665,
+        "ring_sizes": [
+          5,
+          6,
+          8
+        ]
+      },
+      "sec": 70.1187195777893
+    },
+    {
+      "cell": "parp1_s2",
+      "seed": "O/N=C/c1cn3CCNC(=O)c2cccc1c23",
+      "seed_ring_sizes": [
+        5,
+        6,
+        7
+      ],
+      "family_histogram": {
+        "atom_insert": 148,
+        "atom_delete": 5,
+        "atom_restate_semantic": 102,
+        "bond_reorder": 2,
+        "bond_reroute": 15,
+        "cycle_close": 32,
+        "cycle_open": 14,
+        "ring_system_restate": 1
+      },
+      "n_expansions_found": 1,
+      "states_explored": 426,
+      "best": {
+        "depth": 2,
+        "smiles": "NC(=O)c1cccc2c3cn(c12)CCON=C3",
+        "path": [
+          {
+            "family": "cycle_open",
+            "rank": 139,
+            "p": 8.351494758914139e-05
+          },
+          {
+            "family": "cycle_close",
+            "rank": 83,
+            "p": 0.000336950355617276
+          }
+        ],
+        "logp": -17.386059880256653,
+        "ring_sizes": [
+          5,
+          6,
+          8
+        ]
+      },
+      "sec": 64.69254302978516
+    },
+    {
+      "cell": "fa7_s3",
+      "seed": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34",
+      "seed_ring_sizes": [
+        6,
+        6,
+        6,
+        6
+      ],
+      "family_histogram": {
+        "atom_insert": 378,
+        "atom_delete": 5,
+        "atom_restate_semantic": 152,
+        "bond_reorder": 7,
+        "bond_reroute": 126,
+        "cycle_close": 206,
+        "cycle_open": 22,
+        "ring_system_restate": 2
+      },
+      "n_expansions_found": 0,
+      "states_explored": 1107,
+      "best": null,
+      "sec": 482.27007484436035
+    }
+  ]
+}

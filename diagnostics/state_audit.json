@@ -1,0 +1,56 @@
+{
+ "smiles": "CN(C)Cc1ccc2c(c1)CNC(=O)c1cc3c(n1-2)CCCC3",
+ "n_marks": 615,
+ "by_executor": {
+  "atom_insert": 288,
+  "atom_delete": 9,
+  "atom_restate_semantic": 155,
+  "bond_reorder": 1,
+  "bond_reroute": 44,
+  "cycle_close": 98,
+  "cycle_open": 19,
+  "ring_system_restate": 1
+ },
+ "by_family": {
+  "atom_insert": 288,
+  "atom_delete": 9,
+  "atom_restate": 155,
+  "bond_reorder": 1,
+  "bond_reroute": 44,
+  "cycle_insert": 98,
+  "cycle_attach": 19,
+  "ring_system_restate": 1
+ },
+ "enabled": [
+  "atom_insert",
+  "atom_delete",
+  "atom_restate",
+  "bond_reorder",
+  "bond_reroute",
+  "cycle_insert",
+  "cycle_attach",
+  "ring_system_restate"
+ ],
+ "detail": [
+  {
+   "rule": "bond_reorder",
+   "rank": 13,
+   "prob": 0.01265,
+   "cls": "BondReorder",
+   "fields": {
+    "a": "12",
+    "b": "13",
+    "new_order": "1"
+   }
+  },
+  {
+   "rule": "ring_system_restate",
+   "rank": 22,
+   "prob": 0.00763,
+   "cls": "RingSystemRestate",
+   "fields": {
+    "changes": "(BondOrderChange(a=4, b=5, new_order=1), BondOrderChange(a=6, b=7, new_order=1), BondOrderChange(a=8, b=9, new_order=1),"
+   }
+  }
+ ]
+}

@@ -1,0 +1,16 @@
+{
+ "scores": {
+  "x0 phenyl     ": -9.8,
+  "x1 cyclohexyl ": -9.5,
+  "x2 piperidine ": -8.3,
+  "seed          ": -7.6,
+  "B best -11.30 ": -7.6
+ },
+ "smiles": {
+  "x0 phenyl     ": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1-c1ccccc1",
+  "x1 cyclohexyl ": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCCC1",
+  "x2 piperidine ": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1N1CCCCC1",
+  "seed          ": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+  "B best -11.30 ": "FC(F)(c1ccc(-c2ccccc2)cc1)c1cccc(N2CC[NH2+]CC2)c1"
+ }
+}

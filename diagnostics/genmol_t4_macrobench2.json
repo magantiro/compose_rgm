@@ -1,0 +1,225 @@
+{
+ "runs": [
+  {
+   "idx": 0,
+   "target": "parp1",
+   "chembl": "seed0",
+   "qed": 0.8879,
+   "sa": 2.609,
+   "published_ds": 7.3,
+   "delta": 0.4,
+   "control": "dual_macro",
+   "budget": 20,
+   "dock": true,
+   "tag": "macrobench2",
+   "horizon": 4,
+   "rounds": 1,
+   "max_rounds": 1,
+   "per_round": [
+    {
+     "round": 1,
+     "n_cand": 271,
+     "n_feasible": 239,
+     "n_docked_total": 20,
+     "n_lineages": 1,
+     "min_v": 0.0,
+     "surrogate_n": 16,
+     "t_fiber": 62.15,
+     "t_score": 0.0,
+     "t_archive": 0.0,
+     "t_dock": 20.6,
+     "elapsed": 83.3
+    }
+   ],
+   "seed_rng": 20260821,
+   "n_calls": 20,
+   "n_feasible_docked": 16,
+   "first_feasible_call": 1,
+   "best_ds": -8.0,
+   "best_smiles": "Cc1ccc2c(c1)CNC(=O)c1cc(N(C)C)cn1-2",
+   "reached_feasible": true,
+   "first_feasible_round": 1,
+   "timers": {
+    "fiber": 62.15,
+    "score": 0.0,
+    "archive": 0.0,
+    "dock": 20.6
+   },
+   "complete": true,
+   "seconds": 83.8,
+   "resume": {
+    "docked": {
+     "CN(C)Cc1cc(I)c2c(c1)CNC(=O)c1cccn1-2": -7.5,
+     "CN(C)Cc1cpc2c(c1)CNC(=O)c1cccn1-2": -7.1,
+     "CN(C)Cc1ccc2c(c1)CNC(=O)c1cbcn1-2": 0.0,
+     "CN(C)C(=N)c1ccc2c(c1)CNC(=O)c1cccn1-2": -7.9,
+     "CN(C)Cc1ccc2c(c1O)CNC(=O)c1cccn1-2": -7.3,
+     "CN(C)Cc1ccc2c(n1)CNC(=O)c1cccn1-2": -6.9,
+     "CN(C=S)Cc1ccc2c(c1)CNC(=O)c1cccn1-2": -6.9,
+     "CN(C)Cc1ccc2c(c1)CNC(=O)c1cncn1-2": -7.3,
+     "CN(C)Cc1ccc2c(c1)C(Br)NC(=O)c1cccn1-2": -7.6,
+     "Cc1ccc2c(c1)CNC(=O)c1cc(N(C)C)cn1-2": -8.0,
+     "CN(C)Cc1ccc2c(c1)CNC(=O)C1=CC=CB12": 0.0,
+     "Cc1cc(CN(C)C)cc2c1-n1cccc1C(=O)NC2": -7.5,
+     "CN(C)Cc1ccc2c(c1)COC(=O)c1cccn1-2": -7.2,
+     "CN(C)Cc1ccc2c(c1)CNC(=O)c1pccn1-2": -7.2,
+     "CN(C)Bc1ccc2c(c1)CNC(=O)c1cccn1-2": 0.0,
+     "CN(C)Cc1ccc2c(c1)CNC(=O)c1ccc(N)n1-2": -7.3,
+     "CN(C)Cc1ccc2c(c1)BNC(=O)c1cccn1-2": 0.0,
+     "CC(c1ccc2c(c1)CNC(=O)c1cccn1-2)N(C)C": -7.9,
+     "CN(C)C(Cl)c1ccc2c(c1)CNC(=O)c1cccn1-2": -7.9,
+     "CN(C)Cc1ccc2c(c1)CNC(=O)c1cc([PH4])cn1-2": -7.2
+    },
+    "A_oracle": [
+     {
+      "smi": "CN(C)Cc1cc(I)c2c(c1)CNC(=O)c1cccn1-2",
+      "ds": -7.5,
+      "round": 1,
+      "call": 1
+     },
+     {
+      "smi": "CN(C)Cc1cpc2c(c1)CNC(=O)c1cccn1-2",
+      "ds": -7.1,
+      "round": 1,
+      "call": 2
+     },
+     {
+      "smi": "CN(C)C(=N)c1ccc2c(c1)CNC(=O)c1cccn1-2",
+      "ds": -7.9,
+      "round": 1,
+      "call": 4
+     },
+     {
+      "smi": "CN(C)Cc1ccc2c(c1O)CNC(=O)c1cccn1-2",
+      "ds": -7.3,
+      "round": 1,
+      "call": 5
+     },
+     {
+      "smi": "CN(C)Cc1ccc2c(n1)CNC(=O)c1cccn1-2",
+      "ds": -6.9,
+      "round": 1,
+      "call": 6
+     },
+     {
+      "smi": "CN(C=S)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+      "ds": -6.9,
+      "round": 1,
+      "call": 7
+     },
+     {
+      "smi": "CN(C)Cc1ccc2c(c1)CNC(=O)c1cncn1-2",
+      "ds": -7.3,
+      "round": 1,
+      "call": 8
+     },
+     {
+      "smi": "CN(C)Cc1ccc2c(c1)C(Br)NC(=O)c1cccn1-2",
+      "ds": -7.6,
+      "round": 1,
+      "call": 9
+     },
+     {
+      "smi": "Cc1ccc2c(c1)CNC(=O)c1cc(N(C)C)cn1-2",
+      "ds": -8.0,
+      "round": 1,
+      "call": 10
+     },
+     {
+      "smi": "Cc1cc(CN(C)C)cc2c1-n1cccc1C(=O)NC2",
+      "ds": -7.5,
+      "round": 1,
+      "call": 12
+     },
+     {
+      "smi": "CN(C)Cc1ccc2c(c1)COC(=O)c1cccn1-2",
+      "ds": -7.2,
+      "round": 1,
+      "call": 13
+     },
+     {
+      "smi": "CN(C)Cc1ccc2c(c1)CNC(=O)c1pccn1-2",
+      "ds": -7.2,
+      "round": 1,
+      "call": 14
+     },
+     {
+      "smi": "CN(C)Cc1ccc2c(c1)CNC(=O)c1ccc(N)n1-2",
+      "ds": -7.3,
+      "round": 1,
+      "call": 16
+     },
+     {
+      "smi": "CC(c1ccc2c(c1)CNC(=O)c1cccn1-2)N(C)C",
+      "ds": -7.9,
+      "round": 1,
+      "call": 18
+     },
+     {
+      "smi": "CN(C)C(Cl)c1ccc2c(c1)CNC(=O)c1cccn1-2",
+      "ds": -7.9,
+      "round": 1,
+      "call": 19
+     },
+     {
+      "smi": "CN(C)Cc1ccc2c(c1)CNC(=O)c1cc([PH4])cn1-2",
+      "ds": -7.2,
+      "round": 1,
+      "call": 20
+     }
+    ],
+    "A_search_smi": [
+     "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+     "CNCc1ccc2c(c1)CNC(=O)c1cccn1-2",
+     "CN(C)C(=O)c1ccc2c(c1)CNC(=O)c1cccn1-2",
+     "CC(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+     "CN(C)Cc1ccc2c(c1)CN(C)C(=O)c1cccn1-2",
+     "CN(C)Cc1ccc2c(c1)-n1cccc1C(=O)NC2",
+     "Cc1ccc2n1-c1ccc(CN(C)C)cc1CNC2=O",
+     "CC(c1ccc2c(c1)CNC(=O)c1cccn1-2)N(C)C",
+     "Cc1ccn2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+     "CCNCc1ccc2c(c1)CNC(=O)c1cccn1-2",
+     "Cc1cc2n(c1)-c1ccc(CN(C)C)cc1CNC2=O",
+     "CN(C)Cc1cc2c(cc1O)-n1cccc1C(=O)NC2",
+     "CN(C)Cc1cccc2c1-n1cccc1C(=O)NC2",
+     "CC1NC(=O)c2cccn2-c2ccc(CN(C)C)cc21",
+     "CN(C)Cc1ccc2c(c1)CNC(O)c1cccn1-2",
+     "CN(C)Cc1cc2c(cc1Cl)-n1cccc1C(=O)NC2",
+     "CCN(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+     "CN(C)Cc1cc2c(cc1F)-n1cccc1C(=O)NC2",
+     "CN(C)Oc1ccc2c(c1)CNC(=O)c1cccn1-2",
+     "CN(C)Cc1ccc2c(c1)CNC(=O)c1ccc(Br)n1-2",
+     "CN(C)Cc1ccc2c(c1)CNCc1cccn1-2",
+     "CN(C)Cc1ccc2c(c1)CNC(=O)c1ccc(Cl)n1-2",
+     "CN(C)Cc1cccc2c1CNC(=O)c1cccn1-2",
+     "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(Cl)ccn1-2",
+     "CN(C)Cc1ccc2c(c1)CNC(=O)c1ccc(N)n1-2",
+     "CN(C=O)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+     "CN(C)Cc1ccc2c(c1)CNC(=O)c1cc(Cl)cn1-2",
+     "Cc1cc2c(cc1CN(C)C)CNC(=O)c1cccn1-2",
+     "CN(C)Cc1ccc2c(c1)CNC(=O)c1cc(Br)cn1-2",
+     "CN(C)Cc1cc(Cl)c2c(c1)CNC(=O)c1cccn1-2",
+     "CNC(C)c1ccc2c(c1)CNC(=O)c1cccn1-2",
+     "CN(C)CN1Cc2ccccc2-n2cccc2C1=O",
+     "CN(C)Cc1cc(F)c2c(c1)CNC(=O)c1cccn1-2",
+     "CNCc1ccc2c(c1C)CNC(=O)c1cccn1-2",
+     "Cc1ccc2c(c1)CNC(=O)c1cc(N(C)C)cn1-2",
+     "CN(C)Cc1ccc2c(c1)CNC(=O)C1=CC=CC12",
+     "CN(C)Cc1ccc2c(c1)CNC(=O)C1=CC=[SH]N12",
+     "CN(C)Cc1ccc2c(c1)[IH3]NC(=O)c1cccn1-2",
+     "CN(C)[IH3]c1ccc2c(c1)CNC(=O)c1cccn1-2",
+     "CN(CBr)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+     "CN(C)Cc1ccc2c(c1)SNC(=O)c1cccn1-2",
+     "C=C(c1ccc2c(c1)CNC(=O)c1cccn1-2)N(C)C",
+     "CN(S)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+     "CN(C)Cc1ccc2c(p1)CNC(=O)c1cccn1-2",
+     "CN(C)Cc1ccc2c(c1)CNC(=O)c1cccp1-2",
+     "CN(C)Cc1ccc2c(c1)CNC(=O)C1=[SH]C=CN12",
+     "CN(C)Cc1ccc2c(c1)C[SH4]C(=O)c1cccn1-2",
+     "CN(C)Cc1ccc2c(c1)CNC(=O)S1=CC=CN21"
+    ]
+   }
+  }
+ ],
+ "tag": "macrobench2"
+}

@@ -1,0 +1,1030 @@
+{
+  "results": [
+    {
+      "cell": "braf_dev0",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 13,
+          "n_unique_endpoints": 9,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.04849759934874144,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.036478814185986676,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 973,
+          "n_unique_endpoints": 612,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.26885647304374455,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.16370165849229892,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 17.538613080978394
+    },
+    {
+      "cell": "braf_dev1",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 10,
+          "n_unique_endpoints": 7,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.021414221845605295,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.020874362347467902,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 944,
+          "n_unique_endpoints": 574,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.33922321422541457,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.25816066737686627,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 17.302616119384766
+    },
+    {
+      "cell": "braf_dev2",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 11,
+          "n_unique_endpoints": 9,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.0008942122343701025,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.0008880010168676117,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 962,
+          "n_unique_endpoints": 682,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.002287462776724697,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.0022448750677583457,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 39.16334819793701
+    },
+    {
+      "cell": "braf_dev3",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 13,
+          "n_unique_endpoints": 13,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.00111824302897366,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.0009986939442608873,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 973,
+          "n_unique_endpoints": 873,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.005129884600843622,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.003557825817959987,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 24.15779447555542
+    },
+    {
+      "cell": "braf_dev4",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 9,
+          "n_unique_endpoints": 9,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.011376414710135983,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.010416338503730974,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 920,
+          "n_unique_endpoints": 771,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.08961857026902574,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.0820145304857849,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 23.19520854949951
+    },
+    {
+      "cell": "braf_dev5",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 14,
+          "n_unique_endpoints": 11,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.019077732722125866,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.017787699812359982,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 974,
+          "n_unique_endpoints": 715,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.24552000529920742,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.1952670430386231,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 14.043871879577637
+    },
+    {
+      "cell": "fa7_dev6",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 13,
+          "n_unique_endpoints": 13,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.00038380490201133836,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.00033537717044439036,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 973,
+          "n_unique_endpoints": 873,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.0009254966232452255,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.0006761171847613442,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 31.951303482055664
+    },
+    {
+      "cell": "fa7_dev7",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 19,
+          "n_unique_endpoints": 19,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 1.5474695212030794e-05,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 1.511314946181415e-05,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 979,
+          "n_unique_endpoints": 951,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 1.5474695212030794e-05,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 1.511314946181415e-05,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 30.456948280334473
+    },
+    {
+      "cell": "fa7_dev8",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 14,
+          "n_unique_endpoints": 10,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.0032555072147205755,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.0028616124969071087,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 974,
+          "n_unique_endpoints": 636,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.011346181987519577,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.005745171873081403,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 13.598242282867432
+    },
+    {
+      "cell": "fa7_dev9",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 16,
+          "n_unique_endpoints": 13,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.0021961852289921384,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.002113671261136635,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 976,
+          "n_unique_endpoints": 741,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.006238368272698044,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.005490160027657176,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 19.54554510116577
+    },
+    {
+      "cell": "jak2_dev10",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 9,
+          "n_unique_endpoints": 9,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.05630982235867583,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.041305028226540245,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 920,
+          "n_unique_endpoints": 771,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.1495819431343442,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.1009229793212493,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 16.437114238739014
+    },
+    {
+      "cell": "jak2_dev11",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 10,
+          "n_unique_endpoints": 10,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.008912513780015391,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.007827975124257657,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 944,
+          "n_unique_endpoints": 808,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.031082349202190666,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.024720423136229335,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 17.205002784729004
+    },
+    {
+      "cell": "jak2_dev12",
+      "seed": "COc1cc(-c2cnc3cccc(-c4ccc(CC(=O)N5CCS(=O)(=O)CC5)cc4)c3n2)cc(OC)c1OC",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 11,
+          "n_unique_endpoints": 11,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.000543628051854617,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.0005364799712079647,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 962,
+          "n_unique_endpoints": 838,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.0015537967589318118,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.0014007283210560567,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 19.151485919952393
+    },
+    {
+      "cell": "jak2_dev13",
+      "seed": "COc1ccc(-c2cc(N[C@@H](C)c3ccccc3)nc(-n3cnc4ccncc43)n2)cc1OC",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 13,
+          "n_unique_endpoints": 11,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.0008847948303573395,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.0007983085024210471,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 973,
+          "n_unique_endpoints": 737,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.00213567570140411,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.001848677648827513,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 16.04610300064087
+    },
+    {
+      "cell": "jak2_dev14",
+      "seed": "CS(=O)(=O)Nc1ccc(-c2ccnc(Nc3ccc(CN4CCOCC4)cc3)n2)cc1",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 12,
+          "n_unique_endpoints": 12,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.008149213977551568,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.007598165570862589,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 968,
+          "n_unique_endpoints": 856,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.11153733019555931,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.0850447807852414,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 16.028855085372925
+    },
+    {
+      "cell": "jak2_dev15",
+      "seed": "CN1CCN(Cc2cccc(Nc3nccc(-c4ccc(NS(C)(=O)=O)cc4)n3)c2)CC1",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 14,
+          "n_unique_endpoints": 14,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.007218300857036214,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.0068300907232099655,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 974,
+          "n_unique_endpoints": 886,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.059423549737739945,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.04632104431115212,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 17.19517469406128
+    },
+    {
+      "cell": "parp1_dev16",
+      "seed": "COC1CCC(c2nc3c(C(N)=O)cccc3[nH]2)CC1",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 12,
+          "n_unique_endpoints": 10,
+          "d0.4": {
+            "n_feasible": 10,
+            "ceiling_feasible": true,
+            "best_Hz_in_pool": 0.9452186514271669,
+            "best_feasible": {
+              "smiles": "COC1CCC(c2nc3c(C(N)=O)cc(-c4ccccc4)cc3[nH]2)CC1",
+              "qed": 0.7468,
+              "sa": 2.411,
+              "sim": 0.6923,
+              "stoich": [
+                [
+                  "C",
+                  6
+                ]
+              ],
+              "qed_margin": 0.14680000000000004,
+              "sa_margin": 1.589,
+              "sim_margin": 0.2923
+            }
+          },
+          "d0.6": {
+            "n_feasible": 9,
+            "ceiling_feasible": true,
+            "best_Hz_in_pool": 0.83312272536753,
+            "best_feasible": {
+              "smiles": "NC(=O)c1cccc2[nH]c(C3CCC(OCc4ccccc4)CC3)nc12",
+              "qed": 0.7327,
+              "sa": 2.273,
+              "sim": 0.7059,
+              "stoich": [
+                [
+                  "C",
+                  6
+                ]
+              ],
+              "qed_margin": 0.13270000000000004,
+              "sa_margin": 1.7269999999999999,
+              "sim_margin": 0.1059
+            }
+          }
+        },
+        "open": {
+          "n_realizations": 968,
+          "n_unique_endpoints": 720,
+          "d0.4": {
+            "n_feasible": 381,
+            "ceiling_feasible": true,
+            "best_Hz_in_pool": 0.9486466119082431,
+            "best_feasible": {
+              "smiles": "COC1CCC(c2nc3c(C(=O)Nc4ncccn4)cccc3[nH]2)CC1",
+              "qed": 0.7523,
+              "sa": 2.504,
+              "sim": 0.6792,
+              "stoich": [
+                [
+                  "C",
+                  4
+                ],
+                [
+                  "N",
+                  2
+                ]
+              ],
+              "qed_margin": 0.1523,
+              "sa_margin": 1.496,
+              "sim_margin": 0.2792
+            }
+          },
+          "d0.6": {
+            "n_feasible": 141,
+            "ceiling_feasible": true,
+            "best_Hz_in_pool": 0.83312272536753,
+            "best_feasible": {
+              "smiles": "NC(=O)c1cccc2[nH]c(C3CCC(OCc4ccccc4)CC3)nc12",
+              "qed": 0.7327,
+              "sa": 2.273,
+              "sim": 0.7059,
+              "stoich": [
+                [
+                  "C",
+                  6
+                ]
+              ],
+              "qed_margin": 0.13270000000000004,
+              "sa_margin": 1.7269999999999999,
+              "sim_margin": 0.1059
+            }
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 15.040070295333862
+    },
+    {
+      "cell": "parp1_dev17",
+      "seed": "O=C(CN1CCN(C2CCCC2)CC1)N1CCc2c(nc(O)c3ccccc23)C1",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 14,
+          "n_unique_endpoints": 10,
+          "d0.4": {
+            "n_feasible": 9,
+            "ceiling_feasible": true,
+            "best_Hz_in_pool": 0.620269964874276,
+            "best_feasible": {
+              "smiles": "O=C(CN1CCN(C2(c3ccccc3)CCCC2)CC1)N1CCc2c(nc(O)c3ccccc23)C1",
+              "qed": 0.6266,
+              "sa": 2.82,
+              "sim": 0.6508,
+              "stoich": [
+                [
+                  "C",
+                  6
+                ]
+              ],
+              "qed_margin": 0.026600000000000068,
+              "sa_margin": 1.1800000000000002,
+              "sim_margin": 0.2508
+            }
+          },
+          "d0.6": {
+            "n_feasible": 9,
+            "ceiling_feasible": true,
+            "best_Hz_in_pool": 0.5868585810244941,
+            "best_feasible": {
+              "smiles": "O=C(CN1CCN(C2CCCC2)CC1)N1CCc2c(nc(O)c3c(-c4ccccc4)cccc23)C1",
+              "qed": 0.6234,
+              "sa": 2.687,
+              "sim": 0.7581,
+              "stoich": [
+                [
+                  "C",
+                  6
+                ]
+              ],
+              "qed_margin": 0.023399999999999976,
+              "sa_margin": 1.3130000000000002,
+              "sim_margin": 0.15810000000000002
+            }
+          }
+        },
+        "open": {
+          "n_realizations": 974,
+          "n_unique_endpoints": 636,
+          "d0.4": {
+            "n_feasible": 271,
+            "ceiling_feasible": true,
+            "best_Hz_in_pool": 0.8634126828468318,
+            "best_feasible": {
+              "smiles": "O=C(CN1CCN(C2CCCC2)CC1)N1CCc2c(nc(O)c3c(C4=COC=CO4)cccc23)C1",
+              "qed": 0.7261,
+              "sa": 3.32,
+              "sim": 0.6571,
+              "stoich": [
+                [
+                  "C",
+                  4
+                ],
+                [
+                  "O",
+                  2
+                ]
+              ],
+              "qed_margin": 0.1261,
+              "sa_margin": 0.6800000000000002,
+              "sim_margin": 0.2571
+            }
+          },
+          "d0.6": {
+            "n_feasible": 182,
+            "ceiling_feasible": true,
+            "best_Hz_in_pool": 0.6583333329851337,
+            "best_feasible": {
+              "smiles": "O=C(CN1CCN(C2CCCC2)CC1)N1CCc2c(nc(O)c3c(C4=COC=CO4)cccc23)C1",
+              "qed": 0.7261,
+              "sa": 3.32,
+              "sim": 0.6571,
+              "stoich": [
+                [
+                  "C",
+                  4
+                ],
+                [
+                  "O",
+                  2
+                ]
+              ],
+              "qed_margin": 0.1261,
+              "sa_margin": 0.6800000000000002,
+              "sim_margin": 0.05710000000000004
+            }
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 21.849992513656616
+    },
+    {
+      "cell": "parp1_dev18",
+      "seed": "Cc1nc(-c2ccccc2)sc1C(=O)Nc1cccc(Cc2nnc(O)c3ccccc23)c1",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 11,
+          "n_unique_endpoints": 9,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.00081073186305916,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.0007031331101178584,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 962,
+          "n_unique_endpoints": 682,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.002339215181195128,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.001975434618086316,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 15.763168096542358
+    },
+    {
+      "cell": "parp1_dev19",
+      "seed": "N/C(=N/O)C1c2cccc3c2N(CCNC3=O)C1c1ccc(F)cc1",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 13,
+          "n_unique_endpoints": 12,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.011630213040602808,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.011129501834943796,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 973,
+          "n_unique_endpoints": 816,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.011630213040602808,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.011129501834943796,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 9.605344295501709
+    },
+    {
+      "cell": "parp1_dev20",
+      "seed": "CCc1cc2cc(C(CCN3CCCCC3)Cc3ccc4c(c3)OCCO4)ccc2[nH]c1=O",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 16,
+          "n_unique_endpoints": 14,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.002171146119656888,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.001862709227743709,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 976,
+          "n_unique_endpoints": 798,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.024364306991815975,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.021577853055466365,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 27.8578999042511
+    },
+    {
+      "cell": "parp1_dev21",
+      "seed": "O=C(CCn1c2c(c(=O)[nH]c1=O)CSCC2)NCC(=O)c1ccc(-c2cccnn2)cc1",
+      "arms": {
+        "narrow_frozen": {
+          "n_realizations": 10,
+          "n_unique_endpoints": 10,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.006640085163384132,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.0059956950373594555,
+            "best_feasible": null
+          }
+        },
+        "open": {
+          "n_realizations": 944,
+          "n_unique_endpoints": 808,
+          "d0.4": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.035124589777931585,
+            "best_feasible": null
+          },
+          "d0.6": {
+            "n_feasible": 0,
+            "ceiling_feasible": false,
+            "best_Hz_in_pool": 0.026516751315942264,
+            "best_feasible": null
+          }
+        }
+      },
+      "n_realize_calls": 36,
+      "n_kernel_enumerations": 1,
+      "sec": 15.06080436706543
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+ "seed": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+ "target": "FC(F)(c1ccc(-c2ccccc2)cc1)c1cccc(N2CC[NH2+]CC2)c1",
+ "steps": [
+  {
+   "step": 0,
+   "target_index": 2,
+   "state": "FC(F)(c1ccccc1)c1cccc(N2CC[NH2+]CC2)c1",
+   "n_realizations": 14,
+   "n_canonical": 10,
+   "unsat": null,
+   "carbon_first_insertions": 17,
+   "carbon_mass": 0.10969900484742345,
+   "top_carbon_prob": 0.04245395525952186,
+   "endpoints": [
+    "FC(F)(c1cccc(N2CC[NH2+]CC2)c1)c1ccccc1-c1ccccc1",
+    "FC(F)(c1cccc(-c2ccccc2)c1)c1cccc(N2CC[NH2+]CC2)c1",
+    "FC(F)(c1ccc(-c2ccccc2)cc1)c1cccc(N2CC[NH2+]CC2)c1",
+    "FC(F)(c1ccccc1)c1cc(N2CC[NH2+]CC2)ccc1-c1ccccc1",
+    "FC(F)(c1ccccc1)c1cc(-c2ccccc2)cc(N2CC[NH2+]CC2)c1",
+    "FC(F)(c1ccccc1)c1ccc(-c2ccccc2)c(N2CC[NH2+]CC2)c1",
+    "FC(F)(c1ccccc1)c1cccc(N2CC[NH2+]CC2c2ccccc2)c1",
+    "FC(F)(c1ccccc1)c1cccc(N2CC[NH2+]C(c3ccccc3)C2)c1",
+    "FC(F)(c1ccccc1)c1cccc(N2CC[NH+](c3ccccc3)CC2)c1",
+    "FC(F)(c1ccccc1)c1cccc(N2CC[NH2+]CC2)c1-c1ccccc1"
+   ],
+   "production_built": "FC(F)(c1ccc(-c2ccccc2)cc1)c1cccc(N2CC[NH2+]CC2)c1",
+   "production_stage": null
+  }
+ ],
+ "final": "FC(F)(c1ccc(-c2ccccc2)cc1)c1cccc(N2CC[NH2+]CC2)c1",
+ "target_can": "FC(F)(c1ccc(-c2ccccc2)cc1)c1cccc(N2CC[NH2+]CC2)c1",
+ "final_is_target": true
+}

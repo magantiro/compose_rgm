@@ -1,0 +1,59 @@
+{
+ "fa7_s3_d0.4": {
+  "flags": [
+   "ring10"
+  ],
+  "ds": -10.2,
+  "smiles": "C=CC=c1cc(F)cc(C(=O)N(CCC(C)C)Cc2cccccc(C(N)=O)c(F)cc2)c1=C"
+ },
+ "fa7_s4_d0.6": {
+  "flags": [
+   "diazirine"
+  ],
+  "ds": -7.2,
+  "smiles": "CCC(CCCC(C)=C1N=N1)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1"
+ },
+ "fa7_s5_d0.4": {
+  "flags": [
+   "ring8"
+  ],
+  "ds": -9.3,
+  "smiles": "CC1CNN(C(=O)Cn2c(-c3cccc(C(=O)O)c3)ccc(NC(C)C)c2=O)CCC(F)C1"
+ },
+ "jak2_s14_d0.4": {
+  "flags": [
+   "P(elem)",
+   "ring8"
+  ],
+  "ds": -10.7,
+  "smiles": "CC1=C2c3c(ccnc3[PH3]1)-c1ccccc1C(=O)NC2c1ccc(O)cc1F"
+ },
+ "jak2_s14_d0.6": {
+  "flags": [
+   "ring8"
+  ],
+  "ds": -10.6,
+  "smiles": "CC(C)=C1c2ccnc3[nH]cc(c23)C(c2ccc(O)cc2F)NC(=O)C1C"
+ },
+ "parp1_s1_d0.6": {
+  "flags": [
+   "P(elem)"
+  ],
+  "ds": -9.2,
+  "smiles": "O=C1NCCc2c(OC(O)=C[PH2](F)F)[nH]c3cccc1c23"
+ },
+ "parp1_s2_d0.4": {
+  "flags": [
+   "I-hypervalent H2d2"
+  ],
+  "ds": -11.6,
+  "smiles": "O=C1NCCn2c3c(c4cccc1c42)C=[IH2]O3"
+ },
+ "parp1_s2_d0.6": {
+  "flags": [
+   "I-hypervalent H4d1"
+  ],
+  "ds": -10.3,
+  "smiles": "O=C1NCCn2cc([IH4])c3cccc1c32"
+ }
+}

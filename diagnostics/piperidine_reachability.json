@@ -1,0 +1,138 @@
+{
+ "seed": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+ "base": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1-c1ccccc1",
+ "ring_ids": [
+  16,
+  17,
+  18,
+  19,
+  20,
+  21
+ ],
+ "build": [
+  {
+   "step": 0,
+   "slot": 16,
+   "smiles": "Cc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F"
+  },
+  {
+   "step": 1,
+   "slot": 17,
+   "smiles": "C=Cc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F"
+  },
+  {
+   "step": 2,
+   "slot": 18,
+   "smiles": "CC=Cc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F"
+  },
+  {
+   "step": 3,
+   "slot": 19,
+   "smiles": "C=CC=Cc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F"
+  },
+  {
+   "step": 4,
+   "slot": 20,
+   "smiles": "CC=CC=Cc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F"
+  },
+  {
+   "step": 5,
+   "slot": 21,
+   "smiles": "C=CC=CC=Cc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F"
+  }
+ ],
+ "dbg": {
+  "sat_seen": 1,
+  "sat_skipped_aromatic": 0,
+  "restate_fam": 158,
+  "on_ring": 58,
+  "target_N": 6,
+  "applied_ok": 6
+ },
+ "n_restate_ring_local": 1,
+ "n_dearomatized": 1,
+ "restate": [
+  {
+   "j": 468,
+   "smiles": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCCC1",
+   "still_aromatic": false,
+   "rank": 30,
+   "mass": 0.005903161308620707
+  }
+ ],
+ "n_retype_hits": 6,
+ "hits": [
+  {
+   "dearom_j": 468,
+   "dearom_rank": 30,
+   "dearom_mass": 0.005903161308620707,
+   "dearom_smiles": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCCC1",
+   "retype_slot": 16,
+   "retype_rank": 116,
+   "retype_mass": 0.0010025943207591839,
+   "final": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1N1CCCCC1",
+   "piperidine_match": true,
+   "canonical": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1N1CCCCC1"
+  },
+  {
+   "dearom_j": 468,
+   "dearom_rank": 30,
+   "dearom_mass": 0.005903161308620707,
+   "dearom_smiles": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCCC1",
+   "retype_slot": 19,
+   "retype_rank": 108,
+   "retype_mass": 0.0011307441948823667,
+   "final": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCNCC1",
+   "piperidine_match": false,
+   "canonical": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCNCC1"
+  },
+  {
+   "dearom_j": 468,
+   "dearom_rank": 30,
+   "dearom_mass": 0.005903161308620707,
+   "dearom_smiles": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCCC1",
+   "retype_slot": 18,
+   "retype_rank": 142,
+   "retype_mass": 0.0008278685601718896,
+   "final": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCNC1",
+   "piperidine_match": false,
+   "canonical": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCNC1"
+  },
+  {
+   "dearom_j": 468,
+   "dearom_rank": 30,
+   "dearom_mass": 0.005903161308620707,
+   "dearom_smiles": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCCC1",
+   "retype_slot": 20,
+   "retype_rank": 143,
+   "retype_mass": 0.0008278685601718896,
+   "final": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCNC1",
+   "piperidine_match": false,
+   "canonical": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCNC1"
+  },
+  {
+   "dearom_j": 468,
+   "dearom_rank": 30,
+   "dearom_mass": 0.005903161308620707,
+   "dearom_smiles": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCCC1",
+   "retype_slot": 17,
+   "retype_rank": 185,
+   "retype_mass": 0.0005164809138923382,
+   "final": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCCN1",
+   "piperidine_match": false,
+   "canonical": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCCN1"
+  },
+  {
+   "dearom_j": 468,
+   "dearom_rank": 30,
+   "dearom_mass": 0.005903161308620707,
+   "dearom_smiles": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCCC1",
+   "retype_slot": 21,
+   "retype_rank": 186,
+   "retype_mass": 0.0005164809138923382,
+   "final": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCCN1",
+   "piperidine_match": false,
+   "canonical": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCCN1"
+  }
+ ]
+}

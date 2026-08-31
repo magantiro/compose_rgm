@@ -1,0 +1,31 @@
+{
+  "cell": "parp1_s0",
+  "reached": false,
+  "final_D": 32,
+  "path": [
+    "CN(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+    "C#CN(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+    "C#CN(C#C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+    "C#CN(C#C)C(=C)c1ccc2c(c1)CNC(=O)c1cccn1-2",
+    "C#CN(C#C)C(=C)c1cc(C)c2c(c1)CNC(=O)c1cccn1-2",
+    "C#CN(C#C)C(=C)c1cc(C#N)c2c(c1)CNC(=O)c1cccn1-2",
+    "C#CN(C#C)C(=C)c1cc(C#N)c2c(c1)C(=C)NC(=O)c1cccn1-2",
+    "C#CN(C#C)C(=C)c1cc(C#N)c2c(c1)C(=C)N(C)C(=O)c1cccn1-2",
+    "C#CN(C#C)C(=C)c1cc(C#N)c2c(c1)C(=C)N(C#C)C(=O)c1cccn1-2",
+    "C#CN(C#C)C(=C)c1cc(C#N)c2c(c1)C(=C)N(C#C)C(=O)c1c(C)ccn1-2",
+    "C#CN(C#C)C(=C)c1cc(C#N)c2c(c1)C(=C)N(C#C)C(=O)c1c(C#N)ccn1-2",
+    "C#CN(C#C)C(=C)c1cc(C#N)c2c(c1)C(=C)N(C#C)C(=O)c1c(C#N)c(C)cn1-2",
+    "C#CN(C#C)C(=C)c1cc(C#N)c2c(c1)C(=C)N(C#C)C(=O)c1c(C#N)c(C#N)cn1-2",
+    "C#CN(C#C)C(=C)c1cc(C#N)c2c(c1)C(=C)N(C#C)C(=O)c1c(C#N)c(C#N)c(C)n1-2",
+    "C#CN(C#C)C(=C)c1cc(C#N)c2c(c1)C(=C)N(C#C)C(=O)c1c(C#N)c(C#N)c(C#N)n1-2",
+    "C#CN(C#C)c1cc#cn2c(=C)c3cc1cc(C#N)c3-n1c(C#N)c(C#N)c(C#N)c1C2=O",
+    "C#CC(C#C)c1cc#cn2c(=C)c3cc1cc(C#N)c3-n1c(C#N)c(C#N)c(C#N)c1C2=O",
+    "C#CC(C#C)c1c2c#cn3c(c2)-c2cc1cc(C#N)c2n1c(C#N)c(C#N)c(C#N)c1c3=O",
+    "C#CC1C#Cc2c3c4c(C#N)cc2c1c1c#cn(c-3c1)c(=O)c1c(C#N)c(C#N)c(C#N)n41",
+    "C#CC1C#Cc2c3c4c(C#N)cc2c1c1ccn(c-3c1)c(=O)c1c(C#N)c(C#N)c(C#N)n41",
+    "C#CC1C#Cc2c3c4c(CN)cc2c1c1ccn(c-3c1)c(=O)c1c(C#N)c(C#N)c(C#N)n41",
+    "C#CC1C#Cc2c3c4c(CN)cc2c1c1ccn(c-3c1)c(=O)c1c(C#N)c(C#N)c(CN)n41",
+    "C#CC1C#Cc2c3c4c(CN)cc2c1c1ccn(c-3c1)c(=O)c1c(C#N)c(C#N)c(CC)n41"
+  ],
+  "n_edits": 22
+}

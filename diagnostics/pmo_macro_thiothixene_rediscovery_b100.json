@@ -1,0 +1,35 @@
+{
+ "task": "thiothixene_rediscovery",
+ "arm": "MACRO_FROZEN_5e399bc_refine2",
+ "oracle_source": "PyTDC 0.3.6",
+ "budget": 100,
+ "calls_spent": 100,
+ "unique": 100,
+ "rounds": 0,
+ "n_particles": 8,
+ "episode_len": 5,
+ "refine_fired": 0,
+ "best": 0.2619047619047619,
+ "top10_mean": 0.2231896369194483,
+ "auc_top10": 0.0,
+ "curve": [
+  {
+   "calls": 100,
+   "best": 0.2619047619047619,
+   "top10_mean": 0.2231896369194483,
+   "n_distinct_pop": 100,
+   "unique": 100,
+   "max_depth": 0
+  },
+  {
+   "calls": 100,
+   "best": 0.2619047619047619,
+   "top10_mean": 0.2231896369194483,
+   "n_distinct_pop": 100,
+   "unique": 100,
+   "max_depth": 0
+  }
+ ],
+ "max_depth": 0,
+ "seconds": 3.4
+}

@@ -1,0 +1,39 @@
+{
+  "status": "TARGET, NOT A RESULT -- do not place in any table",
+  "target": {
+    "mean_diff": -0.309,
+    "ci": [
+      -0.636,
+      0.017
+    ],
+    "coverage": "25/30",
+    "wins": 18,
+    "losses": 7,
+    "stated_budget_if_achieved": "200 oracle calls/cell, single configuration"
+  },
+  "why_the_combined_column_is_not_a_200_call_result": "per-cell value = min(new@100 mean-of-3, old@200 n=1); producing it required BOTH runs = 3x100 + 200 = 500 calls/cell. Per-molecule provenance is <=200 calls, but panel production cost is 500.",
+  "how_to_make_it_real": "run the CURRENT frozen narrow controller at 200 calls on all 30 cells (single configuration, no selection). Expected to beat the target: new@100 already beats old@200 by -1.190 kcal/mol paired (n=13, CI [-1.992,-0.387]), and the old panel had not plateaued at 200.",
+  "evidence": {
+    "new100_vs_old200_paired": {
+      "mean": -1.19,
+      "ci": [
+        -1.992,
+        -0.387
+      ],
+      "n": 13,
+      "new_better_on": "10/13"
+    },
+    "old_panel_budget_curve": {
+      "wins_at_100": 5,
+      "wins_at_150": 6,
+      "wins_at_200": 12,
+      "median_call_of_best": 105,
+      "max_call_of_best": 187
+    }
+  },
+  "combined_exploratory_only": {
+    "selection_gain": 0.156,
+    "noise_floor": 0.7,
+    "note": "cherry-pick gain is 0.22x noise; the column's edge is coverage, not selection"
+  }
+}

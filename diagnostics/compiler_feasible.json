@@ -1,0 +1,10 @@
+[
+  "CN(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+  "CC(c1ccc2c(c1)CNC(=O)c1cccn1-2)N(C)C",
+  "CCC(c1ccc2c(c1)CNC(=O)c1cccn1-2)N(C)C",
+  "CC(C)C(c1ccc2c(c1)CNC(=O)c1cccn1-2)N(C)C",
+  "CCC(C)C(c1ccc2c(c1)CNC(=O)c1cccn1-2)N(C)C",
+  "CCC(CC)C(c1ccc2c(c1)CNC(=O)c1cccn1-2)N(C)C",
+  "CCC(C(C)C)C(c1ccc2c(c1)CNC(=O)c1cccn1-2)N(C)C",
+  "CCC(C)C(CC)C(c1ccc2c(c1)CNC(=O)c1cccn1-2)N(C)C"
+]

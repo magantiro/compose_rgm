@@ -1,0 +1,574 @@
+[
+ {
+  "label": "parp1_s0 SEED (route 0)",
+  "smi": "CN(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+  "n_marks": 453,
+  "rows": [
+   {
+    "family": "atom_insert",
+    "n": 216,
+    "mass": 0.457408,
+    "best_rank": 2,
+    "in_cap": 134,
+    "applied": 216,
+    "clean_frac": 0.616,
+    "clean_mass": 0.454534
+   },
+   {
+    "family": "atom_delete",
+    "n": 5,
+    "mass": 0.270496,
+    "best_rank": 0,
+    "in_cap": 5,
+    "applied": 5,
+    "clean_frac": 1.0,
+    "clean_mass": 0.270496
+   },
+   {
+    "family": "bond_reroute",
+    "n": 36,
+    "mass": 0.132243,
+    "best_rank": 5,
+    "in_cap": 36,
+    "applied": 36,
+    "clean_frac": 1.0,
+    "clean_mass": 0.132243
+   },
+   {
+    "family": "atom_restate_semantic",
+    "n": 123,
+    "mass": 0.123254,
+    "best_rank": 3,
+    "in_cap": 123,
+    "applied": 123,
+    "clean_frac": 0.472,
+    "clean_mass": 0.112287
+   },
+   {
+    "family": "bond_reorder",
+    "n": 1,
+    "mass": 0.010448,
+    "best_rank": 15,
+    "in_cap": 1,
+    "applied": 1,
+    "clean_frac": 1.0,
+    "clean_mass": 0.010448
+   },
+   {
+    "family": "ring_system_restate",
+    "n": 1,
+    "mass": 0.00603,
+    "best_rank": 26,
+    "in_cap": 1,
+    "applied": 1,
+    "clean_frac": 1.0,
+    "clean_mass": 0.00603
+   },
+   {
+    "family": "cycle_close",
+    "n": 57,
+    "mass": 7.2e-05,
+    "best_rank": 305,
+    "in_cap": 0,
+    "applied": 57,
+    "clean_frac": 1.0,
+    "clean_mass": 7.2e-05
+   },
+   {
+    "family": "cycle_open",
+    "n": 14,
+    "mass": 4.9e-05,
+    "best_rank": 355,
+    "in_cap": 0,
+    "applied": 14,
+    "clean_frac": 0.857,
+    "clean_mass": 4.2e-05
+   }
+  ],
+  "required": {
+   "rank": 414,
+   "prob": 6.055719711506113e-07,
+   "family": "cycle_close",
+   "within_family_rank": 18,
+   "family_n": 57,
+   "in_cap": false,
+   "clean": true
+  },
+  "seconds": 8.3
+ },
+ {
+  "label": "parp1_s0 route 6 (opened)",
+  "smi": "C=CCCCCc1cccc(CNC(=O)c2ccc[nH]2)c1",
+  "n_marks": 634,
+  "rows": [
+   {
+    "family": "ring_system_restate",
+    "n": 6,
+    "mass": 0.700693,
+    "best_rank": 0,
+    "in_cap": 6,
+    "applied": 6,
+    "clean_frac": 1.0,
+    "clean_mass": 0.700693
+   },
+   {
+    "family": "bond_reorder",
+    "n": 11,
+    "mass": 0.21925,
+    "best_rank": 6,
+    "in_cap": 11,
+    "applied": 11,
+    "clean_frac": 0.909,
+    "clean_mass": 0.208817
+   },
+   {
+    "family": "bond_reroute",
+    "n": 55,
+    "mass": 0.021445,
+    "best_rank": 15,
+    "in_cap": 50,
+    "applied": 55,
+    "clean_frac": 1.0,
+    "clean_mass": 0.021445
+   },
+   {
+    "family": "atom_insert",
+    "n": 290,
+    "mass": 0.017466,
+    "best_rank": 20,
+    "in_cap": 101,
+    "applied": 290,
+    "clean_frac": 0.6,
+    "clean_mass": 0.017069
+   },
+   {
+    "family": "atom_delete",
+    "n": 2,
+    "mass": 0.015074,
+    "best_rank": 10,
+    "in_cap": 2,
+    "applied": 2,
+    "clean_frac": 1.0,
+    "clean_mass": 0.015074
+   },
+   {
+    "family": "atom_restate_semantic",
+    "n": 142,
+    "mass": 0.014576,
+    "best_rank": 21,
+    "in_cap": 111,
+    "applied": 142,
+    "clean_frac": 0.458,
+    "clean_mass": 0.011511
+   },
+   {
+    "family": "cycle_open",
+    "n": 9,
+    "mass": 0.009409,
+    "best_rank": 23,
+    "in_cap": 9,
+    "applied": 9,
+    "clean_frac": 1.0,
+    "clean_mass": 0.009409
+   },
+   {
+    "family": "cycle_close",
+    "n": 119,
+    "mass": 0.002086,
+    "best_rank": 28,
+    "in_cap": 10,
+    "applied": 119,
+    "clean_frac": 0.874,
+    "clean_mass": 0.00184
+   }
+  ],
+  "required": {
+   "rank": 20,
+   "prob": 0.003637525121460664,
+   "family": "atom_insert",
+   "within_family_rank": 0,
+   "family_n": 290,
+   "in_cap": true,
+   "clean": true
+  },
+  "seconds": 11.3
+ },
+ {
+  "label": "parp1_s0 route 12 (pre-close)",
+  "smi": "Cc1ccc(CCCc2ccc3c(c2)CNC(=O)c2cccn2C3=O)cc1",
+  "n_marks": 611,
+  "rows": [
+   {
+    "family": "atom_restate_semantic",
+    "n": 156,
+    "mass": 0.467247,
+    "best_rank": 1,
+    "in_cap": 119,
+    "applied": 156,
+    "clean_frac": 0.462,
+    "clean_mass": 0.466561
+   },
+   {
+    "family": "atom_delete",
+    "n": 5,
+    "mass": 0.26833,
+    "best_rank": 0,
+    "in_cap": 5,
+    "applied": 5,
+    "clean_frac": 1.0,
+    "clean_mass": 0.26833
+   },
+   {
+    "family": "bond_reroute",
+    "n": 15,
+    "mass": 0.161217,
+    "best_rank": 4,
+    "in_cap": 15,
+    "applied": 15,
+    "clean_frac": 1.0,
+    "clean_mass": 0.161217
+   },
+   {
+    "family": "atom_insert",
+    "n": 288,
+    "mass": 0.097335,
+    "best_rank": 11,
+    "in_cap": 152,
+    "applied": 288,
+    "clean_frac": 0.622,
+    "clean_mass": 0.097068
+   },
+   {
+    "family": "bond_reorder",
+    "n": 6,
+    "mass": 0.003881,
+    "best_rank": 40,
+    "in_cap": 6,
+    "applied": 6,
+    "clean_frac": 1.0,
+    "clean_mass": 0.003881
+   },
+   {
+    "family": "ring_system_restate",
+    "n": 2,
+    "mass": 0.001906,
+    "best_rank": 38,
+    "in_cap": 2,
+    "applied": 2,
+    "clean_frac": 1.0,
+    "clean_mass": 0.001906
+   },
+   {
+    "family": "cycle_open",
+    "n": 21,
+    "mass": 5.1e-05,
+    "best_rank": 303,
+    "in_cap": 0,
+    "applied": 21,
+    "clean_frac": 0.905,
+    "clean_mass": 4.5e-05
+   },
+   {
+    "family": "cycle_close",
+    "n": 118,
+    "mass": 3.2e-05,
+    "best_rank": 235,
+    "in_cap": 1,
+    "applied": 118,
+    "clean_frac": 1.0,
+    "clean_mass": 3.2e-05
+   }
+  ],
+  "required": {
+   "rank": 18,
+   "prob": 0.0034842473674857126,
+   "family": "atom_insert",
+   "within_family_rank": 5,
+   "family_n": 288,
+   "in_cap": true,
+   "clean": true
+  },
+  "seconds": 19.0
+ },
+ {
+  "label": "parp1_s0 route 1",
+  "smi": "O=C1NCc2cc(CN3CC3)ccc2-n2cccc21",
+  "n_marks": 393,
+  "rows": [
+   {
+    "family": "atom_insert",
+    "n": 198,
+    "mass": 0.632747,
+    "best_rank": 0,
+    "in_cap": 155,
+    "applied": 198,
+    "clean_frac": 0.621,
+    "clean_mass": 0.629099
+   },
+   {
+    "family": "atom_restate_semantic",
+    "n": 117,
+    "mass": 0.151311,
+    "best_rank": 19,
+    "in_cap": 117,
+    "applied": 117,
+    "clean_frac": 0.427,
+    "clean_mass": 0.086647
+   },
+   {
+    "family": "atom_delete",
+    "n": 5,
+    "mass": 0.110991,
+    "best_rank": 2,
+    "in_cap": 5,
+    "applied": 5,
+    "clean_frac": 1.0,
+    "clean_mass": 0.110991
+   },
+   {
+    "family": "ring_system_restate",
+    "n": 1,
+    "mass": 0.074447,
+    "best_rank": 1,
+    "in_cap": 1,
+    "applied": 1,
+    "clean_frac": 1.0,
+    "clean_mass": 0.074447
+   },
+   {
+    "family": "bond_reorder",
+    "n": 1,
+    "mass": 0.02576,
+    "best_rank": 6,
+    "in_cap": 1,
+    "applied": 1,
+    "clean_frac": 1.0,
+    "clean_mass": 0.02576
+   },
+   {
+    "family": "cycle_open",
+    "n": 17,
+    "mass": 0.004502,
+    "best_rank": 201,
+    "in_cap": 17,
+    "applied": 17,
+    "clean_frac": 0.882,
+    "clean_mass": 0.003975
+   },
+   {
+    "family": "cycle_close",
+    "n": 54,
+    "mass": 0.000242,
+    "best_rank": 252,
+    "in_cap": 4,
+    "applied": 54,
+    "clean_frac": 1.0,
+    "clean_mass": 0.000242
+   }
+  ],
+  "required": {
+   "rank": 215,
+   "prob": 0.0003820114192621882,
+   "family": "cycle_open",
+   "within_family_rank": 3,
+   "family_n": 17,
+   "in_cap": true,
+   "clean": true
+  },
+  "seconds": 7.9
+ },
+ {
+  "label": "parp1_s0 route 3",
+  "smi": "CCNCc1cccc(CNC(=O)c2ccc[nH]2)c1",
+  "n_marks": 526,
+  "rows": [
+   {
+    "family": "atom_insert",
+    "n": 249,
+    "mass": 0.423825,
+    "best_rank": 1,
+    "in_cap": 139,
+    "applied": 249,
+    "clean_frac": 0.622,
+    "clean_mass": 0.422808
+   },
+   {
+    "family": "atom_delete",
+    "n": 2,
+    "mass": 0.348567,
+    "best_rank": 0,
+    "in_cap": 2,
+    "applied": 2,
+    "clean_frac": 1.0,
+    "clean_mass": 0.348567
+   },
+   {
+    "family": "bond_reroute",
+    "n": 42,
+    "mass": 0.096111,
+    "best_rank": 4,
+    "in_cap": 41,
+    "applied": 42,
+    "clean_frac": 1.0,
+    "clean_mass": 0.096111
+   },
+   {
+    "family": "ring_system_restate",
+    "n": 6,
+    "mass": 0.059991,
+    "best_rank": 10,
+    "in_cap": 6,
+    "applied": 6,
+    "clean_frac": 1.0,
+    "clean_mass": 0.059991
+   },
+   {
+    "family": "bond_reorder",
+    "n": 6,
+    "mass": 0.045776,
+    "best_rank": 9,
+    "in_cap": 6,
+    "applied": 6,
+    "clean_frac": 1.0,
+    "clean_mass": 0.045776
+   },
+   {
+    "family": "atom_restate_semantic",
+    "n": 127,
+    "mass": 0.025246,
+    "best_rank": 19,
+    "in_cap": 93,
+    "applied": 127,
+    "clean_frac": 0.472,
+    "clean_mass": 0.02393
+   },
+   {
+    "family": "cycle_close",
+    "n": 85,
+    "mass": 0.000387,
+    "best_rank": 116,
+    "in_cap": 6,
+    "applied": 85,
+    "clean_frac": 0.988,
+    "clean_mass": 0.000387
+   },
+   {
+    "family": "cycle_open",
+    "n": 9,
+    "mass": 9.7e-05,
+    "best_rank": 210,
+    "in_cap": 7,
+    "applied": 9,
+    "clean_frac": 1.0,
+    "clean_mass": 9.7e-05
+   }
+  ],
+  "required": {
+   "rank": 19,
+   "prob": 0.007677057100597101,
+   "family": "atom_restate_semantic",
+   "within_family_rank": 0,
+   "family_n": 127,
+   "in_cap": true,
+   "clean": true
+  },
+  "seconds": 9.0
+ },
+ {
+  "label": "parp1_s0 route 15",
+  "smi": "CC(CCc1ccc2c(c1)CNC(=O)c1cccn1C2=O)c1ccc2c(c1)CNC2",
+  "n_marks": 717,
+  "rows": [
+   {
+    "family": "atom_insert",
+    "n": 327,
+    "mass": 0.208692,
+    "best_rank": 3,
+    "in_cap": 127,
+    "applied": 327,
+    "clean_frac": 0.621,
+    "clean_mass": 0.208109
+   },
+   {
+    "family": "bond_reroute",
+    "n": 16,
+    "mass": 0.194082,
+    "best_rank": 2,
+    "in_cap": 16,
+    "applied": 16,
+    "clean_frac": 1.0,
+    "clean_mass": 0.194082
+   },
+   {
+    "family": "atom_delete",
+    "n": 8,
+    "mass": 0.172798,
+    "best_rank": 0,
+    "in_cap": 5,
+    "applied": 8,
+    "clean_frac": 1.0,
+    "clean_mass": 0.172798
+   },
+   {
+    "family": "atom_restate_semantic",
+    "n": 173,
+    "mass": 0.157239,
+    "best_rank": 1,
+    "in_cap": 107,
+    "applied": 173,
+    "clean_frac": 0.462,
+    "clean_mass": 0.150285
+   },
+   {
+    "family": "ring_system_restate",
+    "n": 9,
+    "mass": 0.149689,
+    "best_rank": 7,
+    "in_cap": 9,
+    "applied": 9,
+    "clean_frac": 1.0,
+    "clean_mass": 0.149689
+   },
+   {
+    "family": "bond_reorder",
+    "n": 6,
+    "mass": 0.112117,
+    "best_rank": 6,
+    "in_cap": 6,
+    "applied": 6,
+    "clean_frac": 1.0,
+    "clean_mass": 0.112117
+   },
+   {
+    "family": "cycle_open",
+    "n": 25,
+    "mass": 0.003378,
+    "best_rank": 122,
+    "in_cap": 21,
+    "applied": 25,
+    "clean_frac": 0.88,
+    "clean_mass": 0.002911
+   },
+   {
+    "family": "cycle_close",
+    "n": 153,
+    "mass": 0.002006,
+    "best_rank": 91,
+    "in_cap": 9,
+    "applied": 153,
+    "clean_frac": 1.0,
+    "clean_mass": 0.002006
+   }
+  ],
+  "required": {
+   "rank": 3,
+   "prob": 0.04837242290853554,
+   "family": "atom_insert",
+   "within_family_rank": 0,
+   "family_n": 327,
+   "in_cap": true,
+   "clean": true
+  },
+  "seconds": 24.5
+ }
+]

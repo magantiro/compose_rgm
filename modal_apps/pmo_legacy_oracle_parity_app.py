@@ -38,13 +38,20 @@ ROOT = Path(__file__).resolve().parents[1]
 
 # sklearn 0.21.3 is the last release before the tree dtype change; its newest
 # wheels are cp37. numpy is pinned below 1.20 for binary compatibility with it.
+# Modal's builder only offers Python >= 3.10, where sklearn 0.21.3 has no
+# wheels, so bring a 3.7 base image directly. rdkit is deliberately ABSENT: the
+# panel fingerprints are computed locally with modern RDKit and passed in as
+# arrays, so both sides consume IDENTICAL features and any discrepancy is the
+# estimator alone rather than the featurisation.
 image = (
-    modal.Image.debian_slim(python_version="3.7")
+    modal.Image.from_registry("python:3.7-slim", add_python=None)
     .pip_install("numpy==1.18.5", "scipy==1.4.1", "scikit-learn==0.21.3",
-                 "joblib==0.14.1", "rdkit-pypi==2021.3.5")
+                 "joblib==0.14.1")
     .add_local_file(ROOT / "artifacts/tdc_originals/jnk3.pkl",  "/orig/jnk3.pkl",  copy=True)
     .add_local_file(ROOT / "artifacts/tdc_originals/gsk3b.pkl", "/orig/gsk3b.pkl", copy=True)
     .add_local_file(ROOT / "artifacts/tdc_originals/drd2.pkl",  "/orig/drd2.pkl",  copy=True)
+    .add_local_file(ROOT / "artifacts/tdc_originals/parity_panel.npz",
+                    "/orig/parity_panel.npz", copy=True)
     .add_local_file(ROOT / "artifacts/oracles/molleo_task3_v1/jnk3_forest.npz",
                     "/frozen/jnk3_forest.npz", copy=True)
     .add_local_file(ROOT / "artifacts/oracles/molleo_task3_v1/gsk3b_forest.npz",
@@ -55,47 +62,23 @@ image = (
 
 app = modal.App("pmo-legacy-oracle-parity")
 
-# Fixed canonical panel. Mixed drug-like molecules plus two known actives per
-# task family, so orientation is testable rather than assumed.
-PANEL = [
-    "CC(C)Cc1ccc(C(C)C(=O)O)cc1",                       # ibuprofen
-    "CC(=O)Oc1ccccc1C(=O)O",                            # aspirin
-    "CN1C=NC2=C1C(=O)N(C)C(=O)N2C",                     # caffeine
-    "c1ccc2c(c1)ccc1ccccc12",                           # anthracene
-    "CC(C)(C)NCC(O)c1ccc(O)c(CO)c1",                    # salbutamol
-    "COc1cc2c(cc1OC)CC(N)C2",                           # a small amine
-    "O=C(Nc1ccccc1)c1ccccc1",                           # benzanilide
-    "CCN(CC)CCNC(=O)c1ccc(N)cc1",                       # procainamide
-    "Clc1ccccc1C1=NCC(=O)Nc2ccc(Cl)cc21",               # a benzodiazepine core
-    "CC1=C(C(=O)Nc2ccccc2)SC(=N1)N",                    # thiazole amide
-]
-
 
 @app.function(image=image, cpu=(2.0, 2.0), memory=8192, timeout=60 * 60)
-def parity() -> dict[str, Any]:
+def parity():
     import hashlib, pickle
     import numpy as np
-    from rdkit import Chem, DataStructs, RDLogger
-    from rdkit.Chem import AllChem
-    RDLogger.DisableLog("rdApp.*")
 
     def sha(p):
         return hashlib.sha256(open(p, "rb").read()).hexdigest()
 
-    canon = [Chem.MolToSmiles(Chem.MolFromSmiles(s)) for s in PANEL]
-    mols = [Chem.MolFromSmiles(s) for s in canon]
+    d = np.load("/orig/parity_panel.npz", allow_pickle=True)
+    Xbit, Xcnt = d["X_bit2048"], d["X_count2048"]
+    panel = [str(s) for s in d["panel"]]
 
-    def ecfp(m, nbits=2048, r=2):
-        fp = AllChem.GetMorganFingerprintAsBitVect(m, r, nBits=nbits)
-        a = np.zeros((1,), dtype=np.int8)
-        DataStructs.ConvertToNumpyArray(fp, a)
-        return a
-
-    # ---- frozen implementations, plain numpy, no sklearn ----
     def forest_predict(npz, X):
-        d = np.load(npz)
-        cl, cr, feat = d["children_left"], d["children_right"], d["feature"]
-        leaf, root = d["leaf_p1"], d["tree_root"]
+        z = np.load(npz)
+        cl, cr, feat = z["children_left"], z["children_right"], z["feature"]
+        leaf, root = z["leaf_p1"], z["tree_root"]
         out = np.zeros(len(X))
         for i, x in enumerate(X):
             tot = 0.0
@@ -107,55 +90,38 @@ def parity() -> dict[str, Any]:
             out[i] = tot / len(root)
         return out
 
-    report = {}
-    X2048 = np.array([ecfp(m, 2048, 2) for m in mols], dtype=np.float64)
+    report = {"panel": panel, "sklearn": __import__("sklearn").__version__,
+              "numpy": np.__version__}
 
     for name, pkl, npz in [("jnk3", "/orig/jnk3.pkl", "/frozen/jnk3_forest.npz"),
                            ("gsk3b", "/orig/gsk3b.pkl", "/frozen/gsk3b_forest.npz")]:
-        with open(pkl, "rb") as f:
-            est = pickle.load(f)
-        orig = est.predict_proba(X2048)[:, 1]
-        ours = forest_predict(npz, X2048)
+        est = pickle.load(open(pkl, "rb"))
+        orig = est.predict_proba(Xbit)[:, 1]
+        ours = forest_predict(npz, Xbit)
         diff = np.abs(orig - ours)
-        wrong = np.abs((1.0 - orig) - ours)          # negative control
+        wrong = np.abs((1.0 - orig) - ours)
         report[name] = {
             "pickle_sha256": sha(pkl), "npz_sha256": sha(npz),
             "n_estimators": int(getattr(est, "n_estimators", -1)),
-            "n_features_expected": int(np.load(npz)["n_features"]),
-            "original": [round(float(v), 10) for v in orig],
-            "frozen":   [round(float(v), 10) for v in ours],
+            "original": [round(float(v), 12) for v in orig],
+            "frozen": [round(float(v), 12) for v in ours],
             "max_abs_diff": float(diff.max()),
             "wrong_orientation_max_abs_diff": float(wrong.max()),
-            "PASS": bool(diff.max() < 1e-9),
-        }
+            "PASS": bool(diff.max() < 1e-9)}
 
-    # ---- DRD2: SVM with Platt scaling, ECFP6 count-based per TDC ----
-    with open("/orig/drd2.pkl", "rb") as f:
-        svm = pickle.load(f)
-    from rdkit.Chem import rdMolDescriptors
-    def drd2_fp(m):
-        fp = rdMolDescriptors.GetMorganFingerprint(m, 3, useCounts=True, useFeatures=True)
-        a = np.zeros((32681,), dtype=np.float64)
-        for idx, v in fp.GetNonzeroElements().items():
-            a[idx % 32681] += v
-        return a
-    Xd = np.array([drd2_fp(m) for m in mols])
+    # DRD2: SVC with Platt scaling, TDC folds counts to 2048
     try:
-        orig_d = svm.predict_proba(Xd)[:, 1]
-        ok = True
+        svm = pickle.load(open("/orig/drd2.pkl", "rb"))
+        orig = svm.predict_proba(Xcnt)[:, 1]
+        z = np.load("/frozen/drd2_svm_parameters.npz")
+        report["drd2"] = {
+            "pickle_sha256": sha("/orig/drd2.pkl"),
+            "npz_sha256": sha("/frozen/drd2_svm_parameters.npz"),
+            "original": [round(float(v), 12) for v in orig],
+            "frozen_keys": [str(k) for k in z.files],
+            "note": "original evaluated; frozen SVM replay compared locally"}
     except Exception as e:
-        orig_d, ok = None, False
-        report["drd2_error"] = f"{type(e).__name__}: {str(e)[:200]}"
-    report["drd2"] = {
-        "pickle_sha256": sha("/orig/drd2.pkl"),
-        "npz_sha256": sha("/frozen/drd2_svm_parameters.npz"),
-        "original": [round(float(v), 10) for v in orig_d] if ok else None,
-        "note": ("DRD2 featurisation must be confirmed against the TDC source "
-                 "before this row is meaningful; the SVM is Platt-scaled."),
-    }
-    report["panel"] = canon
-    report["sklearn"] = __import__("sklearn").__version__
-    report["numpy"] = np.__version__
+        report["drd2"] = {"error": "%s: %s" % (type(e).__name__, str(e)[:200])}
     return report
 
 

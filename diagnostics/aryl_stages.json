@@ -1,0 +1,81 @@
+[
+ {
+  "target": "C1CCCCC1c1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F",
+  "reached": false,
+  "depth": 8,
+  "steps": [
+   {
+    "rule": "bond_reorder",
+    "rank": 7,
+    "prob": 0.026039083895790772,
+    "in_cap": true,
+    "smiles": "C=CCCCCc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F"
+   },
+   {
+    "rule": "bond_reorder",
+    "rank": 1,
+    "prob": 0.08192060416784465,
+    "in_cap": true,
+    "smiles": "CCCCCCc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F"
+   },
+   {
+    "rule": "bond_reorder",
+    "rank": 7,
+    "prob": 0.026039083895790772,
+    "in_cap": true,
+    "smiles": "C=CCCCCc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F"
+   },
+   {
+    "rule": "bond_reorder",
+    "rank": 1,
+    "prob": 0.08192060416784465,
+    "in_cap": true,
+    "smiles": "CCCCCCc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F"
+   },
+   {
+    "rule": "bond_reorder",
+    "rank": 7,
+    "prob": 0.026039083895790772,
+    "in_cap": true,
+    "smiles": "C=CCCCCc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F"
+   },
+   {
+    "rule": "bond_reorder",
+    "rank": 1,
+    "prob": 0.08192060416784465,
+    "in_cap": true,
+    "smiles": "CCCCCCc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F"
+   },
+   {
+    "rule": "bond_reorder",
+    "rank": 7,
+    "prob": 0.026039083895790772,
+    "in_cap": true,
+    "smiles": "C=CCCCCc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F"
+   },
+   {
+    "rule": "bond_reorder",
+    "rank": 1,
+    "prob": 0.08192060416784465,
+    "in_cap": true,
+    "smiles": "CCCCCCc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F"
+   }
+  ],
+  "halted": "budget",
+  "final": "CCCCCCc1ccc(N2CC[NH2+]CC2)cc1C(F)(F)F"
+ },
+ {
+  "target": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1-c1ccccc1",
+  "reached": true,
+  "depth": 1,
+  "steps": [
+   {
+    "rule": "ring_system_restate",
+    "rank": 2,
+    "prob": 0.04300265952869178,
+    "in_cap": true,
+    "smiles": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1-c1ccccc1"
+   }
+  ]
+ }
+]

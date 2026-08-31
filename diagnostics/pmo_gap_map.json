@@ -1,0 +1,119 @@
+{
+ "budget": 100,
+ "arm": "L1",
+ "note": "100-call floors projected to 10k via official finish=True",
+ "rows": {
+  "valsartan_smarts": {
+   "ours": 0.1067767107687807,
+   "genmol": 0.822,
+   "deficit": 0.7152232892312193
+  },
+  "troglitazone_rediscovery": {
+   "ours": 0.3611347469140151,
+   "genmol": 0.867,
+   "deficit": 0.5058652530859848
+  },
+  "sitagliptin_mpo": {
+   "ours": 0.11166712647317174,
+   "genmol": 0.584,
+   "deficit": 0.47233287352682823
+  },
+  "isomers_c9h10n2o2pf2cl": {
+   "ours": 0.4438450340609064,
+   "genmol": 0.833,
+   "deficit": 0.38915496593909354
+  },
+  "celecoxib_rediscovery": {
+   "ours": 0.47499175824542217,
+   "genmol": 0.826,
+   "deficit": 0.3510082417545778
+  },
+  "thiothixene_rediscovery": {
+   "ours": 0.3862174226971456,
+   "genmol": 0.692,
+   "deficit": 0.30578257730285435
+  },
+  "albuterol_similarity": {
+   "ours": 0.6639085700898367,
+   "genmol": 0.937,
+   "deficit": 0.27309142991016333
+  },
+  "zaleplon_mpo": {
+   "ours": 0.3371451769311736,
+   "genmol": 0.584,
+   "deficit": 0.2468548230688264
+  },
+  "jnk3": {
+   "ours": 0.6711275,
+   "genmol": 0.906,
+   "deficit": 0.23487250000000004
+  },
+  "ranolazine_mpo": {
+   "ours": 0.6440854938769487,
+   "genmol": 0.821,
+   "deficit": 0.17691450612305126
+  },
+  "fexofenadine_mpo": {
+   "ours": 0.7420467692282215,
+   "genmol": 0.894,
+   "deficit": 0.15195323077177847
+  },
+  "perindopril_mpo": {
+   "ours": 0.5866733456860732,
+   "genmol": 0.718,
+   "deficit": 0.13132665431392676
+  },
+  "mestranol_similarity": {
+   "ours": 0.8529651520066194,
+   "genmol": 0.982,
+   "deficit": 0.1290348479933806
+  },
+  "median1": {
+   "ours": 0.2966616977381876,
+   "genmol": 0.398,
+   "deficit": 0.1013383022618124
+  },
+  "scaffold_hop": {
+   "ours": 0.5295248913363756,
+   "genmol": 0.628,
+   "deficit": 0.09847510866362441
+  },
+  "amlodipine_mpo": {
+   "ours": 0.7137758386121745,
+   "genmol": 0.81,
+   "deficit": 0.09622416138782552
+  },
+  "deco_hop": {
+   "ours": 0.8823622752965495,
+   "genmol": 0.96,
+   "deficit": 0.07763772470345043
+  },
+  "median2": {
+   "ours": 0.29079492687358915,
+   "genmol": 0.359,
+   "deficit": 0.06820507312641083
+  },
+  "osimertinib_mpo": {
+   "ours": 0.8231478325829718,
+   "genmol": 0.876,
+   "deficit": 0.05285216741702825
+  },
+  "isomers_c7h8n2o2": {
+   "ours": 0.8951228025814302,
+   "genmol": 0.942,
+   "deficit": 0.04687719741856977
+  },
+  "gsk3b": {
+   "ours": 0.94525,
+   "genmol": 0.986,
+   "deficit": 0.04074999999999995
+  },
+  "qed": {
+   "ours": 0.9435257340537473,
+   "genmol": 0.942,
+   "deficit": -0.0015257340537473407
+  }
+ },
+ "sum_ours": 12.702750806053341,
+ "sum_genmol_subset": 17.367
+}

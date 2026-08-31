@@ -1,0 +1,130 @@
+{
+ "cell": "5ht1b_s7_d0.4",
+ "target": "5ht1b",
+ "replicates": 5,
+ "rows": [
+  {
+   "label": "seed",
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+   "anchor": null,
+   "scores": [
+    -7.5,
+    -7.6,
+    -7.5,
+    -7.6,
+    -7.5
+   ],
+   "best": -7.6,
+   "mean": -7.540000000000001,
+   "sd": 0.04898979485566339
+  },
+  {
+   "label": "a0",
+   "smiles": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1-c1ccccc1",
+   "anchor": 0,
+   "sim": 0.524,
+   "qed": 0.904,
+   "sa": 2.97,
+   "scores": [
+    -9.8,
+    -9.8,
+    -9.9,
+    -9.8,
+    -9.8
+   ],
+   "best": -9.9,
+   "mean": -9.819999999999999,
+   "sd": 0.039999999999999855
+  },
+  {
+   "label": "a1",
+   "smiles": "FC(F)(F)c1ccc(-c2ccccc2)c(N2CC[NH2+]CC2)c1",
+   "anchor": 1,
+   "sim": 0.524,
+   "qed": 0.904,
+   "sa": 3.0,
+   "scores": [
+    -9.2,
+    -8.4,
+    -9.2,
+    -9.0,
+    -5.7
+   ],
+   "best": -9.2,
+   "mean": -8.3,
+   "sd": 1.3326664999166142
+  },
+  {
+   "label": "a2",
+   "smiles": "FC(F)(F)c1cc(-c2ccccc2)cc(N2CC[NH2+]CC2)c1",
+   "anchor": 2,
+   "sim": 0.615,
+   "qed": 0.904,
+   "sa": 2.99,
+   "scores": [
+    -9.6,
+    -9.6,
+    -9.6,
+    -9.6,
+    -9.6
+   ],
+   "best": -9.6,
+   "mean": -9.6,
+   "sd": 0.0
+  },
+  {
+   "label": "a3",
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]C(c3ccccc3)C2)c1",
+   "anchor": 3,
+   "sim": 0.581,
+   "qed": 0.904,
+   "sa": 3.41,
+   "scores": [
+    -9.1,
+    -9.2,
+    -9.2,
+    -9.1,
+    -9.2
+   ],
+   "best": -9.2,
+   "mean": -9.16,
+   "sd": 0.04898979485566339
+  },
+  {
+   "label": "a5",
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1-c1ccccc1",
+   "anchor": 5,
+   "sim": 0.432,
+   "qed": 0.904,
+   "sa": 3.07,
+   "scores": [
+    -9.3,
+    -8.8,
+    -8.8,
+    -9.0,
+    -8.5
+   ],
+   "best": -9.3,
+   "mean": -8.88,
+   "sd": 0.26381811916545855
+  },
+  {
+   "label": "a6",
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]CC2c2ccccc2)c1",
+   "anchor": 6,
+   "sim": 0.545,
+   "qed": 0.904,
+   "sa": 3.42,
+   "scores": [
+    -9.2,
+    -9.2,
+    -9.2,
+    -9.1,
+    -9.2
+   ],
+   "best": -9.2,
+   "mean": -9.179999999999998,
+   "sd": 0.039999999999999855
+  }
+ ]
+}

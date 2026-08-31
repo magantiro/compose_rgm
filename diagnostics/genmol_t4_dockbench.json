@@ -1,0 +1,63 @@
+{
+ "target": "jak2",
+ "n": 20,
+ "configs": [
+  {
+   "config": "serial cpu=4 (Gate-0)",
+   "seconds": 61.1,
+   "n_results": 20,
+   "n_scored": 20,
+   "mean": -8.77,
+   "min": -9.3,
+   "per_mol_s": 3.05
+  },
+  {
+   "config": "serial cpu=1",
+   "seconds": 57.5,
+   "n_results": 20,
+   "n_scored": 20,
+   "mean": -8.815,
+   "min": -9.3,
+   "per_mol_s": 2.87
+  },
+  {
+   "config": "parallel w=4 cpu=1",
+   "seconds": 24.2,
+   "n_results": 20,
+   "n_scored": 20,
+   "mean": -8.855,
+   "min": -9.3,
+   "per_mol_s": 1.21,
+   "order_preserved": true,
+   "n_comparable": 20,
+   "mean_abs_delta_vs_serial": 0.115,
+   "max_abs_delta_vs_serial": 0.5
+  },
+  {
+   "config": "parallel w=8 cpu=1",
+   "seconds": 29.5,
+   "n_results": 20,
+   "n_scored": 20,
+   "mean": -8.825,
+   "min": -9.3,
+   "per_mol_s": 1.47,
+   "order_preserved": true,
+   "n_comparable": 20,
+   "mean_abs_delta_vs_serial": 0.095,
+   "max_abs_delta_vs_serial": 0.5
+  },
+  {
+   "config": "parallel w=16 cpu=1",
+   "seconds": 126.7,
+   "n_results": 20,
+   "n_scored": 4,
+   "mean": -8.525,
+   "min": -9.0,
+   "per_mol_s": 6.34,
+   "order_preserved": true,
+   "n_comparable": 4,
+   "mean_abs_delta_vs_serial": 0.175,
+   "max_abs_delta_vs_serial": 0.6
+  }
+ ]
+}

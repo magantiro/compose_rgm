@@ -1,0 +1,31 @@
+{
+ "task": "scaffold_hop",
+ "n_labels": 249455,
+ "n_train": 50000,
+ "n_test": 10000,
+ "models": [
+  {
+   "model": "ridge",
+   "spearman": 0.897,
+   "top1pct_recall": 0.37,
+   "top1pct_enrichment": 37.0,
+   "mean_true_score_of_predicted_top1pct": 0.445,
+   "held_out_mean": 0.373,
+   "held_out_max": 0.5127,
+   "seconds": 0.8
+  },
+  {
+   "model": "mlp",
+   "spearman": 0.9587,
+   "top1pct_recall": 0.55,
+   "top1pct_enrichment": 55.0,
+   "mean_true_score_of_predicted_top1pct": 0.4512,
+   "held_out_mean": 0.373,
+   "held_out_max": 0.5127,
+   "seconds": 23.0
+  }
+ ],
+ "chosen": "mlp",
+ "verdict": "USABLE for search guidance",
+ "seconds": 35.3
+}

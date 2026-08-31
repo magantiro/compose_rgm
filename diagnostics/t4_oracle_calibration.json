@@ -1,0 +1,182 @@
+[
+  {
+    "target": "5ht1b",
+    "idx": 7,
+    "delta": 0.4,
+    "n": 5,
+    "mean_delta": 0.31999999999999995,
+    "their_best": -13.0,
+    "our_best_on_theirs": -12.7,
+    "pairs": [
+      {
+        "smiles": "Cc1cccc(C2=CC=C(c3cccc(-c4cccc(N5CC[NH2+]CC5)c4)c3)NN2)c1",
+        "reported": -13.0,
+        "ours": -12.4
+      },
+      {
+        "smiles": "Cc1c(-c2cccc(N3CCCCC3)c2)cccc1-c1cccc(N2CC[NH2+]CC2)c1",
+        "reported": -12.8,
+        "ours": -12.3
+      },
+      {
+        "smiles": "Cc1c(-c2cccc(N3CCCCC3)c2)cccc1-c1cccc(N2CC[NH2+]CC2)c1",
+        "reported": -12.8,
+        "ours": -12.3
+      },
+      {
+        "smiles": "Cc1c(-c2cccc(N3CC[NH2+]C3)c2)cccc1-c1cccc(N2CC[NH2+]C2)c1",
+        "reported": -12.7,
+        "ours": -12.7
+      },
+      {
+        "smiles": "Cc1c(-c2cccc(N3CCCC3)c2)cccc1-c1cccc(N2CCC[NH2+]CC2)c1",
+        "reported": -12.5,
+        "ours": -12.5
+      }
+    ]
+  },
+  {
+    "target": "braf",
+    "idx": 9,
+    "delta": 0.6,
+    "n": 5,
+    "mean_delta": 0.039999999999999855,
+    "their_best": -9.7,
+    "our_best_on_theirs": -9.7,
+    "pairs": [
+      {
+        "smiles": "CCCNC(=O)c1cnn2c(-c3cccc(NC(=O)NC)c3)ccnc12",
+        "reported": -9.7,
+        "ours": -9.7
+      },
+      {
+        "smiles": "CCCNC(=O)c1cnn2c(-c3cccc(NC(=O)NC)c3)ccnc12",
+        "reported": -9.7,
+        "ours": -9.7
+      },
+      {
+        "smiles": "CCCNC(=O)c1cnn2c(-c3cccc(NC(=O)NC)c3)ccnc12",
+        "reported": -9.7,
+        "ours": -9.7
+      },
+      {
+        "smiles": "CCCNC(=O)c1cnn2c(-c3cccc(NC(=O)NCC)c3)ccnc12",
+        "reported": -9.6,
+        "ours": -9.5
+      },
+      {
+        "smiles": "CCCNC(=O)c1cnn2c(-c3cccc(NC(=O)NCC)c3)ccnc12",
+        "reported": -9.6,
+        "ours": -9.5
+      }
+    ]
+  },
+  {
+    "target": "braf",
+    "idx": 10,
+    "delta": 0.6,
+    "n": 5,
+    "mean_delta": -0.019999999999999928,
+    "their_best": -10.7,
+    "our_best_on_theirs": -10.6,
+    "pairs": [
+      {
+        "smiles": "O=C(NCCN1CCOCC1)c1cc(Oc2ccc(-c3ccc(F)cc3)cc2)ccn1",
+        "reported": -10.7,
+        "ours": -10.5
+      },
+      {
+        "smiles": "O=C(NCCN1CCOCC1)c1cc(Oc2ccc(-c3ccc(F)cc3)cc2)ccn1",
+        "reported": -10.6,
+        "ours": -10.5
+      },
+      {
+        "smiles": "O=C(NCCN1CCOCC1)c1cc(Oc2ccc(C(=O)N3CCOCC3)cc2)ccn1",
+        "reported": -10.5,
+        "ours": -10.6
+      },
+      {
+        "smiles": "Cc1ccc(-c2ccc(Oc3ccnc(C(=O)NCCN4CCOCC4)c3)cc2)cc1",
+        "reported": -10.5,
+        "ours": -10.6
+      },
+      {
+        "smiles": "O=C(NCCN1CCOCC1)c1cc(Oc2ccc(C(=O)N3CCOCC3)cc2)ccn1",
+        "reported": -10.4,
+        "ours": -10.6
+      }
+    ]
+  },
+  {
+    "target": "braf",
+    "idx": 11,
+    "delta": 0.6,
+    "n": 5,
+    "mean_delta": 0.019999999999999928,
+    "their_best": -10.1,
+    "our_best_on_theirs": -10.1,
+    "pairs": [
+      {
+        "smiles": "CNC(=O)Nc1cccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)c1",
+        "reported": -10.1,
+        "ours": -10.1
+      },
+      {
+        "smiles": "CNC(=O)Nc1cccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)c1",
+        "reported": -10.1,
+        "ours": -10.1
+      },
+      {
+        "smiles": "CCN(CC)C(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+        "reported": -10.1,
+        "ours": -10.1
+      },
+      {
+        "smiles": "CNC(=O)Nc1cccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)c1",
+        "reported": -10.0,
+        "ours": -10.1
+      },
+      {
+        "smiles": "CNC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+        "reported": -10.0,
+        "ours": -9.8
+      }
+    ]
+  },
+  {
+    "target": "parp1",
+    "idx": 0,
+    "delta": 0.4,
+    "n": 5,
+    "mean_delta": 0.22000000000000028,
+    "their_best": -13.6,
+    "our_best_on_theirs": -13.7,
+    "pairs": [
+      {
+        "smiles": "O=C1NCc2cc(C3CCCC3Cc3ccc4c(c3)CNC(=O)c3cccn3C4=O)ccc21",
+        "reported": -13.6,
+        "ours": -13.5
+      },
+      {
+        "smiles": "O=C1CCCc2cc(CCc3ccc4c(c3)CNC(=O)c3cccn3C4=O)ccc21",
+        "reported": -13.6,
+        "ours": -13.7
+      },
+      {
+        "smiles": "O=C1NCc2cc(CC3(c4ccc5c(c4)CNC(=O)c4cccn4C5=O)CC3)ccc21",
+        "reported": -13.5,
+        "ours": -13.2
+      },
+      {
+        "smiles": "O=C1CCCc2cc(CCc3ccc4c(c3)CCCNC(=O)c3cccn3-4)ccc21",
+        "reported": -13.5,
+        "ours": -13.4
+      },
+      {
+        "smiles": "O=C1NCc2cc(N3CCCC3Cc3ccc4c(c3)CNC(=O)c3cccn3C4=O)ccc21",
+        "reported": -13.4,
+        "ours": -12.7
+      }
+    ]
+  }
+]

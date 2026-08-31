@@ -1,0 +1,983 @@
+[
+  {
+    "target": "braf",
+    "idx": 11,
+    "delta": 0.6,
+    "beta": 0.0,
+    "tag": "gateB",
+    "seed": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)Nc1cccnc1)c2)cc3)ccc4Cl",
+    "per_depth": [
+      {
+        "stage": 0,
+        "depth": 1,
+        "n": 48,
+        "ess": 47.99999999999999,
+        "min_v": 0.5044212144287191,
+        "n_feas": 0,
+        "mean_dheavy": -0.20833333333333334,
+        "max_dheavy": 1,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.7930671517579899,
+        "mean_qed": 0.26422489749202316,
+        "mean_sa": 2.3893368522970375
+      },
+      {
+        "stage": 0,
+        "depth": 2,
+        "n": 48,
+        "ess": 47.99999999999999,
+        "min_v": 0.5009525867794674,
+        "n_feas": 0,
+        "mean_dheavy": -0.25,
+        "max_dheavy": 1,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.785331774625938,
+        "mean_qed": 0.2659523382172127,
+        "mean_sa": 2.3934636665513302
+      },
+      {
+        "stage": 0,
+        "depth": 3,
+        "n": 48,
+        "ess": 47.99999999999999,
+        "min_v": 0.47954479053848387,
+        "n_feas": 0,
+        "mean_dheavy": -0.3125,
+        "max_dheavy": 1,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.7344966663231514,
+        "mean_qed": 0.26649632530778683,
+        "mean_sa": 2.3914610364440203
+      },
+      {
+        "stage": 0,
+        "depth": 4,
+        "n": 48,
+        "ess": 47.99999999999999,
+        "min_v": 0.30790254032680553,
+        "n_feas": 0,
+        "mean_dheavy": -0.3541666666666667,
+        "max_dheavy": 1,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.7160113632797378,
+        "mean_qed": 0.26754615967659834,
+        "mean_sa": 2.3981920809601194
+      },
+      {
+        "stage": 0,
+        "depth": 5,
+        "n": 48,
+        "ess": 47.99999999999999,
+        "min_v": 0.3337067245019878,
+        "n_feas": 0,
+        "mean_dheavy": -0.4583333333333333,
+        "max_dheavy": 1,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.7054025243015017,
+        "mean_qed": 0.2734115649865713,
+        "mean_sa": 2.40173896045189
+      },
+      {
+        "stage": 0,
+        "depth": 6,
+        "n": 48,
+        "ess": 47.99999999999999,
+        "min_v": 0.3337067245019878,
+        "n_feas": 0,
+        "mean_dheavy": -0.5,
+        "max_dheavy": 2,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.7100511326029956,
+        "mean_qed": 0.2754957852916547,
+        "mean_sa": 2.4160410427803005
+      },
+      {
+        "stage": 0,
+        "depth": 7,
+        "n": 48,
+        "ess": 48.00000000000002,
+        "min_v": 0.30790254032680553,
+        "n_feas": 0,
+        "mean_dheavy": -0.5833333333333334,
+        "max_dheavy": 2,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.7132843863630414,
+        "mean_qed": 0.28245369374769064,
+        "mean_sa": 2.410132345271307
+      },
+      {
+        "stage": 0,
+        "depth": 8,
+        "n": 48,
+        "ess": 48.000000000000014,
+        "min_v": 0.361918072550724,
+        "n_feas": 0,
+        "mean_dheavy": -0.6875,
+        "max_dheavy": 2,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.6760706725568092,
+        "mean_qed": 0.277007923150499,
+        "mean_sa": 2.4048127482315382
+      },
+      {
+        "stage": 1,
+        "depth": 9,
+        "n": 48,
+        "ess": 48.000000000000014,
+        "min_v": 0.2528788169004575,
+        "n_feas": 0,
+        "mean_dheavy": -1.7291666666666667,
+        "max_dheavy": 1,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.6381957139462372,
+        "mean_qed": 0.32698296862507975,
+        "mean_sa": 2.492887896739475
+      },
+      {
+        "stage": 1,
+        "depth": 10,
+        "n": 48,
+        "ess": 48.000000000000014,
+        "min_v": 0.22036709492448886,
+        "n_feas": 0,
+        "mean_dheavy": -1.7083333333333333,
+        "max_dheavy": 2,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.6391879075358713,
+        "mean_qed": 0.3226550079096297,
+        "mean_sa": 2.530692806753802
+      },
+      {
+        "stage": 1,
+        "depth": 11,
+        "n": 48,
+        "ess": 47.99999999999999,
+        "min_v": 0.1961471450556208,
+        "n_feas": 0,
+        "mean_dheavy": -1.7916666666666667,
+        "max_dheavy": 2,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.6384091352089108,
+        "mean_qed": 0.32696112961251717,
+        "mean_sa": 2.474776096345374
+      },
+      {
+        "stage": 1,
+        "depth": 12,
+        "n": 48,
+        "ess": 47.99999999999999,
+        "min_v": 0.18803418803418803,
+        "n_feas": 0,
+        "mean_dheavy": -1.8125,
+        "max_dheavy": 2,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.6449953709891614,
+        "mean_qed": 0.32419436891629855,
+        "mean_sa": 2.474027018746103
+      },
+      {
+        "stage": 1,
+        "depth": 13,
+        "n": 48,
+        "ess": 47.99999999999999,
+        "min_v": 0.1961471450556208,
+        "n_feas": 0,
+        "mean_dheavy": -1.8541666666666667,
+        "max_dheavy": 2,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.6371190748950332,
+        "mean_qed": 0.3236876588855017,
+        "mean_sa": 2.4440271788815164
+      },
+      {
+        "stage": 1,
+        "depth": 14,
+        "n": 48,
+        "ess": 47.99999999999999,
+        "min_v": 0.14882415853878156,
+        "n_feas": 0,
+        "mean_dheavy": -1.9375,
+        "max_dheavy": 2,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.6347409406190173,
+        "mean_qed": 0.3226808036071591,
+        "mean_sa": 2.4378259688234962
+      },
+      {
+        "stage": 1,
+        "depth": 15,
+        "n": 48,
+        "ess": 47.99999999999999,
+        "min_v": 0.24425657223913583,
+        "n_feas": 0,
+        "mean_dheavy": -1.9583333333333333,
+        "max_dheavy": 2,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.6302908491637476,
+        "mean_qed": 0.31855904849718353,
+        "mean_sa": 2.4588839932245685
+      },
+      {
+        "stage": 1,
+        "depth": 16,
+        "n": 48,
+        "ess": 47.99999999999999,
+        "min_v": 0.17461233450028657,
+        "n_feas": 0,
+        "mean_dheavy": -2.0416666666666665,
+        "max_dheavy": 2,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.631100221099311,
+        "mean_qed": 0.3209206675125425,
+        "mean_sa": 2.4812812208292967
+      },
+      {
+        "stage": 2,
+        "depth": 17,
+        "n": 48,
+        "ess": 47.99999999999999,
+        "min_v": 0.14882415853878156,
+        "n_feas": 0,
+        "mean_dheavy": -2.875,
+        "max_dheavy": 2,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.565290986054748,
+        "mean_qed": 0.40306496141666415,
+        "mean_sa": 2.62211088338441
+      },
+      {
+        "stage": 2,
+        "depth": 18,
+        "n": 48,
+        "ess": 47.99999999999999,
+        "min_v": 0.17461233450028657,
+        "n_feas": 0,
+        "mean_dheavy": -2.8541666666666665,
+        "max_dheavy": 2,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.5469898073809266,
+        "mean_qed": 0.3988006438811475,
+        "mean_sa": 2.6670585533334674
+      },
+      {
+        "stage": 2,
+        "depth": 19,
+        "n": 48,
+        "ess": 48.000000000000014,
+        "min_v": 0.14882415853878156,
+        "n_feas": 0,
+        "mean_dheavy": -2.75,
+        "max_dheavy": 2,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.549403355597805,
+        "mean_qed": 0.383925723919329,
+        "mean_sa": 2.6411807454039278
+      },
+      {
+        "stage": 2,
+        "depth": 20,
+        "n": 48,
+        "ess": 48.000000000000014,
+        "min_v": 0.10762752894850496,
+        "n_feas": 0,
+        "mean_dheavy": -2.875,
+        "max_dheavy": 2,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.5495855814224037,
+        "mean_qed": 0.38848276436734946,
+        "mean_sa": 2.6059728845163526
+      },
+      {
+        "stage": 2,
+        "depth": 21,
+        "n": 48,
+        "ess": 48.000000000000014,
+        "min_v": 0.14882415853878156,
+        "n_feas": 0,
+        "mean_dheavy": -2.9583333333333335,
+        "max_dheavy": 1,
+        "mean_drings": 0.0,
+        "max_drings": 0,
+        "mean_sim": 0.5429864009096009,
+        "mean_qed": 0.3829985580352302,
+        "mean_sa": 2.6876142838091006
+      },
+      {
+        "stage": 2,
+        "depth": 22,
+        "n": 48,
+        "ess": 48.0,
+        "min_v": 0.14882415853878156,
+        "n_feas": 0,
+        "mean_dheavy": -3.0833333333333335,
+        "max_dheavy": 1,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 0,
+        "mean_sim": 0.5313515264612857,
+        "mean_qed": 0.3820811461822813,
+        "mean_sa": 2.624062325322982
+      },
+      {
+        "stage": 2,
+        "depth": 23,
+        "n": 48,
+        "ess": 48.0,
+        "min_v": 0.14882415853878156,
+        "n_feas": 0,
+        "mean_dheavy": -2.9583333333333335,
+        "max_dheavy": 1,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 0,
+        "mean_sim": 0.5457337067761118,
+        "mean_qed": 0.37793083342688893,
+        "mean_sa": 2.549846394098891
+      },
+      {
+        "stage": 2,
+        "depth": 24,
+        "n": 48,
+        "ess": 47.99999999999999,
+        "min_v": 0.14882415853878156,
+        "n_feas": 0,
+        "mean_dheavy": -3.0,
+        "max_dheavy": 2,
+        "mean_drings": -0.020833333333333332,
+        "max_drings": 0,
+        "mean_sim": 0.5454536807882793,
+        "mean_qed": 0.3763694427694189,
+        "mean_sa": 2.557210564292255
+      }
+    ],
+    "best": {
+      "v": 0.10762752894850496,
+      "smi": "CN(C(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)C1CCCCC1",
+      "depth": 20
+    },
+    "n_feasible_states": 0,
+    "frontier_top": [
+      [
+        "CN(C(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)C1CCCCC1",
+        [
+          0.10762752894850496,
+          -4,
+          0,
+          20
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCCCC1",
+        [
+          0.14882415853878156,
+          -5,
+          0,
+          24
+        ]
+      ],
+      [
+        "COC1CCCC(=NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4cccnc4)c3)cc2)C1",
+        [
+          0.15611814345991554,
+          -3,
+          0,
+          24
+        ]
+      ],
+      [
+        "CC1(O)CCCC(=NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4cccnc4)c3)cc2)C1",
+        [
+          0.16295675573390067,
+          -3,
+          0,
+          22
+        ]
+      ],
+      [
+        "CC1(F)CCCC(=NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4cccnc4)c3)cc2)C1",
+        [
+          0.1670227024489952,
+          -3,
+          0,
+          21
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCCCC1F",
+        [
+          0.17461233450028657,
+          -4,
+          0,
+          22
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCCC(F)C1",
+        [
+          0.17461233450028657,
+          -4,
+          0,
+          17
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCC(F)CC1",
+        [
+          0.17461233450028657,
+          -4,
+          0,
+          19
+        ]
+      ],
+      [
+        "O=C(N=C1CCCC(CF)C1)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+        [
+          0.17805371211591056,
+          -3,
+          0,
+          20
+        ]
+      ],
+      [
+        "COC1(C)CCCC(=NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4cccnc4)c3)cc2)C1",
+        [
+          0.18278040867395023,
+          -2,
+          0,
+          23
+        ]
+      ],
+      [
+        "CN(CNC1CCCCC1)c1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+        [
+          0.18803418803418803,
+          -5,
+          0,
+          12
+        ]
+      ],
+      [
+        "CC1CCCC(NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4cccnc4)c3)cc2)C1",
+        [
+          0.1961471450556208,
+          -4,
+          0,
+          20
+        ]
+      ],
+      [
+        "CC1CCCCC1NC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+        [
+          0.1961471450556208,
+          -4,
+          0,
+          21
+        ]
+      ],
+      [
+        "CC1CCC(NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4cccnc4)c3)cc2)CC1",
+        [
+          0.19614714505562109,
+          -4,
+          0,
+          22
+        ]
+      ],
+      [
+        "CN(CNc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)C1CCCCC1",
+        [
+          0.1999335435853647,
+          -5,
+          0,
+          17
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCC(F)C(F)C1",
+        [
+          0.20051264330620333,
+          -3,
+          0,
+          20
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCC(F)CC1F",
+        [
+          0.20051264330620333,
+          -3,
+          0,
+          21
+        ]
+      ],
+      [
+        "Cc1ccc(NC(=O)c2cc(Oc3ccc(NC(=O)NC4CCCCC4)cc3)ccn2)cn1",
+        [
+          0.20256303445077906,
+          -4,
+          0,
+          24
+        ]
+      ],
+      [
+        "COC1CCCC(NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4cccnc4)c3)cc2)C1",
+        [
+          0.21039926751201432,
+          -3,
+          0,
+          24
+        ]
+      ],
+      [
+        "Cc1cncc(NC(=O)c2cc(Oc3ccc(NC(=O)NC4CCCCC4)cc3)ccn2)c1",
+        [
+          0.2105263157894737,
+          -4,
+          0,
+          18
+        ]
+      ],
+      [
+        "CC1CCCC(NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4cccnc4)c3)cc2)C1F",
+        [
+          0.22036709492448886,
+          -3,
+          0,
+          10
+        ]
+      ],
+      [
+        "CC1CC(F)CCC1NC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+        [
+          0.22036709492448886,
+          -3,
+          0,
+          22
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCC(F)(F)CC1",
+        [
+          0.23168583806459522,
+          -3,
+          0,
+          19
+        ]
+      ],
+      [
+        "CC1(F)CCC(NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4cccnc4)c3)cc2)CC1",
+        [
+          0.2345745270891488,
+          -3,
+          0,
+          23
+        ]
+      ],
+      [
+        "O=C(Nc1cccnc1)c1cc(Oc2ccc(NCNC3CCCCC3)cc2)ccn1",
+        [
+          0.24020787495203172,
+          -6,
+          0,
+          20
+        ]
+      ],
+      [
+        "N#Cc1ccc(NC(=O)c2cc(Oc3ccc(NC(=O)NC4CCCCC4)cc3)ccn2)cn1",
+        [
+          0.24242424242424243,
+          -3,
+          0,
+          19
+        ]
+      ],
+      [
+        "O=C(N=C1CCCC(C(F)F)C1)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+        [
+          0.24243785818050811,
+          -2,
+          0,
+          19
+        ]
+      ],
+      [
+        "CCCC(C)NC(=O)c1cc(Oc2ccc(NC(=O)Nc3ccccc3)cc2)ccn1",
+        [
+          0.2427720686989457,
+          -6,
+          -1,
+          22
+        ]
+      ],
+      [
+        "CN(C(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1Cl)C1CCCCC1",
+        [
+          0.24404159112212628,
+          -3,
+          0,
+          21
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3ccc(F)nc3)c2)cc1)NC1CCCCC1",
+        [
+          0.244236442720496,
+          -4,
+          0,
+          23
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCCCC1O",
+        [
+          0.24425657223913583,
+          -4,
+          0,
+          21
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCC(O)CC1",
+        [
+          0.24425657223913583,
+          -4,
+          0,
+          20
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCCC(O)C1",
+        [
+          0.24425657223913583,
+          -4,
+          0,
+          21
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)NC3CCCNC3)c2)cc1)Nc1cccc(F)c1",
+        [
+          0.24999999999999994,
+          -4,
+          0,
+          21
+        ]
+      ],
+      [
+        "Cc1ccc(NC(=O)c2cc(Oc3ccc(NC(=O)NC4CCCC(C)C4)cc3)ccn2)cn1",
+        [
+          0.25089835434968066,
+          -3,
+          0,
+          19
+        ]
+      ],
+      [
+        "Cc1ccncc1NC(=O)c1cc(Oc2ccc(NC(=O)NC3CCCCC3)cc2)ccn1",
+        [
+          0.2521367521367521,
+          -4,
+          0,
+          23
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCC(CF)CC1",
+        [
+          0.2528788169004575,
+          -3,
+          0,
+          18
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCCC(CF)C1",
+        [
+          0.2528788169004575,
+          -3,
+          0,
+          10
+        ]
+      ],
+      [
+        "O=C(Nc1ccccc1)Nc1ccc(Oc2ccnc(C(=O)NC3CCCNC3)c2)cc1",
+        [
+          0.25438596491228066,
+          -5,
+          0,
+          23
+        ]
+      ],
+      [
+        "COCC(C)NC(=O)c1cc(Oc2ccc(NC(=O)Nc3ccccc3Cl)cc2)ccn1",
+        [
+          0.25443597867042916,
+          -5,
+          -1,
+          24
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1(F)CCCCC1",
+        [
+          0.2589687638064525,
+          -4,
+          0,
+          23
+        ]
+      ],
+      [
+        "CN(C(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1O)C1CCCCC1",
+        [
+          0.26038404058762826,
+          -3,
+          0,
+          22
+        ]
+      ],
+      [
+        "CN1CCCC(=NC(=O)c2cc(Oc3ccc(NC(=O)Nc4cccc(C(F)(F)F)c4)cc3)ccn2)C1",
+        [
+          0.26587301587301587,
+          0,
+          0,
+          19
+        ]
+      ],
+      [
+        "CN1CCCC(NC(=O)c2cc(Oc3ccc(NC(=O)Nc4cccc(F)c4)cc3)ccn2)C1",
+        [
+          0.26829268292682923,
+          -3,
+          0,
+          24
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cncc(Cl)c3)c2)cc1)NC1CCCCC1",
+        [
+          0.27126275908011194,
+          -4,
+          0,
+          19
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cnccc3Cl)c2)cc1)NC1CCCCC1",
+        [
+          0.27126275908011194,
+          -4,
+          0,
+          20
+        ]
+      ],
+      [
+        "CC1CCCC(NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4cccnc4)c3)cc2)C1O",
+        [
+          0.27312330466091794,
+          -3,
+          0,
+          17
+        ]
+      ],
+      [
+        "Cc1ncccc1NC(=O)c1cc(Oc2ccc(NC(=O)NC3CCCCC3)cc2)ccn1",
+        [
+          0.2735042735042735,
+          -4,
+          0,
+          23
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(CNc3cccnc3)c2)cc1)NC1CCCCC1",
+        [
+          0.2735042735042735,
+          -6,
+          0,
+          22
+        ]
+      ],
+      [
+        "CN1CCCC(NC(=O)c2cc(Oc3ccc(NC(=O)Nc4ccccc4)cc3)ccn2)C1",
+        [
+          0.2735042735042735,
+          -4,
+          0,
+          22
+        ]
+      ],
+      [
+        "Cc1ccc(NC(=O)c2cc(Oc3ccc(NC(=O)NC4CCCCC4O)cc3)ccn2)cn1",
+        [
+          0.27540127252169516,
+          -3,
+          0,
+          20
+        ]
+      ],
+      [
+        "Cc1cc(NC(=O)NC2CCCC(O)C2)ccc1Oc1ccnc(C(=O)Nc2cccnc2)c1",
+        [
+          0.2754012725216953,
+          -3,
+          0,
+          23
+        ]
+      ],
+      [
+        "Cc1cc(Oc2ccnc(C(=O)Nc3cccnc3)c2)ccc1NC(=O)NC1CCCC(O)C1",
+        [
+          0.2754012725216956,
+          -3,
+          0,
+          22
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)c(O)c1)NC1CCCCC1",
+        [
+          0.27551043447778223,
+          -4,
+          0,
+          24
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCCC(CF)C1F",
+        [
+          0.2757950814888749,
+          -2,
+          0,
+          9
+        ]
+      ],
+      [
+        "CC1(O)CCC(NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4cccnc4)c3)cc2)CC1",
+        [
+          0.2786618642028893,
+          -3,
+          0,
+          24
+        ]
+      ],
+      [
+        "Cc1cccc(NC(=O)Nc2ccc(Oc3ccnc(C(=O)NC4CCCNC4)c3)cc2)c1",
+        [
+          0.27983539094650206,
+          -4,
+          0,
+          13
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)N=C3CCCNC3)c2)cc1)Nc1cccc(C(F)(F)F)c1",
+        [
+          0.28035799202447054,
+          -1,
+          0,
+          18
+        ]
+      ],
+      [
+        "COCC1CCCC(NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4cccnc4)c3)cc2)C1",
+        [
+          0.28469567879757124,
+          -2,
+          0,
+          18
+        ]
+      ],
+      [
+        "Cc1ccc(NC(=O)c2cc(Oc3ccc(NC(=O)NC4CCC(C=O)CC4)cc3)ccn2)cn1",
+        [
+          0.28776849110299896,
+          -2,
+          0,
+          20
+        ]
+      ],
+      [
+        "CN(C(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3ccc(Cl)nc3)c2)cc1)C1CCCCC1",
+        [
+          0.29283087443442046,
+          -3,
+          0,
+          14
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)NC3CCCNC3)c2)cc1)Nc1cccc(Cl)c1",
+        [
+          0.2936773312023,
+          -4,
+          0,
+          24
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Oc2ccnc(C(=O)NC3CCCNC3)c2)cc1)Nc1ccccc1Cl",
+        [
+          0.2936773312023,
+          -4,
+          0,
+          23
+        ]
+      ],
+      [
+        "O=C(Nc1ccc(Cl)cc1)Nc1ccc(Oc2ccnc(C(=O)NC3CCCNC3)c2)cc1",
+        [
+          0.2936773312023001,
+          -4,
+          0,
+          24
+        ]
+      ]
+    ],
+    "banked_last": [
+      "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCCCC1",
+      "COC1(C)CCCC(=NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4cccnc4)c3)cc2)C1",
+      "CC1(O)CCCC(=NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4cccnc4)c3)cc2)C1",
+      "CC1(F)CCCC(=NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4cccnc4)c3)cc2)C1",
+      "CN(C(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)C1CCCCC1",
+      "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCC(F)CC1",
+      "Cc1cncc(NC(=O)c2cc(Oc3ccc(NC(=O)NC4CCCCC4)cc3)ccn2)c1",
+      "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCCC(F)C1",
+      "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCCCC1C(F)(F)F",
+      "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCCCC1C(F)F",
+      "CN(C(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3ccc(Cl)nc3)c2)cc1)C1CCCCC1",
+      "Cc1cccc(NC(=O)Nc2ccc(Oc3ccnc(C(=O)NC4CCCNC4)c3)cc2)c1",
+      "CN(CNC1CCCCC1)c1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+      "CC1CCCC(NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4ccc(Cl)nc4)c3)cc2)C1",
+      "CC1CCCC(NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4cccnc4)c3)cc2)C1F",
+      "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCCC(CF)C1F",
+      "NC(=O)c1ccc(NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4cccnc4)c3)cc2)cc1",
+      "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCCC(C(F)F)C1",
+      "O=C(Nc1cccc(C(F)F)c1)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)c(F)c1",
+      "Cc1ccc(NC(=O)c2cc(Oc3ccc(NC(=O)Nc4cccc(C(F)(F)F)c4C)cc3)ccn2)cn1",
+      "COc1ccc(NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4cccnc4)c3)cc2)c(C(F)F)c1",
+      "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)Nc1cccc(C(F)(F)F)c1F",
+      "Cc1ccncc1NC(=O)c1cc(Oc2ccc(NC(=O)Nc3ccc(Cl)cc3C(F)(F)F)cc2)ccn1",
+      "O=C(Nc1ccc(Cl)cc1)Nc1ccc(Oc2ccnc(C(=O)Nc3ccc(C(F)(F)F)nc3)c2)cc1"
+    ],
+    "wall_s": 3548.227591753006
+  }
+]

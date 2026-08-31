@@ -2177,3 +2177,71 @@ def ring_fast_ab(job: dict) -> dict:
                 eager_ms=round(ms_eager, 1), fast_ms=round(ms_fast, 1),
                 speedup=round(ms_eager / max(ms_fast, 1e-9), 2),
                 eager_stage=r_eager.get("stage"), fast_stage=r_fast.get("stage"))
+
+
+@app.function(image=image, cpu=(1.0, 1.0), memory=int(4 * 1024), timeout=30 * 60,
+              retries=0, max_containers=2,
+              volumes={str(ARTIFACT_ROOT): artifact_volume})
+def helpers_cost(job: dict) -> dict:
+    """How expensive is make_helpers? The ring_fast_ab timing EXCLUDED it --
+    it was hoisted out of the timed block -- but production calls it inside
+    _build_ring_cached, i.e. once per ring build."""
+    import time
+    from compose_v4.experiments.hphi_lazy_helpers import make_helpers
+    rt = _runtime(); model = rt["model"]
+    ts = []
+    for _ in range(int(job.get("n", 3))):
+        t = time.time()
+        make_helpers(model, time_point=float(TIME_POINT),
+                     canonical_slots=CANONICAL_SLOTS)
+        ts.append(round((time.time() - t) * 1000, 1))
+    return dict(make_helpers_ms=ts, mean_ms=round(sum(ts) / len(ts), 1))
+
+
+# ============ DOES MORE CPU PER CONTAINER ACTUALLY HELP? ====================
+# The Modal cap is on CONTAINER COUNT, so if a container scaled with CPUs we
+# could buy wall-clock at fixed concurrency. Both are pinned to 1 today
+# (cpu=(1.0,1.0), OMP_NUM_THREADS=1, torch.set_num_threads(1)).
+#
+# The workload is torch forward passes PLUS RDKit legality checks. Torch matmul
+# threads; RDKit does not. So the ceiling is Amdahl over whatever fraction is
+# actually torch -- measured here rather than assumed.
+
+@app.function(image=image, cpu=(4.0, 4.0), memory=int(6 * 1024), timeout=40 * 60,
+              retries=0, max_containers=2,
+              volumes={str(ARTIFACT_ROOT): artifact_volume})
+def thread_scaling(job: dict) -> dict:
+    import time, os
+    import torch
+    import numpy as np
+    from rdkit import RDLogger
+    RDLogger.DisableLog("rdApp.*")
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.experiments.production_successor_kernel import (
+        enumerate_factorized_marked_law)
+
+    rt = _runtime(); model = rt["model"]
+    states = []
+    for smi in job["smiles"]:
+        states.append(pad_molecular_graph(smiles_to_molecular_graph(smi), CANONICAL_SLOTS))
+
+    out = {}
+    for nthreads in job.get("threads", [1, 2, 4]):
+        torch.set_num_threads(int(nthreads))
+        os.environ["OMP_NUM_THREADS"] = str(nthreads)
+        # warm once so we time steady state, not first-call graph setup
+        enumerate_factorized_marked_law(model, states[0], float(TIME_POINT))
+        ts, nmarks = [], []
+        for st in states:
+            t = time.time()
+            law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
+            ts.append((time.time() - t) * 1000)
+            nmarks.append(len(law.marks))
+        out[str(nthreads)] = dict(mean_ms=round(sum(ts) / len(ts), 1),
+                                  per_call=[round(x, 1) for x in ts],
+                                  marks=nmarks)
+    base = out[str(job.get("threads", [1, 2, 4])[0])]["mean_ms"]
+    for k in out:
+        out[k]["speedup_vs_1thread"] = round(base / out[k]["mean_ms"], 2)
+    return out

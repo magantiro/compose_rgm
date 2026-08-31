@@ -2305,7 +2305,62 @@ def drive_episodes(payload: dict, n_particles: int = 64, rounds: int = 3,
             print(f"  warm-start: {_rejected}/{len(warm)} rejected", flush=True)
         print(f"  archived {len(archive)} feasible warm-start molecules", flush=True)
 
-    for rd in range(int(rounds)):
+    # WARM START AFTER PREEMPTION.
+    #
+    # Modal can preempt and re-execute this function; without this the run began
+    # again at round 0 with a fresh controller and an empty archive. Measured
+    # cost: parp1_s0_d0.6 r1 reached round 6 at best -11.7, was preempted, and
+    # came back at round 3 having lost that molecule entirely. Every round
+    # already commits a full checkpoint to the volume -- the state to continue
+    # was durably on disk and simply never read back.
+    #
+    # ORACLE CONTRACT PRESERVED. `docked` is restored and the loop resumes at
+    # the next unfinished round, so a run that dies at round 4 still spends
+    # rounds*dock_per_round calls in total, never more.
+    #
+    # Resume only on an EXACT config match. A checkpoint from a different
+    # budget, particle count, arm, seed or refine setting is a different
+    # experiment; it is ignored, never merged.
+    _start_round = 0
+    _sfx0 = ((f"_{arm}" if arm else "")
+             + ("" if semantics == "legacy" else f"_{semantics}")
+             + ("" if int(refine) == 0 else f"_rf{int(refine)}")
+             + f"_r{int(run_seed)}")
+    _ckp0 = Path("/artifacts/macro_basin") / f"episodes_{payload['cell']}{_sfx0}.json"
+    try:
+        if _ckp0.exists():
+            _prev = json.loads(_ckp0.read_text())
+            _pp = _prev.get("provenance", {}) or {}
+            _done0 = int(_prev.get("round", -1)) + 1
+            if (_pp.get("cell") == payload["cell"]
+                    and int(_pp.get("rounds", -1)) == int(rounds)
+                    and int(_pp.get("dock_per_round", -1)) == int(dock_per_round)
+                    and int(_pp.get("n_particles", -1)) == int(n_particles)
+                    and int(_pp.get("run_seed", -1)) == int(run_seed)
+                    and int(_pp.get("refine", 0) or 0) == int(refine)
+                    and _pp.get("arm") == arm
+                    and abs(float(_pp.get("delta", -1)) - float(delta)) < 1e-9
+                    and 0 < _done0 < int(rounds)):
+                docked_smi.update({k: float(v) for k, v in (_prev.get("docked") or {}).items()})
+                for _a in (_prev.get("archive") or []):
+                    if _a.get("smiles") and _a["smiles"] not in seen:
+                        archive.append(_a); seen.add(_a["smiles"])
+                budget_curve.extend(_prev.get("budget_curve") or [])
+                _ap = _prev.get("action_probs") or {}
+                if _ap:
+                    _q = np.array([float(_ap.get(f"{_n}{_l}", 0.0))
+                                   for _n, _l in ACTION_SPACE], float)
+                    if _q.sum() > 0:
+                        _q = _q / _q.sum()
+                        ctrl.logits = np.log(np.maximum(_q, 1e-9))
+                _start_round = _done0
+                print(f"WARM START {payload['cell']} r{run_seed}: round {_done0}/{rounds}, "
+                      f"{len(docked_smi)} docked, {len(archive)} archived", flush=True)
+    except Exception as _exc:
+        print(f"  warm start unavailable ({type(_exc).__name__}: {_exc}); fresh start",
+              flush=True)
+
+    for rd in range(_start_round, int(rounds)):
         jobs, prog_actions = [], []
         # STARTING POINTS. While nothing is feasible, restarting every episode
         # from the seed forces each one to complete the entire repair in
@@ -2553,7 +2608,32 @@ def drive_episodes(payload: dict, n_particles: int = 64, rounds: int = 3,
                                                     in zip(ACTION_SPACE, ctrl.probs())}),
                                  indent=1, default=str))
         artifact_volume.commit()
-    return dict(cell=payload["cell"], best=min(docked_smi.values()) if docked_smi else None)
+
+        # EARLY STOP ONCE THE COMPARATOR IS CLEARLY BEATEN.
+        #
+        # best-so-far is MONOTONE, so stopping early can only make the reported
+        # number worse -- "reached -12.3 in 60 calls" is a strictly stronger and
+        # still-honest claim than the same score at 100. There is no optional-
+        # stopping inflation here for that reason.
+        #
+        # Requires the margin to exceed the 0.70 kcal/mol docking noise floor, so
+        # a cell is never banked on a difference indistinguishable from noise.
+        # `calls_spent` is recorded, and the budget must be reported as AT MOST
+        # rounds*dock_per_round rather than exactly that.
+        #
+        # Warm start makes this reversible: a banked cell can be topped back up
+        # to the full budget later without repeating the rounds already done.
+        _tgt = payload.get("genmol")
+        _mrg_raw = payload.get("stop_margin", 0.70)
+        _mrg = None if _mrg_raw is None else float(_mrg_raw)
+        if (_mrg is not None and _tgt is not None and best is not None
+                and float(best) <= float(_tgt) - _mrg and rd + 1 < int(rounds)):
+            print(f"EARLY STOP {payload['cell']} r{run_seed}: best {best} beats GenMol "
+                  f"{_tgt} by {abs(float(best)-float(_tgt)):.2f} at "
+                  f"{len(docked_smi)} calls (round {rd+1}/{rounds})", flush=True)
+            break
+    return dict(cell=payload["cell"], best=min(docked_smi.values()) if docked_smi else None,
+                calls_spent=len(docked_smi), rounds_done=rd + 1)
 
 
 @app.local_entrypoint()

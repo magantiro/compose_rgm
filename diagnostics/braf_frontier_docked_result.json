@@ -1,0 +1,739 @@
+{
+ "target": "braf",
+ "rows": [
+  {
+   "label": "seed",
+   "smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)NCCN1CCOCC1)c2)cc3)ccc4Cl",
+   "scores": [
+    -9.8,
+    -9.6,
+    -9.4,
+    -10.3,
+    -9.5
+   ],
+   "best": -10.3,
+   "mean": -9.719999999999999,
+   "sd": 0.3187475490101848
+  },
+  {
+   "label": "f248",
+   "smiles": "CC1=C2CN(C(=O)Nc3ccc(Oc4ccnc(C(=O)NCCN5CCOCC5)c4)cc3)C2=C1",
+   "qed": 0.6583,
+   "sa": 2.8566,
+   "sim": 0.6,
+   "depth": 7,
+   "scores": [
+    -9.2,
+    -8.8,
+    -10.8,
+    -9.7,
+    -9.8
+   ],
+   "best": -10.8,
+   "mean": -9.66,
+   "sd": 0.6740919818541088
+  },
+  {
+   "label": "f316",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NC=C=NCC(c3ccc(Cl)c(C(F)(F)F)c3)C2)ccn1",
+   "qed": 0.6047,
+   "sa": 3.9364,
+   "sim": 0.6023,
+   "depth": 7,
+   "scores": [
+    -9.8,
+    -9.9,
+    -9.7,
+    -10.8,
+    -9.8
+   ],
+   "best": -10.8,
+   "mean": -10.0,
+   "sd": 0.40496913462633194
+  },
+  {
+   "label": "f7",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc2c(cn1)N(C(=O)Nc1ccc(Cl)c(C(F)(F)F)c1)CN=CCC2",
+   "qed": 0.6027,
+   "sa": 3.1015,
+   "sim": 0.6,
+   "depth": 5,
+   "scores": [
+    -9.5,
+    -9.0,
+    -9.6,
+    -8.7,
+    -9.4
+   ],
+   "best": -9.6,
+   "mean": -9.239999999999998,
+   "sd": 0.33823069050575544
+  },
+  {
+   "label": "f218",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NN3C(=NCN=C2)c2cc(Cl)c(C(F)(F)F)cc23)ccn1",
+   "qed": 0.6313,
+   "sa": 3.5466,
+   "sim": 0.6092,
+   "depth": 7,
+   "scores": [
+    -7.9,
+    -5.9,
+    -9.1,
+    -8.4,
+    -8.8
+   ],
+   "best": -9.1,
+   "mean": -8.02,
+   "sd": 1.1338430226446694
+  },
+  {
+   "label": "f154",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NC3(c4ccc(Cl)c(C(F)(F)F)c4)CN=CC=C23)ccn1",
+   "qed": 0.6138,
+   "sa": 3.8221,
+   "sim": 0.6279,
+   "depth": 7,
+   "scores": [
+    -10.1,
+    -10.1,
+    -10.2,
+    -9.9,
+    -10.2
+   ],
+   "best": -10.2,
+   "mean": -10.1,
+   "sd": 0.10954451150103282
+  },
+  {
+   "label": "f97",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NN3CN(c4ccc(Cl)c(C(F)(F)F)c4)C3N=N2)ccn1",
+   "qed": 0.6023,
+   "sa": 3.8655,
+   "sim": 0.6092,
+   "depth": 7,
+   "scores": [
+    -10.0,
+    -10.0,
+    -10.0,
+    -9.9,
+    -9.8
+   ],
+   "best": -10.0,
+   "mean": -9.940000000000001,
+   "sd": 0.07999999999999971
+  },
+  {
+   "label": "f264",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NNC(=Cc3ccc(Cl)c(C(F)(F)F)c3)C=C2)ccn1",
+   "qed": 0.6025,
+   "sa": 3.2287,
+   "sim": 0.6235,
+   "depth": 7,
+   "scores": [
+    -9.5,
+    -9.6,
+    -10.1,
+    -9.4,
+    -10.0
+   ],
+   "best": -10.1,
+   "mean": -9.72,
+   "sd": 0.27856776554368223
+  },
+  {
+   "label": "f388",
+   "smiles": "CC(=O)N1c2cc(C(F)(F)F)c(Cl)cc2N=C(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)C1C",
+   "qed": 0.6226,
+   "sa": 3.6233,
+   "sim": 0.6047,
+   "depth": 7,
+   "scores": [
+    -9.9,
+    -9.4,
+    -9.2,
+    -9.6,
+    -9.2
+   ],
+   "best": -9.9,
+   "mean": -9.459999999999999,
+   "sd": 0.2653299832284323
+  },
+  {
+   "label": "f269",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NN3CC(c4ccc(Cl)c(C(F)(F)F)c4)=C3CC2)ccn1",
+   "qed": 0.6016,
+   "sa": 3.2646,
+   "sim": 0.6235,
+   "depth": 7,
+   "scores": [
+    -9.7,
+    -8.9,
+    -9.8,
+    -9.8,
+    -9.4
+   ],
+   "best": -9.8,
+   "mean": -9.52,
+   "sd": 0.34292856398964494
+  },
+  {
+   "label": "f238",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=Cc3cc(Cl)c(C(F)(F)F)cc3N3C(=O)C=C23)ccn1",
+   "qed": 0.6278,
+   "sa": 3.2135,
+   "sim": 0.6,
+   "depth": 7,
+   "scores": [
+    -10.1,
+    -9.9,
+    -10.0,
+    -9.8,
+    -9.6
+   ],
+   "best": -10.1,
+   "mean": -9.879999999999999,
+   "sd": 0.1720465053408525
+  },
+  {
+   "label": "f193",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NC(c3ccc(Cl)c(C(F)(F)F)c3)C3OCC3=C2)ccn1",
+   "qed": 0.6063,
+   "sa": 3.9868,
+   "sim": 0.6092,
+   "depth": 7,
+   "scores": [
+    -9.8,
+    -9.0,
+    -9.2,
+    -9.7,
+    -9.7
+   ],
+   "best": -9.8,
+   "mean": -9.48,
+   "sd": 0.31874754901018465
+  },
+  {
+   "label": "f318",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NN=C=NCN(c3ccc(Cl)c(C(F)(F)F)c3)C2)ccn1",
+   "qed": 0.607,
+   "sa": 3.5213,
+   "sim": 0.6092,
+   "depth": 7,
+   "scores": [
+    -9.6,
+    -9.7,
+    -9.8,
+    -10.0,
+    -9.9
+   ],
+   "best": -10.0,
+   "mean": -9.799999999999999,
+   "sd": 0.14142135623730975
+  },
+  {
+   "label": "f359",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NN3CC2=CCc2cc(Cl)c(C(F)(F)F)cc23)ccn1",
+   "qed": 0.6486,
+   "sa": 3.9881,
+   "sim": 0.6,
+   "depth": 7,
+   "scores": [
+    -10.0,
+    -8.6,
+    -9.3,
+    -9.7,
+    -9.3
+   ],
+   "best": -10.0,
+   "mean": -9.38,
+   "sd": 0.47074409183759275
+  },
+  {
+   "label": "f104",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NC(c3ccc(Cl)c(C(F)(F)F)c3)=CN3CC=C23)ccn1",
+   "qed": 0.6084,
+   "sa": 3.3272,
+   "sim": 0.6163,
+   "depth": 7,
+   "scores": [
+    -9.5,
+    -9.8,
+    -10.0,
+    -10.1,
+    -10.1
+   ],
+   "best": -10.1,
+   "mean": -9.9,
+   "sd": 0.22803508501982742
+  },
+  {
+   "label": "f252",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(Oc2ccc(NC(=O)N3CC4CC43C(F)(F)F)cc2)ccn1",
+   "qed": 0.6007,
+   "sa": 3.6551,
+   "sim": 0.622,
+   "depth": 7,
+   "scores": [
+    -10.5,
+    -10.4,
+    -10.4,
+    -10.3,
+    -9.1
+   ],
+   "best": -10.5,
+   "mean": -10.139999999999999,
+   "sd": 0.523832034148352
+  },
+  {
+   "label": "f94",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NC3=CN(c4ccc(Cl)c(C(F)(F)F)c4)C3C=C2)ccn1",
+   "qed": 0.6068,
+   "sa": 3.771,
+   "sim": 0.6163,
+   "depth": 7,
+   "scores": [
+    -9.3,
+    -9.5,
+    -9.7,
+    -9.1,
+    -9.4
+   ],
+   "best": -9.7,
+   "mean": -9.4,
+   "sd": 0.19999999999999982
+  },
+  {
+   "label": "f181",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NN(c3ccc(Cl)c(C(F)(F)F)c3)CN=CCO2)ccn1",
+   "qed": 0.6009,
+   "sa": 3.4111,
+   "sim": 0.6163,
+   "depth": 7,
+   "scores": [
+    -8.6,
+    -9.5,
+    -9.2,
+    -10.0,
+    -8.8
+   ],
+   "best": -10.0,
+   "mean": -9.219999999999999,
+   "sd": 0.49959983987187184
+  },
+  {
+   "label": "f267",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NN3CC(c4cc(C(F)(F)F)c(Cl)cn4)=C3C=C2)ccn1",
+   "qed": 0.6083,
+   "sa": 3.4673,
+   "sim": 0.6047,
+   "depth": 7,
+   "scores": [
+    -9.1,
+    -9.4,
+    -9.5,
+    -9.7,
+    -9.5
+   ],
+   "best": -9.7,
+   "mean": -9.440000000000001,
+   "sd": 0.19595917942265417
+  },
+  {
+   "label": "f130",
+   "smiles": "C=C1N2C=C2C(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)=NN1c1ccc(Cl)c(C(F)(F)F)c1",
+   "qed": 0.6056,
+   "sa": 3.3265,
+   "sim": 0.6353,
+   "depth": 7,
+   "scores": [
+    -9.5,
+    -9.6,
+    -8.8,
+    -9.3,
+    -9.5
+   ],
+   "best": -9.6,
+   "mean": -9.34,
+   "sd": 0.2870540018881461
+  },
+  {
+   "label": "f53",
+   "smiles": "NC(=O)N1c2cc(C(F)(F)F)c(Cl)cc2C2=C(Oc3ccnc(C(=O)NCCN4CCOCC4)c3)C21",
+   "qed": 0.6024,
+   "sa": 3.6011,
+   "sim": 0.6118,
+   "depth": 6,
+   "scores": [
+    -10.1,
+    -9.1,
+    -9.7,
+    -9.7,
+    -9.6
+   ],
+   "best": -10.1,
+   "mean": -9.639999999999999,
+   "sd": 0.31999999999999995
+  },
+  {
+   "label": "f228",
+   "smiles": "CC1CC(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)=NN(c2ccc(Cl)c(C(F)(F)F)c2)C=N1",
+   "qed": 0.6009,
+   "sa": 3.757,
+   "sim": 0.6092,
+   "depth": 7,
+   "scores": [
+    -9.6,
+    -9.8,
+    -9.9,
+    -9.2,
+    -9.9
+   ],
+   "best": -9.9,
+   "mean": -9.68,
+   "sd": 0.26381811916545883
+  },
+  {
+   "label": "f106",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NC(c3ccc(Cl)c(C(F)(F)F)c3)CN3CCC23)ccn1",
+   "qed": 0.6082,
+   "sa": 3.8102,
+   "sim": 0.6163,
+   "depth": 7,
+   "scores": [
+    -9.5,
+    -9.8,
+    -9.5,
+    -9.6,
+    -9.6
+   ],
+   "best": -9.8,
+   "mean": -9.6,
+   "sd": 0.10954451150103348
+  },
+  {
+   "label": "f299",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NC=CN3CN(c4ccc(Cl)c(C(F)(F)F)c4)N23)ccn1",
+   "qed": 0.602,
+   "sa": 3.4476,
+   "sim": 0.6163,
+   "depth": 7,
+   "scores": [
+    -10.1,
+    -8.7,
+    -10.2,
+    -10.0,
+    -9.6
+   ],
+   "best": -10.2,
+   "mean": -9.72,
+   "sd": 0.5491812087098392
+  },
+  {
+   "label": "f86",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(Oc2ccc(NC(=O)N3C4=CC(OF)=NC3=C4)cc2)ccn1",
+   "qed": 0.6079,
+   "sa": 3.9195,
+   "sim": 0.6024,
+   "depth": 6,
+   "scores": [
+    -10.1,
+    -9.1,
+    -9.5,
+    -10.2,
+    -10.2
+   ],
+   "best": -10.2,
+   "mean": -9.819999999999999,
+   "sd": 0.44452221541785725
+  },
+  {
+   "label": "f323",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NC3=C=NCN(c4ccc(Cl)c(C(F)(F)F)c4)C32)ccn1",
+   "qed": 0.6126,
+   "sa": 3.9589,
+   "sim": 0.6207,
+   "depth": 7,
+   "scores": [
+    -9.5,
+    -9.5,
+    -10.2,
+    -9.6,
+    -10.0
+   ],
+   "best": -10.2,
+   "mean": -9.76,
+   "sd": 0.2870540018881463
+  },
+  {
+   "label": "f52",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=C3NC(=O)N(C2)c2cc(C(F)(F)F)c(Cl)cc23)ccn1",
+   "qed": 0.604,
+   "sa": 3.8359,
+   "sim": 0.6,
+   "depth": 6,
+   "scores": [
+    -9.3,
+    -9.5,
+    -9.2,
+    -9.7,
+    -9.5
+   ],
+   "best": -9.7,
+   "mean": -9.440000000000001,
+   "sd": 0.17435595774162682
+  },
+  {
+   "label": "f203",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NC(c3ccc(Cl)c(C(F)(F)F)c3)=C=NCC=C2)ccn1",
+   "qed": 0.6088,
+   "sa": 3.5716,
+   "sim": 0.6163,
+   "depth": 7,
+   "scores": [
+    -9.3,
+    -9.0,
+    -10.0,
+    -9.7,
+    -8.7
+   ],
+   "best": -10.0,
+   "mean": -9.34,
+   "sd": 0.467332857821917
+  },
+  {
+   "label": "f257",
+   "smiles": "CN(CC(F)(F)F)C(=O)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+   "qed": 0.6021,
+   "sa": 2.5183,
+   "sim": 0.6711,
+   "depth": 7,
+   "scores": [
+    -9.5,
+    -9.9,
+    -8.4,
+    -8.0,
+    -9.5
+   ],
+   "best": -9.9,
+   "mean": -9.059999999999999,
+   "sd": 0.7282856582413251
+  },
+  {
+   "label": "f96",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NC3CN(c4ccc(Cl)c(C(F)(F)F)c4)C3CC2)ccn1",
+   "qed": 0.606,
+   "sa": 3.8543,
+   "sim": 0.6471,
+   "depth": 7,
+   "scores": [
+    -9.1,
+    -9.1,
+    -9.9,
+    -9.4,
+    -9.1
+   ],
+   "best": -9.9,
+   "mean": -9.32,
+   "sd": 0.3124099870362665
+  },
+  {
+   "label": "f255",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(Oc2ccc(NC(=O)N3C=CC3C(F)F)cc2)ccn1",
+   "qed": 0.6123,
+   "sa": 3.3375,
+   "sim": 0.6125,
+   "depth": 7,
+   "scores": [
+    -9.0,
+    -10.3,
+    -10.4,
+    -10.4,
+    -10.5
+   ],
+   "best": -10.5,
+   "mean": -10.120000000000001,
+   "sd": 0.563560112144215
+  },
+  {
+   "label": "f138",
+   "smiles": "CN1N=C(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)C2c3cc(Cl)c(C(F)(F)F)cc3C2C1=O",
+   "qed": 0.63,
+   "sa": 3.9267,
+   "sim": 0.6145,
+   "depth": 7,
+   "scores": [
+    -9.5,
+    -10.3,
+    -9.3,
+    -9.0,
+    -10.4
+   ],
+   "best": -10.4,
+   "mean": -9.7,
+   "sd": 0.5549774770204645
+  },
+  {
+   "label": "f294",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NC3=CN3CN(c3ccc(Cl)c(C(F)(F)F)c3)O2)ccn1",
+   "qed": 0.6,
+   "sa": 3.4951,
+   "sim": 0.6235,
+   "depth": 7,
+   "scores": [
+    -9.8,
+    -10.3,
+    -10.1,
+    -10.0,
+    -10.0
+   ],
+   "best": -10.3,
+   "mean": -10.040000000000001,
+   "sd": 0.1624807680927192
+  },
+  {
+   "label": "f324",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NN(c3ccc(Cl)c(C(F)(F)F)c3)OCCN=C2)ccn1",
+   "qed": 0.6009,
+   "sa": 3.4493,
+   "sim": 0.6429,
+   "depth": 7,
+   "scores": [
+    -10.1,
+    -9.3,
+    -9.9,
+    -9.9,
+    -9.6
+   ],
+   "best": -10.1,
+   "mean": -9.76,
+   "sd": 0.2799999999999998
+  },
+  {
+   "label": "f341",
+   "smiles": "CN1CN=C(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)C2=C1N2c1ccc(Cl)c(C(F)(F)F)c1",
+   "qed": 0.6071,
+   "sa": 3.2631,
+   "sim": 0.6235,
+   "depth": 7,
+   "scores": [
+    -9.2,
+    -8.8,
+    -9.2,
+    -9.2,
+    -9.3
+   ],
+   "best": -9.3,
+   "mean": -9.14,
+   "sd": 0.17435595774162665
+  },
+  {
+   "label": "f15",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NN(c3ccc(Cl)c(C(F)(F)F)c3)CC3CC=C23)ccn1",
+   "qed": 0.6028,
+   "sa": 3.6592,
+   "sim": 0.6092,
+   "depth": 6,
+   "scores": [
+    -9.8,
+    -9.5,
+    -9.9,
+    -9.7,
+    -9.7
+   ],
+   "best": -9.9,
+   "mean": -9.720000000000002,
+   "sd": 0.13266499161421622
+  },
+  {
+   "label": "f192",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NN(c3ccc(Cl)c(C(F)(F)F)c3)C3OCCC23)ccn1",
+   "qed": 0.6018,
+   "sa": 3.8636,
+   "sim": 0.6163,
+   "depth": 7,
+   "scores": [
+    -9.7,
+    -10.2,
+    -9.9,
+    -9.1,
+    -9.4
+   ],
+   "best": -10.2,
+   "mean": -9.66,
+   "sd": 0.38262252939417973
+  },
+  {
+   "label": "f306",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NC(c3ccc(Cl)c(C(F)(F)F)c3)C(=O)N=CC2)ccn1",
+   "qed": 0.6058,
+   "sa": 3.6846,
+   "sim": 0.6235,
+   "depth": 7,
+   "scores": [
+    -9.8,
+    -10.0,
+    -9.3,
+    -10.0,
+    -9.9
+   ],
+   "best": -10.0,
+   "mean": -9.8,
+   "sd": 0.2607680962081057
+  },
+  {
+   "label": "f8",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NN3CC(c4ccc(Cl)c(C(F)(F)F)c4)C3C=C2)ccn1",
+   "qed": 0.6094,
+   "sa": 3.9883,
+   "sim": 0.6163,
+   "depth": 6,
+   "scores": [
+    -9.1,
+    -9.1,
+    -9.0,
+    -9.4,
+    -8.8
+   ],
+   "best": -9.4,
+   "mean": -9.080000000000002,
+   "sd": 0.19390719429665307
+  },
+  {
+   "label": "f75",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NN3C(=O)CCC(=N2)c2cc(Cl)c(C(F)(F)F)cc23)ccn1",
+   "qed": 0.6128,
+   "sa": 3.9746,
+   "sim": 0.6047,
+   "depth": 6,
+   "scores": [
+    -9.6,
+    -9.6,
+    -9.5,
+    -9.3,
+    -9.5
+   ],
+   "best": -9.6,
+   "mean": -9.5,
+   "sd": 0.10954451150103284
+  },
+  {
+   "label": "f187",
+   "smiles": "O=C(NCCN1CCOCC1)c1cc(OC2=NN(c3ccc(Cl)c(C(F)(F)F)c3)COC=C=N2)ccn1",
+   "qed": 0.6028,
+   "sa": 3.6179,
+   "sim": 0.6163,
+   "depth": 7,
+   "scores": [
+    -9.9,
+    -9.7,
+    -9.3,
+    -10.6,
+    -9.7
+   ],
+   "best": -10.6,
+   "mean": -9.84,
+   "sd": 0.42708313008125226
+  }
+ ]
+}

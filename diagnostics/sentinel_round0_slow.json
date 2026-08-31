@@ -1,0 +1,145 @@
+{
+ "cell": "5ht1b_s7_d0.6",
+ "round": 0,
+ "n_feasible": 6,
+ "docked": {
+  "FC(F)(F)c1cc(-c2ccccc2)cc(N2CC[NH2+]CC2)c1": -9.6,
+  "CC(F)(F)c1cccc(N2CC[NH2+]CC2)c1": -7.7,
+  "OC(F)(F)c1cccc(N2CC[NH2+]CC2)c1": -7.6,
+  "NC(F)(F)c1cccc(N2CC[NH2+]CC2)c1": -7.5,
+  "CC(C)(F)c1cccc(N2CC[NH2+]CC2)c1": -7.4,
+  "CC(F)(Nc1ccccc1)c1cccc(N2CC[NH2+]CC2)c1": -6.7
+ },
+ "best_ds": -9.6,
+ "archive": [
+  {
+   "smiles": "OC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 1,
+   "heavy": 16,
+   "sim": 0.165,
+   "qed": 0.155,
+   "sa": 0.28,
+   "_ai": [
+    12
+   ],
+   "trace": [
+    "restate1",
+    "restate3",
+    "decorate1",
+    "local_extend6",
+    "cyclize1"
+   ]
+  },
+  {
+   "smiles": "FC(F)(F)c1cc(-c2ccccc2)cc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 1,
+   "heavy": 22,
+   "sim": 0.015,
+   "qed": 0.304,
+   "sa": 1.01,
+   "_ai": [
+    18
+   ],
+   "trace": [
+    "build_ring_system6:ok(sim+0.015)",
+    "grow1",
+    "local_extend2",
+    "shrink1",
+    "restate1"
+   ]
+  },
+  {
+   "smiles": "CC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 1,
+   "heavy": 16,
+   "sim": 0.165,
+   "qed": 0.204,
+   "sa": 0.48,
+   "_ai": [
+    12
+   ],
+   "trace": [
+    "restate1",
+    "local_extend2",
+    "restate2",
+    "shrink2",
+    "grow1"
+   ]
+  },
+  {
+   "smiles": "NC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 1,
+   "heavy": 16,
+   "sim": 0.165,
+   "qed": 0.104,
+   "sa": 0.2,
+   "_ai": [
+    13
+   ],
+   "trace": [
+    "restate2",
+    "cyclize1",
+    "close_disjoint1",
+    "restate3",
+    "restate2"
+   ]
+  },
+  {
+   "smiles": "CC(F)(Nc1ccccc1)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 2,
+   "heavy": 22,
+   "sim": 0.019,
+   "qed": 0.249,
+   "sa": 0.27,
+   "_ai": [
+    14,
+    18
+   ],
+   "trace": [
+    "restate3",
+    "build_ring_system6:ok(sim+0.019)",
+    "restate2",
+    "local_extend8",
+    "local_extend1"
+   ]
+  },
+  {
+   "smiles": "CC(C)(F)c1cccc(N2CC[NH2+]CC2)c1",
+   "prefix_len": 1,
+   "heavy": 16,
+   "sim": 0.165,
+   "qed": 0.2,
+   "sa": 0.42,
+   "_ai": [
+    14
+   ],
+   "trace": [
+    "restate3",
+    "build_ring_system6:ok(sim-0.088)",
+    "local_extend2"
+   ]
+  }
+ ],
+ "action_probs": {
+  "local_extend1": 0.037249999999999985,
+  "local_extend2": 0.037249999999999985,
+  "local_extend3": 0.037249999999999985,
+  "local_extend4": 0.037249999999999985,
+  "local_extend6": 0.037249999999999985,
+  "local_extend8": 0.037249999999999985,
+  "grow1": 0.037249999999999985,
+  "grow2": 0.037249999999999985,
+  "grow4": 0.037249999999999985,
+  "cyclize1": 0.037249999999999985,
+  "close_disjoint1": 0.037249999999999985,
+  "annulate1": 0.037249999999999985,
+  "restate1": 0.037249999999999985,
+  "restate2": 0.037249999999999985,
+  "restate3": 0.037249999999999985,
+  "shrink1": 0.037249999999999985,
+  "shrink2": 0.037249999999999985,
+  "decorate1": 0.037249999999999985,
+  "build_ring_system6": 0.29225,
+  "STOP0": 0.037249999999999985
+ }
+}

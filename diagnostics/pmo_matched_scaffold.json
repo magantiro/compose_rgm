@@ -1,0 +1,83 @@
+{
+ "banks": [],
+ "runs": [
+  {
+   "task": "scaffold_hop",
+   "arm": "oracle_prescreened",
+   "oracle_source": "PyTDC 0.3.6",
+   "budget": 500,
+   "bank_n": 100,
+   "uncounted_prescreen_calls": 249455,
+   "primed": 100,
+   "calls_spent": 500,
+   "unique": 600,
+   "rounds": 15,
+   "best": 0.5444971037388099,
+   "top10_mean": 0.542449189571945,
+   "auc_top10": 0.5348951798392769,
+   "curve": [
+    {
+     "calls": 0,
+     "best": 0.5261475514640072,
+     "top10_mean": 0.5194134047315072,
+     "n_distinct_pop": 100,
+     "unique": 100,
+     "lineages": 100,
+     "max_depth": 0,
+     "t": 2.0
+    },
+    {
+     "calls": 120,
+     "best": 0.5365365365365365,
+     "top10_mean": 0.5312320519056777,
+     "n_distinct_pop": 220,
+     "unique": 220,
+     "lineages": 220,
+     "max_depth": 3,
+     "t": 453.6
+    },
+    {
+     "calls": 280,
+     "best": 0.5421925266023261,
+     "top10_mean": 0.5381099342949431,
+     "n_distinct_pop": 380,
+     "unique": 380,
+     "lineages": 380,
+     "max_depth": 4,
+     "t": 945.3
+    },
+    {
+     "calls": 500,
+     "best": 0.5444971037388099,
+     "top10_mean": 0.542449189571945,
+     "n_distinct_pop": 400,
+     "unique": 600,
+     "lineages": 400,
+     "max_depth": 6,
+     "t": 1588.4
+    },
+    {
+     "calls": 500,
+     "best": 0.5444971037388099,
+     "top10_mean": 0.542449189571945,
+     "n_distinct_pop": 400,
+     "unique": 600,
+     "lineages": 400,
+     "max_depth": 6,
+     "t": 1589.3
+    }
+   ],
+   "best_by_depth": {
+    "0": 0.52615,
+    "1": 0.53493,
+    "2": 0.54219,
+    "3": 0.54219,
+    "4": 0.54245,
+    "5": 0.5445
+   },
+   "max_depth": 6,
+   "complete": true,
+   "seconds": 1589.3
+  }
+ ]
+}

@@ -1,0 +1,108 @@
+[
+  {
+    "target": "jak2",
+    "idx": 12,
+    "delta": 0.6,
+    "beta": 4.0,
+    "n_docked": 3,
+    "n_requested": 3,
+    "best_ds": -9.4,
+    "best_smi": "CC(O)C(=O)N(C(=O)CCCC1=Nc2ccccc2-c2ncnc3[nH]cc1c23)C(C)(C)C",
+    "top": [
+      [
+        "CC(O)C(=O)N(C(=O)CCCC1=Nc2ccccc2-c2ncnc3[nH]cc1c23)C(C)(C)C",
+        -9.4
+      ],
+      [
+        "CC(C)(C)N(C(=O)CCO)C(=O)CCCC1=Nc2ccccc2-c2ncnc3[nH]cc1c23",
+        -9.0
+      ],
+      [
+        "CC(C)(C)N(C(=O)CCN)C(=O)CCCC1=Nc2ccccc2-c2ncnc3[nH]cc1c23",
+        -7.5
+      ]
+    ],
+    "wall_s": 8.276988983154297
+  },
+  {
+    "target": "braf",
+    "idx": 11,
+    "delta": 0.6,
+    "beta": 4.0,
+    "n_docked": 17,
+    "n_requested": 17,
+    "best_ds": -10.0,
+    "best_smi": "CCNC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+    "top": [
+      [
+        "CCNC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+        -10.0
+      ],
+      [
+        "C=CNC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+        -10.0
+      ],
+      [
+        "CNC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+        -9.8
+      ],
+      [
+        "NC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+        -9.7
+      ],
+      [
+        "CC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+        -9.6
+      ],
+      [
+        "Cc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+        -9.5
+      ],
+      [
+        "O=C(Nc1cccnc1)c1cc(Oc2ccc(Cl)cc2)ccn1",
+        -9.2
+      ],
+      [
+        "O=C(Nc1cccnc1)c1cc(Oc2ccc(F)cc2)ccn1",
+        -9.2
+      ],
+      [
+        "O=C(O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+        -9.2
+      ],
+      [
+        "O=C(Nc1cccnc1)c1cc(Oc2ccccc2)ccn1",
+        -9.1
+      ],
+      [
+        "Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+        -8.9
+      ],
+      [
+        "O=C(Nc1cccnc1)c1cc(Oc2ccc(I)cc2)ccn1",
+        -8.9
+      ],
+      [
+        "O=C(Nc1cccnc1)c1cc(Oc2ccc(Br)cc2)ccn1",
+        -8.9
+      ],
+      [
+        "CNc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+        -8.9
+      ],
+      [
+        "COc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+        -8.8
+      ],
+      [
+        "O=CNc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+        -8.8
+      ],
+      [
+        "CCNc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+        -8.8
+      ]
+    ],
+    "wall_s": 24.3972008228302
+  }
+]

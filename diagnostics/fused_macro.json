@@ -1,0 +1,295 @@
+[
+ {
+  "status": "OK",
+  "stage": null,
+  "smiles": "CN(C)Cc1cc2c(c3ccccc13)-n1cccc1C(=O)NC2",
+  "trace": [
+   "fuse_edge(5,6)",
+   "atom_insert@19(r31)",
+   "atom_insert@20(r65)",
+   "atom_insert@21(r11)",
+   "atom_insert@22(r50)",
+   "bond_insert(6,22)(r1)"
+  ],
+  "edge": [
+   5,
+   6
+  ],
+  "fused_gain": 1,
+  "spiro_gain": 0,
+  "bridged_gain": 0,
+  "sys_gain": 0,
+  "arom_gain": 1,
+  "n_fiber": 96,
+  "n_candidates": 1,
+  "anchor_rank": 0,
+  "ring_state": "aromatic",
+  "heavy": 23,
+  "sys": 1,
+  "arom": 3,
+  "relations": {
+   "fused": 3,
+   "linked": 2
+  },
+  "sim": 0.585,
+  "qed": 0.79,
+  "sa": 2.75,
+  "t4": true,
+  "t4_d06": false
+ },
+ {
+  "status": "UNSAT",
+  "stage": "aromatise",
+  "smiles": "CN(C)Cc1ccc2c(c1)C1C=CC=CN1C(=O)c1cccn1-2",
+  "trace": [
+   "fuse_edge(9,10)",
+   "atom_insert@19(r14)",
+   "atom_insert@20(r78)",
+   "atom_insert@21(r6)",
+   "atom_insert@22(r52)",
+   "bond_insert(10,22)(r0)"
+  ],
+  "edge": [
+   9,
+   10
+  ],
+  "fused_gain": 1,
+  "spiro_gain": 0,
+  "bridged_gain": 0,
+  "sys_gain": 0,
+  "arom_gain": 0,
+  "n_fiber": 103,
+  "n_candidates": 1,
+  "reason": "kekule_missing(4, 5)@0",
+  "anchor_rank": 1,
+  "ring_state": "aromatic"
+ },
+ {
+  "status": "OK",
+  "stage": null,
+  "smiles": "CN(C)Cc1ccc2c(c1)CNC(=O)c1c3ccccc3cn1-2",
+  "trace": [
+   "fuse_edge(14,15)",
+   "atom_insert@19(r8)",
+   "atom_insert@20(r94)",
+   "atom_insert@21(r12)",
+   "atom_insert@22(r42)",
+   "bond_insert(15,22)(r0)"
+  ],
+  "edge": [
+   14,
+   15
+  ],
+  "fused_gain": 1,
+  "spiro_gain": 0,
+  "bridged_gain": 0,
+  "sys_gain": 0,
+  "arom_gain": 1,
+  "n_fiber": 95,
+  "n_candidates": 1,
+  "anchor_rank": 2,
+  "ring_state": "aromatic",
+  "heavy": 23,
+  "sys": 1,
+  "arom": 3,
+  "relations": {
+   "fused": 3,
+   "linked": 2
+  },
+  "sim": 0.611,
+  "qed": 0.79,
+  "sa": 2.64,
+  "t4": true,
+  "t4_d06": true
+ },
+ {
+  "status": "OK",
+  "stage": null,
+  "smiles": "CN(C)Cc1ccc2c(c1)CNC(=O)c1cc3ccccc3n1-2",
+  "trace": [
+   "fuse_edge(15,16)",
+   "atom_insert@19(r11)",
+   "atom_insert@20(r72)",
+   "atom_insert@21(r11)",
+   "atom_insert@22(r40)",
+   "bond_insert(16,22)(r2)"
+  ],
+  "edge": [
+   15,
+   16
+  ],
+  "fused_gain": 1,
+  "spiro_gain": 0,
+  "bridged_gain": 0,
+  "sys_gain": 0,
+  "arom_gain": 1,
+  "n_fiber": 96,
+  "n_candidates": 1,
+  "anchor_rank": 3,
+  "ring_state": "aromatic",
+  "heavy": 23,
+  "sys": 1,
+  "arom": 3,
+  "relations": {
+   "fused": 3,
+   "linked": 2
+  },
+  "sim": 0.623,
+  "qed": 0.79,
+  "sa": 2.51,
+  "t4": true,
+  "t4_d06": true
+ },
+ {
+  "status": "OK",
+  "stage": null,
+  "smiles": "CN(C)Cc1cc2c(c3c1CCCC3)-n1cccc1C(=O)NC2",
+  "trace": [
+   "fuse_edge(5,6)",
+   "atom_insert@19(r31)",
+   "atom_insert@20(r21)",
+   "atom_insert@21(r2)",
+   "atom_insert@22(r6)",
+   "bond_insert(6,22)(r136)"
+  ],
+  "edge": [
+   5,
+   6
+  ],
+  "fused_gain": 1,
+  "spiro_gain": 0,
+  "bridged_gain": 0,
+  "sys_gain": 0,
+  "arom_gain": 0,
+  "n_fiber": 113,
+  "n_candidates": 1,
+  "anchor_rank": 0,
+  "ring_state": "saturated",
+  "heavy": 23,
+  "sys": 1,
+  "arom": 2,
+  "relations": {
+   "fused": 3,
+   "linked": 2
+  },
+  "sim": 0.582,
+  "qed": 0.926,
+  "sa": 3.07,
+  "t4": true,
+  "t4_d06": false
+ },
+ {
+  "status": "OK",
+  "stage": null,
+  "smiles": "CN(C)Cc1ccc2c(c1)C1CCCCN1C(=O)c1cccn1-2",
+  "trace": [
+   "fuse_edge(9,10)",
+   "atom_insert@19(r14)",
+   "atom_insert@20(r9)",
+   "atom_insert@21(r6)",
+   "atom_insert@22(r6)",
+   "bond_insert(10,22)(r133)"
+  ],
+  "edge": [
+   9,
+   10
+  ],
+  "fused_gain": 1,
+  "spiro_gain": 0,
+  "bridged_gain": 0,
+  "sys_gain": 0,
+  "arom_gain": 0,
+  "n_fiber": 117,
+  "n_candidates": 1,
+  "anchor_rank": 1,
+  "ring_state": "saturated",
+  "heavy": 23,
+  "sys": 1,
+  "arom": 2,
+  "relations": {
+   "linked": 2,
+   "fused": 3
+  },
+  "sim": 0.483,
+  "qed": 0.852,
+  "sa": 3.07,
+  "t4": true,
+  "t4_d06": false
+ },
+ {
+  "status": "OK",
+  "stage": null,
+  "smiles": "CN(C)Cc1ccc2c(c1)CNC(=O)c1c3c(cn1-2)CCCC3",
+  "trace": [
+   "fuse_edge(14,15)",
+   "atom_insert@19(r8)",
+   "atom_insert@20(r8)",
+   "atom_insert@21(r6)",
+   "atom_insert@22(r6)",
+   "bond_insert(15,22)(r143)"
+  ],
+  "edge": [
+   14,
+   15
+  ],
+  "fused_gain": 1,
+  "spiro_gain": 0,
+  "bridged_gain": 0,
+  "sys_gain": 0,
+  "arom_gain": 0,
+  "n_fiber": 112,
+  "n_candidates": 1,
+  "anchor_rank": 2,
+  "ring_state": "saturated",
+  "heavy": 23,
+  "sys": 1,
+  "arom": 2,
+  "relations": {
+   "fused": 3,
+   "linked": 2
+  },
+  "sim": 0.593,
+  "qed": 0.926,
+  "sa": 2.87,
+  "t4": true,
+  "t4_d06": false
+ },
+ {
+  "status": "OK",
+  "stage": null,
+  "smiles": "CN(C)Cc1ccc2c(c1)CNC(=O)c1cc3c(n1-2)CCCC3",
+  "trace": [
+   "fuse_edge(15,16)",
+   "atom_insert@19(r11)",
+   "atom_insert@20(r8)",
+   "atom_insert@21(r5)",
+   "atom_insert@22(r6)",
+   "bond_insert(16,22)(r149)"
+  ],
+  "edge": [
+   15,
+   16
+  ],
+  "fused_gain": 1,
+  "spiro_gain": 0,
+  "bridged_gain": 0,
+  "sys_gain": 0,
+  "arom_gain": 0,
+  "n_fiber": 113,
+  "n_candidates": 1,
+  "anchor_rank": 3,
+  "ring_state": "saturated",
+  "heavy": 23,
+  "sys": 1,
+  "arom": 2,
+  "relations": {
+   "fused": 3,
+   "linked": 2
+  },
+  "sim": 0.604,
+  "qed": 0.926,
+  "sa": 2.8,
+  "t4": true,
+  "t4_d06": true
+ }
+]

@@ -1,0 +1,125 @@
+{
+  "source": "diagnostics/genmol_t4_official_s1.json",
+  "panel": "30 cells, single trajectory per cell",
+  "method": "best_at_B = min(ds in A_oracle with call<=B); exact prefix of the same run",
+  "by_budget": {
+    "10": {
+      "coverage": 14,
+      "wins": 1,
+      "losses": 13,
+      "mean_diff": 1.7923,
+      "n_paired": 13
+    },
+    "20": {
+      "coverage": 14,
+      "wins": 1,
+      "losses": 13,
+      "mean_diff": 1.7,
+      "n_paired": 13
+    },
+    "25": {
+      "coverage": 18,
+      "wins": 2,
+      "losses": 16,
+      "mean_diff": 1.6765,
+      "n_paired": 17
+    },
+    "30": {
+      "coverage": 18,
+      "wins": 2,
+      "losses": 16,
+      "mean_diff": 1.6706,
+      "n_paired": 17
+    },
+    "40": {
+      "coverage": 18,
+      "wins": 2,
+      "losses": 16,
+      "mean_diff": 1.6529,
+      "n_paired": 17
+    },
+    "50": {
+      "coverage": 18,
+      "wins": 4,
+      "losses": 14,
+      "mean_diff": 1.2824,
+      "n_paired": 17
+    },
+    "60": {
+      "coverage": 18,
+      "wins": 4,
+      "losses": 14,
+      "mean_diff": 1.1824,
+      "n_paired": 17
+    },
+    "75": {
+      "coverage": 21,
+      "wins": 5,
+      "losses": 16,
+      "mean_diff": 1.4684,
+      "n_paired": 19
+    },
+    "100": {
+      "coverage": 22,
+      "wins": 5,
+      "losses": 17,
+      "mean_diff": 1.045,
+      "n_paired": 20
+    },
+    "125": {
+      "coverage": 25,
+      "wins": 6,
+      "losses": 19,
+      "mean_diff": 0.9045,
+      "n_paired": 22
+    },
+    "150": {
+      "coverage": 25,
+      "wins": 6,
+      "losses": 19,
+      "mean_diff": 0.8409,
+      "n_paired": 22
+    },
+    "175": {
+      "coverage": 25,
+      "wins": 10,
+      "losses": 15,
+      "mean_diff": 0.5591,
+      "n_paired": 22
+    },
+    "200": {
+      "coverage": 25,
+      "wins": 12,
+      "losses": 13,
+      "mean_diff": 0.4864,
+      "n_paired": 22
+    }
+  },
+  "first_achieve_calls": [
+    4,
+    13,
+    22,
+    31,
+    60,
+    69,
+    70,
+    86,
+    88,
+    99,
+    101,
+    104,
+    105,
+    107,
+    124,
+    131,
+    136,
+    138,
+    141,
+    153,
+    159,
+    164,
+    168,
+    186,
+    187
+  ]
+}

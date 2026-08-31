@@ -1,0 +1,69 @@
+{
+ "smiles": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCCC1",
+ "n_marks": 618,
+ "families": {
+  "atom_insert": 281,
+  "atom_delete": 10,
+  "atom_restate_semantic": 158,
+  "bond_reroute": 51,
+  "cycle_close": 99,
+  "cycle_open": 16,
+  "ring_system_restate": 3
+ },
+ "samples": {
+  "atom_delete": {
+   "type": "AtomDelete",
+   "attrs": {
+    "v": "0"
+   }
+  },
+  "cycle_open": {
+   "type": "CycleOpenEdge",
+   "attrs": {
+    "a": "4",
+    "b": "5"
+   }
+  },
+  "bond_reroute": {
+   "type": "BondReroute",
+   "attrs": {
+    "a": "0",
+    "b": "1",
+    "new_order": "1",
+    "u": "0",
+    "v": "5"
+   }
+  },
+  "ring_system_restate": {
+   "type": "RingSystemRestate",
+   "attrs": {
+    "changes": "(BondOrderChange(a=4, b=5, new_order=1), BondOrderChange(a=6"
+   }
+  },
+  "atom_restate_semantic": {
+   "type": "SemanticAtomRestate",
+   "attrs": {
+    "target_class_index": "0",
+    "v": "0"
+   }
+  },
+  "atom_insert": {
+   "type": "AtomInsert",
+   "attrs": {
+    "atom_type": "2",
+    "formal_charge": "0",
+    "implicit_h_count": "3",
+    "neighbors": "((5, 1),)",
+    "slot": "22"
+   }
+  },
+  "cycle_close": {
+   "type": "CycleCloseEdge",
+   "attrs": {
+    "a": "5",
+    "b": "8",
+    "order": "1"
+   }
+  }
+ }
+}

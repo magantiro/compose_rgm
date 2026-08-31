@@ -1,0 +1,141 @@
+{
+ "seed": {
+  "n_insert_actions": 216,
+  "n_distinct_elements": 7,
+  "action_counts": {
+   "S": 60,
+   "P": 49,
+   "Br": 45,
+   "O": 17,
+   "F": 17,
+   "N": 17,
+   "Cl": 11
+  },
+  "R_theta": {
+   "O": 0.3954,
+   "S": 0.3893,
+   "P": 0.1027,
+   "F": 0.051,
+   "Cl": 0.0509,
+   "Br": 0.0099,
+   "N": 0.0009
+  },
+  "sampler_q": {
+   "S": 0.3081,
+   "O": 0.2451,
+   "P": 0.181,
+   "F": 0.115,
+   "Cl": 0.0821,
+   "Br": 0.0555,
+   "N": 0.0132
+  },
+  "R_theta_carbon": 0.0,
+  "sampler_carbon": 0.0,
+  "R_theta_halogen": 0.1118,
+  "sampler_halogen": 0.2526
+ },
+ "grown1": {
+  "n_insert_actions": 252,
+  "n_distinct_elements": 7,
+  "action_counts": {
+   "S": 70,
+   "P": 58,
+   "Br": 52,
+   "O": 20,
+   "F": 20,
+   "N": 20,
+   "Cl": 12
+  },
+  "R_theta": {
+   "O": 0.4954,
+   "F": 0.3145,
+   "S": 0.1488,
+   "P": 0.0292,
+   "Cl": 0.007,
+   "Br": 0.0044,
+   "N": 0.0008
+  },
+  "sampler_q": {
+   "O": 0.3337,
+   "S": 0.2746,
+   "F": 0.1912,
+   "P": 0.1322,
+   "Cl": 0.0478,
+   "Br": 0.0143,
+   "N": 0.0063
+  },
+  "R_theta_carbon": 0.0,
+  "sampler_carbon": 0.0,
+  "R_theta_halogen": 0.3259,
+  "sampler_halogen": 0.2533
+ },
+ "grown2": {
+  "n_insert_actions": 219,
+  "n_distinct_elements": 7,
+  "action_counts": {
+   "S": 60,
+   "P": 51,
+   "Br": 45,
+   "O": 18,
+   "F": 18,
+   "N": 18,
+   "Cl": 9
+  },
+  "R_theta": {
+   "O": 0.7693,
+   "S": 0.0939,
+   "F": 0.063,
+   "P": 0.0529,
+   "Cl": 0.0131,
+   "Br": 0.0068,
+   "N": 0.001
+  },
+  "sampler_q": {
+   "O": 0.418,
+   "S": 0.2263,
+   "F": 0.1561,
+   "P": 0.1452,
+   "Cl": 0.0368,
+   "Br": 0.0176
+  },
+  "R_theta_carbon": 0.0,
+  "sampler_carbon": 0.0,
+  "R_theta_halogen": 0.0829,
+  "sampler_halogen": 0.2105
+ },
+ "grown3": {
+  "n_insert_actions": 333,
+  "n_distinct_elements": 7,
+  "action_counts": {
+   "S": 93,
+   "P": 76,
+   "Br": 69,
+   "O": 26,
+   "F": 26,
+   "N": 26,
+   "Cl": 17
+  },
+  "R_theta": {
+   "S": 0.5066,
+   "O": 0.3905,
+   "F": 0.082,
+   "P": 0.0134,
+   "Cl": 0.0052,
+   "Br": 0.002,
+   "N": 0.0002
+  },
+  "sampler_q": {
+   "S": 0.3804,
+   "O": 0.3033,
+   "F": 0.1295,
+   "P": 0.1118,
+   "Cl": 0.0499,
+   "Br": 0.0217,
+   "N": 0.0034
+  },
+  "R_theta_carbon": 0.0,
+  "sampler_carbon": 0.0,
+  "R_theta_halogen": 0.0892,
+  "sampler_halogen": 0.2011
+ }
+}

@@ -1,0 +1,188 @@
+[
+  {
+    "target": "5ht1b",
+    "idx": 7,
+    "delta": 0.4,
+    "beta": 4.0,
+    "n_docked": 27,
+    "n_requested": 27,
+    "best_ds": -10.2,
+    "best_smi": "CCCN1CCCCCCCCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CCC1",
+    "top": [
+      [
+        "CCCN1CCCCCCCCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CCC1",
+        -10.2
+      ],
+      [
+        "CCN1CCCCCCCCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CCC1",
+        -10.2
+      ],
+      [
+        "FC(F)(F)C=CN1CCCCCCCCN(Cc2cccc(N3CC[NH2+]CC3)c2)CCC1",
+        -9.2
+      ],
+      [
+        "OCCCCCN1CCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CC1",
+        -9.0
+      ],
+      [
+        "CCCCCN1CCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CC1",
+        -8.9
+      ],
+      [
+        "CCCCCCN1CCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CC1",
+        -8.7
+      ],
+      [
+        "CCCCN1CCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CC1",
+        -8.7
+      ],
+      [
+        "CSCCN1CCN(Cc2cc(N3CC[NH2+]CC3)cc(C(F)(F)F)c2)CC1",
+        -8.6
+      ],
+      [
+        "CN(C)CCN(CCN(C)C)C(C)(C)c1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        -8.1
+      ],
+      [
+        "CCCN(CC)CCN(CCC)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        -8.1
+      ],
+      [
+        "CCC(CC)(c1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1)N(C)CCN(C)C",
+        -8.1
+      ],
+      [
+        "CCN(CCO)CCN(C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        -8.1
+      ],
+      [
+        "CC(c1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1)N(CCN(C)C)CCN(C)C",
+        -8.0
+      ],
+      [
+        "CN(C)CCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)ccc1C(F)(F)F",
+        -8.0
+      ],
+      [
+        "CN(C)CCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        -7.9
+      ],
+      [
+        "CCCN(CC)CCN(CC)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        -7.9
+      ],
+      [
+        "CCN(CC)CCN(CC)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        -7.9
+      ],
+      [
+        "CCCCCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        -7.8
+      ],
+      [
+        "COCCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        -7.7
+      ],
+      [
+        "CNCCN(CCN(C)C)Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1",
+        -7.7
+      ]
+    ],
+    "wall_s": 41.97527718544006
+  },
+  {
+    "target": "parp1",
+    "idx": 0,
+    "delta": 0.4,
+    "beta": 4.0,
+    "n_docked": 36,
+    "n_requested": 36,
+    "best_ds": -9.8,
+    "best_smi": "CCC(Cc1c(C)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2)N1CCCCC1",
+    "top": [
+      [
+        "CCC(Cc1c(C)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2)N1CCCCC1",
+        -9.8
+      ],
+      [
+        "Cc1c(CC(C)(C)N2CCCCC2)c2n(c1C(C)(C)C)-c1ccc(CN(C)C)cc1CNC2=O",
+        -9.7
+      ],
+      [
+        "Cc1c(CC(C)N2CCCCC2)c2n(c1C(C)(C)C)-c1ccc(CN(C)C)cc1CNC2=O",
+        -9.6
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CCN3CCC(O)CC3)c(Br)c(C(C)(C)C)n1-2",
+        -9.5
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CC(C)(C)N3CCCCC3)c(Cl)c(C(C)(C)C)n1-2",
+        -9.3
+      ],
+      [
+        "CC(Cc1c(Cl)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2)N1CCCCC1",
+        -9.3
+      ],
+      [
+        "CC(CN1CCC(F)CC1)c1c(Cl)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        -9.2
+      ],
+      [
+        "C=C(CN1CCCCC1)c1c(Cl)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        -9.2
+      ],
+      [
+        "CCN(C)C(C)CCN(C(=O)c1ccc2c(c1)CNC(=O)c1cccn1-2)C(=O)C(F)(F)F",
+        -9.2
+      ],
+      [
+        "CCN(C)CC(C)CN(C(=O)c1ccc2c(c1)CNC(=O)c1cccn1-2)C(=O)C(F)(F)F",
+        -9.2
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CC(C)(C)N3CCC(N)CC3)c(Cl)c(C(C)(C)C)n1-2",
+        -9.1
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CC(C)(C)N3CCC(O)CC3)c(Cl)c(C(C)(C)C)n1-2",
+        -9.0
+      ],
+      [
+        "C=C(CN1CCC(F)CC1)c1c(Cl)c(C(C)(C)C)n2c1C(=O)NCc1cc(CN(C)C)ccc1-2",
+        -9.0
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CCN3CCC(F)CC3)c(Cl)c(C(C)(C)C)n1-2",
+        -9.0
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CC(C)(C)N3CCC(=O)CC3)c(Cl)c(C(C)(C)C)n1-2",
+        -8.9
+      ],
+      [
+        "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(CCN3CCCCC3)c(Cl)c(C(C)(C)C)n1-2",
+        -8.8
+      ],
+      [
+        "CCN(CC)CCCN(C(=O)c1ccc2c(c1)CNC(=O)c1cccn1-2)C(=O)C(F)(F)F",
+        -8.8
+      ],
+      [
+        "CCCN(C)CCCN(C(=O)c1ccc2c(c1)CNC(=O)c1cccn1-2)C(=O)C(F)(F)F",
+        -8.8
+      ],
+      [
+        "CC1CCN(CCc2c(Cl)c(C(C)(C)C)n3c2C(=O)NCc2cc(CN(C)C)ccc2-3)CC1",
+        -8.7
+      ],
+      [
+        "CCN(CCO)CCCN(C(=O)c1ccc2c(c1)CNC(=O)c1cccn1-2)C(=O)C(F)(F)F",
+        -8.6
+      ]
+    ],
+    "wall_s": 54.02061724662781
+  }
+]

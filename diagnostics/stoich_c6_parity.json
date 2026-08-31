@@ -1,0 +1,182 @@
+{
+ "rows": [
+  {
+   "seed": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+   "topology": "pendant",
+   "state": "aromatic",
+   "legacy_status": "OK",
+   "quota_status": "OK",
+   "legacy_smiles": "CN(C)Cc1ccc2c(c1)CN(c1ccccc1)C(=O)c1cccn1-2",
+   "quota_smiles": "CN(C)Cc1ccc2c(c1)CN(c1ccccc1)C(=O)c1cccn1-2",
+   "trace_match": true,
+   "identical": true
+  },
+  {
+   "seed": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+   "topology": "pendant",
+   "state": "saturated",
+   "legacy_status": "OK",
+   "quota_status": "OK",
+   "legacy_smiles": "CN(C)Cc1ccc2c(c1)CN(C1CCCCC1)C(=O)c1cccn1-2",
+   "quota_smiles": "CN(C)Cc1ccc2c(c1)CN(C1CCCCC1)C(=O)c1cccn1-2",
+   "trace_match": true,
+   "identical": true
+  },
+  {
+   "seed": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+   "topology": "fused",
+   "state": "aromatic",
+   "legacy_status": "OK",
+   "quota_status": "OK",
+   "legacy_smiles": "CN(C)Cc1cc2c(c3ccccc13)-n1cccc1C(=O)NC2",
+   "quota_smiles": "CN(C)Cc1cc2c(c3ccccc13)-n1cccc1C(=O)NC2",
+   "trace_match": true,
+   "identical": true
+  },
+  {
+   "seed": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+   "topology": "fused",
+   "state": "saturated",
+   "legacy_status": "OK",
+   "quota_status": "OK",
+   "legacy_smiles": "CN(C)Cc1cc2c(c3c1CCCC3)-n1cccc1C(=O)NC2",
+   "quota_smiles": "CN(C)Cc1cc2c(c3c1CCCC3)-n1cccc1C(=O)NC2",
+   "trace_match": true,
+   "identical": true
+  },
+  {
+   "seed": "COc1[nH]c3cccc2C(=O)NCCc1c23",
+   "topology": "pendant",
+   "state": "aromatic",
+   "legacy_status": "OK",
+   "quota_status": "OK",
+   "legacy_smiles": "COc1[nH]c2cccc3c2c1CCN(c1ccccc1)C3=O",
+   "quota_smiles": "COc1[nH]c2cccc3c2c1CCN(c1ccccc1)C3=O",
+   "trace_match": true,
+   "identical": true
+  },
+  {
+   "seed": "COc1[nH]c3cccc2C(=O)NCCc1c23",
+   "topology": "pendant",
+   "state": "saturated",
+   "legacy_status": "OK",
+   "quota_status": "OK",
+   "legacy_smiles": "COc1[nH]c2cccc3c2c1CCN(C1CCCCC1)C3=O",
+   "quota_smiles": "COc1[nH]c2cccc3c2c1CCN(C1CCCCC1)C3=O",
+   "trace_match": true,
+   "identical": true
+  },
+  {
+   "seed": "COc1[nH]c3cccc2C(=O)NCCc1c23",
+   "topology": "fused",
+   "state": "aromatic",
+   "legacy_status": "OK",
+   "quota_status": "OK",
+   "legacy_smiles": "COc1[nH]c2c3c(cc4ccccc42)C(=O)NCCc13",
+   "quota_smiles": "COc1[nH]c2c3c(cc4ccccc42)C(=O)NCCc13",
+   "trace_match": true,
+   "identical": true
+  },
+  {
+   "seed": "COc1[nH]c3cccc2C(=O)NCCc1c23",
+   "topology": "fused",
+   "state": "saturated",
+   "legacy_status": "OK",
+   "quota_status": "OK",
+   "legacy_smiles": "COc1[nH]c2c3c(cc4c2c1CCNC4=O)CCCC3",
+   "quota_smiles": "COc1[nH]c2c3c(cc4c2c1CCNC4=O)CCCC3",
+   "trace_match": true,
+   "identical": true
+  },
+  {
+   "seed": "O/N=C/c1cn3CCNC(=O)c2cccc1c23",
+   "topology": "pendant",
+   "state": "aromatic",
+   "legacy_status": "OK",
+   "quota_status": "OK",
+   "legacy_smiles": "O=C1NCCn2cc(C=NOc3ccccc3)c3cccc1c32",
+   "quota_smiles": "O=C1NCCn2cc(C=NOc3ccccc3)c3cccc1c32",
+   "trace_match": true,
+   "identical": true
+  },
+  {
+   "seed": "O/N=C/c1cn3CCNC(=O)c2cccc1c23",
+   "topology": "pendant",
+   "state": "saturated",
+   "legacy_status": "OK",
+   "quota_status": "OK",
+   "legacy_smiles": "O=C1NCCn2cc(C=NOC3CCCCC3)c3cccc1c32",
+   "quota_smiles": "O=C1NCCn2cc(C=NOC3CCCCC3)c3cccc1c32",
+   "trace_match": true,
+   "identical": true
+  },
+  {
+   "seed": "O/N=C/c1cn3CCNC(=O)c2cccc1c23",
+   "topology": "fused",
+   "state": "aromatic",
+   "legacy_status": "UNSAT",
+   "quota_status": "UNSAT",
+   "legacy_smiles": "O=C1NC2C=CC=CC2n2cc(C=NO)c3cccc1c32",
+   "quota_smiles": "O=C1NC2C=CC=CC2n2cc(C=NO)c3cccc1c32",
+   "trace_match": true,
+   "identical": true
+  },
+  {
+   "seed": "O/N=C/c1cn3CCNC(=O)c2cccc1c23",
+   "topology": "fused",
+   "state": "saturated",
+   "legacy_status": "OK",
+   "quota_status": "OK",
+   "legacy_smiles": "O=C1NC2CCCCC2n2cc(C=NO)c3cccc1c32",
+   "quota_smiles": "O=C1NC2CCCCC2n2cc(C=NO)c3cccc1c32",
+   "trace_match": true,
+   "identical": true
+  },
+  {
+   "seed": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34",
+   "topology": "pendant",
+   "state": "aromatic",
+   "legacy_status": "OK",
+   "quota_status": "OK",
+   "legacy_smiles": "CC(C)CCN(Cc1ccc2ccc(C(N)=Nc3ccccc3)cc2c1)C(=O)c1cccc2ccccc12",
+   "quota_smiles": "CC(C)CCN(Cc1ccc2ccc(C(N)=Nc3ccccc3)cc2c1)C(=O)c1cccc2ccccc12",
+   "trace_match": true,
+   "identical": true
+  },
+  {
+   "seed": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34",
+   "topology": "pendant",
+   "state": "saturated",
+   "legacy_status": "OK",
+   "quota_status": "OK",
+   "legacy_smiles": "CC(C)CCN(Cc1ccc2ccc(C(N)=NC3CCCCC3)cc2c1)C(=O)c1cccc2ccccc12",
+   "quota_smiles": "CC(C)CCN(Cc1ccc2ccc(C(N)=NC3CCCCC3)cc2c1)C(=O)c1cccc2ccccc12",
+   "trace_match": true,
+   "identical": true
+  },
+  {
+   "seed": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34",
+   "topology": "fused",
+   "state": "aromatic",
+   "legacy_status": "OK",
+   "quota_status": "OK",
+   "legacy_smiles": "CC(C)CCN(Cc1cc2cc(C(=N)N)ccc2c2ccccc12)C(=O)c1cccc2ccccc12",
+   "quota_smiles": "CC(C)CCN(Cc1cc2cc(C(=N)N)ccc2c2ccccc12)C(=O)c1cccc2ccccc12",
+   "trace_match": true,
+   "identical": true
+  },
+  {
+   "seed": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34",
+   "topology": "fused",
+   "state": "saturated",
+   "legacy_status": "OK",
+   "quota_status": "OK",
+   "legacy_smiles": "CC(C)CCN(Cc1cc2cc(C(=N)N)ccc2c2c1CCCC2)C(=O)c1cccc2ccccc12",
+   "quota_smiles": "CC(C)CCN(Cc1cc2cc(C(=N)N)ccc2c2c1CCCC2)C(=O)c1cccc2ccccc12",
+   "trace_match": true,
+   "identical": true
+  }
+ ],
+ "n_identical": 16,
+ "n": 16
+}

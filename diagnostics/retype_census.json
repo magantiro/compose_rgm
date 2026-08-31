@@ -1,0 +1,40 @@
+{
+ "smiles": "FC(F)(F)c1cc(N2CC[NH2+]CC2)ccc1C1CCCCC1",
+ "ring_ids": [
+  16,
+  17,
+  18,
+  19,
+  20,
+  21
+ ],
+ "n_restate": 158,
+ "n_on_ring": 58,
+ "on_ring_by_element": {
+  "N": 6,
+  "S": 17,
+  "P": 12,
+  "I": 12,
+  "B": 6,
+  "O": 5
+ },
+ "all_by_element": {
+  "C": 4,
+  "N": 16,
+  "O": 12,
+  "S": 39,
+  "P": 32,
+  "Cl": 3,
+  "Br": 3,
+  "I": 32,
+  "B": 17
+ },
+ "v_seen_on_ring": [
+  16,
+  17,
+  18,
+  19,
+  20,
+  21
+ ]
+}

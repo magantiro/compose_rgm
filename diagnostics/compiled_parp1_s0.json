@@ -1,0 +1,28 @@
+{
+  "cell": "parp1_s0",
+  "reached": false,
+  "route": [
+    "CN(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+    "CC(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+    "CCC(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+    "CCCC(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+    "CCCCC(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+    "CCCCCC(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+    "CCCCCCC(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+    "CCCCCCCC(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+    "CCCCCCCC(CC)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+    "CCCCCCCC(CCC)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+    "CCCCCC(C)CC(CCC)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+    "CCCC(Cc1ccc2c(c1)CNC(=O)c1cccn1-2)CC(C)CCCCCN",
+    "CCCC(Cc1ccc2c(c1)CNC(=O)c1cccn1-2)CC(C)CCCCCNC"
+  ],
+  "n_ops": 12,
+  "realized": [
+    30,
+    31
+  ],
+  "target": [
+    33,
+    38
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "controller": "narrow-3spec",
+  "budget_calls": 100,
+  "results": [
+    {
+      "cell": "fa7_s3_d0.6",
+      "seed": 1,
+      "best": null,
+      "calls_spent": 0,
+      "rounds_done": 10,
+      "genmol": -7.3
+    }
+  ]
+}

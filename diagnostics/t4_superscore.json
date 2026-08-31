@@ -1,0 +1,49 @@
+{
+  "what": "exploratory superscore: per-cell best of (new narrow @100, mean of 3) and (old official panel @200, n=1)",
+  "NOT_REPORTABLE": "max over 2 configurations vs GenMol's mean-of-3 is a different estimator; true cost 500 calls/cell",
+  "combined": {
+    "coverage": "25/30",
+    "wins": 18,
+    "losses": 7,
+    "mean_diff": -0.309,
+    "ci": [
+      -0.636,
+      0.017
+    ],
+    "n_paired": 22
+  },
+  "on_13_overlapping_cells": {
+    "new_at_100": {
+      "mean": -0.051,
+      "ci": [
+        -0.429,
+        0.327
+      ]
+    },
+    "old_at_200": {
+      "mean": 1.138,
+      "ci": [
+        0.298,
+        1.979
+      ]
+    },
+    "max_of_two": {
+      "mean": -0.208,
+      "ci": [
+        -0.562,
+        0.146
+      ]
+    }
+  },
+  "selection_gain": 0.156,
+  "noise_floor": 0.7,
+  "gain_over_noise": 0.22,
+  "conclusion": "combined column's edge is coverage, not cherry-picking; new@100 alone lands within 0.22x noise of the max",
+  "unreached_by_either": [
+    "5ht1b_s8_d0.6",
+    "braf_s9_d0.4",
+    "braf_s9_d0.6",
+    "braf_s10_d0.6",
+    "braf_s11_d0.6"
+  ]
+}

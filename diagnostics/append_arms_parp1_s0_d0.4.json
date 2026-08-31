@@ -1,0 +1,3842 @@
+[
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "Cc1cn2c(c1Cl)C(=O)NCc1cc(CN(C)CCl)c(SCNN=N)cc1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1cn2c(c1Cl)C(=O)NCc1c-2cc(SCNN=N)c2c1CN(CCl)C2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1cn2c(c1Cl)C(=O)NCc1c-2cc(OCNN=O)c2c1CN(CCl)C2"
+   }
+  ],
+  "smi": "Cc1cn2c(c1Cl)C(=O)NCc1c-2cc(OCNN=O)c2c1CN(CCl)C2",
+  "systems": 1,
+  "basin": 0.1667,
+  "sim_seed": 0.1951,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.198,
+  "sa": 3.92
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CN(Cc1c(F)cc2c(c1Cl)CNC(=O)c1cc(Cl)c(N)n1-2)C([SH3])=NC#[SH3]"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Nc1c(Cl)cc2n1-c1cc(F)c(CN3C[SH2]#CN=C3[SH3])c(Cl)c1CNC2=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Nc1cc2c(c(Cl)c1CN1C[SH2]#CN=C1[SH3])CNC(=S)c1cc(Cl)c(N)n1-2"
+   }
+  ],
+  "smi": "Nc1cc2c(c(Cl)c1CN1C[SH2]#CN=C1[SH3])CNC(=S)c1cc(Cl)c(N)n1-2",
+  "systems": 2,
+  "basin": 0.1158,
+  "sim_seed": 0.1379,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.473,
+  "sa": 5.02
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CCN(CS)CN(Cc1ccc2c(c1)CNC(=O)c1cccn1-2)C(C)C=O"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CCN1CN(Cc2ccc3c(c2)CNC(=O)c2cccn2-3)C(C)C(=O)C1S"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CCN1CN(Cc2ccc3c(c2)CNC(=O)c2cccn2-3)C(C)C(=O)C1S"
+   }
+  ],
+  "smi": "CCN1CN(Cc2ccc3c(c2)CNC(=O)c2cccn2-3)C(C)C(=O)C1S",
+  "systems": 2,
+  "basin": 0.3973,
+  "sim_seed": 0.5574,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.795,
+  "sa": 4.11
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CSC(Cl)N(C)C(OS)c1cc(C)c2c(c1)C(Br)NC(=O)c1ccc(Br)n1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CSC1(Cl)SOC(c2cc(C)c3c(c2)C(Br)NC(=O)c2ccc(Br)n2-3)N1C"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CSC1(Cl)SOC(C2CC(F)C3C(C2)C(Br)NC(=O)C2CCC(Br)N23)N1C"
+   }
+  ],
+  "smi": "CSC1(Cl)SOC(C2CC(F)C3C(C2)C(Br)NC(=O)C2CCC(Br)N23)N1C",
+  "systems": 2,
+  "basin": 0.11,
+  "sim_seed": 0.1,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 0,
+  "qed": 0.31,
+  "sa": 6.18
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "Cc1c(I)c(O)c2n1-c1cc(Cl)c(CN(C)C(N)C(O)I)cc1CNC2=O"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1c(I)c(O)c2n1-c1cc(Cl)c(CN3COC(I)C3N)cc1CNC2=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1c(I)c(O)c2n1-c1cc(Cl)c(CN3C[SH4]C(I)C3Br)cc1CNC2=O"
+   }
+  ],
+  "smi": "Cc1c(I)c(O)c2n1-c1cc(Cl)c(CN3C[SH4]C(I)C3Br)cc1CNC2=O",
+  "systems": 2,
+  "basin": 0.1789,
+  "sim_seed": 0.2195,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.285,
+  "sa": 4.95
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CN(C#CC#N)C(C=O)c1cc2c(cc1Br)-n1c(cc(Cl)c1Cl)C(=O)NC2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "N#CC#CN1CC(=O)C1c1cc2c(cc1Br)-n1c(cc(Cl)c1Cl)C(=O)NC2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "N#CCCN1CC(=O)C1c1cc2c(cc1Br)-n1c(cc(Cl)c1Br)C(=O)NC2"
+   }
+  ],
+  "smi": "N#CCCN1CC(=O)C1c1cc2c(cc1Br)-n1c(cc(Cl)c1Br)C(=O)NC2",
+  "systems": 2,
+  "basin": 0.2,
+  "sim_seed": 0.2436,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.68,
+  "sa": 4.19
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "C=C(N)N(O)C(S)c1cc(CN(C)C)cc2c1-n1cccc1C(=O)N(S)C2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CN(C)Cc1cc2c(c(C3SC=C(N)N3O)c1)-n1cccc1C(=O)N(S)C2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CN(C)Cc1cc2c(c(C3SC=C(F)N3C)c1)-n1cccc1C(=O)N(S)C2"
+   }
+  ],
+  "smi": "CN(C)Cc1cc2c(c(C3SC=C(F)N3C)c1)-n1cccc1C(=O)N(S)C2",
+  "systems": 2,
+  "basin": 0.2381,
+  "sim_seed": 0.3562,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.623,
+  "sa": 4.3
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "O=C(c1cc(O)c2c(c1)C(Br)N(O)C(=O)c1ccc(F)n1-2)N(C#[SH3])C(F)=S"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "O=C(c1cc(O)c2c(c1)C(Br)n1oc3cc(F)n-2c3c1=O)N(C#[SH3])C(F)=S"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "C#CN(C(=O)c1cc(O)c2c(c1)C(I)n1oc3cc(F)n-2c3c1=O)C(F)=S"
+   }
+  ],
+  "smi": "C#CN(C(=O)c1cc(O)c2c(c1)C(I)n1oc3cc(F)n-2c3c1=O)C(F)=S",
+  "systems": 1,
+  "basin": 0.0784,
+  "sim_seed": 0.0769,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 3,
+  "qed": 0.106,
+  "sa": 5.56
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CN(C)C(=O)c1c(Br)c(F)c2c(c1OSC#[SH3])CNC(=O)c1ccc(F)n1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "O=C1NCc2c(OSC#[SH3])c(C(=O)N3CC3)c(Br)c(F)c2-n2c(F)ccc21"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "O=C1NCc2c(OSC#[SH3])c(C(=O)N3CC3)c(Br)c(F)c2-n2c(S)ccc21"
+   }
+  ],
+  "smi": "O=C1NCc2c(OSC#[SH3])c(C(=O)N3CC3)c(Br)c(F)c2-n2c(S)ccc21",
+  "systems": 2,
+  "basin": 0.1538,
+  "sim_seed": 0.1628,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.395,
+  "sa": 4.28
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CCN=CN=Nc1c(C(=O)N(C)C)cc2c(c1O)-n1cccc1C(=O)NC2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CN(C)C(=O)c1cc2c(c(O)c1N=NC1=NCC1)-n1cccc1C(=O)NC2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1c([SH3]=NC2=NCC2)c(C(=O)N(C)C)cc2c1-n1cccc1C(=O)NC2"
+   }
+  ],
+  "smi": "Cc1c([SH3]=NC2=NCC2)c(C(=O)N(C)C)cc2c1-n1cccc1C(=O)NC2",
+  "systems": 2,
+  "basin": 0.3333,
+  "sim_seed": 0.3944,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.847,
+  "sa": 4.01
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "C#CC(=C)C(I)N1Cc2cc(C(=O)N(C)C)ccc2-n2cc(I)cc2C1=O"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "C#CC(=C)C(I)N1Cc2cc(C(=O)N3CC3)ccc2-n2cc(I)cc2C1=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "C=CC(=C)C(I)N1CC2CC(C(=O)N3CC3)CCC2N2CC(I)CC2C1=O"
+   }
+  ],
+  "smi": "C=CC(=C)C(I)N1CC2CC(C(=O)N3CC3)CCC2N2CC(I)CC2C1=O",
+  "systems": 2,
+  "basin": 0.0825,
+  "sim_seed": 0.0568,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 0,
+  "qed": 0.165,
+  "sa": 5.08
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CN(CCO)C(CN)c1cc2c(cc1Cl)-n1cccc1C(=O)NC2SCI"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "NCC(c1cc2c(cc1Cl)-n1cccc1C(=O)NC2SCI)N1CCOC1"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "O=CC(c1cc2c(cc1Cl)-n1cccc1C(=O)NC2SCI)N1CCOC1"
+   }
+  ],
+  "smi": "O=CC(c1cc2c(cc1Cl)-n1cccc1C(=O)NC2SCI)N1CCOC1",
+  "systems": 2,
+  "basin": 0.2333,
+  "sim_seed": 0.253,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.374,
+  "sa": 4.69
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CCN(C)c1ccc2n1-c1cc(N)c(CN(C)C)c(N(C)C)c1CNC2=O"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CN(C)Cc1c(N)cc2c(c1N(C)C)CNC(=O)c1ccc(N3CCC3)n1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CN(C)Cc1c(I)cc2c(c1N(C)C)CNC(=S)c1ccc(N3CCC3)n1-2"
+   }
+  ],
+  "smi": "CN(C)Cc1c(I)cc2c(c1N(C)C)CNC(=S)c1ccc(N3CCC3)n1-2",
+  "systems": 2,
+  "basin": 0.1548,
+  "sim_seed": 0.2432,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.52,
+  "sa": 3.65
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "C#CCN(Cc1ccc2c(c1)CN(CN)C(=O)c1c(Cl)ccn1-2)C(=O)CCl"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "C#CCN1C(=O)C(Cl)C1c1ccc2c(c1)CN(CN)C(=O)c1c(Cl)ccn1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "C=CCN1C(=O)C(Cl)C1c1ccc2c(c1)CN(NN)C(=O)c1c(Cl)ccn1-2"
+   }
+  ],
+  "smi": "C=CCN1C(=O)C(Cl)C1c1ccc2c(c1)CN(NN)C(=O)c1c(Cl)ccn1-2",
+  "systems": 2,
+  "basin": 0.1957,
+  "sim_seed": 0.1807,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.268,
+  "sa": 4.31
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "Cc1c(Br)cn2c1C(=O)NCc1cc(C(CCNF)N(C)C)c(NCl)cc1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1c(Br)cn2c1C(=O)NCc1cc(C3CCN(F)CN3C)c(NCl)cc1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1c(F)cn2c1C(O)NCc1cc(C3CCN(F)CN3C)c(NCl)cc1-2"
+   }
+  ],
+  "smi": "Cc1c(F)cn2c1C(O)NCc1cc(C3CCN(F)CN3C)c(NCl)cc1-2",
+  "systems": 2,
+  "basin": 0.1212,
+  "sim_seed": 0.1395,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.68,
+  "sa": 4.9
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "COc1cc2c(c(Cl)c1CN(C)C)C(S)N(I)C(=O)c1c(S)c(Cl)c(Cl)n1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "COc1cc2c(c(Cl)c1CN1CC1)C(S)N(I)C(=O)c1c(S)c(Cl)c(Cl)n1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "COc1cc2c(c(Cl)c1CN1CC1)C(S)N(O)C(O)c1c(S)c(Cl)c(Cl)n1-2"
+   }
+  ],
+  "smi": "COc1cc2c(c(Cl)c1CN1CC1)C(S)N(O)C(O)c1c(S)c(Cl)c(Cl)n1-2",
+  "systems": 2,
+  "basin": 0.0842,
+  "sim_seed": 0.0964,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.402,
+  "sa": 4.57
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CCN(Cc1cc(F)c2c(c1F)CNC(=O)c1c(C)c(I)cn1-2)C(C)=NO"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CC1=NOCCN1Cc1cc(F)c2c(c1F)CNC(=O)c1c(C)c(I)cn1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CC1=NOCCN1Cc1cc(Cl)c2c(c1F)CNC(=O)c1c(C)c(Br)cn1-2"
+   }
+  ],
+  "smi": "CC1=NOCCN1Cc1cc(Cl)c2c(c1F)CNC(=O)c1c(C)c(Br)cn1-2",
+  "systems": 2,
+  "basin": 0.1667,
+  "sim_seed": 0.1905,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.75,
+  "sa": 3.77
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CCN(Cc1cc(Cl)c2c(c1N)C(OC)NC(=O)c1ccc(F)n1-2)C(=O)Cl"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CCN(C(=O)Cl)C1c2cc(Cl)c3c(c2N)C(OC)N1C(=O)c1ccc(F)n1-3"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "C#CN(C(=O)Cl)C1c2cc(Cl)c3c(c2N)C(OC)N1C(=O)c1ccc(C)n1-3"
+   }
+  ],
+  "smi": "C#CN(C(=O)Cl)C1c2cc(Cl)c3c(c2N)C(OC)N1C(=O)c1ccc(C)n1-3",
+  "systems": 1,
+  "basin": 0.1212,
+  "sim_seed": 0.1379,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.273,
+  "sa": 5.6
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CN=C(O)N(CF)Cc1ccc2c(c1C(=O)C[SH3])CNC(=O)c1cccn1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "O=C(C[SH3])c1c(Cn2c(F)cnc2O)ccc2c1CNC(=O)c1cccn1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Nc1nnc(F)n1Cc1ccc2c(c1C(=O)C[SH3])CNC(=O)c1cccn1-2"
+   }
+  ],
+  "smi": "Nc1nnc(F)n1Cc1ccc2c(c1C(=O)C[SH3])CNC(=O)c1cccn1-2",
+  "systems": 2,
+  "basin": 0.2927,
+  "sim_seed": 0.3378,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 3,
+  "qed": 0.639,
+  "sa": 3.83
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CCN=CN(CC)C(CO)c1cc(Br)c2c(c1)CN(O)C(=O)c1cccn1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CCN=CN1CCC(O)C1c1cc(Br)c2c(c1)CN(O)C(=O)c1cccn1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CCNCN1CCC(=O)C1c1cc(Br)c2c(c1)CN(O)C(=O)c1cccn1-2"
+   }
+  ],
+  "smi": "CCNCN1CCC(=O)C1c1cc(Br)c2c(c1)CN(O)C(=O)c1cccn1-2",
+  "systems": 2,
+  "basin": 0.2333,
+  "sim_seed": 0.2222,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.725,
+  "sa": 4.04
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "COCCN(C=O)C(Br)(OC)c1cc(F)c2c(c1)CNC(=O)c1cccn1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "COC(Br)(c1cc(F)c2c(c1)CNC(=O)c1cccn1-2)N1CCOCC1=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "COC(Br)(c1cc(C)c2c(c1)CNC(=O)c1cccn1-2)N1CCSCC1=O"
+   }
+  ],
+  "smi": "COC(Br)(c1cc(C)c2c(c1)CNC(=O)c1cccn1-2)N1CCSCC1=O",
+  "systems": 2,
+  "basin": 0.3077,
+  "sim_seed": 0.3857,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.577,
+  "sa": 4.12
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CNCN(C)C(=O)c1cc2c(c(O)c1O)-n1ccc(O)c1C(=O)NC2SI"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "O=C1NC(SI)c2cc(C(=O)N3C=CNC3)c(O)c(O)c2-n2ccc(O)c21"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CSC1NC(=O)c2c(O)ccn2-c2c1cc(C(=O)N1C=CNC1)c(O)c2O"
+   }
+  ],
+  "smi": "CSC1NC(=O)c2c(O)ccn2-c2c1cc(C(=O)N1C=CNC1)c(O)c2O",
+  "systems": 2,
+  "basin": 0.1444,
+  "sim_seed": 0.1852,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.489,
+  "sa": 4.59
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "Cc1cn2c(c1Br)C(=O)NCc1cc(CN(C)C(Cl)=S(O)Cl)cc(CN)c1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1cn2c(c1Br)C(=O)NCc1cc(CN3COS(Cl)=C3Cl)cc(CN)c1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1cn2c(c1Cl)C(=O)NCc1cc(CN3COS(Cl)=C3Cl)cc(C=N)c1-2"
+   }
+  ],
+  "smi": "Cc1cn2c(c1Cl)C(=O)NCc1cc(CN3COS(Cl)=C3Cl)cc(C=N)c1-2",
+  "systems": 2,
+  "basin": 0.2118,
+  "sim_seed": 0.2405,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.323,
+  "sa": 4.7
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CN(C(=O)O)C(CO)c1cc2c(cc1CS)-n1c(C=O)ccc1C(=O)NC2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CN1C(=O)OC(O)C1c1cc2c(cc1CS)-n1c(C=O)ccc1C(=O)NC2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CN1C(=O)OC(O)C1C1CC2CNC(=O)C3CCC(C=O)N3C2CC1CN"
+   }
+  ],
+  "smi": "CN1C(=O)OC(O)C1C1CC2CNC(=O)C3CCC(C=O)N3C2CC1CN",
+  "systems": 2,
+  "basin": 0.1368,
+  "sim_seed": 0.1163,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 0,
+  "qed": 0.53,
+  "sa": 5.3
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CNc1cc2n(c1O)-c1ccc(CN(C)C(=O)NN)c(O)c1CN(F)C2=O"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CNc1cc2n(c1O)-c1ccc(CN3CNNC3=O)c(O)c1CN(F)C2=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Nc1c(NO)cc2n1-c1ccc(CN3CNNC3=O)c(O)c1CN(F)C2=O"
+   }
+  ],
+  "smi": "Nc1c(NO)cc2n1-c1ccc(CN3CNNC3=O)c(O)c1CN(F)C2=O",
+  "systems": 2,
+  "basin": 0.1591,
+  "sim_seed": 0.1875,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.335,
+  "sa": 4.1
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CN=CCOCN(C#N)Cc1ccc2c(c1)CN(C)C(=O)c1c(C)ccn1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1ccn2c1C(=O)N(C)Cc1cc(CN(C#N)COC3C=NC3)ccc1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1ccn2c1C(=O)N(C)Cc1cc(CN(CN)COC3C=NC3)ccc1-2"
+   }
+  ],
+  "smi": "Cc1ccn2c1C(=O)N(C)Cc1cc(CN(CN)COC3C=NC3)ccc1-2",
+  "systems": 2,
+  "basin": 0.2299,
+  "sim_seed": 0.2987,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.786,
+  "sa": 4.02
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CC(C)N1Cc2cc(C(O)N(C)C)c(F)cc2-n2c(cc(S)c2NCl)C1=O"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CC(C)N1Cc2c(cc(F)c3c2CN(C)C3O)-n2c(cc(S)c2NCl)C1=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CC(O)N1Cc2c(cc(F)c3c2CN(C)C3O)-n2c(cc(N)c2NCl)C1=O"
+   }
+  ],
+  "smi": "CC(O)N1Cc2c(cc(F)c3c2CN(C)C3O)-n2c(cc(N)c2NCl)C1=O",
+  "systems": 1,
+  "basin": 0.101,
+  "sim_seed": 0.1149,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.574,
+  "sa": 4.64
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "Cc1c(C(C)C)cc2n1-c1cc(ONO)c(CN(C)C)cc1CN(C)C2=O"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1c(C(C)C)cc2n1-c1cc(ONO)c(CN(C)C)c3c1CN(C3)C2=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "C=C(C)C1CC2C(=O)N3CC4C(CN(C)C)C(ONO)CC(C4C3)N2C1C"
+   }
+  ],
+  "smi": "C=C(C)C1CC2C(=O)N3CC4C(CN(C)C)C(ONO)CC(C4C3)N2C1C",
+  "systems": 1,
+  "basin": 0.0808,
+  "sim_seed": 0.1176,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 0,
+  "qed": 0.549,
+  "sa": 6.06
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CN=c1[nH]c(=O)c2c(Br)c(C)c(S)n2c2cc(Cl)c(CN(C)CBr)c(I)c12"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1c(Br)c2n(c1S)-c1c3c(Cl)c(CN(C)CBr)c(I)c1C(=NC3)NC2=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1c(Cl)c2n(c1Br)-c1c3c(Cl)c(CN(C)CBr)c(I)c1C(=NC3)NC2=O"
+   }
+  ],
+  "smi": "Cc1c(Cl)c2n(c1Br)-c1c3c(Cl)c(CN(C)CBr)c(I)c1C(=NC3)NC2=O",
+  "systems": 1,
+  "basin": 0.1196,
+  "sim_seed": 0.1707,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.282,
+  "sa": 5.24
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CN(C(=O)c1c(Cl)cc2c(c1OC=O)CNC(=O)c1c(Cl)ccn1-2)C(N)=S"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CN(C(=O)c1c(Cl)cc2c3c1OC(=O)N(C3)C(=O)c1c(Cl)ccn1-2)C(N)=S"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "C=C1c2c(Cl)ccn2-c2cc(Br)c(C(=O)N(C)C(N)=S)c3c2CN1C(=O)O3"
+   }
+  ],
+  "smi": "C=C1c2c(Cl)ccn2-c2cc(Br)c(C(=O)N(C)C(N)=S)c3c2CN1C(=O)O3",
+  "systems": 1,
+  "basin": 0.1146,
+  "sim_seed": 0.1628,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.649,
+  "sa": 4.58
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "COC(O)(S)N(Cc1ccc2c(c1Br)CNC(=O)c1cc(C)cn1-2)C(=O)O"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1cc2n(c1)-c1ccc(C3COC(O)(S)N3C(=O)O)c(Br)c1CNC2=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CC1CC2C(=O)NCC3C(Br)C(C4COC(O)(O)N4C(=O)O)CCC3N2C1"
+   }
+  ],
+  "smi": "CC1CC2C(=O)NCC3C(Br)C(C4COC(O)(O)N4C(=O)O)CCC3N2C1",
+  "systems": 2,
+  "basin": 0.1042,
+  "sim_seed": 0.093,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 0,
+  "qed": 0.328,
+  "sa": 5.18
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CCN(CC#N)C(=S)c1c(C)cc2c(c1Br)CNC(=O)c1cc(Cl)c(C)n1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1cc2c(c(Br)c1C(=S)N1CCC1C#N)CNC(=O)c1cc(Cl)c(C)n1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1cc2c(c(Br)c1C(=S)N1CCC1C#N)CSC(=O)c1cc(Br)c(C)n1-2"
+   }
+  ],
+  "smi": "Cc1cc2c(c(Br)c1C(=S)N1CCC1C#N)CSC(=O)c1cc(Br)c(C)n1-2",
+  "systems": 2,
+  "basin": 0.117,
+  "sim_seed": 0.1136,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.475,
+  "sa": 4.22
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CCOc1c(CN(C)C)c(F)cc2c1CNC(=O)c1c(CBr)c(I)c(Cl)n1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1oc2c(CN(C)C)c(F)cc3c2c1[nH]c(=O)c1c(CBr)c(I)c(Cl)n13"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1oc2c(CN(C)C)c(F)cc3c2c1[nH]c(=O)c1c(CI)c(I)c(Br)n13"
+   }
+  ],
+  "smi": "Cc1oc2c(CN(C)C)c(F)cc3c2c1[nH]c(=O)c1c(CI)c(I)c(Br)n13",
+  "systems": 1,
+  "basin": 0.102,
+  "sim_seed": 0.1852,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 4,
+  "qed": 0.239,
+  "sa": 3.8
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CSC(C)(c1ccc2c(c1)CN(C)C(=O)c1cc(NF)cn1-2)N(C)C(=O)S"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CN1Cc2cc(C3(C)SCCN3C(=O)S)ccc2-n2cc(NF)cc2C1=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CC1(c2ccc3c(c2)CN(F)C(=O)c2cc(NI)cn2-3)SCCN1C(=O)S"
+   }
+  ],
+  "smi": "CC1(c2ccc3c(c2)CN(F)C(=O)c2cc(NI)cn2-3)SCCN1C(=O)S",
+  "systems": 2,
+  "basin": 0.191,
+  "sim_seed": 0.1786,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.353,
+  "sa": 4.72
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CNNC(=O)NOc1cc2n(c1I)-c1ccc(CN(C)C)cc1CNC2=O"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CN(C)Cc1ccc2c(c1)CNC(=O)c1cc(ON3CNNC3=O)c(I)n1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CN(C)Cc1ccc2c(c1)CNC(O)c1cc(O[SH3]3CNNC3=O)c(I)n1-2"
+   }
+  ],
+  "smi": "CN(C)Cc1ccc2c(c1)CNC(O)c1cc(O[SH3]3CNNC3=O)c(I)n1-2",
+  "systems": 2,
+  "basin": 0.1868,
+  "sim_seed": 0.3649,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.467,
+  "sa": 4.79
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "Cc1cc(C(C)N(C)C(=O)CO)cc2c1-n1cccc1C(=O)N(OCN)C2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1cc(C2COCC(=O)N2C)cc2c1-n1cccc1C(=O)N(OCN)C2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1cc(C2COCC(=O)N2F)cc2c1-n1cccc1C(=O)N(OCO)C2"
+   }
+  ],
+  "smi": "Cc1cc(C2COCC(=O)N2F)cc2c1-n1cccc1C(=O)N(OCO)C2",
+  "systems": 2,
+  "basin": 0.2308,
+  "sim_seed": 0.2346,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.648,
+  "sa": 4.24
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CN(C(O)=S)C(N)([SH3])c1cc(Cl)c2c(c1F)c(=S)n(Br)c(=O)c1cccn12"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CN1C(=S)O[SH2]C1(N)c1cc(Cl)c2c(c1F)c(=S)n(Br)c(=O)c1cccn12"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "NC1(c2cc(Cl)c3c(c2F)c(=S)n(Br)c(=O)c2nccn23)[SH2]OC(=S)N1Br"
+   }
+  ],
+  "smi": "NC1(c2cc(Cl)c3c(c2F)c(=S)n(Br)c(=O)c2nccn23)[SH2]OC(=S)N1Br",
+  "systems": 2,
+  "basin": 0.0938,
+  "sim_seed": 0.0889,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 3,
+  "qed": 0.352,
+  "sa": 5.05
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "C=C(C)N(Cc1ccc2c(c1)C(CNC)NC(=O)c1ccc(Cl)n1-2)C(N)=O"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "C=C(C)N(Cc1ccc2c(c1)C(C1CN1)NC(=O)c1ccc(Cl)n1-2)C(N)=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "C=C(C)N(CC1CCC2C(C1)C(C1CN1)NC(=O)C1CCC(Cl)N12)C(N)O"
+   }
+  ],
+  "smi": "C=C(C)N(CC1CCC2C(C1)C(C1CN1)NC(=O)C1CCC(Cl)N12)C(N)O",
+  "systems": 2,
+  "basin": 0.1,
+  "sim_seed": 0.1264,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 0,
+  "qed": 0.231,
+  "sa": 5.47
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "Cc1cc2n(c1C)-c1c(S)cc(CN(C(N)=O)C(O)=S)c(Cl)c1CNC2=O"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1cc2n(c1C)-c1c(S)cc(Cn3c(=O)[nH]oc3=S)c(Cl)c1CNC2=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1cc2n(c1I)-c1c(S)cc(Cn3c(=O)[nH]oc3=S)c(S)c1CNC2=O"
+   }
+  ],
+  "smi": "Cc1cc2n(c1I)-c1c(S)cc(Cn3c(=O)[nH]oc3=S)c(S)c1CNC2=O",
+  "systems": 2,
+  "basin": 0.1724,
+  "sim_seed": 0.1975,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 3,
+  "qed": 0.232,
+  "sa": 4.33
+ },
+ {
+  "program": [
+   [
+    "grow",
+    8
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 8,
+    "executed": 8,
+    "halted": null,
+    "smi": "CCN(Cc1cc(Cl)c2c(c1)C(=CCl)NC(=O)c1cc(O)c(O)n1-2)C(=O)Cl"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "O=C1NC(=CCl)c2cc(C3CCN3C(=O)Cl)cc(Cl)c2-n2c1cc(O)c2O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "O=C1NC(CBr)c2cc(C3CCN3C(=O)Cl)cc(Cl)c2-n2c1cc(O)c2O"
+   }
+  ],
+  "smi": "O=C1NC(CBr)c2cc(C3CCN3C(=O)Cl)cc(Cl)c2-n2c1cc(O)c2O",
+  "systems": 2,
+  "basin": 0.1613,
+  "sim_seed": 0.131,
+  "heavy": 27,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.35,
+  "sa": 4.39
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CCN(C#CCl)Cc1cc(I)c2c(c1)CN(C)C(=O)c1c(Cl)c(N(C)S)c(N)n1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CCN(C#CCl)Cc1cc(I)c2c(c1)CN(C)C(=O)c1c(Cl)c(N3CS3)c(N)n1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CCN(C#CCl)Cc1cc(C)c2c(c1)CN(C)C(=O)c1c(Cl)c(N3CS3)c(N)n1-2"
+   }
+  ],
+  "smi": "CCN(C#CCl)Cc1cc(C)c2c(c1)CN(C)C(=O)c1c(Cl)c(N3CS3)c(N)n1-2",
+  "systems": 2,
+  "basin": 0.1413,
+  "sim_seed": 0.1765,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.33,
+  "sa": 4.17
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "Cc1cc2n(c1)-c1cc(I)c(CN(C)CCON)cc1CN(N(O)OCO)C2=O"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1cc2n(c1)-c1cc(I)c(C3NOCCN3C)cc1CN(N(O)OCO)C2=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CC1CC2C(=O)N(N(O)OCI)CC3CC(C4NOCCN4C)C(I)CC3N2C1"
+   }
+  ],
+  "smi": "CC1CC2C(=O)N(N(O)OCI)CC3CC(C4NOCCN4C)C(I)CC3N2C1",
+  "systems": 2,
+  "basin": 0.0962,
+  "sim_seed": 0.1087,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 0,
+  "qed": 0.274,
+  "sa": 5.88
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CC(=O)[SH](N)(N)=NN1C(=O)c2c(Br)cc(C)n2-c2ccc(CN(C)C)cc2C1F"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1cc(Br)c2n1-c1ccc(CN(C)C)cc1C(F)N(N=[SH]1(N)NCC1=O)C2=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1cc(Br)c2n1-c1ccc(CN(C)C)cc1C(F)N(N=[SH]1(N)NCC1=O)C2=O"
+   }
+  ],
+  "smi": "Cc1cc(Br)c2n1-c1ccc(CN(C)C)cc1C(F)N(N=[SH]1(N)NCC1=O)C2=O",
+  "systems": 2,
+  "basin": 0.1546,
+  "sim_seed": 0.2987,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.456,
+  "sa": 4.63
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CCN(C=O)C(=N)c1c(Cl)c(O)c2c(c1Br)CN(Cl)C(=O)c1c(Br)c(Br)c(O)n1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "N=C(c1c(Cl)c(O)c2c(c1Br)CN(Cl)C(=O)c1c(Br)c(Br)c(O)n1-2)N1CCC1=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "N=C(c1c(Cl)c(O)c2c(c1Br)CN(Cl)C(=O)c1c(I)c(Br)c(O)n1-2)N1[SH4]CC1=O"
+   }
+  ],
+  "smi": "N=C(c1c(Cl)c(O)c2c(c1Br)CN(Cl)C(=O)c1c(I)c(Br)c(O)n1-2)N1[SH4]CC1=O",
+  "systems": 2,
+  "basin": 0.0645,
+  "sim_seed": 0.0562,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.183,
+  "sa": 4.83
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "Cc1c(C(=S)N(C)C(O)S)cc2c(=O)n(C)c(=O)c3c(Cl)c(C=O)cn3c2c1F"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1c(C(=S)N2COC2S)cc2c(=O)n(C)c(=O)c3c(Cl)c(C=O)cn3c2c1F"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CC1C(F)C2C(CC1C(S)N1COC1S)C(=O)N(C)C(=O)C1C(Cl)C(C=O)CN12"
+   }
+  ],
+  "smi": "CC1C(F)C2C(CC1C(S)N1COC1S)C(=O)N(C)C(=O)C1C(Cl)C(C=O)CN12",
+  "systems": 2,
+  "basin": 0.0784,
+  "sim_seed": 0.0652,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 0,
+  "qed": 0.278,
+  "sa": 6.06
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CNC1NC(=O)c2c(Cl)c(I)c(C)n2-c2c(F)c(Cl)c(CN(C)C(C)=O)c(F)c21"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CC(=O)N(C)Cc1c(F)c2c(c(F)c1Cl)-n1c(C)c(I)c(Cl)c1C(=O)NC21CN1"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1c(I)c(Cl)c2n1-c1c(F)c(F)c(CN(C)C(C)O)c(F)c1C1(CN1)NC2=O"
+   }
+  ],
+  "smi": "Cc1c(I)c(Cl)c2n1-c1c(F)c(F)c(CN(C)C(C)O)c(F)c1C1(CN1)NC2=O",
+  "systems": 1,
+  "basin": 0.1053,
+  "sim_seed": 0.1529,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.242,
+  "sa": 5.2
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CCN(C)C(O)c1cc2c(c(C)c1O)-n1cc(Br)c(C)c1C(=O)N(OI)C2(C)O"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1c(O)c(C2OCCN2C)cc2c1-n1cc(Br)c(C)c1C(=O)N(OI)C2(C)O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1c(O)c(C2OCCN2C)cc2c1-n1cc(I)c(C)c1C(=O)N(CI)C2(C)O"
+   }
+  ],
+  "smi": "Cc1c(O)c(C2OCCN2C)cc2c1-n1cc(I)c(C)c1C(=O)N(CI)C2(C)O",
+  "systems": 2,
+  "basin": 0.1188,
+  "sim_seed": 0.1111,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.305,
+  "sa": 4.77
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CC(N=S)NC(C)C(c1cc2c(c(I)c1F)-n1cc(O)cc1C(=O)NC2)N(C)C"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CC(N=S)NC1CCN(C)C1c1cc2c(c(I)c1F)-n1cc(O)cc1C(=O)NC2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "C=NC(C)=NC1CCN(C)C1c1cc2c(c(I)c1F)-n1cc(O)cc1C(=O)NC2"
+   }
+  ],
+  "smi": "C=NC(C)=NC1CCN(C)C1c1cc2c(c(I)c1F)-n1cc(O)cc1C(=O)NC2",
+  "systems": 2,
+  "basin": 0.2083,
+  "sim_seed": 0.2118,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.371,
+  "sa": 4.92
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CON(C)C(CBr)(c1cc(Cl)c2c(c1)C(N)(O)NC(=O)c1c(N)ccn1-2)N(C)C"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CON1CCN(C)C1(CBr)c1cc(Cl)c2c(c1)C(N)(O)NC(=O)c1c(N)ccn1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CON1CCN(C)C1(CCl)c1cc(Cl)c2c(c1)C(N)(O)NC(=O)c1c(F)ccn1-2"
+   }
+  ],
+  "smi": "CON1CCN(C)C1(CCl)c1cc(Cl)c2c(c1)C(N)(O)NC(=O)c1c(F)ccn1-2",
+  "systems": 2,
+  "basin": 0.1579,
+  "sim_seed": 0.1573,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.488,
+  "sa": 4.89
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CC(=O)N(CF)Cc1cc(F)c2c(c1F)C(C)(C)N(C)C(=O)c1cc(Cl)c(F)n1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CC(=O)N(CF)C1CC2(C)c3c(F)c1cc(F)c3-n1c(cc(Cl)c1F)C(=O)N2C"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1c2cc(F)c3c1C(C)(CC2N(CF)C(N)=O)N(C)C(=O)c1cc(Cl)c(F)n1-3"
+   }
+  ],
+  "smi": "Cc1c2cc(F)c3c1C(C)(CC2N(CF)C(N)=O)N(C)C(=O)c1cc(Cl)c(F)n1-3",
+  "systems": 1,
+  "basin": 0.12,
+  "sim_seed": 0.1364,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.742,
+  "sa": 5.37
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "Cc1cn2c(c1Br)C(=O)NCc1cc(CN(C#N)C(SCl)C(=O)C=O)cc(Cl)c1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1cn2c(c1Br)C(=O)NCc1cc(C3C(=O)C(=O)C(SCl)N3C#N)cc(Cl)c1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CC1=[SH3][SH]2C(=C1Br)C(=O)NCc1cc(C3C(=O)C(=O)C(SCl)N3C#N)cc(Cl)c12"
+   }
+  ],
+  "smi": "CC1=[SH3][SH]2C(=C1Br)C(=O)NCc1cc(C3C(=O)C(=O)C(SCl)N3C#N)cc(Cl)c12",
+  "systems": 2,
+  "basin": 0.1875,
+  "sim_seed": 0.1724,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 1,
+  "qed": 0.192,
+  "sa": 5.83
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CCN(Cc1ccc2c(c1CF)CNC(=O)c1c(F)cc(NC)n1-2)C(C)COC"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CCN(Cc1ccc2c(c1CF)CNC(=O)c1c(F)cc(NC)n1-2)C1CCOC1"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CCN(Cc1ccc2c(c1CBr)CNC(=O)c1c(F)cc(NC)n1-2)C1CCOC1"
+   }
+  ],
+  "smi": "CCN(Cc1ccc2c(c1CBr)CNC(=O)c1c(F)cc(NC)n1-2)C1CCOC1",
+  "systems": 2,
+  "basin": 0.1782,
+  "sim_seed": 0.2159,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.643,
+  "sa": 4.02
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CC(=N)N(C)C(Cl)c1cc(I)c2c(c1N)C(C)NC(=O)c1c(Cl)c(SO)c(N)n1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CC1NC(=O)c2c(Cl)c(SO)c(N)n2-c2c(I)cc(C(Cl)N3C=CC3=N)c(N)c21"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1c(SO)c(N)n2c1C(=O)NC(C)c1c(N)c(C(F)N3C=CC3=N)cc(I)c1-2"
+   }
+  ],
+  "smi": "Cc1c(SO)c(N)n2c1C(=O)NC(C)c1c(N)c(C(F)N3C=CC3=N)cc(I)c1-2",
+  "systems": 2,
+  "basin": 0.0952,
+  "sim_seed": 0.0957,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.179,
+  "sa": 5.29
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CN(C(=O)CCl)C(F)(F)c1cc2c(c(O)c1F)-n1c(Cl)cc(F)c1C(=O)NC2Br"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "O=C1NC(Br)c2cc(C(F)(F)N3C=C(Cl)C3=O)c(F)c(O)c2-n2c(Cl)cc(F)c21"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "O=C1NC(S)c2cc(C(F)(F)N3C=C(Cl)C3=O)c(F)c(O)c2N2C(Cl)=[SH]C(F)=C12"
+   }
+  ],
+  "smi": "O=C1NC(S)c2cc(C(F)(F)N3C=C(Cl)C3=O)c(F)c(O)c2N2C(Cl)=[SH]C(F)=C12",
+  "systems": 2,
+  "basin": 0.1122,
+  "sim_seed": 0.0909,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 1,
+  "qed": 0.17,
+  "sa": 5.26
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "Cc1c(Cl)c(C(=O)N(C)C=N)cc2c(=O)n(ON=O)c(=O)c3c(F)cc(Br)n3c12"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1c(Cl)c2c(c3c(=O)n(ON=O)c(=O)c4c(F)cc(Br)n4c13)C(=N)N(C)C2=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1cc(Br)n2c1c(=O)n(ON=O)c(=O)c1c3c(c(N)c(C)c12)C(=O)N(C)C3=N"
+   }
+  ],
+  "smi": "Cc1cc(Br)n2c1c(=O)n(ON=O)c(=O)c1c3c(c(N)c(C)c12)C(=O)N(C)C3=N",
+  "systems": 1,
+  "basin": 0.1011,
+  "sim_seed": 0.0814,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 3,
+  "qed": 0.331,
+  "sa": 4.18
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CNC(=O)C1c2c(cc(O)c(C(F)N(C)C)c2S)-n2cc(OC)cc2C(=O)N1F"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CNC(=O)C1c2c3cc(O)c(C(F)N(C)C)c2Sc2c(OC)cc(n2-3)C(=O)N1F"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "C=NC(=O)C1c2c3cc(O)c(C(F)N(C)N)c2Sc2c(OC)cc(n2-3)C(=O)N1F"
+   }
+  ],
+  "smi": "C=NC(=O)C1c2c3cc(O)c(C(F)N(C)N)c2Sc2c(OC)cc(n2-3)C(=O)N1F",
+  "systems": 1,
+  "basin": 0.0909,
+  "sim_seed": 0.1196,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.217,
+  "sa": 6.09
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CSN(Cl)CN(C(=NN)c1ccc2c(c1)CNC(=O)c1cc(O)c(N)n1-2)C(C)S"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CSN(Cl)CN1C(c2ccc3c(c2)CNC(=O)c2cc(O)c(N)n2-3)=NNC1(C)S"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CSN(Cl)CN1C(c2ccc3c(c2)CNC(=O)c2cc(Br)c(N)n2-3)=NNC1(C)I"
+   }
+  ],
+  "smi": "CSN(Cl)CN1C(c2ccc3c(c2)CNC(=O)c2cc(Br)c(N)n2-3)=NNC1(C)I",
+  "systems": 2,
+  "basin": 0.2198,
+  "sim_seed": 0.2927,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.162,
+  "sa": 4.63
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "COc1cc2c(cc1CN(CC(=O)O)C(=O)ON)CN(O)C(=O)c1cc(Br)cn1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "COc1cc2c(cc1-c1noc(=O)n1CC(=O)O)CN(O)C(=O)c1cc(Br)cn1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CNc1cc2c(cc1-c1noc(=O)n1CC(=O)S)CN(O)C(=O)c1cc(Br)cn1-2"
+   }
+  ],
+  "smi": "CNc1cc2c(cc1-c1noc(=O)n1CC(=O)S)CN(O)C(=O)c1cc(Br)cn1-2",
+  "systems": 2,
+  "basin": 0.1505,
+  "sim_seed": 0.1461,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 3,
+  "qed": 0.385,
+  "sa": 3.76
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CNc1ccc2n1-c1ccc(CN(C=O)C(O)=C(S)[SH](O)ON)cc1CNC2=O"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CNc1ccc2n1-c1ccc(CN3C(=O)NO[SH](O)C(S)=C3O)cc1CNC2=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CNc1ccc2n1-c1ccc(CN3C(=O)NOS(=O)C(O)=C3O)cc1CNC2=O"
+   }
+  ],
+  "smi": "CNc1ccc2n1-c1ccc(CN3C(=O)NOS(=O)C(O)=C3O)cc1CNC2=O",
+  "systems": 2,
+  "basin": 0.253,
+  "sim_seed": 0.3378,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.501,
+  "sa": 4.31
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "N#CCN(C#CC=N)C(F)(Br)c1cc2c(cc1Cl)-n1c(cc(F)c1I)C(=O)NC2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "N#CC1N=CC#CN1C(F)(Br)c1cc2c(cc1Cl)-n1c(cc(F)c1I)C(=O)NC2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "N#CC1N=CC#CN1C(F)(Br)C1CC2CNC(=O)C3CC(F)C(N)N3C2CC1Cl"
+   }
+  ],
+  "smi": "N#CC1N=CC#CN1C(F)(Br)C1CC2CNC(=O)C3CC(F)C(N)N3C2CC1Cl",
+  "systems": 2,
+  "basin": 0.1038,
+  "sim_seed": 0.0947,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 0,
+  "qed": 0.343,
+  "sa": 6.58
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "Cc1cc2c(cc1C(=O)N(CNON)C(=O)C(N)=S)CN(C)C(=O)c1cccn1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1cc2c(cc1C(=O)N1C(=O)C(=S)N=C1NON)CN(C)C(=O)c1cccn1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1cc2c(cc1C(=O)N1C(NON)=NC(=S)C1Cl)CN(C)C(=O)c1cccn1-2"
+   }
+  ],
+  "smi": "Cc1cc2c(cc1C(=O)N1C(NON)=NC(=S)C1Cl)CN(C)C(=O)c1cccn1-2",
+  "systems": 2,
+  "basin": 0.1957,
+  "sim_seed": 0.2262,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.322,
+  "sa": 4.23
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "O=NSCN(C(=O)O)C(CCO)c1ccc2c(c1)CNC(=O)c1c(Cl)c(Br)cn1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "O=NSC1C(O)CC(c2ccc3c(c2)CNC(=O)c2c(Cl)c(Br)cn2-3)N1C(=O)O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "O=NSC1C(O)CC(c2ccc3c(c2)CNC(=O)c2c(Cl)c(Br)cn2-3)[SH3]1[SH2](=O)O"
+   }
+  ],
+  "smi": "O=NSC1C(O)CC(c2ccc3c(c2)CNC(=O)c2c(Cl)c(Br)cn2-3)[SH3]1[SH2](=O)O",
+  "systems": 2,
+  "basin": 0.2316,
+  "sim_seed": 0.2805,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.309,
+  "sa": 5.58
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "COC1(C)NC(=O)c2c(C=N)c(C=O)cn2-c2cc(Br)c(CN(C)C(C)=O)cc21"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "COC1(C)c2cc(CN(C)C(C)=O)c(Br)cc2-n2cc(C=O)c3c2C(=O)N1C3=N"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "COC1(C)c2cc(CN(C)C(C)=O)c(Br)cc2-n2cc(C=O)c3c2C(=O)N1C3=N"
+   }
+  ],
+  "smi": "COC1(C)c2cc(CN(C)C(C)=O)c(Br)cc2-n2cc(C=O)c3c2C(=O)N1C3=N",
+  "systems": 1,
+  "basin": 0.1031,
+  "sim_seed": 0.1461,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.712,
+  "sa": 4.89
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CCCN(Cc1cc2c(cc1F)-n1cc(Cl)c(Br)c1C(=O)NC2)C(=S)C(Br)CC"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CCC1(Br)CCCN(Cc2cc3c(cc2F)-n2cc(Cl)c(Br)c2C(=O)NC3)C1=S"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CCC1(C)CCCN(Cc2cc3c(cc2F)-n2cc(Cl)c(Cl)c2C(=O)NC3)C1=S"
+   }
+  ],
+  "smi": "CCC1(C)CCCN(Cc2cc3c(cc2F)-n2cc(Cl)c(Cl)c2C(=O)NC3)C1=S",
+  "systems": 2,
+  "basin": 0.2159,
+  "sim_seed": 0.25,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.622,
+  "sa": 3.97
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CSC1(F)c2cc(CN(C(N)=O)C(=O)O)c(I)cc2-n2cc(Cl)cc2C(=O)N1F"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CSC1(F)c2cc(Cn3c(=O)[nH]oc3=O)c(I)cc2-n2cc(Cl)cc2C(=O)N1F"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "COC1(F)c2cc(Cn3c(=O)[nH]oc3=O)c(F)cc2-n2cc(Cl)cc2C(=O)N1F"
+   }
+  ],
+  "smi": "COC1(F)c2cc(Cn3c(=O)[nH]oc3=O)c(F)cc2-n2cc(Cl)cc2C(=O)N1F",
+  "systems": 2,
+  "basin": 0.1304,
+  "sim_seed": 0.1379,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 3,
+  "qed": 0.504,
+  "sa": 4.51
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CC(=O)N(C(Cl)=NS)C(C)(C)c1cc(F)c2c(c1)CN(C)C(=O)c1c(C)ccn1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1ccn2c1C(=O)N(C)Cc1cc(C(C)(C)N3C(=O)CSN=C3Cl)cc(F)c1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1ccn2c1C(N)N(C)Cc1cc(C(C)(C)N3C(=O)CSN=C3Cl)cc(F)c1-2"
+   }
+  ],
+  "smi": "Cc1ccn2c1C(N)N(C)Cc1cc(C(C)(C)N3C(=O)CSN=C3Cl)cc(F)c1-2",
+  "systems": 2,
+  "basin": 0.1531,
+  "sim_seed": 0.1348,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.577,
+  "sa": 4.51
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "Cc1cc(CN(C)C#[SH2]Cl)cc2c1-n1c(C(C)O)cc(Br)c1C(=O)N(C(N)S)C2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1cc(CN(C)C#[SH2]Cl)cc2c1-n1c(C(C)O)cc(Br)c1C(=O)N(C1NS1)C2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1cc(CN(C)C#[SH2]Br)cc2c1-n1c(C(C)O)cc(Br)c1C(=O)N(C1NS1)C2"
+   }
+  ],
+  "smi": "Cc1cc(CN(C)C#[SH2]Br)cc2c1-n1c(C(C)O)cc(Br)c1C(=O)N(C1NS1)C2",
+  "systems": 2,
+  "basin": 0.1596,
+  "sim_seed": 0.1954,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.336,
+  "sa": 5.11
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CC(NF)=S(C)C1(N(C)C)NC(=O)c2cccn2-c2ccc(CN(C)C)c(Cl)c21"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CC1=S(C2(N(C)C)NC(=O)c3cccn3-c3ccc(CN(C)C)c(Cl)c32)CN1F"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CC1=S(C2(N(C)C)NC(=O)C3CCCN3C3CCC(=CN(C)C)C(Cl)C32)CN1F"
+   }
+  ],
+  "smi": "CC1=S(C2(N(C)C)NC(=O)C3CCCN3C3CCC(=CN(C)C)C(Cl)C32)CN1F",
+  "systems": 2,
+  "basin": 0.1313,
+  "sim_seed": 0.1124,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 0,
+  "qed": 0.41,
+  "sa": 5.66
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CCNN1Cc2cc(C(=O)N(C)CC=CBr)c(O)c(C)c2-n2c(N)ccc2C1=O"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CCNN1Cc2cc(C(=O)N3CC(=CBr)C3)c(O)c(C)c2-n2c(N)ccc2C1=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CC=NN1CC2CC(C(=O)N3CC(=CBr)C3)C(O)C(C)C2N2C(N)CCC2C1=O"
+   }
+  ],
+  "smi": "CC=NN1CC2CC(C(=O)N3CC(=CBr)C3)C(O)C(C)C2N2C(N)CCC2C1=O",
+  "systems": 2,
+  "basin": 0.0777,
+  "sim_seed": 0.0645,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 0,
+  "qed": 0.582,
+  "sa": 5.57
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CCN(N)C(c1cc2c(cc1SO)-n1cc(F)cc1C(=O)NC2)N(C)C(F)OF"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "NN1CCCN(C(F)OF)C1c1cc2c(cc1SO)-n1cc(F)cc1C(=O)NC2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "O=C1NCC2CC(C3N(O)CCCN3C(F)OF)C(SO)CC2N2CC(F)CC12"
+   }
+  ],
+  "smi": "O=C1NCC2CC(C3N(O)CCCN3C(F)OF)C(SO)CC2N2CC(F)CC12",
+  "systems": 2,
+  "basin": 0.1176,
+  "sim_seed": 0.086,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 0,
+  "qed": 0.446,
+  "sa": 5.78
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CN(C)Cc1c(Cl)cc2c(c1F)CN(SOCCN)C(=O)c1c(I)c(CBr)cn1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CN(C)Cc1c(Cl)cc2c(c1F)CN(SOC1=NC1)C(=O)c1c(I)c(CBr)cn1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CN(C)Cc1c(Cl)cc2c(c1F)CN(COC1=NC1)C(=O)c1c(I)c(CCl)cn1-2"
+   }
+  ],
+  "smi": "CN(C)Cc1c(Cl)cc2c(c1F)CN(COC1=NC1)C(=O)c1c(I)c(CCl)cn1-2",
+  "systems": 2,
+  "basin": 0.1031,
+  "sim_seed": 0.186,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.417,
+  "sa": 3.81
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "COc1cc(CN(C)C=O)c(O)c2c1-n1cccc1C(=O)NC2C(I)=CN[SH2]F"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "COc1cc2c(O)c3c1-n1cccc1C(=O)N(C(=O)N(C)C2)C3C(I)=CN[SH2]F"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "COc1cc2c(O)c3c1-n1cccc1C(=O)N(C(=O)N(C)C2)C3C(I)NN[SH2]F"
+   }
+  ],
+  "smi": "COc1cc2c(O)c3c1-n1cccc1C(=O)N(C(=O)N(C)C2)C3C(I)NN[SH2]F",
+  "systems": 1,
+  "basin": 0.1828,
+  "sim_seed": 0.1932,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.235,
+  "sa": 5.75
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "C=Cc1cc2c(c(O)c1CN(C)C)CNC(=O)c1c(C(C)(C)SC)cc(SC)n1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "C=Cc1cc2c(c(O)c1CN(C)C)CNC(=O)c1c(C3(C)CCS3)cc(SC)n1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CCc1cc2c(c(O)c1CN(C)C)CNC(=O)c1c(C3(C)CCS3)cc(OC)n1-2"
+   }
+  ],
+  "smi": "CCc1cc2c(c(O)c1CN(C)C)CNC(=O)c1c(C3(C)CCS3)cc(OC)n1-2",
+  "systems": 2,
+  "basin": 0.1613,
+  "sim_seed": 0.2625,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.783,
+  "sa": 4.15
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "C=C(Br)C(S)(Cl)N(COF)Cc1cc(F)c2c(c1C)CN(O)C(=O)c1cccn1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1c(CN(COF)C2(Cl)SC=C2Br)cc(F)c2c1CN(O)C(=O)c1cccn1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CC1C(CN(COF)C2(Cl)SC=C2Br)CC(O)C2C1CN(O)C(=O)C1CCCN12"
+   }
+  ],
+  "smi": "CC1C(CN(COF)C2(Cl)SC=C2Br)CC(O)C2C1CN(O)C(=O)C1CCCN12",
+  "systems": 2,
+  "basin": 0.1346,
+  "sim_seed": 0.1158,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 0,
+  "qed": 0.253,
+  "sa": 5.81
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CCN(C(=O)O)C(F)c1cc2c(cc1Cl)-n1c(C)c(Br)c(N)c1C(=O)N(O)C2F"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1c(Br)c(N)c2n1-c1cc(Cl)c(C3(F)CCN3C(=O)O)cc1C(F)N(O)C2=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1c(Br)c(N)c2n1-c1cc(Cl)c(C3(F)CCN3C(=O)O)cc1C(F)C(Cl)C2=O"
+   }
+  ],
+  "smi": "Cc1c(Br)c(N)c2n1-c1cc(Cl)c(C3(F)CCN3C(=O)O)cc1C(F)C(Cl)C2=O",
+  "systems": 2,
+  "basin": 0.0909,
+  "sim_seed": 0.0978,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.414,
+  "sa": 4.85
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "C=CC(=O)N(CC)Cc1cc(F)c2c(c1)CNC(=O)c1c(C(C)(C)Cl)c(I)cn1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CC(C)(Cl)c1c(I)cn2c1C(=O)NCc1cc(CN3CCC=CC3=O)cc(F)c1-2"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CC(C)(Cl)c1c(Br)cn2c1C(O)NCc1cc(CN3CCC=CC3=O)cc(F)c1-2"
+   }
+  ],
+  "smi": "CC(C)(Cl)c1c(Br)cn2c1C(O)NCc1cc(CN3CCC=CC3=O)cc(F)c1-2",
+  "systems": 2,
+  "basin": 0.17,
+  "sim_seed": 0.1818,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.644,
+  "sa": 4.28
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "CCC(=NOC)N(CC)Cc1cc2c(=S)[nH]c(=O)c3c(F)c(C)cn3c2cc1F"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "CON=C1CCCCN1Cc1cc2c(=S)[nH]c(=O)c3c(F)c(C)cn3c2cc1F"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "CON=C1CCCCN1Cc1cc2c(=S)[nH]c(=O)c3c(F)c(C)cn3c2cc1F"
+   }
+  ],
+  "smi": "CON=C1CCCCN1Cc1cc2c(=S)[nH]c(=O)c3c(F)c(C)cn3c2cc1F",
+  "systems": 2,
+  "basin": 0.1368,
+  "sim_seed": 0.1348,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 3,
+  "qed": 0.515,
+  "sa": 3.52
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "COCC1NC(=O)c2c(O)ccn2-c2c(OO)cc(C(=O)N(C)C(F)(F)Br)cc21"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "O=C1NC2COCCN(C(F)(F)Br)C(=O)c3cc(OO)c(c2c3)-n2ccc(O)c21"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Nc1ccn2c1C(=O)NC1COCCN(C(F)(F)F)C(=O)c3cc(OO)c-2c1c3"
+   }
+  ],
+  "smi": "Nc1ccn2c1C(=O)NC1COCCN(C(F)(F)F)C(=O)c3cc(OO)c-2c1c3",
+  "systems": 1,
+  "basin": 0.1531,
+  "sim_seed": 0.1364,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.373,
+  "sa": 5.34
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "NNC(=O)N(CC=O)Cc1cc(Br)c2c(c1CF)CNC(=O)c1c(Cl)c(Br)cn1-2"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "NN1C(=O)CN(Cc2cc(Br)c3c(c2CF)CNC(=O)c2c(Cl)c(Br)cn2-3)C1=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "NN1C(=O)CN(Cc2cc(Br)c3c(c2CF)CNC(=O)c2c(Cl)c(Cl)cn2-3)C1=O"
+   }
+  ],
+  "smi": "NN1C(=O)CN(Cc2cc(Br)c3c(c2CF)CNC(=O)c2c(Cl)c(Cl)cn2-3)C1=O",
+  "systems": 2,
+  "basin": 0.1562,
+  "sim_seed": 0.1647,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.381,
+  "sa": 3.9
+ },
+ {
+  "program": [
+   [
+    "grow",
+    10
+   ],
+   [
+    "close_disjoint",
+    1
+   ],
+   [
+    "restate",
+    2
+   ]
+  ],
+  "trace": [
+   {
+    "macro": "grow",
+    "L": 10,
+    "executed": 10,
+    "halted": null,
+    "smi": "Cc1c(C)c2n(c1F)-c1ccc(CN(C(=O)O)C(N)=NO)cc1CN(SCl)C2=O"
+   },
+   {
+    "macro": "close_disjoint",
+    "L": 1,
+    "executed": 1,
+    "halted": null,
+    "smi": "Cc1c(C)c2n(c1F)-c1ccc(CN3C(=O)OON=C3N)cc1CN(SCl)C2=O"
+   },
+   {
+    "macro": "restate",
+    "L": 2,
+    "executed": 2,
+    "halted": null,
+    "smi": "Cc1c(O)c2n(c1F)-c1ccc(CN3C(=O)OON=C3F)cc1CN(SCl)C2=O"
+   }
+  ],
+  "smi": "Cc1c(O)c2n(c1F)-c1ccc(CN3C(=O)OON=C3F)cc1CN(SCl)C2=O",
+  "systems": 2,
+  "basin": 0.172,
+  "sim_seed": 0.2,
+  "heavy": 29,
+  "rings": 4,
+  "arom": 2,
+  "qed": 0.442,
+  "sa": 4.21
+ }
+]

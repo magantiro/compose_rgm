@@ -1,0 +1,31 @@
+{
+ "task": "jnk3",
+ "n_labels": 249455,
+ "n_train": 50000,
+ "n_test": 10000,
+ "models": [
+  {
+   "model": "ridge",
+   "spearman": 0.5631,
+   "top1pct_recall": 0.46,
+   "top1pct_enrichment": 46.0,
+   "mean_true_score_of_predicted_top1pct": 0.1255,
+   "held_out_mean": 0.0163,
+   "held_out_max": 0.49,
+   "seconds": 0.8
+  },
+  {
+   "model": "mlp",
+   "spearman": 0.5829,
+   "top1pct_recall": 0.67,
+   "top1pct_enrichment": 67.0,
+   "mean_true_score_of_predicted_top1pct": 0.1512,
+   "held_out_mean": 0.0163,
+   "held_out_max": 0.49,
+   "seconds": 18.8
+  }
+ ],
+ "chosen": "mlp",
+ "verdict": "USABLE for search guidance",
+ "seconds": 37.1
+}

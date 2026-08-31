@@ -1,0 +1,106 @@
+{
+ "task": "scaffold_hop",
+ "reportable": false,
+ "diagnostic": "oracle_greedy_reachability",
+ "note": "ORACLE-GREEDY REACHABILITY DIAGNOSTIC. Cheats by scoring every successor off-budget, and ranks GREEDILY by immediate score. Never cite as a benchmark result, and never describe the result as a support ceiling: a greedy beam prunes sacrificial routes, so stalling here does NOT bound what the operator support can reach.",
+ "width": 8,
+ "depth": 8,
+ "n_seeds": 8,
+ "microbench": {
+  "t_fiber_s": 10.967,
+  "successors_per_fiber": 285.2,
+  "t_oracle_ms": 26.95,
+  "projected_min": 19.9
+ },
+ "start_best": 0.5261475514640072,
+ "oracle_greedy_best": 0.6284584980237155,
+ "beam_collapsed": null,
+ "best_by_depth": {
+  "0": 0.52615,
+  "1": 0.56402,
+  "2": 0.5725,
+  "3": 0.57459,
+  "4": 0.62609,
+  "5": 0.62846,
+  "6": 0.62846,
+  "7": 0.62846,
+  "8": 0.62846
+ },
+ "trace": [
+  {
+   "depth": 0,
+   "beam": 8,
+   "best": 0.5261475514640072,
+   "mean": 0.5207692625628284
+  },
+  {
+   "depth": 1,
+   "beam": 8,
+   "best": 0.5640239451014747,
+   "mean": 0.5478748377910877,
+   "candidates": 2337,
+   "elapsed": 258.7
+  },
+  {
+   "depth": 2,
+   "beam": 8,
+   "best": 0.5724962630792226,
+   "mean": 0.5654112903558224,
+   "candidates": 2341,
+   "elapsed": 399.6
+  },
+  {
+   "depth": 3,
+   "beam": 8,
+   "best": 0.5745890495612409,
+   "mean": 0.5727578613894748,
+   "candidates": 2310,
+   "elapsed": 536.5
+  },
+  {
+   "depth": 4,
+   "beam": 8,
+   "best": 0.6260882396340564,
+   "mean": 0.6070014676984206,
+   "candidates": 2284,
+   "elapsed": 680.7
+  },
+  {
+   "depth": 5,
+   "beam": 8,
+   "best": 0.6284584980237155,
+   "mean": 0.6256659032607618,
+   "candidates": 2321,
+   "elapsed": 814.5
+  },
+  {
+   "depth": 6,
+   "beam": 8,
+   "best": 0.6284584980237155,
+   "mean": 0.6275696511275932,
+   "candidates": 2285,
+   "elapsed": 957.8
+  },
+  {
+   "depth": 7,
+   "beam": 8,
+   "best": 0.6284584980237155,
+   "mean": 0.6284584980237155,
+   "candidates": 2141,
+   "elapsed": 1105.3
+  },
+  {
+   "depth": 8,
+   "beam": 8,
+   "best": 0.6284584980237155,
+   "mean": 0.6284584980237155,
+   "candidates": 2012,
+   "elapsed": 1260.2
+  }
+ ],
+ "fibers": 64,
+ "successors_scored": 18031,
+ "seconds": 1260.2,
+ "ood_pairs": 18031,
+ "ood_above_corpus_max": 11368
+}
