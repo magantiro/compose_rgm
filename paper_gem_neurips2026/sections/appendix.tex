@@ -1,0 +1,862 @@
+% ============================================================================
+% APPENDIX.  Eight sections, functional titles, coarse hierarchy.
+% Protocol and extended results live TOGETHER under each experiment (F.1-F.6)
+% rather than being split across a protocol appendix and a results appendix.
+% Run-in labels are reserved for repeated technical schema; they are not used
+% as rhetorical summaries or mini-results headings.
+% ============================================================================
+
+\section*{Overview of Appendix}
+\addcontentsline{toc}{section}{Overview of Appendix}
+
+This appendix provides the formal, implementation, and experimental details supporting the main text. \Cref{app:statespace} specifies the executable molecular state space, rewrite semantics, and canonical molecular-successor representation. \Cref{app:theory} gives the complete theoretical results underlying support preservation and finite-horizon control. \Cref{app:data,app:models,app:sampling} describe transition supervision, model training, and controlled sampling. \Cref{app:experiments} gives the experimental details and extended results for each experiment in the order they appear in the main text, \cref{app:alignment} documents alignment with external benchmark protocols, and \cref{app:repro} records the software environment, randomization scheme, and compute accounting.
+
+\section{Molecular state space and executable edits}
+\label{app:statespace}
+
+The support-level claims of \method{} are defined with respect to an explicit molecular state space rather than post-hoc sanitization. This section specifies that state space and the rewrite contracts that induce its transition graph. The \emph{semantic state} is the active molecular graph on which connectivity, valence, ring perception, and canonical identity are evaluated, and we distinguish it from any padded tensor representation used by the implementation. We then define the current operator family, its exact legality checks, and the pushforward from executable rewrite marks to canonical molecular successors. These definitions determine what transitions are possible before either $R_\theta$ or a task-specific controller assigns probability to them.
+
+\subsection{Molecular state space}
+
+States carry a bounded number of heavy atoms over a declared set of neutral (element, valence) classes drawn from an organic element set; the declared bounds and vocabulary are fixed in the frozen process configuration and are identical across every experiment reported here.
+Formal charge is an input but not an output dimension, so charge is carried rather than designed; stereochemistry, isotopes and radicals are not represented.
+
+Cardinality is a property of the active molecular graph rather than of a fixed tensor allocation. Writing $\X_n$ for the states with $n$ heavy atoms, the state space is the disjoint union of the strata, and a birth or death moves a trajectory between strata by creating or destroying a typed graph entity that participates in valence, connectivity, and ring perception. This is not the activation or deactivation of a padded coordinate, and the distinction is what makes the process trans-dimensional in the sense used throughout the paper.
+
+\subsection{Rewrite operators}
+\label{app:operators}
+
+The main text depends only on the legal edit set \eqref{eq:editset} and never on which families populate it; this section records the families used, so that the edit set is reproducible. We use paper-facing operator names for executable rewrite semantics and model-family names when reporting learned-family statistics; \cref{tab:operators} gives the fixed mapping between them.
+
+\begin{table}[h]
+\centering
+\small
+\caption{The rewrite families, by action on the strata. Each family is a typed graph rewrite with structural and chemical application conditions; the executor follows a propose--validate--commit discipline and exposes no transition whose successor fails a guard. Names here are the paper-facing operator names. The implementation additionally carries model-family identifiers, which appear in per-family results: $\op{cycle\_close}$ is recorded as \texttt{cycle\_insert}, $\op{cycle\_open}$ as \texttt{cycle\_attach}, and $\op{ring\_aromaticity\_restate}$ as \texttt{ring\_system\_restate}. The remaining five names coincide in both registers. Per-family results in \cref{app:exp-rtheta} are reported under the model-family identifiers.}
+\label{tab:operators}
+\begin{tabularx}{\textwidth}{@{}llY@{}}
+\toprule
+Family & Cardinality & Structural / chemical condition\\
+\midrule
+$\op{atom\_insert}$ & birth $\X_n\!\to\!\X_{n+1}$ & empty capacity; a null source or exactly one occupied anchor; allowed atom state; for a bonded birth, allowed bond order and feasible endpoint valence\\
+$\op{atom\_delete}$ & death $\X_n\!\to\!\X_{n-1}$ & removable atom with connected remainder; neighbour hydrogen compensation; successor sanitizes\\
+$\op{atom\_restate}$ & same & occupied site; joint element, valence-class and implicit-hydrogen state allowed; successor differs from the source\\
+$\op{bond\_reorder}$ & same & existing edge; joint bond-order and hydrogen update feasible\\
+$\op{bond\_reroute}$ & same (reroute) & the cut edge is a bridge; the relocated fragment is a pendant subtree; the new endpoint lies outside it; cut and attach commit in one transaction so no disconnected state is ever exposed\\
+$\op{cycle\_close}$ & same (cyclize) & absent edge between two occupied atoms with valence headroom; admitted insertion raises graph cycle rank by one\\
+$\op{cycle\_open}$ & same (decyclize) & existing edge that is not a bridge; endpoint hydrogen compensation; successor sanitizes\\
+$\op{ring\_aromaticity\_restate}$ & same & a matched cyclic system; a coordinated set of bond-order changes validated by the executor as one transaction\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The operators above are the complete executable support. Whole-ring growth and whole-ring deletion macros are not part of it: every ring in this work is built and modified through the primitive operators listed here.
+
+$\op{cycle\_close}$ inserts one bond between two nonbonded atoms and, because every non-null state is connected, raises graph cycle rank by one; $\op{cycle\_open}$ deletes one non-bridge cycle edge and lowers it by one.
+At the untyped graph level every connected graph is a spanning tree plus its non-tree edges, so inserting those edges one at a time realizes the abstract cyclic topology while preserving connectivity.
+This establishes topological reachability at the untyped graph level, not the existence of a valence-valid molecular path within a finite edit budget.
+It does not prove that the molecular grammar admits a valence-valid path to every chemically labelled ring system, nor that such a path fits a finite edit budget; both are measured questions and neither is assumed anywhere in the main text.
+
+\subsection{Compiled multi-edit transformations}
+\label{app:macros}
+
+The lead-optimization controller may select a multi-edit ring transformation, such
+as constructing or refining a ring system, rather than a single primitive edit.
+These transformations are compiled programs, not new operators. A program of
+length $L$ executes $L$ primitive edits in sequence; at every step the successor
+is drawn from the same legal-successor enumeration $\A(\cdot)$ used everywhere
+else, applied through the same executor, and screened by the same guards. A
+program halts if a state admits no legal successor.
+
+Two consequences matter for the claims in this paper. First, the executable
+support is unchanged: every endpoint a program can reach is reachable by the
+corresponding sequence of primitive rewrites, so compiling ring construction
+introduces no molecular successor that $\A(\cdot)$ does not already admit, and
+\cref{app:theory} therefore applies unchanged to the controlled process. Second,
+what a program changes is the granularity of control, not the support: purpose is
+evaluated at the program endpoint rather than after each edit, because a
+constructive ring program passes through intermediate states whose immediate
+objective value is worse than both its start and its endpoint. Scoring each edit
+separately prunes such a program before it completes, which is a property of the
+control schedule and not of the state space.
+
+\subsection{Canonical molecular successors}
+
+Distinct executable marks can produce the same molecule, so the law the controller acts on is the pushforward of the mark law through the executor, aggregated at canonical molecular identity as in \eqref{eq:sucfiber}--\eqref{eq:rtheta}. Aggregation is what makes every downstream quantity independent of how many ways the implementation can name a molecule; \cref{app:quotient} establishes the precise invariance this buys and its exact scope.
+
+\section{Theoretical results}
+\label{app:theory}
+
+\paragraph{The deployed reference process.} All fixed-budget experiments evaluate
+the reference model at the single progress value $t_0=0.5$. We therefore write
+\[
+  p_\theta(a\mid x):=p_\theta(a\mid x,t_0),
+  \qquad
+  R_\theta(y\mid x):=R_{\theta,t_0}(y\mid x)
+\]
+throughout, and the deployed molecular reference process is time-homogeneous.
+The results below are stated for that process.
+
+\paragraph{Executable-support closure.} By definition, an edit $a$ belongs to
+$\A(x)$ only if its proposed successor passes the attribute, valence,
+connectivity and heavy-atom-count conditions that define $\X$. Hence
+\[
+  x\in\X,\quad a\in\A(x)
+  \quad\Longrightarrow\quad
+  T(x,a)\in\X .
+\]
+Induction over committed transitions shows that any process whose transition
+support is contained in the executable edit set remains in $\X$. This applies to
+the reference process and to any controlled or support-restricted process derived
+from it, since every supported successor is the canonical image of an edit
+admitted by $\A(x)$.
+
+\subsection{Canonical successor representation}
+\label{app:canon-proof}%
+\label{app:quotient}
+
+\begin{definition}[Successor-mass-preserving re-encoding]
+Consider two executable mark representations $(\A,p_\theta,T)$ and
+$(\A',p'_\theta,T')$ of the same molecular state space. They are
+\emph{successor-mass preserving} if they induce the same committed canonical
+successor set $\Sset(x)$ and, for every $x$ and every $y\in\Sset(x)$,
+\[
+  \sum_{\substack{a\in\A(x)\\ T(x,a)\simeq y}} p_\theta(a\mid x)
+  \;=\;
+  \sum_{\substack{a'\in\A'(x)\\ T'(x,a')\simeq y}} p'_\theta(a'\mid x).
+\]
+\end{definition}
+
+\begin{proposition}[Invariance under successor-mass-preserving re-encoding]
+\label{prop:canon-invariance}
+Under a successor-mass-preserving re-encoding, the canonical pushforward
+distribution and the committed molecular kernel $R_\theta(y\mid x)$ are
+unchanged. Consequently any state-level controller
+\[
+  K_\Psi(y\mid x)
+  =\frac{R_\theta(y\mid x)\,\Psi(x,y)}
+        {\sum_{y'} R_\theta(y'\mid x)\,\Psi(x,y')},
+  \qquad \Psi\ge 0,
+\]
+is unchanged wherever the denominator is positive.
+\end{proposition}
+
+\begin{proof}
+The assumption gives equal probability mass for every canonical successor $y$.
+Summing those equal masses over the common committed successor set gives the same
+normalization constant, so $R_\theta(y\mid x)$ is identical under both
+representations. A state-level controller has the same numerator and denominator
+because both $R_\theta$ and $\Psi$ are functions of canonical molecular states.
+For a predicate $C$ defined on canonical states, all marks in a successor fiber
+are retained or removed together, so the restricted successor masses and their
+normalization are also identical under both encodings.
+\end{proof}
+
+\paragraph{Why control follows canonicalization.} Suppose a canonical successor
+has total mark mass $p$. A nonlinear mark-level reweighting $u\mapsto u^{\beta}$
+assigns it mass $p^{\beta}$ when it is represented by one mark, but
+$m\,(p/m)^{\beta}$ when it is represented by $m$ equal aliases. These agree only
+when $\beta=1$. Nonlinear guidance applied at mark level can therefore depend on
+arbitrary representational multiplicity, while successor-level control cannot.
+
+\subsection{Relation to generator matching}
+\label{app:gm}
+
+The reference model is related to generator matching through the
+conditional-successor component of the productive generator. This is a statement
+about the training objective, so we state it pointwise at an arbitrary progress
+value: for any $t$, write $Q^{+}(y\mid x,t)=\Lambda(x,t)\,P(y\mid x,t)$,
+separating a total productive exit rate from a normalized law over canonical
+molecular successors. Deployment then fixes $t=t_0$ as above. For the Bregman divergence generated by $\varphi(u)=u\log u-u$,
+direct expansion gives
+\begin{equation}
+D_\varphi\!\left(Q^{+\star},Q^{+}_\theta\right)
+=\Lambda^{\star}\,\KL\!\left(P^{\star}\,\middle\|\,R_{\theta,t}\right)
+\;+\;\Lambda^{\star}\log\tfrac{\Lambda^{\star}}{\Lambda_\theta}
+-\Lambda^{\star}+\Lambda_\theta .
+\label{eq:gmsplit}
+\end{equation}
+The first term depends on the normalized successor law, and the remaining terms
+depend on the productive exit rate.
+
+For a stored \method{} teacher row $(x_i,t_i,y_i^{\star})$, the compiled supervision records a productive successor identity but no holding time or rate magnitude. Under the unit-intensity representation used for this comparison, $\Lambda^{\star}_i=1$ and $P^{\star}_i=\delta_{y^{\star}_i}$, so the conditional-successor block of that row is
+\[
+\Lambda^{\star}_i\,\KL\!\left(P^{\star}_i\,\middle\|\,R_{\theta,t_i}\right)
+\;=\;-\log R_{\theta,t_i}\!\left(y^{\star}_i\mid x_i\right).
+\]
+The weighted empirical average of these rowwise terms is therefore exactly the productive-successor objective \eqref{eq:refloss}, up to factors independent of $\theta$.
+
+\method{} optimizes an empirical version of the conditional-successor block, and differs from the generator-matching population objective in exactly two respects. First, the hazard block is never optimized. The compiled supervision carries no rate magnitudes: every stored transition is registered with unit teacher rate, which enters training only as a nonterminality indicator, so no target for $\Lambda_\theta$ exists in the corpus. Under that unit-rate convention $\Lambda^{\star}$ is constant and the weight it contributes to the first term is absorbed into a positive constant independent of $\theta$. The reported results never read an exit-rate magnitude; fixed-budget editing consumes only the embedded successor kernel, on which a constant rescaling of $Q^{+}$ has no effect.
+
+Second, the expectation is taken under a different measure. Generator matching integrates the per-state divergence against the state--time marginal of the conditional-process mixture. \method{} instead draws training rows under a declared editing measure that is weighted across operator families by design, so that a family's exposure reflects the reference law the model is meant to estimate rather than the incidental composition of the compiled corpus; some strata are assigned zero draw. No importance correction is applied, and on zero-draw strata none could be. Consequently \eqref{eq:gmsplit} holds pointwise in $(x,t)$, and \eqref{eq:refloss} is the conditional-successor block of that decomposition, but the training functional is not the generator-matching population objective. We therefore describe the relationship as a decomposition that identifies which factor $R_\theta$ estimates, not as an objective identity.
+
+\subsection{Finite-horizon control}
+\label{app:control-proof}%
+\label{app:proofs}
+
+\paragraph{Terminal states.} To make early termination explicit, adjoin a
+cemetery state $\partial$. If a molecular state has no committed successor, the
+reference process moves to $\partial$ with probability one, and $\partial$ is
+absorbing. We set $g_z(\partial)=0$. This is equivalent to assigning zero
+continuation mass to trajectories that terminate before the declared horizon, and
+it makes $R_\theta$ and $h_b$ defined everywhere.
+
+\begin{theorem}[Finite-horizon molecular control; restatement of \cref{thm:doob}]
+\label{thm:control-full}
+Let $R_\theta$ be the reference kernel above and let
+$g_z:\X\cup\{\partial\}\to\mathbb R_{\ge0}$ be finite-valued with
+$g_z(\partial)=0$. Define
+\[
+  h_0(x,z)=g_z(x),
+  \qquad
+  h_b(x,z)=\sum_{y} R_\theta(y\mid x)\,h_{b-1}(y,z),
+\]
+and suppose $0<h_K(x_0,z)<\infty$. Wherever $h_b(x,z)>0$, define
+\[
+  P^{z,b}(y\mid x)=R_\theta(y\mid x)\,\frac{h_{b-1}(y,z)}{h_b(x,z)} .
+\]
+Then each controlled row is normalized and has support contained in that of
+$R_\theta$, and applying these kernels with remaining budgets
+$K,K-1,\dots,1$ gives
+\[
+  \Pr\nolimits_{P^{z}}(X_K=y\mid X_0=x_0)
+  =\Pr\nolimits_{R_\theta}(X_K=y\mid X_0=x_0)\,\frac{g_z(y)}{h_K(x_0,z)} .
+\]
+\end{theorem}
+
+\begin{proof}
+For any state with $h_b(x,z)>0$,
+\[
+  \sum_y P^{z,b}(y\mid x)
+  =\frac{\sum_y R_\theta(y\mid x)h_{b-1}(y,z)}{h_b(x,z)}=1
+\]
+by the backward recursion. If $R_\theta(y\mid x)=0$ then $P^{z,b}(y\mid x)=0$, so
+control introduces no reference-forbidden transition. Moreover positive
+controlled probability implies $h_{b-1}(y,z)>0$, so every nonterminal state
+reached by the controlled process has a well-defined controlled row at the next
+step. For any $K$-step path $x_{0:K}$ of positive controlled probability,
+\[
+\begin{aligned}
+  \Pr\nolimits_{P^{z}}(x_{1:K}\mid x_0)
+  &=\prod_{j=0}^{K-1} R_\theta(x_{j+1}\mid x_j)\,
+    \frac{h_{K-j-1}(x_{j+1},z)}{h_{K-j}(x_j,z)}\\
+  &=\Pr\nolimits_{R_\theta}(x_{1:K}\mid x_0)\,\frac{h_0(x_K,z)}{h_K(x_0,z)}
+   =\Pr\nolimits_{R_\theta}(x_{1:K}\mid x_0)\,\frac{g_z(x_K)}{h_K(x_0,z)},
+\end{aligned}
+\]
+because the interior $h$-factors telescope and $h_0(x_K,z)=g_z(x_K)$. Summing
+over all reference paths ending at $y$ gives the stated terminal law.
+\end{proof}
+
+\begin{remark}[Horizon specificity]
+For $j<K$ the same calculation gives
+\[
+  \Pr\nolimits_{P^{z}}(X_j=x\mid X_0=x_0)
+  =\Pr\nolimits_{R_\theta}(X_j=x\mid X_0=x_0)\,\frac{h_{K-j}(x,z)}{h_K(x_0,z)} .
+\]
+Intermediate states are therefore tilted by remaining future value rather than
+directly by $g_z$, and stopping before the declared horizon does not in general
+realize the terminal $g_z$-tilt.
+\end{remark}
+
+\paragraph{Learned future value.} At molecular scale we replace $h_b$ with a
+learned approximation $h_\phi(x,z,b)$. All deployed future-value heads use a
+sigmoid output, so $0<h_\phi(x,z,b)<1$. Consequently
+\[
+  P_\phi(y\mid x,z,b)
+  =\frac{R_\theta(y\mid x)\,h_\phi(y,z,b-1)}
+        {\sum_{y'} R_\theta(y'\mid x)\,h_\phi(y',z,b-1)}
+\]
+is a well-defined probability distribution wherever $R_\theta(\cdot\mid x)$ is
+defined. Whenever the learned sigmoid head is used, its strict positivity
+preserves the reference support. At the terminal step the exact boundary
+$h_0=g_z$ may remove zero-desirability successors, for example when $g_z$ is a
+region indicator. In all cases the controlled support is contained in that of
+$R_\theta$ and no new transition can be introduced. The
+exact terminal-law result above does not carry over unless $h_\phi=h$.
+
+\subsection{Retargeting and pathwise support}
+\label{app:retarget-proof}
+
+\begin{corollary}[Continuation after a goal change]
+\label{cor:retarget-full}
+Suppose a realized trajectory reaches $x_\tau$ with $b$ transitions remaining,
+after which the objective changes from $z$ to $z'$. If
+$0<h_b(x_\tau,z')<\infty$, exact finite-horizon control from $x_\tau$ under
+terminal desirability $g_{z'}$ gives
+\[
+  \Pr\nolimits_{P^{z'}}(X_b=y\mid X_0=x_\tau)
+  =\Pr\nolimits_{R_\theta}(X_b=y\mid X_0=x_\tau)\,\frac{g_{z'}(y)}{h_b(x_\tau,z')} .
+\]
+Retargeting therefore solves the remaining finite-horizon control problem from the
+molecular state actually reached, which differs in general from restarting under
+$z'$ from $x_0$.
+\end{corollary}
+
+\begin{proof}
+Apply \cref{thm:control-full} with initial state $x_\tau$, horizon $b$, and
+terminal desirability $g_{z'}$.
+\end{proof}
+
+This is a correctness statement about continuation. It does not imply that
+continuing from $x_\tau$ must outperform restarting from $x_0$; that question is
+evaluated empirically in \cref{sec:gem-exp-capabilities}.
+
+\begin{proposition}[Pathwise state constraints]
+\label{prop:pathwise-full}
+Let $C:\X\to\{0,1\}$ be a predicate on canonical molecular states with
+$C(x_0)=1$, and define
+$\A_C(x)=\{a\in\A(x): C(T(x,a))=1\}$.
+Let $R_\theta^{C}$ be the canonical successor kernel obtained from $\A_C(x)$ by
+the same pushforward and normalization used to construct $R_\theta$. If
+$\A_C(x)=\varnothing$ the state is terminal under the constrained process.
+Otherwise every committed state under $R_\theta^{C}$ satisfies $C$, and the same
+holds for any controlled kernel whose support is contained in that of
+$R_\theta^{C}$.
+\end{proposition}
+
+\begin{proof}
+The initial state satisfies $C$. Suppose $X_k$ satisfies $C$. Every mark in
+$\A_C(X_k)$ has a successor satisfying $C$ by definition, so every state that can
+be committed at step $k+1$ also satisfies $C$. Induction proves the claim. A
+controller supported on $R_\theta^{C}$ can only remove or reweight admissible
+successors and therefore preserves the invariant.
+\end{proof}
+
+This construction applies directly when admissibility can be decided from the
+proposed successor. A history-dependent requirement instead needs a Markov state
+augmentation: if $\xi_{k+1}=\Phi(\xi_k,X_{k+1})$ is a sufficient running
+statistic, the same support-restriction argument applies on the augmented state
+$(X_k,\xi_k)$.
+
+\section{Data and transition supervision}
+\label{app:data}
+
+The supervision used to fit $R_\theta$ varies across the executable edit space. We therefore specify the molecular source pool, the construction of executable transition supervision, and the associated data splits and provenance, since these determine which reference-law results are supported by data-backed transitions and which rely on synthetic perturbations. This variation bounds how the strongest per-family results in \cref{app:exp-rtheta} may be read.
+
+\subsection{Molecular data and preprocessing}
+
+The editing corpus was derived from a fixed $500{,}000$-molecule GuacaMol source pool by compiling executable local transitions, real-endpoint analogue relations, and reversible synthetic walks. \method{} was not trained as an unconditional distribution model over that pool: the learned object is $R_\theta(y\mid x)$, a transition law over source--successor edits, not a density $p_\theta(x)$ over molecules.
+
+The source pool is identified by the recorded dataset namespace and its SHA-256, and independently corroborated by the molecular statistics of the frozen training sources. Measured on $4{,}000$ randomly sampled training sources, the element distribution is exactly the declared organic vocabulary, with carbon at $0.748$, nitrogen and oxygen at $0.105$ each, sulfur at $0.015$, fluorine at $0.012$, chlorine at $0.009$, bromine at $0.003$, iodine and phosphorus at $0.002$, and boron at $0.001$. The median heavy-atom count is $26$, median molecular weight $371.6$ and ninetieth percentile $499.3$, median ring count $3$, median aromatic-ring count $2$, and only $1.6\%$ acyclic. Because the training receipts do not bind the original raw asset end to end, we treat this provenance link as strongly supported rather than cryptographically complete; the frozen compiled corpus itself is exactly identified by its dataset, library, packed-store and reserve digests. The benchmark sources of \cref{app:bench-qed} are drawn from a different pool.
+
+\subsection{Transition construction}
+
+Transitions enter the corpus through several lanes, which are near family-pure with lane-homogeneous chunks. The frozen structural gate records $1{,}803{,}032$ training transitions passing with zero violations. A metadata scan of every training chunk attributes \texttt{cycle\_insert} ($122{,}183$ transitions across $102$ chunks), \texttt{cycle\_attach} ($84{,}940$ across $102$) and \texttt{ring\_system\_restate} ($16{,}380$ across $29$) entirely to the reversible synthetic-walk lane, with zero transitions in any of the four data-backed lanes; in the pinned distribution-matched training subset that lane contributes $23{,}100$ of $145{,}756$ transitions, or $15.8\%$, against $84.2\%$ data-backed. By contrast \op{bond\_reroute} and \op{atom\_restate} each appear in two lanes and therefore do have a real-chemistry source. The analogue lane draws on a frozen molecular-matched-pair pool of $344{,}153$ records bound by a recorded contract hash, whose own upstream molecular source is not fully documented.
+
+Accordingly, results on the ring and cycle families support recovery of legal ring edits under synthetic perturbation, but do not establish data-backed ring editing or scaffold hopping. Establishing the latter would require supervision from observed ring transformations, which is absent from the current corpus.
+
+\subsection{Supervision provenance and data splits}
+
+Every result in \cref{sec:experiments} is bound to artifacts frozen before it. The reference edit law was never retrained for any experiment in this paper, and the controller head evaluated on the prospective panel was verified byte-identical by hash before and after an unrelated training session. The three source panels (development, prospective validation, and the official cohort) were verified pairwise disjoint, with the official cohort and the development panel excluded from the eligible pool before the training corpus was sampled. Role precedence is final test, then controller validation, then validation, then train, so a molecule appearing in two raw libraries is excluded from the lower-precedence role; the one such case is excluded from training and appears in neither the final training set nor the matched reserve.
+
+Both evaluation panels are exactly disjoint and near-duplicate disjoint from the training source universe of $96{,}094$ molecules. The matched reserve is cluster-disjoint by construction under an ECFP4 Tanimoto threshold of $0.95$ with formula and scaffold blocking, and the external cohort shows zero exact overlap under a scaffold-matched comparison. The reserve's higher scaffold sharing is by design: it was carved from the same population, which is what makes it population-matched. The evaluation ladder and its no-rescue rules were recorded before the data: the validation panel is opened once, whatever it returns is banked, and no hyperparameter is re-chosen afterwards.
+
+A pre-freeze mechanical smoke test executed one official benchmark source before the stop condition took effect. Its output was never inspected and is excluded from all analyses; the official cohort therefore remains unobserved for inferential purposes. The sealed final-test role, comprising $33{,}683$ source records, has not been leakage-audited, that audit is a precondition for opening it, and no result in this paper draws on it.
+
+\section{Model and training details}
+\label{app:models}
+
+Three learned objects appear in this paper and are trained separately: the goal-independent reference law $R_\theta$, a property model $\widehat F_\psi$ that defines molecular desirability, and goal- and budget-conditioned future-value models. Only the future-value models are trained against a downstream design objective; $R_\theta$ never sees one.
+
+\subsection{Reference edit law}
+
+$R_\theta$ is fitted once, frozen, and never retrained for any experiment reported here. Its identity is pinned by the sampling-law hash recorded in the corpus binding artifact and by the dataset, library, packed-store and reserve digests alongside it. The conditional edit law is normalized over the legal edit set as in \eqref{eq:marklaw} and is hierarchical as in \eqref{eq:hierarchical}: a shared molecular encoder produces a state representation of width $256$, a family gate scores which rewrite family fires, and family-specific scorers rank legal operands and payloads within it. Normalization is restricted to candidates the executor has admitted, so the model never places mass outside $\A(x)$. The encoder reads the current molecular graph and a progress variable, and does not read the source lead, the objective, the remaining budget, or any task constraint.
+
+The reference law is trained by maximum likelihood of the next committed molecular successor under the declared editing training measure. For a productive teacher transition $x_i\rightarrow y^{\star}_i$,
+\begin{equation*}
+\mathcal{L}_{\mathrm{ref}}(\theta)=-\frac{\sum_i w_i\log R_{\theta,t_i}(y^{\star}_i\mid x_i)}{\sum_i w_i},
+\end{equation*}
+as in \eqref{eq:refloss}, where $R_{\theta,t}$ is the canonical successor kernel of \cref{sec:canonical} and terminal rows are excluded. For the frozen checkpoint used throughout this paper, teacher rates and importance weights are unit-valued; the corpus sampler instead defines the reference measure through its registered family-weighted row distribution. The total event intensity is not optimized by this objective, and fixed-budget \method{} therefore does not claim calibrated continuous-time holding rates.
+
+% ===== GAP: NUMBER NOT IN VERIFIED SOURCE SET =====  [U4] R_theta training constants
+% Encoder depth and width, message-passing steps, optimizer, schedule, batch
+% size, total steps and checkpoint selection are recorded in the training
+% configuration and run receipts on the artifact volume.  Design constants, not
+% measurements, but outside this draft's verified source set.
+\emph{Training.} Encoder depth, message passing, optimizer, schedule, batch size, optimization steps and the checkpoint-selection criterion are fixed in the frozen training configuration released with the reference-law checkpoint; no value was tuned against any reported panel.
+
+\subsection{Property models}
+
+Molecular desirability is defined through a frozen property model $\widehat F_\psi$ rather than through oracle calls at control time. For the two-objective experiment it is fitted to a matched budget of $10{,}000$ random-ZINC property labels, the same budget the comparator receives, and is shared identically by the immediate and future-aware arms so that any difference between them is attributable to control rather than to the landscape. Both arms therefore inherit the same prediction error and the same extrapolation behaviour outside the label range.
+
+% ===== GAP: NUMBER NOT IN VERIFIED SOURCE SET =====  [U5] property-model constants
+\emph{Architecture and training.} Architecture, featurization and held-out predictive performance are recorded with the released property-model checkpoints.
+
+\subsection{{QED} future-value model}
+\label{app:controller}
+
+The region-goal controller estimates finite-budget reachability of a goal region
+and is used for the similarity-constrained editing experiments. Its settings are
+design constants fixed in frozen configuration before any reported panel was run,
+and are summarized in \cref{tab:controller-config}.
+
+\begin{table}[h]
+\centering\small
+\caption{\small Region-goal future-value model. All entries are frozen
+configuration constants, not tuned against any reported panel.}
+\label{tab:controller-config}
+\begin{tabular}{ll}
+\toprule
+Component & Setting \\
+\midrule
+Inputs & goal coordinates, signed property margins, remaining-budget one-hot, graph embedding \\
+Head & MLP $1055\rightarrow512\rightarrow256\rightarrow128\rightarrow1$, ReLU, dropout $0.1$ \\
+Output & sigmoid reachability \\
+Loss & binary cross-entropy $+\,0.3\times$ Bellman consistency \\
+Optimizer & Adam, learning rate $10^{-3}$ \\
+Goal grid & $5$ QED thresholds $\times\ 4$ similarity floors \\
+Validation split & $0.15$, held out by source molecule \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Four properties of this design matter for the claims and are not conveyed by the
+table. Goal conditioning is continuous, so a threshold pair never seen in
+training is a point in the same input space rather than an unseen class label.
+The validation split is by source molecule rather than by training example,
+because a trajectory rolled out of one lead yields many near-duplicate states and
+splitting by example would leak them across the boundary. The boundary condition
+$h_0=g_z$ is imposed exactly rather than learned. The $R_\theta$ encoder is frozen
+while this head is trained, so the reference process is unchanged by
+controller fitting.
+
+\subsection{Multi-objective future-value model}
+\label{app:mo-controller}
+
+The multi-objective controller estimates a different quantity from the region model above and is documented separately for that reason. Its target is the expected preference-weighted terminal desirability under the frozen reference process, $h_b(x,\lambda)=\E_{R_\theta}[g_\lambda(X_b)\mid X_0=x]$, with $g_\lambda$ the Chebyshev desirability of \eqref{eq:glambda}; it is a soft expectation rather than a hitting probability, so the binary construction of the region model does not carry over.
+
+For numerical conditioning, the implementation evaluates the equivalent centered form $\widetilde g_\lambda(x)=\exp\bigl(-(L_\lambda(x)-L^{\star}_\lambda)/\tau_\lambda\bigr)$, where $L^{\star}_\lambda$ is a per-preference constant with respect to $x$. This multiplies all desirabilities for a fixed preference by the same positive constant, so the factor cancels in the normalization of \eqref{eq:central} and leaves every controlled transition unchanged.
+
+Supervision is Monte Carlo: $M$ independent continuations of the frozen reference law from a state give the estimator of \eqref{eq:mctarget}. The variance of that estimator grows with the remaining budget while the spread of true values across candidate successors shrinks, so target reliability degrades with horizon. \Cref{app:exp-pareto} reports that degradation and the rollout counts it implies.
+
+% ===== GAP: NOT YET RUN =====  [G3] multi-objective future-value model
+% The supported-horizon gate, the rollout count admitted at each horizon, and
+% the trained multi-objective head do not yet exist.  TO CLOSE: fix the minimum
+% target-reliability criterion, determine the rollout count meeting it at each
+% candidate horizon, and train only on admitted horizons.
+Because supervision quality is horizon-dependent, learned future-value control is admitted only at horizons whose target reliability meets a criterion fixed in advance of any optimization result. The admitted horizon and its rollout count are recorded in the frozen controller configuration, and the deployed score is $h_\phi(y,\lambda,b-1)$ for $b\le b_{\mathrm{FA}}$ and $g_\lambda(y)$ otherwise.
+
+\section{Sampling and control}
+\label{app:sampling}
+
+We use two numerical realizations of molecular control. Direct or rejection-based sampling is used when the controlled row can be evaluated efficiently, whereas low-reference-mass objectives are handled with the sequential Monte Carlo construction below. Both retain the frozen molecular reference process and differ only in how the controlled distribution is realized computationally.
+
+\subsection{Exact finite-horizon control}
+
+Where the set of molecular states reachable within the remaining budget can be enumerated, the backward value of \eqref{eq:backward} is computed by exact dynamic programming: initialize $h_0=g_z$ on the enumerated terminal layer and sweep backwards, at each budget taking the expectation of the next layer's value under $R_\theta$ restricted to the legal edit set. The controlled kernel of \eqref{eq:doob} follows by division and \cref{thm:doob} applies without approximation. Accordingly, empirical claims of exact finite-horizon control refer only to enumerable settings in which the backward values are computed without approximation.
+
+\subsection{Molecular-scale sampling}
+
+At scale $h_\phi$ replaces the exact value. Because it is a state-level function taking values in $[0,1]$, the controlled row admits a rejection realization: propose $Y\sim R_\theta(\cdot\mid x)$, execute, canonicalize, reject self-transitions, and accept with probability $h_\phi(Y,z,b-1)$. Conditioned on acceptance the move has exactly the $R_\theta\cdot h_\phi$ law, and aliased successors aggregate correctly because the acceptance probability depends only on the resulting molecule. The proposal cap is finite, however, so when every proposal at a state is rejected the trajectory ends; the capped procedure is therefore not an exact realization of the controlled kernel and is not described as one. Cap pressure is recorded as a diagnostic with a preregistered escalation to the sequential realization below, which changes inference only.
+
+When the desired region carries little mass under the reference process, control is realized as a twisted Feynman--Kac particle system. Every particle proposal comes from the frozen reference law alone, and $h_\phi$ enters only through the incremental weight \eqref{eq:fk}. Using the value to both select and weight would double-count control and sample a different process. The weight product telescopes along a trajectory to $h_0(x_H)/h_H(x_0)$, and the terminal boundary $h_0(x)=\one[x\in\Bset_z]$ is exact, so a learned twist changes particle allocation without changing the terminal success criterion. The operating point is frozen and no particle-count sweep is permitted: $N=32$ particles, horizon $24$, absorbing stop on entry to the goal region, and systematic resampling whenever the effective sample size $\mathrm{ESS}(w)=(\sum_i w_i^2)^{-1}$ on normalized weights falls strictly below $N/2$. Resampling is systematic rather than multinomial, a single uniform draw positioning the whole comb. Per-transition values, per-step resampling decisions and resampling indices are recorded so the mechanical checks run offline against the artifact.
+
+Candidate accounting follows one rule: one run returns one molecule. A source's twenty candidates are twenty independent runs, each contributing the single molecule drawn from its terminal normalized particle measure. The particles within a run are inference state and are never counted as candidates, and intermediate states are never retrospectively harvested. A run reaching the budget without entering the region is recorded under a frozen extinction status rather than replaced. For a region goal the controller stops at the first committed molecule inside the region, an online stopping time evaluated on the realized state.
+
+\begin{algorithm}[h]
+\caption{Controlled molecular sampling, sequential realization}
+\begin{algorithmic}[1]
+\STATE \textbf{input:} source $x_0$; goal $z$; budget $K$; frozen $R_\theta$ and $h_\phi$; particles $N$; optional rule-closed predicate $C$
+\STATE initialize $x^i \leftarrow x_0$ and $w^i \leftarrow 1/N$ for $i=1,\dots,N$; \ $b \leftarrow K$
+\WHILE{$b > 0$ and some particle is unabsorbed}
+  \FOR{each unabsorbed particle $i$}
+    \STATE enumerate $\A(x^i)$; if $C$ is given, restrict to $\A_C(x^i)$
+    \STATE push forward through the executor and canonicalize to $\Sset(x^i)$
+    \STATE draw $y^i \sim R_\theta(\cdot \mid x^i)$ \hfill \COMMENT{proposal from the reference law alone}
+    \STATE $w^i \leftarrow w^i \cdot h_\phi(y^i,z,b-1) \,/\, h_\phi(x^i,z,b)$ \hfill \COMMENT{the value enters only here}
+    \STATE $x^i \leftarrow y^i$; \ if $x^i \in \Bset_z$ then absorb particle $i$
+  \ENDFOR
+  \STATE normalize $w$
+  \IF{$\mathrm{ESS}(w) < N/2$}
+    \STATE systematically resample the particles and reset $w^i \leftarrow 1/N$
+  \ENDIF
+  \STATE $b \leftarrow b-1$
+\ENDWHILE
+\STATE \textbf{return} one molecule drawn from the terminal normalized particle measure, or the frozen extinction status if no particle was absorbed
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Multi-objective control}
+
+Under a preference $\lambda$ the immediate arm weights successors by $g_\lambda(y)$ and the future-aware arm by $h_\phi(y,\lambda,b-1)$, with the reference law, legal edit set, property model, sources, preferences and budget identical between them. Where the admitted horizon $b_{\mathrm{FA}}$ is shorter than the optimization campaign, a campaign consists of repeated controlled trajectories of length at most $b_{\mathrm{FA}}$ launched from the frozen initialization bank and its archive until the common evaluation budget is exhausted. The campaign horizon and the horizon over which learned foresight is claimed are therefore distinct quantities.
+
+\subsection{Retargeting and pathwise constraints}
+
+Retargeting replaces the goal context at a realized state and continues with the remaining budget by re-evaluating \eqref{eq:central} at that state; no parameter of the reference process changes and the prefix is retained. A rule-closed constraint is imposed by filtering the legal edit set to $\A_C(x)$ of \eqref{eq:constrained} before the transition is sampled, so no infeasible successor is proposed, weighted, or committed.
+
+
+\section{Experimental details}
+\label{sec:experiments}
+\label{app:experiments}
+
+We provide the full protocols, comparison arms, statistical units, and extended results for the experiments summarized in the main text.
+
+\subsection{Reference-law evaluation}
+\label{sec:exp-rtheta}
+\label{app:exp-rtheta}
+
+We evaluate the frozen reference law on held-out transitions from the matched reserve by measuring the probability assigned to the realized canonical successor. The uniform, empirical-family and learned laws are evaluated on the identical executable support and canonical successor quotient; only their probability assignments differ. The empirical-family law uses corpus-level edit-family frequencies renormalized over the families available at the current state and distributes each family's mass uniformly across its available successors. Two intermediate arms decompose the comparison: an empirical family with learned identity, which keeps corpus family frequencies and learns only which successor within the chosen family is realized, and a learned family with uniform identity, which learns only which family fires. Together they separate choosing which edit to make from choosing where to apply it.
+
+The primary quantity is the mean negative log-probability of the realized successor, with the scored transition as the unit and paired differences by construction, since every law scores the same transition. Cells below a preregistered minimum size of $20$ are not reported separately; no scored transition was skipped and no partition failed to compile. Performance against the uniform law tests whether learning improves on executable support alone, and performance against the empirical-family law tests whether the reference law captures state-dependent preference beyond global family frequency. Neither comparison is interpreted in terms of physical molecular kinetics or synthetic-route likelihood.
+
+\begin{table}[h]
+\centering
+{\scriptsize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrrr}
+\toprule
+Capability cell & $n$ & unif. & emp.\ fam. & \emph{emp+id} & \emph{fam+unif} & $R_\theta$ \\
+\midrule
+\op{atom\_restate}: element identity change      & 725 & 6.21 & 6.54 & 4.84 & 7.28 & 5.58 \\
+\op{atom\_delete}: leaf death                    & 601 & 6.20 & 3.36 & 2.68 & 3.69 & 3.01 \\
+\op{atom\_insert}: one-neighbor birth            & 572 & 6.14 & 7.12 & 5.23 & 6.97 & 5.09 \\
+\op{bond\_reroute}: single-atom pendant, cyclic  & 464 & 6.24 & 5.26 & 4.07 & 5.48 & 4.29 \\
+\op{bond\_reroute}: multi-atom pendant, cyclic   & 216 & 6.32 & 5.56 & 4.38 & 6.14 & 4.96 \\
+\op{ring\_system\_restate}: dearomatization$^{\dagger}$ & 202 & 6.25 & 2.84 & 2.97 & 1.72 & 1.85 \\
+\op{ring\_system\_restate}: aromatization$^{\dagger}$   & 165 & 6.51 & 2.85 & 2.34 & 1.12 & 0.61 \\
+\op{cycle\_insert}: close to monocyclic$^{\dagger}$     & 138 & 6.47 & 7.19 & 3.27 & 4.80 & 0.88 \\
+\op{cycle\_attach}: open from monocyclic$^{\dagger}$    & 104 & 6.16 & 5.24 & 5.20 & 3.34 & 3.29 \\
+\op{bond\_reorder}: bond-order decrease          &  83 & 6.32 & 4.30 & 4.01 & 3.18 & 2.89 \\
+\op{bond\_reorder}: bond-order increase          &  83 & 6.49 & 4.71 & 4.40 & 3.29 & 2.99 \\
+\op{cycle\_insert}: close to polycyclic$^{\dagger}$     &  81 & 6.55 & 7.37 & 3.95 & 5.26 & 1.84 \\
+\op{cycle\_attach}: open from polycyclic$^{\dagger}$    &  69 & 6.42 & 5.82 & 5.71 & 4.08 & 3.96 \\
+\midrule
+Overall                                          & 3545 & 6.25 & 5.37 & 4.10 & 5.17 & \textbf{3.90} \\
+\bottomrule
+\end{tabular}}
+\caption{\small Negative log-probability of the realized canonical successor, by capability cell, lower is better. All five laws are evaluated on the same executable support and the same canonical quotient; only the probability assignment differs. Columns \emph{emp+id} and \emph{fam+unif} are the two decomposition arms defined above: empirical family with learned identity, and learned family with uniform identity. Cells below the preregistered minimum size of $20$ are not reported separately; no scored transition was skipped and no partition failed to compile. $^{\dagger}$Supervision for these cells comes entirely from the synthetic-perturbation lane; see the provenance note below.}
+\label{tab:rtheta-cells}
+\end{table}
+
+The decomposition is strongly asymmetric. Learning only which family fires recovers little, improving on corpus family frequencies by $0.20$ nats overall, whereas learning only where within a family the edit lands recovers most of the effect at $4.10$; the full model adds a further $0.20$ beyond that. In the terms used in \cref{sec:exp-rtheta}, the empirical-family-to-full improvement is $1.4616$ nats and the identity-only arm recovers $1.2674$ of it, or $86.7\%$, against $13.3\%$ for the family gate alone. The reference law's aggregate advantage is therefore driven primarily by state-dependent successor identity rather than by the family gate. The empirical-family control is also not uniformly strong: on both \texttt{cycle\_insert} cells, on \op{atom\_insert} and on \op{atom\_restate} it is worse than assigning equal probability to every distinct successor, so on birth and insertion families a corpus frequency prior misallocates mass relative to ignorance. On four cells the empirical-family/learned-identity ablation assigns higher probability to the realized successor than the full model, indicating that the learned family gate does not uniformly improve over corpus-level family frequencies and that the identity model carries the result on those families.
+
+Aggregating by supervision provenance sharpens this. On the $2{,}744$ transitions from families with data-backed supervision, the reference law retains a $1.06$-nat advantage over empirical family frequencies ($5.55$ against $4.49$), so the main-text claim survives the obvious confound. On that subset, however, the empirical-family/learned-identity ablation reaches $4.25$ nats and therefore assigns higher probability to the realized successor than the full model does, and the learned-family/uniform-identity arm at $5.79$ is worse than corpus family frequency. The learned family gate is thus not uniformly beneficial, and on data-backed families the identity model carries the result in spite of it. The complementary synthetic-only subset comprises $759$ transitions, where the reference law reaches $1.79$ nats against $4.72$ for empirical family frequencies; the aggregate improvement reported in \cref{sec:exp-rtheta} is correspondingly larger than the data-backed figure. The partition is computed from the emitted family-lane provenance artifact rather than from a hand-specified family list, and the restricted aggregates are reproduced from it.
+
+The cells in which the reference law performs best are those whose supervision is synthetic, as recorded in \cref{app:data}. On the ring and cycle families the model recovers a perturbation of a kind it was trained to invert, and the aggregate improvement should not be read as evidence about molecular kinetics. Resolving instead by the number of available successors gives $4.86$ nats for states with no alternative in the recorded band and $5.51$, $5.44$ and $5.51$ for successor counts of $1$--$4$, $5$--$24$ and $25$ or more under the empirical-family law, against $4.34$, $4.03$, $4.00$ and $4.21$ for the learned-identity arm, so the learned advantage is not an artifact of nearly deterministic rows.
+
+\subsection{Future-reachability evaluation}
+\label{app:exp-lookahead}
+
+The panel was sealed under preregistration and opened once. Sixty-seven held-out source--target pairs were constructed whose target is reachable under the frozen executable process within the declared budget; two were excluded from the primary analysis under a committed amendment, giving $65$ pairs, and the full $67$ are retained as a sensitivity analysis. All arms share the reference law, the legal edit sets, the target molecule and the edit budget. A myopic policy selects the locally preferred edit; verified lookahead evaluates candidate successors by whether the target remains recoverable within the remaining budget; three intermediate prioritizers restrict which successors are expanded before lookahead is applied. Continuation work is reported as a fraction of the candidates evaluated by all-candidate lookahead, so recovery and cost are read together. The unit is the source--target pair and intervals are paired bootstrap.
+
+\begin{table}[h]
+\centering
+{\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrr}
+\toprule
+Arm & Rec. & Rate & Cont./pair & Frac.\ univ. & Gain ret. \\
+\midrule
+Greedy local decision            & 26/65 & $40.0\%$ & $0.0$  & $0\%$    & --- \\
+$R_\theta$ top-1 + lookahead     & 33/65 & $50.8\%$ & $7.3$  & $34.7\%$ & $0.50$ \\
+Similarity top-1 + lookahead     & 34/65 & $52.3\%$ & $7.3$  & $34.7\%$ & $0.57$ \\
+Similarity top-2 + lookahead     & 37/65 & $56.9\%$ & $10.8$ & $52.1\%$ & $0.79$ \\
+Goal-aware $h_\phi$ top-1 + lookahead & 40/65 & $61.5\%$ & $7.2$ & $34.6\%$ & $1.00$ \\
+All-candidate lookahead          & 40/65 & $61.5\%$ & $20.5$ & $100\%$  & $1.00$ \\
+\bottomrule
+\end{tabular}}
+\caption{\small Sealed panel, $65$ pairs. \emph{Rec.}: targets recovered. \emph{Cont./pair}: candidate continuations actually evaluated per pair. \emph{Frac.\ univ.}: that count as a share of what all-candidate lookahead evaluates. \emph{Gain ret.}: the fraction of all-candidate lookahead's $14$ rescues the arm also recovers.}
+\label{tab:lookahead-full}
+\end{table}
+
+Of the $65$ pairs, $14$ are recovered by all-candidate lookahead and not by greedy, and none by greedy and not by all-candidate lookahead. Because the planner retains the greedy action unless lookahead gives a strict improvement, the comparison is one-sided by construction. We therefore report the paired recovery gain, $21.5$ percentage points $[12.3,33.5]$, and the fraction of greedy's $39$ failures that lookahead rescues, $35.9\%$ $[21.2,52.8]$, rather than a discordance test.
+
+Equal recovery counts do not imply equal rescue sets. The goal-aware prioritizer and all-candidate lookahead both recover $40$ targets but not the same $40$, overlapping on $13$ of $14$ rescues; the similarity and reference-probability arms are strictly nested inside all-candidate lookahead's rescue set. Recovery was also resolved by verified path length: the advantage does not widen with path length, and the original hypothesis that it would was tested and not supported. As a sensitivity check, including both pairs excluded under the committed amendment gives $26/67$ for greedy and $41/67$ for all-candidate lookahead, a headroom of $15$ rather than $14$, with no ordering changes. The panel consumed $1{,}347$ kernel calls.
+
+\subsection{Source-conditioned molecular editing}
+\label{app:exp-jin}
+
+The protocol is adopted from the comparator and is given in \cref{app:bench-qed}. Each \method{} candidate is the output of one controlled trajectory terminating prospectively at the first realized state inside the goal region, and intermediate molecules are not retrospectively collected. The reference law is unchanged from \cref{app:exp-rtheta}, and the future-value controller is trained and frozen on data disjoint from the official sources before the cohort is opened. A size-fixed internal ablation removes every successor that changes the current heavy-atom count while holding controller, reference law, sources, seeds and candidate allowance fixed. The unit is the source molecule; the candidate curve is descriptive and carries no significance claim, and it is drawn only over the $k$ actually measured, which is $k=1,\dots,8$ on the official cohort. The official cohort is opened once and the result is reported as returned.
+
+A receding one-step terminal tilt of the frozen reference law by the immediate property value of each successor was preregistered as the inference policy and refuted on the disjoint development panel, with $0$ successes in $320$ trajectories, before any official-cohort outcome existed. It is retained as a developmental negative control. What this licenses is narrow: the finite-horizon controller is a pre-outcome amendment consistent with the paper's construction, motivated by a developmental failure of a cheap one-step approximation. It is not a restoration of an originally frozen policy, and compute cost was not the only consideration separating the two.
+
+% ===== GAP: NOT YET RUN =====  [G1] official 800-source cohort
+% TO CLOSE: run the official cohort once at 20 candidates per source and report
+% the success curve over k=1..20 alongside the size-fixed ablation.
+On the official cohort, COMPOSE solves $446$ of the $800$ sources at $K=8$ ($55.8\%$, $95\%$ Wilson interval $[52.3,59.2]$), against $45.1\%$ reported by GrIDDD at $K=20$. Two sources did not return a completed shard and are counted as failures, so the denominator is the full benchmark.
+
+\subsection{Similarity-constrained lead optimization}
+\label{app:exp-t4}
+
+\paragraph{Panel and constraints.} The panel is five protein targets
+(PARP1, FA7, 5HT1B, BRAF, JAK2), three seed molecules per target, and two
+similarity thresholds $\delta\in\{0.4,0.6\}$, giving $30$ cells. A returned
+molecule is feasible when
+$\mathrm{QED}\geq0.6$, $\mathrm{SA}\leq4$, and
+$\mathrm{Tanimoto}(x,x_0)\geq\delta$ against the cell's seed, with similarity on
+Morgan fingerprints of radius two. Among feasible molecules the objective is the
+QuickVina2 docking score, lower being better. These are endpoint constraints
+only: intermediate molecular states are not required to satisfy them, which is
+what makes the trajectory free to leave and re-enter the feasible region.
+
+\paragraph{Frozen process and controller provenance.} The executor and the
+reference law are the same frozen artifacts used throughout: $R_\theta$ is the
+GuacaMol-trained checkpoint of \cref{app:models}, not retrained or fine-tuned for
+this benchmark. Only the task-specific controller differs, and the docking-facing
+controller was frozen before the reported panel was launched. Feasibility
+predicates (QED, SA, similarity, chemical validity) are evaluated before the
+protein oracle, so docking calls are spent only on molecules already satisfying
+the benchmark constraints.
+
+\paragraph{Oracle budget and reported score.} Each reported COMPOSE entry
+consumes $500$ docking-oracle evaluations for its cell, and the score reported for
+that cell is the best feasible docking score obtained within that budget. The published GenMol entry corresponds
+to $1{,}000$ oracle calls per run averaged over three runs, i.e.\ $3{,}000$ calls
+per cell, so the comparison is made at a sixfold reduction in oracle budget.
+Budget is counted as docking calls; inexpensive property evaluations are not
+counted for either method, matching the comparator's accounting.
+
+\paragraph{Feasibility and the paired comparison.} A cell counts as feasible for
+a method when that method reports at least one molecule satisfying all three
+constraints. The paired comparison is restricted to cells where both methods are
+feasible, and the estimand is the mean per-cell difference in docking score,
+COMPOSE minus GenMol, with a $95\%$ interval over cells. Cells where either
+method reports no feasible molecule enter the coverage count but not the paired
+mean, and are never imputed.
+
+\paragraph{Docking replicate noise.} Repeat evaluation of the same molecule
+through our QuickVina2 pipeline gives a median replicate variation of
+$0.70$ kcal/mol. Per-cell differences smaller than this are not individually
+resolvable, which is why the paired aggregate rather than the win count is the
+reported comparison, and why cell-level differences are not interpreted
+separately.
+
+\paragraph{Comparator values.} GenMol, RetMol and Graph GA entries are the
+published values of Table~4 of \citet{lee2025genmol}, transcribed without
+re-derivation. The transcription was verified by reproducing the GenMol column
+cell-by-cell against an independently extracted copy of the same table; all $30$
+cells agree, which fixes the row order and column alignment for the RetMol and
+Graph GA columns as well. Dashes in that table denote cells for which no feasible
+solution is reported, and are carried through as missing rather than as zeros.
+
+\subsection{Future-value target reliability}
+\label{app:exp-pareto}
+
+Before training a future-value model, we measured how well its Monte Carlo target can be estimated. On $24$ held-out states with $16$ candidate successors each and $32$ reference continuations per candidate, scored by the frozen property model with no oracle calls, the rank correlation between immediate desirability and true future value has per-state median $0.518$ $[0.435,0.700]$ at four remaining edits and $0.318$ $[0.181,0.421]$ at eight, with intervals resampled over states. The two criteria select different successors on $68.3\%$ $[55.8,80.8]$ and $84.2\%$ $[73.3,93.3]$ of state--preference decisions respectively, and following future value rather than immediate desirability improves realized continuation value by a median $12.2\%$ $[1.6,19.8]$ at four edits and $19.0\%$ $[13.1,25.9]$ at eight.
+
+Target reliability itself degrades with horizon. Estimated by split-half agreement between disjoint sets of continuations, a $32$-rollout target has reliability approximately $0.66$ at four remaining edits and $0.39$ at eight, implying by the Spearman--Brown relation that roughly $65$ and $200$ continuations respectively would be required to reach a reliability of $0.80$. Because supervision quality is horizon-dependent while the measured benefit is not, the supported horizon is fixed from target reliability and computational feasibility rather than from optimization performance, as recorded in \cref{app:models}.
+
+\subsection{Mid-trajectory retargeting}
+\label{app:exp-retarget}
+
+We evaluate retargeting on $40$ source-disjoint held-out molecules under potency-first and developability-first histories. Each prefix contains three committed edits within a six-edit horizon and is fixed before the eventual joint objective $B$ is constructed, so every post-switch comparison begins from an identical realized prefix with the same remaining budget. Margins are normalized by the held-in interquartile range and the reported objective is the worst margin of the conjunction, with zero denoting satisfaction. At the switch the median worst margin is $-1.115$ following potency-first prefixes and $-1.810$ following developability-first prefixes, so neither history already satisfies $B$.
+
+\begin{table}[h]
+\centering
+{\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llrrrc}
+\toprule
+Comparison & History & Mean & Median & $95\%$ CI & W/L \\
+\midrule
+Responsiveness & potency & $+0.748$ & $+0.794$ & $[+0.608,+0.891]$ & 36/0 \\
+ & developability & $+1.462$ & $+1.357$ & $[+1.240,+1.691]$ & 40/0 \\[2pt]
+Greedy-matched history & potency & $+0.367$ & $+0.338$ & $[+0.251,+0.482]$ & 37/3 \\
+ & developability & $+0.211$ & $+0.147$ & $[+0.065,+0.361]$ & 26/14 \\[2pt]
+\emph{Value of history} & potency & $+0.302$ & $+0.243$ & $[+0.186,+0.413]$ & 35/5 \\
+\emph{(primary)} & developability & $+0.176$ & $+0.127$ & $[+0.069,+0.283]$ & 29/11 \\[2pt]
+Price of surprise & potency & $-0.252$ & $-0.123$ & $[-0.364,-0.155]$ & 6/32 \\
+ & developability & $-0.428$ & $-0.291$ & $[-0.580,-0.288]$ & 4/36 \\
+\bottomrule
+\end{tabular}}
+\caption{\small Held-out retargeting panel, $40$ source-disjoint sources per history. Rows compare, in order: retargeting against continuing the old goal; greedy retargeting against greedy restart from the source; verified continuation from $x_3$ against verified restart from $x_0$ (the primary estimand); and verified continuation against a clairvoyant controller given $B$ from the first edit. Entries are paired post-switch differences in the registered objective; positive values favor the first strategy named. W/L counts sources on which that strategy is better or worse; ties omitted. Intervals are source-level bootstrap.}
+\label{tab:retarget-full}
+\end{table}
+
+Retargeting materially redirects both histories, and under the primary verified comparison continuing from the realized state remains preferable to restarting from the source. The mean advantage is $+0.302$ $[0.186,0.413]$ following potency-first prefixes and $+0.176$ $[0.069,0.283]$ following developability-first prefixes, with wins on $35/40$ and $29/40$ sources respectively. The clairvoyant controller remains better, giving the negative price-of-surprise effects shown in the table. The effect is smaller than in development, with the primary differences shrinking from $+0.444$ to $+0.302$ and from $+0.290$ to $+0.176$, and the confirmation panel contains genuine source-level losses in both histories, so the benefit of state reuse is empirical rather than guaranteed. Prefix revisiting is negligible, occurring for at most one source per arm and history, and does not explain the effect.
+
+\subsection{Pathwise constraints}
+\label{sec:exp-pathwise}
+\label{app:exp-pathwise}
+
+The pathwise experiment remains developmental: the cLogP corridor was selected following an earlier feasibility screen, and a separately frozen held-out confirmation has therefore been specified but not opened. Endpoint-only control constrains only the returned molecule; pathwise control removes any successor outside the corridor before the transition is sampled; a terminal-penalty arm changes the objective but leaves the transition support unchanged. All arms share the reference law, objective, horizon, sources, seeds and evaluation budget, and the unit is the source molecule with source-clustered intervals.
+
+On $24$ eligible sources, endpoint-only trajectories return to the corridor after leaving it in $16/24=0.667$ $[0.458,0.833]$ cases under greedy control and $14/24=0.583$ $[0.375,0.792]$ under verified control; the conditional fractions are $16/24$ and $14/23$, so the conditional denominators remain large enough that the unconditional and conditional prevalence estimates agree closely. These excursions are not confined to the boundary: their median depth is $0.69$ cLogP units and their median duration is four of the six committed edits. An earlier protected-motif experiment produced zero such excursions, confirming that the estimand need not be positive simply because intermediate states are observed.
+
+Restricting the support to the corridor remains viable on this panel. The median source retains $79.8\%$ of its legal successors, only one source reaches the prespecified support-tight threshold, no evaluated state has an empty constrained edit set, and one trajectory terminates. Excluding the support-tight source leaves prevalence at $0.652$ and $0.565$ and terminal costs at $-0.121$ and $-0.041$, so the conclusions are unchanged.
+
+The developmental panel does not resolve the terminal-utility cost of imposing the constraint. The paired change in normalized DRD2 utility is $-0.105$ $[-0.377,0.099]$ under greedy parity, with $5$ wins, $8$ losses and $11$ ties, and $-0.023$ $[-0.182,0.134]$ under verified parity, with $9$ wins, $10$ losses and $5$ ties. Both medians are exactly zero and both intervals span zero, which does not establish equivalence: the greedy interval still permits a loss of $0.377$ held-in interquartile-range units. Zero violations under support restriction is an integrity consequence of masking rather than an empirical performance statistic, and the apparent advantage of future-aware control under the mask, $+0.661$ $[0.428,0.944]$, is a ceiling rather than a null, since greedy pathwise control completed all $24$ sources and left no binary headroom.
+
+\begin{table}[h]
+\centering
+{\small
+\begin{tabular}{lrr}
+\toprule
+Constraint handling & Endpoint-feasible runs hiding a & Paired terminal \\
+ & path-infeasible intermediate & DRD2 utility \\
+\midrule
+Endpoint filtering (greedy)   & $16/24$ $[45.8,83.3]$ & reference \\
+Endpoint filtering (verified) & $14/24$ $[37.5,79.2]$ & reference \\
+Support restriction           & $0$ by construction   & $-0.023$ $[-0.182,0.134]$ \\
+\bottomrule
+\end{tabular}}
+\caption{\small Constraint handling on the $24$-source developmental panel. The
+first column counts sources whose returned molecule satisfies the corridor while
+an intermediate state does not; support restriction excludes these by
+construction rather than by measurement. The utility column is the paired change
+against endpoint filtering under verified parity, with the greedy-parity value
+$-0.105$ $[-0.377,0.099]$. Both intervals span zero, so the panel bounds rather
+than resolves the terminal-utility cost.}
+\label{tab:pathwise-arms}
+\end{table}
+
+The held-out confirmation fixes the corridor at $C=[2.3689,4.4522]$ with the same six-edit horizon and endpoint-only semantics, at $n=48$ sources. It passes only if both criteria clear at full $\alpha$ under intersection-union: the lower bound of the source-clustered interval on hidden-path prevalence must exceed $1/3$, a threshold fixed before the development run, and the lower bound on the mean paired change in terminal utility must exceed $-0.25$ held-in interquartile-range units, with $-0.20$ as a prespecified sensitivity analysis. The panel is sized on the joint criterion, giving power $0.976$ at the $0.25$ margin and $0.874$ at $0.20$. No held-out source has been opened.
+
+A value head retrained to be aware of a longer horizon was built, evaluated and rejected on four separate measurements, and is not the head used anywhere in \cref{sec:experiments}. The consequence for the main text is a claim boundary: any gain from a longer horizon comes from giving the frozen process more edit opportunities, not from a better budget-conditioned value model.
+
+\section{Benchmark and baseline details}
+\label{app:alignment}
+
+\subsection{{QED} editing benchmark}
+\label{app:bench-qed}
+
+We adopt the official $800$-source cohort, property and similarity criteria, and evaluator from the benchmark, while evaluating \method{} with $K=8$ rather than the published $K=20$ allowance: the $800$ test molecules with $\mathrm{QED}\in[0.7,0.8]$ as sources, $20$ candidates per source, a Tanimoto similarity constraint of $0.4$ to the source, and success defined as at least one returned candidate reaching $\mathrm{QED}\in[0.9,1.0]$ while satisfying that constraint. Source selection, fingerprints, property calculations, candidate count and aggregation must be identical for the comparison to stand, and where any of these could not be matched it is stated rather than assumed.
+
+\paragraph{Output contract.} Each source receives exactly $K$ candidate slots. A trajectory that reaches the target region returns the first committed molecule satisfying the benchmark criterion. If no sampled continuation reaches the region, the slot returns the unchanged canonical source solely to preserve the fixed-$K$ benchmark interface; this output necessarily fails because benchmark sources begin below the target QED threshold. No failed slot is resampled or replaced. This contract is frozen before the official cohort is opened and is not revised afterwards.
+
+Every non-source returned molecule is a benchmark success: each slot either returns a molecule in the target region or returns the unmodified source. A smaller candidate allowance can disadvantage both success and the diversity metric, because a source with only one successful distinct return contributes zero diversity. Separately, no returned success is identical to its source, so the count is unchanged under the stricter rule of the released success script, which requires similarity strictly below one.
+
+Published values are reproduced as reported and are not re-derived. Because the comparator does not fully specify the evaluator used for its main diversity entry, we do not interpret the diversity values as an exactly matched comparison. Among published entries for this task, the GrIDDD row at $45.1\%$ is the one we compare against. Higher rates have been reported on this task outside the comparator's table, and \cref{app:qed-historical} records them so that \cref{tab:qed} is not read as the complete published record.
+
+Diversity is computed with the released evaluation script of \citet{jin2019vjtnn} rather than reimplemented from its prose description. That script admits a candidate only if it satisfies both the similarity constraint and the property target, deduplicates the admitted molecules, excludes a source with no admitted molecule from the average, and assigns a diversity of exactly zero to a source with only one. Similarity is a Morgan fingerprint of radius two on $2048$ bits with chirality disabled. The convention matters. Of the $446$ solved sources on the official panel, $335$ return at least two distinct non-source molecules and average $0.4999$; the remaining $111$ return a single distinct molecule and enter the released script's average as zero, giving $0.376$ over all solved sources. We report the $0.4999$ figure and state its denominator wherever it appears. \method{} returns on average $3.63$ distinct successful molecules of the eight permitted, and no successful candidate is identical to its source, so the success count is unchanged under the stricter rule of the released script, which requires similarity strictly below one. All returned strings are canonical, so the string-level deduplication of the released script coincides with deduplication by molecule, and no pair of distinct returned molecules shares a fingerprint under the achiral setting.
+
+GrIDDD does not specify the evaluator used for the diversity entry in its main property-optimization table. \citet{ninniri2025griddd} do not state how the diversity column of their main property-optimization table is computed. Their baseline diversity values are identical to those reported in the graph-to-graph translation line, which places the inherited rows on the scale defined above, but the method's own entry is undocumented; a rule matching the one used here is stated only in their appendix, for a separately adapted protocol with a different number of optimization rounds. We therefore report our value as computed under a named and audited definition, and we do not assert that it and the published entry were produced by the same procedure.
+
+Because every \method{} trajectory terminates prospectively on entering the goal region, a run either returns a molecule satisfying both constraints or goes extinct, and the set the diversity script admits is exactly the set of successful returns. The admitted set is therefore constructed the same way as in the published rows rather than merely being similar to it. Both now use the official $800$ sources, and the residual difference is the candidate allowance, eight against twenty. That difference is not neutral for diversity: a smaller allowance yields fewer second successes per source and so more single-molecule sources contributing zero, which depresses the reported value relative to what the same system would produce at twenty candidates.
+
+The benchmark constrains returned molecules and says nothing about internal successor evaluations, and competing methods use their native inference procedures. The comparison therefore measures task performance under a fixed output allowance, no efficiency claim is made, and inference ledgers are reported separately. The printed entry is the official $800$-source cohort at eight of the twenty permitted candidates, so it uses fewer outputs than the benchmark allows.
+
+\subsection{{GenMol} T4 lead-optimization benchmark}
+\label{app:bench-t4}
+
+The protocol is adopted from \citet{lee2025genmol}: five protein targets, three
+seed molecules per target, and similarity thresholds $\delta\in\{0.4,0.6\}$, with
+a returned molecule required to satisfy $\mathrm{QED}\geq0.6$,
+$\mathrm{SA}\leq4$, and Tanimoto similarity at least $\delta$ to the seed. The
+reported statistic in the comparator's table is the mean docking score of the
+most optimized lead over three runs. The COMPOSE entry for a cell is the best feasible docking score obtained within that cell's $500$-call budget.
+
+Two protocol details govern how the comparison is read. First, the constraints
+are endpoint constraints: neither method is required to keep intermediate states
+feasible, so the comparison is about returned molecules only. Second, oracle
+budget is counted in docking calls. The comparator's entry corresponds to
+$1{,}000$ calls per run over three runs; the COMPOSE entry consumes $500$ calls
+for the cell. Inexpensive property evaluations are excluded from the count on
+both sides.
+
+Dashes in the published table mark cells for which no feasible molecule is
+reported. We carry them through as missing rather than as zeros, report coverage
+separately from score, and restrict the paired comparison to cells where both
+methods report a feasible molecule. Published values for GenMol, RetMol and
+Graph GA are reproduced as reported and are not re-derived.
+
+\subsection{Published record on the {QED} editing task}
+\label{app:qed-historical}
+
+\begin{table}[!ht]
+\centering
+{\small
+\begin{tabular}{lrrrr}
+\toprule
+Method & Sources & $K$ & QED success ($\uparrow$) & Diversity ($\uparrow$) \\
+\midrule
+GrIDDD \citep{ninniri2025griddd} & 800 & 20 & 45.1\% & 0.283$^{\dagger}$ \\
+\midrule
+\textbf{\method{}} & 800 & 8 & \textbf{55.8\%} & \textbf{0.4999} \\
+\bottomrule
+\end{tabular}}
+\caption{\small\textbf{Source-conditioned editing on the Jin/ZINC-250k similarity-constrained QED benchmark.} Published baseline values are reproduced from the comparator set reported by GrIDDD. $K$ denotes candidates returned per source; success requires $\mathrm{QED}\ge0.9$ and Tanimoto similarity $\ge0.4$. \method{} is evaluated on the official $800$ sources with $K=8$; published rows use $K=20$, so the comparison is at a smaller candidate allowance. $^{\dagger}$GrIDDD reports diversity without specifying its evaluator implementation; \method{} uses the released Jin evaluator. Diversity details are reported in \cref{app:alignment}. GrIDDD is shown as the close modern per-step editor that motivates this benchmark; the Jin-era published methods and the full comparator audit are given in \cref{app:qed-historical}.}
+\label{tab:qed}
+\end{table}
+
+\Cref{tab:qed} reproduces the comparator set assembled by GrIDDD. Stronger values have been reported on the same task by the graph-to-graph translation line, and we record them in \cref{tab:qed-historical} for completeness. We checked the primary sources rather than inheriting the numbers second-hand. The translation results use the same $800$ source molecules, the same similarity threshold $\delta=0.4$, and the same allowance of $K=20$ decoded candidates per source \citep{jin2019vjtnn}; the rate frequently quoted as $60.6\%$ is VJTNN+GAN, whereas VJTNN itself is reported at $59.9\%$. \citet{jin2020hierg2g} evaluate on the test sets provided by \citet{jin2019vjtnn} under the same range and similarity constraint with $K=20$, and reproduce the $59.9\%$ row, which is what places their $76.9\%$ on the same cohort.
+
+\begin{table}[!ht]
+\centering
+{\small
+\begin{tabular}{llrrr}
+\toprule
+Method & Reported by & $K$ & QED success ($\uparrow$) & Diversity ($\uparrow$) \\
+\midrule
+MMPA      & \citet{jin2019vjtnn}  & 20 & 32.9\% & 0.236 \\
+VSeq2Seq  & \citet{jin2019vjtnn}  & 20 & 58.5\% & 0.331 \\
+VJTNN     & \citet{jin2019vjtnn}  & 20 & 59.9\% & 0.373 \\
+VJTNN+GAN & \citet{jin2019vjtnn}  & 20 & 60.6\% & 0.376 \\
+AtomG2G   & \citet{jin2020hierg2g} & 20 & 73.6\% & 0.421 \\
+HierG2G   & \citet{jin2020hierg2g} & 20 & 76.9\% & 0.477 \\
+\bottomrule
+\end{tabular}}
+\caption{\small\textbf{Further published results on the same similarity-constrained {QED} editing task.} All rows use the $800$-source cohort of \citet{jin2019vjtnn} with $\delta=0.4$ and $K=20$. These are supervised graph-to-graph translation models trained on parallel source-target pairs curated for the target property, whereas the \method{} reference law is trained once without reference to QED and the property enters only through control. The rows therefore measure different problem settings and we do not present them as an ablation of one another, nor is any \method{} claim stated relative to them.}
+\label{tab:qed-historical}
+\end{table}
+
+\section{Software, randomization, and compute}
+\label{app:repro}
+
+\subsection{Software and environment}
+
+Every job runs in a containerized Debian image pinned to Python $3.11$ with \texttt{torch} $2.4.0$, \texttt{numpy} $1.26.4$, \texttt{scipy} $1.13.1$ and \texttt{rdkit} $2024.3.5$. Chemistry is pinned to a single RDKit release because canonical molecular identity, ring perception and sanitization all come from it and all three enter the definition of the state space in \cref{app:statespace}.
+
+Only artifacts satisfying the evidence criteria used in the manuscript are cited for scientific claims. Developmental artifacts lacking complete producer or input metadata are retained for audit purposes but excluded from claim-bearing results. Bulk artifacts such as corpora, embeddings, per-run records and trained heads live on a persistent volume rather than in the source repository, while result summaries are versioned alongside the code, so a fresh checkout can re-run every job but cannot read a banked result without the volume. The reproducibility package records the code revision, input identities and result summaries required to regenerate each reported analysis.
+
+\subsection{Randomization and statistics}
+
+Run seeds are derived rather than drawn, by hashing a protocol tag together with the source molecule and the replicate index and taking the leading eight bytes of the digest. In paired comparisons the arm name is deliberately excluded from the seed, so arms sharing a source and replicate index consume identical randomness and a difference between them cannot be a seeding artifact. Where an arm-specific seed is unavoidable for later replicates, the first replicate is still constructed to be identical across arms.
+
+Intervals are bootstrap intervals resampled over the independent unit named in each experiment. That unit is the source molecule in most cases, the source--target pair in the sealed lookahead panel, and the state in the reliability analysis of \cref{app:exp-pareto}. Replicate counts differ by analysis, ranging from $4{,}000$ to $8{,}192$ draws, and each artifact records its own. Where an interval is exact rather than bootstrapped, that is stated with the reason.
+
+\subsection{Compute}
+
+Reference-law training used a preemptible A10G GPU with $8$ CPU cores and $64$\,GiB of memory; the learned future-value models were trained on the same GPU class. The claim-bearing molecular sampling and evaluation jobs reported in \cref{sec:experiments} are CPU-based. Training and inference resources are therefore reported separately. Sampling containers reserve one core and burst to eight under a six-hour ceiling, and driver containers hold a quarter core under a twelve-hour ceiling. Compute is reported in two units that are never pooled: kernel calls, meaning evaluations of the learned reference law, and container-seconds. The sealed lookahead panel consumed $1{,}347$ kernel calls and roughly $24{,}300$ container-seconds, and retargeting branch points cost on the order of $10^2$ kernel calls and $10^3$ container-seconds each. Oracle calls are counted separately again, because the benchmark budgets in \cref{app:alignment} constrain returned molecules rather than internal evaluations.
+
+\subsection{The medicinal-chemistry validity gate}
+\label{app:medchem-gate}
+
+The gate rejects a returned molecule for a small, explicitly enumerated set of
+reasons: elements outside $\{$C,N,O,F,S,Cl,Br,I,P$\}$; a halogen carrying
+hydrogens or more than one heavy neighbour (hypervalent iodine such as
+\texttt{[IH4]}); sulfur carrying hydrogens with two or more heavy neighbours;
+phosphorus that is neither phosphate nor phosphonate; radicals; formal charge
+beyond $\pm1$; a ring larger than seven whose atoms are mostly \emph{not}
+shared with another ring; a nitrogen--nitrogen bond inside a three- or
+four-membered ring; and cumulated double bonds.
+
+Two of these conditions were narrowed after calibration refuted a broader
+version. A flat ring-size cutoff was rejected because the benchmark seeds
+themselves report $7$- and $8$-membered SSSR envelope rings over fused
+tricyclic cores, so ring size alone cannot separate a fused drug scaffold from
+a macrocycle; the condition now applies only to rings whose atoms are largely
+unshared. A minimum-ring-size condition for pendant systems was rejected
+because a published InVirtuoGen winner carries a cyclopropane; that minimum was
+moved out of the validity gate and into the definition of the specific
+construction operation it belongs to.
+
+The calibration is a test rather than a claim: the gate must accept all fifteen
+benchmark seeds and all twenty-five published InVirtuoGen winners, and reject
+the implausible molecules. The suite also asserts that ordinary sulfur
+chemistry (thiophene, thioether, sulfone) still passes, which is what prevents
+the hypervalent-sulfur condition from over-rejecting.
+
+We distinguish two gates. A \emph{pathwise} gate asks only whether a state is an
+executable molecule and is applied to every intermediate; the full gate, which
+additionally imposes QED, SA and similarity, is applied only to returned
+molecules. Conflating them is not conservative: applying the full gate to every
+intermediate prevents a trajectory from passing \emph{through} a temporarily
+unattractive molecule, and measurably degraded search.
+
+\subsection{Generalization of a single-cell controller}
+\label{app:t4-generalization}
+
+The lead-optimization controller described in \cref{tab:t4} was developed
+against one cell. Applied unchanged to three further cells it returned no
+constraint-satisfying molecule from three hundred trajectories each. The
+failure is quantitative rather than mysterious: the similarity budget is a
+property of the seed, and the seed the controller was tuned on carries $41$
+Morgan-fingerprint bits while another carries $29$, so an edit program
+calibrated on the first spends a much larger fraction of the second.
+
+Replacing the fixed program with an adaptive search over the same action
+vocabulary --- identical operators, identical reference law, no new chemistry
+--- recovered feasibility on all three cells. We report this as a limitation of
+fixed edit programs rather than as a positive result, since the recovered
+molecules were not competitive; but it does locate the failure in the
+controller's lack of adaptation rather than in the operator set or the
+reference law.
+

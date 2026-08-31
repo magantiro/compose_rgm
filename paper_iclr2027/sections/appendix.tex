@@ -203,7 +203,7 @@ We call such successor-decidable predicates \emph{rule-closed}. Requirements dep
 \section{Data and transition supervision}
 \label{app:data}
 
-A reader should be able to answer, from this section alone, what evidence taught $R_\theta$ to prefer one legal transition over another. That question has two parts: which molecules the transitions were drawn from, and how each transition was constructed. The second part is not uniform across the edit space, and it bounds how the strongest per-family results in \cref{app:exp-rtheta} may be read.
+The supervision used to fit $R_\theta$ varies across the executable edit space. We therefore specify the molecular source pool, the construction of executable transition supervision, and the associated data splits and provenance, since these determine which reference-law results are supported by data-backed transitions and which rely on synthetic perturbations. This variation bounds how the strongest per-family results in \cref{app:exp-rtheta} may be read.
 
 \subsection{Molecular data and preprocessing}
 
@@ -215,7 +215,7 @@ The source pool is identified by the recorded dataset namespace and its SHA-256,
 
 Transitions enter the corpus through several lanes, which are near family-pure with lane-homogeneous chunks. The frozen structural gate records $1{,}803{,}032$ training transitions passing with zero violations. A metadata scan of every training chunk attributes \texttt{cycle\_insert} ($122{,}183$ transitions across $102$ chunks), \texttt{cycle\_attach} ($84{,}940$ across $102$) and \texttt{ring\_system\_restate} ($16{,}380$ across $29$) entirely to the reversible synthetic-walk lane, with zero transitions in any of the four data-backed lanes; in the pinned distribution-matched training subset that lane contributes $23{,}100$ of $145{,}756$ transitions, or $15.8\%$, against $84.2\%$ data-backed. By contrast \op{bond\_reroute} and \op{atom\_restate} each appear in two lanes and therefore do have a real-chemistry source. The analogue lane draws on a frozen molecular-matched-pair pool of $344{,}153$ records bound by a recorded contract hash, whose own upstream molecular source is not fully documented.
 
-The consequence is a scope limit rather than a defect, and it is applied throughout: evidence from the ring and cycle families supports the claim that the process recovers legal ring edits under synthetic perturbation, and does not support a claim of data-backed ring editing or scaffold hopping. Lifting that scope requires a data-backed ring-transformation lane, which the current corpus does not contain.
+Accordingly, results on the ring and cycle families support recovery of legal ring edits under synthetic perturbation, but do not establish data-backed ring editing or scaffold hopping. Establishing the latter would require supervision from observed ring transformations, which is absent from the current corpus.
 
 \subsection{Supervision provenance and data splits}
 
@@ -223,7 +223,7 @@ Every result in \cref{sec:experiments} is bound to artifacts frozen before it. T
 
 Both evaluation panels are exactly disjoint and near-duplicate disjoint from the training source universe of $96{,}094$ molecules. The matched reserve is cluster-disjoint by construction under an ECFP4 Tanimoto threshold of $0.95$ with formula and scaffold blocking, and the external cohort shows zero exact overlap under a scaffold-matched comparison. The reserve's higher scaffold sharing is by design: it was carved from the same population, which is what makes it population-matched. The evaluation ladder and its no-rescue rules were recorded before the data: the validation panel is opened once, whatever it returns is banked, and no hyperparameter is re-chosen afterwards.
 
-A pre-freeze mechanical smoke test executed one official benchmark source before the stop condition took effect. Its output was never inspected, is excluded from every analysis, and is retained only as an audit artifact; we therefore describe the official cohort as inferentially unopened rather than literally never executed. The sealed final-test role, comprising $33{,}683$ source records, has not been leakage-audited, that audit is a precondition for opening it, and no result in this paper draws on it.
+A pre-freeze mechanical smoke test executed one official benchmark source before the stop condition took effect. Its output was never inspected and is excluded from all analyses; the official cohort therefore remains unobserved for inferential purposes. The sealed final-test role, comprising $33{,}683$ source records, has not been leakage-audited, that audit is a precondition for opening it, and no result in this paper draws on it.
 
 \section{Model and training details}
 \label{app:models}
@@ -259,7 +259,7 @@ Molecular desirability is defined through a frozen property model $\widehat F_\p
 
 The region-goal controller estimates finite-budget reachability of a goal region and is used for the similarity-constrained editing experiments. The values below are design constants fixed in frozen preregistration documents before the corresponding data existed.
 
-\emph{Inputs.} The controller conditions on the region's own coordinates, the signed margins of the current molecule to each of them, the remaining budget as a one-hot index, and a graph embedding of the current molecule together with the source lead and their difference and product, produced by the frozen reference-law encoder used unchanged with gradients never flowing into it. The feature width is $4\times256+2+2+2+(24+1)=1055$: four embedding blocks, two state properties, two region thresholds, two signed margins, and a $25$-slot budget one-hot. The budget ceiling of $24$ is frozen because the released checkpoint was trained against a $25$-slot one-hot; a longer horizon is expressed by passing a larger ceiling to the feature builder rather than by editing the constant, which would change the input width and make the checkpoint unloadable.
+\emph{Inputs.} The controller conditions on the region's own coordinates, the signed margins of the current molecule to each of them, the remaining budget as a one-hot index, and a graph embedding of the current molecule together with the source lead and their difference and product, produced by the frozen reference-law encoder used unchanged with gradients never flowing into it. The feature width is $4\times256+2+2+2+(24+1)=1055$: four embedding blocks, two state properties, two region thresholds, two signed margins, and a $25$-slot budget one-hot. The controller uses a $25$-slot one-hot budget encoding indexed from $0$ to $24$. For inference horizons exceeding $24$ edits the controller input is capped at $b_{\mathrm{eff}}=\min(b,24)$, which preserves the input dimensionality and the identity of the frozen checkpoint.
 
 \emph{Architecture and objective.} The head is a multilayer perceptron $1055\rightarrow512\rightarrow256\rightarrow128\rightarrow1$ with rectified-linear activations and dropout $0.1$ after the first two hidden layers. It emits a logit; the sigmoid is applied outside the module, so the multiplicative factor in \eqref{eq:central} lies in $[0,1]$ by construction. The loss is binary cross-entropy against the Monte-Carlo hitting label plus a Bellman consistency term at weight $0.3$ on observed transitions, whose target is the sigmoid of the head at the successor. Optimization uses Adam at learning rate $10^{-3}$ with weight decay $10^{-5}$ for at most $40$ epochs with early stopping at patience $5$, and the best-validation checkpoint is selected rather than the last epoch.
 
@@ -290,11 +290,11 @@ Because supervision quality is horizon-dependent, learned future-value control i
 \section{Sampling and control}
 \label{app:sampling}
 
-Two realizations of the controlled law \eqref{eq:central} are used. One is exact given the learned value; the other is an approximation whose error is in particle allocation rather than in the definition of success. Neither is a separate contribution.
+We use two numerical realizations of molecular control. Direct or rejection-based sampling is used when the controlled row can be evaluated efficiently, whereas low-reference-mass objectives are handled with the sequential Monte Carlo construction below. Both retain the frozen molecular reference process and differ only in how the controlled distribution is realized computationally.
 
 \subsection{Exact finite-horizon control}
 
-Where the set of molecular states reachable within the remaining budget can be enumerated, the backward value of \eqref{eq:backward} is computed by exact dynamic programming: initialize $h_0=g_z$ on the enumerated terminal layer and sweep backwards, at each budget taking the expectation of the next layer's value under $R_\theta$ restricted to the legal edit set. The controlled kernel of \eqref{eq:doob} follows by division and \cref{thm:doob} applies without approximation. This is the only setting in which the word \emph{exact} is used of a deployed computation.
+Where the set of molecular states reachable within the remaining budget can be enumerated, the backward value of \eqref{eq:backward} is computed by exact dynamic programming: initialize $h_0=g_z$ on the enumerated terminal layer and sweep backwards, at each budget taking the expectation of the next layer's value under $R_\theta$ restricted to the legal edit set. The controlled kernel of \eqref{eq:doob} follows by division and \cref{thm:doob} applies without approximation. Accordingly, empirical claims of exact finite-horizon control refer only to enumerable settings in which the backward values are computed without approximation.
 
 \subsection{Molecular-scale sampling}
 
@@ -339,7 +339,7 @@ Retargeting replaces the goal context at a realized state and continues with the
 \section{Experimental details}
 \label{app:experiments}
 
-Each subsection below gives the setup, arms and statistics for one experiment, together with the extended results omitted from the main text, in the order the experiments appear in \cref{sec:experiments}.
+We provide the full protocols, comparison arms, statistical units, and extended results for the experiments summarized in \cref{sec:experiments}.
 
 \subsection{Reference-law evaluation}
 \label{app:exp-rtheta}
@@ -376,7 +376,7 @@ Overall                                          & 3545 & 6.25 & 5.37 & 4.10 & 5
 \label{tab:rtheta-cells}
 \end{table}
 
-The decomposition is lopsided. Learning only which family fires recovers little, improving on corpus family frequencies by $0.20$ nats overall, whereas learning only where within a family the edit lands recovers most of the effect at $4.10$; the full model adds a further $0.20$ beyond that. In the terms used in \cref{sec:exp-rtheta}, the empirical-family-to-full improvement is $1.4616$ nats and the identity-only arm recovers $1.2674$ of it, or $86.7\%$, against $13.3\%$ for the family gate alone. The reference law's advantage is therefore largely an advantage in placing an edit on a particular molecular site rather than in selecting the operator family. The empirical-family control is also not uniformly strong: on both \texttt{cycle\_insert} cells, on \op{atom\_insert} and on \op{atom\_restate} it is worse than assigning equal probability to every distinct successor, so on birth and insertion families a corpus frequency prior misallocates mass relative to ignorance. On four cells the empirical-family/learned-identity ablation assigns higher probability to the realized successor than the full model, indicating that the learned family gate does not uniformly improve over corpus-level family frequencies and that the identity model carries the result on those families.
+The decomposition is strongly asymmetric. Learning only which family fires recovers little, improving on corpus family frequencies by $0.20$ nats overall, whereas learning only where within a family the edit lands recovers most of the effect at $4.10$; the full model adds a further $0.20$ beyond that. In the terms used in \cref{sec:exp-rtheta}, the empirical-family-to-full improvement is $1.4616$ nats and the identity-only arm recovers $1.2674$ of it, or $86.7\%$, against $13.3\%$ for the family gate alone. The reference law's aggregate advantage is therefore driven primarily by state-dependent successor identity rather than by the family gate. The empirical-family control is also not uniformly strong: on both \texttt{cycle\_insert} cells, on \op{atom\_insert} and on \op{atom\_restate} it is worse than assigning equal probability to every distinct successor, so on birth and insertion families a corpus frequency prior misallocates mass relative to ignorance. On four cells the empirical-family/learned-identity ablation assigns higher probability to the realized successor than the full model, indicating that the learned family gate does not uniformly improve over corpus-level family frequencies and that the identity model carries the result on those families.
 
 Aggregating by supervision provenance sharpens this. On the $2{,}744$ transitions from families with data-backed supervision, the reference law retains a $1.06$-nat advantage over empirical family frequencies ($5.55$ against $4.49$), so the main-text claim survives the obvious confound. On that subset, however, the empirical-family/learned-identity ablation reaches $4.25$ nats and therefore assigns higher probability to the realized successor than the full model does, and the learned-family/uniform-identity arm at $5.79$ is worse than corpus family frequency. The learned family gate is thus not uniformly beneficial, and on data-backed families the identity model carries the result in spite of it. The complementary synthetic-only subset comprises $759$ transitions, where the reference law reaches $1.79$ nats against $4.72$ for empirical family frequencies; the aggregate improvement reported in \cref{sec:exp-rtheta} is correspondingly larger than the data-backed figure. The partition is computed from the emitted family-lane provenance artifact rather than from a hand-specified family list, and the restricted aggregates are reproduced from it.
 
@@ -490,7 +490,7 @@ The effect decreases from development to held-out confirmation, with the primary
 
 The pathwise experiment remains developmental: the cLogP corridor was selected following an earlier feasibility screen, and a separately frozen held-out confirmation has therefore been specified but not opened. Endpoint-only control constrains only the returned molecule; pathwise control removes any successor outside the corridor before the transition is sampled; a terminal-penalty arm changes the objective but leaves the transition support unchanged. All arms share the reference law, objective, horizon, sources, seeds and evaluation budget, and the unit is the source molecule with source-clustered intervals.
 
-On $24$ eligible sources, endpoint-only trajectories return to the corridor after leaving it in $16/24=0.667$ $[0.458,0.833]$ cases under greedy control and $14/24=0.583$ $[0.375,0.792]$ under verified control; the conditional fractions are $16/24$ and $14/23$, so the small-denominator pathology the unconditional estimand guards against did not arise. These excursions are not confined to the boundary: their median depth is $0.69$ cLogP units and their median duration is four of the six committed edits. An earlier protected-motif experiment produced zero such excursions, confirming that the estimand need not be positive simply because intermediate states are observed.
+On $24$ eligible sources, endpoint-only trajectories return to the corridor after leaving it in $16/24=0.667$ $[0.458,0.833]$ cases under greedy control and $14/24=0.583$ $[0.375,0.792]$ under verified control; the conditional fractions are $16/24$ and $14/23$, so the conditional denominators remain large enough that the unconditional and conditional prevalence estimates agree closely. These excursions are not confined to the boundary: their median depth is $0.69$ cLogP units and their median duration is four of the six committed edits. An earlier protected-motif experiment produced zero such excursions, confirming that the estimand need not be positive simply because intermediate states are observed.
 
 Restricting the support to the corridor remains viable on this panel. The median source retains $79.8\%$ of its legal successors, only one source reaches the prespecified support-tight threshold, no evaluated state has an empty constrained edit set, and one trajectory terminates. Excluding the support-tight source leaves prevalence at $0.652$ and $0.565$ and terminal costs at $-0.121$ and $-0.041$, so the conclusions are unchanged.
 
@@ -532,7 +532,7 @@ Prior-method values are taken as reported in the comparator's paper and are not 
 
 Diversity is computed with the released evaluation script of \citet{jin2019vjtnn} rather than reimplemented from its prose description, and we audited that script rather than infer its behaviour. It admits a candidate only if it satisfies both the similarity constraint and the property target, deduplicates the admitted molecules, excludes a source with no admitted molecule from the average, and assigns a diversity of exactly zero to a source with only one. Similarity is a Morgan fingerprint of radius two on $2048$ bits with chirality disabled. These choices are not cosmetic. On our panel $19$ of the $70$ solved sources return a single distinct molecule and therefore enter the average as zero, which is the whole difference between the reported $0.393$ and the $0.539$ that averaging over only the $51$ multi-molecule sources would give. The reported value is $0.393$ with a bootstrap interval of $[0.331,0.452]$ over sources. Among solved sources \method{} returns on average $4.34$ distinct successful molecules of the twelve permitted, and no successful candidate is identical to its source, so the success count is unchanged under the stricter rule of the released script, which requires similarity strictly below one. We recomputed drug-likeness and similarity from the returned structures with those same functions rather than trusting the values recorded during sampling; the two agree to machine precision and the admission decision agrees on all $1{,}536$ candidates. All returned strings are canonical, so the string-level deduplication of the released script coincides with deduplication by molecule, and no pair of distinct returned molecules shares a fingerprint under the achiral setting.
 
-One limitation belongs to the comparator rather than to us. \citet{ninniri2025griddd} do not state how the diversity column of their main property-optimization table is computed. Their baseline diversity values are identical to those reported in the graph-to-graph translation line, which places the inherited rows on the scale defined above, but the method's own entry is undocumented; a rule matching the one used here is stated only in their appendix, for a separately adapted protocol with a different number of optimization rounds. We therefore report our value as computed under a named and audited definition, and we do not assert that it and the published entry were produced by the same procedure.
+GrIDDD does not specify the evaluator used for the diversity entry in its main property-optimization table. \citet{ninniri2025griddd} do not state how the diversity column of their main property-optimization table is computed. Their baseline diversity values are identical to those reported in the graph-to-graph translation line, which places the inherited rows on the scale defined above, but the method's own entry is undocumented; a rule matching the one used here is stated only in their appendix, for a separately adapted protocol with a different number of optimization rounds. We therefore report our value as computed under a named and audited definition, and we do not assert that it and the published entry were produced by the same procedure.
 
 Because every \method{} trajectory terminates prospectively on entering the goal region, a run either returns a molecule satisfying both constraints or goes extinct, and the set the diversity script admits is exactly the set of successful returns. The admitted set is therefore constructed the same way as in the published rows rather than merely being similar to it, and the residual differences are the cohort of $128$ against $800$ and the allowance of twelve candidates against twenty. The allowance difference is not neutral for diversity: a smaller allowance yields fewer second successes per source and so more single-molecule sources contributing zero, which depresses the reported value relative to what the same system would produce at twenty candidates.
 
@@ -541,7 +541,7 @@ The benchmark constrains returned molecules and says nothing about internal succ
 \subsection{Published record on the {QED} editing task}
 \label{app:qed-historical}
 
-\Cref{tab:qed} reproduces the comparator set assembled by GrIDDD. Stronger values have been reported on the same task by the graph-to-graph translation line, and we record them in \cref{tab:qed-historical} rather than leave the main table to be read as the full published record. We checked the primary sources rather than inheriting the numbers second-hand. The translation results use the same $800$ source molecules, the same similarity threshold $\delta=0.4$, and the same allowance of $K=20$ decoded candidates per source \citep{jin2019vjtnn}; the rate frequently quoted as $60.6\%$ is VJTNN+GAN, whereas VJTNN itself is reported at $59.9\%$. \citet{jin2020hierg2g} evaluate on the test sets provided by \citet{jin2019vjtnn} under the same range and similarity constraint with $K=20$, and reproduce the $59.9\%$ row, which is what places their $76.9\%$ on the same cohort.
+\Cref{tab:qed} reproduces the comparator set assembled by GrIDDD. Stronger values have been reported on the same task by the graph-to-graph translation line, and we record them in \cref{tab:qed-historical} for completeness. We checked the primary sources rather than inheriting the numbers second-hand. The translation results use the same $800$ source molecules, the same similarity threshold $\delta=0.4$, and the same allowance of $K=20$ decoded candidates per source \citep{jin2019vjtnn}; the rate frequently quoted as $60.6\%$ is VJTNN+GAN, whereas VJTNN itself is reported at $59.9\%$. \citet{jin2020hierg2g} evaluate on the test sets provided by \citet{jin2019vjtnn} under the same range and similarity constraint with $K=20$, and reproduce the $59.9\%$ row, which is what places their $76.9\%$ on the same cohort.
 
 \begin{table}[!ht]
 \centering
@@ -588,4 +588,59 @@ Intervals are bootstrap intervals resampled over the independent unit named in e
 
 \subsection{Compute}
 
-All reported jobs are CPU-only; no result in this paper required a GPU. Sampling containers reserve one core and burst to eight under a six-hour ceiling, and driver containers hold a quarter core under a twelve-hour ceiling. Compute is reported in two units that are never pooled: kernel calls, meaning evaluations of the learned reference law, and container-seconds. The sealed lookahead panel consumed $1{,}347$ kernel calls and roughly $24{,}300$ container-seconds, and retargeting branch points cost on the order of $10^2$ kernel calls and $10^3$ container-seconds each. Oracle calls are counted separately again, because the benchmark budgets in \cref{app:alignment} constrain returned molecules rather than internal evaluations.
+Reference-law training used a preemptible A10G GPU with $8$ CPU cores and $64$\,GiB of memory; the learned future-value models were trained on the same GPU class. The claim-bearing molecular sampling and evaluation jobs reported in \cref{sec:experiments} are CPU-based. Training and inference resources are therefore reported separately. Sampling containers reserve one core and burst to eight under a six-hour ceiling, and driver containers hold a quarter core under a twelve-hour ceiling. Compute is reported in two units that are never pooled: kernel calls, meaning evaluations of the learned reference law, and container-seconds. The sealed lookahead panel consumed $1{,}347$ kernel calls and roughly $24{,}300$ container-seconds, and retargeting branch points cost on the order of $10^2$ kernel calls and $10^3$ container-seconds each. Oracle calls are counted separately again, because the benchmark budgets in \cref{app:alignment} constrain returned molecules rather than internal evaluations.
+
+\subsection{The medicinal-chemistry validity gate}
+\label{app:medchem-gate}
+
+The gate rejects a returned molecule for a small, explicitly enumerated set of
+reasons: elements outside $\{$C,N,O,F,S,Cl,Br,I,P$\}$; a halogen carrying
+hydrogens or more than one heavy neighbour (hypervalent iodine such as
+\texttt{[IH4]}); sulfur carrying hydrogens with two or more heavy neighbours;
+phosphorus that is neither phosphate nor phosphonate; radicals; formal charge
+beyond $\pm1$; a ring larger than seven whose atoms are mostly \emph{not}
+shared with another ring; a nitrogen--nitrogen bond inside a three- or
+four-membered ring; and cumulated double bonds.
+
+Two of these conditions were narrowed after calibration refuted a broader
+version. A flat ring-size cutoff was rejected because the benchmark seeds
+themselves report $7$- and $8$-membered SSSR envelope rings over fused
+tricyclic cores, so ring size alone cannot separate a fused drug scaffold from
+a macrocycle; the condition now applies only to rings whose atoms are largely
+unshared. A minimum-ring-size condition for pendant systems was rejected
+because a published InVirtuoGen winner carries a cyclopropane; that minimum was
+moved out of the validity gate and into the definition of the specific
+construction operation it belongs to.
+
+The calibration is a test rather than a claim: the gate must accept all fifteen
+benchmark seeds and all twenty-five published InVirtuoGen winners, and reject
+the implausible molecules. The suite also asserts that ordinary sulfur
+chemistry (thiophene, thioether, sulfone) still passes, which is what prevents
+the hypervalent-sulfur condition from over-rejecting.
+
+We distinguish two gates. A \emph{pathwise} gate asks only whether a state is an
+executable molecule and is applied to every intermediate; the full gate, which
+additionally imposes QED, SA and similarity, is applied only to returned
+molecules. Conflating them is not conservative: applying the full gate to every
+intermediate prevents a trajectory from passing \emph{through} a temporarily
+unattractive molecule, and measurably degraded search.
+
+\subsection{Generalization of a single-cell controller}
+\label{app:t4-generalization}
+
+The lead-optimization controller described in \cref{sec:exp-t4} was developed
+against one cell. Applied unchanged to three further cells it returned no
+constraint-satisfying molecule from three hundred trajectories each. The
+failure is quantitative rather than mysterious: the similarity budget is a
+property of the seed, and the seed the controller was tuned on carries $41$
+Morgan-fingerprint bits while another carries $29$, so an edit program
+calibrated on the first spends a much larger fraction of the second.
+
+Replacing the fixed program with an adaptive search over the same action
+vocabulary --- identical operators, identical reference law, no new chemistry
+--- recovered feasibility on all three cells. We report this as a limitation of
+fixed edit programs rather than as a positive result, since the recovered
+molecules were not competitive; but it does locate the failure in the
+controller's lack of adaptation rather than in the operator set or the
+reference law.
+

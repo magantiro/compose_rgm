@@ -87,11 +87,14 @@ GrIDDD \citep{ninniri2025griddd} & 800 & 20 & 45.1\% & 0.283$^{\dagger}$ \\
 %% to benchmark performance rather than merely enlarging the formal state space.
 %% -----------------------------------------------------------------------------
 
+\input{sections/lead_optimization}
+
 %% AUTHORING NOTE, not for the PDF: this subsection title asserts a result that
 %% has NOT been measured.  Every value below is \XXX.  If the immediate-vs-
 %% future-aware contrast comes back neutral or negative, the title must change
 %% before submission; do not let a declarative title outlive its measurement.
 \subsection{Future-aware control under competing molecular objectives}
+\label{sec:exp-multiobj}
 \label{sec:exp-pareto}
 
 \Cref{sec:exp-lookahead} showed that remaining-budget information can improve molecular decisions when the desired endpoint is known. We now ask whether the same principle remains useful when molecular design is specified only through competing property preferences. Following the two-objective InversionGNN setting \citep{niu2025inversiongnn}, we optimize JNK3 and GSK3$\beta$ across five preference directions. The matched comparison uses $10{,}000$ random-ZINC property labels, a common objective-blind initialization bank held out from supervision, and the same $5{,}000$-evaluation optimization budget. Within \method{}, the immediate and future-aware controllers additionally share the same frozen $R_\theta$, property model $\widehat{\mathbf F}_\psi$, legal edit sets, preferences, and initialization. They differ only in whether a successor is valued by its immediate desirability $g_\lambda(y)$ or by the remaining-budget future value $h_\phi(y,\lambda,b-1)$. Average Pareto score (APS) is the primary endpoint; hypervolume, novelty, and top-$K$ diversity provide complementary measures of front quality.

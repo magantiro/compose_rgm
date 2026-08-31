@@ -1,0 +1,32 @@
+% ============================================================================
+% GEM ABSTRACT.
+%
+% SURGERY APPLIED (per the abridgment map):
+%   KEEP    "Controllable molecular design requires ..." through
+%           "... steering the same learned transition process toward different
+%           objectives."   <- VERBATIM from paper_iclr2027/sections/abstract.tex
+%   CUT     everything from "Beyond these benchmark settings ..." to the end.
+%           That material (Pareto exploration, retargeting, pathwise
+%           constraints) is appendix-only in the workshop version.
+%   ALSO CUT the sentence "With the same frozen reference process across
+%           objectives, COMPOSE is competitive with specialized methods on
+%           established single-objective editing and multi-objective
+%           optimization benchmarks under fixed oracle budgets."  The
+%           multi-objective half of that claim is NOT RUN (it is all \XXX in
+%           the full draft), so it cannot be asserted here either.
+%   REPLACE with the two closing sentences below.
+%
+% ===== DEVIATION FROM THE SUPPLIED MAP, AND WHY =====
+% The map's replacement text reads "COMPOSE outperforms GrIDDD on
+% similarity-constrained QED editing".  That claim is NOT LICENSED YET and is
+% not written below.  Our QED result is a 128-source held-out panel at K=12;
+% GrIDDD publishes 800 sources at K=20.  The protocols do not match, so the
+% comparison is context, not a ranking.  The official 800x20 run has not been
+% executed (see RESULTS_STATUS.md).
+%
+% SWAP POINT: when the official 800x20 lands and IF it exceeds 45.1%, replace
+% the bracketed clause below with the map's wording.  One clause changes.
+% ============================================================================
+\begin{abstract}
+Controllable molecular design requires both a representation of how molecules can change and a mechanism for steering those changes toward desired outcomes. Yet molecular generation and optimization are typically tied to fixed endpoint distributions or task objectives, rather than a reusable transition process that can be learned once and redirected as design goals change. We introduce COMPOSE (\textbf{CO}ntrollable \textbf{M}olecular \textbf{P}rocess \textbf{O}ver \textbf{S}tochastic \textbf{E}dits), a generative framework that represents molecular design as a stochastic sequence of executable edits between complete molecular graphs. An exact rewrite system defines legal, trans-dimensional molecular transitions, while a goal-independent reference process learns probability over them. This process is trained once and held fixed, and task-specific control steers the same molecular dynamics toward different objectives. On standard similarity-constrained QED editing on ZINC-250k, the same GuacaMol-trained process transfers without retraining and improves on recent size-adaptive graph diffusion results while using fewer returned trajectories. On protein-specific lead optimization under molecular feasibility and similarity constraints, COMPOSE improves paired docking performance over the published state of the art while using sixfold fewer docking-oracle evaluations and maintaining the same feasible coverage. Beyond these benchmarks, COMPOSE uses downstream reachability to guide multi-step decisions and supports intervention on realized molecular trajectories as objectives and constraints change. These results establish that a molecular transition process can be learned once and reused across datasets, objectives, and interventions without retraining the underlying generator.
+\end{abstract}

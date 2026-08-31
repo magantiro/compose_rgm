@@ -1,0 +1,232 @@
+% ============================================================================
+%  COMPOSE --- GEM @ NeurIPS 2026 workshop fork (5-page short paper, dry-lab).
+%
+%  THIS IS A SURGICAL ABRIDGMENT OF paper_iclr2027/main.tex, NOT A REWRITE.
+%  It does not modify, replace or supersede paper_iclr2027/, which remains the
+%  full-paper source of record.  Most retained prose is VERBATIM; the body is
+%  compressed by moving whole sections to the appendix, deleting repeated
+%  motivation, merging neighbouring method sections, and writing only a small
+%  number of connective blocks.
+%
+%  ---------------------------------------------------------------------------
+%  STYLE FILE: THE OFFICIAL GEM WORKSHOP STYLE FILE, IN USE.  NOT A STAND-IN.
+%  ---------------------------------------------------------------------------
+%  gem_workshop.sty
+%    sha256 7409882ae8d1e9651039222a3328298ca65d168d89565cf5c0580403d766ad19
+%    Retrieved 2026-08-26 from the "the GEM version" link on gembio.ai:
+%    https://drive.google.com/file/d/1Ay-EUdIlHGPawAoPqrFKRtFSZBrwDspk/view
+%
+%  ***** A DISCREPANCY ON THE WORKSHOP'S OWN SITE.  READ THIS. *****
+%  gembio.ai says to use the NeurIPS 2026 main-conference template and replace
+%  the style file with "the GEM version".  The file behind that link is
+%  ICLR-lineage (adapted by Hugo Larochelle from the NIPS macros) and its
+%  running head is HARD-CODED to the WRONG VENUE:
+%      \ificlrfinal  \lhead{Published at the GEM workshop, ICLR 2026}
+%      \else         \lhead{Under review at the GEM workshop, ICLR 2026}
+%  The workshop moved to NeurIPS 2026, but the linked style file was not
+%  updated from last cycle.  We use their file VERBATIM and UNPATCHED, because
+%  it is the artifact they instruct submitters to use and because everyone
+%  else's submission will carry the same string.
+%
+%  IF YOU WANT THE HEAD TO READ "NeurIPS 2026" INSTEAD, that is a one-line
+%  change on line 95 of gem_workshop.sty (and line 88 for camera-ready).  It is
+%  deliberately NOT applied here -- editing a venue's supplied style file is
+%  the author's call, not a build decision.  Ask the organizers first.
+%
+%  Because this file is ICLR-lineage, the document is driven the ICLR way:
+%      \usepackage{gem_workshop,times}   and   \iclrfinalcopy for camera-ready.
+%  The style substitutes the anonymous author block automatically while
+%  \iclrfinalcopy is commented out, which is the double-blind mode GEM requires.
+%  The official NeurIPS 2026 kit is kept in this directory as
+%  neurips_2026.sty / REFERENCE_neurips_2026_template.tex for reference only;
+%  it is NOT loaded.  (Its own submission footer is the generic main-conference
+%  "Submitted to ... Do not distribute." string and carries no GEM identity,
+%  which is precisely why GEM ships a replacement.)
+%
+%  FORMAL CONSTRAINTS (gembio.ai, retrieved 2026-08-26):
+%    * Short paper, dry-lab track: UP TO 5 PAGES, excluding references AND
+%      appendix.  The appendix below is therefore unlimited.
+%    * Double-blind: submissions "must be anonymized".  \iclrfinalcopy MUST
+%      stay commented out.  No author names, acknowledgements, or identifying
+%      repository URLs in the main text.
+%    * Deadline 30 August 2026, 11:59pm AoE.  Submission via OpenReview.
+%
+%  ---------------------------------------------------------------------------
+%  THE ONE CONVENTION THIS FORK INHERITS AND MUST KEEP
+%  ---------------------------------------------------------------------------
+%  NO NUMBER APPEARS HERE THAT IS NOT IN A VERIFIED SOURCE.  Unmeasured
+%  quantities stay \XXX inside a \gap block.  Do not replace an \XXX with a
+%  plausible value; replace it with a measurement or leave it.  See
+%  RESULTS_STATUS.md in this directory for exactly which slots are pending.
+% ============================================================================
+\documentclass{article}
+
+\usepackage{gem_workshop,times}
+
+\usepackage{subcaption}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{amsthm}
+\usepackage{booktabs,tabularx,array}
+\usepackage{xspace}
+\usepackage{graphicx}
+\usepackage[table]{xcolor}
+\definecolor{composeteal}{HTML}{487B81}
+\usepackage{enumitem}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage[capitalize,noabbrev]{cleveref}
+
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.75}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.55}
+
+% theorem + column definitions copied EXACTLY from paper_iclr2027/main.tex,
+% because the appendix inputs its section files verbatim and they depend on
+% these (corollary environment; the Y column type in tabularx).
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+% --- macros carried over unchanged from paper_iclr2027/main.tex -------------
+\newcommand{\DEVELOPMENTALPATHWISE}{}
+\newcommand{\PwEvalPhrase}{On the current evaluation}
+\newcommand{\PwPrevN}{14}
+\newcommand{\PwPrevD}{24}
+\newcommand{\PwPrevPct}{58.3}
+\newcommand{\PwDepth}{0.69}
+\newcommand{\PwDuration}{four}
+\newcommand{\PwHorizon}{six}
+\newcommand{\PwDelta}{-0.023}
+\newcommand{\PwCI}{[-0.182,0.134]}
+\newcommand{\PwMargin}{-0.25}
+
+\newcommand{\KL}{\mathrm{KL}}
+\newcommand{\XXX}{{\color{red}\textbf{XXX}}}
+\newcommand{\gap}[1]{\par\noindent{\color{red}\small\textbf{[GAP --- NOT YET RUN.]} #1}\par}
+\newcommand{\gapunverified}[1]{\par\noindent{\color{red}\small\textbf{[GAP --- MEASURED, VALUE NOT IN THE VERIFIED SOURCE SET.]} #1}\par}
+
+\newcommand{\method}{\textsc{Compose}\xspace}
+
+% Uniform interword spacing. TeX's space factor pads the space after a colon
+% (sf 2000) and a period (sf 3000), which shows up as a wide gap after
+% ``\method:'' in the title and after every sentence in the body.
+\frenchspacing
+
+% ---- PAGE ECONOMY (reversible: delete this block to restore style defaults) ----
+% Side margins only -- vertical text block left at the style default.
+\addtolength{\textwidth}{0.15in}
+\addtolength{\oddsidemargin}{-0.075in}
+\addtolength{\evensidemargin}{-0.075in}
+
+% Vertical whitespace. Nothing here changes fonts, sizes, or the text block --
+% only the gaps around headings, displays and floats, which is where a
+% math-heavy paper leaks the most space.
+% Heading skips only. Fonts are copied verbatim from gem_workshop.sty
+% (\large\sc\raggedright etc.) so headings look identical; only the
+% before/after glue is reduced.
+\makeatletter
+\def\section{\@startsection{section}{1}{\z@}{-1.4ex plus -0.4ex minus -.2ex}%
+  {1.0ex plus 0.2ex minus 0.1ex}{\large\sc\raggedright}}
+\def\subsection{\@startsection{subsection}{2}{\z@}{-1.2ex plus -0.4ex minus -.2ex}%
+  {0.55ex plus .15ex}{\normalsize\sc\raggedright}}
+\def\subsubsection{\@startsection{subsubsection}{3}{\z@}{-1.0ex plus -0.4ex minus -.2ex}%
+  {0.4ex plus .15ex}{\normalsize\sc\raggedright}}
+\def\paragraph{\@startsection{paragraph}{4}{\z@}{1.0ex plus 0.3ex minus .2ex}%
+  {-1em}{\normalsize\bf}}
+\makeatother
+\setlength{\abovedisplayskip}{4pt plus 2pt minus 2pt}
+\setlength{\belowdisplayskip}{4pt plus 2pt minus 2pt}
+\setlength{\abovedisplayshortskip}{2pt plus 1pt}
+\setlength{\belowdisplayshortskip}{3pt plus 1pt minus 1pt}
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setlength{\abovecaptionskip}{4pt}
+\setlength{\belowcaptionskip}{2pt}
+% gem_workshop.sty sets \parskip .5pc (6pt) with \parindent 0pt, i.e. a 6pt
+% gap after EVERY paragraph. Trimmed; still large enough to separate
+% paragraphs without indentation.
+\setlength{\parskip}{4pt plus 1pt minus 1pt}
+% gem_workshop.sty does \addtolength{\headsep}{0.25in}, which puts a quarter
+% inch of blank space above the text block on every page. Cancel most of it.
+\addtolength{\headsep}{-0.18in}
+% ------------------------------------------------------------------------------
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\Sset}{\mathcal{S}}
+\newcommand{\Gset}{\mathcal{G}}
+\newcommand{\Bset}{\mathcal{B}}
+\newcommand{\T}{\mathsf{T}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\one}{\mathbf{1}}
+\newcommand{\op}[1]{\texttt{#1}}
+
+%% TITLE: fixed by the owner in paper_iclr2027/main.tex; carried over EXACTLY,
+%% including the size override.  gem_workshop.sty is the same ICLR lineage as
+%% iclr2027_conference.sty, so the same defect applies: at the style's 17.28pt
+%% the title hyphenates ``Con-trol''. 15.9pt is the largest size that fits two
+%% clean lines with Trans-Dimensional Molecular intact.
+\title{\fontsize{15.9}{18.8}\selectfont \method: Generative Stochastic Rewriting for\\ Trans-Dimensional Molecular Design and Control}
+
+% DOUBLE-BLIND: this block is IGNORED while \iclrfinalcopy is commented out --
+% gem_workshop.sty substitutes the anonymous block automatically.  Do not
+% uncomment \iclrfinalcopy for a submission build.
+\author{Anonymous authors}
+
+%\iclrfinalcopy   % camera-ready ONLY; must stay commented out for submission.
+
+\begin{document}
+\maketitle
+
+% ===== A BUG IN gem_workshop.sty, DOCUMENTED BUT DELIBERATELY NOT FIXED. =====
+% Their style file sets the running head INSIDE \@maketitle:
+%     \else \lhead{Under review at the GEM workshop, ICLR 2026}
+% but their \maketitle wraps \@maketitle in \begingroup...\endgroup (lines
+% 62-71), and \lhead is a LOCAL assignment.  \endgroup therefore discards it,
+% and line 80's \fancyhead{} has already cleared the head.  Result: the GEM
+% running head renders on NO page.  Verified in a minimal document containing
+% nothing but their .sty, so this affects every submission using it unmodified.
+%
+% AUTHOR DECISION (2026-08-26): ship their file's UNMODIFIED behaviour.  The
+% head is intentionally absent.  Their string also names the wrong venue
+% ("ICLR 2026"; GEM 2026 is a NeurIPS workshop), which is a second reason not
+% to reinstate it unasked.
+%
+% To restore the head their file intended, uncomment ONE of these.  Neither
+% modifies the supplied style file.
+%\lhead{Under review at the GEM workshop, ICLR 2026}    % their exact string
+%\lhead{Under review at the GEM workshop, NeurIPS 2026} % the actual venue
+% =============================================================================
+
+\input{tables/t4_summary_row}
+\input{sections/gem_abstract}
+\input{sections/gem_intro}
+\input{sections/fig1}
+\input{sections/gem_method}
+\input{sections/gem_experiments}
+\input{tables/combined_23}
+\input{sections/gem_discussion}
+
+\bibliography{references}
+\bibliographystyle{plainnat}
+
+\newpage
+\appendix
+\input{sections/gem_appendix}
+
+\end{document}

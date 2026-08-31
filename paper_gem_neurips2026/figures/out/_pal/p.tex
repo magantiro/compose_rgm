@@ -1,0 +1,191 @@
+\documentclass{article}
+\usepackage[paperwidth=5.5in,paperheight=2.88in,margin=0pt]{geometry}
+\usepackage{times,amsmath,amssymb,tikz,xcolor}
+\usetikzlibrary{arrows}
+\definecolor{navy}{HTML}{1E3B30}
+\definecolor{indigo}{HTML}{46705C}
+\definecolor{cyan}{HTML}{7BA88C}
+\definecolor{orchid}{HTML}{BE8B2B}
+\definecolor{mute}{HTML}{C4D3C8}
+\definecolor{faint}{HTML}{E2EAE3}
+\definecolor{ink}{HTML}{223328}
+\definecolor{ground}{HTML}{F0F5F1}
+\definecolor{card}{HTML}{FFFFFF}
+\definecolor{edge}{HTML}{DDE8DF}
+\pagestyle{empty}\setlength{\parindent}{0pt}
+\begin{document}\noindent
+\begin{tikzpicture}[x=1in,y=1in,>=stealth,line join=round]
+% ---- the executor fixes the support; R_theta is a law on it
+\fill[navy!6,rounded corners=3.2pt] (0.1,2.42) rectangle (5.4,2.78);
+\fill[navy,rounded corners=1.4pt] (0.1,2.42) rectangle (0.14200000000000002,2.78);
+\node[text=navy,anchor=center] at (2.75,2.5999999999999996) {$\textstyle a\in\mathcal{A}(x),\quad T(x,a)\simeq y\in\mathcal{S}(x),\qquad \sum_{y\in\mathcal{S}(x)}R_\theta(y\mid x)=1$};
+% ---- control law: recomputed at every state from the remaining budget
+\fill[navy!6,rounded corners=3.2pt] (0.1,0.06) rectangle (5.4,0.42);
+\fill[navy,rounded corners=1.4pt] (0.1,0.06) rectangle (0.14200000000000002,0.42);
+\node[text=navy,anchor=center] at (2.75,0.24) {$\displaystyle P^{z,b}(y\mid x)\;=\;R_\theta(y\mid x)\,\frac{h_{b-1}(y,z)}{h_b(x,z)},\qquad h_b(x,z)=\mathbb{E}_{R_\theta}\!\left[g_z(X_b)\mid X_0=x\right]$};
+% ---- legal successors the controller did not commit to
+  \draw[mute,line width=0.85pt,->,opacity=0.9] (0.6133333333333336,1.2092598183048946) to[out=72,in=200] (0.8153333333333336,2.05);
+  \draw[mute,line width=0.55pt,line cap=round] (0.8653,2.0308) -- (0.9320,2.0692);
+  \draw[mute,line width=0.55pt,line cap=round] (0.9320,2.0692) -- (0.9987,2.0308);
+  \draw[mute,line width=0.55pt,line cap=round] (0.9987,2.0308) -- (1.0653,2.0692);
+  \draw[mute,line width=0.55pt,line cap=round] (0.9987,2.0308) -- (0.9987,1.9538);
+  \fill[mute] (0.8653,2.0308) circle (0.0160);
+  \fill[mute] (0.9320,2.0692) circle (0.0160);
+  \fill[mute] (0.9987,2.0308) circle (0.0160);
+  \fill[mute] (1.0653,2.0692) circle (0.0160);
+  \fill[mute] (0.9987,1.9538) circle (0.0205);
+  \draw[mute,line width=0.55pt,->,opacity=0.9] (0.6133333333333336,1.2092598183048946) to[out=72,in=200] (1.2353333333333334,1.76);
+  \draw[mute,line width=0.55pt,line cap=round] (1.2853,1.7408) -- (1.3520,1.7792);
+  \draw[mute,line width=0.55pt,line cap=round] (1.3520,1.7792) -- (1.4187,1.7408);
+  \draw[mute,line width=0.55pt,line cap=round] (1.4187,1.7408) -- (1.4853,1.7792);
+  \draw[mute,line width=0.55pt,line cap=round] (1.4853,1.7792) -- (1.5520,1.7408);
+  \fill[mute] (1.2853,1.7408) circle (0.0160);
+  \fill[mute] (1.3520,1.7792) circle (0.0160);
+  \fill[mute] (1.4187,1.7408) circle (0.0160);
+  \fill[mute] (1.4853,1.7792) circle (0.0160);
+  \fill[mute] (1.5520,1.7408) circle (0.0205);
+  \draw[mute,line width=0.85pt,->,opacity=0.9] (1.8680000000000003,1.2772598183048947) to[out=72,in=200] (2.036666666666667,2.05);
+  \draw[mute,line width=0.55pt,line cap=round] (2.0867,2.0654) -- (2.1533,2.0269);
+  \draw[mute,line width=0.55pt,line cap=round] (2.1533,2.0269) -- (2.2200,2.0654);
+  \draw[mute,line width=0.55pt,line cap=round] (2.2200,2.0654) -- (2.2867,2.0269);
+  \draw[mute,line width=0.55pt,line cap=round] (2.2867,2.0269) -- (2.3533,2.0654);
+  \draw[mute,line width=0.55pt,line cap=round] (2.3533,2.0654) -- (2.4200,2.0269);
+  \fill[mute] (2.0867,2.0654) circle (0.0160);
+  \fill[mute] (2.1533,2.0269) circle (0.0160);
+  \fill[mute] (2.2200,2.0654) circle (0.0160);
+  \fill[mute] (2.2867,2.0269) circle (0.0160);
+  \fill[mute] (2.3533,2.0654) circle (0.0160);
+  \fill[mute] (2.4200,2.0269) circle (0.0205);
+  \draw[mute,line width=0.55pt,->,opacity=0.9] (1.8680000000000003,1.2772598183048947) to[out=72,in=200] (2.456666666666667,1.76);
+  \draw[mute,line width=0.55pt,line cap=round] (2.5067,1.7446) -- (2.5733,1.7831);
+  \draw[mute,line width=0.55pt,line cap=round] (2.5733,1.7831) -- (2.5733,1.8601);
+  \draw[mute,line width=0.55pt,line cap=round] (2.5733,1.7831) -- (2.6400,1.7446);
+  \draw[mute,line width=0.55pt,line cap=round] (2.6400,1.7446) -- (2.7067,1.7831);
+  \draw[mute,line width=0.55pt,line cap=round] (2.7067,1.7831) -- (2.7733,1.7446);
+  \fill[mute] (2.5067,1.7446) circle (0.0160);
+  \fill[mute] (2.5733,1.7831) circle (0.0160);
+  \fill[mute] (2.5733,1.8601) circle (0.0160);
+  \fill[mute] (2.6400,1.7446) circle (0.0160);
+  \fill[mute] (2.7067,1.7831) circle (0.0160);
+  \fill[mute] (2.7733,1.7446) circle (0.0205);
+  \draw[mute,line width=0.85pt,->,opacity=0.9] (2.9413333333333336,1.3270392732195782) to[out=72,in=200] (3.1366666666666667,2.05);
+  \draw[mute,line width=0.55pt,line cap=round] (3.1867,2.0500) -- (3.2533,2.0885);
+  \draw[mute,line width=0.55pt,line cap=round] (3.2533,2.0885) -- (3.3200,2.0500);
+  \draw[mute,line width=0.55pt,line cap=round] (3.3200,2.0500) -- (3.3200,1.9730);
+  \draw[mute,line width=0.55pt,line cap=round] (3.3200,2.0500) -- (3.3867,2.0885);
+  \draw[mute,line width=0.55pt,line cap=round] (3.3867,2.0885) -- (3.4533,2.0500);
+  \fill[mute] (3.1867,2.0500) circle (0.0160);
+  \fill[mute] (3.2533,2.0885) circle (0.0160);
+  \fill[mute] (3.3200,2.0500) circle (0.0160);
+  \fill[mute] (3.3200,1.9730) circle (0.0160);
+  \fill[mute] (3.3867,2.0885) circle (0.0160);
+  \fill[mute] (3.4533,2.0500) circle (0.0205);
+  \draw[mute,line width=0.55pt,->,opacity=0.9] (2.9413333333333336,1.3270392732195782) to[out=72,in=200] (3.5566666666666666,1.76);
+  \draw[mute,line width=0.55pt,line cap=round] (3.6067,1.7600) -- (3.6733,1.7985);
+  \draw[mute,line width=0.55pt,line cap=round] (3.6733,1.7985) -- (3.7400,1.7600);
+  \draw[mute,line width=0.55pt,line cap=round] (3.7400,1.7600) -- (3.7400,1.6830);
+  \draw[mute,line width=0.55pt,line cap=round] (3.7400,1.7600) -- (3.8067,1.7985);
+  \fill[mute] (3.6067,1.7600) circle (0.0160);
+  \fill[mute] (3.6733,1.7985) circle (0.0160);
+  \fill[mute] (3.7400,1.7600) circle (0.0160);
+  \fill[mute] (3.7400,1.6830) circle (0.0160);
+  \fill[mute] (3.8067,1.7985) circle (0.0160);
+  \draw[mute,line width=0.85pt,->,opacity=0.9] (4.0944,1.3008660610163152) to[out=72,in=200] (4.343333333333334,2.05);
+  \draw[mute,line width=0.55pt,line cap=round] (4.3933,2.0885) -- (4.4600,2.0500);
+  \draw[mute,line width=0.55pt,line cap=round] (4.4600,2.0500) -- (4.4600,1.9730);
+  \draw[mute,line width=0.55pt,line cap=round] (4.4600,2.0500) -- (4.5267,2.0885);
+  \draw[mute,line width=0.55pt,line cap=round] (4.5267,2.0885) -- (4.5933,2.0500);
+  \fill[mute] (4.3933,2.0885) circle (0.0160);
+  \fill[mute] (4.4600,2.0500) circle (0.0160);
+  \fill[mute] (4.4600,1.9730) circle (0.0160);
+  \fill[mute] (4.5267,2.0885) circle (0.0160);
+  \fill[mute] (4.5933,2.0500) circle (0.0205);
+% ---- the committed trajectory; arrow width carries P^{z,b}
+  \draw[indigo,line width=2.0pt,->,line cap=round] (0.8620000000000003,1.14) -- (1.3020000000000003,1.14);
+  \node[text=ink,anchor=north,font=\sffamily\fontsize{5.9}{7}\selectfont,opacity=0.85] at (1.0820000000000003,1.055) {atom insert};
+  \node[text=ink,anchor=north,font=\fontsize{5.9}{7}\selectfont,opacity=0.55] at (1.0820000000000003,0.9749999999999999) {$\Delta n=+1$};
+  \draw[indigo,line width=2.0pt,->,line cap=round] (2.1166666666666667,1.14) -- (2.556666666666667,1.14);
+  \node[text=ink,anchor=north,font=\sffamily\fontsize{5.9}{7}\selectfont,opacity=0.85] at (2.336666666666667,1.055) {bond reroute};
+  \node[text=ink,anchor=north,font=\fontsize{5.9}{7}\selectfont,opacity=0.55] at (2.336666666666667,0.9749999999999999) {$\Delta n=0$};
+  \draw[indigo,line width=2.0pt,->,line cap=round] (3.19,1.14) -- (3.6300000000000003,1.14);
+  \node[text=ink,anchor=north,font=\sffamily\fontsize{5.9}{7}\selectfont,opacity=0.85] at (3.41,1.055) {atom delete};
+  \node[text=ink,anchor=north,font=\fontsize{5.9}{7}\selectfont,opacity=0.55] at (3.41,0.9749999999999999) {$\Delta n=-1$};
+  \draw[indigo,line width=2.0pt,->,line cap=round] (4.311333333333334,1.14) -- (4.751333333333333,1.14);
+  \node[text=ink,anchor=north,font=\sffamily\fontsize{5.9}{7}\selectfont,opacity=0.85] at (4.531333333333333,1.055) {cycle close};
+  \node[text=ink,anchor=north,font=\fontsize{5.9}{7}\selectfont,opacity=0.55] at (4.531333333333333,0.9749999999999999) {$\Delta n=0$};
+  \draw[indigo,line width=1.0pt,line cap=round] (0.3187,1.1138) -- (0.4320,1.1793);
+  \draw[indigo,line width=1.0pt,line cap=round] (0.4320,1.1793) -- (0.5453,1.1138);
+  \draw[indigo,line width=1.0pt,line cap=round] (0.5453,1.1138) -- (0.6587,1.1793);
+  \draw[indigo,line width=1.0pt,line cap=round] (0.6587,1.1793) -- (0.7720,1.1138);
+  \fill[indigo] (0.3187,1.1138) circle (0.0260);
+  \fill[indigo] (0.4320,1.1793) circle (0.0260);
+  \fill[indigo] (0.5453,1.1138) circle (0.0260);
+  \fill[indigo] (0.6587,1.1793) circle (0.0260);
+  \fill[orchid] (0.7720,1.1138) circle (0.0333);
+  \node[text=navy,anchor=center,font=\fontsize{8.4}{9}\selectfont] at (0.5453333333333337,0.8099999999999998) {$x_0$};
+  \node[text=ink,anchor=center,font=\fontsize{6.0}{7}\selectfont,opacity=0.7] at (0.5453333333333337,0.6749999999999998) {$b=K$};
+  \fill[navy,opacity=0.20] (1.4600,1.1793) circle (0.0680);
+  \draw[indigo,line width=1.0pt,line cap=round] (1.4600,1.1793) -- (1.5733,1.1138);
+  \draw[indigo,line width=1.0pt,line cap=round] (1.5733,1.1138) -- (1.6867,1.1793);
+  \draw[indigo,line width=1.0pt,line cap=round] (1.6867,1.1793) -- (1.8000,1.1138);
+  \draw[indigo,line width=1.0pt,line cap=round] (1.8000,1.1138) -- (1.9133,1.1793);
+  \draw[indigo,line width=1.0pt,line cap=round] (1.9133,1.1793) -- (2.0267,1.1138);
+  \fill[indigo] (1.4600,1.1793) circle (0.0260);
+  \fill[indigo] (1.5733,1.1138) circle (0.0260);
+  \fill[indigo] (1.6867,1.1793) circle (0.0260);
+  \fill[indigo] (1.8000,1.1138) circle (0.0260);
+  \fill[indigo] (1.9133,1.1793) circle (0.0260);
+  \fill[orchid] (2.0267,1.1138) circle (0.0333);
+  \node[text=navy,anchor=center,font=\fontsize{8.4}{9}\selectfont] at (1.8000000000000003,0.8099999999999998) {$x_1$};
+  \node[text=ink,anchor=center,font=\fontsize{6.0}{7}\selectfont,opacity=0.7] at (1.8000000000000003,0.6749999999999998) {$b=K-1$};
+  \draw[navy,opacity=0.20,line width=3.6pt,line cap=round] (2.8733,1.1138) -- (2.8733,0.9830);
+  \draw[indigo,line width=1.0pt,line cap=round] (2.6467,1.1138) -- (2.7600,1.1793);
+  \draw[indigo,line width=1.0pt,line cap=round] (2.7600,1.1793) -- (2.8733,1.1138);
+  \draw[indigo,line width=1.0pt,line cap=round] (2.8733,1.1138) -- (2.8733,0.9830);
+  \draw[indigo,line width=1.0pt,line cap=round] (2.8733,1.1138) -- (2.9867,1.1793);
+  \draw[indigo,line width=1.0pt,line cap=round] (2.9867,1.1793) -- (3.1000,1.1138);
+  \fill[indigo] (2.6467,1.1138) circle (0.0260);
+  \fill[indigo] (2.7600,1.1793) circle (0.0260);
+  \fill[indigo] (2.8733,1.1138) circle (0.0260);
+  \fill[indigo] (2.8733,0.9830) circle (0.0260);
+  \fill[indigo] (2.9867,1.1793) circle (0.0260);
+  \fill[orchid] (3.1000,1.1138) circle (0.0333);
+  \node[text=navy,anchor=center,font=\fontsize{8.4}{9}\selectfont] at (2.8733333333333335,0.8099999999999998) {$x_2$};
+  \node[text=ink,anchor=center,font=\fontsize{6.0}{7}\selectfont,opacity=0.7] at (2.8733333333333335,0.6749999999999998) {$b=K-2$};
+  \draw[ink,opacity=0.34,line width=0.5pt,dash pattern=on 1.1pt off 1.1pt] (3.8813,1.2054) -- (3.7680,1.1400);
+  \draw[ink,opacity=0.34,line width=0.5pt,dash pattern=on 1.1pt off 1.1pt] (3.7680,1.1400) circle (0.0390);
+  \draw[indigo,line width=1.0pt,line cap=round] (3.8813,1.2054) -- (3.9947,1.1400);
+  \draw[indigo,line width=1.0pt,line cap=round] (3.9947,1.1400) -- (3.9947,1.0091);
+  \draw[indigo,line width=1.0pt,line cap=round] (3.9947,1.1400) -- (4.1080,1.2054);
+  \draw[indigo,line width=1.0pt,line cap=round] (4.1080,1.2054) -- (4.2213,1.1400);
+  \fill[indigo] (3.8813,1.2054) circle (0.0260);
+  \fill[indigo] (3.9947,1.1400) circle (0.0260);
+  \fill[indigo] (3.9947,1.0091) circle (0.0260);
+  \fill[indigo] (4.1080,1.2054) circle (0.0260);
+  \fill[orchid] (4.2213,1.1400) circle (0.0333);
+  \node[text=navy,anchor=center,font=\fontsize{8.4}{9}\selectfont] at (4.04,0.8099999999999998) {$x_3$};
+  \node[text=ink,anchor=center,font=\fontsize{6.0}{7}\selectfont,opacity=0.7] at (4.04,0.6749999999999998) {$b=K-3$};
+  \draw[navy,opacity=0.20,line width=3.6pt,line cap=round] (4.8413,1.2054) -- (4.9547,1.0091);
+  \draw[indigo,line width=1.0pt,line cap=round] (5.1813,1.1400) -- (5.0680,1.2054);
+  \draw[indigo,line width=1.0pt,line cap=round] (5.0680,1.2054) -- (4.9547,1.1400);
+  \draw[indigo,line width=1.0pt,line cap=round] (4.9547,1.1400) -- (4.8413,1.2054);
+  \draw[indigo,line width=1.0pt,line cap=round] (4.8413,1.2054) -- (4.9547,1.0091);
+  \draw[indigo,line width=1.0pt,line cap=round] (4.9547,1.0091) -- (4.9547,1.1400);
+  \fill[orchid] (5.1813,1.1400) circle (0.0333);
+  \fill[indigo] (5.0680,1.2054) circle (0.0260);
+  \fill[indigo] (4.9547,1.1400) circle (0.0260);
+  \fill[indigo] (4.8413,1.2054) circle (0.0260);
+  \fill[indigo] (4.9547,1.0091) circle (0.0260);
+  \node[text=navy,anchor=center,font=\fontsize{8.4}{9}\selectfont] at (5.0,0.8099999999999998) {$x_K$};
+  \node[text=ink,anchor=center,font=\fontsize{6.0}{7}\selectfont,opacity=0.7] at (5.0,0.6749999999999998) {$b=0$};
+% ---- the maths, tied to the objects it describes
+  \node[text=ink,anchor=center,font=\fontsize{7.0}{8}\selectfont,opacity=0.75] at (0.9653333333333336,2.29) {$T(x,a)\simeq y$};
+  \draw[indigo,line width=0.45pt,opacity=0.9] (1.0820000000000003,1.252) -- (1.0820000000000003,1.172);
+  \node[draw=indigo,fill=white,line width=0.45pt,rounded corners=1.8pt,inner sep=2.2pt,font=\fontsize{6.5}{7.5}\selectfont,text=ink] at (1.0820000000000003,1.295) {$P^{z,b}(y\mid x)$};
+  \node[draw=mute,fill=white,line width=0.45pt,rounded corners=1.8pt,inner sep=2.2pt,font=\fontsize{6.5}{7.5}\selectfont,text=ink] at (2.1,1.51) {$R_\theta(y\mid x)$};
+  \draw[mute,line width=0.45pt,opacity=0.9] (4.6,2.25) -- (4.51,2.1599999999999997);
+  \node[draw=mute,fill=white,line width=0.45pt,rounded corners=1.8pt,inner sep=2.2pt,font=\fontsize{6.2}{7.2}\selectfont,text=ink] at (4.8,2.3099999999999996) {$h_{b-1}(y,z)\,/\,h_b(x,z)$};
+  \draw[orchid,line width=0.7pt,dash pattern=on 2pt off 1.6pt,opacity=0.9] (5.0,1.3208660610163152) -- (5.0,1.7);
+  \node[text=orchid,anchor=south,font=\fontsize{8.4}{9}\selectfont] at (5.0,1.71) {$g_z$};
+\end{tikzpicture}
+\end{document}

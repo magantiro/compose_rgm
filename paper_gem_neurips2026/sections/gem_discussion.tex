@@ -1,0 +1,30 @@
+% ============================================================================
+% GEM SECTION 4 --- Discussion.  BOTH PARAGRAPHS ARE THE MAP'S TEXT VERBATIM.
+% Nothing is added and nothing is trimmed here.  (An earlier revision of this
+% file carried two extra sentences lifted from the full-paper discussion --
+% the "not unique to COMPOSE" concession and the exact-backward-values
+% qualification.  Those were not in the map and have been removed.  If they
+% are wanted back, that is an authoring decision, not a fitting decision.)
+% ============================================================================
+\section{Discussion}
+\label{sec:discussion}
+
+COMPOSE is built around a reference process that is learned independently of any
+downstream objective. In our experiments, the same GuacaMol-trained $R_\theta$ is
+reused for variable-size editing on ZINC-250k and for protein-specific lead
+optimization, with only the controller changing between tasks. Representing the
+intermediate states explicitly as molecules also makes it possible to look ahead
+before committing an edit, continue from a molecule already reached when the
+objective changes, and restrict which molecular states can be visited along a
+trajectory.
+
+The current formulation still has important limits. Exact finite-horizon control
+requires exact backward values, which are only tractable on small enumerable
+state spaces. At molecular scale we instead rely on the learned approximation
+$h_\phi$, so the exact terminal-law guarantee no longer applies. COMPOSE is also
+limited by the rewrite vocabulary used to define its support. Chemistry that
+cannot be expressed by those rewrites cannot be recovered through control.
+Finally, the optimization experiments inherit the limitations of the property
+models and docking scores used as objectives. Extending the rewrite process to
+broader chemistry and testing it against experimentally measured objectives are
+natural next steps.

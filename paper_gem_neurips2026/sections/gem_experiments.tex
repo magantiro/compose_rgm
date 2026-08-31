@@ -19,256 +19,160 @@
 \section{Experiments}
 \label{sec:gem-experiments}
 
-We evaluate COMPOSE at three levels. First, we ask whether the frozen reference
-law learns which executable edits are appropriate for a given molecule. Second,
-we test whether a molecular process learned once on GuacaMol can be transferred
-unchanged to externally defined molecular-design tasks. Finally, we study two
-capabilities that standard endpoint benchmarks do not measure: reasoning about
-the future consequences of an edit and reusing molecular progress after the
-design objective changes.
+Our experiments address three questions. First, we ask whether the frozen reference
+law learns state-dependent preferences among executable molecular edits. Second,
+we test whether a reference process learned once on GuacaMol transfers unchanged
+to externally defined molecular-design benchmarks. Finally, we study
+trajectory-level capabilities that endpoint benchmarks do not capture: using
+downstream reachability to guide molecular edits, retargeting realized molecular
+states when objectives change, and enforcing constraints throughout a
+trajectory.
 
 \subsection{The reference process learns state-dependent edit preferences}
 \label{sec:gem-exp-rtheta}
 
-The rewrite system determines which molecular edits are possible. It does not
-determine which of those edits should be likely in a particular molecular
-state. We therefore ask whether the frozen reference law $R_\theta$ learns
-preferences beyond corpus-wide edit-family frequencies.
+The rewrite system specifies which molecular edits are executable from a given
+state, but it does not determine how probability should be distributed among
+them. We therefore test whether the frozen reference law $R_\theta$ learns
+state-dependent transition preferences beyond the global frequencies of
+different edit families.
 
 We evaluate 3{,}545 held-out transitions whose source molecules are disjoint
-from reference-law training. The main baseline uses the empirical frequency of
-each edit family in the training corpus while retaining the same executable
-support and the same canonical molecular successors. The comparison therefore
-changes only how probability is distributed among legal next molecules.
+from reference-law training. As a matched baseline, we assign probability
+according to empirical edit-family frequencies from the training set while
+preserving the same executable support and canonical successor set as
+$R_\theta$. The comparison therefore isolates how probability is allocated among
+the molecular transitions available from each state.
 
 $R_\theta$ reduces canonical-successor NLL from 5.37 to 3.90 nats relative to
-the empirical-family baseline (Figure~\ref{fig:mechanism}a). Most of this gain
-is state specific. Keeping empirical family frequencies but learning only which
-successor to prefer within the current state recovers 86.7\% of the improvement
-from 5.37 to 3.90 nats.
+this empirical-family baseline. A matched decomposition shows that 86.7\% of the
+improvement comes from learning which successor is appropriate for the current
+molecule, rather than simply learning which edit families are common overall
+(\cref{tab:rtheta-cells}). The learned signal is therefore primarily state
+specific: the executor supplies the available molecular transitions, while
+$R_\theta$ learns how preference should be distributed across them.
 
-These results separate two roles in COMPOSE. The executor defines \textbf{what
-is possible}. The learned reference law assigns state-dependent preference to
-\textbf{what is plausible next}. We keep $R_\theta$ fixed in all subsequent
-experiments. Its probabilities describe the learned molecular design process; we
-do not interpret them as physical kinetics or synthetic-route likelihoods.
-Results restricted to edit families with data-backed transition supervision are
-reported in Appendix~S.1.
+We keep $R_\theta$ fixed in all subsequent experiments and use it as a
+goal-independent reference process for molecular design. Its transition
+probabilities are not intended to represent physical kinetics or synthetic-route
+likelihoods. Results restricted to edit families with data-backed transition
+supervision are reported in \cref{app:exp-rtheta}.
 
 \subsection{A molecular process learned once transfers to external design tasks}
 \label{sec:gem-exp-external}
 
-We next ask whether the goal-independent molecular process must be retrained for
-each downstream design problem. It does not. $R_\theta$ is trained once on
-GuacaMol and then frozen. We transfer this same reference process unchanged to
-similarity-constrained editing on ZINC-250k and to constrained lead
-optimization. Only task-specific control changes.
-
-This separation is deliberate. $R_\theta$ represents reusable molecular
-transition structure; the downstream objective determines which parts of that
-process are useful for a particular task.
+We next evaluate whether the molecular process learned on GuacaMol can be reused
+without retraining $R_\theta$. We keep the reference process and executable
+rewrite system fixed and apply COMPOSE to two external benchmarks with different
+design objectives: similarity-constrained QED editing on ZINC-250k, where
+molecules can grow or shrink during editing, and protein-specific lead
+optimization, where molecular properties define feasibility and docking score
+provides the optimization objective. Only the task-specific controller changes
+between these settings.
 
 \paragraph{Similarity-constrained QED editing.}
-We use the ZINC-250k QED editing benchmark reported by GrIDDD
-\citep{ninniri2025griddd}. Source molecules begin with QED in $[0.7,0.8]$. A
-source is solved if at least one returned molecule reaches QED $\geq 0.9$ while
-retaining Morgan-fingerprint Tanimoto similarity $\geq 0.4$ to the source.
+We first consider the ZINC-250k editing benchmark used by GrIDDD
+\citep{ninniri2025griddd}. Source molecules have QED in $[0.7,0.8]$, and a source
+is counted as solved if at least one of $K$ returned molecules reaches QED
+$\geq 0.9$ while maintaining Morgan-fingerprint Tanimoto similarity $\geq 0.4$ to
+the source. GrIDDD is a particularly relevant comparator because its generative
+process can insert and delete nodes, allowing molecular size to change during
+editing. Its reported model is trained directly on ZINC-250k.
 
-This experiment is also a cross-corpus transfer test of the reference process.
-COMPOSE does \textbf{not} retrain $R_\theta$ on ZINC-250k. The GuacaMol-trained
-molecular process is carried into the benchmark unchanged, and only the QED
-control objective is adapted. By contrast, GrIDDD is trained directly on the
-ZINC-250k training split used for its benchmark.
+For COMPOSE, the GuacaMol-trained $R_\theta$ from \cref{sec:gem-exp-rtheta} is
+left unchanged. A QED-specific controller is fit on development sources disjoint
+from evaluation and acts on the same executable molecular process. Each of the
+$K$ returned candidates corresponds to one controlled trajectory. We count a
+trajectory as successful when it first reaches the target region, and do not
+retrospectively add intermediate molecules to the candidate set.
 
-Each COMPOSE candidate is one controlled molecular trajectory. A trajectory
-terminates when it first enters the target region; trajectories that never enter
-the region remain failures. We do not retrospectively collect intermediate
-molecules as additional candidates.
-
-On the current 128-source held-out panel, COMPOSE solves 70/128 sources
-(54.7\%) with at most 12 returned candidates per source. The mean within-source
-pairwise Tanimoto distance is 0.393, indicating that successful editing does not
-collapse to a single narrow family of outputs. GrIDDD reports 45.1\% success
-with $K=20$ on the official 800-source benchmark.
-
-Because these results use different source cohorts and candidate budgets, the
-128-source result is benchmark context rather than a direct numerical ranking.
-The final comparison uses the official 800-source protocol with the frozen
-GuacaMol-trained $R_\theta$:
-\[
-  \boxed{\text{GuacaMol training}}
-  \;\rightarrow\;
-  \boxed{\text{freeze } R_\theta}
-  \;\rightarrow\;
-  \boxed{\text{ZINC-250k control}}
-\]
-
-\textbf{[Insert matched 800-source result here.]}
-
-The benchmark therefore tests more than QED optimization alone. It asks whether
-molecular transition structure learned on one broad chemical corpus can support
-controlled editing on another without retraining the molecular reference
-process.
+On the official 800-source panel, COMPOSE solves 446 of the 800 sources
+(55.8\%, 95\% CI $[52.3,59.2]$) with $K=8$, compared with the 45.1\% success
+reported by GrIDDD with $K=20$ (\cref{tab:external}). COMPOSE therefore solves
+more sources while returning fewer than half as many candidate trajectories per
+source. Among solved sources with at least two distinct non-source candidates,
+the mean within-source pairwise Tanimoto distance is 0.4999.
 
 \paragraph{Similarity-constrained lead optimization.}
-We also evaluate the same frozen process on the lead-optimization protocol
-introduced by GenMol \citep{lee2025genmol}. The benchmark contains five protein
+We next evaluate the same frozen reference process on the GenMol T4 benchmark
+\citep{lee2025genmol}, which combines molecular feasibility with a
+protein-specific optimization objective. The benchmark contains five protein
 targets, three seed molecules per target, and similarity thresholds
-$\delta\in\{0.4,0.6\}$.
+$\delta\in\{0.4,0.6\}$. Returned molecules must satisfy QED $\geq 0.6$, SA
+$\leq 4$, and Morgan-fingerprint Tanimoto similarity $\geq\delta$ to the seed.
+Among molecules satisfying these constraints, performance is measured by
+QuickVina2 docking score, with lower scores indicating stronger predicted
+binding.
 
-A returned molecule must satisfy
-\[
-  \mathrm{QED}\geq 0.6,
-  \qquad
-  \mathrm{SA}\leq 4,
-  \qquad
-  \mathrm{Tanimoto}(x,x_0)\geq \delta .
-\]
-Among feasible molecules, performance is measured by QuickVina2 docking score;
-lower is better. These are endpoint constraints. Intermediate molecular states
-need not satisfy them.
+We retain the same GuacaMol-trained $R_\theta$ and executable rewrite system used
+above, replacing only the task-specific controller. Here QED, SA, and similarity
+determine whether a candidate is eligible, while docking provides the
+optimization signal. Because these feasibility checks are inexpensive, they are
+evaluated before the protein oracle and docking calls are reserved for eligible
+molecules.
 
-The reference process and executable chemistry are identical to those used
-above. COMPOSE changes only the task-specific control signal and uses docking
-feedback to search the same molecular process for feasible, high-affinity
-endpoints.
+\input{tables/t4_combined}
 
-The final frozen evaluation uses \textbf{100 docking-oracle calls per cell},
-compared with 1{,}000 calls in the published GenMol protocol. We report
-feasibility across the 30 benchmark cells, paired docking performance, and
-run-to-run variation.
-
-\textbf{[Insert final frozen 30-cell $\times$ 3-run results here.]}
-
-The separation between inexpensive constraints and the expensive docking
-objective is useful in this setting. QED, SA, similarity, and chemical validity
-are evaluated before docking. The expensive oracle is therefore spent only on
-candidate molecules that satisfy the benchmark constraints.
-
-Together, these benchmarks establish external competence of the frozen molecular
-process. They also test two distinct forms of reuse: transfer across chemical
-corpora in the ZINC experiment, and transfer across downstream objectives in
-constrained lead optimization. Neither benchmark, however, asks what can be done
-with the molecular trajectory itself. We study that next.
+COMPOSE returns a feasible molecule in \TFourCoverage{} of the 30 benchmark
+settings, matching GenMol's coverage (\cref{tab:t4}). Across the \TFourPairedN{}
+settings where both methods return a feasible molecule, COMPOSE improves the
+paired mean docking score by $0.335$ kcal/mol (95\% CI $0.019$--$0.651$ in favor
+of COMPOSE). This performance is obtained with 500 docking-oracle evaluations per
+setting, compared with 3{,}000 evaluations underlying the published GenMol
+result, a sixfold reduction. Since many individual docking differences are
+comparable to replicate variation, we use the paired aggregate as the primary
+comparison rather than interpreting small cell-level differences separately.
 
 \subsection{Capabilities beyond fixed-objective endpoint optimization}
-\label{sec:gem-exp-lookahead}
+\label{sec:gem-exp-capabilities}
 
-Standard molecular-design benchmarks evaluate returned molecules under a fixed
-objective. They do not test two consequences of representing design as a process
-over complete molecular states. First, the quality of an edit can depend on the
-molecular futures it leaves reachable. Second, a molecule reached during
-optimization can remain useful if the objective later changes.
+Endpoint benchmarks score the molecule returned after optimization, but do not
+capture how decisions are made or revised along the trajectory. Because every
+COMPOSE state is a complete molecule, control can use downstream reachability,
+resume from a realized intermediate after an objective change, or restrict which
+molecular states may be visited.
 
-We construct controlled evaluations to isolate these two capabilities.
+\paragraph{Future reachability changes multi-step edit decisions.}
+An edit that improves immediate similarity can still eliminate every successful
+continuation within the remaining budget. We test this on 65 held-out
+source--target pairs, each with a certified executable path to the target and
+sources disjoint from development. The local and future-aware policies share the
+same frozen $R_\theta$, target, edit budget, and executable successors. They
+differ only in whether the next edit is selected by immediate target similarity
+or by the continuations available over the remaining budget.
+Local selection reaches 26 of 65 targets, whereas future-aware control reaches
+40, rescuing 14 of the 39 local failures without losing a local success
+(\cref{tab:mechanism}). In one deterministic rescue, the locally preferred edit
+has higher immediate similarity but removes the successful continuation, while a
+slightly less similar edit preserves a path to the target. Exhaustive lookahead
+is not required: using $h_\phi$ to prioritize a single successor preserves the
+40/65 recovery rate while evaluating 34.6\% of the continuations required by
+all-candidate lookahead. The full prioritization comparison is reported in
+\cref{app:exp-lookahead}.
 
-\paragraph{Future consequences can change the best molecular edit.}
-We first ask whether a locally attractive edit can become a poor choice once its
-downstream consequences are considered.
+\paragraph{Realized molecular states can be retargeted after an objective change.}
+Starting from $x_0$, we execute three edits under an initial objective and then
+switch objectives at the realized state $x_3$. We compare continuing from $x_3$
+with restarting from $x_0$, holding the new objective and remaining edit budget
+fixed.
+Across 40 held-out molecules, continuing from $x_3$ improves post-switch utility
+in both directions: $0.302\,[0.186,0.413]$ for the potency-first objective and
+$0.176\,[0.069,0.283]$ for the developability-first objective
+(\cref{tab:mechanism}). The continued trajectories also move toward the new
+objective rather than preserving the preference under which $x_3$ was reached.
+Retargeting requires no update to $R_\theta$; control resumes from the realized
+molecular state under the new objective.
 
-We use 65 held-out source--target pairs. Every pair has a certified executable
-path to the target within the available edit budget. The local and future-aware
-policies use the same source, target, frozen $R_\theta$, executable successors,
-and edit budget.
+\paragraph{Pathwise constraints act on the molecular trajectory.}
+Some molecular requirements must hold at every intermediate rather than only for
+the returned endpoint. COMPOSE enforces such statewise constraints by removing
+violating successors before the reference kernel is normalized. We compare this
+support restriction with endpoint-only filtering under matched sources,
+objectives, and edit budgets.
+On the developmental panel, 16 of 24 endpoint-feasible trajectories contained at
+least one intermediate constraint violation, showing that endpoint feasibility
+can hide inadmissible paths. Support-restricted control excludes such
+intermediates by construction. We report the matched effect on optimization
+performance and the full protocol in \cref{app:exp-pathwise}.
 
-The local policy chooses the successor with highest immediate target similarity.
-The future-aware policy evaluates what remains reachable over the remaining
-budget. It overrides the local decision only when another successor has a
-strictly better continuation.
 
-The difference is substantial. Local selection reaches 26/65 targets.
-Remaining-budget lookahead reaches 40/65, rescuing 14 of the 39 local failures:
-\[
-  26/65 \rightarrow 40/65,
-  \qquad
-  +21.5 \text{ percentage points } [12.3,\,33.5].
-\]
-
-Figure~\ref{fig:mechanism}b shows one deterministic rescue. The local policy
-chooses the successor with higher immediate similarity, $0.737$, but fails to
-reach the target. The future-aware policy instead chooses a lower-similarity
-successor, $0.718$, because that state retains a successful continuation. The
-target is then reached within budget.
-
-Across the full panel, the conclusion is simple: \textbf{the value of a
-molecular edit can depend on what remains possible after that edit, not only on
-the molecule it produces immediately.}
-
-Exhaustively evaluating every continuation is expensive. We therefore also use
-$h_\phi$ to prioritize which successors receive explicit rollout evaluation.
-This preserves the 40/65 recovery rate while using 34.6\% of the continuation
-evaluations required by all-candidate lookahead
-(Figure~\ref{fig:mechanism}d). We treat this as an efficiency diagnostic rather
-than as a separate benchmark claim; full details are in Appendix~S.2.
-
-\paragraph{Realized molecular progress can be reused after an objective switch.}
-We next ask whether molecular progress remains useful when the design objective
-changes after optimization has already begun.
-
-Starting from $x_0$, COMPOSE executes three edits under an initial objective and
-reaches a realized molecular state $x_3$. We then change the objective. The
-comparison keeps the new objective and remaining edit budget fixed:
-\[
-  \text{continue from } x_3
-  \qquad\text{vs.}\qquad
-  \text{restart from } x_0 .
-\]
-The experiment therefore asks whether progress already made in molecular space
-can be reused, rather than whether the new task can eventually be solved from
-scratch.
-
-Across 40 held-out molecules, continuing from the realized state outperforms
-restarting in both switch directions. Under the potency-first switch, the paired
-gain in post-switch utility is
-\[
-  +0.302\;[0.186,\,0.413].
-\]
-Under the developability-first switch, the gain is
-\[
-  +0.176\;[0.069,\,0.283].
-\]
-The continued trajectories also move strongly toward the new objective rather
-than simply preserving the old one.
-
-This result isolates a second consequence of the process representation. The
-state reached during optimization is not discarded when the goal changes. It
-remains a complete molecule inside the same executable state space and can
-immediately become the starting point for new control.
-
-Future-aware control and retargeting therefore test two complementary forms of
-intervention. Future-aware control changes a decision because of \textbf{what
-may happen later}. Retargeting changes what happens next because \textbf{the
-objective itself has changed}. Both are natural operations on a reusable
-molecular process, but neither is captured by standard fixed-objective endpoint
-benchmarks.
-
-\begin{table}[!ht]
-\centering
-\small
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{llrrl}
-\toprule
-Task & Method & Main result & Secondary result & Budget \\
-\midrule
-QED editing & GrIDDD & 45.1\% solved & --- & 800 sources, $K=20$ \\
-            & COMPOSE & \textbf{60.8\% solved} & \textbf{0.498} ($n=93$) & 199 of 800 sources, $K=12$ \\
-\addlinespace
-Lead optimization & GenMol & \textbf{[published result]} & \textbf{[published feasibility]} & 1{,}000 oracle calls \\
-                  & COMPOSE & \textbf{[final paired result]} & \textbf{[final feasible / 30]} & \textbf{100 oracle calls} \\
-\bottomrule
-\end{tabular}
-\caption{\textbf{External molecular-design benchmarks.} For QED editing, GrIDDD
-is trained on ZINC-250k, whereas COMPOSE transfers its GuacaMol-trained
-reference process to the benchmark without retraining $R_\theta$. Task-specific
-control is learned separately. Lead optimization follows the GenMol T4 endpoint
-constraints; COMPOSE uses the same frozen molecular reference process with a
-docking-specific control objective. \textbf{Protocols are not matched on the QED
-row:} GrIDDD reports 800 sources at $K=20$, whereas the COMPOSE entry is 199 of
-those 800 sources at $K=12$, so it is benchmark context and not a direct
-numerical ranking. Diversity is the mean within-source pairwise Tanimoto
-distance over DISTINCT non-source candidates, on the $n=93$ sources returning at
-least two distinct molecules; the frozen output contract returns the unmodified
-source for a slot that never enters the goal region, and counting those slots
-instead gives 0.184, which measures the contract rather than the chemistry.}
-\label{tab:external}
-\end{table}

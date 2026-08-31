@@ -1,0 +1,26 @@
+EDIT 5b — connect every remaining floating atom
+
+The previous cleanup fixed the grey-blue atoms but left the WARM-COLOURED ones
+floating. In panel (b), y1 has a red circle sitting below and left of the
+structure with no bond, y3 has an orange circle below the chain with no bond,
+and y5 has an orange circle and a red circle at the bottom with no bond. The
+same problem appears in panels (a) and (c), since those molecules match.
+
+Do this as an explicit check, molecule by molecule, in all three panels
+including the large molecule x:
+
+  For every single circle, count the bond lines that touch it.
+  If the count is zero, draw a new bond from that circle to the nearest
+  circle in the same molecule.
+  Repeat until no circle anywhere in the figure has zero bonds.
+
+Pay particular attention to the salmon/red circles and the pale orange
+circles. Those are the ones currently left unattached. They are atoms, not
+decorative dots, and every one of them must be bonded into its molecule.
+
+The result must be that every molecule in the figure is one single connected
+piece, with no separate fragments and no lone circles.
+
+Use the same bond stroke width and colour as the existing bonds. Do not move
+any circle, do not change any circle's size or colour, do not resize or
+reposition any molecule, and do not change anything else in the figure.

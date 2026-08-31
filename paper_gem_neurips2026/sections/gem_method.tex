@@ -29,16 +29,14 @@
 % before submission.
 % ============================================================================
 
-\section{COMPOSE: an executable molecular process}
+\section{COMPOSE}
 \label{sec:method}
 
 COMPOSE represents molecular design as control of a learned stochastic process
-over complete molecules (Figure~\ref{fig:ppp}). The construction separates
-three roles. An exact rewrite executor determines which molecular transitions
-are \textbf{possible}. A goal-independent reference model learns which
-executable transitions are \textbf{plausible}. Task-specific control then
-reweights this frozen process according to which molecular futures are
-\textbf{purposeful} for the current objective.
+over complete molecules (Figure~\ref{fig:ppp}). An exact rewrite executor
+determines which molecular transitions are available, a goal-independent
+reference model learns probability over those transitions, and finite-horizon
+control reweights the frozen process toward a downstream design objective.
 
 \subsection{Executable molecular state space}
 \label{sec:gem-support}
@@ -68,31 +66,22 @@ resulting graph. From state $x$, the executor exposes
 The guards enforce the declared atom and bond vocabularies, valence
 constraints, connectivity, and molecular-size bounds before an edit is
 committed. Inadmissible states therefore have zero transition support rather
-than being discouraged by a learned penalty.
+than receiving a learned penalty. The rewrite language includes atom insertion
+and deletion together with atom-, bond-, and ring-level transformations
+(\cref{app:statespace}). Insertions and deletions connect $\mathcal X_n$ with
+$\mathcal X_{n\pm1}$, allowing trajectories to grow, shrink, and restructure
+molecules within the same state space.
 
-The rewrite language contains atom insertion and deletion together with atom-,
-bond-, and ring-level transformations (Appendix~N). Insertion and deletion
-connect $\mathcal X_n$ to $\mathcal X_{n+1}$ and $\mathcal X_{n-1}$, while the
-remaining transformations restructure a molecule at fixed size. COMPOSE is
-therefore trans-dimensional: trajectories can grow, shrink, and reorganize
-molecular graphs within one state space.
+Because every admitted rewrite passes these guards, $T(x,a)\in\mathcal X$ for
+all $x\in\mathcal X$ and $a\in\mathcal A(x)$; the formal closure statement and
+full rewrite semantics are given in \cref{app:statespace}. Multi-edit ring construction and
+refinement used in molecular optimization compile into the same primitive
+rewrite language and do not enlarge this support (\cref{app:macros}).
 
-\begin{proposition}[Executable-support closure]
-\label{prop:gem-closure}
-For every $x\in\mathcal X$ and $a\in\mathcal A(x)$,
-\[
-  T(x,a)\in\mathcal X .
-\]
-\end{proposition}
+The edit sets $\mathcal A(x)$ specify the support of the process. We next learn
+how probability is distributed across it.
 
-Hence any stochastic process supported on the executable edit sets
-$\{\mathcal A(x)\}_{x\in\mathcal X}$ remains in the declared molecular state
-space. The proof and full rewrite semantics are given in Appendix~O.
-
-The executor determines which molecular changes are possible. It does not
-determine how probability should be distributed among them.
-
-\subsection{Learning a molecular reference process}
+\subsection{Learning the reference process}
 \label{sec:gem-reference}
 
 We learn a goal-independent stochastic law over executable edits. Writing a
@@ -106,13 +95,13 @@ $\eta$, the reference model factorizes
   \qquad a\in\mathcal A(x).
   \label{eq:gem-factorization}
 \end{equation}
-Normalization is restricted to candidates admitted by the executor. The model
-receives no design objective, remaining budget, or downstream task information.
-Thus $p_\theta$ models molecular transition structure independently of the
-purpose for which the process will later be controlled.
+Normalization is restricted to candidates admitted by the executor, and the
+model receives no design objective, remaining budget, or task-specific
+constraint. The learned law therefore depends on the current molecular state but
+not on the downstream purpose for which the process will later be used.
 
-The stochastic object used for control is a distribution over \textbf{molecular
-successors}, not raw edit marks. Different marks can produce the same molecule
+The stochastic object used for control is a distribution over molecular
+successors, not raw edit marks. Different marks can produce the same molecule
 because of graph symmetries, equivalent matches, or alternative internal rewrite
 descriptions. For a canonical successor $y$, define its executable fiber
 \[
@@ -121,7 +110,8 @@ descriptions. For a canonical successor $y$, define its executable fiber
   \{a\in\mathcal A(x): T(x,a)\simeq y\},
 \]
 where $\simeq$ denotes registered molecular canonicalization. Let $\mathcal
-S(x)$ denote the distinct non-self canonical successors of $x$. We define
+S(x)$ denote the distinct non-self canonical successors of $x$. Conditioning the
+pushforward mark law on a committed change of molecular state gives
 \begin{equation}
   R_\theta(y\mid x)
   =
@@ -134,52 +124,46 @@ S(x)$ denote the distinct non-self canonical successors of $x$. We define
   \qquad y\in\mathcal S(x).
   \label{eq:gem-rtheta}
 \end{equation}
-This quotient is important. A molecular transition does not become more probable
-merely because symmetry gives the executor several syntactic ways to describe
-it. State-level control therefore acts only after canonicalization.
+Aggregating over the fiber prevents a molecular transition from receiving
+additional probability merely because symmetry or implementation details provide
+several equivalent edit descriptions. Control therefore acts on $R_\theta$ after
+canonicalization rather than on individual edit marks.
 
-We train $R_\theta$ from executable teacher transitions. If $y_i^\star$ is the
-realized canonical successor of state $x_i$, the reference objective is
+We train $R_\theta$ from executable teacher transitions by minimizing the
+canonical-successor negative log-likelihood over transitions that commit a
+molecular jump,
 \begin{equation}
   \mathcal L_{\mathrm{ref}}(\theta)
   =
-  -\frac{1}{N}\sum_{i=1}^{N}\log R_\theta(y_i^\star\mid x_i).
+  -\frac{1}{N}\sum_{i=1}^{N}\log R_\theta(y_i^\star\mid x_i),
   \label{eq:gem-refloss}
 \end{equation}
+with rows sampled from the declared editing measure. The implementation carries a
+per-row registered transition weight, which is unity for every row of the frozen
+checkpoint reported here.
 Every teacher transition is replayed through the same executor used at
 inference. Targets and compiled programs are used to construct supervision but
-are not supplied to the reference model at inference. We learn this reference
-process once and keep it fixed across downstream objectives.
-
-Equations~\eqref{eq:gem-factorization}--\eqref{eq:gem-refloss} also motivate the
-decomposition in Section~\ref{sec:gem-exp-rtheta}: the family head learns
-\textbf{which kind of edit} is appropriate, while the within-family law learns
-\textbf{which molecular successor} is appropriate for the current state.
+are not supplied to the reference model at inference. Once trained, $R_\theta$ is
+fixed across downstream objectives.
 
 \subsection{Finite-horizon control of the frozen process}
 \label{sec:gem-control}
 
-Task information enters only after the molecular reference process has been
-learned. Let $z$ denote a design objective and $g_z:\mathcal X\rightarrow
-\mathbb R_{\geq0}$ its terminal desirability. For $b$ remaining molecular
-transitions, define
+Task information enters only after the reference process has been learned. Let
+$z$ denote a design objective and $g_z:\mathcal X\rightarrow\mathbb R_{\geq0}$
+its terminal desirability. For $b$ remaining transitions, define
 \begin{equation}
   h_0(x,z)=g_z(x),
   \qquad
   h_b(x,z)
   =
-  \sum_{y\in\mathcal S(x)} R_\theta(y\mid x)\, h_{b-1}(y,z).
-  \label{eq:gem-backward}
-\end{equation}
-Equivalently,
-\[
-  h_b(x,z)
+  \sum_{y\in\mathcal S(x)} R_\theta(y\mid x)\, h_{b-1}(y,z)
   =
   \mathbb E_{R_\theta}\!\left[ g_z(X_b)\mid X_0=x \right].
-\]
-This distinction is central. A property model scores \textbf{the molecule
-currently in hand}. The backward value $h_b$ instead scores \textbf{what remains
-reachable from that molecule within the remaining budget}.
+  \label{eq:gem-backward}
+\end{equation}
+A property model scores the current molecule, whereas $h_b(x,z)$ measures the
+desirability reachable from that molecule within the remaining budget.
 
 For $h_b(x,z)>0$, the finite-horizon Doob transform defines
 \begin{equation}
@@ -189,8 +173,8 @@ For $h_b(x,z)>0$, the finite-horizon Doob transform defines
   \frac{h_{b-1}(y,z)}{h_b(x,z)} .
   \label{eq:gem-central}
 \end{equation}
-The controller therefore changes probability only among molecular transitions
-already supported by the frozen reference process.
+The controlled kernel reweights only transitions already supported by
+$R_\theta$.
 
 \begin{proposition}[Finite-horizon molecular control]
 \label{prop:gem-doob}
@@ -204,41 +188,22 @@ Equation~\eqref{eq:gem-central} at each step yields
 \]
 \end{proposition}
 
-Thus exact backward values realize the $g_z$-tilted terminal law while
-introducing no transition outside the executable reference support. The proof
-and precise terminal-state assumptions are given in Appendix~O.
+Exact backward values therefore realize the $g_z$-tilted terminal law without
+introducing transitions outside the reference support. The proof and
+terminal-state assumptions are given in \cref{app:control-proof}.
 
-Exact backward computation requires enumerating the reachable molecular state
-graph and is infeasible at molecular scale. We therefore learn a goal- and
-budget-conditioned approximation
-\begin{equation}
-  h_\phi(x,z,b)\approx
-  \mathbb E_{R_\theta}\left[ g_z(X_b)\mid X_0=x \right]
-  \label{eq:gem-hphi}
-\end{equation}
-from finite-budget continuations of the frozen reference process. Replacing $h$
-by $h_\phi$ in Equation~\eqref{eq:gem-central} gives the scalable future-value
-controller. Approximation error may change which legal successor is preferred,
-but it cannot introduce transitions outside the support of $R_\theta$. We
-therefore reserve the exact terminal-reweighting guarantee for the exact
-$h$-transform. Future-value supervision and sampling algorithms are given in
-Appendices~G and~Q.
+Exact backward evaluation is infeasible in realistic molecular spaces. We
+therefore parameterize a nonnegative, goal- and budget-conditioned
+approximation $h_\phi(x,z,b)\approx h_b(x,z)$, learned from finite-budget
+continuations of the frozen reference process, and substitute it into
+Equation~\eqref{eq:gem-central}.
+Approximation error can alter probability among supported successors, but cannot
+introduce transitions outside $R_\theta$. Exact terminal reweighting is
+therefore a property of the exact $h$-transform rather than the learned
+approximation. Training and sampling details are given in \cref{app:models,app:sampling}.
 
-Because control is recomputed from the molecule actually reached, the same
-process also supports intervention after execution begins. If an objective
-changes from $z$ to $z'$ after reaching $x_\tau$, control simply resumes from
-$x_\tau$ under $z'$; no parameter of $R_\theta$ changes.
-Section~\ref{sec:gem-exp-lookahead} tests whether retaining this realized
-molecular progress is useful in practice.
-
-\paragraph{Executable transformations at longer time scales.}
-\label{sec:gem-macros}
-Some useful molecular changes require several primitive rewrites before their
-value becomes visible. For molecular optimization, COMPOSE therefore exposes a
-small set of temporally extended transformations, including linked and fused
-ring construction and ring-local refinement. These operations introduce no
-additional molecular support: they compile into the same primitive executable
-rewrites, and every committed intermediate is checked by the same executor. The
-controller chooses the transformation semantics, while the frozen reference law
-ranks its legal molecular realizations. Full construction, refinement, and
-qualification details are given in Appendix~L.
+Because control is recomputed from the molecule actually reached, its objective
+can change during a trajectory. If the process reaches $x_\tau$ under $z$ and the
+objective changes to $z'$, control resumes from $x_\tau$ under $z'$ with
+$R_\theta$ unchanged. We evaluate this setting in
+Section~\ref{sec:gem-exp-capabilities}.

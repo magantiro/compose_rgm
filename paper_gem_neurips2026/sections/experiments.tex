@@ -1,0 +1,155 @@
+% ============================================================================
+% SECTION 5 --- Experiments.  Order: Correctness -> Competence -> Attribution
+%               -> Capabilities.  Declarative subsection titles.
+%
+% EVERY NUMBER HERE CARRIES A "% source:" COMMENT.  The verified set is the
+% seven files listed at the top of main.tex and nothing else.
+% EVERY UNMEASURED QUANTITY IS \XXX INSIDE A "GAP" BLOCK.  Do not replace an
+% \XXX with a plausible value; replace it with a measurement or leave it.
+% Compressed to the ICLR 9-page limit.  Full parity list -> app:audit; full
+% experimental designs -> app:capdesign; the 2-objective table ->
+% app:multiobjtable.  The GAP blocks are load-bearing and must NOT be
+% shortened to save space.
+% ============================================================================
+\label{sec:experiments}
+
+We first ask whether the frozen reference law learns state-dependent preferences over executable molecular edits and whether remaining-budget future reachability improves multi-step decisions. We then test the same frozen process on standard source-conditioned editing and preference-conditioned multi-objective design, before evaluating two trajectory-level capabilities: retargeting from realized molecular states and pathwise constraint enforcement.
+
+\subsection{\method{} learns state-dependent preferences among executable molecular edits}
+\label{sec:exp-rtheta}
+
+The executable rewrite system determines which molecular edits are possible, but not which should be preferred in a given molecular state. We therefore test whether the frozen reference law $R_\theta$ learns state-dependent transition structure beyond corpus-wide edit-family frequencies. On $3{,}545$ held-out transitions with source molecules disjoint from reference-law training, we compare $R_\theta$ with an empirical-family baseline that uses training-set family frequencies while operating over the same canonical molecular successors. This holds executable support fixed and asks only whether learning improves how probability is distributed among the available next molecules.
+
+$R_\theta$ reduces canonical-successor NLL from $5.37$ to $3.90$ nats relative to the empirical-family baseline (\cref{fig:mechanism}(a)). A matched decomposition shows that $86.7\%$ of this improvement is recovered by retaining empirical family frequencies and learning only which successor is preferred within the current state. Thus most of the learned signal is not which kinds of edits occur globally, but which executable molecular edit is appropriate for the molecule at hand. The rewrite system therefore defines what is possible, while $R_\theta$ supplies a learned, state-dependent preference over those possibilities.
+
+This effect persists when evaluation is restricted to edit families with data-backed transition supervision, where $R_\theta$ retains a $1.06$-nat advantage over empirical family frequencies (\cref{app:exp-rtheta}). The stronger gains observed for synthetically supervised ring-edit families are therefore not required for the state-dependent preference claim. We use $R_\theta$ throughout the remaining experiments as a goal-independent reference law over fixed executable support, without interpreting its probabilities as physical kinetics or synthetic-route likelihood.
+
+\subsection{\method{} uses future reachability to improve multi-step molecular editing}
+\label{sec:exp-lookahead}
+
+\method{} can evaluate a molecular edit by the futures it leaves reachable, rather than only by the molecule it produces immediately. Because control acts on canonical molecular successors and every committed successor is itself a complete molecule, each candidate edit defines a realized molecular intermediate from which the frozen reference process can be continued over the remaining budget. We isolate this capability through exact target recovery on $65$ held-out source--target pairs with source molecules disjoint from development, each admitting a certified executable edit path within budget. Both policies operate over the same frozen $R_\theta$, target, edit budget, and candidate successors. The local policy greedily selects the successor most similar to the target, whereas the future-aware rollout policy evaluates the continuations reachable over the remaining budget and overrides the local choice only when doing so yields a strict improvement. We independently verify the corresponding exact finite-horizon construction on an enumerable molecular state graph (\cref{app:exp-lookahead}).
+
+Accounting for future reachability changes which molecular edits succeed. Remaining-budget rollout recovers $40/65$ targets, compared with $26/65$ under local selection, rescuing $14$ of the $39$ local failures ($+21.5$ percentage points, $[12.3,33.5]$; \cref{fig:mechanism}(b--c)). A deterministically selected rescue in \cref{fig:mechanism}(b) illustrates the mechanism: the local policy chooses the higher-similarity successor, whereas a single future-aware override takes a lower-similarity edit that preserves a successful continuation and reaches the target within budget. Across the full panel, these rescues show that the value of an edit depends not only on the molecule it produces immediately, but on the molecular futures it leaves reachable.
+
+At molecular scale, exhaustive evaluation of these continuations is expensive, so we use $h_\phi$ to prioritize which successors receive rollout evaluation. This retains the same aggregate recovery using only $34.6\%$ of the continuation evaluations required by all-candidate lookahead (\cref{fig:mechanism}(d)). We treat this result as a prioritization diagnostic rather than a standalone evaluation of $h_\phi$: the two procedures do not recover exactly the same targets, and exact-target similarity uses information unavailable in ordinary property optimization. We next test the complete system on a standard source-conditioned editing benchmark.
+
+%% TITLE IS TEMPORARY: 'performs strongly' until the official 800xK=20 cohort
+%% licenses 'is competitive'.  One word changes; nothing else.
+\subsection{\method{} performs source-conditioned molecular editing on a standard QED benchmark}
+\label{sec:exp-jin}
+
+We next ask whether the complete \method{} system is competitive on a standard molecular-editing task. We use the ZINC-250k similarity-constrained QED benchmark reported by GrIDDD \citep{ninniri2025griddd}: source molecules begin with QED in $[0.7,0.8]$, and a source is solved if at least one returned molecule reaches $\mathrm{QED}\ge0.9$ while retaining Morgan-fingerprint Tanimoto similarity of at least $0.4$. The reference law $R_\theta$ is unchanged from \cref{sec:exp-rtheta,sec:exp-lookahead}; only the QED future-value controller is trained for this task, using sources disjoint from evaluation. Each candidate slot corresponds to one controlled trajectory. Successful trajectories terminate prospectively upon first entering the target region, while trajectories that never reach the region remain failures rather than being resampled.
+
+\begin{table}[!ht]
+\centering
+{\small
+\begin{tabular}{lrrrr}
+\toprule
+Method & Sources & $K$ & QED success ($\uparrow$) & Diversity ($\uparrow$) \\
+\midrule
+GrIDDD \citep{ninniri2025griddd} & 800 & 20 & 45.1\% & 0.283$^{\dagger}$ \\
+\midrule
+\textbf{\method{}} & 128$^{*}$ & 12$^{*}$ & 54.7\%$^{*}$ & 0.393$^{*}$ \\
+\bottomrule
+\end{tabular}}
+\caption{\small\textbf{Source-conditioned editing on the Jin/ZINC-250k similarity-constrained QED benchmark.} Published baseline values are reproduced from the comparator set reported by GrIDDD. $K$ denotes candidates returned per source; success requires $\mathrm{QED}\ge0.9$ and Tanimoto similarity $\ge0.4$. $^{*}$\method{} is currently evaluated on a separate $128$-source held-out panel with $K=12$; published rows use the official $800$ sources with $K=20$, so starred values are shown as benchmark context rather than a direct numerical ranking. $^{\dagger}$GrIDDD reports diversity without specifying its evaluator implementation; \method{} uses the released Jin evaluator. Diversity details are reported in \cref{app:alignment}. GrIDDD is shown as the close modern per-step editor that motivates this benchmark; the Jin-era published methods and the full comparator audit are given in \cref{app:qed-historical}.}
+%% AUTHORING NOTE, not for the PDF: when the frozen official run lands, replace
+%% the starred COMPOSE row in place with (n=800, K=20) and drop the $^{*}$ clause,
+%% since the protocols then match.  Keep the diversity column and the dagger.
+\label{tab:qed}
+\end{table}
+
+%% AUTHORING NOTE, not for the PDF: the result slot below currently holds the
+%% prospective held-out panel (n=128, K=12).  When the frozen official run lands,
+%% replace the numbers with (n=800, K=20), delete the final sentence because the
+%% protocols then match, and rewrite the interpretation to what the result
+%% actually supports rather than mechanically asserting competitiveness.
+%% KEEP the diversity column and the diversity clause.  Do not drop them merely
+%% because success has become directly comparable: success plus diversity is the
+%% package GrIDDD reports side by side, and is a better result than success alone.
+\method{} achieves strong source-conditioned editing performance under the standard similarity-constrained QED criterion. On the held-out evaluation, \method{} solves $70/128$ sources ($54.7\%$) within $12$ returned candidates and maintains substantial within-source molecular diversity ($0.393$ mean pairwise Tanimoto distance), indicating that benchmark success is not driven by collapse to a narrow set of edits. Success increases steadily with candidate allowance rather than depending on a single operating point. \Cref{tab:qed} places this result alongside published methods evaluated under the same benchmark criterion, including GrIDDD at $45.1\%$ success. Because the current \method{} evaluation uses a different source cohort and candidate allowance, these values are reported as benchmark context rather than a direct numerical ranking. Internal inference costs are not matched across methods, since the benchmark constrains the number of returned molecules rather than the successor evaluations performed to produce them. Having established source-conditioned editing competence under a fixed target criterion, we next ask whether future reachability remains useful when no target molecule is specified.
+
+%% TODO [size-fixed ablation, not yet run] --------------------------------------
+%% Run: identical frozen controller, R_theta, sources, candidate allowance and
+%% randomness as the 128-source prospective panel above; remove every successor
+%% with Delta n != 0.  Motivation: GrIDDD reports the same causal ablation and
+%% sees QED success fall 45.1% -> 33.8% (Ninniri et al., NeurIPS 2025, Sec. 5.3).
+%% When measured, add as paragraph 3:
+%%
+%% QED is particularly informative for \method{} because successful optimization
+%% can require changes in molecular size. We therefore repeat the evaluation
+%% after removing every successor that changes heavy-atom count, while holding
+%% $R_\theta$, the controller, sources, candidate allowance, and randomness
+%% fixed. Full \method{} solves XXX sources compared with XXX under size-fixed
+%% support, a paired difference of XXX percentage points.
+%% A positive gap would show that trans-dimensional support contributes directly
+%% to benchmark performance rather than merely enlarging the formal state space.
+%% -----------------------------------------------------------------------------
+
+% REMOVED from the build: sections/lead_optimization.tex holds the SUPERSEDED T4
+% result (10-13 cells, +0.07 kcal/mol in GenMol's favour). The main body now
+% reports the completed panel (19-6-1, -0.335 kcal/mol, CI excluding zero) in
+% Table~\ref{tab:t4}. Keeping both put a self-contradiction in one PDF.
+% \input{sections/lead_optimization}
+
+%% AUTHORING NOTE, not for the PDF: this subsection title asserts a result that
+%% has NOT been measured.  Every value below is \XXX.  If the immediate-vs-
+%% future-aware contrast comes back neutral or negative, the title must change
+%% before submission; do not let a declarative title outlive its measurement.
+\subsection{\method{}'s realized molecular states preserve progress when objectives change}
+\label{sec:exp-retarget}
+
+Design priorities can change after optimization is already underway, for example as new measurements introduce liabilities or additional requirements. \method{} is naturally suited to this setting because its reference process $R_\theta$ is goal-independent and every realized state is itself a complete molecule. A newly specified objective can therefore be applied directly to the molecule already reached. We ask whether this capability is practically useful: does molecular progress accumulated before an objective change provide a better starting point than beginning again from the original molecule?
+
+We test this on $40$ source-disjoint held-out molecules under potency-first and developability-first histories. Each source is edited for three steps before the eventual joint objective $B$ is specified, so the committed prefix cannot anticipate the new goal. After the switch, continuing from the realized state $x_3$ and restarting from the original molecule $x_0$ receive the same $B$, the same three-edit remaining budget, and the same frozen molecular process. This matched comparison isolates whether the molecular state reached before the switch retains useful progress for the newly specified objective.
+
+\begin{table}[!ht]
+\centering
+{\small
+\begin{tabular}{lrr}
+\toprule
+Comparison & Potency-first & Developability-first \\
+\midrule
+\textbf{State reuse:} continue $x_3$ vs.\ restart $x_0$ & \textbf{$+0.302$} $[0.186,0.413]$ & \textbf{$+0.176$} $[0.069,0.283]$ \\
+Retargeting: new vs.\ old objective & $+0.748$ $[0.608,0.891]$ & $+1.462$ $[1.240,1.691]$ \\
+\bottomrule
+\end{tabular}}
+\caption{\small\textbf{Reusing realized molecular states after an objective switch.} Entries are paired changes in the post-switch objective; positive values favor the first strategy. State reuse is the primary comparison; intervals are source-level bootstrap intervals. The complete record is given in \cref{app:exp-retarget}.}
+\label{tab:retarget}
+\end{table}
+
+Continuing from $x_3$ improves the post-switch objective over restarting from $x_0$ by $0.302$ $[0.186,0.413]$ after potency-first optimization and $0.176$ $[0.069,0.283]$ after developability-first optimization (\cref{tab:retarget}). The benefit is not universal across sources, indicating that state reuse is an empirical advantage rather than a consequence of the controller construction. Retargeting also substantially outperforms continuing under the previous objective, confirming that the subsequent trajectory responds to the newly specified goal. Thus, when design priorities change, \method{} can redirect molecular progress already realized under an earlier objective rather than discarding that progress and beginning again from the original molecule.
+
+%% AUTHORING NOTE, not for the PDF.  This subsection is written in the SUCCESS
+%% branch of a confirmation that has NOT been opened.  Numbers render from the
+%% \Pw* macros in main.tex, which currently hold DEVELOPMENT (n=24) values from
+%% the verified/future-aware arm.  Those values would satisfy both gates, but
+%% development did NOT pass the confirmatory test: it is a different, already-
+%% inspected sample, and the cLogP corridor was CHOSEN after a feasibility
+%% screen.  Never write, or imply, that development passed confirmation.
+%% Frozen confirmation: n=48, corridor C=[2.3689,4.4522], intersection-union on
+%%    (i)  lower CI bound on hidden-path prevalence  >  1/3
+%%    (ii) lower CI bound on utility difference      > -0.25 IQR  (-0.20 sens.)
+%% ON THE RESULT:
+%%   both pass       -> keep this title and prose; swap the macros; set
+%%                      \PwEvalPhrase to "On the 48-source held-out evaluation".
+%%   utility fails   -> retitle "Endpoint feasibility can hide pathwise
+%%                      molecular constraint violations"; the phenomenon becomes
+%%                      the result.  Delete paragraph 4 from "Thus the pathwise
+%%                      guarantee" onward, and the "prevents ... while retaining
+%%                      comparable endpoint utility" claim with it.
+%%   prevalence fails-> the section loses its motivation; compress or demote it
+%%                      rather than rescuing it with secondary analyses.
+%% Do not change the corridor, either threshold, the controller, or the analysis
+%% after seeing the confirmation.  Do not rewrite the question after the answer.
+\subsection{Pathwise molecular constraints beyond endpoint feasibility}
+\label{sec:exp-pathwise}
+
+\Cref{sec:exp-retarget} showed that realized molecular states can remain useful when design objectives change. Their explicit representation provides a second advantage: constraints can govern which molecular states the optimization process is allowed to visit, rather than only which molecule it ultimately returns. This distinction matters whenever intermediate designs must remain within a predictor's applicability domain, preserve a required molecular feature, or satisfy a prescribed physicochemical range. Endpoint-only optimization cannot certify such a requirement from the final molecule alone; \method{} can impose it directly by restricting the executable successor support at every realized state.
+
+We test whether this distinction is consequential using a fixed cLogP corridor $C$ while optimizing an independent DRD2 objective over six edits. Endpoint-only control requires only the returned molecule to lie within $C$, whereas \method{}'s pathwise controller removes successors outside $C$ before a transition is sampled. The two arms otherwise share the same $R_\theta$, sources, objective, horizon, and evaluation budget. Because zero pathwise violations follow from support restriction by construction, the empirical question is not whether the mask works, but whether endpoint-only optimization actually hides meaningful violations that make the stronger guarantee worth having.
+
+On the $24$-source developmental panel, $16/24$ ($66.7\%$, $95\%$ CI $[45.8,83.3]$) of endpoint-feasible trajectories leave $C$ at least once before returning under greedy endpoint control, and $14/24$ ($58.3\%$, $[37.5,79.2]$) under verified endpoint control. These excursions extend a median $0.69$ cLogP units beyond the admissible corridor and persist for a median of four of the six committed edits. Endpoint evaluation can therefore certify the returned molecule while failing to characterize molecular states visited earlier in the optimization trajectory.
+
+Pathwise support restriction eliminates such excursions by construction. Relative to endpoint-only control, the paired change in normalized terminal DRD2 utility is $-0.023$ $[-0.182,0.134]$ under verified parity and $-0.105$ $[-0.377,0.099]$ under greedy parity, against a preregistered non-inferiority margin of $0.25$. Both intervals span zero, so the panel does not resolve the terminal-utility cost of enforcing the constraint; it bounds it rather than establishing equivalence. These values are developmental: the held-out confirmation designed for this estimand has not been opened. Because feasibility itself follows directly from support restriction, the empirical contribution is the prevalence of violations hidden by endpoint-only evaluation and the cost, if any, of excluding them. The complete developmental record, the support-viability audit and the confirmation preregistration are given in \cref{app:exp-pathwise}.
+

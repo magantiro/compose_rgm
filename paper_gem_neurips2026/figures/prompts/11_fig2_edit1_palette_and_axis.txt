@@ -1,0 +1,60 @@
+Two corrections to this figure. Change nothing else.
+
+────────────────────────────────────────────────────────────────────
+1. MATCH THE COLOUR PALETTE TO FIGURE 1 EXACTLY
+────────────────────────────────────────────────────────────────────
+This figure currently uses a much heavier, more saturated teal than Figure 1.
+In Figure 1 the deep teal appears only on the single thickest arrow, and
+everything else is soft mid-teal, sage and pale tints. Here the deep teal is
+the fill for every bar, so the whole figure reads darker and punchier than
+its companion.
+
+Restyle using these exact values:
+
+  bars in (a), bar segments in (c), and points in (d)
+      fill        #5FA5A8   soft mid-teal   (NOT the dark teal used now)
+      outline     #2F7A7F   thin, one pixel
+
+  the highlight condition
+      COMPOSE bar, "14 rescued" segment, h-phi point, the star and the
+      right-hand branch in (b)
+      fill        #D2704F   muted terracotta (NOT the orange used now)
+
+  similarity top-2 point in (d)      #A8C4A8   sage
+  "unresolved" segments in (c)       #E6E0D4   pale warm grey
+  all text and headings              #2B3F4E
+  axis lines, ticks, hairlines       #E6E0D4
+
+  molecules in panel (b), matching Figure 1 exactly
+      dark nodes  #3E5C6B
+      mid nodes   #5FA5A8
+      warm nodes  #E3C9A8
+      bonds       #8A8578, one uniform width, every circle bonded
+
+  panel cards   (a) and (d)  #FAF6EE  warm cream
+                (b) and (c)  #EDF2F2  pale blue-grey
+  page ground                #FDFBF7
+
+The finished figure should look like it was made in the same sitting as
+Figure 1: softer, warmer, lower contrast, with terracotta used sparingly as
+the only strong colour.
+
+────────────────────────────────────────────────────────────────────
+2. FIX THE X-COORDINATES IN PANEL (d)
+────────────────────────────────────────────────────────────────────
+The points are plotted at the wrong horizontal positions. Replot them at
+these exact x values on the 0 to 100 axis, keeping the y values as they are:
+
+  local              x = 0
+  R-theta top-1      x = 34.7      currently sits near 25, too far left
+  h-phi top-1        x = 34.6      currently sits near 22, too far left
+  similarity top-2   x = 52.1      currently sits near 40, too far left
+  all-candidate      x = 100
+
+R-theta top-1 and h-phi top-1 must end up almost exactly vertically aligned
+with each other, since 34.7 and 34.6 are nearly identical. That vertical
+alignment is meaningful: the two spend the same evaluation budget and differ
+only in what they recover.
+
+Keep h-phi top-1 and all-candidate at the SAME height, and keep the dashed
+horizontal guide between them.

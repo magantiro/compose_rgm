@@ -1,0 +1,94 @@
+Create a wide landscape scientific figure for a machine-learning paper, in the
+visual style of the Chatterjee lab's Schrodinger-bridge figures (BranchedSBM,
+EntangledSBM, PepTune). Vector-clean, flat, no photorealism, no 3D, no shadows.
+
+CANVAS AND CONTAINERS
+Very pale lavender rounded-rectangle background (#F7F0FB) filling the canvas.
+Inside it, three equal-width white rounded-rectangle panel cards with hairline
+light-violet borders and generous internal padding, side by side. 16:9.
+
+COLOR: one hue family only, no other accent colors.
+  deep navy   #1B1B8F  panel letters, headings, filled equation boxes
+  indigo      #6B6BD6  primary molecule nodes, primary arrows
+  cyan        #4EC3E0  secondary nodes
+  orchid      #C46BD6  highlight / goal
+  plus 10-20% tints of these for fills and soft halos
+
+MOLECULES: draw every molecule as a small abstract node-link graph -- filled
+circles of slightly varying radius in indigo/cyan/violet, connected by thin
+straight bonds. No chemical letters, no atom labels. Each molecule sits in its
+own small white rounded tile.
+
+THE CRITICAL CONSTRAINT: the SAME molecule x and the SAME five successor
+molecules y1...y5 appear in all three panels, drawn identically and in
+IDENTICAL vertical positions. Only the arrows change between panels. This
+repetition is the entire point of the figure; do not vary the molecules.
+
+PANEL A -- heading "Executable support" in bold navy, and beneath it the word
+"POSSIBLE" large in indigo.
+Left: molecule x inside a soft lavender circular halo.
+Then TWO distinct layers, left to right:
+  layer 1: a vertical column of seven small dots labeled "edit marks"
+  layer 2: the five molecule tiles y1...y5 labeled "molecular successors"
+Thin dashed arrows fan from x to the seven marks, then from the marks to the
+five molecules. Two of the marks must converge onto the SAME single molecule
+tile, visibly merging -- this shows that different edits can produce the same
+molecule. All arrows equal thickness and equal opacity; no numbers anywhere.
+Tag each successor tile with a tiny badge: "+1", "-1", "0", "0", "ring".
+
+PANEL B -- heading "Learned reference process", beneath it "PLAUSIBLE" large in
+indigo. Small caption under the heading: "goal-independent".
+Same x, same five molecules, same positions. Now single solid curved arrows
+from x to each molecule, with arrow WIDTH proportional to these numbers, which
+are printed beside each arrow: 0.31, 0.23, 0.16, 0.19, 0.11.
+Small horizontal gradient legend bar at the bottom, pale to saturated indigo,
+labeled "low" and "high".
+
+PANEL C -- heading "Finite-horizon control", beneath it "PURPOSEFUL" large in
+indigo. Small caption: "goal- and budget-conditioned".
+At the top of this panel, a FILLED DEEP-NAVY ROUNDED BOX WITH WHITE TEXT
+containing the formula. This filled navy equation box is the signature element
+of the style; it must be dark navy with white text, not a pale box.
+Left side: a small white rounded box outlined in indigo containing a symbol,
+with two dashed arrows entering it from above, labeled "goal" and "remaining
+budget". These two dashed arrows must point ONLY into that box and must never
+touch the arrows coming from x.
+Same x, same five molecules, same positions. Curved solid arrows from x to each
+molecule, but now with DIFFERENT widths from panel B: the third molecule gets
+by far the thickest arrow, the fifth gets the thinnest.
+To the right of each molecule, a small faint branching tree of tiny dots
+suggesting reachable futures, sized to match, labeled: "weak", "moderate",
+"high", "moderate", "dead end". The "high" tree ends in a filled orchid star.
+The "dead end" tree ends in a small x mark.
+Bottom legend: a pale thin arrow labeled "reference (frozen)" and a thick dark
+arrow labeled "control".
+
+TYPOGRAPHY: clean geometric sans, generous whitespace, no gridlines, no drop
+shadows, no gradient backgrounds, no 3D, no clip art, no decorative icons.
+
+
+================================================================================
+ALTERNATE, VECTOR ROUTE. Use this INSTEAD of image generation when you want a
+sharp result. Paste the spec above, then this:
+
+  Do NOT generate an image. Instead, write complete, self-contained SVG 1.1
+  source code for the figure described above, as text in a code block.
+
+  Requirements:
+  - viewBox="0 0 1600 900", width and height set to 100% so it scales cleanly
+  - use <g> groups with id attributes named panel-a, panel-b, panel-c so the
+    layers are editable after import
+  - all colors as literal hex fills, no CSS classes, no external references,
+    no embedded raster, no <image> tags
+  - arrow widths via stroke-width, arrowheads via a <marker> definition
+  - all text in <text> elements with font-family="Helvetica, Arial, sans-serif"
+    so I can restyle or replace it later
+  - leave the navy equation box EMPTY except for a placeholder <text> reading
+    "EQ" that I will replace by hand
+  - keep y1..y5 as plain text labels; do not attempt subscripts or Greek
+
+  Output only the SVG code.
+
+Then save as fig1.svg, open in Illustrator/Inkscape/Figma, drop in the real
+math, and export PDF for the paper.
+================================================================================

@@ -1,0 +1,1852 @@
+             C OMPOSE: Generative Stochastic Rewriting for
+            Trans-Dimensional Molecular Design and Control
+
+
+                                              Anonymous Author(s)
+                                                  Affiliation
+                                                   Address
+                                                   email
+
+
+
+                                                     Abstract
+ 1            Controllable molecular design requires both a representation of how molecules
+ 2            can change and a mechanism for steering those edits toward desired outcomes.
+ 3            Yet molecular generation and optimization are typically trained on fixed endpoint
+ 4            distributions or task objectives, rather than on a reusable transition process that can
+ 5            be learned once and redirected as design goals evolve. We introduce COMPOSE
+ 6            (COntrollable Molecular Process Over Stochastic Edits), a generative framework
+ 7            that represents molecular design as a stochastic sequence of executable edits be-
+ 8            tween complete, chemically valid molecules. An exact rewrite system defines legal,
+ 9            variable-size molecular transitions, while a goal-independent reference process
+10            learns probability over them. This underlying process is trained once and held
+11            fixed, and task-specific control steers the same molecular dynamics toward dif-
+12            ferent objectives. On standard similarity-constrained QED editing on ZINC-250k,
+13            the same GuacaMol-trained process transfers without retraining and improves on
+14            recent size-adaptive graph diffusion results while using fewer returned trajecto-
+15            ries. On lead optimization under molecular feasibility and similarity constraints,
+16            COMPOSE improves docking performance over the published state of the art while
+17            using sixfold fewer docking-oracle evaluations and maintaining the same feasi-
+18            ble coverage. Beyond these external benchmarks, COMPOSE uses downstream
+19            reachability to guide multi-step decisions and accomodates retargeting on realized
+20            molecular trajectories as objectives and constraints change. These results establish
+21            that a molecular transition process can be learned once and reused across datasets,
+22            objectives, and interventions without retraining the underlying generator.
+
+23   1    I NTRODUCTION
+24   Generative modeling has become a central approach to molecular design, supporting both de novo
+25   generation and the optimization of existing molecules across increasingly complex chemical spaces
+26   [Gómez-Bombarelli et al., 2018, Jin et al., 2018, Vignac et al., 2023, Lee et al., 2025]. Recent graph-
+27   based diffusion, flow, and discrete generative models can learn expressive molecular distributions
+28   and increasingly support conditional generation toward desired structural and functional properties
+29   [Vignac et al., 2023, Campbell et al., 2024, Lee et al., 2025]. These advances have enabled molecular
+30   generation to be substantially more flexible, but the learned object is typically still an endpoint
+31   distribution or a generator specialized toward a particular task, rather than a reusable representation
+32   of transitions between molecular states. For molecular design, this suggests value in modeling the
+33   path between structures, since each transformation changes both the next molecule and the set of
+34   molecular states that remain reachable afterward.
+35   Molecular editing makes this path dependence explicit as each edit changes the set of transformations
+36   available from the resulting molecule. Existing editing and lead-optimization methods already
+37   exploit sequential molecular modifications through graph-to-graph generation, reinforcement learning,
+38   fragment-based search, evolutionary optimization, and MCMC [Jin et al., 2019, Zhou et al., 2019,
+39   Jensen, 2019, Xie et al., 2021, Fu et al., 2021]. However, the consequence of a particular edit can
+     Submitted to the [INSERT WORKSHOP HERE] at NeurIPS 2026. Do not distribute.
+40   extend beyond the molecule it immediately produces. An atom insertion, bond modification, or ring
+41   operation can open or eliminate entire downstream branches of the design space. Molecular editing
+42   may therefore benefit from representing not only the value of individual structures, but also which
+43   molecular futures remain reachable from each state.
+44   Despite this progress, existing approaches capture only parts of a transition-centered approach.
+45   Learned generators can increasingly be guided toward desired properties, but their generative trajec-
+46   tories are often defined through corrupted, masked, or latent states rather than reusable transitions
+47   between complete molecules [Vignac et al., 2023, Campbell et al., 2024, Lee et al., 2025]. Molecular
+48   editing and search methods instead operate directly on complete molecules, but their proposal mecha-
+49   nisms are typically prescribed by the optimizer and coupled to task-specific scoring [Jensen, 2019,
+50   Zhou et al., 2019, Xie et al., 2021]. Recent work further shows that pretrained discrete generators can
+51   be redirected toward multiple objectives and constraints through inference-time guidance and control
+52   [Chen et al., 2025, 2026].Together, these advances motivate a goal-independent generative process
+53   over molecular transitions that can be learned once and controlled as design goals change.
+54   Given this, we introduce C OMPOSE (COntrollable Molecular Process Over Stochastic Edits), a
+55   generative framework that learns a reusable molecular transition process over complete and chemi-
+56   cally valid moelcular graphs and controls it across design objectives (Figure 1). C OMPOSE represents
+57   generation as a stochastic sequence of executable edits between complete molecules. At each molecu-
+58   lar state, an exact executor defines what is possible by enumerating the state-dependent set of legal,
+59   trans-dimensional molecular successors. We then learn a goal-independent reference law Rθ over this
+60   same successor set from executable molecular trajectories, capturing which molecular continuations
+61   are plausible without conditioning on a downstream design goal. A separate finite-horizon controller
+62   determines what edits are purposeful by reweighting molecular continuations according to the value
+63   of the futures they make reachable. Because generation and control operate on the same explicit
+64   molecular support, the transition process can be learned once and redirected across design objectives
+65   without retraining the underlying generator.
+66   We summarize our main contributions as follows.
+67       • We introduce a stochastic molecular process over exact, executable, trans-dimensional rewrites
+68         between complete molecular graphs, with a learned reference law defined on canonical molecular
+69         successors.
+70       • We formulate molecular design as finite-horizon control of this frozen reference process, allowing
+71         edits to be valued by the molecular futures they leave reachable without introducing transitions
+72         outside the reference support.
+73       • We show that the reference process learns state-dependent transition preferences, transfers across
+74         external molecular-design tasks without retraining, and supports future-aware editing, mid-
+75         trajectory retargeting, and pathwise constraints.
+
+76   2      COMPOSE
+77   2.1     E XECUTABLE MOLECULAR STATE SPACE
+78   Let
+                                                         n[
+                                                          max
+
+                                                   X =          Xn
+                                                         n=1
+79   denote the molecular state space, where Xn contains connected molecular graphs with n heavy atoms,
+80   declared atom and bond attributes, and valid valences. Every x ∈ X is therefore a complete molecule
+81   rather than a masked, corrupted, or partially specified state.
+82   Transitions are executed as typed graph rewrites, and an edit mark a specifies a rewrite family,
+83   molecular operands, and a typed payload, and T (x, a) denotes the resulting graph. From state x, the
+84   executor exposes
+                     A(x) = {a : a matches x and T (x, a) passes all executor guards} .                  (1)
+85   The executor rejects edits that violate the fixed atom and bond vocabularies, valence constraints,
+86   connectivity, or molecular-size bounds, so inadmissible states have zero transition support and
+87   T (x, a) ∈ X for every admitted edit. The rewrite vocabulary includes atom insertion and deletion
+88   together with atom-, bond-, and ring-level transformations, allowing trajectories to grow, shrink, and
+89   restructure molecules. Full rewrite semantics and closure are given in Appendix F; multi-edit ring
+90   transformations used in molecular optimization compile to the same primitive support (Appendix F.3).
+
+
+                                                         2
+      Figure 1: Overview of COMPOSE. The executor maps legal edits a ∈ A(x) to canonical molecular successors
+      y ∈ S(x), and the goal-independent kernel Rθ (y | x) defines the reference process. Finite-horizon control
+      reweights each transition by its remaining future value, P z,b (y | x) = Rθ (y | x)hb−1 (y, z)/hb (x, z), without
+      introducing transitions outside the support of Rθ .
+
+91    2.2   L EARNING THE REFERENCE PROCESS
+92    We learn a goal-independent stochastic law over executable molecular edits. Writing a mark as
+93    a = (k, o, η), with rewrite family k, operands o, and typed payload η, the reference model factorizes
+
+                                pθ (a | x) = pθ (k | x) pθ (o, η | k, x),       a ∈ A(x).                          (2)
+
+94    Normalization is restricted to candidates admitted by the executor, and we do not supply the model
+95    with a design objective, remaining budget amount, or task-specific constraint. The learned law
+96    therefore depends on the current molecular state but not on the downstream purpose for which the
+97    process will later be used.
+98    The controller acts on molecular successors rather than raw edit marks. Let S(x) denote the distinct
+99    non-self canonical successors of x. For y ∈ S(x), define
+
+                                         Gy (x) = {a ∈ A(x) : T (x, a) ≃ y},
+
+100   the executable edit marks that produce y, where ≃ denotes registered molecular canonicalization.
+101   Conditioning the pushforward mark law on a committed molecular change gives
+                                              P
+                                                a∈Gy (x) pθ (a | x)
+                         Rθ (y | x) = P            P                      , y ∈ S(x).              (3)
+                                         y ′ ∈S(x)   a∈Gy′ (x) pθ (a | x)
+
+102   Aggregating over Gy (x) prevents symmetry or implementation multiplicity from changing a succes-
+103   sor’s probability, so control acts on Rθ after canonicalization.
+104   We train Rθ from executable teacher transitions by minimizing the canonical-successor negative
+105   log-likelihood over transitions that commit a molecular jump,
+                                                             N
+                                                        1 X
+                                         Lref (θ) = −         log Rθ (yi⋆ | xi ),                                  (4)
+                                                        N i=1
+
+106   with rows sampled from the declared editing measure. Every teacher transition is replayed through
+107   the same executor used at inference. Targets and compiled programs are used to construct supervision
+108   but are not supplied to the reference model at inference. Once trained, Rθ is fixed across downstream
+109   objectives.
+
+
+                                                             3
+110   2.3   F INITE - HORIZON CONTROL OF THE FROZEN PROCESS
+111   Task information enters only after the reference process has been learned. Let z denote a design
+112   objective and gz : X → R≥0 its terminal desirability. For b remaining transitions, define
+                                             X
+         h0 (x, z) = gz (x),   hb (x, z) =        Rθ (y | x) hb−1 (y, z) = ERθ [gz (Xb ) | X0 = x] . (5)
+                                              y∈S(x)
+
+113   A property model scores the current molecule, whereas hb (x, z) measures the desirability reachable
+114   from that molecule within the remaining budget.
+115   For hb (x, z) > 0, the finite-horizon Doob transform defines
+                                                                    hb−1 (y, z)
+                                       P z,b (y | x) = Rθ (y | x)               .                           (6)
+                                                                     hb (x, z)
+116   The controlled kernel reweights only transitions already supported by Rθ .
+117   Proposition 1 (Finite-horizon molecular control). Starting from x0 with budget K, applying Equa-
+118   tion (6) at each step yields
+                                                                                      gz (y)
+                     PrP z (XK = y | X0 = x0 ) = PrRθ (XK = y | X0 = x0 )                       .
+                                                                                    hK (x0 , z)
+119   Exact future values therefore realize the gz -tilted terminal law without introducing transitions outside
+120   the reference support. The proof and terminal-state assumptions are given in Appendix G.3.
+121   Because exact future values are impractical to compute in realistic molecular spaces, we learn a
+122   nonnegative, goal- and budget-conditioned approximation hϕ (x, z, b) ≈ hb (x, z) from finite-budget
+123   continuations of the frozen reference process and substitute it into Equation (6). Approximation error
+124   can reweight supported successors but cannot introduce new support; exact terminal reweighting is
+125   guaranteed only for the exact h-transform.
+126   Because control is recomputed from the molecule actually reached, its objective can change during a
+127   trajectory. If the process reaches xτ under z and the objective changes to z ′ , control resumes from xτ
+128   under z ′ with Rθ unchanged. We evaluate this setting in Section 3.3.
+
+129   3     E XPERIMENTS
+130   Our experiments address three questions. First, we ask whether the frozen reference law learns state-
+131   dependent preferences among executable molecular edits. Second, we evaluate whether a reference
+132   process learned once on GuacaMol transfers to externally defined molecular-design benchmarks.
+133   Finally, we study trajectory-level capabilities that endpoint benchmarks do not capture: using down-
+134   stream reachability to guide molecular edits, retargeting realized molecular states when objectives
+135   change, and enforcing constraints throughout a trajectory.
+136   3.1   C OMPOSE LEARNS STATE - DEPENDENT MOLECULAR EDIT PREFERENCES
+137   The rewrite system specifies which molecular edits are executable but not how probability should be
+138   distributed among them. On 3,545 held-out transitions with source molecules disjoint from training,
+139   we compare Rθ with an empirical-family baseline that preserves the same executable support and
+140   canonical successor set while allocating probability according to training-set edit-family frequencies.
+141   Rθ reduces canonical-successor NLL from 5.37 to 3.90 nats. A matched decomposition shows that
+142   86.7% of this improvement comes from learning which successor is appropriate for the current
+143   molecule rather than which edit families are globally common (Table 6). We keep Rθ fixed in all
+144   subsequent experiments; results restricted to families with data-backed supervision are reported in
+145   Appendix K.1.
+146   3.2   C OMPOSE PERFORMS COMPETITIVELY ON EXTERNAL DESIGN TASKS
+147   We next evaluate whether the molecular process learned on GuacaMol can be reused without retraining
+148   Rθ . We fix the reference process and executable rewrite system and apply COMPOSE to two external
+149   benchmarks with different design objectives: similarity-constrained QED editing on ZINC-250k,
+150   where molecules can grow or shrink during editing, and protein-specific lead optimization, where
+151   molecular properties define feasibility and docking score provides the optimization objective. We
+152   only modify the task-specific controller between these settings.
+
+
+                                                         4
+                    Seed                     δ = 0.4                                     δ = 0.6
+           Target   score COMPOSE         GenMol    RetMol     GraphGA COMPOSE GenMol            RetMol    GraphGA
+           PARP1    -7.3          -10.7     -10.6       -9.0        -8.3       -11.1     -10.4       —         -8.6
+                    -7.8          -11.5     -11.0      -10.7        -8.9       -10.9      -9.7       —         -8.1
+                    -8.2          -11.6     -11.3      -10.9          —        -10.2      -9.2       —           —
+
+           FA7      -6.4          -10.2      -8.4       -8.0        -7.8        -8.7      -7.3      -7.6       -7.6
+                    -6.7           -8.9      -8.4        —          -8.2        -7.2      -7.6       —         -7.6
+                    -8.5           -9.3        —          —           —         -7.9       —         —           —
+
+           5HT1B    -4.5          -11.7     -12.9      -12.1       -11.7       -13.4     -12.1        —       -11.3
+                    -7.6          -11.2     -12.3       -9.0       -12.1       -11.1     -12.0     -10.0      -12.0
+                    -9.8          -11.4     -11.6        —           —            —      -10.5        —          —
+
+           BRAF     -9.3             —      -10.8        —          -9.8          —        —         —           —
+                    -9.4          -11.2     -10.8      -11.6         —         -10.6      -9.7       —           —
+                    -9.8          -10.9     -10.6         —        -11.6          —      -10.5       —        -10.4
+
+           JAK2     -7.7          -10.3     -10.2       -8.2        -8.7        -9.3      -9.3       —         -8.1
+                    -8.0           -9.8     -10.0       -9.0        -9.2        -9.7      -9.4       —         -9.2
+                    -8.6          -10.5      -9.8        —           —         -10.2       —         —          —
+      Table 1: Similarity-constrained lead optimization (GenMol T4). QuickVina2 docking score of the best
+      feasible lead, lower is better, subject to QED ≥ 0.6, SA ≤ 4, and Tanimoto similarity ≥ δ to the seed. Baseline
+      values are from GenMol Table 4: bold marks the best entry in each cell, and a dash indicates that no feasible lead
+      was returned. COMPOSE is feasible in 26/30 cells, matching GenMol, and improves the paired mean by 0.335
+      kcal/mol over the 23 cells where both are feasible (95% CI 0.019–0.651), using 500 docking-oracle evaluations
+      per cell against 3,000 for the published GenMol result.
+
+
+153   Similarity-constrained QED editing. We first consider the ZINC-250k editing benchmark used
+154   by GrIDDD [Ninniri et al., 2025]. Source molecules have QED in [0.7, 0.8], and a source is counted
+155   as solved if at least one of K returned molecules reaches QED ≥ 0.9 while maintaining Morgan-
+156   fingerprint Tanimoto similarity ≥ 0.4 to the source. GrIDDD is a particularly relevant diffusion-based
+157   comparator because its generative process can insert and delete nodes, allowing molecular size to
+158   change during editing (the model is trained directly on ZINC-250k).
+159   For COMPOSE, the GuacaMol-trained Rθ from Section 3.1 is left unchanged. A QED-specific
+160   controller is fit on development sources disjoint from evaluation and acts on the same executable
+161   molecular process. Each of the K returned candidates corresponds to one controlled trajectory. We
+162   count a trajectory as successful when it first reaches the target region, and do not retrospectively add
+163   intermediate molecules to the candidate set.
+164   On the official 800-source panel, COMPOSE solves 446 of the 800 sources (55.8%, 95% CI
+165   [52.3, 59.2]) with K = 8, compared with the 45.1% success reported by GrIDDD with K = 20 (Ta-
+166   ble 2). COMPOSE therefore solves more sources while returning fewer than half as many candidate
+167   trajectories per source. Among solved sources with at least two distinct non-source candidates, the
+168   mean within-source pairwise Tanimoto distance is 0.4999.
+169   Similarity-constrained lead optimization. We next evaluate the same frozen reference process on
+170   the GenMol T4 benchmark [Lee et al., 2025], which combines molecular feasibility with a protein-
+171   specific optimization objective. The benchmark contains five protein targets, three seed molecules
+172   per target, and similarity thresholds δ ∈ {0.4, 0.6}. Returned molecules must satisfy QED ≥ 0.6, SA
+173   ≤ 4, and Morgan-fingerprint Tanimoto similarity ≥ δ to the seed. Among molecules satisfying these
+174   constraints, performance is measured by QuickVina2 docking score, with lower scores indicating
+175   stronger predicted binding.
+176   We retain the same GuacaMol-trained Rθ and executable rewrite system used above, replacing only
+177   the task-specific controller. Here QED, SA, and similarity determine whether a candidate is eligible,
+178   while docking provides the optimization signal. Because these feasibility checks are inexpensive,
+179   they are evaluated before the protein oracle and docking calls are reserved for eligible molecules.
+180   COMPOSE returns a feasible molecule in 26 of the 30 benchmark settings, matching GenMol’s
+181   coverage (Table 1). Across the 23 settings where both methods return a feasible molecule, COM-
+182   POSE improves the paired mean docking score by 0.335 kcal/mol (95% CI 0.019–0.651 in favor
+
+
+                                                               5
+                             Method         Trajectories/source    Success ↑     Diversity ↑
+                              GrIDDD                         20        45.1%           0.283
+                              COMPOSE                         8        55.8%        0.4999
+      Table 2: Similarity-constrained QED editing on ZINC-250k. A source is solved if a returned molecule
+      reaches QED ≥ 0.9 at Morgan-fingerprint Tanimoto ≥ 0.4 to the source. GrIDDD trains directly on ZINC-250k;
+      COMPOSE transfers its GuacaMol-trained Rθ without retraining and solves more sources using fewer than half
+      as many trajectories per source (95% CI [52.3, 59.2]). Diversity is the mean within-source pairwise Tanimoto
+      distance over distinct non-source candidates; GrIDDD does not fully specify its evaluator, so both entries are
+      reported as published rather than exactly matched (Appendix L.1).
+
+
+183   of COMPOSE). This performance was obtained with 500 docking-oracle evaluations per setting,
+184   compared with 3,000 evaluations underlying the published GenMol result, a sixfold reduction.
+
+185   3.3   C OMPOSE ENABLES TRAJECTORY- LEVEL CONTROL BEYOND FIXED - OBJECTIVE ENDPOINT
+186         OPTIMIZATION
+
+187   Endpoint benchmarks score the molecule returned after optimization but do not necessarily capture
+188   how decisions are made or revised along the trajectory. Because every COMPOSE state is a complete
+189   and chemically valid molecule, control can use downstream reachability, resume from a realized
+190   intermediate after an objective change, or restrict which molecular states may be visited along the
+191   generative path.
+192   Future reachability changes multi-step edit decisions. An edit that improves immediate similarity
+193   can still eliminate every successful continuation within the remaining budget. We test this on 65
+194   held-out source–target pairs, each with a certified executable path to the target and sources disjoint
+195   from development. The local and future-aware policies share the same frozen Rθ , target, edit budget,
+196   and executable successors. They differ only in whether the next edit is selected by immediate target
+197   similarity or by the continuations available over the remaining budget. Local selection reaches 26
+198   of 65 targets, whereas future-aware control reaches 40, rescuing 14 of the 39 local failures without
+199   losing a local success (Table 3). In one deterministic rescue, the locally preferred edit has higher
+200   immediate similarity but removes the successful continuation, while a slightly less similar edit
+201   preserves a path to the target. Exhaustive look-ahead is not required: using hϕ to prioritize a single
+202   successor preserves the 40/65 recovery rate while evaluating 34.6% of the continuations required by
+203   all-candidate look-ahead. The comparison is reported in Appendix K.2.
+204   Realized molecular states can be re-targeted after an objective change. Starting from x0 , we
+205   execute three edits under an initial objective and then switch objectives at the realized state x3 . We
+206   compare continuing from x3 with restarting from x0 , holding the new objective and remaining edit
+207   budget fixed. Across 40 held-out molecules, continuing from x3 improves post-switch utility in
+208   both directions: 0.302 [0.186, 0.413] for the potency-first objective and 0.176 [0.069, 0.283] for the
+209   developability-first objective (Table 3). The continued trajectories also move toward the new objective
+210   rather than preserving the preference under which x3 was reached. Retargeting requires no update to
+211   Rθ ; control resumes from the realized molecular state under the new objective.
+212   Pathwise constraints act on the molecular trajectory. Some optimization settings may necessitate
+213   molecular requirements to hold at every intermediate rather than only for the returned endpoint.
+214   COMPOSE enforces such statewise constraints by removing violating successors before the reference
+215   kernel is normalized. We compare this support restriction with endpoint-only filtering under matched
+216   sources, objectives, and edit budgets. On the developmental panel, 16 of 24 endpoint-feasible
+217   trajectories contained at least one intermediate constraint violation, showing that endpoint feasibility
+218   can hide inadmissible paths. Support-restricted control excludes such intermediates by construction.
+219   We report the matched effect on optimization performance and the full protocol in Appendix K.7.
+
+220   4     D ISCUSSION
+221   COMPOSE is built around a reference process over chemically valid molecules that is learned
+222   independently of any downstream objective. In our experiments, the same GuacaMol-trained Rθ is
+223   reused for variable-size editing on ZINC-250k and for protein-specific lead optimization, with only
+224   the controller changing between tasks. Representing the intermediate states explicitly as molecules
+225   also enables the model to look ahead before committing an edit, continue from a molecule already
+
+
+                                                            6
+       Capability                 Matched comparison                     Main finding
+       Future-aware control       remaining-budget vs. local selec-      40/65 vs. 26/65 targets reached
+                                  tion
+       Dynamic retargeting        continue from x3 vs. restart from     improves post-switch utility in both objective
+                                  x0                                    switches
+       Pathwise constraints       support restriction vs. endpoint-     endpoint-only filtering permits hidden inter-
+                                  only filtering                        mediate violations; support restriction pre-
+                                                                        vents them by construction
+      Table 3: Trajectory-level capabilities of the frozen molecular process. Each comparison changes how the
+      trajectory is controlled while keeping the reference process Rθ fixed. Confidence intervals, prioritization results,
+      and full protocols are reported in Appendix K.
+
+
+226   reached when the objective changes, and restrict which molecular states can be visited along a
+227   trajectory.
+228   Nevertheless the current formulation still has several limitations: finite-horizon control requires
+229   evaluating the downstream states reachable within the remaining edit budget, which is only feasible
+230   on small enumerable state graphs. For realistic molecular design problems, we instead learn hϕ to
+231   approximate this future value from sampled continuations. COMPOSE is also limited by its rewrite
+232   vocabulary and by the property models or docking scores used to define downstream objectives.
+233   Extending the executable chemistry and evaluating against experimentally measured objectives are
+234   natural next steps.
+
+235   R EFERENCES
+236   Andrew Campbell, Jason Yim, Regina Barzilay, Tom Rainforth, and Tommi Jaakkola. Generative
+237     flows on discrete state-spaces: Enabling multimodal flows with applications to protein co-design.
+238     In International Conference on Machine Learning (ICML), 2024.
+239   Tong Chen, Yinuo Zhang, and Pranam Chatterjee. AReUReDi: Annealed rectified updates for refining
+240     discrete flows with multi-objective guidance. arXiv preprint arXiv:2510.00352, 2025.
+241   Tong Chen, Maximilian Holsman, Lin Zhao, Yinuo Zhang, and Pranam Chatterjee. pCoMole: Pareto-
+242     constrained molecule editing with discrete flows. OpenReview, 2026. OpenReview submission
+243     https://openreview.net/forum?id=LpttbUObQL.
+244   Tianfan Fu, Cao Xiao, Xinhao Li, Lucas M. Glass, and Jimeng Sun. MIMOSA: Multi-constraint
+245     molecule sampling for molecule optimization. In AAAI Conference on Artificial Intelligence, 2021.
+246   Shrey Goel and Pranam Chatterjee. Minimal-action discrete Schrödinger bridge matching for peptide
+247     sequence design. arXiv preprint arXiv:2601.22408, 2026.
+248   Rafael Gómez-Bombarelli, Jennifer N. Wei, David Duvenaud, José Miguel Hernández-Lobato,
+249     Benjamín Sánchez-Lengeling, Dennis Sheberla, Jorge Aguilera-Iparraguirre, Timothy D. Hirzel,
+250     Ryan P. Adams, and Alán Aspuru-Guzik. Automatic chemical design using a data-driven continu-
+251     ous representation of molecules. ACS Central Science, 4(2):268–276, 2018.
+252   Marton Havasi, Brian Karrer, Itai Gat, and Ricky T. Q. Chen. Edit flows: Flow matching with edit
+253    operations. arXiv preprint arXiv:2506.09018, 2025.
+254   Peter Holderrieth, Marton Havasi, Jason Yim, Neta Shaul, Itai Gat, Tommi Jaakkola, Brian Karrer,
+255     Ricky T. Q. Chen, and Yaron Lipman. Generator matching: Generative modeling with arbitrary
+256     markov processes. In International Conference on Learning Representations, 2025.
+257   Cristian Jensen, Luca Schaufelberger, Riccardo De Santi, Kjell Jorner, and Andreas Krause. Value
+258     matching: Scalable and gradient-free reward-guided flow adaptation. In International Confer-
+259     ence on Learning Representations (ICLR), 2026. OpenReview https://openreview.net/
+260     forum?id=7iXt44Actj.
+261   Jan H. Jensen. A graph-based genetic algorithm and generative model/monte carlo tree search for the
+262     exploration of chemical space. Chemical Science, 10(12):3567–3572, 2019.
+
+
+                                                               7
+263   Wengong Jin, Regina Barzilay, and Tommi Jaakkola. Junction tree variational autoencoder for
+264    molecular graph generation. In International Conference on Machine Learning (ICML), 2018.
+265   Wengong Jin, Kevin Yang, Regina Barzilay, and Tommi Jaakkola. Learning multimodal graph-to-
+266    graph translation for molecular optimization. In International Conference on Learning Representa-
+267    tions (ICLR), 2019. arXiv:1812.01070.
+268   Wengong Jin, Regina Barzilay, and Tommi Jaakkola. Hierarchical generation of molecular graphs
+269    using structural motifs. In International Conference on Machine Learning (ICML), volume 119 of
+270    Proceedings of Machine Learning Research, pages 4839–4848, 2020.
+271   Seul Lee, Karsten Kreis, Srimukh Prasad Veccham, Meng Liu, Danny Reidenbach, Yuxing Peng,
+272     Saee Gopal Paliwal, Weili Nie, and Arash Vahdat. GenMol: A drug discovery generalist with
+273     discrete diffusion. In Proceedings of the 42nd International Conference on Machine Learning,
+274     volume 267 of Proceedings of Machine Learning Research, pages 33205–33226, 2025. URL
+275     https://proceedings.mlr.press/v267/lee25o.html.
+276   Matteo Ninniri, Marco Podda, and Davide Bacciu. Graph diffusion that can insert and delete. In
+277    Advances in Neural Information Processing Systems (NeurIPS), 2025. arXiv:2506.15725.
+278   Yifan Niu, Ziqi Gao, Tingyang Xu, Yang Liu, Yatao Bian, Yu Rong, Junzhou Huang, and Jia Li.
+279     InversionGNN: A dual path network for multi-property molecular optimization. In International
+280     Conference on Learning Representations (ICLR), 2025. arXiv:2503.01488.
+281   Sophia Tang, Yinuo Zhang, and Pranam Chatterjee. PepTune: De novo generation of therapeutic
+282     peptides with multi-objective-guided discrete diffusion. In International Conference on Machine
+283     Learning (ICML), 2025. arXiv:2412.17780.
+284   Clément Vignac, Igor Krawczuk, Antoine Siraudin, Bohan Wang, Volkan Cevher, and Pascal Frossard.
+285     Digress: Discrete denoising diffusion for graph generation. In International Conference on
+286     Learning Representations, 2023.
+287   Yutong Xie, Chence Shi, Hao Zhou, Yuwei Yang, Weinan Zhang, Yong Yu, and Lei Li. MARS:
+288     Markov molecular sampling for multi-objective drug discovery. In International Conference on
+289     Learning Representations (ICLR), 2021.
+290   Seokwon Yoon, Youngbin Choi, Seunghyuk Cho, Seungbeom Lee, MoonJeong Park, and Dongwoo
+291     Kim. Routing by reaching: Composition of pre-trained GFlowNets for multi-objective generation.
+292     In International Conference on Machine Learning (ICML), 2026. arXiv:2602.21565.
+293   Zhenpeng Zhou, Steven Kearnes, Li Li, Richard N. Zare, and Patrick Riley. Optimization of molecules
+294     via deep reinforcement learning. Scientific Reports, 9(1):10752, 2019.
+
+
+
+
+                                                      8
+295   A PPENDIX
+
+296   A     R ELATED WORK
+297   Molecular generation spans latent-variable, graph-to-graph, reinforcement-learning, diffusion, and
+298   flow-based approaches, while molecular optimization has also been formulated directly through
+299   graph edits, fragment proposals, evolutionary operators, and MCMC transitions [Gómez-Bombarelli
+300   et al., 2018, Jin et al., 2018, 2019, Zhou et al., 2019, Jensen, 2019, Xie et al., 2021, Fu et al., 2021,
+301   Vignac et al., 2023, Campbell et al., 2024]. Recent work has begun to relax the fixed-size assumption
+302   of graph generation: GrIDDD introduces node insertion and deletion into discrete graph diffusion,
+303   allowing molecular graphs to grow and shrink during denoising [Ninniri et al., 2025]. C OMPOSE
+304   instead learns a goal-independent stochastic law over an explicit, state-dependent molecular rewrite
+305   space, making the transition process itself the object of subsequent control.
+306   A related line of work treats generation and adaptation directly through stochastic processes. Generator
+307   matching provides a general framework for learning Markov generators from tractable conditional
+308   processes, while Edit Flows develops insertion, deletion, and substitution dynamics for variable-length
+309   discrete generation [Holderrieth et al., 2025, Havasi et al., 2025]. MadSBM is a close mathematical
+310   relative, formulating peptide generation as a controlled Markov process on an amino-acid edit graph,
+311   although its learned control constructs the generative transport rather than adapting an already learned
+312   molecular process [Goel and Chatterjee, 2026]. Value Matching steers a frozen flow model through
+313   a learned value function, and pCoMole studies Pareto-constrained molecular editing with discrete
+314   flows [Jensen et al., 2026, Chen et al., 2026]. Future-aware generative control is therefore not unique
+315   to C OMPOSE: value-guided flow adaptation and pCoMole likewise use learned or rollout-estimated
+316   future value. Our distinction is the substrate on which that control operates. It is a learned canonical
+317   transition law over executable molecular graphs, which is what allows realized molecular states to be
+318   reused, retargeted, and constrained.
+319   Multi-objective molecular design has been addressed through surrogate-based optimization, evolu-
+320   tionary search, and inference-time guidance of generative models. InversionGNN combines multi-
+321   property prediction with gradient-based Pareto search in discrete molecular space [Niu et al., 2025],
+322   while PepTune and AReUReDi use discrete generative models with multi-objective tree search or
+323   Pareto-oriented refinement [Tang et al., 2025, Chen et al., 2025]. Routing by Reaching similarly
+324   composes pretrained GFlowNets for multi-objective generation at inference time [Yoon et al., 2026].
+325   C OMPOSE instead places multi-objective control on a reusable molecular transition process, so that
+326   future reachability and already-reached molecular states can participate directly in Pareto exploration.
+
+327   B     P RELIMINARIES
+328   B.1   M ARKOV CHAINS
+329   Let X be a discrete state space and P0 , . . . , PK−1 a sequence of transition kernels defining a possibly
+330   time-inhomogeneous Markov chain over K steps. Starting from X0 = x0 , the probability of a
+331   trajectory x1:K is
+                                                                   K−1
+                                                                   Y
+                               P (X1:K = x1:K | X0 = x0 ) =              Pk (xk+1 | xk ).                   (7)
+                                                                   k=0
+
+332   Thus each transition depends only on the current state and the step of the process, while the sequence
+333   of kernels determines a distribution over complete trajectories. In C OMPOSE, fixed-budget molecular
+334   editing takes this form: each state is a complete molecular graph and each committed transition
+335   corresponds to one molecular edit.
+
+336   B.2   F INITE - HORIZON D OOB CONTROL
+337   We also recall finite-horizon control of a reference Markov chain. Let gz (x) ≥ 0 assign terminal
+338   desirability under goal z. Defining the backward value hK (x, z) = gz (x) and
+                               X                                                            hk+1 (y, z)
+                 hk (x, z) =       Pk (y | x) hk+1 (y, z),       Pkz (y | x) = Pk (y | x)               ,   (8)
+                               y
+                                                                                             hk (x, z)
+
+
+                                                             9
+339   gives the finite-horizon Doob h-transform wherever hk (x, z) > 0. Writing P z for the law of the
+340   chain run under these controlled kernels, the resulting terminal distribution is
+                                                          P (XK = y | X0 = x0 ) gz (y)
+                           P z (XK = y | X0 = x0 ) =                                   .                     (9)
+                                                             EP [gz (XK ) | X0 = x0 ]
+341   The transform therefore reweights only transitions already present in the reference chain and intro-
+342   duces no new support. With exact backward values, it realizes the reference terminal distribution
+343   tilted by gz . In C OMPOSE, this construction provides the control law for molecular editing, with an
+344   amortized future-value model replacing exact backward computation in large molecular spaces.
+345   C OMPOSE instantiates these generative and control primitives on a state-dependent, trans-dimensional
+346   molecular rewrite space.
+
+347   C     T HE EXECUTABLE MOLECULAR PROCESS IN FULL
+348   We develop C OMPOSE as a reusable stochastic process over molecular edits and a finite-horizon
+349   controller over that process. C OMPOSE realizes generative stochastic rewriting by repeatedly applying
+350   executable molecular edits under a learned, goal-independent transition law. An exact rewrite system
+351   first determines which transitions between complete molecular graphs are executable. We then
+352   learn a goal-independent reference law over this state-dependent support and push it forward to a
+353   canonical molecular successor kernel Rθ . Finally, we control the frozen successor process through a
+354   budget-conditioned h-transform, using a learned future-value model hϕ to approximate the required
+355   backward values at molecular scale.
+356   C.1    E XECUTABLE MOLECULAR TRANSITIONS
+357   C OMPOSE represents every generative state as a complete molecular graph. Let nmax denote the maxi-
+358   mum number of heavy atoms admitted by the declared molecular state space. For n ∈ {1, . . . , nmax },
+359   let Xn be the set of connected molecular graphs with n heavy atoms whose node and edge attributes
+360   lie in the declared vocabularies of elements, bond orders, formal charges, and implicit hydrogens,
+361   and in which every atom satisfies its declared valence constraints. The molecular state space is
+                                                         nG
+                                                          max
+
+                                                   X =          Xn .                                        (10)
+                                                          n=1
+362   Thus each state x ∈ X is a complete molecule rather than a masked, corrupted, or partially specified
+363   representation.
+364   Molecular transitions are generated by typed graph rewrites. An edit mark a specifies a rewrite
+365   type together with its molecular match and typed payload, and T(x, a) denotes the graph obtained
+366   by applying that rewrite to x. The full atom-, bond-, and ring-level edit language is specified in
+367   Appendix F.2. From a state x, the executor exposes only the finite, state-dependent set
+                              
+                      A(x) = a : a matches x and T(x, a) passes all executor guards .                 (11)
+368   Execution follows a propose–validate–commit rule: a successor is admitted only if its attributes
+369   remain in the declared vocabularies, affected valences are satisfied, the graph remains connected,
+370   and its heavy-atom count lies in {1, . . . , nmax }. An edit that fails any guard contributes no transition
+371   to A(x). Inadmissible molecular states are therefore absent from the stochastic support rather than
+372   discouraged through a learned penalty.
+373   The decomposition of X by heavy-atom count makes the process trans-dimensional. Each admitted
+374   edit changes heavy-atom count by at most one, yielding birth, death, or same-cardinality transitions
+375   between Xn and Xn+1 , Xn−1 , or Xn , respectively. Birth and death edits create or remove typed graph
+376   entities that participate in valence, connectivity, and ring perception rather than merely activating or
+377   deactivating padded coordinates. A trajectory may therefore grow, shrink, and restructure a molecular
+378   graph within a common state space.
+379   Because membership in A(x) already encodes the guards defining X , we have T(x, a) ∈ X for
+380   every x ∈ X and a ∈ A(x). Consequently every state reached by a stochastic process supported on
+381   {A(x)}x∈X remains in the declared molecular state space; the argument is given in Appendix G.
+382   The legal edit sets A(x) therefore determine which molecular transitions are possible, but not how
+383   probability should be distributed among them. We next learn a goal-independent stochastic law over
+384   this executable support.
+
+
+                                                          10
+385   C.2   L EARNED MOLECULAR REFERENCE PROCESS
+386   Having defined which molecular rewrites are executable, we next learn how probability is distributed
+387   over them. For every state x with A(x) ̸= ∅, the reference model defines a normalized conditional
+388   law over legal edit marks,
+                                                      X
+                                   pθ (a | x, t),           pθ (a | x, t) = 1,                        (12)
+                                                        a∈A(x)
+
+389   where t is a progress variable. Writing an edit as a = (k, o, η), with family k, matched molecular
+390   operands o, and typed payload η, we parameterize
+                                   pθ (a | x, t) = pθ (k | x, t) pθ (o, η | k, x, t).                    (13)
+391   A shared molecular encoder represents the current graph, while family-specific scorers normalize only
+392   over candidates admitted by the executor. The reference model receives no downstream objective,
+393   remaining budget, or task-specific constraint, and the original source molecule is not supplied as
+394   an additional conditioning variable. The source determines the initial state; task information enters
+395   later through support restrictions and control. Thus the learned reference law represents molecular
+396   plausibility independently of molecular purpose.
+397   Supervision is obtained by compiling molecular endpoint pairs into executable edit programs. Every
+398   stored teacher transition is replayed through the same executor used at inference, so the model is
+399   trained only on transitions available to the deployed process. The compiler may use both endpoints to
+400   construct an edit program, but neither the target endpoint nor the program is available to the reference
+401   model at inference. Because multiple legal marks can execute to the same molecular graph, the
+402   learning objective is defined on the resulting molecular successor rather than on a particular syntactic
+403   realization. Let Rθ,t (y | x) denote the induced law over distinct committed molecular successors,
+404   formalized in Appendix C.3. For productive teacher transitions xi → yi⋆ , we minimize
+                                                        wi log Rθ,ti (yi⋆ | xi )
+                                                    P
+                                      Lref (θ) = − i         P                   ,                        (14)
+                                                                i wi
+
+405   where wi is the registered weight under the declared editing measure. Terminal rows do not enter this
+406   objective. Equation (14) therefore learns which committed molecular successor follows a state under
+407   that measure; it does not calibrate continuous-time holding rates.
+408   This objective is related to generator matching but is not the generator-matching population objective.
+409   Writing the productive rate as Q+ (y | x, t) = Λ(x, t)P (y | x, t), the corresponding generator-
+410   matching divergence separates pointwise into a productive-hazard term and a conditional-successor
+411   term proportional to Λ⋆ KL(P ⋆ ∥ Rθ ). C OMPOSE optimizes the successor component only: the hazard
+412   term is not optimized, and Equation (14) is averaged under the declared family-weighted editing
+413   measure rather than the state–time marginal of the conditional-process mixture [Holderrieth et al.,
+414   2025]. Appendix G.2 gives the full decomposition and the precise measure-level distinction.
+415   The learned mark law is not yet the molecular kernel used for control: distinct executable marks
+416   can yield the same molecular state. We therefore next push pθ through the executor and aggregate
+417   probability by canonical molecular outcome.
+
+418   C.3   C ANONICAL MOLECULAR SUCCESSORS
+419   We now push the learned edit law through the executor to obtain a stochastic process over distinct
+420   molecular states. Multiple legal marks can produce the same molecular graph because of graph
+421   symmetries, equivalent matches, or alternative internal rewrite descriptions. For a successor y, define
+422   its successor set                        
+                                    Gy (x) = a ∈ A(x) : T(x, a) ≃ y ,                                    (15)
+423   where ≃ denotes equivalence under the registered molecular canonicalization. The induced probability
+424   of y is                                           X
+                                      p̄θ,t (y | x) =         pθ (a | x, t).                             (16)
+                                                        a∈Gy (x)
+
+425   Thus probability assigned to a molecular transition is the aggregate mass of every executable mark
+426   that realizes it. For example, deleting any of the three symmetry-equivalent terminal methyl car-
+427   bons in 2-methylpropane, CC(C)C, produces propane; canonicalization exposes propane once with
+
+
+                                                          11
+428   the combined probability of those marks rather than overweighting it because of representational
+429   multiplicity.
+430   Fixed-budget editing counts committed changes of molecular state rather than internal mark draws.
+431   Let S(x) denote the distinct non-self canonical successors admitted by this convention. Conditioning
+432   the pushforward distribution on a committed state change defines the molecular reference kernel
+                                                   1{y ∈ S(x)} p̄θ,t (y | x)
+                                     Rθ,t (y | x) = P                   ′
+                                                                              .                           (17)
+                                                      y ′ ∈S(x) p̄θ,t (y | x)
+
+433   If S(x) = ∅, x is terminal for the committed molecular process. For b > 0, such a state has
+434   hb (x, z) = 0 under the backward recursion of Appendix D.1; trajectories terminating before the
+435   declared horizon therefore carry zero mass in the exact-K-step controlled terminal law. Otherwise Rθ,t
+436   is a normalized law over distinct molecular successors, and iterating it defines the goal-independent
+437   reference process optimized by Equation (14). We suppress t and write Rθ (y | x) when the registered
+438   progress convention is fixed; canonical self-events and other non-committed outcomes are detailed in
+439   Appendix G.1.
+                                                                                   P
+440   Proposition 2 (Canonical normalization). For every nonterminal state x, y∈S(x) Rθ,t (y | x) = 1.
+441   Moreover, any refinement or coarsening of the internal mark representation that preserves the
+442   aggregate probability mass of every canonical successor set leaves Rθ,t unchanged. Consequently,
+443   state-level controllers that reweight Rθ,t using quantities defined on canonical molecular successors
+444   are invariant to such representational refinements.
+445   This invariance relies on performing control after canonicalization: reweighting or truncating in-
+446   dividual marks beforehand can reintroduce dependence on arbitrary edit multiplicities. With the
+447   goal-independent reference process now defined on complete molecular states, we next control this
+448   frozen kernel toward finite-horizon design objectives.
+
+449   D     F INITE - HORIZON CONTROL
+450   D.1    F INITE - HORIZON MOLECULAR CONTROL
+451   Having defined the goal-independent molecular reference process Rθ , we now introduce task-specific
+452   control without modifying that process. Let z denote a design objective and gz : X → R≥0 its
+453   terminal desirability. For a remaining budget of b molecular transitions, define the backward values
+                                              X
+         h0 (x, z) = gz (x),      hb (x, z) =      Rθ (y | x) hb−1 (y, z) = ERθ [gz (Xb ) | X0 = x] . (18)
+                                             y∈S(x)
+
+454   Thus hb (x, z) evaluates a molecule by the desirability reachable from it after b further transitions
+455   under the reference process. Unlike a score of the current molecule, it depends on the molecular
+456   futures that remain accessible through Rθ .
+457   For hb (x, z) > 0, the finite-horizon h-transform defines
+                                                                    hb−1 (y, z)
+                                       Rθz,b (y | x) = Rθ (y | x)               .                         (19)
+                                                                     hb (x, z)
+458   The controlled kernel therefore reweights the same canonical molecular successors according to
+459   their remaining future value: a transition may be preferred despite little immediate improvement if
+460   it preserves access to desirable states later in the trajectory. If hb (x, z) = 0, no state with positive
+461   terminal desirability is reachable within the remaining budget under the reference process, and we
+462   leave the controlled row undefined rather than introduce probability outside its support.
+463   Theorem 3 (Finite-horizon molecular control). Let Rθ define the reference path measure over K
+464   committed transitions from x0 , with trajectories terminating before K assigned zero continuation
+465   mass, let gz be nonnegative and finite-valued, and suppose 0 < hK (x0 , z) < ∞. Applying Rθz,K−j
+466   at step j = 0, . . . , K − 1 defines normalized controlled kernels whose support is contained in that of
+467   Rθ , and whose terminal distribution satisfies
+                                                                                      gz (y)
+                       Pz (XK = y | X0 = x0 ) = PRθ (XK = y | X0 = x0 )                         .         (20)
+                                                                                    hK (x0 , z)
+
+                                                         12
+468   Thus exact backward values realize the gz -tilted terminal law without introducing transitions outside
+469   the executable reference support. The proof is given in Appendix G.3.
+470   The guarantee is horizon-specific: before the terminal step, the controlled marginal is determined
+471   by the remaining backward value rather than directly by gz , so early stopping does not in general
+472   realize the terminal tilt. Because every state of Rθ is a complete molecule and every transition an
+473   executable rewrite, hb (x, z) has a direct interpretation as future desirability from a realized molecular
+474   intermediate through its remaining executable continuations. Exact backward evaluation is tractable
+475   only when the relevant state graph can be enumerated. Appendix D.2 therefore replaces hb with a
+476   learned goal- and budget-conditioned approximation hϕ (x, z, b), retaining the same finite-horizon
+477   control interface at molecular scale.
+
+478   D.2    L EARNING GOAL - AND BUDGET- CONDITIONED FUTURE VALUE
+479   Exact evaluation of the backward values in Appendix D.1 requires propagating terminal desirability
+480   over the molecular states reachable within the remaining edit budget, which is infeasible in realistic
+481   molecular spaces. We therefore learn an amortized approximation hϕ while keeping the molecular
+482   reference process Rθ fixed. For objective z and b remaining transitions,
+                                hϕ (x, z, b) ≈ hb (x, z) = ERθ [gz (Xb ) | X0 = x] .                       (21)
+483   The remaining budget is part of the prediction problem: the same molecule can have different future
+484   value under the same objective depending on how many executable transitions remain.
+485   We construct supervision directly from the frozen reference process. From a molecular state x, M
+486   independent b-step continuations give the Monte Carlo target
+                                            M
+                                         1 X  (m)                         (m)
+                          hM (x, z, b) =
+                          b                    gz Xb ,                    Xb      ∼ Rθb (· | x).           (22)
+                                         M m=1
+
+487   When gz is an indicator, this target estimates finite-budget reachability; for a general nonnegative
+488   desirability, it estimates expected future value. Training and validation are partitioned by molecular
+489   source so that states descended from the same source do not cross splits.
+490   The exact backward values also satisfy the Bellman recursion in Equation (18), which provides
+491   an additional source of supervision when adjacent-budget trajectory pairs are available. We use
+492   this consistency relation as an auxiliary training signal for the reachability-valued controller, while
+493   controllers trained on soft expected-desirability targets are fit directly to their Monte Carlo future-
+494   value estimates. In both cases, hϕ is trained to approximate the backward quantity defining the exact
+495   controller rather than an independent task-specific score. Architecture and training details for the
+496   respective future-value models are given in Appendices I.3 and I.4.
+497   This distinction is important when terminal desirability is derived from a learned property model
+498   Fbψ . The property model Fbψ (x) estimates properties of the current molecule, whereas hϕ (x, z, b)
+499   estimates the desirability reachable from that molecule after b further transitions of Rθ . Property
+500   learning therefore estimates where value may lie; future-value learning propagates that value through
+501   the molecular process.
+502   Replacing the exact backward value in Equation (19) yields the scalable controlled kernel
+                                              Rθ (y | x) hϕ (y, z, b − 1)
+                      Pϕ (y | x, z, b) =     X                                    ,      y ∈ S(x),         (23)
+                                                 Rθ (y ′ | x) hϕ (y ′ , z, b − 1)
+                                           y ′ ∈S(x)
+
+503   whenever the denominator is positive. If hϕ = h, Equation (23) recovers the exact finite-horizon
+504   transform of Theorem 3. With learned hϕ , approximation error can change how probability is allocated
+505   among executable successors, but cannot introduce a transition outside the support of Rθ . Exact
+506   terminal reweighting remains a guarantee of the exact h-transform and is not claimed for the learned
+507   approximation.
+
+508   D.3    S AMPLING THE CONTROLLED MOLECULAR PROCESS
+509   At inference, C OMPOSE applies the controlled kernel in Equation (23) recursively over realized
+510   molecular states. Given the current molecule x, objective z, and remaining budget b, the executor
+
+
+                                                            13
+511   enumerates the canonical successor set S(x); Rθ assigns goal-independent reference probability to
+512   these successors, and hϕ reweights them by their predicted remaining future value. After sampling and
+513   committing a successor, the resulting molecule becomes the next state and the budget is decremented.
+514   Recomputing the controlled law after every committed edit therefore yields a closed-loop molecular
+515   trajectory whose decisions depend on the state actually reached rather than on a trajectory fixed in
+516   advance.
+517   When S(x) can be evaluated directly, we sample from the normalized kernel in Equation (23). The
+518   same row can alternatively be sampled by rejection whenever hϕ admits a finite envelope: proposing
+519   from Rθ (· | x) and accepting in proportion to hϕ recovers the controlled distribution conditional on
+520   acceptance. For objectives whose desirable futures carry little reference mass, direct sampling can
+521   allocate insufficient computation to useful trajectories. We instead use a Feynman–Kac sequential
+522   Monte Carlo construction. Particles propagate under the frozen reference process Rθ , and a transition
+523   x → y with b remaining steps receives incremental potential
+                                                        hϕ (y, z, b − 1)
+                                          Gb (x, y) =                    .                             (24)
+                                                          hϕ (x, z, b)
+524   Particles are resampled when effective sample size falls below N/2. When hϕ equals the exact back-
+525   ward value, these potentials recover the finite-horizon Doob-controlled path law of Appendix D.1.
+526   With learned hϕ , the same value approximation acts as a twisting function for the reference parti-
+527   cle system; the resulting finite-particle procedure is an approximation whose target and boundary
+528   conditions are detailed in Appendix J.
+529   For objectives defined by a target region Bz , we stop prospectively at the first realized hit,
+                                    τ = min({t ≤ K : Xt ∈ Bz } ∪ {K}) .                                (25)
+530   A reached molecule is returned when the target region is entered; if no hit occurs, the trajectory
+531   continues to its declared budget. Intermediate states are not retrospectively collected as additional
+532   samples: one controlled trajectory produces one returned candidate. Objectives without a first-hit
+533   interpretation are sampled to the declared horizon.
+534   D.4   P REFERENCE - CONDITIONED MULTI - OBJECTIVE CONTROL
+535   The preceding construction applies to any nonnegative terminal desirability gz . To control C OMPOSE
+536   under competing molecular objectives, let F  b ψ (x) = Fbψ,1 (x), . . . , Fbψ,m (x) ∈ [0, 1]m denote
+537   frozen property scores oriented so that larger values are preferred, and let λ ∈ ∆m−1 specify a
+538   preference over objectives. We define the weighted Chebyshev shortfall
+                                                                        
+                                     Lλ (x) = max λi 1 − Fbψ,i (x) .                                    (26)
+                                                i=1,...,m
+
+539   Unlike an additive scalarization, the maximum is determined by the most limiting preference-
+540   weighted objective, preventing improvement in one property from arbitrarily compensating for poor
+541   performance on another.
+542   We convert this shortfall into the nonnegative terminal desirability required by the finite-horizon
+543   controller,                                
+                                          Lλ (x)                                
+                         gλ (x) = exp −             ,     τλ = Stdx∼Dtrain Lλ (x) > 0.                (27)
+                                            τλ
+544   The scale τλ is fixed from the property-supervision set before molecular optimization and is not
+545   fitted to generated candidates. Numerical centering used in the implementation leaves normalized
+546   controlled transitions unchanged and is detailed in Appendix I.4.
+547   Setting z = λ in Appendix D.2 gives
+                                                                         
+                                     hϕ (x, λ, b) ≈ ERθ gλ (Xb ) | X0 = x ,
+548   and Equation (23) then defines the corresponding preference-conditioned molecular process. Differ-
+549   ent values of λ therefore alter the desired tradeoff through the controller while leaving the learned
+550   molecular reference process Rθ fixed. Running the controller under multiple preferences yields
+551   preference-conditioned candidate sets, from which we report the nondominated subset; the scalariza-
+552   tion itself carries no claim of Pareto optimality.
+553   The same state-level formulation also permits objectives and admissibility requirements to change
+554   after generation has begun, as we describe next.
+
+
+                                                        14
+555   D.5    R ETARGETING AND PATHWISE MOLECULAR CONSTRAINTS
+556   Because control is conditioned on the current molecular state, C OMPOSE can change either the
+557   design objective or the admissible transition set without retraining the molecular reference process.
+558   Suppose a trajectory controlled under objective z reaches the realized molecule xτ with b transitions
+559   remaining, after which the objective changes to z ′ . Control resumes by evaluating the same kernel in
+560   Equation (23) from xτ under the new goal context z ′ . The realized prefix x0 → · · · → xτ is retained,
+561   and no parameter of Rθ is updated.
+562   Corollary 4 (Exact continuation after a goal change). With exact backward values, applying The-
+563   orem 3 from (xτ , b) with terminal desirability gz′ realizes the gz′ -tilted b-step terminal law of the
+564   reference process started at xτ . This generally differs from specifying z ′ at the original source x0 :
+565   continuation preserves the molecular state actually reached, whereas restarting discards it. With
+566   learned hϕ , the same operation gives the corresponding approximate continuation.
+567   Hard statewise requirements can instead be enforced through executable support. Let C : X → {0, 1}
+568   be a molecular predicate with C(x0 ) = 1, and define the restricted edit set
+                                            
+                                  AC (x) = a ∈ A(x) : C(T(x, a)) = 1 .                              (28)
+569   Applying the canonicalization and normalization of Appendix C.3 to AC (x) gives the constrained
+570   reference kernel RθC . If AC (x) = ∅, the state is terminal under the constrained process; otherwise
+571   every committed successor satisfies C by construction. Finite-horizon control then proceeds with RθC
+572   in place of Rθ . Approximation error in hϕ may therefore misallocate probability among admissible
+573   successors, but cannot violate a constraint enforced through the support itself.
+574   This construction applies to state predicates whose admissibility can be determined from the proposed
+575   molecular successor; we refer to such constraints as rule-closed. Examples include protected scaffolds,
+576   forbidden substructures, and size or charge restrictions. Requirements that depend on accumulated
+577   history require an augmented state. For a sufficient statistic ξk , define
+                                   X
+                                   ek = (Xk , ξk ),       ξk+1 = Φ(ξk , Xk+1 ),
+578   so that the augmented process remains Markov. Cumulative edit costs or other history-dependent
+579   requirements can then be represented explicitly rather than imposed through a non-Markov rejection
+580   rule.
+581   Retargeting and pathwise restriction therefore modify different parts of the same frozen process:
+582   retargeting changes the control context, whereas hard constraints change executable support. In both
+583   cases, the parameters of the learned molecular reference process remain fixed.
+
+584   E     S UPPORTING MATERIAL
+585   OVERVIEW OF A PPENDIX
+586   This appendix provides the formal, implementation, and experimental details supporting the main
+587   text. Appendix F specifies the executable molecular state space, rewrite semantics, and canonical
+588   molecular-successor representation. Appendix G gives the complete theoretical results underlying
+589   support preservation and finite-horizon control. Appendices H to J describe transition supervision,
+590   model training, and controlled sampling. Appendix K gives the experimental details and extended
+591   results for each experiment in the order they appear in the main text, Appendix L documents alignment
+592   with external benchmark protocols, and Appendix M records the software environment, randomization
+593   scheme, and compute accounting.
+
+594   F     M OLECULAR STATE SPACE AND EXECUTABLE EDITS
+595   The support-level claims of C OMPOSE are defined with respect to an explicit molecular state space
+596   rather than post-hoc sanitization. This section specifies that state space and the rewrite contracts that
+597   induce its transition graph. The semantic state is the active molecular graph on which connectivity,
+598   valence, ring perception, and canonical identity are evaluated, and we distinguish it from any padded
+599   tensor representation used by the implementation. We then define the current operator family, its exact
+600   legality checks, and the pushforward from executable rewrite marks to canonical molecular successors.
+601   These definitions determine what transitions are possible before either Rθ or a task-specific controller
+602   assigns probability to them.
+
+
+                                                        15
+603   F.1   M OLECULAR STATE SPACE
+604   States carry a bounded number of heavy atoms over a declared set of neutral (element, valence)
+605   classes drawn from an organic element set; the declared bounds and vocabulary are fixed in the frozen
+606   process configuration and are identical across every experiment reported here. Formal charge is an
+607   input but not an output dimension, so charge is carried rather than designed; stereochemistry, isotopes
+608   and radicals are not represented.
+609   Cardinality is a property of the active molecular graph rather than of a fixed tensor allocation. Writing
+610   Xn for the states with n heavy atoms, the state space is the disjoint union of the strata, and a
+611   birth or death moves a trajectory between strata by creating or destroying a typed graph entity that
+612   participates in valence, connectivity, and ring perception. This is not the activation or deactivation of
+613   a padded coordinate, and the distinction is what makes the process trans-dimensional in the sense
+614   used throughout the paper.
+615   F.2   R EWRITE OPERATORS
+616   The main text depends only on the legal edit set (11) and never on which families populate it; this
+617   section records the families used, so that the edit set is reproducible. We use paper-facing operator
+618   names for executable rewrite semantics and model-family names when reporting learned-family
+619   statistics; Table 4 gives the fixed mapping between them.
+
+      Table 4: The rewrite families, by action on the strata. Each family is a typed graph rewrite with struc-
+      tural and chemical application conditions; the executor follows a propose–validate–commit discipline
+      and exposes no transition whose successor fails a guard. Names here are the paper-facing operator
+      names. The implementation additionally carries model-family identifiers, which appear in per-family
+      results: cycle_close is recorded as cycle_insert, cycle_open as cycle_attach, and
+      ring_aromaticity_restate as ring_system_restate. The remaining five names co-
+      incide in both registers. Per-family results in Appendix K.1 are reported under the model-family
+      identifiers.
+      Family                               Cardinality           Structural / chemical condition
+      atom_insert                          birth Xn → Xn+1       empty capacity; a null source or exactly one
+                                                                 occupied anchor; allowed atom state; for a bonded
+                                                                 birth, allowed bond order and feasible endpoint
+                                                                 valence
+      atom_delete                          death Xn → Xn−1       removable atom with connected remainder;
+                                                                 neighbour hydrogen compensation; successor
+                                                                 sanitizes
+      atom_restate                         same                  occupied site; joint element, valence-class and
+                                                                 implicit-hydrogen state allowed; successor differs
+                                                                 from the source
+      bond_reorder                         same                  existing edge; joint bond-order and hydrogen
+                                                                 update feasible
+      bond_reroute                         same (reroute)        the cut edge is a bridge; the relocated fragment is
+                                                                 a pendant subtree; the new endpoint lies outside it;
+                                                                 cut and attach commit in one transaction so no
+                                                                 disconnected state is ever exposed
+      cycle_close                          same (cyclize)        absent edge between two occupied atoms with
+                                                                 valence headroom; admitted insertion raises graph
+                                                                 cycle rank by one
+      cycle_open                           same (decyclize)      existing edge that is not a bridge; endpoint
+                                                                 hydrogen compensation; successor sanitizes
+      ring_aromaticity_restate             same                  a matched cyclic system; a coordinated set of
+                                                                 bond-order changes validated by the executor as
+                                                                 one transaction
+
+620   The operators above are the complete executable support. Whole-ring growth and whole-ring deletion
+621   macros are not part of it: every ring in this work is built and modified through the primitive operators
+622   listed here.
+623   cycle_close inserts one bond between two nonbonded atoms and, because every non-null state
+624   is connected, raises graph cycle rank by one; cycle_open deletes one non-bridge cycle edge and
+625   lowers it by one. At the untyped graph level every connected graph is a spanning tree plus its non-tree
+
+
+                                                            16
+626   edges, so inserting those edges one at a time realizes the abstract cyclic topology while preserving
+627   connectivity. This establishes topological reachability at the untyped graph level, not the existence
+628   of a valence-valid molecular path within a finite edit budget. It does not prove that the molecular
+629   grammar admits a valence-valid path to every chemically labelled ring system, nor that such a path
+630   fits a finite edit budget; both are measured questions and neither is assumed anywhere in the main
+631   text.
+
+632   F.3   C OMPILED MULTI - EDIT TRANSFORMATIONS
+633   The lead-optimization controller may select a multi-edit ring transformation, such as constructing
+634   or refining a ring system, rather than a single primitive edit. These transformations are compiled
+635   programs, not new operators. A program of length L executes L primitive edits in sequence; at every
+636   step the successor is drawn from the same legal-successor enumeration A(·) used everywhere else,
+637   applied through the same executor, and screened by the same guards. A program halts if a state admits
+638   no legal successor.
+639   Two consequences matter for the claims in this paper. First, the executable support is unchanged:
+640   every endpoint a program can reach is reachable by the corresponding sequence of primitive rewrites,
+641   so compiling ring construction introduces no molecular successor that A(·) does not already admit,
+642   and Appendix G therefore applies unchanged to the controlled process. Second, what a program
+643   changes is the granularity of control, not the support: purpose is evaluated at the program endpoint
+644   rather than after each edit, because a constructive ring program passes through intermediate states
+645   whose immediate objective value is worse than both its start and its endpoint. Scoring each edit
+646   separately prunes such a program before it completes, which is a property of the control schedule and
+647   not of the state space.
+
+648   F.4   C ANONICAL MOLECULAR SUCCESSORS
+649   Distinct executable marks can produce the same molecule, so the law the controller acts on is the
+650   pushforward of the mark law through the executor, aggregated at canonical molecular identity as in
+651   (15)–(17). Aggregation is what makes every downstream quantity independent of how many ways
+652   the implementation can name a molecule; Appendix G.1 establishes the precise invariance this buys
+653   and its exact scope.
+
+654   G     T HEORETICAL RESULTS
+655   The deployed reference process. All fixed-budget experiments evaluate the reference model at the
+656   single progress value t0 = 0.5. We therefore write
+                            pθ (a | x) := pθ (a | x, t0 ),        Rθ (y | x) := Rθ,t0 (y | x)
+657   throughout, and the deployed molecular reference process is time-homogeneous. The results below
+658   are stated for that process.
+
+659   Executable-support closure. By definition, an edit a belongs to A(x) only if its proposed successor
+660   passes the attribute, valence, connectivity and heavy-atom-count conditions that define X . Hence
+                                    x ∈ X,      a ∈ A(x)      =⇒       T (x, a) ∈ X .
+661   Induction over committed transitions shows that any process whose transition support is contained in
+662   the executable edit set remains in X . This applies to the reference process and to any controlled or
+663   support-restricted process derived from it, since every supported successor is the canonical image of
+664   an edit admitted by A(x).
+
+665   G.1    C ANONICAL SUCCESSOR REPRESENTATION
+666   Definition 5 (Successor-mass-preserving re-encoding). Consider two executable mark representations
+667   (A, pθ , T ) and (A′ , p′θ , T ′ ) of the same molecular state space. They are successor-mass preserving if
+668   they induce the same committed canonical successor set S(x) and, for every x and every y ∈ S(x),
+                                             X                      X
+                                                   pθ (a | x) =            p′θ (a′ | x).
+                                     a∈A(x)                    a′ ∈A′ (x)
+                                    T (x,a)≃y                 T ′ (x,a′ )≃y
+
+
+                                                             17
+669   Proposition 6 (Invariance under successor-mass-preserving re-encoding). Under a successor-mass-
+670   preserving re-encoding, the canonical pushforward distribution and the committed molecular kernel
+671   Rθ (y | x) are unchanged. Consequently any state-level controller
+                                                 Rθ (y | x) Ψ(x, y)
+                              KΨ (y | x) = P             ′           ′
+                                                                        ,     Ψ ≥ 0,
+                                                y ′ Rθ (y | x) Ψ(x, y )
+
+672   is unchanged wherever the denominator is positive.
+
+673   Proof. The assumption gives equal probability mass for every canonical successor y. Summing those
+674   equal masses over the common committed successor set gives the same normalization constant, so
+675   Rθ (y | x) is identical under both representations. A state-level controller has the same numerator and
+676   denominator because both Rθ and Ψ are functions of canonical molecular states. For a predicate C
+677   defined on canonical states, all marks in a successor fiber are retained or removed together, so the
+678   restricted successor masses and their normalization are also identical under both encodings.
+
+679   Why control follows canonicalization. Suppose a canonical successor has total mark mass p. A
+680   nonlinear mark-level reweighting u 7→ uβ assigns it mass pβ when it is represented by one mark,
+681   but m (p/m)β when it is represented by m equal aliases. These agree only when β = 1. Nonlinear
+682   guidance applied at mark level can therefore depend on arbitrary representational multiplicity, while
+683   successor-level control cannot.
+
+684   G.2    R ELATION TO GENERATOR MATCHING
+685   The reference model is related to generator matching through the conditional-successor component
+686   of the productive generator. This is a statement about the training objective, so we state it pointwise
+687   at an arbitrary progress value: for any t, write Q+ (y | x, t) = Λ(x, t) P (y | x, t), separating a total
+688   productive exit rate from a normalized law over canonical molecular successors. Deployment then
+689   fixes t = t0 as above. For the Bregman divergence generated by φ(u) = u log u − u, direct expansion
+690   gives
+                                                                          Λ⋆
+                         Dφ Q+⋆ , Q+          ⋆       ⋆              ⋆             ⋆
+                                       
+                                      θ = Λ KL(P ∥ Rθ,t ) + Λ log Λθ − Λ + Λθ .                            (29)
+691   The first term depends on the normalized successor law, and the remaining terms depend on the
+692   productive exit rate.
+693   For a stored C OMPOSE teacher row (xi , ti , yi⋆ ), the compiled supervision records a productive
+694   successor identity but no holding time or rate magnitude. Under the unit-intensity representation used
+695   for this comparison, Λ⋆i = 1 and Pi⋆ = δyi⋆ , so the conditional-successor block of that row is
+
+                                  Λ⋆i KL(Pi⋆ ∥ Rθ,ti ) = − log Rθ,ti (yi⋆ | xi ) .
+696   The weighted empirical average of these rowwise terms is therefore exactly the productive-successor
+697   objective (14), up to factors independent of θ.
+698   C OMPOSE optimizes an empirical version of the conditional-successor block, and differs from the
+699   generator-matching population objective in exactly two respects. First, the hazard block is never
+700   optimized. The compiled supervision carries no rate magnitudes: every stored transition is registered
+701   with unit teacher rate, which enters training only as a nonterminality indicator, so no target for Λθ
+702   exists in the corpus. Under that unit-rate convention Λ⋆ is constant and the weight it contributes to
+703   the first term is absorbed into a positive constant independent of θ. The reported results never read an
+704   exit-rate magnitude; fixed-budget editing consumes only the embedded successor kernel, on which a
+705   constant rescaling of Q+ has no effect.
+706   Second, the expectation is taken under a different measure. Generator matching integrates the per-state
+707   divergence against the state–time marginal of the conditional-process mixture. C OMPOSE instead
+708   draws training rows under a declared editing measure that is weighted across operator families by
+709   design, so that a family’s exposure reflects the reference law the model is meant to estimate rather
+710   than the incidental composition of the compiled corpus; some strata are assigned zero draw. No
+711   importance correction is applied, and on zero-draw strata none could be. Consequently (29) holds
+712   pointwise in (x, t), and (14) is the conditional-successor block of that decomposition, but the training
+713   functional is not the generator-matching population objective. We therefore describe the relationship
+714   as a decomposition that identifies which factor Rθ estimates, not as an objective identity.
+
+
+                                                         18
+715   G.3   F INITE - HORIZON CONTROL
+716   Terminal states. To make early termination explicit, adjoin a cemetery state ∂. If a molecular
+717   state has no committed successor, the reference process moves to ∂ with probability one, and ∂ is
+718   absorbing. We set gz (∂) = 0. This is equivalent to assigning zero continuation mass to trajectories
+719   that terminate before the declared horizon, and it makes Rθ and hb defined everywhere.
+720   Theorem 7 (Finite-horizon molecular control; restatement of Theorem 3). Let Rθ be the reference
+721   kernel above and let gz : X ∪ {∂} → R≥0 be finite-valued with gz (∂) = 0. Define
+                                                          X
+                         h0 (x, z) = gz (x),  hb (x, z) =     Rθ (y | x) hb−1 (y, z),
+                                                                         y
+
+722   and suppose 0 < hK (x0 , z) < ∞. Wherever hb (x, z) > 0, define
+                                                                          hb−1 (y, z)
+                                          P z,b (y | x) = Rθ (y | x)                  .
+                                                                           hb (x, z)
+723   Then each controlled row is normalized and has support contained in that of Rθ , and applying these
+724   kernels with remaining budgets K, K − 1, . . . , 1 gives
+                                                                                             gz (y)
+                     PrP z (XK = y | X0 = x0 ) = PrRθ (XK = y | X0 = x0 )                              .
+                                                                                           hK (x0 , z)
+
+725   Proof. For any state with hb (x, z) > 0,
+                                                            P
+                                                             y Rθ (y | x)hb−1 (y, z)
+                                X
+                                          z,b
+                                      P         (y | x) =                                 =1
+                                 y
+                                                                      hb (x, z)
+
+726   by the backward recursion. If Rθ (y | x) = 0 then P z,b (y | x) = 0, so control introduces no
+727   reference-forbidden transition. Moreover positive controlled probability implies hb−1 (y, z) > 0, so
+728   every nonterminal state reached by the controlled process has a well-defined controlled row at the
+729   next step. For any K-step path x0:K of positive controlled probability,
+                                      K−1
+                                      Y                           hK−j−1 (xj+1 , z)
+               PrP z (x1:K | x0 ) =             Rθ (xj+1 | xj )
+                                      j=0
+                                                                    hK−j (xj , z)
+                                                                h0 (xK , z)                      gz (xK )
+                                 = PrRθ (x1:K | x0 )                        = PrRθ (x1:K | x0 )             ,
+                                                                hK (x0 , z)                     hK (x0 , z)
+730   because the interior h-factors telescope and h0 (xK , z) = gz (xK ). Summing over all reference paths
+731   ending at y gives the stated terminal law.
+732   Remark 8 (Horizon specificity). For j < K the same calculation gives
+                                                                                          hK−j (x, z)
+                     PrP z (Xj = x | X0 = x0 ) = PrRθ (Xj = x | X0 = x0 )                             .
+                                                                                          hK (x0 , z)
+733   Intermediate states are therefore tilted by remaining future value rather than directly by gz , and
+734   stopping before the declared horizon does not in general realize the terminal gz -tilt.
+
+735   Learned future value. At molecular scale we replace hb with a learned approximation hϕ (x, z, b).
+736   All deployed future-value heads use a sigmoid output, so 0 < hϕ (x, z, b) < 1. Consequently
+                                                             Rθ (y | x) hϕ (y, z, b − 1)
+                               Pϕ (y | x, z, b) = P                  ′          ′
+                                                            y ′ Rθ (y | x) hϕ (y , z, b − 1)
+
+737   is a well-defined probability distribution wherever Rθ (· | x) is defined. Whenever the learned
+738   sigmoid head is used, its strict positivity preserves the reference support. At the terminal step the
+739   exact boundary h0 = gz may remove zero-desirability successors, for example when gz is a region
+740   indicator. In all cases the controlled support is contained in that of Rθ and no new transition can be
+741   introduced. The exact terminal-law result above does not carry over unless hϕ = h.
+
+
+                                                                 19
+742   G.4    R ETARGETING AND PATHWISE SUPPORT
+743   Corollary 9 (Continuation after a goal change). Suppose a realized trajectory reaches xτ with b
+744   transitions remaining, after which the objective changes from z to z ′ . If 0 < hb (xτ , z ′ ) < ∞, exact
+745   finite-horizon control from xτ under terminal desirability gz′ gives
+                                                                                    gz′ (y)
+                      PrP z′ (Xb = y | X0 = xτ ) = PrRθ (Xb = y | X0 = xτ )                      .
+                                                                                  hb (xτ , z ′ )
+746   Retargeting therefore solves the remaining finite-horizon control problem from the molecular state
+747   actually reached, which differs in general from restarting under z ′ from x0 .
+
+748   Proof. Apply Theorem 7 with initial state xτ , horizon b, and terminal desirability gz′ .
+
+749   This is a correctness statement about continuation. It does not imply that continuing from xτ must
+750   outperform restarting from x0 ; that question is evaluated empirically in Section 3.3.
+751   Proposition 10 (Pathwise state constraints). Let C : X → {0, 1} be a predicate on canonical
+752   molecular states with C(x0 ) = 1, and define AC (x) = {a ∈ A(x) : C(T (x, a)) = 1}. Let RθC be
+753   the canonical successor kernel obtained from AC (x) by the same pushforward and normalization
+754   used to construct Rθ . If AC (x) = ∅ the state is terminal under the constrained process. Otherwise
+755   every committed state under RθC satisfies C, and the same holds for any controlled kernel whose
+756   support is contained in that of RθC .
+
+757   Proof. The initial state satisfies C. Suppose Xk satisfies C. Every mark in AC (Xk ) has a successor
+758   satisfying C by definition, so every state that can be committed at step k +1 also satisfies C. Induction
+759   proves the claim. A controller supported on RθC can only remove or reweight admissible successors
+760   and therefore preserves the invariant.
+
+761   This construction applies directly when admissibility can be decided from the proposed successor. A
+762   history-dependent requirement instead needs a Markov state augmentation: if ξk+1 = Φ(ξk , Xk+1 )
+763   is a sufficient running statistic, the same support-restriction argument applies on the augmented state
+764   (Xk , ξk ).
+
+765   H     DATA AND TRANSITION SUPERVISION
+766   The supervision used to fit Rθ varies across the executable edit space. We therefore specify the
+767   molecular source pool, the construction of executable transition supervision, and the associated
+768   data splits and provenance, since these determine which reference-law results are supported by
+769   data-backed transitions and which rely on synthetic perturbations. This variation bounds how the
+770   strongest per-family results in Appendix K.1 may be read.
+
+771   H.1    M OLECULAR DATA AND PREPROCESSING
+772   The editing corpus was derived from a fixed 500,000-molecule GuacaMol source pool by compiling
+773   executable local transitions, real-endpoint analogue relations, and reversible synthetic walks. C OM -
+774   POSE was not trained as an unconditional distribution model over that pool: the learned object is
+775   Rθ (y | x), a transition law over source–successor edits, not a density pθ (x) over molecules.
+776   The source pool is identified by the recorded dataset namespace and its SHA-256, and independently
+777   corroborated by the molecular statistics of the frozen training sources. Measured on 4,000 randomly
+778   sampled training sources, the element distribution is exactly the declared organic vocabulary, with
+779   carbon at 0.748, nitrogen and oxygen at 0.105 each, sulfur at 0.015, fluorine at 0.012, chlorine at
+780   0.009, bromine at 0.003, iodine and phosphorus at 0.002, and boron at 0.001. The median heavy-atom
+781   count is 26, median molecular weight 371.6 and ninetieth percentile 499.3, median ring count 3,
+782   median aromatic-ring count 2, and only 1.6% acyclic. Because the training receipts do not bind
+783   the original raw asset end to end, we treat this provenance link as strongly supported rather than
+784   cryptographically complete; the frozen compiled corpus itself is exactly identified by its dataset,
+785   library, packed-store and reserve digests. The benchmark sources of Appendix L.1 are drawn from a
+786   different pool.
+
+
+                                                         20
+787   H.2    T RANSITION CONSTRUCTION
+788   Transitions enter the corpus through several lanes, which are near family-pure with lane-homogeneous
+789   chunks. The frozen structural gate records 1,803,032 training transitions passing with zero violations.
+790   A metadata scan of every training chunk attributes cycle_insert (122,183 transitions across 102
+791   chunks), cycle_attach (84,940 across 102) and ring_system_restate (16,380 across 29)
+792   entirely to the reversible synthetic-walk lane, with zero transitions in any of the four data-backed lanes;
+793   in the pinned distribution-matched training subset that lane contributes 23,100 of 145,756 transitions,
+794   or 15.8%, against 84.2% data-backed. By contrast bond_reroute and atom_restate each
+795   appear in two lanes and therefore do have a real-chemistry source. The analogue lane draws on a
+796   frozen molecular-matched-pair pool of 344,153 records bound by a recorded contract hash, whose
+797   own upstream molecular source is not fully documented.
+798   Accordingly, results on the ring and cycle families support recovery of legal ring edits under synthetic
+799   perturbation, but do not establish data-backed ring editing or scaffold hopping. Establishing the latter
+800   would require supervision from observed ring transformations, which is absent from the current
+801   corpus.
+
+802   H.3    S UPERVISION PROVENANCE AND DATA SPLITS
+803   Every result in Appendix K is bound to artifacts frozen before it. The reference edit law was never
+804   retrained for any experiment in this paper, and the controller head evaluated on the prospective panel
+805   was verified byte-identical by hash before and after an unrelated training session. The three source
+806   panels (development, prospective validation, and the official cohort) were verified pairwise disjoint,
+807   with the official cohort and the development panel excluded from the eligible pool before the training
+808   corpus was sampled. Role precedence is final test, then controller validation, then validation, then
+809   train, so a molecule appearing in two raw libraries is excluded from the lower-precedence role; the
+810   one such case is excluded from training and appears in neither the final training set nor the matched
+811   reserve.
+812   Both evaluation panels are exactly disjoint and near-duplicate disjoint from the training source
+813   universe of 96,094 molecules. The matched reserve is cluster-disjoint by construction under an
+814   ECFP4 Tanimoto threshold of 0.95 with formula and scaffold blocking, and the external cohort shows
+815   zero exact overlap under a scaffold-matched comparison. The reserve’s higher scaffold sharing is by
+816   design: it was carved from the same population, which is what makes it population-matched. The
+817   evaluation ladder and its no-rescue rules were recorded before the data: the validation panel is opened
+818   once, whatever it returns is banked, and no hyperparameter is re-chosen afterwards.
+819   A pre-freeze mechanical smoke test executed one official benchmark source before the stop condition
+820   took effect. Its output was never inspected and is excluded from all analyses; the official cohort
+821   therefore remains unobserved for inferential purposes. The sealed final-test role, comprising 33,683
+822   source records, has not been leakage-audited, that audit is a precondition for opening it, and no result
+823   in this paper draws on it.
+
+824   I     M ODEL AND TRAINING DETAILS
+825   Three learned objects appear in this paper and are trained separately: the goal-independent reference
+826   law Rθ , a property model Fbψ that defines molecular desirability, and goal- and budget-conditioned
+827   future-value models. Only the future-value models are trained against a downstream design objective;
+828   Rθ never sees one.
+
+829   I.1   R EFERENCE EDIT LAW
+830   Rθ is fitted once, frozen, and never retrained for any experiment reported here. Its identity is pinned by
+831   the sampling-law hash recorded in the corpus binding artifact and by the dataset, library, packed-store
+832   and reserve digests alongside it. The conditional edit law is normalized over the legal edit set as in
+833   (12) and is hierarchical as in (13): a shared molecular encoder produces a state representation of
+834   width 256, a family gate scores which rewrite family fires, and family-specific scorers rank legal
+835   operands and payloads within it. Normalization is restricted to candidates the executor has admitted,
+836   so the model never places mass outside A(x). The encoder reads the current molecular graph and a
+837   progress variable, and does not read the source lead, the objective, the remaining budget, or any task
+838   constraint.
+
+
+                                                         21
+839   The reference law is trained by maximum likelihood of the next committed molecular successor
+840   under the declared editing training measure. For a productive teacher transition xi → yi⋆ ,
+                                                     wi log Rθ,ti (yi⋆ | xi )
+                                                 P
+                                     Lref (θ) = − i        P                  ,
+                                                             i wi
+
+841   as in (14), where Rθ,t is the canonical successor kernel of Appendix C.3 and terminal rows are
+842   excluded. For the frozen checkpoint used throughout this paper, teacher rates and importance weights
+843   are unit-valued; the corpus sampler instead defines the reference measure through its registered
+844   family-weighted row distribution. The total event intensity is not optimized by this objective, and
+845   fixed-budget C OMPOSE therefore does not claim calibrated continuous-time holding rates.
+846   Training. Encoder depth, message passing, optimizer, schedule, batch size, optimization steps and
+847   the checkpoint-selection criterion are fixed in the frozen training configuration released with the
+848   reference-law checkpoint; no value was tuned against any reported panel.
+
+849   I.2   P ROPERTY MODELS
+850   Molecular desirability is defined through a frozen property model Fbψ rather than through oracle
+851   calls at control time. For the two-objective experiment it is fitted to a matched budget of 10,000
+852   random-ZINC property labels, the same budget the comparator receives, and is shared identically by
+853   the immediate and future-aware arms so that any difference between them is attributable to control
+854   rather than to the landscape. Both arms therefore inherit the same prediction error and the same
+855   extrapolation behaviour outside the label range.
+856   Architecture and training. Architecture, featurization and held-out predictive performance are recorded
+857   with the released property-model checkpoints.
+
+858   I.3   QED FUTURE - VALUE MODEL
+859   The region-goal controller estimates finite-budget reachability of a goal region and is used for
+860   the similarity-constrained editing experiments. Its settings are design constants fixed in frozen
+861   configuration before any reported panel was run, and are summarized in Table 5.
+
+      Table 5: Region-goal future-value model. All entries are frozen configuration constants, not tuned against any
+      reported panel.
+        Component          Setting
+        Inputs             goal coordinates, signed property margins, remaining-budget one-hot, graph embedding
+        Head               MLP 1055 → 512 → 256 → 128 → 1, ReLU, dropout 0.1
+        Output             sigmoid reachability
+        Loss               binary cross-entropy + 0.3× Bellman consistency
+        Optimizer          Adam, learning rate 10−3
+        Goal grid          5 QED thresholds × 4 similarity floors
+        Validation split   0.15, held out by source molecule
+
+862   Four properties of this design matter for the claims and are not conveyed by the table. Goal condi-
+863   tioning is continuous, so a threshold pair never seen in training is a point in the same input space
+864   rather than an unseen class label. The validation split is by source molecule rather than by training
+865   example, because a trajectory rolled out of one lead yields many near-duplicate states and splitting by
+866   example would leak them across the boundary. The boundary condition h0 = gz is imposed exactly
+867   rather than learned. The Rθ encoder is frozen while this head is trained, so the reference process is
+868   unchanged by controller fitting.
+
+869   I.4   M ULTI - OBJECTIVE FUTURE - VALUE MODEL
+870   The multi-objective controller estimates a different quantity from the region model above and
+871   is documented separately for that reason. Its target is the expected preference-weighted terminal
+872   desirability under the frozen reference process, hb (x, λ) = ERθ [gλ (Xb ) | X0 = x], with gλ the
+873   Chebyshev desirability of (27); it is a soft expectation rather than a hitting probability, so the binary
+874   construction of the region model does not carry over.
+875
+                                the implementation evaluates the equivalent centered form geλ (x) =
+      For numerical conditioning,
+876   exp −(Lλ (x) − L⋆λ )/τλ , where L⋆λ is a per-preference constant with respect to x. This multiplies
+
+
+                                                           22
+877   all desirabilities for a fixed preference by the same positive constant, so the factor cancels in the
+878   normalization of (23) and leaves every controlled transition unchanged.
+879   Supervision is Monte Carlo: M independent continuations of the frozen reference law from a state
+880   give the estimator of (22). The variance of that estimator grows with the remaining budget while the
+881   spread of true values across candidate successors shrinks, so target reliability degrades with horizon.
+882   Appendix K.5 reports that degradation and the rollout counts it implies.
+883   Because supervision quality is horizon-dependent, learned future-value control is admitted only at
+884   horizons whose target reliability meets a criterion fixed in advance of any optimization result. The
+885   admitted horizon and its rollout count are recorded in the frozen controller configuration, and the
+886   deployed score is hϕ (y, λ, b − 1) for b ≤ bFA and gλ (y) otherwise.
+
+887   J     S AMPLING AND CONTROL
+888   We use two numerical realizations of molecular control. Direct or rejection-based sampling is used
+889   when the controlled row can be evaluated efficiently, whereas low-reference-mass objectives are
+890   handled with the sequential Monte Carlo construction below. Both retain the frozen molecular
+891   reference process and differ only in how the controlled distribution is realized computationally.
+
+892   J.1   E XACT FINITE - HORIZON CONTROL
+893   Where the set of molecular states reachable within the remaining budget can be enumerated, the
+894   backward value of (18) is computed by exact dynamic programming: initialize h0 = gz on the
+895   enumerated terminal layer and sweep backwards, at each budget taking the expectation of the next
+896   layer’s value under Rθ restricted to the legal edit set. The controlled kernel of (19) follows by
+897   division and Theorem 3 applies without approximation. Accordingly, empirical claims of exact
+898   finite-horizon control refer only to enumerable settings in which the backward values are computed
+899   without approximation.
+
+900   J.2   M OLECULAR - SCALE SAMPLING
+901   At scale hϕ replaces the exact value. Because it is a state-level function taking values in [0, 1], the
+902   controlled row admits a rejection realization: propose Y ∼ Rθ (· | x), execute, canonicalize, reject
+903   self-transitions, and accept with probability hϕ (Y, z, b − 1). Conditioned on acceptance the move has
+904   exactly the Rθ · hϕ law, and aliased successors aggregate correctly because the acceptance probability
+905   depends only on the resulting molecule. The proposal cap is finite, however, so when every proposal
+906   at a state is rejected the trajectory ends; the capped procedure is therefore not an exact realization
+907   of the controlled kernel and is not described as one. Cap pressure is recorded as a diagnostic with a
+908   preregistered escalation to the sequential realization below, which changes inference only.
+909   When the desired region carries little mass under the reference process, control is realized as a twisted
+910   Feynman–Kac particle system. Every particle proposal comes from the frozen reference law alone,
+911   and hϕ enters only through the incremental weight (24). Using the value to both select and weight
+912   would double-count control and sample a different process. The weight product telescopes along a
+913   trajectory to h0 (xH )/hH (x0 ), and the terminal boundary h0 (x) = 1[x ∈ Bz ] is exact, so a learned
+914   twist changes particle allocation without changing the terminal success criterion. The operating
+915   point is frozen and no particle-count sweep is permitted: N = 32 particles, horizon 24, absorbing
+916   stop on entryPto the goal region, and systematic resampling whenever the effective sample size
+917   ESS(w) = ( i wi2 )−1 on normalized weights falls strictly below N/2. Resampling is systematic
+918   rather than multinomial, a single uniform draw positioning the whole comb. Per-transition values,
+919   per-step resampling decisions and resampling indices are recorded so the mechanical checks run
+920   offline against the artifact.
+921   Candidate accounting follows one rule: one run returns one molecule. A source’s twenty candidates are
+922   twenty independent runs, each contributing the single molecule drawn from its terminal normalized
+923   particle measure. The particles within a run are inference state and are never counted as candidates,
+924   and intermediate states are never retrospectively harvested. A run reaching the budget without entering
+925   the region is recorded under a frozen extinction status rather than replaced. For a region goal the
+926   controller stops at the first committed molecule inside the region, an online stopping time evaluated
+927   on the realized state.
+
+
+                                                         23
+      Algorithm 1 Controlled molecular sampling, sequential realization
+       1: input: source x0 ; goal z; budget K; frozen Rθ and hϕ ; particles N ; optional rule-closed predicate
+            C
+       2: initialize xi ← x0 and w i ← 1/N for i = 1, . . . , N ; b ← K
+       3: while b > 0 and some particle is unabsorbed do
+       4:    for each unabsorbed particle i do
+       5:       enumerate A(xi ); if C is given, restrict to AC (xi )
+       6:       push forward through the executor and canonicalize to S(xi )
+       7:       draw y i ∼ Rθ (· | xi )                            {proposal from the reference law alone}
+       8:       wi ← wi · hϕ (y i , z, b − 1) / hϕ (xi , z, b)                 {the value enters only here}
+       9:      xi ← y i ; if xi ∈ Bz then absorb particle i
+      10:   end for
+      11:   normalize w
+      12:   if ESS(w) < N/2 then
+      13:      systematically resample the particles and reset wi ← 1/N
+      14:   end if
+      15:   b←b−1
+      16: end while
+      17: return one molecule drawn from the terminal normalized particle measure, or the frozen extinc-
+            tion status if no particle was absorbed
+
+928   J.3    M ULTI - OBJECTIVE CONTROL
+929   Under a preference λ the immediate arm weights successors by gλ (y) and the future-aware arm by
+930   hϕ (y, λ, b − 1), with the reference law, legal edit set, property model, sources, preferences and budget
+931   identical between them. Where the admitted horizon bFA is shorter than the optimization campaign, a
+932   campaign consists of repeated controlled trajectories of length at most bFA launched from the frozen
+933   initialization bank and its archive until the common evaluation budget is exhausted. The campaign
+934   horizon and the horizon over which learned foresight is claimed are therefore distinct quantities.
+
+935   J.4    R ETARGETING AND PATHWISE CONSTRAINTS
+936   Retargeting replaces the goal context at a realized state and continues with the remaining budget
+937   by re-evaluating (23) at that state; no parameter of the reference process changes and the prefix is
+938   retained. A rule-closed constraint is imposed by filtering the legal edit set to AC (x) of (28) before
+939   the transition is sampled, so no infeasible successor is proposed, weighted, or committed.
+
+940   K      E XPERIMENTAL DETAILS
+941   We provide the full protocols, comparison arms, statistical units, and extended results for the experi-
+942   ments summarized in the main text.
+
+943   K.1       R EFERENCE - LAW EVALUATION
+944   We evaluate the frozen reference law on held-out transitions from the matched reserve by measuring
+945   the probability assigned to the realized canonical successor. The uniform, empirical-family and
+946   learned laws are evaluated on the identical executable support and canonical successor quotient;
+947   only their probability assignments differ. The empirical-family law uses corpus-level edit-family
+948   frequencies renormalized over the families available at the current state and distributes each family’s
+949   mass uniformly across its available successors. Two intermediate arms decompose the comparison: an
+950   empirical family with learned identity, which keeps corpus family frequencies and learns only which
+951   successor within the chosen family is realized, and a learned family with uniform identity, which
+952   learns only which family fires. Together they separate choosing which edit to make from choosing
+953   where to apply it.
+954   The primary quantity is the mean negative log-probability of the realized successor, with the scored
+955   transition as the unit and paired differences by construction, since every law scores the same transition.
+956   Cells below a preregistered minimum size of 20 are not reported separately; no scored transition
+957   was skipped and no partition failed to compile. Performance against the uniform law tests whether
+958   learning improves on executable support alone, and performance against the empirical-family law
+
+
+                                                         24
+959   tests whether the reference law captures state-dependent preference beyond global family frequency.
+960   Neither comparison is interpreted in terms of physical molecular kinetics or synthetic-route likelihood.
+                    Capability cell                               n    unif.   emp. fam.   emp+id   fam+unif   Rθ
+                    atom_restate: element identity change        725   6.21         6.54     4.84       7.28   5.58
+                    atom_delete: leaf death                      601   6.20         3.36     2.68       3.69   3.01
+                    atom_insert: one-neighbor birth              572   6.14         7.12     5.23       6.97   5.09
+                    bond_reroute: single-atom pendant, cyclic    464   6.24         5.26     4.07       5.48   4.29
+                    bond_reroute: multi-atom pendant, cyclic     216   6.32         5.56     4.38       6.14   4.96
+                    ring_system_restate: dearomatization†        202   6.25         2.84     2.97       1.72   1.85
+                    ring_system_restate: aromatization†          165   6.51         2.85     2.34       1.12   0.61
+                    cycle_insert: close to monocyclic†           138   6.47         7.19     3.27       4.80   0.88
+                    cycle_attach: open from monocyclic†          104   6.16         5.24     5.20       3.34   3.29
+                    bond_reorder: bond-order decrease             83   6.32         4.30     4.01       3.18   2.89
+                    bond_reorder: bond-order increase             83   6.49         4.71     4.40       3.29   2.99
+                    cycle_insert: close to polycyclic†            81   6.55         7.37     3.95       5.26   1.84
+                    cycle_attach: open from polycyclic†           69   6.42         5.82     5.71       4.08   3.96
+                    Overall                                     3545   6.25         5.37     4.10       5.17   3.90
+      Table 6: Negative log-probability of the realized canonical successor, by capability cell, lower is better. All
+      five laws are evaluated on the same executable support and the same canonical quotient; only the probability
+      assignment differs. Columns emp+id and fam+unif are the two decomposition arms defined above: empirical
+      family with learned identity, and learned family with uniform identity. Cells below the preregistered minimum
+      size of 20 are not reported separately; no scored transition was skipped and no partition failed to compile.
+      †
+        Supervision for these cells comes entirely from the synthetic-perturbation lane; see the provenance note below.
+
+961   The decomposition is strongly asymmetric. Learning only which family fires recovers little, improving
+962   on corpus family frequencies by 0.20 nats overall, whereas learning only where within a family the
+963   edit lands recovers most of the effect at 4.10; the full model adds a further 0.20 beyond that. In the
+964   terms used in Appendix K.1, the empirical-family-to-full improvement is 1.4616 nats and the identity-
+965   only arm recovers 1.2674 of it, or 86.7%, against 13.3% for the family gate alone. The reference law’s
+966   aggregate advantage is therefore driven primarily by state-dependent successor identity rather than by
+967   the family gate. The empirical-family control is also not uniformly strong: on both cycle_insert
+968   cells, on atom_insert and on atom_restate it is worse than assigning equal probability to
+969   every distinct successor, so on birth and insertion families a corpus frequency prior misallocates
+970   mass relative to ignorance. On four cells the empirical-family/learned-identity ablation assigns higher
+971   probability to the realized successor than the full model, indicating that the learned family gate does
+972   not uniformly improve over corpus-level family frequencies and that the identity model carries the
+973   result on those families.
+974   Aggregating by supervision provenance sharpens this. On the 2,744 transitions from families with data-
+975   backed supervision, the reference law retains a 1.06-nat advantage over empirical family frequencies
+976   (5.55 against 4.49), so the main-text claim survives the obvious confound. On that subset, however, the
+977   empirical-family/learned-identity ablation reaches 4.25 nats and therefore assigns higher probability
+978   to the realized successor than the full model does, and the learned-family/uniform-identity arm at
+979   5.79 is worse than corpus family frequency. The learned family gate is thus not uniformly beneficial,
+980   and on data-backed families the identity model carries the result in spite of it. The complementary
+981   synthetic-only subset comprises 759 transitions, where the reference law reaches 1.79 nats against
+982   4.72 for empirical family frequencies; the aggregate improvement reported in Appendix K.1 is
+983   correspondingly larger than the data-backed figure. The partition is computed from the emitted
+984   family-lane provenance artifact rather than from a hand-specified family list, and the restricted
+985   aggregates are reproduced from it.
+986   The cells in which the reference law performs best are those whose supervision is synthetic, as
+987   recorded in Appendix H. On the ring and cycle families the model recovers a perturbation of a kind it
+988   was trained to invert, and the aggregate improvement should not be read as evidence about molecular
+989   kinetics. Resolving instead by the number of available successors gives 4.86 nats for states with no
+990   alternative in the recorded band and 5.51, 5.44 and 5.51 for successor counts of 1–4, 5–24 and 25 or
+991   more under the empirical-family law, against 4.34, 4.03, 4.00 and 4.21 for the learned-identity arm,
+992   so the learned advantage is not an artifact of nearly deterministic rows.
+993   K.2    F UTURE - REACHABILITY EVALUATION
+994   The panel was sealed under preregistration and opened once. Sixty-seven held-out source–target
+995   pairs were constructed whose target is reachable under the frozen executable process within the
+
+
+                                                                25
+ 996   declared budget; two were excluded from the primary analysis under a committed amendment, giving
+ 997   65 pairs, and the full 67 are retained as a sensitivity analysis. All arms share the reference law, the
+ 998   legal edit sets, the target molecule and the edit budget. A myopic policy selects the locally preferred
+ 999   edit; verified lookahead evaluates candidate successors by whether the target remains recoverable
+1000   within the remaining budget; three intermediate prioritizers restrict which successors are expanded
+1001   before lookahead is applied. Continuation work is reported as a fraction of the candidates evaluated
+1002   by all-candidate lookahead, so recovery and cost are read together. The unit is the source–target pair
+1003   and intervals are paired bootstrap.
+
+                   Arm                                   Rec.        Rate Cont./pair Frac. univ. Gain ret.
+                   Greedy local decision                 26/65 40.0%            0.0          0%           —
+                   Rθ top-1 + lookahead                  33/65 50.8%            7.3      34.7%         0.50
+                   Similarity top-1 + lookahead          34/65 52.3%            7.3      34.7%         0.57
+                   Similarity top-2 + lookahead          37/65 56.9%           10.8      52.1%         0.79
+                   Goal-aware hϕ top-1 + lookahead 40/65 61.5%                  7.2      34.6%         1.00
+                   All-candidate lookahead               40/65 61.5%           20.5       100%         1.00
+       Table 7: Sealed panel, 65 pairs. Rec.: targets recovered. Cont./pair: candidate continuations actually evaluated
+       per pair. Frac. univ.: that count as a share of what all-candidate lookahead evaluates. Gain ret.: the fraction of
+       all-candidate lookahead’s 14 rescues the arm also recovers.
+
+
+1004   Of the 65 pairs, 14 are recovered by all-candidate lookahead and not by greedy, and none by greedy
+1005   and not by all-candidate lookahead. Because the planner retains the greedy action unless lookahead
+1006   gives a strict improvement, the comparison is one-sided by construction. We therefore report the
+1007   paired recovery gain, 21.5 percentage points [12.3, 33.5], and the fraction of greedy’s 39 failures that
+1008   lookahead rescues, 35.9% [21.2, 52.8], rather than a discordance test.
+1009   Equal recovery counts do not imply equal rescue sets. The goal-aware prioritizer and all-candidate
+1010   lookahead both recover 40 targets but not the same 40, overlapping on 13 of 14 rescues; the similarity
+1011   and reference-probability arms are strictly nested inside all-candidate lookahead’s rescue set. Recovery
+1012   was also resolved by verified path length: the advantage does not widen with path length, and the
+1013   original hypothesis that it would was tested and not supported. As a sensitivity check, including both
+1014   pairs excluded under the committed amendment gives 26/67 for greedy and 41/67 for all-candidate
+1015   lookahead, a headroom of 15 rather than 14, with no ordering changes. The panel consumed 1,347
+1016   kernel calls.
+
+1017   K.3    S OURCE - CONDITIONED MOLECULAR EDITING
+
+1018   The protocol is adopted from the comparator and is given in Appendix L.1. Each C OMPOSE candidate
+1019   is the output of one controlled trajectory terminating prospectively at the first realized state inside
+1020   the goal region, and intermediate molecules are not retrospectively collected. The reference law
+1021   is unchanged from Appendix K.1, and the future-value controller is trained and frozen on data
+1022   disjoint from the official sources before the cohort is opened. A size-fixed internal ablation removes
+1023   every successor that changes the current heavy-atom count while holding controller, reference law,
+1024   sources, seeds and candidate allowance fixed. The unit is the source molecule; the candidate curve is
+1025   descriptive and carries no significance claim, and it is drawn only over the k actually measured, which
+1026   is k = 1, . . . , 8 on the official cohort. The official cohort is opened once and the result is reported as
+1027   returned.
+1028   A receding one-step terminal tilt of the frozen reference law by the immediate property value of
+1029   each successor was preregistered as the inference policy and refuted on the disjoint development
+1030   panel, with 0 successes in 320 trajectories, before any official-cohort outcome existed. It is retained
+1031   as a developmental negative control. What this licenses is narrow: the finite-horizon controller is
+1032   a pre-outcome amendment consistent with the paper’s construction, motivated by a developmental
+1033   failure of a cheap one-step approximation. It is not a restoration of an originally frozen policy, and
+1034   compute cost was not the only consideration separating the two.
+1035   On the official cohort, COMPOSE solves 446 of the 800 sources at K = 8 (55.8%, 95% Wilson
+1036   interval [52.3, 59.2]), against 45.1% reported by GrIDDD at K = 20. Two sources did not return a
+1037   completed shard and are counted as failures, so the denominator is the full benchmark.
+
+
+                                                                26
+1038   K.4    S IMILARITY- CONSTRAINED LEAD OPTIMIZATION
+1039   Panel and constraints. The panel is five protein targets (PARP1, FA7, 5HT1B, BRAF, JAK2), three
+1040   seed molecules per target, and two similarity thresholds δ ∈ {0.4, 0.6}, giving 30 cells. A returned
+1041   molecule is feasible when QED ≥ 0.6, SA ≤ 4, and Tanimoto(x, x0 ) ≥ δ against the cell’s seed,
+1042   with similarity on Morgan fingerprints of radius two. Among feasible molecules the objective is the
+1043   QuickVina2 docking score, lower being better. These are endpoint constraints only: intermediate
+1044   molecular states are not required to satisfy them, which is what makes the trajectory free to leave and
+1045   re-enter the feasible region.
+1046   Frozen process and controller provenance. The executor and the reference law are the same
+1047   frozen artifacts used throughout: Rθ is the GuacaMol-trained checkpoint of Appendix I, not retrained
+1048   or fine-tuned for this benchmark. Only the task-specific controller differs, and the docking-facing
+1049   controller was frozen before the reported panel was launched. Feasibility predicates (QED, SA,
+1050   similarity, chemical validity) are evaluated before the protein oracle, so docking calls are spent only
+1051   on molecules already satisfying the benchmark constraints.
+1052   Oracle budget and reported score. Each reported COMPOSE entry consumes 500 docking-oracle
+1053   evaluations for its cell, and the score reported for that cell is the best feasible docking score obtained
+1054   within that budget. The published GenMol entry corresponds to 1,000 oracle calls per run averaged
+1055   over three runs, i.e. 3,000 calls per cell, so the comparison is made at a sixfold reduction in oracle
+1056   budget. Budget is counted as docking calls; inexpensive property evaluations are not counted for
+1057   either method, matching the comparator’s accounting.
+1058   Feasibility and the paired comparison. A cell counts as feasible for a method when that method
+1059   reports at least one molecule satisfying all three constraints. The paired comparison is restricted to
+1060   cells where both methods are feasible, and the estimand is the mean per-cell difference in docking
+1061   score, COMPOSE minus GenMol, with a 95% interval over cells. Cells where either method reports
+1062   no feasible molecule enter the coverage count but not the paired mean, and are never imputed.
+1063   Docking replicate noise. Repeat evaluation of the same molecule through our QuickVina2 pipeline
+1064   gives a median replicate variation of 0.70 kcal/mol. Per-cell differences smaller than this are not
+1065   individually resolvable, which is why the paired aggregate rather than the win count is the reported
+1066   comparison, and why cell-level differences are not interpreted separately.
+1067   Comparator values. GenMol, RetMol and Graph GA entries are the published values of Table 4
+1068   of Lee et al. [2025], transcribed without re-derivation. The transcription was verified by reproducing
+1069   the GenMol column cell-by-cell against an independently extracted copy of the same table; all 30
+1070   cells agree, which fixes the row order and column alignment for the RetMol and Graph GA columns
+1071   as well. Dashes in that table denote cells for which no feasible solution is reported, and are carried
+1072   through as missing rather than as zeros.
+1073   K.5    F UTURE - VALUE TARGET RELIABILITY
+1074   Before training a future-value model, we measured how well its Monte Carlo target can be estimated.
+1075   On 24 held-out states with 16 candidate successors each and 32 reference continuations per candidate,
+1076   scored by the frozen property model with no oracle calls, the rank correlation between immediate
+1077   desirability and true future value has per-state median 0.518 [0.435, 0.700] at four remaining edits and
+1078   0.318 [0.181, 0.421] at eight, with intervals resampled over states. The two criteria select different
+1079   successors on 68.3% [55.8, 80.8] and 84.2% [73.3, 93.3] of state–preference decisions respectively,
+1080   and following future value rather than immediate desirability improves realized continuation value by
+1081   a median 12.2% [1.6, 19.8] at four edits and 19.0% [13.1, 25.9] at eight.
+1082   Target reliability itself degrades with horizon. Estimated by split-half agreement between disjoint
+1083   sets of continuations, a 32-rollout target has reliability approximately 0.66 at four remaining edits
+1084   and 0.39 at eight, implying by the Spearman–Brown relation that roughly 65 and 200 continuations
+1085   respectively would be required to reach a reliability of 0.80. Because supervision quality is horizon-
+1086   dependent while the measured benefit is not, the supported horizon is fixed from target reliability and
+1087   computational feasibility rather than from optimization performance, as recorded in Appendix I.
+1088   K.6    M ID - TRAJECTORY RETARGETING
+1089   We evaluate retargeting on 40 source-disjoint held-out molecules under potency-first and
+1090   developability-first histories. Each prefix contains three committed edits within a six-edit hori-
+
+
+                                                          27
+1091   zon and is fixed before the eventual joint objective B is constructed, so every post-switch comparison
+1092   begins from an identical realized prefix with the same remaining budget. Margins are normalized by
+1093   the held-in interquartile range and the reported objective is the worst margin of the conjunction, with
+1094   zero denoting satisfaction. At the switch the median worst margin is −1.115 following potency-first
+1095   prefixes and −1.810 following developability-first prefixes, so neither history already satisfies B.
+
+                  Comparison                 History            Mean Median                  95% CI     W/L
+                  Responsiveness               potency        +0.748 +0.794 [+0.608, +0.891] 36/0
+                                               developability +1.462 +1.357 [+1.240, +1.691] 40/0
+                  Greedy-matched history potency              +0.367 +0.338 [+0.251, +0.482] 37/3
+                                               developability +0.211 +0.147 [+0.065, +0.361] 26/14
+                  Value of history             potency        +0.302 +0.243 [+0.186, +0.413] 35/5
+                  (primary)                    developability +0.176 +0.127 [+0.069, +0.283] 29/11
+                  Price of surprise            potency        −0.252 −0.123 [−0.364, −0.155] 6/32
+                                               developability −0.428 −0.291 [−0.580, −0.288] 4/36
+       Table 8: Held-out retargeting panel, 40 source-disjoint sources per history. Rows compare, in order: retargeting
+       against continuing the old goal; greedy retargeting against greedy restart from the source; verified continuation
+       from x3 against verified restart from x0 (the primary estimand); and verified continuation against a clairvoyant
+       controller given B from the first edit. Entries are paired post-switch differences in the registered objective;
+       positive values favor the first strategy named. W/L counts sources on which that strategy is better or worse; ties
+       omitted. Intervals are source-level bootstrap.
+
+
+1096   Retargeting materially redirects both histories, and under the primary verified comparison continuing
+1097   from the realized state remains preferable to restarting from the source. The mean advantage is +0.302
+1098   [0.186, 0.413] following potency-first prefixes and +0.176 [0.069, 0.283] following developability-
+1099   first prefixes, with wins on 35/40 and 29/40 sources respectively. The clairvoyant controller remains
+1100   better, giving the negative price-of-surprise effects shown in the table. The effect is smaller than
+1101   in development, with the primary differences shrinking from +0.444 to +0.302 and from +0.290
+1102   to +0.176, and the confirmation panel contains genuine source-level losses in both histories, so the
+1103   benefit of state reuse is empirical rather than guaranteed. Prefix revisiting is negligible, occurring for
+1104   at most one source per arm and history, and does not explain the effect.
+
+1105   K.7    PATHWISE CONSTRAINTS
+1106   The pathwise experiment remains developmental: the cLogP corridor was selected following an
+1107   earlier feasibility screen, and a separately frozen held-out confirmation has therefore been specified
+1108   but not opened. Endpoint-only control constrains only the returned molecule; pathwise control
+1109   removes any successor outside the corridor before the transition is sampled; a terminal-penalty arm
+1110   changes the objective but leaves the transition support unchanged. All arms share the reference law,
+1111   objective, horizon, sources, seeds and evaluation budget, and the unit is the source molecule with
+1112   source-clustered intervals.
+1113   On 24 eligible sources, endpoint-only trajectories return to the corridor after leaving it in 16/24 =
+1114   0.667 [0.458, 0.833] cases under greedy control and 14/24 = 0.583 [0.375, 0.792] under verified
+1115   control; the conditional fractions are 16/24 and 14/23, so the conditional denominators remain large
+1116   enough that the unconditional and conditional prevalence estimates agree closely. These excursions
+1117   are not confined to the boundary: their median depth is 0.69 cLogP units and their median duration is
+1118   four of the six committed edits. An earlier protected-motif experiment produced zero such excursions,
+1119   confirming that the estimand need not be positive simply because intermediate states are observed.
+1120   Restricting the support to the corridor remains viable on this panel. The median source retains
+1121   79.8% of its legal successors, only one source reaches the prespecified support-tight threshold, no
+1122   evaluated state has an empty constrained edit set, and one trajectory terminates. Excluding the
+1123   support-tight source leaves prevalence at 0.652 and 0.565 and terminal costs at −0.121 and −0.041,
+1124   so the conclusions are unchanged.
+1125   The developmental panel does not resolve the terminal-utility cost of imposing the constraint. The
+1126   paired change in normalized DRD2 utility is −0.105 [−0.377, 0.099] under greedy parity, with 5
+1127   wins, 8 losses and 11 ties, and −0.023 [−0.182, 0.134] under verified parity, with 9 wins, 10 losses
+1128   and 5 ties. Both medians are exactly zero and both intervals span zero, which does not establish
+1129   equivalence: the greedy interval still permits a loss of 0.377 held-in interquartile-range units. Zero
+
+
+                                                              28
+1130   violations under support restriction is an integrity consequence of masking rather than an empirical
+1131   performance statistic, and the apparent advantage of future-aware control under the mask, +0.661
+1132   [0.428, 0.944], is a ceiling rather than a null, since greedy pathwise control completed all 24 sources
+1133   and left no binary headroom.
+
+                 Constraint handling            Endpoint-feasible runs hiding a               Paired terminal
+                                                   path-infeasible intermediate                 DRD2 utility
+                 Endpoint filtering (greedy)                  16/24 [45.8, 83.3]                     reference
+                 Endpoint filtering (verified)                14/24 [37.5, 79.2]                     reference
+                 Support restriction                           0 by construction −0.023 [−0.182, 0.134]
+       Table 9: Constraint handling on the 24-source developmental panel. The first column counts sources whose
+       returned molecule satisfies the corridor while an intermediate state does not; support restriction excludes these
+       by construction rather than by measurement. The utility column is the paired change against endpoint filtering
+       under verified parity, with the greedy-parity value −0.105 [−0.377, 0.099]. Both intervals span zero, so the
+       panel bounds rather than resolves the terminal-utility cost.
+
+
+1134   The held-out confirmation fixes the corridor at C = [2.3689, 4.4522] with the same six-edit horizon
+1135   and endpoint-only semantics, at n = 48 sources. It passes only if both criteria clear at full α under
+1136   intersection-union: the lower bound of the source-clustered interval on hidden-path prevalence must
+1137   exceed 1/3, a threshold fixed before the development run, and the lower bound on the mean paired
+1138   change in terminal utility must exceed −0.25 held-in interquartile-range units, with −0.20 as a
+1139   prespecified sensitivity analysis. The panel is sized on the joint criterion, giving power 0.976 at the
+1140   0.25 margin and 0.874 at 0.20. No held-out source has been opened.
+1141   A value head retrained to be aware of a longer horizon was built, evaluated and rejected on four
+1142   separate measurements, and is not the head used anywhere in Appendix K. The consequence for the
+1143   main text is a claim boundary: any gain from a longer horizon comes from giving the frozen process
+1144   more edit opportunities, not from a better budget-conditioned value model.
+
+1145   L     B ENCHMARK AND BASELINE DETAILS
+1146   L.1    QED EDITING BENCHMARK
+1147   We adopt the official 800-source cohort, property and similarity criteria, and evaluator from the
+1148   benchmark, while evaluating C OMPOSE with K = 8 rather than the published K = 20 allowance:
+1149   the 800 test molecules with QED ∈ [0.7, 0.8] as sources, 20 candidates per source, a Tanimoto
+1150   similarity constraint of 0.4 to the source, and success defined as at least one returned candidate
+1151   reaching QED ∈ [0.9, 1.0] while satisfying that constraint. Source selection, fingerprints, property
+1152   calculations, candidate count and aggregation must be identical for the comparison to stand, and
+1153   where any of these could not be matched it is stated rather than assumed.
+1154   Output contract. Each source receives exactly K candidate slots. A trajectory that reaches the
+1155   target region returns the first committed molecule satisfying the benchmark criterion. If no sampled
+1156   continuation reaches the region, the slot returns the unchanged canonical source solely to preserve the
+1157   fixed-K benchmark interface; this output necessarily fails because benchmark sources begin below
+1158   the target QED threshold. No failed slot is resampled or replaced. This contract is frozen before the
+1159   official cohort is opened and is not revised afterwards.
+1160   Every non-source returned molecule is a benchmark success: each slot either returns a molecule in the
+1161   target region or returns the unmodified source. A smaller candidate allowance can disadvantage both
+1162   success and the diversity metric, because a source with only one successful distinct return contributes
+1163   zero diversity. Separately, no returned success is identical to its source, so the count is unchanged
+1164   under the stricter rule of the released success script, which requires similarity strictly below one.
+1165   Published values are reproduced as reported and are not re-derived. Because the comparator does not
+1166   fully specify the evaluator used for its main diversity entry, we do not interpret the diversity values as
+1167   an exactly matched comparison. Among published entries for this task, the GrIDDD row at 45.1% is
+1168   the one we compare against. Higher rates have been reported on this task outside the comparator’s
+1169   table, and Appendix L.3 records them so that Table 10 is not read as the complete published record.
+1170   Diversity is computed with the released evaluation script of Jin et al. [2019] rather than reimplemented
+1171   from its prose description. That script admits a candidate only if it satisfies both the similarity
+
+
+                                                              29
+1172   constraint and the property target, deduplicates the admitted molecules, excludes a source with
+1173   no admitted molecule from the average, and assigns a diversity of exactly zero to a source with
+1174   only one. Similarity is a Morgan fingerprint of radius two on 2048 bits with chirality disabled. The
+1175   convention matters. Of the 446 solved sources on the official panel, 335 return at least two distinct
+1176   non-source molecules and average 0.4999; the remaining 111 return a single distinct molecule and
+1177   enter the released script’s average as zero, giving 0.376 over all solved sources. We report the 0.4999
+1178   figure and state its denominator wherever it appears. C OMPOSE returns on average 3.63 distinct
+1179   successful molecules of the eight permitted, and no successful candidate is identical to its source, so
+1180   the success count is unchanged under the stricter rule of the released script, which requires similarity
+1181   strictly below one. All returned strings are canonical, so the string-level deduplication of the released
+1182   script coincides with deduplication by molecule, and no pair of distinct returned molecules shares a
+1183   fingerprint under the achiral setting.
+1184   GrIDDD does not specify the evaluator used for the diversity entry in its main property-optimization
+1185   table. Ninniri et al. [2025] do not state how the diversity column of their main property-optimization
+1186   table is computed. Their baseline diversity values are identical to those reported in the graph-to-graph
+1187   translation line, which places the inherited rows on the scale defined above, but the method’s own
+1188   entry is undocumented; a rule matching the one used here is stated only in their appendix, for a
+1189   separately adapted protocol with a different number of optimization rounds. We therefore report
+1190   our value as computed under a named and audited definition, and we do not assert that it and the
+1191   published entry were produced by the same procedure.
+1192   Because every C OMPOSE trajectory terminates prospectively on entering the goal region, a run either
+1193   returns a molecule satisfying both constraints or goes extinct, and the set the diversity script admits is
+1194   exactly the set of successful returns. The admitted set is therefore constructed the same way as in the
+1195   published rows rather than merely being similar to it. Both now use the official 800 sources, and the
+1196   residual difference is the candidate allowance, eight against twenty. That difference is not neutral for
+1197   diversity: a smaller allowance yields fewer second successes per source and so more single-molecule
+1198   sources contributing zero, which depresses the reported value relative to what the same system would
+1199   produce at twenty candidates.
+1200   The benchmark constrains returned molecules and says nothing about internal successor evaluations,
+1201   and competing methods use their native inference procedures. The comparison therefore measures
+1202   task performance under a fixed output allowance, no efficiency claim is made, and inference ledgers
+1203   are reported separately. The printed entry is the official 800-source cohort at eight of the twenty
+1204   permitted candidates, so it uses fewer outputs than the benchmark allows.
+1205   L.2   G EN M OL T4 LEAD - OPTIMIZATION BENCHMARK
+1206   The protocol is adopted from Lee et al. [2025]: five protein targets, three seed molecules per target,
+1207   and similarity thresholds δ ∈ {0.4, 0.6}, with a returned molecule required to satisfy QED ≥ 0.6,
+1208   SA ≤ 4, and Tanimoto similarity at least δ to the seed. The reported statistic in the comparator’s table
+1209   is the mean docking score of the most optimized lead over three runs. The COMPOSE entry for a
+1210   cell is the best feasible docking score obtained within that cell’s 500-call budget.
+1211   Two protocol details govern how the comparison is read. First, the constraints are endpoint con-
+1212   straints: neither method is required to keep intermediate states feasible, so the comparison is about
+1213   returned molecules only. Second, oracle budget is counted in docking calls. The comparator’s entry
+1214   corresponds to 1,000 calls per run over three runs; the COMPOSE entry consumes 500 calls for the
+1215   cell. Inexpensive property evaluations are excluded from the count on both sides.
+1216   Dashes in the published table mark cells for which no feasible molecule is reported. We carry them
+1217   through as missing rather than as zeros, report coverage separately from score, and restrict the paired
+1218   comparison to cells where both methods report a feasible molecule. Published values for GenMol,
+1219   RetMol and Graph GA are reproduced as reported and are not re-derived.
+1220   L.3   P UBLISHED RECORD ON THE QED EDITING TASK
+1221   Table 10 reproduces the comparator set assembled by GrIDDD. Stronger values have been reported on
+1222   the same task by the graph-to-graph translation line, and we record them in Table 11 for completeness.
+1223   We checked the primary sources rather than inheriting the numbers second-hand. The translation
+1224   results use the same 800 source molecules, the same similarity threshold δ = 0.4, and the same
+1225   allowance of K = 20 decoded candidates per source [Jin et al., 2019]; the rate frequently quoted as
+1226   60.6% is VJTNN+GAN, whereas VJTNN itself is reported at 59.9%. Jin et al. [2020] evaluate on the
+
+
+                                                          30
+                    Method                             Sources     K    QED success (↑)      Diversity (↑)
+                    GrIDDD [Ninniri et al., 2025]          800     20              45.1%           0.283†
+                    C OMPOSE                               800     8              55.8%            0.4999
+       Table 10: Source-conditioned editing on the Jin/ZINC-250k similarity-constrained QED benchmark.
+       Published baseline values are reproduced from the comparator set reported by GrIDDD. K denotes candidates
+       returned per source; success requires QED ≥ 0.9 and Tanimoto similarity ≥ 0.4. C OMPOSE is evaluated on
+       the official 800 sources with K = 8; published rows use K = 20, so the comparison is at a smaller candidate
+       allowance. † GrIDDD reports diversity without specifying its evaluator implementation; C OMPOSE uses the
+       released Jin evaluator. Diversity details are reported in Appendix L. GrIDDD is shown as the close modern
+       per-step editor that motivates this benchmark; the Jin-era published methods and the full comparator audit are
+       given in Appendix L.3.
+
+
+1227   test sets provided by Jin et al. [2019] under the same range and similarity constraint with K = 20,
+1228   and reproduce the 59.9% row, which is what places their 76.9% on the same cohort.
+
+                        Method             Reported by        K     QED success (↑)      Diversity (↑)
+                         MMPA              Jin et al. [2019] 20                  32.9%             0.236
+                         VSeq2Seq          Jin et al. [2019] 20                  58.5%             0.331
+                         VJTNN             Jin et al. [2019] 20                  59.9%             0.373
+                         VJTNN+GAN Jin et al. [2019] 20                          60.6%             0.376
+                         AtomG2G           Jin et al. [2020] 20                  73.6%             0.421
+                         HierG2G           Jin et al. [2020] 20                  76.9%             0.477
+       Table 11: Further published results on the same similarity-constrained QED editing task. All rows use
+       the 800-source cohort of Jin et al. [2019] with δ = 0.4 and K = 20. These are supervised graph-to-graph
+       translation models trained on parallel source-target pairs curated for the target property, whereas the C OMPOSE
+       reference law is trained once without reference to QED and the property enters only through control. The rows
+       therefore measure different problem settings and we do not present them as an ablation of one another, nor is any
+       C OMPOSE claim stated relative to them.
+
+
+1229   M     S OFTWARE , RANDOMIZATION , AND COMPUTE
+1230   M.1     S OFTWARE AND ENVIRONMENT
+1231   Every job runs in a containerized Debian image pinned to Python 3.11 with torch 2.4.0, numpy
+1232   1.26.4, scipy 1.13.1 and rdkit 2024.3.5. Chemistry is pinned to a single RDKit release because
+1233   canonical molecular identity, ring perception and sanitization all come from it and all three enter the
+1234   definition of the state space in Appendix F.
+1235   Only artifacts satisfying the evidence criteria used in the manuscript are cited for scientific claims.
+1236   Developmental artifacts lacking complete producer or input metadata are retained for audit purposes
+1237   but excluded from claim-bearing results. Bulk artifacts such as corpora, embeddings, per-run records
+1238   and trained heads live on a persistent volume rather than in the source repository, while result
+1239   summaries are versioned alongside the code, so a fresh checkout can re-run every job but cannot read
+1240   a banked result without the volume. The reproducibility package records the code revision, input
+1241   identities and result summaries required to regenerate each reported analysis.
+
+1242   M.2     R ANDOMIZATION AND STATISTICS
+1243   Run seeds are derived rather than drawn, by hashing a protocol tag together with the source molecule
+1244   and the replicate index and taking the leading eight bytes of the digest. In paired comparisons the
+1245   arm name is deliberately excluded from the seed, so arms sharing a source and replicate index
+1246   consume identical randomness and a difference between them cannot be a seeding artifact. Where
+1247   an arm-specific seed is unavoidable for later replicates, the first replicate is still constructed to be
+1248   identical across arms.
+1249   Intervals are bootstrap intervals resampled over the independent unit named in each experiment. That
+1250   unit is the source molecule in most cases, the source–target pair in the sealed lookahead panel, and
+1251   the state in the reliability analysis of Appendix K.5. Replicate counts differ by analysis, ranging
+1252   from 4,000 to 8,192 draws, and each artifact records its own. Where an interval is exact rather than
+1253   bootstrapped, that is stated with the reason.
+
+
+                                                              31
+1254   M.3    C OMPUTE
+1255   Reference-law training used a preemptible A10G GPU with 8 CPU cores and 64 GiB of memory;
+1256   the learned future-value models were trained on the same GPU class. The claim-bearing molecular
+1257   sampling and evaluation jobs reported in Appendix K are CPU-based. Training and inference
+1258   resources are therefore reported separately. Sampling containers reserve one core and burst to eight
+1259   under a six-hour ceiling, and driver containers hold a quarter core under a twelve-hour ceiling.
+1260   Compute is reported in two units that are never pooled: kernel calls, meaning evaluations of the
+1261   learned reference law, and container-seconds. The sealed lookahead panel consumed 1,347 kernel
+1262   calls and roughly 24,300 container-seconds, and retargeting branch points cost on the order of 102
+1263   kernel calls and 103 container-seconds each. Oracle calls are counted separately again, because the
+1264   benchmark budgets in Appendix L constrain returned molecules rather than internal evaluations.
+
+1265   M.4    T HE MEDICINAL - CHEMISTRY VALIDITY GATE
+1266   The gate rejects a returned molecule for a small, explicitly enumerated set of reasons: elements
+1267   outside {C,N,O,F,S,Cl,Br,I,P}; a halogen carrying hydrogens or more than one heavy neighbour
+1268   (hypervalent iodine such as [IH4]); sulfur carrying hydrogens with two or more heavy neighbours;
+1269   phosphorus that is neither phosphate nor phosphonate; radicals; formal charge beyond ±1; a ring
+1270   larger than seven whose atoms are mostly not shared with another ring; a nitrogen–nitrogen bond
+1271   inside a three- or four-membered ring; and cumulated double bonds.
+1272   Two of these conditions were narrowed after calibration refuted a broader version. A flat ring-size
+1273   cutoff was rejected because the benchmark seeds themselves report 7- and 8-membered SSSR
+1274   envelope rings over fused tricyclic cores, so ring size alone cannot separate a fused drug scaffold
+1275   from a macrocycle; the condition now applies only to rings whose atoms are largely unshared. A
+1276   minimum-ring-size condition for pendant systems was rejected because a published InVirtuoGen
+1277   winner carries a cyclopropane; that minimum was moved out of the validity gate and into the definition
+1278   of the specific construction operation it belongs to.
+1279   The calibration is a test rather than a claim: the gate must accept all fifteen benchmark seeds and
+1280   all twenty-five published InVirtuoGen winners, and reject the implausible molecules. The suite
+1281   also asserts that ordinary sulfur chemistry (thiophene, thioether, sulfone) still passes, which is what
+1282   prevents the hypervalent-sulfur condition from over-rejecting.
+1283   We distinguish two gates. A pathwise gate asks only whether a state is an executable molecule and
+1284   is applied to every intermediate; the full gate, which additionally imposes QED, SA and similarity,
+1285   is applied only to returned molecules. Conflating them is not conservative: applying the full gate to
+1286   every intermediate prevents a trajectory from passing through a temporarily unattractive molecule,
+1287   and measurably degraded search.
+
+1288   M.5    G ENERALIZATION OF A SINGLE - CELL CONTROLLER
+1289   The lead-optimization controller described in Table 1 was developed against one cell. Applied
+1290   unchanged to three further cells it returned no constraint-satisfying molecule from three hundred
+1291   trajectories each. The failure is quantitative rather than mysterious: the similarity budget is a property
+1292   of the seed, and the seed the controller was tuned on carries 41 Morgan-fingerprint bits while another
+1293   carries 29, so an edit program calibrated on the first spends a much larger fraction of the second.
+1294   Replacing the fixed program with an adaptive search over the same action vocabulary — identical
+1295   operators, identical reference law, no new chemistry — recovered feasibility on all three cells. We
+1296   report this as a limitation of fixed edit programs rather than as a positive result, since the recovered
+1297   molecules were not competitive; but it does locate the failure in the controller’s lack of adaptation
+1298   rather than in the operator set or the reference law.
+
+
+
+
+                                                          32
+

@@ -1,0 +1,40 @@
+% ============================================================================
+% GEM INTRODUCTION.  Surgery applied per the abridgment map:
+%   P1  KEEP verbatim, except the opening citation list is trimmed to
+%       representative model classes.
+%   P2  KEEP through "...downstream branches of the design space."
+%       CUT "This distinction is consequential in lead optimization ..."
+%           through "... only at the returned molecule."   (applications list)
+%       KEEP the closing synthesis sentence verbatim.
+%   P3  KEEP verbatim (the gap paragraph).
+%   NEW one-paragraph compression of Section 2 Related Work, which MOVES
+%       WHOLE AND UNCHANGED to app:related.  Citations reused, not re-chosen.
+%   P4  KEEP verbatim (the COMPOSE paragraph).
+%   LIST four contributions -> three, per the map.
+% ============================================================================
+\section{Introduction}
+\label{sec:intro}
+
+Generative modeling has become a central approach to molecular design, supporting both de novo generation and the optimization of existing molecules across increasingly complex chemical spaces \citep{gomezbombarelli2018chemvae,jin2018jtvae,vignac2023digress,lee2025genmol}. Recent graph-based diffusion, flow, and discrete generative models can learn expressive molecular distributions and increasingly support conditional generation toward desired structural and functional properties \citep{vignac2023digress,campbell2024multiflow,lee2025genmol}. These advances have made molecular generation substantially more flexible, but the learned object is still typically an endpoint distribution or a generator specialized toward a particular task, rather than a reusable representation of transitions between molecular states. For molecular design, this suggests value in modeling the path between structures, since each transformation changes both the next molecule and the set of molecular states that remain reachable afterward.
+
+Molecular editing makes this path dependence explicit, because each edit changes the transformations available from the resulting molecule. Existing editing and lead-optimization methods already exploit sequential molecular modifications through graph-to-graph generation, reinforcement learning, fragment-based search, evolutionary optimization, and MCMC \citep{jin2019vjtnn,zhou2019moldqn,jensen2019graphga,xie2021mars,fu2021mimosa}. Yet the consequence of an edit extends beyond the molecule it immediately produces. An atom insertion, bond modification, or ring operation can open or eliminate entire downstream branches of the design space. Molecular editing may therefore benefit from representing not only the value of individual structures, but also which molecular futures remain reachable from each state.
+
+Despite this progress, existing approaches capture only parts of a transition-centered formulation. Learned generators can increasingly be guided toward desired properties, but their generative trajectories are often defined through corrupted, masked, or latent states rather than reusable transitions between complete molecules \citep{vignac2023digress,campbell2024multiflow,lee2025genmol}. Molecular editing and search methods instead operate directly on complete molecules, but their proposal mechanisms are typically prescribed by the optimizer and coupled to task-specific scoring \citep{jensen2019graphga,zhou2019moldqn,xie2021mars}. Recent work further shows that pretrained discrete generators can be redirected toward multiple objectives and constraints through inference-time guidance and control \citep{chen2025areuredi,pcomole2026}. Together, these advances motivate a complementary abstraction: a goal-independent generative process over molecular transitions that can be learned once and controlled as design goals change.
+
+\method{} is related to variable-size discrete generation and editing, controlled stochastic generative processes, and multi-objective molecular optimization. GrIDDD and Edit Flows introduce variable-dimensional transitions \citep{ninniri2025griddd,havasi2025editflows}; MadSBM, Value Matching, and pCoMole use stochastic-process or value-based control \citep{goel2026madsbm,jensen2026valuematching,pcomole2026}; and methods such as AReUReDi steer discrete generators toward molecular objectives \citep{chen2025areuredi}. \method{} instead learns a goal-independent canonical transition law over an exact executable molecular rewrite space, then controls that same process using future molecular reachability (a full comparison is given in \cref{app:related}).
+
+We introduce \textbf{\method{}} (\textbf{CO}ntrollable \textbf{M}olecular \textbf{P}rocess \textbf{O}ver \textbf{S}tochastic \textbf{E}dits), a generative framework that learns a reusable molecular transition process and controls it across design objectives (\cref{fig:ppp}). \method{} represents generation as a stochastic sequence of executable edits between complete molecules. At each molecular state, an exact executor defines what is possible by enumerating the state-dependent set of legal, trans-dimensional molecular successors. We then learn a goal-independent reference law $R_\theta$ over this same successor set from executable molecular trajectories, capturing which molecular continuations are plausible without conditioning on a downstream design goal. A separate finite-horizon controller determines what is purposeful by reweighting these molecular continuations according to the value of the futures they make reachable. Because generation and control operate on the same explicit molecular support, the transition process can be learned once and redirected across design objectives without retraining the underlying generator.
+
+We summarize our main contributions as follows.
+\begin{itemize}[leftmargin=1.5em,itemsep=2pt,topsep=3pt,parsep=0pt]
+\item We introduce a stochastic molecular process over exact, executable,
+trans-dimensional rewrites between complete molecular graphs, with a learned
+reference law defined on canonical molecular successors.
+\item We formulate molecular design as finite-horizon control of this frozen
+process, allowing edits to be valued by the molecular futures they leave
+reachable without introducing transitions outside the reference support.
+\item We show that the reference process learns state-dependent transition
+preferences, transfers across external molecular-design tasks without
+retraining, and supports future-aware editing, mid-trajectory retargeting, and
+pathwise constraints.
+\end{itemize}

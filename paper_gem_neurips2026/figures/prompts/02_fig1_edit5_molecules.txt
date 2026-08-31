@@ -1,0 +1,36 @@
+EDIT 5 — clean up the molecule drawings
+
+The molecule cartoons in this figure are drawn sloppily. Redraw every molecule
+in all three panels, including the large molecule x, to fix the following. Do
+not change anything else in the figure.
+
+1. NO FLOATING ATOMS. Every molecule must be a single connected graph. Right
+   now several circles float with no bond attached to them at all: there is an
+   orphan pale circle at the lower left of y1, one at the right of y3, and
+   several in y5. Every single circle must be joined to the rest of its
+   molecule by at least one bond line. Nothing may be disconnected.
+
+2. BONDS MUST TOUCH THE ATOMS. Each bond line must start exactly at the edge
+   of one circle and end exactly at the edge of the other. No gaps between a
+   bond and a circle, and no bond overshooting past a circle.
+
+3. UNIFORM BONDS. Every bond in every molecule must be the same stroke width
+   and the same colour, a medium neutral grey-blue. Some bonds are currently
+   thin and pale while others are dark and thick; make them all identical.
+
+4. UNIFORM ATOMS. Every circle must be the same diameter. Keep the existing
+   fill colours, but stop varying the sizes.
+
+5. EVEN GEOMETRY. Within each molecule, make all bonds roughly the same
+   length, keep the angles between bonds open and well spread rather than
+   collapsed on top of each other, and do not let any two circles overlap or
+   touch. Each molecule should read as a small, tidy, clearly legible
+   ball-and-stick sketch.
+
+6. KEEP THE MOLECULES IDENTICAL ACROSS PANELS. After redrawing, y1 must still
+   be exactly the same drawing in panels (a), (b) and (c); likewise y2, y3, y4
+   and y5. The large molecule x must be the same in all three panels too.
+
+Keep every molecule in the same position and at the same size it already
+occupies. Do not change the arrows, numbers, badges, headings, legends,
+labels, colours of anything other than the bonds, or the panel layout.

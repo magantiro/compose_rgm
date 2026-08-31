@@ -1,0 +1,38 @@
+% ============================================================================
+% SECTION 4 --- Controlling molecular trajectories
+%   * objective regions and Chebyshev preferences, scale fixed by a statistic
+%     of the SUPERVISION distribution and never by an outcome
+%   * dynamic retargeting, as a compact corollary
+%   * pathwise constraints: rule-closed support restriction vs cumulative
+%     constraints needing an augmented state
+%   * Pareto exploration
+%
+% PROVENANCE NOTE FOR LATER EDITORS.  The preference construction follows
+% docs/AMENDMENT_INVERSIONGNN_2OBJ.md, "ADDENDUM II -- SUPERSEDES the B_lambda
+% construction above" (2026-08-19).  Addendum I's top-10% region construction
+% is WITHDRAWN and must not be reintroduced: it trained the value on observed
+% true-oracle hits, and its own diagnostic showed the five preferences
+% collapsing to three regions.  If you are editing this section from an older
+% document, you are editing from the withdrawn design.
+% No number appears in this section.  Compressed to the 9-page limit.
+% ============================================================================
+\label{sec:trajectories}
+
+\paragraph{Objective regions.}
+\label{sec:regions}
+Campaigns state two kinds of goal and each becomes a terminal desirability. A \emph{requirement} is a region, a property above a threshold and a similarity floor to the source, so $g_z=\one[x\in\Bset_z]$ and the corresponding value is the finite-budget reachability of \cref{sec:hphi}, the thresholds serving as the goal's coordinates. A \emph{preference} is a direction and needs a positive, smooth desirability (\cref{sec:preferences}): a threshold invented to turn a direction into a region is a hyperparameter that will be tuned, and with several objectives simultaneously low such a region degenerates, distinct preferences collapsing onto the same molecules.
+With no threshold and no positive-example requirement nothing here can be slid after seeing a result, and three objects stay separated, which is the paper's thesis restated for the multi-objective case: $\widehat F_\psi$ says \emph{what is desirable}, $R_\theta$ \emph{how molecules can plausibly move}, $h_\phi$ \emph{what is desirable in the future, given how molecules move}.
+
+\begin{corollary}[Exact continuation after a goal change]
+\label{cor:retarget}
+Let a trajectory reach $x_\tau$ with $b'$ edits remaining under goal $z$, and let the goal become $z'$. Applying \cref{thm:doob} from $x_\tau$ with horizon $b'$, controlling the remaining $b'$ edits with the $g_{z'}$-value re-solves the finite-horizon problem exactly from $x_\tau$, and the terminal law is the $g_{z'}$-tilt of the base law started at $x_\tau$ with budget $b'$, in general \emph{not} the law obtained by using $g_{z'}$ from the source lead.
+\end{corollary}
+
+Committed work therefore need not be discarded when the objective moves, and comparing continuation against restart is substantive rather than tautological; the transform applies because $x_\tau$ is a molecule (\cref{prop:closure}), so $g_{z'}$ is decidable on it, whereas an endpoint-conditioned generator has no analogue. It does not assert that continuing is \emph{better}.
+
+\paragraph{Pathwise constraints and Pareto exploration.}
+\label{sec:pathwise}
+A requirement holding at every inspected candidate is a property of the path, and support restriction makes one class exact by construction: for a \emph{rule-closed} predicate $P$ (a protected scaffold, a forbidden substructure, a size or charge window, a similarity floor) we delete violating marks before normalizing, $\A_P(x)=\{a\in\A(x):P(\T(x,a))\}$, so the restricted chain is again a chain on $\X$, \cref{thm:doob} applies unchanged, $P$ holds at \emph{every} committed molecule by induction rather than by filtering at the end, and a candidate rejected by $P$ is rejected before a computational property oracle is called on it.
+A \emph{cumulative} constraint is not a predicate on the current molecule and needs the state augmented with the running statistic; we report which of the two any constraint is.
+Multi-objective design is then a loop over goals rather than scalarization weights. Set $z$ or $\lambda$ to an under-covered direction of a nondominated archive, continue a controlled trajectory toward it under the frozen $R_\theta$, and fold every committed molecule into the archive, which is meaningful because every committed molecule is a candidate.
+Branching is what a restart-based optimizer cannot do: by \cref{cor:retarget} several preference-conditioned continuations launch from one saved prefix, each the exact finite-horizon problem for its own preference on the remaining budget, a \emph{Pareto fan}.

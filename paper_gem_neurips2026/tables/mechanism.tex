@@ -1,0 +1,23 @@
+\begin{table}[!ht]
+\centering\small\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}p{0.20\textwidth} p{0.28\textwidth} p{0.44\textwidth}@{}}
+\toprule
+Trajectory-level capability & Matched comparison & Main finding \\
+\midrule
+Future-aware control & remaining-budget vs.\ local selection
+  & \textbf{40/65} vs.\ 26/65 targets reached \\
+Dynamic retargeting & continue from $x_3$ vs.\ restart from $x_0$
+  & improves post-switch utility in both objective switches \\
+Pathwise constraints & support restriction vs.\ endpoint-only filtering
+  & endpoint-only filtering permits hidden intermediate violations; support
+    restriction prevents them by construction \\
+\bottomrule
+\end{tabular}
+\caption{\small\textbf{Trajectory-level capabilities of the frozen molecular
+process.} Each comparison changes how the trajectory is controlled while keeping
+the reference process $R_\theta$ fixed. Confidence intervals, prioritization
+results, and full protocols are reported in \cref{app:experiments}.}
+\label{tab:mechanism}%
+% alias: the appendix inherits a reference to fig:mechanism from the full paper.
+\label{fig:mechanism}
+\end{table}

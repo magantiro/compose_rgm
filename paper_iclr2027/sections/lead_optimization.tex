@@ -1,0 +1,78 @@
+% ============================================================================
+%  5.4 Similarity-constrained lead optimization.
+%
+%  PROSE IS VERBATIM as supplied.  Do not compress it back into an audit log:
+%  the earlier draft read as several separate investigations (benchmark ->
+%  table -> validity failure -> gate calibration -> failure localisation ->
+%  oracle efficiency -> limitations).  This version follows one progression:
+%  benchmark competence -> validity-aware interpretation -> what remains hard
+%  -> oracle efficiency, and hands directly to 5.5.
+%
+%  ARTIFACTS BEHIND THE NUMBERS (not in the seven-file verified set named in
+%  main.tex; promote them there or mark this section pending):
+%      diagnostics/compose_best_verified.json
+%      docs/genmol_t4_targets.json
+%      diagnostics/t4_win_audit.json
+%
+%  DELIBERATE OMISSION: the standalone Limitations paragraph was removed.  Its
+%  claim that a one-cell controller returned zero feasible molecules elsewhere
+%  is stale given the adaptive-controller result, and it turned a results
+%  section into a development diary.  The durable caveat -- that the benchmark
+%  molecules were inspected during development -- belongs in the discussion.
+%
+%  OPEN RECOMMENDATION: InVirtuoGen (ICLR 2026) should ultimately appear as a
+%  third column here wherever protocol parity is exact, rather than only in the
+%  appendix calibration.  It is currently referenced but not tabulated.
+% ============================================================================
+
+\subsection{\method{} is competitive on similarity-constrained lead optimization}
+\label{sec:exp-t4}
+
+Having established source-conditioned editing toward a prescribed property region, we next ask whether the same executable molecular process can support lead optimization when no target molecule is specified and the objective is an expensive protein-specific oracle. We evaluate \method{} on the lead-optimization protocol introduced by GenMol \citep{lee2025genmol}, comprising five protein targets, three seed molecules per target, and similarity thresholds $\delta\in\{0.4,0.6\}$. A returned molecule must satisfy QED $\geq0.6$, synthetic accessibility (SA) $\leq4$, and Morgan-fingerprint Tanimoto similarity $\geq\delta$ to its seed; among molecules satisfying these endpoint constraints, performance is measured by QuickVina2 docking score (lower is better). Importantly, the constraints apply only to the returned molecule rather than to intermediate states. \method{} therefore optimizes over sequences of executable molecular states while enforcing benchmark feasibility only at the endpoint. Full oracle configuration, docking calibration, and search details are given in \cref{app:medchem-gate}.
+
+Under the published benchmark criterion, \method{} returns a constraint-satisfying molecule in 26/30 cells (\cref{tab:t4}). Across the 23 cells for which both \method{} and GenMol report a feasible molecule, \method{} obtains the lower docking score in 10 cells and GenMol in 13. The mean paired difference is $+0.07$ kcal/mol in GenMol's favor, compared with a median replicate variation of $0.70$ kcal/mol under our QuickVina2 pipeline. We therefore interpret the aggregate result as \textbf{performance near GenMol rather than evidence for a significant advantage of either method}. The cell-wise results are heterogeneous: \method{} improves substantially over GenMol in several settings while leaving a small number of difficult cells responsible for most of the remaining aggregate deficit.
+
+The benchmark's endpoint criteria, however, are not sufficient to guarantee chemically credible outputs. Inspection of the 26 benchmark-feasible \method{} molecules identified seven structures containing failure modes including implausible valence states and chemically atypical ring systems; three of the apparent \method{} improvements over GenMol that exceed docking replicate variation occur among these cases. We therefore introduce an independent chemistry-validity screen and distinguish benchmark feasibility from chemical acceptability throughout our analysis. To avoid calibrating this screen around \method{} outputs, its acceptance criteria are checked against all 15 benchmark seeds and 25 published InVirtuoGen solutions. This calibration is deliberately conservative: for example, candidate rules based solely on ring size were rejected because they incorrectly excluded valid fused-ring systems in the benchmark seeds or a published cyclopropane-containing solution. The complete validity specification and molecule-level audit are provided in \cref{app:medchem-gate}.
+
+After separating these failure modes, the remaining performance gap is concentrated rather than uniform across the benchmark. Three cells account for $+6.9$ kcal/mol of the $+1.6$ kcal/mol cumulative difference from GenMol over jointly feasible cells. Each is a constructive-editing problem in which strong solutions lie substantially farther from the starting molecule than do typical local modifications. For example, on 5HT1B seed 2, high-scoring published solutions contain approximately 31 heavy atoms and five ring systems, compared with 16 heavy atoms and two ring systems in the seed. This concentration suggests that the principal challenge is not maintaining endpoint feasibility under ordinary local editing, but assigning value to longer executable transformation programs whose benefit is realized only after multiple coordinated edits.
+
+Finally, the separation between inexpensive endpoint constraints and the expensive docking objective enables \method{} to allocate oracle evaluations selectively. QED, SA, similarity, and chemical validity can all be evaluated before docking, so only feasible candidate endpoints need reach the protein oracle. On PARP1 seed 1 at $\delta=0.4$, filtering the proposal distribution in this way reaches a QuickVina2 score of $-10.4$ kcal/mol after only ten docking evaluations, compared with $-10.5$ after a 1{,}000-evaluation search; the difference is smaller than measured docking replicate variation. We interpret this as evidence that \method{} can concentrate probability on useful feasible molecular edits, rather than as an extreme-value improvement from the smaller oracle budget. Together, these experiments establish lead-optimization competence under realistic endpoint constraints while exposing the harder regime of long-horizon molecular transformation. \Cref{sec:exp-multiobj} next isolates whether explicitly accounting for those molecular futures improves control when optimization is specified by competing objectives rather than a known target structure.
+
+\begin{table}[!ht]
+\centering
+{\footnotesize
+\begin{tabular}{llr rr rr}
+\toprule
+& & & \multicolumn{2}{c}{$\delta = 0.4$} & \multicolumn{2}{c}{$\delta = 0.6$} \\
+\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+Target & Seed & Seed score & GenMol & \method{} & GenMol & \method{} \\
+\midrule
+PARP1 & 1 & -7.3 & -10.6 & -10.5 & -10.4 & -8.8 \\
+ & 2 & -7.8 & -11.0 & -9.9 & -9.7 & -9.4 \\
+ & 3 & -8.2 & -11.3 & \textbf{-11.6} & -9.2 & \textbf{-10.3} \\
+\midrule
+FA7 & 1 & -6.4 & -8.4 & \textbf{-10.2} & -7.3 & \textbf{-8.9} \\
+ & 2 & -6.7 & -8.4 & \textbf{-9.0} & -7.6 & -7.2 \\
+ & 3 & -8.5 & -- & -9.3 & -- & -7.9 \\
+\midrule
+5HT1B & 1 & -4.5 & -12.9 & -12.3 & -12.1 & \textbf{-13.4} \\
+ & 2 & -7.6 & -12.3 & -10.2 & -12.0 & -8.8 \\
+ & 3 & -9.8 & -11.6 & -11.4 & -10.5 & -- \\
+\midrule
+BRAF & 1 & -9.3 & -10.8 & -- & -- & -- \\
+ & 2 & -9.4 & -10.8 & \textbf{-11.2} & -9.7 & -- \\
+ & 3 & -9.8 & -10.6 & \textbf{-11.7} & -10.5 & -10.0 \\
+\midrule
+JAK2 & 1 & -7.7 & -10.2 & -9.8 & -9.3 & \textbf{-9.4} \\
+ & 2 & -8.0 & -10.0 & -9.7 & -9.4 & -9.4 \\
+ & 3 & -8.6 & -9.8 & \textbf{-10.7} & -- & -10.6 \\
+\bottomrule
+\end{tabular}}
+\caption{\small\textbf{Similarity-constrained lead optimization under the GenMol protocol.}
+Entries report the best QuickVina2 docking score (kcal/mol; lower is better) among
+returned molecules satisfying QED $\geq0.6$, SA $\leq4$, and Tanimoto similarity
+$\geq\delta$. Dashes indicate that no feasible molecule was returned. Across 23 cells with
+feasible outputs from both methods, \method{} obtains the lower score in 10; the mean
+paired difference is $+0.07$ kcal/mol in GenMol's favor.}
+\label{tab:t4}
+\end{table}
