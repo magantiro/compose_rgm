@@ -1,0 +1,1385 @@
+{
+  "results": {
+    "pendant": {
+      "case": {
+        "smiles": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+        "atoms": [
+          0
+        ],
+        "boundary": [
+          [
+            0,
+            1,
+            1.0
+          ]
+        ],
+        "interface": "pendant",
+        "size": 1,
+        "released": 0.041666666666666664,
+        "terminal_h": [
+          0
+        ]
+      },
+      "n_trials": 12,
+      "n_ok": 12,
+      "failure_reasons": {},
+      "attempts": [
+        {
+          "status": "OK",
+          "stage": "",
+          "n_steps": 3,
+          "logq": -3.817114994667566,
+          "families": [
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "atom_delete"
+          ],
+          "rejections": {
+            "frozen_touched": 1245,
+            "not_in_locus": 21,
+            "context_only": 12
+          },
+          "admissible_trace": [
+            48,
+            14,
+            14
+          ]
+        },
+        {
+          "status": "OK",
+          "stage": "",
+          "n_steps": 3,
+          "logq": -5.947544650113736,
+          "families": [
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "atom_restate_semantic"
+          ],
+          "rejections": {
+            "frozen_touched": 1260,
+            "not_in_locus": 21,
+            "context_only": 12
+          },
+          "admissible_trace": [
+            48,
+            14,
+            48
+          ]
+        },
+        {
+          "status": "OK",
+          "stage": "",
+          "n_steps": 3,
+          "logq": -5.989170026513758,
+          "families": [
+            "atom_insert",
+            "atom_delete",
+            "atom_restate_semantic"
+          ],
+          "rejections": {
+            "frozen_touched": 1299,
+            "not_in_locus": 21,
+            "context_only": 12
+          },
+          "admissible_trace": [
+            48,
+            64,
+            48
+          ]
+        },
+        {
+          "status": "OK",
+          "stage": "",
+          "n_steps": 3,
+          "logq": -5.764506467803788,
+          "families": [
+            "atom_delete",
+            "atom_insert",
+            "atom_insert"
+          ],
+          "rejections": {
+            "frozen_touched": 1260,
+            "not_in_locus": 21,
+            "context_only": 16
+          },
+          "admissible_trace": [
+            48,
+            14,
+            48
+          ]
+        },
+        {
+          "status": "OK",
+          "stage": "",
+          "n_steps": 3,
+          "logq": -3.817114994667566,
+          "families": [
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "atom_delete"
+          ],
+          "rejections": {
+            "frozen_touched": 1245,
+            "not_in_locus": 21,
+            "context_only": 12
+          },
+          "admissible_trace": [
+            48,
+            14,
+            14
+          ]
+        },
+        {
+          "status": "OK",
+          "stage": "",
+          "n_steps": 3,
+          "logq": -6.668584807165396,
+          "families": [
+            "atom_delete",
+            "atom_insert",
+            "atom_delete"
+          ],
+          "rejections": {
+            "frozen_touched": 1245,
+            "not_in_locus": 21,
+            "context_only": 16
+          },
+          "admissible_trace": [
+            48,
+            14,
+            14
+          ]
+        },
+        {
+          "status": "OK",
+          "stage": "",
+          "n_steps": 3,
+          "logq": -4.973804725654853,
+          "families": [
+            "atom_restate_semantic",
+            "atom_delete",
+            "atom_insert"
+          ],
+          "rejections": {
+            "frozen_touched": 1245,
+            "not_in_locus": 21,
+            "context_only": 16
+          },
+          "admissible_trace": [
+            48,
+            14,
+            14
+          ]
+        },
+        {
+          "status": "OK",
+          "stage": "",
+          "n_steps": 3,
+          "logq": -2.745375790819,
+          "families": [
+            "atom_delete",
+            "atom_insert",
+            "atom_delete"
+          ],
+          "rejections": {
+            "frozen_touched": 1260,
+            "not_in_locus": 21,
+            "context_only": 16
+          },
+          "admissible_trace": [
+            48,
+            14,
+            48
+          ]
+        },
+        {
+          "status": "OK",
+          "stage": "",
+          "n_steps": 3,
+          "logq": -3.817114994667566,
+          "families": [
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "atom_delete"
+          ],
+          "rejections": {
+            "frozen_touched": 1245,
+            "not_in_locus": 21,
+            "context_only": 12
+          },
+          "admissible_trace": [
+            48,
+            14,
+            14
+          ]
+        },
+        {
+          "status": "OK",
+          "stage": "",
+          "n_steps": 3,
+          "logq": -3.8428922677943245,
+          "families": [
+            "atom_delete",
+            "atom_insert",
+            "atom_restate_semantic"
+          ],
+          "rejections": {
+            "frozen_touched": 1245,
+            "not_in_locus": 21,
+            "context_only": 16
+          },
+          "admissible_trace": [
+            48,
+            14,
+            14
+          ]
+        },
+        {
+          "status": "OK",
+          "stage": "",
+          "n_steps": 3,
+          "logq": -6.571900770749042,
+          "families": [
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "atom_restate_semantic"
+          ],
+          "rejections": {
+            "frozen_touched": 1245,
+            "not_in_locus": 21,
+            "context_only": 12
+          },
+          "admissible_trace": [
+            48,
+            14,
+            14
+          ]
+        },
+        {
+          "status": "OK",
+          "stage": "",
+          "n_steps": 3,
+          "logq": -5.68630819318939,
+          "families": [
+            "atom_insert",
+            "atom_insert",
+            "atom_delete"
+          ],
+          "rejections": {
+            "frozen_touched": 1337,
+            "not_in_locus": 21,
+            "context_only": 12
+          },
+          "admissible_trace": [
+            48,
+            64,
+            96
+          ]
+        }
+      ],
+      "best": {
+        "logq": -3.817114994667566,
+        "n_steps": 3,
+        "families": [
+          "atom_restate_semantic",
+          "atom_restate_semantic",
+          "atom_delete"
+        ],
+        "phases": [
+          "prune_old",
+          "grow_new",
+          "grow_new"
+        ],
+        "endpoint": "Cn1cc(-c2ccc(-c3cc[nH]n3)cc2)c(-c2ccncc2)n1",
+        "endpoint_valid": true,
+        "displacement": {
+          "changed_fraction": 0.041666666666666664,
+          "n_changed_originals": 1,
+          "n_inserted": 0,
+          "n_deleted": 1,
+          "n_changed_regions": 1,
+          "largest_changed_region": 1,
+          "largest_changed_fraction": 0.041666666666666664,
+          "coherence": 1.0,
+          "d_heavy": -1,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_ring_atoms": 0,
+          "topology_changed": false
+        }
+      }
+    },
+    "bridge_free": {
+      "case": {
+        "smiles": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+        "atoms": [
+          21,
+          22
+        ],
+        "boundary": [
+          [
+            21,
+            20,
+            1.0
+          ],
+          [
+            21,
+            23,
+            1.0
+          ]
+        ],
+        "interface": "bridge",
+        "size": 2,
+        "released": 0.0625,
+        "terminal_h": [
+          1,
+          1
+        ]
+      },
+      "n_trials": 12,
+      "n_ok": 0,
+      "failure_reasons": {
+        "no_connectivity_preserving_handoff": 12
+      },
+      "attempts": [
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -15.098582155029135,
+          "families": [
+            "bond_reorder",
+            "bond_reorder",
+            "atom_restate_semantic",
+            "atom_delete",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder"
+          ],
+          "rejections": {
+            "frozen_touched": 12308,
+            "not_in_locus": 224,
+            "context_only": 313
+          },
+          "admissible_trace": [
+            44,
+            85,
+            44,
+            71,
+            65,
+            38,
+            65,
+            38,
+            65,
+            38,
+            6,
+            38
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -18.82609939252299,
+          "families": [
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "atom_restate_semantic",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "atom_insert",
+            "bond_reorder",
+            "bond_reorder"
+          ],
+          "rejections": {
+            "frozen_touched": 12801,
+            "not_in_locus": 224,
+            "context_only": 327
+          },
+          "admissible_trace": [
+            44,
+            85,
+            44,
+            85,
+            44,
+            71,
+            105,
+            69,
+            105,
+            69,
+            105,
+            69
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -20.230344815398766,
+          "families": [
+            "atom_insert",
+            "atom_delete",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "atom_insert",
+            "atom_delete",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reroute"
+          ],
+          "rejections": {
+            "frozen_touched": 12528,
+            "not_in_locus": 224,
+            "context_only": 330
+          },
+          "admissible_trace": [
+            44,
+            80,
+            44,
+            85,
+            44,
+            85,
+            44,
+            85,
+            44,
+            85,
+            44,
+            80
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -22.378927766769195,
+          "families": [
+            "atom_restate_semantic",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "bond_reorder",
+            "bond_reorder",
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "atom_delete",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder"
+          ],
+          "rejections": {
+            "frozen_touched": 12522,
+            "not_in_locus": 224,
+            "context_only": 321
+          },
+          "admissible_trace": [
+            44,
+            71,
+            105,
+            69,
+            105,
+            69,
+            60,
+            49,
+            85,
+            44,
+            44,
+            44
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -27.626828179884704,
+          "families": [
+            "bond_reorder",
+            "bond_reorder",
+            "atom_insert",
+            "atom_delete",
+            "atom_restate_semantic",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "atom_restate_semantic",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder"
+          ],
+          "rejections": {
+            "frozen_touched": 12695,
+            "not_in_locus": 224,
+            "context_only": 327
+          },
+          "admissible_trace": [
+            44,
+            85,
+            44,
+            45,
+            44,
+            60,
+            96,
+            60,
+            96,
+            60,
+            96,
+            105
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -33.685234687479905,
+          "families": [
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "atom_insert",
+            "atom_delete",
+            "atom_restate_semantic",
+            "atom_insert",
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "atom_delete",
+            "bond_reorder",
+            "bond_reorder",
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "atom_restate_semantic"
+          ],
+          "rejections": {
+            "frozen_touched": 12339,
+            "not_in_locus": 224,
+            "context_only": 309
+          },
+          "admissible_trace": [
+            44,
+            79,
+            44,
+            80,
+            44,
+            44,
+            60,
+            45,
+            45,
+            45,
+            80,
+            44
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -40.123650734223155,
+          "families": [
+            "bond_reorder",
+            "atom_restate_semantic",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "atom_delete",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "atom_restate_semantic"
+          ],
+          "rejections": {
+            "frozen_touched": 12485,
+            "not_in_locus": 224,
+            "context_only": 304
+          },
+          "admissible_trace": [
+            44,
+            85,
+            105,
+            69,
+            105,
+            69,
+            60,
+            69,
+            60,
+            60,
+            38,
+            65
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -28.469569469909914,
+          "families": [
+            "atom_restate_semantic",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "atom_restate_semantic",
+            "bond_reorder",
+            "bond_reroute",
+            "atom_delete",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "atom_insert",
+            "atom_restate_semantic",
+            "bond_reorder",
+            "bond_reorder"
+          ],
+          "rejections": {
+            "frozen_touched": 12660,
+            "not_in_locus": 224,
+            "context_only": 321
+          },
+          "admissible_trace": [
+            44,
+            80,
+            105,
+            80,
+            105,
+            80,
+            71,
+            105,
+            103,
+            65,
+            38,
+            65
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -15.571905383199288,
+          "families": [
+            "bond_reorder",
+            "bond_reorder",
+            "atom_insert",
+            "atom_delete",
+            "atom_delete",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder"
+          ],
+          "rejections": {
+            "frozen_touched": 12307,
+            "not_in_locus": 224,
+            "context_only": 313
+          },
+          "admissible_trace": [
+            44,
+            85,
+            44,
+            80,
+            44,
+            65,
+            38,
+            65,
+            38,
+            65,
+            38,
+            65
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -22.702748439572837,
+          "families": [
+            "atom_restate_semantic",
+            "bond_reorder",
+            "bond_reorder",
+            "atom_restate_semantic",
+            "bond_reorder",
+            "bond_reorder",
+            "atom_restate_semantic",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reroute",
+            "bond_reorder",
+            "bond_reorder",
+            "atom_delete",
+            "bond_reorder",
+            "bond_reorder"
+          ],
+          "rejections": {
+            "frozen_touched": 12642,
+            "not_in_locus": 224,
+            "context_only": 310
+          },
+          "admissible_trace": [
+            44,
+            44,
+            85,
+            49,
+            49,
+            85,
+            49,
+            69,
+            105,
+            71,
+            105,
+            103
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -16.170567372420148,
+          "families": [
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "atom_delete",
+            "bond_reorder",
+            "atom_insert",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder"
+          ],
+          "rejections": {
+            "frozen_touched": 12667,
+            "not_in_locus": 224,
+            "context_only": 324
+          },
+          "admissible_trace": [
+            44,
+            85,
+            44,
+            85,
+            44,
+            65,
+            38,
+            69,
+            105,
+            69,
+            105,
+            71
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -30.65431744887833,
+          "families": [
+            "atom_insert",
+            "atom_insert",
+            "atom_delete",
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "atom_delete",
+            "bond_reorder",
+            "bond_reorder",
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "bond_reorder",
+            "bond_reorder",
+            "atom_restate_semantic",
+            "bond_reorder",
+            "bond_reorder",
+            "bond_reorder"
+          ],
+          "rejections": {
+            "frozen_touched": 12623,
+            "not_in_locus": 224,
+            "context_only": 306
+          },
+          "admissible_trace": [
+            44,
+            80,
+            98,
+            80,
+            80,
+            71,
+            44,
+            85,
+            49,
+            60,
+            69,
+            105
+          ]
+        }
+      ],
+      "best": null
+    },
+    "bridge_saturated": {
+      "case": {
+        "smiles": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+        "atoms": [
+          6,
+          7,
+          8,
+          9,
+          22,
+          23
+        ],
+        "boundary": [
+          [
+            6,
+            5,
+            1.0
+          ],
+          [
+            9,
+            10,
+            1.0
+          ]
+        ],
+        "interface": "bridge",
+        "size": 6,
+        "released": 0.25,
+        "terminal_h": [
+          0,
+          0
+        ]
+      },
+      "n_trials": 12,
+      "n_ok": 0,
+      "failure_reasons": {
+        "no_connectivity_preserving_handoff": 10,
+        "grow_new:apply_failed": 2
+      },
+      "attempts": [
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -34.666649852597274,
+          "families": [
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_insert",
+            "bond_reorder",
+            "bond_reorder",
+            "atom_delete",
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "atom_insert",
+            "cycle_open",
+            "cycle_close",
+            "bond_reorder",
+            "atom_delete",
+            "atom_delete",
+            "atom_insert"
+          ],
+          "rejections": {
+            "frozen_touched": 6365,
+            "not_in_locus": 111,
+            "context_only": 128
+          },
+          "admissible_trace": [
+            86,
+            92,
+            86,
+            103,
+            143,
+            109,
+            143,
+            103,
+            75,
+            111,
+            126,
+            184
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -35.91891609036192,
+          "families": [
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "atom_delete",
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_delete"
+          ],
+          "rejections": {
+            "frozen_touched": 6158,
+            "not_in_locus": 112,
+            "context_only": 128
+          },
+          "admissible_trace": [
+            86,
+            75,
+            86,
+            103,
+            86,
+            92,
+            103,
+            75,
+            86,
+            75,
+            86,
+            92
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -43.387959873243055,
+          "families": [
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_delete",
+            "atom_delete",
+            "atom_restate_semantic",
+            "atom_insert",
+            "atom_insert",
+            "atom_delete",
+            "bond_reroute",
+            "atom_delete",
+            "atom_delete",
+            "cycle_close"
+          ],
+          "rejections": {
+            "frozen_touched": 6341,
+            "not_in_locus": 105,
+            "context_only": 128
+          },
+          "admissible_trace": [
+            86,
+            75,
+            86,
+            92,
+            125,
+            92,
+            116,
+            92,
+            86,
+            126,
+            161,
+            198
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -35.969864685927995,
+          "families": [
+            "atom_insert",
+            "atom_insert",
+            "atom_insert",
+            "atom_delete",
+            "atom_delete",
+            "atom_insert",
+            "atom_insert",
+            "atom_delete",
+            "atom_delete",
+            "atom_insert",
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_restate_semantic",
+            "atom_delete",
+            "atom_insert"
+          ],
+          "rejections": {
+            "frozen_touched": 6459,
+            "not_in_locus": 112,
+            "context_only": 128
+          },
+          "admissible_trace": [
+            86,
+            92,
+            125,
+            140,
+            125,
+            92,
+            125,
+            163,
+            125,
+            92,
+            125,
+            168
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -32.61113028503204,
+          "families": [
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_restate_semantic",
+            "atom_restate_semantic",
+            "atom_insert",
+            "atom_delete",
+            "atom_delete",
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_restate_semantic",
+            "atom_delete",
+            "atom_insert"
+          ],
+          "rejections": {
+            "frozen_touched": 6191,
+            "not_in_locus": 112,
+            "context_only": 128
+          },
+          "admissible_trace": [
+            86,
+            92,
+            86,
+            75,
+            86,
+            75,
+            75,
+            92,
+            125,
+            92,
+            86,
+            92
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "grow_new:apply_failed",
+          "n_steps": 1,
+          "logq": -2.811448155017866,
+          "families": [
+            "atom_insert"
+          ],
+          "rejections": {
+            "frozen_touched": 764,
+            "not_in_locus": 14,
+            "context_only": 16
+          },
+          "admissible_trace": [
+            86,
+            75
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -42.1382204126776,
+          "families": [
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_insert",
+            "atom_insert",
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "cycle_open",
+            "cycle_close",
+            "bond_reorder",
+            "atom_insert"
+          ],
+          "rejections": {
+            "frozen_touched": 6433,
+            "not_in_locus": 111,
+            "context_only": 128
+          },
+          "admissible_trace": [
+            86,
+            75,
+            86,
+            75,
+            86,
+            75,
+            86,
+            92,
+            125,
+            141,
+            185,
+            141
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "grow_new:apply_failed",
+          "n_steps": 7,
+          "logq": -13.1636867260946,
+          "families": [
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_restate_semantic",
+            "atom_delete",
+            "atom_insert",
+            "atom_insert"
+          ],
+          "rejections": {
+            "frozen_touched": 3104,
+            "not_in_locus": 56,
+            "context_only": 64
+          },
+          "admissible_trace": [
+            86,
+            75,
+            86,
+            111,
+            75,
+            86,
+            92,
+            125
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -34.73798411665974,
+          "families": [
+            "atom_insert",
+            "atom_restate_semantic",
+            "atom_insert",
+            "atom_insert",
+            "atom_insert",
+            "atom_insert",
+            "atom_delete",
+            "bond_reorder",
+            "atom_delete",
+            "atom_delete",
+            "atom_delete",
+            "atom_delete",
+            "atom_insert",
+            "atom_delete",
+            "cycle_open",
+            "cycle_close"
+          ],
+          "rejections": {
+            "frozen_touched": 6539,
+            "not_in_locus": 111,
+            "context_only": 128
+          },
+          "admissible_trace": [
+            86,
+            75,
+            111,
+            133,
+            168,
+            205,
+            179,
+            153,
+            192,
+            168,
+            133,
+            111
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -44.951235386777306,
+          "families": [
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "cycle_close",
+            "atom_restate_semantic",
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_restate_semantic",
+            "atom_restate_semantic"
+          ],
+          "rejections": {
+            "frozen_touched": 6111,
+            "not_in_locus": 142,
+            "context_only": 128
+          },
+          "admissible_trace": [
+            86,
+            92,
+            86,
+            111,
+            86,
+            75,
+            86,
+            92,
+            86,
+            103,
+            69,
+            69
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -35.99161699188205,
+          "families": [
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_restate_semantic",
+            "atom_delete",
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_insert",
+            "atom_delete",
+            "atom_delete",
+            "atom_insert"
+          ],
+          "rejections": {
+            "frozen_touched": 6188,
+            "not_in_locus": 112,
+            "context_only": 128
+          },
+          "admissible_trace": [
+            86,
+            75,
+            86,
+            75,
+            86,
+            102,
+            75,
+            86,
+            75,
+            86,
+            75,
+            86
+          ]
+        },
+        {
+          "status": "UNSAT",
+          "stage": "no_connectivity_preserving_handoff",
+          "n_steps": 16,
+          "logq": -42.85878036208897,
+          "families": [
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_delete",
+            "atom_insert",
+            "atom_insert",
+            "atom_restate_semantic",
+            "bond_reorder",
+            "atom_restate_semantic",
+            "atom_insert",
+            "atom_delete",
+            "atom_restate_semantic",
+            "atom_insert",
+            "atom_restate_semantic",
+            "cycle_open",
+            "cycle_close"
+          ],
+          "rejections": {
+            "frozen_touched": 6316,
+            "not_in_locus": 111,
+            "context_only": 128
+          },
+          "admissible_trace": [
+            86,
+            75,
+            86,
+            111,
+            86,
+            111,
+            133,
+            154,
+            93,
+            76,
+            109,
+            76
+          ]
+        }
+      ],
+      "best": null
+    }
+  },
+  "sec": 742.073968410492
+}

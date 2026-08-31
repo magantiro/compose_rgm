@@ -1,0 +1,135 @@
+{
+  "results": {
+    "pendant": {
+      "case": {
+        "smiles": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+        "atoms": [
+          0
+        ],
+        "boundary": [
+          [
+            0,
+            1,
+            1.0
+          ]
+        ],
+        "interface": "pendant",
+        "size": 1,
+        "released": 0.041666666666666664,
+        "terminal_h": [
+          0
+        ]
+      },
+      "n_trials": 12,
+      "n_ok": 7,
+      "failure_reasons": {
+        "grow_new:no_admissible_action": 5
+      },
+      "best": {
+        "logq": -3.8171147088925665,
+        "n_steps": 3,
+        "families": [
+          "atom_restate_semantic",
+          "atom_restate_semantic",
+          "atom_delete"
+        ],
+        "phases": [
+          "prune_old",
+          "grow_new",
+          "grow_new"
+        ],
+        "endpoint": "Cn1cc(-c2ccc(-c3cc[nH]n3)cc2)c(-c2ccncc2)n1",
+        "endpoint_valid": true,
+        "displacement": {
+          "changed_fraction": 0.041666666666666664,
+          "n_changed_originals": 1,
+          "n_inserted": 0,
+          "n_deleted": 1,
+          "n_changed_regions": 1,
+          "largest_changed_region": 1,
+          "largest_changed_fraction": 0.041666666666666664,
+          "coherence": 1.0,
+          "d_heavy": -1,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_ring_atoms": 0,
+          "topology_changed": false
+        }
+      }
+    },
+    "bridge_free": {
+      "case": {
+        "smiles": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+        "atoms": [
+          21,
+          22
+        ],
+        "boundary": [
+          [
+            21,
+            20,
+            1.0
+          ],
+          [
+            21,
+            23,
+            1.0
+          ]
+        ],
+        "interface": "bridge",
+        "size": 2,
+        "released": 0.0625,
+        "terminal_h": [
+          1,
+          1
+        ]
+      },
+      "n_trials": 12,
+      "n_ok": 0,
+      "failure_reasons": {
+        "no_connectivity_preserving_handoff": 12
+      },
+      "best": null
+    },
+    "bridge_saturated": {
+      "case": {
+        "smiles": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+        "atoms": [
+          6,
+          7,
+          8,
+          9,
+          22,
+          23
+        ],
+        "boundary": [
+          [
+            6,
+            5,
+            1.0
+          ],
+          [
+            9,
+            10,
+            1.0
+          ]
+        ],
+        "interface": "bridge",
+        "size": 6,
+        "released": 0.25,
+        "terminal_h": [
+          0,
+          0
+        ]
+      },
+      "n_trials": 12,
+      "n_ok": 0,
+      "failure_reasons": {
+        "no_connectivity_preserving_handoff": 10,
+        "grow_new:apply_failed": 2
+      },
+      "best": null
+    }
+  },
+  "sec": 1404.2169637680054
+}
