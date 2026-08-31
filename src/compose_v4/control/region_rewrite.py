@@ -141,6 +141,35 @@ class RewriteContext:
         return replace(self, phase=phase)
 
 
+def prune_budget(region, mol_bonds=None) -> int:
+    """Primitive steps sufficient to remove the region, derived from structure.
+
+        budget = |M| + (bonds internal to M) + (boundary bonds)
+
+    Not a tuned constant. `atom_delete` is legal only where it does not
+    disconnect or break valence, i.e. essentially at leaves, so INTERIOR atoms
+    of the old connector must first be made leaf-like by breaking their bonds.
+    Measured: a 2-atom region given 2 prune steps never issued a single
+    atom_delete, because both of its atoms were interior. One step per atom plus
+    one per incident bond is sufficient for any connected region and follows
+    from the region itself.
+    """
+    n = len(region.atoms)
+    b_bnd = len(region.boundary)
+    b_int = 0
+    if mol_bonds is not None:
+        import numpy as np
+        b = np.asarray(mol_bonds)
+        atoms = sorted(int(a) for a in region.atoms)
+        for i, u in enumerate(atoms):
+            for v in atoms[i + 1:]:
+                if b[u][v] > 0:
+                    b_int += 1
+    else:
+        b_int = max(0, n - 1)          # connected region: at least a spanning tree
+    return int(n + b_int + b_bnd)
+
+
 def context_from_region(region) -> RewriteContext:
     """Build the frozen context from a Region (see control/region.py)."""
     frozen = frozenset(range(region.n_atoms_total)) - frozenset(region.atoms)
@@ -497,13 +526,14 @@ class Proposal:
     rejections: dict = field(default_factory=dict)
     lineage: object = None
     first_handoff_step: object = None   # steps taken before handoff first held
+    min_observed: list = field(default_factory=list)  # best reachable observable/step
 
 
 def propose(enum_fn, apply_fn, ctx: RewriteContext, start_state, *,
             schedule, rng, gate_fn=None, lineage=None,
             original_region_ids=frozenset(), max_handoff_steps=24,
             potential_fn=None, beta: float = 0.0, epsilon: float = 0.1,
-            potentials=None, betas=None):
+            potentials=None, betas=None, observe_fn=None):
     """Run one region-local trajectory under an explicit phase schedule.
 
     `schedule` is a list of (phase, n_steps). `enum_fn(state) -> (fams, acts,
@@ -558,10 +588,19 @@ def propose(enum_fn, apply_fn, ctx: RewriteContext, start_state, *,
                 # aggregation, so no edit-alias multiplicity is reintroduced.
                 phi0 = phase_pot(st, ctx, lineage)
                 gain = np.zeros(len(idx), float)
+                obs = []
                 for k_i, j_i in enumerate(idx):
                     y_i = apply_fn(st, j_i)
                     gain[k_i] = (-1e9 if y_i is None
                                  else phase_pot(y_i, ctx, lineage) - phi0)
+                    # Reuses the successor already applied here, so recording
+                    # the best reachable d_old costs no extra apply. This is what
+                    # separates "a useful action exists and we miss it" from
+                    # "the grammar cannot make progress at all".
+                    if observe_fn is not None and y_i is not None:
+                        obs.append(observe_fn(y_i, ctx, lineage))
+                if obs:
+                    p.min_observed.append(min(obs))
                 shaped = w * np.exp(phase_beta * np.clip(gain, -60.0, 60.0))
                 if shaped.sum() > 0:
                     shaped = shaped / shaped.sum()

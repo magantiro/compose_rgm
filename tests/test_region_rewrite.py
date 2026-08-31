@@ -502,3 +502,41 @@ def test_prune_never_undoes_the_handoff_it_depends_on():
     ctx, lin, old = _split_ctx()
     still_dependent = _chain(4)                       # no old-free route
     assert prune_potential(still_dependent, ctx, lin, old) <= -1e5
+
+
+def test_prune_budget_is_derived_from_structure_not_tuned():
+    """Interior atoms are not directly deletable, so |M| steps is never enough."""
+    from compose_v4.control.region_rewrite import prune_budget
+    from compose_v4.control.region import Region
+    r = Region(atoms=frozenset({1, 2}),
+               boundary=((1, 0, 1.0), (2, 3, 1.0)),
+               kind="linker", generator="t", n_atoms_total=4,
+               n_context_components=2, interface="splitting")
+    b = np.zeros((4, 4), dtype=int)
+    for i in range(3):
+        b[i][i + 1] = b[i + 1][i] = 1
+    # 2 atoms + 1 internal bond + 2 boundary bonds
+    assert prune_budget(r, b) == 5
+    assert prune_budget(r, b) > len(r.atoms), "budget must exceed atom count"
+
+
+def test_observe_fn_records_best_reachable_value_per_step():
+    st = _chain(4)
+    ctx, lin, old = _split_ctx()
+    fams, acts = ["bond_reorder", "bond_reorder"], [_Bond(1, 2, 2), _Bond(2, 1, 3)]
+
+    def enum_fn(_s):
+        return fams, acts, np.array([0.5, 0.5])
+
+    def apply_fn(s, _j):
+        return s
+
+    seen = []
+    p = propose(enum_fn, apply_fn, ctx, st, schedule=[("grow_new", 2)],
+                rng=np.random.default_rng(0), lineage=lin, original_region_ids=old,
+                potential_fn=lambda s, c, l: connectivity_potential(s, c, l, old),
+                beta=6.0, epsilon=0.1,
+                observe_fn=lambda y, c, l: old_dependence(y, c, l, old))
+    assert p.status == "OK"
+    assert len(p.min_observed) == 2, "one best-reachable value per step"
+    assert all(isinstance(v, int) for v in p.min_observed)

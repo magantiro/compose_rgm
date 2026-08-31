@@ -163,11 +163,15 @@ def sentinels(job: dict) -> dict:
             except Exception:
                 return None
 
+        # Prune budget is DERIVED from the region: one step per atom plus one
+        # per incident bond. A 2-atom region given 2 steps never issued a single
+        # atom_delete, because interior atoms must first be made leaf-like.
+        st_raw = smiles_to_molecular_graph(smi)
+        pb = RR.prune_budget(region, st_raw.bonds)
         if name == "pendant":
-            schedule = [("prune_old", max(1, rec["size"])), ("grow_new", 2)]
+            schedule = [("prune_old", pb), ("grow_new", 2)]
         else:
-            schedule = [("grow_new", "until_handoff"),
-                        ("prune_old", max(1, rec["size"]))]
+            schedule = [("grow_new", "until_handoff"), ("prune_old", pb)]
 
         # Splitting regions get the task-independent connectivity-progress
         # proposal; pendant does not need it.
@@ -193,6 +197,8 @@ def sentinels(job: dict) -> dict:
                            potentials=(pots if arm_beta > 0 else None),
                            betas=({k: arm_beta for k in pots} if arm_beta > 0 else None),
                            beta=arm_beta,
+                           observe_fn=(None if name == "pendant" else
+                                       (lambda y, c, l: RR.old_dependence(y, c, l, old_ids))),
                            epsilon=float(job.get("epsilon", 0.1)))
             diag = RR.connectivity_diagnostics(
                 p.endpoint if p.endpoint is not None else st0, ctx,
@@ -204,6 +210,9 @@ def sentinels(job: dict) -> dict:
                              "rejections": dict(p.rejections),
                              "admissible_trace": p.n_admissible_seen[:12],
                              "first_handoff_step": p.first_handoff_step,
+                             "prune_budget": pb,
+                             "min_d_old_reachable": (min(p.min_observed)
+                                                     if p.min_observed else None),
                              **diag})
             if p.status == "OK" and best is None:
                 d = GG.structural_displacement(st0, p.endpoint, lin0, p.lineage)
