@@ -169,39 +169,72 @@ def sentinels(job: dict) -> dict:
             schedule = [("grow_new", "until_handoff"),
                         ("prune_old", max(1, rec["size"]))]
 
-        attempts, best = [], None
-        for trial in range(int(job.get("trials", 8))):
+        # Splitting regions get the task-independent connectivity-progress
+        # proposal; pendant does not need it.
+        pot = (None if name == "pendant"
+               else (lambda s_, c_, l_: RR.connectivity_potential(s_, c_, l_, old_ids)))
+        # MATCHED ABLATION, same horizon and same kernel budget:
+        #   beta = 0  -> q_base(y|x,M) proportional to R_theta(y|x)   (undirected)
+        #   beta > 0  -> q_conn = R_theta * exp[beta dPhi_conn]        (directed)
+        arms_beta = ({"directed": float(job.get("beta", 6.0)), "undirected": 0.0}
+                     if name != "pendant" else {"directed": 0.0})
+        by_arm = {}
+        for arm_name, arm_beta in arms_beta.items():
+          attempts, best = [], None
+          for trial in range(int(job.get("trials", 8))):
             p = RR.propose(enum_fn, apply_fn, ctx, st0, schedule=schedule,
                            rng=np.random.default_rng(100 + trial),
                            lineage=lin0, original_region_ids=old_ids,
-                           max_handoff_steps=int(job.get("max_handoff", 16)))
+                           max_handoff_steps=int(job.get("max_handoff", 16)),
+                           potential_fn=(pot if arm_beta > 0 else None),
+                           beta=arm_beta,
+                           epsilon=float(job.get("epsilon", 0.1)))
+            diag = RR.connectivity_diagnostics(
+                p.endpoint if p.endpoint is not None else st0, ctx,
+                p.lineage or lin0, old_ids)
             attempts.append({"status": p.status, "stage": p.stage,
                              "n_steps": len(p.steps),
                              "logq": p.conditional_path_logq,
                              "families": [x["family"] for x in p.steps],
                              "rejections": dict(p.rejections),
-                             "admissible_trace": p.n_admissible_seen[:12]})
+                             "admissible_trace": p.n_admissible_seen[:12],
+                             "first_handoff_step": p.first_handoff_step,
+                             **diag})
             if p.status == "OK" and best is None:
                 d = GG.structural_displacement(st0, p.endpoint, lin0, p.lineage)
-                best = {"logq": p.conditional_path_logq,
+                # STRICTER than "handoff happened": the superseded region must
+                # actually be gone, and the change must be nontrivial.
+                surviving_old = [i for i in old_ids if i in p.lineage.slot_of]
+                best = {"old_region_removed": len(surviving_old) == 0,
+                        "n_old_atoms_surviving": len(surviving_old),
+                        "logq_finite": bool(np.isfinite(p.conditional_path_logq)),
+                        "changed_nontrivial": bool(d["changed_fraction"] > 0.0),
+                        "logq": p.conditional_path_logq,
                         "n_steps": len(p.steps),
                         "families": [s["family"] for s in p.steps],
                         "phases": [s["phase"] for s in p.steps],
                         "endpoint": canonical_state_key(p.endpoint),
                         "endpoint_valid": bool(is_valid(canonical_state_key(p.endpoint))),
                         "displacement": d}
-        from collections import Counter
-        results[name] = {
-            "case": rec,
+          from collections import Counter
+          by_arm[arm_name] = {
             "n_trials": len(attempts),
             "n_ok": sum(1 for a in attempts if a["status"] == "OK"),
+            "n_handoff_reached": sum(1 for a in attempts
+                                     if a["stage"] != "no_connectivity_preserving_handoff"),
+            "mean_new_material": (sum(a["n_new_material"] for a in attempts)
+                                  / max(1, len(attempts))),
+            "max_components_touched": max((a["components_touched_by_new"]
+                                           for a in attempts), default=0),
+            "first_handoff_steps": [a["first_handoff_step"] for a in attempts],
             "failure_reasons": dict(Counter(a["stage"] for a in attempts
                                             if a["status"] != "OK")),
-            "attempts": attempts,          # per-trial traces; without these the
-                                           # artifact cannot say whether a
-                                           # failure was missing MOVES or a
-                                           # directionless PROPOSAL
+            "attempts": attempts,
             "best": best,
+          }
+        results[name] = {
+            "case": rec,
+            "arms": by_arm,
         }
     return {"results": results, "sec": time.time() - t0}
 
@@ -216,17 +249,23 @@ def main(trials: int = 8, n_seeds: int = 6):
     print(f"sec={r['sec']:.0f}\n")
     for name, v in r["results"].items():
         if v.get("status") == "NO_CASE_FOUND":
-            print(f"{name:18s} NO CASE FOUND"); continue
+            print(f"{name:20s} NO CASE FOUND"); continue
         c = v["case"]
-        print(f"{name:18s} {v['n_ok']}/{v['n_trials']} OK   region size {c['size']} "
-              f"released {c['released']:.2f} terminal_H {c['terminal_h']}")
-        if v["failure_reasons"]:
-            print(f"{'':18s} failures: {v['failure_reasons']}")
-        b = v["best"]
-        if b:
-            d = b["displacement"]
-            print(f"{'':18s} steps {b['n_steps']} logq {b['logq']:.2f} "
-                  f"changed {d['changed_fraction']:.2f} "
-                  f"largest_region {d['largest_changed_region']} "
-                  f"coherence {d['coherence']:.2f} dRank {d['d_cycle_rank']}")
-            print(f"{'':18s} {b['endpoint']}")
+        print(f"{name:20s} size {c['size']} released {c['released']:.2f} "
+              f"terminal_H {c['terminal_h']}")
+        for arm, a in v["arms"].items():
+            print(f"   {arm:12s} {a['n_ok']}/{a['n_trials']} OK  "
+                  f"handoff_reached {a['n_handoff_reached']}  "
+                  f"new_material {a['mean_new_material']:.1f}  "
+                  f"components_touched<= {a['max_components_touched']}")
+            if a["failure_reasons"]:
+                print(f"   {'':12s} failures: {a['failure_reasons']}")
+            b = a["best"]
+            if b:
+                d = b["displacement"]
+                print(f"   {'':12s} steps {b['n_steps']} logq {b['logq']:.2f} "
+                      f"changed {d['changed_fraction']:.2f} "
+                      f"coherence {d['coherence']:.2f} "
+                      f"old_removed {b['old_region_removed']} "
+                      f"dRank {d['d_cycle_rank']}")
+                print(f"   {'':12s} {b['endpoint']}")

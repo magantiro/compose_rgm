@@ -290,6 +290,108 @@ def handoff_satisfied(state, ctx: RewriteContext, lineage: Lineage,
     return ctx_slots <= seen
 
 
+def connectivity_diagnostics(state, ctx: RewriteContext, lineage: Lineage,
+                             original_region_ids: frozenset) -> dict:
+    """Instrumentation for the appendage failure mode.
+
+    The dense growth term can reward extending one long useless branch from a
+    single terminal forever. These fields make that visible: if |N_t| climbs
+    while components_touched stays at 1, the dense term needs to reward frontier
+    progress toward SPANNING another component rather than raw new material.
+    """
+    import numpy as np
+    b = np.asarray(state.bonds)
+    types = np.asarray(state.atom_types)
+    n = int(b.shape[0])
+    old = {lineage.slot_of[i] for i in original_region_ids if i in lineage.slot_of}
+    live = {i for i in range(n) if int(types[i]) != 0} - old
+    ctx_slots = {int(c) for c in ctx.frozen} & live
+    new_slots = {lineage.slot_of[i] for i in lineage.slot_of
+                 if i not in original_region_ids and lineage.slot_of[i] not in ctx_slots}
+    new_slots &= live
+    touched = 0
+    seen = set()
+    for start in sorted(ctx_slots):
+        if start in seen:
+            continue
+        stack, comp = [start], set()
+        while stack:
+            v = stack.pop()
+            if v in comp:
+                continue
+            comp.add(v); seen.add(v)
+            for w in range(n):
+                if w in live and w not in comp and b[v][w] > 0:
+                    stack.append(w)
+        if comp & new_slots:
+            touched += 1
+    return {"n_new_material": len(new_slots),
+            "components_touched_by_new": touched}
+
+
+def connectivity_potential(state, ctx: RewriteContext, lineage: Lineage,
+                           original_region_ids: frozenset,
+                           deficit_weight: float = 64.0) -> float:
+    """Task-independent connectivity progress, k-general.
+
+        Phi(x) = -W * (groups among preserved components - 1)
+                 + |new material attached to some preserved component|
+
+    The first term is the CONNECTIVITY DEFICIT: how many separate groups the
+    preserved components currently fall into once the original region is
+    ignored. It is zero exactly when handoff is satisfied, and it is defined
+    over components rather than over a terminal pair, so k > 2 needs no new
+    formulation -- for k terminals it is simply the remaining deficit.
+
+    The second term shapes the growth phase: closing a new connection is only
+    possible once new material hangs off a preserved component, so growing that
+    material is rewarded before any merge occurs. Without it the potential is
+    flat until the single step that completes the connection, which gives the
+    sampler nothing to climb.
+
+    `deficit_weight` MUST exceed the largest growth bonus reachable within the
+    horizon, or the shaping term competes with the topological objective it is
+    supposed to serve: at W=8 with a 16-step horizon, ten useless appended atoms
+    (+10) outrank completing a component merge (+8). W=64 dominates any growth a
+    realistic horizon allows.
+
+    Connectivity is evaluated on C union N_t with surviving ORIGINAL-REGION
+    lineage removed, so the region being replaced can never make the preserved
+    components look already-connected. Handoff means the NEW material spans them
+    independently.
+
+    Nothing here refers to a task, an objective, or a specific terminal.
+    """
+    import numpy as np
+    b = np.asarray(state.bonds)
+    types = np.asarray(state.atom_types)
+    n = int(b.shape[0])
+    old = {lineage.slot_of[i] for i in original_region_ids if i in lineage.slot_of}
+    live = {i for i in range(n) if int(types[i]) != 0} - old
+    ctx_slots = {int(c) for c in ctx.frozen} & live
+    if not ctx_slots:
+        return -deficit_weight * 4.0
+
+    seen, groups = set(), 0
+    attached = 0
+    for start in sorted(ctx_slots):
+        if start in seen:
+            continue
+        groups += 1
+        stack, comp = [start], set()
+        while stack:
+            v = stack.pop()
+            if v in comp:
+                continue
+            comp.add(v); seen.add(v)
+            for w in range(n):
+                if w in live and w not in comp and b[v][w] > 0:
+                    stack.append(w)
+        # new material (not original, not preserved context) riding on this group
+        attached += len(comp - ctx_slots)
+    return -deficit_weight * (groups - 1) + float(attached)
+
+
 # ------------------------------------------------------------------- proposal
 @dataclass
 class Proposal:
@@ -306,11 +408,13 @@ class Proposal:
     n_admissible_seen: list = field(default_factory=list)
     rejections: dict = field(default_factory=dict)
     lineage: object = None
+    first_handoff_step: object = None   # steps taken before handoff first held
 
 
 def propose(enum_fn, apply_fn, ctx: RewriteContext, start_state, *,
             schedule, rng, gate_fn=None, lineage=None,
-            original_region_ids=frozenset(), max_handoff_steps=24):
+            original_region_ids=frozenset(), max_handoff_steps=24,
+            potential_fn=None, beta: float = 0.0, epsilon: float = 0.1):
     """Run one region-local trajectory under an explicit phase schedule.
 
     `schedule` is a list of (phase, n_steps). `enum_fn(state) -> (fams, acts,
@@ -335,6 +439,10 @@ def propose(enum_fn, apply_fn, ctx: RewriteContext, start_state, *,
         for _i in range(budget):
             if until_handoff and handoff_satisfied(st, ctx, lineage,
                                                    original_region_ids):
+                # Observable only: the policy already evaluates this predicate
+                # here, so recording when it first flips changes nothing.
+                if p.first_handoff_step is None:
+                    p.first_handoff_step = len(p.steps)
                 break
             fams, acts, probs = enum_fn(st)
             idx, why = admissible_indices(fams, acts, ctx)
@@ -349,6 +457,23 @@ def propose(enum_fn, apply_fn, ctx: RewriteContext, start_state, *,
                 p.status, p.stage = "UNSAT", f"{phase}:zero_mass"
                 return p
             w = w / w.sum()
+            if potential_fn is not None and beta > 0.0:
+                # q_directed(y) proportional to R_theta(y|x) exp[beta (Phi(y) - Phi(x))].
+                # Phi is evaluated on the APPLIED successor, i.e. after canonical
+                # aggregation, so no edit-alias multiplicity is reintroduced.
+                phi0 = potential_fn(st, ctx, lineage)
+                gain = np.zeros(len(idx), float)
+                for k_i, j_i in enumerate(idx):
+                    y_i = apply_fn(st, j_i)
+                    gain[k_i] = (-1e9 if y_i is None
+                                 else potential_fn(y_i, ctx, lineage) - phi0)
+                shaped = w * np.exp(beta * np.clip(gain, -60.0, 60.0))
+                if shaped.sum() > 0:
+                    shaped = shaped / shaped.sum()
+                    # A small region-local floor keeps every executable path in
+                    # the support: some valid handoffs need one sideways step
+                    # before the topological gap shrinks.
+                    w = (1.0 - epsilon) * shaped + epsilon * w
             choice = int(rng.choice(len(idx), p=w))
             j = idx[choice]
             nxt = apply_fn(st, j)

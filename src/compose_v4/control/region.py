@@ -42,8 +42,12 @@ spiro or bridged system through ordinary primitive support, it stands. We simply
 do not build a proposal whose only purpose is to find one. A spiro or bridged
 shortcut earns its way in later only if held-out geometry shows it recurs among
 strong molecules AND generic region resampling cannot reach it efficiently.
-Ordinary pendant, linked and fused systems, segment replacement, expansion and
-contraction, and composition refinement remain core.
+Pendant, linked and fused systems, segment replacement, expansion and
+contraction, and composition refinement are CURRENT HIGH-PRIORITY SEMANTIC
+SHORTCUTS -- not the definition of the search space. Generic variable-scope
+executable region resampling is the core mechanism; a transformation earns a
+specialised shortcut when it recurs AND generic resampling is inefficient at
+finding it. Stated this way so we do not slowly rebuild a macro taxonomy.
 """
 
 from __future__ import annotations

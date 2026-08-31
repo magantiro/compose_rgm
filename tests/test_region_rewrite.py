@@ -274,3 +274,178 @@ def test_new_atom_on_a_terminal_is_admissible():
     assert 0 in idx, "new atom on a terminal was refused; handoff is unreachable"
     assert 1 not in idx, "terminal-terminal bond must still be refused"
     assert why["context_only"] == 1
+
+
+# ------------------------------------------- connectivity-progress proposal
+from compose_v4.control.region_rewrite import connectivity_potential
+
+
+def _phi(st, ctx, lin, old):
+    return connectivity_potential(st, ctx, lin, old)
+
+
+def test_potential_is_a_connectivity_deficit_not_a_terminal_rule():
+    """Zero deficit exactly when the preserved components are joined without
+    the original region; strictly worse when they are not."""
+    ctx = _ctx(frozen={0, 3}, locus={1, 2}, terminals=((0, 1, 1.0), (3, 2, 1.0)),
+               interface="splitting", k=2)
+    lin = Lineage.initial([0, 1, 2, 3])
+    old = frozenset({lin.id_of[1], lin.id_of[2]})
+    split = _chain(4)                       # only the old region joins 0 and 3
+    joined = _chain(4)
+    joined.bonds[0][3] = joined.bonds[3][0] = 1
+    assert _phi(split, ctx, lin, old) < _phi(joined, ctx, lin, old)
+    assert _phi(joined, ctx, lin, old) >= 0.0     # deficit cleared
+
+
+def test_potential_rewards_new_material_before_any_merge():
+    """Growth must be climbable, or the potential is flat until the one step
+    that completes the connection and the sampler has nothing to follow."""
+    ctx = _ctx(frozen={0, 3}, locus={1, 2}, terminals=((0, 1, 1.0), (3, 2, 1.0)),
+               interface="splitting", k=2)
+    lin = Lineage.initial([0, 1, 2, 3])
+    old = frozenset({lin.id_of[1], lin.id_of[2]})
+    bare = _chain(5)
+    bare.atom_types[4] = 0                  # slot 4 empty
+    grown = _chain(5)
+    grown.bonds[0][4] = grown.bonds[4][0] = 1   # new atom hanging off terminal 0
+    lin2 = lin.observe("atom_insert", _Insert(4, 2, neighbors=((0, 1),)))
+    assert _phi(grown, ctx, lin2, old) > _phi(bare, ctx, lin, old)
+
+
+def test_potential_generalises_to_three_preserved_components():
+    """k>2 needs no new formulation: it is the remaining deficit."""
+    ctx = _ctx(frozen={0, 3, 5}, locus={1, 2, 4},
+               terminals=((0, 1, 1.0), (3, 2, 1.0), (5, 4, 1.0)),
+               interface="multi", k=3)
+    lin = Lineage.initial(range(6))
+    old = frozenset({lin.id_of[1], lin.id_of[2], lin.id_of[4]})
+    s = _chain(6)
+    three = _phi(s, ctx, lin, old)
+    s2 = _chain(6)
+    s2.bonds[0][3] = s2.bonds[3][0] = 1     # merge two of the three
+    assert _phi(s2, ctx, lin, old) > three
+
+
+def test_directed_proposal_keeps_an_exploration_floor():
+    """No executable action may be driven to zero probability."""
+    st = _chain(4)
+    ctx = _ctx(frozen={0, 3}, locus={1, 2}, terminals=((0, 1, 1.0), (3, 2, 1.0)),
+               interface="splitting", k=2)
+    lin = Lineage.initial([0, 1, 2, 3])
+    old = frozenset({lin.id_of[1], lin.id_of[2]})
+    fams = ["bond_reorder", "bond_reorder"]
+    acts = [_Bond(1, 2, 2), _Bond(2, 1, 3)]
+
+    def enum_fn(_s):
+        return fams, acts, np.array([0.5, 0.5])
+
+    def apply_fn(s, _j):
+        return s
+
+    p = propose(enum_fn, apply_fn, ctx, st, schedule=[("grow_new", 4)],
+                rng=np.random.default_rng(1), lineage=lin,
+                original_region_ids=old,
+                potential_fn=lambda s, c, l: connectivity_potential(s, c, l, old),
+                beta=6.0, epsilon=0.1)
+    assert p.status == "OK"
+    assert all(s["q"] > 0.0 for s in p.steps), "an executable action lost support"
+
+
+def test_surviving_old_region_never_counts_toward_handoff():
+    """The region being replaced must not make the context look connected."""
+    ctx = _ctx(frozen={0, 3}, locus={1, 2}, terminals=((0, 1, 1.0), (3, 2, 1.0)),
+               interface="splitting", k=2)
+    lin = Lineage.initial([0, 1, 2, 3])
+    old = frozenset({lin.id_of[1], lin.id_of[2]})
+    st = _chain(4)                       # 0-1-2-3: joined ONLY through the old region
+    assert not handoff_satisfied(st, ctx, lin, old)
+    assert connectivity_potential(st, ctx, lin, old) < 0.0, "deficit must remain"
+
+
+def test_merge_dominates_any_growth_the_horizon_allows():
+    """W must exceed the largest reachable growth bonus, or appended atoms
+    outrank the topological objective."""
+    ctx = _ctx(frozen={0, 3}, locus={1, 2}, terminals=((0, 1, 1.0), (3, 2, 1.0)),
+               interface="splitting", k=2)
+    lin = Lineage.initial([0, 1, 2, 3])
+    old = frozenset({lin.id_of[1], lin.id_of[2]})
+    merged = _chain(4)
+    merged.bonds[0][3] = merged.bonds[3][0] = 1
+    phi_merged = connectivity_potential(merged, ctx, lin, old)
+    # 16 appended atoms on one side, still split
+    big = _State([2] * 20, np.zeros((20, 20), dtype=int))
+    for i in range(3):
+        big.bonds[i][i + 1] = big.bonds[i + 1][i] = 1
+    lin_big = Lineage.initial(range(4))
+    for k in range(4, 20):
+        big.bonds[0][k] = big.bonds[k][0] = 1
+        lin_big = lin_big.observe("atom_insert", _Insert(k, 2, neighbors=((0, 1),)))
+    phi_appendage = connectivity_potential(big, ctx, lin_big, old)
+    assert phi_merged > phi_appendage, "a useless appendage outranked a real merge"
+
+
+def test_appendage_diagnostics_expose_one_sided_growth():
+    from compose_v4.control.region_rewrite import connectivity_diagnostics
+    ctx = _ctx(frozen={0, 3}, locus={1, 2}, terminals=((0, 1, 1.0), (3, 2, 1.0)),
+               interface="splitting", k=2)
+    lin = Lineage.initial([0, 1, 2, 3])
+    old = frozenset({lin.id_of[1], lin.id_of[2]})
+    s = _State([2] * 6, np.zeros((6, 6), dtype=int))
+    for i in range(3):
+        s.bonds[i][i + 1] = s.bonds[i + 1][i] = 1
+    lin2 = lin
+    for k in (4, 5):
+        s.bonds[0][k] = s.bonds[k][0] = 1
+        lin2 = lin2.observe("atom_insert", _Insert(k, 2, neighbors=((0, 1),)))
+    d = connectivity_diagnostics(s, ctx, lin2, old)
+    assert d["n_new_material"] == 2
+    assert d["components_touched_by_new"] == 1, "growth is all on one side"
+
+
+def test_recorded_density_is_the_full_exploration_floor_mixture():
+    """conditional_path_logq must be the density actually sampled from --
+    (1-eps)*shaped + eps*base -- not the shaped part alone."""
+    st = _chain(4)
+    ctx = _ctx(frozen={0, 3}, locus={1, 2}, terminals=((0, 1, 1.0), (3, 2, 1.0)),
+               interface="splitting", k=2)
+    lin = Lineage.initial([0, 1, 2, 3])
+    old = frozenset({lin.id_of[1], lin.id_of[2]})
+    base = np.array([0.25, 0.75])
+    fams, acts = ["bond_reorder", "bond_reorder"], [_Bond(1, 2, 2), _Bond(2, 1, 3)]
+
+    def enum_fn(_s):
+        return fams, acts, base
+
+    def apply_fn(s, _j):
+        return s                       # identical successors -> dPhi = 0 for both
+
+    eps = 0.1
+    p = propose(enum_fn, apply_fn, ctx, st, schedule=[("grow_new", 1)],
+                rng=np.random.default_rng(0), lineage=lin, original_region_ids=old,
+                potential_fn=lambda s, c, l: connectivity_potential(s, c, l, old),
+                beta=6.0, epsilon=eps)
+    assert p.status == "OK"
+    q = p.steps[0]["q"]
+    # both successors identical => shaped == base => mixture == base
+    assert q == pytest.approx(base[0] / base.sum()) or q == pytest.approx(base[1] / base.sum())
+    assert p.conditional_path_logq == pytest.approx(np.log(q))
+
+
+def test_first_handoff_step_is_recorded_without_changing_policy():
+    st = _chain(4)
+    st.bonds[0][3] = st.bonds[3][0] = 1        # already connected at t=0
+    ctx = _ctx(frozen={0, 3}, locus={1, 2}, terminals=((0, 1, 1.0), (3, 2, 1.0)),
+               interface="splitting", k=2)
+    lin = Lineage.initial([0, 1, 2, 3])
+    old = frozenset({lin.id_of[1], lin.id_of[2]})
+
+    def enum_fn(_s):
+        return ["bond_reorder"], [_Bond(1, 2, 2)], np.array([1.0])
+
+    p = propose(enum_fn, lambda s, j: s, ctx, st,
+                schedule=[("grow_new", "until_handoff")],
+                rng=np.random.default_rng(0), lineage=lin,
+                original_region_ids=old, max_handoff_steps=5)
+    assert p.status == "OK"
+    assert p.first_handoff_step == 0, "handoff held immediately; no steps needed"
