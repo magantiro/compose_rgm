@@ -1,0 +1,24 @@
+{
+  "source": "GrIDDD (Ninniri et al.) Table 3, QED optimization row, similarity >= 0.4",
+  "provenance": "author-supplied; NOT programmatically extracted -- verify against the PDF before submission",
+  "rows": [
+    {
+      "method": "GrIDDD",
+      "success_pct": 45.1,
+      "diversity": 0.283,
+      "K": 20,
+      "trained_on": "ZINC-250k"
+    }
+  ],
+  "compose": {
+    "success_pct": 60.8,
+    "solved": 121,
+    "n_sources": 199,
+    "diversity": 0.498,
+    "diversity_n": 93,
+    "K": 12,
+    "trained_on": "GuacaMol (transferred, R_theta frozen)",
+    "status": "interim; full 800-source panel in progress"
+  },
+  "evaluator_parity": "UNVERIFIED. GrIDDD reports a 'Div.' metric but does not spell out the aggregation rule. COMPOSE diversity is the mean pairwise Tanimoto distance over DISTINCT non-source candidates on sources returning >=2 such candidates. Report side by side under a shared 'Diversity' heading, but do NOT claim COMPOSE is more diverse until the two implementations are confirmed identical."
+}

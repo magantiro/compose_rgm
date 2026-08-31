@@ -1,0 +1,178 @@
+{
+  "source": "arXiv:2501.06158v3 Table 4 (lead optimization)",
+  "metric": "mean docking score of the most optimized lead over 3 runs (kcal/mol); lower is better",
+  "note": "null = published dash (no feasible solution reported)",
+  "validation": "GenMol column cross-checked cell-by-cell against docs/genmol_t4_targets.json; exact match on all 30 cells",
+  "methods": [
+    "GenMol",
+    "RetMol",
+    "Graph GA"
+  ],
+  "rows": [
+    {
+      "row": 0,
+      "target": "parp1",
+      "seed_score": -7.3,
+      "genmol_d04": -10.6,
+      "retmol_d04": -9.0,
+      "graphga_d04": -8.3,
+      "genmol_d06": -10.4,
+      "retmol_d06": null,
+      "graphga_d06": -8.6
+    },
+    {
+      "row": 1,
+      "target": "parp1",
+      "seed_score": -7.8,
+      "genmol_d04": -11.0,
+      "retmol_d04": -10.7,
+      "graphga_d04": -8.9,
+      "genmol_d06": -9.7,
+      "retmol_d06": null,
+      "graphga_d06": -8.1
+    },
+    {
+      "row": 2,
+      "target": "parp1",
+      "seed_score": -8.2,
+      "genmol_d04": -11.3,
+      "retmol_d04": -10.9,
+      "graphga_d04": null,
+      "genmol_d06": -9.2,
+      "retmol_d06": null,
+      "graphga_d06": null
+    },
+    {
+      "row": 3,
+      "target": "fa7",
+      "seed_score": -6.4,
+      "genmol_d04": -8.4,
+      "retmol_d04": -8.0,
+      "graphga_d04": -7.8,
+      "genmol_d06": -7.3,
+      "retmol_d06": -7.6,
+      "graphga_d06": -7.6
+    },
+    {
+      "row": 4,
+      "target": "fa7",
+      "seed_score": -6.7,
+      "genmol_d04": -8.4,
+      "retmol_d04": null,
+      "graphga_d04": -8.2,
+      "genmol_d06": -7.6,
+      "retmol_d06": null,
+      "graphga_d06": -7.6
+    },
+    {
+      "row": 5,
+      "target": "fa7",
+      "seed_score": -8.5,
+      "genmol_d04": null,
+      "retmol_d04": null,
+      "graphga_d04": null,
+      "genmol_d06": null,
+      "retmol_d06": null,
+      "graphga_d06": null
+    },
+    {
+      "row": 6,
+      "target": "5ht1b",
+      "seed_score": -4.5,
+      "genmol_d04": -12.9,
+      "retmol_d04": -12.1,
+      "graphga_d04": -11.7,
+      "genmol_d06": -12.1,
+      "retmol_d06": null,
+      "graphga_d06": -11.3
+    },
+    {
+      "row": 7,
+      "target": "5ht1b",
+      "seed_score": -7.6,
+      "genmol_d04": -12.3,
+      "retmol_d04": -9.0,
+      "graphga_d04": -12.1,
+      "genmol_d06": -12.0,
+      "retmol_d06": -10.0,
+      "graphga_d06": -12.0
+    },
+    {
+      "row": 8,
+      "target": "5ht1b",
+      "seed_score": -9.8,
+      "genmol_d04": -11.6,
+      "retmol_d04": null,
+      "graphga_d04": null,
+      "genmol_d06": -10.5,
+      "retmol_d06": null,
+      "graphga_d06": null
+    },
+    {
+      "row": 9,
+      "target": "braf",
+      "seed_score": -9.3,
+      "genmol_d04": -10.8,
+      "retmol_d04": null,
+      "graphga_d04": -9.8,
+      "genmol_d06": null,
+      "retmol_d06": null,
+      "graphga_d06": null
+    },
+    {
+      "row": 10,
+      "target": "braf",
+      "seed_score": -9.4,
+      "genmol_d04": -10.8,
+      "retmol_d04": -11.6,
+      "graphga_d04": null,
+      "genmol_d06": -9.7,
+      "retmol_d06": null,
+      "graphga_d06": null
+    },
+    {
+      "row": 11,
+      "target": "braf",
+      "seed_score": -9.8,
+      "genmol_d04": -10.6,
+      "retmol_d04": null,
+      "graphga_d04": -11.6,
+      "genmol_d06": -10.5,
+      "retmol_d06": null,
+      "graphga_d06": -10.4
+    },
+    {
+      "row": 12,
+      "target": "jak2",
+      "seed_score": -7.7,
+      "genmol_d04": -10.2,
+      "retmol_d04": -8.2,
+      "graphga_d04": -8.7,
+      "genmol_d06": -9.3,
+      "retmol_d06": null,
+      "graphga_d06": -8.1
+    },
+    {
+      "row": 13,
+      "target": "jak2",
+      "seed_score": -8.0,
+      "genmol_d04": -10.0,
+      "retmol_d04": -9.0,
+      "graphga_d04": -9.2,
+      "genmol_d06": -9.4,
+      "retmol_d06": null,
+      "graphga_d06": -9.2
+    },
+    {
+      "row": 14,
+      "target": "jak2",
+      "seed_score": -8.6,
+      "genmol_d04": -9.8,
+      "retmol_d04": null,
+      "graphga_d04": null,
+      "genmol_d06": null,
+      "retmol_d06": null,
+      "graphga_d06": null
+    }
+  ]
+}

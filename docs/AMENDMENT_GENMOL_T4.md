@@ -175,6 +175,157 @@ FK-SMC with ESS-triggered resampling.
 Retargeting is excluded outright: nothing about the goal changes during T4, so
 including it would be gimmickry.
 
+## FROZEN CONFIGURATION — recorded 2026-08-23, before the official run
+
+The policy below is frozen. After the 30 official cells are inspected, no
+scientific change may be made: not the controller, archive rule, feasibility
+definition, docking configuration, or any hyperparameter. Infrastructure
+failures may be resumed or retried; scientific behaviour does not move.
+
+    arm                 immediate      (Level 1. future_h is dead on measurement:
+                                        107 h/round, and sampled rollouts are only
+                                        1.7x cheaper, not the 22x first claimed.)
+    archive             multi-lineage Pareto-on-shortfall PLUS elitism on v
+    lineages            N_LINEAGE = 8
+    horizon             4
+    rounds x per_round  50 x 20 = 1,000 evaluated molecules per cell
+    docking             QuickVina2, exhaustiveness 1, num_modes 10,
+                        DOCK_WORKERS = 4 concurrent, cpu_per_dock = 1
+    containers          cpu = 4, resume enabled, persist every round
+
+### The bug the dev confirmation caught
+
+Archive admission was `top-32 by R_theta(y|x) * g_terminal(y)`. A molecule that is
+nearly feasible but that R_theta rates an improbable edit fell outside that cut
+and was never stored. The signature is `min_v` RISING between rounds, which can
+only mean the incumbent was lost:
+
+    fa7    0.2415 -> 0.146 -> 0.0635 -> 0.0635 -> 0.0635   (frozen; found 0.0207
+                                                            at round 6 and lost it)
+    parp1  0.2154 -> 0.1049 -> 0.0432 -> 0.0432 -> 0.0517  (rose)
+
+Best-v candidates are now admitted unconditionally, independent of R_theta mass.
+Result on the same dev cells, same budget:
+
+    jak2  (control)  155 -> 187 feasible, best -9.9      no regression
+    parp1            0   -> 161 feasible, best -12.2     feasible from round 2
+    fa7              0   -> 13  feasible, best -9.1      feasible from round 6
+
+Both cells that killed the original Level-1 optimizer are solved by one archive
+fix. Not lookahead, not a learned controller. The search was already finding the
+chemistry; the bookkeeping was deleting it. This is why the escalation ladder was
+not climbed: the diagnosed failure was archive admission, not myopia.
+
+### Execution gates, all passed
+
+    integration    40 calls -> 40 feasible docked, order and accounting identical
+                   to serial; docking 59.8s -> 32.1s inside the controller
+    docking bias   signed mean D(cpu=1) - D(cpu=4) = -0.045 kcal/mol, which is
+                   6.4% of the Gate-0 median replicate spread of 0.70. No shift.
+    resume         killed after a persisted docking batch, then restarted:
+                   20/20 molecules retained, 0 lost, 40 docked == 40 calls
+                   (no double charge), rounds 1 -> 2, feasible 20 -> 40.
+
+`DOCK_WORKERS = 4` is measured, not chosen: w=4 gave 2.52x, w=8 gave 2.07x, and
+w=16 collapsed to 0.48x while silently returning results for only 4 of 20
+molecules. More workers loses dockings without raising an error.
+
+### Reporting constraints that bind the official table
+
+Gate 0 measured per-molecule docking noise at ~0.70 kcal/mol median, 9.30 max.
+**An individual cell margin under 1 kcal/mol is not a result.** What is
+defensible is cells solved, cells filled where the comparator reports a dash, and
+aggregate behaviour. The first pass is ONE replicate; GenMol reports one figure
+per cell, but any claim about a single cell's score must carry the noise caveat.
+
+fa7 is the fragile cell: it solved with 13 feasible molecules, crossing at round 6
+of 10 at a 200-call budget. The official 1,000-call budget gives it far more room
+after crossing, but it is the cell to watch.
+
+## The horizon finding: why six controllers plateaued
+
+Recorded 2026-08-24. Comparator tables are extracted artifacts, never hand-typed:
+`docs/genmol_t4_targets.json` (GenMol Table 4) and
+`docs/invirtuogen_t4_targets.json` (InVirtuoGen lead table, 28/30 solved).
+
+### The published winners are 8-15 executable edits away
+
+InVirtuoGen released the molecules behind its T4 runs. Comparing them structurally
+to the benchmark seeds -- zero docking calls -- gives the distance directly, since
+each executable edit changes the heavy-atom count by at most one:
+
+| cell | dHeavy | dRings | min possible edits |
+|---|---|---|---|
+| 5ht1b s7 d=0.4 | **+15** | +3 | >= 15 |
+| parp1 s0 d=0.4 | **+14** | +3 | >= 14 |
+| braf s9 d=0.6 | -14 | -1 | >= 14 |
+| braf s11 d=0.6 | -10 | -1 | >= 10 |
+| braf s10 d=0.6 | -8 | 0 | >= 8 |
+
+Every controller in this amendment searched **1-4 edits** from the seed, with macro
+proposals reaching 8. The chemistry that scores -13 to -14 sits at 14-15. Six arms
+were re-ranking candidates in a neighbourhood that does not contain the answer.
+
+**This is the single explanation that covers all of them.** vecelite, dockelite,
+macro at two budgets, softreward, and the lightweight adapter each moved scores by
++-0.5 and traded one cell class for another, because all of them redistribute a
+fixed local candidate supply.
+
+### Growth is much harder than deletion
+
+A beam search over legal successors, guided by similarity to the winner minus a
+penalty on remaining heavy-atom distance, run to a per-cell depth exceeding the
+structurally required minimum:
+
+| cell | direction | depth | best similarity to a winner | exact hit |
+|---|---|---|---|---|
+| braf s10 d=0.6 | -8 atoms | 16/16 | **0.8750** | no |
+| braf s11 d=0.6 | -10 atoms | 18/18 | **0.8750** | no |
+| braf s9 d=0.6 | -14 atoms | 22/22 | **0.8644** | no |
+| parp1 s0 d=0.4 | **+14 atoms** | 22/22 | **0.5500** | no |
+| 5ht1b s7 d=0.4 | **+15 atoms** | 23/23 | **0.5098** | no |
+
+Same algorithm, same budget, same guidance: deletion-direction targets are
+approached to 0.87, growth-direction targets stall below 0.55. Removing structure
+is easy in this state space; **building it -- +14 atoms and +3 rings -- is hard.**
+The two cells where we are ~4 kcal/mol behind are precisely the growth cells.
+
+**Evidence boundary.** No exact hit was found, and this is a bounded heuristic
+beam: a miss means "not found at width 16, depth >= the required minimum", NOT
+that the molecule lies outside COMPOSE's executable state space. Claiming a
+support limitation would need an explicit operator incompatibility or exhaustive
+bounded search. The *contrast* between directions is the robust result; the
+absolute misses are not.
+
+### Two audit-design errors worth not repeating
+
+The first version capped depth at 12. Three of five targets require >= 14 edits,
+so those misses were **guaranteed before the search began** and carried no
+information. Depth is now derived per cell from |dHeavy| plus headroom.
+
+The first version also ranked purely by Tanimoto similarity. A molecule can look
+similar while having no route to the target's size, so the beam circled near the
+seed. Ranking is now `sim - 0.02 * |heavy gap|`.
+
+### Competitor molecules: development only
+
+The published winners were used to measure required horizons and the
+growth/deletion asymmetry. They must NOT appear anywhere in a reported
+optimizer: no target-similarity guidance, no seeding, no reward term. The
+production controller sees only docking, QED, SA, and similarity-to-seed, and
+starts from the benchmark seed. Using competitor outputs to choose a horizon
+range is calibration; using them inside inference would be leakage.
+
+### Consequence
+
+The indicated algorithm is long-horizon trajectory optimization with credit
+assigned across the path: an offspring is `x_0 -> ... -> x_L` with every
+intermediate executable, only `x_L` docked, and the endpoint reward applied to
+every transition that produced it. Synthetic check: with a payoff reachable only
+through unrewarded intermediate states, endpoint-only credit learns the bridge at
++0.16 while path-level credit learns it at +1.64 -- a 10x difference on exactly
+the structure `+3 rings via unrewarded growth steps` presents.
+
 ## BARRED
 
 Training a T4-specific `h_phi`. Twisted SMC. Reopening beam widths or the

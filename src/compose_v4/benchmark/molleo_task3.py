@@ -218,6 +218,8 @@ class OracleMeter:
     on_evaluated: Callable[[str, tuple[float, ...]], None] | None = None
     _spent: int = field(default=0, init=False)
     _cache: dict[str, tuple[float, ...]] = field(default_factory=dict, init=False)
+    #: Molecules seeded via prime(), i.e. known from outside the counted budget.
+    _primed: int = field(default=0, init=False)
 
     @property
     def spent(self) -> int:
@@ -229,8 +231,20 @@ class OracleMeter:
 
     @property
     def n_unique(self) -> int:
-        """Distinct molecules evaluated. Equals `spent` under PER_MOLECULE."""
+        """Distinct molecules with a known value.
+
+        Equals `spent` under PER_MOLECULE when nothing was primed, and
+        `spent + n_primed` once an arm seeds values from outside the counted
+        budget. Compare against `spent`, never the other way round, when what
+        you want is what the arm actually paid for.
+        """
+
         return len(self._cache)
+
+    @property
+    def n_primed(self) -> int:
+        """Molecules seeded from outside the counted budget via prime()."""
+        return self._primed
 
     def _charge(self) -> int:
         return 1 if self.counting_rule is CountingRule.PER_MOLECULE \
@@ -271,6 +285,39 @@ class OracleMeter:
                 f"expected {self.n_objectives} objectives, got {len(vals)}")
         self._spent += cost
         self._cache[key] = vals
+        if self.on_evaluated is not None:
+            self.on_evaluated(key, vals)
+        return vals
+
+    def prime(self, smiles: str, values: Sequence[float]) -> tuple[float, ...]:
+        """Record a value obtained OUTSIDE the counted budget. Charges nothing.
+
+        This exists for one specific, auditable purpose: reproducing a
+        baseline's initialization convention. GenMol's PMO runs read their
+        initial population out of a per-task vocabulary CSV whose scores were
+        computed offline, so those molecules are known before counted call 1 and
+        never enter mol_buffer, which is what max_oracle_calls counts. An arm
+        claiming to match that information regime has to seed the same way, or
+        it is comparing two different budgets and calling the difference an
+        algorithmic result.
+
+        This is NOT a budget escape hatch. It charges nothing only because the
+        caller asserts the value came from evaluations made outside the counted
+        budget, and EVERY use must be reported together with how many uncounted
+        evaluations produced it. Priming a value the arm never actually paid for
+        anywhere would silently inflate it, which is the exact failure this
+        method is meant to make visible rather than convenient.
+        """
+
+        key = self._key(smiles)
+        if key in self._cache:
+            return self._cache[key]
+        vals = tuple(float(v) for v in values)
+        if len(vals) != self.n_objectives:
+            raise ValueError(
+                f"expected {self.n_objectives} objectives, got {len(vals)}")
+        self._cache[key] = vals
+        self._primed += 1
         if self.on_evaluated is not None:
             self.on_evaluated(key, vals)
         return vals

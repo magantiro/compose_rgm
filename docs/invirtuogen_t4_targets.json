@@ -1,0 +1,142 @@
+{
+ "source": "InVirtuoGen_results README, lead optimization table (3 seeds, +/- std)",
+ "note": "parenthesised InVirtuoGen entries are reported in brackets in the source table, which we read as not satisfying the hard constraints; treated as unsolved here and flagged.",
+ "budget": "max_oracle_calls 1000; no prescreen flag in the lead command",
+ "rows": [
+  {
+   "target": "parp1",
+   "seed_score": -7.3,
+   "genmol_d04": -10.6,
+   "invirtuo_d04": -14.1,
+   "genmol_d06": -10.4,
+   "invirtuo_d06": -12.3,
+   "invirtuo_parenthesised": false
+  },
+  {
+   "target": "parp1",
+   "seed_score": -7.8,
+   "genmol_d04": -11.0,
+   "invirtuo_d04": -13.4,
+   "genmol_d06": -9.7,
+   "invirtuo_d06": -11.7,
+   "invirtuo_parenthesised": false
+  },
+  {
+   "target": "parp1",
+   "seed_score": -8.2,
+   "genmol_d04": -11.3,
+   "invirtuo_d04": -9.0,
+   "genmol_d06": -9.2,
+   "invirtuo_d06": -10.7,
+   "invirtuo_parenthesised": false
+  },
+  {
+   "target": "fa7",
+   "seed_score": -6.4,
+   "genmol_d04": -8.4,
+   "invirtuo_d04": -8.4,
+   "genmol_d06": -7.3,
+   "invirtuo_d06": -7.7,
+   "invirtuo_parenthesised": false
+  },
+  {
+   "target": "fa7",
+   "seed_score": -6.7,
+   "genmol_d04": -8.4,
+   "invirtuo_d04": -8.9,
+   "genmol_d06": -7.6,
+   "invirtuo_d06": -7.5,
+   "invirtuo_parenthesised": false
+  },
+  {
+   "target": "fa7",
+   "seed_score": -8.5,
+   "genmol_d04": null,
+   "invirtuo_d04": null,
+   "genmol_d06": null,
+   "invirtuo_d06": null,
+   "invirtuo_parenthesised": true
+  },
+  {
+   "target": "5ht1b",
+   "seed_score": -4.5,
+   "genmol_d04": -12.9,
+   "invirtuo_d04": -13.3,
+   "genmol_d06": -12.1,
+   "invirtuo_d06": -12.4,
+   "invirtuo_parenthesised": false
+  },
+  {
+   "target": "5ht1b",
+   "seed_score": -7.6,
+   "genmol_d04": -12.3,
+   "invirtuo_d04": -12.0,
+   "genmol_d06": -12.0,
+   "invirtuo_d06": -12.0,
+   "invirtuo_parenthesised": false
+  },
+  {
+   "target": "5ht1b",
+   "seed_score": -9.8,
+   "genmol_d04": -11.6,
+   "invirtuo_d04": -10.9,
+   "genmol_d06": -10.5,
+   "invirtuo_d06": -10.6,
+   "invirtuo_parenthesised": false
+  },
+  {
+   "target": "braf",
+   "seed_score": -9.3,
+   "genmol_d04": -10.8,
+   "invirtuo_d04": -10.1,
+   "genmol_d06": null,
+   "invirtuo_d06": -9.7,
+   "invirtuo_parenthesised": false
+  },
+  {
+   "target": "braf",
+   "seed_score": -9.4,
+   "genmol_d04": -10.8,
+   "invirtuo_d04": -10.8,
+   "genmol_d06": -9.7,
+   "invirtuo_d06": -10.4,
+   "invirtuo_parenthesised": false
+  },
+  {
+   "target": "braf",
+   "seed_score": -9.8,
+   "genmol_d04": -10.6,
+   "invirtuo_d04": -10.6,
+   "genmol_d06": -10.5,
+   "invirtuo_d06": -10.3,
+   "invirtuo_parenthesised": false
+  },
+  {
+   "target": "jak2",
+   "seed_score": -7.7,
+   "genmol_d04": -10.2,
+   "invirtuo_d04": -10.2,
+   "genmol_d06": -9.3,
+   "invirtuo_d06": -9.7,
+   "invirtuo_parenthesised": false
+  },
+  {
+   "target": "jak2",
+   "seed_score": -8.0,
+   "genmol_d04": -10.0,
+   "invirtuo_d04": -10.5,
+   "genmol_d06": -9.4,
+   "invirtuo_d06": -10.4,
+   "invirtuo_parenthesised": false
+  },
+  {
+   "target": "jak2",
+   "seed_score": -8.6,
+   "genmol_d04": -9.8,
+   "invirtuo_d04": -10.2,
+   "genmol_d06": null,
+   "invirtuo_d06": -10.3,
+   "invirtuo_parenthesised": false
+  }
+ ]
+}

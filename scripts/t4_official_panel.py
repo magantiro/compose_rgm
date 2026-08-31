@@ -20,7 +20,12 @@ from pathlib import Path
 import modal
 
 ROOT = Path(__file__).resolve().parents[1]
-POOL = int(os.environ.get("T4_POOL", "6"))
+# POOL=2, not 6. The workspace caps at 100 containers, so 6 runs x 64 episodes
+# demand ~384 and every run crawls in lockstep -- aggregate throughput is
+# identical (the cap binds either way) but the FIRST completion arrives ~3x
+# later and long runs approach the 4h drive_episodes timeout. Two runs use
+# ~98 of the 100 slots, saturating the cap while still finishing steadily.
+POOL = int(os.environ.get("T4_POOL", "2"))
 ROUNDS = int(os.environ.get("T4_ROUNDS", "10"))
 DOCK_PER_ROUND = int(os.environ.get("T4_DOCK", "10"))
 N_PART = int(os.environ.get("T4_PARTICLES", "64"))
@@ -43,6 +48,15 @@ cells = [f"{s['target']}_s{s['idx']}_d{d}"
          for d in ("0.4", "0.6")]
 jobs = [(c, rs) for c in cells for rs in RUN_SEEDS]
 assert len(jobs) == 90, len(jobs)
+# Cells already spawned by an earlier driver and still running server-side.
+# They are valid official runs at this config, so they are neither cancelled nor
+# re-queued -- re-spawning would duplicate work against the same checkpoint.
+SKIP = {tuple(x.split(":")[0:1]) + (int(x.split(":")[1]),)
+        for x in os.environ.get("T4_SKIP", "").split(",") if x.strip()}
+if SKIP:
+    before = len(jobs)
+    jobs = [j for j in jobs if j not in SKIP]
+    print(f"skipping {before - len(jobs)} already-spawned runs: {sorted(SKIP)}")
 
 fn = modal.Function.from_name("macro-basin", "drive_episodes")
 
