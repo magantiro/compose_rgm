@@ -148,7 +148,7 @@ def enumerate_training_regions(smiles_list, per_molecule: int = 3,
     return out
 
 
-@app.function(image=image, cpu=(1.0, 1.0), memory=MEM_MIB, timeout=60 * 60,
+@app.function(image=image, cpu=(1.0, 1.0), memory=MEM_MIB, timeout=3 * 60 * 60,
               retries=2, max_containers=80,
               volumes={ARTIFACT_ROOT: artifact_volume})
 def screen_region(job: dict) -> dict:
@@ -177,7 +177,15 @@ def screen_region(job: dict) -> dict:
     rt = _runtime(); model, system = rt["model"], rt["system"]
     out = []
     t0 = time.time()
+    d = Path(OUT_DIR) / "screen"
+    d.mkdir(parents=True, exist_ok=True)
+    unit_path = d / f"unit{int(job['unit']):04d}.json"
+    deadline = float(job.get("soft_deadline_s", 2.5 * 3600))
     for rec in job["regions"]:
+        if time.time() - t0 > deadline:      # return what we have rather than
+            print(f"[screen] unit {job['unit']} soft deadline after "
+                  f"{len(out)}/{len(job['regions'])} regions", flush=True)
+            break                            # letting the container be killed
         smi = rec["smiles"]
         st0 = pad_molecular_graph(smiles_to_molecular_graph(smi), CANONICAL_SLOTS)
         n_real = len(smiles_to_molecular_graph(smi).atom_types)
@@ -243,14 +251,20 @@ def screen_region(job: dict) -> dict:
                 break
         out.append({**rec, "reachable": found_depth is not None,
                     "reach_depth": found_depth})
+        # persist after every region: a killed container then costs one region,
+        # not the whole unit
+        unit_path.write_text(json.dumps({"regions": out, "sec": time.time() - t0}))
+        artifact_volume.commit()
+        print(f"[region] u{job['unit']} {len(out)}/{len(job['regions'])} "
+              f"size={rec['size']} sat={int(rec['saturated'])} "
+              f"reach={'Y' if found_depth else 'n'} "
+              f"d={found_depth} {time.time() - t0:.0f}s", flush=True)
     n_reach = sum(1 for r in out if r["reachable"])
     res = {"regions": out, "n_reachable": n_reach, "sec": time.time() - t0}
     # Persist server-side. `modal run --detach` only keeps the LAST triggered
     # function alive, so the local entrypoint that would collect these results
     # dies with the client; a screen that is not written here is lost work.
-    d = Path(OUT_DIR) / "screen"
-    d.mkdir(parents=True, exist_ok=True)
-    (d / f"unit{int(job['unit']):04d}.json").write_text(json.dumps(res))
+    unit_path.write_text(json.dumps(res))
     artifact_volume.commit()
     print(f"[screen] unit {job['unit']}: {len(out)} regions, {n_reach} reachable, "
           f"{time.time() - t0:.0f}s", flush=True)
@@ -511,6 +525,13 @@ def collect_replay(job: dict) -> dict:
             "sec": time.time() - t0}
 
 
+def _build_net(torch, n_feat: int):
+    """One definition of the architecture, so the fit and every consumer of the
+    checkpoint cannot drift apart."""
+    return torch.nn.Sequential(torch.nn.Linear(n_feat, 48), torch.nn.ReLU(),
+                               torch.nn.Linear(48, 1))
+
+
 @app.function(image=image, cpu=(1.0, 1.0), memory=int(6 * 1024), timeout=60 * 60,
               volumes={ARTIFACT_ROOT: artifact_volume})
 def fit_bellman(batches: list, max_b: int = 6, epochs: int = 400) -> dict:
@@ -534,18 +555,19 @@ def fit_bellman(batches: list, max_b: int = 6, epochs: int = 400) -> dict:
         return X, np.array(G, np.float32), SP, SG, SX
 
     n_feat = len(features_from_shared(recs[0]["shared"], 1, "establishment"))
-    net = torch.nn.Sequential(torch.nn.Linear(n_feat, 48), torch.nn.ReLU(),
-                              torch.nn.Linear(48, 1))
-    tgt = torch.nn.Sequential(torch.nn.Linear(n_feat, 48), torch.nn.ReLU(),
-                              torch.nn.Linear(48, 1))
+    net, tgt = _build_net(torch, n_feat), _build_net(torch, n_feat)
     tgt.load_state_dict(net.state_dict())
     opt = torch.optim.Adam(net.parameters(), lr=3e-3)
     report = {}
     torch.set_grad_enabled(True)
-    for kind in ("establishment", "completion"):
-        X, G, SP, SG, SX = build(kind)
-        for b in range(1, max_b + 1):
-            # target: g(x) if terminal, else sum_y p(y|x) h_{b-1}(y)
+    # Both terminal kinds are trained JOINTLY at each horizon. Training them in
+    # sequence let the completion pass overwrite the establishment committor --
+    # the kind is a feature, so one network is fine, but only if it never sees
+    # the two kinds in separate phases.
+    data = {kind: build(kind) for kind in ("establishment", "completion")}
+    for b in range(1, max_b + 1):
+        xs, ys = [], []
+        for kind, (X, G, SP, SG, SX) in data.items():
             with torch.no_grad():
                 tv = []
                 for i in range(len(X)):
@@ -560,20 +582,22 @@ def fit_bellman(batches: list, max_b: int = 6, epochs: int = 400) -> dict:
                     hv = torch.sigmoid(tgt(sx).squeeze(-1)).numpy()
                     hv = np.maximum(hv, np.array(SG[i]))          # terminals pin to 1
                     tv.append(float(np.dot(SP[i], hv)))
-                tv = np.array(tv, np.float32)
-            xb = torch.tensor([features_from_shared(x, b, kind) for x in X],
-                              dtype=torch.float32)
-            yb = torch.tensor(tv)
-            for _e in range(epochs // max_b):
-                opt.zero_grad()
-                pred = torch.sigmoid(net(xb).squeeze(-1))
-                loss = torch.nn.functional.mse_loss(pred, yb)
-                loss.backward(); opt.step()
-            tgt.load_state_dict(net.state_dict())
+            tv = np.array(tv, np.float32)
+            xs.extend(features_from_shared(x, b, kind) for x in X)
+            ys.extend(tv.tolist())
             report[f"{kind}|b={b}"] = {"target_mean": float(tv.mean()),
                                        "target_max": float(tv.max()),
-                                       "n_nonzero": int((tv > 1e-6).sum()),
-                                       "mse": float(loss)}
+                                       "n_nonzero": int((tv > 1e-6).sum())}
+        xb = torch.tensor(xs, dtype=torch.float32)
+        yb = torch.tensor(ys, dtype=torch.float32)
+        for _e in range(max(1, epochs // max_b)):
+            opt.zero_grad()
+            pred = torch.sigmoid(net(xb).squeeze(-1))
+            loss = torch.nn.functional.mse_loss(pred, yb)
+            loss.backward(); opt.step()
+        tgt.load_state_dict(net.state_dict())
+        for kind in data:
+            report[f"{kind}|b={b}"]["mse"] = float(loss)
     torch.set_grad_enabled(False)
     Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
     torch.save({"state_dict": net.state_dict(), "n_features": n_feat,
