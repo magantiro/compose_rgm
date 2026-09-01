@@ -109,9 +109,13 @@ def _pick_cases(smiles_list, max_region=8):
     return out
 
 
+# retries=2: with a 15-way map, a single preempted container and retries=0
+# fails the whole map and cancels every sibling. Preemption was observed in
+# earlier runs. Units are independent and deterministic per (case, arm, trial),
+# so a retry reproduces the same work.
 @app.function(image=image, cpu=(1.0, 1.0), memory=MEM_MIB, timeout=90 * 60,
-              retries=0, volumes={ARTIFACT_ROOT: artifact_volume})
-def sentinels(job: dict) -> dict:
+              retries=2, volumes={ARTIFACT_ROOT: artifact_volume})
+def sentinel_unit(job: dict) -> dict:
     import sys
     sys.path.insert(0, str(Path(REMOTE_ROOT) / "src"))
     import numpy as np
@@ -125,14 +129,15 @@ def sentinels(job: dict) -> dict:
     from compose_v4.gates.med_chem_gate import is_valid
 
     rt = _runtime(); model, system = rt["model"], rt["system"]
-    cases = _pick_cases(job["smiles"])
-    results = {}
     t0 = time.time()
-
-    for name, rec in cases.items():
-        if rec is None:
-            results[name] = {"status": "NO_CASE_FOUND"}
-            continue
+    name = job["case_name"]
+    rec = _pick_cases(job["smiles"]).get(name)
+    if rec is None:
+        return {"unit": {"case_name": name, "status": "NO_CASE_FOUND"},
+                "sec": time.time() - t0}
+    arm_only, trials = job["arm"], job["trials"]
+    results = {}
+    for _once in (0,):
         smi = rec["smiles"]
         st0 = pad_molecular_graph(smiles_to_molecular_graph(smi), CANONICAL_SLOTS)
         n_real = len(smiles_to_molecular_graph(smi).atom_types)
@@ -177,26 +182,30 @@ def sentinels(job: dict) -> dict:
         # proposal; pendant does not need it.
         # Establishment uses d_old (covers growth AND rewiring); removal uses
         # the prune potential, which is guarded so it can never undo the handoff.
-        pots = ({} if name == "pendant" else {
-            "grow_new": (lambda s_, c_, l_: RR.connectivity_potential(s_, c_, l_, old_ids)),
-            "prune_old": (lambda s_, c_, l_: RR.prune_potential(s_, c_, l_, old_ids)),
+        # Structural finite-horizon h-transform, replacing one-step shaping.
+        # Terminals are structural events, not task objectives, and no operator
+        # is preferred by name.
+        h_terms = ({} if name == "pendant" else {
+            "grow_new": (lambda s_, l_: RR.establishment_terminal(s_, ctx, l_, old_ids)),
+            "prune_old": (lambda s_, l_: RR.completion_terminal(s_, ctx, l_, old_ids)),
         })
         # MATCHED ABLATION, same horizon and same kernel budget:
         #   beta = 0  -> q_base(y|x,M) proportional to R_theta(y|x)   (undirected)
         #   beta > 0  -> q_conn = R_theta * exp[beta dPhi_conn]        (directed)
-        arms_beta = ({"directed": float(job.get("beta", 6.0)), "undirected": 0.0}
-                     if name != "pendant" else {"directed": 0.0})
+        arms_beta = {arm_only: (0.0 if arm_only == "undirected"
+                                else float(job.get("beta", 6.0)))}
         by_arm = {}
         for arm_name, arm_beta in arms_beta.items():
           attempts, best = [], None
-          for trial in range(int(job.get("trials", 8))):
+          for trial in trials:
             p = RR.propose(enum_fn, apply_fn, ctx, st0, schedule=schedule,
                            rng=np.random.default_rng(100 + trial),
                            lineage=lin0, original_region_ids=old_ids,
                            max_handoff_steps=int(job.get("max_handoff", 16)),
-                           potentials=(pots if arm_beta > 0 else None),
-                           betas=({k: arm_beta for k in pots} if arm_beta > 0 else None),
-                           beta=arm_beta,
+                           h_terminals=(h_terms if arm_beta > 0 else None),
+                           h_budget=int(job.get("h_budget", 3)),
+                           h_quota=int(job.get("h_quota", 2)),
+                           beta=0.0,
                            observe_fn=(None if name == "pendant" else
                                        (lambda y, c, l: RR.old_dependence(y, c, l, old_ids))),
                            epsilon=float(job.get("epsilon", 0.1)))
@@ -213,13 +222,25 @@ def sentinels(job: dict) -> dict:
                              "prune_budget": pb,
                              "min_d_old_reachable": (min(p.min_observed)
                                                      if p.min_observed else None),
+                             "changed_nontrivial": bool(
+                                 p.status == "OK" and p.endpoint is not None
+                                 and GG.structural_displacement(
+                                     st0, p.endpoint, lin0, p.lineage)["changed_fraction"] > 0.0),
+                             "old_region_removed": bool(
+                                 p.status == "OK" and not [
+                                     i for i in old_ids
+                                     if i in (p.lineage or lin0).slot_of]),
                              **diag})
-            if p.status == "OK" and best is None:
+            if p.status == "OK":
                 d = GG.structural_displacement(st0, p.endpoint, lin0, p.lineage)
-                # STRICTER than "handoff happened": the superseded region must
-                # actually be gone, and the change must be nontrivial.
+                # QUALIFICATION: deleting a methyl and regrowing an identical one
+                # is not a replacement. Rank complete (old region gone AND the
+                # molecule actually changed) above merely-nontrivial above
+                # merely-OK, rather than keeping whichever attempt finished first.
                 surviving_old = [i for i in old_ids if i in p.lineage.slot_of]
-                best = {"old_region_removed": len(surviving_old) == 0,
+                _rank = (len(surviving_old) == 0) * 2 + (d["changed_fraction"] > 0.0)
+                cand = {"_rank": int(_rank),
+                        "old_region_removed": len(surviving_old) == 0,
                         "n_old_atoms_surviving": len(surviving_old),
                         "logq_finite": bool(np.isfinite(p.conditional_path_logq)),
                         "changed_nontrivial": bool(d["changed_fraction"] > 0.0),
@@ -230,10 +251,15 @@ def sentinels(job: dict) -> dict:
                         "endpoint": canonical_state_key(p.endpoint),
                         "endpoint_valid": bool(is_valid(canonical_state_key(p.endpoint))),
                         "displacement": d}
+                if best is None or cand["_rank"] > best["_rank"]:
+                    best = cand
           from collections import Counter
           by_arm[arm_name] = {
             "n_trials": len(attempts),
             "n_ok": sum(1 for a in attempts if a["status"] == "OK"),
+            "n_ok_nontrivial": sum(1 for a in attempts if a.get("changed_nontrivial")),
+            "n_complete": sum(1 for a in attempts
+                              if a.get("changed_nontrivial") and a.get("old_region_removed")),
             "n_handoff_reached": sum(1 for a in attempts
                                      if a["stage"] != "no_connectivity_preserving_handoff"),
             "mean_new_material": (sum(a["n_new_material"] for a in attempts)
@@ -246,40 +272,83 @@ def sentinels(job: dict) -> dict:
             "attempts": attempts,
             "best": best,
           }
-        results[name] = {
-            "case": rec,
+        results = {
+            "case": rec, "case_name": name, "arm": arm_only,
             "arms": by_arm,
         }
-    return {"results": results, "sec": time.time() - t0}
+    return {"unit": results, "sec": time.time() - t0}
 
 
 @app.local_entrypoint()
-def main(trials: int = 8, n_seeds: int = 6):
+def main(trials: int = 12, n_seeds: int = 6, chunk: int = 4):
+    """One remote unit per (case, arm, trial-chunk).
+
+    Case selection happens REMOTELY: it needs RDKit, and the environment that
+    runs `modal run` does not have it. Case names and arms are fixed, so the
+    entrypoint can build the job list without selecting anything.
+    """
+    from collections import Counter, defaultdict
     dv = json.loads(Path("docs/GENMOL_T4_DEV_SEEDS.json").read_text())["seeds"]
     smiles = [s["smiles"] for s in dv[:n_seeds]]
-    r = sentinels.remote({"smiles": smiles, "trials": trials})
+    jobs = []
+    for name in ("pendant", "splitting_free", "splitting_saturated"):
+        arms = ["directed"] if name == "pendant" else ["directed", "undirected"]
+        for arm in arms:
+            for lo in range(0, trials, chunk):
+                jobs.append({"case_name": name, "smiles": smiles, "arm": arm,
+                             "trials": list(range(lo, min(lo + chunk, trials)))})
+    print(f"units={len(jobs)} (chunk={chunk})")
+    out = list(sentinel_unit.map(jobs))
+
+    merged = defaultdict(lambda: {"case": None, "arms": defaultdict(
+        lambda: {"attempts": [], "best": None})})
+    for o in out:
+        u = o.get("unit") or {}
+        if not u or u.get("status") == "NO_CASE_FOUND":
+            continue
+        m = merged[u["case_name"]]
+        m["case"] = u["case"]
+        for arm, a in u["arms"].items():
+            tgt = m["arms"][arm]
+            tgt["attempts"].extend(a["attempts"])
+            if tgt["best"] is None:
+                tgt["best"] = a["best"]
+    results = {}
+    for name, m in merged.items():
+        arms = {}
+        for arm, a in m["arms"].items():
+            atts = a["attempts"]
+            arms[arm] = {"n_trials": len(atts),
+                         "n_ok": sum(1 for x in atts if x["status"] == "OK"),
+                         "failure_reasons": dict(Counter(
+                             x["stage"] for x in atts if x["status"] != "OK")),
+                         "attempts": atts, "best": a["best"]}
+        results[name] = {"case": m["case"], "arms": arms}
+
     Path("diagnostics").mkdir(exist_ok=True)
-    Path("diagnostics/region_sentinels.json").write_text(json.dumps(r, indent=2))
-    print(f"sec={r['sec']:.0f}\n")
-    for name, v in r["results"].items():
-        if v.get("status") == "NO_CASE_FOUND":
-            print(f"{name:20s} NO CASE FOUND"); continue
+    Path("diagnostics/region_sentinels.json").write_text(
+        json.dumps({"results": results, "unit_sec": [o["sec"] for o in out]}, indent=2))
+    print(f"slowest unit {max(o['sec'] for o in out):.0f}s  "
+          f"total unit-seconds {sum(o['sec'] for o in out):.0f}\n")
+    for name, v in results.items():
         c = v["case"]
         print(f"{name:20s} size {c['size']} released {c['released']:.2f} "
-              f"terminal_H {c['terminal_h']}")
+              f"termH {c['terminal_h']}")
         for arm, a in v["arms"].items():
+            fh = [x["first_handoff_step"] for x in a["attempts"]
+                  if x.get("first_handoff_step") is not None]
+            md = [x["min_d_old_reachable"] for x in a["attempts"]
+                  if x.get("min_d_old_reachable") is not None]
             print(f"   {arm:12s} {a['n_ok']}/{a['n_trials']} OK  "
-                  f"handoff_reached {a['n_handoff_reached']}  "
-                  f"new_material {a['mean_new_material']:.1f}  "
-                  f"components_touched<= {a['max_components_touched']}")
+                  f"handoff@{sorted(fh) if fh else 'never'}  "
+                  f"min_d_old_reachable={min(md) if md else None}")
             if a["failure_reasons"]:
                 print(f"   {'':12s} failures: {a['failure_reasons']}")
             b = a["best"]
             if b:
                 d = b["displacement"]
-                print(f"   {'':12s} steps {b['n_steps']} logq {b['logq']:.2f} "
-                      f"changed {d['changed_fraction']:.2f} "
-                      f"coherence {d['coherence']:.2f} "
-                      f"old_removed {b['old_region_removed']} "
-                      f"dRank {d['d_cycle_rank']}")
+                print(f"   {'':12s} old_removed={b['old_region_removed']} "
+                      f"surviving={b['n_old_atoms_surviving']} "
+                      f"changed={d['changed_fraction']:.2f} "
+                      f"coherence={d['coherence']:.2f} steps={b['n_steps']}")
                 print(f"   {'':12s} {b['endpoint']}")

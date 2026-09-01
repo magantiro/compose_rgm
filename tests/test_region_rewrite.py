@@ -540,3 +540,143 @@ def test_observe_fn_records_best_reachable_value_per_step():
     assert p.status == "OK"
     assert len(p.min_observed) == 2, "one best-reachable value per step"
     assert all(isinstance(v, int) for v in p.min_observed)
+
+
+# ------------------------------- structural finite-horizon future value
+from compose_v4.control.region_rewrite import (
+    completion_terminal, establishment_terminal, structural_h)
+
+
+def test_h_is_one_at_a_structural_terminal_and_zero_with_no_budget():
+    ctx, lin, old = _split_ctx()
+    joined = _chain(4)
+    joined.bonds[0][3] = joined.bonds[3][0] = 1
+    term = lambda s_, l_: establishment_terminal(s_, ctx, l_, old)
+    assert structural_h(joined, ctx, lin, 3, term, None, None) == 1.0
+    split = _chain(4)
+    assert structural_h(split, ctx, lin, 0, term, None, None) == 0.0
+
+
+def test_h_gives_mass_to_a_zero_gain_enabling_move():
+    """The whole point: a step with no immediate gain must still carry mass if it
+    opens a path to the terminal. No operator is named."""
+    ctx, lin, old = _split_ctx()
+    start = _chain(4)                       # split: only route uses the old region
+
+    enabling = _chain(4)                    # no closer by any one-step measure...
+    enabling.bonds[1][2] = enabling.bonds[2][1] = 0
+    goal = _chain(4)                        # ...but one more step reaches terminal
+    goal.bonds[1][2] = goal.bonds[2][1] = 0
+    goal.bonds[0][3] = goal.bonds[3][0] = 1
+    inert = _chain(4)                       # leads nowhere
+
+    table = {id(start): [("cycle_open", enabling), ("bond_reorder", inert)],
+             id(enabling): [("cycle_close", goal)],
+             id(inert): [("bond_reorder", inert)]}
+
+    def enum_fn(s_):
+        moves = table.get(id(s_), [])
+        return ([m[0] for m in moves],
+                [_Bond(1, 2) for _ in moves],
+                np.array([1.0 / max(1, len(moves))] * len(moves)))
+
+    def apply_fn(s_, j):
+        return table.get(id(s_), [])[j][1]
+
+    term = lambda s_, l_: establishment_terminal(s_, ctx, l_, old)
+    h_enabling = structural_h(enabling, ctx, lin, 2, term, enum_fn, apply_fn)
+    h_inert = structural_h(inert, ctx, lin, 2, term, enum_fn, apply_fn)
+    assert h_enabling > 0.0, "the enabling state must carry future value"
+    assert h_enabling > h_inert, "zero-gain enabler must outrank a dead end"
+
+
+def test_completion_terminal_requires_both_removal_and_intact_handoff():
+    ctx, lin, old = _split_ctx()
+    joined = _chain(4)
+    joined.bonds[0][3] = joined.bonds[3][0] = 1
+    assert not completion_terminal(joined, ctx, lin, old), "old region still present"
+    lin2 = lin.observe("atom_delete", _Del(1)).observe("atom_delete", _Del(2))
+    gone = _chain(4)
+    gone.bonds[0][3] = gone.bonds[3][0] = 1
+    for v in (1, 2):
+        gone.atom_types[v] = 0
+        gone.bonds[v][:] = 0; gone.bonds[:, v] = 0
+    assert completion_terminal(gone, ctx, lin2, old)
+
+
+def test_structural_h_memo_actually_caches():
+    """The memo was dead code keyed on id(); this asserts it now short-circuits."""
+    ctx, lin, old = _split_ctx()
+    start = _chain(4)
+    calls = {"n": 0}
+
+    def enum_fn(s_):
+        calls["n"] += 1
+        return ["bond_reorder"], [_Bond(1, 2)], np.array([1.0])
+
+    def apply_fn(s_, j):
+        return s_                       # self-loop: same content every time
+
+    term = lambda s_, l_: False         # never terminal -> full depth explored
+    memo = {}
+    structural_h(start, ctx, lin, 3, term, enum_fn, apply_fn, memo=memo)
+    first = calls["n"]
+    structural_h(start, ctx, lin, 3, term, enum_fn, apply_fn, memo=memo)
+    assert calls["n"] == first, "second call re-enumerated; memo is not working"
+    assert memo, "memo stayed empty"
+
+
+# ------------------------------- adaptive tilt (KL control strength)
+from compose_v4.control.region_rewrite import adaptive_tilt, structural_features
+
+
+def test_adaptive_tilt_hits_the_target_ess():
+    w = np.full(20, 1 / 20)
+    h = np.linspace(0.01, 1.0, 20)
+    for target in (0.2, 0.5, 0.8):
+        q, T, ess = adaptive_tilt(w, h, target_ess=target)
+        assert q.sum() == pytest.approx(1.0), "proposal must stay normalised"
+        assert abs(ess - target) < 0.08, f"ESS {ess:.2f} missed target {target}"
+
+
+def test_tilt_is_monotone_in_control_strength():
+    """A lower ESS target must mean a sharper tilt, i.e. a smaller temperature."""
+    w = np.full(20, 1 / 20)
+    h = np.linspace(0.01, 1.0, 20)
+    _q1, T_sharp, _e1 = adaptive_tilt(w, h, target_ess=0.2)
+    _q2, T_soft, _e2 = adaptive_tilt(w, h, target_ess=0.8)
+    assert T_sharp < T_soft
+
+
+def test_tilt_normalisation_survives_a_bad_committor():
+    """Approximation must cost efficiency, never correctness."""
+    w = np.full(8, 1 / 8)
+    for h in (np.zeros(8), np.full(8, 1e-300), np.array([1e9] + [1e-9] * 7)):
+        q, _T, _e = adaptive_tilt(w, h, target_ess=0.3)
+        assert q.sum() == pytest.approx(1.0)
+        assert np.all(q >= 0.0)
+
+
+def test_structural_features_are_finite_and_shaped():
+    from compose_v4.control.region_rewrite import STRUCTURAL_FEATURES
+    ctx, lin, old = _split_ctx()
+    f = structural_features(_chain(4), ctx, lin, old, budget=3,
+                            terminal_kind="establishment")
+    assert len(f) == len(STRUCTURAL_FEATURES)
+    assert all(np.isfinite(x) for x in f)
+    fc = structural_features(_chain(4), ctx, lin, old, budget=3,
+                             terminal_kind="completion")
+    assert fc[-1] == 1.0 and f[-1] == 0.0, "terminal kind must be encoded"
+
+
+def test_shared_features_reassemble_identically():
+    """The 12x-redundancy fix must produce bit-identical vectors."""
+    from compose_v4.control.region_rewrite import (
+        features_from_shared, structural_features_shared)
+    ctx, lin, old = _split_ctx()
+    st = _chain(4)
+    shared = structural_features_shared(st, ctx, lin, old)
+    for b in (1, 3, 6):
+        for kind in ("establishment", "completion"):
+            direct = structural_features(st, ctx, lin, old, b, kind)
+            assert features_from_shared(shared, b, kind) == direct

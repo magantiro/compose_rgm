@@ -509,6 +509,196 @@ def connectivity_potential(state, ctx: RewriteContext, lineage: Lineage,
     return -deficit_weight * float(d_old) + float(attached)
 
 
+# ------------------------------------------ structural future value (h-transform)
+def establishment_terminal(state, ctx, lineage, old_ids) -> bool:
+    """Structural terminal event for establishment: alternative connectivity."""
+    return old_dependence(state, ctx, lineage, old_ids) == 0
+
+
+def completion_terminal(state, ctx, lineage, old_ids) -> bool:
+    """Structural terminal event for completion: superseded region gone AND the
+    handoff it was predicated on still intact."""
+    if [i for i in old_ids if i in lineage.slot_of]:
+        return False
+    return old_dependence(state, ctx, lineage, old_ids) == 0
+
+
+def structural_h(state, ctx, lineage, budget, terminal_fn, enum_fn, apply_fn, *,
+                 quota: int = 2, memo=None, depth_cap: int = 3) -> float:
+    """h_b(x): probability of reaching a STRUCTURAL terminal event within b steps
+    under the canonical region-local base kernel.
+
+        h_0(x) = g(x)
+        h_b(x) = g(x)  if g(x), else  sum_y R_M(y|x) h_{b-1}(y)
+
+    This is the same finite-horizon Doob construction the project already uses,
+    with a structural event in place of a task objective. Plateau moves earn mass
+    from the FUTURES THEY ENABLE rather than from their operator identity: an
+    action whose own step gain is zero still carries h_{b-1} > 0 if it opens a
+    path to the terminal. No operator is named anywhere in this function.
+
+    The recursion is bounded by a family-stratified quota and a depth cap, so h
+    is an APPROXIMATION -- deliberately. Correctness of the sampler does not
+    depend on h being exact: the proposal density is defined by whatever h is
+    used, so q stays exactly evaluable. Only efficiency degrades if h is poor.
+    """
+    import numpy as np
+    if memo is None:
+        memo = {}
+    b = int(min(budget, depth_cap))
+    if terminal_fn(state, lineage):
+        return 1.0
+    if b <= 0:
+        return 0.0
+    # CONTENT key, not id(): the same molecule recurs constantly inside one
+    # lookahead tree and across the successors of a single decision, and object
+    # identity would miss every one of those. The lineage signature is part of
+    # the key because the completion terminal depends on which original atoms
+    # still survive, not only on the graph.
+    key = (np.asarray(state.atom_types).tobytes(),
+           np.asarray(state.bonds).tobytes(),
+           tuple(sorted(lineage.id_of.items())), b)
+    if key in memo:
+        return memo[key]
+    fams, acts, probs = enum_fn(state)
+    idx, _why = admissible_indices(fams, acts, ctx)
+    if not idx:
+        memo[key] = 0.0
+        return 0.0
+    w = np.array([float(probs[j]) for j in idx], float)
+    if w.sum() <= 0:
+        memo[key] = 0.0
+        return 0.0
+    w = w / w.sum()                     # R_M: the region-local base kernel
+    order = sorted(range(len(idx)), key=lambda k: -w[k])
+    per, total = {}, 0.0
+    for k in order:
+        j = idx[k]
+        f = fams[j]
+        if per.get(f, 0) >= quota:      # family-stratified, so a rare enabling
+            continue                    # family is never crowded out
+        y = apply_fn(state, j)
+        if y is None:
+            continue
+        per[f] = per.get(f, 0) + 1
+        lin2 = lineage.observe(f, acts[j])
+        total += w[k] * structural_h(y, ctx, lin2, b - 1, terminal_fn,
+                                     enum_fn, apply_fn, quota=quota, memo=memo,
+                                     depth_cap=depth_cap)
+    out = float(min(1.0, total))
+    memo[key] = out
+    return out
+
+
+# ------------------------------- amortized structural committor + adaptive tilt
+STRUCTURAL_FEATURES = (
+    "d_old", "n_surviving_old", "n_new_material", "components_touched",
+    "budget", "n_heavy", "cycle_rank", "n_ring_systems", "n_bridges",
+    "frac_old_remaining", "is_completion_terminal",
+)
+
+
+def structural_features_shared(state, ctx: RewriteContext, lineage: Lineage,
+                               original_region_ids: frozenset) -> list:
+    """The budget- and terminal-independent part of the feature vector.
+
+    Only `budget` and the terminal-kind flag vary across the (b, tau) grid, yet
+    the three BFS passes behind d_old, the connectivity diagnostics and the
+    topology block were being recomputed for every combination -- 12x identical
+    work per visited state. Compute once, then vary the two scalars.
+    """
+    from compose_v4.control.graph_geometry import topology
+    d_old = old_dependence(state, ctx, lineage, original_region_ids)
+    surviving = sum(1 for i in original_region_ids if i in lineage.slot_of)
+    diag = connectivity_diagnostics(state, ctx, lineage, original_region_ids)
+    t = topology(state)
+    n0 = max(1, len(original_region_ids))
+    return [float(d_old), float(surviving), float(diag["n_new_material"]),
+            float(diag["components_touched_by_new"]),
+            float(t["n_heavy"]), float(t["cycle_rank"]),
+            float(t["n_ring_systems"]), float(t["n_bridges"]),
+            surviving / n0]
+
+
+def features_from_shared(shared: list, budget: int,
+                         terminal_kind: str = "establishment") -> list:
+    """Assemble the full vector from the shared part plus the two varying scalars.
+    Order must match STRUCTURAL_FEATURES."""
+    return (shared[:4] + [float(budget)] + shared[4:]
+            + [1.0 if terminal_kind == "completion" else 0.0])
+
+
+def structural_features(state, ctx: RewriteContext, lineage: Lineage,
+                        original_region_ids: frozenset, budget: int,
+                        terminal_kind: str = "establishment") -> list:
+    """Cheap, lineage-aware features for the amortized committor.
+
+    Deliberately structural: connectivity deficit, how much of the superseded
+    region survives, how much new material exists and how many preserved
+    components it touches, remaining budget, and coarse topology. No operator
+    identity and no task objective appears here -- the same reason the explicit
+    h had none.
+    """
+    from compose_v4.control.graph_geometry import topology
+    d_old = old_dependence(state, ctx, lineage, original_region_ids)
+    surviving = sum(1 for i in original_region_ids if i in lineage.slot_of)
+    diag = connectivity_diagnostics(state, ctx, lineage, original_region_ids)
+    t = topology(state)
+    n0 = max(1, len(original_region_ids))
+    return [float(d_old), float(surviving), float(diag["n_new_material"]),
+            float(diag["components_touched_by_new"]), float(budget),
+            float(t["n_heavy"]), float(t["cycle_rank"]),
+            float(t["n_ring_systems"]), float(t["n_bridges"]),
+            surviving / n0, 1.0 if terminal_kind == "completion" else 0.0]
+
+
+def adaptive_tilt(base_w, h_values, target_ess: float = 0.3,
+                  lo: float = 1e-3, hi: float = 1e3, iters: int = 24):
+    """Choose the tilt temperature T so the proposal keeps a target ESS.
+
+        q ∝ base_w * h^(1/T)
+
+    T -> infinity recovers the base kernel (ESS 1, no control); T -> 0
+    concentrates on argmax h (ESS -> 1/n, a brittle controller). Rather than
+    fixing an arbitrarily sharp tilt, bisect T so the normalised effective
+    sample size hits `target_ess`. This is the standard KL/path-integral
+    control-strength knob: it sets how far the proposal may move from R_theta in
+    KL terms, measured rather than assumed.
+
+    Returns (q, T, ess_fraction). q is exactly normalised whatever h is, so an
+    approximate committor costs efficiency, never correctness.
+    """
+    import numpy as np
+    w = np.asarray(base_w, float)
+    h = np.clip(np.asarray(h_values, float), 1e-12, None)
+    n = len(w)
+    if n == 0 or w.sum() <= 0:
+        return w, float("nan"), 0.0
+
+    def q_at(T):
+        q = w * np.power(h, 1.0 / max(T, 1e-9))
+        ssum = q.sum()
+        if ssum <= 0 or not np.isfinite(ssum):
+            return w / w.sum()
+        return q / ssum
+
+    def ess_frac(q):
+        return float(1.0 / (n * np.sum(q ** 2))) if n else 0.0
+
+    if ess_frac(q_at(hi)) <= target_ess:      # even the base kernel is peaked
+        q = q_at(hi)
+        return q, hi, ess_frac(q)
+    a, b = lo, hi
+    for _ in range(iters):
+        mid = (a * b) ** 0.5                  # bisect in log T
+        if ess_frac(q_at(mid)) < target_ess:
+            a = mid                           # too sharp -> raise T
+        else:
+            b = mid
+    q = q_at(b)
+    return q, float(b), ess_frac(q)
+
+
 # ------------------------------------------------------------------- proposal
 @dataclass
 class Proposal:
@@ -527,13 +717,16 @@ class Proposal:
     lineage: object = None
     first_handoff_step: object = None   # steps taken before handoff first held
     min_observed: list = field(default_factory=list)  # best reachable observable/step
+    tilt_log: list = field(default_factory=list)      # (T, ESS) per shaped step
 
 
 def propose(enum_fn, apply_fn, ctx: RewriteContext, start_state, *,
             schedule, rng, gate_fn=None, lineage=None,
             original_region_ids=frozenset(), max_handoff_steps=24,
             potential_fn=None, beta: float = 0.0, epsilon: float = 0.1,
-            potentials=None, betas=None, observe_fn=None):
+            potentials=None, betas=None, observe_fn=None,
+            h_terminals=None, h_budget=3, h_quota=2,
+            h_model=None, target_ess=0.3):
     """Run one region-local trajectory under an explicit phase schedule.
 
     `schedule` is a list of (phase, n_steps). `enum_fn(state) -> (fams, acts,
@@ -551,6 +744,9 @@ def propose(enum_fn, apply_fn, ctx: RewriteContext, start_state, *,
         lineage = Lineage.initial(live)
     p = Proposal(status="OK")
     p.lineage = lineage
+    # One memo for the whole trajectory: the same molecules recur across steps,
+    # not just within a single decision's lookahead tree.
+    h_memo: dict = {}
     for phase, n_steps in schedule:
         ctx = ctx.with_phase(phase)
         # Establishment and removal optimise DIFFERENT objectives, so the
@@ -558,6 +754,7 @@ def propose(enum_fn, apply_fn, ctx: RewriteContext, start_state, *,
         # potential is what left prune_old undirected and the superseded region
         # in place after a successful handoff.
         phase_pot = (potentials or {}).get(phase, potential_fn)
+        phase_term = (h_terminals or {}).get(phase)
         phase_beta = float((betas or {}).get(phase, beta))
         until_handoff = (n_steps == "until_handoff")
         budget = int(max_handoff_steps) if until_handoff else int(n_steps)
@@ -582,7 +779,43 @@ def propose(enum_fn, apply_fn, ctx: RewriteContext, start_state, *,
                 p.status, p.stage = "UNSAT", f"{phase}:zero_mass"
                 return p
             w = w / w.sum()
-            if phase_pot is not None and phase_beta > 0.0:
+            if h_model is not None:
+                # AMORTIZED: one cheap committor evaluation per successor, no
+                # tree expansion. Exact normalisation is preserved by
+                # adaptive_tilt, so approximation costs efficiency only.
+                kind = "completion" if phase == "prune_old" else "establishment"
+                hs = np.zeros(len(idx), float)
+                for k_i, j_i in enumerate(idx):
+                    y_i = apply_fn(st, j_i)
+                    if y_i is None:
+                        continue
+                    lin_i = lineage.observe(fams[j_i], acts[j_i])
+                    hs[k_i] = h_model(y_i, ctx, lin_i, max(0, budget - _i - 1), kind)
+                    if observe_fn is not None:
+                        p.min_observed.append(observe_fn(y_i, ctx, lin_i))
+                q, T, ess = adaptive_tilt(w, hs, target_ess=target_ess)
+                p.tilt_log.append({"T": T, "ess": ess, "phase": phase})
+                w = (1.0 - epsilon) * q + epsilon * w
+            elif phase_term is not None:
+                # q(y|x) proportional to R_M(y|x) h_{b-1}(y): the h-transform of
+                # the region-local base kernel toward a structural terminal.
+                hs = np.zeros(len(idx), float)
+                for k_i, j_i in enumerate(idx):
+                    y_i = apply_fn(st, j_i)
+                    if y_i is None:
+                        continue
+                    lin_i = lineage.observe(fams[j_i], acts[j_i])
+                    hs[k_i] = structural_h(y_i, ctx, lin_i, int(h_budget) - 1,
+                                           phase_term, enum_fn, apply_fn,
+                                           quota=int(h_quota), memo=h_memo)
+                    if observe_fn is not None:
+                        obs_v = observe_fn(y_i, ctx, lin_i)
+                        p.min_observed.append(obs_v)
+                shaped = w * hs
+                if shaped.sum() > 0:
+                    shaped = shaped / shaped.sum()
+                    w = (1.0 - epsilon) * shaped + epsilon * w
+            elif phase_pot is not None and phase_beta > 0.0:
                 # q_directed(y) proportional to R_theta(y|x) exp[beta (Phi(y) - Phi(x))].
                 # Phi is evaluated on the APPLIED successor, i.e. after canonical
                 # aggregation, so no edit-alias multiplicity is reintroduced.
