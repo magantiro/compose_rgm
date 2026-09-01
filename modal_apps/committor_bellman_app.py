@@ -1075,3 +1075,226 @@ def rank(max_regions: int = 0):
          "per_region": [{k_: o[k_] for k_ in
                          ("case", "smiles", "saturated", "n_plateau",
                           "n_contrast", "n_pairs", "n_correct")} for o in out]}))
+
+
+@app.function(image=image, cpu=(1.0, 1.0), memory=MEM_MIB, timeout=3 * 60 * 60,
+              retries=2, max_containers=80,
+              volumes={ARTIFACT_ROOT: artifact_volume})
+def arm_compare(job: dict) -> dict:
+    """R_M versus R_M * h_phi on complete region replacement, matched on
+    EXECUTOR CALLS rather than on trials.
+
+    Trials are the wrong unit: the tilt evaluates every admissible successor at
+    each step, while the base kernel applies only the one it samples. Matching
+    trials would hand the tilt ~100x the compute. Matching executor calls means
+    the undirected arm gets many more restarts out of the same budget, which is
+    the honest comparison and the one that reflects practical runtime.
+
+    Run on the WHOLE held-out pool, reachable or not. The frozen search solved
+    1/52; regions it could not solve are exactly the population the committor is
+    supposed to help with, so filtering them out would destroy the test.
+    """
+    import sys
+    sys.path.insert(0, str(Path(REMOTE_ROOT) / "src"))
+    import numpy as np
+    import torch
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.experiments.production_successor_kernel import (
+        canonical_state_key, enumerate_factorized_marked_law)
+    from compose_v4.control.region import Region
+    from compose_v4.control import region_rewrite as RR
+    from compose_v4.gates.med_chem_gate import is_valid
+
+    artifact_volume.reload()
+    ckpt = torch.load(f"{OUT_DIR}/committor_bellman_v1.pt", map_location="cpu")
+    n_feat = int(ckpt["n_features"])
+    net = _build_net(torch, n_feat)
+    net.load_state_dict(ckpt["state_dict"]); net.eval()
+    torch.set_grad_enabled(False)
+
+    rt = _runtime(); model, system = rt["model"], rt["system"]
+    rec = job["region"]; smi = rec["smiles"]
+    st0 = pad_molecular_graph(smiles_to_molecular_graph(smi), CANONICAL_SLOTS)
+    raw = smiles_to_molecular_graph(smi)
+    n_real = len(raw.atom_types)
+    region = Region(atoms=frozenset(rec["atoms"]),
+                    boundary=tuple((i, j, o) for i, j, o in rec["boundary"]),
+                    kind="", generator="arm", n_atoms_total=n_real,
+                    n_context_components=2, interface=rec["interface"])
+    ctx = RR.context_from_region(region)
+    lin0 = RR.Lineage.initial(range(n_real))
+    old_ids = frozenset(lin0.id_of[s] for s in rec["atoms"] if s in lin0.id_of)
+    pb = RR.prune_budget(region, raw.bonds)
+    schedule = [("grow_new", "until_handoff"), ("prune_old", pb)]
+    budget_calls = int(job.get("budget_calls", 20000))
+    max_trials = int(job.get("max_trials", 2000))
+    cache: dict = {}
+    calls = {"n": 0}
+
+    def enum_fn(st):
+        k = canonical_state_key(st)
+        if k not in cache:
+            law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
+            cache[k] = ([m.executor_rule_name for m in law.marks],
+                        [m.action for m in law.marks],
+                        np.array([m.probability for m in law.marks], float))
+        return cache[k]
+
+    def apply_fn(st, j):
+        calls["n"] += 1
+        fams, acts, _ = enum_fn(st)
+        try:
+            y = system.apply(st, fams[j], acts[j])
+        except Exception:
+            return None
+        if y is None:
+            return None
+        k = canonical_state_key(y)
+        if not k or not is_valid(k) or not RR.graph_connected(y):
+            return None
+        if not RR.context_preserved(st0, y, ctx.frozen, ctx.terminal_context_slots):
+            return None
+        return y
+
+    hcache: dict = {}
+
+    def h_model(y, c, lin, budget, kind):
+        key = (canonical_state_key(y), int(budget), kind)
+        if key not in hcache:
+            sh = RR.structural_features_shared(y, c, lin, old_ids)
+            f = RR.features_from_shared(sh, int(budget), kind)
+            hcache[key] = float(torch.sigmoid(
+                net(torch.tensor([f], dtype=torch.float32))).item())
+        return hcache[key]
+
+    out = {}
+    for arm in ("R_M", "R_M_hphi"):
+        calls["n"] = 0
+        t0 = time.time()
+        n_trials = 0
+        est, comp, first_comp_trial = 0, 0, None
+        stuck = 0
+        deadline_s = float(job.get("arm_deadline_s", 1500))
+        hit_deadline = False
+        while calls["n"] < budget_calls and n_trials < max_trials:
+            if time.time() - t0 > deadline_s:
+                hit_deadline = True     # safety valve only; if it fires the
+                break                   # call-matching for this arm is broken
+            before_calls = calls["n"]
+            p = RR.propose(
+                enum_fn, apply_fn, ctx, st0, schedule=schedule,
+                rng=np.random.default_rng(9000 + n_trials),
+                lineage=lin0, original_region_ids=old_ids,
+                max_handoff_steps=int(job.get("max_handoff", 16)),
+                h_terminals=None, beta=0.0,
+                h_model=(h_model if arm == "R_M_hphi" else None),
+                target_ess=float(job.get("target_ess", 0.3)),
+                epsilon=float(job.get("epsilon", 0.1)))
+            n_trials += 1
+            if n_trials <= 3 or n_trials % 25 == 0:
+                print(f"[trial] {job['case_name']} {arm} t={n_trials} "
+                      f"calls={calls['n']} status={p.status} stage={p.stage} "
+                      f"{time.time() - t0:.0f}s", flush=True)
+            end = p.endpoint if p.endpoint is not None else st0
+            lin = p.lineage or lin0
+            if RR.establishment_terminal(end, ctx, lin, old_ids):
+                est += 1
+            if RR.completion_terminal(end, ctx, lin, old_ids):
+                comp += 1
+                if first_comp_trial is None:
+                    first_comp_trial = n_trials
+            if calls["n"] == before_calls:      # trial spent nothing: the region
+                stuck += 1                      # admits no action at all, so
+                if stuck >= 5:                  # repeating it cannot help
+                    break
+        out[arm] = {"trials": n_trials, "calls": calls["n"],
+                    "n_establishment": est, "n_complete": comp,
+                    "first_complete_trial": first_comp_trial,
+                    "hit_deadline": hit_deadline, "stuck": stuck,
+                    "sec": time.time() - t0}
+    print(f"[arm] {job['case_name']} "
+          f"R_M: trials={out['R_M']['trials']} est={out['R_M']['n_establishment']} "
+          f"comp={out['R_M']['n_complete']} | "
+          f"hphi: trials={out['R_M_hphi']['trials']} "
+          f"est={out['R_M_hphi']['n_establishment']} "
+          f"comp={out['R_M_hphi']['n_complete']}", flush=True)
+    res = {"case": job["case_name"], "smiles": smi,
+           "saturated": bool(rec.get("saturated")),
+           "reachable": bool(rec.get("reachable")),
+           "released": rec.get("released"), "arms": out}
+    ad = Path(OUT_DIR) / "arms"
+    ad.mkdir(parents=True, exist_ok=True)
+    (ad / f"{job['case_name']}.json").write_text(json.dumps(res))
+    artifact_volume.commit()
+    return res
+
+
+@app.function(image=image, cpu=(1.0, 1.0), memory=int(2 * 1024), timeout=20 * 60,
+              volumes={ARTIFACT_ROOT: artifact_volume})
+def harvest_arms() -> list:
+    artifact_volume.reload()
+    d = Path(OUT_DIR) / "arms"
+    return [json.loads(f.read_text()) for f in sorted(d.glob("*.json"))] if d.exists() else []
+
+
+@app.local_entrypoint()
+def arms_report():
+    """Report the arm comparison from whatever is persisted on the volume."""
+    out = harvest_arms.remote()
+    if not out:
+        print("no arm results persisted yet"); return
+    def nreg(arm, key):
+        return sum(1 for o in out if o["arms"][arm][key] > 0)
+    print(f"regions={len(out)}")
+    for arm in ("R_M", "R_M_hphi"):
+        dl = sum(1 for o in out if o["arms"][arm].get("hit_deadline"))
+        print(f"  {arm:<10} establishment={nreg(arm,'n_establishment'):>3}  "
+              f"COMPLETE={nreg(arm,'n_complete'):>3}  "
+              f"trials={sum(o['arms'][arm]['trials'] for o in out):>6}  "
+              f"calls={sum(o['arms'][arm]['calls'] for o in out):>8}  "
+              f"deadline_hit={dl}")
+    won = [o["case"] for o in out
+           if o["arms"]["R_M_hphi"]["n_complete"] > 0 and o["arms"]["R_M"]["n_complete"] == 0]
+    lost = [o["case"] for o in out
+            if o["arms"]["R_M"]["n_complete"] > 0 and o["arms"]["R_M_hphi"]["n_complete"] == 0]
+    print(f"  h_phi solves & R_M does not: {len(won)}  |  reverse: {len(lost)}")
+    Path("diagnostics").mkdir(exist_ok=True)
+    Path("diagnostics/committor_arms.json").write_text(json.dumps(out, default=str))
+
+
+@app.local_entrypoint()
+def arms(budget_calls: int = 20000, max_trials: int = 2000, limit: int = 0):
+    """End-to-end: does tilting by the frozen committor buy complete region
+    replacement that the base kernel does not reach at the same executor cost?"""
+    scr = json.loads(Path("diagnostics/heldout_screen.json").read_text())
+    regions, mols = scr["regions"], scr["molecules"]
+    train = {s["smiles"] for s in json.loads(
+        Path("docs/GENMOL_T4_DEV_SEEDS.json").read_text())["seeds"][6:22]}
+    assert not (set(mols) & train), "held-out molecules overlap the fit set"
+    if limit:
+        regions = regions[:limit]          # pilot only; never for a reported run
+    print(f"held-out regions={len(regions)} (whole pool, unfiltered)  "
+          f"budget={budget_calls} executor calls per arm per region")
+    jobs = [{"region": r, "case_name": f"a{i}", "budget_calls": budget_calls,
+             "max_trials": max_trials} for i, r in enumerate(regions)]
+    out = [o for o in arm_compare.map(jobs) if o]
+
+    def agg(arm, key):
+        return sum(o["arms"][arm][key] for o in out)
+
+    def nreg(arm, key):
+        return sum(1 for o in out if o["arms"][arm][key] > 0)
+    print(f"\nregions={len(out)}")
+    for arm in ("R_M", "R_M_hphi"):
+        print(f"  {arm:<10} regions with establishment={nreg(arm,'n_establishment'):>3}"
+              f"  regions with COMPLETE replacement={nreg(arm,'n_complete'):>3}"
+              f"  trials={agg(arm,'trials'):>6}  calls={agg(arm,'calls'):>8}")
+    both = [(o["case"], o["arms"]["R_M"]["n_complete"],
+             o["arms"]["R_M_hphi"]["n_complete"]) for o in out]
+    won = [c for c, a, b in both if b > 0 and a == 0]
+    lost = [c for c, a, b in both if a > 0 and b == 0]
+    print(f"  h_phi solves, R_M does not: {len(won)}  |  R_M solves, h_phi does not: {len(lost)}")
+    Path("diagnostics").mkdir(exist_ok=True)
+    Path("diagnostics/committor_arms.json").write_text(json.dumps(
+        {"budget_calls": budget_calls, "per_region": out}, default=str))
