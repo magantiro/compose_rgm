@@ -282,6 +282,48 @@ def list_training_regions(smiles_list: list, per_molecule: int = 3) -> list:
     return enumerate_training_regions(smiles_list, per_molecule=per_molecule)
 
 
+@app.function(image=image, cpu=(1.0, 1.0), memory=int(8 * 1024), timeout=60 * 60,
+              volumes={ARTIFACT_ROOT: artifact_volume})
+def fit_from_volume(max_b: int = 6, epochs: int = 400) -> dict:
+    """Read every persisted collection unit off the volume and fit."""
+    artifact_volume.reload()
+    d = Path(OUT_DIR) / "collect"
+    units = [json.loads(f.read_text()) for f in sorted(d.glob("*.json"))]
+    print(f"[fit] {len(units)} collection units off the volume", flush=True)
+    return fit_bellman.local([u["records"] for u in units],
+                             max_b=max_b, epochs=epochs)
+
+
+@app.function(image=image, cpu=(1.0, 1.0), memory=int(2 * 1024), timeout=20 * 60,
+              volumes={ARTIFACT_ROOT: artifact_volume})
+def reset_collect() -> int:
+    """Clear persisted collection units so a new run cannot inherit stale ones."""
+    artifact_volume.reload()
+    d = Path(OUT_DIR) / "collect"
+    n = 0
+    if d.exists():
+        for f in d.glob("*.json"):
+            f.unlink(); n += 1
+    artifact_volume.commit()
+    return n
+
+
+@app.function(image=image, cpu=(1.0, 1.0), memory=int(2 * 1024), timeout=20 * 60,
+              volumes={ARTIFACT_ROOT: artifact_volume})
+def collect_summary() -> list:
+    """Per-unit summary of the persisted collection, without the records."""
+    artifact_volume.reload()
+    d = Path(OUT_DIR) / "collect"
+    out = []
+    for f in sorted(d.glob("*.json")):
+        u = json.loads(f.read_text())
+        out.append({k: u.get(k) for k in
+                    ("case", "role", "region_smiles", "saturated", "released",
+                     "n_states", "n_terminal_states", "n_terminal_successors",
+                     "n_paths_found", "sec")})
+    return out
+
+
 @app.function(image=image, cpu=(1.0, 1.0), memory=int(2 * 1024), timeout=20 * 60,
               volumes={ARTIFACT_ROOT: artifact_volume})
 def harvest_screen() -> list:
@@ -516,13 +558,21 @@ def collect_replay(job: dict) -> dict:
           f"{time.time() - t0:.0f}s", flush=True)
     n_term = sum(1 for r in records if r["g_est"] or r["g_comp"])
     n_succ_term = sum(1 for r in records for s_ in r["succ"] if s_["g_est"] or s_["g_comp"])
-    return {"case": job["case_name"], "region_smiles": smi,
+    res = {"case": job["case_name"], "region_smiles": smi,
             "n_paths_found": len(paths),
             "region_atoms": rec["atoms"], "saturated": bool(rec.get("saturated")),
             "released": rec.get("released"), "records": records,
             "n_states": len(records), "n_terminal_states": n_term,
             "n_terminal_successors": n_succ_term,
+            "role": job.get("role"),
             "sec": time.time() - t0}
+    # Persist before returning: an hour of collection must not depend on the
+    # client surviving. A heartbeat failure already dropped one connection.
+    cd = Path(OUT_DIR) / "collect"
+    cd.mkdir(parents=True, exist_ok=True)
+    (cd / f"{job['case_name']}.json").write_text(json.dumps(res))
+    artifact_volume.commit()
+    return res
 
 
 def _build_net(torch, n_feat: int):
@@ -748,8 +798,9 @@ def mixture(neg_per_pos: int = 2, sat_zero: int = 12, max_b: int = 6,
     print("  positive molecules:",
           len({p['smiles'] for p in picked if p['role'] == 'positive'}))
 
-    jobs = [{"region": p, "case_name": f"{p['role']}{i}", "rng": i}
-            for i, p in enumerate(picked)]
+    print(f"cleared {reset_collect.remote()} stale collection units")
+    jobs = [{"region": p, "case_name": f"{p['role']}{i}", "rng": i,
+             "role": p["role"]} for i, p in enumerate(picked)]
     out = [o for o in collect_replay.map(jobs) if o]
     role_of = {j["case_name"]: j["region"]["role"] for j in jobs}
     for o in out:
