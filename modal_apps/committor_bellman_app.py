@@ -244,9 +244,17 @@ def screen_region(job: dict) -> dict:
         out.append({**rec, "reachable": found_depth is not None,
                     "reach_depth": found_depth})
     n_reach = sum(1 for r in out if r["reachable"])
-    print(f"[screen] {len(out)} regions, {n_reach} reachable, "
+    res = {"regions": out, "n_reachable": n_reach, "sec": time.time() - t0}
+    # Persist server-side. `modal run --detach` only keeps the LAST triggered
+    # function alive, so the local entrypoint that would collect these results
+    # dies with the client; a screen that is not written here is lost work.
+    d = Path(OUT_DIR) / "screen"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / f"unit{int(job['unit']):04d}.json").write_text(json.dumps(res))
+    artifact_volume.commit()
+    print(f"[screen] unit {job['unit']}: {len(out)} regions, {n_reach} reachable, "
           f"{time.time() - t0:.0f}s", flush=True)
-    return {"regions": out, "n_reachable": n_reach, "sec": time.time() - t0}
+    return res
 
 
 @app.function(image=image, cpu=(1.0, 1.0), memory=int(2 * 1024), timeout=20 * 60,
@@ -258,6 +266,18 @@ def list_training_regions(smiles_list: list, per_molecule: int = 3) -> list:
     import sys
     sys.path.insert(0, str(Path(REMOTE_ROOT) / "src"))
     return enumerate_training_regions(smiles_list, per_molecule=per_molecule)
+
+
+@app.function(image=image, cpu=(1.0, 1.0), memory=int(2 * 1024), timeout=20 * 60,
+              volumes={ARTIFACT_ROOT: artifact_volume})
+def harvest_screen() -> list:
+    """Read every persisted screen unit off the volume."""
+    artifact_volume.reload()
+    d = Path(OUT_DIR) / "screen"
+    if not d.exists():
+        return []
+    return [r for f in sorted(d.glob("unit*.json"))
+            for r in json.loads(f.read_text())["regions"]]
 
 
 @app.function(image=image, cpu=(1.0, 1.0), memory=int(2 * 1024), timeout=20 * 60,
@@ -579,10 +599,11 @@ def screen(per_molecule: int = 30, batch: int = 12, train_lo: int = 6,
     assert not (set(train) & sentinel), "train/test molecule leak"
     regions = list_many_regions.remote(train, per_molecule=per_molecule)
     print(f"molecules={len(train)} regions={len(regions)}")
-    jobs = [{"regions": regions[i:i + batch]} for i in range(0, len(regions), batch)]
+    jobs = [{"regions": regions[i:i + batch], "unit": i // batch}
+            for i in range(0, len(regions), batch)]
     print(f"screen units={len(jobs)}")
     out = list(screen_region.map(jobs))
-    scr = [r for o in out for r in o["regions"]]
+    scr = harvest_screen.remote() or [r for o in out for r in o["regions"]]
     reach = [r for r in scr if r["reachable"]]
     sat_reach = [r for r in reach if r["saturated"]]
     Path("diagnostics").mkdir(exist_ok=True)
@@ -665,6 +686,21 @@ def _build_mixture(screened, neg_per_pos=2, sat_zero=12, seed=0):
             break
         take(r, "zero")
     return picked
+
+
+@app.local_entrypoint()
+def harvest(train_lo: int = 6, train_hi: int = 22):
+    """Rebuild the local screen mirror from the volume after a client death."""
+    dv = json.loads(Path("docs/GENMOL_T4_DEV_SEEDS.json").read_text())["seeds"]
+    train = [s["smiles"] for s in dv[train_lo:train_hi]]
+    scr = harvest_screen.remote()
+    Path("diagnostics").mkdir(exist_ok=True)
+    Path("diagnostics/region_screen.json").write_text(json.dumps(
+        {"train_molecules": train, "regions": scr}))
+    reach = [r for r in scr if r["reachable"]]
+    print(f"harvested={len(scr)}  reachable={len(reach)}  "
+          f"molecules={len({r['smiles'] for r in reach})}  "
+          f"saturated_reachable={sum(1 for r in reach if r['saturated'])}")
 
 
 @app.local_entrypoint()
