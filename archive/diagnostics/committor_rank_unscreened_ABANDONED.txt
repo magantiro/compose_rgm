@@ -1,0 +1,15 @@
+UNINFORMATIVE — unscreened held-out ranking attempt, killed before completion.
+Regions were sampled blindly from dv[:6] without a reachability screen, so most
+contained no completable successor and therefore no contrast to rank. pairs=0 here
+measures absence of a ranking problem, NOT committor quality. Superseded by the
+screened two-stage protocol (coverage denominator, then conditional ranking).
+
+[rank] r4 pairs=0 correct=0 498s
+[rank] r3 pairs=0 correct=0 708s
+[rank] r24 pairs=0 correct=0 853s
+[rank] r16 pairs=0 correct=0 1439s
+[rank] r5 pairs=0 correct=0 1719s
+[rank] r9 pairs=0 correct=0 1924s
+[rank] r8 pairs=0 correct=0 2169s
+[rank] r17 pairs=0 correct=0 3454s
+[rank] r27 pairs=0 correct=0 4271s

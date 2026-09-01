@@ -177,7 +177,7 @@ def screen_region(job: dict) -> dict:
     rt = _runtime(); model, system = rt["model"], rt["system"]
     out = []
     t0 = time.time()
-    d = Path(OUT_DIR) / "screen"
+    d = Path(OUT_DIR) / str(job.get("subdir", "screen"))
     d.mkdir(parents=True, exist_ok=True)
     unit_path = d / f"unit{int(job['unit']):04d}.json"
     deadline = float(job.get("soft_deadline_s", 2.5 * 3600))
@@ -325,10 +325,10 @@ def collect_summary() -> list:
 
 @app.function(image=image, cpu=(1.0, 1.0), memory=int(2 * 1024), timeout=20 * 60,
               volumes={ARTIFACT_ROOT: artifact_volume})
-def harvest_screen() -> list:
+def harvest_screen(subdir: str = "screen") -> list:
     """Read every persisted screen unit off the volume."""
     artifact_volume.reload()
-    d = Path(OUT_DIR) / "screen"
+    d = Path(OUT_DIR) / subdir
     if not d.exists():
         return []
     return [r for f in sorted(d.glob("unit*.json"))
@@ -930,8 +930,11 @@ def rank_region(job: dict) -> dict:
                 return False
         return False
 
-    # walk the frozen directed proposal until it hits a plateau
+    # Walk the frozen directed proposal, recording EVERY plateau contrast along
+    # the way rather than stopping at the first. That is a power decision made
+    # before seeing any held-out result, not a filter on outcomes.
     pairs, t0 = [], time.time()
+    n_plateau, n_contrast = 0, 0
     st, lin = st0, lin0
     for t in range(horizon):
         fams, acts, probs = enum_fn(st)
@@ -947,13 +950,15 @@ def rank_region(job: dict) -> dict:
             succ.append((j, y, l2, RR.old_dependence(y, ctx, l2, old_ids)))
         if not succ:
             break
-        flat = [s for s in succ if s[3] >= base]     # no connectivity progress
+        flat = [s_ for s_ in succ if s_[3] >= base]   # no connectivity progress
         remaining = horizon - t - 1
         if len(flat) >= 2 and remaining >= 2:
-            labelled = [(s, completes(s[1], s[2], remaining)) for s in flat]
-            good = [s for s, ok in labelled if ok]
-            bad = [s for s, ok in labelled if not ok]
-            if good and bad:
+            n_plateau += 1
+            labelled = [(s_, completes(s_[1], s_[2], remaining)) for s_ in flat]
+            good = [s_ for s_, ok in labelled if ok]
+            bad = [s_ for s_, ok in labelled if not ok]
+            if good and bad:                          # a genuine contrast
+                n_contrast += 1
                 for g in good:
                     for b in bad:
                         pairs.append({
@@ -961,15 +966,15 @@ def rank_region(job: dict) -> dict:
                             "h_good": h_phi(g[1], g[2], remaining),
                             "h_bad": h_phi(b[1], b[2], remaining),
                             "fam_good": fams[g[0]], "fam_bad": fams[b[0]]})
-                break
-        nxt = min(succ, key=lambda s: (s[3], -float(probs[s[0]])))
+        nxt = min(succ, key=lambda s_: (s_[3], -float(probs[s_[0]])))
         st, lin = nxt[1], nxt[2]
 
     n_ok = sum(1 for p in pairs if p["h_good"] > p["h_bad"])
-    print(f"[rank] {job['case_name']} pairs={len(pairs)} correct={n_ok} "
-          f"{time.time() - t0:.0f}s", flush=True)
+    print(f"[rank] {job['case_name']} plateaus={n_plateau} contrast={n_contrast} "
+          f"pairs={len(pairs)} correct={n_ok} {time.time() - t0:.0f}s", flush=True)
     return {"case": job["case_name"], "smiles": smi,
             "saturated": bool(rec.get("saturated")), "pairs": pairs,
+            "n_plateau": n_plateau, "n_contrast": n_contrast,
             "n_pairs": len(pairs), "n_correct": n_ok, "sec": time.time() - t0}
 
 
@@ -982,30 +987,91 @@ def list_test_regions(smiles_list: list, per_molecule: int = 6) -> list:
 
 
 @app.local_entrypoint()
-def rank(per_molecule: int = 6, test_lo: int = 0, test_hi: int = 6):
-    """Held-out plateau-ranking test. See the module docstring on rank_region."""
+def screen_heldout(batch: int = 4, test_lo: int = 0, test_hi: int = 6):
+    """STAGE A of the held-out protocol: screen EVERY eligible region on the
+    untouched molecules with the same frozen reachability search used
+    everywhere else, and report the full denominator.
+
+    This is the coverage question -- where does a ranking problem exist at all?
+    It is answered before, and separately from, whether h_phi solves it. The
+    committor is NOT retrained after this, and no search parameter is tuned on
+    what comes back.
+    """
     dv = json.loads(Path("docs/GENMOL_T4_DEV_SEEDS.json").read_text())["seeds"]
     test = [s["smiles"] for s in dv[test_lo:test_hi]]
     train = {s["smiles"] for s in dv[6:22]}
     assert not (set(test) & train), "held-out molecules overlap the fit set"
-    regions = list_test_regions.remote(test, per_molecule=per_molecule)
-    print(f"held-out molecules={len(test)} regions={len(regions)}")
-    jobs = [{"region": r, "case_name": f"r{i}"} for i, r in enumerate(regions)]
+    regions = list_many_regions.remote(test, per_molecule=100000)   # ALL eligible
+    print(f"held-out molecules={len(test)}  eligible regions={len(regions)}")
+    jobs = [{"regions": regions[i:i + batch], "unit": i // batch,
+             "subdir": "screen_heldout"}
+            for i in range(0, len(regions), batch)]
+    print(f"screen units={len(jobs)}")
+    list(screen_region.map(jobs))
+    scr = harvest_screen.remote("screen_heldout")
+    reach = [r for r in scr if r["reachable"]]
+    Path("diagnostics").mkdir(exist_ok=True)
+    Path("diagnostics/heldout_screen.json").write_text(json.dumps(
+        {"molecules": test, "regions": scr}))
+    from collections import Counter
+    print(f"\nCOVERAGE  reachable/eligible = {len(reach)}/{len(scr)} "
+          f"= {len(reach) / max(1, len(scr)):.1%}")
+    print(f"  saturated eligible={sum(1 for r in scr if r['saturated'])} "
+          f"saturated reachable={sum(1 for r in reach if r['saturated'])}")
+    print(f"  molecules with a reachable region="
+          f"{len({r['smiles'] for r in reach})}/{len(test)}")
+    print(f"  reach depth histogram: {dict(Counter(r['reach_depth'] for r in reach))}")
+
+
+@app.local_entrypoint()
+def rank(max_regions: int = 0):
+    """STAGE B: conditional ranking, on reachable held-out regions only.
+
+    Reports two separate facts, never one blended number:
+      coverage  -- how often a plateau contrast exists at all
+      ranking   -- given a contrast, does h_phi order it correctly
+
+    The committor is frozen. Nothing here retrains or retunes it.
+    """
+    scr = json.loads(Path("diagnostics/heldout_screen.json").read_text())
+    eligible, mols = scr["regions"], scr["molecules"]
+    train = {s["smiles"] for s in json.loads(
+        Path("docs/GENMOL_T4_DEV_SEEDS.json").read_text())["seeds"][6:22]}
+    assert not (set(mols) & train), "held-out molecules overlap the fit set"
+    reach = [r for r in eligible if r["reachable"]]
+    if max_regions:
+        reach = reach[:max_regions]
+    print(f"eligible={len(eligible)} reachable={len(reach)} "
+          f"({len(reach) / max(1, len(eligible)):.1%} of eligible)")
+    jobs = [{"region": r, "case_name": f"h{i}"} for i, r in enumerate(reach)]
     out = [o for o in rank_region.map(jobs) if o]
+
+    n_plateau = sum(o["n_plateau"] for o in out)
+    n_contrast = sum(o["n_contrast"] for o in out)
     tot = sum(o["n_pairs"] for o in out)
     cor = sum(o["n_correct"] for o in out)
-    reg = sum(1 for o in out if o["n_pairs"] > 0)
-    print(f"\nregions with a plateau pair={reg}/{len(out)}  pairs={tot}  "
-          f"correct={cor} ({cor / max(1, tot):.1%})")
-    if tot:
+    gaps = [p["h_good"] - p["h_bad"] for o in out for p in o["pairs"]]
+    ties = sum(1 for g in gaps if g == 0.0)
+    auc = (cor + 0.5 * ties) / tot if tot else float("nan")
+    print("\n--- COVERAGE (where a ranking problem exists) ---")
+    print(f"  reachable/eligible      = {len(reach)}/{len(eligible)}")
+    print(f"  regions with a plateau  = {sum(1 for o in out if o['n_plateau'])}/{len(out)}")
+    print(f"  regions with a contrast = {sum(1 for o in out if o['n_contrast'])}/{len(out)}")
+    print(f"  plateau states={n_plateau}  contrast states={n_contrast}")
+    print("\n--- RANKING (given a contrast, is h_phi right) ---")
+    if not tot:
+        print("  NO CONTRAST PAIRS -- ranking undefined on this pool.")
+        print("  Do not manufacture more tests; go to R_M vs R_M*h_phi end-to-end.")
+    else:
         import statistics as st_
-        gaps = [p["h_good"] - p["h_bad"] for o in out for p in o["pairs"]]
+        print(f"  pairs={tot}  correct={cor}  accuracy={cor / tot:.1%}  AUC={auc:.3f}")
         print(f"  median h_good - h_bad = {st_.median(gaps):+.4f}")
         print(f"  molecules contributing = "
               f"{len({o['smiles'] for o in out if o['n_pairs']})}")
-    Path("diagnostics").mkdir(exist_ok=True)
     Path("diagnostics/committor_rank.json").write_text(json.dumps(
-        {"n_pairs": tot, "n_correct": cor,
+        {"n_eligible": len(eligible), "n_reachable": len(reach),
+         "n_plateau_states": n_plateau, "n_contrast_states": n_contrast,
+         "n_pairs": tot, "n_correct": cor, "auc": auc,
          "per_region": [{k_: o[k_] for k_ in
-                         ("case", "smiles", "saturated", "n_pairs", "n_correct")}
-                        for o in out]}))
+                         ("case", "smiles", "saturated", "n_plateau",
+                          "n_contrast", "n_pairs", "n_correct")} for o in out]}))
