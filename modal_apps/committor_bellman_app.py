@@ -1003,7 +1003,7 @@ def list_test_regions(smiles_list: list, per_molecule: int = 6) -> list:
 
 @app.local_entrypoint()
 def screen_dude(batch: int = 4, per_molecule: int = 2, n_molecules: int = 60,
-                subdir: str = "screen_dude"):
+                offset: int = 0, subdir: str = "screen_dude"):
     """Screen the fresh DUD-E holdout pool -- SAME DISTRIBUTION as the dev seeds.
 
     PREREGISTERED QUALIFICATION GATE, fixed before looking at any result:
@@ -1017,7 +1017,9 @@ def screen_dude(batch: int = 4, per_molecule: int = 2, n_molecules: int = 60,
     pool = json.loads(Path("docs/DUDE_HOLDOUT_POOL.json").read_text())
     dv = json.loads(Path("docs/GENMOL_T4_DEV_SEEDS.json").read_text())["seeds"]
     used = {s["smiles"] for s in dv}
-    smiles = [m["smiles"] for m in pool["molecules"] if m["smiles"] not in used][:n_molecules]
+    avail = [m["smiles"] for m in pool["molecules"] if m["smiles"] not in used]
+    smiles = avail[offset:offset + n_molecules]   # offset: extend the screen to
+                                                  # new molecules toward the gate
     print(f"fresh DUD-E molecules={len(smiles)} (of {pool['n']} available)")
     regions = list_many_regions.remote(smiles, per_molecule=per_molecule)
     print(f"eligible splitting regions={len(regions)}")
