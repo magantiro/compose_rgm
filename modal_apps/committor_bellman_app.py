@@ -1953,6 +1953,17 @@ def single_attempt(job: dict) -> dict:
             return None
         return base_apply(st, j)
 
+    h_terms = None
+    if arm == "R_M_lookahead":
+        # POSITIVE CONTROL, not a candidate controller: this is the explicit
+        # depth-3 lookahead that scored 12/12 on the sentinel and is far too
+        # expensive to deploy. Without it, a 0/32 for the learned committor
+        # cannot be told apart from "these held-out regions are simply harder
+        # than the sentinel case".
+        h_terms = {
+            "grow_new": (lambda s_, l_: RR.establishment_terminal(s_, ctx, l_, old_ids)),
+            "prune_old": (lambda s_, l_: RR.completion_terminal(s_, ctx, l_, old_ids)),
+        }
     net = None
     if arm == "R_M_hphi":
         artifact_volume.reload()
@@ -1972,12 +1983,28 @@ def single_attempt(job: dict) -> dict:
         return hcache[key]
 
     t0 = time.time()
+
+    def observe(y, c, lin):
+        """Per-step progress. Without this an attempt is silent for its whole
+        run -- the lookahead arm goes 30+ minutes emitting nothing, so a stall
+        and slow progress look identical from outside."""
+        d = RR.old_dependence(y, c, lin, old_ids)
+        n = len(observe.seen); observe.seen.append(d)
+        if n % 2 == 0 or d == 0:
+            print(f"[step] {job['case_name']} {arm} s{job['seed']} t={n} "
+                  f"d_old={d} calls={calls['n']} {time.time() - t0:.0f}s", flush=True)
+        return d
+    observe.seen = []
+
     p = RR.propose(enum_fn, apply_fn, ctx, st0, schedule=schedule,
                    rng=np.random.default_rng(int(job["seed"])),
                    lineage=lin0, original_region_ids=old_ids,
                    max_handoff_steps=int(job.get("max_handoff", 16)),
-                   h_terminals=None, beta=0.0,
+                   h_terminals=h_terms, beta=0.0,
+                   h_budget=int(job.get("h_budget", 3)),
+                   h_quota=int(job.get("h_quota", 2)),
                    h_model=(h_model if arm == "R_M_hphi" else None),
+                   observe_fn=observe,
                    target_ess=float(job.get("target_ess", 0.3)),
                    epsilon=float(job.get("epsilon", 0.1)))
     end = p.endpoint if p.endpoint is not None else st0
@@ -1990,7 +2017,10 @@ def single_attempt(job: dict) -> dict:
            "calls": calls["n"], "hit_ceiling": calls["n"] >= ceiling,
            "steps": len(p.steps),   # Proposal.steps is a list of step records
            "first_handoff_step": p.first_handoff_step,
-           "status": p.status, "stage": p.stage, "sec": time.time() - t0}
+           "status": p.status, "stage": p.stage,
+           "d_old_trace": observe.seen,      # min d_old reached is the real
+           "min_d_old": min(observe.seen) if observe.seen else None,
+           "sec": time.time() - t0}
     d = Path(OUT_DIR) / "race"
     d.mkdir(parents=True, exist_ok=True)
     (d / f"{job['case_name']}_{arm}_{job['seed']}.json").write_text(json.dumps(res))
@@ -2024,7 +2054,7 @@ def profile_attempt(max_calls: int = 4000, n: int = 2):
 
 @app.local_entrypoint()
 def race(seeds: int = 2, seed0: int = 1, max_calls: int = 4150,
-         n_regions: int = 16):
+         n_regions: int = 16, arms: str = "R_M,R_M_hphi"):
     """STAGE: independent attempts, paired by (region, seed), one wave.
 
     Matched per ATTEMPT with a frozen call ceiling, not on executor calls.
@@ -2041,7 +2071,7 @@ def race(seeds: int = 2, seed0: int = 1, max_calls: int = 4150,
     jobs = [{"region": r, "case_name": f"r{i}", "arm": a, "seed": s,
              "max_calls": max_calls}
             for i, r in enumerate(reach)
-            for a in ("R_M", "R_M_hphi")
+            for a in arms.split(",")
             for s in range(seed0, seed0 + seeds)]
     print(f"jobs={len(jobs)} (one wave)")
     out = [o for o in single_attempt.map(jobs) if o]
@@ -2049,7 +2079,7 @@ def race(seeds: int = 2, seed0: int = 1, max_calls: int = 4150,
     Path(f"diagnostics/race_seed{seed0}_{seed0+seeds-1}.json").write_text(
         json.dumps(out, default=str))
     import statistics as st_
-    for arm in ("R_M", "R_M_hphi"):
+    for arm in arms.split(","):
         v = [o for o in out if o["arm"] == arm]
         est = sum(1 for o in v if o["establishment"])
         comp = sum(1 for o in v if o["complete"])
