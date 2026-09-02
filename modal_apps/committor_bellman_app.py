@@ -1497,3 +1497,141 @@ def verify_cache(n: int = 6, depth: int = 3, revisits: int = 3):
           f"saving={1 - fast / max(1, slow):.1%}")
     print("  EQUIVALENT" if (kmm == 0 and fmm == 0 and succ > 0)
           else "  NOT EQUIVALENT -- do not use the cache")
+
+
+@app.function(image=image, cpu=(1.0, 1.0), memory=MEM_MIB, timeout=60 * 60,
+              retries=2, max_containers=80,
+              volumes={ARTIFACT_ROOT: artifact_volume})
+def verify_law_cache(job: dict) -> dict:
+    """GATE 1: the slot-keyed law cache must equal uncached enumeration.
+
+    The successor-apply check was not enough. The defect was in the LAW cache --
+    a canonical-key hit returned another state's marks, actions and
+    probabilities. So this compares, for every visited state, the cached lookup
+    against a FRESH enumerate_factorized_marked_law call on that exact state:
+
+      - the executor rule name of every mark, in order
+      - the action of every mark, in order
+      - every mark probability, bitwise
+
+    Also counts canonical-key collisions actually encountered, so the corrected
+    cache is exercised on the states where the old one would have been wrong.
+    """
+    import sys
+    sys.path.insert(0, str(Path(REMOTE_ROOT) / "src"))
+    import numpy as np
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.experiments.production_successor_kernel import (
+        canonical_state_key, enumerate_factorized_marked_law)
+    from compose_v4.control.region import Region
+    from compose_v4.control import region_rewrite as RR
+    from compose_v4.gates.med_chem_gate import is_valid
+
+    rt = _runtime(); model, system = rt["model"], rt["system"]
+    rec = job["region"]; smi = rec["smiles"]
+    st0 = pad_molecular_graph(smiles_to_molecular_graph(smi), CANONICAL_SLOTS)
+    n_real = len(smiles_to_molecular_graph(smi).atom_types)
+    region = Region(atoms=frozenset(rec["atoms"]),
+                    boundary=tuple((i, j, o) for i, j, o in rec["boundary"]),
+                    kind="", generator="lawverify", n_atoms_total=n_real,
+                    n_context_components=2, interface=rec["interface"])
+    ctx = RR.context_from_region(region)
+    lin0 = RR.Lineage.initial(range(n_real))
+    cache: dict = {}
+
+    def enum_cached(st):                      # the shipped path
+        k = _slot_key(st)
+        if k not in cache:
+            law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
+            cache[k] = ([m.executor_rule_name for m in law.marks],
+                        [m.action for m in law.marks],
+                        np.array([m.probability for m in law.marks], float))
+        return cache[k]
+
+    def enum_fresh(st):                       # ground truth, never cached
+        law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
+        return ([m.executor_rule_name for m in law.marks],
+                [m.action for m in law.marks],
+                np.array([m.probability for m in law.marks], float))
+
+    # explore, then REVISIT so cache hits (not misses) are what gets compared
+    frontier, states = [(st0, lin0)], []
+    for _ in range(int(job.get("depth", 3))):
+        nxt = []
+        for st, lin in frontier:
+            states.append((st, lin))
+            fams, acts, probs = enum_cached(st)
+            idx, _w = RR.admissible_indices(fams, acts, ctx)
+            for j in sorted(idx, key=lambda k_: -float(probs[k_]))[:4]:
+                try:
+                    y = system.apply(st, fams[j], acts[j])
+                except Exception:
+                    continue
+                if y is None:
+                    continue
+                k = canonical_state_key(y)
+                if not k or not is_valid(k) or not RR.graph_connected(y):
+                    continue
+                nxt.append((y, lin.observe(fams[j], acts[j])))
+        frontier = nxt[:6]
+        if not frontier:
+            break
+
+    by_canon: dict = {}
+    for st, _l in states:
+        by_canon.setdefault(canonical_state_key(st), set()).add(_slot_key(st))
+    collided = {c for c, v in by_canon.items() if len(v) > 1}
+
+    n_states, n_marks = 0, 0
+    mm_rule, mm_action, mm_prob, n_collided_checked = 0, 0, 0, 0
+    for rep in range(int(job.get("revisits", 3))):
+        for st, _l in states:
+            cf, ca, cp = enum_cached(st)          # hit after the first pass
+            ff, fa, fp = enum_fresh(st)
+            n_states += 1
+            if canonical_state_key(st) in collided:
+                n_collided_checked += 1
+            if len(cf) != len(ff):
+                mm_rule += 1
+                continue
+            n_marks += len(cf)
+            if cf != ff:
+                mm_rule += 1
+            if [repr(a) for a in ca] != [repr(a) for a in fa]:
+                mm_action += 1
+            if not np.array_equal(cp, fp):
+                mm_prob += 1
+    res = {"case": job["case_name"], "smiles": smi,
+           "states_compared": n_states, "marks_compared": n_marks,
+           "canonical_keys": len(by_canon), "colliding_keys": len(collided),
+           "collided_states_checked": n_collided_checked,
+           "rule_mismatches": mm_rule, "action_mismatches": mm_action,
+           "prob_mismatches": mm_prob}
+    print(f"[law] {job['case_name']} states={n_states} marks={n_marks} "
+          f"collided_checked={n_collided_checked} "
+          f"mm rule={mm_rule} action={mm_action} prob={mm_prob}", flush=True)
+    return res
+
+
+@app.local_entrypoint()
+def verify_law(n: int = 10, depth: int = 3, revisits: int = 3):
+    """GATE 1 report: cached law == uncached law, bitwise."""
+    scr = json.loads(Path("diagnostics/heldout_screen.json").read_text())
+    jobs = [{"region": r, "case_name": f"L{i}", "depth": depth,
+             "revisits": revisits} for i, r in enumerate(scr["regions"][:n])]
+    out = [o for o in verify_law_cache.map(jobs) if o]
+    S = lambda k: sum(o[k] for o in out)
+    print(f"\nregions={len(out)}  states compared={S('states_compared')}  "
+          f"marks compared={S('marks_compared')}")
+    print(f"  canonical keys={S('canonical_keys')}  colliding={S('colliding_keys')}"
+          f"  states on a collided key={S('collided_states_checked')}")
+    print(f"  mismatches: rule={S('rule_mismatches')} "
+          f"action={S('action_mismatches')} prob={S('prob_mismatches')}")
+    ok = (S('rule_mismatches') == 0 and S('action_mismatches') == 0
+          and S('prob_mismatches') == 0 and S('states_compared') > 0)
+    print("  GATE 1 PASS -- slot-keyed law cache is exact" if ok
+          else "  GATE 1 FAIL -- do not proceed")
+    Path("diagnostics").mkdir(exist_ok=True)
+    Path("diagnostics/law_cache_equivalence.json").write_text(
+        json.dumps({"pass": ok, "per_region": out}))
