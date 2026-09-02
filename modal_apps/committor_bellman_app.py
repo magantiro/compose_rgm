@@ -1002,6 +1002,58 @@ def list_test_regions(smiles_list: list, per_molecule: int = 6) -> list:
 
 
 @app.local_entrypoint()
+def screen_pool(batch: int = 4, per_molecule: int = 6,
+                subdir: str = "screen_pool"):
+    """Screen the fresh benchmark-disjoint pool with the corrected kernel.
+
+    The reachable/screened denominator is reported over everything actually
+    screened, so the coverage number cannot be flattered by which regions
+    happen to finish first.
+    """
+    pool = json.loads(Path("docs/STRUCTURAL_QUAL_POOL.json").read_text())
+    dv = json.loads(Path("docs/GENMOL_T4_DEV_SEEDS.json").read_text())["seeds"]
+    train = {s["smiles"] for s in dv}
+    smiles = [s for s in pool["smiles"] if s not in train]
+    print(f"pool molecules={len(smiles)}")
+    regions = list_many_regions.remote(smiles, per_molecule=per_molecule)
+    print(f"eligible splitting regions={len(regions)}")
+    jobs = [{"regions": regions[i:i + batch], "unit": i // batch,
+             "subdir": subdir} for i in range(0, len(regions), batch)]
+    print(f"screen units={len(jobs)}")
+    list(screen_region.map(jobs))
+    scr = harvest_screen.remote(subdir)
+    reach = [r for r in scr if r["reachable"]]
+    Path("diagnostics").mkdir(exist_ok=True)
+    Path("diagnostics/pool_screen.json").write_text(json.dumps(
+        {"molecules": smiles, "regions": scr}))
+    print(f"COVERAGE reachable/screened = {len(reach)}/{len(scr)} "
+          f"= {len(reach) / max(1, len(scr)):.1%}")
+    print(f"  molecules with a reachable region={len({r['smiles'] for r in reach})}")
+    print(f"  saturated reachable={sum(1 for r in reach if r['saturated'])}")
+
+
+@app.local_entrypoint()
+def pool_status(subdir: str = "screen_pool"):
+    """Read the running pool screen off the volume and apply the stop gate.
+
+    Lets the run be stopped on sufficient evidence instead of on the last
+    straggler -- the failure that cost hours on the arms run and killed the
+    first Gate 2 attempt. Units in flight still persist, so stopping early
+    discards nothing already collected.
+    """
+    scr = harvest_screen.remote(subdir)
+    reach = [r for r in scr if r["reachable"]]
+    mols = {r["smiles"] for r in reach}
+    Path("diagnostics").mkdir(exist_ok=True)
+    Path("diagnostics/pool_screen.json").write_text(json.dumps(
+        {"molecules": sorted({r["smiles"] for r in scr}), "regions": scr}))
+    print(f"screened={len(scr)} reachable={len(reach)} molecules={len(mols)} "
+          f"saturated_reachable={sum(1 for r in reach if r['saturated'])}")
+    print(f"GATE {'MET' if (len(reach) >= 30 and len(mols) >= 8) else 'not met'} "
+          f"(need >=30 reachable across >=8 molecules)")
+
+
+@app.local_entrypoint()
 def screen_heldout(batch: int = 4, test_lo: int = 0, test_hi: int = 6):
     """STAGE A of the held-out protocol: screen EVERY eligible region on the
     untouched molecules with the same frozen reachability search used
