@@ -1077,6 +1077,55 @@ def rank(max_regions: int = 0):
                           "n_contrast", "n_pairs", "n_correct")} for o in out]}))
 
 
+def _slot_key(state):
+    """Exact slot layout, NOT the canonical key.
+
+    canonical_state_key is a graph-isomorphism key, so two states that differ
+    only in which slots hold which atoms share it. Mark actions carry slot
+    COORDINATES, so index j denotes a different edit in those two states and a
+    cache hit keyed canonically returns the wrong successor. Measured: 381
+    wrong successors out of 909 on one region, with zero feature mismatches --
+    the states came back valid, just not the ones asked for.
+    """
+    import numpy as np
+    return (np.asarray(state.atom_types).tobytes(),
+            np.asarray(state.bonds).tobytes())
+
+
+def make_memo_apply(system, enum_fn, key_fn, guard_fn, calls, cap=200000):
+    """One executor application per (state, mark), reused everywhere.
+
+    enumerate_factorized_marked_law does NOT carry successor states -- marks hold
+    only (family, rule, action, coordinate, logprob) -- so something must apply
+    them. What was wasteful is applying the SAME (state, mark) repeatedly: once
+    to featurize it for h_phi, again for the sampled step, and again on every
+    restart, since trials all begin at the same root. Only the law was memoized.
+
+    `calls` counts genuine executor invocations, so a cache hit is correctly
+    free and the reported executor cost stays honest.
+    """
+    memo: dict = {}
+
+    def apply_fn(st, j):
+        k = (_slot_key(st), int(j))
+        if k in memo:
+            return memo[k]
+        calls["n"] += 1
+        fams, acts, _ = enum_fn(st)
+        try:
+            y = system.apply(st, fams[j], acts[j])
+        except Exception:
+            y = None
+        if y is not None and not guard_fn(y):
+            y = None
+        if len(memo) < cap:
+            memo[k] = y
+        return y
+
+    apply_fn.memo = memo
+    return apply_fn
+
+
 @app.function(image=image, cpu=(1.0, 1.0), memory=MEM_MIB, timeout=3 * 60 * 60,
               retries=2, max_containers=80,
               volumes={ARTIFACT_ROOT: artifact_volume})
@@ -1141,21 +1190,13 @@ def arm_compare(job: dict) -> dict:
                         np.array([m.probability for m in law.marks], float))
         return cache[k]
 
-    def apply_fn(st, j):
-        calls["n"] += 1
-        fams, acts, _ = enum_fn(st)
-        try:
-            y = system.apply(st, fams[j], acts[j])
-        except Exception:
-            return None
-        if y is None:
-            return None
+    def _guard(y):
         k = canonical_state_key(y)
-        if not k or not is_valid(k) or not RR.graph_connected(y):
-            return None
-        if not RR.context_preserved(st0, y, ctx.frozen, ctx.terminal_context_slots):
-            return None
-        return y
+        return bool(k and is_valid(k) and RR.graph_connected(y)
+                    and RR.context_preserved(st0, y, ctx.frozen,
+                                             ctx.terminal_context_slots))
+
+    apply_fn = make_memo_apply(system, enum_fn, canonical_state_key, _guard, calls)
 
     hcache: dict = {}
 
@@ -1298,3 +1339,161 @@ def arms(budget_calls: int = 20000, max_trials: int = 2000, limit: int = 0):
     Path("diagnostics").mkdir(exist_ok=True)
     Path("diagnostics/committor_arms.json").write_text(json.dumps(
         {"budget_calls": budget_calls, "per_region": out}, default=str))
+
+
+@app.function(image=image, cpu=(1.0, 1.0), memory=MEM_MIB, timeout=60 * 60,
+              retries=2, max_containers=80,
+              volumes={ARTIFACT_ROOT: artifact_volume})
+def verify_successor_cache(job: dict) -> dict:
+    """Equivalence test for the memoized successor application.
+
+    The speedup is worthless if it changes what the controller sees, so this
+    compares the memoized path against the current uncached one and requires
+    BIT-IDENTICAL results on both:
+      - the canonical successor key for every (state, mark)
+      - the full structural feature vector h_phi would be scored on
+
+    Reports the executor-call saving alongside, so the amortization claim is
+    measured rather than asserted.
+    """
+    import sys
+    sys.path.insert(0, str(Path(REMOTE_ROOT) / "src"))
+    import numpy as np
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.experiments.production_successor_kernel import (
+        canonical_state_key, enumerate_factorized_marked_law)
+    from compose_v4.control.region import Region
+    from compose_v4.control import region_rewrite as RR
+    from compose_v4.gates.med_chem_gate import is_valid
+
+    rt = _runtime(); model, system = rt["model"], rt["system"]
+    rec = job["region"]; smi = rec["smiles"]
+    st0 = pad_molecular_graph(smiles_to_molecular_graph(smi), CANONICAL_SLOTS)
+    n_real = len(smiles_to_molecular_graph(smi).atom_types)
+    region = Region(atoms=frozenset(rec["atoms"]),
+                    boundary=tuple((i, j, o) for i, j, o in rec["boundary"]),
+                    kind="", generator="verify", n_atoms_total=n_real,
+                    n_context_components=2, interface=rec["interface"])
+    ctx = RR.context_from_region(region)
+    lin0 = RR.Lineage.initial(range(n_real))
+    old_ids = frozenset(lin0.id_of[s] for s in rec["atoms"] if s in lin0.id_of)
+    law_cache: dict = {}
+
+    def enum_fn(st):
+        k = canonical_state_key(st)
+        if k not in law_cache:
+            law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
+            law_cache[k] = ([m.executor_rule_name for m in law.marks],
+                            [m.action for m in law.marks],
+                            np.array([m.probability for m in law.marks], float))
+        return law_cache[k]
+
+    def _guard(y):
+        k = canonical_state_key(y)
+        return bool(k and is_valid(k) and RR.graph_connected(y)
+                    and RR.context_preserved(st0, y, ctx.frozen,
+                                             ctx.terminal_context_slots))
+
+    slow_calls, fast_calls = {"n": 0}, {"n": 0}
+
+    def slow_apply(st, j):                      # current behaviour: no memo
+        slow_calls["n"] += 1
+        fams, acts, _ = enum_fn(st)
+        try:
+            y = system.apply(st, fams[j], acts[j])
+        except Exception:
+            return None
+        return y if (y is not None and _guard(y)) else None
+
+    fast_apply = make_memo_apply(system, enum_fn, canonical_state_key,
+                                 _guard, fast_calls)
+
+    # visit a spread of states, then re-visit them the way trials actually do
+    frontier, states = [(st0, lin0)], []
+    for _ in range(int(job.get("depth", 3))):
+        nxt = []
+        for st, lin in frontier:
+            states.append((st, lin))
+            fams, acts, probs = enum_fn(st)
+            idx, _w = RR.admissible_indices(fams, acts, ctx)
+            for j in sorted(idx, key=lambda k_: -float(probs[k_]))[:4]:
+                y = slow_apply(st, j)
+                if y is not None:
+                    nxt.append((y, lin.observe(fams[j], acts[j])))
+        frontier = nxt[:6]
+        if not frontier:
+            break
+
+    n_key, n_feat_cmp, mismatch_key, mismatch_feat = 0, 0, 0, 0
+    for rep in range(int(job.get("revisits", 3))):     # trials revisit states
+        for st, lin in states:
+            fams, acts, probs = enum_fn(st)
+            idx, _w = RR.admissible_indices(fams, acts, ctx)
+            for j in idx:
+                a, b = slow_apply(st, j), fast_apply(st, j)
+                if (a is None) != (b is None):
+                    mismatch_key += 1
+                    continue
+                if a is None:
+                    continue
+                n_key += 1
+                if canonical_state_key(a) != canonical_state_key(b):
+                    mismatch_key += 1
+                    continue
+                if rep == 0:
+                    l2 = lin.observe(fams[j], acts[j])
+                    fa = RR.features_from_shared(
+                        RR.structural_features_shared(a, ctx, l2, old_ids),
+                        3, "establishment")
+                    fb = RR.features_from_shared(
+                        RR.structural_features_shared(b, ctx, l2, old_ids),
+                        3, "establishment")
+                    n_feat_cmp += 1
+                    if fa != fb:
+                        mismatch_feat += 1
+    # census: how often does one canonical key cover several slot layouts?
+    by_canon: dict = {}
+    for st, _l in states:
+        by_canon.setdefault(canonical_state_key(st), set()).add(_slot_key(st))
+    colliding = sum(1 for v in by_canon.values() if len(v) > 1)
+    extra = sum(len(v) - 1 for v in by_canon.values())
+    res = {"case": job["case_name"], "smiles": smi,
+           "canonical_keys": len(by_canon), "colliding_keys": colliding,
+           "extra_layouts": extra,
+           "states_visited": len(states),
+           "successors_compared": n_key, "features_compared": n_feat_cmp,
+           "key_mismatches": mismatch_key, "feature_mismatches": mismatch_feat,
+           "slow_executor_calls": slow_calls["n"],
+           "fast_executor_calls": fast_calls["n"]}
+    print(f"[verify] {job['case_name']} succ={n_key} feat={n_feat_cmp} "
+          f"key_mm={mismatch_key} feat_mm={mismatch_feat} "
+          f"slow={slow_calls['n']} fast={fast_calls['n']}", flush=True)
+    return res
+
+
+@app.local_entrypoint()
+def verify_cache(n: int = 6, depth: int = 3, revisits: int = 3):
+    """Prove the memoized successor path is bit-identical before using it."""
+    scr = json.loads(Path("diagnostics/heldout_screen.json").read_text())
+    regions = scr["regions"][:n]
+    jobs = [{"region": r, "case_name": f"v{i}", "depth": depth,
+             "revisits": revisits} for i, r in enumerate(regions)]
+    out = [o for o in verify_successor_cache.map(jobs) if o]
+    succ = sum(o["successors_compared"] for o in out)
+    feat = sum(o["features_compared"] for o in out)
+    kmm = sum(o["key_mismatches"] for o in out)
+    fmm = sum(o["feature_mismatches"] for o in out)
+    slow = sum(o["slow_executor_calls"] for o in out)
+    fast = sum(o["fast_executor_calls"] for o in out)
+    ck = sum(o["canonical_keys"] for o in out)
+    cc = sum(o["colliding_keys"] for o in out)
+    print(f"\nCANONICAL-KEY COLLISION CENSUS: {cc}/{ck} canonical keys cover "
+          f">1 slot layout ({cc / max(1, ck):.1%}); "
+          f"extra layouts={sum(o['extra_layouts'] for o in out)}")
+    print(f"\nregions={len(out)}  successors compared={succ}  features compared={feat}")
+    print(f"  key mismatches={kmm}   feature mismatches={fmm}")
+    print(f"  executor calls: uncached={slow}  memoized={fast}  "
+          f"saving={1 - fast / max(1, slow):.1%}")
+    print("  EQUIVALENT" if (kmm == 0 and fmm == 0 and succ > 0)
+          else "  NOT EQUIVALENT -- do not use the cache")
