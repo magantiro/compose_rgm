@@ -113,8 +113,9 @@ def _pick_cases(smiles_list, max_region=8):
 # fails the whole map and cancels every sibling. Preemption was observed in
 # earlier runs. Units are independent and deterministic per (case, arm, trial),
 # so a retry reproduces the same work.
-@app.function(image=image, cpu=(1.0, 1.0), memory=MEM_MIB, timeout=90 * 60,
-              retries=2, volumes={ARTIFACT_ROOT: artifact_volume})
+@app.function(image=image, cpu=(1.0, 1.0), memory=MEM_MIB, timeout=5 * 60 * 60,
+              retries=2, max_containers=80,
+              volumes={ARTIFACT_ROOT: artifact_volume})
 def sentinel_unit(job: dict) -> dict:
     import sys
     sys.path.insert(0, str(Path(REMOTE_ROOT) / "src"))
@@ -282,7 +283,16 @@ def sentinel_unit(job: dict) -> dict:
             "case": rec, "case_name": name, "arm": arm_only,
             "arms": by_arm,
         }
-    return {"unit": results, "sec": time.time() - t0}
+    res = {"unit": results, "sec": time.time() - t0}
+    # Persist before returning. The previous Gate 2 attempt lost nine completed
+    # units because six others hit the function timeout, the error propagated,
+    # and this function only ever returned to the client.
+    d = Path(ARTIFACT_ROOT) / "region_sentinels" / "units"
+    d.mkdir(parents=True, exist_ok=True)
+    tag = f"{job['case_name']}_{job['arm']}_{job['trials'][0]:03d}"
+    (d / f"{tag}.json").write_text(json.dumps(res))
+    artifact_volume.commit()
+    return res
 
 
 @app.local_entrypoint()
@@ -358,3 +368,54 @@ def main(trials: int = 12, n_seeds: int = 6, chunk: int = 4):
                       f"changed={d['changed_fraction']:.2f} "
                       f"coherence={d['coherence']:.2f} steps={b['n_steps']}")
                 print(f"   {'':12s} {b['endpoint']}")
+
+
+@app.function(image=image, cpu=(1.0, 1.0), memory=int(2 * 1024), timeout=20 * 60,
+              volumes={ARTIFACT_ROOT: artifact_volume})
+def harvest_units() -> list:
+    """Every persisted sentinel unit, so a merge never depends on the client."""
+    artifact_volume.reload()
+    d = Path(ARTIFACT_ROOT) / "region_sentinels" / "units"
+    return [json.loads(f.read_text()) for f in sorted(d.glob("*.json"))] if d.exists() else []
+
+
+@app.function(image=image, cpu=(1.0, 1.0), memory=int(2 * 1024), timeout=20 * 60,
+              volumes={ARTIFACT_ROOT: artifact_volume})
+def reset_units() -> int:
+    artifact_volume.reload()
+    d = Path(ARTIFACT_ROOT) / "region_sentinels" / "units"
+    n = 0
+    if d.exists():
+        for f in d.glob("*.json"):
+            f.unlink(); n += 1
+    artifact_volume.commit()
+    return n
+
+
+@app.local_entrypoint()
+def report():
+    """Merge and report the ablation from whatever is persisted on the volume."""
+    from collections import Counter, defaultdict
+    out = harvest_units.remote()
+    if not out:
+        print("no sentinel units persisted"); return
+    merged = defaultdict(lambda: defaultdict(list))
+    for o in out:
+        u = o.get("unit") or {}
+        if not u or u.get("status") == "NO_CASE_FOUND":
+            continue
+        for name, r in u.items():
+            for arm, a in r["arms"].items():
+                merged[name][arm].extend(a["attempts"])
+    print(f"units persisted={len(out)}")
+    for name in sorted(merged):
+        print(f"\n{name}")
+        for arm in sorted(merged[name]):
+            atts = merged[name][arm]
+            ok = sum(1 for x in atts if x["status"] == "OK")
+            reasons = Counter(x["stage"] for x in atts if x["status"] != "OK")
+            print(f"  {arm:<11} {ok}/{len(atts)} OK   {dict(reasons)}")
+    Path("diagnostics").mkdir(exist_ok=True)
+    Path("diagnostics/region_sentinels_corrected.json").write_text(
+        json.dumps({n: {a: merged[n][a] for a in merged[n]} for n in merged},
+                   default=str))
