@@ -50,6 +50,21 @@ MEM_MIB = int(3 * 1024)
 _RT: dict[str, Any] = {}
 
 
+def _slot_key(state):
+    """Exact slot layout, NOT the canonical key.
+
+    canonical_state_key is a graph-isomorphism key, so two states that differ
+    only in which slots hold which atoms share it. Mark actions carry slot
+    COORDINATES, so index j denotes a different edit in those two states and a
+    cache hit keyed canonically returns the wrong successor. Measured: 381
+    wrong successors out of 909 on one region, with zero feature mismatches --
+    the states came back valid, just not the ones asked for.
+    """
+    import numpy as np
+    return (np.asarray(state.atom_types).tobytes(),
+            np.asarray(state.bonds).tobytes())
+
+
 def _runtime():
     if "model" in _RT:
         return _RT
@@ -199,8 +214,8 @@ def screen_region(job: dict) -> dict:
         cache: dict = {}
 
         def enum_fn(st):
-            k = canonical_state_key(st)
-            if k not in cache:
+            k = _slot_key(st)          # NOT the canonical key: actions carry
+            if k not in cache:         # slot coordinates (see _slot_key)
                 law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
                 cache[k] = ([m.executor_rule_name for m in law.marks],
                             [m.action for m in law.marks],
@@ -381,8 +396,8 @@ def collect_replay(job: dict) -> dict:
     law_cache: dict = {}
 
     def enum_fn(st):
-        k = canonical_state_key(st)
-        if k not in law_cache:
+        k = _slot_key(st)              # NOT the canonical key: actions carry
+        if k not in law_cache:         # slot coordinates (see _slot_key)
             law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
             law_cache[k] = ([m.executor_rule_name for m in law.marks],
                             [m.action for m in law.marks],
@@ -874,8 +889,8 @@ def rank_region(job: dict) -> dict:
     horizon = int(job.get("horizon", 5))
 
     def enum_fn(st):
-        k = canonical_state_key(st)
-        if k not in cache:
+        k = _slot_key(st)              # NOT the canonical key: actions carry
+        if k not in cache:             # slot coordinates (see _slot_key)
             law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
             cache[k] = ([m.executor_rule_name for m in law.marks],
                         [m.action for m in law.marks],
@@ -1077,21 +1092,6 @@ def rank(max_regions: int = 0):
                           "n_contrast", "n_pairs", "n_correct")} for o in out]}))
 
 
-def _slot_key(state):
-    """Exact slot layout, NOT the canonical key.
-
-    canonical_state_key is a graph-isomorphism key, so two states that differ
-    only in which slots hold which atoms share it. Mark actions carry slot
-    COORDINATES, so index j denotes a different edit in those two states and a
-    cache hit keyed canonically returns the wrong successor. Measured: 381
-    wrong successors out of 909 on one region, with zero feature mismatches --
-    the states came back valid, just not the ones asked for.
-    """
-    import numpy as np
-    return (np.asarray(state.atom_types).tobytes(),
-            np.asarray(state.bonds).tobytes())
-
-
 def make_memo_apply(system, enum_fn, key_fn, guard_fn, calls, cap=200000):
     """One executor application per (state, mark), reused everywhere.
 
@@ -1182,8 +1182,8 @@ def arm_compare(job: dict) -> dict:
     calls = {"n": 0}
 
     def enum_fn(st):
-        k = canonical_state_key(st)
-        if k not in cache:
+        k = _slot_key(st)              # NOT the canonical key: actions carry
+        if k not in cache:             # slot coordinates (see _slot_key)
             law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
             cache[k] = ([m.executor_rule_name for m in law.marks],
                         [m.action for m in law.marks],
@@ -1381,8 +1381,8 @@ def verify_successor_cache(job: dict) -> dict:
     law_cache: dict = {}
 
     def enum_fn(st):
-        k = canonical_state_key(st)
-        if k not in law_cache:
+        k = _slot_key(st)              # NOT the canonical key: actions carry
+        if k not in law_cache:         # slot coordinates (see _slot_key)
             law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
             law_cache[k] = ([m.executor_rule_name for m in law.marks],
                             [m.action for m in law.marks],
