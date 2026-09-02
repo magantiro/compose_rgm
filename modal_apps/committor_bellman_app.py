@@ -1002,6 +1002,59 @@ def list_test_regions(smiles_list: list, per_molecule: int = 6) -> list:
 
 
 @app.local_entrypoint()
+def exec_check(budget_calls: int = 6000, max_trials: int = 400,
+               n_regions: int = 12, src: str = "diagnostics/screen_screen_pool.json"):
+    """CONDITIONAL execution efficiency, not a reachability-rate benchmark.
+
+    Regions are SELECTED BECAUSE a rewrite is known to exist: they come from
+    the pool screen, on molecules disjoint from every molecule the committor
+    trained on, and were found reachable by the frozen structural search. That
+    selection is deliberate and is reported, because the question here is only:
+
+        given that an executable rewrite exists, does R_M * h_phi find it more
+        efficiently than R_M?
+
+    Region-selection coverage is a different question, measured in the general
+    variable-scope gate, not here.
+
+    Matched on EXECUTOR CALLS alone -- one binding resource, no wall-clock
+    valve, so neither arm can be stopped by a limit the other never reaches.
+    """
+    pool = json.loads(Path(src).read_text())
+    reach = [r for r in pool["regions"] if r["reachable"]]
+    train = {s["smiles"] for s in json.loads(
+        Path("docs/GENMOL_T4_DEV_SEEDS.json").read_text())["seeds"]}
+    reach = [r for r in reach if r["smiles"] not in train][:n_regions]
+    assert reach, "no known-reachable held-out regions"
+    print(f"SELECTED CONDITIONAL ON REACHABILITY: {len(reach)} regions, "
+          f"{len({r['smiles'] for r in reach})} molecules, all disjoint from "
+          f"the committor's training molecules")
+    print(f"matched on executor calls only: {budget_calls} per arm per region")
+    jobs = [{"region": r, "case_name": f"x{i}", "budget_calls": budget_calls,
+             "max_trials": max_trials, "arm_deadline_s": 1e9}
+            for i, r in enumerate(reach)]
+    out = [o for o in arm_compare.map(jobs) if o]
+    print(f"\nregions={len(out)}")
+    for arm in ("R_M", "R_M_hphi"):
+        est = sum(1 for o in out if o["arms"][arm]["n_establishment"] > 0)
+        comp = sum(1 for o in out if o["arms"][arm]["n_complete"] > 0)
+        tr = sum(o["arms"][arm]["trials"] for o in out)
+        ca = sum(o["arms"][arm]["calls"] for o in out)
+        dl = sum(1 for o in out if o["arms"][arm].get("hit_deadline"))
+        print(f"  {arm:<10} establishment={est:>3}/{len(out)}  complete={comp:>3}/{len(out)}"
+              f"  trials={tr:<6} calls={ca:<8} deadline_hit={dl}")
+    won = [o["case"] for o in out if o["arms"]["R_M_hphi"]["n_establishment"] > 0
+           and o["arms"]["R_M"]["n_establishment"] == 0]
+    lost = [o["case"] for o in out if o["arms"]["R_M"]["n_establishment"] > 0
+            and o["arms"]["R_M_hphi"]["n_establishment"] == 0]
+    print(f"  h_phi establishes & R_M does not: {len(won)}  |  reverse: {len(lost)}")
+    Path("diagnostics").mkdir(exist_ok=True)
+    Path("diagnostics/exec_check.json").write_text(json.dumps(
+        {"selection": "conditional on reachability, molecule-disjoint",
+         "budget_calls": budget_calls, "per_region": out}, default=str))
+
+
+@app.local_entrypoint()
 def budget_probe(subdir: str = "budget_probe"):
     """Calibration probe: how much does apparent reachability depend on B?
 
@@ -1147,7 +1200,10 @@ def pool_status(subdir: str = "screen_pool"):
     reach = [r for r in scr if r["reachable"]]
     mols = {r["smiles"] for r in reach}
     Path("diagnostics").mkdir(exist_ok=True)
-    Path("diagnostics/pool_screen.json").write_text(json.dumps(
+    # per-subdir filename: a shared name silently overwrote the pool screen
+    # with a rescreen of TRAINING regions, which would have been read back as
+    # held-out data
+    Path(f"diagnostics/screen_{subdir}.json").write_text(json.dumps(
         {"molecules": sorted({r["smiles"] for r in scr}), "regions": scr}))
     print(f"screened={len(scr)} reachable={len(reach)} molecules={len(mols)} "
           f"saturated_reachable={sum(1 for r in reach if r['saturated'])}")
