@@ -1884,3 +1884,185 @@ def verify_law(n: int = 10, depth: int = 3, revisits: int = 3):
     Path("diagnostics").mkdir(exist_ok=True)
     Path("diagnostics/law_cache_equivalence.json").write_text(
         json.dumps({"pass": ok, "per_region": out}))
+
+
+@app.function(image=image, cpu=(1.0, 1.0), memory=MEM_MIB, timeout=2 * 60 * 60,
+              retries=2, max_containers=80,
+              volumes={ARTIFACT_ROOT: artifact_volume})
+def single_attempt(job: dict) -> dict:
+    """ONE independent rewrite attempt: one region, one arm, one seed.
+
+    Replaces the serial-restart design. Hundreds of restarts inside a container
+    estimate a tiny per-region success probability very precisely, which is not
+    the question -- and at ~8s per executor call it projected to 14 hours. The
+    question is whether h_phi makes a KNOWN-reachable rewrite easier to execute
+    at a practical budget, so attempts are independent jobs that fan out.
+
+    A fixed executor-call ceiling bounds one attempt. No wall-clock valve.
+    """
+    import sys
+    sys.path.insert(0, str(Path(REMOTE_ROOT) / "src"))
+    import numpy as np
+    import torch
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.experiments.production_successor_kernel import (
+        canonical_state_key, enumerate_factorized_marked_law)
+    from compose_v4.control.region import Region
+    from compose_v4.control import region_rewrite as RR
+    from compose_v4.gates.med_chem_gate import is_valid
+
+    arm = job["arm"]
+    rt = _runtime(); model, system = rt["model"], rt["system"]
+    rec = job["region"]; smi = rec["smiles"]
+    st0 = pad_molecular_graph(smiles_to_molecular_graph(smi), CANONICAL_SLOTS)
+    raw = smiles_to_molecular_graph(smi)
+    n_real = len(raw.atom_types)
+    region = Region(atoms=frozenset(rec["atoms"]),
+                    boundary=tuple((i, j, o) for i, j, o in rec["boundary"]),
+                    kind="", generator="race", n_atoms_total=n_real,
+                    n_context_components=2, interface=rec["interface"])
+    ctx = RR.context_from_region(region)
+    lin0 = RR.Lineage.initial(range(n_real))
+    old_ids = frozenset(lin0.id_of[s] for s in rec["atoms"] if s in lin0.id_of)
+    pb = RR.prune_budget(region, raw.bonds)
+    schedule = [("grow_new", "until_handoff"), ("prune_old", pb)]
+    ceiling = int(job["max_calls"])
+    calls = {"n": 0}
+    cache: dict = {}
+
+    def enum_fn(st):
+        k = _slot_key(st)
+        if k not in cache:
+            law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
+            cache[k] = ([m.executor_rule_name for m in law.marks],
+                        [m.action for m in law.marks],
+                        np.array([m.probability for m in law.marks], float))
+        return cache[k]
+
+    def _guard(y):
+        k = canonical_state_key(y)
+        return bool(k and is_valid(k) and RR.graph_connected(y)
+                    and RR.context_preserved(st0, y, ctx.frozen,
+                                             ctx.terminal_context_slots))
+
+    base_apply = make_memo_apply(system, enum_fn, canonical_state_key, _guard, calls)
+
+    def apply_fn(st, j):
+        if calls["n"] >= ceiling:      # hard allowance for ONE attempt
+            return None
+        return base_apply(st, j)
+
+    net = None
+    if arm == "R_M_hphi":
+        artifact_volume.reload()
+        ck = torch.load(f"{OUT_DIR}/committor_bellman_v1.pt", map_location="cpu")
+        net = _build_net(torch, int(ck["n_features"]))
+        net.load_state_dict(ck["state_dict"]); net.eval()
+        torch.set_grad_enabled(False)
+    hcache: dict = {}
+
+    def h_model(y, c, lin, budget, kind):
+        key = (_slot_key(y), int(budget), kind)
+        if key not in hcache:
+            f = RR.features_from_shared(
+                RR.structural_features_shared(y, c, lin, old_ids), int(budget), kind)
+            hcache[key] = float(torch.sigmoid(
+                net(torch.tensor([f], dtype=torch.float32))).item())
+        return hcache[key]
+
+    t0 = time.time()
+    p = RR.propose(enum_fn, apply_fn, ctx, st0, schedule=schedule,
+                   rng=np.random.default_rng(int(job["seed"])),
+                   lineage=lin0, original_region_ids=old_ids,
+                   max_handoff_steps=int(job.get("max_handoff", 16)),
+                   h_terminals=None, beta=0.0,
+                   h_model=(h_model if arm == "R_M_hphi" else None),
+                   target_ess=float(job.get("target_ess", 0.3)),
+                   epsilon=float(job.get("epsilon", 0.1)))
+    end = p.endpoint if p.endpoint is not None else st0
+    lin = p.lineage or lin0
+    res = {"case": job["case_name"], "arm": arm, "seed": int(job["seed"]),
+           "smiles": smi, "region_atoms": rec["atoms"],
+           "saturated": bool(rec.get("saturated")),
+           "establishment": bool(RR.establishment_terminal(end, ctx, lin, old_ids)),
+           "complete": bool(RR.completion_terminal(end, ctx, lin, old_ids)),
+           "calls": calls["n"], "hit_ceiling": calls["n"] >= ceiling,
+           "steps": len(p.steps),   # Proposal.steps is a list of step records
+           "first_handoff_step": p.first_handoff_step,
+           "status": p.status, "stage": p.stage, "sec": time.time() - t0}
+    d = Path(OUT_DIR) / "race"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / f"{job['case_name']}_{arm}_{job['seed']}.json").write_text(json.dumps(res))
+    artifact_volume.commit()
+    print(f"[race] {job['case_name']} {arm} s{job['seed']} "
+          f"est={int(res['establishment'])} comp={int(res['complete'])} "
+          f"calls={res['calls']} steps={res['steps']} ceil={int(res['hit_ceiling'])} "
+          f"{res['sec']:.0f}s", flush=True)
+    return res
+
+
+@app.local_entrypoint()
+def profile_attempt(max_calls: int = 4000, n: int = 2):
+    """Measure what ONE full attempt actually costs post-cache-fix, on 1-2
+    regions, one base and one guided. The ceiling for the race is chosen from
+    this and then FROZEN -- never tuned on whether either arm succeeds."""
+    scr = json.loads(Path("diagnostics/screen_dude_combined.json").read_text())
+    reach = [r for r in scr["regions"] if r["reachable"]][:n]
+    jobs = [{"region": r, "case_name": f"p{i}", "arm": a, "seed": 1,
+             "max_calls": max_calls}
+            for i, r in enumerate(reach) for a in ("R_M", "R_M_hphi")]
+    out = [o for o in single_attempt.map(jobs) if o]
+    for o in sorted(out, key=lambda o: (o["case"], o["arm"])):
+        print(f"  {o['case']} {o['arm']:<10} calls={o['calls']:<6} steps={o['steps']:<3} "
+              f"est={int(o['establishment'])} comp={int(o['complete'])} "
+              f"ceiling_hit={int(o['hit_ceiling'])} {o['sec']:.0f}s")
+    mx = max((o["calls"] for o in out), default=0)
+    print(f"\nmax calls for one attempt={mx}  -> suggested frozen ceiling="
+          f"{int(mx * 1.5)}")
+
+
+@app.local_entrypoint()
+def race(seeds: int = 2, seed0: int = 1, max_calls: int = 4150,
+         n_regions: int = 16):
+    """STAGE: independent attempts, paired by (region, seed), one wave.
+
+    Matched per ATTEMPT with a frozen call ceiling, not on executor calls.
+    The profile showed h_phi spends ~100x the calls of R_M but only ~2x the
+    wall time -- its calls are cheap memoized applies while R_M's each trigger
+    a fresh law enumeration -- so matching on calls would penalise guidance for
+    being cheap per call. Cost is reported instead of equalised.
+    """
+    scr = json.loads(Path("diagnostics/screen_dude_combined.json").read_text())
+    reach = [r for r in scr["regions"] if r["reachable"]][:n_regions]
+    print(f"SELECTED CONDITIONAL ON REACHABILITY: {len(reach)} regions, "
+          f"{len({r['smiles'] for r in reach})} molecules, disjoint from training")
+    print(f"frozen ceiling={max_calls} calls/attempt, seeds={seed0}..{seed0+seeds-1}")
+    jobs = [{"region": r, "case_name": f"r{i}", "arm": a, "seed": s,
+             "max_calls": max_calls}
+            for i, r in enumerate(reach)
+            for a in ("R_M", "R_M_hphi")
+            for s in range(seed0, seed0 + seeds)]
+    print(f"jobs={len(jobs)} (one wave)")
+    out = [o for o in single_attempt.map(jobs) if o]
+    Path("diagnostics").mkdir(exist_ok=True)
+    Path(f"diagnostics/race_seed{seed0}_{seed0+seeds-1}.json").write_text(
+        json.dumps(out, default=str))
+    import statistics as st_
+    for arm in ("R_M", "R_M_hphi"):
+        v = [o for o in out if o["arm"] == arm]
+        est = sum(1 for o in v if o["establishment"])
+        comp = sum(1 for o in v if o["complete"])
+        print(f"  {arm:<10} attempts={len(v):<4} establishment={est:<4} complete={comp:<4} "
+              f"median_calls={st_.median([o['calls'] for o in v]) if v else 0:.0f} "
+              f"median_sec={st_.median([o['sec'] for o in v]) if v else 0:.0f}")
+    # paired by (region, seed): discordant pairs are the evidence
+    pair = {}
+    for o in out:
+        pair.setdefault((o["case"], o["seed"]), {})[o["arm"]] = o
+    win = sum(1 for p in pair.values()
+              if p.get("R_M_hphi", {}).get("establishment") and not p.get("R_M", {}).get("establishment"))
+    loss = sum(1 for p in pair.values()
+               if p.get("R_M", {}).get("establishment") and not p.get("R_M_hphi", {}).get("establishment"))
+    tie = len(pair) - win - loss
+    print(f"  paired (region,seed): h_phi only={win}  R_M only={loss}  tied={tie}  of {len(pair)}")

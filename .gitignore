@@ -99,3 +99,6 @@ artifacts/tdc_originals/
 
 # Distribution bundles rebuilt from sources
 *.zip
+
+# Downloaded upstream datasets (rebuild with tools/build_dude_pool.py)
+.cache/
