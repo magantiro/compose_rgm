@@ -1,0 +1,79 @@
+{
+  "status": "OK",
+  "n_states": 2844,
+  "stages": {
+    "establishment|b=1": {
+      "target_mean": 0.12670516967773438,
+      "target_max": 1.0,
+      "n_nonzero": 1253,
+      "mse": 0.04582419991493225
+    },
+    "completion|b=1": {
+      "target_mean": 0.009811553172767162,
+      "target_max": 1.0,
+      "n_nonzero": 90,
+      "mse": 0.04582419991493225
+    },
+    "establishment|b=2": {
+      "target_mean": 0.20847532153129578,
+      "target_max": 1.0,
+      "n_nonzero": 2844,
+      "mse": 0.01532736886292696
+    },
+    "completion|b=2": {
+      "target_mean": 0.09017270803451538,
+      "target_max": 1.0,
+      "n_nonzero": 2844,
+      "mse": 0.01532736886292696
+    },
+    "establishment|b=3": {
+      "target_mean": 0.25269263982772827,
+      "target_max": 1.0,
+      "n_nonzero": 2844,
+      "mse": 0.006779719144105911
+    },
+    "completion|b=3": {
+      "target_mean": 0.10169462114572525,
+      "target_max": 1.0,
+      "n_nonzero": 2844,
+      "mse": 0.006779719144105911
+    },
+    "establishment|b=4": {
+      "target_mean": 0.2757791578769684,
+      "target_max": 1.0,
+      "n_nonzero": 2844,
+      "mse": 0.004163145087659359
+    },
+    "completion|b=4": {
+      "target_mean": 0.10393021255731583,
+      "target_max": 1.0,
+      "n_nonzero": 2844,
+      "mse": 0.004163145087659359
+    },
+    "establishment|b=5": {
+      "target_mean": 0.29096719622612,
+      "target_max": 1.0,
+      "n_nonzero": 2844,
+      "mse": 0.0031022096518427134
+    },
+    "completion|b=5": {
+      "target_mean": 0.10630276054143906,
+      "target_max": 1.0,
+      "n_nonzero": 2844,
+      "mse": 0.0031022096518427134
+    },
+    "establishment|b=6": {
+      "target_mean": 0.30391883850097656,
+      "target_max": 1.0,
+      "n_nonzero": 2844,
+      "mse": 0.0025098263286054134
+    },
+    "completion|b=6": {
+      "target_mean": 0.10943189263343811,
+      "target_max": 1.0,
+      "n_nonzero": 2844,
+      "mse": 0.0025098263286054134
+    }
+  },
+  "path": "/artifacts/region_committor/committor_bellman_v1.pt"
+}
