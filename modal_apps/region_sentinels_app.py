@@ -153,7 +153,13 @@ def sentinel_unit(job: dict) -> dict:
         cache: dict = {}
 
         def enum_fn(st):
-            k = canonical_state_key(st)
+            # Slot layout, NOT canonical_state_key: mark actions carry slot
+            # COORDINATES, and canonically-equal states with different layouts
+            # share a canonical key, so a hit returned another state's actions
+            # and probabilities. Measured 9-10 colliding keys per 65-82 during
+            # ordinary exploration.
+            k = (np.asarray(st.atom_types).tobytes(),
+                 np.asarray(st.bonds).tobytes())
             if k not in cache:
                 law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
                 cache[k] = ([m.executor_rule_name for m in law.marks],
