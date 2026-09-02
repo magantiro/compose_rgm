@@ -1002,6 +1002,43 @@ def list_test_regions(smiles_list: list, per_molecule: int = 6) -> list:
 
 
 @app.local_entrypoint()
+def screen_dude(batch: int = 4, per_molecule: int = 2, n_molecules: int = 60,
+                subdir: str = "screen_dude"):
+    """Screen the fresh DUD-E holdout pool -- SAME DISTRIBUTION as the dev seeds.
+
+    PREREGISTERED QUALIFICATION GATE, fixed before looking at any result:
+        >= 10 reachable regions spanning >= 5 molecules.
+
+    Screening stops once that is met; stragglers are not waited on. The full
+    denominator screened is recorded either way, so the stop cannot flatter the
+    rate -- though the rate is not the point here. These regions exist to
+    supply a CONDITIONAL execution test, not a coverage benchmark.
+    """
+    pool = json.loads(Path("docs/DUDE_HOLDOUT_POOL.json").read_text())
+    dv = json.loads(Path("docs/GENMOL_T4_DEV_SEEDS.json").read_text())["seeds"]
+    used = {s["smiles"] for s in dv}
+    smiles = [m["smiles"] for m in pool["molecules"] if m["smiles"] not in used][:n_molecules]
+    print(f"fresh DUD-E molecules={len(smiles)} (of {pool['n']} available)")
+    regions = list_many_regions.remote(smiles, per_molecule=per_molecule)
+    print(f"eligible splitting regions={len(regions)}")
+    jobs = [{"regions": regions[i:i + batch], "unit": i // batch, "subdir": subdir}
+            for i in range(0, len(regions), batch)]
+    print(f"screen units={len(jobs)}  GATE: >=10 reachable across >=5 molecules")
+    list(screen_region.map(jobs))
+    scr = harvest_screen.remote(subdir)
+    reach = [r for r in scr if r["reachable"]]
+    mols = {r["smiles"] for r in reach}
+    Path("diagnostics").mkdir(exist_ok=True)
+    Path(f"diagnostics/screen_{subdir}.json").write_text(json.dumps(
+        {"molecules": sorted({r["smiles"] for r in scr}), "regions": scr}))
+    print(f"DENOMINATOR screened={len(scr)}  reachable={len(reach)} "
+          f"({len(reach) / max(1, len(scr)):.1%}) across {len(mols)} molecules")
+    print(f"  saturated reachable={sum(1 for r in reach if r['saturated'])}")
+    print("  GATE MET" if (len(reach) >= 10 and len(mols) >= 5)
+          else "  gate not met -- screen more molecules")
+
+
+@app.local_entrypoint()
 def exec_check(budget_calls: int = 6000, max_trials: int = 400,
                n_regions: int = 12, src: str = "diagnostics/screen_screen_pool.json"):
     """CONDITIONAL execution efficiency, not a reachability-rate benchmark.
