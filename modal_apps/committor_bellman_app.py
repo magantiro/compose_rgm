@@ -1002,7 +1002,109 @@ def list_test_regions(smiles_list: list, per_molecule: int = 6) -> list:
 
 
 @app.local_entrypoint()
-def screen_pool(batch: int = 4, per_molecule: int = 6,
+def budget_probe(subdir: str = "budget_probe"):
+    """Calibration probe: how much does apparent reachability depend on B?
+
+    "Reachable" has meant "completable within 5 primitive edits under
+    frozen-context rules". That was a fair unit test for future-aware plateau
+    reasoning, where the known paths were 2-3 edits long. It is NOT a statement
+    about whether a region is rewriteable: a scaffold rewrite may legitimately
+    need 20+ primitive edits, and calling it unreachable at B=5 is a statement
+    about the budget, not the molecule.
+
+    So: same frozen search, same regions, only B varies over {5, 10, 20} plus a
+    structural allowance
+
+        B(M) = 2|V_M| - 1 + |boundary M|
+
+    (|V_M| atoms, a connected region's spanning-tree lower bound on internal
+    bonds, and one step per boundary bond). Measures only whether a complete
+    rewrite exists and the step it first completes at. No retraining, no
+    replication, no committor work.
+    """
+    scr = json.loads(Path("diagnostics/region_screen.json").read_text())
+    regions = scr["regions"]
+    free_ok = [r for r in regions if r["reachable"] and not r["saturated"]][:3]
+    sat = [r for r in regions if r["saturated"]][:3]
+    big = sorted(regions, key=lambda r: -r["size"])[:2]
+    sel, seen = [], set()
+    for r in free_ok + sat + big:
+        k = (r["smiles"], tuple(r["atoms"]))
+        if k not in seen:
+            seen.add(k); sel.append(r)
+    print(f"probe regions={len(sel)}  "
+          f"(free-reachable={len(free_ok)} saturated={len(sat)} largest={len(big)})")
+    jobs, u = [], 0
+    for r in sel:
+        bm = 2 * int(r["size"]) - 1 + len(r["boundary"])
+        for depth in (5, 10, 20, bm):
+            jobs.append({"regions": [r], "unit": u, "subdir": f"{subdir}_d{depth}",
+                         "depth": int(depth)})
+            u += 1
+    print(f"units={len(jobs)}  (B in 5/10/20/structural, one region each)")
+    out = list(screen_region.map(jobs))
+    rows = []
+    for j, o in zip(jobs, out):
+        for rr in o["regions"]:
+            rows.append({"smiles": rr["smiles"], "size": rr["size"],
+                         "saturated": rr["saturated"], "B": j["depth"],
+                         "reachable": rr["reachable"],
+                         "first_completion": rr["reach_depth"]})
+    Path("diagnostics").mkdir(exist_ok=True)
+    Path("diagnostics/budget_probe.json").write_text(json.dumps(rows))
+    from collections import defaultdict
+    by_b = defaultdict(list)
+    for r in rows:
+        by_b[r["B"]].append(r)
+    print("\nB      regions  complete  first-completion steps")
+    for b in sorted(by_b):
+        v = by_b[b]
+        ok = [x for x in v if x["reachable"]]
+        print(f"{b:<6} {len(v):<8} {len(ok):<9} "
+              f"{sorted(x['first_completion'] for x in ok)}")
+    print("\nper region (size, saturated) -> first completion by B")
+    per = defaultdict(dict)
+    for r in rows:
+        per[(r["smiles"][:28], r["size"], r["saturated"])][r["B"]] = r["first_completion"]
+    for k, v in per.items():
+        print(f"  size={k[1]} sat={int(k[2])} {k[0]}: "
+              + " ".join(f"B{b}={v[b]}" for b in sorted(v)))
+
+
+@app.local_entrypoint()
+def rescreen_reachable(batch: int = 2, subdir: str = "rescreen"):
+    """Re-screen the regions the PRE-FIX screen called reachable.
+
+    Same molecules, same regions, same frozen search -- only the law cache key
+    changed. This separates two explanations for the fresh pool's 0.7%
+    reachability against the training pool's 10.8%:
+
+      distribution  the new molecules are simply harder, or
+      kernel        the canonical-key collisions were manufacturing paths that
+                    a correct transition law does not contain.
+
+    The second would mean the committor's training positives were partly
+    artifacts, so it has to be answered before any refit.
+    """
+    scr = json.loads(Path("diagnostics/region_screen.json").read_text())
+    prev = [r for r in scr["regions"] if r["reachable"]]
+    print(f"previously-reachable regions={len(prev)} "
+          f"across {len({r['smiles'] for r in prev})} molecules")
+    jobs = [{"regions": prev[i:i + batch], "unit": i // batch, "subdir": subdir}
+            for i in range(0, len(prev), batch)]
+    print(f"units={len(jobs)}")
+    list(screen_region.map(jobs))
+    now = harvest_screen.remote(subdir)
+    still = [r for r in now if r["reachable"]]
+    print(f"STILL REACHABLE under the corrected kernel: {len(still)}/{len(now)}")
+    print(f"  molecules={len({r['smiles'] for r in still})}")
+    print(f"  depths={sorted(r['reach_depth'] for r in still if r['reach_depth'])}")
+    Path("diagnostics/rescreen_reachable.json").write_text(json.dumps(
+        {"n_prev": len(prev), "n_still": len(still), "regions": now}))
+
+
+@app.local_entrypoint()
+def screen_pool(batch: int = 4, per_molecule: int = 2, n_molecules: int = 150,
                 subdir: str = "screen_pool"):
     """Screen the fresh benchmark-disjoint pool with the corrected kernel.
 
@@ -1013,7 +1115,7 @@ def screen_pool(batch: int = 4, per_molecule: int = 6,
     pool = json.loads(Path("docs/STRUCTURAL_QUAL_POOL.json").read_text())
     dv = json.loads(Path("docs/GENMOL_T4_DEV_SEEDS.json").read_text())["seeds"]
     train = {s["smiles"] for s in dv}
-    smiles = [s for s in pool["smiles"] if s not in train]
+    smiles = [s for s in pool["smiles"] if s not in train][:n_molecules]
     print(f"pool molecules={len(smiles)}")
     regions = list_many_regions.remote(smiles, per_molecule=per_molecule)
     print(f"eligible splitting regions={len(regions)}")
