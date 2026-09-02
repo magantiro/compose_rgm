@@ -404,9 +404,8 @@ def report():
         u = o.get("unit") or {}
         if not u or u.get("status") == "NO_CASE_FOUND":
             continue
-        for name, r in u.items():
-            for arm, a in r["arms"].items():
-                merged[name][arm].extend(a["attempts"])
+        for arm, a in u["arms"].items():          # unit is flat: case_name+arms
+            merged[u["case_name"]][arm].extend(a["attempts"])
     print(f"units persisted={len(out)}")
     for name in sorted(merged):
         print(f"\n{name}")
@@ -419,3 +418,33 @@ def report():
     Path("diagnostics/region_sentinels_corrected.json").write_text(
         json.dumps({n: {a: merged[n][a] for a in merged[n]} for n in merged},
                    default=str))
+
+
+@app.local_entrypoint()
+def requalify(trials: int = 4, n_seeds: int = 6):
+    """Post-cache mechanism requalification, NOT the 12-trial experiment.
+
+    One trial per unit so each persists as soon as it finishes, and only the
+    load-bearing arm: splitting_free / directed. The saturated directed arm is
+    deliberately excluded -- arbitrary saturated splitting is already known to
+    be a rare short-horizon regime, and it must not hold up the algorithm.
+
+    The question here is narrow: with the corrected law cache, does the
+    mechanism still establish handoff at all? Not: does it reproduce 12/12 with
+    an explicit depth-3 lookahead we have already decided is too expensive to
+    deploy.
+    """
+    from collections import Counter
+    dv = json.loads(Path("docs/GENMOL_T4_DEV_SEEDS.json").read_text())["seeds"]
+    smiles = [s["smiles"] for s in dv[:n_seeds]]
+    jobs = [{"case_name": "splitting_free", "smiles": smiles, "arm": "directed",
+             "trials": [t]} for t in range(trials)]
+    print(f"requalification units={len(jobs)} (1 trial each, splitting_free/directed)")
+    out = list(sentinel_unit.map(jobs))
+    atts = [x for o in out if (o.get("unit") or {}).get("arms")
+            for a in o["unit"]["arms"].values() for x in a["attempts"]]
+    ok = sum(1 for x in atts if x["status"] == "OK")
+    print(f"\nsplitting_free / directed (corrected kernel): {ok}/{len(atts)} establish handoff")
+    print(f"  failure stages: {dict(Counter(x['stage'] for x in atts if x['status'] != 'OK'))}")
+    print("  MECHANISM REQUALIFIED" if ok > 0 else
+          "  NO HANDOFF -- stop and diagnose before Gate 3")
