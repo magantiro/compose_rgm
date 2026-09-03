@@ -1,7 +1,18 @@
 # Region resampling — variable-scope executable rewriting
 
-**Status: splitting phase CLOSED.** The remaining open item is the general
-local→global gate, not more splitting work.
+**Status: CLOSED — structural execution QUALIFIED.**
+
+    R_M        256 attempts   2 establishment    0 complete    0/16 regions
+    R_M·h_phi  256 attempts 142 establishment   26 complete    7/16 regions
+
+16 known-reachable held-out regions, molecules disjoint from training, 16
+particles per (region, arm), matched horizon / ceiling / regions / seeds. N came
+from the measured handoff mass via 1-(1-m)^N and kappa=1.0 was declared, both
+before the run. This is CONDITIONAL execution efficiency -- regions were chosen
+because a rewrite exists -- not a coverage rate.
+
+The remaining open item is the general local→global gate, not more splitting
+work.
 
 The question: molecular design as control of a frozen learned process, where a
 transformation is a *region* rewrite — a connected mutable region `M`, a
@@ -107,6 +118,23 @@ All under the `compose-v4-artifacts` volume, `/region_committor/`:
 `screen/`, `collect/`, `arms/`, `race/`, plus the checkpoint. Local mirrors land
 in `diagnostics/`. Every unit persists independently, so a dead client never
 destroys finished work.
+
+## The bug that hid the result
+
+Every guided-vs-base zero before 2026-09-02 was `R_M` against `R_M` plus
+overhead, and none of them is evidence about the committor. `adaptive_tilt`
+bisects a temperature for an ABSOLUTE ESS target and returns the untilted base
+whenever the base kernel's own ESS already sits below it. Measured base ESS was
+0.061 against a 0.3 target, so the early return fired at all 79 steps, T pinned
+to its bound, and `h^(1/T) ≈ 1` collapsed the guided proposal onto the base.
+
+The committor was never the problem: `h_max_progress / h_max_all = 1.000`, so
+the progress successor was top-ranked at essentially every step. `kl_tilt`
+replaces the absolute target with a base-relative trust region and raised
+progress mass from 0.00004 to 0.09359 at kappa=1 from the SAME fitted model.
+
+**Check the reported tilt temperature before trusting any guided-vs-base
+result.** If it sits at the bisection bound, guidance was off.
 
 ## What this phase established
 
