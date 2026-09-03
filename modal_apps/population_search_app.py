@@ -234,6 +234,20 @@ def search_cell(job: dict) -> dict:
             archive[key] = max(archive.get(key, -1.0), sc_new)
             pop = sorted(pop + [(key, sc_new)], key=lambda t: -t[1])[:pop_size]
         events.append(ev)
+        # Persist every iteration. Persisting only on completion lost three
+        # whole cells when a session restart hit at 176/180 iterations: each was
+        # one or two iterations short, so ~93% of their work was discarded even
+        # though almost everything had been computed.
+        _partial = {"cell": job["cell"], "arm": job.get("arm", "mu_exec"),
+                    "seed_smiles": start, "seed_score": s0,
+                    "best_score": max(archive.values()),
+                    "improvement": max(archive.values()) - s0,
+                    "n_archive": len(archive), "events": events,
+                    "complete": False, "sec": time.time() - t0}
+        _d = Path(OUT_DIR) / "population"
+        _d.mkdir(parents=True, exist_ok=True)
+        (_d / f"{job['cell']}.json").write_text(json.dumps(_partial))
+        artifact_volume.commit()
         print(f"[pop] {job['cell']} it={it} {reg.interface}/{reg.kind} "
               f"r_rel={reg.released_fraction:.2f} ok={int(ev['ok'])} "
               f"best={max(s for s in archive.values()):.4f} "
@@ -244,7 +258,7 @@ def search_cell(job: dict) -> dict:
            "best_score": max(archive.values()),
            "improvement": max(archive.values()) - s0,
            "n_archive": len(archive), "events": events,
-           "sec": time.time() - t0}
+           "complete": True, "sec": time.time() - t0}
     d_out = Path(OUT_DIR) / "population"
     d_out.mkdir(parents=True, exist_ok=True)
     (d_out / f"{job['cell']}.json").write_text(json.dumps(res))
@@ -367,6 +381,36 @@ def ab(indices: str = "3,9,8,5,21,4", iters: int = 15, pop_size: int = 6,
                if p.get("mu_exec", 0) > p.get("Q_taskvalue", 0))
     print(f"\npaired by seed: Q better={wins}  mu_exec better={loss}  "
           f"tied={len(pair) - wins - loss}  of {len(pair)}")
+
+
+@app.local_entrypoint()
+def resume(cells: str = "A4,B3,B21", iters: int = 15, pop_size: int = 6,
+           particles: int = 1, tau: float = 0.05):
+    """Run only the named A/B cells, e.g. after a client death.
+
+    Cell names are arm letter plus dev-seed index: A=mu_exec, B=Q_taskvalue.
+    Reruns nothing that already persisted.
+    """
+    import sys as _sys
+    _sys.path.insert(0, "tools")
+    from preflight import assert_synced
+    assert_synced(strict=False)
+    dv = json.loads(Path("docs/GENMOL_T4_DEV_SEEDS.json").read_text())["seeds"]
+    table = json.loads(Path("diagnostics/task_value_qed.json").read_text())
+    jobs = []
+    for c in cells.split(","):
+        c = c.strip()
+        arm_letter, idx = c[0], int(c[1:])
+        base = {"cell": c, "seed_smiles": dv[idx]["smiles"], "seed": 71 + idx,
+                "iters": iters, "pop_size": pop_size, "particles": particles,
+                "tau": tau}
+        if arm_letter == "B":
+            jobs.append({**base, "arm": "Q_taskvalue", "value_table": table})
+        else:
+            jobs.append({**base, "arm": "mu_exec"})
+    print(f"resuming {len(jobs)} cells: {[j['cell'] for j in jobs]}")
+    out = [o for o in search_cell.map(jobs) if o and "error" not in o]
+    print(f"completed {len(out)}")
 
 
 @app.local_entrypoint()
