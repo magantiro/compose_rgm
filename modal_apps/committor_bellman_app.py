@@ -2096,3 +2096,164 @@ def race(seeds: int = 2, seed0: int = 1, max_calls: int = 4150,
                if p.get("R_M", {}).get("establishment") and not p.get("R_M_hphi", {}).get("establishment"))
     tie = len(pair) - win - loss
     print(f"  paired (region,seed): h_phi only={win}  R_M only={loss}  tied={tie}  of {len(pair)}")
+
+
+@app.function(image=image, cpu=(1.0, 1.0), memory=MEM_MIB, timeout=2 * 60 * 60,
+              retries=2, max_containers=80,
+              volumes={ARTIFACT_ROOT: artifact_volume})
+def proposal_mass(job: dict) -> dict:
+    """How much proposal mass actually lands on progress successors?
+
+        m = sum over {y : d_old(y) < d_old(x)} of q(y|x)
+
+    This is the number that decides whether a population can work, and the
+    branching factor is NOT a substitute for it: 1/115 per step assumes uniform
+    sampling and a single successful continuation, and the guided proposal is
+    deliberately neither. With m in hand the population size follows from
+    1 - (1-m)^N instead of from a worst-case combinatorial bound.
+
+    Both arms are measured with the SAME construction propose() uses --
+    w normalised over admissible actions, then for the guided arm the
+    ESS-adaptive tilt and the epsilon exploration floor -- so the comparison is
+    of proposals, not of two different codepaths.
+    """
+    import sys
+    sys.path.insert(0, str(Path(REMOTE_ROOT) / "src"))
+    import numpy as np
+    import torch
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.experiments.production_successor_kernel import (
+        canonical_state_key, enumerate_factorized_marked_law)
+    from compose_v4.control.region import Region
+    from compose_v4.control import region_rewrite as RR
+    from compose_v4.gates.med_chem_gate import is_valid
+
+    rt = _runtime(); model, system = rt["model"], rt["system"]
+    rec = job["region"]; smi = rec["smiles"]
+    st0 = pad_molecular_graph(smiles_to_molecular_graph(smi), CANONICAL_SLOTS)
+    n_real = len(smiles_to_molecular_graph(smi).atom_types)
+    region = Region(atoms=frozenset(rec["atoms"]),
+                    boundary=tuple((i, j, o) for i, j, o in rec["boundary"]),
+                    kind="", generator="mass", n_atoms_total=n_real,
+                    n_context_components=2, interface=rec["interface"])
+    ctx = RR.context_from_region(region)
+    lin0 = RR.Lineage.initial(range(n_real))
+    old_ids = frozenset(lin0.id_of[s] for s in rec["atoms"] if s in lin0.id_of)
+    eps = float(job.get("epsilon", 0.1))
+    tess = float(job.get("target_ess", 0.3))
+    cache: dict = {}
+    calls = {"n": 0}
+
+    def enum_fn(st):
+        k = _slot_key(st)
+        if k not in cache:
+            law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
+            cache[k] = ([m.executor_rule_name for m in law.marks],
+                        [m.action for m in law.marks],
+                        np.array([m.probability for m in law.marks], float))
+        return cache[k]
+
+    def _guard(y):
+        k = canonical_state_key(y)
+        return bool(k and is_valid(k) and RR.graph_connected(y)
+                    and RR.context_preserved(st0, y, ctx.frozen,
+                                             ctx.terminal_context_slots))
+
+    apply_fn = make_memo_apply(system, enum_fn, canonical_state_key, _guard, calls)
+
+    artifact_volume.reload()
+    ck = torch.load(f"{OUT_DIR}/committor_bellman_v1.pt", map_location="cpu")
+    net = _build_net(torch, int(ck["n_features"]))
+    net.load_state_dict(ck["state_dict"]); net.eval()
+    torch.set_grad_enabled(False)
+
+    steps, st, lin = [], st0, lin0
+    t0 = time.time()
+    for t in range(int(job.get("horizon", 6))):
+        fams, acts, probs = enum_fn(st)
+        idx, _w = RR.admissible_indices(fams, acts, ctx)
+        if not idx:
+            break
+        base_d = RR.old_dependence(st, ctx, lin, old_ids)
+        w = np.array([float(probs[j]) for j in idx], float)
+        if w.sum() <= 0:
+            break
+        w = w / w.sum()
+        ds, hs, keep = [], np.zeros(len(idx)), []
+        for k_i, j in enumerate(idx):
+            y = apply_fn(st, j)
+            if y is None:
+                ds.append(None); continue
+            l2 = lin.observe(fams[j], acts[j])
+            d = RR.old_dependence(y, ctx, l2, old_ids)
+            ds.append(d)
+            hs[k_i] = float(torch.sigmoid(net(torch.tensor(
+                [RR.features_from_shared(
+                    RR.structural_features_shared(y, ctx, l2, old_ids),
+                    max(0, 6 - t), "establishment")], dtype=torch.float32))).item())
+            keep.append((k_i, j, y, l2, d))
+        q, T, ess = RR.adaptive_tilt(w, hs, target_ess=tess)
+        q_guided = (1.0 - eps) * q + eps * w          # exactly propose()'s mix
+        prog = [k for k, d in enumerate(ds) if d is not None and d < base_d]
+        hand = [k for k, d in enumerate(ds) if d == 0]
+        steps.append({
+            "t": t, "d_old": int(base_d), "n_admissible": len(idx),
+            "n_progress": len(prog), "n_handoff": len(hand),
+            "mass_base_progress": float(w[prog].sum()) if prog else 0.0,
+            "mass_guided_progress": float(q_guided[prog].sum()) if prog else 0.0,
+            "mass_base_handoff": float(w[hand].sum()) if hand else 0.0,
+            "mass_guided_handoff": float(q_guided[hand].sum()) if hand else 0.0,
+            "tilt_T": float(T), "ess": float(ess),
+            "h_max_progress": float(hs[prog].max()) if prog else 0.0,
+            "h_max_all": float(hs.max()),
+        })
+        if hand:
+            break                       # handoff is available here; that is the
+                                        # decision the population has to make
+        if not keep:
+            break
+        nxt = min(keep, key=lambda z: (z[4], -float(probs[z[1]])))
+        st, lin = nxt[2], nxt[3]
+    res = {"case": job["case_name"], "smiles": smi, "steps": steps,
+           "calls": calls["n"], "sec": time.time() - t0}
+    d = Path(OUT_DIR) / "mass"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / f"{job['case_name']}.json").write_text(json.dumps(res))
+    artifact_volume.commit()
+    s0 = steps[-1] if steps else {}
+    print(f"[mass] {job['case_name']} steps={len(steps)} "
+          f"last d_old={s0.get('d_old')} n_prog={s0.get('n_progress')} "
+          f"base={s0.get('mass_base_progress', 0):.4f} "
+          f"guided={s0.get('mass_guided_progress', 0):.4f} "
+          f"{time.time() - t0:.0f}s", flush=True)
+    return res
+
+
+@app.local_entrypoint()
+def mass(n_regions: int = 16, horizon: int = 6):
+    """Measure proposal mass on progress successors, then size the population."""
+    scr = json.loads(Path("diagnostics/screen_dude_combined.json").read_text())
+    reach = [r for r in scr["regions"] if r["reachable"]][:n_regions]
+    jobs = [{"region": r, "case_name": f"m{i}", "horizon": horizon}
+            for i, r in enumerate(reach)]
+    print(f"measuring proposal mass on {len(jobs)} known-reachable held-out regions")
+    out = [o for o in proposal_mass.map(jobs) if o]
+    Path("diagnostics").mkdir(exist_ok=True)
+    Path("diagnostics/proposal_mass.json").write_text(json.dumps(out, default=str))
+    allst = [s for o in out for s in o["steps"]]
+    if not allst:
+        print("no steps recorded"); return
+    import statistics as st_
+    for key in ("progress", "handoff"):
+        b = [s[f"mass_base_{key}"] for s in allst]
+        g = [s[f"mass_guided_{key}"] for s in allst]
+        print(f"\n{key} successors: steps with any = "
+              f"{sum(1 for s in allst if s['n_' + key] > 0)}/{len(allst)}")
+        print(f"  base   mass: median={st_.median(b):.4f} max={max(b):.4f}")
+        print(f"  guided mass: median={st_.median(g):.4f} max={max(g):.4f}")
+        for m, lbl in ((st_.median(g), "median"), (max(g), "best")):
+            if m > 0:
+                import math
+                need = math.ceil(math.log(0.3) / math.log(1 - m)) if m < 1 else 1
+                print(f"  guided {lbl} mass {m:.4f} -> N for 70% success: {need}")
