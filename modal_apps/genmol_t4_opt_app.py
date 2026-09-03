@@ -576,6 +576,20 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
         ev.update({"qed": pr["qed"], "sa": pr["sa"], "sim": pr["sim"],
                    "v": pr["v"], "ds": ds, "charged": True})
         events.append(ev)
+        # Persist after every CHARGED call. Writing only at the end would put a
+        # multi-hour cell one interruption away from losing everything, and
+        # would make progress unobservable while it runs.
+        _f = [a for a in archive if a["v"] <= 0 and a["ds"] is not None
+              and a["smiles"] != seed]
+        _b = min(_f, key=lambda a: a["ds"]) if _f else None
+        _d = Path(POP_OUT); _d.mkdir(parents=True, exist_ok=True)
+        (_d / f"{task['cell']}.json").write_text(json.dumps({
+            "cell": task["cell"], "arm": arm, "target": target, "delta": delta,
+            "seed": seed, "seed_props": p0, "n_dock": n_dock,
+            "n_feasible": len(_f), "best_ds": _b["ds"] if _b else None,
+            "best_smiles": _b["smiles"] if _b else None, "events": events,
+            "complete": False, "sec": time.perf_counter() - t0}))
+        artifact_volume.commit()
 
     feas = [a for a in archive if a["v"] <= 0 and a["ds"] is not None
             and a["smiles"] != seed]
@@ -585,7 +599,8 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
            "n_feasible": len(feas),
            "best_ds": best["ds"] if best else None,
            "best_smiles": best["smiles"] if best else None,
-           "events": events, "sec": time.perf_counter() - t0}
+           "events": events, "complete": True,
+           "sec": time.perf_counter() - t0}
     d = Path(POP_OUT)
     d.mkdir(parents=True, exist_ok=True)
     (d / f"{task['cell']}.json").write_text(json.dumps(res))
