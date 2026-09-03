@@ -652,6 +652,65 @@ def structural_features(state, ctx: RewriteContext, lineage: Lineage,
             surviving / n0, 1.0 if terminal_kind == "completion" else 0.0]
 
 
+def kl_tilt(base_w, h_values, kappa: float = 1.0, eta_max: float = 64.0,
+            iters: int = 40):
+    """Tilt under a trust region measured against the FROZEN base process.
+
+        q_eta ∝ R_M · h^eta,     largest eta with KL(q_eta ‖ R_M) ≤ kappa
+
+    Replaces the absolute-ESS rule, which was unusable here. That rule bisected
+    T for a target ESS and, whenever the base kernel's own ESS already sat below
+    the target, returned the UNTILTED base -- so on a peaked R_M (measured ESS
+    0.061 against a 0.3 target) the controller silently switched itself off at
+    every step, which is precisely the regime where guidance matters. An
+    absolute ESS target is not reachable when the passive kernel is already
+    concentrated; a base-RELATIVE constraint always is.
+
+    KL is the right budget for this system: COMPOSE control is a KL-regularised
+    change of path measure relative to frozen R_theta, so limiting how far the
+    proposal may depart from the learned process is the same quantity the
+    theory already spends. eta = 0 recovers R_M exactly (KL = 0) and KL grows
+    monotonically in eta, so the largest admissible eta is found by bisection.
+
+    Returns (q, eta, kl, ess_fraction). q is exactly normalised whatever h is,
+    so an approximate committor costs efficiency, never correctness.
+    """
+    import numpy as np
+    w = np.asarray(base_w, float)
+    h = np.clip(np.asarray(h_values, float), 1e-12, None)
+    n = len(w)
+    if n == 0 or w.sum() <= 0:
+        return w, 0.0, 0.0, 0.0
+    w = w / w.sum()
+
+    def q_at(eta):
+        lg = np.log(w) + eta * np.log(h)
+        lg -= lg.max()
+        q = np.exp(lg)
+        t = q.sum()
+        return w if (t <= 0 or not np.isfinite(t)) else q / t
+
+    def kl_of(q):
+        m = q > 0
+        return float(np.sum(q[m] * (np.log(q[m]) - np.log(w[m]))))
+
+    def ess_frac(q):
+        return float(1.0 / (n * np.sum(q ** 2)))
+
+    if kl_of(q_at(eta_max)) <= kappa:        # trust region never binds
+        q = q_at(eta_max)
+        return q, float(eta_max), kl_of(q), ess_frac(q)
+    lo, hi = 0.0, eta_max
+    for _ in range(iters):
+        mid = 0.5 * (lo + hi)
+        if kl_of(q_at(mid)) <= kappa:
+            lo = mid                          # still inside the region
+        else:
+            hi = mid
+    q = q_at(lo)
+    return q, float(lo), kl_of(q), ess_frac(q)
+
+
 def adaptive_tilt(base_w, h_values, target_ess: float = 0.3,
                   lo: float = 1e-3, hi: float = 1e3, iters: int = 24):
     """Choose the tilt temperature T so the proposal keeps a target ESS.
@@ -726,7 +785,7 @@ def propose(enum_fn, apply_fn, ctx: RewriteContext, start_state, *,
             potential_fn=None, beta: float = 0.0, epsilon: float = 0.1,
             potentials=None, betas=None, observe_fn=None,
             h_terminals=None, h_budget=3, h_quota=2,
-            h_model=None, target_ess=0.3):
+            h_model=None, target_ess=0.3, tilt="ess", kappa=1.0):
     """Run one region-local trajectory under an explicit phase schedule.
 
     `schedule` is a list of (phase, n_steps). `enum_fn(state) -> (fams, acts,
@@ -793,8 +852,19 @@ def propose(enum_fn, apply_fn, ctx: RewriteContext, start_state, *,
                     hs[k_i] = h_model(y_i, ctx, lin_i, max(0, budget - _i - 1), kind)
                     if observe_fn is not None:
                         p.min_observed.append(observe_fn(y_i, ctx, lin_i))
-                q, T, ess = adaptive_tilt(w, hs, target_ess=target_ess)
-                p.tilt_log.append({"T": T, "ess": ess, "phase": phase})
+                if tilt == "kl":
+                    # Base-relative trust region. The absolute-ESS rule returns
+                    # the UNTILTED base whenever the base kernel's own ESS is
+                    # already below target, which on a peaked R_M disabled the
+                    # controller at every step. Measured on held-out regions:
+                    # progress mass 0.00004 -> 0.09359 at kappa=1 from the same
+                    # committor, with only the tilt policy changed.
+                    q, eta, kl, ess = kl_tilt(w, hs, kappa=kappa)
+                    p.tilt_log.append({"eta": eta, "kl": kl, "ess": ess,
+                                       "phase": phase})
+                else:
+                    q, T, ess = adaptive_tilt(w, hs, target_ess=target_ess)
+                    p.tilt_log.append({"T": T, "ess": ess, "phase": phase})
                 w = (1.0 - epsilon) * q + epsilon * w
             elif phase_term is not None:
                 # q(y|x) proportional to R_M(y|x) h_{b-1}(y): the h-transform of

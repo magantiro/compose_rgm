@@ -2005,6 +2005,8 @@ def single_attempt(job: dict) -> dict:
                    h_quota=int(job.get("h_quota", 2)),
                    h_model=(h_model if arm == "R_M_hphi" else None),
                    observe_fn=observe,
+                   tilt=str(job.get("tilt", "kl")),
+                   kappa=float(job.get("kappa", 1.0)),
                    target_ess=float(job.get("target_ess", 0.3)),
                    epsilon=float(job.get("epsilon", 0.1)))
     end = p.endpoint if p.endpoint is not None else st0
@@ -2054,7 +2056,8 @@ def profile_attempt(max_calls: int = 4000, n: int = 2):
 
 @app.local_entrypoint()
 def race(seeds: int = 2, seed0: int = 1, max_calls: int = 4150,
-         n_regions: int = 16, arms: str = "R_M,R_M_hphi"):
+         n_regions: int = 16, arms: str = "R_M,R_M_hphi",
+         tilt: str = "kl", kappa: float = 1.0):
     """STAGE: independent attempts, paired by (region, seed), one wave.
 
     Matched per ATTEMPT with a frozen call ceiling, not on executor calls.
@@ -2069,7 +2072,7 @@ def race(seeds: int = 2, seed0: int = 1, max_calls: int = 4150,
           f"{len({r['smiles'] for r in reach})} molecules, disjoint from training")
     print(f"frozen ceiling={max_calls} calls/attempt, seeds={seed0}..{seed0+seeds-1}")
     jobs = [{"region": r, "case_name": f"r{i}", "arm": a, "seed": s,
-             "max_calls": max_calls}
+             "max_calls": max_calls, "tilt": tilt, "kappa": kappa}
             for i, r in enumerate(reach)
             for a in arms.split(",")
             for s in range(seed0, seed0 + seeds)]
@@ -2195,6 +2198,13 @@ def proposal_mass(job: dict) -> dict:
             keep.append((k_i, j, y, l2, d))
         q, T, ess = RR.adaptive_tilt(w, hs, target_ess=tess)
         q_guided = (1.0 - eps) * q + eps * w          # exactly propose()'s mix
+        # corrected controller: base-relative KL trust region, several kappa
+        # reported for characterisation. kappa=1.0 is the declared default and
+        # is NOT selected from splitting outcomes.
+        kl_q = {}
+        for kap in (0.5, 1.0, 2.0, 5.0):
+            qk, eta, kl, essk = RR.kl_tilt(w, hs, kappa=kap)
+            kl_q[kap] = ((1.0 - eps) * qk + eps * w, eta, kl, essk)
         prog = [k for k, d in enumerate(ds) if d is not None and d < base_d]
         hand = [k for k, d in enumerate(ds) if d == 0]
         steps.append({
@@ -2207,6 +2217,12 @@ def proposal_mass(job: dict) -> dict:
             "tilt_T": float(T), "ess": float(ess),
             "h_max_progress": float(hs[prog].max()) if prog else 0.0,
             "h_max_all": float(hs.max()),
+            **{f"mass_kl{k}_progress": (float(v[0][prog].sum()) if prog else 0.0)
+               for k, v in kl_q.items()},
+            **{f"mass_kl{k}_handoff": (float(v[0][hand].sum()) if hand else 0.0)
+               for k, v in kl_q.items()},
+            **{f"eta_kl{k}": v[1] for k, v in kl_q.items()},
+            **{f"ess_kl{k}": v[3] for k, v in kl_q.items()},
         })
         if hand:
             break                       # handoff is available here; that is the

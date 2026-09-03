@@ -680,3 +680,45 @@ def test_shared_features_reassemble_identically():
         for kind in ("establishment", "completion"):
             direct = structural_features(st, ctx, lin, old, b, kind)
             assert features_from_shared(shared, b, kind) == direct
+
+
+def test_kl_tilt_steers_a_peaked_base_where_ess_tilt_cannot():
+    """The ESS rule silently disables itself on a peaked base; KL does not.
+
+    adaptive_tilt returns the UNTILTED base whenever the base kernel's own ESS
+    is already at or below the target, which on a concentrated R_M means the
+    controller never acts. This pins that difference so the regression cannot
+    come back unnoticed.
+    """
+    import numpy as np
+    from compose_v4.control.region_rewrite import adaptive_tilt, kl_tilt
+    rng = np.random.default_rng(0)
+    w = rng.dirichlet(np.full(115, 0.05))       # peaked, like the measured base
+    h = rng.uniform(0.0, 0.2, 115)
+    good = 7
+    h[good] = 0.87                              # the correctly ranked successor
+    n = len(w)
+    assert 1.0 / (n * np.sum(w ** 2)) < 0.3     # base ESS below the old target
+
+    q_ess, T, _ = adaptive_tilt(w, h, target_ess=0.3)
+    # T pins to the bisection bound, so h^(1/T) is near 1 but not exactly 1:
+    # assert the SEMANTIC claim -- no material steering -- not bitwise equality.
+    assert T >= 1e3 - 1e-9
+    assert q_ess[good] < 1.05 * w[good]
+
+    q_kl, eta, kl, _ = kl_tilt(w, h, kappa=1.0)
+    assert q_kl[good] > 50 * w[good]            # actually steers
+    assert kl <= 1.0 + 1e-6                     # and respects the budget
+    assert eta > 0.0
+    assert q_kl.sum() == pytest.approx(1.0)     # exactly normalised
+
+
+def test_kl_tilt_is_identity_at_zero_budget():
+    import numpy as np
+    from compose_v4.control.region_rewrite import kl_tilt
+    rng = np.random.default_rng(1)
+    w = rng.dirichlet(np.full(20, 0.5))
+    h = rng.uniform(0.01, 1.0, 20)
+    q, eta, kl, _ = kl_tilt(w, h, kappa=0.0)
+    assert kl == pytest.approx(0.0, abs=1e-9)
+    assert np.allclose(q, w / w.sum(), atol=1e-9)
