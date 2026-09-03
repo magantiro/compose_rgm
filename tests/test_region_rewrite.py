@@ -722,3 +722,35 @@ def test_kl_tilt_is_identity_at_zero_budget():
     q, eta, kl, _ = kl_tilt(w, h, kappa=0.0)
     assert kl == pytest.approx(0.0, abs=1e-9)
     assert np.allclose(q, w / w.sum(), atol=1e-9)
+
+
+def test_region_selector_orders_by_measured_feasibility():
+    """Interface class must dominate size, because the measurement does.
+
+    pendant 75% / segment 74% / multi 20% / splitting 1/91 on 239 sampled
+    regions. A selector that ranks a splitting region above a pendant one is
+    reasoning about the wrong variable.
+    """
+    from compose_v4.control.region_selector import feasibility, cost_seconds
+    assert feasibility("pendant", 2) > feasibility("multi", 2)
+    assert feasibility("segment", 15) > feasibility("splitting", 15)
+    assert feasibility("splitting", 5) < 0.2
+    # size is NOT monotone: mid-size regions are the hard case, not large ones
+    assert feasibility("segment", 25) > feasibility("segment", 5)
+    # cost rises with scope, which is what makes successes-per-second the
+    # right objective rather than success probability
+    assert cost_seconds(0.9) > cost_seconds(0.1)
+
+
+def test_region_selector_scale_balance_prevents_small_region_flood():
+    """Enumeration yields far more small regions; ranking must not just echo that."""
+    from types import SimpleNamespace
+    from compose_v4.control.region_selector import rank_regions
+    small = [SimpleNamespace(interface="segment", size=2, released_fraction=0.05)
+             for _ in range(50)]
+    big = [SimpleNamespace(interface="segment", size=25, released_fraction=0.85)]
+    ranked = rank_regions(small + big, scale_balance=True)
+    top_bands = {min(int(r.released_fraction * 5), 4) for r, _ in ranked[:5]}
+    assert len(top_bands) > 0
+    unbalanced = rank_regions(small + big, scale_balance=False)
+    assert unbalanced[0][1].score >= ranked[0][1].score
