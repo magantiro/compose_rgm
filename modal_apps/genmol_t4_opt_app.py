@@ -596,10 +596,17 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                     meta.append((gk, y, l2, float(probs[j]), key, p_))
                     # EVERY committed state is a complete valid molecule
                     if key not in cands:
+                        dd = GG.structural_displacement(p_["st"], y, p_["lin"], l2)
                         cands[key] = {"smiles": key, "interface": p_["reg"].interface,
                                       "kind": p_["reg"].kind,
                                       "r_release": p_["reg"].released_fraction,
-                                      "step": step + 1}
+                                      "step": step + 1,
+                                      "region_id": id(p_["reg"]),
+                                      "parent": parent,
+                                      "r_coherent": dd["largest_changed_fraction"],
+                                      "d_ring_systems": dd["d_ring_systems"],
+                                      "d_cycle_rank": dd["d_cycle_rank"],
+                                      "d_heavy": dd["d_heavy"]}
             if not feats:
                 break
             # ---- ONE batched committor call for the whole frontier
@@ -692,8 +699,29 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
             if pr is None:
                 continue
             pool.append({**c, **pr})
-        pool.sort(key=lambda a: (a["v"], -a.get("qed", 0)))
-        take = pool[: min(per_round, budget - n_dock)]
+        # Round-robin across (parent, region) instead of a global sort.
+        # A global sort by (v, -qed) put 19 of 20 dockings on ONE region: every
+        # candidate is feasible with near-identical QED, so ties broke
+        # arbitrarily and the oracle was spent on near-siblings from a single
+        # frontier. Diversity of what gets DOCKED is the point of having 4816
+        # candidates.
+        from collections import defaultdict as _dd
+        by_src = _dd(list)
+        for a in pool:
+            by_src[(a.get("parent"), a.get("region_id"))].append(a)
+        for v_ in by_src.values():
+            v_.sort(key=lambda a: (a["v"], -a.get("qed", 0)))
+        take, srcs = [], list(by_src.values())
+        want = min(per_round, budget - n_dock)
+        i_ = 0
+        while len(take) < want and any(srcs):
+            grp = srcs[i_ % len(srcs)]
+            if grp:
+                take.append(grp.pop(0))
+            i_ += 1
+            if i_ > 10000:
+                break
+            srcs = [g for g in srcs if g]
 
         # ---- BATCH docking, concurrent; archive updated only afterwards
         t_d = time.perf_counter()
