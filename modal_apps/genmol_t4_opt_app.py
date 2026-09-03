@@ -409,12 +409,36 @@ def main(which: str = "dev", rounds: int = 3, per_round: int = 8,
 POP_OUT = "/artifacts/t4_population"
 
 
-@app.function(image=image, cpu=(4.0, 4.0), memory=int(6 * 1024),
+@app.function(image=image, cpu=(8.0, 8.0), memory=int(24 * 1024),
               timeout=6 * 60 * 60, retries=2, max_containers=80,
               volumes={ARTIFACT_ROOT: artifact_volume})
 def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
+    """Round-based population search, matching the prior T4 round contract.
+
+    The prior official run was already a population method: 8 lineages, a large
+    candidate pool per round, 20 dockings run CONCURRENTLY, and the archive
+    updated only after the whole batch. An earlier version of this function
+    replaced that with one parent -> one rewrite -> one docking -> wait, which
+    destroyed both proposal and oracle parallelism and cost ~75s per docking
+    call against the prior 1.3s. That was an implementation error, not a
+    property of the controller.
+
+    Only the OFFSPRING PROPOSAL changes here:
+
+        old   sample the marked law, select among realizations
+        new   M ~ Q(M|x,z), then the frozen region rewrite
+              q ∝ R_M * h_phi^eta with KL(q || R_M) <= kappa
+
+    Everything else -- lineage count, parent selection, feasibility, batch size,
+    budget accounting, archive update after the batch -- is kept, so a
+    difference is attributable to the proposal.
+
+    Within a round, candidate j+1 must not depend on the docking of candidate j;
+    that is what re-serializes a population algorithm.
+    """
     import os
     import sys
+    from concurrent.futures import ThreadPoolExecutor
 
     import numpy as np
     import torch
@@ -430,6 +454,7 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
         canonical_state_key, enumerate_factorized_marked_law)
     from compose_v4.control.region import enumerate_regions
     from compose_v4.control import region_rewrite as RR
+    from compose_v4.control import graph_geometry as GG
     from compose_v4.control.region_selector import sample_region
     from compose_v4.control.task_value import TaskValue
     from compose_v4.gates.med_chem_gate import is_valid
@@ -437,7 +462,11 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
     rt = _runtime(); model, system = rt["model"], rt["system"]
     gen = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
     seed, delta, target = task["smiles"], task["delta"], task["target"]
-    budget = int(task["budget"])                 # docking calls, charged exactly
+    budget = int(task["budget"])
+    per_round = int(task.get("per_round", 20))       # dockings per round
+    n_lineages = int(task.get("lineages", 8))
+    rewrites_per_round = int(task.get("rewrites_per_round", 40))
+    workers = int(task.get("workers", 8))
     arm = task.get("arm", "mu_exec")
     tau = float(task.get("tau", 0.05))
     kappa = float(task.get("kappa", 1.0))
@@ -448,7 +477,7 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
     value_fn = tv.value_fn() if tv is not None else None
 
     artifact_volume.reload()
-    ck = torch.load(f"/artifacts/region_committor/committor_bellman_v1.pt",
+    ck = torch.load("/artifacts/region_committor/committor_bellman_v1.pt",
                     map_location="cpu")
     net = torch.nn.Sequential(torch.nn.Linear(int(ck["n_features"]), 48),
                               torch.nn.ReLU(), torch.nn.Linear(48, 1))
@@ -459,42 +488,38 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
         m = Chem.MolFromSmiles(smi)
         if m is None:
             return None
-        q = float(QED.qed(m)); s = float(sascorer.calculateScore(m))
+        q = float(QED.qed(m)); sa = float(sascorer.calculateScore(m))
         sim = float(DataStructs.TanimotoSimilarity(seed_fp, gen.GetFingerprint(m)))
-        v = max(max(0.0, QED_MIN - q) / QED_MIN, max(0.0, s - SA_MAX) / SA_MAX,
+        v = max(max(0.0, QED_MIN - q) / QED_MIN, max(0.0, sa - SA_MAX) / SA_MAX,
                 max(0.0, delta - sim) / delta)
-        return {"qed": q, "sa": s, "sim": sim, "v": v}
+        return {"qed": q, "sa": sa, "sim": sim, "v": v}
 
-    t0 = time.perf_counter()
-    p0 = props(seed)
-    archive = [{"smiles": seed, **p0, "ds": None}]
-    docked: dict[str, float] = {}
-    n_dock, events = 0, []
-
-    def rewrite(parent):
-        """One region proposal on `parent`; returns a SMILES or None."""
+    def one_rewrite(parent, sub_seed):
+        """One guided region rewrite. Depends only on `parent`, so a round's
+        rewrites are independent and may run concurrently."""
+        r = np.random.default_rng(sub_seed)
         try:
-            regions = [r for r in enumerate_regions(parent) if 1 <= r.size <= 24]
+            regions = [x for x in enumerate_regions(parent) if 1 <= x.size <= 24]
         except Exception:
-            return None, None
+            return None
         if not regions:
-            return None, None
-        reg, rs = sample_region(regions, rng, epsilon=eps_region,
-                               value_fn=value_fn, tau=tau)
+            return None
+        reg, _rs = sample_region(regions, r, epsilon=eps_region,
+                                 value_fn=value_fn, tau=tau)
         if reg is None:
-            return None, None
+            return None
         raw = smiles_to_molecular_graph(parent)
         st0 = pad_molecular_graph(raw, CANONICAL_SLOTS)
         n_real = len(raw.atom_types)
         ctx = RR.context_from_region(reg)
         lin0 = RR.Lineage.initial(range(n_real))
-        old_ids = frozenset(lin0.id_of[s] for s in reg.atoms if s in lin0.id_of)
+        old_ids = frozenset(lin0.id_of[s_] for s_ in reg.atoms if s_ in lin0.id_of)
         cache: dict = {}
         memo: dict = {}
 
-        def slot_key(state):
-            return (np.asarray(state.atom_types).tobytes(),
-                    np.asarray(state.bonds).tobytes())
+        def slot_key(st):
+            return (np.asarray(st.atom_types).tobytes(),
+                    np.asarray(st.bonds).tobytes())
 
         def enum_fn(st):
             k = slot_key(st)
@@ -505,16 +530,20 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                             np.array([m.probability for m in law.marks], float))
             return cache[k]
 
-        def apply_fn(st, j):
-            k = (slot_key(st), int(j))
+        def apply_fn(st, jj):
+            k = (slot_key(st), int(jj))
             if k in memo:
                 return memo[k]
             fams, acts, _ = enum_fn(st)
             try:
-                y = system.apply(st, fams[j], acts[j])
+                y = system.apply(st, fams[jj], acts[jj])
             except Exception:
                 y = None
-            memo[k] = y
+            # bounded: eight concurrent rewrites each memoising ~1500 applied
+            # graphs is what makes a round OOM, and an OOM here is reported as
+            # a cancellation, which reads like a client problem and is not
+            if len(memo) < 4000:
+                memo[k] = y
             return y
 
         hc: dict = {}
@@ -533,88 +562,114 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                  else [("grow_new", "until_handoff"),
                        ("prune_old", max(1, reg.size))])
         p = RR.propose(enum_fn, apply_fn, ctx, st0, schedule=sched,
-                       rng=np.random.default_rng(int(rng.integers(0, 10 ** 6))),
+                       rng=np.random.default_rng(int(r.integers(0, 10 ** 6))),
                        lineage=lin0, original_region_ids=old_ids,
                        max_handoff_steps=int(task.get("max_handoff", 16)),
                        h_model=h_model, tilt="kl", kappa=kappa,
                        epsilon=float(task.get("epsilon", 0.1)))
         if p.status != "OK" or p.endpoint is None:
-            return None, reg
+            return None
         key = canonical_state_key(p.endpoint)
         if not key or not is_valid(key):
-            return None, reg
-        return key, reg
+            return None
+        # structural displacement is the local-to-global evidence: a large-scope
+        # proposal that only swaps a substituent has not made a global move, and
+        # without this the scale column alone cannot tell the difference
+        d_ = GG.structural_displacement(st0, p.endpoint, lin0, p.lineage)
+        return {"smiles": key, "interface": reg.interface, "kind": reg.kind,
+                "r_release": reg.released_fraction, "n_steps": len(p.steps),
+                "r_coherent": d_["largest_changed_fraction"],
+                "d_ring_systems": d_["d_ring_systems"],
+                "d_cycle_rank": d_["d_cycle_rank"],
+                "d_heavy": d_["d_heavy"]}
+
+    t0 = time.perf_counter()
+    p0 = props(seed)
+    archive = [{"smiles": seed, **p0, "ds": None}]
+    docked: dict[str, float] = {}
+    n_dock, rounds_log = 0, []
+    rd = 0
 
     while n_dock < budget:
-        # parent: prefer feasible with good docking, else lowest constraint
-        # violation -- the same rule `optimize` uses, so the arms differ only in
-        # how a child is PROPOSED.
+        rd += 1
+        t_r = time.perf_counter()
+        # ---- parents: the prior rule, top lineages by feasible-then-docking
         scored = sorted(archive, key=lambda a: (
             0 if (a["v"] <= 0 and a["ds"] is not None) else 1,
             a["ds"] if a["ds"] is not None else 0.0, a["v"]))
-        parent = scored[0]["smiles"] if rng.random() < 0.7 else \
-            archive[int(rng.integers(0, len(archive)))]["smiles"]
-        child, reg = rewrite(parent)
-        ev = {"n_dock": n_dock, "parent": parent,
-              "interface": reg.interface if reg is not None else None,
-              "kind": reg.kind if reg is not None else None,
-              "r_release": reg.released_fraction if reg is not None else None,
-              "ok": child is not None}
-        if child is None or child in docked:
-            events.append(ev)
-            continue
-        pr = props(child)
-        if pr is None:
-            events.append(ev)
-            continue
-        # every distinct molecule sent to the oracle costs one budget unit,
-        # feasible or not -- the same accounting `optimize` uses
-        ds = _dock(child, target, f"{task['cell']}_{n_dock}")
-        n_dock += 1
-        docked[child] = ds if ds is not None else 0.0
-        archive.append({"smiles": child, **pr, "ds": ds})
-        ev.update({"qed": pr["qed"], "sa": pr["sa"], "sim": pr["sim"],
-                   "v": pr["v"], "ds": ds, "charged": True})
-        events.append(ev)
-        # Persist after every CHARGED call. Writing only at the end would put a
-        # multi-hour cell one interruption away from losing everything, and
-        # would make progress unobservable while it runs.
-        _f = [a for a in archive if a["v"] <= 0 and a["ds"] is not None
-              and a["smiles"] != seed]
-        _b = min(_f, key=lambda a: a["ds"]) if _f else None
-        _d = Path(POP_OUT); _d.mkdir(parents=True, exist_ok=True)
-        (_d / f"{task['cell']}.json").write_text(json.dumps({
-            "cell": task["cell"], "arm": arm, "target": target, "delta": delta,
-            "seed": seed, "seed_props": p0, "n_dock": n_dock,
-            "n_feasible": len(_f), "best_ds": _b["ds"] if _b else None,
-            "best_smiles": _b["smiles"] if _b else None, "events": events,
-            "complete": False, "sec": time.perf_counter() - t0}))
-        artifact_volume.commit()
+        parents = [a["smiles"] for a in scored[:n_lineages]] or [seed]
 
-    feas = [a for a in archive if a["v"] <= 0 and a["ds"] is not None
-            and a["smiles"] != seed]
-    best = min(feas, key=lambda a: a["ds"]) if feas else None
-    res = {"cell": task["cell"], "arm": arm, "target": target, "delta": delta,
-           "seed": seed, "seed_props": p0, "n_dock": n_dock,
-           "n_feasible": len(feas),
-           "best_ds": best["ds"] if best else None,
-           "best_smiles": best["smiles"] if best else None,
-           "events": events, "complete": True,
-           "sec": time.perf_counter() - t0}
-    d = Path(POP_OUT)
-    d.mkdir(parents=True, exist_ok=True)
-    (d / f"{task['cell']}.json").write_text(json.dumps(res))
-    artifact_volume.commit()
-    print(f"[t4pop] {task['cell']} arm={arm} dock={n_dock}/{budget} "
-          f"feasible={len(feas)} best={best['ds'] if best else None} "
-          f"{time.perf_counter() - t0:.0f}s", flush=True)
+        # ---- PROPOSE: independent guided rewrites, run concurrently
+        jobs = [(parents[i % len(parents)], int(rng.integers(0, 10 ** 9)))
+                for i in range(rewrites_per_round)]
+        t_prop = time.perf_counter()
+        with ThreadPoolExecutor(max_workers=workers) as ex:
+            cands = [c for c in ex.map(lambda a: one_rewrite(*a), jobs) if c]
+        t_prop = time.perf_counter() - t_prop
+
+        # ---- cheap downselect BEFORE spending the oracle
+        pool = []
+        for c in cands:
+            if c["smiles"] in docked:
+                continue
+            pr = props(c["smiles"])
+            if pr is None:
+                continue
+            pool.append({**c, **pr})
+        pool.sort(key=lambda a: (a["v"], -a.get("qed", 0)))
+        take = pool[: min(per_round, budget - n_dock)]
+
+        # ---- BATCH docking, concurrent; archive updated only afterwards
+        t_d = time.perf_counter()
+        scores = _dock_many([a["smiles"] for a in take], target,
+                            f"{task['cell']}_r{rd}", workers=workers)
+        t_d = time.perf_counter() - t_d
+        for a, ds in zip(take, scores):
+            n_dock += 1
+            docked[a["smiles"]] = ds if ds is not None else 0.0
+            archive.append({**a, "ds": ds})
+
+        feas = [a for a in archive if a["v"] <= 0 and a["ds"] is not None
+                and a["smiles"] != seed]
+        best = min(feas, key=lambda a: a["ds"]) if feas else None
+        rounds_log.append({
+            "round": rd, "n_rewrites": len(jobs), "n_cand": len(cands),
+            "n_pool": len(pool), "n_docked_total": n_dock,
+            "n_lineages": len(parents), "best_ds": best["ds"] if best else None,
+            "t_propose": round(t_prop, 1), "t_dock": round(t_d, 1),
+            "elapsed": round(time.perf_counter() - t0, 1),
+            "scales": [round(c["r_release"], 2) for c in cands[:20]],
+            "docked": [{"smi": a["smiles"], "ds": ds, "r_release": a["r_release"],
+                        "r_coherent": a.get("r_coherent"),
+                        "d_rings": a.get("d_ring_systems"),
+                        "interface": a["interface"], "qed": a.get("qed"),
+                        "sim": a.get("sim")}
+                       for a, ds in zip(take, scores)]})
+        res = {"cell": task["cell"], "arm": arm, "target": target,
+               "delta": delta, "seed": seed, "seed_props": p0,
+               "n_dock": n_dock, "n_feasible": len(feas),
+               "best_ds": best["ds"] if best else None,
+               "best_smiles": best["smiles"] if best else None,
+               "rounds": rounds_log, "complete": n_dock >= budget,
+               "sec": time.perf_counter() - t0}
+        d = Path(POP_OUT); d.mkdir(parents=True, exist_ok=True)
+        (d / f"{task['cell']}.json").write_text(json.dumps(res))
+        artifact_volume.commit()
+        print(f"[t4pop] {task['cell']} r{rd} dock={n_dock}/{budget} "
+              f"cand={len(cands)} best={best['ds'] if best else None} "
+              f"t_prop={t_prop:.0f}s t_dock={t_d:.0f}s "
+              f"elapsed={time.perf_counter() - t0:.0f}s", flush=True)
+        if not take:
+            break
     return res
 
 
 @app.local_entrypoint()
 def t4_population(budget: int = 500, arms: str = "mu_exec,Q_taskvalue",
                   deltas: str = "0.4,0.6", n_seeds: int = 15,
-                  tau: float = 0.05, dry_run: bool = True):
+                  tau: float = 0.05, lineages: int = 8, per_round: int = 20,
+                  rewrites_per_round: int = 40, workers: int = 8,
+                  dry_run: bool = True):
     """T4 with the local-to-global population search. DRY RUN BY DEFAULT.
 
     `dry_run=True` prints the full plan -- cells, arms, budget, total docking
@@ -643,7 +698,11 @@ def t4_population(budget: int = 500, arms: str = "mu_exec,Q_taskvalue",
                 t = {"cell": f"{a}_{s['target']}_{i}_d{d}", "smiles": s["smiles"],
                      "target": s["target"], "delta": d, "budget": budget,
                      "arm": a, "tau": tau, "seed_rng": 1000 + i,
-                     "kappa": 1.0, "epsilon_region": 0.2}
+                     "kappa": 1.0, "epsilon_region": 0.2,
+                     # prior round contract: 8 lineages, 20 docked per round
+                     "lineages": lineages, "per_round": per_round,
+                     "rewrites_per_round": rewrites_per_round,
+                     "workers": workers}
                 if a == "Q_taskvalue":
                     if table is None:
                         raise SystemExit("no task_value table; run the QED "
@@ -701,6 +760,74 @@ def t4_population_report(out):
         if b:
             print(f"  {lo}-{hi}: proposed {len(b)} accepted "
                   f"{sum(1 for e in b if e['ok'])}")
+
+
+@app.local_entrypoint()
+def t4_spawn(budget: int = 500, arms: str = "mu_exec,Q_taskvalue",
+             deltas: str = "0.4,0.6", n_seeds: int = 15, tau: float = 0.05,
+             lineages: int = 8, per_round: int = 20,
+             rewrites_per_round: int = 40, workers: int = 8):
+    """Fire the cells server-side and exit, leaving no client to lose.
+
+    `modal run --detach` still cancels a .map() when the local client dies, and
+    that killed three consecutive T4 attempts at roughly the two-hour mark --
+    once before round 1, once at round 10 with 71 of 100 calls done. A
+    multi-hour benchmark cannot depend on a laptop staying awake, so each cell
+    is spawned instead: the call is queued server-side, this entrypoint returns
+    immediately, and results are read from the volume afterwards.
+    """
+    import sys as _sys
+    _sys.path.insert(0, "tools")
+    from preflight import assert_synced
+    assert_synced(strict=False)
+    seeds = json.loads(Path("docs/GENMOL_T4_SEEDS.json").read_text())[:n_seeds]
+    table = None
+    p_ = Path("diagnostics/task_value_qed.json")
+    if p_.exists():
+        table = json.loads(p_.read_text())
+    ids = []
+    for i, s_ in enumerate(seeds):
+        for d in [float(x) for x in deltas.split(",")]:
+            for a in [x.strip() for x in arms.split(",")]:
+                t = {"cell": f"{a}_{s_['target']}_{i}_d{d}", "smiles": s_["smiles"],
+                     "target": s_["target"], "delta": d, "budget": budget,
+                     "arm": a, "tau": tau, "seed_rng": 1000 + i, "kappa": 1.0,
+                     "epsilon_region": 0.2, "lineages": lineages,
+                     "per_round": per_round,
+                     "rewrites_per_round": rewrites_per_round,
+                     "workers": workers}
+                if a == "Q_taskvalue":
+                    if table is None:
+                        raise SystemExit("no task_value table for the tilt arm")
+                    t["value_table"] = table
+                ids.append((t["cell"], t4_population_cell.spawn(t).object_id))
+    Path("diagnostics").mkdir(exist_ok=True)
+    Path("diagnostics/t4_spawned.json").write_text(json.dumps(
+        {"budget": budget, "cells": [{"cell": c, "call_id": o} for c, o in ids]}))
+    print(f"spawned {len(ids)} cells server-side; this client can now exit")
+    for c, o in ids[:6]:
+        print(f"  {c}  {o}")
+    print("\nread progress with:  modal run modal_apps/genmol_t4_opt_app.py::t4_progress")
+
+
+@app.function(image=image, cpu=(1.0, 1.0), memory=int(2 * 1024), timeout=15 * 60,
+              volumes={ARTIFACT_ROOT: artifact_volume})
+def _read_cells() -> list:
+    artifact_volume.reload()
+    d = Path(POP_OUT)
+    return [json.loads(f.read_text()) for f in sorted(d.glob("*.json"))] if d.exists() else []
+
+
+@app.local_entrypoint()
+def t4_progress():
+    """Read whatever the spawned cells have persisted so far."""
+    out = _read_cells.remote()
+    print(f"cells with data: {len(out)}")
+    for r in sorted(out, key=lambda r: r["cell"]):
+        rd = r.get("rounds", [])
+        print(f"  {r['cell']:<28} dock={r.get('n_dock',0):>4}/{r.get('n_dock',0) and ''}"
+              f"  best={str(r.get('best_ds')):>7}  rounds={len(rd):>3}  "
+              f"complete={r.get('complete')}  {r.get('sec',0)/3600:.1f}h")
 
 
 @app.local_entrypoint()
