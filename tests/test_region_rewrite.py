@@ -754,3 +754,38 @@ def test_region_selector_scale_balance_prevents_small_region_flood():
     assert len(top_bands) > 0
     unbalanced = rank_regions(small + big, scale_balance=False)
     assert unbalanced[0][1].score >= ranked[0][1].score
+
+
+def test_task_value_winsorises_a_single_lucky_rewrite():
+    """One outlier must not set the value of a whole region class.
+
+    Measured: 46 accepted rewrites whose max delta was +0.454 while the next
+    largest was +0.121. Unwinsorised that single point produced a 3.5x tilt
+    toward its cell; shrinkage alone does not help, because the problem is the
+    observation's magnitude rather than its weight.
+    """
+    from compose_v4.control.task_value import TaskValue, tukey_fences
+    events = [{"ok": True, "interface": "segment", "r_release": 0.05,
+               "delta": -0.01} for _ in range(20)]
+    events += [{"ok": True, "interface": "multi", "r_release": 0.45,
+                "delta": 0.45}]                      # the lucky one
+    tv = TaskValue.from_events(events)
+    assert tv.hi < 0.45                              # it got clipped
+    assert tv.value("multi", 0.45) < 0.1
+    # a failed proposal carries no task information; that is mu_exec's business
+    n_before = tv._n
+    tv.observe("segment", 0.05, -1.0, accepted=False)
+    assert tv._n == n_before
+
+
+def test_task_value_shrinks_thin_cells_toward_the_global_mean():
+    from compose_v4.control.task_value import TaskValue
+    events = [{"ok": True, "interface": "segment", "r_release": 0.05,
+               "delta": 0.0} for _ in range(40)]
+    events += [{"ok": True, "interface": "pendant", "r_release": 0.05,
+                "delta": 0.05}]
+    tv = TaskValue.from_events(events)
+    thin = tv.value("pendant", 0.05)
+    thick = tv.value("segment", 0.05)
+    assert abs(thin - tv.global_mean) < abs(0.05 - tv.global_mean)
+    assert thick == pytest.approx(tv.global_mean, abs=2e-3)

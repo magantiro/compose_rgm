@@ -31,6 +31,28 @@ def _band(released_fraction: float) -> int:
     return min(int(float(released_fraction) * 5), 4)
 
 
+def tukey_fences(values, k: float = 3.0):
+    """Far-out fences, p25 - k*IQR and p75 + k*IQR.
+
+    Task deltas are heavy-tailed: on 46 observed rewrites the maximum was +0.454
+    while the next largest was +0.121, and removing that ONE point moved the
+    global mean from -0.0017 to -0.0119. Unwinsorised, a single lucky rewrite
+    set the value of an entire (interface, band) cell and produced a 3.5x tilt
+    toward it. Shrinkage does not fix that, because the problem is the
+    observation's magnitude rather than its weight.
+
+    k=3 is Tukey's far-out fence, chosen from the shape of the delta
+    distribution and fixed before any A/B outcome was seen.
+    """
+    v = sorted(float(x) for x in values)
+    if len(v) < 4:
+        return float("-inf"), float("inf")
+    q1 = v[len(v) // 4]
+    q3 = v[(3 * len(v)) // 4]
+    iqr = q3 - q1
+    return q1 - k * iqr, q3 + k * iqr
+
+
 @dataclass
 class TaskValue:
     """Shrunk mean task delta per (interface, scope band).
@@ -40,6 +62,8 @@ class TaskValue:
     """
 
     strength: float = 6.0
+    lo: float = float("-inf")      # winsorisation bounds; see tukey_fences
+    hi: float = float("inf")
     _cells: dict = field(default_factory=dict)
     _n: int = 0
     _sum: float = 0.0
@@ -54,12 +78,13 @@ class TaskValue:
         """
         if not accepted:
             return
+        d = min(max(float(delta), self.lo), self.hi)   # winsorised
         k = (str(interface), _band(released_fraction))
         c = self._cells.setdefault(k, [0, 0.0])
         c[0] += 1
-        c[1] += float(delta)
+        c[1] += d
         self._n += 1
-        self._sum += float(delta)
+        self._sum += d
 
     @property
     def global_mean(self) -> float:
@@ -78,12 +103,15 @@ class TaskValue:
         return lambda r: self.value(r.interface, r.released_fraction)
 
     def to_dict(self) -> dict:
-        return {"strength": self.strength, "n": self._n, "sum": self._sum,
+        return {"strength": self.strength, "lo": self.lo, "hi": self.hi,
+                "n": self._n, "sum": self._sum,
                 "cells": {f"{k[0]}|{k[1]}": v for k, v in self._cells.items()}}
 
     @classmethod
     def from_dict(cls, d: dict) -> "TaskValue":
-        tv = cls(strength=float(d.get("strength", 6.0)))
+        tv = cls(strength=float(d.get("strength", 6.0)),
+                 lo=float(d.get("lo", float("-inf"))),
+                 hi=float(d.get("hi", float("inf"))))
         tv._n = int(d.get("n", 0))
         tv._sum = float(d.get("sum", 0.0))
         for k, v in (d.get("cells") or {}).items():
@@ -94,7 +122,10 @@ class TaskValue:
     @classmethod
     def from_events(cls, events, strength: float = 6.0) -> "TaskValue":
         """Fit from population-search events, which already carry the tuple."""
-        tv = cls(strength=strength)
+        deltas = [e["delta"] for e in events
+                  if e.get("ok") and e.get("delta") is not None]
+        lo, hi = tukey_fences(deltas)
+        tv = cls(strength=strength, lo=lo, hi=hi)
         for e in events:
             if e.get("ok") and e.get("delta") is not None:
                 tv.observe(e["interface"], e["r_release"], e["delta"], True)
