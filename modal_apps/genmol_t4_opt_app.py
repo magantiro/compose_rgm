@@ -465,7 +465,6 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
     budget = int(task["budget"])
     per_round = int(task.get("per_round", 20))       # dockings per round
     n_lineages = int(task.get("lineages", 8))
-    rewrites_per_round = int(task.get("rewrites_per_round", 40))
     workers = int(task.get("workers", 8))
     arm = task.get("arm", "mu_exec")
     tau = float(task.get("tau", 0.05))
@@ -494,26 +493,41 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                 max(0.0, delta - sim) / delta)
         return {"qed": q, "sa": sa, "sim": sim, "v": v}
 
-    def one_rewrite(parent, sub_seed):
-        """One guided region rewrite. Depends only on `parent`, so a round's
-        rewrites are independent and may run concurrently."""
-        r = np.random.default_rng(sub_seed)
-        try:
-            regions = [x for x in enumerate_regions(parent) if 1 <= x.size <= 24]
-        except Exception:
-            return None
-        if not regions:
-            return None
-        reg, _rs = sample_region(regions, r, epsilon=eps_region,
-                                 value_fn=value_fn, tau=tau)
-        if reg is None:
-            return None
-        raw = smiles_to_molecular_graph(parent)
-        st0 = pad_molecular_graph(raw, CANONICAL_SLOTS)
-        n_real = len(raw.atom_types)
-        ctx = RR.context_from_region(reg)
-        lin0 = RR.Lineage.initial(range(n_real))
-        old_ids = frozenset(lin0.id_of[s_] for s_ in reg.atoms if s_ in lin0.id_of)
+    def batched_rewrite(parent, regions_k, max_steps, rng_):
+        """One controlled search FRONTIER -> many molecular offspring.
+
+        The serial form paid for one complete trajectory per molecule, which is
+        where the ~250x candidate-pool deficit against the old optimizer came
+        from: it generated ~1950 realizations from a single fiber enumeration
+        and docked the best 20, while we produced 8 and docked all 8 -- no
+        selection pressure at all.
+
+        This changes the unit of computation, not the controller. Particles
+        sitting on the SAME state share one kernel evaluation: the law is
+        enumerated once, successors applied once, h_phi scored once for the
+        whole frontier in a single batched call, and then m particles are drawn
+        from the identical q. Distributionally this is the same process; only
+        the arithmetic is shared.
+
+        Two further wins fall out for free:
+          * every committed state in COMPOSE is a complete valid molecule, so
+            the frontier itself is a candidate pool -- intermediates no longer
+            get discarded in favour of endpoints only;
+          * a 25-step scaffold rewrite and a 3-step substituent rewrite advance
+            as concurrent particles, so global-move latency stops being every
+            proposal's latency.
+        """
+        frontier = []
+        for reg, k in regions_k:
+            raw_ = smiles_to_molecular_graph(parent)
+            st_ = pad_molecular_graph(raw_, CANONICAL_SLOTS)
+            n_ = len(raw_.atom_types)
+            ctx_ = RR.context_from_region(reg)
+            lin_ = RR.Lineage.initial(range(n_))
+            old_ = frozenset(lin_.id_of[a] for a in reg.atoms if a in lin_.id_of)
+            frontier.append({"st": st_, "lin": lin_, "ctx": ctx_, "old": old_,
+                             "reg": reg, "mult": k, "step": 0})
+        cands: dict = {}
         cache: dict = {}
         memo: dict = {}
 
@@ -522,66 +536,101 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                     np.asarray(st.bonds).tobytes())
 
         def enum_fn(st):
-            k = slot_key(st)
-            if k not in cache:
+            k_ = slot_key(st)
+            if k_ not in cache:
                 law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
-                cache[k] = ([m.executor_rule_name for m in law.marks],
-                            [m.action for m in law.marks],
-                            np.array([m.probability for m in law.marks], float))
-            return cache[k]
+                cache[k_] = ([m.executor_rule_name for m in law.marks],
+                             [m.action for m in law.marks],
+                             np.array([m.probability for m in law.marks], float))
+            return cache[k_]
 
         def apply_fn(st, jj):
-            k = (slot_key(st), int(jj))
-            if k in memo:
-                return memo[k]
-            fams, acts, _ = enum_fn(st)
-            try:
-                y = system.apply(st, fams[jj], acts[jj])
-            except Exception:
-                y = None
-            # bounded: eight concurrent rewrites each memoising ~1500 applied
-            # graphs is what makes a round OOM, and an OOM here is reported as
-            # a cancellation, which reads like a client problem and is not
-            if len(memo) < 4000:
-                memo[k] = y
-            return y
+            k_ = (slot_key(st), int(jj))
+            if k_ not in memo:
+                fams, acts, _ = enum_fn(st)
+                try:
+                    y = system.apply(st, fams[jj], acts[jj])
+                except Exception:
+                    y = None
+                if len(memo) < 20000:
+                    memo[k_] = y
+                else:
+                    return y
+            return memo[k_]
 
-        hc: dict = {}
-
-        def h_model(y, c, lin, b_, kind, _o=old_ids, _h=hc):
-            key = (slot_key(y), int(b_), kind)
-            if key not in _h:
-                f = RR.features_from_shared(
-                    RR.structural_features_shared(y, c, lin, _o), int(b_), kind)
-                _h[key] = float(torch.sigmoid(
-                    net(torch.tensor([f], dtype=torch.float32))).item())
-            return _h[key]
-
-        sched = ([("prune_old", max(1, reg.size)), ("grow_new", 2)]
-                 if reg.interface == "pendant"
-                 else [("grow_new", "until_handoff"),
-                       ("prune_old", max(1, reg.size))])
-        p = RR.propose(enum_fn, apply_fn, ctx, st0, schedule=sched,
-                       rng=np.random.default_rng(int(r.integers(0, 10 ** 6))),
-                       lineage=lin0, original_region_ids=old_ids,
-                       max_handoff_steps=int(task.get("max_handoff", 16)),
-                       h_model=h_model, tilt="kl", kappa=kappa,
-                       epsilon=float(task.get("epsilon", 0.1)))
-        if p.status != "OK" or p.endpoint is None:
-            return None
-        key = canonical_state_key(p.endpoint)
-        if not key or not is_valid(key):
-            return None
-        # structural displacement is the local-to-global evidence: a large-scope
-        # proposal that only swaps a substituent has not made a global move, and
-        # without this the scale column alone cannot tell the difference
-        d_ = GG.structural_displacement(st0, p.endpoint, lin0, p.lineage)
-        return {"smiles": key, "interface": reg.interface, "kind": reg.kind,
-                "r_release": reg.released_fraction, "n_steps": len(p.steps),
-                "r_coherent": d_["largest_changed_fraction"],
-                "d_ring_systems": d_["d_ring_systems"],
-                "d_cycle_rank": d_["d_cycle_rank"],
-                "d_heavy": d_["d_heavy"]}
+        for step in range(max_steps):
+            if not frontier:
+                break
+            # ---- group particles that occupy the SAME (state, region)
+            groups: dict = {}
+            for p_ in frontier:
+                gk = (slot_key(p_["st"]), id(p_["reg"]))
+                if gk in groups:
+                    groups[gk]["mult"] += p_["mult"]
+                else:
+                    groups[gk] = p_
+            # ---- expand each unique state ONCE
+            feats, meta = [], []
+            for gk, p_ in groups.items():
+                fams, acts, probs = enum_fn(p_["st"])
+                idx, _w = RR.admissible_indices(fams, acts, p_["ctx"])
+                if not idx:
+                    continue
+                budget_left = max(0, max_steps - step)
+                for j in idx:
+                    y = apply_fn(p_["st"], j)
+                    if y is None:
+                        continue
+                    key = canonical_state_key(y)
+                    if not key or not is_valid(key):
+                        continue
+                    if not RR.context_preserved(p_["st"], y, p_["ctx"].frozen,
+                                                p_["ctx"].terminal_context_slots):
+                        continue
+                    if not RR.graph_connected(y):
+                        continue
+                    l2 = p_["lin"].observe(fams[j], acts[j])
+                    sh = RR.structural_features_shared(y, p_["ctx"], l2, p_["old"])
+                    feats.append(RR.features_from_shared(sh, budget_left,
+                                                         "establishment"))
+                    meta.append((gk, y, l2, float(probs[j]), key, p_))
+                    # EVERY committed state is a complete valid molecule
+                    if key not in cands:
+                        cands[key] = {"smiles": key, "interface": p_["reg"].interface,
+                                      "kind": p_["reg"].kind,
+                                      "r_release": p_["reg"].released_fraction,
+                                      "step": step + 1}
+            if not feats:
+                break
+            # ---- ONE batched committor call for the whole frontier
+            with torch.no_grad():
+                h_all = torch.sigmoid(net(torch.tensor(feats, dtype=torch.float32)
+                                          ).squeeze(-1)).numpy()
+            # ---- per unique state: tilt once, then draw its particles
+            nxt = []
+            for gk, p_ in groups.items():
+                sel = [i for i, m_ in enumerate(meta) if m_[0] == gk]
+                if not sel:
+                    continue
+                w = np.array([meta[i][3] for i in sel], float)
+                if w.sum() <= 0:
+                    continue
+                w = w / w.sum()
+                hs = np.array([h_all[i] for i in sel], float)
+                q, _eta, _kl, _ess = RR.kl_tilt(w, hs, kappa=kappa)
+                q = (1.0 - float(task.get("epsilon", 0.1))) * q + \
+                    float(task.get("epsilon", 0.1)) * w
+                q = q / q.sum()
+                draws = rng_.choice(len(sel), size=int(p_["mult"]), p=q)
+                for d_ in np.unique(draws):
+                    i = sel[int(d_)]
+                    _gk, y, l2, _p, _key, src = meta[i]
+                    nxt.append({"st": y, "lin": l2, "ctx": src["ctx"],
+                                "old": src["old"], "reg": src["reg"],
+                                "mult": int((draws == d_).sum()),
+                                "step": step + 1})
+            frontier = nxt[: int(task.get("max_frontier", 64))]
+        return list(cands.values())
 
     t0 = time.perf_counter()
     p0 = props(seed)
@@ -599,12 +648,39 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
             a["ds"] if a["ds"] is not None else 0.0, a["v"]))
         parents = [a["smiles"] for a in scored[:n_lineages]] or [seed]
 
-        # ---- PROPOSE: independent guided rewrites, run concurrently
-        jobs = [(parents[i % len(parents)], int(rng.integers(0, 10 ** 9)))
-                for i in range(rewrites_per_round)]
+        # ---- PROPOSE: region bundles per lineage, one shared frontier each.
+        # Regions come from Q(M|x,z); particles within a region share the early
+        # frontier, and h_phi is scored for the whole frontier in one call.
+        regions_per_lineage = int(task.get("regions_per_lineage", 3))
+        particles_per_region = int(task.get("particles_per_region", 4))
         t_prop = time.perf_counter()
+        bundles = []
+        for parent in parents:
+            try:
+                regs = [x for x in enumerate_regions(parent) if 1 <= x.size <= 24]
+            except Exception:
+                continue
+            if not regs:
+                continue
+            picked = []
+            for _ in range(regions_per_lineage):
+                reg, _rs = sample_region(regs, rng, epsilon=eps_region,
+                                         value_fn=value_fn, tau=tau)
+                if reg is not None:
+                    picked.append((reg, particles_per_region))
+            if picked:
+                bundles.append((parent, picked))
+        cands = []
         with ThreadPoolExecutor(max_workers=workers) as ex:
-            cands = [c for c in ex.map(lambda a: one_rewrite(*a), jobs) if c]
+            futs = [ex.submit(batched_rewrite, par, picked,
+                              int(task.get("max_handoff", 16)),
+                              np.random.default_rng(int(rng.integers(0, 10 ** 9))))
+                    for par, picked in bundles]
+            for f_ in futs:
+                try:
+                    cands.extend(f_.result())
+                except Exception:
+                    continue
         t_prop = time.perf_counter() - t_prop
 
         # ---- cheap downselect BEFORE spending the oracle
@@ -633,7 +709,7 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                 and a["smiles"] != seed]
         best = min(feas, key=lambda a: a["ds"]) if feas else None
         rounds_log.append({
-            "round": rd, "n_rewrites": len(jobs), "n_cand": len(cands),
+            "round": rd, "n_bundles": len(bundles), "n_cand": len(cands),
             "n_pool": len(pool), "n_docked_total": n_dock,
             "n_lineages": len(parents), "best_ds": best["ds"] if best else None,
             "t_propose": round(t_prop, 1), "t_dock": round(t_d, 1),
@@ -668,8 +744,8 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
 def t4_population(budget: int = 500, arms: str = "mu_exec,Q_taskvalue",
                   deltas: str = "0.4,0.6", n_seeds: int = 15,
                   tau: float = 0.05, lineages: int = 8, per_round: int = 20,
-                  rewrites_per_round: int = 40, workers: int = 8,
-                  dry_run: bool = True):
+                  regions_per_lineage: int = 3, particles_per_region: int = 4,
+                  workers: int = 8, dry_run: bool = True):
     """T4 with the local-to-global population search. DRY RUN BY DEFAULT.
 
     `dry_run=True` prints the full plan -- cells, arms, budget, total docking
@@ -701,7 +777,8 @@ def t4_population(budget: int = 500, arms: str = "mu_exec,Q_taskvalue",
                      "kappa": 1.0, "epsilon_region": 0.2,
                      # prior round contract: 8 lineages, 20 docked per round
                      "lineages": lineages, "per_round": per_round,
-                     "rewrites_per_round": rewrites_per_round,
+                     "regions_per_lineage": regions_per_lineage,
+                     "particles_per_region": particles_per_region,
                      "workers": workers}
                 if a == "Q_taskvalue":
                     if table is None:
@@ -766,7 +843,8 @@ def t4_population_report(out):
 def t4_spawn(budget: int = 500, arms: str = "mu_exec,Q_taskvalue",
              deltas: str = "0.4,0.6", n_seeds: int = 15, tau: float = 0.05,
              lineages: int = 8, per_round: int = 20,
-             rewrites_per_round: int = 40, workers: int = 8):
+             regions_per_lineage: int = 3, particles_per_region: int = 4,
+             workers: int = 8):
     """Fire the cells server-side and exit, leaving no client to lose.
 
     `modal run --detach` still cancels a .map() when the local client dies, and
@@ -794,7 +872,8 @@ def t4_spawn(budget: int = 500, arms: str = "mu_exec,Q_taskvalue",
                      "arm": a, "tau": tau, "seed_rng": 1000 + i, "kappa": 1.0,
                      "epsilon_region": 0.2, "lineages": lineages,
                      "per_round": per_round,
-                     "rewrites_per_round": rewrites_per_round,
+                     "regions_per_lineage": regions_per_lineage,
+                     "particles_per_region": particles_per_region,
                      "workers": workers}
                 if a == "Q_taskvalue":
                     if table is None:
