@@ -382,3 +382,313 @@ def main(which: str = "dev", rounds: int = 3, per_round: int = 8,
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(o, indent=1))
     print(f"\nwrote {p}")
+
+
+# ---------------------------------------------------------------------------
+# T4 with the local-to-global population search.
+#
+# Same task, same budget accounting, same feasibility contract as `optimize`
+# above: QED >= 0.6, SA <= 4, sim >= delta on the RETURNED molecule, scored by
+# the docking of the best feasible lead, with the seed's own score not charged.
+#
+# What changes is only the proposal. `optimize` samples the marked law and
+# selects among realizations; this runs the qualified stack --
+#
+#     mu_exec(M|x)          which region to rewrite, feasibility/cost-aware
+#     [ x exp(V_z/tau) ]    optional task tilt, the arm under test
+#     q_rewrite(w|x,M)      frozen committor + KL trust region at kappa=1
+#
+# -- so it can choose the SCALE of each edit rather than only its content. The
+# standing T4 conclusion located the failure exactly there: broad-C sampled the
+# useful semantic 1.0% of the time against narrow-B's 33.3%, a proposal-
+# probability bottleneck rather than a realization or ranking defect.
+#
+# Nothing below the region selector is retuned for T4.
+# ---------------------------------------------------------------------------
+
+POP_OUT = "/artifacts/t4_population"
+
+
+@app.function(image=image, cpu=(4.0, 4.0), memory=int(6 * 1024),
+              timeout=6 * 60 * 60, retries=2, max_containers=80,
+              volumes={ARTIFACT_ROOT: artifact_volume})
+def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
+    import os
+    import sys
+
+    import numpy as np
+    import torch
+    sys.path.insert(0, str(REMOTE_ROOT / "src"))
+    from rdkit import Chem, DataStructs, RDConfig, RDLogger
+    from rdkit.Chem import QED, rdFingerprintGenerator
+    RDLogger.DisableLog("rdApp.*")
+    sys.path.append(os.path.join(RDConfig.RDContribDir, "SA_Score"))
+    import sascorer
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.experiments.production_successor_kernel import (
+        canonical_state_key, enumerate_factorized_marked_law)
+    from compose_v4.control.region import enumerate_regions
+    from compose_v4.control import region_rewrite as RR
+    from compose_v4.control.region_selector import sample_region
+    from compose_v4.control.task_value import TaskValue
+    from compose_v4.gates.med_chem_gate import is_valid
+
+    rt = _runtime(); model, system = rt["model"], rt["system"]
+    gen = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
+    seed, delta, target = task["smiles"], task["delta"], task["target"]
+    budget = int(task["budget"])                 # docking calls, charged exactly
+    arm = task.get("arm", "mu_exec")
+    tau = float(task.get("tau", 0.05))
+    kappa = float(task.get("kappa", 1.0))
+    eps_region = float(task.get("epsilon_region", 0.2))
+    rng = np.random.default_rng(int(task["seed_rng"]))
+    seed_fp = gen.GetFingerprint(Chem.MolFromSmiles(seed))
+    tv = TaskValue.from_dict(task["value_table"]) if task.get("value_table") else None
+    value_fn = tv.value_fn() if tv is not None else None
+
+    artifact_volume.reload()
+    ck = torch.load(f"/artifacts/region_committor/committor_bellman_v1.pt",
+                    map_location="cpu")
+    net = torch.nn.Sequential(torch.nn.Linear(int(ck["n_features"]), 48),
+                              torch.nn.ReLU(), torch.nn.Linear(48, 1))
+    net.load_state_dict(ck["state_dict"]); net.eval()
+    torch.set_grad_enabled(False)
+
+    def props(smi):
+        m = Chem.MolFromSmiles(smi)
+        if m is None:
+            return None
+        q = float(QED.qed(m)); s = float(sascorer.calculateScore(m))
+        sim = float(DataStructs.TanimotoSimilarity(seed_fp, gen.GetFingerprint(m)))
+        v = max(max(0.0, QED_MIN - q) / QED_MIN, max(0.0, s - SA_MAX) / SA_MAX,
+                max(0.0, delta - sim) / delta)
+        return {"qed": q, "sa": s, "sim": sim, "v": v}
+
+    t0 = time.perf_counter()
+    p0 = props(seed)
+    archive = [{"smiles": seed, **p0, "ds": None}]
+    docked: dict[str, float] = {}
+    n_dock, events = 0, []
+
+    def rewrite(parent):
+        """One region proposal on `parent`; returns a SMILES or None."""
+        try:
+            regions = [r for r in enumerate_regions(parent) if 1 <= r.size <= 24]
+        except Exception:
+            return None, None
+        if not regions:
+            return None, None
+        reg, rs = sample_region(regions, rng, epsilon=eps_region,
+                               value_fn=value_fn, tau=tau)
+        if reg is None:
+            return None, None
+        raw = smiles_to_molecular_graph(parent)
+        st0 = pad_molecular_graph(raw, CANONICAL_SLOTS)
+        n_real = len(raw.atom_types)
+        ctx = RR.context_from_region(reg)
+        lin0 = RR.Lineage.initial(range(n_real))
+        old_ids = frozenset(lin0.id_of[s] for s in reg.atoms if s in lin0.id_of)
+        cache: dict = {}
+        memo: dict = {}
+
+        def slot_key(state):
+            return (np.asarray(state.atom_types).tobytes(),
+                    np.asarray(state.bonds).tobytes())
+
+        def enum_fn(st):
+            k = slot_key(st)
+            if k not in cache:
+                law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
+                cache[k] = ([m.executor_rule_name for m in law.marks],
+                            [m.action for m in law.marks],
+                            np.array([m.probability for m in law.marks], float))
+            return cache[k]
+
+        def apply_fn(st, j):
+            k = (slot_key(st), int(j))
+            if k in memo:
+                return memo[k]
+            fams, acts, _ = enum_fn(st)
+            try:
+                y = system.apply(st, fams[j], acts[j])
+            except Exception:
+                y = None
+            memo[k] = y
+            return y
+
+        hc: dict = {}
+
+        def h_model(y, c, lin, b_, kind, _o=old_ids, _h=hc):
+            key = (slot_key(y), int(b_), kind)
+            if key not in _h:
+                f = RR.features_from_shared(
+                    RR.structural_features_shared(y, c, lin, _o), int(b_), kind)
+                _h[key] = float(torch.sigmoid(
+                    net(torch.tensor([f], dtype=torch.float32))).item())
+            return _h[key]
+
+        sched = ([("prune_old", max(1, reg.size)), ("grow_new", 2)]
+                 if reg.interface == "pendant"
+                 else [("grow_new", "until_handoff"),
+                       ("prune_old", max(1, reg.size))])
+        p = RR.propose(enum_fn, apply_fn, ctx, st0, schedule=sched,
+                       rng=np.random.default_rng(int(rng.integers(0, 10 ** 6))),
+                       lineage=lin0, original_region_ids=old_ids,
+                       max_handoff_steps=int(task.get("max_handoff", 16)),
+                       h_model=h_model, tilt="kl", kappa=kappa,
+                       epsilon=float(task.get("epsilon", 0.1)))
+        if p.status != "OK" or p.endpoint is None:
+            return None, reg
+        key = canonical_state_key(p.endpoint)
+        if not key or not is_valid(key):
+            return None, reg
+        return key, reg
+
+    while n_dock < budget:
+        # parent: prefer feasible with good docking, else lowest constraint
+        # violation -- the same rule `optimize` uses, so the arms differ only in
+        # how a child is PROPOSED.
+        scored = sorted(archive, key=lambda a: (
+            0 if (a["v"] <= 0 and a["ds"] is not None) else 1,
+            a["ds"] if a["ds"] is not None else 0.0, a["v"]))
+        parent = scored[0]["smiles"] if rng.random() < 0.7 else \
+            archive[int(rng.integers(0, len(archive)))]["smiles"]
+        child, reg = rewrite(parent)
+        ev = {"n_dock": n_dock, "parent": parent,
+              "interface": reg.interface if reg is not None else None,
+              "kind": reg.kind if reg is not None else None,
+              "r_release": reg.released_fraction if reg is not None else None,
+              "ok": child is not None}
+        if child is None or child in docked:
+            events.append(ev)
+            continue
+        pr = props(child)
+        if pr is None:
+            events.append(ev)
+            continue
+        # every distinct molecule sent to the oracle costs one budget unit,
+        # feasible or not -- the same accounting `optimize` uses
+        ds = _dock(child, target, f"{task['cell']}_{n_dock}")
+        n_dock += 1
+        docked[child] = ds if ds is not None else 0.0
+        archive.append({"smiles": child, **pr, "ds": ds})
+        ev.update({"qed": pr["qed"], "sa": pr["sa"], "sim": pr["sim"],
+                   "v": pr["v"], "ds": ds, "charged": True})
+        events.append(ev)
+
+    feas = [a for a in archive if a["v"] <= 0 and a["ds"] is not None
+            and a["smiles"] != seed]
+    best = min(feas, key=lambda a: a["ds"]) if feas else None
+    res = {"cell": task["cell"], "arm": arm, "target": target, "delta": delta,
+           "seed": seed, "seed_props": p0, "n_dock": n_dock,
+           "n_feasible": len(feas),
+           "best_ds": best["ds"] if best else None,
+           "best_smiles": best["smiles"] if best else None,
+           "events": events, "sec": time.perf_counter() - t0}
+    d = Path(POP_OUT)
+    d.mkdir(parents=True, exist_ok=True)
+    (d / f"{task['cell']}.json").write_text(json.dumps(res))
+    artifact_volume.commit()
+    print(f"[t4pop] {task['cell']} arm={arm} dock={n_dock}/{budget} "
+          f"feasible={len(feas)} best={best['ds'] if best else None} "
+          f"{time.perf_counter() - t0:.0f}s", flush=True)
+    return res
+
+
+@app.local_entrypoint()
+def t4_population(budget: int = 500, arms: str = "mu_exec,Q_taskvalue",
+                  deltas: str = "0.4,0.6", n_seeds: int = 15,
+                  tau: float = 0.05, dry_run: bool = True):
+    """T4 with the local-to-global population search. DRY RUN BY DEFAULT.
+
+    `dry_run=True` prints the full plan -- cells, arms, budget, total docking
+    calls -- and launches nothing. Pass `--no-dry-run` to actually spend the
+    oracle budget. The default is deliberate: this is the benchmark, and it
+    should not be startable by a stray command.
+    """
+    import sys as _sys
+    _sys.path.insert(0, "tools")
+    from preflight import assert_synced
+    assert_synced(strict=False)
+
+    seeds = json.loads(Path("docs/GENMOL_T4_SEEDS.json").read_text())
+    seeds = seeds[:n_seeds]
+    table = None
+    p = Path("diagnostics/task_value_qed.json")
+    if p.exists():
+        table = json.loads(p.read_text())
+    arm_list = [a.strip() for a in arms.split(",")]
+    d_list = [float(d) for d in deltas.split(",")]
+
+    jobs = []
+    for i, s in enumerate(seeds):
+        for d in d_list:
+            for a in arm_list:
+                t = {"cell": f"{a}_{s['target']}_{i}_d{d}", "smiles": s["smiles"],
+                     "target": s["target"], "delta": d, "budget": budget,
+                     "arm": a, "tau": tau, "seed_rng": 1000 + i,
+                     "kappa": 1.0, "epsilon_region": 0.2}
+                if a == "Q_taskvalue":
+                    if table is None:
+                        raise SystemExit("no task_value table; run the QED "
+                                         "collect first or drop that arm")
+                    t["value_table"] = table
+                jobs.append(t)
+
+    total = len(jobs) * budget
+    print(f"\nT4 POPULATION SEARCH -- {'PLAN ONLY (dry run)' if dry_run else 'LAUNCHING'}")
+    print(f"  seeds={len(seeds)}  deltas={d_list}  arms={arm_list}")
+    print(f"  cells={len(jobs)}  budget={budget} docking calls/cell")
+    print(f"  TOTAL DOCKING CALLS = {total:,}")
+    print(f"  published protocol is 1,000/cell; this run uses {budget}")
+    print(f"  frozen: R_theta, committor, kappa=1.0, mu_exec, "
+          f"tau={tau}, epsilon_region=0.2")
+    print(f"  feasibility: QED>={QED_MIN}, SA<={SA_MAX}, sim>=delta; "
+          f"seed's own docking not charged")
+    import statistics as st
+    cmp_ = json.loads(Path("docs/genmol_t4_all_methods.json").read_text())["rows"]
+    print("\n  comparators (read from docs/genmol_t4_all_methods.json):")
+    for m, c4, c6 in (("GenMol", "genmol_d04", "genmol_d06"),
+                      ("RetMol", "retmol_d04", "retmol_d06"),
+                      ("GraphGA", "graphga_d04", "graphga_d06")):
+        n = sum(1 for r in cmp_ for c in (c4, c6) if r.get(c) is not None)
+        v4 = [r[c4] for r in cmp_ if r.get(c4) is not None]
+        v6 = [r[c6] for r in cmp_ if r.get(c6) is not None]
+        print(f"    {m:<8} solved {n}/30   mean d0.4 {st.mean(v4):.2f}   "
+              f"mean d0.6 {st.mean(v6):.2f}")
+    if dry_run:
+        print("\n  DRY RUN -- nothing launched. Re-run with --no-dry-run to spend "
+              "the oracle budget.")
+        return
+    out = [o for o in t4_population_cell.map(jobs) if o]
+    Path("diagnostics").mkdir(exist_ok=True)
+    Path("diagnostics/t4_population.json").write_text(json.dumps(out, default=str))
+    t4_population_report(out)
+
+
+def t4_population_report(out):
+    import statistics as st
+    print(f"\ncells={len(out)}")
+    for arm in sorted({o["arm"] for o in out}):
+        v = [o for o in out if o["arm"] == arm]
+        for d in sorted({o["delta"] for o in v}):
+            w = [o for o in v if o["delta"] == d]
+            solved = [o for o in w if o["best_ds"] is not None]
+            print(f"  {arm:<12} delta={d}  solved {len(solved)}/{len(w)}  "
+                  f"mean best {st.mean([o['best_ds'] for o in solved]) if solved else float('nan'):.2f}")
+    ev = [e for o in out for e in o["events"]]
+    print(f"\nproposals={len(ev)} accepted={sum(1 for e in ev if e['ok'])}")
+    print("scale usage (does it use different scales, question 3):")
+    for lo, hi in ((0.0, 0.2), (0.2, 0.4), (0.4, 0.6), (0.6, 0.8), (0.8, 1.01)):
+        b = [e for e in ev if e.get("r_release") is not None
+             and lo <= e["r_release"] < hi]
+        if b:
+            print(f"  {lo}-{hi}: proposed {len(b)} accepted "
+                  f"{sum(1 for e in b if e['ok'])}")
+
+
+@app.local_entrypoint()
+def t4_population_report_only():
+    out = json.loads(Path("diagnostics/t4_population.json").read_text())
+    t4_population_report(out)
