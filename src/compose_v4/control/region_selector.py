@@ -1,19 +1,24 @@
-"""Q(M | x, z): which region to rewrite, and at what scale.
+"""mu_exec(M | x) and Q(M | x, z): which region to rewrite, and at what scale.
 
 The inner controller is frozen and qualified -- given a viable region it
 navigates the rewrite. This is the outer half: choosing a region worth spending
-that controller on. It factorises the way the search actually needs:
+that controller on. It splits into a TASK-INDEPENDENT prior and a task tilt:
 
-    score(M) = feasibility(M) * value(M) / cost(M)
+    mu_exec(M|x)  ∝  p_feas(M|x) / E[C(M)|x]  *  pi(s(M)) / |M_s(x)|
 
-    feasibility   can this region be rewritten at all
-    value         would rewriting it help (task-dependent, injected)
-    cost          what the inner controller will spend trying
+        which regions are executable and computationally worthwhile at all.
+        Dividing by measured cost puts the units right: a budgeted search
+        maximises expected successes per SECOND, not probability of success, so
+        a 0.8-scope region succeeding 46% at 448s is worth less than a local
+        edit succeeding 40% at 60s. The last factor balances scale.
 
-Dividing by cost is what makes the units right: the quantity a budgeted search
-maximises is expected successes per second, not probability of success. A
-scaffold rewrite that succeeds 46% of the time but costs 448s is worth less per
-second than a local edit succeeding 40% at 60s, and only this form says so.
+    Q(M|x,z)      ∝  mu_exec(M|x) * exp( V_z(M,x) / tau_M )
+
+        then tilt toward regions whose futures look promising for the current
+        task. The tilt is exponential rather than multiplicative because task
+        value has arbitrary sign and scale -- multiplying by a negative or
+        unnormalised V would not even be a measure -- and because this is the
+        same KL-control form the rest of COMPOSE uses.
 
 Everything here is calibrated from the measured local-to-global gate (239
 sampled regions, one particle each) rather than assumed. Two of those
@@ -98,31 +103,40 @@ class RegionScore:
     feasibility: float
     value: float
     cost_s: float
+    mu_exec: float
     score: float
     interface: str
     size: int
     released_fraction: float
 
 
-def score_region(region, value: float = 1.0) -> RegionScore:
-    """Expected successful rewrites per second of controller time."""
+def score_region(region, value: float = 0.0, tau: float = 1.0) -> RegionScore:
+    """mu_exec, and Q = mu_exec * exp(V/tau) when a task value is supplied.
+
+    `value` defaults to 0.0, not 1.0: with no task the tilt must be exactly
+    exp(0) = 1, leaving the task-independent prior untouched.
+    """
+    import math
     f = feasibility(region.interface, region.size)
     c = cost_seconds(region.released_fraction)
-    return RegionScore(feasibility=f, value=float(value), cost_s=c,
-                       score=f * float(value) / c, interface=region.interface,
+    mu = f / c
+    tilt = math.exp(float(value) / max(1e-9, float(tau)))
+    return RegionScore(feasibility=f, value=float(value), cost_s=c, mu_exec=mu,
+                       score=mu * tilt, interface=region.interface,
                        size=int(region.size),
                        released_fraction=float(region.released_fraction))
 
 
-def rank_regions(regions, value_fn=None, scale_balance: bool = True):
-    """Rank regions by expected successes per second.
+def rank_regions(regions, value_fn=None, scale_balance: bool = True,
+                 tau: float = 1.0):
+    """Rank regions by mu_exec, or by Q when a task value is supplied.
 
     `scale_balance` divides by how many regions share a scope band. Without it
     the selector drowns in small regions -- not because they score well, but
     because enumeration produces far more of them, so an unbalanced ranking
     reports the shape of the enumerator rather than a decision.
     """
-    scored = [(r, score_region(r, 1.0 if value_fn is None else value_fn(r)))
+    scored = [(r, score_region(r, 0.0 if value_fn is None else value_fn(r), tau))
               for r in regions]
     if scale_balance:
         from collections import Counter
@@ -131,3 +145,40 @@ def rank_regions(regions, value_fn=None, scale_balance: bool = True):
         for r, s in scored:
             s.score /= max(1, counts[band(r)])
     return sorted(scored, key=lambda rs: -rs[1].score)
+
+
+def sample_region(regions, rng, value_fn=None, tau: float = 1.0,
+                  epsilon: float = 0.2, scale_balance: bool = True):
+    """Sample a region from Q, mixed with a scale-balanced exploration floor.
+
+        Q = (1 - epsilon) Q_learned + epsilon mu_scale_balanced
+
+    The floor is not decoration. mu_exec rewards successes per second, and cheap
+    pendant edits win that trade almost every time -- 75% feasible at 60s
+    against 46% at 448s. Left alone the search would collapse onto small local
+    moves, which is precisely the failure mode the local-to-global work exists
+    to avoid: a large region may have worse immediate success-per-second and
+    still be the only route out of a basin. The floor guarantees every
+    structural scale keeps a share of the budget.
+    """
+    import numpy as np
+    if not regions:
+        return None, None
+    ranked = rank_regions(regions, value_fn=value_fn, tau=tau,
+                          scale_balance=scale_balance)
+    regs = [r for r, _ in ranked]
+    q = np.array([s.score for _, s in ranked], float)
+    q = q / q.sum() if q.sum() > 0 else np.full(len(q), 1.0 / len(q))
+
+    band = lambda r: min(int(r.released_fraction * 5), 4)
+    from collections import Counter
+    counts = Counter(band(r) for r in regs)
+    nb = len(counts)
+    # uniform over scale bands first, then uniform within a band: an unweighted
+    # uniform would still be dominated by whichever band enumerates most
+    floor = np.array([1.0 / (nb * counts[band(r)]) for r in regs], float)
+    floor = floor / floor.sum()
+
+    mix = (1.0 - epsilon) * q + epsilon * floor
+    i = int(rng.choice(len(regs), p=mix / mix.sum()))
+    return regs[i], ranked[i][1]
