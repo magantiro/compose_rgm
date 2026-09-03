@@ -98,6 +98,7 @@ def search_cell(job: dict) -> dict:
     from compose_v4.control import region_rewrite as RR
     from compose_v4.control import graph_geometry as GG
     from compose_v4.control.region_selector import sample_region
+    from compose_v4.control.task_value import TaskValue
     from compose_v4.gates.med_chem_gate import is_valid
 
     rt = _runtime(); model, system = rt["model"], rt["system"]
@@ -107,6 +108,9 @@ def search_cell(job: dict) -> dict:
     iters = int(job.get("iters", 12))
     pop_size = int(job.get("pop_size", 8))
     particles = int(job.get("particles", 1))
+    tau = float(job.get("tau", 0.05))
+    tv = TaskValue.from_dict(job["value_table"]) if job.get("value_table") else None
+    value_fn = tv.value_fn() if tv is not None else None   # None -> mu_exec only
 
     artifact_volume.reload()
     ck = torch.load(f"{OUT_DIR}/committor_bellman_v1.pt", map_location="cpu")
@@ -143,7 +147,8 @@ def search_cell(job: dict) -> dict:
         regions = [r for r in regions if 1 <= r.size <= 24]
         if not regions:
             continue
-        reg, rs = sample_region(regions, rng, epsilon=epsilon_region)
+        reg, rs = sample_region(regions, rng, epsilon=epsilon_region,
+                                value_fn=value_fn, tau=tau)
         if reg is None:
             continue
 
@@ -234,7 +239,8 @@ def search_cell(job: dict) -> dict:
               f"best={max(s for s in archive.values()):.4f} "
               f"{time.time() - t0:.0f}s", flush=True)
 
-    res = {"cell": job["cell"], "seed_smiles": start, "seed_score": s0,
+    res = {"cell": job["cell"], "arm": job.get("arm", "mu_exec"),
+           "seed_smiles": start, "seed_score": s0,
            "best_score": max(archive.values()),
            "improvement": max(archive.values()) - s0,
            "n_archive": len(archive), "events": events,
@@ -271,6 +277,96 @@ def main(n_seeds: int = 12, iters: int = 12, pop_size: int = 8,
           f"epsilon_region={epsilon_region} objective=QED (cheap, not docking)")
     out = [o for o in search_cell.map(jobs) if o and "error" not in o]
     report(out)
+
+
+@app.local_entrypoint()
+def collect(indices: str = "7,6,19,12,2,18,13", iters: int = 15,
+            pop_size: int = 6, particles: int = 1, tag: str = "fit"):
+    """Generate (x, M) -> delta observations with mu_exec only.
+
+    This is both the V_z training set and the control arm's own protocol, run on
+    a DISJOINT set of seeds from the eventual test so the estimator is never
+    fitted on the molecules it is judged on.
+    """
+    import sys as _sys
+    _sys.path.insert(0, "tools")
+    from preflight import assert_synced
+    assert_synced(strict=False)
+    dv = json.loads(Path("docs/GENMOL_T4_DEV_SEEDS.json").read_text())["seeds"]
+    idx = [int(i) for i in indices.split(",")]
+    jobs = [{"cell": f"{tag}{i}", "seed_smiles": dv[i]["smiles"], "seed": 31 + i,
+             "iters": iters, "pop_size": pop_size, "particles": particles,
+             "arm": "mu_exec"} for i in idx]
+    print(f"collecting on seeds {idx} (QED "
+          f"{[round(dv[i]['qed'], 3) for i in idx]})")
+    out = [o for o in search_cell.map(jobs) if o and "error" not in o]
+    ev = [e for o in out for e in o["events"]]
+    acc = [e for e in ev if e.get("ok")]
+    Path("diagnostics").mkdir(exist_ok=True)
+    Path(f"diagnostics/population_{tag}.json").write_text(json.dumps(out, default=str))
+    _sys.path.insert(0, "src")
+    from compose_v4.control.task_value import TaskValue
+    tv = TaskValue.from_events(ev)
+    Path("diagnostics/task_value_qed.json").write_text(json.dumps(tv.to_dict()))
+    print(f"\nproposals={len(ev)} accepted={len(acc)} "
+          f"({len(acc)/max(1,len(ev)):.0%})  global mean delta={tv.global_mean:+.5f}")
+    print("fitted cells (interface, scope band) -> V:")
+    for (iface, band), (n, s_) in sorted(tv._cells.items()):
+        print(f"  {iface:<10} band{band} n={n:<3} V={tv.value(iface, band*0.2+0.01):+.5f}")
+    print("\nwrote diagnostics/task_value_qed.json")
+
+
+@app.local_entrypoint()
+def ab(indices: str = "3,9,8,5,21,4", iters: int = 15, pop_size: int = 6,
+       particles: int = 1, tau: float = 0.05):
+    """Matched A/B: mu_exec alone against mu_exec * exp(V_z/tau).
+
+    Same seeds, same iteration budget, same particles, same everything below the
+    region selector. The ONLY difference is whether the task-value tilt is
+    applied, so a difference is attributable to task conditioning.
+    """
+    import sys as _sys
+    _sys.path.insert(0, "tools")
+    from preflight import assert_synced
+    assert_synced(strict=False)
+    dv = json.loads(Path("docs/GENMOL_T4_DEV_SEEDS.json").read_text())["seeds"]
+    table = json.loads(Path("diagnostics/task_value_qed.json").read_text())
+    idx = [int(i) for i in indices.split(",")]
+    fit_seeds = json.loads(Path("diagnostics/population_fit.json").read_text())
+    fit_smiles = {o["seed_smiles"] for o in fit_seeds}
+    assert not (fit_smiles & {dv[i]["smiles"] for i in idx}), \
+        "test seeds overlap the seeds V_z was fitted on"
+    jobs = []
+    for i in idx:
+        base = {"seed_smiles": dv[i]["smiles"], "seed": 71 + i, "iters": iters,
+                "pop_size": pop_size, "particles": particles, "tau": tau}
+        jobs.append({**base, "cell": f"A{i}", "arm": "mu_exec"})
+        jobs.append({**base, "cell": f"B{i}", "arm": "Q_taskvalue",
+                     "value_table": table})
+    print(f"A/B on seeds {idx}, {len(jobs)} cells, tau={tau}")
+    out = [o for o in search_cell.map(jobs) if o and "error" not in o]
+    Path("diagnostics/population_ab.json").write_text(json.dumps(out, default=str))
+    import statistics as st
+    for arm in ("mu_exec", "Q_taskvalue"):
+        v = [o for o in out if o["arm"] == arm]
+        imp = [o["improvement"] for o in v]
+        ev = [e for o in v for e in o["events"]]
+        acc = [e for e in ev if e.get("ok")]
+        print(f"\n{arm:<13} cells={len(v)} improved={sum(1 for i in imp if i > 1e-6)}"
+              f"  median={st.median(imp) if imp else 0:+.4f} max={max(imp, default=0):+.4f}"
+              f"  accepted={len(acc)}/{len(ev)}")
+        if acc:
+            print(f"  mean delta of accepted rewrites: "
+                  f"{st.mean([e['delta'] for e in acc]):+.5f}")
+    pair = {}
+    for o in out:
+        pair.setdefault(o["seed_smiles"], {})[o["arm"]] = o["improvement"]
+    wins = sum(1 for p in pair.values()
+               if p.get("Q_taskvalue", 0) > p.get("mu_exec", 0))
+    loss = sum(1 for p in pair.values()
+               if p.get("mu_exec", 0) > p.get("Q_taskvalue", 0))
+    print(f"\npaired by seed: Q better={wins}  mu_exec better={loss}  "
+          f"tied={len(pair) - wins - loss}  of {len(pair)}")
 
 
 @app.local_entrypoint()
