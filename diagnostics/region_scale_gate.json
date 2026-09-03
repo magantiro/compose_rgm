@@ -1,0 +1,6069 @@
+{
+  "results": [
+    {
+      "cell": "dev0_b0_r0",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball1",
+          "region_has_ring": true,
+          "r_release": 0.125,
+          "region_size": 3,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 475,
+          "sec_region": 45.749807357788086
+        }
+      ],
+      "sec": 47.445427656173706
+    },
+    {
+      "cell": "dev0_b0_r1",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball0",
+          "region_has_ring": true,
+          "r_release": 0.041666666666666664,
+          "region_size": 1,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 573,
+          "sec_region": 44.346315145492554,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 8,
+          "first_handoff_step": 7,
+          "logq": -15.257773729092857,
+          "r_change": 0.16666666666666666,
+          "r_coherent": 0.16666666666666666,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 1,
+          "old_region_removed": false,
+          "endpoint": "CSc1cc(-c2ccc(-c3cn(C)nc3-c3ccncc3)cc2)n[nH]1"
+        }
+      ],
+      "sec": 45.17250919342041
+    },
+    {
+      "cell": "dev0_b0_r2",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "ball1+co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.125,
+          "region_size": 3,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 285,
+          "sec_region": 22.042410850524902,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 3,
+          "first_handoff_step": 0,
+          "logq": -4.94718918140643,
+          "r_change": 0.08333333333333333,
+          "r_coherent": 0.08333333333333333,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 1,
+          "old_region_removed": false,
+          "endpoint": "Cc1cc(-c2nn(C)cc2-c2ccc(-c3n[nH]cc3C)cc2)ccn1"
+        }
+      ],
+      "sec": 23.671627044677734
+    },
+    {
+      "cell": "dev0_b0_r3",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball1",
+          "region_has_ring": true,
+          "r_release": 0.125,
+          "region_size": 3,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 572,
+          "sec_region": 57.84386467933655
+        }
+      ],
+      "sec": 58.607059478759766
+    },
+    {
+      "cell": "dev0_b1_r0",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "ball2+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.2916666666666667,
+          "region_size": 7,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 553,
+          "sec_region": 28.673126459121704,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 7,
+          "first_handoff_step": 0,
+          "logq": -7.863642721956007,
+          "r_change": 0.16666666666666666,
+          "r_coherent": 0.08333333333333333,
+          "coherence": 0.6666666666666666,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 0,
+          "old_region_removed": false,
+          "endpoint": "Cn1cc(-c2ccc(-c3cc[nH]n3)c(F)c2)c(-c2ccncc2)n1"
+        }
+      ],
+      "sec": 30.424540996551514
+    },
+    {
+      "cell": "dev0_b1_r1",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball0+co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.20833333333333334,
+          "region_size": 5,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 404,
+          "sec_region": 28.593788623809814
+        }
+      ],
+      "sec": 29.829208374023438
+    },
+    {
+      "cell": "dev0_b1_r2",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.3333333333333333,
+          "region_size": 8,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 556,
+          "sec_region": 39.4462251663208
+        }
+      ],
+      "sec": 41.23362970352173
+    },
+    {
+      "cell": "dev0_b1_r3",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.3333333333333333,
+          "region_size": 8,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1497,
+          "sec_region": 100.20501852035522
+        }
+      ],
+      "sec": 102.68519520759583
+    },
+    {
+      "cell": "dev0_b2_r0",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+co_ring_system+complement+one_cut",
+          "region_has_ring": true,
+          "r_release": 0.5,
+          "region_size": 12,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1987,
+          "sec_region": 84.19445562362671
+        }
+      ],
+      "sec": 85.99475455284119
+    },
+    {
+      "cell": "dev0_b2_r1",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball0+co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.4583333333333333,
+          "region_size": 11,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1333,
+          "sec_region": 44.12968397140503
+        }
+      ],
+      "sec": 46.859129667282104
+    },
+    {
+      "cell": "dev0_b2_r2",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.5416666666666666,
+          "region_size": 13,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 2472,
+          "sec_region": 110.45583581924438,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 13,
+          "first_handoff_step": 0,
+          "logq": -29.505263735463313,
+          "r_change": 0.08333333333333333,
+          "r_coherent": 0.08333333333333333,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 1,
+          "old_region_removed": false,
+          "endpoint": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)c(Cl)c1"
+        }
+      ],
+      "sec": 112.7128643989563
+    },
+    {
+      "cell": "dev0_b2_r3",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.5,
+          "region_size": 12,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2276,
+          "sec_region": 101.90041089057922
+        }
+      ],
+      "sec": 104.36987400054932
+    },
+    {
+      "cell": "dev0_b3_r0",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.7083333333333334,
+          "region_size": 17,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 5951,
+          "sec_region": 221.57905960083008
+        }
+      ],
+      "sec": 224.52216696739197
+    },
+    {
+      "cell": "dev0_b3_r1",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.625,
+          "region_size": 15,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1740,
+          "sec_region": 71.9247989654541
+        }
+      ],
+      "sec": 72.73096585273743
+    },
+    {
+      "cell": "dev0_b3_r2",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+co_ring_system+complement+one_cut",
+          "region_has_ring": true,
+          "r_release": 0.75,
+          "region_size": 18,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 6357,
+          "sec_region": 215.33505296707153,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 20,
+          "first_handoff_step": null,
+          "logq": -65.53828702943217,
+          "r_change": 0.375,
+          "r_coherent": 0.16666666666666666,
+          "coherence": 0.5714285714285714,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 1,
+          "old_region_removed": false,
+          "endpoint": "Nc1[nH]nc(-c2ccncc2)c1-c1ccc(-c2cc(CF)[nH]n2)cc1"
+        }
+      ],
+      "sec": 217.19330263137817
+    },
+    {
+      "cell": "dev0_b3_r3",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball0+co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.7083333333333334,
+          "region_size": 17,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 4325,
+          "sec_region": 162.3540744781494,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 17,
+          "first_handoff_step": 0,
+          "logq": -43.97765948304932,
+          "r_change": 0.08333333333333333,
+          "r_coherent": 0.041666666666666664,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": -1,
+          "old_region_removed": false,
+          "endpoint": "Cc1c[nH]nc1-c1ccc(-c2c[nH]nc2-c2ccncc2)cc1"
+        }
+      ],
+      "sec": 163.87214469909668
+    },
+    {
+      "cell": "dev0_b4_r0",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.875,
+          "region_size": 21,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 8846,
+          "sec_region": 296.4204308986664,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 21,
+          "first_handoff_step": 0,
+          "logq": -73.03994079463934,
+          "r_change": 0.3333333333333333,
+          "r_coherent": 0.08333333333333333,
+          "coherence": 0.2857142857142857,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 2,
+          "old_region_removed": false,
+          "endpoint": "Cn1ccc(-c2ccc(-c3cn(C)nc3-c3cc(Cl)ncc3Cl)cc2)n1"
+        }
+      ],
+      "sec": 297.8467962741852
+    },
+    {
+      "cell": "dev0_b4_r1",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.8333333333333334,
+          "region_size": 20,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 8246,
+          "sec_region": 275.4839904308319
+        }
+      ],
+      "sec": 276.71432638168335
+    },
+    {
+      "cell": "dev0_b4_r2",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.875,
+          "region_size": 21,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 9880,
+          "sec_region": 319.7284083366394,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 21,
+          "first_handoff_step": 0,
+          "logq": -64.81592009678592,
+          "r_change": 0.25,
+          "r_coherent": 0.08333333333333333,
+          "coherence": 0.5,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": -1,
+          "old_region_removed": false,
+          "endpoint": "Oc1cnccc1-c1n[nH]cc1-c1ccc(-c2cc[nH]n2)cc1"
+        }
+      ],
+      "sec": 321.1642875671387
+    },
+    {
+      "cell": "dev0_b4_r3",
+      "seed": "Cc1c[nH]nc1-c1ccc(-c2cn(C)nc2-c2ccncc2)cc1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.875,
+          "region_size": 21,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 10031,
+          "sec_region": 472.0893349647522
+        }
+      ],
+      "sec": 474.64175629615784
+    },
+    {
+      "cell": "dev1_b0_r0",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.07692307692307693,
+          "region_size": 2,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 76,
+          "sec_region": 13.78803300857544,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 2,
+          "first_handoff_step": 0,
+          "logq": -2.728939661526001,
+          "r_change": 0.11538461538461539,
+          "r_coherent": 0.07692307692307693,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 0,
+          "old_region_removed": false,
+          "endpoint": "CN(C)C(=O)Oc1ccc2c(N)c(Cc3ccc(F)cc3)c(=O)oc2c1"
+        }
+      ],
+      "sec": 16.591742515563965
+    },
+    {
+      "cell": "dev1_b0_r1",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "ball1",
+          "region_has_ring": false,
+          "r_release": 0.07692307692307693,
+          "region_size": 2,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1008,
+          "sec_region": 89.07375621795654
+        }
+      ],
+      "sec": 91.55209398269653
+    },
+    {
+      "cell": "dev1_b0_r2",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball1",
+          "region_has_ring": true,
+          "r_release": 0.11538461538461539,
+          "region_size": 3,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 805,
+          "sec_region": 77.10723280906677
+        }
+      ],
+      "sec": 79.26186513900757
+    },
+    {
+      "cell": "dev1_b0_r3",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "ball0+co_ball0+co_ball1+co_ball2+complement+one_cut",
+          "region_has_ring": false,
+          "r_release": 0.038461538461538464,
+          "region_size": 1,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 62,
+          "sec_region": 12.813005447387695,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 3,
+          "first_handoff_step": null,
+          "logq": -2.8596583187676514,
+          "r_change": 0.11538461538461539,
+          "r_coherent": 0.07692307692307693,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 1,
+          "old_region_removed": true,
+          "endpoint": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C=O)ccc12"
+        }
+      ],
+      "sec": 14.22324538230896
+    },
+    {
+      "cell": "dev1_b1_r0",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.2692307692307692,
+          "region_size": 7,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1179,
+          "sec_region": 76.35472750663757
+        }
+      ],
+      "sec": 77.78045535087585
+    },
+    {
+      "cell": "dev1_b1_r1",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.34615384615384615,
+          "region_size": 9,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 2134,
+          "sec_region": 81.22561407089233,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 9,
+          "first_handoff_step": 0,
+          "logq": -23.642856381220433,
+          "r_change": 0.19230769230769232,
+          "r_coherent": 0.07692307692307693,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": -3,
+          "old_region_removed": false,
+          "endpoint": "CCOc1ccc2c(C)c(Cc3ccc(F)cc3)c(=O)oc2c1"
+        }
+      ],
+      "sec": 82.09016489982605
+    },
+    {
+      "cell": "dev1_b1_r2",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.2692307692307692,
+          "region_size": 7,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1613,
+          "sec_region": 100.52289366722107
+        }
+      ],
+      "sec": 101.90633249282837
+    },
+    {
+      "cell": "dev1_b1_r3",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.2692307692307692,
+          "region_size": 7,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2192,
+          "sec_region": 142.0829577445984
+        }
+      ],
+      "sec": 142.67126607894897
+    },
+    {
+      "cell": "dev1_b2_r0",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.5,
+          "region_size": 13,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 2197,
+          "sec_region": 93.1233742237091,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 13,
+          "first_handoff_step": 0,
+          "logq": -31.0961987914688,
+          "r_change": 0.3076923076923077,
+          "r_coherent": 0.11538461538461539,
+          "coherence": 0.6,
+          "d_cycle_rank": 1,
+          "d_ring_systems": -1,
+          "d_heavy": -2,
+          "old_region_removed": false,
+          "endpoint": "CN(C)C(=O)Oc1ccc2c(c1)OCC1=C2c2ccc(I)cc2C1"
+        }
+      ],
+      "sec": 94.58090996742249
+    },
+    {
+      "cell": "dev1_b2_r1",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.5769230769230769,
+          "region_size": 15,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 2436,
+          "sec_region": 104.08007407188416,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 15,
+          "first_handoff_step": 0,
+          "logq": -37.8632445228918,
+          "r_change": 0.23076923076923078,
+          "r_coherent": 0.07692307692307693,
+          "coherence": 0.5,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": -1,
+          "old_region_removed": false,
+          "endpoint": "CN(C)C(=O)Oc1cc(Cl)c2cc(Cc3ccccc3)c(=O)oc2c1"
+        }
+      ],
+      "sec": 105.47216463088989
+    },
+    {
+      "cell": "dev1_b2_r2",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.5,
+          "region_size": 13,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1346,
+          "sec_region": 71.19346165657043
+        }
+      ],
+      "sec": 72.51969361305237
+    },
+    {
+      "cell": "dev1_b2_r3",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.5769230769230769,
+          "region_size": 15,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2741,
+          "sec_region": 104.21786785125732
+        }
+      ],
+      "sec": 105.52355694770813
+    },
+    {
+      "cell": "dev1_b3_r0",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.6923076923076923,
+          "region_size": 18,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 5455,
+          "sec_region": 204.22200727462769
+        }
+      ],
+      "sec": 206.49763822555542
+    },
+    {
+      "cell": "dev1_b3_r1",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.7692307692307693,
+          "region_size": 20,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 7453,
+          "sec_region": 222.49379539489746,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 20,
+          "first_handoff_step": 0,
+          "logq": -61.33240041441795,
+          "r_change": 0.38461538461538464,
+          "r_coherent": 0.07692307692307693,
+          "coherence": 0.2857142857142857,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": -2,
+          "old_region_removed": false,
+          "endpoint": "COc1ccc2c(O)c(Cc3ccc(F)cc3Cl)c(=O)oc2c1F"
+        }
+      ],
+      "sec": 223.4380168914795
+    },
+    {
+      "cell": "dev1_b3_r2",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.6923076923076923,
+          "region_size": 18,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 4779,
+          "sec_region": 155.79309034347534
+        }
+      ],
+      "sec": 156.40971326828003
+    },
+    {
+      "cell": "dev1_b3_r3",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball0+co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.6538461538461539,
+          "region_size": 17,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 4506,
+          "sec_region": 160.53099966049194
+        }
+      ],
+      "sec": 161.87314105033875
+    },
+    {
+      "cell": "dev1_b4_r0",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.8461538461538461,
+          "region_size": 22,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 3849,
+          "sec_region": 119.97221255302429
+        }
+      ],
+      "sec": 123.60224175453186
+    },
+    {
+      "cell": "dev1_b4_r1",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.8846153846153846,
+          "region_size": 23,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 9021,
+          "sec_region": 278.9719150066376,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 23,
+          "first_handoff_step": 0,
+          "logq": -55.31646354255433,
+          "r_change": 0.5769230769230769,
+          "r_coherent": 0.15384615384615385,
+          "coherence": 0.4,
+          "d_cycle_rank": 1,
+          "d_ring_systems": 0,
+          "d_heavy": -3,
+          "old_region_removed": false,
+          "endpoint": "Nc1cc2c3cc1OCNN=C(c1ccccc1)C(=C2)C(O)O3"
+        }
+      ],
+      "sec": 280.7437460422516
+    },
+    {
+      "cell": "dev1_b4_r2",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.8461538461538461,
+          "region_size": 22,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 8008,
+          "sec_region": 224.88974928855896,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 22,
+          "first_handoff_step": 0,
+          "logq": -51.230049999511316,
+          "r_change": 0.46153846153846156,
+          "r_coherent": 0.11538461538461539,
+          "coherence": 0.6,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": -5,
+          "old_region_removed": false,
+          "endpoint": "COc1cc(F)ccc1Cc1cc2ccccc2oc1=O"
+        }
+      ],
+      "sec": 226.30675792694092
+    },
+    {
+      "cell": "dev1_b4_r3",
+      "seed": "Cc1c(Cc2ccc(F)cc2)c(=O)oc2cc(OC(=O)N(C)C)ccc12",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+complement+one_cut",
+          "region_has_ring": true,
+          "r_release": 0.8846153846153846,
+          "region_size": 23,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 9520,
+          "sec_region": 293.28231549263,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 25,
+          "first_handoff_step": null,
+          "logq": -72.77208220473456,
+          "r_change": 0.42307692307692313,
+          "r_coherent": 0.15384615384615385,
+          "coherence": 0.5,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": -1,
+          "old_region_removed": false,
+          "endpoint": "COc1ccc2oc(=O)c(Cc3cccc(OCN(C)C)c3)cc2c1"
+        }
+      ],
+      "sec": 294.0814208984375
+    },
+    {
+      "cell": "dev2_b0_r0",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.175,
+          "region_size": 7,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 3081,
+          "sec_region": 637.5307683944702
+        }
+      ],
+      "sec": 639.8993363380432
+    },
+    {
+      "cell": "dev2_b0_r1",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball1",
+          "region_has_ring": true,
+          "r_release": 0.1,
+          "region_size": 4,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 351,
+          "sec_region": 211.06015253067017
+        }
+      ],
+      "sec": 212.47085404396057
+    },
+    {
+      "cell": "dev2_b0_r2",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.15,
+          "region_size": 6,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 376,
+          "sec_region": 117.28581547737122,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 6,
+          "first_handoff_step": 0,
+          "logq": -10.193686587542894,
+          "r_change": 0.0,
+          "r_coherent": 0.0,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 0,
+          "old_region_removed": false,
+          "endpoint": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12"
+        }
+      ],
+      "sec": 119.83048915863037
+    },
+    {
+      "cell": "dev2_b0_r3",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball1",
+          "region_has_ring": true,
+          "r_release": 0.1,
+          "region_size": 4,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 432,
+          "sec_region": 196.75530862808228
+        }
+      ],
+      "sec": 198.06862688064575
+    },
+    {
+      "cell": "dev2_b1_r0",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball0+co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.3,
+          "region_size": 12,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1588,
+          "sec_region": 120.19127154350281
+        }
+      ],
+      "sec": 122.98048806190491
+    },
+    {
+      "cell": "dev2_b1_r1",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.25,
+          "region_size": 10,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2542,
+          "sec_region": 425.083065032959
+        }
+      ],
+      "sec": 425.8002791404724
+    },
+    {
+      "cell": "dev2_b1_r2",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+complement+one_cut",
+          "region_has_ring": true,
+          "r_release": 0.325,
+          "region_size": 13,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 3209,
+          "sec_region": 314.2822263240814,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 15,
+          "first_handoff_step": null,
+          "logq": -34.26072083912532,
+          "r_change": 0.175,
+          "r_coherent": 0.1,
+          "coherence": 0.6666666666666666,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 1,
+          "old_region_removed": false,
+          "endpoint": "Cc1cccc(C)c1-n1c(=O)c2cnc(N(O)c3ccc(N4CCC(O)CC4)cc3)nc2n2c3ccccc3nc12"
+        }
+      ],
+      "sec": 315.3337652683258
+    },
+    {
+      "cell": "dev2_b1_r3",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.25,
+          "region_size": 10,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 3176,
+          "sec_region": 313.7301962375641,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 10,
+          "first_handoff_step": 0,
+          "logq": -23.36620273706858,
+          "r_change": 0.1,
+          "r_coherent": 0.1,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 3,
+          "old_region_removed": false,
+          "endpoint": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)c(CNO)c3)nc2n2c3ccccc3nc12"
+        }
+      ],
+      "sec": 314.71830582618713
+    },
+    {
+      "cell": "dev2_b2_r0",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.55,
+          "region_size": 22,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 9933,
+          "sec_region": 798.0360555648804,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 22,
+          "first_handoff_step": 0,
+          "logq": -75.16470652652308,
+          "r_change": 0.125,
+          "r_coherent": 0.075,
+          "coherence": 0.6,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 3,
+          "old_region_removed": false,
+          "endpoint": "COc1cc(N(O)c2ncc3c(=O)n(-c4c(C)cccc4C)c4nc5ccccc5n4c3n2)ccc1N1CCN(C)CC1"
+        }
+      ],
+      "sec": 799.9278831481934
+    },
+    {
+      "cell": "dev2_b2_r1",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.475,
+          "region_size": 19,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1885,
+          "sec_region": 159.5551176071167
+        }
+      ],
+      "sec": 161.11852049827576
+    },
+    {
+      "cell": "dev2_b2_r2",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.575,
+          "region_size": 23,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 4602,
+          "sec_region": 521.5044198036194
+        }
+      ],
+      "sec": 522.3181400299072
+    },
+    {
+      "cell": "dev2_b2_r3",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.525,
+          "region_size": 21,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 5247,
+          "sec_region": 509.1908555030823,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 21,
+          "first_handoff_step": 0,
+          "logq": -54.12436300558999,
+          "r_change": 0.2,
+          "r_coherent": 0.05,
+          "coherence": 0.4,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": -2,
+          "old_region_removed": false,
+          "endpoint": "CN1CCN(c2ccc(Nc3nc(N)c4c(n3)-n3c(nc5ccccc53)N(c3ccccc3)C4)cc2)CC1"
+        }
+      ],
+      "sec": 510.4513919353485
+    },
+    {
+      "cell": "dev2_b3_r0",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.775,
+          "region_size": 31,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 12830,
+          "sec_region": 821.2054738998413
+        }
+      ],
+      "sec": 822.6189556121826
+    },
+    {
+      "cell": "dev2_b3_r1",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.7,
+          "region_size": 28,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 12987,
+          "sec_region": 811.8329617977142,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 28,
+          "first_handoff_step": 0,
+          "logq": -69.47192190096847,
+          "r_change": 0.2,
+          "r_coherent": 0.1,
+          "coherence": 0.5,
+          "d_cycle_rank": 1,
+          "d_ring_systems": -1,
+          "d_heavy": 3,
+          "old_region_removed": false,
+          "endpoint": "Cc1ccc2c(c1)nc1n(-c3c(C)cccc3C)c(=O)cc3nc(Nc4ccc5c(c4)C(O)=C4CN5CCN4C)nc-3n21"
+        }
+      ],
+      "sec": 813.276341676712
+    },
+    {
+      "cell": "dev2_b3_r2",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.775,
+          "region_size": 31,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 7691,
+          "sec_region": 631.4392492771149
+        }
+      ],
+      "sec": 632.8398551940918
+    },
+    {
+      "cell": "dev2_b3_r3",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.75,
+          "region_size": 30,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 12057,
+          "sec_region": 872.4063191413879
+        }
+      ],
+      "sec": 874.1704580783844
+    },
+    {
+      "cell": "dev2_b4_r0",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.9,
+          "region_size": 36,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 20219,
+          "sec_region": 1852.643581867218,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 36,
+          "first_handoff_step": 0,
+          "logq": -135.20593102641695,
+          "r_change": 0.35,
+          "r_coherent": 0.1,
+          "coherence": 0.3333333333333333,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 3,
+          "old_region_removed": false,
+          "endpoint": "Cc1cc2nc3n(-c4cccc(Cl)c4)c(=O)c4cnc(Nc5cc(Cl)c(N6CCN(C)CC6)cc5Br)nc4n3c2cc1O"
+        }
+      ],
+      "sec": 1854.0935773849487
+    },
+    {
+      "cell": "dev2_b4_r1",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.85,
+          "region_size": 34,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 16391,
+          "sec_region": 1687.9483189582825,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 34,
+          "first_handoff_step": 0,
+          "logq": -108.21361165666104,
+          "r_change": 0.225,
+          "r_coherent": 0.15,
+          "coherence": 0.8571428571428571,
+          "d_cycle_rank": 1,
+          "d_ring_systems": -3,
+          "d_heavy": 0,
+          "old_region_removed": false,
+          "endpoint": "CN1CCN2c3ccc(cc3)Nc3ncc4c(=O)n(c5nc6ccccc6n5c4n3)-c3ccc(c(N)c3)CC2C1"
+        }
+      ],
+      "sec": 1689.603278875351
+    },
+    {
+      "cell": "dev2_b4_r2",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.9,
+          "region_size": 36,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 22700,
+          "sec_region": 1636.8911533355713,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 36,
+          "first_handoff_step": 0,
+          "logq": -113.41870021171577,
+          "r_change": 0.225,
+          "r_coherent": 0.1,
+          "coherence": 0.4444444444444444,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 5,
+          "old_region_removed": false,
+          "endpoint": "Cc1cc(C(C)F)ccc1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3N(C)C)nc2n2c3ccccc3nc12"
+        }
+      ],
+      "sec": 1638.1425530910492
+    },
+    {
+      "cell": "dev2_b4_r3",
+      "seed": "Cc1cccc(C)c1-n1c(=O)c2cnc(Nc3ccc(N4CCN(C)CC4)cc3)nc2n2c3ccccc3nc12",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.875,
+          "region_size": 35,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 18990,
+          "sec_region": 1238.5511813163757,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 35,
+          "first_handoff_step": 0,
+          "logq": -116.9977070088735,
+          "r_change": 0.375,
+          "r_coherent": 0.1,
+          "coherence": 0.36363636363636365,
+          "d_cycle_rank": 1,
+          "d_ring_systems": -2,
+          "d_heavy": -1,
+          "old_region_removed": false,
+          "endpoint": "Cc1cc2c(F)c(c1)N1Cc3cnc(nc3-n3c1nc1cccc(Cl)c13)Nc1ccc(N3CCNCC3)cc1-2"
+        }
+      ],
+      "sec": 1259.5484580993652
+    },
+    {
+      "cell": "dev3_b0_r0",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball0",
+          "region_has_ring": false,
+          "r_release": 0.03125,
+          "region_size": 1,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 759,
+          "sec_region": 110.6928780078888
+        }
+      ],
+      "sec": 111.94242310523987
+    },
+    {
+      "cell": "dev3_b0_r1",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "ball0+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.03125,
+          "region_size": 1,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 77,
+          "sec_region": 11.663793325424194,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 1,
+          "first_handoff_step": 0,
+          "logq": -1.5945268367767536,
+          "r_change": 0.0625,
+          "r_coherent": 0.0625,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 1,
+          "old_region_removed": false,
+          "endpoint": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCC(C)C3)c2)n1"
+        }
+      ],
+      "sec": 13.177307605743408
+    },
+    {
+      "cell": "dev3_b0_r2",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.1875,
+          "region_size": 6,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2611,
+          "sec_region": 175.1787166595459
+        }
+      ],
+      "sec": 176.54216361045837
+    },
+    {
+      "cell": "dev3_b0_r3",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball1",
+          "region_has_ring": true,
+          "r_release": 0.125,
+          "region_size": 4,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1048,
+          "sec_region": 125.66784143447876
+        }
+      ],
+      "sec": 126.93219923973083
+    },
+    {
+      "cell": "dev3_b1_r0",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.21875,
+          "region_size": 7,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1499,
+          "sec_region": 137.3799831867218
+        }
+      ],
+      "sec": 138.82766008377075
+    },
+    {
+      "cell": "dev3_b1_r1",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.21875,
+          "region_size": 7,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2780,
+          "sec_region": 200.10694360733032
+        }
+      ],
+      "sec": 202.4289882183075
+    },
+    {
+      "cell": "dev3_b1_r2",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.34375,
+          "region_size": 11,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 1843,
+          "sec_region": 82.00366067886353,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 11,
+          "first_handoff_step": 0,
+          "logq": -17.089263078965356,
+          "r_change": 0.125,
+          "r_coherent": 0.09375,
+          "coherence": 1.0,
+          "d_cycle_rank": 1,
+          "d_ring_systems": 0,
+          "d_heavy": 0,
+          "old_region_removed": false,
+          "endpoint": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2ccc3c(c2)NC(NC2CCCCC2)O3)n1"
+        }
+      ],
+      "sec": 83.5759162902832
+    },
+    {
+      "cell": "dev3_b1_r3",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.28125,
+          "region_size": 9,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1688,
+          "sec_region": 160.19181990623474
+        }
+      ],
+      "sec": 161.80753207206726
+    },
+    {
+      "cell": "dev3_b2_r0",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.4375,
+          "region_size": 14,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 3458,
+          "sec_region": 245.9631485939026
+        }
+      ],
+      "sec": 246.73736238479614
+    },
+    {
+      "cell": "dev3_b2_r1",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.4375,
+          "region_size": 14,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2763,
+          "sec_region": 203.01703214645386
+        }
+      ],
+      "sec": 204.40172719955444
+    },
+    {
+      "cell": "dev3_b2_r2",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.59375,
+          "region_size": 19,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 6110,
+          "sec_region": 294.0128152370453,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 19,
+          "first_handoff_step": 0,
+          "logq": -71.96353969946297,
+          "r_change": 0.25,
+          "r_coherent": 0.09375,
+          "coherence": 0.42857142857142855,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 1,
+          "old_region_removed": false,
+          "endpoint": "Cc1cc(NC(=O)NC2CCCCC2)cc(-c2n[nH]c(Cl)c2-c2cc(C)nc3[nH]ccc23)c1"
+        }
+      ],
+      "sec": 295.2421770095825
+    },
+    {
+      "cell": "dev3_b2_r3",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.5,
+          "region_size": 16,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 4325,
+          "sec_region": 266.3309485912323
+        }
+      ],
+      "sec": 268.53756046295166
+    },
+    {
+      "cell": "dev3_b3_r0",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.65625,
+          "region_size": 21,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 9702,
+          "sec_region": 452.8070719242096
+        }
+      ],
+      "sec": 454.2132716178894
+    },
+    {
+      "cell": "dev3_b3_r1",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+complement+one_cut",
+          "region_has_ring": true,
+          "r_release": 0.6875,
+          "region_size": 22,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 10065,
+          "sec_region": 478.56298899650574,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 24,
+          "first_handoff_step": null,
+          "logq": -67.99252104839863,
+          "r_change": 0.125,
+          "r_coherent": 0.0625,
+          "coherence": 0.6666666666666666,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 0,
+          "old_region_removed": false,
+          "endpoint": "Cn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(N(N)C(=O)NC3CCCCC3)c2)n1"
+        }
+      ],
+      "sec": 479.41098260879517
+    },
+    {
+      "cell": "dev3_b3_r2",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.78125,
+          "region_size": 25,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 3010,
+          "sec_region": 139.67849445343018
+        }
+      ],
+      "sec": 141.11644077301025
+    },
+    {
+      "cell": "dev3_b3_r3",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+co_ring_system+complement+one_cut",
+          "region_has_ring": true,
+          "r_release": 0.71875,
+          "region_size": 23,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 15909,
+          "sec_region": 610.6840572357178,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 25,
+          "first_handoff_step": null,
+          "logq": -83.14085239928316,
+          "r_change": 0.21875,
+          "r_coherent": 0.09375,
+          "coherence": 0.5,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 0,
+          "old_region_removed": false,
+          "endpoint": "Cn1cc(-c2ccnc3[nH]ccc23)c(-c2ccc(Br)c(N=C(O)NC3CCCCC3)c2)n1"
+        }
+      ],
+      "sec": 612.6226906776428
+    },
+    {
+      "cell": "dev3_b4_r0",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.84375,
+          "region_size": 27,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 17632,
+          "sec_region": 699.6069991588593,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 27,
+          "first_handoff_step": 0,
+          "logq": -92.7858569695842,
+          "r_change": 0.28125,
+          "r_coherent": 0.0625,
+          "coherence": 0.2222222222222222,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 3,
+          "old_region_removed": false,
+          "endpoint": "Cc1c(-c2cc(N)nc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCC(Br)CC3=O)c2)nn1C"
+        }
+      ],
+      "sec": 700.9107396602631
+    },
+    {
+      "cell": "dev3_b4_r1",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+co_ring_system+complement+one_cut",
+          "region_has_ring": true,
+          "r_release": 0.8125,
+          "region_size": 26,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 11379,
+          "sec_region": 563.6190226078033,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 28,
+          "first_handoff_step": null,
+          "logq": -74.6455980757289,
+          "r_change": 0.375,
+          "r_coherent": 0.15625,
+          "coherence": 0.4166666666666667,
+          "d_cycle_rank": 2,
+          "d_ring_systems": -1,
+          "d_heavy": 3,
+          "old_region_removed": false,
+          "endpoint": "Cc1cc2c3c(-c4cc(Cl)cc(NC(=O)N(C)C5CCCCC5)c4)nn4ccc5[nH]c(n1)c2c5c34"
+        }
+      ],
+      "sec": 564.4276502132416
+    },
+    {
+      "cell": "dev3_b4_r2",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.84375,
+          "region_size": 27,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 16568,
+          "sec_region": 684.2490999698639,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 27,
+          "first_handoff_step": 0,
+          "logq": -103.13762434025512,
+          "r_change": 0.1875,
+          "r_coherent": 0.0625,
+          "coherence": 0.3333333333333333,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 3,
+          "old_region_removed": false,
+          "endpoint": "CCn1nc(-c2cccc(NC(=O)NC3CCCCC3C)c2)c(-c2cc(Cl)nc3[nH]ccc23)c1S"
+        }
+      ],
+      "sec": 685.9612605571747
+    },
+    {
+      "cell": "dev3_b4_r3",
+      "seed": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NC(=O)NC3CCCCC3)c2)n1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.8125,
+          "region_size": 26,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 13087,
+          "sec_region": 521.5538036823273
+        }
+      ],
+      "sec": 522.9733600616455
+    },
+    {
+      "cell": "dev4_b0_r0",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "ball0",
+          "region_has_ring": true,
+          "r_release": 0.03125,
+          "region_size": 1,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 13,
+          "sec_region": 8.277214288711548,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 1,
+          "first_handoff_step": 0,
+          "logq": -0.06890611430772868,
+          "r_change": 0.09375,
+          "r_coherent": 0.03125,
+          "coherence": 0.5,
+          "d_cycle_rank": -1,
+          "d_ring_systems": 0,
+          "d_heavy": -1,
+          "old_region_removed": true,
+          "endpoint": "CNC(=O)c1cc(CNc2c(C(=O)Nc3cccc(OC(F)F)c3)cnn2C)ccn1"
+        }
+      ],
+      "sec": 9.671573877334595
+    },
+    {
+      "cell": "dev4_b0_r1",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "ball2+two_cut",
+          "region_has_ring": true,
+          "r_release": 0.1875,
+          "region_size": 6,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1328,
+          "sec_region": 139.41026902198792
+        }
+      ],
+      "sec": 141.55762124061584
+    },
+    {
+      "cell": "dev4_b0_r2",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ring_system",
+          "region_has_ring": true,
+          "r_release": 0.15625,
+          "region_size": 5,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2153,
+          "sec_region": 132.77113842964172
+        }
+      ],
+      "sec": 135.59521341323853
+    },
+    {
+      "cell": "dev4_b0_r3",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": false,
+          "r_release": 0.0625,
+          "region_size": 2,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 678,
+          "sec_region": 107.54784536361694
+        }
+      ],
+      "sec": 109.15146350860596
+    },
+    {
+      "cell": "dev4_b1_r0",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.25,
+          "region_size": 8,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2202,
+          "sec_region": 151.16802620887756
+        }
+      ],
+      "sec": 152.65783619880676
+    },
+    {
+      "cell": "dev4_b1_r1",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+complement+one_cut",
+          "region_has_ring": true,
+          "r_release": 0.34375,
+          "region_size": 11,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 1277,
+          "sec_region": 90.66581988334656,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 13,
+          "first_handoff_step": null,
+          "logq": -11.694508043656855,
+          "r_change": 0.15625,
+          "r_coherent": 0.0625,
+          "coherence": 0.6666666666666666,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": -1,
+          "old_region_removed": false,
+          "endpoint": "CNC(=O)c1cc(CNc2c(C(=O)Nc3cc4c(cc3C)OCO4)cnn2C)ccn1"
+        }
+      ],
+      "sec": 91.7097315788269
+    },
+    {
+      "cell": "dev4_b1_r2",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.34375,
+          "region_size": 11,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 3268,
+          "sec_region": 222.3853063583374
+        }
+      ],
+      "sec": 223.63762545585632
+    },
+    {
+      "cell": "dev4_b1_r3",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.25,
+          "region_size": 8,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 664,
+          "sec_region": 67.2868218421936,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 8,
+          "first_handoff_step": 0,
+          "logq": -19.873533065357133,
+          "r_change": 0.09375,
+          "r_coherent": 0.03125,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": -2,
+          "old_region_removed": false,
+          "endpoint": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OCO4)cnn2C)ccn1"
+        }
+      ],
+      "sec": 68.40730738639832
+    },
+    {
+      "cell": "dev4_b2_r0",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.5,
+          "region_size": 16,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 3145,
+          "sec_region": 144.24966287612915
+        }
+      ],
+      "sec": 145.98969674110413
+    },
+    {
+      "cell": "dev4_b2_r1",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.59375,
+          "region_size": 19,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 3854,
+          "sec_region": 217.34396743774414
+        }
+      ],
+      "sec": 218.66908168792725
+    },
+    {
+      "cell": "dev4_b2_r2",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.59375,
+          "region_size": 19,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1682,
+          "sec_region": 90.9164125919342
+        }
+      ],
+      "sec": 91.56309509277344
+    },
+    {
+      "cell": "dev4_b2_r3",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.53125,
+          "region_size": 17,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 5967,
+          "sec_region": 277.2566673755646
+        }
+      ],
+      "sec": 278.7132177352905
+    },
+    {
+      "cell": "dev4_b3_r0",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.625,
+          "region_size": 20,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2174,
+          "sec_region": 106.33819937705994
+        }
+      ],
+      "sec": 107.59667801856995
+    },
+    {
+      "cell": "dev4_b3_r1",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.78125,
+          "region_size": 25,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 9545,
+          "sec_region": 416.53507375717163,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 25,
+          "first_handoff_step": 0,
+          "logq": -87.56984786057055,
+          "r_change": 0.21875,
+          "r_coherent": 0.0625,
+          "coherence": 0.4,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 0,
+          "old_region_removed": false,
+          "endpoint": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OCO4)cnn2C#N)cc(O)n1"
+        }
+      ],
+      "sec": 418.506228685379
+    },
+    {
+      "cell": "dev4_b3_r2",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.75,
+          "region_size": 24,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 10563,
+          "sec_region": 416.5135896205902,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 24,
+          "first_handoff_step": 0,
+          "logq": -67.57345348101526,
+          "r_change": 0.375,
+          "r_coherent": 0.15625,
+          "coherence": 0.5,
+          "d_cycle_rank": 1,
+          "d_ring_systems": 0,
+          "d_heavy": 1,
+          "old_region_removed": false,
+          "endpoint": "Nc1n[nH]c(N2CCCCc3cc(ccn3)C2)c1C(=O)Nc1ccc2c(c1F)OC(F)(F)O2"
+        }
+      ],
+      "sec": 417.48620319366455
+    },
+    {
+      "cell": "dev4_b3_r3",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.625,
+          "region_size": 20,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 12803,
+          "sec_region": 481.4669089317322
+        }
+      ],
+      "sec": 484.0980772972107
+    },
+    {
+      "cell": "dev4_b4_r0",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+complement+one_cut",
+          "region_has_ring": true,
+          "r_release": 0.875,
+          "region_size": 28,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 13371,
+          "sec_region": 585.2624678611755,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 30,
+          "first_handoff_step": null,
+          "logq": -99.75896662949863,
+          "r_change": 0.28125,
+          "r_coherent": 0.09375,
+          "coherence": 0.375,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 2,
+          "old_region_removed": false,
+          "endpoint": "CNC(=O)Nc1c(NC(=O)c2cn[nH]c2NCc2cc(O)ncc2F)ccc2c1OC(F)(F)O2"
+        }
+      ],
+      "sec": 586.2806882858276
+    },
+    {
+      "cell": "dev4_b4_r1",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.875,
+          "region_size": 28,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 14314,
+          "sec_region": 595.6577749252319,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 28,
+          "first_handoff_step": 0,
+          "logq": -107.37633268356628,
+          "r_change": 0.375,
+          "r_coherent": 0.1875,
+          "coherence": 0.5454545454545454,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 3,
+          "old_region_removed": false,
+          "endpoint": "CCSc1nccc(CN(Cl)c2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)c(NC)nn2C)c1Cl"
+        }
+      ],
+      "sec": 597.1188399791718
+    },
+    {
+      "cell": "dev4_b4_r2",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.84375,
+          "region_size": 27,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 8590,
+          "sec_region": 313.13304448127747
+        }
+      ],
+      "sec": 314.3989202976227
+    },
+    {
+      "cell": "dev4_b4_r3",
+      "seed": "CNC(=O)c1cc(CNc2c(C(=O)Nc3ccc4c(c3)OC(F)(F)O4)cnn2C)ccn1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.84375,
+          "region_size": 27,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 13538,
+          "sec_region": 496.8058030605316
+        }
+      ],
+      "sec": 498.11442613601685
+    },
+    {
+      "cell": "dev5_b0_r0",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.14285714285714285,
+          "region_size": 4,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 430,
+          "sec_region": 34.662633657455444,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 4,
+          "first_handoff_step": 0,
+          "logq": -4.520856090624566,
+          "r_change": 0.17857142857142855,
+          "r_coherent": 0.07142857142857142,
+          "coherence": 0.6666666666666666,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": -1,
+          "old_region_removed": false,
+          "endpoint": "ClC1CCc2ccc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)cc21"
+        }
+      ],
+      "sec": 36.11270189285278
+    },
+    {
+      "cell": "dev5_b0_r1",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.17857142857142858,
+          "region_size": 5,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2093,
+          "sec_region": 130.10922527313232
+        }
+      ],
+      "sec": 132.39550614356995
+    },
+    {
+      "cell": "dev5_b0_r2",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "ball0",
+          "region_has_ring": true,
+          "r_release": 0.03571428571428571,
+          "region_size": 1,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 26,
+          "sec_region": 5.73313570022583,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 1,
+          "first_handoff_step": 0,
+          "logq": -2.3872465317522673,
+          "r_change": 0.10714285714285714,
+          "r_coherent": 0.10714285714285714,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 0,
+          "old_region_removed": false,
+          "endpoint": "ON=C1CCc2cc(-c3nc(C4CCNCC4)oc3-c3ccncc3)ccc21"
+        }
+      ],
+      "sec": 8.476548671722412
+    },
+    {
+      "cell": "dev5_b0_r3",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "ball0+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.03571428571428571,
+          "region_size": 1,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 77,
+          "sec_region": 8.31658148765564,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 1,
+          "first_handoff_step": 0,
+          "logq": -0.07640510979521399,
+          "r_change": 0.07142857142857142,
+          "r_coherent": 0.07142857142857142,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 1,
+          "old_region_removed": false,
+          "endpoint": "CN1CCC(c2nc(-c3ccc4c(c3)CCC4=NO)c(-c3ccncc3)[nH]2)CC1"
+        }
+      ],
+      "sec": 9.766602039337158
+    },
+    {
+      "cell": "dev5_b1_r0",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.2857142857142857,
+          "region_size": 8,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 815,
+          "sec_region": 41.58579897880554
+        }
+      ],
+      "sec": 42.916030406951904
+    },
+    {
+      "cell": "dev5_b1_r1",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.35714285714285715,
+          "region_size": 10,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 3460,
+          "sec_region": 185.85746431350708
+        }
+      ],
+      "sec": 188.59545922279358
+    },
+    {
+      "cell": "dev5_b1_r2",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+co_ring_system+complement+one_cut+ring_system",
+          "region_has_ring": true,
+          "r_release": 0.21428571428571427,
+          "region_size": 6,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1492,
+          "sec_region": 54.25972294807434
+        }
+      ],
+      "sec": 57.65130853652954
+    },
+    {
+      "cell": "dev5_b1_r3",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.21428571428571427,
+          "region_size": 6,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2981,
+          "sec_region": 154.30351448059082
+        }
+      ],
+      "sec": 155.64328336715698
+    },
+    {
+      "cell": "dev5_b2_r0",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.5714285714285714,
+          "region_size": 16,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 4582,
+          "sec_region": 203.45355224609375
+        }
+      ],
+      "sec": 205.00324964523315
+    },
+    {
+      "cell": "dev5_b2_r1",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball0+co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.5714285714285714,
+          "region_size": 16,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 6759,
+          "sec_region": 232.6214621067047
+        }
+      ],
+      "sec": 233.82581686973572
+    },
+    {
+      "cell": "dev5_b2_r2",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.4642857142857143,
+          "region_size": 13,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 2058,
+          "sec_region": 112.84915542602539,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 13,
+          "first_handoff_step": 0,
+          "logq": -24.66294477754065,
+          "r_change": 0.25,
+          "r_coherent": 0.17857142857142858,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": -2,
+          "old_region_removed": false,
+          "endpoint": "c1cc(-c2[nH]c(C3CCNCC3)nc2-c2ccc3c(c2)SCS3)ccn1"
+        }
+      ],
+      "sec": 114.28303170204163
+    },
+    {
+      "cell": "dev5_b2_r3",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [],
+      "sec": 2.4153599739074707
+    },
+    {
+      "cell": "dev5_b3_r0",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball0+co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.75,
+          "region_size": 21,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 8047,
+          "sec_region": 297.42463207244873
+        }
+      ],
+      "sec": 300.0365104675293
+    },
+    {
+      "cell": "dev5_b3_r1",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.75,
+          "region_size": 21,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 5812,
+          "sec_region": 254.5436863899231
+        }
+      ],
+      "sec": 257.2533164024353
+    },
+    {
+      "cell": "dev5_b3_r2",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.7142857142857143,
+          "region_size": 20,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 6913,
+          "sec_region": 255.95333337783813
+        }
+      ],
+      "sec": 256.62095379829407
+    },
+    {
+      "cell": "dev5_b3_r3",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.6785714285714286,
+          "region_size": 19,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 6750,
+          "sec_region": 261.2861795425415,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 19,
+          "first_handoff_step": 0,
+          "logq": -54.118382826684424,
+          "r_change": 0.17857142857142855,
+          "r_coherent": 0.07142857142857142,
+          "coherence": 0.6666666666666666,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": -1,
+          "old_region_removed": false,
+          "endpoint": "Cn1c(C2CCNCC2)nc(-c2ccc3c(c2)CCC3)c1-c1ccncc1"
+        }
+      ],
+      "sec": 262.8271601200104
+    },
+    {
+      "cell": "dev5_b4_r0",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.8928571428571429,
+          "region_size": 25,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 11047,
+          "sec_region": 413.5519988536835,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 25,
+          "first_handoff_step": 0,
+          "logq": -63.81055129490753,
+          "r_change": 0.39285714285714285,
+          "r_coherent": 0.17857142857142858,
+          "coherence": 0.45454545454545453,
+          "d_cycle_rank": 1,
+          "d_ring_systems": 0,
+          "d_heavy": 3,
+          "old_region_removed": false,
+          "endpoint": "C=C1CC(c2nc(-c3cc4c5c(nccc5c3)CC4)c(-c3ccncc3F)[nH]2)CON1"
+        }
+      ],
+      "sec": 415.05341625213623
+    },
+    {
+      "cell": "dev5_b4_r1",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.8928571428571429,
+          "region_size": 25,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 14749,
+          "sec_region": 611.1644113063812,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 25,
+          "first_handoff_step": 0,
+          "logq": -67.93413182970387,
+          "r_change": 0.4285714285714286,
+          "r_coherent": 0.21428571428571427,
+          "coherence": 0.5,
+          "d_cycle_rank": 2,
+          "d_ring_systems": -2,
+          "d_heavy": 3,
+          "old_region_removed": false,
+          "endpoint": "Cc1occ2c1Cc1c-2ccc2c3nc(C4CCN(O)CC4)[nH]c3c3ccncc3c12"
+        }
+      ],
+      "sec": 612.5787787437439
+    },
+    {
+      "cell": "dev5_b4_r2",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.8214285714285714,
+          "region_size": 23,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 13081,
+          "sec_region": 544.2226274013519,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 23,
+          "first_handoff_step": 0,
+          "logq": -70.3473672063838,
+          "r_change": 0.3571428571428571,
+          "r_coherent": 0.2857142857142857,
+          "coherence": 0.8,
+          "d_cycle_rank": 2,
+          "d_ring_systems": -2,
+          "d_heavy": 2,
+          "old_region_removed": false,
+          "endpoint": "C=C1CC(=NO)c2ccc3c(c21)C12CCCCC1=Nn1c2nc-3c1-c1ccncc1"
+        }
+      ],
+      "sec": 546.504677772522
+    },
+    {
+      "cell": "dev5_b4_r3",
+      "seed": "O/N=C1\\CCc2cc(-c3nc(C4CCNCC4)[nH]c3-c3ccncc3)ccc21",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.8214285714285714,
+          "region_size": 23,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 11459,
+          "sec_region": 364.83041405677795
+        }
+      ],
+      "sec": 367.5187680721283
+    },
+    {
+      "cell": "dev6_b0_r0",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "ball0+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.02857142857142857,
+          "region_size": 1,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 33,
+          "sec_region": 14.53745150566101,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 1,
+          "first_handoff_step": 0,
+          "logq": -1.3426219155375878,
+          "r_change": 0.05714285714285714,
+          "r_coherent": 0.05714285714285714,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 1,
+          "old_region_removed": false,
+          "endpoint": "O=C(NCc1cccc(-c2cc(O)cc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1"
+        }
+      ],
+      "sec": 15.25676441192627
+    },
+    {
+      "cell": "dev6_b0_r1",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball1",
+          "region_has_ring": true,
+          "r_release": 0.08571428571428572,
+          "region_size": 3,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 462,
+          "sec_region": 123.24764394760132
+        }
+      ],
+      "sec": 124.68134808540344
+    },
+    {
+      "cell": "dev6_b0_r2",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.17142857142857143,
+          "region_size": 6,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1507,
+          "sec_region": 192.1676185131073
+        }
+      ],
+      "sec": 193.27980279922485
+    },
+    {
+      "cell": "dev6_b0_r3",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.14285714285714285,
+          "region_size": 5,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 575,
+          "sec_region": 74.97352409362793,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 5,
+          "first_handoff_step": 0,
+          "logq": -9.162593615278665,
+          "r_change": 0.05714285714285714,
+          "r_coherent": 0.05714285714285714,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 1,
+          "old_region_removed": false,
+          "endpoint": "O=C(NCc1cccc(-c2cccc(-c3nc4cc[nH]cc-4c3Br)c2O)c1)C(CO)c1ccccc1"
+        }
+      ],
+      "sec": 75.75595569610596
+    },
+    {
+      "cell": "dev6_b1_r0",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.2,
+          "region_size": 7,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2658,
+          "sec_region": 193.67289996147156
+        }
+      ],
+      "sec": 196.23001050949097
+    },
+    {
+      "cell": "dev6_b1_r1",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.2571428571428571,
+          "region_size": 9,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2746,
+          "sec_region": 307.4214768409729
+        }
+      ],
+      "sec": 309.63831996917725
+    },
+    {
+      "cell": "dev6_b1_r2",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+co_ring_system+complement+one_cut",
+          "region_has_ring": true,
+          "r_release": 0.37142857142857144,
+          "region_size": 13,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 3296,
+          "sec_region": 168.14190030097961
+        }
+      ],
+      "sec": 171.6257336139679
+    },
+    {
+      "cell": "dev6_b1_r3",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.3142857142857143,
+          "region_size": 11,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 3350,
+          "sec_region": 259.05481219291687
+        }
+      ],
+      "sec": 262.0768394470215
+    },
+    {
+      "cell": "dev6_b2_r0",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.42857142857142855,
+          "region_size": 15,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 4214,
+          "sec_region": 326.7397005558014
+        }
+      ],
+      "sec": 328.10838437080383
+    },
+    {
+      "cell": "dev6_b2_r1",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.4857142857142857,
+          "region_size": 17,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 4362,
+          "sec_region": 305.1123421192169
+        }
+      ],
+      "sec": 306.74147152900696
+    },
+    {
+      "cell": "dev6_b2_r2",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.5428571428571428,
+          "region_size": 19,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 6799,
+          "sec_region": 463.82890272140503,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 19,
+          "first_handoff_step": 0,
+          "logq": -51.261702597300186,
+          "r_change": 0.11428571428571428,
+          "r_coherent": 0.05714285714285714,
+          "coherence": 0.6666666666666666,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 0,
+          "old_region_removed": false,
+          "endpoint": "O=C(NCc1cc(Cl)cc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2)c1)C(CO)c1ccccc1"
+        }
+      ],
+      "sec": 465.27342534065247
+    },
+    {
+      "cell": "dev6_b2_r3",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+co_ring_system+complement+one_cut",
+          "region_has_ring": true,
+          "r_release": 0.5428571428571428,
+          "region_size": 19,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 5602,
+          "sec_region": 317.81880140304565,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 21,
+          "first_handoff_step": null,
+          "logq": -55.945957819687656,
+          "r_change": 0.14285714285714285,
+          "r_coherent": 0.05714285714285714,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": -3,
+          "old_region_removed": false,
+          "endpoint": "Oc1c(-c2cccc(CNCCc3ccccc3)c2)cccc1-c1cc2c[nH]ccc-2n1"
+        }
+      ],
+      "sec": 319.5906312465668
+    },
+    {
+      "cell": "dev6_b3_r0",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball0+co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.6,
+          "region_size": 21,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 5752,
+          "sec_region": 586.3773703575134,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 21,
+          "first_handoff_step": 0,
+          "logq": -59.19977903811945,
+          "r_change": 0.08571428571428572,
+          "r_coherent": 0.05714285714285714,
+          "coherence": 1.0,
+          "d_cycle_rank": 1,
+          "d_ring_systems": -1,
+          "d_heavy": -1,
+          "old_region_removed": false,
+          "endpoint": "O=C(NCc1cc2ccc1c1c(-c3cc4c[nH]ccc-4n3)cccc21)C(CO)c1ccccc1"
+        }
+      ],
+      "sec": 587.4376909732819
+    },
+    {
+      "cell": "dev6_b3_r1",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.6857142857142857,
+          "region_size": 24,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 8146,
+          "sec_region": 469.76006150245667
+        }
+      ],
+      "sec": 471.36399483680725
+    },
+    {
+      "cell": "dev6_b3_r2",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.7142857142857143,
+          "region_size": 25,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 7580,
+          "sec_region": 397.1986496448517
+        }
+      ],
+      "sec": 398.65184473991394
+    },
+    {
+      "cell": "dev6_b3_r3",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.7142857142857143,
+          "region_size": 25,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 6357,
+          "sec_region": 347.58288407325745
+        }
+      ],
+      "sec": 348.84833550453186
+    },
+    {
+      "cell": "dev6_b4_r0",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.8,
+          "region_size": 28,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 7772,
+          "sec_region": 356.99228954315186
+        }
+      ],
+      "sec": 358.61493825912476
+    },
+    {
+      "cell": "dev6_b4_r1",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.8,
+          "region_size": 28,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 9891,
+          "sec_region": 448.30369997024536
+        }
+      ],
+      "sec": 449.6789708137512
+    },
+    {
+      "cell": "dev6_b4_r2",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.8571428571428571,
+          "region_size": 30,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 19017,
+          "sec_region": 932.4760322570801
+        }
+      ],
+      "sec": 934.1940584182739
+    },
+    {
+      "cell": "dev6_b4_r3",
+      "seed": "O=C(NCc1cccc(-c2cccc(-c3cc4c[nH]ccc-4n3)c2O)c1)C(CO)c1ccccc1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.8571428571428571,
+          "region_size": 30,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 18421,
+          "sec_region": 981.2166023254395,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 30,
+          "first_handoff_step": 0,
+          "logq": -116.75510264962594,
+          "r_change": 0.42857142857142855,
+          "r_coherent": 0.14285714285714285,
+          "coherence": 0.35714285714285715,
+          "d_cycle_rank": 1,
+          "d_ring_systems": -2,
+          "d_heavy": 4,
+          "old_region_removed": false,
+          "endpoint": "O=C(NCc1cccc2c1OCCc1[nH]ccc3nc(cc1-3)-c1cccc-2c1)C(O)c1cc(Cl)c(Cl)cc1F"
+        }
+      ],
+      "sec": 984.1279728412628
+    },
+    {
+      "cell": "dev7_b0_r0",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball0",
+          "region_has_ring": true,
+          "r_release": 0.02564102564102564,
+          "region_size": 1,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 5,
+          "sec_region": 15.855372667312622
+        }
+      ],
+      "sec": 16.488396406173706
+    },
+    {
+      "cell": "dev7_b0_r1",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.1794871794871795,
+          "region_size": 7,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 3302,
+          "sec_region": 323.6039252281189
+        }
+      ],
+      "sec": 324.8251519203186
+    },
+    {
+      "cell": "dev7_b0_r2",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.1794871794871795,
+          "region_size": 7,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2992,
+          "sec_region": 312.1300892829895
+        }
+      ],
+      "sec": 314.75034737586975
+    },
+    {
+      "cell": "dev7_b0_r3",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball1",
+          "region_has_ring": true,
+          "r_release": 0.07692307692307693,
+          "region_size": 3,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 227,
+          "sec_region": 55.755067348480225,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 3,
+          "first_handoff_step": 0,
+          "logq": -6.65334596914646,
+          "r_change": 0.05128205128205128,
+          "r_coherent": 0.05128205128205128,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 1,
+          "old_region_removed": false,
+          "endpoint": "N=C(N)NCCCC(NC(=O)C1CCC2CCC(N)(Cc3ccccc3)CN21)C(=O)c1nc2cc(Cl)ccc2s1"
+        }
+      ],
+      "sec": 57.144564628601074
+    },
+    {
+      "cell": "dev7_b1_r0",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball0+co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.20512820512820512,
+          "region_size": 8,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 502,
+          "sec_region": 96.52485227584839,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 8,
+          "first_handoff_step": 0,
+          "logq": -15.083185542513235,
+          "r_change": 0.0,
+          "r_coherent": 0.0,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 0,
+          "old_region_removed": false,
+          "endpoint": "N=C(N)NCCCC(NC(=O)C1CCC2CCC(N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1"
+        }
+      ],
+      "sec": 99.75639533996582
+    },
+    {
+      "cell": "dev7_b1_r1",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.38461538461538464,
+          "region_size": 15,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2013,
+          "sec_region": 165.0987548828125
+        }
+      ],
+      "sec": 167.39332628250122
+    },
+    {
+      "cell": "dev7_b1_r2",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.38461538461538464,
+          "region_size": 15,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 4178,
+          "sec_region": 347.49125623703003
+        }
+      ],
+      "sec": 348.4077932834625
+    },
+    {
+      "cell": "dev7_b1_r3",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.28205128205128205,
+          "region_size": 11,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 2490,
+          "sec_region": 176.51580786705017,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 11,
+          "first_handoff_step": 0,
+          "logq": -35.242600139385786,
+          "r_change": 0.10256410256410256,
+          "r_coherent": 0.07692307692307693,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 0,
+          "old_region_removed": false,
+          "endpoint": "N=C(N)NCCCC(NC(=O)C1CCC2CC(O)C(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1"
+        }
+      ],
+      "sec": 177.2496178150177
+    },
+    {
+      "cell": "dev7_b2_r0",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+complement+one_cut",
+          "region_has_ring": true,
+          "r_release": 0.4358974358974359,
+          "region_size": 17,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 5663,
+          "sec_region": 315.0935089588165,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 19,
+          "first_handoff_step": null,
+          "logq": -44.72953866339022,
+          "r_change": 0.05128205128205128,
+          "r_coherent": 0.02564102564102564,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": -1,
+          "old_region_removed": false,
+          "endpoint": "N=C(N)NCCCC(NC(=O)C1CCC2CCC(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1"
+        }
+      ],
+      "sec": 316.6833372116089
+    },
+    {
+      "cell": "dev7_b2_r1",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.5897435897435898,
+          "region_size": 23,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 10418,
+          "sec_region": 605.5623848438263
+        }
+      ],
+      "sec": 608.0356774330139
+    },
+    {
+      "cell": "dev7_b2_r2",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.5897435897435898,
+          "region_size": 23,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 7495,
+          "sec_region": 377.5135507583618
+        }
+      ],
+      "sec": 378.54202795028687
+    },
+    {
+      "cell": "dev7_b2_r3",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.48717948717948717,
+          "region_size": 19,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 7434,
+          "sec_region": 404.527459859848
+        }
+      ],
+      "sec": 406.2600471973419
+    },
+    {
+      "cell": "dev7_b3_r0",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.6666666666666666,
+          "region_size": 26,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 11889,
+          "sec_region": 524.4811644554138
+        }
+      ],
+      "sec": 525.8295001983643
+    },
+    {
+      "cell": "dev7_b3_r1",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.7948717948717948,
+          "region_size": 31,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 11528,
+          "sec_region": 568.468859910965
+        }
+      ],
+      "sec": 569.6684362888336
+    },
+    {
+      "cell": "dev7_b3_r2",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.7948717948717948,
+          "region_size": 31,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 11201,
+          "sec_region": 549.9101600646973
+        }
+      ],
+      "sec": 551.4701406955719
+    },
+    {
+      "cell": "dev7_b3_r3",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.717948717948718,
+          "region_size": 28,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 7657,
+          "sec_region": 342.42611360549927
+        }
+      ],
+      "sec": 350.3520677089691
+    },
+    {
+      "cell": "dev7_b4_r0",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.8205128205128205,
+          "region_size": 32,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 14195,
+          "sec_region": 622.6406693458557
+        }
+      ],
+      "sec": 625.5494341850281
+    },
+    {
+      "cell": "dev7_b4_r1",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.8974358974358975,
+          "region_size": 35,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 14238,
+          "sec_region": 580.8380172252655
+        }
+      ],
+      "sec": 582.4743213653564
+    },
+    {
+      "cell": "dev7_b4_r2",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+complement+one_cut",
+          "region_has_ring": true,
+          "r_release": 0.8974358974358975,
+          "region_size": 35,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 34278,
+          "sec_region": 1564.2625539302826
+        }
+      ],
+      "sec": 1565.6218950748444
+    },
+    {
+      "cell": "dev7_b4_r3",
+      "seed": "N=C(N)NCCC[C@H](NC(=O)[C@@H]1CCC2CC[C@@](N)(Cc3ccccc3)CN21)C(=O)c1nc2ccccc2s1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.8461538461538461,
+          "region_size": 33,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 11601,
+          "sec_region": 497.43604135513306
+        }
+      ],
+      "sec": 500.25812673568726
+    },
+    {
+      "cell": "dev8_b0_r0",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": false,
+          "r_release": 0.19230769230769232,
+          "region_size": 5,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 739,
+          "sec_region": 52.49651479721069
+        }
+      ],
+      "sec": 54.270254135131836
+    },
+    {
+      "cell": "dev8_b0_r1",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball1",
+          "region_has_ring": true,
+          "r_release": 0.15384615384615385,
+          "region_size": 4,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 748,
+          "sec_region": 77.13519239425659
+        }
+      ],
+      "sec": 79.27914524078369
+    },
+    {
+      "cell": "dev8_b0_r2",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+complement+one_cut",
+          "region_has_ring": false,
+          "r_release": 0.11538461538461539,
+          "region_size": 3,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 229,
+          "sec_region": 23.712162971496582,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 5,
+          "first_handoff_step": null,
+          "logq": -2.1093654610825077,
+          "r_change": 0.19230769230769232,
+          "r_coherent": 0.07692307692307693,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": -1,
+          "old_region_removed": true,
+          "endpoint": "CCOc1cc(OCC)cc(C(CO)Nc2ccc(C(=N)N)cc2)c1"
+        }
+      ],
+      "sec": 25.38017988204956
+    },
+    {
+      "cell": "dev8_b0_r3",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball1",
+          "region_has_ring": true,
+          "r_release": 0.15384615384615385,
+          "region_size": 4,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1085,
+          "sec_region": 87.29312419891357
+        }
+      ],
+      "sec": 88.68298029899597
+    },
+    {
+      "cell": "dev8_b1_r0",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.34615384615384615,
+          "region_size": 9,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2463,
+          "sec_region": 117.59930944442749
+        }
+      ],
+      "sec": 119.19695448875427
+    },
+    {
+      "cell": "dev8_b1_r1",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.38461538461538464,
+          "region_size": 10,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1859,
+          "sec_region": 71.97400641441345
+        }
+      ],
+      "sec": 72.88430380821228
+    },
+    {
+      "cell": "dev8_b1_r2",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.38461538461538464,
+          "region_size": 10,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2216,
+          "sec_region": 86.01911449432373
+        }
+      ],
+      "sec": 88.08626627922058
+    },
+    {
+      "cell": "dev8_b1_r3",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.34615384615384615,
+          "region_size": 9,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2220,
+          "sec_region": 106.02839922904968
+        }
+      ],
+      "sec": 107.53010535240173
+    },
+    {
+      "cell": "dev8_b2_r0",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.5769230769230769,
+          "region_size": 15,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 5373,
+          "sec_region": 159.08854937553406
+        }
+      ],
+      "sec": 164.31086683273315
+    },
+    {
+      "cell": "dev8_b2_r1",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.5769230769230769,
+          "region_size": 15,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2339,
+          "sec_region": 46.421908378601074
+        }
+      ],
+      "sec": 49.74753165245056
+    },
+    {
+      "cell": "dev8_b2_r2",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.5769230769230769,
+          "region_size": 15,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 4849,
+          "sec_region": 152.8302149772644
+        }
+      ],
+      "sec": 153.63605213165283
+    },
+    {
+      "cell": "dev8_b2_r3",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.5769230769230769,
+          "region_size": 15,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 6620,
+          "sec_region": 189.9726424217224
+        }
+      ],
+      "sec": 190.68583822250366
+    },
+    {
+      "cell": "dev8_b3_r0",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.7692307692307693,
+          "region_size": 20,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 7708,
+          "sec_region": 215.17961239814758,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 20,
+          "first_handoff_step": 0,
+          "logq": -64.07774428620209,
+          "r_change": 0.4230769230769231,
+          "r_coherent": 0.2692307692307692,
+          "coherence": 0.6363636363636364,
+          "d_cycle_rank": 1,
+          "d_ring_systems": -1,
+          "d_heavy": 2,
+          "old_region_removed": false,
+          "endpoint": "CCOc1c(O)c2cc(c1Cl)C(C(=O)O)Nc1cccc(c1)C(Cl)=NC#CO2"
+        }
+      ],
+      "sec": 216.8567373752594
+    },
+    {
+      "cell": "dev8_b3_r1",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.7692307692307693,
+          "region_size": 20,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 6963,
+          "sec_region": 178.7128825187683
+        }
+      ],
+      "sec": 180.5355086326599
+    },
+    {
+      "cell": "dev8_b3_r2",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.7692307692307693,
+          "region_size": 20,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 5709,
+          "sec_region": 129.74743056297302
+        }
+      ],
+      "sec": 133.58164358139038
+    },
+    {
+      "cell": "dev8_b3_r3",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.7692307692307693,
+          "region_size": 20,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 8068,
+          "sec_region": 286.5334987640381
+        }
+      ],
+      "sec": 288.9520466327667
+    },
+    {
+      "cell": "dev8_b4_r0",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.8846153846153846,
+          "region_size": 23,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 3768,
+          "sec_region": 90.0984137058258
+        }
+      ],
+      "sec": 90.82402968406677
+    },
+    {
+      "cell": "dev8_b4_r1",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.8846153846153846,
+          "region_size": 23,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2518,
+          "sec_region": 67.90195798873901
+        }
+      ],
+      "sec": 70.41422295570374
+    },
+    {
+      "cell": "dev8_b4_r2",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.8846153846153846,
+          "region_size": 23,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 17771,
+          "sec_region": 310.1706507205963,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 27,
+          "first_handoff_step": 4,
+          "logq": -84.37380371563077,
+          "r_change": 0.6538461538461539,
+          "r_coherent": 0.23076923076923078,
+          "coherence": 0.5454545454545454,
+          "d_cycle_rank": 1,
+          "d_ring_systems": 1,
+          "d_heavy": -4,
+          "old_region_removed": false,
+          "endpoint": "CC1=NC(c2ccc(NCc3ccccc3F)cc2)N=C1C"
+        }
+      ],
+      "sec": 313.263662815094
+    },
+    {
+      "cell": "dev8_b4_r3",
+      "seed": "CCOc1cc(OCC)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+complement+one_cut",
+          "region_has_ring": true,
+          "r_release": 0.8846153846153846,
+          "region_size": 23,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 12439,
+          "sec_region": 345.74230456352234
+        }
+      ],
+      "sec": 346.67358660697937
+    },
+    {
+      "cell": "dev9_b0_r0",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball1",
+          "region_has_ring": true,
+          "r_release": 0.13793103448275862,
+          "region_size": 4,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 611,
+          "sec_region": 76.63338327407837
+        }
+      ],
+      "sec": 77.95852208137512
+    },
+    {
+      "cell": "dev9_b0_r1",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "ball0+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.034482758620689655,
+          "region_size": 1,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 33,
+          "sec_region": 9.623095512390137,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 1,
+          "first_handoff_step": 0,
+          "logq": -1.4615077176824276,
+          "r_change": 0.06896551724137931,
+          "r_coherent": 0.06896551724137931,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 1,
+          "old_region_removed": false,
+          "endpoint": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2C)C(=O)O)c1"
+        }
+      ],
+      "sec": 11.964421510696411
+    },
+    {
+      "cell": "dev9_b0_r2",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "ball1+co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.10344827586206896,
+          "region_size": 3,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 304,
+          "sec_region": 20.020281076431274,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 3,
+          "first_handoff_step": 0,
+          "logq": -6.036220650991181,
+          "r_change": 0.06896551724137931,
+          "r_coherent": 0.06896551724137931,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 1,
+          "old_region_removed": false,
+          "endpoint": "CCc1cc(OC2CCOC(C)C2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1"
+        }
+      ],
+      "sec": 21.355014085769653
+    },
+    {
+      "cell": "dev9_b0_r3",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "ball0+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.034482758620689655,
+          "region_size": 1,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 63,
+          "sec_region": 7.106479167938232,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 1,
+          "first_handoff_step": 0,
+          "logq": -2.09133032282793,
+          "r_change": 0.06896551724137931,
+          "r_coherent": 0.06896551724137931,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 1,
+          "old_region_removed": false,
+          "endpoint": "CCc1cc(OC2CCOC(C)C2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1"
+        }
+      ],
+      "sec": 8.829853057861328
+    },
+    {
+      "cell": "dev9_b1_r0",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "ball2+co_ball0+co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.27586206896551724,
+          "region_size": 8,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 963,
+          "sec_region": 67.78567552566528,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 8,
+          "first_handoff_step": 0,
+          "logq": -11.538855595694775,
+          "r_change": 0.13793103448275862,
+          "r_coherent": 0.034482758620689655,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": -3,
+          "old_region_removed": false,
+          "endpoint": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccccc2)C(=O)O)c1"
+        }
+      ],
+      "sec": 70.30941605567932
+    },
+    {
+      "cell": "dev9_b1_r1",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.2413793103448276,
+          "region_size": 7,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1130,
+          "sec_region": 81.35640048980713
+        }
+      ],
+      "sec": 82.05324649810791
+    },
+    {
+      "cell": "dev9_b1_r2",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.27586206896551724,
+          "region_size": 8,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1118,
+          "sec_region": 88.58864617347717
+        }
+      ],
+      "sec": 90.58323311805725
+    },
+    {
+      "cell": "dev9_b1_r3",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.20689655172413793,
+          "region_size": 6,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1446,
+          "sec_region": 105.45864844322205
+        }
+      ],
+      "sec": 106.80284285545349
+    },
+    {
+      "cell": "dev9_b2_r0",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+complement+one_cut",
+          "region_has_ring": true,
+          "r_release": 0.5172413793103449,
+          "region_size": 15,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 5721,
+          "sec_region": 184.8671259880066,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 17,
+          "first_handoff_step": null,
+          "logq": -49.94604265456291,
+          "r_change": 0.3448275862068966,
+          "r_coherent": 0.20689655172413793,
+          "coherence": 0.75,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 0,
+          "old_region_removed": false,
+          "endpoint": "N=C(N)c1ccc(NC(F)(C(=O)O)c2ccc(Cl)c(N=C3CCOCC3)c2)cc1"
+        }
+      ],
+      "sec": 186.5201849937439
+    },
+    {
+      "cell": "dev9_b2_r1",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.4482758620689655,
+          "region_size": 13,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2595,
+          "sec_region": 149.7044494152069
+        }
+      ],
+      "sec": 151.01604390144348
+    },
+    {
+      "cell": "dev9_b2_r2",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.4827586206896552,
+          "region_size": 14,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 791,
+          "sec_region": 28.344988107681274
+        }
+      ],
+      "sec": 29.004434823989868
+    },
+    {
+      "cell": "dev9_b2_r3",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.4482758620689655,
+          "region_size": 13,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 3636,
+          "sec_region": 150.07261657714844
+        }
+      ],
+      "sec": 152.7114188671112
+    },
+    {
+      "cell": "dev9_b3_r0",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.7586206896551724,
+          "region_size": 22,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 7365,
+          "sec_region": 229.90256547927856
+        }
+      ],
+      "sec": 231.27841758728027
+    },
+    {
+      "cell": "dev9_b3_r1",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.6896551724137931,
+          "region_size": 20,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 6032,
+          "sec_region": 225.76296854019165
+        }
+      ],
+      "sec": 227.17086720466614
+    },
+    {
+      "cell": "dev9_b3_r2",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.7241379310344828,
+          "region_size": 21,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 6623,
+          "sec_region": 255.81251525878906
+        }
+      ],
+      "sec": 258.2107367515564
+    },
+    {
+      "cell": "dev9_b3_r3",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.6551724137931034,
+          "region_size": 19,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 6854,
+          "sec_region": 210.78663086891174
+        }
+      ],
+      "sec": 211.99390721321106
+    },
+    {
+      "cell": "dev9_b4_r0",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.896551724137931,
+          "region_size": 26,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 19087,
+          "sec_region": 542.1536877155304,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 26,
+          "first_handoff_step": 0,
+          "logq": -111.69058193787964,
+          "r_change": 0.3448275862068966,
+          "r_coherent": 0.06896551724137931,
+          "coherence": 0.2,
+          "d_cycle_rank": 1,
+          "d_ring_systems": 0,
+          "d_heavy": 3,
+          "old_region_removed": false,
+          "endpoint": "CNC1=NCc2ccc(N(C)C(C(=O)O)c3cc(C)cc(OC4CCOCC4C)c3)cc21"
+        }
+      ],
+      "sec": 543.2406413555145
+    },
+    {
+      "cell": "dev9_b4_r1",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.8620689655172413,
+          "region_size": 25,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 8705,
+          "sec_region": 280.5877025127411
+        }
+      ],
+      "sec": 283.6418318748474
+    },
+    {
+      "cell": "dev9_b4_r2",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.896551724137931,
+          "region_size": 26,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 18512,
+          "sec_region": 541.9785013198853,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 26,
+          "first_handoff_step": 0,
+          "logq": -105.40312327376313,
+          "r_change": 0.41379310344827586,
+          "r_coherent": 0.1724137931034483,
+          "coherence": 0.45454545454545453,
+          "d_cycle_rank": 1,
+          "d_ring_systems": 0,
+          "d_heavy": 2,
+          "old_region_removed": false,
+          "endpoint": "COC1COCC(C)C1Oc1cccc(C(Nc2ccc3c(c2)C(S)=NC3)C(=O)O)c1"
+        }
+      ],
+      "sec": 543.7552654743195
+    },
+    {
+      "cell": "dev9_b4_r3",
+      "seed": "CCc1cc(OC2CCOCC2)cc(C(Nc2ccc(C(=N)N)cc2)C(=O)O)c1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.8275862068965517,
+          "region_size": 24,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 9352,
+          "sec_region": 315.1345407962799
+        }
+      ],
+      "sec": 316.6463418006897
+    },
+    {
+      "cell": "dev10_b0_r0",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball1",
+          "region_has_ring": true,
+          "r_release": 0.11538461538461539,
+          "region_size": 3,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1524,
+          "sec_region": 118.32623529434204
+        }
+      ],
+      "sec": 119.72721242904663
+    },
+    {
+      "cell": "dev10_b0_r1",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball1",
+          "region_has_ring": true,
+          "r_release": 0.15384615384615385,
+          "region_size": 4,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 849,
+          "sec_region": 55.6078314781189
+        }
+      ],
+      "sec": 56.22707223892212
+    },
+    {
+      "cell": "dev10_b0_r2",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": false,
+          "r_release": 0.11538461538461539,
+          "region_size": 3,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 409,
+          "sec_region": 44.9520468711853
+        }
+      ],
+      "sec": 47.44568085670471
+    },
+    {
+      "cell": "dev10_b0_r3",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball1",
+          "region_has_ring": true,
+          "r_release": 0.15384615384615385,
+          "region_size": 4,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2219,
+          "sec_region": 101.69680166244507
+        }
+      ],
+      "sec": 103.39758133888245
+    },
+    {
+      "cell": "dev10_b1_r0",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.3076923076923077,
+          "region_size": 8,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1989,
+          "sec_region": 97.08835911750793
+        }
+      ],
+      "sec": 98.34340763092041
+    },
+    {
+      "cell": "dev10_b1_r1",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.34615384615384615,
+          "region_size": 9,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1338,
+          "sec_region": 77.68976664543152
+        }
+      ],
+      "sec": 78.46422100067139
+    },
+    {
+      "cell": "dev10_b1_r2",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.3076923076923077,
+          "region_size": 8,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1153,
+          "sec_region": 94.45679211616516
+        }
+      ],
+      "sec": 96.00413012504578
+    },
+    {
+      "cell": "dev10_b1_r3",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.34615384615384615,
+          "region_size": 9,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2550,
+          "sec_region": 133.36271691322327
+        }
+      ],
+      "sec": 134.3959858417511
+    },
+    {
+      "cell": "dev10_b2_r0",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.5769230769230769,
+          "region_size": 15,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2210,
+          "sec_region": 107.41614890098572
+        }
+      ],
+      "sec": 109.10373330116272
+    },
+    {
+      "cell": "dev10_b2_r1",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.5769230769230769,
+          "region_size": 15,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 3069,
+          "sec_region": 147.59280943870544
+        }
+      ],
+      "sec": 150.47377753257751
+    },
+    {
+      "cell": "dev10_b2_r2",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.5769230769230769,
+          "region_size": 15,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2873,
+          "sec_region": 182.67849111557007
+        }
+      ],
+      "sec": 185.27878284454346
+    },
+    {
+      "cell": "dev10_b2_r3",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball0+co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.5769230769230769,
+          "region_size": 15,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 2827,
+          "sec_region": 86.10977864265442,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 15,
+          "first_handoff_step": 0,
+          "logq": -38.36351087716927,
+          "r_change": 0.42307692307692313,
+          "r_coherent": 0.15384615384615385,
+          "coherence": 0.5714285714285714,
+          "d_cycle_rank": 1,
+          "d_ring_systems": -1,
+          "d_heavy": -3,
+          "old_region_removed": false,
+          "endpoint": "CC(Oc1nc2c(N)nc1-c1c[nH]nc1N2)c1ccc(F)cn1"
+        }
+      ],
+      "sec": 88.66137290000916
+    },
+    {
+      "cell": "dev10_b3_r0",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+co_ring_system+complement+one_cut",
+          "region_has_ring": true,
+          "r_release": 0.7307692307692307,
+          "region_size": 19,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 5293,
+          "sec_region": 165.02372765541077,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 21,
+          "first_handoff_step": null,
+          "logq": -65.12139223863602,
+          "r_change": 0.38461538461538464,
+          "r_coherent": 0.19230769230769232,
+          "coherence": 0.625,
+          "d_cycle_rank": 1,
+          "d_ring_systems": 0,
+          "d_heavy": -2,
+          "old_region_removed": false,
+          "endpoint": "Fc1ccc(C2=NCc3nc(S)c(Nc4cc[nH]n4)nc3S2)nc1"
+        }
+      ],
+      "sec": 166.7990062236786
+    },
+    {
+      "cell": "dev10_b3_r1",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+co_ring_system+complement+one_cut",
+          "region_has_ring": true,
+          "r_release": 0.7692307692307693,
+          "region_size": 20,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 5599,
+          "sec_region": 204.53533244132996,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 22,
+          "first_handoff_step": null,
+          "logq": -55.2649330737878,
+          "r_change": 0.46153846153846156,
+          "r_coherent": 0.11538461538461539,
+          "coherence": 0.42857142857142855,
+          "d_cycle_rank": 1,
+          "d_ring_systems": -1,
+          "d_heavy": -5,
+          "old_region_removed": false,
+          "endpoint": "Cc1cc(N2c3ccc(nc3)COc3cncc2n3)n[nH]1"
+        }
+      ],
+      "sec": 205.88494205474854
+    },
+    {
+      "cell": "dev10_b3_r2",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball0+co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.6923076923076923,
+          "region_size": 18,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 3027,
+          "sec_region": 119.16803860664368,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 18,
+          "first_handoff_step": 0,
+          "logq": -48.06584368417603,
+          "r_change": 0.38461538461538464,
+          "r_coherent": 0.11538461538461539,
+          "coherence": 0.42857142857142855,
+          "d_cycle_rank": 1,
+          "d_ring_systems": 0,
+          "d_heavy": -2,
+          "old_region_removed": false,
+          "endpoint": "Cc1cccc(C2=NCc3ncc(Nc4cc(C)[nH]n4)nc3O2)n1"
+        }
+      ],
+      "sec": 119.93908953666687
+    },
+    {
+      "cell": "dev10_b3_r3",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.7307692307692307,
+          "region_size": 19,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 5612,
+          "sec_region": 163.3780162334442
+        }
+      ],
+      "sec": 164.68006896972656
+    },
+    {
+      "cell": "dev10_b4_r0",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.8846153846153846,
+          "region_size": 23,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 3108,
+          "sec_region": 98.75736260414124
+        }
+      ],
+      "sec": 100.14684820175171
+    },
+    {
+      "cell": "dev10_b4_r1",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.8846153846153846,
+          "region_size": 23,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 5414,
+          "sec_region": 156.12168645858765
+        }
+      ],
+      "sec": 157.80915451049805
+    },
+    {
+      "cell": "dev10_b4_r2",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.8846153846153846,
+          "region_size": 23,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 8629,
+          "sec_region": 244.72134375572205
+        }
+      ],
+      "sec": 246.1635947227478
+    },
+    {
+      "cell": "dev10_b4_r3",
+      "seed": "Cc1cc(Nc2nc(O[C@@H](C)c3ccc(F)cn3)c(C#N)nc2C)n[nH]1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball0+co_ball1+co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.8846153846153846,
+          "region_size": 23,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 7950,
+          "sec_region": 251.44290947914124,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 23,
+          "first_handoff_step": 0,
+          "logq": -71.18890423699482,
+          "r_change": 0.3846153846153846,
+          "r_coherent": 0.15384615384615385,
+          "coherence": 0.5,
+          "d_cycle_rank": 1,
+          "d_ring_systems": -1,
+          "d_heavy": -1,
+          "old_region_removed": false,
+          "endpoint": "N#Cc1nc2c(nc1NCc1ccccn1)Nc1cc([nH]n1)CCO2"
+        }
+      ],
+      "sec": 252.168221950531
+    },
+    {
+      "cell": "dev11_b0_r0",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "ball1+ball2+co_ball0+co_ball1+co_ball2+complement+one_cut",
+          "region_has_ring": false,
+          "r_release": 0.15151515151515152,
+          "region_size": 5,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 406,
+          "sec_region": 60.162227153778076,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 7,
+          "first_handoff_step": null,
+          "logq": -4.415583163984957,
+          "r_change": 0.21212121212121213,
+          "r_coherent": 0.06060606060606061,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": -4,
+          "old_region_removed": true,
+          "endpoint": "CCCN(N)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1"
+        }
+      ],
+      "sec": 62.70925331115723
+    },
+    {
+      "cell": "dev11_b0_r1",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball1",
+          "region_has_ring": true,
+          "r_release": 0.09090909090909091,
+          "region_size": 3,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 144,
+          "sec_region": 22.514272451400757
+        }
+      ],
+      "sec": 24.226372480392456
+    },
+    {
+      "cell": "dev11_b0_r2",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball1",
+          "region_has_ring": true,
+          "r_release": 0.09090909090909091,
+          "region_size": 3,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 64,
+          "sec_region": 22.35408329963684
+        }
+      ],
+      "sec": 24.69050908088684
+    },
+    {
+      "cell": "dev11_b0_r3",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.0-0.2",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "ball1",
+          "region_has_ring": true,
+          "r_release": 0.06060606060606061,
+          "region_size": 2,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 67,
+          "sec_region": 16.336297273635864,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 2,
+          "first_handoff_step": 0,
+          "logq": -1.7015908297894609,
+          "r_change": 0.09090909090909091,
+          "r_coherent": 0.06060606060606061,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": 0,
+          "old_region_removed": false,
+          "endpoint": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(C)nn4cccnc34)ncn2)C1"
+        }
+      ],
+      "sec": 18.688844203948975
+    },
+    {
+      "cell": "dev11_b1_r0",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+co_ring_system+complement+one_cut",
+          "region_has_ring": false,
+          "r_release": 0.3333333333333333,
+          "region_size": 11,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 2651,
+          "sec_region": 148.70468378067017,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 13,
+          "first_handoff_step": null,
+          "logq": -16.026910837319676,
+          "r_change": 0.30303030303030304,
+          "r_coherent": 0.06060606060606061,
+          "coherence": 0.6666666666666666,
+          "d_cycle_rank": 1,
+          "d_ring_systems": 0,
+          "d_heavy": -6,
+          "old_region_removed": false,
+          "endpoint": "Nc1nn2cccnc2c1-c1cc(N2CCCC3(CCNC3=O)C2)ncn1"
+        }
+      ],
+      "sec": 149.67996382713318
+    },
+    {
+      "cell": "dev11_b1_r1",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+complement+one_cut",
+          "region_has_ring": false,
+          "r_release": 0.2727272727272727,
+          "region_size": 9,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 1192,
+          "sec_region": 108.38652658462524,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 11,
+          "first_handoff_step": null,
+          "logq": -5.428041944042501,
+          "r_change": 0.30303030303030304,
+          "r_coherent": 0.030303030303030304,
+          "coherence": 1.0,
+          "d_cycle_rank": 0,
+          "d_ring_systems": 0,
+          "d_heavy": -8,
+          "old_region_removed": true,
+          "endpoint": "NC(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1"
+        }
+      ],
+      "sec": 109.82608890533447
+    },
+    {
+      "cell": "dev11_b1_r2",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.24242424242424243,
+          "region_size": 8,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 2480,
+          "sec_region": 215.3478605747223
+        }
+      ],
+      "sec": 217.02216911315918
+    },
+    {
+      "cell": "dev11_b1_r3",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.2-0.4",
+          "interface": "multi",
+          "kind": "multi",
+          "generator": "ball2",
+          "region_has_ring": true,
+          "r_release": 0.24242424242424243,
+          "region_size": 8,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 232,
+          "sec_region": 13.667861223220825
+        }
+      ],
+      "sec": 15.464325428009033
+    },
+    {
+      "cell": "dev11_b2_r0",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball2",
+          "region_has_ring": true,
+          "r_release": 0.5454545454545454,
+          "region_size": 18,
+          "n_particles": 1,
+          "n_ok": 1,
+          "any_ok": true,
+          "calls_region": 9074,
+          "sec_region": 257.73537516593933,
+          "status": "OK",
+          "stage": "",
+          "n_steps": 18,
+          "first_handoff_step": 0,
+          "logq": -67.69089680319355,
+          "r_change": 0.45454545454545453,
+          "r_coherent": 0.30303030303030304,
+          "coherence": 1.0,
+          "d_cycle_rank": 3,
+          "d_ring_systems": -1,
+          "d_heavy": -4,
+          "old_region_removed": false,
+          "endpoint": "Nc1nn2cccnc2c1-c1ncnc2c1C1=C3CN2CCC3N2OCC1=C2F"
+        }
+      ],
+      "sec": 259.6485879421234
+    },
+    {
+      "cell": "dev11_b2_r1",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.48484848484848486,
+          "region_size": 16,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 6275,
+          "sec_region": 239.49911284446716
+        }
+      ],
+      "sec": 240.80356454849243
+    },
+    {
+      "cell": "dev11_b2_r2",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.48484848484848486,
+          "region_size": 16,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 6275,
+          "sec_region": 208.1532416343689
+        }
+      ],
+      "sec": 209.85693264007568
+    },
+    {
+      "cell": "dev11_b2_r3",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.4-0.6",
+          "interface": "segment",
+          "kind": "linker",
+          "generator": "co_ball1",
+          "region_has_ring": true,
+          "r_release": 0.5757575757575758,
+          "region_size": 19,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 6445,
+          "sec_region": 259.73708152770996
+        }
+      ],
+      "sec": 261.39524507522583
+    },
+    {
+      "cell": "dev11_b3_r0",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.696969696969697,
+          "region_size": 23,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 3174,
+          "sec_region": 123.59643840789795
+        }
+      ],
+      "sec": 126.35036969184875
+    },
+    {
+      "cell": "dev11_b3_r1",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.6666666666666666,
+          "region_size": 22,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 8056,
+          "sec_region": 279.70970273017883
+        }
+      ],
+      "sec": 280.48140811920166
+    },
+    {
+      "cell": "dev11_b3_r2",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.6666666666666666,
+          "region_size": 22,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 8056,
+          "sec_region": 281.8812322616577
+        }
+      ],
+      "sec": 283.3166129589081
+    },
+    {
+      "cell": "dev11_b3_r3",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.6-0.8",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.7878787878787878,
+          "region_size": 26,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 1831,
+          "sec_region": 61.12781095504761
+        }
+      ],
+      "sec": 63.78138875961304
+    },
+    {
+      "cell": "dev11_b4_r0",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.8787878787878788,
+          "region_size": 29,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 8985,
+          "sec_region": 305.67061734199524
+        }
+      ],
+      "sec": 307.0676281452179
+    },
+    {
+      "cell": "dev11_b4_r1",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "pendant",
+          "kind": "substituent",
+          "generator": "co_ball0+co_ball1+co_ball2+complement+one_cut",
+          "region_has_ring": true,
+          "r_release": 0.8484848484848485,
+          "region_size": 28,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 19470,
+          "sec_region": 741.4087471961975
+        }
+      ],
+      "sec": 742.8057653903961
+    },
+    {
+      "cell": "dev11_b4_r2",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.8484848484848485,
+          "region_size": 28,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 6679,
+          "sec_region": 214.1053500175476
+        }
+      ],
+      "sec": 215.10636162757874
+    },
+    {
+      "cell": "dev11_b4_r3",
+      "seed": "CCCN(CC(F)(F)F)C(=O)C1CCCN(c2cc(-c3c(N)nn4cccnc34)ncn2)C1",
+      "rows": [
+        {
+          "band": "0.8-1.01",
+          "interface": "splitting",
+          "kind": "linker",
+          "generator": "two_cut",
+          "region_has_ring": true,
+          "r_release": 0.8787878787878788,
+          "region_size": 29,
+          "n_particles": 1,
+          "n_ok": 0,
+          "any_ok": false,
+          "calls_region": 7875,
+          "sec_region": 270.69303703308105
+        }
+      ],
+      "sec": 272.05338525772095
+    }
+  ]
+}
