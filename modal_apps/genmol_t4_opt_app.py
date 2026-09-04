@@ -639,9 +639,45 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
             frontier = nxt[: int(task.get("max_frontier", 64))]
         return list(cands.values())
 
+    # Oracle allocation needs an objective signal. Ranking by (v, -qed) fails
+    # once molecules are feasible: v is identically 0 and QED ties break
+    # arbitrarily, which is the documented defect that left parp1 seed0 at -8.5
+    # with 175 feasible dockings. Same bootstrap-ridge Thompson surrogate the
+    # prior T4 controller used, on Morgan fingerprints.
+    ENSEMBLE, RIDGE, WARMUP = 8, 1.0, 16
+    _sur_W = [None]
+
+    def _fp(smi):
+        m = Chem.MolFromSmiles(smi)
+        if m is None:
+            return None
+        return np.asarray(gen.GetFingerprint(m), dtype=np.float32)
+
+    def surrogate_fit(pairs):
+        if len(pairs) < WARMUP:
+            _sur_W[0] = None
+            return
+        X = np.stack([p_[0] for p_ in pairs]); y = np.array([p_[1] for p_ in pairs],
+                                                            dtype=np.float32)
+        n, d = X.shape
+        Ws = []
+        for _ in range(ENSEMBLE):
+            idx = rng.integers(0, n, n)
+            Xb, yb = X[idx], y[idx]
+            A = Xb.T @ Xb + RIDGE * np.eye(d, dtype=np.float32)
+            Ws.append(np.linalg.solve(A, Xb.T @ yb))
+        _sur_W[0] = np.stack(Ws)
+
+    def surrogate_score(X):
+        """Thompson draw: lower is better, matching docking score."""
+        if _sur_W[0] is None:
+            return np.zeros(len(X), dtype=np.float32)
+        return X @ _sur_W[0][rng.integers(0, len(_sur_W[0]))]
+
     t0 = time.perf_counter()
     p0 = props(seed)
     archive = [{"smiles": seed, **p0, "ds": None}]
+    sur_pairs: list = []
     docked: dict[str, float] = {}
     n_dock, rounds_log = 0, []
     rd = 0
@@ -709,8 +745,20 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
         by_src = _dd(list)
         for a in pool:
             by_src[(a.get("parent"), a.get("region_id"))].append(a)
+        # rank WITHIN a bundle by the surrogate (falls back to QED before warmup)
+        fps = {}
+        for a in pool:
+            f_ = _fp(a["smiles"])
+            if f_ is not None:
+                fps[a["smiles"]] = f_
+        if fps and _sur_W[0] is not None:
+            keys = list(fps)
+            sc = surrogate_score(np.stack([fps[k] for k in keys]))
+            pred = dict(zip(keys, sc))
+        else:
+            pred = {}
         for v_ in by_src.values():
-            v_.sort(key=lambda a: (a["v"], -a.get("qed", 0)))
+            v_.sort(key=lambda a: (a["v"], pred.get(a["smiles"], -a.get("qed", 0))))
         take, srcs = [], list(by_src.values())
         want = min(per_round, budget - n_dock)
         i_ = 0
@@ -732,6 +780,10 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
             n_dock += 1
             docked[a["smiles"]] = ds if ds is not None else 0.0
             archive.append({**a, "ds": ds})
+            f_ = _fp(a["smiles"])
+            if f_ is not None and ds is not None:
+                sur_pairs.append((f_, float(ds)))
+        surrogate_fit(sur_pairs)
 
         feas = [a for a in archive if a["v"] <= 0 and a["ds"] is not None
                 and a["smiles"] != seed]
@@ -743,9 +795,16 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
             "t_propose": round(t_prop, 1), "t_dock": round(t_d, 1),
             "elapsed": round(time.perf_counter() - t0, 1),
             "scales": [round(c["r_release"], 2) for c in cands[:20]],
+            "n_bundles_selected": len(bundles),
+            "n_bundles_docked": len({(a.get("parent"), a.get("region_id"))
+                                     for a in take}),
+            "bundle_scopes": sorted({round(r.released_fraction, 2)
+                                     for _p, ps in bundles for r, _k in ps}),
             "docked": [{"smi": a["smiles"], "ds": ds, "r_release": a["r_release"],
                         "r_coherent": a.get("r_coherent"),
                         "d_rings": a.get("d_ring_systems"),
+                        "d_cycle_rank": a.get("d_cycle_rank"),
+                        "step": a.get("step"),
                         "interface": a["interface"], "qed": a.get("qed"),
                         "sim": a.get("sim")}
                        for a, ds in zip(take, scores)]})

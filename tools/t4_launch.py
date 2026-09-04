@@ -27,7 +27,12 @@ def main() -> None:
     ap.add_argument("--budget", type=int, default=500)
     ap.add_argument("--n-seeds", type=int, default=15)
     ap.add_argument("--deltas", default="0.4,0.6")
-    ap.add_argument("--arms", default="mu_exec,Q_taskvalue")
+    ap.add_argument("--arms", default="mu_exec")   # V_z = 0 until a T4-specific
+                                                   # estimator exists; the QED
+                                                   # table was null and learned
+                                                   # QED-region effects, and the
+                                                   # interface accepting it is
+                                                   # not a reason to use it here
     ap.add_argument("--lineages", type=int, default=8)
     ap.add_argument("--per-round", type=int, default=20)
     ap.add_argument("--regions-per-lineage", type=int, default=3)
