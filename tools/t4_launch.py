@@ -38,6 +38,10 @@ def main() -> None:
     ap.add_argument("--regions-per-lineage", type=int, default=3)
     ap.add_argument("--particles-per-region", type=int, default=4)
     ap.add_argument("--workers", type=int, default=8)
+    ap.add_argument("--max-frontier", type=int, default=8,
+                    help="search width per bundle (NOT the candidate pool)")
+    ap.add_argument("--emit-per-bundle", type=int, default=3,
+                    help="representatives offered to the oracle per region")
     ap.add_argument("--tau", type=float, default=0.05)
     a = ap.parse_args()
 
@@ -59,7 +63,8 @@ def main() -> None:
                      "per_round": a.per_round,
                      "regions_per_lineage": a.regions_per_lineage,
                      "particles_per_region": a.particles_per_region,
-                     "workers": a.workers}
+                     "workers": a.workers, "max_frontier": a.max_frontier,
+                     "emit_per_bundle": a.emit_per_bundle}
                 if arm == "Q_taskvalue":
                     if tbl is None:
                         raise SystemExit("no task_value table for the tilt arm")

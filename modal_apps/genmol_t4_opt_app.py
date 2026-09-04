@@ -642,8 +642,40 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
             # 0.21, 20/20 distinct bundles either way). Thirteen times the
             # proposal compute bought nothing, so the frontier is capped where
             # the curve flattens.
-            frontier = nxt[: int(task.get("max_frontier", 8))]
-        return list(cands.values())
+            frontier = nxt[: int(task.get("max_frontier", 8))]   # search width
+
+        # THE FRONTIER IS FOR SEARCHING; THE CANDIDATE POOL IS FOR SPENDING
+        # ORACLE CALLS. Emitting every valid intermediate conflated the two and
+        # produced 55,038 candidates for 20 docking slots -- 83 minutes of
+        # proposal for a top-20 no better than the 4,816-candidate round. The
+        # intermediates stay available internally to continue the search; only a
+        # few representatives per REGION bundle are offered to the oracle.
+        n_emit = int(task.get("emit_per_bundle", 3))
+        by_region: dict = {}
+        for c in cands.values():
+            by_region.setdefault(c["region_id"], []).append(c)
+        out = []
+        for rid, cs in by_region.items():
+            reps, seen_ = [], set()
+
+            def _add(c):
+                if c and c["smiles"] not in seen_:
+                    seen_.add(c["smiles"]); reps.append(c)
+
+            # the deepest rewrite: the most fully realized version of this region
+            _add(max(cs, key=lambda c: c["step"]))
+            # the structurally largest realized change from this region
+            _add(max(cs, key=lambda c: c.get("r_coherent") or 0.0))
+            # a topology-changing alternative if this region produced one
+            rings = [c for c in cs if (c.get("d_ring_systems") or 0) != 0]
+            if rings:
+                _add(max(rings, key=lambda c: abs(c.get("d_ring_systems") or 0)))
+            for c in sorted(cs, key=lambda c: -(c.get("r_coherent") or 0.0)):
+                if len(reps) >= n_emit:
+                    break
+                _add(c)
+            out.extend(reps[:n_emit])
+        return out
 
     # Oracle allocation needs an objective signal. Ranking by (v, -qed) fails
     # once molecules are feasible: v is identically 0 and QED ties break
