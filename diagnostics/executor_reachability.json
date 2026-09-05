@@ -1,0 +1,45 @@
+[
+  {
+    "mode": "prune",
+    "case": "splitting_free",
+    "note": "handoff at step 2",
+    "d_old_start": 0,
+    "found": {
+      "depth": 3,
+      "path": [
+        "cycle_open",
+        "atom_delete",
+        "atom_delete"
+      ],
+      "smiles": "CCn1cc(-c2ccnc3[nH]ccc23)c(-c2cccc(NNNC3CCCCC3)c2)n1",
+      "d_old": 0
+    },
+    "states_expanded": 32,
+    "depth_bound": 5,
+    "per_family": 4,
+    "beam": 40,
+    "verdict": "PATH_EXISTS -> proposal problem",
+    "sec": 111.29947876930237
+  },
+  {
+    "mode": "plateau",
+    "case": "splitting_saturated",
+    "note": "",
+    "d_old_start": 4,
+    "found": {
+      "depth": 2,
+      "path": [
+        "cycle_open",
+        "cycle_close"
+      ],
+      "smiles": "C=C1C(c2cn(C)nc2-c2ccncc2)=CC=C1c1n[nH]cc1C",
+      "d_old": 3
+    },
+    "states_expanded": 127,
+    "depth_bound": 5,
+    "per_family": 4,
+    "beam": 40,
+    "verdict": "PATH_EXISTS -> proposal problem",
+    "sec": 71.81002879142761
+  }
+]

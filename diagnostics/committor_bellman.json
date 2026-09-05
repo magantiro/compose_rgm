@@ -1,0 +1,79 @@
+{
+  "status": "OK",
+  "n_states": 5758,
+  "stages": {
+    "establishment|b=1": {
+      "target_mean": 3.353563826635764e-08,
+      "target_max": 7.65855293138884e-05,
+      "n_nonzero": 5,
+      "mse": 1.728346092022548e-06
+    },
+    "establishment|b=2": {
+      "target_mean": 0.0009624799713492393,
+      "target_max": 0.0029431635048240423,
+      "n_nonzero": 5758,
+      "mse": 3.661668301901955e-08
+    },
+    "establishment|b=3": {
+      "target_mean": 0.000928336288779974,
+      "target_max": 0.0028462482150644064,
+      "n_nonzero": 5758,
+      "mse": 3.7275995623531344e-08
+    },
+    "establishment|b=4": {
+      "target_mean": 0.0009054554393514991,
+      "target_max": 0.002780555747449398,
+      "n_nonzero": 5758,
+      "mse": 3.54248612666197e-08
+    },
+    "establishment|b=5": {
+      "target_mean": 0.0008827210403978825,
+      "target_max": 0.0027150935493409634,
+      "n_nonzero": 5758,
+      "mse": 3.361960310144241e-08
+    },
+    "establishment|b=6": {
+      "target_mean": 0.0008601144654676318,
+      "target_max": 0.0026498266961425543,
+      "n_nonzero": 5758,
+      "mse": 3.185716224152202e-08
+    },
+    "completion|b=1": {
+      "target_mean": 0.0,
+      "target_max": 0.0,
+      "n_nonzero": 0,
+      "mse": 4.010618681604683e-07
+    },
+    "completion|b=2": {
+      "target_mean": 0.00046481669414788485,
+      "target_max": 0.0014112285571172833,
+      "n_nonzero": 5757,
+      "mse": 5.961529492282125e-09
+    },
+    "completion|b=3": {
+      "target_mean": 0.00042423204286023974,
+      "target_max": 0.0012893808307126164,
+      "n_nonzero": 5757,
+      "mse": 6.425231457996006e-09
+    },
+    "completion|b=4": {
+      "target_mean": 0.00040445939521305263,
+      "target_max": 0.0012309119338169694,
+      "n_nonzero": 5757,
+      "mse": 5.834787319969337e-09
+    },
+    "completion|b=5": {
+      "target_mean": 0.0003853690286632627,
+      "target_max": 0.0011741048656404018,
+      "n_nonzero": 5757,
+      "mse": 5.331669772346004e-09
+    },
+    "completion|b=6": {
+      "target_mean": 0.0003674679610412568,
+      "target_max": 0.0011207660427317023,
+      "n_nonzero": 5757,
+      "mse": 4.874010972599763e-09
+    }
+  },
+  "path": "/artifacts/region_committor/committor_bellman_v1.pt"
+}

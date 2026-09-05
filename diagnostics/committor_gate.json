@@ -1,0 +1,18 @@
+{
+  "splitting_free": {
+    "states": 561,
+    "terminal_states": 13,
+    "terminal_predecessors": 118,
+    "distinct_molecules_with_terminals": 1,
+    "nonzero_b1_establishment": 131,
+    "nonzero_b1_completion": 6
+  },
+  "splitting_saturated": {
+    "states": 142,
+    "terminal_states": 0,
+    "terminal_predecessors": 0,
+    "distinct_molecules_with_terminals": 0,
+    "nonzero_b1_establishment": 0,
+    "nonzero_b1_completion": 0
+  }
+}
