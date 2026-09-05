@@ -1038,3 +1038,116 @@ def t4_progress():
 def t4_population_report_only():
     out = json.loads(Path("diagnostics/t4_population.json").read_text())
     t4_population_report(out)
+
+
+@app.function(image=image, cpu=(2.0, 2.0), memory=int(8 * 1024), timeout=60 * 60,
+              volumes={ARTIFACT_ROOT: artifact_volume})
+def ring_admissibility_probe(task: dict[str, Any]) -> dict[str, Any]:
+    """Why does region rewriting almost never form a ring?
+
+    On this cell the winning molecule needed a NEW FUSED RING (+1 ring for +1
+    heavy atom); our proposals instead decorate with halogens and sulfur and
+    changed a ring system once in forty dockings.
+
+    Ring formation generally has to bond region material ONTO context atoms, and
+    `admissible_indices` refuses anything reaching non-terminal frozen context,
+    because that is the invariant preserving C = x \\ M. So the hypothesis is
+    that ring-forming families are proposed by R_theta and then systematically
+    refused by region admissibility -- not that R_theta fails to propose them.
+
+    This counts, per family: how often R_theta offers it, how much probability
+    mass it carries, and how often it is admitted versus refused and why. No
+    docking; nothing here can be tuned toward the benchmark.
+    """
+    import sys
+    from collections import Counter, defaultdict
+    sys.path.insert(0, str(REMOTE_ROOT / "src"))
+    import numpy as np
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.experiments.production_successor_kernel import (
+        enumerate_factorized_marked_law)
+    from compose_v4.control.region import enumerate_regions
+    from compose_v4.control import region_rewrite as RR
+
+    rt = _runtime(); model = rt["model"]
+    smi = task["smiles"]
+    raw = smiles_to_molecular_graph(smi)
+    st0 = pad_molecular_graph(raw, CANONICAL_SLOTS)
+    n_real = len(raw.atom_types)
+    law = enumerate_factorized_marked_law(model, st0, float(TIME_POINT))
+    fams = [m.executor_rule_name for m in law.marks]
+    acts = [m.action for m in law.marks]
+    probs = np.array([m.probability for m in law.marks], float)
+
+    offered = Counter(fams)
+    mass = defaultdict(float)
+    for f, p_ in zip(fams, probs):
+        mass[f] += float(p_)
+
+    regions = [r for r in enumerate_regions(smi) if 1 <= r.size <= 24]
+    per_region = []
+    admit = Counter(); reject = defaultdict(Counter)
+    for reg in regions[: int(task.get("n_regions", 40))]:
+        ctx = RR.context_from_region(reg)
+        lin0 = RR.Lineage.initial(range(n_real))
+        idx, why = RR.admissible_indices(fams, acts, ctx)
+        ok_f = Counter(fams[j] for j in idx)
+        for f, c in ok_f.items():
+            admit[f] += c
+        # per-family refusal reason, recomputed so the funnel is attributable
+        allowed = ctx.locus | ctx.terminal_context_slots
+        for j, f in enumerate(fams):
+            if j in set(idx):
+                continue
+            a = acts[j]
+            reach = RR.touched_slots(a)
+            new = RR.created_slot(a)
+            if new is not None:
+                reach = reach - {new}
+            if reach & (ctx.frozen - ctx.terminal_context_slots):
+                reject[f]["frozen_touched"] += 1
+            elif not reach or not (reach <= allowed):
+                reject[f]["not_in_locus"] += 1
+            else:
+                reject[f]["context_only"] += 1
+        per_region.append({"size": reg.size, "interface": reg.interface,
+                           "r_release": reg.released_fraction,
+                           "n_admissible": len(idx),
+                           "ring_admissible": sum(ok_f[f] for f in
+                                                  ("cycle_insert", "cycle_attach",
+                                                   "ring_system_grow",
+                                                   "ring_system_restate"))})
+    res = {"smiles": smi, "n_marks": len(fams),
+           "offered": dict(offered), "mass": {k: round(v, 5) for k, v in mass.items()},
+           "admitted_total": dict(admit),
+           "rejected": {k: dict(v) for k, v in reject.items()},
+           "regions_probed": len(per_region), "per_region": per_region}
+    d = Path("/artifacts/t4_population"); d.mkdir(parents=True, exist_ok=True)
+    (d / "ring_admissibility.json").write_text(json.dumps(res))
+    artifact_volume.commit()
+    return res
+
+
+@app.local_entrypoint()
+def ring_probe(smiles: str = "", n_regions: int = 40):
+    if not smiles:
+        smiles = json.loads(Path("docs/GENMOL_T4_SEEDS.json").read_text())[0]["smiles"]
+    r = ring_admissibility_probe.remote({"smiles": smiles, "n_regions": n_regions})
+    RING = ("cycle_insert", "cycle_attach", "ring_system_grow", "ring_system_restate")
+    print(f"seed: {r['smiles']}\nmarks in the law: {r['n_marks']}, "
+          f"regions probed: {r['regions_probed']}\n")
+    print(f"{'family':<22} {'offered':>8} {'R_theta mass':>13} {'admitted':>9} {'frozen_rej':>11}")
+    for f in sorted(r["offered"], key=lambda f: -r["offered"][f]):
+        rej = r["rejected"].get(f, {})
+        star = " <-- RING" if f in RING else ""
+        print(f"{f:<22} {r['offered'][f]:>8} {r['mass'].get(f,0):>13.5f} "
+              f"{r['admitted_total'].get(f,0):>9} {rej.get('frozen_touched',0):>11}{star}")
+    ring_off = sum(r["offered"].get(f, 0) for f in RING)
+    ring_adm = sum(r["admitted_total"].get(f, 0) for f in RING)
+    ring_mass = sum(r["mass"].get(f, 0.0) for f in RING)
+    print(f"\nRING-FORMING families: offered {ring_off} marks carrying "
+          f"{ring_mass:.4f} of R_theta mass")
+    print(f"  admitted across {r['regions_probed']} regions: {ring_adm}")
+    nz = [p for p in r["per_region"] if p["ring_admissible"] > 0]
+    print(f"  regions with ANY ring-forming action admissible: {len(nz)}/{r['regions_probed']}")
