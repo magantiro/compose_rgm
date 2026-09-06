@@ -1,5 +1,28 @@
 # COMPOSE handoff — region resampling / T4 (2026-09-05)
 
+## The point of the project
+
+COMPOSE treats molecular design as **control of a frozen learned process**. A
+generator `R_theta` is learned once over executable chemical rewrites; a
+controller steers trajectories without changing it, as a KL-regularised change
+of path measure. Every transformation is realised as primitive executable steps
+through complete, chemically valid molecules -- never an endpoint a search must
+later justify.
+
+The intended end state, in order:
+
+    executable region rewriting        DONE, qualified
+    local <-> global rewrite geometry  DONE, gate passed
+    Q(M|x,z)   region/scale selection  mu_exec done; V_z null so far
+    Q(o|x,M,z) macro/program option    <- THE CURRENT GAP
+    population search                  loop built and running
+    T4 benchmark                       in progress, plateaued (see below)
+    PMO benchmark                      after T4
+
+`docs/CAMPAIGN_LESSONS.md` holds 41 rules exported from the agent's persistent
+memory. Read it before running anything expensive -- most entries exist because
+a run was lost or a number was misread.
+
 ## Where to start an agent
 
 ```
