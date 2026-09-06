@@ -138,6 +138,49 @@ program (`scaffold_extend x8 -> append_system x1 -> restate x2`), not a
 single-step option. Treat programs as compound options now, or start with
 single-step options and add programs after the audit?
 
+## Key files, and the numbers to beat
+
+New modules from this campaign:
+
+    src/compose_v4/control/region.py            region enumeration, interfaces
+    src/compose_v4/control/region_rewrite.py    the frozen inner controller;
+                                                kl_tilt lives here, NOT adaptive_tilt
+    src/compose_v4/control/region_selector.py   mu_exec and Q = mu_exec*exp(V/tau)
+    src/compose_v4/control/task_value.py        V_z, winsorised shrunk means
+    src/compose_v4/control/macro_engine.py      PRE-EXISTING option layer, unused
+                                                by the region path -- the gap
+    modal_apps/committor_bellman_app.py         screen / collect / fit / race / mass
+    modal_apps/region_scale_gate_app.py         the local->global gate
+    modal_apps/population_search_app.py         the QED population loop + A/B
+    modal_apps/genmol_t4_opt_app.py             T4, both the old and new paths
+    tools/{preflight,t4_launch,t4_audit,repo_audit,build_dude_pool}.py
+
+Inputs:
+
+    docs/GENMOL_T4_SEEDS.json        15 benchmark seeds (the T4 cells)
+    docs/GENMOL_T4_DEV_SEEDS.json    22 dev seeds; [6:22] trained the committor,
+                                     [:6] were sentinels -- BOTH are spent
+    docs/DUDE_HOLDOUT_POOL.json      743 fresh DUD-E actives, canonical-disjoint
+    docs/STRUCTURAL_QUAL_POOL.json   220 MOLLEO/PMO molecules (distribution-shifted)
+
+**The bar, read from artifacts, never transcribed:**
+
+    diagnostics/genmol_t4_official_s2.json   prior COMPOSE @500 calls/cell
+        delta=0.4  solved 14/14  mean -10.26  best -11.70
+        delta=0.6  solved 11/13  mean  -9.24  best -13.40
+    diagnostics/genmol_t4_official_s1.json   prior COMPOSE @200 calls/cell
+        delta=0.4  solved 14/15  mean -10.01
+    docs/genmol_t4_all_methods.json          published comparators
+        GenMol 26/30 (-10.62 / -9.81), GraphGA 19/30, RetMol 11/30
+
+    On the audit cell (parp1 idx=0, delta=0.4): seed -7.3, prior COMPOSE -8.5
+    @200 and -9.5 @500, ivg -9.8 @1000, GenMol -10.6. The new path reached -8.7
+    at 71 calls before the plateau.
+
+Frozen parameters -- do not tune without a reason: `kappa=1.0` (KL trust region),
+`tau=0.05`, `epsilon=0.1` (primitive exploration floor), `epsilon_region=0.2`
+(scale floor), 8 lineages, 20 dockings/round.
+
 ## Reproducing what has been run
 
 `experiments/INDEX.md` lists 193 apps and 266 entrypoints with exact commands.
