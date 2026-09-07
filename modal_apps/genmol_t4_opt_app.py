@@ -71,7 +71,7 @@ image = (
 
 app = modal.App("genmol-t4-opt")
 RUN_ROOT = "/artifacts/editing_v2/r_theta_run"
-TIME_POINT, CANONICAL_SLOTS = 0.5, 48
+TIME_POINT, CANONICAL_SLOTS, MAX_ACTIVE_ATOMS = 0.5, 48, 40
 
 QED_MIN, SA_MAX, TAU_V = 0.6, 4.0, 0.10
 APPLY_CAP = 300          # marks executed per parent, top-R_theta first
@@ -110,13 +110,18 @@ def _runtime():
     runtime, _b, _c = build_process_v2_score_revised_scratch_runtime(
         src, materialized_state=bundle)
     model = runtime.model
-    ck = torch.load(Path(RUN_ROOT) / "runs" / "run_v2_01" / CHECKPOINT_FILENAME,
-                    map_location="cpu", weights_only=False)
+    model_checkpoint = Path(RUN_ROOT) / "runs" / "run_v2_01" / CHECKPOINT_FILENAME
+    ck = torch.load(model_checkpoint, map_location="cpu", weights_only=False)
     model.load_state_dict(ck["selected_model_state"], strict=True)
     model.eval()
     torch.set_grad_enabled(False)
     torch.set_num_threads(1)
-    _RT.update({"model": model, "system": _default_rewrite_system(model)})
+    _RT.update({
+        "model": model,
+        "system": _default_rewrite_system(model),
+        "model_checkpoint": str(model_checkpoint),
+        "run_paths": str(Path(RUN_ROOT) / "run_inputs" / "RUN_PATHS.json"),
+    })
     return _RT
 
 
@@ -394,9 +399,9 @@ def main(which: str = "dev", rounds: int = 3, per_round: int = 8,
 # What changes is only the proposal. `optimize` samples the marked law and
 # selects among realizations; this runs the qualified stack --
 #
-#     mu_exec(M|x)          which region to rewrite, feasibility/cost-aware
-#     [ x exp(V_z/tau) ]    optional task tilt, the arm under test
-#     q_rewrite(w|x,M)      frozen committor + KL trust region at kappa=1
+#     Q(M|x,z)              WHERE to rewrite, feasibility/cost-aware
+#     Q(o|x,M,z)            WHAT to do, balanced applicability-aware prior
+#     q_rewrite(w|x,M,o)    HOW, frozen committor + KL at kappa=1
 #
 # -- so it can choose the SCALE of each edit rather than only its content. The
 # standing T4 conclusion located the failure exactly there: broad-C sampled the
@@ -426,8 +431,8 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
     Only the OFFSPRING PROPOSAL changes here:
 
         old   sample the marked law, select among realizations
-        new   M ~ Q(M|x,z), then the frozen region rewrite
-              q ∝ R_M * h_phi^eta with KL(q || R_M) <= kappa
+        new   M ~ Q(M|x,z), o ~ Q(o|x,M,z), then the frozen region rewrite
+              q ∝ R_M,o * h_phi^eta with KL(q || R_M,o) <= kappa
 
     Everything else -- lineage count, parent selection, feasibility, batch size,
     budget accounting, archive update after the batch -- is kept, so a
@@ -436,9 +441,13 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
     Within a round, candidate j+1 must not depend on the docking of candidate j;
     that is what re-serializes a population algorithm.
     """
+    import hashlib
     import os
+    import platform
     import sys
+    from collections import Counter
     from concurrent.futures import ThreadPoolExecutor
+    from datetime import datetime, timezone
 
     import numpy as np
     import torch
@@ -448,16 +457,39 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
     RDLogger.DisableLog("rdApp.*")
     sys.path.append(os.path.join(RDConfig.RDContribDir, "SA_Score"))
     import sascorer
-    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.chem.molecular_graph import (
+        NULL_IDX,
+        molecular_graph_to_smiles,
+        smiles_to_molecular_graph,
+    )
     from compose_v4.chem.state import pad_molecular_graph
     from compose_v4.experiments.production_successor_kernel import (
         canonical_state_key, enumerate_factorized_marked_law)
     from compose_v4.control.region import enumerate_regions
     from compose_v4.control import region_rewrite as RR
     from compose_v4.control import graph_geometry as GG
+    from compose_v4.control.macro_engine import (
+        BACKBONE_ELEMENTS,
+        TERMINAL_ELEMENTS,
+        contract_for,
+    )
+    from compose_v4.control.option_selector import (
+        BUILD_RING_SYSTEM_OPTION,
+        GENERIC_OPTION,
+        OPTION_GROUPS,
+        OPTIONS,
+        applicable_options,
+        bundle_identity,
+        conditioned_action_distribution,
+        option_horizon,
+        primitive_option_at_step,
+        retain_product_applicable_options,
+        sample_option,
+    )
     from compose_v4.control.region_selector import sample_region
     from compose_v4.control.task_value import TaskValue
     from compose_v4.gates.med_chem_gate import is_valid
+    from compose_v4.rewrite.kernel import InvalidRewrite
 
     rt = _runtime(); model, system = rt["model"], rt["system"]
     gen = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
@@ -469,15 +501,45 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
     arm = task.get("arm", "mu_exec")
     tau = float(task.get("tau", 0.05))
     kappa = float(task.get("kappa", 1.0))
+    if kappa != 1.0:
+        raise ValueError(f"the qualified T4 controller freezes kappa=1.0, got {kappa}")
     eps_region = float(task.get("epsilon_region", 0.2))
+    eps_option = float(task.get("epsilon_option", 0.1))
+    macro_temperature = float(task.get("macro_temperature", 2.0))
+    eps_macro = float(task.get("epsilon_macro", 0.15))
     rng = np.random.default_rng(int(task["seed_rng"]))
     seed_fp = gen.GetFingerprint(Chem.MolFromSmiles(seed))
     tv = TaskValue.from_dict(task["value_table"]) if task.get("value_table") else None
     value_fn = tv.value_fn() if tv is not None else None
 
+    def sha256_file(path):
+        digest = hashlib.sha256()
+        with open(path, "rb") as handle:
+            for block in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(block)
+        return digest.hexdigest()
+
     artifact_volume.reload()
-    ck = torch.load("/artifacts/region_committor/committor_bellman_v1.pt",
-                    map_location="cpu")
+    committor_path = "/artifacts/region_committor/committor_bellman_v1.pt"
+    seed_manifest_path = REMOTE_ROOT / "docs" / "GENMOL_T4_SEEDS.json"
+    qvina_path = "/opt/dock/qvina02"
+    receptor_path = f"/opt/dock/receptors/{target}.pdbqt"
+    ck = torch.load(committor_path, map_location="cpu")
+    input_hashes = {
+        "committor": sha256_file(committor_path),
+        "r_theta_checkpoint": sha256_file(rt["model_checkpoint"]),
+        "r_theta_run_paths": sha256_file(rt["run_paths"]),
+        "seed_manifest": sha256_file(seed_manifest_path),
+        "qvina02": sha256_file(qvina_path),
+        "receptor": sha256_file(receptor_path),
+    }
+    expected_seed_hash = task.get("seed_manifest_sha256")
+    if expected_seed_hash and expected_seed_hash != input_hashes["seed_manifest"]:
+        raise ValueError(
+            "seed manifest hash differs between the clean launch tree and deployed app: "
+            f"{expected_seed_hash} != {input_hashes['seed_manifest']}"
+        )
+    started_at = datetime.now(timezone.utc).isoformat()
     net = torch.nn.Sequential(torch.nn.Linear(int(ck["n_features"]), 48),
                               torch.nn.ReLU(), torch.nn.Linear(48, 1))
     net.load_state_dict(ck["state_dict"]); net.eval()
@@ -493,55 +555,68 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                 max(0.0, delta - sim) / delta)
         return {"qed": q, "sa": sa, "sim": sim, "v": v}
 
-    def batched_rewrite(parent, regions_k, max_steps, rng_):
-        """One controlled search FRONTIER -> many molecular offspring.
+    def composition_delta(before_smi, after_smi):
+        before_mol = Chem.MolFromSmiles(before_smi)
+        after_mol = Chem.MolFromSmiles(after_smi)
+        if before_mol is None or after_mol is None:
+            return {}, 0, 0, 0
+        before = Counter(atom.GetSymbol() for atom in before_mol.GetAtoms())
+        after = Counter(atom.GetSymbol() for atom in after_mol.GetAtoms())
+        delta_by_element = {
+            element: int(after[element] - before[element])
+            for element in sorted(set(before) | set(after))
+            if after[element] != before[element]
+        }
+        added_terminal = sum(
+            max(0, delta_by_element.get(element, 0))
+            for element in TERMINAL_ELEMENTS
+        )
+        added_backbone = sum(
+            max(0, delta_by_element.get(element, 0))
+            for element in BACKBONE_ELEMENTS
+        )
+        added_sulfur = max(0, delta_by_element.get("S", 0))
+        return delta_by_element, added_terminal, added_backbone, added_sulfur
 
-        The serial form paid for one complete trajectory per molecule, which is
-        where the ~250x candidate-pool deficit against the old optimizer came
-        from: it generated ~1950 realizations from a single fiber enumeration
-        and docked the best 20, while we produced 8 and docked all 8 -- no
-        selection pressure at all.
+    def batched_rewrite(parent, parent_lineage_id, regions_k, max_steps, rng_):
+        """Search selected ``(parent, region, option)`` bundles concurrently.
 
-        This changes the unit of computation, not the controller. Particles
-        sitting on the SAME state share one kernel evaluation: the law is
-        enumerated once, successors applied once, h_phi scored once for the
-        whole frontier in a single batched call, and then m particles are drawn
-        from the identical q. Distributionally this is the same process; only
-        the arithmetic is shared.
+        ``Q(M|x,z)`` allocates one region draw and ``Q(o|x,M,z)`` samples one
+        applicable option for that draw.  Options never clone a region draw.
+        Within a bundle, the existing macro machinery restricts primitive
+        support before the frozen committor and KL tilt are applied.  Generic
+        support is byte-for-byte the qualified raw region law.
 
-        Two further wins fall out for free:
-          * every committed state in COMPOSE is a complete valid molecule, so
-            the frontier itself is a candidate pool -- intermediates no longer
-            get discarded in favour of endpoints only;
-          * a 25-step scaffold rewrite and a 3-step substituent rewrite advance
-            as concurrent particles, so global-move latency stops being every
-            proposal's latency.
+        Every transition is still executed by the production executor and is
+        checked for validity, connectivity, and frozen-context preservation.
+        BUILD_RING_SYSTEM is an indivisible eleven-step proposal; its
+        intermediates remain search states and only completed endpoints enter
+        the candidate pool.
         """
-        frontier = []
-        for reg, k in regions_k:
-            raw_ = smiles_to_molecular_graph(parent)
-            st_ = pad_molecular_graph(raw_, CANONICAL_SLOTS)
-            n_ = len(raw_.atom_types)
-            ctx_ = RR.context_from_region(reg)
-            lin_ = RR.Lineage.initial(range(n_))
-            old_ = frozenset(lin_.id_of[a] for a in reg.atoms if a in lin_.id_of)
-            frontier.append({"st": st_, "lin": lin_, "ctx": ctx_, "old": old_,
-                             "reg": reg, "mult": k, "step": 0})
+        import hashlib
+        from collections import Counter, defaultdict
+
         cands: dict = {}
         cache: dict = {}
         memo: dict = {}
 
         def slot_key(st):
-            return (np.asarray(st.atom_types).tobytes(),
-                    np.asarray(st.bonds).tobytes())
+            # Actions carry persistent-slot coordinates, so a canonical SMILES
+            # key is scientifically invalid for marked-law reuse.
+            return (
+                np.asarray(st.atom_types).tobytes(),
+                np.asarray(st.bonds).tobytes(),
+            )
 
         def enum_fn(st):
             k_ = slot_key(st)
             if k_ not in cache:
                 law = enumerate_factorized_marked_law(model, st, float(TIME_POINT))
-                cache[k_] = ([m.executor_rule_name for m in law.marks],
-                             [m.action for m in law.marks],
-                             np.array([m.probability for m in law.marks], float))
+                cache[k_] = (
+                    [m.executor_rule_name for m in law.marks],
+                    [m.action for m in law.marks],
+                    np.array([m.probability for m in law.marks], float),
+                )
             return cache[k_]
 
         def apply_fn(st, jj):
@@ -550,7 +625,7 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                 fams, acts, _ = enum_fn(st)
                 try:
                     y = system.apply(st, fams[jj], acts[jj])
-                except Exception:
+                except InvalidRewrite:  # executor rejects some enumerated marks
                     y = None
                 if len(memo) < 20000:
                     memo[k_] = y
@@ -558,124 +633,427 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                     return y
             return memo[k_]
 
+        def checked_successor(st, origin_st, ctx, action_index, contract):
+            y = apply_fn(st, int(action_index))
+            if y is None:
+                return None
+            if int(np.sum(np.asarray(y.atom_types) != int(NULL_IDX))) > MAX_ACTIVE_ATOMS:
+                return None
+            try:
+                key = canonical_state_key(y)
+            except InvalidRewrite:
+                return None
+            if not key or not is_valid(key):
+                return None
+            if not RR.context_preserved(
+                origin_st,
+                y,
+                ctx.frozen,
+                ctx.terminal_context_slots,
+            ):
+                return None
+            if not RR.graph_connected(y):
+                return None
+            if contract is not None and not contract(key):
+                return None
+            return y, key
+
+        frontier = []
+        receipts: dict[str, dict] = {}
+        for reg, multiplicity, region_score in regions_k:
+            raw_ = smiles_to_molecular_graph(parent)
+            st_ = pad_molecular_graph(raw_, CANONICAL_SLOTS)
+            n_ = len(raw_.atom_types)
+            ctx_ = RR.context_from_region(reg)
+            lin_ = RR.Lineage.initial(range(n_))
+            old_ = frozenset(lin_.id_of[a] for a in reg.atoms if a in lin_.id_of)
+            fams, acts, _probs = enum_fn(st_)
+            idx, _why = RR.admissible_indices(fams, acts, ctx_)
+            n_free = min(
+                int(np.sum(np.asarray(st_.atom_types) == int(NULL_IDX))),
+                MAX_ACTIVE_ATOMS - n_,
+            )
+            support_applicable = applicable_options(fams, idx, n_free_slots=n_free)
+
+            def has_clean_product(
+                option,
+                fams_=fams,
+                probs_=_probs,
+                idx_=idx,
+                state_=st_,
+                context_=ctx_,
+            ):
+                conditioned = conditioned_action_distribution(
+                    fams_,
+                    probs_,
+                    idx_,
+                    option,
+                    step=0,
+                    temperature=macro_temperature,
+                    exploration=eps_macro,
+                )
+                active = primitive_option_at_step(option, 0)
+                before = molecular_graph_to_smiles(state_)
+                contract = contract_for(active, before) if active else None
+                return any(
+                    checked_successor(
+                        state_, state_, context_, int(j), contract
+                    )
+                    is not None
+                    for j in conditioned.indices
+                )
+
+            options = retain_product_applicable_options(
+                support_applicable, has_clean_product
+            )
+            choice = sample_option(options, rng_, exploration=eps_option)
+            bundle_id = bundle_identity(
+                parent, parent_lineage_id, reg.key(), choice.selected
+            )
+            receipt = receipts.setdefault(
+                bundle_id,
+                {
+                    "bundle_id": bundle_id,
+                    "parent": parent,
+                    "parent_lineage_id": int(parent_lineage_id),
+                    "region_atoms": sorted(int(x) for x in reg.atoms),
+                    "region_id": hashlib.sha256(
+                        json.dumps(
+                            [list(reg.key()[0]), [list(x) for x in reg.key()[1]]],
+                            separators=(",", ":"),
+                        ).encode()
+                    ).hexdigest()[:20],
+                    "interface": reg.interface,
+                    "kind": reg.kind,
+                    "r_release": float(reg.released_fraction),
+                    "option": choice.selected,
+                    "q_option": float(choice.selected_probability),
+                    "support_applicable_options": list(support_applicable),
+                    "applicable_options": list(choice.applicable),
+                    "option_probabilities": {
+                        name: float(prob)
+                        for name, prob in zip(choice.applicable, choice.probabilities)
+                    },
+                    "q_region": getattr(region_score, "selection_probability", None),
+                    "q_region_base": getattr(region_score, "base_probability", None),
+                    "q_region_floor": getattr(region_score, "floor_probability", None),
+                    "mu_exec": getattr(region_score, "mu_exec", None),
+                    "region_draws": 0,
+                    "particles": 0,
+                    "n_candidates": 0,
+                    "n_emitted": 0,
+                    "max_step": 0,
+                    "max_search_step": 0,
+                    "max_r_coherent": 0.0,
+                    "ring_system_deltas": {},
+                    "program_complete": False,
+                    "halt_counts": {},
+                },
+            )
+            receipt["region_draws"] += 1
+            receipt["particles"] += int(multiplicity)
+            frontier.append(
+                {
+                    "st": st_,
+                    "lin": lin_,
+                    "ctx": ctx_,
+                    "old": old_,
+                    "reg": reg,
+                    "mult": int(multiplicity),
+                    "step": 0,
+                    "option": choice.selected,
+                    "q_option": float(choice.selected_probability),
+                    "bundle_id": bundle_id,
+                    "region_id": receipt["region_id"],
+                    "origin_st": st_,
+                    "origin_lin": lin_,
+                }
+            )
+
+        def note_halt(particle, reason):
+            receipt = receipts[particle["bundle_id"]]
+            counts = receipt["halt_counts"]
+            counts[reason] = counts.get(reason, 0) + int(particle["mult"])
+
+        def record_committed_candidate(particle, y, key, lineage, active_macro, step_):
+            horizon = option_horizon(particle["option"], max_steps)
+            program_complete = int(step_) >= horizon
+            if particle["option"] == BUILD_RING_SYSTEM_OPTION and not program_complete:
+                return
+            candidate_key = (particle["bundle_id"], key)
+            if candidate_key in cands:
+                return
+            # Audit displacement is relative to the bundle parent, never merely
+            # the latest primitive transition.
+            dd = GG.structural_displacement(
+                particle["origin_st"], y, particle["origin_lin"], lineage
+            )
+            (
+                element_delta,
+                added_terminal,
+                added_backbone,
+                added_sulfur,
+            ) = composition_delta(parent, key)
+            cands[candidate_key] = {
+                "smiles": key,
+                "interface": particle["reg"].interface,
+                "kind": particle["reg"].kind,
+                "r_release": particle["reg"].released_fraction,
+                "step": int(step_),
+                "region_id": particle["region_id"],
+                "bundle_id": particle["bundle_id"],
+                "parent": parent,
+                "parent_lineage_id": int(parent_lineage_id),
+                "option": particle["option"],
+                "option_phase": active_macro or GENERIC_OPTION,
+                "q_option": particle["q_option"],
+                "program_complete": bool(program_complete),
+                "r_coherent": dd["largest_changed_fraction"],
+                "r_change": dd["changed_fraction"],
+                "d_ring_systems": dd["d_ring_systems"],
+                "d_cycle_rank": dd["d_cycle_rank"],
+                "d_heavy": dd["d_heavy"],
+                "element_delta": element_delta,
+                "added_terminal_halogen": added_terminal,
+                "added_backbone_atoms": added_backbone,
+                "added_sulfur": added_sulfur,
+            }
+
         for step in range(max_steps):
             if not frontier:
                 break
-            # ---- group particles that occupy the SAME (state, region)
+            # Only particles with identical slot state, context, lineage and
+            # bundle may share arithmetic.  Canonically identical molecules can
+            # carry different slot-addressed actions and must never be merged.
             groups: dict = {}
             for p_ in frontier:
-                gk = (slot_key(p_["st"]), id(p_["reg"]))
+                gk = (
+                    slot_key(p_["st"]),
+                    p_["bundle_id"],
+                    tuple(sorted(p_["ctx"].locus)),
+                    tuple(sorted(p_["lin"].id_of.items())),
+                )
                 if gk in groups:
                     groups[gk]["mult"] += p_["mult"]
                 else:
-                    groups[gk] = p_
-            # ---- expand each unique state ONCE
+                    groups[gk] = dict(p_)
+
             feats, meta = [], []
             for gk, p_ in groups.items():
-                fams, acts, probs = enum_fn(p_["st"])
-                idx, _w = RR.admissible_indices(fams, acts, p_["ctx"])
-                if not idx:
+                horizon = option_horizon(p_["option"], max_steps)
+                if step >= horizon:
                     continue
-                budget_left = max(0, max_steps - step)
-                for j in idx:
-                    y = apply_fn(p_["st"], j)
-                    if y is None:
+                fams, acts, probs = enum_fn(p_["st"])
+                idx, _why = RR.admissible_indices(fams, acts, p_["ctx"])
+                if not idx:
+                    note_halt(p_, "no_region_admissible_action")
+                    continue
+
+                # Avoid applying unrelated macro families.  The first pass is
+                # support-only; the second pass renormalizes after product-level
+                # validity, context and macro-contract checks.
+                pre = conditioned_action_distribution(
+                    fams,
+                    probs,
+                    idx,
+                    p_["option"],
+                    step=step,
+                    temperature=macro_temperature,
+                    exploration=eps_macro,
+                )
+                if not pre.indices.size:
+                    note_halt(p_, "no_option_support")
+                    continue
+                active_macro = primitive_option_at_step(p_["option"], step)
+                before = molecular_graph_to_smiles(p_["st"])
+                contract = contract_for(active_macro, before) if active_macro else None
+                clean = np.zeros(len(probs), dtype=bool)
+                successors = {}
+                for j in pre.indices:
+                    j = int(j)
+                    successor = checked_successor(
+                        p_["st"], p_["origin_st"], p_["ctx"], j, contract
+                    )
+                    if successor is None:
                         continue
-                    key = canonical_state_key(y)
-                    if not key or not is_valid(key):
-                        continue
-                    if not RR.context_preserved(p_["st"], y, p_["ctx"].frozen,
-                                                p_["ctx"].terminal_context_slots):
-                        continue
-                    if not RR.graph_connected(y):
-                        continue
+                    y, key = successor
+                    clean[j] = True
+                    successors[j] = (y, key)
+
+                conditioned = conditioned_action_distribution(
+                    fams,
+                    probs,
+                    idx,
+                    p_["option"],
+                    step=step,
+                    clean=clean,
+                    temperature=macro_temperature,
+                    exploration=eps_macro,
+                )
+                if not conditioned.indices.size:
+                    note_halt(p_, "no_clean_option_product")
+                    continue
+                budget_left = max(0, horizon - step)
+                for j, base_prob in zip(
+                    conditioned.indices, conditioned.probabilities
+                ):
+                    j = int(j)
+                    y, key = successors[j]
                     l2 = p_["lin"].observe(fams[j], acts[j])
-                    sh = RR.structural_features_shared(y, p_["ctx"], l2, p_["old"])
-                    feats.append(RR.features_from_shared(sh, budget_left,
-                                                         "establishment"))
-                    meta.append((gk, y, l2, float(probs[j]), key, p_))
-                    # EVERY committed state is a complete valid molecule
-                    if key not in cands:
-                        dd = GG.structural_displacement(p_["st"], y, p_["lin"], l2)
-                        cands[key] = {"smiles": key, "interface": p_["reg"].interface,
-                                      "kind": p_["reg"].kind,
-                                      "r_release": p_["reg"].released_fraction,
-                                      "step": step + 1,
-                                      "region_id": id(p_["reg"]),
-                                      "parent": parent,
-                                      "r_coherent": dd["largest_changed_fraction"],
-                                      "d_ring_systems": dd["d_ring_systems"],
-                                      "d_cycle_rank": dd["d_cycle_rank"],
-                                      "d_heavy": dd["d_heavy"]}
+                    new_slot = RR.created_slot(acts[j])
+                    ctx2 = (
+                        p_["ctx"].with_locus(new_slot)
+                        if new_slot is not None
+                        else p_["ctx"]
+                    )
+                    sh = RR.structural_features_shared(y, ctx2, l2, p_["old"])
+                    feats.append(
+                        RR.features_from_shared(sh, budget_left, "establishment")
+                    )
+                    meta.append(
+                        (
+                            gk,
+                            y,
+                            l2,
+                            ctx2,
+                            float(base_prob),
+                            key,
+                            p_,
+                            conditioned.active_macro,
+                        )
+                    )
             if not feats:
                 break
-            # ---- ONE batched committor call for the whole frontier
+
             with torch.no_grad():
-                h_all = torch.sigmoid(net(torch.tensor(feats, dtype=torch.float32)
-                                          ).squeeze(-1)).numpy()
-            # ---- per unique state: tilt once, then draw its particles
+                h_all = torch.sigmoid(
+                    net(torch.tensor(feats, dtype=torch.float32)).squeeze(-1)
+                ).numpy()
+
             nxt = []
             for gk, p_ in groups.items():
                 sel = [i for i, m_ in enumerate(meta) if m_[0] == gk]
                 if not sel:
                     continue
-                w = np.array([meta[i][3] for i in sel], float)
+                w = np.array([meta[i][4] for i in sel], float)
                 if w.sum() <= 0:
                     continue
                 w = w / w.sum()
                 hs = np.array([h_all[i] for i in sel], float)
                 q, _eta, _kl, _ess = RR.kl_tilt(w, hs, kappa=kappa)
-                q = (1.0 - float(task.get("epsilon", 0.1))) * q + \
-                    float(task.get("epsilon", 0.1)) * w
+                primitive_floor = float(task.get("epsilon", 0.1))
+                q = (1.0 - primitive_floor) * q + primitive_floor * w
                 q = q / q.sum()
                 draws = rng_.choice(len(sel), size=int(p_["mult"]), p=q)
                 for d_ in np.unique(draws):
                     i = sel[int(d_)]
-                    _gk, y, l2, _p, _key, src = meta[i]
-                    nxt.append({"st": y, "lin": l2, "ctx": src["ctx"],
-                                "old": src["old"], "reg": src["reg"],
-                                "mult": int((draws == d_).sum()),
-                                "step": step + 1})
-            # Measured optimum, not a guess: round 1 produced 4816 candidates in
-            # 379s and round 2 produced 55038 in 4991s, and the top-20 selected
-            # from each were equivalent (best realized coherent change 0.24 vs
-            # 0.21, 20/20 distinct bundles either way). Thirteen times the
-            # proposal compute bought nothing, so the frontier is capped where
-            # the curve flattens.
-            frontier = nxt[: int(task.get("max_frontier", 8))]   # search width
+                    _gk, y, l2, ctx2, _p, key, src, active_macro = meta[i]
+                    nxt.append(
+                        {
+                            **src,
+                            "st": y,
+                            "lin": l2,
+                            "ctx": ctx2,
+                            "mult": int((draws == d_).sum()),
+                            "step": step + 1,
+                        }
+                    )
+                    record_committed_candidate(
+                        src, y, key, l2, active_macro, step + 1
+                    )
+
+            for particle in nxt:
+                receipt = receipts[particle["bundle_id"]]
+                receipt["max_search_step"] = max(
+                    int(receipt["max_search_step"]), int(particle["step"])
+                )
+
+            # The measured width cap is per bundle.  Applying it across all
+            # bundles would let whichever bundle appears first steal another
+            # region-option draw's search allocation.
+            cap = int(task.get("max_frontier", 8))
+            by_bundle = defaultdict(list)
+            for particle in nxt:
+                by_bundle[particle["bundle_id"]].append(particle)
+            frontier = [
+                particle
+                for bundle_id in sorted(by_bundle)
+                for particle in by_bundle[bundle_id][:cap]
+            ]
 
         # THE FRONTIER IS FOR SEARCHING; THE CANDIDATE POOL IS FOR SPENDING
-        # ORACLE CALLS. Emitting every valid intermediate conflated the two and
-        # produced 55,038 candidates for 20 docking slots -- 83 minutes of
-        # proposal for a top-20 no better than the 4,816-candidate round. The
-        # intermediates stay available internally to continue the search; only a
-        # few representatives per REGION bundle are offered to the oracle.
+        # ORACLE CALLS.  Emit a small representative set from each complete
+        # (parent, region, option) bundle.
         n_emit = int(task.get("emit_per_bundle", 3))
-        by_region: dict = {}
-        for c in cands.values():
-            by_region.setdefault(c["region_id"], []).append(c)
+        by_bundle = defaultdict(list)
+        for candidate in cands.values():
+            by_bundle[candidate["bundle_id"]].append(candidate)
         out = []
-        for rid, cs in by_region.items():
+        for bundle_id in sorted(by_bundle):
+            cs = by_bundle[bundle_id]
             reps, seen_ = [], set()
 
-            def _add(c):
-                if c and c["smiles"] not in seen_:
-                    seen_.add(c["smiles"]); reps.append(c)
+            def _add(candidate, seen=seen_, selected=reps):
+                if candidate and candidate["smiles"] not in seen:
+                    seen.add(candidate["smiles"])
+                    selected.append(candidate)
 
-            # the deepest rewrite: the most fully realized version of this region
-            _add(max(cs, key=lambda c: c["step"]))
-            # the structurally largest realized change from this region
-            _add(max(cs, key=lambda c: c.get("r_coherent") or 0.0))
-            # a topology-changing alternative if this region produced one
-            rings = [c for c in cs if (c.get("d_ring_systems") or 0) != 0]
+            _add(max(cs, key=lambda candidate: candidate["step"]))
+            with_properties = [
+                (candidate, props(candidate["smiles"])) for candidate in cs
+            ]
+            with_properties = [item for item in with_properties if item[1] is not None]
+            if with_properties:
+                _add(
+                    min(
+                        with_properties,
+                        key=lambda item: (item[1]["v"], -item[1]["qed"]),
+                    )[0]
+                )
+            rings = [
+                candidate
+                for candidate in cs
+                if (candidate.get("d_ring_systems") or 0) != 0
+                or (candidate.get("d_cycle_rank") or 0) != 0
+            ]
             if rings:
-                _add(max(rings, key=lambda c: abs(c.get("d_ring_systems") or 0)))
-            for c in sorted(cs, key=lambda c: -(c.get("r_coherent") or 0.0)):
+                _add(
+                    max(
+                        rings,
+                        key=lambda candidate: (
+                            abs(candidate.get("d_ring_systems") or 0),
+                            abs(candidate.get("d_cycle_rank") or 0),
+                        ),
+                    )
+                )
+            _add(max(cs, key=lambda candidate: candidate.get("r_coherent") or 0.0))
+            for candidate in sorted(
+                cs, key=lambda candidate: -(candidate.get("r_coherent") or 0.0)
+            ):
                 if len(reps) >= n_emit:
                     break
-                _add(c)
-            out.extend(reps[:n_emit])
-        return out
+                _add(candidate)
+            emitted = reps[:n_emit]
+            out.extend(emitted)
+
+            receipt = receipts[bundle_id]
+            receipt["n_candidates"] = len(cs)
+            receipt["n_emitted"] = len(emitted)
+            receipt["max_step"] = max(candidate["step"] for candidate in cs)
+            receipt["max_r_coherent"] = max(
+                float(candidate.get("r_coherent") or 0.0) for candidate in cs
+            )
+            receipt["ring_system_deltas"] = {
+                str(k): int(v)
+                for k, v in sorted(
+                    Counter(candidate.get("d_ring_systems") for candidate in cs).items(),
+                    key=lambda item: str(item[0]),
+                )
+            }
+            receipt["program_complete"] = any(
+                candidate.get("program_complete", False) for candidate in cs
+            )
+        return out, [receipts[key] for key in sorted(receipts)]
 
     # Oracle allocation needs an objective signal. Ranking by (v, -qed) fails
     # once molecules are feasible: v is identically 0 and QED ties break
@@ -712,6 +1090,70 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
             return np.zeros(len(X), dtype=np.float32)
         return X @ _sur_W[0][rng.integers(0, len(_sur_W[0]))]
 
+    def candidate_diversity(records):
+        """Mean pairwise Morgan distance over distinct canonical molecules."""
+        fps_ = []
+        seen_ = set()
+        for record in records:
+            smi = record.get("smiles") or record.get("smi")
+            if not smi or smi in seen_:
+                continue
+            mol = Chem.MolFromSmiles(smi)
+            if mol is None:
+                continue
+            seen_.add(smi)
+            fps_.append(gen.GetFingerprint(mol))
+        if len(fps_) < 2:
+            return 0.0
+        distances = [
+            1.0 - float(DataStructs.TanimotoSimilarity(fps_[i], fps_[j]))
+            for i in range(len(fps_))
+            for j in range(i + 1, len(fps_))
+        ]
+        return float(np.mean(distances))
+
+    def option_diagnostics(records):
+        """Structural outcomes by selected option, independent of docking."""
+        grouped = {}
+        for record in records:
+            grouped.setdefault(record.get("option", "unknown"), []).append(record)
+        out = {}
+        for option in sorted(grouped):
+            items = grouped[option]
+            coherent = [float(item.get("r_coherent") or 0.0) for item in items]
+            out[option] = {
+                "n": len(items),
+                "median_r_release": float(
+                    np.median([float(item.get("r_release") or 0.0) for item in items])
+                ),
+                "median_r_coherent": float(np.median(coherent)),
+                "max_r_coherent": max(coherent),
+                "ring_system_increase": sum(
+                    int((item.get("d_ring_systems") or 0) > 0) for item in items
+                ),
+                "cycle_rank_increase": sum(
+                    int((item.get("d_cycle_rank") or 0) > 0) for item in items
+                ),
+                "any_topology_change": sum(
+                    int(
+                        (item.get("d_ring_systems") or 0) != 0
+                        or (item.get("d_cycle_rank") or 0) != 0
+                    )
+                    for item in items
+                ),
+                "mean_d_heavy": float(
+                    np.mean([float(item.get("d_heavy") or 0.0) for item in items])
+                ),
+                "added_backbone_atoms": sum(
+                    int(item.get("added_backbone_atoms") or 0) for item in items
+                ),
+                "added_terminal_halogen": sum(
+                    int(item.get("added_terminal_halogen") or 0) for item in items
+                ),
+                "added_sulfur": sum(int(item.get("added_sulfur") or 0) for item in items),
+            }
+        return out
+
     t0 = time.perf_counter()
     p0 = props(seed)
     archive = [{"smiles": seed, **p0, "ds": None}]
@@ -722,12 +1164,17 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
 
     while n_dock < budget:
         rd += 1
-        t_r = time.perf_counter()
         # ---- parents: the prior rule, top lineages by feasible-then-docking
         scored = sorted(archive, key=lambda a: (
             0 if (a["v"] <= 0 and a["ds"] is not None) else 1,
             a["ds"] if a["ds"] is not None else 0.0, a["v"]))
         parents = [a["smiles"] for a in scored[:n_lineages]] or [seed]
+        # The population contract is eight lineages from round one onward.  At
+        # initialization those lineages share x0 but make independent Q(M),
+        # Q(o) and primitive draws; returning only one parent silently reduced
+        # the first round to three bundles instead of the declared twenty-four.
+        if len(parents) < n_lineages:
+            parents.extend([seed] * (n_lineages - len(parents)))
 
         # ---- PROPOSE: region bundles per lineage, one shared frontier each.
         # Regions come from Q(M|x,z); particles within a region share the early
@@ -736,44 +1183,98 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
         particles_per_region = int(task.get("particles_per_region", 4))
         t_prop = time.perf_counter()
         bundles = []
-        for parent in parents:
-            try:
-                regs = [x for x in enumerate_regions(parent) if 1 <= x.size <= 24]
-            except Exception:
-                continue
+        for parent_lineage_id, parent in enumerate(parents):
+            regs = [x for x in enumerate_regions(parent) if 1 <= x.size <= 24]
             if not regs:
                 continue
             picked = []
             for _ in range(regions_per_lineage):
-                reg, _rs = sample_region(regs, rng, epsilon=eps_region,
-                                         value_fn=value_fn, tau=tau)
+                reg, region_score = sample_region(
+                    regs,
+                    rng,
+                    epsilon=eps_region,
+                    value_fn=value_fn,
+                    tau=tau,
+                )
                 if reg is not None:
-                    picked.append((reg, particles_per_region))
+                    picked.append((reg, particles_per_region, region_score))
             if picked:
-                bundles.append((parent, picked))
+                bundles.append((parent, parent_lineage_id, picked))
         cands = []
+        bundle_receipts = []
         with ThreadPoolExecutor(max_workers=workers) as ex:
-            futs = [ex.submit(batched_rewrite, par, picked,
+            futs = [ex.submit(batched_rewrite, par, parent_lineage_id, picked,
                               int(task.get("max_handoff", 16)),
                               np.random.default_rng(int(rng.integers(0, 10 ** 9))))
-                    for par, picked in bundles]
+                    for par, parent_lineage_id, picked in bundles]
             for f_ in futs:
-                try:
-                    cands.extend(f_.result())
-                except Exception:
-                    continue
+                candidates_, receipts_ = f_.result()
+                cands.extend(candidates_)
+                bundle_receipts.extend(receipts_)
         t_prop = time.perf_counter() - t_prop
 
+        # Repeated region draws may select the same option.  They are repeated
+        # probability mass for one (parent, region, option) bundle, not fake
+        # bundle diversity, so merge their receipts explicitly.
+        merged_receipts = {}
+        for receipt in bundle_receipts:
+            bundle_id = receipt["bundle_id"]
+            if bundle_id not in merged_receipts:
+                merged_receipts[bundle_id] = dict(receipt)
+                continue
+            dst = merged_receipts[bundle_id]
+            for field in (
+                "region_draws",
+                "particles",
+                "n_candidates",
+                "n_emitted",
+            ):
+                dst[field] += int(receipt[field])
+            dst["max_step"] = max(int(dst["max_step"]), int(receipt["max_step"]))
+            dst["max_search_step"] = max(
+                int(dst["max_search_step"]), int(receipt["max_search_step"])
+            )
+            dst["max_r_coherent"] = max(
+                float(dst["max_r_coherent"]), float(receipt["max_r_coherent"])
+            )
+            dst["program_complete"] = bool(
+                dst["program_complete"] or receipt["program_complete"]
+            )
+            ring_counts = {
+                key: int(value) for key, value in dst["ring_system_deltas"].items()
+            }
+            for key, value in receipt["ring_system_deltas"].items():
+                ring_counts[key] = ring_counts.get(key, 0) + int(value)
+            dst["ring_system_deltas"] = dict(sorted(ring_counts.items()))
+            for reason, value in receipt["halt_counts"].items():
+                dst["halt_counts"][reason] = dst["halt_counts"].get(reason, 0) + int(value)
+        bundle_receipts = [merged_receipts[key] for key in sorted(merged_receipts)]
+
         # ---- cheap downselect BEFORE spending the oracle
-        pool = []
+        pool_by_smiles = {}
         for c in cands:
             if c["smiles"] in docked:
                 continue
             pr = props(c["smiles"])
             if pr is None:
                 continue
-            pool.append({**c, **pr})
-        # Round-robin across (parent, region) instead of a global sort.
+            # Global canonical deduplication is independent of the bundle
+            # frontier.  One molecule earns at most one oracle call.
+            existing = pool_by_smiles.get(c["smiles"])
+            if existing is None:
+                pool_by_smiles[c["smiles"]] = {
+                    **c,
+                    **pr,
+                    "origin_bundle_ids": [c["bundle_id"]],
+                    "origin_options": [c["option"]],
+                }
+            else:
+                if c["bundle_id"] not in existing["origin_bundle_ids"]:
+                    existing["origin_bundle_ids"].append(c["bundle_id"])
+                if c["option"] not in existing["origin_options"]:
+                    existing["origin_options"].append(c["option"])
+        pool = list(pool_by_smiles.values())
+        # Round-robin across (parent, region, option) instead of a global sort.
         # A global sort by (v, -qed) put 19 of 20 dockings on ONE region: every
         # candidate is feasible with near-identical QED, so ties broke
         # arbitrarily and the oracle was spent on near-siblings from a single
@@ -782,7 +1283,7 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
         from collections import defaultdict as _dd
         by_src = _dd(list)
         for a in pool:
-            by_src[(a.get("parent"), a.get("region_id"))].append(a)
+            by_src[a.get("bundle_id")].append(a)
         # rank WITHIN a bundle by the surrogate (falls back to QED before warmup)
         fps = {}
         for a in pool:
@@ -797,17 +1298,18 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
             pred = {}
         for v_ in by_src.values():
             v_.sort(key=lambda a: (a["v"], pred.get(a["smiles"], -a.get("qed", 0))))
-        take, srcs = [], list(by_src.values())
+        take = []
+        srcs = [by_src[bundle_id] for bundle_id in sorted(by_src)]
         want = min(per_round, budget - n_dock)
-        i_ = 0
-        while len(take) < want and any(srcs):
-            grp = srcs[i_ % len(srcs)]
-            if grp:
-                take.append(grp.pop(0))
-            i_ += 1
-            if i_ > 10000:
-                break
-            srcs = [g for g in srcs if g]
+        while len(take) < want and srcs:
+            next_pass = []
+            for group in srcs:
+                if len(take) >= want:
+                    break
+                take.append(group.pop(0))
+                if group:
+                    next_pass.append(group)
+            srcs = next_pass
 
         # ---- BATCH docking, concurrent; archive updated only afterwards
         t_d = time.perf_counter()
@@ -826,35 +1328,142 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
         feas = [a for a in archive if a["v"] <= 0 and a["ds"] is not None
                 and a["smiles"] != seed]
         best = min(feas, key=lambda a: a["ds"]) if feas else None
+        options_selected = Counter()
+        for receipt in bundle_receipts:
+            options_selected[receipt["option"]] += int(receipt["region_draws"])
+        options_docked = Counter(a["option"] for a in take)
+        candidates_by_option = Counter(a["option"] for a in pool)
         rounds_log.append({
-            "round": rd, "n_bundles": len(bundles), "n_cand": len(cands),
-            "n_pool": len(pool), "n_docked_total": n_dock,
-            "n_lineages": len(parents), "best_ds": best["ds"] if best else None,
-            "t_propose": round(t_prop, 1), "t_dock": round(t_d, 1),
+            "round": rd,
+            "n_parent_batches": len(bundles),
+            "n_region_draws": sum(
+                int(receipt["region_draws"]) for receipt in bundle_receipts
+            ),
+            "n_bundles": len(bundle_receipts),
+            "n_cand": len(cands),
+            "n_unique_candidates": len(pool),
+            "n_pool": len(pool),
+            "candidate_diversity": round(candidate_diversity(pool), 6),
+            "docked_diversity": round(candidate_diversity(take), 6),
+            "n_docked_total": n_dock,
+            "n_docking_failures": sum(ds is None for ds in scores),
+            "n_lineages": len(parents),
+            "best_ds": best["ds"] if best else None,
+            "t_propose": round(t_prop, 1),
+            "t_dock": round(t_d, 1),
             "elapsed": round(time.perf_counter() - t0, 1),
             "scales": [round(c["r_release"], 2) for c in cands[:20]],
-            "n_bundles_selected": len(bundles),
-            "n_bundles_docked": len({(a.get("parent"), a.get("region_id"))
-                                     for a in take}),
-            "bundle_scopes": sorted({round(r.released_fraction, 2)
-                                     for _p, ps in bundles for r, _k in ps}),
-            "docked": [{"smi": a["smiles"], "ds": ds, "r_release": a["r_release"],
-                        "r_coherent": a.get("r_coherent"),
-                        "d_rings": a.get("d_ring_systems"),
-                        "d_cycle_rank": a.get("d_cycle_rank"),
-                        "step": a.get("step"),
-                        "interface": a["interface"], "qed": a.get("qed"),
-                        "sim": a.get("sim")}
-                       for a, ds in zip(take, scores)]})
-        res = {"cell": task["cell"], "arm": arm, "target": target,
-               "delta": delta, "seed": seed, "seed_props": p0,
-               "n_dock": n_dock, "n_feasible": len(feas),
-               "best_ds": best["ds"] if best else None,
-               "best_smiles": best["smiles"] if best else None,
-               "rounds": rounds_log, "complete": n_dock >= budget,
-               "sec": time.perf_counter() - t0}
+            "n_bundles_selected": len(bundle_receipts),
+            "n_bundles_docked": len({a.get("bundle_id") for a in take}),
+            "bundle_scopes": sorted(
+                {round(receipt["r_release"], 2) for receipt in bundle_receipts}
+            ),
+            "options_selected": dict(sorted(options_selected.items())),
+            "options_docked": dict(sorted(options_docked.items())),
+            "candidates_by_option": dict(sorted(candidates_by_option.items())),
+            "candidate_option_diagnostics": option_diagnostics(pool),
+            "docked_option_diagnostics": option_diagnostics(take),
+            "bundles": bundle_receipts,
+            "docked": [
+                {
+                    "smi": a["smiles"],
+                    "ds": ds,
+                    "surrogate_score": pred.get(a["smiles"]),
+                    "bundle_id": a.get("bundle_id"),
+                    "origin_bundle_ids": a.get("origin_bundle_ids"),
+                    "origin_options": a.get("origin_options"),
+                    "parent_lineage_id": a.get("parent_lineage_id"),
+                    "option": a.get("option"),
+                    "option_phase": a.get("option_phase"),
+                    "program_complete": a.get("program_complete"),
+                    "r_release": a["r_release"],
+                    "r_change": a.get("r_change"),
+                    "r_coherent": a.get("r_coherent"),
+                    "d_rings": a.get("d_ring_systems"),
+                    "d_cycle_rank": a.get("d_cycle_rank"),
+                    "d_heavy": a.get("d_heavy"),
+                    "element_delta": a.get("element_delta"),
+                    "added_backbone_atoms": a.get("added_backbone_atoms"),
+                    "added_terminal_halogen": a.get("added_terminal_halogen"),
+                    "added_sulfur": a.get("added_sulfur"),
+                    "step": a.get("step"),
+                    "interface": a["interface"],
+                    "qed": a.get("qed"),
+                    "sa": a.get("sa"),
+                    "sim": a.get("sim"),
+                }
+                for a, ds in zip(take, scores)
+            ],
+        })
+        res = {
+            "schema_version": "t4_three_level_option_audit_v1",
+            "session": task.get("session"),
+            "cell": task["cell"],
+            "arm": arm,
+            "target": target,
+            "delta": delta,
+            "seed": seed,
+            "seed_props": p0,
+            "n_dock": n_dock,
+            "n_feasible": len(feas),
+            "n_docking_failures": sum(
+                int(round_record.get("n_docking_failures", 0))
+                for round_record in rounds_log
+            ),
+            "best_ds": best["ds"] if best else None,
+            "best_smiles": best["smiles"] if best else None,
+            "rounds": rounds_log,
+            "complete": n_dock >= budget,
+            "sec": time.perf_counter() - t0,
+            "controller": {
+                "factorization": "Q(M|x,z) -> Q(o|x,M,z) -> q(w|x,M,o)",
+                "region_prior": "mu_exec" if value_fn is None else "mu_exec_exp_V",
+                "region_value_identity": "none" if value_fn is None else "task_value",
+                "kappa": kappa,
+                "epsilon_primitive": float(task.get("epsilon", 0.1)),
+                "epsilon_region": eps_region,
+                "epsilon_option": eps_option,
+                "macro_temperature": macro_temperature,
+                "epsilon_macro": eps_macro,
+                "options": list(OPTIONS),
+                "option_groups": {
+                    group: list(options) for group, options in OPTION_GROUPS.items()
+                },
+                "generic_permanently_active": True,
+                "compound_program": BUILD_RING_SYSTEM_OPTION,
+                "ordinary_macro_horizon": 1,
+                "generic_horizon": int(task.get("max_handoff", 16)),
+                "build_ring_system_horizon": 11,
+                "max_active_atoms": MAX_ACTIVE_ATOMS,
+                "persistent_slots": CANONICAL_SLOTS,
+                "lineages": n_lineages,
+                "per_round": per_round,
+                "regions_per_lineage": regions_per_lineage,
+                "particles_per_region": particles_per_region,
+                "max_frontier_per_bundle": int(task.get("max_frontier", 8)),
+                "emit_per_bundle": int(task.get("emit_per_bundle", 3)),
+            },
+            "provenance": {
+                "code_revision": task.get("code_revision"),
+                "seed_manifest_sha256": task.get("seed_manifest_sha256"),
+                "input_sha256": input_hashes,
+                "r_theta_run_root": RUN_ROOT,
+                "committor_path": committor_path,
+                "seed_rng": int(task["seed_rng"]),
+                "started_at_utc": started_at,
+                "updated_at_utc": datetime.now(timezone.utc).isoformat(),
+                "python": platform.python_version(),
+                "numpy": np.__version__,
+                "torch": torch.__version__,
+                "hardware": "Modal CPU",
+                "precision": "float32 committor; float64 probability arrays",
+            },
+        }
         d = Path(POP_OUT); d.mkdir(parents=True, exist_ok=True)
-        (d / f"{task['cell']}.json").write_text(json.dumps(res))
+        output_path = d / f"{task['cell']}.json"
+        temporary_path = d / f".{task['cell']}.json.tmp"
+        temporary_path.write_text(json.dumps(res, sort_keys=True))
+        temporary_path.replace(output_path)
         artifact_volume.commit()
         print(f"[t4pop] {task['cell']} r{rd} dock={n_dock}/{budget} "
               f"cand={len(cands)} best={best['ds'] if best else None} "
@@ -1074,7 +1683,6 @@ def ring_admissibility_probe(task: dict[str, Any]) -> dict[str, Any]:
     smi = task["smiles"]
     raw = smiles_to_molecular_graph(smi)
     st0 = pad_molecular_graph(raw, CANONICAL_SLOTS)
-    n_real = len(raw.atom_types)
     law = enumerate_factorized_marked_law(model, st0, float(TIME_POINT))
     fams = [m.executor_rule_name for m in law.marks]
     acts = [m.action for m in law.marks]
@@ -1090,8 +1698,7 @@ def ring_admissibility_probe(task: dict[str, Any]) -> dict[str, Any]:
     admit = Counter(); reject = defaultdict(Counter)
     for reg in regions[: int(task.get("n_regions", 40))]:
         ctx = RR.context_from_region(reg)
-        lin0 = RR.Lineage.initial(range(n_real))
-        idx, why = RR.admissible_indices(fams, acts, ctx)
+        idx, _why = RR.admissible_indices(fams, acts, ctx)
         ok_f = Counter(fams[j] for j in idx)
         for f, c in ok_f.items():
             admit[f] += c

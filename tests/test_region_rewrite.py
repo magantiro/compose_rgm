@@ -756,6 +756,26 @@ def test_region_selector_scale_balance_prevents_small_region_flood():
     assert unbalanced[0][1].score >= ranked[0][1].score
 
 
+def test_sample_region_receipt_records_the_actual_normalized_q_probability():
+    """A bundle must record Q(M), not only an unnormalized region score."""
+    from types import SimpleNamespace
+
+    import numpy as np
+
+    from compose_v4.control.region_selector import sample_region
+
+    regions = [
+        SimpleNamespace(interface="pendant", size=2, released_fraction=0.1),
+        SimpleNamespace(interface="segment", size=8, released_fraction=0.4),
+        SimpleNamespace(interface="multi", size=16, released_fraction=0.8),
+    ]
+    _region, receipt = sample_region(regions, np.random.default_rng(4), epsilon=0.2)
+    assert receipt.selection_probability is not None
+    assert 0.0 < receipt.selection_probability < 1.0
+    assert receipt.base_probability is not None
+    assert receipt.floor_probability is not None
+
+
 def test_task_value_winsorises_a_single_lucky_rewrite():
     """One outlier must not set the value of a whole region class.
 

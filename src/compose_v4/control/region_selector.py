@@ -39,7 +39,7 @@ point it.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 # Measured on the 2026-09-02 gate: successes / attempts.
 _INTERFACE = {
@@ -48,13 +48,23 @@ _INTERFACE = {
     "multi": (11, 56),
     "splitting": (1, 91),
 }
-_SIZE_BUCKETS = ((1, 3, 15, 27), (4, 6, 4, 22), (7, 10, 7, 36),
-                 (11, 20, 24, 76), (21, 10 ** 6, 30, 78))
+_SIZE_BUCKETS = (
+    (1, 3, 15, 27),
+    (4, 6, 4, 22),
+    (7, 10, 7, 36),
+    (11, 20, 24, 76),
+    (21, 10**6, 30, 78),
+)
 # Median wall-clock seconds for one attempt, by released fraction.
-_COST_BANDS = ((0.0, 0.2, 60.0), (0.2, 0.4, 108.0), (0.4, 0.6, 190.0),
-               (0.6, 0.8, 256.0), (0.8, 1.01, 448.0))
+_COST_BANDS = (
+    (0.0, 0.2, 60.0),
+    (0.2, 0.4, 108.0),
+    (0.4, 0.6, 190.0),
+    (0.6, 0.8, 256.0),
+    (0.8, 1.01, 448.0),
+)
 _GLOBAL = (80, 239)
-_PRIOR_STRENGTH = 8.0        # pseudo-counts pulling a cell toward its backoff
+_PRIOR_STRENGTH = 8.0  # pseudo-counts pulling a cell toward its backoff
 
 
 def _smoothed(hits: int, n: int, backoff: float, strength: float = _PRIOR_STRENGTH) -> float:
@@ -108,6 +118,12 @@ class RegionScore:
     interface: str
     size: int
     released_fraction: float
+    # Populated by sample_region.  Keeping the normalized probabilities on the
+    # receipt makes a selected (parent, region, option) bundle auditable without
+    # changing the rank_regions public contract.
+    base_probability: float | None = None
+    floor_probability: float | None = None
+    selection_probability: float | None = None
 
 
 def score_region(region, value: float = 0.0, tau: float = 1.0) -> RegionScore:
@@ -117,18 +133,24 @@ def score_region(region, value: float = 0.0, tau: float = 1.0) -> RegionScore:
     exp(0) = 1, leaving the task-independent prior untouched.
     """
     import math
+
     f = feasibility(region.interface, region.size)
     c = cost_seconds(region.released_fraction)
     mu = f / c
     tilt = math.exp(float(value) / max(1e-9, float(tau)))
-    return RegionScore(feasibility=f, value=float(value), cost_s=c, mu_exec=mu,
-                       score=mu * tilt, interface=region.interface,
-                       size=int(region.size),
-                       released_fraction=float(region.released_fraction))
+    return RegionScore(
+        feasibility=f,
+        value=float(value),
+        cost_s=c,
+        mu_exec=mu,
+        score=mu * tilt,
+        interface=region.interface,
+        size=int(region.size),
+        released_fraction=float(region.released_fraction),
+    )
 
 
-def rank_regions(regions, value_fn=None, scale_balance: bool = True,
-                 tau: float = 1.0):
+def rank_regions(regions, value_fn=None, scale_balance: bool = True, tau: float = 1.0):
     """Rank regions by mu_exec, or by Q when a task value is supplied.
 
     `scale_balance` divides by how many regions share a scope band. Without it
@@ -136,10 +158,10 @@ def rank_regions(regions, value_fn=None, scale_balance: bool = True,
     because enumeration produces far more of them, so an unbalanced ranking
     reports the shape of the enumerator rather than a decision.
     """
-    scored = [(r, score_region(r, 0.0 if value_fn is None else value_fn(r), tau))
-              for r in regions]
+    scored = [(r, score_region(r, 0.0 if value_fn is None else value_fn(r), tau)) for r in regions]
     if scale_balance:
         from collections import Counter
+
         band = lambda r: min(int(r.released_fraction * 5), 4)
         counts = Counter(band(r) for r, _ in scored)
         for r, s in scored:
@@ -147,8 +169,9 @@ def rank_regions(regions, value_fn=None, scale_balance: bool = True,
     return sorted(scored, key=lambda rs: -rs[1].score)
 
 
-def sample_region(regions, rng, value_fn=None, tau: float = 1.0,
-                  epsilon: float = 0.2, scale_balance: bool = True):
+def sample_region(
+    regions, rng, value_fn=None, tau: float = 1.0, epsilon: float = 0.2, scale_balance: bool = True
+):
     """Sample a region from Q, mixed with a scale-balanced exploration floor.
 
         Q = (1 - epsilon) Q_learned + epsilon mu_scale_balanced
@@ -162,16 +185,17 @@ def sample_region(regions, rng, value_fn=None, tau: float = 1.0,
     structural scale keeps a share of the budget.
     """
     import numpy as np
+
     if not regions:
         return None, None
-    ranked = rank_regions(regions, value_fn=value_fn, tau=tau,
-                          scale_balance=scale_balance)
+    ranked = rank_regions(regions, value_fn=value_fn, tau=tau, scale_balance=scale_balance)
     regs = [r for r, _ in ranked]
     q = np.array([s.score for _, s in ranked], float)
     q = q / q.sum() if q.sum() > 0 else np.full(len(q), 1.0 / len(q))
 
     band = lambda r: min(int(r.released_fraction * 5), 4)
     from collections import Counter
+
     counts = Counter(band(r) for r in regs)
     nb = len(counts)
     # uniform over scale bands first, then uniform within a band: an unweighted
@@ -180,5 +204,10 @@ def sample_region(regions, rng, value_fn=None, tau: float = 1.0,
     floor = floor / floor.sum()
 
     mix = (1.0 - epsilon) * q + epsilon * floor
-    i = int(rng.choice(len(regs), p=mix / mix.sum()))
+    mix = mix / mix.sum()
+    for j, (_region, score) in enumerate(ranked):
+        score.base_probability = float(q[j])
+        score.floor_probability = float(floor[j])
+        score.selection_probability = float(mix[j])
+    i = int(rng.choice(len(regs), p=mix))
     return regs[i], ranked[i][1]
