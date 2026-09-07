@@ -1,0 +1,73 @@
+{
+  "schema_version": "t4_three_level_launch_plan_v1",
+  "session": "compose_iclr",
+  "recorded_at": "2026-09-06",
+  "scientific_implementation_revision": "c360d09dc00db974d6915e22c6baaff9a0d1d596",
+  "operational_stop_limit_revision": "c0f793a",
+  "exact_launch_revision_source": "the clean HEAD recorded by tools/t4_launch.py",
+  "task_census": {
+    "cells": 1,
+    "target": "parp1",
+    "seed_index": 0,
+    "delta": 0.4,
+    "oracle_calls": 20,
+    "rounds": 1
+  },
+  "concurrency": {
+    "modal_cells": 1,
+    "cpu_cores_per_cell": 8,
+    "memory_gib_per_cell": 24,
+    "proposal_threads": 8,
+    "simultaneous_docking_workers": 8,
+    "gpu_count": 0
+  },
+  "bounded_search": {
+    "lineages": 8,
+    "region_draws_per_lineage": 3,
+    "particles_per_draw": 4,
+    "max_frontier_per_bundle": 8,
+    "max_emitted_per_bundle": 3,
+    "generic_horizon": 16,
+    "ordinary_macro_horizon": 1,
+    "build_ring_system_horizon": 11
+  },
+  "representative_prior_measurements": [
+    {
+      "setting": "old shared-frontier round 1 with one lineage",
+      "candidates": 4816,
+      "proposal_seconds": 379
+    },
+    {
+      "setting": "old shared-frontier round 2 with eight lineages and frontier 64",
+      "candidates": 55038,
+      "proposal_seconds": 4991
+    }
+  ],
+  "expectation": {
+    "wall_time_minutes": [
+      10,
+      30
+    ],
+    "cpu_core_hours": [
+      1.3,
+      4.0
+    ],
+    "basis": "sampled-state harvesting, one-step ordinary macros, and at most three emitted representatives per bundle; applicability scans add uncertainty",
+    "dollar_cost": "not estimated because no current account-specific Modal rate was verified"
+  },
+  "stop_and_recovery": {
+    "cell_timeout_minutes": 120,
+    "automatic_retries": 0,
+    "hard_cpu_core_hour_exposure": 16,
+    "restart_unit": "the single parp1 seed-0 delta-0.4 cell",
+    "persistence": "one atomic result after the complete audited round",
+    "on_failure": "inspect the call and logs before any explicit relaunch"
+  },
+  "remote_inventory": {
+    "t4_app_tasks_before_deploy": 0,
+    "output_collision_found": false,
+    "planned_cell": "compose_iclr_macro_prior_parp1_0_d0.4",
+    "volume": "compose-v4-artifacts",
+    "volume_path": "/t4_population/compose_iclr_macro_prior_parp1_0_d0.4.json"
+  }
+}
