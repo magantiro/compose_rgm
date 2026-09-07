@@ -1,0 +1,524 @@
+{
+  "code_revision": "2352c33a7e4dcde2ab0077acd6ba299b2d86a710",
+  "configuration": {
+    "additional_oracle_calls": 0,
+    "cell": "compose_iclr_macro_prior_parp1_0_d0.4",
+    "comparison_selection": "audit best feasible vs all five existing snapshot winners",
+    "exclusions": [],
+    "fingerprint": {
+      "bits": 2048,
+      "radius": 2
+    },
+    "precision": "integer topology counts; float64 descriptors",
+    "qed_min": 0.6,
+    "randomness": "none in structural analysis; 2D depiction is illustrative",
+    "sa_max": 4.0,
+    "similarity_min": 0.4,
+    "source_csv_row_count": 2617
+  },
+  "evidence_role": "development-only endpoint analysis; no causal intervention",
+  "hardware": "arm64",
+  "historical_mcts_inventory": {
+    "budgets": [
+      100
+    ],
+    "completed_bo_runs_in_local_tournament": 0,
+    "interpretation": "existence evidence only; not used to rank search algorithms",
+    "run_count": 12,
+    "runs_with_ledger_call_mismatch": 11,
+    "task_count": 6
+  },
+  "input_sha256": {
+    "diagnostics/ivg_molecules/docking_parp1_idx0_thr4.csv": "52d7df3662bed8b76032114dd839dc000932353b82a0ab1697da5796bd0f4fac",
+    "diagnostics/ivg_winners.json": "26253656d62c1ea4c45042b668a928358e6f3acf9a93b4317bd025daaac98f43",
+    "diagnostics/pmo_bo_tournament.json": "3beb97b9fa022558878cf8f2f19487b794a7a87f81d38dd874554146bd37d228",
+    "diagnostics/pmo_puct_tournament.json": "df43cfb5fd432aab34679f9e30718baa196d6fdcd7848d9b760886bb651bf3c4",
+    "diagnostics/t4_oracle_calibration.json": "61d4552aa69cd5cfc6e28b7842169206f055e661a913d56e9cddb2b4e5245c37",
+    "diagnostics/t4_three_level_option_audit.json": "225c8bbb998544dca0818fdfefd879652216ce7848a5b060db689b932f92c1df",
+    "modal_apps/genmol_t4_opt_app.py": "b47d663794dbba2e24d61ff880f793286b5c4b1c87841d5baa500ecf6d40552c",
+    "modal_apps/pmo_control_app.py": "c479039d8830f38e95a9aeb082dcd78c9dee6684090339f30f42b70c6f03e1fb",
+    "src/compose_v4/control/macro_engine.py": "90ba2427af76710398f991ae1938306c481d09b76a0536b4b5193bd2ab9f3977",
+    "src/compose_v4/eval/ring_taxonomy.py": "cd3ca3b265f9009d558be2c9c62fd18a49991cb51ac7604f5c1f60fe320fb2b2",
+    "tools/t4_compare_winners.py": "245aa49c03b85c998bac86de05fcca601db755226e1066085d58170c0cb55d29"
+  },
+  "limitations": [
+    "The existing winner snapshot is not the three-run paper aggregate.",
+    "Source CSV identity is hashed locally; upstream revision/license lineage is not embedded in the historical snapshot.",
+    "Historical redocking lacks the current audit's full input-hash provenance; scores are reported context only.",
+    "Ring fragments are descriptive views, not proposals or executor paths.",
+    "Endpoints do not establish reachability, a valid path, causal docking improvement, or pose contacts.",
+    "The inspected cell is development evidence; final generalization needs a separate untouched panel."
+  ],
+  "records": [
+    {
+      "id": "seed",
+      "score": null,
+      "smiles": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+      "structure": {
+        "aromatic_rings": 2,
+        "canonical_smiles": "CN(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+        "cycle_rank": 3,
+        "elements": {
+          "C": 15,
+          "N": 3,
+          "O": 1
+        },
+        "feasible": true,
+        "formal_charge": 0,
+        "heavy_atoms": 19,
+        "qed": 0.8879035012540928,
+        "ring_sizes": [
+          5,
+          6,
+          7
+        ],
+        "ring_system_count": 1,
+        "ring_systems": [
+          {
+            "ring_atoms": 14,
+            "ring_elements": {
+              "C": 12,
+              "N": 2
+            },
+            "ring_fragment_smiles": "C1NCc2ccccc2-n2cccc21",
+            "ring_sizes": [
+              5,
+              6,
+              7
+            ]
+          }
+        ],
+        "sa": 2.6092079178834915,
+        "similarity_to_seed": 1.0
+      }
+    },
+    {
+      "id": "compose_best_feasible",
+      "score": -8.9,
+      "smiles": "C=C1CCOC(O)C1N1Cc2cc(CN(C)C)ccc2-n2cccc2C1=O",
+      "structure": {
+        "aromatic_rings": 2,
+        "canonical_smiles": "C=C1CCOC(O)C1N1Cc2cc(CN(C)C)ccc2-n2cccc2C1=O",
+        "cycle_rank": 4,
+        "elements": {
+          "C": 21,
+          "N": 3,
+          "O": 3
+        },
+        "feasible": true,
+        "formal_charge": 0,
+        "heavy_atoms": 27,
+        "qed": 0.8449769012038228,
+        "ring_sizes": [
+          5,
+          6,
+          6,
+          7
+        ],
+        "ring_system_count": 2,
+        "ring_systems": [
+          {
+            "ring_atoms": 6,
+            "ring_elements": {
+              "C": 5,
+              "O": 1
+            },
+            "ring_fragment_smiles": "C1CCOCC1",
+            "ring_sizes": [
+              6
+            ]
+          },
+          {
+            "ring_atoms": 14,
+            "ring_elements": {
+              "C": 12,
+              "N": 2
+            },
+            "ring_fragment_smiles": "C1NCc2ccccc2-n2cccc21",
+            "ring_sizes": [
+              5,
+              6,
+              7
+            ]
+          }
+        ],
+        "sa": 3.951201140437716,
+        "similarity_to_seed": 0.47761194029850745
+      }
+    },
+    {
+      "historical_redock_scores": [
+        -13.5
+      ],
+      "id": "ivg_snapshot_1",
+      "reported_constraints": {
+        "qed": 0.651691156040468,
+        "sa": 3.780462301933037,
+        "sim": 0.42424242424242425
+      },
+      "score": -13.6,
+      "smiles": "O=C1NCc2cc(C3CCCC3Cc3ccc4c(c3)CNC(=O)c3cccn3C4=O)ccc21",
+      "source_csv_lines": [
+        2499
+      ],
+      "structure": {
+        "aromatic_rings": 3,
+        "canonical_smiles": "O=C1NCc2cc(C3CCCC3Cc3ccc4c(c3)CNC(=O)c3cccn3C4=O)ccc21",
+        "cycle_rank": 6,
+        "elements": {
+          "C": 27,
+          "N": 3,
+          "O": 3
+        },
+        "feasible": true,
+        "formal_charge": 0,
+        "heavy_atoms": 33,
+        "qed": 0.651691156040468,
+        "ring_sizes": [
+          5,
+          5,
+          5,
+          6,
+          6,
+          8
+        ],
+        "ring_system_count": 3,
+        "ring_systems": [
+          {
+            "ring_atoms": 5,
+            "ring_elements": {
+              "C": 5
+            },
+            "ring_fragment_smiles": "C1CCCC1",
+            "ring_sizes": [
+              5
+            ]
+          },
+          {
+            "ring_atoms": 9,
+            "ring_elements": {
+              "C": 8,
+              "N": 1
+            },
+            "ring_fragment_smiles": "C1NCc2ccccc21",
+            "ring_sizes": [
+              5,
+              6
+            ]
+          },
+          {
+            "ring_atoms": 15,
+            "ring_elements": {
+              "C": 13,
+              "N": 2
+            },
+            "ring_fragment_smiles": "C1NCc2ccccc2Cn2cccc21",
+            "ring_sizes": [
+              5,
+              6,
+              8
+            ]
+          }
+        ],
+        "sa": 3.780462301933037,
+        "similarity_to_seed": 0.42424242424242425
+      }
+    },
+    {
+      "historical_redock_scores": [
+        -13.7
+      ],
+      "id": "ivg_snapshot_2",
+      "reported_constraints": {
+        "qed": 0.7310885949557691,
+        "sa": 2.757300027433152,
+        "sim": 0.4745762711864407
+      },
+      "score": -13.6,
+      "smiles": "O=C1CCCc2cc(CCc3ccc4c(c3)CNC(=O)c3cccn3C4=O)ccc21",
+      "source_csv_lines": [
+        1622
+      ],
+      "structure": {
+        "aromatic_rings": 3,
+        "canonical_smiles": "O=C1CCCc2cc(CCc3ccc4c(c3)CNC(=O)c3cccn3C4=O)ccc21",
+        "cycle_rank": 5,
+        "elements": {
+          "C": 25,
+          "N": 2,
+          "O": 3
+        },
+        "feasible": true,
+        "formal_charge": 0,
+        "heavy_atoms": 30,
+        "qed": 0.7310885949557691,
+        "ring_sizes": [
+          5,
+          6,
+          6,
+          6,
+          8
+        ],
+        "ring_system_count": 2,
+        "ring_systems": [
+          {
+            "ring_atoms": 10,
+            "ring_elements": {
+              "C": 10
+            },
+            "ring_fragment_smiles": "C1CCCc2ccccc21",
+            "ring_sizes": [
+              6,
+              6
+            ]
+          },
+          {
+            "ring_atoms": 15,
+            "ring_elements": {
+              "C": 13,
+              "N": 2
+            },
+            "ring_fragment_smiles": "C1NCc2ccccc2Cn2cccc21",
+            "ring_sizes": [
+              5,
+              6,
+              8
+            ]
+          }
+        ],
+        "sa": 2.7573000274331516,
+        "similarity_to_seed": 0.4745762711864407
+      }
+    },
+    {
+      "historical_redock_scores": [
+        -13.2
+      ],
+      "id": "ivg_snapshot_3",
+      "reported_constraints": {
+        "qed": 0.6955070851990655,
+        "sa": 3.144091776203954,
+        "sim": 0.4590163934426229
+      },
+      "score": -13.5,
+      "smiles": "O=C1NCc2cc(CC3(c4ccc5c(c4)CNC(=O)c4cccn4C5=O)CC3)ccc21",
+      "source_csv_lines": [
+        455
+      ],
+      "structure": {
+        "aromatic_rings": 3,
+        "canonical_smiles": "O=C1NCc2cc(CC3(c4ccc5c(c4)CNC(=O)c4cccn4C5=O)CC3)ccc21",
+        "cycle_rank": 6,
+        "elements": {
+          "C": 25,
+          "N": 3,
+          "O": 3
+        },
+        "feasible": true,
+        "formal_charge": 0,
+        "heavy_atoms": 31,
+        "qed": 0.6955070851990655,
+        "ring_sizes": [
+          3,
+          5,
+          5,
+          6,
+          6,
+          8
+        ],
+        "ring_system_count": 3,
+        "ring_systems": [
+          {
+            "ring_atoms": 3,
+            "ring_elements": {
+              "C": 3
+            },
+            "ring_fragment_smiles": "C1CC1",
+            "ring_sizes": [
+              3
+            ]
+          },
+          {
+            "ring_atoms": 9,
+            "ring_elements": {
+              "C": 8,
+              "N": 1
+            },
+            "ring_fragment_smiles": "C1NCc2ccccc21",
+            "ring_sizes": [
+              5,
+              6
+            ]
+          },
+          {
+            "ring_atoms": 15,
+            "ring_elements": {
+              "C": 13,
+              "N": 2
+            },
+            "ring_fragment_smiles": "C1NCc2ccccc2Cn2cccc21",
+            "ring_sizes": [
+              5,
+              6,
+              8
+            ]
+          }
+        ],
+        "sa": 3.144091776203954,
+        "similarity_to_seed": 0.45901639344262296
+      }
+    },
+    {
+      "historical_redock_scores": [
+        -13.4
+      ],
+      "id": "ivg_snapshot_4",
+      "reported_constraints": {
+        "qed": 0.7082877620534909,
+        "sa": 3.094322383377829,
+        "sim": 0.4833333333333333
+      },
+      "score": -13.5,
+      "smiles": "O=C1CCCc2cc(CCc3ccc4c(c3)CCCNC(=O)c3cccn3-4)ccc21",
+      "source_csv_lines": [
+        1802
+      ],
+      "structure": {
+        "aromatic_rings": 3,
+        "canonical_smiles": "O=C1CCCc2cc(CCc3ccc4c(c3)CCCNC(=O)c3cccn3-4)ccc21",
+        "cycle_rank": 5,
+        "elements": {
+          "C": 26,
+          "N": 2,
+          "O": 2
+        },
+        "feasible": true,
+        "formal_charge": 0,
+        "heavy_atoms": 30,
+        "qed": 0.7082877620534909,
+        "ring_sizes": [
+          5,
+          6,
+          6,
+          6,
+          9
+        ],
+        "ring_system_count": 2,
+        "ring_systems": [
+          {
+            "ring_atoms": 10,
+            "ring_elements": {
+              "C": 10
+            },
+            "ring_fragment_smiles": "C1CCCc2ccccc21",
+            "ring_sizes": [
+              6,
+              6
+            ]
+          },
+          {
+            "ring_atoms": 16,
+            "ring_elements": {
+              "C": 14,
+              "N": 2
+            },
+            "ring_fragment_smiles": "C1NCCCc2ccccc2-n2cccc21",
+            "ring_sizes": [
+              5,
+              6,
+              9
+            ]
+          }
+        ],
+        "sa": 3.094322383377829,
+        "similarity_to_seed": 0.48333333333333334
+      }
+    },
+    {
+      "historical_redock_scores": [
+        -12.7
+      ],
+      "id": "ivg_snapshot_5",
+      "reported_constraints": {
+        "qed": 0.6561767552797705,
+        "sa": 3.5043777701636323,
+        "sim": 0.417910447761194
+      },
+      "score": -13.4,
+      "smiles": "O=C1NCc2cc(N3CCCC3Cc3ccc4c(c3)CNC(=O)c3cccn3C4=O)ccc21",
+      "source_csv_lines": [
+        756
+      ],
+      "structure": {
+        "aromatic_rings": 3,
+        "canonical_smiles": "O=C1NCc2cc(N3CCCC3Cc3ccc4c(c3)CNC(=O)c3cccn3C4=O)ccc21",
+        "cycle_rank": 6,
+        "elements": {
+          "C": 26,
+          "N": 4,
+          "O": 3
+        },
+        "feasible": true,
+        "formal_charge": 0,
+        "heavy_atoms": 33,
+        "qed": 0.6561767552797705,
+        "ring_sizes": [
+          5,
+          5,
+          5,
+          6,
+          6,
+          8
+        ],
+        "ring_system_count": 3,
+        "ring_systems": [
+          {
+            "ring_atoms": 5,
+            "ring_elements": {
+              "C": 4,
+              "N": 1
+            },
+            "ring_fragment_smiles": "C1CCNC1",
+            "ring_sizes": [
+              5
+            ]
+          },
+          {
+            "ring_atoms": 9,
+            "ring_elements": {
+              "C": 8,
+              "N": 1
+            },
+            "ring_fragment_smiles": "C1NCc2ccccc21",
+            "ring_sizes": [
+              5,
+              6
+            ]
+          },
+          {
+            "ring_atoms": 15,
+            "ring_elements": {
+              "C": 13,
+              "N": 2
+            },
+            "ring_fragment_smiles": "C1NCc2ccccc2Cn2cccc21",
+            "ring_sizes": [
+              5,
+              6,
+              8
+            ]
+          }
+        ],
+        "sa": 3.5043777701636323,
+        "similarity_to_seed": 0.417910447761194
+      }
+    }
+  ],
+  "sa_score_data_sha256": "10dcef9340c873e7b987924461b0af5365eb8dd96be607203debe8ddf80c1e73",
+  "schema_version": "t4_winner_structural_comparison_v1",
+  "software": {
+    "numpy": "2.5.3",
+    "python": "3.12.9",
+    "rdkit": "2026.03.6"
+  }
+}
