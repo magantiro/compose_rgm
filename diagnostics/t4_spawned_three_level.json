@@ -1,0 +1,16 @@
+{
+  "budget": 20,
+  "cells": [
+    {
+      "call": "fc-01M1WZ669CN5GB29R8DJPQ1DQR",
+      "cell": "compose_iclr_macro_prior_parp1_0_d0.4"
+    }
+  ],
+  "code_revision": "e46f37c81d1e425f8a5d51487a9f42c50e16b961",
+  "epsilon_macro": 0.15,
+  "epsilon_option": 0.1,
+  "macro_temperature": 2.0,
+  "schema_version": "t4_three_level_spawn_v1",
+  "seed_manifest_sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+  "session": "compose_iclr"
+}
