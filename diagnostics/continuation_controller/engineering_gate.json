@@ -1,0 +1,254 @@
+{
+  "code_revision": "644a4bf2648b40f5af7c93816bf2c627d16fbd8d",
+  "configuration": {
+    "device": "cpu",
+    "exclusions": [],
+    "exploration": 0.1,
+    "external_oracle_calls": 0,
+    "horizon": 2,
+    "kappa": 1.0,
+    "max_executor_applications": 64,
+    "max_expansions": 32,
+    "max_terminal_evaluations": 32,
+    "objective": "cycle rank >= 1 at complete two-step endpoint",
+    "persistent_slots": 6,
+    "precision": "float64 probability arrays",
+    "reference_law": "hand-declared two-branch fixture, not R_theta",
+    "seed": 0,
+    "seed_derivation": "literal fixed fixture seed",
+    "source_count": 1,
+    "split": "synthetic engineering-only, not part of train/calibration/final panels",
+    "trained_models": [],
+    "winner_inputs": [],
+    "workers": 1
+  },
+  "evidence_role": "computed engineering fixture, not a learned-model benchmark",
+  "hardware": "arm64",
+  "input_sha256": {
+    "docs/CONTINUATION_CONTROLLER_IMPLEMENTATION.md": "0f109b722d3305b2d49fae9f3d8bbae7f0c1b5751195756f3b1f57a87e5cbebf",
+    "src/compose_v4/chem/molecular_graph.py": "d33725fd64b63a1c7cd9095e9828f65ad19db8d729e79183f49c9473ea65c4fc",
+    "src/compose_v4/chem/state.py": "4aa1acc257b053a562969ad8cc9b62fd84ce2931b04f1890f1c242888a3cecf5",
+    "src/compose_v4/control/continuation.py": "38dc27cdb6580d7e5932ec227860e700ca23f9ea269ce9970eb858b2b7db9cb7",
+    "src/compose_v4/control/macro_engine.py": "90ba2427af76710398f991ae1938306c481d09b76a0536b4b5193bd2ab9f3977",
+    "src/compose_v4/control/option_continuation.py": "5cbb3aac462a0c945014cc2bfa345c5068a1e131e792c114a0e52c0cd2228135",
+    "src/compose_v4/control/option_selector.py": "6d117d59343210cf81b6c8f959d78250c5d9a6edb92f1eecab0f040b56ef64ed",
+    "src/compose_v4/control/region_rewrite.py": "c04206b7dfd12198d2c96d09ea9ba0cad5a930dc7c49f26ed6462eeae0216bd7",
+    "src/compose_v4/data/charge_policy.py": "e4fbb52ba8779883b58789afd0a72f2bce426e622b7110101d1fc14cdfb378b2",
+    "src/compose_v4/experiments/continuation_gate.py": "316f6a054c64acf1b7514faba1ee330a1440a60292f611a8d414c47e91fc5216",
+    "src/compose_v4/gates/med_chem_gate.py": "415d5eaedaca77f13252cdc08385c2df7078d1221850e66616699b66cf75b20e",
+    "src/compose_v4/rewrite/kernel.py": "4066addeead48375fd0a8ec76eb52470376ec7ddb35c528f5a07df4828b3bce6",
+    "src/compose_v4/rewrite/operators.py": "b723788494a98cb0a7373101862f871254fd0b933cdcc408dc4caa0a53226019",
+    "tests/test_continuation.py": "e5aa45258abb59a300d069fc976cc67bb5d39b8f715b685e0d5608a51c07d942",
+    "tests/test_option_continuation.py": "7ee2e944a826b07b32475d797c7198b2dedc695dadc7ca65b6f7ff10932c48b8"
+  },
+  "limitations": [
+    "The fixture deliberately isolates delayed credit and does not measure discovery coverage.",
+    "No frozen learned-model runtime was loaded; this timing cannot price T4.",
+    "The exact bounded solver is a reference, not a scalable MCTS implementation.",
+    "No docking-specific continuation estimator has been qualified or deployed."
+  ],
+  "result": {
+    "cache_fixture": {
+      "False": {
+        "value": 0.709096,
+        "work": {
+          "budget_abstentions": 0,
+          "edges": 62,
+          "expansions": 31,
+          "row_cache_hits": 0,
+          "terminal_evaluations": 32,
+          "value_cache_hits": 0
+        }
+      },
+      "True": {
+        "value": 0.709096,
+        "work": {
+          "budget_abstentions": 0,
+          "edges": 4,
+          "expansions": 2,
+          "row_cache_hits": 7,
+          "terminal_evaluations": 2,
+          "value_cache_hits": 8
+        }
+      }
+    },
+    "checks": {
+      "cached_uncached_value_parity": true,
+      "complete_executable_sample": true,
+      "exact_doob_normalized": true,
+      "future_guidance_crosses_plateau": true,
+      "future_values_match_declared_paths": true,
+      "kl_bound": true
+    },
+    "decision": {
+      "eta": 64.0,
+      "kl": 0.49463193721407284,
+      "probabilities": [
+        0.9500000000000001,
+        0.05
+      ],
+      "status": "guided",
+      "successor_values": [
+        1.0,
+        0.0
+      ]
+    },
+    "exact_source_state": {
+      "atom_types": [
+        2,
+        2,
+        2,
+        2,
+        0,
+        0
+      ],
+      "bonds": [
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "formal_charges": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "implicit_h_counts": [
+        3,
+        2,
+        2,
+        3,
+        0,
+        0
+      ]
+    },
+    "guided_success_probability": 0.9500000000000001,
+    "kernel_work_for_decision": {
+      "executor_applications": 4,
+      "law_enumerations": 3,
+      "legal_products": 4,
+      "rejected_products": 0,
+      "row_cache_hits": 0
+    },
+    "passed": true,
+    "reference_success_probability": 0.5,
+    "sampled_trace": {
+      "bundle_id": "engineering-ring-plateau-v1",
+      "conditional_path_logq": -0.05129329438755046,
+      "continuation_work": {
+        "budget_abstentions": 0,
+        "edges": 2,
+        "expansions": 2,
+        "row_cache_hits": 0,
+        "terminal_evaluations": 2,
+        "value_cache_hits": 1
+      },
+      "endpoint": "C1CCCC1",
+      "kernel_work": {
+        "executor_applications": 4,
+        "law_enumerations": 3,
+        "legal_products": 4,
+        "rejected_products": 0,
+        "row_cache_hits": 4
+      },
+      "option": "generic",
+      "seconds": 0.02468295898870565,
+      "status": "complete",
+      "trace": [
+        {
+          "action": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                3,
+                1
+              ]
+            ],
+            "slot": 4
+          },
+          "after": "CCCCC",
+          "before": "CCCC",
+          "decision_status": "guided",
+          "eta": 64.0,
+          "family": "atom_insert",
+          "kl": 0.49463193721407284,
+          "probability": 0.9500000000000001,
+          "reference_probability": 0.5,
+          "step": 1
+        },
+        {
+          "action": {
+            "a": 0,
+            "b": 4,
+            "order": 1
+          },
+          "after": "C1CCCC1",
+          "before": "CCCCC",
+          "decision_status": "guided",
+          "eta": 64.0,
+          "family": "bond_insert",
+          "kl": 0.0,
+          "probability": 1.0,
+          "reference_probability": 1.0,
+          "step": 2
+        }
+      ]
+    }
+  },
+  "schema_version": "continuation_engineering_gate_v1",
+  "seconds": 1.0595287500182167,
+  "software": {
+    "numpy": "2.5.3",
+    "python": "3.12.9",
+    "rdkit": "2026.03.6"
+  }
+}

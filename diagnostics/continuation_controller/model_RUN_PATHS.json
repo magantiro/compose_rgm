@@ -1,0 +1,17 @@
+{
+  "_comment": "Paths INSIDE the Modal container. The Active8 run and gate-zero decision must be the pair whose source_index_sha256 agree, or open_process_v2_t1_source refuses. Training reads collated rows from packed_store, never RDKit collation.",
+  "artifact_root": "/artifacts",
+  "active8_root": "/artifacts/editing_v2/process_v2_active8/8ecc0e5e825a15200560c58960d4f662c9ca23be785c825c9c24aa73308144bb",
+  "gate_zero": "/artifacts/editing_v2/process_v2_gate_zero_v6/bd4ac715f699c39c9012c3428475d13057bd7d3d18b2fb10ff716607633c4f2d/DECISION.json",
+  "corpus_roots": [
+    "/artifacts/editing_v2/r_theta_run/consolidated_train"
+  ],
+  "packed_store": "/artifacts/editing_v2/r_theta_run/packed_train_store",
+  "packed_panel_store": "/artifacts/editing_v2/r_theta_run/packed_panel_store",
+  "materialized_scorer": "/artifacts/editing_v2/r_theta_run/materialized_scorer",
+  "_gate_zero_note": "v6 is the decision whose source_index_sha256 matches the Active8 stream ON THE VOLUME. The locally generated v7 matches the LOCAL Active8 copy, which differs -- the corpus was compiled on Modal, so the volume's Active8 is authoritative here.",
+  "panel_corpus_roots": [
+    "/artifacts/editing_v2/r_theta_run/consolidated_panel"
+  ],
+  "_corpus_roots_note": "One gzipped JSON-lines object instead of 4,764 slice files. Verified to load identically: same 151,059 entries in the same order, zero differing fields, same 19 exclusions. Per-object latency on a network volume made the slice walk the longest part of container startup."
+}

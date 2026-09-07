@@ -1,0 +1,15 @@
+{
+  "access_basis": "existing internal project artifacts in the user workspace",
+  "checkpoint_expected_sha256": "c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8",
+  "checkpoint_listing_size": "83.7 MiB",
+  "checkpoint_rehashed": false,
+  "checkpoint_volume_path": "/editing_v2/r_theta_run/runs/run_v2_01/R_THETA_CHECKPOINT.pt",
+  "matches_audited_run_paths": true,
+  "new_oracle_calls": 0,
+  "new_scientific_jobs": 0,
+  "run_paths_sha256": "585286e0fb6dd8fb6b5a050dc3e5f8d1c7e782b105df114cbcb14cabbb5b2bc2",
+  "run_paths_volume_path": "/editing_v2/r_theta_run/run_inputs/RUN_PATHS.json",
+  "schema_version": "continuation_runtime_inventory_v1",
+  "volume": "compose-v4-artifacts",
+  "recorded_at_utc": "2026-09-07 05:28:46 UTC"
+}

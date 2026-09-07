@@ -1,0 +1,696 @@
+{
+  "base_revision": "e5f8147584db194e10d43a975d547a885ee861dd",
+  "implementation_commit": "644a4bf2648b",
+  "post_commit_checks": {
+    "engineering_gate": "all six checks passed",
+    "focused_ruff_check": "passed",
+    "focused_ruff_format_check": "six files already formatted",
+    "git_diff_check": "source patch passed; staged artifact check passes excluding byte-preserved raw pytest XML with traceback trailing whitespace",
+    "preflight_strict": "passed; zero source/configuration drift"
+  },
+  "command": "KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 .venv/bin/python -m pytest -q --junitxml=diagnostics/continuation_controller/full_suite.xml",
+  "failure_groups": {
+    "tests.test_aromatic_cycle_open_component_semantics": 1,
+    "tests.test_aromatic_cycle_open_global_oracle": 2,
+    "tests.test_benchmark_process_v2_active8_teacher_support": 7,
+    "tests.test_contextual_ring_restate_scorer": 4,
+    "tests.test_e6_a2_3_readiness": 5,
+    "tests.test_e6_graph_audit": 1,
+    "tests.test_editing_v2_process_v2_active8_bounded_reduction": 2,
+    "tests.test_editing_v2_process_v2_active8_fast_finalize": 5,
+    "tests.test_editing_v2_process_v2_active8_parallel_sentinel": 5,
+    "tests.test_editing_v2_process_v2_active8_pipeline": 38,
+    "tests.test_editing_v2_process_v2_active8_publication": 6,
+    "tests.test_editing_v2_process_v2_t1_panel": 3,
+    "tests.test_editing_v2_process_v2_t1_runtime": 12,
+    "tests.test_editing_v2_semantic_t1_capacity_runner": 1,
+    "tests.test_process_v2_p50_modal_surface": 1,
+    "tests.test_ring_core_identity_gate": 2,
+    "tests.test_ring_core_zero_mixture": 1,
+    "tests.test_ringcore_validation_panel_builder": 6,
+    "tests.test_semantic_active8_decision_modal_surface": 1,
+    "tests.test_slot_safety": 1
+  },
+  "failures": [
+    {
+      "class": "tests.test_aromatic_cycle_open_component_semantics",
+      "message": "AssertionError: assert 'ff77d6f5e1bd...ad9b361e2e77d' == 'ff944f225825...f2a6e370d9f01'\n  \n  - ff944f22582562fb02ee277b26b3ade5e595e89fed64d128029f2a6e370d9f01\n  + ff77d6f5e1bd8f2280b14c788cc0acfa4a62ef2131b6ad48571ad9b361e2e77d",
+      "name": "test_inspected_validation_overflow_source_is_resolved_without_censoring",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_aromatic_cycle_open_global_oracle",
+      "message": "AssertionError: assert 4 == 2\n +  where 4 = len((MolecularGraph(atom_types=array([2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2,\\n       2, 2, 2], d...  0, 0, 2],\\n       [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,\\n        0, 2, 0]], dtype=int32))))\n +    where (MolecularGraph(atom_types=array([2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2,\\n       2, 2, 2], d...  0, 0, 2],\\n       [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,\\n        0, 2, 0]], dtype=int32))) = KekuleAliasEnumeration(source_key='CC(C)(C)c1cc[n+](CCCCC[n+]2ccc(C(C)(C)C)cc2)cc1', aromatic_edges=((4, 5), (4, 24), ... 0, 0, 2],\\n       [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,\\n        0, 2, 0]], dtype=int32)))).aliases",
+      "name": "test_rdkit_supplier_is_incomplete_for_two_validation_mismatch_patterns[CC(C)(C)c1cc[n+](CCCCC[n+]2ccc(C(C)(C)C)cc2)cc1]",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_aromatic_cycle_open_global_oracle",
+      "message": "AssertionError: assert 4 == 2\n +  where 4 = len((MolecularGraph(atom_types=array([2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2,\\n       2, 2, 2, 2,...    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,\\n        0, 0, 0, 0, 0, 0, 2, 0]], dtype=int32))))\n +    where (MolecularGraph(atom_types=array([2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2,\\n       2, 2, 2, 2,...    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,\\n        0, 0, 0, 0, 0, 0, 2, 0]], dtype=int32))) = KekuleAliasEnumeration(source_key='CC(C)(C)c1cc[n+](CCCCCCCCCC[n+]2ccc(C(C)(C)C)cc2)cc1', aromatic_edges=((4, 5), (4, ...   [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,\\n        0, 0, 0, 0, 0, 0, 2, 0]], dtype=int32)))).aliases",
+      "name": "test_rdkit_supplier_is_incomplete_for_two_validation_mismatch_patterns[CC(C)(C)c1cc[n+](CCCCCCCCCC[n+]2ccc(C(C)(C)C)cc2)cc1]",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_benchmark_process_v2_active8_teacher_support",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_frozen_runtime_is_the_declared_production_shape",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_benchmark_process_v2_active8_teacher_support",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_jin_panel_has_two_real_teachers_per_family_at_40_slots",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_benchmark_process_v2_active8_teacher_support",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_panel_round_trip_refuses_a_resealed_authority_grant",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_benchmark_process_v2_active8_teacher_support",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_fast_and_slow_exact_common_evidence_match_on_frozen_jin_teacher",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_benchmark_process_v2_active8_teacher_support",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_direct_and_slow_admission_evidence_match_on_frozen_jin_teacher",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_benchmark_process_v2_active8_teacher_support",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_report_refuses_one_fast_evidence_mismatch",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_benchmark_process_v2_active8_teacher_support",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_report_carries_complete_false_authority_and_provenance",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_contextual_ring_restate_scorer",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_contextual_revision_is_one_zero_initialized_score_residual",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_contextual_ring_restate_scorer",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_context_separates_successors_with_equal_bond_descriptors",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_contextual_ring_restate_scorer",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_raw_aliases_share_one_canonical_group_context",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_contextual_ring_restate_scorer",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_context_feature_is_persistent_slot_relabel_equivariant",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_e6_a2_3_readiness",
+      "message": "compose_v4.experiments.e6_graph_audit.E6GraphAuditError: A2.2b artifact provenance does not match current sources",
+      "name": "test_audit_reports_exact_missing_decisions_without_solver",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_e6_a2_3_readiness",
+      "message": "compose_v4.experiments.e6_graph_audit.E6GraphAuditError: A2.2b artifact provenance does not match current sources",
+      "name": "test_e7_dynamic_horizon_is_not_imported",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_e6_a2_3_readiness",
+      "message": "compose_v4.experiments.e6_graph_audit.E6GraphAuditError: A2.2b artifact provenance does not match current sources",
+      "name": "test_named_tilt_families_are_not_misrepresented_as_g",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_e6_a2_3_readiness",
+      "message": "compose_v4.experiments.e6_graph_audit.E6GraphAuditError: A2.2b artifact provenance does not match current sources",
+      "name": "test_frozen_artifact_matches_current_inputs",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_e6_a2_3_readiness",
+      "message": "compose_v4.experiments.e6_graph_audit.E6GraphAuditError: A2.2b artifact provenance does not match current sources",
+      "name": "test_freeze_is_idempotent_but_never_overwrites",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_e6_graph_audit",
+      "message": "compose_v4.experiments.e6_graph_audit.E6GraphAuditError: A2.2b artifact provenance does not match current sources",
+      "name": "test_frozen_artifact_is_self_hashed_provenance_bound_and_green",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_bounded_reduction",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_interrupted_derivation_publishes_no_preparation",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_bounded_reduction",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_finalization_uses_a_fresh_shared_bounded_derivation",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_fast_finalize",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_fast_finalizer_is_byte_identical_without_replaying_reduction",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_fast_finalize",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_fast_finalizer_refuses_changed_task_payload_before_publication",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_fast_finalize",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_fast_finalizer_refuses_invalid_hash_concurrency[0]",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_fast_finalize",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_fast_finalizer_refuses_invalid_hash_concurrency[65]",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_fast_finalize",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_fast_finalizer_refuses_invalid_hash_concurrency[True]",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_parallel_sentinel",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_parallel_partitions_preserve_the_serial_final_bytes_and_restart",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_parallel_sentinel",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_partition_validation_and_reduction_refuse_inventory_mutations",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_parallel_sentinel",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_a_parallel_sentinel_mismatch_blocks_completion",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_parallel_sentinel",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_in_memory_partition_results_cannot_publish_completion",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_parallel_sentinel",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_changed_map_inventory_after_preparation_blocks_completion",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_active8_names_the_receipt_bound_payload_identity_when_decoding",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_release_sentinel_names_the_receipt_bound_payload_identity_when_decoding",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_the_published_layout_is_the_one_gate_zero_pins",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_every_published_shape_is_exactly_the_frozen_seam",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_the_stage_publishes_both_rejection_categories",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_supported_and_exclusion_reason_cross_the_seam",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_the_cell_and_the_raw_axes_travel_together",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_a_constant_classifier_does_not_move_admission",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_a_raising_classifier_still_publishes_the_admission_decision",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_a_resealed_row_whose_total_moved_is_refused",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_the_totals_equal_the_evidence_they_are_derived_from",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_the_reduction_is_independent_of_task_order",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_an_incomplete_reduction_publishes_nothing",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_a_restart_reuses_exact_outputs_and_refuses_a_corrupt_target",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_one_chunk_reports_progress_and_an_exact_restart_reuses_it",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_the_completion_is_published_only_after_the_sentinel_passes",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_the_sentinel_is_exhaustive_on_a_small_corpus_and_reports_the_seam_fields",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c",
+      "name": "test_a_resealed_false_state_identity_is_caught_by_the_sentinel",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_require_sentinel_passed_refuses_resealed_semantic_mutations",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_the_bounded_dictionary_oracle_agrees_with_the_reference_oracle",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_batched_teacher_support_matches_the_slow_full_quotient",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_batched_teacher_support_matches_all_genuine_cells_in_reversed_order",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_family_teacher_admission_matches_all_genuine_cells",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_family_teacher_admission_rejects_an_exact_successor_mismatch",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_family_teacher_admission_rejects_a_noncanonical_insert_slot",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_family_teacher_admission_reports_bounded_monotone_progress",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_batched_teacher_support_is_a_callable_checker",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_batched_teacher_support_reports_monotone_progress_without_changing_results",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_batched_teacher_support_refuses_nonzero_disabled_family_masks[ring_system_grow]",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_batched_teacher_support_refuses_nonzero_disabled_family_masks[ring_system_delete]",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_batched_teacher_support_never_builds_a_canonical_quotient",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_the_plan_is_one_task_per_source_chunk",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_the_plan_addresses_every_declared_input",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_the_plan_publishes_immutably_and_reopens_exactly",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_the_plan_refuses_an_existing_different_payload",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_a_moved_implementation_revision_refuses_the_plan",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_a_task_whose_chunk_binding_moved_cannot_read_its_chunk",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_pipeline",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_the_upstream_rejection_code_is_the_rebind_code",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_publication",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_an_identical_retry_never_replaces_the_committed_directory",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_publication",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_a_preexisting_legacy_staging_directory_is_never_deleted",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_publication",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_two_identical_concurrent_publishers_share_one_committed_winner",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_publication",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_a_valid_but_divergent_retry_is_an_immutable_collision",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_publication",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_an_invalid_existing_target_is_preserved_and_refused",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_active8_publication",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_a_symlinked_published_member_is_not_a_committed_task",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_t1_panel",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_a_resealed_gate_zero_fail_cannot_feed_t1",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_t1_panel",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_selected_address_reopens_the_exact_persistent_slot_states",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_t1_panel",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_a_panel_entry_with_a_stale_exact_state_hash_is_refused",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_t1_runtime",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_one_genuine_cached_transition_compiles_the_complete_successor_partition",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_t1_runtime",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_score_only_model_revision_reuses_active8_support_but_not_its_state",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_t1_runtime",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_score_revision_bridge_adds_only_contextual_ring_restate_capacity",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_t1_runtime",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_active8_support_geometry_change_blocks_t1_model_reconstruction",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_t1_runtime",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_prepared_plan_groups_panel_entries_by_existing_active8_chunk",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_t1_runtime",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_prepared_leaf_publication_is_restart_safe",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_t1_runtime",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_reduction_refuses_an_incomplete_leaf_inventory",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_t1_runtime",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_leaf_reuse_requires_the_exact_authorized_plan",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_t1_runtime",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_worker_authentication_refuses_changed_upstream_provenance",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_t1_runtime",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_a_resealed_wrong_teacher_key_is_refused",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_t1_runtime",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_publish_writes_nothing_when_a_planned_leaf_is_missing",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_process_v2_t1_runtime",
+      "message": "failed on setup with \"compose_v4.experiments.editing_gate_zero_runtime.EditingGateZeroRuntimeError: reconstructed production RingCore catalog fingerprint drifted: 82fd910cafe2eeb7 != 639ff6078c32d43c\"",
+      "name": "test_completion_reopens_without_chemistry",
+      "status": "error"
+    },
+    {
+      "class": "tests.test_editing_v2_semantic_t1_capacity_runner",
+      "message": "compose_v4.experiments.editing_v2_semantic_runtime.SemanticScratchRuntimeError: scratch RingCore catalog differs from the requested architecture",
+      "name": "test_full_partition_scorer_covers_exact_semantic_editing_v2_active8",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_process_v2_p50_modal_surface",
+      "message": "assert 0 == 2\n +  where 0 = <built-in method count of str object at 0xac0f50000>('_run_prep_work(work, output_root=output_root)')\n +    where <built-in method count of str object at 0xac0f50000> = '\"\"\"Prepare and run the bounded Process-V2 P50 pilot on Modal.\\n\\nThe launcher is intentionally thin.  Production modu...un_p50_gpu_remote\",\\n    \"scan_completed_remote\",\\n    \"scan_collated_remote\",\\n    \"train_driver\",\\n    \"train\",\\n]\\n'.count",
+      "name": "test_an_explicit_slice_list_replaces_the_derived_plan",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_ring_core_identity_gate",
+      "message": "ring_core_identity.RingCoreIdentityError: operator-registry hash d752a07e13c4de73 != frozen 9197401e8dc3a7ae; cycle-op semantic hash 3129435e5cc4a302 != frozen 27a823aeb6cf7548",
+      "name": "test_valid_ring_core_payload_passes",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_ring_core_identity_gate",
+      "message": "ring_core_identity.RingCoreIdentityError: operator-registry hash d752a07e13c4de73 != frozen 9197401e8dc3a7ae; cycle-op semantic hash 3129435e5cc4a302 != frozen 27a823aeb6cf7548",
+      "name": "test_declared_locked_scheduler_hash_passes_identity",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_ring_core_zero_mixture",
+      "message": "AssertionError: assert '9197401e8dc3a7ae' == 'd752a07e13c4de73'\n  \n  - d752a07e13c4de73\n  + 9197401e8dc3a7ae",
+      "name": "test_manifest_is_zero_mixture_ring_core",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_ringcore_validation_panel_builder",
+      "message": "AssertionError: assert 'c15eb7828c0d...63d615f3ec534' == '518465d7289e...b4320ba6d21b8'\n  \n  - 518465d7289ea8772ed32f40f52d31371508fa7c4b65bcf8a9bb4320ba6d21b8\n  + c15eb7828c0db0775f4ad32cf4e77ad0b1c5ed3777598bbc9a763d615f3ec534",
+      "name": "test_sampler_implementation_hash_matches_frozen_protocol",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_ringcore_validation_panel_builder",
+      "message": "compose_v4.experiments.ringcore_validation_panel.ValidationPanelError: panel sampler implementation changed after protocol freeze",
+      "name": "test_production_panel_is_deterministic_exact_addressed_prefix",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_ringcore_validation_panel_builder",
+      "message": "compose_v4.experiments.ringcore_validation_panel.ValidationPanelError: panel sampler implementation changed after protocol freeze",
+      "name": "test_expanded_panel_retains_the_exact_initial_prefix",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_ringcore_validation_panel_builder",
+      "message": "compose_v4.experiments.ringcore_validation_panel.ValidationPanelError: panel sampler implementation changed after protocol freeze",
+      "name": "test_forensics_panel_retains_exact_family_target_in_stream_order",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_ringcore_validation_panel_builder",
+      "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'path-length bins'\n  Actual message: 'panel sampler implementation changed after protocol freeze'",
+      "name": "test_builder_refuses_sampler_or_partition_drift",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_ringcore_validation_panel_builder",
+      "message": "compose_v4.experiments.ringcore_validation_panel.ValidationPanelError: panel sampler implementation changed after protocol freeze",
+      "name": "test_panel_build_identity_is_compact_and_hash_bound",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_semantic_active8_decision_modal_surface",
+      "message": "compose_v4.experiments.editing_v2_semantic_runtime.SemanticScratchRuntimeError: scratch RingCore catalog differs from the requested architecture",
+      "name": "test_exact_live_model_identity_binds_semantic_capabilities_seed_and_state",
+      "status": "failure"
+    },
+    {
+      "class": "tests.test_slot_safety",
+      "message": "AssertionError: new slot-unsafe occupancy test outside the enforced set:\n    modal_apps/experiment_b_exact_control_app.py:145\n    modal_apps/experiment_b_exact_control_app.py:170\n    modal_apps/experiment_c0_planning_signal_app.py:214\nassert not ['modal_apps/experiment_b_exact_control_app.py:145', 'modal_apps/experiment_b_exact_control_app.py:170', 'modal_apps/experiment_c0_planning_signal_app.py:214']",
+      "name": "test_the_rest_of_the_repo_does_not_regress",
+      "status": "failure"
+    }
+  ],
+  "focused_nonpassing": [],
+  "focused_total": 92,
+  "interpretation": "repository-wide verification is non-green; no new continuation tests failed; no unrelated repairs or gate relaxations made",
+  "junit_outcomes": {
+    "error": 58,
+    "failure": 46,
+    "passed": 4348,
+    "skipped": 3
+  },
+  "new_test_outcomes": {
+    "passed": 29
+  },
+  "raw_xml_sha256": "4702b5d4f75c65fb3a1026a37ea34f272c699c93a3e9632d5cd0791748b81166",
+  "reported_pytest_counts": {
+    "errors": 58,
+    "failed": 46,
+    "passed": 4348,
+    "seconds": 1883.74,
+    "skipped": 2,
+    "warnings": 6,
+    "xfailed": 1
+  },
+  "schema_version": "continuation_verification_v1",
+  "suite_attributes": [
+    {
+      "errors": "58",
+      "failures": "46",
+      "hostname": "BGS-STU23-147",
+      "name": "pytest",
+      "skipped": "3",
+      "tests": "4455",
+      "time": "1883.598",
+      "timestamp": "2026-09-07T01:13:49.722550-04:00"
+    }
+  ],
+  "tested_staged_patch_sha256": "9d14536229d41a73468ebe02ee300da85a7a2577f3777ce17dbc1499dd905083"
+}
