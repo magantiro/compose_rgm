@@ -23,6 +23,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from compose_v4.control.fused_option import BUILD_FUSED_RING_OPTION, FUSED_HORIZON
 from compose_v4.control.macro_engine import (
     BUILD_RING_SYSTEM,
     MACRO_FAMILIES,
@@ -51,6 +52,7 @@ MACRO_OPTIONS = (
     "shrink",
 )
 OPTIONS = (GENERIC_OPTION,) + MACRO_OPTIONS + (BUILD_RING_SYSTEM_OPTION,)
+OPT_IN_OPTIONS = (BUILD_FUSED_RING_OPTION,)
 
 # Balance purposes first and variants second.  This prevents, for example,
 # adding another ring topology from silently increasing total ring-option mass.
@@ -98,7 +100,7 @@ class ConditionedActionDistribution:
 def bundle_identity(parent: str, parent_lineage_id: int, region_key, option: str) -> str:
     """Stable identity for one distinct outer-controller search bundle."""
 
-    if option not in OPTIONS:
+    if option not in OPTIONS + OPT_IN_OPTIONS:
         raise KeyError(f"unknown option {option!r}; known: {OPTIONS}")
     payload = json.dumps(
         {
@@ -123,6 +125,8 @@ def primitive_option_at_step(option: str, step: int) -> str | None:
 
     if option == GENERIC_OPTION:
         return None
+    if option == BUILD_FUSED_RING_OPTION:
+        return "scaffold_extend" if step < 4 else "annulate" if step < FUSED_HORIZON else None
     if option == BUILD_RING_SYSTEM_OPTION:
         offset = int(step)
         for macro, length in BUILD_RING_SYSTEM:
@@ -145,6 +149,8 @@ def option_horizon(option: str, generic_horizon: int) -> int:
 
     if option == BUILD_RING_SYSTEM_OPTION:
         return sum(int(length) for _macro, length in BUILD_RING_SYSTEM)
+    if option == BUILD_FUSED_RING_OPTION:
+        return FUSED_HORIZON
     if option not in OPTIONS:
         raise KeyError(f"unknown option {option!r}; known: {OPTIONS}")
     return int(generic_horizon) if option == GENERIC_OPTION else 1
@@ -155,6 +161,7 @@ def applicable_options(
     admissible_indices,
     *,
     n_free_slots: int | None = None,
+    include_fused: bool = False,
 ) -> tuple[str, ...]:
     """Options with initial primitive support inside the selected region.
 
@@ -178,6 +185,14 @@ def applicable_options(
     enough_slots = n_free_slots is None or int(n_free_slots) >= int(first_length)
     if enough_slots and present.intersection(MACRO_FAMILIES[first_macro]):
         out.append(BUILD_RING_SYSTEM_OPTION)
+    # Necessary family/slot check only. Opt-in callers MUST also test the
+    # stateful kernel's first row through retain_product_applicable_options.
+    if (
+        include_fused
+        and (n_free_slots is None or int(n_free_slots) >= 4)
+        and present.intersection(MACRO_FAMILIES["scaffold_extend"])
+    ):
+        out.append(BUILD_FUSED_RING_OPTION)
     return tuple(out)
 
 
@@ -217,7 +232,11 @@ def balanced_option_prior(
         raise ValueError("applicable option set is empty; generic must be present")
     if len(opts) != len(set(opts)):
         raise ValueError(f"duplicate applicable options: {opts}")
-    unknown = [option for option in opts if option not in OPTION_GROUP_BY_NAME]
+    groups = OPTION_GROUPS
+    if BUILD_FUSED_RING_OPTION in opts:
+        groups = {**groups, "ring_topology": groups["ring_topology"] + OPT_IN_OPTIONS}
+    known = set(OPTIONS + OPT_IN_OPTIONS)
+    unknown = [option for option in opts if option not in known]
     if unknown:
         raise KeyError(f"unknown applicable options: {unknown}; known: {OPTIONS}")
     eps = float(exploration)
@@ -225,11 +244,11 @@ def balanced_option_prior(
         raise ValueError(f"exploration must lie in [0, 1], got {exploration}")
 
     represented = tuple(
-        group for group in OPTION_GROUPS if any(option in opts for option in OPTION_GROUPS[group])
+        group for group in groups if any(option in opts for option in groups[group])
     )
     base = np.zeros(len(opts), dtype=float)
     for group in represented:
-        members = [i for i, option in enumerate(opts) if option in OPTION_GROUPS[group]]
+        members = [i for i, option in enumerate(opts) if option in groups[group]]
         for i in members:
             base[i] = 1.0 / (len(represented) * len(members))
     floor = np.full(len(opts), 1.0 / len(opts), dtype=float)
@@ -270,6 +289,8 @@ def conditioned_action_distribution(
     macro-local contract before normalization.
     """
 
+    if option == BUILD_FUSED_RING_OPTION:
+        raise ValueError("build_fused_ring requires the stateful OptionContinuationKernel")
     fams = list(families)
     probs = np.asarray(probabilities, dtype=float)
     if probs.ndim != 1 or len(fams) != len(probs):

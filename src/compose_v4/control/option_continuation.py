@@ -17,9 +17,18 @@ import numpy as np
 from compose_v4.chem.molecular_graph import MolecularGraph, is_element
 from compose_v4.control.continuation import (
     ContinuationBudgetExceeded,
+    ContinuationWork,
+    ControlledDecision,
     FiniteHorizonContinuation,
     ReferenceRow,
     continuation_decision,
+)
+from compose_v4.control.fused_option import (
+    BUILD_FUSED_RING_OPTION,
+    FusedProgress,
+    completed_fused_cycle,
+    descriptor_indices,
+    eligible_fusion_edges,
 )
 from compose_v4.control.macro_engine import contract_for
 from compose_v4.control.option_selector import (
@@ -63,6 +72,7 @@ class OptionState:
     step: int
     horizon: int
     bundle_id: str
+    fused_progress: FusedProgress | None = None
 
     def __post_init__(self) -> None:
         if not self.bundle_id:
@@ -87,6 +97,14 @@ class OptionState:
             raise ValueError("lineage must identify every real atom slot exactly once")
         if self.lineage.next_id <= max(self.lineage.slot_of, default=-1):
             raise ValueError("lineage next_id must exceed every existing atom identity")
+        if self.option == BUILD_FUSED_RING_OPTION:
+            if not isinstance(self.fused_progress, FusedProgress):
+                raise ValueError("build_fused_ring requires explicit FusedProgress")
+            self.fused_progress.validate(self.graph, self.origin, self.context.locus, self.step)
+            if self.step == 0 and exact_graph_key(self.graph) != exact_graph_key(self.origin):
+                raise ValueError("fused program must start from its exact origin state")
+        elif self.fused_progress is not None:
+            raise ValueError("fused progress is only valid for build_fused_ring")
 
     @property
     def remaining(self) -> int:
@@ -94,7 +112,7 @@ class OptionState:
 
     def key(self) -> tuple:
         ctx, lin = self.context, self.lineage
-        return (
+        legacy = (
             self.bundle_id,
             exact_graph_key(self.graph),
             exact_graph_key(self.origin),
@@ -111,6 +129,8 @@ class OptionState:
             self.step,
             self.horizon,
         )
+        # Preserve every existing cache identity; only the opt-in state extends it.
+        return legacy if self.fused_progress is None else legacy + (self.fused_progress,)
 
 
 @dataclass
@@ -154,6 +174,7 @@ class OptionContinuationKernel:
         self.work = OptionKernelWork()
         self._marks: dict[tuple, tuple[tuple[str, Any], ...]] = {}
         self._rows: dict[tuple, ReferenceRow[OptionState]] = {}
+        self._fused_support: dict[tuple, dict] = {}
 
     @classmethod
     def from_runtime(cls, model, system, *, time_point: float, max_executor_applications: int):
@@ -191,6 +212,8 @@ class OptionContinuationKernel:
         ):
             raise ValueError("marked law must have aligned finite nonnegative positive-mass rows")
         indices, _ = admissible_indices(families, actions, node.context)
+        if node.option == BUILD_FUSED_RING_OPTION:
+            return self._fused_row(node, families, actions, p, indices)
         pre = conditioned_action_distribution(families, p, indices, node.option, step=node.step)
         active = primitive_option_at_step(node.option, node.step)
         contract = contract_for(active, canonical_state_key(node.graph)) if active else None
@@ -247,6 +270,123 @@ class OptionContinuationKernel:
         self._rows[cache_key] = row
         return row
 
+    def _fused_row(self, node, families, actions, probabilities, admissible):
+        """Joint edge/mark reference; share executor work, not augmented states."""
+        progress = node.fused_progress
+        edges = (
+            eligible_fusion_edges(node.origin, node.context.locus)
+            if progress.edge is None
+            else (progress.edge,)
+        )
+        active = primitive_option_at_step(node.option, node.step)
+        contract = contract_for(active, canonical_state_key(node.graph))
+        in_region = set(admissible)
+        pre_rows, audit = {}, []
+        for edge in edges:
+            matches = sorted(
+                in_region.intersection(
+                    descriptor_indices(families, actions, probabilities, progress, edge, node.step)
+                )
+            )
+            pre = conditioned_action_distribution(families, probabilities, matches, active)
+            pre_rows[edge] = pre
+            audit.append(
+                {
+                    "edge": list(edge),
+                    "descriptor_region_marks": len(matches),
+                    "after_inherited_cap": len(pre.indices),
+                }
+            )
+
+        # One physical action can belong to two oriented-edge branches. Apply
+        # each index once, then retain separate program states and joint mass.
+        products = {}
+        for index in sorted({int(i) for pre in pre_rows.values() for i in pre.indices}):
+            if self.work.executor_applications >= self.max_executor_applications:
+                raise ContinuationBudgetExceeded("executor-application budget exhausted")
+            self.work.executor_applications += 1
+            try:
+                product = self.system.apply(node.graph, families[index], actions[index])
+                key = canonical_state_key(product)
+            except InvalidRewrite:
+                self.work.rejected_products += 1
+                continue
+            if not (
+                0 < product.n_real_atoms <= 40
+                and graph_connected(product)
+                and charge_policy_preserved(node.graph, product)
+                and is_valid(key)
+                and context_preserved(
+                    node.origin, product, node.context.frozen, node.context.terminal_context_slots
+                )
+                and contract(key)
+            ):
+                self.work.rejected_products += 1
+                continue
+            products[index] = product
+
+        branches = []
+        for edge, receipt in zip(edges, audit):
+            successors = {}
+            for raw_index in pre_rows[edge].indices:
+                index = int(raw_index)
+                if index not in products:
+                    continue
+                product = products[index]
+                slot = created_slot(actions[index])
+                next_progress = FusedProgress(
+                    edge, progress.path + (slot,) if slot is not None else progress.path
+                )
+                if node.step == node.horizon - 1 and not completed_fused_cycle(
+                    node.origin, product, next_progress
+                ):
+                    self.work.rejected_products += 1
+                    continue
+                context = node.context.with_locus(slot) if slot is not None else node.context
+                successors[index] = OptionState(
+                    product,
+                    node.origin,
+                    context,
+                    node.lineage.observe(families[index], actions[index]),
+                    node.option,
+                    node.step + 1,
+                    node.horizon,
+                    node.bundle_id,
+                    next_progress,
+                )
+            receipt["after_product_contract"] = len(successors)
+            conditioned = conditioned_action_distribution(
+                families, probabilities, sorted(successors), active
+            )
+            if len(conditioned.indices):
+                branches.append((successors, conditioned))
+        nodes, mass, marks = [], [], []
+        for successors, conditioned in branches:
+            for index, probability in zip(conditioned.indices, conditioned.probabilities):
+                index = int(index)
+                nodes.append(successors[index])
+                mass.append(float(probability) / len(branches))
+                marks.append((families[index], actions[index]))
+        row = ReferenceRow(tuple(nodes), tuple(mass))
+        cache_key = node.key()
+        self.work.legal_products += len({i for successors, _ in branches for i in successors})
+        self._marks[cache_key] = tuple(marks)
+        self._fused_support[cache_key] = {
+            "eligible_oriented_edges": len(edges),
+            "product_applicable_oriented_edges": len(branches),
+            "augmented_successors": len(nodes),
+            "physical_marks": len({i for successors, _ in branches for i in successors}),
+            "edges": audit,
+        }
+        self._rows[cache_key] = row
+        return row
+
+    def fused_support(self, node: OptionState) -> dict:
+        """Completed-row funnel only; never exposes partially normalized work."""
+        from copy import deepcopy
+
+        return deepcopy(self._fused_support[node.key()])
+
     def marks(self, node: OptionState) -> tuple[tuple[str, Any], ...]:
         return self._marks[node.key()]
 
@@ -287,7 +427,10 @@ def sample_option_trajectory(
         "max_terminal_evaluations": max_terminal_evaluations,
     }
     planner_seed = None
-    if estimator == "exact":
+    if estimator == "reference":
+        continuation = None
+        rng = np.random.default_rng(seed)
+    elif estimator == "exact":
         continuation = FiniteHorizonContinuation(
             kernel.row, terminal_weight, OptionState.key, **common
         )
@@ -315,9 +458,15 @@ def sample_option_trajectory(
         except ContinuationBudgetExceeded:
             status = "executor_budget_exhausted"
             break
-        kwargs = {"fallback_values": tuple(fallback_weight(s) for s in row.successors)}
         estimate = None
-        if estimator == "sampled":
+        kwargs = (
+            {}
+            if estimator == "reference"
+            else {"fallback_values": tuple(fallback_weight(s) for s in row.successors)}
+        )
+        if estimator == "reference":
+            decision = ControlledDecision(row.probabilities, "reference", None, 0.0, 0.0)
+        elif estimator == "sampled":
             sampled = sampled_continuation_decision(row, node.remaining, continuation, **kwargs)
             decision, estimate = sampled.decision, sampled.estimate
         else:
@@ -345,8 +494,14 @@ def sample_option_trajectory(
                 "sampled_estimate": asdict(estimate) if estimate is not None else None,
             }
         )
+        if next_node.fused_progress is not None:
+            from compose_v4.rewrite.trace_shard import encode_state
+
+            trace[-1]["fused_progress"] = next_node.fused_progress.payload()
+            trace[-1]["exact_state"] = encode_state(next_node.graph)
+            trace[-1]["support_funnel"] = kernel.fused_support(node)
         node = next_node
-    return {
+    result = {
         "bundle_id": initial.bundle_id,
         "option": initial.option,
         "estimator": estimator,
@@ -355,6 +510,8 @@ def sample_option_trajectory(
             "planner_seed": planner_seed,
             "derivation": "SeedSequence(seed).spawn(2): planner uint64 seed, path stream"
             if estimator == "sampled"
+            else "default_rng(seed), no planner"
+            if estimator == "reference"
             else "default_rng(seed), exact deterministic planner",
         },
         "path_probability_role": "conditional on realized planner randomness, not marginalized over lookahead samples",
@@ -362,7 +519,12 @@ def sample_option_trajectory(
         "endpoint": canonical_state_key(node.graph) if status == "complete" else None,
         "conditional_path_logq": logq,
         "trace": trace,
-        "continuation_work": asdict(continuation.work),
+        "continuation_work": asdict(continuation.work if continuation else ContinuationWork()),
         "kernel_work": asdict(kernel.work),
         "seconds": perf_counter() - started,
     }
+    if node.fused_progress is not None:
+        result["final_fused_progress"] = node.fused_progress.payload()
+        if status == "no_admissible_action":
+            result["failure_support_funnel"] = kernel.fused_support(node)
+    return result

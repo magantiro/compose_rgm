@@ -77,7 +77,7 @@ def state_payload(node: OptionState) -> dict:
     context = asdict(node.context)
     context["frozen"] = sorted(context["frozen"])
     context["locus"] = sorted(context["locus"])
-    return {
+    payload = {
         "graph": graph_payload(node.graph),
         "origin": graph_payload(node.origin),
         "context": context,
@@ -91,6 +91,9 @@ def state_payload(node: OptionState) -> dict:
         "horizon": node.horizon,
         "bundle_id": node.bundle_id,
     }
+    if node.fused_progress is not None:
+        payload["fused_progress"] = node.fused_progress.payload()
+    return payload
 
 
 def initial_state(contract: dict, seed_manifest: list) -> OptionState:
