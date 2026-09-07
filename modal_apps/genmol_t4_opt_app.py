@@ -415,7 +415,7 @@ POP_OUT = "/artifacts/t4_population"
 
 
 @app.function(image=image, cpu=(8.0, 8.0), memory=int(24 * 1024),
-              timeout=6 * 60 * 60, retries=2, max_containers=80,
+              timeout=2 * 60 * 60, retries=0, max_containers=80,
               volumes={ARTIFACT_ROOT: artifact_volume})
 def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
     """Round-based population search, matching the prior T4 round contract.

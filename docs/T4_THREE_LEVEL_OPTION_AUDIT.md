@@ -84,6 +84,7 @@ The audited launch is exactly one 20-call round:
 | region exploration floor | 0.2 |
 | option exploration mixture | 0.1 |
 | existing macro temperature / exploration | 2.0 / 0.15 |
+| cell timeout / automatic retries | 2 hours / 0 |
 
 The macro weights are inherited from the existing option machinery. They must
 not be adjusted after inspecting docking outcomes.
