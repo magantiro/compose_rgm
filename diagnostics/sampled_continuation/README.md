@@ -70,9 +70,9 @@ Touched-file Ruff lint and format checks passed. Strict clean-mounted-tree
 preflight passed at the scientific source candidate. `tools/repo_audit.py`
 completed; it is a reference inventory, not a scientific correctness gate.
 
-Repository-wide verification was started once on the frozen candidate and is
-still pending. It has already reported failures/errors, so no full-suite pass or
-completed scientific milestone is claimed. A duplicate focused invocation that
+Repository-wide verification finished on the frozen candidate: 4,388 passed,
+49 failed, 58 errors, two skipped and one xfailed in 2,621.67 seconds. No
+full-suite pass or completed scientific milestone is claimed. A duplicate focused invocation that
 included the unchanged, long-running feasibility-frontier test was terminated;
 that test remains in the full suite. No test was weakened or silently skipped.
 
@@ -87,3 +87,48 @@ hyperparameter. Before promotion, use the frozen learned model on an independent
 development panel, match the declared binding compute budget and baselines, and
 measure full-program completion, diversity, realized chemistry, and wall time.
 No new training, production deployment, or docking was launched in this repair.
+
+## Recorded-process replay follow-up
+
+The separately committed offline replay (`383e71c`) reuses the frozen inventory
+without loading a model or invoking the executor. `recorded_replay.json` binds
+its inputs and configuration. The fixed sampled comparison stops at an unknown
+step-2 row after one rollout was started and none completed. The root reference
+distribution is retained within 1e-12. No sampled value or partial ranking is
+published as guidance. This is an incomplete-data result, not a ring-chemistry
+failure, a live cache-equivalence certificate, or a performance measurement.
+
+Thirty focused replay/sampled-estimator tests passed in 1.74 seconds, including
+stored-versus-direct executor-fixture row equality, corruption rejection, and
+missing-data abstention. See `replay_tests.xml`. Run the frozen diagnostic with:
+
+```sh
+KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 .venv/bin/python tools/continuation_replay.py
+```
+
+The completed full suite tested its frozen `69e4ffb` candidate. The follow-up
+adds a standalone replay module and its tests; none of that candidate's existing
+source, config, test, or Modal app files changed. Its new tests were run
+separately, not claimed to have been collected by that suite.
+
+## Full-suite triage and exact runtime recheck
+
+Comparison with `diagnostics/continuation_profile/full_suite.xml` finds 105
+shared nonpassing test identities and two additional failures. Shared identities
+are not proof of identical causes or permission to dismiss a gate. The failures
+include frozen RingCore catalog/provenance mismatches, the blanket V1-config
+freeze's rejection of the added continuation profile filename, and three
+slot-safety findings in older experiment apps. These remain unresolved.
+
+The two additional nodes concern parallel capacity compilation and multiworker
+collation. They passed without code changes when run once outside the sandbox
+with the required subprocess/shared-memory permissions: two passed in 17.85 s.
+The exact command, source revision, and input/output hashes are in
+`verification.json`; `runtime_recheck.xml` preserves the result. This recheck
+does not rewrite the full-suite outcome. No full-suite rerun or unrelated gate
+repair was performed, and no training, cloud science, or docking was launched.
+
+The staged artifact whitespace check reports trailing spaces within the two
+original full-suite XML tracebacks. Those hashed raw outputs are retained
+byte-for-byte. The code/documentation check excluding these raw payloads passes;
+the unrestricted artifact check is not described as green.

@@ -22,10 +22,33 @@
   },
   "full_suite": {
     "command": "KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 .venv/bin/python -m pytest -q --junitxml=diagnostics/sampled_continuation/full_suite.xml",
-    "status": "running; failures and errors observed, final counts pending",
+    "status": "completed_non_green",
     "pid_at_launch": 23497,
-    "exit_code": null,
-    "artifact_when_finished": "full_suite.xml"
+    "exit_code": 1,
+    "artifact": "full_suite.xml",
+    "sha256": "3a0d2f8ff2b1d82270cb84c61a77f7cb7e537e9010f3311ff2b45cd9c4e71a1b",
+    "passed": 4388,
+    "failed": 49,
+    "errors": 58,
+    "skipped": 2,
+    "xfailed": 1,
+    "seconds_reported": 2621.67,
+    "prior_xml": "diagnostics/continuation_profile/full_suite.xml",
+    "prior_xml_sha256": "4d0bd26591bdba1552cf3710db239ab8d82c29fe3032e6fcd3caa267a416e8f0",
+    "shared_nonpassing_test_identities": 105,
+    "new_nonpassing_test_identities": 2,
+    "interpretation": "Shared failing identities do not prove identical causes or make those gates irrelevant. They include catalog/provenance drift, a configuration-name freeze conflict, and slot-safety failures. No gate was waived."
+  },
+  "runtime_recheck": {
+    "command": "KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 .venv/bin/python -m pytest -q tests/test_editing_t1_panel.py::test_capacity_census_parallel_compilation_is_byte_identical_and_bounded tests/test_process_v2_runtime_checkpoint.py::test_direct_and_multiworker_collation_produce_identical_masks --junitxml=diagnostics/sampled_continuation/runtime_recheck.xml",
+    "environment": "same local virtualenv outside the sandbox, with subprocess/shared-memory permissions; exact two nodes run once",
+    "source_revision": "383e71c3e375ef3a076c133de726088d8673fc80",
+    "exit_code": 0,
+    "passed": 2,
+    "seconds_reported": 17.85,
+    "artifact": "runtime_recheck.xml",
+    "sha256": "72d9cd9f8246392a4900bf9d009433e1f21151645eefb52a0fb38aeb60db87c4",
+    "interpretation": "The two additional multiprocessing/runtime failures pass without code changes outside the sandbox. This does not replace the non-green full-suite receipt."
   },
   "other_checks": {
     "touched_python_ruff_check": "passed, eight files",
@@ -33,7 +56,8 @@
     "strict_clean_mounted_tree_preflight": "passed at scientific source revision",
     "git_diff_check": "passed",
     "repo_reference_audit": "completed; not a scientific gate",
-    "engineering_input_hash_revalidation": "all material inputs unchanged"
+    "engineering_input_hash_revalidation": "all material inputs unchanged",
+    "artifact_staged_diff_check": "reports trailing whitespace inside the two raw full-suite XML traceback payloads; the hashed raw test output is preserved byte-for-byte, not sanitized to make this check green"
   },
   "deviations": [
     "An initial focused command named nonexistent tests/test_t4_option_audit.py; pytest exited 4 with no tests run. Correct file is tests/test_t4_audit.py.",
@@ -41,8 +65,22 @@
   ],
   "new_docking_calls": 0,
   "new_cloud_scientific_runs": 0,
+  "recorded_replay": {
+    "code_revision": "383e71c",
+    "command": "KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 .venv/bin/python tools/continuation_replay.py",
+    "status": "incomplete_recorded_graph",
+    "baseline_retained": true,
+    "artifact": "recorded_replay.json",
+    "sha256": "5b03521aa25c281bb518ce594c1769b7844a94c16e4faf8f98017c616e5502e7",
+    "tests_passed": 30,
+    "tests_seconds": 1.74,
+    "test_artifact": "replay_tests.xml",
+    "test_artifact_sha256": "751114ca611914f526e965acaa363b02ca8b7de1c854923a0dfa27e97e6aa1c7",
+    "full_suite_scope": "new standalone module and tests checked separately; existing frozen full-suite source files unchanged",
+    "iteration_note": "Initial test compared Python tuples to decoded JSON arrays. Replaced that representation-type assertion with exact canonical wire-byte equality; coordinate and probability checks were retained."
+  },
   "remaining": [
-    "Finish and classify repository-wide verification without weakening gates.",
+    "Repository-wide verification is complete but remains non-green; resolve the outstanding frozen catalog/provenance, contract, and slot-safety issues in their authorized lanes before claiming milestone completion.",
     "Validate compatibility before consuming the recovered complete production rows in a new evaluator.",
     "Qualify real-molecule completion and compute efficiency at matched budgets before replacing the live T4 controller."
   ]
