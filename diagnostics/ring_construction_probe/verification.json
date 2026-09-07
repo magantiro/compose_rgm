@@ -1,0 +1,52 @@
+{
+  "schema_version": "ring_construction_probe_verification_v1",
+  "scientific_source_revision": "ea9655143d1e2fdefd38490ef9975b719522a860",
+  "milestone_complete": false,
+  "production_promoted": false,
+  "probe": {
+    "command": "KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 .venv/bin/python tools/ring_construction_probe.py",
+    "exit_code": 0,
+    "artifact": "result.json",
+    "sha256": "57d2a7c8be89a163532df562acdf4ba1acbb266b27f6b1580121ddc934331beb",
+    "requested": 2,
+    "accepted": 2,
+    "source_count": 1,
+    "executor_applications": 39,
+    "committed_path_steps": 15,
+    "input_and_configuration_hashes_revalidated": true,
+    "population_coverage_claim": false,
+    "learned_controller_claim": false
+  },
+  "focused": {
+    "command": "KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 .venv/bin/python -m pytest -q tests/test_ring_construction_probe.py --junitxml=diagnostics/ring_construction_probe/focused.xml",
+    "exit_code": 0,
+    "passed": 10,
+    "seconds_reported": 1.98,
+    "artifact": "focused.xml",
+    "sha256": "58db3a51c5900b2a620f725ee67414af08e2545ecf773b50fe7314bba93b075d"
+  },
+  "dependencies": {
+    "command": "KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 .venv/bin/python -m pytest -q tests/test_ring_construction_probe.py tests/test_continuation_profile.py tests/test_option_selector.py tests/test_slot_safety.py::test_experiment_infrastructure_is_slot_safe tests/test_macro_engine.py::test_layer2_annulate_and_append_are_mutually_exclusive tests/test_macro_engine.py::test_build_ring_system_is_a_program_over_existing_macros --junitxml=diagnostics/ring_construction_probe/dependency_tests.xml",
+    "exit_code": 0,
+    "passed": 44,
+    "seconds_reported": 1.87,
+    "artifact": "dependency_tests.xml",
+    "sha256": "7f331480c038bd0769846b07e062c8b4de7636124f467031321dd1049989dd69"
+  },
+  "checks": {
+    "ruff_check": "passed for three new Python files",
+    "ruff_format_check": "passed for three new Python files",
+    "preflight_strict": "passed at exact source revision; zero mounted-tree drift",
+    "repo_reference_audit": "completed; an inventory rather than a scientific gate",
+    "full_suite": "prior frozen source has 4388 passed, 49 failed, 58 errors, two skipped and one xfailed; no full-suite pass claimed",
+    "full_suite_receipt": "../sampled_continuation/verification.json",
+    "new_module_scope": "standalone addition with separately run tests; existing controller/executor/config/test files unchanged"
+  },
+  "new_cloud_runs": 0,
+  "new_docking_calls": 0,
+  "remaining": [
+    "Record an explicit program/support decision before integrating a fused compound option.",
+    "Measure the option-conditioned production law; uniform primitive witnesses are not learned discovery evidence.",
+    "Resolve full-suite scientific gates in their authorized lanes before claiming milestone completion."
+  ]
+}
