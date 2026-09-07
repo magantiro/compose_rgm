@@ -66,6 +66,8 @@ image = (
                     str(REMOTE_ROOT / "docs/GENMOL_T4_SEEDS.json"), copy=True)
     .add_local_file(ROOT / "docs/GENMOL_T4_DEV_SEEDS.json",
                     str(REMOTE_ROOT / "docs/GENMOL_T4_DEV_SEEDS.json"), copy=True)
+    .add_local_file(ROOT / "modal_apps/genmol_t4_opt_app.py",
+                    str(REMOTE_ROOT / "modal_apps/genmol_t4_opt_app.py"), copy=True)
     .env({"PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}", "OMP_NUM_THREADS": "1"})
 )
 
@@ -84,6 +86,162 @@ BOXES = {
 }
 
 _RT: dict[str, Any] = {}
+
+
+@app.function(
+    image=image,
+    cpu=(1.0, 1.0),
+    memory=6144,
+    timeout=900,
+    max_containers=1,
+    retries=0,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def continuation_profile(task: dict[str, Any]) -> dict[str, Any]:
+    """One capped, zero-oracle profile. Never calls a population/docking driver."""
+    import hashlib
+    import platform
+    import threading
+    import traceback
+    from datetime import datetime, timezone
+
+    import numpy as np
+    import torch
+    from rdkit import rdBase
+
+    from compose_v4.experiments.continuation_profile import (
+        canonical_bytes,
+        initial_state,
+        publish_json,
+        run_profile,
+        verify_file,
+    )
+    from compose_v4.experiments.production_successor_kernel import (
+        enumerate_factorized_marked_law,
+    )
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    _validate_remote_revision(task["image_revision"])
+    verify_file(REMOTE_ROOT / "modal_apps/genmol_t4_opt_app.py", task["app_sha256"])
+    contract_path = REMOTE_ROOT / "configs/continuation_profile_v1.json"
+    verify_file(contract_path, task["contract_sha256"])
+    contract = json.loads(contract_path.read_text())
+    if (
+        task["run_id"]
+        != hashlib.sha256(
+            canonical_bytes(
+                {
+                    "contract_sha256": task["contract_sha256"],
+                    "image_revision_sha256": task["image_revision"]["image_revision_sha256"],
+                    "app_sha256": task["app_sha256"],
+                }
+            )
+        ).hexdigest()
+    ):
+        raise ValueError("profile output identity does not match the exact launch")
+    # This is an operational run namespace, not a cross-revision scientific cache key.
+    output = ARTIFACT_ROOT / "continuation_profile" / task["run_id"]
+    if (output / "result.json").exists():
+        return json.loads((output / "result.json").read_text())
+    if (output / "progress.json").exists():
+        raise RuntimeError(
+            "partial profile exists; preserve its completed rows and audit before resuming"
+        )
+    started = time.perf_counter()
+    progress = {
+        "schema_version": "continuation_profile_progress_v1",
+        "phase": "inputs",
+        "complete": False,
+        "oracle_calls": 0,
+        "run_id": task["run_id"],
+        "code_revision": task["image_revision"]["commit"],
+    }
+    stop = threading.Event()
+
+    def publish_progress():
+        progress["updated_at_utc"] = datetime.now(timezone.utc).isoformat()
+        progress["elapsed_seconds"] = time.perf_counter() - started
+        publish_json(output / "progress.json", dict(progress))
+        artifact_volume.commit()
+
+    def heartbeat():
+        while not stop.wait(contract["compute"]["heartbeat_seconds"]):
+            publish_progress()
+
+    publish_json(output / "launch.json", task)
+    publish_progress()
+    thread = threading.Thread(target=heartbeat, daemon=True)
+    thread.start()
+    try:
+        inputs = {
+            "run_paths": verify_file(Path(contract["run_paths"]), contract["run_paths_sha256"]),
+            "checkpoint": verify_file(Path(contract["checkpoint"]), contract["checkpoint_sha256"]),
+            "source_manifest": verify_file(
+                REMOTE_ROOT / contract["source_manifest"], contract["source_manifest_sha256"]
+            ),
+        }
+        progress["phase"] = "frozen_runtime_initialization"
+        init_start = time.perf_counter()
+        runtime = _runtime()
+        runtime_seconds = time.perf_counter() - init_start
+        node = initial_state(
+            contract, json.loads((REMOTE_ROOT / contract["source_manifest"]).read_text())
+        )
+
+        def enumerate_law(graph):
+            law = enumerate_factorized_marked_law(runtime["model"], graph, contract["time_point"])
+            return (
+                tuple(m.executor_rule_name for m in law.marks),
+                tuple(m.action for m in law.marks),
+                tuple(m.probability for m in law.marks),
+            )
+
+        result = run_profile(
+            node,
+            enumerate_law,
+            runtime["system"],
+            contract,
+            output,
+            snapshot_id=task["run_id"],
+            commit_volume=artifact_volume.commit,
+            progress=progress,
+        )
+        result.update(
+            {
+                "complete": True,
+                "code_revision": task["image_revision"]["commit"],
+                "contract_sha256": task["contract_sha256"],
+                "input_sha256": inputs,
+                "configuration": contract,
+                "runtime_seconds": runtime_seconds,
+                "software": {
+                    "python": platform.python_version(),
+                    "numpy": np.__version__,
+                    "torch": torch.__version__,
+                    "rdkit": rdBase.rdkitVersion,
+                },
+                "hardware": {
+                    "machine": platform.machine(),
+                    "cpu": platform.processor(),
+                    "torch_threads": torch.get_num_threads(),
+                },
+                "run_id": task["run_id"],
+                "elapsed_seconds": time.perf_counter() - started,
+                "completed_at_utc": datetime.now(timezone.utc).isoformat(),
+            }
+        )
+        publish_json(output / "result.json", result)
+        progress.update(phase="complete", complete=True, decision_status=result["status"])
+        return result
+    except Exception as error:
+        # Boundary receipt, then fail loudly. No input substitution or gate relaxation.
+        progress.update(phase="failed", error_type=type(error).__name__, error=str(error))
+        publish_json(output / "failure.json", {**progress, "traceback": traceback.format_exc()})
+        raise
+    finally:
+        stop.set()
+        thread.join(timeout=30)
+        publish_progress()
 
 
 def _runtime():

@@ -40,6 +40,11 @@ def main() -> None:
     ap.add_argument("--deltas", default="0.4")
     ap.add_argument("--arms", default="macro_prior")
     ap.add_argument("--session", default="compose_iclr")
+    ap.add_argument(
+        "--continuation-profile",
+        action="store_true",
+        help="one frozen, capped zero-docking profile; no T4 cells are launched",
+    )
     # V_z = 0 until a T4-specific estimator exists; the QED table was null and
     # learned QED-region effects, and an interface accepting it is not a reason
     # to use it here.  `macro_prior` names the new unlearned option-prior arm.
@@ -76,6 +81,10 @@ def main() -> None:
             "PREFLIGHT FAIL: Modal scientific launches require a fully clean "
             "committed tree, not only clean mounted src/configs"
         )
+
+    if a.continuation_profile:
+        launch_continuation_profile(preflight)
+        return
 
     fn = modal.Function.from_name("genmol-t4-opt", "t4_population_cell")
     seed_manifest = ROOT / "docs/GENMOL_T4_SEEDS.json"
@@ -145,6 +154,48 @@ def main() -> None:
     print(f"receipt: {receipt_path}")
     for c, o in spawned[:8]:
         print(f"  {c}  {o}")
+
+
+def launch_continuation_profile(preflight: dict) -> None:
+    """Spawn only the fixed diagnostic into the deployed app; retain its call ID."""
+    import sys
+
+    sys.path.insert(0, str(ROOT))
+    from modal_apps.run_process_v2_p50_app import local_image_revision
+
+    contract = ROOT / "configs/continuation_profile_v1.json"
+    revision = local_image_revision(expected_commit=preflight["commit"])
+    identity = {
+        "contract_sha256": _sha256(contract),
+        "image_revision_sha256": revision["image_revision_sha256"],
+        "app_sha256": _sha256(ROOT / "modal_apps/genmol_t4_opt_app.py"),
+    }
+    run_id = hashlib.sha256(
+        json.dumps(identity, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    ).hexdigest()
+    task = {
+        "run_id": run_id,
+        "image_revision": revision,
+        "contract_sha256": identity["contract_sha256"],
+        "app_sha256": identity["app_sha256"],
+    }
+    function = modal.Function.from_name("genmol-t4-opt", "continuation_profile")
+    call = function.spawn(task)
+    receipt = {
+        "schema_version": "continuation_profile_spawn_v1",
+        "task": task,
+        "call_id": call.object_id,
+        "oracle_calls": 0,
+        "volume": "compose-v4-artifacts",
+        "volume_path": f"/continuation_profile/{run_id}",
+    }
+    path = ROOT / "diagnostics/continuation_profile_spawn.json"
+    temporary = path.with_suffix(".json.tmp")
+    temporary.write_text(json.dumps(receipt, sort_keys=True, indent=2) + "\n")
+    temporary.replace(path)
+    print(f"spawned zero-docking continuation profile: {call.object_id}")
+    print(f"volume result: {receipt['volume_path']}/result.json")
+    print(f"receipt: {path}")
 
 
 if __name__ == "__main__":
