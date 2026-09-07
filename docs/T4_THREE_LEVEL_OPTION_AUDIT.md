@@ -118,7 +118,7 @@ Run from a clean committed tree only:
 ```bash
 python3 tools/preflight.py --strict
 modal deploy modal_apps/genmol_t4_opt_app.py
-python3 tools/t4_launch.py --budget 20 --n-seeds 1 --deltas 0.4 --arms macro_prior
+python3 tools/t4_launch.py --budget 20 --n-seeds 1 --deltas 0.4 --arms macro_prior --session compose_iclr
 ```
 
 Do not use `modal run --detach`. The cell writes a complete round receipt to the
@@ -148,3 +148,80 @@ retained as a negative verification result. The bounded T4 audit proceeds only
 because its focused dependency closure is green and the repository contract
 explicitly forbids delaying a bounded scientific run for unrelated cleanup that
 does not block correctness, reproducibility, or recovery of the current run.
+
+## Audited result and decision
+
+The one authorized cell completed on 2026-09-07. It was launched from clean
+revision `e46f37c81d1e425f8a5d51487a9f42c50e16b961` as Modal function call
+`fc-01M1WZ669CN5GB29R8DJPQ1DQR`. No additional cell or retry was launched.
+The authoritative local result is
+`diagnostics/t4_three_level_option_audit.json`, SHA-256
+`225c8bbb998544dca0818fdfefd879652216ce7848a5b060db689b932f92c1df`.
+The deployed result remains at
+`/t4_population/compose_iclr_macro_prior_parp1_0_d0.4.json` on the
+`compose-v4-artifacts` volume.
+
+### Measured controller behavior
+
+- The controller made 24 region draws from eight lineage entries and selected
+  24 distinct `(parent lineage, region, option)` bundles. The 20 docked
+  candidates represented 20 distinct bundles and 20 distinct canonical
+  molecules.
+- Twelve options were selected: `append` 1, `aromatize` 1,
+  `build_ring_system` 3, `decorate` 2, `generic` 5, `grow` 3, `open` 1,
+  `rebuild` 2, `restate` 1, `scaffold_extend` 2, `shrink` 1, and
+  `small_ring` 2. `cyclize`, `annulate`, `append_system`, and `local` were not
+  selected in this finite prior sample, so the audit provides no direct outcome
+  evidence for those options.
+- The search harvested 57 candidates and 49 unique canonical candidates. Mean
+  pairwise Morgan distance was 0.548 in the unique pool and 0.538 among the 20
+  docked molecules.
+- `BUILD_RING_SYSTEM` completed in two of three selected bundles. Both docked
+  completed endpoints added eight heavy atoms and increased both ring-system
+  count and graph cycle rank by one. The feasible endpoint added eight C/N/O
+  backbone atoms, no terminal halogen, and no sulfur. It scored -8.9 kcal/mol
+  with QED 0.845, SA 3.951, and seed similarity 0.478. The other endpoint
+  scored -9.3 kcal/mol but was infeasible under the frozen benchmark gates
+  (QED 0.546 and SA 4.293).
+- `small_ring` produced another cycle-rank and ring-system increase, but its
+  docked score was -7.3 kcal/mol. `grow` and `rebuild` did not produce topology
+  changes in this round and their docked outputs still included sulfur or
+  terminal-halogen additions. `scaffold_extend` produced only C/N/O backbone
+  additions in its two docked outputs.
+- Across all 20 docked molecules, ring-system deltas were 0 for 16 and +1 for
+  4. Cycle-rank deltas were 0 for 15, +1 for 3, and -1 for 2. Added-material
+  counts summed to 27 C/N/O backbone atoms, seven terminal halogens, and two
+  sulfur atoms.
+- Intended released-region scale had negligible negative correlation with
+  realized coherent change (`r=-0.128`). Realized coherent change ranged from
+  0.05 to 0.47 with median 0.11. Both completed compound programs realized
+  0.47 change from intended released-region scales 0.05 and 0.16. The released
+  region therefore records where existing parent structure may be touched; it
+  is not a calibrated upper bound on new material created by a temporally
+  extended option.
+- Nineteen of 20 docked molecules met the frozen QED, SA, and similarity gates.
+  There were no docking failures. The best feasible score was -8.9 kcal/mol.
+  This 20-call mechanism audit is not budget-matched to prior 200-, 500-, or
+  1,000-call results and is not evidence of benchmark superiority.
+- Proposal time was 2,208.4 seconds, docking time was 34.3 seconds, and total
+  cell time was 2,244.6 seconds. The launch plan expected 10 to 30 minutes;
+  measured total time was 37.4 minutes. The process emitted no progress
+  heartbeat between model load and the completed round.
+
+### Decision
+
+The chemistry diagnostic is positive: the compound option produced complete,
+valid, constructive ring-system growth and supplied the best feasible molecule
+in the round. The result supports retaining macros as proposal channels within
+the three-level controller. It does not support claiming that every constructive
+single-step macro is effective; `grow` and `rebuild` remained partly decorative,
+and `cyclize` was not sampled.
+
+The efficiency diagnostic is negative. A proposal-to-docking wall-time ratio of
+about 64:1 is unsuitable for a longer benchmark even though the candidate pool
+was bounded. No option weights, region policy, `kappa`, generator checkpoint, or
+committor were changed after observing the result. No further T4 launch is
+authorized by this audit. Before any longer run, separately profile the proposal
+path, add bundle-level and docking-completion heartbeats, and demonstrate a
+material speedup with decision-equivalent candidate generation on development
+inputs.
