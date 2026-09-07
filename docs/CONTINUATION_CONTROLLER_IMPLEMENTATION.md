@@ -98,3 +98,59 @@ G, reusable fragments/templates, option weights, checkpoint training, or the
 independent discovery panel. This inspected T4 cell is development evidence.
 Final generalization needs an untouched panel. No benchmark superiority follows
 from the local gate, path existence, or architectural validity.
+
+## 2026-09-07 repair and sampled-estimator milestone
+
+Authority: the user's request to fix budget handling and test a principled,
+efficient controller. This extends the engineering lane, not training authority
+or permission to weaken any production gate. The platform identity and declared
+support above remain unchanged. No T4 replacement is authorized by fixture tests.
+
+1. Repair the diagnostic's cancellation boundary. A computational stop must
+   escape legacy chemical-rejection handlers without changing executor code.
+   Count and persist every entered public executor call, including interrupted
+   enclosing calls. Reproduce this through actual ring-restate lowering.
+2. Add a fixed-sample Monte Carlo reference-continuation estimator. For every
+   positive-probability root successor, average K complete reference suffixes
+   to the original terminal horizon. Sample transitions from full reference
+   rows, without top-k, depth truncation, or winner-derived weights. Cache exact
+   rows, not sampled outcomes. This is linear in K, root support, and horizon
+   in row visits; molecular enumeration within each row can still be expensive.
+3. Freeze K and a simultaneous Hoeffding confidence level before each comparison.
+   Apply guidance only when complete sampling separates at least two supported
+   continuation values. Use conservative lower bounds as tilt weights. A
+   completed all-zero sample is not proof of unreachability. Overlapping bounds,
+   insufficient budget, and empty support return distinct baseline/abstention
+   statuses. Never use an interrupted partial comparison to guide a decision.
+4. Preserve the existing KL tilt (kappa=1), exploration, option support, complete
+   molecular executor states, and outer bundle identity. Monte Carlo randomness
+   and committed-path randomness must use separate recorded streams. Conditional
+   decision probabilities are not marginal path probabilities after integrating
+   out the estimator's randomness.
+5. Require focused tests of nested cancellation, honest receipts, fixed sample
+   counts, analytic bounded-reference agreement, confidence coverage and null
+   abstention, reference support, KL, determinism, and actual executor integration.
+   Numerical fixture results must carry input hashes and explicit synthetic roles.
+
+Existing production profile outputs must be inventoried and preserved before a
+new cloud run. Do not repeat the exhausted exact tree as an efficiency test.
+A full learned-model chemistry comparison still requires the separate frozen
+development panel and matched baselines specified above. This milestone can
+finish its code repairs while leaving those scientific outcomes unqualified.
+
+For m distinct supported exact root states, the sampled estimator uses
+`h_hat_i = mean(G(S_terminal))` over K independent reference suffixes and
+`r = sqrt(log(2m/alpha)/(2K))`. The clipped intervals
+`[max(0,h_hat_i-r), min(1,h_hat_i+r)]` cover all m expectations simultaneously
+with probability at least `1-alpha` under a deterministic reference/objective.
+This is a per-comparison Monte Carlo guarantee, not across-round coverage or
+calibration of a learned value model. Guidance requires a disjoint pair of
+intervals and uses their lower bounds in the existing KL tilt. The policy is
+an explicitly conservative approximation, not an optimality guarantee.
+
+Remaining practical risks: full row construction still enumerates and executes
+many marks; K samples per supported root state can itself be too expensive on
+wide support; a rare terminal event can cause honest repeated abstention; and
+spending the entire executor budget on lookahead leaves no budget for later
+committed steps. These require production cost/completion evidence before
+promoting this estimator. The engineering K=32 is not a selected T4 setting.

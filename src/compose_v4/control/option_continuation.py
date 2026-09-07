@@ -261,6 +261,10 @@ def sample_option_trajectory(
     seed: int,
     max_expansions: int,
     max_terminal_evaluations: int,
+    estimator: str = "exact",
+    samples_per_successor: int = 32,
+    confidence_alpha: float = 0.05,
+    max_rollouts: int = 1024,
 ) -> dict:
     """Run one fixed bundle; no extra outer draws or hidden retry-until-success.
 
@@ -271,16 +275,39 @@ def sample_option_trajectory(
     from dataclasses import asdict
     from time import perf_counter
 
-    started = perf_counter()
-    continuation = FiniteHorizonContinuation(
-        kernel.row,
-        terminal_weight,
-        OptionState.key,
-        snapshot_id=snapshot_id,
-        max_expansions=max_expansions,
-        max_terminal_evaluations=max_terminal_evaluations,
+    from compose_v4.control.sampled_continuation import (
+        SampledContinuation,
+        sampled_continuation_decision,
     )
-    rng = np.random.default_rng(seed)
+
+    started = perf_counter()
+    common = {
+        "snapshot_id": snapshot_id,
+        "max_expansions": max_expansions,
+        "max_terminal_evaluations": max_terminal_evaluations,
+    }
+    planner_seed = None
+    if estimator == "exact":
+        continuation = FiniteHorizonContinuation(
+            kernel.row, terminal_weight, OptionState.key, **common
+        )
+        rng = np.random.default_rng(seed)  # preserve the existing exact fixture stream
+    elif estimator == "sampled":
+        planner_stream, path_stream = np.random.SeedSequence(seed).spawn(2)
+        planner_seed = int(planner_stream.generate_state(1, dtype=np.uint64)[0])
+        continuation = SampledContinuation(
+            kernel.row,
+            terminal_weight,
+            OptionState.key,
+            **common,
+            seed=planner_seed,
+            samples_per_successor=samples_per_successor,
+            alpha=confidence_alpha,
+            max_rollouts=max_rollouts,
+        )
+        rng = np.random.default_rng(path_stream)
+    else:
+        raise ValueError(f"unknown continuation estimator: {estimator!r}")
     node, trace, logq, status = initial, [], 0.0, "complete"
     while node.remaining:
         try:
@@ -288,12 +315,13 @@ def sample_option_trajectory(
         except ContinuationBudgetExceeded:
             status = "executor_budget_exhausted"
             break
-        decision = continuation_decision(
-            row,
-            node.remaining,
-            continuation,
-            fallback_values=tuple(fallback_weight(s) for s in row.successors),
-        )
+        kwargs = {"fallback_values": tuple(fallback_weight(s) for s in row.successors)}
+        estimate = None
+        if estimator == "sampled":
+            sampled = sampled_continuation_decision(row, node.remaining, continuation, **kwargs)
+            decision, estimate = sampled.decision, sampled.estimate
+        else:
+            decision = continuation_decision(row, node.remaining, continuation, **kwargs)
         if not decision.probabilities:
             status = "no_admissible_action"
             break
@@ -314,12 +342,22 @@ def sample_option_trajectory(
                 "decision_status": decision.status,
                 "eta": decision.eta,
                 "kl": decision.kl,
+                "sampled_estimate": asdict(estimate) if estimate is not None else None,
             }
         )
         node = next_node
     return {
         "bundle_id": initial.bundle_id,
         "option": initial.option,
+        "estimator": estimator,
+        "randomness": {
+            "seed": seed,
+            "planner_seed": planner_seed,
+            "derivation": "SeedSequence(seed).spawn(2): planner uint64 seed, path stream"
+            if estimator == "sampled"
+            else "default_rng(seed), exact deterministic planner",
+        },
+        "path_probability_role": "conditional on realized planner randomness, not marginalized over lookahead samples",
         "status": status,
         "endpoint": canonical_state_key(node.graph) if status == "complete" else None,
         "conditional_path_logq": logq,
