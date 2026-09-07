@@ -1,0 +1,49 @@
+{
+  "schema_version": "sampled_continuation_verification_v1",
+  "scientific_source_revision": "69e4ffb6fbdfb9d281dfe87895493118d925e747",
+  "milestone_complete": false,
+  "production_promoted": false,
+  "focused": {
+    "command": "KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 .venv/bin/python -m pytest -q tests/test_continuation.py tests/test_option_continuation.py tests/test_sampled_continuation.py tests/test_continuation_profile.py tests/test_option_selector.py tests/test_region_rewrite.py tests/test_t4_audit.py --junitxml=diagnostics/sampled_continuation/focused.xml",
+    "exit_code": 0,
+    "passed": 136,
+    "seconds_reported": 9.97,
+    "artifact": "focused.xml",
+    "sha256": "4bac88a12049a8aa8b7ffa830e39fdcceb4a2dd652ac5398380cedbd1da7a60e"
+  },
+  "engineering_gate": {
+    "command": "OMP_NUM_THREADS=1 .venv/bin/python tools/sampled_continuation_gate.py",
+    "exit_code": 0,
+    "checks_passed": 6,
+    "artifact": "engineering_gate.json",
+    "sha256": "664f5feb638b10e9bd2373847e046d4b3d2fc05ec5626caf09fa79fec99411c2",
+    "input_manifest": "inputs.json",
+    "input_manifest_sha256": "05f1ade8c98b9f12f9f4f374b3f996d91aaf10290101f54b09970966e8da3abb"
+  },
+  "full_suite": {
+    "command": "KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 .venv/bin/python -m pytest -q --junitxml=diagnostics/sampled_continuation/full_suite.xml",
+    "status": "running; failures and errors observed, final counts pending",
+    "pid_at_launch": 23497,
+    "exit_code": null,
+    "artifact_when_finished": "full_suite.xml"
+  },
+  "other_checks": {
+    "touched_python_ruff_check": "passed, eight files",
+    "touched_python_ruff_format_check": "passed, eight files",
+    "strict_clean_mounted_tree_preflight": "passed at scientific source revision",
+    "git_diff_check": "passed",
+    "repo_reference_audit": "completed; not a scientific gate",
+    "engineering_input_hash_revalidation": "all material inputs unchanged"
+  },
+  "deviations": [
+    "An initial focused command named nonexistent tests/test_t4_option_audit.py; pytest exited 4 with no tests run. Correct file is tests/test_t4_audit.py.",
+    "A focused run including tests/test_macro_engine.py reached its slow unchanged feasibility-frontier test. It was interrupted and then terminated after its native call ignored SIGINT; exit 143. The full suite retains that test. The recorded completed focused run contains only the directly affected dependencies."
+  ],
+  "new_docking_calls": 0,
+  "new_cloud_scientific_runs": 0,
+  "remaining": [
+    "Finish and classify repository-wide verification without weakening gates.",
+    "Validate compatibility before consuming the recovered complete production rows in a new evaluator.",
+    "Qualify real-molecule completion and compute efficiency at matched budgets before replacing the live T4 controller."
+  ]
+}
