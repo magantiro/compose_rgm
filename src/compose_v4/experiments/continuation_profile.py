@@ -120,6 +120,14 @@ def initial_state(contract: dict, seed_manifest: list) -> OptionState:
     )
 
 
+class _ExecutorBudgetStop(BaseException):
+    """Internal cancellation, deliberately not a chemical ``Exception``.
+
+    Legacy lowering explores alternatives under ``except Exception``. Translate
+    this sentinel only AFTER unwinding that code, never inside the executor.
+    """
+
+
 class ExecutorMeter:
     """Scoped diagnostic hook, including public executor calls inside enumeration."""
 
@@ -133,6 +141,14 @@ class ExecutorMeter:
         self.phase = "option_validation"
 
     @contextmanager
+    def boundary(self):
+        """Expose the public budget exception outside chemical rejection code."""
+        try:
+            yield
+        except _ExecutorBudgetStop as error:
+            raise ContinuationBudgetExceeded("total public-executor budget exhausted") from error
+
+    @contextmanager
     def instrument(self):
         from unittest.mock import patch
 
@@ -140,9 +156,10 @@ class ExecutorMeter:
 
         def measured(system, state, rule_name, action):
             if self.calls >= self.limit:
-                raise ContinuationBudgetExceeded("total public-executor budget exhausted")
+                raise _ExecutorBudgetStop()
             self.calls += 1
             receipt = {
+                "call_index": self.calls - 1,
                 "phase": self.phase,
                 "source": encode_state(state),
                 "mark": encode_action(rule_name, action),
@@ -150,20 +167,34 @@ class ExecutorMeter:
             started = perf_counter()
             try:
                 result = original(system, state, rule_name, action)
-            except InvalidRewrite as error:
-                self.seconds += perf_counter() - started
+            except BaseException as error:
+                # Receipt only, never suppress or convert a chemistry/runtime
+                # failure. Enclosing calls interrupted by cancellation count too.
+                status = (
+                    "budget_interrupted"
+                    if isinstance(error, _ExecutorBudgetStop)
+                    else "invalid_rewrite"
+                    if isinstance(error, InvalidRewrite)
+                    else "execution_error"
+                )
                 self.attempts.append(
-                    {**receipt, "status": "invalid_rewrite", "message": str(error)}
+                    {
+                        **receipt,
+                        "status": status,
+                        "error_type": type(error).__name__,
+                        "message": str(error),
+                    }
                 )
                 raise
             else:
-                self.seconds += perf_counter() - started
                 self.attempts.append(
                     {**receipt, "status": "executed", "product": encode_state(result)}
                 )
                 return result
+            finally:
+                self.seconds += perf_counter() - started
 
-        with patch.object(RewriteSystem, "apply", measured):
+        with self.boundary(), patch.object(RewriteSystem, "apply", measured):
             yield self
 
 
@@ -247,7 +278,8 @@ def _run_profile(
         start = perf_counter()
         attempts_start = len(meter.attempts)
         try:
-            result = kernel.row(state)
+            with meter.boundary():
+                result = kernel.row(state)
         finally:
             timings["rows"] += perf_counter() - start
             progress["kernel_work"] = asdict(kernel.work)
@@ -340,6 +372,8 @@ def _run_profile(
     work = asdict(kernel.work)
     if meter.calls > contract["max_executor_applications"]:
         raise RuntimeError("executor ceiling exceeded")
+    if sorted(a["call_index"] for a in meter.attempts) != list(range(meter.calls)):
+        raise RuntimeError("executor receipts do not cover every entered call exactly once")
     return {
         "schema_version": "continuation_profile_result_v1",
         "status": status,

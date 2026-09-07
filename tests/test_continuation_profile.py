@@ -158,10 +158,86 @@ def test_meter_covers_enumerator_internal_calls_and_restores_executor(tmp_path):
     with ExecutorMeter(1).instrument() as meter:
         actual = kernel.system.apply(node.graph, families[0], actions[0])
         assert exact_graph_key(actual) == exact_graph_key(expected)
-        with pytest.raises(ContinuationBudgetExceeded):
+        with pytest.raises(ContinuationBudgetExceeded), meter.boundary():
             kernel.system.apply(node.graph, families[0], actions[0])
         assert meter.calls == 1
     assert RewriteSystem.apply is original
+
+
+def _real_ring_restate():
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.rewrite.kernel import de_novo_rewrite_system
+    from compose_v4.rewrite.tracelets import BondOrderChange, RingSystemRestate
+
+    graph = pad_molecular_graph(smiles_to_molecular_graph("C1CCCCC1"), 8)
+    action = RingSystemRestate(tuple(BondOrderChange(i, (i + 1) % 6, 2) for i in (0, 2, 4)))
+    return de_novo_rewrite_system(), graph, action
+
+
+@pytest.mark.parametrize("limit", [1, 2, 3, 4])
+def test_budget_cancellation_escapes_real_ring_restate_lowering(limit):
+    system, graph, action = _real_ring_restate()
+    original = RewriteSystem.apply
+    meter = ExecutorMeter(limit)
+    with pytest.raises(ContinuationBudgetExceeded), meter.instrument():
+        system.apply(graph, "ring_system_restate", action)
+    assert RewriteSystem.apply is original
+    assert meter.calls == limit == len(meter.attempts)
+    assert sorted(a["call_index"] for a in meter.attempts) == list(range(limit))
+    assert meter.attempts[-1]["status"] == "budget_interrupted"
+    assert all(a["status"] in {"executed", "budget_interrupted"} for a in meter.attempts)
+
+
+def test_nested_cancellation_abstains_and_persists_all_entered_calls(tmp_path):
+    node, kernel = engineering_fixture()
+    system, ring, action = _real_ring_restate()
+
+    def reference(graph):
+        if graph.n_real_atoms > 4:
+            # Actual legacy lowering inside a law enumeration, as in the failed
+            # production profile. It must not turn cancellation into UNSAT.
+            system.apply(ring, "ring_system_restate", action)
+        return kernel.enumerate_law(graph)
+
+    result = run_profile(
+        node,
+        reference,
+        kernel.system,
+        {"max_executor_applications": 3, "max_expansions": 10, "max_terminal_evaluations": 10},
+        tmp_path,
+        snapshot_id="fixture-real-nested-ring-lowering",
+        commit_volume=lambda: None,
+        progress={},
+    )
+    assert result["status"] == "budget_abstention"
+    assert result["decision"]["probabilities"] == pytest.approx([0.5, 0.5])
+    assert result["decision"]["successor_values"] is None
+    assert result["total_public_executor_calls"] == 3
+    assert len(result["rows"]) == 1  # interrupted successor row was not published
+    receipts = [json.loads(p.read_text()) for p in (tmp_path / "attempts").glob("*.json")]
+    attempts = [a for receipt in receipts for a in receipt["attempts"]]
+    assert sorted(a["call_index"] for a in attempts) == [0, 1, 2]
+    assert sum(a["status"] == "budget_interrupted" for a in attempts) == 1
+
+
+def test_meter_preserves_real_chemistry_and_propagates_unexpected_errors(monkeypatch):
+    system, graph, action = _real_ring_restate()
+    expected = system.apply(graph, "ring_system_restate", action)
+    with ExecutorMeter(100).instrument() as meter:
+        actual = system.apply(graph, "ring_system_restate", action)
+    assert exact_graph_key(actual) == exact_graph_key(expected)
+    assert meter.calls == len(meter.attempts) > 1
+    assert all(a["status"] == "executed" for a in meter.attempts)
+
+    def broken(*args):
+        raise ValueError("genuine runtime error")
+
+    monkeypatch.setattr(RewriteSystem, "apply", broken)
+    meter = ExecutorMeter(2)
+    with pytest.raises(ValueError, match="genuine runtime error"), meter.instrument():
+        system.apply(graph, "ring_system_restate", action)
+    assert meter.attempts[0]["status"] == "execution_error"
 
 
 def test_profile_has_no_docking_training_or_fanout_launch_surface():
