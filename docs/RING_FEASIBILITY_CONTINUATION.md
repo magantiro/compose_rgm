@@ -47,3 +47,20 @@ and cost before proposing a learned-model integration. If they do not, report
 the negative result and the need for a different allowed continuation (such as
 refinement), not more selection pressure on an empty feasible set. These are
 inspected development bundles, not held-out evidence or a claim of superiority.
+
+## Follow-up after the complete zero-refinement check
+
+The seven complete backups used 325 executor calls and about eight seconds;
+six had zero feasible terminal mass under the declared neutral reference.
+Before evaluating further endpoints, freeze this next check: resume exactly the
+six saved infeasible construction endpoints for **two existing ring-scoped
+refinement steps**. Preserve each original parent, region, exact atom-birth
+lineage, completed cycle and bundle identity. Exclude the already-feasible
+seventh endpoint explicitly, without rerunning its construction. This is the
+existing `refine=2` option, not a new ring recipe or expanded atom support.
+
+The same per-bundle limits apply (6,144 total executor calls at most). Report
+first-step properties and complete two-step backups separately. One-step
+feasible intermediate witnesses do not become completed two-step programs.
+No intermediate feasibility pruning, new docking, or automatic further-depth
+extension. Retain the first result unchanged and publish this check separately.

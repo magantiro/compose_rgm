@@ -10,9 +10,10 @@ import json
 import math
 import platform
 import subprocess
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 from time import perf_counter
+from types import SimpleNamespace
 
 import numpy as np
 from rdkit import Chem, rdBase
@@ -226,6 +227,7 @@ def probe(node, properties):
                         "state": state_payload(s),
                         "reference_probability": p,
                         "feasible_value": float(h),
+                        "properties": properties(canonical_state_key(s.graph)),
                     }
                     for s, p, h in zip(row.successors, row.probabilities, values, strict=True)
                 ],
@@ -244,10 +246,39 @@ def probe(node, properties):
     }
 
 
+def refinement_start(initial, encoded_endpoint, progress):
+    """Continue saved atom births in their recorded order, never from SMILES."""
+    spec = replace(ring_spec(initial.option), refine=2)
+    graph = decode_state(encoded_endpoint)
+    if not completed_construction(initial.origin, graph, progress, spec):
+        raise ValueError("refinement requires the exact completed construction")
+    context, lineage = initial.context, initial.lineage
+    for slot in progress.path:
+        context = context.with_locus(slot)
+        lineage = lineage.observe(
+            "atom_insert", SimpleNamespace(slot=slot, atom_type=int(graph.atom_types[slot]))
+        )
+    return replace(
+        initial,
+        graph=graph,
+        context=context,
+        lineage=lineage,
+        option=spec.option,
+        step=spec.growth + 1,
+        horizon=spec.horizon,
+        ring_progress=progress,
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("run", type=Path)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--refine-saved",
+        action="store_true",
+        help="reuse six infeasible completed rings for two existing refinement steps",
+    )
     args = parser.parse_args()
     if args.output.exists():
         raise ValueError(f"preserve previous result: {args.output}")
@@ -276,7 +307,10 @@ def main():
     ]
     report = {
         "schema_version": "t4_ring_feasibility_v1",
-        "configuration": CONFIG,
+        "configuration": {
+            **CONFIG,
+            "mode": "refine_saved_two_steps" if args.refine_saved else "construction",
+        },
         "code_revision": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
         ).strip(),
@@ -293,10 +327,26 @@ def main():
             "precision": "float64 probabilities",
         },
         "bundles": [],
+        "excluded_bundles": [],
         "status": "incomplete",
     }
     for bundle in sorted(bundles, key=lambda b: b["bundle_id"]):
         node, path = saved_bundle(lock, warm, bundle, properties)
+        if args.refine_saved:
+            if path[-1]["v"] == 0:
+                report["excluded_bundles"].append(
+                    {"bundle_id": node.bundle_id, "reason": "saved_construction_already_feasible"}
+                )
+                continue
+            endpoint = next(
+                t
+                for w in lock["work"]
+                for t in w["sampled_transitions"]
+                if t["bundle_id"] == node.bundle_id and t["step"] == node.horizon
+            )
+            node = refinement_start(
+                node, endpoint["product"], RingProgress.from_payload(endpoint["ring_progress"])
+            )
         result = probe(node, properties)
         report["bundles"].append(
             {
