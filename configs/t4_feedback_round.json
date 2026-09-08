@@ -1,0 +1,67 @@
+{
+  "schema_version": "t4_feedback_round_contract_v1",
+  "source_role": "inspected development PARP1 seed0; no held-out inference",
+  "training_authorized": false,
+  "endpoint_selection_policy": "t4_feasible_only_v1",
+  "task": {
+    "session": "compose_iclr",
+    "delta": 0.4,
+    "budget": 20,
+    "per_round": 20,
+    "lineages": 8,
+    "regions_per_lineage": 3,
+    "particles_per_region": 1,
+    "workers": 1,
+    "max_frontier": 8,
+    "emit_per_bundle": 3,
+    "max_handoff": 16,
+    "seed_rng": 1000,
+    "kappa": 1,
+    "epsilon": 0.1,
+    "epsilon_region": 0.2,
+    "epsilon_option": 0.1,
+    "macro_temperature": 2,
+    "epsilon_macro": 0.15,
+    "include_fused": true,
+    "max_executor_applications": 20000
+  },
+  "expected_input_sha256": {
+    "committor": "566cfe582973884b22e29c02b00b8188d9ef158b47387275eb36b6e8e62e2c11",
+    "r_theta_checkpoint": "c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8",
+    "r_theta_run_paths": "585286e0fb6dd8fb6b5a050dc3e5f8d1c7e782b105df114cbcb14cabbb5b2bc2",
+    "seed_manifest": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+    "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+    "receptor": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9"
+  },
+  "compute": {
+    "cpu": 1,
+    "memory_mib": 8192,
+    "timeout_seconds": 3600,
+    "automatic_retries": 0,
+    "oracle_call_limit": 20,
+    "heartbeat_seconds": 30
+  },
+  "additional_rounds": 1,
+  "contract_sha256": "UNSEALED_PENDING_COMPUTE_ALLOCATION_DECISION",
+  "source": {
+    "warm": {
+      "path": "t4_warm_continuation/180696c8c1caf1b4fab2107fb2c9b49792a70372cf8d22664a1947972ec31cdd/warm_start.json",
+      "sha256": "2df69a5a21ee9658a1add7938252ff70425d61464cd0c08a9f34fe0b38f29f65"
+    },
+    "lock": {
+      "path": "t4_partial_docking/6162234b802b661012c4773171623a0dd964cb1394dbeb65405160248abf4a6d/candidate_lock.json",
+      "sha256": "a6a47a063410e10b5e8f596ad896fcaa7dee38fb513ce19251022bdc63fd78a4"
+    },
+    "docking": {
+      "path": "t4_partial_docking/6162234b802b661012c4773171623a0dd964cb1394dbeb65405160248abf4a6d/docking.json",
+      "sha256": "261dd328c6a402ebe6de34115863a01000d12f1bf8d56c1456390ff323311b31"
+    }
+  },
+  "required_rdkit": "2024.03.5",
+  "accounting": {
+    "source_guided_calls": 33,
+    "maximum_new_calls": 20,
+    "remaining_allowance_before": 27,
+    "automatic_continuation": false
+  }
+}

@@ -303,6 +303,23 @@ def t4_warm_continuation(task: dict[str, Any]) -> dict[str, Any]:
 
 
 @app.function(
+    image=image, cpu=(1.0, 1.0), memory=8192, timeout=3600,
+    max_containers=1, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_feedback_round(task: dict[str, Any]) -> dict[str, Any]:
+    """One twenty-call round from all 33 saved evaluations; no automatic next round."""
+    from compose_v4.experiments.t4_feedback_round import run_remote
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return run_remote(
+        task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume, _runtime,
+        _validate_remote_revision,
+        lambda t, progress, cached, warm: t4_population_cell.local(t, progress, cached, warm),
+        lambda smiles, rd: _dock_many(smiles, "parp1", f"{task['run_id']}_{rd}", workers=1),
+    )
+
+
+@app.function(
     image=image, cpu=(1.0, 1.0), memory=2048, timeout=3600,
     max_containers=1, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
 )

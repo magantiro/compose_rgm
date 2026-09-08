@@ -280,12 +280,46 @@ def run_continuation(
     if source_lock["input_sha256"] != contract["expected_input_sha256"]:
         raise ValueError("source scientific input identities differ")
     warm = initial_archive(source_lock, source_docking)
+    return run_rounds(
+        task,
+        warm,
+        prepare,
+        dock,
+        output,
+        additional_rounds=2,
+        endpoint_policy=endpoint_policy,
+        source_identity=contract["source"],
+        commit=commit,
+        progress=progress,
+    )
+
+
+def run_rounds(
+    task,
+    warm,
+    prepare,
+    dock,
+    output,
+    *,
+    additional_rounds,
+    endpoint_policy,
+    source_identity,
+    commit=lambda: None,
+    progress=None,
+):
+    """Shared locked-round execution; callers validate prospective authorization."""
+    if additional_rounds not in (1, 2):
+        raise ValueError("only one or two explicitly authorized rounds are supported")
+    validate_policy(endpoint_policy)
+    progress = {} if progress is None else progress
+    initial_attempts = warm["oracle_attempts"]
+    initial_round = warm["round"]
     feasible = [c for c in warm["archive"] if c["ds"] is not None and c["v"] <= 0]
     progress.update(best_score=min((c["ds"] for c in feasible), default=None))
     seal(output / "warm_start.json", warm)
     commit()
     results = []
-    for rd in (2, 3):
+    for rd in range(initial_round + 1, initial_round + additional_rounds + 1):
         directory = output / f"round_{rd}"
         round_task = {
             **task,
@@ -356,9 +390,9 @@ def run_continuation(
         "schema_version": "t4_warm_continuation_v1",
         "status": "complete",
         "task": task,
-        "source": contract["source"],
+        "source": source_identity,
         "rounds": results,
-        "new_oracle_attempts": warm["oracle_attempts"] - 20,
+        "new_oracle_attempts": warm["oracle_attempts"] - initial_attempts,
         "cumulative_oracle_attempts": warm["oracle_attempts"],
         "interpretation_scope": "guided-only inspected development continuation",
     }
