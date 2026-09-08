@@ -1,0 +1,124 @@
+{
+  "files": {
+    "committor/candidate_lock.json": {
+      "bytes": 267709,
+      "sha256": "e99baac798845533aa4df820a2dbd8c482632e81827a1d9cb33036e2c6a89ce0"
+    },
+    "committor/docking.json": {
+      "bytes": 16047,
+      "sha256": "b9604eb299d8c848fa90114ed246452dff9e539897789c8623c69677e7f62751"
+    },
+    "committor/docking_started.json": {
+      "bytes": 303,
+      "sha256": "9ad5a49652cc685f188011eec4771cdfafd61f1ea867f89dd8c8b85f59453017"
+    },
+    "committor/executor_attempts_0.json": {
+      "bytes": 23170131,
+      "sha256": "21af9bbef177b0af1ade8f490ef5fe18c043d671d8e9016c0e65383f13b82708"
+    },
+    "committor/parents/00.json": {
+      "bytes": 62870,
+      "sha256": "b22e40ee4f82bd7530e8d7916c6b590420af314759feae2d0812de682479dd99"
+    },
+    "committor/parents/01.json": {
+      "bytes": 22492,
+      "sha256": "b8ce90f52998e9c8623b97aaab156acfffb2623691c5b34d6c959b2ea627b274"
+    },
+    "committor/parents/02.json": {
+      "bytes": 59118,
+      "sha256": "96d857d6acccee5f0339e92007803b73997ac878cfe175cc5d18756d3aad994c"
+    },
+    "committor/parents/03.json": {
+      "bytes": 11950,
+      "sha256": "5076295336256c771fa171c86a2695241b0704d9a9552a14140037a3e1463764"
+    },
+    "committor/parents/04.json": {
+      "bytes": 35857,
+      "sha256": "e303e702bd1f6e394c495a047cfebe99401a2494812bb790552f4759c10820b6"
+    },
+    "committor/parents/05.json": {
+      "bytes": 11458,
+      "sha256": "80b2748333e248b55307aebc4c0e5875f37a1e6ac0c526ddf539e098a6daa759"
+    },
+    "committor/parents/06.json": {
+      "bytes": 12228,
+      "sha256": "43fb32c213546985d049428958ae6f5a3f0c10fce567b4e3e8eb1e0c3f1e92ab"
+    },
+    "committor/parents/07.json": {
+      "bytes": 35476,
+      "sha256": "61c6228ce64b4005d147033f21145f232028096e9a67f06272ad2686e7fd24cd"
+    },
+    "heartbeat.json": {
+      "bytes": 268,
+      "sha256": "c96525c7dc8616697e8daff0dc8d07caea50a2c1a09b4ae4a6f70c105c3575b6"
+    },
+    "launch.json": {
+      "bytes": 48196,
+      "sha256": "5a4b0874f6f8429c48872e7f3553057447d0c7cf8e56b859bc851ec63fb0840d"
+    },
+    "oracle_barrier.json": {
+      "bytes": 237,
+      "sha256": "c2282f12327df77881c882af53708247f30382233f8533b890d9da82c09e9be4"
+    },
+    "reference/candidate_lock.json": {
+      "bytes": 261299,
+      "sha256": "72a7ee065dbe09ce499db07b27d9ce200f7b53b0cd99ce906c7009bb18dd202a"
+    },
+    "reference/docking.json": {
+      "bytes": 15980,
+      "sha256": "3cd90d87170c1d0941aef0f043573b2ae32f91298f14f08e0c7c0c98238ae89c"
+    },
+    "reference/docking_started.json": {
+      "bytes": 303,
+      "sha256": "6ed01ead4d350c97c8d82b0f582f83349a774938ddc98ffda5a4be1155a52287"
+    },
+    "reference/executor_attempts_0.json": {
+      "bytes": 17810339,
+      "sha256": "344c961d4d4e145e5dbffb75f46c7234f744e8b1d8359a2281848036bf5d660d"
+    },
+    "reference/parents/00.json": {
+      "bytes": 60967,
+      "sha256": "918aaeedbbb6e957ce358e220ab246d648f08b4542b2005ea0ab07cbec5ed1d0"
+    },
+    "reference/parents/01.json": {
+      "bytes": 22024,
+      "sha256": "bdaba757bd1b76fdfc67549eec4632e2df31e72c8fea23e3d4d12122340d6e8f"
+    },
+    "reference/parents/02.json": {
+      "bytes": 57072,
+      "sha256": "43913fa49b3bb131f0e287de076b940da8dae7174e1a091f546383a07fb1e3a0"
+    },
+    "reference/parents/03.json": {
+      "bytes": 11815,
+      "sha256": "4e613470ab41beb92c092f0f0137a820576a8cfc015919a5616a82cede61e5c0"
+    },
+    "reference/parents/04.json": {
+      "bytes": 35145,
+      "sha256": "15692d9b62f3f8c74def59a51d3fdd0b1b7ce473283cf84eb3f60372abb3625b"
+    },
+    "reference/parents/05.json": {
+      "bytes": 11337,
+      "sha256": "dcbf7236607734ab9c75302cfd69c514fbf67a64c388aa61a97b145eb3b25dbd"
+    },
+    "reference/parents/06.json": {
+      "bytes": 12081,
+      "sha256": "ad5734afff373c73c97a7ed2eae83ecef4e6d2fba51ca46eb71f9e8ac6347cbb"
+    },
+    "reference/parents/07.json": {
+      "bytes": 34759,
+      "sha256": "aa8742bc20ce6944406e7271301493b7173176f45f7d1d89696f4c4843a46ec2"
+    },
+    "result.json": {
+      "bytes": 35808,
+      "sha256": "7a8058fbfa18d268ee63160565872997dfbd429622c3d28098f7c7b2b0facc04"
+    },
+    "runtime_gate.json": {
+      "bytes": 1037,
+      "sha256": "d30b82d3b0e519fa9f029f4d014e8532acdd766918364dfdeea61dda13b9ff6e"
+    }
+  },
+  "retrieved_at_utc": "2026-09-08T06:41:50.683232+00:00",
+  "schema_version": "t4_remote_artifact_inventory_v1",
+  "volume": "compose-v4-artifacts",
+  "volume_path": "/t4_matched_pilot/f1464df61efaf23e04574fcebcb037116507b8c5d02f9c9bdc166facfe019889"
+}
