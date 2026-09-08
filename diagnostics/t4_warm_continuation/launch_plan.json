@@ -1,0 +1,78 @@
+{
+  "schema_version": "t4_warm_launch_plan_v1",
+  "recorded_at_utc": "2026-09-08T07:28:00Z",
+  "scientific_revision": "6fe5cdf3d650d16fb4f27b9804a4608d91e0693c",
+  "worktree": "/private/tmp/compose-t4-warm.gOVuSy",
+  "run_id": "9aef7ea2d6b10c6bdd605d3dc6786a6cb57085cb102aae2e44da09743f62be97",
+  "identity": {
+    "app_sha256": "ac809fcf9f09ffaa5847b6d4ea6909feb28440233657b141435aa9a938142605",
+    "contract_sha256": "4830c7bfb8fa4606a46813e47292a0756ace40340bde5e35fa4d99cd117bced1",
+    "image_revision_sha256": "27f7a77d658e2509dbf450b46545273c5254b85436b0b4eae53e8144e1a7d25e"
+  },
+  "task_census": {
+    "additional_rounds": 2,
+    "parents_per_round": 8,
+    "regions_per_parent": 3,
+    "new_oracle_call_limit": 40,
+    "reused_calls": 20,
+    "executor_ceiling_per_round": 20000
+  },
+  "compute": {
+    "cpu": 1,
+    "memory_mib": 8192,
+    "gpu": null,
+    "workers": 1,
+    "timeout_seconds": 3600,
+    "automatic_retries": 0
+  },
+  "estimate": {
+    "basis": "previous repaired guided round: 449.687 proposal seconds and 16335 executor applications; larger warm parents may cost more",
+    "expected_remote_seconds": [
+      1200,
+      2400
+    ],
+    "requested_compute_usd": [
+      0.037032,
+      0.074064
+    ],
+    "requested_compute_at_timeout_usd": 0.111096,
+    "cpu_usd_per_core_second": 0.0000131,
+    "memory_usd_per_gib_second": 0.00000222,
+    "pricing_source": "https://modal.com/pricing",
+    "pricing_checked_date": "2026-09-08",
+    "exclusions": "not an invoice; excludes builds, storage, plan charges and any usage above memory request"
+  },
+  "artifact_inventory": {
+    "source_remote_present": true,
+    "target_namespace_present": false,
+    "genmol_t4_opt_active_tasks": 0,
+    "source_lock_sha256": "e99baac798845533aa4df820a2dbd8c482632e81827a1d9cb33036e2c6a89ce0",
+    "source_docking_sha256": "b9604eb299d8c848fa90114ed246452dff9e539897789c8623c69677e7f62751",
+    "scope": "read-only root/source inventory before deployment; unrelated apps untouched"
+  },
+  "reuse": {
+    "source_attempts": 20,
+    "archive_records_with_seed": 21,
+    "exact_state_metadata_mappings_verified": 21,
+    "initial_round_recomputed": false,
+    "policy": "same full guided archive; explicit warm restart, not asserted bit-identical legacy resumption"
+  },
+  "verification": {
+    "focused_tests_passed": 83,
+    "focused_seconds": 6.69,
+    "full_suite": "running once on frozen source, with required multiprocessing permissions",
+    "new_modules_tests_and_launcher_lint_format": "passed",
+    "legacy_app_lint": "17 unchanged baseline messages and counts",
+    "legacy_app_format": "noncompliant before and after; no unrelated whole-file formatting",
+    "preflight": "passed on clean exact launch worktree",
+    "deploy": "complete; no scientific spawn yet"
+  },
+  "restart_units": [
+    "complete parent receipt",
+    "candidate lock",
+    "docking result",
+    "exact archive and RNG checkpoint"
+  ],
+  "stop_policy": "two rounds only; no backfill; failed preparation or interrupted oracle requires explicit accounting before retry",
+  "interpretation_scope": "guided-only inspected PARP1 seed0 d=0.4 developmental continuation; no reference comparison or IVG superiority claim"
+}
