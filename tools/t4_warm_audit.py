@@ -99,7 +99,9 @@ def report(root: Path) -> dict:
         }
 
     curve.append(score_point(warm))
-    for rd in (2, 3):
+    # A feedback episode can start after the audited partial event 2. Do not
+    # look for a fictitious completed round 2 in the new run's namespace.
+    for rd in range(warm["round"] + 1, warm["round"] + 3):
         directory = root / f"round_{rd}"
         lock_path = directory / "candidate_lock.json"
         if not lock_path.exists():
@@ -145,6 +147,10 @@ def report(root: Path) -> dict:
             "executor_calls": lock["total_public_executor_calls"],
             "law_enumerations": sum(w["law_enumerations"] for w in lock["work"]),
             "sampled_transitions": len(trace),
+            "parent_budgets": [w.get("parent_budget") for w in lock["work"]],
+            "unselected_region_draws": sum(
+                w.get("unselected_region_draws", 0) for w in lock["work"]
+            ),
         }
         docking_path = directory / "docking.json"
         if docking_path.exists():

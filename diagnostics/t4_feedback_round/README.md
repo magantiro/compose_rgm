@@ -1,4 +1,43 @@
-# Feedback-round preparation, no new scientific run
+# Feedback-round development record
+
+## Authorized run, 2026-09-08
+
+The user approved equal 2,500-public-executor-call shares for eight parents,
+within the existing 20,000 total ceiling. The single feedback round is now
+spawned into deployed `genmol-t4-opt`, with no automatic next round:
+
+- Scientific code: `bdb933948ec6b9f5bbfd0b1c14cce26b7a6a8ef6`.
+- Call: `fc-01M2100VP8YHZP8DJMTSCMBBMC`.
+- Volume: `compose-v4-artifacts`.
+- Prefix: `t4_feedback_round/7b3ff467f806ff38058d520a9aee8273caabe3be0a9e164678f7428ed2f323ff`.
+- Contract self-hash: `9fdf7b46c149e49b36eb6196700129af5c89bb2f973304b49dd0f7924ade90c8`.
+- Spawn receipt: `attempt_1/spawn.json`, SHA-256
+  `3388164b3f463a32a3bf81a364e39910bbcc5dba434446e6d16dedf9821bfce3`.
+
+All three remote source files matched the contract's physical hashes before
+launch. No feedback namespace existed. Strict preflight passed in the clean
+worktree, followed by deployment and `tools/t4_launch.py --feedback-round`.
+The launcher's own clean-source check also passed. Unrelated concurrent
+scaffold/decoder work was excluded and preserved in the shared workspace.
+
+Launch verification at the scientific revision: 77 passed in 8.59 seconds,
+covering parent-budget cancellation, retained exact outputs, feedback import,
+warm continuation, matched-pilot arithmetic, endpoint selection and saved
+docking. `launch_focused.xml` SHA-256:
+`3ff0eef6f4c90212d8432272f4217c585d099aec3ef6b23fbfc57b7df7857fb6`.
+Ruff checks on touched standalone modules/tests and diff checks passed.
+The unrelated non-green full suite was not repeated.
+
+The offline auditor now starts after the archive's actual event, so it does
+not require a fictitious completed round 2. Three focused auditor tests passed
+in 2.20 seconds, recorded in `audit_tests.xml`. This reporting-only change is
+not part of the serialized scientific image and does not regenerate proposals.
+
+Results are pending. The starting best is -9.3 at 33 calls. At most 20 new
+calls are authorized. Share exhaustion is finite-budget censoring, not
+chemical invalidity or evidence that an incomplete compound program succeeded.
+
+## Earlier preparation record
 
 Implementation revision: `01c17cf8ebeb` (full identity available in Git).
 The single twenty-call round was authorized in chat. Its intra-round executor
