@@ -236,6 +236,7 @@ def population_fixture(monkeypatch, tmp_path):
     return ns["t4_population_cell"]
 
 
+@torch.enable_grad()
 def test_real_population_preparation_carries_fused_progress_and_emits_only_endpoint(
     monkeypatch, tmp_path
 ):
