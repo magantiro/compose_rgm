@@ -1,0 +1,107 @@
+{
+  "application_parity": {
+    "baseline_lint_count": 17,
+    "baseline_revision": "1be2706772b9bc576fa3df84592fa8f7770abe20",
+    "current_lint_count": 17,
+    "new_functions": [
+      "fused_reference_profile"
+    ],
+    "new_lint_code_message_pairs": [],
+    "unchanged_function_asts": [
+      "_dock",
+      "_dock_many",
+      "_dock_one",
+      "_read_cells",
+      "_runtime",
+      "continuation_profile",
+      "drive",
+      "main",
+      "optimize",
+      "ring_admissibility_probe",
+      "ring_probe",
+      "t4_population",
+      "t4_population_cell",
+      "t4_population_report",
+      "t4_population_report_only",
+      "t4_progress",
+      "t4_spawn"
+    ]
+  },
+  "code_revision": "26a0a92fac7242fa549b3de2fa703849d1994eb8",
+  "focused": {
+    "command": "KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 .venv/bin/python -m pytest -q tests/test_fused_reference_profile.py tests/test_fused_option.py tests/test_fused_option_audit.py tests/test_option_continuation.py tests/test_continuation_profile.py tests/test_slot_safety.py::test_experiment_infrastructure_is_slot_safe --junitxml=diagnostics/fused_reference_profile/focused.xml",
+    "counts": {
+      "errors": "0",
+      "failures": "0",
+      "hostname": "BGS-STU23-147",
+      "name": "pytest",
+      "skipped": "0",
+      "tests": "61",
+      "time": "3.497",
+      "timestamp": "2026-09-07T22:07:12.141373-04:00"
+    },
+    "path": "diagnostics/fused_reference_profile/focused.xml",
+    "sha256": "a70fa15a3a7d7108736f608b8df54f1ad29dec95847e560417ed98c93fe1f9e1"
+  },
+  "format_lint": {
+    "git_diff_check": "passed",
+    "scoped_files": [
+      "src/compose_v4/experiments/fused_reference_profile.py",
+      "tests/test_fused_reference_profile.py",
+      "tools/t4_launch.py"
+    ],
+    "scoped_ruff_check": "passed",
+    "scoped_ruff_format_check": "passed",
+    "whole_legacy_application_lint": "non-green with no new diagnostics"
+  },
+  "full_suite": {
+    "code_revision": "1be2706772b9bc576fa3df84592fa8f7770abe20",
+    "errors": 58,
+    "failures": 47,
+    "gate_waiver": false,
+    "new_failure_identities_vs_preceding_suite": 0,
+    "passed": 4423,
+    "path": "diagnostics/fused_option_audit/full_suite.xml",
+    "sha256": "55cbcf561013e5e9097e105a336aacde9beda1b52b7d11c56a880088e78aaf9c",
+    "skipped": 2,
+    "xfailed": 1
+  },
+  "input_sha256": {
+    "configs/fused_reference_profile_contract.json": "45f24f14aea5d0538fa648b8d1effec03441028f738d5bdf757d1f3bdfe0dacb",
+    "docs/FUSED_REFERENCE_PROFILE.md": "0b7f48f0ebdf91b5e80041fa9458620a811b1da1698bc1e472c63d06ef6f70c4",
+    "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+    "modal_apps/genmol_t4_opt_app.py": "9e9b024a5ca5fed13febcec620d469444c759db53fd6c7935aee215f361d68fb",
+    "src/compose_v4/experiments/fused_reference_profile.py": "e19bbea5d0259fef0d8879000add660851e663afe5491f2a4ba28555478d9119",
+    "tests/test_fused_reference_profile.py": "eb7904c0779ac442f03a76fa9eab7c3b0f85e8ebf7bfaba01f763ef9dcf81cdc",
+    "tools/t4_launch.py": "217116c59dd048311caff5dfbd0793ae5f53ec5c0248710c5016ab173e1d6220"
+  },
+  "limitations": [
+    "No learned-model result at preparation time",
+    "RDKit/environment cause of local catalog failure is hypothesized, not established",
+    "One fixed region is not Q(M) sampling and one fixed option is not Q(o) sampling",
+    "Not a completed repository milestone; no docking, guidance comparison, or training authorization"
+  ],
+  "required_remote_gate": "unchanged production source, materialization, catalog and strict checkpoint load must pass before law enumeration",
+  "runtime_source_inventory": {
+    "changed_preexisting_files": [
+      "src/compose_v4/control/option_continuation.py",
+      "src/compose_v4/control/option_selector.py",
+      "src/compose_v4/experiments/continuation_profile.py"
+    ],
+    "compared_preexisting_files": 388,
+    "prior_code_revision": "eab79ab30ae25b719deb6c1e3e55e92176b71494",
+    "prior_launch": "diagnostics/continuation_profile/attempt_1/dcdac938b77b7440e0c214bcb197252d1e0c4dd9707720f18d1b336a3177b443/launch.json",
+    "prior_launch_sha256": "9e54d0091d95cf849557580140ce0551ae5d35bf1374bd371f9abc020b56500c",
+    "reuse_decision": "no certified cross-run row reuse; different augmented program states and incomplete old runtime receipt; bounded five-row audit instead of exhaustive replay"
+  },
+  "schema_version": "fused_reference_readiness_v1",
+  "scientific_run_scope": "one frozen-model zero-docking reference trajectory, no automatic retry or promotion",
+  "software": {
+    "machine": "arm64",
+    "numpy": "2.5.3",
+    "python": "3.12.9",
+    "rdkit": "2026.03.6",
+    "torch": "2.14.0"
+  },
+  "status": "scoped_driver_checks_passed_full_repository_non_green"
+}
