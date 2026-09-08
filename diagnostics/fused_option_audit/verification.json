@@ -1,0 +1,42 @@
+{
+  "schema_version": "fused_option_verification_v1",
+  "source_revision": "1be2706772b9bc576fa3df84592fa8f7770abe20",
+  "evidence_role": "local model-free engineering integration; not production qualification",
+  "artifacts": {
+    "result.json": "a8dc8e8a688075076044dfc21c13096239b7b8a7286f7f6e0a2fdeb6c3ada251",
+    "focused.xml": "3328374ed16f3b33c0eeb80be42971934e789a3334748a22f6ed05751ff0c056",
+    "full_suite.xml": "55cbcf561013e5e9097e105a336aacde9beda1b52b7d11c56a880088e78aaf9c"
+  },
+  "configuration_sha256": "629a4dfbb6e04a305b2b4e9aa7ad378215d6444f2aaec3b958b26cb2b30a6a82",
+  "input_hash_recheck": "passed for every recorded material input",
+  "focused_tests": {"passed": 120, "failed": 0, "errors": 0, "skipped": 0},
+  "lint": "passed for all eight touched Python files",
+  "format": "passed for all eight touched Python files",
+  "strict_preflight": "passed; mounted-source drift zero",
+  "repository_reference_inventory": "completed; not a scientific acceptance gate",
+  "staged_source_diff_check": "passed",
+  "full_suite": {
+    "status": "completed_non_green",
+    "observed_nonpassing_tests": true,
+    "final_counts": {"passed": 4423, "failed": 47, "errors": 58, "skipped": 2, "xfailed": 1},
+    "exit_code": 1,
+    "seconds_reported": 1851.37,
+    "prior_result_artifact": "../sampled_continuation/full_suite.xml",
+    "prior_result_sha256": "3a0d2f8ff2b1d82270cb84c61a77f7cb7e537e9010f3311ff2b45cd9c4e71a1b",
+    "shared_nonpassing_identities": 105,
+    "new_nonpassing_identities": 0,
+    "comparison_limit": "Matching failing identities does not prove identical causes or waive any gate.",
+    "source_revision": "1be2706772b9bc576fa3df84592fa8f7770abe20",
+    "environment": "macOS, outside sandbox for native shared-memory and multiprocessing tests",
+    "command": "KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 .venv/bin/python -m pytest -q --junitxml=diagnostics/fused_option_audit/full_suite.xml",
+    "tool_session_id": 67997,
+    "result_artifact": "full_suite.xml"
+  },
+  "milestone_complete": false,
+  "production_model_audit_launched": false,
+  "new_docking_calls": 0,
+  "training_runs": 0,
+  "default_t4_option_set_changed": false,
+  "artifact_diff_check": "raw full-suite XML contains traceback trailing whitespace; preserve original hashed bytes",
+  "pushed": false
+}
