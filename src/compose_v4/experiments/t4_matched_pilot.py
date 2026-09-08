@@ -309,16 +309,22 @@ def run_remote(
     thread = threading.Thread(target=heartbeat, daemon=True)
     thread.start()
     try:
-        runtime = runtime_factory()  # existing frozen runtime gates, outside proposal meter
+        docking_only = contract.get("docking_only", False)
+        if docking_only and runtime_factory is not None:
+            raise ValueError("saved docking must not initialize the generator")
+        runtime = None if docking_only else runtime_factory()
         seed_path = repo_root / "docs/GENMOL_T4_SEEDS.json"
         input_paths = {
             "seed_manifest": seed_path,
-            "r_theta_checkpoint": Path(runtime["model_checkpoint"]),
-            "r_theta_run_paths": Path(runtime["run_paths"]),
-            "committor": Path("/artifacts/region_committor/committor_bellman_v1.pt"),
             "qvina02": Path("/opt/dock/qvina02"),
             "receptor": Path("/opt/dock/receptors/parp1.pdbqt"),
         }
+        if runtime is not None:
+            input_paths.update(
+                r_theta_checkpoint=Path(runtime["model_checkpoint"]),
+                r_theta_run_paths=Path(runtime["run_paths"]),
+                committor=Path("/artifacts/region_committor/committor_bellman_v1.pt"),
+            )
         for name, input_path in input_paths.items():
             verify_file(input_path, contract["expected_input_sha256"][name])
         seed = json.loads(seed_path.read_text())[0]
@@ -333,9 +339,13 @@ def run_remote(
             "expected_input_sha256": contract["expected_input_sha256"],
         }
         gate = {
-            "status": "existing_frozen_runtime_gates_passed",
+            "status": "docking_only_inputs_verified"
+            if docking_only
+            else "existing_frozen_runtime_gates_passed",
             "initialization_seconds": time.perf_counter() - started,
-            "model_parameter_dtypes": sorted({str(p.dtype) for p in runtime["model"].parameters()}),
+            "model_parameter_dtypes": sorted({str(p.dtype) for p in runtime["model"].parameters()})
+            if runtime
+            else [],
             "input_paths": {name: str(p) for name, p in sorted(input_paths.items())},
             "input_sha256": contract["expected_input_sha256"],
         }

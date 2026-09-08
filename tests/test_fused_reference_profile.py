@@ -280,6 +280,7 @@ def test_runtime_gate_failure_stops_before_model_enumeration(tmp_path):
         "fused_reference_profile",
         "t4_matched_pilot",
         "t4_warm_continuation",
+        "t4_partial_docking",
     ],
 )
 def test_launcher_spawns_only_the_selected_profile(tmp_path, monkeypatch, kind):
@@ -296,6 +297,7 @@ def test_launcher_spawns_only_the_selected_profile(tmp_path, monkeypatch, kind):
         "continuation_profile": "configs/continuation_profile_v1.json",
         "t4_matched_pilot": "configs/t4_matched_pilot.json",
         "t4_warm_continuation": "configs/t4_warm_continuation.json",
+        "t4_partial_docking": "configs/t4_partial_docking.json",
     }[kind]
     (tmp_path / config).write_bytes((ROOT / config).read_bytes())
     (tmp_path / "modal_apps/genmol_t4_opt_app.py").write_text("# launch boundary fixture\n")
@@ -323,12 +325,15 @@ def test_launcher_spawns_only_the_selected_profile(tmp_path, monkeypatch, kind):
         fused=kind == "fused_reference_profile",
         matched=kind == "t4_matched_pilot",
         warm=kind == "t4_warm_continuation",
+        partial=kind == "t4_partial_docking",
     )
     assert len(calls) == 2
     assert calls[0] == ("genmol-t4-opt", kind)
     receipt = json.loads((tmp_path / f"diagnostics/{kind}_spawn.json").read_text())
     assert receipt["task"] == calls[1]
     assert receipt["oracle_calls"] == 0
-    assert receipt["oracle_call_limit"] == (40 if kind.startswith("t4_") else 0)
+    assert receipt["oracle_call_limit"] == (
+        13 if kind == "t4_partial_docking" else 40 if kind.startswith("t4_") else 0
+    )
     assert receipt["call_id"] == "fc-fixture"
     assert receipt["volume_path"] == f"/{kind}/{calls[1]['run_id']}"

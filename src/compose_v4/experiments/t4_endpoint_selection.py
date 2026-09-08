@@ -14,6 +14,24 @@ LEGACY_RANK_ALL = "legacy_rank_all_v1"
 T4_FEASIBLE_ONLY = "t4_feasible_only_v1"
 
 
+def calculate_properties(molecule, *, seed_fp, generator, sa_scorer, delta, qed_min, sa_max):
+    """The existing T4 property calculation, shared by generation and saved docking."""
+    from rdkit import DataStructs
+    from rdkit.Chem import QED
+
+    if molecule is None:
+        return None
+    q = float(QED.qed(molecule))
+    sa = float(sa_scorer(molecule))
+    sim = float(DataStructs.TanimotoSimilarity(seed_fp, generator.GetFingerprint(molecule)))
+    v = max(
+        max(0.0, qed_min - q) / qed_min,
+        max(0.0, sa - sa_max) / sa_max,
+        max(0.0, delta - sim) / delta,
+    )
+    return {"qed": q, "sa": sa, "sim": sim, "v": v}
+
+
 def validate_policy(policy: str) -> None:
     if policy not in (LEGACY_RANK_ALL, T4_FEASIBLE_ONLY):
         raise ValueError(f"unknown T4 endpoint selection policy: {policy!r}")

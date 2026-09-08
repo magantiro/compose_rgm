@@ -1,0 +1,67 @@
+{
+  "accounting": {
+    "automatic_continuation": false,
+    "maximum_new_calls_this_diagnostic": 13,
+    "new_call_allowance": 40,
+    "partial_round_not_optimizer_completion": true,
+    "source_guided_calls": 20
+  },
+  "authorized_smiles": [
+    "CC(C)Cc1ccc2c(c1)CNC(=O)c1c(O)ccn1-2",
+    "CC(C)c1cc2n(c1)-c1c(cc(CN(C)C)c3ccccc13)CNC2=O",
+    "CC(C)c1cn2c(c1O)C(F)NCc1cc(CN(C)C)ccc1-2",
+    "CCNCc1cc2c(cc1I)-n1cccc1C(=O)NC2",
+    "CCNCc1ccc2c(c1)CNC(=O)c1cc(C(C)C)cn1-2",
+    "CN(C)Cc1cc2c(cc1I)-n1ccc(F)c1C(=O)NC2",
+    "CN(C)Cc1cc2c(cc1I)-n1ccnc1C(=O)NC2",
+    "CN(C)Cc1ccc2c(c1)CN(C)C(=O)c1c(Br)ccn1-2",
+    "CN(C)Cc1ccc2c(c1)CNC(=O)C1=C(Br)C=CC12",
+    "CN(C)Cc1ccc2c(c1)CNC(=O)c1c(O)c3ccccc3n1-2",
+    "CN(C=N)Cc1ccc2c(c1)CNCc1cccn1-2",
+    "CN1C=Nc2cc3c(cc2C1)CNC(=O)c1cccn1-3",
+    "Cc1cc(CN(C)C)cc2c1-n1c(ccc1C1=NC(=O)NON1C)C(=O)NC2"
+  ],
+  "compute": {
+    "automatic_retries": 0,
+    "cpu": 1,
+    "cpu_per_dock": 1,
+    "docking_containers": 4,
+    "memory_mib": 2048,
+    "oracle_call_limit": 13,
+    "timeout_seconds": 3600,
+    "worker_timeout_seconds": 600
+  },
+  "contract_sha256": "3a56fe201c5498ea44961d8580c019af30fe87da65006a1908194fcabbd32166",
+  "docking_only": true,
+  "expected_input_sha256": {
+    "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+    "receptor": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9",
+    "seed_manifest": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"
+  },
+  "required_rdkit": "2024.03.5",
+  "schema_version": "t4_partial_docking_contract_v1",
+  "source": {
+    "code_revision": "34aa672eee4cb5d60bfa92d4c5386bd455617c73",
+    "files": {
+      "failure.json": "3d95c83392f2eb8309de1fb5d1c0f85c21888b29c611b9a956eec170a1422f8b",
+      "round_2/parents/00.json": "9b26437f8c2a18f9aca9659900fb4b23dff2c3901b2db559d0f35d92db7606cf",
+      "round_2/parents/01.json": "929573666e8efaaa5155c26289b7eaecdcf03a5df7a176bf317ec3b20b897cb3",
+      "round_2/parents/02.json": "bde8347140f60502d67a3b23ba56c464e3c80d997b4633b04c47b86588f9e70c",
+      "round_2/parents/03.json": "e6430a2a6ad26ece1e1bb2b1f92a3084bb673feceaaa93f23a7bbb83e35607b9",
+      "round_2/parents/04.json": "bdf55a98819668f3239b1ec8d3038e23477e10ded8723629cc7975415a92f401",
+      "round_2/parents/05.json": "268254379884f6b4bf7fadb015b9cbf81c46716cb98af08f0e7fb3f4f9e75c5a",
+      "round_2/parents/06.json": "767f0a283c2029edb5cebb8a6a73d50d82fe34a8c80ed09a354ca86697383054",
+      "warm_start.json": "2df69a5a21ee9658a1add7938252ff70425d61464cd0c08a9f34fe0b38f29f65"
+    },
+    "local_selection_audit_sha256": "3858aa16b85cedbef74693058c49981a776d5f7451209672ef00a30d2e01d15d",
+    "volume_path": "t4_warm_continuation/180696c8c1caf1b4fab2107fb2c9b49792a70372cf8d22664a1947972ec31cdd"
+  },
+  "source_role": "approved partial-round development diagnostic; seven of eight completed parents",
+  "task": {
+    "budget": 13,
+    "delta": 0.4,
+    "per_round": 13,
+    "session": "compose_iclr"
+  },
+  "training_authorized": false
+}

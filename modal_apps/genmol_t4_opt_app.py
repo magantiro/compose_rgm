@@ -302,6 +302,37 @@ def t4_warm_continuation(task: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+@app.function(
+    image=image, cpu=(1.0, 1.0), memory=2048, timeout=3600,
+    max_containers=1, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_partial_docking(task: dict[str, Any]) -> dict[str, Any]:
+    """Dock only the approved saved prefix; no generator or automatic next round."""
+    from compose_v4.experiments.t4_partial_docking import run_remote
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return run_remote(
+        task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume, _validate_remote_revision,
+        lambda jobs: t4_partial_dock_one.map(jobs, order_outputs=False, return_exceptions=True),
+        qed_min=QED_MIN, sa_max=SA_MAX,
+    )
+
+
+@app.function(
+    image=image, cpu=(1.0, 1.0), memory=2048, timeout=600,
+    max_containers=4, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_partial_dock_one(task: dict[str, Any]) -> dict[str, Any]:
+    """One locked molecule per container, one oracle attempt, no retries."""
+    from compose_v4.experiments.t4_partial_docking import dock_saved_row
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return dock_saved_row(
+        task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume, _validate_remote_revision,
+        lambda smiles, tag: _dock(smiles, "parp1", tag, cpu=1),
+    )
+
+
 def _runtime():
     if "model" in _RT:
         return _RT
@@ -670,7 +701,7 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
     import torch
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
     from rdkit import Chem, DataStructs, RDConfig, RDLogger
-    from rdkit.Chem import QED, rdFingerprintGenerator
+    from rdkit.Chem import rdFingerprintGenerator
     RDLogger.DisableLog("rdApp.*")
     sys.path.append(os.path.join(RDConfig.RDContribDir, "SA_Score"))
     import sascorer
@@ -691,7 +722,7 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
     from compose_v4.rewrite.trace_shard import decode_state, encode_state
     from compose_v4.experiments.t4_warm_continuation import exact_context, payload_hash
     from compose_v4.experiments.t4_endpoint_selection import (
-        LEGACY_RANK_ALL, annotate_endpoints, validate_policy,
+        LEGACY_RANK_ALL, annotate_endpoints, calculate_properties, validate_policy,
     )
     from compose_v4.control import region_rewrite as RR
     from compose_v4.control import graph_geometry as GG
@@ -792,14 +823,10 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
     torch.set_grad_enabled(False)
 
     def props(smi):
-        m = Chem.MolFromSmiles(smi)
-        if m is None:
-            return None
-        q = float(QED.qed(m)); sa = float(sascorer.calculateScore(m))
-        sim = float(DataStructs.TanimotoSimilarity(seed_fp, gen.GetFingerprint(m)))
-        v = max(max(0.0, QED_MIN - q) / QED_MIN, max(0.0, sa - SA_MAX) / SA_MAX,
-                max(0.0, delta - sim) / delta)
-        return {"qed": q, "sa": sa, "sim": sim, "v": v}
+        return calculate_properties(
+            Chem.MolFromSmiles(smi), seed_fp=seed_fp, generator=gen,
+            sa_scorer=sascorer.calculateScore, delta=delta, qed_min=QED_MIN, sa_max=SA_MAX,
+        )
 
     def composition_delta(before_smi, after_smi):
         before_mol = Chem.MolFromSmiles(before_smi)

@@ -41,6 +41,11 @@ def main() -> None:
     ap.add_argument("--arms", default="macro_prior")
     ap.add_argument("--session", default="compose_iclr")
     ap.add_argument(
+        "--partial-docking",
+        action="store_true",
+        help="approved saved partial-round batch only, at most 13 new dockings",
+    )
+    ap.add_argument(
         "--warm-continuation",
         action="store_true",
         help="two guided warm rounds from the frozen full archive, at most 40 new calls",
@@ -92,6 +97,7 @@ def main() -> None:
                 a.fused_reference_profile,
                 a.matched_pilot,
                 a.warm_continuation,
+                a.partial_docking,
             )
         )
         > 1
@@ -114,12 +120,14 @@ def main() -> None:
         or a.fused_reference_profile
         or a.matched_pilot
         or a.warm_continuation
+        or a.partial_docking
     ):
         launch_continuation_profile(
             preflight,
             fused=a.fused_reference_profile,
             matched=a.matched_pilot,
             warm=a.warm_continuation,
+            partial=a.partial_docking,
         )
         return
 
@@ -194,7 +202,12 @@ def main() -> None:
 
 
 def launch_continuation_profile(
-    preflight: dict, *, fused: bool = False, matched: bool = False, warm: bool = False
+    preflight: dict,
+    *,
+    fused: bool = False,
+    matched: bool = False,
+    warm: bool = False,
+    partial: bool = False,
 ) -> None:
     """Spawn only the fixed diagnostic into the deployed app; retain its call ID."""
     import sys
@@ -203,7 +216,9 @@ def launch_continuation_profile(
     from modal_apps.run_process_v2_p50_app import local_image_revision
 
     kind = (
-        "t4_warm_continuation"
+        "t4_partial_docking"
+        if partial
+        else "t4_warm_continuation"
         if warm
         else "t4_matched_pilot"
         if matched
@@ -214,6 +229,7 @@ def launch_continuation_profile(
     contract = (
         ROOT
         / {
+            "t4_partial_docking": "configs/t4_partial_docking.json",
             "t4_warm_continuation": "configs/t4_warm_continuation.json",
             "t4_matched_pilot": "configs/t4_matched_pilot.json",
             "fused_reference_profile": "configs/fused_reference_profile_contract.json",
@@ -242,7 +258,7 @@ def launch_continuation_profile(
         "task": task,
         "call_id": call.object_id,
         "oracle_calls": 0,
-        "oracle_call_limit": 40 if matched or warm else 0,
+        "oracle_call_limit": 13 if partial else 40 if matched or warm else 0,
         "volume": "compose-v4-artifacts",
         "volume_path": f"/{kind}/{run_id}",
     }
