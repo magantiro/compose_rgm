@@ -1,0 +1,377 @@
+{
+  "analysis_code_revision": "0fec8ad05ab6589043dbeb721a62c1217d7a8105",
+  "call_status": "completed_result_matches_volume",
+  "configuration": {
+    "acceptance": {
+      "budgets": "at most 2000 total public executor calls; 900s function timeout is incomplete work, not a matched-budget result",
+      "comparison": "one attempt cannot estimate population completion rate, guide superiority, or docking gain",
+      "identities": "verify exact image, contract self-hash, source manifest, run paths, checkpoint; existing frozen _runtime gates must pass unchanged",
+      "promotion": "no automatic guidance comparison, T4 enablement, docking, or training",
+      "reporting": "raw law and product funnels, selected edge, primitive path, intended release vs realized structural displacement, topology deltas, canonical candidate diversity, model/proposal/persistence time",
+      "support": "unchanged production marked-law evaluator, stateful fused option, inherited 300/20 cap, and executor; explicit empty support, not chemical unreachability",
+      "validity": "every sampled state complete, connected, supported and context-preserving; independent exact-slot fused-cycle witness on completion"
+    },
+    "authority": "2026-09-07 user approval: fix the audit interface and proceed with one new capped controller component test",
+    "checkpoint": "/artifacts/editing_v2/r_theta_run/runs/run_v2_01/R_THETA_CHECKPOINT.pt",
+    "checkpoint_sha256": "c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8",
+    "compute": {
+      "containers": 1,
+      "cost_excludes": [
+        "image build and startup",
+        "storage",
+        "platform-specific premiums"
+      ],
+      "cpu_limit": 1,
+      "cpu_usd_per_core_second": 0.0000131,
+      "expected_wall_time": "prior identical frozen runtime initialized in 208.801s; complete five-row proposal time remains unmeasured; 900s is a stop limit, not an ETA",
+      "function_timeout_seconds": 900,
+      "gpu": null,
+      "heartbeat_seconds": 20,
+      "maximum_configured_function_cost_usd": 0.023778,
+      "memory_mib": 6144,
+      "memory_usd_per_gib_second": 0.00000222,
+      "precision": "frozen float32 model; float64 probabilities",
+      "pricing_accessed": "2026-09-07",
+      "pricing_source": "https://modal.com/pricing",
+      "threads": 1
+    },
+    "contract_sha256": "fefbcbdcbb1bbded2a44506c14aab57244ab0b7b5c12b3e21da48e6273c221f9",
+    "estimator": "reference",
+    "executor_meter_scope": "all public RewriteSystem.apply calls, including within production marked-law enumeration; model initialization separately timed",
+    "horizon": 5,
+    "kappa": 1,
+    "macro_exploration": 0.15,
+    "macro_temperature": 2,
+    "max_active_atoms": 40,
+    "max_executor_applications": 2000,
+    "max_expansions": 0,
+    "max_terminal_evaluations": 0,
+    "option": "build_fused_ring",
+    "option_prior_policy": "unchanged purpose-balanced prior with exploration; fixed option diagnostic does not draw Q(o)",
+    "oracle_calls": 0,
+    "persistent_slots": 48,
+    "primitive_exploration": 0.1,
+    "raw_law_normalization_atol": 0.00002,
+    "raw_law_normalization_authority": "unchanged enumerate_factorized_marked_law default; read from its public signature, no raw-weight renormalization",
+    "region_selection": "smallest region by (size, sorted atom slots, boundary) from unchanged enumerate_regions with a necessary eligible_fusion_edges witness; freeze before learned-law inspection",
+    "region_selection_is_qm_sample": false,
+    "restart_unit": "completed exact-state raw law and augmented reference row; persist sampled path plus RNG after every edit; no automatic retry or unvalidated cross-run reuse",
+    "revision_reason": "repair stricter duplicate audit-only numerical check; retain attempt_1 as failed; do not change the production evaluator, model, controller, source, seed, support, or budgets",
+    "run_paths": "/artifacts/editing_v2/r_theta_run/run_inputs/RUN_PATHS.json",
+    "run_paths_sha256": "585286e0fb6dd8fb6b5a050dc3e5f8d1c7e782b105df114cbcb14cabbb5b2bc2",
+    "schema_version": "fused_reference_profile_contract_v2",
+    "scope": "one conditional option cost/support audit, not a Q(M) comparison, discovery panel, training run, or T4 promotion",
+    "seed": 1000,
+    "source_index": 0,
+    "source_manifest": "docs/GENMOL_T4_SEEDS.json",
+    "source_manifest_sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+    "source_role": "inspected PARP1 seed0 development source; no winner molecule or docking score used",
+    "supersedes_contract_sha256": "032c11ffe6fb3652357e768ced19052f6bd280500d12fb854912ad58bf59e5d8",
+    "time_point": 0.5,
+    "training_authorized": false,
+    "winner_inputs": []
+  },
+  "counts": {
+    "completed_endpoints": 1,
+    "executor_status_counts": {
+      "executed": 186,
+      "invalid_rewrite": 60
+    },
+    "laws": 5,
+    "oracle_calls": 0,
+    "public_executor_calls": 246,
+    "row_support_sizes": [
+      2,
+      1,
+      1,
+      1,
+      1
+    ],
+    "rows": 5,
+    "sampled_edits": 5,
+    "unique_canonical_counterfactual_products": 6
+  },
+  "decision": "construction/support check passed for this one source and option; move next to a matched objective-driven end-to-end pilot, not repeated ring demonstrations",
+  "endpoint": "CN(C)Cc1ccc2c(c1)CNC(=O)c1c3ccccc3cn1-2",
+  "limitations": [
+    "One fixed-option, applicability-conditioned development-source trajectory, not a Q(M) or Q(o) sample",
+    "Reference only; no learned-guidance superiority test",
+    "Row support sizes 2,1,1,1,1 do not test a difficult multi-branch continuation problem",
+    "Six counterfactual intermediate products are not six independent completed proposals",
+    "No docking-score result or IVG competitiveness evidence",
+    "Audit persistence dominates proposal wall time; this is not an optimized production throughput benchmark"
+  ],
+  "normalization_absolute_errors": [
+    3.3459853110429094e-8,
+    8.495730685620373e-8,
+    4.497437511297164e-8,
+    1.3259499642703787e-7,
+    3.007772786389751e-8
+  ],
+  "realized_endpoint_change": {
+    "changed_fraction": 0.10526315789473684,
+    "coherence": 1,
+    "d_cycle_rank": 1,
+    "d_heavy": 4,
+    "d_ring_atoms": 4,
+    "d_ring_systems": 0,
+    "largest_changed_fraction": 0.3157894736842105,
+    "largest_changed_region": 6,
+    "n_changed_originals": 2,
+    "n_changed_regions": 1,
+    "n_deleted": 0,
+    "n_inserted": 4,
+    "topology_changed": true
+  },
+  "run_code_revision": "0fec8ad05ab6589043dbeb721a62c1217d7a8105",
+  "run_id": "10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2",
+  "runtime_gate": {
+    "catalog_fingerprint": "639ff6078c32d43c",
+    "input_sha256": {
+      "checkpoint": "c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8",
+      "run_paths": "585286e0fb6dd8fb6b5a050dc3e5f8d1c7e782b105df114cbcb14cabbb5b2bc2",
+      "source_manifest": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"
+    },
+    "runtime_seconds": 131.748091911,
+    "status": "existing_frozen_runtime_gates_passed"
+  },
+  "sampled_edge": {
+    "edge": [
+      15,
+      14
+    ],
+    "path": [
+      19
+    ],
+    "schema_version": "fused_progress_v1"
+  },
+  "schema_version": "fused_reference_completed_attempt_review_v1",
+  "selection": {
+    "atoms": [
+      14,
+      15
+    ],
+    "boundary": [
+      [
+        14,
+        13,
+        1.5
+      ],
+      [
+        15,
+        16,
+        1.5
+      ]
+    ],
+    "eligible_oriented_edges": [
+      [
+        14,
+        15
+      ],
+      [
+        15,
+        14
+      ]
+    ],
+    "enumerated_regions": 91,
+    "intended_r_release": 0.10526315789473684,
+    "interface": "segment",
+    "is_qm_sample": false,
+    "necessary_applicable_regions": 46,
+    "selection_rule": "smallest region by (size, sorted atom slots, boundary) from unchanged enumerate_regions with a necessary eligible_fusion_edges witness; freeze before learned-law inspection",
+    "source_role": "inspected PARP1 seed0 development source; no winner molecule or docking score used"
+  },
+  "status": "complete",
+  "timings_seconds": {
+    "elapsed_before_result_publication": 220.829241839,
+    "law_enumeration": 19.701860901999964,
+    "persistence": 63.09385178800002,
+    "proposal": 82.969829503,
+    "runtime_initialization": 131.748091911
+  },
+  "topology_witness": {
+    "attachment_edges": [
+      [
+        14,
+        22
+      ],
+      [
+        15,
+        19
+      ]
+    ],
+    "checks": {
+      "aromatic_ring_gain_one": true,
+      "cycle_rank_gain_one": true,
+      "exact_new_six_cycle": true,
+      "initial_atoms_and_connectivity_retained": true,
+      "requested_attachment": true,
+      "ring_system_delta": true,
+      "six_carbon_cycle": true
+    },
+    "cycle_slots": [
+      14,
+      15,
+      19,
+      20,
+      21,
+      22
+    ],
+    "deltas": {
+      "aromatic_rings": 1,
+      "cycle_rank": 1,
+      "heavy_atoms": 4,
+      "ring_systems": 0
+    },
+    "new_slots": [
+      19,
+      20,
+      21,
+      22
+    ],
+    "passed": true,
+    "shared_slots": [
+      14,
+      15
+    ]
+  },
+  "verification": {
+    "content_addresses_and_hashes": true,
+    "exact_selected_primitive_replay": true,
+    "executor_receipt_census": true,
+    "independent_topology_witness": true,
+    "local_numpy": "2.5.3",
+    "local_python": "3.12.9",
+    "local_rdkit": "2026.03.6",
+    "local_verifier_executor_calls": 5,
+    "new_model_calls": 0,
+    "new_oracle_calls": 0,
+    "remote_bytes_equal": true,
+    "rng_and_reference_path": true,
+    "total_local_verifier_executor_calls_this_turn": 10,
+    "verifier_attempt_notes": [
+      "SDK-return comparison was corrected for tuple/JSON-array serialization before any edit replay.",
+      "Mass verification was corrected to reproduce the production Python 3.11 sequential summation before any edit replay.",
+      "One five-edit replay passed, then a tuple/JSON-array comparison in the witness verifier stopped reporting.",
+      "The final verifier passed all checks, including another five-edit replay. No model or oracle calls were made by any verifier."
+    ]
+  },
+  "verified_files": {
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/attempts/000000.json": {
+      "bytes": 67937,
+      "remote_byte_equivalence": true,
+      "sha256": "2ddab7581a221d8e4917b49f88921e3decb278c41b2698592d57663c14a83329"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/attempts/000050.json": {
+      "bytes": 67387,
+      "remote_byte_equivalence": true,
+      "sha256": "ea1d888a7a07c56f665d93a2ed5709b2d99f567f2d9fc81f8e68f0010add6ea1"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/attempts/000099.json": {
+      "bytes": 68327,
+      "remote_byte_equivalence": true,
+      "sha256": "1ff4ca6f37b4815594882c93a4db4bdcceef2afb54c7e9a6920592ed2c7639fe"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/attempts/000148.json": {
+      "bytes": 69220,
+      "remote_byte_equivalence": true,
+      "sha256": "ac0d371a0856295653749ad412243152d2ff1eada717341ecbfb95325462815b"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/attempts/000197.json": {
+      "bytes": 70057,
+      "remote_byte_equivalence": true,
+      "sha256": "c0cfa8d2a5d4e75716c0ce08a2b2ee30dfa9a51189b5b54287c8e94089ce2d7d"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/heartbeat.json": {
+      "bytes": 480,
+      "remote_byte_equivalence": true,
+      "sha256": "e016a8b9a4fefebf4be174e39ed5540e6da1ffd82e2e3c6b64b8f7e3d103a055"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/launch.json": {
+      "bytes": 47981,
+      "remote_byte_equivalence": true,
+      "sha256": "17a4812a57b984dae19ba8c1507cb9f0cccf02f01478a34770f5c5e485e9b30e"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/laws/1f20353f1d6c999db7da6ca21db466821859a9b05f980ad29bc7734c60338728.json": {
+      "bytes": 139770,
+      "remote_byte_equivalence": true,
+      "sha256": "0d2ae1d38391ee947b6b1516e7b9782bb7260a8a5051e34d4c60be53d7adbe61"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/laws/3e08f9fe69126482b19049bc0f32f097882495466ae81b6ba96eb25612267869.json": {
+      "bytes": 108414,
+      "remote_byte_equivalence": true,
+      "sha256": "bb698e01234938c913c8c809b638ab061ce10f776d5293a987158be5421b36f8"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/laws/440ab67e6a34319ba97508572676cc10e41a32f8349fd27a51d025f43f79294f.json": {
+      "bytes": 125142,
+      "remote_byte_equivalence": true,
+      "sha256": "0cd98be0bf1744cdb27b538f8c8450c8b49c3b34fb3befc1400e2687007985b9"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/laws/7f2278474cacd8c93bd340701005a07c14eb8e087284259088ad820226b2150e.json": {
+      "bytes": 145615,
+      "remote_byte_equivalence": true,
+      "sha256": "47ea79b49fe6edab00a6f1b452180a48716fe30608e9c8b48ef5878bf22d8a94"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/laws/c99c8ddeade0a2b3439e4b3e81a55cc38cb8394517ff0fd277217bf07342c091.json": {
+      "bytes": 119735,
+      "remote_byte_equivalence": true,
+      "sha256": "a92f1aa3e87bbc364235f2c03402f360cf6d195d826c9d02bc166936775deaf6"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/progress.json": {
+      "bytes": 445,
+      "remote_byte_equivalence": true,
+      "sha256": "1d3c6551396d4bdf4fe25ecb95a7297f9f69f0af7db794ae1776be4db05b0ccf"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/result.json": {
+      "bytes": 34907,
+      "remote_byte_equivalence": true,
+      "sha256": "591fe8b255ee4b5e434478771c59f5394987acb6013d95c7da40ab1fac157474"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/rows/263c0c9f26c44167f558a470ba80cd0d2a32059fc9f92776c4b78281a3ba064b.json": {
+      "bytes": 4478,
+      "remote_byte_equivalence": true,
+      "sha256": "a3dcb712410af04b4c03f70e758fefdda789a1b4c1c15c94b95ee2fe1275ba30"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/rows/7f2c37bed7ca634b3fc585243a75464d67459361a87df9c27edf5c2e53829a69.json": {
+      "bytes": 4350,
+      "remote_byte_equivalence": true,
+      "sha256": "dd7ee10c5ff7031336439ad64d482ef417971c061cf9288d2b8f181363d3abd3"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/rows/8fb33e62f6e4682e44db25f118f212f572edc51924d070ad2943c0c44c3a0669.json": {
+      "bytes": 6439,
+      "remote_byte_equivalence": true,
+      "sha256": "51ec2356192c96319d22b2250cc3b4d39cfea57ca1a23f3ac30a76dfa2df3312"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/rows/a0b98b803cd14742d0ebda8ef2a8e89dc3fe1f0cceca681143f74f59a4eb4c4b.json": {
+      "bytes": 4414,
+      "remote_byte_equivalence": true,
+      "sha256": "547eebbcaeddc542ca28a2da2c021d721f8de074a3ba560829480107883227db"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/rows/cccbf874cf5c08adadefb06f31bcf3e5acc5612a5d9b97f4b086d2d6fb03dfc1.json": {
+      "bytes": 4465,
+      "remote_byte_equivalence": true,
+      "sha256": "962103655ac69455a4171b6636d0a05ad8881f03e00a9281c2668e18646a68e9"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/runtime_environment.json": {
+      "bytes": 433,
+      "remote_byte_equivalence": true,
+      "sha256": "288647c8748216e28ed67f4987b8053ca2ca2327a8c4f1c05e8205340276d918"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/runtime_gate.json": {
+      "bytes": 384,
+      "remote_byte_equivalence": true,
+      "sha256": "384721fc56569e45f1727c5d78949449f525560d66b59fd471959cc2a1bc28c3"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/sampled_path.json": {
+      "bytes": 24670,
+      "remote_byte_equivalence": true,
+      "sha256": "637e40f16a64ee425b196a268b8b0bb07bd01eb54412bad7fa57b298571e01e1"
+    },
+    "diagnostics/fused_reference_profile/attempt_2/10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2/selection.json": {
+      "bytes": 532,
+      "remote_byte_equivalence": true,
+      "sha256": "86ca800f7ca99487d7f3b54359275bbdfba51c92531652d3040087c0d92667ba"
+    }
+  },
+  "reproduction_command": "KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 .venv/bin/python - <<'PY'\nimport hashlib,json,math,platform,subprocess\nfrom collections import Counter\nfrom concurrent.futures import ThreadPoolExecutor\nfrom pathlib import Path\nimport modal,numpy as np\nfrom rdkit import rdBase\nfrom compose_v4.experiments.continuation_profile import canonical_bytes\nfrom compose_v4.experiments.ring_construction_probe import topology_witness\nfrom compose_v4.rewrite import action_codec,action_codec_v4\nfrom compose_v4.rewrite.kernel import canonical_state_key,editing_v2_semantic_rewrite_system\nfrom compose_v4.rewrite.trace_shard import decode_state,encode_state\nrun_id='10b4e170c095679e42230e21a19a51d3285be1c9e07bc4546bfe2775583d20d2'\nbase=Path('diagnostics/fused_reference_profile/attempt_2')/run_id\nv=modal.Volume.from_name('compose-v4-artifacts')\npaths=sorted(base.rglob('*.json'))\ndef verify_remote(path):\n    raw=path.read_bytes()\n    remote=b''.join(v.read_file(f'/fused_reference_profile/{run_id}/{path.relative_to(base)}'))\n    assert raw==remote,path\n    return str(path),{'sha256':hashlib.sha256(raw).hexdigest(),'bytes':len(raw),'remote_byte_equivalence':True}\nwith ThreadPoolExecutor(max_workers=4) as pool:\n    files=dict(pool.map(verify_remote,paths))\nread=lambda p:json.loads((base/p).read_text())\nr=read('result.json')\nassert r['status']=='complete'\nlaunch=read('launch.json')\nspawn=json.loads((base.parent/'spawn.json').read_text())\nassert spawn['task']==launch\nassert r['run_id']==run_id\nassert r['configuration']==json.loads(Path('configs/fused_reference_profile_contract.json').read_text())\ncall_result=modal.FunctionCall.from_id(spawn['call_id']).get(timeout=0)\nassert canonical_bytes(call_result)==canonical_bytes(r)  # SDK tuples serialize as JSON arrays\nrows=[]\nfor receipt in r['rows']+r['laws']:\n    raw=(base/receipt['path']).read_bytes()\n    assert hashlib.sha256(raw).hexdigest()==receipt['sha256']\n    payload=json.loads(raw)\n    assert hashlib.sha256(canonical_bytes(payload)).hexdigest()==Path(receipt['path']).stem\n    assert payload['snapshot_id']==run_id\n    if receipt['path'].startswith('laws/'):\n        total=0.0\n        for probability in payload['probabilities']: total+=probability  # Python 3.11 left-fold sum\n        assert total==payload['normalization']['total_probability']\n        assert abs(total-1)<=payload['normalization']['absolute_tolerance']\n    else:\n        assert math.isclose(sum(payload['probabilities']),1,abs_tol=1e-12)\n        assert len(payload['marks'])==len(payload['probabilities'])==len(payload['successors'])\n        rows.append(payload)\nrng=np.random.default_rng(r['configuration']['seed'])\nsystem=editing_v2_semantic_rewrite_system()\norigin=decode_state(r['initial_state']['graph'])\nprior=r['initial_state']\nfor step in r['trace']:\n    row=read(step['row_path'])\n    assert row['source']==step['source']==prior\n    chosen=int(rng.choice(len(row['successors']),p=row['probabilities']))\n    assert chosen==step['selected_index']\n    assert row['successors'][chosen]==step['successor']\n    assert row['probabilities'][chosen]==step['probability']==step['reference_probability']\n    mark=step['mark']\n    codec=action_codec_v4 if mark['schema_version']==4 else action_codec\n    family,action=codec.decode_action(mark)\n    product=system.apply(decode_state(step['source']['graph']),family,action)\n    assert encode_state(product)==step['successor']['graph']\n    assert step['kl']==0\n    prior=step['successor']\nassert prior==r['final_state']\nassert rng.bit_generator.state==read('sampled_path.json')['rng_state']\nwitness=topology_witness(origin,decode_state(prior['graph']),'fused')\nassert canonical_bytes(witness)==canonical_bytes(r['independent_topology_witness']) and witness['passed']\nassert canonical_state_key(decode_state(prior['graph']))==r['endpoint']\nattempts=[a for p in sorted((base/'attempts').glob('*.json')) for a in json.loads(p.read_text())['attempts']]\nassert sorted(a['call_index'] for a in attempts)==list(range(r['total_public_executor_calls']))\nassert r['total_public_executor_calls']<=r['configuration']['max_executor_applications']\ncanonical_products={canonical_state_key(decode_state(s['graph'])) for row in rows for s in row['successors']}\nassert len(canonical_products)==r['unique_canonical_candidate_products']\nreport={\n 'schema_version':'fused_reference_completed_attempt_review_v1',\n 'analysis_code_revision':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),\n 'run_code_revision':r['code_revision'],'run_id':run_id,'call_status':'completed_result_matches_volume',\n 'verified_files':files,'configuration':r['configuration'],'runtime_gate':r['runtime_gate'],\n 'status':r['status'],'endpoint':r['endpoint'],'selection':r['selection'],\n 'sampled_edge':r['trace'][0]['successor']['fused_progress'],\n 'realized_endpoint_change':r['trace'][-1]['realized_change'],'topology_witness':witness,\n 'counts':{'sampled_edits':len(r['trace']),'completed_endpoints':1,'laws':len(r['laws']),'rows':len(rows),'row_support_sizes':[len(x['successors']) for x in rows],'unique_canonical_counterfactual_products':len(canonical_products),'public_executor_calls':len(attempts),'executor_status_counts':dict(sorted(Counter(a['status'] for a in attempts).items())),'oracle_calls':r['oracle_calls']},\n 'timings_seconds':{'runtime_initialization':r['runtime_gate']['runtime_seconds'],'proposal':r['proposal_seconds'],'law_enumeration':r['timings']['enumeration'],'persistence':r['timings']['persistence'],'elapsed_before_result_publication':r['elapsed_seconds']},\n 'normalization_absolute_errors':[read(x['path'])['normalization']['absolute_error'] for x in r['laws']],\n 'verification':{'remote_bytes_equal':True,'content_addresses_and_hashes':True,'rng_and_reference_path':True,'exact_selected_primitive_replay':True,'independent_topology_witness':True,'executor_receipt_census':True,'local_verifier_executor_calls':5,'new_model_calls':0,'new_oracle_calls':0,'local_python':platform.python_version(),'local_numpy':np.__version__,'local_rdkit':rdBase.rdkitVersion},\n 'limitations':['One fixed-option, applicability-conditioned development-source trajectory, not a Q(M) or Q(o) sample','Reference only; no learned-guidance superiority test','Row support sizes 2,1,1,1,1 do not test a difficult multi-branch continuation problem','Six counterfactual intermediate products are not six independent completed proposals','No docking-score result or IVG competitiveness evidence','Audit persistence dominates proposal wall time; this is not an optimized production throughput benchmark'],\n 'decision':'construction/support check passed for this one source and option; move next to a matched objective-driven end-to-end pilot, not repeated ring demonstrations'\n}\nprint(json.dumps(report,sort_keys=True,indent=2))\n\nPY"
+}

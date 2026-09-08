@@ -1,4 +1,10 @@
-# Frozen reference audit: failed before sampling
+# Frozen reference audit evidence
+
+Current result: the repaired second attempt completed a verified fused-ring
+path. See `attempt_2/README.md` and `attempt_2/review.json`. The failed first
+attempt below is retained unchanged as historical evidence.
+
+## Attempt 1: failed before sampling
 
 One approved attempt ran on committed revision
 `8e844b422b6c4af6cca547e8f4b3d9274d99ae1e`, after strict clean-worktree preflight
