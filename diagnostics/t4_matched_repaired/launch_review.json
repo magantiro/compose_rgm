@@ -1,0 +1,73 @@
+{
+  "comparison_method": "JUnit testcase identities and failure/error messages; ignore process memory addresses only; require each additional failure to pass its unchanged exact node once with necessary OS permissions",
+  "decision": "proceed with the one authorized bounded development comparison, subject to unchanged remote runtime/input gates",
+  "deployed": true,
+  "exact_node_rechecks": {
+    "tests.test_editing_t1_panel::test_capacity_census_parallel_compilation_is_byte_identical_and_bounded": {
+      "environment": "same local toolchain with subprocess/shared-memory permission",
+      "passed": true,
+      "path": "diagnostics/t4_matched_repaired/shared_memory_recheck.xml",
+      "seconds": 3.526
+    },
+    "tests.test_process_v2_runtime_checkpoint::test_direct_and_multiworker_collation_produce_identical_masks": {
+      "environment": "same local toolchain with subprocess/shared-memory permission",
+      "passed": true,
+      "path": "diagnostics/t4_matched_repaired/multiworker_recheck.xml",
+      "seconds": 12.174
+    }
+  },
+  "full_suite": {
+    "errors": 58,
+    "failed": 49,
+    "new_environment_failures": {
+      "tests.test_editing_t1_panel::test_capacity_census_parallel_compilation_is_byte_identical_and_bounded": {
+        "message": "RuntimeError: torch_shm_manager at \"/Users/rmaganti/compose_rgm_git/.venv/lib/python3.12/site-packages/torch/bin/torch_shm_manager\": Operation not permitted\nException raised from start_manager at /Users/runner/work/pytorch/pytorch/torch/lib/libshm/core.cpp:67 (most recent call first):\nframe #0: c10::Error::Error(c10::SourceLocation, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>) + 52 (0x10d6b3f18 in libc10.dylib)\nframe #1: c10::detail::torchCheckFail(char const*, char const*, unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&) + 120 (0x10d6b1584 in libc10.dylib)\nframe #2: THManagedMapAllocatorInit::THManagedMapAllocatorInit(char const*, char const*) + 2104 (0x10b93fb14 in libshm.dylib)\nframe #3: THManagedMapAllocator::makeDataPtr(char const*, char const*, int, unsigned long) + 68 (0x10b940114 in libshm.dylib)\nframe #4: THPStorage_shareFilename(_object*, _object*) + 156 (0x10f814bf4 in libtorch_python.dylib)\n<omitting python frames>\nframe #54: start + 6992 (0x18aa43e00 in dyld)",
+        "type": "failure"
+      },
+      "tests.test_process_v2_runtime_checkpoint::test_direct_and_multiworker_collation_produce_identical_masks": {
+        "message": "AssertionError: multiworker collation at workers=1 did not finish within 300s; the DataLoader worker never delivered a batch. This is the invariant failing, not a flaky test.",
+        "type": "failure"
+      }
+    },
+    "passed": 4490,
+    "resolved_prior_failures": [
+      "tests.test_tiny_rate_experiment::test_exact_marginal_batch_has_late_null_target_and_trains",
+      "tests.test_tiny_rate_experiment::test_tiny_coverage_batch_and_short_training_gate",
+      "tests.test_tracelet_conditional::test_causal_frontier_batch_trains_against_all_enabled_successors",
+      "tests.test_tracelet_conditional::test_quotient_energy_aromatic_view_has_trainable_gm_loss",
+      "tests.test_tracelet_conditional::test_tracelet_loss_and_target_free_ancestral_sampler_are_executable",
+      "tests.test_tracelet_conditional::test_training_recovery_resumes_exactly",
+      "tests.test_value_twist::test_net_forward_shape_and_training_runs",
+      "tests.test_vectorized_successor_scoring::test_gradients_match_the_stacked_reduction"
+    ],
+    "shared_issue_messages_equal_ignoring_memory_addresses": true,
+    "shared_nonpassing_identities": 105,
+    "skipped": 2,
+    "total_cases": 4600,
+    "xfailed": 1
+  },
+  "input_sha256": {
+    "diagnostics/t4_append_contract_repair/attempt_1/result.json": "eac7d943f11eec9a62178793eb127fc73f00aef5145fde6360e6a9e95342cde8",
+    "diagnostics/t4_matched_pilot/full_suite.xml": "bcafece9326517cf89eea761842ae39c049d27c82cdabd9bfbc2c74865d4db49",
+    "diagnostics/t4_matched_repaired/full_suite.xml": "331e88393396cb0a75fadb6ed46306aacb4c864196a20771a8755422abf0067b",
+    "diagnostics/t4_matched_repaired/launch_plan.json": "e477d73ce7f555fd33735978013ca614989483f5d1deb7dc3123eaebd6be7da5",
+    "diagnostics/t4_matched_repaired/multiworker_recheck.xml": "1cb7466b6c9346e475d66eb93c8aa1facb559e0d7c8e2f7005b518d2fde5dc42",
+    "diagnostics/t4_matched_repaired/shared_memory_recheck.xml": "fbf158aa93204b4961957ba401c13a81a8d3c4a1ad582fad36c9acb0c9b285db"
+  },
+  "limitations": [
+    "105 existing nonpassing test identities remain; no test or gate weakened",
+    "local RingCore catalog fingerprint differs from frozen runtime; remote runtime must validate its unchanged pinned environment and physical inputs",
+    "single inspected development cell; unseeded docking; no superiority or full-scale exactness claim"
+  ],
+  "milestone_complete": false,
+  "new_unresolved_nonpassing_identities": [],
+  "oracle_budget": 40,
+  "preflight_clean_launch_worktree": true,
+  "recorded_at_utc": "2026-09-08T06:20:35.007395+00:00",
+  "repository_green": false,
+  "review_revision": "c3dda37cba77e27a339bdc3a1c069b34059dd168",
+  "schema_version": "t4_repaired_launch_review_v1",
+  "scientific_revision": "cb7e94cfd611c632d530fccbed8ed2a00306b637",
+  "scientific_source_and_tests_unchanged_since_freeze": true,
+  "spawned_at_review": false
+}
