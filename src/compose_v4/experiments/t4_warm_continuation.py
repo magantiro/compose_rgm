@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 import time
@@ -33,6 +34,20 @@ def payload_hash(payload: dict) -> str:
     return hashlib.sha256(canonical_bytes(payload)).hexdigest()
 
 
+def _atom_output_order(molecule) -> list[int]:
+    # RDKit 2024 serializes this property as a Python list with a trailing
+    # comma; newer releases emit JSON-compatible lists. Both carry the same
+    # permutation. Parse literals, never evaluate code or alter the ordering.
+    order = ast.literal_eval(molecule.GetProp("_smilesAtomOutputOrder"))
+    if (
+        not isinstance(order, list)
+        or any(type(index) is not int for index in order)
+        or sorted(order) != list(range(molecule.GetNumAtoms()))
+    ):
+        raise ValueError("RDKit _smilesAtomOutputOrder is not a complete atom permutation")
+    return order
+
+
 def canonical_slots(state, smiles: str) -> dict[int, int]:
     """Map SMILES metadata indices to saved slots; never reconstruct a state.
 
@@ -44,8 +59,8 @@ def canonical_slots(state, smiles: str) -> dict[int, int]:
     if metadata is None or Chem.MolToSmiles(metadata) != Chem.MolToSmiles(molecule):
         raise ValueError("parent SMILES metadata differs from exact saved state")
     inverse = {index: slot for slot, index in slot_to_rdkit.items()}
-    saved_order = json.loads(molecule.GetProp("_smilesAtomOutputOrder"))
-    metadata_order = json.loads(metadata.GetProp("_smilesAtomOutputOrder"))
+    saved_order = _atom_output_order(molecule)
+    metadata_order = _atom_output_order(metadata)
     mapping = {a: inverse[b] for a, b in zip(metadata_order, saved_order, strict=True)}
     if set(mapping.values()) != set(slot_to_rdkit):
         raise ValueError("region-to-slot mapping is not a complete bijection")

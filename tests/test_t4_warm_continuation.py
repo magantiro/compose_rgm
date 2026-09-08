@@ -18,6 +18,7 @@ from compose_v4.control.region_rewrite import context_from_region
 from compose_v4.experiments.continuation_profile import sha256_file
 from compose_v4.experiments.t4_matched_pilot import seal, unseal
 from compose_v4.experiments.t4_warm_continuation import (
+    _atom_output_order,
     advance_archive,
     canonical_slots,
     endpoint,
@@ -35,6 +36,38 @@ SOURCE = ROOT / "diagnostics/t4_matched_repaired/attempt_1/committor"
 
 def graph(smiles):
     return pad_molecular_graph(smiles_to_molecular_graph(smiles), 48)
+
+
+@pytest.mark.parametrize("serialized", ["[2, 0, 1]", "[2,0,1,]"])
+def test_rdkit_atom_order_accepts_old_and_new_serializations(serialized):
+    molecule = SimpleNamespace(GetProp=lambda _: serialized, GetNumAtoms=lambda: 3)
+    assert _atom_output_order(molecule) == [2, 0, 1]
+
+
+@pytest.mark.parametrize("serialized", ["[0,0,1,]", "[0,1,3]", "[0,1]", "[False,1,2]"])
+def test_rdkit_atom_order_still_requires_a_complete_permutation(serialized):
+    molecule = SimpleNamespace(GetProp=lambda _: serialized, GetNumAtoms=lambda: 3)
+    with pytest.raises(ValueError, match="complete atom permutation"):
+        _atom_output_order(molecule)
+
+
+def test_saved_archive_conversion_matches_with_legacy_rdkit_metadata(monkeypatch):
+    from rdkit import Chem
+
+    lock, docking = unseal(SOURCE / "candidate_lock.json"), unseal(SOURCE / "docking.json")
+    expected = initial_archive(lock, docking)
+    original = Chem.MolToSmiles
+
+    def legacy_smiles(molecule, *args, **kwargs):
+        smiles = original(molecule, *args, **kwargs)
+        field = "_smilesAtomOutputOrder"
+        order = molecule.GetProp(field)
+        if not order.endswith(",]"):
+            molecule.SetProp(field, order[:-1] + ",]")
+        return smiles
+
+    monkeypatch.setattr(Chem, "MolToSmiles", legacy_smiles)
+    assert initial_archive(lock, docking) == expected
 
 
 @pytest.mark.parametrize("smiles", ["CCC(O)N", "c1ccncc1", "CC(=O)[O-]", "c1cc[nH]c1"])

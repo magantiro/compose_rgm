@@ -41,13 +41,24 @@ deployment identity, resource census, timing/cost estimate, inventory, and stop
 policy. Source/config/app files remain identical to the scientific source even
 when later isolated reporting code or evidence is committed.
 
-## Live attempt
+## Attempts
 
 The continuation was spawned into the deployed app on 2026-09-08:
 `fc-01M2005G8FSNYBXN3RM7P9Z0SA`. The content-addressed volume path is
 `t4_warm_continuation/9aef7ea2d6b10c6bdd605d3dc6786a6cb57085cb102aae2e44da09743f62be97`.
-`attempt_1/spawn.json` binds its exact launch manifest. No additional run is
-authorized by the focused-verification policy.
+`attempt_1/spawn.json` binds its exact launch manifest. Startup failed after
+152.83 seconds in `canonical_slots`, before archive publication, molecular
+proposal, or docking. The frozen runtime gates passed. Remote RDKit 2024 emits
+`_smilesAtomOutputOrder` as a Python list with a trailing comma, which the JSON
+parser rejected. The failure and all four remote startup receipts are retained.
+
+The bounded repair parses this metadata with `ast.literal_eval` and verifies
+that it is a complete integer permutation. Regression tests cover both formats,
+malformed permutations, and equality of all 21 recovered archive records under
+legacy formatting. This changes serialization compatibility, not states, region
+draws, controller weights, scientific inputs, or oracle accounting. Resume the
+same authorized two-round continuation with the full 40-call allowance still
+unspent. There is no failed oracle batch or completed proposal work to replay.
 
 ## Result interpretation
 
