@@ -1,0 +1,2 @@
+# Full executor receipts remain local and on the Modal volume; review hashes them.
+attempt_*/**/executor_attempts_*.json
