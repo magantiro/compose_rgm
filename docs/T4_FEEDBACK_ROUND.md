@@ -61,8 +61,9 @@ builds, storage, usage above resource requests, and account-specific charges.
 The recorded rate source is the 2026-09-08 check linked in
 `docs/T4_PARTIAL_DOCKING.md`. No accelerator is requested.
 
-The prior attempt spent 589.567 seconds on preparation before exhausting
-20,000 calls, with seven parent units complete. Its ledger contains 18,186
+The prior attempt spent 589.567 total wall seconds before exhausting 20,000
+calls, including 92.478 seconds of initialization, with seven parent units
+complete. Its ledger contains 18,186
 distinct exact source/action pairs, so simple duplicate elimination accounts
 for only 1,814/20,000 calls in a provisional read-only count (not yet a sealed
 performance benchmark). This is not evidence that caching alone can make

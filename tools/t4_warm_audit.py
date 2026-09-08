@@ -13,7 +13,7 @@ import numpy as np
 from rdkit import rdBase
 
 from compose_v4.control.graph_geometry import topology
-from compose_v4.experiments.continuation_profile import sha256_file
+from compose_v4.experiments.continuation_profile import publish_json, sha256_file
 from compose_v4.experiments.t4_matched_pilot import unseal
 from compose_v4.experiments.t4_warm_continuation import (
     advance_archive,
@@ -33,6 +33,11 @@ def counts(encoded: dict) -> dict:
 
 
 def candidate_summary(candidate: dict, lock: dict, parents: dict, seed_counts: dict) -> dict:
+    # Lazy import keeps the existing ring-quality auditor's use of this helper
+    # acyclic during module initialization. These are structural diagnostics,
+    # not new oracle eligibility rules.
+    from tools.t4_ring_quality_audit import ring_descriptors
+
     actual = counts(endpoint(lock, candidate))
     parent = parents[candidate["parent"]]
     before = counts(parent["state"])
@@ -49,6 +54,9 @@ def candidate_summary(candidate: dict, lock: dict, parents: dict, seed_counts: d
         "cumulative_delta_from_seed": {k: actual[k] - seed_counts[k] for k in actual},
         "ancestors": [*parent["ancestors"], parent["smiles"]],
         "parent_round": parent["round"],
+        "parent_docking_score": parent["ds"],
+        "ring_descriptors": ring_descriptors(candidate["smiles"]),
+        "parent_ring_descriptors": ring_descriptors(parent["smiles"]),
         "new_cycle_this_round": candidate["d_cycle_rank"] > 0,
         "system_split_without_cycle_gain": (
             candidate["d_ring_systems"] > 0 and candidate["d_cycle_rank"] <= 0
@@ -152,6 +160,17 @@ def report(root: Path) -> dict:
                 w.get("unselected_region_draws", 0) for w in lock["work"]
             ),
         }
+        ledger_path = directory / "executor_attempts_0.json"
+        if ledger_path.exists():
+            ledger = json.loads(ledger_path.read_text())
+            attempts = ledger["attempts"]
+            if ledger["prior_calls"] != 0 or sorted(a["call_index"] for a in attempts) != list(
+                range(lock["total_public_executor_calls"])
+            ):
+                raise ValueError("public executor ledger does not reconcile with the round")
+            row["executor_receipt_counts"] = dict(
+                sorted(Counter(a["status"] for a in attempts).items())
+            )
         docking_path = directory / "docking.json"
         if docking_path.exists():
             docking = unseal(docking_path)
@@ -221,4 +240,11 @@ def report(root: Path) -> dict:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("root", type=Path)
-    print(json.dumps(report(parser.parse_args().root), sort_keys=True, indent=2, allow_nan=False))
+    parser.add_argument("--output", type=Path)
+    args = parser.parse_args()
+    result = report(args.root)
+    if args.output:
+        digest = publish_json(args.output, result)
+        print(json.dumps({"output": str(args.output), "sha256": digest}))
+    else:
+        print(json.dumps(result, sort_keys=True, indent=2, allow_nan=False))

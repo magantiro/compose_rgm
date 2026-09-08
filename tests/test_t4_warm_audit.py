@@ -1,6 +1,7 @@
 """Offline audit rejects stale topology and archive bindings."""
 
 import copy
+import json
 
 import pytest
 from test_t4_warm_continuation import fixture_source, synthetic_prepare
@@ -39,6 +40,29 @@ def test_full_round_audit_and_tampered_warm_identity(tmp_path):
         audit["rounds"][1]["selected_candidates"][0]["cumulative_delta_from_seed"]["n_heavy"] == 22
     )
     assert [p["cumulative_calls"] for p in audit["best_so_far_curve"]] == [20, 21, 22]
+    candidate = audit["rounds"][1]["selected_candidates"][0]
+    assert candidate["parent_docking_score"] == -9.0
+    assert candidate["ring_descriptors"]["aromatic_rings"] == 0
+    ledger_path = root / "round_3/executor_attempts_0.json"
+    calls = audit["rounds"][1]["executor_calls"]
+    ledger = {
+        "prior_calls": 0,
+        "attempts": [{"call_index": i, "status": "executed"} for i in range(calls)],
+    }
+    ledger_path.write_text(json.dumps(ledger))
+    assert report(root)["rounds"][1]["executor_receipt_counts"] == (
+        {"executed": calls} if calls else {}
+    )
+    ledger["prior_calls"] = 1
+    ledger_path.write_text(json.dumps(ledger))
+    with pytest.raises(ValueError, match="ledger does not reconcile"):
+        report(root)
+    ledger["prior_calls"] = 0
+    ledger["attempts"].append({"call_index": calls, "status": "executed"})
+    ledger_path.write_text(json.dumps(ledger))
+    with pytest.raises(ValueError, match="ledger does not reconcile"):
+        report(root)
+    ledger_path.unlink()
     path = root / "round_3/candidate_lock.json"
     lock = unseal(path)
     lock["task"]["warm_start_sha256"] = "wrong"
