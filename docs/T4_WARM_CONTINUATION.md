@@ -26,7 +26,8 @@ fragments, scores, or reference-distance rewards enter the optimizer.
 Inherit the exact task and six input identities from
 `configs/t4_matched_pilot.json`. Keep Q(M), the applicability-balanced untrained
 Q(o), generic, R_theta, committor, kappa=1, exploration settings, horizons,
-eight lineages, three region draws, one particle, and oracle allocation fixed.
+eight lineages, three region draws, and one particle fixed. Oracle allocation
+retains its bundle-first ordering, with the explicit endpoint amendment below.
 The existing bootstrap-ridge acquisition consumes all available docking pairs;
 it is an inherited heuristic, not a calibrated uncertainty model. Similarity
 remains against the original seed at d=0.4, never the current parent.
@@ -95,3 +96,33 @@ ring-system and heavy-atom deltas, ancestry, candidate diversity, feasibility,
 all docking results, best-so-far scores, and proposal time. Distinguish new ring
 formation from splitting an old system by opening it. Freeze the result before
 deciding the next scientific change.
+
+## Endpoint-quality amendment, 2026-09-08
+
+The user requested suitable fused and pendant construction without arbitrary
+polycyclic products, using a principled rule. Before any continuation docking,
+enable `t4_feasible_only_v1` for this development continuation. This is an
+explicit change to endpoint allocation, not a claim that the legacy protocol
+already enforced it. Preserve the old rank-all behavior for historical tasks.
+The amended contract self-hash is
+`c6de57c78df9dd74d2f3ecf3370e3d8a0057b78b46f122ec127317e5e5d4e5bc`.
+
+Use the existing production QED/SA/original-seed similarity evaluator and its
+unchanged thresholds. Only v=0 endpoints can receive oracle calls. Nonfinite
+or missing properties fail closed. Keep every deduplicated emitted candidate,
+including ineligible ones and their exclusion reasons, in the candidate lock.
+Allocate diversity-first across eligible bundles using the same surrogate and
+ordering; allow a short batch, never backfill with ineligible candidates.
+
+Do not apply the endpoint mask to intermediate states. Generic stays active.
+No ring-count reward, new topology blacklist, winner-derived fragment, or new
+SA/QED threshold is introduced. Report cycle rank, ring systems, RDKit
+bridgehead/spiro changes, and exact fused-program witnesses separately. Passing
+these screens does not establish medicinal quality, stability, synthesis or
+binding. The legacy med-chem gate was partly calibrated against inspected IVG
+winners; its flags are diagnostics, not independent chemical validation.
+
+Attempt 2 exhausted the existing 20,000-executor ceiling with seven complete
+parent units and no new oracle calls. Preserve its failed outcome and reuse
+compatible completed work only through an explicit dependency/accounting
+decision. This amendment does not raise that ceiling or authorize a retry.

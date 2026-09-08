@@ -24,6 +24,12 @@ from compose_v4.experiments.continuation_profile import (
     verify_file,
 )
 from compose_v4.experiments.production_successor_kernel import canonical_state_key
+from compose_v4.experiments.t4_endpoint_selection import (
+    LEGACY_RANK_ALL,
+    T4_FEASIBLE_ONLY,
+    feasible_endpoint,
+    validate_policy,
+)
 from compose_v4.experiments.t4_matched_pilot import _stamp, seal, unseal
 from compose_v4.rewrite.trace_shard import decode_state
 
@@ -162,6 +168,8 @@ def advance_archive(warm: dict, lock: dict, docking: dict) -> dict:
 
 
 def verify_round(lock: dict, warm: dict, task: dict) -> None:
+    policy = task.get("endpoint_selection_policy", LEGACY_RANK_ALL)
+    validate_policy(policy)
     if lock["task"] != task or lock["round"] != warm["round"] + 1:
         raise ValueError("round lock task or round mismatch")
     if lock["oracle_calls"] != 0 or len(lock["take"]) > task["per_round"]:
@@ -183,6 +191,10 @@ def verify_round(lock: dict, warm: dict, task: dict) -> None:
         if any(s != parents[bundle["parent"]] for s in sources):
             raise ValueError("proposal did not start from the saved exact parent")
     for candidate in lock["take"]:
+        if policy == T4_FEASIBLE_ONLY and (
+            not feasible_endpoint(candidate) or candidate.get("oracle_eligible") is not True
+        ):
+            raise ValueError("ineligible endpoint in strict T4 oracle lock")
         if (
             candidate["option"] in ("build_ring_system", "build_fused_ring")
             and not candidate["program_complete"]
@@ -253,6 +265,8 @@ def run_continuation(
     """Two locked batches, full archive reuse, no automatic failed-work retry."""
     if contract["additional_rounds"] != 2 or contract["compute"]["oracle_call_limit"] != 40:
         raise ValueError("only two rounds and 40 new oracle calls are authorized")
+    endpoint_policy = contract.get("endpoint_selection_policy", LEGACY_RANK_ALL)
+    validate_policy(endpoint_policy)
     progress = {} if progress is None else progress
     lock_path, dock_path = source / "candidate_lock.json", source / "docking.json"
     verify_file(lock_path, contract["source"]["candidate_lock_sha256"])
@@ -279,6 +293,7 @@ def run_continuation(
             "primitive_guidance": "committor",
             "prepare_only": True,
             "warm_start_sha256": payload_hash(warm),
+            "endpoint_selection_policy": endpoint_policy,
         }
         progress.update(
             phase="prepare",

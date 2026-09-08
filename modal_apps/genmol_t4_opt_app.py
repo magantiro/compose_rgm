@@ -690,6 +690,9 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
     from compose_v4.experiments.t4_matched_pilot import primitive_distribution
     from compose_v4.rewrite.trace_shard import decode_state, encode_state
     from compose_v4.experiments.t4_warm_continuation import exact_context, payload_hash
+    from compose_v4.experiments.t4_endpoint_selection import (
+        LEGACY_RANK_ALL, annotate_endpoints, validate_policy,
+    )
     from compose_v4.control import region_rewrite as RR
     from compose_v4.control import graph_geometry as GG
     from compose_v4.control.macro_engine import (
@@ -724,6 +727,8 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
     workers = int(task.get("workers", 8))
     arm = task.get("arm", "mu_exec")
     guidance = task.get("primitive_guidance", "committor")
+    endpoint_policy = task.get("endpoint_selection_policy", LEGACY_RANK_ALL)
+    validate_policy(endpoint_policy)
     if guidance not in ("committor", "reference"):
         raise ValueError(f"unknown primitive_guidance: {guidance!r}")
     include_fused = bool(task.get("include_fused", False))
@@ -1615,7 +1620,9 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
                     existing["origin_bundle_ids"].append(c["bundle_id"])
                 if c["option"] not in existing["origin_options"]:
                     existing["origin_options"].append(c["option"])
-        pool = list(pool_by_smiles.values())
+        # Endpoint allocation only: rejected records remain in the locked pool.
+        # Do not apply this mask to intermediate states or change bundle draws.
+        pool = annotate_endpoints(list(pool_by_smiles.values()), endpoint_policy)
         # Round-robin across (parent, region, option) instead of a global sort.
         # A global sort by (v, -qed) put 19 of 20 dockings on ONE region: every
         # candidate is feasible with near-identical QED, so ties broke
@@ -1625,7 +1632,8 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
         from collections import defaultdict as _dd
         by_src = _dd(list)
         for a in pool:
-            by_src[a.get("bundle_id")].append(a)
+            if a.get("oracle_eligible", True):
+                by_src[a.get("bundle_id")].append(a)
         # rank WITHIN a bundle by the surrogate (falls back to QED before warmup)
         fps = {}
         for a in pool:

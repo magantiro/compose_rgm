@@ -314,6 +314,37 @@ def test_round_and_archive_invariants(tmp_path, defect):
         verify_round(lock, warm, task)
 
 
+def test_strict_oracle_lock_cannot_admit_constraint_violations(tmp_path):
+    source, _contract, task = fixture_source(tmp_path)
+    warm = initial_archive(unseal(source / "candidate_lock.json"), unseal(source / "docking.json"))
+    task = {**task, "endpoint_selection_policy": "t4_feasible_only_v1"}
+    lock = synthetic_prepare(task, None, None, warm)
+    candidate = lock["take"][0]
+    candidate.update(qed=0.8, sa=4.2, sim=0.6, v=0.05, oracle_eligible=True)
+    with pytest.raises(ValueError, match="ineligible endpoint"):
+        verify_round(lock, warm, task)
+    candidate.update(sa=3.0, v=0.0)
+    verify_round(lock, warm, task)
+
+
+def test_contract_endpoint_policy_reaches_each_round_before_oracle(tmp_path):
+    source, contract, task = fixture_source(tmp_path)
+    contract["endpoint_selection_policy"] = "t4_feasible_only_v1"
+    observed = []
+
+    def prepare(actual_task, *args):
+        observed.append(actual_task["endpoint_selection_policy"])
+        lock = synthetic_prepare(actual_task, *args)
+        lock["take"][0].update(qed=0.8, sa=3.0, sim=0.6, v=0.0, oracle_eligible=True)
+        return lock
+
+    result = run_continuation(
+        task, prepare, lambda *_: [-9.0], tmp_path / "out", source=source, contract=contract
+    )
+    assert result["new_oracle_attempts"] == 2
+    assert observed == ["t4_feasible_only_v1"] * 2
+
+
 @torch.enable_grad()
 def test_real_warm_preparation_reuses_states_and_original_seed(monkeypatch, tmp_path):
     from compose_v4.chem import molecular_graph
