@@ -36,6 +36,10 @@ def feedback_archive(root: Path, contract: dict) -> dict:
     warm, lock, docking = (assets[k] for k in ("warm", "lock", "docking"))
     source_task = lock["source_task"]
     for key, value in contract["task"].items():
+        if key == "executor_calls_per_parent":
+            if value != 2500:
+                raise ValueError("only the approved 2500-call parent share is authorized")
+            continue
         if source_task.get(key) != value:
             raise ValueError(f"feedback changed frozen controller field: {key}")
     if source_task["expected_input_sha256"] != contract["expected_input_sha256"]:
@@ -82,6 +86,10 @@ def run_remote(
             or contract["compute"]["oracle_call_limit"] != 20
             or actual_task["budget"] != 20
             or actual_task["per_round"] != 20
+            or actual_task.get("executor_calls_per_parent") != 2500
+            or actual_task["max_executor_applications"] != 20000
+            or actual_task["lineages"] != 8
+            or actual_task["workers"] != 1
         ):
             raise ValueError("only one new twenty-call feedback round is authorized")
         if rdBase.rdkitVersion != contract["required_rdkit"]:

@@ -43,9 +43,23 @@ are not regenerated: their scored outputs already enter the new archive.
 ## Compute, accounting, and acceptance
 
 One CPU, 8 GiB, no GPU, one-hour whole-job limit, zero retries. The original
-20,000 total public-executor ceiling remains. Allocation within that ceiling
-is pending the explicit user choice; the draft contract is deliberately
-unsealed and cannot launch until that choice is recorded.
+20,000 total public-executor ceiling remains. The user explicitly approved
+equal 2,500-call shares for the eight parents before this run. Unused shares
+are not redistributed. Nested public executor calls count toward both the
+parent share and total ceiling. The share may stop an incomplete decision or
+trajectory; only previously committed valid outputs are retained. Incomplete
+compound programs remain ineligible. Record budget stops and any region draws
+whose option applicability work could not finish, never invent their options.
+This changes finite-budget search effort and may censor long trajectories.
+It does not claim an unchanged full path distribution. The frozen transition
+law applies at completed decisions, and no molecular support is removed.
+
+The previous T4 task's 1 CPU/8 GiB requested-resource base-rate estimate is
+0.00003086 USD per container-second, about 0.111 USD for the one-hour limit.
+This is a planning estimate, not a billing cap or invoice, and excludes image
+builds, storage, usage above resource requests, and account-specific charges.
+The recorded rate source is the 2026-09-08 check linked in
+`docs/T4_PARTIAL_DOCKING.md`. No accelerator is requested.
 
 The prior attempt spent 589.567 seconds on preparation before exhausting
 20,000 calls, with seven parent units complete. Its ledger contains 18,186
@@ -73,3 +87,13 @@ and no implicit retries. Apply the user-approved bounded T4 verification policy
 in AGENTS.md; do not repeat the unrelated non-green broad suite. Launch only
 from a clean committed source after strict preflight, deployment, and
 `python3 tools/t4_launch.py --feedback-round`.
+
+Prelaunch repair: repeated region/option draws can share canonical identity
+and primitive depth while carrying different exact slot layouts. Warm
+candidates already persist their exact committed state. Endpoint recovery now
+uses that state to disambiguate matching sampled transitions; a missing exact
+match still fails closed. Legacy candidates without an exact state retain the
+strict unambiguous-match requirement. No reconstruction or resampling occurs.
+
+The sealed allocation contract self-hash is
+`9fdf7b46c149e49b36eb6196700129af5c89bb2f973304b49dd0f7924ade90c8`.

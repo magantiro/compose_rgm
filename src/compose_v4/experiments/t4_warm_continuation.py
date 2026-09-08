@@ -98,6 +98,11 @@ def endpoint(lock: dict, candidate: dict) -> dict:
         if row["bundle_id"] == candidate["bundle_id"]
         and row["step"] == candidate["step"]
         and row["canonical_product"] == candidate["smiles"]
+        # Repeated draws of the same bundle can reach the same canonical
+        # molecule at the same depth with different persistent slot layouts.
+        # New warm candidates carry the exact committed state; use it to
+        # disambiguate, never pick an arbitrary canonical match.
+        and ("state" not in candidate or row["product"] == candidate["state"])
     ]
     if not matches or any(value != matches[0] for value in matches):
         raise ValueError("selected candidate has missing or ambiguous exact endpoint")
@@ -176,6 +181,14 @@ def verify_round(lock: dict, warm: dict, task: dict) -> None:
         raise ValueError("round lock violates zero-oracle preparation or batch cap")
     if lock["input_sha256"] != task["expected_input_sha256"]:
         raise ValueError("round lock changed frozen scientific inputs")
+    if task.get("executor_calls_per_parent") is not None:
+        shares = [unit["parent_budget"] for unit in lock["work"]]
+        if len(shares) != 8 or any(
+            share["limit"] != 2500 or not 0 <= share["executor_calls"] <= 2500 for share in shares
+        ):
+            raise ValueError("round must account for all eight bounded parent shares")
+        if sum(share["executor_calls"] for share in shares) != lock["total_public_executor_calls"]:
+            raise ValueError("parent shares do not reconcile with the public executor ledger")
     previous = {canonical_state_key(decode_state(c["state"])) for c in warm["archive"]}
     identities = [c["smiles"] for c in lock["take"]]
     if len(set(identities)) != len(identities) or previous.intersection(identities):

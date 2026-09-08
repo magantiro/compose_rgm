@@ -773,6 +773,13 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
     per_round = int(task.get("per_round", 20))       # dockings per round
     n_lineages = int(task.get("lineages", 8))
     workers = int(task.get("workers", 8))
+    parent_share = task.get("executor_calls_per_parent")
+    if parent_share is not None and (
+        workers != 1 or n_lineages != 8 or parent_share != 2500
+        or task.get("max_executor_applications") != 20000
+        or not task.get("prepare_only") or warm_start is None
+    ):
+        raise ValueError("parent shares require the approved single-worker 8 x 2500 feedback lane")
     arm = task.get("arm", "mu_exec")
     guidance = task.get("primitive_guidance", "committor")
     endpoint_policy = task.get("endpoint_selection_policy", LEGACY_RANK_ALL)
@@ -961,378 +968,390 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
 
         frontier = []
         receipts: dict[str, dict] = {}
-        for reg, multiplicity, region_score in regions_k:
-            if warm_start is None:
-                raw_ = smiles_to_molecular_graph(parent)
-                st_ = pad_molecular_graph(raw_, CANONICAL_SLOTS)
-                ctx_ = RR.context_from_region(reg)
-            else:
-                st_ = exact_parents[parent]
-                ctx_ = exact_context(st_, parent, reg)
-            n_ = st_.n_real_atoms
-            lin_ = RR.Lineage.initial(np.flatnonzero(is_element(st_.atom_types)))
-            old_ = frozenset(lin_.id_of[a] for a in ctx_.locus if a in lin_.id_of)
-            fams, acts, _probs = enum_fn(st_)
-            idx, _why = RR.admissible_indices(fams, acts, ctx_)
-            n_free = min(
-                int(np.sum(np.asarray(st_.atom_types) == int(NULL_IDX))),
-                MAX_ACTIVE_ATOMS - n_,
-            )
-            support_applicable = applicable_options(
-                fams, idx, n_free_slots=n_free, include_fused=include_fused
-            )
+        from compose_v4.experiments.t4_parent_budget import ParentExecutorShare
 
-            def has_clean_product(
-                option,
-                fams_=fams,
-                probs_=_probs,
-                idx_=idx,
-                state_=st_,
-                context_=ctx_,
-                lineage_=lin_,
-                region_=reg,
-            ):
-                if option == BUILD_FUSED_RING_OPTION:
-                    node = OptionState(
-                        state_, state_, context_, lineage_, option, 0,
-                        option_horizon(option, max_steps),
-                        bundle_identity(parent, parent_lineage_id, region_.key(), option),
-                        FusedProgress(),
-                    )
-                    return bool(fused_kernel.row(node).successors)
-                conditioned = conditioned_action_distribution(
-                    fams_,
-                    probs_,
-                    idx_,
+        share = ParentExecutorShare(task.get("executor_calls_per_parent"))
+        with share.instrument():
+            for reg, multiplicity, region_score in regions_k:
+                if warm_start is None:
+                    raw_ = smiles_to_molecular_graph(parent)
+                    st_ = pad_molecular_graph(raw_, CANONICAL_SLOTS)
+                    ctx_ = RR.context_from_region(reg)
+                else:
+                    st_ = exact_parents[parent]
+                    ctx_ = exact_context(st_, parent, reg)
+                n_ = st_.n_real_atoms
+                lin_ = RR.Lineage.initial(np.flatnonzero(is_element(st_.atom_types)))
+                old_ = frozenset(lin_.id_of[a] for a in ctx_.locus if a in lin_.id_of)
+                fams, acts, _probs = enum_fn(st_)
+                idx, _why = RR.admissible_indices(fams, acts, ctx_)
+                n_free = min(
+                    int(np.sum(np.asarray(st_.atom_types) == int(NULL_IDX))),
+                    MAX_ACTIVE_ATOMS - n_,
+                )
+                support_applicable = applicable_options(
+                    fams, idx, n_free_slots=n_free, include_fused=include_fused
+                )
+
+                def has_clean_product(
                     option,
-                    step=0,
-                    temperature=macro_temperature,
-                    exploration=eps_macro,
-                )
-                active = primitive_option_at_step(option, 0)
-                contract = state_contract_for(active, state_) if active else None
-                return any(
-                    checked_successor(
-                        state_, state_, context_, int(j), contract
+                    fams_=fams,
+                    probs_=_probs,
+                    idx_=idx,
+                    state_=st_,
+                    context_=ctx_,
+                    lineage_=lin_,
+                    region_=reg,
+                ):
+                    if option == BUILD_FUSED_RING_OPTION:
+                        node = OptionState(
+                            state_, state_, context_, lineage_, option, 0,
+                            option_horizon(option, max_steps),
+                            bundle_identity(parent, parent_lineage_id, region_.key(), option),
+                            FusedProgress(),
+                        )
+                        return bool(fused_kernel.row(node).successors)
+                    conditioned = conditioned_action_distribution(
+                        fams_,
+                        probs_,
+                        idx_,
+                        option,
+                        step=0,
+                        temperature=macro_temperature,
+                        exploration=eps_macro,
                     )
-                    is not None
-                    for j in conditioned.indices
+                    active = primitive_option_at_step(option, 0)
+                    contract = state_contract_for(active, state_) if active else None
+                    return any(
+                        checked_successor(
+                            state_, state_, context_, int(j), contract
+                        )
+                        is not None
+                        for j in conditioned.indices
+                    )
+
+                options = retain_product_applicable_options(
+                    support_applicable, has_clean_product
+                )
+                choice = sample_option(options, rng_, exploration=eps_option)
+                bundle_id = bundle_identity(
+                    parent, parent_lineage_id, reg.key(), choice.selected
+                )
+                receipt = receipts.setdefault(
+                    bundle_id,
+                    {
+                        "bundle_id": bundle_id,
+                        "parent": parent,
+                        "parent_lineage_id": int(parent_lineage_id),
+                        "region_atoms": sorted(int(x) for x in reg.atoms),
+                        "region_slot_atoms": sorted(int(x) for x in ctx_.locus),
+                        "region_id": hashlib.sha256(
+                            json.dumps(
+                                [list(reg.key()[0]), [list(x) for x in reg.key()[1]]],
+                                separators=(",", ":"),
+                            ).encode()
+                        ).hexdigest()[:20],
+                        "interface": reg.interface,
+                        "kind": reg.kind,
+                        "r_release": float(reg.released_fraction),
+                        "option": choice.selected,
+                        "q_option": float(choice.selected_probability),
+                        "support_applicable_options": list(support_applicable),
+                        "applicable_options": list(choice.applicable),
+                        "option_probabilities": {
+                            name: float(prob)
+                            for name, prob in zip(choice.applicable, choice.probabilities)
+                        },
+                        "q_region": getattr(region_score, "selection_probability", None),
+                        "q_region_base": getattr(region_score, "base_probability", None),
+                        "q_region_floor": getattr(region_score, "floor_probability", None),
+                        "mu_exec": getattr(region_score, "mu_exec", None),
+                        "region_draws": 0,
+                        "particles": 0,
+                        "n_candidates": 0,
+                        "n_emitted": 0,
+                        "max_step": 0,
+                        "max_search_step": 0,
+                        "max_r_coherent": 0.0,
+                        "ring_system_deltas": {},
+                        "program_complete": False,
+                        "halt_counts": {},
+                    },
+                )
+                receipt["region_draws"] += 1
+                receipt["particles"] += int(multiplicity)
+                frontier.append(
+                    {
+                        "st": st_,
+                        "lin": lin_,
+                        "ctx": ctx_,
+                        "old": old_,
+                        "reg": reg,
+                        "mult": int(multiplicity),
+                        "step": 0,
+                        "option": choice.selected,
+                        "q_option": float(choice.selected_probability),
+                        "bundle_id": bundle_id,
+                        "region_id": receipt["region_id"],
+                        "origin_st": st_,
+                        "origin_lin": lin_,
+                        "fused_progress": (
+                            FusedProgress() if choice.selected == BUILD_FUSED_RING_OPTION else None
+                        ),
+                    }
                 )
 
-            options = retain_product_applicable_options(
-                support_applicable, has_clean_product
-            )
-            choice = sample_option(options, rng_, exploration=eps_option)
-            bundle_id = bundle_identity(
-                parent, parent_lineage_id, reg.key(), choice.selected
-            )
-            receipt = receipts.setdefault(
-                bundle_id,
-                {
-                    "bundle_id": bundle_id,
+            def note_halt(particle, reason):
+                receipt = receipts[particle["bundle_id"]]
+                counts = receipt["halt_counts"]
+                counts[reason] = counts.get(reason, 0) + int(particle["mult"])
+
+            def record_committed_candidate(particle, y, key, lineage, active_macro, step_):
+                horizon = option_horizon(particle["option"], max_steps)
+                program_complete = int(step_) >= horizon
+                if particle["option"] in (
+                    BUILD_RING_SYSTEM_OPTION, BUILD_FUSED_RING_OPTION
+                ) and not program_complete:
+                    return
+                candidate_key = (particle["bundle_id"], key)
+                if candidate_key in cands:
+                    return
+                # Audit displacement is relative to the bundle parent, never merely
+                # the latest primitive transition.
+                dd = GG.structural_displacement(
+                    particle["origin_st"], y, particle["origin_lin"], lineage
+                )
+                (
+                    element_delta,
+                    added_terminal,
+                    added_backbone,
+                    added_sulfur,
+                ) = composition_delta(parent, key)
+                cands[candidate_key] = {
+                    "smiles": key,
+                    "interface": particle["reg"].interface,
+                    "kind": particle["reg"].kind,
+                    "r_release": particle["reg"].released_fraction,
+                    "step": int(step_),
+                    "region_id": particle["region_id"],
+                    "bundle_id": particle["bundle_id"],
                     "parent": parent,
                     "parent_lineage_id": int(parent_lineage_id),
-                    "region_atoms": sorted(int(x) for x in reg.atoms),
-                    "region_slot_atoms": sorted(int(x) for x in ctx_.locus),
-                    "region_id": hashlib.sha256(
-                        json.dumps(
-                            [list(reg.key()[0]), [list(x) for x in reg.key()[1]]],
-                            separators=(",", ":"),
-                        ).encode()
-                    ).hexdigest()[:20],
-                    "interface": reg.interface,
-                    "kind": reg.kind,
-                    "r_release": float(reg.released_fraction),
-                    "option": choice.selected,
-                    "q_option": float(choice.selected_probability),
-                    "support_applicable_options": list(support_applicable),
-                    "applicable_options": list(choice.applicable),
-                    "option_probabilities": {
-                        name: float(prob)
-                        for name, prob in zip(choice.applicable, choice.probabilities)
-                    },
-                    "q_region": getattr(region_score, "selection_probability", None),
-                    "q_region_base": getattr(region_score, "base_probability", None),
-                    "q_region_floor": getattr(region_score, "floor_probability", None),
-                    "mu_exec": getattr(region_score, "mu_exec", None),
-                    "region_draws": 0,
-                    "particles": 0,
-                    "n_candidates": 0,
-                    "n_emitted": 0,
-                    "max_step": 0,
-                    "max_search_step": 0,
-                    "max_r_coherent": 0.0,
-                    "ring_system_deltas": {},
-                    "program_complete": False,
-                    "halt_counts": {},
-                },
-            )
-            receipt["region_draws"] += 1
-            receipt["particles"] += int(multiplicity)
-            frontier.append(
-                {
-                    "st": st_,
-                    "lin": lin_,
-                    "ctx": ctx_,
-                    "old": old_,
-                    "reg": reg,
-                    "mult": int(multiplicity),
-                    "step": 0,
-                    "option": choice.selected,
-                    "q_option": float(choice.selected_probability),
-                    "bundle_id": bundle_id,
-                    "region_id": receipt["region_id"],
-                    "origin_st": st_,
-                    "origin_lin": lin_,
-                    "fused_progress": (
-                        FusedProgress() if choice.selected == BUILD_FUSED_RING_OPTION else None
-                    ),
+                    "option": particle["option"],
+                    "option_phase": active_macro or GENERIC_OPTION,
+                    "q_option": particle["q_option"],
+                    "program_complete": bool(program_complete),
+                    "r_coherent": dd["largest_changed_fraction"],
+                    "r_change": dd["changed_fraction"],
+                    "d_ring_systems": dd["d_ring_systems"],
+                    "d_cycle_rank": dd["d_cycle_rank"],
+                    "d_heavy": dd["d_heavy"],
+                    "element_delta": element_delta,
+                    "added_terminal_halogen": added_terminal,
+                    "added_backbone_atoms": added_backbone,
+                    "added_sulfur": added_sulfur,
                 }
-            )
+                if warm_start is not None:
+                    cands[candidate_key]["state"] = encode_state(y)
 
-        def note_halt(particle, reason):
-            receipt = receipts[particle["bundle_id"]]
-            counts = receipt["halt_counts"]
-            counts[reason] = counts.get(reason, 0) + int(particle["mult"])
-
-        def record_committed_candidate(particle, y, key, lineage, active_macro, step_):
-            horizon = option_horizon(particle["option"], max_steps)
-            program_complete = int(step_) >= horizon
-            if particle["option"] in (
-                BUILD_RING_SYSTEM_OPTION, BUILD_FUSED_RING_OPTION
-            ) and not program_complete:
-                return
-            candidate_key = (particle["bundle_id"], key)
-            if candidate_key in cands:
-                return
-            # Audit displacement is relative to the bundle parent, never merely
-            # the latest primitive transition.
-            dd = GG.structural_displacement(
-                particle["origin_st"], y, particle["origin_lin"], lineage
-            )
-            (
-                element_delta,
-                added_terminal,
-                added_backbone,
-                added_sulfur,
-            ) = composition_delta(parent, key)
-            cands[candidate_key] = {
-                "smiles": key,
-                "interface": particle["reg"].interface,
-                "kind": particle["reg"].kind,
-                "r_release": particle["reg"].released_fraction,
-                "step": int(step_),
-                "region_id": particle["region_id"],
-                "bundle_id": particle["bundle_id"],
-                "parent": parent,
-                "parent_lineage_id": int(parent_lineage_id),
-                "option": particle["option"],
-                "option_phase": active_macro or GENERIC_OPTION,
-                "q_option": particle["q_option"],
-                "program_complete": bool(program_complete),
-                "r_coherent": dd["largest_changed_fraction"],
-                "r_change": dd["changed_fraction"],
-                "d_ring_systems": dd["d_ring_systems"],
-                "d_cycle_rank": dd["d_cycle_rank"],
-                "d_heavy": dd["d_heavy"],
-                "element_delta": element_delta,
-                "added_terminal_halogen": added_terminal,
-                "added_backbone_atoms": added_backbone,
-                "added_sulfur": added_sulfur,
-            }
-            if warm_start is not None:
-                cands[candidate_key]["state"] = encode_state(y)
-
-        for step in range(max_steps):
-            if not frontier:
-                break
-            # Only particles with identical slot state, context, lineage and
-            # bundle may share arithmetic.  Canonically identical molecules can
-            # carry different slot-addressed actions and must never be merged.
-            groups: dict = {}
-            for p_ in frontier:
-                gk = (
-                    slot_key(p_["st"]),
-                    p_["bundle_id"],
-                    tuple(sorted(p_["ctx"].locus)),
-                    tuple(sorted(p_["lin"].id_of.items())),
-                    p_["lin"].next_id,
-                    p_.get("fused_progress"),
-                )
-                if gk in groups:
-                    groups[gk]["mult"] += p_["mult"]
-                else:
-                    groups[gk] = dict(p_)
-
-            feats, meta = [], []
-            for gk, p_ in groups.items():
-                horizon = option_horizon(p_["option"], max_steps)
-                if step >= horizon:
-                    continue
-                if p_["option"] == BUILD_FUSED_RING_OPTION:
-                    row = fused_kernel.row(option_state(p_))
-                    if not row.successors:
-                        note_halt(p_, "no_clean_fused_product")
-                    for successor, base_prob in zip(row.successors, row.probabilities):
-                        sh = RR.structural_features_shared(
-                            successor.graph, successor.context, successor.lineage, p_["old"]
-                        )
-                        feats.append(RR.features_from_shared(sh, horizon - step, "establishment"))
-                        meta.append((
-                            gk, successor.graph, successor.lineage, successor.context,
-                            float(base_prob), canonical_state_key(successor.graph), p_,
-                            primitive_option_at_step(p_["option"], step), successor.fused_progress,
-                        ))
-                    continue
-                fams, acts, probs = enum_fn(p_["st"])
-                idx, _why = RR.admissible_indices(fams, acts, p_["ctx"])
-                if not idx:
-                    note_halt(p_, "no_region_admissible_action")
-                    continue
-
-                # Avoid applying unrelated macro families.  The first pass is
-                # support-only; the second pass renormalizes after product-level
-                # validity, context and macro-contract checks.
-                pre = conditioned_action_distribution(
-                    fams,
-                    probs,
-                    idx,
-                    p_["option"],
-                    step=step,
-                    temperature=macro_temperature,
-                    exploration=eps_macro,
-                )
-                if not pre.indices.size:
-                    note_halt(p_, "no_option_support")
-                    continue
-                active_macro = primitive_option_at_step(p_["option"], step)
-                contract = state_contract_for(active_macro, p_["st"]) if active_macro else None
-                clean = np.zeros(len(probs), dtype=bool)
-                successors = {}
-                for j in pre.indices:
-                    j = int(j)
-                    successor = checked_successor(
-                        p_["st"], p_["origin_st"], p_["ctx"], j, contract
+            for step in range(max_steps):
+                if not frontier:
+                    break
+                # Only particles with identical slot state, context, lineage and
+                # bundle may share arithmetic.  Canonically identical molecules can
+                # carry different slot-addressed actions and must never be merged.
+                groups: dict = {}
+                for p_ in frontier:
+                    gk = (
+                        slot_key(p_["st"]),
+                        p_["bundle_id"],
+                        tuple(sorted(p_["ctx"].locus)),
+                        tuple(sorted(p_["lin"].id_of.items())),
+                        p_["lin"].next_id,
+                        p_.get("fused_progress"),
                     )
-                    if successor is None:
+                    if gk in groups:
+                        groups[gk]["mult"] += p_["mult"]
+                    else:
+                        groups[gk] = dict(p_)
+
+                feats, meta = [], []
+                for gk, p_ in groups.items():
+                    horizon = option_horizon(p_["option"], max_steps)
+                    if step >= horizon:
                         continue
-                    y, key = successor
-                    clean[j] = True
-                    successors[j] = (y, key)
+                    if p_["option"] == BUILD_FUSED_RING_OPTION:
+                        row = fused_kernel.row(option_state(p_))
+                        if not row.successors:
+                            note_halt(p_, "no_clean_fused_product")
+                        for successor, base_prob in zip(row.successors, row.probabilities):
+                            sh = RR.structural_features_shared(
+                                successor.graph, successor.context, successor.lineage, p_["old"]
+                            )
+                            feats.append(RR.features_from_shared(sh, horizon - step, "establishment"))
+                            meta.append((
+                                gk, successor.graph, successor.lineage, successor.context,
+                                float(base_prob), canonical_state_key(successor.graph), p_,
+                                primitive_option_at_step(p_["option"], step), successor.fused_progress,
+                            ))
+                        continue
+                    fams, acts, probs = enum_fn(p_["st"])
+                    idx, _why = RR.admissible_indices(fams, acts, p_["ctx"])
+                    if not idx:
+                        note_halt(p_, "no_region_admissible_action")
+                        continue
 
-                conditioned = conditioned_action_distribution(
-                    fams,
-                    probs,
-                    idx,
-                    p_["option"],
-                    step=step,
-                    clean=clean,
-                    temperature=macro_temperature,
-                    exploration=eps_macro,
-                )
-                if not conditioned.indices.size:
-                    note_halt(p_, "no_clean_option_product")
-                    continue
-                budget_left = max(0, horizon - step)
-                for j, base_prob in zip(
-                    conditioned.indices, conditioned.probabilities
-                ):
-                    j = int(j)
-                    y, key = successors[j]
-                    l2 = p_["lin"].observe(fams[j], acts[j])
-                    new_slot = RR.created_slot(acts[j])
-                    ctx2 = (
-                        p_["ctx"].with_locus(new_slot)
-                        if new_slot is not None
-                        else p_["ctx"]
+                    # Avoid applying unrelated macro families.  The first pass is
+                    # support-only; the second pass renormalizes after product-level
+                    # validity, context and macro-contract checks.
+                    pre = conditioned_action_distribution(
+                        fams,
+                        probs,
+                        idx,
+                        p_["option"],
+                        step=step,
+                        temperature=macro_temperature,
+                        exploration=eps_macro,
                     )
-                    sh = RR.structural_features_shared(y, ctx2, l2, p_["old"])
-                    feats.append(
-                        RR.features_from_shared(sh, budget_left, "establishment")
-                    )
-                    meta.append(
-                        (
-                            gk,
-                            y,
-                            l2,
-                            ctx2,
-                            float(base_prob),
-                            key,
-                            p_,
-                            conditioned.active_macro,
-                            None,
+                    if not pre.indices.size:
+                        note_halt(p_, "no_option_support")
+                        continue
+                    active_macro = primitive_option_at_step(p_["option"], step)
+                    contract = state_contract_for(active_macro, p_["st"]) if active_macro else None
+                    clean = np.zeros(len(probs), dtype=bool)
+                    successors = {}
+                    for j in pre.indices:
+                        j = int(j)
+                        successor = checked_successor(
+                            p_["st"], p_["origin_st"], p_["ctx"], j, contract
                         )
+                        if successor is None:
+                            continue
+                        y, key = successor
+                        clean[j] = True
+                        successors[j] = (y, key)
+
+                    conditioned = conditioned_action_distribution(
+                        fams,
+                        probs,
+                        idx,
+                        p_["option"],
+                        step=step,
+                        clean=clean,
+                        temperature=macro_temperature,
+                        exploration=eps_macro,
                     )
-            if not feats:
-                break
+                    if not conditioned.indices.size:
+                        note_halt(p_, "no_clean_option_product")
+                        continue
+                    budget_left = max(0, horizon - step)
+                    for j, base_prob in zip(
+                        conditioned.indices, conditioned.probabilities
+                    ):
+                        j = int(j)
+                        y, key = successors[j]
+                        l2 = p_["lin"].observe(fams[j], acts[j])
+                        new_slot = RR.created_slot(acts[j])
+                        ctx2 = (
+                            p_["ctx"].with_locus(new_slot)
+                            if new_slot is not None
+                            else p_["ctx"]
+                        )
+                        sh = RR.structural_features_shared(y, ctx2, l2, p_["old"])
+                        feats.append(
+                            RR.features_from_shared(sh, budget_left, "establishment")
+                        )
+                        meta.append(
+                            (
+                                gk,
+                                y,
+                                l2,
+                                ctx2,
+                                float(base_prob),
+                                key,
+                                p_,
+                                conditioned.active_macro,
+                                None,
+                            )
+                        )
+                if not feats:
+                    break
 
-            with torch.no_grad():
-                h_all = torch.sigmoid(
-                    net(torch.tensor(feats, dtype=torch.float32)).squeeze(-1)
-                ).numpy() if guidance == "committor" else np.ones(len(feats))
+                with torch.no_grad():
+                    h_all = torch.sigmoid(
+                        net(torch.tensor(feats, dtype=torch.float32)).squeeze(-1)
+                    ).numpy() if guidance == "committor" else np.ones(len(feats))
 
-            nxt = []
-            for gk, p_ in groups.items():
-                sel = [i for i, m_ in enumerate(meta) if m_[0] == gk]
-                if not sel:
-                    continue
-                w = np.array([meta[i][4] for i in sel], float)
-                if w.sum() <= 0:
-                    continue
-                w = w / w.sum()
-                hs = np.array([h_all[i] for i in sel], float)
-                primitive_floor = float(task.get("epsilon", 0.1))
-                q = primitive_distribution(w, hs, guidance, kappa, primitive_floor)
-                draws = rng_.choice(len(sel), size=int(p_["mult"]), p=q)
-                for d_ in np.unique(draws):
-                    i = sel[int(d_)]
-                    _gk, y, l2, ctx2, _p, key, src, active_macro, fused_progress = meta[i]
-                    if task.get("prepare_only", False):
-                        trace.append({
-                            "bundle_id": src["bundle_id"], "option": src["option"],
-                            "step": step + 1, "source": encode_state(src["st"]),
-                            "product": encode_state(y), "canonical_product": key,
-                            "reference_probability": float(w[int(d_)]),
-                            "sample_probability": float(q[int(d_)]),
-                            "reference_support_size": len(w),
-                            "h_min": float(hs.min()) if guidance == "committor" else None,
-                            "h_max": float(hs.max()) if guidance == "committor" else None,
-                            "kl": float(np.sum(q[q > 0] * np.log(q[q > 0] / w[q > 0]))),
-                            "fused_progress": fused_progress.payload() if fused_progress else None,
-                        })
-                    nxt.append(
-                        {
-                            **src,
-                            "st": y,
-                            "lin": l2,
-                            "ctx": ctx2,
-                            "mult": int((draws == d_).sum()),
-                            "step": step + 1,
-                            "fused_progress": fused_progress,
-                        }
+                nxt = []
+                for gk, p_ in groups.items():
+                    sel = [i for i, m_ in enumerate(meta) if m_[0] == gk]
+                    if not sel:
+                        continue
+                    w = np.array([meta[i][4] for i in sel], float)
+                    if w.sum() <= 0:
+                        continue
+                    w = w / w.sum()
+                    hs = np.array([h_all[i] for i in sel], float)
+                    primitive_floor = float(task.get("epsilon", 0.1))
+                    q = primitive_distribution(w, hs, guidance, kappa, primitive_floor)
+                    draws = rng_.choice(len(sel), size=int(p_["mult"]), p=q)
+                    for d_ in np.unique(draws):
+                        i = sel[int(d_)]
+                        _gk, y, l2, ctx2, _p, key, src, active_macro, fused_progress = meta[i]
+                        if task.get("prepare_only", False):
+                            trace.append({
+                                "bundle_id": src["bundle_id"], "option": src["option"],
+                                "step": step + 1, "source": encode_state(src["st"]),
+                                "product": encode_state(y), "canonical_product": key,
+                                "reference_probability": float(w[int(d_)]),
+                                "sample_probability": float(q[int(d_)]),
+                                "reference_support_size": len(w),
+                                "h_min": float(hs.min()) if guidance == "committor" else None,
+                                "h_max": float(hs.max()) if guidance == "committor" else None,
+                                "kl": float(np.sum(q[q > 0] * np.log(q[q > 0] / w[q > 0]))),
+                                "fused_progress": fused_progress.payload() if fused_progress else None,
+                            })
+                        nxt.append(
+                            {
+                                **src,
+                                "st": y,
+                                "lin": l2,
+                                "ctx": ctx2,
+                                "mult": int((draws == d_).sum()),
+                                "step": step + 1,
+                                "fused_progress": fused_progress,
+                            }
+                        )
+                        record_committed_candidate(
+                            src, y, key, l2, active_macro, step + 1
+                        )
+
+                for particle in nxt:
+                    receipt = receipts[particle["bundle_id"]]
+                    receipt["max_search_step"] = max(
+                        int(receipt["max_search_step"]), int(particle["step"])
                     )
-                    record_committed_candidate(
-                        src, y, key, l2, active_macro, step + 1
+
+                # The measured width cap is per bundle.  Applying it across all
+                # bundles would let whichever bundle appears first steal another
+                # region-option draw's search allocation.
+                cap = int(task.get("max_frontier", 8))
+                by_bundle = defaultdict(list)
+                for particle in nxt:
+                    by_bundle[particle["bundle_id"]].append(particle)
+                frontier = [
+                    particle
+                    for bundle_id in sorted(by_bundle)
+                    for particle in by_bundle[bundle_id][:cap]
+                ]
+
+        if share.exhausted:
+            for particle in frontier:
+                if particle["step"] < option_horizon(particle["option"], max_steps):
+                    counts = receipts[particle["bundle_id"]]["halt_counts"]
+                    counts["parent_executor_share_exhausted"] = (
+                        counts.get("parent_executor_share_exhausted", 0) + int(particle["mult"])
                     )
-
-            for particle in nxt:
-                receipt = receipts[particle["bundle_id"]]
-                receipt["max_search_step"] = max(
-                    int(receipt["max_search_step"]), int(particle["step"])
-                )
-
-            # The measured width cap is per bundle.  Applying it across all
-            # bundles would let whichever bundle appears first steal another
-            # region-option draw's search allocation.
-            cap = int(task.get("max_frontier", 8))
-            by_bundle = defaultdict(list)
-            for particle in nxt:
-                by_bundle[particle["bundle_id"]].append(particle)
-            frontier = [
-                particle
-                for bundle_id in sorted(by_bundle)
-                for particle in by_bundle[bundle_id][:cap]
-            ]
 
         # THE FRONTIER IS FOR SEARCHING; THE CANDIDATE POOL IS FOR SPENDING
         # ORACLE CALLS.  Emit a small representative set from each complete
@@ -1407,6 +1426,10 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
                 candidate.get("program_complete", False) for candidate in cs
             )
         return out, [receipts[key] for key in sorted(receipts)], {
+            "parent_budget": share.receipt() if share.limit is not None else None,
+            "unselected_region_draws": len(regions_k) - sum(
+                int(receipt["region_draws"]) for receipt in receipts.values()
+            ),
             "law_enumerations": len(cache), "memoized_option_products": len(memo),
             "fused_option_products": fused_kernel.work.executor_applications if fused_kernel else 0,
             "sampled_transitions": trace,

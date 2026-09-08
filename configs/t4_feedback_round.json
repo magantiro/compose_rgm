@@ -23,7 +23,8 @@
     "macro_temperature": 2,
     "epsilon_macro": 0.15,
     "include_fused": true,
-    "max_executor_applications": 20000
+    "max_executor_applications": 20000,
+    "executor_calls_per_parent": 2500
   },
   "expected_input_sha256": {
     "committor": "566cfe582973884b22e29c02b00b8188d9ef158b47387275eb36b6e8e62e2c11",
@@ -42,7 +43,7 @@
     "heartbeat_seconds": 30
   },
   "additional_rounds": 1,
-  "contract_sha256": "UNSEALED_PENDING_COMPUTE_ALLOCATION_DECISION",
+  "contract_sha256": "9fdf7b46c149e49b36eb6196700129af5c89bb2f973304b49dd0f7924ade90c8",
   "source": {
     "warm": {
       "path": "t4_warm_continuation/180696c8c1caf1b4fab2107fb2c9b49792a70372cf8d22664a1947972ec31cdd/warm_start.json",

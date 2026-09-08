@@ -64,6 +64,18 @@ def test_feedback_source_hash_fails_closed(sources):
         feedback_archive(root, contract)
 
 
+def test_feedback_contract_freezes_approved_allocation():
+    from compose_v4.experiments.t4_warm_continuation import payload_hash
+
+    contract = json.loads((ROOT / "configs/t4_feedback_round.json").read_text())
+    digest = contract.pop("contract_sha256")
+    assert payload_hash(contract) == digest
+    assert contract["task"]["executor_calls_per_parent"] == 2500
+    assert contract["task"]["max_executor_applications"] == 20000
+    assert contract["additional_rounds"] == 1
+    assert contract["compute"]["oracle_call_limit"] == 20
+
+
 def test_shared_runner_can_stop_after_one_locked_round(tmp_path):
     from test_t4_warm_continuation import fixture_source
 
