@@ -1,0 +1,58 @@
+{
+  "files": {
+    "failure.json": {
+      "bytes": 345,
+      "sha256": "3d95c83392f2eb8309de1fb5d1c0f85c21888b29c611b9a956eec170a1422f8b"
+    },
+    "heartbeat.json": {
+      "bytes": 282,
+      "sha256": "d394716985b4ef41c74600481a75e5ab3364c82135fabe8f11f4d9aead6ea122"
+    },
+    "launch.json": {
+      "bytes": 48419,
+      "sha256": "b8f5715c896ba2df61be0c73783b146e7c88e78d91c822667a5830ad7292b76e"
+    },
+    "round_2/executor_attempts_0.json": {
+      "bytes": 29829279,
+      "sha256": "8f9ad61e15966caac0cdfe62f2dea47f63902583b9a69aa2a547c7ce9d75a901"
+    },
+    "round_2/parents/00.json": {
+      "bytes": 61070,
+      "sha256": "9b26437f8c2a18f9aca9659900fb4b23dff2c3901b2db559d0f35d92db7606cf"
+    },
+    "round_2/parents/01.json": {
+      "bytes": 46503,
+      "sha256": "929573666e8efaaa5155c26289b7eaecdcf03a5df7a176bf317ec3b20b897cb3"
+    },
+    "round_2/parents/02.json": {
+      "bytes": 49991,
+      "sha256": "bde8347140f60502d67a3b23ba56c464e3c80d997b4633b04c47b86588f9e70c"
+    },
+    "round_2/parents/03.json": {
+      "bytes": 13634,
+      "sha256": "e6430a2a6ad26ece1e1bb2b1f92a3084bb673feceaaa93f23a7bbb83e35607b9"
+    },
+    "round_2/parents/04.json": {
+      "bytes": 23443,
+      "sha256": "bdf55a98819668f3239b1ec8d3038e23477e10ded8723629cc7975415a92f401"
+    },
+    "round_2/parents/05.json": {
+      "bytes": 14181,
+      "sha256": "268254379884f6b4bf7fadb015b9cbf81c46716cb98af08f0e7fb3f4f9e75c5a"
+    },
+    "round_2/parents/06.json": {
+      "bytes": 19907,
+      "sha256": "767f0a283c2029edb5cebb8a6a73d50d82fe34a8c80ed09a354ca86697383054"
+    },
+    "runtime_gate.json": {
+      "bytes": 1031,
+      "sha256": "4cea44d847795eada0f4046607713be27e1bf0eb91448cd095ed0db9ddc08dbc"
+    },
+    "warm_start.json": {
+      "bytes": 28432,
+      "sha256": "2df69a5a21ee9658a1add7938252ff70425d61464cd0c08a9f34fe0b38f29f65"
+    }
+  },
+  "volume": "compose-v4-artifacts",
+  "volume_path": "t4_warm_continuation/180696c8c1caf1b4fab2107fb2c9b49792a70372cf8d22664a1947972ec31cdd"
+}

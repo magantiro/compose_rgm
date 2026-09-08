@@ -1,0 +1,3 @@
+# Full attempted-executor ledger remains on disk and in the hashed Modal volume.
+# remote_inventory.json binds its exact bytes; do not re-enumerate to recover it.
+/round_2/executor_attempts_0.json
