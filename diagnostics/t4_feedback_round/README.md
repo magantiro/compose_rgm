@@ -3,8 +3,8 @@
 ## Authorized run, 2026-09-08
 
 The user approved equal 2,500-public-executor-call shares for eight parents,
-within the existing 20,000 total ceiling. The single feedback round is now
-spawned into deployed `genmol-t4-opt`, with no automatic next round:
+within the existing 20,000 total ceiling. The single feedback round completed
+on deployed `genmol-t4-opt`, with no automatic next round:
 
 - Scientific code: `bdb933948ec6b9f5bbfd0b1c14cce26b7a6a8ef6`.
 - Call: `fc-01M2100VP8YHZP8DJMTSCMBBMC`.
@@ -33,9 +33,93 @@ not require a fictitious completed round 2. Three focused auditor tests passed
 in 2.20 seconds, recorded in `audit_tests.xml`. This reporting-only change is
 not part of the serialized scientific image and does not regenerate proposals.
 
-Results are pending. The starting best is -9.3 at 33 calls. At most 20 new
-calls are authorized. Share exhaustion is finite-budget censoring, not
-chemical invalidity or evidence that an incomplete compound program succeeded.
+## Completed result
+
+The best observed feasible docking score improved from **-9.3 at 33 calls to
+-9.6 at 46 calls**. All 13 new dockings completed without failure and passed
+the frozen QED, SA, and original-seed similarity constraints. The round stopped
+normally. Unused allowance is not authority for another round.
+
+`review.json` binds every downloaded JSON by SHA-256 and checks exact-state
+topology, sampled probabilities, the frozen KL bound, executor accounting,
+candidate-lock chronology, docking receipts, and deterministic archive reduction.
+The raw receipts are under `attempt_1/7b3ff467f806ff38058d520a9aee8273caabe3be0a9e164678f7428ed2f323ff/`.
+The 19.55 MB executor ledger remains on disk and at the same Modal prefix,
+hash-bound in the review, but is excluded from Git to avoid duplicating it.
+
+| Quantity | Observed result |
+|---|---:|
+| Parent units checkpointed | 8; 3 exhausted their individual shares |
+| Region/option draws | 24; no unselected region draws |
+| Unique compressed pool | 36 molecules, 23 bundles, 13 feasible |
+| Docked candidates | 13 unique molecules from 11 bundles |
+| Public executor calls | 12,885 of the 20,000 ceiling |
+| Ledger statuses | 11,849 executed; 1,035 invalid; 1 budget-interrupted |
+| Law enumerations / sampled transitions | 69 / 117 |
+| Proposal / docking time | 566.014 s / 33.057 s |
+| Total driver wall time | 840.615 s, including 225.008 s initialization |
+| Pool / docked mean pairwise Morgan distance | 0.695 / 0.619 |
+| Docked intended release, min/median/max | 0.036 / 0.150 / 0.435 |
+| Docked realized coherent change, min/median/max | 0.045 / 0.091 / 0.143 |
+
+Selected options were generic (8), append (3), rebuild (2), restate (2), and
+one each of aromatize, build_ring_system, cyclize, decorate, grow, local, open,
+scaffold_extend, and small_ring. The fused program was applicable in 8 of 24
+draws but selected zero times. The one pendant program reached step 9 of 11
+before its parent's share expired; its mandatory two restatement steps did
+not complete, so it emitted no oracle endpoint. Share exhaustion is
+finite-budget censoring, not chemical invalidity or a completed program.
+
+Two pool candidates gained a cycle relative to their parent; one was docked.
+That `small_ring` endpoint scored -9.4 and added a three-membered ring to a
+previously fused-ring-built parent. Its cycle rank is five, two above the seed.
+All 13 docked endpoints have zero RDKit bridgehead and spiro atoms. This does
+not establish medicinal quality or synthetic feasibility.
+
+The -9.6 best instead came from `generic` refinement of a -9.2 parent descended
+from the earlier pendant-ring construction. It retained cycle rank four and
+two ring systems, while its aromatic-ring count increased from two to three.
+This is an observed build-then-refine ancestry, not another ring addition.
+The 0.3 best-score gain is not a causal algorithm improvement: docking is
+unseeded, this is an inspected development cell, and no matched control ran.
+Completing all eight parent units under bounded shares is demonstrated; a
+speed improvement over the prior interrupted run is not demonstrated.
+
+### What the IVG comparison actually says
+
+Reuse all five `ivg_snapshot_*` records in
+`../t4_winner_comparison/comparison.json`; its old COMPOSE record is superseded
+by this round's best. The source CSV, winner snapshot, analysis script, and
+ring-taxonomy hashes were checked against that artifact on 2026-09-08.
+
+| Structural descriptor | New COMPOSE best | Five saved IVG winners |
+|---|---:|---:|
+| Heavy atoms | 29 | 30–33 |
+| Graph cycle rank | 4 | 5–6 |
+| Aromatic rings | 3 | 3 |
+| Largest SSSR ring | 7 | 8–9 |
+| Ring systems | 2 | 2–3 |
+
+The missing chemistry is not simply more aromatic rings. These IVG endpoints
+have different ring arrangements, more nonaromatic cycles, and a larger
+central scaffold ring. These are endpoint descriptions, not atom-mapped
+expansion paths or proof that a particular edit improves docking. The saved
+winner snapshot also lacks complete upstream revision/license provenance;
+it is not a matched-budget benchmark or an untouched final evaluation.
+
+The next useful question is whether existing executor paths can efficiently
+change ring size and arrangement while retaining feasible candidates, alongside
+continued refinement. Do not turn these winners into templates or similarity
+rewards, tune macro weights to their scores, or assume that more rings are
+always better. No additional scientific run was launched for this comparison.
+
+The final auditor additionally reports parent scores and ring descriptors and
+reconciles the complete executor ledger. Two focused tests passed in 2.97 s;
+Ruff lint, formatting, and diff checks passed. `final_audit_tests.xml` SHA-256:
+`b7e1a08d9ef1a5a435199cda855061b73627914772b3c6c59d6bcc4ae600a551`.
+The added test initially expected a zero-count status key for an empty
+synthetic ledger; that fixture assertion was corrected without changing the
+auditor or acceptance rule. No repository-wide pass is claimed.
 
 ## Earlier preparation record
 
