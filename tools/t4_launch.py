@@ -41,6 +41,11 @@ def main() -> None:
     ap.add_argument("--arms", default="macro_prior")
     ap.add_argument("--session", default="compose_iclr")
     ap.add_argument(
+        "--warm-continuation",
+        action="store_true",
+        help="two guided warm rounds from the frozen full archive, at most 40 new calls",
+    )
+    ap.add_argument(
         "--matched-pilot",
         action="store_true",
         help="one frozen paired cold-start round, at most 20 dockings per arm",
@@ -80,7 +85,17 @@ def main() -> None:
     ap.add_argument("--macro-temperature", type=float, default=2.0)
     ap.add_argument("--epsilon-macro", type=float, default=0.15)
     a = ap.parse_args()
-    if sum((a.continuation_profile, a.fused_reference_profile, a.matched_pilot)) > 1:
+    if (
+        sum(
+            (
+                a.continuation_profile,
+                a.fused_reference_profile,
+                a.matched_pilot,
+                a.warm_continuation,
+            )
+        )
+        > 1
+    ):
         ap.error("choose only one diagnostic")
     if not re.fullmatch(r"[A-Za-z0-9_-]+", a.session):
         raise SystemExit("--session must contain only letters, numbers, '_' or '-'")
@@ -94,9 +109,17 @@ def main() -> None:
             "committed tree, not only clean mounted src/configs"
         )
 
-    if a.continuation_profile or a.fused_reference_profile or a.matched_pilot:
+    if (
+        a.continuation_profile
+        or a.fused_reference_profile
+        or a.matched_pilot
+        or a.warm_continuation
+    ):
         launch_continuation_profile(
-            preflight, fused=a.fused_reference_profile, matched=a.matched_pilot
+            preflight,
+            fused=a.fused_reference_profile,
+            matched=a.matched_pilot,
+            warm=a.warm_continuation,
         )
         return
 
@@ -171,7 +194,7 @@ def main() -> None:
 
 
 def launch_continuation_profile(
-    preflight: dict, *, fused: bool = False, matched: bool = False
+    preflight: dict, *, fused: bool = False, matched: bool = False, warm: bool = False
 ) -> None:
     """Spawn only the fixed diagnostic into the deployed app; retain its call ID."""
     import sys
@@ -180,7 +203,9 @@ def launch_continuation_profile(
     from modal_apps.run_process_v2_p50_app import local_image_revision
 
     kind = (
-        "t4_matched_pilot"
+        "t4_warm_continuation"
+        if warm
+        else "t4_matched_pilot"
         if matched
         else "fused_reference_profile"
         if fused
@@ -189,6 +214,7 @@ def launch_continuation_profile(
     contract = (
         ROOT
         / {
+            "t4_warm_continuation": "configs/t4_warm_continuation.json",
             "t4_matched_pilot": "configs/t4_matched_pilot.json",
             "fused_reference_profile": "configs/fused_reference_profile_contract.json",
             "continuation_profile": "configs/continuation_profile_v1.json",
@@ -216,7 +242,7 @@ def launch_continuation_profile(
         "task": task,
         "call_id": call.object_id,
         "oracle_calls": 0,
-        "oracle_call_limit": 40 if matched else 0,
+        "oracle_call_limit": 40 if matched or warm else 0,
         "volume": "compose-v4-artifacts",
         "volume_path": f"/{kind}/{run_id}",
     }

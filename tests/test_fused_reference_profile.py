@@ -273,18 +273,30 @@ def test_runtime_gate_failure_stops_before_model_enumeration(tmp_path):
     assert events[0] == "identity"
 
 
-@pytest.mark.parametrize("fused", [False, True])
-def test_launcher_spawns_only_the_selected_profile(tmp_path, monkeypatch, fused):
+@pytest.mark.parametrize(
+    "kind",
+    [
+        "continuation_profile",
+        "fused_reference_profile",
+        "t4_matched_pilot",
+        "t4_warm_continuation",
+    ],
+)
+def test_launcher_spawns_only_the_selected_profile(tmp_path, monkeypatch, kind):
     import sys
     from types import SimpleNamespace
 
     from tools import t4_launch
 
-    kind = "fused_reference_profile" if fused else "continuation_profile"
     (tmp_path / "configs").mkdir()
     (tmp_path / "modal_apps").mkdir()
     (tmp_path / "diagnostics").mkdir()
-    config = CONTRACT_PATH if fused else "configs/continuation_profile_v1.json"
+    config = {
+        "fused_reference_profile": CONTRACT_PATH,
+        "continuation_profile": "configs/continuation_profile_v1.json",
+        "t4_matched_pilot": "configs/t4_matched_pilot.json",
+        "t4_warm_continuation": "configs/t4_warm_continuation.json",
+    }[kind]
     (tmp_path / config).write_bytes((ROOT / config).read_bytes())
     (tmp_path / "modal_apps/genmol_t4_opt_app.py").write_text("# launch boundary fixture\n")
     revision = {"commit": "a" * 40, "image_revision_sha256": "b" * 64}
@@ -306,11 +318,17 @@ def test_launcher_spawns_only_the_selected_profile(tmp_path, monkeypatch, fused)
         return SimpleNamespace(spawn=spawn)
 
     monkeypatch.setattr(t4_launch.modal.Function, "from_name", lookup)
-    t4_launch.launch_continuation_profile({"commit": revision["commit"]}, fused=fused)
+    t4_launch.launch_continuation_profile(
+        {"commit": revision["commit"]},
+        fused=kind == "fused_reference_profile",
+        matched=kind == "t4_matched_pilot",
+        warm=kind == "t4_warm_continuation",
+    )
     assert len(calls) == 2
     assert calls[0] == ("genmol-t4-opt", kind)
     receipt = json.loads((tmp_path / f"diagnostics/{kind}_spawn.json").read_text())
     assert receipt["task"] == calls[1]
     assert receipt["oracle_calls"] == 0
+    assert receipt["oracle_call_limit"] == (40 if kind.startswith("t4_") else 0)
     assert receipt["call_id"] == "fc-fixture"
     assert receipt["volume_path"] == f"/{kind}/{calls[1]['run_id']}"

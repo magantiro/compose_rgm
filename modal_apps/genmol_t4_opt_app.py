@@ -285,6 +285,23 @@ def t4_matched_pilot(task: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+@app.function(
+    image=image, cpu=(1.0, 1.0), memory=8192, timeout=3600,
+    max_containers=1, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_warm_continuation(task: dict[str, Any]) -> dict[str, Any]:
+    """Two guided warm rounds, 40 new calls, with exact-state archive checkpoints."""
+    from compose_v4.experiments.t4_warm_continuation import run_remote
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return run_remote(
+        task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume, _runtime,
+        _validate_remote_revision,
+        lambda t, progress, cached, warm: t4_population_cell.local(t, progress, cached, warm),
+        lambda smiles, rd: _dock_many(smiles, "parp1", f"{task['run_id']}_{rd}", workers=1),
+    )
+
+
 def _runtime():
     if "model" in _RT:
         return _RT
@@ -616,7 +633,8 @@ POP_OUT = "/artifacts/t4_population"
 @app.function(image=image, cpu=(8.0, 8.0), memory=int(24 * 1024),
               timeout=2 * 60 * 60, retries=0, max_containers=80,
               volumes={ARTIFACT_ROOT: artifact_volume})
-def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None) -> dict[str, Any]:
+def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
+                       warm_start=None) -> dict[str, Any]:
     """Round-based population search, matching the prior T4 round contract.
 
     The prior official run was already a population method: 8 lineages, a large
@@ -658,6 +676,7 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None) -
     import sascorer
     from compose_v4.chem.molecular_graph import (
         NULL_IDX,
+        is_element,
         smiles_to_molecular_graph,
     )
     from compose_v4.chem.state import pad_molecular_graph
@@ -669,7 +688,8 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None) -
         OptionContinuationKernel, OptionState, exact_graph_key,
     )
     from compose_v4.experiments.t4_matched_pilot import primitive_distribution
-    from compose_v4.rewrite.trace_shard import encode_state
+    from compose_v4.rewrite.trace_shard import decode_state, encode_state
+    from compose_v4.experiments.t4_warm_continuation import exact_context, payload_hash
     from compose_v4.control import region_rewrite as RR
     from compose_v4.control import graph_geometry as GG
     from compose_v4.control.macro_engine import (
@@ -716,6 +736,16 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None) -
     macro_temperature = float(task.get("macro_temperature", 2.0))
     eps_macro = float(task.get("epsilon_macro", 0.15))
     rng = np.random.default_rng(int(task["seed_rng"]))
+    if warm_start is not None:
+        if payload_hash(warm_start) != task.get("warm_start_sha256"):
+            raise ValueError("warm archive identity mismatch")
+        if not task.get("prepare_only"):
+            raise ValueError("exact-state warm continuation requires locked one-round preparation")
+        rng.bit_generator.state = warm_start["rng_state"]
+    exact_parents = {
+        row["smiles"]: decode_state(row["state"])
+        for row in warm_start["archive"]
+    } if warm_start is not None else {}
     seed_fp = gen.GetFingerprint(Chem.MolFromSmiles(seed))
     tv = TaskValue.from_dict(task["value_table"]) if task.get("value_table") else None
     value_fn = tv.value_fn() if tv is not None else None
@@ -883,12 +913,16 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None) -
         frontier = []
         receipts: dict[str, dict] = {}
         for reg, multiplicity, region_score in regions_k:
-            raw_ = smiles_to_molecular_graph(parent)
-            st_ = pad_molecular_graph(raw_, CANONICAL_SLOTS)
-            n_ = len(raw_.atom_types)
-            ctx_ = RR.context_from_region(reg)
-            lin_ = RR.Lineage.initial(range(n_))
-            old_ = frozenset(lin_.id_of[a] for a in reg.atoms if a in lin_.id_of)
+            if warm_start is None:
+                raw_ = smiles_to_molecular_graph(parent)
+                st_ = pad_molecular_graph(raw_, CANONICAL_SLOTS)
+                ctx_ = RR.context_from_region(reg)
+            else:
+                st_ = exact_parents[parent]
+                ctx_ = exact_context(st_, parent, reg)
+            n_ = st_.n_real_atoms
+            lin_ = RR.Lineage.initial(np.flatnonzero(is_element(st_.atom_types)))
+            old_ = frozenset(lin_.id_of[a] for a in ctx_.locus if a in lin_.id_of)
             fams, acts, _probs = enum_fn(st_)
             idx, _why = RR.admissible_indices(fams, acts, ctx_)
             n_free = min(
@@ -950,6 +984,7 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None) -
                     "parent": parent,
                     "parent_lineage_id": int(parent_lineage_id),
                     "region_atoms": sorted(int(x) for x in reg.atoms),
+                    "region_slot_atoms": sorted(int(x) for x in ctx_.locus),
                     "region_id": hashlib.sha256(
                         json.dumps(
                             [list(reg.key()[0]), [list(x) for x in reg.key()[1]]],
@@ -1056,6 +1091,8 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None) -
                 "added_backbone_atoms": added_backbone,
                 "added_sulfur": added_sulfur,
             }
+            if warm_start is not None:
+                cands[candidate_key]["state"] = encode_state(y)
 
         for step in range(max_steps):
             if not frontier:
@@ -1433,6 +1470,14 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None) -
     docked: dict[str, float] = {}
     n_dock, rounds_log = 0, []
     rd = 0
+    if warm_start is not None:
+        archive = [dict(row) for row in warm_start["archive"]]
+        archive[0].update(p0)
+        docked = {canonical_state_key(decode_state(row["state"])): row["ds"]
+                  for row in archive}
+        sur_pairs = [(_fp(row["smiles"]), row["ds"]) for row in archive if row["ds"] is not None]
+        rd = int(warm_start["round"])
+        surrogate_fit(sur_pairs)
 
     while n_dock < budget:
         rd += 1
@@ -1593,6 +1638,10 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None) -
             pred = dict(zip(keys, sc))
         else:
             pred = {}
+        if warm_start is not None:
+            for candidate in pool:
+                value = pred.get(candidate["smiles"])
+                candidate["surrogate_score"] = float(value) if value is not None else None
         for v_ in by_src.values():
             v_.sort(key=lambda a: (a["v"], pred.get(a["smiles"], -a.get("qed", 0))))
         take = []

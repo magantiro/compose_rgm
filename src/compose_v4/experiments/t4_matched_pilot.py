@@ -251,7 +251,18 @@ def run_pair(task, prepare, dock, output: Path, *, commit=lambda: None, progress
 
 
 def run_remote(
-    task, repo_root, artifact_root, volume, runtime_factory, validate_revision, prepare, dock
+    task,
+    repo_root,
+    artifact_root,
+    volume,
+    runtime_factory,
+    validate_revision,
+    prepare,
+    dock,
+    *,
+    contract_path=CONTRACT_PATH,
+    run_kind="t4_matched_pilot",
+    runner=run_pair,
 ):
     """Thin remote provenance/heartbeat boundary; never changes the proposal law."""
     import resource
@@ -259,7 +270,7 @@ def run_remote(
 
     validate_revision(task["image_revision"])
     verify_file(repo_root / "modal_apps/genmol_t4_opt_app.py", task["app_sha256"])
-    path = repo_root / CONTRACT_PATH
+    path = repo_root / contract_path
     verify_file(path, task["contract_sha256"])
     contract = json.loads(path.read_text())
     body = {k: v for k, v in contract.items() if k != "contract_sha256"}
@@ -272,7 +283,7 @@ def run_remote(
     }
     if hashlib.sha256(canonical_bytes(identity)).hexdigest() != task["run_id"]:
         raise ValueError("pilot run identity mismatch")
-    output = artifact_root / "t4_matched_pilot" / task["run_id"]
+    output = artifact_root / run_kind / task["run_id"]
     started = time.perf_counter()
     progress = {"phase": "initialization", "run_id": task["run_id"]}
     stop, mutex = threading.Event(), threading.RLock()
@@ -330,7 +341,7 @@ def run_remote(
         }
         publish_json(output / "runtime_gate.json", gate)
         commit()
-        result = run_pair(actual_task, prepare, dock, output, commit=commit, progress=progress)
+        result = runner(actual_task, prepare, dock, output, commit=commit, progress=progress)
         result.update(
             code_revision=actual_task["code_revision"],
             configuration=contract,
