@@ -24,7 +24,7 @@ from compose_v4.experiments.continuation_profile import canonical_bytes, sha256_
 from compose_v4.experiments.t4_matched_pilot import ARMS, unseal, verify_pair
 from compose_v4.gates.med_chem_gate import is_valid
 from compose_v4.rewrite.action_codec_v4 import decode_action
-from compose_v4.rewrite.kernel import canonical_state_key, editing_v2_rewrite_system
+from compose_v4.rewrite.kernel import canonical_state_key, editing_v2_semantic_rewrite_system
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
 
 
@@ -65,7 +65,7 @@ def report(root: Path, ledger_root: Path) -> dict:
     inventory_path = root / "remote_inventory.json"
     inventory = json.loads(inventory_path.read_text())
     hashes = {str(inventory_path): sha256_file(inventory_path)}
-    system, rows = editing_v2_rewrite_system(), []
+    system, rows = editing_v2_semantic_rewrite_system(), []
     for arm, lock in locks.items():
         ledger_path = ledger_root / f"{arm}.json"
         for path, remote in (
