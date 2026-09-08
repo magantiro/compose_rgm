@@ -1,0 +1,640 @@
+{
+  "arms": {
+    "committor": {
+      "best": {
+        "added_backbone_atoms": 3,
+        "added_sulfur": 0,
+        "added_terminal_halogen": 0,
+        "bundle_id": "fb36bc726552da6436c0",
+        "d_cycle_rank": 0,
+        "d_heavy": 3,
+        "d_ring_systems": 0,
+        "ds": -8.2,
+        "element_delta": {
+          "C": 3
+        },
+        "interface": "multi",
+        "kind": "multi",
+        "option": "generic",
+        "option_phase": "generic",
+        "origin_bundle_ids": [
+          "fb36bc726552da6436c0"
+        ],
+        "origin_options": [
+          "generic"
+        ],
+        "parent": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+        "parent_lineage_id": 2,
+        "program_complete": false,
+        "q_option": 0.1883333333333333,
+        "qed": 0.9455916638952703,
+        "r_change": 0.05263157894736842,
+        "r_coherent": 0.21052631578947367,
+        "r_release": 0.15789473684210525,
+        "region_id": "b337d0c200b7d67fb90b",
+        "sa": 2.8638638363796947,
+        "sim": 0.6538461538461539,
+        "smiles": "CC(C)c1cc2n(c1)-c1ccc(CN(C)C)cc1CNC2=O",
+        "step": 5,
+        "v": 0.0
+      },
+      "by_option": {
+        "append": {
+          "added_backbone_atoms": 1,
+          "added_sulfur": 0,
+          "added_terminal_halogen": 0,
+          "any_topology_change": 0,
+          "cycle_rank_increase": 0,
+          "max_r_coherent": 0.10526315789473684,
+          "mean_d_heavy": 1.0,
+          "median_r_coherent": 0.10526315789473684,
+          "median_r_release": 0.10526315789473684,
+          "n": 1,
+          "ring_system_increase": 0
+        },
+        "aromatize": {
+          "added_backbone_atoms": 1,
+          "added_sulfur": 1,
+          "added_terminal_halogen": 0,
+          "any_topology_change": 0,
+          "cycle_rank_increase": 0,
+          "max_r_coherent": 0.15789473684210525,
+          "mean_d_heavy": 0.0,
+          "median_r_coherent": 0.15789473684210525,
+          "median_r_release": 0.736842105263158,
+          "n": 2,
+          "ring_system_increase": 0
+        },
+        "decorate": {
+          "added_backbone_atoms": 0,
+          "added_sulfur": 0,
+          "added_terminal_halogen": 2,
+          "any_topology_change": 0,
+          "cycle_rank_increase": 0,
+          "max_r_coherent": 0.10526315789473684,
+          "mean_d_heavy": 1.0,
+          "median_r_coherent": 0.10526315789473684,
+          "median_r_release": 0.5789473684210527,
+          "n": 2,
+          "ring_system_increase": 0
+        },
+        "generic": {
+          "added_backbone_atoms": 6,
+          "added_sulfur": 0,
+          "added_terminal_halogen": 2,
+          "any_topology_change": 0,
+          "cycle_rank_increase": 0,
+          "max_r_coherent": 0.21052631578947367,
+          "mean_d_heavy": 1.0,
+          "median_r_coherent": 0.10526315789473684,
+          "median_r_release": 0.07894736842105263,
+          "n": 6,
+          "ring_system_increase": 0
+        },
+        "grow": {
+          "added_backbone_atoms": 2,
+          "added_sulfur": 1,
+          "added_terminal_halogen": 0,
+          "any_topology_change": 0,
+          "cycle_rank_increase": 0,
+          "max_r_coherent": 0.10526315789473684,
+          "mean_d_heavy": 1.0,
+          "median_r_coherent": 0.10526315789473684,
+          "median_r_release": 0.47368421052631576,
+          "n": 3,
+          "ring_system_increase": 0
+        },
+        "open": {
+          "added_backbone_atoms": 0,
+          "added_sulfur": 0,
+          "added_terminal_halogen": 0,
+          "any_topology_change": 1,
+          "cycle_rank_increase": 0,
+          "max_r_coherent": 0.05263157894736842,
+          "mean_d_heavy": 0.0,
+          "median_r_coherent": 0.05263157894736842,
+          "median_r_release": 0.21052631578947367,
+          "n": 1,
+          "ring_system_increase": 1
+        },
+        "rebuild": {
+          "added_backbone_atoms": 1,
+          "added_sulfur": 0,
+          "added_terminal_halogen": 1,
+          "any_topology_change": 0,
+          "cycle_rank_increase": 0,
+          "max_r_coherent": 0.10526315789473684,
+          "mean_d_heavy": 1.0,
+          "median_r_coherent": 0.10526315789473684,
+          "median_r_release": 0.07894736842105263,
+          "n": 2,
+          "ring_system_increase": 0
+        },
+        "scaffold_extend": {
+          "added_backbone_atoms": 1,
+          "added_sulfur": 0,
+          "added_terminal_halogen": 0,
+          "any_topology_change": 0,
+          "cycle_rank_increase": 0,
+          "max_r_coherent": 0.10526315789473684,
+          "mean_d_heavy": 1.0,
+          "median_r_coherent": 0.10526315789473684,
+          "median_r_release": 0.10526315789473684,
+          "n": 1,
+          "ring_system_increase": 0
+        },
+        "shrink": {
+          "added_backbone_atoms": 0,
+          "added_sulfur": 0,
+          "added_terminal_halogen": 0,
+          "any_topology_change": 1,
+          "cycle_rank_increase": 0,
+          "max_r_coherent": 0.05263157894736842,
+          "mean_d_heavy": -1.0,
+          "median_r_coherent": 0.05263157894736842,
+          "median_r_release": 0.42105263157894735,
+          "n": 1,
+          "ring_system_increase": 1
+        },
+        "small_ring": {
+          "added_backbone_atoms": 0,
+          "added_sulfur": 0,
+          "added_terminal_halogen": 0,
+          "any_topology_change": 1,
+          "cycle_rank_increase": 1,
+          "max_r_coherent": 0.10526315789473684,
+          "mean_d_heavy": 0.0,
+          "median_r_coherent": 0.10526315789473684,
+          "median_r_release": 0.7894736842105263,
+          "n": 1,
+          "ring_system_increase": 1
+        }
+      },
+      "candidate_count": 31,
+      "compound_programs": [
+        {
+          "bundle_id": "01175f4b451671814d20",
+          "halt_counts": {
+            "no_clean_option_product": 1
+          },
+          "max_search_step": 8,
+          "option": "build_ring_system",
+          "program_complete": false
+        },
+        {
+          "bundle_id": "c808400777e6a0952c54",
+          "halt_counts": {
+            "no_clean_option_product": 1
+          },
+          "max_search_step": 8,
+          "option": "build_ring_system",
+          "program_complete": false
+        },
+        {
+          "bundle_id": "c9ff3c0e89d6994877f6",
+          "halt_counts": {
+            "no_clean_option_product": 1
+          },
+          "max_search_step": 8,
+          "option": "build_ring_system",
+          "program_complete": false
+        }
+      ],
+      "docked_bundles": 19,
+      "docked_diversity": 0.5543280700978331,
+      "docked_options": {
+        "append": 1,
+        "aromatize": 2,
+        "decorate": 2,
+        "generic": 6,
+        "grow": 3,
+        "open": 1,
+        "rebuild": 2,
+        "scaffold_extend": 1,
+        "shrink": 1,
+        "small_ring": 1
+      },
+      "docked_topology_changes": [
+        {
+          "d_cycle_rank": 1,
+          "d_heavy": 0,
+          "d_ring_systems": 1,
+          "option": "small_ring",
+          "r_coherent": 0.10526315789473684,
+          "r_release": 0.7894736842105263,
+          "smiles": "O=C1NCc2cc(CN3CC3)ccc2-n2cccc21"
+        },
+        {
+          "d_cycle_rank": -1,
+          "d_heavy": 0,
+          "d_ring_systems": 1,
+          "option": "open",
+          "r_coherent": 0.05263157894736842,
+          "r_release": 0.21052631578947367,
+          "smiles": "CN(C)Cc1ccc(-n2cccc2)c(CNC=O)c1"
+        },
+        {
+          "d_cycle_rank": -1,
+          "d_heavy": -1,
+          "d_ring_systems": 1,
+          "option": "shrink",
+          "r_coherent": 0.05263157894736842,
+          "r_release": 0.42105263157894735,
+          "smiles": "CN(C)Cc1ccc(-n2cccc2C(N)=O)cc1"
+        }
+      ],
+      "docking_attempts": 20,
+      "docking_failures": 0,
+      "docking_seconds": 47.10600367500001,
+      "executor_calls": 15046,
+      "feasible": 17,
+      "intended_release_min_median_max": [
+        0.05263157894736842,
+        0.18421052631578946,
+        0.8947368421052632
+      ],
+      "law_enumerations": 76,
+      "mean_recorded_kl": 0.24156624535758447,
+      "nontrivial_reference_rows": 119,
+      "pool_diversity": 0.563041285057088,
+      "proposal_seconds": 442.206952454,
+      "realized_coherent_min_median_max": [
+        0.05263157894736842,
+        0.10526315789473684,
+        0.21052631578947367
+      ],
+      "sampled_transitions": 120,
+      "selected_options": {
+        "append": 1,
+        "aromatize": 2,
+        "build_ring_system": 3,
+        "decorate": 3,
+        "generic": 5,
+        "grow": 3,
+        "open": 1,
+        "rebuild": 2,
+        "restate": 1,
+        "scaffold_extend": 1,
+        "shrink": 1,
+        "small_ring": 1
+      },
+      "unique_docked": 20,
+      "unique_pool": 29
+    },
+    "reference": {
+      "best": {
+        "added_backbone_atoms": 3,
+        "added_sulfur": 0,
+        "added_terminal_halogen": 0,
+        "bundle_id": "fb36bc726552da6436c0",
+        "d_cycle_rank": 0,
+        "d_heavy": 3,
+        "d_ring_systems": 0,
+        "ds": -8.3,
+        "element_delta": {
+          "C": 3
+        },
+        "interface": "multi",
+        "kind": "multi",
+        "option": "generic",
+        "option_phase": "generic",
+        "origin_bundle_ids": [
+          "fb36bc726552da6436c0"
+        ],
+        "origin_options": [
+          "generic"
+        ],
+        "parent": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+        "parent_lineage_id": 2,
+        "program_complete": false,
+        "q_option": 0.1883333333333333,
+        "qed": 0.9455916638952703,
+        "r_change": 0.05263157894736842,
+        "r_coherent": 0.21052631578947367,
+        "r_release": 0.15789473684210525,
+        "region_id": "b337d0c200b7d67fb90b",
+        "sa": 2.8638638363796947,
+        "sim": 0.6538461538461539,
+        "smiles": "CC(C)c1cc2n(c1)-c1ccc(CN(C)C)cc1CNC2=O",
+        "step": 7,
+        "v": 0.0
+      },
+      "by_option": {
+        "append": {
+          "added_backbone_atoms": 1,
+          "added_sulfur": 0,
+          "added_terminal_halogen": 0,
+          "any_topology_change": 0,
+          "cycle_rank_increase": 0,
+          "max_r_coherent": 0.10526315789473684,
+          "mean_d_heavy": 1.0,
+          "median_r_coherent": 0.10526315789473684,
+          "median_r_release": 0.10526315789473684,
+          "n": 1,
+          "ring_system_increase": 0
+        },
+        "aromatize": {
+          "added_backbone_atoms": 1,
+          "added_sulfur": 1,
+          "added_terminal_halogen": 0,
+          "any_topology_change": 0,
+          "cycle_rank_increase": 0,
+          "max_r_coherent": 0.15789473684210525,
+          "mean_d_heavy": 0.0,
+          "median_r_coherent": 0.15789473684210525,
+          "median_r_release": 0.736842105263158,
+          "n": 2,
+          "ring_system_increase": 0
+        },
+        "decorate": {
+          "added_backbone_atoms": 0,
+          "added_sulfur": 0,
+          "added_terminal_halogen": 2,
+          "any_topology_change": 0,
+          "cycle_rank_increase": 0,
+          "max_r_coherent": 0.10526315789473684,
+          "mean_d_heavy": 1.0,
+          "median_r_coherent": 0.10526315789473684,
+          "median_r_release": 0.47368421052631576,
+          "n": 2,
+          "ring_system_increase": 0
+        },
+        "generic": {
+          "added_backbone_atoms": 10,
+          "added_sulfur": 0,
+          "added_terminal_halogen": 1,
+          "any_topology_change": 0,
+          "cycle_rank_increase": 0,
+          "max_r_coherent": 0.2631578947368421,
+          "mean_d_heavy": 1.5,
+          "median_r_coherent": 0.13157894736842105,
+          "median_r_release": 0.07894736842105263,
+          "n": 6,
+          "ring_system_increase": 0
+        },
+        "grow": {
+          "added_backbone_atoms": 2,
+          "added_sulfur": 0,
+          "added_terminal_halogen": 1,
+          "any_topology_change": 0,
+          "cycle_rank_increase": 0,
+          "max_r_coherent": 0.10526315789473684,
+          "mean_d_heavy": 1.0,
+          "median_r_coherent": 0.10526315789473684,
+          "median_r_release": 0.47368421052631576,
+          "n": 3,
+          "ring_system_increase": 0
+        },
+        "open": {
+          "added_backbone_atoms": 0,
+          "added_sulfur": 0,
+          "added_terminal_halogen": 0,
+          "any_topology_change": 1,
+          "cycle_rank_increase": 0,
+          "max_r_coherent": 0.05263157894736842,
+          "mean_d_heavy": 0.0,
+          "median_r_coherent": 0.05263157894736842,
+          "median_r_release": 0.21052631578947367,
+          "n": 1,
+          "ring_system_increase": 1
+        },
+        "rebuild": {
+          "added_backbone_atoms": 2,
+          "added_sulfur": 0,
+          "added_terminal_halogen": 0,
+          "any_topology_change": 0,
+          "cycle_rank_increase": 0,
+          "max_r_coherent": 0.10526315789473684,
+          "mean_d_heavy": 1.0,
+          "median_r_coherent": 0.10526315789473684,
+          "median_r_release": 0.07894736842105263,
+          "n": 2,
+          "ring_system_increase": 0
+        },
+        "scaffold_extend": {
+          "added_backbone_atoms": 1,
+          "added_sulfur": 0,
+          "added_terminal_halogen": 0,
+          "any_topology_change": 0,
+          "cycle_rank_increase": 0,
+          "max_r_coherent": 0.10526315789473684,
+          "mean_d_heavy": 1.0,
+          "median_r_coherent": 0.10526315789473684,
+          "median_r_release": 0.10526315789473684,
+          "n": 1,
+          "ring_system_increase": 0
+        },
+        "shrink": {
+          "added_backbone_atoms": 0,
+          "added_sulfur": 0,
+          "added_terminal_halogen": 0,
+          "any_topology_change": 1,
+          "cycle_rank_increase": 0,
+          "max_r_coherent": 0.05263157894736842,
+          "mean_d_heavy": -1.0,
+          "median_r_coherent": 0.05263157894736842,
+          "median_r_release": 0.42105263157894735,
+          "n": 1,
+          "ring_system_increase": 1
+        },
+        "small_ring": {
+          "added_backbone_atoms": 0,
+          "added_sulfur": 0,
+          "added_terminal_halogen": 0,
+          "any_topology_change": 1,
+          "cycle_rank_increase": 1,
+          "max_r_coherent": 0.10526315789473684,
+          "mean_d_heavy": 0.0,
+          "median_r_coherent": 0.10526315789473684,
+          "median_r_release": 0.7894736842105263,
+          "n": 1,
+          "ring_system_increase": 1
+        }
+      },
+      "candidate_count": 31,
+      "compound_programs": [
+        {
+          "bundle_id": "01175f4b451671814d20",
+          "halt_counts": {
+            "no_clean_option_product": 1
+          },
+          "max_search_step": 8,
+          "option": "build_ring_system",
+          "program_complete": false
+        },
+        {
+          "bundle_id": "c808400777e6a0952c54",
+          "halt_counts": {
+            "no_clean_option_product": 1
+          },
+          "max_search_step": 8,
+          "option": "build_ring_system",
+          "program_complete": false
+        },
+        {
+          "bundle_id": "c9ff3c0e89d6994877f6",
+          "halt_counts": {
+            "no_clean_option_product": 1
+          },
+          "max_search_step": 8,
+          "option": "build_ring_system",
+          "program_complete": false
+        }
+      ],
+      "docked_bundles": 19,
+      "docked_diversity": 0.5495906709201485,
+      "docked_options": {
+        "append": 1,
+        "aromatize": 2,
+        "decorate": 2,
+        "generic": 6,
+        "grow": 3,
+        "open": 1,
+        "rebuild": 2,
+        "scaffold_extend": 1,
+        "shrink": 1,
+        "small_ring": 1
+      },
+      "docked_topology_changes": [
+        {
+          "d_cycle_rank": 1,
+          "d_heavy": 0,
+          "d_ring_systems": 1,
+          "option": "small_ring",
+          "r_coherent": 0.10526315789473684,
+          "r_release": 0.7894736842105263,
+          "smiles": "O=C1NCc2cc(CN3CC3)ccc2-n2cccc21"
+        },
+        {
+          "d_cycle_rank": -1,
+          "d_heavy": 0,
+          "d_ring_systems": 1,
+          "option": "open",
+          "r_coherent": 0.05263157894736842,
+          "r_release": 0.21052631578947367,
+          "smiles": "CN(C)Cc1ccc(-n2cccc2C=O)c(CN)c1"
+        },
+        {
+          "d_cycle_rank": -1,
+          "d_heavy": -1,
+          "d_ring_systems": 1,
+          "option": "shrink",
+          "r_coherent": 0.05263157894736842,
+          "r_release": 0.42105263157894735,
+          "smiles": "CN(C)Cc1ccc(-n2cccc2C(N)=O)cc1"
+        }
+      ],
+      "docking_attempts": 20,
+      "docking_failures": 0,
+      "docking_seconds": 49.65395554199995,
+      "executor_calls": 12759,
+      "feasible": 19,
+      "intended_release_min_median_max": [
+        0.05263157894736842,
+        0.15789473684210525,
+        0.8947368421052632
+      ],
+      "law_enumerations": 79,
+      "mean_recorded_kl": 0.0,
+      "nontrivial_reference_rows": 119,
+      "pool_diversity": 0.5563799609836186,
+      "proposal_seconds": 433.47927785700006,
+      "realized_coherent_min_median_max": [
+        0.05263157894736842,
+        0.10526315789473684,
+        0.2631578947368421
+      ],
+      "sampled_transitions": 120,
+      "selected_options": {
+        "append": 1,
+        "aromatize": 2,
+        "build_ring_system": 3,
+        "decorate": 3,
+        "generic": 5,
+        "grow": 3,
+        "open": 1,
+        "rebuild": 2,
+        "restate": 1,
+        "scaffold_extend": 1,
+        "shrink": 1,
+        "small_ring": 1
+      },
+      "unique_docked": 20,
+      "unique_pool": 29
+    }
+  },
+  "configuration": {
+    "compute": {
+      "automatic_retries": 0,
+      "cpu": 1,
+      "heartbeat_seconds": 30,
+      "memory_mib": 8192,
+      "oracle_call_limit": 40,
+      "timeout_seconds": 3600
+    },
+    "contract_sha256": "c020d92f4c64d531d1b2b0f6273df4dda22e37c1a2cd78bb981500b993e74455",
+    "expected_input_sha256": {
+      "committor": "566cfe582973884b22e29c02b00b8188d9ef158b47387275eb36b6e8e62e2c11",
+      "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "r_theta_checkpoint": "c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8",
+      "r_theta_run_paths": "585286e0fb6dd8fb6b5a050dc3e5f8d1c7e782b105df114cbcb14cabbb5b2bc2",
+      "receptor": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9",
+      "seed_manifest": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"
+    },
+    "schema_version": "t4_matched_pilot_contract_v1",
+    "source_role": "inspected development PARP1 seed0; no held-out inference",
+    "task": {
+      "budget": 20,
+      "delta": 0.4,
+      "emit_per_bundle": 3,
+      "epsilon": 0.1,
+      "epsilon_macro": 0.15,
+      "epsilon_option": 0.1,
+      "epsilon_region": 0.2,
+      "include_fused": true,
+      "kappa": 1,
+      "lineages": 8,
+      "macro_temperature": 2,
+      "max_executor_applications": 20000,
+      "max_frontier": 8,
+      "max_handoff": 16,
+      "particles_per_region": 1,
+      "per_round": 20,
+      "regions_per_lineage": 3,
+      "seed_rng": 1000,
+      "session": "compose_iclr",
+      "workers": 1
+    },
+    "training_authorized": false
+  },
+  "elapsed_seconds": 1234.867369976,
+  "input_sha256": {
+    "committor/candidate_lock.json": "3824eeb496b6185af2c5a254278137afef3ea5d79e3c79096fad667356b9df08",
+    "committor/docking.json": "4b37173ec5c25c2f575dab5293f7b3337ec50a7a0c3c4c3d7c8035be67edbf29",
+    "committor/docking_started.json": "cecf927fa3d06168e869cda0a62fc0cf7b161ae1f270b47026aed2227da98695",
+    "heartbeat.json": "b72b61c8e2d6b0579c24d9aff59521cb94832210b17dce9f5f2c0bfb8d2bb2af",
+    "oracle_barrier.json": "4e28ff327a9806373351f997cb03920347805ec59d980a638dab4e923b3865f8",
+    "reference/candidate_lock.json": "438e057920a4c6506a6555b9556e2f8a17fcda00d8672840d517b31c720c2b94",
+    "reference/docking.json": "215af3b6da3a8bb6043f985966221b5648df6105e316ea8bd3b2916590c71c5f",
+    "reference/docking_started.json": "7fd1ea4b883b4e1f3d5308ae6345de9b3630793375fc3fbb9a71c57ce041646e",
+    "result.json": "892ca135745e8af5ac0d5e54e04589c82dda5e98dba14aead7a69da2bceffced",
+    "runtime_gate.json": "260487b12c0f36839ee9e1a86cdc19c3e5d15ce8b8272e6a65dabc70957aedc1",
+    "spawn.json": "9661ff6dd2ba5a6c78ba0c2be9db29fcb31b10c06889f83e6d946a68372e5450"
+  },
+  "limitations": [
+    "one inspected development source",
+    "cold-start structural committor, not docking-value learning",
+    "inherited unseeded OpenBabel/QuickVina oracle; no paired noise-control claim",
+    "same compute ceilings, not identical realized work"
+  ],
+  "paired_outer_plan_verified": true,
+  "review_revision": "dd2f7be5cfb7249ead56f876f735bd901ec28718",
+  "review_script_sha256": "3e23924eb12d91763ce34af382766dfe74d262a709fd61cd1d2a6b39accdbfb4",
+  "schema_version": "t4_matched_review_v1",
+  "software": {
+    "numpy": "2.5.3",
+    "python": "3.12.9"
+  },
+  "source_revision": "219c1cd276ed5cf0fd1c98311e408bdf9b04f41b",
+  "status": "complete"
+}

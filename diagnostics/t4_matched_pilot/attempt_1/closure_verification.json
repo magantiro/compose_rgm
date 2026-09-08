@@ -1,0 +1,120 @@
+{
+  "new_model_calls": 0,
+  "new_oracle_calls": 0,
+  "replayed_unique_executor_calls": 2,
+  "schema_version": "t4_closure_false_rejection_verification_v1",
+  "witnesses": [
+    {
+      "arm": "reference",
+      "bundle_id": "c808400777e6a0952c54",
+      "connected": true,
+      "exact_replay_matches": true,
+      "exact_slot_contract_accepts": true,
+      "frozen_context_preserved": true,
+      "heavy_atoms": 27,
+      "legacy_contract_accepts": false,
+      "mark": {
+        "executor_rule": "cycle_close",
+        "model_family": "cycle_insert",
+        "payload": {
+          "a": 21,
+          "b": 26,
+          "order": 1
+        },
+        "payload_type": "CycleCloseEdge",
+        "schema": "compose.rewrite.action",
+        "schema_version": 4
+      },
+      "new_system_sizes": [
+        6
+      ],
+      "product": "CN(C)Cc1ccc2c(c1)CNC(=O)c1ccc(C3=NC(=O)NON3C)n1-2",
+      "region_admissible": true,
+      "valid": true
+    },
+    {
+      "arm": "reference",
+      "bundle_id": "c808400777e6a0952c54",
+      "connected": true,
+      "exact_replay_matches": true,
+      "exact_slot_contract_accepts": true,
+      "frozen_context_preserved": true,
+      "heavy_atoms": 27,
+      "legacy_contract_accepts": false,
+      "mark": {
+        "executor_rule": "cycle_close",
+        "model_family": "cycle_insert",
+        "payload": {
+          "a": 23,
+          "b": 25,
+          "order": 1
+        },
+        "payload_type": "CycleCloseEdge",
+        "schema": "compose.rewrite.action",
+        "schema_version": 4
+      },
+      "new_system_sizes": [
+        6
+      ],
+      "product": "CN(C)Cc1ccc2c(c1)CNC(=O)c1ccc(C3=NC(=O)N(O)CN3)n1-2",
+      "region_admissible": true,
+      "valid": true
+    },
+    {
+      "arm": "committor",
+      "bundle_id": "c808400777e6a0952c54",
+      "connected": true,
+      "exact_replay_matches": true,
+      "exact_slot_contract_accepts": true,
+      "frozen_context_preserved": true,
+      "heavy_atoms": 27,
+      "legacy_contract_accepts": false,
+      "mark": {
+        "executor_rule": "cycle_close",
+        "model_family": "cycle_insert",
+        "payload": {
+          "a": 21,
+          "b": 26,
+          "order": 1
+        },
+        "payload_type": "CycleCloseEdge",
+        "schema": "compose.rewrite.action",
+        "schema_version": 4
+      },
+      "new_system_sizes": [
+        6
+      ],
+      "product": "CN(C)Cc1ccc2c(c1)CNC(=O)c1ccc(C3=NC(=O)NON3C)n1-2",
+      "region_admissible": true,
+      "valid": true
+    },
+    {
+      "arm": "committor",
+      "bundle_id": "c808400777e6a0952c54",
+      "connected": true,
+      "exact_replay_matches": true,
+      "exact_slot_contract_accepts": true,
+      "frozen_context_preserved": true,
+      "heavy_atoms": 27,
+      "legacy_contract_accepts": false,
+      "mark": {
+        "executor_rule": "cycle_close",
+        "model_family": "cycle_insert",
+        "payload": {
+          "a": 23,
+          "b": 25,
+          "order": 1
+        },
+        "payload_type": "CycleCloseEdge",
+        "schema": "compose.rewrite.action",
+        "schema_version": 4
+      },
+      "new_system_sizes": [
+        6
+      ],
+      "product": "CN(C)Cc1ccc2c(c1)CNC(=O)c1ccc(C3=NC(=O)N(O)CN3)n1-2",
+      "region_admissible": true,
+      "valid": true
+    }
+  ]
+}

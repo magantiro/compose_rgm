@@ -81,3 +81,19 @@ The integration also corrects exact-state cache identity to include charge and
 implicit hydrogen channels, and shared-particle identity to include lineage
 next-ID and fused program progress. These changes protect persistent-slot
 semantics; no executor, vocabulary, region prior, or primitive support is altered.
+
+## Completed development decision
+
+The paired round completed from `219c1cd`, with 20 docking attempts per arm and
+no docking failures. Both arms found the same best molecule; its unseeded docking
+scores were -8.3 reference and -8.2 guided, not evidence of a guidance effect.
+All three construction programs in each arm stopped before closure. Saved-state
+analysis verified that the SMILES-index-based append-system contract falsely
+rejects two valid six-membered pendant closures in one bundle in both arms.
+The other two bundles' recorded closures miss the existing size requirement.
+No contract repair or additional docking run has been performed.
+
+The complete evidence, limitations, and next repair target are in
+`diagnostics/t4_matched_pilot/attempt_1/README.md`. Preserve the general
+region-option controller; repair atom-correspondence checks before interpreting
+these construction failures as a limitation of its search space.

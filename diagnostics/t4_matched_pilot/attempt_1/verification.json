@@ -1,0 +1,42 @@
+{
+  "affected_chain_recheck_sha256": "e52b04ad0927acb5aebd99b8d658271b73a5843056b27c59f91d5cfb6082092a",
+  "analysis_tool_bytes_match_recorded_artifacts": {
+    "tools/t4_closure_diagnosis.py": "2467d0d9c267ed878cdb5ec30687543fc81702a3416dc71d6553d4ea6178b114",
+    "tools/t4_matched_audit.py": "3e23924eb12d91763ce34af382766dfe74d262a709fd61cd1d2a6b39accdbfb4"
+  },
+  "focused_tests_passed": 90,
+  "full_suite": {
+    "affected_chain_recheck": "9/9 passed including fixture and eight affected nodes",
+    "errors": 58,
+    "failed": 55,
+    "new_failure_cause": "T4 test fixture leaked disabled gradient mode",
+    "new_nonpassing_identities": 8,
+    "passed": 4445,
+    "repository_green": false,
+    "shared_nonpassing_identities": 105,
+    "skipped": 2,
+    "test_only_repair_commit": "dd2f7be",
+    "xfailed": 1
+  },
+  "full_suite_sha256": "bcafece9326517cf89eea761842ae39c049d27c82cdabd9bfbc2c74865d4db49",
+  "local_remote_byte_equal_files": [
+    "committor/candidate_lock.json",
+    "committor/docking.json",
+    "committor/docking_started.json",
+    "heartbeat.json",
+    "oracle_barrier.json",
+    "reference/candidate_lock.json",
+    "reference/docking.json",
+    "reference/docking_started.json",
+    "result.json",
+    "runtime_gate.json"
+  ],
+  "new_docking_attempts": 40,
+  "new_model_training_runs": 0,
+  "pushed": false,
+  "read_only_analysis_tools_commit": "8108371",
+  "schema_version": "t4_matched_verification_v1",
+  "scientific_conclusion": "No guidance benefit shown; identity-unsafe append-system contract demonstrably rejects valid six-membered closures",
+  "scientific_revision": "219c1cd276ed5cf0fd1c98311e408bdf9b04f41b",
+  "source_macro_contract_repaired": false
+}

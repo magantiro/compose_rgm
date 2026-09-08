@@ -1,0 +1,123 @@
+{
+  "files": {
+    "committor/candidate_lock.json": {
+      "bytes": 260920,
+      "sha256": "3824eeb496b6185af2c5a254278137afef3ea5d79e3c79096fad667356b9df08"
+    },
+    "committor/docking.json": {
+      "bytes": 15963,
+      "sha256": "4b37173ec5c25c2f575dab5293f7b3337ec50a7a0c3c4c3d7c8035be67edbf29"
+    },
+    "committor/docking_started.json": {
+      "bytes": 303,
+      "sha256": "cecf927fa3d06168e869cda0a62fc0cf7b161ae1f270b47026aed2227da98695"
+    },
+    "committor/executor_attempts_0.json": {
+      "bytes": 21475217,
+      "sha256": "9f7152e0cee9051adb6a62eb6a0903ab71970c0207f1e54968bf836f2cd43771"
+    },
+    "committor/parents/00.json": {
+      "bytes": 56911,
+      "sha256": "a169cc43e9cf4d42a95337adde3f70543d83f75683d56fa665623948f7bff513"
+    },
+    "committor/parents/01.json": {
+      "bytes": 22492,
+      "sha256": "568eafe9325e3eb1787b5e56f4d51f9427b7d455110cfcedd5a98803e31e0c23"
+    },
+    "committor/parents/02.json": {
+      "bytes": 59118,
+      "sha256": "74bcde2a918e6b5e2b97969ec79942bb8a23edff9a37948c8095ee3ef8b9f9d8"
+    },
+    "committor/parents/03.json": {
+      "bytes": 11950,
+      "sha256": "86cf1adb2d5bc25f5f39103988e612d62ee74a559622720875daf7f69051b829"
+    },
+    "committor/parents/04.json": {
+      "bytes": 35857,
+      "sha256": "59b3d3a7d41a8905a956d0eae4463a2725ae4e4e8c641efdb730f7a62bfa800f"
+    },
+    "committor/parents/05.json": {
+      "bytes": 11458,
+      "sha256": "2950ab83b7266703ddf3aa711a1745a7281e93c64c1612a73398ab9d8aa0d6de"
+    },
+    "committor/parents/06.json": {
+      "bytes": 12228,
+      "sha256": "11d3e9285a1d6e1ca210b447560b1a7ebe1b9d3e4e8c5c8ef9ab581f79e8aa3a"
+    },
+    "committor/parents/07.json": {
+      "bytes": 35476,
+      "sha256": "70c8ec6e102381013cb3004e8c9b0f5d43804c02465cf3da34cf3c6d7f1a814c"
+    },
+    "heartbeat.json": {
+      "bytes": 264,
+      "sha256": "b72b61c8e2d6b0579c24d9aff59521cb94832210b17dce9f5f2c0bfb8d2bb2af"
+    },
+    "launch.json": {
+      "bytes": 48196,
+      "sha256": "d7cb12512157e9470f4afb729abb76dc15a25116b12dae77b76021c2b1097aec"
+    },
+    "oracle_barrier.json": {
+      "bytes": 237,
+      "sha256": "4e28ff327a9806373351f997cb03920347805ec59d980a638dab4e923b3865f8"
+    },
+    "reference/candidate_lock.json": {
+      "bytes": 254951,
+      "sha256": "438e057920a4c6506a6555b9556e2f8a17fcda00d8672840d517b31c720c2b94"
+    },
+    "reference/docking.json": {
+      "bytes": 15897,
+      "sha256": "215af3b6da3a8bb6043f985966221b5648df6105e316ea8bd3b2916590c71c5f"
+    },
+    "reference/docking_started.json": {
+      "bytes": 303,
+      "sha256": "7fd1ea4b883b4e1f3d5308ae6345de9b3630793375fc3fbb9a71c57ce041646e"
+    },
+    "reference/executor_attempts_0.json": {
+      "bytes": 18350347,
+      "sha256": "2340a68cbbddb2e9402e539008663ad5459fda13cb3a4e6b829488a495acd0fc"
+    },
+    "reference/parents/00.json": {
+      "bytes": 55423,
+      "sha256": "6c4174269ec5f454668d7bc130ec9618fb5b743a61ec9a2cee24f0c49398790b"
+    },
+    "reference/parents/01.json": {
+      "bytes": 22024,
+      "sha256": "961a232d27a3d804654b718a488a86d4796c46816a47960d42c171ffe7924539"
+    },
+    "reference/parents/02.json": {
+      "bytes": 57072,
+      "sha256": "8e99ba655d21bf849df9745b62da1dd7dcac699835dbcf75499471b9e26b4818"
+    },
+    "reference/parents/03.json": {
+      "bytes": 11815,
+      "sha256": "8c5043a32aa129159340466330925c33c33139f9d430601e2a3ef49b0e110f57"
+    },
+    "reference/parents/04.json": {
+      "bytes": 35145,
+      "sha256": "cf617336118f0f0093d28de5d4b39c196c2e52db86072e9a1b49e06c7b18faee"
+    },
+    "reference/parents/05.json": {
+      "bytes": 11337,
+      "sha256": "cf9c5f978459c2f515404e1b1ec726f309237e17ac36fdc416c40d9dd16ef015"
+    },
+    "reference/parents/06.json": {
+      "bytes": 12081,
+      "sha256": "55fcc2e483372691f977957097e349be341f7eaff4943ec8742d0d33937ea5cf"
+    },
+    "reference/parents/07.json": {
+      "bytes": 34759,
+      "sha256": "96be42453bbd339a0993c0203d04e5dae48c26f0d0d48634dae96c178e8cd828"
+    },
+    "result.json": {
+      "bytes": 35636,
+      "sha256": "892ca135745e8af5ac0d5e54e04589c82dda5e98dba14aead7a69da2bceffced"
+    },
+    "runtime_gate.json": {
+      "bytes": 1032,
+      "sha256": "260487b12c0f36839ee9e1a86cdc19c3e5d15ce8b8272e6a65dabc70957aedc1"
+    }
+  },
+  "schema_version": "t4_remote_artifact_inventory_v1",
+  "volume": "compose-v4-artifacts",
+  "volume_path": "/t4_matched_pilot/4036ff371486d2aae87c2295296440ba55865b5fdcdef9aaf1ee3c535f8b868a"
+}
