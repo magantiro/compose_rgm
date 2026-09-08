@@ -32,6 +32,7 @@ from compose_v4.control.fused_option import (
 )
 from compose_v4.control.macro_engine import state_contract_for
 from compose_v4.control.option_selector import (
+    ConditionedActionDistribution,
     conditioned_action_distribution,
     option_horizon,
     primitive_option_at_step,
@@ -43,6 +44,13 @@ from compose_v4.control.region_rewrite import (
     context_preserved,
     created_slot,
     graph_connected,
+)
+from compose_v4.control.ring_expansion import (
+    EXPAND_RING_OPTION,
+    ExpansionProgress,
+    completed_expansion,
+    eligible_expansion_edges,
+    expansion_descriptor_indices,
 )
 from compose_v4.data.charge_policy import charge_policy_preserved
 from compose_v4.gates.med_chem_gate import is_valid
@@ -73,6 +81,7 @@ class OptionState:
     horizon: int
     bundle_id: str
     fused_progress: FusedProgress | None = None
+    expansion_progress: ExpansionProgress | None = None
 
     def __post_init__(self) -> None:
         if not self.bundle_id:
@@ -105,6 +114,14 @@ class OptionState:
                 raise ValueError("fused program must start from its exact origin state")
         elif self.fused_progress is not None:
             raise ValueError("fused progress is only valid for build_fused_ring")
+        if self.option == EXPAND_RING_OPTION:
+            if not isinstance(self.expansion_progress, ExpansionProgress):
+                raise ValueError("expand_ring requires explicit ExpansionProgress")
+            self.expansion_progress.validate(self.graph, self.origin, self.context.locus, self.step)
+            if self.step == 0 and exact_graph_key(self.graph) != exact_graph_key(self.origin):
+                raise ValueError("expansion program must start from its exact origin state")
+        elif self.expansion_progress is not None:
+            raise ValueError("expansion progress is only valid for expand_ring")
 
     @property
     def remaining(self) -> int:
@@ -130,6 +147,8 @@ class OptionState:
             self.horizon,
         )
         # Preserve every existing cache identity; only the opt-in state extends it.
+        if self.expansion_progress is not None:
+            return legacy + (self.expansion_progress,)
         return legacy if self.fused_progress is None else legacy + (self.fused_progress,)
 
 
@@ -175,6 +194,7 @@ class OptionContinuationKernel:
         self._marks: dict[tuple, tuple[tuple[str, Any], ...]] = {}
         self._rows: dict[tuple, ReferenceRow[OptionState]] = {}
         self._fused_support: dict[tuple, dict] = {}
+        self._expansion_support: dict[tuple, dict] = {}
 
     @classmethod
     def from_runtime(cls, model, system, *, time_point: float, max_executor_applications: int):
@@ -212,8 +232,8 @@ class OptionContinuationKernel:
         ):
             raise ValueError("marked law must have aligned finite nonnegative positive-mass rows")
         indices, _ = admissible_indices(families, actions, node.context)
-        if node.option == BUILD_FUSED_RING_OPTION:
-            return self._fused_row(node, families, actions, p, indices)
+        if node.option in (BUILD_FUSED_RING_OPTION, EXPAND_RING_OPTION):
+            return self._descriptor_row(node, families, actions, p, indices)
         pre = conditioned_action_distribution(families, p, indices, node.option, step=node.step)
         active = primitive_option_at_step(node.option, node.step)
         contract = state_contract_for(active, node.graph) if active else None
@@ -270,25 +290,43 @@ class OptionContinuationKernel:
         self._rows[cache_key] = row
         return row
 
-    def _fused_row(self, node, families, actions, probabilities, admissible):
+    def _descriptor_row(self, node, families, actions, probabilities, admissible):
         """Joint edge/mark reference; share executor work, not augmented states."""
-        progress = node.fused_progress
+        expansion = node.option == EXPAND_RING_OPTION
+        progress = node.expansion_progress if expansion else node.fused_progress
+        eligible_edges = eligible_expansion_edges if expansion else eligible_fusion_edges
+        match_indices = expansion_descriptor_indices if expansion else descriptor_indices
         edges = (
-            eligible_fusion_edges(node.origin, node.context.locus)
+            eligible_edges(node.origin, node.context.locus)
             if progress.edge is None
             else (progress.edge,)
         )
         active = primitive_option_at_step(node.option, node.step)
         contract = state_contract_for(active, node.graph)
+
+        def condition(matches):
+            if not expansion:
+                return conditioned_action_distribution(families, probabilities, matches, active)
+            # This NEW channel conditions descriptors before applying the
+            # inherited cap. Unrelated marks must not erase its sole closure.
+            # Existing fused/generic/macro laws retain their frozen cap order.
+            idx = np.asarray(matches, dtype=int)
+            local = conditioned_action_distribution(
+                [families[i] for i in idx], probabilities[idx], range(len(idx)), active
+            )
+            return ConditionedActionDistribution(
+                node.option, active, idx[local.indices], local.probabilities
+            )
+
         in_region = set(admissible)
         pre_rows, audit = {}, []
         for edge in edges:
             matches = sorted(
                 in_region.intersection(
-                    descriptor_indices(families, actions, probabilities, progress, edge, node.step)
+                    match_indices(families, actions, probabilities, progress, edge, node.step)
                 )
             )
-            pre = conditioned_action_distribution(families, probabilities, matches, active)
+            pre = condition(matches)
             pre_rows[edge] = pre
             audit.append(
                 {
@@ -319,7 +357,7 @@ class OptionContinuationKernel:
                 and context_preserved(
                     node.origin, product, node.context.frozen, node.context.terminal_context_slots
                 )
-                and contract(product)
+                and (contract is None or contract(product))
             ):
                 self.work.rejected_products += 1
                 continue
@@ -334,15 +372,26 @@ class OptionContinuationKernel:
                     continue
                 product = products[index]
                 slot = created_slot(actions[index])
-                next_progress = FusedProgress(
-                    edge, progress.path + (slot,) if slot is not None else progress.path
+                next_progress = (
+                    ExpansionProgress(edge, slot if slot is not None else progress.new_slot)
+                    if expansion
+                    else FusedProgress(
+                        edge, progress.path + (slot,) if slot is not None else progress.path
+                    )
                 )
-                if node.step == node.horizon - 1 and not completed_fused_cycle(
+                completes = completed_expansion if expansion else completed_fused_cycle
+                if node.step == node.horizon - 1 and not completes(
                     node.origin, product, next_progress
                 ):
                     self.work.rejected_products += 1
                     continue
                 context = node.context.with_locus(slot) if slot is not None else node.context
+                if expansion:
+                    try:
+                        next_progress.validate(product, node.origin, context.locus, node.step + 1)
+                    except ValueError:
+                        self.work.rejected_products += 1
+                        continue
                 successors[index] = OptionState(
                     product,
                     node.origin,
@@ -352,12 +401,11 @@ class OptionContinuationKernel:
                     node.step + 1,
                     node.horizon,
                     node.bundle_id,
-                    next_progress,
+                    fused_progress=None if expansion else next_progress,
+                    expansion_progress=next_progress if expansion else None,
                 )
             receipt["after_product_contract"] = len(successors)
-            conditioned = conditioned_action_distribution(
-                families, probabilities, sorted(successors), active
-            )
+            conditioned = condition(sorted(successors))
             if len(conditioned.indices):
                 branches.append((successors, conditioned))
         nodes, mass, marks = [], [], []
@@ -371,7 +419,8 @@ class OptionContinuationKernel:
         cache_key = node.key()
         self.work.legal_products += len({i for successors, _ in branches for i in successors})
         self._marks[cache_key] = tuple(marks)
-        self._fused_support[cache_key] = {
+        support = self._expansion_support if expansion else self._fused_support
+        support[cache_key] = {
             "eligible_oriented_edges": len(edges),
             "product_applicable_oriented_edges": len(branches),
             "augmented_successors": len(nodes),
@@ -386,6 +435,11 @@ class OptionContinuationKernel:
         from copy import deepcopy
 
         return deepcopy(self._fused_support[node.key()])
+
+    def expansion_support(self, node: OptionState) -> dict:
+        from copy import deepcopy
+
+        return deepcopy(self._expansion_support[node.key()])
 
     def marks(self, node: OptionState) -> tuple[tuple[str, Any], ...]:
         return self._marks[node.key()]
@@ -500,6 +554,12 @@ def sample_option_trajectory(
             trace[-1]["fused_progress"] = next_node.fused_progress.payload()
             trace[-1]["exact_state"] = encode_state(next_node.graph)
             trace[-1]["support_funnel"] = kernel.fused_support(node)
+        if next_node.expansion_progress is not None:
+            from compose_v4.rewrite.trace_shard import encode_state
+
+            trace[-1]["expansion_progress"] = next_node.expansion_progress.payload()
+            trace[-1]["exact_state"] = encode_state(next_node.graph)
+            trace[-1]["support_funnel"] = kernel.expansion_support(node)
         node = next_node
     result = {
         "bundle_id": initial.bundle_id,
@@ -527,4 +587,8 @@ def sample_option_trajectory(
         result["final_fused_progress"] = node.fused_progress.payload()
         if status == "no_admissible_action":
             result["failure_support_funnel"] = kernel.fused_support(node)
+    if node.expansion_progress is not None:
+        result["final_expansion_progress"] = node.expansion_progress.payload()
+        if status == "no_admissible_action":
+            result["failure_support_funnel"] = kernel.expansion_support(node)
     return result

@@ -30,6 +30,7 @@ from compose_v4.control.macro_engine import (
     macro_action_distribution,
     proposal_support,
 )
+from compose_v4.control.ring_expansion import EXPAND_RING_OPTION, EXPANSION_PHASES
 
 GENERIC_OPTION = "generic"
 BUILD_RING_SYSTEM_OPTION = "build_ring_system"
@@ -52,7 +53,7 @@ MACRO_OPTIONS = (
     "shrink",
 )
 OPTIONS = (GENERIC_OPTION,) + MACRO_OPTIONS + (BUILD_RING_SYSTEM_OPTION,)
-OPT_IN_OPTIONS = (BUILD_FUSED_RING_OPTION,)
+OPT_IN_OPTIONS = (BUILD_FUSED_RING_OPTION, EXPAND_RING_OPTION)
 
 # Balance purposes first and variants second.  This prevents, for example,
 # adding another ring topology from silently increasing total ring-option mass.
@@ -125,6 +126,8 @@ def primitive_option_at_step(option: str, step: int) -> str | None:
 
     if option == GENERIC_OPTION:
         return None
+    if option == EXPAND_RING_OPTION:
+        return EXPANSION_PHASES[step] if 0 <= step < len(EXPANSION_PHASES) else None
     if option == BUILD_FUSED_RING_OPTION:
         return "scaffold_extend" if step < 4 else "annulate" if step < FUSED_HORIZON else None
     if option == BUILD_RING_SYSTEM_OPTION:
@@ -149,6 +152,8 @@ def option_horizon(option: str, generic_horizon: int) -> int:
 
     if option == BUILD_RING_SYSTEM_OPTION:
         return sum(int(length) for _macro, length in BUILD_RING_SYSTEM)
+    if option == EXPAND_RING_OPTION:
+        return len(EXPANSION_PHASES)
     if option == BUILD_FUSED_RING_OPTION:
         return FUSED_HORIZON
     if option not in OPTIONS:
@@ -162,6 +167,7 @@ def applicable_options(
     *,
     n_free_slots: int | None = None,
     include_fused: bool = False,
+    include_expansion: bool = False,
 ) -> tuple[str, ...]:
     """Options with initial primitive support inside the selected region.
 
@@ -193,6 +199,12 @@ def applicable_options(
         and present.intersection(MACRO_FAMILIES["scaffold_extend"])
     ):
         out.append(BUILD_FUSED_RING_OPTION)
+    if (
+        include_expansion
+        and (n_free_slots is None or int(n_free_slots) >= 1)
+        and ("cycle_open" in present)
+    ):
+        out.append(EXPAND_RING_OPTION)
     return tuple(out)
 
 
@@ -233,7 +245,7 @@ def balanced_option_prior(
     if len(opts) != len(set(opts)):
         raise ValueError(f"duplicate applicable options: {opts}")
     groups = OPTION_GROUPS
-    if BUILD_FUSED_RING_OPTION in opts:
+    if any(option in opts for option in OPT_IN_OPTIONS):
         groups = {**groups, "ring_topology": groups["ring_topology"] + OPT_IN_OPTIONS}
     known = set(OPTIONS + OPT_IN_OPTIONS)
     unknown = [option for option in opts if option not in known]
@@ -289,8 +301,8 @@ def conditioned_action_distribution(
     macro-local contract before normalization.
     """
 
-    if option == BUILD_FUSED_RING_OPTION:
-        raise ValueError("build_fused_ring requires the stateful OptionContinuationKernel")
+    if option in OPT_IN_OPTIONS:
+        raise ValueError(f"{option} requires the stateful OptionContinuationKernel")
     fams = list(families)
     probs = np.asarray(probabilities, dtype=float)
     if probs.ndim != 1 or len(fams) != len(probs):

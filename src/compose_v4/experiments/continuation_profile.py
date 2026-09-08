@@ -93,6 +93,8 @@ def state_payload(node: OptionState) -> dict:
     }
     if node.fused_progress is not None:
         payload["fused_progress"] = node.fused_progress.payload()
+    if node.expansion_progress is not None:
+        payload["expansion_progress"] = node.expansion_progress.payload()
     return payload
 
 
