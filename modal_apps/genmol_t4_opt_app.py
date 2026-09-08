@@ -268,6 +268,23 @@ def fused_reference_profile(task: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+@app.function(
+    image=image, cpu=(1.0, 1.0), memory=8192, timeout=3600,
+    max_containers=1, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_matched_pilot(task: dict[str, Any]) -> dict[str, Any]:
+    """One paired cold-start round; both candidate locks precede docking."""
+    from compose_v4.experiments.t4_matched_pilot import run_remote
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return run_remote(
+        task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume, _runtime,
+        _validate_remote_revision,
+        lambda t, progress, cached: t4_population_cell.local(t, progress, cached),
+        lambda smiles, arm: _dock_many(smiles, "parp1", f"{task['run_id']}_{arm}", workers=1),
+    )
+
+
 def _runtime():
     if "model" in _RT:
         return _RT
@@ -599,7 +616,7 @@ POP_OUT = "/artifacts/t4_population"
 @app.function(image=image, cpu=(8.0, 8.0), memory=int(24 * 1024),
               timeout=2 * 60 * 60, retries=0, max_containers=80,
               volumes={ARTIFACT_ROOT: artifact_volume})
-def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
+def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None) -> dict[str, Any]:
     """Round-based population search, matching the prior T4 round contract.
 
     The prior official run was already a population method: 8 lineages, a large
@@ -648,6 +665,12 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
     from compose_v4.experiments.production_successor_kernel import (
         canonical_state_key, enumerate_factorized_marked_law)
     from compose_v4.control.region import enumerate_regions
+    from compose_v4.control.fused_option import BUILD_FUSED_RING_OPTION, FusedProgress
+    from compose_v4.control.option_continuation import (
+        OptionContinuationKernel, OptionState, exact_graph_key,
+    )
+    from compose_v4.experiments.t4_matched_pilot import primitive_distribution
+    from compose_v4.rewrite.trace_shard import encode_state
     from compose_v4.control import region_rewrite as RR
     from compose_v4.control import graph_geometry as GG
     from compose_v4.control.macro_engine import (
@@ -681,6 +704,10 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
     n_lineages = int(task.get("lineages", 8))
     workers = int(task.get("workers", 8))
     arm = task.get("arm", "mu_exec")
+    guidance = task.get("primitive_guidance", "committor")
+    if guidance not in ("committor", "reference"):
+        raise ValueError(f"unknown primitive_guidance: {guidance!r}")
+    include_fused = bool(task.get("include_fused", False))
     tau = float(task.get("tau", 0.05))
     kappa = float(task.get("kappa", 1.0))
     if kappa != 1.0:
@@ -715,6 +742,9 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
         "qvina02": sha256_file(qvina_path),
         "receptor": sha256_file(receptor_path),
     }
+    for name, expected in task.get("expected_input_sha256", {}).items():
+        if input_hashes.get(name) != expected:
+            raise ValueError(f"frozen input hash mismatch: {name}")
     expected_seed_hash = task.get("seed_manifest_sha256")
     if expected_seed_hash and expected_seed_hash != input_hashes["seed_manifest"]:
         raise ValueError(
@@ -781,14 +811,12 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
         cands: dict = {}
         cache: dict = {}
         memo: dict = {}
+        trace = []
 
         def slot_key(st):
             # Actions carry persistent-slot coordinates, so a canonical SMILES
             # key is scientifically invalid for marked-law reuse.
-            return (
-                np.asarray(st.atom_types).tobytes(),
-                np.asarray(st.bonds).tobytes(),
-            )
+            return exact_graph_key(st)
 
         def enum_fn(st):
             k_ = slot_key(st)
@@ -819,7 +847,7 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
             y = apply_fn(st, int(action_index))
             if y is None:
                 return None
-            if int(np.sum(np.asarray(y.atom_types) != int(NULL_IDX))) > MAX_ACTIVE_ATOMS:
+            if y.n_real_atoms > MAX_ACTIVE_ATOMS:
                 return None
             try:
                 key = canonical_state_key(y)
@@ -840,6 +868,19 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                 return None
             return y, key
 
+        fused_kernel = OptionContinuationKernel(
+            enum_fn, system,
+            max_executor_applications=int(task.get("max_executor_applications", 20000)),
+        ) if include_fused else None
+
+        def option_state(particle):
+            return OptionState(
+                particle["st"], particle["origin_st"], particle["ctx"],
+                particle["lin"], particle["option"], int(particle["step"]),
+                option_horizon(particle["option"], max_steps),
+                particle["bundle_id"], particle.get("fused_progress"),
+            )
+
         frontier = []
         receipts: dict[str, dict] = {}
         for reg, multiplicity, region_score in regions_k:
@@ -855,7 +896,9 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                 int(np.sum(np.asarray(st_.atom_types) == int(NULL_IDX))),
                 MAX_ACTIVE_ATOMS - n_,
             )
-            support_applicable = applicable_options(fams, idx, n_free_slots=n_free)
+            support_applicable = applicable_options(
+                fams, idx, n_free_slots=n_free, include_fused=include_fused
+            )
 
             def has_clean_product(
                 option,
@@ -864,7 +907,17 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                 idx_=idx,
                 state_=st_,
                 context_=ctx_,
+                lineage_=lin_,
+                region_=reg,
             ):
+                if option == BUILD_FUSED_RING_OPTION:
+                    node = OptionState(
+                        state_, state_, context_, lineage_, option, 0,
+                        option_horizon(option, max_steps),
+                        bundle_identity(parent, parent_lineage_id, region_.key(), option),
+                        FusedProgress(),
+                    )
+                    return bool(fused_kernel.row(node).successors)
                 conditioned = conditioned_action_distribution(
                     fams_,
                     probs_,
@@ -949,6 +1002,9 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                     "region_id": receipt["region_id"],
                     "origin_st": st_,
                     "origin_lin": lin_,
+                    "fused_progress": (
+                        FusedProgress() if choice.selected == BUILD_FUSED_RING_OPTION else None
+                    ),
                 }
             )
 
@@ -960,7 +1016,9 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
         def record_committed_candidate(particle, y, key, lineage, active_macro, step_):
             horizon = option_horizon(particle["option"], max_steps)
             program_complete = int(step_) >= horizon
-            if particle["option"] == BUILD_RING_SYSTEM_OPTION and not program_complete:
+            if particle["option"] in (
+                BUILD_RING_SYSTEM_OPTION, BUILD_FUSED_RING_OPTION
+            ) and not program_complete:
                 return
             candidate_key = (particle["bundle_id"], key)
             if candidate_key in cands:
@@ -1014,6 +1072,8 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                     p_["bundle_id"],
                     tuple(sorted(p_["ctx"].locus)),
                     tuple(sorted(p_["lin"].id_of.items())),
+                    p_["lin"].next_id,
+                    p_.get("fused_progress"),
                 )
                 if gk in groups:
                     groups[gk]["mult"] += p_["mult"]
@@ -1024,6 +1084,21 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
             for gk, p_ in groups.items():
                 horizon = option_horizon(p_["option"], max_steps)
                 if step >= horizon:
+                    continue
+                if p_["option"] == BUILD_FUSED_RING_OPTION:
+                    row = fused_kernel.row(option_state(p_))
+                    if not row.successors:
+                        note_halt(p_, "no_clean_fused_product")
+                    for successor, base_prob in zip(row.successors, row.probabilities):
+                        sh = RR.structural_features_shared(
+                            successor.graph, successor.context, successor.lineage, p_["old"]
+                        )
+                        feats.append(RR.features_from_shared(sh, horizon - step, "establishment"))
+                        meta.append((
+                            gk, successor.graph, successor.lineage, successor.context,
+                            float(base_prob), canonical_state_key(successor.graph), p_,
+                            primitive_option_at_step(p_["option"], step), successor.fused_progress,
+                        ))
                     continue
                 fams, acts, probs = enum_fn(p_["st"])
                 idx, _why = RR.admissible_indices(fams, acts, p_["ctx"])
@@ -1102,6 +1177,7 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                             key,
                             p_,
                             conditioned.active_macro,
+                            None,
                         )
                     )
             if not feats:
@@ -1110,7 +1186,7 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
             with torch.no_grad():
                 h_all = torch.sigmoid(
                     net(torch.tensor(feats, dtype=torch.float32)).squeeze(-1)
-                ).numpy()
+                ).numpy() if guidance == "committor" else np.ones(len(feats))
 
             nxt = []
             for gk, p_ in groups.items():
@@ -1122,14 +1198,25 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                     continue
                 w = w / w.sum()
                 hs = np.array([h_all[i] for i in sel], float)
-                q, _eta, _kl, _ess = RR.kl_tilt(w, hs, kappa=kappa)
                 primitive_floor = float(task.get("epsilon", 0.1))
-                q = (1.0 - primitive_floor) * q + primitive_floor * w
-                q = q / q.sum()
+                q = primitive_distribution(w, hs, guidance, kappa, primitive_floor)
                 draws = rng_.choice(len(sel), size=int(p_["mult"]), p=q)
                 for d_ in np.unique(draws):
                     i = sel[int(d_)]
-                    _gk, y, l2, ctx2, _p, key, src, active_macro = meta[i]
+                    _gk, y, l2, ctx2, _p, key, src, active_macro, fused_progress = meta[i]
+                    if task.get("prepare_only", False):
+                        trace.append({
+                            "bundle_id": src["bundle_id"], "option": src["option"],
+                            "step": step + 1, "source": encode_state(src["st"]),
+                            "product": encode_state(y), "canonical_product": key,
+                            "reference_probability": float(w[int(d_)]),
+                            "sample_probability": float(q[int(d_)]),
+                            "reference_support_size": len(w),
+                            "h_min": float(hs.min()) if guidance == "committor" else None,
+                            "h_max": float(hs.max()) if guidance == "committor" else None,
+                            "kl": float(np.sum(q[q > 0] * np.log(q[q > 0] / w[q > 0]))),
+                            "fused_progress": fused_progress.payload() if fused_progress else None,
+                        })
                     nxt.append(
                         {
                             **src,
@@ -1138,6 +1225,7 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                             "ctx": ctx2,
                             "mult": int((draws == d_).sum()),
                             "step": step + 1,
+                            "fused_progress": fused_progress,
                         }
                     )
                     record_committed_candidate(
@@ -1235,7 +1323,12 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
             receipt["program_complete"] = any(
                 candidate.get("program_complete", False) for candidate in cs
             )
-        return out, [receipts[key] for key in sorted(receipts)]
+        return out, [receipts[key] for key in sorted(receipts)], {
+            "law_enumerations": len(cache), "memoized_option_products": len(memo),
+            "fused_option_products": fused_kernel.work.executor_applications if fused_kernel else 0,
+            "sampled_transitions": trace,
+            "rng_state": rng_.bit_generator.state,
+        }
 
     # Oracle allocation needs an objective signal. Ranking by (v, -qed) fails
     # once molecules are feasible: v is identically 0 and QED ties break
@@ -1384,15 +1477,40 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                 bundles.append((parent, parent_lineage_id, picked))
         cands = []
         bundle_receipts = []
-        with ThreadPoolExecutor(max_workers=workers) as ex:
-            futs = [ex.submit(batched_rewrite, par, parent_lineage_id, picked,
-                              int(task.get("max_handoff", 16)),
-                              np.random.default_rng(int(rng.integers(0, 10 ** 9))))
-                    for par, parent_lineage_id, picked in bundles]
-            for f_ in futs:
-                candidates_, receipts_ = f_.result()
-                cands.extend(candidates_)
-                bundle_receipts.extend(receipts_)
+        work_receipts = []
+        def prepare_parent(par, parent_lineage_id, picked, parent_rng):
+            cached = (parent_cache or {}).get(parent_lineage_id)
+            if cached is not None:
+                return cached["candidates"], cached["bundles"], cached["work"]
+            return batched_rewrite(
+                par, parent_lineage_id, picked, int(task.get("max_handoff", 16)), parent_rng
+            )
+        jobs = [
+            (par, parent_lineage_id, picked,
+             np.random.default_rng(int(rng.integers(0, 10 ** 9))))
+            for par, parent_lineage_id, picked in bundles
+        ]
+
+        def collect(result, cands=cands, bundle_receipts=bundle_receipts, work_receipts=work_receipts):
+            candidates_, receipts_, work_ = result
+            cands.extend(candidates_)
+            bundle_receipts.extend(receipts_)
+            work_receipts.append(work_)
+            if progress is not None:
+                progress({
+                    "phase": "parent_complete", "parent_index": len(work_receipts) - 1,
+                    "candidates": candidates_, "bundles": receipts_, "work": work_,
+                })
+
+        if workers == 1:
+            # Complete and persist one restart unit before starting the next.
+            for job in jobs:
+                collect(prepare_parent(*job))
+        else:
+            with ThreadPoolExecutor(max_workers=workers) as ex:
+                futs = [ex.submit(prepare_parent, *job) for job in jobs]
+                for future in futs:
+                    collect(future.result())
         t_prop = time.perf_counter() - t_prop
 
         # Repeated region draws may select the same option.  They are repeated
@@ -1492,6 +1610,26 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                 if group:
                     next_pass.append(group)
             srcs = next_pass
+
+        if task.get("prepare_only", False):
+            return {
+                "schema_version": "t4_candidate_lock_v1", "task": task,
+                "input_sha256": input_hashes, "bundles": bundle_receipts,
+                "pool": pool, "take": take, "round": rd,
+                "n_candidates": len(cands), "work": work_receipts,
+                "proposal_seconds": t_prop, "candidate_diversity": candidate_diversity(pool),
+                "selected_diversity": candidate_diversity(take),
+                "candidate_option_diagnostics": option_diagnostics(pool),
+                "selected_option_diagnostics": option_diagnostics(take),
+                "started_at_utc": started_at,
+                "locked_at_utc": datetime.now(timezone.utc).isoformat(),
+                "rng_state": rng.bit_generator.state,
+                "oracle_calls": 0,
+                "software": {
+                    "python": platform.python_version(), "numpy": np.__version__,
+                    "torch": torch.__version__, "rdkit": Chem.rdBase.rdkitVersion,
+                },
+            }
 
         # ---- BATCH docking, concurrent; archive updated only afterwards
         t_d = time.perf_counter()
@@ -1607,7 +1745,8 @@ def t4_population_cell(task: dict[str, Any]) -> dict[str, Any]:
                 "epsilon_option": eps_option,
                 "macro_temperature": macro_temperature,
                 "epsilon_macro": eps_macro,
-                "options": list(OPTIONS),
+                "options": list(OPTIONS) + ([BUILD_FUSED_RING_OPTION] if include_fused else []),
+                "primitive_guidance": guidance,
                 "option_groups": {
                     group: list(options) for group, options in OPTION_GROUPS.items()
                 },

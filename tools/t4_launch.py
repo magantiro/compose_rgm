@@ -41,6 +41,11 @@ def main() -> None:
     ap.add_argument("--arms", default="macro_prior")
     ap.add_argument("--session", default="compose_iclr")
     ap.add_argument(
+        "--matched-pilot",
+        action="store_true",
+        help="one frozen paired cold-start round, at most 20 dockings per arm",
+    )
+    ap.add_argument(
         "--continuation-profile",
         action="store_true",
         help="one frozen, capped zero-docking profile; no T4 cells are launched",
@@ -75,8 +80,8 @@ def main() -> None:
     ap.add_argument("--macro-temperature", type=float, default=2.0)
     ap.add_argument("--epsilon-macro", type=float, default=0.15)
     a = ap.parse_args()
-    if a.continuation_profile and a.fused_reference_profile:
-        ap.error("choose only one zero-docking profile")
+    if sum((a.continuation_profile, a.fused_reference_profile, a.matched_pilot)) > 1:
+        ap.error("choose only one diagnostic")
     if not re.fullmatch(r"[A-Za-z0-9_-]+", a.session):
         raise SystemExit("--session must contain only letters, numbers, '_' or '-'")
 
@@ -89,8 +94,10 @@ def main() -> None:
             "committed tree, not only clean mounted src/configs"
         )
 
-    if a.continuation_profile or a.fused_reference_profile:
-        launch_continuation_profile(preflight, fused=a.fused_reference_profile)
+    if a.continuation_profile or a.fused_reference_profile or a.matched_pilot:
+        launch_continuation_profile(
+            preflight, fused=a.fused_reference_profile, matched=a.matched_pilot
+        )
         return
 
     fn = modal.Function.from_name("genmol-t4-opt", "t4_population_cell")
@@ -163,18 +170,29 @@ def main() -> None:
         print(f"  {c}  {o}")
 
 
-def launch_continuation_profile(preflight: dict, *, fused: bool = False) -> None:
+def launch_continuation_profile(
+    preflight: dict, *, fused: bool = False, matched: bool = False
+) -> None:
     """Spawn only the fixed diagnostic into the deployed app; retain its call ID."""
     import sys
 
     sys.path.insert(0, str(ROOT))
     from modal_apps.run_process_v2_p50_app import local_image_revision
 
-    kind = "fused_reference_profile" if fused else "continuation_profile"
-    contract = ROOT / (
-        "configs/fused_reference_profile_contract.json"
+    kind = (
+        "t4_matched_pilot"
+        if matched
+        else "fused_reference_profile"
         if fused
-        else "configs/continuation_profile_v1.json"
+        else "continuation_profile"
+    )
+    contract = (
+        ROOT
+        / {
+            "t4_matched_pilot": "configs/t4_matched_pilot.json",
+            "fused_reference_profile": "configs/fused_reference_profile_contract.json",
+            "continuation_profile": "configs/continuation_profile_v1.json",
+        }[kind]
     )
     revision = local_image_revision(expected_commit=preflight["commit"])
     identity = {
@@ -198,6 +216,7 @@ def launch_continuation_profile(preflight: dict, *, fused: bool = False) -> None
         "task": task,
         "call_id": call.object_id,
         "oracle_calls": 0,
+        "oracle_call_limit": 40 if matched else 0,
         "volume": "compose-v4-artifacts",
         "volume_path": f"/{kind}/{run_id}",
     }
@@ -205,7 +224,7 @@ def launch_continuation_profile(preflight: dict, *, fused: bool = False) -> None
     temporary = path.with_suffix(".json.tmp")
     temporary.write_text(json.dumps(receipt, sort_keys=True, indent=2) + "\n")
     temporary.replace(path)
-    print(f"spawned zero-docking {kind}: {call.object_id}")
+    print(f"spawned {kind}: {call.object_id}; oracle limit={receipt['oracle_call_limit']}")
     print(f"volume result: {receipt['volume_path']}/result.json")
     print(f"receipt: {path}")
 
