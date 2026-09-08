@@ -96,5 +96,5 @@ in this inspected cell. This partial batch did not improve the best-so-far
 score. It is not a completed eight-parent round, a multiround optimization
 result, a matched causal ablation, or an IVG performance claim. The next
 scientific question is accumulation through feedback-driven rounds; this
-diagnostic does not answer it or authorize another run. All work is local and
+diagnostic does not answer it or authorize another run. All commits are local and
 unpushed. The separate warm attempt's compute-ceiling failure remains recorded.
