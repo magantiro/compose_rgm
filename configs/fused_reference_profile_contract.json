@@ -1,7 +1,6 @@
 {
-  "schema_version": "fused_reference_profile_contract_v1",
-  "contract_sha256": "032c11ffe6fb3652357e768ced19052f6bd280500d12fb854912ad58bf59e5d8",
-  "authority": "2026-09-07 user approval: inspect relevant verification failures, then one capped frozen-model zero-docking audit",
+  "schema_version": "fused_reference_profile_contract_v2",
+  "authority": "2026-09-07 user approval: fix the audit interface and proceed with one new capped controller component test",
   "scope": "one conditional option cost/support audit, not a Q(M) comparison, discovery panel, training run, or T4 promotion",
   "source_manifest": "docs/GENMOL_T4_SEEDS.json",
   "source_manifest_sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
@@ -38,7 +37,7 @@
     "precision": "frozen float32 model; float64 probabilities",
     "function_timeout_seconds": 900,
     "heartbeat_seconds": 20,
-    "expected_wall_time": "unmeasured for fused five-row path; prior different 28-row profile took 420.61s; 900s is a stop limit, not an ETA",
+    "expected_wall_time": "prior identical frozen runtime initialized in 208.801s; complete five-row proposal time remains unmeasured; 900s is a stop limit, not an ETA",
     "maximum_configured_function_cost_usd": 0.023778,
     "cost_excludes": [
       "image build and startup",
@@ -62,5 +61,10 @@
   },
   "oracle_calls": 0,
   "winner_inputs": [],
-  "training_authorized": false
+  "training_authorized": false,
+  "supersedes_contract_sha256": "032c11ffe6fb3652357e768ced19052f6bd280500d12fb854912ad58bf59e5d8",
+  "raw_law_normalization_atol": 0.00002,
+  "raw_law_normalization_authority": "unchanged enumerate_factorized_marked_law default; read from its public signature, no raw-weight renormalization",
+  "revision_reason": "repair stricter duplicate audit-only numerical check; retain attempt_1 as failed; do not change the production evaluator, model, controller, source, seed, support, or budgets",
+  "contract_sha256": "fefbcbdcbb1bbded2a44506c14aab57244ab0b7b5c12b3e21da48e6273c221f9"
 }

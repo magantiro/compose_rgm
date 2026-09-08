@@ -11,6 +11,7 @@ import hashlib
 import json
 from collections.abc import Callable
 from dataclasses import asdict
+from inspect import signature
 from pathlib import Path
 from time import perf_counter
 
@@ -38,11 +39,16 @@ from compose_v4.experiments.continuation_profile import (
     state_payload,
     verify_file,
 )
+from compose_v4.experiments.production_successor_kernel import enumerate_factorized_marked_law
 from compose_v4.experiments.ring_construction_probe import topology_witness
 from compose_v4.rewrite.kernel import canonical_state_key
 from compose_v4.rewrite.trace_shard import encode_state
 
 CONTRACT_PATH = "configs/fused_reference_profile_contract.json"
+# Read the existing evaluator's numerical contract; do not create a second one.
+NORMALIZATION_ATOL = float(
+    signature(enumerate_factorized_marked_law).parameters["normalization_tolerance"].default
+)
 
 
 def load_contract(path: Path) -> dict:
@@ -51,7 +57,8 @@ def load_contract(path: Path) -> dict:
     if hashlib.sha256(canonical_bytes(body)).hexdigest() != value.get("contract_sha256"):
         raise ValueError(f"contract self-hash mismatch: {path}")
     expected = {
-        "schema_version": "fused_reference_profile_contract_v1",
+        "schema_version": "fused_reference_profile_contract_v2",
+        "raw_law_normalization_atol": NORMALIZATION_ATOL,
         "option": BUILD_FUSED_RING_OPTION,
         "horizon": FUSED_HORIZON,
         "estimator": "reference",
@@ -148,21 +155,54 @@ def run_reference_profile(
             timings["enumeration"] += perf_counter() - start
             meter.phase = "option_validation"
         p = np.asarray(probabilities, dtype=float)
+        # Match the production evaluator's Python sum and absolute tolerance.
+        # These raw weights are never renormalized here; the existing option
+        # kernel still owns conditioning and construction of its probability row.
+        total = float(sum(p.ravel().tolist()))
+        normalization = {
+            "total_probability": total if np.isfinite(total) else str(total),
+            "absolute_error": abs(total - 1.0) if np.isfinite(total) else None,
+            "absolute_tolerance": NORMALIZATION_ATOL,
+            "authority": "enumerate_factorized_marked_law default normalization_tolerance",
+        }
         if (
             p.ndim != 1
             or len(families) != len(actions)
             or len(actions) != len(p)
             or not np.isfinite(p).all()
             or (p < 0).any()
-            or (len(p) and not np.isclose(p.sum(), 1.0, atol=1e-8, rtol=1e-8))
+            or (p.size and abs(total - 1.0) > NORMALIZATION_ATOL)
         ):
-            raise ValueError("production marked law is malformed; not publishing it")
+            diagnostic_path = f"rejected_laws/{len(law_receipts):04d}.json"
+            persist(
+                diagnostic_path,
+                {
+                    "schema_version": "rejected_marked_law_diagnostic_v1",
+                    "status": "rejected_not_an_admissible_probability_row",
+                    "snapshot_id": snapshot_id,
+                    "state": encode_state(graph),
+                    "family_count": len(families),
+                    "action_count": len(actions),
+                    "probability_shape": list(p.shape),
+                    "probabilities_flat": [
+                        float(v) if np.isfinite(v) else str(v) for v in p.ravel()
+                    ],
+                    "normalization": normalization,
+                },
+            )
+            raise ValueError(
+                f"production marked law is malformed: shape={p.shape}, "
+                f"families={len(families)}, actions={len(actions)}, "
+                f"total_probability={total!r}, tolerance={NORMALIZATION_ATOL}; "
+                f"rejected diagnostic saved to {diagnostic_path}"
+            )
         payload = {
             "schema_version": "fused_reference_law_v1",
             "snapshot_id": snapshot_id,
             "state": encode_state(graph),
             "marks": [encode_action(f, a) for f, a in zip(families, actions)],
             "probabilities": p.tolist(),
+            "normalization": normalization,
         }
         identity = hashlib.sha256(canonical_bytes(payload)).hexdigest()
         path = f"laws/{identity}.json"
@@ -303,7 +343,6 @@ def run_remote_task(task, *, repo_root, artifact_root, volume, runtime_factory, 
     import torch
     from rdkit import rdBase
 
-    from compose_v4.experiments.production_successor_kernel import enumerate_factorized_marked_law
     from compose_v4.rewrite.typed_ring_catalog import ring_catalog_fingerprint
 
     validate_revision(task["image_revision"])
@@ -331,6 +370,23 @@ def run_remote_task(task, *, repo_root, artifact_root, volume, runtime_factory, 
         "complete": False,
         "oracle_calls": 0,
     }
+    environment = {
+        "schema_version": "fused_reference_runtime_environment_v1",
+        "run_id": task["run_id"],
+        "software": {
+            "python": platform.python_version(),
+            "numpy": np.__version__,
+            "torch": torch.__version__,
+            "rdkit": rdBase.rdkitVersion,
+        },
+        "hardware": {
+            "machine": platform.machine(),
+            "cpu": platform.processor(),
+            "threads": torch.get_num_threads(),
+        },
+        "model_parameter_dtypes": None,
+        "recorded_at_utc": datetime.now(timezone.utc).isoformat(),
+    }
     stop, lock = threading.Event(), threading.RLock()
 
     def commit():
@@ -351,6 +407,7 @@ def run_remote_task(task, *, repo_root, artifact_root, volume, runtime_factory, 
 
     publish_json(output / "launch.json", task)
     publish_json(output / "progress.json", progress)
+    publish_json(output / "runtime_environment.json", environment)
     commit()
     thread = threading.Thread(target=heartbeat, daemon=True)
     thread.start()
@@ -382,6 +439,11 @@ def run_remote_task(task, *, repo_root, artifact_root, volume, runtime_factory, 
             "runtime_seconds": runtime_seconds,
         }
         publish_json(output / "runtime_gate.json", gate)
+        environment["model_parameter_dtypes"] = sorted(
+            {str(parameter.dtype) for parameter in runtime["model"].parameters()}
+        )
+        environment["hardware"]["threads"] = torch.get_num_threads()
+        publish_json(output / "runtime_environment.json", environment)
         commit()
 
         def enumerate_law(graph):
@@ -440,4 +502,9 @@ def run_remote_task(task, *, repo_root, artifact_root, volume, runtime_factory, 
         publish_json(
             output / "progress.json", {**progress, "elapsed_seconds": perf_counter() - started}
         )
+        environment["hardware"]["peak_rss_native_units"] = resource.getrusage(
+            resource.RUSAGE_SELF
+        ).ru_maxrss
+        environment["final_phase"] = progress["phase"]
+        publish_json(output / "runtime_environment.json", environment)
         commit()

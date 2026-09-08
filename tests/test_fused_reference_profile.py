@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 
+import numpy as np
 import pytest
 from test_fused_option import fixture_law, kernel, source
 
@@ -12,6 +13,7 @@ from compose_v4.control.option_continuation import sample_option_trajectory
 from compose_v4.experiments.continuation_profile import canonical_bytes, sha256_file
 from compose_v4.experiments.fused_reference_profile import (
     CONTRACT_PATH,
+    NORMALIZATION_ATOL,
     initial_state,
     load_contract,
     run_reference_profile,
@@ -114,6 +116,43 @@ def test_invalid_law_is_not_published(tmp_path):
     with pytest.raises(ValueError, match="malformed"):
         profile(tmp_path, law=invalid)
     assert not (tmp_path / "laws").exists()
+    rejected = json.loads((tmp_path / "rejected_laws/0000.json").read_text())
+    assert rejected["normalization"]["total_probability"] == "nan"
+    assert set(rejected["probabilities_flat"]) == {"nan"}
+
+
+def test_float32_scale_error_preserves_raw_weights_and_existing_option_path(tmp_path):
+    def float32_law(graph):
+        families, actions, probabilities = fixture_law(graph)
+        p = (np.asarray(probabilities, dtype=np.float32) * np.float32(1 + 5e-7)).tolist()
+        assert abs(sum(p) - 1.0) <= NORMALIZATION_ATOL
+        assert not np.isclose(sum(p), 1.0, atol=1e-8, rtol=1e-8)
+        return families, actions, p
+
+    result = profile(tmp_path / "perturbed", law=float32_law)
+    baseline = profile(tmp_path / "baseline")
+    assert result["status"] == baseline["status"] == "complete"
+    assert result["endpoint"] == baseline["endpoint"]
+    assert [s["probability"] for s in result["trace"]] == pytest.approx(
+        [s["probability"] for s in baseline["trace"]], abs=1e-12
+    )
+    first = json.loads((tmp_path / "perturbed" / result["laws"][0]["path"]).read_text())
+    assert first["probabilities"] == float32_law(source().graph)[2]
+    assert first["normalization"]["absolute_error"] > 2e-8
+
+
+def test_out_of_contract_mass_still_fails_and_saves_exact_rejected_values(tmp_path):
+    def invalid(graph):
+        families, actions, probabilities = fixture_law(graph)
+        return families, actions, [p * (1 + 2 * NORMALIZATION_ATOL) for p in probabilities]
+
+    with pytest.raises(ValueError, match="total_probability=.*rejected diagnostic"):
+        profile(tmp_path, law=invalid)
+    assert not (tmp_path / "laws").exists()
+    assert not (tmp_path / "rows").exists()
+    rejected = json.loads((tmp_path / "rejected_laws/0000.json").read_text())
+    assert rejected["probabilities_flat"] == invalid(source().graph)[2]
+    assert rejected["normalization"]["absolute_error"] > NORMALIZATION_ATOL
 
 
 def test_frozen_contract_and_source_use_applicability_not_docking():
@@ -227,6 +266,10 @@ def test_runtime_gate_failure_stops_before_model_enumeration(tmp_path):
     assert json.loads((output / "failure.json").read_text())["error_type"] == "ValueError"
     assert not (output / "laws").exists()
     assert not (output / "result.json").exists()
+    environment = json.loads((output / "runtime_environment.json").read_text())
+    assert environment["software"]["rdkit"]
+    assert environment["model_parameter_dtypes"] is None
+    assert environment["final_phase"] == "failed"
     assert events[0] == "identity"
 
 

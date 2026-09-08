@@ -1,6 +1,6 @@
 # Frozen-model fused reference audit
 
-Prospective decision, 2026-09-07. The user approved checking relevant verification
+Initial prospective decision, 2026-09-07. The user approved checking relevant verification
 failures and then one capped learned-model audit. This authorizes neither a
 guided comparison nor docking, training, or promotion of the option into T4.
 
@@ -39,7 +39,8 @@ systems. Inspected winner molecules and docking outcomes are not inputs.
 
 The authoritative self-hashed contract is
 `configs/fused_reference_profile_contract.json`, semantic SHA-256
-`032c11ffe6fb3652357e768ced19052f6bd280500d12fb854912ad58bf59e5d8`.
+`fefbcbdcbb1bbded2a44506c14aab57244ab0b7b5c12b3e21da48e6273c221f9`
+(revision 2; revision-1 evidence and its contract are retained in attempt_1).
 It binds exact source-manifest, run-path, and checkpoint hashes; source index 0;
 seed 1000; time 0.5; the deterministic applicability-only region selection; and
 the unchanged macro conditioning parameters. This is an already inspected
@@ -115,3 +116,24 @@ launch `t4_population_cell`. The receipt names the content-addressed volume
 directory and call ID. Monitor that directory's progress, heartbeat, runtime
 gate, and final result or failure receipt. Publish the audited result and its
 interpretation separately from the implementation. Do not push without approval.
+
+## Authorized boundary repair, revision 2
+
+The user approved fixing the numerical interface and proceeding with one new
+capped test. Attempt 1 passed all frozen runtime gates, then failed the audit's
+stricter duplicate mass check before any option row or sampled edit. It has no
+complete law to reuse; all its receipts remain unchanged.
+
+Read the normalization tolerance directly from the unchanged production
+evaluator's signature and bind it in the contract. Do not renormalize raw
+weights in the audit. Reject nonfinite, negative, misaligned, or out-of-contract
+mass and save diagnostic values separately from valid probability rows. Persist
+runtime environment observations before initialization and on failure as well
+as success. All source, seed, option, model, controller, chemistry-support,
+executor-budget, and timeout choices remain unchanged.
+
+Focused regression and dependency checks are the repair gate. Do not repeat
+unaffected training, molecular preparation, or the historical non-green full
+suite for this isolated reporting/interface repair. Use the existing deployment
+and spawn procedure, with a new immutable run ID. This does not authorize a
+docking campaign or alteration of scientific acceptance thresholds.
