@@ -18,7 +18,12 @@ from compose_v4.chem.molecular_graph import (
     MolecularGraph,
     is_element,
 )
-from compose_v4.chem.state import empty_molecular_graph, is_valid_state
+from compose_v4.chem.state import (
+    empty_molecular_graph,
+    is_connected_or_null,
+    is_valid_state,
+    pad_molecular_graph,
+)
 from compose_v4.rewrite.compiler import TraceCompilationError, compile_null_to_target
 from compose_v4.rewrite.kernel import InvalidRewrite, RewriteSystem, de_novo_rewrite_system
 from compose_v4.rewrite.operators import (
@@ -88,6 +93,7 @@ def _compile_null_to_target_tracelets(
     *,
     system: RewriteSystem,
     typed_ring_payloads: bool,
+    preserved_source: MolecularGraph | None = None,
 ) -> RewriteTrace:
     """Compile a connected target using cycles, ears, and electronic restates.
 
@@ -102,7 +108,19 @@ def _compile_null_to_target_tracelets(
     if np.any(target.bonds == BOND_AROMATIC):
         raise TraceCompilationError("target contains non-Kekulized aromatic bonds")
     real = tuple(int(v) for v in np.flatnonzero(is_element(target.atom_types)))
-    source = empty_molecular_graph(target.n_atoms)
+    source = (empty_molecular_graph(target.n_atoms) if preserved_source is None
+              else pad_molecular_graph(preserved_source, target.n_atoms))
+    if source.n_atoms != target.n_atoms or not is_valid_state(source) or not is_connected_or_null(source):
+        raise TraceCompilationError("preserved source must be valid, connected and slot-aligned")
+    protected = {int(v) for v in np.flatnonzero(is_element(source.atom_types))}
+    if not protected <= set(real):
+        raise TraceCompilationError("preserved atoms are absent from the target")
+    indices = sorted(protected)
+    if (not np.array_equal(source.atom_types[indices], target.atom_types[indices]) or
+            not np.array_equal(source.formal_charges[indices], target.formal_charges[indices]) or
+            not np.array_equal(source.bonds[np.ix_(indices, indices)],
+                               target.bonds[np.ix_(indices, indices)])):
+        raise TraceCompilationError("preserved source must agree with exact target core chemistry")
     if not real:
         return RewriteTrace(source, target, (), {"compiler": "identity_null"})
 
@@ -119,6 +137,9 @@ def _compile_null_to_target_tracelets(
         len(block_edges[index]) >= len(blocks[index])
         for index in range(len(blocks))
     ]
+    if any(cyclic[i] and vertices & protected and not vertices <= protected
+           for i, vertices in enumerate(blocks)):
+        raise TraceCompilationError("preserved source must contain complete cyclic blocks")
     incident: dict[int, list[int]] = defaultdict(list)
     for block_id, vertices in enumerate(blocks):
         for v in vertices:
@@ -137,9 +158,13 @@ def _compile_null_to_target_tracelets(
     saturated_h = _saturated_hydrogens(target, graph)
     state = source
     steps: list[RewriteStep] = []
-    committed: set[frozenset[int]] = set()
-    built: set[int] = set()
-    processed_blocks: set[int] = set()
+    committed: set[frozenset[int]] = {
+        _edge(a, b) for a in protected for b in protected if source.bonds[a, b]
+    }
+    built: set[int] = set(protected)
+    processed_blocks: set[int] = {
+        i for i, vertices in enumerate(blocks) if vertices <= protected
+    }
     lowered_steps = 0
 
     def commit(rule_name: str, action) -> None:
@@ -355,7 +380,12 @@ def _compile_null_to_target_tracelets(
                 process_block(child, other)
 
     cyclic_blocks = [index for index, is_cyclic in enumerate(cyclic) if is_cyclic]
-    if cyclic_blocks:
+    if protected:
+        for entry in sorted(protected):
+            for block_id in incident[entry]:
+                if block_id not in processed_blocks:
+                    process_block(block_id, entry)
+    elif cyclic_blocks:
         root_block = min(
             cyclic_blocks,
             key=lambda index: (len(blocks[index]), tuple(sorted(blocks[index]))),
@@ -429,7 +459,7 @@ def _compile_null_to_target_tracelets(
     # Ring topology is now explicit. Refine the neutral carbon carrier atoms
     # while every atom-level rewrite can condition on actual ring membership,
     # ring size, and fusion context.
-    for v in sorted(cyclic_vertices):
+    for v in sorted(cyclic_vertices - protected):
         desired = (
             int(target.atom_types[v]),
             int(target.formal_charges[v]),
@@ -455,11 +485,15 @@ def _compile_null_to_target_tracelets(
     bridges = {_edge(a, b) for a, b in nx.bridges(graph)}
     ring_graph = graph.copy()
     ring_graph.remove_edges_from(tuple(tuple(edge) for edge in bridges))
-    electronically_committed: set[frozenset[int]] = set()
+    electronically_committed: set[frozenset[int]] = {
+        _edge(a, b) for a in protected for b in protected if source.bonds[a, b]
+    }
     for vertices in sorted(
         nx.connected_components(ring_graph),
         key=lambda component: tuple(sorted(component)),
     ):
+        if set(vertices) <= protected:
+            continue
         component = ring_graph.subgraph(vertices)
         changes = tuple(
             BondOrderChange(a, b, int(target.bonds[a, b]))
