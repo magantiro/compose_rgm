@@ -76,9 +76,13 @@ executor work, exclusions, and all failures in task-specific artifacts.
 Focused tests must verify exact endpoint recovery and region-slot mapping,
 archive completeness, RNG restoration, original-seed constraints, round locks,
 oracle accounting, no implicit retries, and no incomplete program candidates.
-Run repository-wide verification once on the frozen launch candidate; classify
-known baseline failures without relaxing gates. Newly implicated scientific
-failures stop launch. Do not claim a green repository when it is not green.
+Operational amendment, 2026-09-08, approved by the user before new oracle calls:
+the passing focused controller/launcher tests and audit tests are the verification
+boundary for this bounded development run. Stop the unrelated broad suite and
+preserve its actual partial/completed result without treating it as green.
+Do not repeat unchanged expensive tests. Clean-source and physical-input checks,
+executor validity, candidate locks, budgets, and all scientific gates remain
+mandatory. Newly implicated scientific failures stop launch.
 
 From a clean committed worktree, use `python3 tools/preflight.py --strict`,
 then `modal deploy modal_apps/genmol_t4_opt_app.py`, then

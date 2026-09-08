@@ -1,0 +1,20 @@
+{
+  "schema_version": "t4_warm_launch_review_v1",
+  "recorded_at_utc": "2026-09-08T07:53:00Z",
+  "scientific_revision": "6fe5cdf3d650d16fb4f27b9804a4608d91e0693c",
+  "decision": "launch the one authorized two-round guided development continuation",
+  "authority": "user explicitly approved stopping the broad suite and proceeding with passing focused checks; requested removing unnecessary delays",
+  "focused_tests_passed": 83,
+  "offline_auditor_tests_passed": 2,
+  "broad_suite": "finished as interrupt arrived: 4520 passed, 47 failed, 58 errors, 2 skipped, 1 xfailed, 1902.66 seconds; 105 unchanged baseline nonpassing identities and messages; no new nonpassing identity",
+  "scientific_source_changed_after_focused_verification": false,
+  "configuration_changed": false,
+  "scientific_gates_relaxed": false,
+  "preflight_clean_worktree": true,
+  "deployed": true,
+  "active_t4_tasks_before_spawn": 0,
+  "new_oracle_call_limit": 40,
+  "additional_rounds": 2,
+  "repository_green": false,
+  "scope": "bounded guided-only inspected PARP1 seed0 d=0.4 development; no benchmark claim"
+}

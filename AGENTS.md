@@ -663,6 +663,14 @@ null-threshold, `NO_GO`, mismatched, or merely hash-valid prerequisite is not tr
 
 ### Repository-specific verification
 
+- User-authorized T4 development policy (2026-09-08): bounded controller development
+  runs use focused tests for changed dependencies and scientific invariants, plus
+  clean-source, input-hash, candidate-lock, and budget checks. Do not make an
+  unrelated repository-wide suite a launch blocker or rerun unchanged expensive
+  tests merely for ceremony. Full-suite verification remains a milestone/release
+  requirement, not a prerequisite to every bounded T4 development experiment.
+  Preserve failures and incomplete checks honestly; never waive scientific gates,
+  leakage controls, executor validity, or oracle accounting under this policy.
 - While iterating, run the narrowest focused tests for every touched invariant.
 - For the current Python environment, use `.venv/bin/python -m pytest` and
   `.venv/bin/python -m ruff check` so the repository-pinned toolchain is used.
