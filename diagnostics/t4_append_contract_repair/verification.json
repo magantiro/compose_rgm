@@ -1,0 +1,46 @@
+{
+  "authoritative_artifact_sha256": {
+    "diagnostics/t4_append_contract_repair/attempt_1/fixture.json": "14386c367baa303cc82245884a784ef15cfc33551173fd9562cc37faf0728ea2",
+    "diagnostics/t4_append_contract_repair/attempt_1/result.json": "eac7d943f11eec9a62178793eb127fc73f00aef5145fde6360e6a9e95342cde8",
+    "diagnostics/t4_append_contract_repair/focused.xml": "4568feecd2503e884b961c4df389e7cfd655a3a50570c299c1200931fac52503"
+  },
+  "broader_dependency_run": "stopped in unrelated legacy BRAF feasibility-frontier test; no final test summary; six early fixture codec failures corrected and included in final focused result",
+  "existing_failure": "tests/test_slot_safety.py::test_the_rest_of_the_repo_does_not_regress",
+  "failure_message_equals_previous_full_suite": true,
+  "fixture_and_implementation_hashes_verified": true,
+  "complete_staged_diff_check_passed": true,
+  "focused_command": "KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 .venv/bin/python -m pytest -q tests/test_state_macro_contract.py tests/test_t4_append_contract_audit.py tests/test_t4_matched_pilot.py tests/test_option_continuation.py tests/test_fused_option.py tests/test_option_selector.py tests/test_slot_safety.py tests/test_macro_engine.py::test_layer2_annulate_and_append_are_mutually_exclusive tests/test_macro_engine.py::test_append_closure_requires_a_substantial_new_system tests/test_macro_engine.py::test_build_ring_system_is_a_program_over_existing_macros --junitxml=diagnostics/t4_append_contract_repair/focused.xml",
+  "focused_tests": {
+    "errors": 0,
+    "failures": 1,
+    "passed": 101,
+    "skipped": 0,
+    "tests": 102
+  },
+  "format": {
+    "legacy_files": "existing whole-file formatting debt retained",
+    "new_files_and_continuation": "passed",
+    "new_macro_functions": "passed"
+  },
+  "full_suite_this_repair": "not run; no milestone-complete claim; previous suite remains non-green",
+  "implementation_revision": "cac32a2ef784aafd18627255665e93ec5f4560cb",
+  "lint": {
+    "macro_engine_existing_diagnostics": 58,
+    "new_diagnostics": 0,
+    "new_files_and_continuation": "passed",
+    "t4_app_existing_diagnostics": 17
+  },
+  "new_model_calls": 0,
+  "new_oracle_calls": 0,
+  "pushed": false,
+  "remote_job_launched": false,
+  "schema_version": "t4_append_contract_verification_v1",
+  "scientific_conclusion": "Identity repair matches all 47 saved product decisions. No completed-program, discovery-coverage, or docking-improvement claim.",
+  "strict_preflight": {
+    "command": ".venv/bin/python tools/preflight.py --strict",
+    "mounted_tree_drift": 0,
+    "passed": true,
+    "revision": "cac32a2ef784aafd18627255665e93ec5f4560cb"
+  },
+  "unique_saved_executor_replays": 33
+}

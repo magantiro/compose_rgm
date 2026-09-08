@@ -97,3 +97,14 @@ The complete evidence, limitations, and next repair target are in
 `diagnostics/t4_matched_pilot/attempt_1/README.md`. Preserve the general
 region-option controller; repair atom-correspondence checks before interpreting
 these construction failures as a limitation of its search space.
+
+## Subsequent identity repair, 2026-09-08
+
+Revision `cac32a2` routes exact-state T4 applicability/execution and continuation
+through persistent-slot macro predicates. All 47 saved closure products match
+the prior independent diagnosis: the two valid pendant closures are recovered
+in both arms, with no false acceptances or remaining false rejections on this
+fixed set. This does not revise the original sampled programs or docking scores.
+No new model or oracle calls were made. See `APPEND_CONTRACT_REPAIR.md` and
+`diagnostics/t4_append_contract_repair/README.md` for scope, provenance, negative
+findings, verification limitations, and the next launch boundary.
