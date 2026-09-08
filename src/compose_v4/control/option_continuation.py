@@ -52,6 +52,13 @@ from compose_v4.control.ring_expansion import (
     eligible_expansion_edges,
     expansion_descriptor_indices,
 )
+from compose_v4.control.ring_program import (
+    RingProgress,
+    completed_construction,
+    construction_branches,
+    construction_indices,
+    ring_spec,
+)
 from compose_v4.data.charge_policy import charge_policy_preserved
 from compose_v4.gates.med_chem_gate import is_valid
 from compose_v4.rewrite.kernel import InvalidRewrite, RewriteSystem, canonical_state_key
@@ -82,6 +89,7 @@ class OptionState:
     bundle_id: str
     fused_progress: FusedProgress | None = None
     expansion_progress: ExpansionProgress | None = None
+    ring_progress: RingProgress | None = None
 
     def __post_init__(self) -> None:
         if not self.bundle_id:
@@ -122,6 +130,17 @@ class OptionState:
                 raise ValueError("expansion program must start from its exact origin state")
         elif self.expansion_progress is not None:
             raise ValueError("expansion progress is only valid for expand_ring")
+        spec = ring_spec(self.option)
+        if spec is not None:
+            if not isinstance(self.ring_progress, RingProgress):
+                raise ValueError("parameterized construction requires RingProgress")
+            self.ring_progress.validate(
+                self.graph, self.origin, self.context.locus, self.step, spec
+            )
+            if self.step == 0 and exact_graph_key(self.graph) != exact_graph_key(self.origin):
+                raise ValueError("ring program must start from its exact origin state")
+        elif self.ring_progress is not None:
+            raise ValueError("ring progress requires a parameterized construction option")
 
     @property
     def remaining(self) -> int:
@@ -147,6 +166,8 @@ class OptionState:
             self.horizon,
         )
         # Preserve every existing cache identity; only the opt-in state extends it.
+        if self.ring_progress is not None:
+            return legacy + (self.ring_progress,)
         if self.expansion_progress is not None:
             return legacy + (self.expansion_progress,)
         return legacy if self.fused_progress is None else legacy + (self.fused_progress,)
@@ -159,6 +180,7 @@ class OptionKernelWork:
     rejected_products: int = 0
     legal_products: int = 0
     row_cache_hits: int = 0
+    product_cache_hits: int = 0
 
 
 class OptionContinuationKernel:
@@ -195,6 +217,8 @@ class OptionContinuationKernel:
         self._rows: dict[tuple, ReferenceRow[OptionState]] = {}
         self._fused_support: dict[tuple, dict] = {}
         self._expansion_support: dict[tuple, dict] = {}
+        self._construction_support: dict[tuple, dict] = {}
+        self._construction_products: dict[tuple, MolecularGraph | None] = {}
 
     @classmethod
     def from_runtime(cls, model, system, *, time_point: float, max_executor_applications: int):
@@ -232,7 +256,10 @@ class OptionContinuationKernel:
         ):
             raise ValueError("marked law must have aligned finite nonnegative positive-mass rows")
         indices, _ = admissible_indices(families, actions, node.context)
-        if node.option in (BUILD_FUSED_RING_OPTION, EXPAND_RING_OPTION):
+        if (
+            node.option in (BUILD_FUSED_RING_OPTION, EXPAND_RING_OPTION)
+            or node.ring_progress is not None
+        ):
             return self._descriptor_row(node, families, actions, p, indices)
         pre = conditioned_action_distribution(families, p, indices, node.option, step=node.step)
         active = primitive_option_at_step(node.option, node.step)
@@ -292,20 +319,34 @@ class OptionContinuationKernel:
 
     def _descriptor_row(self, node, families, actions, probabilities, admissible):
         """Joint edge/mark reference; share executor work, not augmented states."""
+        spec = ring_spec(node.option)
         expansion = node.option == EXPAND_RING_OPTION
-        progress = node.expansion_progress if expansion else node.fused_progress
+        progress = (
+            node.ring_progress
+            if spec
+            else node.expansion_progress
+            if expansion
+            else node.fused_progress
+        )
         eligible_edges = eligible_expansion_edges if expansion else eligible_fusion_edges
         match_indices = expansion_descriptor_indices if expansion else descriptor_indices
-        edges = (
-            eligible_edges(node.origin, node.context.locus)
-            if progress.edge is None
-            else (progress.edge,)
-        )
+        if spec:
+            edges = (
+                construction_branches(node.origin, node.context.locus, spec)
+                if not progress.anchors
+                else ((progress.anchors, progress.pattern),)
+            )
+        else:
+            edges = (
+                eligible_edges(node.origin, node.context.locus)
+                if progress.edge is None
+                else (progress.edge,)
+            )
         active = primitive_option_at_step(node.option, node.step)
         contract = state_contract_for(active, node.graph)
 
         def condition(matches):
-            if not expansion:
+            if not expansion and spec is None:
                 return conditioned_action_distribution(families, probabilities, matches, active)
             # This NEW channel conditions descriptors before applying the
             # inherited cap. Unrelated marks must not erase its sole closure.
@@ -323,14 +364,29 @@ class OptionContinuationKernel:
         for edge in edges:
             matches = sorted(
                 in_region.intersection(
-                    match_indices(families, actions, probabilities, progress, edge, node.step)
+                    construction_indices(
+                        families,
+                        actions,
+                        probabilities,
+                        node.graph,
+                        spec,
+                        progress,
+                        edge,
+                        node.step,
+                    )
+                    if spec
+                    else match_indices(families, actions, probabilities, progress, edge, node.step)
                 )
             )
             pre = condition(matches)
             pre_rows[edge] = pre
             audit.append(
                 {
-                    "edge": list(edge),
+                    **(
+                        {"branch": [list(items) for items in edge]}
+                        if spec
+                        else {"edge": list(edge)}
+                    ),
                     "descriptor_region_marks": len(matches),
                     "after_inherited_cap": len(pre.indices),
                 }
@@ -340,15 +396,27 @@ class OptionContinuationKernel:
         # each index once, then retain separate program states and joint mass.
         products = {}
         for index in sorted({int(i) for pre in pre_rows.values() for i in pre.indices}):
-            if self.work.executor_applications >= self.max_executor_applications:
-                raise ContinuationBudgetExceeded("executor-application budget exhausted")
-            self.work.executor_applications += 1
-            try:
-                product = self.system.apply(node.graph, families[index], actions[index])
-                key = canonical_state_key(product)
-            except InvalidRewrite:
+            # A parameter menu must not reexecute the same physical first edit
+            # once per quota/pattern. Context checks remain bundle-specific.
+            product_key = (exact_graph_key(node.graph), families[index], repr(actions[index]))
+            if spec and product_key in self._construction_products:
+                self.work.product_cache_hits += 1
+                product = self._construction_products[product_key]
+            else:
+                if self.work.executor_applications >= self.max_executor_applications:
+                    raise ContinuationBudgetExceeded("executor-application budget exhausted")
+                self.work.executor_applications += 1
+                try:
+                    product = self.system.apply(node.graph, families[index], actions[index])
+                    canonical_state_key(product)
+                except InvalidRewrite:
+                    product = None
+                if spec:
+                    self._construction_products[product_key] = product
+            if product is None:
                 self.work.rejected_products += 1
                 continue
+            key = canonical_state_key(product)
             if not (
                 0 < product.n_real_atoms <= 40
                 and graph_connected(product)
@@ -373,22 +441,44 @@ class OptionContinuationKernel:
                 product = products[index]
                 slot = created_slot(actions[index])
                 next_progress = (
-                    ExpansionProgress(edge, slot if slot is not None else progress.new_slot)
+                    RingProgress(
+                        edge[0],
+                        edge[1],
+                        progress.path + (slot,) if slot is not None else progress.path,
+                    )
+                    if spec
+                    else ExpansionProgress(edge, slot if slot is not None else progress.new_slot)
                     if expansion
                     else FusedProgress(
                         edge, progress.path + (slot,) if slot is not None else progress.path
                     )
                 )
                 completes = completed_expansion if expansion else completed_fused_cycle
-                if node.step == node.horizon - 1 and not completes(
-                    node.origin, product, next_progress
-                ):
+                completion_failed = (
+                    spec is not None
+                    and node.step in (spec.growth, spec.horizon - 1)
+                    and not completed_construction(
+                        node.origin, product, next_progress, spec, refined=node.step > spec.growth
+                    )
+                ) or (
+                    spec is None
+                    and node.step == node.horizon - 1
+                    and not completes(node.origin, product, next_progress)
+                )
+                if completion_failed:
                     self.work.rejected_products += 1
                     continue
                 context = node.context.with_locus(slot) if slot is not None else node.context
-                if expansion:
+                if expansion or spec:
                     try:
-                        next_progress.validate(product, node.origin, context.locus, node.step + 1)
+                        if spec:
+                            next_progress.validate(
+                                product, node.origin, context.locus, node.step + 1, spec
+                            )
+                        else:
+                            next_progress.validate(
+                                product, node.origin, context.locus, node.step + 1
+                            )
                     except ValueError:
                         self.work.rejected_products += 1
                         continue
@@ -401,8 +491,9 @@ class OptionContinuationKernel:
                     node.step + 1,
                     node.horizon,
                     node.bundle_id,
-                    fused_progress=None if expansion else next_progress,
+                    fused_progress=None if expansion or spec else next_progress,
                     expansion_progress=next_progress if expansion else None,
+                    ring_progress=next_progress if spec else None,
                 )
             receipt["after_product_contract"] = len(successors)
             conditioned = condition(sorted(successors))
@@ -419,10 +510,22 @@ class OptionContinuationKernel:
         cache_key = node.key()
         self.work.legal_products += len({i for successors, _ in branches for i in successors})
         self._marks[cache_key] = tuple(marks)
-        support = self._expansion_support if expansion else self._fused_support
+        support = (
+            self._construction_support
+            if spec
+            else self._expansion_support
+            if expansion
+            else self._fused_support
+        )
         support[cache_key] = {
-            "eligible_oriented_edges": len(edges),
-            "product_applicable_oriented_edges": len(branches),
+            **(
+                {"eligible_branches": len(edges), "product_applicable_branches": len(branches)}
+                if spec
+                else {
+                    "eligible_oriented_edges": len(edges),
+                    "product_applicable_oriented_edges": len(branches),
+                }
+            ),
             "augmented_successors": len(nodes),
             "physical_marks": len({i for successors, _ in branches for i in successors}),
             "edges": audit,
@@ -440,6 +543,11 @@ class OptionContinuationKernel:
         from copy import deepcopy
 
         return deepcopy(self._expansion_support[node.key()])
+
+    def construction_support(self, node: OptionState) -> dict:
+        from copy import deepcopy
+
+        return deepcopy(self._construction_support[node.key()])
 
     def marks(self, node: OptionState) -> tuple[tuple[str, Any], ...]:
         return self._marks[node.key()]
@@ -560,6 +668,12 @@ def sample_option_trajectory(
             trace[-1]["expansion_progress"] = next_node.expansion_progress.payload()
             trace[-1]["exact_state"] = encode_state(next_node.graph)
             trace[-1]["support_funnel"] = kernel.expansion_support(node)
+        if next_node.ring_progress is not None:
+            from compose_v4.rewrite.trace_shard import encode_state
+
+            trace[-1]["ring_progress"] = next_node.ring_progress.payload()
+            trace[-1]["exact_state"] = encode_state(next_node.graph)
+            trace[-1]["support_funnel"] = kernel.construction_support(node)
         node = next_node
     result = {
         "bundle_id": initial.bundle_id,
@@ -591,4 +705,8 @@ def sample_option_trajectory(
         result["final_expansion_progress"] = node.expansion_progress.payload()
         if status == "no_admissible_action":
             result["failure_support_funnel"] = kernel.expansion_support(node)
+    if node.ring_progress is not None:
+        result["final_ring_progress"] = node.ring_progress.payload()
+        if status == "no_admissible_action":
+            result["failure_support_funnel"] = kernel.construction_support(node)
     return result

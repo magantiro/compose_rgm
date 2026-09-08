@@ -320,6 +320,23 @@ def t4_feedback_round(task: dict[str, Any]) -> dict[str, Any]:
 
 
 @app.function(
+    image=image, cpu=(1.0, 1.0), memory=8192, timeout=3600,
+    max_containers=1, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_ring_program_round(task: dict[str, Any]) -> dict[str, Any]:
+    """One parameterized-option round from all 46 saved calls; at most 20 new dockings."""
+    from compose_v4.experiments.t4_ring_program_round import run_remote
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return run_remote(
+        task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume, _runtime,
+        _validate_remote_revision,
+        lambda t, progress, cached, warm: t4_population_cell.local(t, progress, cached, warm),
+        lambda smiles, rd: _dock_many(smiles, "parp1", f"{task['run_id']}_{rd}", workers=1),
+    )
+
+
+@app.function(
     image=image, cpu=(1.0, 1.0), memory=2048, timeout=3600,
     max_containers=1, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
@@ -732,6 +749,7 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
         canonical_state_key, enumerate_factorized_marked_law)
     from compose_v4.control.region import enumerate_regions
     from compose_v4.control.fused_option import BUILD_FUSED_RING_OPTION, FusedProgress
+    from compose_v4.control.ring_program import RingProgress, default_ring_options, ring_spec
     from compose_v4.control.option_continuation import (
         OptionContinuationKernel, OptionState, exact_graph_key,
     )
@@ -787,6 +805,11 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
     if guidance not in ("committor", "reference"):
         raise ValueError(f"unknown primitive_guidance: {guidance!r}")
     include_fused = bool(task.get("include_fused", False))
+    ring_options = tuple(task.get("ring_program_options", ()))
+    if task.get("include_ring_programs", False):
+        ring_options = ring_options or default_ring_options()
+    if len(set(ring_options)) != len(ring_options) or any(ring_spec(o) is None for o in ring_options):
+        raise ValueError("ring_program_options must be distinct parameterized construction options")
     tau = float(task.get("tau", 0.05))
     kappa = float(task.get("kappa", 1.0))
     if kappa != 1.0:
@@ -956,7 +979,7 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
         fused_kernel = OptionContinuationKernel(
             enum_fn, system,
             max_executor_applications=int(task.get("max_executor_applications", 20000)),
-        ) if include_fused else None
+        ) if include_fused or ring_options else None
 
         def option_state(particle):
             return OptionState(
@@ -964,6 +987,7 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
                 particle["lin"], particle["option"], int(particle["step"]),
                 option_horizon(particle["option"], max_steps),
                 particle["bundle_id"], particle.get("fused_progress"),
+                ring_progress=particle.get("ring_progress"),
             )
 
         frontier = []
@@ -990,7 +1014,8 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
                     MAX_ACTIVE_ATOMS - n_,
                 )
                 support_applicable = applicable_options(
-                    fams, idx, n_free_slots=n_free, include_fused=include_fused
+                    fams, idx, n_free_slots=n_free, include_fused=include_fused,
+                    ring_options=ring_options,
                 )
 
                 def has_clean_product(
@@ -1003,12 +1028,13 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
                     lineage_=lin_,
                     region_=reg,
                 ):
-                    if option == BUILD_FUSED_RING_OPTION:
+                    if option == BUILD_FUSED_RING_OPTION or ring_spec(option) is not None:
                         node = OptionState(
                             state_, state_, context_, lineage_, option, 0,
                             option_horizon(option, max_steps),
                             bundle_identity(parent, parent_lineage_id, region_.key(), option),
-                            FusedProgress(),
+                            FusedProgress() if option == BUILD_FUSED_RING_OPTION else None,
+                            ring_progress=RingProgress() if ring_spec(option) is not None else None,
                         )
                         return bool(fused_kernel.row(node).successors)
                     conditioned = conditioned_action_distribution(
@@ -1098,6 +1124,7 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
                         "fused_progress": (
                             FusedProgress() if choice.selected == BUILD_FUSED_RING_OPTION else None
                         ),
+                        "ring_progress": RingProgress() if ring_spec(choice.selected) is not None else None,
                     }
                 )
 
@@ -1106,12 +1133,12 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
                 counts = receipt["halt_counts"]
                 counts[reason] = counts.get(reason, 0) + int(particle["mult"])
 
-            def record_committed_candidate(particle, y, key, lineage, active_macro, step_):
+            def record_committed_candidate(particle, y, key, lineage, active_macro, step_, ring_progress=None):
                 horizon = option_horizon(particle["option"], max_steps)
                 program_complete = int(step_) >= horizon
-                if particle["option"] in (
+                if (particle["option"] in (
                     BUILD_RING_SYSTEM_OPTION, BUILD_FUSED_RING_OPTION
-                ) and not program_complete:
+                ) or ring_spec(particle["option"]) is not None) and not program_complete:
                     return
                 candidate_key = (particle["bundle_id"], key)
                 if candidate_key in cands:
@@ -1141,6 +1168,7 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
                     "option_phase": active_macro or GENERIC_OPTION,
                     "q_option": particle["q_option"],
                     "program_complete": bool(program_complete),
+                    "ring_progress": ring_progress.payload() if ring_progress else None,
                     "r_coherent": dd["largest_changed_fraction"],
                     "r_change": dd["changed_fraction"],
                     "d_ring_systems": dd["d_ring_systems"],
@@ -1169,6 +1197,7 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
                         tuple(sorted(p_["lin"].id_of.items())),
                         p_["lin"].next_id,
                         p_.get("fused_progress"),
+                        p_.get("ring_progress"),
                     )
                     if gk in groups:
                         groups[gk]["mult"] += p_["mult"]
@@ -1180,10 +1209,10 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
                     horizon = option_horizon(p_["option"], max_steps)
                     if step >= horizon:
                         continue
-                    if p_["option"] == BUILD_FUSED_RING_OPTION:
+                    if p_["option"] == BUILD_FUSED_RING_OPTION or p_.get("ring_progress") is not None:
                         row = fused_kernel.row(option_state(p_))
                         if not row.successors:
-                            note_halt(p_, "no_clean_fused_product")
+                            note_halt(p_, "no_clean_ring_program_product" if p_.get("ring_progress") is not None else "no_clean_fused_product")
                         for successor, base_prob in zip(row.successors, row.probabilities):
                             sh = RR.structural_features_shared(
                                 successor.graph, successor.context, successor.lineage, p_["old"]
@@ -1192,7 +1221,7 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
                             meta.append((
                                 gk, successor.graph, successor.lineage, successor.context,
                                 float(base_prob), canonical_state_key(successor.graph), p_,
-                                primitive_option_at_step(p_["option"], step), successor.fused_progress,
+                                primitive_option_at_step(p_["option"], step), successor.ring_progress or successor.fused_progress,
                             ))
                         continue
                     fams, acts, probs = enum_fn(p_["st"])
@@ -1297,7 +1326,9 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
                     draws = rng_.choice(len(sel), size=int(p_["mult"]), p=q)
                     for d_ in np.unique(draws):
                         i = sel[int(d_)]
-                        _gk, y, l2, ctx2, _p, key, src, active_macro, fused_progress = meta[i]
+                        _gk, y, l2, ctx2, _p, key, src, active_macro, progress = meta[i]
+                        ring_progress = progress if ring_spec(src["option"]) is not None else None
+                        fused_progress = None if ring_progress is not None else progress
                         if task.get("prepare_only", False):
                             trace.append({
                                 "bundle_id": src["bundle_id"], "option": src["option"],
@@ -1310,6 +1341,7 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
                                 "h_max": float(hs.max()) if guidance == "committor" else None,
                                 "kl": float(np.sum(q[q > 0] * np.log(q[q > 0] / w[q > 0]))),
                                 "fused_progress": fused_progress.payload() if fused_progress else None,
+                                "ring_progress": ring_progress.payload() if ring_progress else None,
                             })
                         nxt.append(
                             {
@@ -1320,10 +1352,11 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
                                 "mult": int((draws == d_).sum()),
                                 "step": step + 1,
                                 "fused_progress": fused_progress,
+                                "ring_progress": ring_progress,
                             }
                         )
                         record_committed_candidate(
-                            src, y, key, l2, active_macro, step + 1
+                            src, y, key, l2, active_macro, step + 1, ring_progress
                         )
 
                 for particle in nxt:
@@ -1431,7 +1464,9 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
                 int(receipt["region_draws"]) for receipt in receipts.values()
             ),
             "law_enumerations": len(cache), "memoized_option_products": len(memo),
-            "fused_option_products": fused_kernel.work.executor_applications if fused_kernel else 0,
+            ("stateful_option_products" if ring_options else "fused_option_products"):
+                fused_kernel.work.executor_applications if fused_kernel else 0,
+            **({"ring_program_product_cache_hits": fused_kernel.work.product_cache_hits} if ring_options else {}),
             "sampled_transitions": trace,
             "rng_state": rng_.bit_generator.state,
         }
@@ -1866,7 +1901,7 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
                 "epsilon_option": eps_option,
                 "macro_temperature": macro_temperature,
                 "epsilon_macro": eps_macro,
-                "options": list(OPTIONS) + ([BUILD_FUSED_RING_OPTION] if include_fused else []),
+                "options": list(OPTIONS) + ([BUILD_FUSED_RING_OPTION] if include_fused else []) + list(ring_options),
                 "primitive_guidance": guidance,
                 "option_groups": {
                     group: list(options) for group, options in OPTION_GROUPS.items()

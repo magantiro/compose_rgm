@@ -13,6 +13,7 @@ from rdkit import Chem
 
 from compose_v4.chem.molecular_graph import is_element
 from compose_v4.control.region_rewrite import RewriteContext
+from compose_v4.control.ring_program import RingProgress, completed_construction, ring_spec
 from compose_v4.experiments.aromatic_cycle_open_semantics import (
     _index_preserving_rdkit_molecule,
 )
@@ -204,16 +205,24 @@ def verify_round(lock: dict, warm: dict, task: dict) -> None:
         if any(s != parents[bundle["parent"]] for s in sources):
             raise ValueError("proposal did not start from the saved exact parent")
     for candidate in lock["take"]:
+        spec = ring_spec(candidate["option"])
         if policy == T4_FEASIBLE_ONLY and (
             not feasible_endpoint(candidate) or candidate.get("oracle_eligible") is not True
         ):
             raise ValueError("ineligible endpoint in strict T4 oracle lock")
         if (
-            candidate["option"] in ("build_ring_system", "build_fused_ring")
-            and not candidate["program_complete"]
-        ):
+            candidate["option"] in ("build_ring_system", "build_fused_ring") or spec is not None
+        ) and not candidate["program_complete"]:
             raise ValueError("incomplete compound program in oracle lock")
         endpoint(lock, candidate)
+        if spec is not None and not completed_construction(
+            decode_state(parents[candidate["parent"]]),
+            decode_state(endpoint(lock, candidate)),
+            RingProgress.from_payload(candidate["ring_progress"]),
+            spec,
+            refined=bool(spec.refine),
+        ):
+            raise ValueError("parameterized ring candidate lacks its exact construction witness")
 
 
 def prepare_round(task, warm, prepare, output, commit, progress):

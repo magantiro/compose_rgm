@@ -31,6 +31,7 @@ from compose_v4.control.macro_engine import (
     proposal_support,
 )
 from compose_v4.control.ring_expansion import EXPAND_RING_OPTION, EXPANSION_PHASES
+from compose_v4.control.ring_program import ring_spec
 
 GENERIC_OPTION = "generic"
 BUILD_RING_SYSTEM_OPTION = "build_ring_system"
@@ -101,7 +102,7 @@ class ConditionedActionDistribution:
 def bundle_identity(parent: str, parent_lineage_id: int, region_key, option: str) -> str:
     """Stable identity for one distinct outer-controller search bundle."""
 
-    if option not in OPTIONS + OPT_IN_OPTIONS:
+    if option not in OPTIONS + OPT_IN_OPTIONS and ring_spec(option) is None:
         raise KeyError(f"unknown option {option!r}; known: {OPTIONS}")
     payload = json.dumps(
         {
@@ -124,6 +125,9 @@ def primitive_option_at_step(option: str, step: int) -> str | None:
     :func:`option_horizon`.
     """
 
+    spec = ring_spec(option)
+    if spec is not None:
+        return spec.phase(step)
     if option == GENERIC_OPTION:
         return None
     if option == EXPAND_RING_OPTION:
@@ -150,6 +154,9 @@ def option_horizon(option: str, generic_horizon: int) -> int:
     indivisible and stops after its declared program length.
     """
 
+    spec = ring_spec(option)
+    if spec is not None:
+        return spec.horizon
     if option == BUILD_RING_SYSTEM_OPTION:
         return sum(int(length) for _macro, length in BUILD_RING_SYSTEM)
     if option == EXPAND_RING_OPTION:
@@ -168,6 +175,7 @@ def applicable_options(
     n_free_slots: int | None = None,
     include_fused: bool = False,
     include_expansion: bool = False,
+    ring_options: tuple[str, ...] = (),
 ) -> tuple[str, ...]:
     """Options with initial primitive support inside the selected region.
 
@@ -205,6 +213,16 @@ def applicable_options(
         and ("cycle_open" in present)
     ):
         out.append(EXPAND_RING_OPTION)
+    if len(set(ring_options)) != len(ring_options):
+        raise ValueError("duplicate ring construction options")
+    for option in ring_options:
+        spec = ring_spec(option)
+        if spec is None:
+            raise ValueError(f"expected a parameterized ring option, got {option!r}")
+        if (n_free_slots is None or int(n_free_slots) >= spec.growth) and (
+            present.intersection(MACRO_FAMILIES["scaffold_extend"])
+        ):
+            out.append(option)
     return tuple(out)
 
 
@@ -245,9 +263,13 @@ def balanced_option_prior(
     if len(opts) != len(set(opts)):
         raise ValueError(f"duplicate applicable options: {opts}")
     groups = OPTION_GROUPS
-    if any(option in opts for option in OPT_IN_OPTIONS):
-        groups = {**groups, "ring_topology": groups["ring_topology"] + OPT_IN_OPTIONS}
-    known = set(OPTIONS + OPT_IN_OPTIONS)
+    construction = tuple(option for option in opts if ring_spec(option) is not None)
+    if construction or any(option in opts for option in OPT_IN_OPTIONS):
+        groups = {
+            **groups,
+            "ring_topology": groups["ring_topology"] + OPT_IN_OPTIONS + construction,
+        }
+    known = set(OPTIONS + OPT_IN_OPTIONS + construction)
     unknown = [option for option in opts if option not in known]
     if unknown:
         raise KeyError(f"unknown applicable options: {unknown}; known: {OPTIONS}")
@@ -301,7 +323,7 @@ def conditioned_action_distribution(
     macro-local contract before normalization.
     """
 
-    if option in OPT_IN_OPTIONS:
+    if option in OPT_IN_OPTIONS or ring_spec(option) is not None:
         raise ValueError(f"{option} requires the stateful OptionContinuationKernel")
     fams = list(families)
     probs = np.asarray(probabilities, dtype=float)
