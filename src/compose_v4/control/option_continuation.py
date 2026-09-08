@@ -30,7 +30,7 @@ from compose_v4.control.fused_option import (
     descriptor_indices,
     eligible_fusion_edges,
 )
-from compose_v4.control.macro_engine import contract_for
+from compose_v4.control.macro_engine import state_contract_for
 from compose_v4.control.option_selector import (
     conditioned_action_distribution,
     option_horizon,
@@ -216,7 +216,7 @@ class OptionContinuationKernel:
             return self._fused_row(node, families, actions, p, indices)
         pre = conditioned_action_distribution(families, p, indices, node.option, step=node.step)
         active = primitive_option_at_step(node.option, node.step)
-        contract = contract_for(active, canonical_state_key(node.graph)) if active else None
+        contract = state_contract_for(active, node.graph) if active else None
         clean = np.zeros(len(p), dtype=bool)
         products: dict[int, OptionState] = {}
         for index in pre.indices:
@@ -238,7 +238,7 @@ class OptionContinuationKernel:
                 and context_preserved(
                     node.origin, product, node.context.frozen, node.context.terminal_context_slots
                 )
-                and (contract is None or contract(key))
+                and (contract is None or contract(product))
             ):
                 self.work.rejected_products += 1
                 continue
@@ -279,7 +279,7 @@ class OptionContinuationKernel:
             else (progress.edge,)
         )
         active = primitive_option_at_step(node.option, node.step)
-        contract = contract_for(active, canonical_state_key(node.graph))
+        contract = state_contract_for(active, node.graph)
         in_region = set(admissible)
         pre_rows, audit = {}, []
         for edge in edges:
@@ -319,7 +319,7 @@ class OptionContinuationKernel:
                 and context_preserved(
                     node.origin, product, node.context.frozen, node.context.terminal_context_slots
                 )
-                and contract(key)
+                and contract(product)
             ):
                 self.work.rejected_products += 1
                 continue

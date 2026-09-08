@@ -25,9 +25,14 @@ probability and needs no retraining.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from compose_v4.chem.molecular_graph import MolecularGraph
 
 #: A macro names a PURPOSE; the families are how that purpose is executed.
 MACRO_FAMILIES: dict[str, tuple[str, ...]] = {
@@ -372,7 +377,13 @@ def backbone_only(before_smiles: str, composition: str = "mixed"):
 
 
 def append_system_closure(before_smiles: str, min_new: int = APPEND_MIN_NEW_ATOMS):
-    """Accept a closure only if it creates a NEW ring system of >= min_new atoms
+    """Historical SMILES-only predicate, retained for legacy audit reproduction.
+
+    WARNING: independently parsed SMILES do not preserve atom correspondence.
+    The old index comparison below can falsely reject pendant closures. Exact
+    state callers MUST use state_contract_for instead; do not rematch states.
+
+    Original intent: accept only a NEW ring system of >= min_new atoms
     that does not weld back onto an existing one.
 
     Two conditions, both measured against the pre-closure state:
@@ -404,6 +415,59 @@ def append_system_closure(before_smiles: str, min_new: int = APPEND_MIN_NEW_ATOM
         return False
 
     return ok
+
+
+def slot_ring_systems(graph: MolecularGraph) -> tuple[frozenset[int], ...]:
+    """Ring systems in persistent slots, grouping cycles sharing any atom.
+
+    Removing graph bridges leaves exactly the ring edges. Their nontrivial
+    connected components merge fused, bridged and spiro cycles just as
+    ring_systems does, without SSSR choices or SMILES atom renumbering.
+    NULL and SCAR slots are not elements and cannot belong to a ring system.
+    """
+    import networkx as nx
+
+    from compose_v4.chem.molecular_graph import is_element
+
+    slots = np.flatnonzero(is_element(graph.atom_types))
+    adjacency = graph.bonds[np.ix_(slots, slots)] != 0
+    ring_graph = nx.Graph()
+    ring_graph.add_nodes_from(int(i) for i in slots)
+    rows, cols = np.nonzero(np.triu(adjacency, 1))
+    ring_graph.add_edges_from((int(slots[i]), int(slots[j])) for i, j in zip(rows, cols))
+    ring_graph.remove_edges_from(list(nx.bridges(ring_graph)))
+    systems = (frozenset(c) for c in nx.connected_components(ring_graph) if len(c) > 1)
+    return tuple(sorted(systems, key=lambda c: tuple(sorted(c))))
+
+
+def state_contract_for(
+    macro: str, before: MolecularGraph, **kwargs
+) -> Callable[[MolecularGraph], bool] | None:
+    """Macro-local predicate for executor products in the SAME slot coordinates.
+
+    This is a support condition, not a replacement for executor legality,
+    validity, or frozen-region checks. Only append_system needs cross-state
+    ring-atom correspondence; all other predicates retain their existing law.
+    """
+    from compose_v4.rewrite.kernel import canonical_state_key
+
+    if macro != "append_system":
+        contract = contract_for(macro, canonical_state_key(before), **kwargs)
+        return None if contract is None else lambda product: contract(canonical_state_key(product))
+
+    old_systems = slot_ring_systems(before)
+    old_ring_atoms = frozenset().union(*old_systems)
+
+    def pendant(product: MolecularGraph) -> bool:
+        if product.n_atoms != before.n_atoms:
+            raise ValueError("append_system contract requires the same persistent-slot layout")
+        systems = slot_ring_systems(product)
+        return len(systems) > len(old_systems) and any(
+            len(atoms) >= APPEND_MIN_NEW_ATOMS and atoms.isdisjoint(old_ring_atoms)
+            for atoms in systems
+        )
+
+    return pendant
 
 
 # ---------------------------------------------------------------------------

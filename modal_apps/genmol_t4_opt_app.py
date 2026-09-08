@@ -658,7 +658,6 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None) -
     import sascorer
     from compose_v4.chem.molecular_graph import (
         NULL_IDX,
-        molecular_graph_to_smiles,
         smiles_to_molecular_graph,
     )
     from compose_v4.chem.state import pad_molecular_graph
@@ -676,7 +675,7 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None) -
     from compose_v4.control.macro_engine import (
         BACKBONE_ELEMENTS,
         TERMINAL_ELEMENTS,
-        contract_for,
+        state_contract_for,
     )
     from compose_v4.control.option_selector import (
         BUILD_RING_SYSTEM_OPTION,
@@ -864,7 +863,7 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None) -
                 return None
             if not RR.graph_connected(y):
                 return None
-            if contract is not None and not contract(key):
+            if contract is not None and not contract(y):
                 return None
             return y, key
 
@@ -928,8 +927,7 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None) -
                     exploration=eps_macro,
                 )
                 active = primitive_option_at_step(option, 0)
-                before = molecular_graph_to_smiles(state_)
-                contract = contract_for(active, before) if active else None
+                contract = state_contract_for(active, state_) if active else None
                 return any(
                     checked_successor(
                         state_, state_, context_, int(j), contract
@@ -1122,8 +1120,7 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None) -
                     note_halt(p_, "no_option_support")
                     continue
                 active_macro = primitive_option_at_step(p_["option"], step)
-                before = molecular_graph_to_smiles(p_["st"])
-                contract = contract_for(active_macro, before) if active_macro else None
+                contract = state_contract_for(active_macro, p_["st"]) if active_macro else None
                 clean = np.zeros(len(probs), dtype=bool)
                 successors = {}
                 for j in pre.indices:

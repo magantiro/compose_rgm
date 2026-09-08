@@ -275,3 +275,60 @@ def test_real_population_preparation_carries_fused_progress_and_emits_only_endpo
     resumed = prepare(task, parent_cache={0: units[0]})
     assert resumed["take"] == reference["take"]
     assert resumed["bundles"] == reference["bundles"]
+
+
+@torch.enable_grad()
+def test_real_population_accepts_exact_slot_pendant_at_applicability_and_execution(
+    monkeypatch, tmp_path
+):
+    from compose_v4.control import region, region_selector
+    from compose_v4.experiments import production_successor_kernel as prod
+    from compose_v4.rewrite.operators import BondInsert
+
+    prepare = population_fixture(monkeypatch, tmp_path)
+
+    def law(_model, _graph, _time):
+        return SimpleNamespace(
+            marks=[
+                SimpleNamespace(
+                    executor_rule_name="bond_insert", action=BondInsert(6, 11, 1), probability=1.0
+                )
+            ]
+        )
+
+    monkeypatch.setattr(prod, "enumerate_factorized_marked_law", law)
+
+    def forced_append(options, _rng, **_kwargs):
+        # Fails if first-product applicability still uses the SMILES predicate.
+        assert "generic" in options and "append_system" in options
+        return option_selector.OptionChoice(
+            "append_system", tuple(options), tuple(1 / len(options) for _ in options)
+        )
+
+    monkeypatch.setattr(option_selector, "sample_option", forced_append)
+    seed = "c1ccccc1CCCCCC"
+    largest = max(
+        (r for r in region.enumerate_regions(seed) if {6, 11} <= r.atoms), key=lambda r: r.size
+    )
+    monkeypatch.setattr(region_selector, "sample_region", lambda *_a, **_kw: (largest, None))
+    result = prepare(
+        {
+            "smiles": seed,
+            "delta": 0.4,
+            "target": "parp1",
+            "budget": 20,
+            "seed_rng": 1000,
+            "lineages": 1,
+            "regions_per_lineage": 1,
+            "workers": 1,
+            "particles_per_region": 1,
+            "prepare_only": True,
+            "primitive_guidance": "reference",
+        }
+    )
+    assert result["oracle_calls"] == 0
+    assert len(result["take"]) == 1
+    candidate = result["take"][0]
+    assert candidate["option"] == "append_system" and candidate["step"] == 1
+    assert candidate["d_cycle_rank"] == candidate["d_ring_systems"] == 1
+    assert candidate["d_heavy"] == 0
