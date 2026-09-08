@@ -45,6 +45,11 @@ def main() -> None:
         action="store_true",
         help="one frozen, capped zero-docking profile; no T4 cells are launched",
     )
+    ap.add_argument(
+        "--fused-reference-profile",
+        action="store_true",
+        help="one capped frozen-model fused reference trajectory; no docking or lookahead",
+    )
     # V_z = 0 until a T4-specific estimator exists; the QED table was null and
     # learned QED-region effects, and an interface accepting it is not a reason
     # to use it here.  `macro_prior` names the new unlearned option-prior arm.
@@ -70,6 +75,8 @@ def main() -> None:
     ap.add_argument("--macro-temperature", type=float, default=2.0)
     ap.add_argument("--epsilon-macro", type=float, default=0.15)
     a = ap.parse_args()
+    if a.continuation_profile and a.fused_reference_profile:
+        ap.error("choose only one zero-docking profile")
     if not re.fullmatch(r"[A-Za-z0-9_-]+", a.session):
         raise SystemExit("--session must contain only letters, numbers, '_' or '-'")
 
@@ -82,8 +89,8 @@ def main() -> None:
             "committed tree, not only clean mounted src/configs"
         )
 
-    if a.continuation_profile:
-        launch_continuation_profile(preflight)
+    if a.continuation_profile or a.fused_reference_profile:
+        launch_continuation_profile(preflight, fused=a.fused_reference_profile)
         return
 
     fn = modal.Function.from_name("genmol-t4-opt", "t4_population_cell")
@@ -156,14 +163,19 @@ def main() -> None:
         print(f"  {c}  {o}")
 
 
-def launch_continuation_profile(preflight: dict) -> None:
+def launch_continuation_profile(preflight: dict, *, fused: bool = False) -> None:
     """Spawn only the fixed diagnostic into the deployed app; retain its call ID."""
     import sys
 
     sys.path.insert(0, str(ROOT))
     from modal_apps.run_process_v2_p50_app import local_image_revision
 
-    contract = ROOT / "configs/continuation_profile_v1.json"
+    kind = "fused_reference_profile" if fused else "continuation_profile"
+    contract = ROOT / (
+        "configs/fused_reference_profile_contract.json"
+        if fused
+        else "configs/continuation_profile_v1.json"
+    )
     revision = local_image_revision(expected_commit=preflight["commit"])
     identity = {
         "contract_sha256": _sha256(contract),
@@ -179,21 +191,21 @@ def launch_continuation_profile(preflight: dict) -> None:
         "contract_sha256": identity["contract_sha256"],
         "app_sha256": identity["app_sha256"],
     }
-    function = modal.Function.from_name("genmol-t4-opt", "continuation_profile")
+    function = modal.Function.from_name("genmol-t4-opt", kind)
     call = function.spawn(task)
     receipt = {
-        "schema_version": "continuation_profile_spawn_v1",
+        "schema_version": f"{kind}_spawn_v1",
         "task": task,
         "call_id": call.object_id,
         "oracle_calls": 0,
         "volume": "compose-v4-artifacts",
-        "volume_path": f"/continuation_profile/{run_id}",
+        "volume_path": f"/{kind}/{run_id}",
     }
-    path = ROOT / "diagnostics/continuation_profile_spawn.json"
+    path = ROOT / f"diagnostics/{kind}_spawn.json"
     temporary = path.with_suffix(".json.tmp")
     temporary.write_text(json.dumps(receipt, sort_keys=True, indent=2) + "\n")
     temporary.replace(path)
-    print(f"spawned zero-docking continuation profile: {call.object_id}")
+    print(f"spawned zero-docking {kind}: {call.object_id}")
     print(f"volume result: {receipt['volume_path']}/result.json")
     print(f"receipt: {path}")
 

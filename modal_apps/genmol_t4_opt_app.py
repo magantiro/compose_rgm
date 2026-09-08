@@ -244,6 +244,30 @@ def continuation_profile(task: dict[str, Any]) -> dict[str, Any]:
         publish_progress()
 
 
+@app.function(
+    image=image,
+    cpu=(1.0, 1.0),
+    memory=6144,
+    timeout=900,
+    max_containers=1,
+    retries=0,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def fused_reference_profile(task: dict[str, Any]) -> dict[str, Any]:
+    """One authenticated frozen-model reference path; no T4 driver or docking."""
+    from compose_v4.experiments.fused_reference_profile import run_remote_task
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return run_remote_task(
+        task,
+        repo_root=REMOTE_ROOT,
+        artifact_root=ARTIFACT_ROOT,
+        volume=artifact_volume,
+        runtime_factory=_runtime,
+        validate_revision=_validate_remote_revision,
+    )
+
+
 def _runtime():
     if "model" in _RT:
         return _RT
