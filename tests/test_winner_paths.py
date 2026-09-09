@@ -45,7 +45,11 @@ def test_config_refuses_support_changes():
 
 
 def test_annotation_and_census_identity():
-    from tools.ivg_winner_paths import annotate, pairs_from_census
+    from compose_v4.control.region import enumerate_regions
+    from compose_v4.experiments.t4_warm_continuation import canonical_slots, exact_context
+    from compose_v4.rewrite.kernel import canonical_state_key
+    from compose_v4.rewrite.trace_shard import decode_state
+    from tools.ivg_winner_paths import annotate, mapped_context, pairs_from_census
 
     source, target = "CC", "CCC1CCCCC1"
     winner = {"canonical_smiles": target, "source_rows": [{"line": 2}]}
@@ -70,3 +74,8 @@ def test_annotation_and_census_identity():
         row["next_edit"]["learned_mark_support_and_probability"] == "not_evaluated"
         for row in rows[:-1]
     )
+    graph = decode_state(path["states"][-1])
+    smiles = canonical_state_key(graph)
+    mapping = canonical_slots(graph, smiles)
+    for region in enumerate_regions(smiles):
+        assert mapped_context(region, mapping) == exact_context(graph, smiles, region)

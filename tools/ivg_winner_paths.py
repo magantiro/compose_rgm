@@ -8,10 +8,11 @@ import gzip
 import hashlib
 import json
 import platform
+import resource
 import subprocess
 import time
 from collections import Counter
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -23,9 +24,9 @@ from rdkit.Contrib.SA_Score import sascorer
 from compose_v4.control.docking_value import DockingValue, molecular_features
 from compose_v4.control.macro_engine import MACRO_FAMILIES
 from compose_v4.control.region import enumerate_regions
-from compose_v4.control.region_rewrite import admissible_indices
+from compose_v4.control.region_rewrite import admissible_indices, context_from_region
 from compose_v4.eval.ring_taxonomy import ring_taxonomy_report
-from compose_v4.experiments.t4_warm_continuation import exact_context
+from compose_v4.experiments.t4_warm_continuation import canonical_slots
 from compose_v4.experiments.winner_paths import PathConfig, find_path, replay
 from compose_v4.rewrite.action_codec_v4 import decode_action
 from compose_v4.rewrite.kernel import canonical_state_key
@@ -189,8 +190,9 @@ def annotate(pair, path, model):
             family, action = decode_action(path["actions"][index])
             scopes = []
             regions = [r for r in enumerate_regions(smiles) if 1 <= len(r.atoms) <= 24]
+            mapping = canonical_slots(graph, smiles)
             for region in regions:
-                ctx = exact_context(graph, smiles, region)
+                ctx = mapped_context(region, mapping)
                 if admissible_indices((family,), (action,), ctx)[0]:
                     scopes.append(len(region.atoms) / graph.n_real_atoms)
             row["next_edit"] = {
@@ -205,6 +207,17 @@ def annotate(pair, path, model):
             }
         steps.append(row)
     return steps
+
+
+def mapped_context(region, mapping):
+    """Coordinate transport of the production context; map the molecule only once."""
+    ctx = context_from_region(region)
+    return replace(
+        ctx,
+        frozen=frozenset(mapping[a] for a in ctx.frozen),
+        locus=frozenset(mapping[a] for a in ctx.locus),
+        terminals=tuple((mapping[a], mapping[b], order) for a, b, order in ctx.terminals),
+    )
 
 
 def run(args):
@@ -243,13 +256,81 @@ def run(args):
         "snapshot": snapshot,
     }
     scientific_id = digest(common)
+    prior_id = None
+    if args.reuse_code_revision:
+        old_implementation = {
+            name: hashlib.sha256(
+                subprocess.check_output(
+                    ["git", "show", f"{args.reuse_code_revision}:{name}"], cwd=ROOT
+                )
+            ).hexdigest()
+            for name in implementation
+        }
+        if any(
+            old_implementation[name] != value
+            for name, value in implementation.items()
+            if name != "tools/ivg_winner_paths.py"
+        ):
+            raise ValueError(
+                "prior-receipt conversion requires identical search/executor dependencies"
+            )
+        prior_id = digest({**common, "implementation_sha256": old_implementation})
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    publish(
+        args.output / "preparation.json",
+        {
+            **common,
+            "scientific_identity": scientific_id,
+            "code_revision": revision,
+            "n_pairs": len(pairs),
+            "n_cell_run_winners": sum(len(p["references"]) for p in pairs),
+            "prior_scientific_identity": prior_id,
+            "workers": 1,
+            "new_oracle_calls": 0,
+            "stop_limit": "128 expansions per mapping, two mappings per pair; no automatic retry",
+            "started_at_utc": datetime.now(timezone.utc).isoformat(),
+        },
+    )
     receipts, rows = [], []
     started = time.monotonic()
     for number, pair in enumerate(pairs, 1):
         cache_id = digest({"scientific_identity": scientific_id, "pair": pair})
         receipt_path = args.output / "pairs" / f"{cache_id}.json.gz"
         cached = receipt_path.exists()
+        prior_path = (
+            args.output
+            / "pairs"
+            / f"{digest({'scientific_identity': prior_id, 'pair': pair})}.json.gz"
+        )
+        if not cached and prior_id and prior_path.exists():
+            prior = json.loads(gzip.decompress(prior_path.read_bytes()))
+            if (
+                prior["scientific_identity"] != prior_id
+                or prior["pair"] != pair
+                or digest(prior["payload"]) != prior["payload_sha256"]
+            ):
+                raise ValueError(f"{prior_path}: corrupt prior receipt")
+            tick = time.monotonic()
+            payload = prior["payload"]
+            if annotate(pair, payload["path"], model) != payload["annotations"]:
+                raise ValueError(
+                    f"{prior_path}: fast annotation differs from the prior direct result"
+                )
+            receipt = {
+                **prior,
+                "scientific_identity": scientific_id,
+                "code_revision": revision,
+                "equivalence": {
+                    "prior_receipt": str(prior_path.relative_to(args.output)),
+                    "prior_sha256": sha(prior_path),
+                    "prior_code_revision": prior["code_revision"],
+                    "search_dependencies_unchanged": True,
+                    "all_annotations_equal": True,
+                    "fast_annotation_seconds": time.monotonic() - tick,
+                },
+            }
+            publish(receipt_path, receipt, compressed=True)
+            cached = True
         if cached:
             receipt = json.loads(gzip.decompress(receipt_path.read_bytes()))
             if receipt["scientific_identity"] != scientific_id or receipt["pair"] != pair:
@@ -348,6 +429,8 @@ def run(args):
         "execution": {
             "completed_at_utc": datetime.now(timezone.utc).isoformat(),
             "seconds_this_invocation": time.monotonic() - started,
+            "peak_rss_native_units": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+            "peak_rss_units": "bytes" if platform.system() == "Darwin" else "KiB",
             "cache": receipts,
         },
     }
@@ -367,5 +450,9 @@ if __name__ == "__main__":
         default=ROOT / "diagnostics/t4_lazy_reference_probe/cache/candidate_lock.json",
     )
     parser.add_argument("--output", type=Path, default=ROOT / "diagnostics/ivg_winner_paths")
+    parser.add_argument(
+        "--reuse-code-revision",
+        help="verify and convert prior receipts after an annotation-only speedup",
+    )
     RDLogger.DisableLog("rdApp.warning")
     run(parser.parse_args())
