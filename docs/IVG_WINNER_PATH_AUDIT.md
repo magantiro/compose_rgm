@@ -60,3 +60,9 @@ to 128 expanded states per mapping per unique seed-target pair. Expected wall
 time is minutes, not a measured guarantee. Restart unit is a hash-checked pair
 receipt; completed compatible pairs are replay-checked and reused. Results
 include all pairs and an explicit failure category, not only recovered winners.
+
+Completed evidence is in `diagnostics/ivg_winner_paths/README.md`, with hashed
+audit, review and exact pair receipts. The audit found 82/91 locally replayed
+witnesses and reproduced the empty-footprint rejection of `RingSystemRestate`.
+No controller repair, pinned-runtime path replay or learned-law scoring has
+been performed. Frozen task-value scoring abstained on local feature mismatch.
