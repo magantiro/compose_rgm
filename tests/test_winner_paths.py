@@ -30,11 +30,19 @@ def test_exact_replayed_witness(source, target):
 
 
 def test_support_and_abstention():
+    import json
+
+    import numpy as np
+
+    from tools.ivg_winner_paths import canonical
+
     assert find_path("CCN", "CC[NH3+]", PathConfig())["status"] == "unreachable_charge_change"
     assert find_path("C", "C" * 49, PathConfig())["status"] == "unsupported_size"
     limited = find_path("CC", "CCC1CCCCC1", PathConfig(max_expansions=1))
     assert limited["status"] == "search_unresolved"
     assert all(attempt["expanded"] == 1 for attempt in limited["attempts"])
+    assert json.loads(canonical({"residual": np.int64(3)})) == {"residual": 3}
+    assert json.loads(canonical(limited))["status"] == "search_unresolved"
 
 
 def test_config_refuses_support_changes():

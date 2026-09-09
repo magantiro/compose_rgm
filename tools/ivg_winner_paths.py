@@ -38,7 +38,14 @@ SNAPSHOT_SHA = "b3454d5105ab6b800f1665c01eb31b206ebe8dad9a1d18eda6638ace08e15de4
 
 
 def canonical(value):
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    def integer_scalar(item):
+        if isinstance(item, np.integer):
+            return int(item)
+        raise TypeError(f"unsupported JSON value: {type(item).__name__}")
+
+    return json.dumps(
+        value, sort_keys=True, separators=(",", ":"), allow_nan=False, default=integer_scalar
+    ).encode()
 
 
 def digest(value):
@@ -257,6 +264,7 @@ def run(args):
     }
     scientific_id = digest(common)
     prior_id = None
+    same_annotation = False
     if args.reuse_code_revision:
         old_implementation = {
             name: hashlib.sha256(
@@ -275,6 +283,21 @@ def run(args):
                 "prior-receipt conversion requires identical search/executor dependencies"
             )
         prior_id = digest({**common, "implementation_sha256": old_implementation})
+        old_tree = ast.parse(
+            subprocess.check_output(
+                ["git", "show", f"{args.reuse_code_revision}:tools/ivg_winner_paths.py"], cwd=ROOT
+            )
+        )
+        new_tree = ast.parse(Path(__file__).read_text())
+
+        def annotation_functions(tree):
+            return {
+                node.name: ast.dump(node)
+                for node in tree.body
+                if isinstance(node, ast.FunctionDef) and node.name in {"annotate", "mapped_context"}
+            }
+
+        same_annotation = annotation_functions(old_tree) == annotation_functions(new_tree)
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     publish(
         args.output / "preparation.json",
@@ -312,7 +335,10 @@ def run(args):
                 raise ValueError(f"{prior_path}: corrupt prior receipt")
             tick = time.monotonic()
             payload = prior["payload"]
-            if annotate(pair, payload["path"], model) != payload["annotations"]:
+            if (
+                not same_annotation
+                and annotate(pair, payload["path"], model) != payload["annotations"]
+            ):
                 raise ValueError(
                     f"{prior_path}: fast annotation differs from the prior direct result"
                 )
@@ -326,7 +352,11 @@ def run(args):
                     "prior_code_revision": prior["code_revision"],
                     "search_dependencies_unchanged": True,
                     "all_annotations_equal": True,
-                    "fast_annotation_seconds": time.monotonic() - tick,
+                    "annotation_equivalence": "unchanged_function_asts_and_dependencies"
+                    if same_annotation
+                    else "all_rows_recomputed_equal",
+                    "conversion_seconds": time.monotonic() - tick,
+                    "previous_equivalence": prior.get("equivalence"),
                 },
             }
             publish(receipt_path, receipt, compressed=True)
