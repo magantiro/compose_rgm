@@ -41,6 +41,11 @@ def main() -> None:
     ap.add_argument("--arms", default="macro_prior")
     ap.add_argument("--session", default="compose_iclr")
     ap.add_argument(
+        "--frontier-compare",
+        action="store_true",
+        help="one paired resumable-frontier round, at most 40 new dockings total",
+    )
+    ap.add_argument(
         "--target-recovery",
         action="store_true",
         help="one answer-known 32-edit controller diagnostic; zero docking",
@@ -134,6 +139,7 @@ def main() -> None:
                 a.lazy_reference_probe,
                 a.uncapped_lookahead_probe,
                 a.target_recovery,
+                a.frontier_compare,
             )
         )
         > 1
@@ -163,6 +169,7 @@ def main() -> None:
         or a.lazy_reference_probe
         or a.uncapped_lookahead_probe
         or a.target_recovery
+        or a.frontier_compare
     ):
         launch_continuation_profile(
             preflight,
@@ -176,6 +183,7 @@ def main() -> None:
             lazy_probe=a.lazy_reference_probe,
             uncapped_probe=a.uncapped_lookahead_probe,
             target_recovery=a.target_recovery,
+            frontier_compare=a.frontier_compare,
         )
         return
 
@@ -262,6 +270,7 @@ def launch_continuation_profile(
     lazy_probe: bool = False,
     uncapped_probe: bool = False,
     target_recovery: bool = False,
+    frontier_compare: bool = False,
 ) -> None:
     """Spawn only the fixed diagnostic into the deployed app; retain its call ID."""
     import sys
@@ -270,7 +279,9 @@ def launch_continuation_profile(
     from modal_apps.run_process_v2_p50_app import local_image_revision
 
     kind = (
-        "t4_target_recovery"
+        "t4_frontier_compare"
+        if frontier_compare
+        else "t4_target_recovery"
         if target_recovery
         else "t4_uncapped_lookahead_probe"
         if uncapped_probe
@@ -295,6 +306,7 @@ def launch_continuation_profile(
     contract = (
         ROOT
         / {
+            "t4_frontier_compare": "configs/t4_frontier_compare.json",
             "t4_target_recovery": "configs/t4_target_recovery.json",
             "t4_task_search_audit": "configs/t4_task_search_audit.json",
             "t4_lazy_reference_probe": "configs/t4_lazy_reference_probe.json",
@@ -335,7 +347,7 @@ def launch_continuation_profile(
         else 13
         if partial
         else 40
-        if matched or warm
+        if matched or warm or frontier_compare
         else 0,
         "volume": "compose-v4-artifacts",
         "volume_path": f"/{kind}/{run_id}",

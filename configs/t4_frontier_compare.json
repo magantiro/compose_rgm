@@ -1,0 +1,93 @@
+{
+  "schema_version": "t4_frontier_comparison_contract_v1",
+  "question": "one-round development comparison of resumable in-loop guidance and same-generator post-hoc selection",
+  "session": "compose_iclr",
+  "training_authorized": false,
+  "required_rdkit": "2024.03.5",
+  "source": {
+    "path": "t4_ring_program_round/ddb2f823de568fdb904b4e08341ee3effc2e9828a9043de7836bfc202144cb0d/round_4/archive.json",
+    "sha256": "803741324ac0e30bff96f9ad36809c6d08ff8334a76a1cc1927a7296a91daf30"
+  },
+  "value_check": {
+    "path": "diagnostics/t4_task_search/value_check.json",
+    "sha256": "ad61461bfd724ee563e09f0f1fad81725f4c55fed9ff3944d3908b08aaec3ea4"
+  },
+  "expected_input_sha256": {
+    "committor": "566cfe582973884b22e29c02b00b8188d9ef158b47387275eb36b6e8e62e2c11",
+    "r_theta_checkpoint": "c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8",
+    "r_theta_run_paths": "585286e0fb6dd8fb6b5a050dc3e5f8d1c7e782b105df114cbcb14cabbb5b2bc2",
+    "seed_manifest": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+    "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+    "receptor": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9"
+  },
+  "task": {
+    "session": "compose_iclr",
+    "delta": 0.4,
+    "budget": 40,
+    "per_round": 20,
+    "lineages": 8,
+    "workers": 1
+  },
+  "arms": {
+    "post_hoc": {
+      "lineages": 8,
+      "primitive_budget": 16,
+      "planning_transitions": 0,
+      "oracle_batch": 20,
+      "seed": 1000,
+      "guidance": "post_hoc"
+    },
+    "in_loop": {
+      "lineages": 8,
+      "primitive_budget": 16,
+      "planning_transitions": 2,
+      "oracle_batch": 20,
+      "seed": 1000,
+      "guidance": "in_loop"
+    }
+  },
+  "additional_rounds": 1,
+  "generic_permanently_active": true,
+  "kappa": 1,
+  "selection": "stage1_one_candidate_per_bundle_quality_order",
+  "preparation_stop": "all_lineages_primitive_budget_complete_or_true_support_dead_end",
+  "events_per_parent": 48,
+  "compute": {
+    "oracle_call_limit": 40,
+    "oracle_calls_per_arm": 20,
+    "preparation_containers": 2,
+    "cpu_per_preparation": 1,
+    "memory_mib_per_preparation": 8192,
+    "driver_containers": 1,
+    "driver_cpu": 1,
+    "driver_memory_mib": 8192,
+    "timeout_seconds": 21600,
+    "retries": 0,
+    "heartbeat_seconds": 30,
+    "executor_limit": null,
+    "expected_wall_seconds": [
+      1800,
+      7200
+    ],
+    "expected_cost": "record account rates and actual usage; at most 18 container-hours under administrative timeout",
+    "stop_limit": "administrative timeout is incomplete, not a scientific result"
+  },
+  "semantics": {
+    "warm_start_counted_calls_per_arm": 51,
+    "endpoint_only_constraints": true,
+    "seed_tanimoto": 0.4,
+    "qed_min": 0.6,
+    "sa_max": 4,
+    "task_snapshot": "all prior-round archive only",
+    "generator_task_gate": "in_loop only",
+    "candidate_origin": "committed completed options only",
+    "barrier": "both arms locked and audited before first docking",
+    "failed_oracle": "counts as attempt",
+    "unknown_interrupted_oracle": "no automatic retry",
+    "oracle_duplicates_across_arms": "separate actual attempts, each charged",
+    "replicates": 1,
+    "claims": "inspected development, not benchmark superiority",
+    "automatic_next_round": false
+  },
+  "contract_sha256": "c7036dfdd0d605f60d9bfef24a2032c50df79554d0881f1cc249beff6dd3651d"
+}

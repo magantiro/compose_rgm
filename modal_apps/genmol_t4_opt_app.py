@@ -93,6 +93,72 @@ _RT: dict[str, Any] = {}
 @app.function(
     image=image,
     cpu=(1.0, 1.0),
+    memory=8192,
+    timeout=21600,
+    max_containers=2,
+    retries=0,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_frontier_prepare(task: dict[str, Any]) -> dict[str, Any]:
+    """Independent zero-oracle preparation worker for one comparison arm."""
+    from compose_v4.experiments.t4_frontier_compare import prepare_worker
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return prepare_worker(
+        task,
+        REMOTE_ROOT,
+        ARTIFACT_ROOT,
+        artifact_volume,
+        _runtime,
+        _validate_remote_revision,
+    )
+
+
+@app.function(
+    image=image,
+    cpu=(1.0, 1.0),
+    memory=8192,
+    timeout=21600,
+    max_containers=1,
+    retries=0,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_frontier_compare(task: dict[str, Any]) -> dict[str, Any]:
+    """One paired round; both independent CPU workers lock before any docking."""
+    from compose_v4.experiments.t4_frontier_compare import ARMS, run_remote
+    from compose_v4.experiments.t4_matched_pilot import seal, unseal
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    def prepare_pair(task, output, commit, progress):
+        path = output / "preparation_calls.json"
+        calls = unseal(path) if path.exists() else {}
+        for arm in ARMS:
+            if arm not in calls:
+                calls[arm] = t4_frontier_prepare.spawn({**task, "arm": arm}).object_id
+                seal(path, calls)
+                commit()
+        paths = {}
+        for arm in ARMS:
+            progress.update(phase="waiting_for_preparation", arm=arm, preparation_calls=calls)
+            result = modal.FunctionCall.from_id(calls[arm]).get()
+            paths[arm] = result["preparation_path"]
+        return paths
+
+    return run_remote(
+        task,
+        REMOTE_ROOT,
+        ARTIFACT_ROOT,
+        artifact_volume,
+        _runtime,
+        _validate_remote_revision,
+        prepare_pair,
+        lambda smiles, item: _dock(smiles, "parp1", f"{task['run_id']}_{item}", cpu=1),
+    )
+
+
+@app.function(
+    image=image,
+    cpu=(1.0, 1.0),
     memory=6144,
     timeout=900,
     max_containers=1,

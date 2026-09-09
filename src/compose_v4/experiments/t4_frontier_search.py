@@ -50,9 +50,16 @@ class FrontierConfig:
     planning_transitions: int = 2
     oracle_batch: int = 20
     seed: int = 1000
+    guidance: str = "in_loop"
 
     def __post_init__(self):
+        if self.guidance not in ("in_loop", "post_hoc"):
+            raise ValueError("frontier guidance must be in_loop or post_hoc")
+        if self.guidance == "post_hoc" and self.planning_transitions != 0:
+            raise ValueError("post-hoc generation does not perform task-guided planning")
         for field, value in asdict(self).items():
+            if field == "guidance":
+                continue
             if type(value) is not int or value < (
                 0 if field in ("seed", "planning_transitions") else 1
             ):
@@ -153,6 +160,10 @@ def prepare_slice(
         return properties[smiles]
 
     def endpoint(node):
+        # Zero planning alone is NOT a post-hoc baseline: decision() also scores
+        # completed successors. Disable that entire generation-time value route.
+        if config.guidance == "post_hoc":
+            return None
         if node.stage != "where":
             return None
         smiles = canonical_state_key(node.graph)

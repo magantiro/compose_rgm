@@ -182,3 +182,44 @@ def test_legacy_oracle_audit_does_not_accept_new_unverified_preparation():
     result = run(warm, events_per_parent=0)
     with pytest.raises(ValueError):
         verify_lock(result["checkpoint"], warm, editing_v2_rewrite_system())
+
+
+def test_post_hoc_has_no_generation_time_value_route(monkeypatch):
+    from compose_v4.control.docking_value import DockingValue
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("post-hoc generation must not call task desirability")
+
+    monkeypatch.setattr(DockingValue, "desirability", forbidden)
+    result = run(
+        archive(),
+        events_per_parent=12,
+        config=FrontierConfig(
+            lineages=1, primitive_budget=4, planning_transitions=0, guidance="post_hoc"
+        ),
+    )
+    unit = result["checkpoint"]["frontier"][0]
+    assert unit["planner"]["work"]["endpoint_evaluations"] == 0
+    assert unit["planner"]["work"]["planning_transitions"] == 0
+    for event in unit["path"]:
+        assert event["decision"]["probabilities"] == pytest.approx(event["decision"]["reference"])
+    with pytest.raises(ValueError, match="post-hoc"):
+        FrontierConfig(guidance="post_hoc", planning_transitions=2)
+
+
+def test_frontier_selected_path_audit_and_tamper_rejection():
+    from compose_v4.experiments.t4_frontier_audit import verify_preparation
+
+    warm = archive()
+    full = run(warm, events_per_parent=12)
+    verified = verify_preparation(full, warm, editing_v2_rewrite_system())
+    assert verified["schema_version"] == "t4_frontier_oracle_lock_v1"
+    assert verified["audit"]["selected_path_executor_calls"] > 0
+    assert verified["audit"]["pool_count"] == len(full["pool"])
+    bad = copy.deepcopy(full)
+    bad["pool"][0]["r_coherent"] += 1
+    with pytest.raises(ValueError, match="geometry"):
+        verify_preparation(bad, warm, editing_v2_rewrite_system())
+    partial = run(warm, events_per_parent=2)
+    with pytest.raises(ValueError, match="horizon"):
+        verify_preparation(partial, warm, editing_v2_rewrite_system())
