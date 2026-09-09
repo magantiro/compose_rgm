@@ -26,3 +26,9 @@ development diagnostics, not templates or training examples.
 Use focused regression/dependency tests under the scoped T4 development policy;
 no unrelated full-suite release gate for this narrow repair. Publish input-hashed
 before/after evidence separately from the immutable original audit.
+
+Completed local evidence: `diagnostics/t4_restate_footprint/README.md` and its
+input-hashed audit. All 17 footprints are repaired; 10/17 selected-context
+singleton option checks succeed, including all three PARP1 seed0/d=0.4 cases.
+Seven downstream failures and the pathwise/endpoint gate distinction remain
+explicit. This repair has not been deployed or evaluated with learned guidance.
