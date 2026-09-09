@@ -75,6 +75,22 @@ def review(directory: Path):
         "configuration": result["configuration"],
         "new_oracle_calls": 0,
         "decision": result["decision"],
+        "parent_work": [
+            {
+                key: unit[key]
+                for key in (
+                    "parent_index",
+                    "parent_budget",
+                    "planning_budget",
+                    "planner",
+                    "law_work",
+                    "option_kernel_work",
+                    "seconds",
+                )
+                if key in unit
+            }
+            for unit in lock["work"]
+        ],
         "pool": [{k: c[k] for k in fields} for c in pool],
         "take": [{k: c[k] for k in fields} for c in lock["take"]],
         "n_pool": len(pool),
