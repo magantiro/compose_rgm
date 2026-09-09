@@ -6,6 +6,7 @@ import json
 import platform
 from collections import Counter
 from dataclasses import asdict, dataclass
+from pathlib import Path
 from time import perf_counter
 
 import numpy as np
@@ -29,6 +30,7 @@ from compose_v4.data.charge_policy import charge_policy_preserved
 from compose_v4.experiments.continuation_profile import (
     ExecutorMeter,
     encode_action,
+    sha256_file,
     state_payload,
     verify_file,
 )
@@ -247,6 +249,7 @@ def run_recovery(
                     event.update(
                         mark=encode_action(*mark),
                         option_source=state_payload(node.active),
+                        option_product=state_payload(kernel.row(node.active).successors[index]),
                         option_completed=following.stage == "where",
                         endpoint=describe(following.graph, following.lineage),
                     )
@@ -309,6 +312,10 @@ def run_recovery(
                 "python": platform.python_version(),
                 "numpy": np.__version__,
                 "rdkit": rdBase.rdkitVersion,
+            },
+            "scoring_asset_sha256": {
+                name: sha256_file(Path(sascorer.__file__).parent / name)
+                for name in ("sascorer.py", "fpscores.pkl.gz")
             },
         }
         save("search", result)
