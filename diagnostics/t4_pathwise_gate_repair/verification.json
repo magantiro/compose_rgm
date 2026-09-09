@@ -1,0 +1,38 @@
+{
+  "schema_version": "t4_pathwise_gate_verification_v1",
+  "code_revision": "8c0a6d4f2d7bf325f74f669d6b7378359a76a3e1",
+  "audit_sha256": "76a4a3609e9d119bbbca16bc562fb4496fcb77f583c3015946bc72334337106a",
+  "focused_tests_sha256": "2eff92dbcc66093788767dc6e3cf6d89b3867409de68abba252747dd959ec283",
+  "clean_source_preflight": "passed",
+  "focused_tests": {
+    "passed": 70,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 10.104,
+    "nodes": [
+      "tests/test_pathwise_option_gate.py",
+      "tests/test_t4_task_search.py",
+      "tests/test_option_continuation.py",
+      "tests/test_region_restate_footprint.py",
+      "tests/test_t4_endpoint_selection.py",
+      "tests/test_lazy_reference.py",
+      "tests/test_task_search.py"
+    ],
+    "invocation": "PYTHONPATH=src:. /Users/rmaganti/compose_rgm_git/.venv/bin/python -m pytest -q <nodes> --junitxml=/Users/rmaganti/compose_rgm_git/diagnostics/t4_pathwise_gate_repair/focused_tests.xml"
+  },
+  "ruff_check": "passed",
+  "ruff_format_check": "passed",
+  "checked_python_files": [
+    "src/compose_v4/control/option_continuation.py",
+    "src/compose_v4/experiments/t4_endpoint_selection.py",
+    "src/compose_v4/experiments/t4_task_search.py",
+    "src/compose_v4/experiments/t4_task_search_audit.py",
+    "tools/t4_restate_footprint_audit.py",
+    "tests/test_pathwise_option_gate.py",
+    "tests/test_t4_task_search.py"
+  ],
+  "diff_check": "passed",
+  "repository_wide_suite": "not run; scoped T4 development policy, not a release milestone",
+  "evidence_role": "local saved-action regression and synthetic plumbing checks, not blind discovery or docking validation"
+}
