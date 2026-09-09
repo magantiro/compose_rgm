@@ -5,6 +5,7 @@ from dataclasses import asdict
 import numpy as np
 
 from compose_v4.chem.molecular_graph import is_element
+from compose_v4.control.carbonyl_option import CarbonylProgress
 from compose_v4.control.fused_option import FusedProgress
 from compose_v4.control.molecular_task_search import MolecularSearchState
 from compose_v4.control.option_continuation import OptionState
@@ -63,6 +64,9 @@ def decode_option(payload: dict) -> OptionState:
         else None,
         ring_progress=RingProgress.from_payload(payload["ring_progress"])
         if "ring_progress" in payload
+        else None,
+        carbonyl_progress=CarbonylProgress.from_payload(payload["carbonyl_progress"])
+        if "carbonyl_progress" in payload
         else None,
     )
 

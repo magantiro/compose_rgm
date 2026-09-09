@@ -12,6 +12,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from compose_v4.chem.molecular_graph import NULL_IDX, MolecularGraph, is_element
+from compose_v4.control.carbonyl_option import INSERT_RING_CARBONYL_OPTION, CarbonylProgress
 from compose_v4.control.fused_option import BUILD_FUSED_RING_OPTION, FusedProgress
 from compose_v4.control.option_continuation import (
     OptionContinuationKernel,
@@ -90,12 +91,16 @@ class MolecularHierarchy:
         generic_horizon: int = 3,
         ring_options: tuple[str, ...] | None = None,
         lazy_applicability: bool = False,
+        include_carbonyl_options: bool = False,
     ):
         if type(generic_horizon) is not int or generic_horizon < 1:
             raise ValueError("generic_horizon must be a positive primitive count")
         self.kernel, self.generic_horizon = kernel, generic_horizon
         self.ring_options = default_ring_options() if ring_options is None else ring_options
         self.lazy_applicability = lazy_applicability
+        if type(include_carbonyl_options) is not bool:
+            raise ValueError("include_carbonyl_options must be an explicit boolean")
+        self.include_carbonyl_options = include_carbonyl_options
         self._selection_rows = {}
 
     def sample_reference(self, node: MolecularSearchState, rng) -> MolecularSearchState | None:
@@ -140,6 +145,7 @@ class MolecularHierarchy:
             bundle,
             FusedProgress() if option == BUILD_FUSED_RING_OPTION else None,
             ring_progress=RingProgress() if ring_spec(option) is not None else None,
+            carbonyl_progress=CarbonylProgress() if option == INSERT_RING_CARBONYL_OPTION else None,
         )
 
     def row(self, node: MolecularSearchState) -> SearchRow[MolecularSearchState]:
@@ -174,6 +180,7 @@ class MolecularHierarchy:
                     indices,
                     n_free_slots=free,
                     include_fused=True,
+                    include_carbonyl=self.include_carbonyl_options,
                     ring_options=self.ring_options,
                 )
                 if option_horizon(o, min(self.generic_horizon, node.budget)) <= node.budget

@@ -97,6 +97,8 @@ def state_payload(node: OptionState) -> dict:
         payload["expansion_progress"] = node.expansion_progress.payload()
     if node.ring_progress is not None:
         payload["ring_progress"] = node.ring_progress.payload()
+    if node.carbonyl_progress is not None:
+        payload["carbonyl_progress"] = node.carbonyl_progress.payload()
     return payload
 
 

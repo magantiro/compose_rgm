@@ -23,6 +23,12 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from compose_v4.control.carbonyl_option import (
+    ADD_CARBONYL_OPTION,
+    CARBONYL_OPTIONS,
+    CORE_PHASES,
+    INSERT_RING_CARBONYL_OPTION,
+)
 from compose_v4.control.fused_option import BUILD_FUSED_RING_OPTION, FUSED_HORIZON
 from compose_v4.control.macro_engine import (
     BUILD_RING_SYSTEM,
@@ -54,7 +60,7 @@ MACRO_OPTIONS = (
     "shrink",
 )
 OPTIONS = (GENERIC_OPTION,) + MACRO_OPTIONS + (BUILD_RING_SYSTEM_OPTION,)
-OPT_IN_OPTIONS = (BUILD_FUSED_RING_OPTION, EXPAND_RING_OPTION)
+OPT_IN_OPTIONS = (BUILD_FUSED_RING_OPTION, EXPAND_RING_OPTION) + CARBONYL_OPTIONS
 
 # Balance purposes first and variants second.  This prevents, for example,
 # adding another ring topology from silently increasing total ring-option mass.
@@ -130,6 +136,10 @@ def primitive_option_at_step(option: str, step: int) -> str | None:
         return spec.phase(step)
     if option == GENERIC_OPTION:
         return None
+    if option == ADD_CARBONYL_OPTION:
+        return "grow" if step == 0 else None
+    if option == INSERT_RING_CARBONYL_OPTION:
+        return CORE_PHASES[step] if 0 <= step < len(CORE_PHASES) else None
     if option == EXPAND_RING_OPTION:
         return EXPANSION_PHASES[step] if 0 <= step < len(EXPANSION_PHASES) else None
     if option == BUILD_FUSED_RING_OPTION:
@@ -157,6 +167,10 @@ def option_horizon(option: str, generic_horizon: int) -> int:
     spec = ring_spec(option)
     if spec is not None:
         return spec.horizon
+    if option == ADD_CARBONYL_OPTION:
+        return 1
+    if option == INSERT_RING_CARBONYL_OPTION:
+        return len(CORE_PHASES)
     if option == BUILD_RING_SYSTEM_OPTION:
         return sum(int(length) for _macro, length in BUILD_RING_SYSTEM)
     if option == EXPAND_RING_OPTION:
@@ -175,6 +189,7 @@ def applicable_options(
     n_free_slots: int | None = None,
     include_fused: bool = False,
     include_expansion: bool = False,
+    include_carbonyl: bool = False,
     ring_options: tuple[str, ...] = (),
 ) -> tuple[str, ...]:
     """Options with initial primitive support inside the selected region.
@@ -213,6 +228,11 @@ def applicable_options(
         and ("cycle_open" in present)
     ):
         out.append(EXPAND_RING_OPTION)
+    if include_carbonyl:
+        if "atom_insert" in present and (n_free_slots is None or int(n_free_slots) >= 1):
+            out.append(ADD_CARBONYL_OPTION)
+        if "cycle_open" in present and (n_free_slots is None or int(n_free_slots) >= 2):
+            out.append(INSERT_RING_CARBONYL_OPTION)
     if len(set(ring_options)) != len(ring_options):
         raise ValueError("duplicate ring construction options")
     for option in ring_options:
@@ -267,7 +287,11 @@ def balanced_option_prior(
     if construction or any(option in opts for option in OPT_IN_OPTIONS):
         groups = {
             **groups,
-            "ring_topology": groups["ring_topology"] + OPT_IN_OPTIONS + construction,
+            "ring_topology": groups["ring_topology"]
+            + (BUILD_FUSED_RING_OPTION, EXPAND_RING_OPTION)
+            + construction,
+            "material": groups["material"] + (ADD_CARBONYL_OPTION,),
+            "restructure": groups["restructure"] + (INSERT_RING_CARBONYL_OPTION,),
         }
     known = set(OPTIONS + OPT_IN_OPTIONS + construction)
     unknown = [option for option in opts if option not in known]

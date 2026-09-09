@@ -15,6 +15,15 @@ from typing import Any
 import numpy as np
 
 from compose_v4.chem.molecular_graph import MolecularGraph, is_element
+from compose_v4.control.carbonyl_option import (
+    ADD_CARBONYL_OPTION,
+    INSERT_RING_CARBONYL_OPTION,
+    CarbonylProgress,
+    carbonyl_indices,
+    completed_core_carbonyl,
+    core_descriptor_indices,
+    eligible_core_edges,
+)
 from compose_v4.control.continuation import (
     ContinuationBudgetExceeded,
     ContinuationWork,
@@ -91,6 +100,7 @@ class OptionState:
     fused_progress: FusedProgress | None = None
     expansion_progress: ExpansionProgress | None = None
     ring_progress: RingProgress | None = None
+    carbonyl_progress: CarbonylProgress | None = None
 
     def __post_init__(self) -> None:
         if not self.bundle_id:
@@ -142,6 +152,14 @@ class OptionState:
                 raise ValueError("ring program must start from its exact origin state")
         elif self.ring_progress is not None:
             raise ValueError("ring progress requires a parameterized construction option")
+        if self.option == INSERT_RING_CARBONYL_OPTION:
+            if not isinstance(self.carbonyl_progress, CarbonylProgress):
+                raise ValueError("insert_ring_carbonyl requires explicit CarbonylProgress")
+            self.carbonyl_progress.validate(self.graph, self.origin, self.context.locus, self.step)
+            if self.step == 0 and exact_graph_key(self.graph) != exact_graph_key(self.origin):
+                raise ValueError("core carbonyl program must start at its exact origin")
+        elif self.carbonyl_progress is not None:
+            raise ValueError("carbonyl progress is only valid for insert_ring_carbonyl")
 
     @property
     def remaining(self) -> int:
@@ -167,6 +185,8 @@ class OptionState:
             self.horizon,
         )
         # Preserve every existing cache identity; only the opt-in state extends it.
+        if self.carbonyl_progress is not None:
+            return legacy + (self.carbonyl_progress,)
         if self.ring_progress is not None:
             return legacy + (self.ring_progress,)
         if self.expansion_progress is not None:
@@ -237,6 +257,7 @@ class OptionContinuationKernel:
         self._fused_support: dict[tuple, dict] = {}
         self._expansion_support: dict[tuple, dict] = {}
         self._construction_support: dict[tuple, dict] = {}
+        self._carbonyl_support: dict[tuple, dict] = {}
         self._primitive_products: dict[tuple, tuple[MolecularGraph, str] | None] = {}
         self._lazy_rows: dict[tuple, LazyReferenceRow[OptionState]] = {}
 
@@ -337,11 +358,35 @@ class OptionContinuationKernel:
             raise ValueError("marked law must have aligned finite nonnegative positive-mass rows")
         indices, _ = admissible_indices(families, actions, node.context)
         if (
-            node.option in (BUILD_FUSED_RING_OPTION, EXPAND_RING_OPTION)
+            node.option
+            in (BUILD_FUSED_RING_OPTION, EXPAND_RING_OPTION, INSERT_RING_CARBONYL_OPTION)
             or node.ring_progress is not None
         ):
             return self._descriptor_row(node, families, actions, p, indices, lazy=lazy)
-        pre = conditioned_action_distribution(families, p, indices, node.option, step=node.step)
+
+        def condition(clean=None):
+            if node.option != ADD_CARBONYL_OPTION:
+                return conditioned_action_distribution(
+                    families, p, indices, node.option, step=node.step, clean=clean
+                )
+            # Restrict this optional descriptor before the inherited cap, just
+            # like the other new descriptor channels. Preserve old grow law.
+            subset = np.asarray(
+                sorted(set(indices) & set(carbonyl_indices(node.graph, families, actions))),
+                dtype=int,
+            )
+            local = conditioned_action_distribution(
+                [families[i] for i in subset],
+                p[subset],
+                range(len(subset)),
+                "grow",
+                clean=None if clean is None else clean[subset],
+            )
+            return ConditionedActionDistribution(
+                node.option, "grow", subset[local.indices], local.probabilities
+            )
+
+        pre = condition()
         active = primitive_option_at_step(node.option, node.step)
         contract = state_contract_for(active, node.graph) if active else None
 
@@ -390,9 +435,7 @@ class OptionContinuationKernel:
             if product is not None:
                 products[index] = product
                 clean[index] = True
-        conditioned = conditioned_action_distribution(
-            families, p, indices, node.option, step=node.step, clean=clean
-        )
+        conditioned = condition(clean)
         self._marks[cache_key] = tuple(
             (families[int(i)], actions[int(i)]) for i in conditioned.indices
         )
@@ -407,15 +450,30 @@ class OptionContinuationKernel:
         """Joint edge/mark reference; share executor work, not augmented states."""
         spec = ring_spec(node.option)
         expansion = node.option == EXPAND_RING_OPTION
+        carbonyl = node.option == INSERT_RING_CARBONYL_OPTION
         progress = (
-            node.ring_progress
+            node.carbonyl_progress
+            if carbonyl
+            else node.ring_progress
             if spec
             else node.expansion_progress
             if expansion
             else node.fused_progress
         )
-        eligible_edges = eligible_expansion_edges if expansion else eligible_fusion_edges
-        match_indices = expansion_descriptor_indices if expansion else descriptor_indices
+        eligible_edges = (
+            eligible_core_edges
+            if carbonyl
+            else eligible_expansion_edges
+            if expansion
+            else eligible_fusion_edges
+        )
+        match_indices = (
+            core_descriptor_indices
+            if carbonyl
+            else expansion_descriptor_indices
+            if expansion
+            else descriptor_indices
+        )
         if spec:
             edges = (
                 construction_branches(node.origin, node.context.locus, spec)
@@ -432,7 +490,7 @@ class OptionContinuationKernel:
         contract = state_contract_for(active, node.graph)
 
         def condition(matches):
-            if not expansion and spec is None:
+            if not (expansion or carbonyl) and spec is None:
                 return conditioned_action_distribution(families, probabilities, matches, active)
             # This NEW channel conditions descriptors before applying the
             # inherited cap. Unrelated marks must not erase its sole closure.
@@ -491,7 +549,9 @@ class OptionContinuationKernel:
                 return None
             slot = created_slot(actions[index])
             next_progress = (
-                RingProgress(
+                progress.advance(edge, slot, node.step)
+                if carbonyl
+                else RingProgress(
                     edge[0],
                     edge[1],
                     progress.path + (slot,) if slot is not None else progress.path,
@@ -503,7 +563,13 @@ class OptionContinuationKernel:
                     edge, progress.path + (slot,) if slot is not None else progress.path
                 )
             )
-            completes = completed_expansion if expansion else completed_fused_cycle
+            completes = (
+                completed_core_carbonyl
+                if carbonyl
+                else completed_expansion
+                if expansion
+                else completed_fused_cycle
+            )
             completion_failed = (
                 spec is not None
                 and node.step in (spec.growth, spec.horizon - 1)
@@ -519,7 +585,7 @@ class OptionContinuationKernel:
                 self.work.rejected_products += 1
                 return None
             context = node.context.with_locus(slot) if slot is not None else node.context
-            if expansion or spec:
+            if expansion or carbonyl or spec:
                 try:
                     if spec:
                         next_progress.validate(
@@ -539,9 +605,10 @@ class OptionContinuationKernel:
                 node.step + 1,
                 node.horizon,
                 node.bundle_id,
-                fused_progress=None if expansion or spec else next_progress,
+                fused_progress=None if expansion or carbonyl or spec else next_progress,
                 expansion_progress=next_progress if expansion else None,
                 ring_progress=next_progress if spec else None,
+                carbonyl_progress=next_progress if carbonyl else None,
             )
 
         if lazy:
@@ -587,7 +654,9 @@ class OptionContinuationKernel:
         self.work.legal_products += len({i for successors, _ in branches for i in successors})
         self._marks[cache_key] = tuple(marks)
         support = (
-            self._construction_support
+            self._carbonyl_support
+            if carbonyl
+            else self._construction_support
             if spec
             else self._expansion_support
             if expansion
@@ -624,6 +693,11 @@ class OptionContinuationKernel:
         from copy import deepcopy
 
         return deepcopy(self._construction_support[node.key()])
+
+    def carbonyl_support(self, node: OptionState) -> dict:
+        from copy import deepcopy
+
+        return deepcopy(self._carbonyl_support[node.key()])
 
     def marks(self, node: OptionState) -> tuple[tuple[str, Any], ...]:
         return self._marks[node.key()]
@@ -750,6 +824,12 @@ def sample_option_trajectory(
             trace[-1]["ring_progress"] = next_node.ring_progress.payload()
             trace[-1]["exact_state"] = encode_state(next_node.graph)
             trace[-1]["support_funnel"] = kernel.construction_support(node)
+        if next_node.carbonyl_progress is not None:
+            from compose_v4.rewrite.trace_shard import encode_state
+
+            trace[-1]["carbonyl_progress"] = next_node.carbonyl_progress.payload()
+            trace[-1]["exact_state"] = encode_state(next_node.graph)
+            trace[-1]["support_funnel"] = kernel.carbonyl_support(node)
         node = next_node
     result = {
         "bundle_id": initial.bundle_id,
@@ -785,4 +865,8 @@ def sample_option_trajectory(
         result["final_ring_progress"] = node.ring_progress.payload()
         if status == "no_admissible_action":
             result["failure_support_funnel"] = kernel.construction_support(node)
+    if node.carbonyl_progress is not None:
+        result["final_carbonyl_progress"] = node.carbonyl_progress.payload()
+        if status == "no_admissible_action":
+            result["failure_support_funnel"] = kernel.carbonyl_support(node)
     return result
