@@ -1,0 +1,49 @@
+{
+  "blocker": "Current authorized milestone does not explicitly authorize this paired T4 comparison; requires explicit user milestone/budget approval",
+  "clean_worktree_before_launch": true,
+  "code_revision": "a6aa24b9a4b2b21883538a9301e609e83ff2435c",
+  "contract_file_sha256": "a47e82c6490ecff6bc4dc1bd133640fde9c0b36fc19b449baed83a4ab85e73de",
+  "deployment_succeeded": true,
+  "environment": {
+    "numpy": "1.26.4",
+    "omp_num_threads": 1,
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "python": "3.12.9",
+    "rdkit": "2024.03.5",
+    "scipy": "1.13.1"
+  },
+  "full_suite_run": false,
+  "junit_sha256": "b3ae5ccd044a290c6584baa816e142b9da447b8015f33e1fedbfac25df26dd21",
+  "launch_status": "blocked_by_approval_review",
+  "legacy_modal_app_lint": {
+    "baseline_issues": 17,
+    "current_issues": 17,
+    "new_issues_in_added_block": 0
+  },
+  "new_docking_calls": 0,
+  "preflight_strict_passed": true,
+  "real_reference_checkpoint_loaded_locally": false,
+  "ruff_new_or_touched_modules": "6 files passed check and format",
+  "schema_version": "t4_frontier_comparison_verification_v1",
+  "scientific_job_started": false,
+  "scope": "engineering verification only; no new molecular performance evidence",
+  "tests": {
+    "errors": 0,
+    "failures": 0,
+    "input_sha256": {
+      "tests/test_frontier_search.py": "30947a4dcefece56b2746a15cde4d966dd5e23adc8dabce8c499f45a3f88bb49",
+      "tests/test_option_continuation.py": "7ee2e944a826b07b32475d797c7198b2dedc695dadc7ca65b6f7ff10932c48b8",
+      "tests/test_region.py": "d2a16c424685fb7870f4b99bcdf2b812a5b23d26c519634cef9ba5e3d1de98b6",
+      "tests/test_ring_expansion.py": "68225570dd928d00480f3e52894d1d327d1153b1f1bbd5bffab1602222ca19e4",
+      "tests/test_ring_program.py": "5e5dfd96df360d38863aaa25f12510556191f591ffc5d1853f6effd3864e5fd9",
+      "tests/test_t4_frontier_compare.py": "403f6e92972ecc9612dac8b32aefa72e2a3ee682e5249d6ec9dd499b976ea8ed",
+      "tests/test_t4_frontier_search.py": "94b157ae378931609f1a0500f70f6faa353fa86933092385f25fd1539c8e6942",
+      "tests/test_t4_task_search.py": "b6b32aacb0ed4db1c9e5b8421530586595b2dc52802b628d13d961c407c824eb",
+      "tests/test_task_search.py": "9c737559c475d8f7bc18266c783bce9ccc85e7285350aa17f584a93362d8023c"
+    },
+    "passed": 102,
+    "seconds": 27.409,
+    "skipped": 0,
+    "timestamp": "2026-09-09T18:17:16.318690-04:00"
+  }
+}

@@ -1,6 +1,8 @@
 # First resumable-frontier docking comparison
 
 Status: prospective development recipe, recorded before new docking outcomes.
+Implementation and deployment verified; scientific spawn blocked pending explicit
+user authorization for this paired 40-call milestone. No new docking calls spent.
 Session: `compose_iclr`. This advances stage 1, not reference-model training.
 
 ## Question and support
