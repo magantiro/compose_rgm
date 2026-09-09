@@ -1,8 +1,40 @@
-# Target-informed controller recovery: launched, outcome pending
+# Target-informed controller recovery: cancelled, incomplete
 
-This is one answer-known development attempt, not replay of a witness and not
-blind docking optimization. No recovery result or docking improvement is yet
-claimed. The prior 51-call docking archive remains unchanged.
+This answer-known development attempt was cancelled for inefficient planning,
+with no committed molecular edit in the last persisted decision/heartbeat
+records. It is not a recovery failure proof, witness replay, or blind docking
+optimization result. The prior 51-call docking archive remains unchanged.
+
+## Stop and retained evidence
+
+Only call `fc-01M23MZG5XMSVHNJWJKDEVT86B` was cancelled using the Modal call
+cancellation API. No other job or remote artifact was removed. The final saved
+heartbeat is at 2026-09-09 18:09:38 UTC and records elapsed time 821.977529 s,
+80 completed law enumerations, 8,795 public executor calls, three completed
+planning rollouts out of four started, and zero committed molecular edits.
+This heartbeat is not a final runtime or billing receipt.
+
+Two selection decisions were saved: WHERE had a non-reference task tilt;
+WHAT selected `construct:pendant:5:4,0,1:aromatic:0` with no task-value contrast.
+No HOW decision was saved. Target similarity therefore remained 0.383975833.
+Do not describe this as entirely inactive guidance: the first region decision
+did change, but no actual editing progress had yet been committed.
+
+All 87 published files were downloaded without changing the remote volume,
+including 81 saved exact-state laws. The file census is later than the last
+heartbeat, explaining 81 retained laws versus its 80 completed-law counter.
+The full cache is under `attempt_1/run/` locally and the original volume
+namespace below. The committed last heartbeat has physical SHA-256
+`f98f35716bda6362b4f4cc889493e09fba4bdfde425a7e8a0ea4a586cd013bc6`.
+Saved laws require a scientific-dependency compatibility check before reuse.
+The transport helper is `tools/t4_saved_run_download.py`; it refuses to replace
+an existing local file with different bytes. Exact cancellation wall time was
+not separately persisted.
+
+The fast one-step heuristic repair remains unlaunched and unselected. The
+saved-path analysis in `../t4_target_path_values/README.md` shows immediate-score
+valleys on all three development paths, so reduced latency alone does not
+establish that this heuristic is the appropriate main controller.
 
 ## Frozen run
 
@@ -66,7 +98,7 @@ Deployment completed in 55.697 seconds, followed by strict preflight and
 No `modal run --detach` or ephemeral driver was used. The first remote listing
 confirmed `launch.json` was published at 2026-09-09 13:55 EDT.
 
-## Monitoring and next action
+## Original monitoring contract and next action
 
 Read `heartbeat.json`, `runtime_gate.json`, `decisions/`, `search.json`,
 `result.json` and `failure.json` under the namespace above. Every completed
@@ -75,7 +107,7 @@ has an exact-state receipt. Heartbeats are emitted every 30 seconds. One CPU,
 8 GiB, no accelerator; estimated 10-45 minutes with a 70-minute platform cap.
 These are an estimate and resource ceiling, not measured completed-run cost.
 
-Review the actual recovery outcome before choosing another experiment. A
+The attempt is now incomplete, not awaiting a final recovery outcome. A
 planning-only target encounter is not a committed recovery. If the run stalls
 or fails, compare saved decisions with the known path only in a separate
 post-run diagnostic. Do not automatically retry, dock, change the guide,
