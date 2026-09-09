@@ -191,9 +191,19 @@ def review(directory):
         ]
         if paths
         else None,
-        "paths_with_feasibility_valleys": sum(
+        "paths_with_infeasible_intermediates_and_feasible_endpoint": sum(
             any(
                 c["infeasible_intermediate_steps"] and not c["endpoint_failures"]
+                for c in p["constraints"].values()
+            )
+            for p in paths
+        ),
+        "paths_with_feasible_infeasible_feasible_valley": sum(
+            any(
+                c["infeasible_intermediate_steps"]
+                and c["feasible_steps"]
+                and c["feasible_steps"][0] < max(c["infeasible_intermediate_steps"])
+                and not c["endpoint_failures"]
                 for c in p["constraints"].values()
             )
             for p in paths
