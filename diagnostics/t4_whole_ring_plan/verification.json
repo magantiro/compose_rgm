@@ -1,0 +1,36 @@
+{
+  "schema_version": "t4_whole_ring_plan_verification_v1",
+  "scientific_revision": "b2d60737aa5d2f79a7cff8843fd3d7c3e4b2bfa5",
+  "result_path": "diagnostics/t4_whole_ring_plan/result.json",
+  "result_sha256": "252dccee4785d3a8e972df30c4a075e7e98bdf02e120300990bcb1de9d21cee9",
+  "worktree": "/private/tmp/compose-whole-ring.GGBq3I/source",
+  "environment": {
+    "python": "/Users/rmaganti/compose_rgm_git/.venv/bin/python",
+    "PYTHONPATH": "/private/tmp/compose-t4-chemistry.hizM8Y:src:.",
+    "OMP_NUM_THREADS": "1"
+  },
+  "focused_tests": {
+    "files": [
+      "tests/test_whole_ring_plan.py",
+      "tests/test_ring_program.py",
+      "tests/test_winner_paths.py"
+    ],
+    "passed": 19,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "seconds": 5.349,
+    "junit_path": "/private/tmp/compose-whole-ring.GGBq3I/focused.xml",
+    "junit_sha256": "29d3dbaaf6fff6fe1950fdf8f263982672c1929638579f0bc44e8a0f62d85c3a"
+  },
+  "checks": {
+    "preflight_mounted_source_drift": 0,
+    "ruff_check_new_python_files": "passed",
+    "ruff_format_check_new_python_files": "passed",
+    "git_diff_check": "passed",
+    "full_repository_suite": "not_run_bounded_T4_development_policy"
+  },
+  "oracle_calls": 0,
+  "remote_launches": 0,
+  "scope": "one target-informed compilation diagnostic, not a release or autonomous controller qualification"
+}
