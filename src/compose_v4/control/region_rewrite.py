@@ -36,6 +36,8 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field, replace
 
+from compose_v4.rewrite.tracelets import RingSystemRestate
+
 
 # ------------------------------------------------------------------- lineage
 @dataclass
@@ -95,8 +97,10 @@ def touched_slots(action) -> frozenset:
 
     Shapes come from rewrite/operators.py: bond ops carry (a, b) and reroute
     also (u, v); AtomInsert carries the new `slot` plus its neighbours; atom
-    ops carry `v`.
+    ops carry `v`. RingSystemRestate carries endpoints in each nested change.
     """
+    if isinstance(action, RingSystemRestate):
+        return frozenset(int(v) for change in action.changes for v in (change.a, change.b))
     s = set()
     for name in ("a", "b", "u", "v", "slot"):
         val = getattr(action, name, None)
@@ -215,7 +219,12 @@ def admissible_indices(fams, acts, ctx: RewriteContext):
         # entirely inside the context, and that is exactly the opening move of
         # make-before-break. Refusing it made the handoff unreachable and
         # produced 12/12 no_connectivity_preserving_handoff.
-        if new is None and reach and reach <= ctx.frozen:
+        # A composite must not hide a context-context bond change alongside
+        # an otherwise admissible locus/boundary change.
+        frozen_bond_change = isinstance(a, RingSystemRestate) and any(
+            change.a in ctx.frozen and change.b in ctx.frozen for change in a.changes
+        )
+        if (new is None and reach and reach <= ctx.frozen) or frozen_bond_change:
             why["context_only"] += 1
             continue
         ok.append(j)
