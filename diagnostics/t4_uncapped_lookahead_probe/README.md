@@ -1,8 +1,43 @@
-# Uncapped lookahead: launch record
+# Uncapped lookahead: completed negative result
 
-Status at 2026-09-09 04:39:05 UTC: spawned and initializing. No result or docking
-improvement is claimed. This directory will receive the immutable result and
-compact review after preparation and exact selected-path verification finish.
+Completed at 2026-09-09 05:31:09 UTC. Removing executor/state cutoffs did not
+activate task guidance in this fixed-parent probe. No docking improvement is
+claimed. Authoritative outputs: result.json, verification.json and review.json.
+
+## Outcome
+
+- 32/32 reference rollouts completed, zero interrupted; 28 terminal evaluations.
+- Zero task-dependent WHERE/WHAT/HOW decisions (10/10/16 decisions respectively);
+  maximum total variation from reference was below 4e-16, numerical roundoff.
+- 10 canonically unique harvested candidates, zero feasible, zero selected for
+  docking, zero construction options completed, zero cycle-rank changes.
+- Overlapping constraint failures: similarity 10/10, QED 7/10, SA 5/10.
+- Proposal time 3003.178 seconds (50.05 minutes); total 3155.193 seconds.
+  40,337 public executor calls; 369 completed law enumerations used 2870.870
+  seconds. Frozen-law enumeration remains the dominant computational cost.
+- All 16 committed edits passed exact production replay verification. No new
+  oracle calls; the existing 51-call docking archive was not updated.
+- Committed options: generic 3, open 2, append 1, aromatize 1, decorate 1,
+  grow 1, rebuild 1. No constructive ring program was selected on this path.
+
+Interpretation: full reference rollouts alone did not produce a useful task
+signal here. This disproves the sufficiency of removing these cutoffs for this
+parent/seed, not the potential of all lookahead controllers. The next authorized
+work is the offline target-informed path diagnostic, not another blind run or
+automatic docking. It separates executor reachability from guidance and
+constraint barriers without fitting to released winners.
+
+Result physical SHA-256:
+`510200ff61e3a878e447b4a188f890e571ac9cae2534f8a59b596cb28b980943`.
+Verification physical SHA-256:
+`5efc23527d43f827352657e17e13f7d339419c03e1a51f7cce42483ded9491a9`.
+Compact review physical SHA-256:
+`295cbb8090de2b55484743bb04d34293cdfffc266c38c7733541f18fa91a4b7e`.
+The 120 MiB full lock remains on the Modal volume below and in ignored
+cache/candidate_lock.json, SHA-256
+`27ee5f6824a53c6f9aa8896a7cd666c43feb27eb36129a1d32c3cf355ebf58d3`.
+The committed review projector checked its envelope, physical lock hash and
+verified result before extracting records; it performed no new molecular search.
 
 This user-authorized comparison removes the planning/public-executor and cached
 search-state cutoffs. It does not change the 16-edit terminal objective, 32-rollout
@@ -47,8 +82,8 @@ completion is claimed. Unrelated dirty scaffold/model work was excluded.
 
 Deployment completed, then tools/t4_launch.py --uncapped-lookahead-probe spawned
 the durable call. One CPU, 8 GiB, no retries, a two-hour administrative timeout,
-zero fresh oracle calls. The 15-90-minute estimate is an extrapolation, not a
-measured completion time. There is no automatic docking or next round.
+zero fresh oracle calls. The original 15-90-minute estimate was an extrapolation;
+measured completion time is reported above. There is no automatic docking or next round.
 
 Heartbeat fields report phase, executor calls, law enumerations, completed
 rollouts and terminal/nonzero-terminal counts once planning begins. Inspect
