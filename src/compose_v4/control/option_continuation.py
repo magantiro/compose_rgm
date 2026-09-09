@@ -219,6 +219,7 @@ class OptionContinuationKernel:
         self._expansion_support: dict[tuple, dict] = {}
         self._construction_support: dict[tuple, dict] = {}
         self._construction_products: dict[tuple, MolecularGraph | None] = {}
+        self._primitive_products: dict[tuple, tuple[MolecularGraph, str] | None] = {}
 
     @classmethod
     def from_runtime(cls, model, system, *, time_point: float, max_executor_applications: int):
@@ -268,15 +269,24 @@ class OptionContinuationKernel:
         products: dict[int, OptionState] = {}
         for index in pre.indices:
             index = int(index)
-            if self.work.executor_applications >= self.max_executor_applications:
-                raise ContinuationBudgetExceeded("executor-application budget exhausted")
-            self.work.executor_applications += 1
-            try:
-                product = self.system.apply(node.graph, families[index], actions[index])
-                key = canonical_state_key(product)
-            except InvalidRewrite:
+            physical_key = (exact_graph_key(node.graph), families[index], repr(actions[index]))
+            if physical_key in self._primitive_products:
+                self.work.product_cache_hits += 1
+                executed = self._primitive_products[physical_key]
+            else:
+                if self.work.executor_applications >= self.max_executor_applications:
+                    raise ContinuationBudgetExceeded("executor-application budget exhausted")
+                self.work.executor_applications += 1
+                try:
+                    product = self.system.apply(node.graph, families[index], actions[index])
+                    executed = (product, canonical_state_key(product))
+                except InvalidRewrite:
+                    executed = None
+                self._primitive_products[physical_key] = executed
+            if executed is None:
                 self.work.rejected_products += 1
                 continue
+            product, key = executed
             if not (
                 0 < product.n_real_atoms <= 40
                 and graph_connected(product)

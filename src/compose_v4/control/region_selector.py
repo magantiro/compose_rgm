@@ -169,10 +169,10 @@ def rank_regions(regions, value_fn=None, scale_balance: bool = True, tau: float 
     return sorted(scored, key=lambda rs: -rs[1].score)
 
 
-def sample_region(
-    regions, rng, value_fn=None, tau: float = 1.0, epsilon: float = 0.2, scale_balance: bool = True
+def region_distribution(
+    regions, value_fn=None, tau: float = 1.0, epsilon: float = 0.2, scale_balance: bool = True
 ):
-    """Sample a region from Q, mixed with a scale-balanced exploration floor.
+    """Return the existing ranked regions, scores and complete mixed law.
 
         Q = (1 - epsilon) Q_learned + epsilon mu_scale_balanced
 
@@ -187,7 +187,7 @@ def sample_region(
     import numpy as np
 
     if not regions:
-        return None, None
+        return [], [], np.asarray([], dtype=float)
     ranked = rank_regions(regions, value_fn=value_fn, tau=tau, scale_balance=scale_balance)
     regs = [r for r, _ in ranked]
     q = np.array([s.score for _, s in ranked], float)
@@ -209,5 +209,17 @@ def sample_region(
         score.base_probability = float(q[j])
         score.floor_probability = float(floor[j])
         score.selection_probability = float(mix[j])
+    return regs, [score for _, score in ranked], mix
+
+
+def sample_region(
+    regions, rng, value_fn=None, tau: float = 1.0, epsilon: float = 0.2, scale_balance: bool = True
+):
+    """Sample the qualified region law without changing its arithmetic or RNG use."""
+    regs, scores, mix = region_distribution(
+        regions, value_fn=value_fn, tau=tau, epsilon=epsilon, scale_balance=scale_balance
+    )
+    if not regs:
+        return None, None
     i = int(rng.choice(len(regs), p=mix))
-    return regs[i], ranked[i][1]
+    return regs[i], scores[i]

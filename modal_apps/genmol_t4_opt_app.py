@@ -864,6 +864,40 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
             f"{expected_seed_hash} != {input_hashes['seed_manifest']}"
         )
     started_at = datetime.now(timezone.utc).isoformat()
+    if task.get("controller") == "hierarchical_task_v1":
+        # Explicit prepare-only schema boundary. The legacy single-bundle
+        # verifier/launcher must not silently consume cross-option paths.
+        if (not task.get("prepare_only") or warm_start is None or parent_cache
+                or target != "parp1" or delta != 0.4 or workers != 1):
+            raise ValueError("hierarchical task search requires uncached PARP1 d=0.4 warm preparation")
+        from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+        from compose_v4.experiments.t4_matched_pilot import unseal
+        from compose_v4.experiments.t4_task_search import prepare as prepare_hierarchy
+
+        _validate_remote_revision(task["image_revision"])
+        archive_path = Path(task["warm_archive_path"])
+        if sha256_file(archive_path) != task["warm_archive_file_sha256"]:
+            raise ValueError("hierarchical warm archive physical identity mismatch")
+        if payload_hash(unseal(archive_path)) != payload_hash(warm_start):
+            raise ValueError("hierarchical warm archive payload mismatch")
+        if task.get("expected_input_sha256") != input_hashes:
+            raise ValueError("hierarchical preparation requires every frozen input identity")
+
+        def hierarchy_law(graph):
+            law = enumerate_factorized_marked_law(model, graph, float(TIME_POINT))
+            return (
+                tuple(mark.executor_rule_name for mark in law.marks),
+                tuple(mark.action for mark in law.marks),
+                tuple(mark.probability for mark in law.marks),
+            )
+
+        result = prepare_hierarchy(
+            warm_start, source_sha256=task["warm_archive_file_sha256"],
+            enumerate_law=hierarchy_law, system=system, input_sha256=input_hashes,
+            progress=progress,
+        )
+        result.update(started_at_utc=started_at, image_revision=task["image_revision"])
+        return result
     net = torch.nn.Sequential(torch.nn.Linear(int(ck["n_features"]), 48),
                               torch.nn.ReLU(), torch.nn.Linear(48, 1))
     net.load_state_dict(ck["state_dict"]); net.eval()
