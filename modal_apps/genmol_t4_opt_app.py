@@ -66,6 +66,8 @@ image = (
                     str(REMOTE_ROOT / "docs/GENMOL_T4_SEEDS.json"), copy=True)
     .add_local_file(ROOT / "docs/GENMOL_T4_DEV_SEEDS.json",
                     str(REMOTE_ROOT / "docs/GENMOL_T4_DEV_SEEDS.json"), copy=True)
+    .add_local_file(ROOT / "diagnostics/t4_task_search/value_check.json",
+                    str(REMOTE_ROOT / "diagnostics/t4_task_search/value_check.json"), copy=True)
     .add_local_file(ROOT / "modal_apps/genmol_t4_opt_app.py",
                     str(REMOTE_ROOT / "modal_apps/genmol_t4_opt_app.py"), copy=True)
     .env({"PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}", "OMP_NUM_THREADS": "1"})
@@ -364,6 +366,22 @@ def t4_partial_dock_one(task: dict[str, Any]) -> dict[str, Any]:
     return dock_saved_row(
         task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume, _validate_remote_revision,
         lambda smiles, tag: _dock(smiles, "parp1", tag, cpu=1),
+    )
+
+
+@app.function(
+    image=image, cpu=(1.0, 1.0), memory=8192, timeout=3600,
+    max_containers=1, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_task_search_audit(task: dict[str, Any]) -> dict[str, Any]:
+    """One resumable zero-oracle audit of cross-option task planning."""
+    from compose_v4.experiments.t4_task_search_audit import run_remote
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return run_remote(
+        task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume, _runtime,
+        _validate_remote_revision,
+        lambda t, progress, cached, warm: t4_population_cell.local(t, progress, cached, warm),
     )
 
 
@@ -867,10 +885,11 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
     if task.get("controller") == "hierarchical_task_v1":
         # Explicit prepare-only schema boundary. The legacy single-bundle
         # verifier/launcher must not silently consume cross-option paths.
-        if (not task.get("prepare_only") or warm_start is None or parent_cache
+        if (not task.get("prepare_only") or warm_start is None
                 or target != "parp1" or delta != 0.4 or workers != 1):
-            raise ValueError("hierarchical task search requires uncached PARP1 d=0.4 warm preparation")
+            raise ValueError("hierarchical task search requires PARP1 d=0.4 warm preparation")
         from compose_v4.experiments.t4_matched_pilot import unseal
+        from compose_v4.experiments.t4_task_search import PreparationConfig
         from compose_v4.experiments.t4_task_search import prepare as prepare_hierarchy
         from modal_apps.run_process_v2_p50_app import _validate_remote_revision
 
@@ -894,7 +913,8 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
         result = prepare_hierarchy(
             warm_start, source_sha256=task["warm_archive_file_sha256"],
             enumerate_law=hierarchy_law, system=system, input_sha256=input_hashes,
-            progress=progress,
+            progress=progress, parent_cache=parent_cache,
+            config=PreparationConfig(**task["preparation"]),
         )
         result.update(started_at_utc=started_at, image_revision=task["image_revision"])
         return result

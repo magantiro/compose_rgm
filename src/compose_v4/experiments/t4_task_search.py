@@ -19,7 +19,7 @@ from compose_v4.control.docking_value import DockingValue, identity
 from compose_v4.control.molecular_task_search import MolecularHierarchy, MolecularSearchState
 from compose_v4.control.option_continuation import OptionContinuationKernel, exact_graph_key
 from compose_v4.control.task_search import TaskSearch
-from compose_v4.experiments.continuation_profile import ExecutorMeter
+from compose_v4.experiments.continuation_profile import ExecutorMeter, encode_action, state_payload
 from compose_v4.experiments.t4_endpoint_selection import calculate_properties, feasible_endpoint
 from compose_v4.experiments.t4_parent_budget import ParentExecutorShare
 from compose_v4.rewrite.kernel import canonical_state_key
@@ -63,6 +63,7 @@ def prepare(
     input_sha256: dict,
     config: PreparationConfig | None = None,
     progress=None,
+    parent_cache: dict | None = None,
 ) -> dict:
     config = config or PreparationConfig()
     if warm.get("schema_version") != "t4_exact_archive_v1" or not warm.get("archive"):
@@ -78,6 +79,23 @@ def prepare(
     started = perf_counter()
     model = DockingValue.fit(archive, before_round=next_round, source_sha256=source_sha256)
     snapshot = model.payload["snapshot_sha256"]
+    preparation_identity = identity(
+        {
+            "source": source_sha256,
+            "inputs": input_sha256,
+            "config": asdict(config),
+            "snapshot": snapshot,
+        }
+    )
+    parent_cache = {} if parent_cache is None else parent_cache
+    for index, unit in parent_cache.items():
+        if (
+            type(index) is not int
+            or not 0 <= index < config.lineages
+            or unit["parent_index"] != index
+            or unit["preparation_identity"] != preparation_identity
+        ):
+            raise ValueError("cached parent identity/configuration mismatch")
     seed = archive[0]["smiles"]
     generator = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
     seed_fp = generator.GetFingerprint(Chem.MolFromSmiles(seed))
@@ -117,9 +135,42 @@ def prepare(
     old_keys = {canonical_state_key(decode_state(r["state"])) for r in archive}
     pool, units = {}, []
     all_started = 0
-    with ExecutorMeter(config.lineages * config.executor_per_parent).instrument() as meter:
+    prior_calls = sum(u["parent_budget"]["executor_calls"] for u in parent_cache.values())
+
+    def merge(unit):
+        for record in unit["candidates"]:
+            smiles = record["smiles"]
+            if smiles not in pool:
+                pool[smiles] = {**record, "origin_bundle_ids": list(record["origin_bundle_ids"])}
+            else:
+                pool[smiles]["origin_bundle_ids"] = sorted(
+                    set(pool[smiles]["origin_bundle_ids"] + record["origin_bundle_ids"])
+                )
+        value_cache.update(unit["terminal_values"])
+
+    with ExecutorMeter(
+        config.lineages * config.executor_per_parent - prior_calls
+    ).instrument() as meter:
         for parent_index, parent in enumerate(parents):
+            if parent_index in parent_cache:
+                unit = parent_cache[parent_index]
+                if unit["parent"] != parent["smiles"]:
+                    raise ValueError("cached parent differs from round-frozen parent selection")
+                units.append(unit)
+                merge(unit)
+                all_started += unit["planner"]["rollouts_started"]
+                continue
             parent_start = perf_counter()
+            attempt_start = len(meter.attempts)
+            parent_candidates = []
+            if progress:
+                progress(
+                    {
+                        "schema_version": "t4_task_search_parent_started_v2",
+                        "parent_index": parent_index,
+                        "preparation_identity": preparation_identity,
+                    }
+                )
             root = MolecularSearchState.start(
                 decode_state(parent["state"]),
                 budget=config.primitive_budget,
@@ -127,9 +178,19 @@ def prepare(
             )
             law_cache = {}
 
-            def cached_law(graph, law_cache=law_cache):
+            def cached_law(graph, law_cache=law_cache, parent_index=parent_index):
                 key = exact_graph_key(graph)
                 if key not in law_cache:
+                    if progress:
+                        progress(
+                            {
+                                "schema_version": "t4_task_search_tick_v2",
+                                "parent_index": parent_index,
+                                "phase": meter.phase,
+                                "executor_calls": prior_calls + meter.calls,
+                                "law_enumerations": len(law_cache),
+                            }
+                        )
                     law_cache[key] = enumerate_law(graph)
                 return law_cache[key]
 
@@ -195,6 +256,7 @@ def prepare(
                                 interface=product.region.interface,
                             )
                         if node.stage == "what":
+                            event["option_initial"] = state_payload(product.active)
                             bundle = {
                                 "bundle_id": product.active.bundle_id,
                                 "option": product.active.option,
@@ -207,10 +269,14 @@ def prepare(
                                 "origin_lineage": node.lineage,
                             }
                         if node.stage == "how":
+                            active_product = kernel.row(node.active).successors[index]
                             event.update(
                                 bundle_id=bundle["bundle_id"],
                                 option=node.active.option,
                                 primitive_step=node.active.step + 1,
+                                mark=encode_action(*kernel.marks(node.active)[index]),
+                                option_source=state_payload(node.active),
+                                option_product=state_payload(active_product),
                             )
                         path.append(event)
                         if node.stage == "how" and product.stage == "where":
@@ -247,16 +313,15 @@ def prepare(
                                     "predicted_docking": float(model.predict([smiles])[0]),
                                     "origin_bundle_ids": [bundle["bundle_id"]],
                                 }
-                                if smiles not in pool:
-                                    pool[smiles] = record
-                                elif bundle["bundle_id"] not in pool[smiles]["origin_bundle_ids"]:
-                                    pool[smiles]["origin_bundle_ids"].append(bundle["bundle_id"])
+                                parent_candidates.append(record)
                         node = product
             except ContinuationBudgetExceeded as error:
                 status = str(error)
             if share.exhausted:
                 status = "parent_executor_budget_exhausted"
             unit = {
+                "schema_version": "t4_task_search_parent_v2",
+                "preparation_identity": preparation_identity,
                 "parent_index": parent_index,
                 "parent": parent["smiles"],
                 "status": status,
@@ -268,11 +333,15 @@ def prepare(
                 "acting_rng_state": acting_rng.bit_generator.state,
                 "law_enumerations": len(law_cache),
                 "seconds": perf_counter() - parent_start,
+                "candidates": parent_candidates,
+                "terminal_values": dict(value_cache),
+                "executor_attempts": meter.attempts[attempt_start:],
             }
             units.append(unit)
+            merge(unit)
             all_started += planner.work.rollouts_started
             if progress:
-                progress({**unit, "schema_version": "t4_task_search_parent_v2"})
+                progress(unit)
     candidates = sorted(pool.values(), key=lambda r: r["smiles"])
     eligible = [r for r in candidates if feasible_endpoint(r)]
     # Each emitted completion is one committed bundle outcome. Deduplication can
@@ -300,8 +369,9 @@ def prepare(
             {"smiles": k, "value": value_cache[k]} for k in sorted(value_cache)
         ],
         "planning_rollouts_started": all_started,
-        "executor_calls": meter.calls,
-        "executor_attempts": meter.attempts,
+        "executor_calls": prior_calls + meter.calls,
+        "new_executor_calls": meter.calls,
+        "executor_attempts": [a for u in units for a in u["executor_attempts"]],
         "seconds": perf_counter() - started,
         "software": {"rdkit": rdBase.rdkitVersion, "numpy": np.__version__},
         "config_sha256": identity(asdict(config)),

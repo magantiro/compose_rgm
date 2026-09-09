@@ -41,6 +41,11 @@ def main() -> None:
     ap.add_argument("--arms", default="macro_prior")
     ap.add_argument("--session", default="compose_iclr")
     ap.add_argument(
+        "--task-search-audit",
+        action="store_true",
+        help="one bounded cross-option production preparation; zero docking",
+    )
+    ap.add_argument(
         "--ring-program-round",
         action="store_true",
         help="one parameterized-ring round from the 46-call archive, at most 20 new calls",
@@ -110,6 +115,7 @@ def main() -> None:
                 a.partial_docking,
                 a.feedback_round,
                 a.ring_program_round,
+                a.task_search_audit,
             )
         )
         > 1
@@ -135,6 +141,7 @@ def main() -> None:
         or a.partial_docking
         or a.feedback_round
         or a.ring_program_round
+        or a.task_search_audit
     ):
         launch_continuation_profile(
             preflight,
@@ -144,6 +151,7 @@ def main() -> None:
             partial=a.partial_docking,
             feedback=a.feedback_round,
             rings=a.ring_program_round,
+            task_search=a.task_search_audit,
         )
         return
 
@@ -226,6 +234,7 @@ def launch_continuation_profile(
     partial: bool = False,
     feedback: bool = False,
     rings: bool = False,
+    task_search: bool = False,
 ) -> None:
     """Spawn only the fixed diagnostic into the deployed app; retain its call ID."""
     import sys
@@ -234,7 +243,9 @@ def launch_continuation_profile(
     from modal_apps.run_process_v2_p50_app import local_image_revision
 
     kind = (
-        "t4_ring_program_round"
+        "t4_task_search_audit"
+        if task_search
+        else "t4_ring_program_round"
         if rings
         else "t4_feedback_round"
         if feedback
@@ -251,6 +262,7 @@ def launch_continuation_profile(
     contract = (
         ROOT
         / {
+            "t4_task_search_audit": "configs/t4_task_search_audit.json",
             "t4_ring_program_round": "configs/t4_ring_program_round.json",
             "t4_feedback_round": "configs/t4_feedback_round.json",
             "t4_partial_docking": "configs/t4_partial_docking.json",

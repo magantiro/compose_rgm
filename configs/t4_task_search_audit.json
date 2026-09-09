@@ -1,0 +1,79 @@
+{
+  "schema_version": "t4_task_search_audit_contract_v1",
+  "source_role": "inspected development PARP1 seed0; new task-aware search episode",
+  "training_authorized": false,
+  "required_rdkit": "2024.03.5",
+  "source": {
+    "path": "t4_ring_program_round/ddb2f823de568fdb904b4e08341ee3effc2e9828a9043de7836bfc202144cb0d/round_4/archive.json",
+    "sha256": "803741324ac0e30bff96f9ad36809c6d08ff8334a76a1cc1927a7296a91daf30"
+  },
+  "value_check": {
+    "path": "diagnostics/t4_task_search/value_check.json",
+    "sha256": "ad61461bfd724ee563e09f0f1fad81725f4c55fed9ff3944d3908b08aaec3ea4"
+  },
+  "task": {
+    "session": "compose_iclr",
+    "controller": "hierarchical_task_v1",
+    "prepare_only": true,
+    "delta": 0.4,
+    "budget": 0,
+    "per_round": 20,
+    "lineages": 8,
+    "workers": 1,
+    "seed_rng": 1000,
+    "kappa": 1,
+    "epsilon": 0.1,
+    "epsilon_region": 0.2,
+    "epsilon_option": 0.1
+  },
+  "preparation": {
+    "lineages": 8,
+    "primitive_budget": 16,
+    "executor_per_parent": 2500,
+    "planning_executor_per_parent": 512,
+    "max_rows": 128,
+    "max_terminals": 256,
+    "max_rollouts": 32,
+    "initial_rollouts": 8,
+    "rollouts_per_decision": 2,
+    "oracle_batch": 20,
+    "seed": 1000
+  },
+  "expected_input_sha256": {
+    "committor": "566cfe582973884b22e29c02b00b8188d9ef158b47387275eb36b6e8e62e2c11",
+    "r_theta_checkpoint": "c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8",
+    "r_theta_run_paths": "585286e0fb6dd8fb6b5a050dc3e5f8d1c7e782b105df114cbcb14cabbb5b2bc2",
+    "seed_manifest": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+    "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+    "receptor": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9"
+  },
+  "compute": {
+    "cpu": 1,
+    "memory_mib": 8192,
+    "timeout_seconds": 3600,
+    "automatic_retries": 0,
+    "oracle_call_limit": 0,
+    "heartbeat_seconds": 30,
+    "verification_executor_limit": 2048,
+    "task_census": "8 sequential parent units; up to 128 committed primitive steps",
+    "reference_timing": "prior ring round: 679.525 s proposals for 10570 public executor calls; new planner timing unmeasured",
+    "expected_wall_seconds": [
+      600,
+      1800
+    ],
+    "expected_cost": "one CPU and 8 GiB for about 10-30 minutes, at most one container-hour; current dollar rate not verified",
+    "restart_unit": "completed parent, no automatic interrupted-parent replay",
+    "stop_limit": "20000 search executor calls; 2048 verifier calls; timeout is incomplete, never a matched-budget success"
+  },
+  "audit_routing": {
+    "minimum_completed_rollouts": 1,
+    "nonreference_total_variation_threshold": 1e-8,
+    "required_nonreference_stages": [
+      "where",
+      "what",
+      "how"
+    ],
+    "minimum_feasible_parent_lineages": 2
+  },
+  "contract_sha256": "a5618e9041b408e719bef1571cee2453519c832c573e96391399e574a55cdf6d"
+}
