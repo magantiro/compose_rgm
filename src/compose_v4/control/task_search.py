@@ -106,7 +106,7 @@ class TaskSearch(Generic[State]):
         *,
         snapshot_id: str,
         seed: int,
-        max_rows: int = 128,
+        max_rows: int | None = 128,
         max_terminals: int = 256,
         max_rollouts: int = 32,
         max_path_steps: int = 48,
@@ -124,7 +124,11 @@ class TaskSearch(Generic[State]):
             ("max_rollouts", max_rollouts),
             ("max_path_steps", max_path_steps),
         ):
-            setattr(self, name, _nonnegative_integer(value, name))
+            setattr(
+                self,
+                name,
+                None if name == "max_rows" and value is None else _nonnegative_integer(value, name),
+            )
         self.work = SearchWork()
         self.rows: dict[Hashable, SearchRow[State]] = {}
         self.returns: dict[Hashable, ReturnEstimate] = {}
@@ -136,9 +140,12 @@ class TaskSearch(Generic[State]):
         if key in self.rows:
             self.work.row_hits += 1
             return self.rows[key]
-        if self.work.rows >= self.max_rows or (
-            key not in self.sampled_keys
-            and len(set(self.rows) | self.sampled_keys) >= self.max_rows
+        if self.max_rows is not None and (
+            self.work.rows >= self.max_rows
+            or (
+                key not in self.sampled_keys
+                and len(set(self.rows) | self.sampled_keys) >= self.max_rows
+            )
         ):
             raise ContinuationBudgetExceeded("hierarchical search row budget exhausted")
         self.work.rows += 1  # attempted rows, including interrupted construction
@@ -221,7 +228,8 @@ class TaskSearch(Generic[State]):
                         )
                     key = self.state_key(state)
                     if (
-                        key not in self.sampled_keys
+                        self.max_rows is not None
+                        and key not in self.sampled_keys
                         and key not in self.rows
                         and len(set(self.rows) | self.sampled_keys) >= self.max_rows
                     ):

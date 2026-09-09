@@ -12,6 +12,19 @@ from compose_v4.rewrite.kernel import InvalidRewrite, RewriteSystem
 from compose_v4.rewrite.operators import AtomDelete
 
 
+def test_uncapped_nested_meters_keep_all_calls_past_old_ceiling(monkeypatch):
+    graph = pad_molecular_graph(smiles_to_molecular_graph("CC"), 48)
+    monkeypatch.setattr(RewriteSystem, "apply", lambda self, state, *_: state)
+    system = RewriteSystem.__new__(RewriteSystem)
+    parent, planning = ParentExecutorShare(None), ParentExecutorShare(None)
+    with ExecutorMeter(None).instrument() as total, parent.instrument(), planning.instrument():
+        for _ in range(2501):
+            system.apply(graph, "atom_delete", AtomDelete(1))
+    assert total.calls == len(total.attempts) == parent.calls == planning.calls == 2501
+    assert not parent.exhausted and not planning.exhausted
+    assert parent.receipt()["limit"] is None
+
+
 def test_equal_shares_preserve_global_count_and_next_parent(monkeypatch):
     graph = pad_molecular_graph(smiles_to_molecular_graph("CC"), 48)
     monkeypatch.setattr(RewriteSystem, "apply", lambda self, state, *_: state)

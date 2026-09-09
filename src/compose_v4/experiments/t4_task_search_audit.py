@@ -96,11 +96,24 @@ def verify_lock(lock, warm, system, *, verification_limit=2048):
         meter.phase = "selected_path_verification"
         for unit in lock["work"]:
             calls = unit["parent_budget"]["executor_calls"]
-            if not 0 <= calls <= config.executor_per_parent or calls != len(
-                unit["executor_attempts"]
+            if (
+                type(calls) is not int
+                or calls < 0
+                or (config.executor_per_parent is not None and calls > config.executor_per_parent)
+                or calls != len(unit["executor_attempts"])
+                or unit["parent_budget"]["limit"] != config.executor_per_parent
             ):
                 raise ValueError("parent executor accounting mismatch")
-            if unit["planning_budget"]["executor_calls"] > config.planning_executor_per_parent:
+            planning_calls = unit["planning_budget"]["executor_calls"]
+            if (
+                type(planning_calls) is not int
+                or not 0 <= planning_calls <= calls
+                or (
+                    config.planning_executor_per_parent is not None
+                    and planning_calls > config.planning_executor_per_parent
+                )
+                or unit["planning_budget"]["limit"] != config.planning_executor_per_parent
+            ):
                 raise ValueError("planning exceeded its parent share")
             root = MolecularSearchState.start(
                 decode_state(parents[unit["parent"]]["state"]),
@@ -424,12 +437,30 @@ def run_remote(
     prepare,
     *,
     lazy_probe=False,
+    uncapped_probe=False,
 ):
-    contract_path = "configs/t4_lazy_reference_probe.json" if lazy_probe else CONTRACT_PATH
-    kind = "t4_lazy_reference_probe" if lazy_probe else KIND
+    if lazy_probe and uncapped_probe:
+        raise ValueError("choose one task-search probe")
+    kind = (
+        "t4_uncapped_lookahead_probe"
+        if uncapped_probe
+        else "t4_lazy_reference_probe"
+        if lazy_probe
+        else KIND
+    )
+    contract_path = f"configs/{kind}.json"
     contract = json.loads((repo_root / contract_path).read_text())
     expected_preparation = (
-        PreparationConfig(lineages=1, planning_policy="lazy_reference")
+        PreparationConfig(
+            lineages=1,
+            planning_policy="lazy_reference",
+            compute_policy="metered_uncapped_v1",
+            executor_per_parent=None,
+            planning_executor_per_parent=None,
+            max_rows=None,
+        )
+        if uncapped_probe
+        else PreparationConfig(lineages=1, planning_policy="lazy_reference")
         if lazy_probe
         else PreparationConfig()
     )
@@ -462,11 +493,13 @@ def run_remote(
         result = run_audit(
             actual_task, warm, prepare, runtime_factory()["system"], output, **kwargs
         )
-        if lazy_probe:
+        if lazy_probe or uncapped_probe:
             # A one-parent cost probe cannot evaluate the two-lineage audit gate.
             # It neither replaces that gate nor authorizes docking.
             result.update(
-                decision="review_lazy_reference_cost_probe",
+                decision="review_uncapped_lookahead_probe"
+                if uncapped_probe
+                else "review_lazy_reference_cost_probe",
                 full_audit_routing_applicable=False,
                 automatic_docking=False,
             )

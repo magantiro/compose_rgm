@@ -402,6 +402,23 @@ def t4_lazy_reference_probe(task: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+@app.function(
+    image=image, cpu=(1.0, 1.0), memory=8192, timeout=7200,
+    max_containers=1, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_uncapped_lookahead_probe(task: dict[str, Any]) -> dict[str, Any]:
+    """Same parent and horizon, metered search without executor/state cutoffs."""
+    from compose_v4.experiments.t4_task_search_audit import run_remote
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return run_remote(
+        task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume, _runtime,
+        _validate_remote_revision,
+        lambda t, progress, cached, warm: t4_population_cell.local(t, progress, cached, warm),
+        uncapped_probe=True,
+    )
+
+
 def _runtime():
     if "model" in _RT:
         return _RT

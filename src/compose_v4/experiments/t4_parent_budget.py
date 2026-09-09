@@ -30,13 +30,10 @@ class ParentExecutorShare:
 
     @contextmanager
     def instrument(self):
-        if self.limit is None:
-            yield self
-            return
         original = RewriteSystem.apply
 
         def apply(system, state, rule, action):
-            if self.calls >= self.limit:
+            if self.limit is not None and self.calls >= self.limit:
                 raise _ParentShareStop(self)
             self.calls += 1
             return original(system, state, rule, action)

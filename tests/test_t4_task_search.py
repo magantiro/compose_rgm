@@ -1,13 +1,15 @@
 """Prepare-only integration with synthetic labels and the production executor."""
 
 import copy
+import hashlib
 import json
+from pathlib import Path
 
 import pytest
 
 from compose_v4.chem.molecular_graph import ELEMENT_TO_IDX, smiles_to_molecular_graph
 from compose_v4.chem.state import pad_molecular_graph
-from compose_v4.experiments.t4_matched_pilot import seal
+from compose_v4.experiments.t4_matched_pilot import canonical_bytes, seal
 from compose_v4.experiments.t4_task_search import PreparationConfig, prepare
 from compose_v4.experiments.t4_task_search_audit import run_audit, summarize, verify_lock
 from compose_v4.rewrite.kernel import canonical_state_key, editing_v2_rewrite_system
@@ -16,7 +18,8 @@ from compose_v4.rewrite.trace_shard import decode_state, encode_state
 
 
 @pytest.mark.parametrize("planning_policy", ["adaptive_full_rows", "lazy_reference"])
-def test_preparation_is_round_frozen_bounded_and_never_docks(planning_policy):
+@pytest.mark.parametrize("uncapped", [False, True])
+def test_preparation_is_round_frozen_bounded_and_never_docks(planning_policy, uncapped):
     rows = []
     for i in range(1, 18):
         graph = pad_molecular_graph(smiles_to_molecular_graph("C" * i), 48)
@@ -37,13 +40,14 @@ def test_preparation_is_round_frozen_bounded_and_never_docks(planning_policy):
     cfg = PreparationConfig(
         lineages=1,
         primitive_budget=2,
-        executor_per_parent=128,
-        planning_executor_per_parent=16,
-        max_rows=32,
+        executor_per_parent=None if uncapped else 128,
+        planning_executor_per_parent=None if uncapped else 16,
+        max_rows=None if uncapped else 32,
         max_rollouts=2,
         initial_rollouts=1,
         rollouts_per_decision=1,
         planning_policy=planning_policy,
+        compute_policy="metered_uncapped_v1" if uncapped else "bounded_v1",
     )
     warm = {
         "schema_version": "t4_exact_archive_v1",
@@ -65,6 +69,8 @@ def test_preparation_is_round_frozen_bounded_and_never_docks(planning_policy):
     assert result["new_oracle_calls"] == 0 and not result["automatic_docking"]
     assert result["prior_oracle_attempts"] == 16
     assert result["executor_calls"] <= 128
+    assert result["executor_calls"] > 0
+    assert result["work"][0]["planning_budget"]["executor_calls"] > 0
     assert sum(c["schema_version"] == "t4_task_search_parent_v2" for c in checkpoints) == 1
     assert result["value_snapshot"]["before_round"] == 2
     assert all(r["round"] < 2 for r in result["value_snapshot"]["training_rows"])
@@ -88,6 +94,11 @@ def test_preparation_is_round_frozen_bounded_and_never_docks(planning_policy):
     tampered["pool"][0]["r_coherent"] += 0.1
     with pytest.raises(ValueError, match="structural metadata"):
         verify_lock(tampered, warm, editing_v2_rewrite_system())
+    if uncapped:
+        tampered = copy.deepcopy(result)
+        tampered["work"][0]["planning_budget"]["executor_calls"] = result["executor_calls"] + 1
+        with pytest.raises(ValueError, match="planning exceeded"):
+            verify_lock(tampered, warm, editing_v2_rewrite_system())
 
     def forbidden_law(graph):
         raise AssertionError("complete parents must not be regenerated")
@@ -115,6 +126,7 @@ def test_unfinished_parent_is_not_automatically_replayed(tmp_path):
 def test_planning_policy_extension_preserves_legacy_config_identity():
     cfg = PreparationConfig()
     assert "planning_policy" not in cfg.payload()
+    assert "compute_policy" not in cfg.payload()
     assert PreparationConfig(**cfg.payload()) == cfg
     assert (
         PreparationConfig(planning_policy="lazy_reference").payload()["planning_policy"]
@@ -122,3 +134,40 @@ def test_planning_policy_extension_preserves_legacy_config_identity():
     )
     with pytest.raises(ValueError, match="planning policy"):
         PreparationConfig(planning_policy="unknown")
+
+
+def test_uncapped_config_is_explicit_and_preserves_legacy_guards():
+    cfg = PreparationConfig(
+        compute_policy="metered_uncapped_v1",
+        executor_per_parent=None,
+        planning_executor_per_parent=None,
+        max_rows=None,
+    )
+    assert PreparationConfig(**cfg.payload()) == cfg
+    with pytest.raises(ValueError, match="uncapped preparation"):
+        PreparationConfig(compute_policy="metered_uncapped_v1")
+    with pytest.raises(ValueError, match="invalid preparation field"):
+        PreparationConfig(planning_executor_per_parent=None)
+    with pytest.raises(ValueError, match="bounded development"):
+        PreparationConfig(executor_per_parent=2501)
+
+
+def test_uncapped_contract_only_changes_compute_policy_and_run_boundary():
+    root = Path(__file__).resolve().parents[1]
+    old = json.loads((root / "configs/t4_lazy_reference_probe.json").read_text())
+    new = json.loads((root / "configs/t4_uncapped_lookahead_probe.json").read_text())
+    digest = new.pop("contract_sha256")
+    assert hashlib.sha256(canonical_bytes(new)).hexdigest() == digest
+    for field in ("source", "value_check", "expected_input_sha256", "task", "required_rdkit"):
+        assert new[field] == old[field]
+    assert new["compute"]["oracle_call_limit"] == 0
+    assert new["compute"]["automatic_retries"] == 0
+    assert new["compute"]["timeout_seconds"] == 7200
+    cfg = PreparationConfig(**new["preparation"])
+    assert cfg.compute_policy == "metered_uncapped_v1"
+    equivalent = cfg.payload()
+    equivalent.pop("compute_policy")
+    for field in ("executor_per_parent", "planning_executor_per_parent", "max_rows"):
+        assert equivalent[field] is None
+        equivalent[field] = old["preparation"][field]
+    assert equivalent == old["preparation"]

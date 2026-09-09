@@ -198,16 +198,16 @@ class OptionContinuationKernel:
         enumerate_law: Callable[[MolecularGraph], tuple],
         system: RewriteSystem,
         *,
-        max_executor_applications: int,
+        max_executor_applications: int | None,
         macro_temperature: float = 2.0,
         macro_exploration: float = 0.15,
     ) -> None:
-        if (
+        if max_executor_applications is not None and (
             isinstance(max_executor_applications, bool)
             or not isinstance(max_executor_applications, int)
             or max_executor_applications < 0
         ):
-            raise ValueError("max_executor_applications must be a nonnegative integer")
+            raise ValueError("max_executor_applications must be a nonnegative integer or None")
         if macro_temperature != 2.0 or macro_exploration != 0.15:
             raise ValueError("the inherited macro temperature/exploration are frozen at 2.0/0.15")
         self.enumerate_law = enumerate_law
@@ -224,7 +224,9 @@ class OptionContinuationKernel:
         self._lazy_rows: dict[tuple, LazyReferenceRow[OptionState]] = {}
 
     @classmethod
-    def from_runtime(cls, model, system, *, time_point: float, max_executor_applications: int):
+    def from_runtime(
+        cls, model, system, *, time_point: float, max_executor_applications: int | None
+    ):
         from compose_v4.experiments.production_successor_kernel import (
             enumerate_factorized_marked_law,
         )
@@ -254,7 +256,10 @@ class OptionContinuationKernel:
         if physical_key in self._primitive_products:
             self.work.product_cache_hits += 1
             return self._primitive_products[physical_key]
-        if self.work.executor_applications >= self.max_executor_applications:
+        if (
+            self.max_executor_applications is not None
+            and self.work.executor_applications >= self.max_executor_applications
+        ):
             raise ContinuationBudgetExceeded("executor-application budget exhausted")
         self.work.executor_applications += 1
         try:

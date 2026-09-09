@@ -139,8 +139,8 @@ class ExecutorMeter:
     """Scoped diagnostic hook, including public executor calls inside enumeration."""
 
     def __init__(self, limit):
-        if isinstance(limit, bool) or not isinstance(limit, int) or limit < 0:
-            raise ValueError("executor limit must be a nonnegative integer")
+        if limit is not None and (type(limit) is not int or limit < 0):
+            raise ValueError("executor limit must be a nonnegative integer or None")
         self.limit = limit
         self.calls = 0
         self.seconds = 0.0
@@ -162,7 +162,7 @@ class ExecutorMeter:
         original = RewriteSystem.apply
 
         def measured(system, state, rule_name, action):
-            if self.calls >= self.limit:
+            if self.limit is not None and self.calls >= self.limit:
                 raise _ExecutorBudgetStop()
             self.calls += 1
             receipt = {

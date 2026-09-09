@@ -30,9 +30,9 @@ from compose_v4.rewrite.trace_shard import decode_state, encode_state
 class PreparationConfig:
     lineages: int = 8
     primitive_budget: int = 16
-    executor_per_parent: int = 2500
-    planning_executor_per_parent: int = 512
-    max_rows: int = 128
+    executor_per_parent: int | None = 2500
+    planning_executor_per_parent: int | None = 512
+    max_rows: int | None = 128
     max_terminals: int = 256
     max_rollouts: int = 32
     initial_rollouts: int = 8
@@ -40,16 +40,32 @@ class PreparationConfig:
     oracle_batch: int = 20
     seed: int = 1000
     planning_policy: str = "adaptive_full_rows"
+    compute_policy: str = "bounded_v1"
 
     def payload(self):
         result = asdict(self)
         # The optional policy extension must not invalidate legacy saved locks.
         if self.planning_policy == "adaptive_full_rows":
             result.pop("planning_policy")
+        if self.compute_policy == "bounded_v1":
+            result.pop("compute_policy")
         return result
 
     def __post_init__(self):
+        if self.compute_policy not in ("bounded_v1", "metered_uncapped_v1"):
+            raise ValueError(f"unknown compute policy: {self.compute_policy!r}")
+        uncapped = self.compute_policy == "metered_uncapped_v1"
         for name, value in asdict(self).items():
+            if name == "compute_policy":
+                continue
+            if uncapped and name in (
+                "executor_per_parent",
+                "planning_executor_per_parent",
+                "max_rows",
+            ):
+                if value is not None:
+                    raise ValueError(f"uncapped preparation requires {name}=None")
+                continue
             if name == "planning_policy":
                 if value not in ("adaptive_full_rows", "lazy_reference"):
                     raise ValueError(f"unknown planning policy: {value!r}")
@@ -59,8 +75,13 @@ class PreparationConfig:
         if (
             self.lineages > 8
             or self.primitive_budget > 16
-            or self.executor_per_parent > 2500
-            or self.planning_executor_per_parent >= self.executor_per_parent
+            or (
+                not uncapped
+                and (
+                    self.executor_per_parent > 2500
+                    or self.planning_executor_per_parent >= self.executor_per_parent
+                )
+            )
             or self.oracle_batch > 20
         ):
             raise ValueError("preparation exceeds the bounded development allocation")
@@ -160,9 +181,12 @@ def prepare(
                 )
         value_cache.update(unit["terminal_values"])
 
-    with ExecutorMeter(
-        config.lineages * config.executor_per_parent - prior_calls
-    ).instrument() as meter:
+    remaining_calls = (
+        None
+        if config.executor_per_parent is None
+        else config.lineages * config.executor_per_parent - prior_calls
+    )
+    with ExecutorMeter(remaining_calls).instrument() as meter:
         for parent_index, parent in enumerate(parents):
             if parent_index in parent_cache:
                 unit = parent_cache[parent_index]
@@ -190,9 +214,15 @@ def prepare(
             )
             law_cache = {}
             law_work = {"attempted": 0, "completed": 0, "executor_calls": 0, "seconds": 0.0}
+            # Bound per parent; the kernel callback is wired before its planner.
+            search_progress = {}
 
             def cached_law(
-                graph, law_cache=law_cache, parent_index=parent_index, law_work=law_work
+                graph,
+                law_cache=law_cache,
+                parent_index=parent_index,
+                law_work=law_work,
+                search_progress=search_progress,
             ):
                 key = exact_graph_key(graph)
                 if key not in law_cache:
@@ -204,6 +234,12 @@ def prepare(
                                 "phase": meter.phase,
                                 "executor_calls": prior_calls + meter.calls,
                                 "law_enumerations": len(law_cache),
+                                "rollouts_started": search_progress["work"].rollouts_started,
+                                "rollouts_completed": search_progress["work"].rollouts_completed,
+                                "terminal_evaluations": search_progress[
+                                    "work"
+                                ].terminal_evaluations,
+                                "nonzero_terminal_values": sum(v > 0 for v in value_cache.values()),
                             }
                         )
                     before_calls, before_time = meter.calls, perf_counter()
@@ -238,6 +274,7 @@ def prepare(
                 else None,
             )
             acting_rng = np.random.default_rng(seeds[1])
+            search_progress["work"] = planner.work
             share = ParentExecutorShare(config.executor_per_parent)
             planning_share = ParentExecutorShare(config.planning_executor_per_parent)
             node, path, bundle, complete_options = root, [], None, 0

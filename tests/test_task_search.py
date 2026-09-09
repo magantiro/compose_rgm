@@ -61,6 +61,25 @@ def test_budget_interruption_does_not_publish_partial_returns():
     assert planner.decision(())["probabilities"] == pytest.approx([0.5, 0.5])
 
 
+@pytest.mark.parametrize("lazy", [False, True])
+def test_uncapped_rows_reach_terminal_beyond_old_state_ceiling(lazy):
+    planner = TaskSearch(
+        lambda s: SearchRow((s + 1,), ("advance",), (1.0,), (1.0,), 0.1),
+        lambda s: 0.75 if s == 140 else None,
+        lambda s: s,
+        snapshot_id="synthetic-state-cap-regression",
+        seed=0,
+        max_rows=None,
+        max_path_steps=140,
+        reference_draw=(lambda s, rng: s + 1) if lazy else None,
+    )
+    assert planner.plan(0, 1) == 1
+    assert planner.work.rollouts_interrupted == 0
+    assert planner.work.terminal_evaluations == 1
+    assert planner.returns[0].mean(0) == pytest.approx(0.75)
+    assert planner.decision(139)["probabilities"] == [1.0]
+
+
 def test_completed_evidence_survives_later_interruption():
     planner = binary_planner((0, 0, 0))
     planner.plan((), 1)
