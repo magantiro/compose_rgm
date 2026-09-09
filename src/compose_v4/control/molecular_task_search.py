@@ -89,11 +89,41 @@ class MolecularHierarchy:
         *,
         generic_horizon: int = 3,
         ring_options: tuple[str, ...] | None = None,
+        lazy_applicability: bool = False,
     ):
         if type(generic_horizon) is not int or generic_horizon < 1:
             raise ValueError("generic_horizon must be a positive primitive count")
         self.kernel, self.generic_horizon = kernel, generic_horizon
         self.ring_options = default_ring_options() if ring_options is None else ring_options
+        self.lazy_applicability = lazy_applicability
+        self._selection_rows = {}
+
+    def sample_reference(self, node: MolecularSearchState, rng) -> MolecularSearchState | None:
+        """Reference-only planning draw; no task tilt or sampled support truncation."""
+        if node.stage != "how":
+            key = node.key()
+            if key not in self._selection_rows:
+                self._selection_rows[key] = self.row(node)
+            row = self._selection_rows[key]
+            if not row.successors:
+                return None
+            return row.successors[int(rng.choice(len(row.successors), p=row.reference))]
+        active = self.kernel.lazy_row(node.active).sample(rng)
+        return None if active is None else self._successor(node, active)
+
+    @staticmethod
+    def _successor(node, active):
+        if active.remaining:
+            return MolecularSearchState(
+                active.graph,
+                active.lineage,
+                node.budget - 1,
+                node.root_id,
+                "how",
+                node.region,
+                active,
+            )
+        return MolecularSearchState(active.graph, active.lineage, node.budget - 1, node.root_id)
 
     def option_state(self, node: MolecularSearchState, option: str) -> OptionState:
         context = exact_context(node.graph, canonical_state_key(node.graph), node.region)
@@ -150,7 +180,12 @@ class MolecularHierarchy:
             )
             states = {o: self.option_state(node, o) for o in options}
             options = retain_product_applicable_options(
-                options, lambda o: bool(self.kernel.row(states[o]).successors)
+                options,
+                lambda o: (
+                    self.kernel.lazy_row(states[o]).has_product()
+                    if self.lazy_applicability
+                    else bool(self.kernel.row(states[o]).successors)
+                ),
             )
             return SearchRow(
                 tuple(
@@ -171,22 +206,6 @@ class MolecularHierarchy:
                 0.1,
             )
         row = self.kernel.row(node.active)
-        successors = []
-        for active in row.successors:
-            if active.remaining:
-                successor = MolecularSearchState(
-                    active.graph,
-                    active.lineage,
-                    node.budget - 1,
-                    node.root_id,
-                    "how",
-                    node.region,
-                    active,
-                )
-            else:
-                successor = MolecularSearchState(
-                    active.graph, active.lineage, node.budget - 1, node.root_id
-                )
-            successors.append(successor)
+        successors = [self._successor(node, active) for active in row.successors]
         labels = tuple(f"{rule}:{action!r}" for rule, action in self.kernel.marks(node.active))
         return SearchRow(tuple(successors), labels, row.probabilities, row.probabilities, 0.1)

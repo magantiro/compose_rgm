@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from collections import Counter
-from dataclasses import asdict
 
 import numpy as np
 from rdkit import Chem, rdBase
@@ -75,7 +74,7 @@ def verify_lock(lock, warm, system, *, verification_limit=2048):
         or lock["automatic_docking"] is not False
         or lock["prior_oracle_attempts"] != warm["oracle_attempts"]
         or len(lock["work"]) != config.lineages
-        or lock["config_sha256"] != identity(asdict(config))
+        or lock["config_sha256"] != identity(lock["config"])
     ):
         raise ValueError("hierarchical lock schema, round or budget mismatch")
     model = DockingValue.from_payload(lock["value_snapshot"])
@@ -415,13 +414,30 @@ def run_audit(task, warm, prepare, system, output, *, commit=lambda: None, progr
     return {**summarize(lock, verification), "candidate_lock_sha256": lock_sha}
 
 
-def run_remote(task, repo_root, artifact_root, volume, runtime_factory, validate_revision, prepare):
-    contract = json.loads((repo_root / CONTRACT_PATH).read_text())
+def run_remote(
+    task,
+    repo_root,
+    artifact_root,
+    volume,
+    runtime_factory,
+    validate_revision,
+    prepare,
+    *,
+    lazy_probe=False,
+):
+    contract_path = "configs/t4_lazy_reference_probe.json" if lazy_probe else CONTRACT_PATH
+    kind = "t4_lazy_reference_probe" if lazy_probe else KIND
+    contract = json.loads((repo_root / contract_path).read_text())
+    expected_preparation = (
+        PreparationConfig(lineages=1, planning_policy="lazy_reference")
+        if lazy_probe
+        else PreparationConfig()
+    )
 
     def runner(actual_task, prepare, dock, output, **kwargs):
         if (
             contract["compute"]["oracle_call_limit"] != 0
-            or contract["preparation"] != asdict(PreparationConfig())
+            or PreparationConfig(**contract["preparation"]) != expected_preparation
             or rdBase.rdkitVersion != contract["required_rdkit"]
         ):
             raise ValueError("audit recipe, oracle limit or RDKit mismatch")
@@ -443,7 +459,18 @@ def run_remote(task, repo_root, artifact_root, volume, runtime_factory, validate
             warm_start_sha256=identity(warm),
             preparation=contract["preparation"],
         )
-        return run_audit(actual_task, warm, prepare, runtime_factory()["system"], output, **kwargs)
+        result = run_audit(
+            actual_task, warm, prepare, runtime_factory()["system"], output, **kwargs
+        )
+        if lazy_probe:
+            # A one-parent cost probe cannot evaluate the two-lineage audit gate.
+            # It neither replaces that gate nor authorizes docking.
+            result.update(
+                decision="review_lazy_reference_cost_probe",
+                full_audit_routing_applicable=False,
+                automatic_docking=False,
+            )
+        return result
 
     volume.reload()
     return common_remote(
@@ -455,7 +482,7 @@ def run_remote(task, repo_root, artifact_root, volume, runtime_factory, validate
         validate_revision,
         prepare,
         None,
-        contract_path=CONTRACT_PATH,
-        run_kind=KIND,
+        contract_path=contract_path,
+        run_kind=kind,
         runner=runner,
     )

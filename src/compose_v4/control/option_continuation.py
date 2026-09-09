@@ -30,6 +30,7 @@ from compose_v4.control.fused_option import (
     descriptor_indices,
     eligible_fusion_edges,
 )
+from compose_v4.control.lazy_reference import LazyReferenceBranch, LazyReferenceRow
 from compose_v4.control.macro_engine import state_contract_for
 from compose_v4.control.option_selector import (
     ConditionedActionDistribution,
@@ -212,14 +213,15 @@ class OptionContinuationKernel:
         self.enumerate_law = enumerate_law
         self.system = system
         self.max_executor_applications = max_executor_applications
+        self.macro_temperature, self.macro_exploration = macro_temperature, macro_exploration
         self.work = OptionKernelWork()
         self._marks: dict[tuple, tuple[tuple[str, Any], ...]] = {}
         self._rows: dict[tuple, ReferenceRow[OptionState]] = {}
         self._fused_support: dict[tuple, dict] = {}
         self._expansion_support: dict[tuple, dict] = {}
         self._construction_support: dict[tuple, dict] = {}
-        self._construction_products: dict[tuple, MolecularGraph | None] = {}
         self._primitive_products: dict[tuple, tuple[MolecularGraph, str] | None] = {}
+        self._lazy_rows: dict[tuple, LazyReferenceRow[OptionState]] = {}
 
     @classmethod
     def from_runtime(cls, model, system, *, time_point: float, max_executor_applications: int):
@@ -238,12 +240,56 @@ class OptionContinuationKernel:
         return cls(enumerate_law, system, max_executor_applications=max_executor_applications)
 
     def row(self, node: OptionState) -> ReferenceRow[OptionState]:
+        return self._row(node, lazy=False)
+
+    def lazy_row(self, node: OptionState) -> LazyReferenceRow[OptionState]:
+        """Same reference law, resolving products only as needed for a draw."""
+        key = node.key()
+        if key not in self._lazy_rows:
+            self._lazy_rows[key] = self._row(node, lazy=True)
+        return self._lazy_rows[key]
+
+    def _physical_product(self, node, family, action):
+        physical_key = (exact_graph_key(node.graph), family, repr(action))
+        if physical_key in self._primitive_products:
+            self.work.product_cache_hits += 1
+            return self._primitive_products[physical_key]
+        if self.work.executor_applications >= self.max_executor_applications:
+            raise ContinuationBudgetExceeded("executor-application budget exhausted")
+        self.work.executor_applications += 1
+        try:
+            product = self.system.apply(node.graph, family, action)
+            executed = (product, canonical_state_key(product))
+        except InvalidRewrite:
+            executed = None
+        self._primitive_products[physical_key] = executed
+        return executed
+
+    def _clean_product(self, node, family, action, contract):
+        executed = self._physical_product(node, family, action)
+        if executed is not None:
+            product, key = executed
+            if (
+                0 < product.n_real_atoms <= 40
+                and graph_connected(product)
+                and charge_policy_preserved(node.graph, product)
+                and is_valid(key)
+                and context_preserved(
+                    node.origin, product, node.context.frozen, node.context.terminal_context_slots
+                )
+                and (contract is None or contract(product))
+            ):
+                return product
+        self.work.rejected_products += 1
+        return None
+
+    def _row(self, node: OptionState, *, lazy: bool):
         cache_key = node.key()
-        if cache_key in self._rows:
+        if not lazy and cache_key in self._rows:
             self.work.row_cache_hits += 1
             return self._rows[cache_key]
         if node.remaining == 0:
-            return ReferenceRow((), ())
+            return LazyReferenceRow({}) if lazy else ReferenceRow((), ())
         self.work.law_enumerations += 1
         families, actions, probabilities = self.enumerate_law(node.graph)
         p = np.asarray(probabilities, dtype=float)
@@ -261,48 +307,19 @@ class OptionContinuationKernel:
             node.option in (BUILD_FUSED_RING_OPTION, EXPAND_RING_OPTION)
             or node.ring_progress is not None
         ):
-            return self._descriptor_row(node, families, actions, p, indices)
+            return self._descriptor_row(node, families, actions, p, indices, lazy=lazy)
         pre = conditioned_action_distribution(families, p, indices, node.option, step=node.step)
         active = primitive_option_at_step(node.option, node.step)
         contract = state_contract_for(active, node.graph) if active else None
-        clean = np.zeros(len(p), dtype=bool)
-        products: dict[int, OptionState] = {}
-        for index in pre.indices:
-            index = int(index)
-            physical_key = (exact_graph_key(node.graph), families[index], repr(actions[index]))
-            if physical_key in self._primitive_products:
-                self.work.product_cache_hits += 1
-                executed = self._primitive_products[physical_key]
-            else:
-                if self.work.executor_applications >= self.max_executor_applications:
-                    raise ContinuationBudgetExceeded("executor-application budget exhausted")
-                self.work.executor_applications += 1
-                try:
-                    product = self.system.apply(node.graph, families[index], actions[index])
-                    executed = (product, canonical_state_key(product))
-                except InvalidRewrite:
-                    executed = None
-                self._primitive_products[physical_key] = executed
-            if executed is None:
-                self.work.rejected_products += 1
-                continue
-            product, key = executed
-            if not (
-                0 < product.n_real_atoms <= 40
-                and graph_connected(product)
-                and charge_policy_preserved(node.graph, product)
-                and is_valid(key)
-                and context_preserved(
-                    node.origin, product, node.context.frozen, node.context.terminal_context_slots
-                )
-                and (contract is None or contract(product))
-            ):
-                self.work.rejected_products += 1
-                continue
+
+        def successor(index):
+            product = self._clean_product(node, families[index], actions[index], contract)
+            if product is None:
+                return None
             lineage = node.lineage.observe(families[index], actions[index])
             new_slot = created_slot(actions[index])
             context = node.context.with_locus(new_slot) if new_slot is not None else node.context
-            products[index] = OptionState(
+            result = OptionState(
                 product,
                 node.origin,
                 context,
@@ -313,7 +330,33 @@ class OptionContinuationKernel:
                 node.bundle_id,
             )
             self.work.legal_products += 1
-            clean[index] = True
+            return result
+
+        if lazy:
+            generic = node.option == "generic"
+            weights = (
+                p[pre.indices]
+                if generic
+                else np.maximum(p[pre.indices], 1e-300) ** (1 / self.macro_temperature)
+            )
+            return LazyReferenceRow(
+                {
+                    None: LazyReferenceBranch(
+                        tuple(map(int, pre.indices)),
+                        tuple(weights),
+                        0.0 if generic else self.macro_exploration,
+                        successor,
+                    )
+                }
+            )
+        clean = np.zeros(len(p), dtype=bool)
+        products = {}
+        for raw_index in pre.indices:
+            index = int(raw_index)
+            product = successor(index)
+            if product is not None:
+                products[index] = product
+                clean[index] = True
         conditioned = conditioned_action_distribution(
             families, p, indices, node.option, step=node.step, clean=clean
         )
@@ -327,7 +370,7 @@ class OptionContinuationKernel:
         self._rows[cache_key] = row
         return row
 
-    def _descriptor_row(self, node, families, actions, probabilities, admissible):
+    def _descriptor_row(self, node, families, actions, probabilities, admissible, *, lazy=False):
         """Joint edge/mark reference; share executor work, not augmented states."""
         spec = ring_spec(node.option)
         expansion = node.option == EXPAND_RING_OPTION
@@ -402,109 +445,99 @@ class OptionContinuationKernel:
                 }
             )
 
-        # One physical action can belong to two oriented-edge branches. Apply
-        # each index once, then retain separate program states and joint mass.
+        # Physical products are shared; branch/context checks are not.
         products = {}
-        for index in sorted({int(i) for pre in pre_rows.values() for i in pre.indices}):
-            # A parameter menu must not reexecute the same physical first edit
-            # once per quota/pattern. Context checks remain bundle-specific.
-            product_key = (exact_graph_key(node.graph), families[index], repr(actions[index]))
-            if spec and product_key in self._construction_products:
-                self.work.product_cache_hits += 1
-                product = self._construction_products[product_key]
-            else:
-                if self.work.executor_applications >= self.max_executor_applications:
-                    raise ContinuationBudgetExceeded("executor-application budget exhausted")
-                self.work.executor_applications += 1
-                try:
-                    product = self.system.apply(node.graph, families[index], actions[index])
-                    canonical_state_key(product)
-                except InvalidRewrite:
-                    product = None
-                if spec:
-                    self._construction_products[product_key] = product
-            if product is None:
-                self.work.rejected_products += 1
-                continue
-            key = canonical_state_key(product)
-            if not (
-                0 < product.n_real_atoms <= 40
-                and graph_connected(product)
-                and charge_policy_preserved(node.graph, product)
-                and is_valid(key)
-                and context_preserved(
-                    node.origin, product, node.context.frozen, node.context.terminal_context_slots
+
+        def successor(edge, index):
+            if index not in products:
+                products[index] = self._clean_product(
+                    node, families[index], actions[index], contract
                 )
-                and (contract is None or contract(product))
-            ):
+            product = products[index]
+            if product is None:
+                return None
+            slot = created_slot(actions[index])
+            next_progress = (
+                RingProgress(
+                    edge[0],
+                    edge[1],
+                    progress.path + (slot,) if slot is not None else progress.path,
+                )
+                if spec
+                else ExpansionProgress(edge, slot if slot is not None else progress.new_slot)
+                if expansion
+                else FusedProgress(
+                    edge, progress.path + (slot,) if slot is not None else progress.path
+                )
+            )
+            completes = completed_expansion if expansion else completed_fused_cycle
+            completion_failed = (
+                spec is not None
+                and node.step in (spec.growth, spec.horizon - 1)
+                and not completed_construction(
+                    node.origin, product, next_progress, spec, refined=node.step > spec.growth
+                )
+            ) or (
+                spec is None
+                and node.step == node.horizon - 1
+                and not completes(node.origin, product, next_progress)
+            )
+            if completion_failed:
                 self.work.rejected_products += 1
-                continue
-            products[index] = product
+                return None
+            context = node.context.with_locus(slot) if slot is not None else node.context
+            if expansion or spec:
+                try:
+                    if spec:
+                        next_progress.validate(
+                            product, node.origin, context.locus, node.step + 1, spec
+                        )
+                    else:
+                        next_progress.validate(product, node.origin, context.locus, node.step + 1)
+                except ValueError:
+                    self.work.rejected_products += 1
+                    return None
+            return OptionState(
+                product,
+                node.origin,
+                context,
+                node.lineage.observe(families[index], actions[index]),
+                node.option,
+                node.step + 1,
+                node.horizon,
+                node.bundle_id,
+                fused_progress=None if expansion or spec else next_progress,
+                expansion_progress=next_progress if expansion else None,
+                ring_progress=next_progress if spec else None,
+            )
+
+        if lazy:
+            return LazyReferenceRow(
+                {
+                    edge: LazyReferenceBranch(
+                        tuple(map(int, pre.indices)),
+                        tuple(
+                            np.maximum(probabilities[pre.indices], 1e-300)
+                            ** (1 / self.macro_temperature)
+                        ),
+                        self.macro_exploration,
+                        lambda index, edge=edge: successor(edge, index),
+                    )
+                    for edge, pre in pre_rows.items()
+                }
+            )
+
+        for index in sorted({int(i) for pre in pre_rows.values() for i in pre.indices}):
+            products[index] = self._clean_product(node, families[index], actions[index], contract)
 
         branches = []
         for edge, receipt in zip(edges, audit):
             successors = {}
             for raw_index in pre_rows[edge].indices:
                 index = int(raw_index)
-                if index not in products:
-                    continue
-                product = products[index]
-                slot = created_slot(actions[index])
-                next_progress = (
-                    RingProgress(
-                        edge[0],
-                        edge[1],
-                        progress.path + (slot,) if slot is not None else progress.path,
-                    )
-                    if spec
-                    else ExpansionProgress(edge, slot if slot is not None else progress.new_slot)
-                    if expansion
-                    else FusedProgress(
-                        edge, progress.path + (slot,) if slot is not None else progress.path
-                    )
-                )
-                completes = completed_expansion if expansion else completed_fused_cycle
-                completion_failed = (
-                    spec is not None
-                    and node.step in (spec.growth, spec.horizon - 1)
-                    and not completed_construction(
-                        node.origin, product, next_progress, spec, refined=node.step > spec.growth
-                    )
-                ) or (
-                    spec is None
-                    and node.step == node.horizon - 1
-                    and not completes(node.origin, product, next_progress)
-                )
-                if completion_failed:
-                    self.work.rejected_products += 1
-                    continue
-                context = node.context.with_locus(slot) if slot is not None else node.context
-                if expansion or spec:
-                    try:
-                        if spec:
-                            next_progress.validate(
-                                product, node.origin, context.locus, node.step + 1, spec
-                            )
-                        else:
-                            next_progress.validate(
-                                product, node.origin, context.locus, node.step + 1
-                            )
-                    except ValueError:
-                        self.work.rejected_products += 1
-                        continue
-                successors[index] = OptionState(
-                    product,
-                    node.origin,
-                    context,
-                    node.lineage.observe(families[index], actions[index]),
-                    node.option,
-                    node.step + 1,
-                    node.horizon,
-                    node.bundle_id,
-                    fused_progress=None if expansion or spec else next_progress,
-                    expansion_progress=next_progress if expansion else None,
-                    ring_progress=next_progress if spec else None,
-                )
+                product = successor(edge, index)
+                if product is not None:
+                    successors[index] = product
             receipt["after_product_contract"] = len(successors)
             conditioned = condition(sorted(successors))
             if len(conditioned.indices):

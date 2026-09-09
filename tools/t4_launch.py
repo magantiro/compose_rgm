@@ -80,6 +80,11 @@ def main() -> None:
         action="store_true",
         help="one capped frozen-model fused reference trajectory; no docking or lookahead",
     )
+    ap.add_argument(
+        "--lazy-reference-probe",
+        action="store_true",
+        help="one saved-parent task-search cost probe; zero docking",
+    )
     # V_z = 0 until a T4-specific estimator exists; the QED table was null and
     # learned QED-region effects, and an interface accepting it is not a reason
     # to use it here.  `macro_prior` names the new unlearned option-prior arm.
@@ -116,6 +121,7 @@ def main() -> None:
                 a.feedback_round,
                 a.ring_program_round,
                 a.task_search_audit,
+                a.lazy_reference_probe,
             )
         )
         > 1
@@ -142,6 +148,7 @@ def main() -> None:
         or a.feedback_round
         or a.ring_program_round
         or a.task_search_audit
+        or a.lazy_reference_probe
     ):
         launch_continuation_profile(
             preflight,
@@ -152,6 +159,7 @@ def main() -> None:
             feedback=a.feedback_round,
             rings=a.ring_program_round,
             task_search=a.task_search_audit,
+            lazy_probe=a.lazy_reference_probe,
         )
         return
 
@@ -235,6 +243,7 @@ def launch_continuation_profile(
     feedback: bool = False,
     rings: bool = False,
     task_search: bool = False,
+    lazy_probe: bool = False,
 ) -> None:
     """Spawn only the fixed diagnostic into the deployed app; retain its call ID."""
     import sys
@@ -243,7 +252,9 @@ def launch_continuation_profile(
     from modal_apps.run_process_v2_p50_app import local_image_revision
 
     kind = (
-        "t4_task_search_audit"
+        "t4_lazy_reference_probe"
+        if lazy_probe
+        else "t4_task_search_audit"
         if task_search
         else "t4_ring_program_round"
         if rings
@@ -263,6 +274,7 @@ def launch_continuation_profile(
         ROOT
         / {
             "t4_task_search_audit": "configs/t4_task_search_audit.json",
+            "t4_lazy_reference_probe": "configs/t4_lazy_reference_probe.json",
             "t4_ring_program_round": "configs/t4_ring_program_round.json",
             "t4_feedback_round": "configs/t4_feedback_round.json",
             "t4_partial_docking": "configs/t4_partial_docking.json",

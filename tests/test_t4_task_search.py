@@ -15,7 +15,8 @@ from compose_v4.rewrite.operators import AtomInsert
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
 
 
-def test_preparation_is_round_frozen_bounded_and_never_docks():
+@pytest.mark.parametrize("planning_policy", ["adaptive_full_rows", "lazy_reference"])
+def test_preparation_is_round_frozen_bounded_and_never_docks(planning_policy):
     rows = []
     for i in range(1, 18):
         graph = pad_molecular_graph(smiles_to_molecular_graph("C" * i), 48)
@@ -42,6 +43,7 @@ def test_preparation_is_round_frozen_bounded_and_never_docks():
         max_rollouts=2,
         initial_rollouts=1,
         rollouts_per_decision=1,
+        planning_policy=planning_policy,
     )
     warm = {
         "schema_version": "t4_exact_archive_v1",
@@ -79,6 +81,9 @@ def test_preparation_is_round_frozen_bounded_and_never_docks():
     assert verification["replayed_steps"] >= 1
     assert summarize(result, verification)["decision"] == "diagnose_before_docking"
     assert result["pool"]
+    if planning_policy == "lazy_reference":
+        assert result["work"][0]["planner"]["reference_draws"] > 0
+        assert result["work"][0]["planner"]["rollouts_completed"] > 0
     tampered = copy.deepcopy(result)
     tampered["pool"][0]["r_coherent"] += 0.1
     with pytest.raises(ValueError, match="structural metadata"):
@@ -105,3 +110,15 @@ def test_unfinished_parent_is_not_automatically_replayed(tmp_path):
     seal(tmp_path / "started/00.json", {"parent_index": 0})
     with pytest.raises(RuntimeError, match="unfinished started parent"):
         run_audit({}, {}, None, None, tmp_path)
+
+
+def test_planning_policy_extension_preserves_legacy_config_identity():
+    cfg = PreparationConfig()
+    assert "planning_policy" not in cfg.payload()
+    assert PreparationConfig(**cfg.payload()) == cfg
+    assert (
+        PreparationConfig(planning_policy="lazy_reference").payload()["planning_policy"]
+        == "lazy_reference"
+    )
+    with pytest.raises(ValueError, match="planning policy"):
+        PreparationConfig(planning_policy="unknown")

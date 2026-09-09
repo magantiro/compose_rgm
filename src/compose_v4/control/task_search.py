@@ -1,7 +1,7 @@
 """Budgeted, importance-weighted search over a supplied executable hierarchy.
 
-This is approximate planning, not exact posterior sampling. Full reference
-rows are retained; only completed rollouts supply return observations.
+This is approximate planning, not exact posterior sampling. Committed decisions
+retain full reference rows; only completed rollouts supply return observations.
 """
 
 from __future__ import annotations
@@ -84,6 +84,8 @@ class SearchWork:
     rollouts_completed: int = 0
     rollouts_interrupted: int = 0
     dead_ends: int = 0
+    reference_draws: int = 0
+    deepest_rollout_steps: int = 0
 
 
 class TaskSearch(Generic[State]):
@@ -108,10 +110,12 @@ class TaskSearch(Generic[State]):
         max_terminals: int = 256,
         max_rollouts: int = 32,
         max_path_steps: int = 48,
+        reference_draw: Callable[[State, np.random.Generator], State | None] | None = None,
     ):
         if not snapshot_id:
             raise ValueError("immutable reference/objective snapshot_id is required")
         self.reference, self.terminal, self.state_key = reference, terminal, state_key
+        self.reference_draw = reference_draw
         self.snapshot_id = snapshot_id
         self.rng = np.random.default_rng(_nonnegative_integer(seed, "seed"))
         for name, value in (
@@ -125,13 +129,17 @@ class TaskSearch(Generic[State]):
         self.rows: dict[Hashable, SearchRow[State]] = {}
         self.returns: dict[Hashable, ReturnEstimate] = {}
         self.terminals: dict[Hashable, float] = {}
+        self.sampled_keys: set[Hashable] = set()
 
     def row(self, state: State) -> SearchRow[State]:
         key = self.state_key(state)
         if key in self.rows:
             self.work.row_hits += 1
             return self.rows[key]
-        if self.work.rows >= self.max_rows:
+        if self.work.rows >= self.max_rows or (
+            key not in self.sampled_keys
+            and len(set(self.rows) | self.sampled_keys) >= self.max_rows
+        ):
             raise ContinuationBudgetExceeded("hierarchical search row budget exhausted")
         self.work.rows += 1  # attempted rows, including interrupted construction
         result = self.reference(state)
@@ -206,17 +214,42 @@ class TaskSearch(Generic[State]):
                 value = self.terminal_value(state)
                 if value is not None:
                     break
-                row = self.row(state)
-                if not row.successors:
-                    self.work.dead_ends += 1
-                    value = 0.0
-                    break
-                if len(path) >= self.max_path_steps:
-                    raise ContinuationBudgetExceeded("hierarchical rollout path bound exhausted")
-                q = self.decision(state)["probabilities"]
-                index = int(self.rng.choice(len(q), p=q))
-                path.append((self.state_key(state), math.log(row.reference[index] / q[index])))
-                state = row.successors[index]
+                if self.reference_draw is not None:
+                    if len(path) >= self.max_path_steps:
+                        raise ContinuationBudgetExceeded(
+                            "hierarchical rollout path bound exhausted"
+                        )
+                    key = self.state_key(state)
+                    if (
+                        key not in self.sampled_keys
+                        and key not in self.rows
+                        and len(set(self.rows) | self.sampled_keys) >= self.max_rows
+                    ):
+                        raise ContinuationBudgetExceeded("hierarchical search row budget exhausted")
+                    self.sampled_keys.add(key)
+                    self.work.reference_draws += 1
+                    following = self.reference_draw(state, self.rng)
+                    if following is None:
+                        self.work.dead_ends += 1
+                        value = 0.0
+                        break
+                    path.append((key, 0.0))  # exact reference/proposal suffix ratio = 1
+                    state = following
+                else:
+                    row = self.row(state)
+                    if not row.successors:
+                        self.work.dead_ends += 1
+                        value = 0.0
+                        break
+                    if len(path) >= self.max_path_steps:
+                        raise ContinuationBudgetExceeded(
+                            "hierarchical rollout path bound exhausted"
+                        )
+                    q = self.decision(state)["probabilities"]
+                    index = int(self.rng.choice(len(q), p=q))
+                    path.append((self.state_key(state), math.log(row.reference[index] / q[index])))
+                    state = row.successors[index]
+                self.work.deepest_rollout_steps = max(self.work.deepest_rollout_steps, len(path))
         except ContinuationBudgetExceeded:
             self.work.rollouts_interrupted += 1
             return False
@@ -246,8 +279,11 @@ class TaskSearch(Generic[State]):
             "snapshot_id": self.snapshot_id,
             **asdict(self.work),
             "cached_rows": len(self.rows),
+            "sampled_row_keys": len(self.sampled_keys),
             "rng_state": self.rng.bit_generator.state,
-            "estimator": "adaptive_suffix_self_normalized_importance_with_shrinkage",
+            "estimator": "reference_rollouts_with_shrinkage"
+            if self.reference_draw is not None
+            else "adaptive_suffix_self_normalized_importance_with_shrinkage",
             "exact_doob": False,
             "uncertainty_calibrated": False,
         }

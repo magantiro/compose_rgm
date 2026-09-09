@@ -39,9 +39,21 @@ class PreparationConfig:
     rollouts_per_decision: int = 2
     oracle_batch: int = 20
     seed: int = 1000
+    planning_policy: str = "adaptive_full_rows"
+
+    def payload(self):
+        result = asdict(self)
+        # The optional policy extension must not invalidate legacy saved locks.
+        if self.planning_policy == "adaptive_full_rows":
+            result.pop("planning_policy")
+        return result
 
     def __post_init__(self):
         for name, value in asdict(self).items():
+            if name == "planning_policy":
+                if value not in ("adaptive_full_rows", "lazy_reference"):
+                    raise ValueError(f"unknown planning policy: {value!r}")
+                continue
             if type(value) is not int or value < (0 if name == "seed" else 1):
                 raise ValueError(f"invalid preparation field {name}: {value!r}")
         if (
@@ -83,7 +95,7 @@ def prepare(
         {
             "source": source_sha256,
             "inputs": input_sha256,
-            "config": asdict(config),
+            "config": config.payload(),
             "snapshot": snapshot,
         }
     )
@@ -177,8 +189,11 @@ def prepare(
                 root_id=f"round{next_round}:lineage{parent_index}",
             )
             law_cache = {}
+            law_work = {"attempted": 0, "completed": 0, "executor_calls": 0, "seconds": 0.0}
 
-            def cached_law(graph, law_cache=law_cache, parent_index=parent_index):
+            def cached_law(
+                graph, law_cache=law_cache, parent_index=parent_index, law_work=law_work
+            ):
                 key = exact_graph_key(graph)
                 if key not in law_cache:
                     if progress:
@@ -191,13 +206,22 @@ def prepare(
                                 "law_enumerations": len(law_cache),
                             }
                         )
-                    law_cache[key] = enumerate_law(graph)
+                    before_calls, before_time = meter.calls, perf_counter()
+                    law_work["attempted"] += 1
+                    try:
+                        law_cache[key] = enumerate_law(graph)
+                        law_work["completed"] += 1
+                    finally:
+                        law_work["executor_calls"] += meter.calls - before_calls
+                        law_work["seconds"] += perf_counter() - before_time
                 return law_cache[key]
 
             kernel = OptionContinuationKernel(
                 cached_law, system, max_executor_applications=config.executor_per_parent
             )
-            hierarchy = MolecularHierarchy(kernel)
+            hierarchy = MolecularHierarchy(
+                kernel, lazy_applicability=config.planning_policy == "lazy_reference"
+            )
             seeds = np.random.SeedSequence([config.seed, next_round, parent_index]).spawn(2)
             planner = TaskSearch(
                 hierarchy.row,
@@ -209,6 +233,9 @@ def prepare(
                 max_terminals=config.max_terminals,
                 max_rollouts=config.max_rollouts,
                 max_path_steps=3 * config.primitive_budget,
+                reference_draw=hierarchy.sample_reference
+                if config.planning_policy == "lazy_reference"
+                else None,
             )
             acting_rng = np.random.default_rng(seeds[1])
             share = ParentExecutorShare(config.executor_per_parent)
@@ -332,6 +359,8 @@ def prepare(
                 "planner": planner.receipt(),
                 "acting_rng_state": acting_rng.bit_generator.state,
                 "law_enumerations": len(law_cache),
+                "law_work": dict(law_work),
+                "option_kernel_work": asdict(kernel.work),
                 "seconds": perf_counter() - parent_start,
                 "candidates": parent_candidates,
                 "terminal_values": dict(value_cache),
@@ -356,7 +385,7 @@ def prepare(
         "schema_version": "t4_hierarchical_candidate_lock_v2",
         "controller": "hierarchical_task_v1",
         "round": next_round,
-        "config": asdict(config),
+        "config": config.payload(),
         "source_sha256": source_sha256,
         "input_sha256": input_sha256,
         "value_snapshot": model.payload,
@@ -374,6 +403,6 @@ def prepare(
         "executor_attempts": [a for u in units for a in u["executor_attempts"]],
         "seconds": perf_counter() - started,
         "software": {"rdkit": rdBase.rdkitVersion, "numpy": np.__version__},
-        "config_sha256": identity(asdict(config)),
+        "config_sha256": identity(config.payload()),
         "automatic_docking": False,
     }
