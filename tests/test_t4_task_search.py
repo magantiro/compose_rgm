@@ -50,6 +50,11 @@ def test_preparation_is_round_frozen_bounded_and_never_docks(planning_policy, un
         planning_policy=planning_policy,
         compute_policy="metered_uncapped_v1" if uncapped else "bounded_v1",
         **({"product_gate": "executable_intermediates_v1"} if pathwise else {}),
+        **(
+            {"return_policy": "anytime_options_v1"}
+            if pathwise and planning_policy == "lazy_reference"
+            else {}
+        ),
     )
     warm = {
         "schema_version": "t4_exact_archive_v1",

@@ -111,11 +111,15 @@ class TaskSearch(Generic[State]):
         max_rollouts: int = 32,
         max_path_steps: int = 48,
         reference_draw: Callable[[State, np.random.Generator], State | None] | None = None,
+        endpoint: Callable[[State], float | None] | None = None,
     ):
         if not snapshot_id:
             raise ValueError("immutable reference/objective snapshot_id is required")
         self.reference, self.terminal, self.state_key = reference, terminal, state_key
         self.reference_draw = reference_draw
+        self.endpoint = endpoint
+        self.endpoints: dict[Hashable, float | None] = {}
+        self.endpoint_evaluations = 0
         self.snapshot_id = snapshot_id
         self.rng = np.random.default_rng(_nonnegative_integer(seed, "seed"))
         for name, value in (
@@ -211,6 +215,20 @@ class TaskSearch(Generic[State]):
             "snapshot_id": self.snapshot_id,
         }
 
+    def endpoint_value(self, state: State) -> float:
+        """A completed option may be a candidate without ending the search suffix."""
+        if self.endpoint is None:
+            return 0.0
+        key = self.state_key(state)
+        if key not in self.endpoints:
+            value = self.endpoint(state)
+            if value is not None:
+                if not math.isfinite(value) or not 0 <= value <= 1:
+                    raise ValueError("endpoint task value must be finite in [0, 1]")
+                self.endpoint_evaluations += 1
+            self.endpoints[key] = value
+        return self.endpoints[key] or 0.0
+
     def rollout(self, root: State) -> bool:
         if self.work.rollouts_started >= self.max_rollouts:
             return False
@@ -219,7 +237,9 @@ class TaskSearch(Generic[State]):
         try:
             for _ in range(self.max_path_steps + 1):
                 value = self.terminal_value(state)
+                stop_value = self.endpoint_value(state)
                 if value is not None:
+                    value = max(value, stop_value)
                     break
                 if self.reference_draw is not None:
                     if len(path) >= self.max_path_steps:
@@ -239,15 +259,15 @@ class TaskSearch(Generic[State]):
                     following = self.reference_draw(state, self.rng)
                     if following is None:
                         self.work.dead_ends += 1
-                        value = 0.0
+                        value = stop_value
                         break
-                    path.append((key, 0.0))  # exact reference/proposal suffix ratio = 1
+                    path.append((key, 0.0, stop_value))  # reference/proposal suffix ratio = 1
                     state = following
                 else:
                     row = self.row(state)
                     if not row.successors:
                         self.work.dead_ends += 1
-                        value = 0.0
+                        value = stop_value
                         break
                     if len(path) >= self.max_path_steps:
                         raise ContinuationBudgetExceeded(
@@ -255,7 +275,13 @@ class TaskSearch(Generic[State]):
                         )
                     q = self.decision(state)["probabilities"]
                     index = int(self.rng.choice(len(q), p=q))
-                    path.append((self.state_key(state), math.log(row.reference[index] / q[index])))
+                    path.append(
+                        (
+                            self.state_key(state),
+                            math.log(row.reference[index] / q[index]),
+                            stop_value,
+                        )
+                    )
                     state = row.successors[index]
                 self.work.deepest_rollout_steps = max(self.work.deepest_rollout_steps, len(path))
         except ContinuationBudgetExceeded:
@@ -267,8 +293,9 @@ class TaskSearch(Generic[State]):
             raise
         self.returns.setdefault(self.state_key(state), ReturnEstimate()).add(value, 0.0)
         log_weight = 0.0
-        for key, log_ratio in reversed(path):
+        for key, log_ratio, stop_value in reversed(path):
             log_weight += log_ratio
+            value = max(value, stop_value)
             self.returns.setdefault(key, ReturnEstimate()).add(value, log_weight)
         self.work.rollouts_completed += 1
         return True
@@ -294,4 +321,15 @@ class TaskSearch(Generic[State]):
             else "adaptive_suffix_self_normalized_importance_with_shrinkage",
             "exact_doob": False,
             "uncertainty_calibrated": False,
+            **(
+                {
+                    "return_policy": "anytime_options_v1",
+                    "endpoint_evaluations": self.endpoint_evaluations,
+                    "positive_endpoint_evaluations": sum(
+                        v is not None and v > 0 for v in self.endpoints.values()
+                    ),
+                }
+                if self.endpoint is not None
+                else {}
+            ),
         }

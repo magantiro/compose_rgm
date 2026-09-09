@@ -53,6 +53,7 @@ class PreparationConfig:
     planning_policy: str = "adaptive_full_rows"
     compute_policy: str = "bounded_v1"
     product_gate: str = LEGACY_PRODUCT_GATE
+    return_policy: str = "terminal_only_v1"
 
     def payload(self):
         result = asdict(self)
@@ -63,15 +64,24 @@ class PreparationConfig:
             result.pop("compute_policy")
         if self.product_gate == LEGACY_PRODUCT_GATE:
             result.pop("product_gate")
+        if self.return_policy == "terminal_only_v1":
+            result.pop("return_policy")
         return result
 
     def __post_init__(self):
         validate_product_gate(self.product_gate)
+        if self.return_policy not in ("terminal_only_v1", "anytime_options_v1"):
+            raise ValueError(f"unknown return policy: {self.return_policy!r}")
+        if (
+            self.return_policy == "anytime_options_v1"
+            and self.product_gate != EXECUTABLE_PRODUCT_GATE
+        ):
+            raise ValueError("anytime options require separate pathwise and endpoint gates")
         if self.compute_policy not in ("bounded_v1", "metered_uncapped_v1"):
             raise ValueError(f"unknown compute policy: {self.compute_policy!r}")
         uncapped = self.compute_policy == "metered_uncapped_v1"
         for name, value in asdict(self).items():
-            if name in ("compute_policy", "product_gate"):
+            if name in ("compute_policy", "product_gate", "return_policy"):
                 continue
             if uncapped and name in (
                 "executor_per_parent",
@@ -165,15 +175,23 @@ def prepare(
             )
         return property_cache[smiles]
 
-    def terminal(node):
-        if node.budget:
-            return None
+    def candidate_value(node):
         smiles = canonical_state_key(node.graph)
         if smiles not in value_cache:
-            value_cache[smiles] = model.desirability(
-                smiles, endpoint_check({"smiles": smiles, **properties(smiles)})
+            value_cache[smiles] = (
+                0.0
+                if (config.return_policy == "anytime_options_v1" and smiles in old_keys)
+                else model.desirability(
+                    smiles, endpoint_check({"smiles": smiles, **properties(smiles)})
+                )
             )
         return value_cache[smiles]
+
+    def terminal(node):
+        return None if node.budget else candidate_value(node)
+
+    def endpoint(node):
+        return candidate_value(node) if node.stage == "where" else None
 
     parents = sorted(
         archive,
@@ -295,6 +313,7 @@ def prepare(
                 reference_draw=hierarchy.sample_reference
                 if config.planning_policy == "lazy_reference"
                 else None,
+                endpoint=endpoint if config.return_policy == "anytime_options_v1" else None,
             )
             acting_rng = np.random.default_rng(seeds[1])
             search_progress["work"] = planner.work
@@ -469,6 +488,11 @@ def prepare(
         "terminal_value_evaluations": [
             {"smiles": k, "value": value_cache[k]} for k in sorted(value_cache)
         ],
+        **(
+            {"value_evaluation_scope": "completed_options_and_terminal"}
+            if config.return_policy == "anytime_options_v1"
+            else {}
+        ),
         "planning_rollouts_started": all_started,
         "executor_calls": prior_calls + meter.calls,
         "new_executor_calls": meter.calls,
