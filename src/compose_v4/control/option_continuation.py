@@ -61,7 +61,7 @@ from compose_v4.control.ring_program import (
     ring_spec,
 )
 from compose_v4.data.charge_policy import charge_policy_preserved
-from compose_v4.gates.med_chem_gate import is_valid
+from compose_v4.gates.med_chem_gate import is_executable, is_valid
 from compose_v4.rewrite.kernel import InvalidRewrite, RewriteSystem, canonical_state_key
 
 
@@ -184,6 +184,20 @@ class OptionKernelWork:
     product_cache_hits: int = 0
 
 
+LEGACY_PRODUCT_GATE = "endpoint_every_step_v1"
+EXECUTABLE_PRODUCT_GATE = "executable_intermediates_v1"
+
+
+def validate_product_gate(policy: str) -> None:
+    if policy not in (LEGACY_PRODUCT_GATE, EXECUTABLE_PRODUCT_GATE):
+        raise ValueError(f"unknown product gate policy: {policy!r}")
+
+
+def product_gate_accepts(smiles: str, policy: str) -> bool:
+    validate_product_gate(policy)
+    return is_executable(smiles) if policy == EXECUTABLE_PRODUCT_GATE else is_valid(smiles)
+
+
 class OptionContinuationKernel:
     """Existing option support and executor, with an explicit application ceiling.
 
@@ -201,6 +215,7 @@ class OptionContinuationKernel:
         max_executor_applications: int | None,
         macro_temperature: float = 2.0,
         macro_exploration: float = 0.15,
+        product_gate: str = LEGACY_PRODUCT_GATE,
     ) -> None:
         if max_executor_applications is not None and (
             isinstance(max_executor_applications, bool)
@@ -210,6 +225,8 @@ class OptionContinuationKernel:
             raise ValueError("max_executor_applications must be a nonnegative integer or None")
         if macro_temperature != 2.0 or macro_exploration != 0.15:
             raise ValueError("the inherited macro temperature/exploration are frozen at 2.0/0.15")
+        validate_product_gate(product_gate)
+        self.product_gate = product_gate
         self.enumerate_law = enumerate_law
         self.system = system
         self.max_executor_applications = max_executor_applications
@@ -225,7 +242,13 @@ class OptionContinuationKernel:
 
     @classmethod
     def from_runtime(
-        cls, model, system, *, time_point: float, max_executor_applications: int | None
+        cls,
+        model,
+        system,
+        *,
+        time_point: float,
+        max_executor_applications: int | None,
+        product_gate: str = LEGACY_PRODUCT_GATE,
     ):
         from compose_v4.experiments.production_successor_kernel import (
             enumerate_factorized_marked_law,
@@ -239,7 +262,12 @@ class OptionContinuationKernel:
                 tuple(m.probability for m in law.marks),
             )
 
-        return cls(enumerate_law, system, max_executor_applications=max_executor_applications)
+        return cls(
+            enumerate_law,
+            system,
+            max_executor_applications=max_executor_applications,
+            product_gate=product_gate,
+        )
 
     def row(self, node: OptionState) -> ReferenceRow[OptionState]:
         return self._row(node, lazy=False)
@@ -278,7 +306,7 @@ class OptionContinuationKernel:
                 0 < product.n_real_atoms <= 40
                 and graph_connected(product)
                 and charge_policy_preserved(node.graph, product)
-                and is_valid(key)
+                and product_gate_accepts(key, self.product_gate)
                 and context_preserved(
                     node.origin, product, node.context.frozen, node.context.terminal_context_slots
                 )

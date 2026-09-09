@@ -19,7 +19,8 @@ from compose_v4.rewrite.trace_shard import decode_state, encode_state
 
 @pytest.mark.parametrize("planning_policy", ["adaptive_full_rows", "lazy_reference"])
 @pytest.mark.parametrize("uncapped", [False, True])
-def test_preparation_is_round_frozen_bounded_and_never_docks(planning_policy, uncapped):
+@pytest.mark.parametrize("pathwise", [False, True])
+def test_preparation_is_round_frozen_bounded_and_never_docks(planning_policy, uncapped, pathwise):
     rows = []
     for i in range(1, 18):
         graph = pad_molecular_graph(smiles_to_molecular_graph("C" * i), 48)
@@ -48,6 +49,7 @@ def test_preparation_is_round_frozen_bounded_and_never_docks(planning_policy, un
         rollouts_per_decision=1,
         planning_policy=planning_policy,
         compute_policy="metered_uncapped_v1" if uncapped else "bounded_v1",
+        **({"product_gate": "executable_intermediates_v1"} if pathwise else {}),
     )
     warm = {
         "schema_version": "t4_exact_archive_v1",

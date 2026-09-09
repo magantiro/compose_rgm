@@ -14,7 +14,12 @@ import numpy as np
 from rdkit import rdBase
 
 from compose_v4.chem.molecular_graph import is_element
-from compose_v4.control.option_continuation import OptionContinuationKernel, OptionState
+from compose_v4.control.option_continuation import (
+    EXECUTABLE_PRODUCT_GATE,
+    LEGACY_PRODUCT_GATE,
+    OptionContinuationKernel,
+    OptionState,
+)
 from compose_v4.control.region import enumerate_regions
 from compose_v4.control.region_rewrite import (
     Lineage,
@@ -23,6 +28,7 @@ from compose_v4.control.region_rewrite import (
     touched_slots,
 )
 from compose_v4.experiments.t4_warm_continuation import canonical_slots
+from compose_v4.gates.med_chem_gate import pathwise_reasons, validity_reasons
 from compose_v4.rewrite.action_codec_v4 import decode_action
 from compose_v4.rewrite.kernel import editing_v2_semantic_rewrite_system
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
@@ -32,18 +38,29 @@ from tools.ivg_winner_paths import digest, mapped_context, publish, sha
 ROOT = Path(__file__).resolve().parents[1]
 BASELINE_SHA = "3b7fb79a541b94dd5421f30ffc0516c5cdc4d9316845cd40561d799ec517f922"
 REPAIRED = "src/compose_v4/control/region_rewrite.py"
+GATE_SOURCE = "src/compose_v4/control/option_continuation.py"
+ENDPOINT_SOURCE = "src/compose_v4/experiments/t4_endpoint_selection.py"
+FOOTPRINT_SHA = "9c93f491837ebdce607fa587cd357348ec33d8f83f5c5347395861e1aafa3824"
 
 
-def run(directory: Path, output: Path):
+def run(directory: Path, output: Path, *, gate_repair_baseline: Path | None = None):
     if subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT).strip():
         raise ValueError("use a clean committed worktree and an external output directory")
     baseline = directory / "audit.json"
     if sha(baseline) != BASELINE_SHA:
         raise ValueError("winner audit input hash mismatch")
     audit = json.loads(baseline.read_text())
+    before = None
+    if gate_repair_baseline is not None:
+        if sha(gate_repair_baseline) != FOOTPRINT_SHA:
+            raise ValueError("footprint repair input hash mismatch")
+        before = json.loads(gate_repair_baseline.read_text())
+        if sha(ROOT / REPAIRED) != before["after_region_code_sha256"]:
+            raise ValueError("region code changed after footprint repair")
+    policy = EXECUTABLE_PRODUCT_GATE if before else LEGACY_PRODUCT_GATE
     unchanged = {}
     for name, expected in audit["implementation_sha256"].items():
-        if name != REPAIRED:
+        if name != REPAIRED and not (before and name in (GATE_SOURCE, ENDPOINT_SOURCE)):
             if sha(ROOT / name) != expected:
                 raise ValueError(f"unexpected changed dependency: {name}")
             unchanged[name] = expected
@@ -53,6 +70,9 @@ def run(directory: Path, output: Path):
     ):
         raise ValueError("saved-state replay requires the audited local RDKit/NumPy runtime")
     started, rows, inputs = time.monotonic(), [], {str(baseline): BASELINE_SHA}
+    if before:
+        inputs[str(gate_repair_baseline)] = FOOTPRINT_SHA
+        previous_rows = {(r["pair_id"], r["step"]): r for r in before["rows"]}
     for pair in audit["pairs"]:
         if pair["status"] != "witness_found":
             continue
@@ -90,6 +110,7 @@ def run(directory: Path, output: Path):
                     lambda _, f=family, a=action: ((f,), (a,), (1.0,)),
                     editing_v2_semantic_rewrite_system(),
                     max_executor_applications=1,
+                    product_gate=policy,
                 )
                 for option in ("generic", "restate", "aromatize"):
                     node = OptionState(
@@ -129,6 +150,27 @@ def run(directory: Path, output: Path):
                     "kernel_executor_applications": kernel_calls,
                 }
             )
+            if before:
+                previous = previous_rows[(pair["pair_id"], step)]
+                if any(
+                    rows[-1][k] != previous[k]
+                    for k in (
+                        "source_state_sha256",
+                        "expected_slots",
+                        "actual_slots",
+                        "after_passing_regions",
+                        "context_preserving_regions",
+                        "scope_range",
+                    )
+                ):
+                    raise ValueError("saved action/context selection changed")
+                product_key = annotations[step + 1]["smiles"]
+                rows[-1].update(
+                    before_singleton_option_checks=previous["singleton_option_checks"],
+                    saved_product_smiles=product_key,
+                    endpoint_rejection_reasons=validity_reasons(product_key),
+                    pathwise_rejection_reasons=pathwise_reasons(product_key),
+                )
     result = {
         "schema_version": "t4_restate_footprint_repair_v1",
         "rows": rows,
@@ -160,6 +202,24 @@ def run(directory: Path, output: Path):
         "evidence_role": "development regression, no blind-discovery or pinned-Modal-runtime claim",
         "seconds": time.monotonic() - started,
     }
+    if before:
+        if {(r["pair_id"], r["step"]) for r in rows} != set(previous_rows):
+            raise ValueError("gate repair must account for every saved restatement")
+        result.update(
+            schema_version="t4_pathwise_gate_repair_v1",
+            before_gate_code_sha256=audit["implementation_sha256"][GATE_SOURCE],
+            after_gate_code_sha256=sha(ROOT / GATE_SOURCE),
+            integration_sha256={
+                name: sha(ROOT / name)
+                for name in (
+                    "src/compose_v4/experiments/t4_endpoint_selection.py",
+                    "src/compose_v4/experiments/t4_task_search.py",
+                    "src/compose_v4/experiments/t4_task_search_audit.py",
+                    "docs/T4_PATHWISE_GATE_REPAIR.md",
+                )
+            },
+        )
+        result["configuration"]["product_gate"] = policy
     publish(output, result)
     print(
         json.dumps(
@@ -177,5 +237,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("directory", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--gate-repair-baseline", type=Path)
     args = parser.parse_args()
-    run(args.directory, args.output)
+    run(args.directory, args.output, gate_repair_baseline=args.gate_repair_baseline)

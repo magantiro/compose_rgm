@@ -14,7 +14,12 @@ from compose_v4.control import graph_geometry as GG
 from compose_v4.control.docking_value import DockingValue, identity
 from compose_v4.control.fused_option import FusedProgress, completed_fused_cycle
 from compose_v4.control.molecular_task_search import MolecularHierarchy, MolecularSearchState
-from compose_v4.control.option_continuation import OptionState, exact_graph_key
+from compose_v4.control.option_continuation import (
+    EXECUTABLE_PRODUCT_GATE,
+    OptionState,
+    exact_graph_key,
+    product_gate_accepts,
+)
 from compose_v4.control.region_rewrite import Lineage, RewriteContext, context_preserved
 from compose_v4.control.ring_program import RingProgress, completed_construction, ring_spec
 from compose_v4.control.task_search import SearchRow
@@ -25,11 +30,15 @@ from compose_v4.experiments.continuation_profile import (
     state_payload,
     verify_file,
 )
-from compose_v4.experiments.t4_endpoint_selection import calculate_properties, feasible_endpoint
+from compose_v4.experiments.t4_endpoint_selection import (
+    acceptable_endpoint,
+    calculate_properties,
+    feasible_endpoint,
+)
 from compose_v4.experiments.t4_matched_pilot import run_remote as common_remote
 from compose_v4.experiments.t4_matched_pilot import seal, unseal
 from compose_v4.experiments.t4_task_search import PreparationConfig
-from compose_v4.gates.med_chem_gate import is_valid
+from compose_v4.gates.med_chem_gate import validity_reasons
 from compose_v4.rewrite import action_codec, action_codec_v4
 from compose_v4.rewrite.kernel import canonical_state_key
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
@@ -67,6 +76,9 @@ def decode_option(payload):
 def verify_lock(lock, warm, system, *, verification_limit=2048):
     """Replay selected edits only. Learned full-row correctness is not re-enumerated."""
     config = PreparationConfig(**lock["config"])
+    endpoint_check = (
+        acceptable_endpoint if config.product_gate == EXECUTABLE_PRODUCT_GATE else feasible_endpoint
+    )
     if (
         lock["schema_version"] != "t4_hierarchical_candidate_lock_v2"
         or lock["round"] != warm["round"] + 1
@@ -214,7 +226,9 @@ def verify_lock(lock, warm, system, *, verification_limit=2048):
                             active.context.frozen,
                             active.context.terminal_context_slots,
                         )
-                        or not is_valid(canonical_state_key(product))
+                        or not product_gate_accepts(
+                            canonical_state_key(product), config.product_gate
+                        )
                     ):
                         raise ValueError("invalid replay, option or context transition")
                     complete = following.remaining == 0
@@ -294,10 +308,21 @@ def verify_lock(lock, warm, system, *, verification_limit=2048):
             raise ValueError("candidate feasibility metadata mismatch")
         if not np.isclose(c["predicted_docking"], model.predict([c["smiles"]])[0]):
             raise ValueError("candidate task score mismatch")
+        if config.product_gate == EXECUTABLE_PRODUCT_GATE:
+            reasons = validity_reasons(c["smiles"])
+            exclusions = ([] if feasible_endpoint(c) else ["existing_t4_constraint_violation"]) + [
+                f"med_chem:{r}" for r in reasons
+            ]
+            if (
+                c.get("med_chem_exclusion_reasons") != reasons
+                or c.get("oracle_eligible") is not endpoint_check(c)
+                or c.get("endpoint_exclusion_reasons") != exclusions
+            ):
+                raise ValueError("candidate endpoint-screen metadata mismatch")
     if (
         len(lock["take"]) > config.oracle_batch
         or len({r["smiles"] for r in lock["take"]}) != len(lock["take"])
-        or any(c not in pool or not feasible_endpoint(c) for c in lock["take"])
+        or any(c not in pool or not endpoint_check(c) for c in lock["take"])
     ):
         raise ValueError("invalid selected candidate lock")
     if lock["executor_calls"] != sum(u["parent_budget"]["executor_calls"] for u in lock["work"]):

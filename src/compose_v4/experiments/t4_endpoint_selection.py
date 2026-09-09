@@ -47,6 +47,21 @@ def feasible_endpoint(candidate: dict) -> bool:
     return candidate["v"] == 0
 
 
+def acceptable_endpoint(candidate: dict) -> bool:
+    """Existing med-chem screen plus T4 feasibility, only for returned candidates.
+
+    Kept distinct from benchmark feasibility: the inherited screen is a heuristic,
+    not an additional benchmark threshold or independent chemical validation.
+    """
+    from compose_v4.gates.med_chem_gate import is_valid
+
+    feasible = feasible_endpoint(candidate)
+    smiles = candidate.get("smiles")
+    if not isinstance(smiles, str) or not smiles:
+        raise ValueError("endpoint requires nonempty smiles for the returned-molecule screen")
+    return feasible and is_valid(smiles)
+
+
 def annotate_endpoints(pool: list[dict], policy: str) -> list[dict]:
     """Keep every record; mark eligibility only under the explicit new policy."""
     validate_policy(policy)

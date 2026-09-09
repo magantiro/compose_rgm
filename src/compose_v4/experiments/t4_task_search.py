@@ -17,11 +17,22 @@ from compose_v4.control import graph_geometry as GG
 from compose_v4.control.continuation import ContinuationBudgetExceeded
 from compose_v4.control.docking_value import DockingValue, identity
 from compose_v4.control.molecular_task_search import MolecularHierarchy, MolecularSearchState
-from compose_v4.control.option_continuation import OptionContinuationKernel, exact_graph_key
+from compose_v4.control.option_continuation import (
+    EXECUTABLE_PRODUCT_GATE,
+    LEGACY_PRODUCT_GATE,
+    OptionContinuationKernel,
+    exact_graph_key,
+    validate_product_gate,
+)
 from compose_v4.control.task_search import TaskSearch
 from compose_v4.experiments.continuation_profile import ExecutorMeter, encode_action, state_payload
-from compose_v4.experiments.t4_endpoint_selection import calculate_properties, feasible_endpoint
+from compose_v4.experiments.t4_endpoint_selection import (
+    acceptable_endpoint,
+    calculate_properties,
+    feasible_endpoint,
+)
 from compose_v4.experiments.t4_parent_budget import ParentExecutorShare
+from compose_v4.gates.med_chem_gate import validity_reasons
 from compose_v4.rewrite.kernel import canonical_state_key
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
 
@@ -41,6 +52,7 @@ class PreparationConfig:
     seed: int = 1000
     planning_policy: str = "adaptive_full_rows"
     compute_policy: str = "bounded_v1"
+    product_gate: str = LEGACY_PRODUCT_GATE
 
     def payload(self):
         result = asdict(self)
@@ -49,14 +61,17 @@ class PreparationConfig:
             result.pop("planning_policy")
         if self.compute_policy == "bounded_v1":
             result.pop("compute_policy")
+        if self.product_gate == LEGACY_PRODUCT_GATE:
+            result.pop("product_gate")
         return result
 
     def __post_init__(self):
+        validate_product_gate(self.product_gate)
         if self.compute_policy not in ("bounded_v1", "metered_uncapped_v1"):
             raise ValueError(f"unknown compute policy: {self.compute_policy!r}")
         uncapped = self.compute_policy == "metered_uncapped_v1"
         for name, value in asdict(self).items():
-            if name == "compute_policy":
+            if name in ("compute_policy", "product_gate"):
                 continue
             if uncapped and name in (
                 "executor_per_parent",
@@ -129,6 +144,9 @@ def prepare(
             or unit["preparation_identity"] != preparation_identity
         ):
             raise ValueError("cached parent identity/configuration mismatch")
+    endpoint_check = (
+        acceptable_endpoint if config.product_gate == EXECUTABLE_PRODUCT_GATE else feasible_endpoint
+    )
     seed = archive[0]["smiles"]
     generator = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
     seed_fp = generator.GetFingerprint(Chem.MolFromSmiles(seed))
@@ -152,7 +170,9 @@ def prepare(
             return None
         smiles = canonical_state_key(node.graph)
         if smiles not in value_cache:
-            value_cache[smiles] = model.desirability(smiles, feasible_endpoint(properties(smiles)))
+            value_cache[smiles] = model.desirability(
+                smiles, endpoint_check({"smiles": smiles, **properties(smiles)})
+            )
         return value_cache[smiles]
 
     parents = sorted(
@@ -253,7 +273,10 @@ def prepare(
                 return law_cache[key]
 
             kernel = OptionContinuationKernel(
-                cached_law, system, max_executor_applications=config.executor_per_parent
+                cached_law,
+                system,
+                max_executor_applications=config.executor_per_parent,
+                product_gate=config.product_gate,
             )
             hierarchy = MolecularHierarchy(
                 kernel, lazy_applicability=config.planning_policy == "lazy_reference"
@@ -377,6 +400,18 @@ def prepare(
                                     "predicted_docking": float(model.predict([smiles])[0]),
                                     "origin_bundle_ids": [bundle["bundle_id"]],
                                 }
+                                if config.product_gate == EXECUTABLE_PRODUCT_GATE:
+                                    reasons = validity_reasons(smiles)
+                                    record.update(
+                                        med_chem_exclusion_reasons=reasons,
+                                        oracle_eligible=endpoint_check(record),
+                                        endpoint_exclusion_reasons=(
+                                            ["existing_t4_constraint_violation"]
+                                            if not feasible_endpoint(record)
+                                            else []
+                                        )
+                                        + [f"med_chem:{r}" for r in reasons],
+                                    )
                                 parent_candidates.append(record)
                         node = product
             except ContinuationBudgetExceeded as error:
@@ -409,7 +444,7 @@ def prepare(
             if progress:
                 progress(unit)
     candidates = sorted(pool.values(), key=lambda r: r["smiles"])
-    eligible = [r for r in candidates if feasible_endpoint(r)]
+    eligible = [r for r in candidates if endpoint_check(r)]
     # Each emitted completion is one committed bundle outcome. Deduplication can
     # merge origins, never create extra region draws from planning trajectories.
     eligible.sort(key=lambda r: (r["predicted_docking"], r["smiles"]))
