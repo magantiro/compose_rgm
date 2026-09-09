@@ -1062,6 +1062,7 @@ def _concatenate_factorized_mark_batches(
         scaffold_contexts=(tuple(c for batch in batches for c in batch.scaffold_contexts)
                            if has_scaffolds else None),
         scaffold_node_flags=tensors("scaffold_node_flags") if has_scaffolds else None,
+        scaffold_min_h_counts=tensors("scaffold_min_h_counts") if has_scaffolds else None,
         scaffold_prepared_rows=(tuple(row for batch in batches for row in batch.scaffold_prepared_rows)
                                 if has_prepared_scaffolds else None),
         node_context_features=tensors("node_context_features") if has_node_context else None,

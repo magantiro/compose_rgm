@@ -11,7 +11,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Mapping, Sequence
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 
 import numpy as np
 
@@ -68,10 +68,37 @@ class ScaffoldContext:
     atoms: tuple[tuple[int, int, int, int], ...]  # slot, element, charge, source H
     bonds: tuple[tuple[int, int, int], ...]  # nonzero induced edges
     attachment_slots: tuple[int, ...]
+    # Keyword-only keeps application subclasses with required fields compatible.
+    minimum_h_counts: tuple[tuple[int, int], ...] = field(default=(), kw_only=True)
+
+    def __post_init__(self):
+        self.validate_hydrogen_reserve()
+
+    def validate_hydrogen_reserve(self) -> None:
+        """Validate optional source-only bounds, including subclass construction."""
+        bounds = self.minimum_h_counts
+        source_h = {v: h for v, _, _, h in self.atoms}
+        if (not isinstance(bounds, tuple)
+                or any(not isinstance(row, tuple) or len(row) != 2 for row in bounds)):
+            raise ValueError("minimum H counts must be immutable (slot, count) pairs")
+        if any(type(v) is not int or type(h) is not int for v, h in bounds):
+            raise ValueError("minimum H slots and counts must be integers")
+        if tuple(v for v, _ in bounds) != tuple(sorted({v for v, _ in bounds})):
+            raise ValueError("minimum H slots must be sorted and unique")
+        if any(v not in source_h or not 0 < h <= source_h[v] for v, h in bounds):
+            raise ValueError("minimum H must be positive and no greater than supplied H")
+
+    def hydrogen_reserve(self) -> np.ndarray:
+        self.validate_hydrogen_reserve()
+        result = np.zeros(self.n_slots, dtype=np.int64)
+        for slot, h in self.minimum_h_counts:
+            result[slot] = h
+        return result
 
     @classmethod
     def from_source(
         cls, source: MolecularGraph, attachment_slots: Sequence[int] = (),
+        *, minimum_h_counts: tuple[tuple[int, int], ...] = (),
     ) -> ScaffoldContext:
         _validate_graph(source)
         slots = _real_slots(source)
@@ -89,6 +116,7 @@ class ScaffoldContext:
             tuple((v, u, int(source.bonds[v, u])) for v in slots for u in slots
                   if u > v and source.bonds[v, u]),
             tuple(sorted(int(v) for v in attachments)),
+            minimum_h_counts=minimum_h_counts,
         )
 
     @property
@@ -98,6 +126,8 @@ class ScaffoldContext:
     @property
     def identity(self) -> str:
         payload = {"format": "preserved_scaffold_v1", **asdict(self)}
+        if not self.minimum_h_counts:
+            payload.pop("minimum_h_counts")  # preserve legacy empty-policy identities
         return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
 
     def node_flags(self) -> np.ndarray:
@@ -127,11 +157,15 @@ class ScaffoldContext:
             tuple(sorted((min(int(p[a]), int(p[b])), max(int(p[a]), int(p[b])), order)
                          for a, b, order in self.bonds)),
             tuple(sorted(int(p[v]) for v in self.attachment_slots)),
+            minimum_h_counts=tuple(sorted((int(p[v]), h) for v, h in self.minimum_h_counts)),
         )
 
     def accepts(self, state: MolecularGraph) -> bool:
         """Check the context invariant; executor validity is a separate guard."""
         if state.n_atoms != self.n_slots:
+            return False
+        self.validate_hydrogen_reserve()
+        if any(int(state.implicit_h_counts[v]) < h for v, h in self.minimum_h_counts):
             return False
         protected = set(self.protected_slots)
         attachments = set(self.attachment_slots)
@@ -172,9 +206,10 @@ def _align_scaffold_target(
     target: MolecularGraph,
     source_to_target: Mapping[int, int],
     attachment_slots: Sequence[int],
+    minimum_h_counts: tuple[tuple[int, int], ...] = (),
 ) -> tuple[ScaffoldContext, MolecularGraph, dict[int, int]]:
     _validate_graph(target)
-    context = ScaffoldContext.from_source(source, attachment_slots)
+    context = ScaffoldContext.from_source(source, attachment_slots, minimum_h_counts=minimum_h_counts)
     source_slots, target_slots = set(context.protected_slots), set(_real_slots(target))
     mapping = dict(source_to_target)
     if any(not isinstance(v, (int, np.integer)) for v in (*mapping, *mapping.values())):
@@ -209,6 +244,7 @@ def compile_scaffold_to_target_tracelets(
     source_to_target: Mapping[int, int],
     *,
     attachment_slots: Sequence[int] = (),
+    minimum_h_counts: tuple[tuple[int, int], ...] = (),
     system: RewriteSystem | None = None,
     typed_ring_payloads: bool = False,
 ) -> ScaffoldConstruction:
@@ -223,7 +259,7 @@ def compile_scaffold_to_target_tracelets(
     from compose_v4.rewrite.tracelet_compiler import _compile_null_to_target_tracelets
 
     context, aligned, mapping = _align_scaffold_target(
-        source, target, source_to_target, attachment_slots)
+        source, target, source_to_target, attachment_slots, minimum_h_counts)
     trace = _compile_null_to_target_tracelets(
         aligned, system=context.rewrite_system(system), typed_ring_payloads=typed_ring_payloads,
         preserved_source=source)
@@ -241,6 +277,7 @@ def compile_scaffold_to_target(
     source_to_target: Mapping[int, int],
     *,
     attachment_slots: Sequence[int] = (),
+    minimum_h_counts: tuple[tuple[int, int], ...] = (),
     system: RewriteSystem | None = None,
 ) -> ScaffoldConstruction:
     """Grow a connected supplied core by typed births and chord insertions.
@@ -251,7 +288,7 @@ def compile_scaffold_to_target(
     Empty contexts retain the existing micro compiler, not the tracelet recipe.
     """
     context, aligned, target_to_slot = _align_scaffold_target(
-        source, target, source_to_target, attachment_slots)
+        source, target, source_to_target, attachment_slots, minimum_h_counts)
     source_slots = set(context.protected_slots)
     # Independent copies prevent a caller's later array mutation changing replay.
     initial = pad_molecular_graph(source, source.n_atoms)

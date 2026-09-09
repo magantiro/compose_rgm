@@ -799,6 +799,7 @@ class FactorizedMarkBatch:
     property_condition_mask: Tensor | None = None
     scaffold_contexts: tuple[ScaffoldContext, ...] | None = None
     scaffold_node_flags: Tensor | None = None
+    scaffold_min_h_counts: Tensor | None = None
     node_context_features: Tensor | None = None
     node_context_schema: str | None = None
     node_context_keys: tuple[str, ...] | None = None
@@ -847,6 +848,8 @@ class FactorizedMarkBatch:
                                else self.scaffold_contexts[start:stop]),
             scaffold_node_flags=(None if self.scaffold_node_flags is None
                                  else tensor_slice(self.scaffold_node_flags)),
+            scaffold_min_h_counts=(None if self.scaffold_min_h_counts is None
+                                   else tensor_slice(self.scaffold_min_h_counts)),
             node_context_features=(None if self.node_context_features is None
                                    else tensor_slice(self.node_context_features)),
             node_context_schema=self.node_context_schema,
@@ -967,6 +970,8 @@ class FactorizedMarkBatch:
             scaffold_contexts=self.scaffold_contexts,
             scaffold_node_flags=(None if self.scaffold_node_flags is None
                                  else move(self.scaffold_node_flags)),
+            scaffold_min_h_counts=(None if self.scaffold_min_h_counts is None
+                                   else move(self.scaffold_min_h_counts)),
             node_context_features=(None if self.node_context_features is None
                                    else move(self.node_context_features)),
             node_context_schema=self.node_context_schema,
@@ -1068,6 +1073,8 @@ class FactorizedMarkBatch:
             scaffold_contexts=self.scaffold_contexts,
             scaffold_node_flags=(None if self.scaffold_node_flags is None
                                  else pin(self.scaffold_node_flags)),
+            scaffold_min_h_counts=(None if self.scaffold_min_h_counts is None
+                                   else pin(self.scaffold_min_h_counts)),
             node_context_features=(None if self.node_context_features is None
                                    else pin(self.node_context_features)),
             node_context_schema=self.node_context_schema,
@@ -1503,6 +1510,7 @@ def prepare_factorized_mark_batch(
     if any(state.n_atoms != n_slots for state in states):
         raise ValueError("all factorized mark states must use the same slot count")
     scaffold_flags = None
+    scaffold_min_h = None
     if scaffold_contexts is not None:
         if len(scaffold_contexts) != count:
             raise ValueError("scaffold conditions have the wrong row count")
@@ -1512,6 +1520,7 @@ def prepare_factorized_mark_batch(
                 or ring_restate_scorer_mode != LEGACY_RING_RESTATE_SCORER_MODE):
             raise ValueError("scaffold construction currently qualifies the legacy lipid lane only")
         scaffold_flags = torch.from_numpy(np.stack([c.node_flags() for c in scaffold_contexts]))
+        scaffold_min_h = torch.from_numpy(np.stack([c.hydrogen_reserve() for c in scaffold_contexts]))
     weights = importance_weights or (1.0,) * count
     if len(weights) != count:
         raise ValueError("importance weights have the wrong length")
@@ -1951,6 +1960,7 @@ def prepare_factorized_mark_batch(
         node_context_keys=context_keys,
         scaffold_contexts=scaffold_contexts,
         scaffold_node_flags=scaffold_flags,
+        scaffold_min_h_counts=scaffold_min_h,
         atom_types=torch.from_numpy(
             np.stack([state.atom_types for state in states])
         ).long(),
@@ -4913,6 +4923,13 @@ class FactorizedTraceletRateModel(nn.Module):
             if self.device.type == "cpu" and any(not c.accepts(s) for c, s in zip(batch.scaffold_contexts, batch.states)):
                 raise ValueError("batch state violates its supplied scaffold")
             expected_flags = torch.from_numpy(np.stack([c.node_flags() for c in batch.scaffold_contexts]))
+            if (batch.scaffold_min_h_counts is None
+                    or tuple(batch.scaffold_min_h_counts.shape) != tuple(batch.atom_types.shape)):
+                raise ValueError("scaffold hydrogen reserve missing; re-prepare legacy batches")
+            if self.device.type == "cpu":
+                expected_h = torch.from_numpy(np.stack([c.hydrogen_reserve() for c in batch.scaffold_contexts]))
+                if not torch.equal(batch.scaffold_min_h_counts, expected_h):
+                    raise ValueError("scaffold hydrogen reserve disagrees with supplied contexts")
             if batch.scaffold_node_flags is None or (self.device.type == "cpu"
                     and not torch.equal(batch.scaffold_node_flags, expected_flags)):
                 raise ValueError("scaffold flags disagree with supplied contexts")
@@ -4989,6 +5006,7 @@ class FactorizedTraceletRateModel(nn.Module):
                 batch.scaffold_node_flags.to(dtype=node.dtype)
             ) * real_float
         elif (batch.scaffold_contexts is not None or batch.scaffold_node_flags is not None
+              or batch.scaffold_min_h_counts is not None
               or batch.scaffold_prepared_rows is not None):
             raise ValueError("unconditioned model cannot silently ignore scaffold conditions")
         if self.node_context_encoder is not None:
@@ -5481,19 +5499,31 @@ class FactorizedTraceletRateModel(nn.Module):
         core = batch.scaffold_node_flags[..., 0].bool()
         ports = batch.scaffold_node_flags[..., 1].bool()
         mutable_boundary = ~core | ports
+        # CPU-collated policy tensor; all arithmetic here is batch-vectorized.
+        assert batch.scaffold_min_h_counts is not None
+        available_h = batch.implicit_h_counts - batch.scaffold_min_h_counts
+        orders = torch.arange(1, 4, device=available_h.device)
         pair_allowed = (mutable_boundary.unsqueeze(2) & mutable_boundary.unsqueeze(1)
                         & ~(core.unsqueeze(2) & core.unsqueeze(1)))
         result = dict(masks)
         result["grow_root"] = masks["grow_root"] & ~core.any(dim=1, keepdim=True)
-        result["grow_connected"] = masks["grow_connected"] & mutable_boundary[..., None, None]
+        result["grow_connected"] = (masks["grow_connected"] & mutable_boundary[..., None, None]
+            & (available_h[..., None, None] >= orders[None, None, :, None]))
         result["atom_delete"] = masks["atom_delete"] & ~core
         result["atom_restate"] = masks["atom_restate"] & ~core[..., None]
-        result["bond_reorder"] = masks["bond_reorder"] & pair_allowed[..., None]
+        delta = orders[None, None, None, :] - batch.bonds[..., None]
+        result["bond_reorder"] = (masks["bond_reorder"] & pair_allowed[..., None]
+            & (available_h[:, :, None, None] >= delta)
+            & (available_h[:, None, :, None] >= delta))
         removed = batch.graft_remove_neighbors.clamp_min(0)
         old_edge_allowed = pair_allowed.gather(2, removed)
-        result["bond_reroute"] = masks["bond_reroute"] & pair_allowed & old_edge_allowed
+        # Qualified grafts relocate a single bond: moved H is unchanged,
+        # removed-neighbor H increases, and target H decreases by one.
+        result["bond_reroute"] = (masks["bond_reroute"] & pair_allowed & old_edge_allowed
+            & (available_h[:, None, :] >= 1))
         result["cycle_insert"] = masks["cycle_insert"] & ~core.any(dim=1, keepdim=True)
-        result["cycle_attach"] = masks["cycle_attach"] & mutable_boundary[..., None]
+        result["cycle_attach"] = (masks["cycle_attach"] & mutable_boundary[..., None]
+            & (available_h[..., None] >= self.attach_required_h[None, None, :]))
         if batch.ring_delete_actions is None:
             raise ValueError("scaffold batch lacks CPU-filtered ring delete candidates")
         return result

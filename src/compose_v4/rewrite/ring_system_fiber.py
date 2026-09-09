@@ -236,6 +236,7 @@ def build_semantic_ring_system_decoder(
         {} if scaffold_context is None else
         {slot: (element, charge, h) for slot, element, charge, h in scaffold_context.atoms}
     )
+    minimum_h = {} if scaffold_context is None else dict(scaffold_context.minimum_h_counts)
     members = tuple(int(slot) for slot in placement.system_atoms)
     if len(set(members)) != len(members):
         raise ValueError("semantic ring placement repeats a member")
@@ -326,6 +327,7 @@ def build_semantic_ring_system_decoder(
             options = {
                 option for option in options
                 if charge == 0 and option.atom_type == element
+                and option.final_h_count >= minimum_h.get(slot, 0)
                 and (slot in scaffold_context.attachment_slots
                      or option.final_h_count == source_h)
             }

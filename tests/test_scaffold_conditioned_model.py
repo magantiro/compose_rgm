@@ -120,18 +120,23 @@ def tables(model, batch):
 
 
 @pytest.mark.parametrize(
-    "source,current,ports",
+    "source,current,ports,reserve",
     [
-        ("C", "CCC", (0,)),
-        ("NC", "NCC", (1,)),
-        ("NC", "NCC", (0, 1)),
-        ("CC", "CC(C)C", (1,)),
-        ("C1CC1", "C1CC1C", (2,)),
+        ("C", "CCC", (0,), ()),
+        ("NC", "NCC", (1,), ()),
+        ("NC", "NCC", (0, 1), ()),
+        ("CC", "CC(C)C", (1,), ()),
+        ("C1CC1", "C1CC1C", (2,), ()),
+        ("C", "CCC", (0,), ((0, 2),)),
+        ("NC", "NCC", (0, 1), ((0, 1), (1, 2))),
+        ("CC", "CC(C)C", (1,), ((1, 1),)),
+        ("C1CC1", "C1CC1C", (2,), ((2, 1),)),
+        ("NC=O", "N(C=O)C", (0, 1), ((0, 1),)),
     ],
 )
-def test_primitive_masks_equal_independent_executor_filter(model, source, current, ports):
+def test_primitive_masks_equal_independent_executor_filter(model, source, current, ports, reserve):
     state = graph(current)
-    context = ScaffoldContext.from_source(graph(source), ports)
+    context = ScaffoldContext.from_source(graph(source), ports, minimum_h_counts=reserve)
     empty = ScaffoldContext.from_source(empty_molecular_graph(8))
     base, _, _ = tables(model, batch_for(model, state, empty))
     conditional, _, _ = tables(model, batch_for(model, state, context))
