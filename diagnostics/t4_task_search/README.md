@@ -91,3 +91,8 @@ budget. Then freeze candidates and the matched comparison before spending fresh
 docking calls. A failed or all-reference audit must be reported, not called a
 controller improvement. No automatic multi-round campaign is authorized by this
 result. The previously observed best docking score remains -9.7 at 51 calls.
+
+Follow-up: the production audit is now complete in
+[../t4_task_search_audit/README.md](../t4_task_search_audit/README.md). Exact paths
+verified, but no planning rollout completed and task guidance stayed inactive.
+The chronological predictor check above does not override that negative result.
