@@ -419,6 +419,21 @@ def t4_uncapped_lookahead_probe(task: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+@app.function(
+    image=image, cpu=(1.0, 1.0), memory=8192, timeout=4200,
+    max_containers=1, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_target_recovery(task: dict[str, Any]) -> dict[str, Any]:
+    """One answer-known controller recovery attempt, never docking or fitting."""
+    from compose_v4.experiments.t4_target_recovery import run_remote
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return run_remote(
+        task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume, _runtime,
+        _validate_remote_revision,
+    )
+
+
 def _runtime():
     if "model" in _RT:
         return _RT

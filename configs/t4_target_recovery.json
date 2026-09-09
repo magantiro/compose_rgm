@@ -1,0 +1,71 @@
+{
+  "schema_version": "t4_target_recovery_contract_v1",
+  "authorization": {
+    "date": "2026-09-09",
+    "decision_document": "docs/T4_TARGET_RECOVERY.md",
+    "scope": "one target-informed controller attempt, no witness input, zero docking"
+  },
+  "training_authorized": false,
+  "source_role": "inspected PARP1 seed0 development case, not held out",
+  "required_rdkit": "2024.03.5",
+  "source": {
+    "path": "t4_ring_program_round/ddb2f823de568fdb904b4e08341ee3effc2e9828a9043de7836bfc202144cb0d/round_4/archive.json",
+    "sha256": "803741324ac0e30bff96f9ad36809c6d08ff8334a76a1cc1927a7296a91daf30",
+    "smiles": "CN(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2"
+  },
+  "target": {
+    "smiles": "O=C1CCCc2cc(CCc3ccc4c(c3)CNC(=O)c3cccn3C4=O)ccc21",
+    "pair_id": "5705946f25f35dd88189b1204f01f294e96a43e78fd1c5030967c48cecceccc8",
+    "selection": "shortest saved witness among three cell winners, not proved shortest",
+    "census_path": "diagnostics/ivg_t4_census/census.json",
+    "census_sha256": "2c06fdfe65fc31327d865381ccb8f4d2c40553c3925d9dc0a03386c22fda05bb",
+    "upstream_revision": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+    "upstream_cell": "docking_parp1_idx0_thr4",
+    "upstream_run_seed": 1,
+    "upstream_source_line": 1622,
+    "access_basis": "pinned public IVG results for noncommercial development analysis; census records license ambiguity",
+    "witness_actions_supplied": false
+  },
+  "task": {
+    "session": "compose_iclr",
+    "controller": "hierarchical_target_recovery_v1",
+    "prepare_only": true,
+    "delta": 0.4,
+    "budget": 0,
+    "seed_rng": 1000,
+    "kappa": 1,
+    "epsilon": 0.1,
+    "epsilon_region": 0.2,
+    "epsilon_option": 0.1
+  },
+  "recovery": {
+    "primitive_budget": 32,
+    "max_rollouts": 8,
+    "initial_rollouts": 2,
+    "seed": 1000,
+    "stop_seconds": 3600
+  },
+  "expected_input_sha256": {
+    "committor": "566cfe582973884b22e29c02b00b8188d9ef158b47387275eb36b6e8e62e2c11",
+    "r_theta_checkpoint": "c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8",
+    "r_theta_run_paths": "585286e0fb6dd8fb6b5a050dc3e5f8d1c7e782b105df114cbcb14cabbb5b2bc2",
+    "seed_manifest": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+    "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+    "receptor": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9"
+  },
+  "compute": {
+    "cpu": 1,
+    "memory_mib": 8192,
+    "timeout_seconds": 4200,
+    "automatic_retries": 0,
+    "oracle_call_limit": 0,
+    "heartbeat_seconds": 30,
+    "task_census": "one source-target pair, up to eight 32-edit planning rollouts and one 32-edit committed trajectory",
+    "reference_timing": "prior uncapped probe: 2870.870 law seconds / 369 law enumerations",
+    "expected_wall_seconds": [600, 2700],
+    "expected_cost": "one CPU and 8 GiB for at most 70 container-minutes; current dollar rate unverified",
+    "restart_unit": "complete attempt; persist every law and decision, no automatic incomplete-attempt retry",
+    "stop_limit": "32 edits, 8 rollouts, 3600 molecular-work seconds at new-law boundaries; platform 4200 seconds"
+  },
+  "contract_sha256": "be43613a17f737f0910985ad6f18ebc82951d232cb8e213aacc2c7642c48d3c4"
+}

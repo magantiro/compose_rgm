@@ -41,6 +41,11 @@ def main() -> None:
     ap.add_argument("--arms", default="macro_prior")
     ap.add_argument("--session", default="compose_iclr")
     ap.add_argument(
+        "--target-recovery",
+        action="store_true",
+        help="one answer-known 32-edit controller diagnostic; zero docking",
+    )
+    ap.add_argument(
         "--task-search-audit",
         action="store_true",
         help="one bounded cross-option production preparation; zero docking",
@@ -128,6 +133,7 @@ def main() -> None:
                 a.task_search_audit,
                 a.lazy_reference_probe,
                 a.uncapped_lookahead_probe,
+                a.target_recovery,
             )
         )
         > 1
@@ -156,6 +162,7 @@ def main() -> None:
         or a.task_search_audit
         or a.lazy_reference_probe
         or a.uncapped_lookahead_probe
+        or a.target_recovery
     ):
         launch_continuation_profile(
             preflight,
@@ -168,6 +175,7 @@ def main() -> None:
             task_search=a.task_search_audit,
             lazy_probe=a.lazy_reference_probe,
             uncapped_probe=a.uncapped_lookahead_probe,
+            target_recovery=a.target_recovery,
         )
         return
 
@@ -253,6 +261,7 @@ def launch_continuation_profile(
     task_search: bool = False,
     lazy_probe: bool = False,
     uncapped_probe: bool = False,
+    target_recovery: bool = False,
 ) -> None:
     """Spawn only the fixed diagnostic into the deployed app; retain its call ID."""
     import sys
@@ -261,7 +270,9 @@ def launch_continuation_profile(
     from modal_apps.run_process_v2_p50_app import local_image_revision
 
     kind = (
-        "t4_uncapped_lookahead_probe"
+        "t4_target_recovery"
+        if target_recovery
+        else "t4_uncapped_lookahead_probe"
         if uncapped_probe
         else "t4_lazy_reference_probe"
         if lazy_probe
@@ -284,6 +295,7 @@ def launch_continuation_profile(
     contract = (
         ROOT
         / {
+            "t4_target_recovery": "configs/t4_target_recovery.json",
             "t4_task_search_audit": "configs/t4_task_search_audit.json",
             "t4_lazy_reference_probe": "configs/t4_lazy_reference_probe.json",
             "t4_uncapped_lookahead_probe": "configs/t4_uncapped_lookahead_probe.json",
