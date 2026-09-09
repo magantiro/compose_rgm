@@ -1,0 +1,75 @@
+{
+  "clean_worktree_before_and_after": true,
+  "code_revision": "28bad97040fed500f07e9985f3cdc4fd1e644166",
+  "command": "env PYTHONPATH=/private/tmp/compose-t4-chemistry.hizM8Y:src:. OMP_NUM_THREADS=1 /Users/rmaganti/compose_rgm_git/.venv/bin/python -m pytest -q tests/test_frontier_search.py tests/test_t4_frontier_search.py tests/test_task_search.py tests/test_t4_task_search.py tests/test_option_continuation.py tests/test_region.py tests/test_ring_program.py tests/test_ring_expansion.py --junitxml=/private/tmp/compose-frontier-verify.Ok6WJ8/focused.xml",
+  "counts": {
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "tests": 97
+  },
+  "development_repairs": [
+    "JSON lineage shape was normalized for resume equivalence.",
+    "Legacy verifier now rejects unsupported schema before parsing configuration.",
+    "Multi-lineage pending-slice census prevents repeating completed parent work."
+  ],
+  "diff_check": "passed",
+  "evidence_class": "computed_engineering_verification_on_synthetic_fixtures",
+  "full_repository_suite": "not run; bounded development is not a release milestone",
+  "hardware": {
+    "accelerator": "none",
+    "architecture": "arm64",
+    "platform": "macOS-26.5.2-arm64-arm-64bit"
+  },
+  "inputs": {
+    "docs/RESUMABLE_FRONTIER_STAGE1.md": "b3228d5f8d4a0e791b4ff86e157b84ef3f91af13e544e265874de5bf08addd45",
+    "src/compose_v4/control/frontier_search.py": "558da45d5672e8cfcb99b5d5b1c0ee91509fa42a0daa8d5c00c23d5bcb675d93",
+    "src/compose_v4/control/molecular_search_codec.py": "a2e489663198701a678faa86170e8ce203e7e85200cca563c590c4ca2bc6bd9c",
+    "src/compose_v4/experiments/t4_frontier_search.py": "16c56c44187aadc44111bfea485651f48ec182251804b84d1da782ad6115fce0",
+    "src/compose_v4/experiments/t4_task_search_audit.py": "f38548da91018f93a699cd029f1c60bf89038ea46c229af9906f995c1885c5d1",
+    "tests/test_frontier_search.py": "30947a4dcefece56b2746a15cde4d966dd5e23adc8dabce8c499f45a3f88bb49",
+    "tests/test_option_continuation.py": "7ee2e944a826b07b32475d797c7198b2dedc695dadc7ca65b6f7ff10932c48b8",
+    "tests/test_region.py": "d2a16c424685fb7870f4b99bcdf2b812a5b23d26c519634cef9ba5e3d1de98b6",
+    "tests/test_ring_expansion.py": "68225570dd928d00480f3e52894d1d327d1153b1f1bbd5bffab1602222ca19e4",
+    "tests/test_ring_program.py": "5e5dfd96df360d38863aaa25f12510556191f591ffc5d1853f6effd3864e5fd9",
+    "tests/test_t4_frontier_search.py": "3b75b388de085febda576d3f3f8594a77e1459f77845c992aeaffcab27a53b7b",
+    "tests/test_t4_task_search.py": "b6b32aacb0ed4db1c9e5b8421530586595b2dc52802b628d13d961c407c824eb",
+    "tests/test_task_search.py": "9c737559c475d8f7bc18266c783bce9ccc85e7285350aa17f584a93362d8023c"
+  },
+  "junit_local_path": "/private/tmp/compose-frontier-verify.Ok6WJ8/focused.xml",
+  "junit_sha256": "a9c0f75a24ae62a7a652c8d89426fc86f47113b5f077099c967c94973517fef7",
+  "labels": "synthetic fixtures only; no measured docking outcomes introduced",
+  "limitations": [
+    "No task-performance or proposal-throughput conclusion.",
+    "No learned continuation critic.",
+    "New preparation schema is not a candidate lock or docking authorization.",
+    "Pinned RDKit/numpy/scipy overlay is not full equivalence to the Python 3.11 remote image."
+  ],
+  "lint_and_format": "six touched Python files passed ruff check and ruff format --check",
+  "new_docking_calls": 0,
+  "precision": "existing float64 NumPy controller arithmetic and exact int32 molecular arrays",
+  "randomness": "explicit fixture seeds; T4 planning and acting use separate SeedSequence children of (seed, round, lineage)",
+  "remote_jobs_launched": 0,
+  "schema_version": "t4_frontier_stage1_verification_v1",
+  "software": {
+    "numpy": "1.26.4",
+    "python": "3.12.9 (main, Feb  5 2025, 18:58:23) [Clang 19.1.6 ]",
+    "rdkit": "2024.03.5",
+    "scipy": "1.13.1"
+  },
+  "suite_seconds": 21.304,
+  "test_files": [
+    "tests/test_frontier_search.py",
+    "tests/test_t4_frontier_search.py",
+    "tests/test_task_search.py",
+    "tests/test_t4_task_search.py",
+    "tests/test_option_continuation.py",
+    "tests/test_region.py",
+    "tests/test_ring_program.py",
+    "tests/test_ring_expansion.py"
+  ],
+  "timestamps": [
+    "2026-09-09T15:41:25.893666-04:00"
+  ],
+  "worktree": "/private/tmp/compose-frontier-verify.Ok6WJ8/source"
+}
