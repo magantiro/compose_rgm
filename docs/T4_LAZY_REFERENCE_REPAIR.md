@@ -65,3 +65,12 @@ public executor calls inside marked-law enumeration separately from option
 product materialization: lazy option draws cannot eliminate an upstream
 enumerator's own validation cost. A one-parent probe does not evaluate or waive
 the frozen multi-parent audit gate.
+
+## Recorded outcome
+
+The probe at a914195 completed and exact selected-path replay passed, but zero
+planning rollouts completed and guidance remained reference-only. See
+diagnostics/t4_lazy_reference_probe/README.md for the negative result, cost
+breakdown and immutable artifact hashes. The lazy sampler is implemented;
+effective production task guidance is not established. No larger run or docking
+was authorized by this outcome.
