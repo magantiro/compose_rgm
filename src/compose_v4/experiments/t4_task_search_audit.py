@@ -12,16 +12,16 @@ from rdkit.Contrib.SA_Score import sascorer
 
 from compose_v4.control import graph_geometry as GG
 from compose_v4.control.docking_value import DockingValue, identity
-from compose_v4.control.fused_option import FusedProgress, completed_fused_cycle
+from compose_v4.control.fused_option import completed_fused_cycle
+from compose_v4.control.molecular_search_codec import decode_option
 from compose_v4.control.molecular_task_search import MolecularHierarchy, MolecularSearchState
 from compose_v4.control.option_continuation import (
     EXECUTABLE_PRODUCT_GATE,
-    OptionState,
     exact_graph_key,
     product_gate_accepts,
 )
-from compose_v4.control.region_rewrite import Lineage, RewriteContext, context_preserved
-from compose_v4.control.ring_program import RingProgress, completed_construction, ring_spec
+from compose_v4.control.region_rewrite import context_preserved
+from compose_v4.control.ring_program import completed_construction, ring_spec
 from compose_v4.control.task_search import SearchRow
 from compose_v4.data.charge_policy import charge_policy_preserved
 from compose_v4.experiments.continuation_profile import (
@@ -47,34 +47,10 @@ CONTRACT_PATH = "configs/t4_task_search_audit.json"
 KIND = "t4_task_search_audit"
 
 
-def decode_option(payload):
-    context = dict(payload["context"])
-    context.update(
-        frozen=frozenset(context["frozen"]),
-        locus=frozenset(context["locus"]),
-        terminals=tuple(tuple(x) for x in context["terminals"]),
-    )
-    lineage = payload["lineage"]
-    return OptionState(
-        decode_state(payload["graph"]),
-        decode_state(payload["origin"]),
-        RewriteContext(**context),
-        Lineage(dict(lineage["slot_of"]), dict(lineage["id_of"]), lineage["next_id"]),
-        payload["option"],
-        payload["step"],
-        payload["horizon"],
-        payload["bundle_id"],
-        FusedProgress.from_payload(payload["fused_progress"])
-        if "fused_progress" in payload
-        else None,
-        ring_progress=RingProgress.from_payload(payload["ring_progress"])
-        if "ring_progress" in payload
-        else None,
-    )
-
-
 def verify_lock(lock, warm, system, *, verification_limit=2048):
     """Replay selected edits only. Learned full-row correctness is not re-enumerated."""
+    if lock.get("schema_version") != "t4_hierarchical_candidate_lock_v2":
+        raise ValueError("unsupported hierarchical candidate-lock schema")
     config = PreparationConfig(**lock["config"])
     endpoint_check = (
         acceptable_endpoint if config.product_gate == EXECUTABLE_PRODUCT_GATE else feasible_endpoint
