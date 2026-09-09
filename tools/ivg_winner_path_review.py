@@ -11,6 +11,10 @@ import subprocess
 from collections import Counter
 from pathlib import Path
 
+from compose_v4.control.region_rewrite import touched_slots
+from compose_v4.rewrite.action_codec_v4 import decode_action
+from compose_v4.rewrite.tracelets import RingSystemRestate
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -33,8 +37,18 @@ def review(directory):
     audit_path = directory / "audit.json"
     audit = json.loads(audit_path.read_text())
     by_target, by_cell, operations = {}, {}, Counter()
-    paths, unresolved, timings = [], [], []
+    paths, unresolved, timings, footprints = [], [], [], []
     hashes = {"audit.json": sha(audit_path)}
+    inspected_source = {}
+    for relative_source in (
+        "src/compose_v4/control/region_rewrite.py",
+        "src/compose_v4/rewrite/action_codec_v4.py",
+        "src/compose_v4/rewrite/tracelets.py",
+    ):
+        actual = sha(ROOT / relative_source)
+        if actual != audit["implementation_sha256"][relative_source]:
+            raise ValueError(f"{relative_source}: source differs from audited implementation")
+        inspected_source[relative_source] = actual
     for pair in audit["pairs"]:
         receipt_path = directory / pair["receipt"]
         if sha(receipt_path) != pair["receipt_sha256"]:
@@ -79,6 +93,24 @@ def review(directory):
             if hashlib.sha256(canonical(state)).hexdigest() != step["state_sha256"]:
                 raise ValueError(f"{receipt_path}: annotation state mismatch")
         counts = Counter(a["executor_rule"] for a in path["actions"])
+        for index, mark in enumerate(path["actions"]):
+            family, action = decode_action(mark)
+            if isinstance(action, RingSystemRestate):
+                expected = sorted({v for change in action.changes for v in (change.a, change.b)})
+                observed = sorted(touched_slots(action))
+                footprints.append(
+                    {
+                        "pair_id": pair["pair_id"],
+                        "step": index,
+                        "executor_rule": family,
+                        "bond_change_endpoints": expected,
+                        "reported_touch_slots": observed,
+                        "equal": expected == observed,
+                        "regions_passing_touch_filter": steps[index]["next_edit"][
+                            "touch_filter_regions"
+                        ],
+                    }
+                )
         operations.update(counts)
         trajectories = {}
         for delta in steps[0]["failed_constraints_by_delta"]:
@@ -135,6 +167,7 @@ def review(directory):
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
         ).strip(),
         "producer_sha256": sha(script),
+        "inspected_source_sha256": inspected_source,
         "python": platform.python_version(),
         "configuration": {
             "seed": None,
@@ -169,6 +202,11 @@ def review(directory):
             bool(p["zero_touch_filter_steps"]) for p in paths
         ),
         "operations": dict(sorted(operations.items())),
+        "composite_action_footprints": footprints,
+        "saved_pair_search_seconds": sum(p["search_seconds"] for p in audit["pairs"]),
+        "saved_pair_total_seconds_including_original_slow_annotations": sum(
+            p["total_seconds"] for p in audit["pairs"]
+        ),
         "paths": paths,
         "unresolved": unresolved,
         "annotation_speedup_equivalence": timings,
