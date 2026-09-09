@@ -870,9 +870,9 @@ def t4_population_cell(task: dict[str, Any], progress=None, parent_cache=None,
         if (not task.get("prepare_only") or warm_start is None or parent_cache
                 or target != "parp1" or delta != 0.4 or workers != 1):
             raise ValueError("hierarchical task search requires uncached PARP1 d=0.4 warm preparation")
-        from modal_apps.run_process_v2_p50_app import _validate_remote_revision
         from compose_v4.experiments.t4_matched_pilot import unseal
         from compose_v4.experiments.t4_task_search import prepare as prepare_hierarchy
+        from modal_apps.run_process_v2_p50_app import _validate_remote_revision
 
         _validate_remote_revision(task["image_revision"])
         archive_path = Path(task["warm_archive_path"])

@@ -61,6 +61,7 @@ def test_preparation_is_round_frozen_bounded_and_never_docks():
     assert result["value_snapshot"]["before_round"] == 2
     assert all(r["round"] < 2 for r in result["value_snapshot"]["training_rows"])
     for unit in result["work"]:
+        assert unit["path"] and unit["completed_options"] >= 1
         for event in unit["path"]:
             assert event["decision"]["kl"] <= 1 + 1e-10
             assert canonical_state_key(decode_state(event["product"]))
