@@ -59,3 +59,10 @@ source to the external Modal service. No deployment, spawn or new docking call
 occurred. Explicit approval for that source upload is required before retrying;
 do not bypass the rejection through another launcher. The authorized batch
 remains the same 16 identities. No surrogate or controller change has been made.
+
+The user subsequently approved the source upload and fixed batch. Deployment
+and spawn from the already-tested clean `af28010` commit then succeeded. All 16
+attempts completed with no failures in 113.866 container-seconds; observed best
+was -9.9 versus inherited -9.7. See
+`diagnostics/t4_proposal_docking/README.md` and its hashed raw receipts and audit.
+The earlier permission block is resolved. No additional run was launched.
