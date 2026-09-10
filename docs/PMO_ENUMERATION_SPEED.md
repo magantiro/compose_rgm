@@ -73,7 +73,19 @@ python -m pytest -q tests/test_molecular_serialization_cache.py tests/test_seman
 
 The two initial JSONs retain their original dirty-tree identities and file hashes;
 they are developmental measurements, not silently relabeled frozen-source runs.
-The final receipt will identify the committed implementation. Nothing here changes
+The final receipt identifies the committed implementation. Nothing here changes
 the two live pilot arms, their scores, or their query budgets. Compatibility with
 old persistent law caches must be established explicitly before any future reuse;
 this repair does not bypass existing source-identity guards.
+
+## Frozen implementation receipt
+
+`diagnostics/pmo_enumeration_speed/frozen_paired.json` records implementation
+`ff31dbd6e0138243743dd9eadc2e02e27fb511de`: median speedups 1.9403x and
+1.7611x, with exact parity on all 642 and 700 marks/products. SHA-256:
+`8a6cb3a37b7be14636a4f10a23b569affc6e007cfbd9309750e931788aeb4ac0`.
+Its broad `candidate_dirty` flag is true because two unrelated diagnostic files
+were untracked. Production files and the profiling script match the committed
+implementation; all three physical file hashes are recorded in the receipt.
+The final focused run again passed 19 tests in 3.53 seconds. The running pilot used
+the old implementation throughout, so these speedups cannot explain its scores.
