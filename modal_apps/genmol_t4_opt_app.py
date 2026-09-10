@@ -93,6 +93,21 @@ _RT: dict[str, Any] = {}
 
 
 @app.function(
+    image=image, cpu=(1.0, 1.0), memory=2048, timeout=1200,
+    max_containers=1, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_proposal_docking(task: dict[str, Any]) -> dict[str, Any]:
+    """Dock all 16 frozen eligible repairs; no model initialization or ranking."""
+    from compose_v4.experiments.t4_proposal_docking import run_remote
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return run_remote(
+        task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume, _validate_remote_revision,
+        lambda smiles, tag: _dock(smiles, "parp1", tag, cpu=1),
+    )
+
+
+@app.function(
     image=image, cpu=(1.0, 1.0), memory=8192, timeout=1200,
     max_containers=3, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
