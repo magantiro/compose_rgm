@@ -1,0 +1,32 @@
+{
+  "schema_version": "t4_repair_neighbors_verification_v1",
+  "generation_revision": "18cab20f7e277d2dda436c1244bd564f0d61b181",
+  "focused_tests": {
+    "command": "env PYTHONPATH=/private/tmp/compose-t4-chemistry.hizM8Y:src:. OMP_NUM_THREADS=1 /Users/rmaganti/compose_rgm_git/.venv/bin/python -m pytest -q tests/test_t4_repair_neighbors.py tests/test_saved_marked_law.py tests/test_t4_constraint_recovery.py",
+    "passed": 9,
+    "failed": 0,
+    "seconds": 18.05,
+    "clean_worktree": true,
+    "junit": "focused_tests.xml"
+  },
+  "strict_preflight_passed": true,
+  "focused_ruff_passed": true,
+  "focused_format_check_passed": true,
+  "legacy_app_ruff": {
+    "findings": 17,
+    "same_code_and_message_multiset_as_parent_e2e9df8": true,
+    "new_wrapper_findings": 0
+  },
+  "full_suite_run": false,
+  "artifact_reduction": {
+    "locked_artifact_assertions_passed": true,
+    "successive_reductions_byte_identical": true,
+    "analysis_tool_ruff_passed": true,
+    "summary_sha256": "5afacb5f9ec4a0863284bc089e43cc25ec5112725b2e5631edd5c250f54d9b38",
+    "fetch_sha256": "06951ecf20d46dd4a7f88d9080ec9f279a8c5c278a28254d8d514cb6a878335b",
+    "focused_tests_xml_sha256": "8a23d6700305b4abf0e397ecd811e7348e733aa2fd0c2310247dfd5b0b1ee64d"
+  },
+  "qualification": "bounded development only, not a completed repository milestone",
+  "launch": "attempt_1/launch.json",
+  "oracle_calls_authorized": 0
+}
