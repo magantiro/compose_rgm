@@ -1,0 +1,18 @@
+[
+  {
+    "name": "perindopril_top_molecules.pdf",
+    "url": "https://api.github.com/repos/invirtuolabs/InVirtuoGen_results/git/blobs/1dc8abb1399ee6dbf9220bc3059201541fc6cf3b",
+    "git_blob": "1dc8abb1399ee6dbf9220bc3059201541fc6cf3b",
+    "sha256": "b034d0cc3292e08036de4f8933e133cb54373830421fec57dd219c371a2eab65",
+    "access_basis": "public research inspection; repository CC-BY-NC-SA-4.0, no model downloaded",
+    "use": "diagnostic-only; not benchmark/controller input"
+  },
+  {
+    "name": "perindopril_no_prescreen_summary.txt",
+    "url": "https://api.github.com/repos/invirtuolabs/InVirtuoGen_results/git/blobs/da01ad0aacd0374cc11bcb66852a3decf41eb608",
+    "git_blob": "da01ad0aacd0374cc11bcb66852a3decf41eb608",
+    "sha256": "8cd65d9c98cac09f9233ef6ce425d1cd35d8bb9c7a2851cccd14172af811346a",
+    "access_basis": "public research inspection; repository CC-BY-NC-SA-4.0, no model downloaded",
+    "use": "diagnostic-only; not benchmark/controller input"
+  }
+]
