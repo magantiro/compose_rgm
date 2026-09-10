@@ -41,6 +41,11 @@ def main() -> None:
     ap.add_argument("--arms", default="macro_prior")
     ap.add_argument("--session", default="compose_iclr")
     ap.add_argument(
+        "--option-decision-audit",
+        action="store_true",
+        help="four conditional option decision checks; zero docking",
+    )
+    ap.add_argument(
         "--frontier-compare",
         action="store_true",
         help="one paired resumable-frontier round, at most 40 new dockings total",
@@ -140,6 +145,7 @@ def main() -> None:
                 a.uncapped_lookahead_probe,
                 a.target_recovery,
                 a.frontier_compare,
+                a.option_decision_audit,
             )
         )
         > 1
@@ -170,6 +176,7 @@ def main() -> None:
         or a.uncapped_lookahead_probe
         or a.target_recovery
         or a.frontier_compare
+        or a.option_decision_audit
     ):
         launch_continuation_profile(
             preflight,
@@ -184,6 +191,7 @@ def main() -> None:
             uncapped_probe=a.uncapped_lookahead_probe,
             target_recovery=a.target_recovery,
             frontier_compare=a.frontier_compare,
+            option_decision=a.option_decision_audit,
         )
         return
 
@@ -271,6 +279,7 @@ def launch_continuation_profile(
     uncapped_probe: bool = False,
     target_recovery: bool = False,
     frontier_compare: bool = False,
+    option_decision: bool = False,
 ) -> None:
     """Spawn only the fixed diagnostic into the deployed app; retain its call ID."""
     import sys
@@ -279,7 +288,9 @@ def launch_continuation_profile(
     from modal_apps.run_process_v2_p50_app import local_image_revision
 
     kind = (
-        "t4_frontier_compare"
+        "t4_option_decision_audit"
+        if option_decision
+        else "t4_frontier_compare"
         if frontier_compare
         else "t4_target_recovery"
         if target_recovery
@@ -306,6 +317,7 @@ def launch_continuation_profile(
     contract = (
         ROOT
         / {
+            "t4_option_decision_audit": "configs/t4_option_decision_audit.json",
             "t4_frontier_compare": "configs/t4_frontier_compare.json",
             "t4_target_recovery": "configs/t4_target_recovery.json",
             "t4_task_search_audit": "configs/t4_task_search_audit.json",
@@ -336,6 +348,26 @@ def launch_continuation_profile(
         "app_sha256": identity["app_sha256"],
     }
     function = modal.Function.from_name("genmol-t4-opt", kind)
+    if option_decision:
+        receipt = {
+            "schema_version": "t4_option_decision_spawn_v1",
+            "task": task,
+            "volume": "compose-v4-artifacts",
+            "oracle_calls": 0,
+            "cases": [],
+        }
+        path = ROOT / "diagnostics/t4_option_decision_spawn.json"
+        for case in range(4):
+            call = function.spawn({**task, "case_index": case})
+            volume_path = f"/{kind}/case_{case}/{run_id}"
+            receipt["cases"].append(
+                {"case_index": case, "call_id": call.object_id, "volume_path": volume_path}
+            )
+            temporary = path.with_suffix(".json.tmp")
+            temporary.write_text(json.dumps(receipt, sort_keys=True, indent=2) + "\n")
+            temporary.replace(path)
+            print(f"spawned case {case}: {call.object_id}; {volume_path}; zero docking")
+        return
     call = function.spawn(task)
     receipt = {
         "schema_version": f"{kind}_spawn_v1",

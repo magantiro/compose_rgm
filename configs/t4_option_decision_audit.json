@@ -1,0 +1,50 @@
+{
+  "schema_version": "t4_option_decision_audit_contract_v1",
+  "authorization": "2026-09-09 explicit user approval of four zero-docking decision-point checks",
+  "task": {"session": "compose_iclr", "delta": 0.4, "budget": 0},
+  "oracle_calls": 0,
+  "training_authorized": false,
+  "required_rdkit": "2024.03.5",
+  "plan": {
+    "path": "diagnostics/t4_whole_ring_plan/result.json",
+    "sha256": "252dccee4785d3a8e972df30c4a075e7e98bdf02e120300990bcb1de9d21cee9"
+  },
+  "archive": {
+    "path": "t4_ring_program_round/ddb2f823de568fdb904b4e08341ee3effc2e9828a9043de7836bfc202144cb0d/round_4/archive.json",
+    "sha256": "803741324ac0e30bff96f9ad36809c6d08ff8334a76a1cc1927a7296a91daf30"
+  },
+  "expected_input_sha256": {
+    "committor": "566cfe582973884b22e29c02b00b8188d9ef158b47387275eb36b6e8e62e2c11",
+    "r_theta_checkpoint": "c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8",
+    "r_theta_run_paths": "585286e0fb6dd8fb6b5a050dc3e5f8d1c7e782b105df114cbcb14cabbb5b2bc2",
+    "seed_manifest": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+    "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+    "receptor": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9"
+  },
+  "diagnostic": {
+    "cases": 4,
+    "focal_attempts_per_case": 2,
+    "balanced_prior_attempts_per_case": 2,
+    "seed_rule": "case seed=1000+case_index; option draws SeedSequence([case_seed,0]); attempt RNG SeedSequence([case_seed,attempt_index+1])",
+    "context": "fully mutable conditional assay; production WHERE unchanged and not evaluated",
+    "generic_horizon": 3,
+    "program_horizons": "existing option_horizon registry",
+    "macro_temperature": 2.0,
+    "macro_exploration": 0.15,
+    "option_exploration": 0.1,
+    "product_gate": "executable_intermediates_v1",
+    "generation": "reference only, no target or surrogate",
+    "comparison": "post-lock DockingValue and answer-known exact prefix support",
+    "split": "inspected development, no held-out inference"
+  },
+  "compute": {
+    "containers": 4, "cpu": 1, "memory_mib": 8192,
+    "timeout_seconds": 1800, "retries": 0, "heartbeat_seconds": 30,
+    "oracle_call_limit": 0, "executor_limit": null,
+    "reference_timing": "prior target recovery: 2870.870 law seconds / 369 enumerations; startup separately about 134.6 seconds",
+    "expected_wall_seconds": [300, 900],
+    "expected_cost": "up to 2 CPU-hours and 16 GiB-hours; current dollar rates unverified, not a dollar estimate",
+    "stop_limit": "program completion or actual support dead end; administrative timeout is incomplete"
+  },
+  "contract_sha256": "b23ca2a72d0ce383bd3e7263e7d2276085600779ac87cd3c26a455d07db37a20"
+}
