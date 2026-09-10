@@ -60,10 +60,10 @@ def test_retention_deduplicates_preserves_floor_and_isolates_post_hoc():
     assert np.allclose(identical["first_slot_probabilities"], p)
 
 
-def execute(records, *, stop_after=None):
+def execute(records, *, stop_after=None, config=None):
     process = kernel()
     hierarchy = MolecularHierarchy(process, lazy_applicability=True, include_carbonyl_options=True)
-    config = BeamConfig(arm="post_hoc", depth=2, seed=2011)
+    config = config or BeamConfig(arm="post_hoc", depth=2, seed=2011)
     root = MolecularSearchState.start(initial("CCC").graph, budget=44, root_id="fixture")
     saves = 0
 

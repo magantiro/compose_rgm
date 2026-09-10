@@ -41,6 +41,11 @@ def main() -> None:
     ap.add_argument("--arms", default="macro_prior")
     ap.add_argument("--session", default="compose_iclr")
     ap.add_argument(
+        "--constraint-recovery",
+        action="store_true",
+        help="three incumbent-preserving constraint-guidance searches; zero docking",
+    )
+    ap.add_argument(
         "--macro-beam",
         action="store_true",
         help="four winner-blind completed-option searches; zero docking",
@@ -159,6 +164,7 @@ def main() -> None:
                 a.frontier_compare,
                 a.option_decision_audit,
                 a.macro_beam,
+                a.constraint_recovery,
             )
         )
         > 1
@@ -193,6 +199,7 @@ def main() -> None:
         or a.frontier_compare
         or a.option_decision_audit
         or a.macro_beam
+        or a.constraint_recovery
     ):
         launch_continuation_profile(
             preflight,
@@ -210,6 +217,7 @@ def main() -> None:
             option_decision=a.option_decision_audit,
             macro_beam=a.macro_beam,
             macro_beam_cases=a.macro_beam_cases,
+            constraint_recovery=a.constraint_recovery,
         )
         return
 
@@ -300,6 +308,7 @@ def launch_continuation_profile(
     option_decision: bool = False,
     macro_beam: bool = False,
     macro_beam_cases: list[int] | None = None,
+    constraint_recovery: bool = False,
 ) -> None:
     """Spawn only the fixed diagnostic into the deployed app; retain its call ID."""
     import sys
@@ -308,7 +317,9 @@ def launch_continuation_profile(
     from modal_apps.run_process_v2_p50_app import local_image_revision
 
     kind = (
-        "t4_macro_beam"
+        "t4_constraint_recovery"
+        if constraint_recovery
+        else "t4_macro_beam"
         if macro_beam
         else "t4_option_decision_audit"
         if option_decision
@@ -339,6 +350,7 @@ def launch_continuation_profile(
     contract = (
         ROOT
         / {
+            "t4_constraint_recovery": "configs/t4_constraint_recovery.json",
             "t4_macro_beam": "configs/t4_macro_beam.json",
             "t4_option_decision_audit": "configs/t4_option_decision_audit.json",
             "t4_frontier_compare": "configs/t4_frontier_compare.json",
@@ -371,9 +383,11 @@ def launch_continuation_profile(
         "app_sha256": identity["app_sha256"],
     }
     function = modal.Function.from_name("genmol-t4-opt", kind)
-    if option_decision or macro_beam:
+    if option_decision or macro_beam or constraint_recovery:
         receipt = {
-            "schema_version": "t4_macro_beam_spawn_v1"
+            "schema_version": "t4_constraint_recovery_spawn_v1"
+            if constraint_recovery
+            else "t4_macro_beam_spawn_v1"
             if macro_beam
             else "t4_option_decision_spawn_v1",
             "task": task,
@@ -382,11 +396,17 @@ def launch_continuation_profile(
             "cases": [],
         }
         path = ROOT / (
-            "diagnostics/t4_macro_beam_spawn.json"
+            "diagnostics/t4_constraint_recovery_spawn.json"
+            if constraint_recovery
+            else "diagnostics/t4_macro_beam_spawn.json"
             if macro_beam
             else "diagnostics/t4_option_decision_spawn.json"
         )
-        cases = range(4) if macro_beam_cases is None else sorted(set(macro_beam_cases))
+        cases = (
+            range(3 if constraint_recovery else 4)
+            if macro_beam_cases is None
+            else sorted(set(macro_beam_cases))
+        )
         if not cases or any(type(case) is not int or not 0 <= case < 4 for case in cases):
             raise ValueError("macro-beam case selection must be nonempty and within 0..3")
         for case in cases:

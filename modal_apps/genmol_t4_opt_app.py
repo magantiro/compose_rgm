@@ -94,6 +94,21 @@ _RT: dict[str, Any] = {}
 
 @app.function(
     image=image, cpu=(1.0, 1.0), memory=8192, timeout=1800,
+    max_containers=3, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_constraint_recovery(task: dict[str, Any]) -> dict[str, Any]:
+    """One of three incumbent-preserving, zero-docking recovery comparisons."""
+    from compose_v4.experiments.t4_macro_beam import run_remote
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return run_remote(task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume,
+                      _runtime, _validate_remote_revision,
+                      contract_path="configs/t4_constraint_recovery.json",
+                      run_kind="t4_constraint_recovery")
+
+
+@app.function(
+    image=image, cpu=(1.0, 1.0), memory=8192, timeout=1800,
     max_containers=4, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
 def t4_macro_beam(task: dict[str, Any]) -> dict[str, Any]:

@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass
+import math
+from dataclasses import asdict, dataclass, replace
 from functools import lru_cache
 from time import perf_counter
 
@@ -55,10 +56,19 @@ class BeamConfig:
     branches: int = 3
     primitive_budget: int = 44
     seed: int = 2000
+    preserve_root: bool = False
+    retention_score: str = "desirability"
 
     def __post_init__(self):
         if self.arm not in ARMS or self.root_index not in (0, 1):
             raise ValueError("beam requires a declared arm and root index")
+        if type(self.preserve_root) is not bool or self.retention_score not in (
+            "desirability",
+            "recovery_desirability",
+        ):
+            raise ValueError("invalid incumbent or intermediate guidance policy")
+        if self.preserve_root and self.width < 2:
+            raise ValueError("incumbent preservation requires an exploratory slot")
         for name in ("depth", "width", "branches", "primitive_budget", "seed"):
             value = getattr(self, name)
             if type(value) is not int or value < (0 if name == "seed" else 1):
@@ -79,8 +89,29 @@ def distance(a, b):
     return 1 - len(x & y) / len(x | y) if x or y else 0.0
 
 
-def retain(candidates, config, rng, score):
+def recovery_desirability(violation, predicted_docking, payload, scale):
+    """Graded immediate heuristic; not a future recovery probability."""
+    values = (violation, predicted_docking, payload["best"], payload["scale"], scale)
+    if not all(math.isfinite(v) for v in values) or violation < 0 or min(values[-2:]) <= 0:
+        raise ValueError("recovery guidance requires finite values and positive scales")
+    penalty = max(0.0, predicted_docking - payload["best"]) / payload["scale"]
+    return math.exp(-min(700.0, penalty + violation / scale))
+
+
+def retain(candidates, config, rng, score, *, incumbent=None):
     """Finite-pool retention, not a full-reference molecular transition law."""
+    if config.preserve_root:
+        if incumbent is None:
+            raise ValueError("incumbent-preserving retention requires the exact root")
+        offspring = [r for r in candidates if r["smiles"] != incumbent["smiles"]]
+        chosen, audit = retain(
+            offspring, replace(config, width=config.width - 1, preserve_root=False), rng, score
+        )
+        return [incumbent, *chosen], {
+            "policy": "incumbent_plus_offspring",
+            "incumbent": incumbent["smiles"],
+            "offspring": audit,
+        }
     unique = {}
     for row in sorted(candidates, key=lambda r: r["attempt_id"]):
         unique.setdefault(row["smiles"], row)
@@ -91,7 +122,7 @@ def retain(candidates, config, rng, score):
     values = None
     q, eta = p, 0.0
     if config.arm == "guided":
-        values = np.asarray([score(r["smiles"])["desirability"] for r in pool])
+        values = np.asarray([score(r["smiles"])[config.retention_score] for r in pool])
         core, eta, _ = _tilted(p, (1 + values) / 2, kappa=1.0, exploration=0.0)
         q = 0.9 * core + 0.1 * p
     kl = float(np.sum(q * np.log(q / p)))
@@ -172,7 +203,15 @@ def run_search(root, hierarchy, *, config, score, save, read, meter, progress):
         return locked
     witnesses = WitnessIndex(meter)
     selection_rows = {}
-    beam = [{"node": encode_search_state(root), "chain": []}]
+    incumbent = {
+        "node": encode_search_state(root),
+        "chain": [],
+        "smiles": canonical_state_key(root.graph),
+        "attempt_id": "incumbent",
+    }
+    beam = (
+        [incumbent] if config.preserve_root else [{"node": encode_search_state(root), "chain": []}]
+    )
     levels, all_attempts = [], []
     for depth in range(config.depth):
         stage = f"levels/{depth:02}"
@@ -297,7 +336,7 @@ def run_search(root, hierarchy, *, config, score, save, read, meter, progress):
         rng = np.random.default_rng(
             np.random.SeedSequence([config.seed, config.root_index, depth, 991])
         )
-        beam, decision = retain(candidates, config, rng, score)
+        beam, decision = retain(candidates, config, rng, score, incumbent=incumbent)
         selection = {
             "depth": depth,
             "beam": beam,
@@ -326,11 +365,22 @@ def run_search(root, hierarchy, *, config, score, save, read, meter, progress):
     return lock
 
 
-def run_remote(task, repo_root, artifact_root, volume, runtime_factory, validate_revision):
-    contract = json.loads((repo_root / CONTRACT_PATH).read_text())
+def run_remote(
+    task,
+    repo_root,
+    artifact_root,
+    volume,
+    runtime_factory,
+    validate_revision,
+    *,
+    contract_path=CONTRACT_PATH,
+    run_kind=KIND,
+):
+    contract = json.loads((repo_root / contract_path).read_text())
     case = task["case_index"]
-    if type(case) is not int or not 0 <= case < 4 or contract["oracle_calls"] != 0:
-        raise ValueError("macro beam permits only the four approved zero-oracle cases")
+    cases = contract.get("cases", [{"arm": ARMS[c // 2], "root_index": c % 2} for c in range(4)])
+    if type(case) is not int or not 0 <= case < len(cases) or contract["oracle_calls"] != 0:
+        raise ValueError("macro beam requires a declared zero-oracle case")
     if rdBase.rdkitVersion != contract["required_rdkit"]:
         raise ValueError("macro beam requires pinned RDKit")
 
@@ -375,18 +425,24 @@ def run_remote(task, repo_root, artifact_root, volume, runtime_factory, validate
                 sa_max=4.0,
             )
             eligible = acceptable_endpoint({"smiles": smiles, **props})
-            return {
+            prediction = float(model.predict([smiles])[0])
+            result = {
                 "smiles": smiles,
                 **props,
                 "oracle_eligible": eligible,
-                "predicted_docking": float(model.predict([smiles])[0]),
+                "predicted_docking": prediction,
                 "desirability": model.desirability(smiles, eligible),
             }
+            if "recovery_scale" in contract:
+                result["recovery_desirability"] = recovery_desirability(
+                    props["v"], prediction, model.payload, contract["recovery_scale"]
+                )
+            return result
 
         # Root selection uses observed task labels, not predictions or winners.
         eligible = [r for r in warm["archive"] if r["ds"] is not None and acceptable_endpoint(r)]
         roots = [warm["archive"][0], min(eligible, key=lambda r: (r["ds"], r["smiles"]))]
-        config = BeamConfig(arm=ARMS[case // 2], root_index=case % 2, **contract["search"])
+        config = BeamConfig(**cases[case], **contract["search"])
         root_row = roots[config.root_index]
         graph = exact_archive_graph(root_row)
         root = MolecularSearchState.start(
@@ -480,7 +536,7 @@ def run_remote(task, repo_root, artifact_root, volume, runtime_factory, validate
         validate_revision,
         None,
         None,
-        contract_path=CONTRACT_PATH,
-        run_kind=f"{KIND}/case_{case}",
+        contract_path=contract_path,
+        run_kind=f"{run_kind}/case_{case}",
         runner=runner,
     )
