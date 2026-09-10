@@ -66,6 +66,14 @@ PyTDC distribution instead, without changing oracle definitions, seeds, roots,
 or search settings. Failed initialization receipts are retained; only cases
 confirmed to have stopped before any oracle query may be relaunched.
 
+The next launch started the four JNK3 cases, but PyTDC import failed on the
+other eight cases because its package omits a runtime `requests` dependency.
+The image now explicitly includes `requests` and `networkx`, as the existing
+PMO harness does. A build-time check constructs both PyTDC oracles without
+scoring molecules. Only the eight unscored cases are retried using `--tasks
+albuterol_similarity perindopril_mpo`; the running JNK3 cases are retained.
+No scientific Python source or contract changes accompany this image repair.
+
 Focused checks cover oracle charging/resume, candidate locks and feedback
 timing, unchanged beam retention, and launch bounds. No broad regression suite
 is an iteration gate for this bounded development probe. This does not waive

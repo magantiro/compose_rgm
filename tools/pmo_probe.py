@@ -11,9 +11,17 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main():
+    from compose_v4.experiments.pmo_macro_probe import TASKS
+
     parser = argparse.ArgumentParser()
     parser.add_argument("mode", choices=("prepare", "launch", "status"))
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--tasks",
+        nargs="+",
+        choices=TASKS,
+        help="Operate only on these declared cases; permits retrying unscored startup failures",
+    )
     args = parser.parse_args()
     from compose_v4.control.docking_value import identity
     from compose_v4.experiments.continuation_profile import publish_json, sha256_file
@@ -70,6 +78,8 @@ def main():
         }
         publish_json(receipt, payload)
         for case in cases(contract):
+            if args.tasks and case["task"] not in args.tasks:
+                continue
             task = {**body, "run_id": run_id, "case": case}
             call = function.spawn(task)
             payload["cases"].append({"case": case, "call_id": call.object_id})
@@ -79,6 +89,8 @@ def main():
         return
     receipt = json.loads(args.output.read_text())
     for row in receipt["cases"]:
+        if args.tasks and row["case"]["task"] not in args.tasks:
+            continue
         name = case_name(row["case"])
         folder = args.output.parent / name
         folder.mkdir(parents=True, exist_ok=True)
@@ -106,6 +118,8 @@ def main():
                 if process.returncode == 0
                 else "pending heartbeat",
             )
+        except (ImportError, RuntimeError, ValueError) as error:
+            print(name, "FAILED", type(error).__name__, str(error), flush=True)
         else:
             publish_json(folder / "result.json", result)
             print(
