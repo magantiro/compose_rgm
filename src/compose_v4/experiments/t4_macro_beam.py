@@ -65,6 +65,7 @@ class BeamConfig:
         if type(self.preserve_root) is not bool or self.retention_score not in (
             "desirability",
             "recovery_desirability",
+            "no_similarity_desirability",
         ):
             raise ValueError("invalid incumbent or intermediate guidance policy")
         if self.preserve_root and self.width < 2:
@@ -96,6 +97,17 @@ def recovery_desirability(violation, predicted_docking, payload, scale):
         raise ValueError("recovery guidance requires finite values and positive scales")
     penalty = max(0.0, predicted_docking - payload["best"]) / payload["scale"]
     return math.exp(-min(700.0, penalty + violation / scale))
+
+
+def no_similarity_desirability(props, predicted_docking, payload, policy):
+    """Intermediate ranking ablation only; never changes endpoint eligibility."""
+    qed_min, sa_max = policy["qed_min"], policy["sa_max"]
+    if not all(math.isfinite(v) for v in (props["qed"], props["sa"], qed_min, sa_max)):
+        raise ValueError("intermediate QED/SA guidance requires finite values")
+    if min(qed_min, sa_max) <= 0:
+        raise ValueError("intermediate QED/SA guidance requires positive thresholds")
+    violation = max(0.0, (qed_min - props["qed"]) / qed_min, (props["sa"] - sa_max) / sa_max)
+    return recovery_desirability(violation, predicted_docking, payload, policy["scale"])
 
 
 def retain(candidates, config, rng, score, *, incumbent=None):
@@ -436,6 +448,10 @@ def run_remote(
             if "recovery_scale" in contract:
                 result["recovery_desirability"] = recovery_desirability(
                     props["v"], prediction, model.payload, contract["recovery_scale"]
+                )
+            if "no_similarity_guidance" in contract:
+                result["no_similarity_desirability"] = no_similarity_desirability(
+                    props, prediction, model.payload, contract["no_similarity_guidance"]
                 )
             return result
 

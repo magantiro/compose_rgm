@@ -63,6 +63,11 @@ def main() -> None:
         help="resume only named failed/missing macro-beam cases; defaults to all four",
     )
     ap.add_argument(
+        "--no-similarity-penalty",
+        action="store_true",
+        help="one intermediate similarity-penalty ablation; zero docking",
+    )
+    ap.add_argument(
         "--option-decision-audit",
         action="store_true",
         help="four conditional option decision checks; zero docking",
@@ -171,6 +176,7 @@ def main() -> None:
                 a.macro_beam,
                 a.constraint_recovery,
                 a.repair_neighbors,
+                a.no_similarity_penalty,
             )
         )
         > 1
@@ -207,6 +213,7 @@ def main() -> None:
         or a.macro_beam
         or a.constraint_recovery
         or a.repair_neighbors
+        or a.no_similarity_penalty
     ):
         launch_continuation_profile(
             preflight,
@@ -226,6 +233,7 @@ def main() -> None:
             macro_beam_cases=a.macro_beam_cases,
             constraint_recovery=a.constraint_recovery,
             repair_neighbors=a.repair_neighbors,
+            no_similarity_penalty=a.no_similarity_penalty,
         )
         return
 
@@ -318,6 +326,7 @@ def launch_continuation_profile(
     macro_beam_cases: list[int] | None = None,
     constraint_recovery: bool = False,
     repair_neighbors: bool = False,
+    no_similarity_penalty: bool = False,
 ) -> None:
     """Spawn only the fixed diagnostic into the deployed app; retain its call ID."""
     import sys
@@ -326,7 +335,9 @@ def launch_continuation_profile(
     from modal_apps.run_process_v2_p50_app import local_image_revision
 
     kind = (
-        "t4_repair_neighbors"
+        "t4_no_similarity_penalty"
+        if no_similarity_penalty
+        else "t4_repair_neighbors"
         if repair_neighbors
         else "t4_constraint_recovery"
         if constraint_recovery
@@ -361,6 +372,7 @@ def launch_continuation_profile(
     contract = (
         ROOT
         / {
+            "t4_no_similarity_penalty": "configs/t4_no_similarity_penalty.json",
             "t4_repair_neighbors": "configs/t4_repair_neighbors.json",
             "t4_constraint_recovery": "configs/t4_constraint_recovery.json",
             "t4_macro_beam": "configs/t4_macro_beam.json",
@@ -395,9 +407,11 @@ def launch_continuation_profile(
         "app_sha256": identity["app_sha256"],
     }
     function = modal.Function.from_name("genmol-t4-opt", kind)
-    if option_decision or macro_beam or constraint_recovery:
+    if option_decision or macro_beam or constraint_recovery or no_similarity_penalty:
         receipt = {
-            "schema_version": "t4_constraint_recovery_spawn_v1"
+            "schema_version": "t4_no_similarity_penalty_spawn_v1"
+            if no_similarity_penalty
+            else "t4_constraint_recovery_spawn_v1"
             if constraint_recovery
             else "t4_macro_beam_spawn_v1"
             if macro_beam
@@ -408,14 +422,16 @@ def launch_continuation_profile(
             "cases": [],
         }
         path = ROOT / (
-            "diagnostics/t4_constraint_recovery_spawn.json"
+            "diagnostics/t4_no_similarity_penalty_spawn.json"
+            if no_similarity_penalty
+            else "diagnostics/t4_constraint_recovery_spawn.json"
             if constraint_recovery
             else "diagnostics/t4_macro_beam_spawn.json"
             if macro_beam
             else "diagnostics/t4_option_decision_spawn.json"
         )
         cases = (
-            range(3 if constraint_recovery else 4)
+            range(1 if no_similarity_penalty else 3 if constraint_recovery else 4)
             if macro_beam_cases is None
             else sorted(set(macro_beam_cases))
         )
