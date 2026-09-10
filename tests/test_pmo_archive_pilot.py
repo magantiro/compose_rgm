@@ -114,6 +114,7 @@ def test_persistent_feedback_resume_does_not_recharge_or_reveal_future_labels(
             "stage_seconds": {},
         }
         store.save(name, record)
+        witnesses.meter.attempts.append({"status": "invalid_rewrite", "fixture_attempt": index})
         return record
 
     monkeypatch.setattr(pilot, "execute_option", fake_option)
@@ -163,6 +164,9 @@ def test_persistent_feedback_resume_does_not_recharge_or_reveal_future_labels(
     with pytest.raises(InterruptedError):
         run(tmp_path / "resume", interrupted=True)
     resumed = run(tmp_path / "resume")
+    assert pilot.Store(tmp_path / "resume", lambda: None).read("executor/0000") == [
+        {"status": "invalid_rewrite", "fixture_attempt": 0}
+    ]
     assert calls == ["C" * i for i in range(3, 9)]
     for key in ("best", "curve", "credit", "archive", "attempts", "auc_top10"):
         assert full[key] == resumed[key]

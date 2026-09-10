@@ -391,7 +391,8 @@ def run_case(contract, case, hierarchy, store, scores, *, meter, progress):
             flush=True,
         )
         # Preserve raw attempted execution evidence without retaining quadratic arrays in RAM forever.
-        store.save(f"executor/{attempt:04}", meter.attempts)
+        if store.read(f"executor/{attempt:04}") is None:
+            store.save(f"executor/{attempt:04}", meter.attempts)
         # Preserve cached-product witnesses even when their full receipts leave RAM.
         for row in meter.attempts[witnesses.cursor :]:
             if row["status"] == "executed":
@@ -592,6 +593,7 @@ def run_remote(task, root, artifact_root, volume, runtime_factory, validate_revi
             law_counts=law.counts,
             executor_calls=meter.calls,
             executor_seconds=meter.seconds,
+            cost_scope="law/executor/persistence counters describe this invocation; prior attempt receipts are retained",
             persistence=dict(store.timings),
             peak_rss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
             run_id=task["run_id"],
