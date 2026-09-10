@@ -106,8 +106,20 @@ def recovery_counts(rows, archive_smiles, incumbent):
     }
 
 
-def run_remote(task, repo_root, artifact_root, volume, runtime_factory, validate_revision):
-    contract = json.loads((repo_root / CONTRACT_PATH).read_text())
+def run_remote(
+    task,
+    repo_root,
+    artifact_root,
+    volume,
+    runtime_factory,
+    validate_revision,
+    *,
+    contract_path=CONTRACT_PATH,
+    run_kind=KIND,
+    select_roots=select_panel,
+    cached_products=None,
+):
+    contract = json.loads((repo_root / contract_path).read_text())
     if contract["oracle_calls"] != 0 or rdBase.rdkitVersion != contract["required_rdkit"]:
         raise ValueError("repair support census requires zero docking and pinned RDKit")
 
@@ -134,7 +146,7 @@ def run_remote(task, repo_root, artifact_root, volume, runtime_factory, validate
             or source_lock["value_snapshot_sha256"] != model.payload["snapshot_sha256"]
         ):
             raise ValueError("repair inputs disagree with the frozen 51-call archive")
-        panel = select_panel(source_lock["candidates"], contract["panel"]["count"])
+        panel = select_roots(source_lock["candidates"], contract["panel"]["count"])
         save("panel_lock", {"selection": contract["panel"], "roots": panel})
         generator = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
         seed_fp = generator.GetFingerprint(Chem.MolFromSmiles(actual_task["smiles"]))
@@ -181,6 +193,14 @@ def run_remote(task, repo_root, artifact_root, volume, runtime_factory, validate
                 progress.update(phase="repair_enumeration", root_index=index, roots=len(panel))
                 name = f"roots/{index:02d}"
                 generation = read(f"{name}/generation_lock")
+                cached = None
+                if generation is None and cached_products is not None:
+                    cached = cached_products(node.graph, law.priors, contract)
+                    if cached is not None:
+                        generation, cached_rows, receipt = cached
+                        save(f"{name}/reuse", receipt)
+                        save(f"{name}/generation_lock", generation)
+                        save(f"{name}/scored_lock", cached_rows)
                 if generation is None:
                     generation = enumerate_products(node.graph, law, runtime["system"])
                     save(f"{name}/generation_lock", generation)
@@ -239,7 +259,7 @@ def run_remote(task, repo_root, artifact_root, volume, runtime_factory, validate
         validate_revision,
         None,
         None,
-        contract_path=CONTRACT_PATH,
-        run_kind=KIND,
+        contract_path=contract_path,
+        run_kind=run_kind,
         runner=runner,
     )

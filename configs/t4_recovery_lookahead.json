@@ -1,0 +1,127 @@
+{
+  "contract_sha256": "fe737820cc75aac46be6b58890fcd32abb4361b9e5b80693c67f2ae16394c2f0",
+  "schema_version": "t4_recovery_lookahead_contract_v1",
+  "authorization": "2026-09-10 user approved short recovery lookahead before discarding intermediates; one nine-candidate decision, zero docking",
+  "task": {
+    "session": "compose_iclr",
+    "delta": 0.4,
+    "budget": 0
+  },
+  "oracle_calls": 0,
+  "training_authorized": false,
+  "required_rdkit": "2024.03.5",
+  "archive": {
+    "path": "t4_ring_program_round/ddb2f823de568fdb904b4e08341ee3effc2e9828a9043de7836bfc202144cb0d/round_4/archive.json",
+    "sha256": "803741324ac0e30bff96f9ad36809c6d08ff8334a76a1cc1927a7296a91daf30"
+  },
+  "value_snapshot": {
+    "path": "t4_option_decision_audit/case_0/f9dce46f60769f19299140c6c786edb22a161fa256b129b31345c5e231aa773b/task_snapshot.json",
+    "sha256": "5359cabfd241b427f5da6dd10ad3f5103be706e098e0f0c9b27a8bbb467c400e"
+  },
+  "expected_input_sha256": {
+    "committor": "566cfe582973884b22e29c02b00b8188d9ef158b47387275eb36b6e8e62e2c11",
+    "r_theta_checkpoint": "c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8",
+    "r_theta_run_paths": "585286e0fb6dd8fb6b5a050dc3e5f8d1c7e782b105df114cbcb14cabbb5b2bc2",
+    "seed_manifest": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+    "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+    "receptor": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9"
+  },
+  "panel": {
+    "path": "t4_no_similarity_penalty/case_0/232389884cb5ee6fa95b846d0f7e0e7098cab08e0995617f02951e142fdd9050/scored_lock.json",
+    "sha256": "c7b808cf968cfd20b5e66d002dbc38c69c2bb39fdc8a3b9223698c064e1e43b9",
+    "count": 9,
+    "selection": "all candidates with attempt_id prefix levels/01/, sorted attempt_id; workers take i::3",
+    "source_split": "inspected development, not held-out"
+  },
+  "law_caches": [
+    {
+      "path": "t4_no_similarity_penalty/case_0/232389884cb5ee6fa95b846d0f7e0e7098cab08e0995617f02951e142fdd9050",
+      "launch_sha256": "ea651ab3e265541eae59190830f8ffbb91de1cbc7eb8e5a53b95065f50fe2de9"
+    },
+    {
+      "path": "t4_repair_neighbors/7bb480732e9ce78061ce4d1313fcfd1ff443319433aa7872a9862a0160bff67b",
+      "launch_sha256": "f2c230da5d2dcf511aa1088b84ccc576b6db90dddbc6999fb162fc82cf6964ff"
+    },
+    {
+      "path": "t4_constraint_recovery/case_2/2dc9ba02d3e63016b666b9b1479177f0d508f77d71178b7031ef65258de9e69c",
+      "launch_sha256": "330ad04ddaf41d9b6b1e4fe2ece4ec2f861de006738b2e892987a09c4abc0ea1"
+    },
+    {
+      "path": "t4_macro_beam/case_1/b9941ef7e2f9740e6ea2c0df5527d42f151c5b0b3b19072c17474a25105c6219",
+      "launch_sha256": "ac320ec44e11a1bc58d43c5fb7641224ec2bfb14b00d7d9479f9e56cb09cd126"
+    },
+    {
+      "path": "t4_macro_beam/case_3/b9941ef7e2f9740e6ea2c0df5527d42f151c5b0b3b19072c17474a25105c6219",
+      "launch_sha256": "52ca64e51ac6e002b2c7c2a4a8baeceaf12af2fee7164b16782b69945cf60bf0"
+    },
+    {
+      "path": "t4_macro_beam/case_0/dd7e778c2e3581c4f92fff8db061a03b0cab7a0d9a83b937492d4f12bb182750",
+      "launch_sha256": "4a02be32f7fb1bcfec9e6cea791ea7c41c6a7ed22ee9d1b4e6dd635cf49454c6"
+    },
+    {
+      "path": "t4_macro_beam/case_2/dd7e778c2e3581c4f92fff8db061a03b0cab7a0d9a83b937492d4f12bb182750",
+      "launch_sha256": "0e015a2bf374630a8da1c4109e77d284109d22d842e8bc96bbf85499511c626d"
+    },
+    {
+      "path": "t4_target_recovery/70611576f82d337385717acac425591ed6dd76fc21b017ab8ad59a6ac4949936",
+      "launch_sha256": "de04263ee32d964b863649c492694272ca038b6ff254e6e16d1596a6935d9924"
+    }
+  ],
+  "search": {
+    "primitive_depth": 1,
+    "enumeration": "all positive-mass marks from the existing production evaluator; no top-k or family restriction",
+    "scope": "unrestricted one-edit support census, not a sampled Q(M,o) trajectory",
+    "probability_claim": "none; do not implement another canonical-successor law",
+    "rng": "none: deterministic enumeration and panel selection"
+  },
+  "acceptance": {
+    "replay_eligible_representatives": true,
+    "lock_before_scoring": true,
+    "primary": "matched retention probability and selected new eligible one-edit continuations; separately report all-row availability",
+    "automatic_docking": false,
+    "automatic_deeper_search": false,
+    "incomplete_is_not_unreachable": true,
+    "final_eligibility": "unchanged QED>=0.6, SA<=4, original-seed Morgan radius2/2048 similarity>=0.4 plus separate medchem screen"
+  },
+  "compute": {
+    "containers": 3,
+    "cpu": 1,
+    "memory_mib": 8192,
+    "timeout_seconds": 1200,
+    "retries": 0,
+    "heartbeat_seconds": 30,
+    "oracle_call_limit": 0,
+    "executor_limit": null,
+    "expected_wall_seconds": [
+      180,
+      360
+    ],
+    "expected_cost": "timeout envelope 1 CPU-hour and 8 GiB-hours excluding build; dollar rates unverified",
+    "reference_timing": "previous workers initialized in 136..207 seconds and used 8..10 seconds per fresh law on average; property scoring and exact replay additional",
+    "restart_unit": "completed root generation/scored locks; compatible exact-state laws reused",
+    "stop_limit": "nine roots at exactly one primitive step; timeout records incomplete"
+  },
+  "lock": {
+    "path": "t4_no_similarity_penalty/case_0/232389884cb5ee6fa95b846d0f7e0e7098cab08e0995617f02951e142fdd9050/generation_lock.json",
+    "sha256": "68c80f669e3e1f3f26991555a3ef3930ca00c11bf71ada1228e3bb45042727c7"
+  },
+  "product_cache": {
+    "path": "t4_repair_neighbors/7bb480732e9ce78061ce4d1313fcfd1ff443319433aa7872a9862a0160bff67b",
+    "result_sha256": "d168925bc0638ac0a40d36feee39c9f7f3f2a316b37e421feafbc2bb29500fff",
+    "enumerator_ast_sha256": "376e721aa38f637cdb74109a4f1cf21a730bbef26b6e2c1a988fba0c59480a32"
+  },
+  "planning": {
+    "value": "max saved-model terminal desirability over eligible unobserved one-edit endpoints; 0 if none",
+    "scope": "unrestricted primitive recovery after a completed option, not a new claim about the original region/option law",
+    "known_endpoints": "zero acquisition only, never remove from support",
+    "retention": "original incumbent/tilt/diversity with kappa1 and exploration0.1",
+    "paired_seed": [
+      2000,
+      1,
+      1,
+      991
+    ],
+    "final_gates": "unchanged",
+    "automatic_followup": false
+  }
+}

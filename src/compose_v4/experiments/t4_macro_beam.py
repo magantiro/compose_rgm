@@ -66,6 +66,7 @@ class BeamConfig:
             "desirability",
             "recovery_desirability",
             "no_similarity_desirability",
+            "one_step_value",
         ):
             raise ValueError("invalid incumbent or intermediate guidance policy")
         if self.preserve_root and self.width < 2:
