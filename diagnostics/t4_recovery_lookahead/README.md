@@ -39,7 +39,7 @@ was not run. The app was deployed before durable spawning through t4_launch.
 Read-only collection, using the clean launch source for molecular replay:
 
 ```sh
-env PYTHONPATH=/private/tmp/compose-t4-chemistry.hizM8Y:/private/tmp/compose-recovery-lookahead.2FMuIt/src:/private/tmp/compose-recovery-lookahead.2FMuIt:. OMP_NUM_THREADS=1 \
+env PYTHONPATH=/private/tmp/compose-t4-chemistry.hizM8Y:/private/tmp/compose-recovery-lookahead-v2.WOe9JP/src:/private/tmp/compose-recovery-lookahead-v2.WOe9JP:. OMP_NUM_THREADS=1 \
   .venv/bin/python diagnostics/t4_recovery_lookahead/fetch.py
 ```
 

@@ -44,6 +44,22 @@ def main():
     assert launch["oracle_calls"] == contract["oracle_calls"] == 0
     assert [c["case_index"] for c in launch["cases"]] == [0, 1, 2]
     assert sha256_file(contract_path) == launch["task"]["contract_sha256"]
+    cache_launch_path = ROOT / "diagnostics/t4_repair_neighbors/attempt_1/launch.json"
+    cached_sources = json.loads(cache_launch_path.read_text())["task"]["image_revision"][
+        "serialized_sources"
+    ]
+    current_sources = launch["task"]["image_revision"]["serialized_sources"]
+    scored_dependencies = {
+        p: h
+        for p, h in cached_sources.items()
+        if p.startswith("src/compose_v4/control/")
+        or p
+        in (
+            "src/compose_v4/experiments/t4_endpoint_selection.py",
+            "src/compose_v4/experiments/continuation_profile.py",
+        )
+    }
+    assert all(current_sources[p] == h for p, h in scored_dependencies.items())
     volume = modal.Volume.from_name(launch["volume"])
     remote_hashes = {}
 
@@ -170,7 +186,16 @@ def main():
                     "exact_replay_verified": True,
                 }
             )
-    inputs = [contract_path, *sorted(destination.rglob("*.json"))]
+    failed_heartbeats = sorted((HERE / "attempt_1").glob("case_*/heartbeat.json"))
+    failed_worker_seconds = sum(
+        json.loads(p.read_text())["elapsed_seconds"] for p in failed_heartbeats
+    )
+    inputs = [
+        contract_path,
+        cache_launch_path,
+        *failed_heartbeats,
+        *sorted(destination.rglob("*.json")),
+    ]
     report = {
         "schema_version": "t4_recovery_lookahead_summary_v1",
         "oracle_calls": 0,
@@ -180,6 +205,8 @@ def main():
         "comparison": comparison,
         "selected_continuations": selected,
         "worker_work": work,
+        "cached_scoring_dependencies": scored_dependencies,
+        "failed_attempt_worker_elapsed_seconds": failed_worker_seconds,
         "input_sha256": {str(p.relative_to(ROOT)): sha256_file(p) for p in inputs},
         "remote_sha256": remote_hashes,
         "analysis": {
