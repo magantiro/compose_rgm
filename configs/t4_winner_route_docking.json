@@ -1,0 +1,26 @@
+{
+  "schema_version": "t4_winner_route_docking_contract_v1",
+  "authorization": "2026-09-10 user approved exact IVG winner docking first, followed by saved route endpoint diagnosis",
+  "contract_sha256": "012031cf84d64bf13bc538bceddeff2cbe62a4f7b4db34112a201ef582093f7e",
+  "required_rdkit": "2024.03.5",
+  "docking_only": true,
+  "training_authorized": false,
+  "optimizer_continuation": false,
+  "winner_continue_below": -11.0,
+  "witness": {
+    "path": "diagnostics/t4_whole_ring_plan/result.json",
+    "sha256": "252dccee4785d3a8e972df30c4a075e7e98bdf02e120300990bcb1de9d21cee9"
+  },
+  "incumbent": {
+    "path": "t4_macro_lookahead/8776743bbb813429663f339f60cbce587e59d427248dfaee80020014b11a6b28/result.json",
+    "sha256": "025a5a5586d440b3bfd07b65877998d10e259bae86d2b28f410155b3f1b82728"
+  },
+  "task": {"budget": 6, "per_round": 6, "delta": 0.4, "session": "compose_iclr"},
+  "compute": {"oracle_call_limit": 6, "automatic_retries": 0, "cpu": 1, "memory_mib": 4096, "max_containers": 1, "timeout_seconds": 1200},
+  "docking": {"cpu": 1, "exhaustiveness": 1, "num_modes": 10, "random_seed": null, "box_source": "modal_apps/genmol_t4_opt_app.py:BOXES.parp1", "ligand_preparation": "unchanged production Open Babel --gen3D"},
+  "expected_input_sha256": {
+    "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+    "receptor": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9",
+    "seed_manifest": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"
+  }
+}

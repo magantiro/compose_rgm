@@ -1,0 +1,15 @@
+{
+  "schema_version": "t4_winner_route_verification_v1",
+  "source_parent": "6f413638cb4cee7c145b282b4a212c3058784e06",
+  "tests": {"passed": 7, "failed": 0, "skipped": 0, "seconds": 3.31, "xml_path": "/private/tmp/t4-winner-route-tests.xml", "xml_sha256": "8275105c4a6f4395e4633550a30facc9eb308af0498e01b437fc6da178f87706"},
+  "implementation_sha256": "90a68490c77195f30d3242cd30d671caf889e7bb7fdebdd08a378e02a9c795d0",
+  "contract_file_sha256": "16da0cae955bb7067bf6faf4707102ee94232350c8404739836518623e7334fd",
+  "actual_saved_panel_validated": true,
+  "actual_panel_count": 6,
+  "production_dock_ast_unchanged": true,
+  "focused_ruff_passed": true,
+  "diff_check_passed": true,
+  "repository_wide_suite_run": false,
+  "new_docking_calls": 0,
+  "scientific_role": "bounded development launch checks, not release completion"
+}

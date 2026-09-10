@@ -41,6 +41,11 @@ def main() -> None:
     ap.add_argument("--arms", default="macro_prior")
     ap.add_argument("--session", default="compose_iclr")
     ap.add_argument(
+        "--winner-route-docking",
+        action="store_true",
+        help="known winner first, then at most five saved route/control dockings",
+    )
+    ap.add_argument(
         "--macro-lookahead",
         action="store_true",
         help="four macro-continuation feedback rounds, at most 40 new dockings",
@@ -186,6 +191,7 @@ def main() -> None:
                 a.warm_continuation,
                 a.partial_docking,
                 a.proposal_docking,
+                a.winner_route_docking,
                 a.macro_feedback,
                 a.macro_lookahead,
                 a.feedback_round,
@@ -227,6 +233,7 @@ def main() -> None:
         or a.warm_continuation
         or a.partial_docking
         or a.proposal_docking
+        or a.winner_route_docking
         or a.macro_feedback
         or a.macro_lookahead
         or a.feedback_round
@@ -250,6 +257,7 @@ def main() -> None:
             warm=a.warm_continuation,
             partial=a.partial_docking,
             proposal_docking=a.proposal_docking,
+            winner_route_docking=a.winner_route_docking,
             macro_feedback=a.macro_feedback,
             macro_lookahead=a.macro_lookahead,
             feedback=a.feedback_round,
@@ -347,6 +355,7 @@ def launch_continuation_profile(
     warm: bool = False,
     partial: bool = False,
     proposal_docking: bool = False,
+    winner_route_docking: bool = False,
     macro_feedback: bool = False,
     macro_lookahead: bool = False,
     feedback: bool = False,
@@ -371,7 +380,9 @@ def launch_continuation_profile(
     from modal_apps.run_process_v2_p50_app import local_image_revision
 
     kind = (
-        "t4_macro_lookahead"
+        "t4_winner_route_docking"
+        if winner_route_docking
+        else "t4_macro_lookahead"
         if macro_lookahead
         else "t4_macro_feedback"
         if macro_feedback
@@ -416,6 +427,7 @@ def launch_continuation_profile(
     contract = (
         ROOT
         / {
+            "t4_winner_route_docking": "configs/t4_winner_route_docking.json",
             "t4_macro_feedback": "configs/t4_macro_feedback.json",
             "t4_macro_lookahead": "configs/t4_macro_lookahead.json",
             "t4_proposal_docking": "configs/t4_proposal_docking.json",
@@ -518,7 +530,9 @@ def launch_continuation_profile(
         "task": task,
         "call_id": call.object_id,
         "oracle_calls": 0,
-        "oracle_call_limit": 16
+        "oracle_call_limit": 6
+        if winner_route_docking
+        else 16
         if proposal_docking
         else 20
         if feedback or rings
