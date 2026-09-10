@@ -45,3 +45,17 @@ No assumption that a missing ring implies improved docking.
 Before launch: focused lock/accounting/retry/resource tests, pinned chemistry,
 clean committed source and strict preflight. Deploy the T4 app, then use
 `python3 tools/t4_launch.py --proposal-docking`. No full-suite milestone claim.
+
+## Launch status, 2026-09-10
+
+Implementation is committed at `2f02ba9` and `af28010`. On the clean
+`af28010` worktree, the three proposal-batch tests and two existing durable
+docking/retry regression tests passed (5 tests, 4.23 seconds). Strict preflight
+reported zero mounted drift; `git diff --check` passed. No prior
+`t4_proposal_docking` namespace was found on the Modal volume.
+
+The permission reviewer rejected `modal deploy` because it uploads application
+source to the external Modal service. No deployment, spawn or new docking call
+occurred. Explicit approval for that source upload is required before retrying;
+do not bypass the rejection through another launcher. The authorized batch
+remains the same 16 identities. No surrogate or controller change has been made.
