@@ -1,14 +1,14 @@
 # One-step recovery lookahead
 
-Status: first attempt failed an operational compatibility check before new
-molecular enumeration. A source-hash-only repair is prepared; no outcome yet.
-This is one fixed-decision diagnostic, not a
-multi-round optimizer run or docking experiment.
+Status: completed. Short repair found a new eligible molecule, but lookahead
+did not change the selected offspring in this paired decision. There were no
+new docking calls. This is a fixed-decision diagnostic, not a multi-round
+optimizer or a demonstrated docking improvement.
 
-Generation revision: `3dc2d2d010b4` (full identity in the launch receipt).
-Run: `9cbc9853afb9ab5692e8c4fb64c74d05822044df45f3f5ceb20b36ba0df024c5`.
+Generation revision: `d86c055d49070f2cb14ab050e5ff7b7c4029f351`.
+Run: `6f6e72c73ac0fcbce1fa0e0449375929f8ee42888199345aee99cdd6324e9b35`.
 Volume: `compose-v4-artifacts`; the three case paths and call IDs are in
-`attempt_1/launch.json`.
+`attempt_2/launch.json`. The failed first attempt remains separately preserved.
 
 All nine candidates at the saved second retention decision are included, not
 just the known near-feasible state. Three workers prepare deterministic i::3
@@ -66,3 +66,55 @@ Its receipts live separately under `attempt_2`; the collector defaults there.
 No first-attempt repair rows completed, so only previously compatible earlier
 diagnostic rows can be reused. Startup cost of the failed attempt is additional
 and must not disappear from compute reporting.
+
+## Result
+
+`summary.json` is the authoritative input-hashed reduction. Across all nine
+roots, 5,093 canonical root/product pairs contained 18 eligible pairs, including
+16 new eligible molecules. Four roots had new eligible continuations; five had
+any eligible continuation when known archive returns are included.
+
+| Retention arm, followed by the same repair rule | First-slot probability on roots with new eligible repairs | Selected new eligible molecules |
+| --- | ---: | ---: |
+| Immediate | 0.789558 | 1 |
+| One-step lookahead | 0.943562 | 1 |
+
+Both selected `levels/01/attempt_01_01` and `levels/01/attempt_02_00`.
+Only the former had a new eligible repair. Both arms therefore returned the
+same molecule, not two distinct discoveries:
+
+```text
+Cc1nc(=O)nc(-c2cc(Br)c3n2-c2ccc(CN(C)C)cc2CNC3=O)n1C
+```
+
+The exact `atom_delete` witness removes fluorine at persistent slot 27.
+QED is 0.650791, SA 3.334475 and original-seed similarity 0.492308. Cycle rank
+stays four and ring-system count stays two; this is local repair, not new ring
+construction. The remaining primitive budget is 39.
+
+Its predicted docking is -8.819451, worse than the incumbent prediction
+-9.148093. Even the best prediction across all 16 new eligible products is
+-9.004462. These are frozen-model predictions, not docking observations.
+The result demonstrates a useful repair from an already-retained state, but no
+selected-endpoint advantage from lookahead under this paired seed. It does not
+prove lookahead is generally ineffective. A cheaper proposed next comparison is
+repair completion on already-retained states, preserving exploration; no such
+optimizer run was launched here.
+
+## Completed verification and compute
+
+The source-hash repair passed four focused tests in 2.92 seconds on the clean
+launch source. The collector verified all nine roots, sealed inputs, exact-state
+and cache dependency identities, endpoint eligibility, archive novelty, original
+selection probabilities within 1e-12, exact selected indices and selected-repair
+executor replay. All 28 reused scoring/topology/codec dependencies matched.
+Touched-code lint/format passed. No full-suite milestone qualification is claimed.
+
+Successful worker elapsed times were 173.5, 191.8 and 249.9 seconds, about 4.2
+minutes for the parallel worker phase, excluding deployment and collection.
+Proposal counters were 54.6, 69.8 and 102.1 seconds. Six new laws were enumerated,
+two old laws reused, and one complete prior repair row reused. Public executor
+calls totalled 6,132. Peak RSS per Linux worker was approximately 4.11 million
+KiB. These are elapsed/reservation metrics, not measured CPU utilization.
+The failed first attempt adds 427.2 worker-seconds of startup; it is not omitted
+or reported as a molecular failure. No new oracle calls, training or follow-up.

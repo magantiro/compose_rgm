@@ -201,6 +201,30 @@ def main():
         "oracle_calls": 0,
         "pool_count": len(pool),
         "census": census,
+        "availability": {
+            "roots_with_new_eligible": sum(r["new_eligible"] > 0 for r in census),
+            "roots_with_any_eligible": sum(r["eligible"] > 0 for r in census),
+            "root_product_pairs": sum(r["unique_products"] for r in census),
+            "eligible_root_product_pairs": sum(r["eligible"] for r in census),
+            "new_eligible_root_product_pairs": sum(r["new_eligible"] for r in census),
+            "distinct_new_eligible": len(
+                {
+                    r["smiles"]
+                    for rows in repairs.values()
+                    for r in rows
+                    if r["oracle_eligible"] and not r["in_prior_archive"]
+                }
+            ),
+            "best_new_predicted_docking": min(
+                (
+                    r["predicted_docking"]
+                    for rows in repairs.values()
+                    for r in rows
+                    if r["oracle_eligible"] and not r["in_prior_archive"]
+                ),
+                default=None,
+            ),
+        },
         "reused_roots": reused,
         "comparison": comparison,
         "selected_continuations": selected,
