@@ -1,0 +1,41 @@
+{
+  "schema_version": "t4_macro_beam_verification_v1",
+  "scope": "bounded zero-oracle development diagnostic, not milestone qualification",
+  "first_revision": "7e337d28f19630743f98bf12aedc68aa15f153f1",
+  "first_focused_suite": {
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 20.22,
+    "sha256": "dc8c7cbe8a2b604d0eaa3db776ea0e470615da8fdd12a6d76785a7dd05e8b22b"
+  },
+  "repair_revision_prefix": "ac7de60",
+  "repair_focused_suite": {
+    "passed": 9,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 18.97,
+    "sha256": "c177275a56a9ab1a921e298205449a69c385f957730df3dc821dbdc4dabd53d7"
+  },
+  "test_command": "env PYTHONPATH=/private/tmp/compose-t4-chemistry.hizM8Y:src:. OMP_NUM_THREADS=1 /Users/rmaganti/compose_rgm_git/.venv/bin/python -m pytest -q tests/test_saved_marked_law.py tests/test_t4_macro_beam.py tests/test_option_decision_audit.py --junitxml=<artifact path>",
+  "local_python": "3.12.9",
+  "local_platform": "macOS-26.5.2-arm64-arm-64bit",
+  "local_rdkit": "2024.03.5",
+  "strict_preflight": "passed on both clean committed launch worktrees, zero mounted drift",
+  "focused_lint_and_format": "passed for new experiment/helper/tests and touched launcher",
+  "legacy_app_lint": {
+    "status": "fails with 17 existing findings",
+    "baseline_revision": "651574b",
+    "checked_revision": "ac7de60",
+    "finding_code_message_multisets_identical": true,
+    "new_wrapper_findings": 0,
+    "unrelated_cleanup_performed": false
+  },
+  "repository_wide_suite": "not run under the bounded T4 development policy",
+  "development_repairs": [
+    "initial interruption test detected tuple/list lock serialization mismatch; normalized through JSON before publication; exact test then passed",
+    "initial seed workers failed on noncanonical archive SMILES spelling; compared canonical molecular identities without reconstructing exact slots; only failed cases relaunched"
+  ],
+  "oracle_calls": 0,
+  "pushed": false
+}
