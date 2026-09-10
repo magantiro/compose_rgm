@@ -419,7 +419,7 @@ def run_remote(task, root, artifact_root, volume, runtime_factory, validate_revi
             "input_sha256": contract["expected_input_sha256"],
             "software": {
                 p: importlib.metadata.version(p)
-                for p in ("numpy", "rdkit", "torch", "PyTDC", "guacamol")
+                for p in ("numpy", "rdkit", "torch", "PyTDC")
             },
             "hardware": {
                 "cpu": 1,

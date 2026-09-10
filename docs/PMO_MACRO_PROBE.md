@@ -59,6 +59,13 @@ the existing ten-molecule JNK3 parity fixture. Seven unchanged beam/cache tests
 passed in 18.92 seconds. Ruff and whitespace checks passed. No full suite was
 run, and this development launch does not declare the controller milestone done.
 
+Operational correction: the first deployment stopped during runtime metadata
+collection because it requested a standalone `guacamol` distribution version
+that is not installed in the PyTDC image. The correction records the installed
+PyTDC distribution instead, without changing oracle definitions, seeds, roots,
+or search settings. Failed initialization receipts are retained; only cases
+confirmed to have stopped before any oracle query may be relaunched.
+
 Focused checks cover oracle charging/resume, candidate locks and feedback
 timing, unchanged beam retention, and launch bounds. No broad regression suite
 is an iteration gate for this bounded development probe. This does not waive
