@@ -128,6 +128,8 @@ def prepare(root: Path) -> dict:
 
 
 def load_contract(root: Path) -> dict:
+    from compose_v4.rewrite.editing_v2_process_identity import require_editing_process_v2_identity
+
     c = json.loads((root / CONTRACT).read_text())
     if identity({k: v for k, v in c.items() if k != "contract_sha256"}) != c["contract_sha256"]:
         raise ValueError("branch policy contract hash mismatch")
@@ -143,6 +145,11 @@ def load_contract(root: Path) -> dict:
         raise ValueError("branch policy exceeds declared scope or changes recipe")
     for key in ("prepared", "protocol"):
         verify_file(root / c[key]["path"], c[key]["sha256"])
+    # Fail locally before allocating containers, not later in the frozen model
+    # loader. Do not rebind historical training artifacts to changed source.
+    gate_path = root / "configs/editing_v2_process_v2_gate_zero_structural.json"
+    gate = json.loads(gate_path.read_text())
+    require_editing_process_v2_identity(gate["process_identity"]["process_identity_sha256"])
     return c
 
 

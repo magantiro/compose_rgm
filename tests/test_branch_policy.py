@@ -7,6 +7,21 @@ from compose_v4.control.branch_policy import BranchPolicy
 from compose_v4.experiments.pmo_branch_policy import candidate_pool, worker_identity
 
 
+def test_launch_checks_frozen_process_before_remote_allocation(monkeypatch):
+    from pathlib import Path
+
+    from compose_v4.experiments.pmo_branch_policy import load_contract
+    from compose_v4.rewrite import editing_v2_process_identity as process
+
+    root = Path(__file__).resolve().parents[1]
+    assert load_contract(root)["new_oracle_limit"] == 32
+    monkeypatch.setattr(
+        process, "editing_process_v2_identity", lambda: {"process_identity_sha256": "changed"}
+    )
+    with pytest.raises(process.EditingV2ProcessIdentityError, match="differs"):
+        load_contract(root)
+
+
 def test_policy_learns_order_and_does_not_read_evaluation_scores():
     observations = [
         {"parent_smiles": "CCO", "parent_score": 0.4, "smiles": "CCN", "score": 0.1},
