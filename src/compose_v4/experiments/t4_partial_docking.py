@@ -231,13 +231,23 @@ def run_batch(
     return result
 
 
-def dock_saved_row(task, repo_root, artifact_root, volume, validate_revision, dock):
+def dock_saved_row(
+    task,
+    repo_root,
+    artifact_root,
+    volume,
+    validate_revision,
+    dock,
+    *,
+    run_kind=KIND,
+    batch_limit=13,
+):
     validate_revision(task["image_revision"])
     verify_file(repo_root / "modal_apps/genmol_t4_opt_app.py", task["app_sha256"])
     if not re.fullmatch(r"[0-9a-f]{64}", task["run_id"]):
         raise ValueError("malformed partial docking run ID")
     volume.reload()
-    root = artifact_root / KIND / task["run_id"]
+    root = artifact_root / run_kind / task["run_id"]
     path = root / "candidate_lock.json"
     verify_file(path, task["candidate_lock_sha256"])
     lock = unseal(path)
@@ -249,7 +259,7 @@ def dock_saved_row(task, repo_root, artifact_root, volume, validate_revision, do
     }.items():
         verify_file(path, lock["task"]["expected_input_sha256"][name])
     index = task["index"]
-    if type(index) is not int or not 0 <= index < len(lock["take"]) <= 13:
+    if type(index) is not int or not 0 <= index < len(lock["take"]) <= batch_limit:
         raise ValueError("worker index outside locked batch")
     barrier = json.loads((root / "docking_started.json").read_text())
     if barrier["candidate_lock_sha256"] != task["candidate_lock_sha256"]:

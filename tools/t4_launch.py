@@ -108,6 +108,11 @@ def main() -> None:
         help="approved saved partial-round batch only, at most 13 new dockings",
     )
     ap.add_argument(
+        "--proposal-docking",
+        action="store_true",
+        help="dock all 16 frozen eligible repair proposals without surrogate selection",
+    )
+    ap.add_argument(
         "--warm-continuation",
         action="store_true",
         help="two guided warm rounds from the frozen full archive, at most 40 new calls",
@@ -170,6 +175,7 @@ def main() -> None:
                 a.matched_pilot,
                 a.warm_continuation,
                 a.partial_docking,
+                a.proposal_docking,
                 a.feedback_round,
                 a.ring_program_round,
                 a.task_search_audit,
@@ -208,6 +214,7 @@ def main() -> None:
         or a.matched_pilot
         or a.warm_continuation
         or a.partial_docking
+        or a.proposal_docking
         or a.feedback_round
         or a.ring_program_round
         or a.task_search_audit
@@ -228,6 +235,7 @@ def main() -> None:
             matched=a.matched_pilot,
             warm=a.warm_continuation,
             partial=a.partial_docking,
+            proposal_docking=a.proposal_docking,
             feedback=a.feedback_round,
             rings=a.ring_program_round,
             task_search=a.task_search_audit,
@@ -322,6 +330,7 @@ def launch_continuation_profile(
     matched: bool = False,
     warm: bool = False,
     partial: bool = False,
+    proposal_docking: bool = False,
     feedback: bool = False,
     rings: bool = False,
     task_search: bool = False,
@@ -344,7 +353,9 @@ def launch_continuation_profile(
     from modal_apps.run_process_v2_p50_app import local_image_revision
 
     kind = (
-        "t4_recovery_lookahead"
+        "t4_proposal_docking"
+        if proposal_docking
+        else "t4_recovery_lookahead"
         if recovery_lookahead
         else "t4_no_similarity_penalty"
         if no_similarity_penalty
@@ -383,6 +394,7 @@ def launch_continuation_profile(
     contract = (
         ROOT
         / {
+            "t4_proposal_docking": "configs/t4_proposal_docking.json",
             "t4_recovery_lookahead": "configs/t4_recovery_lookahead.json",
             "t4_no_similarity_penalty": "configs/t4_no_similarity_penalty.json",
             "t4_repair_neighbors": "configs/t4_repair_neighbors.json",
@@ -482,7 +494,9 @@ def launch_continuation_profile(
         "task": task,
         "call_id": call.object_id,
         "oracle_calls": 0,
-        "oracle_call_limit": 20
+        "oracle_call_limit": 16
+        if proposal_docking
+        else 20
         if feedback or rings
         else 13
         if partial
