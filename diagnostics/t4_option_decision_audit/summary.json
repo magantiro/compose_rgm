@@ -1,0 +1,396 @@
+{
+  "analysis_sha256": "50779206d1e5c0fc265548736d1dbb89d31507bae4da04a70e59c8845574b54b",
+  "byte_identical_value_snapshots": false,
+  "cases": [
+    {
+      "applicable_option_count": 38,
+      "attempt_options": [
+        "construct:pendant:6:6,0,0:aromatic:0",
+        "construct:pendant:6:6,0,0:aromatic:0",
+        "restate",
+        "rebuild"
+      ],
+      "case_index": 0,
+      "completed": 4,
+      "elapsed_seconds_including_initialization_and_support_audit": 275.518877962,
+      "eligible_attempts": 4,
+      "focal_attempts": 2,
+      "focal_completed": 2,
+      "focal_known_canonical_matches": 1,
+      "focal_option_balanced_prior": 0.009831578947368422,
+      "fresh_law_enumerations": 18,
+      "fresh_law_seconds": 61.245896797,
+      "generic_option_balanced_prior": 0.18263157894736845,
+      "initialization_seconds": 131.751036516,
+      "known_eligible": true,
+      "known_path_support": {
+        "exact_path_probability": 0.05,
+        "probability_scope": "specified exact-state prefix conditional on option and fully mutable region",
+        "steps": [
+          {
+            "branches": 2,
+            "canonical_matches_before_exact_slot_match": 2,
+            "exact_prefix_probability": 0.1,
+            "row_successors": 20,
+            "step": 1
+          },
+          {
+            "branches": 1,
+            "canonical_matches_before_exact_slot_match": 1,
+            "exact_prefix_probability": 0.05,
+            "row_successors": 2,
+            "step": 2
+          },
+          {
+            "branches": 1,
+            "canonical_matches_before_exact_slot_match": 1,
+            "exact_prefix_probability": 0.05,
+            "row_successors": 1,
+            "step": 3
+          },
+          {
+            "branches": 1,
+            "canonical_matches_before_exact_slot_match": 1,
+            "exact_prefix_probability": 0.05,
+            "row_successors": 1,
+            "step": 4
+          },
+          {
+            "branches": 1,
+            "canonical_matches_before_exact_slot_match": 1,
+            "exact_prefix_probability": 0.05,
+            "row_successors": 1,
+            "step": 5
+          },
+          {
+            "branches": 1,
+            "canonical_matches_before_exact_slot_match": 1,
+            "exact_prefix_probability": 0.05,
+            "row_successors": 1,
+            "step": 6
+          },
+          {
+            "branches": 1,
+            "canonical_matches_before_exact_slot_match": 1,
+            "exact_prefix_probability": 0.05,
+            "row_successors": 1,
+            "step": 7
+          }
+        ],
+        "supported": true
+      },
+      "known_prediction_change_from_source": -0.2709727146870913,
+      "known_rank_among_unique_eligible": 2,
+      "known_topology_change": {
+        "cycle_rank": 1,
+        "n_bonds": 7,
+        "n_bridges": 1,
+        "n_heavy": 6,
+        "n_ring_atoms": 6,
+        "n_ring_systems": 1
+      },
+      "law_cache_hits": 45,
+      "old_run_law_receipts_reused": 0,
+      "option": "construct:pendant:6:6,0,0:aromatic:0",
+      "peak_rss_kib_linux": 4130820,
+      "post_initialization_seconds_including_support_audit": 143.76784144599998,
+      "public_executor_calls_including_support_audit": 922,
+      "unique_completed": 4,
+      "unique_eligible": 4
+    },
+    {
+      "applicable_option_count": 37,
+      "attempt_options": [
+        "construct:fused:6:6,0,0:nonaromatic:0",
+        "construct:fused:6:6,0,0:nonaromatic:0",
+        "rebuild",
+        "generic"
+      ],
+      "case_index": 1,
+      "completed": 4,
+      "elapsed_seconds_including_initialization_and_support_audit": 329.85505894799996,
+      "eligible_attempts": 2,
+      "focal_attempts": 2,
+      "focal_completed": 2,
+      "focal_known_canonical_matches": 1,
+      "focal_option_balanced_prior": 0.0102027027027027,
+      "fresh_law_enumerations": 14,
+      "fresh_law_seconds": 74.32670878599987,
+      "generic_option_balanced_prior": 0.1827027027027027,
+      "initialization_seconds": 196.078844528,
+      "known_eligible": true,
+      "known_path_support": {
+        "exact_path_probability": 0.07142857142857142,
+        "probability_scope": "specified exact-state prefix conditional on option and fully mutable region",
+        "steps": [
+          {
+            "branches": 2,
+            "canonical_matches_before_exact_slot_match": 4,
+            "exact_prefix_probability": 0.14285714285714285,
+            "row_successors": 14,
+            "step": 1
+          },
+          {
+            "branches": 2,
+            "canonical_matches_before_exact_slot_match": 2,
+            "exact_prefix_probability": 0.14285714285714285,
+            "row_successors": 2,
+            "step": 2
+          },
+          {
+            "branches": 2,
+            "canonical_matches_before_exact_slot_match": 2,
+            "exact_prefix_probability": 0.14285714285714285,
+            "row_successors": 2,
+            "step": 3
+          },
+          {
+            "branches": 2,
+            "canonical_matches_before_exact_slot_match": 2,
+            "exact_prefix_probability": 0.14285714285714285,
+            "row_successors": 2,
+            "step": 4
+          },
+          {
+            "branches": 1,
+            "canonical_matches_before_exact_slot_match": 1,
+            "exact_prefix_probability": 0.07142857142857142,
+            "row_successors": 2,
+            "step": 5
+          }
+        ],
+        "supported": true
+      },
+      "known_prediction_change_from_source": -0.0853330038854514,
+      "known_rank_among_unique_eligible": 2,
+      "known_topology_change": {
+        "cycle_rank": 1,
+        "n_bonds": 5,
+        "n_bridges": 0,
+        "n_heavy": 4,
+        "n_ring_atoms": 4,
+        "n_ring_systems": 0
+      },
+      "law_cache_hits": 48,
+      "old_run_law_receipts_reused": 0,
+      "option": "construct:fused:6:6,0,0:nonaromatic:0",
+      "peak_rss_kib_linux": 4170636,
+      "post_initialization_seconds_including_support_audit": 133.77621441999997,
+      "public_executor_calls_including_support_audit": 1150,
+      "unique_completed": 4,
+      "unique_eligible": 2
+    },
+    {
+      "applicable_option_count": 37,
+      "attempt_options": [
+        "add_carbonyl",
+        "add_carbonyl",
+        "decorate",
+        "scaffold_extend"
+      ],
+      "case_index": 2,
+      "completed": 4,
+      "elapsed_seconds_including_initialization_and_support_audit": 169.437378523,
+      "eligible_attempts": 4,
+      "focal_attempts": 2,
+      "focal_completed": 2,
+      "focal_known_canonical_matches": 2,
+      "focal_option_balanced_prior": 0.0387027027027027,
+      "fresh_law_enumerations": 1,
+      "fresh_law_seconds": 7.192039542000003,
+      "generic_option_balanced_prior": 0.1827027027027027,
+      "initialization_seconds": 133.75683948900001,
+      "known_eligible": true,
+      "known_path_support": {
+        "exact_path_probability": 0.1431178078570819,
+        "probability_scope": "specified exact-state prefix conditional on option and fully mutable region",
+        "steps": [
+          {
+            "branches": 1,
+            "canonical_matches_before_exact_slot_match": 1,
+            "exact_prefix_probability": 0.1431178078570819,
+            "row_successors": 7,
+            "step": 1
+          }
+        ],
+        "supported": true
+      },
+      "known_prediction_change_from_source": -0.06075619171287894,
+      "known_rank_among_unique_eligible": 3,
+      "known_topology_change": {
+        "cycle_rank": 0,
+        "n_bonds": 1,
+        "n_bridges": 1,
+        "n_heavy": 1,
+        "n_ring_atoms": 0,
+        "n_ring_systems": 0
+      },
+      "law_cache_hits": 43,
+      "old_run_law_receipts_reused": 0,
+      "option": "add_carbonyl",
+      "peak_rss_kib_linux": 4112884,
+      "post_initialization_seconds_including_support_audit": 35.68053903399999,
+      "public_executor_calls_including_support_audit": 188,
+      "unique_completed": 3,
+      "unique_eligible": 3
+    },
+    {
+      "applicable_option_count": 37,
+      "attempt_options": [
+        "insert_ring_carbonyl",
+        "insert_ring_carbonyl",
+        "local",
+        "grow"
+      ],
+      "case_index": 3,
+      "completed": 4,
+      "elapsed_seconds_including_initialization_and_support_audit": 241.39077173599998,
+      "eligible_attempts": 2,
+      "focal_attempts": 2,
+      "focal_completed": 2,
+      "focal_known_canonical_matches": 1,
+      "focal_option_balanced_prior": 0.047702702702702694,
+      "fresh_law_enumerations": 7,
+      "fresh_law_seconds": 62.12263670300004,
+      "generic_option_balanced_prior": 0.1827027027027027,
+      "initialization_seconds": 148.276867485,
+      "known_eligible": true,
+      "known_path_support": {
+        "exact_path_probability": 0.05,
+        "probability_scope": "specified exact-state prefix conditional on option and fully mutable region",
+        "steps": [
+          {
+            "branches": 2,
+            "canonical_matches_before_exact_slot_match": 2,
+            "exact_prefix_probability": 0.1,
+            "row_successors": 20,
+            "step": 1
+          },
+          {
+            "branches": 1,
+            "canonical_matches_before_exact_slot_match": 1,
+            "exact_prefix_probability": 0.05,
+            "row_successors": 2,
+            "step": 2
+          },
+          {
+            "branches": 1,
+            "canonical_matches_before_exact_slot_match": 1,
+            "exact_prefix_probability": 0.05,
+            "row_successors": 1,
+            "step": 3
+          },
+          {
+            "branches": 1,
+            "canonical_matches_before_exact_slot_match": 1,
+            "exact_prefix_probability": 0.05,
+            "row_successors": 1,
+            "step": 4
+          }
+        ],
+        "supported": true
+      },
+      "known_prediction_change_from_source": -0.12319157572958872,
+      "known_rank_among_unique_eligible": 1,
+      "known_topology_change": {
+        "cycle_rank": 0,
+        "n_bonds": 2,
+        "n_bridges": 1,
+        "n_heavy": 2,
+        "n_ring_atoms": 1,
+        "n_ring_systems": 0
+      },
+      "law_cache_hits": 47,
+      "old_run_law_receipts_reused": 0,
+      "option": "insert_ring_carbonyl",
+      "peak_rss_kib_linux": 4103096,
+      "post_initialization_seconds_including_support_audit": 93.11390425099998,
+      "public_executor_calls_including_support_audit": 745,
+      "unique_completed": 4,
+      "unique_eligible": 2
+    }
+  ],
+  "generation_code_revision": "0e02cfd5f6bfd406b71d4a7b3699f311f8f8d08f",
+  "input_sha256": {
+    "case_0/cache_inventory.json": "7bc273a5a9231c9ffaa56599dcbcea4136ebef53662bd9c277cce1d95bdec89b",
+    "case_0/heartbeat.json": "a30b4bf45cf045494bd936bd8f139b63aa09734bdd906cc10cf46ca13e7281ee",
+    "case_0/proposal_lock.json": "6ed3c829a79533d48fc9d4892ec062b03a8fb139c084d948218bf586b76dd001",
+    "case_0/result.json": "082789d7f108584ea6ec83686bdeb14230c8dd8ad08689b1c962ec2e80f96c50",
+    "case_0/runtime_gate.json": "e4400dcb5169f7abf6fbc0cedac7435a0234d12dd4fda02caf8a396c9e410ad3",
+    "case_0/task_snapshot.json": "5359cabfd241b427f5da6dd10ad3f5103be706e098e0f0c9b27a8bbb467c400e",
+    "case_1/cache_inventory.json": "7bc273a5a9231c9ffaa56599dcbcea4136ebef53662bd9c277cce1d95bdec89b",
+    "case_1/heartbeat.json": "57c1bf1349a917c47aca85a29df18e9ef897e18a1372004a1a84f1814dce8c4b",
+    "case_1/proposal_lock.json": "f78eef52981972ed423fd1cc3aa9e34b1bc40c63a092791e37dc5cb315e3ee09",
+    "case_1/result.json": "dcd44c5f2e065de881a24610e0a5f9b3b8f0499892162087458b676b356f8b87",
+    "case_1/runtime_gate.json": "67e978903bd8712b9539cd111933b60d70b4b3ecb324770ececfdd465b8f690f",
+    "case_1/task_snapshot.json": "5359cabfd241b427f5da6dd10ad3f5103be706e098e0f0c9b27a8bbb467c400e",
+    "case_2/cache_inventory.json": "7bc273a5a9231c9ffaa56599dcbcea4136ebef53662bd9c277cce1d95bdec89b",
+    "case_2/heartbeat.json": "0fa1db5e6d06ef39ff873c8c4ebf0478664e137f36d10e0d951352530e170053",
+    "case_2/proposal_lock.json": "9d45d206d675688f50ea20b14f546799baa10eb4a70b975410435fe3b4eb01bb",
+    "case_2/result.json": "32ab7643c3b9541da73c1c8f086eedde586b568552b3d5f0860f7f9bc1818b54",
+    "case_2/runtime_gate.json": "7ca5ee686d66525552256332ecd1ee32c8d3cfa3715f9501ee20ffc4dd53c2ca",
+    "case_2/task_snapshot.json": "5359cabfd241b427f5da6dd10ad3f5103be706e098e0f0c9b27a8bbb467c400e",
+    "case_3/cache_inventory.json": "7bc273a5a9231c9ffaa56599dcbcea4136ebef53662bd9c277cce1d95bdec89b",
+    "case_3/heartbeat.json": "92fdf00447524b6b18b0534a8b41716b1928cf11d8be8a870f2a3bca33d74141",
+    "case_3/proposal_lock.json": "e8609bb886bbff18a5ba574055af9755b01ffba4be45f834991d612fc5347188",
+    "case_3/result.json": "42f20f9046b0f0c6acc956a56a8cbf9e590e3a0510f73911818848c86b502796",
+    "case_3/runtime_gate.json": "7818696356ed929aff4f76d14a15b328f4659f9d4406bc77e07af73e2064236a",
+    "case_3/task_snapshot.json": "842b7c1e0eec765eccd3a7967e0f8d6e0b703986630bd6a40f6aeb98e824e6b1",
+    "launch.json": "61b7970c412d447c3e5d40565ffc9118fd6d733843530aa8dfda3b13a600711b"
+  },
+  "limitations": [
+    "four answer-known starting states and preselected focal option types",
+    "attachment sites and known continuations not supplied to proposal generation",
+    "conditional decision diagnosis, not seed-to-winner autonomous recovery",
+    "two focal trials per case, not a precise recovery-rate estimate",
+    "surrogate ordering is not observed docking ordering",
+    "reported timing includes post-lock support diagnosis; pure proposal time not isolated",
+    "the local/global region-selection policy is not evaluated by this fully mutable assay"
+  ],
+  "new_docking_calls": 0,
+  "run_id": "f9dce46f60769f19299140c6c786edb22a161fa256b129b31345c5e231aa773b",
+  "schema_version": "option_decision_summary_v1",
+  "total_attempts": 16,
+  "total_completed": 16,
+  "total_eligible_attempts": 12,
+  "total_focal_known_canonical_matches": 5,
+  "total_unique_completed": 15,
+  "value_snapshot_equivalence": [
+    {
+      "case_index": 0,
+      "max_coefficient_difference_from_case_0": 0.0,
+      "minimum_distinct_molecule_prediction_gap": 0.03544035541123591,
+      "pairwise_prediction_order_stable_under_bound": true,
+      "prediction_error_upper_bound_from_case_0": 0.0,
+      "same_recipe_training_rows_and_features": true,
+      "snapshot_sha256": "32d42d8546d1302717802e90cb997c74eb04b9e9298a54a363dc8d1a0db463d9"
+    },
+    {
+      "case_index": 1,
+      "max_coefficient_difference_from_case_0": 0.0,
+      "minimum_distinct_molecule_prediction_gap": 0.015080701570378885,
+      "pairwise_prediction_order_stable_under_bound": true,
+      "prediction_error_upper_bound_from_case_0": 0.0,
+      "same_recipe_training_rows_and_features": true,
+      "snapshot_sha256": "32d42d8546d1302717802e90cb997c74eb04b9e9298a54a363dc8d1a0db463d9"
+    },
+    {
+      "case_index": 2,
+      "max_coefficient_difference_from_case_0": 0.0,
+      "minimum_distinct_molecule_prediction_gap": 0.012918374688949186,
+      "pairwise_prediction_order_stable_under_bound": true,
+      "prediction_error_upper_bound_from_case_0": 0.0,
+      "same_recipe_training_rows_and_features": true,
+      "snapshot_sha256": "32d42d8546d1302717802e90cb997c74eb04b9e9298a54a363dc8d1a0db463d9"
+    },
+    {
+      "case_index": 3,
+      "max_coefficient_difference_from_case_0": 3.885780586188048e-16,
+      "minimum_distinct_molecule_prediction_gap": 0.015645110754334723,
+      "pairwise_prediction_order_stable_under_bound": true,
+      "prediction_error_upper_bound_from_case_0": 5.364632349458276e-15,
+      "same_recipe_training_rows_and_features": true,
+      "snapshot_sha256": "d68c6967a5cd71fa475f400741c3afea690e5e988887e667ba522e95a4ab52ac"
+    }
+  ]
+}

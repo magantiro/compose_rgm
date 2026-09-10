@@ -1,0 +1,39 @@
+{
+  "schema_version": "option_decision_verification_v1",
+  "generation_code_revision": "0e02cfd5f6bfd406b71d4a7b3699f311f8f8d08f",
+  "run_id": "f9dce46f60769f19299140c6c786edb22a161fa256b129b31345c5e231aa773b",
+  "contract_physical_sha256": "13c20e2da90175fcf5ab6ac99841919635d96f1c1ea732d89ea0da04b5338b58",
+  "focused_tests": {
+    "nodes": ["tests/test_option_decision_audit.py", "tests/test_carbonyl_option.py"],
+    "passed": 11,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 5.247,
+    "environment": "repository venv with pinned RDKit 2024.03.5 chemistry overlay and OMP_NUM_THREADS=1",
+    "artifact": "focused.xml",
+    "artifact_sha256": "89cc4a0b6dad84611b2052c1bd87cb24789dfaacde74b88fb7e5faf960ae661e",
+    "artifact_serialization_note": "original JUnit content retained with a final newline"
+  },
+  "strict_preflight": "passed on clean committed worktree",
+  "focused_ruff": "passed",
+  "contract_self_hash": "passed",
+  "remote_physical_input_gates": "passed in all four workers",
+  "full_repository_suite": "not run; scoped bounded T4 development policy",
+  "failed_intermediate_checks": [
+    {
+      "check": "byte identity of independently fitted value snapshots",
+      "outcome": "failed for case 3; coefficient-only difference up to 3.885780586188048e-16",
+      "disposition": "all snapshots preserved; summary records a kernel-bound proof of ordering stability, not byte identity"
+    }
+  ],
+  "calls": [
+    {"case_index": 0, "call_id": "fc-01M24FTKT7CXS66VF7XSMZ6J1Y"},
+    {"case_index": 1, "call_id": "fc-01M24FTMAVHS1NFMW137S3ZMXD"},
+    {"case_index": 2, "call_id": "fc-01M24FTMY02N661VGBBXYRW77E"},
+    {"case_index": 3, "call_id": "fc-01M24FTNF6FNBR0931SJK1KF1B"}
+  ],
+  "new_docking_calls": 0,
+  "reference_training_runs": 0,
+  "next_experiment_launched": false
+}
