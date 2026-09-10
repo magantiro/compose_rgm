@@ -130,8 +130,9 @@ class MolecularHierarchy:
             )
         return MolecularSearchState(active.graph, active.lineage, node.budget - 1, node.root_id)
 
-    def option_state(self, node: MolecularSearchState, option: str) -> OptionState:
-        context = exact_context(node.graph, canonical_state_key(node.graph), node.region)
+    def option_state(self, node: MolecularSearchState, option: str, *, context=None) -> OptionState:
+        if context is None:
+            context = exact_context(node.graph, canonical_state_key(node.graph), node.region)
         horizon = option_horizon(option, min(self.generic_horizon, node.budget))
         bundle = hashlib.sha256(repr((node.key(), option)).encode()).hexdigest()[:20]
         return OptionState(
@@ -185,7 +186,7 @@ class MolecularHierarchy:
                 )
                 if option_horizon(o, min(self.generic_horizon, node.budget)) <= node.budget
             )
-            states = {o: self.option_state(node, o) for o in options}
+            states = {o: self.option_state(node, o, context=context) for o in options}
             options = retain_product_applicable_options(
                 options,
                 lambda o: (

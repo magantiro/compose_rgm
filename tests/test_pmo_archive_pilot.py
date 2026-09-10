@@ -178,3 +178,19 @@ def test_contract_is_bounded_and_label_free():
     )
     assert all("score" not in r for r in c["roots"])
     assert len(c["law_caches"]) == 1
+
+
+def test_shared_region_context_is_exactly_the_per_option_context():
+    from compose_v4.experiments.t4_warm_continuation import exact_context
+    from compose_v4.rewrite.kernel import canonical_state_key
+
+    hierarchy = MolecularHierarchy(kernel(), lazy_applicability=True, include_carbonyl_options=True)
+    node = MolecularSearchState.start(initial("CCC").graph, budget=11, root_id="fixture")
+    where = hierarchy.row(node)
+    selected = max(where.successors, key=lambda n: n.region.released_fraction)
+    context = exact_context(selected.graph, canonical_state_key(selected.graph), selected.region)
+    what = hierarchy.row(selected)
+    for option in what.labels:
+        shared = hierarchy.option_state(selected, option, context=context)
+        separate = hierarchy.option_state(selected, option)
+        assert shared.key() == separate.key()
