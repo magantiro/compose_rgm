@@ -1,0 +1,60 @@
+{
+  "base_revision": "4367c0fa75efd3aefd8e3727d516bafd9de7ae73",
+  "created_at_utc": "2026-09-10T09:25:45.085863+00:00",
+  "diff_check": "pass",
+  "full_suite": "not run under bounded T4 development policy",
+  "new_model_law_calls": 0,
+  "new_oracle_calls": 0,
+  "ruff": "touched modules/tests/CLI pass; legacy app 17 unchanged findings; changed functions range-formatted",
+  "schema_version": "t4_macro_lookahead_verification_v1",
+  "source_sha256": {
+    "configs/t4_macro_lookahead.json": "92bf98e680897198e7c3e8cd726077192de8aec72b70ec2e17cca4324877966f",
+    "docs/T4_MACRO_LOOKAHEAD.md": "3c3edbe29f8914e305e437ed12a2335d0ecb3d206102402bd822d89b93006edd",
+    "modal_apps/genmol_t4_opt_app.py": "23c76fbdb41061034974bc965f4931e740db4a0c3c4ff49c5147ac79442f9727",
+    "src/compose_v4/experiments/saved_marked_law.py": "89bb0928714ef566e63f170ae1486e802dc777183221fed005886b646a88250f",
+    "src/compose_v4/experiments/t4_macro_feedback.py": "2f775f310293673523c72d1c52e87c5867836cc41ec905990cba3f5be72e69bb",
+    "src/compose_v4/experiments/t4_macro_feedback_remote.py": "e421f55914379ce4eb79d2c3b91c667b858e6fc4fa5b0af12773102eb245e114",
+    "src/compose_v4/experiments/t4_macro_lookahead.py": "8fb245f38d20fa2cd9e9f4879115bd0408a2e0a9c42d6a6ff04b0f94e1650b00",
+    "tests/test_saved_marked_law.py": "bd0368fd5323429131f3966bd07857a36897c9a195c623437254b063c26fefbb",
+    "tests/test_t4_macro_lookahead.py": "e5e5d4d10af917a4c087c968e00fcb7bcee66d95e236ece415fba61bd6496698",
+    "tools/t4_launch.py": "41a3b0bb932a7a952521b3235e3d7cc441203539c2501fb4e6622ea6b7089f07"
+  },
+  "source_state_check": {
+    "preserved_selected_budgets": [
+      110,
+      94,
+      95,
+      96,
+      109,
+      107,
+      102,
+      96
+    ],
+    "prior_archive_rows": 95,
+    "prior_pool": 157
+  },
+  "tests": [
+    {
+      "errors": "0",
+      "failures": "0",
+      "name": "pytest",
+      "path": "/private/tmp/t4-macro-lookahead-focused.xml",
+      "sha256": "1063548b9b60d7dbe9529a87edbf2a7d078cbc7a0ea7db2babe60e7a41e263a7",
+      "skipped": "0",
+      "tests": "10",
+      "time": "7.854",
+      "timestamp": "2026-09-10T05:19:52.701941-04:00"
+    },
+    {
+      "errors": "0",
+      "failures": "0",
+      "name": "pytest",
+      "path": "/private/tmp/t4-macro-lookahead-launch-focused.xml",
+      "sha256": "ec8b9b6ce07d820828cc602700c7a2e815a60776861e7d4b862d6bb60dc760d3",
+      "skipped": "0",
+      "tests": "2",
+      "time": "2.735",
+      "timestamp": "2026-09-10T05:21:33.190351-04:00"
+    }
+  ]
+}

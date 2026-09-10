@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import PurePosixPath
 from time import perf_counter
 
 import numpy as np
@@ -71,7 +72,13 @@ class SavedMarkedLaw:
                 }
             )
             if compatible:
-                self.priors.append(directory)
+                for relative in source.get("cache_paths", ["."]):
+                    if (
+                        PurePosixPath(relative).is_absolute()
+                        or ".." in PurePosixPath(relative).parts
+                    ):
+                        raise ValueError("law cache must remain inside its validated source run")
+                    self.priors.append(directory / relative)
         save("law_cache_inventory", inventory)
 
     def __call__(self, graph):

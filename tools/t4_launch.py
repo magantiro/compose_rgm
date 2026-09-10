@@ -41,6 +41,11 @@ def main() -> None:
     ap.add_argument("--arms", default="macro_prior")
     ap.add_argument("--session", default="compose_iclr")
     ap.add_argument(
+        "--macro-lookahead",
+        action="store_true",
+        help="four macro-continuation feedback rounds, at most 40 new dockings",
+    )
+    ap.add_argument(
         "--macro-feedback",
         action="store_true",
         help="ten whole-option feedback rounds, at most 40 new dockings",
@@ -182,6 +187,7 @@ def main() -> None:
                 a.partial_docking,
                 a.proposal_docking,
                 a.macro_feedback,
+                a.macro_lookahead,
                 a.feedback_round,
                 a.ring_program_round,
                 a.task_search_audit,
@@ -222,6 +228,7 @@ def main() -> None:
         or a.partial_docking
         or a.proposal_docking
         or a.macro_feedback
+        or a.macro_lookahead
         or a.feedback_round
         or a.ring_program_round
         or a.task_search_audit
@@ -244,6 +251,7 @@ def main() -> None:
             partial=a.partial_docking,
             proposal_docking=a.proposal_docking,
             macro_feedback=a.macro_feedback,
+            macro_lookahead=a.macro_lookahead,
             feedback=a.feedback_round,
             rings=a.ring_program_round,
             task_search=a.task_search_audit,
@@ -340,6 +348,7 @@ def launch_continuation_profile(
     partial: bool = False,
     proposal_docking: bool = False,
     macro_feedback: bool = False,
+    macro_lookahead: bool = False,
     feedback: bool = False,
     rings: bool = False,
     task_search: bool = False,
@@ -362,7 +371,9 @@ def launch_continuation_profile(
     from modal_apps.run_process_v2_p50_app import local_image_revision
 
     kind = (
-        "t4_macro_feedback"
+        "t4_macro_lookahead"
+        if macro_lookahead
+        else "t4_macro_feedback"
         if macro_feedback
         else "t4_proposal_docking"
         if proposal_docking
@@ -406,6 +417,7 @@ def launch_continuation_profile(
         ROOT
         / {
             "t4_macro_feedback": "configs/t4_macro_feedback.json",
+            "t4_macro_lookahead": "configs/t4_macro_lookahead.json",
             "t4_proposal_docking": "configs/t4_proposal_docking.json",
             "t4_recovery_lookahead": "configs/t4_recovery_lookahead.json",
             "t4_no_similarity_penalty": "configs/t4_no_similarity_penalty.json",
@@ -513,7 +525,7 @@ def launch_continuation_profile(
         else 13
         if partial
         else 40
-        if matched or warm or frontier_compare or macro_feedback
+        if matched or warm or frontier_compare or macro_feedback or macro_lookahead
         else 0,
         "volume": "compose-v4-artifacts",
         "volume_path": f"/{kind}/{run_id}",

@@ -235,7 +235,19 @@ def scorer(model, seed_smiles):
 
 
 def run_episode(
-    contract, task, archive, output, propose, execute, *, commit, progress, score_factory=scorer
+    contract,
+    task,
+    archive,
+    output,
+    propose,
+    execute,
+    *,
+    commit,
+    progress,
+    score_factory=scorer,
+    initial_state=None,
+    select_parents=parent_selection,
+    select_oracle=oracle_selection,
 ):
     """Lock proposals, finish docking, then update value/parents. Resume complete units."""
     read, save = storage(output, commit)
@@ -249,6 +261,11 @@ def run_episode(
     if len(warm) != 4 or search["lineages"] != 8:
         raise ValueError("feedback requires original seed and four distinct observed roots")
     state = {"archive": archive, "pool": [seed, *warm], "parents": [seed] * 4 + warm}
+    if initial_state is not None:
+        if initial_state["archive"] != archive or len(initial_state["parents"]) != 8:
+            raise ValueError("warm episode disagrees with its exact source archive/parents")
+        state = initial_state
+        seed = next(r for r in state["pool"] if r["smiles"] == archive[0]["smiles"])
     save("initial", state)
     initial_calls, summaries = len(archive) - 1, []
     first_round = max(r["round"] for r in archive) + 1
@@ -297,7 +314,7 @@ def run_episode(
         lock = read(f"{dock_folder}/candidate_lock")
         if lock is None:
             rng = np.random.default_rng(np.random.SeedSequence([search["seed"], number, 701]))
-            take = oracle_selection(
+            take = select_oracle(
                 pool,
                 state["archive"],
                 score,
@@ -368,7 +385,7 @@ def run_episode(
         if len(rows) - 1 - initial_calls > contract["compute"]["oracle_call_limit"]:
             raise ValueError("feedback exceeded authorized oracle budget")
         after_model, next_score = fit(rows, f"{folder}/posterior", label_round + 1)
-        parents, decision = parent_selection(
+        parents, decision = select_parents(
             pool,
             rows,
             seed,

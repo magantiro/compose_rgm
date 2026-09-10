@@ -44,22 +44,37 @@ def contract_at(repo_root):
     return contract
 
 
-def worker_remote(task, repo_root, artifact_root, volume, runtime_factory, validate_revision):
+def worker_remote(
+    task,
+    repo_root,
+    artifact_root,
+    volume,
+    runtime_factory,
+    validate_revision,
+    *,
+    kind=KIND,
+    contract_path=CONTRACT_PATH,
+    load_contract=contract_at,
+    search_runner=None,
+):
     volume.reload()
-    contract = contract_at(repo_root)
+    contract = load_contract(repo_root)
+    if rdBase.rdkitVersion != contract["required_rdkit"]:
+        raise ValueError("feedback requires pinned RDKit")
+    replicas = contract["search"].get("replicas", 1)
     number, index = task["round"], task["worker_index"]
     if (
         type(number) is not int
-        or not 0 <= number < 10
+        or not 0 <= number < contract["search"]["rounds"]
         or type(index) is not int
-        or not 0 <= index < 8
+        or not 0 <= index < contract["search"]["lineages"] * replicas
     ):
         raise ValueError("feedback worker outside declared round/parent census")
     prefix = f"rounds/{number:02}/workers/{index:02}"
-    episode = artifact_root / KIND / task["run_id"]
+    episode = artifact_root / kind / task["run_id"]
     before_path = episode / f"rounds/{number:02}/before.json"
     verify_file(before_path, task["before_sha256"])
-    parent = unseal(before_path)["parents"][index]
+    parent = unseal(before_path)["parents"][index // replicas]
     if identity(parent) != task["parent_sha256"]:
         raise ValueError("worker parent differs from locked round exact state")
 
@@ -134,23 +149,51 @@ def worker_remote(task, repo_root, artifact_root, volume, runtime_factory, valid
                 kernel, lazy_applicability=True, include_carbonyl_options=True
             )
             try:
-                lock = run_search(
-                    decode_search_state(parent["node"]),
-                    hierarchy,
-                    config=BeamConfig(
-                        arm="post_hoc",
-                        depth=1,
-                        width=3,
-                        branches=2,
-                        primitive_budget=110,
+                if search_runner is not None:
+                    search_result = search_runner(
+                        parent,
+                        hierarchy,
                         seed=seed,
-                    ),
-                    score=no_task_score,
-                    save=save,
-                    read=read,
-                    meter=meter,
-                    progress=progress,
-                )
+                        save=save,
+                        read=read,
+                        meter=meter,
+                        progress=progress,
+                        prefix=prefix,
+                        task=task,
+                        episode=episode,
+                        contract=contract,
+                    )
+                else:
+                    lock = run_search(
+                        decode_search_state(parent["node"]),
+                        hierarchy,
+                        config=BeamConfig(
+                            arm="post_hoc",
+                            depth=1,
+                            width=3,
+                            branches=2,
+                            primitive_budget=110,
+                            seed=seed,
+                        ),
+                        score=no_task_score,
+                        save=save,
+                        read=read,
+                        meter=meter,
+                        progress=progress,
+                    )
+                    search_result = {
+                        "candidates": [
+                            extend_candidate(parent, a["candidate"], prefix)
+                            for a in lock["attempts"]
+                            if a["status"] == "complete"
+                        ],
+                        "attempts": len(lock["attempts"]),
+                        "options": dict(
+                            Counter(a["bundle"]["option"] for a in lock["attempts"] if a["bundle"])
+                        ),
+                        "outcomes": dict(Counter(a["status"] for a in lock["attempts"])),
+                        "proposal_seconds": lock["proposal_seconds_this_invocation"],
+                    }
             finally:
                 save("executor_attempts_this_invocation", meter.attempts)
         result = {
@@ -158,17 +201,7 @@ def worker_remote(task, repo_root, artifact_root, volume, runtime_factory, valid
             "worker_index": index,
             "round": number,
             "parent_sha256": task["parent_sha256"],
-            "candidates": [
-                extend_candidate(parent, a["candidate"], prefix)
-                for a in lock["attempts"]
-                if a["status"] == "complete"
-            ],
-            "attempts": len(lock["attempts"]),
-            "options": dict(
-                Counter(a["bundle"]["option"] for a in lock["attempts"] if a["bundle"])
-            ),
-            "outcomes": dict(Counter(a["status"] for a in lock["attempts"])),
-            "proposal_seconds": lock["proposal_seconds_this_invocation"],
+            **search_result,
             "initialization_seconds": initialization,
             "law_work": law.counts,
             "kernel_work": asdict(kernel.work),
@@ -191,18 +224,32 @@ def worker_remote(task, repo_root, artifact_root, volume, runtime_factory, valid
         validate_revision,
         None,
         None,
-        contract_path=CONTRACT_PATH,
-        run_kind=f"{KIND}/{task['run_id']}/{prefix}",
+        contract_path=contract_path,
+        run_kind=f"{kind}/{task['run_id']}/{prefix}",
         runner=runner,
     )
 
 
-def driver_remote(task, repo_root, artifact_root, volume, validate_revision, parallel, dock):
+def driver_remote(
+    task,
+    repo_root,
+    artifact_root,
+    volume,
+    validate_revision,
+    parallel,
+    dock,
+    *,
+    kind=KIND,
+    contract_path=CONTRACT_PATH,
+    load_contract=contract_at,
+    archive_loader=initial_archive,
+    episode_runner=run_episode,
+):
     volume.reload()
-    contract = contract_at(repo_root)
+    contract = load_contract(repo_root)
 
     def runner(actual_task, _prepare, _dock, output, *, commit, progress):
-        archive = initial_archive(contract, artifact_root)
+        archive = archive_loader(contract, artifact_root)
         if archive[0]["smiles"] != actual_task["smiles"]:
             from compose_v4.experiments.t4_macro_beam import canonical_smiles
 
@@ -210,6 +257,10 @@ def driver_remote(task, repo_root, artifact_root, volume, validate_revision, par
                 raise ValueError("feedback source differs from PARP1 seed0")
 
         def propose(number, parents, before_hash):
+            expanded = [p for p in parents for _ in range(contract["search"].get("replicas", 1))]
+            from compose_v4.experiments.continuation_profile import sha256_file
+
+            value_hash = sha256_file(output / f"rounds/{number:02}/prior/value.json")
             tasks = [
                 {
                     **task,
@@ -217,8 +268,9 @@ def driver_remote(task, repo_root, artifact_root, volume, validate_revision, par
                     "worker_index": i,
                     "before_sha256": before_hash,
                     "parent_sha256": identity(parent),
+                    "prior_value_sha256": value_hash,
                 }
-                for i, parent in enumerate(parents)
+                for i, parent in enumerate(expanded)
             ]
             progress.update(phase="proposals", workers_complete=0, workers_total=len(tasks))
             started, results = perf_counter(), {}
@@ -262,11 +314,11 @@ def driver_remote(task, repo_root, artifact_root, volume, validate_revision, par
                 volume,
                 validate_revision,
                 dock,
-                run_kind=f"{KIND}/{task['run_id']}/docking",
-                batch_limit=4,
+                run_kind=f"{kind}/{task['run_id']}/docking",
+                batch_limit=contract["compute"]["per_round"],
             )
 
-        return run_episode(
+        return episode_runner(
             contract,
             actual_task,
             archive,
@@ -286,7 +338,7 @@ def driver_remote(task, repo_root, artifact_root, volume, validate_revision, par
         validate_revision,
         None,
         None,
-        contract_path=CONTRACT_PATH,
-        run_kind=KIND,
+        contract_path=contract_path,
+        run_kind=kind,
         runner=runner,
     )

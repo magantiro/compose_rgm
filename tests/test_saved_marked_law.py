@@ -10,7 +10,8 @@ from compose_v4.experiments.t4_matched_pilot import seal
 from compose_v4.rewrite.trace_shard import encode_state
 
 
-def test_saved_law_reuse_checks_inputs_and_rejects_corrupt_mass(tmp_path, monkeypatch):
+@pytest.mark.parametrize("cache_path", [".", "caches/00"])
+def test_saved_law_reuse_checks_inputs_and_rejects_corrupt_mass(tmp_path, monkeypatch, cache_path):
     graph = initial("CCC").graph
     families, actions, probabilities = engineering_law(graph)
     payload = {
@@ -37,9 +38,15 @@ def test_saved_law_reuse_checks_inputs_and_rejects_corrupt_mass(tmp_path, monkey
     expected = {"checkpoint": "a" * 64}
     (old / "runtime_gate.json").write_text(json.dumps({"input_sha256": expected}))
     key = saved.identity(payload["source"])
-    seal(old / f"laws/{key}.json", payload)
+    seal(old / cache_path / f"laws/{key}.json", payload)
     contract = {
-        "law_caches": [{"path": "old", "launch_sha256": sha256_file(old / "launch.json")}],
+        "law_caches": [
+            {
+                "path": "old",
+                "launch_sha256": sha256_file(old / "launch.json"),
+                "cache_paths": [cache_path],
+            }
+        ],
         "expected_input_sha256": expected,
     }
     records = {}

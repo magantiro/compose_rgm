@@ -93,6 +93,67 @@ _RT: dict[str, Any] = {}
 
 
 @app.function(
+    image=image,
+    cpu=(1.0, 1.0),
+    memory=2048,
+    timeout=7200,
+    max_containers=1,
+    retries=0,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_macro_lookahead(task: dict[str, Any]) -> dict[str, Any]:
+    """Four macro-continuation rounds; at most 40 new oracle calls."""
+    from compose_v4.experiments import t4_macro_lookahead as policy
+    from compose_v4.experiments.t4_macro_feedback_remote import driver_remote
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return driver_remote(
+        task,
+        REMOTE_ROOT,
+        ARTIFACT_ROOT,
+        artifact_volume,
+        _validate_remote_revision,
+        lambda tasks: t4_macro_lookahead_propose.map(tasks, order_outputs=False),
+        lambda smiles, tag: _dock(smiles, "parp1", tag, cpu=1),
+        kind=policy.KIND,
+        contract_path=policy.CONTRACT_PATH,
+        load_contract=policy.contract_at,
+        archive_loader=policy.initial_archive,
+        episode_runner=policy.episode_runner,
+    )
+
+
+@app.function(
+    image=image,
+    cpu=(1.0, 1.0),
+    memory=8192,
+    timeout=1800,
+    max_containers=16,
+    retries=0,
+    scaledown_window=600,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_macro_lookahead_propose(task: dict[str, Any]) -> dict[str, Any]:
+    """Six complete options with a recorded task-guided branch decision."""
+    from compose_v4.experiments import t4_macro_lookahead as policy
+    from compose_v4.experiments.t4_macro_feedback_remote import worker_remote
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return worker_remote(
+        task,
+        REMOTE_ROOT,
+        ARTIFACT_ROOT,
+        artifact_volume,
+        _runtime,
+        _validate_remote_revision,
+        kind=policy.KIND,
+        contract_path=policy.CONTRACT_PATH,
+        load_contract=policy.contract_at,
+        search_runner=policy.run_local_search,
+    )
+
+
+@app.function(
     image=image, cpu=(1.0, 1.0), memory=2048, timeout=7200,
     max_containers=1, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
