@@ -1,6 +1,8 @@
 # One-step recovery lookahead
 
-Status: launched; no outcome yet. This is one fixed-decision diagnostic, not a
+Status: first attempt failed an operational compatibility check before new
+molecular enumeration. A source-hash-only repair is prepared; no outcome yet.
+This is one fixed-decision diagnostic, not a
 multi-round optimizer run or docking experiment.
 
 Generation revision: `3dc2d2d010b4` (full identity in the launch receipt).
@@ -44,3 +46,23 @@ env PYTHONPATH=/private/tmp/compose-t4-chemistry.hizM8Y:/private/tmp/compose-rec
 The local chemistry overlay pins RDKit 2024.03.5, numpy 1.26.4 and scipy 1.13.1.
 The collector binds its own hash, planner/executor module hashes and all input
 hashes. It does not launch workers or spend oracle calls.
+
+## Operational correction
+
+All three first-attempt workers failed with `cached repair enumerator changed`
+at root 0. The Python 3.12 local AST hash included the empty `type_params` field,
+which Python 3.11 on Modal does not emit. The function source itself is identical
+to the cached producer. It hashes to
+`fed69b0fbb4368b649166b33424a716d7ae5ebe61e86440db060670f77e69b8f`.
+The corrected guard hashes that exact function source, extracted using its source
+span, rather than serializing interpreter-specific AST fields. Other cached-law,
+input and exact-state checks remain unchanged. A regression test prohibits use
+of AST serialization for this cache identity and checks that function-body changes
+still invalidate the identity. This is not a chemistry, threshold or planning
+change. First-attempt contract and all failure/runtime receipts are preserved.
+
+Attempt 2 is the same scientific decision with this compatibility repair only.
+Its receipts live separately under `attempt_2`; the collector defaults there.
+No first-attempt repair rows completed, so only previously compatible earlier
+diagnostic rows can be reused. Startup cost of the failed attempt is additional
+and must not disappear from compute reporting.

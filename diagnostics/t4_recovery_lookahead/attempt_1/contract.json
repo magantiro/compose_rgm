@@ -1,5 +1,5 @@
 {
-  "contract_sha256": "9e28993e955599232f47cda979174f8aaa67ced20be20a3dc47d8122aa318d88",
+  "contract_sha256": "fe737820cc75aac46be6b58890fcd32abb4361b9e5b80693c67f2ae16394c2f0",
   "schema_version": "t4_recovery_lookahead_contract_v1",
   "authorization": "2026-09-10 user approved short recovery lookahead before discarding intermediates; one nine-candidate decision, zero docking",
   "task": {
@@ -108,7 +108,7 @@
   "product_cache": {
     "path": "t4_repair_neighbors/7bb480732e9ce78061ce4d1313fcfd1ff443319433aa7872a9862a0160bff67b",
     "result_sha256": "d168925bc0638ac0a40d36feee39c9f7f3f2a316b37e421feafbc2bb29500fff",
-    "enumerator_source_sha256": "fed69b0fbb4368b649166b33424a716d7ae5ebe61e86440db060670f77e69b8f"
+    "enumerator_ast_sha256": "376e721aa38f637cdb74109a4f1cf21a730bbef26b6e2c1a988fba0c59480a32"
   },
   "planning": {
     "value": "max saved-model terminal desirability over eligible unobserved one-edit endpoints; 0 if none",

@@ -28,8 +28,9 @@ ROOT = HERE.parents[1]
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--receipt", type=Path)
+    parser.add_argument("--attempt", choices=("attempt_1", "attempt_2"), default="attempt_2")
     args = parser.parse_args()
-    destination = HERE / "attempt_1"
+    destination = HERE / args.attempt
     receipt_path = destination / "launch.json"
     if args.receipt:
         incoming = json.loads(args.receipt.read_text())

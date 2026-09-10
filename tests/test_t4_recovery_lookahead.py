@@ -1,5 +1,7 @@
 """Focused one-step planning and complete-decision regression checks."""
 
+import ast
+import hashlib
 import json
 from types import SimpleNamespace
 
@@ -11,7 +13,20 @@ from compose_v4.experiments.t4_recovery_lookahead import (
     best_new_endpoint,
     compare_retention,
     decision_pool,
+    enumerator_source_hash,
 )
+
+
+def test_cache_hash_uses_source_not_version_dependent_ast(monkeypatch):
+    source = "def enumerate_products(x):\n    return x\n"
+    monkeypatch.setattr(
+        ast, "dump", lambda *a, **k: pytest.fail("AST serialization is not portable")
+    )
+    assert enumerator_source_hash(source) == hashlib.sha256(source.rstrip().encode()).hexdigest()
+    assert enumerator_source_hash(source + "\nelsewhere = 1\n") == enumerator_source_hash(source)
+    assert enumerator_source_hash(source.replace("return x", "return 0")) != enumerator_source_hash(
+        source
+    )
 
 
 def test_full_pool_not_only_known_recoverable_state():

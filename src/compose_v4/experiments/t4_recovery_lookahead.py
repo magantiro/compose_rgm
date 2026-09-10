@@ -24,6 +24,14 @@ KIND = "t4_recovery_lookahead"
 CONTRACT_PATH = f"configs/{KIND}.json"
 
 
+def enumerator_source_hash(source):
+    """Bind unchanged function source without Python-version-dependent AST fields."""
+    function = next(
+        n for n in ast.parse(source).body if getattr(n, "name", "") == "enumerate_products"
+    )
+    return hashlib.sha256(ast.get_source_segment(source, function).encode()).hexdigest()
+
+
 def decision_pool(candidates, count):
     pool = sorted(
         (r for r in candidates if r["attempt_id"].startswith("levels/01/")),
@@ -107,14 +115,9 @@ def run_remote(task, repo_root, artifact_root, volume, runtime_factory, validate
             if cached_result["configuration"][name] != config[name]:
                 raise ValueError("cached repair scoring inputs differ")
         module = repo_root / "src/compose_v4/experiments/t4_repair_neighbors.py"
-        function = next(
-            n
-            for n in ast.parse(module.read_text()).body
-            if getattr(n, "name", "") == "enumerate_products"
-        )
         if (
-            hashlib.sha256(ast.dump(function).encode()).hexdigest()
-            != config["product_cache"]["enumerator_ast_sha256"]
+            enumerator_source_hash(module.read_text())
+            != config["product_cache"]["enumerator_source_sha256"]
         ):
             raise ValueError("cached repair enumerator changed")
         exact = encode_state(graph)
@@ -143,7 +146,7 @@ def run_remote(task, repo_root, artifact_root, volume, runtime_factory, validate
                             path / "scored_lock.json",
                         )
                     },
-                    "enumerator_ast_sha256": config["product_cache"]["enumerator_ast_sha256"],
+                    "enumerator_source_sha256": config["product_cache"]["enumerator_source_sha256"],
                     "executor_and_model_compatible": True,
                 },
             )
