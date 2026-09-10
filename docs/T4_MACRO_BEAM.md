@@ -70,3 +70,18 @@ post-hoc isolation, exact replay, resume determinism and the four-worker launch.
 Use clean committed source, strict preflight, deploy genmol_t4_opt_app.py, then
 `python tools/t4_launch.py --macro-beam`. Full-suite verification remains a
 milestone requirement, not a gate for this bounded development run.
+
+## Seed-input repair, first launch
+
+The initial seed-root workers stopped before proposal generation because their
+archive SMILES was not the canonical spelling. The exact saved graph and the
+canonicalized archive string agree. Repair the comparison, not the graph: decode
+the persistent state unchanged and compare canonical identities. Canonicalize
+the old archive identity set for post-lock novelty accounting as well.
+
+Preserve both failures. Relaunch only seed-root cases 0 and 2 using
+`--macro-beam --macro-beam-cases 0 2`; cases 1 and 3 continue unchanged. The repair
+does not change the generator, guidance, RNG, root graph, options or retention.
+The aggregate must bind both revisions and confirm that the archive-parent
+candidate identities have unchanged novelty classifications. No additional
+program attempts or oracle calls are authorized for completed cases.

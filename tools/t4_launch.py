@@ -46,6 +46,13 @@ def main() -> None:
         help="four winner-blind completed-option searches; zero docking",
     )
     ap.add_argument(
+        "--macro-beam-cases",
+        nargs="+",
+        type=int,
+        choices=range(4),
+        help="resume only named failed/missing macro-beam cases; defaults to all four",
+    )
+    ap.add_argument(
         "--option-decision-audit",
         action="store_true",
         help="four conditional option decision checks; zero docking",
@@ -160,6 +167,8 @@ def main() -> None:
     if not re.fullmatch(r"[A-Za-z0-9_-]+", a.session):
         raise SystemExit("--session must contain only letters, numbers, '_' or '-'")
 
+    if a.macro_beam_cases is not None and not a.macro_beam:
+        ap.error("--macro-beam-cases requires --macro-beam")
     from preflight import assert_synced
 
     preflight = assert_synced(strict=True)
@@ -200,6 +209,7 @@ def main() -> None:
             frontier_compare=a.frontier_compare,
             option_decision=a.option_decision_audit,
             macro_beam=a.macro_beam,
+            macro_beam_cases=a.macro_beam_cases,
         )
         return
 
@@ -289,6 +299,7 @@ def launch_continuation_profile(
     frontier_compare: bool = False,
     option_decision: bool = False,
     macro_beam: bool = False,
+    macro_beam_cases: list[int] | None = None,
 ) -> None:
     """Spawn only the fixed diagnostic into the deployed app; retain its call ID."""
     import sys
@@ -375,7 +386,10 @@ def launch_continuation_profile(
             if macro_beam
             else "diagnostics/t4_option_decision_spawn.json"
         )
-        for case in range(4):
+        cases = range(4) if macro_beam_cases is None else sorted(set(macro_beam_cases))
+        if not cases or any(type(case) is not int or not 0 <= case < 4 for case in cases):
+            raise ValueError("macro-beam case selection must be nonempty and within 0..3")
+        for case in cases:
             call = function.spawn({**task, "case_index": case})
             volume_path = f"/{kind}/case_{case}/{run_id}"
             receipt["cases"].append(

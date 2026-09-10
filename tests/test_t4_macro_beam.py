@@ -10,7 +10,24 @@ from test_carbonyl_option import initial, kernel
 
 from compose_v4.control.molecular_task_search import MolecularHierarchy, MolecularSearchState
 from compose_v4.experiments.continuation_profile import ExecutorMeter
-from compose_v4.experiments.t4_macro_beam import BeamConfig, replay, retain, run_search
+from compose_v4.experiments.t4_macro_beam import (
+    BeamConfig,
+    exact_archive_graph,
+    replay,
+    retain,
+    run_search,
+)
+from compose_v4.rewrite.trace_shard import encode_state
+
+
+def test_archive_alias_matches_without_reconstructing_exact_slots():
+    graph = initial("CCC").graph
+    row = {"state": encode_state(graph), "smiles": "C(C)C"}
+    assert encode_state(exact_archive_graph(row)) == row["state"]
+    with pytest.raises(ValueError, match="differs from canonical metadata"):
+        exact_archive_graph({**row, "smiles": "CC"})
+    with pytest.raises(ValueError, match="invalid SMILES"):
+        exact_archive_graph({**row, "smiles": "("})
 
 
 def forbidden_score(smiles):
@@ -127,6 +144,11 @@ def test_launcher_spawns_only_four_macro_beam_workers(monkeypatch, tmp_path):
     assert [c["case_index"] for c in calls] == [0, 1, 2, 3]
     receipt = json.loads((tmp_path / "diagnostics/t4_macro_beam_spawn.json").read_text())
     assert receipt["oracle_calls"] == 0
+    calls.clear()
+    t4_launch.launch_continuation_profile(
+        {"commit": "a" * 40}, macro_beam=True, macro_beam_cases=[2, 0, 2]
+    )
+    assert [c["case_index"] for c in calls] == [0, 2]
 
 
 def test_invalid_search_sizes_fail():

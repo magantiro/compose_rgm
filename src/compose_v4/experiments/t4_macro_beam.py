@@ -31,6 +31,21 @@ CONTRACT_PATH = f"configs/{KIND}.json"
 ARMS = ("post_hoc", "guided")
 
 
+def canonical_smiles(smiles):
+    molecule = Chem.MolFromSmiles(smiles)
+    if molecule is None:
+        raise ValueError(f"archive contains invalid SMILES: {smiles!r}")
+    return Chem.MolToSmiles(molecule)
+
+
+def exact_archive_graph(row):
+    """Validate molecular identity without reconstructing persistent slots."""
+    graph = decode_state(row["state"])
+    if canonical_state_key(graph) != canonical_smiles(row["smiles"]):
+        raise ValueError("beam root exact state differs from canonical metadata")
+    return graph
+
+
 @dataclass(frozen=True)
 class BeamConfig:
     arm: str = "guided"
@@ -373,9 +388,7 @@ def run_remote(task, repo_root, artifact_root, volume, runtime_factory, validate
         roots = [warm["archive"][0], min(eligible, key=lambda r: (r["ds"], r["smiles"]))]
         config = BeamConfig(arm=ARMS[case // 2], root_index=case % 2, **contract["search"])
         root_row = roots[config.root_index]
-        graph = decode_state(root_row["state"])
-        if canonical_state_key(graph) != root_row["smiles"]:
-            raise ValueError("beam root exact state differs from canonical metadata")
+        graph = exact_archive_graph(root_row)
         root = MolecularSearchState.start(
             graph, budget=config.primitive_budget, root_id=f"beam-root-{config.root_index}"
         )
@@ -413,7 +426,7 @@ def run_remote(task, repo_root, artifact_root, volume, runtime_factory, validate
             )
             save("executor_attempts", meter.attempts)
         progress.update(phase="post_lock_scoring")
-        old = {r["smiles"] for r in warm["archive"]}
+        old = {canonical_smiles(r["smiles"]) for r in warm["archive"]}
         candidates = [
             {
                 **a["candidate"],
