@@ -93,6 +93,19 @@ _RT: dict[str, Any] = {}
 
 
 @app.function(
+    image=image, cpu=(1.0, 1.0), memory=8192, timeout=1200,
+    max_containers=1, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_repair_neighbors(task: dict[str, Any]) -> dict[str, Any]:
+    """Complete one-edit support census on three locked near-feasible states."""
+    from compose_v4.experiments.t4_repair_neighbors import run_remote
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return run_remote(task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume,
+                      _runtime, _validate_remote_revision)
+
+
+@app.function(
     image=image, cpu=(1.0, 1.0), memory=8192, timeout=1800,
     max_containers=3, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
 )

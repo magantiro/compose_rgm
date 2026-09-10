@@ -41,6 +41,11 @@ def main() -> None:
     ap.add_argument("--arms", default="macro_prior")
     ap.add_argument("--session", default="compose_iclr")
     ap.add_argument(
+        "--repair-neighbors",
+        action="store_true",
+        help="one-edit repair census on three locked near-feasible states; zero docking",
+    )
+    ap.add_argument(
         "--constraint-recovery",
         action="store_true",
         help="three incumbent-preserving constraint-guidance searches; zero docking",
@@ -165,6 +170,7 @@ def main() -> None:
                 a.option_decision_audit,
                 a.macro_beam,
                 a.constraint_recovery,
+                a.repair_neighbors,
             )
         )
         > 1
@@ -200,6 +206,7 @@ def main() -> None:
         or a.option_decision_audit
         or a.macro_beam
         or a.constraint_recovery
+        or a.repair_neighbors
     ):
         launch_continuation_profile(
             preflight,
@@ -218,6 +225,7 @@ def main() -> None:
             macro_beam=a.macro_beam,
             macro_beam_cases=a.macro_beam_cases,
             constraint_recovery=a.constraint_recovery,
+            repair_neighbors=a.repair_neighbors,
         )
         return
 
@@ -309,6 +317,7 @@ def launch_continuation_profile(
     macro_beam: bool = False,
     macro_beam_cases: list[int] | None = None,
     constraint_recovery: bool = False,
+    repair_neighbors: bool = False,
 ) -> None:
     """Spawn only the fixed diagnostic into the deployed app; retain its call ID."""
     import sys
@@ -317,7 +326,9 @@ def launch_continuation_profile(
     from modal_apps.run_process_v2_p50_app import local_image_revision
 
     kind = (
-        "t4_constraint_recovery"
+        "t4_repair_neighbors"
+        if repair_neighbors
+        else "t4_constraint_recovery"
         if constraint_recovery
         else "t4_macro_beam"
         if macro_beam
@@ -350,6 +361,7 @@ def launch_continuation_profile(
     contract = (
         ROOT
         / {
+            "t4_repair_neighbors": "configs/t4_repair_neighbors.json",
             "t4_constraint_recovery": "configs/t4_constraint_recovery.json",
             "t4_macro_beam": "configs/t4_macro_beam.json",
             "t4_option_decision_audit": "configs/t4_option_decision_audit.json",
