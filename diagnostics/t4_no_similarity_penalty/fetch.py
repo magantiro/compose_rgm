@@ -7,6 +7,8 @@ import hashlib
 import json
 import platform
 import subprocess
+from collections import Counter
+from datetime import datetime, timezone
 from pathlib import Path
 
 import modal
@@ -16,7 +18,7 @@ from rdkit import rdBase
 from compose_v4.experiments.continuation_profile import canonical_bytes, publish_json, sha256_file
 from compose_v4.experiments.t4_macro_beam import no_similarity_desirability
 from compose_v4.experiments.t4_matched_pilot import unseal
-from diagnostics.t4_constraint_recovery.summarize import summarize
+from diagnostics.t4_constraint_recovery.summarize import distribution, summarize
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -25,8 +27,32 @@ ROOT = HERE.parents[1]
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--receipt", type=Path)
+    parser.add_argument("--capture-lifecycle", action="store_true")
     args = parser.parse_args()
     destination = HERE / "attempt_1"
+    if args.capture_lifecycle:
+        command = ["modal", "app", "logs", "genmol-t4-opt", "--timestamps"]
+        process = subprocess.Popen(
+            command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+        )
+        try:
+            log = process.communicate(timeout=8)[0]
+        except subprocess.TimeoutExpired:
+            process.terminate()
+            log = process.communicate(timeout=5)[0]
+        publish_json(
+            destination / "lifecycle.json",
+            {
+                "command": command,
+                "collected_at_utc": datetime.now(timezone.utc).isoformat(),
+                "scope": "app-wide corroboration, not exact per-call attribution",
+                "preemption_lines": [
+                    line for line in log.splitlines() if "preemption" in line.lower()
+                ],
+                "collector_sha256": sha256_file(Path(__file__)),
+                "timing_limit": "heartbeat elapsed counter reset during this run; final counters cover only the resumed invocation; do not claim a whole-job speedup",
+            },
+        )
     launch_path = destination / "launch.json"
     if args.receipt:
         incoming = json.loads(args.receipt.read_text())
@@ -126,10 +152,48 @@ def main():
             }
         )
     arms.append(summarize(destination, "no_similarity"))
+    arms[-1]["timing_scope"] = (
+        "final resumed invocation only; interrupted work excluded; not a whole-job timing or call count"
+    )
+    candidates = result["candidates"]
+    all_candidate_diagnostics = {
+        "qed_below_threshold": sum(r["qed"] < 0.6 for r in candidates),
+        "sa_above_threshold": sum(r["sa"] > 4 for r in candidates),
+        "similarity_below_threshold": sum(r["sim"] < 0.4 for r in candidates),
+        "final_gate_failures_overlap": True,
+        "original_seed_similarity": distribution([r["sim"] for r in candidates]),
+        "predicted_docking": distribution([r["predicted_docking"] for r in candidates]),
+        "ring_system_deltas_from_root": dict(
+            sorted(Counter(r["cumulative_change"]["d_ring_systems"] for r in candidates).items())
+        ),
+        "cycle_rank_deltas_from_root": dict(
+            sorted(Counter(r["cumulative_change"]["d_cycle_rank"] for r in candidates).items())
+        ),
+        "cycle_rank_deltas_per_option": dict(
+            sorted(Counter(r["structural_change"]["d_cycle_rank"] for r in candidates).items())
+        ),
+        "realized_change_from_root": distribution(
+            [r["cumulative_change"]["largest_changed_fraction"] for r in candidates]
+        ),
+        "constructive_programs": [
+            {
+                "option": r["bundle"]["option"],
+                "smiles": r["smiles"],
+                "change": r["structural_change"],
+                "sim": r["sim"],
+                "qed": r["qed"],
+                "sa": r["sa"],
+                "oracle_eligible": r["oracle_eligible"],
+            }
+            for r in candidates
+            if r["bundle"]["option"].startswith("construct:")
+        ],
+    }
     report = {
         "schema_version": "t4_no_similarity_summary_v1",
         "arms": arms,
         "candidate_overlap": overlaps,
+        "all_candidate_diagnostics": all_candidate_diagnostics,
         "oracle_calls": 0,
         "winner_used": False,
         "input_sha256": {str(p.relative_to(ROOT)): sha256_file(p) for p in sorted(inputs)},
