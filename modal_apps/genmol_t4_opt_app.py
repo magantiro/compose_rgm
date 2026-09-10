@@ -96,6 +96,19 @@ _RT: dict[str, Any] = {}
     image=image, cpu=(1.0, 1.0), memory=8192, timeout=1800,
     max_containers=4, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
+def t4_macro_beam(task: dict[str, Any]) -> dict[str, Any]:
+    """One winner-blind, zero-oracle completed-option search worker."""
+    from compose_v4.experiments.t4_macro_beam import run_remote
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return run_remote(task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume,
+                      _runtime, _validate_remote_revision)
+
+
+@app.function(
+    image=image, cpu=(1.0, 1.0), memory=8192, timeout=1800,
+    max_containers=4, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
 def t4_option_decision_audit(task: dict[str, Any]) -> dict[str, Any]:
     """One of four approved conditional zero-oracle option diagnoses."""
     from compose_v4.experiments.option_decision_audit import run_remote
