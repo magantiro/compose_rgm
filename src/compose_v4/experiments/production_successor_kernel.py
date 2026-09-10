@@ -48,10 +48,10 @@ from compose_v4.model.factorized_tracelet_rate_model import (
     MARK_RULE_NAMES,
     MARK_RULE_TO_INDEX,
     PROCESS_V2_EDITING_PROCESS_SEMANTICS,
-    SEMANTIC_EDITING_V2_PROCESS_SEMANTICS,
     SEMANTIC_ATOM_RESTATE_ACTION_SEMANTICS,
     SEMANTIC_CYCLE_CLOSE_ACTION_SEMANTICS,
     SEMANTIC_CYCLE_OPEN_ACTION_SEMANTICS,
+    SEMANTIC_EDITING_V2_PROCESS_SEMANTICS,
     SEMANTIC_RING_RESTATE_SCORER_MODE,
     FactorizedMarkBatch,
     FactorizedTraceletRateModel,
@@ -163,16 +163,22 @@ def _one_state_batch(
     prepared_batch: FactorizedMarkBatch | None,
 ) -> FactorizedMarkBatch:
     if prepared_batch is None:
-        prepared_batch = prepare_factorized_mark_batch(
-            (state,),
-            (float(time),),
-            (None,),
-            (None,),
-            (0.0,),
-            use_aromatic_bond_view=True,
-            ring_catalog=model.ring_catalog,
-            **operator_capability_batch_kwargs(model.operator_capabilities),
-        )
+        from compose_v4.chem.molecular_graph import molecular_serialization_cache
+
+        # Semantic admission repeatedly visits identical source/Kekule/product
+        # states. Cache only exact serialization outcomes within this one row;
+        # the validators, action support and neural probabilities are unchanged.
+        with molecular_serialization_cache():
+            prepared_batch = prepare_factorized_mark_batch(
+                (state,),
+                (float(time),),
+                (None,),
+                (None,),
+                (0.0,),
+                use_aromatic_bond_view=True,
+                ring_catalog=model.ring_catalog,
+                **operator_capability_batch_kwargs(model.operator_capabilities),
+            )
     if prepared_batch.batch_size != 1:
         raise ProductionSuccessorKernelError(
             f"a one-state kernel row received batch_size={prepared_batch.batch_size}"

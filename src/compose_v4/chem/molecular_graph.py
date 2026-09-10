@@ -49,12 +49,15 @@ KNOWN LIMITATIONS (carried over from be_matrix.py):
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from collections import OrderedDict
+from collections.abc import Iterator
+from contextlib import contextmanager
+from contextvars import ContextVar
+from dataclasses import dataclass, field
 from typing import Optional
 
 import numpy as np
-from rdkit import Chem
-from rdkit import RDLogger
+from rdkit import Chem, RDLogger
 
 # Suppress noisy RDKit warnings; we surface our own errors.
 RDLogger.DisableLog("rdApp.*")
@@ -687,7 +690,70 @@ def smiles_to_molecular_graph(smiles: str) -> MolecularGraph:
     return mg
 
 
-def molecular_graph_to_smiles(mg: MolecularGraph) -> Optional[str]:
+@dataclass
+class MolecularSerializationCache:
+    """Bounded, explicitly scoped cache of exact-state serialization outcomes.
+
+    Keys snapshot every array, including padding and dtype. Mutating a graph
+    therefore cannot retrieve a stale value; canonical aliases are never used
+    as input identities. Only strings/None are retained, never mutable graphs.
+    """
+
+    max_entries: int
+    entries: OrderedDict[tuple[tuple[str, tuple[int, ...], bytes], ...], str | None] = field(
+        default_factory=OrderedDict, repr=False
+    )
+    hits: int = 0
+    misses: int = 0
+
+
+_serialization_cache: ContextVar[MolecularSerializationCache | None] = ContextVar(
+    "compose_molecular_serialization_cache", default=None
+)
+
+
+@contextmanager
+def molecular_serialization_cache(max_entries: int = 512) -> Iterator[MolecularSerializationCache]:
+    """Memoize only inside this context; release entries even after exceptions.
+
+    Context-local storage avoids a process-wide cache shared by unrelated jobs.
+    Nested scopes get independent bounded storage and restore their caller.
+    """
+    if max_entries <= 0:
+        raise ValueError("molecular serialization cache needs max_entries > 0")
+    cache = MolecularSerializationCache(max_entries)
+    token = _serialization_cache.set(cache)
+    try:
+        yield cache
+    finally:
+        _serialization_cache.reset(token)
+        cache.entries.clear()
+
+
+def molecular_graph_to_smiles(mg: MolecularGraph) -> str | None:
+    """Canonical RDKit serialization, optionally memoized by exact array content."""
+    cache = _serialization_cache.get()
+    if cache is None:
+        return _molecular_graph_to_smiles_uncached(mg)
+    arrays = (mg.atom_types, mg.formal_charges, mg.implicit_h_counts, mg.bonds)
+    # Object arrays are not the molecular representation; do not cache their
+    # pointer bytes or alter the legacy error behavior on malformed inputs.
+    if any(a.dtype.hasobject for a in arrays):
+        return _molecular_graph_to_smiles_uncached(mg)
+    key = tuple((a.dtype.str, a.shape, a.tobytes()) for a in arrays)
+    if key in cache.entries:
+        cache.hits += 1
+        cache.entries.move_to_end(key)
+        return cache.entries[key]
+    cache.misses += 1
+    result = _molecular_graph_to_smiles_uncached(mg)
+    cache.entries[key] = result
+    if len(cache.entries) > cache.max_entries:
+        cache.entries.popitem(last=False)
+    return result
+
+
+def _molecular_graph_to_smiles_uncached(mg: MolecularGraph) -> str | None:
     """Construct an RDKit Mol from a MolecularGraph and return canonical SMILES.
 
     Null atoms are skipped. Returns None if RDKit's sanitization fails (which
@@ -728,27 +794,27 @@ def molecular_graph_to_smiles(mg: MolecularGraph) -> Optional[str]:
             atom.SetIsAromatic(True)
         rd_idx[i] = rw.AddAtom(atom)
 
-    # Add bonds from upper triangle of the heavy-heavy adjacency matrix.
-    for i in range(n):
-        if i not in rd_idx:
+    # Visit existing upper-triangle bonds in the same row-major order as the
+    # dense scan. Molecular graphs are sparse, while padded slot matrices are
+    # not: avoid a Python iteration for every absent edge on every validity call.
+    left, right = np.nonzero(np.triu(mg.bonds, k=1))
+    for i, j in zip(left.tolist(), right.tolist()):
+        if i not in rd_idx or j not in rd_idx:
             continue
-        for j in range(i + 1, n):
-            if j not in rd_idx:
-                continue
-            cls = int(mg.bonds[i, j])
-            if cls == BOND_NULL:
-                continue
-            if cls == BOND_SINGLE:
-                bt = Chem.BondType.SINGLE
-            elif cls == BOND_DOUBLE:
-                bt = Chem.BondType.DOUBLE
-            elif cls == BOND_TRIPLE:
-                bt = Chem.BondType.TRIPLE
-            elif cls == BOND_AROMATIC:
-                bt = Chem.BondType.AROMATIC
-            else:
-                return None
-            rw.AddBond(rd_idx[i], rd_idx[j], bt)
+        cls = int(mg.bonds[i, j])
+        if cls == BOND_NULL:
+            continue
+        if cls == BOND_SINGLE:
+            bt = Chem.BondType.SINGLE
+        elif cls == BOND_DOUBLE:
+            bt = Chem.BondType.DOUBLE
+        elif cls == BOND_TRIPLE:
+            bt = Chem.BondType.TRIPLE
+        elif cls == BOND_AROMATIC:
+            bt = Chem.BondType.AROMATIC
+        else:
+            return None
+        rw.AddBond(rd_idx[i], rd_idx[j], bt)
 
     mol = rw.GetMol()
     try:
