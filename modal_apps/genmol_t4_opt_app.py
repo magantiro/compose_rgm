@@ -93,6 +93,36 @@ _RT: dict[str, Any] = {}
 
 
 @app.function(
+    image=image, cpu=(1.0, 1.0), memory=2048, timeout=7200,
+    max_containers=1, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_macro_feedback(task: dict[str, Any]) -> dict[str, Any]:
+    """Ten observed-feedback rounds; at most 40 new oracle calls."""
+    from compose_v4.experiments.t4_macro_feedback_remote import driver_remote
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return driver_remote(
+        task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume, _validate_remote_revision,
+        lambda tasks: t4_macro_feedback_propose.map(tasks, order_outputs=False),
+        lambda smiles, tag: _dock(smiles, "parp1", tag, cpu=1),
+    )
+
+
+@app.function(
+    image=image, cpu=(1.0, 1.0), memory=8192, timeout=1200,
+    max_containers=8, retries=0, scaledown_window=600,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_macro_feedback_propose(task: dict[str, Any]) -> dict[str, Any]:
+    """Two completed options from a locked parent; retain warm generator runtime."""
+    from compose_v4.experiments.t4_macro_feedback_remote import worker_remote
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return worker_remote(task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume,
+                         _runtime, _validate_remote_revision)
+
+
+@app.function(
     image=image, cpu=(1.0, 1.0), memory=2048, timeout=1200,
     max_containers=1, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
