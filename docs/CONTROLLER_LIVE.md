@@ -6,11 +6,24 @@ known-winner reconstruction and mathematics are not benchmark success.
 
 ## Champion and exact regime
 
+- Update: the fresh-seed comparison finished. Both fixed and evolving memory
+  reached **0.672021505032247**, with identical top-ten mean 0.6532973102.
+  The first evolving-memory lead below did not replicate. Stop the unchanged
+  memory comparison and retain simpler fixed memory. Replication cost: 81 new
+  calls, 398.839 seconds, 329.686 proposal seconds. Audit:
+  `diagnostics/pmo_evolving_memory/replication_report.json`.
+- Best observed endpoint **0.6747477697966318** is from a separate cached
+  primitive-neighborhood diagnostic, not a full-controller comparison. One atom
+  deletion improves the previous champion by 0.0027263, at 1024 new queries.
+  Of 1580 supported neighbors, 1044 were scored (20 cached), 30 improve the
+  originating 0.649519 parent, and one exceeds 0.672022. Local pass: 5.273 seconds,
+  reusing 16.936 seconds of generation. Poor oracle efficiency; do not promote
+  exhaustive local scoring. `diagnostics/pmo_cached_neighborhood/report.json`.
 - PMO perindopril, exposed prescreened development: new best **0.672021505032247**,
   versus **0.6580812002646271** in the latest fixed-memory control, starting
   identically from 0.649519052838329. Six rounds, 109 new calls, 619.577 seconds.
   Top-ten means 0.6502614449 versus 0.6482515168. First-run criterion passed;
-  replication required. The best sequence was hydroxyl addition then generic
+  its lead did not replicate, as recorded above. The best sequence was hydroxyl addition then generic
   ring opening, not a newly selected donor. All six completed new-donor uses
   were worse than their parents. Do not claim a demonstrated transfer mechanism.
   Audit: `diagnostics/pmo_evolving_memory/report.json` and README.
@@ -27,7 +40,7 @@ known-winner reconstruction and mathematics are not benchmark success.
   starts and donors, six option rounds, 156 and 149 new calls. First gain:
   four-edit side-chain replacement; replication: 47-edit structural replacement.
   `diagnostics/pmo_donor_comparison/README.md` and its two reports.
-- Historical labels: 249455 prescreen evaluations plus **841 development physical
+- Historical labels: 249455 prescreen evaluations plus **1992 development physical
   calls** through the latest batch. The bank is our recovered historical asset,
   not external labels. Its legacy provenance remains incomplete. Do not call
   this no-prescreen. The separate no-new-prescreen controller remained at
@@ -91,10 +104,15 @@ Completed PMO call: `fc-01M291A3D6D26JKTAH17S4CCPB`, run
 Deployed clean source `eda6e8963d7f`, strict preflight passed. Deployment 89.413s.
 Durable prefix `compose-v4-artifacts/pmo_evolving_memory/<run>`; local spawn
 `/private/tmp/compose-pmo-evolving-memory-runs/<run>/spawn.json`.
-Goal active and unmet. No job currently running. Preparing the earned fresh-seed
-replication with identical starts/memory, seed 20261003. No concurrent T4 job.
+Goal active and unmet. No job currently running. Replication completed:
+`fc-01M292KFN8Y77CD4DYA92F74MV`, run
+`f6f3264e4271ba044265c4b782c7d4aea154ad12ad027d6627efb44e962651e9`,
+clean source `cc15546c6fac`, deployment 87.222 seconds. Durable volume prefix as
+above; local `/private/tmp/compose-pmo-evolving-memory-replication-runs/<run>`.
+Latest local diagnostic: `/private/tmp/compose-pmo-cached-neighborhood-20260911b`.
+No concurrent T4 job.
 
-Current hypothesis: fixed donor memory cannot directly reuse newly evolved
+Completed hypothesis: fixed donor memory cannot directly reuse newly evolved
 components across branches. Compare evolving proposal memory to frozen memory,
 with identical starts, actual-score parent allocation, and broad reference
 editing in both. Only an arm's own requested discoveries update its memory,
@@ -110,6 +128,38 @@ uses seed 20261003. Exact initial parent/donor equality and the 109 cache-only
 labels were verified; three memory/worker/round-lock tests passed in 2.37 seconds,
 with touched-code formatting and lint passing. A repeated lead supports the
 comparison; null or reversal leaves the first gain seed-dependent.
+
+Current hypothesis: paid local labels can improve query selection. Run the
+fixed-recipe endpoint ranking check and, only if informative, a 32-call maximum
+locked comparison on previously unscored neighbors. Preserve broad options;
+this tests local interpolation, not future value or cross-parent generalization.
+`docs/PMO_LOCAL_QUERY_SELECTION.md` governs the next bounded component test.
+
+Completed: local query selection passed its component criterion. Sixteen predicted
+choices averaged 0.646121 versus 0.552757 for sixteen uniform choices, with two
+versus one improvements over the originating parent. No new champion. Thirty-two
+new queries, 7.008 seconds preparation plus 2.402 seconds replay/scoring.
+`diagnostics/pmo_local_query_selection/report.json`. Next: test the unchanged
+selector on new parent neighborhoods before integrating it into the broad loop.
+The exact kernel repair is 30.56x faster on a recorded 256-molecule fixture,
+3.575s to 0.117s, with zero numerical error; the 1580-state kernel took 5.586s.
+
+Parallel component completed: persistent two-option donor planning versus
+immediate continuation. Actual witnessed paths were retained. Both bests remain
+0.674748; no temporary-loss branch recovered above its root. Fourteen new calls,
+15.501s total, 11.903s proposals. Of 32 unique attempted tasks, 17 compiled,
+12 failed size bounds, two were unresolved and one was a self-proposal.
+Stop this unchanged schedule/proposal recipe. The 574 replayed primitives are
+supporting work, not benchmark improvement. `diagnostics/pmo_persistent_lookahead`.
+No experiment remains active. Goal is unmet.
+
+The three completed local batches (cached neighborhood, local query selection,
+persistent lookahead), including executed source snapshots and all raw receipts,
+are preserved on volume `compose-v4-artifacts` at
+`controller_local/9bcf2a80cc1496a1433c53a9790b747922d8aee2211de730ceb99e561e0a5b8b/artifacts.tar.gz`.
+The archive SHA-256 is the directory name. Local copy:
+`/private/tmp/compose-controller-local-20260911.tar.gz`. Upload completed;
+individual audited summaries remain in their diagnostic directories.
 
 Preserve generic/reference chemistry and local/global editing. Donor programs
 use the unchanged valid-state executor but need not have positive probability

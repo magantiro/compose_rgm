@@ -47,12 +47,32 @@ def molecular_features(smiles: str) -> tuple[str, tuple[tuple[int, ...], ...]]:
 def graph_kernel(left, right) -> np.ndarray:
     """Average of two fixed graph-fingerprint kernels, no fitted preprocessing."""
 
-    def tanimoto(a, b):
-        a, b = set(a), set(b)
-        return len(a & b) / len(a | b) if a or b else 1.0
+    def masks(rows):
+        # Build each bit set once, not once per molecule pair. Integer popcounts
+        # compute exactly the same intersection/union cardinalities as sets.
+        encoded = []
+        for row in rows:
+            values = []
+            for bits in row:
+                value = 0
+                for bit in bits:
+                    if not isinstance(bit, (int, np.integer)) or not 0 <= bit < RECIPE["fp_size"]:
+                        raise ValueError(f"fingerprint bit outside declared width: {bit!r}")
+                    value |= 1 << int(bit)
+                values.append(value)
+            encoded.append(values)
+        return encoded
 
+    def tanimoto(a, b):
+        union = a | b
+        return (a & b).bit_count() / union.bit_count() if union else 1.0
+
+    masks_left, masks_right = masks(left), masks(right)
     return np.asarray(
-        [[sum(tanimoto(a, b) for a, b in zip(x, y, strict=True)) / 2 for y in right] for x in left],
+        [
+            [sum(tanimoto(a, b) for a, b in zip(x, y, strict=True)) / 2 for y in masks_right]
+            for x in masks_left
+        ],
         dtype=np.float64,
     ).reshape(len(left), len(right))
 

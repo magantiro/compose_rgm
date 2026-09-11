@@ -36,6 +36,26 @@ def test_kernel_is_normalized_and_distinguishes_graph_connectivity():
     assert kernel[0, 1] < 1 and kernel[1, 2] < 1
 
 
+def test_bit_kernel_matches_independent_set_cardinalities_exactly():
+    rng = np.random.default_rng(11)
+    rows = [
+        tuple(tuple(map(int, rng.integers(0, 2048, size=70))) for _ in range(2)) for _ in range(18)
+    ] + [((), ()), ((2, 2, 3), (3, 3))]
+    expected = np.empty((len(rows), len(rows)))
+    for i, left in enumerate(rows):
+        for j, right in enumerate(rows):
+            values = []
+            for a, b in zip(left, right, strict=True):
+                a, b = set(a), set(b)
+                values.append(len(a & b) / len(a | b) if a or b else 1.0)
+            expected[i, j] = sum(values) / 2
+    np.testing.assert_array_equal(graph_kernel(rows, rows), expected)
+    assert graph_kernel([], rows).shape == (0, len(rows))
+    assert graph_kernel(rows, []).shape == (len(rows), 0)
+    with pytest.raises(ValueError, match="declared width"):
+        graph_kernel([((2048,), ())], rows)
+
+
 def test_no_future_labels_duplicates_nonfinite_or_tampered_snapshot():
     archive = fixture_archive()
     with pytest.raises(ValueError, match="outside"):

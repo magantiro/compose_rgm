@@ -1,4 +1,23 @@
-# Evolving donor memory: first comparison positive, replication required
+# Evolving donor memory: first lead did not replicate
+
+Fresh seed 20261003, unchanged starts and 116 initial donors: both arms reached
+0.672021505032247 and top-ten mean 0.6532973101816607. The first-run memory
+advantage below did not replicate. Stop this unchanged comparison and retain
+the simpler fixed-memory controller. This does reproduce the broader
+controller's ability to improve from the shared 0.649519 initialization.
+
+Replication: 81 new calls, 398.839 seconds, 329.686 proposal seconds,
+1170.864 summed worker seconds over 176 workers. Six newly evolved donor uses
+completed, only one improving its immediate parent. No demonstrated mechanism
+or external benchmark advantage. Historical calls became 922 after replication.
+Clean source cc15546c6fac; run
+`f6f3264e4271ba044265c4b782c7d4aea154ad12ad027d6627efb44e962651e9`;
+Modal call `fc-01M292KFN8Y77CD4DYA92F74MV`. Source snapshot, input hashes,
+arm isolation and numerical replay are verified by `replication_report.json`.
+Raw files remain in the matching volume prefix and local
+`/private/tmp/compose-pmo-evolving-memory-replication-runs/<run>`.
+
+## Original first run
 
 Six synchronous rounds completed from identical starts (best 0.6495190528).
 The evolving arm reached **0.6720215050**, fixed memory **0.6580812003**.
