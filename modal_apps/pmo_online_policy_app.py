@@ -12,7 +12,7 @@ from modal_apps.run_process_v2_p50_app import (
 from modal_apps.run_process_v2_p50_app import image as base_image
 
 image = base_image.pip_install(
-    "PyTDC==0.3.6", "numpy==1.26.4", "scipy==1.13.1", "rdkit==2024.3.5"
+    "PyTDC==0.3.6", "numpy==1.26.4", "scipy==1.13.1", "rdkit==2024.3.5", "requests", "networkx"
 ).env(
     {
         "PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}",
@@ -31,6 +31,14 @@ for path in (
     "diagnostics/pmo_inference_speed/reference_law_sealed.json",
 ):
     image = image.add_local_file(ROOT / path, str(REMOTE_ROOT / path), copy=True)
+
+# Construct the evaluator during the image build, without scoring a molecule.
+# PyTDC 0.3.6 omits runtime imports from its declared dependencies.
+image = image.run_commands(
+    'python -c "from pathlib import Path; '
+    "from compose_v4.experiments.pmo_macro_probe import make_oracle; "
+    "make_oracle('perindopril_mpo', Path('/root/compose'), {})\""
+)
 
 app = modal.App("compose-pmo-online-policy")
 shared = {
