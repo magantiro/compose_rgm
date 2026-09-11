@@ -13,7 +13,7 @@ def main():
     parser.add_argument("mode", choices=("prepare", "launch", "status"))
     parser.add_argument(
         "--experiment",
-        choices=("particles", "replacement", "continuation", "learned"),
+        choices=("particles", "replacement", "continuation", "learned", "donor"),
         default="particles",
     )
     parser.add_argument("--prior", type=Path)
@@ -25,7 +25,9 @@ def main():
     from compose_v4.control.docking_value import identity
     from compose_v4.experiments.continuation_profile import publish_json, sha256_file
 
-    if args.experiment == "learned":
+    if args.experiment == "donor":
+        from compose_v4.experiments import pmo_donor_comparison as experiment
+    elif args.experiment == "learned":
         from compose_v4.experiments import pmo_learned_proposal as experiment
     elif args.experiment == "continuation":
         from compose_v4.experiments import pmo_replacement_continuation as experiment
