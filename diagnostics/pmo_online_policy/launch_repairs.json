@@ -1,0 +1,30 @@
+{
+  "schema_version": "pmo_online_launch_repairs_v1",
+  "contract_sha256": "b49390261fdd2b404162d4408468e660a2bfde2c9538a0482e72596a782f0720",
+  "repairs": [
+    {
+      "run_id": "4e849f5370e3f773122204c780fae777f64089972ea43dc0eac3ce1a800f4956",
+      "producer": "6262ab728578",
+      "call_id": "fc-01M26Y68YAA739QHZMPHZSH7WE",
+      "status": "failed_before_proposals_and_scores",
+      "failure_receipt": {
+        "payload": {"at": "2026-09-11T00:34:40.308104+00:00", "error": "ModuleNotFoundError(\"No module named 'requests'\")", "progress": {"oracle_calls": 0, "phase": "initialization"}},
+        "payload_sha256": "d2dbbcf467dc6f7e57e090ebfb09cf4b8d3fce70eb71e2012296c9c5a330a521"
+      },
+      "repair": "ce57d3a6261d: match established PMO runtime dependencies and construct evaluator during image build, without scoring"
+    },
+    {
+      "run_id": "847a1d54e583f0bbb34687a7ca62160234f773c0bd483857ed63879000718286",
+      "producer": "ce57d3a6261d",
+      "call_id": "fc-01M26YFZ039XEETZ1SKYNAJCC9",
+      "status": "cancelled_stalled_empty_calibration_map",
+      "last_inspected_heartbeat": {"at": "2026-09-11T00:43:35.261627+00:00", "oracle_calls": 0, "phase": "proposals", "round": 0, "seconds": 218.21886841900002, "training_observations": 220, "workers_complete": 0, "workers_total": 0},
+      "remote_cancel_log_at": "2026-09-11T00:44:33+00:00",
+      "repair": "662a2227d74d: empty calibration bypasses remote map; four frozen/online and empty/nonempty workflow cases pass including resume"
+    }
+  ],
+  "scope_change": false,
+  "new_oracle_calls_across_failed_attempts": 0,
+  "new_proposal_workers_across_failed_attempts": 0,
+  "interpretation": "Operational failures, not controller performance results. No budget increase, weight change, chemistry change or claim of scientific success. Raw remote receipts remain on compose-v4-artifacts under pmo_online_policy/<run_id>."
+}

@@ -14,6 +14,7 @@ import numpy as np
 from rdkit import Chem, rdBase
 
 from compose_v4.experiments.continuation_profile import publish_json, sha256_file
+from compose_v4.experiments.pmo_online_policy import load_contract
 from compose_v4.experiments.t4_matched_pilot import unseal
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -79,12 +80,17 @@ def summarize(result, prepared, phases):
             raise ValueError("final archive summary does not replay")
         scored = [r for r in records if r["status"] == "scored"]
         candidates = [r["candidate"] for r in scored]
-        choices = [r for p in phases.values() for r in p["choices"]["choices"] if r["arm"] == arm]
+        choices = [
+            {"round": n, **r}
+            for n, p in phases.items()
+            for r in p["choices"]["choices"]
+            if r["arm"] == arm
+        ]
         policies = [phases[i]["choices"]["policy_by_arm"][arm] for i in range(1, 9)]
         parent_sizes = [
             Chem.MolFromSmiles(c["parent"]["smiles"]).GetNumHeavyAtoms() for c in choices
         ]
-        known_counts, missed_gaps, complete_contrasts = [], [], 0
+        known_counts, missed_gaps, complete_contrasts, missed_examples = [], [], 0, []
         for choice in choices:
             known = [
                 known_labels[c["smiles"]] for c in choice["pool"] if c["smiles"] in known_labels
@@ -94,6 +100,28 @@ def summarize(result, prepared, phases):
                 selected_smiles = choice["pool"][choice["selected"]]["smiles"]
                 missed_gaps.append(max(known) - known_labels[selected_smiles])
                 complete_contrasts += len(known) == len(choice["pool"])
+                if missed_gaps[-1] > 1e-12:
+                    index = max(
+                        (i for i, c in enumerate(choice["pool"]) if c["smiles"] in known_labels),
+                        key=lambda i: known_labels[choice["pool"][i]["smiles"]],
+                    )
+                    candidate = choice["pool"][index]
+                    missed_examples.append(
+                        {
+                            "round": choice["round"],
+                            "slot": choice["slot"],
+                            "selected_smiles": selected_smiles,
+                            "selected_score": known_labels[selected_smiles],
+                            "selected_probability": choice["allocation"]["probabilities"][
+                                choice["selected"]
+                            ],
+                            "better_known_smiles": candidate["smiles"],
+                            "better_known_score": known_labels[candidate["smiles"]],
+                            "better_known_probability": choice["allocation"]["probabilities"][
+                                index
+                            ],
+                        }
+                    )
         if arm != "learned" and len(set(policies)) != 1:
             raise ValueError("a frozen control changed policy")
         if arm == "learned" and policies[1:] != [
@@ -142,6 +170,7 @@ def summarize(result, prepared, phases):
                 "mean_gap_to_best_known_alternative": float(np.mean(missed_gaps))
                 if missed_gaps
                 else None,
+                "examples": missed_examples,
                 "scope": "retrospective partial-label diagnostic using already-charged outcomes across arms; no unobserved labels inferred, no training, not unbiased policy regret",
             },
             "best_smiles": sorted(s for s, v in observed.items() if abs(v - best) < 1e-12),
@@ -206,6 +235,10 @@ def main():
         raise ValueError(f"refusing to overwrite {args.output}")
     paths = [args.snapshot / "result.json", ROOT / "diagnostics/pmo_online_policy/prepared.json"]
     result, prepared = unseal(paths[0]), json.loads(paths[1].read_text())
+    contract = load_contract(ROOT)
+    if result["contract_sha256"] != contract["contract_sha256"]:
+        raise ValueError("result belongs to another experimental contract")
+    paths.extend([ROOT / "configs/pmo_online_policy.json", ROOT / contract["protocol"]["path"]])
     phases = {}
     for number in range(1, 9):
         phases[number] = {}

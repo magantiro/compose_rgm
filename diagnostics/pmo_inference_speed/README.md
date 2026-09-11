@@ -92,3 +92,26 @@ Those were confirmed against the baseline and were not repaired during a probe
 requiring the exact predeclared source hashes. No repository-wide suite was run.
 This is bounded development evidence, not a release or full milestone completion.
 All code and evidence commits remain unpushed.
+
+## Subsequent runtime admission, 2026-09-11
+
+The original production worker's recovered full parent law
+(`reference_law_sealed.json`, SHA-256
+`1966ec6cddb20d2010b2ea7df3208c594cb1ff5c260c9dac87bc99cc34fc66f9`)
+has digest `1a6bd68a...`, exactly matching the accelerated probe. A new worker
+reproduced the other digest, `7ba34c96...`, and retained its complete arrays in
+`portability_check_sealed.json`. Direct comparison measured identical ordered
+actions, maximum probability difference `3.794342490204272e-08`, and marked-law
+half-L1 difference `6.046095143637787e-08`. Thus the numerical magnitude is now
+measured; the underlying cross-worker cause remains unproven. Neither changing
+chemistry nor a probability truncation was used to obtain agreement.
+
+The separate online-policy development contract declared portability limits of
+`1e-7` maximum absolute difference and `1e-6` half-L1 before this comparison.
+It retains the prior exact within-worker cache requirement. Its later admission
+worker matched all 1,196 original probabilities exactly and loaded the package
+in 0.176226 seconds. These are bounded runtime checks, not a claim of bitwise
+equivalence across all future molecules or hardware. Original Gate 0 records
+are unchanged. The separately authorized search and its outcomes are recorded
+under `diagnostics/pmo_online_policy`; the earlier speed-only result above
+remains zero-oracle evidence.
