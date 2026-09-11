@@ -179,7 +179,7 @@ def session(
                 output / "heartbeat.json",
                 {**progress, "at": _stamp(), "seconds": perf_counter() - started},
             )
-            store.flush(force=True)
+            store.flush()
 
     thread = threading.Thread(target=heartbeat, daemon=True)
     thread.start()
@@ -204,30 +204,38 @@ def archive_metrics(archive):
     }
 
 
-def driver_remote(task, root, artifact_root, volume, validate_revision, parallel):
+def driver_remote(
+    task, root, artifact_root, volume, validate_revision, parallel, *, run_session=None
+):
     import resource
 
-    import torch
-
-    from compose_v4.control.trajectory_value import predict
-    from compose_v4.control.winner_imitation import ImitationRanker
-
-    with session(task, root, artifact_root, volume, validate_revision) as (c, store, progress):
+    with (run_session or session)(task, root, artifact_root, volume, validate_revision) as (
+        c,
+        store,
+        progress,
+    ):
         previous = store.read("result")
         if previous is not None:
             return previous
         started, at = perf_counter(), _stamp()
-        data = json.loads((root / PREPARED).read_text())
+        data = json.loads((root / c.get("prepared", {"path": PREPARED})["path"]).read_text())
         history = dict(data["observed"])
-        model_path = artifact_root / c["value_checkpoint"]["path"]
-        verify_file(model_path, c["value_checkpoint"]["sha256"])
-        torch.set_num_threads(1)
-        torch.use_deterministic_algorithms(True)
-        model = ImitationRanker(518, hidden=128)
-        model.load_state_dict(
-            torch.load(model_path, map_location="cpu", weights_only=False)["model"]
-        )
-        model.eval()
+        arms = tuple(c.get("arms", ARMS))
+        if "future" in arms:
+            import torch
+
+            from compose_v4.control.trajectory_value import predict
+            from compose_v4.control.winner_imitation import ImitationRanker
+
+            model_path = artifact_root / c["value_checkpoint"]["path"]
+            verify_file(model_path, c["value_checkpoint"]["sha256"])
+            torch.set_num_threads(1)
+            torch.use_deterministic_algorithms(True)
+            model = ImitationRanker(518, hidden=128)
+            model.load_state_dict(
+                torch.load(model_path, map_location="cpu", weights_only=False)["model"]
+            )
+            model.eval()
         scores = DurableScores(
             store.output,
             make_oracle(c["task"], root, c),
@@ -248,7 +256,7 @@ def driver_remote(task, root, artifact_root, volume, validate_revision, parallel
                 "log_potential": [0.0] * n,
                 "archive": {p["smiles"]: p["score"] for p in initial},
             }
-            for arm in ARMS
+            for arm in arms
         }
         rounds, work = [], []
         for step in range(1, c["boundaries"] + 1):
@@ -259,7 +267,7 @@ def driver_remote(task, root, artifact_root, volume, validate_revision, parallel
                 work.extend(done["workers"])
                 continue
             tasks, assignments = {}, {}
-            for arm in ARMS:
+            for arm in arms:
                 assignments[arm] = []
                 for slot, parent in enumerate(state[arm]["particles"]):
                     key = None if parent is None else worker_identity(step, slot, parent)
@@ -326,11 +334,11 @@ def driver_remote(task, root, artifact_root, volume, validate_revision, parallel
                         strict=True,
                     )
                 )
-                if requested and not terminal
+                if "future" in arms and requested and not terminal
                 else {}
             )
             audits = {}
-            for arm in ARMS:
+            for arm in arms:
                 previous_arm = state[arm]
                 proposed = [candidates.get(k) for k in assignments[arm]]
                 for p in proposed:
@@ -388,12 +396,15 @@ def driver_remote(task, root, artifact_root, volume, validate_revision, parallel
                 "at": _stamp(),
             }
             rows = [{k: v for k, v in r.items() if k != "candidates"} for r in results.values()]
-            store.save(f"round/{step}/complete", {"state": state, "audit": audit, "workers": rows})
-            store.flush(force=True)
+            store.save(
+                f"round/{step}/complete",
+                {"state": state, "audit": audit, "workers": rows},
+                durable=True,
+            )
             rounds.append(audit)
             work.extend(rows)
         terminal_outputs = {}
-        for arm in ARMS:
+        for arm in arms:
             a = rounds[-1]["arms"][arm]
             rng = np.random.default_rng(np.random.SeedSequence([c["seed"], 1000]))
             index = None if a["status"] == "extinct" else int(rng.choice(n, p=a["weights"]))
@@ -407,8 +418,8 @@ def driver_remote(task, root, artifact_root, volume, validate_revision, parallel
             "initial_parents": initial,
             "initial_metrics": archive_metrics({p["smiles"]: p["score"] for p in initial}),
             "rounds": rounds,
-            "arms": {a: archive_metrics(state[a]["archive"]) for a in ARMS},
-            "archives": {a: state[a]["archive"] for a in ARMS},
+            "arms": {a: archive_metrics(state[a]["archive"]) for a in arms},
+            "archives": {a: state[a]["archive"] for a in arms},
             "terminal_draws": terminal_outputs,
             "new_oracle_calls": scores.meter.spent,
             "oracle_rows": scores.rows,
@@ -426,7 +437,10 @@ def driver_remote(task, root, artifact_root, volume, validate_revision, parallel
                 "particle_dtype": "float64",
                 "peak_rss": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
             },
-            "interpretation": "winner-informed warm development, not a matched PMO AUC benchmark; full queried archive differs from terminal weighted draw",
+            "interpretation": c.get(
+                "interpretation",
+                "winner-informed warm development, not a matched PMO AUC benchmark; full queried archive differs from terminal weighted draw",
+            ),
         }
         store.save("result", result)
         return result

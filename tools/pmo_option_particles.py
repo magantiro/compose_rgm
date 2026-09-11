@@ -11,14 +11,18 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=("prepare", "launch", "status"))
-    parser.add_argument("--experiment", choices=("particles", "replacement"), default="particles")
+    parser.add_argument(
+        "--experiment", choices=("particles", "replacement", "continuation"), default="particles"
+    )
     parser.add_argument("--prior", type=Path)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     from compose_v4.control.docking_value import identity
     from compose_v4.experiments.continuation_profile import publish_json, sha256_file
 
-    if args.experiment == "replacement":
+    if args.experiment == "continuation":
+        from compose_v4.experiments import pmo_replacement_continuation as experiment
+    elif args.experiment == "replacement":
         from compose_v4.experiments import pmo_region_replacement as experiment
     else:
         from compose_v4.experiments import pmo_option_particles as experiment
@@ -40,17 +44,13 @@ def main():
     import modal
 
     if args.mode == "launch":
-        from compose_v4.experiments.pmo_route_support import development_revision
         from tools.preflight import assert_synced
 
-        preflight = assert_synced(strict=args.experiment == "replacement")
+        preflight = assert_synced(strict=True)
         c = load_contract(ROOT)
-        if args.experiment == "replacement":
-            from modal_apps.run_process_v2_p50_app import local_image_revision
+        from modal_apps.run_process_v2_p50_app import local_image_revision
 
-            revision = local_image_revision(expected_commit=preflight["commit"], repo_root=ROOT)
-        else:
-            revision = development_revision(ROOT)
+        revision = local_image_revision(expected_commit=preflight["commit"], repo_root=ROOT)
         body = {
             "contract_sha256": c["contract_sha256"],
             "image_revision": revision,

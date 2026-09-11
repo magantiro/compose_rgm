@@ -357,8 +357,7 @@ def _frozen_save(store, name, payload):
     previous = store.read(name)
     if previous is not None and previous != payload:
         raise ValueError(f"restart changed locked {name}")
-    store.save(name, payload)
-    store.flush(force=True)
+    store.save(name, payload, durable=True)
 
 
 def driver_remote(

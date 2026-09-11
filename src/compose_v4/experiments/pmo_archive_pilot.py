@@ -6,6 +6,7 @@ import json
 from collections import Counter
 from dataclasses import replace
 from pathlib import Path
+from threading import RLock
 from time import perf_counter
 
 import numpy as np
@@ -123,22 +124,27 @@ class Store:
     def __init__(self, output, commit, interval=30):
         self.output, self._commit, self.interval = output, commit, interval
         self.last_flush = perf_counter()
+        self._flush_lock = RLock()
         self.timings = {"json_seconds": 0.0, "commit_seconds": 0.0, "commits": 0, "writes": 0}
 
     def flush(self, force=False):
-        if force or perf_counter() - self.last_flush >= self.interval:
-            start = perf_counter()
-            self._commit()
-            self.timings["commit_seconds"] += perf_counter() - start
-            self.timings["commits"] += 1
-            self.last_flush = perf_counter()
+        # Recheck the interval after acquiring the lock: a heartbeat may have
+        # waited behind a barrier that already published its local receipt.
+        with self._flush_lock:
+            if force or perf_counter() - self.last_flush >= self.interval:
+                start = perf_counter()
+                self._commit()
+                self.timings["commit_seconds"] += perf_counter() - start
+                self.timings["commits"] += 1
+                self.last_flush = perf_counter()
 
-    def save(self, name, value):
+    def save(self, name, value, *, durable=False):
         start = perf_counter()
         seal(self.output / f"{name}.json", value)
         self.timings["json_seconds"] += perf_counter() - start
         self.timings["writes"] += 1
-        self.flush()
+        # One barrier, not an overdue periodic flush followed by a forced one.
+        self.flush(force=durable)
 
     def read(self, name):
         path = self.output / f"{name}.json"

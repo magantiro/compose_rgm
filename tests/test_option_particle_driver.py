@@ -4,6 +4,7 @@ import json
 from contextlib import contextmanager
 
 import numpy as np
+import pytest
 import torch
 
 from compose_v4.control.winner_imitation import ImitationRanker
@@ -12,7 +13,8 @@ from compose_v4.experiments.continuation_profile import sha256_file
 from compose_v4.experiments.pmo_archive_pilot import Store
 
 
-def test_shared_work_retains_particles_all_scores_and_resume(tmp_path, monkeypatch):
+@pytest.mark.parametrize("arms", [experiment.ARMS, ("reference", "immediate")])
+def test_shared_work_retains_particles_all_scores_and_resume(tmp_path, monkeypatch, arms):
     output = tmp_path / "output"
     model_path = tmp_path / "value.pt"
     torch.save({"model": ImitationRanker(518, hidden=128).state_dict()}, model_path)
@@ -29,7 +31,10 @@ def test_shared_work_retains_particles_all_scores_and_resume(tmp_path, monkeypat
         "new_oracle_limit": 24,
         "seed": 1,
         "beta": 10,
+        "arms": list(arms),
     }
+    if "future" not in arms:
+        del c["value_checkpoint"]  # Actual-score execution must not load a head.
     store = Store(output, lambda: None)
 
     @contextmanager
@@ -78,7 +83,8 @@ def test_shared_work_retains_particles_all_scores_and_resume(tmp_path, monkeypat
     assert len(first["immediate"]["log_weights"]) == 4
     assert len(calls) == len(set(calls)) == result["new_oracle_calls"]
     assert calls == ["CC", "CCC", "CCCC", "CCCCC", "CCCCCC"]
-    for arm in experiment.ARMS:
+    assert set(result["arms"]) == set(arms)
+    for arm in arms:
         assert set(result["archives"][arm]) == {"C", *calls}
         assert result["arms"][arm]["best"] == 0.9
     # Completed runs return their sealed artifact without new work or queries.

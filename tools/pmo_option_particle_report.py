@@ -176,7 +176,11 @@ def report(path):
         "law_seconds_sum": sum(x["law_work"]["law_seconds"] for x in r["workers"]),
         "driver_io": r["io_timings"],
         "historical_unique_labels_available": r["historical_unique_labels"],
-        "interpretation": "null best-score result; modest immediate-arm top10 gain in one warm development run; not official PMO AUC or blind generalization",
+        "initial_best": r["initial_metrics"]["best"],
+        "any_best_improvement": any(
+            a["best"] > r["initial_metrics"]["best"] for a in r["arms"].values()
+        ),
+        "interpretation": "warm-development particle comparison; inspect the measured arms and initial best, not official PMO AUC or blind generalization",
     }
 
 
