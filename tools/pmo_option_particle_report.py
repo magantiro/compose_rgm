@@ -15,6 +15,8 @@ from rdkit.Chem import rdFingerprintGenerator, rdMolDescriptors
 from compose_v4.control.archive_allocation import sample_archive_parents
 from compose_v4.control.docking_value import identity
 from compose_v4.control.donor_memory import build_memory, proposal_identity
+from compose_v4.control.local_endpoint_selector import active as local_active
+from compose_v4.control.local_endpoint_selector import policy_identity as local_policy_identity
 from compose_v4.control.option_particles import advance, log_potentials
 from compose_v4.experiments.continuation_profile import publish_json, sha256_file
 from compose_v4.experiments.inference_package import software
@@ -46,6 +48,17 @@ def proposal_depths(parents, proposed, depths):
             raise ValueError("new primitive depth lacks a matching exact parent chain/count")
         result.append(depth + child["primitive_count"])
     return result
+
+
+def slot_policy_identity(configuration, arm, step, slot, broad_policy, memory_id=None):
+    """Identify the actually drawn channel without merging local and broad work."""
+    if arm not in configuration.get("local_selector_arms", []) or not local_active(
+        configuration["seed"], step, slot
+    ):
+        return broad_policy
+    if memory_id is None:
+        raise ValueError("local selection receipt requires its frozen donor memory")
+    return local_policy_identity(memory_id, configuration["endpoint_model_sha256"])
 
 
 def report(path):
@@ -94,6 +107,7 @@ def report(path):
         archive_depths = {p["smiles"]: 0 for p in parents}
         used_workers = set()
         memory_audits = []
+        local_audits = []
         attempts = failures = 0
         for round_row in r["rounds"]:
             a = round_row["arms"][arm]
@@ -101,6 +115,7 @@ def report(path):
                 raise ValueError("proposal score differs from its actual oracle receipt")
             step = round_row["boundary"]
             policy_id = c.get("proposal_ids", {}).get(arm)
+            memory_id = None
             if c.get("donor_memory_modes"):
                 memory = build_memory(
                     prepared_data["initial_donor_memory"],
@@ -108,6 +123,7 @@ def report(path):
                     mode=c["donor_memory_modes"][arm],
                 )
                 policy_id = proposal_identity(memory["memory_id"])
+                memory_id = memory["memory_id"]
                 initial_donors = {p["smiles"] for p in prepared_data["initial_donor_memory"]}
                 donors_used = []
                 donor_draws = []
@@ -165,11 +181,29 @@ def report(path):
                         "completed_uses": donors_used,
                     }
                 )
-            used_workers.update(
-                worker_identity(step, slot, p, policy_id)
-                for slot, p in enumerate(parents)
-                if p is not None
-            )
+            for slot, parent in enumerate(parents):
+                if parent is None:
+                    continue
+                selected_policy = slot_policy_identity(c, arm, step, slot, policy_id, memory_id)
+                used_workers.add(worker_identity(step, slot, parent, selected_policy))
+                child = a["proposals"][slot]
+                local_draw = selected_policy != policy_id
+                if child is not None and (
+                    (child["bundle"]["option"] == "local_endpoint_selector") != local_draw
+                    or (local_draw and child["primitive_count"] != 1)
+                ):
+                    raise ValueError("local/broad channel or primitive count differs from its draw")
+                if local_draw:
+                    local_audits.append(
+                        {
+                            "boundary": step,
+                            "slot": slot,
+                            "parent_score": parent["score"],
+                            "completed": child is not None,
+                            "score": None if child is None else child["score"],
+                            "policy_id": selected_policy,
+                        }
+                    )
             terminal = step == c["boundaries"]
             proposed_depths = proposal_depths(parents, a["proposals"], depths)
             rng = np.random.default_rng(np.random.SeedSequence([c["seed"], step, 999]))
@@ -265,8 +299,11 @@ def report(path):
         # Older arms share proposal workers; these are not additive arm costs.
         audited_attempts = [a for w in arm_workers for a in w["attempts"]]
         has_attempt_census = all("proposal_attempts" in a for a in audited_attempts)
+        local_attempts = [a for a in audited_attempts if a.get("component") == "local_endpoint"]
         sampled_attempts = (
-            sum(a["proposal_attempts"] for a in audited_attempts) if has_attempt_census else None
+            sum(a["proposal_attempts"] for a in audited_attempts)
+            if has_attempt_census and not local_attempts
+            else None
         )
         steps = sum(a["primitive_steps"] for a in audited_attempts) if has_attempt_census else None
         generated_fresh = {
@@ -279,6 +316,7 @@ def report(path):
                 "particle_replay_verified": not archive_mode,
                 "archive_selection_replay_verified": archive_mode,
                 **({"donor_memory_replay": memory_audits} if memory_audits else {}),
+                **({"local_channel_replay": local_audits} if local_audits else {}),
                 "complete_options": len(proposals),
                 "attempted_options": attempts,
                 "failed_options": failures,
@@ -296,7 +334,17 @@ def report(path):
                 "proposal_sampling": {
                     "attempts": sampled_attempts,
                     "primitive_steps": steps,
-                    "attempts_per_step": sampled_attempts / steps if steps else None,
+                    "attempts_per_step": sampled_attempts / steps
+                    if steps and sampled_attempts is not None
+                    else None,
+                    "local_support_census": {
+                        "draws": len(local_attempts),
+                        "positive_mass_marks": sum(a["proposal_attempts"] for a in local_attempts),
+                        "canonical_products": sum(a["available_products"] for a in local_attempts),
+                        "predicted_products": sum(a["unqueried_products"] for a in local_attempts),
+                        "selection_seconds": sum(a["selection_seconds"] for a in local_attempts),
+                        "note": "Enumeration counts are not stochastic proposal attempts; mixed-channel attempt ratios are undefined.",
+                    },
                     "what_kl": quantiles(
                         [
                             a["what_allocation"]["kl"]

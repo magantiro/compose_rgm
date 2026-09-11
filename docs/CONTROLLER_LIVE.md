@@ -6,13 +6,21 @@ known-winner reconstruction and mathematics are not benchmark success.
 
 ## Champion and exact regime
 
-- Update: the fresh-seed comparison finished. Both fixed and evolving memory
+- Current observed best: **0.6835298930947339**, from the completed four-round
+  local-guided broad controller, versus **0.6803013430498075** for its matched
+  fixed-memory baseline. Both started at 0.6747477698. Eighty-five new calls,
+  497.011 seconds; positive on best score but lower guided top-ten mean and
+  diversity. Not replicated. Exact four-edit winning suffix: local ring closure,
+  then three generic atom restatements. `diagnostics/pmo_local_guidance/README.md`.
+  No run is active. Next decision is unchanged fresh-seed replication, not
+  retuning or starting from the new winner; additional launch authority is needed.
+- Earlier fresh-seed memory comparison: both fixed and evolving memory
   reached **0.672021505032247**, with identical top-ten mean 0.6532973102.
   The first evolving-memory lead below did not replicate. Stop the unchanged
   memory comparison and retain simpler fixed memory. Replication cost: 81 new
   calls, 398.839 seconds, 329.686 proposal seconds. Audit:
   `diagnostics/pmo_evolving_memory/replication_report.json`.
-- Best observed endpoint **0.6747477697966318** is from a separate cached
+- Previous observed endpoint **0.6747477697966318** is from a separate cached
   primitive-neighborhood diagnostic, not a full-controller comparison. One atom
   deletion improves the previous champion by 0.0027263, at 1024 new queries.
   Of 1580 supported neighbors, 1044 were scored (20 cached), 30 improve the
@@ -40,7 +48,7 @@ known-winner reconstruction and mathematics are not benchmark success.
   starts and donors, six option rounds, 156 and 149 new calls. First gain:
   four-edit side-chain replacement; replication: 47-edit structural replacement.
   `diagnostics/pmo_donor_comparison/README.md` and its two reports.
-- Historical labels: 249455 prescreen evaluations plus **2056 development physical
+- Historical labels: 249455 prescreen evaluations plus **2141 development physical
   calls** through the latest batch. The bank is our recovered historical asset,
   not external labels. Its legacy provenance remains incomplete. Do not call
   this no-prescreen. The separate no-new-prescreen controller remained at
@@ -183,6 +191,28 @@ The scoped amendment is recorded in both the primary and execution-worktree
 AGENTS.md. Proceed with this single prepared comparison; no additional second-task
 experiment or extra label budget is bundled into the approval. No scientific
 recipe, model coefficient, executor rule or input artifact changed.
+
+Completed run: `pmo_local_guidance/2f58bc8ace9d1591520d0c2a670a0b04cb1bd1cad4879f1ca4420361c8570e72`,
+durable call `fc-01M297KAGZKERT3EE8P8SJW9MM`, exact deployed revision
+`797d7085e737`. Both arms started at 0.6747477698. Guided finished at
+0.6835298931 versus baseline 0.6803013430, passing the predeclared best-score
+criterion. Guided top-ten mean was lower (0.6743329457 versus 0.6747775400),
+as was archive diversity. Eighty-five new calls, 497.011 seconds total and
+470.540 seconds proposals. Development physical-call total is now 2141, plus
+249455 historical prescreen calls. No scientific job remains active.
+Local source snapshot and spawn receipt are under
+`/private/tmp/compose-pmo-local-guidance-runs/2f58bc8ace9d1591520d0c2a670a0b04cb1bd1cad4879f1ca4420361c8570e72/`.
+The source snapshot is also preserved on the same remote run namespace.
+
+The new winner comes from a local ring closure followed by three generic atom
+restatements, all four exact primitives independently replayed. The local model
+still misranked an immediately better move at 110/1618 in the matched first-round
+neighborhood. This is a positive mixture result, not learned future-value
+validation or external benchmark success. Audit and decision:
+`diagnostics/pmo_local_guidance/{report,evidence}.json` and README.md.
+Next: unchanged fresh-seed replication from the same original starts and model,
+not the new winner. That is not yet authorized or launched; no second task is
+running. Do not tune this mixture on the new scores. Overall goal remains unmet.
 
 The three completed local batches (cached neighborhood, local query selection,
 persistent lookahead), including executed source snapshots and all raw receipts,
