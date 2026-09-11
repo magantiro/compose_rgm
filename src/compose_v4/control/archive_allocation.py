@@ -43,6 +43,33 @@ def parent_distribution(archive: list[dict], observed: dict[str, float], explora
     return probabilities
 
 
+def sample_archive_parents(archive: dict[str, dict], n: int, rng, *, exploration=0.2):
+    """One incumbent slot plus stochastic full-archive branching, not an SMC row.
+
+    The archive has one exact representative per canonical molecule. Rank-based
+    sampling is an optimization heuristic; its exploration mass is not uncertainty.
+    """
+    if type(n) is not int or n < 2 or not archive:
+        raise ValueError("archive branching requires at least two slots and a nonempty archive")
+    if any(s != row["smiles"] for s, row in archive.items()):
+        raise ValueError("archive key differs from molecular identity")
+    rows = [archive[s] for s in sorted(archive)]
+    probabilities = parent_distribution(
+        rows, {s: r["score"] for s, r in archive.items()}, exploration
+    )
+    best = min(range(len(rows)), key=lambda i: (-rows[i]["score"], rows[i]["smiles"]))
+    indices = [best, *map(int, rng.choice(len(rows), size=n - 1, p=probabilities))]
+    return [rows[i] for i in indices], {
+        "schema_version": "archive_parent_selection_v1",
+        "canonical_order": [r["smiles"] for r in rows],
+        "probabilities": probabilities.tolist(),
+        "indices": indices,
+        "incumbent_index": best,
+        "exploration": exploration,
+        "interpretation": "slot zero retains incumbent; remaining slots sample rank-weighted archive with uniform exploration; not a Doob or SMC transition",
+    }
+
+
 class ArchiveCredit:
     """One observation per attempted option; update its realized descendant credit.
 

@@ -10,6 +10,7 @@ from time import perf_counter
 
 import numpy as np
 
+from compose_v4.control.archive_allocation import sample_archive_parents
 from compose_v4.control.docking_value import identity
 from compose_v4.control.option_particles import advance, log_potentials
 from compose_v4.experiments.continuation_profile import publish_json, sha256_file, verify_file
@@ -262,6 +263,9 @@ def driver_remote(
             }
             for arm in arms
         }
+        for arm in arms:
+            if c.get("parent_selection_modes", {}).get(arm) == "archive":
+                state[arm]["archive_nodes"] = {p["smiles"]: p for p in initial}
         rounds, work = [], []
         for step in range(1, c["boundaries"] + 1):
             done = store.read(f"round/{step}/complete")
@@ -359,25 +363,40 @@ def driver_remote(
                     None if p is None else future.get(p["smiles"], p["score"]) for p in proposed
                 ]
                 selection_mode = c.get("selection_modes", {}).get(arm, arm)
-                psi = log_potentials(
-                    selection_mode, measured, expected, terminal=terminal, beta=c["beta"]
-                )
                 rng = np.random.default_rng(np.random.SeedSequence([c["seed"], step, 999]))
-                update = advance(
-                    previous_arm["log_weights"],
-                    previous_arm["log_potential"],
-                    psi,
-                    [p is not None for p in proposed],
-                    rng,
-                    resample=selection_mode != "reference" and not terminal,
-                )
-                chosen = [proposed[i] for i in update["indices"]]
-                state[arm] = {
-                    "particles": chosen,
-                    "archive": previous_arm["archive"],
-                    "log_weights": update["log_weights"],
-                    "log_potential": update["log_potential"],
-                }
+                if c.get("parent_selection_modes", {}).get(arm) == "archive":
+                    nodes = previous_arm["archive_nodes"]
+                    for p in proposed:
+                        if p is not None:
+                            nodes.setdefault(p["smiles"], p)
+                    chosen, selection = sample_archive_parents(
+                        nodes, n, rng, exploration=c["archive_exploration"]
+                    )
+                    update = {"status": "live", "archive_selection": selection}
+                    state[arm] = {
+                        "particles": chosen,
+                        "archive": previous_arm["archive"],
+                        "archive_nodes": nodes,
+                    }
+                else:
+                    psi = log_potentials(
+                        selection_mode, measured, expected, terminal=terminal, beta=c["beta"]
+                    )
+                    update = advance(
+                        previous_arm["log_weights"],
+                        previous_arm["log_potential"],
+                        psi,
+                        [p is not None for p in proposed],
+                        rng,
+                        resample=selection_mode != "reference" and not terminal,
+                    )
+                    chosen = [proposed[i] for i in update["indices"]]
+                    state[arm] = {
+                        "particles": chosen,
+                        "archive": previous_arm["archive"],
+                        "log_weights": update["log_weights"],
+                        "log_potential": update["log_potential"],
+                    }
                 metrics = archive_metrics(state[arm]["archive"])
                 audits[arm] = {
                     **metrics,
@@ -395,8 +414,13 @@ def driver_remote(
                     "future_values": expected,
                 }
                 progress.update(**{f"best_{arm}": metrics["best"]})
+                detail = (
+                    "archive branching"
+                    if "archive_selection" in update
+                    else f"ESS={update['ess']:.2f} resampled={update['resampled']}"
+                )
                 print(
-                    f"[particles] boundary={step} arm={arm} best={metrics['best']:.6f} top10={metrics['top10_mean']:.6f} ESS={update['ess']:.2f} resampled={update['resampled']}",
+                    f"[particles] boundary={step} arm={arm} best={metrics['best']:.6f} top10={metrics['top10_mean']:.6f} {detail}",
                     flush=True,
                 )
             audit = {
@@ -419,11 +443,16 @@ def driver_remote(
         terminal_outputs = {}
         for arm in arms:
             a = rounds[-1]["arms"][arm]
+            if c.get("parent_selection_modes", {}).get(arm) == "archive":
+                terminal_outputs[arm] = state[arm]["particles"][0]
+                continue
             rng = np.random.default_rng(np.random.SeedSequence([c["seed"], 1000]))
             index = None if a["status"] == "extinct" else int(rng.choice(n, p=a["weights"]))
             terminal_outputs[arm] = None if index is None else state[arm]["particles"][index]
         result = {
-            "schema_version": "option_particles_result_v1",
+            "schema_version": "option_population_result_v2"
+            if c.get("parent_selection_modes")
+            else "option_particles_result_v1",
             "status": "complete_development",
             "configuration": c,
             "run_id": task["run_id"],
@@ -434,6 +463,18 @@ def driver_remote(
             "arms": {a: archive_metrics(state[a]["archive"]) for a in arms},
             "archives": {a: state[a]["archive"] for a in arms},
             "terminal_draws": terminal_outputs,
+            **(
+                {
+                    "returned_molecule_rules": {
+                        a: "best_archive_molecule"
+                        if c["parent_selection_modes"][a] == "archive"
+                        else "terminal_particle_draw"
+                        for a in arms
+                    }
+                }
+                if c.get("parent_selection_modes")
+                else {}
+            ),
             "new_oracle_calls": scores.meter.spent,
             "oracle_rows": scores.rows,
             "historical_unique_labels": len(data["observed"]),

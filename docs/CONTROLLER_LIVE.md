@@ -62,6 +62,17 @@ reconstruction and valid chemistry do not count as benchmark success.
 
 ## Current hypothesis and bounded experiment
 
+Current next run: `configs/pmo_archive_branching.json` and
+`docs/PMO_ARCHIVE_BRANCHING.md`. Both PMO gains disappeared from the active
+population after exactly one follow-up draw. The new comparison uses identical
+top-16 exact parents from both completed comparisons (best 0.603023), identical
+donor/reference proposals, and contrasts forward-only SMC with archive parent
+sampling. One incumbent slot plus 15 rank-weighted/full-support archive draws.
+Four rounds, at most 128 new queries, 29 workers plus one driver, $10 reserved
+cap. No concurrent T4 job. A new best beyond 0.603023 and the SMC arm earns
+replication; merely retaining the incumbent is a null. Ten focused parent,
+driver, donor, and restart checks passed in 3.79 seconds.
+
 Use coordinated population-derived graph proposals to avoid sampling each
 enabling primitive independently, then retain broad reference editing for local
 refinement and open-ended exploration. The isolated donor channel's positive
@@ -94,7 +105,7 @@ call `fc-01M28SEZ6K9JNBB8ENBT9SF2YG`, source `731a62699d02`.
 Raw result SHA-256 `92da4b2adf711aa0e0c7146f8a397dde7372fdd66608e1ae9a10b6e71387c4c5`.
 No recovery or repeated completed oracle queries were needed.
 
-T4 transfer prepared: `configs/t4_donor_probe.json` and `docs/T4_DONOR_PROBE.md`.
+T4 transfer completed, negative: `configs/t4_donor_probe.json` and `docs/T4_DONOR_PROBE.md`.
 One matched proposal batch from the existing exact-state T4 archive, not a full
 optimizer. Same eight parents and endpoint gates for both arms, 16 option slots
 per arm, at most eight novel dockings per arm plus two seed and two incumbent
@@ -102,6 +113,18 @@ repeat controls. No public winner endpoints, docking predictor, or learned
 future-value head. At most 14 workers plus one driver, 20 total new calls,
 $5 reserved cap. Launch only from the clean committed image. Ten focused
 T4 allocation/lock/resume, donor and shared-driver checks passed in 4.27 seconds.
+Run `f01772ffc5e8b46e8038de69ae7e09b47e1fde3c6be0ebc976c7e8bedf608166`,
+call `fc-01M28THS9HPKKCW7924H6E6STJ`, source `85c948083f30`.
+Deployment 114.424 seconds, execution 114.772 seconds. Six docking attempts:
+hybrid's two novel eligible proposals scored -7.5/-7.6; seed repeats -7.3/-7.3,
+incumbent repeats -11.8/-12.3. Baseline produced no novel eligible endpoint.
+31/32 options completed, so compiler failure was not the principal bottleneck.
+Of 31 completed endpoints, 22 failed endpoint constraints and seven were already
+observed. No extra med-chem-only rejection. The run stopped at six calls rather
+than spending the unused budget on unregistered replacement proposals.
+Authoritative audit: `diagnostics/t4_donor_probe/report.json`. One additional
+report regression covers floating property roundoff versus exact eligibility;
+QED differed by 1.1e-16 across ARM/x86, with unchanged decisions.
 
 Scientific change explicitly authorized by the user's full controller/macro
 license: donor plans compile under the frozen executor but need not have positive
@@ -111,11 +134,13 @@ No executor, model weights, charge/size/slot semantics or benchmark gate changed
 
 ## Decision and next action
 
-The PMO best-score gain repeated across two seeds. Next, test whether this same
-proposal change transfers to T4 before scaling it. A clear feasible gain beyond
-the docking control spread earns a short continuation. Poor coverage or scores
-stop this transfer recipe; small differences are inconclusive. No full panel
-or external superiority claim follows from these development comparisons.
+The PMO best-score gain repeated across two seeds, but the one-option T4 transfer
+failed on feasible novel coverage and score. Stop that unchanged T4 recipe.
+The next T4 question is whether coordinated topology-plus-property repair can
+finish at useful feasible endpoints, using the saved exact intermediates without
+imposing endpoint constraints on their internal path. This is a proposed repair,
+not yet a demonstrated controller improvement. No full panel or external
+superiority claim follows from these development comparisons.
 
 Future-aware work remains a candidate, but the previous head is rejected for
 this process: its training target was a witnessed-path maximum and its primitive
