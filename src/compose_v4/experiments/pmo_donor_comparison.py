@@ -15,6 +15,7 @@ from compose_v4.control.graph_geometry import structural_displacement, topology
 from compose_v4.control.molecular_search_codec import decode_search_state, encode_search_state
 from compose_v4.control.molecular_task_search import MolecularSearchState
 from compose_v4.experiments.continuation_profile import publish_json, sha256_file, verify_file
+from compose_v4.experiments.pmo_archive_pilot import Store
 from compose_v4.experiments.pmo_branch_policy import propose_remote
 from compose_v4.experiments.pmo_option_particles import driver_remote as particle_driver
 from compose_v4.experiments.pmo_option_particles import session as particle_session
@@ -224,8 +225,8 @@ def load_contract(root):
 class ReferenceComponent:
     """Identity policy carrying the mixture's provenance, not a learned model."""
 
-    def __init__(self):
-        self.payload = {"model_sha256": CHANNEL_ID}
+    def __init__(self, proposal_id=CHANNEL_ID):
+        self.payload = {"model_sha256": proposal_id}
 
     def distribution(self, node, row):
         return row.reference, {
@@ -289,9 +290,10 @@ def worker_remote(
     rng = np.random.default_rng(
         np.random.SeedSequence([c["seed"], task["phase"], task["slot"], 776])
     )
-    use_donor = (
-        task.get("proposal_id") == CHANNEL_ID and rng.random() < CHANNEL["donor_probability"]
-    )
+    has_memory = bool(c.get("donor_memory_modes"))
+    use_donor = (has_memory or task.get("proposal_id") == CHANNEL_ID) and rng.random() < CHANNEL[
+        "donor_probability"
+    ]
     if not use_donor:
         return propose_remote(
             task,
@@ -302,7 +304,7 @@ def worker_remote(
             runtime_factory,
             run_session=scoped_session,
             proposal_factory=lambda root, c, t: (
-                ReferenceComponent() if t.get("proposal_id") else None
+                ReferenceComponent(t["proposal_id"]) if t.get("proposal_id") else None
             ),
         )
     with scoped_session(task, root, artifact_root, volume, validate) as (c, store, progress):
@@ -313,8 +315,24 @@ def worker_remote(
         data = json.loads((root / c["prepared"]["path"]).read_text())
         parent = task["parent"]
         origin = decode_search_state(parent["node"])
-        i = int(rng.integers(len(data["donors"])))
-        donor = decode_state(data["donors"][i])
+        memory = None
+        if has_memory:
+            from compose_v4.control.donor_memory import validate_memory
+
+            memory_path = (
+                artifact_root
+                / c["artifact_kind"]
+                / task["run_id"]
+                / f"memory/{task['donor_memory_id']}.json"
+            )
+            verify_file(memory_path, task["donor_memory_sha256"])
+            memory = Store(memory_path.parent, lambda: None).read(memory_path.stem)
+            validate_memory(memory, task["donor_memory_id"])
+            i = int(rng.choice(len(memory["rows"]), p=memory["probabilities"]))
+            donor = decode_state(memory["rows"][i]["state"])
+        else:
+            i = int(rng.integers(len(data["donors"])))
+            donor = decode_state(data["donors"][i])
         left, right = pendant_cuts(origin.graph), pendant_cuts(donor)
         candidate = None
         progress.update(phase="donor_compile", donor=i)
@@ -325,6 +343,12 @@ def worker_remote(
             candidate = donor_candidate(
                 parent, result, f"workers/{task['worker_id']}/draws/00", i, a, b
             )
+            if candidate is not None and memory is not None:
+                candidate["bundle"].update(
+                    donor_memory_id=memory["memory_id"],
+                    donor_smiles=memory["rows"][i]["smiles"],
+                    donor_probability=memory["probabilities"][i],
+                )
         else:
             result = {"status": "no_pendant_cut"}
             store.save("draws/00", result)
@@ -352,7 +376,7 @@ def worker_remote(
             "law_work": {"fresh_laws": 0, "law_seconds": 0.0},
             "executor_calls": result.get("attempts", 0) + result.get("primitive_steps", 0),
             "oracle_calls": 0,
-            "proposal_policy_sha256": CHANNEL_ID,
+            "proposal_policy_sha256": task.get("proposal_id", CHANNEL_ID),
             "code_revision": task["image_revision"]["commit"],
             "io_timings": dict(store.timings),
             "reference_probability_certified": False,

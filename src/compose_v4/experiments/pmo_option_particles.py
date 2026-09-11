@@ -160,7 +160,12 @@ def session(
     if "worker_id" in task:
         if not 1 <= task["phase"] <= c["boundaries"] or not 0 <= task["slot"] < c["particles"]:
             raise ValueError("particle worker outside declared census")
-        if task.get("proposal_id") not in c.get("proposal_ids", {"reference": None}).values():
+        if c.get("donor_memory_modes"):
+            from compose_v4.control.donor_memory import proposal_identity
+
+            if task.get("proposal_id") != proposal_identity(task["donor_memory_id"]):
+                raise ValueError("worker donor memory identity is not authorized")
+        elif task.get("proposal_id") not in c.get("proposal_ids", {"reference": None}).values():
             raise ValueError("worker proposal identity is not authorized")
         if task["worker_id"] != worker_identity(
             task["phase"], task["slot"], task["parent"], task.get("proposal_id")
@@ -276,9 +281,30 @@ def driver_remote(
                 continue
             tasks, assignments = {}, {}
             for arm in arms:
+                memory_context = {}
+                if c.get("donor_memory_modes"):
+                    from compose_v4.control.donor_memory import build_memory, proposal_identity
+
+                    memory = build_memory(
+                        data["initial_donor_memory"],
+                        state[arm]["archive_nodes"],
+                        mode=c["donor_memory_modes"][arm],
+                    )
+                    memory_id = memory["memory_id"]
+                    _frozen_save(store, f"memory/{memory_id}", memory)
+                    memory_context = {
+                        "donor_memory_id": memory_id,
+                        "donor_memory_sha256": sha256_file(
+                            store.output / f"memory/{memory_id}.json"
+                        ),
+                    }
                 assignments[arm] = []
                 for slot, parent in enumerate(state[arm]["particles"]):
-                    proposal_id = c.get("proposal_ids", {}).get(arm)
+                    proposal_id = (
+                        proposal_identity(memory_context["donor_memory_id"])
+                        if memory_context
+                        else c.get("proposal_ids", {}).get(arm)
+                    )
                     key = (
                         None if parent is None else worker_identity(step, slot, parent, proposal_id)
                     )
@@ -292,6 +318,7 @@ def driver_remote(
                                 "slot": slot,
                                 "parent": parent,
                                 "worker_id": key,
+                                **memory_context,
                                 **({"proposal_id": proposal_id} if proposal_id is not None else {}),
                             },
                         )
