@@ -61,8 +61,9 @@ def test_pool_aggregates_draws_and_only_excludes_already_observed_queries():
 
 
 @pytest.mark.parametrize("online", [False, True])
+@pytest.mark.parametrize("empty_calibration", [False, True])
 def test_deployed_loop_locks_before_scoring_freezes_fit_and_resumes_without_charges(
-    tmp_path, monkeypatch, online
+    tmp_path, monkeypatch, online, empty_calibration
 ):
     from contextlib import contextmanager
     from types import SimpleNamespace
@@ -82,7 +83,7 @@ def test_deployed_loop_locks_before_scoring_freezes_fit_and_resumes_without_char
         "observations": [
             {"parent_smiles": "C", "parent_score": 0.01, "smiles": "CC", "score": 0.02}
         ],
-        "calibration_parents": [root] * 4,
+        "calibration_parents": [] if empty_calibration else [root] * 4,
     }
     publish_json(tmp_path / "prepared.json", data)
     contract = {
@@ -125,6 +126,7 @@ def test_deployed_loop_locks_before_scoring_freezes_fit_and_resumes_without_char
             return q, {"model_sha256": self.payload["model_sha256"]}
 
     def parallel(tasks):
+        assert tasks, "empty calibration must not dispatch a remote map"
         for task in tasks:
             parent = task["parent"]
             candidates = []

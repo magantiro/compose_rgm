@@ -417,7 +417,8 @@ def driver_remote(
                 phase="proposals", round=phase, workers_complete=0, workers_total=len(tasks)
             )
             results = {}
-            for result in parallel(list(tasks.values())):
+            # An empty calibration phase is a no-op, not a remote map request.
+            for result in parallel(list(tasks.values())) if tasks else ():
                 key = result["worker_id"]
                 if key not in tasks or key in results or not result["replay_verified"]:
                     raise ValueError("proposal completion identity mismatch")
