@@ -73,12 +73,14 @@ def report(path):
     ):
         raise ValueError("oracle census differs or exceeds the locked budget")
     rows = []
+    fresh_scores = {q["smiles"]: q["score"] for q in r["oracle_rows"]}
     max_replay_error = 0.0
     fpgen = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
     for arm in c["arms"]:
         selection_mode = c.get("selection_modes", {}).get(arm, arm)
         weights, previous = [-float(np.log(n))] * n, [0.0] * n
         proposals = []
+        offspring_deltas = []
         selected = []
         live_before = [True] * n
         parents, depths, observed_depths = r["initial_parents"], [0] * n, []
@@ -121,6 +123,11 @@ def report(path):
                     raise ValueError(f"particle numerical replay mismatch: {arm}/{step}/{key}")
             weights, previous = update["log_weights"], update["log_potential"]
             proposed_depths = proposal_depths(parents, a["proposals"], depths)
+            offspring_deltas.extend(
+                child["score"] - parent["score"]
+                for parent, child in zip(parents, a["proposals"], strict=True)
+                if child is not None
+            )
             observed_depths.extend(d for d in proposed_depths if d is not None)
             depths = [proposed_depths[i] for i in update["indices"]]
             parents = [a["proposals"][i] for i in update["indices"]]
@@ -152,6 +159,18 @@ def report(path):
         independently_queried.update({p["smiles"]: p["score"] for p in proposals})
         if independently_queried != r["archives"][arm]:
             raise ValueError("archive excludes an evaluated candidate or imports unqueried labels")
+        policy_id = c.get("proposal_ids", {}).get(arm)
+        arm_workers = [w for w in r["workers"] if w.get("proposal_policy_sha256") == policy_id]
+        # Older arms share proposal workers; these are not additive arm costs.
+        audited_attempts = [a for w in arm_workers for a in w["attempts"]]
+        has_attempt_census = all("proposal_attempts" in a for a in audited_attempts)
+        sampled_attempts = (
+            sum(a["proposal_attempts"] for a in audited_attempts) if has_attempt_census else None
+        )
+        steps = sum(a["primitive_steps"] for a in audited_attempts) if has_attempt_census else None
+        generated_fresh = {
+            p["smiles"]: p["score"] for p in proposals if p["smiles"] in fresh_scores
+        }
         rows.append(
             {
                 "arm": arm,
@@ -162,6 +181,29 @@ def report(path):
                 "failed_options": failures,
                 "offered_particle_slots": n * c["boundaries"],
                 "unique_generated_candidates": len({p["smiles"] for p in proposals}),
+                "newly_queried_candidates": len(generated_fresh),
+                "newly_queried_best": max(generated_fresh.values(), default=None),
+                "offspring_improvement": {
+                    "distribution": quantiles(offspring_deltas),
+                    "mean": float(np.mean(offspring_deltas)) if offspring_deltas else None,
+                    "improved": sum(d > 0 for d in offspring_deltas),
+                    "tied": sum(d == 0 for d in offspring_deltas),
+                    "worse": sum(d < 0 for d in offspring_deltas),
+                },
+                "proposal_sampling": {
+                    "attempts": sampled_attempts,
+                    "primitive_steps": steps,
+                    "attempts_per_step": sampled_attempts / steps if steps else None,
+                    "what_kl": quantiles(
+                        [
+                            a["what_allocation"]["kl"]
+                            for a in audited_attempts
+                            if a.get("what_allocation")
+                        ]
+                    ),
+                    "worker_seconds": sum(w["seconds"] for w in arm_workers),
+                    "cost_note": "Workers can be shared between arms with the same proposal identity; do not add shared costs twice.",
+                },
                 "new_primitive_depth": quantiles(observed_depths),
                 "primitive_steps_per_option": quantiles([p["primitive_count"] for p in proposals]),
                 "option_counts": dict(Counter(p["bundle"]["option"] for p in proposals)),
