@@ -4,6 +4,13 @@ Updated 2026-09-11. Active goal: reproducible improvement over the actual T4 and
 PMO champions, then verified matched external comparisons. Supporting chemistry,
 known-winner reconstruction and mathematics are not benchmark success.
 
+Operational status: fresh-seed replication authorized on 2026-09-11 and being
+prepared, not yet launched. Cap: 128 new calls, 30 containers, $10. Seed 20261009;
+same original starts/model/mixture, with paid-cache and exclusion roles kept
+separate. The first run is complete and preserved. The product goal record still
+says blocked; the new scoped work can proceed, and the competitive-controller
+objective remains unmet and unchanged.
+
 ## Champion and exact regime
 
 - Current observed best: **0.6835298930947339**, from the completed four-round
@@ -12,8 +19,8 @@ known-winner reconstruction and mathematics are not benchmark success.
   497.011 seconds; positive on best score but lower guided top-ten mean and
   diversity. Not replicated. Exact four-edit winning suffix: local ring closure,
   then three generic atom restatements. `diagnostics/pmo_local_guidance/README.md`.
-  No run is active. Next decision is unchanged fresh-seed replication, not
-  retuning or starting from the new winner; additional launch authority is needed.
+  No run is active yet. The authorized next step is unchanged fresh-seed
+  replication, not retuning or starting from the new winner.
 - Earlier fresh-seed memory comparison: both fixed and evolving memory
   reached **0.672021505032247**, with identical top-ten mean 0.6532973102.
   The first evolving-memory lead below did not replicate. Stop the unchanged
@@ -211,8 +218,29 @@ neighborhood. This is a positive mixture result, not learned future-value
 validation or external benchmark success. Audit and decision:
 `diagnostics/pmo_local_guidance/{report,evidence}.json` and README.md.
 Next: unchanged fresh-seed replication from the same original starts and model,
-not the new winner. That is not yet authorized or launched; no second task is
-running. Do not tune this mixture on the new scores. Overall goal remains unmet.
+not the new winner. This has now been authorized; no second task is running.
+Do not tune this mixture on the new scores. Overall goal remains unmet.
+
+Replication preparation finding (read-only inspection, no new model/oracle
+calls): `pmo_option_particles.py` currently uses `data["observed"]` both as the
+paid-score lookup and as the initial local exclusion set. Copying the older
+memory-replication pattern, which merges previous-run labels into `observed`,
+would therefore change this local-guidance proposal law. The saved round-1
+selection and oracle ledger confirm that its winning precursor would be removed.
+Repair implemented: original prepared inputs and proposal exclusions remain
+fixed; 85 additional paid labels occupy a separate requested-only score cache.
+The completed first run is unaffected. Do not modify its model or use its new
+winner as an initial state. The loader also pins the first run's seed, so an
+explicit replication contract is required rather than editing an old run in place.
+
+Replication contract `configs/pmo_local_guidance_replication.json`:
+`8c5554584534f3d535edd870c5fa7ce489625ae848b586ed706151b8cfede439`.
+Fourteen focused driver, selector, report and cache/exclusion checks passed
+(3.53 seconds for thirteen, 1.43 seconds for the replication input check).
+Touched-code formatting/lint and diff checks passed. Original prepared inputs,
+model and contract are unmodified. Qualified prior law-cache metadata is uploaded.
+Next operational action: one clean launch commit, strict preflight, deploy and
+durably spawn. No overall milestone/full-suite completion is claimed.
 
 The three completed local batches (cached neighborhood, local query selection,
 persistent lookahead), including executed source snapshots and all raw receipts,

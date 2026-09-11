@@ -227,8 +227,8 @@ def prepare(root: Path, prior_path: Path):
     }
 
 
-def load_contract(root):
-    c = json.loads((root / CONTRACT).read_text())
+def load_contract(root, *, contract_path=CONTRACT, seed=20261008):
+    c = json.loads((root / contract_path).read_text())
     if identity({k: v for k, v in c.items() if k != "contract_sha256"}) != c["contract_sha256"]:
         raise ValueError("local guidance contract hash mismatch")
     if (
@@ -238,7 +238,7 @@ def load_contract(root):
         c["draws_per_bundle"],
         c["new_oracle_limit"],
         c["primitive_budget"],
-    ) != (20261008, 16, 4, 1, 128, 64):
+    ) != (seed, 16, 4, 1, 128, 64):
         raise ValueError("local guidance recipe exceeds the declared scope")
     if (
         c["arms"] != ["baseline", "guided"]
@@ -369,7 +369,17 @@ def local_worker(task, root, c, store, progress, runtime, law, started, initiali
     return result
 
 
-def worker_remote(task, root, artifact_root, volume, validate, runtime_factory):
+def worker_remote(
+    task,
+    root,
+    artifact_root,
+    volume,
+    validate,
+    runtime_factory,
+    *,
+    run_session=None,
+    contract_loader=load_contract,
+):
     if task.get("local_selector"):
         return propose_remote(
             task,
@@ -378,7 +388,7 @@ def worker_remote(task, root, artifact_root, volume, validate, runtime_factory):
             volume,
             validate,
             runtime_factory,
-            run_session=session,
+            run_session=run_session or session,
             proposal_factory=lambda r, c, t: ReferenceComponent(t["proposal_id"]),
         )
     return broad_worker(
@@ -388,8 +398,8 @@ def worker_remote(task, root, artifact_root, volume, validate, runtime_factory):
         volume,
         validate,
         runtime_factory,
-        contract_loader=load_contract,
-        run_session=session,
+        contract_loader=contract_loader,
+        run_session=run_session or session,
     )
 
 

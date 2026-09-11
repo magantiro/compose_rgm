@@ -372,6 +372,19 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped PMO replication authorization, 2026-09-11:** the user approved the
+requested unchanged fresh-seed replication after the first local-guidance
+comparison passed its best-score criterion. Authorize one paired Perindopril
+MPO replication, seed 20261009, four rounds, at most 128 new oracle calls across
+both arms, 29 CPU workers plus one driver, no GPU, and $10 reserved cost.
+Preserve the original sixteen starts, 116 donors, fitted endpoint model and
+proposal mixture. Reuse previous paid scores only when requested, separately
+from the original proposal exclusions. Record a distinct replication contract
+and preserve the first run. Focused checks, clean committed source, strict
+preflight, deployment then durable spawn, and complete accounting remain
+required. This does not authorize another task, model training, additional
+replications, or a no-prescreen benchmark.
+
 **Scoped PMO authorization, 2026-09-11:** after the explicit request to permit the
 prepared four-round comparison at 128 new oracle calls, 30 containers and $10,
 the user replied "ok well lets just go ahead" and "what are you waiting for".

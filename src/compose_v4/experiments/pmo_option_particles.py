@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import threading
 from collections import Counter
 from contextlib import contextmanager
@@ -223,6 +224,18 @@ def archive_metrics(archive):
     }
 
 
+def initial_score_history(data):
+    """Oracle lookup only: requested-only cache must not alter proposal exclusions."""
+    history = dict(data["observed"])
+    for smiles, score in data.get("requested_only_scores", {}).items():
+        if not isinstance(score, (int, float)) or not math.isfinite(score):
+            raise ValueError(f"invalid requested-only score for {smiles}: {score!r}")
+        if smiles in history and history[smiles] != score:
+            raise ValueError(f"requested-only score conflicts with observed label for {smiles}")
+        history[smiles] = score
+    return history
+
+
 def driver_remote(
     task, root, artifact_root, volume, validate_revision, parallel, *, run_session=None
 ):
@@ -238,7 +251,7 @@ def driver_remote(
             return previous
         started, at = perf_counter(), _stamp()
         data = json.loads((root / c.get("prepared", {"path": PREPARED})["path"]).read_text())
-        history = dict(data["observed"])
+        history = initial_score_history(data)
         arms = tuple(c.get("arms", ARMS))
         if "future" in arms:
             import torch
@@ -531,7 +544,8 @@ def driver_remote(
             ),
             "new_oracle_calls": scores.meter.spent,
             "oracle_rows": scores.rows,
-            "historical_unique_labels": len(data["observed"]),
+            "historical_unique_labels": len(initial_score_history(data)),
+            "requested_only_cache_labels": len(data.get("requested_only_scores", {})),
             "workers": work,
             "io_timings": dict(store.timings),
             "seconds": perf_counter() - started,

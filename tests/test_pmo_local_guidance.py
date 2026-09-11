@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from time import perf_counter
 
 import numpy as np
+import pytest
 from test_donor_memory import donor, node
 
 from compose_v4.control.donor_memory import proposal_identity
@@ -80,12 +81,20 @@ def test_actual_local_worker_deduplicates_aliases_and_replays(tmp_path, monkeypa
     assert result["oracle_calls"] == 0 and result["replay_verified"]
 
 
-def test_driver_keeps_baseline_and_local_tasks_separate_and_locks_round(tmp_path, monkeypatch):
+@pytest.mark.parametrize("cached", [False, True])
+def test_driver_keeps_baseline_and_local_tasks_separate_and_locks_round(
+    tmp_path, monkeypatch, cached
+):
     parent = node("CC", 0.2)
     seed = next(s for s in range(100) if active(s, 1, 0) and not active(s, 1, 1))
     (tmp_path / "prepared.json").write_text(
         json.dumps(
-            {"parents": [parent], "observed": {"CC": 0.2}, "initial_donor_memory": [donor(parent)]}
+            {
+                "parents": [parent],
+                "observed": {"CC": 0.2},
+                "initial_donor_memory": [donor(parent)],
+                "requested_only_scores": {"CCO": 0.6} if cached else {},
+            }
         )
     )
     c = {
@@ -144,8 +153,16 @@ def test_driver_keeps_baseline_and_local_tasks_separate_and_locks_round(tmp_path
         parallel,
         run_session=session,
     )
-    assert result["new_oracle_calls"] == 3
+    assert result["new_oracle_calls"] == (2 if cached else 3)
     assert result["arms"]["guided"]["best"] == 0.6
     assert "CCO" not in result["archives"]["baseline"]
     assert "CCC" not in result["archives"]["guided"]
     assert "CCN" in result["archives"]["guided"] and "CCN" in result["archives"]["baseline"]
+
+
+def test_paid_score_cache_rejects_conflicting_or_invalid_labels():
+    for score in (0.3, float("nan"), float("inf")):
+        with pytest.raises(ValueError):
+            driver.initial_score_history(
+                {"observed": {"CC": 0.2}, "requested_only_scores": {"CC": score}}
+            )

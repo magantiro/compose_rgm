@@ -80,7 +80,9 @@ def report(path):
                 if hashlib.sha256(payload).hexdigest() != c[key]["sha256"]:
                     raise ValueError(f"executed proposal {key} differs from the contract")
         prepared_data = json.loads(prepared)
-        history = dict(prepared_data["observed"])
+        from compose_v4.experiments.pmo_option_particles import initial_score_history
+
+        history = initial_score_history(prepared_data)
     for q in r["oracle_rows"]:
         if q["smiles"] in history or q["status"] != "complete":
             raise ValueError("repeated historical query or incomplete oracle receipt")

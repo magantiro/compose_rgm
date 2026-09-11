@@ -23,6 +23,7 @@ def main():
             "archive",
             "memory",
             "local_guidance",
+            "local_guidance_replication",
         ),
         default="particles",
     )
@@ -37,7 +38,9 @@ def main():
     from compose_v4.control.docking_value import identity
     from compose_v4.experiments.continuation_profile import publish_json, sha256_file
 
-    if args.experiment == "local_guidance":
+    if args.experiment == "local_guidance_replication":
+        from compose_v4.experiments import pmo_local_guidance_replication as experiment
+    elif args.experiment == "local_guidance":
         from compose_v4.experiments import pmo_local_guidance as experiment
     elif args.experiment == "memory":
         from compose_v4.experiments import pmo_evolving_memory as experiment
@@ -133,6 +136,7 @@ def main():
         # Preserve exact source bytes as well as the source-revision identity.
         paths = sorted(
             set(body["image_revision"]["serialized_sources"])
+            | set(c.get("replication", {}).get("input_files", {}))
             | {c[k]["path"] for k in ("model", "training") if k in c}
             | {
                 APP,
