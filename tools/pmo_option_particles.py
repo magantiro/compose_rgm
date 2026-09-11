@@ -12,15 +12,22 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=("prepare", "launch", "status"))
     parser.add_argument(
-        "--experiment", choices=("particles", "replacement", "continuation"), default="particles"
+        "--experiment",
+        choices=("particles", "replacement", "continuation", "learned"),
+        default="particles",
     )
     parser.add_argument("--prior", type=Path)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--model", type=Path)
+    parser.add_argument("--training-manifest", type=Path)
+    parser.add_argument("--training-data", type=Path)
     args = parser.parse_args()
     from compose_v4.control.docking_value import identity
     from compose_v4.experiments.continuation_profile import publish_json, sha256_file
 
-    if args.experiment == "continuation":
+    if args.experiment == "learned":
+        from compose_v4.experiments import pmo_learned_proposal as experiment
+    elif args.experiment == "continuation":
         from compose_v4.experiments import pmo_replacement_continuation as experiment
     elif args.experiment == "replacement":
         from compose_v4.experiments import pmo_region_replacement as experiment
@@ -37,6 +44,21 @@ def main():
             return
         if args.prior is None:
             parser.error("prepare requires the prior trajectory result")
+        if args.experiment == "learned":
+            if any(p is None for p in (args.model, args.training_manifest, args.training_data)):
+                parser.error("learned prepare requires model, training-manifest and training-data")
+            print(
+                json.dumps(
+                    prepare(
+                        ROOT,
+                        args.prior,
+                        model_path=args.model,
+                        manifest_path=args.training_manifest,
+                        decisions_path=args.training_data,
+                    )
+                )
+            )
+            return
         print(json.dumps(prepare(ROOT, args.prior)))
         return
     if args.output is None or args.output.resolve().is_relative_to(ROOT):
@@ -73,6 +95,7 @@ def main():
         # Preserve exact source bytes as well as the source-revision identity.
         paths = sorted(
             set(body["image_revision"]["serialized_sources"])
+            | {c[k]["path"] for k in ("model", "training") if k in c}
             | {
                 APP,
                 PROTOCOL,

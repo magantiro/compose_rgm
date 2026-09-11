@@ -13,7 +13,9 @@ from compose_v4.experiments.continuation_profile import sha256_file
 from compose_v4.experiments.pmo_archive_pilot import Store
 
 
-@pytest.mark.parametrize("arms", [experiment.ARMS, ("reference", "immediate")])
+@pytest.mark.parametrize(
+    "arms", [experiment.ARMS, ("reference", "immediate"), ("baseline", "learned")]
+)
 def test_shared_work_retains_particles_all_scores_and_resume(tmp_path, monkeypatch, arms):
     output = tmp_path / "output"
     model_path = tmp_path / "value.pt"
@@ -35,6 +37,9 @@ def test_shared_work_retains_particles_all_scores_and_resume(tmp_path, monkeypat
     }
     if "future" not in arms:
         del c["value_checkpoint"]  # Actual-score execution must not load a head.
+    if "learned" in arms:
+        c["proposal_ids"] = {"baseline": None, "learned": "fixture_policy"}
+        c["selection_modes"] = {"baseline": "immediate", "learned": "immediate"}
     store = Store(output, lambda: None)
 
     @contextmanager
@@ -71,16 +76,21 @@ def test_shared_work_retains_particles_all_scores_and_resume(tmp_path, monkeypat
                 "replay_verified": True,
                 "attempts": [{"status": "complete"}],
                 "candidates": [candidate],
+                "proposal_policy_sha256": t.get("proposal_id"),
             }
 
     task = {"run_id": "test", "image_revision": {"commit": "fixture"}}
     result = experiment.driver_remote(task, tmp_path, tmp_path, None, None, parallel)
-    assert len(task_censuses[0]) == 4  # not 12 duplicate proposals across arms
+    assert len(task_censuses[0]) == (8 if "learned" in arms else 4)
     first = result["rounds"][0]["arms"]
-    assert first["immediate"]["resampled"]
-    assert not first["reference"]["resampled"]
-    assert first["immediate"]["indices"] == [3] * 4
-    assert len(first["immediate"]["log_weights"]) == 4
+    guided = "learned" if "learned" in arms else "immediate"
+    assert first[guided]["resampled"]
+    if "reference" in arms:
+        assert not first["reference"]["resampled"]
+    else:
+        assert first["baseline"]["indices"] == first["learned"]["indices"]
+    assert first[guided]["indices"] == [3] * 4
+    assert len(first[guided]["log_weights"]) == 4
     assert len(calls) == len(set(calls)) == result["new_oracle_calls"]
     assert calls == ["CC", "CCC", "CCCC", "CCCCC", "CCCCCC"]
     assert set(result["arms"]) == set(arms)

@@ -163,6 +163,7 @@ def execute_option(
     progress,
     *,
     primitive_budget=11,
+    proposal_policy=None,
 ):
     """One registered option, no beam or oracle lookahead. Resumable at each primitive."""
     origin = decode_search_state(parent["node"])
@@ -170,7 +171,10 @@ def execute_option(
         raise ValueError("primitive_budget must be a positive integer")
     node = replace(origin, budget=primitive_budget)  # local clock, NOT a query budget
     record = store.read(name)
+    policy_id = None if proposal_policy is None else proposal_policy.payload["model_sha256"]
     if record is not None:
+        if record.get("proposal_policy_sha256") != policy_id:
+            raise ValueError("option resume changed its proposal policy")
         if record["parent_id"] != parent["id"] or record["source"] != encode_search_state(node):
             raise ValueError("option resume changed its exact parent")
         if record["status"] != "running":
@@ -207,7 +211,10 @@ def execute_option(
                 if node.stage == "where"
                 else list(row.labels)
             )
-            q, audit = credit.distribution(row.reference, node.stage, cells, adaptive=adaptive)
+            if proposal_policy is not None and node.stage == "what":
+                q, audit = proposal_policy.distribution(node, row)
+            else:
+                q, audit = credit.distribution(row.reference, node.stage, cells, adaptive=adaptive)
             selected = int(rng.choice(len(q), p=q))
             following = row.successors[selected]
             event.update(
@@ -221,7 +228,10 @@ def execute_option(
                     "region": encode_search_state(node)["region"],
                 }
         else:
-            following = hierarchy.sample_reference(node, rng)
+            if proposal_policy is None:
+                following = hierarchy.sample_reference(node, rng)
+            else:
+                following, event["proposal"] = proposal_policy.sample(hierarchy, node, rng)
             if following is None:
                 stage_seconds[node.stage] += perf_counter() - start
                 status = "support_dead_end"
@@ -239,6 +249,7 @@ def execute_option(
             "bundle": bundle,
             "status": "running",
             "rng_state": rng.bit_generator.state,
+            "proposal_policy_sha256": policy_id,
         }
         store.save(name, record)
     record = {
@@ -249,6 +260,7 @@ def execute_option(
         "bundle": bundle,
         "status": status,
         "rng_state": rng.bit_generator.state,
+        "proposal_policy_sha256": policy_id,
     }
     if status == "complete":
         if not events or bundle is None or node.stage != "where":

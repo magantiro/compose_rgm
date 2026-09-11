@@ -57,6 +57,11 @@ def report(path):
         prepared = tar.extractfile(c["prepared"]["path"]).read()
         if hashlib.sha256(prepared).hexdigest() != c["prepared"]["sha256"]:
             raise ValueError("prepared score history does not match the contract")
+        for key in ("model", "training"):
+            if key in c:
+                payload = tar.extractfile(c[key]["path"]).read()
+                if hashlib.sha256(payload).hexdigest() != c[key]["sha256"]:
+                    raise ValueError(f"executed proposal {key} differs from the contract")
         history = dict(json.loads(prepared)["observed"])
     for q in r["oracle_rows"]:
         if q["smiles"] in history or q["status"] != "complete":
@@ -71,6 +76,7 @@ def report(path):
     max_replay_error = 0.0
     fpgen = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
     for arm in c["arms"]:
+        selection_mode = c.get("selection_modes", {}).get(arm, arm)
         weights, previous = [-float(np.log(n))] * n, [0.0] * n
         proposals = []
         selected = []
@@ -84,7 +90,7 @@ def report(path):
             step = round_row["boundary"]
             terminal = step == c["boundaries"]
             psi = log_potentials(
-                arm, a["scores"], a["future_values"], terminal=terminal, beta=c["beta"]
+                selection_mode, a["scores"], a["future_values"], terminal=terminal, beta=c["beta"]
             )
             update = advance(
                 weights,
@@ -92,7 +98,7 @@ def report(path):
                 psi,
                 [p is not None for p in a["proposals"]],
                 np.random.default_rng(np.random.SeedSequence([c["seed"], step, 999])),
-                resample=arm != "reference" and not terminal,
+                resample=selection_mode != "reference" and not terminal,
             )
             for key in ("status", "resampled", "indices", "log_potential"):
                 if update[key] != a[key]:

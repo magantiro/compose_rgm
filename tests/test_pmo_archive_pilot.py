@@ -43,7 +43,7 @@ def test_delayed_credit_changes_allocation_not_trial_count():
         credit.observe("e2", parent_chain=[], scale="local", option="local", reward=0)
 
 
-def run_option(output, *, interrupt=False):
+def run_option(output, *, interrupt=False, proposal_policy=None):
     process = kernel()
     hierarchy = MolecularHierarchy(process, lazy_applicability=True, include_carbonyl_options=True)
     root = MolecularSearchState.start(initial("CCC").graph, budget=0, root_id="fixture")
@@ -72,6 +72,7 @@ def run_option(output, *, interrupt=False):
             store,
             WitnessIndex(meter),
             {},
+            proposal_policy=proposal_policy,
         )
     return record
 
@@ -86,6 +87,28 @@ def test_real_option_renews_local_clock_and_replays_same_path_after_interrupt(tm
     assert full["candidate"]["primitive_count"] >= 1
     assert full["candidate"]["primitives"] > 50
     assert full["candidate"]["node"]["stage"] == "where"
+
+
+def test_proposal_policy_runs_inside_option_and_is_resume_bound(tmp_path):
+    from test_learned_proposal import zero_policy
+
+    policy = zero_policy()
+    full = run_option(tmp_path / "learned", proposal_policy=policy)
+    assert full["proposal_policy_sha256"] == policy.payload["model_sha256"]
+    what = [e for e in full["events"] if e.get("stage") == "what"]
+    how = [e for e in full["events"] if "mark" in e]
+    assert what and how
+    assert all(e["proposal"]["model_sha256"] == policy.payload["model_sha256"] for e in how)
+    assert what[0]["allocation"]["model_sha256"] == policy.payload["model_sha256"]
+    where = next(e for e in full["events"] if e.get("stage") == "where")
+    assert where["allocation"]["reference"] == where["allocation"]["probabilities"]
+    with pytest.raises(ValueError, match="proposal policy"):
+        run_option(tmp_path / "learned")
+    with pytest.raises(InterruptedError):
+        run_option(tmp_path / "resume_learned", interrupt=True, proposal_policy=policy)
+    resumed = run_option(tmp_path / "resume_learned", proposal_policy=policy)
+    for key in ("events", "candidate", "rng_state"):
+        assert resumed[key] == full[key]
 
 
 def test_persistent_feedback_resume_does_not_recharge_or_reveal_future_labels(

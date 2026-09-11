@@ -153,8 +153,11 @@ def load_contract(root: Path) -> dict:
     return c
 
 
-def worker_identity(phase: int, slot: int, parent: dict) -> str:
-    return identity({"phase": phase, "slot": slot, "parent": parent})
+def worker_identity(phase: int, slot: int, parent: dict, proposal_id=None) -> str:
+    payload = {"phase": phase, "slot": slot, "parent": parent}
+    if proposal_id is not None:
+        payload["proposal_id"] = proposal_id
+    return identity(payload)
 
 
 @contextmanager
@@ -218,7 +221,15 @@ def session(task, root, artifact_root, volume, validate_revision):
 
 
 def propose_remote(
-    task, root, artifact_root, volume, validate_revision, runtime_factory, *, run_session=None
+    task,
+    root,
+    artifact_root,
+    volume,
+    validate_revision,
+    runtime_factory,
+    *,
+    run_session=None,
+    proposal_factory=None,
 ):
     from compose_v4.control.molecular_task_search import MolecularHierarchy
     from compose_v4.control.option_continuation import (
@@ -237,6 +248,12 @@ def propose_remote(
         previous = store.read("complete")
         if previous is not None:
             return previous
+        proposal_policy = (
+            None if proposal_factory is None else proposal_factory(root, contract, task)
+        )
+        policy_id = None if proposal_policy is None else proposal_policy.payload["model_sha256"]
+        if policy_id != task.get("proposal_id"):
+            raise ValueError("worker did not load its locked proposal policy")
         start = perf_counter()
         runtime = runtime_factory()
         for key, field in (
@@ -297,6 +314,7 @@ def propose_remote(
                     witnesses,
                     progress,
                     primitive_budget=contract.get("primitive_budget", 11),
+                    proposal_policy=proposal_policy,
                 )
                 attempts.append(
                     {
@@ -304,6 +322,16 @@ def propose_remote(
                         "status": record["status"],
                         "bundle": record["bundle"],
                         "proposal_seconds": record["proposal_seconds"],
+                        "proposal_attempts": sum(
+                            e.get("proposal", {}).get("attempts", 1)
+                            for e in record["events"]
+                            if "mark" in e
+                        ),
+                        "primitive_steps": sum("mark" in e for e in record["events"]),
+                        "what_allocation": next(
+                            (e["allocation"] for e in record["events"] if e.get("stage") == "what"),
+                            None,
+                        ),
                     }
                 )
                 if record["status"] == "complete":
@@ -330,6 +358,9 @@ def propose_remote(
             "oracle_calls": 0,
             "code_revision": task["image_revision"]["commit"],
             "io_timings": dict(store.timings),
+            "proposal_policy_sha256": None
+            if proposal_policy is None
+            else proposal_policy.payload["model_sha256"],
         }
         store.save("complete", result)
         return result

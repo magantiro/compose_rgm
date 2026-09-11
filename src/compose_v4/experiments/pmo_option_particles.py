@@ -159,7 +159,11 @@ def session(
     if "worker_id" in task:
         if not 1 <= task["phase"] <= c["boundaries"] or not 0 <= task["slot"] < c["particles"]:
             raise ValueError("particle worker outside declared census")
-        if task["worker_id"] != worker_identity(task["phase"], task["slot"], task["parent"]):
+        if task.get("proposal_id") not in c.get("proposal_ids", {"reference": None}).values():
+            raise ValueError("worker proposal identity is not authorized")
+        if task["worker_id"] != worker_identity(
+            task["phase"], task["slot"], task["parent"], task.get("proposal_id")
+        ):
             raise ValueError("particle task parent/seed identity changed")
         output /= f"workers/{task['worker_id']}"
     volume.reload()
@@ -270,7 +274,10 @@ def driver_remote(
             for arm in arms:
                 assignments[arm] = []
                 for slot, parent in enumerate(state[arm]["particles"]):
-                    key = None if parent is None else worker_identity(step, slot, parent)
+                    proposal_id = c.get("proposal_ids", {}).get(arm)
+                    key = (
+                        None if parent is None else worker_identity(step, slot, parent, proposal_id)
+                    )
                     assignments[arm].append(key)
                     if key is not None:
                         tasks.setdefault(
@@ -281,6 +288,7 @@ def driver_remote(
                                 "slot": slot,
                                 "parent": parent,
                                 "worker_id": key,
+                                **({"proposal_id": proposal_id} if proposal_id is not None else {}),
                             },
                         )
             _frozen_save(
@@ -294,6 +302,8 @@ def driver_remote(
                 key = result["worker_id"]
                 if key not in tasks or key in results or not result["replay_verified"]:
                     raise ValueError("unexpected or unverified particle proposal")
+                if result.get("proposal_policy_sha256") != tasks[key].get("proposal_id"):
+                    raise ValueError("particle proposal used the wrong policy")
                 if len(result["attempts"]) != 1 or len(result["candidates"]) > 1:
                     raise ValueError(
                         "particle must use one reference option draw, not candidate reranking"
@@ -348,7 +358,10 @@ def driver_remote(
                 expected = [
                     None if p is None else future.get(p["smiles"], p["score"]) for p in proposed
                 ]
-                psi = log_potentials(arm, measured, expected, terminal=terminal, beta=c["beta"])
+                selection_mode = c.get("selection_modes", {}).get(arm, arm)
+                psi = log_potentials(
+                    selection_mode, measured, expected, terminal=terminal, beta=c["beta"]
+                )
                 rng = np.random.default_rng(np.random.SeedSequence([c["seed"], step, 999]))
                 update = advance(
                     previous_arm["log_weights"],
@@ -356,7 +369,7 @@ def driver_remote(
                     psi,
                     [p is not None for p in proposed],
                     rng,
-                    resample=arm != "reference" and not terminal,
+                    resample=selection_mode != "reference" and not terminal,
                 )
                 chosen = [proposed[i] for i in update["indices"]]
                 state[arm] = {
