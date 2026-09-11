@@ -4,7 +4,17 @@ Updated 2026-09-11. Active goal: reproducible improvement over the actual T4 and
 PMO champions, then verified matched external comparisons. Supporting chemistry,
 known-winner reconstruction and mathematics are not benchmark success.
 
-Operational status: fresh-seed replication completed and audited on 2026-09-11.
+Operational status: offline complete-edit context learner implemented and tested;
+**rejected**, no new oracle calls or live job. Preparation plus fit/evaluation took
+4.6562 seconds. Training retained damaging edits and separately labeled failures.
+The cut-context model missed the only calibration-pool improvement; the same-data
+endpoint-only model found it. In the later audit, only 1/12 eligible logged pools
+contained any improvement even with perfect ranking. Next: use complete planned
+molecular endpoints to improve proposal construction before compilation, not
+another unchanged cut-kernel or long mixture run. This next change is untested.
+Artifact: `diagnostics/pmo_edit_chooser/README.md` and `report.json`.
+
+Previous fresh-seed replication completed and audited on 2026-09-11.
 Both arms remained at 0.6747477698. Stop this unchanged mixture: the first best-score
 advantage did not repeat. Cost: 76 new calls, 403.8898 seconds, no live job.
 Same original starts/model/mixture, with paid-cache and exclusion roles kept

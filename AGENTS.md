@@ -372,6 +372,16 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped offline edit-chooser authorization, 2026-09-11:** the user's latest
+approval authorizes implementing and fitting a context-sensitive complete-edit
+controller on existing paid development outcomes, including damaging edits and
+separately recorded compilation failures. The immediate scope is local CPU data
+preparation, source-grouped/chronological retrospective evaluation, and focused
+checks, with zero new task-oracle calls and no remote training or deployment.
+`docs/PMO_EDIT_CHOOSER.md` records this bounded recipe. No reference-model,
+executor, benchmark-gate, or editing-V2 training-contract change is authorized.
+The completed replication below is not authority for another online run.
+
 **Scoped PMO replication authorization, 2026-09-11:** the user approved the
 requested unchanged fresh-seed replication after the first local-guidance
 comparison passed its best-score criterion. Authorize one paired Perindopril
