@@ -18,6 +18,60 @@ from compose_v4.experiments.continuation_profile import publish_json, sha256_fil
 from compose_v4.experiments.inference_package import software
 
 
+def diagnose_failure(trace_path, law_path):
+    from compose_v4.control.region_rewrite import admissible_indices
+    from compose_v4.experiments.t4_macro_beam import replay
+    from compose_v4.experiments.t4_matched_pilot import unseal
+    from compose_v4.gates.med_chem_gate import pathwise_reasons
+    from compose_v4.rewrite.action_codec_v4 import decode_action
+    from compose_v4.rewrite.kernel import (
+        InvalidRewrite,
+        canonical_state_key,
+        editing_v2_rewrite_system,
+    )
+    from compose_v4.rewrite.trace_shard import encode_state
+
+    trace, law = unseal(trace_path), unseal(law_path)
+    node = decode_search_state(trace["node"])
+    if trace["status"] != "support_dead_end" or law["source"] != encode_state(node.graph):
+        raise ValueError("failed trace and exact saved production law disagree")
+    system = editing_v2_rewrite_system()
+    replayed = replay(trace["events"], system)
+    families, actions = zip(*(decode_action(m) for m in law["marks"]))
+    indices, _ = admissible_indices(families, actions, node.active.context)
+    rows = []
+    for i in indices:
+        if (
+            families[i] not in ("atom_delete", "cycle_open", "bond_delete")
+            or law["probabilities"][i] <= 0
+        ):
+            continue
+        row = {"mark": law["marks"][i], "production_probability": law["probabilities"][i]}
+        try:
+            product = system.apply(node.graph, families[i], actions[i])
+        except InvalidRewrite as exc:
+            row.update(executor_valid=False, error=str(exc))
+        else:
+            smiles = canonical_state_key(product)
+            row.update(
+                executor_valid=True, smiles=smiles, pathwise_rejections=pathwise_reasons(smiles)
+            )
+        rows.append(row)
+    progress = node.active.replacement_progress
+    return {
+        "input_sha256": {str(p): sha256_file(p) for p in (trace_path, law_path)},
+        "replayed_primitives": replayed,
+        "failed_molecule": canonical_state_key(node.graph),
+        "removed_atoms": progress.removed,
+        "opened_cycles": progress.opened,
+        "construction_started": progress.build_origin is not None,
+        "remaining_admissible_positive_prune_marks": rows,
+        "new_oracle_calls": 0,
+        "new_model_calls": 0,
+        "interpretation": "remaining deletion products pass the executor but fail the unchanged sulfur-hydrogen pathwise gate; this diagnoses the pruning recipe, not impossibility under every supported edit sequence",
+    }
+
+
 def report(path):
     r = json.loads(path.read_text())
     snapshot = path.with_name("source_snapshot.json")
@@ -76,6 +130,9 @@ def report(path):
                 "primitive_steps": p["primitive_count"],
                 "intended_release": p["bundle"]["r_release"],
                 "realized_coherent": computed["largest_changed_fraction"],
+                "deleted_atoms": computed["n_deleted"],
+                "inserted_atoms": computed["n_inserted"],
+                "changed_original_atoms": computed["n_changed_originals"],
                 "cycle_rank_delta": computed["d_cycle_rank"],
                 "ring_system_delta": computed["d_ring_systems"],
                 "heavy_atoms_before": before.graph.n_real_atoms,
@@ -130,8 +187,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("result", type=Path)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--failure-trace", type=Path)
+    parser.add_argument("--failure-law", type=Path)
     args = parser.parse_args()
     value = report(args.result)
+    if (args.failure_trace is None) != (args.failure_law is None):
+        parser.error("failure diagnosis requires both exact trace and saved law")
+    if args.failure_trace is not None:
+        value["failed_replacement_diagnosis"] = diagnose_failure(
+            args.failure_trace, args.failure_law
+        )
     publish_json(args.output, value)
     print(
         json.dumps(
