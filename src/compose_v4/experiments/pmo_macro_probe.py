@@ -16,7 +16,7 @@ import numpy as np
 from rdkit import Chem, DataStructs, rdBase
 from rdkit.Chem import rdFingerprintGenerator
 
-from compose_v4.benchmark.molleo_task3 import OracleMeter
+from compose_v4.benchmark.molleo_task3 import BudgetExceeded, OracleMeter
 from compose_v4.control.docking_value import identity
 from compose_v4.control.molecular_task_search import MolecularHierarchy, MolecularSearchState
 from compose_v4.control.option_continuation import EXECUTABLE_PRODUCT_GATE, OptionContinuationKernel
@@ -194,6 +194,8 @@ class DurableScores:
     def __init__(self, output, oracle, budget, commit, progress):
         self.output, self.oracle, self.commit, self.progress = output, oracle, commit, progress
         self.rows = []
+        self._pending = None
+        self._interrupted = False
         self.context = {"role": "initial", "lock_path": None}
         for start in sorted((output / "oracle").glob("*/started.json")):
             result = start.with_name("result.json")
@@ -208,22 +210,34 @@ class DurableScores:
         )
         self.meter.restore({r["smiles"]: (r["score"],) for r in self.rows})
 
-    def _raw(self, smiles):
+    def _reserve(self, smiles, number, *, lock_sha256=None):
         lock = self.context["lock_path"]
         if not lock or not Path(lock).exists():
             raise ValueError("PMO evaluation requires a durable candidate lock")
-        number = len(self.rows)
         row = {
             "schema_version": "pmo_probe_oracle_v1",
             "index": number,
             "smiles": smiles,
             **self.context,
-            "lock_sha256": sha256_file(Path(lock)),
+            "lock_sha256": lock_sha256 or sha256_file(Path(lock)),
             "started_at": _stamp(),
         }
         folder = self.output / "oracle" / f"{number:04}"
         seal(folder / "started.json", row)
-        self.commit()
+        return row
+
+    def _raw(self, smiles):
+        if self._interrupted:
+            raise RuntimeError("interrupted oracle batch cannot continue or retry")
+        batched = self._pending is not None
+        if batched:
+            row = self._pending.pop(smiles)
+            if row["index"] != len(self.rows):
+                raise ValueError("locked oracle batch order changed")
+        else:
+            row = self._reserve(smiles, len(self.rows))
+            self.commit()
+        folder = self.output / "oracle" / f"{row['index']:04}"
         start = perf_counter()
         try:
             value = float(self.oracle(smiles))
@@ -235,7 +249,8 @@ class DurableScores:
             raise
         row.update(score=value, status="complete", oracle_seconds=perf_counter() - start)
         seal(folder / "result.json", row)
-        self.commit()
+        if not batched:
+            self.commit()
         self.rows.append(row)
         self.progress.update(oracle_calls=len(self.rows), best=max(r["score"] for r in self.rows))
         print(
@@ -245,7 +260,51 @@ class DurableScores:
         return (value,)
 
     def score(self, smiles):
+        if self._interrupted:
+            raise RuntimeError("interrupted oracle batch cannot continue or retry")
         return {"desirability": self.meter(smiles)[0]}
+
+    def score_many(self, smiles):
+        """Score a locked, nonadaptive batch with two remote persistence barriers.
+
+        Reserve every new canonical identity durably before the first call, then
+        flush all results before returning any values. Evaluation order, values,
+        canonical deduplication and per-molecule charging match `score`. An
+        interrupted reservation remains unresolved, never an implicit retry.
+        This API is not for candidate selection that depends on within-batch scores.
+        """
+        if self._interrupted or self._pending is not None:
+            raise RuntimeError("interrupted or nested oracle batch cannot continue")
+        keys = [canonical_smiles(s) for s in smiles]
+        observed = self.meter.evaluated()
+        novel = list(dict.fromkeys(s for s in keys if s not in observed))
+        if not self.meter.can_afford(len(novel)):
+            raise BudgetExceeded("locked oracle batch exceeds remaining budget; nothing evaluated")
+        if not novel:
+            return [self.score(s) for s in keys]
+        lock = self.context["lock_path"]
+        if not lock or not Path(lock).exists():
+            raise ValueError("PMO evaluation requires a durable candidate lock")
+        lock_hash = sha256_file(Path(lock))
+        pending = {}
+        try:
+            for i, s in enumerate(novel, start=len(self.rows)):
+                pending[s] = self._reserve(s, i, lock_sha256=lock_hash)
+            self.commit()  # All attempted identities are durable before any call.
+            self._pending = pending
+            result = [self.score(s) for s in keys]
+            if pending:
+                raise ValueError("locked oracle batch left unevaluated identities")
+            self.commit()  # No scores reach the controller before this barrier.
+        except BaseException:
+            self._interrupted = True
+            # Completed local results may be recovered, but missing results stay
+            # ambiguous. Both the current instance and restart fail closed.
+            self.commit()
+            raise
+        finally:
+            self._pending = None
+        return result
 
 
 def run_case(contract, case, hierarchy, output, scores, *, meter, commit, progress):
@@ -418,8 +477,7 @@ def run_remote(task, root, artifact_root, volume, runtime_factory, validate_revi
         gate = {
             "input_sha256": contract["expected_input_sha256"],
             "software": {
-                p: importlib.metadata.version(p)
-                for p in ("numpy", "rdkit", "torch", "PyTDC")
+                p: importlib.metadata.version(p) for p in ("numpy", "rdkit", "torch", "PyTDC")
             },
             "hardware": {
                 "cpu": 1,

@@ -145,10 +145,24 @@ class Store:
         return unseal(path) if path.exists() else None
 
 
-def execute_option(parent, hierarchy, credit, adaptive, rng, name, store, witnesses, progress):
+def execute_option(
+    parent,
+    hierarchy,
+    credit,
+    adaptive,
+    rng,
+    name,
+    store,
+    witnesses,
+    progress,
+    *,
+    primitive_budget=11,
+):
     """One registered option, no beam or oracle lookahead. Resumable at each primitive."""
     origin = decode_search_state(parent["node"])
-    node = replace(origin, budget=11)  # local program clock, NOT a replenished query budget
+    if type(primitive_budget) is not int or primitive_budget < 1:
+        raise ValueError("primitive_budget must be a positive integer")
+    node = replace(origin, budget=primitive_budget)  # local clock, NOT a query budget
     record = store.read(name)
     if record is not None:
         if record["parent_id"] != parent["id"] or record["source"] != encode_search_state(node):
@@ -160,7 +174,7 @@ def execute_option(parent, hierarchy, credit, adaptive, rng, name, store, witnes
         events, bundle = record["events"], record["bundle"]
     else:
         events, bundle = [], None
-    source = encode_search_state(replace(origin, budget=11))
+    source = encode_search_state(replace(origin, budget=primitive_budget))
     started = perf_counter()
     stage_seconds = {"where": 0.0, "what": 0.0, "how": 0.0, "replay": 0.0}
     status = "running"
@@ -171,7 +185,7 @@ def execute_option(parent, hierarchy, credit, adaptive, rng, name, store, witnes
         progress.update(
             phase="option_proposal",
             stage=node.stage,
-            primitive=11 - node.budget,
+            primitive=primitive_budget - node.budget,
             option=None if bundle is None else bundle["option"],
         )
         event = {"source": encode_search_state(node)}

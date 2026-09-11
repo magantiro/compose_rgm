@@ -28,14 +28,14 @@ def main():
     import modal
 
     if args.mode == "launch":
-        from modal_apps.run_process_v2_p50_app import local_image_revision
+        from compose_v4.experiments.pmo_route_support import development_revision
         from tools.preflight import assert_synced
 
-        commit = assert_synced(strict=True)["commit"]
+        assert_synced(strict=False)
         c, _ = load_contract(ROOT)
         body = {
             "contract_sha256": c["contract_sha256"],
-            "image_revision": local_image_revision(expected_commit=commit),
+            "image_revision": development_revision(ROOT),
             "app_sha256": sha256_file(ROOT / APP),
         }
         task = {**body, "run_id": identity(body), "started_at": _stamp()}
@@ -64,7 +64,11 @@ def main():
         volume = modal.Volume.from_name(receipt["volume"])
         for name in ("current_best", *(f"original_root_{i}" for i in range(4))):
             prefix = f"{receipt['prefix']}/{name}"
-            entries = {e.path.rsplit("/", 1)[-1] for e in volume.listdir(prefix)}
+            try:
+                entries = {e.path.rsplit("/", 1)[-1] for e in volume.listdir(prefix)}
+            except modal.exception.NotFoundError:
+                print(name, "awaiting first durable worker receipt; parent call still live")
+                continue
             file = "result.json" if "result.json" in entries else "heartbeat.json"
             if file not in entries:
                 print(name, "initializing")

@@ -7,7 +7,6 @@ from modal_apps.run_process_v2_p50_app import (
     ARTIFACT_ROOT,
     REMOTE_ROOT,
     ROOT,
-    _validate_remote_revision,
     artifact_volume,
 )
 
@@ -15,6 +14,7 @@ image = prior_image
 for path in (
     "modal_apps/pmo_route_support_app.py",
     "docs/PMO_ROUTE_SUPPORT_REPAIR.md",
+    "docs/PMO_ROUTE_SUPPORT_DEV_SNAPSHOT.md",
     "diagnostics/pmo_route_support/prior_spawn.json",
 ):
     image = image.add_local_file(ROOT / path, str(REMOTE_ROOT / path), copy=True)
@@ -30,19 +30,30 @@ shared = {
 
 @app.function(**shared, max_containers=5, timeout=900)
 def worker(task):
-    from compose_v4.experiments.pmo_route_support import worker_remote
+    from compose_v4.experiments.pmo_route_support import (
+        validate_development_revision,
+        worker_remote,
+    )
 
     return worker_remote(
-        task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume, _validate_remote_revision
+        task,
+        REMOTE_ROOT,
+        ARTIFACT_ROOT,
+        artifact_volume,
+        lambda r: validate_development_revision(r, REMOTE_ROOT),
     )
 
 
 @app.function(**shared, max_containers=1, timeout=1200)
 def run(task):
     from compose_v4.experiments.pmo_archive_pilot import Store
-    from compose_v4.experiments.pmo_route_support import KIND, load_contract
+    from compose_v4.experiments.pmo_route_support import (
+        KIND,
+        load_contract,
+        validate_development_revision,
+    )
 
-    _validate_remote_revision(task["image_revision"])
+    validate_development_revision(task["image_revision"], REMOTE_ROOT)
     c, _ = load_contract(REMOTE_ROOT)
     results = list(
         worker.map([{**task, "slot": i} for i in range(len(c["sources"]))], order_outputs=False)

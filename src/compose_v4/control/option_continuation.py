@@ -47,6 +47,12 @@ from compose_v4.control.option_selector import (
     option_horizon,
     primitive_option_at_step,
 )
+from compose_v4.control.region_replacement import (
+    ReplacementProgress,
+    maximum_horizon,
+    released_slots,
+    replacement_spec,
+)
 from compose_v4.control.region_rewrite import (
     Lineage,
     RewriteContext,
@@ -101,6 +107,7 @@ class OptionState:
     expansion_progress: ExpansionProgress | None = None
     ring_progress: RingProgress | None = None
     carbonyl_progress: CarbonylProgress | None = None
+    replacement_progress: ReplacementProgress | None = None
 
     def __post_init__(self) -> None:
         if not self.bundle_id:
@@ -110,7 +117,12 @@ class OptionState:
         for name, value in (("step", self.step), ("horizon", self.horizon)):
             if isinstance(value, bool) or not isinstance(value, int) or value < 0:
                 raise ValueError(f"{name} must be a nonnegative integer")
-        expected = option_horizon(self.option, self.horizon)
+        replacement = replacement_spec(self.option)
+        expected = (
+            maximum_horizon(self.origin, self.context, replacement)
+            if replacement
+            else option_horizon(self.option, self.horizon)
+        )
         if self.horizon < 1 or expected != self.horizon or self.step > self.horizon:
             raise ValueError("option phase/horizon does not match the registered program")
         if set(self.lineage.slot_of) != set(self.lineage.id_of.values()) or any(
@@ -160,9 +172,23 @@ class OptionState:
                 raise ValueError("core carbonyl program must start at its exact origin")
         elif self.carbonyl_progress is not None:
             raise ValueError("carbonyl progress is only valid for insert_ring_carbonyl")
+        if replacement is not None:
+            if not isinstance(self.replacement_progress, ReplacementProgress):
+                raise ValueError("region replacement requires explicit phase/provenance")
+            self.replacement_progress.validate(
+                self.graph, self.origin, self.context, self.step, replacement
+            )
+            if self.step == 0 and exact_graph_key(self.graph) != exact_graph_key(self.origin):
+                raise ValueError("region replacement must start at its exact origin")
+        elif self.replacement_progress is not None:
+            raise ValueError("replacement progress is only valid for a region replacement")
 
     @property
     def remaining(self) -> int:
+        if self.replacement_progress is not None and self.replacement_progress.complete(
+            replacement_spec(self.option)
+        ):
+            return 0
         return self.horizon - self.step
 
     def key(self) -> tuple:
@@ -185,6 +211,8 @@ class OptionState:
             self.horizon,
         )
         # Preserve every existing cache identity; only the opt-in state extends it.
+        if self.replacement_progress is not None:
+            return legacy + (self.replacement_progress.key(),)
         if self.carbonyl_progress is not None:
             return legacy + (self.carbonyl_progress,)
         if self.ring_progress is not None:
@@ -344,6 +372,8 @@ class OptionContinuationKernel:
             return self._rows[cache_key]
         if node.remaining == 0:
             return LazyReferenceRow({}) if lazy else ReferenceRow((), ())
+        if node.replacement_progress is not None:
+            return self._replacement_row(node, lazy=lazy)
         self.work.law_enumerations += 1
         families, actions, probabilities = self.enumerate_law(node.graph)
         p = np.asarray(probabilities, dtype=float)
@@ -445,6 +475,138 @@ class OptionContinuationKernel:
         )
         self._rows[cache_key] = row
         return row
+
+    def _replacement_row(self, node, *, lazy):
+        """One primitive of prune-then-construct; no task score between phases."""
+        from dataclasses import replace
+
+        spec, progress = replacement_spec(node.option), node.replacement_progress
+        if progress.build_origin is not None:
+            inner = OptionState(
+                node.graph,
+                progress.build_origin,
+                node.context,
+                node.lineage,
+                spec.option,
+                progress.build_step,
+                spec.horizon,
+                node.bundle_id + "/build",
+                ring_progress=progress.ring,
+            )
+
+            def wrap(child):
+                if child is None:
+                    return None
+                return replace(
+                    node,
+                    graph=child.graph,
+                    context=child.context,
+                    lineage=child.lineage,
+                    step=node.step + 1,
+                    replacement_progress=ReplacementProgress(
+                        progress.removed,
+                        progress.opened,
+                        progress.build_origin,
+                        child.step,
+                        child.ring_progress,
+                    ),
+                )
+
+            if lazy:
+                row = self.lazy_row(inner)
+                return LazyReferenceRow(
+                    {
+                        key: LazyReferenceBranch(
+                            branch.indices,
+                            tuple(branch.weights),
+                            branch.uniform_fraction,
+                            lambda i, branch=branch: wrap(branch.resolve(i)),
+                        )
+                        for key, branch in row.branches.items()
+                    }
+                )
+            row = self.row(inner)
+            self._marks[node.key()] = self.marks(inner)
+            result = ReferenceRow(tuple(wrap(child) for child in row.successors), row.probabilities)
+            self._rows[node.key()] = result
+            return result
+
+        self.work.law_enumerations += 1
+        families, actions, probabilities = self.enumerate_law(node.graph)
+        p = np.asarray(probabilities, dtype=float)
+        if (
+            p.ndim != 1
+            or len(p) != len(families)
+            or len(p) != len(actions)
+            or not np.isfinite(p).all()
+            or np.any(p < 0)
+        ):
+            raise ValueError("replacement requires aligned finite production probabilities")
+        admissible, _ = admissible_indices(families, actions, node.context)
+        live_region = released_slots(node.graph, node.context)
+
+        def product(index):
+            family, action = families[index], actions[index]
+            child = self._clean_product(node, family, action, None)
+            if child is None:
+                return None
+            removed = progress.removed + int(family == "atom_delete")
+            opened = progress.opened + int(family in ("cycle_open", "bond_delete"))
+            context = node.context
+            next_progress = ReplacementProgress(removed, opened)
+            if not released_slots(child, context):
+                # Growth may attach at a preserved boundary atom. Frozen
+                # identity/context bonds still pass the original context guard.
+                for slot in context.terminal_context_slots:
+                    context = context.with_locus(slot)
+                next_progress = ReplacementProgress(removed, opened, child, 0, RingProgress())
+            result = replace(
+                node,
+                graph=child,
+                context=context,
+                lineage=node.lineage.observe(family, action),
+                step=node.step + 1,
+                replacement_progress=next_progress,
+            )
+            self.work.legal_products += 1
+            return result
+
+        def branch(allowed_families):
+            idx = tuple(
+                int(i)
+                for i in admissible
+                if families[i] in allowed_families
+                and p[i] > 0
+                and (families[i] != "atom_delete" or actions[i].v in live_region)
+            )
+            return LazyReferenceBranch(
+                idx,
+                tuple(p[list(idx)] ** (1 / self.macro_temperature)),
+                self.macro_exploration,
+                product,
+            )
+
+        # Remove a legal released atom when possible; opening a cycle is an
+        # enabling step only when no such deletion is currently executable.
+        selected = branch(("atom_delete",))
+        if not selected.has_product():
+            selected = branch(("cycle_open", "bond_delete"))
+        if lazy:
+            return LazyReferenceRow({"prune": selected})
+        indices = [i for i in selected.indices if selected.resolve(i) is not None]
+        weights = p[indices] ** (1 / self.macro_temperature)
+        q = (
+            (
+                (1 - self.macro_exploration) * weights / weights.sum()
+                + self.macro_exploration / len(weights)
+            )
+            if len(weights)
+            else []
+        )
+        self._marks[node.key()] = tuple((families[i], actions[i]) for i in indices)
+        result = ReferenceRow(tuple(selected.resolve(i) for i in indices), tuple(q))
+        self._rows[node.key()] = result
+        return result
 
     def _descriptor_row(self, node, families, actions, probabilities, admissible, *, lazy=False):
         """Joint edge/mark reference; share executor work, not augmented states."""

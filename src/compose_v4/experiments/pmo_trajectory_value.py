@@ -374,9 +374,9 @@ def driver_remote(task, root, artifact_root, volume, validate_revision, parallel
         def score_list(smiles, name):
             _frozen_save(store, name, {"smiles": sorted(set(smiles))})
             scores.context = {"role": name, "lock_path": str(store.output / f"{name}.json")}
-            for s in sorted(set(smiles)):
-                if s not in history:
-                    history[s] = scores.score(s)["desirability"]
+            novel = [s for s in sorted(set(smiles)) if s not in history]
+            for s, value in zip(novel, scores.score_many(novel), strict=True):
+                history[s] = value["desirability"]
 
         coverage = workers(0, data["audits"])
         parents = [

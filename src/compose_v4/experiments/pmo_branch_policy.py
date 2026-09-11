@@ -275,14 +275,17 @@ def propose_remote(
                 product_gate=EXECUTABLE_PRODUCT_GATE,
             )
             hierarchy = MolecularHierarchy(
-                kernel, lazy_applicability=True, include_carbonyl_options=True
+                kernel,
+                lazy_applicability=True,
+                include_carbonyl_options=True,
+                include_region_replacement=contract.get("include_region_replacement", False),
             )
             witnesses = WitnessIndex(meter)
             for draw in range(contract["draws_per_bundle"]):
                 rng = np.random.default_rng(
                     np.random.SeedSequence([contract["seed"], task["phase"], task["slot"], draw])
                 )
-                progress.update(draw=draw, draws=4)
+                progress.update(draw=draw, draws=contract["draws_per_bundle"])
                 record = execute_option(
                     task["parent"],
                     hierarchy,
@@ -293,6 +296,7 @@ def propose_remote(
                     store,
                     witnesses,
                     progress,
+                    primitive_budget=contract.get("primitive_budget", 11),
                 )
                 attempts.append(
                     {
@@ -325,6 +329,7 @@ def propose_remote(
             "executor_calls": meter.calls,
             "oracle_calls": 0,
             "code_revision": task["image_revision"]["commit"],
+            "io_timings": dict(store.timings),
         }
         store.save("complete", result)
         return result

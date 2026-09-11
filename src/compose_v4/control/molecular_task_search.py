@@ -26,6 +26,15 @@ from compose_v4.control.option_selector import (
     retain_product_applicable_options,
 )
 from compose_v4.control.region import Region, enumerate_regions
+from compose_v4.control.region_replacement import (
+    ReplacementProgress,
+    maximum_horizon,
+    replacement_options,
+    replacement_spec,
+)
+from compose_v4.control.region_replacement import (
+    applicable as replacement_applicable,
+)
 from compose_v4.control.region_rewrite import Lineage, admissible_indices
 from compose_v4.control.region_selector import region_distribution
 from compose_v4.control.ring_program import RingProgress, default_ring_options, ring_spec
@@ -92,6 +101,7 @@ class MolecularHierarchy:
         ring_options: tuple[str, ...] | None = None,
         lazy_applicability: bool = False,
         include_carbonyl_options: bool = False,
+        include_region_replacement: bool = False,
     ):
         if type(generic_horizon) is not int or generic_horizon < 1:
             raise ValueError("generic_horizon must be a positive primitive count")
@@ -101,6 +111,9 @@ class MolecularHierarchy:
         if type(include_carbonyl_options) is not bool:
             raise ValueError("include_carbonyl_options must be an explicit boolean")
         self.include_carbonyl_options = include_carbonyl_options
+        if type(include_region_replacement) is not bool:
+            raise ValueError("include_region_replacement must be an explicit boolean")
+        self.include_region_replacement = include_region_replacement
         self._selection_rows = {}
 
     def sample_reference(self, node: MolecularSearchState, rng) -> MolecularSearchState | None:
@@ -134,6 +147,9 @@ class MolecularHierarchy:
         if context is None:
             context = exact_context(node.graph, canonical_state_key(node.graph), node.region)
         horizon = option_horizon(option, min(self.generic_horizon, node.budget))
+        replacement = replacement_spec(option)
+        if replacement is not None:
+            horizon = maximum_horizon(node.graph, context, replacement)
         bundle = hashlib.sha256(repr((node.key(), option)).encode()).hexdigest()[:20]
         return OptionState(
             node.graph,
@@ -147,6 +163,7 @@ class MolecularHierarchy:
             FusedProgress() if option == BUILD_FUSED_RING_OPTION else None,
             ring_progress=RingProgress() if ring_spec(option) is not None else None,
             carbonyl_progress=CarbonylProgress() if option == INSERT_RING_CARBONYL_OPTION else None,
+            replacement_progress=ReplacementProgress() if replacement is not None else None,
         )
 
     def row(self, node: MolecularSearchState) -> SearchRow[MolecularSearchState]:
@@ -187,6 +204,15 @@ class MolecularHierarchy:
                 if option_horizon(o, min(self.generic_horizon, node.budget)) <= node.budget
             )
             states = {o: self.option_state(node, o, context=context) for o in options}
+            if self.include_region_replacement:
+                for option in replacement_options(self.ring_options):
+                    spec = replacement_spec(option)
+                    if (
+                        replacement_applicable(node.graph, context, spec)
+                        and maximum_horizon(node.graph, context, spec) <= node.budget
+                    ):
+                        states[option] = self.option_state(node, option, context=context)
+                options = tuple(states)
             options = retain_product_applicable_options(
                 options,
                 lambda o: (

@@ -36,6 +36,7 @@ from compose_v4.control.macro_engine import (
     macro_action_distribution,
     proposal_support,
 )
+from compose_v4.control.region_replacement import replacement_spec
 from compose_v4.control.ring_expansion import EXPAND_RING_OPTION, EXPANSION_PHASES
 from compose_v4.control.ring_program import ring_spec
 
@@ -108,7 +109,11 @@ class ConditionedActionDistribution:
 def bundle_identity(parent: str, parent_lineage_id: int, region_key, option: str) -> str:
     """Stable identity for one distinct outer-controller search bundle."""
 
-    if option not in OPTIONS + OPT_IN_OPTIONS and ring_spec(option) is None:
+    if (
+        option not in OPTIONS + OPT_IN_OPTIONS
+        and ring_spec(option) is None
+        and replacement_spec(option) is None
+    ):
         raise KeyError(f"unknown option {option!r}; known: {OPTIONS}")
     payload = json.dumps(
         {
@@ -131,6 +136,10 @@ def primitive_option_at_step(option: str, step: int) -> str | None:
     :func:`option_horizon`.
     """
 
+    if replacement_spec(option) is not None:
+        raise ValueError(
+            "replacement phase is stateful, not determined by the primitive clock alone"
+        )
     spec = ring_spec(option)
     if spec is not None:
         return spec.phase(step)
@@ -164,6 +173,10 @@ def option_horizon(option: str, generic_horizon: int) -> int:
     indivisible and stops after its declared program length.
     """
 
+    if replacement_spec(option) is not None:
+        # Its caller derives the maximum from the exact released region and
+        # cycle rank. Unlike fixed construction, it can finish before this cap.
+        return int(generic_horizon)
     spec = ring_spec(option)
     if spec is not None:
         return spec.horizon
@@ -284,16 +297,17 @@ def balanced_option_prior(
         raise ValueError(f"duplicate applicable options: {opts}")
     groups = OPTION_GROUPS
     construction = tuple(option for option in opts if ring_spec(option) is not None)
-    if construction or any(option in opts for option in OPT_IN_OPTIONS):
+    replacements = tuple(option for option in opts if replacement_spec(option) is not None)
+    if construction or replacements or any(option in opts for option in OPT_IN_OPTIONS):
         groups = {
             **groups,
             "ring_topology": groups["ring_topology"]
             + (BUILD_FUSED_RING_OPTION, EXPAND_RING_OPTION)
             + construction,
             "material": groups["material"] + (ADD_CARBONYL_OPTION,),
-            "restructure": groups["restructure"] + (INSERT_RING_CARBONYL_OPTION,),
+            "restructure": groups["restructure"] + (INSERT_RING_CARBONYL_OPTION,) + replacements,
         }
-    known = set(OPTIONS + OPT_IN_OPTIONS + construction)
+    known = set(OPTIONS + OPT_IN_OPTIONS + construction + replacements)
     unknown = [option for option in opts if option not in known]
     if unknown:
         raise KeyError(f"unknown applicable options: {unknown}; known: {OPTIONS}")
@@ -347,7 +361,11 @@ def conditioned_action_distribution(
     macro-local contract before normalization.
     """
 
-    if option in OPT_IN_OPTIONS or ring_spec(option) is not None:
+    if (
+        option in OPT_IN_OPTIONS
+        or ring_spec(option) is not None
+        or replacement_spec(option) is not None
+    ):
         raise ValueError(f"{option} requires the stateful OptionContinuationKernel")
     fams = list(families)
     probs = np.asarray(probabilities, dtype=float)

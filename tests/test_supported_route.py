@@ -8,6 +8,9 @@ from compose_v4.control.supported_route import (
     lower_supported,
     transported_target,
 )
+from compose_v4.control.supported_route import (
+    permute_persistent_slots as production_permute,
+)
 from compose_v4.experiments.quotient_invariance import permute_persistent_slots
 from compose_v4.rewrite.kernel import editing_v2_semantic_rewrite_system
 from compose_v4.rewrite.operators import AtomInsert, BondReorder, CycleCloseEdge, CycleOpenEdge
@@ -58,6 +61,7 @@ def test_birth_correspondence_keeps_sparse_exact_state():
     system = editing_v2_semantic_rewrite_system()
     dense = pad_molecular_graph(smiles_to_molecular_graph("CC"), 48)
     source = permute_persistent_slots(dense, list(reversed(range(48))))
+    assert exact_key(source) == exact_key(production_permute(dense, list(reversed(range(48)))))
     action = AtomInsert(3, int(source.atom_types[46]), 0, 3, ((46, 1),))
     following = system.apply(source, "atom_insert", action)
     target, order = transported_target(source, following, source, list(range(48)))

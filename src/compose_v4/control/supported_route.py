@@ -12,10 +12,9 @@ from itertools import count
 import networkx as nx
 import numpy as np
 
-from compose_v4.chem.molecular_graph import NULL_IDX, is_element
+from compose_v4.chem.molecular_graph import NULL_IDX, MolecularGraph, is_element
 from compose_v4.control.docking_value import identity
 from compose_v4.data.charge_policy import charge_policy_preserved
-from compose_v4.experiments.quotient_invariance import permute_persistent_slots
 from compose_v4.rewrite.action_codec_v4 import encode_action
 from compose_v4.rewrite.kernel import InvalidRewrite, canonical_state_key
 from compose_v4.rewrite.trace_shard import encode_state
@@ -23,6 +22,23 @@ from compose_v4.rewrite.trace_shard import encode_state
 
 def exact_key(graph):
     return identity(encode_state(graph))
+
+
+def permute_persistent_slots(state: MolecularGraph, permutation) -> MolecularGraph:
+    """Exact array relabeling, without importing the experiment registry.
+
+    Same operation as quotient_invariance.permute_persistent_slots, checked
+    against that independent implementation in the focused correspondence test.
+    """
+    order = np.asarray(permutation, dtype=np.int64)
+    if order.shape != (state.n_atoms,) or set(order.tolist()) != set(range(state.n_atoms)):
+        raise ValueError("slot relabeling must be a bijection over every persistent slot")
+    return MolecularGraph(
+        atom_types=state.atom_types[order].copy(),
+        formal_charges=state.formal_charges[order].copy(),
+        implicit_h_counts=state.implicit_h_counts[order].copy(),
+        bonds=state.bonds[np.ix_(order, order)].copy(),
+    )
 
 
 def transported_target(original, following, current, permutation):

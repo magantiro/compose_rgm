@@ -10,6 +10,7 @@ from compose_v4.control.fused_option import FusedProgress
 from compose_v4.control.molecular_task_search import MolecularSearchState
 from compose_v4.control.option_continuation import OptionState
 from compose_v4.control.region import Region
+from compose_v4.control.region_replacement import ReplacementProgress
 from compose_v4.control.region_rewrite import Lineage, RewriteContext
 from compose_v4.control.ring_expansion import ExpansionProgress
 from compose_v4.control.ring_program import RingProgress
@@ -67,6 +68,9 @@ def decode_option(payload: dict) -> OptionState:
         else None,
         carbonyl_progress=CarbonylProgress.from_payload(payload["carbonyl_progress"])
         if "carbonyl_progress" in payload
+        else None,
+        replacement_progress=ReplacementProgress.from_payload(payload["replacement_progress"])
+        if "replacement_progress" in payload
         else None,
     )
 

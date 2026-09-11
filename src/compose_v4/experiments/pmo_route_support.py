@@ -1,6 +1,7 @@
 """Zero-oracle production-law repair of the five saved development routes."""
 
 import json
+import subprocess
 import threading
 from itertools import pairwise
 from time import perf_counter
@@ -29,6 +30,37 @@ APP = f"modal_apps/{KIND}_app.py"
 CONTRACT = f"configs/{KIND}.json"
 
 
+def development_revision(root):
+    """Explicitly uncommitted source snapshot, authorized for this repair only."""
+    from modal_apps.run_process_v2_p50_app import _serialized_source_paths
+
+    commit = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=root, check=True, capture_output=True, text=True
+    ).stdout.strip()
+    body = {
+        "schema": "compose.route_support_development_snapshot_v1",
+        "commit": commit,
+        "worktree_clean": False,
+        "serialized_sources": {p: sha256_file(root / p) for p in _serialized_source_paths(root)},
+    }
+    return {**body, "image_revision_sha256": identity(body)}
+
+
+def validate_development_revision(revision, root):
+    from modal_apps.run_process_v2_p50_app import _serialized_source_paths
+
+    body = {k: v for k, v in revision.items() if k != "image_revision_sha256"}
+    if (
+        revision["schema"] != "compose.route_support_development_snapshot_v1"
+        or revision["worktree_clean"] is not False
+        or identity(body) != revision["image_revision_sha256"]
+        or set(revision["serialized_sources"]) != set(_serialized_source_paths(root))
+    ):
+        raise ValueError("development source snapshot identity mismatch")
+    for p, h in revision["serialized_sources"].items():
+        verify_file(root / p, h)
+
+
 def prepare(root, prior_path):
     prior = json.loads(prior_path.read_text())
     if prior["status"] != "spawned":
@@ -47,6 +79,7 @@ def prepare(root, prior_path):
         "diagnostics/pmo_trajectory_value/prepared.json",
         str(prior_dest.relative_to(root)),
         "docs/PMO_ROUTE_SUPPORT_REPAIR.md",
+        "docs/PMO_ROUTE_SUPPORT_DEV_SNAPSHOT.md",
     ):
         inputs[p] = sha256_file(root / p)
     c = {
