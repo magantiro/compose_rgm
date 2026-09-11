@@ -13,7 +13,7 @@ def main():
     parser.add_argument("mode", choices=("prepare", "launch", "status"))
     parser.add_argument(
         "--experiment",
-        choices=("particles", "replacement", "continuation", "learned", "donor"),
+        choices=("particles", "replacement", "continuation", "learned", "donor", "t4_donor"),
         default="particles",
     )
     parser.add_argument("--prior", type=Path)
@@ -27,7 +27,9 @@ def main():
     from compose_v4.control.docking_value import identity
     from compose_v4.experiments.continuation_profile import publish_json, sha256_file
 
-    if args.experiment == "donor":
+    if args.experiment == "t4_donor":
+        from compose_v4.experiments import t4_donor_probe as experiment
+    elif args.experiment == "donor":
         from compose_v4.experiments import pmo_donor_comparison as experiment
     elif args.experiment == "learned":
         from compose_v4.experiments import pmo_learned_proposal as experiment
@@ -48,6 +50,13 @@ def main():
             return
         if args.prior is None:
             parser.error("prepare requires the prior trajectory result")
+        if args.experiment == "t4_donor":
+            if args.reuse_result is None:
+                parser.error(
+                    "T4 prepare requires --prior archive and --reuse-result completed episode"
+                )
+            print(json.dumps(prepare(ROOT, args.prior, args.reuse_result)))
+            return
         if args.experiment == "donor":
             print(
                 json.dumps(

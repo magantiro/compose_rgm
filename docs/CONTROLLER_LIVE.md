@@ -48,6 +48,12 @@ reconstruction and valid chemistry do not count as benchmark success.
   2443.108 recorded worker-seconds, 0.175 oracle execution seconds. The best
   gain is a four-primitive side-chain replacement, not a ring addition.
   See `diagnostics/pmo_donor_comparison/report.json` and its README.
+- Fresh-seed PMO replication also improved: hybrid best **0.5869734364739604**,
+  baseline **0.5595028849441883**. Top-ten means 0.549018 versus 0.544569.
+  149 new queries, 627.439 seconds, 186 workers, 2365.461 recorded worker-seconds.
+  Both runs improve from the same original starts, but this remains exposed
+  prescreened development, not external SOTA. Particle decisions replay exactly.
+  See `diagnostics/pmo_donor_comparison/replication_report.json`.
 - External comparison: match task, oracle, initialization/prescreening, total
   charged task labels and policy-training calls, per-run budget and replicates.
   Known-winner development is not blind discovery. T4 constraints apply to
@@ -61,7 +67,7 @@ enabling primitive independently, then retain broad reference editing for local
 refinement and open-ended exploration. The isolated donor channel's positive
 result earns a matched comparison, not a benchmark-success claim.
 
-Fresh-seed replication next: `configs/pmo_donor_comparison.json` and
+Fresh-seed replication completed: `configs/pmo_donor_comparison.json` and
 `PMO_DONOR_COMPARISON.md`. Identical 16 original prescreened starts, six option
 boundaries, actual-score SMC in both arms. Baseline uses the broad reference
 options; hybrid mixes that law 50/50 with donor programs. The probe's new winner
@@ -83,6 +89,19 @@ all 72 existing queries, then finished at 156. Submission-to-finish was 752.728
 seconds including recovery downtime, not the final session's 184.422 seconds.
 The permanent JSON-content comparison repair retains fail-closed drift checks.
 Ten focused donor/cache/driver/restart checks pass in 3.84 seconds.
+Replication run: `88906fe9b25c5b283d4d68571dd8273aabbb16ba10929f182dc6f19f6df6ea5c`,
+call `fc-01M28SEZ6K9JNBB8ENBT9SF2YG`, source `731a62699d02`.
+Raw result SHA-256 `92da4b2adf711aa0e0c7146f8a397dde7372fdd66608e1ae9a10b6e71387c4c5`.
+No recovery or repeated completed oracle queries were needed.
+
+T4 transfer prepared: `configs/t4_donor_probe.json` and `docs/T4_DONOR_PROBE.md`.
+One matched proposal batch from the existing exact-state T4 archive, not a full
+optimizer. Same eight parents and endpoint gates for both arms, 16 option slots
+per arm, at most eight novel dockings per arm plus two seed and two incumbent
+repeat controls. No public winner endpoints, docking predictor, or learned
+future-value head. At most 14 workers plus one driver, 20 total new calls,
+$5 reserved cap. Launch only from the clean committed image. Ten focused
+T4 allocation/lock/resume, donor and shared-driver checks passed in 4.27 seconds.
 
 Scientific change explicitly authorized by the user's full controller/macro
 license: donor plans compile under the frozen executor but need not have positive
@@ -92,10 +111,11 @@ No executor, model weights, charge/size/slot semantics or benchmark gate changed
 
 ## Decision and next action
 
-Best-score improvement over both the shared prescreened start and baseline earns
-a fresh-seed replication. Top-ten-only improvement is limited refinement evidence.
-A null stops the unchanged mixture; a truncated comparison is inconclusive.
-Next T4 work must compare against its actual incumbent, not a weaker recent arm.
+The PMO best-score gain repeated across two seeds. Next, test whether this same
+proposal change transfers to T4 before scaling it. A clear feasible gain beyond
+the docking control spread earns a short continuation. Poor coverage or scores
+stop this transfer recipe; small differences are inconclusive. No full panel
+or external superiority claim follows from these development comparisons.
 
 Future-aware work remains a candidate, but the previous head is rejected for
 this process: its training target was a witnessed-path maximum and its primitive

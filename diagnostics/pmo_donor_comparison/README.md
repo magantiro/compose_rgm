@@ -58,3 +58,21 @@ decisions before its outputs.
 The replication uses at most 14 workers plus one driver, reserving the other
 15 containers for a parallel bounded T4 lane. Scheduling changes no draws,
 candidate locks, score calls or resampling decisions.
+
+## Replication outcome
+
+Seed 20260927 completed in 627.439 seconds with 149 new physical queries.
+Hybrid best 0.5869734364739604 versus baseline 0.5595028849441883; top-ten means
+0.549018 versus 0.544569. The original prescreened initialization is unchanged.
+The best-score gain therefore repeated, though it is smaller than the first run.
+This does not establish performance on another PMO task or against external AUC.
+
+Run `88906fe9b25c5b283d4d68571dd8273aabbb16ba10929f182dc6f19f6df6ea5c`,
+source `731a62699d02`, authoritative analysis `replication_report.json`.
+186 workers, 2365.461 recorded worker-seconds, 1970.001 neural-law seconds,
+0.165 oracle execution seconds. All particle decisions replay exactly. No
+recovery was needed. Hybrid completed 75/91 attempted options, baseline 93/95;
+greater compilation failure remains a cost of this mixture.
+
+Best new SMILES:
+`CCOC(=O)C(CN)C1CC2CCCCC2N1C(=O)Nc1nc(-c2cccnc2)cs1`.

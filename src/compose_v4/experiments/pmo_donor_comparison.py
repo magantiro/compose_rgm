@@ -273,8 +273,19 @@ def donor_candidate(parent, result, candidate_id, donor_index, source_cut, donor
     }
 
 
-def worker_remote(task, root, artifact_root, volume, validate, runtime_factory):
-    c = load_contract(root)
+def worker_remote(
+    task,
+    root,
+    artifact_root,
+    volume,
+    validate,
+    runtime_factory,
+    *,
+    contract_loader=None,
+    run_session=None,
+):
+    c = (contract_loader or load_contract)(root)
+    scoped_session = run_session or session
     rng = np.random.default_rng(
         np.random.SeedSequence([c["seed"], task["phase"], task["slot"], 776])
     )
@@ -289,12 +300,12 @@ def worker_remote(task, root, artifact_root, volume, validate, runtime_factory):
             volume,
             validate,
             runtime_factory,
-            run_session=session,
+            run_session=scoped_session,
             proposal_factory=lambda root, c, t: (
                 ReferenceComponent() if t.get("proposal_id") else None
             ),
         )
-    with session(task, root, artifact_root, volume, validate) as (c, store, progress):
+    with scoped_session(task, root, artifact_root, volume, validate) as (c, store, progress):
         previous = store.read("complete")
         if previous is not None:
             return previous
