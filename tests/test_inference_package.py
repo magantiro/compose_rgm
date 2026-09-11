@@ -10,6 +10,7 @@ from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.experiments.continuation_profile import sha256_file
 from compose_v4.experiments.inference_package import load_package, write_package
 from compose_v4.experiments.pmo_inference_speed import law_values
+from compose_v4.experiments.t4_matched_pilot import seal, unseal
 from compose_v4.model.factorized_tracelet_rate_model import FactorizedTraceletRateModel
 from compose_v4.rewrite.typed_ring_catalog import build_typed_ring_catalog
 
@@ -68,4 +69,34 @@ def test_unauthorized_source_change_rejected_before_unpickle(package, monkeypatc
     with pytest.raises(ValueError, match="unauthorized"):
         load_package(
             path, manifest_sha256=digest, repo_root=ROOT, probe_source_changes={SOURCE: "0" * 64}
+        )
+
+
+def test_qualified_receipt_binds_same_package_before_loading(package):
+    path, _, digest = package
+    manifest = unseal(path / "manifest.json")
+    receipt = {
+        "status": "pass",
+        "oracle_calls": 0,
+        "export": {"manifest_sha256": digest},
+        "package_tensor_sha256": manifest["tensor_sha256"],
+        "rows": [{"parity": True}] * 3,
+        "cache_sources": {},
+    }
+    proof = path / "proof.json"
+    seal(proof, receipt)
+    load_package(
+        path,
+        manifest_sha256=digest,
+        repo_root=ROOT,
+        qualified_source_receipt=(proof, sha256_file(proof)),
+    )
+    receipt["package_tensor_sha256"] = "wrong"
+    seal(proof, receipt)
+    with pytest.raises(ValueError, match="qualification"):
+        load_package(
+            path,
+            manifest_sha256=digest,
+            repo_root=ROOT,
+            qualified_source_receipt=(proof, sha256_file(proof)),
         )

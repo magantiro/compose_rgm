@@ -75,12 +75,15 @@ def load_package(
     manifest_sha256: str,
     repo_root: Path,
     probe_source_changes: dict[str, str] | None = None,
+    qualified_source_receipt: tuple[Path, str] | None = None,
 ):
     """Verify before unpickling a trusted, locally produced inference artifact.
 
     ``probe_source_changes`` does not authorize search. It permits only the two
     serialization-cache files for a source-bound, zero-oracle equivalence probe.
-    Ordinary inference passes no overrides and requires identical dependencies.
+    Ordinary inference either uses identical dependencies, or supplies a pinned
+    passing paired receipt. Cross-worker numerical admission belongs to its
+    downstream run contract and is not implied by this source-compatibility check.
     """
     verify_file(directory / "manifest.json", manifest_sha256)
     manifest = unseal(directory / "manifest.json")
@@ -91,6 +94,22 @@ def load_package(
         raise ValueError("inference package schema/software mismatch")
     sources = manifest["provenance"]["dependency_sources"]
     changes = probe_source_changes or {}
+    if qualified_source_receipt is not None:
+        if probe_source_changes is not None:
+            raise ValueError("cannot mix probe overrides with qualified source receipt")
+        path, digest = qualified_source_receipt
+        verify_file(path, digest)
+        receipt = unseal(path)
+        if (
+            receipt.get("status") != "pass"
+            or receipt.get("oracle_calls") != 0
+            or receipt["export"]["manifest_sha256"] != manifest_sha256
+            or receipt["package_tensor_sha256"] != manifest["tensor_sha256"]
+            or len(receipt["rows"]) != 3
+            or not all(r["parity"] for r in receipt["rows"])
+        ):
+            raise ValueError("source qualification does not bind passing model/cache evidence")
+        changes = receipt["cache_sources"]
     if not sources or not set(changes).issubset(CACHE_SOURCES):
         raise ValueError("unauthorized inference dependency override")
     for path, digest in sources.items():

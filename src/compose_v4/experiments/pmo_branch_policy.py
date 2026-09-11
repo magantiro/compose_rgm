@@ -217,7 +217,9 @@ def session(task, root, artifact_root, volume, validate_revision):
         store.flush(force=True)
 
 
-def propose_remote(task, root, artifact_root, volume, validate_revision, runtime_factory):
+def propose_remote(
+    task, root, artifact_root, volume, validate_revision, runtime_factory, *, run_session=None
+):
     from compose_v4.control.molecular_task_search import MolecularHierarchy
     from compose_v4.control.option_continuation import (
         EXECUTABLE_PRODUCT_GATE,
@@ -227,7 +229,7 @@ def propose_remote(task, root, artifact_root, volume, validate_revision, runtime
     from compose_v4.experiments.saved_marked_law import SavedMarkedLaw
     from compose_v4.experiments.t4_macro_beam import WitnessIndex
 
-    with session(task, root, artifact_root, volume, validate_revision) as (
+    with (run_session or session)(task, root, artifact_root, volume, validate_revision) as (
         contract,
         store,
         progress,
@@ -243,6 +245,10 @@ def propose_remote(task, root, artifact_root, volume, validate_revision, runtime
         ):
             verify_file(Path(runtime[field]), contract["expected_input_sha256"][key])
         initialization = perf_counter() - start
+        if "validation" in runtime:
+            store.save("runtime_validation", runtime["validation"])
+            payload = runtime["primed_law"]
+            store.save(f"laws/{identity(payload['source'])}", payload)
         store.save(
             "runtime_gate",
             {
@@ -350,12 +356,14 @@ def _frozen_save(store, name, payload):
     store.flush(force=True)
 
 
-def driver_remote(task, root, artifact_root, volume, validate_revision, parallel):
+def driver_remote(
+    task, root, artifact_root, volume, validate_revision, parallel, *, run_session=None
+):
     import importlib.metadata
     import platform
     import resource
 
-    with session(task, root, artifact_root, volume, validate_revision) as (
+    with (run_session or session)(task, root, artifact_root, volume, validate_revision) as (
         contract,
         store,
         progress,
@@ -365,6 +373,8 @@ def driver_remote(task, root, artifact_root, volume, validate_revision, parallel
             return previous
         started = perf_counter()
         data = json.loads((root / contract["prepared"]["path"]).read_text())
+        arm_names = tuple(contract.get("arms", ARMS))
+        online_updates = bool(contract.get("online_updates", False))
         history = dict(data["observed"])
         scores = DurableScores(
             store.output,
@@ -457,7 +467,11 @@ def driver_remote(task, root, artifact_root, volume, validate_revision, parallel
                 }
             )
         _frozen_save(store, "phase/0/observations", {"observations": new_observations})
-        policy = fit("policies/updated", data["observations"] + new_observations)
+        initial_observations = data["observations"] + new_observations
+        policy = fit("policies/updated", initial_observations)
+        policies = {arm: policy for arm in arm_names}
+        arm_observations = {arm: list(initial_observations) for arm in arm_names}
+        update_log = []
         states = {
             arm: {
                 "archive": list(common_archive),
@@ -465,12 +479,12 @@ def driver_remote(task, root, artifact_root, volume, validate_revision, parallel
                 "selections": [],
                 "curve": [],
             }
-            for arm in ARMS
+            for arm in arm_names
         }
         initial = {"best": max(common_observed.values()), "top10_sum": top10_sum(common_observed)}
         for number in range(1, contract["evaluation_rounds"] + 1):
             parents = []
-            for arm in ARMS:
+            for arm in arm_names:
                 state = states[arm]
                 probabilities = parent_distribution(state["archive"], state["observed"])
                 for slot in range(4):
@@ -483,7 +497,7 @@ def driver_remote(task, root, artifact_root, volume, validate_revision, parallel
             outputs = proposals(number, parents)
             choices = []
             for i, result in enumerate(outputs):
-                arm, slot = ARMS[i // 4], i % 4
+                arm, slot = arm_names[i // 4], i % 4
                 pool, reference, excluded = candidate_pool(
                     result["candidates"], states[arm]["observed"]
                 )
@@ -497,7 +511,7 @@ def driver_remote(task, root, artifact_root, volume, validate_revision, parallel
                     "selected": None,
                 }
                 if pool:
-                    q, audit = policy.distribution(pool, reference, guided=arm == "learned")
+                    q, audit = policies[arm].distribution(pool, reference, guided=arm != "balanced")
                     rng = np.random.default_rng(
                         np.random.SeedSequence([contract["seed"], number, slot, 101])
                     )
@@ -511,6 +525,10 @@ def driver_remote(task, root, artifact_root, volume, validate_revision, parallel
                     "choices": choices,
                     "policy_sha256": policy.payload["model_sha256"],
                     "training_observations_sha256": policy.payload["observations_sha256"],
+                    "policy_by_arm": {a: p.payload["model_sha256"] for a, p in policies.items()},
+                    "training_by_arm": {
+                        a: p.payload["observations_sha256"] for a, p in policies.items()
+                    },
                 },
             )
             # All choices are locked before any fresh label in this round is read.
@@ -528,6 +546,15 @@ def driver_remote(task, root, artifact_root, volume, validate_revision, parallel
                 else:
                     candidate = choice["pool"][selected]
                     value = score(candidate, lock_name, f"evaluation/{arm}/{number}")
+                    arm_observations[arm].append(
+                        {
+                            "id": candidate["id"],
+                            "parent_smiles": candidate["parent_smiles"],
+                            "parent_score": candidate["parent_score"],
+                            "smiles": candidate["smiles"],
+                            "score": value,
+                        }
+                    )
                     state["observed"][candidate["smiles"]] = value
                     if not any(r["smiles"] == candidate["smiles"] for r in state["archive"]):
                         state["archive"].append({**candidate, "score": value})
@@ -550,13 +577,27 @@ def driver_remote(task, root, artifact_root, volume, validate_revision, parallel
                 )
                 evaluated.append({"arm": arm, **event})
             _frozen_save(store, f"phase/{number}/outcomes", {"outcomes": evaluated})
+            if online_updates and number < contract["evaluation_rounds"]:
+                # The entire round is locked/scored first. Only this arm's own
+                # observations may change its next-round policy; no label sharing.
+                policies["learned"] = fit(f"policies/online_{number}", arm_observations["learned"])
+                update_log.append(
+                    {
+                        "after_round": number,
+                        "arm": "learned",
+                        "model_sha256": policies["learned"].payload["model_sha256"],
+                        "observations_sha256": policies["learned"].payload["observations_sha256"],
+                        "observations": len(arm_observations["learned"]),
+                        "seconds": store.read(f"policies/online_{number}_time")["seconds"],
+                    }
+                )
             progress.update(
                 phase="evaluation_feedback",
                 round=number,
-                best_by_arm={a: max(states[a]["observed"].values()) for a in ARMS},
+                best_by_arm={a: max(states[a]["observed"].values()) for a in arm_names},
             )
             print(
-                f"[branch] round={number} calls={scores.meter.spent}/32 best={progress['best_by_arm']}",
+                f"[branch] round={number} calls={scores.meter.spent}/{contract['new_oracle_limit']} best={progress['best_by_arm']}",
                 flush=True,
             )
         arms = {}
@@ -577,15 +618,19 @@ def driver_remote(task, root, artifact_root, volume, validate_revision, parallel
                 **state,
             }
         result = {
-            "schema_version": "pmo_branch_policy_result_v1",
+            "schema_version": "pmo_online_policy_result_v1"
+            if online_updates
+            else "pmo_branch_policy_result_v1",
             "status": "complete_bounded_development",
             "historical_calls": data["historical_calls"],
             "historical_unique_labels": len(history),
             "new_oracle_calls": scores.meter.spent,
             "new_physical_calls_by_role": dict(Counter(r["role"] for r in scores.rows)),
-            "oracle_limit": 32,
+            "oracle_limit": contract["new_oracle_limit"],
             "calibration_candidates": len(training_candidates),
-            "evaluation_policy_frozen": True,
+            "evaluation_policy_frozen": not online_updates,
+            "online_updates": update_log,
+            "final_policy_by_arm": {a: p.payload["model_sha256"] for a, p in policies.items()},
             "initial_policy_sha256": initial_policy.payload["model_sha256"],
             "updated_policy_sha256": policy.payload["model_sha256"],
             "training": policy.payload["fit"],
@@ -611,11 +656,11 @@ def driver_remote(task, root, artifact_root, volume, validate_revision, parallel
             "oracle_ledger": [
                 sha256_file(p) for p in sorted((store.output / "oracle").glob("*/result.json"))
             ],
-            "interpretation": "warm-start developmental policy intervention; 200 historical calls plus explicit new-call ledger; no official PMO, unseen-task, exact-control or IVG-superiority claim",
+            "interpretation": f"warm-start developmental policy intervention; {data['historical_calls']} historical calls plus explicit new-call ledger; no official PMO, unseen-task, exact-control or IVG-superiority claim",
         }
-        if scores.meter.spent > 32 or policy.payload["observations_sha256"] != identity(
-            data["observations"] + new_observations
-        ):
+        if scores.meter.spent > contract["new_oracle_limit"] or policy.payload[
+            "observations_sha256"
+        ] != identity(data["observations"] + new_observations):
             raise ValueError("oracle cap or frozen evaluation training boundary violated")
         store.save("result", result)
         return result

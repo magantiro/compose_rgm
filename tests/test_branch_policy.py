@@ -60,8 +60,9 @@ def test_pool_aggregates_draws_and_only_excludes_already_observed_queries():
     assert candidate_pool([], {}) == ([], [], [])
 
 
+@pytest.mark.parametrize("online", [False, True])
 def test_deployed_loop_locks_before_scoring_freezes_fit_and_resumes_without_charges(
-    tmp_path, monkeypatch
+    tmp_path, monkeypatch, online
 ):
     from contextlib import contextmanager
     from types import SimpleNamespace
@@ -92,6 +93,8 @@ def test_deployed_loop_locks_before_scoring_freezes_fit_and_resumes_without_char
         "evaluation_rounds": 2,
         "contract_sha256": "fixture",
     }
+    if online:
+        contract.update(online_updates=True, arms=["balanced", "frozen", "learned"])
     store = Store(tmp_path / "output", lambda: None)
     calls, fits = [], []
 
@@ -152,14 +155,26 @@ def test_deployed_loop_locks_before_scoring_freezes_fit_and_resumes_without_char
     volume = SimpleNamespace(reload=lambda: None)
     result = run.driver_remote(task, tmp_path, tmp_path, volume, None, parallel)
     assert result["new_oracle_calls"] == len(calls) <= 32
-    assert len(fits) == 2
-    assert max(len(r["smiles"]) for r in fits[-1]) <= 17
+    assert len(fits) == (3 if online else 2)
+    assert max(len(r["smiles"]) for r in fits[1]) <= 17
     assert all(len(a["selections"]) == 8 for a in result["arms"].values())
     for number in (1, 2):
         assert store.read(f"phase/{number}/choices")["training_observations_sha256"] == identity(
-            fits[-1]
+            fits[1]
         )
+    if online:
+        first, second = (store.read(f"phase/{n}/choices") for n in (1, 2))
+        assert first["policy_by_arm"]["learned"] == first["policy_by_arm"]["frozen"]
+        assert second["policy_by_arm"]["frozen"] == first["policy_by_arm"]["frozen"]
+        assert second["policy_by_arm"]["learned"] != first["policy_by_arm"]["learned"]
+        own = [
+            e["candidate"]["smiles"]
+            for e in result["arms"]["learned"]["selections"]
+            if e["round"] == 1 and e["status"] == "scored"
+        ]
+        assert [r["smiles"] for r in fits[2][len(fits[1]) :]] == own
+        assert len(result["online_updates"]) == 1
     again = run.driver_remote(task, tmp_path, tmp_path, volume, None, parallel)
     assert again == result
     assert again["new_oracle_calls"] == len(calls)
-    assert len(fits) == 2
+    assert len(fits) == (3 if online else 2)
