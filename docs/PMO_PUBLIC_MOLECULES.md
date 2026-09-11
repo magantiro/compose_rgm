@@ -13,8 +13,12 @@ The downloaded immutable Git blob is
 `1dc8abb1399ee6dbf9220bc3059201541fc6cf3b`, SHA-256
 `b034d0cc3292e08036de4f8933e133cb54373830421fec57dd219c371a2eab65`.
 Text extraction returns no text: the PDF is one 1500x900 raster image. Printed
-SMILES are not a machine-readable molecule table and have not been transcribed
-or independently rescored here.
+SMILES are not a machine-readable molecule table. The initial inspection did not
+transcribe or rescore them; a later
+[answer-known diagnostic](../diagnostics/pmo_public_winner_recovery/README.md)
+does so for one locked example. That example scores 0.80883 under our evaluator
+and has replay-verified routes from all five declared starts. This is capability
+evidence, not autonomous discovery.
 
 The figure labels examples around 0.80-0.81, but it is not bound to the three
 no-prescreen runs by the inspected metadata. Moreover its first structure labeled
