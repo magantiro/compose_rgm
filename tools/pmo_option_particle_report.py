@@ -11,6 +11,7 @@ import numpy as np
 from rdkit import Chem, DataStructs
 from rdkit.Chem import rdFingerprintGenerator, rdMolDescriptors
 
+from compose_v4.control.docking_value import identity
 from compose_v4.control.option_particles import advance, log_potentials
 from compose_v4.experiments.continuation_profile import publish_json, sha256_file
 from compose_v4.experiments.inference_package import software
@@ -24,14 +25,48 @@ def quantiles(values):
     )
 
 
+def proposal_depths(parents, proposed, depths):
+    """Count new edits along sampled ancestry, not a shared historical prefix."""
+    result = []
+    for parent, child, depth in zip(parents, proposed, depths, strict=True):
+        if child is None:
+            result.append(None)
+            continue
+        if (
+            parent is None
+            or depth is None
+            or child["chain"] != parent["chain"] + [child["id"]]
+            or child["primitives"] - parent["primitives"] != child["primitive_count"]
+            or child["primitive_count"] < 1
+        ):
+            raise ValueError("new primitive depth lacks a matching exact parent chain/count")
+        result.append(depth + child["primitive_count"])
+    return result
+
+
 def report(path):
     r = json.loads(path.read_text())
     c, n = r["configuration"], r["configuration"]["particles"]
+    if identity({k: v for k, v in c.items() if k != "contract_sha256"}) != c["contract_sha256"]:
+        raise ValueError("saved particle contract hash mismatch")
     archive = path.with_name("source_snapshot.tar.gz")
     with tarfile.open(archive, "r:gz") as tar:
         for p, h in r["image_revision"]["serialized_sources"].items():
             if hashlib.sha256(tar.extractfile(p).read()).hexdigest() != h:
                 raise ValueError(f"executed source archive mismatch: {p}")
+        prepared = tar.extractfile(c["prepared"]["path"]).read()
+        if hashlib.sha256(prepared).hexdigest() != c["prepared"]["sha256"]:
+            raise ValueError("prepared score history does not match the contract")
+        history = dict(json.loads(prepared)["observed"])
+    for q in r["oracle_rows"]:
+        if q["smiles"] in history or q["status"] != "complete":
+            raise ValueError("repeated historical query or incomplete oracle receipt")
+        history[q["smiles"]] = q["score"]
+    if (
+        len(r["oracle_rows"]) != r["new_oracle_calls"]
+        or len(r["oracle_rows"]) > c["new_oracle_limit"]
+    ):
+        raise ValueError("oracle census differs or exceeds the locked budget")
     rows = []
     max_replay_error = 0.0
     fpgen = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
@@ -40,9 +75,12 @@ def report(path):
         proposals = []
         selected = []
         live_before = [True] * n
+        parents, depths, observed_depths = r["initial_parents"], [0] * n, []
         attempts = failures = 0
         for round_row in r["rounds"]:
             a = round_row["arms"][arm]
+            if any(p is not None and history[p["smiles"]] != p["score"] for p in a["proposals"]):
+                raise ValueError("proposal score differs from its actual oracle receipt")
             step = round_row["boundary"]
             terminal = step == c["boundaries"]
             psi = log_potentials(
@@ -76,6 +114,10 @@ def report(path):
                 if error > 1e-12:
                     raise ValueError(f"particle numerical replay mismatch: {arm}/{step}/{key}")
             weights, previous = update["log_weights"], update["log_potential"]
+            proposed_depths = proposal_depths(parents, a["proposals"], depths)
+            observed_depths.extend(d for d in proposed_depths if d is not None)
+            depths = [proposed_depths[i] for i in update["indices"]]
+            parents = [a["proposals"][i] for i in update["indices"]]
             attempts += sum(live_before)
             failures += sum(
                 live and p is None for live, p in zip(live_before, a["proposals"], strict=True)
@@ -91,17 +133,6 @@ def report(path):
                     "top10_mean": a["top10_mean"],
                 }
             )
-
-        # Never count the incumbent's 23 historical edits as new work.
-        def new_depth(p):
-            bases = [
-                q["primitives"]
-                for q in r["initial_parents"]
-                if p["chain"][: len(q["chain"])] == q["chain"]
-            ]
-            if not bases:
-                raise ValueError("missing initial ancestry prefix")
-            return p["primitives"] - max(bases)
 
         products = sorted(r["archives"][arm])
         fps = [fpgen.GetFingerprint(Chem.MolFromSmiles(s)) for s in products]
@@ -125,7 +156,7 @@ def report(path):
                 "failed_options": failures,
                 "offered_particle_slots": n * c["boundaries"],
                 "unique_generated_candidates": len({p["smiles"] for p in proposals}),
-                "new_primitive_depth": quantiles([new_depth(p) for p in proposals]),
+                "new_primitive_depth": quantiles(observed_depths),
                 "primitive_steps_per_option": quantiles([p["primitive_count"] for p in proposals]),
                 "option_counts": dict(Counter(p["bundle"]["option"] for p in proposals)),
                 "intended_release": quantiles([p["bundle"]["r_release"] for p in proposals]),
