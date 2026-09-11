@@ -386,7 +386,10 @@ def candidate_pool(
 
 def _frozen_save(store, name, payload):
     previous = store.read(name)
-    if previous is not None and previous != payload:
+    # Compare the persisted JSON representation. A live donor cut has tuple
+    # components, but the identical receipt reloads them as lists after preemption.
+    # Both have the same content identity; changed values must still fail closed.
+    if previous is not None and identity(previous) != identity(payload):
         raise ValueError(f"restart changed locked {name}")
     store.save(name, payload, durable=True)
 

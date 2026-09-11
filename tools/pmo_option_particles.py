@@ -21,6 +21,8 @@ def main():
     parser.add_argument("--model", type=Path)
     parser.add_argument("--training-manifest", type=Path)
     parser.add_argument("--training-data", type=Path)
+    parser.add_argument("--replicate", type=int, choices=(0, 1), default=0)
+    parser.add_argument("--reuse-result", type=Path)
     args = parser.parse_args()
     from compose_v4.control.docking_value import identity
     from compose_v4.experiments.continuation_profile import publish_json, sha256_file
@@ -46,6 +48,17 @@ def main():
             return
         if args.prior is None:
             parser.error("prepare requires the prior trajectory result")
+        if args.experiment == "donor":
+            print(
+                json.dumps(
+                    prepare(
+                        ROOT, args.prior, replicate=args.replicate, reuse_result=args.reuse_result
+                    )
+                )
+            )
+            return
+        if args.replicate:
+            parser.error("--replicate applies only to the donor comparison")
         if args.experiment == "learned":
             if any(p is None for p in (args.model, args.training_manifest, args.training_data)):
                 parser.error("learned prepare requires model, training-manifest and training-data")

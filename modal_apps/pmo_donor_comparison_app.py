@@ -1,4 +1,4 @@
-"""Matched mixed-proposal development; at most 29 workers plus one driver."""
+"""Matched mixed-proposal replication; at most 14 workers plus one driver."""
 
 import modal
 
@@ -22,7 +22,7 @@ shared = {
 }
 
 
-@app.function(**shared, max_containers=29, timeout=180, scaledown_window=60)
+@app.function(**shared, max_containers=14, timeout=180, scaledown_window=60)
 def worker(task):
     from compose_v4.experiments.pmo_donor_comparison import load_contract, worker_remote
     from compose_v4.experiments.pmo_online_policy import runtime

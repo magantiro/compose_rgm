@@ -38,7 +38,9 @@ CHANNEL = {
 CHANNEL_ID = identity(CHANNEL)
 
 
-def prepare(root, prior_path):
+def prepare(root, prior_path, *, replicate=0, reuse_result=None):
+    if type(replicate) is not int or replicate not in (0, 1):
+        raise ValueError("donor comparison permits the initial run and one fresh-seed replication")
     prior = json.loads(prior_path.read_text())
     if (
         prior["schema_version"] != "donor_probe_result_v1"
@@ -94,7 +96,8 @@ def prepare(root, prior_path):
     c = {k: old[k] for k in ("task", "expected_input_sha256", "runtime_contract_sha256")}
     c.update(
         schema_version="donor_comparison_contract_v1",
-        seed=20260926,
+        seed=20260926 + replicate,
+        replicate=replicate,
         particles=16,
         boundaries=6,
         arms=["baseline", "hybrid"],
@@ -133,6 +136,47 @@ def prepare(root, prior_path):
         interpretation="prescreened exposed development; identical actual-score SMC but different proposal path laws; no exact original-reference Doob or kappa claim; not PMO AUC",
     )
     c["contract_sha256"] = identity(c)
+    if reuse_result is not None:
+        previous = json.loads(reuse_result.read_text())
+        if (
+            previous["status"] != "complete_development"
+            or previous["configuration"]["schema_version"] != "donor_comparison_contract_v1"
+            or previous["configuration"]["expected_input_sha256"] != c["expected_input_sha256"]
+        ):
+            raise ValueError("law reuse requires a complete compatible donor comparison")
+        # Deterministic wrapper conversion for the existing exact-law cache API.
+        # The raw molecular laws remain in their original worker directories.
+        metadata = root / "diagnostics/pmo_donor_comparison/cache_metadata"
+        origin = {"source_result_sha256": sha256_file(reuse_result), "run_id": previous["run_id"]}
+        publish_json(
+            metadata / "launch.json", {**origin, "image_revision": previous["image_revision"]}
+        )
+        publish_json(
+            metadata / "runtime_gate.json", {**origin, "input_sha256": c["expected_input_sha256"]}
+        )
+        c["law_caches"] = [
+            {
+                "path": f"{KIND}/{previous['run_id']}",
+                "launch_sha256": sha256_file(metadata / "launch.json"),
+                "cache_paths": sorted(
+                    f"workers/{w['worker_id']}"
+                    for w in previous["workers"]
+                    if w["law_work"]["fresh_laws"] > 0
+                ),
+                **origin,
+            }
+        ]
+        c["contract_sha256"] = identity({k: v for k, v in c.items() if k != "contract_sha256"})
+    if replicate:
+        c["compute"]["max_workers"] = 14  # Leave 15 containers for the parallel T4 lane.
+        c["compute"]["expected_minutes"] = [4, 12]
+        c["replication_decision"] = (
+            "Same starts, donors, proposal mixture, beta, particles and boundaries; only RNG seed changes. "
+            "A second best-score gain over initialization and baseline supports replication, not external SOTA. "
+            "A null or reversal leaves the first gain seed-dependent; do not increase this unchanged recipe. "
+            "Timeout or failed execution remains inconclusive. Prior result enters only exact-law cache reuse."
+        )
+        c["contract_sha256"] = identity({k: v for k, v in c.items() if k != "contract_sha256"})
     publish_json(root / CONTRACT, c)
     return c
 
@@ -149,8 +193,10 @@ def load_contract(root):
         c["primitive_budget"],
         c["beta"],
         c["draws_per_bundle"],
-    ) != (20260926, 16, 6, 192, 64, 10.0, 1):
+    ) != (20260926 + c.get("replicate", 0), 16, 6, 192, 64, 10.0, 1):
         raise ValueError("donor comparison exceeds locked recipe")
+    if type(c.get("replicate", 0)) is not int or c.get("replicate", 0) not in (0, 1):
+        raise ValueError("undeclared donor comparison replication")
     if c["channel"] != CHANNEL or c["proposal_ids"] != {"baseline": None, "hybrid": CHANNEL_ID}:
         raise ValueError("donor proposal law changed")
     if c["arms"] != ["baseline", "hybrid"] or c["selection_modes"] != {

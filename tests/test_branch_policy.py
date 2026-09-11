@@ -7,6 +7,22 @@ from compose_v4.control.branch_policy import BranchPolicy
 from compose_v4.experiments.pmo_branch_policy import candidate_pool, worker_identity
 
 
+def test_frozen_save_accepts_json_equivalence_but_rejects_changed_values(tmp_path):
+    from compose_v4.experiments.pmo_archive_pilot import Store
+    from compose_v4.experiments.pmo_branch_policy import _frozen_save
+
+    store = Store(tmp_path, lambda: None)
+    task = {"parent": {"source_cut": {"component": (2, 4, 8)}}, "seed": 71}
+    _frozen_save(store, "identity", task)
+    assert store.read("identity") != task  # JSON round-trip changes tuple to list.
+    _frozen_save(store, "identity", task)
+    changed = copy.deepcopy(task)
+    changed["parent"]["source_cut"]["component"] = (2, 4, 9)
+    with pytest.raises(ValueError, match="restart changed locked identity"):
+        _frozen_save(store, "identity", changed)
+    assert store.read("identity")["parent"]["source_cut"]["component"] == [2, 4, 8]
+
+
 def test_launch_checks_frozen_process_before_remote_allocation(monkeypatch):
     from pathlib import Path
 

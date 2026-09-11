@@ -90,5 +90,6 @@ def test_reference_component_does_not_reweight_or_consume_extra_draws():
 def test_registered_donor_comparison_contract():
     root = Path(__file__).resolve().parents[1]
     c = load_contract(root)
-    assert c["compute"]["max_workers"] + c["compute"]["driver_containers"] == 30
+    assert c["compute"]["max_workers"] + c["compute"]["driver_containers"] == 15
+    assert c["seed"] == 20260927 and c["replicate"] == 1
     assert c["particles"] * c["boundaries"] * len(c["arms"]) == c["new_oracle_limit"]

@@ -5,6 +5,7 @@ import hashlib
 import json
 import tarfile
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 
 import numpy as np
@@ -232,6 +233,27 @@ def report(path):
                 "rounds": selected,
             }
         )
+    recovery_path = path.with_name("resume_after_preemption.json")
+    recovery = None
+    if recovery_path.exists():
+        recovered = json.loads(recovery_path.read_text())
+        original = json.loads(path.with_name("spawn.json").read_text())
+        if recovered["task"] != original["task"] or recovered[
+            "original_receipt_sha256"
+        ] != sha256_file(path.with_name("spawn.json")):
+            raise ValueError("recovery did not preserve the original deployed task")
+        recovery = {
+            "receipt_sha256": sha256_file(recovery_path),
+            "original_call_id": original["call_id"],
+            "resumed_call_id": recovered["call_id"],
+            "same_deployed_task": True,
+            "submission_to_finish_seconds": (
+                datetime.fromisoformat(r["finished_at"])
+                - datetime.fromisoformat(original["task"]["started_at"])
+            ).total_seconds(),
+            "final_driver_session_seconds": r["seconds"],
+            "cost_limit": "submission-to-finish includes downtime; worker totals exclude lost preemption work; final session time is not full experiment wall time",
+        }
     return {
         "schema_version": "option_particles_report_v1",
         "run_id": r["run_id"],
@@ -249,7 +271,10 @@ def report(path):
         "new_oracle_calls": r["new_oracle_calls"],
         "oracle_seconds": sum(x["oracle_seconds"] for x in r["oracle_rows"]),
         "worker_tasks": len(r["workers"]),
-        "wall_seconds": r["seconds"],
+        "wall_seconds": r["seconds"]
+        if recovery is None
+        else recovery["submission_to_finish_seconds"],
+        "recovery": recovery,
         "proposal_wall_seconds": sum(x["proposal_seconds"] for x in r["rounds"]),
         "worker_seconds_sum": sum(x["seconds"] for x in r["workers"]),
         "law_seconds_sum": sum(x["law_work"]["law_seconds"] for x in r["workers"]),
