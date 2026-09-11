@@ -169,6 +169,21 @@ rounds and at most 128 new queries. Baseline 50% donor/50% reference; interventi
 baseline earns replication; null/reversal stops the unchanged mixture. This is
 not future-value or exact Doob control. No scientific job launched yet.
 
+Launch status: clean source `a215fe7992a5` passed strict preflight. The focused
+integration/cache/legacy-driver checks passed (13 nodes initially; the final
+driver fixture passed after correcting its two-slot/shared-channel setup).
+Deployment was rejected by the approval reviewer because the recorded repository
+milestone remains the older scoped T4 authorization. No Modal job started and no
+new experiment cost was incurred. Resolve the milestone explicitly before retrying
+the same four-round PMO deployment (128-call, 30-container, $10 maximum).
+
+Authorization resolved on 2026-09-11: the user explicitly said "ok well lets just
+go ahead" and "what are you waiting for" after that bounded launch request.
+The scoped amendment is recorded in both the primary and execution-worktree
+AGENTS.md. Proceed with this single prepared comparison; no additional second-task
+experiment or extra label budget is bundled into the approval. No scientific
+recipe, model coefficient, executor rule or input artifact changed.
+
 The three completed local batches (cached neighborhood, local query selection,
 persistent lookahead), including executed source snapshots and all raw receipts,
 are preserved on volume `compose-v4-artifacts` at

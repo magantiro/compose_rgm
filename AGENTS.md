@@ -372,6 +372,22 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped PMO authorization, 2026-09-11:** after the explicit request to permit the
+prepared four-round comparison at 128 new oracle calls, 30 containers and $10,
+the user replied "ok well lets just go ahead" and "what are you waiting for".
+This authorizes recording this amendment, deploying
+`modal_apps/pmo_local_guidance_app.py`, and durably spawning the single paired
+Perindopril MPO development comparison in `configs/pmo_local_guidance.json`
+(contract `0682c9efc6dea9051ef8bee34a6d0d3dca4f95b84eba8cf8285e6a4381bb07aa`).
+The limit is 128 new oracle calls across both arms, at most 29 workers plus one
+driver, no GPU, and $10 total reserved cost. Reuse the prepared inputs, frozen
+endpoint model, compatible caches and completed focused checks; retain strict
+preflight, clean committed source, input hashes, executor replay, candidate locks
+and full oracle accounting. This is a bounded development run, not a declaration
+of a completed milestone or a waiver of release/full-suite verification. It does
+not authorize another task, extra rounds, fresh model training or a broader
+benchmark. The frozen process and editing-V2 training ladder remain unchanged.
+
 As of the current editing-V2 rebuild, the authorized sequence is:
 
 1. finish and freeze the content-addressed editing corpus derivatives;
