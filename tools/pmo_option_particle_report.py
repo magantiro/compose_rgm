@@ -14,6 +14,7 @@ from rdkit.Chem import rdFingerprintGenerator, rdMolDescriptors
 
 from compose_v4.control.archive_allocation import sample_archive_parents
 from compose_v4.control.docking_value import identity
+from compose_v4.control.donor_memory import build_memory, proposal_identity
 from compose_v4.control.option_particles import advance, log_potentials
 from compose_v4.experiments.continuation_profile import publish_json, sha256_file
 from compose_v4.experiments.inference_package import software
@@ -65,7 +66,8 @@ def report(path):
                 payload = tar.extractfile(c[key]["path"]).read()
                 if hashlib.sha256(payload).hexdigest() != c[key]["sha256"]:
                     raise ValueError(f"executed proposal {key} differs from the contract")
-        history = dict(json.loads(prepared)["observed"])
+        prepared_data = json.loads(prepared)
+        history = dict(prepared_data["observed"])
     for q in r["oracle_rows"]:
         if q["smiles"] in history or q["status"] != "complete":
             raise ValueError("repeated historical query or incomplete oracle receipt")
@@ -91,14 +93,80 @@ def report(path):
         archive_nodes = {p["smiles"]: p for p in parents}
         archive_depths = {p["smiles"]: 0 for p in parents}
         used_workers = set()
+        memory_audits = []
         attempts = failures = 0
         for round_row in r["rounds"]:
             a = round_row["arms"][arm]
             if any(p is not None and history[p["smiles"]] != p["score"] for p in a["proposals"]):
                 raise ValueError("proposal score differs from its actual oracle receipt")
             step = round_row["boundary"]
+            policy_id = c.get("proposal_ids", {}).get(arm)
+            if c.get("donor_memory_modes"):
+                memory = build_memory(
+                    prepared_data["initial_donor_memory"],
+                    archive_nodes,
+                    mode=c["donor_memory_modes"][arm],
+                )
+                policy_id = proposal_identity(memory["memory_id"])
+                initial_donors = {p["smiles"] for p in prepared_data["initial_donor_memory"]}
+                donors_used = []
+                donor_draws = []
+                for slot, child in enumerate(a["proposals"]):
+                    draw_rng = np.random.default_rng(
+                        np.random.SeedSequence([c["seed"], step, slot, 776])
+                    )
+                    if draw_rng.random() >= c["memory_recipe"]["donor_probability"]:
+                        continue
+                    index = int(draw_rng.choice(len(memory["rows"]), p=memory["probabilities"]))
+                    selected_donor = memory["rows"][index]["smiles"]
+                    if child is not None and (
+                        child["bundle"]["option"] != "donor_transplant"
+                        or child["bundle"]["donor_index"] != index
+                    ):
+                        raise ValueError("completed donor selection differs from its RNG draw")
+                    donor_draws.append(
+                        {
+                            "slot": slot,
+                            "smiles": selected_donor,
+                            "new_donor": selected_donor not in initial_donors,
+                            "completed": child is not None,
+                        }
+                    )
+                for child in a["proposals"]:
+                    if child is None or child["bundle"]["option"] != "donor_transplant":
+                        continue
+                    bundle = child["bundle"]
+                    donor = memory["rows"][bundle["donor_index"]]
+                    if (
+                        bundle["donor_memory_id"] != memory["memory_id"]
+                        or bundle["donor_smiles"] != donor["smiles"]
+                        or abs(
+                            bundle["donor_probability"]
+                            - memory["probabilities"][bundle["donor_index"]]
+                        )
+                        > 1e-12
+                    ):
+                        raise ValueError("donor memory differs from the arm's actual scored prefix")
+                    donors_used.append(
+                        {
+                            "smiles": donor["smiles"],
+                            "new_donor": donor["smiles"] not in initial_donors,
+                            "child": child["smiles"],
+                            "score": child["score"],
+                            "parent_score": child["parent_score"],
+                        }
+                    )
+                memory_audits.append(
+                    {
+                        "boundary": step,
+                        "memory_id": memory["memory_id"],
+                        "donors": len(memory["rows"]),
+                        "attempted_uses": donor_draws,
+                        "completed_uses": donors_used,
+                    }
+                )
             used_workers.update(
-                worker_identity(step, slot, p, c.get("proposal_ids", {}).get(arm))
+                worker_identity(step, slot, p, policy_id)
                 for slot, p in enumerate(parents)
                 if p is not None
             )
@@ -210,6 +278,7 @@ def report(path):
                 **r["arms"][arm],
                 "particle_replay_verified": not archive_mode,
                 "archive_selection_replay_verified": archive_mode,
+                **({"donor_memory_replay": memory_audits} if memory_audits else {}),
                 "complete_options": len(proposals),
                 "attempted_options": attempts,
                 "failed_options": failures,

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import tarfile
 from functools import partial
 
 from compose_v4.control.docking_value import identity
@@ -22,7 +23,9 @@ PREPARED = f"diagnostics/{KIND}/prepared.json"
 PROTOCOL = "docs/PMO_EVOLVING_MEMORY.md"
 
 
-def prepare(root, prior_path):
+def prepare(root, prior_path, *, replicate=0, reuse_result=None):
+    if type(replicate) is not int or replicate not in (0, 1):
+        raise ValueError("memory comparison permits only one earned fresh-seed replication")
     store = Store(prior_path.parent, lambda: None)
     result, data = store.read("result"), store.read("prepared")
     if (
@@ -89,6 +92,47 @@ def prepare(root, prior_path):
         },
         "initialization": "same top 16 latest exact canonical states; original donor bank plus these parents; no public winner",
     }
+    previous_run = None
+    if replicate:
+        if reuse_result is None:
+            raise ValueError("memory replication requires the positive completed first comparison")
+        previous_run = json.loads(reuse_result.read_text())
+        if (
+            previous_run["status"] != "complete_development"
+            or previous_run["configuration"]["schema_version"] != "evolving_memory_contract_v1"
+            or previous_run["configuration"].get("replicate", 0) != 0
+            or previous_run["arms"]["evolving"]["best"]
+            <= max(previous_run["initial_metrics"]["best"], previous_run["arms"]["fixed"]["best"])
+        ):
+            raise ValueError("first memory comparison did not earn replication")
+        with tarfile.open(reuse_result.with_name("source_snapshot.tar.gz"), "r:gz") as snapshot:
+            old_bytes = snapshot.extractfile(
+                previous_run["configuration"]["prepared"]["path"]
+            ).read()
+        import hashlib
+
+        if (
+            hashlib.sha256(old_bytes).hexdigest()
+            != previous_run["configuration"]["prepared"]["sha256"]
+        ):
+            raise ValueError("first memory comparison prepared snapshot changed")
+        old_data = json.loads(old_bytes)
+        if any(prepared[k] != old_data[k] for k in ("parents", "initial_donor_memory", "observed")):
+            raise ValueError(
+                "replication changed initial states, donor memory or historical labels"
+            )
+        for row in previous_run["oracle_rows"]:
+            if row["status"] != "complete" or row["smiles"] in prepared["observed"]:
+                raise ValueError("replication cache has repeated or incomplete labels")
+            prepared["observed"][row["smiles"]] = row["score"]
+        prepared["historical_development_physical_calls"] += previous_run["new_oracle_calls"]
+        prepared["replication_cache"] = {
+            "path": str(reuse_result),
+            "sha256": sha256_file(reuse_result),
+            "role": "paid query lookup only; never an initial parent or donor",
+        }
+    elif reuse_result is not None:
+        raise ValueError("reuse-result is reserved for the earned replication")
     publish_json(root / PREPARED, prepared)
     previous = json.loads((root / "configs/pmo_archive_branching.json").read_text())
     c = {
@@ -99,7 +143,8 @@ def prepare(root, prior_path):
         schema_version="evolving_memory_contract_v1",
         artifact_kind=KIND,
         authorization="active user controller goal authorizes bounded PMO implementation and experiments, up to 30 containers",
-        seed=20261002,
+        seed=20261002 + replicate,
+        replicate=replicate,
         particles=16,
         boundaries=6,
         draws_per_bundle=1,
@@ -135,6 +180,35 @@ def prepare(root, prior_path):
         },
         interpretation="warm prescreened development; same broad reference and ranked donor mixture, only donor memory updates differ; no exact original-reference Doob or official PMO AUC claim",
     )
+    if previous_run is not None:
+        if previous_run["configuration"]["expected_input_sha256"] != c["expected_input_sha256"]:
+            raise ValueError("replication reference-model identities changed")
+        metadata = root / f"diagnostics/{KIND}/cache_metadata"
+        origin = {
+            "source_result_sha256": sha256_file(reuse_result),
+            "run_id": previous_run["run_id"],
+        }
+        publish_json(
+            metadata / "launch.json", {**origin, "image_revision": previous_run["image_revision"]}
+        )
+        publish_json(
+            metadata / "runtime_gate.json", {**origin, "input_sha256": c["expected_input_sha256"]}
+        )
+        c["law_caches"].append(
+            {
+                "path": f"{KIND}/{previous_run['run_id']}",
+                **origin,
+                "launch_sha256": sha256_file(metadata / "launch.json"),
+                "cache_paths": sorted(
+                    f"workers/{w['worker_id']}"
+                    for w in previous_run["workers"]
+                    if w["law_work"]["fresh_laws"] > 0
+                ),
+            }
+        )
+        c["replication_decision"] = (
+            "Same initial exact parents, donors, proposal distributions, parent rule, rounds and query ceiling; only seed changes. New labels are request-only cache entries. A repeated lead supports replication, not external SOTA; null/reversal leaves the first gain seed-dependent."
+        )
     c["contract_sha256"] = identity(c)
     publish_json(root / CONTRACT, c)
     return {
@@ -158,8 +232,10 @@ def load_contract(root):
         c["primitive_budget"],
         c["archive_exploration"],
         c["beta"],
-    ) != (20261002, 16, 6, 1, 192, 64, 0.2, 10.0):
+    ) != (20261002 + c.get("replicate", 0), 16, 6, 1, 192, 64, 0.2, 10.0):
         raise ValueError("evolving memory recipe changed")
+    if type(c.get("replicate", 0)) is not int or c.get("replicate", 0) not in (0, 1):
+        raise ValueError("undeclared memory replication")
     if (
         c["arms"] != ["fixed", "evolving"]
         or c["memory_recipe"] != RECIPE

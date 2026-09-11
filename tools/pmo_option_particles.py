@@ -68,7 +68,7 @@ def main():
                 parser.error("prepare requires --prior source and --reuse-result second source")
             print(json.dumps(prepare(ROOT, args.prior, args.reuse_result)))
             return
-        if args.experiment == "donor":
+        if args.experiment in ("donor", "memory"):
             print(
                 json.dumps(
                     prepare(

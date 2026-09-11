@@ -77,3 +77,21 @@ These are heuristic population proposals and actual-score archive selection,
 not an exact original-reference Doob transform, a learned committor, or a
 representation-invariant mark controller. The original executor support and
 frozen neural law remain separately identified.
+
+## Earned replication, declared before its outcomes
+
+The completed first comparison passed its best-score criterion. Repeat once
+with seed 20261003, otherwise identical initial exact parents, 116 donors,
+selection, proposal mixture, round count and query ceiling. The 0.6720 result
+is not injected into starts or donor memory. Its paid scores are reusable only
+when independently requested; append 109 prior calls to historical accounting
+(841 development calls before replication). Reuse compatible exact-state laws
+under their existing dependency checks. The same 30-container/$10 per-run cap
+applies. A repeated best-score lead supports replication; null or reversal makes
+the initial advantage seed-dependent. This is still not official PMO AUC.
+
+Mechanistic caution from the first result: all six completed uses of newly added
+donors decreased their parent's score; the best molecule arose through generic
+ring opening after hydroxyl addition. Therefore the treatment's observed lead
+does not establish that novel-component transfer directly improved chemistry.
+Retain that distinction regardless of the replication result.
