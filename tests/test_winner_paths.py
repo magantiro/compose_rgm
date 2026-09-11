@@ -2,7 +2,7 @@
 
 import pytest
 
-from compose_v4.experiments.winner_paths import PathConfig, find_path, replay
+from compose_v4.experiments.winner_paths import PathConfig, find_path, find_path_from_state, replay
 
 
 @pytest.mark.parametrize(
@@ -50,6 +50,22 @@ def test_config_refuses_support_changes():
         PathConfig(max_active=41)
     with pytest.raises(ValueError, match="positive"):
         PathConfig(max_expansions=0)
+
+
+def test_saved_sparse_slots_are_replayed_without_reconstruction():
+    from compose_v4.experiments.quotient_invariance import permute_persistent_slots
+    from compose_v4.rewrite.trace_shard import decode_state, encode_state
+
+    dense = find_path("CC", "CC", PathConfig())["source_state"]
+    sparse = permute_persistent_slots(decode_state(dense), list(reversed(range(48))))
+    payload = encode_state(sparse)
+    result = find_path_from_state(payload, "CCC1CCCCC1", PathConfig(), "CC")
+    assert result["status"] == "witness_found"
+    assert result["source_state"] == result["states"][0] == payload
+    assert set(result["source_metadata_to_slot"].values()) == {46, 47}
+    assert replay(payload, result["actions"], result["target_2d"]) == result["states"]
+    with pytest.raises(ValueError, match="metadata differs"):
+        find_path_from_state(payload, "CCC", PathConfig(), "CO")
 
 
 def test_annotation_and_census_identity():

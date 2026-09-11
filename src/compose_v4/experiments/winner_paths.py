@@ -12,6 +12,7 @@ from rdkit import Chem
 from rdkit.Chem import rdFMCS
 
 from compose_v4.chem.molecular_graph import (
+    NULL_IDX,
     ORGANIC_VOCABULARY,
     MolecularGraph,
     MolecularGraphError,
@@ -21,6 +22,7 @@ from compose_v4.chem.molecular_graph import (
 from compose_v4.chem.state import empty_molecular_graph, pad_molecular_graph
 from compose_v4.control.option_continuation import exact_graph_key
 from compose_v4.data.charge_policy import charge_policy_preserved
+from compose_v4.experiments.t4_warm_continuation import canonical_slots
 from compose_v4.rewrite.action_codec_v4 import decode_action, encode_action
 from compose_v4.rewrite.kernel import (
     InvalidRewrite,
@@ -136,8 +138,10 @@ def alignments(source_smiles: str, target_smiles: str, config: PathConfig) -> li
 def _target_layout(source, target, mapping, config):
     # New atoms prefer originally empty slots; retired source slots may be reused.
     target_to_slot = {b: a for a, b in mapping}
-    retired = frozenset(range(source.n_real_atoms)) - set(target_to_slot.values())
-    free = [i for i in range(source.n_real_atoms, config.slots)] + sorted(retired)
+    retired = frozenset(int(i) for i in np.flatnonzero(is_element(source.atom_types))) - set(
+        target_to_slot.values()
+    )
+    free = [int(i) for i in np.flatnonzero(source.atom_types == NULL_IDX)] + sorted(retired)
     for b in range(target.n_real_atoms):
         if b not in target_to_slot:
             target_to_slot[b] = free.pop(0)
@@ -305,17 +309,40 @@ def replay(source_payload: dict, actions: list[dict], expected_smiles: str) -> l
 def find_path(source_smiles: str, target_smiles: str, config: PathConfig) -> dict:
     try:
         source = smiles_to_molecular_graph(source_smiles)
+    except MolecularGraphError as exc:
+        return {"status": "unsupported_representation", "reason": str(exc)}
+    if source.n_real_atoms > config.max_active:
+        return {"status": "unsupported_size"}
+    source = pad_molecular_graph(source, config.slots)
+    return find_path_from_state(encode_state(source), target_smiles, config, source_smiles)
+
+
+def find_path_from_state(
+    source_payload: dict,
+    target_smiles: str,
+    config: PathConfig,
+    source_smiles: str | None = None,
+) -> dict:
+    """Search and replay from the saved slots; SMILES supplies correspondence only."""
+    source = decode_state(source_payload)
+    if len(source.atom_types) != config.slots:
+        raise ValueError("saved source must retain exactly 48 persistent slots")
+    if not 1 <= source.n_real_atoms <= config.max_active:
+        return {"status": "unsupported_size"}
+    try:
         target = smiles_to_molecular_graph(target_smiles)
     except MolecularGraphError as exc:
         return {"status": "unsupported_representation", "reason": str(exc)}
-    if max(source.n_real_atoms, target.n_real_atoms) > config.max_active:
+    if target.n_real_atoms > config.max_active:
         return {"status": "unsupported_size"}
-    source = pad_molecular_graph(source, config.slots)
+    source_smiles = source_smiles or canonical_state_key(source)
+    metadata_to_slot = canonical_slots(source, source_smiles)
     target = pad_molecular_graph(target, config.slots)
     initial, final = graph_stats(source), graph_stats(target)
     dn, dc = (final[k] - initial[k] for k in ("heavy_atoms", "cycle_rank"))
     result = {
         "source_state": encode_state(source),
+        "source_metadata_to_slot": {str(k): v for k, v in sorted(metadata_to_slot.items())},
         "target_2d": canonical_state_key(target),
         "source_stats": initial,
         "target_stats": final,
@@ -330,7 +357,9 @@ def find_path(source_smiles: str, target_smiles: str, config: PathConfig) -> dic
         if not mapping["mapping"]:
             attempts.append({"mapping": mapping, "status": "no_mapping"})
             continue
-        candidate = search_mapping(source, target, mapping["mapping"], config)
+        slot_mapping = [[metadata_to_slot[a], b] for a, b in mapping["mapping"]]
+        candidate = search_mapping(source, target, slot_mapping, config)
+        mapping = {**mapping, "persistent_slot_mapping": slot_mapping}
         attempts.append({"mapping": mapping, **candidate})
         if candidate["status"] == "witness_found":
             states = replay(result["source_state"], candidate["actions"], result["target_2d"])

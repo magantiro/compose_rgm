@@ -1,0 +1,47 @@
+{
+  "schema_version": "pmo_public_winner_recovery_v1",
+  "role": "answer-known development diagnostic; not autonomous discovery or benchmark evaluation",
+  "task": "perindopril_mpo",
+  "target": {
+    "id": "ivg_public_plot_row1_example1",
+    "smiles": "CCCC(Br)c1cc2c(ccn2CCC(NC(C)C(=O)N2C(C(=O)O)CC3CCCCC32)C(=O)OCC)o1",
+    "identity_status": "manual transcription of printed SMILES, checked against drawing; no machine-readable author record",
+    "reported_rounded_score": 0.81,
+    "public_url": "https://github.com/invirtuolabs/InVirtuoGen_results/blob/main/plots/tdc/perindopril_mpo/top_smiles_cuda%3A0.pdf",
+    "git_blob": "1dc8abb1399ee6dbf9220bc3059201541fc6cf3b",
+    "pdf_sha256": "b034d0cc3292e08036de4f8933e133cb54373830421fec57dd219c371a2eab65",
+    "png_sha256": "90d99be42ad18325df9dd88127e7a6f586c6a7ccb205aff846c6699fd5de9c6c",
+    "access": "public research inspection, CC-BY-NC-SA-4.0 repository terms",
+    "no_prescreen_run_identity": "not established"
+  },
+  "sources": {
+    "best_archive": "diagnostics/pmo_online_policy/result_sealed.json",
+    "best_archive_sha256": "627f2e8a86107f54080902c53d8ac11fc307275c8d522541bfdc4e3d99287946",
+    "best_arm": "balanced",
+    "roots": "configs/pmo_macro_probe.json",
+    "selection": "current best by recorded score, followed by all four original saved roots in registered order"
+  },
+  "path_search": {
+    "slots": 48,
+    "max_active": 40,
+    "mapping_timeout_seconds": 1,
+    "matches_per_molecule": 4,
+    "max_expansions": 128,
+    "children_per_expansion": 4,
+    "max_steps": 64
+  },
+  "evaluation": {
+    "new_oracle_call_limit": 2,
+    "order": ["current_best_parity", "public_target"],
+    "parity_absolute_tolerance": 1e-12,
+    "pytdc_version": "0.3.6",
+    "rdkit_version": "2024.03.5",
+    "no_docking": true,
+    "no_training": true,
+    "no_candidate_injection_into_optimizer": true
+  },
+  "seed": null,
+  "seed_reason": "deterministic correspondence search; wall-time-bounded MCS can vary with hardware",
+  "compute": {"workers": 1, "device": "cpu", "expected_minutes": [1, 10], "remote_jobs": 0},
+  "acceptance": "record score/parity and all five bounded outcomes; a recovered target requires exact saved-state executor replay at every step; unresolved is not impossible"
+}
