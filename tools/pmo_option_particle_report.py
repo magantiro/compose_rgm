@@ -12,10 +12,12 @@ import numpy as np
 from rdkit import Chem, DataStructs
 from rdkit.Chem import rdFingerprintGenerator, rdMolDescriptors
 
+from compose_v4.control.archive_allocation import sample_archive_parents
 from compose_v4.control.docking_value import identity
 from compose_v4.control.option_particles import advance, log_potentials
 from compose_v4.experiments.continuation_profile import publish_json, sha256_file
 from compose_v4.experiments.inference_package import software
+from compose_v4.experiments.pmo_branch_policy import worker_identity
 
 
 def quantiles(values):
@@ -85,64 +87,93 @@ def report(path):
         selected = []
         live_before = [True] * n
         parents, depths, observed_depths = r["initial_parents"], [0] * n, []
+        archive_mode = c.get("parent_selection_modes", {}).get(arm) == "archive"
+        archive_nodes = {p["smiles"]: p for p in parents}
+        archive_depths = {p["smiles"]: 0 for p in parents}
+        used_workers = set()
         attempts = failures = 0
         for round_row in r["rounds"]:
             a = round_row["arms"][arm]
             if any(p is not None and history[p["smiles"]] != p["score"] for p in a["proposals"]):
                 raise ValueError("proposal score differs from its actual oracle receipt")
             step = round_row["boundary"]
+            used_workers.update(
+                worker_identity(step, slot, p, c.get("proposal_ids", {}).get(arm))
+                for slot, p in enumerate(parents)
+                if p is not None
+            )
             terminal = step == c["boundaries"]
-            psi = log_potentials(
-                selection_mode, a["scores"], a["future_values"], terminal=terminal, beta=c["beta"]
-            )
-            update = advance(
-                weights,
-                previous,
-                psi,
-                [p is not None for p in a["proposals"]],
-                np.random.default_rng(np.random.SeedSequence([c["seed"], step, 999])),
-                resample=selection_mode != "reference" and not terminal,
-            )
-            for key in ("status", "resampled", "indices", "log_potential"):
-                if update[key] != a[key]:
-                    raise ValueError(f"particle decision replay mismatch: {arm}/{step}/{key}")
-            # The first cross-platform audit exposed only floating roundoff
-            # (max ESS difference 4.45e-15), not changed ancestry. Do not demand
-            # bit-identical exp/log on ARM macOS and x86 Linux. The 1e-12
-            # diagnostic tolerance does not alter the running ESS trigger.
-            for key in ("weights", "ess", "log_weights"):
-                expected = a[key] if isinstance(a[key], list) else [a[key]]
-                actual = update[key] if isinstance(update[key], list) else [update[key]]
-                if [x is None for x in expected] != [x is None for x in actual]:
-                    raise ValueError("particle zero-weight mask changed")
-                error = max(
-                    (abs(x - y) for x, y in zip(actual, expected, strict=True) if x is not None),
-                    default=0,
-                )
-                max_replay_error = max(max_replay_error, error)
-                if error > 1e-12:
-                    raise ValueError(f"particle numerical replay mismatch: {arm}/{step}/{key}")
-            weights, previous = update["log_weights"], update["log_potential"]
             proposed_depths = proposal_depths(parents, a["proposals"], depths)
+            rng = np.random.default_rng(np.random.SeedSequence([c["seed"], step, 999]))
+            if archive_mode:
+                for p, depth in zip(a["proposals"], proposed_depths, strict=True):
+                    if p is not None:
+                        archive_nodes.setdefault(p["smiles"], p)
+                        archive_depths.setdefault(p["smiles"], depth)
+                next_parents, selection = sample_archive_parents(
+                    archive_nodes, n, rng, exploration=c["archive_exploration"]
+                )
+                if selection != a["archive_selection"]:
+                    raise ValueError(f"archive parent selection differs: {arm}/{step}")
+                next_depths = [archive_depths[p["smiles"]] for p in next_parents]
+            else:
+                psi = log_potentials(
+                    selection_mode,
+                    a["scores"],
+                    a["future_values"],
+                    terminal=terminal,
+                    beta=c["beta"],
+                )
+                update = advance(
+                    weights,
+                    previous,
+                    psi,
+                    [p is not None for p in a["proposals"]],
+                    rng,
+                    resample=selection_mode != "reference" and not terminal,
+                )
+                for key in ("status", "resampled", "indices", "log_potential"):
+                    if update[key] != a[key]:
+                        raise ValueError(f"particle decision replay mismatch: {arm}/{step}/{key}")
+                # Numerical tolerance only; selection and zero-weight masks stay exact.
+                for key in ("weights", "ess", "log_weights"):
+                    expected = a[key] if isinstance(a[key], list) else [a[key]]
+                    actual = update[key] if isinstance(update[key], list) else [update[key]]
+                    if [x is None for x in expected] != [x is None for x in actual]:
+                        raise ValueError("particle zero-weight mask changed")
+                    error = max(
+                        (
+                            abs(x - y)
+                            for x, y in zip(actual, expected, strict=True)
+                            if x is not None
+                        ),
+                        default=0,
+                    )
+                    max_replay_error = max(max_replay_error, error)
+                    if error > 1e-12:
+                        raise ValueError(f"particle numerical replay mismatch: {arm}/{step}/{key}")
+                weights, previous = update["log_weights"], update["log_potential"]
+                next_depths = [proposed_depths[i] for i in update["indices"]]
+                next_parents = [a["proposals"][i] for i in update["indices"]]
             offspring_deltas.extend(
                 child["score"] - parent["score"]
                 for parent, child in zip(parents, a["proposals"], strict=True)
                 if child is not None
             )
             observed_depths.extend(d for d in proposed_depths if d is not None)
-            depths = [proposed_depths[i] for i in update["indices"]]
-            parents = [a["proposals"][i] for i in update["indices"]]
+            depths, parents = next_depths, next_parents
             attempts += sum(live_before)
             failures += sum(
                 live and p is None for live, p in zip(live_before, a["proposals"], strict=True)
             )
-            live_before = [a["proposals"][i] is not None for i in update["indices"]]
+            live_before = [p is not None for p in next_parents]
             proposals.extend(p for p in a["proposals"] if p is not None)
             selected.append(
                 {
                     "boundary": step,
-                    "ess": a["ess"],
-                    "resampled": a["resampled"],
+                    "ess": a.get("ess"),
+                    "resampled": a.get("resampled"),
+                    "parent_selection": "archive" if archive_mode else "smc",
                     "best": a["best"],
                     "top10_mean": a["top10_mean"],
                 }
@@ -160,8 +191,9 @@ def report(path):
         independently_queried.update({p["smiles"]: p["score"] for p in proposals})
         if independently_queried != r["archives"][arm]:
             raise ValueError("archive excludes an evaluated candidate or imports unqueried labels")
-        policy_id = c.get("proposal_ids", {}).get(arm)
-        arm_workers = [w for w in r["workers"] if w.get("proposal_policy_sha256") == policy_id]
+        arm_workers = [w for w in r["workers"] if w["worker_id"] in used_workers]
+        if {w["worker_id"] for w in arm_workers} != used_workers:
+            raise ValueError("parent ancestry lacks matching worker receipts")
         # Older arms share proposal workers; these are not additive arm costs.
         audited_attempts = [a for w in arm_workers for a in w["attempts"]]
         has_attempt_census = all("proposal_attempts" in a for a in audited_attempts)
@@ -176,7 +208,8 @@ def report(path):
             {
                 "arm": arm,
                 **r["arms"][arm],
-                "particle_replay_verified": True,
+                "particle_replay_verified": not archive_mode,
+                "archive_selection_replay_verified": archive_mode,
                 "complete_options": len(proposals),
                 "attempted_options": attempts,
                 "failed_options": failures,
