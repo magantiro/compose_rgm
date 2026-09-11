@@ -283,6 +283,12 @@ def propose_remote(
             contract=contract,
             progress=progress,
         )
+        if task.get("local_selector"):
+            from compose_v4.experiments.pmo_local_guidance import local_worker
+
+            return local_worker(
+                task, root, contract, store, progress, runtime, law, start, initialization
+            )
         meter, attempts, candidates = ExecutorMeter(None), [], []
         with meter.instrument():
             kernel = OptionContinuationKernel(

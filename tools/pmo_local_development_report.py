@@ -20,6 +20,7 @@ from compose_v4.experiments.winner_paths import replay
 from compose_v4.rewrite import action_codec, action_codec_v4
 from compose_v4.rewrite.kernel import canonical_state_key, editing_v2_semantic_rewrite_system
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
+from tools.pmo_cross_parent_selection import decision, predict_frozen, transfer_arms
 from tools.pmo_local_query_selection import metrics, partition, query_arms
 from tools.pmo_persistent_lookahead import best_first, continuation_tasks
 
@@ -30,7 +31,7 @@ def provenance(directory):
     store = Store(directory, lambda: None)
     config, result = (store.read(k) for k in ("configuration", "result"))
     verify_file(directory / "configuration.json", result["configuration_sha256"])
-    for path, h in config["input_sha256"].items():
+    for path, h in config.get("input_sha256", config.get("inputs", {})).items():
         verify_file(Path(path), h)
     with tarfile.open(directory / "source_snapshot.tar.gz") as archive:
         for p, h in config["implementation"].items():
@@ -222,13 +223,122 @@ def lookahead_report(directory):
     }, config
 
 
+def cross_parent_report(directory):
+    store, config, result = provenance(directory)
+    verify_file(directory / "query_lock.json", result["query_lock_sha256"])
+    lock = store.read("query_lock")
+    model_path = next(Path(p) for p in config["inputs"] if p.endswith("/query_lock.json"))
+    history_path = next(Path(p) for p in config["inputs"] if p.endswith("/prepared.json"))
+    model, history = unseal(model_path), unseal(history_path)
+    prior = unseal(history_path.with_name("result.json"))
+    known = history["known"].copy()
+    for q in prior["oracle_rows"]:
+        if q["smiles"] in known or q["status"] != "complete":
+            raise ValueError("cross-parent history contains unresolved or repeated queries")
+        known[q["smiles"]] = q["score"]
+    query_union = sorted(
+        {s for batch in lock["batches"] for rows in batch["arms"].values() for s in rows}
+    )
+    if query_union != lock["new"] or set(query_union) & set(known) or len(query_union) > 64:
+        raise ValueError(
+            "cross-parent query union differs from fixed allocations or repeats history"
+        )
+    if [q["smiles"] for q in result["oracle_rows"]] != query_union:
+        raise ValueError("cross-parent physical query order differs from lock")
+    prior_best = max(known.values())
+    receipts(store, {**result, "new_calls": result["summary"]["new_calls"]}, known)
+    measured, details, max_error = [], [], 0.0
+    system = editing_v2_semantic_rewrite_system()
+    for i, batch in enumerate(lock["batches"]):
+        path = directory / f"generation/{i}.json"
+        verify_file(path, lock["generation_sha256"][i])
+        generation = store.read(f"generation/{i}")
+        products = {p["smiles"]: p for p in generation["products"]}
+        historical = set(known) - set(query_union)
+        if batch["pool"] != sorted(set(products) - historical):
+            raise ValueError("cross-parent allocation omitted unqueried supported products")
+        predicted = predict_frozen(model, batch["pool"])
+        recorded = [batch["predictions"][s] for s in batch["pool"]]
+        np.testing.assert_allclose(predicted, recorded, rtol=0, atol=1e-12)
+        max_error = max(max_error, float(np.max(np.abs(predicted - recorded))))
+        if batch["arms"] != transfer_arms(batch["pool"], predicted, i):
+            raise ValueError("cross-parent candidate selection does not reproduce")
+        measured.append(
+            {a: metrics(rows, known, batch["parent"]["score"]) for a, rows in batch["arms"].items()}
+        )
+        source = decode_state(generation["source"])
+        if generation["source"] != batch["parent"]["node"]["graph"]:
+            raise ValueError("cross-parent source lost exact slot identity")
+        from compose_v4.control.graph_geometry import topology
+
+        before = topology(source)
+        arm_details = {}
+        for arm, rows in batch["arms"].items():
+            for s in rows:
+                row, a = products[s], products[s]["witnesses"][0]
+                codec = action_codec_v4 if a["schema_version"] == 4 else action_codec
+                actual = system.apply(source, *codec.decode_action(a))
+                if encode_state(actual) != row["state"] or canonical_state_key(actual) != s:
+                    raise ValueError("cross-parent scored product lacks primitive replay")
+            arm_details[arm] = {
+                "selected": [
+                    {
+                        "smiles": s,
+                        "score": known[s],
+                        "prediction": batch["predictions"][s],
+                        "topology": products[s]["topology"],
+                        "primitive": products[s]["witnesses"][0],
+                    }
+                    for s in rows
+                ],
+                "mae": float(np.mean([abs(known[s] - batch["predictions"][s]) for s in rows])),
+                "pool_coverage": len(rows) / len(products),
+                "improvement_recall": "unknown for unqueried candidates",
+            }
+        details.append(
+            {
+                "parent_smiles": batch["parent"]["smiles"],
+                "parent_score": batch["parent"]["score"],
+                "parent_topology": before,
+                "available_products": len(products),
+                "new_pool": len(batch["pool"]),
+                "generation_seconds": generation["generation_seconds"],
+                "prediction_seconds": batch["prediction_seconds"],
+                "arms": arm_details,
+            }
+        )
+    expected_best = max(prior_best, max(known[s] for s in query_union))
+    summary = result["summary"]
+    if (
+        summary["per_parent"] != measured
+        or summary["decision"] != decision(measured)
+        or summary["best"] != expected_best
+        or summary["prior_champion"] != prior_best
+    ):
+        raise ValueError("cross-parent outcomes/decision do not match paid receipts")
+    return {
+        **summary,
+        "details": details,
+        "numerical_prediction_replay_error": max_error,
+        "parent_in_model_training": config["parent_in_model_training"],
+        "historical_prescreen_calls": config["historical_prescreen_calls"],
+        "historical_development_physical_calls": config["historical_development_physical_calls"],
+        "oracle_seconds": sum(q["oracle_seconds"] for q in result["oracle_rows"]),
+        "checks": "input/source hashes; unchanged fitted coefficients and predictions; full pool allocation; query locks/union/physical receipts; exact primitive replay; outcomes and decision",
+    }, config
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("mode", choices=("selection", "lookahead"))
+    p.add_argument("mode", choices=("selection", "lookahead", "cross_parent"))
     p.add_argument("--input", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
     a = p.parse_args()
-    report, config = (selection_report if a.mode == "selection" else lookahead_report)(a.input)
+    report, config = {
+        "selection": selection_report,
+        "lookahead": lookahead_report,
+        "cross_parent": cross_parent_report,
+    }[a.mode](a.input)
     report.update(
         schema_version=f"pmo_{a.mode}_local_audit_v1",
         input_sha256={

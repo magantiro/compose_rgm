@@ -11,7 +11,10 @@ from compose_v4.rewrite.trace_shard import encode_state
 
 
 @pytest.mark.parametrize("cache_path", [".", "caches/00"])
-def test_saved_law_reuse_checks_inputs_and_rejects_corrupt_mass(tmp_path, monkeypatch, cache_path):
+@pytest.mark.parametrize("separate_metadata", [False, True])
+def test_saved_law_reuse_checks_inputs_and_rejects_corrupt_mass(
+    tmp_path, monkeypatch, cache_path, separate_metadata
+):
     graph = initial("CCC").graph
     families, actions, probabilities = engineering_law(graph)
     payload = {
@@ -49,6 +52,12 @@ def test_saved_law_reuse_checks_inputs_and_rejects_corrupt_mass(tmp_path, monkey
         ],
         "expected_input_sha256": expected,
     }
+    if separate_metadata:
+        metadata = tmp_path / "new_metadata"
+        metadata.mkdir()
+        (old / "launch.json").rename(metadata / "launch.json")
+        (old / "runtime_gate.json").rename(metadata / "runtime_gate.json")
+        contract["law_caches"][0]["metadata_path"] = "new_metadata"
     records = {}
 
     def save(name, value):

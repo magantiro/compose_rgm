@@ -22,6 +22,7 @@ def main():
             "t4_donor",
             "archive",
             "memory",
+            "local_guidance",
         ),
         default="particles",
     )
@@ -36,7 +37,9 @@ def main():
     from compose_v4.control.docking_value import identity
     from compose_v4.experiments.continuation_profile import publish_json, sha256_file
 
-    if args.experiment == "memory":
+    if args.experiment == "local_guidance":
+        from compose_v4.experiments import pmo_local_guidance as experiment
+    elif args.experiment == "memory":
         from compose_v4.experiments import pmo_evolving_memory as experiment
     elif args.experiment == "archive":
         from compose_v4.experiments import pmo_archive_branching as experiment

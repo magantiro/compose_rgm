@@ -30,11 +30,15 @@ class SavedMarkedLaw:
         inventory = []
         for source in contract.get("law_caches", []):
             directory = artifact_root / source["path"]
-            if not (directory / "launch.json").exists():
+            metadata_relative = PurePosixPath(source.get("metadata_path", source["path"]))
+            if metadata_relative.is_absolute() or ".." in metadata_relative.parts:
+                raise ValueError("law cache metadata must remain inside the artifact root")
+            metadata = artifact_root / metadata_relative
+            if not (metadata / "launch.json").exists():
                 inventory.append({"path": source["path"], "available": False})
                 continue
-            verify_file(directory / "launch.json", source["launch_sha256"])
-            old = json.loads((directory / "launch.json").read_text())["image_revision"][
+            verify_file(metadata / "launch.json", source["launch_sha256"])
+            old = json.loads((metadata / "launch.json").read_text())["image_revision"][
                 "serialized_sources"
             ]
             dependencies = {
@@ -56,7 +60,7 @@ class SavedMarkedLaw:
                 for p, h in dependencies.items()
                 if not (repo_root / p).exists() or sha256_file(repo_root / p) != h
             ]
-            gate = json.loads((directory / "runtime_gate.json").read_text())
+            gate = json.loads((metadata / "runtime_gate.json").read_text())
             compatible = (
                 bool(dependencies)
                 and not mismatch

@@ -40,7 +40,7 @@ known-winner reconstruction and mathematics are not benchmark success.
   starts and donors, six option rounds, 156 and 149 new calls. First gain:
   four-edit side-chain replacement; replication: 47-edit structural replacement.
   `diagnostics/pmo_donor_comparison/README.md` and its two reports.
-- Historical labels: 249455 prescreen evaluations plus **1992 development physical
+- Historical labels: 249455 prescreen evaluations plus **2056 development physical
   calls** through the latest batch. The bank is our recovered historical asset,
   not external labels. Its legacy provenance remains incomplete. Do not call
   this no-prescreen. The separate no-new-prescreen controller remained at
@@ -152,6 +152,22 @@ immediate continuation. Actual witnessed paths were retained. Both bests remain
 Stop this unchanged schedule/proposal recipe. The 574 replayed primitives are
 supporting work, not benchmark improvement. `diagnostics/pmo_persistent_lookahead`.
 No experiment remains active. Goal is unmet.
+
+Cross-parent selection completed: the same fitted endpoint model found 4/16 and
+2/16 parent-improving products, against 0/16 in both uniform controls. Mean scores
+were 0.667499/0.611814 and 0.659941/0.596829. Neither new parent was a training
+endpoint, but this remains related exposed chemistry. Best stays 0.674748.
+Sixty-four calls, 52.328 seconds preparation plus 3.549 scoring/replay. Prediction
+replay error is zero; all selected primitive endpoints and paid receipts audited.
+`diagnostics/pmo_cross_parent_selection/report.json`.
+
+Next bounded run is prepared under `docs/PMO_LOCAL_GUIDANCE.md`: compare the
+retained fixed-memory broad controller to its mixture with the tested local
+selector. Same sixteen exact initial states, 116 donors, frozen model, four
+rounds and at most 128 new queries. Baseline 50% donor/50% reference; intervention
+50% donor/25% reference/25% local selector. A new champion above the simultaneous
+baseline earns replication; null/reversal stops the unchanged mixture. This is
+not future-value or exact Doob control. No scientific job launched yet.
 
 The three completed local batches (cached neighborhood, local query selection,
 persistent lookahead), including executed source snapshots and all raw receipts,

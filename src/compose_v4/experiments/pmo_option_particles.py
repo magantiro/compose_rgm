@@ -163,7 +163,16 @@ def session(
         if c.get("donor_memory_modes"):
             from compose_v4.control.donor_memory import proposal_identity
 
-            if task.get("proposal_id") != proposal_identity(task["donor_memory_id"]):
+            expected = proposal_identity(task["donor_memory_id"])
+            if task.get("local_selector"):
+                from compose_v4.control.local_endpoint_selector import active, policy_identity
+
+                if not c.get("local_selector_arms") or not active(
+                    c["seed"], task["phase"], task["slot"]
+                ):
+                    raise ValueError("local selector task is not authorized by the mixture")
+                expected = policy_identity(task["donor_memory_id"], c["endpoint_model_sha256"])
+            if task.get("proposal_id") != expected:
                 raise ValueError("worker donor memory identity is not authorized")
         elif task.get("proposal_id") not in c.get("proposal_ids", {"reference": None}).values():
             raise ValueError("worker proposal identity is not authorized")
@@ -305,6 +314,23 @@ def driver_remote(
                         if memory_context
                         else c.get("proposal_ids", {}).get(arm)
                     )
+                    local_context = {}
+                    if arm in c.get("local_selector_arms", []):
+                        from compose_v4.control.local_endpoint_selector import (
+                            active,
+                            policy_identity,
+                        )
+
+                        if active(c["seed"], step, slot):
+                            proposal_id = policy_identity(
+                                memory_context["donor_memory_id"], c["endpoint_model_sha256"]
+                            )
+                            local_context = {
+                                "local_selector": True,
+                                "local_exclusions": sorted(
+                                    set(data["observed"]) | set(state[arm]["archive"])
+                                ),
+                            }
                     key = (
                         None if parent is None else worker_identity(step, slot, parent, proposal_id)
                     )
@@ -319,6 +345,7 @@ def driver_remote(
                                 "parent": parent,
                                 "worker_id": key,
                                 **memory_context,
+                                **local_context,
                                 **({"proposal_id": proposal_id} if proposal_id is not None else {}),
                             },
                         )
