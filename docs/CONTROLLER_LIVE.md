@@ -4,12 +4,20 @@ Updated 2026-09-11. Active goal: reproducible improvement over the actual T4 and
 PMO champions, then verified matched external comparisons. Supporting chemistry,
 known-winner reconstruction and mathematics are not benchmark success.
 
-Operational status: fresh-seed replication authorized on 2026-09-11 and being
-prepared, not yet launched. Cap: 128 new calls, 30 containers, $10. Seed 20261009;
-same original starts/model/mixture, with paid-cache and exclusion roles kept
-separate. The first run is complete and preserved. The product goal record still
-says blocked; the new scoped work can proceed, and the competitive-controller
-objective remains unmet and unchanged.
+Operational status: fresh-seed replication completed and audited on 2026-09-11.
+Both arms remained at 0.6747477698. Stop this unchanged mixture: the first best-score
+advantage did not repeat. Cost: 76 new calls, 403.8898 seconds, no live job.
+Same original starts/model/mixture, with paid-cache and exclusion roles kept
+separate. The first run and its best molecule are preserved. The full
+competitive-controller objective remains unmet; no broader run is authorized.
+
+Completed run `83d84e96ce3d961d09816b3a7829103a1b608380147416c6b0996e9643806b77`,
+call `fc-01M29BN6BVQQF5PDR2A9PNKKP7`, source `c7818ce74c2d`.
+Deployment `compose-pmo-local-guidance-replication` completed in 93.321 seconds;
+strict preflight passed with a clean tree. Durable local receipt is under
+`/private/tmp/compose-pmo-local-guidance-replication-runs/<run_id>/spawn.json`.
+Audit: `diagnostics/pmo_local_guidance_replication/report.json` and README.
+Do not launch it again or start another task without a bounded new recipe.
 
 ## Champion and exact regime
 
@@ -17,10 +25,10 @@ objective remains unmet and unchanged.
   local-guided broad controller, versus **0.6803013430498075** for its matched
   fixed-memory baseline. Both started at 0.6747477698. Eighty-five new calls,
   497.011 seconds; positive on best score but lower guided top-ten mean and
-  diversity. Not replicated. Exact four-edit winning suffix: local ring closure,
+  diversity. Its advantage did not replicate. Exact four-edit winning suffix: local ring closure,
   then three generic atom restatements. `diagnostics/pmo_local_guidance/README.md`.
-  No run is active yet. The authorized next step is unchanged fresh-seed
-  replication, not retuning or starting from the new winner.
+  Fresh-seed replication: both 0.6747477698; top-ten means 0.6724616451 baseline
+  and 0.6728082152 guided. No promotion of this unchanged local-guided mixture.
 - Earlier fresh-seed memory comparison: both fixed and evolving memory
   reached **0.672021505032247**, with identical top-ten mean 0.6532973102.
   The first evolving-memory lead below did not replicate. Stop the unchanged
@@ -55,7 +63,7 @@ objective remains unmet and unchanged.
   starts and donors, six option rounds, 156 and 149 new calls. First gain:
   four-edit side-chain replacement; replication: 47-edit structural replacement.
   `diagnostics/pmo_donor_comparison/README.md` and its two reports.
-- Historical labels: 249455 prescreen evaluations plus **2141 development physical
+- Historical labels: 249455 prescreen evaluations plus **2217 development physical
   calls** through the latest batch. The bank is our recovered historical asset,
   not external labels. Its legacy provenance remains incomplete. Do not call
   this no-prescreen. The separate no-new-prescreen controller remained at
@@ -239,8 +247,8 @@ Fourteen focused driver, selector, report and cache/exclusion checks passed
 (3.53 seconds for thirteen, 1.43 seconds for the replication input check).
 Touched-code formatting/lint and diff checks passed. Original prepared inputs,
 model and contract are unmodified. Qualified prior law-cache metadata is uploaded.
-Next operational action: one clean launch commit, strict preflight, deploy and
-durably spawn. No overall milestone/full-suite completion is claimed.
+Launch completed from clean commit c7818ce after strict preflight and deployment.
+No overall milestone/full-suite completion is claimed.
 
 The three completed local batches (cached neighborhood, local query selection,
 persistent lookahead), including executed source snapshots and all raw receipts,
