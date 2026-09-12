@@ -116,6 +116,82 @@ class MolecularHierarchy:
         self.include_region_replacement = include_region_replacement
         self._selection_rows = {}
 
+    def complete_reference_program(self, node, rng, *, max_options=3, stop_probability=0.5):
+        """Run complete existing options, recording their actual primitive witnesses.
+
+        This is the broad branch of the program optimizer. It neither selects a
+        supplied endpoint nor prunes an unfinished option by task properties.
+        The inherited disabled BUILD_RING_SYSTEM option remains disabled.
+        """
+        from compose_v4.control.edit_program import extract_program
+        from compose_v4.rewrite.action_codec_v4 import encode_action
+        from compose_v4.rewrite.trace_shard import encode_state
+
+        if (
+            node.stage != "where"
+            or node.budget < 1
+            or type(max_options) is not int
+            or max_options < 1
+        ):
+            raise ValueError("complete proposal requires a budgeted option boundary")
+        if not 0 <= stop_probability <= 1:
+            raise ValueError("invalid complete-option stopping probability")
+        source, stages = node.graph, []
+        for _ in range(max_options):
+            if node.budget == 0:
+                break
+            for expected in ("where", "what"):
+                if node.stage != expected:
+                    raise ValueError("broad proposal has inconsistent hierarchy stage")
+                row = self.row(node)
+                allowed = [
+                    i
+                    for i, label in enumerate(row.labels)
+                    if expected != "what" or label != "build_ring_system"
+                ]
+                if not allowed:
+                    raise ValueError("broad complete proposal reached a selection dead end")
+                weights = row.reference[allowed]
+                node = row.successors[int(rng.choice(allowed, p=weights / weights.sum()))]
+            option = node.active.option
+            actions, states = [], [encode_state(node.graph)]
+            while node.stage == "how":
+                lazy = self.kernel.lazy_row(node.active)
+                active = lazy.sample(rng)
+                if active is None:
+                    raise ValueError("broad proposal could not complete its chosen option")
+                indices = [
+                    i
+                    for branch in lazy.branches.values()
+                    for i, product in branch.products.items()
+                    if product is active
+                ]
+                if not indices:
+                    raise RuntimeError("production sample lacks its exact marked-law witness")
+                families, marks, _ = self.kernel.enumerate_law(node.graph)
+                actions.append(encode_action(families[indices[0]], marks[indices[0]]))
+                states.append(encode_state(active.graph))
+                node = self._successor(node, active)
+            stages.append(
+                {
+                    "name": option,
+                    "actions": actions,
+                    "states": states,
+                    "endpoint": canonical_state_key(node.graph),
+                }
+            )
+            if rng.random() < stop_probability:
+                break
+        program, binding = extract_program(source, stages)
+        return (
+            program,
+            binding,
+            {
+                "complete_options": len(stages),
+                "primitive_edits": sum(len(s["actions"]) for s in stages),
+            },
+        )
+
     def sample_reference(self, node: MolecularSearchState, rng) -> MolecularSearchState | None:
         """Reference-only planning draw; no task tilt or sampled support truncation."""
         if node.stage != "how":
@@ -243,3 +319,27 @@ class MolecularHierarchy:
         successors = [self._successor(node, active) for active in row.successors]
         labels = tuple(f"{rule}:{action!r}" for rule, action in self.kernel.marks(node.active))
         return SearchRow(tuple(successors), labels, row.probabilities, row.probabilities, 0.1)
+
+
+def dispatch_complete_proposal(
+    rng, *, program_sampler, broad_sampler, probabilities=(0.7, 0.2, 0.1)
+):
+    """First-class optimizer dispatch BEFORE any legacy single-region WHERE draw.
+
+    The weights define new proposal-channel probabilities, never R_theta path
+    likelihoods. The program handler jointly chooses its mutable sites; only the
+    broad handler enters the unchanged WHERE/WHAT/HOW hierarchy.
+    """
+    weights = np.asarray(probabilities, dtype=float)
+    if (
+        weights.shape != (3,)
+        or not np.isfinite(weights).all()
+        or np.any(weights <= 0)
+        or not np.isclose(weights.sum(), 1)
+    ):
+        raise ValueError(
+            "mutation/recombination/broad probabilities must be positive and sum to one"
+        )
+    channel = ("mutation", "recombination", "broad")[int(rng.choice(3, p=weights))]
+    product = broad_sampler() if channel == "broad" else program_sampler(channel)
+    return channel, product

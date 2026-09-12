@@ -26,12 +26,24 @@ integration branch is `compose-iclr`; the Modal session name is
 
 ## Current outcome
 
-New implementation: typed attachment-specific complete programs, multi-site
-dependency graphs, conservative conflict serialization, peak-capacity checks,
-and uninterrupted serial/independent/joint proposal arms. Every primitive still
-passes the existing executor. The first proposal is finite-bank retrieval, not
-yet a task-adapted pointer decoder or future-value model. It remains separate
-from the deployed broad population controller.
+New implementation: a score-adaptive coordinated-program optimizer now dispatches
+before the legacy connected-region WHERE stage. It mutates attachments, created
+atom classes and chain/ring-segment length, replaces compatible branches, and
+retains the broad hierarchy as its third channel. Every full construction passes
+the existing executor before endpoint eligibility or scoring. It is a non-neural
+optimizer with measured-score replay, not a pointer decoder or future-value model.
+The previous population/SMC runtime is preserved as an alternative, not overwritten.
+
+The first local batch expanded the fixed paid bank: 16 new eligible endpoints
+from 75 attempts in 4.23 seconds of proposal work, 13 through mutation and three
+through recombination. Ten endpoints changed two sites. These endpoints have not
+been docked. The local program-development mode lacks the remote reference assets;
+its ten broad draws were counted as explicit failures, not silently reallocated.
+Twenty-five focused tests passed, including exact broad-branch execution on a
+model-free fixture, program mutation, measured-feedback and resume. This is an
+implementation/yield result, not a new docking score or a full milestone sign-off.
+See `docs/ADAPTIVE_PROGRAM_OPTIMIZER.md` and
+`diagnostics/adaptive_program_optimizer/attempt_1/result.json`.
 
 On the corrected answer-known PARP1 diagnostic, joint proposals reconstructed
 the demonstrated winner 14/32 times from the seed versus 4/32 serial and 2/32
@@ -158,13 +170,16 @@ between -12.6 and -13.3; independent bundles are more varied but mostly weaker.
 That supports learning coordinated attachments/parameters from completed scored
 programs, not another larger particle population or a relabeled endpoint value.
 
-Next implementation unit: use source-grouped structural programs plus separately
-identified scored replay to expand transferable linker/core/peripheral choices,
-then integrate the optional program channel into the broad runtime. The new
-27-endpoint replay has only one source group and cannot validate transfer or
-calibration. Preserve the serial baseline and endpoint-only constraints. Any
-next fitting or paid campaign needs its own frozen recipe and permitted scope;
-the completed 28-call pool is not an unlimited continuation budget.
+Current hypothesis: making those programs variable expands the useful neighborhood;
+measured endpoint feedback should then improve allocation within the same expanded
+support. Variable-program generation and the adaptive archive API are implemented.
+The first 16 new eligible endpoints are locked, unscored and resumable. Next paid
+decision: compare static and adaptive preferences with identical initial information
+and mutation/recombination support. The suggested 108-call maximum needs a new
+budget decision beyond the older 66-call cap; no paid follow-on is active.
+The 27-endpoint archive has only one source group and cannot validate transfer or
+calibration. Preserve the serial baseline, endpoint-only constraints, old champion,
+and all failed attempts. Do not promote adaptation based on structural yield alone.
 
 ## Code map
 
@@ -182,6 +197,9 @@ submission revision and a fresh-laptop path, see
 | Persistent option runtime | `option_controller.py`, `option_controller_runtime.py` |
 | Attachment-specific programs | `edit_program.py`, `edit_program_policy.py` |
 | Multi-site dependency graph and proposal arms | `edit_program_graph.py`, `multi_site_program_policy.py` |
+| Variable program mutations and branch replacement | `program_mutation.py` |
+| Adaptive archive, top-level dispatch and locked score updates | `adaptive_program_optimizer.py`, `molecular_task_search.py` |
+| Cache-only batch preparation/resume | `tools/adaptive_program_search.py` |
 | Locked program docking and review | `t4_program_pool.py`, `tools/review_t4_program_pool.py` |
 | Scored complete-program replay preparation | `tools/prepare_scored_program_replay.py` |
 | PMO continuation bank | `pmo_option_controller_bank.py` |

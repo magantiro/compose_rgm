@@ -372,6 +372,21 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped adaptive program-optimizer integration, 2026-09-12:** following the
+completed 28-call pool, the user explicitly requested promoting coordinated
+programs into the main implementation, variable attachments/parameters, branch
+replacement/recombination, and score-adaptive archive search. Authorize this
+implementation and local cache-only development using existing paid records.
+The next development recipe uses top-level 70/20/10 mutation/recombination/broad
+dispatch before legacy WHERE, configurable primitive/block caps, exact serial
+execution, endpoint-only gates, durable state and measured-outcome updates.
+This is a new optimization proposal, not an exact reference law or Doob claim.
+No neural model training, new oracle evaluation or remote deployment follows
+from this implementation unit. The suggested 108-call campaign exceeds the
+previous 66-call ceiling and remains a separate budget decision. Existing
+reference/executor semantics, source roles, completed locks and training gates
+remain unchanged. Acceptance and local commands: `docs/ADAPTIVE_PROGRAM_OPTIMIZER.md`.
+
 **Scoped multi-site program extension and bounded docking approval, 2026-09-12:**
 the user explicitly requested adding jointly planned edits across disconnected
 mutable sites, dependency/conflict separation, and serial executor revalidation.
