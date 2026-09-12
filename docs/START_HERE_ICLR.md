@@ -101,6 +101,10 @@ same planner. No next paid T4 round is currently authorized.
 
 ## Code map
 
+For the exact submitted-paper versus post-submission boundary, including the
+submission revision and a fresh-laptop path, see
+`docs/PAPER_TO_CURRENT_CODE.md`.
+
 | Concern | Primary files |
 | --- | --- |
 | WHERE region law | `src/compose_v4/control/region.py`, `region_selector.py` |
@@ -140,8 +144,9 @@ directory until their hashes and a durable replacement location are verified.
 
 1. This file.
 2. `AGENTS.md` for scientific and authorization constraints.
-3. `diagnostics/t4_frontier_compare/README.md` for the current primary result.
-4. `docs/OPTION_CONTROLLER_RUNTIME_V1.md` for the newer controller runtime.
-5. `docs/CONTROLLER_LIVE.md` only as a chronological evidence ledger.
-6. `docs/MACRO_INVENTORY.md` and `docs/CAMPAIGN_LESSONS.md` before changing
+3. `docs/PAPER_TO_CURRENT_CODE.md` for the paper-to-current implementation map.
+4. `diagnostics/t4_frontier_compare/README.md` for the current primary result.
+5. `docs/OPTION_CONTROLLER_RUNTIME_V1.md` for the newer controller runtime.
+6. `docs/CONTROLLER_LIVE.md` only as a chronological evidence ledger.
+7. `docs/MACRO_INVENTORY.md` and `docs/CAMPAIGN_LESSONS.md` before changing
    option support or launching expensive work.

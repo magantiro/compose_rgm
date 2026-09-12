@@ -21,20 +21,23 @@ Three layers, kept separate on purpose:
 1. **[`docs/START_HERE_ICLR.md`](docs/START_HERE_ICLR.md)**: authoritative
    controller status, current T4 and PMO evidence, branch layout, and the next
    scientific decision.
-2. **[`experiments/INDEX.md`](experiments/INDEX.md)** — every runnable
-   experiment: 193 apps, 266 entrypoints, with the exact command for each.
-   Generated from source by `tools/gen_experiment_index.py`, so it cannot drift.
-3. **[`experiments/region_resampling/`](experiments/region_resampling/)** — the
+2. **[`docs/PAPER_TO_CURRENT_CODE.md`](docs/PAPER_TO_CURRENT_CODE.md)**:
+   submitted-paper code and evidence versus post-submission controller
+   extensions, plus a fresh-laptop first-hour path.
+3. **[`experiments/INDEX.md`](experiments/INDEX.md)** — every runnable
+   experiment and its source-derived command. Regenerate it with
+   `tools/gen_experiment_index.py` after adding an entrypoint.
+4. **[`experiments/region_resampling/`](experiments/region_resampling/)** — the
    current campaign, with its preregistered gates, inputs, outputs and known
    limitations.
-4. **[`docs/INDEX.md`](docs/INDEX.md)** — all documents, classified CURRENT /
+5. **[`docs/INDEX.md`](docs/INDEX.md)** — historical document census, classified CURRENT /
    SUPERSEDED / HISTORICAL.
 
 ## Layout
 
 ```
 src/compose_v4/     library. importable, no experiment logic
-modal_apps/         experiment entrypoints, run with `modal run`
+modal_apps/         experiment entrypoints; obey each experiment's launch contract
 experiments/        what each experiment asks, how to rerun it, what it produced
 tools/              repo tooling (audit, index generation, dataset rebuild)
 tests/              pytest; mirrors src/
