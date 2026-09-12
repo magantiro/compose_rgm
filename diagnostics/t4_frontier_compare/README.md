@@ -1,32 +1,92 @@
-# Paired frontier comparison: ready, not launched
+# Paired T4 frontier comparison
 
-The implementation is frozen at `a6aa24b9a4b2b21883538a9301e609e83ff2435c`.
-The self-hashed prospective recipe is `configs/t4_frontier_compare.json`,
-contract body SHA-256 `c7036dfdd0d605f60d9bfef24a2032c50df79554d0881f1cc249beff6dd3651d`.
+Status: complete positive development result. This is one inspected,
+unreplicated PARP1 seed0, delta=0.4 round, not evidence of benchmark superiority
+or generalization.
 
-On the clean detached launch worktree, all 102 focused tests passed in 27.409 s,
-with zero failures, errors or skips. Six changed/new Python files pass lint and
-format checks. The legacy Modal application has 17 existing lint findings, with
-no new issue types/counts or findings in the added block. No whole-repository
-suite was run, under the bounded T4 development policy in AGENTS.md.
-Tests use small synthetic reference rows and the production executor; they do
-not establish behavior of the full learned reference on the T4 cell. Local
-Python is 3.12.9 with the pinned chemistry overlay; remote Python is 3.11.
+This is not yet competitive with the verified external results for this cell.
+The three released InVirtuoGen runs report -13.5, -13.6, and -13.6, and GenMol
+reports -10.6. The broader current controller is also below the workshop
+COMPOSE result of -10.7 at 500 calls, although this warm-start arm has used only
+59 total calls. These budgets and procedures are not a matched superiority
+comparison.
 
-Strict preflight passed and deployment of `genmol-t4-opt` succeeded. The spawn
-command was rejected by the approval reviewer because the current repository
-milestone does not explicitly authorize the paired 40-call T4 comparison.
-No scientific call was spawned, no call ID exists, and no new docking evaluations
-were spent. This is an authorization boundary, not a negative scientific result.
+The same 51-call warm archive (best feasible score -9.7), frozen reference model,
+executor, local/global region law, option support, primitive horizon, endpoint
+constraints, and round-frozen docking predictor were used in both arms. The
+post-hoc arm used task value only after generation. The in-loop arm additionally
+used two-transition resumable planning during generation. Both candidate locks
+were audited before the first oracle call.
 
-Next required decision: explicit user authorization for this one warm-start round
-per arm, at most 20 new dockings each (40 total), two parallel 1-core/8-GiB
-preparation workers plus one driver, with a six-hour administrative timeout.
-The expected preparation interval is 30–120 minutes, not a measured promise.
-Do not bypass the rejection with another command or a different launcher.
+## Result
 
-The clean deployed source remains at
-`/private/tmp/compose-frontier-pair.FmM9Iy/source`; its raw focused JUnit receipt is
-`/private/tmp/compose-frontier-pair.FmM9Iy/focused.xml`. Verification and input
-hashes are recorded in `verification.json`. All unrelated working changes remain
-outside this revision. Nothing was pushed.
+| Measure | Post-hoc | In-loop |
+| --- | ---: | ---: |
+| Completed candidate pool | 55 | 56 |
+| Eligible and docked | 4 | 8 |
+| Unique canonical docked | 4/4 | 8/8 |
+| Distinct docked bundles | 4 | 8 |
+| Best new docking score | -9.9 | **-10.0** |
+| Improvement over shared -9.7 champion | 0.2 | **0.3** |
+| Topology-changing docked molecules | 1 | 1 |
+| Slowest lineage proposal time | 793.1 s | 1,065.1 s |
+| Aggregate proposal compute | 3,523.0 s | 5,674.6 s |
+| Executor calls | 21,722 | 58,135 |
+
+The in-loop arm used eight successful new docking attempts and the post-hoc arm
+used four, for 12 total against the authorized maximum of 40. There were no
+failed docking calls. The completed reduction and docking recovery took 627.3 s;
+proposal work had already been completed and hash-locked in the reusable source
+partitions.
+
+The best endpoint in each arm came from the same semantic option class,
+`construct:pendant:6:5,1,0:nonaromatic:0`. Each added six heavy atoms, one cycle,
+and one ring system through ordinary valid primitive transitions. The post-hoc
+ring scored -9.9 at similarity 0.458; the in-loop ring scored -10.0 at similarity
+0.444. This is direct evidence that the option layer can produce constructive,
+feasible ring chemistry on this development cell. It does not show that rings
+are generally beneficial.
+
+Intended region release ranged from 0.074 to 0.593 post-hoc and 0.074 to 0.724
+in-loop. Median intended release was 0.393 in both arms, while median realized
+coherent change was 0.073. The successful ring endpoints came from intended
+release 0.074 but realized coherent change 0.259. Intended search scope and
+realized molecular change therefore remain distinct quantities.
+
+Candidate diversity was 4/4 and 8/8 unique canonical molecules within arms,
+each from a different bundle. Across arms, 11 of 12 dockings were unique. The
+one repeated canonical molecule scored -9.2 and -9.1, an observed 0.1 kcal/mol
+repeat difference in the inherited unseeded docking pipeline.
+
+## Decision
+
+The immediate failure is no longer inability to construct a useful ring. The
+round-frozen endpoint predictor ranked the observed best ring last in each arm
+(4/4 post-hoc and 8/8 in-loop). In-loop planning doubled endpoint eligibility,
+but WHERE and WHAT received no task-value contrast; only eight HOW decisions were
+task-guided. The next controller experiment should therefore target reusable
+delayed value and oracle allocation across option-complete outcomes, while
+retaining explicit bundle/option exploration. It should not narrow support,
+reward ring count, tune macro weights to these docking outcomes, or call the
+current endpoint predictor a future-value model.
+
+No automatic next round is authorized. A replicated or multiround T4 comparison
+requires a new prospective contract and oracle authorization. PMO oracle work
+also remains unauthorized.
+
+The IVG comparator values and public endpoint provenance are recorded in
+`../ivg_winner_paths/audit.json`; no IVG endpoint entered this run.
+
+## Provenance
+
+- Source run: `c663e7ac0532b0664a40b02de1d53868a3c0bf69726f2957c68fc26777cfa843`
+- Source code: `2f535a96d734a3fe9f7d6616ad55aea43d0505ac`
+- Contract body SHA-256: `87d2e8c1841d7647f008914660e27e58efdb950c96cb410baaf064e74c129b7a`
+- Full source result SHA-256: `1574f7066d59e8a0703532f5c2314b89ba8c330159d888e003a8a0af65d0fec4`
+- Machine-readable verified review: `result.json`
+- Remote namespace: `/t4_frontier_compare/c663e7ac0532b0664a40b02de1d53868a3c0bf69726f2957c68fc26777cfa843`
+
+The machine-readable review binds every downloaded JSON artifact by SHA-256 and
+rechecks the sealed candidate locks, pre-oracle barrier, lock-to-docking identity,
+attempt accounting, endpoint eligibility, shared warm champion, and absence of
+an automatic continuation.

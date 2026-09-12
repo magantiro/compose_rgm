@@ -34,6 +34,21 @@ The repair therefore requires exactly one successor equal to the recorded full
 option state and rejects zero matches or duplicate matches; it does not weaken
 the executor, option contract, or molecular-product check.
 
+Final status, 2026-09-12: complete. Recovery run
+`c663e7ac0532b0664a40b02de1d53868a3c0bf69726f2957c68fc26777cfa843`
+reused and audited all 16 source partitions, locked both arms before docking,
+and completed 12 successful new oracle attempts with no failures. Post-hoc
+produced four eligible endpoints and reached -9.9. In-loop produced eight and
+reached -10.0, improving the shared 51-call warm champion of -9.7. The best
+endpoint in both arms was a completed six-member pendant-ring construction,
+with cycle-rank and ring-system deltas of +1 and six added heavy atoms. The
+frozen endpoint predictor ranked those winners last within their respective
+docked batches. This is a positive development result for executable compound
+options and a negative result for endpoint ranking; it is one inspected round,
+not a reproducibility or benchmark-superiority result. The verified numerical
+record is [the paired comparison review](../diagnostics/t4_frontier_compare/result.json).
+No automatic continuation is authorized.
+
 ## Question and support
 
 Does short in-loop task guidance improve eligible molecular proposals over the
