@@ -15,7 +15,18 @@ region controller and HOW remains the existing option continuation kernel. No
 reference model, executor, molecular support, `Q(M)`, docking label or Modal job
 changed. Runtime contract: `docs/OPTION_CONTROLLER_RUNTIME_V1.md`.
 
-Latest discriminating result: the only eligible stored balanced-reference PMO
+Latest paid development result: the locked 95-candidate Perindopril MPO
+plan-pool assay found a new champion of **0.6948083338**, versus the prior
+**0.6835298931**. All three parent improvements occurred among 31 `actor_top`
+candidates; the 32 uniform and 32 largest-release candidates produced none. The
+winning local plan used six primitives and released 10.5% of the parent. This
+shows the existing complete-plan actor had sparse ranking signal and the pool
+was not barren. It does not validate the new future-value head or a full PMO
+optimizer, and it is not a ring-building result. Cost: 95 new calls, bringing
+accounting to 249455 prescreen plus 2370 development physical calls. Audit:
+`diagnostics/pmo_plan_pool_prevalence/`. No job is active.
+
+Latest option-value result: the only eligible stored balanced-reference PMO
 continuations contain zero positive cells among 288 identified horizon-threshold
 targets (600 total cells; 48% identified after right censoring; 50 boundary rows,
 four source groups, eight terminal lineages). Fitting would therefore create a

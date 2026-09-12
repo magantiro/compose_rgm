@@ -84,3 +84,19 @@ distribution, structural diversity, intended release, realized primitive depth,
 compilation coverage, proposal time, and all oracle accounting must be reported.
 This is exposed warm development, not official PMO area under the curve or evidence
 of external superiority.
+
+## Result
+
+The complete assay finished on 2026-09-12. All 95 candidates were scored. The
+best reached `0.6948083337796512`, exceeding the prior champion
+`0.6835298930947339` by `0.0112784406849173`. Three candidates improved their
+exact parents, and all three came from the 31 `actor_top` candidates. Uniform
+hash and largest release produced zero parent improvements across 32 candidates
+each. The winning plan is a local six-primitive rewrite at released fraction
+`0.10526315789473684`, not a ring construction.
+
+The declared positive decision fires: bank the candidate and attribute the
+selection role. This establishes useful sparse ranking signal in the recorded
+complete-plan actor, but not a validated future value or efficient full
+optimizer. Authoritative result and interpretation:
+`diagnostics/pmo_plan_pool_prevalence/`.

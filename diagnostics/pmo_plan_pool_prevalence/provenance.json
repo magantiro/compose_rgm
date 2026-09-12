@@ -1,0 +1,45 @@
+{
+  "analysis_commit": "10a08fc55cb07ea61a860d865cdde64e998234dd",
+  "authorized_calls": 95,
+  "compiled_lock": {
+    "candidate_count": 95,
+    "content_identity": "3dba22ccf6572ddf94d95daa7ab3efcee04fc42704b08be1c931ba1734f6cf52",
+    "file_sha256": "4f43b5a0b51942ae12e72ef0393eddfaec10f75fdf5c75ec6f7b7037963aeeb7",
+    "path": "/private/tmp/compose-pmo-plan-pool-compile/compiled_pool_lock.json"
+  },
+  "hardware": {
+    "device": "cpu",
+    "machine": "arm64",
+    "processes": 1
+  },
+  "implementation_sha256": {
+    "src/compose_v4/experiments/pmo_macro_probe.py": "09e63943115e12201f5e31127b4e167b8d4e065183c2d2379daa4e928c574bd7",
+    "src/compose_v4/experiments/pmo_plan_pool_lock.py": "47437811de1d58e2fa4068fa4927d1c94ac5cd5497c23231184a360d2276499a",
+    "tools/pmo_plan_pool_lock.py": "b043d693f8f2145156942d14691741cde5418c522b28eb73cb8159499debf736"
+  },
+  "new_oracle_calls": 95,
+  "oracle": {
+    "name": "perindopril_mpo",
+    "pytdc_source_identity": "26675490e5253f68f5effe3186e58f3a009dd723a7d327e94310910818ea76ce",
+    "pytdc_python_files": 64
+  },
+  "report": {
+    "content_identity": "075801cfb19ceb182cbc89d50e468c2bc1b444324968226dde69725eee983b88",
+    "file_sha256": "33c9101804e87f3adc2a1908cbd0a315fdc7156747de34df13f1f998a20c6167",
+    "path": "diagnostics/pmo_plan_pool_prevalence/report.json"
+  },
+  "request_lock": {
+    "file_sha256": "579fee9cb9b4b482ee29ec06089ac764bc6776bc44bfdf5a5e62cfa83c4355",
+    "path": "/private/tmp/compose-pmo-plan-pool-score/result_oracle/request_lock.json"
+  },
+  "schema_version": "pmo_plan_pool_prevalence_provenance_v1",
+  "software": {
+    "PyTDC": "0.3.6",
+    "numpy": "1.26.4",
+    "python": "3.12.9",
+    "rdkit": "2024.03.5",
+    "scipy": "1.13.1",
+    "torch": "2.4.0"
+  },
+  "task": "perindopril_mpo"
+}
