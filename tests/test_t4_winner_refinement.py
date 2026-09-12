@@ -12,6 +12,7 @@ from compose_v4.experiments.t4_winner_refinement import (
     contract_at,
     property_scorer,
     replicate_summary,
+    reused_winner_controls,
     sample_stream,
     select_candidates,
     winner_at,
@@ -20,6 +21,44 @@ from compose_v4.rewrite.kernel import editing_v2_semantic_rewrite_system
 from compose_v4.rewrite.operators import AtomInsert
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_resume_reuses_only_the_exact_completed_controls():
+    from compose_v4.rewrite.kernel import canonical_state_key
+    from compose_v4.rewrite.trace_shard import encode_state
+
+    contract = contract_at(ROOT)
+    state = winner_at(ROOT, contract)
+    seed = json.loads((ROOT / "docs/GENMOL_T4_SEEDS.json").read_text())[0]["smiles"]
+    winner = property_scorer(seed)(
+        {"smiles": canonical_state_key(state), "state": encode_state(state)}
+    )
+    rows = reused_winner_controls(ROOT, contract, winner)
+    assert len(rows) == 3 and all(row["completed_at_utc"] for row in rows)
+    with pytest.raises(ValueError, match="different winner"):
+        reused_winner_controls(ROOT, contract, {**winner, "sim": 0.9})
+    with pytest.raises(ValueError, match="seed schedule"):
+        reused_winner_controls(ROOT, {**contract, "docking": {"seeds": [1, 2, 3]}}, winner)
+
+
+def test_qualified_inference_dependencies_and_reference_inputs_match():
+    from compose_v4.experiments.continuation_profile import verify_file
+    from compose_v4.experiments.t4_matched_pilot import unseal
+
+    c = contract_at(ROOT)
+    config = c["qualified_inference"]
+    package = unseal(ROOT / "diagnostics/pmo_inference_speed/package_manifest.json")
+    receipt = unseal(ROOT / config["qualification"]["path"])
+    assert receipt["status"] == "pass"
+    assert receipt["export"]["manifest_sha256"] == config["package"]["manifest_sha256"]
+    assert (
+        package["provenance"]["reference_inputs"]["checkpoint"]["sha256"]
+        == c["expected_input_sha256"]["r_theta_checkpoint"]
+    )
+    for path, digest in package["provenance"]["dependency_sources"].items():
+        verify_file(ROOT / path, receipt["cache_sources"].get(path, digest))
+    for path, digest in config["extra_model_sources"].items():
+        verify_file(ROOT / path, digest)
 
 
 def test_selection_is_unique_balanced_and_ignores_task_scores():

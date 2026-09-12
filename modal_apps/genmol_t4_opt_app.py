@@ -70,6 +70,12 @@ image = (
                     str(REMOTE_ROOT / "diagnostics/t4_task_search/value_check.json"), copy=True)
     .add_local_file(ROOT / "diagnostics/t4_whole_ring_plan/result.json",
                     str(REMOTE_ROOT / "diagnostics/t4_whole_ring_plan/result.json"), copy=True)
+    .add_local_file(ROOT / "diagnostics/pmo_inference_speed/result_sealed.json",
+                    str(REMOTE_ROOT / "diagnostics/pmo_inference_speed/result_sealed.json"), copy=True)
+    .add_local_file(ROOT / "diagnostics/pmo_inference_speed/reference_law_sealed.json",
+                    str(REMOTE_ROOT / "diagnostics/pmo_inference_speed/reference_law_sealed.json"), copy=True)
+    .add_local_file(ROOT / "diagnostics/t4_winner_refinement/attempt_1/docked_controls.json",
+                    str(REMOTE_ROOT / "diagnostics/t4_winner_refinement/attempt_1/docked_controls.json"), copy=True)
     .add_local_file(ROOT / "modal_apps/genmol_t4_opt_app.py",
                     str(REMOTE_ROOT / "modal_apps/genmol_t4_opt_app.py"), copy=True)
     .env({"PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}", "OMP_NUM_THREADS": "1"})
@@ -113,10 +119,11 @@ def t4_winner_refinement(task: dict[str, Any]) -> dict[str, Any]:
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
 def t4_winner_refinement_propose(task: dict[str, Any]) -> dict[str, Any]:
-    from compose_v4.experiments.t4_winner_refinement import proposal_remote
+    from compose_v4.experiments.t4_winner_refinement import proposal_remote, qualified_runtime
     from modal_apps.run_process_v2_p50_app import _validate_remote_revision
 
-    return proposal_remote(task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume, _runtime,
+    return proposal_remote(task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume,
+                           lambda: qualified_runtime(REMOTE_ROOT, ARTIFACT_ROOT),
                            _validate_remote_revision)
 
 

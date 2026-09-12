@@ -59,6 +59,73 @@ def winner_at(root, contract):
     return graph
 
 
+def qualified_runtime(root, artifacts):
+    """Reuse an authenticated inference export, without reopening training gates.
+
+    The original checkpoint, complete dependency inventory, qualified cache-source
+    receipt and independent saved probability row must all match. No gate is edited.
+    """
+    from compose_v4.experiments.inference_package import load_package
+    from compose_v4.experiments.pmo_online_policy import compare_laws, law_values
+    from compose_v4.experiments.production_successor_kernel import _default_rewrite_system
+
+    contract = contract_at(root)
+    config = contract["qualified_inference"]
+    for path, digest in config["extra_model_sources"].items():
+        verify_file(root / path, digest)
+    package = config["package"]
+    directory = Path(package["package_path"])
+    if directory.parent != artifacts / "inference_packages":
+        raise ValueError("inference package outside the approved artifact root")
+    model, manifest = load_package(
+        directory,
+        manifest_sha256=package["manifest_sha256"],
+        repo_root=root,
+        qualified_source_receipt=(
+            root / config["qualification"]["path"],
+            config["qualification"]["sha256"],
+        ),
+    )
+    reference_inputs = manifest["provenance"]["reference_inputs"]
+    for key, field in (("checkpoint", "r_theta_checkpoint"), ("run_paths", "r_theta_run_paths")):
+        if reference_inputs[key]["sha256"] != contract["expected_input_sha256"][field]:
+            raise ValueError("inference export belongs to another frozen reference model")
+        verify_file(Path(reference_inputs[key]["path"]), reference_inputs[key]["sha256"])
+    law = config["reference_law"]
+    verify_file(root / law["path"], law["sha256"])
+    reference = unseal(root / law["path"])
+    _, actual = law_values(model, decode_state(reference["source"]))
+    comparison = compare_laws(actual, reference, config["portability"])
+    return {
+        "model": model,
+        "system": _default_rewrite_system(model),
+        "model_checkpoint": reference_inputs["checkpoint"]["path"],
+        "run_paths": reference_inputs["run_paths"]["path"],
+        "validation": {**comparison, "package_manifest_sha256": package["manifest_sha256"]},
+    }
+
+
+def reused_winner_controls(root, contract, winner):
+    """Return only the exact completed controls named by a resume amendment."""
+    reuse = contract.get("reuse_winner_controls")
+    if reuse is None:
+        return None
+    verify_file(root / reuse["path"], reuse["sha256"])
+    rows = unseal(root / reuse["path"])
+    if len(rows) != 3 or [r["index"] for r in rows] != [0, 1, 2]:
+        raise ValueError("control reuse requires three complete indexed receipts")
+    if [r["docking_seed"] for r in rows] != contract["docking"]["seeds"]:
+        raise ValueError("reused controls change the docking seed schedule")
+    for row in rows:
+        if any(
+            row[k] != winner[k] for k in ("smiles", "state", "qed", "sa", "sim", "oracle_eligible")
+        ):
+            raise ValueError("reused control has a different winner or endpoint protocol")
+        if not row.get("completed_at_utc") or not row.get("started_at_utc"):
+            raise ValueError("ambiguous control attempt cannot be reused or retried")
+    return rows
+
+
 def property_scorer(seed_smiles):
     generator = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
     seed_fp = generator.GetFingerprint(Chem.MolFromSmiles(seed_smiles))
@@ -312,6 +379,7 @@ def proposal_remote(task, root, artifacts, volume, runtime_factory, validate_rev
         "products": [score(r) for r in products],
         "detail": detail,
         "law_work": law.counts,
+        "runtime_validation": runtime.get("validation"),
         "seconds": perf_counter() - started,
         "oracle_calls": 0,
         "source": encode_state(graph),
@@ -397,9 +465,21 @@ def driver_remote(task, root, artifacts, volume, validate_revision, propose, doc
             commit()
             return result
 
-        winner_rows = batch(
-            "winner", [{**winner, "docking_seed": s} for s in contract["docking"]["seeds"]]
-        )
+        winner_rows = reused_winner_controls(root, contract, winner)
+        reused_calls = 0 if winner_rows is None else len(winner_rows)
+        if winner_rows is None:
+            winner_rows = batch(
+                "winner", [{**winner, "docking_seed": s} for s in contract["docking"]["seeds"]]
+            )
+        else:
+            seal(
+                output / "reused_winner_controls.json",
+                {
+                    "source": contract["reuse_winner_controls"],
+                    "rows": winner_rows,
+                },
+            )
+            commit()
         progress.update(phase="proposal_census", winner_scores=[r["ds"] for r in winner_rows])
         print(f"winner controls: {[r['ds'] for r in winner_rows]}", flush=True)
         census = list(propose([{**task, "unit": 0}]))
@@ -452,7 +532,9 @@ def driver_remote(task, root, artifacts, volume, validate_revision, propose, doc
             "docked": docked,
             "best": best,
             "confirmation": repeated,
-            "new_oracle_attempts": len(winner_rows) + len(docked) + len(repeated),
+            "new_oracle_attempts": len(winner_rows) - reused_calls + len(docked) + len(repeated),
+            "reused_control_attempts": reused_calls,
+            "total_assay_oracle_attempts": len(winner_rows) + len(docked) + len(repeated),
             "comparison": replicate_summary(winner_rows, [best, *repeated])
             if best
             else {"status": "no_scored_candidates"},
@@ -466,7 +548,7 @@ def driver_remote(task, root, artifacts, volume, validate_revision, propose, doc
             "benchmark_claim": False,
             "training_performed": False,
         }
-        if result["new_oracle_attempts"] > contract["compute"]["oracle_call_limit"]:
+        if result["total_assay_oracle_attempts"] > contract["compute"]["oracle_call_limit"]:
             raise RuntimeError("oracle budget exceeded")
         seal(output / "completed.json", result)
         commit()

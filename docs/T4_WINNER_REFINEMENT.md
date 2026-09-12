@@ -43,6 +43,23 @@ development evidence, not substituted for the fresh control replicates.
 
 ## Decision and interpretation
 
+### Recorded operational resume, 2026-09-12
+
+The first launch completed its three winner controls, all -13.6, then failed
+during reference initialization because the training-chain process identity was
+stale. No proposal endpoint was docked. Preserve that failed run and reuse the
+three sealed controls; the entire assay still permits nineteen calls, with at
+most sixteen remaining. Do not retry or reselect the controls.
+
+The resume uses the previously authenticated inference package with the same
+checkpoint hash, its passing cache-source qualification, all 116 dependency-file
+bindings, and the existing independent saved-law numerical admission. It does
+not edit, waive, or reopen the failed training-chain gate. WHERE/WHAT/HOW,
+proposal seeds, proposal limits, endpoint selection and docking protocol are
+unchanged. Report newly spent and reused calls separately. Qualification failure
+must stop the resume before proposal generation. This operational amendment is
+not authorization for a second scientific replicate.
+
 Compare the selected candidate's three scores with the winner's three scores,
 including their ranges and individual replicate differences. A negative mean
 difference is a development signal; three repeats do not establish broad

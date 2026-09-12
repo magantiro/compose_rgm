@@ -372,6 +372,37 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped multi-site program extension and bounded docking approval, 2026-09-12:**
+the user explicitly requested adding jointly planned edits across disconnected
+mutable sites, dependency/conflict separation, and serial executor revalidation.
+Implement an optional two-to-four-site program channel, preserving the existing
+single-region and generic channels. Reuse the attachment-program backend and
+exact traces, and compare uninterrupted serial, independently chosen multi-site,
+and jointly conditioned multi-site proposals without intermediate task pruning.
+The user's subsequent full Modal approval authorizes a bounded follow-on docking
+pilot, not unlimited compute: retain at most 66 new calls, 30 total containers,
+CPU only, and a $20 reserved ceiling. Freeze a task-specific recipe, contexts,
+candidate locks, repeat allocation and work limits before launch; adding the
+multi-site arms must fit that ceiling or remain a separate zero-oracle assay.
+Use a clean committed source, existing production docking protocol and durable
+receipts. No reference/executor change, hidden-oracle screening, new outer-test
+selection or benchmark-superiority claim follows from this development scope.
+This supersedes the offline-only restriction immediately below, not the
+editing-V2 training ladder or the separate nineteen-call refinement recipe.
+
+**Scoped attachment-specific program development, 2026-09-12:** the user approved
+trying the supplied program-proposal recommendation. The immediate implementation
+unit is a local, zero-oracle typed program/replay adapter and context-conditioned
+attachment proposal, reusing exact saved demonstrations and immutable public scored
+candidate pools. Preserve existing source roles, label external scores separately,
+and keep answer-known reconstruction distinct from transfer and discovery. This
+optional executor-supported proposal does not modify R_theta, executor semantics,
+the existing WHERE law, or its KL contracts. Any eventual departure from the old
+controller is a separately identified proposal arm, not an exact Doob claim.
+The proposed 66-call comparison remains a separate unapproved experiment. No
+remote deployment, new oracle calls, or large training/data run follows from this
+local implementation scope. Preserve the previous bounded refinement recipe.
+
 **Scoped winner-initialized T4 refinement, 2026-09-12:** the user approved the
 proposed small experiment starting from a published IVG winner. Implement and run
 the recipe in `docs/T4_WINNER_REFINEMENT.md` and
@@ -383,6 +414,13 @@ caps are the bounded implementation of that approval. No model fitting,
 reference/executor change, automatic follow-on round, or matched benchmark
 superiority claim is authorized. Keep original-seed endpoint constraints,
 immutable candidate locks, exact trace replay and full call accounting.
+
+The first launch spent three of those nineteen calls on completed winner
+controls, then failed at a stale training-chain identity. The bounded repair may
+reuse the already-qualified, dependency-matching inference package and those
+exact controls. Preserve the failed receipt and gate, verify source/tensor/law
+parity, and spend at most sixteen additional calls under the unchanged recipe.
+No new replicate, changed proposal law, or new control selection is authorized.
 
 **Scoped option-controller continuation-bank preparation, 2026-09-12:** after
 reviewing the small `+0.0112784407` plan-pool gain, the user agreed to stop

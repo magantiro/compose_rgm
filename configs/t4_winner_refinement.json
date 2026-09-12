@@ -19,7 +19,7 @@
     "reserved_cost_usd": 10,
     "restart_unit": "immutable proposal unit or completed oracle receipt; ambiguous oracle calls never retried"
   },
-  "contract_sha256": "a3f0735f05f50dc3f31c14f7c987a71aa7d456790cf2f6787c5b1de6515c279f",
+  "contract_sha256": "934de5690c1bb13874dfbf768e2bb0b2fee25de4fb010c70d8164235c3848db0",
   "docking": {
     "cpu": 1,
     "exhaustiveness": 1,
@@ -50,9 +50,55 @@
   "law_caches": [],
   "protocol": {
     "path": "docs/T4_WINNER_REFINEMENT.md",
-    "sha256": "4e475104a454ad5a0b1616b3f0f749c21a5b074dc295559a1f5cc2c2d6fd0990"
+    "sha256": "2df86af4f05478fe44259a9d5aedf8232b0c2eb2f03d07e64029ea5047a3e02d"
+  },
+  "qualified_inference": {
+    "extra_model_sources": {
+      "src/compose_v4/experiments/editing_v2_process_v2_t1_runtime.py": "c73cf783295bcc5f5da4a65737e6960634d09a65acc40927ca8dba841c3e3b24",
+      "src/compose_v4/experiments/editing_v2_semantic_t1_capacity_runner.py": "63bef72d5537917a6784472263a070dd0f10aff50157a7aa960f253044920c77"
+    },
+    "package": {
+      "at": "2026-09-10T23:38:21.115771+00:00",
+      "contract_sha256": "94a31eae0c25b457039221c53cfcd7b498b2e555f046937015648e48d9429cb8",
+      "manifest_sha256": "d89cfaf14e44fbdbc9e974c56ded9e6c7f09e27cbe624243a6a1faf7e8d0ea59",
+      "marks": 1196,
+      "oracle_calls": 0,
+      "original_runtime_seconds": 102.93228336,
+      "package_load_seconds": 0.08130083300000024,
+      "package_path": "/artifacts/inference_packages/9dd2eaa142417ad9bbf7ca1bf18586e3372c3312dcbee59d40a3117bb5affe66",
+      "roundtrip_law_sha256": "7ba34c96715ba35540cbff309b7d3c73c97d3cb09347c2164af701a700047e8e",
+      "run_id": "41306bcba8ac5ce3de12e47c97cb9c96e822b16bbc81c6da65e37a400b985d1e",
+      "schema_version": "inference_export_result_v1",
+      "status": "verified_export",
+      "tensor_sha256": "c977ee3fe0cfdcafa204a2add27f3feef59f5dfcf4f3384659d8902a9006167c"
+    },
+    "portability": {
+      "max_absolute_error": 1e-07,
+      "max_half_l1": 1e-06
+    },
+    "qualification": {
+      "path": "diagnostics/pmo_inference_speed/result_sealed.json",
+      "sha256": "50f0a13f23165db6f1f3b475b3557ab08878e86aa0b7174256cb79a5dc08c829"
+    },
+    "reference_law": {
+      "path": "diagnostics/pmo_inference_speed/reference_law_sealed.json",
+      "sha256": "1966ec6cddb20d2010b2ea7df3208c594cb1ff5c260c9dac87bc99cc34fc66f9"
+    }
   },
   "required_rdkit": "2024.03.5",
+  "resume": {
+    "control_selection_changed": false,
+    "previous_contract_file_sha256": "8f6bbc297e5ebf817595bd46b7fd97845f386668edecc498f9aa05417ee8a01b",
+    "proposal_recipe_changed": false,
+    "reason": "stale training-chain identity; use existing qualified inference package, preserve gate",
+    "remaining_new_oracle_calls": 16
+  },
+  "reuse_winner_controls": {
+    "calls": 3,
+    "path": "diagnostics/t4_winner_refinement/attempt_1/docked_controls.json",
+    "run_id": "fd2fe78e8fe3a6cc5f0dbdd9a3795c28bfa00762d9abc536e57501eb69e7cc92",
+    "sha256": "da005e8d6b6a25e04923061d1616231f0357b74b6e831774fd207a434bbcc192"
+  },
   "schema_version": "t4_winner_refinement_contract_v1",
   "search": {
     "candidate_limit": 14,
