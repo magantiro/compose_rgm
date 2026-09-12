@@ -372,6 +372,22 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped option-controller construction authorization, 2026-09-12:** the user
+explicitly requested implementation of the full controller architecture selected
+in `docs/CONTROLLER_LITERATURE_DECISION_2026-09-12.md`. The immediate milestone
+is the offline, reusable controller core and its retrospective gate described in
+`docs/OPTION_CONTROLLER_V1.md`: compositional option decisions, a
+policy-congruent distributional improvement target/model, a conservative learned
+option proposal with explicit reference probability, persistent option-boundary
+SMC state with proposal correction, and batch acquisition over locked completed
+candidates. Local CPU fitting may use existing paid development outcomes and
+exact stored trajectories. This authorization permits zero new oracle calls, no
+Modal deployment, no accelerator training, no reference-model or executor
+change, and no benchmark claim. A later live paired run still requires its own
+prospective recipe and budget authorization. `BUILD_RING_SYSTEM` support may be
+implemented but remains disabled by default until the inherited compound-option
+decision is recorded.
+
 **Scoped learned-plan comparison authorization, 2026-09-11:** the user approved
 trying the proposed learning search policy and then requested continued work.
 Authorize one warm Perindopril development comparison: four rounds, sixteen

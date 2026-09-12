@@ -1,16 +1,26 @@
 # COMPOSE controller: current decision record
 
-Updated 2026-09-11. Active goal: reproducible improvement over the actual T4 and
+Updated 2026-09-12. Active goal: reproducible improvement over the actual T4 and
 PMO champions, then verified matched external comparisons. Supporting chemistry,
 known-winner reconstruction and mathematics are not benchmark success.
 
-Current active run: the authorized paired T4 frontier comparison on PARP1 seed0,
-delta 0.4, launched from clean commit `06e6fcb2f77d` as durable Modal call
-`fc-01M29P6WDXEV2Z3SHQZ4EYEY30`, run
-`765b2b854d50c29966f2b2a032a4ccbe1e3364c43d50a8376c6845f48cc5ed41`.
-It compares identical post-hoc and in-loop generators for one synchronous round,
-20 new docking calls per arm. Sixteen exact lineage workers are reduced before
-either arm docks. No automatic later round is authorized.
+Current active run: none. The option-controller V1 reusable core is implemented
+offline: compositional WHAT features, a policy-identified distributional
+best-improvement value, a conservative learned proposal with explicit base-law
+probability, persistent option-boundary SMC with `B/q` correction, and locked
+joint-posterior batch acquisition. WHERE remains the qualified external region
+controller and HOW remains the existing exact option continuation kernel. No
+reference model, executor, molecular support, `Q(M)`, docking label or Modal job
+changed in this milestone.
+
+Latest discriminating result: the only eligible stored balanced-reference PMO
+continuations contain zero positive cells among 288 identified horizon-threshold
+targets (600 total cells; 48% identified after right censoring; 50 boundary rows,
+four source groups, eight terminal lineages). Fitting would therefore create a
+trivial all-negative head, not a validated future-value model. The gate abstains
+and prescribes the smallest missing evidence: policy-congruent option
+continuations containing both improving and non-improving outcomes. Audit:
+`diagnostics/option_controller_v1/report.json`. New oracle calls: zero.
 
 Latest PMO mechanism: witnessed three-option recoveries exist (51 among 903
 temporary-loss branches), but their future-return lift is directional rather than
