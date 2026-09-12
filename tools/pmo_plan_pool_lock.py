@@ -8,25 +8,41 @@ import subprocess
 from pathlib import Path
 
 from compose_v4.experiments.continuation_profile import publish_json, sha256_file
-from compose_v4.experiments.pmo_plan_pool_lock import build_lock
+from compose_v4.experiments.pmo_plan_pool_lock import build_lock, compile_locked_queues
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--result", type=Path, required=True)
-    parser.add_argument("--artifacts", type=Path, required=True)
-    parser.add_argument(
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    lock = subparsers.add_parser("lock")
+    lock.add_argument("--result", type=Path, required=True)
+    lock.add_argument("--artifacts", type=Path, required=True)
+    lock.add_argument(
         "--prepared",
         type=Path,
         default=Path("diagnostics/pmo_plan_policy/prepared.json"),
     )
-    parser.add_argument(
+    lock.add_argument(
         "--output",
         type=Path,
         default=Path("diagnostics/pmo_plan_policy/pool_queue_lock.json"),
     )
-    parser.add_argument("--max-pools", type=int, default=32)
+    lock.add_argument("--max-pools", type=int, default=32)
+    compile_parser = subparsers.add_parser("compile")
+    compile_parser.add_argument("--lock", type=Path, required=True)
+    compile_parser.add_argument("--artifacts", type=Path, required=True)
+    compile_parser.add_argument("--output", type=Path, required=True)
+    compile_parser.add_argument("--workers", type=int, default=8)
     args = parser.parse_args()
+    if args.command == "compile":
+        value = compile_locked_queues(
+            args.lock, args.artifacts, args.output, workers=args.workers
+        )
+        print(
+            f"compiled {value['candidate_count']} unique candidates after "
+            f"{value['attempt_count']} attempts; new oracle calls=0"
+        )
+        return
     value = build_lock(
         args.result, args.artifacts, args.prepared, max_pools=args.max_pools
     )

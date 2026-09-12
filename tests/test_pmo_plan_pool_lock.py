@@ -1,7 +1,11 @@
+import pytest
+
+from compose_v4.control.docking_value import identity
 from compose_v4.experiments.pmo_plan_pool_lock import (
     Pool,
     role_queues,
     round_robin_pools,
+    validate_lock,
 )
 
 
@@ -50,3 +54,17 @@ def test_role_queues_are_deterministic_disjoint_and_exclude_known():
     assert first["actor_top"][0]["smiles"] == row.products[-1]
     flattened = [entry["smiles"] for queue in first.values() for entry in queue]
     assert len(flattened) == len(set(flattened))
+
+
+def test_queue_lock_identity_fails_closed():
+    body = {
+        "schema_version": "pmo_plan_pool_queue_lock_v1",
+        "roles": ["actor_top", "uniform_hash", "largest_release"],
+        "queue_depth": 3,
+        "new_oracle_calls": 0,
+    }
+    lock = {**body, "lock_sha256": identity(body), "analysis_commit": "abc"}
+    validate_lock(lock)
+    lock["queue_depth"] = 4
+    with pytest.raises(ValueError, match="invalid or altered"):
+        validate_lock(lock)
