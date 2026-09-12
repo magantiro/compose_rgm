@@ -122,9 +122,8 @@ submission revision and a fresh-laptop path, see
    losslessly on `legacy-main-recovery-20260912` at commit `f20f7bb`. That
    branch is unvalidated quarantine, not current controller work; do not merge
    it wholesale.
-2. Start from a fresh clone or clean worktree of `compose-iclr` after this
-   integration commit. The branch is local and unpushed until explicitly
-   authorized.
+2. Start from a fresh clone or clean worktree of `origin/compose-iclr`. The
+   quarantine branch is durable on `origin` but is not a development base.
 3. Run `python3 tools/preflight.py` before any scientific launch.
 4. For long T4 work, run `modal deploy modal_apps/genmol_t4_opt_app.py`, then
    use the durable launcher in `tools/t4_launch.py`. Do not use

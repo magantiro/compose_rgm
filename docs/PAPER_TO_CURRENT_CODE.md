@@ -128,7 +128,7 @@ primitive executor.
 
 ## First hour on a fresh laptop
 
-After `compose-iclr` has been pushed and cloned:
+After cloning the repository:
 
 ```bash
 git switch compose-iclr
@@ -165,6 +165,6 @@ from their recorded durable locations and verified by hash.
 - Topic branches and detached historical worktrees are evidence lineage, not
   alternative starting points.
 
-At the time this map was written, `compose-iclr` is local and unpushed. A
-partner cloning from `origin` will not receive it until an authorized push is
-performed.
+Both `compose-iclr` and `legacy-main-recovery-20260912` are published on
+`origin`. New collaborators should check out `compose-iclr`; the recovery
+branch exists only to make the preserved legacy state durable.
