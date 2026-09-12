@@ -22,6 +22,18 @@ enumeration and preserves the original paths, RNG streams, primitive horizons,
 and candidate pool. It will rerun reduction, selected-path replay, and locking in
 the pinned RDKit container before any of the authorized calls can occur.
 
+Recovery run
+`6742f226f6768273cb1f83f0fb7e58f0a75acfaf1f91ecf3c9ecb365fde181b8`
+then authenticated and reduced the reused partitions, but stopped during the
+first selected-path audit with zero oracle calls. The verifier had assumed that
+one physical primitive mark must yield exactly one augmented option state. A
+parameterized construction mark can legitimately match several option-progress
+branches even though all remain ordinary executor transitions. In the failing
+event the recorded exact augmented product matched one of two branches uniquely.
+The repair therefore requires exactly one successor equal to the recorded full
+option state and rejects zero matches or duplicate matches; it does not weaken
+the executor, option contract, or molecular-product check.
+
 ## Question and support
 
 Does short in-loop task guidance improve eligible molecular proposals over the

@@ -33,6 +33,26 @@ from compose_v4.rewrite.kernel import canonical_state_key
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
 
 
+def matching_replayed_successor(successors, expected_payload):
+    """Resolve one recorded augmented state from an aliased primitive mark.
+
+    A physical descriptor mark can be compatible with several option-progress
+    branches. The event's exact saved option state disambiguates those branches;
+    accepting the mark requires exactly one match, not exactly one total branch.
+    """
+    expected = payload_hash(expected_payload)
+    matches = [
+        successor
+        for successor in successors
+        if payload_hash(state_payload(successor)) == expected
+    ]
+    if len(matches) != 1:
+        raise ValueError(
+            "selected primitive does not uniquely recover its recorded augmented successor"
+        )
+    return matches[0]
+
+
 def verify_preparation(result, warm, system):
     """No learned-law re-enumeration: replay the selected marks through option contracts.
 
@@ -202,11 +222,15 @@ def verify_preparation(result, warm, system):
                         max_executor_applications=None,
                         product_gate=EXECUTABLE_PRODUCT_GATE,
                     ).row(node.active)
-                    if len(witness.successors) != 1 or payload_hash(
-                        state_payload(witness.successors[0])
-                    ) != payload_hash(event["option_product"]):
-                        raise ValueError("selected primitive fails executor or option contract")
-                    following = witness.successors[0]
+                    try:
+                        following = matching_replayed_successor(
+                            witness.successors, event["option_product"]
+                        )
+                    except ValueError as error:
+                        raise ValueError(
+                            f"lineage {unit['lineage_index']} event {index}: "
+                            "selected primitive fails executor or option contract"
+                        ) from error
                     expected_product = MolecularHierarchy._successor(node, following)
                     if payload_hash(encode_search_state(expected_product)) != payload_hash(
                         event["product"]

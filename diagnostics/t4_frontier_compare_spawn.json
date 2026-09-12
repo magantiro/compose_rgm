@@ -1,14 +1,14 @@
 {
-  "call_id": "fc-01M29PZF2CJBEA4FF9JB7Y9KQY",
+  "call_id": "fc-01M29VHT4WPACHQP9KTNVXFJZ8",
   "oracle_call_limit": 40,
   "oracle_calls": 0,
   "schema_version": "t4_frontier_compare_spawn_v1",
   "task": {
     "app_sha256": "bd7e35e6de7bc86ba32f5bea0d52d737e1e9b1932a1b12eefca5fc698b0fa962",
-    "contract_sha256": "7e184daaa14bbef2c30126b59d1f083c5872d0b6149eeecaa2ce9a8a7bcd6a9a",
+    "contract_sha256": "7367eb6ed056136b670a6ff8a4f25759910905481bd0352184c5c9e4856502ca",
     "image_revision": {
-      "commit": "ce956add35fa12fc1898fb202c4c3b9d0bb4fecb",
-      "image_revision_sha256": "c1d3a97fc64e9a93424fcc66c1b173a9ef9a62170dcec65db638a8cef616124c",
+      "commit": "e83a176f9223035494d3bb75b31a22cf2a69cb73",
+      "image_revision_sha256": "d7dd647130212d8704bda6d922248099bc4f245f9bc9a2fb98b7f464ccb07686",
       "schema": "compose.editing_v2.process_v2_p50_modal_image_revision",
       "schema_version": 1,
       "serialized_sources": {
@@ -96,7 +96,7 @@
         "configs/ringcore_v1_successor_leaderboard_v1.json": "cc8015439ee346cf53abd5784368c691130c57eef887d6df39dc01c1639009dc",
         "configs/t4_constraint_recovery.json": "8a72f0f041ee32bab754700b92368371fcab1072f6f5a57eb49d913d8b7e2335",
         "configs/t4_feedback_round.json": "35d0c9da1e74e1e301617aae9b1a0ca93179cac0c75a07fdad6d35bfea9f8b1e",
-        "configs/t4_frontier_compare.json": "7e184daaa14bbef2c30126b59d1f083c5872d0b6149eeecaa2ce9a8a7bcd6a9a",
+        "configs/t4_frontier_compare.json": "7367eb6ed056136b670a6ff8a4f25759910905481bd0352184c5c9e4856502ca",
         "configs/t4_lazy_reference_probe.json": "26699d84b7de5ef33f6d34a604ca12513a0fad34cc1966706a2eb8493b8e6ec2",
         "configs/t4_macro_beam.json": "06173eb3d0d64965427b2258a8722799585c17a287e2d2bc1fa0c3273502e296",
         "configs/t4_matched_pilot.json": "446ad5526d6a47efe1b5645cfe00a7604c5fc5f8b6104f762c7ad6da90abce77",
@@ -138,7 +138,7 @@
         "src/compose_v4/control/carbonyl_option.py": "f9e1a33592aac6ead62cc0c2e8f0f4b564353f563f1c5b79c057b69fc4ba93e2",
         "src/compose_v4/control/constrained_search.py": "56ef42724492b9ed259f5d7aadaa3f3ca2f4f69c3b6fbbd1064fe274db6ed98e",
         "src/compose_v4/control/continuation.py": "38dc27cdb6580d7e5932ec227860e700ca23f9ea269ce9970eb858b2b7db9cb7",
-        "src/compose_v4/control/docking_value.py": "a4c89e82534a311fff797b7573cd9bc58b0fa5ea8ed9c22c83ae9a60c46a041e",
+        "src/compose_v4/control/docking_value.py": "d27ed4b73c5ba2dc99a2eacebba915801f3ca4e71a0e4b5c491377b5978b148d",
         "src/compose_v4/control/feasibility_frontier.py": "dfd6f3ac12781510253fd1e848b77710ccef861c2681285664148f5421c7a0fb",
         "src/compose_v4/control/frontier_search.py": "558da45d5672e8cfcb99b5d5b1c0ee91509fa42a0daa8d5c00c23d5bcb675d93",
         "src/compose_v4/control/fused_option.py": "2b6243338c7dbf317935943dc75ecb2452335e41c2598f084f0ccca965c1d940",
@@ -365,8 +365,8 @@
         "src/compose_v4/experiments/support_invariance_qualification.py": "eea5827683a05bbf1cdaba08f2070c228da007e81bdb785d6dbe3cf92c63487a",
         "src/compose_v4/experiments/t4_endpoint_selection.py": "8276ba1563a1d8031532afa972c32d7cfab3538fd6dc14901b53aa192cec1ab0",
         "src/compose_v4/experiments/t4_feedback_round.py": "6b62b6bfcea59993cecc435fe3975e586059831fab6e966a18a089aa530351ac",
-        "src/compose_v4/experiments/t4_frontier_audit.py": "a43ccf81aaab72744995926d606a4ced16959de9d2f35e5d8f56d6c72d4ffffd",
-        "src/compose_v4/experiments/t4_frontier_compare.py": "d5c703cd4dc3cd374bdc7e40f9bfc4f9eaaf4eed2bf7d02d5501e5d26d77931c",
+        "src/compose_v4/experiments/t4_frontier_audit.py": "6f450c6d83b5275247983e15b3bc536e24511fa83ffc29aedd42b4e34bfbc855",
+        "src/compose_v4/experiments/t4_frontier_compare.py": "05ed935fce318faf74badab3e60bedd3164d426e17a09159d0c6804c1a5a122c",
         "src/compose_v4/experiments/t4_frontier_search.py": "b9ab38334e21840d48258940b18a51a368deb4a6b8270fd5dab98546e2125f13",
         "src/compose_v4/experiments/t4_macro_beam.py": "e5d9e757d1f0a60ec8a1a673046d7dc3348f4f0efc792c0e02a7f860e5626698",
         "src/compose_v4/experiments/t4_matched_pilot.py": "8ccbc05e32cd05c8dbde746e41ece693ef997f6765180e0011a5bd416d90ac4a",
@@ -456,11 +456,11 @@
         "src/compose_v4/rewrite/tree_transport.py": "4f1bb53f8fe60ff6e7dcf00408cf43d66dc79a0ce4e80bde7d70e72708a736aa",
         "src/compose_v4/rewrite/typed_ring_catalog.py": "f043fdb1b309ba72555d662a27b90c487e061ab9771b0c4efadd4786e41790d1"
       },
-      "tree": "8202dd60145cd2e4b8985d47cc6f9bb9544354b2",
+      "tree": "78e6c87dbf8a35f94e2dd56bd98bc77cf7011589",
       "worktree_clean": true
     },
-    "run_id": "1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe"
+    "run_id": "6742f226f6768273cb1f83f0fb7e58f0a75acfaf1f91ecf3c9ecb365fde181b8"
   },
   "volume": "compose-v4-artifacts",
-  "volume_path": "/t4_frontier_compare/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe"
+  "volume_path": "/t4_frontier_compare/6742f226f6768273cb1f83f0fb7e58f0a75acfaf1f91ecf3c9ecb365fde181b8"
 }

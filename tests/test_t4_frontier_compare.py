@@ -7,7 +7,9 @@ import pytest
 
 from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
 from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.experiments import t4_frontier_audit
 from compose_v4.experiments.continuation_profile import sha256_file
+from compose_v4.experiments.t4_frontier_audit import matching_replayed_successor
 from compose_v4.experiments.t4_frontier_compare import (
     ARMS,
     dock_locked_pair,
@@ -203,3 +205,17 @@ def test_pre_oracle_reuse_authenticates_every_partition_and_blocks_crossed_barri
     (source_root / "oracle_barrier.json").write_text("{}")
     with pytest.raises(ValueError, match="crossed the oracle barrier"):
         load_reused_preparations(tmp_path, contract)
+
+
+def test_replay_uses_exact_augmented_product_to_disambiguate_one_physical_mark(monkeypatch):
+    monkeypatch.setattr(t4_frontier_audit, "state_payload", lambda value: value)
+    expected = {"branch": "right", "graph": "same physical molecule"}
+    successors = [
+        {"branch": "left", "graph": "same physical molecule"},
+        expected,
+    ]
+    assert matching_replayed_successor(successors, expected) is expected
+    with pytest.raises(ValueError, match="uniquely recover"):
+        matching_replayed_successor([successors[0]], expected)
+    with pytest.raises(ValueError, match="uniquely recover"):
+        matching_replayed_successor([expected, copy.deepcopy(expected)], expected)
