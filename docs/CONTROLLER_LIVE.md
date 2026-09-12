@@ -23,6 +23,18 @@ continuation value can enrich completed improving plans before paying for a broa
 run. Do not call an endpoint predictor future value, and do not scale the rejected
 complete-plan actor.
 
+Zero-new-call failure separation completed. Across 46 recorded plan pools, only
+76/890 distinct products (8.5%) had pre-run labels. Four pool instances, covering
+three distinct parent structures, contained a known improvement; behavior assigned
+0.89% mean mass to known improvers. This is evidence of ranking headroom but not a
+valid estimate of total proposal recall because 91.5% of distinct products are
+counterfactually unlabeled. The frozen and learning arms continued 6 and 8 scored
+temporary-loss states and recovered 0 above the respective pre-loss score.
+Therefore endpoint-only continuation is inadequate, while rollout-value headroom
+remains unmeasured. Audit: `diagnostics/pmo_plan_policy/failure_separation.json`.
+Next safe action is a locked, bounded pool-prevalence assay on strong parents;
+that requires a new paid-label authorization and must be specified before calls.
+
 Operational status: offline complete-edit context learner implemented and tested;
 **rejected**, no new oracle calls or live job. Preparation plus fit/evaluation took
 4.6562 seconds. Training retained damaging edits and separately labeled failures.

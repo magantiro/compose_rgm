@@ -26,6 +26,33 @@ twisted sequential Monte Carlo, or an exact Doob transform. The next experiment
 must test joint multi-step reachability and delayed credit, not another scale-up
 of this actor.
 
+## Zero-oracle failure separation
+
+The post-run audit in `failure_separation.json` examines all 46 recorded
+complete-plan pools without adding labels. The pools contain 1,719 product slots
+and 890 distinct products, but only 297 slots (17.3%) and 76 distinct products
+(8.5%) had scores before this run. Four pool instances contain a pre-run known
+parent improvement. They represent three distinct parent structures, and the
+behavior policies assign 0.89% mean probability mass to known improving products.
+The learning policy selects the known improvement from the meaningful high-score
+parent pool in round four, but that 0.674748 product is below the retained elite
+set and cannot improve the primary metric.
+
+Counterfactual label coverage is too low to decide whether unselected plans are
+mostly bad or merely unmeasured. The lineage evidence is less ambiguous: frozen
+and learning continue six and eight scored temporary-loss intermediates,
+respectively, and recover zero above the corresponding pre-loss score. Allowing
+low intermediates plus endpoint policy updates is therefore insufficient under
+the tested continuation allocation. This does not test whether wider,
+rollout-valued allocation could recover them.
+
+The next discriminating experiment is a locked pool-prevalence assay on strong
+parents. Randomly selected, previously unscored endpoints must be locked before
+labels are obtained. If useful endpoints are absent, change the proposal process;
+if present but missed, compare endpoint ranking with rollout-derived continuation
+value on the same fixed pools. This is a proposed new paid-label milestone, not
+authorized by the completed comparison.
+
 Authoritative evidence is `report.json`. It binds deployed commit
 `8150257d7d5f2e6d022cd648177b4803cd4c1948`, contract
 `f26d61756bf0eb577d33ee21edb7959bfd182cfc0a1a948339de8a4d60fe03d5`, and
