@@ -242,6 +242,21 @@ class ImprovementFitConfig:
     seed: int = 20260912
 
 
+def improvement_parameter_id(model: MonotoneImprovementModel) -> str:
+    parameters = {
+        name: value.detach().cpu().tolist() for name, value in sorted(model.state_dict().items())
+    }
+    return identity(
+        {
+            "schema_version": "monotone_improvement_parameters_v1",
+            "input_dim": model.input_dim,
+            "n_horizons": model.n_horizons,
+            "n_thresholds": model.n_thresholds,
+            "parameters": parameters,
+        }
+    )
+
+
 def fit_improvement_model(
     targets: ImprovementTargets, config: ImprovementFitConfig | None = None
 ) -> tuple[MonotoneImprovementModel, dict]:
@@ -294,7 +309,11 @@ def fit_improvement_model(
         "parameters": parameters,
         "history": history,
     }
-    return model, {**body, "model_id": identity(body)}
+    return model, {
+        **body,
+        "parameter_id": improvement_parameter_id(model),
+        "model_id": identity(body),
+    }
 
 
 def predict_improvement(model: MonotoneImprovementModel, features: np.ndarray) -> np.ndarray:

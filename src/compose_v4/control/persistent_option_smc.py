@@ -100,6 +100,7 @@ class PersistentOptionPopulation:
     option_boundary: int
     rng_state: dict
     controller_snapshot: str
+    control_context: dict | None = None
 
     def __post_init__(self) -> None:
         if not self.particles or self.option_boundary < 0 or not self.controller_snapshot:
@@ -111,9 +112,19 @@ class PersistentOptionPopulation:
         ):
             raise ValueError("population mixes controller snapshots")
         _json_copy(self.rng_state)
+        if self.control_context is not None:
+            _json_copy(self.control_context)
 
     @classmethod
-    def start(cls, exact_states: Sequence[dict], *, seed: int, controller_snapshot: str):
+    def start(
+        cls,
+        exact_states: Sequence[dict],
+        *,
+        seed: int,
+        controller_snapshot: str,
+        log_potentials: Sequence[float] | None = None,
+        control_context: dict | None = None,
+    ):
         states = tuple(_json_copy(value) for value in exact_states)
         if (
             not states
@@ -123,13 +134,20 @@ class PersistentOptionPopulation:
         ):
             raise ValueError("population start requires exact states and a nonnegative seed")
         n = len(states)
+        potentials = (
+            np.zeros(n, dtype=float)
+            if log_potentials is None
+            else np.asarray(log_potentials, dtype=float)
+        )
+        if potentials.shape != (n,) or not np.isfinite(potentials).all():
+            raise ValueError("initial log potentials must be finite and state-aligned")
         particles = tuple(
             PersistentOptionParticle(
                 particle_id=identity({"root": i, "state": state, "seed": int(seed)})[:24],
                 exact_state=state,
                 history=(),
                 log_weight=-math.log(n),
-                log_potential=0.0,
+                log_potential=float(potentials[i]),
                 alive=True,
                 rng_identity=identity({"stream": i, "seed": int(seed)})[:24],
                 controller_snapshot=controller_snapshot,
@@ -141,25 +159,31 @@ class PersistentOptionPopulation:
             0,
             _json_copy(np.random.default_rng(int(seed)).bit_generator.state),
             controller_snapshot,
+            None if control_context is None else _json_copy(control_context),
         )
 
     def to_dict(self) -> dict:
         body = {
-            "schema_version": "persistent_option_population_v1",
+            "schema_version": "persistent_option_population_v2",
             "particles": [particle.to_dict() for particle in self.particles],
             "option_boundary": self.option_boundary,
             "rng_state": self.rng_state,
             "controller_snapshot": self.controller_snapshot,
+            "control_context": self.control_context,
         }
         return {**_json_copy(body), "population_id": identity(body)}
 
     @classmethod
     def from_dict(cls, payload: dict) -> PersistentOptionPopulation:
         data = _json_copy(payload)
-        if data.pop("schema_version", None) != "persistent_option_population_v1":
+        schema = data.pop("schema_version", None)
+        if schema not in (
+            "persistent_option_population_v1",
+            "persistent_option_population_v2",
+        ):
             raise ValueError("unsupported persistent option-population schema")
         expected = data.pop("population_id", None)
-        body = {"schema_version": "persistent_option_population_v1", **data}
+        body = {"schema_version": schema, **data}
         if identity(body) != expected:
             raise ValueError("persistent option-population identity mismatch")
         particles = tuple(PersistentOptionParticle.from_dict(row) for row in data["particles"])
@@ -168,6 +192,7 @@ class PersistentOptionPopulation:
             int(data["option_boundary"]),
             data["rng_state"],
             data["controller_snapshot"],
+            data.get("control_context"),
         )
 
 
@@ -175,23 +200,28 @@ class PersistentOptionPopulation:
 class OptionTransition:
     source_particle_id: str
     next_exact_state: dict | None
-    reference_probability: float
-    proposal_probability: float
+    log_reference_probability: float
+    log_proposal_probability: float
     next_log_potential: float | None
     alive: bool
     audit: dict
+    operational: dict | None = None
 
     def __post_init__(self) -> None:
         if not self.source_particle_id:
             raise ValueError("option transition requires a source particle")
         if (
-            not math.isfinite(self.reference_probability)
-            or not math.isfinite(self.proposal_probability)
-            or self.reference_probability <= 0
-            or self.proposal_probability <= 0
+            not math.isfinite(self.log_reference_probability)
+            or not math.isfinite(self.log_proposal_probability)
+            or self.log_reference_probability > 1e-12
+            or self.log_proposal_probability > 1e-12
         ):
-            raise ValueError("sampled options require positive reference and proposal probability")
+            raise ValueError(
+                "sampled options require finite log probabilities no greater than zero"
+            )
         _json_copy(self.audit)
+        if self.operational is not None:
+            _json_copy(self.operational)
         if self.alive:
             if self.next_exact_state is None or self.next_log_potential is None:
                 raise ValueError("live option transition requires a state and potential")
@@ -230,8 +260,8 @@ def advance_population(
             increments.append(None)
             continue
         increment = (
-            math.log(row.reference_probability)
-            - math.log(row.proposal_probability)
+            row.log_reference_probability
+            - row.log_proposal_probability
             + row.next_log_potential
             - particle.log_potential
         )
@@ -259,6 +289,7 @@ def advance_population(
             population.option_boundary + 1,
             _json_copy(rng.bit_generator.state),
             population.controller_snapshot,
+            population.control_context,
         )
         return following, {
             "status": "extinct",
@@ -328,6 +359,7 @@ def advance_population(
         population.option_boundary + 1,
         _json_copy(rng.bit_generator.state),
         population.controller_snapshot,
+        population.control_context,
     )
     return following, {
         "status": "live",

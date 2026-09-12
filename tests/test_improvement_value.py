@@ -10,6 +10,7 @@ from compose_v4.control.improvement_value import (
     censored_targets,
     evaluate_improvement,
     fit_improvement_model,
+    improvement_parameter_id,
     predict_improvement,
     source_group_split,
 )
@@ -83,6 +84,7 @@ def test_monotone_parameterization_and_fitting():
     fitted_prediction = predict_improvement(fitted, targets.features)
     assert receipt["identified_cells"] == 32
     assert receipt["model_id"]
+    assert receipt["parameter_id"] == improvement_parameter_id(fitted)
     assert receipt["parameters"]
     assert np.all(np.diff(fitted_prediction, axis=1) >= -1e-7)
     assert np.all(np.diff(fitted_prediction, axis=2) <= 1e-7)

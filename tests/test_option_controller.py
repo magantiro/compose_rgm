@@ -2,14 +2,22 @@ import numpy as np
 import pytest
 import torch
 
-from compose_v4.control.improvement_value import MonotoneImprovementModel
+from compose_v4.control.improvement_value import (
+    MonotoneImprovementModel,
+    improvement_parameter_id,
+)
 from compose_v4.control.option_controller import OptionBoundaryController
 from compose_v4.control.option_features import (
+    REGION_CONTEXT_NAMES,
+    boundary_value_features,
     option_feature_names,
     option_state_features,
     structural_option_features,
 )
-from compose_v4.control.option_policy import AdvantageWeightedOptionActor
+from compose_v4.control.option_policy import (
+    AdvantageWeightedOptionActor,
+    option_actor_parameter_id,
+)
 from compose_v4.control.region_replacement import PREFIX as REPLACEMENT_PREFIX
 from compose_v4.control.ring_program import RingSpec, default_ring_options
 
@@ -29,8 +37,8 @@ def test_structural_features_are_compositional_not_default_menu_membership():
 def test_option_state_features_include_local_global_and_option_clock():
     values = option_state_features(
         [1, 0, 1],
-        current_score=0.4,
-        incumbent=0.5,
+        current_utility=0.4,
+        incumbent_utility=0.5,
         remaining_options=6,
         released_fraction=0.8,
         region_size=24,
@@ -42,11 +50,15 @@ def test_option_state_features_include_local_global_and_option_clock():
     )
     assert values.shape == (12,)
     assert values[-6] == pytest.approx(0.8)
+    boundary = boundary_value_features(
+        [1, 0, 1], current_utility=0.4, incumbent_utility=0.5, remaining_options=6
+    )
+    assert values.shape[0] == boundary.shape[0] + len(REGION_CONTEXT_NAMES)
 
 
 def test_integrated_controller_records_b_over_q_and_exact_terminal_boundary():
     option_dim = len(option_feature_names())
-    actor = AdvantageWeightedOptionActor(2, option_dim, hidden=4)
+    actor = AdvantageWeightedOptionActor(2 + len(REGION_CONTEXT_NAMES), option_dim, hidden=4)
     value = MonotoneImprovementModel(2, 2, 2, hidden=4)
     for model in (actor, value):
         for parameter in model.parameters():
@@ -54,16 +66,19 @@ def test_integrated_controller_records_b_over_q_and_exact_terminal_boundary():
     controller = OptionBoundaryController(
         actor,
         value,
-        actor_snapshot="actor-a",
-        value_snapshot="value-a",
+        actor_snapshot=option_actor_parameter_id(actor),
+        value_snapshot=improvement_parameter_id(value),
         horizons=(1, 2),
         thresholds=(0.01, 0.1),
     )
     selected = controller.decide(
-        ("generic", "cyclize"), (0.7, 0.3), [0.2, 0.4], np.random.default_rng(2)
+        ("generic", "cyclize"),
+        (0.7, 0.3),
+        [0.2, 0.4, *([0.0] * len(REGION_CONTEXT_NAMES))],
+        np.random.default_rng(2),
     )
     assert selected.reference_probability == pytest.approx(selected.proposal_probability)
-    assert selected.controller_snapshot == "actor-a:value-a"
+    assert selected.controller_snapshot == controller.snapshot
     intermediate = controller.log_potential([0.2, 0.4], remaining_options=2, incumbent=0.5)
     assert intermediate > 5
     assert controller.log_potential(
@@ -80,8 +95,45 @@ def test_controller_rejects_unbound_feature_dimensions():
         OptionBoundaryController(
             actor,
             value,
-            actor_snapshot="actor-a",
-            value_snapshot="value-a",
+            actor_snapshot=option_actor_parameter_id(actor),
+            value_snapshot=improvement_parameter_id(value),
             horizons=(1,),
             thresholds=(0.1,),
         )
+
+
+def test_controller_rejects_snapshot_not_matching_loaded_tensors():
+    actor = AdvantageWeightedOptionActor(
+        2 + len(REGION_CONTEXT_NAMES), len(option_feature_names()), hidden=4
+    )
+    value = MonotoneImprovementModel(2, 1, 1, hidden=4)
+    with pytest.raises(ValueError, match="configuration"):
+        OptionBoundaryController(
+            actor,
+            value,
+            actor_snapshot="unbound-actor",
+            value_snapshot=improvement_parameter_id(value),
+            horizons=(1,),
+            thresholds=(0.1,),
+        )
+
+
+def test_controller_owns_frozen_parameter_copies():
+    actor = AdvantageWeightedOptionActor(
+        2 + len(REGION_CONTEXT_NAMES), len(option_feature_names()), hidden=4
+    )
+    value = MonotoneImprovementModel(2, 1, 1, hidden=4)
+    controller = OptionBoundaryController(
+        actor,
+        value,
+        actor_snapshot=option_actor_parameter_id(actor),
+        value_snapshot=improvement_parameter_id(value),
+        horizons=(1,),
+        thresholds=(0.1,),
+    )
+    actor_parameter = next(actor.parameters())
+    controller_parameter = next(controller.actor.parameters())
+    with torch.no_grad():
+        actor_parameter.add_(1)
+    assert not torch.equal(actor_parameter, controller_parameter)
+    assert not controller_parameter.requires_grad

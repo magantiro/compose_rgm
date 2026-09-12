@@ -12,6 +12,7 @@ from compose_v4.control.continuation import (
     FiniteHorizonContinuation,
     continuation_decision,
 )
+from compose_v4.control.molecular_search_codec import decode_option
 from compose_v4.control.option_continuation import (
     OptionContinuationKernel,
     OptionState,
@@ -110,6 +111,10 @@ def test_sampled_path_probability_and_executor_trace():
     assert result["conditional_path_logq"] == pytest.approx(
         sum(np.log(step["probability"]) for step in result["trace"])
     )
+    assert result["conditional_reference_path_logp"] == pytest.approx(
+        sum(np.log(step["reference_probability"]) for step in result["trace"])
+    )
+    assert decode_option(result["final_option_state"]).key() != node.key()
     assert all(step["kl"] <= 1 for step in result["trace"])
     assert node.graph.n_real_atoms == 4  # source was never mutated
 

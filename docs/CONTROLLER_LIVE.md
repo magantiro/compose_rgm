@@ -4,14 +4,16 @@ Updated 2026-09-12. Active goal: reproducible improvement over the actual T4 and
 PMO champions, then verified matched external comparisons. Supporting chemistry,
 known-winner reconstruction and mathematics are not benchmark success.
 
-Current active run: none. The option-controller V1 reusable core is implemented
-offline: compositional WHAT features, a policy-identified distributional
-best-improvement value, a conservative learned proposal with explicit base-law
-probability, persistent option-boundary SMC with `B/q` correction, and locked
-joint-posterior batch acquisition. WHERE remains the qualified external region
-controller and HOW remains the existing exact option continuation kernel. No
+Current active run: none. The option-controller V1 execution engine now composes
+the production WHERE, WHAT and HOW layers at complete-option boundaries. It has
+separate pre-WHERE value and post-WHERE actor features, content-bound frozen
+actor/value tensors, full-path `B/q` accounting, pathwise best-utility state,
+restartable exact molecular particles and locked joint-posterior acquisition.
+This is a mechanically executable controller, not validated learned guidance:
+the retrospective evidence gate below abstains. WHERE remains the qualified
+region controller and HOW remains the existing option continuation kernel. No
 reference model, executor, molecular support, `Q(M)`, docking label or Modal job
-changed in this milestone.
+changed. Runtime contract: `docs/OPTION_CONTROLLER_RUNTIME_V1.md`.
 
 Latest discriminating result: the only eligible stored balanced-reference PMO
 continuations contain zero positive cells among 288 identified horizon-threshold

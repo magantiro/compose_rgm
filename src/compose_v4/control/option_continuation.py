@@ -925,7 +925,7 @@ def sample_option_trajectory(
         rng = np.random.default_rng(path_stream)
     else:
         raise ValueError(f"unknown continuation estimator: {estimator!r}")
-    node, trace, logq, status = initial, [], 0.0, "complete"
+    node, trace, logp, logq, status = initial, [], 0.0, 0.0, "complete"
     while node.remaining:
         try:
             row = kernel.row(node)
@@ -951,6 +951,7 @@ def sample_option_trajectory(
         selected = int(rng.choice(len(row.successors), p=decision.probabilities))
         next_node = row.successors[selected]
         probability = decision.probabilities[selected]
+        logp += math.log(row.probabilities[selected])
         logq += math.log(probability)
         family, action = kernel.marks(node)[selected]
         trace.append(
@@ -1009,12 +1010,17 @@ def sample_option_trajectory(
         "path_probability_role": "conditional on realized planner randomness, not marginalized over lookahead samples",
         "status": status,
         "endpoint": canonical_state_key(node.graph) if status == "complete" else None,
+        "conditional_reference_path_logp": logp,
         "conditional_path_logq": logq,
         "trace": trace,
         "continuation_work": asdict(continuation.work if continuation else ContinuationWork()),
         "kernel_work": asdict(kernel.work),
         "seconds": perf_counter() - started,
     }
+    if status == "complete":
+        from compose_v4.experiments.continuation_profile import state_payload
+
+        result["final_option_state"] = state_payload(node)
     if node.fused_progress is not None:
         result["final_fused_progress"] = node.fused_progress.payload()
         if status == "no_admissible_action":

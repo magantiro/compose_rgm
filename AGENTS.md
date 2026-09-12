@@ -372,6 +372,19 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped option-controller runtime integration, 2026-09-12:** after reviewing
+the completed offline core, the user explicitly requested proceeding with the
+missing end-to-end implementation. This authorizes production-state feature
+extraction, WHERE/WHAT/HOW composition through the existing hierarchy and
+option continuation kernel, exact persistent population advancement, and
+locked-candidate acquisition wiring. It also authorizes local model-free
+fixtures and cache-only dry runs. It does not authorize new oracle calls, Modal
+deployment, accelerator fitting, reference/executor changes, or a benchmark
+claim. Learned guidance must remain fail-closed unless supplied with immutable,
+validated actor and value snapshots. The inherited `BUILD_RING_SYSTEM`
+compound-option decision remains unresolved, so this integration must consume
+the caller's frozen applicable option set without activating that program.
+
 **Scoped option-controller construction authorization, 2026-09-12:** the user
 explicitly requested implementation of the full controller architecture selected
 in `docs/CONTROLLER_LITERATURE_DECISION_2026-09-12.md`. The immediate milestone

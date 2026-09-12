@@ -47,6 +47,19 @@ SPECIALS = (
     "add_carbonyl",
     "insert_ring_carbonyl",
 )
+VALUE_CONTEXT_NAMES = (
+    "task:current_utility",
+    "task:incumbent_utility",
+    "clock:remaining_options_scaled",
+)
+REGION_CONTEXT_NAMES = (
+    "region:released_fraction",
+    "region:size_fraction",
+    "region:boundary_bonds_scaled",
+    "region:context_components_scaled",
+    "region:has_ring",
+    "region:ring_boundary_fraction",
+)
 
 
 def option_feature_names() -> tuple[str, ...]:
@@ -64,6 +77,39 @@ def option_feature_names() -> tuple[str, ...]:
         "refinement_scaled",
         "primitive_horizon_scaled",
     )
+
+
+def boundary_value_features(
+    molecular_features,
+    *,
+    current_utility: float,
+    incumbent_utility: float,
+    remaining_options: int,
+) -> np.ndarray:
+    """Features available before the next WHERE decision.
+
+    Utilities must already be oriented so larger is better. This function does
+    not call an oracle or silently reverse task-specific score conventions.
+    """
+
+    if (
+        isinstance(remaining_options, bool)
+        or not isinstance(remaining_options, (int, np.integer))
+        or not 0 <= remaining_options <= 16
+    ):
+        raise ValueError("remaining option clock must be an integer in 0..16")
+    base = np.asarray(molecular_features, dtype=np.float32)
+    context = np.asarray(
+        (current_utility, incumbent_utility, remaining_options / 16), dtype=np.float32
+    )
+    if (
+        base.ndim != 1
+        or not base.size
+        or not np.isfinite(base).all()
+        or not np.isfinite(context).all()
+    ):
+        raise ValueError("option-boundary value features must be finite vectors")
+    return np.concatenate((base, context))
 
 
 def _families(option: str, spec) -> set[str]:
@@ -152,8 +198,8 @@ def structural_option_features(option: str, *, generic_horizon: int = 3) -> np.n
 def option_state_features(
     molecular_features,
     *,
-    current_score: float,
-    incumbent: float,
+    current_utility: float,
+    incumbent_utility: float,
     remaining_options: int,
     released_fraction: float,
     region_size: int,
@@ -166,18 +212,23 @@ def option_state_features(
     """Append task, option-clock and numeric region context to fixed molecular features."""
 
     if (
-        isinstance(remaining_options, bool)
-        or not isinstance(remaining_options, (int, np.integer))
-        or remaining_options < 0
-        or total_atoms < 1
+        total_atoms < 1
         or not 0 <= region_size <= total_atoms
+        or boundary_bonds < 0
+        or context_components < 0
+        or ring_boundary_bonds < 0
+        or ring_boundary_bonds > boundary_bonds
+        or not 0 <= released_fraction <= 1
     ):
         raise ValueError("invalid option clock or region cardinality")
-    scalars = np.asarray(
+    value = boundary_value_features(
+        molecular_features,
+        current_utility=current_utility,
+        incumbent_utility=incumbent_utility,
+        remaining_options=remaining_options,
+    )
+    region = np.asarray(
         (
-            current_score,
-            incumbent,
-            remaining_options / 16,
             released_fraction,
             region_size / total_atoms,
             boundary_bonds / max(total_atoms, 1),
@@ -187,12 +238,6 @@ def option_state_features(
         ),
         dtype=np.float32,
     )
-    base = np.asarray(molecular_features, dtype=np.float32)
-    if (
-        base.ndim != 1
-        or not base.size
-        or not np.isfinite(base).all()
-        or not np.isfinite(scalars).all()
-    ):
+    if not np.isfinite(region).all():
         raise ValueError("option-boundary state features must be finite vectors")
-    return np.concatenate((base, scalars))
+    return np.concatenate((value, region))

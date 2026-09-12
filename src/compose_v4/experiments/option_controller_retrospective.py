@@ -27,6 +27,7 @@ from compose_v4.control.improvement_value import (
     predict_improvement,
     source_group_split,
 )
+from compose_v4.control.option_features import boundary_value_features
 from compose_v4.control.trajectory_value import molecule_features
 from compose_v4.experiments.continuation_profile import sha256_file
 from compose_v4.experiments.inference_package import software
@@ -193,10 +194,13 @@ def analyze(data: dict, *, input_path: Path, repo_root: Path) -> dict:
     train_indices, calibration_indices = source_group_split(source_ids, seed=SEED)
     traces = []
     for row in records:
-        features = tuple(molecule_features(row["smiles"])) + (
-            float(row["score"]),
-            float(row["incumbent"]),
-            float(row["remaining"] / configuration["boundaries"]),
+        features = tuple(
+            boundary_value_features(
+                molecule_features(row["smiles"]),
+                current_utility=float(row["score"]),
+                incumbent_utility=float(row["incumbent"]),
+                remaining_options=int(row["remaining"]),
+            )
         )
         traces.append(
             ImprovementTrace(

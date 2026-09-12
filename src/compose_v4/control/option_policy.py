@@ -164,6 +164,20 @@ class OptionActorFitConfig:
     seed: int = 20260912
 
 
+def option_actor_parameter_id(actor: AdvantageWeightedOptionActor) -> str:
+    parameters = {
+        name: value.detach().cpu().tolist() for name, value in sorted(actor.state_dict().items())
+    }
+    return identity(
+        {
+            "schema_version": "option_actor_parameters_v1",
+            "state_dim": actor.state_dim,
+            "option_dim": actor.option_dim,
+            "parameters": parameters,
+        }
+    )
+
+
 def _training_distribution(logits, reference, floor):
     controlled = torch.softmax(torch.log(reference) + logits, dim=0)
     return floor * reference + (1 - floor) * controlled
@@ -254,7 +268,11 @@ def fit_option_actor(
         "decisions": [row.decision_id for row in rows],
         "history": history,
     }
-    return actor, {**body, "policy_id": identity(body)}
+    return actor, {
+        **body,
+        "parameter_id": option_actor_parameter_id(actor),
+        "policy_id": identity(body),
+    }
 
 
 def actor_distribution(

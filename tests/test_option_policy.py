@@ -7,6 +7,7 @@ from compose_v4.control.option_policy import (
     actor_distribution,
     conservative_option_distribution,
     fit_option_actor,
+    option_actor_parameter_id,
 )
 
 
@@ -47,6 +48,7 @@ def test_advantage_weighted_actor_learns_declared_choice():
     decision = actor_distribution(actor, example())
     assert decision.proposal[1] > 0.5
     assert snapshot["behavior_policy_id"] == "policy-a"
+    assert snapshot["parameter_id"] == option_actor_parameter_id(actor)
     assert snapshot["policy_id"]
     with pytest.raises(ValueError, match="behavior-policy"):
         fit_option_actor([example("policy-b")], behavior_policy_id="policy-a")

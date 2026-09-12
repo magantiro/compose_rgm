@@ -3,6 +3,7 @@ import math
 import numpy as np
 import pytest
 
+from compose_v4.control.docking_value import identity
 from compose_v4.control.option_particles import advance
 from compose_v4.control.persistent_option_smc import (
     OptionTransition,
@@ -20,8 +21,8 @@ def transitions(population, potentials, *, reference=None, proposal=None, alive=
         OptionTransition(
             particle.particle_id,
             {"state": i + 10} if alive[i] else None,
-            reference[i],
-            proposal[i],
+            math.log(reference[i]),
+            math.log(proposal[i]),
             potentials[i] if alive[i] else None,
             alive[i],
             {"option": "generic", "slot": i},
@@ -116,8 +117,8 @@ def test_enumerated_two_boundary_smdp_recovers_exact_target_path_law():
         OptionTransition(
             particle.particle_id,
             {"branch": branch},
-            0.6 if branch == "a" else 0.4,
-            0.5,
+            math.log(0.6 if branch == "a" else 0.4),
+            math.log(0.5),
             math.log(h_a if branch == "a" else h_b),
             True,
             {"option": branch},
@@ -131,8 +132,8 @@ def test_enumerated_two_boundary_smdp_recovers_exact_target_path_law():
         OptionTransition(
             particle.particle_id,
             {"terminal": index},
-            second_reference[index],
-            0.5,
+            math.log(second_reference[index]),
+            math.log(0.5),
             math.log(terminal_values[index]),
             True,
             {"terminal": index},
@@ -159,6 +160,20 @@ def test_restart_round_trip_reproduces_resampling_and_histories():
     assert all(p.exact_state_id for p in first.particles)
 
 
+def test_version_one_population_receipt_remains_readable():
+    population = PersistentOptionPopulation.start(
+        [{"state": 0}], seed=7, controller_snapshot="controller-a"
+    )
+    current = population.to_dict()
+    current.pop("population_id")
+    current.pop("control_context")
+    current["schema_version"] = "persistent_option_population_v1"
+    legacy = {**current, "population_id": identity(current)}
+    restored = PersistentOptionPopulation.from_dict(legacy)
+    assert restored.control_context is None
+    assert restored.particles == population.particles
+
+
 def test_extinction_and_zero_proposal_fail_explicitly():
     population = PersistentOptionPopulation.start(
         [{"state": i} for i in range(2)], seed=0, controller_snapshot="controller-a"
@@ -173,7 +188,7 @@ def test_extinction_and_zero_proposal_fail_explicitly():
     )
     assert partial_receipt["weights"] == [1, 0]
     assert [particle.alive for particle in partial.particles] == [True, False]
-    with pytest.raises(ValueError, match="positive"):
-        OptionTransition("p", {"state": 1}, 1, 0, 0, True, {})
+    with pytest.raises(ValueError, match="log probabilities"):
+        OptionTransition("p", {"state": 1}, 0, -math.inf, 0, True, {})
     with pytest.raises(ValueError, match="next state"):
-        OptionTransition("p", {"state": 1}, 1, 1, None, False, {})
+        OptionTransition("p", {"state": 1}, 0, 0, None, False, {})

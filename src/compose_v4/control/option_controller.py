@@ -8,6 +8,7 @@ the caller must use the exact declared terminal potential at the last boundary.
 
 from __future__ import annotations
 
+import copy
 import math
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -15,15 +16,22 @@ from dataclasses import dataclass
 import numpy as np
 import torch
 
+from compose_v4.control.docking_value import identity
 from compose_v4.control.improvement_value import (
     MonotoneImprovementModel,
+    improvement_parameter_id,
     predict_improvement,
 )
-from compose_v4.control.option_features import option_feature_names, structural_option_features
+from compose_v4.control.option_features import (
+    REGION_CONTEXT_NAMES,
+    option_feature_names,
+    structural_option_features,
+)
 from compose_v4.control.option_policy import (
     AdvantageWeightedOptionActor,
     OptionDistribution,
     conservative_option_distribution,
+    option_actor_parameter_id,
 )
 
 
@@ -54,7 +62,11 @@ class OptionBoundaryController:
         max_kl: float = 1.0,
         beta: float = 10.0,
     ) -> None:
-        self.actor, self.value = actor.eval(), value.eval()
+        # Own frozen copies so later fitting or mutation of the caller's modules
+        # cannot change a controller that already carries a parameter identity.
+        self.actor, self.value = copy.deepcopy(actor).eval(), copy.deepcopy(value).eval()
+        self.actor.requires_grad_(False)
+        self.value.requires_grad_(False)
         self.actor_snapshot, self.value_snapshot = actor_snapshot, value_snapshot
         raw_horizons, raw_thresholds = tuple(horizons), tuple(thresholds)
         if any(
@@ -68,9 +80,11 @@ class OptionBoundaryController:
         if (
             not actor_snapshot
             or not value_snapshot
+            or actor_snapshot != option_actor_parameter_id(self.actor)
+            or value_snapshot != improvement_parameter_id(self.value)
             or len(self.horizons) != value.n_horizons
             or len(self.thresholds) != value.n_thresholds
-            or actor.state_dim != value.input_dim
+            or actor.state_dim != value.input_dim + len(REGION_CONTEXT_NAMES)
             or actor.option_dim != len(option_feature_names())
             or not self.horizons
             or not self.thresholds
@@ -86,7 +100,18 @@ class OptionBoundaryController:
             or not math.isfinite(self.beta)
         ):
             raise ValueError("invalid option-boundary controller configuration")
-        self.snapshot = f"{actor_snapshot}:{value_snapshot}"
+        self.snapshot = identity(
+            {
+                "schema_version": "option_boundary_controller_snapshot_v1",
+                "actor_parameter_id": actor_snapshot,
+                "value_parameter_id": value_snapshot,
+                "horizons": self.horizons,
+                "thresholds": self.thresholds,
+                "base_floor": self.base_floor,
+                "max_kl": self.max_kl,
+                "beta": self.beta,
+            }
+        )
 
     def decide(self, options, reference, state_features, rng) -> SelectedOption:
         names = tuple(options)
