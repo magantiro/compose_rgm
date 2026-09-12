@@ -4,6 +4,7 @@ from compose_v4.control.docking_value import identity
 from compose_v4.experiments.continuation_profile import publish_json, sha256_file
 from compose_v4.experiments.pmo_plan_pool_lock import (
     Pool,
+    analyze_compiled_chemistry,
     role_queues,
     round_robin_pools,
     score_compiled_lock,
@@ -84,6 +85,7 @@ def test_score_lock_is_nonadaptive_and_reports_role_failure(tmp_path):
                 "candidate_id": str(index),
                 "smiles": smiles,
                 "role": role,
+                "source": "C",
                 "parent_score": 0.5,
                 "probability": 0.1,
                 "release": 0.2,
@@ -125,3 +127,16 @@ def test_score_lock_is_nonadaptive_and_reports_role_failure(tmp_path):
     assert report["parent_improvements"] == 1
     assert report["decision"] == "ranking_failure_repair_selector_before_proposal"
     assert report["role_summaries"]["uniform_hash"]["parent_improvements"] == 1
+    target = {
+        "target": {"id": "public", "canonical_smiles": "CCC"},
+        "oracle_ledger": [{"role": "public_target", "score": 0.8}],
+    }
+    target_path = tmp_path / "target.json"
+    publish_json(target_path, target)
+    chemistry = analyze_compiled_chemistry(
+        compiled_path, target_path, tmp_path / "chemistry.json"
+    )
+    assert chemistry["candidate_count"] == 3
+    assert chemistry["closest_candidate"]["smiles"] == "CCC"
+    assert chemistry["closest_candidate"]["target_tanimoto"] == 1.0
+    assert chemistry["new_oracle_calls"] == 0

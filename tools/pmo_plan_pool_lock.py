@@ -9,6 +9,7 @@ from pathlib import Path
 
 from compose_v4.experiments.continuation_profile import publish_json, sha256_file
 from compose_v4.experiments.pmo_plan_pool_lock import (
+    analyze_compiled_chemistry,
     build_lock,
     compile_locked_queues,
     score_compiled_lock,
@@ -41,6 +42,10 @@ def main() -> None:
     score_parser.add_argument("--compiled", type=Path, required=True)
     score_parser.add_argument("--output", type=Path, required=True)
     score_parser.add_argument("--authorize-new-calls", type=int, required=True)
+    analyze_parser = subparsers.add_parser("analyze")
+    analyze_parser.add_argument("--compiled", type=Path, required=True)
+    analyze_parser.add_argument("--target", type=Path, required=True)
+    analyze_parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "compile":
         value = compile_locked_queues(
@@ -49,6 +54,14 @@ def main() -> None:
         print(
             f"compiled {value['candidate_count']} unique candidates after "
             f"{value['attempt_count']} attempts; new oracle calls=0"
+        )
+        return
+    if args.command == "analyze":
+        value = analyze_compiled_chemistry(args.compiled, args.target, args.output)
+        print(
+            f"analyzed {value['candidate_count']} locked candidates; "
+            f"closest target Tanimoto={value['closest_candidate']['target_tanimoto']:.4f}; "
+            "new oracle calls=0"
         )
         return
     if args.command == "score":

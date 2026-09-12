@@ -15,7 +15,7 @@ from time import perf_counter
 
 import numpy as np
 from rdkit import Chem, DataStructs, rdBase
-from rdkit.Chem import rdFingerprintGenerator
+from rdkit.Chem import Lipinski, rdFingerprintGenerator
 
 from compose_v4.control.docking_value import identity
 from compose_v4.control.donor_program import compile_transplant, transplant_plan
@@ -409,6 +409,118 @@ def _diversity(smiles: list[str]) -> float:
         for j in range(i + 1, len(fps))
     ]
     return float(np.mean(distances))
+
+
+def _shape(smiles: str) -> dict:
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        raise ValueError(f"invalid molecular shape input: {smiles}")
+    rings = sorted(len(ring) for ring in Chem.GetSymmSSSR(mol))
+    return {
+        "heavy_atoms": mol.GetNumHeavyAtoms(),
+        "cycle_rank": mol.GetNumBonds() - mol.GetNumAtoms() + 1,
+        "ring_sizes": rings,
+        "ring_count": len(rings),
+        "aromatic_rings": int(Lipinski.NumAromaticRings(mol)),
+    }
+
+
+def analyze_compiled_chemistry(
+    compiled_path: Path, target_path: Path, output: Path
+) -> dict:
+    """Post-lock public-target diagnostic; never a candidate-selection score."""
+    compiled = json.loads(compiled_path.read_text())
+    validate_compiled_lock(compiled)
+    target_artifact = json.loads(target_path.read_text())
+    target = target_artifact["target"]
+    target_smiles = target["canonical_smiles"]
+    target_shape = _shape(target_smiles)
+    generator = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
+    target_fp = generator.GetFingerprint(Chem.MolFromSmiles(target_smiles))
+    rows = []
+    for candidate in compiled["candidates"]:
+        mol = Chem.MolFromSmiles(candidate["smiles"])
+        parent = Chem.MolFromSmiles(candidate["source"])
+        if mol is None or parent is None:
+            raise ValueError("compiled candidate or exact parent has invalid SMILES")
+        similarity = float(
+            DataStructs.TanimotoSimilarity(generator.GetFingerprint(mol), target_fp)
+        )
+        parent_similarity = float(
+            DataStructs.TanimotoSimilarity(generator.GetFingerprint(parent), target_fp)
+        )
+        shape = _shape(candidate["smiles"])
+        rows.append(
+            {
+                "candidate_id": candidate["candidate_id"],
+                "smiles": candidate["smiles"],
+                "role": candidate["role"],
+                "release": candidate["release"],
+                "primitive_steps": candidate["primitive_steps"],
+                "target_tanimoto": similarity,
+                "parent_target_tanimoto": parent_similarity,
+                "target_tanimoto_delta": similarity - parent_similarity,
+                "shape": shape,
+                "target_ring_multiset_match": shape["ring_sizes"]
+                == target_shape["ring_sizes"],
+            }
+        )
+    by_role = {}
+    for role in ROLES:
+        selected = [row for row in rows if row["role"] == role]
+        values = np.asarray([row["target_tanimoto"] for row in selected])
+        deltas = np.asarray([row["target_tanimoto_delta"] for row in selected])
+        by_role[role] = {
+            "count": len(selected),
+            "mean_target_tanimoto": float(values.mean()),
+            "max_target_tanimoto": float(values.max()),
+            "mean_target_tanimoto_delta": float(deltas.mean()),
+            "moves_toward_target": int((deltas > 1e-12).sum()),
+            "target_ring_multiset_matches": sum(
+                row["target_ring_multiset_match"] for row in selected
+            ),
+        }
+    closest = max(rows, key=lambda row: (row["target_tanimoto"], row["smiles"]))
+    report = {
+        "schema_version": "pmo_plan_pool_public_target_diagnostic_v1",
+        "evidence_class": "computed_answer_known_post_lock_development_diagnostic",
+        "compiled_lock": {
+            "path": str(compiled_path),
+            "sha256": sha256_file(compiled_path),
+        },
+        "target_input": {"path": str(target_path), "sha256": sha256_file(target_path)},
+        "target": {
+            "id": target["id"],
+            "smiles": target_smiles,
+            "score": next(
+                row["score"]
+                for row in target_artifact["oracle_ledger"]
+                if row["role"] == "public_target"
+            ),
+            "shape": target_shape,
+        },
+        "candidate_count": len(rows),
+        "closest_candidate": closest,
+        "moves_toward_target": sum(
+            row["target_tanimoto_delta"] > 1e-12 for row in rows
+        ),
+        "target_ring_multiset_matches": sum(
+            row["target_ring_multiset_match"] for row in rows
+        ),
+        "role_summaries": by_role,
+        "rows": rows,
+        "new_oracle_calls": 0,
+        "interpretation_limit": (
+            "Post-lock graph proximity is not task value, future value, or autonomous discovery; "
+            "the public target did not affect candidate generation or selection."
+        ),
+        "analysis_commit": subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], text=True
+        ).strip(),
+    }
+    report["content_sha256"] = identity(report)
+    publish_json(output, report)
+    return report
 
 
 def _role_summary(rows: list[dict]) -> dict:
