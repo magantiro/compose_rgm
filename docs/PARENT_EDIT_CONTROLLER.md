@@ -126,8 +126,12 @@ audit and failed operand-only decomposition; `branch_repair_1` retains the
 first observed-write result; `branch_repair_2` includes real donation and the
 degenerate BRAF contrast; `next_fit_1` retains the v2 training snapshots.
 Each records physical inputs and implementation identities. The final committed-
-source reruns will be named `committed_audit`, `committed_branches`, and
-`committed_next_fit`; they are reproductions, not independent experiments.
+source reproductions are `committed_audit`, `committed_branches`, and
+`committed_next_fit`, all bound to code `6bcc220`. Their results and eight model
+payloads passed hash validation; 104 distinct physical input/source files were
+checked, with bound source bytes matching the commit. These are reproductions,
+not independent experiments. See the artifact directory's `README.md` for the
+authoritative result map and retained development history.
 
 ```sh
 PYTHONPATH=src:.:tests OMP_NUM_THREADS=1 python tools/parent_edit_diagnostic.py --output <new-audit-directory>
