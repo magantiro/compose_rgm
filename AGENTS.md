@@ -372,6 +372,19 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped option-controller continuation-bank preparation, 2026-09-12:** after
+reviewing the small `+0.0112784407` plan-pool gain, the user agreed to stop
+scaling that unchanged complete-plan generator and proceed to the smallest
+decisive test of the actual persistent WHERE/WHAT/HOW controller. This
+authorizes a zero-oracle local preparation and implementation of a locked,
+balanced-reference option-boundary continuation-bank experiment on existing
+exact Perindopril development parents. It may reuse the already qualified
+inference package and existing paid labels for prediction-only diagnostics.
+No new oracle call, Modal deployment, model fitting, reference or executor
+change, or benchmark claim is authorized by this preparation scope. The remote
+proposal run and any later scoring require a separately recorded exact compute
+and call authorization. `BUILD_RING_SYSTEM` remains disabled.
+
 **Scoped PMO plan-pool assay authorization, 2026-09-12:** the user explicitly
 authorized scoring the already locked Perindopril MPO plan-pool prevalence
 assay. This permits exactly 95 new PMO oracle calls, one for every candidate in
