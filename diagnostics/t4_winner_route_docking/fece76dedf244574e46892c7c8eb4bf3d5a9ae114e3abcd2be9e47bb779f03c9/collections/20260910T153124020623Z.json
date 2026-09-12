@@ -1,0 +1,12 @@
+{
+  "collected_at_utc": "20260910T153124020623Z",
+  "prefix": "t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9",
+  "sha256": {
+    "candidate_lock.json": "9511c56673de7528ef68cb75ffe860a231b8afc005d90abe3369ae52d7f64a57",
+    "docking_started.json": "9745ba82f1d902a3244d261c142a9405d0b8dc3a797b9f394caba83224cacb05",
+    "launch.json": "b4b49a9075c5ab2b2c343e7606b6c99b81bb2ecebfb6b8e8a67f4b4d0ee8e69e",
+    "rows/00/started.json": "c073c8c675ca09f393f42aed7136ccc3f930b08f1b4f9a92e4b5ce0ed20d9393",
+    "runtime_gate.json": "201f0a09f1d4f960ec52fa5a8cb096533747662f40170781e216eeeeabf99f38"
+  },
+  "volume": "compose-v4-artifacts"
+}

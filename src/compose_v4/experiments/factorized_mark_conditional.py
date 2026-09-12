@@ -21,6 +21,7 @@ from torch import Tensor, nn
 from torch.utils.data import DataLoader, Dataset
 
 from compose_v4.chem.molecular_graph import MolecularGraph
+from compose_v4.model.node_context import NodeContextProvider
 from compose_v4.experiments import zero_mixture_instrumentation as _zmi
 from compose_v4.experiments.cnof_conditional import PathRecord
 from compose_v4.experiments.factorized_training_objective import (
@@ -62,6 +63,7 @@ from compose_v4.rewrite.action_codec_v4 import (
     canonical_family as editing_v2_canonical_family,
 )
 from compose_v4.rewrite.tracelets import RingSystemGrow
+from compose_v4.rewrite.scaffold_construction import ScaffoldContext
 from compose_v4.rewrite.typed_ring_catalog import TypedRingCatalog
 
 
@@ -83,6 +85,7 @@ class FactorizedMarkExample:
     ring_teacher_semantic_certificate: RingTeacherSemanticCertificate | None = None
     record_index: int | None = None
     progress_index: int | None = None
+    scaffold_context: ScaffoldContext | None = None
 
     @property
     def ring_grow_support_mask(self) -> tuple[bool, ...] | None:
@@ -133,9 +136,20 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
         condition_dropout_probability: float = 0.0,
         ring_family_mass_mode: str = "boolean",
         record_index_sampler: object | None = None,
+        record_scaffold_contexts: tuple[ScaffoldContext, ...] | None = None,
     ) -> None:
         if not records:
             raise ValueError("factorized mark training records must be non-empty")
+        if record_scaffold_contexts is not None:
+            if len(record_scaffold_contexts) != len(records) or any(
+                not isinstance(context, ScaffoldContext) or not context.accepts(record.path.trace.source)
+                for record, context in zip(records, record_scaffold_contexts, strict=True)
+            ):
+                raise ValueError("scaffold contexts must align with every source record")
+            if ring_catalog is not None or training_support_cache is not None or require_cached_support:
+                raise ValueError("conditional datasets require separate prepared scaffold support, not state-only ring caches")
+            if ring_family_mass_mode != "boolean":
+                raise ValueError("conditional datasets currently require Boolean ring family mass")
         if start_index < 0 or length < 0:
             raise ValueError("dataset indices and length must be non-negative")
         if not 0.0 <= late_time_fraction <= 1.0:
@@ -199,6 +213,7 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
                 "record_index_sampler tags must align 1:1 with the training records"
             )
         self.record_index_sampler = record_index_sampler
+        self.record_scaffold_contexts = record_scaffold_contexts
         self._ring_support_model: FactorizedTraceletRateModel | None = None
         self._ring_support_examples_since_reset = 0
 
@@ -268,6 +283,10 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
             teacher_rule_name = None
             teacher_rate = 0.0
         state = record.path.state_at(progress)
+        scaffold_context = (None if self.record_scaffold_contexts is None
+                            else self.record_scaffold_contexts[record_index])
+        if scaffold_context is not None and not scaffold_context.accepts(state):
+            raise ValueError("sampled training state violates its supplied scaffold")
         property_condition_values = None
         property_condition_mask = None
         if self.target_property_conditions is not None:
@@ -374,6 +393,7 @@ class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
             ring_teacher_semantic_certificate=ring_teacher_semantic_certificate,
             record_index=record_index,
             progress_index=int(progress),
+            scaffold_context=scaffold_context,
         )
 
 
@@ -450,6 +470,7 @@ class FactorizedMarkCollator:
     cycle_close_action_semantics: str = LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS
     cycle_open_action_semantics: str = LEGACY_CYCLE_OPEN_ACTION_SEMANTICS
     atom_delete_action_semantics: str = LEGACY_ATOM_DELETE_ACTION_SEMANTICS
+    node_context_provider: NodeContextProvider | None = None
     _chemistry_feature_cache: OrderedDict[
         tuple[
             int,
@@ -475,6 +496,7 @@ class FactorizedMarkCollator:
         use_aromatic_bond_view: bool,
         ring_catalog: TypedRingCatalog | None = None,
         chemistry_feature_cache_limit: int = 2048,
+        node_context_provider: NodeContextProvider | None = None,
     ) -> FactorizedMarkCollator:
         """Build a collator from one immutable capability object, dropping nothing.
 
@@ -487,10 +509,15 @@ class FactorizedMarkCollator:
             use_aromatic_bond_view,
             ring_catalog,
             chemistry_feature_cache_limit=chemistry_feature_cache_limit,
+            node_context_provider=node_context_provider,
             **operator_capability_batch_kwargs(capabilities),
         )
 
     def __call__(self, examples: list[FactorizedMarkExample]) -> FactorizedMarkBatch:
+        contexts = tuple(example.scaffold_context for example in examples)
+        has_scaffolds = any(c is not None for c in contexts)
+        if has_scaffolds and any(c is None for c in contexts):
+            raise ValueError("use explicit empty scaffold contexts, not missing conditions")
         support_rows = tuple(example.ring_grow_support_indices for example in examples)
         topology_masses = tuple(
             example.ring_topology_local_support_log_mass for example in examples
@@ -541,6 +568,8 @@ class FactorizedMarkCollator:
             ring_catalog=self.ring_catalog,
             chemistry_feature_cache=self._chemistry_feature_cache,
             chemistry_feature_cache_limit=self.chemistry_feature_cache_limit,
+            scaffold_contexts=contexts if has_scaffolds else None,
+            node_context_provider=self.node_context_provider,
             **capability_kwargs,
             property_condition_values=(
                 tuple(values for values in condition_values if values is not None)
@@ -724,6 +753,15 @@ def assert_teachers_in_exact_candidates(batch: FactorizedMarkBatch) -> None:
             candidates = delete_cands[i] if delete_cands is not None else ()
         if candidates is None:
             continue  # family validated via its per-coordinate mask, not a candidate list
+        if action not in candidates and rule_name == "ring_system_restate":
+            # Same undirected marked operation after slot relocation; do not
+            # substitute a different Kekule assignment or filter the teacher.
+            def edge_key(mark):
+                return tuple(sorted((min(c.a, c.b), max(c.a, c.b), c.new_order)
+                                    for c in mark.changes))
+
+            if sum(edge_key(c) == edge_key(action) for c in candidates) == 1:
+                continue
         if action not in candidates:
             try:
                 from compose_v4.chem.molecular_graph import molecular_graph_to_smiles
@@ -1006,8 +1044,30 @@ def _concatenate_factorized_mark_batches(
     else:
         raise ValueError("factorized batches mix topology masses and missing values")
 
+    has_scaffolds = any(batch.scaffold_contexts is not None for batch in batches)
+    if has_scaffolds and any(batch.scaffold_contexts is None for batch in batches):
+        raise ValueError("factorized batches mix scaffold contexts and missing conditions")
+    has_prepared_scaffolds = any(batch.scaffold_prepared_rows is not None for batch in batches)
+    if has_prepared_scaffolds and any(batch.scaffold_prepared_rows is None for batch in batches):
+        raise ValueError("factorized batches mix prepared and unprepared scaffold rows")
+    schemas = {batch.node_context_schema for batch in batches}
+    if len(schemas) != 1:
+        raise ValueError("factorized batches mix node context schemas")
+    has_node_context = next(iter(schemas)) is not None
+    if any((batch.node_context_features is not None) != has_node_context
+           or (batch.node_context_keys is not None) != has_node_context for batch in batches):
+        raise ValueError("factorized batches have incomplete node context metadata")
     return FactorizedMarkBatch(
         states=tuple(state for batch in batches for state in batch.states),
+        scaffold_contexts=(tuple(c for batch in batches for c in batch.scaffold_contexts)
+                           if has_scaffolds else None),
+        scaffold_node_flags=tensors("scaffold_node_flags") if has_scaffolds else None,
+        scaffold_prepared_rows=(tuple(row for batch in batches for row in batch.scaffold_prepared_rows)
+                                if has_prepared_scaffolds else None),
+        node_context_features=tensors("node_context_features") if has_node_context else None,
+        node_context_schema=next(iter(schemas)),
+        node_context_keys=(tuple(key for batch in batches for key in batch.node_context_keys)
+                           if has_node_context else None),
         atom_types=tensors("atom_types"),
         formal_charges=tensors("formal_charges"),
         implicit_h_counts=tensors("implicit_h_counts"),

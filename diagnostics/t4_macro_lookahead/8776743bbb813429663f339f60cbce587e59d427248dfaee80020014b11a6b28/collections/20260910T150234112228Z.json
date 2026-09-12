@@ -1,0 +1,27 @@
+{
+  "collected_at_utc": "20260910T150234112228Z",
+  "prefix": "t4_macro_lookahead/8776743bbb813429663f339f60cbce587e59d427248dfaee80020014b11a6b28",
+  "sha256": {
+    "initial.json": "da573cf541ac7ae3818d1027dde0b3ff81518efb94c197cbc54130721d5b3e59",
+    "launch.json": "ea3b121620e6e5aab1e18f2e72c45526de999ac9737dff8e731645c8d8a4bc8b",
+    "result.json": "025a5a5586d440b3bfd07b65877998d10e259bae86d2b28f410155b3f1b82728",
+    "rounds/00/after.json": "8f86a94873f465fa04ce860cba34935199239e4715b63ab84b23da51d5c305be",
+    "rounds/00/generated.json": "7f45dd97e02e0e556d54eb49052891001ccf869cc29a4b21c0f06357db44432a",
+    "rounds/00/posterior/value.json": "d552a1f42e671ce497d9a20d0159a4370b25d4c0a74a9bb37616ac971e6efa79",
+    "rounds/00/prior/value.json": "61705ec1693d448ce9e9f39c094e7aa60936aa179e5ca09587376e916bbe89d7",
+    "rounds/01/after.json": "fcfa36e56d9f4b976afa1e6ca31b14978c03bae24f39c1ea8bbd7d3ead13bdaa",
+    "rounds/01/generated.json": "5d8106258c393a3777b874ac2c91d54f963d1d01389fb4aa9b6a1f5d4c1fffad",
+    "rounds/01/posterior/value.json": "6192ae12443c312ff8263e516e259a9757117070eefba9e2e16ec5a605bfe073",
+    "rounds/01/prior/value.json": "d552a1f42e671ce497d9a20d0159a4370b25d4c0a74a9bb37616ac971e6efa79",
+    "rounds/02/after.json": "a7755ac437d6550572f2f23aa73f63e3c05c7d339739dd438a41b46f12fca93e",
+    "rounds/02/generated.json": "4fcf5577a54f16d38de50c4544bd8fc27efedd42cf643cd3f7f1e9a03d67c302",
+    "rounds/02/posterior/value.json": "ea86e857a56386a9f9f1c3c671e9a575f884c28eab377f16de2ded343b288009",
+    "rounds/02/prior/value.json": "6192ae12443c312ff8263e516e259a9757117070eefba9e2e16ec5a605bfe073",
+    "rounds/03/after.json": "c8cc2d4584eaad4743d7bfe574245a9ffa3b2f032431a5ab5bfa5f7fe36cc33b",
+    "rounds/03/generated.json": "9045a10944b054a824ee67846ff57d4ab47684ef2a4355af772cc245a7ca8a46",
+    "rounds/03/posterior/value.json": "b70cb7ebf84303d01291f810ffd6644ca32c1721c04185da854a0e46dd07da77",
+    "rounds/03/prior/value.json": "ea86e857a56386a9f9f1c3c671e9a575f884c28eab377f16de2ded343b288009",
+    "runtime_gate.json": "f42a03edfa02244cd8386ce47b881a01242ff6007ba570776162a6242fe131dd"
+  },
+  "volume": "compose-v4-artifacts"
+}

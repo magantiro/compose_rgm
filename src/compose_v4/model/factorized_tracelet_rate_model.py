@@ -105,6 +105,9 @@ from compose_v4.rewrite.ring_restate_semantics import (
     enumerate_ring_restate_semantic_groups,
 )
 from compose_v4.rewrite.tracelet_fiber import enumerate_ring_system_restate_actions
+from compose_v4.rewrite.scaffold_construction import ScaffoldContext
+from compose_v4.model.node_context import NodeContextProvider, node_context_key, prepare_node_context
+from compose_v4.model.scaffold_prepared import PreparedScaffoldRow, validate_prepared_scaffolds
 from compose_v4.rewrite.typed_ring_catalog import (
     TypedRingCatalog,
     attach_template,
@@ -794,6 +797,12 @@ class FactorizedMarkBatch:
     ) = None
     property_condition_values: Tensor | None = None
     property_condition_mask: Tensor | None = None
+    scaffold_contexts: tuple[ScaffoldContext, ...] | None = None
+    scaffold_node_flags: Tensor | None = None
+    node_context_features: Tensor | None = None
+    node_context_schema: str | None = None
+    node_context_keys: tuple[str, ...] | None = None
+    scaffold_prepared_rows: tuple[PreparedScaffoldRow, ...] | None = None
 
     @property
     def batch_size(self) -> int:
@@ -834,6 +843,17 @@ class FactorizedMarkBatch:
 
         return FactorizedMarkBatch(
             states=self.states[start:stop],
+            scaffold_contexts=(None if self.scaffold_contexts is None
+                               else self.scaffold_contexts[start:stop]),
+            scaffold_node_flags=(None if self.scaffold_node_flags is None
+                                 else tensor_slice(self.scaffold_node_flags)),
+            node_context_features=(None if self.node_context_features is None
+                                   else tensor_slice(self.node_context_features)),
+            node_context_schema=self.node_context_schema,
+            node_context_keys=(None if self.node_context_keys is None
+                               else self.node_context_keys[start:stop]),
+            scaffold_prepared_rows=(None if self.scaffold_prepared_rows is None
+                                    else self.scaffold_prepared_rows[start:stop]),
             atom_types=tensor_slice(self.atom_types),
             formal_charges=tensor_slice(self.formal_charges),
             implicit_h_counts=tensor_slice(self.implicit_h_counts),
@@ -944,6 +964,14 @@ class FactorizedMarkBatch:
 
         return FactorizedMarkBatch(
             states=self.states,
+            scaffold_contexts=self.scaffold_contexts,
+            scaffold_node_flags=(None if self.scaffold_node_flags is None
+                                 else move(self.scaffold_node_flags)),
+            node_context_features=(None if self.node_context_features is None
+                                   else move(self.node_context_features)),
+            node_context_schema=self.node_context_schema,
+            node_context_keys=self.node_context_keys,
+            scaffold_prepared_rows=self.scaffold_prepared_rows,
             atom_types=move(self.atom_types),
             formal_charges=move(self.formal_charges),
             implicit_h_counts=move(self.implicit_h_counts),
@@ -1037,6 +1065,14 @@ class FactorizedMarkBatch:
 
         return FactorizedMarkBatch(
             states=self.states,
+            scaffold_contexts=self.scaffold_contexts,
+            scaffold_node_flags=(None if self.scaffold_node_flags is None
+                                 else pin(self.scaffold_node_flags)),
+            node_context_features=(None if self.node_context_features is None
+                                   else pin(self.node_context_features)),
+            node_context_schema=self.node_context_schema,
+            node_context_keys=self.node_context_keys,
+            scaffold_prepared_rows=self.scaffold_prepared_rows,
             atom_types=pin(self.atom_types),
             formal_charges=pin(self.formal_charges),
             implicit_h_counts=pin(self.implicit_h_counts),
@@ -1443,12 +1479,18 @@ def prepare_factorized_mark_batch(
     atom_delete_action_semantics: str = LEGACY_ATOM_DELETE_ACTION_SEMANTICS,
     property_condition_values: tuple[tuple[float, ...], ...] | None = None,
     property_condition_mask: tuple[tuple[bool, ...], ...] | None = None,
+    scaffold_contexts: tuple[ScaffoldContext, ...] | None = None,
+    node_context_provider: NodeContextProvider | None = None,
 ) -> FactorizedMarkBatch:
     """Collate valid states and cheap graph-theoretic application conditions."""
 
     count = len(states)
     if not count:
         raise ValueError("a factorized mark batch must be non-empty")
+    if (node_context_provider is not None
+            and getattr(node_context_provider, "requires_aromatic_bond_view", False)
+            and not use_aromatic_bond_view):
+        raise ValueError("node context provider requires the aromatic bond view")
     lengths = {
         len(times),
         len(teacher_actions),
@@ -1460,6 +1502,16 @@ def prepare_factorized_mark_batch(
     n_slots = states[0].n_atoms
     if any(state.n_atoms != n_slots for state in states):
         raise ValueError("all factorized mark states must use the same slot count")
+    scaffold_flags = None
+    if scaffold_contexts is not None:
+        if len(scaffold_contexts) != count:
+            raise ValueError("scaffold conditions have the wrong row count")
+        if any(not context.accepts(state) for context, state in zip(scaffold_contexts, states)):
+            raise ValueError("batch state violates its supplied scaffold")
+        if (editing_process_semantics != LEGACY_EDITING_PROCESS_SEMANTICS
+                or ring_restate_scorer_mode != LEGACY_RING_RESTATE_SCORER_MODE):
+            raise ValueError("scaffold construction currently qualifies the legacy lipid lane only")
+        scaffold_flags = torch.from_numpy(np.stack([c.node_flags() for c in scaffold_contexts]))
     weights = importance_weights or (1.0,) * count
     if len(weights) != count:
         raise ValueError("importance weights have the wrong length")
@@ -1871,8 +1923,34 @@ def prepare_factorized_mark_batch(
                 raise RuntimeError("ring-aware state features lack delete actions")
             ring_delete_actions.append(features.ring_delete_actions)
 
+    # Context-dependent filtering must not mutate the shared state-only chemistry cache.
+    if scaffold_contexts is not None:
+        for index, (context, state) in enumerate(zip(scaffold_contexts, states)):
+            system = context.rewrite_system()
+
+            def admitted(actions: tuple, family: str, *, system=system, state=state) -> tuple:
+                accepted = []
+                for action in actions:
+                    try:
+                        system.apply(state, family, action)
+                    except InvalidRewrite:
+                        continue
+                    accepted.append(action)
+                return tuple(accepted)
+
+            restate_actions[index] = admitted(restate_actions[index], "ring_system_restate")
+            if ring_delete_actions:
+                ring_delete_actions[index] = admitted(ring_delete_actions[index], "ring_system_delete")
+
+    context_features, context_schema, context_keys = prepare_node_context(
+        node_context_provider, states, scaffold_contexts, neural_bonds)
     return FactorizedMarkBatch(
         states=states,
+        node_context_features=context_features,
+        node_context_schema=context_schema,
+        node_context_keys=context_keys,
+        scaffold_contexts=scaffold_contexts,
+        scaffold_node_flags=scaffold_flags,
         atom_types=torch.from_numpy(
             np.stack([state.atom_types for state in states])
         ).long(),
@@ -2578,6 +2656,8 @@ class FactorizedTraceletRateModel(nn.Module):
         rate_factorization: str = "hierarchical",
         ring_candidate_cache_limit: int = 32768,
         property_condition_dim: int = 0,
+        scaffold_conditioning: bool = False,
+        node_context_provider: NodeContextProvider | None = None,
         empirical_mark_prior_mode: str = "none",
         empirical_mark_priors: FactorizedMarkEmpiricalPriors | None = None,
         ring_family_mass_mode: str = "boolean",
@@ -3214,6 +3294,23 @@ class FactorizedTraceletRateModel(nn.Module):
             ),
             persistent=False,
         )
+        # Opt-in: old checkpoints/default initialization are byte-for-byte unaffected.
+        # Empty contexts contribute zero; both pilot arms use this same architecture.
+        self.scaffold_conditioning = bool(scaffold_conditioning)
+        self.scaffold_encoder = (
+            nn.Linear(2, hidden_dim, bias=False) if scaffold_conditioning else None
+        )
+        self.node_context_provider = node_context_provider
+        self.node_context_schema = None if node_context_provider is None else node_context_provider.schema
+        if node_context_provider is not None and (
+            not isinstance(self.node_context_schema, str) or not self.node_context_schema
+            or not isinstance(node_context_provider.feature_dim, int) or node_context_provider.feature_dim <= 0
+        ):
+            raise ValueError("node context provider requires a schema and positive feature dimension")
+        self.node_context_encoder = (
+            None if node_context_provider is None
+            else nn.Linear(node_context_provider.feature_dim, hidden_dim, bias=False)
+        )
 
     @property
     def device(self) -> torch.device:
@@ -3334,7 +3431,35 @@ class FactorizedTraceletRateModel(nn.Module):
         logits[:, MARK_RULE_TO_INDEX["ring_system_grow"]] += ring_mass
         return logits
 
-    def _ring_grow_support(self, state: MolecularGraph) -> tuple[bool, ...]:
+    def _ring_grow_support(
+        self, state: MolecularGraph, scaffold_context: ScaffoldContext | None = None,
+    ) -> tuple[bool, ...]:
+        if scaffold_context is not None:
+            key = scaffold_context.state_cache_key(state)
+            cached = self._ring_grow_support_cache.get(key)
+            if cached is not None:
+                self._ring_grow_support_cache.move_to_end(key)
+                return cached
+            coarse = ring_system_template_local_support_mask(
+                state, self.ring_system_templates, self.ring_system_template_aliases)
+            support = [False] * len(coarse)
+            for raw_index in np.flatnonzero(coarse):
+                index = int(raw_index)
+                if self.ring_electronic_mode == "catalog_exact":
+                    support[index] = bool(self._ring_paired_candidates(state, index, scaffold_context))
+                else:
+                    support[index] = any(semantic_ring_prefix_is_completable(
+                        self._ring_semantic_decoder(state, group[0], scaffold_context), ())
+                        for group in self._ring_template_placement_groups(state, index))
+                    if not support[index] and self._ring_witness_candidates(state, index, scaffold_context):
+                        # Do not silently discard an executable resonance witness
+                        # or advertise a family the recursive sampler cannot draw.
+                        raise RuntimeError("scaffold ring witness is outside the semantic decoder; qualification required")
+            cached = tuple(support)
+            self._ring_grow_support_cache[key] = cached
+            if len(self._ring_grow_support_cache) > self._ring_candidate_cache_limit:
+                self._ring_grow_support_cache.popitem(last=False)
+            return cached
         key = self._state_cache_key(state)
         cached = self._ring_grow_support_cache.get(key)
         if cached is None:
@@ -3574,12 +3699,15 @@ class FactorizedTraceletRateModel(nn.Module):
         self,
         state: MolecularGraph,
         placement: RingSystemPlacement,
+        scaffold_context: ScaffoldContext | None = None,
     ) -> SemanticRingSystemDecoder:
-        state_key = self._state_cache_key(state)
+        state_key = (self._state_cache_key(state) if scaffold_context is None
+                     else scaffold_context.state_cache_key(state))
         key = (state_key, ring_system_placement_key(placement))
         cached = self._ring_semantic_decoder_cache.get(key)
         if cached is None:
-            cached = build_semantic_ring_system_decoder(state, placement)
+            cached = build_semantic_ring_system_decoder(
+                state, placement, scaffold_context=scaffold_context)
             self._ring_semantic_decoder_cache[key] = cached
             if (
                 len(self._ring_semantic_decoder_cache)
@@ -3606,21 +3734,33 @@ class FactorizedTraceletRateModel(nn.Module):
         self,
         state: MolecularGraph,
         template_index: int,
+        scaffold_context: ScaffoldContext | None = None,
     ) -> tuple[ExecutableRingGrowCandidate, ...]:
         """Return cached executor-verified catalog witnesses when available."""
 
         aliases = self.ring_system_electronic_witness_aliases
         if aliases is None:
             return ()
-        state_key = self._state_cache_key(state)
+        state_key = (self._state_cache_key(state) if scaffold_context is None
+                     else scaffold_context.state_cache_key(state))
         key = (state_key, int(template_index))
         cached = self._ring_paired_candidate_cache.get(key)
         if cached is None:
             cached = enumerate_executable_ring_grow_candidates(
                 state,
                 aliases[int(template_index)],
-                stop_after_first=self.ring_electronic_mode != "catalog_exact",
+                stop_after_first=(scaffold_context is None and self.ring_electronic_mode != "catalog_exact"),
             )
+            if scaffold_context is not None:
+                runtime = scaffold_context.rewrite_system()
+                admitted = []
+                for candidate in cached:
+                    try:
+                        runtime.apply(state, "ring_system_grow", candidate.action)
+                    except InvalidRewrite:
+                        continue
+                    admitted.append(candidate)
+                cached = tuple(admitted)
             self._ring_paired_candidate_cache[key] = cached
             if (
                 len(self._ring_paired_candidate_cache)
@@ -3635,12 +3775,13 @@ class FactorizedTraceletRateModel(nn.Module):
         self,
         state: MolecularGraph,
         template_index: int,
+        scaffold_context: ScaffoldContext | None = None,
     ) -> tuple[ExecutableRingGrowCandidate, ...]:
         """Return the exact catalog candidate table for catalog-exact scoring."""
 
         if self.ring_system_electronic_aliases is None:
             raise RuntimeError("paired ring candidates require catalog_exact mode")
-        return self._ring_witness_candidates(state, template_index)
+        return self._ring_witness_candidates(state, template_index, scaffold_context)
 
     def _ring_delete_candidates(
         self,
@@ -3700,7 +3841,15 @@ class FactorizedTraceletRateModel(nn.Module):
                     "precomputed ring support has the wrong shape: "
                     f"{tuple(precomputed_support.shape)} != {expected_shape}"
                 )
-        if precomputed_support is None:
+        if batch.scaffold_contexts is not None:
+            # Old state-only cache rows are not evidence of conditional support.
+            support_rows = (tuple(row.ring_support for row in batch.scaffold_prepared_rows)
+                if batch.scaffold_prepared_rows is not None else
+                tuple(self._ring_grow_support(state, context)
+                      for state, context in zip(batch.states, batch.scaffold_contexts)))
+            mask = torch.tensor(support_rows,
+                dtype=torch.bool, device=self.device)
+        elif precomputed_support is None:
             # Training likelihoods require the exact executor-aware support.
             # Inference may defer this expensive refinement until the ring
             # family is actually selected; family probabilities use only the
@@ -3980,6 +4129,8 @@ class FactorizedTraceletRateModel(nn.Module):
         self,
         state: MolecularGraph,
         action: RingSystemGrow,
+        *,
+        scaffold_context: ScaffoldContext | None = None,
     ) -> RingTeacherSemanticCertificate:
         """Compile the exact teacher-only semantic DP outside neural forward.
 
@@ -3991,6 +4142,11 @@ class FactorizedTraceletRateModel(nn.Module):
         """
 
         action_is_valid = bool(is_valid_ring_system_grow(state, action))
+        if action_is_valid and scaffold_context is not None:
+            try:
+                scaffold_context.rewrite_system().apply(state, "ring_system_grow", action)
+            except InvalidRewrite:
+                action_is_valid = False
         if not action_is_valid:
             return RingTeacherSemanticCertificate(False, ())
         teacher_key = ring_system_placement_key(ring_system_placement(action))
@@ -4006,7 +4162,7 @@ class FactorizedTraceletRateModel(nn.Module):
             placement_certificates = []
             for group in placement_groups:
                 placement = group[0]
-                decoder = self._ring_semantic_decoder(state, placement)
+                decoder = self._ring_semantic_decoder(state, placement, scaffold_context)
                 supported = bool(semantic_ring_prefix_is_completable(decoder, ()))
                 categories = None
                 masks = None
@@ -4054,6 +4210,8 @@ class FactorizedTraceletRateModel(nn.Module):
         pair: Tensor,
         *,
         certificate: RingTeacherTemplateCertificate | None = None,
+        scaffold_context: ScaffoldContext | None = None,
+        prepared_decoders: tuple[SemanticRingSystemDecoder, ...] | None = None,
     ) -> tuple[
         Tensor,
         tuple[tuple[SemanticRingSystemDecoder, Tensor], ...],
@@ -4068,9 +4226,11 @@ class FactorizedTraceletRateModel(nn.Module):
             global_state,
             pair,
         )
-        decoders = tuple(
-            self._ring_semantic_decoder(state, placement) for placement in placements
+        decoders = prepared_decoders if prepared_decoders is not None else tuple(
+            self._ring_semantic_decoder(state, placement, scaffold_context) for placement in placements
         )
+        if len(decoders) != len(placements):
+            raise ValueError("prepared ring decoder count changed")
         semantic_tables = tuple(
             (
                 decoder,
@@ -4112,10 +4272,11 @@ class FactorizedTraceletRateModel(nn.Module):
         node: Tensor,
         global_state: Tensor,
         pair: Tensor,
+        scaffold_context: ScaffoldContext | None = None,
     ) -> tuple[tuple[ExecutableRingGrowCandidate, ...], Tensor]:
         """Score the shared exact candidate table as a normalized hierarchy."""
 
-        candidates = self._ring_paired_candidates(state, template_index)
+        candidates = self._ring_paired_candidates(state, template_index, scaffold_context)
         if not candidates:
             return candidates, node.new_empty((0,))
         placements = tuple(
@@ -4328,6 +4489,7 @@ class FactorizedTraceletRateModel(nn.Module):
         *,
         property_values: tuple[float, ...] | None,
         property_mask: tuple[bool, ...] | None = None,
+        scaffold_context: ScaffoldContext | None = None,
     ) -> SampledRewriteMark:
         """Sample one legal mark under an optional standardized target vector."""
 
@@ -4347,7 +4509,16 @@ class FactorizedTraceletRateModel(nn.Module):
             values = None
             mask = None
 
-        cache_key = self._state_cache_key(state)
+        if self.scaffold_conditioning != (scaffold_context is not None):
+            raise ValueError("sampler/model scaffold conditioning disagree")
+        if scaffold_context is not None and any((
+            getattr(self, "virtualize_legacy_self_grafts", False),
+            getattr(self, "disabled_sampling_rule_names", ()),
+            getattr(self, "excluded_sampling_ring_template_indices", ()),
+        )):
+            raise ValueError("scaffold sampler cannot use unmatched inference-only support overrides")
+        cache_key = (self._state_cache_key(state) if scaffold_context is None
+                     else scaffold_context.state_cache_key(state))
         cached_batch = self._sampling_state_cache.get(cache_key)
         if cached_batch is None:
             cached_batch = prepare_factorized_mark_batch(
@@ -4369,6 +4540,8 @@ class FactorizedTraceletRateModel(nn.Module):
                 cycle_close_action_semantics=self.cycle_close_action_semantics,
                 cycle_open_action_semantics=self.cycle_open_action_semantics,
                 atom_delete_action_semantics=self.atom_delete_action_semantics,
+                scaffold_contexts=(None if scaffold_context is None else (scaffold_context,)),
+                node_context_provider=self.node_context_provider,
             )
             self._sampling_state_cache[cache_key] = cached_batch
             if len(self._sampling_state_cache) > self._sampling_state_cache_limit:
@@ -4387,7 +4560,7 @@ class FactorizedTraceletRateModel(nn.Module):
             node,
             global_state,
             pair,
-            require_exact_ring_support=False,
+            require_exact_ring_support=scaffold_context is not None,
         )
         nonself_graft_mask = masks["bond_reroute"][0].clone()
         legacy_virtual_grafts = bool(
@@ -4594,8 +4767,9 @@ class FactorizedTraceletRateModel(nn.Module):
             template = self.attach_templates[template_index]
             return template.instantiate(anchor, null_slots[: template.span])
         if rule_name == "ring_system_grow":
+            scaffold_context = None if batch.scaffold_contexts is None else batch.scaffold_contexts[0]
             exact_template_mask = torch.tensor(
-                self._ring_grow_support(state),
+                self._ring_grow_support(state, scaffold_context),
                 dtype=torch.bool,
                 device=self.device,
             )
@@ -4634,6 +4808,7 @@ class FactorizedTraceletRateModel(nn.Module):
                         node,
                         global_state,
                         pair,
+                        scaffold_context=scaffold_context,
                     )
                 )
                 if not candidates:
@@ -4661,6 +4836,7 @@ class FactorizedTraceletRateModel(nn.Module):
                     node,
                     global_state,
                     pair,
+                    scaffold_context=scaffold_context,
                 )
             )
             if not bool(placement_mask.any()):
@@ -4718,10 +4894,37 @@ class FactorizedTraceletRateModel(nn.Module):
             return batch.ring_restate_actions[0][action_index]
         raise ValueError(f"unsupported sampled rule family: {rule_name}")
 
+    def _validate_scaffold_batch(
+        self,
+        batch: FactorizedMarkBatch,
+    ) -> None:
+        if self.scaffold_conditioning:
+            # GPU forward must consume bound CPU-prepared conditional tables;
+            # no ring discovery may be delegated to a training container.
+            if self.device.type != "cpu" and batch.scaffold_prepared_rows is None:
+                raise ValueError("scaffold training requires prepared CPU support")
+            if batch.scaffold_contexts is None or len(batch.scaffold_contexts) != batch.batch_size:
+                raise ValueError("scaffold model requires one explicit context per row")
+            if (self.enable_cycle_ops or self.editing_process_semantics != LEGACY_EDITING_PROCESS_SEMANTICS
+                    or self.ring_family_mass_mode != "boolean"):
+                raise ValueError("scaffold construction currently qualifies the legacy lipid lane only")
+            if batch.scaffold_prepared_rows is not None:
+                validate_prepared_scaffolds(self, batch)
+            if self.device.type == "cpu" and any(not c.accepts(s) for c, s in zip(batch.scaffold_contexts, batch.states)):
+                raise ValueError("batch state violates its supplied scaffold")
+            expected_flags = torch.from_numpy(np.stack([c.node_flags() for c in batch.scaffold_contexts]))
+            if batch.scaffold_node_flags is None or (self.device.type == "cpu"
+                    and not torch.equal(batch.scaffold_node_flags, expected_flags)):
+                raise ValueError("scaffold flags disagree with supplied contexts")
+            if (batch.ring_teacher_semantic_certificates is not None
+                    and any(c is not None for c in batch.ring_teacher_semantic_certificates)):
+                raise ValueError("unbound ring certificates cannot be reused for scaffold conditions")
+
     def _encode_batch(
         self,
         batch: FactorizedMarkBatch,
     ) -> tuple[Tensor, Tensor, Tensor]:
+        self._validate_scaffold_batch(batch)
         atom_types = batch.atom_types
         charges = batch.formal_charges + 2
         hydrogens = batch.implicit_h_counts
@@ -4776,6 +4979,35 @@ class FactorizedTraceletRateModel(nn.Module):
             + self.hydrogen_embedding(hydrogens)
             + self.atom_ring_embedding(batch.atom_topology)
         ) * real_float
+        if self.scaffold_conditioning:
+            if batch.scaffold_contexts is None or batch.scaffold_node_flags is None:
+                raise ValueError("scaffold model requires explicit contexts, including empty contexts")
+            if tuple(batch.scaffold_node_flags.shape) != (*atom_types.shape, 2):
+                raise ValueError("scaffold flags have the wrong shape")
+            assert self.scaffold_encoder is not None
+            node = node + self.scaffold_encoder(
+                batch.scaffold_node_flags.to(dtype=node.dtype)
+            ) * real_float
+        elif (batch.scaffold_contexts is not None or batch.scaffold_node_flags is not None
+              or batch.scaffold_prepared_rows is not None):
+            raise ValueError("unconditioned model cannot silently ignore scaffold conditions")
+        if self.node_context_encoder is not None:
+            if (self.node_context_provider.schema != self.node_context_schema
+                    or batch.node_context_schema != self.node_context_schema):
+                raise ValueError("node context schema differs from the model configuration")
+            expected_keys = tuple(node_context_key(state, None if batch.scaffold_contexts is None
+                                                  else batch.scaffold_contexts[index])
+                                  for index, state in enumerate(batch.states))
+            if batch.node_context_keys != expected_keys:
+                raise ValueError("node context features are not bound to these states and conditions")
+            features = batch.node_context_features
+            if features is None or tuple(features.shape) != (*atom_types.shape, self.node_context_encoder.in_features):
+                raise ValueError("node context features are missing or have the wrong shape")
+            node = node + self.node_context_encoder(features.to(dtype=node.dtype)) * real_float
+        elif any(value is not None for value in (
+            batch.node_context_features, batch.node_context_schema, batch.node_context_keys
+        )):
+            raise ValueError("model cannot silently ignore node context features")
         edge_mask = (bonds != 0).unsqueeze(-1)
         edge_state = self.bond_embedding(bonds)
         batch_size, n_slots = atom_types.shape
@@ -5171,6 +5403,8 @@ class FactorizedTraceletRateModel(nn.Module):
         # rejection policy.  It must happen before the within-family partitions
         # and family normalization are computed.
         masks = _apply_charge_policy_to_action_masks(batch, masks)
+        if batch.scaffold_contexts is not None:
+            masks = self._scaffold_action_masks(batch, masks)
         atom_insert_z = torch.logsumexp(
             torch.stack(
                 (
@@ -5233,6 +5467,36 @@ class FactorizedTraceletRateModel(nn.Module):
         if family_z.shape != (batch_size, len(MARK_RULE_NAMES)):
             raise RuntimeError("factorized family partition has an invalid shape")
         return masks, logits, family_z
+
+    def _scaffold_action_masks(
+        self, batch: FactorizedMarkBatch, masks: dict[str, Tensor],
+    ) -> dict[str, Tensor]:
+        """Intersect the existing lipid mark language before every normalizer.
+
+        Primitive constraints follow exact hydrogen-compensated edge changes.
+        Ring delete/restate candidates were executor-filtered on CPU at collation;
+        ring-grow electronics use the same condition in their recursive decoder.
+        """
+        assert batch.scaffold_node_flags is not None
+        core = batch.scaffold_node_flags[..., 0].bool()
+        ports = batch.scaffold_node_flags[..., 1].bool()
+        mutable_boundary = ~core | ports
+        pair_allowed = (mutable_boundary.unsqueeze(2) & mutable_boundary.unsqueeze(1)
+                        & ~(core.unsqueeze(2) & core.unsqueeze(1)))
+        result = dict(masks)
+        result["grow_root"] = masks["grow_root"] & ~core.any(dim=1, keepdim=True)
+        result["grow_connected"] = masks["grow_connected"] & mutable_boundary[..., None, None]
+        result["atom_delete"] = masks["atom_delete"] & ~core
+        result["atom_restate"] = masks["atom_restate"] & ~core[..., None]
+        result["bond_reorder"] = masks["bond_reorder"] & pair_allowed[..., None]
+        removed = batch.graft_remove_neighbors.clamp_min(0)
+        old_edge_allowed = pair_allowed.gather(2, removed)
+        result["bond_reroute"] = masks["bond_reroute"] & pair_allowed & old_edge_allowed
+        result["cycle_insert"] = masks["cycle_insert"] & ~core.any(dim=1, keepdim=True)
+        result["cycle_attach"] = masks["cycle_attach"] & mutable_boundary[..., None]
+        if batch.ring_delete_actions is None:
+            raise ValueError("scaffold batch lacks CPU-filtered ring delete candidates")
+        return result
 
     def _ring_restate_logits(
         self,
@@ -5562,6 +5826,17 @@ class FactorizedTraceletRateModel(nn.Module):
             key = (batch_index, int(action.anchor), template_index)
             return logits["cycle_attach"][key], masks["cycle_attach"][key]
         if isinstance(action, RingSystemGrow):
+            scaffold_context = (None if batch.scaffold_contexts is None
+                                else batch.scaffold_contexts[batch_index])
+            prepared_row = (None if batch.scaffold_prepared_rows is None
+                            else batch.scaffold_prepared_rows[batch_index])
+            if scaffold_context is not None and prepared_row is None:
+                try:
+                    scaffold_context.rewrite_system().apply(
+                        batch.states[batch_index], "ring_system_grow", action)
+                except InvalidRewrite:
+                    zero = logits["ring_system_grow"][batch_index].sum() * 0.0
+                    return zero, zero.new_tensor(False, dtype=torch.bool)
             teacher_placement = ring_system_placement(action)
             teacher_placement_key = ring_system_placement_key(teacher_placement)
             certificates = getattr(
@@ -5572,6 +5847,8 @@ class FactorizedTraceletRateModel(nn.Module):
             teacher_certificate = (
                 None if certificates is None else certificates[batch_index]
             )
+            if prepared_row is not None:
+                teacher_certificate = prepared_row.teacher_certificate
             action_is_valid = (
                 bool(is_valid_ring_system_grow(batch.states[batch_index], action))
                 if teacher_certificate is None
@@ -5612,6 +5889,7 @@ class FactorizedTraceletRateModel(nn.Module):
                             node[batch_index],
                             global_state[batch_index],
                             pair[batch_index],
+                            scaffold_context=scaffold_context,
                         )
                     )
                     matching = tuple(
@@ -5651,10 +5929,10 @@ class FactorizedTraceletRateModel(nn.Module):
                 key = (batch_index, template_index)
                 if not bool(masks["ring_system_grow"][key]):
                     continue
-                placement_groups = self._ring_template_placement_groups(
-                    batch.states[batch_index],
-                    template_index,
-                )
+                prepared_template = (None if prepared_row is None else next(
+                    item for item in prepared_row.templates if item.template_index == template_index))
+                placement_groups = (prepared_template.placement_groups if prepared_template is not None
+                    else self._ring_template_placement_groups(batch.states[batch_index], template_index))
                 placements = tuple(group[0] for group in placement_groups)
                 matching_placements = tuple(
                     index
@@ -5671,6 +5949,8 @@ class FactorizedTraceletRateModel(nn.Module):
                         global_state[batch_index],
                         pair[batch_index],
                         certificate=template_certificate,
+                        scaffold_context=scaffold_context,
+                        prepared_decoders=(None if prepared_template is None else prepared_template.decoders),
                     )
                 )
                 if not bool(placement_mask.any()):
@@ -5748,9 +6028,20 @@ class FactorizedTraceletRateModel(nn.Module):
             try:
                 action_index = candidates.index(action)
             except ValueError as exc:
-                raise RuntimeError(
-                    "teacher ring restate is outside exact dynamic candidates"
-                ) from exc
+                # Slot relocation can reverse an undirected bond or reorder
+                # coordinated changes. Match that same marked operation, not
+                # a different Kekule assignment or a new molecular successor.
+                def edge_key(mark):
+                    return tuple(sorted((min(c.a, c.b), max(c.a, c.b), c.new_order)
+                                        for c in mark.changes))
+
+                matches = [i for i, candidate in enumerate(candidates)
+                           if edge_key(candidate) == edge_key(action)]
+                if len(matches) != 1:
+                    raise RuntimeError(
+                        "teacher ring restate is outside exact dynamic candidates"
+                    ) from exc
+                action_index = matches[0]
             key = (batch_index, action_index)
             if self.ring_restate_scorer_mode == SEMANTIC_RING_RESTATE_SCORER_MODE:
                 group_ids = batch.ring_restate_successor_group_ids

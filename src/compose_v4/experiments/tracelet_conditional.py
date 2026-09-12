@@ -6,6 +6,7 @@ import copy
 from concurrent.futures import Executor, ProcessPoolExecutor
 from contextlib import contextmanager, nullcontext
 from dataclasses import dataclass
+from functools import partial
 from math import exp
 from multiprocessing import get_context
 from time import perf_counter
@@ -35,6 +36,7 @@ from compose_v4.model.rate_model import FiberRatePrediction
 from compose_v4.rewrite.kernel import canonical_state_key, de_novo_rewrite_system
 from compose_v4.rewrite.causal_trace import CausalTraceCTMC, CausalTraceSample
 from compose_v4.rewrite.progress import TraceProgressCTMC
+from compose_v4.rewrite.scaffold_construction import ScaffoldContext
 from compose_v4.rewrite.tracelet_compiler import compile_null_to_target_tracelets
 from compose_v4.rewrite.tree_transport import compile_carbon_tree_to_target
 from compose_v4.rewrite.tracelet_fiber import (
@@ -1129,10 +1131,17 @@ def sample_tracelet_ancestral(
     max_fiber_cache: int = 1024,
     max_rate_cache: int = 4096,
     source_prior: MolecularSourcePrior | None = None,
+    scaffold_context: ScaffoldContext | None = None,
 ) -> TraceletRollout:
     cached_fibers = fiber_cache if fiber_cache is not None else {}
     cached_rates = rate_cache if rate_cache is not None else {}
     state = (source_prior or NullSourcePrior()).sample(rng, n_slots=n_slots)
+    if getattr(model, "scaffold_conditioning", False) and scaffold_context is None:
+        raise ValueError("scaffold-conditioned rollout requires an explicit condition, including NULL")
+    if scaffold_context is not None and (
+        scaffold_context.n_slots != n_slots or not scaffold_context.accepts(state)
+    ):
+        raise ValueError("rollout source does not satisfy the supplied scaffold condition")
     begin_rollout_audit = getattr(model, "begin_rollout_audit", None)
     if callable(begin_rollout_audit):
         begin_rollout_audit()
@@ -1150,6 +1159,18 @@ def sample_tracelet_ancestral(
         None,
     )
     direct_runtime = de_novo_rewrite_system() if callable(direct_mark_sampler) else None
+    if scaffold_context is not None:
+        conditioned_sampler = getattr(model, "sample_rewrite_mark_conditioned", None)
+        if not callable(conditioned_sampler) or not getattr(model, "scaffold_conditioning", False):
+            raise ValueError("scaffold rollout requires the condition-aware direct mark law")
+        direct_mark_sampler = partial(
+            conditioned_sampler, property_values=None, scaffold_context=scaffold_context
+        )
+        # Unconditioned hazard/proposal shortcuts are not interchangeable with
+        # the conditional law. Use its already-qualified direct realization.
+        hazard_probe_sampler = None
+        post_event_mark_sampler = None
+        direct_runtime = scaffold_context.rewrite_system()
     while operational_time < operational_horizon and len(event_times) < max_events:
         interval_end = min(operational_time + time_step, operational_horizon)
         frozen_time = 1.0 - exp(-(operational_time + interval_end) / 2.0)

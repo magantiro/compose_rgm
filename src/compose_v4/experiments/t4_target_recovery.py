@@ -14,7 +14,7 @@ from rdkit import Chem, rdBase
 from rdkit.Chem import rdFingerprintGenerator
 from rdkit.Contrib.SA_Score import sascorer
 
-from compose_v4.control.continuation import ContinuationBudgetExceeded
+from compose_v4.control.continuation import ContinuationBudgetExceeded, _tilted
 from compose_v4.control.docking_value import graph_kernel, identity, molecular_features
 from compose_v4.control.graph_geometry import structural_displacement, topology
 from compose_v4.control.molecular_task_search import MolecularHierarchy, MolecularSearchState
@@ -38,6 +38,7 @@ from compose_v4.experiments.t4_endpoint_selection import acceptable_endpoint, ca
 from compose_v4.experiments.t4_matched_pilot import run_remote as common_remote
 from compose_v4.experiments.t4_matched_pilot import seal, unseal
 from compose_v4.gates.med_chem_gate import validity_reasons
+from compose_v4.rewrite import action_codec, action_codec_v4
 from compose_v4.rewrite.kernel import canonical_state_key
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
 
@@ -51,9 +52,14 @@ class RecoveryConfig:
     initial_rollouts: int = 2
     seed: int = 1000
     stop_seconds: int = 3600
+    planning_policy: str = "full_horizon"
 
     def __post_init__(self):
         for name, value in asdict(self).items():
+            if name == "planning_policy":
+                if value not in ("full_horizon", "next_option_heuristic"):
+                    raise ValueError(f"unknown recovery planning policy: {value!r}")
+                continue
             if type(value) is not int or value < (0 if name == "seed" else 1):
                 raise ValueError(f"invalid target-recovery field {name}: {value!r}")
         if self.primitive_budget > 32 or self.max_rollouts > 8:
@@ -107,6 +113,34 @@ def verify_transition(node, following, mark, system):
         raise ValueError("target-recovery committed edit failed exact/pathwise verification")
 
 
+def heuristic_decision(row, objective):
+    """Cheap one-step HOW guidance, explicitly not a continuation estimate."""
+    if not row.successors:
+        return {"status": "no_admissible_action", "probabilities": [], "kl": 0.0}
+    values = [objective.evaluate(s.graph)["value"] for s in row.successors]
+    tilted, eta, _ = _tilted(row.core, values, kappa=1.0, exploration=0.0)
+    q = (1 - row.epsilon) * tilted + row.epsilon * np.asarray(row.floor)
+    p, live = row.reference, q > 0
+    kl = float(np.sum(q[live] * np.log(q[live] / p[live])))
+    if kl > 1 + 1e-10 or not np.isclose(q.sum(), 1, atol=1e-12):
+        raise ValueError("heuristic decision violates probability/KL invariant")
+    return {
+        "status": "one_step_target_heuristic",
+        "probabilities": q.tolist(),
+        "reference": p.tolist(),
+        "core": list(row.core),
+        "floor": list(row.floor),
+        "epsilon": row.epsilon,
+        "values": values,
+        "visits": [0] * len(values),
+        "labels": list(row.labels),
+        "kl": kl,
+        "eta": eta,
+        "snapshot_id": objective.snapshot,
+        "continuation_estimate": False,
+    }
+
+
 def run_recovery(
     source,
     target_smiles,
@@ -116,11 +150,14 @@ def run_recovery(
     config=None,
     save=lambda name, payload: None,
     progress=None,
+    initial_laws=None,
 ):
     """Search receives a source and destination, never a witness or its actions."""
     config = config or RecoveryConfig()
     objective = TargetObjective(target_smiles)
-    started, laws, path, law_seconds = perf_counter(), {}, [], 0.0
+    started, laws, path, law_seconds = perf_counter(), dict(initial_laws or {}), [], 0.0
+    reused_laws = len(laws)
+    reused_keys, reused_used = set(laws), set()
     progress = {} if progress is None else progress
     root = MolecularSearchState.start(
         source, budget=config.primitive_budget, root_id=objective.snapshot
@@ -158,6 +195,8 @@ def run_recovery(
         def cached_law(graph):
             nonlocal law_seconds
             key = exact_graph_key(graph)
+            if key in reused_keys:
+                reused_used.add(key)
             if key not in laws:
                 if perf_counter() - started >= config.stop_seconds:
                     raise ContinuationBudgetExceeded("administrative_elapsed_stop")
@@ -165,8 +204,10 @@ def run_recovery(
                     phase=meter.phase,
                     laws_completed=len(laws),
                     executor_calls=meter.calls,
-                    rollouts_completed=planner.work.rollouts_completed,
-                    rollouts_started=planner.work.rollouts_started,
+                    rollouts_completed=sum(p["rollouts_completed"] for p in completed_planners)
+                    + planner.work.rollouts_completed,
+                    rollouts_started=sum(p["rollouts_started"] for p in completed_planners)
+                    + planner.work.rollouts_started,
                     committed_edits=sum(e["stage"] == "how" for e in path),
                 )
                 before = perf_counter()
@@ -187,27 +228,42 @@ def run_recovery(
                 )
             return laws[key]
 
+        option_start_budget = root.budget
+        fast = config.planning_policy == "next_option_heuristic"
+
         def terminal(n):
             value = objective.evaluate(n.graph)
-            return value["value"] if n.budget == 0 or value["exact_hit"] else None
+            at_boundary = fast and n.stage == "where" and n.budget < option_start_budget
+            return value["value"] if n.budget == 0 or value["exact_hit"] or at_boundary else None
 
         kernel = OptionContinuationKernel(
             cached_law, system, max_executor_applications=None, product_gate=EXECUTABLE_PRODUCT_GATE
         )
         hierarchy = MolecularHierarchy(kernel, lazy_applicability=True)
-        planner = TaskSearch(
-            hierarchy.row,
-            terminal,
-            MolecularSearchState.key,
-            snapshot_id=objective.snapshot,
-            seed=int(seeds[0].generate_state(1)[0]),
-            max_rows=None,
-            max_terminals=256,
-            max_rollouts=config.max_rollouts,
-            max_path_steps=3 * config.primitive_budget,
-            reference_draw=hierarchy.sample_reference,
-            endpoint=lambda n: objective.evaluate(n.graph)["value"] if n.stage == "where" else None,
-        )
+        completed_planners = []
+
+        def new_planner(index, remaining_rollouts):
+            return TaskSearch(
+                hierarchy.row,
+                terminal,
+                MolecularSearchState.key,
+                snapshot_id=identity({"objective": objective.snapshot, "option_index": index})
+                if fast
+                else objective.snapshot,
+                seed=int(np.random.SeedSequence([config.seed, index, 1]).generate_state(1)[0])
+                if fast
+                else int(seeds[0].generate_state(1)[0]),
+                max_rows=None,
+                max_terminals=256,
+                max_rollouts=remaining_rollouts,
+                max_path_steps=3 * config.primitive_budget,
+                reference_draw=hierarchy.sample_reference,
+                endpoint=None
+                if fast
+                else lambda n: objective.evaluate(n.graph)["value"] if n.stage == "where" else None,
+            )
+
+        planner = new_planner(0, config.max_rollouts)
         try:
             for event_index in range(3 * config.primitive_budget):
                 if objective.evaluate(node.graph)["exact_hit"]:
@@ -216,9 +272,22 @@ def run_recovery(
                 if node.budget == 0:
                     break
                 meter.phase = "planning"
-                planner.plan(node, config.initial_rollouts if not path else 1)
+                if fast and node.stage == "where":
+                    if path:
+                        completed_planners.append(planner.receipt())
+                        option_start_budget = node.budget
+                        used = sum(p["rollouts_started"] for p in completed_planners)
+                        planner = new_planner(len(completed_planners), config.max_rollouts - used)
+                    planner.plan(node, config.initial_rollouts)
+                elif not fast:
+                    planner.plan(node, config.initial_rollouts if not path else 1)
                 meter.phase = "committed_decision"
-                decision, row = planner.decision(node), planner.row(node)
+                row = planner.row(node)
+                decision = (
+                    heuristic_decision(row, objective)
+                    if fast and node.stage == "how"
+                    else planner.decision(node)
+                )
                 if not row.successors:
                     status = "no_admissible_action"
                     break
@@ -302,6 +371,10 @@ def run_recovery(
             "planner": planner.receipt(),
             "kernel_work": asdict(kernel.work),
             "law_enumerations": len(laws),
+            "reused_law_rows_available": reused_laws,
+            "reused_law_rows_used": len(reused_used),
+            "new_law_enumerations": len(laws) - reused_laws,
+            "completed_option_planners": completed_planners,
             "law_seconds": law_seconds,
             "executor_calls": meter.calls,
             "executor_attempts": meter.attempts,
@@ -322,10 +395,48 @@ def run_recovery(
     return result
 
 
-def run_remote(task, repo_root, artifact_root, volume, runtime_factory, validate_revision):
+def load_saved_laws(directory, *, repo_root, expected):
+    """Reuse exact-state model laws only with a checked scientific dependency closure."""
+    verify_file(directory / "launch.json", expected["launch_sha256"])
+    old = json.loads((directory / "launch.json").read_text())["image_revision"][
+        "serialized_sources"
+    ]
+    for path, digest in expected["implementation_sha256"].items():
+        verify_file(repo_root / path, digest)
+        if old.get(path) != digest:
+            raise ValueError(f"saved law implementation differs: {path}")
+    result, hashes = {}, {}
+    for path in sorted((directory / "laws").glob("*.json")):
+        payload = unseal(path)
+        if path.stem != identity(payload["source"]):
+            raise ValueError("saved law exact-state filename identity mismatch")
+        decoded = [
+            (action_codec_v4 if m["schema_version"] == 4 else action_codec).decode_action(m)
+            for m in payload["marks"]
+        ]
+        weights = tuple(payload["probabilities"])
+        if (
+            len(weights) != len(decoded)
+            or not np.isfinite(weights).all()
+            or any(p < 0 for p in weights)
+            or not np.isclose(sum(weights), 1, atol=1e-12)
+        ):
+            raise ValueError("invalid cached marked probability law")
+        key = exact_graph_key(decode_state(payload["source"]))
+        result[key] = tuple(f for f, _ in decoded), tuple(a for _, a in decoded), weights
+        hashes[str(path.relative_to(directory))] = sha256_file(path)
+    if not result:
+        raise ValueError("no compatible saved laws are available")
+    return result, {"input_sha256": hashes, "compatibility": expected}
+
+
+def run_remote(
+    task, repo_root, artifact_root, volume, runtime_factory, validate_revision, *, fast=False
+):
     from compose_v4.experiments.production_successor_kernel import enumerate_factorized_marked_law
 
-    contract_path = f"configs/{KIND}.json"
+    kind = f"{KIND}_fast" if fast else KIND
+    contract_path = f"configs/{kind}.json"
     contract = json.loads((repo_root / contract_path).read_text())
 
     def runner(actual_task, _prepare, _dock, output, *, commit, progress):
@@ -360,6 +471,18 @@ def run_remote(task, repo_root, artifact_root, volume, runtime_factory, validate
             seal(output / f"{name}.json", payload)
             commit()
 
+        initial_laws = None
+        if fast:
+            cache_path = artifact_root / contract["saved_laws"]["path"]
+            if not cache_path.resolve().is_relative_to(artifact_root.resolve()):
+                raise ValueError("saved laws escape the declared artifact root")
+            initial_laws, receipt = load_saved_laws(
+                cache_path, repo_root=repo_root, expected=contract["saved_laws"]
+            )
+            old_gate = json.loads((cache_path / "runtime_gate.json").read_text())
+            if old_gate["input_sha256"] != contract["expected_input_sha256"]:
+                raise ValueError("saved law checkpoint/data inputs differ")
+            save("law_cache_reuse", receipt)
         save("started", {"task": actual_task, "contract_sha256": task["contract_sha256"]})
         return run_recovery(
             source,
@@ -369,6 +492,7 @@ def run_remote(task, repo_root, artifact_root, volume, runtime_factory, validate
             config=RecoveryConfig(**contract["recovery"]),
             save=save,
             progress=progress,
+            initial_laws=initial_laws,
         )
 
     volume.reload()
@@ -382,6 +506,6 @@ def run_remote(task, repo_root, artifact_root, volume, runtime_factory, validate
         None,
         None,
         contract_path=contract_path,
-        run_kind=KIND,
+        run_kind=kind,
         runner=runner,
     )

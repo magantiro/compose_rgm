@@ -1,0 +1,198 @@
+{
+  "analysis_sha256": "5de4c073e76b4d16553e39b342e0315965c7db8b19fdd65d6054be6d1dbd8a95",
+  "checks": [
+    "sealed payloads",
+    "candidate and barrier identities",
+    "winner-first ordering",
+    "all six rows included",
+    "input and pose hashes",
+    "prepared achiral molecular identity",
+    "pose scores equal reported scores"
+  ],
+  "configuration": {
+    "authorization": "2026-09-10 user approved exact IVG winner docking first, followed by saved route endpoint diagnosis",
+    "compute": {
+      "automatic_retries": 0,
+      "cpu": 1,
+      "max_containers": 1,
+      "memory_mib": 4096,
+      "oracle_call_limit": 6,
+      "timeout_seconds": 1200
+    },
+    "contract_sha256": "012031cf84d64bf13bc538bceddeff2cbe62a4f7b4db34112a201ef582093f7e",
+    "docking": {
+      "box_source": "modal_apps/genmol_t4_opt_app.py:BOXES.parp1",
+      "cpu": 1,
+      "exhaustiveness": 1,
+      "ligand_preparation": "unchanged production Open Babel --gen3D",
+      "num_modes": 10,
+      "random_seed": null
+    },
+    "docking_only": true,
+    "expected_input_sha256": {
+      "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9",
+      "seed_manifest": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"
+    },
+    "incumbent": {
+      "path": "t4_macro_lookahead/8776743bbb813429663f339f60cbce587e59d427248dfaee80020014b11a6b28/result.json",
+      "sha256": "025a5a5586d440b3bfd07b65877998d10e259bae86d2b28f410155b3f1b82728"
+    },
+    "optimizer_continuation": false,
+    "required_rdkit": "2024.03.5",
+    "schema_version": "t4_winner_route_docking_contract_v1",
+    "task": {
+      "budget": 6,
+      "delta": 0.4,
+      "per_round": 6,
+      "session": "compose_iclr"
+    },
+    "training_authorized": false,
+    "winner_continue_below": -11.0,
+    "witness": {
+      "path": "diagnostics/t4_whole_ring_plan/result.json",
+      "sha256": "252dccee4785d3a8e972df30c4a075e7e98bdf02e120300990bcb1de9d21cee9"
+    }
+  },
+  "created_at_utc": "2026-09-10T15:34:25.792145+00:00",
+  "hardware": {
+    "analysis": "CPU, integer molecular graphs",
+    "machine": "arm64"
+  },
+  "input_sha256": {
+    "diagnostics/t4_macro_lookahead/8776743bbb813429663f339f60cbce587e59d427248dfaee80020014b11a6b28/diagnosis.json": "6fa43172da40b8287ee3872a01f50d0a00d4e1a5fbe19d8314fc97d16e4ad07f",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/candidate_lock.json": "9511c56673de7528ef68cb75ffe860a231b8afc005d90abe3369ae52d7f64a57",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/docking_started.json": "9745ba82f1d902a3244d261c142a9405d0b8dc3a797b9f394caba83224cacb05",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/00/l.mol": "f5fd6076c69768b96211fd8c2ddf2174eba3fb8a8c0027225c0b7171171d3184",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/00/l.pdbqt": "76417d81c91747f4f8510b9d22ed18d1f3152b0daa9724389f16a61032d98766",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/00/manifest.json": "7e19a3331064fcae173ec458d852b376db094339f0e3260259699b7a24a68f6d",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/00/o.pdbqt": "5eb53d94d800ffcc14fd0402f02a92c4515884452faa14b1821db97b8e99486f",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/01/l.mol": "019caa1eaa177f066a46e5e5a96c8d0a816b22e3e6a7255404199abe8cf98c32",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/01/l.pdbqt": "e65c2c6afcfe4945a8a95979d37af8c3c4b3fb79415bcca1c96db676c408bd05",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/01/manifest.json": "bbcbce9a1726a7422b0e2ec02034178ae3c15b0505eb6cbc04e4f35617904f3a",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/01/o.pdbqt": "653bff97803a7fc2b4a04f006c9c19074abed74ec0f04c22e630ee35456b83db",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/02/l.mol": "dccfbeef77bac09b4b69ad3572c75d137b46b5f6c3a8e7d12dac3ee7c052b310",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/02/l.pdbqt": "725bd1de760ae4df505afab8c42f1832eb4e4a39adb2beb88f9cd1a5b89e4712",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/02/manifest.json": "44c8702ce952376dc123ec19bc4b25c7abcacbc45508809c944c7a71249e27b8",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/02/o.pdbqt": "16e1d7dbc0a3e0cfebf5fbe95533d16fa0baf2fd54465306486d23a43c324c92",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/03/l.mol": "994fdc4f7d5b2fd4fe7023b38e870ec7da9793418022c49b316082519993b68c",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/03/l.pdbqt": "c10f46f0622092548e4be0a9f17c99ac3daa7570bc0c78e0c495f6b284f02ba0",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/03/manifest.json": "7ddc05db2afaf819a05ec0c92189d8ec620325482e7bc905d9110e59a074560a",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/03/o.pdbqt": "f77d10d53716a0d871865bd2421aa743eec67cc4e2b480a33eb8914772cb7300",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/04/l.mol": "310c2ada78b60d4c0cf83137a06cedf4c2efc5bd7a4f10231401df61f2eb860c",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/04/l.pdbqt": "67cd4c7d49e1483c34d342062881da879ec7b57e3d232d67481f5ed01e263218",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/04/manifest.json": "1d0ed957ff418a4dc56d487488a612dfd700e3a2cfbea9ecdbca3f3685cb4828",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/04/o.pdbqt": "0b1da3aa20fa5d57115376863b120c64b2cd8da22758dac5fa9590a159608103",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/05/l.mol": "1611bf8f309bb85b660f2e41601ddc18ae62a95b9bcc1d39db2dcbf65a3cc27d",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/05/l.pdbqt": "d4e6cdb8a99f174e115e23cdeaed61faf02a8bdad1d114e01c2541ae44fec86e",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/05/manifest.json": "775f9c9908d164ab934e74718c9b999bf661711b672cb4b1ec9e8169da922724",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/poses/05/o.pdbqt": "6ffab094195e696bc7f0f9768db791ec8ee644f7d699d320a58b68cbfab86a39",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/result.json": "02f9d33a271b1bea6b74252fe107d0e2761bad40b7d9a869f808f2671bb9176d",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/rows/00/result.json": "e1574148c7600f04eab2db68097ba5a757fd77b4955cba19d47a5ab31d5dac31",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/rows/00/started.json": "c073c8c675ca09f393f42aed7136ccc3f930b08f1b4f9a92e4b5ce0ed20d9393",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/rows/01/result.json": "f1389406400b390b03385fe241cb4a143b4464080b5ea370f6f2427d8d7525f4",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/rows/01/started.json": "87fa1bcd3c2975ad5e818465607c4c41088d9342fdd6ec6ec406ccc860a58579",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/rows/02/result.json": "80ad5831444fbe10e97d04172f812a336b12f216cd9401b51d96cb57221e8f4d",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/rows/02/started.json": "cfba415e4fac8ce2d1ec8e6003ca31c802e621bfe0f3445e7f5b28e482d27a55",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/rows/03/result.json": "9d9d119a9e3fc37eb0ee1360585fd0a561da509cc640e194d5f52551fe133299",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/rows/03/started.json": "a9354e7b53d71fcde8d6229e33d606f983796d5ecbc7d7545b5c77b87523fd7d",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/rows/04/result.json": "5db1af4de448dc6e3f4781a46c89352c0dff9903be83b360007dfa7c78e2dbb2",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/rows/04/started.json": "847d0a87d40abd4412affdf8275ca42707d7278cf1cadbb006256c7186938ab1",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/rows/05/result.json": "17db6cc5808c4c3dfd8a371eca0d8810774c51c6418a9e271dd9e264464895be",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/rows/05/started.json": "e71e372e52d8665872feef204b9b185bf44192e1fbb64ad80b127a69212f05e3",
+    "diagnostics/t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/runtime_gate.json": "201f0a09f1d4f960ec52fa5a8cb096533747662f40170781e216eeeeabf99f38"
+  },
+  "limitations": [
+    "one docking per molecule, no uncertainty estimate",
+    "answer-known route, not autonomous discovery",
+    "score is not experimental affinity",
+    "unset production docking seeds",
+    "prior predictions are diagnostic only, not newly fit"
+  ],
+  "new_oracle_calls": 0,
+  "randomness": "unchanged production docking: Open Babel and QuickVina seeds not explicitly set",
+  "rows": [
+    {
+      "completed_at_utc": "2026-09-10T15:31:24.634295+00:00",
+      "docking_seconds": 6.734451253000003,
+      "ds": -13.6,
+      "prepared_achiral_graph_matches": true,
+      "prior_surrogate_prediction": -8.748040648073943,
+      "qed": 0.7310885949557691,
+      "role": "core_carbonyl_insertion",
+      "sa": 2.7573000274331516,
+      "sim": 0.4745762711864407,
+      "smiles": "O=C1CCCc2cc(CCc3ccc4c(c3)CNC(=O)c3cccn3C4=O)ccc21"
+    },
+    {
+      "completed_at_utc": "2026-09-10T15:31:32.380266+00:00",
+      "docking_seconds": 3.601451090000001,
+      "ds": -7.7,
+      "prepared_achiral_graph_matches": true,
+      "prior_surrogate_prediction": -7.419261156643495,
+      "qed": 0.7949267772648932,
+      "role": "remodel_linker",
+      "sa": 2.5405852631592385,
+      "sim": 0.7555555555555555,
+      "smiles": "CCc1ccc2c(c1)CNC(=O)c1cccn1-2"
+    },
+    {
+      "completed_at_utc": "2026-09-10T15:31:41.883018+00:00",
+      "docking_seconds": 4.930952473000005,
+      "ds": -9.5,
+      "prepared_achiral_graph_matches": true,
+      "prior_surrogate_prediction": -8.054218765300549,
+      "qed": 0.789107342578331,
+      "role": "pendant_benzene",
+      "sa": 2.3367583250100328,
+      "sim": 0.6875,
+      "smiles": "O=C1NCc2cc(CCc3ccccc3)ccc2-n2cccc21"
+    },
+    {
+      "completed_at_utc": "2026-09-10T15:31:53.480807+00:00",
+      "docking_seconds": 6.122108136999998,
+      "ds": -11.8,
+      "prepared_achiral_graph_matches": true,
+      "prior_surrogate_prediction": -8.427414176120049,
+      "qed": 0.7421395352603332,
+      "role": "fused_six_ring",
+      "sa": 2.590871538761098,
+      "sim": 0.673469387755102,
+      "smiles": "O=C1NCc2cc(CCc3ccc4c(c3)CCCC4)ccc2-n2cccc21"
+    },
+    {
+      "completed_at_utc": "2026-09-10T15:32:03.331445+00:00",
+      "docking_seconds": 6.1386205029999985,
+      "ds": -12.5,
+      "prepared_achiral_graph_matches": true,
+      "prior_surrogate_prediction": -8.564661748529604,
+      "qed": 0.7568873393669047,
+      "role": "ring_carbonyl",
+      "sa": 2.6869306215857414,
+      "sim": 0.6,
+      "smiles": "O=C1CCCc2cc(CCc3ccc4c(c3)CNC(=O)c3cccn3-4)ccc21"
+    },
+    {
+      "completed_at_utc": "2026-09-10T15:32:15.671224+00:00",
+      "docking_seconds": 7.504179922999995,
+      "ds": -9.8,
+      "prepared_achiral_graph_matches": true,
+      "prior_surrogate_prediction": -9.93852092795773,
+      "qed": 0.6023412239033228,
+      "role": "incumbent_redock",
+      "sa": 3.9466771922169803,
+      "sim": 0.41975308641975306,
+      "smiles": "CN(C)Cc1cc2c(c(-c3ncc(C4CCCC(=O)C4)c4c3COCC4)c1)-n1cccc1C(=O)NC2"
+    }
+  ],
+  "run_docking_seconds": 35.031763379,
+  "run_elapsed_seconds": 70.677289559,
+  "run_oracle_calls": 6,
+  "run_revision": "6986b84d4950a2929b175740d1bb35da7facad6f",
+  "schema_version": "t4_winner_route_audit_v1",
+  "software": {
+    "python": "3.12.9",
+    "rdkit": "2024.03.5"
+  },
+  "split_identity": "answer-known PARP1 seed0 development diagnostic, excluded from optimizer fitting"
+}

@@ -1,0 +1,19 @@
+{
+  "collected_at_utc": "20260910T084500142468Z",
+  "prefix": "t4_macro_feedback/3e8730df1962c80fcc8cfad050010c76a2e533f6191cd19b4bb25206ffc57c11",
+  "sha256": {
+    "initial.json": "907b3db9d04cd045458622df13ad4cc173c8616b051e8e8c0d69ee3e58e5b269",
+    "launch.json": "cce952f7209a5f7cb62f26ad43a1ca6f631937b65add0a5a2cf26d3cd9737333",
+    "rounds/00/after.json": "9c54fef2e142d4b00f281c68fa64996001067e441ceb70ab4bf20a2abdd61b04",
+    "rounds/01/after.json": "8c15e87272883313622816d65959d008336d1b8bca0f51b1ee1cdf224d687deb",
+    "rounds/02/after.json": "41be4783834ced621b328ff8fd882c61eeed51c140aaa10b8e912e5256533786",
+    "rounds/03/after.json": "13cefd430c743f370f8af72f2e17983dc22025208f2c48a287c52a10f04d29c0",
+    "rounds/04/after.json": "69d0f3fe30a02a5427ac40a7c1648f44da052f5beb819b16e62c0f1bf180dc24",
+    "rounds/05/after.json": "3027a19a43cdb75aeeba11b1c605d0f36f48618313097b2cd47de4f3a0141b08",
+    "rounds/06/after.json": "378c99b7649eb2574e81269b4d6ab2a60809ce5e81ee7acfe3bea25dcbedcaef",
+    "rounds/07/after.json": "d886e2d96566bbc532b5a447ffbb85348542b99003161e10664a8c9300ac9ebe",
+    "rounds/08/after.json": "2bb189d01fdfbcb34cf731d98deaa33e6b063eb7a17860d9c21888b26f3f59ff",
+    "runtime_gate.json": "461bafacdb9ae2846a6bdb33f4b5c78d845ff81065cb0ea4f0d5b87e5497981d"
+  },
+  "volume": "compose-v4-artifacts"
+}

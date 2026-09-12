@@ -1,0 +1,10 @@
+{
+  "collected_at_utc": "20260910T093006115282Z",
+  "prefix": "t4_macro_lookahead/8776743bbb813429663f339f60cbce587e59d427248dfaee80020014b11a6b28",
+  "sha256": {
+    "initial.json": "da573cf541ac7ae3818d1027dde0b3ff81518efb94c197cbc54130721d5b3e59",
+    "launch.json": "ea3b121620e6e5aab1e18f2e72c45526de999ac9737dff8e731645c8d8a4bc8b",
+    "runtime_gate.json": "f42a03edfa02244cd8386ce47b881a01242ff6007ba570776162a6242fe131dd"
+  },
+  "volume": "compose-v4-artifacts"
+}

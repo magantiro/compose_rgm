@@ -21,6 +21,7 @@ from compose_v4.chem.molecular_graph import (
     per_atom_valence_check,
 )
 from compose_v4.rewrite.factorized_fiber import CNOF_ATOM_TYPES, CNOF_VALENCE
+from compose_v4.rewrite.scaffold_construction import ScaffoldContext
 from compose_v4.rewrite.trace import RewriteTrace
 from compose_v4.rewrite.tracelets import (
     AtomPayload,
@@ -162,6 +163,9 @@ class SemanticRingSystemDecoder:
     aromatic_positions: frozenset[int]
     source_state_key: tuple[bytes, bytes, bytes, bytes]
     source_state: MolecularGraph = field(compare=False, hash=False, repr=False)
+    # Optional source-only condition. It participates in equality/hash, so all
+    # memoized prefix and leaf predicates are isolated across supplied cores.
+    scaffold_context: ScaffoldContext | None = None
 
     @property
     def span(self) -> int:
@@ -212,6 +216,8 @@ def _semantic_target_orders(
 def build_semantic_ring_system_decoder(
     state: MolecularGraph,
     placement: RingSystemPlacement,
+    *,
+    scaffold_context: ScaffoldContext | None = None,
 ) -> SemanticRingSystemDecoder:
     """Compile neutral-CNOF joint electronic support for one placement.
 
@@ -224,6 +230,12 @@ def build_semantic_ring_system_decoder(
     remains the authoritative electronic predicate at complete leaves.
     """
 
+    if scaffold_context is not None and not scaffold_context.accepts(state):
+        raise ValueError("ring decoder state violates its supplied scaffold context")
+    protected = (
+        {} if scaffold_context is None else
+        {slot: (element, charge, h) for slot, element, charge, h in scaffold_context.atoms}
+    )
     members = tuple(int(slot) for slot in placement.system_atoms)
     if len(set(members)) != len(members):
         raise ValueError("semantic ring placement repeats a member")
@@ -309,6 +321,14 @@ def build_semantic_ring_system_decoder(
                                 pi_electrons,
                             )
                         )
+        if slot in protected:
+            element, charge, source_h = protected[slot]
+            options = {
+                option for option in options
+                if charge == 0 and option.atom_type == element
+                and (slot in scaffold_context.attachment_slots
+                     or option.final_h_count == source_h)
+            }
         options_by_member.append(tuple(sorted(options)))
 
     aromatic_graph = nx.Graph()
@@ -360,6 +380,7 @@ def build_semantic_ring_system_decoder(
             state.bonds.tobytes(),
         ),
         state,
+        scaffold_context,
     )
 
 
@@ -824,6 +845,8 @@ def _semantic_ring_final_state_is_valid(
         implicit_h_counts,
         bonds,
     )
+    if decoder.scaffold_context is not None and not decoder.scaffold_context.accepts(successor):
+        return False
     if not bool(per_atom_valence_check(successor).all()):
         return False
     try:
