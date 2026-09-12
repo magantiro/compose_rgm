@@ -81,6 +81,7 @@ def prepare_slice(
     events_per_parent: int = 3,
     executor_limit: int | None = None,
     progress=None,
+    lineage_indices: tuple[int, ...] | None = None,
 ) -> dict:
     """Advance retained lineages; a slice/round boundary never deletes an unfinished one.
 
@@ -89,6 +90,15 @@ def prepare_slice(
     A zero-event slice refreshes task scores without executing molecular edits.
     """
     config = config or FrontierConfig()
+    selected_lineages = (
+        list(range(config.lineages)) if lineage_indices is None else sorted(lineage_indices)
+    )
+    if (
+        not selected_lineages
+        or len(set(selected_lineages)) != len(selected_lineages)
+        or any(type(i) is not int or not 0 <= i < config.lineages for i in selected_lineages)
+    ):
+        raise ValueError("lineage partition must contain distinct in-range integer indices")
     if type(events_per_parent) is not int or events_per_parent < 0:
         raise ValueError("events_per_parent must be a nonnegative scheduling quantum")
     if (
@@ -128,6 +138,7 @@ def prepare_slice(
             previous.get("schema_version") != SCHEMA
             or previous.get("reference_id") != reference_id
             or payload_hash(previous) != checkpoint.get("checkpoint_sha256")
+            or previous.get("partition_lineages", list(range(config.lineages))) != selected_lineages
             or previous["round"] > next_round
             or prefix[: len(previous["archive_prefix"])] != previous["archive_prefix"]
             or (previous["round"] == next_round and prefix != previous["archive_prefix"])
@@ -238,6 +249,7 @@ def prepare_slice(
             and unit["current"]["budget"] > 0
             and unit["status"] != "no_admissible_action"
             for unit, target in zip(units, targets, strict=True)
+            if unit["lineage_index"] in selected_lineages
         )
         return (
             {"events_per_parent": events_per_parent, "target_events": targets}
@@ -260,6 +272,7 @@ def prepare_slice(
             "archive_prefix": prefix,
             "value_snapshot": model.payload,
             "frontier": units,
+            "partition_lineages": selected_lineages,
             "retired_lineages": retired,
             "pending_slice": pending_slice(),
             "executor_calls": prior_calls + meter.calls,
@@ -279,6 +292,8 @@ def prepare_slice(
         return result
 
     for unit, target in zip(units, targets, strict=True):
+        if unit["lineage_index"] not in selected_lineages:
+            continue
         root = decode_search_state(unit["root"])
         node = decode_search_state(unit["current"])
         law_cache = {}

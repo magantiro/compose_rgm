@@ -1,8 +1,9 @@
 # First resumable-frontier docking comparison
 
 Status: prospective development recipe, recorded before new docking outcomes.
-Implementation and deployment verified; scientific spawn blocked pending explicit
-user authorization for this paired 40-call milestone. No new docking calls spent.
+The user explicitly approved the paired 40-call milestone on 2026-09-09 and
+authorized up to 20 concurrent Modal containers. The initial two-worker launch
+was blocked before spawning; this amendment partitions unchanged work by lineage.
 Session: `compose_iclr`. This advances stage 1, not reference-model training.
 
 ## Question and support
@@ -51,19 +52,25 @@ does. Underfilled batches are reported, not rescued with extra trajectories.
 
 ## Launch and interruption
 
-Two independent CPU preparation containers may run concurrently. Both audited
+Sixteen independent CPU preparation containers, one per (arm, parent lineage),
+run alongside one driver, below the user's 20-container limit. The full eight-parent
+census, lineage-derived RNGs and molecular paths are retained. A deterministic
+reduction combines all eight lineages before global selection; missing lineages
+cannot be silently dropped. Both audited
 locks must exist before either arm docks. The driver records each oracle attempt
 before calling QuickVina and publishes each result immediately. An interrupted
 attempt with unknown outcome blocks automatic redocking and requires accounting
 review. No generator rerun is needed to recover completed preparation.
 
 No executor-count stop or wall-time stopping rule substitutes for the scientific
-horizon. The administrative six-hour timeout marks incomplete work and preserves
-checkpoints; it is not a matched-compute result. Expected preparation is roughly
-30–120 minutes per arm, with substantial uncertainty: the prior ring round used
+horizon. A one-hour administrative worker timeout (90 minutes for the driver)
+marks incomplete work and preserves checkpoints; it is not a matched-compute
+result. The working elapsed-time estimate is 10–30 minutes, not measured yet.
+The original serial-within-arm estimate was 30–120 minutes, with substantial
+uncertainty: the prior ring round used
 10,570 executor applications in 680 s and the stalled task audit used 19,648 in
-1,439 s, while full-row planning can exceed both. At two concurrent 1-core/8-GiB
-workers plus a driver, reserve at most 18 container-hours for the timeout envelope.
+1,439 s, while full-row planning can exceed both. At sixteen concurrent 1-core/8-GiB
+workers plus a driver, the timeout envelope is at most 17.5 container-hours.
 Record actual resource rates/cost from the account rather than inventing dollars.
 The first real preparation is the reusable timing benchmark, not a throwaway test.
 
@@ -76,7 +83,10 @@ Use a clean committed worktree. Run `python3 tools/preflight.py`, deploy
 Before any oracle call, verify the exact warm prefix, frozen input hashes and
 configuration; replay only committed primitive paths; check full recorded rows,
 support, probability normalization, KL/floors, option continuity, canonical
-identity, endpoint eligibility and candidate provenance. Use focused regression
+identity, endpoint eligibility and candidate provenance. Verify exact path,
+probability, RNG and global-pool parity against serial preparation on a small
+production-executor fixture, and fail reduction for duplicate/missing lineages.
+Use focused regression
 tests for post-hoc isolation, replay, lock-before-docking and interrupted-oracle
 accounting. These are not a new broad capability gate.
 

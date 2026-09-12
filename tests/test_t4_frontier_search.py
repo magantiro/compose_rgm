@@ -223,3 +223,44 @@ def test_frontier_selected_path_audit_and_tamper_rejection():
     partial = run(warm, events_per_parent=2)
     with pytest.raises(ValueError, match="horizon"):
         verify_preparation(partial, warm, editing_v2_rewrite_system())
+
+
+@pytest.mark.parametrize("guidance", ["post_hoc", "in_loop"])
+def test_partition_reduction_preserves_serial_paths_rng_probabilities_and_pool(guidance):
+    from compose_v4.experiments.t4_frontier_compare import merge_preparations
+
+    warm = archive()
+    config = FrontierConfig(
+        lineages=2,
+        primitive_budget=4,
+        planning_transitions=0 if guidance == "post_hoc" else 1,
+        guidance=guidance,
+    )
+    serial = run(warm, config=config, events_per_parent=12)
+    parts = [run(warm, config=config, events_per_parent=12, lineage_indices=(i,)) for i in range(2)]
+    merged = merge_preparations(list(reversed(parts)), warm, editing_v2_rewrite_system())
+    for actual, expected in zip(
+        merged["checkpoint"]["frontier"], serial["checkpoint"]["frontier"], strict=True
+    ):
+        for field in ("current", "root", "path", "acting_rng", "candidates", "planning_remaining"):
+            assert actual[field] == expected[field]
+    assert merged["pool"] == serial["pool"]
+    assert merged["proposed_for_audit"] == serial["proposed_for_audit"]
+    assert merged["executor_calls"] == 0
+    assert merged["checkpoint"]["executor_calls"] == sum(
+        p["checkpoint"]["executor_calls"] for p in parts
+    )
+    with pytest.raises(ValueError, match="missing lineage"):
+        merge_preparations(parts[:1], warm, editing_v2_rewrite_system())
+    with pytest.raises(ValueError, match="duplicate"):
+        merge_preparations([parts[0], parts[0]], warm, editing_v2_rewrite_system())
+    with pytest.raises(ValueError, match="partition"):
+        run(warm, config=config, lineage_indices=(0, 0))
+    with pytest.raises(ValueError, match="mismatch"):
+        run(
+            warm,
+            config=config,
+            checkpoint=parts[0]["checkpoint"],
+            events_per_parent=0,
+            lineage_indices=(1,),
+        )

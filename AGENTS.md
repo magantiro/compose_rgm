@@ -372,6 +372,55 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped offline edit-chooser authorization, 2026-09-11:** the user's latest
+approval authorizes implementing and fitting a context-sensitive complete-edit
+controller on existing paid development outcomes, including damaging edits and
+separately recorded compilation failures. The immediate scope is local CPU data
+preparation, source-grouped/chronological retrospective evaluation, and focused
+checks, with zero new task-oracle calls and no remote training or deployment.
+`docs/PMO_EDIT_CHOOSER.md` records this bounded recipe in the research worktree.
+No reference-model, executor, benchmark-gate, or editing-V2 training-contract
+change is authorized. The completed replication is not another online-run permit.
+
+**Scoped PMO replication authorization, 2026-09-11:** the user approved the
+requested unchanged fresh-seed replication after the first local-guidance
+comparison passed its best-score criterion. Authorize one paired Perindopril
+MPO replication, seed 20261009, four rounds, at most 128 new oracle calls across
+both arms, 29 CPU workers plus one driver, no GPU, and $10 reserved cost.
+Preserve the original sixteen starts, 116 donors, fitted endpoint model and
+proposal mixture. Reuse previous paid scores only when requested, separately
+from the original proposal exclusions. Record a distinct replication contract
+and preserve the first run. Focused checks, clean committed source, strict
+preflight, deployment then durable spawn, and complete accounting remain
+required. This does not authorize another task, model training, additional
+replications, or a no-prescreen benchmark.
+
+**Scoped PMO authorization, 2026-09-11:** after the explicit request to permit the
+prepared four-round comparison at 128 new oracle calls, 30 containers and $10,
+the user replied "ok well lets just go ahead" and "what are you waiting for".
+This authorizes recording this amendment, deploying
+`modal_apps/pmo_local_guidance_app.py`, and durably spawning the single paired
+Perindopril MPO development comparison in `configs/pmo_local_guidance.json`
+(contract `0682c9efc6dea9051ef8bee34a6d0d3dca4f95b84eba8cf8285e6a4381bb07aa`).
+The limit is 128 new oracle calls across both arms, at most 29 workers plus one
+driver, no GPU, and $10 total reserved cost. Reuse the prepared inputs, frozen
+endpoint model, compatible caches and completed focused checks; retain strict
+preflight, clean committed source, input hashes, executor replay, candidate locks
+and full oracle accounting. This is a bounded development run, not a declaration
+of a completed milestone or a waiver of release/full-suite verification. It does
+not authorize another task, extra rounds, fresh model training or a broader
+benchmark. The frozen process and editing-V2 training ladder remain unchanged.
+
+**Scoped T4 authorization, 2026-09-09:** the user explicitly approved one
+warm-start paired frontier comparison on PARP1 seed0, delta=0.4, at most 20 new
+docking calls per arm (40 total), and up to 20 simultaneous Modal containers.
+`configs/t4_frontier_compare.json` records the exact recipe. Independent parent
+lineages may be partitioned without changing their RNG streams, molecular laws,
+primitive horizons, or global candidate selection. This authorizes the bounded
+development deployment and spawn, not reference-model training, later rounds,
+or a broader benchmark. All input, clean-source, replay, lock and oracle-accounting
+checks remain in force. The editing-V2 training ladder below is unchanged.
+
 As of the current editing-V2 rebuild, the authorized sequence is:
 
 1. finish and freeze the content-addressed editing corpus derivatives;

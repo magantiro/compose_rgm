@@ -55,22 +55,24 @@
   "compute": {
     "oracle_call_limit": 40,
     "oracle_calls_per_arm": 20,
-    "preparation_containers": 2,
+    "preparation_containers": 16,
     "cpu_per_preparation": 1,
     "memory_mib_per_preparation": 8192,
     "driver_containers": 1,
     "driver_cpu": 1,
     "driver_memory_mib": 8192,
-    "timeout_seconds": 21600,
+    "timeout_seconds": 3600,
     "retries": 0,
     "heartbeat_seconds": 30,
     "executor_limit": null,
     "expected_wall_seconds": [
-      1800,
-      7200
+      600,
+      1800
     ],
-    "expected_cost": "record account rates and actual usage; at most 18 container-hours under administrative timeout",
-    "stop_limit": "administrative timeout is incomplete, not a scientific result"
+    "expected_cost": "record actual usage and account rates; at most 17.5 container-hours under administrative timeouts",
+    "stop_limit": "administrative timeout is incomplete, not a scientific result",
+    "maximum_concurrent_containers": 17,
+    "driver_timeout_seconds": 5400
   },
   "semantics": {
     "warm_start_counted_calls_per_arm": 51,
@@ -89,5 +91,19 @@
     "claims": "inspected development, not benchmark superiority",
     "automatic_next_round": false
   },
-  "contract_sha256": "c7036dfdd0d605f60d9bfef24a2032c50df79554d0881f1cc249beff6dd3651d"
+  "previous_contract_sha256": "c7036dfdd0d605f60d9bfef24a2032c50df79554d0881f1cc249beff6dd3651d",
+  "launch_authorization": {
+    "status": "explicit_user_approved",
+    "date": "2026-09-09",
+    "scope": "one paired PARP1 seed0 delta=0.4 warm-start round, up to 40 new docking calls",
+    "maximum_containers": 20,
+    "basis": "User explicitly answered yes to this round and authorized up to twenty parallel Modal containers."
+  },
+  "preparation_partition": {
+    "unit": "one exact parent lineage per arm",
+    "total_units": 16,
+    "seed_rule": "unchanged SeedSequence([config.seed, next_round, lineage_index])",
+    "reduction": "all eight lineages in index order before global selection; exact serial parity required"
+  },
+  "contract_sha256": "91001551ae0d56b98a8d345a104bbd59fc5868fb371ad87126152e91dec2a4ba"
 }

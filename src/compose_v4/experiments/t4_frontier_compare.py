@@ -34,6 +34,9 @@ def load_contract(repo_root):
         or contract["compute"]["oracle_calls_per_arm"] != 20
         or contract["events_per_parent"] != 48
         or contract["training_authorized"] is not False
+        or contract.get("launch_authorization", {}).get("status") != "explicit_user_approved"
+        or contract["compute"]["preparation_containers"] != 16
+        or contract["compute"]["maximum_concurrent_containers"] > 20
         or contract["kappa"] != 1
         or set(contract["arms"]) != set(ARMS)
         or contract["arms"]["post_hoc"]
@@ -68,6 +71,9 @@ def prepare_worker(task, repo_root, artifact_root, volume, runtime_factory, vali
     arm = task["arm"]
     if arm not in ARMS:
         raise ValueError("unknown comparison arm")
+    lineage = task["lineage_index"]
+    if type(lineage) is not int or not 0 <= lineage < contract["arms"][arm]["lineages"]:
+        raise ValueError("unknown comparison lineage")
 
     def runner(actual_task, _prepare, _dock, output, *, commit, progress):
         from compose_v4.experiments.production_successor_kernel import (
@@ -108,7 +114,9 @@ def prepare_worker(task, repo_root, artifact_root, volume, runtime_factory, vali
         checkpoint_path = output / "checkpoint.json"
         checkpoint = unseal(checkpoint_path) if checkpoint_path.exists() else None
         memory_cache = {}
-        progress.update(phase="preparation", arm=arm, law_evaluations=0, law_cache_hits=0)
+        progress.update(
+            phase="preparation", arm=arm, lineage_index=lineage, law_evaluations=0, law_cache_hits=0
+        )
 
         def law(graph):
             exact = encode_state(graph)
@@ -196,14 +204,16 @@ def prepare_worker(task, repo_root, artifact_root, volume, runtime_factory, vali
             checkpoint=checkpoint,
             events_per_parent=contract["events_per_parent"],
             progress=checkpoint_progress,
+            lineage_indices=(lineage,),
         )
         prepared["worker"] = {
             "arm": arm,
             "law_evaluations": progress["law_evaluations"],
             "law_cache_hits": progress["law_cache_hits"],
             "proposal_seconds_this_invocation": time.perf_counter() - started,
+            "lineage_index": lineage,
             "planner_work_by_lineage": [
-                u["planner"]["work"] for u in prepared["checkpoint"]["frontier"]
+                prepared["checkpoint"]["frontier"][lineage]["planner"]["work"]
             ],
         }
         seal(prepared_path, prepared)
@@ -226,9 +236,84 @@ def prepare_worker(task, repo_root, artifact_root, volume, runtime_factory, vali
         None,
         None,
         contract_path=CONTRACT_PATH,
-        run_kind=f"{KIND}/{arm}",
+        run_kind=f"{KIND}/{arm}/lineage_{lineage:02d}",
         runner=runner,
     )
+
+
+def merge_preparations(parts, warm, system):
+    """Deterministic reduction of every lineage; no molecular re-enumeration."""
+    if not parts:
+        raise ValueError("cannot merge an empty lineage census")
+    first = parts[0]["checkpoint"]
+    config = FrontierConfig(**first["config"])
+    units = {}
+    identities = (
+        "schema_version",
+        "reference_id",
+        "round",
+        "source_sha256",
+        "input_sha256",
+        "code_revision",
+        "config",
+        "archive_prefix",
+        "value_snapshot",
+        "prior_oracle_attempts",
+    )
+    for part in parts:
+        saved = part["checkpoint"]
+        if payload_hash({k: v for k, v in saved.items() if k != "checkpoint_sha256"}) != saved[
+            "checkpoint_sha256"
+        ] or any(saved[k] != first[k] for k in identities):
+            raise ValueError("lineage partitions have inconsistent identities or hashes")
+        indices = saved.get("partition_lineages", [])
+        if len(indices) != 1 or saved["pending_slice"] is not None or saved["retired_lineages"]:
+            raise ValueError("expected a complete single-lineage preparation")
+        index = indices[0]
+        if type(index) is not int or not 0 <= index < config.lineages or index in units:
+            raise ValueError("duplicate or out-of-range lineage partition")
+        unit = saved["frontier"][index]
+        if unit["lineage_index"] != index or (
+            unit["current"]["budget"] and unit["status"] != "no_admissible_action"
+        ):
+            raise ValueError("lineage partition did not complete its scientific horizon")
+        units[index] = unit
+    if set(units) != set(range(config.lineages)):
+        raise ValueError("missing lineage partition; partial pools cannot dock")
+    merged = {
+        **first,
+        "frontier": [units[i] for i in range(config.lineages)],
+        "partition_lineages": list(range(config.lineages)),
+        "executor_calls": sum(p["checkpoint"]["executor_calls"] for p in parts),
+        "new_executor_calls": 0,
+    }
+    merged.pop("checkpoint_sha256")
+    merged["checkpoint_sha256"] = payload_hash(merged)
+
+    def forbidden(_):
+        raise AssertionError("lineage reduction must not enumerate molecular laws")
+
+    result = prepare_slice(
+        warm,
+        source_sha256=first["source_sha256"],
+        input_sha256=first["input_sha256"],
+        code_revision=first["code_revision"],
+        enumerate_law=forbidden,
+        system=system,
+        config=config,
+        checkpoint=merged,
+        events_per_parent=0,
+    )
+    result["seconds"] = max(p["seconds"] for p in parts)
+    result["worker"] = {
+        "parallel_lineages": config.lineages,
+        "sum_proposal_seconds": sum(p["seconds"] for p in parts),
+        "slowest_lineage_proposal_seconds": max(p["seconds"] for p in parts),
+        "law_evaluations": sum(p.get("worker", {}).get("law_evaluations", 0) for p in parts),
+        "law_cache_hits": sum(p.get("worker", {}).get("law_cache_hits", 0) for p in parts),
+        "planner_work_by_lineage": [units[i]["planner"]["work"] for i in range(config.lineages)],
+    }
+    return result
 
 
 def dock_locked_pair(locks, warm, output, dock, *, commit=lambda: None, progress=None):
@@ -355,11 +440,24 @@ def run_remote(
         volume.reload()
         locks, preparation = {}, {}
         for arm in ARMS:
-            path = Path(preparation_paths[arm])
-            expected = artifact_root / KIND / arm / task["run_id"] / "preparation.json"
-            if path != expected:
-                raise ValueError("preparation came from another run or arm")
-            prepared = unseal(path)
+            paths = [Path(p) for p in preparation_paths[arm]]
+            expected = [
+                artifact_root
+                / KIND
+                / arm
+                / f"lineage_{i:02d}"
+                / task["run_id"]
+                / "preparation.json"
+                for i in range(contract["arms"][arm]["lineages"])
+            ]
+            if paths != expected:
+                raise ValueError("preparation came from another run, arm or lineage")
+            progress.update(phase="lineage_reduction", arm=arm)
+            prepared = merge_preparations(
+                [unseal(p) for p in paths], warm, runtime_factory()["system"]
+            )
+            path = output / arm / "preparation.json"
+            seal(path, prepared)
             if (
                 prepared["checkpoint"]["config"] != contract["arms"][arm]
                 or prepared["checkpoint"]["source_sha256"] != contract["source"]["sha256"]
@@ -376,6 +474,7 @@ def run_remote(
                 "seconds": prepared["seconds"],
                 "executor_calls": prepared["checkpoint"]["executor_calls"],
                 **prepared["worker"],
+                "partition_sha256": {str(p): sha256_file(p) for p in paths},
             }
             commit()
         result = dock_locked_pair(locks, warm, output, dock, commit=commit, progress=progress)
