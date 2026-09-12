@@ -26,7 +26,56 @@ integration branch is `compose-iclr`; the Modal session name is
 
 ## Current outcome
 
-No scientific job is active. An attempted duplicate T4 launch on 2026-09-12
+New implementation: typed attachment-specific complete programs, multi-site
+dependency graphs, conservative conflict serialization, peak-capacity checks,
+and uninterrupted serial/independent/joint proposal arms. Every primitive still
+passes the existing executor. The first proposal is finite-bank retrieval, not
+yet a task-adapted pointer decoder or future-value model. It remains separate
+from the deployed broad population controller.
+
+On the corrected answer-known PARP1 diagnostic, joint proposals reconstructed
+the demonstrated winner 14/32 times from the seed versus 4/32 serial and 2/32
+independent; post-linker counts were 7/32, 3/32 and 1/32. Independent pools were
+more diverse. Two initially mismatched serial-horizon comparisons are explicitly
+excluded and preserved. This is not autonomous discovery or a docking gain.
+See `docs/ATTACHMENT_PROGRAM_PROPOSAL.md` for exact artifacts and limitations.
+
+Active run record: the nineteen-call winner-refinement assay completed three
+controls at -13.6, then failed at a stale training-chain identity. Its checked
+resume uses the existing qualified inference package and reuses those controls,
+allowing at most sixteen additional calls. Clean launch commit: `0d965bf`.
+Call: `fc-01M2BJYZ04VGA4S3J4JHSFQPY1`; remote run:
+`t4_winner_refinement/d8881faeffb165bcbe59b1a572d5a6c9b2ec394746875b72a1e8a85ec6d55fd1`.
+Last observed phase: `option_proposals`, 2026-09-12 19:56:09 UTC. A separate
+26-candidate plus two-repeat pool diagnostic is prepared under the new approval;
+see `docs/T4_PROGRAM_POOL.md`. Do not conflate these two assays or their budgets.
+
+The primary scientific champion is unchanged until new candidate docking results
+are verified. The -13.6 controls are the supplied winner, not a discovered lead.
+
+### Earlier development evidence
+
+Current development direction: use published IVG winners explicitly to learn
+coordinated option sequences and attachment/primitive choices, then evaluate
+autonomous search separately. Inverse decomposition now supplies 83 verified ring
+demonstrations across 64 of 82 supported winners, including decoration restoration.
+Preparation took 22.73 seconds with zero oracle calls. These start from
+inverse-derived precursors, not benchmark seeds. The earlier raw-witness fit had
+no whole-ring labels; that data gap is repaired.
+
+The neural option actor is still **not promoted**: on four source groups excluded
+from fitting, negative log likelihood was 3.995 versus 3.813 for the simpler
+demonstration marginal (lower is better). A counterfactual on the real PARP1 route
+rows shows that the marginal raises the first needed option 12.7-fold but halves
+each of the next three. The specified four-option prefix remains about 7.1e-12
+under its stated conditioning. Static ring frequency does not coordinate the
+route. Next: complete multi-option demonstrations, including core-carbonyl
+insertion, with attachment-level learning. Do not scale the rejected actor or
+static prior unchanged. See `diagnostics/inverse_ring_proposals/README.md` and
+`docs/WINNER_PROPOSAL_DEVELOPMENT.md`. Implementation and diagnostic artifacts
+are uncommitted; the full controller milestone is not complete.
+
+An earlier attempted duplicate T4 launch on 2026-09-12
 was stopped after the repository inventory revealed that the exact comparison
 had already completed. The duplicate spent zero oracle calls. Do not relaunch
 it.

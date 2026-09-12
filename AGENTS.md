@@ -390,6 +390,14 @@ selection or benchmark-superiority claim follows from this development scope.
 This supersedes the offline-only restriction immediately below, not the
 editing-V2 training ladder or the separate nineteen-call refinement recipe.
 
+The next concrete use of that approval is the smaller locked-pool diagnostic in
+`docs/T4_PROGRAM_POOL.md`: score all 26 eligible non-winner molecules from the
+corrected, already-locked two-context/three-arm pools, then repeat the best twice.
+At most 28 new calls, eight workers plus one driver, CPU only, and $20 reserved.
+Reuse the three completed winner controls. It is NOT the proposed three-context,
+eight-per-arm pilot and makes no matched benchmark claim. Preserve the confounded
+earlier diagnostics and their exclusion notices.
+
 **Scoped attachment-specific program development, 2026-09-12:** the user approved
 trying the supplied program-proposal recommendation. The immediate implementation
 unit is a local, zero-oracle typed program/replay adapter and context-conditioned
