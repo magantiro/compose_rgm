@@ -26,6 +26,18 @@ integration branch is `compose-iclr`; the Modal session name is
 
 ## Current outcome
 
+Latest authorization: the user approved the paired parent/edit learning cycles,
+with 108 docking calls maximum on BRAF/JAK2 and 24,000 PMO queries, $20 combined
+reserved compute and at most 30 containers. Inputs and task-independent PMO
+initializations are prepared; no new calls have been spent at this checkpoint.
+The launch uses twelve shared CPU workers, two group drivers and at most two
+confirmation workers, below the approved ceiling. Forty focused launch/dependency
+tests passed; no full-suite or benchmark sign-off is claimed. Recipe and decision:
+[`PARENT_EDIT_LEARNING_CYCLES.md`](PARENT_EDIT_LEARNING_CYCLES.md), machine-readable
+contract `configs/parent_edit_cycles.json`. Launch and progress receipts will live
+under `diagnostics/parent_edit_cycles/`. This new allocation is separate from all
+completed allocations below.
+
 Current implementation checkpoint: the parent/edit controller now has verified
 real-program decomposition (20/32 measured constructions), fresh-state proposal
 budgets with retained ancestry, an explicit existing-atom channel, mutation-context
@@ -52,7 +64,8 @@ FA7's ranked champion repeated at -9.3/-9.3, while JAK2 repeated at -10.7/-9.6
 and the new 5HT1B champion at -7.5/-12.7. Retain the previous 5HT1B incumbent
 (fresh -13.2/-13.9). The scored-history ranking arm has not earned promotion.
 All eight arm-specific archives have been updated from their own locked queries
-and compatible confirmations. No docking is active or further round authorized.
+and compatible confirmations. That scoring round is no longer active; the new
+learning-cycle allocation above is its own authorization.
 Four of the 73 newly allocated calls remain unspent; they are not a new assay.
 Authoritative receipts, review and decision:
 `diagnostics/t4_second_generation/scoring_1/`.

@@ -372,6 +372,20 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped parent-edit learning-cycle approval, 2026-09-12:** the user replied
+"sure" to a ceiling of 108 new docking calls across BRAF/JAK2, 24,000 PMO
+queries, $20 total reserved compute and at most 30 simultaneous containers.
+Implement and run the bounded paired development comparison in
+`docs/PARENT_EDIT_LEARNING_CYCLES.md`. Both arms use the same repaired broad
+program engine; learned selection alone differs. Preserve exact execution,
+40-atom T4 support, original-seed gates, all historical information declarations,
+query locks, receipts and failures. CPU-only modest predictor updates are part
+of this authorization; frozen-reference training is not. Freeze input/recipe,
+oracle and compute manifests before paid execution, use clean committed source,
+no automatic oracle retries, and report completed batches promptly. This
+supersedes the preceding local-only restriction for this bounded experiment,
+not the editing-V2 training ladder or any frozen scientific gate.
+
 **Scoped parent-edit controller implementation, 2026-09-12:** the user requested
 learning complete parent/edit choices and bringing PMO into the shared program
 engine. The immediate unit is local, zero-oracle implementation: inspect and

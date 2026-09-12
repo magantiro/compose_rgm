@@ -78,4 +78,5 @@ def prepare_query_batch(search, task, *, count, seed, model=None, diagnostic=Fal
     )
     selected["task_id"] = task.task_id
     selected["model_sha256"] = None if model is None else model.payload["model_sha256"]
-    return search.lock_query_subset(pool["batch_id"], selected["selected_ids"], selected)
+    locked = search.lock_query_subset(pool["batch_id"], selected["selected_ids"], selected)
+    return {**locked, "proposal_seconds": pool["proposal_seconds"]}

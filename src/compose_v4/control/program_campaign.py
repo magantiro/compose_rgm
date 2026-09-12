@@ -6,7 +6,9 @@ oracle and frozen run inputs. Local fixture runs use explicitly synthetic labels
 
 import json
 from dataclasses import asdict, replace
+from datetime import datetime, timezone
 from pathlib import Path
+from time import perf_counter
 
 from rdkit import Chem
 
@@ -22,11 +24,12 @@ from compose_v4.rewrite.trace_shard import decode_state
 class ProgramQueryLedger:
     """Reserve before evaluation; cached repeats are free, failures stay charged."""
 
-    def __init__(self, output, task, evaluate, *, budget):
+    def __init__(self, output, task, evaluate, *, budget, flush=None):
         if type(budget) is not int or budget < 1:
             raise ValueError("positive explicitly authorized query budget required")
         self.output, self.task, self.evaluate, self.budget = Path(output), task, evaluate, budget
         self.rows, self.cache = [], {}
+        self.flush = flush or (lambda: None)
         self.blocked = False
         manifest = {
             "task": asdict(task),
@@ -83,10 +86,13 @@ class ProgramQueryLedger:
             "role": role,
             "lock_id": lock_id,
             "oracle_protocol": self.task.oracle_protocol,
+            "started_at_utc": datetime.now(timezone.utc).isoformat(),
         }
         publish_json(folder / "started.json", started)
         # Append the reservation first: exceptions do not refund the query.
         self.rows.append({**started, "status": "started"})
+        self.flush()  # Remote reservation must survive worker loss before evaluation.
+        begin = perf_counter()
         try:
             score = float(self.evaluate(endpoint))
             utility = self.task.utility(score)
@@ -94,12 +100,21 @@ class ProgramQueryLedger:
             self.blocked = True
             body = {**started, "status": "failed", "error": repr(error)}
             publish_json(folder / "result.json", {**body, "receipt_id": identity(body)})
+            self.flush()
             raise
-        body = {**started, "status": "complete", "score": score, "utility": utility}
+        body = {
+            **started,
+            "status": "complete",
+            "score": score,
+            "utility": utility,
+            "seconds": perf_counter() - begin,
+            "completed_at_utc": datetime.now(timezone.utc).isoformat(),
+        }
         row = {**body, "receipt_id": identity(body)}
         publish_json(folder / "result.json", row)
         self.rows[-1] = row
         self.cache[endpoint] = row
+        self.flush()
         return row
 
 
@@ -117,6 +132,10 @@ def run_program_campaign(
     fit_model=None,
     fit_model_id=None,
     stagnation_rounds=3,
+    warm_start=None,
+    bootstrap_rounds=1,
+    progress=None,
+    max_seconds=None,
 ):
     """Initial states are charged, then complete programs bootstrap the archive.
 
@@ -126,6 +145,12 @@ def run_program_campaign(
     """
     if rounds < 1 or queries_per_round < 1 or ledger.task != task:
         raise ValueError("invalid campaign rounds, query count or task ledger")
+    if type(bootstrap_rounds) is not int or bootstrap_rounds < 1:
+        raise ValueError("positive bootstrap round count required")
+    if max_seconds is not None and max_seconds <= 0:
+        raise ValueError("positive campaign time limit required")
+    progress = progress or (lambda row: None)
+    began = perf_counter()
     if fit_model is not None and (not isinstance(fit_model_id, str) or len(fit_model_id) != 64):
         raise ValueError("learning cycles require an immutable update-rule identity")
     if stagnation_rounds is not None and (
@@ -150,6 +175,9 @@ def run_program_campaign(
         "learning": fit_model is not None,
         "fit_model_id": fit_model_id,
         "stagnation_rounds": stagnation_rounds,
+        "warm_start": None if warm_start is None else warm_start["snapshot_id"],
+        "bootstrap_rounds": bootstrap_rounds,
+        "max_seconds": max_seconds,
     }
     manifest = output / "manifest.json"
     if manifest.exists() and json.loads(manifest.read_text()) != json.loads(json.dumps(recipe)):
@@ -160,6 +188,8 @@ def run_program_campaign(
         if not pending.with_name("complete.json").exists():
             raise RuntimeError(f"pending round needs explicit receipt-based recovery: {pending}")
     starts = initialization["candidates"]
+    if not starts and warm_start is None:
+        raise ValueError("campaign needs charged initial states or a declared warm archive")
     if sum(r["endpoint"] not in ledger.cache for r in starts) > ledger.remaining:
         raise ValueError("initialization exceeds the declared remaining query budget")
     source_group = initialization["lock_sha256"]
@@ -168,6 +198,15 @@ def run_program_campaign(
     search = ProgramOptimizer(
         config, source_group=source_group, oracle_protocol=task.oracle_protocol, hierarchy=hierarchy
     )
+    if warm_start is not None:
+        search = ProgramOptimizer.restore(warm_start, hierarchy=hierarchy)
+        if search.config != config or search.oracle_protocol != task.oracle_protocol:
+            raise ValueError("warm archive configuration or oracle domain changed")
+        if search.pending is not None or not search.entries:
+            raise ValueError("warm archive must contain resolved measured programs")
+    warm_observations = [
+        (r["endpoint"], task.utility(r["score"])) for r in search.observations.values()
+    ]
     history = []
     for round_index in range(rounds):
         folder = output / f"round_{round_index:04d}"
@@ -179,12 +218,15 @@ def run_program_campaign(
             continue
         if not ledger.remaining:
             break
+        if max_seconds is not None and perf_counter() - began >= max_seconds:
+            break
         if stagnation_rounds is not None and len(history) >= stagnation_rounds:
             recent = [r["top_k_utility"] for r in history[-stagnation_rounds:]]
             if max(recent[1:]) <= recent[0]:
                 break
         count = min(queries_per_round, ledger.remaining)
-        if not search.entries:
+        progress({"phase": "proposing", "round": round_index, "oracle_calls": len(ledger.rows)})
+        if not search.entries or (warm_start is None and round_index < bootstrap_rounds):
             source = decode_state(starts[round_index % len(starts)]["state"])
             broad = None
             if hierarchy is not None:
@@ -211,6 +253,8 @@ def run_program_campaign(
             bootstrap = True
         else:
             model = fit_model(search, task) if fit_model is not None else None
+            if model is not None:
+                publish_json(folder / "model.json", model.payload)
             batch = prepare_query_batch(
                 search,
                 task,
@@ -221,6 +265,7 @@ def run_program_campaign(
             )
             bootstrap = False
         publish_json(folder / "pending.json", {"batch": batch, "recipe_sha256": identity(recipe)})
+        ledger.flush()  # Publish the candidate lock before any charged query.
         outcomes = []
         for candidate in batch["candidates"]:
             row = ledger.query(candidate["endpoint"], lock_id=batch["batch_id"], role="candidate")
@@ -244,10 +289,16 @@ def run_program_campaign(
             "queried_candidates": len(batch["candidates"]),
             "oracle_calls_including_initialization": len(ledger.rows),
             "top_k_utility": archive_top_k(
-                [(r["endpoint"], r["utility"]) for r in ledger.rows], k=task.top_k
+                warm_observations + [(r["endpoint"], r["utility"]) for r in ledger.rows],
+                k=task.top_k,
             ),
             "top_k": task.top_k,
             "model_updated": not bootstrap and fit_model is not None,
+            "proposal_seconds": batch.get("proposal_seconds", 0.0),
+            "proposal_attempts": len(batch["attempts"]),
+            "pool_size": len(batch.get("proposal_pool", batch)["candidates"]),
+            "seconds": perf_counter() - began,
+            "best_new_utility": max((r["utility"] for r in ledger.rows), default=None),
         }
         if task.kind == "pmo":
             summary["pmo_top10_auc_so_far"] = pmo_top_ten_auc(
@@ -258,6 +309,8 @@ def run_program_campaign(
             {"snapshot": search.snapshot(), "summary": summary, "recipe_sha256": identity(recipe)},
         )
         history.append(summary)
+        progress({"phase": "scored", **summary})
+        ledger.flush()
         if not batch["candidates"]:
             break  # Explicit proposal-yield stop, no unbounded retry-until-novel.
     return {

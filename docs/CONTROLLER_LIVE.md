@@ -375,3 +375,13 @@ replicates for external comparisons. Known-winner development is not blind
 discovery. At most 30 Modal containers within declared caps; scientific launches
 use clean committed source, deploy and durable spawn. Reuse paid trajectories;
 focused checks, no repeated full suites, unrelated cleanup or excessive commits.
+# Latest: approved parent/edit learning cycles, 2026-09-12
+
+Prepared, not yet scored: BRAF/JAK2 paired learning cycles (108 docking calls
+maximum) and four PMO tasks, three seeds, two arms (24,000 initialization-inclusive
+queries maximum). Combined $20 reserved ceiling. Same repaired proposal support,
+learned selection versus score-blind control. Forty focused launch/dependency
+tests pass. Existing incumbents are unchanged. Authoritative contract:
+`configs/parent_edit_cycles.json`; local receipt namespace:
+`diagnostics/parent_edit_cycles/`. Do not interpret the older chronological
+authorization or active-run statements below as the status of this allocation.

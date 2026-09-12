@@ -1,0 +1,1 @@
+{"admitted":100,"excluded":[],"new_oracle_calls":0,"role":"task-independent fresh imports; no prior slot replay claimed","source":"docs/PMO_INIT_BANK.json","source_selection_rule":"first 100 of INVGNN_FIBER_MOLECULES states; objective-blind, fixed before any PMO task is run","source_sha256":"b679b4dc54006acf570fefb80f49d83a46c18c979c9e376fdd4d37b2cec5f860"}
