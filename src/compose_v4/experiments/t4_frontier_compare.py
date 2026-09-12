@@ -8,7 +8,7 @@ import time
 from collections import Counter
 from pathlib import Path
 
-from rdkit import rdBase
+from rdkit import Chem, rdBase
 
 from compose_v4.control.frontier_search import payload_hash
 from compose_v4.experiments.continuation_profile import encode_action, sha256_file, verify_file
@@ -17,11 +17,45 @@ from compose_v4.experiments.t4_frontier_search import FrontierConfig, prepare_sl
 from compose_v4.experiments.t4_matched_pilot import _stamp, seal, unseal
 from compose_v4.experiments.t4_matched_pilot import run_remote as common_remote
 from compose_v4.rewrite import action_codec, action_codec_v4
-from compose_v4.rewrite.trace_shard import encode_state
+from compose_v4.rewrite.kernel import canonical_state_key
+from compose_v4.rewrite.trace_shard import decode_state, encode_state
 
 KIND = "t4_frontier_compare"
 CONTRACT_PATH = "configs/t4_frontier_compare.json"
 ARMS = ("post_hoc", "in_loop")
+
+
+def normalize_warm_metadata(warm, source_sha256):
+    """Migrate spelling only after proving equality to every exact saved graph."""
+    archive = []
+    corrections = []
+    for index, record in enumerate(warm["archive"]):
+        exact = canonical_state_key(decode_state(record["state"]))
+        molecule = Chem.MolFromSmiles(record["smiles"])
+        metadata = None if molecule is None else Chem.MolToSmiles(molecule)
+        if metadata != exact:
+            raise ValueError("archive molecular metadata differs from exact saved state")
+        if record["smiles"] != exact:
+            corrections.append(
+                {
+                    "index": index,
+                    "original_smiles": record["smiles"],
+                    "canonical_smiles": exact,
+                    "exact_state_sha256": payload_hash(record["state"]),
+                }
+            )
+        archive.append({**record, "smiles": exact})
+    return {
+        **warm,
+        "archive": archive,
+        "source_metadata_normalization": {
+            "schema_version": "t4_exact_archive_metadata_normalization_v1",
+            "source_sha256": source_sha256,
+            "row_count": len(archive),
+            "corrections": corrections,
+            "rule": "canonicalize SMILES only after equality to decoded exact persistent-slot graph",
+        },
+    }
 
 
 def load_contract(repo_root):
@@ -62,7 +96,7 @@ def load_warm(artifact_root, contract):
         or len(warm["archive"]) != 52
     ):
         raise ValueError("comparison requires the complete exact 51-call archive")
-    return warm
+    return normalize_warm_metadata(warm, contract["source"]["sha256"])
 
 
 def prepare_worker(task, repo_root, artifact_root, volume, runtime_factory, validate_revision):
@@ -81,6 +115,7 @@ def prepare_worker(task, repo_root, artifact_root, volume, runtime_factory, vali
         )
 
         warm = load_warm(artifact_root, contract)
+        seal(output / "source_metadata_normalization.json", warm["source_metadata_normalization"])
         prepared_path = output / "preparation.json"
         if prepared_path.exists():
             prepared = unseal(prepared_path)
@@ -436,6 +471,7 @@ def run_remote(
 
     def runner(actual_task, _prepare, _dock, output, *, commit, progress):
         warm = load_warm(artifact_root, contract)
+        seal(output / "source_metadata_normalization.json", warm["source_metadata_normalization"])
         preparation_paths = prepare_pair(task, output, commit, progress)
         volume.reload()
         locks, preparation = {}, {}

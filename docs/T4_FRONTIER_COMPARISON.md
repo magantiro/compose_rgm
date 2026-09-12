@@ -74,6 +74,14 @@ workers plus a driver, the timeout envelope is at most 17.5 container-hours.
 Record actual resource rates/cost from the account rather than inventing dollars.
 The first real preparation is the reusable timing benchmark, not a throwaway test.
 
+The first partitioned launch stopped before molecular enumeration or docking: one
+of 52 old archive rows stored a noncanonical spelling of the same molecule in its
+metadata. The source file and exact persistent-slot states remain frozen. On
+retry, canonicalize only the metadata string after independently decoding the
+exact graph and proving RDKit canonical identity; record the source hash, row,
+old string, canonical string, and exact-state hash. Any molecular mismatch still
+fails. This is a deterministic metadata migration, not a relaxed identity gate.
+
 Use a clean committed worktree. Run `python3 tools/preflight.py`, deploy
 `modal_apps/genmol_t4_opt_app.py`, then spawn with
 `python3 tools/t4_launch.py --frontier-compare`. No ephemeral detached apps.

@@ -1,0 +1,24 @@
+{
+  "schema_version": "t4_frontier_compare_preoracle_failure_v1",
+  "status": "failed_before_molecular_enumeration_or_docking",
+  "call_id": "fc-01M29P6WDXEV2Z3SHQZ4EYEY30",
+  "run_id": "765b2b854d50c29966f2b2a032a4ccbe1e3364c43d50a8376c6845f48cc5ed41",
+  "executed_commit": "06e6fcb2f77dedca9c9fd62ec0ce16e479edf107",
+  "contract_file_sha256": "7e184daaa14bbef2c30126b59d1f083c5872d0b6149eeecaa2ce9a8a7bcd6a9a",
+  "source_archive_sha256": "803741324ac0e30bff96f9ad36809c6d08ff8334a76a1cc1927a7296a91daf30",
+  "new_docking_calls": 0,
+  "failure": "archive canonical metadata disagrees with exact state",
+  "identity_audit": {
+    "archive_rows": 52,
+    "invalid_metadata_smiles": 0,
+    "raw_string_mismatches": 1,
+    "canonical_molecular_mismatches": 0,
+    "correction": {
+      "index": 0,
+      "original_smiles": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+      "canonical_smiles": "CN(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+      "exact_state_sha256": "d33a59ceb9547bf955296f7cae3c0b196d75d0be1845e7e97365fbe1b0dc1700"
+    }
+  },
+  "decision": "preserve the source and exact graph; retry only after deterministic metadata normalization that proves canonical equality and records the correction"
+}
