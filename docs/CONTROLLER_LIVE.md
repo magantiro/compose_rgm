@@ -5,6 +5,12 @@ Updated 2026-09-12. The authoritative collaborator snapshot is now
 evidence ledger and intentionally retains superseded decisions and negative
 results.
 
+Latest local checkpoint: see `docs/PARENT_EDIT_CONTROLLER.md` for the repaired
+parent/edit engine, mixed selector audit, next-model training, real branch
+exchange and degenerate BRAF contrast. New task-oracle calls: zero. No remote
+job is active. The older "current" statements below are chronological history;
+the collaborator snapshot above takes precedence.
+
 Current active run: none. The paired T4 frontier comparison is complete, not
 running: in-loop reached -10.0 from the shared -9.7 warm champion and produced
 eight eligible endpoints, versus -9.9 and four endpoints post-hoc. It used 12

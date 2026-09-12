@@ -372,6 +372,19 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped parent-edit controller implementation, 2026-09-12:** the user requested
+learning complete parent/edit choices and bringing PMO into the shared program
+engine. The immediate unit is local, zero-oracle implementation: inspect and
+repair opaque program branches, ancestry-limited proposal horizons and access to
+existing-atom edits; add explicit T4/PMO task semantics and a modest completed-
+program utility predictor. Local CPU fitting may reuse measured development
+outcomes under a recorded chronological diagnostic, not claim prospective
+validation. Preserve the score-blind recipe, exact executor/reference, 40-atom
+T4 support, original-seed constraints, ancestry and all work accounting. New
+remote jobs, oracle calls, the suggested 24-run PMO comparison and further T4
+campaigns need separate bounded launch contracts. Acceptance and decisions:
+`docs/PARENT_EDIT_CONTROLLER.md`. Earlier frozen artifacts remain unchanged.
+
 **Scoped second-generation docking approval, 2026-09-12:** after the request
 for 73 calls and clarification that $20 is a ceiling rather than expected spend,
 the user approved proceeding. Score all 49 distinct locked attempt_2 queries,

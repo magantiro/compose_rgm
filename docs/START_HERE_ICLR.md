@@ -26,6 +26,23 @@ integration branch is `compose-iclr`; the Modal session name is
 
 ## Current outcome
 
+Current implementation checkpoint: the parent/edit controller now has verified
+real-program decomposition (20/32 measured constructions), fresh-state proposal
+budgets with retained ancestry, an explicit existing-atom channel, mutation-context
+features, and shared metered learning-cycle plumbing. A real BRAF branch exchange
+produced a new executable endpoint while retaining another branch; it is unscored.
+The first small selector audit was mixed (three positive, two negative, three
+unchanged archive-gain pools), so learned guidance remains unqualified. Next-model
+fits retain 81 unique measured endpoints and all 101 observations across four
+targets, including repeats, for future evaluation only. No new oracle calls or
+remote run. Full details, limits and artifact map:
+[`PARENT_EDIT_CONTROLLER.md`](PARENT_EDIT_CONTROLLER.md).
+
+Correction to the BRAF mutation interpretation: the recorded attachment-only
+variant is canonically the parent, and extension-only equals the joint candidate.
+This is evidence for extension, not an attachment interaction. The existing
+observations resolve the four-arm panel without further docking.
+
 The second-generation scoring round is complete: **69 calls in 102.00 driver
 seconds**, 293.47 summed worker seconds, no oracle failures. Best new first scores
 across the two arms are JAK2 -10.9, FA7 -9.4, BRAF -11.2 and 5HT1B -12.7.

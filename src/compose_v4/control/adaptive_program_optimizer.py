@@ -16,7 +16,9 @@ from time import perf_counter
 
 import numpy as np
 
+from compose_v4.control.current_state_edits import current_state_program
 from compose_v4.control.docking_value import identity
+from compose_v4.control.edit_learning_data import exploration_niches
 from compose_v4.control.edit_program import EditProgram, attachment_bindings, extract_program
 from compose_v4.control.edit_program_graph import (
     combine_bound_programs,
@@ -28,6 +30,7 @@ from compose_v4.control.molecular_task_search import (
     MolecularSearchState,
     dispatch_complete_proposal,
 )
+from compose_v4.control.program_decomposition import verified_branches
 from compose_v4.control.program_mutation import (
     PARAMETER_MOVES,
     attachment_mutation_choices,
@@ -56,10 +59,39 @@ class ProgramSearchConfig:
     double_mutation_probability: float = 0.25
     require_broad_runtime: bool = True
     parent_allocation: str = "score_rank"
+    continuation_root: str = "ancestral_constructor"
+    current_state_edit_probability: float = 0.0
+    decompose_programs: bool = False
+    score_direction: str = "minimize"
+
+    @classmethod
+    def parent_edit_recipe(cls, *, seed=20260912, score_direction="minimize"):
+        """Explicit new development recipe; legacy constructors keep old defaults.
+
+        The matched learned/control arms use the same score-blind parent law.
+        Niche allocation remains a separate opt-in ablation.
+        """
+        return cls(
+            seed=seed,
+            score_direction=score_direction,
+            parent_allocation="score_blind",
+            continuation_root="exact_current_state",
+            current_state_edit_probability=0.25,
+            decompose_programs=True,
+        )
 
     def __post_init__(self):
-        if self.parent_allocation not in ("score_rank", "score_blind"):
-            raise ValueError("parent allocation must be score_rank or score_blind")
+        if self.continuation_root not in ("ancestral_constructor", "exact_current_state"):
+            raise ValueError("unknown continuation-root contract")
+        if self.score_direction not in ("minimize", "maximize"):
+            raise ValueError("score direction must be minimize or maximize")
+        if (
+            not 0 <= self.current_state_edit_probability <= 1
+            or type(self.decompose_programs) is not bool
+        ):
+            raise ValueError("invalid current-state/decomposition configuration")
+        if self.parent_allocation not in ("score_rank", "score_blind", "niche_score"):
+            raise ValueError("parent allocation must be score_rank, score_blind or niche_score")
         if any(
             type(v) is not int or v < 1
             for v in (
@@ -117,7 +149,8 @@ class ProgramOptimizer:
         self.entries, self.observations, self.duplicate_counts = {}, {}, {}
         self.failed_endpoints, self.history, self.pending = set(), [], None
         self.batches = 0
-        self._program_cache, self._source_cache = {}, {}
+        self._program_cache, self._source_cache, self._branch_cache = {}, {}, {}
+        self._niche_cache = None
 
     def _program(self, entry):
         key = identity(entry["program"])
@@ -147,12 +180,19 @@ class ProgramOptimizer:
         if static_score is not None and not math.isfinite(static_score):
             raise ValueError("static-control inheritance must be a finite recorded preference")
         source, program = self._source(record), self._program(record)
+        # Admission verifies stored construction work, not the next proposal's
+        # horizon. Only the explicit fresh-state recipe separates these clocks.
+        fresh = self.config.continuation_root == "exact_current_state"
         _, replay = execute_program_graph(
             source,
             compile_program_graph(program),
             tuple(record["assignment"]),
-            max_primitives=self.config.max_primitives,
-            max_blocks=self.config.max_blocks,
+            max_primitives=max(self.config.max_primitives, len(program.marks))
+            if fresh
+            else self.config.max_primitives,
+            max_blocks=max(self.config.max_blocks, len(program.blocks))
+            if fresh
+            else self.config.max_blocks,
         )
         if (
             replay["endpoint"] != record["endpoint"]
@@ -207,10 +247,20 @@ class ProgramOptimizer:
                 for s in endpoints
             ]
         )
-        ranks = np.asarray([1 + np.sum(scores < v) for v in scores], dtype=float)
+        costs = scores if self.config.score_direction == "minimize" else -scores
+        ranks = np.asarray([1 + np.sum(costs < v) for v in costs], dtype=float)
         quality = (
             np.ones(len(endpoints)) if self.config.parent_allocation == "score_blind" else 1 / ranks
         )
+        if self.config.parent_allocation == "niche_score":
+            key = (tuple(endpoints), tuple(costs))
+            if self._niche_cache is None or self._niche_cache[0] != key:
+                self._niche_cache = (key, exploration_niches(endpoints, -costs))
+            niches = self._niche_cache[1]
+            selected = [set(group) for group in niches["selected"]]
+            quality = np.asarray(
+                [sum(1 / len(group) for group in selected if s in group) for s in endpoints]
+            )
         # Exhaustion tempers exploitation, not the explicit exploration floor.
         quality /= np.asarray(
             [1 + np.mean([self.duplicate_counts.get(k, 0) for k in groups[s]]) for s in endpoints]
@@ -249,6 +299,21 @@ class ProgramOptimizer:
         }
 
     def _mutate(self, entry):
+        if (
+            self.config.current_state_edit_probability
+            and self.rng.random() < self.config.current_state_edit_probability
+        ):
+            source = decode_state(entry["trace"]["states"][-1])
+            program, binding, detail = current_state_program(source, self.rng)
+            return (
+                source,
+                program,
+                binding,
+                {
+                    "current_state_edit": detail,
+                    **self._continuation_lineage(entry),
+                },
+            )
         source, program, binding = (
             self._source(entry),
             self._program(entry),
@@ -291,12 +356,27 @@ class ProgramOptimizer:
                 )
         return source, program, binding, {"mutations": edits}
 
+    def _branches(self, entry):
+        program, binding = self._program(entry), tuple(entry["assignment"])
+        if not self.config.decompose_programs:
+            return program, binding, {"status": "legacy_blocks"}
+        key = entry["entry_id"]
+        if key not in self._branch_cache:
+            self._branch_cache[key] = verified_branches(
+                self._source(entry),
+                program,
+                binding,
+                max_primitives=self.config.max_primitives,
+            )
+        return self._branch_cache[key]
+
     def _recombine(self, entry):
         source, program, binding = (
             self._source(entry),
             self._program(entry),
             tuple(entry["assignment"]),
         )
+        program, binding, decomposition = self._branches(entry)
         components = branch_components(program)
         count = min(
             len(components), 1 + int(self.rng.random() < self.config.double_mutation_probability)
@@ -313,7 +393,7 @@ class ProgramOptimizer:
             pieces.append((keep, tuple(binding[i] for i in roots)))
         for _ in removed:
             donor, receipt = self._parent()
-            donor_program = self._program(donor)
+            donor_program, _, donor_decomposition = self._branches(donor)
             branches = branch_components(donor_program)
             branch = branches[int(self.rng.integers(len(branches)))]
             donor_program, _ = select_branch(donor_program, branch)
@@ -333,6 +413,7 @@ class ProgramOptimizer:
                     "blocks": branch,
                     "bindings_truncated": census.truncated,
                     "binding_probability": float(weights[at]),
+                    "decomposition": donor_decomposition,
                 }
             )
         if len(pieces) == 1:
@@ -344,14 +425,42 @@ class ProgramOptimizer:
                 max_primitives=self.config.max_primitives,
                 max_blocks=self.config.max_blocks,
             )
-        return source, combined, anchors, {"removed_branches": removed, "donors": donors}
+        return (
+            source,
+            combined,
+            anchors,
+            {
+                "removed_branches": removed,
+                "donors": donors,
+                "decomposition": decomposition,
+            },
+        )
+
+    @staticmethod
+    def _continuation_lineage(entry):
+        ancestors = [
+            *entry.get("construction_ancestry", []),
+            {
+                "entry_id": entry["entry_id"],
+                "source_state_sha256": identity(entry["source_state"]),
+                "endpoint": entry["endpoint"],
+                "primitive_edits": len(entry["program"]["marks"]),
+            },
+        ]
+        return {
+            "construction_ancestry": ancestors,
+            "original_seed_state": entry.get("original_seed_state", entry["source_state"]),
+            "ancestral_primitive_edits": sum(a["primitive_edits"] for a in ancestors),
+            "accounting": "new proposal work only; archive/history retain all earlier attempts and queries",
+        }
 
     def _broad(self, entry):
         if self.hierarchy is None:
             raise ValueError("broad_runtime_unavailable_in_local_development")
         program = self._program(entry)
-        remaining = self.config.max_primitives - len(program.marks)
-        blocks = self.config.max_blocks - len(program.blocks)
+        fresh = self.config.continuation_root == "exact_current_state"
+        remaining = self.config.max_primitives - (0 if fresh else len(program.marks))
+        blocks = self.config.max_blocks - (0 if fresh else len(program.blocks))
         if remaining < 1 or blocks < 1:
             raise ValueError("no remaining work for a complete broad continuation")
         state = decode_state(entry["trace"]["states"][-1])
@@ -362,6 +471,17 @@ class ProgramOptimizer:
         _, tail_trace = execute_program_graph(
             state, compile_program_graph(tail), anchors, max_primitives=remaining, max_blocks=blocks
         )
+        if fresh:
+            return (
+                state,
+                tail,
+                anchors,
+                {
+                    "broad": info,
+                    "reused_exact_prefix": True,
+                    **self._continuation_lineage(entry),
+                },
+            )
         # Reuse the exact admitted prefix, then compile the complete constructor.
         stages, start = [], 0
         for trace in (entry["trace"], tail_trace):
@@ -483,6 +603,28 @@ class ProgramOptimizer:
                 "provenance": record,
                 "inherited_static_score": entry["static_score"],
             }
+            if "construction_ancestry" in metadata:
+                candidate.update(
+                    {
+                        k: metadata[k]
+                        for k in (
+                            "construction_ancestry",
+                            "original_seed_state",
+                            "ancestral_primitive_edits",
+                        )
+                    }
+                )
+            elif "construction_ancestry" in entry:
+                candidate.update(
+                    {
+                        k: entry[k]
+                        for k in (
+                            "construction_ancestry",
+                            "original_seed_state",
+                            "ancestral_primitive_edits",
+                        )
+                    }
+                )
             candidate["candidate_id"] = identity(candidate)
             candidates.append(candidate)
         body = {
@@ -504,6 +646,34 @@ class ProgramOptimizer:
                 }
             )
         )
+
+    def lock_query_subset(self, pool_id, selected_ids, selection_receipt):
+        """Separate a generated pool lock from its pre-oracle query allocation."""
+        if (
+            self.pending is None
+            or self.pending["batch_id"] != pool_id
+            or "proposal_pool" in self.pending
+        ):
+            raise ValueError("query subset needs one unresolved, unselected proposal pool")
+        available = {c["candidate_id"]: c for c in self.pending["candidates"]}
+        if (
+            not selected_ids
+            or len(set(selected_ids)) != len(selected_ids)
+            or not set(selected_ids) <= set(available)
+        ):
+            raise ValueError(
+                "query subset contains duplicate, missing or unknown candidate identities"
+            )
+        if selection_receipt.get("selected_ids") != list(selected_ids):
+            raise ValueError("selection receipt disagrees with query candidate order")
+        if identity({k: v for k, v in self.pending.items() if k != "batch_id"}) != pool_id:
+            raise ValueError("proposal pool lock was modified")
+        body = {k: v for k, v in self.pending.items() if k != "batch_id"}
+        body["proposal_pool"] = {"pool_id": pool_id, "candidates": body["candidates"]}
+        body["candidates"] = [available[k] for k in selected_ids]
+        body["selection"] = selection_receipt
+        self.pending = json.loads(json.dumps({**body, "batch_id": identity(body)}))
+        return json.loads(json.dumps(self.pending))
 
     def observe_batch(self, batch_id, outcomes):
         """Consume every locked outcome once; failures are not low-score labels."""
