@@ -40,18 +40,34 @@ more diverse. Two initially mismatched serial-horizon comparisons are explicitly
 excluded and preserved. This is not autonomous discovery or a docking gain.
 See `docs/ATTACHMENT_PROGRAM_PROPOSAL.md` for exact artifacts and limitations.
 
-Active run record: the nineteen-call winner-refinement assay completed three
-controls at -13.6, then failed at a stale training-chain identity. Its checked
-resume uses the existing qualified inference package and reuses those controls,
-allowing at most sixteen additional calls. Clean launch commit: `0d965bf`.
-Call: `fc-01M2BJYZ04VGA4S3J4JHSFQPY1`; remote run:
-`t4_winner_refinement/d8881faeffb165bcbe59b1a572d5a6c9b2ec394746875b72a1e8a85ec6d55fd1`.
-Last observed phase: `option_proposals`, 2026-09-12 19:56:09 UTC. A separate
-26-candidate plus two-repeat pool diagnostic is prepared under the new approval;
-see `docs/T4_PROGRAM_POOL.md`. Do not conflate these two assays or their budgets.
+Completed docking evidence, checked on 2026-09-12:
 
-The primary scientific champion is unchanged until new candidate docking results
-are verified. The -13.6 controls are the supplied winner, not a discovered lead.
+- Winner-initialized reference refinement: best candidate -13.0, fresh repeats
+  -13.0 and -13.0, versus three -13.6 winner controls. Nineteen total calls,
+  including the three controls reused after the initial training-chain failure.
+  Resume completed in 232.14 seconds at `0d965bf`. This is a negative result.
+- Fully scored program pool: best non-winner candidate -13.3, fresh repeats
+  -13.3 and -13.3. The joint channel proposed it from the original seed and
+  post-linker state; the independent channel also proposed it post-linker.
+  All 26 unique non-winner candidates were scored, then the best repeated twice.
+  Twenty-eight new calls, 54.67 seconds of driver runtime, 94.90 summed docking
+  worker seconds, eight workers plus a driver, CPU only. No surrogate selection.
+  Clean source `1762f2d`; call `fc-01M2BM16P93H7P304NPDBN4FN1`; result prefix:
+  `t4_program_pool/79c5b633c04b3f5cc1dc30ab729e8522b521a9ebf12118811fddaeaaebfb2563`.
+
+Authoritative review: `diagnostics/t4_program_pool/attempt_1/review.json`, with
+all input hashes and the unchanged remote receipt alongside it. Its README
+separates the three proposal arms. These are winner-informed development results,
+not a matched improvement over the autonomous broad controller or an IVG win.
+The supplied -13.6 winner remains better. Both remote assays are finished; there
+is no active run or automatic follow-on round.
+
+The next reusable data unit is prepared: 54 complete program/attachment
+representations of 27 measured endpoints, including the reused winner, with
+source/endpoint/representation-balanced weights. All belong to one inspected
+source group; this is not a transfer validation set. Rejected and unscored
+attempts retain explicit exclusions, not invented negative scores. No model was
+fitted. See `scored_program_replay.json` in the same diagnostic directory.
 
 ### Earlier development evidence
 
@@ -134,19 +150,21 @@ new oracle calls. See `docs/PMO_OPTION_CONTROLLER_BANK.md` and
 
 ## Next scientific decision
 
-The next T4 controller should evaluate and allocate complete semi-Markov option
-outcomes, while preserving the qualified WHERE distribution, the balanced WHAT
-exploration floor, the frozen reference process, and exact HOW execution. It
-should not reward ring count, narrow support to rings, tune macro weights on
-the observed docking outcomes, or call an endpoint predictor a future-value
-model.
+Retain coordinated program proposals and the existing generic broad channel.
+Do not scale the same small winner-derived bank: it improves useful proposal
+density in this development neighborhood but has only two new eligible seed
+endpoints and five post-linker endpoints. The five post-linker variants all score
+between -12.6 and -13.3; independent bundles are more varied but mostly weaker.
+That supports learning coordinated attachments/parameters from completed scored
+programs, not another larger particle population or a relabeled endpoint value.
 
-The smallest useful next experiment is a prospective paired test of
-option-boundary delayed value and acquisition against the current in-loop
-controller. A positive result must improve eligible yield or best observed
-score at a declared oracle cap while retaining option and molecular diversity.
-A null stops that value construction; it does not justify more rounds of the
-same planner. No next paid T4 round is currently authorized.
+Next implementation unit: use source-grouped structural programs plus separately
+identified scored replay to expand transferable linker/core/peripheral choices,
+then integrate the optional program channel into the broad runtime. The new
+27-endpoint replay has only one source group and cannot validate transfer or
+calibration. Preserve the serial baseline and endpoint-only constraints. Any
+next fitting or paid campaign needs its own frozen recipe and permitted scope;
+the completed 28-call pool is not an unlimited continuation budget.
 
 ## Code map
 
@@ -162,6 +180,10 @@ submission revision and a fresh-laptop path, see
 | Resumable T4 planner | `frontier_search.py`, `t4_frontier_search.py` |
 | Paired T4 driver | `t4_frontier_compare.py`, `t4_frontier_audit.py` |
 | Persistent option runtime | `option_controller.py`, `option_controller_runtime.py` |
+| Attachment-specific programs | `edit_program.py`, `edit_program_policy.py` |
+| Multi-site dependency graph and proposal arms | `edit_program_graph.py`, `multi_site_program_policy.py` |
+| Locked program docking and review | `t4_program_pool.py`, `tools/review_t4_program_pool.py` |
+| Scored complete-program replay preparation | `tools/prepare_scored_program_replay.py` |
 | PMO continuation bank | `pmo_option_controller_bank.py` |
 | Remote entrypoints | `modal_apps/genmol_t4_opt_app.py`, `modal_apps/pmo_option_controller_bank_app.py` |
 

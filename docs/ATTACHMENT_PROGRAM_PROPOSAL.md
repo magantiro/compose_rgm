@@ -115,3 +115,20 @@ examples and genuinely scored program contrasts, including linker/core changes,
 then compare useful eligible density at matched work. Do not scale the same tiny
 retrieval bank or claim docking gains from reconstruction. Preserve post-hoc and
 uninterrupted-serial controls.
+
+## Completed docking and scored replay
+
+The corrected locked pools have now been fully docked: 26 unique non-winner
+candidates plus two fresh evaluations of the best. Best new score -13.3, repeated
+-13.3 and -13.3, versus supplied-winner controls at -13.6. No superiority claim.
+The joint post-linker pool contains five new variants between -12.6 and -13.3,
+but the bank remains narrow. Driver runtime was 54.67 seconds with eight workers.
+See `diagnostics/t4_program_pool/attempt_1/README.md` and its sealed review.
+
+The deterministic replay adapter in `tools/prepare_scored_program_replay.py`
+preserves exact programs, attachments, dependency graphs and measured labels.
+The current bank has 54 representations, 27 endpoints, one inspected source
+group. Endpoint-balanced weights prevent multiple decompositions from increasing
+one molecule's contribution. No model fitting or future-value labels are implied.
+This prepares the next learning unit; it does not implement or qualify a general
+task-adapted program decoder.

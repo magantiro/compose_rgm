@@ -1,0 +1,11 @@
+{
+  "schema_version": "t4_program_pool_launch_reference_v1",
+  "call_id": "fc-01M2BM16P93H7P304NPDBN4FN1",
+  "source_revision_prefix": "1762f2db4ed3",
+  "complete_source_identity": "remote_result.json:payload.task.image_revision",
+  "lock_sha256": "077daa1965bfa0ee53b14463a3ffe43af36ddbc2e4ba66b100ccb56c0ab5242e",
+  "volume": "compose-v4-artifacts",
+  "volume_path": "t4_program_pool/79c5b633c04b3f5cc1dc30ab729e8522b521a9ebf12118811fddaeaaebfb2563",
+  "new_oracle_call_limit": 28,
+  "status": "completed"
+}
