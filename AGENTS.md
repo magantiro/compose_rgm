@@ -372,6 +372,19 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped second-generation docking approval, 2026-09-12:** after the request
+for 73 calls and clarification that $20 is a ceiling rather than expected spend,
+the user approved proceeding. Score all 49 distinct locked attempt_2 queries,
+then obtain two fresh evaluations of each arm/cell champion and each of the four
+first-generation incumbents, sharing identical confirmation queries. At most
+73 new calls, eight single-CPU workers plus one driver, no GPU or automatic
+oracle retries, and $20 maximum reserved cost. Reuse the exact candidate pools,
+original-seed gates and target-specific docking protocol; preserve the FA7
+ranked shortfall and separate arm label access. Launch from a clean committed
+source and publish restart-safe receipts and measured archives. No regeneration,
+further paid generation, reference training or benchmark-win claim follows.
+Contract: `docs/T4_SECOND_GENERATION.md` and its frozen scoring manifest.
+
 **Scoped measured second-generation preparation, 2026-09-12:** following the
 completed four-target round, the user requested program-level exploitation of
 the 32 measured outcomes and whole-program size features, without changing the

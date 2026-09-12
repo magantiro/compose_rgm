@@ -104,7 +104,17 @@ size accounting, endpoint gates and exploration/exhaustion rules. Completed
 mutations include growth, contraction and size-neutral changes. No shrinkage
 reward was added.
 
-### Proposed scoring allocation, awaiting approval
+### Scoring allocation, approved 2026-09-12
+
+**Update, 2026-09-12:** the user approved proceeding after clarification of
+actual prior timings and cost. The allocation below is now authorized, at most
+73 new calls and $20 reserved, not $20 expected spend. The prior 36-call round
+completed in 61.16 driver seconds with 3.88 seconds per molecule on average.
+For this round, expect a few minutes after launch at similar throughput; image
+deployment, startup and variable preparation times are additional. CPU/RAM
+execution is expected to be cents-scale at current published Modal rates, not
+a provider billing receipt. Eight workers plus one driver, no GPU or retries.
+The new allocation is separate from the old two-call remainder.
 
 Use the already locked attempt_2 pools without regeneration or surrogate
 screening. Score all 49 distinct target/molecule pairs once, sharing the first
@@ -119,10 +129,10 @@ eight incumbent confirmations, or **73 new docking calls**. Reuse repeat
 receipts for identical arm champions rather than performing duplicate physical
 evaluations. Compare fresh repeats separately from selection scores.
 
-Request a new $20 reserved ceiling, eight single-CPU workers plus one driver,
-zero automatic oracle retries and unchanged receptor/preparation/search
-settings. The old allocation has only two calls remaining; this document is
-not authorization to spend 73. No further paid round is automatic.
+The approved new allocation has a $20 reserved ceiling, eight single-CPU
+workers plus one driver, zero automatic oracle retries and unchanged
+receptor/preparation/search settings. It is separate from the old allocation's
+two remaining calls. No further paid round is automatic.
 
 The engineering promotion question is whether feedback yields improvements
 over the corresponding first-generation incumbents in more than one cell,
@@ -130,6 +140,21 @@ with fresh-repeat support, and whether it improves over score-blind selection
 under the same proposal limits. A single improved endpoint does not establish
 an aggregate benchmark win. Negative results remain part of the controller
 decision ledger.
+
+The exact scoring manifest is `configs/t4_second_generation_lock.json`.
+The two-stage runner uses the unchanged production docking function, commits
+every started query and result, and rejects ambiguous retries. Four focused
+tests cover arm-specific champion selection, shared confirmations, failure and
+budget accounting, exact trace replay, completed reuse and interrupted-start
+rejection. One test fixture needed JSON normalization to match the persisted
+production boundary; no production gate was weakened. Ruff and whitespace
+checks pass. A full-suite milestone sign-off is not claimed.
+
+From a clean committed source, deploy `modal_apps/t4_second_generation_app.py`
+and run `PYTHONPATH=src:. python tools/t4_second_generation.py launch`, writing
+the launch receipt outside the clean source checkout. Then retrieve the sealed
+remote result and run `tools/t4_second_generation.py review --folder <receipts>`
+in the pinned chemistry environment to update each arm's own scored archive.
 
 ### Verification and reproduction
 
