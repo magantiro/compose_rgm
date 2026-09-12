@@ -1,0 +1,77 @@
+{
+  "authorization": "2026-09-12 user approved the proposed small winner-initialized refinement experiment; implementation cap 19 calls, no follow-on run",
+  "compute": {
+    "automatic_retries": 0,
+    "docking_timeout_seconds": 480,
+    "driver_containers": 1,
+    "driver_timeout_seconds": 3600,
+    "expected_wall_seconds": [
+      300,
+      1800
+    ],
+    "max_active_containers": 9,
+    "max_docking_containers": 8,
+    "max_docking_cpu_hours": 2.533333333333333,
+    "max_proposal_containers": 8,
+    "max_proposal_cpu_hours": 5.666666666666667,
+    "oracle_call_limit": 19,
+    "proposal_timeout_seconds": 1200,
+    "reserved_cost_usd": 10,
+    "restart_unit": "immutable proposal unit or completed oracle receipt; ambiguous oracle calls never retried"
+  },
+  "contract_sha256": "a3f0735f05f50dc3f31c14f7c987a71aa7d456790cf2f6787c5b1de6515c279f",
+  "docking": {
+    "cpu": 1,
+    "exhaustiveness": 1,
+    "interpretation": "paired protocol, not externally matched seeding",
+    "ligand_preparation": "unchanged Open Babel gen3D; independent stochastic conformers retained",
+    "num_modes": 10,
+    "seeds": [
+      1701,
+      1702,
+      1703
+    ]
+  },
+  "docking_only": true,
+  "expected_input_sha256": {
+    "committor": "566cfe582973884b22e29c02b00b8188d9ef158b47387275eb36b6e8e62e2c11",
+    "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+    "r_theta_checkpoint": "c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8",
+    "r_theta_run_paths": "585286e0fb6dd8fb6b5a050dc3e5f8d1c7e782b105df114cbcb14cabbb5b2bc2",
+    "receptor": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9",
+    "seed_manifest": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"
+  },
+  "generation_delegated_to_proposal_workers": true,
+  "historical_route": {
+    "calls": 6,
+    "path": "t4_winner_route_docking/fece76dedf244574e46892c7c8eb4bf3d5a9ae114e3abcd2be9e47bb779f03c9/result.json",
+    "sha256": "02f9d33a271b1bea6b74252fe107d0e2761bad40b7d9a869f808f2671bb9176d"
+  },
+  "law_caches": [],
+  "protocol": {
+    "path": "docs/T4_WINNER_REFINEMENT.md",
+    "sha256": "4e475104a454ad5a0b1616b3f0f749c21a5b074dc295559a1f5cc2c2d6fd0990"
+  },
+  "required_rdkit": "2024.03.5",
+  "schema_version": "t4_winner_refinement_contract_v1",
+  "search": {
+    "candidate_limit": 14,
+    "desired_multi_edit_candidates": 7,
+    "guidance": "reference-only WHERE/WHAT/HOW; no learned value; diverse complete-candidate allocation",
+    "options_per_stream": 2,
+    "primitive_budget": 14,
+    "seed": 20260912,
+    "streams": 16
+  },
+  "task": {
+    "budget": 19,
+    "delta": 0.4,
+    "per_round": 14,
+    "session": "compose_iclr"
+  },
+  "training_authorized": false,
+  "winner": {
+    "path": "diagnostics/t4_whole_ring_plan/result.json",
+    "sha256": "252dccee4785d3a8e972df30c4a075e7e98bdf02e120300990bcb1de9d21cee9"
+  }
+}

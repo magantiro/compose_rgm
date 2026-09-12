@@ -372,6 +372,18 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped winner-initialized T4 refinement, 2026-09-12:** the user approved the
+proposed small experiment starting from a published IVG winner. Implement and run
+the recipe in `docs/T4_WINNER_REFINEMENT.md` and
+`configs/t4_winner_refinement.json`: one exact supported PARP1 seed0 delta=0.4
+winner, a broad primitive census and sixteen short existing-controller streams,
+at most nineteen new docking calls including winner and best-candidate repeats,
+CPU only, at most eight workers plus one driver, and $10 reserved. The numeric
+caps are the bounded implementation of that approval. No model fitting,
+reference/executor change, automatic follow-on round, or matched benchmark
+superiority claim is authorized. Keep original-seed endpoint constraints,
+immutable candidate locks, exact trace replay and full call accounting.
+
 **Scoped option-controller continuation-bank preparation, 2026-09-12:** after
 reviewing the small `+0.0112784407` plan-pool gain, the user agreed to stop
 scaling that unchanged complete-plan generator and proceed to the smallest

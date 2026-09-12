@@ -93,6 +93,47 @@ _RT: dict[str, Any] = {}
 
 
 @app.function(
+    image=image, cpu=(1.0, 1.0), memory=4096, timeout=3600,
+    max_containers=1, retries=0, volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_winner_refinement(task: dict[str, Any]) -> dict[str, Any]:
+    from compose_v4.experiments.t4_winner_refinement import driver_remote
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return driver_remote(
+        task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume, _validate_remote_revision,
+        lambda tasks: t4_winner_refinement_propose.map(tasks, order_outputs=False),
+        lambda tasks: t4_winner_refinement_dock.map(tasks, order_outputs=False),
+    )
+
+
+@app.function(
+    image=image, cpu=(1.0, 1.0), memory=8192, timeout=1200,
+    max_containers=8, retries=0, scaledown_window=60,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_winner_refinement_propose(task: dict[str, Any]) -> dict[str, Any]:
+    from compose_v4.experiments.t4_winner_refinement import proposal_remote
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return proposal_remote(task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume, _runtime,
+                           _validate_remote_revision)
+
+
+@app.function(
+    image=image, cpu=(1.0, 1.0), memory=4096, timeout=480,
+    max_containers=8, retries=0, scaledown_window=60,
+    volumes={str(ARTIFACT_ROOT): artifact_volume},
+)
+def t4_winner_refinement_dock(task: dict[str, Any]) -> dict[str, Any]:
+    from compose_v4.experiments.t4_winner_refinement import dock_remote
+    from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+
+    return dock_remote(task, REMOTE_ROOT, ARTIFACT_ROOT, artifact_volume, _validate_remote_revision,
+                       lambda smiles, tag, seed: _dock(smiles, "parp1", tag, cpu=1, random_seed=seed))
+
+
+@app.function(
     image=image,
     cpu=(1.0, 1.0),
     memory=4096,
@@ -758,7 +799,8 @@ def _runtime():
     return _RT
 
 
-def _dock(smiles: str, target: str, tag: str, cpu: int = 4) -> float | None:
+def _dock(smiles: str, target: str, tag: str, cpu: int = 4,
+          random_seed: int | None = None) -> float | None:
     """`cpu` is QuickVina's own thread count. It defaults to 4, which is what
     Gate 0 used to establish docking parity, so the default path is unchanged.
     Batch docking passes cpu=1 because each concurrent docking gets one core."""
@@ -785,7 +827,8 @@ def _dock(smiles: str, target: str, tag: str, cpu: int = 4) -> float | None:
              "--ligand", lig, "--out", out,
              "--center_x", str(cx), "--center_y", str(cy), "--center_z", str(cz),
              "--size_x", str(sx), "--size_y", str(sy), "--size_z", str(sz),
-             "--cpu", str(int(cpu)), "--num_modes", "10", "--exhaustiveness", "1"],
+             "--cpu", str(int(cpu)), "--num_modes", "10", "--exhaustiveness", "1"]
+            + ([] if random_seed is None else ["--seed", str(int(random_seed))]),
             capture_output=True, timeout=300, check=True)
         for line in open(out):
             if line.startswith("REMARK VINA RESULT"):
