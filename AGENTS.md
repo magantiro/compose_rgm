@@ -372,6 +372,16 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped learned-plan comparison authorization, 2026-09-11:** the user approved
+trying the proposed learning search policy and then requested continued work.
+Authorize one warm Perindopril development comparison: four rounds, sixteen
+parents per arm, frozen versus online-updated complete-plan policy, at most 128
+new oracle calls total, CPU only, at most 29 workers plus one driver and $10.
+Initialize the controller from existing paid labels, preserve the frozen reference
+and executor, and retain the broad reference channel. No public winner enters
+training or the population. `docs/PMO_PLAN_POLICY.md` records the exact recipe;
+this supersedes the completed offline-only scope below, not the editing-V2 gates.
+
 **Scoped offline edit-chooser authorization, 2026-09-11:** the user's latest
 approval authorizes implementing and fitting a context-sensitive complete-edit
 controller on existing paid development outcomes, including damaging edits and

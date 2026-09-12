@@ -4,6 +4,21 @@ Updated 2026-09-11. Active goal: reproducible improvement over the actual T4 and
 PMO champions, then verified matched external comparisons. Supporting chemistry,
 known-winner reconstruction and mathematics are not benchmark success.
 
+Active development candidate: the frozen-versus-updating complete-plan proposal
+comparison is implemented and locally prepared, but not launched. Both arms start
+from the same best sixteen exact saved states, current best 0.6835298931, and the
+same initial policy. Half of proposal traffic remains the broad reference channel;
+the other half samples complete donor/cut plans before compiling the selected plan
+through the valid executor. Only the learning arm applies round-end clipped policy
+updates from its own realized score changes. Bound: four rounds, 128 new physical
+calls total, 29 CPU workers plus one driver, $10. Hypothesis: feedback increases
+improving-plan frequency and top-ten learning-curve quality. Zero calls spent so
+far. The fixed paid-label molecular encoder took 4.359 seconds to fit and improved
+grouped calibration RMSE from 0.2601 (constant) to 0.1586. This is endpoint signal,
+not future value or evidence of online improvement. Next: remote numerical check,
+then the one bounded paired run. Protocol: `docs/PMO_PLAN_POLICY.md`; prepared
+artifact: `diagnostics/pmo_plan_policy/`.
+
 Operational status: offline complete-edit context learner implemented and tested;
 **rejected**, no new oracle calls or live job. Preparation plus fit/evaluation took
 4.6562 seconds. Training retained damaging edits and separately labeled failures.

@@ -150,6 +150,7 @@ def session(
     contract_loader=load_contract,
     app_path=APP,
     kind=KIND,
+    proposal_validator=None,
 ):
     validate_revision(task["image_revision"])
     c = contract_loader(root)
@@ -161,7 +162,9 @@ def session(
     if "worker_id" in task:
         if not 1 <= task["phase"] <= c["boundaries"] or not 0 <= task["slot"] < c["particles"]:
             raise ValueError("particle worker outside declared census")
-        if c.get("donor_memory_modes"):
+        if proposal_validator is not None:
+            proposal_validator(task, c)
+        elif c.get("donor_memory_modes"):
             from compose_v4.control.donor_memory import proposal_identity
 
             expected = proposal_identity(task["donor_memory_id"])
@@ -237,7 +240,16 @@ def initial_score_history(data):
 
 
 def driver_remote(
-    task, root, artifact_root, volume, validate_revision, parallel, *, run_session=None
+    task,
+    root,
+    artifact_root,
+    volume,
+    validate_revision,
+    parallel,
+    *,
+    run_session=None,
+    round_context_factory=None,
+    round_update_factory=None,
 ):
     import resource
 
@@ -320,6 +332,11 @@ def driver_remote(
                             store.output / f"memory/{memory_id}.json"
                         ),
                     }
+                policy_context = (
+                    {}
+                    if round_context_factory is None
+                    else round_context_factory(data, state, store, arm, memory_context)
+                )
                 assignments[arm] = []
                 for slot, parent in enumerate(state[arm]["particles"]):
                     proposal_id = (
@@ -327,6 +344,7 @@ def driver_remote(
                         if memory_context
                         else c.get("proposal_ids", {}).get(arm)
                     )
+                    proposal_id = policy_context.get("proposal_id", proposal_id)
                     local_context = {}
                     if arm in c.get("local_selector_arms", []):
                         from compose_v4.control.local_endpoint_selector import (
@@ -358,6 +376,7 @@ def driver_remote(
                                 "parent": parent,
                                 "worker_id": key,
                                 **memory_context,
+                                **policy_context,
                                 **local_context,
                                 **({"proposal_id": proposal_id} if proposal_id is not None else {}),
                             },
@@ -429,6 +448,11 @@ def driver_remote(
                 expected = [
                     None if p is None else future.get(p["smiles"], p["score"]) for p in proposed
                 ]
+                policy_snapshot, policy_audit = (None, None)
+                if round_update_factory is not None:
+                    policy_snapshot, policy_audit = round_update_factory(
+                        data, previous_arm, proposed, results, assignments[arm], arm
+                    )
                 selection_mode = c.get("selection_modes", {}).get(arm, arm)
                 rng = np.random.default_rng(np.random.SeedSequence([c["seed"], step, 999]))
                 if c.get("parent_selection_modes", {}).get(arm) == "archive":
@@ -440,11 +464,14 @@ def driver_remote(
                         nodes, n, rng, exploration=c["archive_exploration"]
                     )
                     update = {"status": "live", "archive_selection": selection}
-                    state[arm] = {
+                    next_state = {
                         "particles": chosen,
                         "archive": previous_arm["archive"],
                         "archive_nodes": nodes,
                     }
+                    if policy_snapshot is not None:
+                        next_state["plan_policy"] = policy_snapshot
+                    state[arm] = next_state
                 else:
                     psi = log_potentials(
                         selection_mode, measured, expected, terminal=terminal, beta=c["beta"]
@@ -464,6 +491,8 @@ def driver_remote(
                         "log_weights": update["log_weights"],
                         "log_potential": update["log_potential"],
                     }
+                    if policy_snapshot is not None:
+                        state[arm]["plan_policy"] = policy_snapshot
                 metrics = archive_metrics(state[arm]["archive"])
                 audits[arm] = {
                     **metrics,
@@ -479,6 +508,7 @@ def driver_remote(
                     "proposals": proposed,
                     "scores": measured,
                     "future_values": expected,
+                    **({"policy_update": policy_audit} if policy_audit is not None else {}),
                 }
                 progress.update(**{f"best_{arm}": metrics["best"]})
                 detail = (
