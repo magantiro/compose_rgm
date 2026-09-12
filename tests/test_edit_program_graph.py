@@ -11,12 +11,13 @@ from compose_v4.control.edit_program_graph import (
     combine_bound_programs,
     compile_program_graph,
     execute_program_graph,
+    program_size_profile,
     scheduled_program,
 )
 from compose_v4.control.macro_engine import ELEMENT_CODE
 from compose_v4.experiments.whole_ring_plan import execute_program
 from compose_v4.rewrite.action_codec_v4 import encode_action
-from compose_v4.rewrite.operators import AtomInsert, CycleOpenEdge
+from compose_v4.rewrite.operators import AtomDelete, AtomInsert, CycleOpenEdge
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
 
 
@@ -97,6 +98,38 @@ def test_triple_resource_overflow_is_rejected_even_when_every_pair_fits():
     program, _ = combine_bound_programs(source, parts)
     with pytest.raises(ValueError, match="peak-capacity"):
         scheduled_program(compile_program_graph(program), 34)
+
+
+def test_size_accounting_accepts_shrink_then_regrow_without_rewarding_shrinkage():
+    source = graph("C" * 39)
+    marks = [encode_action("atom_delete", AtomDelete(i)) for i in (38, 37, 36, 35)]
+    marks.extend(
+        encode_action(
+            "atom_insert", AtomInsert(i, ELEMENT_CODE["C"], 0, 3, ((0 if i == 39 else i - 1, 1),))
+        )
+        for i in range(39, 44)
+    )
+    product, stage = execute_program(source, marks)
+    program, _ = extract_program(source, [stage])
+    size = program_size_profile(compile_program_graph(program), 39)
+    assert product.n_real_atoms == size["final_heavy_atoms"] == 40
+    assert size["source_heavy_atoms"] == 39
+    assert size["peak_heavy_atoms"] == 40
+    assert size["delta_heavy_atoms"] == 1
+
+
+def test_final_size_cannot_hide_an_illegal_peak():
+    source = graph("CCCCC")
+    marks = [
+        encode_action("atom_insert", AtomInsert(i, ELEMENT_CODE["C"], 0, 3, ((i - 1, 1),)))
+        for i in (5, 6)
+    ] + [encode_action("atom_delete", AtomDelete(i)) for i in (0, 1)]
+    _, stage = execute_program(source, marks)
+    program, _ = extract_program(source, [stage])
+    compiled = compile_program_graph(program)
+    assert program_size_profile(compiled, 5)["delta_heavy_atoms"] == 0
+    with pytest.raises(ValueError, match="peak-capacity"):
+        program_size_profile(compiled, 39)
 
 
 def test_real_route_records_dependencies_without_assuming_branch_independence():

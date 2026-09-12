@@ -195,6 +195,21 @@ def _topological(graph, initial_atoms, priority):
     return tuple(order), timeline
 
 
+def program_size_profile(graph: ProgramGraph, initial_atoms: int) -> dict:
+    """Size of the existing legal resource schedule, not a task-value prediction."""
+    order, timeline = _topological(graph, initial_atoms, None)
+    final = timeline[-1]["end"] if timeline else initial_atoms
+    return {
+        "source_heavy_atoms": initial_atoms,
+        "peak_heavy_atoms": max([initial_atoms, *(row["peak"] for row in timeline)]),
+        "final_heavy_atoms": final,
+        "delta_heavy_atoms": final - initial_atoms,
+        "scheduled_blocks": list(order),
+        "capacity_timeline": timeline,
+        "definition": "complete constructor under the existing dependency/resource schedule",
+    }
+
+
 def scheduled_program(graph: ProgramGraph, initial_atoms: int, *, priority=None):
     """Deterministic complete-block schedule with globally fresh symbolic handles.
 

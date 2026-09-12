@@ -155,3 +155,62 @@ def test_no_forced_padding_to_maximum_blocks_and_configuration_is_explicit():
     assert replace(config, max_primitives=40, max_blocks=12).max_blocks == 12
     with pytest.raises(ValueError, match="sum to one"):
         replace(config, channel_probabilities=(1.0, 0.0, 0.0))
+
+
+def test_score_blind_ablation_and_exhaustion_preserve_endpoint_exploration():
+    search = optimizer()
+    batch = search.propose_batch(eligible)
+    search.observe_batch(batch["batch_id"], outcomes(search, batch, -5))
+    search.duplicate_counts.clear()  # Equal exhaustion for the initial uniform check.
+    keys, ranked = search.selection()
+    search.config = replace(search.config, parent_allocation="score_blind")
+    same_keys, uniform = search.selection()
+    assert same_keys == keys
+    assert np.allclose(uniform, np.full(len(keys), 1 / len(keys)))
+    assert not np.allclose(ranked, uniform)
+    search.duplicate_counts[keys[0]] = 10_000
+    _, exhausted = search.selection()
+    assert exhausted[0] >= search.config.exploration / len(keys)
+
+
+def test_new_programs_record_constructor_and_measured_parent_sizes():
+    search = optimizer()
+    batch = search.propose_batch(eligible)
+    for candidate in batch["candidates"]:
+        size = candidate["provenance"]["program_size"]
+        assert size["source_heavy_atoms"] == 2
+        assert size["measured_parent_heavy_atoms"] == 9
+        assert size["peak_heavy_atoms"] <= 40
+        assert size["final_heavy_atoms"] - 9 == size["delta_from_measured_parent"]
+
+
+def test_mutation_kind_never_draws_an_unavailable_contraction():
+    from tests.test_edit_program import graph
+    from tests.test_edit_program_graph import add_chain
+
+    source = graph("CC")
+    program, binding = add_chain(source, 0)
+    _, trace = execute_program_graph(source, compile_program_graph(program), binding)
+    search = ProgramOptimizer(
+        ProgramSearchConfig(require_broad_runtime=False, double_mutation_probability=0),
+        source_group="fixture",
+        oracle_protocol="fixture:no-real-oracle",
+    )
+    key = search.add_measured_program(
+        {
+            "source_group": search.source_group,
+            "oracle_protocol": search.oracle_protocol,
+            "source_state": trace["states"][0],
+            "program": program.payload(),
+            "assignment": list(binding),
+            "trace": trace,
+            "endpoint": trace["endpoint"],
+        },
+        receipt_id="fixture:one-birth",
+        score=-1,
+    )
+    for _ in range(20):
+        _, _, _, metadata = search._mutate(search.entries[key])
+        move = metadata["mutations"][0]
+        assert move["kind"] in move["available_kinds"]
+        assert "contract_segment" not in move["available_kinds"]

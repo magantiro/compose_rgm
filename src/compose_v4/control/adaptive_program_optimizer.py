@@ -22,6 +22,7 @@ from compose_v4.control.edit_program_graph import (
     combine_bound_programs,
     compile_program_graph,
     execute_program_graph,
+    program_size_profile,
 )
 from compose_v4.control.molecular_task_search import (
     MolecularSearchState,
@@ -29,6 +30,7 @@ from compose_v4.control.molecular_task_search import (
 )
 from compose_v4.control.program_mutation import (
     PARAMETER_MOVES,
+    attachment_mutation_choices,
     branch_components,
     mutate_attachment,
     mutate_parameter,
@@ -53,8 +55,11 @@ class ProgramSearchConfig:
     exploration: float = 0.2
     double_mutation_probability: float = 0.25
     require_broad_runtime: bool = True
+    parent_allocation: str = "score_rank"
 
     def __post_init__(self):
+        if self.parent_allocation not in ("score_rank", "score_blind"):
+            raise ValueError("parent allocation must be score_rank or score_blind")
         if any(
             type(v) is not int or v < 1
             for v in (
@@ -203,7 +208,13 @@ class ProgramOptimizer:
             ]
         )
         ranks = np.asarray([1 + np.sum(scores < v) for v in scores], dtype=float)
-        quality = 1 / ranks
+        quality = (
+            np.ones(len(endpoints)) if self.config.parent_allocation == "score_blind" else 1 / ranks
+        )
+        # Exhaustion tempers exploitation, not the explicit exploration floor.
+        quality /= np.asarray(
+            [1 + np.mean([self.duplicate_counts.get(k, 0) for k in groups[s]]) for s in endpoints]
+        )
         quality = (
             self.config.exploration / len(quality)
             + (1 - self.config.exploration) * quality / quality.sum()
@@ -213,10 +224,6 @@ class ProgramOptimizer:
             representatives = groups[endpoint]
             unexhausted = np.asarray(
                 [1 / (1 + self.duplicate_counts.get(k, 0)) for k in representatives]
-            )
-            # Exhausted endpoints lose allocation too, not only one representation.
-            mass /= 1 + sum(self.duplicate_counts.get(k, 0) for k in representatives) / len(
-                representatives
             )
             for key, weight in zip(representatives, unexhausted / unexhausted.sum(), strict=True):
                 keys.append(key)
@@ -230,6 +237,15 @@ class ProgramOptimizer:
         return self.entries[keys[index]], {
             "entry_id": keys[index],
             "parent_probability": float(weights[index]),
+            "parent_measured_score": float(
+                np.mean(
+                    [
+                        r["score"]
+                        for r in self.observations.values()
+                        if r["endpoint"] == self.entries[keys[index]]["endpoint"]
+                    ]
+                )
+            ),
         }
 
     def _mutate(self, entry):
@@ -241,19 +257,38 @@ class ProgramOptimizer:
         edits = []
         number = 1 + int(self.rng.random() < self.config.double_mutation_probability)
         for _ in range(number):
-            move = ("attachment", *PARAMETER_MOVES)[int(self.rng.integers(4))]
+            parameters = {m: parameter_choices(program, m) for m in PARAMETER_MOVES}
+            attachments = attachment_mutation_choices(
+                source, program, binding, max_bindings=self.config.max_bindings
+            )
+            available = (["attachment"] if attachments[1] else []) + [
+                m for m in PARAMETER_MOVES if parameters[m]
+            ]
+            if not available:
+                raise ValueError("program has no available bounded mutation")
+            move = available[int(self.rng.integers(len(available)))]
             if move == "attachment":
                 binding, census = mutate_attachment(
-                    source, program, binding, self.rng, max_bindings=self.config.max_bindings
+                    source,
+                    program,
+                    binding,
+                    self.rng,
+                    max_bindings=self.config.max_bindings,
+                    prepared=attachments,
                 )
-                edits.append({"kind": move, **census})
+                edits.append({"kind": move, "available_kinds": available, **census})
             else:
-                choices = parameter_choices(program, move)
-                if not choices:
-                    raise ValueError(f"no conditional choices for {move}")
+                choices = parameters[move]
                 choice = choices[int(self.rng.integers(len(choices)))]
                 program = mutate_parameter(program, move, choice)
-                edits.append({"kind": move, "choice": choice, "choices": len(choices)})
+                edits.append(
+                    {
+                        "kind": move,
+                        "available_kinds": available,
+                        "choice": choice,
+                        "choices": len(choices),
+                    }
+                )
         return source, program, binding, {"mutations": edits}
 
     def _recombine(self, entry):
@@ -375,13 +410,27 @@ class ProgramOptimizer:
                     broad_sampler=broad_sampler,
                     probabilities=self.config.channel_probabilities,
                 )
-                _, trace = execute_program_graph(
+                graph = compile_program_graph(program)
+                size = program_size_profile(graph, source.n_real_atoms)
+                size["measured_parent_heavy_atoms"] = decode_state(
+                    entry["trace"]["states"][-1]
+                ).n_real_atoms
+                size["delta_from_measured_parent"] = (
+                    size["final_heavy_atoms"] - size["measured_parent_heavy_atoms"]
+                )
+                chosen["program_size"] = size
+                product, trace = execute_program_graph(
                     source,
-                    compile_program_graph(program),
+                    graph,
                     binding,
                     max_primitives=self.config.max_primitives,
                     max_blocks=self.config.max_blocks,
                 )
+                if (
+                    product.n_real_atoms != size["final_heavy_atoms"]
+                    or trace["capacity_timeline"] != size["capacity_timeline"]
+                ):
+                    raise RuntimeError("compiled size accounting differs from exact execution")
             except ValueError as error:
                 attempts.append(
                     {
@@ -411,6 +460,7 @@ class ProgramOptimizer:
                 "endpoint": endpoint,
                 "status": outcome,
                 "metadata": metadata,
+                "program_size": size,
                 "properties": properties,
                 "actual_changes": trace["actual_changes"],
             }

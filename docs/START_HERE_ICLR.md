@@ -26,6 +26,19 @@ integration branch is `compose-iclr`; the Modal session name is
 
 ## Current outcome
 
+Second-generation preparation is now locked at
+`diagnostics/t4_second_generation/attempt_2`: 31 score-ranked candidates and
+32 score-blind controls, comprising 49 distinct target/molecule queries.
+Both arms reuse the exact same eight measured programs per cell. Whole-program
+source/peak/final size is explicit; no shrinkage reward or capacity increase.
+Conditional mutation selection avoids unavailable operations, and duplicate
+exhaustion no longer erases the 20% endpoint exploration floor. FA7 ranked
+selection filled seven of eight slots under its unchanged work cap. Total
+preparation took 81.85 seconds, with zero new oracle calls. These candidates
+are unscored. The proposed next round is at most 73 new calls including fresh
+champion/incumbent confirmations, requiring a new bounded approval. See
+`docs/T4_SECOND_GENERATION.md`. Do not regenerate or silently extend these pools.
+
 Completed four-target run: 32 locked candidates across JAK2 seed1, FA7 seed0, BRAF
 seed1 and 5HT1B seed0, plus four seed controls (36 docking calls). One shared
 146-program library now fills all four eight-candidate pools in 25.06 seconds;

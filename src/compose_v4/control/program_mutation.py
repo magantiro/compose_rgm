@@ -200,13 +200,26 @@ def replace_branch(
     )
 
 
-def mutate_attachment(source, program, assignment, rng, *, max_changed=2, max_bindings=64):
+def attachment_mutation_choices(source, program, assignment, *, max_changed=2, max_bindings=64):
     census = attachment_bindings(program, source, max_bindings=max_bindings)
     choices = [
         (a, d)
         for a, d in zip(census.assignments, census.context_distances, strict=True)
         if 1 <= sum(x != y for x, y in zip(a, assignment, strict=True)) <= max_changed
     ]
+    return census, choices
+
+
+def mutate_attachment(
+    source, program, assignment, rng, *, max_changed=2, max_bindings=64, prepared=None
+):
+    census, choices = (
+        attachment_mutation_choices(
+            source, program, assignment, max_changed=max_changed, max_bindings=max_bindings
+        )
+        if prepared is None
+        else prepared
+    )
     if not choices:
         raise ValueError("no alternative context-compatible bounded attachment assignment")
     import numpy as np

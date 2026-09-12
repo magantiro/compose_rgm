@@ -372,6 +372,20 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped measured second-generation preparation, 2026-09-12:** following the
+completed four-target round, the user requested program-level exploitation of
+the 32 measured outcomes and whole-program size features, without changing the
+architecture or 40-atom support. Implement source/peak/final size accounting,
+retain measured-score parent allocation and an explicit exploration floor, and
+prepare one bounded local second-generation comparison on the same four cells.
+Use score-ranked versus score-blind parents from the identical paid archive,
+with the same mutation/recombination/broad channels and no surrogate veto.
+Do not assign a shrinkage reward or transfer numeric scores across targets.
+This preparation makes zero new oracle calls. A second paid generation exceeds
+the two remaining calls of the previous allocation and requires a new bounded
+call/cost approval. No additional model training or executor/reference change.
+Recipe and acceptance: `docs/T4_SECOND_GENERATION.md`.
+
 **Scoped four-cell program curriculum, 2026-09-12:** the user explicitly requested
 continuing onto other docking targets, using their released winners aggressively
 as shared development material, and letting the controller run. Authorize one
