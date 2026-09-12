@@ -1,11 +1,12 @@
 # COMPOSE (RGM) — agent context
 
 **Rewrite Generator Matching for validity-preserving molecular generation.**
-A continuous-time Markov chain over molecular graphs whose committed states are
-complete, chemically valid, connected molecules and whose transitions are
-executable chemical rewrites; Generator Matching learns their contextual firing
-rates. Non-monotone, flexible-size, target-free at inference. Paper 1 (methods)
-lives in `paper_iclr_stochastic_rewriting/`.
+A stochastic process over molecular graphs whose committed non-null states are
+complete, supported, connected molecules and whose transitions are executable
+chemical rewrites. The reference process is learned without a downstream task;
+task information enters through a separate controller at inference. The
+submitted workshop package, current controller work, and historical manuscript
+variants are mapped in `docs/PAPER_TO_CURRENT_CODE.md`.
 
 > Not to be confused with the sibling repo `KoshaTx/compose` (a discrete-*diffusion*
 > operator-editing framework). Same name lineage, different generative process.
@@ -14,27 +15,27 @@ lives in `paper_iclr_stochastic_rewriting/`.
 This file loads automatically every session. Keep it short and high-signal —
 detail lives in the imported context files below and in scoped `CLAUDE.md`s.
 
-## Plan of record — read this before any other document
+## Start here
 
-- **[`docs/EXPERIMENT_PLAN.md`](docs/EXPERIMENT_PLAN.md)** — the ONLY current
-  experiment plan.
-- **[`docs/PROJECT_BOARD.md`](docs/PROJECT_BOARD.md)** — the durable task board.
-  The in-session task tool has been wiped twice; this file is what persists.
-- **[`docs/DECISION_LOG.md`](docs/DECISION_LOG.md)** — what is established, and
-  what was tried and refuted. Read it before re-running an experiment.
+1. **[`AGENTS.md`](AGENTS.md)** is the repository-wide scientific and execution
+   contract. A task-specific frozen contract may narrow it.
+2. **[`docs/START_HERE_ICLR.md`](docs/START_HERE_ICLR.md)** is the authoritative
+   controller status, current T4 and PMO evidence, and next decision.
+3. **[`docs/PAPER_TO_CURRENT_CODE.md`](docs/PAPER_TO_CURRENT_CODE.md)** maps the
+   submitted paper implementation to post-submission controller extensions.
+4. **[`docs/CONTROLLER_LIVE.md`](docs/CONTROLLER_LIVE.md)** is the chronological
+   evidence ledger. It is not the first-read status page.
 
-**Everything else in `docs/` and every `paper*/` directory is HISTORY** unless
-it is linked from one of those three. `docs/` holds 84 markdown files accumulated
-across several earlier framings; a dozen are stamped ARCHIVED, but absence of a
-banner does not mean a document is current. Default to history.
-
-The manuscript's existing experimental section describes a materially different
-model and must not be executed or cited.
+Do not infer authority from filenames such as `CURRENT`, `PLAN`, or `HANDOFF`.
+This repository preserves superseded plans and preregistrations because they are
+part of the scientific record. Follow the reading order in `START_HERE_ICLR.md`
+and the current task's explicit acceptance criteria.
 
 
 ## How we work
 
-1. **Context auto-loads.** The `@`-imported files at the bottom are in your context now.
+1. **Context auto-loads.** Read `AGENTS.md` and the start page even when this file
+   has already been loaded automatically.
 2. **Capture durable learnings** in `.claude/context/learnings.md` when you hit a non-obvious
    gotcha or make a design call. Commit it — that's how it spreads on the next pull.
 3. **`.claude/` is code.** Edit the context files in the same PR as the change that makes them
@@ -136,14 +137,15 @@ uv sync                          # .venv + deps (or: pip install -e ".[dev]"); t
 export PYTHONPATH=src:scripts    # both for scripts; `src` also lets parallel-rollout worker subprocesses find compose_v4
 export KMP_DUPLICATE_LIB_OK=TRUE # macOS OpenMP guard (silences the abort)
 export OMP_NUM_THREADS=1         # REQUIRED locally: torch's bundled OpenMP + brew's collide → suite segfaults without it (see learnings)
-pytest tests/                    # full suite (494 tests, pythonpath=["src"] -> `from compose_v4.…`)
+pytest tests/                    # full suite; use focused tests while iterating
 pytest tests/test_e0_toy_h_exactness.py -q   # one file
 ruff check .                     # lint (line-length 100, target py310)
-python scripts/prelaunch_gate.py --corpus <name>  # pre-Modal-launch gate: tests+ruff+clean-tree+corpus+hashes
+python3 tools/preflight.py       # required before current controller launches
 ```
 
 Cloud training / rollout evaluation run on **Modal** (`modal_apps/`), against the
-`compose-v4-artifacts` volume. Never launch a Modal job before `prelaunch_gate.py` is green.
+`compose-v4-artifacts` volume. Never launch a Modal job before the task's current
+preflight and authorization contract is green.
 SMC experiment runs are single-process — the multiprocessing rollout path fork-deadlocks
 on some macOS setups; prefer serial locally, Modal for scale (see `learnings.md`).
 
@@ -167,17 +169,17 @@ on some macOS setups; prefer serial locally, Modal for scale (see `learnings.md`
 - `src/compose_v4/chem/` — `MolecularGraph`, padded state, validity/canonicalization.
 - `src/compose_v4/rewrite/` — the rewrite kernel + legal-event **fibers** (`fiber.py`,
   `factorized_fiber.py`, `tracelet_fiber.py`, `ring_system_fiber.py`); `kernel.py` = executor.
-- `src/compose_v4/experiments/` — Generator Matching training, conditional (`cnof_conditional.py`,
-  `tracelet_conditional.py`), value-guided sampling, calibrated/parallel sampling.
+- `src/compose_v4/experiments/` — Generator Matching training, value-guided
+  sampling, scientific drivers, and artifact reductions.
+- `src/compose_v4/control/` — current region, option, continuation, frontier,
+  and persistent-controller library code.
 - `src/compose_v4/eval/` — `molecular_quality.py` (V/U/N, descriptor Wassersteins, FCD).
 - `src/compose_v4/data/` — corpus loading/splits: `cnof.py` (de-novo CNOF-neutral) and `organic_corpus.py`
   (the LOCKED broad-organic B-edit scope + shared loader + census; see learnings 2026-07-27).
-- `scripts/` — experiment drivers. The conditional controller is
-  `griddd_value_guided_smc_controller.py` (hard scaffold/similarity/required-/forbidden-SMARTS
-  fibers, arbitrary state→float objective, population dump, anytime traces). Paper results:
-  `tier1_pathwise_safety.py`, `physchem_box.py`, `e0_toy_h_exactness.py`,
-  `doob_guidance_ground_truth.py`, `make_paper_figures.py`.
-- `paper_iclr_stochastic_rewriting/` — the paper (`main.tex`, `latexmk -pdf`).
+- `scripts/` — local experiment drivers, readers, audits, and figure builders.
+- `paper_gem_neurips2026/` — submitted workshop package.
+- `paper_iclr2027/` — full manuscript source from which that package was
+  abridged. See the paper-to-current map before editing any manuscript.
 - `diagnostics/` — committed result JSONs; `modal_apps/` — cloud apps; `tests/` — pytest.
 
 Reproducible inputs: `configs/benchmarks/cnof_leads.json`. Base checkpoint (Lineage B) is on
