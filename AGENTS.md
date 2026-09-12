@@ -372,6 +372,17 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped PMO plan-pool assay authorization, 2026-09-12:** the user explicitly
+authorized scoring the already locked Perindopril MPO plan-pool prevalence
+assay. This permits exactly 95 new PMO oracle calls, one for every candidate in
+the immutable compiled lock with file SHA-256
+`4f43b5a0b51942ae12e72ef0393eddfaec10f75fdf5c75ec6f7b7037963aeeb7`.
+Run the existing restart-safe local scorer once and publish the complete result
+and per-candidate receipts. No candidate regeneration, relocking, adaptive
+selection, additional call, Modal deployment, docking call, controller fitting,
+or broader benchmark run is authorized. An ambiguous started receipt must fail
+closed rather than be retried.
+
 **Scoped option-controller runtime integration, 2026-09-12:** after reviewing
 the completed offline core, the user explicitly requested proceeding with the
 missing end-to-end implementation. This authorizes production-state feature

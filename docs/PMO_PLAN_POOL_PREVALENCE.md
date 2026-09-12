@@ -17,8 +17,29 @@ The preparation stage is offline and adds zero oracle calls. It uses the complet
 run artifacts from plan-policy run
 `170ca5944c646076d6adf1be75edd5ba781119eddc23d12fa6d2d11b45510e4b`.
 It does not generate new plans, train a model, change the executor or reference
-process, or use a public winner. A later scoring stage is not authorized by this
-document.
+process, or use a public winner.
+
+## Scoring authorization and execution
+
+On 2026-09-12 the user explicitly authorized the complete locked assay. The
+immutable compiled lock is
+`/private/tmp/compose-pmo-plan-pool-compile/compiled_pool_lock.json`, file
+SHA-256 `4f43b5a0b51942ae12e72ef0393eddfaec10f75fdf5c75ec6f7b7037963aeeb7`.
+It contains 95 unique candidates: 31 `actor_top`, 32 `uniform_hash`, and 32
+`largest_release`. The assay permits exactly 95 new Perindopril MPO calls.
+
+Execution is local CPU in one process because the PMO oracle is inexpensive;
+the restart unit is one candidate with a sealed started/result receipt. The
+expected wall time is less than ten minutes. An ambiguous started receipt is not
+retried. The result namespace is
+`/private/tmp/compose-pmo-plan-pool-score/`.
+
+```bash
+PYTHONPATH=src python3 tools/pmo_plan_pool_lock.py score \
+  --compiled /private/tmp/compose-pmo-plan-pool-compile/compiled_pool_lock.json \
+  --output /private/tmp/compose-pmo-plan-pool-score/result.json \
+  --authorize-new-calls 95
+```
 
 ## Frozen lock rule
 
