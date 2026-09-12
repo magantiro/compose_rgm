@@ -1,17 +1,20 @@
 """Tiny orchestration receipts, no network, no docking or model checkpoints."""
 
 import copy
+import json
 
 import pytest
 
 from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
 from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.experiments.continuation_profile import sha256_file
 from compose_v4.experiments.t4_frontier_compare import (
     ARMS,
     dock_locked_pair,
+    load_reused_preparations,
     normalize_warm_metadata,
 )
-from compose_v4.experiments.t4_matched_pilot import unseal
+from compose_v4.experiments.t4_matched_pilot import seal, unseal
 from compose_v4.rewrite.kernel import canonical_state_key
 from compose_v4.rewrite.trace_shard import encode_state
 
@@ -102,3 +105,101 @@ def test_warm_metadata_migration_changes_only_proven_equivalent_spelling():
     bad["archive"][0]["smiles"] = "CN"
     with pytest.raises(ValueError, match="differs from exact saved state"):
         normalize_warm_metadata(bad, "a" * 64)
+
+
+def test_pre_oracle_reuse_authenticates_every_partition_and_blocks_crossed_barrier(tmp_path):
+    run_id = "1" * 64
+    revision = "2" * 40
+    source_contract_file = "3" * 64
+    expected_inputs = {"seed_manifest": "4" * 64, "r_theta_checkpoint": "5" * 64}
+    source_sha256 = "6" * 64
+    source_root = tmp_path / "t4_frontier_compare" / run_id
+    source_root.mkdir(parents=True)
+    launch = {
+        "run_id": run_id,
+        "contract_sha256": source_contract_file,
+        "image_revision": {
+            "commit": revision,
+            "serialized_sources": {"configs/t4_frontier_compare.json": source_contract_file},
+        },
+    }
+    failure = {
+        "run_id": run_id,
+        "phase": "lineage_reduction",
+        "error_type": "ValueError",
+        "preparation_calls": {f"{arm}:{i}": f"call-{arm}-{i}" for arm in ARMS for i in range(8)},
+    }
+    launch_path, failure_path = source_root / "launch.json", source_root / "failure.json"
+    launch_path.write_text(json.dumps(launch, sort_keys=True))
+    failure_path.write_text(json.dumps(failure, sort_keys=True))
+    configs = {
+        arm: {
+            "lineages": 8,
+            "primitive_budget": 16,
+            "planning_transitions": 0 if arm == "post_hoc" else 2,
+            "oracle_batch": 20,
+            "seed": 1000,
+            "guidance": arm,
+        }
+        for arm in ARMS
+    }
+    registered = {arm: [] for arm in ARMS}
+    for arm in ARMS:
+        for lineage in range(8):
+            path = (
+                tmp_path
+                / "t4_frontier_compare"
+                / arm
+                / f"lineage_{lineage:02d}"
+                / run_id
+                / "preparation.json"
+            )
+            seal(
+                path,
+                {
+                    "checkpoint": {
+                        "code_revision": revision,
+                        "source_sha256": source_sha256,
+                        "config": configs[arm],
+                        "partition_lineages": [lineage],
+                        "input_sha256": {**expected_inputs, "implementation": "7" * 64},
+                        "checkpoint_sha256": f"checkpoint-{arm}-{lineage}",
+                    },
+                    "worker": {"arm": arm, "lineage_index": lineage},
+                },
+            )
+            registered[arm].append(
+                {
+                    "path": str(path.relative_to(tmp_path)),
+                    "sha256": sha256_file(path),
+                }
+            )
+    contract = {
+        "source": {"sha256": source_sha256},
+        "expected_input_sha256": expected_inputs,
+        "arms": configs,
+        "preparation_reuse": {
+            "schema_version": "t4_frontier_preparation_reuse_v1",
+            "source_run_id": run_id,
+            "source_code_revision": revision,
+            "source_contract_file_sha256": source_contract_file,
+            "source_failure_phase": "lineage_reduction",
+            "source_launch": {
+                "path": str(launch_path.relative_to(tmp_path)),
+                "sha256": sha256_file(launch_path),
+            },
+            "source_failure": {
+                "path": str(failure_path.relative_to(tmp_path)),
+                "sha256": sha256_file(failure_path),
+            },
+            "preparations": registered,
+        },
+    }
+    paths, audit = load_reused_preparations(tmp_path, contract)
+    assert all(len(paths[arm]) == 8 for arm in ARMS)
+    assert audit["source_oracle_barrier_absent"] is True
+    assert audit["source_oracle_attempt_artifacts"] == 0
+
+    (source_root / "oracle_barrier.json").write_text("{}")
+    with pytest.raises(ValueError, match="crossed the oracle barrier"):
+        load_reused_preparations(tmp_path, contract)

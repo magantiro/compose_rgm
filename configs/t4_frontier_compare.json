@@ -55,7 +55,7 @@
   "compute": {
     "oracle_call_limit": 40,
     "oracle_calls_per_arm": 20,
-    "preparation_containers": 16,
+    "preparation_containers": 0,
     "cpu_per_preparation": 1,
     "memory_mib_per_preparation": 8192,
     "driver_containers": 1,
@@ -66,12 +66,12 @@
     "heartbeat_seconds": 30,
     "executor_limit": null,
     "expected_wall_seconds": [
-      600,
-      1800
+      120,
+      900
     ],
-    "expected_cost": "record actual usage and account rates; at most 17.5 container-hours under administrative timeouts",
+    "expected_cost": "reuse 16 authenticated zero-oracle preparation units; one driver plus at most 40 docking calls",
     "stop_limit": "administrative timeout is incomplete, not a scientific result",
-    "maximum_concurrent_containers": 17,
+    "maximum_concurrent_containers": 1,
     "driver_timeout_seconds": 5400
   },
   "semantics": {
@@ -91,7 +91,7 @@
     "claims": "inspected development, not benchmark superiority",
     "automatic_next_round": false
   },
-  "previous_contract_sha256": "c7036dfdd0d605f60d9bfef24a2032c50df79554d0881f1cc249beff6dd3651d",
+  "previous_contract_sha256": "91001551ae0d56b98a8d345a104bbd59fc5868fb371ad87126152e91dec2a4ba",
   "launch_authorization": {
     "status": "explicit_user_approved",
     "date": "2026-09-09",
@@ -103,7 +103,45 @@
     "unit": "one exact parent lineage per arm",
     "total_units": 16,
     "seed_rule": "unchanged SeedSequence([config.seed, next_round, lineage_index])",
-    "reduction": "all eight lineages in index order before global selection; exact serial parity required"
+    "reduction": "all eight lineages in index order before global selection; exact serial parity required",
+    "execution": "reuse all sixteen hash-bound complete partitions from the failed pre-oracle source run"
   },
-  "contract_sha256": "91001551ae0d56b98a8d345a104bbd59fc5868fb371ad87126152e91dec2a4ba"
+  "preparation_reuse": {
+    "schema_version": "t4_frontier_preparation_reuse_v1",
+    "source_run_id": "1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe",
+    "source_code_revision": "ce956add35fa12fc1898fb202c4c3b9d0bb4fecb",
+    "source_contract_file_sha256": "7e184daaa14bbef2c30126b59d1f083c5872d0b6149eeecaa2ce9a8a7bcd6a9a",
+    "source_failure_phase": "lineage_reduction",
+    "source_launch": {
+      "path": "t4_frontier_compare/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe/launch.json",
+      "sha256": "39a7eabeb86b2f88540f164e57e7ee913707a53983705516d36d494b3b8a5a81"
+    },
+    "source_failure": {
+      "path": "t4_frontier_compare/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe/failure.json",
+      "sha256": "0ada2621eea8f3b1a355b70bdbc4802b1f83733aa0dc4f5668add60cb5a8a665"
+    },
+    "preparations": {
+      "post_hoc": [
+        {"path": "t4_frontier_compare/post_hoc/lineage_00/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe/preparation.json", "sha256": "6a201cd324d59625bd982d1b3326c390c9c8fe54063e8cca10d82885b30bf9b0"},
+        {"path": "t4_frontier_compare/post_hoc/lineage_01/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe/preparation.json", "sha256": "0cef0bc158e3fe0fc18b779d479eb498b7571594dba535c8ab9b95b3d7a3ce34"},
+        {"path": "t4_frontier_compare/post_hoc/lineage_02/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe/preparation.json", "sha256": "fd0e43b39fc5558b50dac704a8ea17e91c80151c952cd8a6b45f2a3eab6d3844"},
+        {"path": "t4_frontier_compare/post_hoc/lineage_03/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe/preparation.json", "sha256": "da41fae74eee4cb43444900eebb2851807474ad184815f5fc681cb49bcbb797d"},
+        {"path": "t4_frontier_compare/post_hoc/lineage_04/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe/preparation.json", "sha256": "403655d94dd37ac7db738c2972e3a63b38688ed2b86985978ace406367d7f630"},
+        {"path": "t4_frontier_compare/post_hoc/lineage_05/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe/preparation.json", "sha256": "d79e63b7a5763f5801c9679b9942ca9bf6e5ed6397ed6b29b94a8f720322aa18"},
+        {"path": "t4_frontier_compare/post_hoc/lineage_06/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe/preparation.json", "sha256": "958b874314c7ffdeba748ab451fde4c99373eb4f194eb46f7c236f54d3ab953b"},
+        {"path": "t4_frontier_compare/post_hoc/lineage_07/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe/preparation.json", "sha256": "ff37429888287090baf785cf9013b01f461bd419dc399ded2cb06bb2762e1916"}
+      ],
+      "in_loop": [
+        {"path": "t4_frontier_compare/in_loop/lineage_00/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe/preparation.json", "sha256": "649bf757510c3a6d6e4c6a4f9a1639e087f3ede8bdd8b621b0eefb7c4dc21abb"},
+        {"path": "t4_frontier_compare/in_loop/lineage_01/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe/preparation.json", "sha256": "7db99931c05a3d4d2e737229544a7a36561766007ddb998f0abdb9e5618e778e"},
+        {"path": "t4_frontier_compare/in_loop/lineage_02/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe/preparation.json", "sha256": "2ada4dd246ac888f0959460fde2e5bae20a47a7815e89db84d5f4b54986fd7b8"},
+        {"path": "t4_frontier_compare/in_loop/lineage_03/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe/preparation.json", "sha256": "0c34baa2a1482f1c5862d9793cc16365d880742ce414a4fc2f0de27e581e06d9"},
+        {"path": "t4_frontier_compare/in_loop/lineage_04/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe/preparation.json", "sha256": "068001cdc8d383e19414e2ce3b401233ce22cb28be53e1434d521041c3413181"},
+        {"path": "t4_frontier_compare/in_loop/lineage_05/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe/preparation.json", "sha256": "f528bd00bb003cd066e99ff9b5bdac1701d02d538579b857f7d509359bd0f17d"},
+        {"path": "t4_frontier_compare/in_loop/lineage_06/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe/preparation.json", "sha256": "a047ac8c17ec57b3059e2008be88870a056d5cca66a471adc54e05649b53b3ba"},
+        {"path": "t4_frontier_compare/in_loop/lineage_07/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe/preparation.json", "sha256": "81ded54a4fecd4e13f1b1aad468fee247c4a03c073780f42af9f67a6b6dead30"}
+      ]
+    }
+  },
+  "contract_sha256": "87d2e8c1841d7647f008914660e27e58efdb950c96cb410baaf064e74c129b7a"
 }

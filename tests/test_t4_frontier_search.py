@@ -2,6 +2,7 @@
 
 import copy
 import json
+import math
 
 import pytest
 
@@ -54,7 +55,8 @@ def run(warm, **kwargs):
         enumerate_law=kwargs.pop("enumerate_law", fixture_law),
         system=editing_v2_rewrite_system(),
         config=kwargs.pop(
-            "config", FrontierConfig(lineages=1, primitive_budget=4, planning_transitions=1)
+            "config",
+            FrontierConfig(lineages=1, primitive_budget=4, planning_transitions=1),
         ),
         **kwargs,
     )
@@ -71,8 +73,18 @@ def test_prepare_resume_keeps_full_path_rng_and_checkpoint_without_docking():
     frozen_checkpoint = copy.deepcopy(saved)
     split = run(warm, checkpoint=saved, events_per_parent=4)
     assert saved == frozen_checkpoint  # no mutation of the caller's checkpoint
-    whole, resumed = continuous["checkpoint"]["frontier"][0], split["checkpoint"]["frontier"][0]
-    for key in ("current", "root", "path", "candidates", "acting_rng", "planning_remaining"):
+    whole, resumed = (
+        continuous["checkpoint"]["frontier"][0],
+        split["checkpoint"]["frontier"][0],
+    )
+    for key in (
+        "current",
+        "root",
+        "path",
+        "candidates",
+        "acting_rng",
+        "planning_remaining",
+    ):
         assert resumed[key] == whole[key]
     assert resumed["planner"]["rng_state"] == whole["planner"]["rng_state"]
     assert resumed["planner"]["states"] == whole["planner"]["states"]
@@ -114,7 +126,12 @@ def test_new_oracle_round_keeps_unfinished_exact_frontier_without_chemical_recom
     new = copy.deepcopy(warm)
     graph = pad_molecular_graph(smiles_to_molecular_graph("C" * 18), 48)
     new["archive"].append(
-        {"smiles": canonical_state_key(graph), "state": encode_state(graph), "ds": -2.0, "round": 2}
+        {
+            "smiles": canonical_state_key(graph),
+            "state": encode_state(graph),
+            "ds": -2.0,
+            "round": 2,
+        }
     )
     new.update(round=2, oracle_attempts=17)
 
@@ -226,7 +243,11 @@ def test_frontier_selected_path_audit_and_tamper_rejection():
 
 
 @pytest.mark.parametrize("guidance", ["post_hoc", "in_loop"])
-def test_partition_reduction_preserves_serial_paths_rng_probabilities_and_pool(guidance):
+def test_partition_reduction_preserves_serial_paths_rng_probabilities_and_pool(
+    guidance,
+):
+    from compose_v4.control.docking_value import LEGACY_RECIPE, identity
+    from compose_v4.experiments.t4_frontier_audit import verify_preparation
     from compose_v4.experiments.t4_frontier_compare import merge_preparations
 
     warm = archive()
@@ -242,7 +263,14 @@ def test_partition_reduction_preserves_serial_paths_rng_probabilities_and_pool(g
     for actual, expected in zip(
         merged["checkpoint"]["frontier"], serial["checkpoint"]["frontier"], strict=True
     ):
-        for field in ("current", "root", "path", "acting_rng", "candidates", "planning_remaining"):
+        for field in (
+            "current",
+            "root",
+            "path",
+            "acting_rng",
+            "candidates",
+            "planning_remaining",
+        ):
             assert actual[field] == expected[field]
     assert merged["pool"] == serial["pool"]
     assert merged["proposed_for_audit"] == serial["proposed_for_audit"]
@@ -250,6 +278,46 @@ def test_partition_reduction_preserves_serial_paths_rng_probabilities_and_pool(g
     assert merged["checkpoint"]["executor_calls"] == sum(
         p["checkpoint"]["executor_calls"] for p in parts
     )
+    compatible = copy.deepcopy(parts)
+    snapshot = compatible[1]["checkpoint"]["value_snapshot"]
+    snapshot["recipe"] = LEGACY_RECIPE
+    snapshot["coefficients"][0] = math.nextafter(snapshot["coefficients"][0], math.inf)
+    snapshot["snapshot_sha256"] = identity(
+        {k: v for k, v in snapshot.items() if k != "snapshot_sha256"}
+    )
+    legacy_snapshot_id = snapshot["snapshot_sha256"]
+    for unit in compatible[1]["checkpoint"]["frontier"]:
+        if unit["planner"] is None:
+            continue
+        unit["planner"]["snapshot_id"] = legacy_snapshot_id
+        unit["planner"]["checkpoint_sha256"] = payload_hash(
+            {k: v for k, v in unit["planner"].items() if k != "checkpoint_sha256"}
+        )
+        for event in unit["path"]:
+            event["decision"]["snapshot_id"] = legacy_snapshot_id
+    compatible[1]["checkpoint"]["checkpoint_sha256"] = payload_hash(
+        {k: v for k, v in compatible[1]["checkpoint"].items() if k != "checkpoint_sha256"}
+    )
+    reused = merge_preparations(compatible, warm, editing_v2_rewrite_system())
+    assert reused["source_value_snapshot_equivalence"]["unique_snapshot_count"] == 2
+    assert all(
+        row["equivalent"] for row in reused["source_value_snapshot_equivalence"]["comparisons"]
+    )
+    assert (
+        verify_preparation(reused, warm, editing_v2_rewrite_system())["take"]
+        == reused["proposed_for_audit"]
+    )
+    incompatible = copy.deepcopy(compatible)
+    snapshot = incompatible[1]["checkpoint"]["value_snapshot"]
+    snapshot["coefficients"][0] += 1e-8
+    snapshot["snapshot_sha256"] = identity(
+        {k: v for k, v in snapshot.items() if k != "snapshot_sha256"}
+    )
+    incompatible[1]["checkpoint"]["checkpoint_sha256"] = payload_hash(
+        {k: v for k, v in incompatible[1]["checkpoint"].items() if k != "checkpoint_sha256"}
+    )
+    with pytest.raises(ValueError, match="drift exceeds"):
+        merge_preparations(incompatible, warm, editing_v2_rewrite_system())
     with pytest.raises(ValueError, match="missing lineage"):
         merge_preparations(parts[:1], warm, editing_v2_rewrite_system())
     with pytest.raises(ValueError, match="duplicate"):

@@ -1,5 +1,5 @@
 {
-  "call_id": "fc-01M29P6WDXEV2Z3SHQZ4EYEY30",
+  "call_id": "fc-01M29PZF2CJBEA4FF9JB7Y9KQY",
   "oracle_call_limit": 40,
   "oracle_calls": 0,
   "schema_version": "t4_frontier_compare_spawn_v1",
@@ -7,8 +7,8 @@
     "app_sha256": "bd7e35e6de7bc86ba32f5bea0d52d737e1e9b1932a1b12eefca5fc698b0fa962",
     "contract_sha256": "7e184daaa14bbef2c30126b59d1f083c5872d0b6149eeecaa2ce9a8a7bcd6a9a",
     "image_revision": {
-      "commit": "06e6fcb2f77dedca9c9fd62ec0ce16e479edf107",
-      "image_revision_sha256": "fd3dde8584939b38f66998424ab929fe273229152bf99a0f46956728d5571939",
+      "commit": "ce956add35fa12fc1898fb202c4c3b9d0bb4fecb",
+      "image_revision_sha256": "c1d3a97fc64e9a93424fcc66c1b173a9ef9a62170dcec65db638a8cef616124c",
       "schema": "compose.editing_v2.process_v2_p50_modal_image_revision",
       "schema_version": 1,
       "serialized_sources": {
@@ -366,7 +366,7 @@
         "src/compose_v4/experiments/t4_endpoint_selection.py": "8276ba1563a1d8031532afa972c32d7cfab3538fd6dc14901b53aa192cec1ab0",
         "src/compose_v4/experiments/t4_feedback_round.py": "6b62b6bfcea59993cecc435fe3975e586059831fab6e966a18a089aa530351ac",
         "src/compose_v4/experiments/t4_frontier_audit.py": "a43ccf81aaab72744995926d606a4ced16959de9d2f35e5d8f56d6c72d4ffffd",
-        "src/compose_v4/experiments/t4_frontier_compare.py": "13cd255637a9bd0a5d55763183799af1c68a6f1a97b82938ce1e4fef3f4b7502",
+        "src/compose_v4/experiments/t4_frontier_compare.py": "d5c703cd4dc3cd374bdc7e40f9bfc4f9eaaf4eed2bf7d02d5501e5d26d77931c",
         "src/compose_v4/experiments/t4_frontier_search.py": "b9ab38334e21840d48258940b18a51a368deb4a6b8270fd5dab98546e2125f13",
         "src/compose_v4/experiments/t4_macro_beam.py": "e5d9e757d1f0a60ec8a1a673046d7dc3348f4f0efc792c0e02a7f860e5626698",
         "src/compose_v4/experiments/t4_matched_pilot.py": "8ccbc05e32cd05c8dbde746e41ece693ef997f6765180e0011a5bd416d90ac4a",
@@ -456,11 +456,11 @@
         "src/compose_v4/rewrite/tree_transport.py": "4f1bb53f8fe60ff6e7dcf00408cf43d66dc79a0ce4e80bde7d70e72708a736aa",
         "src/compose_v4/rewrite/typed_ring_catalog.py": "f043fdb1b309ba72555d662a27b90c487e061ab9771b0c4efadd4786e41790d1"
       },
-      "tree": "7f65dcf39566526c19a149a60c628f717281397c",
+      "tree": "8202dd60145cd2e4b8985d47cc6f9bb9544354b2",
       "worktree_clean": true
     },
-    "run_id": "765b2b854d50c29966f2b2a032a4ccbe1e3364c43d50a8376c6845f48cc5ed41"
+    "run_id": "1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe"
   },
   "volume": "compose-v4-artifacts",
-  "volume_path": "/t4_frontier_compare/765b2b854d50c29966f2b2a032a4ccbe1e3364c43d50a8376c6845f48cc5ed41"
+  "volume_path": "/t4_frontier_compare/1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe"
 }

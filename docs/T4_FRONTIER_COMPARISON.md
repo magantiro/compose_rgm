@@ -6,6 +6,22 @@ authorized up to 20 concurrent Modal containers. The initial two-worker launch
 was blocked before spawning; this amendment partitions unchanged work by lineage.
 Session: `compose_iclr`. This advances stage 1, not reference-model training.
 
+Current recovery status, recorded before any new docking outcome: source run
+`1782604b465e423e3fe9ed6e6f9b5bf41f8ddd4bc74062dc1d86372990e5dafe`
+completed all 16 lineage partitions and then failed during deterministic
+reduction, before an oracle barrier existed. Every scientific identity matched.
+Two snapshot hashes differed only because host BLAS implementations changed the
+51 ridge coefficients by at most `3.885780586188048e-16`; their maximum summed
+kernel prediction difference is bounded by the coefficient L1 difference. The
+recovery contract binds the source launch, failure, and every partition by
+SHA-256, requires the source result, oracle barrier, and oracle-attempt artifacts
+to be absent, and accepts only authenticated snapshots that agree exactly outside
+the coefficients and differ by at most `1e-14` per coefficient. New snapshots
+serialize coefficients to 14 decimal places. The recovery performs no molecular
+enumeration and preserves the original paths, RNG streams, primitive horizons,
+and candidate pool. It will rerun reduction, selected-path replay, and locking in
+the pinned RDKit container before any of the authorized calls can occur.
+
 ## Question and support
 
 Does short in-loop task guidance improve eligible molecular proposals over the

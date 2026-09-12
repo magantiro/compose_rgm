@@ -9,15 +9,24 @@ from rdkit.Contrib.SA_Score import sascorer
 
 from compose_v4.control import graph_geometry as GG
 from compose_v4.control.continuation import _tilted
-from compose_v4.control.docking_value import DockingValue
+from compose_v4.control.docking_value import DockingValue, snapshot_equivalence
 from compose_v4.control.frontier_search import payload_hash
-from compose_v4.control.molecular_search_codec import decode_search_state, encode_search_state
+from compose_v4.control.molecular_search_codec import (
+    decode_search_state,
+    encode_search_state,
+)
 from compose_v4.control.molecular_task_search import MolecularHierarchy
-from compose_v4.control.option_continuation import EXECUTABLE_PRODUCT_GATE, OptionContinuationKernel
+from compose_v4.control.option_continuation import (
+    EXECUTABLE_PRODUCT_GATE,
+    OptionContinuationKernel,
+)
 from compose_v4.control.option_selector import GENERIC_OPTION, balanced_option_prior
 from compose_v4.control.task_search import SearchRow
 from compose_v4.experiments.continuation_profile import ExecutorMeter, state_payload
-from compose_v4.experiments.t4_endpoint_selection import acceptable_endpoint, calculate_properties
+from compose_v4.experiments.t4_endpoint_selection import (
+    acceptable_endpoint,
+    calculate_properties,
+)
 from compose_v4.experiments.t4_frontier_search import SCHEMA, FrontierConfig
 from compose_v4.rewrite import action_codec, action_codec_v4
 from compose_v4.rewrite.kernel import canonical_state_key
@@ -48,10 +57,29 @@ def verify_preparation(result, warm, system):
     ):
         raise ValueError("frontier preparation hash, prefix, round or lineage mismatch")
     model = DockingValue.fit(
-        warm["archive"], before_round=saved["round"], source_sha256=saved["source_sha256"]
+        warm["archive"],
+        before_round=saved["round"],
+        source_sha256=saved["source_sha256"],
     )
     if model.payload != saved["value_snapshot"]:
         raise ValueError("frontier task snapshot is not the complete prior-round archive")
+    source_snapshots = result.get("source_value_snapshots", [saved["value_snapshot"]])
+    if not source_snapshots or len({p["snapshot_sha256"] for p in source_snapshots}) != len(
+        source_snapshots
+    ):
+        raise ValueError("frontier source task snapshots are missing or duplicated")
+    snapshot_audit = [
+        snapshot_equivalence(
+            model.payload,
+            source,
+            probe_smiles=(candidate["smiles"] for candidate in result["pool"]),
+        )
+        for source in source_snapshots
+    ]
+    allowed_snapshot_ids = {
+        model.payload["snapshot_sha256"],
+        *(p["snapshot_sha256"] for p in source_snapshots),
+    }
     old_states = {payload_hash(r["state"]) for r in warm["archive"]}
     previous = {r["smiles"] for r in warm["archive"]}
     endpoints, options, decisions = {}, Counter(), Counter()
@@ -68,6 +96,7 @@ def verify_preparation(result, warm, system):
             if (
                 payload_hash({k: v for k, v in planner.items() if k != "checkpoint_sha256"})
                 != planner["checkpoint_sha256"]
+                or planner["snapshot_id"] not in allowed_snapshot_ids
             ):
                 raise ValueError("planner checkpoint hash mismatch")
             cached = {payload_hash(planner["states"][r["node"]]): r for r in planner["rows"]}
@@ -110,7 +139,7 @@ def verify_preparation(result, warm, system):
                     or np.any((q > 0) & (p <= 0))
                     or q[selected] <= 0
                     or d["labels"][selected] != event["selected_label"]
-                    or d["snapshot_id"] != model.payload["snapshot_sha256"]
+                    or d["snapshot_id"] not in allowed_snapshot_ids
                 ):
                     raise ValueError("invalid frontier decision probability, support or snapshot")
                 live = q > 0
@@ -164,7 +193,11 @@ def verify_preparation(result, warm, system):
                     # Reuse the actual option filter/progress/executor machinery,
                     # but admit only the selected witness, not a new proposal row.
                     witness = OptionContinuationKernel(
-                        lambda _, rule=rule, action=action: ((rule,), (action,), (1.0,)),
+                        lambda _, rule=rule, action=action: (
+                            (rule,),
+                            (action,),
+                            (1.0,),
+                        ),
                         system,
                         max_executor_applications=None,
                         product_gate=EXECUTABLE_PRODUCT_GATE,
@@ -181,12 +214,20 @@ def verify_preparation(result, warm, system):
                         raise ValueError("primitive exact product or option progress mismatch")
                     if product.stage == "where":
                         local = GG.structural_displacement(
-                            node.active.origin, product.graph, origin_lineage, product.lineage
+                            node.active.origin,
+                            product.graph,
+                            origin_lineage,
+                            product.lineage,
                         )
                         cumulative = GG.structural_displacement(
                             root.graph, product.graph, root.lineage, product.lineage
                         )
-                        endpoints[(root.root_id, index)] = (event, node, local, cumulative)
+                        endpoints[(root.root_id, index)] = (
+                            event,
+                            node,
+                            local,
+                            cumulative,
+                        )
                 node = product
             if payload_hash(unit["current"]) != payload_hash(encode_search_state(node)) or (
                 node.budget and unit["status"] != "no_admissible_action"
@@ -264,5 +305,6 @@ def verify_preparation(result, warm, system):
             "eligible_count": sum(c["oracle_eligible"] for c in pool),
             "selected_options": dict(sorted(options.items())),
             "decisions": dict(sorted(decisions.items())),
+            "source_value_snapshot_equivalence": snapshot_audit,
         },
     }

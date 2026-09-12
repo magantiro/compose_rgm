@@ -6,10 +6,13 @@ import numpy as np
 import pytest
 
 from compose_v4.control.docking_value import (
+    LEGACY_RECIPE,
     DockingValue,
     chronological_check,
     graph_kernel,
+    identity,
     molecular_features,
+    snapshot_equivalence,
 )
 
 
@@ -25,6 +28,36 @@ def test_snapshot_roundtrip_and_smiles_serialization_invariance():
     np.testing.assert_array_equal(model.predict(["CCO"]), restored.predict(["CCO"]))
     assert model.desirability("CCO", False) == 0
     assert 0 < model.desirability("CCO", True) <= 1
+
+
+def test_legacy_snapshot_last_bit_drift_has_an_authenticated_global_bound():
+    current = DockingValue.fit(fixture_archive(), before_round=2, source_sha256="a" * 64)
+    legacy = copy.deepcopy(current.payload)
+    legacy["recipe"] = LEGACY_RECIPE
+    legacy["coefficients"][0] = float(np.nextafter(legacy["coefficients"][0], np.inf))
+    body = {k: v for k, v in legacy.items() if k != "snapshot_sha256"}
+    legacy["snapshot_sha256"] = identity(body)
+    audit = snapshot_equivalence(current.payload, legacy, probe_smiles=("CCO", "C1CC1"))
+    assert audit["equivalent"] is True
+    assert audit["max_abs_coefficient_difference"] <= 1e-14
+    assert (
+        audit["max_abs_probe_prediction_difference"]
+        <= audit["global_prediction_difference_bound"] + np.finfo(np.float64).eps
+    )
+
+    material = copy.deepcopy(legacy)
+    material["coefficients"][0] += 1e-8
+    body = {k: v for k, v in material.items() if k != "snapshot_sha256"}
+    material["snapshot_sha256"] = identity(body)
+    with pytest.raises(ValueError, match="drift exceeds"):
+        snapshot_equivalence(current.payload, material)
+
+    altered_labels = copy.deepcopy(legacy)
+    altered_labels["best"] -= 0.1
+    body = {k: v for k, v in altered_labels.items() if k != "snapshot_sha256"}
+    altered_labels["snapshot_sha256"] = identity(body)
+    with pytest.raises(ValueError, match="outside coefficient"):
+        snapshot_equivalence(current.payload, altered_labels)
 
 
 def test_kernel_is_normalized_and_distinguishes_graph_connectivity():

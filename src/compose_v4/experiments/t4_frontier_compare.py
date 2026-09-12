@@ -10,8 +10,13 @@ from pathlib import Path
 
 from rdkit import Chem, rdBase
 
+from compose_v4.control.docking_value import snapshot_equivalence
 from compose_v4.control.frontier_search import payload_hash
-from compose_v4.experiments.continuation_profile import encode_action, sha256_file, verify_file
+from compose_v4.experiments.continuation_profile import (
+    encode_action,
+    sha256_file,
+    verify_file,
+)
 from compose_v4.experiments.t4_frontier_audit import verify_preparation
 from compose_v4.experiments.t4_frontier_search import FrontierConfig, prepare_slice
 from compose_v4.experiments.t4_matched_pilot import _stamp, seal, unseal
@@ -23,6 +28,13 @@ from compose_v4.rewrite.trace_shard import decode_state, encode_state
 KIND = "t4_frontier_compare"
 CONTRACT_PATH = "configs/t4_frontier_compare.json"
 ARMS = ("post_hoc", "in_loop")
+
+
+def _inside(root: Path, relative: str) -> Path:
+    path = root / relative
+    if not path.resolve().is_relative_to(root.resolve()):
+        raise ValueError(f"artifact path escapes root: {relative!r}")
+    return path
 
 
 def normalize_warm_metadata(warm, source_sha256):
@@ -60,6 +72,14 @@ def normalize_warm_metadata(warm, source_sha256):
 
 def load_contract(repo_root):
     contract = json.loads((repo_root / CONTRACT_PATH).read_text())
+    reuse = contract.get("preparation_reuse")
+    preparation_compute_is_valid = (
+        contract["compute"]["preparation_containers"] == 0
+        and contract["compute"]["maximum_concurrent_containers"] == 1
+        if reuse
+        else contract["compute"]["preparation_containers"] == 16
+        and contract["compute"]["maximum_concurrent_containers"] <= 20
+    )
     if (
         payload_hash({k: v for k, v in contract.items() if k != "contract_sha256"})
         != contract["contract_sha256"]
@@ -69,18 +89,118 @@ def load_contract(repo_root):
         or contract["events_per_parent"] != 48
         or contract["training_authorized"] is not False
         or contract.get("launch_authorization", {}).get("status") != "explicit_user_approved"
-        or contract["compute"]["preparation_containers"] != 16
-        or contract["compute"]["maximum_concurrent_containers"] > 20
+        or not preparation_compute_is_valid
         or contract["kappa"] != 1
         or set(contract["arms"]) != set(ARMS)
         or contract["arms"]["post_hoc"]
-        != {**contract["arms"]["in_loop"], "guidance": "post_hoc", "planning_transitions": 0}
+        != {
+            **contract["arms"]["in_loop"],
+            "guidance": "post_hoc",
+            "planning_transitions": 0,
+        }
         or rdBase.rdkitVersion != contract["required_rdkit"]
     ):
         raise ValueError("frontier comparison contract or pinned chemistry mismatch")
     for arm in ARMS:
         FrontierConfig(**contract["arms"][arm])
+    if reuse and (
+        reuse.get("schema_version") != "t4_frontier_preparation_reuse_v1"
+        or reuse.get("source_failure_phase") != "lineage_reduction"
+        or len(reuse.get("source_run_id", "")) != 64
+        or any(c not in "0123456789abcdef" for c in reuse.get("source_run_id", ""))
+        or len(reuse.get("source_code_revision", "")) != 40
+        or any(c not in "0123456789abcdef" for c in reuse.get("source_code_revision", ""))
+        or set(reuse.get("preparations", {})) != set(ARMS)
+        or any(len(reuse["preparations"][arm]) != 8 for arm in ARMS)
+    ):
+        raise ValueError("frontier preparation reuse contract is incomplete")
     return contract
+
+
+def load_reused_preparations(artifact_root: Path, contract: dict) -> tuple[dict, dict]:
+    """Authenticate a complete pre-oracle source run and its 16 partitions."""
+    reuse = contract["preparation_reuse"]
+    source_run = reuse["source_run_id"]
+    root = artifact_root / KIND / source_run
+    launch_path = _inside(artifact_root, reuse["source_launch"]["path"])
+    failure_path = _inside(artifact_root, reuse["source_failure"]["path"])
+    if launch_path != root / "launch.json" or failure_path != root / "failure.json":
+        raise ValueError("source launch or failure path changes the registered source run")
+    verify_file(launch_path, reuse["source_launch"]["sha256"])
+    verify_file(failure_path, reuse["source_failure"]["sha256"])
+    launch = json.loads(launch_path.read_text())
+    failure = json.loads(failure_path.read_text())
+    if (
+        launch.get("run_id") != source_run
+        or launch.get("contract_sha256") != reuse["source_contract_file_sha256"]
+        or launch.get("image_revision", {}).get("commit") != reuse["source_code_revision"]
+        or launch.get("image_revision", {}).get("serialized_sources", {}).get(CONTRACT_PATH)
+        != reuse["source_contract_file_sha256"]
+        or failure.get("run_id") != source_run
+        or failure.get("phase") != reuse["source_failure_phase"]
+        or failure.get("error_type") != "ValueError"
+        or len(failure.get("preparation_calls", {})) != 16
+    ):
+        raise ValueError("source frontier run provenance differs from reuse contract")
+    if (
+        (root / "oracle_barrier.json").exists()
+        or (root / "result.json").exists()
+        or any(root.glob("*/oracle/*"))
+    ):
+        raise ValueError("source frontier run crossed the oracle barrier")
+
+    paths, receipts = {}, {}
+    for arm in ARMS:
+        paths[arm], receipts[arm] = [], []
+        for lineage, registered in enumerate(reuse["preparations"][arm]):
+            expected = (
+                artifact_root
+                / KIND
+                / arm
+                / f"lineage_{lineage:02d}"
+                / source_run
+                / "preparation.json"
+            )
+            path = _inside(artifact_root, registered["path"])
+            if path != expected:
+                raise ValueError("reused preparation path changes arm, lineage or source run")
+            verify_file(path, registered["sha256"])
+            part = unseal(path)
+            saved = part["checkpoint"]
+            if (
+                saved["code_revision"] != reuse["source_code_revision"]
+                or saved["source_sha256"] != contract["source"]["sha256"]
+                or saved["config"] != contract["arms"][arm]
+                or saved.get("partition_lineages") != [lineage]
+                or part.get("worker", {}).get("arm") != arm
+                or part.get("worker", {}).get("lineage_index") != lineage
+                or any(
+                    saved["input_sha256"].get(key) != value
+                    for key, value in contract["expected_input_sha256"].items()
+                )
+            ):
+                raise ValueError("reused preparation differs from current scientific contract")
+            paths[arm].append(path)
+            receipts[arm].append(
+                {
+                    "lineage_index": lineage,
+                    "path": str(path),
+                    "sha256": registered["sha256"],
+                    "checkpoint_sha256": saved["checkpoint_sha256"],
+                }
+            )
+    return paths, {
+        "schema_version": "t4_frontier_preparation_reuse_audit_v1",
+        "source_run_id": source_run,
+        "source_code_revision": reuse["source_code_revision"],
+        "source_launch_sha256": reuse["source_launch"]["sha256"],
+        "source_failure_sha256": reuse["source_failure"]["sha256"],
+        "source_failure_phase": failure["phase"],
+        "source_oracle_barrier_absent": True,
+        "source_result_absent": True,
+        "source_oracle_attempt_artifacts": 0,
+        "preparations": receipts,
+    }
 
 
 def load_warm(artifact_root, contract):
@@ -115,7 +235,10 @@ def prepare_worker(task, repo_root, artifact_root, volume, runtime_factory, vali
         )
 
         warm = load_warm(artifact_root, contract)
-        seal(output / "source_metadata_normalization.json", warm["source_metadata_normalization"])
+        seal(
+            output / "source_metadata_normalization.json",
+            warm["source_metadata_normalization"],
+        )
         prepared_path = output / "preparation.json"
         if prepared_path.exists():
             prepared = unseal(prepared_path)
@@ -150,7 +273,11 @@ def prepare_worker(task, repo_root, artifact_root, volume, runtime_factory, vali
         checkpoint = unseal(checkpoint_path) if checkpoint_path.exists() else None
         memory_cache = {}
         progress.update(
-            phase="preparation", arm=arm, lineage_index=lineage, law_evaluations=0, law_cache_hits=0
+            phase="preparation",
+            arm=arm,
+            lineage_index=lineage,
+            law_evaluations=0,
+            law_cache_hits=0,
         )
 
         def law(graph):
@@ -292,9 +419,21 @@ def merge_preparations(parts, warm, system):
         "code_revision",
         "config",
         "archive_prefix",
-        "value_snapshot",
         "prior_oracle_attempts",
     )
+    probe_smiles = tuple(c["smiles"] for part in parts for c in part["pool"])
+    snapshots = {
+        part["checkpoint"]["value_snapshot"]["snapshot_sha256"]: part["checkpoint"][
+            "value_snapshot"
+        ]
+        for part in parts
+    }
+    snapshot_ids = sorted(snapshots)
+    baseline_snapshot = snapshots[snapshot_ids[0]]
+    equivalence = [
+        snapshot_equivalence(baseline_snapshot, snapshots[key], probe_smiles=probe_smiles)
+        for key in snapshot_ids
+    ]
     for part in parts:
         saved = part["checkpoint"]
         if payload_hash({k: v for k, v in saved.items() if k != "checkpoint_sha256"}) != saved[
@@ -339,6 +478,13 @@ def merge_preparations(parts, warm, system):
         checkpoint=merged,
         events_per_parent=0,
     )
+    result["source_value_snapshots"] = [snapshots[key] for key in sorted(snapshots)]
+    result["source_value_snapshot_equivalence"] = {
+        "schema_version": "t4_value_snapshot_equivalence_v1",
+        "comparisons": equivalence,
+        "unique_snapshot_count": len(snapshots),
+        "probe_count": len(set(probe_smiles)),
+    }
     result["seconds"] = max(p["seconds"] for p in parts)
     result["worker"] = {
         "parallel_lineages": config.lineages,
@@ -401,10 +547,16 @@ def dock_locked_pair(locks, warm, output, dock, *, commit=lambda: None, progress
                     raise RuntimeError(
                         f"unknown interrupted oracle attempt: {started}; review accounting before any retry"
                     )
-                seal(started, {**identity, "started_at_utc": _stamp(), "charged_attempts": 1})
+                seal(
+                    started,
+                    {**identity, "started_at_utc": _stamp(), "charged_attempts": 1},
+                )
                 commit()
                 progress.update(
-                    phase="docking", arm=arm, oracle_index=index, new_attempts_in_arm=index + 1
+                    phase="docking",
+                    arm=arm,
+                    oracle_index=index,
+                    new_attempts_in_arm=index + 1,
                 )
                 score = dock(candidate["smiles"], f"{arm}_{index}")
                 if score is not None and (isinstance(score, bool) or not math.isfinite(score)):
@@ -427,7 +579,10 @@ def dock_locked_pair(locks, warm, output, dock, *, commit=lambda: None, progress
                 completed_dockings_in_arm=len(docked),
                 best_new_score=min((r["ds"] for r in docked if r["ds"] is not None), default=None),
                 best_feasible_score=min(
-                    [*prior_feasible_scores, *(r["ds"] for r in docked if r["ds"] is not None)],
+                    [
+                        *prior_feasible_scores,
+                        *(r["ds"] for r in docked if r["ds"] is not None),
+                    ],
                     default=None,
                 ),
             )
@@ -444,7 +599,10 @@ def dock_locked_pair(locks, warm, output, dock, *, commit=lambda: None, progress
             "failed_dockings": sum(r["ds"] is None for r in docked),
             "best_new_score": min((r["ds"] for r in docked if r["ds"] is not None), default=None),
             "best_feasible_score": min(
-                [*prior_feasible_scores, *(r["ds"] for r in docked if r["ds"] is not None)],
+                [
+                    *prior_feasible_scores,
+                    *(r["ds"] for r in docked if r["ds"] is not None),
+                ],
                 default=None,
             ),
             "docked": docked,
@@ -465,25 +623,44 @@ def dock_locked_pair(locks, warm, output, dock, *, commit=lambda: None, progress
 
 
 def run_remote(
-    task, repo_root, artifact_root, volume, runtime_factory, validate_revision, prepare_pair, dock
+    task,
+    repo_root,
+    artifact_root,
+    volume,
+    runtime_factory,
+    validate_revision,
+    prepare_pair,
+    dock,
 ):
     contract = load_contract(repo_root)
 
     def runner(actual_task, _prepare, _dock, output, *, commit, progress):
         warm = load_warm(artifact_root, contract)
-        seal(output / "source_metadata_normalization.json", warm["source_metadata_normalization"])
-        preparation_paths = prepare_pair(task, output, commit, progress)
+        seal(
+            output / "source_metadata_normalization.json",
+            warm["source_metadata_normalization"],
+        )
+        if contract.get("preparation_reuse"):
+            progress.update(phase="preparation_reuse_validation")
+            preparation_paths, reuse_audit = load_reused_preparations(artifact_root, contract)
+            seal(output / "preparation_reuse_audit.json", reuse_audit)
+            generation_revision = contract["preparation_reuse"]["source_code_revision"]
+            commit()
+        else:
+            preparation_paths = prepare_pair(task, output, commit, progress)
+            reuse_audit = None
+            generation_revision = actual_task["code_revision"]
         volume.reload()
         locks, preparation = {}, {}
         for arm in ARMS:
             paths = [Path(p) for p in preparation_paths[arm]]
+            expected_run = (
+                contract["preparation_reuse"]["source_run_id"]
+                if contract.get("preparation_reuse")
+                else task["run_id"]
+            )
             expected = [
-                artifact_root
-                / KIND
-                / arm
-                / f"lineage_{i:02d}"
-                / task["run_id"]
-                / "preparation.json"
+                artifact_root / KIND / arm / f"lineage_{i:02d}" / expected_run / "preparation.json"
                 for i in range(contract["arms"][arm]["lineages"])
             ]
             if paths != expected:
@@ -497,7 +674,7 @@ def run_remote(
             if (
                 prepared["checkpoint"]["config"] != contract["arms"][arm]
                 or prepared["checkpoint"]["source_sha256"] != contract["source"]["sha256"]
-                or prepared["checkpoint"]["code_revision"] != actual_task["code_revision"]
+                or prepared["checkpoint"]["code_revision"] != generation_revision
             ):
                 raise ValueError("prepared arm differs from frozen comparison")
             progress.update(phase="selected_path_audit", arm=arm)
@@ -515,6 +692,7 @@ def run_remote(
             commit()
         result = dock_locked_pair(locks, warm, output, dock, commit=commit, progress=progress)
         result["preparation"] = preparation
+        result["preparation_reuse"] = reuse_audit
         return result
 
     volume.reload()
