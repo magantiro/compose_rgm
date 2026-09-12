@@ -1,7 +1,8 @@
 """Prepare first query batches on a fixed four-cell development curriculum.
 
-Reuse exact source tensors and the same shared PARP1 program logic. The recipient
-winner routes and scores are not passed to the proposal. No docking calls.
+Reuse exact source tensors and a common program library. The optional verified
+public-winner expansion contributes reusable routes, never recipient docking
+labels. No docking calls.
 """
 
 from __future__ import annotations

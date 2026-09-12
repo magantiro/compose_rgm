@@ -26,13 +26,23 @@ integration branch is `compose-iclr`; the Modal session name is
 
 ## Current outcome
 
-Current prepared run: 32 locked candidates across JAK2 seed1, FA7 seed0, BRAF
+Completed four-target run: 32 locked candidates across JAK2 seed1, FA7 seed0, BRAF
 seed1 and 5HT1B seed0, plus four seed controls (36 docking calls). One shared
 146-program library now fills all four eight-candidate pools in 25.06 seconds;
 the PARP1-only library filled only JAK2. The 40-heavy-atom support is unchanged.
-Docking quality is not yet measured for these candidates. See
+Best new scores were -10.3/-9.2/-11.1/-13.1 respectively, against freshly docked
+seeds -7.9/-7.2/-9.4/-5.8. Every query completed; driver time was 61.16 seconds.
+These are first measurements, not repeat-confirmed or matched-baseline wins.
+All 32 measured programs now populate four protocol-bound optimizer archives.
+The best FA7/BRAF/5HT1B candidates shrink their seeds by 5/7/7 atoms; the best
+JAK2 candidate grows by six. No support expansion was needed. See
 `docs/T4_SHARED_PROGRAM_CONTROLLER.md` and
-`configs/t4_program_curriculum_lock.json`. Keep this batch fixed while scoring.
+`diagnostics/t4_program_curriculum/attempt_1/review.json`.
+Run source: `1a5c0cc`; call: `fc-01M2BSMX75V6SM1695M6SFNQ62`.
+No docking is active. Current hypothesis: use these measured programs for shared
+score adaptation and capacity-aware replacement, rather than add particles or
+raise the cap. The next paid comparison/confirmation needs its own bounded
+allocation; 64 of the existing 66 follow-on calls have been consumed.
 
 New implementation: a score-adaptive coordinated-program optimizer now dispatches
 before the legacy connected-region WHERE stage. It mutates attachments, created
@@ -81,7 +91,7 @@ separates the three proposal arms. These are winner-informed development results
 not a matched improvement over the autonomous broad controller or an IVG win.
 The supplied -13.6 winner remains better. Both remote assays are finished; there
 is no unfinished work in those two assays. The separate four-target curriculum
-above is prepared for its bounded first scoring round.
+above has also completed its bounded first scoring round.
 
 The next reusable data unit is prepared: 54 complete program/attachment
 representations of 27 measured endpoints, including the reused winner, with

@@ -1,8 +1,9 @@
 # Shared-program T4 development curriculum
 
 The expanded common library fixes the initial cross-target eligibility failures
-without changing the 40-heavy-atom support. No candidate in these preparation
-artifacts has a new docking score yet.
+without changing the 40-heavy-atom support. These preparation artifacts remain
+unchanged; subsequent scores are stored separately in
+`diagnostics/t4_program_curriculum/attempt_1/review.json`.
 
 | Preparation | JAK2 seed1 | FA7 seed0 | BRAF seed1 | 5HT1B seed0 |
 | --- | ---: | ---: | ---: | ---: |
@@ -19,5 +20,6 @@ as failures rather than reallocated.
 Each attempt stores input hashes, software, configuration, exact traces, complete
 attempt ledgers and candidate locks. The frozen scoring manifest is
 `configs/t4_program_curriculum_lock.json`: all 32 candidates plus four seed
-controls, maximum 36 new docking calls. Scores belong in the separate
-`diagnostics/t4_program_curriculum/` result directory when returned.
+controls, maximum 36 new docking calls. All 36 have now completed. Scores and
+measured optimizer archives are in the separate `diagnostics/t4_program_curriculum/`
+result directory.

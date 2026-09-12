@@ -77,3 +77,28 @@ produces useful docking outcomes. Record capacity-aware whole-program selection
 and the zero-oracle public-winner size census as subsequent work; neither changes
 this candidate lock. Do not raise the current support limit based only on the
 growth-biased first preparation.
+
+## Completed first scores
+
+The frozen round completed all 36 calls in 61.16 driver seconds (139.82 summed
+worker seconds), without oracle failures. JAK2/FA7/BRAF/5HT1B best new scores
+were -10.3/-9.2/-11.1/-13.1, versus seed controls -7.9/-7.2/-9.4/-5.8.
+Each cell has eight candidate calls and one charged seed control. All eight
+JAK2, FA7 and 5HT1B candidates beat their seed control; five of eight BRAF
+candidates do. These are first-evaluation, development-batch findings, not
+repeat-confirmed improvements or a matched static/adaptive comparison.
+
+The best FA7, BRAF and 5HT1B endpoints remove 5, 7 and 7 heavy atoms net;
+JAK2's best adds six. This supports retaining both growth and shrink/remodeling
+programs in the common library. The verified existing public census also finds
+zero above-40 structures among 91 distinct released winners. Keep the qualified
+40-atom lane for the next T4 development iteration.
+
+All 32 scored programs have been replay-verified and admitted to four separate
+protocol-bound optimizer archives. No cross-target scores were substituted and
+the conversion used zero new oracle calls. Results, raw receipts, curves,
+external reported comparators and archive hashes are in
+`diagnostics/t4_program_curriculum/attempt_1/review.json`.
+The original PARP1 -13.3 result is unchanged. The next useful action is measured
+program adaptation and a bounded confirmation/comparison, not another expansion
+of the unscored library. No further paid round is launched automatically.
