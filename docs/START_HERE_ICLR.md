@@ -26,6 +26,23 @@ integration branch is `compose-iclr`; the Modal session name is
 
 ## Current outcome
 
+The second-generation scoring round is complete: **69 calls in 102.00 driver
+seconds**, 293.47 summed worker seconds, no oracle failures. Best new first scores
+across the two arms are JAK2 -10.9, FA7 -9.4, BRAF -11.2 and 5HT1B -12.7.
+These replace neither historical benchmark entries nor repeat-only estimates.
+BRAF's best came from the score-blind arm; ranked BRAF reached only -10.3.
+FA7's ranked champion repeated at -9.3/-9.3, while JAK2 repeated at -10.7/-9.6
+and the new 5HT1B champion at -7.5/-12.7. Retain the previous 5HT1B incumbent
+(fresh -13.2/-13.9). The scored-history ranking arm has not earned promotion.
+All eight arm-specific archives have been updated from their own locked queries
+and compatible confirmations. No docking is active or further round authorized.
+Four of the 73 newly allocated calls remain unspent; they are not a new assay.
+Authoritative receipts, review and decision:
+`diagnostics/t4_second_generation/scoring_1/`.
+Run source `66bec5c`; call `fc-01M2BW7XCWAB9PCK4J2AQDNTFW`.
+
+### Preparation history
+
 Second-generation preparation is now locked at
 `diagnostics/t4_second_generation/attempt_2`: 31 score-ranked candidates and
 32 score-blind controls, comprising 49 distinct target/molecule queries.
@@ -35,8 +52,8 @@ Conditional mutation selection avoids unavailable operations, and duplicate
 exhaustion no longer erases the 20% endpoint exploration floor. FA7 ranked
 selection filled seven of eight slots under its unchanged work cap. Total
 preparation took 81.85 seconds, with zero new oracle calls. These candidates
-are unscored. The proposed next round is at most 73 new calls including fresh
-champion/incumbent confirmations, requiring a new bounded approval. See
+were unscored at preparation. The subsequently approved round above used 69 of
+73 allowed calls including fresh champion/incumbent confirmations. See
 `docs/T4_SECOND_GENERATION.md`. Do not regenerate or silently extend these pools.
 
 Completed four-target run: 32 locked candidates across JAK2 seed1, FA7 seed0, BRAF
@@ -52,10 +69,11 @@ JAK2 candidate grows by six. No support expansion was needed. See
 `docs/T4_SHARED_PROGRAM_CONTROLLER.md` and
 `diagnostics/t4_program_curriculum/attempt_1/review.json`.
 Run source: `1a5c0cc`; call: `fc-01M2BSMX75V6SM1695M6SFNQ62`.
-No docking is active. Current hypothesis: use these measured programs for shared
-score adaptation and capacity-aware replacement, rather than add particles or
-raise the cap. The next paid comparison/confirmation needs its own bounded
-allocation; 64 of the existing 66 follow-on calls have been consumed.
+That initialization used 64 of its separate 66-call follow-on allocation.
+The completed second-generation comparison now shows that parent-score ranking
+alone does not reliably identify the most productive program mutations. Keep
+the measured archives, shared program support and exploration; do not scale an
+unchanged ranked-parent policy or increase the atom cap in response.
 
 New implementation: a score-adaptive coordinated-program optimizer now dispatches
 before the legacy connected-region WHERE stage. It mutates attachments, created

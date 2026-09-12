@@ -1,8 +1,16 @@
 # Measured second-generation preparation
 
+**Scoring completed:** `scoring_1/` contains the 69-call result, confirmations,
+verified review and eight updated archives. All 49 distinct prepared candidates
+were scored. Best new first scores are -10.9/-9.4/-11.2/-12.7 on
+JAK2/FA7/BRAF/5HT1B. Score ranking did not demonstrate an overall advantage;
+see the repeat-only comparisons and negative findings in `scoring_1/README.md`.
+
+## Original preparation record
+
 Attempt_2 contains 49 distinct new target/molecule queries across the paired
-score-ranked and score-blind program proposals. No second-generation molecule
-has been docked. The previous measured champions are unchanged.
+score-ranked and score-blind program proposals. These were all unscored at
+the original candidate lock. That lock was not regenerated before scoring.
 
 | Cell | Ranked: first preparation | Ranked: conditional mutation repair | Score-blind after repair |
 | --- | ---: | ---: | ---: |
@@ -31,8 +39,8 @@ Both used zero oracle calls and one local CPU process. The second attempt's
 predecessor identities, exact snapshots, allocation records, failures and
 implementation/input hashes are retained in each attempt.
 
-Next: score attempt_2 without changing selection. A proposed maximum of 73
-new calls includes all 49 first evaluations and up to 24 fresh champion and
-first-generation incumbent confirmations. This exceeds the old allocation's
-two remaining calls and has not been launched. Details and acceptance criteria:
+The subsequently approved allocation allowed 73 new calls, including all 49
+first evaluations and up to 24 fresh champion and first-generation incumbent
+confirmations. It used 69 after sharing identical confirmations. This is a
+separate allocation from the old allowance's two remaining calls. Details:
 `docs/T4_SECOND_GENERATION.md`.

@@ -158,6 +158,14 @@ in the pinned chemistry environment to update each arm's own scored archive.
 
 ### Verification and reproduction
 
+The paid round is complete. See
+`diagnostics/t4_second_generation/scoring_1/README.md` and its sealed
+`review.json`. It used 69 calls, including all 49 first queries and 20 fresh
+confirmations after sharing two identical arm champions. Parent ranking did
+not earn promotion: it tied the control on JAK2/5HT1B, slightly improved FA7,
+and lost BRAF. The new 5HT1B endpoint is unstable across docking seeds; retain
+the existing incumbent. No additional paid generation is authorized.
+
 Nineteen focused optimizer/mutation/scheduler tests passed, plus the added
 conditional-choice regression and two attachment-transfer tests passed separately.
 Tests cover shrink-then-regrow,
