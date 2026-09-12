@@ -4,6 +4,24 @@ Updated 2026-09-11. Active goal: reproducible improvement over the actual T4 and
 PMO champions, then verified matched external comparisons. Supporting chemistry,
 known-winner reconstruction and mathematics are not benchmark success.
 
+Current active run: the authorized paired T4 frontier comparison on PARP1 seed0,
+delta 0.4, launched from clean commit `06e6fcb2f77d` as durable Modal call
+`fc-01M29P6WDXEV2Z3SHQZ4EYEY30`, run
+`765b2b854d50c29966f2b2a032a4ccbe1e3364c43d50a8376c6845f48cc5ed41`.
+It compares identical post-hoc and in-loop generators for one synchronous round,
+20 new docking calls per arm. Sixteen exact lineage workers are reduced before
+either arm docks. No automatic later round is authorized.
+
+Latest PMO mechanism: witnessed three-option recoveries exist (51 among 903
+temporary-loss branches), but their future-return lift is directional rather than
+root-bootstrap robust, so no learned Doob twist is justified. A signed endpoint-
+delta ranker over complete executable plans does pass the earlier 58-call temporal
+holdout: RMSE 0.119 versus 0.252 for parent retention, score Spearman 0.722, gain
+Spearman 0.402, and mean selected score 0.639 versus 0.548 uniform across nine
+parent choice sets. Predictions are frozen for all 95 unscored locked plan-pool
+candidates. Scoring that full assay requires explicit authorization for exactly
+95 new PMO oracle calls; none has been spent on it.
+
 Latest comparison completed and rejected: the updating complete-plan proposal
 policy tied its frozen-policy control at best score 0.6835298931, final top-ten
 mean 0.6787222097, and mean round-end top-ten mean 0.6781711014. The actor changed

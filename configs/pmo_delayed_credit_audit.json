@@ -1,0 +1,71 @@
+{
+  "schema_version": "pmo_delayed_credit_audit_config_v1",
+  "task": "perindopril_mpo",
+  "evidence_class": "retrospective_exposed_development",
+  "new_oracle_calls": 0,
+  "horizons": [1, 2, 3],
+  "ridge": 1.0,
+  "scale_bandwidth": 0.25,
+  "inputs": [
+    {
+      "name": "option_particles",
+      "local_path": "compose-pmo-option-particle-runs/30fb08d196021d7f8a8d524c86b17c74532b72feac92cebaa1c003322e96441f/result.json",
+      "volume_path": "pmo_option_particles/30fb08d196021d7f8a8d524c86b17c74532b72feac92cebaa1c003322e96441f/result.json",
+      "sha256": "db0277aa0343498b86326a9f27ccf3529e58079043b83f076450707af45c6680"
+    },
+    {
+      "name": "archive_branching",
+      "local_path": "compose-pmo-archive-branching-runs/4e96e69b5d28fa371f02ea0810fc52055678848db2aa67ebf1d6d32d60b47b8d/result.json",
+      "volume_path": "pmo_archive_branching/4e96e69b5d28fa371f02ea0810fc52055678848db2aa67ebf1d6d32d60b47b8d/result.json",
+      "sha256": "46cec002fbd450f1a1fb65f9bf1a0b2278b95b613398c8345e78d185d2b3bc09"
+    },
+    {
+      "name": "donor_comparison",
+      "local_path": "compose-pmo-donor-comparison-runs/478421560799673857cd5aa0d2fc36df5b2ee4582828936ca6eb428699bd02fd/result.json",
+      "volume_path": "pmo_donor_comparison/478421560799673857cd5aa0d2fc36df5b2ee4582828936ca6eb428699bd02fd/result.json",
+      "sha256": "2072617650562b9a2bac11b6445b5113204505ceffa56be95e058af561ee4b27"
+    },
+    {
+      "name": "donor_replication",
+      "local_path": "compose-pmo-donor-replication-runs/88906fe9b25c5b283d4d68571dd8273aabbb16ba10929f182dc6f19f6df6ea5c/result.json",
+      "volume_path": "pmo_donor_comparison/88906fe9b25c5b283d4d68571dd8273aabbb16ba10929f182dc6f19f6df6ea5c/result.json",
+      "sha256": "92da4b2adf711aa0e0c7146f8a397dde7372fdd66608e1ae9a10b6e71387c4c5"
+    },
+    {
+      "name": "evolving_memory",
+      "local_path": "compose-pmo-evolving-memory-runs/e111b2aac585acaf2c5c8d6338599f6a53856db9e3c5a7132b9cd77e53292189/result.json",
+      "volume_path": "pmo_evolving_memory/e111b2aac585acaf2c5c8d6338599f6a53856db9e3c5a7132b9cd77e53292189/result.json",
+      "sha256": "a7e6278f7db3d0d6fe2028ef7d244a9135f2892d6c1398168ee1eef74bd27c4a"
+    },
+    {
+      "name": "evolving_memory_replication",
+      "local_path": "compose-pmo-evolving-memory-replication-runs/f6f3264e4271ba044265c4b782c7d4aea154ad12ad027d6627efb44e962651e9/result.json",
+      "volume_path": "pmo_evolving_memory/f6f3264e4271ba044265c4b782c7d4aea154ad12ad027d6627efb44e962651e9/result.json",
+      "sha256": "6867b5c66c52d811eb85391b1be060c3ab80cac1cdfe41ecaaa37f1a71e8c9fe"
+    },
+    {
+      "name": "learned_proposal",
+      "local_path": "compose-pmo-learned-proposal-runs/1d4ae62017d41ab1f0736a74dd49a984e92b1c332daa7df2e2472dd2d1a187cf/result.json",
+      "volume_path": "pmo_learned_proposal/1d4ae62017d41ab1f0736a74dd49a984e92b1c332daa7df2e2472dd2d1a187cf/result.json",
+      "sha256": "21ebc00a3ae7f410016662d16f7a1267548f2aac4c273d595b3cb8c57b37973c"
+    },
+    {
+      "name": "local_guidance",
+      "local_path": "compose-pmo-local-guidance-runs/2f58bc8ace9d1591520d0c2a670a0b04cb1bd1cad4879f1ca4420361c8570e72/result.json",
+      "volume_path": "pmo_local_guidance/2f58bc8ace9d1591520d0c2a670a0b04cb1bd1cad4879f1ca4420361c8570e72/result.json",
+      "sha256": "ff603cdfce8ae1045ade4a0709b9678c5c08e38d17b2272a62c5543aa0ebac94"
+    },
+    {
+      "name": "local_guidance_replication",
+      "local_path": "compose-pmo-local-guidance-replication-runs/83d84e96ce3d961d09816b3a7829103a1b608380147416c6b0996e9643806b77/result.json",
+      "volume_path": "pmo_local_guidance/83d84e96ce3d961d09816b3a7829103a1b608380147416c6b0996e9643806b77/result.json",
+      "sha256": "939ec5f30c950f14db44428b9446866cdccb734c439d6b5f8fa326e81004602b"
+    },
+    {
+      "name": "replacement_continuation",
+      "local_path": "compose-pmo-replacement-continuation-runs/72e39c6079e3c06b10122a57661e8f0e529f876277a83fe16e45ec82a3962bdb/result.json",
+      "volume_path": "pmo_replacement_continuation/72e39c6079e3c06b10122a57661e8f0e529f876277a83fe16e45ec82a3962bdb/result.json",
+      "sha256": "4a33345e87a3047f7ed9d503fd2d2e2662626c60e58628524819535c0e798ca4"
+    }
+  ]
+}
