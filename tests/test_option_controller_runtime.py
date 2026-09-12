@@ -12,7 +12,10 @@ from compose_v4.control.improvement_value import (
     MonotoneImprovementModel,
     improvement_parameter_id,
 )
-from compose_v4.control.molecular_task_search import MolecularHierarchy, MolecularSearchState
+from compose_v4.control.molecular_task_search import (
+    MolecularHierarchy,
+    MolecularSearchState,
+)
 from compose_v4.control.option_continuation import OptionContinuationKernel
 from compose_v4.control.option_controller import OptionBoundaryController
 from compose_v4.control.option_controller_runtime import (
@@ -81,7 +84,8 @@ def roots():
     # the hierarchy row. The new runtime must still leave it disabled by default.
     graph = pad_molecular_graph(smiles_to_molecular_graph("CCCC"), 12)
     return tuple(
-        MolecularSearchState.start(graph, budget=1, root_id=f"root-{index}") for index in range(2)
+        MolecularSearchState.start(graph, budget=1, root_id=f"root-{index}")
+        for index in range(2)
     )
 
 
@@ -94,9 +98,12 @@ def test_runtime_executes_where_what_how_and_locks_complete_candidates():
     assert receipt["particle_update"]["status"] == "live"
     assert all(row["status"] == "complete" for row in receipt["transitions"])
     assert all(
-        "build_ring_system" not in row["applicable_options"] for row in receipt["transitions"]
+        "build_ring_system" not in row["applicable_options"]
+        for row in receipt["transitions"]
     )
-    assert all(row["option_reference_probability"] > 0 for row in receipt["transitions"])
+    assert all(
+        row["option_reference_probability"] > 0 for row in receipt["transitions"]
+    )
     assert all(row["option_proposal_probability"] > 0 for row in receipt["transitions"])
     assert all(particle.history for particle in following.particles if particle.alive)
     candidates = engine.locked_candidates(following)
@@ -111,7 +118,9 @@ def test_runtime_executes_where_what_how_and_locks_complete_candidates():
 def test_runtime_resume_reproduces_exact_population():
     first_engine, second_engine = runtime(), runtime()
     initial = first_engine.start_population(roots(), incumbent=0.1, seed=17)
-    restored = PersistentOptionPopulation.from_dict(json.loads(json.dumps(initial.to_dict())))
+    restored = PersistentOptionPopulation.from_dict(
+        json.loads(json.dumps(initial.to_dict()))
+    )
     assert restored.control_context == initial.control_context
     first, _ = first_engine.advance(initial, incumbent=0.1, resample=False)
     second, _ = second_engine.advance(restored, incumbent=0.1, resample=False)

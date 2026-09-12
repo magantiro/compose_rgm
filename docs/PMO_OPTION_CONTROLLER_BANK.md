@@ -1,7 +1,7 @@
 # Balanced option-boundary continuation bank
 
-Status: preparation contract. No remote proposal or task-oracle evaluation is
-authorized by this document.
+Status: prepared and committed locally. No remote proposal or task-oracle
+evaluation is authorized by this document.
 
 ## Question
 

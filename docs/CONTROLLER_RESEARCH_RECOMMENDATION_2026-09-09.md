@@ -1,5 +1,39 @@
 # A search-and-learning controller for COMPOSE
 
+## Current decision, 2026-09-12
+
+The authorized paired T4 development round is complete. From the identical
+51-call PARP1 seed0, delta=0.4 archive (best -9.7), post-hoc control produced four
+eligible docked endpoints and reached -9.9; short in-loop control produced eight
+and reached -10.0. Both best molecules were completed six-member pendant-ring
+options, not decorative primitive edits. The exact result, paths, hashes, scale
+diagnostics, option census, and proposal work are recorded in
+[the paired comparison artifact](../diagnostics/t4_frontier_compare/README.md).
+
+This changes the immediate diagnosis. Broad option support and the executor can
+construct useful feasible ring chemistry on this cell. The endpoint predictor
+ranked the observed winner last in each arm, so current value assignment is now
+the clearest measured bottleneck. In-loop search increased eligible coverage but
+used 58,135 executor calls versus 21,722 post-hoc and affected only eight HOW
+decisions; WHERE and WHAT had no task-value contrast. One unreplicated 0.1
+kcal/mol arm difference is not a reproducibility claim.
+
+This is not an IVG-level result. The verified public IVG records for the same
+cell are -13.5, -13.6, and -13.6; GenMol reports -10.6. The current run is also
+below the workshop COMPOSE value of -10.7 at 500 calls, but has consumed only 59
+total calls in the in-loop history. These are reference points at unmatched
+budgets and do not establish a matched ranking.
+
+The current T4 champion under this exact warm-start development protocol is
+-10.0 after 59 total calls in the in-loop arm. The complete-plan PMO ranker
+remains a banked null for policy improvement: predictive fit did not translate
+into robust selected-return improvement. There is no active scientific run and
+no automatic next round. The next discriminating controller change is reusable
+option-complete delayed value plus explicit exploratory oracle allocation,
+evaluated against the same-generator post-hoc arm. It must earn its additional
+proposal cost before scale-up. No further T4 or PMO oracle work is authorized by
+the completed contract.
+
 ## Recommendation
 
 Develop an option-aware, receding-horizon graph-search controller with a persistent

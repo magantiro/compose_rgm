@@ -474,6 +474,14 @@ of a completed milestone or a waiver of release/full-suite verification. It does
 not authorize another task, extra rounds, fresh model training or a broader
 benchmark. The frozen process and editing-V2 training ladder remain unchanged.
 
+**Completed scoped T4 comparison, 2026-09-12:** the authorized warm-start
+paired frontier comparison on PARP1 seed0, delta=0.4 is complete. It used 12 of
+the allowed 40 new docking calls. The in-loop arm produced eight eligible
+endpoints and reached -10.0; post-hoc produced four and reached -9.9. The
+machine-readable review is `diagnostics/t4_frontier_compare/result.json`.
+This result does not authorize another round, reference-model training, or a
+broader benchmark.
+
 As of the current editing-V2 rebuild, the authorized sequence is:
 
 1. finish and freeze the content-addressed editing corpus derivatives;

@@ -308,13 +308,13 @@ def t4_option_decision_audit(task: dict[str, Any]) -> dict[str, Any]:
     image=image,
     cpu=(1.0, 1.0),
     memory=8192,
-    timeout=21600,
-    max_containers=2,
+    timeout=3600,
+    max_containers=16,
     retries=0,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
 def t4_frontier_prepare(task: dict[str, Any]) -> dict[str, Any]:
-    """Independent zero-oracle preparation worker for one comparison arm."""
+    """Independent zero-oracle preparation worker for one exact parent lineage."""
     from compose_v4.experiments.t4_frontier_compare import prepare_worker
     from modal_apps.run_process_v2_p50_app import _validate_remote_revision
 
@@ -332,7 +332,7 @@ def t4_frontier_prepare(task: dict[str, Any]) -> dict[str, Any]:
     image=image,
     cpu=(1.0, 1.0),
     memory=8192,
-    timeout=21600,
+    timeout=5400,
     max_containers=1,
     retries=0,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
@@ -347,15 +347,20 @@ def t4_frontier_compare(task: dict[str, Any]) -> dict[str, Any]:
         path = output / "preparation_calls.json"
         calls = unseal(path) if path.exists() else {}
         for arm in ARMS:
-            if arm not in calls:
-                calls[arm] = t4_frontier_prepare.spawn({**task, "arm": arm}).object_id
-                seal(path, calls)
-                commit()
+            for lineage in range(8):
+                key = f"{arm}:{lineage}"
+                if key not in calls:
+                    calls[key] = t4_frontier_prepare.spawn({**task, "arm": arm, "lineage_index": lineage}).object_id
+                    seal(path, calls)
+                    commit()
         paths = {}
         for arm in ARMS:
-            progress.update(phase="waiting_for_preparation", arm=arm, preparation_calls=calls)
-            result = modal.FunctionCall.from_id(calls[arm]).get()
-            paths[arm] = result["preparation_path"]
+            paths[arm] = []
+            for lineage in range(8):
+                key = f"{arm}:{lineage}"
+                progress.update(phase="waiting_for_preparation", arm=arm, lineage_index=lineage, preparation_calls=calls)
+                result = modal.FunctionCall.from_id(calls[key]).get()
+                paths[arm].append(result["preparation_path"])
         return paths
 
     return run_remote(

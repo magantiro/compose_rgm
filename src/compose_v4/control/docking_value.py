@@ -11,7 +11,8 @@ import numpy as np
 from rdkit import Chem
 from rdkit.Chem import rdFingerprintGenerator
 
-RECIPE = {
+COEFFICIENT_DECIMAL_PLACES = 14
+LEGACY_RECIPE = {
     "schema_version": "docking_value_recipe_v1",
     "ridge": 1.0,
     "warmup": 16,
@@ -21,11 +22,21 @@ RECIPE = {
     "center_targets": True,
     "uncertainty": "not_estimated",
 }
+RECIPE = {
+    **LEGACY_RECIPE,
+    # ``numpy.linalg.solve`` can differ at the final binary ulp across BLAS
+    # builds/hosts.  Serialize below that operational noise so identical
+    # archives produce one content identity without changing useful precision.
+    "coefficient_decimal_places": COEFFICIENT_DECIMAL_PLACES,
+}
+SNAPSHOT_EQUIVALENCE_ATOL = 1e-14
 
 
 def identity(payload: dict) -> str:
     return hashlib.sha256(
-        json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+        json.dumps(
+            payload, sort_keys=True, separators=(",", ":"), allow_nan=False
+        ).encode()
     ).hexdigest()
 
 
@@ -56,8 +67,13 @@ def graph_kernel(left, right) -> np.ndarray:
             for bits in row:
                 value = 0
                 for bit in bits:
-                    if not isinstance(bit, (int, np.integer)) or not 0 <= bit < RECIPE["fp_size"]:
-                        raise ValueError(f"fingerprint bit outside declared width: {bit!r}")
+                    if (
+                        not isinstance(bit, (int, np.integer))
+                        or not 0 <= bit < RECIPE["fp_size"]
+                    ):
+                        raise ValueError(
+                            f"fingerprint bit outside declared width: {bit!r}"
+                        )
                     value |= 1 << int(bit)
                 values.append(value)
             encoded.append(values)
@@ -70,7 +86,10 @@ def graph_kernel(left, right) -> np.ndarray:
     masks_left, masks_right = masks(left), masks(right)
     return np.asarray(
         [
-            [sum(tanimoto(a, b) for a, b in zip(x, y, strict=True)) / 2 for y in masks_right]
+            [
+                sum(tanimoto(a, b) for a, b in zip(x, y, strict=True)) / 2
+                for y in masks_right
+            ]
             for x in masks_left
         ],
         dtype=np.float64,
@@ -93,7 +112,9 @@ def validate_archive(archive: list[dict]) -> None:
             or not isinstance(score, (int, float))
             or not math.isfinite(score)
         ):
-            raise ValueError(f"archive row {index}: nonfinite or malformed docking score {score!r}")
+            raise ValueError(
+                f"archive row {index}: nonfinite or malformed docking score {score!r}"
+            )
 
 
 @dataclass(frozen=True)
@@ -104,7 +125,9 @@ class DockingValue:
     def fit(cls, archive: list[dict], *, before_round: int, source_sha256: str):
         if type(before_round) is not int or before_round < 1:
             raise ValueError("before_round must be a positive integer")
-        if len(source_sha256) != 64 or any(c not in "0123456789abcdef" for c in source_sha256):
+        if len(source_sha256) != 64 or any(
+            c not in "0123456789abcdef" for c in source_sha256
+        ):
             raise ValueError("task-value archive requires a physical SHA-256 identity")
         rows, excluded, features, seen = [], [], [], set()
         for index, row in enumerate(archive):
@@ -115,7 +138,9 @@ class DockingValue:
                 )
             key, feature = molecular_features(row["smiles"])
             if key in seen:
-                raise ValueError(f"archive row {index}: duplicate canonical identity {key}")
+                raise ValueError(
+                    f"archive row {index}: duplicate canonical identity {key}"
+                )
             seen.add(key)
             score = row.get("ds")
             if score is None:
@@ -124,7 +149,9 @@ class DockingValue:
                         "row": index,
                         "smiles": key,
                         "round": rd,
-                        "reason": "undocked_source" if rd == 0 else "missing_oracle_label",
+                        "reason": (
+                            "undocked_source" if rd == 0 else "missing_oracle_label"
+                        ),
                     }
                 )
                 continue
@@ -136,7 +163,9 @@ class DockingValue:
                 raise ValueError(
                     f"archive row {index}: nonfinite or malformed docking score {score!r}"
                 )
-            rows.append({"smiles": key, "ds": float(score), "round": rd, "source_row": index})
+            rows.append(
+                {"smiles": key, "ds": float(score), "round": rd, "source_row": index}
+            )
             features.append(feature)
         if len(rows) < RECIPE["warmup"]:
             raise ValueError(
@@ -144,8 +173,12 @@ class DockingValue:
             )
         scores = np.asarray([r["ds"] for r in rows])
         mean = float(scores.mean())
-        coefficients = np.linalg.solve(
-            graph_kernel(features, features) + RECIPE["ridge"] * np.eye(len(rows)), scores - mean
+        coefficients = np.round(
+            np.linalg.solve(
+                graph_kernel(features, features) + RECIPE["ridge"] * np.eye(len(rows)),
+                scores - mean,
+            ),
+            decimals=COEFFICIENT_DECIMAL_PLACES,
         )
         payload = {
             "schema_version": "docking_value_snapshot_v1",
@@ -177,9 +210,9 @@ class DockingValue:
 
     def predict(self, smiles: list[str]) -> np.ndarray:
         features = [molecular_features(s)[1] for s in smiles]
-        return self.payload["mean"] + graph_kernel(features, self.payload["features"]) @ np.asarray(
-            self.payload["coefficients"], dtype=np.float64
-        )
+        return self.payload["mean"] + graph_kernel(
+            features, self.payload["features"]
+        ) @ np.asarray(self.payload["coefficients"], dtype=np.float64)
 
     def desirability(self, smiles: str, feasible: bool) -> float:
         if type(feasible) is not bool:
@@ -188,6 +221,82 @@ class DockingValue:
             return 0.0
         penalty = max(0.0, float(self.predict([smiles])[0]) - self.payload["best"])
         return math.exp(-min(700.0, penalty / self.payload["scale"]))
+
+
+def snapshot_equivalence(left: dict, right: dict, *, probe_smiles=()) -> dict:
+    """Prove bounded equivalence of legacy/current round-frozen snapshots.
+
+    This is deliberately narrower than accepting arbitrary close predictors.
+    Both payloads must be authentic, use the same fixed recipe apart from the
+    declared coefficient-serialization field, and agree exactly on all fitted
+    inputs and summaries.  The coefficient bound then provides a global score
+    bound because every graph-kernel entry lies in ``[0, 1]``.
+    """
+
+    def validate(payload):
+        body = {k: v for k, v in payload.items() if k != "snapshot_sha256"}
+        if payload.get("schema_version") != "docking_value_snapshot_v1" or identity(
+            body
+        ) != payload.get("snapshot_sha256"):
+            raise ValueError("task-value snapshot hash or schema mismatch")
+        recipe = dict(payload.get("recipe", {}))
+        decimals = recipe.pop("coefficient_decimal_places", None)
+        if recipe != LEGACY_RECIPE or decimals not in (
+            None,
+            COEFFICIENT_DECIMAL_PLACES,
+        ):
+            raise ValueError("task-value snapshots use nonequivalent recipes")
+
+    validate(left)
+    validate(right)
+    ignored = {"snapshot_sha256", "coefficients", "recipe"}
+    if {k: v for k, v in left.items() if k not in ignored} != {
+        k: v for k, v in right.items() if k not in ignored
+    }:
+        raise ValueError(
+            "task-value snapshots differ outside coefficient serialization"
+        )
+    a = np.asarray(left["coefficients"], dtype=np.float64)
+    b = np.asarray(right["coefficients"], dtype=np.float64)
+    if (
+        a.shape != b.shape
+        or a.ndim != 1
+        or not np.isfinite(a).all()
+        or not np.isfinite(b).all()
+    ):
+        raise ValueError("task-value snapshot coefficient shape or values differ")
+    maximum = float(np.max(np.abs(a - b), initial=0.0))
+    if maximum > SNAPSHOT_EQUIVALENCE_ATOL:
+        raise ValueError(
+            "task-value snapshot coefficient drift exceeds equivalence bound"
+        )
+    probes = tuple(sorted(set(probe_smiles)))
+    prediction_drift = 0.0
+    if probes:
+        prediction_drift = float(
+            np.max(
+                np.abs(
+                    DockingValue(left).predict(list(probes))
+                    - DockingValue(right).predict(list(probes))
+                ),
+                initial=0.0,
+            )
+        )
+    bound = len(a) * maximum
+    if prediction_drift > bound + np.finfo(np.float64).eps:
+        raise RuntimeError(
+            "observed task-value prediction drift exceeds its kernel bound"
+        )
+    return {
+        "left_snapshot_sha256": left["snapshot_sha256"],
+        "right_snapshot_sha256": right["snapshot_sha256"],
+        "coefficient_count": len(a),
+        "max_abs_coefficient_difference": maximum,
+        "global_prediction_difference_bound": float(bound),
+        "probe_count": len(probes),
+        "max_abs_probe_prediction_difference": prediction_drift,
+        "equivalent": True,
+    }
 
 
 def chronological_check(archive: list[dict], *, source_sha256: str) -> dict:
@@ -199,7 +308,8 @@ def chronological_check(archive: list[dict], *, source_sha256: str) -> dict:
         current = [row for row in archive if row["round"] == rd]
         if sum(row.get("ds") is not None for row in prefix) < RECIPE["warmup"]:
             skipped.extend(
-                {"smiles": row["smiles"], "round": rd, "reason": "prior_warmup"} for row in current
+                {"smiles": row["smiles"], "round": rd, "reason": "prior_warmup"}
+                for row in current
             )
             continue
         model = DockingValue.fit(prefix, before_round=rd, source_sha256=source_sha256)
@@ -207,7 +317,11 @@ def chronological_check(archive: list[dict], *, source_sha256: str) -> dict:
         for row in current:
             if row.get("ds") is None:
                 skipped.append(
-                    {"smiles": row["smiles"], "round": rd, "reason": "missing_oracle_label"}
+                    {
+                        "smiles": row["smiles"],
+                        "round": rd,
+                        "reason": "missing_oracle_label",
+                    }
                 )
                 continue
             if not math.isfinite(row["ds"]):
@@ -228,7 +342,9 @@ def chronological_check(archive: list[dict], *, source_sha256: str) -> dict:
             if a["round"] != b["round"] or a["observed"] == b["observed"]:
                 continue
             pairs += 1
-            product = (a["observed"] - b["observed"]) * (a["predicted"] - b["predicted"])
+            product = (a["observed"] - b["observed"]) * (
+                a["predicted"] - b["predicted"]
+            )
             correct += 1 if product > 0 else 0.5 if product == 0 else 0
     mae = (
         float(np.mean([abs(r["predicted"] - r["observed"]) for r in predictions]))
@@ -242,7 +358,10 @@ def chronological_check(archive: list[dict], *, source_sha256: str) -> dict:
     )
     concordance = correct / pairs if pairs else None
     passes = (
-        len(predictions) >= 20 and mae < baseline and concordance is not None and concordance > 0.5
+        len(predictions) >= 20
+        and mae < baseline
+        and concordance is not None
+        and concordance > 0.5
     )
     return {
         "schema_version": "docking_value_chronological_v1",
@@ -256,7 +375,11 @@ def chronological_check(archive: list[dict], *, source_sha256: str) -> dict:
         "mae": mae,
         "baseline_mae": baseline,
         "concordance": concordance,
-        "decision": "development_signal_present" if passes else "do_not_launch_on_this_predictor",
+        "decision": (
+            "development_signal_present"
+            if passes
+            else "do_not_launch_on_this_predictor"
+        ),
         "new_oracle_calls": 0,
         "uncertainty_calibrated": False,
     }

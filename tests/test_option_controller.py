@@ -58,7 +58,9 @@ def test_option_state_features_include_local_global_and_option_clock():
 
 def test_integrated_controller_records_b_over_q_and_exact_terminal_boundary():
     option_dim = len(option_feature_names())
-    actor = AdvantageWeightedOptionActor(2 + len(REGION_CONTEXT_NAMES), option_dim, hidden=4)
+    actor = AdvantageWeightedOptionActor(
+        2 + len(REGION_CONTEXT_NAMES), option_dim, hidden=4
+    )
     value = MonotoneImprovementModel(2, 2, 2, hidden=4)
     for model in (actor, value):
         for parameter in model.parameters():
@@ -77,9 +79,13 @@ def test_integrated_controller_records_b_over_q_and_exact_terminal_boundary():
         [0.2, 0.4, *([0.0] * len(REGION_CONTEXT_NAMES))],
         np.random.default_rng(2),
     )
-    assert selected.reference_probability == pytest.approx(selected.proposal_probability)
+    assert selected.reference_probability == pytest.approx(
+        selected.proposal_probability
+    )
     assert selected.controller_snapshot == controller.snapshot
-    intermediate = controller.log_potential([0.2, 0.4], remaining_options=2, incumbent=0.5)
+    intermediate = controller.log_potential(
+        [0.2, 0.4], remaining_options=2, incumbent=0.5
+    )
     assert intermediate > 5
     assert controller.log_potential(
         [0.2, 0.4], remaining_options=0, incumbent=0.5, terminal_best=0.7

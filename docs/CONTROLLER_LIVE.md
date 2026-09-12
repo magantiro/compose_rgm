@@ -1,10 +1,19 @@
 # COMPOSE controller: current decision record
 
-Updated 2026-09-12. Active goal: reproducible improvement over the actual T4 and
-PMO champions, then verified matched external comparisons. Supporting chemistry,
-known-winner reconstruction and mathematics are not benchmark success.
+Updated 2026-09-12. The authoritative collaborator snapshot is now
+[`START_HERE_ICLR.md`](START_HERE_ICLR.md). This file is the chronological
+evidence ledger and intentionally retains superseded decisions and negative
+results.
 
-Current active run: none. The option-controller V1 execution engine now composes
+Current active run: none. The paired T4 frontier comparison is complete, not
+running: in-loop reached -10.0 from the shared -9.7 warm champion and produced
+eight eligible endpoints, versus -9.9 and four endpoints post-hoc. It used 12
+new docking calls total. The strongest observed PMO development molecule remains
+0.6948083338 from the locked 95-candidate plan-pool assay. Neither result is a
+matched external benchmark win. See `diagnostics/t4_frontier_compare/result.json`
+and `diagnostics/pmo_plan_pool_prevalence/`.
+
+The option-controller V1 execution engine now composes
 the production WHERE, WHAT and HOW layers at complete-option boundaries. It has
 separate pre-WHERE value and post-WHERE actor features, content-bound frozen
 actor/value tensors, full-path `B/q` accounting, pathwise best-utility state,
@@ -14,6 +23,8 @@ the retrospective evidence gate below abstains. WHERE remains the qualified
 region controller and HOW remains the existing option continuation kernel. No
 reference model, executor, molecular support, `Q(M)`, docking label or Modal job
 changed. Runtime contract: `docs/OPTION_CONTROLLER_RUNTIME_V1.md`.
+
+## Chronological evidence ledger
 
 Latest paid development result: the locked 95-candidate Perindopril MPO
 plan-pool assay found a new champion of **0.6948083338**, versus the prior
@@ -101,9 +112,9 @@ strict preflight passed with a clean tree. Durable local receipt is under
 Audit: `diagnostics/pmo_local_guidance_replication/report.json` and README.
 Do not launch it again or start another task without a bounded new recipe.
 
-## Champion and exact regime
+## Historical champion progression and exact regimes
 
-- Current observed best: **0.6835298930947339**, from the completed four-round
+- Earlier observed best: **0.6835298930947339**, from the completed four-round
   local-guided broad controller, versus **0.6803013430498075** for its matched
   fixed-memory baseline. Both started at 0.6747477698. Eighty-five new calls,
   497.011 seconds; positive on best score but lower guided top-ten mean and

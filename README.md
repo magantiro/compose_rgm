@@ -18,13 +18,16 @@ Three layers, kept separate on purpose:
 
 ## Start here
 
-1. **[`experiments/INDEX.md`](experiments/INDEX.md)** — every runnable
+1. **[`docs/START_HERE_ICLR.md`](docs/START_HERE_ICLR.md)**: authoritative
+   controller status, current T4 and PMO evidence, branch layout, and the next
+   scientific decision.
+2. **[`experiments/INDEX.md`](experiments/INDEX.md)** — every runnable
    experiment: 193 apps, 266 entrypoints, with the exact command for each.
    Generated from source by `tools/gen_experiment_index.py`, so it cannot drift.
-2. **[`experiments/region_resampling/`](experiments/region_resampling/)** — the
+3. **[`experiments/region_resampling/`](experiments/region_resampling/)** — the
    current campaign, with its preregistered gates, inputs, outputs and known
    limitations.
-3. **[`docs/INDEX.md`](docs/INDEX.md)** — all documents, classified CURRENT /
+4. **[`docs/INDEX.md`](docs/INDEX.md)** — all documents, classified CURRENT /
    SUPERSEDED / HISTORICAL.
 
 ## Layout
@@ -42,14 +45,16 @@ archive/            superseded material, kept rather than deleted
 
 ## Running an experiment
 
-```bash
-modal run modal_apps/<app>.py::<entrypoint> [--flags]
-```
+Read the experiment contract before choosing a launcher. For the long T4
+driver, use `modal deploy modal_apps/genmol_t4_opt_app.py` followed by the
+durable entrypoint in `tools/t4_launch.py`; do not substitute an ephemeral
+`modal run --detach` invocation.
 
 Four facts that are easy to learn the hard way:
 
-- **`--detach` for anything long.** An attached run dies when the laptop
-  suspends, and it takes the client-side merge with it.
+- **Use the campaign's durable deployed-app launcher for long work.** The T4
+  launcher persists a function-call ID and volume namespace so the run survives
+  the local client.
 - **Persist per unit.** A `.map` that returns results only to the client loses
   everything if one unit times out. Write each unit to the volume and harvest
   from there.

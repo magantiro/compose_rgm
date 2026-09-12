@@ -1,5 +1,9 @@
 # COMPOSE handoff — region resampling / T4 (2026-09-05)
 
+> Historical handoff. For the current controller state, completed T4 result,
+> PMO status, and collaborator workflow, read
+> [`START_HERE_ICLR.md`](START_HERE_ICLR.md) first.
+
 ## The point of the project
 
 COMPOSE treats molecular design as **control of a frozen learned process**. A

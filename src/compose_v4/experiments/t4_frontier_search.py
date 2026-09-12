@@ -25,13 +25,20 @@ from compose_v4.control.molecular_search_codec import (
     encode_lineage,
     encode_search_state,
 )
-from compose_v4.control.molecular_task_search import MolecularHierarchy, MolecularSearchState
+from compose_v4.control.molecular_task_search import (
+    MolecularHierarchy,
+    MolecularSearchState,
+)
 from compose_v4.control.option_continuation import (
     EXECUTABLE_PRODUCT_GATE,
     OptionContinuationKernel,
     exact_graph_key,
 )
-from compose_v4.experiments.continuation_profile import ExecutorMeter, encode_action, state_payload
+from compose_v4.experiments.continuation_profile import (
+    ExecutorMeter,
+    encode_action,
+    state_payload,
+)
 from compose_v4.experiments.t4_endpoint_selection import (
     acceptable_endpoint,
     calculate_properties,
@@ -56,7 +63,9 @@ class FrontierConfig:
         if self.guidance not in ("in_loop", "post_hoc"):
             raise ValueError("frontier guidance must be in_loop or post_hoc")
         if self.guidance == "post_hoc" and self.planning_transitions != 0:
-            raise ValueError("post-hoc generation does not perform task-guided planning")
+            raise ValueError(
+                "post-hoc generation does not perform task-guided planning"
+            )
         for field, value in asdict(self).items():
             if field == "guidance":
                 continue
@@ -65,7 +74,9 @@ class FrontierConfig:
             ):
                 raise ValueError(f"invalid frontier configuration {field}={value!r}")
         if self.lineages > 8 or self.primitive_budget > 16 or self.oracle_batch > 20:
-            raise ValueError("frontier configuration exceeds the bounded T4 development cell")
+            raise ValueError(
+                "frontier configuration exceeds the bounded T4 development cell"
+            )
 
 
 def prepare_slice(
@@ -81,6 +92,7 @@ def prepare_slice(
     events_per_parent: int = 3,
     executor_limit: int | None = None,
     progress=None,
+    lineage_indices: tuple[int, ...] | None = None,
 ) -> dict:
     """Advance retained lineages; a slice/round boundary never deletes an unfinished one.
 
@@ -89,6 +101,22 @@ def prepare_slice(
     A zero-event slice refreshes task scores without executing molecular edits.
     """
     config = config or FrontierConfig()
+    selected_lineages = (
+        list(range(config.lineages))
+        if lineage_indices is None
+        else sorted(lineage_indices)
+    )
+    if (
+        not selected_lineages
+        or len(set(selected_lineages)) != len(selected_lineages)
+        or any(
+            type(i) is not int or not 0 <= i < config.lineages
+            for i in selected_lineages
+        )
+    ):
+        raise ValueError(
+            "lineage partition must contain distinct in-range integer indices"
+        )
     if type(events_per_parent) is not int or events_per_parent < 0:
         raise ValueError("events_per_parent must be a nonnegative scheduling quantum")
     if (
@@ -100,7 +128,9 @@ def prepare_slice(
         or len(code_revision) != 40
         or any(c not in "0123456789abcdef" for c in code_revision)
     ):
-        raise ValueError("frontier preparation requires input SHA-256s and an exact code revision")
+        raise ValueError(
+            "frontier preparation requires input SHA-256s and an exact code revision"
+        )
     if warm.get("schema_version") != "t4_exact_archive_v1" or not warm.get("archive"):
         raise ValueError("frontier preparation requires an exact-state T4 archive")
     archive, next_round = warm["archive"], warm["round"] + 1
@@ -109,7 +139,9 @@ def prepare_slice(
     for record in archive:
         if canonical_state_key(decode_state(record["state"])) != record["smiles"]:
             raise ValueError("archive canonical metadata disagrees with exact state")
-    model = DockingValue.fit(archive, before_round=next_round, source_sha256=source_sha256)
+    model = DockingValue.fit(
+        archive, before_round=next_round, source_sha256=source_sha256
+    )
     snapshot = model.payload["snapshot_sha256"]
     reference_id = payload_hash(
         {
@@ -128,11 +160,17 @@ def prepare_slice(
             previous.get("schema_version") != SCHEMA
             or previous.get("reference_id") != reference_id
             or payload_hash(previous) != checkpoint.get("checkpoint_sha256")
+            or previous.get("partition_lineages", list(range(config.lineages)))
+            != selected_lineages
             or previous["round"] > next_round
             or prefix[: len(previous["archive_prefix"])] != previous["archive_prefix"]
-            or (previous["round"] == next_round and prefix != previous["archive_prefix"])
+            or (
+                previous["round"] == next_round and prefix != previous["archive_prefix"]
+            )
         ):
-            raise ValueError("frontier checkpoint identity/hash or append-only archive mismatch")
+            raise ValueError(
+                "frontier checkpoint identity/hash or append-only archive mismatch"
+            )
         # Detach caller-owned persisted data before extending any lineage.
         units = json.loads(json.dumps(previous["frontier"], allow_nan=False))
         if len(units) != config.lineages or [u["lineage_index"] for u in units] != list(
@@ -180,7 +218,11 @@ def prepare_slice(
     parents = sorted(
         archive,
         key=lambda row: (
-            0 if feasible_endpoint(props(row["smiles"])) and row["ds"] is not None else 1,
+            (
+                0
+                if feasible_endpoint(props(row["smiles"])) and row["ds"] is not None
+                else 1
+            ),
             row["ds"] if row["ds"] is not None else 0,
             props(row["smiles"])["v"],
         ),
@@ -213,7 +255,9 @@ def prepare_slice(
 
     if not units:
         units = [fresh(index) for index in range(config.lineages)]
-    retired = [] if previous is None else json.loads(json.dumps(previous["retired_lineages"]))
+    retired = (
+        [] if previous is None else json.loads(json.dumps(previous["retired_lineages"]))
+    )
     for index, unit in enumerate(units):
         if unit["started_round"] < next_round and (
             decode_search_state(unit["current"]).budget == 0
@@ -225,9 +269,13 @@ def prepare_slice(
     pending = None if previous is None else previous.get("pending_slice")
     if pending is not None and previous["round"] == next_round:
         if pending["events_per_parent"] != events_per_parent:
-            raise ValueError("resume the unfinished slice with its original events_per_parent")
+            raise ValueError(
+                "resume the unfinished slice with its original events_per_parent"
+            )
         targets = list(pending["target_events"])
-        if len(targets) != len(units) or any(type(t) is not int or t < 0 for t in targets):
+        if len(targets) != len(units) or any(
+            type(t) is not int or t < 0 for t in targets
+        ):
             raise ValueError("malformed pending-slice lineage census")
     else:
         targets = [len(unit["path"]) + events_per_parent for unit in units]
@@ -238,6 +286,7 @@ def prepare_slice(
             and unit["current"]["budget"] > 0
             and unit["status"] != "no_admissible_action"
             for unit, target in zip(units, targets, strict=True)
+            if unit["lineage_index"] in selected_lineages
         )
         return (
             {"events_per_parent": events_per_parent, "target_events": targets}
@@ -260,6 +309,7 @@ def prepare_slice(
             "archive_prefix": prefix,
             "value_snapshot": model.payload,
             "frontier": units,
+            "partition_lineages": selected_lineages,
             "retired_lineages": retired,
             "pending_slice": pending_slice(),
             "executor_calls": prior_calls + meter.calls,
@@ -279,6 +329,8 @@ def prepare_slice(
         return result
 
     for unit, target in zip(units, targets, strict=True):
+        if unit["lineage_index"] not in selected_lineages:
+            continue
         root = decode_search_state(unit["root"])
         node = decode_search_state(unit["current"])
         law_cache = {}
@@ -290,7 +342,10 @@ def prepare_slice(
             return law_cache[key]
 
         kernel = OptionContinuationKernel(
-            cached_law, system, max_executor_applications=None, product_gate=EXECUTABLE_PRODUCT_GATE
+            cached_law,
+            system,
+            max_executor_applications=None,
+            product_gate=EXECUTABLE_PRODUCT_GATE,
         )
         hierarchy = MolecularHierarchy(kernel)
 
@@ -298,9 +353,14 @@ def prepare_slice(
             row = hierarchy.row(state)
             if state.stage == "how":
                 unit["how_witnesses"][payload_hash(encode_search_state(state))] = [
-                    {"mark": encode_action(*mark), "option_product": state_payload(active)}
+                    {
+                        "mark": encode_action(*mark),
+                        "option_product": state_payload(active),
+                    }
                     for mark, active in zip(
-                        kernel.marks(state.active), kernel.row(state.active).successors, strict=True
+                        kernel.marks(state.active),
+                        kernel.row(state.active).successors,
+                        strict=True,
                     )
                 ]
             return row
@@ -336,7 +396,9 @@ def prepare_slice(
                         with meter.boundary():
                             planning = planner.advance(node, unit["planning_remaining"])
                     finally:
-                        unit["planning_remaining"] -= planner.work.planning_transitions - before
+                        unit["planning_remaining"] -= (
+                            planner.work.planning_transitions - before
+                        )
                     if planning["status"] == "executor_paused":
                         unit["status"] = "executor_paused"
                         break
@@ -350,7 +412,9 @@ def prepare_slice(
                     if not row.successors:
                         unit["status"] = "no_admissible_action"
                         break
-                    choice = int(rng.choice(len(row.successors), p=decision["probabilities"]))
+                    choice = int(
+                        rng.choice(len(row.successors), p=decision["probabilities"])
+                    )
                     product = row.successors[choice]
                     event = {
                         "index": len(unit["path"]),
@@ -371,9 +435,9 @@ def prepare_slice(
                             "origin_lineage": encode_lineage(node.lineage),
                         }
                     if node.stage == "how":
-                        witness = unit["how_witnesses"][payload_hash(encode_search_state(node))][
-                            choice
-                        ]
+                        witness = unit["how_witnesses"][
+                            payload_hash(encode_search_state(node))
+                        ][choice]
                         event.update(witness)
                         if product.stage == "where":
                             local = GG.structural_displacement(
@@ -397,14 +461,19 @@ def prepare_slice(
                                     "d_ring_systems": local["d_ring_systems"],
                                     "d_heavy": local["d_heavy"],
                                     "cumulative_change": GG.structural_displacement(
-                                        root.graph, product.graph, root.lineage, product.lineage
+                                        root.graph,
+                                        product.graph,
+                                        root.lineage,
+                                        product.lineage,
                                     ),
                                 }
                             )
                     unit["path"].append(event)
                     node = product
                     unit["planning_remaining"] = config.planning_transitions
-                    unit["status"] = "primitive_budget_complete" if node.budget == 0 else "ready"
+                    unit["status"] = (
+                        "primitive_budget_complete" if node.budget == 0 else "ready"
+                    )
                     save(node)
         except ContinuationBudgetExceeded:
             unit["status"] = "executor_paused"
@@ -429,9 +498,15 @@ def prepare_slice(
             origin_bundle_ids=sorted(set(candidate["origin_bundle_ids"])),
         )
     selected, represented = [], set()
-    for candidate in sorted(candidates, key=lambda c: (c["predicted_docking"], c["smiles"])):
+    for candidate in sorted(
+        candidates, key=lambda c: (c["predicted_docking"], c["smiles"])
+    ):
         available = [b for b in candidate["origin_bundle_ids"] if b not in represented]
-        if candidate["oracle_eligible"] and available and len(selected) < config.oracle_batch:
+        if (
+            candidate["oracle_eligible"]
+            and available
+            and len(selected) < config.oracle_batch
+        ):
             selected.append({**candidate, "allocated_bundle_id": available[0]})
             represented.add(available[0])
     result = publish()
