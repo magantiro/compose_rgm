@@ -1,0 +1,114 @@
+{
+  "schema_version": "pmo_plan_policy_audit_v1",
+  "evidence_class": "computed_development",
+  "task": "perindopril_mpo",
+  "protocol": "warm paired four-round complete-plan policy comparison",
+  "run": {
+    "run_id": "170ca5944c646076d6adf1be75edd5ba781119eddc23d12fa6d2d11b45510e4b",
+    "call_id": "fc-01M29H2XCECZFANCW4JPPRYH02",
+    "source_commit": "8150257d7d5f2e6d022cd648177b4803cd4c1948",
+    "contract_sha256": "f26d61756bf0eb577d33ee21edb7959bfd182cfc0a1a948339de8a4d60fe03d5",
+    "encoder_id": "5ead566c471062427e4f6f144bdac6881e162f72006d19753451aa5b74870ad2",
+    "raw_result_sha256": "4dca72933d8268408c32d4da9d79acfb76deb6964c63aa48c6bd043154ab2cd1",
+    "durable_prefix": "compose-v4-artifacts/pmo_plan_policy/170ca5944c646076d6adf1be75edd5ba781119eddc23d12fa6d2d11b45510e4b",
+    "started_at": "2026-09-12T00:43:20.178182+00:00",
+    "finished_at": "2026-09-12T00:47:57.131007+00:00",
+    "status": "complete_development"
+  },
+  "inputs": {
+    "historical_unique_labels": 2217,
+    "initial_parents": 16,
+    "initial_best": 0.6835298930947339,
+    "initial_top10_mean": 0.6763022705388483,
+    "public_winner_used": false,
+    "reference_model_retrained": false,
+    "future_value_used": false,
+    "doob_control_used": false
+  },
+  "primary": {
+    "frozen": {
+      "final_best": 0.6835298930947339,
+      "final_top10_mean": 0.6787222096517102,
+      "mean_round_end_top10_mean": 0.6781711013900468,
+      "final_unique_queried": 63
+    },
+    "learning": {
+      "final_best": 0.6835298930947339,
+      "final_top10_mean": 0.6787222096517102,
+      "mean_round_end_top10_mean": 0.6781711013900468,
+      "final_unique_queried": 63
+    },
+    "learning_minus_frozen": {
+      "final_best": 0.0,
+      "final_top10_mean": 0.0,
+      "mean_round_end_top10_mean": 0.0
+    },
+    "criterion_passed": false
+  },
+  "proposal_audit": {
+    "frozen": {
+      "proposals": 64,
+      "unique_proposal_smiles": 49,
+      "scored_proposals": 48,
+      "parent_improving_proposals": 3,
+      "median_score_change_from_parent": -0.05650989726899586,
+      "maximum_score_change_from_parent": 0.24265936945330568,
+      "topology_changed": 15,
+      "cycle_rank_increased": 3,
+      "ring_system_count_increased": 2
+    },
+    "learning": {
+      "proposals": 64,
+      "unique_proposal_smiles": 50,
+      "scored_proposals": 49,
+      "parent_improving_proposals": 4,
+      "median_score_change_from_parent": -0.045300708048855,
+      "maximum_score_change_from_parent": 0.0055535732531757365,
+      "topology_changed": 12,
+      "cycle_rank_increased": 1,
+      "ring_system_count_increased": 1
+    },
+    "median_changed_fraction_frozen": 0.02564102564102564,
+    "median_changed_fraction_learning": 0.02564102564102564,
+    "final_archive_shared": 51,
+    "final_archive_only_frozen": 12,
+    "final_archive_only_learning": 12
+  },
+  "policy_audit": {
+    "scored_plan_decisions": 18,
+    "parent_improving_plan_decisions": 2,
+    "round_mean_pool_total_variation": [
+      0.04943701154979016,
+      0.1317747086504197,
+      0.1291415280977183,
+      0.12866896818465431
+    ],
+    "round_mean_selected_probability_change": [
+      0.002789338144997829,
+      0.013965898503444247,
+      -0.01134596076318621,
+      -0.08195460891185874
+    ],
+    "policy_snapshot_changed_every_round": true
+  },
+  "compute": {
+    "new_oracle_calls": 58,
+    "oracle_call_status_complete": 58,
+    "wall_seconds": 276.95283322,
+    "proposal_seconds_sum_by_round": 243.53648906899994,
+    "worker_seconds_sum": 971.6531043039997,
+    "oracle_seconds_sum": 0.06553223899997107,
+    "worker_tasks": 112,
+    "device": "cpu",
+    "threads_per_worker": 1,
+    "peak_driver_rss_bytes": 3589392,
+    "neural_dtype": "float32",
+    "particle_dtype": "float64"
+  },
+  "decision": {
+    "outcome": "negative",
+    "stop_unchanged_recipe": true,
+    "interpretation": "The online actor produced arm-specific molecules and materially changed complete-plan probabilities, but it did not change any primary elite-set metric. Complete-plan reranking with sparse one-round endpoint gains is not the missing competitive mechanism.",
+    "next_hypothesis": "The next controller must improve multi-step proposal reachability and delayed credit jointly, while retaining broad local-to-global reference proposals. Do not scale this endpoint-plan selector or describe it as future-value control."
+  }
+}

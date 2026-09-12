@@ -4,20 +4,24 @@ Updated 2026-09-11. Active goal: reproducible improvement over the actual T4 and
 PMO champions, then verified matched external comparisons. Supporting chemistry,
 known-winner reconstruction and mathematics are not benchmark success.
 
-Active development candidate: the frozen-versus-updating complete-plan proposal
-comparison is implemented and locally prepared, but not launched. Both arms start
-from the same best sixteen exact saved states, current best 0.6835298931, and the
-same initial policy. Half of proposal traffic remains the broad reference channel;
-the other half samples complete donor/cut plans before compiling the selected plan
-through the valid executor. Only the learning arm applies round-end clipped policy
-updates from its own realized score changes. Bound: four rounds, 128 new physical
-calls total, 29 CPU workers plus one driver, $10. Hypothesis: feedback increases
-improving-plan frequency and top-ten learning-curve quality. Zero calls spent so
-far. The fixed paid-label molecular encoder took 4.359 seconds to fit and improved
-grouped calibration RMSE from 0.2601 (constant) to 0.1586. This is endpoint signal,
-not future value or evidence of online improvement. Next: remote numerical check,
-then the one bounded paired run. Protocol: `docs/PMO_PLAN_POLICY.md`; prepared
-artifact: `diagnostics/pmo_plan_policy/`.
+Latest comparison completed and rejected: the updating complete-plan proposal
+policy tied its frozen-policy control at best score 0.6835298931, final top-ten
+mean 0.6787222097, and mean round-end top-ten mean 0.6781711014. The actor changed
+after every round and later plan-pool total variation was about 0.13; final
+archives still differed by 12 molecules per arm. The null is therefore not a
+failure to execute the intervention. It is evidence that sparse endpoint-gain
+updates over sampled complete donor plans do not solve the missing proposal and
+delayed-credit problem. Stop this unchanged recipe. Cost: 58 new calls, 276.953
+seconds wall time, and 243.536 summed proposal seconds. Current champion remains
+0.6835298931. Protocol and audit: `docs/PMO_PLAN_POLICY.md` and
+`diagnostics/pmo_plan_policy/`. No job is active.
+
+Current hypothesis: competitive improvement requires coupling multi-step proposal
+reachability to delayed value, while retaining broad local-to-global reference
+traffic. The next smallest experiment must distinguish whether a rollout-derived
+continuation value can enrich completed improving plans before paying for a broad
+run. Do not call an endpoint predictor future value, and do not scale the rejected
+complete-plan actor.
 
 Operational status: offline complete-edit context learner implemented and tested;
 **rejected**, no new oracle calls or live job. Preparation plus fit/evaluation took
