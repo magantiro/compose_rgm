@@ -372,6 +372,36 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped four-cell program curriculum, 2026-09-12:** the user explicitly requested
+continuing onto other docking targets, using their released winners aggressively
+as shared development material, and letting the controller run. Authorize one
+bounded cold-start scoring round: JAK2 seed1, FA7 seed0, BRAF seed1 and 5HT1B
+seed0 at delta=0.4, eight already locked program candidates plus one seed control
+per cell, exactly 36 new calls maximum. The prior follow-on used 28 calls;
+cumulative maximum is 64, within the existing 66-call/$20 follow-on ceiling.
+Use at most eight CPU workers plus one driver, no automatic retry, the same
+shared library and mutation recipe across cells, and the existing docking
+pipeline with individually hash-verified target receptors. Freeze
+`configs/t4_program_curriculum_lock.json` before scoring. This is the initial
+paid archive for a development curriculum, not a full-suite benchmark or a
+matched adaptive/static superiority result. Preserve failures, exact traces,
+source exposure and old results. No subsequent paid round follows automatically.
+
+**Scoped shared-controller transfer, 2026-09-12:** the user requested retaining
+the measured -13.3 PARP1 result and making coordinated, context-bound complete
+programs the default architecture, then freezing one recipe across T4. Prepare
+the same shared program library and cold-start adapter on JAK2 seed1, FA7 seed0,
+BRAF seed1 and 5HT1B seed0, using existing exact source states. These form the
+user-requested small development curriculum, not the frozen final comparison.
+Use one shared library, including the newly authorized public winner-derived
+programs from all tasks, not separate target-specific scripts. Do not transfer
+PARP1 scores as new-target labels. Preserve the broad
+reference channel and measured-feedback implementation. The initial local
+preparation uses zero new oracle calls; a full-suite paid sweep is not authorized
+by the existence of these prepared candidates. Freeze a bounded launch contract
+within the recorded call/cost authority before any remote execution. No change
+to the reference, executor, frozen evaluation gates or editing-V2 training lane.
+
 **Scoped adaptive program-optimizer integration, 2026-09-12:** following the
 completed 28-call pool, the user explicitly requested promoting coordinated
 programs into the main implementation, variable attachments/parameters, branch

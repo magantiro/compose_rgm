@@ -26,6 +26,14 @@ integration branch is `compose-iclr`; the Modal session name is
 
 ## Current outcome
 
+Current prepared run: 32 locked candidates across JAK2 seed1, FA7 seed0, BRAF
+seed1 and 5HT1B seed0, plus four seed controls (36 docking calls). One shared
+146-program library now fills all four eight-candidate pools in 25.06 seconds;
+the PARP1-only library filled only JAK2. The 40-heavy-atom support is unchanged.
+Docking quality is not yet measured for these candidates. See
+`docs/T4_SHARED_PROGRAM_CONTROLLER.md` and
+`configs/t4_program_curriculum_lock.json`. Keep this batch fixed while scoring.
+
 New implementation: a score-adaptive coordinated-program optimizer now dispatches
 before the legacy connected-region WHERE stage. It mutates attachments, created
 atom classes and chain/ring-segment length, replaces compatible branches, and
@@ -72,7 +80,8 @@ all input hashes and the unchanged remote receipt alongside it. Its README
 separates the three proposal arms. These are winner-informed development results,
 not a matched improvement over the autonomous broad controller or an IVG win.
 The supplied -13.6 winner remains better. Both remote assays are finished; there
-is no active run or automatic follow-on round.
+is no unfinished work in those two assays. The separate four-target curriculum
+above is prepared for its bounded first scoring round.
 
 The next reusable data unit is prepared: 54 complete program/attachment
 representations of 27 measured endpoints, including the reused winner, with
