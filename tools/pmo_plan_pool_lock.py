@@ -8,7 +8,11 @@ import subprocess
 from pathlib import Path
 
 from compose_v4.experiments.continuation_profile import publish_json, sha256_file
-from compose_v4.experiments.pmo_plan_pool_lock import build_lock, compile_locked_queues
+from compose_v4.experiments.pmo_plan_pool_lock import (
+    build_lock,
+    compile_locked_queues,
+    score_compiled_lock,
+)
 
 
 def main() -> None:
@@ -33,6 +37,10 @@ def main() -> None:
     compile_parser.add_argument("--artifacts", type=Path, required=True)
     compile_parser.add_argument("--output", type=Path, required=True)
     compile_parser.add_argument("--workers", type=int, default=8)
+    score_parser = subparsers.add_parser("score")
+    score_parser.add_argument("--compiled", type=Path, required=True)
+    score_parser.add_argument("--output", type=Path, required=True)
+    score_parser.add_argument("--authorize-new-calls", type=int, required=True)
     args = parser.parse_args()
     if args.command == "compile":
         value = compile_locked_queues(
@@ -41,6 +49,20 @@ def main() -> None:
         print(
             f"compiled {value['candidate_count']} unique candidates after "
             f"{value['attempt_count']} attempts; new oracle calls=0"
+        )
+        return
+    if args.command == "score":
+        from compose_v4.experiments.pmo_macro_probe import make_oracle
+
+        value = score_compiled_lock(
+            args.compiled,
+            args.output,
+            make_oracle("perindopril_mpo", Path.cwd(), {}),
+            authorized_calls=args.authorize_new_calls,
+        )
+        print(
+            f"scored {value['new_oracle_calls']} candidates; "
+            f"best={value['best_score']:.9f}; decision={value['decision']}"
         )
         return
     value = build_lock(

@@ -1,10 +1,12 @@
 import pytest
 
 from compose_v4.control.docking_value import identity
+from compose_v4.experiments.continuation_profile import publish_json, sha256_file
 from compose_v4.experiments.pmo_plan_pool_lock import (
     Pool,
     role_queues,
     round_robin_pools,
+    score_compiled_lock,
     validate_lock,
 )
 
@@ -68,3 +70,58 @@ def test_queue_lock_identity_fails_closed():
     lock["queue_depth"] = 4
     with pytest.raises(ValueError, match="invalid or altered"):
         validate_lock(lock)
+
+
+def test_score_lock_is_nonadaptive_and_reports_role_failure(tmp_path):
+    rows = []
+    for index, (smiles, role) in enumerate(
+        zip(("C", "CC", "CCC"), ("actor_top", "uniform_hash", "largest_release"))
+    ):
+        trace = tmp_path / f"trace_{index}.json"
+        publish_json(trace, {"status": "compiled", "smiles": smiles})
+        rows.append(
+            {
+                "candidate_id": str(index),
+                "smiles": smiles,
+                "role": role,
+                "parent_score": 0.5,
+                "probability": 0.1,
+                "release": 0.2,
+                "primitive_steps": 2,
+                "path": str(trace),
+                "sha256": sha256_file(trace),
+            }
+        )
+    compiled = {
+        "schema_version": "pmo_plan_pool_compiled_lock_v1",
+        "candidate_count": 3,
+        "candidates": rows,
+        "new_oracle_calls": 0,
+    }
+    compiled["content_sha256"] = identity(compiled)
+    compiled_path = tmp_path / "compiled.json"
+    publish_json(compiled_path, compiled)
+    calls = []
+    values = {"C": 0.4, "CC": 0.6, "CCC": 0.3}
+
+    def oracle(smiles):
+        calls.append(smiles)
+        return values[smiles]
+
+    with pytest.raises(ValueError, match="authorization must equal"):
+        score_compiled_lock(
+            compiled_path, tmp_path / "denied.json", oracle, authorized_calls=2
+        )
+    assert calls == []
+    report = score_compiled_lock(
+        compiled_path,
+        tmp_path / "result.json",
+        oracle,
+        authorized_calls=3,
+        champion=0.95,
+    )
+    assert calls == ["C", "CC", "CCC"]
+    assert report["new_oracle_calls"] == 3
+    assert report["parent_improvements"] == 1
+    assert report["decision"] == "ranking_failure_repair_selector_before_proposal"
+    assert report["role_summaries"]["uniform_hash"]["parent_improvements"] == 1

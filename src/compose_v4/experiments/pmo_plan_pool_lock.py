@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import platform
 import subprocess
 from collections import defaultdict
@@ -10,12 +11,19 @@ from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+from time import perf_counter
+
+import numpy as np
+from rdkit import Chem, DataStructs, rdBase
+from rdkit.Chem import rdFingerprintGenerator
 
 from compose_v4.control.docking_value import identity
 from compose_v4.control.donor_program import compile_transplant, transplant_plan
 from compose_v4.control.edit_replay import cut_from_payload
 from compose_v4.control.molecular_search_codec import decode_search_state
 from compose_v4.experiments.continuation_profile import publish_json, sha256_file
+from compose_v4.experiments.t4_matched_pilot import seal
+from compose_v4.experiments.t4_matched_pilot import unseal as unseal_receipt
 from compose_v4.rewrite.kernel import canonical_state_key
 from compose_v4.rewrite.trace_shard import decode_state
 
@@ -365,6 +373,195 @@ def compile_locked_queues(
             "machine": platform.machine(),
             "workers": workers,
             "device": "cpu",
+        },
+    }
+    report["content_sha256"] = identity(report)
+    publish_json(output, report)
+    return report
+
+
+def validate_compiled_lock(value: dict) -> None:
+    body = {key: item for key, item in value.items() if key != "content_sha256"}
+    if (
+        value.get("schema_version") != "pmo_plan_pool_compiled_lock_v1"
+        or identity(body) != value.get("content_sha256")
+        or value.get("new_oracle_calls") != 0
+        or value.get("candidate_count") != len(value.get("candidates", []))
+        or len({row["smiles"] for row in value.get("candidates", [])})
+        != value.get("candidate_count")
+    ):
+        raise ValueError("invalid or altered compiled plan-pool lock")
+
+
+def _diversity(smiles: list[str]) -> float:
+    if len(smiles) < 2:
+        return 0.0
+    generator = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
+    fps = []
+    for value in smiles:
+        mol = Chem.MolFromSmiles(value)
+        if mol is None:
+            raise ValueError(f"invalid locked candidate SMILES: {value}")
+        fps.append(generator.GetFingerprint(mol))
+    distances = [
+        1 - DataStructs.TanimotoSimilarity(fps[i], fps[j])
+        for i in range(len(fps))
+        for j in range(i + 1, len(fps))
+    ]
+    return float(np.mean(distances))
+
+
+def _role_summary(rows: list[dict]) -> dict:
+    scores = np.asarray([row["score"] for row in rows], dtype=float)
+    deltas = np.asarray([row["delta"] for row in rows], dtype=float)
+    return {
+        "count": len(rows),
+        "best_score": float(scores.max()),
+        "mean_score": float(scores.mean()),
+        "mean_delta": float(deltas.mean()),
+        "median_delta": float(np.median(deltas)),
+        "max_delta": float(deltas.max()),
+        "parent_improvements": int((deltas > 1e-12).sum()),
+        "champion_improvements": sum(row["champion_improvement"] for row in rows),
+        "mean_pairwise_morgan_distance": _diversity([row["smiles"] for row in rows]),
+    }
+
+
+def score_compiled_lock(
+    compiled_path: Path,
+    output: Path,
+    oracle,
+    *,
+    authorized_calls: int,
+    champion: float = 0.6835298930947339,
+) -> dict:
+    """Score one prelocked nonadaptive batch with restart-safe local receipts."""
+    compiled = json.loads(compiled_path.read_text())
+    validate_compiled_lock(compiled)
+    if authorized_calls != compiled["candidate_count"]:
+        raise ValueError(
+            f"authorization must equal locked candidate count {compiled['candidate_count']}"
+        )
+    if not math.isfinite(champion) or not 0 <= champion <= 1:
+        raise ValueError("invalid incumbent champion")
+    for row in compiled["candidates"]:
+        if sha256_file(Path(row["path"])) != row["sha256"]:
+            raise ValueError(f"compiled trace identity mismatch: {row['candidate_id']}")
+    receipt_root = output.parent / f"{output.stem}_oracle"
+    receipt_root.mkdir(parents=True, exist_ok=True)
+    request = {
+        "schema_version": "pmo_plan_pool_oracle_request_v1",
+        "compiled_lock": {
+            "path": str(compiled_path),
+            "sha256": sha256_file(compiled_path),
+        },
+        "authorized_calls": authorized_calls,
+        "candidate_ids": [row["candidate_id"] for row in compiled["candidates"]],
+        "smiles": [row["smiles"] for row in compiled["candidates"]],
+    }
+    request["request_sha256"] = identity(request)
+    request_path = receipt_root / "request_lock.json"
+    if request_path.exists():
+        if json.loads(request_path.read_text()) != request:
+            raise ValueError("existing oracle request lock differs")
+    else:
+        publish_json(request_path, request)
+    started = perf_counter()
+    scored = []
+    for index, candidate in enumerate(compiled["candidates"]):
+        directory = receipt_root / f"{index:03d}"
+        start_path, result_path = directory / "started.json", directory / "result.json"
+        reservation = {
+            "schema_version": "pmo_plan_pool_oracle_receipt_v1",
+            "index": index,
+            "candidate_id": candidate["candidate_id"],
+            "smiles": candidate["smiles"],
+            "request_sha256": request["request_sha256"],
+        }
+        if result_path.exists():
+            result = unseal_receipt(result_path)
+            if {key: result[key] for key in reservation} != reservation:
+                raise ValueError(f"oracle result identity mismatch at index {index}")
+        elif start_path.exists():
+            raise RuntimeError(
+                f"ambiguous oracle attempt cannot be retried: {start_path}"
+            )
+        else:
+            seal(start_path, reservation)
+            call_started = perf_counter()
+            value = float(oracle(candidate["smiles"]))
+            if not math.isfinite(value) or not 0 <= value <= 1:
+                raise ValueError(f"PMO oracle returned invalid score {value!r}")
+            result = {
+                **reservation,
+                "status": "complete",
+                "score": value,
+                "oracle_seconds": perf_counter() - call_started,
+            }
+            seal(result_path, result)
+        if result.get("status") != "complete":
+            raise RuntimeError(f"failed oracle receipt at index {index}")
+        score = float(result["score"])
+        delta = score - float(candidate["parent_score"])
+        scored.append(
+            {
+                **candidate,
+                "score": score,
+                "delta": delta,
+                "parent_improvement": delta > 1e-12,
+                "champion_improvement": score > champion + 1e-12,
+                "oracle_receipt": {
+                    "path": str(result_path),
+                    "sha256": sha256_file(result_path),
+                },
+            }
+        )
+    by_role = {
+        role: _role_summary([row for row in scored if row["role"] == role])
+        for role in ROLES
+    }
+    best = max(scored, key=lambda row: (row["score"], row["smiles"]))
+    improvements = [row for row in scored if row["parent_improvement"]]
+    if best["score"] > champion + 1e-12:
+        decision = "champion_improved_bank_candidate_and_attribute_selection_role"
+    elif improvements and not any(row["role"] == "actor_top" for row in improvements):
+        decision = "ranking_failure_repair_selector_before_proposal"
+    elif improvements:
+        decision = (
+            "channel_locally_fertile_but_not_champion_competitive_mix_broad_options"
+        )
+    else:
+        decision = "donor_plan_pools_barren_move_assay_to_full_option_mixture"
+    report = {
+        "schema_version": "pmo_plan_pool_prevalence_result_v1",
+        "evidence_class": "measured_exposed_warm_development",
+        "task": "perindopril_mpo",
+        "compiled_lock": {
+            "path": str(compiled_path),
+            "sha256": sha256_file(compiled_path),
+        },
+        "request_lock": {
+            "path": str(request_path),
+            "sha256": sha256_file(request_path),
+        },
+        "incumbent_champion": champion,
+        "new_oracle_calls": len(scored),
+        "best_score": best["score"],
+        "best_candidate": best,
+        "champion_improved": best["score"] > champion + 1e-12,
+        "parent_improvements": len(improvements),
+        "role_summaries": by_role,
+        "scored": scored,
+        "decision": decision,
+        "seconds": perf_counter() - started,
+        "completed_at": datetime.now(timezone.utc).isoformat(),
+        "analysis_commit": subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], text=True
+        ).strip(),
+        "software": {
+            "python": platform.python_version(),
+            "numpy": np.__version__,
+            "rdkit": rdBase.rdkitVersion,
         },
     }
     report["content_sha256"] = identity(report)

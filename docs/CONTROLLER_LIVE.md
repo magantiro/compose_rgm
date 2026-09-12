@@ -104,10 +104,12 @@ Do not launch it again or start another task without a bounded new recipe.
   starts and donors, six option rounds, 156 and 149 new calls. First gain:
   four-edit side-chain replacement; replication: 47-edit structural replacement.
   `diagnostics/pmo_donor_comparison/README.md` and its two reports.
-- Historical labels: 249455 prescreen evaluations plus **2217 development physical
-  calls** through the latest batch. The bank is our recovered historical asset,
-  not external labels. Its legacy provenance remains incomplete. Do not call
-  this no-prescreen. The separate no-new-prescreen controller remained at
+- Historical accounting: 249455 prescreen evaluations plus **2275 development
+  physical calls** through the plan-policy comparison. The prescreen job retained
+  only each task's top 100 and discarded 249355 per-molecule labels; it is not a
+  249455-row training bank. The retained bank is our historical asset, not
+  external labels, and its legacy provenance remains incomplete. Do not call this
+  no-prescreen. The separate no-new-prescreen controller remained at
   0.5222329679 (`diagnostics/pmo_learned_proposal/report.json`).
 - T4: preserve both historical controller lineages. The workshop table selects
   compact B in 11 cells and an older 200-call controller in 15, with four failures.

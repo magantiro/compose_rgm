@@ -8,6 +8,11 @@ whether the recorded pools lacked useful products or whether the controller rank
 useful unscored products away: 814 of 890 distinct pool products had no pre-run
 label. This assay separates those explanations on the already generated pools.
 
+Historical accounting includes 249455 prescreen evaluations, but the producer
+retained only each task's top 100 and discarded 249355 item-level labels. The
+complete-plan endpoint model was fitted on 1044 rows from the retained development
+history, not on a 249455-row prescreen corpus.
+
 The preparation stage is offline and adds zero oracle calls. It uses the complete
 run artifacts from plan-policy run
 `170ca5944c646076d6adf1be75edd5ba781119eddc23d12fa6d2d11b45510e4b`.
@@ -58,4 +63,3 @@ distribution, structural diversity, intended release, realized primitive depth,
 compilation coverage, proposal time, and all oracle accounting must be reported.
 This is exposed warm development, not official PMO area under the curve or evidence
 of external superiority.
-
