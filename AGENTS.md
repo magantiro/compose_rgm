@@ -372,6 +372,28 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped winner-informed Perindopril program curriculum, 2026-09-13:** after the
+completed fast PMO run exposed poor transfer from the generic T4 program library,
+the user explicitly requested aggressive use of published IVG molecules and
+approval to pursue a Perindopril result above IVG. Implement one answer-known,
+task-informed program curriculum from the already verified public 0.8088297766
+endpoint and its five exact COMPOSE recovery witnesses. Compile, replay and lock
+a bounded family of supported endpoint variants before scoring. The run may make
+at most 16 deterministic Perindopril-MPO calls: four declared exact roots, the
+published endpoint and at most eleven program-derived variants. Compute the
+official counted-only top-ten AUC with `finish=True` and a 10,000-query
+denominator. Compare against the repository-reported IVG no-prescreen value
+0.645 and prescreen value 0.753, but label any positive result as
+winner-informed Perindopril development, not held-out PMO or general controller
+superiority. Candidate molecules must be outputs of replay-verified complete
+programs from the charged roots, never injected as an unaccounted initial
+archive. Preserve 40-active/48-slot support, exact executor semantics, the
+pinned PyTDC/RDKit oracle, unique canonical accounting and every failed program.
+The already observed element-restatement plateau is a disclosed retrospective
+development finding, not prospective evidence. T4 runs and their frozen
+configuration remain unchanged. Contract and acceptance:
+`docs/PMO_WINNER_PROGRAM_CURRICULUM.md`.
+
 **Scoped T4 context-ranked program-retrieval diagnosis, 2026-09-13:** while the
 frozen full-suite run remains immutable, the user requested continuing the
 parallel controller-development track. The first completed live unit exhausted

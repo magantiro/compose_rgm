@@ -39,7 +39,8 @@
     "celecoxib_rediscovery": 0.798,
     "jnk3": 0.825,
     "osimertinib_mpo": 0.87,
+    "perindopril_mpo": 0.645,
     "scaffold_hop": 0.589
   },
-  "no_prescreen_note_partial": "Table 2 (no ZINC250k prescreen), column sum 16.676. Only the 6 tasks COMPOSE has run are transcribed; a full-table sum assertion is NOT possible from a partial transcription and none is claimed here."
+  "no_prescreen_note_partial": "Table 2 (no ZINC250k prescreen), column sum 16.676. Only 7 tasks relevant to COMPOSE development are transcribed; a full-table sum assertion is NOT possible from a partial transcription and none is claimed here."
 }

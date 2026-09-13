@@ -1,0 +1,112 @@
+{
+  "schema_version": "pmo_winner_program_curriculum_contract_v1",
+  "authorization": "2026-09-13 user explicitly requested aggressive public-winner development and a Perindopril result above IVG",
+  "task": "perindopril_mpo",
+  "seed": 20260913,
+  "support": {
+    "active_atoms_max": 40,
+    "persistent_slots": 48,
+    "formal_charge_changes": false,
+    "stereochemistry": "out_of_scope",
+    "max_primitives_per_complete_program": 96,
+    "max_blocks_per_complete_program": 2
+  },
+  "compilation": {
+    "slots": 48,
+    "max_active": 40,
+    "mapping_timeout_seconds": 1,
+    "matches_per_molecule": 4,
+    "max_expansions": 128,
+    "children_per_expansion": 4,
+    "max_steps": 64
+  },
+  "oracle": {
+    "budget_ceiling": 16,
+    "expected_queries": 15,
+    "metric_budget": 10000,
+    "metric_frequency": 100,
+    "finish": true,
+    "pytdc_version": "0.3.6",
+    "rdkit_version": "2024.03.5",
+    "oracle_source_sha256": "0ea83059a50a730f55db3df7367ac642c8ac27b525acd0c8f240494524a1a014"
+  },
+  "comparators": {
+    "source_path": "docs/invirtuogen_pmo_targets.json",
+    "source_sha256": "87cf4adaecd0463af152b201bc1f1c45e17c329b5c029f1c1faffcd7c2cd9019",
+    "prescreen_auc_top10": 0.753,
+    "prescreen_std": 0.019,
+    "no_prescreen_auc_top10": 0.645,
+    "no_prescreen_std": 0.032,
+    "primary": "no_prescreen_auc_top10"
+  },
+  "public_endpoint": {
+    "id": "ivg_public_plot_row1_example1",
+    "smiles": "CCCC(Br)c1cc2c(ccn2CCC(NC(C)C(=O)N2C(C(=O)O)CC3CCCCC32)C(=O)OCC)o1",
+    "reported_rounded_score": 0.81,
+    "verified_score": 0.8088297765764039,
+    "pdf_sha256": "b034d0cc3292e08036de4f8933e133cb54373830421fec57dd219c371a2eab65",
+    "public_url": "https://github.com/invirtuolabs/InVirtuoGen_results/blob/main/plots/tdc/perindopril_mpo/top_smiles_cuda%3A0.pdf"
+  },
+  "variants": {
+    "distal_elements": [
+      "B",
+      "C",
+      "N",
+      "O",
+      "F",
+      "P",
+      "S",
+      "Cl",
+      "Br",
+      "I"
+    ],
+    "shorter_segment_smiles": "CCCC(Br)c1cc2c(ccn2CC(NC(C)C(=O)N2C(C(=O)O)CC3CCCCC32)C(=O)OCC)o1"
+  },
+  "root_order": [
+    "original_root_0",
+    "original_root_1",
+    "original_root_2",
+    "original_root_3"
+  ],
+  "route_inputs": {
+    "current_best": {
+      "path": "diagnostics/pmo_public_winner_recovery/current_best.json",
+      "sha256": "2fc4666977c4f829c2cc8f4959ed1e25c35e28f6ec69ae92ab38fcb268abda3b"
+    },
+    "original_root_0": {
+      "path": "diagnostics/pmo_public_winner_recovery/original_root_0.json",
+      "sha256": "70036e1d4ac8c9438d7246b61770ace2961bf2ff2c21e65edbf4cc4ba1e1d940"
+    },
+    "original_root_1": {
+      "path": "diagnostics/pmo_public_winner_recovery/original_root_1.json",
+      "sha256": "5f6e9a03c99a74c8610b41a3b700d88f8c43eb94a2af16bc531775fa6900c82a"
+    },
+    "original_root_2": {
+      "path": "diagnostics/pmo_public_winner_recovery/original_root_2.json",
+      "sha256": "148e42bb0aba483262561b99703516a9eaf971f77364a31e2d1ee90e813cc43f"
+    },
+    "original_root_3": {
+      "path": "diagnostics/pmo_public_winner_recovery/original_root_3.json",
+      "sha256": "851f2941a570df2c2e23d94e9df35aeb41efb4dd0daf0256bc0f9e8b3f58389c"
+    }
+  },
+  "other_inputs": {
+    "recovery_config": {
+      "path": "configs/pmo_public_winner_recovery.json",
+      "sha256": "2ef4a86e36e519ffb3f2263c06a9bce64056e3bea67b6fe8e09c276fd39bc30c"
+    },
+    "recovery_result": {
+      "path": "diagnostics/pmo_public_winner_recovery/result.json",
+      "sha256": "1bdbd4ebd164e7f5a75e7766cbc36401ed5bbfb8f1e190545eba94d322d0ebdc"
+    }
+  },
+  "information_regime": {
+    "role": "answer-known winner-informed Perindopril development",
+    "candidate_injection": false,
+    "program_supervision": "public endpoint plus exact target-known COMPOSE recovery witnesses",
+    "retrospective_probe_disclosed": true,
+    "held_out_claim": false,
+    "general_pmo_claim": false,
+    "t4_affected": false
+  }
+}
