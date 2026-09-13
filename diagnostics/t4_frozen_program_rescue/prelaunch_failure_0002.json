@@ -1,0 +1,17 @@
+{
+  "schema_version": "t4_frozen_program_rescue_prelaunch_failure_v1",
+  "stage": "repaired_relaunch_local_image_attestation",
+  "at_utc": "2026-09-13T20:06:35Z",
+  "new_oracle_calls": 0,
+  "remote_writes": 0,
+  "workers_spawned": 0,
+  "error": "RuntimeError: every serialized Process-V2 P50 source must be Git-tracked",
+  "offending_paths": [
+    "src/compose_v4.egg-info/PKG-INFO",
+    "src/compose_v4.egg-info/SOURCES.txt",
+    "src/compose_v4.egg-info/dependency_links.txt",
+    "src/compose_v4.egg-info/requires.txt",
+    "src/compose_v4.egg-info/top_level.txt"
+  ],
+  "interpretation": "An ignored editable-install metadata directory was present beneath src and was therefore included by source discovery but absent from Git. The launch stopped before task construction or worker spawning. Move that generated directory outside the serialized source tree, then rerun the unchanged lock."
+}
