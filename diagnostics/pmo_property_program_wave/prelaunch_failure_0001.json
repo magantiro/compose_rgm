@@ -1,0 +1,14 @@
+{
+  "schema_version": "pmo_property_program_wave_prelaunch_failure_v1",
+  "timestamp": "2026-09-13T06:31:00-04:00",
+  "stage": "oracle_source_import_before_adapter_construction",
+  "status": "failed_before_query_reservation",
+  "new_oracle_calls": 0,
+  "automatic_retry": false,
+  "error_type": "ImportError",
+  "root_cause": "PyTDC 0.3.6 imported removed rdkit.six before the audited compatibility adapter was constructed",
+  "curriculum_path": "diagnostics/pmo_property_program_wave/curriculum.json",
+  "curriculum_sha256": "e1ccfaa10390846feedaa3e864716d02956a0ec5146481c73d8d641c80581ddb",
+  "failed_code_revision": "4a4f642",
+  "query_receipts_created": 0
+}

@@ -38,6 +38,12 @@ whereas the local frozen SVM manifest records
 No current parity artifact proves these are decision-equivalent. That gap must
 be resolved before a DRD2 result is called authoritative.
 
+The first scoring prelaunch failed before reserving a query because the pinned
+PyTDC source was imported before its audited `rdkit.six` compatibility adapter.
+The replacement implementation installs compatibility first and consumes
+`curriculum_v2.json`; the original zero-call curriculum remains preserved as
+`curriculum.json`.
+
 ## Frozen procedure
 
 1. Load the same previously charged, unrelated neutral COMPOSE root and verify

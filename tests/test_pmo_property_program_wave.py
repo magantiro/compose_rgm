@@ -6,6 +6,7 @@ import pytest
 from compose_v4.experiments.pmo_property_program_wave import (
     build_curriculum,
     load_contract,
+    verified_adapters,
 )
 from compose_v4.experiments.pmo_target_program_wave import score_values
 
@@ -40,6 +41,12 @@ def test_frozen_forest_assets_match_the_official_pickle_lineage():
             manifest[task]["parameters_npz_sha256"]
             == contract["tasks"][task]["parameters_sha256"]
         )
+
+
+def test_compatibility_is_installed_before_pinned_tdc_source_import():
+    adapters = verified_adapters(ROOT, load_contract(ROOT))
+
+    assert tuple(sorted(adapters)) == ("gsk3b", "jnk3", "qed")
 
 
 def test_real_property_programs_replay_from_the_unrelated_root():

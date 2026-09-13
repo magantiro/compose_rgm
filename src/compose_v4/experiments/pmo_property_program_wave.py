@@ -26,6 +26,7 @@ from compose_v4.rewrite.trace_shard import decode_state
 KIND = "pmo_property_program_wave"
 CONTRACT = f"configs/{KIND}.json"
 OUTPUT = f"diagnostics/{KIND}"
+CURRICULUM_NAME = "curriculum_v2.json"
 
 
 def _read(path: Path) -> dict:
@@ -177,9 +178,21 @@ def _adapters(root: Path, contract: dict):
     return adapters
 
 
+def verified_adapters(root: Path, contract: dict):
+    """Install PyTDC compatibility before importing its pinned oracle source."""
+
+    adapters = _adapters(root, contract)
+    import tdc.chem_utils.oracle.oracle as oracle_module
+
+    verify_file(
+        Path(oracle_module.__file__), contract["oracle"]["pytdc_oracle_source_sha256"]
+    )
+    return adapters
+
+
 def prepare(root: Path, output: Path) -> dict:
     output = _output(root, output)
-    destination = output / "curriculum.json"
+    destination = output / CURRICULUM_NAME
     if destination.exists():
         raise ValueError(f"curriculum already exists: {destination}")
     if _git(root, "status", "--porcelain"):
@@ -192,7 +205,7 @@ def prepare(root: Path, output: Path) -> dict:
 def run(root: Path, output: Path) -> dict:
     output = _output(root, output)
     contract = load_contract(root)
-    curriculum_path = output / "curriculum.json"
+    curriculum_path = output / CURRICULUM_NAME
     curriculum = unseal(curriculum_path)
     if curriculum["contract_sha256"] != sha256_file(root / CONTRACT):
         raise ValueError("curriculum contract changed")
@@ -204,12 +217,7 @@ def run(root: Path, output: Path) -> dict:
         raise ValueError("RDKit version differs from the frozen oracle")
     if importlib.metadata.version("PyTDC") != contract["oracle"]["pytdc_version"]:
         raise ValueError("PyTDC version differs from the frozen oracle")
-    import tdc.chem_utils.oracle.oracle as oracle_module
-
-    verify_file(
-        Path(oracle_module.__file__), contract["oracle"]["pytdc_oracle_source_sha256"]
-    )
-    adapters = _adapters(root, contract)
+    adapters = verified_adapters(root, contract)
     result_path = output / "result.json"
     if result_path.exists():
         return unseal(result_path)
