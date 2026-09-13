@@ -130,7 +130,7 @@ def prepare() -> dict:
     for unit_id, launch in sorted(first_launch["units"].items()):
         call = modal.FunctionCall.from_id(launch["call_id"])
         try:
-            call_result = call.get(timeout=0)
+            call_result = call.get(timeout=1)
         except TimeoutError:
             if first_lock["units"][unit_id]["checkpoint_path"] is not None:
                 raise ValueError(
