@@ -26,7 +26,7 @@ from compose_v4.experiments.t4_matched_pilot import seal, unseal
 KIND = "pmo_ivg_oracle_parity"
 CONTRACT = f"configs/{KIND}.json"
 OUTPUT = f"diagnostics/{KIND}"
-LOCK_NAME = "query_lock.json"
+LOCK_NAME = "query_lock_v2.json"
 
 
 def _read(path: Path) -> dict:
@@ -74,6 +74,19 @@ def _verify_source_inputs(root: Path, contract: dict) -> None:
         is not False
     ):
         raise ValueError("precontract parity-probe accounting changed")
+    failure_row = contract["prequery_asset_gate_failure"]
+    verify_file(root / failure_row["path"], failure_row["sha256"])
+    failure = unseal(root / failure_row["path"])
+    if (
+        failure.get("authoritative_oracle_calls_started") != 0
+        or failure.get("authoritative_oracle_calls_completed") != 0
+        or failure.get("task_score_information_observed") is not False
+    ):
+        raise ValueError("prequery asset-gate failure accounting changed")
+    verify_file(
+        root / failure_row["invalidated_query_lock_path"],
+        failure_row["invalidated_query_lock_sha256"],
+    )
 
 
 def load_contract(root: Path) -> dict:
@@ -292,10 +305,16 @@ def build_verified_adapters(
     asset_root = output / "ivg_oracle_assets"
     with _working_directory(asset_root):
         adapters = {task: Oracle(name=task) for task in sorted(contract["tasks"])}
-    assets = {
-        path: verify_file(asset_root / path, expected)
-        for path, expected in contract["oracle"]["downloaded_assets"].items()
-    }
+    assets = {}
+    for path, expected in contract["oracle"]["downloaded_assets"].items():
+        asset_path = asset_root / path
+        if asset_path.stat().st_size != expected["bytes"]:
+            raise ValueError(f"downloaded oracle asset size mismatch: {path}")
+        assets[path] = {
+            "sha256": verify_file(asset_path, expected["sha256"]),
+            "bytes": asset_path.stat().st_size,
+            "pytdc_dataverse_file_id": expected["pytdc_dataverse_file_id"],
+        }
     return adapters, assets
 
 

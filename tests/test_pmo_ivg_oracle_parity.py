@@ -20,6 +20,11 @@ def test_contract_freezes_eleven_tasks_and_all_parity_calls():
     assert contract["oracle"]["authoritative_query_ceiling"] == 150
     assert contract["oracle"]["precontract_diagnostic_calls"] == 1
     assert contract["oracle"]["total_new_parity_environment_calls"] == 151
+    assert contract["oracle"]["downloaded_assets"]["oracle/gsk3b_current.pkl"] == {
+        "sha256": "d3a20701b80e5179c88c3ad4dc3483dd7ab35c50dc055c6773a7f5b63e89b6d5",
+        "bytes": 27791452,
+        "pytdc_dataverse_file_id": 6413412,
+    }
     assert contract["information_regime"]["candidate_reselection"] is False
     assert contract["information_regime"]["general_pmo_claim"] is False
 

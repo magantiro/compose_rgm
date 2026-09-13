@@ -391,6 +391,16 @@ general PMO claim follows automatically. Positive results remain answer-known,
 winner/panel-informed development evidence; this audit changes the evaluator,
 not the locked candidates.
 
+The first parity launch stopped before any authoritative query because its
+asset gate correctly rejected legacy HN-GFN `gsk3b.pkl`/`jnk3.pkl` hashes as
+identities for PyTDC's distinct `*_current.pkl` downloads. Preserve the failed
+lock and `diagnostics/pmo_ivg_oracle_parity/prequery_failure_0001.json`. The
+bounded repair may freeze the actual PyTDC 1.1.15 current assets served under
+Dataverse file IDs 6413412 and 6413420, update only those identities, and seal
+`query_lock_v2.json` from the unchanged 150 source observations. No task score
+was observed, so the molecule set, order, comparators and call ceiling remain
+unchanged.
+
 **Scoped PMO formula/median panel wave, 2026-09-13:** after the panel-informed
 QED/GSK3B/JNK3 refinement beat both IVG regimes on all three tasks, the user
 requested continued aggressive PMO development. Implement and run the bounded

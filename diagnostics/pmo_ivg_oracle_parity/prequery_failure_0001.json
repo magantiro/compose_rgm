@@ -1,0 +1,35 @@
+{
+  "payload": {
+    "authoritative_oracle_calls_completed": 0,
+    "authoritative_oracle_calls_started": 0,
+    "automatic_retries": 0,
+    "expected_assets": {
+      "oracle/gsk3b_current.pkl": "18d1cc9bb9498e4bae0755842080558cb2d0444ecb51beffa0ef58a6d760b74b",
+      "oracle/jnk3_current.pkl": "5c7548343996a22d9a7aae8a91f34e4bc2e5e6e5a6d9c2decce3b164459af52b"
+    },
+    "invalidated_query_lock": {
+      "path": "diagnostics/pmo_ivg_oracle_parity/query_lock.json",
+      "sha256": "4c43a726c91493bc8dc2f6c91494f26f120fc9236a98f050dc920dd2d5aeded4"
+    },
+    "observed_assets": {
+      "oracle/gsk3b_current.pkl": {
+        "bytes": 27791452,
+        "pytdc_dataverse_file_id": 6413412,
+        "sha256": "d3a20701b80e5179c88c3ad4dc3483dd7ab35c50dc055c6773a7f5b63e89b6d5"
+      },
+      "oracle/jnk3_current.pkl": {
+        "bytes": 10888588,
+        "pytdc_dataverse_file_id": 6413420,
+        "sha256": "cde8576fb4fa3f60b9f258ff9cf1b9ff346eb50d196d5cbbe25965efc1864889"
+      }
+    },
+    "observed_at": "2026-09-13",
+    "repair": "Freeze the actual PyTDC 1.1.15 current-asset identities and a new query lock before any authoritative score. Preserve this failed lock and do not reuse it.",
+    "root_cause": "The expected hashes belonged to legacy gsk3b.pkl and jnk3.pkl copies vendored by HN-GFN. PyTDC 1.1.15 with scikit-learn 1.2.2 selects and downloads the distinct gsk3b_current.pkl and jnk3_current.pkl assets. The earlier manifest explicitly marked byte identity to the TDC download unverified.",
+    "schema_version": "pmo_ivg_oracle_parity_prequery_failure_v1",
+    "stage": "downloaded_oracle_asset_identity_gate",
+    "status": "failed_before_authoritative_query",
+    "task_score_information_observed": false
+  },
+  "payload_sha256": "dc50abaab191fea600d9180d6a8121c032fb112306b2b9826d1208a483a1974a"
+}

@@ -47,6 +47,15 @@ metadata, `tdc/oracles.py`, and the molecular-oracle implementation. It also
 downloads, then verifies, the exact `gsk3b_current.pkl` and
 `jnk3_current.pkl` assets before the first authoritative score.
 
+The first launch stopped at this gate with zero authoritative calls. Its
+expected hashes belonged to legacy HN-GFN copies named `gsk3b.pkl` and
+`jnk3.pkl`, not the distinct current assets selected by PyTDC 1.1.15 with
+scikit-learn 1.2.2. The failure and invalidated first lock are preserved. The
+repaired contract binds the downloaded current assets to Dataverse file IDs
+6413412 and 6413420, their byte sizes and SHA-256 values, and uses
+`query_lock_v2.json`. No molecule, order, comparator, metric or call ceiling
+changed during this pre-score repair.
+
 The official Dockerfile leaves some non-oracle packages and its base Python
 runtime indirectly versioned. The contract therefore calls this an
 IVG-pinned core-oracle parity audit, not a byte-identical reproduction of the
@@ -81,7 +90,7 @@ UV_CACHE_DIR=.uv-cache uv run --isolated --no-project --python 3.11 \
 
 Acceptance requires:
 
-1. The immutable lock contains all 150 source observations across exactly 11
+1. The immutable `query_lock_v2.json` contains all 150 source observations across exactly 11
    tasks, with input hashes and original scores.
 2. Every environment, PyTDC-source and learned-oracle asset identity passes
    before scoring.

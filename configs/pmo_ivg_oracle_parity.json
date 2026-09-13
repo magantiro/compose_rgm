@@ -62,8 +62,16 @@
       "tdc_oracle_py": "211be401ec5f3c06ddca37e72064bbeb4de52437b218bb3f4a4a381eec1de1f5"
     },
     "downloaded_assets": {
-      "oracle/gsk3b_current.pkl": "18d1cc9bb9498e4bae0755842080558cb2d0444ecb51beffa0ef58a6d760b74b",
-      "oracle/jnk3_current.pkl": "5c7548343996a22d9a7aae8a91f34e4bc2e5e6e5a6d9c2decce3b164459af52b"
+      "oracle/gsk3b_current.pkl": {
+        "sha256": "d3a20701b80e5179c88c3ad4dc3483dd7ab35c50dc055c6773a7f5b63e89b6d5",
+        "bytes": 27791452,
+        "pytdc_dataverse_file_id": 6413412
+      },
+      "oracle/jnk3_current.pkl": {
+        "sha256": "cde8576fb4fa3f60b9f258ff9cf1b9ff346eb50d196d5cbbe25965efc1864889",
+        "bytes": 10888588,
+        "pytdc_dataverse_file_id": 6413420
+      }
     }
   },
   "official_ivg_environment_evidence": {
@@ -82,6 +90,13 @@
     "path": "diagnostics/pmo_ivg_oracle_parity/precontract_probe_0001.json",
     "sha256": "3f470058a147720af8a00813de5b56240851b17da7dcc46748b7a9afc29f2bf8",
     "oracle_calls": 1
+  },
+  "prequery_asset_gate_failure": {
+    "path": "diagnostics/pmo_ivg_oracle_parity/prequery_failure_0001.json",
+    "sha256": "788392f6bcf9885742adb5c608275d838571469771c487495d2c4cbf9bfeaebc",
+    "authoritative_oracle_calls": 0,
+    "invalidated_query_lock_path": "diagnostics/pmo_ivg_oracle_parity/query_lock.json",
+    "invalidated_query_lock_sha256": "4c43a726c91493bc8dc2f6c91494f26f120fc9236a98f050dc920dd2d5aeded4"
   },
   "tasks": {
     "albuterol_similarity": {"queries": 16, "ivg_no_prescreen_auc_top10": 0.9495725879733247, "ivg_prescreen_auc_top10": 0.9745329577899683},
