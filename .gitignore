@@ -47,6 +47,7 @@ scripts/presentation/__pycache__/
 .claude/settings.local.json
 diagnostics/.v2_scan_cache.pkl
 diagnostics/.v2_successor_cache.pkl
+diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets/
 
 # Frozen h_phi controller weights: 5.1 MB total, and the manifest records
 # their sha256, so the blanket *.pt rule above would leave a frozen model
