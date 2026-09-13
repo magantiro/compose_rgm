@@ -105,6 +105,13 @@ live frozen run. The unresolved 5HT1B seed-2 cell stayed at one endpoint in both
 arms. See [`T4_PROGRAM_RETRIEVAL.md`](T4_PROGRAM_RETRIEVAL.md) and
 `diagnostics/t4_program_retrieval/attempt_2/result.json`.
 
+Verification boundary: the focused T4/program suite passes 26/26 and all 31
+sealed retrieval artifacts validate. The repository-wide suite is not green. Its
+ordinary invocation stops on the documented Editing-V2 semantic registry binding
+drift; a continue-on-collection audit exposed further clustered legacy failures
+before it was terminated at 47% after a long CPU-bound unrelated test. Do not
+represent this branch as globally test-clean until that separate lane is repaired.
+
 The bounded fast albuterol
 run completed six rounds/110 charged queries before its time stop. Best score
 remained 0.350 from initialization; top-ten mean rose 0.264309 to 0.304106.

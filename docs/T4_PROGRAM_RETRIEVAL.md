@@ -90,3 +90,12 @@ improvement because the compared endpoints and public scores were already known
 development evidence. The operator did not expand support on 5HT1B seed 2, and
 BRAF seed 2 produced two fewer eligible endpoints despite recovering two
 additional known winners. Those limitations remain explicit next-step evidence.
+
+Focused verification passed: 26 T4/program tests, Ruff on every touched Python
+file, sealed-artifact validation for all 31 result files, deterministic scientific
+batch identity across two executions, and `git diff --check`. The ordinary full
+suite stopped during collection on the pre-existing Editing-V2 semantic registry
+binding drift. A single documented `--continue-on-collection-errors` audit was
+already materially red in those legacy lanes and reached 47% before remaining
+CPU-bound on an unrelated test; it was terminated after more than fifteen minutes.
+This result is therefore scoped-verified, not a repository-wide green sign-off.
