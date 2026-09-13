@@ -1,0 +1,26 @@
+{
+  "schema_version": "t4_frozen_program_unit_manual_resume_v1",
+  "unit_id": "jak2_2_r2",
+  "reason": "manual resume after an isolated FileNotFoundError at the post-round publication boundary",
+  "authorization": "user explicitly requested restarting from the durable point with exact oracle accounting on 2026-09-13",
+  "original_driver_call_id": "fc-01M2CE78Y7ZRQAXMNSVD775CH4",
+  "resume_call_id": "fc-01M2CSMJZH791PCC2VMR8N5WY7",
+  "remote_run_id": "54c3cb6d4a708cecc45c5037d8873a3f051538c6bc787bf84eff161f30be90da",
+  "remote_unit_path": "t4_frozen_program_benchmark/54c3cb6d4a708cecc45c5037d8873a3f051538c6bc787bf84eff161f30be90da/units/jak2_2_r2",
+  "deployed_commit": "c272b881bd23ebf1f46bbd1989e6e2871ad20687",
+  "launch_task_payload_sha256": "5876d06ab6e2bf83f85a3c8807757b76a13722fc2dfc433eb1d645f287b92257",
+  "preserved_failure_payload_sha256": "99dcd1a87a1c9985ff382739bf813b01f3c3fed16940a61c22331e5ea790c0cd",
+  "oracle_ledger_before_resume": {
+    "started": 779,
+    "completed": 779,
+    "ambiguous": 0,
+    "contiguous_indices": true,
+    "next_query_index": 779
+  },
+  "controller_seed": 20260915,
+  "docking_seed": 1703,
+  "source_index": 2,
+  "automatic_retry": false,
+  "manual_resume_started_at_utc": "2026-09-13T07:10:28Z",
+  "orchestration_revision": "1762519f50d9aca2add8984ce5e2571a9cf49e09"
+}
