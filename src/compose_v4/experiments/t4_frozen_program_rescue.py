@@ -10,6 +10,7 @@ from __future__ import annotations
 import gzip
 import hashlib
 import json
+from collections.abc import Callable
 from pathlib import Path
 
 from compose_v4.control.docking_value import identity
@@ -19,10 +20,13 @@ from compose_v4.experiments.t4_matched_pilot import unseal
 SCHEMA = "t4_frozen_program_rescue_contract_v1"
 LOCK_SCHEMA = "t4_frozen_program_rescue_lock_v1"
 RELAUNCH_LOCK_SCHEMA = "t4_frozen_program_rescue_relaunch_lock_v2"
+RELAUNCH_V3_LOCK_SCHEMA = "t4_frozen_program_rescue_relaunch_lock_v3"
 TOMBSTONE_FAILURE = "ambiguous_charged_query_unobserved"
 TOMBSTONE_COMPATIBILITY_ERROR = (
     "ValueError('missing score requires an explicit failure or unqueried status')"
 )
+REPAIRED_INPUT_PATH = "src/compose_v4/control/adaptive_program_optimizer.py"
+REPAIRED_INPUT_REASON = "accept_exact_charged_missing_observation_status"
 REQUIRED_STARTED_FIELDS = {
     "query_index",
     "round_index",
@@ -180,6 +184,55 @@ def validate_tombstone_compatibility_failure(failure: dict, *, unit_id: str) -> 
         or failure.get("automatic_retry") is not False
     ):
         raise ValueError(f"unexpected first-relaunch outcome: {unit_id}")
+
+
+def validate_repaired_input_override(
+    override: dict,
+    *,
+    frozen_sha256: str,
+    repaired_sha256: str,
+) -> None:
+    """Accept only the sealed one-file compatibility repair."""
+    expected = {
+        "path": REPAIRED_INPUT_PATH,
+        "frozen_sha256": frozen_sha256,
+        "repaired_sha256": repaired_sha256,
+        "reason": REPAIRED_INPUT_REASON,
+    }
+    if override != expected:
+        raise ValueError("T4 rescue input override changed scope or identity")
+
+
+def validate_relaunch_prequery_identity_error(
+    message: str,
+    *,
+    frozen_sha256: str,
+    repaired_sha256: str,
+) -> None:
+    expected = (
+        f"input identity mismatch: /root/compose/{REPAIRED_INPUT_PATH}: "
+        f"expected {frozen_sha256}, got {repaired_sha256}"
+    )
+    if message != expected:
+        raise ValueError("unexpected repaired-relaunch prequery failure")
+
+
+def verify_with_repaired_input(
+    path: Path,
+    expected_sha256: str,
+    *,
+    root: Path,
+    override: dict,
+    verify: Callable[[Path, str], None],
+) -> None:
+    """Delegate normal verification, replacing one exact frozen digest."""
+    relative = str(path.relative_to(root))
+    if relative != override["path"]:
+        verify(path, expected_sha256)
+        return
+    if expected_sha256 != override["frozen_sha256"]:
+        raise ValueError("T4 rescue repair was requested for an unexpected digest")
+    verify(path, override["repaired_sha256"])
 
 
 def load_rescue_contract(root: Path, relative: str) -> dict:

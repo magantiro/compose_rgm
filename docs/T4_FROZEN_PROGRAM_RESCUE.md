@@ -87,6 +87,25 @@ state. Before relaunch, require a contiguous started/result ledger with no new
 ambiguity and lock every newly completed observation. Units still executing a
 checkpoint-free bootstrap under the first relaunch are left untouched.
 
+## Repaired-image contract-input failure
+
+The next 19-unit relaunch also failed closed, this time before `run_unit` and
+before any oracle call. Its image revision described and verified the repaired
+optimizer bytes, but loading the original benchmark contract still required
+the original optimizer digest. Preserve the v2 relaunch receipt and a sealed
+19-call failure census. These remote function failures caused no query
+reservation, oracle call or artifact-volume write.
+
+The bounded v3 repair may replace contract-input verification for exactly
+`src/compose_v4/control/adaptive_program_optimizer.py`, from the original
+contract digest to the sealed repaired digest. The override must fail if the
+path, either digest or the declared repair reason differs. All other input
+hashes use the original verification path. Reaudit that all 19 query ledgers
+and durable first-relaunch failures are unchanged before spawning them again.
+The three checkpoint-free bootstrap invocations remain untouched. This is an
+identity-validation repair for the already authorized status-vocabulary fix;
+it changes no controller decision or scientific setting.
+
 ## Artifacts and procedure
 
 1. Audit the live volume read-only and freeze a rescue lock containing the

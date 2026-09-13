@@ -81,6 +81,82 @@ def test_only_exact_tombstone_compatibility_failure_is_relaunchable() -> None:
         rescue.validate_tombstone_compatibility_failure(failure, unit_id="braf_0_r1")
 
 
+def test_only_exact_repaired_input_override_is_accepted() -> None:
+    frozen = "a" * 64
+    repaired = "b" * 64
+    override = {
+        "path": rescue.REPAIRED_INPUT_PATH,
+        "frozen_sha256": frozen,
+        "repaired_sha256": repaired,
+        "reason": rescue.REPAIRED_INPUT_REASON,
+    }
+    rescue.validate_repaired_input_override(
+        override, frozen_sha256=frozen, repaired_sha256=repaired
+    )
+
+    override["path"] = "src/compose_v4/control/edit_program_policy.py"
+    with pytest.raises(ValueError, match="changed scope"):
+        rescue.validate_repaired_input_override(
+            override, frozen_sha256=frozen, repaired_sha256=repaired
+        )
+
+
+def test_only_exact_prequery_identity_error_is_relaunchable() -> None:
+    frozen = "a" * 64
+    repaired = "b" * 64
+    message = (
+        f"input identity mismatch: /root/compose/{rescue.REPAIRED_INPUT_PATH}: "
+        f"expected {frozen}, got {repaired}"
+    )
+    rescue.validate_relaunch_prequery_identity_error(
+        message, frozen_sha256=frozen, repaired_sha256=repaired
+    )
+
+    with pytest.raises(ValueError, match="unexpected repaired-relaunch"):
+        rescue.validate_relaunch_prequery_identity_error(
+            message + " extra", frozen_sha256=frozen, repaired_sha256=repaired
+        )
+
+
+def test_repaired_input_verifier_overrides_only_the_sealed_digest(tmp_path) -> None:
+    frozen = "a" * 64
+    repaired = "b" * 64
+    override = {
+        "path": rescue.REPAIRED_INPUT_PATH,
+        "frozen_sha256": frozen,
+        "repaired_sha256": repaired,
+        "reason": rescue.REPAIRED_INPUT_REASON,
+    }
+    observed = []
+    repair = tmp_path / rescue.REPAIRED_INPUT_PATH
+    ordinary = tmp_path / "src/compose_v4/control/edit_program.py"
+
+    rescue.verify_with_repaired_input(
+        repair,
+        frozen,
+        root=tmp_path,
+        override=override,
+        verify=lambda path, digest: observed.append((path, digest)),
+    )
+    rescue.verify_with_repaired_input(
+        ordinary,
+        "c" * 64,
+        root=tmp_path,
+        override=override,
+        verify=lambda path, digest: observed.append((path, digest)),
+    )
+
+    assert observed == [(repair, repaired), (ordinary, "c" * 64)]
+    with pytest.raises(ValueError, match="unexpected digest"):
+        rescue.verify_with_repaired_input(
+            repair,
+            "d" * 64,
+            root=tmp_path,
+            override=override,
+            verify=lambda _path, _digest: None,
+        )
+
+
 def test_locked_round_binds_the_exact_candidate() -> None:
     reservation = started()
     candidates = [{"candidate_id": str(index), "endpoint": "C"} for index in range(4)]

@@ -404,6 +404,20 @@ before another invocation. Leave still-running bootstrap invocations untouched;
 total concurrent rescue workers remain at most 22. No other controller or
 protocol change follows.
 
+The sealed repaired relaunch subsequently stopped all 19 affected invocations
+before `run_unit` or any oracle call. The image-level revision check accepted
+the repaired source, but the original frozen benchmark contract correctly
+rejected the changed byte identity of
+`src/compose_v4/control/adaptive_program_optimizer.py`. Preserve the v2 launch
+receipt and record all 19 remote exceptions as one zero-query prelaunch
+failure. A second bounded repair may override contract-input verification only
+for that exact file, only from the frozen digest recorded by the original
+contract to the repaired digest sealed by the new rescue lock, and only for the
+already authorized tombstone-status compatibility change. Every other original
+contract input remains byte-exact. Reaudit unchanged query ledgers before
+relaunching the same 19 units; leave the three bootstrap invocations untouched,
+use zero automatic retries, and make no controller or protocol change.
+
 **Scoped PMO Median1 closing query, 2026-09-13:** after the exact IVG-core
 oracle audit exceeded IVG no-prescreen on all eleven completed tasks and IVG
 prescreen on ten, the user requested aggressive continuation across PMO. The

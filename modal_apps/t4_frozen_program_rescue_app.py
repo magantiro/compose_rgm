@@ -15,7 +15,7 @@ from modal_apps.genmol_t4_opt_app import image as base_image
 from modal_apps.run_process_v2_p50_app import _validate_remote_revision
 
 APP_NAME = "compose-t4-frozen-program-rescue"
-LOCK_PATH = "diagnostics/t4_frozen_program_rescue/relaunch_lock_v2.json"
+LOCK_PATH = "diagnostics/t4_frozen_program_rescue/relaunch_lock_v3.json"
 SOURCE_APP = "modal_apps/t4_frozen_program_benchmark_app.py"
 SOURCE_PREFLIGHT = "diagnostics/t4_frozen_program_benchmark/preflight_v2.json"
 SOURCE_CONTRACT = "configs/t4_frozen_program_benchmark_v2.json"
@@ -75,8 +75,12 @@ def _validate_frozen_source_revision(value, expected):
 )
 def worker(task):
     from compose_v4.control.docking_value import identity
+    from compose_v4.experiments import t4_frozen_program_benchmark as benchmark
     from compose_v4.experiments.continuation_profile import sha256_file, verify_file
-    from compose_v4.experiments.t4_frozen_program_benchmark import run_unit
+    from compose_v4.experiments.t4_frozen_program_rescue import (
+        validate_repaired_input_override,
+        verify_with_repaired_input,
+    )
     from compose_v4.experiments.t4_matched_pilot import unseal
 
     _validate_remote_revision(task["rescue_image_revision"])
@@ -93,15 +97,40 @@ def worker(task):
     if task["unit_id"] not in lock["units"]:
         raise ValueError("T4 repaired relaunch unit is outside its lock")
     source_task = lock["source_task"]
-    return run_unit(
-        {**source_task, "unit_id": task["unit_id"]},
-        REMOTE_ROOT,
-        ARTIFACT_ROOT,
-        artifact_volume,
-        lambda revision: _validate_frozen_source_revision(
-            revision, source_task["image_revision"]
-        ),
-        lambda smiles, target, tag, seed: _dock(
-            smiles, target, tag, cpu=1, random_seed=seed
-        ),
+    override = lock["contract_input_override"]
+    source_contract = unseal(REMOTE_ROOT / SOURCE_CONTRACT)
+    frozen_sha256 = source_contract["inputs"][override["path"]]
+    repaired_sha256 = sha256_file(REMOTE_ROOT / override["path"])
+    validate_repaired_input_override(
+        override,
+        frozen_sha256=frozen_sha256,
+        repaired_sha256=repaired_sha256,
     )
+
+    frozen_verify_file = benchmark.verify_file
+
+    def verify_rescue_input(path, expected):
+        return verify_with_repaired_input(
+            path,
+            expected,
+            root=REMOTE_ROOT,
+            override=override,
+            verify=frozen_verify_file,
+        )
+
+    benchmark.verify_file = verify_rescue_input
+    try:
+        return benchmark.run_unit(
+            {**source_task, "unit_id": task["unit_id"]},
+            REMOTE_ROOT,
+            ARTIFACT_ROOT,
+            artifact_volume,
+            lambda revision: _validate_frozen_source_revision(
+                revision, source_task["image_revision"]
+            ),
+            lambda smiles, target, tag, seed: _dock(
+                smiles, target, tag, cpu=1, random_seed=seed
+            ),
+        )
+    finally:
+        benchmark.verify_file = frozen_verify_file
