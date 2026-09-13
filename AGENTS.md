@@ -372,6 +372,25 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped PMO panel-informed property refinement, 2026-09-13:** after the
+single-anchor learned-property wave reproduced excellent anchors but diluted
+top-ten performance with generic one-edit variants, the user requested
+aggressive continued PMO development. Implement and run the bounded follow-on
+in `docs/PMO_PROPERTY_PANEL_REFINEMENT.md`: QED, GSK3B and JNK3, ten predeclared
+neutral panel-transcribed or explicitly panel-derived structures per task, plus
+the same previously charged unrelated exact root. Compile every endpoint into a
+complete COMPOSE program and exact-replay all 30 before any new task score is
+observed. Score each root and endpoint exactly once, at most 33 new local CPU
+oracle calls total, with no retry or replacement. Reuse the already qualified
+QED and byte-matched frozen GSK3B/JNK3 oracle implementations, official
+10,000-query top-ten AUC, 40-active/48-slot support, canonical deduplication and
+both IVG comparison regimes. Preserve candidate-level source roles and do not
+describe derived positional or family variants as exact public panel records.
+This is answer-known development and a test of panel-informed program support,
+not held-out discovery, general PMO superiority or autonomous optimization.
+DRD2 remains excluded pending current-oracle parity. No frozen-reference
+training, Modal use, T4 change or automatic later wave follows.
+
 **Scoped PMO learned-property program wave, 2026-09-13:** after the first
 five-task target-program wave beat both recorded IVG comparators on every task,
 the user requested aggressive continuation across PMO. Implement and run the

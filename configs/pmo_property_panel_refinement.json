@@ -1,0 +1,134 @@
+{
+  "schema_version": "pmo_property_panel_refinement_contract_v1",
+  "authorization": "2026-09-13 user requested aggressive PMO continuation after the mixed single-anchor property wave",
+  "seed": 20260913,
+  "support": {
+    "active_atoms_max": 40,
+    "persistent_slots": 48,
+    "formal_charge_changes": false,
+    "stereochemistry": "out_of_scope",
+    "max_primitives_per_complete_program": 96,
+    "max_blocks_per_complete_program": 2
+  },
+  "compilation": {
+    "slots": 48,
+    "max_active": 40,
+    "mapping_timeout_seconds": 2,
+    "matches_per_molecule": 8,
+    "max_expansions": 1024,
+    "children_per_expansion": 8,
+    "max_steps": 96
+  },
+  "oracle": {
+    "queries_per_task": 11,
+    "program_outputs_per_task": 10,
+    "total_query_ceiling": 33,
+    "metric_budget": 10000,
+    "metric_frequency": 100,
+    "finish": true,
+    "pytdc_version": "0.3.6",
+    "rdkit_version": "2024.03.5",
+    "pytdc_oracle_source_sha256": "0ea83059a50a730f55db3df7367ac642c8ac27b525acd0c8f240494524a1a014",
+    "forest_manifest_path": "artifacts/oracles/molleo_task3_v1/molleo_task3_oracle_manifest.json",
+    "forest_manifest_sha256": "c4ca22fb8eddf087c687d245da2353817f643459cfc86be08f58993aab3979cf"
+  },
+  "source_root": {
+    "path": "diagnostics/pmo_public_winner_recovery/original_root_0.json",
+    "sha256": "70036e1d4ac8c9438d7246b61770ace2961bf2ff2c21e65edbf4cc4ba1e1d940"
+  },
+  "internal_baseline": {
+    "path": "diagnostics/pmo_property_program_wave/result.json",
+    "sha256": "541925950b4e1a1fb5e425e4eda6c7f7719f42f000d1b29b44c9745e59d624e5",
+    "role": "completed single-anchor generic-neighborhood wave"
+  },
+  "upstream": {
+    "repository": "https://github.com/invirtuolabs/InVirtuoGen_results",
+    "commit": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+    "license": "MIT",
+    "archive_sha256": "09a9f3d2d9c676d0a71af7fc9f19724d6247daad15728e81e0c0e70377dc94c0"
+  },
+  "tasks": {
+    "qed": {
+      "top_molecule_panel_sha256": "e410f3eab57f2a20155af0cd202341329478c7a62b90c7637a5e49f127b8923d",
+      "oracle_kind": "pytdc_qed",
+      "no_prescreen_auc_top10": 0.9423282027962263,
+      "no_prescreen_csv_sha256": "4b6b37bd2e335165f8216d84b1503ce8ca5b97f13cae10c3df6b9b6bbb2a0032",
+      "prescreen_auc_top10": 0.943446030900466,
+      "prescreen_csv_sha256": "b60265d31e3c6c9013e4ec549c09d477cb8aebaa651ee597cd53e029272a4c68",
+      "candidates": [
+        {"smiles": "CC(C)N1N=CC2=NC(c3ccc(-c4ccccn4)cc3)NC21", "source_role": "panel_family_positional_variant"},
+        {"smiles": "CC(C)N1N=CC2=NC(c3ccc(-c4cccnc4)cc3)NC21", "source_role": "exact_panel_transcription"},
+        {"smiles": "CC(C)N1N=CC2=NC(c3ccc(-c4ccncc4)cc3)NC21", "source_role": "panel_family_positional_variant"},
+        {"smiles": "CC(C)N1N=CC2=NC(c3cccc(-c4ccccn4)c3)NC21", "source_role": "panel_family_positional_variant"},
+        {"smiles": "CC(C)N1N=CC2=NC(c3cccc(-c4cccnc4)c3)NC21", "source_role": "panel_family_positional_variant"},
+        {"smiles": "CC(C)N1N=CC2=NC(c3cccc(-c4ccncc4)c3)NC21", "source_role": "panel_family_positional_variant"},
+        {"smiles": "CC(C)N1N=CC2=NC(c3ccccc3-c3ccccn3)NC21", "source_role": "panel_family_positional_variant"},
+        {"smiles": "CC(C)N1N=CC2=NC(c3ccccc3-c3cccnc3)NC21", "source_role": "panel_family_positional_variant"},
+        {"smiles": "CC(C)N1N=CC2=NC(c3ccccc3-c3ccncc3)NC21", "source_role": "panel_family_positional_variant"},
+        {"smiles": "CCc1cc(C)ccc1N1N=CC2=NC(c3ccccn3)NC21", "source_role": "panel_family_substitution_variant"}
+      ]
+    },
+    "gsk3b": {
+      "top_molecule_panel_sha256": "2c1c13ad734c958ac83a262739e981033d4843ceffd36282b993386c48a6579f",
+      "oracle_kind": "frozen_tdc_forest",
+      "parameters_path": "artifacts/oracles/molleo_task3_v1/gsk3b_forest.npz",
+      "parameters_sha256": "cfba66af235b022e7b2aa6d1fb6ab690f619f2e6b1281371f551526fe6370302",
+      "official_pickle_sha256": "18d1cc9bb9498e4bae0755842080558cb2d0444ecb51beffa0ef58a6d760b74b",
+      "no_prescreen_auc_top10": 0.9515509085758085,
+      "no_prescreen_csv_sha256": "2bbb6ef8530a73ba4ea91ba4f2ed52d1a05933d66bb783e4601266c8ebbeedf0",
+      "prescreen_auc_top10": 0.9877549999999982,
+      "prescreen_csv_sha256": "665f799a57192bd2711223eac85d7c316bb92aaff37f7d68e4f9b3e06defdaef",
+      "candidates": [
+        {"smiles": "COc1ccc(NN=C2C(=O)NN=C2c2ccccc2)cc1", "source_role": "exact_panel_transcription"},
+        {"smiles": "COc1ccc(NN=C2C(=O)NN=C2c2ccc(OC)cc2)cc1", "source_role": "panel_transcription"},
+        {"smiles": "C#COc1ccc(C2=NNC(=O)C2=NNc2ccc(OC)cc2)cc1", "source_role": "panel_transcription"},
+        {"smiles": "CNOc1ccc(NN=C2C(=O)NN=C2c2ccc(OC)cc2)cc1", "source_role": "panel_transcription"},
+        {"smiles": "C#COc1ccc(NN=C2C(=O)NN=C2c2ccc(OC)cc2)cc1", "source_role": "panel_transcription"},
+        {"smiles": "CNc1ccc(NN=C2C(=O)NN=C2c2ccc(OC)cc2)cc1", "source_role": "panel_transcription"},
+        {"smiles": "COc1ccc(NN=C2C(=O)NN=C2c2ccc(Cl)cc2)cc1", "source_role": "panel_transcription"},
+        {"smiles": "C#CNOc1ccc(C2=NNC(=O)C2=NNc2ccc(OC)cc2)cc1", "source_role": "panel_transcription"},
+        {"smiles": "COc1ccc(C2=NNC(=O)C2=NNc2ccccc2)cc1", "source_role": "panel_transcription"},
+        {"smiles": "COc1ccc(C2=NNC(=O)C2=NNc2ccc(Cl)cc2)cc1", "source_role": "panel_family_variant"}
+      ]
+    },
+    "jnk3": {
+      "top_molecule_panel_sha256": "8741a07f785035ae38df4a03e742c9622697a02bb765414b9cc1495fecb70d16",
+      "oracle_kind": "frozen_tdc_forest",
+      "parameters_path": "artifacts/oracles/molleo_task3_v1/jnk3_forest.npz",
+      "parameters_sha256": "bdfe15dc647d38cd5a7af148feb805df6870918a9ac83b088d1845109923d84a",
+      "official_pickle_sha256": "5c7548343996a22d9a7aae8a91f34e4bc2e5e6e5a6d9c2decce3b164459af52b",
+      "no_prescreen_auc_top10": 0.8254327400593272,
+      "no_prescreen_csv_sha256": "3591ac4f3e5cb0bb3417870a166452c2bc1a0b9d903040a59198aff2a3873386",
+      "prescreen_auc_top10": 0.8978348498483483,
+      "prescreen_csv_sha256": "b2f32528ab241993da0687ef65c3d9ec5a682f1b33f2a84112086c601fb202a4",
+      "candidates": [
+        {"smiles": "N#Cc1ccc(Nc2nccc(-c3ccc(-n4cnc(-c5ccc(Nc6cccs6)cc5)n4)cc3)n2)cc1", "source_role": "exact_panel_transcription"},
+        {"smiles": "N#Cc1ccc(-c2ncn(-c3ccc(-c4ccnc(Nc5ccc(Nc6cccs6)cc5)n4)cc3)n2)cc1", "source_role": "panel_transcription"},
+        {"smiles": "Nc1ncn(-c2ccc(-c3ccnc(Nc4ccc(Nc5cccs5)cc4)n3)cc2)n1", "source_role": "panel_transcription"},
+        {"smiles": "Clc1ncn(-c2ccc(-c3ccnc(Nc4ccc(Nc5cccs5)cc4)n3)cc2)n1", "source_role": "panel_transcription"},
+        {"smiles": "N=Cc1ncn(-c2ccc(-c3ccnc(Nc4ccc(Nc5cccs5)cc4)n3)cc2)n1", "source_role": "panel_transcription"},
+        {"smiles": "Cc1ncn(-c2ccc(-c3ccnc(Nc4ccc(Nc5cccs5)cc4)n3)cc2)n1", "source_role": "panel_transcription"},
+        {"smiles": "Sc1ncn(-c2ccc(-c3ccnc(Nc4ccc(Nc5cccs5)cc4)n3)cc2)n1", "source_role": "panel_transcription"},
+        {"smiles": "N#Cc1ccc(Nc2nccc(-c3ccc(-n4cnc(-c5nccs5)n4)cc3)n2)cc1", "source_role": "panel_transcription"},
+        {"smiles": "N#Cc1ccc(Nc2nccc(-c3ccc(-n4cnc(Nc5cccs5)n4)cc3)n2)cc1", "source_role": "panel_transcription"},
+        {"smiles": "N#Cc1ccc(Nc2nccc(-c3ccc(-n4cnc(-c5cccs5)n4)cc3)n2)cc1", "source_role": "panel_transcription"}
+      ]
+    }
+  },
+  "excluded": {
+    "drd2": {
+      "reason": "downloaded official TDC pickle is not byte-identical to the local frozen SVM and current parity is unverified",
+      "downloaded_pickle_sha256": "bf6d92d9bc1bef7efa688e14855c707e6ab7b43ec2c2f2ef28deabdc2a53480a",
+      "local_manifest_pickle_sha256": "dbc473fca922c834dbaee6eaba832caaff26d4f891734078fb1af359a111100f"
+    }
+  },
+  "information_regime": {
+    "role": "answer-known panel-informed public-property PMO development",
+    "direct_endpoint_injection": false,
+    "public_candidate_structures_used_as_program_targets": true,
+    "program_supervision": "ten predeclared panel-transcribed or explicitly panel-derived structures per task",
+    "held_out_claim": false,
+    "general_pmo_claim": false,
+    "t4_affected": false
+  }
+}
