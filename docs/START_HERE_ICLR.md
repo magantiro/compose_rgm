@@ -30,9 +30,12 @@ controller commits do not alter that deployed code or its sealed recipe.
 | Hard limits | 45,030 calls including confirmations, 30 containers, CPU only, $20 reserved ceiling |
 
 The remote zero-oracle preflight passed, including the clean source identity,
-all five receptors and QuickVina. At the last read-only check, the run was active
-and 29 unit directories had been initialized. No result has been retrieved or
-interpreted yet. Monitor without spawning another run:
+all five receptors and QuickVina. At the 2026-09-13 04:34 UTC read-only snapshot,
+7,238 docking calls had completed, 35 of 45 units had started, two had completed,
+and none had failed. Twenty-one started units were at or better than the
+corresponding reported IVG mean. These are provisional per-run values, not the
+final three-replicate aggregation or confirmation result. Monitor without
+spawning another run:
 
 ```sh
 MODAL_PROFILE=nitya PYTHONPATH=src:. .venv/bin/python \
@@ -90,6 +93,17 @@ Priority is **T4**; PMO is parked by user direction. Two work tracks are separat
    novel eligible BRAF endpoints and none on JAK2. It failed its preregistered
    gate, made zero oracle calls, and remains disabled in the benchmark. See
    [`T4_PROGRAM_COMPOSITION.md`](T4_PROGRAM_COMPOSITION.md).
+
+The newest controller-development result is positive for bounded direct program
+retrieval. Across all fifteen exact delta=0.4 sources, an eight-candidate
+context-ranked retrieval slice produced 178 eligible endpoints versus 157 for
+the forced-mutation cold-start control. It reconstructed 26 additional public
+development winners across thirteen cells, with 51.46 versus 53.14 summed
+proposal seconds and zero oracle calls. This is answer-known structural evidence,
+not autonomous discovery or a new docking result. It remains absent from the
+live frozen run. The unresolved 5HT1B seed-2 cell stayed at one endpoint in both
+arms. See [`T4_PROGRAM_RETRIEVAL.md`](T4_PROGRAM_RETRIEVAL.md) and
+`diagnostics/t4_program_retrieval/attempt_2/result.json`.
 
 The bounded fast albuterol
 run completed six rounds/110 charged queries before its time stop. Best score

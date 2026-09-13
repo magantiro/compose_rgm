@@ -432,7 +432,10 @@ def status(receipt):
     import modal
 
     saved = json.loads(receipt.read_text())
-    contract = load_contract(ROOT)
+    # Status is a read-only view of the already sealed launch. Later controller
+    # development intentionally changes local source hashes, so requiring the
+    # current checkout to match the deployed source would make monitoring fail.
+    contract = unseal(ROOT / CONTRACT)
     volume = modal.Volume.from_name(saved["volume"])
     prefix = saved["volume_path"].strip("/")
     units, total_calls = [], 0

@@ -71,5 +71,22 @@ Run locally with:
 
 ```sh
 PYTHONPATH=src:. .venv/bin/python tools/t4_program_retrieval_probe.py \
-  --output diagnostics/t4_program_retrieval/attempt_1
+  --output diagnostics/t4_program_retrieval/attempt_3
 ```
+
+## Result, 2026-09-13
+
+The authoritative clean-source run is
+`diagnostics/t4_program_retrieval/attempt_2/result.json`. The structural gate
+passed. Direct retrieval produced 178 eligible endpoints across the fifteen
+cells, compared with 157 for the control. It recovered 26 public development
+winners absent from the paired control batches across thirteen cells. Summed
+proposal time was 51.46 seconds, compared with 53.14 seconds for the control.
+No task-oracle calls were made.
+
+The result is positive for retaining bounded direct retrieval in a successor
+controller. It does not establish autonomous recovery or prospective score
+improvement because the compared endpoints and public scores were already known
+development evidence. The operator did not expand support on 5HT1B seed 2, and
+BRAF seed 2 produced two fewer eligible endpoints despite recovering two
+additional known winners. Those limitations remain explicit next-step evidence.
