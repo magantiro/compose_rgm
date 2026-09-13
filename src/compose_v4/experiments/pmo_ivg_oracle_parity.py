@@ -26,7 +26,7 @@ from compose_v4.experiments.t4_matched_pilot import seal, unseal
 KIND = "pmo_ivg_oracle_parity"
 CONTRACT = f"configs/{KIND}.json"
 OUTPUT = f"diagnostics/{KIND}"
-LOCK_NAME = "query_lock_v2.json"
+LOCK_NAME = "query_lock_v3.json"
 
 
 def _read(path: Path) -> dict:
@@ -86,6 +86,19 @@ def _verify_source_inputs(root: Path, contract: dict) -> None:
     verify_file(
         root / failure_row["invalidated_query_lock_path"],
         failure_row["invalidated_query_lock_sha256"],
+    )
+    size_failure_row = contract["prequery_asset_size_gate_failure"]
+    verify_file(root / size_failure_row["path"], size_failure_row["sha256"])
+    size_failure = unseal(root / size_failure_row["path"])
+    if (
+        size_failure.get("authoritative_oracle_calls_started") != 0
+        or size_failure.get("authoritative_oracle_calls_completed") != 0
+        or size_failure.get("task_score_information_observed") is not False
+    ):
+        raise ValueError("prequery asset-size failure accounting changed")
+    verify_file(
+        root / size_failure_row["invalidated_query_lock_path"],
+        size_failure_row["invalidated_query_lock_sha256"],
     )
 
 

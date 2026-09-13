@@ -64,12 +64,12 @@
     "downloaded_assets": {
       "oracle/gsk3b_current.pkl": {
         "sha256": "d3a20701b80e5179c88c3ad4dc3483dd7ab35c50dc055c6773a7f5b63e89b6d5",
-        "bytes": 27791452,
+        "bytes": 27791877,
         "pytdc_dataverse_file_id": 6413412
       },
       "oracle/jnk3_current.pkl": {
         "sha256": "cde8576fb4fa3f60b9f258ff9cf1b9ff346eb50d196d5cbbe25965efc1864889",
-        "bytes": 10888588,
+        "bytes": 10888961,
         "pytdc_dataverse_file_id": 6413420
       }
     }
@@ -97,6 +97,13 @@
     "authoritative_oracle_calls": 0,
     "invalidated_query_lock_path": "diagnostics/pmo_ivg_oracle_parity/query_lock.json",
     "invalidated_query_lock_sha256": "4c43a726c91493bc8dc2f6c91494f26f120fc9236a98f050dc920dd2d5aeded4"
+  },
+  "prequery_asset_size_gate_failure": {
+    "path": "diagnostics/pmo_ivg_oracle_parity/prequery_failure_0002.json",
+    "sha256": "e0f79844774f03cd4022e3cb662cacda1ab9430e215e98cf43f5325870758c85",
+    "authoritative_oracle_calls": 0,
+    "invalidated_query_lock_path": "diagnostics/pmo_ivg_oracle_parity/query_lock_v2.json",
+    "invalidated_query_lock_sha256": "7dbac64e4ae6daa9f9fc60f02dfd94bbcdcaa8a6307192f20970ecb04a594b80"
   },
   "tasks": {
     "albuterol_similarity": {"queries": 16, "ivg_no_prescreen_auc_top10": 0.9495725879733247, "ivg_prescreen_auc_top10": 0.9745329577899683},

@@ -1,0 +1,41 @@
+{
+  "payload": {
+    "authoritative_oracle_calls_completed": 0,
+    "authoritative_oracle_calls_started": 0,
+    "automatic_retries": 0,
+    "contracted_assets": {
+      "oracle/gsk3b_current.pkl": {
+        "bytes": 27791452,
+        "sha256": "d3a20701b80e5179c88c3ad4dc3483dd7ab35c50dc055c6773a7f5b63e89b6d5"
+      },
+      "oracle/jnk3_current.pkl": {
+        "bytes": 10888588,
+        "sha256": "cde8576fb4fa3f60b9f258ff9cf1b9ff346eb50d196d5cbbe25965efc1864889"
+      }
+    },
+    "invalidated_query_lock": {
+      "path": "diagnostics/pmo_ivg_oracle_parity/query_lock_v2.json",
+      "sha256": "7dbac64e4ae6daa9f9fc60f02dfd94bbcdcaa8a6307192f20970ecb04a594b80"
+    },
+    "observed_assets": {
+      "oracle/gsk3b_current.pkl": {
+        "bytes": 27791877,
+        "pytdc_dataverse_file_id": 6413412,
+        "sha256": "d3a20701b80e5179c88c3ad4dc3483dd7ab35c50dc055c6773a7f5b63e89b6d5"
+      },
+      "oracle/jnk3_current.pkl": {
+        "bytes": 10888961,
+        "pytdc_dataverse_file_id": 6413420,
+        "sha256": "cde8576fb4fa3f60b9f258ff9cf1b9ff346eb50d196d5cbbe25965efc1864889"
+      }
+    },
+    "observed_at": "2026-09-13",
+    "repair": "Correct only the two current-asset byte counts, preserve the hashes and Dataverse IDs, and seal query_lock_v3.json from the unchanged 150 source observations.",
+    "root_cause": "The first repair correctly recorded the downloaded current-asset hashes but mistakenly copied byte counts from the legacy HN-GFN pickle manifest. The downloaded current-file sizes were not read with stat before freezing the v2 lock.",
+    "schema_version": "pmo_ivg_oracle_parity_prequery_failure_v2",
+    "stage": "downloaded_oracle_asset_size_gate",
+    "status": "failed_before_authoritative_query",
+    "task_score_information_observed": false
+  },
+  "payload_sha256": "add529c5484f205bb6994d68fe3eb20d3595365053a6ccb06ec9947ecc6b5b84"
+}

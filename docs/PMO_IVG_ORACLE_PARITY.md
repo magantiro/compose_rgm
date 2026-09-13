@@ -56,6 +56,13 @@ repaired contract binds the downloaded current assets to Dataverse file IDs
 `query_lock_v2.json`. No molecule, order, comparator, metric or call ceiling
 changed during this pre-score repair.
 
+The v2 launch then stopped at the byte-size gate, also before any authoritative
+query. The current-file hashes and Dataverse IDs were correct, but the v2
+contract had copied the legacy byte sizes rather than reading the downloaded
+files. That failure and lock remain immutable. The v3 repair changes only the
+two measured byte counts and the lock name; it does not change a molecule or
+score.
+
 The official Dockerfile leaves some non-oracle packages and its base Python
 runtime indirectly versioned. The contract therefore calls this an
 IVG-pinned core-oracle parity audit, not a byte-identical reproduction of the
@@ -90,7 +97,7 @@ UV_CACHE_DIR=.uv-cache uv run --isolated --no-project --python 3.11 \
 
 Acceptance requires:
 
-1. The immutable `query_lock_v2.json` contains all 150 source observations across exactly 11
+1. The immutable `query_lock_v3.json` contains all 150 source observations across exactly 11
    tasks, with input hashes and original scores.
 2. Every environment, PyTDC-source and learned-oracle asset identity passes
    before scoring.

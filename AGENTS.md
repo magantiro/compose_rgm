@@ -401,6 +401,14 @@ Dataverse file IDs 6413412 and 6413420, update only those identities, and seal
 was observed, so the molecule set, order, comparators and call ceiling remain
 unchanged.
 
+The repaired v2 launch also stopped before any authoritative query. Its hashes
+and Dataverse IDs were correct, but the contract had copied byte counts from
+the legacy pickle manifest instead of the downloaded current files. Preserve
+`query_lock_v2.json` and
+`diagnostics/pmo_ivg_oracle_parity/prequery_failure_0002.json`. Correct only
+the two measured byte counts and seal `query_lock_v3.json` from the unchanged
+150 observations. The call ceiling and all scientific inputs remain unchanged.
+
 **Scoped PMO formula/median panel wave, 2026-09-13:** after the panel-informed
 QED/GSK3B/JNK3 refinement beat both IVG regimes on all three tasks, the user
 requested continued aggressive PMO development. Implement and run the bounded
