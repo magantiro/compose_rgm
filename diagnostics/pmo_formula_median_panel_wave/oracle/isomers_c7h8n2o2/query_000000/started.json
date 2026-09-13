@@ -1,0 +1,1 @@
+{"payload":{"automatic_retry":false,"query":{"role":"charged_task_root","smiles":"CC(=O)Nc1ccccc1","source_role":"predeclared_task_specific_generic_root"},"query_index":0,"task":"isomers_c7h8n2o2"},"payload_sha256":"3be6a76d8bc0498ed34727ffc10bd733395bb5832d557d17cb2f2428beef3fc6"}

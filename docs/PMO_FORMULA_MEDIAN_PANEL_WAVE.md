@@ -78,3 +78,33 @@ or that a general controller would recover them without formula/panel access.
 - Exactly 22 query receipts complete without retry or replacement.
 - Results preserve molecules, evidence roles, metrics, timings, hashes and
   exact margins.
+
+## Measured result, 2026-09-13
+
+All 22 locked queries completed once, with 22 started and 22 completed
+receipts, no retry and no replacement. The result payload SHA-256 is
+`720abc67b835340aef2844830555a321cd62d204fb1a6a41e9ee9c0ebad04d0c`.
+
+| Task | COMPOSE AUC | IVG no-prescreen | Arithmetic margin | IVG prescreen | Arithmetic margin |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| isomers C7H8N2O2 | 0.008877448115 | 0.968379250485 | -0.959501802370 | 0.987884834582 | -0.979007386467 |
+| median1 | 0.384597630720 | 0.342035519761 | +0.042562110958 | 0.386148049924 | -0.001550419205 |
+
+Median1 reached a best score of 0.406484790684 and final top-ten mean of
+0.384809275821. One low-scoring panel transcription diluted an otherwise
+competitive panel, so this wave beat the no-prescreen mean but missed the
+prescreen mean by 0.001550419205.
+
+The C7 formula result exposed an evaluator mismatch. Every candidate has the
+exact molecular formula, but PyTDC 0.3.6 computes its total-atom modifier by
+applying a molecular-formula parser to the input SMILES string. Canonicalizing
+the same displayed public molecules therefore produced scores from
+0.007446583071 to 0.014625334710 instead of the panel's reported 1.00.
+
+The pinned IVG source revision installs PyTDC 1.1.15 in its Dockerfile and pins
+RDKit 2023.9.6 in its requirements, whereas this wave used PyTDC 0.3.6 and
+RDKit 2024.03.5. The table's margins are exact arithmetic against the published
+numbers, but they are not a matched-oracle head-to-head result. This mismatch
+also requires a parity audit of the nine earlier PMO development results before
+retaining any cross-system superiority claim. The COMPOSE execution and the 22
+measured outcomes remain valid under their declared local oracle.

@@ -1,0 +1,1 @@
+{"payload":{"query":{"role":"charged_task_root","smiles":"CC1CCCCC1O","source_role":"predeclared_task_specific_generic_root"},"query_index":0,"score":0.20254787341673336,"seconds":0.000323625048622489,"status":"complete","task":"median1"},"payload_sha256":"03a25c6672a14603000343ab14fe4b8bdee38821a40041f6657e350074210a3b"}

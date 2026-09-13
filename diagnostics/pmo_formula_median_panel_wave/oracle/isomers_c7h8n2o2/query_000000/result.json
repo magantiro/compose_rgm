@@ -1,0 +1,1 @@
+{"payload":{"query":{"role":"charged_task_root","smiles":"CC(=O)Nc1ccccc1","source_role":"predeclared_task_specific_generic_root"},"query_index":0,"score":0.0024175515673645035,"seconds":0.00048179097939282656,"status":"complete","task":"isomers_c7h8n2o2"},"payload_sha256":"6fd227ef3ae04de94074714ca714be856e605ac1019578edf7f50cc43ffa103f"}

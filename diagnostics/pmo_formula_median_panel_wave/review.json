@@ -1,0 +1,32 @@
+{
+  "schema_version": "pmo_formula_median_panel_wave_review_v1",
+  "result_path": "diagnostics/pmo_formula_median_panel_wave/result.json",
+  "result_file_sha256": "2316ea30310287c7436a916c2dedafae7dd8477fb85fc127498b425184047853",
+  "result_payload_sha256": "720abc67b835340aef2844830555a321cd62d204fb1a6a41e9ee9c0ebad04d0c",
+  "measured": {
+    "oracle_calls": 22,
+    "started_receipts": 22,
+    "completed_receipts": 22,
+    "automatic_retries": 0,
+    "replacement_queries": 0,
+    "isomers_c7h8n2o2_auc_top10": 0.008877448115289052,
+    "median1_auc_top10": 0.3845976307197073
+  },
+  "reported_ivg_environment": {
+    "upstream_revision": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+    "dockerfile_sha256": "68fd2bab68070972a75ac399573ba32263eece7e74828fac604b74ad646c7b83",
+    "requirements_sha256": "3a2eae6baa8f0d21ebc153582682ab6a459729939204966b0fe68be2caccb2f2",
+    "setup_sha256": "ebb01ecbbcbf9e822e3f472f26befd26d3e02ac9fc16c72f83fdefebf9fe1fb8",
+    "pytdc": "1.1.15",
+    "rdkit": "2023.9.6"
+  },
+  "compose_wave_environment": {
+    "pytdc": "0.3.6",
+    "rdkit": "2024.03.5",
+    "numpy": "1.26.4",
+    "scikit_learn": "1.2.2"
+  },
+  "finding": "the published IVG comparator and this COMPOSE wave do not use a matched oracle environment",
+  "claim_status": "arithmetic margins retained; cross-system superiority claim abstains pending parity audit",
+  "next_safe_action": "qualify the IVG-reported evaluator environment and rescore locked molecular endpoints before further cross-system PMO claims"
+}
