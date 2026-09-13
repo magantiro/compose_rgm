@@ -199,3 +199,33 @@ query reservations are absent. `diagnostics/fast_pmo_run/startup_review.json`
 retains the zero-query audit. Image-input discovery is now host-only, with a
 focused container-import regression check. This is a manual startup repair,
 not an oracle retry or changed proposal, input lock, budget or scoring recipe.
+
+### Run outcome and priority change
+
+The corrected run (`506961088fbb`, `fc-01M2C81XFZT6BQN6R535K3AWCT`) completed
+six rounds with all sixteen slots filled per round, then stopped at the declared
+between-round time check. There were 110 completed, charged unique queries:
+16 initialization and 94 generated candidates. Two additional candidate requests
+hit already-scored entries. Eighteen queries remained unused; no seventh round.
+
+Best initialization and final score: 0.350. Best new candidate: 0.30877193.
+Top-ten mean: 0.26430927 to 0.30410632. There is no new champion and no external
+benchmark superiority. Budget-128 AUC with a flat unused-budget tail is 0.18526950,
+not a full PMO result. Query-level values and provenance are in
+`diagnostics/fast_pmo_run/result.json`.
+
+Measured time: proposal 22.3349 seconds, oracle callbacks 0.1055 seconds, worker
+wall 431.8953 seconds, CPU 38.02 seconds. The uninstrumented remainder includes
+durability waits, reporting, admission/replay and setup; it is not all attributed
+to one function. Receipt timestamps show roughly 1.4 seconds between first query
+reservation and scoring, whereas its oracle callback took 0.000814 seconds.
+Per-query synchronous volume commits are a clear overhead source. No reference
+calls or model fits. Inherited full-resource tariff estimate is about $0.0095
+for worker wall time, excluding build/startup/storage, not an actual invoice.
+
+The user redirected work to T4 after this run. Preserve the PMO archive and all
+failures; do not extend this run or start another PMO experiment. Next research
+target is an explicit protected pair of reusable T4 transformations, retaining
+the fast baseline, total 32-primitive/eight-block limits, original-seed endpoint
+constraints and 40-atom support. No assertion of improved docking follows from
+that proposed capability. No further paid campaign is implied by this result.
