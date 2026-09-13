@@ -397,6 +397,14 @@ task-specific roots above therefore replace that inappropriate root before the
 candidate lock; they do not alter the candidates, oracle, metric, support or
 call ceiling.
 
+The first sealed curriculum then exposed a specialized-adapter dispatch defect
+before starting any query. Preserve that lock and
+`diagnostics/pmo_formula_median_panel_wave/prequery_failure_0002.json` as an
+invalidated zero-query attempt. Repair only the adapter by using the existing
+general pinned-PyTDC dispatcher, seal a new curriculum from the changed
+implementation, and retain the same candidates, roots, metric and 22-call
+ceiling.
+
 **Scoped PMO panel-informed property refinement, 2026-09-13:** after the
 single-anchor learned-property wave reproduced excellent anchors but diluted
 top-ten performance with generic one-edit variants, the user requested

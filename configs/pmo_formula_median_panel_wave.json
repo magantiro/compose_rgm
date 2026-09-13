@@ -96,6 +96,8 @@
     "general_pmo_claim": false,
     "t4_affected": false,
     "prelock_unrelated_root_attempt_failed": true,
-    "prelock_failure_artifact": "diagnostics/pmo_formula_median_panel_wave/prelock_failure_0001.json"
+    "prelock_failure_artifact": "diagnostics/pmo_formula_median_panel_wave/prelock_failure_0001.json",
+    "prequery_specialized_adapter_attempt_failed": true,
+    "prequery_failure_artifact": "diagnostics/pmo_formula_median_panel_wave/prequery_failure_0002.json"
   }
 }

@@ -15,11 +15,11 @@ from rdkit.Chem import rdMolDescriptors
 from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.control.edit_program import EditProgram, execute_bound_program
-from compose_v4.experiments.continuation_profile import sha256_file
+from compose_v4.experiments.continuation_profile import sha256_file, verify_file
+from compose_v4.experiments.parent_edit_cycles import pmo_oracle
 from compose_v4.experiments.pmo_property_panel_refinement import (
     build_task_programs,
 )
-from compose_v4.experiments.pmo_property_program_wave import verified_adapters
 from compose_v4.experiments.pmo_target_program_wave import _canonical, score_values
 from compose_v4.experiments.t4_matched_pilot import seal, unseal
 from compose_v4.rewrite.kernel import canonical_state_key
@@ -28,7 +28,7 @@ from compose_v4.rewrite.trace_shard import decode_state, encode_state
 KIND = "pmo_formula_median_panel_wave"
 CONTRACT = f"configs/{KIND}.json"
 OUTPUT = f"diagnostics/{KIND}"
-CURRICULUM_NAME = "curriculum.json"
+CURRICULUM_NAME = "curriculum_v2.json"
 
 
 def _read(path: Path) -> dict:
@@ -244,6 +244,22 @@ def prepare(root: Path, output: Path) -> dict:
     payload = build_curriculum(root, load_contract(root))
     seal(destination, payload)
     return payload
+
+
+def verified_adapters(root: Path, contract: dict) -> dict:
+    """Construct the general pinned PyTDC tasks and verify their source module."""
+
+    protocols = {
+        name: f"pinned_formula_median_panel_wave_v1:{name}"
+        for name in contract["tasks"]
+    }
+    adapters = {name: pmo_oracle(name, protocols) for name in sorted(contract["tasks"])}
+    import tdc.chem_utils.oracle.oracle as oracle_module
+
+    verify_file(
+        Path(oracle_module.__file__), contract["oracle"]["pytdc_oracle_source_sha256"]
+    )
+    return adapters
 
 
 def run(root: Path, output: Path) -> dict:

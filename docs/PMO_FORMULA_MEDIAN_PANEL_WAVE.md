@@ -49,6 +49,15 @@ scale and topology. The root is still a charged query and is not selected after
 observing its task score. This changes the structural starting context, not the
 candidate panel, score labels, comparator, metric, support, or call ceiling.
 
+After the first curriculum lock, the scoring entry point correctly stopped
+before the first query because it called an adapter factory specialized for QED
+and frozen-forest objectives. That factory could not dispatch these general
+PyTDC tasks. This zero-query implementation defect is stored in
+`diagnostics/pmo_formula_median_panel_wave/prequery_failure_0002.json`. The
+scoring adapter was replaced with the existing general pinned-PyTDC dispatcher,
+and the first curriculum remains immutable but invalidated for scoring. A new
+curriculum must be sealed under the repaired implementation before any query.
+
 ## Baselines and interpretation
 
 The external baselines are the official three-run mean IVG no-prescreen and

@@ -1,0 +1,23 @@
+{
+  "schema_version": "pmo_formula_median_prequery_failure_v1",
+  "phase": "authoritative_scoring_prequery_adapter_construction",
+  "curriculum_path": "diagnostics/pmo_formula_median_panel_wave/curriculum.json",
+  "curriculum_sha256": "295a2259686cb3b376559fc9262e27c7eefa0cd10ca74090e66b2ea97868c748",
+  "code_revision": "e1c574a8418899e423203a883182289871f10f62",
+  "required_environment": {
+    "rdkit": "2024.03.5",
+    "pytdc": "0.3.6",
+    "numpy": "1.26.4",
+    "scikit_learn": "1.2.2"
+  },
+  "environment_gate_passed": true,
+  "status": "adapter_dispatch_failed",
+  "exception_type": "KeyError",
+  "exception_detail": "oracle_kind",
+  "cause": "the new wave called a helper specialized for QED and frozen-forest task rows rather than the existing general pinned-PyTDC dispatcher",
+  "decision": "preserve and invalidate the first curriculum for scoring; repair only adapter dispatch and seal a new curriculum under the changed implementation",
+  "started_query_receipts": 0,
+  "completed_query_receipts": 0,
+  "new_oracle_calls": 0,
+  "automatic_retries": 0
+}
