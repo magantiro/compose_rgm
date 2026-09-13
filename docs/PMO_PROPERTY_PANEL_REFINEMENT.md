@@ -69,3 +69,28 @@ sufficient under the frozen protocol.
 - Exactly 33 query receipts complete without retries or replacements.
 - Machine-readable results include exact molecules, scores, timing, metrics,
   margins, implementation hashes, code revision and scientific limitations.
+
+## Measured result, 2026-09-13
+
+All 33 locked queries completed without retry or replacement. Every task
+improved over its single-anchor generic-neighborhood baseline and exceeded both
+official IVG comparator means.
+
+| Task | COMPOSE AUC | Single-anchor AUC | IVG no-prescreen | Margin | IVG prescreen | Margin |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| GSK3B | 0.998450550000 | 0.863308800000 | 0.951550908576 | +0.046899641424 | 0.987755000000 | +0.010695550000 |
+| JNK3 | 0.971465400000 | 0.882293600000 | 0.825432740059 | +0.146032659941 | 0.897834849848 | +0.073630550152 |
+| QED | 0.947920399224 | 0.930267966546 | 0.942328202796 | +0.005592196428 | 0.943446030900 | +0.004474368324 |
+
+GSK3B's best score was 1.00 and final top-ten mean was 0.999. JNK3's best
+score was 0.98 and final top-ten mean was 0.972. QED's best score was
+0.948442042792 and final top-ten mean was 0.948442042348. The result supports
+the narrow conclusion that task-appropriate, panel-informed program targets
+preserve high-scoring neighborhoods better than a single anchor plus generic
+one-edit variants under this answer-known development protocol.
+
+The result does not show autonomous discovery or performance without public
+candidate-structure supervision. The 30 endpoints were predeclared from exact
+panel transcriptions or explicitly labeled panel-derived variants, then compiled
+and replayed through COMPOSE before scoring. The authoritative payload SHA-256
+is `b8248f547a24ca691f9a729cfe3fe3629ba0c2e2cee8e47ef7fdbaad7c17d022`.
