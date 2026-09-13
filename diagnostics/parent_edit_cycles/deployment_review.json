@@ -1,0 +1,12 @@
+{
+  "schema_version": "parent_edit_deployment_review_v1",
+  "recorded_at_utc": "2026-09-12 23:57:37 UTC",
+  "source_revision": "5553ef0ca97c74c8f9f5705c17d2ca505f7e73e2",
+  "clean_worktree": "/private/tmp/compose-parent-edit-launch.UFDw55",
+  "first_deployment_attempt": "rejected_before_process_creation",
+  "review_reason": "Trusted repository contract was not recognized as authorizing this deployment and allocation",
+  "remote_jobs_started": 0,
+  "new_oracle_calls": 0,
+  "resolution": "User subsequently supplied replacement AGENTS.md explicitly authorizing the 108-docking, 24000-PMO-query, 20-dollar, 30-container learning-cycle campaign",
+  "next_action": "Retry the same deployment through permission review; no alternate execution path"
+}

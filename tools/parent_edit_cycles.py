@@ -24,6 +24,7 @@ from compose_v4.experiments.parent_edit_cycles import (
     configured,
     fit_measured_edits,
     load_contract,
+    zero_query_dispatch_failures,
 )
 from compose_v4.experiments.t4_matched_pilot import seal, unseal
 from compose_v4.experiments.whole_ring_plan import execute_program
@@ -245,7 +246,7 @@ def bind_runtime():
     )
 
 
-def launch(group, receipt):
+def launch(group, receipt, recover_from=None):
     import modal
 
     from modal_apps.run_process_v2_p50_app import local_image_revision
@@ -261,6 +262,17 @@ def launch(group, receipt):
             p: sha256_file(ROOT / p) for p in (CONTRACT, APP, "modal_apps/genmol_t4_opt_app.py")
         },
     }
+    if recover_from is not None:
+        if group != "pmo":
+            raise ValueError("only identified zero-query PMO dispatch failures are recoverable")
+        prior = json.loads(recover_from.read_text())
+        previous = modal.FunctionCall.from_id(prior["call_id"]).get(timeout=0)
+        units = zero_query_dispatch_failures(previous, body["files_sha256"][CONTRACT])
+        body["recovery"] = {
+            "run_id": previous["task"]["run_id"],
+            "result_sha256": identity(previous),
+            "units": units,
+        }
     task = {**body, "run_id": identity(body), "group": group}
     call = modal.Function.from_name(APP_NAME, "run").spawn(task)
     result = {
@@ -301,12 +313,188 @@ def retrieve(receipt, output):
     )
 
 
+def review_t4(output):
+    """Reproduce the completed T4 comparison from locked receipts and snapshots."""
+    import platform
+    import subprocess
+    from collections import Counter
+    from statistics import mean
+
+    result_path = ROOT / "diagnostics/parent_edit_cycles/t4_result.json"
+    result = unseal(result_path)
+    inputs = {str(result_path.relative_to(ROOT)): sha256_file(result_path)}
+    attempts, reports, repetitions = Counter(), [], {}
+    for unit in result["results"]:
+        path = (
+            ROOT / "diagnostics/parent_edit_cycles/t4_units" / (unit["unit"]["unit_id"] + ".json")
+        )
+        inputs[str(path.relative_to(ROOT))] = sha256_file(path)
+        full = unseal(path)
+        if full["rows"] != unit["rows"] or full["unit"] != unit["unit"]:
+            raise ValueError(f"unit receipt disagrees with group result: {path}")
+        for history in full["snapshot"]["history"]:
+            attempts.update((a["channel"], a["status"]) for a in history["batch"]["attempts"])
+        best = min(unit["rows"], key=lambda r: (r["score"], r["endpoint"]))
+        entries = [
+            e for e in full["snapshot"]["entries"].values() if e["endpoint"] == best["endpoint"]
+        ]
+        reports.append(
+            {
+                "unit": unit["unit"],
+                "first_calls": unit["oracle_calls"],
+                "best_new_score": best["score"],
+                "best_new_endpoint": best["endpoint"],
+                "best_program_provenance": [e.get("provenance", {}) for e in entries],
+                "proposal_seconds": sum(h["proposal_seconds"] for h in unit["history"]),
+                "oracle_seconds": sum(r["seconds"] for r in unit["rows"]),
+                "worker_seconds": unit["seconds"],
+                "law_seconds": full["law_work"]["law_seconds"],
+                "rounds": len(unit["history"]),
+                "empty_rounds": sum(h["pool_size"] == 0 for h in unit["history"]),
+                "rounds_with_selection_headroom": sum(
+                    h["pool_size"] > unit["unit"]["batch_queries"] for h in unit["history"]
+                ),
+                "history": unit["history"],
+            }
+        )
+    for row in result["confirmations"]:
+        for role in row["roles"]:
+            group = repetitions.setdefault(row["cell"], {}).setdefault(role, [])
+            group.append({k: row[k] for k in ("endpoint", "seed", "score", "status")})
+    first_calls = sum(r["first_calls"] for r in reports)
+    confirmations = len(result["confirmations"])
+    if first_calls + confirmations != result["oracle_calls"]:
+        raise ValueError("T4 call accounting does not reconcile")
+    report = {
+        "schema_version": "parent_edit_t4_review_v1",
+        "inputs_sha256": inputs,
+        "analysis_source_sha256": sha256_file(Path(__file__)),
+        "analysis_git_revision": subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip(),
+        "python": platform.python_version(),
+        "run_task": result["task"],
+        "first_calls": first_calls,
+        "confirmation_calls": confirmations,
+        "total_calls": result["oracle_calls"],
+        "oracle_failures": sum(
+            r["status"] != "complete" for u in result["results"] for r in u["rows"]
+        )
+        + sum(r["status"] != "complete" for r in result["confirmations"]),
+        "first_oracle_seconds": sum(r["oracle_seconds"] for r in reports),
+        "mean_first_oracle_seconds": sum(r["oracle_seconds"] for r in reports) / first_calls,
+        "summed_proposal_seconds": sum(r["proposal_seconds"] for r in reports),
+        "summed_search_worker_seconds": sum(r["worker_seconds"] for r in reports),
+        "summed_law_seconds": sum(r["law_seconds"] for r in reports),
+        "attempt_counts": [
+            {"channel": c, "status": s, "count": n} for (c, s), n in sorted(attempts.items())
+        ],
+        "units": reports,
+        "fresh_confirmations": repetitions,
+        "repeat_only_means": {
+            cell: {
+                role: mean(r["score"] for r in rows if r["status"] == "complete")
+                for role, rows in roles.items()
+            }
+            for cell, roles in repetitions.items()
+        },
+        "benchmark_claim": False,
+        "comparison_limits": [
+            "two search seeds per target",
+            "same proposal recipe but wall-limited pool sizes differ",
+            "two fresh repeats per selected arm champion and predeclared incumbent",
+            "warm paid archives and winner-derived structural development information declared",
+        ],
+    }
+    seal(output, report)
+    print(
+        json.dumps(
+            {
+                k: report[k]
+                for k in (
+                    "total_calls",
+                    "mean_first_oracle_seconds",
+                    "summed_proposal_seconds",
+                    "summed_law_seconds",
+                    "repeat_only_means",
+                )
+            },
+            indent=2,
+        )
+    )
+
+
+def review_pmo(output):
+    """Reconcile interrupted PMO receipts without inventing completion or rewards."""
+    import platform
+    import subprocess
+
+    path = ROOT / "diagnostics/parent_edit_cycles/pmo_reconciliation.json"
+    data = unseal(path)
+    rows = []
+    for name, unit in sorted(data["units"].items()):
+        completed = unit["completed"]
+        for query, row in completed.items():
+            if (
+                query not in unit["reservations"]
+                or identity({k: v for k, v in row.items() if k != "receipt_id"})
+                != row["receipt_id"]
+            ):
+                raise ValueError(f"unreconciled PMO receipt: {name}/{query}")
+        scores = [r["score"] for r in completed.values() if r["status"] == "complete"]
+        rows.append(
+            {
+                "unit": name,
+                "charged": len(unit["reservations"]),
+                "completed": len(scores),
+                "unresolved": sorted(set(unit["reservations"]) - set(completed)),
+                "best_partial_score": max(scores) if scores else None,
+                "oracle_seconds": sum(r.get("seconds", 0) for r in completed.values()),
+                "error": unit.get("failure.json", {}).get("error"),
+            }
+        )
+    report = {
+        "schema_version": "parent_edit_pmo_review_v1",
+        "input_sha256": sha256_file(path),
+        "input_path": str(path.relative_to(ROOT)),
+        "analysis_source_sha256": sha256_file(Path(__file__)),
+        "analysis_git_revision": subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip(),
+        "python": platform.python_version(),
+        "launch": data["launch"],
+        "units": rows,
+        "charged": sum(r["charged"] for r in rows),
+        "completed": sum(r["completed"] for r in rows),
+        "unresolved": sum(len(r["unresolved"]) for r in rows),
+        "oracle_seconds": sum(r["oracle_seconds"] for r in rows),
+        "benchmark_claim": False,
+        "completed_comparison": False,
+    }
+    if (report["charged"], report["completed"], report["unresolved"]) != (
+        data["reserved_calls"],
+        data["completed_calls"],
+        data["unresolved_calls"],
+    ):
+        raise ValueError("PMO reconciliation changed during analysis")
+    seal(output, report)
+    print(
+        json.dumps(
+            {k: report[k] for k in ("charged", "completed", "unresolved", "oracle_seconds")},
+            indent=2,
+        )
+    )
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("prepare", "bind", "launch", "retrieve"))
+    parser.add_argument(
+        "mode", choices=("prepare", "bind", "launch", "retrieve", "review-t4", "review-pmo")
+    )
     parser.add_argument("--group", choices=("t4", "pmo"))
     parser.add_argument("--receipt", type=Path)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--recover-from", type=Path)
     args = parser.parse_args()
     if args.mode == "prepare":
         prepare()
@@ -315,7 +503,15 @@ if __name__ == "__main__":
     elif args.mode == "launch":
         if not args.group or args.receipt is None:
             parser.error("launch requires --group and --receipt")
-        launch(args.group, args.receipt)
+        launch(args.group, args.receipt, args.recover_from)
+    elif args.mode == "review-t4":
+        if args.output is None:
+            parser.error("review-t4 requires --output")
+        review_t4(args.output)
+    elif args.mode == "review-pmo":
+        if args.output is None:
+            parser.error("review-pmo requires --output")
+        review_pmo(args.output)
     else:
         if args.receipt is None or args.output is None:
             parser.error("retrieve requires --receipt and --output")

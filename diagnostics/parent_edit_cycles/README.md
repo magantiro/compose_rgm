@@ -5,6 +5,11 @@ $20 combined reserved cost, up to 30 simultaneous containers. The concrete launc
 uses twelve shared workers, two group drivers and two confirmation workers.
 All are CPU-only with explicit memory/time ceilings and zero automatic retries.
 
+Current outcome: T4 complete (72 calls); PMO interrupted (647 charged
+reservations, 646 completed scores, one unresolved query). No parent-edit campaign
+containers are active and no recovery has launched. See `docs/PARENT_EDIT_CYCLES_REPORT.md`
+for results, implementation, limitations and the next proposed decision.
+
 `configs/parent_edit_cycles.json` is the self-hashed launch contract. Its material
 inputs include the exact warm T4 histories, common shared program library and
 three task-independent PMO initialization locks. Existing PMO scores are not
@@ -23,8 +28,18 @@ was regenerated and no result was inspected between these bindings.
 
 Forty focused launch/dependency tests passed in 8.95 seconds; lint/format and
 diff checks passed. This is not a full repository verification or benchmark
-result. Launch receipts and retrieved results will be added here. Durable remote
+result. Launch receipts and retrieved results are retained here. Durable remote
 artifacts live in `parent_edit_cycles/<run_id>/` on `compose-v4-artifacts`.
 
 Read `docs/PARENT_EDIT_LEARNING_CYCLES.md` for the fixed hypothesis, comparisons,
 query accounting and positive/negative/inconclusive decisions.
+
+Deployment succeeded from clean commit `5553ef0ca97c` (137.555 seconds build/deploy).
+Both approved groups were submitted; `t4_launch.json` and `pmo_launch.json` retain
+the exact task identities and call handles. These are operational launch receipts,
+not measured improvements. The completed T4 result is `t4_result.json`; unit
+snapshots are in `t4_units/`. `t4_review.json` records reproducible aggregation.
+`pmo_reconciliation.json` preserves all retrieved query reservations/results and
+their source hashes; `pmo_review.json` rechecks accounting. `pmo_call_graph.json`
+records the failed driver, rejected worker and cancellations. Preserve the one
+unresolved query as charged; do not blindly respawn these calls.
