@@ -57,7 +57,7 @@ def run(task):
         ARTIFACT_ROOT,
         artifact_volume,
         _validate_remote_revision,
-        lambda tasks: worker.map(tasks, order_outputs=False),
+        lambda tasks: worker.map(tasks, order_outputs=True, return_exceptions=True),
         lambda tasks: confirm.map(tasks, order_outputs=False),
     )
 

@@ -322,7 +322,7 @@ class MolecularHierarchy:
 
 
 def dispatch_complete_proposal(
-    rng, *, program_sampler, broad_sampler, probabilities=(0.7, 0.2, 0.1)
+    rng, *, program_sampler, broad_sampler, probabilities=(0.7, 0.2, 0.1), proposal_mode="mixed"
 ):
     """First-class optimizer dispatch BEFORE any legacy single-region WHERE draw.
 
@@ -332,13 +332,17 @@ def dispatch_complete_proposal(
     """
     weights = np.asarray(probabilities, dtype=float)
     if (
-        weights.shape != (3,)
+        proposal_mode not in ("mixed", "program_only")
+        or weights.shape != (3,)
         or not np.isfinite(weights).all()
-        or np.any(weights <= 0)
+        or np.any(weights < 0)
+        or np.any(weights[:2] <= 0)
         or not np.isclose(weights.sum(), 1)
+        or (proposal_mode == "mixed" and weights[2] <= 0)
+        or (proposal_mode == "program_only" and weights[2] != 0)
     ):
         raise ValueError(
-            "mutation/recombination/broad probabilities must be positive and sum to one"
+            "channel probabilities must sum to one and match the explicit proposal mode"
         )
     channel = ("mutation", "recombination", "broad")[int(rng.choice(3, p=weights))]
     product = broad_sampler() if channel == "broad" else program_sampler(channel)

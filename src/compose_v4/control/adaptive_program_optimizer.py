@@ -40,8 +40,9 @@ from compose_v4.control.program_mutation import (
     parameter_choices,
     select_branch,
 )
+from compose_v4.control.program_work_cache import ProgramWorkCache
 from compose_v4.rewrite.kernel import canonical_state_key
-from compose_v4.rewrite.trace_shard import decode_state
+from compose_v4.rewrite.trace_shard import decode_state, encode_state
 
 
 @dataclass(frozen=True)
@@ -63,6 +64,10 @@ class ProgramSearchConfig:
     current_state_edit_probability: float = 0.0
     decompose_programs: bool = False
     score_direction: str = "minimize"
+    proposal_mode: str = "mixed"
+    proposal_cache_entries: int = 0
+    mutation_sampling: str = "random"
+    mutation_context_limit: int = 128
 
     @classmethod
     def parent_edit_recipe(cls, *, seed=20260912, score_direction="minimize"):
@@ -80,7 +85,33 @@ class ProgramSearchConfig:
             decompose_programs=True,
         )
 
+    @classmethod
+    def program_only_recipe(cls, *, seed=20260912, score_direction="minimize"):
+        """Named optimization proposal, not a sample from the frozen reference.
+
+        Retain the repaired program engine and renormalize its 70:20 allocation.
+        Existing-atom edits still execute through the production enumerators.
+        """
+        from dataclasses import replace
+
+        return replace(
+            cls.parent_edit_recipe(seed=seed, score_direction=score_direction),
+            proposal_mode="program_only",
+            channel_probabilities=(7 / 9, 2 / 9, 0.0),
+            require_broad_runtime=False,
+        )
+
     def __post_init__(self):
+        if self.mutation_sampling not in ("random", "untried"):
+            raise ValueError("unknown mutation sampling policy")
+        if type(self.mutation_context_limit) is not int or self.mutation_context_limit < 1:
+            raise ValueError("mutation context limit must be a positive integer")
+        if type(self.proposal_cache_entries) is not int or self.proposal_cache_entries < 0:
+            raise ValueError("proposal cache capacity must be a nonnegative integer")
+        if self.proposal_mode not in ("mixed", "program_only"):
+            raise ValueError("unknown explicit proposal mode")
+        if self.proposal_mode == "program_only" and self.require_broad_runtime:
+            raise ValueError("program-only mode cannot require a reference runtime")
         if self.continuation_root not in ("ancestral_constructor", "exact_current_state"):
             raise ValueError("unknown continuation-root contract")
         if self.score_direction not in ("minimize", "maximize"):
@@ -120,10 +151,13 @@ class ProgramSearchConfig:
         weights = self.channel_probabilities
         if (
             len(weights) != 3
-            or any(not math.isfinite(v) or v <= 0 for v in weights)
+            or any(not math.isfinite(v) or v < 0 for v in weights)
+            or any(v <= 0 for v in weights[:2])
             or not math.isclose(sum(weights), 1)
+            or (self.proposal_mode == "mixed" and weights[2] <= 0)
+            or (self.proposal_mode == "program_only" and weights[2] != 0)
         ):
-            raise ValueError("three positive channel probabilities must sum to one")
+            raise ValueError("channel probabilities must sum to one and match the proposal mode")
 
 
 class ProgramOptimizer:
@@ -151,6 +185,8 @@ class ProgramOptimizer:
         self.batches = 0
         self._program_cache, self._source_cache, self._branch_cache = {}, {}, {}
         self._niche_cache = None
+        self.work_cache = ProgramWorkCache(config.proposal_cache_entries)
+        self.mutation_choices_seen = {}
 
     def _program(self, entry):
         key = identity(entry["program"])
@@ -304,7 +340,9 @@ class ProgramOptimizer:
             and self.rng.random() < self.config.current_state_edit_probability
         ):
             source = decode_state(entry["trace"]["states"][-1])
-            program, binding, detail = current_state_program(source, self.rng)
+            program, binding, detail = current_state_program(
+                source, self.rng, work_cache=self.work_cache if self.work_cache.capacity else None
+            )
             return (
                 source,
                 program,
@@ -323,27 +361,67 @@ class ProgramOptimizer:
         number = 1 + int(self.rng.random() < self.config.double_mutation_probability)
         for _ in range(number):
             parameters = {m: parameter_choices(program, m) for m in PARAMETER_MOVES}
-            attachments = attachment_mutation_choices(
-                source, program, binding, max_bindings=self.config.max_bindings
+            attachments = self.work_cache.get(
+                "mutation_bindings",
+                (
+                    identity(encode_state(source)),
+                    program.program_id,
+                    binding,
+                    self.config.max_bindings,
+                ),
+                lambda program=program, binding=binding: attachment_mutation_choices(
+                    source, program, binding, max_bindings=self.config.max_bindings
+                ),
             )
             available = (["attachment"] if attachments[1] else []) + [
                 m for m in PARAMETER_MOVES if parameters[m]
             ]
+            context, untried = None, None
+            if self.config.mutation_sampling == "untried":
+                # Conditional one-decision menus, never an attachment x payload
+                # Cartesian frontier. Later decisions see the modified program.
+                context = identity(
+                    {
+                        "source": encode_state(source),
+                        "program": program.payload(),
+                        "binding": binding,
+                        "max_bindings": self.config.max_bindings,
+                    }
+                )
+                prior = self.mutation_choices_seen.get(context, set())
+                menus = {**parameters, "attachment": tuple(a for a, _ in attachments[1])}
+                untried = {
+                    move: tuple(c for c in menus[move] if identity((move, c)) not in prior)
+                    for move in available
+                }
+                available = [m for m in available if untried[m]]
             if not available:
-                raise ValueError("program has no available bounded mutation")
+                raise ValueError(
+                    "bounded mutation context exhausted"
+                    if context
+                    else "program has no available bounded mutation"
+                )
             move = available[int(self.rng.integers(len(available)))]
             if move == "attachment":
+                prepared = attachments
+                if untried is not None:
+                    permitted = set(untried[move])
+                    prepared = (
+                        attachments[0],
+                        [(a, d) for a, d in attachments[1] if a in permitted],
+                    )
                 binding, census = mutate_attachment(
                     source,
                     program,
                     binding,
                     self.rng,
                     max_bindings=self.config.max_bindings,
-                    prepared=attachments,
+                    prepared=prepared,
                 )
+                choice = binding
                 edits.append({"kind": move, "available_kinds": available, **census})
             else:
-                choices = parameters[move]
+                choices = parameters[move] if untried is None else untried[move]
                 choice = choices[int(self.rng.integers(len(choices)))]
                 program = mutate_parameter(program, move, choice)
                 edits.append(
@@ -354,6 +432,15 @@ class ProgramOptimizer:
                         "choices": len(choices),
                     }
                 )
+            if context is not None:
+                if (
+                    context not in self.mutation_choices_seen
+                    and len(self.mutation_choices_seen) >= self.config.mutation_context_limit
+                ):
+                    del self.mutation_choices_seen[next(iter(self.mutation_choices_seen))]
+                self.mutation_choices_seen.setdefault(context, set()).add(identity((move, choice)))
+                edits[-1]["sampling"] = "untried_conditional_choice"
+                edits[-1]["context"] = context
         return source, program, binding, {"mutations": edits}
 
     def _branches(self, entry):
@@ -397,8 +484,16 @@ class ProgramOptimizer:
             branches = branch_components(donor_program)
             branch = branches[int(self.rng.integers(len(branches)))]
             donor_program, _ = select_branch(donor_program, branch)
-            census = attachment_bindings(
-                donor_program, source, max_bindings=self.config.max_bindings
+            census = self.work_cache.get(
+                "donor_bindings",
+                (
+                    identity(encode_state(source)),
+                    donor_program.program_id,
+                    self.config.max_bindings,
+                ),
+                lambda donor_program=donor_program: attachment_bindings(
+                    donor_program, source, max_bindings=self.config.max_bindings
+                ),
             )
             if not census.assignments:
                 raise ValueError("no context-compatible donor branch attachment")
@@ -529,6 +624,7 @@ class ProgramOptimizer:
                     program_sampler=program_sampler,
                     broad_sampler=broad_sampler,
                     probabilities=self.config.channel_probabilities,
+                    proposal_mode=self.config.proposal_mode,
                 )
                 graph = compile_program_graph(program)
                 size = program_size_profile(graph, source.n_real_atoms)
@@ -539,15 +635,40 @@ class ProgramOptimizer:
                     size["final_heavy_atoms"] - size["measured_parent_heavy_atoms"]
                 )
                 chosen["program_size"] = size
-                product, trace = execute_program_graph(
-                    source,
-                    graph,
-                    binding,
-                    max_primitives=self.config.max_primitives,
-                    max_blocks=self.config.max_blocks,
+
+                def execute(source=source, graph=graph, binding=binding):
+                    try:
+                        _, receipt = execute_program_graph(
+                            source,
+                            graph,
+                            binding,
+                            max_primitives=self.config.max_primitives,
+                            max_blocks=self.config.max_blocks,
+                        )
+                    except ValueError as error:
+                        return {"error": str(error)}
+                    return {"trace": receipt}
+
+                execution_key = identity(
+                    {
+                        "source": encode_state(source),
+                        "program": program.payload(),
+                        "binding": binding,
+                        "max_primitives": self.config.max_primitives,
+                        "max_blocks": self.config.max_blocks,
+                    }
                 )
+                chosen["execution_key"] = execution_key
+                executed = self.work_cache.get(
+                    "exact_execution",
+                    execution_key,
+                    execute,
+                )
+                if "error" in executed:
+                    raise ValueError(executed["error"])
+                trace = executed["trace"]
                 if (
-                    product.n_real_atoms != size["final_heavy_atoms"]
+                    decode_state(trace["states"][-1]).n_real_atoms != size["final_heavy_atoms"]
                     or trace["capacity_timeline"] != size["capacity_timeline"]
                 ):
                     raise RuntimeError("compiled size accounting differs from exact execution")
@@ -582,6 +703,7 @@ class ProgramOptimizer:
                 "metadata": metadata,
                 "program_size": size,
                 "properties": properties,
+                "execution_key": execution_key,
                 "actual_changes": trace["actual_changes"],
             }
             attempts.append(record)
@@ -642,6 +764,7 @@ class ProgramOptimizer:
                 {
                     **self.pending,
                     "proposal_seconds": perf_counter() - started,
+                    "work_cache": self.work_cache.report(),
                     "new_oracle_calls": 0,
                 }
             )
@@ -737,6 +860,9 @@ class ProgramOptimizer:
             "history": self.history,
             "pending": self.pending,
             "batches": self.batches,
+            "mutation_choices_seen": [
+                [key, sorted(values)] for key, values in self.mutation_choices_seen.items()
+            ],
         }
         return json.loads(json.dumps({**body, "snapshot_id": identity(body)}))
 
@@ -760,4 +886,7 @@ class ProgramOptimizer:
         for key in ("entries", "observations", "duplicate_counts", "history", "pending", "batches"):
             setattr(result, key, json.loads(json.dumps(snapshot[key])))
         result.failed_endpoints = set(snapshot["failed_endpoints"])
+        result.mutation_choices_seen = {
+            key: set(values) for key, values in snapshot.get("mutation_choices_seen", [])
+        }
         return result

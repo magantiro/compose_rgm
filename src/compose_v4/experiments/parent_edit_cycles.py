@@ -202,6 +202,54 @@ def dock_observation(smiles, target, seed, folder, tag, dock):
     return value
 
 
+def pmo_oracle(name, protocols):
+    """Dispatch the frozen campaign's tasks, not an older probe's task subset.
+
+    Constructing this adapter performs no scoring. Each later call is made only
+    by ProgramQueryLedger. The compatibility shim is identical to the existing
+    PyTDC adapter and does not replace the pinned oracle implementation.
+    """
+    if name not in protocols:
+        raise ValueError(f"PMO task {name!r} is outside the frozen campaign")
+    import sys
+    import types
+
+    import rdkit
+
+    shim = types.ModuleType("rdkit.six")
+    shim.iteritems = lambda d, **kwargs: iter(d.items())
+    shim.itervalues = lambda d, **kwargs: iter(d.values())
+    shim.iterkeys = lambda d, **kwargs: iter(d.keys())
+    shim.string_types = (str,)
+    sys.modules["rdkit.six"] = rdkit.six = shim
+    from tdc import Oracle
+
+    oracle = Oracle(name=name)
+    return lambda smiles: float(oracle(smiles))
+
+
+def unit_reservations(folder):
+    """Read charged reservations, retaining unresolved attempts without retry."""
+    rows = []
+    for reservation in sorted((folder / "oracle").glob("query_*/started.json")):
+        receipt = reservation.with_name("result.json")
+        started = json.loads(reservation.read_text())
+        row = (
+            json.loads(receipt.read_text())
+            if receipt.exists()
+            else {**started, "status": "started"}
+        )
+        if receipt.exists() and (
+            identity({k: v for k, v in row.items() if k != "receipt_id"}) != row.get("receipt_id")
+            or any(row.get(k) != v for k, v in started.items())
+        ):
+            raise ValueError(f"corrupt existing query receipt: {receipt}")
+        if row["index"] != len(rows):
+            raise ValueError(f"noncontiguous query reservations: {reservation}")
+        rows.append(row)
+    return rows
+
+
 def run_unit(task, root, artifacts, volume, validate_revision, dock):
     c = validate_launch(task, root, validate_revision)
     unit = next((r for r in c["units"] if r["unit_id"] == task["unit_id"]), None)
@@ -212,7 +260,22 @@ def run_unit(task, root, artifacts, volume, validate_revision, dock):
     if (folder / "result.json").exists():
         return unseal(folder / "result.json")
     if (folder / "started.json").exists():
-        raise RuntimeError("started unit requires explicit receipt-based recovery, not relaunch")
+        # A duplicate/ambiguous invocation must stop THIS unit, not cancel other
+        # independent workers. Read reservations without evaluating or retrying.
+        rows = unit_reservations(folder)
+        failure = {
+            "unit": unit,
+            "error": "started unit requires explicit receipt-based recovery, not relaunch",
+            "failure_kind": "restart_guard",
+            "oracle_calls": len(rows),
+            "rows": rows,
+            "at": _stamp(),
+            "automatic_retry": False,
+            "accounting_complete": False,
+        }
+        seal(folder / "restart_guard.json", failure)
+        volume.commit()
+        return failure
     seal(folder / "started.json", {"unit": unit, "task": task, "at": _stamp()})
     volume.commit()
     started, progress = perf_counter(), {"phase": "runtime", "oracle_calls": 0}
@@ -267,11 +330,9 @@ def run_unit(task, root, artifacts, volume, validate_revision, dock):
                     smiles, domain["target"], 1701, folder / "poses" / f"{index:06d}", tag, dock
                 )
         else:
-            from compose_v4.experiments.pmo_macro_probe import make_oracle
-
             domain = c["pmo_protocols"][unit["name"]]
             pt = ProgramTask(unit["name"], identity(domain), "pmo")
-            evaluate = make_oracle(unit["name"], root, {})
+            evaluate = pmo_oracle(unit["name"], c["pmo_protocols"])
             initialized = json.loads((root / PREPARED / f"init_{unit['seed']}.json").read_text())
             warm = None
             import importlib.metadata
@@ -421,12 +482,56 @@ def run_confirmation(task, root, artifacts, volume, validate_revision, dock):
     return result
 
 
+def zero_query_dispatch_failures(previous, contract_sha256):
+    """Explicit recovery only for completed, identified pre-oracle dispatch failures.
+
+    Scored, ambiguous, or differently failed units are never resubmitted by this
+    path. The first attempt and all its compute remain part of the campaign.
+    """
+    if previous["group"] != "pmo" or previous["task"]["files_sha256"][CONTRACT] != contract_sha256:
+        raise ValueError("recovery predecessor has a different group or frozen contract")
+    units = []
+    for row in previous["results"]:
+        name = row["unit"]["name"]
+        if row.get("error") != repr(ValueError(f"undeclared PMO oracle {name}")):
+            continue
+        if name not in ("isomers_c7h8n2o2", "scaffold_hop"):
+            raise ValueError("unexpected dispatch failure outside the identified repair")
+        if row["oracle_calls"] != 0 or row["rows"]:
+            raise ValueError("dispatch recovery cannot retry a charged or ambiguous query")
+        units.append(row["unit"]["unit_id"])
+    if not units or len(set(units)) != len(units):
+        raise ValueError("no distinct zero-query dispatch failures to recover")
+    return sorted(units)
+
+
 def run_group(task, root, artifacts, volume, validate_revision, parallel, confirm=None):
     c = validate_launch(task, root, validate_revision)
     group = task["group"]
     if group not in ("t4", "pmo"):
         raise ValueError("unknown campaign group")
     volume.reload()
+    units = [r["unit_id"] for r in c["units"] if r["kind"] == group]
+    if "recovery" in task:
+        prior = task["recovery"]
+        if (
+            group != "pmo"
+            or len(prior["run_id"]) != 64
+            or any(ch not in "0123456789abcdef" for ch in prior["run_id"])
+        ):
+            raise ValueError("invalid recovery predecessor")
+        previous = unseal(artifacts / KIND / prior["run_id"] / "pmo/result.json")
+        if identity(previous) != prior["result_sha256"]:
+            raise ValueError("recovery predecessor results changed")
+        recovered = zero_query_dispatch_failures(previous, task["files_sha256"][CONTRACT])
+        if recovered != prior["units"] or not set(recovered).issubset(units):
+            raise ValueError("recovery unit census changed")
+        units = recovered
+        claim = artifacts / KIND / prior["run_id"] / "pmo/dispatch_recovery.json"
+        if claim.exists() and unseal(claim)["run_id"] != task["run_id"]:
+            raise RuntimeError("predecessor already has an explicit dispatch recovery")
+        seal(claim, {"run_id": task["run_id"], "units": units, "at": _stamp()})
+        volume.commit()
     folder = artifacts / KIND / task["run_id"] / group
     if (folder / "result.json").exists():
         return unseal(folder / "result.json")
@@ -435,9 +540,26 @@ def run_group(task, root, artifacts, volume, validate_revision, parallel, confir
     seal(folder / "started.json", task)
     volume.commit()
     rows = []
-    for result in parallel(
-        [{**task, "unit_id": r["unit_id"]} for r in c["units"] if r["kind"] == group]
+    # Ordered exception-valued map results isolate failed workers. No restart.
+    for unit_id, result in zip(
+        units, parallel([{**task, "unit_id": unit} for unit in units]), strict=True
     ):
+        if isinstance(result, BaseException):
+            volume.reload()
+            reserved = unit_reservations(artifacts / KIND / task["run_id"] / "units" / unit_id)
+            result = {
+                "unit": next(r for r in c["units"] if r["unit_id"] == unit_id),
+                "error": repr(result),
+                "failure_kind": "worker_exception",
+                "oracle_calls": len(reserved),
+                "rows": reserved,
+                "automatic_retry": False,
+                "accounting_complete": False,
+                "at": _stamp(),
+            }
+            seal(folder / "worker_failures" / f"{unit_id}.json", result)
+        if result["unit"]["unit_id"] != unit_id:
+            raise ValueError("parallel adapter must retain input/result identities and order")
         rows.append(result)
         publish_json(
             folder / "progress.json",
@@ -448,6 +570,7 @@ def run_group(task, root, artifacts, volume, validate_revision, parallel, confir
         "group": group,
         "results": sorted(rows, key=lambda r: r["unit"]["unit_id"]),
         "oracle_calls": sum(r["oracle_calls"] for r in rows),
+        "accounting_complete": all(r.get("accounting_complete", True) for r in rows),
         "task": task,
         "at": _stamp(),
     }

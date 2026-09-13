@@ -104,3 +104,52 @@ def test_pmo_logging_trapezoids_and_tail_are_not_final_best():
     )
     with pytest.raises(ValueError, match="invalid unique-query"):
         pmo_top_ten_auc([0.2] * 6, budget=5)
+
+
+def test_all_scored_initial_states_are_available_beyond_legacy_bootstrap(tmp_path):
+    from tests.test_edit_program import graph
+
+    source, stages = ring_and_carbonyl()
+    program, _ = extract_program(source, stages)
+    task = ProgramTask("synthetic_size_fixture", "fixture:all-initial", "pmo")
+    initialized = initialization_lock(
+        [
+            {"state": encode_state(graph(s)), "source_id": s}
+            for s in ("CC", "CCC", "CCCC", "CCO", "CCCO", "CCN")
+        ],
+        count=6,
+        seed=7,
+        source_sha256="a" * 64,
+    )
+    config = replace(
+        ProgramSearchConfig.program_only_recipe(seed=871, score_direction="maximize"),
+        candidates_per_batch=2,
+        attempts_per_batch=32,
+    )
+    ledger = ProgramQueryLedger(
+        tmp_path / "queries",
+        task,
+        lambda s: Chem.MolFromSmiles(s).GetNumHeavyAtoms() / 40,
+        budget=12,
+    )
+    result = run_program_campaign(
+        output=tmp_path / "run",
+        task=task,
+        config=config,
+        initialization=initialized,
+        library=(ProgramEntry(program, ("fixture",)),),
+        ledger=ledger,
+        rounds=3,
+        queries_per_round=2,
+        initialization_mode="all_scored_pool",
+        initial_parent_fraction=1,
+        stagnation_rounds=None,
+    )
+    assert result["oracle_calls"] <= 12
+    assert len([r for r in ledger.rows if r["role"] == "initialization"]) == 6
+    assert len(result["history"]) == 3
+    chosen = [r["initialization_parent"] for r in result["history"]]
+    assert all(r["available_scored_parents"] == 6 for r in chosen)
+    assert all(r["selection"] == "uniform_all_scored" for r in chosen)
+    assert all(r["observation_receipt"] in {q["receipt_id"] for q in ledger.rows} for r in chosen)
+    assert [r["index"] for r in chosen] != [0, 1, 2]

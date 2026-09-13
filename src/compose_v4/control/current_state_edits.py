@@ -6,6 +6,7 @@ replaces the broad channel. All candidates pass the unchanged semantic executor.
 
 from time import perf_counter
 
+from compose_v4.control.docking_value import identity
 from compose_v4.control.edit_program import extract_program
 from compose_v4.experiments.whole_ring_plan import execute_program
 from compose_v4.rewrite.action_codec_v4 import encode_action
@@ -15,6 +16,7 @@ from compose_v4.rewrite.operators import (
     enumerate_cycle_open_edges,
     enumerate_semantic_atom_restates,
 )
+from compose_v4.rewrite.trace_shard import encode_state
 from compose_v4.rewrite.tracelet_fiber import enumerate_ring_system_restate_actions
 
 ENUMERATORS = {
@@ -26,7 +28,7 @@ ENUMERATORS = {
 }
 
 
-def current_state_program(source, rng, *, family=None):
+def current_state_program(source, rng, *, family=None, work_cache=None):
     """One sampled legal operation; absent/invalid choices are explicit failures.
 
     Select the family before enumerating, so a large restatement frontier does
@@ -37,7 +39,15 @@ def current_state_program(source, rng, *, family=None):
     family = families[int(rng.integers(len(families)))] if family is None else family
     if family not in ENUMERATORS:
         raise ValueError(f"unknown explicit current-state edit family: {family}")
-    actions = ENUMERATORS[family](source)
+    actions = (
+        ENUMERATORS[family](source)
+        if work_cache is None
+        else work_cache.get(
+            "current_state_actions",
+            (identity(encode_state(source)), family),
+            lambda: ENUMERATORS[family](source),
+        )
+    )
     if not actions:
         raise ValueError(f"current-state family has no applicable action: {family}")
     action = actions[int(rng.integers(len(actions)))]

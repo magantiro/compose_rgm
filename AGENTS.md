@@ -372,6 +372,32 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped fast PMO completion run, 2026-09-12:** the user replied "great lets od
+it" to one short direct-scoring PMO run after the measured throughput repair.
+Authorize one albuterol-similarity development run, seed 20260921, at most 128
+new queries including the sixteen prelocked initialization structures, seven
+rounds of at most sixteen candidates, one CPU container, no GPU or automatic
+retry, 600-second worker timeout and $1 total reserved compute. Freeze
+`configs/fast_pmo_run.json` before launch from clean committed source. Use the
+program-only random-mutation recipe, cache128, all-scored initial-parent pool,
+direct scoring, and the existing exact executor and oracle. No predictor or
+reference fitting, new docking, other task, grid or recovery of the previous
+ambiguous PMO reservation follows. Record completed rounds, shortfalls, actual
+query/compute curves and termination reason. This is a bounded development
+run, not a full-suite benchmark or milestone/release sign-off.
+
+**Scoped fast program-search repair, 2026-09-12:** the user requested restoring
+productive program-first search after the mixed learning-cycle campaign. The
+immediate unit is local, zero-oracle implementation and bounded throughput
+measurement under `docs/FAST_PROGRAM_SEARCH.md`: explicit program-only dispatch,
+optional selection only with excess candidates, exact attempted-proposal reuse,
+and PMO initialization/dispatch/failure-isolation repairs. Preserve old recipes,
+all results and incumbents, reference/executor semantics, 40-atom T4 support and
+charged-query guards. This changes the optimization proposal, not the frozen
+reference law. No new paid campaign, reference training or automatic recovery
+of unresolved queries follows. Later proposal learning requires the throughput
+decision first; the previous paid campaign must not be relaunched unchanged.
+
 **Scoped parent-edit learning-cycle approval, 2026-09-12:** the user replied
 "sure" to a ceiling of 108 new docking calls across BRAF/JAK2, 24,000 PMO
 queries, $20 total reserved compute and at most 30 simultaneous containers.

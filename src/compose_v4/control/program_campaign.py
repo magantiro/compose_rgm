@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from time import perf_counter
 
+import numpy as np
 from rdkit import Chem
 
 from compose_v4.control.adaptive_program_optimizer import ProgramOptimizer
@@ -136,6 +137,8 @@ def run_program_campaign(
     bootstrap_rounds=1,
     progress=None,
     max_seconds=None,
+    initialization_mode="legacy_bootstrap",
+    initial_parent_fraction=0.2,
 ):
     """Initial states are charged, then complete programs bootstrap the archive.
 
@@ -147,6 +150,12 @@ def run_program_campaign(
         raise ValueError("invalid campaign rounds, query count or task ledger")
     if type(bootstrap_rounds) is not int or bootstrap_rounds < 1:
         raise ValueError("positive bootstrap round count required")
+    if initialization_mode not in ("legacy_bootstrap", "all_scored_pool"):
+        raise ValueError("unknown initialization parent mode")
+    if not 0 < initial_parent_fraction <= 1:
+        raise ValueError("initial-parent exploration fraction must be in (0, 1]")
+    if initialization_mode == "all_scored_pool" and (task.kind != "pmo" or warm_start is not None):
+        raise ValueError("all-scored initialization is an explicit cold-start PMO recipe")
     if max_seconds is not None and max_seconds <= 0:
         raise ValueError("positive campaign time limit required")
     progress = progress or (lambda row: None)
@@ -173,11 +182,14 @@ def run_program_campaign(
         "rounds": rounds,
         "queries_per_round": queries_per_round,
         "learning": fit_model is not None,
+        "selection_policy": "fit_only_for_excess_pool_v1",
         "fit_model_id": fit_model_id,
         "stagnation_rounds": stagnation_rounds,
         "warm_start": None if warm_start is None else warm_start["snapshot_id"],
         "bootstrap_rounds": bootstrap_rounds,
         "max_seconds": max_seconds,
+        "initialization_mode": initialization_mode,
+        "initial_parent_fraction": initial_parent_fraction,
     }
     manifest = output / "manifest.json"
     if manifest.exists() and json.loads(manifest.read_text()) != json.loads(json.dumps(recipe)):
@@ -226,8 +238,20 @@ def run_program_campaign(
                 break
         count = min(queries_per_round, ledger.remaining)
         progress({"phase": "proposing", "round": round_index, "oracle_calls": len(ledger.rows)})
-        if not search.entries or (warm_start is None and round_index < bootstrap_rounds):
-            source = decode_state(starts[round_index % len(starts)]["state"])
+        initial_choice = None
+        bootstrap = not search.entries or (warm_start is None and round_index < bootstrap_rounds)
+        if initialization_mode == "all_scored_pool":
+            # A separate round-addressed stream preserves the proposal RNG. All
+            # charged exact initialization states stay available after bootstrap.
+            parent_rng = np.random.default_rng(
+                np.random.SeedSequence([config.seed, round_index, 31])
+            )
+            bootstrap = bootstrap or parent_rng.random() < initial_parent_fraction
+            if bootstrap:
+                initial_choice = int(parent_rng.integers(len(starts)))
+        if bootstrap:
+            at = round_index % len(starts) if initial_choice is None else initial_choice
+            source = decode_state(starts[at]["state"])
             broad = None
             if hierarchy is not None:
                 from compose_v4.control.molecular_task_search import MolecularSearchState
@@ -250,17 +274,32 @@ def run_program_campaign(
                 eligibility=task.endpoint_evaluator(),
                 broad_sampler=broad,
             )
+            # Metadata outside the candidate lock does not change the completed
+            # transformations or invent a zero-edit construction.
+            initialization_parent = {
+                "endpoint": starts[at]["endpoint"],
+                "index": at,
+                "available_scored_parents": len(starts),
+                "selection": "uniform_all_scored"
+                if initial_choice is not None
+                else "legacy_round_index",
+                "observation_receipt": ledger.cache[starts[at]["endpoint"]]["receipt_id"],
+            }
             bootstrap = True
         else:
-            model = fit_model(search, task) if fit_model is not None else None
-            if model is not None:
-                publish_json(folder / "model.json", model.payload)
+
+            def lazy_model(search=search, folder=folder):
+                model = fit_model(search, task)
+                if model is not None:
+                    publish_json(folder / "model.json", model.payload)
+                return model
+
             batch = prepare_query_batch(
                 search,
                 task,
                 count=count,
                 seed=config.seed + round_index,
-                model=model,
+                model_factory=lazy_model if fit_model is not None else None,
                 diagnostic=True,
             )
             bootstrap = False
@@ -293,12 +332,14 @@ def run_program_campaign(
                 k=task.top_k,
             ),
             "top_k": task.top_k,
-            "model_updated": not bootstrap and fit_model is not None,
+            "model_updated": batch.get("selection", {}).get("model_sha256") is not None,
             "proposal_seconds": batch.get("proposal_seconds", 0.0),
             "proposal_attempts": len(batch["attempts"]),
             "pool_size": len(batch.get("proposal_pool", batch)["candidates"]),
             "seconds": perf_counter() - began,
             "best_new_utility": max((r["utility"] for r in ledger.rows), default=None),
+            "initialization_parent": initialization_parent if bootstrap else None,
+            "work_cache": batch.get("work_cache"),
         }
         if task.kind == "pmo":
             summary["pmo_top10_auc_so_far"] = pmo_top_ten_auc(

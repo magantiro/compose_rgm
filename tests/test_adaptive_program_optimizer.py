@@ -157,6 +157,115 @@ def test_no_forced_padding_to_maximum_blocks_and_configuration_is_explicit():
         replace(config, channel_probabilities=(1.0, 0.0, 0.0))
 
 
+def test_program_only_mode_is_explicit_and_never_enters_reference(monkeypatch):
+    search = optimizer()
+    search.config = replace(
+        ProgramSearchConfig.program_only_recipe(seed=871),
+        attempts_per_batch=32,
+        candidates_per_batch=2,
+    )
+
+    def forbidden(*args):
+        pytest.fail("program-only optimization must not enter the reference hierarchy")
+
+    monkeypatch.setattr(search, "_broad", forbidden)
+    batch = search.propose_batch(eligible)
+    assert batch["candidates"]
+    assert {r["channel"] for r in batch["attempts"]} <= {"mutation", "recombination"}
+    assert search.config.current_state_edit_probability == 0.25
+    assert ProgramOptimizer.restore(search.snapshot()).config == search.config
+    with pytest.raises(ValueError, match="match the proposal mode"):
+        replace(search.config, proposal_mode="mixed")
+    with pytest.raises(ValueError, match="cannot require"):
+        replace(search.config, require_broad_runtime=True)
+    assert ProgramSearchConfig().channel_probabilities == (0.7, 0.2, 0.1)
+
+
+def test_direct_allocation_does_not_fit_when_the_entire_pool_can_be_scored():
+    from compose_v4.control.parent_edit_search import prepare_query_batch
+    from compose_v4.control.program_task import ProgramTask
+
+    search = optimizer()
+    search.config = replace(search.config, score_direction="maximize")
+    task = ProgramTask("fixture", search.oracle_protocol, "pmo")
+
+    def forbidden():
+        pytest.fail("no model fit is needed to select every candidate")
+
+    batch = prepare_query_batch(
+        search,
+        task,
+        count=2,
+        seed=1,
+        model_factory=forbidden,
+        diagnostic=True,
+    )
+    assert len(batch["candidates"]) == 2
+    assert batch["selection"]["mode"] == "direct"
+    assert batch["selection"]["model_sha256"] is None
+    assert len(batch["proposal_pool"]["candidates"]) == 2
+
+
+def test_proposal_cache_reuses_work_without_dropping_unqueried_candidates():
+    from compose_v4.control.program_work_cache import ProgramWorkCache
+
+    uncached, cached = optimizer(), optimizer()
+    cached.config = replace(cached.config, proposal_cache_entries=128)
+    cached.work_cache = ProgramWorkCache(128)
+    one, two = uncached.propose_batch(eligible), cached.propose_batch(eligible)
+    assert one["candidates"] == two["candidates"]
+    labels = [
+        {**r, "score": None, "failure": "cache_miss_not_evaluated"}
+        for r in outcomes(cached, two, -1)
+    ]
+    cached.observe_batch(two["batch_id"], labels)
+    restored = ProgramOptimizer.restore(cached.snapshot())
+    assert not restored.work_cache.entries
+    # Caches do not change the random stream or suppress unqueried endpoints.
+    assert (
+        cached.propose_batch(eligible)["candidates"]
+        == restored.propose_batch(eligible)["candidates"]
+    )
+
+
+def test_proposal_cache_is_bounded_and_addresses_exact_inputs():
+    from compose_v4.control.program_work_cache import ProgramWorkCache
+
+    cache, evaluated = ProgramWorkCache(2), []
+
+    def compute():
+        evaluated.append(1)
+        return len(evaluated)
+
+    assert cache.get("binding", "exact-state-a", compute) == 1
+    assert cache.get("binding", "exact-state-a", compute) == 1
+    assert cache.get("binding", "exact-state-b", compute) == 2
+    assert cache.get("execution", "exact-state-a", compute) == 3
+    assert len(cache.entries) == 2
+    assert cache.get("binding", "exact-state-a", compute) == 4
+
+
+def test_untried_mutations_preserve_conditional_history_across_resume():
+    search = optimizer()
+    search.config = replace(
+        search.config,
+        mutation_sampling="untried",
+        double_mutation_probability=0,
+        mutation_context_limit=2,
+    )
+    entry = next(iter(search.entries.values()))
+    choices = []
+    for _ in range(5):
+        _, program, binding, detail = search._mutate(entry)
+        choices.append((program.program_id, binding))
+        assert detail["mutations"][0]["sampling"] == "untried_conditional_choice"
+    assert len(set(choices)) == 5
+    assert len(search.mutation_choices_seen) == 1
+    restored = ProgramOptimizer.restore(search.snapshot())
+    left, right = search._mutate(entry), restored._mutate(entry)
+    assert left[1:] == right[1:]
+
+
 def test_score_blind_ablation_and_exhaustion_preserve_endpoint_exploration():
     search = optimizer()
     batch = search.propose_batch(eligible)

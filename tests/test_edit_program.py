@@ -121,6 +121,26 @@ def test_capped_binding_is_reported_and_saved_state_corruption_is_rejected():
         extract_program(source, bad)
 
 
+def test_binding_masks_enforce_zero_bonds_injectivity_order_and_visit_caps():
+    from itertools import permutations
+
+    source = graph("CCC")
+    actions = [encode_action("atom_delete", AtomDelete(i)) for i in (0, 2)]
+    _, stage = execute_program(source, actions)
+    program, _ = extract_program(source, [stage])
+    target = graph("CCCC")
+    expected = tuple((a, b) for a, b in permutations(range(4), 2) if target.bonds[a, b] == 0)
+    census = attachment_bindings(program, target, contextual=False)
+    assert census.assignments == expected
+    assert census.visits == 11 and not census.truncated
+    capped = attachment_bindings(program, target, contextual=False, max_bindings=2)
+    assert capped.assignments == expected[:2] and capped.visits == 4 and capped.truncated
+    limited = attachment_bindings(program, target, contextual=False, max_visits=4)
+    assert limited == capped
+    masked = attachment_bindings(program, target, contextual=False, mutable_slots=frozenset({0, 3}))
+    assert masked.assignments == ((0, 3), (3, 0))
+
+
 def test_real_five_stage_plan_rebinds_without_endpoint_at_inference():
     path = Path("diagnostics/t4_whole_ring_plan/result.json")
     if not path.exists():

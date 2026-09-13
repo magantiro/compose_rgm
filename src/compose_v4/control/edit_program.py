@@ -251,6 +251,17 @@ def attachment_bindings(
         candidates.append(sorted(options, key=lambda i: (distance[i] if contextual else 0, i)))
         distances.append(distance)
     order = sorted(range(len(candidates)), key=lambda i: (len(candidates[i]), i))
+    # Exact column-wise bond masks replace the per-candidate Python generator.
+    # Zero bonds are constraints too. Preserve candidate order, visits and caps;
+    # this is not a heuristic filter or an enlarged/reduced attachment support.
+    full_mask = sum(1 << slot for slot in real)
+    bond_masks = {}
+    for other in real:
+        masks = {}
+        for slot in real:
+            bond = int(graph.bonds[slot, other])
+            masks[bond] = masks.get(bond, 0) | (1 << slot)
+        bond_masks[other] = masks
     binding, assignments, scores = {}, [], []
     visits, truncated = 0, False
 
@@ -266,11 +277,12 @@ def attachment_bindings(
             scores.append(sum(distances[i][slot] for i, slot in enumerate(row)))
             return
         i = order[depth]
+        allowed = full_mask
+        for j, other in binding.items():
+            allowed &= ~(1 << other)
+            allowed &= bond_masks[other].get(program.input_bonds[i][j], 0)
         for slot in candidates[i]:
-            if slot in binding.values() or any(
-                int(graph.bonds[slot, other]) != program.input_bonds[i][j]
-                for j, other in binding.items()
-            ):
+            if not (allowed & (1 << slot)):
                 continue
             binding[i] = slot
             visit(depth + 1)

@@ -120,6 +120,7 @@ def initial_program_batch(
                 program_sampler=program_sampler,
                 broad_sampler=reference_sampler,
                 probabilities=config.channel_probabilities,
+                proposal_mode=config.proposal_mode,
             )
             _, trace = execute_program_graph(
                 source,
