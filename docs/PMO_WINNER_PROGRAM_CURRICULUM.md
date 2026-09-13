@@ -110,17 +110,45 @@ calculation. Run touched-code formatting/lint, `git diff --check`, repository
 verification and the full test suite at the launch boundary. Inspect artifacts
 and final diff before commit.
 
-## Pre-launch verification status, 2026-09-13
+## Measured result, 2026-09-13
+
+The locked curriculum completed all 15 counted queries. Eleven of eleven
+programs replayed from the charged roots and produced distinct supported
+endpoints. The measured result is:
+
+| Quantity | Value |
+| --- | ---: |
+| Best score | 0.8106434833777776 |
+| Final top-ten mean | 0.8090111472565413 |
+| Official 10,000-query top-ten AUC | 0.8084043888960989 |
+| Margin over IVG no-prescreen 0.645 | +0.1634043888960989 |
+| Margin over IVG prescreen 0.753 | +0.0554043888960989 |
+| Counted oracle calls | 15 |
+
+This is a positive result under the frozen winner-informed development
+contract. It beats both recorded IVG comparators numerically. It remains an
+answer-known Perindopril result, not a held-out or general PMO result. Nine
+program endpoints occupy the same 0.8088297765764039 metric plateau; they are
+distinct molecules but not nine independent objective improvements.
+
+The authoritative machine-readable artifact is
+`diagnostics/pmo_winner_program_curriculum/result.json`, with payload SHA-256
+`cd01e59850dd7404bb162d9f51c64ddfc7dca14ebba99affae2f86d73d8ed19a`.
+The run used source revision `da9a0091aa1dba8960188cb6b6001a34df0bfce1`.
+
+## Verification status, 2026-09-13
 
 The focused curriculum and executor dependency suite passes 28 tests. Touched
 Python files pass Ruff lint and formatting, and `git diff --check` passes.
 
-The repository-wide suite is currently blocked during collection by an existing
-editing-V2 identity mismatch. The semantic-capability registry records process
-identity `6c4721f0dd37132aae657e7aa5f1bfc01cef270662f228171c4587eb7dd48491`,
-while the current process implementation reports
-`0a10a2fae24d51853dc30674e31842ea11313571d991e822f23dab7e1124445b`.
-No curriculum code changes either file. The mismatch is retained as a failing
-gate rather than silently re-pinning the registry or skipping its test. The
-scored curriculum does not launch until this separate lineage issue is resolved
-under its own authorization.
+The editing-V2 identity mismatch was repaired under its separate scoped
+contract. Its verifier reports a fixed point and 242 focused tests pass in the
+frozen numerical environment. The curriculum-specific test suite passes four
+tests in the pinned PMO environment, including the PyTDC/RDKit compatibility
+regression. Ruff and `git diff --check` pass for the touched code.
+
+The repository-wide suite is not green. Its remaining pre-existing blockers
+are recorded in `docs/EDITING_V2_REGISTRY_REPIN_2026-09-13.md`: stale E6 artifact
+provenance, an existing duplicate `cycle_rank` definition, and local shared
+memory restrictions. None was suppressed or converted into a passing gate for
+this result.
