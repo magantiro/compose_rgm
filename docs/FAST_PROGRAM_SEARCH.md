@@ -190,3 +190,12 @@ deploy `modal_apps.fast_pmo_run_app`, then use `tools/fast_pmo_run.py launch
 --receipt <durable-path>`. `retrieve` publishes the self-hashed final record;
 the volume additionally retains candidate locks, exact traces, query receipts
 and complete-round archives. A pre-spawn intent prevents ambiguous local retries.
+
+The first invocation (`fc-01M2C7JNEYDFMCJWJPBV79HGDZ`, source `0763d5d52210`)
+failed before worker entry: the auto-mounted Modal package resolved host ROOT
+as `/root` and read `/root/configs/fast_pmo_run.json` during import. Inputs are
+under `/root/compose`. Cancelled the pending call; its artifact namespace and
+query reservations are absent. `diagnostics/fast_pmo_run/startup_review.json`
+retains the zero-query audit. Image-input discovery is now host-only, with a
+focused container-import regression check. This is a manual startup repair,
+not an oracle retry or changed proposal, input lock, budget or scoring recipe.

@@ -29,10 +29,14 @@ image = base_image.pip_install(
         "MKL_NUM_THREADS": "1",
     }
 )
-manifest = json.loads((ROOT / "configs/fast_pmo_run.json").read_text())["payload"]
-for path in sorted({"modal_apps/fast_pmo_run_app.py", *manifest["inputs"]}):
-    if not path.startswith("configs/"):
-        image = image.add_local_file(ROOT / path, str(REMOTE_ROOT / path), copy=True)
+# Modal auto-mounts this package under /root/modal_apps. Its import-time ROOT
+# therefore differs from the authenticated runtime /root/compose. Host files
+# are needed only while building the image, never while importing the worker.
+if modal.is_local():
+    manifest = json.loads((ROOT / "configs/fast_pmo_run.json").read_text())["payload"]
+    for path in sorted({"modal_apps/fast_pmo_run_app.py", *manifest["inputs"]}):
+        if not path.startswith("configs/"):
+            image = image.add_local_file(ROOT / path, str(REMOTE_ROOT / path), copy=True)
 
 app = modal.App("compose-fast-pmo")
 

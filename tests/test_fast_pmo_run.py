@@ -75,3 +75,24 @@ def test_locked_cap_cannot_be_changed(tmp_path):
     with pytest.raises(ValueError, match="bounded approved run"):
         load_contract(tmp_path)
     assert json.loads(json.dumps(asdict(configuration())))["channel_probabilities"][2] == 0
+
+
+def test_container_import_does_not_read_host_manifest(monkeypatch):
+    import runpy
+    from pathlib import Path
+
+    import modal
+
+    monkeypatch.setattr(modal, "is_local", lambda: False)
+    original = Path.read_text
+
+    def guarded(path, *args, **kwargs):
+        if path.name == "fast_pmo_run.json":
+            raise AssertionError("container import tried to read host manifest")
+        return original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", guarded)
+    loaded = runpy.run_path(
+        str(Path(__file__).resolve().parents[1] / "modal_apps/fast_pmo_run_app.py")
+    )
+    assert "run" in loaded
