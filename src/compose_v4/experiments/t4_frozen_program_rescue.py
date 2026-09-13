@@ -112,6 +112,26 @@ def validate_locked_round(started: dict, batch: dict) -> None:
         raise ValueError("ambiguous reservation differs from its locked candidate")
 
 
+def validate_resume_checkpoint(
+    checkpoint: dict | None,
+    *,
+    completed_results: int,
+    started_round: int,
+    bootstrap: bool,
+) -> int:
+    if checkpoint is None:
+        if started_round != 0 or bootstrap is not True:
+            raise ValueError("non-bootstrap T4 interruption lost checkpoint")
+        return 0
+    if (
+        checkpoint["query_count"] > completed_results
+        or checkpoint["query_count"] != len(checkpoint["curve"])
+        or checkpoint["next_round"] > started_round
+    ):
+        raise ValueError("interrupted T4 checkpoint cannot resume safely")
+    return checkpoint["query_count"]
+
+
 def validate_query_paths(started_indices: set[int], result_indices: set[int]) -> int:
     if not started_indices:
         raise ValueError("interrupted unit has no charged query reservation")

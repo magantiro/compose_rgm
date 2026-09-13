@@ -1,0 +1,16 @@
+{
+  "schema_version": "t4_frozen_program_rescue_prelock_failure_v1",
+  "stage": "read_only_prepare",
+  "at_utc": "2026-09-13T19:21:09Z",
+  "new_oracle_calls": 0,
+  "remote_writes": 0,
+  "failed_unit": "braf_2_r2",
+  "error": "FileNotFoundError: interrupted bootstrap unit has no checkpoint.json.gz",
+  "interpretation": "The audit assumed every interrupted unit had a checkpoint. The original worker intentionally creates no pre-query checkpoint for a bootstrap batch. The unit retains its round-0 batch lock and contiguous query ledger, so the repair may admit only a missing checkpoint paired with bootstrap=true and round_index=0.",
+  "implementation_sha256_before_repair": {
+    "configs/t4_frozen_program_rescue.json": "50ba031ffc423a292ed785844aec5bee3953f77b34f964828c494010a570a957",
+    "docs/T4_FROZEN_PROGRAM_RESCUE.md": "6bcfc4b83b226b7a51fd2cb80db7553967ae991eb3420328be6838d984435e5e",
+    "src/compose_v4/experiments/t4_frozen_program_rescue.py": "8424c770bdd1393d5710e2adde0983a10335fbcaa828a61f54f54cf18e633c10",
+    "tools/t4_frozen_program_rescue.py": "c8225675d8efefae10cfa728bb453f1b1ff3a06e232b615aab68821c183500d8"
+  }
+}

@@ -18,6 +18,7 @@ from compose_v4.experiments.t4_frozen_program_rescue import (
     validate_locked_round,
     validate_query_paths,
     validate_rescue_lock,
+    validate_resume_checkpoint,
 )
 from compose_v4.experiments.t4_matched_pilot import seal, unseal
 
@@ -145,16 +146,25 @@ def prepare() -> dict:
         validate_locked_round(started_query, batch_lock["batch"])
 
         checkpoint_path = f"{unit_prefix}/checkpoint.json.gz"
-        checkpoint_raw = _remote_bytes(volume, checkpoint_path)
-        checkpoint = read_gzip_bytes(checkpoint_raw, source=checkpoint_path)
-        if (
-            checkpoint["query_count"] > len(result_indices)
-            or checkpoint["query_count"] != len(checkpoint["curve"])
-            or checkpoint["next_round"] > started_query["round_index"]
-        ):
-            raise ValueError(
-                f"interrupted T4 checkpoint cannot resume safely: {unit_id}"
+        if checkpoint_path in paths:
+            checkpoint_raw = _remote_bytes(volume, checkpoint_path)
+            checkpoint = read_gzip_bytes(checkpoint_raw, source=checkpoint_path)
+            checkpoint_query_count = validate_resume_checkpoint(
+                checkpoint,
+                completed_results=len(result_indices),
+                started_round=started_query["round_index"],
+                bootstrap=batch_lock.get("bootstrap") is True,
             )
+            checkpoint_sha256 = raw_sha256(checkpoint_raw)
+        else:
+            checkpoint_query_count = validate_resume_checkpoint(
+                None,
+                completed_results=len(result_indices),
+                started_round=started_query["round_index"],
+                bootstrap=batch_lock.get("bootstrap") is True,
+            )
+            checkpoint_path = None
+            checkpoint_sha256 = None
 
         tombstone = make_ambiguous_tombstone(
             started_query, reconciled_at_utc=reconciled_at
@@ -177,8 +187,8 @@ def prepare() -> dict:
             "batch_path": batch_path,
             "batch_sha256": raw_sha256(batch_raw),
             "checkpoint_path": checkpoint_path,
-            "checkpoint_sha256": raw_sha256(checkpoint_raw),
-            "checkpoint_query_count": checkpoint["query_count"],
+            "checkpoint_sha256": checkpoint_sha256,
+            "checkpoint_query_count": checkpoint_query_count,
             "tombstone_path": str(tombstone_path.relative_to(ROOT)),
             "tombstone_sha256": sha256_file(tombstone_path),
             "remote_tombstone_path": f"{query_prefix}/result.json",
@@ -253,7 +263,8 @@ def _assert_remote_lock(volume, lock: dict) -> None:
     for unit_id, row in lock["units"].items():
         _read_and_match(volume, row["started_path"], row["started_sha256"])
         _read_and_match(volume, row["batch_path"], row["batch_sha256"])
-        _read_and_match(volume, row["checkpoint_path"], row["checkpoint_sha256"])
+        if row["checkpoint_path"] is not None:
+            _read_and_match(volume, row["checkpoint_path"], row["checkpoint_sha256"])
         unit_prefix = f"{prefix}/units/{unit_id}"
         paths = _paths(volume, unit_prefix)
         if f"{unit_prefix}/result.json" in paths:

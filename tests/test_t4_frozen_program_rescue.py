@@ -59,3 +59,34 @@ def test_locked_round_binds_the_exact_candidate() -> None:
     candidates[3]["endpoint"] = "CCC"
     with pytest.raises(ValueError, match="locked candidate"):
         rescue.validate_locked_round(reservation, {"candidates": candidates})
+
+
+def test_missing_checkpoint_is_allowed_only_for_bootstrap_round_zero() -> None:
+    assert (
+        rescue.validate_resume_checkpoint(
+            None, completed_results=3, started_round=0, bootstrap=True
+        )
+        == 0
+    )
+    with pytest.raises(ValueError, match="non-bootstrap"):
+        rescue.validate_resume_checkpoint(
+            None, completed_results=3, started_round=1, bootstrap=True
+        )
+    with pytest.raises(ValueError, match="non-bootstrap"):
+        rescue.validate_resume_checkpoint(
+            None, completed_results=3, started_round=0, bootstrap=False
+        )
+
+
+def test_checkpoint_cannot_lead_the_durable_results() -> None:
+    checkpoint = {"query_count": 4, "curve": [{}, {}, {}, {}], "next_round": 0}
+    assert (
+        rescue.validate_resume_checkpoint(
+            checkpoint, completed_results=4, started_round=0, bootstrap=True
+        )
+        == 4
+    )
+    with pytest.raises(ValueError, match="cannot resume safely"):
+        rescue.validate_resume_checkpoint(
+            checkpoint, completed_results=3, started_round=0, bootstrap=True
+        )
