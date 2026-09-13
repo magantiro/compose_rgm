@@ -1,0 +1,1 @@
+{"payload":{"query":{"role":"charged_root","smiles":"COc1ccccc1CNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1"},"query_index":0,"score":0.03,"seconds":0.0008645830675959587,"status":"complete","task":"gsk3b"},"payload_sha256":"fb5fb989c6a7d97b2ff7b73c401213c546860dcda7753aa28b36a7dada80d5b8"}

@@ -1,0 +1,1 @@
+{"payload":{"automatic_retry":false,"query":{"candidate_id":"exact_target","operation":"exact_target","program_id":"3f3e04353726c7b04ef18dfcd2da5de56f3d95c50b72d71ed7a927378dc0d36b","role":"complete_program_output","smiles":"COc1ccc(NN=C2C(=O)NN=C2c2ccccc2)cc1"},"query_index":1,"task":"gsk3b"},"payload_sha256":"35d0751ea9beeb8991b04a20367635c2e785ab746bd8414e19ea46d7b404b9ac"}

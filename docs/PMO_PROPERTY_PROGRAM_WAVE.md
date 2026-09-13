@@ -81,3 +81,29 @@ The anchor neighborhoods are narrow and answer-known. A positive result would
 show executable recovery and local transfer around public solutions, not that a
 general controller independently discovered those solutions. DRD2, isomer,
 median, scaffold-hop and remaining MPO tasks require separately qualified waves.
+
+## Measured result, 2026-09-13
+
+All 48 locked queries completed with no retries or replacements. The result was
+mixed: JNK3 exceeded the IVG no-prescreen comparator, but no task exceeded the
+prescreen comparator.
+
+| Task | COMPOSE AUC | IVG no-prescreen | Margin | IVG prescreen | Margin |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| GSK3B | 0.863308800000 | 0.951550908576 | -0.088242108576 | 0.987755000000 | -0.124446200000 |
+| JNK3 | 0.882293600000 | 0.825432740059 | +0.056860859941 | 0.897834849848 | -0.015541249848 |
+| QED | 0.930267966546 | 0.942328202796 | -0.012060236250 | 0.943446030900 | -0.013178064354 |
+
+The exact anchors reproduced their panel rewards: GSK3B 1.00, JNK3 0.98 and QED
+0.948442. Generic one-edit neighborhoods did not preserve those values reliably.
+GSK3B's final top-ten mean was 0.864, JNK3's was 0.883 and QED's was 0.931013.
+The result therefore rejects the hypothesis that one high-scoring public anchor
+plus a generic local neighborhood is sufficient to beat the stronger IVG
+prescreen results on these learned-property objectives.
+
+The next justified development step is to use the complete public top-molecule
+panels as multiple structurally distinct anchors, or to derive task-appropriate
+program variations from their common features. It is not justified to call the
+generic one-edit rule successful on GSK3B/QED or to hide the negative margins.
+The authoritative payload SHA-256 is
+`28f7c6e7703051bf40e45e25535c5a53b5cd9fbdca85d5d4ffa5cb9c9a96b642`.

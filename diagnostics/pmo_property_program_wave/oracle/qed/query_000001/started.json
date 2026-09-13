@@ -1,0 +1,1 @@
+{"payload":{"automatic_retry":false,"query":{"candidate_id":"exact_target","operation":"exact_target","program_id":"a25ff1314723a3b04545d5455b89e70f89609c174ef492584d794328cc47d124","role":"complete_program_output","smiles":"CC(C)N1N=CC2=NC(c3ccc(-c4cccnc4)cc3)NC21"},"query_index":1,"task":"qed"},"payload_sha256":"ea2b77df9dc6e8119f9f6c4d54c26d78d301c5c69a987131697328752c39b410"}
