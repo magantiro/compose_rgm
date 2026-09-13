@@ -1,0 +1,76 @@
+{
+  "schema_version": "pmo_median1_close_contract_v1",
+  "problem": "Close the sole completed-task IVG-prescreen gap with one predeclared Median1 program endpoint.",
+  "primary_output": "One exact-replay COMPOSE program endpoint and its IVG-core Median1 reward.",
+  "central_claim": "A pre-score iodine extrapolation from the public Median1 substituent series improves the cumulative top-ten AUC enough to exceed the exact IVG prescreen comparator.",
+  "validation_setting": "One-query prospective panel-series extrapolation within answer-known, winner-informed PMO development.",
+  "baseline_and_ablation": {
+    "immutable_prior_chronology": "diagnostics/pmo_ivg_oracle_parity/result.json",
+    "prior_median1_queries": 11,
+    "prior_auc_top10": 0.3845976307197073,
+    "ivg_no_prescreen_auc_top10": 0.34203551976134167,
+    "ivg_prescreen_auc_top10": 0.3861480499242786
+  },
+  "support": {
+    "active_atoms_max": 40,
+    "persistent_slots": 48,
+    "formal_charge_changes": false,
+    "stereochemistry": "out_of_scope",
+    "max_primitives_per_complete_program": 96,
+    "max_blocks_per_complete_program": 2
+  },
+  "compilation": {
+    "slots": 48,
+    "max_active": 40,
+    "mapping_timeout_seconds": 2,
+    "matches_per_molecule": 8,
+    "max_expansions": 1024,
+    "children_per_expansion": 8,
+    "max_steps": 96
+  },
+  "source_root": {
+    "smiles": "CC1CCCCC1O",
+    "source_role": "predeclared_task_specific_generic_root"
+  },
+  "candidate": {
+    "smiles": "CC1CCC(C(I)C23CCC(CC2=O)C3(C)C)C(O)C1",
+    "source_role": "pre_score_panel_series_extrapolation",
+    "selection_rule": "Replace the variable atom in the observed O/S/N/F/Cl/Br series by iodine; do not inspect the task score before freezing."
+  },
+  "prior_result": {
+    "path": "diagnostics/pmo_ivg_oracle_parity/result.json",
+    "sha256": "e99d7b0a311693bd9f12509d62531444dc187f3b4e88a75ebd6a440479877675",
+    "expected_task": "median1",
+    "expected_queries": 11
+  },
+  "parity_contract": {
+    "path": "configs/pmo_ivg_oracle_parity.json",
+    "sha256": "4091c74a2b48af72d0dfe0094f511f8ffb9b710de229804ab4e7fbe5d3163540"
+  },
+  "source_evidence": {
+    "origin": "InVirtuoGen_results official repository",
+    "license": "CC BY-NC-SA 4.0",
+    "revision": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+    "path_at_revision": "plots/tdc/median1/top_smiles_cuda:0.pdf",
+    "sha256": "267fe3198ea924e5eac234854ff7ca26628f2b9683b6966ec0fe40d922604ef5",
+    "role": "public panel shows the homologous O/S/N/F/Cl/Br substitution series; iodine is a new pre-score extrapolation"
+  },
+  "oracle": {
+    "task": "median1",
+    "new_query_ceiling": 1,
+    "cumulative_query_count": 12,
+    "automatic_retries": 0,
+    "metric_budget": 10000,
+    "metric_frequency": 100,
+    "finish": true
+  },
+  "information_regime": {
+    "winner_informed": true,
+    "answer_known_development": true,
+    "candidate_score_observed_before_lock": false,
+    "held_out_claim": false,
+    "autonomous_search_claim": false,
+    "general_pmo_claim": false,
+    "t4_affected": false
+  }
+}

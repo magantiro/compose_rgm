@@ -372,6 +372,22 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped PMO Median1 closing query, 2026-09-13:** after the exact IVG-core
+oracle audit exceeded IVG no-prescreen on all eleven completed tasks and IVG
+prescreen on ten, the user requested aggressive continuation across PMO. The
+sole completed-task miss is Median1 by 0.001550419204571274 AUC. Implement and
+run the bounded one-query closeout in `docs/PMO_MEDIAN1_CLOSE.md`. The single
+candidate is an iodine analogue selected before scoring by extending the
+public-panel O/S/N/F/Cl/Br substituent series. Compile it from the same generic
+Median1 root into one complete exact-replay COMPOSE program, freeze its query
+identity, and score it once under the already qualified IVG-core PyTDC 1.1.15
+and RDKit 2023.9.6 environment. Append that observation to the immutable prior
+eleven-call Median1 chronology and report the official 10,000-query top-ten AUC.
+No retry, replacement, reselection, additional candidate, training, Modal use,
+T4 change, or remaining-task query follows automatically. A positive outcome
+is prospective panel-series extrapolation inside an answer-known,
+winner-informed development regime, not held-out or autonomous PMO evidence.
+
 **Scoped PMO IVG-oracle parity audit, 2026-09-13:** after the user requested
 continued aggressive PMO work, inspection of the official IVG repository found
 that its Dockerfile installs PyTDC 1.1.15 while its requirements pin RDKit
