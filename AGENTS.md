@@ -393,6 +393,17 @@ workers and no GPU or automatic retry. The cumulative run must remain below the
 original 45,030-call and $20 ceilings. No controller, T4 protocol, PMO, training,
 candidate replacement or result-dependent scientific change is authorized.
 
+The first rescue relaunch then failed closed in non-bootstrap units after their
+locked batches finished: the original optimizer did not recognize the precise
+`ambiguous_charged_query_unobserved` tombstone status. Preserve the relaunch
+receipt and every unit failure. The bounded repair may accept only that exact
+status as a charged missing observation, without adding a score, blacklisting
+the endpoint, changing proposal state, or relabeling it as an oracle failure or
+cache miss. Audit that each failed unit has a complete contiguous query ledger
+before another invocation. Leave still-running bootstrap invocations untouched;
+total concurrent rescue workers remain at most 22. No other controller or
+protocol change follows.
+
 **Scoped PMO Median1 closing query, 2026-09-13:** after the exact IVG-core
 oracle audit exceeded IVG no-prescreen on all eleven completed tasks and IVG
 prescreen on ten, the user requested aggressive continuation across PMO. The

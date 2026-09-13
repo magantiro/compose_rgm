@@ -1087,6 +1087,7 @@ class ProgramOptimizer:
             if row["score"] is None and row.get("failure") not in (
                 "oracle_failed",
                 "cache_miss_not_evaluated",
+                "ambiguous_charged_query_unobserved",
             ):
                 raise ValueError("missing score requires an explicit failure or unqueried status")
         for row in outcomes:

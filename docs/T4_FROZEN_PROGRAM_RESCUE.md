@@ -70,6 +70,23 @@ No controller parameter, program, source state, eligibility threshold, docking
 setting, seed, oracle protocol or plateau rule may change. No PMO work, model
 training, candidate replacement or result-guided repair is part of this rescue.
 
+## First relaunch compatibility failure
+
+The first relaunch preserved every charged query but exposed a fail-closed
+status-vocabulary mismatch. The frozen optimizer accepted missing scores only
+for `oracle_failed` and `cache_miss_not_evaluated`; it therefore rejected the
+more precise rescue status `ambiguous_charged_query_unobserved` after completing
+the affected locked batch. Do not relabel that receipt as an oracle failure or
+an uncharged cache miss. Preserve every first-relaunch failure artifact.
+
+A bounded repair may add the exact tombstone status to the optimizer's accepted
+missing-observation vocabulary. Like `cache_miss_not_evaluated`, this status
+must consume the pending outcome without adding a task label or blacklisting the
+endpoint. It changes no proposal, score, seed, gate, query identity or random
+state. Before relaunch, require a contiguous started/result ledger with no new
+ambiguity and lock every newly completed observation. Units still executing a
+checkpoint-free bootstrap under the first relaunch are left untouched.
+
 ## Artifacts and procedure
 
 1. Audit the live volume read-only and freeze a rescue lock containing the

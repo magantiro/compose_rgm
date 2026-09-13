@@ -18,7 +18,11 @@ from compose_v4.experiments.t4_matched_pilot import unseal
 
 SCHEMA = "t4_frozen_program_rescue_contract_v1"
 LOCK_SCHEMA = "t4_frozen_program_rescue_lock_v1"
+RELAUNCH_LOCK_SCHEMA = "t4_frozen_program_rescue_relaunch_lock_v2"
 TOMBSTONE_FAILURE = "ambiguous_charged_query_unobserved"
+TOMBSTONE_COMPATIBILITY_ERROR = (
+    "ValueError('missing score requires an explicit failure or unqueried status')"
+)
 REQUIRED_STARTED_FIELDS = {
     "query_index",
     "round_index",
@@ -153,6 +157,29 @@ def validate_query_paths(started_indices: set[int], result_indices: set[int]) ->
     if missing != {max(started_indices)}:
         raise ValueError("unit does not have exactly one final ambiguous reservation")
     return max(started_indices)
+
+
+def validate_relaunch_query_paths(
+    started_indices: set[int], result_indices: set[int]
+) -> int:
+    """Require a fully observed, contiguous ledger after a rescue invocation."""
+    if not started_indices or started_indices != result_indices:
+        raise ValueError("relaunch query ledger contains an ambiguous reservation")
+    expected = set(range(max(started_indices) + 1))
+    if started_indices != expected:
+        raise ValueError("relaunch query ledger is not contiguous")
+    return len(started_indices)
+
+
+def validate_tombstone_compatibility_failure(failure: dict, *, unit_id: str) -> None:
+    if (
+        failure.get("schema_version") != "t4_frozen_program_unit_failure_v1"
+        or failure.get("status") != "failed"
+        or failure.get("unit", {}).get("unit_id") != unit_id
+        or failure.get("error") != TOMBSTONE_COMPATIBILITY_ERROR
+        or failure.get("automatic_retry") is not False
+    ):
+        raise ValueError(f"unexpected first-relaunch outcome: {unit_id}")
 
 
 def load_rescue_contract(root: Path, relative: str) -> dict:

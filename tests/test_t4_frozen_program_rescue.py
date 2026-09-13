@@ -59,6 +59,28 @@ def test_query_paths_require_one_final_ambiguity() -> None:
         rescue.validate_query_paths({0, 1, 3}, {0, 1})
 
 
+def test_relaunch_query_paths_require_complete_contiguous_pairs() -> None:
+    assert rescue.validate_relaunch_query_paths(set(range(8)), set(range(8))) == 8
+    with pytest.raises(ValueError, match="ambiguous"):
+        rescue.validate_relaunch_query_paths(set(range(8)), set(range(7)))
+    with pytest.raises(ValueError, match="not contiguous"):
+        rescue.validate_relaunch_query_paths({0, 1, 3}, {0, 1, 3})
+
+
+def test_only_exact_tombstone_compatibility_failure_is_relaunchable() -> None:
+    failure = {
+        "schema_version": "t4_frozen_program_unit_failure_v1",
+        "status": "failed",
+        "unit": {"unit_id": "braf_0_r1"},
+        "error": rescue.TOMBSTONE_COMPATIBILITY_ERROR,
+        "automatic_retry": False,
+    }
+    rescue.validate_tombstone_compatibility_failure(failure, unit_id="braf_0_r1")
+    failure["error"] = "ValueError('another failure')"
+    with pytest.raises(ValueError, match="unexpected first-relaunch"):
+        rescue.validate_tombstone_compatibility_failure(failure, unit_id="braf_0_r1")
+
+
 def test_locked_round_binds_the_exact_candidate() -> None:
     reservation = started()
     candidates = [{"candidate_id": str(index), "endpoint": "C"} for index in range(4)]

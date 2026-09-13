@@ -152,6 +152,27 @@ def test_incomplete_wrong_domain_and_missing_scores_do_not_update_archive():
     assert not search.failed_endpoints
 
 
+def test_ambiguous_charged_observation_is_consumed_without_inventing_a_label():
+    search = optimizer()
+    batch = search.propose_batch(eligible)
+    labels = [
+        {
+            **row,
+            "score": None,
+            "failure": "ambiguous_charged_query_unobserved",
+        }
+        for row in outcomes(search, batch, -4)
+    ]
+
+    search.observe_batch(batch["batch_id"], labels)
+
+    assert search.pending is None
+    assert len(search.entries) == 1
+    assert set(search.observations) == {"fixture:original"}
+    assert not search.failed_endpoints
+    assert search.history[-1]["outcomes"] == labels
+
+
 def test_no_forced_padding_to_maximum_blocks_and_configuration_is_explicit():
     config = optimizer().config
     assert replace(config, max_primitives=40, max_blocks=12).max_blocks == 12
