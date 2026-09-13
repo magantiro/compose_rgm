@@ -372,6 +372,27 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped frozen T4 interrupted-unit rescue, 2026-09-13:** the original frozen
+full-suite run sealed a partial aggregate after 22 workers stopped with one
+reserved query lacking a durable result, while a separately restarted JAK2
+seed-2 replicate subsequently completed. The user explicitly requested that the
+unfinished units resume from their durable points with the same seeds and exact
+oracle accounting. Implement and run the bounded recovery in
+`docs/T4_FROZEN_PROGRAM_RESCUE.md`. Preserve the original controller, source
+states, program library, endpoint gates, search and docking seeds, query order,
+checkpoints, round locks, 40-atom support and deployed scientific image. For
+each interrupted unit, convert the one already reserved query into an explicit
+charged failure with no score, never redock or relabel that molecule, then
+resume only the remaining budget. Preserve the stale aggregate, its 24 early
+confirmation calls and every failure artifact. Reaggregate only after all 45
+unit outcomes are durable. Lock final champions and obtain only the fresh
+confirmation calls needed by the final lock, reusing an earlier receipt only
+when its complete query identity is identical. At most 16,943 new search calls
+and 30 new confirmations are authorized, using at most 22 concurrent one-CPU
+workers and no GPU or automatic retry. The cumulative run must remain below the
+original 45,030-call and $20 ceilings. No controller, T4 protocol, PMO, training,
+candidate replacement or result-dependent scientific change is authorized.
+
 **Scoped PMO Median1 closing query, 2026-09-13:** after the exact IVG-core
 oracle audit exceeded IVG no-prescreen on all eleven completed tasks and IVG
 prescreen on ten, the user requested aggressive continuation across PMO. The
