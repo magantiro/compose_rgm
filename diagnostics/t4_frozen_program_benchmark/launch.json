@@ -1,0 +1,19 @@
+{
+  "app_id": "ap-leszzlH1iWePa3nhCUAjPr",
+  "app_name": "compose-t4-frozen-program-benchmark",
+  "call_ceiling": 45030,
+  "call_id": "fc-01M2CE78Y7ZRQAXMNSVD775CH4",
+  "contract_sha256": "fdc93e9bc97eaae2e81f2189a3b7568b00d1b5525ff0fb7a657668a6190ad280",
+  "deployed_commit": "c272b881bd23ebf1f46bbd1989e6e2871ad20687",
+  "deployed_tree": "8f6afe94fe651215681623e71980dfcc85762f3e",
+  "image_revision_sha256": "0da900589ec1600e8cd2e07ca675e55fadd4bea221d6ee64fcb1dbd3b61cc033",
+  "launched_at_utc": "2026-09-13T03:50:50Z",
+  "preflight_new_oracle_calls": 0,
+  "preflight_passed": true,
+  "remote_task_identity": "54c3cb6d4a708cecc45c5037d8873a3f051538c6bc787bf84eff161f30be90da",
+  "reserved_usd": 20,
+  "schema_version": "t4_frozen_program_launch_receipt_v1",
+  "task": {},
+  "volume": "compose-v4-artifacts",
+  "volume_path": "t4_frozen_program_benchmark/54c3cb6d4a708cecc45c5037d8873a3f051538c6bc787bf84eff161f30be90da"
+}

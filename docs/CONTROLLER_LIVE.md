@@ -1,17 +1,86 @@
 # COMPOSE controller: current decision record
 
-Updated 2026-09-12. The authoritative collaborator snapshot is now
+Updated 2026-09-13. The authoritative collaborator snapshot is now
 [`START_HERE_ICLR.md`](START_HERE_ICLR.md). This file is the chronological
 evidence ledger and intentionally retains superseded decisions and negative
 results.
 
-Latest local checkpoint: see `docs/PARENT_EDIT_CONTROLLER.md` for the repaired
-parent/edit engine, mixed selector audit, next-model training, real branch
-exchange and degenerate BRAF contrast. New task-oracle calls: zero. No remote
-job is active. The older "current" statements below are chronological history;
-the collaborator snapshot above takes precedence.
+Current active run: the frozen full T4 delta=0.4 program-controller benchmark.
+It was launched from clean immutable commit `c272b881bd23ebf1f46bbd1989e6e2871ad20687`
+after a remote zero-oracle preflight passed. Modal app
+`compose-t4-frozen-program-benchmark` (`ap-leszzlH1iWePa3nhCUAjPr`), call
+`fc-01M2CE78Y7ZRQAXMNSVD775CH4`, durable run
+`54c3cb6d4a708cecc45c5037d8873a3f051538c6bc787bf84eff161f30be90da`.
+The frozen scope is all 15 T4 cells at delta=0.4, three predeclared replicates,
+1,000 calls per unit, 45,030 total-call ceiling including confirmations, and a
+30-container/$20 reserved ceiling. At the last volume check, 29 unit directories
+were initialized. No aggregate result is available yet. Monitor the existing
+receipt with `tools/t4_frozen_program_benchmark.py status`; do not relaunch it.
+Contract and operational details: `docs/T4_FROZEN_PROGRAM_BENCHMARK.md`.
 
-Current active run: none. The paired T4 frontier comparison is complete, not
+Latest parallel controller-development result: the general protected composition
+implementation is retained, but its K=2 zero-oracle structural gate did not pass.
+It produced two eligible composed endpoints on BRAF seed1 and none on JAK2 seed1,
+at 1.042 times the control proposal time. No docking was authorized or performed.
+Composition is therefore disabled in the frozen benchmark. Evidence and decision:
+`docs/T4_PROGRAM_COMPOSITION.md` and
+`diagnostics/t4_program_composition/comparison.json`.
+
+Current priority: T4, per the user's explicit direction. PMO is parked; no new
+PMO run or extension. The bounded fast albuterol run finished six rounds and
+110 charged queries (16 initialization, 94 new candidates, plus two cache hits)
+at its time stop, leaving 18 of the 128-query ceiling unused. Best remained
+0.350 from initialization; best newly generated molecule was 0.308772.
+Top-ten mean rose 0.264309 to 0.304106. Thus no new best-score improvement.
+All six pools filled sixteen slots. Proposal work: 22.335 summed seconds;
+oracle callbacks: 0.106 seconds; worker wall: 431.895 seconds, CPU: 38.02 seconds.
+Synchronous durability/publication waits dominate the remaining wall time;
+it was not reference inference. The 420-second campaign check is between rounds,
+not an interrupt inside an active round. No seventh round or automatic follow-on.
+
+Clean run commit `506961088fbb`, call `fc-01M2C81XFZT6BQN6R535K3AWCT`.
+Authoritative result and query curve: `diagnostics/fast_pmo_run/result.json`.
+One CPU worker, no model fitting/reference calls; $1 reserved, not actual billed
+cost. Using the inherited tariff, 432 seconds at the full 4-GiB allocation is
+approximately $0.0095, excluding startup/build/storage. The preceding host-path
+import failure was stopped at zero queries and retained in `startup_review.json`.
+The old interrupted PMO grid and its unresolved reservation remain unchanged.
+
+Next T4 decision: bounded protected two-program continuation on the exact current
+state, with second-program rebinding and no intermediate task-score pruning.
+Code inspection: existing `_recombine` combines branches on a constructor source;
+the fast fresh-state channel exposes one existing-atom operation. Reusable-library
+P1 -> actual successor -> freshly bound P2 is not an exposed fast channel.
+Retain BRAF/JAK2 incumbents, baseline mutation/recombination, original-seed endpoint
+gates, 40 atoms and 32 total primitives/eight total blocks. First verify new,
+eligible, replayable endpoints at bounded local work and zero oracles. Deeper
+chains, new predictors and a further paid docking pilot are not launched here.
+
+Latest local checkpoint, 2026-09-13: fast program-only search fills all four
+BRAF/JAK2 twelve-candidate pools. Reuse and exact attachment masks reduce summed
+proposal seconds from 68.705 to 55.215 with every exact candidate and attempt
+outcome preserved. New oracle calls: zero. Untried mutation takes 51.073 seconds
+but increases canonical duplicate attempts, so it remains experimental. No
+new score or benchmark win. See `docs/FAST_PROGRAM_SEARCH.md` and
+`diagnostics/fast_program_search/throughput_comparison.json`. PMO dispatch,
+all-scored initialization and failure isolation are repaired locally, not redeployed.
+Next decision: one frozen short direct-scoring PMO run, not another large mixed grid.
+
+Latest paid operational checkpoint, 2026-09-13: T4 complete (72 calls, zero failures);
+PMO interrupted (647 charged, 646 complete, one unresolved query). Learned JAK2
+champion -10.9 repeated -10.5/-10.7; no BRAF incumbent improvement. No active
+campaign containers and no recovery launch. Full report including implementation:
+`docs/PARENT_EDIT_CYCLES_REPORT.md`. Original clean source `5553ef0ca97c`.
+T4 call `fc-01M2C1HEC84P5BQ9VEQYWAGFJV`; PMO call
+`fc-01M2C1HTBHN6X7S5A536A36ZP0`. Caps: 108 docking calls, 24,000 PMO queries,
+$20 combined and 30 containers (concrete deployment at most sixteen).
+Retrieved receipts and reconciled scores: `diagnostics/parent_edit_cycles/`.
+The comparison changes learned endpoint selection only, with the same repaired
+program engine and declared histories. No benchmark win is established.
+The older "current" statements below are chronological history; the collaborator
+snapshot above takes precedence.
+
+Historical checkpoint: the paired T4 frontier comparison is complete, not
 running: in-loop reached -10.0 from the shared -9.7 warm champion and produced
 eight eligible endpoints, versus -9.9 and four endpoints post-hoc. It used 12
 new docking calls total. The strongest observed PMO development molecule remains

@@ -1,9 +1,59 @@
 # COMPOSE ICLR controller: start here
 
 This is the authoritative collaborator handoff for the controller campaign as
-of 2026-09-12. Read this page before the chronological logs. The active
+of 2026-09-13. Read this page before the chronological logs. The active
 integration branch is `compose-iclr`; the Modal session name is
 `compose_iclr`.
+
+## Partner quick start
+
+Clone or update the shared branch, then read the frozen benchmark contract and
+the current controller decision record:
+
+```sh
+git clone --branch compose-iclr https://github.com/KoshaTx/compose_rgm.git
+cd compose_rgm
+git log --oneline -8
+```
+
+The paper-result track is currently running on Modal from the immutable clean
+commit `c272b881bd23ebf1f46bbd1989e6e2871ad20687`. Later documentation and
+controller commits do not alter that deployed code or its sealed recipe.
+
+| Live item | Identity |
+| --- | --- |
+| Modal app | `compose-t4-frozen-program-benchmark` (`ap-leszzlH1iWePa3nhCUAjPr`) |
+| Function call | `fc-01M2CE78Y7ZRQAXMNSVD775CH4` |
+| Durable run | `54c3cb6d4a708cecc45c5037d8873a3f051538c6bc787bf84eff161f30be90da` |
+| Volume prefix | `t4_frozen_program_benchmark/<durable-run-id>` on `compose-v4-artifacts` |
+| Scope | 15 delta=0.4 T4 cells, three predeclared search replicates, at most 1,000 calls per unit |
+| Hard limits | 45,030 calls including confirmations, 30 containers, CPU only, $20 reserved ceiling |
+
+The remote zero-oracle preflight passed, including the clean source identity,
+all five receptors and QuickVina. At the last read-only check, the run was active
+and 29 unit directories had been initialized. No result has been retrieved or
+interpreted yet. Monitor without spawning another run:
+
+```sh
+MODAL_PROFILE=nitya PYTHONPATH=src:. .venv/bin/python \
+  tools/t4_frozen_program_benchmark.py status
+```
+
+The status command reads durable volume state and can take about a minute while
+many units are active. After the call completes, retrieve exactly once with:
+
+```sh
+MODAL_PROFILE=nitya PYTHONPATH=src:. .venv/bin/python \
+  tools/t4_frozen_program_benchmark.py retrieve
+```
+
+Do not relaunch from the root checkout, change the frozen configuration, retry
+ambiguous docking calls, or mix development-controller results into this run.
+Start with [`T4_FROZEN_PROGRAM_BENCHMARK.md`](T4_FROZEN_PROGRAM_BENCHMARK.md),
+`configs/t4_frozen_program_benchmark_v2.json`, and
+`diagnostics/t4_frozen_program_benchmark/launch.json` for exact protocol and
+provenance. The v1 source-state preflight failed before any oracle call and is
+retained as a negative artifact.
 
 ## Project identity
 
@@ -26,16 +76,67 @@ integration branch is `compose-iclr`; the Modal session name is
 
 ## Current outcome
 
+Priority is **T4**; PMO is parked by user direction. Two work tracks are separate:
+
+1. The frozen full-suite benchmark above measures the already selected fast,
+   shared 146-program controller. It uses the same cold-start structural seed
+   in every replicate for parity with the successful development preparation,
+   and independent continuation/docking seeds thereafter. Live score-versus-call
+   curves and a conservative predeclared competitive-plateau rule are part of
+   the frozen contract.
+2. Controller development preserves the fast coordinated-program baseline and
+   explores stronger composition and proposal learning without touching the
+   live run. The first protected two-program structural comparison produced two
+   novel eligible BRAF endpoints and none on JAK2. It failed its preregistered
+   gate, made zero oracle calls, and remains disabled in the benchmark. See
+   [`T4_PROGRAM_COMPOSITION.md`](T4_PROGRAM_COMPOSITION.md).
+
+The bounded fast albuterol
+run completed six rounds/110 charged queries before its time stop. Best score
+remained 0.350 from initialization; top-ten mean rose 0.264309 to 0.304106.
+All six pools filled sixteen slots, with 22.335 total proposal seconds and 0.106
+oracle seconds, but synchronous publication made worker wall time 431.895 seconds.
+This validates candidate throughput, not a new PMO best or matched benchmark win.
+No further PMO campaign or extension is active. Result:
+`diagnostics/fast_pmo_run/result.json`; clean launch commit `506961088fbb`.
+The initial zero-query container-import failure and the previous interrupted grid
+remain separately recorded.
+
+Previous throughput checkpoint: [`FAST_PROGRAM_SEARCH.md`](FAST_PROGRAM_SEARCH.md).
+Explicit program-only dispatch retains the exact executor, coordinated mutation,
+recombination and current-state edits without evaluating the primitive reference.
+Four BRAF/JAK2 pools each fill twelve eligible slots. Binding/caching optimizations
+reduce summed proposal time 68.7 to 55.2 seconds with exact output equivalence.
+These are unscored candidates, not improved benchmark scores. The untried-mutation
+variant remains experimental. PMO initialization/dispatch/isolation repairs were
+used in the bounded fast run above; the old mixed grid was not relaunched.
+
+Latest result (2026-09-13): T4 completed with 72 calls and zero oracle failures.
+The learned JAK2 champion scored -10.9 and repeated -10.5/-10.7; BRAF did not
+improve its incumbent. PMO was interrupted: 647 charged reservations, 646 completed
+scores, one unresolved query. Twelve task-dispatch failures occurred before
+scoring, and a started-unit guard exception cancelled the remaining mapped work.
+The underlying re-entry cause is unconfirmed. No parent-edit campaign containers
+are active; no recovery has launched. Full results, implementation and proposed next decision:
+[`PARENT_EDIT_CYCLES_REPORT.md`](PARENT_EDIT_CYCLES_REPORT.md).
+
+The following launch paragraph is the pre-execution checkpoint, retained for
+lineage rather than current operational status.
+
 Latest authorization: the user approved the paired parent/edit learning cycles,
 with 108 docking calls maximum on BRAF/JAK2 and 24,000 PMO queries, $20 combined
 reserved compute and at most 30 containers. Inputs and task-independent PMO
-initializations are prepared; no new calls have been spent at this checkpoint.
+initializations are frozen. Both group calls have now been submitted from clean
+commit `5553ef0ca97c`; no new scores had been retrieved at that checkpoint.
 The launch uses twelve shared CPU workers, two group drivers and at most two
 confirmation workers, below the approved ceiling. Forty focused launch/dependency
 tests passed; no full-suite or benchmark sign-off is claimed. Recipe and decision:
 [`PARENT_EDIT_LEARNING_CYCLES.md`](PARENT_EDIT_LEARNING_CYCLES.md), machine-readable
 contract `configs/parent_edit_cycles.json`. Launch and progress receipts will live
-under `diagnostics/parent_edit_cycles/`. This new allocation is separate from all
+under `diagnostics/parent_edit_cycles/`. T4 call:
+`fc-01M2C1HEC84P5BQ9VEQYWAGFJV`; PMO call: `fc-01M2C1HTBHN6X7S5A536A36ZP0`.
+The deployed app is `compose-parent-edit-cycles`. Monitor these calls; do not
+respawn started units or retry ambiguous oracle attempts. This allocation is separate from all
 completed allocations below.
 
 Current implementation checkpoint: the parent/edit controller now has verified
@@ -46,8 +147,9 @@ produced a new executable endpoint while retaining another branch; it is unscore
 The first small selector audit was mixed (three positive, two negative, three
 unchanged archive-gain pools), so learned guidance remains unqualified. Next-model
 fits retain 81 unique measured endpoints and all 101 observations across four
-targets, including repeats, for future evaluation only. No new oracle calls or
-remote run. Full details, limits and artifact map:
+targets, including repeats, for future evaluation only. Those local repairs used
+no new oracle calls; the prospective campaign above is now submitted.
+Full details, limits and artifact map:
 [`PARENT_EDIT_CONTROLLER.md`](PARENT_EDIT_CONTROLLER.md).
 
 Correction to the BRAF mutation interpretation: the recorded attachment-only
@@ -181,7 +283,7 @@ route. Next: complete multi-option demonstrations, including core-carbonyl
 insertion, with attachment-level learning. Do not scale the rejected actor or
 static prior unchanged. See `diagnostics/inverse_ring_proposals/README.md` and
 `docs/WINNER_PROPOSAL_DEVELOPMENT.md`. Implementation and diagnostic artifacts
-are uncommitted; the full controller milestone is not complete.
+are preserved in commit `909380e`; the full controller milestone is not complete.
 
 An earlier attempted duplicate T4 launch on 2026-09-12
 was stopped after the repository inventory revealed that the exact comparison
@@ -242,24 +344,25 @@ new oracle calls. See `docs/PMO_OPTION_CONTROLLER_BANK.md` and
 
 ## Next scientific decision
 
-Retain coordinated program proposals and the existing generic broad channel.
-Do not scale the same small winner-derived bank: it improves useful proposal
-density in this development neighborhood but has only two new eligible seed
-endpoints and five post-linker endpoints. The five post-linker variants all score
-between -12.6 and -13.3; independent bundles are more varied but mostly weaker.
-That supports learning coordinated attachments/parameters from completed scored
-programs, not another larger particle population or a relabeled endpoint value.
+Do not change the live benchmark. For development, retain the fast coordinated-
+program baseline, exact-current-state continuation, branch recombination, original-
+seed gates and 40-atom support. The failed protected-composition gate says that
+more depth alone is not yet productive. The next high-leverage question is how to
+make contextually compatible, variable transformations common without exhausting
+work on duplicates, infeasible bindings or a slow reference channel.
 
-Current hypothesis: making those programs variable expands the useful neighborhood;
-measured endpoint feedback should then improve allocation within the same expanded
-support. Variable-program generation and the adaptive archive API are implemented.
-The first 16 new eligible endpoints are locked, unscored and resumable. Next paid
-decision: compare static and adaptive preferences with identical initial information
-and mutation/recombination support. The suggested 108-call maximum needs a new
-budget decision beyond the older 66-call cap; no paid follow-on is active.
-The 27-endpoint archive has only one source group and cannot validate transfer or
-calibration. Preserve the serial baseline, endpoint-only constraints, old champion,
-and all failed attempts. Do not promote adaptation based on structural yield alone.
+The proposed development sequence is: improve component/interface coverage and
+cheap binding filters; collect actual parent/edit outcome contrasts; then learn
+which attachment-specific complete programs to propose. Preserve several measured
+structural families, not only the highest-scoring parent. Add composition depth
+only when a specific two-component failure motivates it. Do not add another future-
+value head, particle increase or expensive selector before candidate support and
+throughput justify it.
+
+The full T4 run will reveal cell-specific deficits under one frozen recipe. Those
+results may choose the next development target, but must not retroactively alter
+the current paper-result track. Any successor becomes a separately frozen version
+and reruns the same protocol.
 
 ## Code map
 
@@ -282,6 +385,9 @@ submission revision and a fresh-laptop path, see
 | Cache-only batch preparation/resume | `tools/adaptive_program_search.py` |
 | Locked program docking and review | `t4_program_pool.py`, `tools/review_t4_program_pool.py` |
 | Scored complete-program replay preparation | `tools/prepare_scored_program_replay.py` |
+| Fast program search and protected composition | `tools/fast_program_search.py`, `adaptive_program_optimizer.py` |
+| Full frozen T4 benchmark | `t4_frozen_program_benchmark.py` under `src/compose_v4/experiments/`, `tools/`, and `modal_apps/` |
+| Parent/edit campaign review | `tools/parent_edit_cycles.py`, `docs/PARENT_EDIT_CYCLES_REPORT.md` |
 | PMO continuation bank | `pmo_option_controller_bank.py` |
 | Remote entrypoints | `modal_apps/genmol_t4_opt_app.py`, `modal_apps/pmo_option_controller_bank_app.py` |
 
@@ -294,9 +400,10 @@ submission revision and a fresh-laptop path, see
 2. Start from a fresh clone or clean worktree of `origin/compose-iclr`. The
    quarantine branch is durable on `origin` but is not a development base.
 3. Run `python3 tools/preflight.py` before any scientific launch.
-4. For long T4 work, run `modal deploy modal_apps/genmol_t4_opt_app.py`, then
-   use the durable launcher in `tools/t4_launch.py`. Do not use
-   `modal run --detach` for the long driver.
+4. The current frozen T4 run is already deployed. Monitor its existing receipt;
+   do not run a launch command. For a future separately authorized T4 campaign,
+   use its task-specific app and durable launcher. Do not use `modal run --detach`
+   for a long driver.
 5. Inventory the content-addressed Modal prefix before recomputing. Local JSON
    files are summaries; bulk states, checkpoints, locks, and docking receipts
    live on the `compose-v4-artifacts` volume.
@@ -313,8 +420,10 @@ directory until their hashes and a durable replacement location are verified.
 1. This file.
 2. `AGENTS.md` for scientific and authorization constraints.
 3. `docs/PAPER_TO_CURRENT_CODE.md` for the paper-to-current implementation map.
-4. `diagnostics/t4_frontier_compare/README.md` for the current primary result.
-5. `docs/OPTION_CONTROLLER_RUNTIME_V1.md` for the newer controller runtime.
-6. `docs/CONTROLLER_LIVE.md` only as a chronological evidence ledger.
-7. `docs/MACRO_INVENTORY.md` and `docs/CAMPAIGN_LESSONS.md` before changing
+4. `docs/T4_FROZEN_PROGRAM_BENCHMARK.md` for the live paper-result track.
+5. `docs/T4_PROGRAM_COMPOSITION.md` for the latest negative/inconclusive R&D gate.
+6. `docs/PARENT_EDIT_CYCLES_REPORT.md` for the last completed learning campaign.
+7. `docs/OPTION_CONTROLLER_RUNTIME_V1.md` for the newer controller runtime.
+8. `docs/CONTROLLER_LIVE.md` only as a chronological evidence ledger.
+9. `docs/MACRO_INVENTORY.md` and `docs/CAMPAIGN_LESSONS.md` before changing
    option support or launching expensive work.
