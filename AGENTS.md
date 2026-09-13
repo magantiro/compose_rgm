@@ -442,6 +442,24 @@ override the QuickVina or receptor hashes, add another repository override, or
 change any controller/runtime setting. Reaudit unchanged ledgers before the
 same 19-unit relaunch.
 
+**Scoped frozen T4 program-vocabulary audit, 2026-09-13:** the user explicitly
+requested an immediate audit of whether the exact frozen 146-program T4 bank is
+a general context-bound transformation vocabulary or retains task-, seed- or
+winner-specific information. Implement and run the bounded zero-oracle audit in
+`docs/T4_PROGRAM_VOCABULARY_AUDIT.md`. Inspect the frozen bank without changing
+it; map its opaque source groups against the public 15-cell registry; scan for
+literal target, seed, score and endpoint fields; verify typed address-free atom
+handles and runtime context rebinding; distinguish complete winner-route
+programs from other program structures; and measure bounded structural-binding
+and exact-execution applicability on all 15 frozen source states. Reconcile the
+existing answer-known direct-retrieval winner recovery and trace the best four
+measured development candidates back to their library program origins. Report
+coverage and execution precision separately, preserve negative results, input
+hashes and source provenance, and make no oracle call, Modal call, library,
+controller, live-run, PMO or T4 scientific change. This is a retrospective
+specificity and applicability audit, not held-out generalization or autonomous
+optimization evidence.
+
 **Scoped PMO Median1 closing query, 2026-09-13:** after the exact IVG-core
 oracle audit exceeded IVG no-prescreen on all eleven completed tasks and IVG
 prescreen on ten, the user requested aggressive continuation across PMO. The
