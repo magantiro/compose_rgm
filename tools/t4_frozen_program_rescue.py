@@ -14,6 +14,7 @@ from compose_v4.experiments.t4_frozen_program_rescue import (
     make_ambiguous_tombstone,
     raw_sha256,
     read_gzip_bytes,
+    read_status_bytes,
     unseal_bytes,
     validate_locked_round,
     validate_query_paths,
@@ -347,7 +348,7 @@ def status() -> dict:
         payload = (
             {}
             if artifact is None
-            else unseal_bytes(_remote_bytes(volume, artifact), source=artifact)
+            else read_status_bytes(_remote_bytes(volume, artifact), source=artifact)
         )
         calls = payload.get(
             "oracle_calls", payload.get("queries_total", payload.get("queries", 0))

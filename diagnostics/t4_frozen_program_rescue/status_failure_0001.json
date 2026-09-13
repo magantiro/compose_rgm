@@ -1,0 +1,9 @@
+{
+  "schema_version": "t4_frozen_program_rescue_status_failure_v1",
+  "stage": "read_only_status",
+  "at_utc": "2026-09-13T19:29:00Z",
+  "new_oracle_calls": 0,
+  "remote_writes": 0,
+  "error": "ValueError: sealed rescue input has unexpected keys for progress.json",
+  "interpretation": "The monitor treated the deliberately plain live progress record as a sealed final artifact. Workers and oracle accounting were unaffected. The repair admits unsealed JSON only when the path is progress.json; final results and recovery inputs remain sealed."
+}

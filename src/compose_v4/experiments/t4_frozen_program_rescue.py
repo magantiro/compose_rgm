@@ -45,6 +45,15 @@ def unseal_bytes(raw: bytes, *, source: str) -> dict:
     return payload
 
 
+def read_status_bytes(raw: bytes, *, source: str) -> dict:
+    value = json.loads(raw)
+    if set(value) == {"payload", "payload_sha256"}:
+        return unseal_bytes(raw, source=source)
+    if not isinstance(value, dict) or not source.endswith("/progress.json"):
+        raise ValueError(f"unsealed non-progress T4 artifact: {source}")
+    return value
+
+
 def read_gzip_bytes(raw: bytes, *, source: str) -> dict:
     return unseal_bytes(gzip.decompress(raw), source=source)
 

@@ -42,6 +42,15 @@ def test_tombstone_rejects_changed_candidate_identity() -> None:
         rescue.validate_tombstone(tombstone, reservation)
 
 
+def test_status_reader_allows_plain_progress_only() -> None:
+    progress = b'{"queries":8,"unit_id":"braf_2_r0"}'
+    assert (
+        rescue.read_status_bytes(progress, source="unit/progress.json")["queries"] == 8
+    )
+    with pytest.raises(ValueError, match="unsealed non-progress"):
+        rescue.read_status_bytes(progress, source="unit/result.json")
+
+
 def test_query_paths_require_one_final_ambiguity() -> None:
     assert rescue.validate_query_paths(set(range(8)), set(range(7))) == 7
     with pytest.raises(ValueError, match="exactly one final"):
