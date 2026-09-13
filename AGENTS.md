@@ -372,6 +372,22 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped editing-V2 registry-lineage repair, 2026-09-13:** the user explicitly
+authorized resolving the repository-wide verification blocker so the locked
+Perindopril curriculum can be scored. The read-only Process-V2 verifier currently
+crashes while treating an arbitrary long JSON prose value as a filesystem path;
+after that defect is fixed, it must enumerate the complete stale pointer chain.
+Repair only machine-checkable hash and identity pointers whose targets are
+unchanged current files, in dependency order and to a fixed point. Do not change
+any process semantics, operator support, registry cells, thresholds, splits,
+authority flags, scientific status or prior evidence. Preserve superseded
+identities as lineage where explicitly declared. Acceptance requires a focused
+regression for the long-string scanner, the verifier reporting `AGREES`, the
+previously failing registry loader importing successfully, and the full suite
+passing. Record every changed pointer and prove all non-pointer JSON/Python
+content is unchanged. This repair confers no Gate-0, T1, P50 or training
+authority. Contract: `docs/EDITING_V2_REGISTRY_REPIN_2026-09-13.md`.
+
 **Scoped winner-informed Perindopril program curriculum, 2026-09-13:** after the
 completed fast PMO run exposed poor transfer from the generic T4 program library,
 the user explicitly requested aggressive use of published IVG molecules and

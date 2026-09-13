@@ -20,9 +20,9 @@ PANEL_KIND = "unique_state_single_target_canonical_successor_capacity"
 OBJECTIVE_UNIT = "exact_source_frozen_time_canonical_successor"
 EMPIRICAL_STATUS = "BLOCKED_PENDING_VERIFIED_INDEPENDENT_OBSERVATION_RECEIPTS"
 EMPIRICAL_RECEIPT_KIND = "independent_empirical_transition_v1"
-EXPECTED_PANEL_POLICY_SHA256 = "cc63968e3211973a0aefac2f8fa2e8cc43e0a44ed8b425625204f959d067b456"
+EXPECTED_PANEL_POLICY_SHA256 = "7902d10e2f02785e7d5ddb4ea769d598a95d7655259e24a8546fe85a887bcf34"
 EXPECTED_CELL_ROLE_POLICY_SHA256 = (
-    "47cbcc02a5b71119426e4c2babb2b9ac06fcb493d9d349bd9a7443ed43449e80"
+    "ecf673f5420bc9546571c236739c1f474c98b962a194e5c59665c8f56c18bd10"
 )
 EXPECTED_PANEL_MINIMUM = 64
 EXPECTED_PANEL_MAXIMUM = 128
@@ -162,7 +162,7 @@ def validate_semantic_t1_capacity_policy(
         or supplied_sha256 != _sha256(body)
         or policy["panel_kind"] != PANEL_KIND
         or policy["objective_unit"] != OBJECTIVE_UNIT
-        or policy["support_time_hex"] != float(0.5).hex()
+        or policy["support_time_hex"] != (0.5).hex()
         or policy["panel_policy_sha256"] != EXPECTED_PANEL_POLICY_SHA256
         or policy["cell_role_policy_sha256"] != EXPECTED_CELL_ROLE_POLICY_SHA256
         or tuple(policy["required_families"]) != RINGCORE_EDITING_FAMILIES

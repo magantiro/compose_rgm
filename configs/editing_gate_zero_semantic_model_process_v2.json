@@ -10,7 +10,7 @@
     "ring_system_restate"
   ],
   "contract_id": "editing_v2_active8_gate0_model_process_v2",
-  "contract_sha256": "6f7efd86913e58a1f857ca2c31865b6d4707013268e7d1cc86b6515db5c203c9",
+  "contract_sha256": "97f4d08fb68d827106fa3230bfb2ca21ff68d79c7620cf5f15c87a989bae9ff1",
   "model_identity": {
     "atom_delete_action_semantics": "process_v2_uniform_gated_atom_delete_v2",
     "atom_restate_action_semantics": "semantic_atom_restate_v1",
@@ -30,7 +30,7 @@
     "ring_restate_scorer_mode": "semantic_successor_group_v1",
     "use_aromatic_bond_view": true
   },
-  "process_identity_sha256": "0c938177a34819e6e828920c1f66e240c6eb251fe7c9ea6cfe6757829dceb2dd",
+  "process_identity_sha256": "f2739338c561cdc38d550aba08e5ec756005beb9b6a97aa9b4177bd57b270682",
   "schema": "compose.editing.gate_zero_semantic_model_process_contract.process_v2",
   "schema_version": 2,
   "status": "FROZEN_PROCESS_V2_MODEL_PROCESS_CONTRACT_NO_AUTHORITY",

@@ -58,33 +58,24 @@ def _inputs() -> tuple[
     )
 
 
-def test_scoped_prerequisites_accept_the_exact_family_receipt_chain() -> None:
+def test_scoped_prerequisites_refuse_superseded_family_receipt_chain() -> None:
     p50_policy, capacity_policy, gate, result, decision = _inputs()
 
-    assert gate["gate_zero_structural_contract_sha256"] == _policy(
+    current_gate_sha256 = _policy(
         "editing_v2_process_v2_gate_zero_structural.json"
     )["contract_sha256"]
-
-    binding = validate_process_v2_p50_scoped_prerequisite_relationships(
-        p50_policy=p50_policy,
-        capacity_policy=capacity_policy,
-        gate_zero_decision=gate,
-        t1_result=result,
-        t1_decision=decision,
-        t1_result_file_sha256="e" * 64,
-    )
-
-    assert binding.optimizer_steps == 50
-    assert binding.batch_size == 64
-    assert binding.t1_initial_model_state_sha256 == result[
-        "score_revision_receipt"
-    ]["current_initial_model_state_sha256"]
-    assert binding.t1_score_revision_receipt_sha256 == decision[
-        "score_revision_receipt_sha256"
-    ]
-    assert [row["family"] for row in result["family_receipts"]] == list(
-        capacity_policy["required_families"]
-    )
+    assert gate["gate_zero_structural_contract_sha256"] != current_gate_sha256
+    with pytest.raises(
+        ProcessV2P50PrerequisiteError, match="identity disagrees"
+    ):
+        validate_process_v2_p50_scoped_prerequisite_relationships(
+            p50_policy=p50_policy,
+            capacity_policy=capacity_policy,
+            gate_zero_decision=gate,
+            t1_result=result,
+            t1_decision=decision,
+            t1_result_file_sha256="e" * 64,
+        )
 
 
 def test_scoped_prerequisites_preserve_a_recomputed_no_go() -> None:
@@ -128,7 +119,7 @@ def test_scoped_prerequisites_refuse_cross_run_gate_zero() -> None:
         )
 
 
-def test_scoped_prerequisites_reopen_exact_artifact_bytes(tmp_path: Path) -> None:
+def test_scoped_prerequisites_refuse_superseded_artifact_bytes(tmp_path: Path) -> None:
     _p50, _capacity, gate, result, _decision = _inputs()
     gate_path = tmp_path / "gate-zero.json"
     result_path = tmp_path / "t1-scoped-result.json"
@@ -141,14 +132,12 @@ def test_scoped_prerequisites_reopen_exact_artifact_bytes(tmp_path: Path) -> Non
     )
     decision_path.write_bytes(canonical_bytes(decision) + b"\n")
 
-    binding = load_process_v2_p50_scoped_prerequisites(
-        gate_zero_decision_path=gate_path,
-        t1_result_path=result_path,
-        t1_decision_path=decision_path,
-        repo_root=ROOT,
-    )
-
-    assert binding.t1_decision_sha256 == decision["decision_sha256"]
-    assert binding.p50_recipe_policy_sha256 == _policy(
-        "editing_v2_process_v2_p50_recipe_policy.json"
-    )["contract_sha256"]
+    with pytest.raises(
+        ProcessV2P50PrerequisiteError, match="identity disagrees"
+    ):
+        load_process_v2_p50_scoped_prerequisites(
+            gate_zero_decision_path=gate_path,
+            t1_result_path=result_path,
+            t1_decision_path=decision_path,
+            repo_root=ROOT,
+        )

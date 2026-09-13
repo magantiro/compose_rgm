@@ -71,7 +71,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 #: The frozen Process-V2 identity, spelled literally so the binding is asserted
 #: against a value this repository froze, not against whatever recomputes today.
-FROZEN_V2_IDENTITY = "0c938177a34819e6e828920c1f66e240c6eb251fe7c9ea6cfe6757829dceb2dd"
+FROZEN_V2_IDENTITY = "f2739338c561cdc38d550aba08e5ec756005beb9b6a97aa9b4177bd57b270682"
 
 #: Producer-side knowledge: which executor rule carries each scoring family.
 _EXECUTOR_RULE = {

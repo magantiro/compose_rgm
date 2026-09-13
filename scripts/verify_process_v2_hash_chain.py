@@ -58,7 +58,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from compose_v4.rewrite.editing_v2_process_identity import (  # noqa: E402
+from compose_v4.rewrite.editing_v2_process_identity import (
     PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS,
     PROCESS_V2_SEMANTICS,
     REJECTED_PROCESS_V2_ATOM_DELETE_ACTION_SEMANTICS,
@@ -342,7 +342,15 @@ def _pointer_edges(root: Path, relative_path: str, payload: object) -> tuple[Poi
         for key, value in node.items():
             if not isinstance(value, str) or "/" not in value:
                 continue
-            if value.startswith("/") or not (root / value).is_file():
+            if value.startswith("/"):
+                continue
+            try:
+                is_file = (root / value).is_file()
+            except OSError:
+                # Arbitrary JSON prose may contain slashes and exceed the host
+                # filesystem's component/path limits. It is not a pointer.
+                is_file = False
+            if not is_file:
                 continue
             for sibling, pin in node.items():
                 if sibling == key or not isinstance(pin, str) or not IS_HEX64.match(pin):
@@ -428,7 +436,15 @@ def _python_constant_pointer_edges(
 
     edges: list[PointerEdge] = []
     for name, value in constants.items():
-        if "/" not in value or value.startswith("/") or not (root / value).is_file():
+        if "/" not in value or value.startswith("/"):
+            continue
+        try:
+            target_is_file = (root / value).is_file()
+        except OSError:
+            # Module-level prose can contain slashes and exceed the platform's
+            # maximum path length.  Such a literal is not a file pointer.
+            target_is_file = False
+        if not target_is_file:
             continue
         stem = name
         for suffix in _PATH_CONSTANT_SUFFIXES:

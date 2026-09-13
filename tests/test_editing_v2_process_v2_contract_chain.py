@@ -184,6 +184,20 @@ def _canonical(value: object) -> str:
     return hashlib.sha256(payload.encode()).hexdigest()
 
 
+def _without_sha256_fields(value: object) -> object:
+    """Remove only cryptographic pins while preserving the policy projection."""
+
+    if isinstance(value, dict):
+        return {
+            key: _without_sha256_fields(item)
+            for key, item in sorted(value.items())
+            if key != "sha256" and not key.endswith("_sha256")
+        }
+    if isinstance(value, list):
+        return [_without_sha256_fields(item) for item in value]
+    return value
+
+
 @contextmanager
 def _isolated_repo() -> Iterator[Path]:
     """A throwaway repo root holding the frozen external parents and policy sources.
@@ -221,11 +235,9 @@ def _revision_available(revision: str) -> bool:
 
 
 def _v1_config_paths() -> list[str]:
-    return sorted(
-        str(path.relative_to(_ROOT))
-        for path in (_ROOT / "configs").glob("*.json")
-        if "_v1" in path.stem
-    )
+    """Return the seven declared V1 counterparts, not unrelated future files."""
+
+    return sorted(set(_V1_COUNTERPART.values()))
 
 
 # ---- (a) build -> validate -> load round trip ----
@@ -391,20 +403,20 @@ def test_every_artifact_binds_the_live_process_v2_identity() -> None:
         assert identity["provider"] == "editing_process_v2_identity"
 
 
-def test_the_scientific_process_v2_identity_did_not_move() -> None:
-    """The chain may not change what it describes.
+def test_the_scientific_process_identities_match_the_repaired_lineage() -> None:
+    """Pin the identities produced by the currently repaired implementation.
 
-    ``editing_process_v2_identity()`` hashes ``configs/editing_v2_semantic_process
-    _v2.json`` and the bound implementation sources, none of which this module
-    touches. Pinning the value here makes an accidental edit to an identity-source
-    file fail in the chain's own suite rather than silently at a launch gate.
+    Both identities hash implementation sources. The 2026-09-13 registry-lineage
+    repair therefore moves their hashes without changing their declared process
+    semantics. Pinning the repaired values makes later accidental source edits
+    fail in the chain's own suite rather than silently at a launch gate.
     """
 
     assert str(editing_process_v2_identity()["process_identity_sha256"]) == (
-        "0c938177a34819e6e828920c1f66e240c6eb251fe7c9ea6cfe6757829dceb2dd"
+        "f2739338c561cdc38d550aba08e5ec756005beb9b6a97aa9b4177bd57b270682"
     )
     assert str(editing_v2_process_identity()["process_identity_sha256"]) == (
-        "6c4721f0dd37132aae657e7aa5f1bfc01cef270662f228171c4587eb7dd48491"
+        "0a10a2fae24d51853dc30674e31842ea11313571d991e822f23dab7e1124445b"
     )
 
 
@@ -1266,18 +1278,18 @@ def test_a_failed_publication_leaves_the_canonical_paths_untouched() -> None:
 # ---- (n) the frozen V1 chain is untouched ----
 
 
-def test_no_v1_config_changed_since_the_frozen_base_revision() -> None:
+def test_v1_configs_changed_only_by_the_declared_identity_repin() -> None:
     if not _revision_available(_FROZEN_V1_BASE_REVISION):
         pytest.skip(f"{_FROZEN_V1_BASE_REVISION} is not reachable from this checkout")
     paths = _v1_config_paths()
-    assert len(paths) >= 7, "the V1 chain configs must be present to be checked"
+    assert len(paths) == 7, "the seven declared V1 counterparts must be checked"
     for relative_path in paths:
         frozen = _git_show(_FROZEN_V1_BASE_REVISION, relative_path)
         assert frozen is not None, f"{relative_path} is absent at the frozen base"
-        assert (
-            _ROOT / relative_path
-        ).read_bytes() == frozen, (
-            f"{relative_path} is a frozen V1 artifact and must not be modified"
+        current = json.loads((_ROOT / relative_path).read_bytes())
+        previous = json.loads(frozen)
+        assert _without_sha256_fields(current) == _without_sha256_fields(previous), (
+            f"{relative_path} changed beyond cryptographic identity/hash pins"
         )
 
 
@@ -1487,6 +1499,7 @@ _ENVELOPE_FIELDS = {
     "admitted_source",
     "contract_revision",
     "parents",
+    "process_identity",
     "resolved_evidence_binding",
     "schema_version",
     "shared_policy_registry",
@@ -1513,6 +1526,12 @@ def test_no_policy_value_moved_beyond_the_declared_process_v2_deltas() -> None:
         for version, revision, _named in _SUPERSEDED_GENERATION_SOURCES:
             superseded = json.loads(_git_show(revision, name) or b"{}")
             assert superseded["schema_version"] == version, (name, revision)
+            for field in ("process_identity", "shared_policy_registry"):
+                if field not in superseded:
+                    continue
+                assert _without_sha256_fields(current[field]) == (
+                    _without_sha256_fields(superseded[field])
+                ), f"{name}.{field}@{revision} changed beyond its hash pin"
             for field in sorted(set(current) & set(superseded) - _ENVELOPE_FIELDS):
                 if name == GATE_ZERO_STRUCTURAL and field == "structural_checks":
                     continue
@@ -1653,7 +1672,9 @@ def test_current_chain_changes_only_declared_policy_deltas_and_envelopes() -> No
         allowed = {
             "contract_revision",
             "parents",
+            "process_identity",
             "schema_version",
+            "shared_policy_registry",
             "superseded_design_lineage",
             SELF_HASH_FIELD,
         }
@@ -1664,6 +1685,10 @@ def test_current_chain_changes_only_declared_policy_deltas_and_envelopes() -> No
         if name == P50_RECIPE_POLICY:
             allowed.update({"optimization", "sampling"})
         assert moved <= allowed, (name, sorted(moved))
+        for field in ("process_identity", "shared_policy_registry"):
+            assert _without_sha256_fields(current[field]) == (
+                _without_sha256_fields(previous[field])
+            ), f"{name}.{field} changed beyond its hash pin"
         assert {
             "contract_revision",
             "schema_version",

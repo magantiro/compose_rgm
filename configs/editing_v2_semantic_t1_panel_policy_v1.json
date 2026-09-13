@@ -1,7 +1,7 @@
 {
   "bounded_p50_authorized": false,
   "cache_handoff": "complete_train_trace_union_for_cpu_successor_fiber_cache_v1",
-  "cell_role_policy_sha256": "47cbcc02a5b71119426e4c2babb2b9ac06fcb493d9d349bd9a7443ed43449e80",
+  "cell_role_policy_sha256": "ecf673f5420bc9546571c236739c1f474c98b962a194e5c59665c8f56c18bd10",
   "checkpoint_selection_authorized": false,
   "empirical_multiplicity_receipts_included": false,
   "final_test_selection_authorized": false,
@@ -33,7 +33,7 @@
   "optimizer_policy_included": false,
   "p50_policy_included": false,
   "panel_kind": "unique_state_single_target_canonical_successor_capacity",
-  "policy_sha256": "cc63968e3211973a0aefac2f8fa2e8cc43e0a44ed8b425625204f959d067b456",
+  "policy_sha256": "7902d10e2f02785e7d5ddb4ea769d598a95d7655259e24a8546fe85a887bcf34",
   "repeated_state_panel_included": false,
   "request_id": "editing-v2-semantic-t1-capacity-v1",
   "schema": "compose.editing_v2.semantic_t1_panel_policy",

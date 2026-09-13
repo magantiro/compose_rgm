@@ -16,7 +16,7 @@
     "source_population": "full_admitted_semantic_active8_corpus",
     "terminal_rows_schedulable": false
   },
-  "cell_role_policy_sha256": "47cbcc02a5b71119426e4c2babb2b9ac06fcb493d9d349bd9a7443ed43449e80",
+  "cell_role_policy_sha256": "ecf673f5420bc9546571c236739c1f474c98b962a194e5c59665c8f56c18bd10",
   "checkpoint_selection_authorized": false,
   "final_test_selection_authorized": false,
   "long_training_authorized": false,
@@ -47,7 +47,7 @@
   },
   "p500_authorized": false,
   "policy_id": "compose-editing-v2-semantic-p50-stage-a-v1",
-  "policy_sha256": "386750bd849bff3cff3acc78ed12eadf0fc51d2a72c0a524b0944cceb3c9175e",
+  "policy_sha256": "295a3155a2e1fc038e9fd6f297bc24a537e3062e3d495ba51b3fd4e88eff35ed",
   "required_physical_binding_purposes": [
     "stream_union_successor_cache",
     "validation_baseline",

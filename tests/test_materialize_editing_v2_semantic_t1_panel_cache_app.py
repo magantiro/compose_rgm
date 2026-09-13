@@ -70,7 +70,7 @@ def _policy() -> dict[str, object]:
         "request_id": "editing-v2-semantic-t1-capacity-v1",
         "support_time_hex": "0x1.0000000000000p-1",
         "cell_role_policy_sha256": (
-            "47cbcc02a5b71119426e4c2babb2b9ac06fcb493d9d349bd9a7443ed43449e80"
+            "ecf673f5420bc9546571c236739c1f474c98b962a194e5c59665c8f56c18bd10"
         ),
         "minimum_entries_by_family": {
             "atom_delete": 64,

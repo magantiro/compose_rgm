@@ -87,6 +87,27 @@ def test_python_edge_discovery_survives_modules_it_cannot_evaluate(verifier) -> 
     assert verifier._python_pointer_edges(_ROOT, "src/absent.py", absent) == ()
 
 
+def test_json_edge_discovery_ignores_long_prose_with_slashes(verifier, tmp_path: Path) -> None:
+    prose = "this/is/not/a/path/" + "x" * 4096
+    payload = {"description": prose, "description_sha256": "a" * 64}
+
+    assert verifier._pointer_edges(tmp_path, "configs/prose.json", payload) == ()
+
+
+def test_python_constant_edge_discovery_ignores_long_prose(
+    verifier, tmp_path: Path
+) -> None:
+    prose = "this/is/not/a/path/" + "x" * 4096
+    constants = {"DESCRIPTION": prose, "DESCRIPTION_SHA256": "a" * 64}
+
+    assert (
+        verifier._python_constant_pointer_edges(
+            tmp_path, "src/compose_v4/prose.py", constants
+        )
+        == ()
+    )
+
+
 def test_the_real_training_gate_pin_is_discovered_and_resolves(verifier) -> None:
     """The live constant must address the live config, by both roles.
 

@@ -29,7 +29,7 @@
       "final_test"
     ],
     "semantic_process_contract": "configs/editing_v2_semantic_process_v1.json",
-    "semantic_process_identity_sha256": "6c4721f0dd37132aae657e7aa5f1bfc01cef270662f228171c4587eb7dd48491"
+    "semantic_process_identity_sha256": "0a10a2fae24d51853dc30674e31842ea11313571d991e822f23dab7e1124445b"
   },
   "bounded_p50_authorized": false,
   "cell_identity_policy": {
@@ -186,7 +186,7 @@
   },
   "gate_zero_authorized": false,
   "registry_id": "editing_v2_active8_semantic_capability_cells_v1",
-  "registry_sha256": "adcbc06d89a2df0baa2869ee5fcb96d738b594841dc1b056c3de827e3c6d18cb",
+  "registry_sha256": "68c9a7f0b9339d4c7b62fba8bae33abdf78ff469b07d0cf393cc38c54b7f7ae0",
   "schema": "compose.editing_v2.semantic_capability_cell_registry",
   "schema_version": 1,
   "scope": {

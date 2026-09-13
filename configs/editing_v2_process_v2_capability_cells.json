@@ -58,7 +58,7 @@
   "checkpoint_selection_authorized": false,
   "contract_id": "editing_v2_process_v2_capability_cells",
   "contract_revision": "process_v2_relational_reroute_capacity_model",
-  "contract_sha256": "a25ea6736d274c09d8fbfc4167e182001a6c10651f999554a18b7f362925be68",
+  "contract_sha256": "9e1d502a97c26a8888b94cbf101206c3734ce5cabcb8cbd16d618036985e21ee",
   "exact_evidence_strata": {
     "canonical_successor_count": {
       "bins": [
@@ -222,7 +222,7 @@
     "identity_schema": "compose.editing.semantic_process_v2_identity",
     "identity_schema_version": 1,
     "module": "src/compose_v4/rewrite/editing_v2_process_identity.py",
-    "process_identity_sha256": "0c938177a34819e6e828920c1f66e240c6eb251fe7c9ea6cfe6757829dceb2dd",
+    "process_identity_sha256": "f2739338c561cdc38d550aba08e5ec756005beb9b6a97aa9b4177bd57b270682",
     "process_semantics": "semantic_editing_v2_v2",
     "provider": "editing_process_v2_identity"
   },
@@ -243,7 +243,7 @@
     "terminal_rows": "outside_capability_cell_registry_hazard_is_separate"
   },
   "shared_policy_registry": {
-    "registry_identity_sha256": "ba88c138f2b560a48fce342461b4653a9457a0a570eb6b15f91566765be51dbd",
+    "registry_identity_sha256": "cb21506e44623a8fc3d5bc2457e30625ef7859e7cef3bd8aacd82a73f49f4c4f",
     "schema": "compose.editing_v2.shared_policy_registry",
     "schema_version": 1
   },

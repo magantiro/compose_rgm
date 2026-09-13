@@ -79,10 +79,10 @@ EXPECTED_T1_EXAMPLES_PER_SLICE = {"minimum": 64, "maximum": 128}
 EXPECTED_T1_CAPACITY_POLICY = {
     "semantic_t1_capacity_policy": ("configs/editing_v2_semantic_t1_capacity_policy_v1.json"),
     "semantic_t1_capacity_policy_file_sha256": (
-        "461fbda87403a8dcf2f548fead04f4156c0b182dcb627169247d0efc42d0d498"
+        "feacddf927597075a5fc0e180c3841b4c4273df602b11a0919396fee1144ed53"
     ),
     "semantic_t1_capacity_policy_sha256": (
-        "b766eec4095f245abce613fbf38a9dde80dbf68a47a6d17c56b61d7a3194d607"
+        "08c886739e584c75ce12df7846043890f00ea6fe8821db97f933bbd1784e2e8d"
     ),
 }
 P50_PREREQUISITE_EVIDENCE_FIELDS = (

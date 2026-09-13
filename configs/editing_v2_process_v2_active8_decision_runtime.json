@@ -13,7 +13,7 @@
   "checkpoint_selection_authorized": false,
   "contract_id": "editing_v2_process_v2_active8_decision_runtime",
   "contract_revision": "process_v2_relational_reroute_capacity_model",
-  "contract_sha256": "3f290f210707e275874468872807d01a9ee77f9a3e7b285b334a722334770477",
+  "contract_sha256": "50e92355ddc50cb48bdc9249456cdf7005a234d9164b9928478e0788df0acf36",
   "final_test_selection_authorized": false,
   "gate_zero_authorized": false,
   "long_training_authorized": false,
@@ -37,7 +37,7 @@
         "identity_role": "physical_sha256",
         "kind": "repository_config",
         "provider": "frozen_repository_artifact",
-        "sha256": "3727d1ce1036d579ebee92e909b6ef679a54156ab8d1d9257319b217ce5b6335",
+        "sha256": "f449cb2734f1aaa440e885b758666add13ad6e7ef84e5aeb66f6a207624160a2",
         "target": "configs/editing_gate_zero_semantic_model_process_v2.json",
         "target_schema": "compose.editing.gate_zero_semantic_model_process_contract.process_v2"
       },
@@ -46,7 +46,7 @@
         "identity_role": "semantic_sha256",
         "kind": "repository_config",
         "provider": "frozen_repository_artifact",
-        "sha256": "6f7efd86913e58a1f857ca2c31865b6d4707013268e7d1cc86b6515db5c203c9",
+        "sha256": "97f4d08fb68d827106fa3230bfb2ca21ff68d79c7620cf5f15c87a989bae9ff1",
         "target": "configs/editing_gate_zero_semantic_model_process_v2.json",
         "target_schema": "compose.editing.gate_zero_semantic_model_process_contract.process_v2"
       }
@@ -56,7 +56,7 @@
     "identity_schema": "compose.editing.semantic_process_v2_identity",
     "identity_schema_version": 1,
     "module": "src/compose_v4/rewrite/editing_v2_process_identity.py",
-    "process_identity_sha256": "0c938177a34819e6e828920c1f66e240c6eb251fe7c9ea6cfe6757829dceb2dd",
+    "process_identity_sha256": "f2739338c561cdc38d550aba08e5ec756005beb9b6a97aa9b4177bd57b270682",
     "process_semantics": "semantic_editing_v2_v2",
     "provider": "editing_process_v2_identity"
   },
@@ -68,7 +68,7 @@
   "schema": "compose.editing_v2.process_v2_active8_decision_runtime",
   "schema_version": 6,
   "shared_policy_registry": {
-    "registry_identity_sha256": "ba88c138f2b560a48fce342461b4653a9457a0a570eb6b15f91566765be51dbd",
+    "registry_identity_sha256": "cb21506e44623a8fc3d5bc2457e30625ef7859e7cef3bd8aacd82a73f49f4c4f",
     "schema": "compose.editing_v2.shared_policy_registry",
     "schema_version": 1
   },

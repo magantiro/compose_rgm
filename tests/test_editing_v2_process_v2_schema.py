@@ -233,15 +233,15 @@ def test_an_omitted_census_field_is_refused(field: str) -> None:
 
 
 def _semantic_pointer(**overrides):
-    keywords = dict(
-        kind=PointerKind.REPOSITORY_CONFIG,
-        provider="probe",
-        target="configs/x.json",
-        target_schema="compose.x",
-        identity_role=IdentityRole.SEMANTIC,
-        sha256=_HASH,
-        hash_algorithm=SEMANTIC_HASH_ALGORITHMS[0],
-    )
+    keywords = {
+        "kind": PointerKind.REPOSITORY_CONFIG,
+        "provider": "probe",
+        "target": "configs/x.json",
+        "target_schema": "compose.x",
+        "identity_role": IdentityRole.SEMANTIC,
+        "sha256": _HASH,
+        "hash_algorithm": SEMANTIC_HASH_ALGORITHMS[0],
+    }
     keywords.update(overrides)
     return typed_pointer(**keywords)
 
@@ -432,7 +432,7 @@ def test_the_protocol_alone_does_not_prove_which_process_produced_the_index() ->
 
     class _V1Shaped(_Index):
         process_identity_sha256 = (
-            "6c4721f0dd37132aae657e7aa5f1bfc01cef270662f228171c4587eb7dd48491"
+            "0a10a2fae24d51853dc30674e31842ea11313571d991e822f23dab7e1124445b"
         )
 
     assert isinstance(_V1Shaped(), StructuralDecisionIndex)
