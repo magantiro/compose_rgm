@@ -1,0 +1,1 @@
+{"payload":{"query":{"role":"charged_root","smiles":"COc1ccccc1CNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1"},"query_index":0,"score":0.15625,"seconds":0.00020699994638562202,"status":"complete","task":"celecoxib_rediscovery"},"payload_sha256":"5092ab8b3b5b1c316dea7b4e58ceafd601b17d76a857f44d272ec81548c7653a"}

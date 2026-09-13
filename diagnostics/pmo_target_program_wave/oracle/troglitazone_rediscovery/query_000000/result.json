@@ -1,0 +1,1 @@
+{"payload":{"query":{"role":"charged_root","smiles":"COc1ccccc1CNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1"},"query_index":0,"score":0.12413793103448276,"seconds":0.00019945797976106405,"status":"complete","task":"troglitazone_rediscovery"},"payload_sha256":"8ca13e0e145aaf752a6f269b523892ddaae843c16b313fbb0d4ab2dfe8398e2d"}

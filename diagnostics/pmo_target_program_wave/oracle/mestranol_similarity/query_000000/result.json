@@ -1,0 +1,1 @@
+{"payload":{"query":{"role":"charged_root","smiles":"COc1ccccc1CNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1"},"query_index":0,"score":0.1673414304993252,"seconds":0.0002993340604007244,"status":"complete","task":"mestranol_similarity"},"payload_sha256":"72df8379fdf00324249f6e96e6fbc877a1c2201a53fdb22fbac48325a6e9ae13"}
