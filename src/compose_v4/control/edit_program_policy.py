@@ -53,6 +53,7 @@ def propose_programs(
     max_bindings: int = 32,
     max_visits: int = 4096,
     mutable_slots: frozenset[int] | None = None,
+    ranked_count: int = 0,
 ) -> dict:
     """Sample fixed complete programs and sites, before executing/ranking endpoints.
 
@@ -60,7 +61,14 @@ def propose_programs(
     balancing prevents many decompositions of one source dominating the prior.
     Probabilities refer to this finite proposal pool, not the full reference law.
     """
-    if type(count) is not int or count < 1 or not math.isfinite(temperature) or temperature <= 0:
+    if (
+        type(count) is not int
+        or count < 1
+        or type(ranked_count) is not int
+        or ranked_count < 0
+        or not math.isfinite(temperature)
+        or temperature <= 0
+    ):
         raise ValueError("proposal count/temperature must be positive")
     prior = source_balanced_prior(entries)
     slots, base, distances, censuses = [], [], [], []
@@ -108,7 +116,7 @@ def propose_programs(
         }
         for i in indices
     ]
-    return {
+    result = {
         "status": "proposed",
         "draws": draws,
         "censuses": censuses,
@@ -116,3 +124,39 @@ def propose_programs(
         "contextual": contextual,
         "probability_domain": "capped program-binding pool; not R_theta",
     }
+    if ranked_count:
+        # Prefer high-probability contextual matches, but first expose at most
+        # one binding per program. This prevents a simple program with many
+        # symmetric bindings from monopolizing a bounded direct-retrieval slice.
+        ordered = sorted(
+            range(len(slots)),
+            key=lambda i: (
+                -float(proposal[i]),
+                distances[i],
+                entries[slots[i][0]].program.program_id,
+                slots[i][1],
+            ),
+        )
+        priority, used = [], set()
+        for unique_programs in (True, False):
+            for raw in ordered:
+                program_index, binding = slots[raw]
+                program_id = entries[program_index].program.program_id
+                if unique_programs and program_id in used:
+                    continue
+                record = {
+                    "program_index": program_index,
+                    "assignment": list(binding),
+                    "proposal_probability": float(proposal[raw]),
+                    "base_probability": float(weights[raw]),
+                    "context_distance": distances[raw],
+                    "pool_index": raw,
+                    "priority": len(priority),
+                    "priority_policy": "context_probability_then_unique_program_v1",
+                }
+                priority.append(record)
+                used.add(program_id)
+                if len(priority) == min(ranked_count, len(slots)):
+                    result["ranked_draws"] = priority
+                    return result
+    return result

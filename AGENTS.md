@@ -372,6 +372,22 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped T4 context-ranked program-retrieval diagnosis, 2026-09-13:** while the
+frozen full-suite run remains immutable, the user requested continuing the
+parallel controller-development track. The first completed live unit exhausted
+proposal yield on 5HT1B seed2 after fourteen calls even though the shared library
+contains verified programs from that source. Implement an optional bounded cold-
+start channel that executes high-probability context-matched programs without
+first forcing a parameter or attachment mutation. Defaults remain unchanged.
+Compare the frozen cold-start proposal with an eight-candidate direct-retrieval
+slice on all fifteen exact T4 delta=0.4 source states, with the same shared
+146-program library, strict endpoint gates, work limits and random remainder.
+This is an answer-known, winner-informed, zero-oracle structural diagnostic, not
+an autonomous benchmark result. Record exact public-winner overlap separately
+from general eligible yield. No docking, Modal deployment, live-run change,
+reference/executor modification or successor benchmark launch is authorized by
+this local diagnosis. Contract and acceptance: `docs/T4_PROGRAM_RETRIEVAL.md`.
+
 **Frozen full T4 delta=0.4 program-controller benchmark, 2026-09-12:** the
 user requested a paper-result track in parallel with controller development and
 authorized Modal use up to 30 total containers. Freeze one shared fast

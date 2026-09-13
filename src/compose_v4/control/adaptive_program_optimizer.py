@@ -73,6 +73,7 @@ class ProgramSearchConfig:
     composition_stop_probability: float = 0.5
     composition_donor_trials: int = 8
     composition_execution_trials: int = 16
+    cold_start_retrieval_candidates: int = 0
 
     @classmethod
     def parent_edit_recipe(cls, *, seed=20260912, score_direction="minimize"):
@@ -139,6 +140,12 @@ class ProgramSearchConfig:
             raise ValueError("composition execution trials must be a positive integer")
         if type(self.proposal_cache_entries) is not int or self.proposal_cache_entries < 0:
             raise ValueError("proposal cache capacity must be a nonnegative integer")
+        if (
+            type(self.cold_start_retrieval_candidates) is not int
+            or self.cold_start_retrieval_candidates < 0
+            or self.cold_start_retrieval_candidates > self.candidates_per_batch
+        ):
+            raise ValueError("cold-start retrieval must fit the candidate batch")
         if self.proposal_mode not in ("mixed", "program_only"):
             raise ValueError("unknown explicit proposal mode")
         if self.proposal_mode == "program_only" and self.require_broad_runtime:

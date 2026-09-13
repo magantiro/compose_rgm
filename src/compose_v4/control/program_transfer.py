@@ -62,9 +62,14 @@ def initial_program_batch(
         seed=config.seed,
         count=2 * config.attempts_per_batch,
         max_bindings=config.max_bindings,
+        ranked_count=min(
+            config.attempts_per_batch,
+            4 * config.cold_start_retrieval_candidates,
+        ),
     )
     rng = np.random.default_rng(np.random.SeedSequence([config.seed, 1]))
     attempts, candidates, seen = [], [], {canonical_state_key(source)}
+    retrievals, retrieval_cursor = 0, 0
     for index in range(config.attempts_per_batch):
         if (
             len(candidates) >= config.candidates_per_batch
@@ -72,6 +77,23 @@ def initial_program_batch(
         ):
             break
         chosen = {}
+        ranked = proposals.get("ranked_draws", ())
+        direct_retrieval = (
+            retrievals < config.cold_start_retrieval_candidates
+            and retrieval_cursor < len(ranked)
+        )
+
+        if direct_retrieval:
+            draw = ranked[retrieval_cursor]
+            retrieval_cursor += 1
+            chosen["channel"] = "retrieval"
+            program = entries[draw["program_index"]].program
+            binding = tuple(draw["assignment"])
+            metadata = {
+                "draws": [draw],
+                "mutations": [],
+                "direct_retrieval": True,
+            }
 
         def program_sampler(channel, index=index, chosen=chosen):
             chosen["channel"] = channel
@@ -115,13 +137,16 @@ def initial_program_batch(
             return broad_sampler(rng)
 
         try:
-            channel, (program, binding, metadata) = dispatch_complete_proposal(
-                rng,
-                program_sampler=program_sampler,
-                broad_sampler=reference_sampler,
-                probabilities=config.channel_probabilities,
-                proposal_mode=config.proposal_mode,
-            )
+            if direct_retrieval:
+                channel = "retrieval"
+            else:
+                channel, (program, binding, metadata) = dispatch_complete_proposal(
+                    rng,
+                    program_sampler=program_sampler,
+                    broad_sampler=reference_sampler,
+                    probabilities=config.channel_probabilities,
+                    proposal_mode=config.proposal_mode,
+                )
             _, trace = execute_program_graph(
                 source,
                 compile_program_graph(program),
@@ -158,6 +183,8 @@ def initial_program_batch(
         if status != "eligible":
             continue
         seen.add(endpoint)
+        if channel == "retrieval":
+            retrievals += 1
         candidate = {
             "source_group": source_group,
             "oracle_protocol": oracle_protocol,
@@ -177,11 +204,19 @@ def initial_program_batch(
         "library_id": identity(
             [{"program": e.program.payload(), "sources": e.source_groups} for e in entries]
         ),
-        "binding_census": {k: v for k, v in proposals.items() if k != "draws"},
+        "binding_census": {
+            k: v for k, v in proposals.items() if k not in ("draws", "ranked_draws")
+        },
         "candidates": candidates,
         "attempts": attempts,
         "rng_state_after_preparation": rng.bit_generator.state,
     }
+    if config.cold_start_retrieval_candidates:
+        body["direct_retrieval"] = {
+            "candidate_target": config.cold_start_retrieval_candidates,
+            "candidates_admitted": retrievals,
+            "priority_attempts": retrieval_cursor,
+        }
     return {
         **body,
         "batch_id": identity(body),

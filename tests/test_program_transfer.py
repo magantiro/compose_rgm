@@ -43,3 +43,35 @@ def test_cold_start_transfers_programs_and_leaves_new_target_scores_unobserved()
         initial_program_batch(
             recipient, entries, replace(config, require_broad_runtime=True), **call
         )
+
+
+def test_cold_start_can_retrieve_an_unmutated_context_matched_program():
+    source, stages = ring_and_carbonyl()
+    program, _ = extract_program(source, stages)
+    entries = shared_program_library([{"program": program.payload(), "source_group": "origin"}])
+    config = ProgramSearchConfig(
+        seed=871,
+        attempts_per_batch=16,
+        candidates_per_batch=1,
+        require_broad_runtime=False,
+        cold_start_retrieval_candidates=1,
+    )
+    batch = initial_program_batch(
+        source,
+        entries,
+        config,
+        source_group="recipient",
+        oracle_protocol="pending:recipient",
+        eligibility=lambda row: {"smiles": row["smiles"], "oracle_eligible": True},
+    )
+    assert len(batch["candidates"]) == 1
+    candidate = batch["candidates"][0]
+    assert candidate["program"] == program.payload()
+    assert candidate["endpoint"] == stages[-1]["endpoint"]
+    assert candidate["provenance"]["channel"] == "retrieval"
+    assert candidate["provenance"]["metadata"]["mutations"] == []
+    assert batch["direct_retrieval"] == {
+        "candidate_target": 1,
+        "candidates_admitted": 1,
+        "priority_attempts": 1,
+    }
