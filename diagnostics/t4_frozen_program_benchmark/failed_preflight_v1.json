@@ -1,0 +1,16 @@
+{
+  "schema_version": "t4_frozen_program_preflight_failure_v1",
+  "contract_path": "configs/t4_frozen_program_benchmark.json",
+  "contract_sha256": "e831072c231994267d67244f859a5b545f715bcbc44af5522a8fc6d10413e1af",
+  "decision": "DO_NOT_LAUNCH",
+  "failure": "braf_1 produced zero eligible cold-start candidates",
+  "completed_cells": [
+    {"cell": "5ht1b_0", "candidates": 3, "attempts": 128},
+    {"cell": "5ht1b_1", "candidates": 15, "attempts": 128},
+    {"cell": "5ht1b_2", "candidates": 1, "attempts": 128},
+    {"cell": "braf_0", "candidates": 1, "attempts": 128}
+  ],
+  "root_cause": "the failed lock reconstructed source tensors from SMILES instead of reusing the exact saved benchmark source states",
+  "repair_scope": "prepare a new immutable v2 lock from the 15 exact saved source tensors; do not change the official endpoint gate",
+  "new_oracle_calls": 0
+}

@@ -1,0 +1,39 @@
+{
+  "code_revision_before_t4_commit": "34b3da521dc02e32dee5fd740d0c854f7d3eaf49",
+  "decision": "PROCEED_WITH_BOUNDED_T4_LAUNCH_AFTER_CLEAN_COMMIT",
+  "decision_basis": {
+    "benchmark_scope": "The failing semantic-capability registry is outside the frozen T4 controller, exact executor, source-state, endpoint-gate, docking, and oracle-accounting dependency closure.",
+    "policy": "AGENTS.md repository-specific verification permits bounded T4 development runs to proceed after focused scientific checks when an unrelated repository-wide failure is preserved honestly.",
+    "scientific_gates_relaxed": false
+  },
+  "focused_t4_checks": {
+    "contract_sha256": "fdc93e9bc97eaae2e81f2189a3b7568b00d1b5525ff0fb7a657668a6190ad280",
+    "new_oracle_calls": 0,
+    "preflight_artifact": "diagnostics/t4_frozen_program_benchmark/preflight_v2.json",
+    "preflight_artifact_sha256": "52c7c6b15ec68c31e10106d0922e2495ba2218a24b987027d0f61f17ff425ec8",
+    "preflight_cells_passed": 15,
+    "preflight_cells_total": 15,
+    "preflight_passed": true,
+    "pytest_last_observed": "24 passed",
+    "ruff_last_observed": "passed"
+  },
+  "full_suite": {
+    "command": "KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 .venv/bin/python -m pytest -q",
+    "outcome": "FAILED_DURING_COLLECTION",
+    "reason": "SemanticCapabilityCellError: semantic capability registry bindings have drifted",
+    "reported_at": "tests/test_editing_v2_semantic_t1_panel_cache.py"
+  },
+  "independent_clean_head_check": {
+    "command": "KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 /Users/rmaganti/compose_rgm_git/.venv/bin/python -m pytest -q --tb=no tests/test_editing_v2_semantic_capability_cells.py",
+    "failed": 6,
+    "passed": 4,
+    "revision": "34b3da521dc02e32dee5fd740d0c854f7d3eaf49",
+    "worktree": "fresh local clone of HEAD"
+  },
+  "limitations": [
+    "This launch is not repository-wide milestone completion.",
+    "The unrelated editing-v2 registry drift remains unresolved and must pass before release completion.",
+    "The full T4 benchmark result remains prospective until the sealed remote run completes."
+  ],
+  "schema_version": "t4_frozen_program_launch_boundary_review_v1"
+}

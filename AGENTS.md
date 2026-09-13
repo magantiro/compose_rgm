@@ -372,6 +372,52 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Frozen full T4 delta=0.4 program-controller benchmark, 2026-09-12:** the
+user requested a paper-result track in parallel with controller development and
+authorized Modal use up to 30 total containers. Freeze one shared fast
+coordinated-program recipe before observing the full results, then evaluate all
+15 official T4 starting cells at delta=0.4 over three predeclared search seeds.
+Each cell/run may use at most 1,000 distinct candidate docking evaluations; the
+published seed score is not charged, matching the official IVG result files.
+After all 45 runs complete, lock one overall first-score champion per cell and
+obtain two fresh confirmation dockings, for a hard ceiling of 45,030 new calls.
+Use one driver plus at most 29 single-CPU workers, no GPU, no automatic oracle
+retry, and a $20 reserved compute ceiling. The frozen controller is the
+program-only, score-blind, cache128 recipe with exact-current-state continuation,
+verified decomposition, current-state editing, shared 146-program library,
+random mutation, no learned selector, no reference inference and no protected
+composition. Preserve 40-atom support and apply the official strict endpoint
+filters: similarity >0.4, QED >0.6 and SA <4. Freeze hashes for the source
+registry/states, shared library, upstream protocol evidence, receptors, docking
+binary, code/config, seed derivation, candidate/query receipts and failure
+treatment. Persist 30-second live heartbeats and full score-versus-call curves.
+After at least 500 calls, stop a run only if it is already at or better than the
+reported cell-level IVG mean and has improved by less than 0.3 docking units over
+the preceding 250 calls. Weak runs retain the full ceiling. Public winner-derived
+programs are disclosed development inputs to the single frozen controller; no
+cell-specific controller or result-dependent repair is allowed. Contract and
+acceptance criteria:
+`docs/T4_FROZEN_PROGRAM_BENCHMARK.md`. Launch only from clean committed source
+after the zero-oracle 15-cell preflight and focused/full launch-boundary checks.
+
+**Scoped T4 protected program-composition experiment, 2026-09-12:** after
+reviewing the latest T4 evidence, the user requested testing whether protected
+program continuation helps and explicitly kept PMO out of the loop. Implement a
+general bounded 2..K exact program-composition channel, but freeze K=2 for the
+first comparison. Every later component binds on the actual exact successor;
+only the completed composition receives the unchanged T4 endpoint eligibility
+check or docking evaluation. Preserve the fast program-only control, shared
+winner-informed development library, score-blind parent law, 40-atom support,
+original-seed delta=0.4 gates, exact executor, ancestry, total 32-primitive and
+eight-block limits, and zero reference inference. First run the frozen local
+structural comparison in `docs/T4_PROGRAM_COMPOSITION.md`. A positive structural
+gate authorizes one locked BRAF seed1/JAK2 seed1 docking pilot of at most 20 new
+calls, eight single-CPU workers plus one driver, no GPU or automatic retry, and
+$10 reserved maximum under the user's standing Modal approval. Freeze exact
+candidate, oracle and compute manifests and use clean committed source before
+launch. PMO, K>2 scoring, task-specific endpoint templates, reference/executor
+changes, model fitting, and any full-suite or benchmark-win claim are excluded.
+
 **Scoped fast PMO completion run, 2026-09-12:** the user replied "great lets od
 it" to one short direct-scoring PMO run after the measured throughput repair.
 Authorize one albuterol-similarity development run, seed 20260921, at most 128
