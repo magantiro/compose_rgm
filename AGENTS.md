@@ -372,6 +372,27 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped PMO learned-property program wave, 2026-09-13:** after the first
+five-task target-program wave beat both recorded IVG comparators on every task,
+the user requested aggressive continuation across PMO. Implement and run the
+next bounded wave in `docs/PMO_PROPERTY_PROGRAM_WAVE.md`: QED, GSK3B and JNK3.
+Use one high-scoring molecule transcribed from each official IVG top-molecule
+panel as disclosed answer-known development supervision, then compile and replay
+fifteen unique complete anchor-neighborhood programs per task from the same
+previously charged unrelated exact root before any task score is observed. Score
+the root and locked endpoints exactly once per task, at most 48 new local CPU
+oracle calls total, with no retry or replacement. Use the official PyTDC QED
+implementation. For GSK3B/JNK3, use the existing validated flat-tree evaluators
+only after recording that the newly downloaded official TDC pickle hashes match
+the frozen extraction manifests byte-for-byte. Preserve 40-active/48-slot
+neutral support, canonical deduplication, the official 10,000-query top-ten AUC,
+exact IVG file hashes and both no-prescreen and prescreen comparisons. DRD2 is
+excluded from this wave because its current TDC pickle does not byte-match the
+local frozen SVM and has not passed a current parity gate. This is a
+winner-informed development wave, not held-out discovery or general PMO
+superiority. No learned-reference training, Modal use, T4 change or automatic
+later wave follows.
+
 **Scoped PMO exact-target program wave, 2026-09-13:** after the measured
 Perindopril curriculum exceeded both recorded IVG comparators, the user
 explicitly requested aggressive application of the same winner-informed
