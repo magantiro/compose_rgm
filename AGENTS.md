@@ -372,6 +372,25 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped PMO IVG-oracle parity audit, 2026-09-13:** after the user requested
+continued aggressive PMO work, inspection of the official IVG repository found
+that its Dockerfile installs PyTDC 1.1.15 while its requirements pin RDKit
+2023.9.6. The eleven completed COMPOSE PMO development tasks were scored under
+PyTDC 0.3.6 and RDKit 2024.03.5, so their arithmetic margins are not yet
+protocol-matched. Implement and run the bounded audit in
+`docs/PMO_IVG_ORACLE_PARITY.md`: rescore the exact 150 already locked molecules,
+without candidate replacement or reselection, under the IVG-pinned oracle
+environment. Preserve source query order, source-result hashes, both original
+scores and parity scores, the official 10,000-query top-ten AUC, and both IVG
+comparison regimes. Count and preserve the one precontract C7 isomer parity
+probe separately, for 151 new parity-environment oracle calls in total. Verify
+PyTDC/RDKit and all material dependency, source-module and downloaded
+GSK3B/JNK3 pickle identities before authoritative scoring. No automatic retry,
+new molecule generation, training, Modal use, T4 change, remaining-task wave or
+general PMO claim follows automatically. Positive results remain answer-known,
+winner/panel-informed development evidence; this audit changes the evaluator,
+not the locked candidates.
+
 **Scoped PMO formula/median panel wave, 2026-09-13:** after the panel-informed
 QED/GSK3B/JNK3 refinement beat both IVG regimes on all three tasks, the user
 requested continued aggressive PMO development. Implement and run the bounded

@@ -1,0 +1,109 @@
+{
+  "schema_version": "pmo_ivg_oracle_parity_contract_v1",
+  "authorization": "2026-09-13 user requested aggressive continued PMO work after the official IVG oracle-version mismatch was identified",
+  "scientific_identity": {
+    "problem": "establish protocol-matched PMO rewards for previously locked COMPOSE molecules",
+    "primary_output": "per-task ordered reward sequences and official 10000-query top-ten AUC under the IVG-pinned oracle environment",
+    "central_claim": "the locked answer-known COMPOSE development candidates can be compared arithmetically with IVG only after evaluation under the same reported core oracle versions",
+    "setting": "retrospective no-reselection parity rescore of eleven completed PMO development tasks",
+    "baselines": ["prior COMPOSE PyTDC 0.3.6 scores", "IVG no-prescreen AUC", "IVG prescreen AUC"],
+    "support": "the exact 150 previously locked neutral molecules; no new molecular support or generator claim"
+  },
+  "inputs": [
+    {
+      "path": "diagnostics/pmo_winner_program_curriculum/result.json",
+      "sha256": "ed24426b11ebe89acf7315d4d98e465eb3b987ee7df9fbea37125d726a37ae87",
+      "tasks": {"perindopril_mpo": 15}
+    },
+    {
+      "path": "diagnostics/pmo_target_program_wave/result.json",
+      "sha256": "1baa701084a4d45b368bcacc4de415b5681e26158d1906a52547d5671b0fc075",
+      "tasks": {
+        "albuterol_similarity": 16,
+        "celecoxib_rediscovery": 16,
+        "mestranol_similarity": 16,
+        "thiothixene_rediscovery": 16,
+        "troglitazone_rediscovery": 16
+      }
+    },
+    {
+      "path": "diagnostics/pmo_property_panel_refinement/result.json",
+      "sha256": "798e662fadaa91f4c5b0b253c5bf449ba4f6d9a1e13eb5a86d54aa4c184e8bf5",
+      "tasks": {"gsk3b": 11, "jnk3": 11, "qed": 11}
+    },
+    {
+      "path": "diagnostics/pmo_formula_median_panel_wave/result.json",
+      "sha256": "2316ea30310287c7436a916c2dedafae7dd8477fb85fc127498b425184047853",
+      "tasks": {"isomers_c7h8n2o2": 11, "median1": 11}
+    }
+  ],
+  "oracle": {
+    "authoritative_query_ceiling": 150,
+    "precontract_diagnostic_calls": 1,
+    "total_new_parity_environment_calls": 151,
+    "automatic_retries": 0,
+    "metric_budget": 10000,
+    "metric_frequency": 100,
+    "finish": true,
+    "environment": {
+      "pytdc": "1.1.15",
+      "rdkit": "2023.09.6",
+      "numpy": "1.26.4",
+      "scikit_learn": "1.2.2",
+      "pandas": "2.1.4",
+      "scipy": "1.15.0",
+      "seaborn": "0.13.2",
+      "requests": "2.32.4",
+      "setuptools": "75.6.0"
+    },
+    "source_files": {
+      "pytdc_metadata": "0925dc34498dd5502429c6d278be70758f1d536417af9cc95392c28e014fe6e6",
+      "tdc_oracles_py": "d2b2194e3573eb620759998e83d8803eacfd5cbd00531e862ebe3283c301cabe",
+      "tdc_oracle_py": "211be401ec5f3c06ddca37e72064bbeb4de52437b218bb3f4a4a381eec1de1f5"
+    },
+    "downloaded_assets": {
+      "oracle/gsk3b_current.pkl": "18d1cc9bb9498e4bae0755842080558cb2d0444ecb51beffa0ef58a6d760b74b",
+      "oracle/jnk3_current.pkl": "5c7548343996a22d9a7aae8a91f34e4bc2e5e6e5a6d9c2decce3b164459af52b"
+    }
+  },
+  "official_ivg_environment_evidence": {
+    "repository": "https://github.com/invirtuolabs/InVirtuoGen_results",
+    "commit": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+    "archive_sha256": "09a9f3d2d9c676d0a71af7fc9f19724d6247daad15728e81e0c0e70377dc94c0",
+    "license": "MIT",
+    "dockerfile_path": "tmp/ivg_repo/InVirtuoGen_results-main/Dockerfile",
+    "dockerfile_sha256": "68fd2bab68070972a75ac399573ba32263eece7e74828fac604b74ad646c7b83",
+    "requirements_path": "tmp/ivg_repo/InVirtuoGen_results-main/requirements.txt",
+    "requirements_sha256": "3a2eae6baa8f0d21ebc153582682ab6a459729939204966b0fe68be2caccb2f2",
+    "setup_path": "tmp/ivg_repo/InVirtuoGen_results-main/setup.py",
+    "setup_sha256": "ebb01ecbbcbf9e822e3f472f26befd26d3e02ac9fc16c72f83fdefebf9fe1fb8"
+  },
+  "precontract_probe": {
+    "path": "diagnostics/pmo_ivg_oracle_parity/precontract_probe_0001.json",
+    "sha256": "3f470058a147720af8a00813de5b56240851b17da7dcc46748b7a9afc29f2bf8",
+    "oracle_calls": 1
+  },
+  "tasks": {
+    "albuterol_similarity": {"queries": 16, "ivg_no_prescreen_auc_top10": 0.9495725879733247, "ivg_prescreen_auc_top10": 0.9745329577899683},
+    "celecoxib_rediscovery": {"queries": 16, "ivg_no_prescreen_auc_top10": 0.7981379953543186, "ivg_prescreen_auc_top10": 0.8392633579120298},
+    "gsk3b": {"queries": 11, "ivg_no_prescreen_auc_top10": 0.9515509085758085, "ivg_prescreen_auc_top10": 0.9877549999999982},
+    "isomers_c7h8n2o2": {"queries": 11, "ivg_no_prescreen_auc_top10": 0.9683792504854166, "ivg_prescreen_auc_top10": 0.9878848345817932},
+    "jnk3": {"queries": 11, "ivg_no_prescreen_auc_top10": 0.8254327400593272, "ivg_prescreen_auc_top10": 0.8978348498483483},
+    "median1": {"queries": 11, "ivg_no_prescreen_auc_top10": 0.34203551976134167, "ivg_prescreen_auc_top10": 0.3861480499242786},
+    "mestranol_similarity": {"queries": 16, "ivg_no_prescreen_auc_top10": 0.7972550848921367, "ivg_prescreen_auc_top10": 0.9907827324168036},
+    "perindopril_mpo": {"queries": 15, "ivg_no_prescreen_auc_top10": 0.645, "ivg_prescreen_auc_top10": 0.753},
+    "qed": {"queries": 11, "ivg_no_prescreen_auc_top10": 0.9423282027962263, "ivg_prescreen_auc_top10": 0.943446030900466},
+    "thiothixene_rediscovery": {"queries": 16, "ivg_no_prescreen_auc_top10": 0.6250301389353266, "ivg_prescreen_auc_top10": 0.6521932997612709},
+    "troglitazone_rediscovery": {"queries": 16, "ivg_no_prescreen_auc_top10": 0.594675360870094, "ivg_prescreen_auc_top10": 0.8527272586754817}
+  },
+  "information_regime": {
+    "role": "retrospective evaluator-parity audit of answer-known winner/panel-informed development candidates",
+    "candidate_reselection": false,
+    "candidate_replacement": false,
+    "new_molecule_generation": false,
+    "held_out_claim": false,
+    "autonomous_search_claim": false,
+    "general_pmo_claim": false,
+    "t4_affected": false
+  }
+}

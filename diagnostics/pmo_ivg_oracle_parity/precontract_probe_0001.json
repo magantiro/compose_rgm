@@ -1,0 +1,34 @@
+{
+  "payload": {
+    "accounting": {
+      "authoritative_rescore_will_evaluate_the_locked_query_again": true,
+      "automatic_retry": false,
+      "included_in_authoritative_150_query_rescore": false,
+      "oracle_calls": 1,
+      "reserved_before_call": false
+    },
+    "environment": {
+      "numpy": "1.26.4",
+      "pandas": "2.1.4",
+      "pytdc": "1.1.15",
+      "python": "3.11",
+      "rdkit": "2023.09.6",
+      "scikit_learn": "1.2.2",
+      "scipy": "1.15.0",
+      "setuptools": "75.6.0"
+    },
+    "interpretation": "This diagnostic established that the prior PyTDC 0.3.6 isomer score was not protocol-comparable to the IVG-reported environment. It is not used to select or alter any molecule.",
+    "observed_at": "2026-09-13",
+    "purpose": "one-molecule diagnostic of the discovered IVG-versus-COMPOSE PMO oracle version mismatch",
+    "query": {
+      "smiles": "COC(=O)Nc1cccnc1",
+      "source_query_index": 1,
+      "source_result_path": "diagnostics/pmo_formula_median_panel_wave/result.json",
+      "task": "isomers_c7h8n2o2"
+    },
+    "schema_version": "pmo_ivg_oracle_parity_precontract_probe_v1",
+    "score": 1.0,
+    "status": "completed_before_contract"
+  },
+  "payload_sha256": "6ff554f9cf6fdb0d8036a9eb3c23ff37489d62d3528fcb97594483d04486d3b8"
+}
