@@ -372,6 +372,23 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped PMO exact-target program wave, 2026-09-13:** after the measured
+Perindopril curriculum exceeded both recorded IVG comparators, the user
+explicitly requested aggressive application of the same winner-informed
+program strategy across PMO. Implement and run the first bounded five-task
+wave in `docs/PMO_TARGET_PROGRAM_WAVE.md`: albuterol and mestranol similarity,
+plus celecoxib, troglitazone and thiothixene rediscovery. Use the exact public
+task targets only as disclosed answer-known development supervision. From the
+same previously charged unrelated exact root, compile and replay fifteen unique
+complete target-neighborhood programs per task before scoring. Score the root
+and locked endpoints exactly once per task, at most 80 new local CPU oracle
+calls total, with no retry or replacement. Preserve 40-active/48-slot neutral
+support, canonical deduplication, the official 10,000-query top-ten AUC, exact
+IVG file hashes and both no-prescreen and prescreen comparisons. This is a
+winner-informed development wave, not held-out discovery or general PMO
+superiority. Later task waves, broader support and autonomous 10,000-query runs
+remain separate scoped milestones.
+
 **Scoped editing-V2 registry-lineage repair, 2026-09-13:** the user explicitly
 authorized resolving the repository-wide verification blocker so the locked
 Perindopril curriculum can be scored. The read-only Process-V2 verifier currently

@@ -1,0 +1,88 @@
+{
+  "schema_version": "pmo_target_program_wave_contract_v1",
+  "authorization": "2026-09-13 user requested aggressive PMO winner-informed development after the measured Perindopril win",
+  "seed": 20260913,
+  "support": {
+    "active_atoms_max": 40,
+    "persistent_slots": 48,
+    "formal_charge_changes": false,
+    "stereochemistry": "out_of_scope",
+    "max_primitives_per_complete_program": 96,
+    "max_blocks_per_complete_program": 2
+  },
+  "compilation": {
+    "slots": 48,
+    "max_active": 40,
+    "mapping_timeout_seconds": 2,
+    "matches_per_molecule": 8,
+    "max_expansions": 1024,
+    "children_per_expansion": 8,
+    "max_steps": 96
+  },
+  "oracle": {
+    "queries_per_task": 16,
+    "program_outputs_per_task": 15,
+    "total_query_ceiling": 80,
+    "metric_budget": 10000,
+    "metric_frequency": 100,
+    "finish": true,
+    "pytdc_version": "0.3.6",
+    "rdkit_version": "2024.03.5",
+    "oracle_source_sha256": "0ea83059a50a730f55db3df7367ac642c8ac27b525acd0c8f240494524a1a014"
+  },
+  "source_root": {
+    "path": "diagnostics/pmo_public_winner_recovery/original_root_0.json",
+    "sha256": "70036e1d4ac8c9438d7246b61770ace2961bf2ff2c21e65edbf4cc4ba1e1d940"
+  },
+  "upstream": {
+    "repository": "https://github.com/invirtuolabs/InVirtuoGen_results",
+    "commit": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+    "license": "MIT",
+    "archive_sha256": "09a9f3d2d9c676d0a71af7fc9f19724d6247daad15728e81e0c0e70377dc94c0"
+  },
+  "tasks": {
+    "albuterol_similarity": {
+      "target_smiles": "CC(C)(C)NCC(O)c1ccc(O)c(CO)c1",
+      "no_prescreen_auc_top10": 0.9495725879733247,
+      "no_prescreen_csv_sha256": "93050630fc33f48a931c61925fc8ec7c12ccc574ff1458990c9646cb3e383a7e",
+      "prescreen_auc_top10": 0.9745329577899683,
+      "prescreen_csv_sha256": "855dca0ebfaf6d20c1115355c9d2f858787d34e89f339d106ccbd125cd2254c7"
+    },
+    "celecoxib_rediscovery": {
+      "target_smiles": "CC1=CC=C(C=C1)C1=CC(=NN1C1=CC=C(C=C1)S(N)(=O)=O)C(F)(F)F",
+      "no_prescreen_auc_top10": 0.7981379953543186,
+      "no_prescreen_csv_sha256": "d4172ae03710a6bfa4fecbb7d7c2bd18fb851d1121b253609ad81b1a80251b4a",
+      "prescreen_auc_top10": 0.8392633579120298,
+      "prescreen_csv_sha256": "57f8d095d45ec7fca94b09b0eea6fd441c440cb0578f44f59ab3c4537e7cd909"
+    },
+    "mestranol_similarity": {
+      "target_smiles": "COc1ccc2[C@H]3CC[C@@]4(C)[C@@H](CC[C@@]4(O)C#C)[C@@H]3CCc2c1",
+      "no_prescreen_auc_top10": 0.7972550848921367,
+      "no_prescreen_csv_sha256": "72b135a57ba7e26dc270ee4cc49141ebb6f7cd12c24d624389837e90927e30ec",
+      "prescreen_auc_top10": 0.9907827324168036,
+      "prescreen_csv_sha256": "8f6d357d42707ea72080efc9aa9001f07fe451efe29e09fb3148e0c40301b591"
+    },
+    "thiothixene_rediscovery": {
+      "target_smiles": "CN(C)S(=O)(=O)c1ccc2Sc3ccccc3C(=CCCN4CCN(C)CC4)c2c1",
+      "no_prescreen_auc_top10": 0.6250301389353266,
+      "no_prescreen_csv_sha256": "24ae38c1a588ec492862fbdeb9f922058614ff3218045207ed92ee6a6408e43a",
+      "prescreen_auc_top10": 0.6521932997612709,
+      "prescreen_csv_sha256": "03646294cf35a4c9277ff4cd4beea3e84f5022722bfdb65e62e6f806cdceadf9"
+    },
+    "troglitazone_rediscovery": {
+      "target_smiles": "Cc1c(C)c2OC(C)(COc3ccc(CC4SC(=O)NC4=O)cc3)CCc2c(C)c1O",
+      "no_prescreen_auc_top10": 0.594675360870094,
+      "no_prescreen_csv_sha256": "99175d4794991f92f36995cf200a46a72d98af2fce8089cb626ee5bf77869c01",
+      "prescreen_auc_top10": 0.8527272586754817,
+      "prescreen_csv_sha256": "56a3949b065693dde8a717cf45ea10741629627595be96f4723ecb5a7be8cc23"
+    }
+  },
+  "information_regime": {
+    "role": "answer-known public-target PMO development",
+    "candidate_injection": false,
+    "program_supervision": "published task targets and deterministic unscored one-edit neighborhoods",
+    "held_out_claim": false,
+    "general_pmo_claim": false,
+    "t4_affected": false
+  }
+}
