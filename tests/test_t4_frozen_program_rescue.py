@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from compose_v4.experiments import t4_frozen_program_rescue as rescue
@@ -190,6 +192,16 @@ def test_complete_repaired_input_set_is_exact(tmp_path) -> None:
         (tmp_path / row["path"], row["repaired_sha256"]) for row in overrides
     ]
 
+    external = Path("/opt/dock/qvina02")
+    rescue.verify_with_repaired_inputs(
+        external,
+        "f" * 64,
+        root=tmp_path,
+        overrides=overrides,
+        verify=lambda checked, digest: observed.append((checked, digest)),
+    )
+    assert observed[-1] == (external, "f" * 64)
+
     with pytest.raises(ValueError, match="override set changed"):
         rescue.validate_repaired_input_overrides(
             overrides[:-1], frozen_sha256=frozen, repaired_sha256=repaired
@@ -204,6 +216,14 @@ def test_general_prequery_error_rejects_unapproved_path() -> None:
             frozen_sha256="a" * 64,
             repaired_sha256="b" * 64,
         )
+
+
+def test_runtime_path_failure_must_match_exactly() -> None:
+    rescue.validate_runtime_path_compatibility_error(
+        rescue.RUNTIME_PATH_COMPATIBILITY_ERROR
+    )
+    with pytest.raises(ValueError, match="unexpected T4 rescue runtime-preflight"):
+        rescue.validate_runtime_path_compatibility_error("another failure")
 
 
 def test_locked_round_binds_the_exact_candidate() -> None:

@@ -22,6 +22,7 @@ LOCK_SCHEMA = "t4_frozen_program_rescue_lock_v1"
 RELAUNCH_LOCK_SCHEMA = "t4_frozen_program_rescue_relaunch_lock_v2"
 RELAUNCH_V3_LOCK_SCHEMA = "t4_frozen_program_rescue_relaunch_lock_v3"
 RELAUNCH_V4_LOCK_SCHEMA = "t4_frozen_program_rescue_relaunch_lock_v4"
+RELAUNCH_V5_LOCK_SCHEMA = "t4_frozen_program_rescue_relaunch_lock_v5"
 TOMBSTONE_FAILURE = "ambiguous_charged_query_unobserved"
 TOMBSTONE_COMPATIBILITY_ERROR = (
     "ValueError('missing score requires an explicit failure or unqueried status')"
@@ -35,6 +36,10 @@ REPAIRED_INPUT_REASONS = {
     ),
     "tools/t4_frozen_program_benchmark.py": "read_only_status_change_not_worker_runtime",
 }
+RUNTIME_PATH_COMPATIBILITY_ERROR = (
+    "'/opt/dock/qvina02' is not in the subpath of '/root/compose' OR one path is "
+    "relative and the other is absolute."
+)
 REQUIRED_STARTED_FIELDS = {
     "query_index",
     "round_index",
@@ -242,6 +247,11 @@ def validate_prequery_input_identity_error(
         raise ValueError("unexpected repaired-relaunch input failure")
 
 
+def validate_runtime_path_compatibility_error(message: str) -> None:
+    if message != RUNTIME_PATH_COMPATIBILITY_ERROR:
+        raise ValueError("unexpected T4 rescue runtime-preflight failure")
+
+
 def verify_with_repaired_input(
     path: Path,
     expected_sha256: str,
@@ -287,7 +297,11 @@ def verify_with_repaired_inputs(
     overrides: list[dict],
     verify: Callable[[Path, str], None],
 ) -> None:
-    relative = str(path.relative_to(root))
+    try:
+        relative = str(path.relative_to(root))
+    except ValueError:
+        verify(path, expected_sha256)
+        return
     matched = [row for row in overrides if row["path"] == relative]
     if not matched:
         verify(path, expected_sha256)

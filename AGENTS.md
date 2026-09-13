@@ -432,6 +432,16 @@ manifest mismatch, path, digest or reason. Reaudit all 19 unchanged query
 ledgers before relaunch; all other rescue and scientific constraints remain
 unchanged.
 
+The v4 launch passed the complete repository-input manifest and entered
+`run_unit`, then stopped before docking while verifying `/opt/dock/qvina02`:
+the rescue-only input wrapper incorrectly required every verified path to be
+relative to `/root/compose`. Preserve the v4 receipt and seal the 19 identical
+zero-query runtime-preflight failures. The bounded v5 repair may delegate paths
+outside the repository root unchanged to the original verifier. It may not
+override the QuickVina or receptor hashes, add another repository override, or
+change any controller/runtime setting. Reaudit unchanged ledgers before the
+same 19-unit relaunch.
+
 **Scoped PMO Median1 closing query, 2026-09-13:** after the exact IVG-core
 oracle audit exceeded IVG no-prescreen on all eleven completed tasks and IVG
 prescreen on ten, the user requested aggressive continuation across PMO. The

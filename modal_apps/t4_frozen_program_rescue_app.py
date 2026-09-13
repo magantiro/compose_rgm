@@ -15,7 +15,7 @@ from modal_apps.genmol_t4_opt_app import image as base_image
 from modal_apps.run_process_v2_p50_app import _validate_remote_revision
 
 APP_NAME = "compose-t4-frozen-program-rescue"
-LOCK_PATH = "diagnostics/t4_frozen_program_rescue/relaunch_lock_v4.json"
+LOCK_PATH = "diagnostics/t4_frozen_program_rescue/relaunch_lock_v5.json"
 SOURCE_APP = "modal_apps/t4_frozen_program_benchmark_app.py"
 SOURCE_PREFLIGHT = "diagnostics/t4_frozen_program_benchmark/preflight_v2.json"
 SOURCE_CONTRACT = "configs/t4_frozen_program_benchmark_v2.json"

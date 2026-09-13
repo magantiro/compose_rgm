@@ -122,6 +122,14 @@ allowed. The existing v2 lock already records the relevant controller delta
 and the disabled retrieval setting. Preserve the v3 receipt and its zero-query
 failure census, then reaudit all 19 ledgers before a v4 launch.
 
+The v4 launch passed every repository contract-input check and entered
+`run_unit`, then failed before docking when the rescue wrapper attempted to
+make `/opt/dock/qvina02` relative to `/root/compose`. The v5 repair delegates
+all paths outside the repository root directly to the original frozen verifier.
+It does not override the QuickVina or receptor identities. Preserve the v4
+receipt and a sealed 19-call zero-query failure census, and reaudit unchanged
+query ledgers before relaunch.
+
 ## Artifacts and procedure
 
 1. Audit the live volume read-only and freeze a rescue lock containing the
