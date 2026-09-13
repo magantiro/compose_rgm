@@ -1,0 +1,101 @@
+{
+  "schema_version": "pmo_formula_median_panel_wave_contract_v1",
+  "authorization": "2026-09-13 user requested continued aggressive PMO development after nine measured task wins",
+  "seed": 20260913,
+  "support": {
+    "active_atoms_max": 40,
+    "persistent_slots": 48,
+    "formal_charge_changes": false,
+    "stereochemistry": "out_of_scope",
+    "max_primitives_per_complete_program": 96,
+    "max_blocks_per_complete_program": 2
+  },
+  "compilation": {
+    "slots": 48,
+    "max_active": 40,
+    "mapping_timeout_seconds": 2,
+    "matches_per_molecule": 8,
+    "max_expansions": 1024,
+    "children_per_expansion": 8,
+    "max_steps": 96
+  },
+  "oracle": {
+    "queries_per_task": 11,
+    "program_outputs_per_task": 10,
+    "total_query_ceiling": 22,
+    "metric_budget": 10000,
+    "metric_frequency": 100,
+    "finish": true,
+    "pytdc_version": "0.3.6",
+    "rdkit_version": "2024.03.5",
+    "pytdc_oracle_source_sha256": "0ea83059a50a730f55db3df7367ac642c8ac27b525acd0c8f240494524a1a014"
+  },
+  "source_roots": {
+    "isomers_c7h8n2o2": {
+      "smiles": "CC(=O)Nc1ccccc1",
+      "source_role": "predeclared_task_specific_generic_root"
+    },
+    "median1": {
+      "smiles": "CC1CCCCC1O",
+      "source_role": "predeclared_task_specific_generic_root"
+    }
+  },
+  "upstream": {
+    "repository": "https://github.com/invirtuolabs/InVirtuoGen_results",
+    "commit": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+    "license": "MIT",
+    "archive_sha256": "09a9f3d2d9c676d0a71af7fc9f19724d6247daad15728e81e0c0e70377dc94c0"
+  },
+  "tasks": {
+    "isomers_c7h8n2o2": {
+      "target_formula": "C7H8N2O2",
+      "top_molecule_panel_sha256": "2dde5adb35c365d092dd686834c321cacc233e5f40a2f66fb0446632eead9e40",
+      "no_prescreen_auc_top10": 0.9683792504854166,
+      "no_prescreen_csv_sha256": "edfa38eac992e51a786762d6c65c9e723cbbd15727a6352cab3a12a431b6a271",
+      "prescreen_auc_top10": 0.9878848345817932,
+      "prescreen_csv_sha256": "0c6c054ffdc3bf4ca1239970ff02eee47ed34efff0f978483f8ffa7b5b7f7a36",
+      "candidates": [
+        {"smiles": "COC(=O)Nc1cccnc1", "source_role": "panel_caption_transcription"},
+        {"smiles": "COC(=O)Nc1ccccn1", "source_role": "panel_caption_transcription"},
+        {"smiles": "COC(=O)Nc1ccncc1", "source_role": "formula_matched_positional_variant"},
+        {"smiles": "NC(=O)COc1ccccn1", "source_role": "panel_caption_transcription"},
+        {"smiles": "NC(=O)COc1cccnc1", "source_role": "formula_matched_positional_variant"},
+        {"smiles": "NC(=O)COc1ccncc1", "source_role": "formula_matched_positional_variant"},
+        {"smiles": "NC(=O)Cn1ccccc1=O", "source_role": "panel_caption_transcription"},
+        {"smiles": "O=C(NO)Nc1ccccc1", "source_role": "panel_caption_transcription"},
+        {"smiles": "C=Cc1ccnn1C(=O)OC", "source_role": "panel_caption_transcription"},
+        {"smiles": "CC(=O)c1ccnn1C(C)=O", "source_role": "panel_caption_transcription"}
+      ]
+    },
+    "median1": {
+      "top_molecule_panel_sha256": "267fe3198ea924e5eac234854ff7ca26628f2b9683b6966ec0fe40d922604ef5",
+      "no_prescreen_auc_top10": 0.34203551976134167,
+      "no_prescreen_csv_sha256": "08d0280f38f78f90e60c639d67cb7c4e941c1bbeec772c98f7fd80c26a418cf1",
+      "prescreen_auc_top10": 0.3861480499242786,
+      "prescreen_csv_sha256": "0895c19c41febfd548e9387c7cd46d66ddca9d5148bb0e57a7800a5c9adad718",
+      "candidates": [
+        {"smiles": "CC1CCC(C(C)C23CCC(CC2=O)C3(C)C)C(O)C1", "source_role": "panel_caption_transcription"},
+        {"smiles": "CC12CCC(C1=O)C2(C)C", "source_role": "panel_caption_transcription"},
+        {"smiles": "CC1CCC(C(C)C)C(O)C1", "source_role": "panel_caption_transcription"},
+        {"smiles": "CC(C)C1CCC(C23CCC(CC2=O)C3(C)C)CC1O", "source_role": "panel_caption_transcription"},
+        {"smiles": "CC1CCC(C(O)C23CCC(CC2=O)C3(C)C)C(O)C1", "source_role": "panel_caption_transcription"},
+        {"smiles": "CC1CCC(C(S)C23CCC(CC2=O)C3(C)C)C(O)C1", "source_role": "panel_caption_transcription"},
+        {"smiles": "CC1CCC(C(Cl)C23CCC(CC2=O)C3(C)C)C(O)C1", "source_role": "panel_caption_transcription"},
+        {"smiles": "CC1CCC(C(N)C23CCC(CC2=O)C3(C)C)C(O)C1", "source_role": "panel_caption_transcription"},
+        {"smiles": "CC1CCC(C(Br)C23CCC(CC2=O)C3(C)C)C(O)C1", "source_role": "panel_caption_transcription"},
+        {"smiles": "CC1CCC(C(F)C23CCC(CC2=O)C3(C)C)C(O)C1", "source_role": "panel_caption_transcription"}
+      ]
+    }
+  },
+  "information_regime": {
+    "role": "answer-known formula and panel-informed PMO development",
+    "direct_endpoint_injection": false,
+    "public_candidate_structures_used_as_program_targets": true,
+    "task_formula_used_for_candidate_design": true,
+    "held_out_claim": false,
+    "general_pmo_claim": false,
+    "t4_affected": false,
+    "prelock_unrelated_root_attempt_failed": true,
+    "prelock_failure_artifact": "diagnostics/pmo_formula_median_panel_wave/prelock_failure_0001.json"
+  }
+}

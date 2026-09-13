@@ -1,0 +1,25 @@
+{
+  "schema_version": "pmo_formula_median_prelock_failure_v1",
+  "phase": "zero_oracle_structural_gate",
+  "task": "isomers_c7h8n2o2",
+  "source_role": "previously_charged_unrelated_exact_root",
+  "source_path": "diagnostics/pmo_public_winner_recovery/original_root_0.json",
+  "source_sha256": "70036e1d4ac8c9438d7246b61770ace2961bf2ff2c21e65edbf4cc4ba1e1d940",
+  "target_smiles": "COC(=O)Nc1cccnc1",
+  "element_alignment": {
+    "status": "search_unresolved",
+    "matched_atoms": 7,
+    "expanded": 1024,
+    "best_residual": 7
+  },
+  "topology_alignment": {
+    "status": "search_unresolved",
+    "matched_atoms": 11,
+    "expanded": 1024,
+    "best_residual": 2,
+    "best_partial_smiles": "O=[SH3]COC(=O)Nc1cccnc1"
+  },
+  "decision": "replace the inappropriate unrelated root with predeclared task-specific generic neutral roots before freezing the curriculum",
+  "new_oracle_calls": 0,
+  "observed_task_scores": 0
+}

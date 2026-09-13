@@ -372,6 +372,31 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped PMO formula/median panel wave, 2026-09-13:** after the panel-informed
+QED/GSK3B/JNK3 refinement beat both IVG regimes on all three tasks, the user
+requested continued aggressive PMO development. Implement and run the bounded
+follow-on in `docs/PMO_FORMULA_MEDIAN_PANEL_WAVE.md`: `isomers_c7h8n2o2` and
+`median1`, ten predeclared neutral structures per task plus one predeclared
+task-specific generic neutral root. The isomer set must contain ten canonical-unique
+molecules whose RDKit molecular formula is exactly C7H8N2O2; the median set
+must retain candidate-level public-panel transcription/derivation roles.
+Compile every endpoint into a complete COMPOSE program and exact-replay all 20
+before any new task score is observed. Score root and endpoints exactly once,
+at most 22 new local CPU PyTDC calls total, with no retry or replacement.
+Preserve the official 10,000-query top-ten AUC, 40-active/48-slot neutral
+support, exact upstream hashes and both IVG comparison regimes. This is
+answer-known white-box development, not held-out discovery, autonomous search
+or general PMO superiority. No Modal use, T4 change, reference training or
+automatic later wave follows.
+
+The prelock attempt to reuse the earlier unrelated root failed the zero-oracle
+structural gate for the C7 task and is preserved in
+`diagnostics/pmo_formula_median_panel_wave/prelock_failure_0001.json`. It
+observed no task score and produced no committed or sealed curriculum. The
+task-specific roots above therefore replace that inappropriate root before the
+candidate lock; they do not alter the candidates, oracle, metric, support or
+call ceiling.
+
 **Scoped PMO panel-informed property refinement, 2026-09-13:** after the
 single-anchor learned-property wave reproduced excellent anchors but diluted
 top-ten performance with generic one-edit variants, the user requested
