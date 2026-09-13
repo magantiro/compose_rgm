@@ -1,9 +1,11 @@
 import json
+import sys
 from pathlib import Path
 
 import pytest
 
 from compose_v4.control.edit_program import EditProgram
+from compose_v4.experiments.parent_edit_cycles import pmo_oracle
 from compose_v4.experiments.pmo_winner_program_curriculum import (
     build_curriculum,
     load_contract,
@@ -61,3 +63,15 @@ def test_contract_records_winner_informed_role():
     raw = json.loads((ROOT / "docs/invirtuogen_pmo_targets.json").read_text())
     assert raw["no_prescreen_targets_partial"]["perindopril_mpo"] == 0.645
     assert raw["targets"]["perindopril_mpo"] == 0.753
+
+
+def test_pinned_oracle_adapter_installs_legacy_rdkit_compatibility_before_import():
+    sys.modules.pop("rdkit.six", None)
+
+    evaluate = pmo_oracle("perindopril_mpo", {"perindopril_mpo": "pinned"})
+
+    assert callable(evaluate)
+    assert "rdkit.six" in sys.modules
+    import tdc.chem_utils.oracle.oracle as oracle_module
+
+    assert Path(oracle_module.__file__).is_file()

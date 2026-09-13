@@ -381,6 +381,10 @@ def run(root: Path, output: Path) -> dict:
         raise ValueError("RDKit version differs from the frozen oracle environment")
     if importlib.metadata.version("PyTDC") != contract["oracle"]["pytdc_version"]:
         raise ValueError("PyTDC version differs from the frozen oracle environment")
+    # Constructing the adapter installs the repository's audited ``rdkit.six``
+    # compatibility shim before PyTDC 0.3.6 imports its oracle module. Modern
+    # RDKit no longer ships that module. Adapter construction performs no score.
+    evaluate = pmo_oracle(contract["task"], {contract["task"]: "pinned_pmo_perindopril_v1"})
     import tdc.chem_utils.oracle.oracle as oracle_module
 
     verify_file(Path(oracle_module.__file__), contract["oracle"]["oracle_source_sha256"])
@@ -390,7 +394,6 @@ def run(root: Path, output: Path) -> dict:
         return unseal(result_path)
     oracle_root = output / "oracle"
     oracle_root.mkdir(parents=True, exist_ok=True)
-    evaluate = pmo_oracle(contract["task"], {contract["task"]: "pinned_pmo_perindopril_v1"})
     scored = []
     for index, query in enumerate(queries):
         folder = oracle_root / f"query_{index:06d}"
