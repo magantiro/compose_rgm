@@ -15,7 +15,7 @@ from modal_apps.genmol_t4_opt_app import image as base_image
 from modal_apps.run_process_v2_p50_app import _validate_remote_revision
 
 APP_NAME = "compose-t4-frozen-program-rescue"
-LOCK_PATH = "diagnostics/t4_frozen_program_rescue/relaunch_lock_v3.json"
+LOCK_PATH = "diagnostics/t4_frozen_program_rescue/relaunch_lock_v4.json"
 SOURCE_APP = "modal_apps/t4_frozen_program_benchmark_app.py"
 SOURCE_PREFLIGHT = "diagnostics/t4_frozen_program_benchmark/preflight_v2.json"
 SOURCE_CONTRACT = "configs/t4_frozen_program_benchmark_v2.json"
@@ -78,8 +78,8 @@ def worker(task):
     from compose_v4.experiments import t4_frozen_program_benchmark as benchmark
     from compose_v4.experiments.continuation_profile import sha256_file, verify_file
     from compose_v4.experiments.t4_frozen_program_rescue import (
-        validate_repaired_input_override,
-        verify_with_repaired_input,
+        validate_repaired_input_overrides,
+        verify_with_repaired_inputs,
     )
     from compose_v4.experiments.t4_matched_pilot import unseal
 
@@ -97,12 +97,16 @@ def worker(task):
     if task["unit_id"] not in lock["units"]:
         raise ValueError("T4 repaired relaunch unit is outside its lock")
     source_task = lock["source_task"]
-    override = lock["contract_input_override"]
+    overrides = lock["contract_input_overrides"]
     source_contract = unseal(REMOTE_ROOT / SOURCE_CONTRACT)
-    frozen_sha256 = source_contract["inputs"][override["path"]]
-    repaired_sha256 = sha256_file(REMOTE_ROOT / override["path"])
-    validate_repaired_input_override(
-        override,
+    frozen_sha256 = {
+        row["path"]: source_contract["inputs"][row["path"]] for row in overrides
+    }
+    repaired_sha256 = {
+        row["path"]: sha256_file(REMOTE_ROOT / row["path"]) for row in overrides
+    }
+    validate_repaired_input_overrides(
+        overrides,
         frozen_sha256=frozen_sha256,
         repaired_sha256=repaired_sha256,
     )
@@ -110,11 +114,11 @@ def worker(task):
     frozen_verify_file = benchmark.verify_file
 
     def verify_rescue_input(path, expected):
-        return verify_with_repaired_input(
+        return verify_with_repaired_inputs(
             path,
             expected,
             root=REMOTE_ROOT,
-            override=override,
+            overrides=overrides,
             verify=frozen_verify_file,
         )
 

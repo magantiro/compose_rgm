@@ -157,6 +157,55 @@ def test_repaired_input_verifier_overrides_only_the_sealed_digest(tmp_path) -> N
         )
 
 
+def test_complete_repaired_input_set_is_exact(tmp_path) -> None:
+    frozen = {path: f"{index + 1:064x}" for index, path in enumerate(rescue.REPAIRED_INPUT_REASONS)}
+    repaired = {
+        path: f"{index + 11:064x}"
+        for index, path in enumerate(rescue.REPAIRED_INPUT_REASONS)
+    }
+    overrides = [
+        {
+            "path": path,
+            "frozen_sha256": frozen[path],
+            "repaired_sha256": repaired[path],
+            "reason": reason,
+        }
+        for path, reason in sorted(rescue.REPAIRED_INPUT_REASONS.items())
+    ]
+    rescue.validate_repaired_input_overrides(
+        overrides, frozen_sha256=frozen, repaired_sha256=repaired
+    )
+
+    observed = []
+    for row in overrides:
+        path = tmp_path / row["path"]
+        rescue.verify_with_repaired_inputs(
+            path,
+            row["frozen_sha256"],
+            root=tmp_path,
+            overrides=overrides,
+            verify=lambda checked, digest: observed.append((checked, digest)),
+        )
+    assert observed == [
+        (tmp_path / row["path"], row["repaired_sha256"]) for row in overrides
+    ]
+
+    with pytest.raises(ValueError, match="override set changed"):
+        rescue.validate_repaired_input_overrides(
+            overrides[:-1], frozen_sha256=frozen, repaired_sha256=repaired
+        )
+
+
+def test_general_prequery_error_rejects_unapproved_path() -> None:
+    with pytest.raises(ValueError, match="unexpected T4 rescue input path"):
+        rescue.validate_prequery_input_identity_error(
+            "unused",
+            path="src/compose_v4/control/unapproved.py",
+            frozen_sha256="a" * 64,
+            repaired_sha256="b" * 64,
+        )
+
+
 def test_locked_round_binds_the_exact_candidate() -> None:
     reservation = started()
     candidates = [{"candidate_id": str(index), "endpoint": "C"} for index in range(4)]

@@ -21,12 +21,20 @@ SCHEMA = "t4_frozen_program_rescue_contract_v1"
 LOCK_SCHEMA = "t4_frozen_program_rescue_lock_v1"
 RELAUNCH_LOCK_SCHEMA = "t4_frozen_program_rescue_relaunch_lock_v2"
 RELAUNCH_V3_LOCK_SCHEMA = "t4_frozen_program_rescue_relaunch_lock_v3"
+RELAUNCH_V4_LOCK_SCHEMA = "t4_frozen_program_rescue_relaunch_lock_v4"
 TOMBSTONE_FAILURE = "ambiguous_charged_query_unobserved"
 TOMBSTONE_COMPATIBILITY_ERROR = (
     "ValueError('missing score requires an explicit failure or unqueried status')"
 )
 REPAIRED_INPUT_PATH = "src/compose_v4/control/adaptive_program_optimizer.py"
 REPAIRED_INPUT_REASON = "accept_exact_charged_missing_observation_status"
+REPAIRED_INPUT_REASONS = {
+    REPAIRED_INPUT_PATH: REPAIRED_INPUT_REASON,
+    "src/compose_v4/control/program_transfer.py": (
+        "direct_retrieval_disabled_by_frozen_zero_candidate_setting"
+    ),
+    "tools/t4_frozen_program_benchmark.py": "read_only_status_change_not_worker_runtime",
+}
 REQUIRED_STARTED_FIELDS = {
     "query_index",
     "round_index",
@@ -217,6 +225,23 @@ def validate_relaunch_prequery_identity_error(
         raise ValueError("unexpected repaired-relaunch prequery failure")
 
 
+def validate_prequery_input_identity_error(
+    message: str,
+    *,
+    path: str,
+    frozen_sha256: str,
+    repaired_sha256: str,
+) -> None:
+    if path not in REPAIRED_INPUT_REASONS:
+        raise ValueError("unexpected T4 rescue input path")
+    expected = (
+        f"input identity mismatch: /root/compose/{path}: "
+        f"expected {frozen_sha256}, got {repaired_sha256}"
+    )
+    if message != expected:
+        raise ValueError("unexpected repaired-relaunch input failure")
+
+
 def verify_with_repaired_input(
     path: Path,
     expected_sha256: str,
@@ -233,6 +258,43 @@ def verify_with_repaired_input(
     if expected_sha256 != override["frozen_sha256"]:
         raise ValueError("T4 rescue repair was requested for an unexpected digest")
     verify(path, override["repaired_sha256"])
+
+
+def validate_repaired_input_overrides(
+    overrides: list[dict],
+    *,
+    frozen_sha256: dict[str, str],
+    repaired_sha256: dict[str, str],
+) -> None:
+    expected = [
+        {
+            "path": path,
+            "frozen_sha256": frozen_sha256[path],
+            "repaired_sha256": repaired_sha256[path],
+            "reason": reason,
+        }
+        for path, reason in sorted(REPAIRED_INPUT_REASONS.items())
+    ]
+    if overrides != expected:
+        raise ValueError("T4 rescue input override set changed scope or identity")
+
+
+def verify_with_repaired_inputs(
+    path: Path,
+    expected_sha256: str,
+    *,
+    root: Path,
+    overrides: list[dict],
+    verify: Callable[[Path, str], None],
+) -> None:
+    relative = str(path.relative_to(root))
+    matched = [row for row in overrides if row["path"] == relative]
+    if not matched:
+        verify(path, expected_sha256)
+        return
+    if len(matched) != 1 or expected_sha256 != matched[0]["frozen_sha256"]:
+        raise ValueError("T4 rescue repair was requested for an unexpected input")
+    verify(path, matched[0]["repaired_sha256"])
 
 
 def load_rescue_contract(root: Path, relative: str) -> dict:

@@ -106,6 +106,22 @@ The three checkpoint-free bootstrap invocations remain untouched. This is an
 identity-validation repair for the already authorized status-vocabulary fix;
 it changes no controller decision or scientific setting.
 
+The v3 launch passed the optimizer override, then stopped before `run_unit` on
+the next original-contract mismatch in `program_transfer.py`. A full comparison
+of every frozen contract input found exactly three mismatches:
+
+1. `adaptive_program_optimizer.py`, the authorized tombstone-status repair;
+2. `program_transfer.py`, a direct-retrieval path disabled because the frozen
+   controller sets `cold_start_retrieval_candidates` to zero; and
+3. `tools/t4_frozen_program_benchmark.py`, a read-only status-monitor change
+   that is not imported by the remote worker.
+
+The v4 override must contain exactly these paths, their original and current
+digests, and their fixed reasons. No prefix, directory or arbitrary override is
+allowed. The existing v2 lock already records the relevant controller delta
+and the disabled retrieval setting. Preserve the v3 receipt and its zero-query
+failure census, then reaudit all 19 ledgers before a v4 launch.
+
 ## Artifacts and procedure
 
 1. Audit the live volume read-only and freeze a rescue lock containing the

@@ -418,6 +418,20 @@ contract input remains byte-exact. Reaudit unchanged query ledgers before
 relaunching the same 19 units; leave the three bootstrap invocations untouched,
 use zero automatic retries, and make no controller or protocol change.
 
+The v3 launch verified the optimizer override and then stopped before any
+oracle call on the next frozen-input mismatch,
+`src/compose_v4/control/program_transfer.py`. A complete manifest comparison
+identified exactly three changed contract inputs: the optimizer status repair;
+the previously recorded direct-retrieval implementation whose frozen
+`cold_start_retrieval_candidates=0` setting disables that path; and the local
+benchmark CLI's read-only status-loader change, which is not worker runtime.
+Preserve the v3 receipt and seal its zero-query failure census. The bounded v4
+repair may verify exactly those three paths against their sealed current
+digests and declared decision-equivalence reasons. It must reject any other
+manifest mismatch, path, digest or reason. Reaudit all 19 unchanged query
+ledgers before relaunch; all other rescue and scientific constraints remain
+unchanged.
+
 **Scoped PMO Median1 closing query, 2026-09-13:** after the exact IVG-core
 oracle audit exceeded IVG no-prescreen on all eleven completed tasks and IVG
 prescreen on ten, the user requested aggressive continuation across PMO. The
