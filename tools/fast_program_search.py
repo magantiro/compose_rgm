@@ -55,6 +55,7 @@ def compare_profiles(before_path, after_path, output, *, require_equivalent=True
             config.pop("proposal_cache_entries")
             if not require_equivalent:
                 config.pop("mutation_sampling")
+                config.pop("composition_probability")
         if configurations[0] != configurations[1]:
             raise ValueError(f"unmatched proposal/work recipe: {name}")
         records = []
@@ -85,6 +86,11 @@ def compare_profiles(before_path, after_path, output, *, require_equivalent=True
         equivalent = exact[0] == exact[1] and attempted[0] == attempted[1]
         if require_equivalent and not equivalent:
             raise ValueError(f"optimization changed exact candidate/attempt semantics: {name}")
+        endpoint_sets = [{c["endpoint"] for c in batch["candidates"]} for batch in records]
+        channel_counts = [
+            dict(Counter(c["provenance"]["channel"] for c in batch["candidates"]))
+            for batch in records
+        ]
         comparisons.append(
             {
                 "unit": name,
@@ -95,10 +101,41 @@ def compare_profiles(before_path, after_path, output, *, require_equivalent=True
                 "after_attempts": new[name]["attempts"],
                 "before_new_candidates": old[name]["eligible_new_candidates"],
                 "after_new_candidates": new[name]["eligible_new_candidates"],
+                "before_eligible_by_channel": channel_counts[0],
+                "after_eligible_by_channel": channel_counts[1],
+                "shared_candidate_endpoints": len(endpoint_sets[0] & endpoint_sets[1]),
+                "new_only_candidate_endpoints": len(endpoint_sets[1] - endpoint_sets[0]),
             }
         )
     before_seconds = sum(r["before_seconds"] for r in comparisons)
     after_seconds = sum(r["after_seconds"] for r in comparisons)
+    composition_endpoints = sum(
+        row["after_eligible_by_channel"].get("program_composition", 0) for row in comparisons
+    )
+    composition_targets = sorted(
+        {
+            row["unit"].rsplit("_", 1)[0]
+            for row in comparisons
+            if row["after_eligible_by_channel"].get("program_composition", 0)
+        }
+    )
+    time_ratio = after_seconds / before_seconds
+    structural_gate = {
+        "required_targets": ["braf_1", "jak2_1"],
+        "composition_eligible_endpoints": composition_endpoints,
+        "targets_with_composition_endpoint": composition_targets,
+        "proposal_time_ratio": time_ratio,
+        "passed": composition_endpoints >= 4
+        and set(composition_targets) == {"braf_1", "jak2_1"}
+        and time_ratio <= 1.5,
+    }
+    structural_gate["decision"] = (
+        "ADVANCE_TO_LOCKED_DOCKING"
+        if structural_gate["passed"]
+        else "NO_DOCKING_INCONCLUSIVE_STRUCTURAL_GATE"
+        if composition_endpoints
+        else "NO_DOCKING_NEGATIVE_STRUCTURAL_GATE"
+    )
     body = {
         "schema_version": "fast_program_comparison_v1",
         "inputs_sha256": inputs,
@@ -106,6 +143,7 @@ def compare_profiles(before_path, after_path, output, *, require_equivalent=True
         "before_seconds": before_seconds,
         "after_seconds": after_seconds,
         "wall_time_reduction_fraction": 1 - after_seconds / before_seconds,
+        "structural_gate": structural_gate,
         "require_equivalent": require_equivalent,
         "new_oracle_calls": 0,
         "software": reports[1]["software"],
@@ -134,6 +172,11 @@ def run(args):
                 wall_seconds=args.seconds,
                 proposal_cache_entries=args.cache_entries,
                 mutation_sampling=args.mutation_sampling,
+                composition_probability=args.composition_probability,
+                max_composed_programs=args.max_composed_programs,
+                composition_stop_probability=args.composition_stop_probability,
+                composition_donor_trials=args.composition_donor_trials,
+                composition_execution_trials=args.composition_execution_trials,
             ),
         )
         for cell in args.cells
@@ -253,6 +296,11 @@ def main():
     parser.add_argument("--seconds", type=float, default=45)
     parser.add_argument("--cache-entries", type=int, default=0)
     parser.add_argument("--mutation-sampling", choices=("random", "untried"), default="random")
+    parser.add_argument("--composition-probability", type=float, default=0.0)
+    parser.add_argument("--max-composed-programs", type=int, default=2)
+    parser.add_argument("--composition-stop-probability", type=float, default=0.5)
+    parser.add_argument("--composition-donor-trials", type=int, default=8)
+    parser.add_argument("--composition-execution-trials", type=int, default=16)
     args = parser.parse_args()
     if args.compare:
         compare_profiles(*args.compare, args.output, require_equivalent=not args.proposal_change)

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 import math
-from collections import defaultdict
+from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass
 from time import perf_counter
 
@@ -68,6 +68,11 @@ class ProgramSearchConfig:
     proposal_cache_entries: int = 0
     mutation_sampling: str = "random"
     mutation_context_limit: int = 128
+    composition_probability: float = 0.0
+    max_composed_programs: int = 2
+    composition_stop_probability: float = 0.5
+    composition_donor_trials: int = 8
+    composition_execution_trials: int = 16
 
     @classmethod
     def parent_edit_recipe(cls, *, seed=20260912, score_direction="minimize"):
@@ -101,11 +106,37 @@ class ProgramSearchConfig:
             require_broad_runtime=False,
         )
 
+    @classmethod
+    def two_program_recipe(cls, *, seed=20260912, score_direction="minimize"):
+        """Fast program search with a protected composition fixed to two.
+
+        The architecture supports a bounded variable number of transformations,
+        but this named first experiment fixes K=2.  Every later transformation
+        is rebound on the actual predecessor, and only the completed composition
+        reaches the task evaluator.
+        """
+        from dataclasses import replace
+
+        return replace(
+            cls.program_only_recipe(seed=seed, score_direction=score_direction),
+            composition_probability=0.25,
+            max_composed_programs=2,
+        )
+
     def __post_init__(self):
         if self.mutation_sampling not in ("random", "untried"):
             raise ValueError("unknown mutation sampling policy")
         if type(self.mutation_context_limit) is not int or self.mutation_context_limit < 1:
             raise ValueError("mutation context limit must be a positive integer")
+        if type(self.max_composed_programs) is not int or self.max_composed_programs < 2:
+            raise ValueError("composition needs a maximum of at least two programs")
+        if type(self.composition_donor_trials) is not int or self.composition_donor_trials < 1:
+            raise ValueError("composition donor trials must be a positive integer")
+        if (
+            type(self.composition_execution_trials) is not int
+            or self.composition_execution_trials < 1
+        ):
+            raise ValueError("composition execution trials must be a positive integer")
         if type(self.proposal_cache_entries) is not int or self.proposal_cache_entries < 0:
             raise ValueError("proposal cache capacity must be a nonnegative integer")
         if self.proposal_mode not in ("mixed", "program_only"):
@@ -146,6 +177,8 @@ class ProgramSearchConfig:
             or self.wall_seconds <= 0
             or not 0 < self.exploration < 1
             or not 0 <= self.double_mutation_probability <= 1
+            or not 0 <= self.composition_probability <= 1
+            or not 0 <= self.composition_stop_probability <= 1
         ):
             raise ValueError("invalid program search wall limit or exploration")
         weights = self.channel_probabilities
@@ -532,6 +565,219 @@ class ProgramOptimizer:
         )
 
     @staticmethod
+    def _receipt_stages(receipt, *, label_prefix):
+        """Expose verified block boundaries for exact program re-extraction."""
+        stages, start = [], 0
+        for index, block in enumerate(receipt["blocks"]):
+            stop = block["stop"]
+            stages.append(
+                {
+                    "name": f"{label_prefix}:{index}:{block['label']}",
+                    "actions": receipt["actions"][start:stop],
+                    "states": receipt["states"][start : stop + 1],
+                    "endpoint": canonical_state_key(decode_state(receipt["states"][stop])),
+                }
+            )
+            start = stop
+        return stages
+
+    def _bound_composition_component(self, state, *, max_primitives, max_blocks):
+        """Draw one bounded archived branch and bind it to the supplied state.
+
+        Candidate donor entries are sampled by the configured parent law.  The
+        task oracle is never consulted.  Context distance only allocates mass
+        inside the finite, executor-supported binding pool.
+        """
+        keys, weights = self.selection()
+        count = min(self.config.composition_donor_trials, len(keys))
+        selected = self.rng.choice(len(keys), size=count, replace=False, p=weights)
+        choices = []
+        for position in selected:
+            entry_id = keys[int(position)]
+            entry = self.entries[entry_id]
+            program, _, decomposition = self._branches(entry)
+            components = branch_components(program)
+            for component in components:
+                branch, _ = select_branch(program, component)
+                if len(branch.marks) > max_primitives or len(branch.blocks) > max_blocks:
+                    continue
+                census = self.work_cache.get(
+                    "composition_bindings",
+                    (
+                        identity(encode_state(state)),
+                        branch.program_id,
+                        self.config.max_bindings,
+                    ),
+                    lambda branch=branch: attachment_bindings(
+                        branch, state, max_bindings=self.config.max_bindings
+                    ),
+                )
+                for assignment, distance in zip(
+                    census.assignments, census.context_distances, strict=True
+                ):
+                    choices.append(
+                        {
+                            "entry_id": entry_id,
+                            "program": branch,
+                            "assignment": assignment,
+                            "blocks": component,
+                            "context_distance": distance,
+                            "parent_probability": float(weights[int(position)]),
+                            "bindings": len(census.assignments),
+                            "donor_components": len(components),
+                            "bindings_truncated": census.truncated,
+                            "decomposition": decomposition,
+                        }
+                    )
+        if not choices:
+            raise ValueError("no reusable component binds within remaining composition work")
+        base = np.asarray(
+            [
+                choice["parent_probability"] / (choice["donor_components"] * choice["bindings"])
+                for choice in choices
+            ],
+            dtype=float,
+        )
+        distance = np.asarray([choice["context_distance"] for choice in choices], dtype=float)
+        contextual = base * np.exp(-(distance - distance.min()))
+        proposal = 0.1 * base / base.sum() + 0.9 * contextual / contextual.sum()
+        order = self.rng.choice(
+            len(choices),
+            size=min(self.config.composition_execution_trials, len(choices)),
+            replace=False,
+            p=proposal,
+        )
+        failures = []
+        for raw_index in order:
+            at = int(raw_index)
+            choice = choices[at]
+
+            def execute(choice=choice):
+                try:
+                    product, receipt = execute_program_graph(
+                        state,
+                        compile_program_graph(choice["program"]),
+                        choice["assignment"],
+                        max_primitives=max_primitives,
+                        max_blocks=max_blocks,
+                    )
+                except ValueError as error:
+                    return {"error": str(error)}
+                return {"product": encode_state(product), "receipt": receipt}
+
+            execution_key = identity(
+                {
+                    "state": encode_state(state),
+                    "program": choice["program"].payload(),
+                    "assignment": choice["assignment"],
+                    "max_primitives": max_primitives,
+                    "max_blocks": max_blocks,
+                }
+            )
+            result = self.work_cache.get("composition_execution", execution_key, execute)
+            if "error" in result:
+                failures.append(result["error"])
+                continue
+            return (
+                choice,
+                float(proposal[at]),
+                decode_state(result["product"]),
+                result["receipt"],
+                {
+                    "choices_considered": len(choices),
+                    "exact_executions_attempted": len(failures) + 1,
+                    "failed_execution_reasons": dict(Counter(failures)),
+                },
+            )
+        summary = dict(Counter(failures))
+        raise ValueError(
+            f"no exact-executable component in {len(order)} bounded choices: {summary}"
+        )
+
+    def _compose_programs(self, entry):
+        """Complete a bounded variable-size composition before task evaluation."""
+        source = decode_state(entry["trace"]["states"][-1])
+        current, stages, components, intermediates = source, [], [], []
+        active_created_slots = set()
+        remaining_primitives, remaining_blocks = (
+            self.config.max_primitives,
+            self.config.max_blocks,
+        )
+        stop_reason = None
+        for index in range(self.config.max_composed_programs):
+            # The first choice must leave at least one primitive and block for
+            # the required second component. Additional components are optional.
+            reserve = int(index == 0)
+            component, probability, product, receipt, compatibility = (
+                self._bound_composition_component(
+                    current,
+                    max_primitives=remaining_primitives - reserve,
+                    max_blocks=remaining_blocks - reserve,
+                )
+            )
+            created_inputs = sorted(set(component["assignment"]) & active_created_slots)
+            stages.extend(self._receipt_stages(receipt, label_prefix=f"composition_{index + 1}"))
+            components.append(
+                {
+                    **{k: v for k, v in component.items() if k not in ("program", "assignment")},
+                    "program_id": component["program"].program_id,
+                    "assignment": list(component["assignment"]),
+                    "proposal_probability": probability,
+                    "input_slots_created_by_earlier_components": created_inputs,
+                    "primitive_edits": len(receipt["actions"]),
+                    "block_count": len(receipt["blocks"]),
+                    "compatibility": compatibility,
+                }
+            )
+            for action in receipt["actions"]:
+                payload = action["payload"]
+                if action["executor_rule"] == "atom_insert":
+                    active_created_slots.add(payload["slot"])
+                elif action["executor_rule"] == "atom_delete":
+                    active_created_slots.discard(payload["v"])
+            current = product
+            intermediates.append(receipt["endpoint"])
+            remaining_primitives -= len(receipt["actions"])
+            remaining_blocks -= len(receipt["blocks"])
+            completed = index + 1
+            if completed < 2:
+                if remaining_primitives < 1 or remaining_blocks < 1:
+                    raise ValueError("first composition component leaves no work for the second")
+                continue
+            if completed == self.config.max_composed_programs:
+                stop_reason = "maximum_components"
+                break
+            if remaining_primitives < 1 or remaining_blocks < 1:
+                stop_reason = "work_exhausted"
+                break
+            if self.rng.random() < self.config.composition_stop_probability:
+                stop_reason = "sampled_stop"
+                break
+        program, assignment = extract_program(source, stages)
+        if (
+            len(program.marks) > self.config.max_primitives
+            or len(program.blocks) > self.config.max_blocks
+        ):
+            raise RuntimeError("protected pair escaped its complete proposal work limits")
+        return (
+            source,
+            program,
+            assignment,
+            {
+                "program_composition": {
+                    "components": components,
+                    "component_count": len(components),
+                    "intermediate_endpoints": intermediates[:-1],
+                    "intermediate_task_evaluations": 0,
+                    "primitive_edits": len(program.marks),
+                    "blocks": len(program.blocks),
+                    "stop_reason": stop_reason,
+                },
+                **self._continuation_lineage(entry),
+            },
+        )
+
+    @staticmethod
     def _continuation_lineage(entry):
         ancestors = [
             *entry.get("construction_ancestry", []),
@@ -619,13 +865,19 @@ class ProgramOptimizer:
                 return self._broad(entry)
 
             try:
-                channel, (source, program, binding, metadata) = dispatch_complete_proposal(
-                    self.rng,
-                    program_sampler=program_sampler,
-                    broad_sampler=broad_sampler,
-                    probabilities=self.config.channel_probabilities,
-                    proposal_mode=self.config.proposal_mode,
-                )
+                if self.config.composition_probability and (
+                    self.rng.random() < self.config.composition_probability
+                ):
+                    channel = chosen["channel"] = "program_composition"
+                    source, program, binding, metadata = self._compose_programs(entry)
+                else:
+                    channel, (source, program, binding, metadata) = dispatch_complete_proposal(
+                        self.rng,
+                        program_sampler=program_sampler,
+                        broad_sampler=broad_sampler,
+                        probabilities=self.config.channel_probabilities,
+                        proposal_mode=self.config.proposal_mode,
+                    )
                 graph = compile_program_graph(program)
                 size = program_size_profile(graph, source.n_real_atoms)
                 size["measured_parent_heavy_atoms"] = decode_state(
@@ -846,7 +1098,16 @@ class ProgramOptimizer:
         self.pending = None
         self.batches += 1
 
-    def snapshot(self):
+    def snapshot(self, *, include_history=True):
+        """Serialize resumable search state.
+
+        Long benchmark runners persist each completed batch separately and may
+        omit the in-memory history to avoid quadratic checkpoint growth. This
+        changes storage only: entries, observations, RNG state, duplicate
+        accounting and pending work remain complete.
+        """
+        if type(include_history) is not bool:
+            raise ValueError("snapshot history flag must be boolean")
         body = {
             "schema_version": "adaptive_program_optimizer_v1",
             "configuration": asdict(self.config),
@@ -857,7 +1118,7 @@ class ProgramOptimizer:
             "observations": self.observations,
             "duplicate_counts": self.duplicate_counts,
             "failed_endpoints": sorted(self.failed_endpoints),
-            "history": self.history,
+            "history": self.history if include_history else [],
             "pending": self.pending,
             "batches": self.batches,
             "mutation_choices_seen": [

@@ -10,6 +10,8 @@ from compose_v4.control.adaptive_program_optimizer import ProgramOptimizer, Prog
 from compose_v4.control.edit_program import extract_program
 from compose_v4.control.edit_program_graph import compile_program_graph, execute_program_graph
 from compose_v4.control.molecular_task_search import dispatch_complete_proposal
+from compose_v4.rewrite.kernel import canonical_state_key
+from compose_v4.rewrite.trace_shard import decode_state
 from tests.test_edit_program import ring_and_carbonyl
 
 
@@ -179,6 +181,160 @@ def test_program_only_mode_is_explicit_and_never_enters_reference(monkeypatch):
     with pytest.raises(ValueError, match="cannot require"):
         replace(search.config, require_broad_runtime=True)
     assert ProgramSearchConfig().channel_probabilities == (0.7, 0.2, 0.1)
+
+
+def test_two_program_composition_rebinds_and_scores_only_completion():
+    from tests.test_edit_program import graph
+    from tests.test_edit_program_graph import add_chain
+
+    source = graph("CC")
+    program, binding = add_chain(source, 0)
+    _, trace = execute_program_graph(source, compile_program_graph(program), binding)
+    config = replace(
+        ProgramSearchConfig.two_program_recipe(seed=11),
+        attempts_per_batch=8,
+        candidates_per_batch=1,
+        current_state_edit_probability=0,
+        decompose_programs=False,
+        composition_probability=1,
+        composition_donor_trials=1,
+    )
+    search = ProgramOptimizer(
+        config, source_group="fixture", oracle_protocol="fixture:no-real-oracle"
+    )
+    search.add_measured_program(
+        {
+            "source_group": search.source_group,
+            "oracle_protocol": search.oracle_protocol,
+            "source_state": trace["states"][0],
+            "program": program.payload(),
+            "assignment": list(binding),
+            "trace": trace,
+            "endpoint": trace["endpoint"],
+        },
+        receipt_id="fixture:parent",
+        score=-1,
+    )
+    evaluations = []
+
+    def final_only(row):
+        evaluations.append(row["smiles"])
+        return {**row, "oracle_eligible": True}
+
+    batch = search.propose_batch(final_only)
+    assert len(batch["candidates"]) == 1
+    candidate = batch["candidates"][0]
+    detail = candidate["provenance"]["metadata"]["program_composition"]
+    assert candidate["provenance"]["channel"] == "program_composition"
+    assert len(candidate["trace"]["actions"]) == 2
+    assert len(candidate["trace"]["blocks"]) == 2
+    assert detail["intermediate_task_evaluations"] == 0
+    assert detail["component_count"] == 2
+    assert detail["intermediate_endpoints"] == [
+        canonical_state_key(decode_state(candidate["trace"]["states"][1]))
+    ]
+    assert evaluations == [candidate["endpoint"]]
+    assert decode_state(candidate["trace"]["states"][0]).n_real_atoms == 3
+    assert decode_state(candidate["trace"]["states"][-1]).n_real_atoms == 5
+    assert ProgramOptimizer.restore(search.snapshot()).config == config
+
+
+def test_program_composition_cannot_borrow_work_beyond_complete_proposal_cap():
+    from tests.test_edit_program import graph
+    from tests.test_edit_program_graph import add_chain
+
+    source = graph("CC")
+    program, binding = add_chain(source, 0)
+    _, trace = execute_program_graph(source, compile_program_graph(program), binding)
+    config = replace(
+        ProgramSearchConfig.two_program_recipe(seed=12),
+        max_primitives=1,
+        max_blocks=1,
+        attempts_per_batch=2,
+        candidates_per_batch=1,
+        decompose_programs=False,
+        composition_probability=1,
+        composition_donor_trials=1,
+    )
+    search = ProgramOptimizer(
+        config, source_group="fixture", oracle_protocol="fixture:no-real-oracle"
+    )
+    search.add_measured_program(
+        {
+            "source_group": search.source_group,
+            "oracle_protocol": search.oracle_protocol,
+            "source_state": trace["states"][0],
+            "program": program.payload(),
+            "assignment": list(binding),
+            "trace": trace,
+            "endpoint": trace["endpoint"],
+        },
+        receipt_id="fixture:parent",
+        score=-1,
+    )
+    batch = search.propose_batch(eligible)
+    assert not batch["candidates"]
+    assert {row["status"] for row in batch["attempts"]} == {"execution_rejected"}
+    assert all("remaining composition work" in row["reason"] for row in batch["attempts"])
+
+
+def test_composition_architecture_supports_bounded_variable_component_count():
+    from tests.test_edit_program import graph
+    from tests.test_edit_program_graph import add_chain
+
+    source = graph("CC")
+    program, binding = add_chain(source, 0)
+    _, trace = execute_program_graph(source, compile_program_graph(program), binding)
+    config = replace(
+        ProgramSearchConfig.two_program_recipe(seed=13),
+        max_composed_programs=3,
+        composition_stop_probability=0,
+        attempts_per_batch=8,
+        candidates_per_batch=1,
+        decompose_programs=False,
+        composition_probability=1,
+        composition_donor_trials=1,
+    )
+    search = ProgramOptimizer(
+        config, source_group="fixture", oracle_protocol="fixture:no-real-oracle"
+    )
+    search.add_measured_program(
+        {
+            "source_group": search.source_group,
+            "oracle_protocol": search.oracle_protocol,
+            "source_state": trace["states"][0],
+            "program": program.payload(),
+            "assignment": list(binding),
+            "trace": trace,
+            "endpoint": trace["endpoint"],
+        },
+        receipt_id="fixture:parent",
+        score=-1,
+    )
+    batch = search.propose_batch(eligible)
+    detail = batch["candidates"][0]["provenance"]["metadata"]["program_composition"]
+    assert detail["component_count"] == 3
+    assert detail["stop_reason"] == "maximum_components"
+    assert len(detail["intermediate_endpoints"]) == 2
+
+
+def test_compact_snapshot_preserves_resumable_state_without_batch_history():
+    search = ProgramOptimizer(
+        ProgramSearchConfig.program_only_recipe(seed=29),
+        source_group="fixture",
+        oracle_protocol="fixture:no-real-oracle",
+    )
+    search.history = [{"large": "historical batch"}]
+    search.batches = 3
+
+    compact = search.snapshot(include_history=False)
+    restored = ProgramOptimizer.restore(compact, hierarchy=None)
+
+    assert compact["history"] == []
+    assert restored.history == []
+    assert restored.batches == 3
+    assert restored.config == search.config
+    assert search.snapshot()["history"] == [{"large": "historical batch"}]
 
 
 def test_direct_allocation_does_not_fit_when_the_entire_pool_can_be_scored():
