@@ -35,6 +35,17 @@ IMPLEMENTATION = (
 )
 
 
+def _source_tree_status():
+    lines = subprocess.check_output(
+        ["git", "status", "--porcelain"], cwd=ROOT, text=True
+    ).splitlines()
+    return [
+        line
+        for line in lines
+        if not line[3:].startswith("diagnostics/t4_program_retrieval/")
+    ]
+
+
 def _winner_index(census):
     winners = {}
     for row in census["cells"]:
@@ -87,6 +98,12 @@ def run(output: Path):
         raise ValueError(
             f"output already exists; use a new immutable attempt: {output}"
         )
+    code_revision = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+    ).strip()
+    source_tree_status = _source_tree_status()
+    if source_tree_status:
+        raise ValueError(f"source tree is not clean: {source_tree_status}")
     contract = unseal(CONTRACT)
     if contract["schema_version"] != "t4_frozen_program_benchmark_v2":
         raise ValueError("unexpected T4 source contract")
@@ -191,14 +208,9 @@ def run(output: Path):
     passed = all_nonempty and cells_with_new_winner >= 5 and ratio <= 1.5
     body = {
         "schema_version": "t4_program_retrieval_probe_v1",
-        "code_revision": subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
-        ).strip(),
-        "working_tree_dirty": bool(
-            subprocess.check_output(
-                ["git", "status", "--porcelain"], cwd=ROOT, text=True
-            )
-        ),
+        "code_revision": code_revision,
+        "working_tree_dirty": bool(source_tree_status),
+        "source_tree_status": source_tree_status,
         "inputs_sha256": {
             str(CONTRACT.relative_to(ROOT)): sha256_file(CONTRACT),
             str(CENSUS.relative_to(ROOT)): sha256_file(CENSUS),
