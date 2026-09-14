@@ -372,6 +372,44 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped T4 Dynamic COMPOSE v2.1 pooled-channel development, 2026-09-14:**
+after the frozen Dynamic-v2 revision failed its sealed zero-oracle preflight,
+the user authorized a new Dynamic-v2.1 implementation and five-cell scored
+development run. Preserve Dynamic-v2 and all of its failure artifacts as a
+closed negative revision; do not relax or bypass its 32-attempt gate. Preserve
+the live Dynamic-v1 workers and every v0, 69-only and Full-146 artifact without
+modification. Dynamic-v2.1 tests whether independently generated shallow-v0
+and structured-v1 eligible proposal pools can compete only after exact
+execution, strict endpoint filtering and cross-channel deduplication, so an
+empty channel consumes no docking allocation. Use independent shallow,
+structured and arbitration random streams. The shallow synthesizer remains
+unchanged, the structured channel retains only the generic protected
+ring-path, substituted-ring and contextual-binding capabilities, and both use
+one empty-at-start run-local route archive and the same exact executor.
+
+Seal a new zero-oracle preflight before scoring. It verifies zero initial
+routes and absent comparator outcomes at runtime, unchanged shallow behavior,
+independent random streams, representative exact execution through both
+channels, deterministic combined pooling and recorded strict-filter yield on
+all five development cells, clean fallback when either channel is empty, and
+complete provenance. It must
+not require either isolated stochastic expert to produce a strict-eligible
+endpoint within an arbitrary draw count. After focused checks and the pinned
+preflight pass, run 5HT1B seed 0, BRAF seed 1, JAK2 seed 1, PARP1 seed 0 and
+FA7 seed 0 with the same replicate-0 controller/docking seeds, delta-0.4 gates,
+40-heavy-atom support,
+32-primitive/eight-block work limits, competitive-plateau rule and 1,000-call
+per-cell ceiling as v0/v1. Add PARP1 seed 0 and FA7 seed 0 so the development
+wave contains one predeclared cell from each T4 protein. At most five
+concurrent single-CPU workers, 5,000 new docking calls, no GPU, confirmation
+calls or automatic retry are
+authorized. Record all generated pools, attempts, filters, arbitration,
+channel-awarded calls, outcomes, ancestry, compute and score curves. Runtime
+may not load Full-146, v0 or v1 outcomes, known routes, endpoints, scores,
+target names or target-to-program rules. Remaining cells, delta 0.6, PMO and
+post-result controller changes remain outside this milestone. The detailed
+contract is `docs/T4_DYNAMIC_V21.md`.
+
 **Scoped T4 Dynamic COMPOSE v2 implementation, 2026-09-14:** while the
 three-cell Dynamic-v1 docking study remains immutable and live, the user
 authorized a separate zero-oracle implementation of Dynamic-v2. The scientific
