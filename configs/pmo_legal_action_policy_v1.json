@@ -1,0 +1,60 @@
+{
+  "payload": {
+    "schema_version": "pmo_legal_action_policy_contract_v1",
+    "authorization": "2026-09-14 user authorized continued generic T4 and PMO controller development",
+    "mode": "held_task_family_zero_oracle_one_step_where_how_given_rule_gate",
+    "input": {
+      "corpus_path": "diagnostics/pmo_dependency_region_program_v2/attempt_1/training_dependency_region_corpus.json.gz",
+      "corpus_sha256": "9b35529eae0975dcf977bc1fc51f3bd838e0184d51de3a7d2822edd0bc3d8b54",
+      "corpus_payload_sha256": "d4b65179df6a1a1b372685b440d0ca56f15d4091a7df4125a04eaa7f7452f81b",
+      "policy_comparison_result_path": "diagnostics/pmo_dependency_region_policy_comparison/attempt_2/result.json",
+      "policy_comparison_result_sha256": "5357211e9482a22bbc66a7e22be7d28bb7a6455515467db0010fb3a81bda0af9",
+      "policy_comparison_result_payload_sha256": "7aa8e6f7692807775515110dd2f0d61693ccaf9002bd86ef8aae24d6e317124e"
+    },
+    "split_identity": "a8495010f23ee78bd2287837578a6167b933395bfe1343028ddab32eb4e5070d",
+    "expected": {
+      "routes": 184,
+      "events": 6143,
+      "runtime_supported_events": 2792,
+      "unique_states": 854,
+      "folds": [0, 1, 2]
+    },
+    "operator_support": {
+      "rules": [
+        "atom_delete",
+        "atom_insert",
+        "atom_restate_semantic",
+        "bond_reorder",
+        "bond_reroute",
+        "cycle_close",
+        "cycle_open",
+        "ring_system_restate"
+      ],
+      "atom_vocabulary": "frozen broad-organic ORGANIC_VOCABULARY",
+      "maximum_active_atoms": 40,
+      "canonical_successor_quotient": true
+    },
+    "ranker": {
+      "negatives_per_teacher": 32,
+      "variance_floor": 0.05,
+      "coefficient_norm": 4.0
+    },
+    "outputs": {
+      "result": "result.json",
+      "runtime_checkpoint": "runtime_fold_checkpoints.json.gz"
+    },
+    "prohibitions": [
+      "oracle_calls",
+      "docking_calls",
+      "modal_launch",
+      "task_scores",
+      "teacher_injection_when_absent",
+      "held_fold_support_change",
+      "complete_route_recovery_claim",
+      "scored_pilot_launch",
+      "t4_artifact_change",
+      "live_run_access"
+    ]
+  },
+  "contract_sha256": "54f1543d560a89cdefbf46e518b81e06ebf71f48474e372d60aa4047d4c23ca1"
+}

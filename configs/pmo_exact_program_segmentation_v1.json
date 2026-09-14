@@ -1,0 +1,63 @@
+{
+  "payload": {
+    "schema_version": "pmo_exact_program_segmentation_contract_v1",
+    "authorization": "2026-09-14 user authorized split-first exact PMO graph/action corpus, generic segmentation and same-source zero-oracle panels",
+    "mode": "training_only_zero_oracle_no_controller_fit",
+    "source_manifest": {
+      "path": "configs/pmo_route_distillation_export_v1.json",
+      "sha256": "15242fc8124dd61b62d6192771af49c86d60e81d06e531e2f894002ef5afee39",
+      "expected_route_instances": 186,
+      "expected_unique_traces": 184,
+      "expected_lineages": 18,
+      "expected_primitive_transitions_with_multiplicity": 6212,
+      "expected_deduplicated_transitions": 6143
+    },
+    "folds": [
+      {
+        "fold": 0,
+        "held_out_task_families": ["bioactivity", "formula"]
+      },
+      {
+        "fold": 1,
+        "held_out_task_families": ["multi_property", "rediscovery"]
+      },
+      {
+        "fold": 2,
+        "held_out_task_families": ["druglikeness", "mpo", "similarity"]
+      }
+    ],
+    "segmentation": {
+      "maximum_primitives_per_segment": 8,
+      "runtime_maximum_primitives": 32,
+      "runtime_maximum_segments": 8,
+      "multi_action_label": "connected_change_dependency_segment",
+      "fallback_label": "primitive_fallback"
+    },
+    "negative_panels": {
+      "generic_compiler": "dynamic_program_synthesis_v1",
+      "campaign_seed": 20260914,
+      "attempts_per_lineage": 32,
+      "max_modules": 3,
+      "max_primitives": 32,
+      "max_blocks": 8,
+      "transformation_equivalence_radius": 2,
+      "teacher_injection": false
+    },
+    "outputs": {
+      "training_corpus": "training_exact_segmented_corpus.json.gz",
+      "result": "result.json",
+      "runtime_checkpoint": null
+    },
+    "prohibitions": [
+      "oracle_calls",
+      "docking_calls",
+      "modal_launch",
+      "controller_training_or_selection",
+      "task_score_path_labels",
+      "invented_semantic_macros",
+      "t4_artifact_changes",
+      "live_run_access"
+    ]
+  },
+  "contract_sha256": "10a57318f753cfdb65aa2323f43b58169cbf2de6c0d18ba2533374176d9236a4"
+}

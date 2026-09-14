@@ -1,0 +1,54 @@
+{
+  "payload": {
+    "schema_version": "pmo_dependency_region_program_contract_v2",
+    "authorization": "2026-09-14 user authorized macro-free PMO dependency-region representation v2",
+    "mode": "training_only_zero_oracle_no_model_fit",
+    "source_v1": {
+      "result_path": "diagnostics/pmo_exact_program_segmentation/attempt_2/result.json",
+      "result_sha256": "f28d03b2be4d69832b3630ef3fdaac08f5407c34c3e1e42d0adb95523335417d",
+      "result_payload_sha256": "56698dc3b101fc5542414e4374b5a304df049fa513a9dbbfd884f5246848002e",
+      "training_corpus_path": "diagnostics/pmo_exact_program_segmentation/attempt_2/training_exact_segmented_corpus.json.gz",
+      "training_corpus_sha256": "129a5546acdb9b20edc69068bbf51609aded6525b2e4ae78eaac47929b969fb8",
+      "training_corpus_payload_sha256": "f662040647ebdfb479ab42dfa75e35850b26b8b60335ad67ec6cc9f2ca4ccfc1",
+      "expected_split_identity": "a8495010f23ee78bd2287837578a6167b933395bfe1343028ddab32eb4e5070d",
+      "expected_route_instances": 186,
+      "expected_unique_traces": 184,
+      "expected_lineages": 18,
+      "expected_primitive_transitions_with_multiplicity": 6212,
+      "expected_deduplicated_transitions": 6143,
+      "expected_runtime_length_routes": 106,
+      "expected_negative_panel_attempts": 576,
+      "expected_negative_panel_unique_complete": 559
+    },
+    "representation": {
+      "runtime_maximum_primitives": 32,
+      "runtime_maximum_components": 8,
+      "component_edges": [
+        "changed_atom_lifetime_overlap_or_observed_bond",
+        "created_handle_producer_consumer",
+        "connected_cycle_open_close_or_restate"
+      ],
+      "control_tokens": ["open", "continue", "close"],
+      "semantic_macro_labels": false,
+      "preserve_global_primitive_order": true
+    },
+    "outputs": {
+      "training_corpus": "training_dependency_region_corpus.json.gz",
+      "result": "result.json",
+      "runtime_checkpoint": null
+    },
+    "prohibitions": [
+      "oracle_calls",
+      "docking_calls",
+      "modal_launch",
+      "model_fit_or_selection",
+      "semantic_macro_labels",
+      "primitive_budget_increase",
+      "negative_panel_regeneration",
+      "task_score_path_labels",
+      "t4_artifact_changes",
+      "live_run_access"
+    ]
+  },
+  "contract_sha256": "ab9033a6845a5d21ca6331b22da0d436b39bfd4e629b3472128b9f849edb22d1"
+}

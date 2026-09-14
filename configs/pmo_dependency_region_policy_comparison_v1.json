@@ -1,0 +1,56 @@
+{
+  "payload": {
+    "schema_version": "pmo_dependency_region_policy_comparison_contract_v1",
+    "authorization": "2026-09-14 user authorized aggressive zero-oracle PMO generic policy development",
+    "mode": "held_task_family_zero_oracle_shared_candidate_policy_comparison",
+    "input": {
+      "dependency_region_corpus_path": "diagnostics/pmo_dependency_region_program_v2/attempt_1/training_dependency_region_corpus.json.gz",
+      "dependency_region_corpus_sha256": "9b35529eae0975dcf977bc1fc51f3bd838e0184d51de3a7d2822edd0bc3d8b54",
+      "dependency_region_corpus_payload_sha256": "d4b65179df6a1a1b372685b440d0ca56f15d4091a7df4125a04eaa7f7452f81b",
+      "panel_corpus_path": "diagnostics/pmo_exact_program_segmentation/attempt_2/training_exact_segmented_corpus.json.gz",
+      "panel_corpus_sha256": "129a5546acdb9b20edc69068bbf51609aded6525b2e4ae78eaac47929b969fb8",
+      "panel_corpus_payload_sha256": "f662040647ebdfb479ab42dfa75e35850b26b8b60335ad67ec6cc9f2ca4ccfc1"
+    },
+    "split_identity": "a8495010f23ee78bd2287837578a6167b933395bfe1343028ddab32eb4e5070d",
+    "expected": {
+      "routes": 184,
+      "runtime_supported_routes": 106,
+      "lineages": 18,
+      "task_families": 7,
+      "panels": 18,
+      "panel_attempts": 576
+    },
+    "models": {
+      "maximum_selected_features_per_head": 32,
+      "uniform_probability_floor": 0.05,
+      "centroid_distance_strength": 0.5,
+      "minimum_scale": 1e-06
+    },
+    "evaluation": {
+      "policies": [
+        "balanced_generic_marginal",
+        "graph_conditioned_flat_autoregressive",
+        "graph_region_dependency_hierarchical"
+      ],
+      "teacher_forced_held_task_family": true,
+      "shared_generic_panels": true,
+      "teacher_injected_reranking_separate": true,
+      "autonomous_generation": false
+    },
+    "outputs": {
+      "result": "result.json",
+      "runtime_checkpoint": "runtime_fold_checkpoints.json.gz"
+    },
+    "prohibitions": [
+      "oracle_calls",
+      "docking_calls",
+      "modal_launch",
+      "task_scores",
+      "teacher_route_runtime_retrieval",
+      "autonomous_decoder_claim",
+      "t4_artifact_changes",
+      "live_run_access"
+    ]
+  },
+  "contract_sha256": "01515daaa10859d0c64652d6d602c3bf4d97f6086bd1c3a5f67f5a98b9cb7e4b"
+}

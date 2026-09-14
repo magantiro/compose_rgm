@@ -1,0 +1,72 @@
+{
+  "payload": {
+    "schema_version": "pmo_route_policy_quality_contract_v1",
+    "authorization": "2026-09-14 user authorized zero-oracle PMO route-policy learning and grouped quality comparison",
+    "mode": "sealed_supervision_offline_cpu_only_no_complete_decoder",
+    "input": {
+      "dataset_path": "diagnostics/pmo_route_distillation/attempt_1/training_dataset.json.gz",
+      "dataset_sha256": "4d280c13cc52493dbf1baa801bb6cc0c0ff7d956516d3edb67fe9433a2240b9e",
+      "dataset_payload_sha256": "121546b2f6a7b32e3502f52484a2d618b7f825dba5d655bcbd58bea5e0f1e381",
+      "audit_path": "diagnostics/pmo_route_distillation/attempt_1/result.json",
+      "audit_sha256": "ec30d1406c73011669f6a6e9661176f4d301652f2fa0479277a10bdb47f7c4d8",
+      "audit_payload_sha256": "a830214c4ff2a2ff212669243365e9723d8b2306c6e0a47e36b7edaab1473a6b"
+    },
+    "expected": {
+      "decisions": 6143,
+      "runtime_supported_decisions": 2792,
+      "local_only_decisions": 3351,
+      "unique_traces": 184,
+      "runtime_supported_unique_traces": 106,
+      "lineages": 18,
+      "task_families": 7,
+      "compound_stages": 0,
+      "created_handle_dependent_decisions": 1231,
+      "created_output_decisions": 1531
+    },
+    "folds": [
+      {
+        "fold": 0,
+        "held_out_task_families": ["bioactivity", "formula"],
+        "expected_test_decisions": 2052
+      },
+      {
+        "fold": 1,
+        "held_out_task_families": ["multi_property", "rediscovery"],
+        "expected_test_decisions": 1797
+      },
+      {
+        "fold": 2,
+        "held_out_task_families": ["druglikeness", "mpo", "similarity"],
+        "expected_test_decisions": 2294
+      }
+    ],
+    "models": {
+      "baseline": "balanced_marginal_action_prior",
+      "candidate": "graph_conditioned_hierarchical_local_ranker",
+      "maximum_selected_features_per_head": 32,
+      "uniform_probability_floor": 0.05,
+      "centroid_distance_strength": 0.5,
+      "minimum_scale": 0.000001
+    },
+    "outputs": {
+      "runtime_fold_checkpoints": "runtime_fold_checkpoints.json.gz",
+      "result": "result.json"
+    },
+    "complete_policy": {
+      "status": "required_abstention_if_compound_stages_are_zero_and_exact_graph_action_pairs_are_absent",
+      "teacher_injection": false,
+      "executable_route_recovery_claim": false
+    },
+    "prohibitions": [
+      "oracle_calls",
+      "docking_calls",
+      "modal_launch",
+      "live_run_access",
+      "t4_artifact_changes",
+      "held_out_vocabulary_or_preprocessing",
+      "invented_macro_labels",
+      "teacher_route_runtime_content"
+    ]
+  },
+  "contract_sha256": "3a0e0452c36c41df1a2954120adf14ed2dd591693bad4195ed0191cdfdbe23e9"
+}

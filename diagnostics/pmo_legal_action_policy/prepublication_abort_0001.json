@@ -1,0 +1,14 @@
+{
+  "schema_version": "pmo_legal_action_policy_prepublication_abort_v1",
+  "attempt": 1,
+  "created_at_utc": "2026-09-14T20:20:30Z",
+  "code_revision": "101cc73d7f71797d176c62f50ca40aeefc1effd8",
+  "process_id": 98299,
+  "elapsed_seconds_approximate": 223,
+  "new_oracle_calls": 0,
+  "docking_calls": 0,
+  "published_scientific_artifact": false,
+  "termination": "operator_requested_sigterm",
+  "reason": "Read-only profiling showed that identical exact legal successor fibers were being re-enumerated and canonicalized independently in each held-task-family fold. The attempt was stopped before publication so a deterministic cross-fold feature cache could remove repeated computation without changing support, folds, teachers, labels, or metrics.",
+  "scientific_interpretation": "No scientific result was produced. This is an operational prepublication abort, not a failed policy gate."
+}
