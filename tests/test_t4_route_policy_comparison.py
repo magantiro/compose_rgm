@@ -15,6 +15,7 @@ from compose_v4.experiments.t4_route_policy_comparison import (
     predeclared_source_folds,
 )
 from compose_v4.rewrite.trace_shard import encode_state
+from tools.t4_route_policy_comparison import _select_folds
 
 
 def test_predeclared_folds_are_source_disjoint_and_balanced():
@@ -35,6 +36,16 @@ def test_predeclared_folds_are_source_disjoint_and_balanced():
     assert sorted(source for row in folds for source in row["test_sources"]) == sorted(
         metadata
     )
+
+
+def test_parallel_fold_selection_preserves_order_and_rejects_unknown_folds():
+    folds = tuple({"fold": index, "value": f"fold-{index}"} for index in range(3))
+    requested, selected = _select_folds(folds, (2, 0, 2))
+    assert requested == (0, 2)
+    assert [row["fold"] for row in selected] == [0, 2]
+    assert _select_folds(folds, None) == ((0, 1, 2), folds)
+    with np.testing.assert_raises_regex(ValueError, "invalid route-policy fold"):
+        _select_folds(folds, (3,))
 
 
 def test_candidate_features_are_address_free_fixed_shape():

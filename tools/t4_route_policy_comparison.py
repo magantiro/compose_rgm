@@ -332,7 +332,28 @@ def _combined_metrics(fold_reports: list[dict], lane: str) -> dict:
     return result
 
 
-def run(output: Path = OUTPUT, *, config: ComparisonConfig | None = None):
+def _select_folds(all_folds, fold_ids: tuple[int, ...] | None):
+    requested = (
+        tuple(row["fold"] for row in all_folds)
+        if fold_ids is None
+        else tuple(sorted(set(fold_ids)))
+    )
+    known = {row["fold"] for row in all_folds}
+    if not requested or not set(requested) <= known:
+        raise ValueError(
+            f"invalid route-policy fold selection: {requested}; known={sorted(known)}"
+        )
+    return requested, tuple(row for row in all_folds if row["fold"] in requested)
+
+
+def run(
+    output: Path = OUTPUT,
+    *,
+    config: ComparisonConfig | None = None,
+    fold_ids: tuple[int, ...] | None = None,
+    code_revision: str | None = None,
+    working_tree_dirty: bool | None = None,
+):
     """Fit and evaluate three grouped policies without a task oracle."""
 
     if config is None:
@@ -350,7 +371,8 @@ def run(output: Path = OUTPUT, *, config: ComparisonConfig | None = None):
     traces, exclusions = _teacher_traces(library)
     if exclusions or len(traces) != 77:
         raise RuntimeError("the signed teacher census is incomplete")
-    folds = predeclared_source_folds(metadata)
+    all_folds = predeclared_source_folds(metadata)
+    requested_folds, folds = _select_folds(all_folds, fold_ids)
     by_source = {
         source: [row for row in traces if row["source_group"] == source]
         for source in metadata
@@ -589,9 +611,18 @@ def run(output: Path = OUTPUT, *, config: ComparisonConfig | None = None):
     runtime_audit = _runtime_payload_audit(runtime_payloads, forbidden)
     if not runtime_audit["passed"]:
         raise RuntimeError(f"runtime checkpoint provenance failed: {runtime_audit}")
-    revision = subprocess.check_output(
-        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
-    ).strip()
+    revision = code_revision
+    if revision is None:
+        revision = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip()
+    dirty = working_tree_dirty
+    if dirty is None:
+        dirty = bool(
+            subprocess.check_output(
+                ["git", "status", "--porcelain"], cwd=ROOT, text=True
+            ).strip()
+        )
     report = {
         "schema_version": SCHEMA,
         "decision": "zero_oracle_grouped_policy_comparison_complete",
@@ -599,7 +630,8 @@ def run(output: Path = OUTPUT, *, config: ComparisonConfig | None = None):
         "configuration": asdict(config),
         "predeclared_split": {
             "rule": "three source-group folds; test source_idx equals fold",
-            "folds": list(folds),
+            "folds": list(all_folds),
+            "evaluated_fold_ids": list(requested_folds),
             "source_balance": "each source equal; hybrid positives equal by source then route",
             "lineage_rule": "all routes from a source molecule remain in one fold",
         },
@@ -639,11 +671,7 @@ def run(output: Path = OUTPUT, *, config: ComparisonConfig | None = None):
         },
         "implementation": {
             "revision": revision,
-            "working_tree_dirty": bool(
-                subprocess.check_output(
-                    ["git", "status", "--porcelain"], cwd=ROOT, text=True
-                ).strip()
-            ),
+            "working_tree_dirty": dirty,
             "python": platform.python_version(),
             "numpy": np.__version__,
             "torch": torch.__version__,

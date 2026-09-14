@@ -432,6 +432,24 @@ wider T4 run, delta 0.6, PMO transfer, another replicate or post-result repair
 is a separate revision. Literal route replay remains a labeled ceiling and
 cannot be reported as autonomous distilled recovery.
 
+**Scoped parallel execution repair for the T4 route-policy gate, 2026-09-14:**
+after the unchanged zero-oracle comparison remained healthy but serialized
+three independent predeclared folds on one local CPU, the user explicitly
+authorized a faster execution-equivalent copy. Preserve the original local
+process and its eventual artifact. Add no scientific policy, feature, support,
+seed, split, attempt-budget or acceptance-gate change. Run exactly one complete
+fold per Modal worker, with three single-CPU workers total, and merge only after
+verifying the complete fold census, exact source assignments, configuration,
+input hashes, code revision and zero oracle/docking counts. Preserve the
+original canonical within-fold source order and seed formulas, and retain the
+same candidate pools for marginal and hybrid scoring. Combine source-balanced
+metrics with the existing source-weighted reduction, not an unweighted mean of
+fold summaries. Publish immutable shard, launch and merge receipts. If the
+original local run finishes first, preserve it and use the parallel copy only
+as an execution-equivalence check. This repair may use Modal for the three
+zero-oracle fold workers. It may not launch the scored five-cell pilot, change
+PMO, weaken a gate, retry automatically or exceed three concurrent CPUs.
+
 **Scoped Dynamic COMPOSE v2.2 five-unit quick pilot, 2026-09-14:** after the
 completed PMO Dynamic-v2.1 comparison showed that global channel allocation
 underperformed Dynamic-v0 on three of four tasks, and the live T4 v2.1 run
