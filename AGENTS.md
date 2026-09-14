@@ -372,6 +372,47 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped T4 Dynamic COMPOSE v2 implementation, 2026-09-14:** while the
+three-cell Dynamic-v1 docking study remains immutable and live, the user
+authorized a separate zero-oracle implementation of Dynamic-v2. The scientific
+problem is whether a generic parent-specific planner gate can preserve the
+efficient route-free Dynamic-v0 proposal law while invoking Dynamic-v1's
+protected structured planner only when molecular opportunity or within-run
+search evidence warrants it. The primary output is a planner-mode choice
+(`shallow_program_channel` or `structured_program_channel`) followed by one
+complete executable program under the existing representation and exact
+executor. The prospective claim is that selective structured planning can
+recover v0's early efficiency and improve harder transformation regimes; it is
+not established by implementation or offline tests.
+
+Implement one shared, interpretable, bounded gate with a 0.75 shallow / 0.25
+structured prior and a 0.10 to 0.50 structured-probability floor/ceiling. The
+gate may use only generic current-molecule features and statistics from charged
+observations within the same run. Preserve Dynamic-v0 behavior as the shallow
+channel, preserve Dynamic-v1 ring-path, substituted-ring and contextual-binding
+capabilities as the structured channel, start with an empty task-specific route
+archive, and retain the 40-atom, 32-primitive, eight-block support. Record
+channel decisions, probabilities, features, proposal/execution/eligibility and
+scored credit so state is exactly resumable. Do not load Full-146, the 146-bank,
+winner routes, endpoints, scores, target names or target-to-program rules at
+runtime.
+
+The user subsequently authorized launching the frozen v2 implementation in its
+own three concurrent single-CPU containers after focused checks and a
+zero-oracle pinned-environment preflight pass. Run exactly the same three cells,
+replicate-0 controller and docking seeds, delta-0.4 gates, 40-heavy-atom support,
+32-primitive/eight-block work limits, competitive-plateau rule and 1,000-call
+per-cell ceiling as v0/v1. At most 3,000 new docking calls, no GPU, no
+confirmation calls and no automatic retry are authorized. The live v1 launch
+may be referenced read-only by its sealed receipt, but v2 must not consume v1
+outcomes or modify, restart, cancel or otherwise affect any v0/v1/69-only/
+Full-146 artifact. Preserve every v2 proposal, gate decision, rejection, query,
+failure and score curve. Remaining T4 cells, delta 0.6, PMO, neural policy and
+any post-result controller change remain outside this milestone. Use focused
+checks during this bounded development launch; an unrelated repository-wide
+suite is not an iteration gate. The detailed contract is
+`docs/T4_DYNAMIC_V2.md`.
+
 **Scoped T4 Dynamic COMPOSE v1 development study, 2026-09-13:** after the
 route-free diagnostic separated a successful shallow BRAF case from a JAK2
 representation/protected-horizon failure and a 5HT1B binding-conditioning
