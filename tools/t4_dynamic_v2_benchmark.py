@@ -57,6 +57,7 @@ ATTEMPT = ROOT / "diagnostics/t4_dynamic_v2"
 REFERENCE = ATTEMPT / "comparison_reference.json"
 RECEIPT = ATTEMPT / "launch.json"
 RESULT = ATTEMPT / "result.json"
+PREFLIGHT_CHANNEL_ATTEMPTS = 32
 
 
 def _read_sealed(path: Path) -> tuple[dict, dict]:
@@ -285,7 +286,7 @@ def build_preflight(*, code_revision: str | None = None) -> dict:
                 np.random.SeedSequence([config.seed, 83, channel_index])
             )
             endpoint = None
-            for channel_attempts in range(1, 13):
+            for channel_attempts in range(1, PREFLIGHT_CHANNEL_ATTEMPTS + 1):
                 try:
                     _, _, _, trace, _ = synthesizer(
                         source,
@@ -334,6 +335,7 @@ def build_preflight(*, code_revision: str | None = None) -> dict:
         "contract_sha256": sha256_file(ROOT / CONTRACT),
         "representative_candidates": rows,
         "preflight_batch_size": 2,
+        "preflight_channel_attempt_limit": PREFLIGHT_CHANNEL_ATTEMPTS,
         "seconds": perf_counter() - began,
         "rdkit": rdBase.rdkitVersion,
         "new_oracle_calls": 0,

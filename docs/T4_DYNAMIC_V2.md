@@ -67,8 +67,12 @@ number of charged observations since the last global-best improvement.
    task rewards.
 6. Snapshot and restore preserve gate state and future proposal decisions
    exactly.
-7. A zero-oracle structural check produces eligible candidates through both
-   channels and records complete planner provenance.
+7. A zero-oracle structural check uses at most 32 deterministic attempts per
+   channel and cell, produces eligible candidates through both channels, and
+   records complete planner provenance. This bound was sealed after the
+   original 12-attempt preflight failed before launch and an offline
+   deterministic trace found the first strict-eligible 5HT1B structured
+   endpoint at attempt 20.
 8. Focused tests, Ruff, formatting and whitespace checks pass. Do not run the
    repository-wide suite as an iteration gate.
 

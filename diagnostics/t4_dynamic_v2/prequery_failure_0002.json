@@ -1,0 +1,19 @@
+{
+  "automatic_retry": false,
+  "code_revision": "7c5afdc265bb2b49869178b8d221604b96bedc92",
+  "contract_sha256": "b3fb1323bc627688a94cb6f2b1ab5253f6f9c8eff9128490e6e972c15ae9b56e",
+  "deterministic_followup": {
+    "environment_role": "local non-authoritative branch-factor diagnostic",
+    "first_strict_eligible_attempt": 20,
+    "new_oracle_calls": 0,
+    "seconds": 15.119705249999242,
+    "unit_id": "5ht1b_0_r0"
+  },
+  "failure": "Dynamic-v2 structured_program_channel produced no eligible pinned candidate for 5ht1b_0_r0 within the sealed 12-attempt per-cell preflight bound.",
+  "new_oracle_calls": 0,
+  "remediation": "Preserve the all-cell, both-channel scientific gate and increase only its deterministic per-channel attempt bound to 32, which covers the observed first eligible attempt at 20 without changing controller or scored-run behavior.",
+  "schema_version": "t4_dynamic_v2_prequery_failure_v1",
+  "scientific_result_observed": false,
+  "status": "failed_before_launch",
+  "stopped_at_utc": "2026-09-14T05:47:01Z"
+}
