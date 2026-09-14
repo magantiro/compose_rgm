@@ -42,7 +42,7 @@ from modal_apps.pmo_complete_program_decoder_app import (
     _validate_existing_shard,
 )
 from tools.pmo_complete_program_decoder import sha256_file
-from tools.pmo_complete_program_decoder_parallel import _read_progress
+from tools.pmo_complete_program_decoder_parallel import _read_progress, _volume_path
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -291,7 +291,16 @@ def test_missing_remote_progress_is_an_unstarted_case_not_a_status_failure():
         def read_file(self, path):
             raise FileNotFoundError(path)
 
-    assert _read_progress(MissingVolume(), {"output": "/missing/case"}) is None
+    assert (
+        _read_progress(MissingVolume(), {"output": "/artifacts/missing/case"}) is None
+    )
+
+
+def test_modal_volume_paths_are_relative_to_the_artifact_mount():
+    assert (
+        _volume_path("/artifacts/pmo_complete_program_decoder/attempt_1/result.json")
+        == "/pmo_complete_program_decoder/attempt_1/result.json"
+    )
 
 
 def test_contract_is_sealed_and_pins_authoritative_sharded_execution():

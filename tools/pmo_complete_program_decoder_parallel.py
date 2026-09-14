@@ -24,6 +24,7 @@ LAUNCH = LOCAL_OUTPUT / "launch.json"
 COLLATE_LAUNCH = LOCAL_OUTPUT / "collate_launch.json"
 EVALUATE_LAUNCH = LOCAL_OUTPUT / "evaluate_launch.json"
 VOLUME = "compose-v4-artifacts"
+VOLUME_MOUNT = Path("/artifacts")
 
 
 def _clean_revision() -> tuple[str, dict]:
@@ -128,8 +129,12 @@ def launch() -> None:
     print(json.dumps({**body, "receipt_sha256": identity(body)}, indent=2))
 
 
+def _volume_path(path: str | Path) -> str:
+    return "/" + Path(path).relative_to(VOLUME_MOUNT).as_posix()
+
+
 def _read_progress(volume, task: dict) -> dict | None:
-    path = f"{task['output']}/progress.json"
+    path = _volume_path(Path(task["output"]) / "progress.json")
     try:
         return json.loads(b"".join(volume.read_file(path)))
     except FileNotFoundError:
@@ -347,7 +352,7 @@ def download() -> None:
             "progress.json",
             "failure.json",
         ):
-            remote = f"{task['output']}/{name}"
+            remote = _volume_path(Path(task["output"]) / name)
             try:
                 data = b"".join(volume.read_file(remote))
             except FileNotFoundError:
@@ -365,7 +370,7 @@ def download() -> None:
             if not destination.exists():
                 destination.write_bytes(data)
     for name in files:
-        data = b"".join(volume.read_file(f"{OUTPUT_ROOT}/{name}"))
+        data = b"".join(volume.read_file(_volume_path(OUTPUT_ROOT / name)))
         destination = LOCAL_OUTPUT / name
         destination.parent.mkdir(parents=True, exist_ok=True)
         if destination.exists() and destination.read_bytes() != data:
