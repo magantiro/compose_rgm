@@ -54,11 +54,14 @@ does not establish that the learned proposer will recover them.
 
 ### Gate 1: teacher ingestion and exact replay
 
-Execute each complete teacher route from its declared source through the
-production binder and executor. Report coverage and execution precision
-separately. Launch requires 77 of 77 admitted traces and exact replay precision
-of 1.0. Missing or ambiguous source assets block the gate; no route may be
-silently replaced.
+Recover each complete teacher route from its signed winner-path source/action
+receipt, match the re-extracted generic program identity to the frozen bank,
+and replay every primitive through the production executor. Report coverage
+and execution precision separately. Launch requires 77 of 77 admitted traces
+and exact replay precision of 1.0. Missing or ambiguous source assets block the
+gate; no route may be silently replaced. Context binding of the normalized
+library row is a separate transfer property and is not required to reconstruct
+the supervised teacher trace.
 
 ### Gate 2: compression and support
 
@@ -81,6 +84,30 @@ exploration floor. Report train and any source-heldout diagnostic separately.
 Proposal rank is measured over the exact applicable candidate row exposed to
 the policy. It is not autonomous endpoint recall unless the proposer actually
 generates and exact-executes the endpoint without injecting the teacher.
+
+## Sealed zero-oracle result
+
+Attempt 1 failed before fitting because three normalized library programs had
+no enumerated binding on their origin seeds. This reproduced the earlier
+vocabulary-audit result and was not an execution failure. Attempt 2 recovered
+all teacher traces from their signed source/action receipts and passed the
+scientific gates in memory, then failed while serializing a NumPy integer in
+the report. Its partially published actor is not authoritative.
+
+Attempt 3 at revision `a358779247ddb635289e0b907d28d818fec75d6c`
+sealed the authoritative artifacts. It reconstructed and exactly replayed all
+77 routes with precision 1.0 and made zero oracle or docking calls. The
+context-conditioned actor achieved source-balanced decision negative log
+likelihood 0.9231, compared with 1.9038 for the source-balanced marginal and
+3.5177 for the generic prior. Its source-balanced top-1 teacher-decision rate
+was 0.9157.
+
+This is not whole-route proposal recovery. The current recognizer produced
+1,372 decisions from 1,378 primitives, including only two compound decisions
+and 1,370 primitive fallbacks. The next gate must therefore measure autonomous
+exact-endpoint and transformation-equivalent proposal recall, precision, rank
+and computation from the source molecule across multiple policy
+factorizations before selecting the scored controller.
 
 ### Gate 4: runtime and provenance
 
