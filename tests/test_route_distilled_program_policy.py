@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 import numpy as np
 import pytest
 
@@ -19,6 +21,7 @@ from compose_v4.control.trajectory_value import molecule_features
 from compose_v4.experiments.editing_v2_evaluation_semantics import (
     production_state_from_smiles,
 )
+from tools.t4_route_distillation import _json_ready
 
 
 def _checkpoint():
@@ -96,3 +99,15 @@ def test_stage_descriptor_and_distilled_program_exact_replay():
     assert metadata["runtime_teacher_lookup"] is False
     assert metadata["initial_stored_complete_routes"] == 0
     assert metadata["completed_module_count"] == 1
+
+
+def test_route_distillation_json_normalizes_numpy_scalars():
+    payload = _json_ready(
+        {
+            "integer": np.int64(7),
+            "floating": np.float32(0.25),
+            "nested": (np.int32(2),),
+        }
+    )
+    assert payload == {"integer": 7, "floating": 0.25, "nested": [2]}
+    json.dumps(payload, allow_nan=False)

@@ -69,10 +69,21 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _json_ready(value):
+    if isinstance(value, np.generic):
+        return value.item()
+    if isinstance(value, dict):
+        return {str(key): _json_ready(child) for key, child in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_ready(child) for child in value]
+    return value
+
+
 def publish(path: Path, payload: dict, *, compressed: bool = False) -> None:
     if path.exists():
         raise ValueError(f"refusing to overwrite route-distillation artifact: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
+    payload = _json_ready(payload)
     envelope = {"payload": payload, "payload_sha256": identity(payload)}
     raw = json.dumps(envelope, sort_keys=True, separators=(",", ":")) + "\n"
     temporary = path.with_suffix(path.suffix + ".tmp")
