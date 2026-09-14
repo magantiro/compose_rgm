@@ -372,6 +372,32 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped T4 complete-route and dynamic-synthesis diagnostic, 2026-09-13:** the
+user explicitly authorized a matched three-cell study of whether COMPOSE can
+recover the frozen program controller's performance without initializing from
+77 stored whole-route entries. Preserve the live 45-unit T4 run and its
+146-program controller without modification. Arm A reuses the completed
+full-146 replicate-0 outcomes read-only. Arm B mechanically derives one
+69-entry library by removing only programs whose sole block is labelled
+`compiled_complete_transformation`. Arm C loads zero rows from the 146-entry
+file, starts with an empty complete-route archive, and constructs protected
+complete proposals at runtime by composing one to three generic parameterized
+modules. Only routes discovered and scored within Arm C may subsequently enter
+its mutation/recombination archive. Run Arms B and C only on 5HT1B seed 0,
+BRAF seed 1 and JAK2 seed 1 with the matched replicate-0 controller and docking
+seeds, unchanged endpoint gates, 1,000-call unit ceilings and the frozen
+competitive-plateau rule. Do not redock or relaunch Arm A. The two new arms may
+use at most six concurrent single-CPU workers, 6,000 new docking calls total,
+no GPU, no confirmation calls and no automatic retry. Preserve per-round score
+curves, candidate shortfalls, failures, exact query ledgers, dynamic module
+choices and all provenance. Report each arm at the same call count as Arm A as
+well as final scores. Report the lower-is-better fraction of full-controller
+improvement recovered only against a separately identified measured source
+score, and label protocol-identity limitations. This is a winner-informed
+three-cell development diagnostic, not a held-out benchmark. Another replicate,
+a wider T4 wave, deeper dynamic composition and any subsequent controller
+change remain outside this bounded milestone.
+
 **Scoped frozen T4 interrupted-unit rescue, 2026-09-13:** the original frozen
 full-suite run sealed a partial aggregate after 22 workers stopped with one
 reserved query lacking a durable result, while a separately restarted JAK2
