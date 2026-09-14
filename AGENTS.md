@@ -372,6 +372,27 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped PMO Dynamic COMPOSE v2.1 four-task development, 2026-09-14:** while
+the five-cell T4 Dynamic-v2.1 launch proceeds independently, the user
+explicitly authorized a parallel PMO development worker to adapt the same
+pooled shallow/structured controller core through a PMO task adapter. Use
+exactly `celecoxib_rediscovery`, `perindopril_mpo`, `gsk3b` and
+`isomers_c7h8n2o2`, one predeclared search seed each and at most 1,000 charged
+oracle calls per task (4,000 total). Start with zero task-specific complete
+routes and no task/panel-informed program curriculum. Preserve the generic
+v0 shallow proposer, generic v1 structured proposer, independent RNG streams,
+post-filter pooled arbitration, common run-local route archive and exact
+executor. PMO changes only initialization, validity, higher-is-better reward,
+native oracle and top-ten trajectory accounting. Do not inherit T4 similarity,
+QED or SA filters. All initialization scores count. Compare with existing
+locked PMO development results and IVG values offline only; neither may enter
+runtime selection. Record best and top-ten score curves, official development
+AUC arithmetic, exact query ledgers, candidate shortfalls, compute and
+failures. Use at most four single-CPU workers, no automatic retry, T4 change,
+fifth PMO task or wider PMO claim. Seal a task-specific zero-oracle preflight
+and a clean committed contract before scoring. This is an answer-known PMO
+development diagnostic, not held-out or full-suite PMO evidence.
+
 **Scoped T4 Dynamic COMPOSE v2.1 pooled-channel development, 2026-09-14:**
 after the frozen Dynamic-v2 revision failed its sealed zero-oracle preflight,
 the user authorized a new Dynamic-v2.1 implementation and five-cell scored
