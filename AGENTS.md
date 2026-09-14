@@ -372,6 +372,38 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped T4 route-distilled Dynamic COMPOSE development, 2026-09-14:** after
+Dynamic-v2.2 recovered the Full-146 BRAF seed-1 score early but remained far
+behind on JAK2 and candidate-starved on FA7, the user explicitly authorized
+supervised proposal learning from all 77 complete T4 routes. Preserve Full-146
+as a read-only teacher/reference and preserve every v0, v1, v2.1 and v2.2
+artifact. Build one shared target-free proposal policy over complete generic
+programs, structural site roles, relative bindings, parameters, dependencies
+and stop decisions. Training may consume all 77 answer-known complete-route
+traces. The fitted runtime artifact must contain no target or protein name,
+seed identity, route identifier, endpoint molecule, absolute source atom
+address, target-to-program map or executable stored route. This is
+trained-on-T4 route distillation, not winner-independent or held-out evidence.
+
+Before docking, publish four zero-oracle gates under the contract in
+`docs/T4_ROUTE_DISTILLED_DYNAMIC.md`: exact teacher ingestion/replay coverage
+and precision; high-level compression with explicit primitive fallbacks and
+abstentions; proposal probability/rank against fixed generic and marginal
+baselines; and a runtime-input/provenance audit. Preserve one unchanged
+shallow generic exploration lane and the empty-at-start run-local route
+archive. Failed, ineligible, duplicate and unqueried products are not task
+labels. Do not relax a failed gate. If the sealed gates pass, freeze one
+distilled controller and run only 5HT1B seed 0, BRAF seed 1, JAK2 seed 1,
+PARP1 seed 0 and FA7 seed 0 at delta 0.4, one predeclared replicate-0 search
+seed each, unchanged endpoint constraints, 40-heavy-atom support,
+32-primitive/eight-block proposal limits and at most 1,000 charged calls per
+cell. Use at most five single-CPU workers, no GPU, confirmation calls,
+automatic retry or comparator information at runtime. Report matched-call
+curves against Full-146 and Dynamic v0/v1/v2.1/v2.2 read-only artifacts. A
+wider T4 run, delta 0.6, PMO transfer, another replicate or post-result repair
+is a separate revision. Literal route replay remains a labeled ceiling and
+cannot be reported as autonomous distilled recovery.
+
 **Scoped Dynamic COMPOSE v2.2 five-unit quick pilot, 2026-09-14:** after the
 completed PMO Dynamic-v2.1 comparison showed that global channel allocation
 underperformed Dynamic-v0 on three of four tasks, and the live T4 v2.1 run
