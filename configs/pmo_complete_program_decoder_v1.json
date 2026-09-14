@@ -1,0 +1,100 @@
+{
+  "payload": {
+    "schema_version": "pmo_complete_program_decoder_contract_v1",
+    "authorization": "2026-09-14 user authorized a bounded zero-oracle PMO complete-program decoder gate",
+    "mode": "implementation_only_awaiting_authoritative_legal_action_rerun",
+    "authoritative_execution_enabled": false,
+    "split_identity": "a8495010f23ee78bd2287837578a6167b933395bfe1343028ddab32eb4e5070d",
+    "inputs": {
+      "panel_corpus": {
+        "path": "diagnostics/pmo_exact_program_segmentation/attempt_2/training_exact_segmented_corpus.json.gz",
+        "sha256": "129a5546acdb9b20edc69068bbf51609aded6525b2e4ae78eaac47929b969fb8",
+        "payload_sha256": "f662040647ebdfb479ab42dfa75e35850b26b8b60335ad67ec6cc9f2ca4ccfc1"
+      },
+      "dependency_region_corpus": {
+        "path": "diagnostics/pmo_dependency_region_program_v2/attempt_1/training_dependency_region_corpus.json.gz",
+        "sha256": "9b35529eae0975dcf977bc1fc51f3bd838e0184d51de3a7d2822edd0bc3d8b54",
+        "payload_sha256": "d4b65179df6a1a1b372685b440d0ca56f15d4091a7df4125a04eaa7f7452f81b"
+      },
+      "dependency_policy_runtime": {
+        "path": "diagnostics/pmo_dependency_region_policy_comparison/attempt_2/runtime_fold_checkpoints.json.gz",
+        "sha256": "5e08b8e2c4f765880428ab4b4ae3afd436cb4021aea4e3248bb010d34243d5d6",
+        "payload_sha256": "44e557f0de8eadc15f6fa0237c77db1a9e0efbacc2c1f35217eac5dce9a2de56"
+      },
+      "legal_action_authoritative": null,
+      "legal_action_preview_fixture_only": {
+        "path": "diagnostics/pmo_legal_action_policy/attempt_1/runtime_fold_checkpoints.json.gz",
+        "sha256": "e6336cfbcccef71b08434bde4e22a9f2b73cb3d1869f82caa844a87520c2a3a4",
+        "payload_sha256": "86612810f7c832595a96d0360fb6fbdd5d32479bae340dbd3fa9918cbe604684",
+        "authoritative": false,
+        "permitted_use": "focused implementation fixtures only"
+      }
+    },
+    "decoder": {
+      "sequence_policy": "balanced_generic_marginal",
+      "arms": [
+        "uniform_where_how",
+        "learned_where_how"
+      ],
+      "beam_widths": [
+        1,
+        8
+      ],
+      "snapshot_depths": [
+        8,
+        16,
+        24,
+        32
+      ],
+      "output_cutoffs": [
+        1,
+        5,
+        10,
+        32
+      ],
+      "successors_per_rule": 32,
+      "maximum_primitives": 32,
+      "maximum_components": 8,
+      "maximum_active_atoms": 40
+    },
+    "expected": {
+      "held_lineages": 18,
+      "runtime_supported_lineages": 8,
+      "teacher_routes": 184,
+      "runtime_supported_routes": 106,
+      "source_fold_cases": 9,
+      "folds": [
+        0,
+        1,
+        2
+      ]
+    },
+    "candidate_lock": {
+      "teacher_free_generation_process": true,
+      "separate_evaluator_process": true,
+      "refuse_overwrite": true
+    },
+    "scientific_gate": {
+      "primary_beam_width": 8,
+      "primary_depth": 32,
+      "require_nonzero_radius2_recovery": true,
+      "require_radius2_recall_above_uniform": true,
+      "require_radius2_mrr_above_uniform": true,
+      "require_exact_endpoint_not_lower": true,
+      "minimum_improved_folds": 2,
+      "authorizes_scored_pmo": false
+    },
+    "prohibitions": [
+      "oracle_calls",
+      "task_scores",
+      "teacher_injection_during_generation",
+      "task_identity_during_generation",
+      "flat_or_hierarchical_sequence_policy",
+      "action_support_change",
+      "modal_launch",
+      "t4_changes",
+      "prior_artifact_changes"
+    ]
+  },
+  "contract_sha256": "0b297c8c6069e97270080c821fed991e4619c6c598bf90d5255f296975877d38"
+}
