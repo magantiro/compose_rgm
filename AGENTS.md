@@ -552,6 +552,34 @@ input/revision identities and source-balanced reduction. This later explicit
 scope supersedes only the earlier three-CPU execution ceiling; it does not
 authorize the scored qualification before the frozen zero-oracle gate passes.
 
+**Scoped T4 route-policy candidate-utility diagnostic, 2026-09-14:** after the
+source-sharded zero-oracle comparison completed nine held-source units without
+an autonomous exact or transformation-equivalent teacher recovery, the user
+explicitly requested an immediate docking check rather than waiting for all 15
+units. Preserve the running zero-oracle workers and their fixed gate. From each
+already durable source shard, deterministically regenerate the original 128
+generic-marginal and 128 context-actor proposals using its sealed fold model,
+source index, configuration, code revision and random seeds. Do not refit a
+model, insert a teacher endpoint, change proposal support or inspect a docking
+score before candidate locking. Apply the official T4 heavy-atom, strict
+similarity, QED and SA endpoint gates, canonical deduplication and the same
+fold-trained graph-contrastive ranker to both proposal pools. Lock at most one
+eligible novel endpoint per policy and source before docking. A later-completing
+source may enter only through this identical frozen rule.
+
+Dock every locked endpoint exactly once with the source cell's frozen target,
+docking seed and oracle protocol. Use no replacement, retry, confirmation,
+adaptive selection, plateau rule or comparator information at runtime. The
+initial nine-source wave may charge at most 18 calls and run at most 15
+single-CPU workers; the complete 15-source diagnostic may charge at most 30
+calls. Preserve candidate locks, exact program/actions, structural properties,
+rank scores, query receipts, failures and per-source comparisons against the
+measured source and read-only Full-146 result. This is a post-hoc utility
+diagnostic prompted by a negative route-recovery trend, not the frozen policy
+gate, an official optimization run, or evidence that unscored candidates are
+strong. It may not modify or qualify the route-distilled controller, PMO, or
+any live benchmark.
+
 **Scoped Dynamic COMPOSE v2.2 five-unit quick pilot, 2026-09-14:** after the
 completed PMO Dynamic-v2.1 comparison showed that global channel allocation
 underperformed Dynamic-v0 on three of four tasks, and the live T4 v2.1 run
