@@ -372,6 +372,38 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped Dynamic COMPOSE v2.2 five-unit quick pilot, 2026-09-14:** after the
+completed PMO Dynamic-v2.1 comparison showed that global channel allocation
+underperformed Dynamic-v0 on three of four tasks, and the live T4 v2.1 run
+showed an absorbing zero-query FA7 bootstrap plus coarse candidate allocation
+on the active cells, the user explicitly authorized an aggressive but bounded
+follow-up revision. Implement Dynamic-v2.2 as the existing route-free v2.1
+shallow and structured proposal support plus exactly two generic repairs: a
+persistent proposal-only T4 feasibility frontier and a chronological
+candidate-specific parent-edit allocator. Preserve an auditable shallow
+opportunity spine, independent proposal random streams, the empty initial
+task-specific route archive, exact executor, 3-module/32-primitive/8-block
+support and post-filter pooled competition. Fit the existing small regularized
+parent-edit model only on charged outcomes from the current unit, predict
+completed absolute utility/archive gain, and retain score-blind structural
+exploration. Ineligible, failed, duplicate and unqueried candidates are never
+task-utility labels.
+
+After a deterministic zero-oracle preflight and focused resume, leakage,
+support and query-accounting tests pass on clean committed source, run exactly
+T4 FA7 seed 0, BRAF seed 1 and JAK2 seed 1 plus PMO GSK3B and
+`isomers_c7h8n2o2`, one predeclared search seed each and at most 256 charged
+calls per unit (1,280 new calls total). T4 keeps the unchanged delta-0.4,
+QED, SA, 40-heavy-atom and docking protocol; PMO uses only its native validity,
+higher-is-better oracle and top-ten trajectory adapter. Use at most five
+concurrent single-CPU workers, no GPU, confirmation calls or automatic retry.
+Full-146, v0, v1, v2.1, IVG and task-informed outcomes are offline comparators
+only and may not enter runtime inputs. Preserve the completed PMO v2.1 result
+and all live/frozen T4 runs without modification. This is a five-unit
+answer-known development pilot, not a held-out or benchmark-wide result. A
+wider run, another seed, changed support, altered endpoint gate or post-result
+v2.2 repair remains a separate revision and is not automatically authorized.
+
 **Scoped PMO Dynamic COMPOSE v2.1 four-task development, 2026-09-14:** while
 the five-cell T4 Dynamic-v2.1 launch proceeds independently, the user
 explicitly authorized a parallel PMO development worker to adapt the same

@@ -48,6 +48,9 @@ scripts/presentation/__pycache__/
 diagnostics/.v2_scan_cache.pkl
 diagnostics/.v2_successor_cache.pkl
 diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets/
+# Durable local mirror of the completed PMO v2.1 campaign. The sealed summary
+# is tracked; the 11 GB per-query working tree remains an operational artifact.
+diagnostics/pmo_dynamic_v21/runs/
 
 # Frozen h_phi controller weights: 5.1 MB total, and the manifest records
 # their sha256, so the blanket *.pt rule above would leave a frozen model

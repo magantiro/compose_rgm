@@ -1,0 +1,60 @@
+{
+  "contract_sha256": "dbd855d707ddb289cf23b1b1238ef0ce833d51772ef63d64b5b17923ffe563ec",
+  "payload": {
+    "automatic_retry": false,
+    "charged_query_ceiling_per_unit": 256,
+    "claim_status": "prospective development hypothesis only",
+    "comparators": "offline reporting only; absent from runtime inputs",
+    "controller_core": {
+      "model": "existing ParentEditFeatures + ParentEditModel ridge ensemble",
+      "model_readiness_unique_endpoints": 24,
+      "pre_model": "0.50 preserved shallow pool order / 0.50 score-blind diversity",
+      "predicted_archive_gain": 0.5,
+      "refit_interval_unique_endpoints": 16,
+      "route_archive_at_start": [],
+      "runtime_comparator_or_winner_inputs": [],
+      "shallow_spine": 0.25,
+      "structural_diversity": 0.25,
+      "support": {
+        "blocks": 8,
+        "modules": 3,
+        "primitives": 32
+      }
+    },
+    "launch_authorized": false,
+    "primary_output": "complete exact-executed molecular endpoint",
+    "required_logging": [
+      "proposal attempts and persistent attempt keys",
+      "frontier states and non-oracle eligibility margins",
+      "complete eligible pools and candidate descriptors",
+      "allocation roles and model identities",
+      "exact query ledger and score curves",
+      "optimizer snapshots including RNG and model state"
+    ],
+    "schema_version": "dynamic_v22_quick_pilot_contract_v1",
+    "scientific_problem": "allocate charged evaluations to productive parent-edit combinations while retaining a persistent proposal-only feasibility frontier",
+    "status": "implementation_ready_not_launched",
+    "task_adapters": {
+      "pmo": {
+        "archive_k": 10,
+        "score_direction": "maximize",
+        "t4_filters": false,
+        "tasks": [
+          "gsk3b",
+          "isomers_c7h8n2o2"
+        ]
+      },
+      "t4": {
+        "archive_k": 1,
+        "cells": [
+          "fa7_0",
+          "braf_1",
+          "jak2_1"
+        ],
+        "persistent_feasibility_frontier": true,
+        "score_direction": "minimize"
+      }
+    },
+    "total_new_call_ceiling": 1280
+  }
+}
