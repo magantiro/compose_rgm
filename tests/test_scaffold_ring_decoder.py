@@ -13,6 +13,7 @@ from compose_v4.rewrite.ring_system_fiber import (
     build_semantic_ring_system_decoder,
     instantiate_semantic_ring_system_grow,
     ring_atom_electronic_category,
+    semantic_ring_canonical_matching,
     semantic_ring_next_category_mask,
     semantic_ring_prefix_is_completable,
 )
@@ -140,3 +141,77 @@ def test_condition_state_key_binds_exact_executable_arrays():
                           state.implicit_h_counts[inverse], state.bonds[np.ix_(inverse, inverse)])
     assert context.permuted(permutation).accepts(permuted)
     assert context.permuted(permutation).state_cache_key(permuted) != context.state_cache_key(state)
+
+
+def test_aromatic_matching_preserves_protected_single_bond_resonance():
+    state = graph("CCCCCC")
+    context = ScaffoldContext.from_source(graph("CC"), (0, 1))
+    aromatic = tuple((index, index + 1) for index in range(5)) + ((0, 5),)
+    ring = RingSystemPlacement(
+        system_atoms=tuple(range(6)),
+        scaffold_bonds=tuple(
+            RingBond(index, index + 1, 1) for index in range(5)
+        ),
+        bond_reorders=(),
+        bond_insertions=(RingBond(0, 5, 1),),
+        aromatic_edges=aromatic,
+        topology_class="monocyclic",
+    )
+    assert context.accepts(state)
+    decoder = build_semantic_ring_system_decoder(
+        state, ring, scaffold_context=context,
+    )
+    categories = tuple(
+        ring_atom_electronic_category(next(
+            option for option in options
+            if option.atom_type == state.atom_types[position]
+            and option.aromatic_demand == 1
+        ))
+        for position, options in enumerate(decoder.options_by_member)
+    )
+
+    matching = semantic_ring_canonical_matching(decoder, categories)
+    assert frozenset((0, 1)) not in matching
+    assert matching == {
+        frozenset((0, 5)), frozenset((1, 2)), frozenset((3, 4)),
+    }
+    assert semantic_ring_prefix_is_completable(decoder, categories)
+    action = instantiate_semantic_ring_system_grow(state, decoder, categories)
+    successor = context.rewrite_system().apply(state, "ring_system_grow", action)
+    assert context.accepts(successor)
+
+
+def test_aromatic_matching_preserves_protected_double_bond_resonance():
+    state = graph("C=CCCCC")
+    context = ScaffoldContext.from_source(graph("C=C"), (0, 1))
+    aromatic = tuple((index, index + 1) for index in range(5)) + ((0, 5),)
+    ring = RingSystemPlacement(
+        system_atoms=tuple(range(6)),
+        scaffold_bonds=tuple(
+            RingBond(index, index + 1, int(state.bonds[index, index + 1]))
+            for index in range(5)
+        ),
+        bond_reorders=(),
+        bond_insertions=(RingBond(0, 5, 1),),
+        aromatic_edges=aromatic,
+        topology_class="monocyclic",
+    )
+    assert context.accepts(state)
+    decoder = build_semantic_ring_system_decoder(
+        state, ring, scaffold_context=context,
+    )
+    categories = tuple(
+        ring_atom_electronic_category(next(
+            option for option in options
+            if option.atom_type == state.atom_types[position]
+            and option.aromatic_demand == 1
+        ))
+        for position, options in enumerate(decoder.options_by_member)
+    )
+
+    matching = semantic_ring_canonical_matching(decoder, categories)
+    assert frozenset((0, 1)) in matching
+    assert semantic_ring_prefix_is_completable(decoder, categories)
+    action = instantiate_semantic_ring_system_grow(state, decoder, categories)
+    successor = context.rewrite_system().apply(state, "ring_system_grow", action)
+    assert context.accepts(successor)

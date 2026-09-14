@@ -639,7 +639,15 @@ def semantic_ring_canonical_matching(
     decoder: SemanticRingSystemDecoder,
     categories: tuple[int, ...],
 ) -> frozenset[frozenset[int]]:
-    """Return one deterministic Kekule lowering for complete semantic labels."""
+    """Return one deterministic scaffold-compatible Kekule lowering.
+
+    A semantic aromatic system can have several equivalent perfect matchings.
+    When some of its edges belong to a supplied scaffold, their executable
+    integer bond orders are exact conditions: protected single edges cannot be
+    selected as double bonds and protected double edges must be selected.  The
+    unconstrained lexicographic matching can otherwise reject a valid aromatic
+    successor merely because it chooses a different resonance representative.
+    """
 
     if len(categories) != decoder.span:
         raise ValueError("semantic category sequence is incomplete")
@@ -651,20 +659,58 @@ def semantic_ring_canonical_matching(
         raise ValueError("semantic category is unavailable at its position")
     result: set[frozenset[int]] = set()
     for component in decoder.aromatic_components:
+        slots = tuple(
+            int(decoder.placement.system_atoms[position])
+            for position in component.positions
+        )
+        local_by_slot = {slot: index for index, slot in enumerate(slots)}
+        adjacency_masks = list(component.adjacency_masks)
+        forced: list[tuple[int, int]] = []
+        forced_vertices = 0
+        if decoder.scaffold_context is not None:
+            aromatic = {
+                frozenset((int(a), int(b)))
+                for a, b in decoder.placement.aromatic_edges
+            }
+            for left_slot, right_slot, order in decoder.scaffold_context.bonds:
+                edge = frozenset((int(left_slot), int(right_slot)))
+                if edge not in aromatic or not edge.issubset(local_by_slot):
+                    continue
+                left = local_by_slot[int(left_slot)]
+                right = local_by_slot[int(right_slot)]
+                if int(order) == 1:
+                    adjacency_masks[left] &= ~(1 << right)
+                    adjacency_masks[right] &= ~(1 << left)
+                elif int(order) == 2:
+                    bits = (1 << left) | (1 << right)
+                    if forced_vertices & bits:
+                        raise ValueError(
+                            "protected aromatic double bonds do not form a matching"
+                        )
+                    forced_vertices |= bits
+                    forced.append((left, right))
+                else:
+                    raise ValueError(
+                        "protected aromatic edge lacks a Kekule-compatible bond order"
+                    )
         required = 0
         for local_index, position in enumerate(component.positions):
             option = selected[position]
             if option is not None and int(option.aromatic_demand) == 1:
                 required |= 1 << local_index
+        if forced_vertices & ~required:
+            raise ValueError(
+                "protected aromatic double bond disagrees with semantic demand"
+            )
         matching = _canonical_component_matching(
-            component.adjacency_masks,
-            required,
+            tuple(adjacency_masks),
+            required ^ forced_vertices,
         )
         if matching is None:
             raise ValueError("semantic aromatic demands lack a perfect matching")
-        for left, right in matching:
-            left_slot = decoder.placement.system_atoms[component.positions[left]]
-            right_slot = decoder.placement.system_atoms[component.positions[right]]
+        for left, right in (*forced, *matching):
+            left_slot = slots[left]
+            right_slot = slots[right]
             result.add(frozenset((int(left_slot), int(right_slot))))
     return frozenset(result)
 
