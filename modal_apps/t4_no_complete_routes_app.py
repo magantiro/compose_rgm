@@ -21,6 +21,9 @@ APP_NAME = "compose-t4-no-complete-routes"
 
 manifest = json.loads((ROOT / CONTRACT).read_text())["payload"]
 SOURCE_LIBRARY = manifest["complete_route_ablation"]["source_library"]
+PREFLIGHT_FAILURE = manifest["complete_route_ablation"]["preflight_packaging_repairs"][
+    0
+]["failure_path"]
 image = (
     base_image.add_local_file(ROOT / APP_PATH, str(REMOTE_ROOT / APP_PATH), copy=True)
     .add_local_file(ROOT / CONTRACT, str(REMOTE_ROOT / CONTRACT), copy=True)
@@ -32,6 +35,11 @@ image = (
     .add_local_file(
         ROOT / SOURCE_LIBRARY,
         str(REMOTE_ROOT / SOURCE_LIBRARY),
+        copy=True,
+    )
+    .add_local_file(
+        ROOT / PREFLIGHT_FAILURE,
+        str(REMOTE_ROOT / PREFLIGHT_FAILURE),
         copy=True,
     )
 )

@@ -20,6 +20,7 @@ from compose_v4.experiments.editing_v2_evaluation_semantics import (
     production_state_from_smiles,
 )
 from compose_v4.experiments.t4_no_complete_routes import (
+    PREFLIGHT_PACKAGING_FAILURE,
     SOURCE_LIBRARY,
     is_complete_route,
     partition_library,
@@ -31,6 +32,7 @@ def test_remote_app_packages_source_library_for_partition_preflight():
     from modal_apps import t4_no_complete_routes_app
 
     assert t4_no_complete_routes_app.SOURCE_LIBRARY == SOURCE_LIBRARY
+    assert t4_no_complete_routes_app.PREFLIGHT_FAILURE == PREFLIGHT_PACKAGING_FAILURE
 
 
 def _row(label, *, extra=False):
