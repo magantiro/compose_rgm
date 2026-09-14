@@ -42,7 +42,11 @@ from modal_apps.pmo_complete_program_decoder_app import (
     _validate_existing_shard,
 )
 from tools.pmo_complete_program_decoder import sha256_file
-from tools.pmo_complete_program_decoder_parallel import _read_progress, _volume_path
+from tools.pmo_complete_program_decoder_parallel import (
+    _download_file_once,
+    _read_progress,
+    _volume_path,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -301,6 +305,27 @@ def test_modal_volume_paths_are_relative_to_the_artifact_mount():
         _volume_path("/artifacts/pmo_complete_program_decoder/attempt_1/result.json")
         == "/pmo_complete_program_decoder/attempt_1/result.json"
     )
+
+
+def test_incremental_collection_never_replaces_a_completed_shard(tmp_path):
+    class FixedVolume:
+        def __init__(self, data):
+            self.data = data
+
+        def read_file(self, path):
+            assert path == "/case_shard.json"
+            yield self.data
+
+    destination = tmp_path / "case_shard.json"
+    assert _download_file_once(
+        FixedVolume(b"sealed\n"), "/case_shard.json", destination
+    )
+    assert destination.read_bytes() == b"sealed\n"
+    assert _download_file_once(
+        FixedVolume(b"sealed\n"), "/case_shard.json", destination
+    )
+    with pytest.raises(ValueError, match="refusing to replace"):
+        _download_file_once(FixedVolume(b"changed\n"), "/case_shard.json", destination)
 
 
 def test_contract_is_sealed_and_pins_authoritative_sharded_execution():

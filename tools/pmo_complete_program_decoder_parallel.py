@@ -336,49 +336,75 @@ def final_status() -> None:
     print(json.dumps(value, indent=2, sort_keys=True))
 
 
-def download() -> None:
+def _download_file_once(volume, remote: str, destination: Path) -> bool:
+    try:
+        data = b"".join(volume.read_file(remote))
+    except FileNotFoundError:
+        return False
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if destination.exists() and destination.read_bytes() != data:
+        raise ValueError(
+            f"refusing to replace local PMO decoder artifact: {destination}"
+        )
+    if not destination.exists():
+        destination.write_bytes(data)
+    return True
+
+
+def collect() -> None:
+    """Download immutable completed shards and preserved failure records."""
+
     import modal
 
     volume = modal.Volume.from_name(VOLUME)
-    files = ["candidate_lock.json", "generation_receipt.json", "result.json"]
     launch_receipt = _load_receipt(
         LAUNCH, "pmo_complete_program_decoder_parallel_launch_v1"
     )
+    rows = []
     for task in launch_receipt["tasks"]:
+        index = str(task["source_case_index"])
+        call_id = launch_receipt["call_ids"][index]
+        try:
+            result = modal.FunctionCall.from_id(call_id).get(timeout=0)
+        except TimeoutError:
+            rows.append({"source_case_index": int(index), "status": "running"})
+            continue
+        except (ValueError, RuntimeError, ImportError, modal.exception.Error) as error:
+            names = ("failure.json", "progress.json")
+            status_value = {
+                "source_case_index": int(index),
+                "status": "failed",
+                "error_type": type(error).__name__,
+                "error": str(error),
+            }
+        else:
+            if result.get("status") not in ("complete", "complete_reused"):
+                raise RuntimeError(f"unexpected PMO decoder case result: {result}")
+            names = ("case_shard.json", "generation_receipt.json", "progress.json")
+            status_value = {"source_case_index": int(index), "status": "complete"}
         relative = Path("shards") / Path(task["output"]).name
-        for name in (
-            "case_shard.json",
-            "generation_receipt.json",
-            "progress.json",
-            "failure.json",
-        ):
+        copied = []
+        for name in names:
             remote = _volume_path(Path(task["output"]) / name)
-            try:
-                data = b"".join(volume.read_file(remote))
-            except FileNotFoundError:
-                continue
-            except Exception as error:
-                if error.__class__.__name__ == "NotFoundError":
-                    continue
-                raise
             destination = LOCAL_OUTPUT / relative / name
-            destination.parent.mkdir(parents=True, exist_ok=True)
-            if destination.exists() and destination.read_bytes() != data:
-                raise ValueError(
-                    f"refusing to replace local PMO decoder artifact: {destination}"
-                )
-            if not destination.exists():
-                destination.write_bytes(data)
+            if _download_file_once(volume, remote, destination):
+                copied.append(name)
+        rows.append({**status_value, "copied": copied})
+    print(json.dumps({"source_cases": rows}, indent=2, sort_keys=True))
+
+
+def download() -> None:
+    import modal
+
+    collect()
+    volume = modal.Volume.from_name(VOLUME)
+    files = ["candidate_lock.json", "generation_receipt.json", "result.json"]
     for name in files:
-        data = b"".join(volume.read_file(_volume_path(OUTPUT_ROOT / name)))
         destination = LOCAL_OUTPUT / name
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        if destination.exists() and destination.read_bytes() != data:
-            raise ValueError(
-                f"refusing to replace local PMO decoder artifact: {destination}"
-            )
-        if not destination.exists():
-            destination.write_bytes(data)
+        if not _download_file_once(
+            volume, _volume_path(OUTPUT_ROOT / name), destination
+        ):
+            raise FileNotFoundError(f"PMO decoder final artifact is absent: {name}")
     print(LOCAL_OUTPUT)
 
 
@@ -386,12 +412,21 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "action",
-        choices=("launch", "status", "collate", "evaluate", "final-status", "download"),
+        choices=(
+            "launch",
+            "status",
+            "collect",
+            "collate",
+            "evaluate",
+            "final-status",
+            "download",
+        ),
     )
     args = parser.parse_args()
     {
         "launch": launch,
         "status": status,
+        "collect": collect,
         "collate": collate,
         "evaluate": evaluate,
         "final-status": final_status,
