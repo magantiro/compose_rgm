@@ -141,6 +141,13 @@ class Candidate:
             raise ValueError("rejected candidate cannot carry fabricated chemistry")
 
 
+def require_nonself_endpoint(source, endpoint) -> None:
+    """Reject executed programs whose canonical endpoint equals their source."""
+
+    if canonical_state_key(endpoint) == canonical_state_key(source):
+        raise ValueError("canonical self event")
+
+
 def predeclared_source_folds(source_metadata: dict[str, dict]) -> tuple[dict, ...]:
     """Hold out one source seed per protein in each of three fixed folds."""
 
@@ -293,6 +300,7 @@ def _synthesize_marginal(source, rng, policy: MarginalPolicy, config: Comparison
     )
     if canonical_state_key(endpoint) != canonical_state_key(current):
         raise RuntimeError("marginal synthesis changed on exact replay")
+    require_nonself_endpoint(source, endpoint)
     return endpoint, trace, tuple(families), len(program.blocks)
 
 

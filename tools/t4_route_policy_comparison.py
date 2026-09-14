@@ -50,6 +50,7 @@ from compose_v4.experiments.t4_route_policy_comparison import (
     fit_marginal_policy,
     generate_marginal_candidates,
     predeclared_source_folds,
+    require_nonself_endpoint,
     teacher_candidate,
 )
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
@@ -170,6 +171,7 @@ def _actor_candidates(source, policy, config, *, seed, prefix):
                 panel_cache=panel_cache,
             )
             endpoint = decode_state(trace["states"][-1])
+            require_nonself_endpoint(source, endpoint)
             result.append(
                 Candidate(
                     f"{prefix}-{index}",

@@ -13,6 +13,7 @@ from compose_v4.experiments.t4_route_policy_comparison import (
     complete_attempt_rows,
     fit_contrastive_ranker,
     predeclared_source_folds,
+    require_nonself_endpoint,
 )
 from compose_v4.rewrite.trace_shard import encode_state
 from tools.t4_route_policy_comparison import _select_folds
@@ -118,3 +119,13 @@ def test_failed_attempts_remain_visible_but_cannot_carry_endpoint():
     attempts = complete_attempt_rows([rejected, complete], {"complete": 2.0})
     assert [row["status"] for row in attempts] == ["complete", "rejected"]
     assert attempts[1]["endpoint_state"] is None
+
+
+def test_canonical_self_endpoint_is_rejected_before_metric_evaluation():
+    source = production_state_from_smiles("CCN", max_atoms=40)
+    equivalent = production_state_from_smiles("CCN", max_atoms=40)
+    changed = production_state_from_smiles("CCO", max_atoms=40)
+
+    with np.testing.assert_raises_regex(ValueError, "canonical self event"):
+        require_nonself_endpoint(source, equivalent)
+    require_nonself_endpoint(source, changed)

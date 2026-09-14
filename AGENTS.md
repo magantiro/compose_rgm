@@ -519,6 +519,19 @@ as an execution-equivalence check. This repair may use Modal for the three
 zero-oracle fold workers. It may not launch the scored five-cell pilot, change
 PMO, weaken a gate, retry automatically or exceed three concurrent CPUs.
 
+The original local process subsequently failed after 11,800.67 seconds during
+metric evaluation because an executed canonical self-event had been retained as
+a complete proposal. Preserve that negative result and the live three-fold
+parallel launch unchanged. A bounded follow-up repair may classify an executed
+endpoint identical to its source as a rejected `canonical_self_event` in both
+the marginal and context-actor proposal paths before metric evaluation. It may
+not change candidate generation, random streams, policies, folds, attempt
+budgets, metrics or gates. After the live folds terminate, retain every durable
+completed fold and relaunch only folds that fail from this exact defect, under a
+new immutable revision and output namespace. No automatic retry, oracle call,
+PMO change or concurrent execution above the existing three-CPU ceiling is
+authorized.
+
 **Scoped Dynamic COMPOSE v2.2 five-unit quick pilot, 2026-09-14:** after the
 completed PMO Dynamic-v2.1 comparison showed that global channel allocation
 underperformed Dynamic-v0 on three of four tasks, and the live T4 v2.1 run
