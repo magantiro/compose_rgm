@@ -42,6 +42,7 @@ from modal_apps.pmo_complete_program_decoder_app import (
     _validate_existing_shard,
 )
 from tools.pmo_complete_program_decoder import sha256_file
+from tools.pmo_complete_program_decoder_parallel import _read_progress
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -283,6 +284,14 @@ def test_completed_source_shard_requires_matching_durable_receipt(tmp_path):
     )
     with pytest.raises(ValueError, match="receipt is invalid"):
         _validate_existing_shard(tmp_path, task)
+
+
+def test_missing_remote_progress_is_an_unstarted_case_not_a_status_failure():
+    class MissingVolume:
+        def read_file(self, path):
+            raise FileNotFoundError(path)
+
+    assert _read_progress(MissingVolume(), {"output": "/missing/case"}) is None
 
 
 def test_contract_is_sealed_and_pins_authoritative_sharded_execution():

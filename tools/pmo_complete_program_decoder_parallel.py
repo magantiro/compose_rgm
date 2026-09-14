@@ -132,6 +132,8 @@ def _read_progress(volume, task: dict) -> dict | None:
     path = f"{task['output']}/progress.json"
     try:
         return json.loads(b"".join(volume.read_file(path)))
+    except FileNotFoundError:
+        return None
     except Exception as error:
         if error.__class__.__name__ == "NotFoundError":
             return None
@@ -348,6 +350,8 @@ def download() -> None:
             remote = f"{task['output']}/{name}"
             try:
                 data = b"".join(volume.read_file(remote))
+            except FileNotFoundError:
+                continue
             except Exception as error:
                 if error.__class__.__name__ == "NotFoundError":
                     continue
