@@ -1,0 +1,21 @@
+{
+  "automatic_retry": false,
+  "code_revision": "f564f9e569a7e95ee402df230620f7eafc309c1f",
+  "contract_sha256": "b1adcb0c63b97f047f52813e19a2b0a74132428198eb20af472b02ce711cb393",
+  "deterministic_followup": {
+    "environment_role": "local non-authoritative branch-factor diagnostic",
+    "first_strict_eligible_attempt": 51,
+    "new_oracle_calls": 0,
+    "seconds": 42.88619308299894,
+    "unit_id": "braf_1_r0"
+  },
+  "failure": "Dynamic-v2 shallow_program_channel produced no eligible pinned candidate for braf_1_r0 within the sealed 32-attempt per-cell preflight bound.",
+  "new_oracle_calls": 0,
+  "remote_task_id": "ta-01M2F7EGE39R16061HS59HKZ1R",
+  "decision": "Preserve the sealed 32-attempt gate and do not launch this frozen v2 controller. The user approved a larger preflight allowance after disclosure, but the repository scientific-validity rule prohibits relaxing a sealed gate after observing failure.",
+  "remediation": "A later controller revision must improve eligible-proposal yield and pass the unchanged 32-attempt all-cell, both-channel gate under a separately authorized development milestone.",
+  "schema_version": "t4_dynamic_v2_prequery_failure_v1",
+  "scientific_result_observed": false,
+  "status": "failed_before_launch",
+  "stopped_at_utc": "2026-09-14T05:52:56Z"
+}

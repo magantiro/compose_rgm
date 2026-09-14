@@ -69,10 +69,12 @@ number of charged observations since the last global-best improvement.
    exactly.
 7. A zero-oracle structural check uses at most 32 deterministic attempts per
    channel and cell, produces eligible candidates through both channels, and
-   records complete planner provenance. This bound was sealed after the
-   original 12-attempt preflight failed before launch and an offline
-   deterministic trace found the first strict-eligible 5HT1B structured
-   endpoint at attempt 20.
+   records complete planner provenance. The original 12-attempt preflight
+   failed before launch on the 5HT1B structured channel; its first eligible
+   deterministic endpoint occurred at attempt 20. The sealed 32-attempt pinned
+   preflight passed that cell and then failed on BRAF's shallow channel. A
+   post-failure increase of this sealed bound is prohibited, so this v2 launch
+   remains blocked rather than weakening the gate.
 8. Focused tests, Ruff, formatting and whitespace checks pass. Do not run the
    repository-wide suite as an iteration gate.
 
