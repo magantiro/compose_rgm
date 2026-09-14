@@ -57,11 +57,11 @@ def _source_tasks(image_revision):
             "source_id": source_task["source_id"],
             "source_index": source_task["source_index"],
             "delta": 0.4,
-            "result_path": f"/artifacts{remote_folder}/result.json",
-            "model_path": f"/artifacts{remote_folder}/models.json.gz",
+            "result_path": f"{remote_folder}/result.json",
+            "model_path": f"{remote_folder}/models.json.gz",
             "source_artifacts_sha256": {
-                f"/artifacts{remote_folder}/result.json": sha256_file(result_path),
-                f"/artifacts{remote_folder}/models.json.gz": sha256_file(model_path),
+                f"{remote_folder}/result.json": sha256_file(result_path),
+                f"{remote_folder}/models.json.gz": sha256_file(model_path),
             },
             "files_sha256": files,
             "image_revision": image_revision,
@@ -135,11 +135,59 @@ def status():
     print(json.dumps(rows, indent=2, sort_keys=True))
 
 
+def collect():
+    import modal
+
+    receipt = json.loads(LAUNCH.read_text())["payload"]
+    volume = modal.Volume.from_name(VOLUME_NAME)
+    locks = OUTPUT / "locks"
+    collected, preserved = [], []
+    for cell, call_id in sorted(receipt["call_ids"].items()):
+        try:
+            modal.FunctionCall.from_id(call_id).get(timeout=0)
+        except TimeoutError:
+            continue
+        destination = locks / cell / "candidate_lock.json"
+        if destination.exists():
+            envelope = json.loads(destination.read_text())
+            if identity(envelope["payload"]) != envelope.get("payload_sha256"):
+                raise ValueError(f"collected candidate lock changed: {destination}")
+            preserved.append(cell)
+            continue
+        remote = f"{REMOTE_OUTPUT}/{cell}/candidate_lock.json"
+        raw = b"".join(volume.read_file(remote))
+        envelope = json.loads(raw)
+        if identity(envelope["payload"]) != envelope.get("payload_sha256"):
+            raise ValueError(f"remote candidate lock changed: {remote}")
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        temporary = destination.with_suffix(".json.tmp")
+        temporary.write_bytes(raw)
+        temporary.replace(destination)
+        collected.append(cell)
+    print(
+        json.dumps(
+            {
+                "status": "incremental_collection_complete",
+                "newly_collected": collected,
+                "already_preserved": preserved,
+                "durable_locks": len(collected) + len(preserved),
+                "oracle_calls": 0,
+            },
+            sort_keys=True,
+        )
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("prepare", "launch", "status"))
+    parser.add_argument("action", choices=("prepare", "launch", "status", "collect"))
     args = parser.parse_args()
-    {"prepare": prepare, "launch": launch, "status": status}[args.action]()
+    {
+        "prepare": prepare,
+        "launch": launch,
+        "status": status,
+        "collect": collect,
+    }[args.action]()
 
 
 if __name__ == "__main__":
