@@ -124,6 +124,15 @@ verify that the worktree is clean. The launch command intentionally fails if
 those conditions, the file hashes, oracle environment, asset identity or
 zero-oracle preflight do not match:
 
+The first authorized process-pool launch, run ID `87d458346fe11c2718d5df8067566793631e8e0f61deca73a24d6143af9e97ea`,
+failed before any unit start or query reservation because its direct in-memory
+configuration retained a tuple while the sealed JSON contract contained a
+list. The original `launch.json` remains immutable, and
+`prequery_failure_0001.json` records the zero-query failure. The one-time
+repaired path serializes configuration into the JSON domain before worker
+submission and writes a distinct `launch_v2.json`; it does not weaken worker
+validation or retry the failed launch artifact.
+
 ```bash
 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 \
 UV_CACHE_DIR=.uv-cache uv run --isolated --no-project --python 3.11 \
@@ -139,7 +148,7 @@ UV_CACHE_DIR=.uv-cache uv run --isolated --no-project --python 3.11 \
   --with 'setuptools==75.6.0' \
   --with fuzzywuzzy \
   --with huggingface-hub \
-  python tools/pmo_dynamic_v21.py launch --workers 4
+  python tools/pmo_dynamic_v21.py relaunch-v2 --workers 4
 ```
 
 The user authorized the bounded launch, but the prepared code still requires

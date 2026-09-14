@@ -21,6 +21,7 @@ from compose_v4.experiments.pmo_dynamic_v21 import (
     configuration,
     execute_task,
     load_contract,
+    serialized_configuration,
 )
 from compose_v4.rewrite.trace_shard import encode_state
 from tests.test_edit_program import ring_and_carbonyl
@@ -52,6 +53,17 @@ def test_contract_fixes_four_tasks_empty_routes_and_offline_comparators():
     assert not any("result.json" in path for path in contract["inputs"])
     assert contract["controller"] == json.loads(json.dumps(asdict(configuration())))
     assert contract["controller"]["score_direction"] == "maximize"
+
+
+def test_direct_worker_launch_configuration_matches_loaded_json_contract():
+    contract = load_contract(ROOT)
+    raw = asdict(configuration())
+    direct_worker_launch = {"configuration": serialized_configuration()}
+
+    assert raw != contract["controller"]
+    assert isinstance(raw["channel_probabilities"], tuple)
+    assert isinstance(contract["controller"]["channel_probabilities"], list)
+    assert direct_worker_launch["configuration"] == contract["controller"]
 
 
 def test_pmo_validity_has_no_t4_similarity_qed_or_sa_gate():
@@ -237,6 +249,56 @@ def test_task_boundary_records_unexpected_failure_without_retry(tmp_path, monkey
         / "celecoxib_rediscovery/failure.json"
     )
     assert experiment.unseal(failure_path)["error"] == "unexpected task failure"
+
+
+def test_relaunch_v2_preserves_failed_launch_and_passes_canonical_configuration(
+    tmp_path, monkeypatch
+):
+    import tools.pmo_dynamic_v21 as runner
+
+    v1_body = {
+        "schema_version": "pmo_dynamic_v21_matched_launch_v1",
+        "configuration": serialized_configuration(),
+        "configuration_id": runner.identity(serialized_configuration()),
+    }
+    failed_launch = {**v1_body, "run_id": runner.identity(v1_body)}
+    runner.seal(tmp_path / runner.LAUNCH, failed_launch)
+    original_sha256 = runner.sha256_file(tmp_path / runner.LAUNCH)
+    contract_path, preflight_path = (
+        tmp_path / runner.CONTRACT,
+        tmp_path / runner.PREFLIGHT,
+    )
+    contract_path.parent.mkdir(parents=True, exist_ok=True)
+    preflight_path.parent.mkdir(parents=True, exist_ok=True)
+    contract_path.write_text("contract\n")
+    preflight_path.write_text("preflight\n")
+    runner.seal(
+        tmp_path / runner.PREQUERY_FAILURE,
+        {
+            "status": "failed_before_unit_start",
+            "failed_launch_sha256": original_sha256,
+            "oracle_calls": 0,
+        },
+    )
+    contract = {"controller": serialized_configuration()}
+    preflight = {"schema_version": "pmo_dynamic_v21_matched_preflight_v1"}
+    monkeypatch.setattr(
+        runner, "validate_launch_ready", lambda *_args, **_kwargs: (contract, preflight)
+    )
+    monkeypatch.setattr(
+        runner, "_execute_launch", lambda _root, launch_row, **_: launch_row
+    )
+    monkeypatch.setattr(
+        runner.subprocess, "check_output", lambda *_args, **_kwargs: "d" * 40
+    )
+
+    launch_v2 = runner.relaunch_v2(tmp_path, workers=4)
+
+    assert launch_v2["schema_version"] == "pmo_dynamic_v21_matched_launch_v2"
+    assert launch_v2["configuration"] == contract["controller"]
+    assert runner.sha256_file(tmp_path / runner.LAUNCH) == original_sha256
+    assert runner.unseal(tmp_path / runner.LAUNCH_V2) == launch_v2
+    assert launch_v2["run_id"] != failed_launch["run_id"]
 
 
 def test_status_is_read_only_and_reports_live_arm_accounting(tmp_path):

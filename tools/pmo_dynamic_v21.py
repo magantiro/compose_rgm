@@ -45,12 +45,14 @@ from compose_v4.experiments.pmo_dynamic_v21 import (
     GSK3B_ASSET,
     INITIALIZATION,
     LAUNCH,
+    LAUNCH_V2,
     MAX_WORKERS,
     OFFLINE_COMPARATORS,
     ORACLE_ENVIRONMENT,
     ORACLE_SOURCE_SHA256,
     PARITY_RESULT,
     PREFLIGHT,
+    PREQUERY_FAILURE,
     RESULT,
     SEARCH_SEED,
     TASK_SEEDS,
@@ -62,6 +64,7 @@ from compose_v4.experiments.pmo_dynamic_v21 import (
     native_oracle,
     policy_payload,
     run_scored_task,
+    serialized_configuration,
     validate_launch_ready,
     verify_runtime_environment,
 )
@@ -152,7 +155,7 @@ def prepare(root: Path = ROOT) -> dict:
             "and formal-charge changes remain outside support"
         ),
         "dynamic_v21_development": policy_payload(),
-        "controller": json.loads(json.dumps(configuration().__dict__)),
+        "controller": serialized_configuration(),
         "initialization": {
             "path": INITIALIZATION,
             "sha256": sha256_file(root / INITIALIZATION),
@@ -474,9 +477,10 @@ def refresh_prequery(root: Path = ROOT) -> dict:
         raise ValueError("cannot refresh PMO Dynamic-v2.1 after a launch exists")
     path = root / CONTRACT
     contract = unseal(path)
-    if contract.get("dynamic_v21_development") != policy_payload() or contract.get(
-        "controller"
-    ) != json.loads(json.dumps(configuration().__dict__)):
+    if (
+        contract.get("dynamic_v21_development") != policy_payload()
+        or contract.get("controller") != serialized_configuration()
+    ):
         raise ValueError("PMO Dynamic-v2.1 scientific policy changed before refresh")
     prior_contract = sha256_file(path)
     prior_preflight = (
@@ -508,6 +512,127 @@ def refresh_prequery(root: Path = ROOT) -> dict:
     }
 
 
+def _failed_launch_zero_query_evidence(root: Path, launch_row: dict) -> dict:
+    base = root / "diagnostics/pmo_dynamic_v21/runs" / launch_row["run_id"]
+    unit_starts = sorted(base.glob("*/*/started.json"))
+    query_starts = sorted(base.glob("*/*/oracle/query_*/started.json"))
+    result_files = sorted(base.glob("*/*/result.json"))
+    failure_files = sorted(base.glob("*/*/failure.json"))
+    return {
+        "unit_started_receipts": [str(path.relative_to(root)) for path in unit_starts],
+        "query_reservations": [str(path.relative_to(root)) for path in query_starts],
+        "unit_results": [str(path.relative_to(root)) for path in result_files],
+        "unit_failures": [str(path.relative_to(root)) for path in failure_files],
+        "charged_oracle_calls": len(query_starts),
+    }
+
+
+def repair_prequery_serialization(root: Path = ROOT) -> dict:
+    """Seal the failed zero-query v1 launch and rebind the unchanged contract."""
+    if (root / PREQUERY_FAILURE).exists() or (root / LAUNCH_V2).exists():
+        raise ValueError("PMO serialization repair already exists; do not repeat it")
+    launch_path, contract_path, preflight_path = (
+        root / LAUNCH,
+        root / CONTRACT,
+        root / PREFLIGHT,
+    )
+    launch_row = unseal(launch_path)
+    contract = unseal(contract_path)
+    prior_preflight = unseal(preflight_path)
+    if launch_row.get("schema_version") != "pmo_dynamic_v21_matched_launch_v1":
+        raise ValueError("serialization repair requires the failed v1 launch")
+    if identity(
+        {key: value for key, value in launch_row.items() if key != "run_id"}
+    ) != launch_row.get("run_id"):
+        raise ValueError("failed v1 launch identity changed")
+    if contract.get("dynamic_v21_development") != policy_payload():
+        raise ValueError("matched PMO policy changed before serialization repair")
+    if contract.get("controller") != serialized_configuration():
+        raise ValueError("matched PMO controller changed before serialization repair")
+    if (
+        prior_preflight.get("passed") is not True
+        or prior_preflight.get("new_oracle_calls") != 0
+        or prior_preflight.get("contract_sha256") != sha256_file(contract_path)
+    ):
+        raise ValueError(
+            "serialization repair requires the sealed zero-query preflight"
+        )
+    evidence = _failed_launch_zero_query_evidence(root, launch_row)
+    if any(
+        evidence[key]
+        for key in (
+            "unit_started_receipts",
+            "query_reservations",
+            "unit_results",
+            "unit_failures",
+        )
+    ):
+        raise ValueError("failed v1 launch advanced beyond the prequery boundary")
+    raw = asdict(configuration())
+    canonical = serialized_configuration()
+    if raw == contract["controller"] or canonical != contract["controller"]:
+        raise ValueError("failed v1 launch serialization mismatch was not reproduced")
+    failure = {
+        "schema_version": "pmo_dynamic_v21_prequery_failure_v1",
+        "status": "failed_before_unit_start",
+        "phase": "worker_launch_validation",
+        "failed_launch_path": LAUNCH,
+        "failed_launch_sha256": sha256_file(launch_path),
+        "failed_run_id": launch_row["run_id"],
+        "contract_sha256": sha256_file(contract_path),
+        "preflight_sha256": sha256_file(preflight_path),
+        "error_type": "ValueError",
+        "error": "PMO Dynamic-v2.1 task is absent from the launch lock",
+        "root_cause": (
+            "direct ProcessPool payload retained tuple-valued configuration fields "
+            "while the sealed contract contains JSON lists"
+        ),
+        "mismatch": {
+            "field": "channel_probabilities",
+            "in_memory_type": type(raw["channel_probabilities"]).__name__,
+            "contract_type": type(
+                contract["controller"]["channel_probabilities"]
+            ).__name__,
+            "json_canonical_configuration_matches_contract": canonical
+            == contract["controller"],
+        },
+        **evidence,
+        "automatic_retry": False,
+        "oracle_calls": 0,
+    }
+    seal(root / PREQUERY_FAILURE, failure)
+    prior_contract_sha256 = sha256_file(contract_path)
+    prior_preflight_sha256 = sha256_file(preflight_path)
+    contract["inputs"] = {
+        relative: sha256_file(root / relative) for relative in _material_inputs()
+    }
+    repair = {
+        "kind": "json_domain_launch_configuration",
+        "scientific_policy_changed": False,
+        "oracle_calls": 0,
+        "prior_contract_sha256": prior_contract_sha256,
+        "prior_preflight_sha256": prior_preflight_sha256,
+        "failed_launch_sha256": failure["failed_launch_sha256"],
+        "failure_receipt_path": PREQUERY_FAILURE,
+        "failure_receipt_sha256": sha256_file(root / PREQUERY_FAILURE),
+        "required_launch_path": LAUNCH_V2,
+    }
+    contract.setdefault("prequery_repairs", []).append(repair)
+    contract["launch_repair"] = repair
+    seal(contract_path, contract)
+    load_contract(root)
+    body = _preflight_body(root)
+    seal(preflight_path, body)
+    return {
+        "status": "serialization_repair_sealed",
+        "failed_run_id": launch_row["run_id"],
+        "failure_receipt_sha256": repair["failure_receipt_sha256"],
+        "contract_sha256": sha256_file(contract_path),
+        "preflight_sha256": sha256_file(preflight_path),
+        "new_oracle_calls": 0,
+    }
+
+
 def _worker(root: str, launch: dict, arm: str, task_name: str) -> dict:
     return run_scored_task(Path(root), launch, arm, task_name)
 
@@ -527,8 +652,8 @@ def launch(root: Path = ROOT, *, workers: int = MAX_WORKERS) -> dict:
         "arms": list(ARMS),
         "units": [{"arm": arm, "task": task} for task in TASKS for arm in ARMS],
         "task_seeds": TASK_SEEDS,
-        "configuration": asdict(configuration()),
-        "configuration_id": identity(asdict(configuration())),
+        "configuration": serialized_configuration(),
+        "configuration_id": identity(serialized_configuration()),
         "workers": workers,
         "cpu_per_worker": 1,
         "charged_query_ceiling": TOTAL_QUERY_CEILING,
@@ -537,6 +662,10 @@ def launch(root: Path = ROOT, *, workers: int = MAX_WORKERS) -> dict:
     }
     launch_row = {**body, "run_id": identity(body)}
     seal(root / LAUNCH, launch_row)
+    return _execute_launch(root, launch_row, workers=workers)
+
+
+def _execute_launch(root: Path, launch_row: dict, *, workers: int) -> dict:
     results = []
     with ProcessPoolExecutor(max_workers=workers) as pool:
         futures = {
@@ -552,6 +681,64 @@ def launch(root: Path = ROOT, *, workers: int = MAX_WORKERS) -> dict:
     aggregate = aggregate_offline(root, launch_row, results)
     seal(root / RESULT, aggregate)
     return aggregate
+
+
+def relaunch_v2(root: Path = ROOT, *, workers: int = MAX_WORKERS) -> dict:
+    """One-time repaired launch after the immutable zero-query v1 failure."""
+    if (root / LAUNCH_V2).exists() or (root / RESULT).exists():
+        raise ValueError("PMO Dynamic-v2.1 repaired launch already exists")
+    failed_launch = unseal(root / LAUNCH)
+    failure = unseal(root / PREQUERY_FAILURE)
+    evidence = _failed_launch_zero_query_evidence(root, failed_launch)
+    if evidence["charged_oracle_calls"] != 0 or any(
+        evidence[key]
+        for key in (
+            "unit_started_receipts",
+            "unit_results",
+            "unit_failures",
+        )
+    ):
+        raise ValueError("failed v1 launch no longer has zero-query prequery status")
+    if (
+        failure.get("failed_launch_sha256") != sha256_file(root / LAUNCH)
+        or failure.get("oracle_calls") != 0
+        or failure.get("status") != "failed_before_unit_start"
+    ):
+        raise ValueError("PMO repaired relaunch failure receipt changed")
+    contract, preflight_row = validate_launch_ready(root, workers=workers)
+    body = {
+        "schema_version": "pmo_dynamic_v21_matched_launch_v2",
+        "contract_sha256": sha256_file(root / CONTRACT),
+        "preflight_sha256": sha256_file(root / PREFLIGHT),
+        "code_revision": subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=root, text=True
+        ).strip(),
+        "tasks": list(TASKS),
+        "arms": list(ARMS),
+        "units": [{"arm": arm, "task": task} for task in TASKS for arm in ARMS],
+        "task_seeds": TASK_SEEDS,
+        "configuration": contract["controller"],
+        "configuration_id": identity(contract["controller"]),
+        "workers": workers,
+        "cpu_per_worker": 1,
+        "charged_query_ceiling": TOTAL_QUERY_CEILING,
+        "automatic_retries": 0,
+        "preflight_schema": preflight_row["schema_version"],
+        "superseded_launch": {
+            "path": LAUNCH,
+            "sha256": sha256_file(root / LAUNCH),
+            "run_id": failed_launch["run_id"],
+            "failure_receipt_path": PREQUERY_FAILURE,
+            "failure_receipt_sha256": sha256_file(root / PREQUERY_FAILURE),
+            "charged_oracle_calls": 0,
+        },
+        "repair": "json_domain_launch_configuration_v1",
+    }
+    launch_row = {**body, "run_id": identity(body)}
+    if launch_row["configuration"] != contract["controller"]:
+        raise ValueError("repaired in-memory launch configuration is not canonical")
+    seal(root / LAUNCH_V2, launch_row)
+    return _execute_launch(root, launch_row, workers=workers)
 
 
 def _live_curve(folder: Path) -> tuple[list[dict], dict]:
@@ -675,21 +862,44 @@ def _live_unit_status(root: Path, launch_row: dict, arm: str, task_name: str) ->
 
 
 def status(root: Path = ROOT) -> dict:
-    if not (root / LAUNCH).exists():
+    launch_path = root / LAUNCH_V2 if (root / LAUNCH_V2).exists() else root / LAUNCH
+    if not launch_path.exists():
         return {"status": "not_launched", "new_oracle_calls": 0}
-    launch_row = unseal(root / LAUNCH)
+    launch_row = unseal(launch_path)
+    if launch_path == root / LAUNCH and (root / PREQUERY_FAILURE).exists():
+        failure = unseal(root / PREQUERY_FAILURE)
+        return {
+            "status": "prequery_failed_zero_query",
+            "launch": launch_row,
+            "failure": failure,
+            "charged_oracle_calls": 0,
+            "required_action": "relaunch-v2 after clean committed repair",
+        }
     rows = {
         arm: {task: _live_unit_status(root, launch_row, arm, task) for task in TASKS}
         for arm in ARMS
     }
-    return {"status": "launched", "launch": launch_row, "arms": rows}
+    return {
+        "status": "launched",
+        "launch_path": str(launch_path.relative_to(root)),
+        "launch": launch_row,
+        "arms": rows,
+    }
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "action",
-        choices=("prepare", "preflight", "refresh-prequery", "launch", "status"),
+        choices=(
+            "prepare",
+            "preflight",
+            "refresh-prequery",
+            "repair-prequery",
+            "launch",
+            "relaunch-v2",
+            "status",
+        ),
     )
     parser.add_argument("--workers", type=int, default=MAX_WORKERS)
     args = parser.parse_args()
@@ -699,8 +909,12 @@ def main() -> None:
         row = preflight()
     elif args.action == "refresh-prequery":
         row = refresh_prequery()
+    elif args.action == "repair-prequery":
+        row = repair_prequery_serialization()
     elif args.action == "launch":
         row = launch(workers=args.workers)
+    elif args.action == "relaunch-v2":
+        row = relaunch_v2(workers=args.workers)
     else:
         row = status()
     print(json.dumps(row, indent=2, sort_keys=True))

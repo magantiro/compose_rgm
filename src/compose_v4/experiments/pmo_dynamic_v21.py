@@ -57,6 +57,8 @@ CONTRACT = "configs/pmo_dynamic_v21_development_v1.json"
 OFFLINE_COMPARATORS = "configs/pmo_dynamic_v21_offline_comparators_v1.json"
 PREFLIGHT = "diagnostics/pmo_dynamic_v21/preflight.json"
 LAUNCH = "diagnostics/pmo_dynamic_v21/launch.json"
+LAUNCH_V2 = "diagnostics/pmo_dynamic_v21/launch_v2.json"
+PREQUERY_FAILURE = "diagnostics/pmo_dynamic_v21/prequery_failure_0001.json"
 RESULT = "diagnostics/pmo_dynamic_v21/result.json"
 INITIALIZATION = "diagnostics/parent_edit_cycles/prepared/init_20260921.json"
 EMPTY_LIBRARY = "diagnostics/pmo_dynamic_v21/empty_library.json"
@@ -114,6 +116,11 @@ def configuration(seed: int = SEARCH_SEED) -> ProgramSearchConfig:
         attempts_per_batch=128,
         wall_seconds=45.0,
     )
+
+
+def serialized_configuration(seed: int = SEARCH_SEED) -> dict:
+    """Return the exact JSON-domain configuration passed to worker processes."""
+    return json.loads(json.dumps(asdict(configuration(seed))))
 
 
 def policy_payload() -> dict:
@@ -213,7 +220,7 @@ def load_contract(root: Path) -> dict:
         raise ValueError("unexpected PMO Dynamic-v2.1 contract schema")
     if contract.get("dynamic_v21_development") != policy_payload():
         raise ValueError("PMO Dynamic-v2.1 development policy changed")
-    if contract.get("controller") != json.loads(json.dumps(asdict(configuration()))):
+    if contract.get("controller") != serialized_configuration():
         raise ValueError("PMO Dynamic-v2.1 controller recipe changed")
     if contract.get("initialization", {}).get("path") != INITIALIZATION:
         raise ValueError("PMO Dynamic-v2.1 initialization source changed")
