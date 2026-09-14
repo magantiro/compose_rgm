@@ -96,9 +96,9 @@
       "worker_memory_mb": 4096,
       "estimated_cpu_hours_ceiling": 54,
       "python_version": "3.11",
-      "numpy_version": "2.5.3",
-      "scipy_version": "1.18.1",
-      "rdkit_version": "2026.03.6",
+      "numpy_version": "1.26.4",
+      "scipy_version": "1.13.1",
+      "rdkit_version": "2024.03.5",
       "oracle_calls": 0,
       "docking_calls": 0
     },
@@ -126,5 +126,5 @@
       "prior_artifact_changes"
     ]
   },
-  "contract_sha256": "3cc5e4b543856748ad1e38faf4b7f1a858ef556bcd78a1d77f8eb4b648d28965"
+  "contract_sha256": "b7d262d6270f51398f704de0333db6e127b6aec36494e5b2ab14a1c762c72d00"
 }

@@ -16,6 +16,13 @@ failed or interrupted case can be recomputed only under the same sealed task
 identity. The final lock is reduced in frozen source-manifest order only after
 the full shard census and all input identities validate.
 
+The first deployment preflight at revision `0bb4bb5` failed before app creation
+because NumPy 2.5.3 has no Python 3.11 wheel. It launched no worker and produced
+no remote PMO artifact. The corrected runtime uses the repository's established
+Python 3.11 Modal base with its pinned NumPy 1.26.4, SciPy 1.13.1 and RDKit
+2024.03.5 environment. The failure is preserved in
+`diagnostics/pmo_complete_program_decoder/implementation/deploy_failure_0.json`.
+
 ## Scientific question
 
 The earlier held-task-family action gate evaluated WHERE/HOW only after the

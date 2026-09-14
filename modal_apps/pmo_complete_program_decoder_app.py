@@ -40,11 +40,7 @@ MATERIAL_FILES = (
     "diagnostics/pmo_legal_action_policy/attempt_2/runtime_fold_checkpoints.json.gz",
 )
 
-image = base_image.pip_install(
-    "numpy==2.5.3",
-    "scipy==1.18.1",
-    "rdkit==2026.3.6",
-).env(
+image = base_image.env(
     {
         "PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}",
         "PYTHONUNBUFFERED": "1",
