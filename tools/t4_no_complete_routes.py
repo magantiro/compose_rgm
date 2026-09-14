@@ -215,7 +215,19 @@ def prepare():
     )
 
 
-def build_preflight():
+def _preflight_code_revision(explicit=None):
+    if explicit is not None:
+        if (
+            not isinstance(explicit, str)
+            or len(explicit) != 40
+            or any(character not in "0123456789abcdef" for character in explicit)
+        ):
+            raise ValueError("explicit preflight revision must be a full Git commit")
+        return explicit
+    return subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+
+
+def build_preflight(*, code_revision=None):
     """Run exact chemistry checks; production authority requires pinned Modal."""
     if rdBase.rdkitVersion != "2024.03.5":
         raise ValueError("structural preflight requires frozen RDKit 2024.03.5")
@@ -315,9 +327,7 @@ def build_preflight():
         "rdkit": rdBase.rdkitVersion,
         "new_oracle_calls": 0,
         "zero_yield_is_a_preserved_negative_result": True,
-        "code_revision": subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], text=True
-        ).strip(),
+        "code_revision": _preflight_code_revision(code_revision),
     }
 
 

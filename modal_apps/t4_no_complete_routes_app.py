@@ -83,7 +83,7 @@ def structural_preflight(task):
         raise ValueError("structural-preflight launch identity changed")
     for path, digest in task["files_sha256"].items():
         verify_file(REMOTE_ROOT / path, digest)
-    return build_preflight()
+    return build_preflight(code_revision=task["image_revision"]["commit"])
 
 
 @app.function(**common, memory=(2048, 2048), max_containers=1, timeout=300)

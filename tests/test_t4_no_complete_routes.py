@@ -26,6 +26,13 @@ from compose_v4.experiments.t4_no_complete_routes import (
     partition_library,
     recovered_improvement,
 )
+from tools.t4_no_complete_routes import _preflight_code_revision
+
+
+def test_remote_preflight_uses_supplied_validated_revision_without_git():
+    revision = "a" * 40
+
+    assert _preflight_code_revision(revision) == revision
 
 
 def test_remote_app_packages_source_library_for_partition_preflight():
