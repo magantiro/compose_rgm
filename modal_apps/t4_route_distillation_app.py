@@ -16,7 +16,7 @@ from modal_apps.run_process_v2_p50_app import (
 from modal_apps.run_process_v2_p50_app import image as base_image
 
 APP_NAME = "compose-t4-route-distillation"
-OUTPUT = ARTIFACT_ROOT / "t4_route_distillation" / "attempt_1"
+OUTPUT = ARTIFACT_ROOT / "t4_route_distillation" / "attempt_2"
 LOCAL_FILES = (
     "configs/t4_frozen_program_benchmark_v2.json",
     "diagnostics/t4_shared_program_controller/attempt_2/shared_library.json",
@@ -30,6 +30,11 @@ for relative in LOCAL_FILES:
     image = image.add_local_file(
         ROOT / relative, str(REMOTE_ROOT / relative), copy=True
     )
+image = image.add_local_dir(
+    ROOT / "diagnostics/ivg_winner_paths/pairs",
+    str(REMOTE_ROOT / "diagnostics/ivg_winner_paths/pairs"),
+    copy=True,
+)
 
 app = modal.App(APP_NAME)
 

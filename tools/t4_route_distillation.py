@@ -21,9 +21,7 @@ from rdkit import rdBase
 from compose_v4.control.docking_value import identity
 from compose_v4.control.edit_program import (
     EditProgram,
-    ProgramExecutionError,
-    attachment_bindings,
-    execute_bound_program,
+    extract_program,
 )
 from compose_v4.control.option_demonstrations import (
     DemonstrationFitConfig,
@@ -47,6 +45,7 @@ from compose_v4.control.route_distilled_program_policy import (
 )
 from compose_v4.control.trajectory_value import molecule_features
 from compose_v4.experiments.t4_matched_pilot import unseal
+from compose_v4.experiments.winner_paths import replay
 from compose_v4.rewrite.kernel import canonical_state_key
 from compose_v4.rewrite.trace_shard import decode_state
 from tools.t4_program_vocabulary_audit import source_group_map
@@ -57,10 +56,8 @@ LIBRARY = (
     ROOT / "diagnostics/t4_shared_program_controller/attempt_2/shared_library.json"
 )
 SEEDS = ROOT / "docs/GENMOL_T4_SEEDS.json"
-MAX_BINDINGS = 64
-MAX_VISITS = 4096
+WINNER_PAIRS = ROOT / "diagnostics/ivg_winner_paths/pairs"
 MAX_PRIMITIVES = 32
-MAX_BLOCKS = 8
 EXPLORATION_FLOOR = 0.10
 
 
@@ -98,7 +95,53 @@ def _strings(value):
             yield from _strings(child)
 
 
-def _teacher_traces(contract: dict, library: list[dict], groups: dict[str, dict]):
+def _receipt_teachers():
+    """Recover exact teacher traces from their signed source/action receipts."""
+    teachers = defaultdict(list)
+    for path in sorted(WINNER_PAIRS.glob("*.json.gz")):
+        row = json.loads(gzip.decompress(path.read_bytes()))
+        if identity(row["payload"]) != row["payload_sha256"]:
+            raise ValueError(f"corrupt winner-route receipt: {path}")
+        saved = row["payload"]["path"]
+        if saved["status"] != "witness_found" or len(saved["actions"]) > MAX_PRIMITIVES:
+            continue
+        states = replay(saved["source_state"], saved["actions"], row["pair"]["target"])
+        if states != saved["states"]:
+            raise RuntimeError(f"saved winner-route states differ from replay: {path}")
+        source = decode_state(saved["source_state"])
+        stage = {
+            "name": "compiled_complete_transformation",
+            "actions": saved["actions"],
+            "states": states,
+            "endpoint": canonical_state_key(decode_state(states[-1])),
+        }
+        program, _ = extract_program(source, [stage])
+        source_groups = {
+            identity(
+                {
+                    "original_benchmark_seed": row["pair"]["source"],
+                    "target": reference["target"],
+                }
+            )
+            for reference in row["pair"]["references"]
+        }
+        teachers[program.program_id].append(
+            {
+                "source": source,
+                "source_groups": source_groups,
+                "trace": {
+                    "states": states,
+                    "actions": saved["actions"],
+                    "endpoint": stage["endpoint"],
+                },
+                "receipt": str(path.relative_to(ROOT)),
+                "receipt_sha256": sha256(path),
+            }
+        )
+    return teachers
+
+
+def _teacher_traces(library: list[dict]):
     complete = [
         row
         for row in library
@@ -107,52 +150,36 @@ def _teacher_traces(contract: dict, library: list[dict], groups: dict[str, dict]
     ]
     if len(complete) != 77:
         raise ValueError(f"expected 77 complete teachers, found {len(complete)}")
+    receipts = _receipt_teachers()
     traces, exclusions = [], []
     for row in complete:
         program = EditProgram.from_payload(row["program"])
-        accepted = None
-        failures = Counter()
-        for group in sorted(row["source_groups"]):
-            cell = groups[group]["cell"]
-            source = decode_state(contract["cells"][cell]["source_state"])
-            census = attachment_bindings(
-                program,
-                source,
-                max_bindings=MAX_BINDINGS,
-                max_visits=MAX_VISITS,
-                contextual=True,
-            )
-            for assignment in census.assignments:
-                try:
-                    product, trace = execute_bound_program(
-                        source,
-                        program,
-                        assignment,
-                        max_primitives=MAX_PRIMITIVES,
-                        max_blocks=MAX_BLOCKS,
-                    )
-                except ProgramExecutionError as error:
-                    failures[f"ProgramExecutionError:{error.step}"] += 1
-                except ValueError as error:
-                    failures[type(error).__name__] += 1
-                else:
-                    if trace["endpoint"] != canonical_state_key(product):
-                        raise RuntimeError("teacher endpoint differs from exact replay")
-                    accepted = {
-                        "source_group": group,
-                        "program_id": program.program_id,
-                        "source": source,
-                        "trace": trace,
-                    }
-                    break
-            if accepted is not None:
-                break
-        if accepted is None:
+        candidates = [
+            candidate
+            for candidate in receipts.get(program.program_id, [])
+            if candidate["source_groups"] & set(row["source_groups"])
+        ]
+        if not candidates:
             exclusions.append(
-                {"program_id": program.program_id, "failures": dict(failures)}
+                {
+                    "program_id": program.program_id,
+                    "reason": "no_exact_signed_teacher_receipt",
+                }
             )
         else:
-            traces.append(accepted)
+            accepted = min(candidates, key=lambda item: item["receipt"])
+            traces.append(
+                {
+                    "source_group": min(
+                        accepted["source_groups"] & set(row["source_groups"])
+                    ),
+                    "program_id": program.program_id,
+                    "source": accepted["source"],
+                    "trace": accepted["trace"],
+                    "receipt": accepted["receipt"],
+                    "receipt_sha256": accepted["receipt_sha256"],
+                }
+            )
     return traces, exclusions
 
 
@@ -282,7 +309,7 @@ def run(
     library = json.loads(LIBRARY.read_text())
     seed_registry = json.loads(SEEDS.read_text())
     groups = source_group_map(contract, seed_registry)
-    traces, exclusions = _teacher_traces(contract, library, groups)
+    traces, exclusions = _teacher_traces(library)
     if exclusions or len(traces) != 77:
         raise RuntimeError(
             f"teacher replay gate failed: admitted={len(traces)}, exclusions={exclusions}"
@@ -345,6 +372,9 @@ def run(
             "teacher_programs": len(traces),
             "decisions": len(rows),
             "configuration": asdict(config),
+            "teacher_receipts": identity(
+                sorted((row["receipt"], row["receipt_sha256"]) for row in traces)
+            ),
         }
     )
     checkpoint = {
@@ -467,6 +497,9 @@ def run(
             str(CONTRACT.relative_to(ROOT)): sha256(CONTRACT),
             str(LIBRARY.relative_to(ROOT)): sha256(LIBRARY),
             str(SEEDS.relative_to(ROOT)): sha256(SEEDS),
+            "teacher_receipts": {
+                row["receipt"]: row["receipt_sha256"] for row in traces
+            },
         },
         "implementation": {
             "revision": code_revision,
