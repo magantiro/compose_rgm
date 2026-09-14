@@ -1,0 +1,13 @@
+{
+  "app_id": "ap-n9s680Cw7p7JuZgUbOQrXN",
+  "automatic_retry": false,
+  "code_revision": "a213c4a834756c6d80016bffaddeaa118ff47a03",
+  "contract_sha256": "d4d3b5d52d4f4ba221a735eba8a813eebf4d7760517be4163384caacb4a6e496",
+  "failure": "The zero-oracle pinned-environment preflight enumerated both channels independently on every development cell and did not complete within a practical launch interval.",
+  "new_oracle_calls": 0,
+  "remediation": "Replace only the excessive channel-by-cell enumeration with all-cell deterministic replay plus one bounded representative exercise per channel. Preserve every scientific and launch gate.",
+  "schema_version": "t4_dynamic_v2_prequery_failure_v1",
+  "scientific_result_observed": false,
+  "status": "stopped_before_launch",
+  "stopped_at_utc": "2026-09-14T05:36:47Z"
+}

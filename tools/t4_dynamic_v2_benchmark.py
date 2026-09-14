@@ -13,6 +13,7 @@ from dataclasses import replace
 from pathlib import Path
 from time import perf_counter
 
+import numpy as np
 from rdkit import rdBase
 
 from compose_v4.control.dynamic_program_synthesis import synthesize_dynamic_program
@@ -226,9 +227,9 @@ def build_preflight(*, code_revision: str | None = None) -> dict:
         config = replace(
             benchmark.configured(contract, unit),
             seed=contract["cold_start_seed"],
-            candidates_per_batch=4,
-            attempts_per_batch=32,
-            wall_seconds=15,
+            candidates_per_batch=2,
+            attempts_per_batch=8,
+            wall_seconds=5,
         )
         kwargs = {
             "source_group": benchmark.identity(
@@ -273,8 +274,6 @@ def build_preflight(*, code_revision: str | None = None) -> dict:
             ):
                 raise ValueError(f"Dynamic-v2 candidate changed on replay: {unit_id}")
 
-        # Exercise each proposal channel explicitly in the pinned chemistry
-        # environment. This is a structural gate only and makes no oracle call.
         eligible_by_channel = {}
         for channel_index, (channel, synthesizer) in enumerate(
             (
@@ -282,15 +281,11 @@ def build_preflight(*, code_revision: str | None = None) -> dict:
                 (STRUCTURED_CHANNEL, synthesize_structured_program),
             )
         ):
-            channel_candidates = []
-            channel_attempts = 0
-            import numpy as np
-
             rng = np.random.default_rng(
                 np.random.SeedSequence([config.seed, 83, channel_index])
             )
-            for _ in range(64):
-                channel_attempts += 1
+            endpoint = None
+            for channel_attempts in range(1, 13):
                 try:
                     _, _, _, trace, _ = synthesizer(
                         source,
@@ -304,16 +299,16 @@ def build_preflight(*, code_revision: str | None = None) -> dict:
                 if kwargs["eligibility"]({"smiles": trace["endpoint"]}).get(
                     "oracle_eligible"
                 ):
-                    channel_candidates.append(trace["endpoint"])
+                    endpoint = trace["endpoint"]
                     break
-            if not channel_candidates:
+            if endpoint is None:
                 raise ValueError(
                     f"Dynamic-v2 {channel} produced no eligible pinned candidate: "
                     f"{unit_id}"
                 )
             eligible_by_channel[channel] = {
                 "attempts": channel_attempts,
-                "endpoint": channel_candidates[0],
+                "endpoint": endpoint,
             }
 
         optimizer = DynamicV2ProgramOptimizer(
@@ -338,7 +333,7 @@ def build_preflight(*, code_revision: str | None = None) -> dict:
         "passed": len(rows) == 3,
         "contract_sha256": sha256_file(ROOT / CONTRACT),
         "representative_candidates": rows,
-        "preflight_batch_size": 4,
+        "preflight_batch_size": 2,
         "seconds": perf_counter() - began,
         "rdkit": rdBase.rdkitVersion,
         "new_oracle_calls": 0,
