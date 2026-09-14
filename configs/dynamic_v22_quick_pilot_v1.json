@@ -1,5 +1,5 @@
 {
-  "contract_sha256": "dbd855d707ddb289cf23b1b1238ef0ce833d51772ef63d64b5b17923ffe563ec",
+  "contract_sha256": "f31af39aec88ac67e9d6a65b938d5298a5814fd028a188f82f39215d31327fb7",
   "payload": {
     "automatic_retry": false,
     "charged_query_ceiling_per_unit": 256,
@@ -21,7 +21,7 @@
         "primitives": 32
       }
     },
-    "launch_authorized": false,
+    "launch_authorized": true,
     "primary_output": "complete exact-executed molecular endpoint",
     "required_logging": [
       "proposal attempts and persistent attempt keys",
@@ -33,7 +33,7 @@
     ],
     "schema_version": "dynamic_v22_quick_pilot_contract_v1",
     "scientific_problem": "allocate charged evaluations to productive parent-edit combinations while retaining a persistent proposal-only feasibility frontier",
-    "status": "implementation_ready_not_launched",
+    "status": "implementation_ready_launch_authorized",
     "task_adapters": {
       "pmo": {
         "archive_k": 10,

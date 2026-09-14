@@ -2,7 +2,7 @@
 
 ## Status and scope
 
-Dynamic-v2.2 is an implemented, unlaunched development revision. It does not
+Dynamic-v2.2 is an implemented, launch-authorized development revision. It does not
 modify or consume the live T4 or PMO Dynamic-v2.1 runs. Its proposed quick
 pilot is limited to 256 charged calls each on T4 FA7 seed 0, BRAF seed 1 and
 JAK2 seed 1, plus PMO GSK3B and C7H8N2O2 isomers. A separate launch lock is

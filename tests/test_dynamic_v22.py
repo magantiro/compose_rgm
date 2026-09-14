@@ -234,7 +234,7 @@ def test_quick_pilot_contract_is_exact_and_excludes_runtime_comparators():
     assert tuple(contract["payload"]["task_adapters"]["pmo"]["tasks"]) == PMO_TASKS
     assert contract["payload"]["charged_query_ceiling_per_unit"] == QUERY_BUDGET
     assert contract["payload"]["controller_core"]["runtime_comparator_or_winner_inputs"] == []
-    assert contract["payload"]["launch_authorized"] is False
+    assert contract["payload"]["launch_authorized"] is True
     t4 = DynamicV22PilotAdapter("t4", "t4:fixture", "fixture")
     pmo = DynamicV22PilotAdapter("pmo", "pmo:fixture", "fixture")
     assert t4.policy.archive_k == 1 and pmo.policy.archive_k == 10

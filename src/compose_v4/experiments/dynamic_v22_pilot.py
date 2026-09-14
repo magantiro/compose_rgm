@@ -85,7 +85,7 @@ class DynamicV22PilotAdapter:
 def quick_pilot_contract() -> dict:
     payload = {
         "schema_version": SCHEMA,
-        "status": "implementation_ready_not_launched",
+        "status": "implementation_ready_launch_authorized",
         "scientific_problem": (
             "allocate charged evaluations to productive parent-edit combinations while "
             "retaining a persistent proposal-only feasibility frontier"
@@ -120,7 +120,7 @@ def quick_pilot_contract() -> dict:
         },
         "charged_query_ceiling_per_unit": QUERY_BUDGET,
         "total_new_call_ceiling": QUERY_BUDGET * (len(T4_CELLS) + len(PMO_TASKS)),
-        "launch_authorized": False,
+        "launch_authorized": True,
         "automatic_retry": False,
         "required_logging": [
             "proposal attempts and persistent attempt keys",
