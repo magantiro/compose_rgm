@@ -2,8 +2,8 @@
   "payload": {
     "schema_version": "pmo_complete_program_decoder_contract_v1",
     "authorization": "2026-09-14 user authorized a bounded zero-oracle PMO complete-program decoder gate",
-    "mode": "implementation_only_awaiting_authoritative_legal_action_rerun",
-    "authoritative_execution_enabled": false,
+    "mode": "authoritative_zero_oracle_durable_source_case_decoder_gate",
+    "authoritative_execution_enabled": true,
     "split_identity": "a8495010f23ee78bd2287837578a6167b933395bfe1343028ddab32eb4e5070d",
     "inputs": {
       "panel_corpus": {
@@ -21,7 +21,16 @@
         "sha256": "5e08b8e2c4f765880428ab4b4ae3afd436cb4021aea4e3248bb010d34243d5d6",
         "payload_sha256": "44e557f0de8eadc15f6fa0237c77db1a9e0efbacc2c1f35217eac5dce9a2de56"
       },
-      "legal_action_authoritative": null,
+      "legal_action_authoritative": {
+        "path": "diagnostics/pmo_legal_action_policy/attempt_2/runtime_fold_checkpoints.json.gz",
+        "sha256": "e6336cfbcccef71b08434bde4e22a9f2b73cb3d1869f82caa844a87520c2a3a4",
+        "payload_sha256": "86612810f7c832595a96d0360fb6fbdd5d32479bae340dbd3fa9918cbe604684",
+        "result_path": "diagnostics/pmo_legal_action_policy/attempt_2/result.json",
+        "result_sha256": "4b54872e6c21cda0734a62c9b167bf47cefa47222e65b9afc190f6e91aa61f86",
+        "result_payload_sha256": "e77fb056e8a4f2895ee887f9937918bb7a002d7bae93593d50853452a9ea87a7",
+        "code_revision": "61f816b4accedfd5d89eb03b3fdbac1e4699266c",
+        "authoritative": true
+      },
       "legal_action_preview_fixture_only": {
         "path": "diagnostics/pmo_legal_action_policy/attempt_1/runtime_fold_checkpoints.json.gz",
         "sha256": "e6336cfbcccef71b08434bde4e22a9f2b73cb3d1869f82caa844a87520c2a3a4",
@@ -74,6 +83,25 @@
       "separate_evaluator_process": true,
       "refuse_overwrite": true
     },
+    "execution": {
+      "mode": "durable_source_case_shards",
+      "source_case_shards": 9,
+      "maximum_concurrent_single_cpu_workers": 9,
+      "automatic_retries": 0,
+      "progress_publish_seconds": 30,
+      "restart_unit": "one_source_fold_case",
+      "deterministic_manifest_order_merge": true,
+      "modal_volume": "compose-v4-artifacts",
+      "worker_timeout_seconds": 21600,
+      "worker_memory_mb": 4096,
+      "estimated_cpu_hours_ceiling": 54,
+      "python_version": "3.11",
+      "numpy_version": "2.5.3",
+      "scipy_version": "1.18.1",
+      "rdkit_version": "2026.03.6",
+      "oracle_calls": 0,
+      "docking_calls": 0
+    },
     "scientific_gate": {
       "primary_beam_width": 8,
       "primary_depth": 32,
@@ -91,10 +119,12 @@
       "task_identity_during_generation",
       "flat_or_hierarchical_sequence_policy",
       "action_support_change",
-      "modal_launch",
+      "modal_workers_above_9",
+      "automatic_retry",
+      "scored_pmo_launch",
       "t4_changes",
       "prior_artifact_changes"
     ]
   },
-  "contract_sha256": "0b297c8c6069e97270080c821fed991e4619c6c598bf90d5255f296975877d38"
+  "contract_sha256": "3cc5e4b543856748ad1e38faf4b7f1a858ef556bcd78a1d77f8eb4b648d28965"
 }

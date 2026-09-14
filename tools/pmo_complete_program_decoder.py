@@ -35,9 +35,11 @@ DEFAULT_GENERATION = Path("diagnostics/pmo_complete_program_decoder/attempt_1")
 IMPLEMENTATION_PATHS = (
     CONTRACT,
     Path("docs/PMO_COMPLETE_PROGRAM_DECODER.md"),
+    Path("modal_apps/pmo_complete_program_decoder_app.py"),
     Path("src/compose_v4/experiments/pmo_complete_program_decoder.py"),
     Path("tests/test_pmo_complete_program_decoder.py"),
     Path("tools/pmo_complete_program_decoder.py"),
+    Path("tools/pmo_complete_program_decoder_parallel.py"),
 )
 
 
@@ -213,6 +215,10 @@ def generate(
     output: Path,
 ) -> None:
     legal_specification = _require_authoritative_execution(contract)
+    if contract.get("execution", {}).get("mode") == "durable_source_case_shards":
+        raise RuntimeError(
+            "authoritative generation requires the durable source-case shard launcher"
+        )
     _require_committed_implementation(root)
     source_manifest, source_manifest_payload_sha256 = _load_envelope(
         root / source_manifest_path

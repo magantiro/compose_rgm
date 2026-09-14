@@ -271,6 +271,7 @@ def decode_source(
         enumerate_rule_successors
     ),
     learned_scorer: Callable[[object, LegalSuccessor, dict], float] | None = None,
+    progress_callback: Callable[[dict], None] | None = None,
 ) -> dict:
     """Decode one autonomous complete-program beam without teacher information."""
 
@@ -404,6 +405,17 @@ def decode_source(
             snapshots[str(depth)] = _ranked_candidates(
                 completed, config.output_cutoffs[-1]
             )
+        if progress_callback is not None:
+            progress_callback(
+                {
+                    "decoder": decoder,
+                    "beam_width": beam_width,
+                    "depth": depth,
+                    "maximum_depth": config.maximum_primitives,
+                    "live_prefixes": len(live),
+                    "telemetry": dict(telemetry),
+                }
+            )
         if not live and depth < config.maximum_primitives:
             for future in config.snapshot_depths:
                 if future > depth:
@@ -428,6 +440,135 @@ def decode_source(
     }
 
 
+def _configuration_payload(config: DecoderConfig) -> dict:
+    return {
+        "beam_widths": list(config.beam_widths),
+        "snapshot_depths": list(config.snapshot_depths),
+        "output_cutoffs": list(config.output_cutoffs),
+        "successors_per_rule": config.successors_per_rule,
+        "maximum_primitives": config.maximum_primitives,
+        "maximum_components": config.maximum_components,
+        "maximum_active_atoms": config.maximum_active_atoms,
+    }
+
+
+def build_candidate_case(
+    source_case: dict,
+    dependency_runtime: dict,
+    legal_runtime: dict,
+    config: DecoderConfig,
+    *,
+    progress_callback: Callable[[dict], None] | None = None,
+) -> dict:
+    """Generate one independently restartable teacher-free source case."""
+
+    validate_fold_checkpoints(dependency_runtime, legal_runtime)
+    dependency = _fold_rows(dependency_runtime)
+    legal = _fold_rows(legal_runtime)
+    required = {
+        "source_case_id",
+        "fold",
+        "source_state",
+        "source_state_identity",
+    }
+    if set(source_case) != required:
+        raise ValueError("source case fields changed")
+    fold = int(source_case["fold"])
+    if fold not in dependency or fold not in legal:
+        raise ValueError("source case fold lacks a matched checkpoint")
+    if identity(source_case["source_state"]) != source_case["source_state_identity"]:
+        raise ValueError("source case state identity changed")
+    expected_case_id = identity(
+        {
+            "schema_version": "pmo_decoder_source_case_v1",
+            "fold": fold,
+            "state_identity": source_case["source_state_identity"],
+        }
+    )
+    if source_case["source_case_id"] != expected_case_id:
+        raise ValueError("source case identity changed")
+    source = decode_state(source_case["source_state"])
+    decoders = []
+    for decoder in DECODERS:
+        for width in config.beam_widths:
+            decoders.append(
+                decode_source(
+                    source,
+                    dependency[fold],
+                    legal[fold],
+                    decoder=decoder,
+                    beam_width=width,
+                    config=config,
+                    progress_callback=progress_callback,
+                )
+            )
+    return {
+        "source_case_id": source_case["source_case_id"],
+        "fold": fold,
+        "source_state": source_case["source_state"],
+        "source_state_identity": source_case["source_state_identity"],
+        "decoders": decoders,
+    }
+
+
+def candidate_lock_from_cases(
+    source_manifest: dict,
+    cases: Iterable[dict],
+    config: DecoderConfig,
+) -> dict:
+    """Deterministically merge a complete independently generated case census."""
+
+    if source_manifest.get("schema_version") != SOURCE_MANIFEST_SCHEMA:
+        raise ValueError("source manifest schema mismatch")
+    if source_manifest.get("teacher_fields_present") is not False:
+        raise ValueError("source manifest is not teacher-free")
+    if source_manifest.get("task_identity_present") is not False:
+        raise ValueError("source manifest contains task identity")
+    expected = {
+        row["source_case_id"]: row for row in source_manifest.get("source_cases", ())
+    }
+    observed = {}
+    expected_pairs = {
+        (decoder, width) for decoder in DECODERS for width in config.beam_widths
+    }
+    for case in cases:
+        case_id = case.get("source_case_id")
+        if case_id in observed:
+            raise ValueError(f"duplicate decoder source case: {case_id}")
+        source = expected.get(case_id)
+        if source is None:
+            raise ValueError(f"unexpected decoder source case: {case_id}")
+        for field in ("fold", "source_state", "source_state_identity"):
+            if case.get(field) != source[field]:
+                raise ValueError(f"decoder source case changed {field}: {case_id}")
+        pairs = {
+            (row.get("decoder"), row.get("beam_width"))
+            for row in case.get("decoders", ())
+        }
+        if pairs != expected_pairs or len(case.get("decoders", ())) != len(
+            expected_pairs
+        ):
+            raise ValueError(f"decoder arm/width census changed: {case_id}")
+        observed[case_id] = case
+    if set(observed) != set(expected):
+        missing = sorted(set(expected) - set(observed))
+        raise ValueError(f"decoder source-case census incomplete: {missing}")
+    ordered = [
+        observed[row["source_case_id"]] for row in source_manifest["source_cases"]
+    ]
+    return {
+        "schema_version": CANDIDATE_LOCK_SCHEMA,
+        "split_identity": source_manifest["split_identity"],
+        "configuration": _configuration_payload(config),
+        "sequence_policy": "balanced_generic_marginal_rule_and_program_control",
+        "decoder_arms": list(DECODERS),
+        "source_cases": ordered,
+        "teacher_fields_present": False,
+        "task_identity_present": False,
+        "new_oracle_calls": 0,
+    }
+
+
 def build_candidate_lock(
     source_manifest: dict,
     dependency_runtime: dict,
@@ -443,54 +584,11 @@ def build_candidate_lock(
     if source_manifest.get("task_identity_present") is not False:
         raise ValueError("source manifest contains task identity")
     validate_fold_checkpoints(dependency_runtime, legal_runtime)
-    dependency = _fold_rows(dependency_runtime)
-    legal = _fold_rows(legal_runtime)
-    cases = []
-    for source_case in source_manifest["source_cases"]:
-        fold = int(source_case["fold"])
-        source = decode_state(source_case["source_state"])
-        decoders = []
-        for decoder in DECODERS:
-            for width in config.beam_widths:
-                decoders.append(
-                    decode_source(
-                        source,
-                        dependency[fold],
-                        legal[fold],
-                        decoder=decoder,
-                        beam_width=width,
-                        config=config,
-                    )
-                )
-        cases.append(
-            {
-                "source_case_id": source_case["source_case_id"],
-                "fold": fold,
-                "source_state": source_case["source_state"],
-                "source_state_identity": source_case["source_state_identity"],
-                "decoders": decoders,
-            }
-        )
-    payload = {
-        "schema_version": CANDIDATE_LOCK_SCHEMA,
-        "split_identity": source_manifest["split_identity"],
-        "configuration": {
-            "beam_widths": list(config.beam_widths),
-            "snapshot_depths": list(config.snapshot_depths),
-            "output_cutoffs": list(config.output_cutoffs),
-            "successors_per_rule": config.successors_per_rule,
-            "maximum_primitives": config.maximum_primitives,
-            "maximum_components": config.maximum_components,
-            "maximum_active_atoms": config.maximum_active_atoms,
-        },
-        "sequence_policy": "balanced_generic_marginal_rule_and_program_control",
-        "decoder_arms": list(DECODERS),
-        "source_cases": cases,
-        "teacher_fields_present": False,
-        "task_identity_present": False,
-        "new_oracle_calls": 0,
-    }
-    return payload
+    cases = [
+        build_candidate_case(source_case, dependency_runtime, legal_runtime, config)
+        for source_case in source_manifest["source_cases"]
+    ]
+    return candidate_lock_from_cases(source_manifest, cases, config)
 
 
 def seal_candidate_lock(payload: dict) -> dict:
@@ -935,7 +1033,9 @@ __all__ = [
     "SOURCE_MANIFEST_SCHEMA",
     "UNIFORM",
     "DecoderConfig",
+    "build_candidate_case",
     "build_candidate_lock",
+    "candidate_lock_from_cases",
     "decode_source",
     "evaluate_candidate_lock",
     "seal_candidate_lock",

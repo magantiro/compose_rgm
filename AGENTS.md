@@ -568,6 +568,27 @@ configuration, tests and documentation are committed. This milestone is
 CPU-only and zero-oracle. It may not call an oracle or docking function, launch
 Modal, access live runs, alter T4, or modify any prior artifact.
 
+**Scoped durable parallel execution for the PMO complete-program decoder,
+2026-09-14:** after the clean-commit legal WHERE/HOW rerun completed unchanged,
+the user explicitly requested full-speed PMO progress with iterative durable
+publication. Preserve the decoder's frozen source cases, folds, checkpoints,
+rule and stop probabilities, exact legal fibers, learned WHERE/HOW scores,
+beam widths, depths, output cutoffs, support limits, candidate identity and
+evaluation gates. Execute exactly one of the nine predeclared teacher-free
+source/fold cases per shard, with at most nine concurrent single-CPU Modal
+workers, zero automatic retries and zero oracle or docking calls. Publish a
+live operational progress record at least every 30 seconds when work advances,
+an immutable completed shard and a separate compute receipt. A stopped or
+failed case may be recomputed only as that same case under the same task and
+input identities; completed shards remain immutable. Deterministically merge
+only after verifying the complete nine-case census, exact manifest order,
+split, configuration, code, input and zero-oracle identities. Load teacher
+routes and endpoints only in the separate evaluator after the candidate lock
+and generation receipt validate. Preserve null and failed outcomes. This
+operational amendment authorizes the zero-oracle Modal decoder gate only. It
+does not authorize a scored PMO pilot, oracle access, scientific-policy or
+support changes, automatic retry, more than nine CPUs, T4 access or T4 changes.
+
 **Scoped T4 route-distilled Dynamic COMPOSE development, 2026-09-14:** after
 Dynamic-v2.2 recovered the Full-146 BRAF seed-1 score early but remained far
 behind on JAK2 and candidate-starved on FA7, the user explicitly authorized

@@ -3,12 +3,18 @@
 ## Status
 
 This milestone implements a CPU-only, zero-oracle complete-program decoder. It
-does not authorize a scored PMO run. Authoritative execution is intentionally
-disabled in `configs/pmo_complete_program_decoder_v1.json` until the upstream
-legal WHERE/HOW result is rerun unchanged from clean committed source and its
-runtime checkpoint is pinned in this contract. The current legal-action
-`attempt_1` artifact is non-authoritative and is permitted only for focused
-implementation fixtures.
+does not authorize a scored PMO run. The legal WHERE/HOW result was rerun
+unchanged from clean committed revision `61f816b`, preserved as `attempt_2`, and
+its runtime checkpoint is now pinned as the authoritative decoder input.
+Legal-action `attempt_1` remains a non-authoritative implementation preview.
+
+Generation is partitioned into the nine frozen teacher-free source/fold cases.
+Each case publishes live operational progress, one immutable candidate shard
+and a separate compute receipt. At most nine single-CPU Modal workers run with
+zero automatic retries. Completed cases are independently reusable, while a
+failed or interrupted case can be recomputed only under the same sealed task
+identity. The final lock is reduced in frozen source-manifest order only after
+the full shard census and all input identities validate.
 
 ## Scientific question
 
@@ -51,10 +57,11 @@ sequence, not raw slot-address payloads.
 
 The candidate lock is deterministic and contains zero teachers, task identity,
 task scores, oracle calls, and timestamps. Runtime and memory measurements are
-written to a separate receipt so they cannot change candidate identity.
-Authoritative generation also refuses to run unless the implementation,
-contract, documentation, and focused test files are tracked, committed, and
-unchanged. Their physical hashes and the Git revision are recorded in the lock.
+written to separate shard and aggregate receipts so they cannot change candidate
+identity. Authoritative generation also refuses to launch unless the
+implementation, contract, documentation, source manifest and focused test files
+are tracked, committed, and unchanged. Their physical hashes and the Git
+revision are recorded in the lock.
 
 ## Evaluation contract
 
@@ -83,17 +90,23 @@ pilot.
 
 ## Commands
 
-After the authoritative legal-action input is pinned and the contract is
-rehash-sealed, the workflow is intentionally split:
+The workflow is intentionally split:
 
 ```bash
 PYTHONPATH=src python tools/pmo_complete_program_decoder.py prepare-sources
-PYTHONPATH=src python tools/pmo_complete_program_decoder.py generate
-PYTHONPATH=src python tools/pmo_complete_program_decoder.py evaluate
+modal deploy modal_apps/pmo_complete_program_decoder_app.py
+PYTHONPATH=src python tools/pmo_complete_program_decoder_parallel.py launch
+PYTHONPATH=src python tools/pmo_complete_program_decoder_parallel.py status
+PYTHONPATH=src python tools/pmo_complete_program_decoder_parallel.py collate
+PYTHONPATH=src python tools/pmo_complete_program_decoder_parallel.py evaluate
+PYTHONPATH=src python tools/pmo_complete_program_decoder_parallel.py final-status
+PYTHONPATH=src python tools/pmo_complete_program_decoder_parallel.py download
 ```
 
-In the current implementation-only state, `generate` and `evaluate` fail
-closed. `prepare-sources` is safe but is not required for focused unit tests.
+The legacy monolithic `generate` command fails closed under the authoritative
+durable-shard contract. `prepare-sources` remains local and zero-oracle. The
+Modal evaluator cannot start until all nine source shards and the independent
+collation call are complete.
 
 ## Claim boundary
 
