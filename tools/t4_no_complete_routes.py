@@ -46,6 +46,8 @@ from compose_v4.experiments.t4_no_complete_routes import (
     CONTRACT,
     LIBRARY,
     PREFLIGHT,
+    PREFLIGHT_PACKAGING_FAILURE,
+    PREFLIGHT_PACKAGING_SOURCE,
     SELECTED_UNITS,
     SOURCE_CONTRACT,
     SOURCE_LIBRARY,
@@ -328,6 +330,77 @@ def preflight():
     print(json.dumps(body, indent=2))
 
 
+def repair_preflight_packaging():
+    """Record the zero-query packaging failure and seal its narrow repair."""
+    contract_path = ROOT / CONTRACT
+    failure_path = ROOT / PREFLIGHT_PACKAGING_FAILURE
+    if (ROOT / PREFLIGHT).exists() or RECEIPT.exists() or failure_path.exists():
+        raise ValueError("packaging repair prerequisites changed or already consumed")
+    if (
+        sha256_file(contract_path)
+        != PREFLIGHT_PACKAGING_SOURCE["source_contract_sha256"]
+    ):
+        raise ValueError("packaging repair source contract changed")
+    contract = unseal(contract_path)
+    for path, digest in PREFLIGHT_PACKAGING_SOURCE["source_input_sha256"].items():
+        if contract["inputs"].get(path) != digest:
+            raise ValueError(f"packaging repair source input changed: {path}")
+    failure = {
+        "schema_version": "t4_no_complete_routes_prequery_failure_v1",
+        "status": "failed_before_oracle_query",
+        "failure_stage": "remote_structural_preflight_input_presence",
+        "source": PREFLIGHT_PACKAGING_SOURCE,
+        "missing_remote_material": SOURCE_LIBRARY,
+        "error_type": "FileNotFoundError",
+        "error": (
+            "/root/compose/diagnostics/t4_shared_program_controller/"
+            "attempt_2/shared_library.json was absent from the Modal image"
+        ),
+        "oracle_calls_started": 0,
+        "oracle_calls_completed": 0,
+        "task_score_information_observed": False,
+        "automatic_retry": False,
+        "repair": (
+            "Package the unchanged hash-bound source 146-program library solely "
+            "for the mechanical 146=69+77 preflight verification; preserve all "
+            "scientific settings and rerun the zero-oracle preflight."
+        ),
+    }
+    seal(failure_path, failure)
+    updated_inputs = (
+        APP,
+        "docs/T4_NO_COMPLETE_ROUTES_DIAGNOSTIC.md",
+        "src/compose_v4/experiments/t4_no_complete_routes.py",
+        "tools/t4_no_complete_routes.py",
+    )
+    for path in updated_inputs:
+        contract["inputs"][path] = sha256_file(ROOT / path)
+    contract["complete_route_ablation"]["preflight_packaging_repairs"] = [
+        {
+            "source": PREFLIGHT_PACKAGING_SOURCE,
+            "failure_path": PREFLIGHT_PACKAGING_FAILURE,
+            "failure_sha256": sha256_file(failure_path),
+            "added_remote_material": SOURCE_LIBRARY,
+            "oracle_calls": 0,
+            "scientific_policy_changed": False,
+        }
+    ]
+    seal(contract_path, contract)
+    load_contract(ROOT)
+    print(
+        json.dumps(
+            {
+                "status": "repaired",
+                "contract_sha256": sha256_file(contract_path),
+                "failure_sha256": sha256_file(failure_path),
+                "added_remote_material": SOURCE_LIBRARY,
+                "oracle_calls": 0,
+            },
+            indent=2,
+        )
+    )
+
+
 def remote_preflight():
     """Obtain the authoritative zero-oracle chemistry check from pinned Modal."""
     import modal
@@ -578,6 +651,7 @@ def main():
         choices=(
             "prepare",
             "preflight",
+            "repair-preflight-packaging",
             "remote-preflight",
             "launch",
             "status",
@@ -591,6 +665,8 @@ def main():
         prepare()
     elif args.mode == "preflight":
         preflight()
+    elif args.mode == "repair-preflight-packaging":
+        repair_preflight_packaging()
     elif args.mode == "remote-preflight":
         remote_preflight()
     elif args.mode == "launch":

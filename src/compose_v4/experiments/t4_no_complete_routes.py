@@ -43,6 +43,27 @@ SOURCE_LIBRARY = (
 )
 LIBRARY = "diagnostics/t4_no_complete_routes/attempt_1/library_69.json"
 SELECTED_UNITS = ("5ht1b_0_r0", "braf_1_r0", "jak2_1_r0")
+PREFLIGHT_PACKAGING_FAILURE = (
+    "diagnostics/t4_no_complete_routes/attempt_1/prequery_failure_0001.json"
+)
+PREFLIGHT_PACKAGING_SOURCE = {
+    "source_commit": "ddf92515c8371dc4537075a34ca4e0494075b8eb",
+    "source_contract_sha256": (
+        "7af070e626575b8e09303a8d84f5e2396ee04830cd841ae720afad53822c7a91"
+    ),
+    "source_input_sha256": {
+        APP: "147a7769fdbe1cb522854e57dc30ae633c2da5270b35912a7eddd37b07248e19",
+        "docs/T4_NO_COMPLETE_ROUTES_DIAGNOSTIC.md": (
+            "8c151e046fd1629ac4bf47a3a0e13346032869ad3cc81b247b6759e077dfcc65"
+        ),
+        "src/compose_v4/experiments/t4_no_complete_routes.py": (
+            "fb63196b23bb015a69fc159733b528bc60b3231694662dc14b6d264958933ae0"
+        ),
+        "tools/t4_no_complete_routes.py": (
+            "b0759625f64d1226ce0d9eb0ce480ec8343ee905ce46cf40772d9f73f8d4fad2"
+        ),
+    },
+}
 COMPATIBILITY_REPINS = {
     "src/compose_v4/control/adaptive_program_optimizer.py": {
         "source_sha256": "587a222c2f517cadf43c4d8e01a9239576992634f133329a073eccfa89b94bcb",
@@ -138,6 +159,18 @@ def validate_ablation_contract(root: Path, contract: dict) -> None:
         raise ValueError("dynamic-only proposal contract changed")
     if diagnostic.get("runtime_compatibility_repins") != COMPATIBILITY_REPINS:
         raise ValueError("frozen-source compatibility repin ledger changed")
+    repairs = diagnostic.get("preflight_packaging_repairs")
+    if repairs is not None and (
+        len(repairs) != 1
+        or repairs[0].get("source") != PREFLIGHT_PACKAGING_SOURCE
+        or repairs[0].get("failure_path") != PREFLIGHT_PACKAGING_FAILURE
+        or repairs[0].get("failure_sha256")
+        != sha256_file(root / PREFLIGHT_PACKAGING_FAILURE)
+        or repairs[0].get("added_remote_material") != SOURCE_LIBRARY
+        or repairs[0].get("oracle_calls") != 0
+        or repairs[0].get("scientific_policy_changed") is not False
+    ):
+        raise ValueError("preflight packaging repair lineage changed")
     if contract["library_path"] != LIBRARY or contract["library_programs"] != 69:
         raise ValueError("diagnostic did not select the exact 69-program library")
 

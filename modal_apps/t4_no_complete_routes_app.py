@@ -20,12 +20,18 @@ APP_PATH = "modal_apps/t4_no_complete_routes_app.py"
 APP_NAME = "compose-t4-no-complete-routes"
 
 manifest = json.loads((ROOT / CONTRACT).read_text())["payload"]
+SOURCE_LIBRARY = manifest["complete_route_ablation"]["source_library"]
 image = (
     base_image.add_local_file(ROOT / APP_PATH, str(REMOTE_ROOT / APP_PATH), copy=True)
     .add_local_file(ROOT / CONTRACT, str(REMOTE_ROOT / CONTRACT), copy=True)
     .add_local_file(
         ROOT / manifest["library_path"],
         str(REMOTE_ROOT / manifest["library_path"]),
+        copy=True,
+    )
+    .add_local_file(
+        ROOT / SOURCE_LIBRARY,
+        str(REMOTE_ROOT / SOURCE_LIBRARY),
         copy=True,
     )
 )

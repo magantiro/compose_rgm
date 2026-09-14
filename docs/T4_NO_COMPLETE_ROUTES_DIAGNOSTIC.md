@@ -151,6 +151,21 @@ The official frozen T4 rescue remains operationally independent. This
 diagnostic may reuse completed official results read-only, but it may not alter,
 restart or finish an official unit.
 
+## Preflight packaging repair
+
+The first remote structural-preflight invocation stopped before any docking
+query because the Modal image contained the mechanically derived 69-program
+library but did not contain the unchanged source 146-program library needed to
+verify the exact partition. The failure is preserved at
+`diagnostics/t4_no_complete_routes/attempt_1/prequery_failure_0001.json`.
+
+The bounded repair adds that hash-bound source file to the remote image solely
+for read-only partition verification. It does not expose the source library to
+the Dynamic-only optimizer, alter either proposal law, change an endpoint gate,
+or authorize an oracle retry. The derived contract records the old commit,
+contract and input hashes, the failure-artifact hash and the added remote
+material. The same zero-oracle preflight must pass before launch.
+
 ## Acceptance
 
 Before launch:
