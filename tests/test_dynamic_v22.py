@@ -30,6 +30,13 @@ from compose_v4.experiments.editing_v2_evaluation_semantics import (
     production_state_from_smiles,
 )
 from compose_v4.rewrite.trace_shard import encode_state
+from tools.dynamic_v22_pilot import (
+    _function_call_state,
+    _pmo_artifact_root,
+    _require_new_artifacts,
+    _verified_t4_failure_receipt,
+    contains_forbidden_runtime_input,
+)
 
 
 class _Search:
@@ -159,7 +166,10 @@ def test_frontier_state_advances_rng_and_attempt_identity_without_oracle_calls()
     assert first["new_oracle_calls"] == second["new_oracle_calls"] == 0
     assert first["frontier_state"]["wave"] == 1
     assert second["frontier_state"]["wave"] == 2
-    assert second["frontier_state"]["state_sha256"] != first["frontier_state"]["state_sha256"]
+    assert (
+        second["frontier_state"]["state_sha256"]
+        != first["frontier_state"]["state_sha256"]
+    )
     assert second["frontier_state"]["attempts"] > first["frontier_state"]["attempts"]
     assert set(first["frontier_state"]["attempt_keys"]) <= set(
         second["frontier_state"]["attempt_keys"]
@@ -220,9 +230,13 @@ def test_v22_snapshot_round_trip_preserves_task_model_boundary():
     optimizer.structured_rng.random(2)
     restored = DynamicV22ProgramOptimizer.restore(optimizer.snapshot(), hierarchy=None)
     assert restored.policy_config == DynamicV22PolicyConfig.for_pmo()
-    assert restored.shallow_rng.bit_generator.state == optimizer.shallow_rng.bit_generator.state
     assert (
-        restored.structured_rng.bit_generator.state == optimizer.structured_rng.bit_generator.state
+        restored.shallow_rng.bit_generator.state
+        == optimizer.shallow_rng.bit_generator.state
+    )
+    assert (
+        restored.structured_rng.bit_generator.state
+        == optimizer.structured_rng.bit_generator.state
     )
     assert restored.parent_edit_model is None
 
@@ -233,14 +247,133 @@ def test_quick_pilot_contract_is_exact_and_excludes_runtime_comparators():
     assert tuple(contract["payload"]["task_adapters"]["t4"]["cells"]) == T4_CELLS
     assert tuple(contract["payload"]["task_adapters"]["pmo"]["tasks"]) == PMO_TASKS
     assert contract["payload"]["charged_query_ceiling_per_unit"] == QUERY_BUDGET
-    assert contract["payload"]["controller_core"]["runtime_comparator_or_winner_inputs"] == []
+    assert (
+        contract["payload"]["controller_core"]["runtime_comparator_or_winner_inputs"]
+        == []
+    )
     assert contract["payload"]["launch_authorized"] is True
     t4 = DynamicV22PilotAdapter("t4", "t4:fixture", "fixture")
     pmo = DynamicV22PilotAdapter("pmo", "pmo:fixture", "fixture")
     assert t4.policy.archive_k == 1 and pmo.policy.archive_k == 10
 
 
-def test_t4_runner_persists_frontier_across_zero_candidate_rounds(tmp_path, monkeypatch):
+def test_launch_validation_ignores_provenance_filenames_but_not_runtime_inputs():
+    task = {
+        "cell": "braf_1",
+        "oracle_protocol": "t4:docking",
+        "image_revision": {
+            "serialized_sources": {
+                "configs/comparator_registry_v1.json": "a" * 64,
+                "src/compose_v4/control/winner_imitation.py": "b" * 64,
+            }
+        },
+        "files_sha256": {"tools/dynamic_v22_pilot.py": "c" * 64},
+    }
+    assert contains_forbidden_runtime_input(task) is False
+    assert contains_forbidden_runtime_input(
+        {**task, "runtime_comparator_or_winner_inputs": ["forbidden"]}
+    )
+
+
+def test_missing_artifact_call_status_reports_pre_oracle_failure():
+    class FailedCall:
+        def get(self, *, timeout):
+            assert timeout == 0
+            raise ValueError(
+                "T4 Dynamic-v2.2 task is absent from the clean launch lock"
+            )
+
+    class FunctionCall:
+        @staticmethod
+        def from_id(call_id):
+            assert call_id == "fc-fixture"
+            return FailedCall()
+
+    class Error(Exception):
+        pass
+
+    modal_fixture = type(
+        "ModalFixture",
+        (),
+        {
+            "FunctionCall": FunctionCall,
+            "exception": type("Exception", (), {"Error": Error}),
+        },
+    )
+    state = _function_call_state(modal_fixture, "fc-fixture")
+    assert state["status"] == "failed"
+    assert state["calls"] == 0
+    assert state["call_count_basis"] == "pre_oracle_launch_validation"
+
+
+def test_relaunch_requires_exact_old_failures_and_never_overwrites(tmp_path):
+    class FailedCall:
+        def get(self, *, timeout):
+            assert timeout == 0
+            raise ValueError(
+                "T4 Dynamic-v2.2 task is absent from the clean launch lock"
+            )
+
+    class FunctionCall:
+        @staticmethod
+        def from_id(_call_id):
+            return FailedCall()
+
+    class Error(Exception):
+        pass
+
+    modal_fixture = type(
+        "ModalFixture",
+        (),
+        {
+            "FunctionCall": FunctionCall,
+            "exception": type("Exception", (), {"Error": Error}),
+        },
+    )
+    receipt = {
+        "receipt_sha256": "d" * 64,
+        "t4_function_call_ids": {"braf_1": "fc-1", "fa7_0": "fc-2"},
+    }
+    failure = _verified_t4_failure_receipt(receipt, modal_fixture)
+    assert failure["total_charged_oracle_calls"] == 0
+    assert [row["cell"] for row in failure["failures"]] == ["braf_1", "fa7_0"]
+    assert failure["failure_receipt_sha256"] == identity(
+        {
+            key: value
+            for key, value in failure.items()
+            if key != "failure_receipt_sha256"
+        }
+    )
+
+    destination = tmp_path / "launch_v2.json"
+    _require_new_artifacts(destination)
+    destination.write_text("already sealed")
+    try:
+        _require_new_artifacts(destination)
+    except ValueError as error:
+        assert "inspect rather than overwrite" in str(error)
+    else:
+        raise AssertionError("a relaunch receipt must be immutable")
+
+
+def test_pmo_status_finds_legacy_nested_artifact_root(tmp_path):
+    receipt = {"pmo_output_root": "diagnostics/dynamic_v22_pilot/runs/lock/pmo"}
+    _primary, location = _pmo_artifact_root(receipt, root=tmp_path)
+    assert location == "declared_output_root"
+    legacy = (
+        tmp_path
+        / "diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets"
+        / receipt["pmo_output_root"]
+    )
+    legacy.mkdir(parents=True)
+    observed, location = _pmo_artifact_root(receipt, root=tmp_path)
+    assert observed == legacy
+    assert location == "legacy_nested_under_oracle_assets"
+
+
+def test_t4_runner_persists_frontier_across_zero_candidate_rounds(
+    tmp_path, monkeypatch
+):
     source = production_state_from_smiles("C1CCCCC1CCO", max_atoms=48)
     config = replace(
         ProgramSearchConfig.program_only_recipe(seed=59),
@@ -264,7 +397,9 @@ def test_t4_runner_persists_frontier_across_zero_candidate_rounds(tmp_path, monk
 
         return ineligible
 
-    monkeypatch.setattr("compose_v4.experiments.dynamic_v22_pilot.strict_endpoint_scorer", scorer)
+    monkeypatch.setattr(
+        "compose_v4.experiments.dynamic_v22_pilot.strict_endpoint_scorer", scorer
+    )
     first = run_t4_pilot_campaign(
         output=tmp_path,
         source_state=encode_state(source),

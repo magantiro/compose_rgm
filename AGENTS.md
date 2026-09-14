@@ -404,6 +404,23 @@ answer-known development pilot, not a held-out or benchmark-wide result. A
 wider run, another seed, changed support, altered endpoint gate or post-result
 v2.2 repair remains a separate revision and is not automatically authorized.
 
+The first five-unit launch preserved its zero-oracle preflight, but all three
+T4 calls then failed before `run_t4_pilot_campaign` because the clean-input
+guard searched provenance-only source filenames for forbidden comparator and
+winner substrings. The default local PMO environment likewise failed before an
+oracle call because it lacked PyTDC; the two PMO units were relaunched once in
+the already qualified PyTDC 1.1.15 and RDKit 2023.9.6 environment and completed
+all 256 calls. Preserve both zero-query failure records and the completed PMO
+artifacts. The user explicitly authorized a bounded operational T4 repair and
+relaunch on 2026-09-14. Exclude only `image_revision` and `files_sha256`
+provenance fields from the runtime-payload substring scan while retaining the
+guard on actual controller inputs. Add read-only status handling for a missing
+worker artifact and seal the exact original three-call, zero-query failure
+census. Relaunch only FA7 seed 0, BRAF seed 1 and JAK2 seed 1 after a new remote
+zero-oracle preflight, preserving every scientific field, seed, budget and
+controller input from the original launch. Do not relaunch PMO, overwrite the
+original receipt, retry automatically, or change the scientific controller.
+
 **Scoped PMO Dynamic COMPOSE v2.1 four-task development, 2026-09-14:** while
 the five-cell T4 Dynamic-v2.1 launch proceeds independently, the user
 explicitly authorized a parallel PMO development worker to adapt the same

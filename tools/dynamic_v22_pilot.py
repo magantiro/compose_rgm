@@ -42,6 +42,9 @@ T4_APP = "modal_apps/t4_dynamic_v22_pilot_app.py"
 T4_APP_NAME = "compose-t4-dynamic-v22-pilot"
 PREFLIGHT = "diagnostics/dynamic_v22_pilot/preflight.json"
 LAUNCH = "diagnostics/dynamic_v22_pilot/launch.json"
+PREFLIGHT_V2 = "diagnostics/dynamic_v22_pilot/preflight_v2.json"
+LAUNCH_V2 = "diagnostics/dynamic_v22_pilot/launch_v2.json"
+T4_FAILURE_RECEIPT = "diagnostics/dynamic_v22_pilot/t4_preoracle_failures.json"
 PMO_RUN_ROOT = "diagnostics/dynamic_v22_pilot/runs"
 MATERIAL_FILES = (
     CONTRACT,
@@ -51,6 +54,85 @@ MATERIAL_FILES = (
     "src/compose_v4/control/dynamic_program_synthesis_v22.py",
     "src/compose_v4/experiments/dynamic_v22_pilot.py",
 )
+
+_PROVENANCE_ONLY_TASK_FIELDS = frozenset({"image_revision", "files_sha256"})
+_FORBIDDEN_RUNTIME_TOKENS = frozenset(
+    {"ivg", "winner", "comparator", "full_146", "v21_result"}
+)
+
+
+def contains_forbidden_runtime_input(task):
+    """Inspect runtime inputs without treating provenance paths as controller inputs."""
+
+    runtime = {
+        key: value
+        for key, value in task.items()
+        if key not in _PROVENANCE_ONLY_TASK_FIELDS
+    }
+    serialized = json.dumps(runtime, sort_keys=True).lower()
+    return any(token in serialized for token in _FORBIDDEN_RUNTIME_TOKENS)
+
+
+def _function_call_state(modal_module, call_id):
+    """Read call state when a worker has not published an artifact."""
+
+    try:
+        result = modal_module.FunctionCall.from_id(call_id).get(timeout=0)
+    except TimeoutError:
+        return {"status": "pending"}
+    except (
+        ValueError,
+        RuntimeError,
+        ImportError,
+        modal_module.exception.Error,
+    ) as error:
+        message = str(error)
+        pre_oracle = "absent from the clean launch lock" in message
+        return {
+            "status": "failed",
+            "failure_type": type(error).__name__,
+            "failure": message,
+            "calls": 0 if pre_oracle else None,
+            "call_count_basis": (
+                "pre_oracle_launch_validation"
+                if pre_oracle
+                else "no_durable_count_available"
+            ),
+        }
+    return {"status": "complete", "result": result}
+
+
+def _verified_t4_failure_receipt(receipt, modal_module):
+    expected = "T4 Dynamic-v2.2 task is absent from the clean launch lock"
+    failures = []
+    for cell, call_id in sorted(receipt["t4_function_call_ids"].items()):
+        state = _function_call_state(modal_module, call_id)
+        if (
+            state.get("status") != "failed"
+            or state.get("failure_type") != "ValueError"
+            or state.get("failure") != expected
+            or state.get("calls") != 0
+        ):
+            raise ValueError(
+                f"original T4 call is not the known pre-oracle failure: {cell}"
+            )
+        failures.append(
+            {
+                "cell": cell,
+                "call_id": call_id,
+                "failure_type": state["failure_type"],
+                "failure": state["failure"],
+                "charged_oracle_calls": 0,
+                "call_count_basis": state["call_count_basis"],
+            }
+        )
+    body = {
+        "schema_version": "dynamic_v22_t4_preoracle_failure_receipt_v1",
+        "original_receipt_sha256": receipt["receipt_sha256"],
+        "failures": failures,
+        "total_charged_oracle_calls": 0,
+    }
+    return {**body, "failure_receipt_sha256": identity(body)}
 
 
 def configuration(*, seed=20260914, kind):
@@ -68,7 +150,10 @@ def configuration(*, seed=20260914, kind):
 def load_contract(root=ROOT):
     observed = json.loads((root / CONTRACT).read_text())
     expected = quick_pilot_contract()
-    if observed != expected or identity(observed["payload"]) != observed["contract_sha256"]:
+    if (
+        observed != expected
+        or identity(observed["payload"]) != observed["contract_sha256"]
+    ):
         raise ValueError("Dynamic-v2.2 quick-pilot contract changed")
     return observed
 
@@ -124,7 +209,8 @@ def build_preflight(root=ROOT):
             calls == 0
             and first["new_oracle_calls"] == second["new_oracle_calls"] == 0
             and second["frontier_state"]["wave"] == 2
-            and first["frontier_state"]["state_sha256"] != second["frontier_state"]["state_sha256"]
+            and first["frontier_state"]["state_sha256"]
+            != second["frontier_state"]["state_sha256"]
             and restored.policy_config == DynamicV22PolicyConfig.for_pmo()
         ),
         "contract_sha256": sha256_file(root / CONTRACT),
@@ -190,6 +276,7 @@ def run_pmo(task, output, launch_lock, root=ROOT):
     load_contract(root)
     _load_launch_lock(Path(launch_lock), task=task, root=root)
     initialized = _load_initialization(root)
+    output = output.resolve()
     from tdc import Oracle
 
     previous = Path.cwd()
@@ -307,9 +394,10 @@ def launch():
     remote_preflight = modal.Function.from_name(T4_APP_NAME, "preflight").remote(
         {"image_revision": lock["image_revision"]}
     )
-    if remote_preflight.get("passed") is not True or remote_preflight.get(
-        "new_oracle_calls"
-    ) != 0:
+    if (
+        remote_preflight.get("passed") is not True
+        or remote_preflight.get("new_oracle_calls") != 0
+    ):
         raise RuntimeError("Dynamic-v2.2 remote zero-oracle preflight failed")
     publish_json(ROOT / PREFLIGHT, remote_preflight)
     worker = modal.Function.from_name(T4_APP_NAME, "worker")
@@ -329,17 +417,129 @@ def launch():
     print(json.dumps(receipt, indent=2, sort_keys=True))
 
 
+def _load_launch_receipt(path):
+    receipt = json.loads(path.read_text())
+    body = {key: value for key, value in receipt.items() if key != "receipt_sha256"}
+    if identity(body) != receipt.get("receipt_sha256"):
+        raise ValueError(f"Dynamic-v2.2 launch receipt changed: {path}")
+    return receipt
+
+
+def _require_new_artifacts(*paths):
+    existing = [str(path) for path in paths if path.exists()]
+    if existing:
+        raise ValueError(
+            "Dynamic-v2.2 relaunch artifacts already exist; inspect rather than overwrite: "
+            + ", ".join(existing)
+        )
+
+
+def _t4_relaunch_body(root=ROOT):
+    base = _launch_body(root)
+    body = {
+        key: value
+        for key, value in base.items()
+        if key not in {"schema_version", "launch_id", "pmo_tasks"}
+    }
+    body["schema_version"] = "dynamic_v22_t4_relaunch_lock_v2"
+    body["pmo_relaunch_authorized"] = False
+    return {**body, "launch_id": identity(body)}
+
+
+def relaunch_t4_v2():
+    """Relaunch only the three T4 units after proving the first calls failed cleanly."""
+
+    import modal
+
+    destination = ROOT / LAUNCH_V2
+    preflight_destination = ROOT / PREFLIGHT_V2
+    failure_destination = ROOT / T4_FAILURE_RECEIPT
+    _require_new_artifacts(destination, preflight_destination, failure_destination)
+    original = _load_launch_receipt(ROOT / LAUNCH)
+    failure_receipt = _verified_t4_failure_receipt(original, modal)
+    lock = _t4_relaunch_body()
+    for field in (
+        "authorized",
+        "contract_sha256",
+        "query_budget",
+        "t4_cells",
+        "controller_seed",
+        "automatic_retry",
+        "confirmation_calls",
+        "max_concurrent_single_cpu_workers",
+        "runtime_comparator_or_winner_inputs",
+    ):
+        if lock[field] != original["launch_lock"][field]:
+            raise ValueError(f"T4 relaunch changed frozen scientific field: {field}")
+    remote_preflight = modal.Function.from_name(T4_APP_NAME, "preflight").remote(
+        {"image_revision": lock["image_revision"]}
+    )
+    if (
+        remote_preflight.get("passed") is not True
+        or remote_preflight.get("new_oracle_calls") != 0
+    ):
+        raise RuntimeError("Dynamic-v2.2 relaunch zero-oracle preflight failed")
+    tasks = _t4_tasks(lock)
+    original_tasks = {task["cell"]: task for task in original["t4_tasks"]}
+    invariant_fields = (
+        "cell",
+        "target",
+        "source_idx",
+        "source_state",
+        "source_state_sha256",
+        "original_seed",
+        "oracle_protocol",
+        "qvina02_sha256",
+        "receptor_sha256",
+        "controller_seed",
+        "docking_seed",
+        "query_budget",
+        "automatic_retry",
+    )
+    for task in tasks:
+        previous = original_tasks[task["cell"]]
+        for field in invariant_fields:
+            if task[field] != previous[field]:
+                raise ValueError(
+                    f"T4 relaunch changed {task['cell']} scientific field: {field}"
+                )
+    worker = modal.Function.from_name(T4_APP_NAME, "worker")
+    calls = {task["cell"]: worker.spawn(task).object_id for task in tasks}
+    publish_json(failure_destination, failure_receipt)
+    publish_json(preflight_destination, remote_preflight)
+    receipt_body = {
+        "schema_version": "dynamic_v22_t4_relaunch_receipt_v2",
+        "launch_lock": lock,
+        "t4_tasks": tasks,
+        "t4_function_call_ids": calls,
+        "t4_volume": original["t4_volume"],
+        "original_launch_receipt_sha256": original["receipt_sha256"],
+        "verified_failure_receipt": T4_FAILURE_RECEIPT,
+        "verified_failure_receipt_sha256": failure_receipt["failure_receipt_sha256"],
+        "preflight_sha256": sha256_file(preflight_destination),
+        "pmo_relaunched": False,
+    }
+    receipt = {**receipt_body, "receipt_sha256": identity(receipt_body)}
+    publish_json(destination, receipt)
+    print(json.dumps(receipt, indent=2, sort_keys=True))
+
+
 def _remote_json(volume, path):
     return json.loads(b"".join(volume.read_file(path)))
 
 
-def status():
+def _pmo_artifact_root(receipt, root=ROOT):
+    primary = root / receipt["pmo_output_root"]
+    legacy = root / ORACLE_ASSET_ROOT / receipt["pmo_output_root"]
+    if not primary.exists() and legacy.exists():
+        return legacy, "legacy_nested_under_oracle_assets"
+    return primary, "declared_output_root"
+
+
+def status(launch_path=ROOT / LAUNCH):
     import modal
 
-    receipt = json.loads((ROOT / LAUNCH).read_text())
-    body = {key: value for key, value in receipt.items() if key != "receipt_sha256"}
-    if identity(body) != receipt.get("receipt_sha256"):
-        raise ValueError("Dynamic-v2.2 launch receipt changed")
+    receipt = _load_launch_receipt(launch_path)
     volume = modal.Volume.from_name(receipt["t4_volume"])
     rows = []
     lock = receipt["launch_lock"]
@@ -348,7 +548,7 @@ def status():
         result = None
         try:
             result = _remote_json(volume, f"{folder}/result.json")
-        except modal.exception.NotFoundError:
+        except (FileNotFoundError, modal.exception.NotFoundError):
             pass
         if result is not None:
             rows.append(
@@ -367,13 +567,13 @@ def status():
                 for row in volume.listdir(folder)
                 if row.path.rsplit("/", 1)[-1].startswith("round_")
             )
-        except modal.exception.NotFoundError:
+        except (FileNotFoundError, modal.exception.NotFoundError):
             names = []
         current = {"cell": task["cell"], "status": "pending", "calls": 0, "best": None}
         for name in reversed(names):
             try:
                 saved = _remote_json(volume, f"{folder}/{name}/complete.json")
-            except modal.exception.NotFoundError:
+            except (FileNotFoundError, modal.exception.NotFoundError):
                 continue
             summary = saved["summary"]
             current = {
@@ -384,27 +584,61 @@ def status():
                 "frontier_wave": saved["frontier_state"]["wave"],
             }
             break
+        call_state = _function_call_state(
+            modal, receipt["t4_function_call_ids"][task["cell"]]
+        )
+        if call_state["status"] == "failed":
+            current.update(
+                status="failed",
+                failure_type=call_state["failure_type"],
+                failure=call_state["failure"],
+                call_count_basis=call_state["call_count_basis"],
+            )
+            if call_state["calls"] is not None and current["calls"] == 0:
+                current["calls"] = call_state["calls"]
+        elif call_state["status"] == "complete" and isinstance(
+            call_state.get("result"), dict
+        ):
+            remote_result = call_state["result"]
+            current.update(
+                status=remote_result.get("status", "complete"),
+                calls=remote_result.get("charged_oracle_calls", current["calls"]),
+                best=remote_result.get("best_score", current["best"]),
+            )
         rows.append(current)
     pmo = []
-    pmo_root = ROOT / receipt["pmo_output_root"]
-    for task in lock["pmo_tasks"]:
-        path = pmo_root / task / "result.json"
-        if path.exists():
-            row = json.loads(path.read_text())
-            pmo.append(
-                {
-                    "task": task,
-                    "status": row["status"],
-                    "calls": row["charged_oracle_calls"],
-                    "best": row["best_score"],
-                    "top10": row["final_top10"],
-                    "auc_top10_256": row["auc_top10_256"],
-                }
-            )
-        else:
-            oracle = pmo_root / task / "oracle"
-            calls = len(list(oracle.glob("query_*/result.json"))) if oracle.exists() else 0
-            pmo.append({"task": task, "status": "running" if calls else "pending", "calls": calls})
+    if "pmo_output_root" in receipt:
+        pmo_root, pmo_location = _pmo_artifact_root(receipt)
+        for task in lock["pmo_tasks"]:
+            path = pmo_root / task / "result.json"
+            if path.exists():
+                row = json.loads(path.read_text())
+                pmo.append(
+                    {
+                        "task": task,
+                        "status": row["status"],
+                        "calls": row["charged_oracle_calls"],
+                        "best": row["best_score"],
+                        "top10": row["final_top10"],
+                        "auc_top10_256": row["auc_top10_256"],
+                        "artifact_location": pmo_location,
+                    }
+                )
+            else:
+                oracle = pmo_root / task / "oracle"
+                calls = (
+                    len(list(oracle.glob("query_*/result.json")))
+                    if oracle.exists()
+                    else 0
+                )
+                pmo.append(
+                    {
+                        "task": task,
+                        "status": "running" if calls else "pending",
+                        "calls": calls,
+                        "artifact_location": pmo_location,
+                    }
+                )
     print(json.dumps({"t4": rows, "pmo": pmo}, indent=2, sort_keys=True))
 
 
@@ -413,7 +647,9 @@ def main():
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("show-contract")
     subparsers.add_parser("launch")
-    subparsers.add_parser("status")
+    subparsers.add_parser("relaunch-t4-v2")
+    status_parser = subparsers.add_parser("status")
+    status_parser.add_argument("--launch", default=LAUNCH)
     preflight = subparsers.add_parser("preflight")
     preflight.add_argument("--output")
     pmo = subparsers.add_parser("run-pmo")
@@ -431,8 +667,10 @@ def main():
         result = run_pmo(args.task, Path(args.output), Path(args.launch_lock))
     elif args.command == "launch":
         return launch()
+    elif args.command == "relaunch-t4-v2":
+        return relaunch_t4_v2()
     else:
-        return status()
+        return status(ROOT / args.launch)
     print(json.dumps(result, indent=2, sort_keys=True))
 
 

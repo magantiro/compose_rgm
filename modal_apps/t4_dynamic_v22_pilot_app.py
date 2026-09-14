@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from dataclasses import replace
 from pathlib import Path
 
@@ -45,10 +44,9 @@ def _validate_task(task):
     from compose_v4.control.docking_value import identity
     from compose_v4.experiments.continuation_profile import sha256_file, verify_file
     from compose_v4.experiments.dynamic_v22_pilot import QUERY_BUDGET, T4_CELLS
+    from tools.dynamic_v22_pilot import contains_forbidden_runtime_input
 
     body = {key: value for key, value in task.items() if key != "run_id"}
-    forbidden = {"ivg", "winner", "comparator", "full_146", "v21_result"}
-    serialized = json.dumps(body, sort_keys=True).lower()
     if (
         identity(body) != task.get("run_id")
         or task.get("authorized") is not True
@@ -57,7 +55,7 @@ def _validate_task(task):
         or task.get("automatic_retry") != 0
         or task.get("contract_sha256") != sha256_file(REMOTE_ROOT / CONTRACT)
         or identity(task.get("source_state")) != task.get("source_state_sha256")
-        or any(token in serialized for token in forbidden)
+        or contains_forbidden_runtime_input(body)
     ):
         raise ValueError("T4 Dynamic-v2.2 task is absent from the clean launch lock")
     expected_files = {
