@@ -372,6 +372,34 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped PMO route-distillation export and cross-benchmark transfer preparation,
+2026-09-14:** the user explicitly authorized a bounded, zero-oracle revision that
+exports generic route supervision from the locked PMO development artifacts and
+prepares a later balanced T4+PMO controller comparison. Admit exactly the 181
+complete programs bound by the authoritative target, property, panel, formula and
+Perindopril curriculum results plus the five saved Perindopril winner witnesses.
+Freeze every inclusion, exclusion, source hash, task-family label and shared-base
+lineage before fitting. Preserve exact primitive ancestry and distinguish complete
+routes within the 32-primitive runtime support from longer routes that can supply
+only local decision supervision. Use the same state features, structural option
+vocabulary and 18-field stage descriptor as
+`src/compose_v4/control/route_distilled_program_policy.py`, while exporting
+task-independent action roles, relative created-handle provenance and dependency
+labels without silently treating primitive fallbacks as learned high-level modules.
+
+This revision may publish a deterministic training-only dataset and zero-oracle
+audit. It must not train or advertise the current coarse actor as a final PMO
+policy because the frozen recognizer finds no compound PMO stages, and it must not
+make an oracle call, launch a scored experiment, access or change a live run, or
+alter a T4 artifact. A future PMO-only checkpoint and a future balanced T4+PMO
+checkpoint must remain distinct and use explicit domain, task-family, lineage and
+decision weights. Runtime checkpoints may contain no task name, route identifier,
+endpoint, SMILES, absolute atom address, assignment, source graph,
+target-to-program map or executable teacher route. The detailed contract is
+`docs/PMO_ROUTE_DISTILLED_TRANSFER.md`. Training either checkpoint, changing the
+generic stage recognizer or running a scored PMO or T4 pilot requires a subsequent
+scoped contract; any scored call also requires separate launch authorization.
+
 **Scoped T4 route-distilled Dynamic COMPOSE development, 2026-09-14:** after
 Dynamic-v2.2 recovered the Full-146 BRAF seed-1 score early but remained far
 behind on JAK2 and candidate-starved on FA7, the user explicitly authorized

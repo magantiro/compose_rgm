@@ -1,0 +1,141 @@
+{
+  "payload": {
+    "schema_version": "pmo_route_distillation_export_contract_v1",
+    "authorization": "2026-09-14 user authorized bounded zero-oracle PMO route-supervision export and future balanced T4+PMO controller preparation",
+    "mode": "zero_oracle_export_only_no_actor_training_no_scored_launch",
+    "support": {
+      "persistent_slots": 48,
+      "active_atoms_max": 40,
+      "runtime_max_primitives": 32,
+      "runtime_max_blocks": 8
+    },
+    "expected_counts": {
+      "curriculum_programs": 181,
+      "witness_routes": 5,
+      "route_instances": 186,
+      "primitive_transitions_with_multiplicity": 6212,
+      "unique_endpoints_in_curricula": 178,
+      "unique_exact_traces": 184,
+      "deduplicated_decisions": 6143,
+      "lineages": 18,
+      "runtime_supported_route_instances": 107,
+      "long_route_local_only_instances": 79,
+      "runtime_supported_unique_traces": 106,
+      "long_route_local_only_unique_traces": 78,
+      "recognized_compound_stages": 0
+    },
+    "task_families": {
+      "albuterol_similarity": "similarity",
+      "celecoxib_rediscovery": "rediscovery",
+      "gsk3b": "bioactivity",
+      "isomers_c7h8n2o2": "formula",
+      "jnk3": "bioactivity",
+      "median1": "multi_property",
+      "mestranol_similarity": "similarity",
+      "perindopril_mpo": "mpo",
+      "qed": "druglikeness",
+      "thiothixene_rediscovery": "rediscovery",
+      "troglitazone_rediscovery": "rediscovery"
+    },
+    "curricula": [
+      {
+        "collection": "target_program_wave",
+        "path": "diagnostics/pmo_target_program_wave/curriculum.json",
+        "sha256": "97ac684ff9fda25992adb9f552a545283232e5620eb5deb467b3a723112ff9b0",
+        "result_path": "diagnostics/pmo_target_program_wave/result.json",
+        "result_sha256": "1baa701084a4d45b368bcacc4de415b5681e26158d1906a52547d5671b0fc075",
+        "programs": 75
+      },
+      {
+        "collection": "property_program_wave_v2",
+        "path": "diagnostics/pmo_property_program_wave/curriculum_v2.json",
+        "sha256": "2f3a11b5fd5f818358e9de132f60ec4c6ba2882b5cd71b66aaad5c407069bed9",
+        "result_path": "diagnostics/pmo_property_program_wave/result.json",
+        "result_sha256": "541925950b4e1a1fb5e425e4eda6c7f7719f42f000d1b29b44c9745e59d624e5",
+        "programs": 45
+      },
+      {
+        "collection": "property_panel_refinement",
+        "path": "diagnostics/pmo_property_panel_refinement/curriculum.json",
+        "sha256": "e0325aab91b7f5be332af9d9d9e6546aac3a734b7537412f77091b97f7337b8a",
+        "result_path": "diagnostics/pmo_property_panel_refinement/result.json",
+        "result_sha256": "798e662fadaa91f4c5b0b253c5bf449ba4f6d9a1e13eb5a86d54aa4c184e8bf5",
+        "programs": 30
+      },
+      {
+        "collection": "formula_median_panel_wave_v2",
+        "path": "diagnostics/pmo_formula_median_panel_wave/curriculum_v2.json",
+        "sha256": "224b7459307496d649a8310baad7bd47ed38bee762ffbfb37e216bfadbbc918c",
+        "result_path": "diagnostics/pmo_formula_median_panel_wave/result.json",
+        "result_sha256": "2316ea30310287c7436a916c2dedafae7dd8477fb85fc127498b425184047853",
+        "programs": 20
+      },
+      {
+        "collection": "winner_program_curriculum",
+        "path": "diagnostics/pmo_winner_program_curriculum/curriculum.json",
+        "sha256": "99a68d75e79d4284e1831dcdd9101eb92f54ffa8417007b16b2b918111b54316",
+        "result_path": "diagnostics/pmo_winner_program_curriculum/result.json",
+        "result_sha256": "ed24426b11ebe89acf7315d4d98e465eb3b987ee7df9fbea37125d726a37ae87",
+        "programs": 11
+      }
+    ],
+    "witnesses": {
+      "task": "perindopril_mpo",
+      "audit_path": "diagnostics/pmo_public_winner_recovery/route_audit.json",
+      "audit_sha256": "fa7efcb02651b1400fa295701f22f528b1fc6c63b08819e80b6dd15f8f7d5918",
+      "result_path": "diagnostics/pmo_public_winner_recovery/result.json",
+      "result_sha256": "1bdbd4ebd164e7f5a75e7766cbc36401ed5bbfb8f1e190545eba94d322d0ebdc",
+      "paths": {
+        "diagnostics/pmo_public_winner_recovery/current_best.json": "2fc4666977c4f829c2cc8f4959ed1e25c35e28f6ec69ae92ab38fcb268abda3b",
+        "diagnostics/pmo_public_winner_recovery/original_root_0.json": "70036e1d4ac8c9438d7246b61770ace2961bf2ff2c21e65edbf4cc4ba1e1d940",
+        "diagnostics/pmo_public_winner_recovery/original_root_1.json": "5f6e9a03c99a74c8610b41a3b700d88f8c43eb94a2af16bc531775fa6900c82a",
+        "diagnostics/pmo_public_winner_recovery/original_root_2.json": "148e42bb0aba483262561b99703516a9eaf971f77364a31e2d1ee90e813cc43f",
+        "diagnostics/pmo_public_winner_recovery/original_root_3.json": "851f2941a570df2c2e23d94e9df35aeb41efb4dd0daf0256bc0f9e8b3f58389c"
+      }
+    },
+    "excluded": {
+      "diagnostics/pmo_property_program_wave/curriculum.json": {
+        "sha256": "e1ccfaa10390846feedaa3e864716d02956a0ec5146481c73d8d641c80581ddb",
+        "reason": "superseded_by_result_bound_curriculum_v2"
+      },
+      "diagnostics/pmo_formula_median_panel_wave/curriculum.json": {
+        "sha256": "295a2259686cb3b376559fc9262e27c7eefa0cd10ca74090e66b2ea97868c748",
+        "reason": "superseded_by_result_bound_curriculum_v2"
+      },
+      "diagnostics/pmo_winner_imitation/result.json": {
+        "sha256": "298174afd5ce31291d4ba3fa5c3d01e552281cc5eaec81264015c2ed101a322a",
+        "reason": "derivative_of_the_five_admitted_witnesses"
+      },
+      "diagnostics/pmo_route_support/report.json": {
+        "sha256": "d4cde200df9ed8c849320088f052f9e2d9cb7f90763213d741f66503e41eca6d",
+        "reason": "derivative_route_reencoding_not_independent_supervision"
+      }
+    },
+    "lineage": {
+      "curriculum_rule": "sha256_of_declared_exact_base_trace_except_winner_curriculum_uses_abstract_input_topology_and_common_base_marks",
+      "witness_rule": "sha256_of_exact_source_state_and_full_witness_actions",
+      "deduplication": "collapse_identical_exact_state_action_traces_keep_all_provenance_members"
+    },
+    "weighting": {
+      "domain": "equal_domain_mass",
+      "family": "equal_task_family_mass_within_domain",
+      "lineage": "equal_lineage_mass_within_family",
+      "decision": "equal_decision_mass_within_lineage",
+      "terminal_scores_used": false
+    },
+    "outputs": {
+      "dataset": "training_dataset.json.gz",
+      "audit": "result.json",
+      "runtime_checkpoint": null
+    },
+    "prohibitions": [
+      "oracle_calls",
+      "actor_training",
+      "scored_launch",
+      "live_run_access",
+      "t4_artifact_changes",
+      "task_specific_runtime_content"
+    ]
+  },
+  "contract_sha256": "5decd5e9d69647b4c46036f2e9744f988a7503cdbc3978785b8e971bd9b6d5f3"
+}
