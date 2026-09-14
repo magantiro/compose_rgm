@@ -16,7 +16,7 @@ from compose_v4.experiments.t4_route_policy_comparison import (
     require_nonself_endpoint,
 )
 from compose_v4.rewrite.trace_shard import encode_state
-from tools.t4_route_policy_comparison import _select_folds
+from tools.t4_route_policy_comparison import _select_folds, _select_test_sources
 
 
 def test_predeclared_folds_are_source_disjoint_and_balanced():
@@ -47,6 +47,27 @@ def test_parallel_fold_selection_preserves_order_and_rejects_unknown_folds():
     assert _select_folds(folds, None) == ((0, 1, 2), folds)
     with np.testing.assert_raises_regex(ValueError, "invalid route-policy fold"):
         _select_folds(folds, (3,))
+
+
+def test_source_shard_selection_preserves_fold_order_and_rejects_bad_census():
+    folds = (
+        {"fold": 0, "test_sources": ["source-c", "source-a"]},
+        {"fold": 1, "test_sources": ["source-d", "source-b"]},
+    )
+    assert _select_test_sources(folds, None) == {
+        0: ("source-c", "source-a"),
+        1: ("source-d", "source-b"),
+    }
+    assert _select_test_sources(folds, ("source-a", "source-d")) == {
+        0: ("source-a",),
+        1: ("source-d",),
+    }
+    with np.testing.assert_raises_regex(ValueError, "nonempty and unique"):
+        _select_test_sources(folds, ())
+    with np.testing.assert_raises_regex(ValueError, "nonempty and unique"):
+        _select_test_sources(folds, ("source-a", "source-a"))
+    with np.testing.assert_raises_regex(ValueError, "outside selected folds"):
+        _select_test_sources(folds, ("source-unknown",))
 
 
 def test_candidate_features_are_address_free_fixed_shape():

@@ -305,7 +305,13 @@ def _synthesize_marginal(source, rng, policy: MarginalPolicy, config: Comparison
 
 
 def generate_marginal_candidates(
-    source, policy: MarginalPolicy, config: ComparisonConfig, *, seed: int, prefix: str
+    source,
+    policy: MarginalPolicy,
+    config: ComparisonConfig,
+    *,
+    seed: int,
+    prefix: str,
+    progress_callback=None,
 ) -> tuple[list[Candidate], float]:
     rng = np.random.default_rng(seed)
     began, result = perf_counter(), []
@@ -338,6 +344,10 @@ def generate_marginal_candidates(
                     str(error),
                 )
             )
+        if progress_callback is not None and (
+            (index + 1) % 16 == 0 or index + 1 == config.attempts_per_source
+        ):
+            progress_callback(index + 1, config.attempts_per_source)
     return result, perf_counter() - began
 
 

@@ -532,6 +532,26 @@ new immutable revision and output namespace. No automatic retry, oracle call,
 PMO change or concurrent execution above the existing three-CPU ceiling is
 authorized.
 
+The live three-fold copy remained opaque and exposed the same terminal
+self-event risk, so the user subsequently authorized the fastest
+execution-equivalent durable replacement and up to the previously declared
+Modal capacity. Preserve the failed local run and all three live fold calls
+untouched. Under a new revision and namespace, partition the same predeclared
+test census into exactly 15 one-held-source tasks, one per T4 source. Every task
+must refit from the identical ten-source training fold, preserve the original
+within-fold source index and seed formulas, generate the unchanged 32 training
+negatives per training source and 128 marginal plus 128 actor proposals for its
+single test source, and use the unchanged models, metrics and selection gate.
+This is an operational shard only: no policy, split, feature, support, attempt
+budget, acceptance rule or oracle access changes. Use at most 15 new concurrent
+single-CPU workers, zero oracle calls, zero automatic retries, a dedicated
+artifact volume, live phase/attempt progress, and an atomic result/model pair
+per source. The recovery unit is one source. Merge only after verifying all 15
+unique source artifacts, identical model checkpoints within each fold, exact
+input/revision identities and source-balanced reduction. This later explicit
+scope supersedes only the earlier three-CPU execution ceiling; it does not
+authorize the scored qualification before the frozen zero-oracle gate passes.
+
 **Scoped Dynamic COMPOSE v2.2 five-unit quick pilot, 2026-09-14:** after the
 completed PMO Dynamic-v2.1 comparison showed that global channel allocation
 underperformed Dynamic-v0 on three of four tasks, and the live T4 v2.1 run

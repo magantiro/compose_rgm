@@ -156,7 +156,7 @@ def _actor_policy(train: list[dict], *, fold: int):
     return RouteDistilledProgramPolicy.from_checkpoint(checkpoint), checkpoint, history
 
 
-def _actor_candidates(source, policy, config, *, seed, prefix):
+def _actor_candidates(source, policy, config, *, seed, prefix, progress_callback=None):
     began = perf_counter()
     rng, result, panel_cache = np.random.default_rng(seed), [], {}
     for index in range(config.attempts_per_source):
@@ -196,6 +196,10 @@ def _actor_candidates(source, policy, config, *, seed, prefix):
                     str(error),
                 )
             )
+        if progress_callback is not None and (
+            (index + 1) % 16 == 0 or index + 1 == config.attempts_per_source
+        ):
+            progress_callback(index + 1, config.attempts_per_source)
     return result, perf_counter() - began
 
 
@@ -348,13 +352,36 @@ def _select_folds(all_folds, fold_ids: tuple[int, ...] | None):
     return requested, tuple(row for row in all_folds if row["fold"] in requested)
 
 
+def _select_test_sources(
+    folds: tuple[dict, ...], test_source_ids: tuple[str, ...] | None
+) -> dict[int, tuple[str, ...]]:
+    known = {source: row["fold"] for row in folds for source in row["test_sources"]}
+    if test_source_ids is None:
+        return {row["fold"]: tuple(row["test_sources"]) for row in folds}
+    if not test_source_ids or len(set(test_source_ids)) != len(test_source_ids):
+        raise ValueError("test-source selection must be nonempty and unique")
+    unknown = sorted(set(test_source_ids) - set(known))
+    if unknown:
+        raise ValueError(f"test sources are outside selected folds: {unknown}")
+    requested = set(test_source_ids)
+    selected = {
+        row["fold"]: tuple(
+            source for source in row["test_sources"] if source in requested
+        )
+        for row in folds
+    }
+    return {fold: sources for fold, sources in selected.items() if sources}
+
+
 def run(
     output: Path = OUTPUT,
     *,
     config: ComparisonConfig | None = None,
     fold_ids: tuple[int, ...] | None = None,
+    test_source_ids: tuple[str, ...] | None = None,
     code_revision: str | None = None,
     working_tree_dirty: bool | None = None,
+    progress_callback=None,
 ):
     """Fit and evaluate three grouped policies without a task oracle."""
 
@@ -375,6 +402,7 @@ def run(
         raise RuntimeError("the signed teacher census is incomplete")
     all_folds = predeclared_source_folds(metadata)
     requested_folds, folds = _select_folds(all_folds, fold_ids)
+    selected_test_sources = _select_test_sources(folds, test_source_ids)
     by_source = {
         source: [row for row in traces if row["source_group"] == source]
         for source in metadata
@@ -382,12 +410,21 @@ def run(
     reports, runtime_payloads, fold_models = [], [], []
     for split in folds:
         fold = split["fold"]
+        evaluated_sources = selected_test_sources.get(fold, ())
+        if not evaluated_sources:
+            continue
         train = [row for row in traces if row["source_group"] in split["train_sources"]]
-        test = [row for row in traces if row["source_group"] in split["test_sources"]]
+        test = [row for row in traces if row["source_group"] in evaluated_sources]
         marginal = fit_marginal_policy(
             train, exploration_floor=config.exploration_floor
         )
+        if progress_callback is not None:
+            progress_callback({"phase": "actor_fit", "fold": fold, "status": "started"})
         actor, actor_checkpoint, actor_history = _actor_policy(train, fold=fold)
+        if progress_callback is not None:
+            progress_callback(
+                {"phase": "actor_fit", "fold": fold, "status": "complete"}
+            )
 
         negatives, training_generation = {}, {}
         for source_index, source_id in enumerate(split["train_sources"]):
@@ -404,6 +441,19 @@ def run(
                 training_config,
                 seed=config.seed + 10_000 * fold + source_index,
                 prefix=f"train-{fold}-{source_index}",
+                progress_callback=(
+                    None
+                    if progress_callback is None
+                    else lambda completed, total, *, source_id=source_id, fold=fold: progress_callback(
+                        {
+                            "phase": "training_negatives",
+                            "fold": fold,
+                            "source_id": source_id,
+                            "completed": completed,
+                            "total": total,
+                        }
+                    )
+                ),
             )
             negatives[source_id] = [
                 _candidate_vector(source, candidate, config)
@@ -424,6 +474,10 @@ def run(
             for index, teacher in enumerate(train)
         ]
         ranker, ranker_fit = fit_contrastive_ranker(positives, negatives, config)
+        if progress_callback is not None:
+            progress_callback(
+                {"phase": "ranker_fit", "fold": fold, "status": "complete"}
+            )
         marginal_checkpoint = marginal.checkpoint()
         ranker_checkpoint = ranker.checkpoint()
         runtime_payloads.extend(
@@ -432,6 +486,8 @@ def run(
 
         shared_cases, autonomous_cases, census = [], [], []
         for source_index, source_id in enumerate(split["test_sources"]):
+            if source_id not in evaluated_sources:
+                continue
             source_teachers = by_source[source_id]
             source = source_teachers[0]["source"]
             marginal_candidates, marginal_seconds = generate_marginal_candidates(
@@ -440,6 +496,20 @@ def run(
                 config,
                 seed=config.seed + 100_000 * fold + source_index,
                 prefix=f"generic-{fold}-{source_index}",
+                progress_callback=(
+                    None
+                    if progress_callback is None
+                    else lambda completed, total, *, source_id=source_id, fold=fold: progress_callback(
+                        {
+                            "phase": "test_generation",
+                            "policy": POLICY_GENERIC,
+                            "fold": fold,
+                            "source_id": source_id,
+                            "completed": completed,
+                            "total": total,
+                        }
+                    )
+                ),
             )
             actor_candidates, actor_seconds = _actor_candidates(
                 source,
@@ -447,6 +517,20 @@ def run(
                 config,
                 seed=config.seed + 200_000 * fold + source_index,
                 prefix=f"actor-{fold}-{source_index}",
+                progress_callback=(
+                    None
+                    if progress_callback is None
+                    else lambda completed, total, *, source_id=source_id, fold=fold: progress_callback(
+                        {
+                            "phase": "test_generation",
+                            "policy": POLICY_ACTOR,
+                            "fold": fold,
+                            "source_id": source_id,
+                            "completed": completed,
+                            "total": total,
+                        }
+                    )
+                ),
             )
             generic_scores = _rank_scores(
                 marginal_candidates,
@@ -553,7 +637,7 @@ def run(
             "evaluation_role": "test",
             "train_sources": split["train_sources"],
             "calibration_sources": split["calibration_sources"],
-            "test_sources": split["test_sources"],
+            "test_sources": list(evaluated_sources),
         }
         autonomous = evaluate(
             {
@@ -634,6 +718,11 @@ def run(
             "rule": "three source-group folds; test source_idx equals fold",
             "folds": list(all_folds),
             "evaluated_fold_ids": list(requested_folds),
+            "evaluated_test_sources": sorted(
+                source
+                for sources in selected_test_sources.values()
+                for source in sources
+            ),
             "source_balance": "each source equal; hybrid positives equal by source then route",
             "lineage_rule": "all routes from a source molecule remain in one fold",
         },
