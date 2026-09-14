@@ -372,6 +372,38 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped T4 Dynamic COMPOSE v1 development study, 2026-09-13:** after the
+route-free diagnostic separated a successful shallow BRAF case from a JAK2
+representation/protected-horizon failure and a 5HT1B binding-conditioning
+failure, the user authorized one focused Dynamic-v1 repair. Preserve the
+Full-146 controller, Dynamic-v0 implementation, completed BRAF/JAK2 outcomes
+and still-running Dynamic-v0 5HT1B unit byte-for-byte. First run a zero-oracle,
+answer-known teacher-forced reachability audit on 5HT1B seed 0, BRAF seed 1 and
+JAK2 seed 1. Then implement exactly three generic capabilities in a separate
+v1 path: bounded protected ring-path remodeling, jointly parameterized
+substituted-ring construction, and bounded context-conditioned binding
+enumeration using no task-oracle value. The reachability audit must report
+exact executor replay, coverage, precision or abstention, and the minimum v1
+module count needed for each inspected Full-146 transformation. It must not
+promote an inspected route or endpoint into the deployed grammar, sampler or
+initial archive.
+
+After the live Dynamic-v0 5HT1B unit is durable and only if the zero-oracle
+gate and launch-boundary tests pass, freeze one shared Dynamic-v1 controller
+and run it once on the same three development cells with the same replicate-0
+controller and docking seeds, delta-0.4 endpoint gates, 40-heavy-atom support,
+32-primitive/eight-block work limits, competitive-plateau rule and 1,000-call
+per-cell ceiling. At most 3,000 new docking calls, three concurrent single-CPU
+workers, no GPU, no confirmation calls and no automatic retry are authorized.
+Record every proposal, rejection, candidate shortfall, query, failure, module
+choice, binding alternative, complete score-versus-call curve and provenance.
+Dynamic-v0 and Full-146 are read-only comparators and must not be redocked.
+This is winner-informed development on three declared cells, not held-out or
+full-benchmark evidence. Evaluation on the remaining twelve T4 cells, another
+replicate, a delta-0.6 run, PMO work, neural proposal learning and any fourth
+controller capability remain outside this milestone. The detailed contract is
+`docs/T4_DYNAMIC_V1.md`.
+
 **Scoped T4 complete-route and dynamic-synthesis diagnostic, 2026-09-13:** the
 user explicitly authorized a matched three-cell study of whether COMPOSE can
 recover the frozen program controller's performance without initializing from
