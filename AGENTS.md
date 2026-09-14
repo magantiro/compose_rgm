@@ -372,6 +372,75 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped route-distilled T4 qualification and conditional dual-threshold benchmark,
+2026-09-14:** after explicitly rejecting the stored Full-146 controller as the
+paper controller, the user authorized the newest generic route-distilled
+Dynamic COMPOSE line for a staged T4 launch. The scientific problem is whether
+one target-free policy learned from the 77 successful T4 trajectories can
+propose complete executable programs without loading those trajectories at
+runtime. The primary model output is a distribution over generic module
+sequences, relative structural bindings, parameters and stop decisions. The
+prospective claim is trained-on-T4 optimization performance, not held-out-route
+generalization. Model support remains the declared neutral, charge-preserving,
+stereochemistry-free persistent-slot graph representation with at most 40
+active atoms, three high-level modules, 32 primitives and eight blocks.
+
+Preserve the already running three held-source zero-oracle policy-comparison
+folds exactly. Do not relaunch, repair, relax or select a policy before all
+three immutable folds are durable and provenance-compatible. Select the
+proposal factorization using the predeclared source-balanced autonomous
+transformation-recovery evidence, with exact recovery secondary and execution
+precision, unique endpoint yield and compute reported as safeguards. The
+shared-panel result is reranking evidence only and cannot substitute for
+autonomous generation. Fit the selected factorization once on all 77 training
+routes, freeze its numeric target-free checkpoint, and audit that runtime
+contains no protein/target name, source or seed identity, route identity,
+endpoint molecule, absolute atom address, target-to-program map or executable
+teacher route. Preserve an unchanged shallow generic exploration lane and an
+empty task-specific complete-route archive at search start.
+
+Before any benchmark-wide launch, run exactly one scored qualification unit on
+5HT1B seed 0, BRAF seed 1, JAK2 seed 1, PARP1 seed 0 and FA7 seed 0 at delta
+0.4 using the replicate-0 controller seed 20260913 and docking seed 1701. Each
+unit must run its full 1,000-call allowance unless proposal yield is exhausted;
+there is no score-plateau termination, automatic retry, confirmation call or
+GPU. Use at most five concurrent single-CPU workers and at most 5,000 charged
+docking calls. Launch requires a clean committed revision, a deterministic
+zero-oracle runtime preflight, exact input and checkpoint hashes, isolated RNG
+streams, exact replay, strict endpoint constraints and a complete candidate and
+query ledger. Qualification passes only if all five units are durable, every
+cell produces at least one eligible scored endpoint, the runtime provenance
+audit passes, and at least four of five champions meet or improve the exact
+cell-specific IVG mean frozen in the existing T4 comparator registry. This
+gate is fixed before scores are observed and must not be weakened after a
+negative result.
+
+Only if that qualification passes, freeze the controller and launch the full
+T4 benchmark at both delta 0.4 and delta 0.6. Use the same 15 benchmark source
+molecules at both thresholds and the same three paired controller/docking seed
+assignments per cell: (20260913, 1701), (20260914, 1702), and (20260915, 1703).
+The only scientific adapter change between thresholds is the similarity gate.
+Keep QED greater than 0.6, SA less than 4, the 40-atom support, docking protocol,
+program support, policy checkpoint, parent/archive logic and every search
+hyperparameter fixed. Run all 90 units to their 1,000-call ceilings unless
+proposal yield is exhausted. Do not use plateau stopping, result-dependent
+replacement, automatic retry or confirmation calls in this search wave. The
+wave may use at most 15 concurrent single-CPU Modal workers, no GPU and at most
+90,000 new docking calls. Use a new dedicated artifact volume rather than the
+nearly inode-exhausted shared volume.
+
+Record best eligible score at every charged call, matched-call summaries at 50,
+100, 200, 400, 600, 800 and 1,000 calls, all failed charged calls, candidate
+shortfalls, proposal/executor/filter outcomes, complete champion lineages,
+wall-clock and compute, hashes, configuration, software and hardware. Preserve
+the five qualification results separately even if their identical unit
+identities later appear in the full wave; do not silently count or reuse them
+as full-wave results. Full-146, Dynamic-v0/v1/v2.1/v2.2 and IVG values are
+read-only comparators and may not enter runtime selection. If qualification
+fails, stop before the 90-unit wave, report the negative result and require a
+new scoped controller revision. The full dual-threshold result is a
+trained-on-public-T4 evaluation of one generic route-distilled controller.
+
 **Scoped PMO route-distillation export and cross-benchmark transfer preparation,
 2026-09-14:** the user explicitly authorized a bounded, zero-oracle revision that
 exports generic route supervision from the locked PMO development artifacts and
