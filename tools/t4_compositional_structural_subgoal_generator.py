@@ -707,6 +707,154 @@ def _coverage(
     }
 
 
+def _overall_summary(fold_reports: list[dict]) -> dict:
+    """Reduce the frozen fold reports without changing any selection decision."""
+
+    all_sources = [source for fold in fold_reports for source in fold["sources"]]
+    policies = {}
+    for policy_id in (POLICY_UNIFORM, POLICY_LEARNED):
+        cutoffs = {}
+        for cutoff in (8, 32, 128):
+            name = str(cutoff)
+            rows = [source["policies"][policy_id]["cutoffs"][name] for source in all_sources]
+            quality_rows = [
+                source
+                for fold in fold_reports
+                for source in fold["endpoint_and_transformation_quality"]["policies"][policy_id][
+                    "per_source"
+                ]
+            ]
+            family_counts = {
+                family: {
+                    "held_recovered": sum(
+                        row["families"][family]["held_recovered"] for row in rows
+                    ),
+                    "held_instances": sum(
+                        row["families"][family]["held_instances"] for row in rows
+                    ),
+                }
+                for family in ("whole_patch", *GRANULAR_COMPONENT_FAMILIES)
+            }
+            for counts in family_counts.values():
+                counts["instance_weighted_coverage"] = (
+                    counts["held_recovered"] / counts["held_instances"]
+                    if counts["held_instances"]
+                    else None
+                )
+            granular_recovered = sum(
+                family_counts[family]["held_recovered"] for family in GRANULAR_COMPONENT_FAMILIES
+            )
+            granular_instances = sum(
+                family_counts[family]["held_instances"] for family in GRANULAR_COMPONENT_FAMILIES
+            )
+            cutoffs[name] = {
+                "source_balanced": {
+                    "exact_endpoint_recall": float(
+                        np.mean([row["cutoffs"][name]["exact_recall"] for row in quality_rows])
+                    ),
+                    "transformation_equivalent_recall": float(
+                        np.mean(
+                            [row["cutoffs"][name]["transformation_recall"] for row in quality_rows]
+                        )
+                    ),
+                    "exact_patch_recall": float(
+                        np.mean([row["families"]["whole_patch"]["held_coverage"] for row in rows])
+                    ),
+                    "granular_component_coverage": float(
+                        np.mean(
+                            [
+                                np.mean(
+                                    [
+                                        row["families"][family]["held_coverage"]
+                                        for family in GRANULAR_COMPONENT_FAMILIES
+                                    ]
+                                )
+                                for row in rows
+                            ]
+                        )
+                    ),
+                    "unique_patch_yield": float(
+                        np.mean([row["unique_patch_yield"] for row in rows])
+                    ),
+                    "novel_whole_patch_yield": float(
+                        np.mean([row["novel_whole_patch_yield"] for row in rows])
+                    ),
+                    "unique_endpoint_yield": float(
+                        np.mean([row["unique_endpoint_yield"] for row in rows])
+                    ),
+                    "fixed_k_yield": float(np.mean([row["fixed_k_yield"] for row in rows])),
+                },
+                "instance_weighted": {
+                    "exact_patch_recall": family_counts["whole_patch"][
+                        "instance_weighted_coverage"
+                    ],
+                    "granular_component_coverage": granular_recovered / granular_instances,
+                },
+                "families": family_counts,
+                "minimum_per_source": {
+                    "novel_whole_patch_yield": min(row["novel_whole_patch_yield"] for row in rows),
+                    "unique_endpoint_yield": min(row["unique_endpoint_yield"] for row in rows),
+                    "fixed_k_yield": min(row["fixed_k_yield"] for row in rows),
+                },
+            }
+        telemetry_rows = [source["policies"][policy_id]["telemetry"] for source in all_sources]
+        telemetry = {
+            key: sum(int(row.get(key, 0)) for row in telemetry_rows)
+            for key in sorted({key for row in telemetry_rows for key in row})
+        }
+        compile_denominator = telemetry["legal_patch_compile_coverage_denominator"]
+        realization_denominator = telemetry["exact_realization_precision_denominator"]
+        policies[policy_id] = {
+            "cutoffs": cutoffs,
+            "work": telemetry,
+            "legal_patch_compile_coverage": telemetry["legal_patch_compile_coverage_numerator"]
+            / compile_denominator,
+            "exact_realization_precision": telemetry["exact_realization_precision_numerator"]
+            / realization_denominator,
+        }
+    learned = policies[POLICY_LEARNED]
+    uniform = policies[POLICY_UNIFORM]
+    improving_cutoffs = []
+    for cutoff in (32, 128):
+        name = str(cutoff)
+        learned_metrics = learned["cutoffs"][name]["source_balanced"]
+        uniform_metrics = uniform["cutoffs"][name]["source_balanced"]
+        if (
+            learned_metrics["granular_component_coverage"]
+            > uniform_metrics["granular_component_coverage"]
+            or learned_metrics["transformation_equivalent_recall"]
+            > uniform_metrics["transformation_equivalent_recall"]
+        ) and learned["exact_realization_precision"] >= uniform["exact_realization_precision"]:
+            improving_cutoffs.append(cutoff)
+    gates = {
+        "all_held_sources_emit_unique_exactly_realized_patch": all(
+            learned["cutoffs"]["128"]["minimum_per_source"][name] > 0
+            for name in ("unique_endpoint_yield", "fixed_k_yield")
+        ),
+        "at_least_one_novel_whole_patch_per_held_source": learned["cutoffs"]["128"][
+            "minimum_per_source"
+        ]["novel_whole_patch_yield"]
+        > 0,
+        "generated_held_component_support_nonzero": learned["cutoffs"]["128"]["source_balanced"][
+            "granular_component_coverage"
+        ]
+        > 0,
+        "all_accepted_candidates_exactly_execute": all(
+            policies[policy_id]["exact_realization_precision"] == 1
+            for policy_id in (POLICY_UNIFORM, POLICY_LEARNED)
+        ),
+        "learned_improvement_gate": bool(improving_cutoffs),
+        "learned_improving_cutoffs": improving_cutoffs,
+        "exact_teacher_recovery_required": False,
+    }
+    gates["passed"] = all(
+        value
+        for key, value in gates.items()
+        if key not in {"learned_improving_cutoffs", "exact_teacher_recovery_required"}
+    )
+    return {"policies": policies, "gates": gates}
+
+
 def evaluate_all(input_root: Path, lock_path: Path, output: Path) -> None:
     _contract()
     lock = load_sealed(lock_path)
@@ -873,6 +1021,7 @@ def evaluate_all(input_root: Path, lock_path: Path, output: Path) -> None:
                 "payload_sha256": identity(_contract()),
             },
             "folds": fold_reports,
+            "overall": _overall_summary(fold_reports),
             "costs": {
                 "new_oracle_calls": 0,
                 "new_docking_calls": 0,

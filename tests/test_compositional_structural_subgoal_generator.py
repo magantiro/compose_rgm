@@ -18,6 +18,8 @@ from compose_v4.control.generic_legal_action_policy import (
     enumerate_legal_successors,
     enumerate_rule_successors,
 )
+from compose_v4.control.structural_subgoal_components import GRANULAR_COMPONENT_FAMILIES
+from tools.t4_compositional_structural_subgoal_generator import _overall_summary
 
 
 def _ethane() -> MolecularGraph:
@@ -169,3 +171,74 @@ def test_local_fiber_is_decision_equivalent_to_filtering_complete_fiber() -> Non
     }
 
     assert observed == expected
+
+
+def test_overall_summary_applies_the_frozen_improvement_gate() -> None:
+    def coverage(policy: str, cutoff: int) -> dict:
+        recovered = int(policy == "balanced_joint_autoregressive" and cutoff == 128)
+        families = {
+            family: {
+                "held_instances": 1,
+                "held_recovered": recovered,
+                "held_coverage": float(recovered),
+            }
+            for family in ("whole_patch", *GRANULAR_COMPONENT_FAMILIES)
+        }
+        return {
+            "families": families,
+            "unique_patch_yield": cutoff,
+            "novel_whole_patch_yield": cutoff,
+            "unique_endpoint_yield": cutoff,
+            "fixed_k_yield": 1.0,
+        }
+
+    policies = {
+        policy: {
+            "cutoffs": {str(cutoff): coverage(policy, cutoff) for cutoff in (8, 32, 128)},
+            "telemetry": {
+                "compile_attempts": 128,
+                "exactly_realized": 128,
+                "candidate_shortfall": 0,
+                "legal_patch_compile_coverage_numerator": 128,
+                "legal_patch_compile_coverage_denominator": 128,
+                "exact_realization_precision_numerator": 128,
+                "exact_realization_precision_denominator": 128,
+            },
+        }
+        for policy in ("uniform_joint_grammar", "balanced_joint_autoregressive")
+    }
+    quality_policy = {
+        "per_source": [
+            {
+                "cutoffs": {
+                    str(cutoff): {
+                        "exact_recall": 0.0,
+                        "transformation_recall": 0.0,
+                    }
+                    for cutoff in (8, 32, 128)
+                }
+            }
+        ]
+    }
+    summary = _overall_summary(
+        [
+            {
+                "sources": [{"policies": policies}],
+                "endpoint_and_transformation_quality": {
+                    "policies": {
+                        "uniform_joint_grammar": quality_policy,
+                        "balanced_joint_autoregressive": quality_policy,
+                    }
+                },
+            }
+        ]
+    )
+
+    assert summary["gates"]["passed"] is True
+    assert summary["gates"]["learned_improving_cutoffs"] == [128]
+    assert (
+        summary["policies"]["balanced_joint_autoregressive"]["cutoffs"]["128"]["instance_weighted"][
+            "granular_component_coverage"
+        ]
+        == 1.0
+    )
