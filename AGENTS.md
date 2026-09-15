@@ -397,6 +397,16 @@ training, broader controller integration and Dynamic-v0 optimization wave
 remain unauthorized until this zero-oracle representation, realization and
 proposal gate is sealed.
 
+Every conditional-realizer shard that can run longer than 30 seconds must
+emit a structured heartbeat at least every 30 seconds. The heartbeat must
+identify the source, phase and current route; report completed and total
+routes, elapsed time, recent or overall throughput, search expansions and
+attempts, failure or abstention counts, and an explicitly labelled estimated
+time to the configured search limit. Publish the same state as a durable
+progress receipt so live status does not depend on an attached terminal. The
+estimate is operational telemetry, not a scientific stopping rule, and may
+not change any search bound, source order, gate or evidence classification.
+
 The first 15-source launch failed in every worker before loading a teacher
 trace because the Modal image omitted the transitive
 `tools/t4_program_vocabulary_audit.py` import. Preserve its launch receipt and

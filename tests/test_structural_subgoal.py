@@ -12,8 +12,12 @@ from compose_v4.control.structural_subgoal import (
     extract_structural_goal,
     instantiate_goal,
 )
+from compose_v4.control.structural_subgoal_realizer import (
+    RealizerConfig,
+    realize_structural_goal,
+)
 from compose_v4.rewrite.kernel import canonical_state_key
-from compose_v4.rewrite.trace_shard import encode_state
+from compose_v4.rewrite.trace_shard import decode_state, encode_state
 
 
 def _methane() -> MolecularGraph:
@@ -73,3 +77,39 @@ def test_address_free_binding_enumeration_contains_teacher_assignment():
     census = attachment_bindings(goal.subgoals[0], source)
     assert teacher_bindings[0] in census.assignments
     assert census.visits > 0
+
+
+def test_conditional_realizer_reaches_bound_goal_without_teacher_actions():
+    source, target, states, actions = _created_handle_trace()
+    goal, teacher_bindings, _ = extract_structural_goal(states, actions)
+    progress = []
+
+    result = realize_structural_goal(
+        source,
+        goal,
+        teacher_bindings,
+        config=RealizerConfig(maximum_expansions=64, children_per_expansion=8),
+        progress=progress.append,
+    )
+
+    assert result["status"] == "realized"
+    assert result["endpoint_matches_bound_target"]
+    assert result["primitive_teacher_actions_used"] == 0
+    assert canonical_state_key(decode_state(result["states"][-1])) == canonical_state_key(target)
+    assert progress
+
+
+def test_conditional_realizer_reports_bounded_abstention():
+    source, _, states, actions = _created_handle_trace()
+    goal, teacher_bindings, _ = extract_structural_goal(states, actions)
+
+    result = realize_structural_goal(
+        source,
+        goal,
+        teacher_bindings,
+        config=RealizerConfig(maximum_primitives=1, maximum_expansions=1),
+    )
+
+    assert result["status"].endswith("abstention")
+    assert not result["endpoint_matches_bound_target"]
+    assert result["actions"] == []

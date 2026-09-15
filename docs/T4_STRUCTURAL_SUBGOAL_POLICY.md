@@ -98,6 +98,19 @@ separate exploration and refinement lane in the shared archive.
 
 No scored optimization or oracle call is authorized by this document.
 
+## Live progress and ETA contract
+
+Conditional realization can take materially longer than target construction.
+Each remote source shard therefore emits and durably publishes a structured
+heartbeat at least every 30 seconds while work is active. It records the
+source, phase, current route, routes completed and total, elapsed time,
+throughput, search expansions and attempts, failures or abstentions, and an
+explicitly labelled estimate to the configured search limit. Completion and
+failure receipts use the same task identity.
+
+The estimate is operational telemetry only. It does not authorize early
+stopping, alter the search limit, or turn incomplete work into a result.
+
 ## Parallel execution amendment, 2026-09-15
 
 The user authorized immediate Modal parallelization of this zero-oracle work.
