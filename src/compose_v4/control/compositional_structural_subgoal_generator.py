@@ -18,11 +18,16 @@ from dataclasses import dataclass
 import networkx as nx
 import numpy as np
 
-from compose_v4.chem.molecular_graph import MolecularGraph, is_element
+from compose_v4.chem.molecular_graph import (
+    ORGANIC_VOCABULARY,
+    MolecularGraph,
+    is_element,
+)
 from compose_v4.control.docking_value import identity
 from compose_v4.control.generic_legal_action_policy import (
     RULES,
     LegalSuccessor,
+    _candidate_actions,
     _record_parts,
     action_features,
     enumerate_legal_successors,
@@ -37,7 +42,19 @@ from compose_v4.control.structural_subgoal_realizer import (
     realize_structural_goal,
 )
 from compose_v4.control.trajectory_value import molecule_features
-from compose_v4.rewrite.kernel import canonical_state_key
+from compose_v4.rewrite.action_codec_v4 import encode_action
+from compose_v4.rewrite.kernel import (
+    InvalidRewrite,
+    canonical_state_key,
+    editing_v2_semantic_rewrite_system,
+)
+from compose_v4.rewrite.operators import (
+    SemanticAtomRestate,
+    resolve_semantic_atom_restate_action,
+)
+from compose_v4.rewrite.semantic_atom_restate import (
+    prepare_semantic_atom_restate_context,
+)
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
 
 CHECKPOINT_SCHEMA = "compositional_structural_subgoal_generator_v1"
@@ -467,6 +484,73 @@ def _is_local(prefix: _Prefix, candidate: LegalSuccessor) -> bool:
     return bool(references) and references <= set(prefix.mutable_slots)
 
 
+def enumerate_local_legal_successors(
+    graph: MolecularGraph,
+    allowed_slots: tuple[int, ...],
+) -> tuple[LegalSuccessor, ...]:
+    """Enumerate the exact Active8 fiber whose references are local.
+
+    This is decision-equivalent to filtering :func:`enumerate_legal_successors`
+    after complete enumeration.  It filters address roles before exact execution
+    and therefore avoids paying for molecule-wide nonlocal candidates.  Semantic
+    atom restatement retains its authoritative resolver and shared prepared
+    context.
+    """
+
+    allowed = {int(slot) for slot in allowed_slots}
+    if not allowed:
+        return ()
+    source_key = canonical_state_key(graph)
+    system = editing_v2_semantic_rewrite_system()
+    successors: dict[str, LegalSuccessor] = {}
+    for rule in RULES:
+        resolved = []
+        if rule == "atom_restate_semantic":
+            context = prepare_semantic_atom_restate_context(graph)
+            for slot in sorted(allowed):
+                if (
+                    slot < 0
+                    or slot >= len(graph.atom_types)
+                    or not bool(is_element(graph.atom_types[slot]))
+                ):
+                    continue
+                for target_class in range(len(ORGANIC_VOCABULARY)):
+                    action = SemanticAtomRestate(slot, target_class)
+                    resolution = resolve_semantic_atom_restate_action(
+                        graph,
+                        action,
+                        context=context,
+                    )
+                    if (
+                        resolution is not None
+                        and resolution.admitted
+                        and resolution.successor is not None
+                    ):
+                        resolved.append((action, resolution.successor))
+        else:
+            for action in _candidate_actions(graph, rule):
+                action_record = encode_action(rule, action)
+                _, references, _, _ = _record_parts(action_record, graph)
+                if not references or not references <= allowed:
+                    continue
+                try:
+                    successor = system.apply(graph, rule, action)
+                except (InvalidRewrite, ValueError):
+                    continue
+                resolved.append((action, successor))
+        for action, successor in resolved:
+            key = canonical_state_key(successor)
+            if key == source_key or key in successors:
+                continue
+            successors[key] = LegalSuccessor(
+                rule=rule,
+                action_record=encode_action(rule, action),
+                successor=successor,
+                successor_key=key,
+            )
+    return tuple(successors[key] for key in sorted(successors))
+
+
 def _dependencies(actions: tuple[dict, ...]) -> tuple[tuple[int, int, str], ...]:
     if len(actions) < 2:
         return ()
@@ -601,7 +685,7 @@ def generate_compositional_patches(
     prefixes = list(retained_first)
     continue_prefixes = retained_first[:second_event_beam]
     for prefix in continue_prefixes:
-        legal = enumerate_legal_successors(prefix.current)
+        legal = enumerate_local_legal_successors(prefix.current, prefix.mutable_slots)
         telemetry["second_legal_successors"] += len(legal)
         candidates = []
         for candidate in legal:
@@ -679,6 +763,7 @@ __all__ = [
     "PatchTrainingEvent",
     "WeightedDiagonalDensity",
     "balanced_event_weights",
+    "enumerate_local_legal_successors",
     "fit_compositional_patch_generator",
     "fit_weighted_density",
     "generate_compositional_patches",

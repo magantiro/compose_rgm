@@ -8,11 +8,16 @@ from compose_v4.chem.molecular_graph import MolecularGraph
 from compose_v4.control.compositional_structural_subgoal_generator import (
     PatchTrainingEvent,
     balanced_event_weights,
+    enumerate_local_legal_successors,
     fit_compositional_patch_generator,
     generate_compositional_patches,
     region_features,
 )
-from compose_v4.control.generic_legal_action_policy import enumerate_rule_successors
+from compose_v4.control.generic_legal_action_policy import (
+    _record_parts,
+    enumerate_legal_successors,
+    enumerate_rule_successors,
+)
 
 
 def _ethane() -> MolecularGraph:
@@ -145,3 +150,22 @@ def test_joint_generator_emits_only_exactly_realized_novel_patches() -> None:
     assert all(row.realization["primitive_teacher_actions_used"] == 0 for row in rows)
     assert telemetry["exactly_realized"] == len(rows)
     assert all(row.goal.subgoals for row in rows)
+
+
+def test_local_fiber_is_decision_equivalent_to_filtering_complete_fiber() -> None:
+    source = _ethane()
+    allowed = (0,)
+    expected = {
+        candidate.successor_key
+        for candidate in enumerate_legal_successors(source)
+        if (
+            bool(_record_parts(candidate.action_record, source)[1])
+            and _record_parts(candidate.action_record, source)[1] <= set(allowed)
+        )
+    }
+
+    observed = {
+        candidate.successor_key for candidate in enumerate_local_legal_successors(source, allowed)
+    }
+
+    assert observed == expected
