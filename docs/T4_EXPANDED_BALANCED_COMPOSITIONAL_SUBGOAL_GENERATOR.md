@@ -63,3 +63,64 @@ This revision makes no docking or task-oracle call and launches no Modal job.
 It tests only whether the additional sealed training evidence improves
 zero-oracle held-source structural proposal quality. It cannot establish
 molecular utility or an IVG comparison.
+
+## Measured result
+
+The frozen expanded fit emitted all 128 requested candidates for both policies
+on all 15 held sources. This is 3,840 candidates in total, with zero candidate
+shortfall. Every accepted candidate exactly realized and replayed: 1,920/1,920
+for the uniform policy and 1,920/1,920 for the learned policy. The uniform arm
+filled its pools in 1,922 compiler attempts. The learned arm required 2,041
+attempts, with 73 `TypeError` and 48 `ValueError` compile abstentions recorded
+before replacement candidates filled the frozen pools.
+
+The table reports source-balanced granular component coverage. The baseline is
+the separately frozen fit without the delta-0.6 routes. The grammar, compiler,
+folds, seeds and candidate budgets are identical.
+
+| K | Uniform | Baseline learned | Expanded learned | Expanded minus baseline |
+| ---: | ---: | ---: | ---: | ---: |
+| 8 | 24.08% | 18.01% | 18.26% | +0.25 points |
+| 32 | 37.86% | 34.63% | 35.13% | +0.50 points |
+| 128 | 46.25% | 59.77% | 58.24% | -1.53 points |
+
+The expanded learned arm passes the unchanged within-revision gate at K=128:
+it exceeds uniform in every fold, 63.94% versus 46.28% in fold 0, 51.96%
+versus 43.02% in fold 1, and 58.81% versus 49.44% in fold 2, while exact
+realization precision remains 100%. It remains worse than uniform at K=8 in
+all three folds and at K=32 in two of three folds.
+
+The added delta-0.6 supervision does not establish a consistent improvement
+over the baseline learned fit. It gives small aggregate gains at K=8 and K=32,
+but lowers the primary broad-support K=128 measurement. At K=128, learned novel
+whole-patch yield also changes from 92.67 to 90.40 per source, and unique patch
+yield changes from 94.67 to 92.27 per source. This is a mixed, not a positive,
+data-expansion result.
+
+Both learned revisions recover 2/147 exact held patches at K=32 and K=128.
+Neither the expanded learned arm nor its uniform control recovers any of the 77
+complete teacher endpoints or any radius-2 teacher transformation class at
+K=8, K=32 or K=128. These are material negative findings. They do not establish
+poor docking utility because this milestone observes no task score.
+
+The immutable candidate lock has physical SHA-256
+`36af44427cab2fdbb76aa5b330707f048abef8cab74a4af62405a7571b1f69b6`
+and payload SHA-256
+`43b7470b73867d2a9805455465c3f594cd9c5edea6e6ed174b622a1b4cf328b6`.
+The result has physical SHA-256
+`9c305507d53db6b42933fe4b29fc3c791329cebe0280a79971a26ac2193635c5`
+and payload SHA-256
+`ef36d32fc691a2c9b98107e9e33917025c16b026695a48d58b1dc26f98b09f8d`.
+The independent candidate-lock rebuild took 3,102.46 summed pool seconds on
+one CPU worker and was byte-identical to the first lock. This is 20.22 seconds
+slower than the baseline revision's independent 3,082.24-second build, a 0.66%
+difference under the same candidate work.
+
+## Decision boundary
+
+The expanded model remains a valid candidate for a later score-blind utility
+comparison because it generates broad, novel and exactly executable support.
+The offline evidence does not select it over the baseline learned model. A
+later utility lock must preserve both learned revisions and their matched
+uniform controls. No model, compiler, support, split, budget or acceptance rule
+is changed in response to this result.
