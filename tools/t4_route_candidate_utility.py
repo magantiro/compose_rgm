@@ -100,10 +100,7 @@ def launch():
 
     if LAUNCH.exists():
         raise ValueError("candidate-lock launch exists; monitor instead")
-    manifest = json.loads(TASKS.read_text())
-    body = manifest["payload"]
-    if identity(body) != manifest.get("payload_sha256"):
-        raise ValueError("candidate-lock task manifest changed")
+    body = json.loads(TASKS.read_text())
     worker = modal.Function.from_name(APP_NAME, "lock_worker")
     calls = {task["cell"]: worker.spawn(task).object_id for task in body["tasks"]}
     receipt = {
@@ -121,7 +118,10 @@ def launch():
 def status():
     import modal
 
-    receipt = json.loads(LAUNCH.read_text())["payload"]
+    receipt = json.loads(LAUNCH.read_text())
+    expected = receipt.pop("receipt_sha256")
+    if identity(receipt) != expected:
+        raise ValueError("candidate-lock launch receipt changed")
     rows = []
     for cell, call_id in sorted(receipt["call_ids"].items()):
         try:
@@ -138,7 +138,10 @@ def status():
 def collect():
     import modal
 
-    receipt = json.loads(LAUNCH.read_text())["payload"]
+    receipt = json.loads(LAUNCH.read_text())
+    expected = receipt.pop("receipt_sha256")
+    if identity(receipt) != expected:
+        raise ValueError("candidate-lock launch receipt changed")
     volume = modal.Volume.from_name(VOLUME_NAME)
     locks = OUTPUT / "locks"
     collected, preserved = [], []
@@ -149,15 +152,17 @@ def collect():
             continue
         destination = locks / cell / "candidate_lock.json"
         if destination.exists():
-            envelope = json.loads(destination.read_text())
-            if identity(envelope["payload"]) != envelope.get("payload_sha256"):
+            lock = json.loads(destination.read_text())
+            expected = lock.pop("lock_sha256")
+            if identity(lock) != expected:
                 raise ValueError(f"collected candidate lock changed: {destination}")
             preserved.append(cell)
             continue
         remote = f"{REMOTE_OUTPUT}/{cell}/candidate_lock.json"
         raw = b"".join(volume.read_file(remote))
-        envelope = json.loads(raw)
-        if identity(envelope["payload"]) != envelope.get("payload_sha256"):
+        lock = json.loads(raw)
+        expected = lock.pop("lock_sha256")
+        if identity(lock) != expected:
             raise ValueError(f"remote candidate lock changed: {remote}")
         destination.parent.mkdir(parents=True, exist_ok=True)
         temporary = destination.with_suffix(".json.tmp")
