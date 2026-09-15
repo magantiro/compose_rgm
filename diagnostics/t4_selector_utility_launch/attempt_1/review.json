@@ -1,0 +1,103 @@
+{
+  "payload": {
+    "schema_version": "t4_selector_utility_review_v1",
+    "evidence_status": "prospective first-score selected development evidence",
+    "score_direction": "minimize",
+    "score_unit": "kcal/mol as emitted by the bound QuickVina wrapper",
+    "run_id": "9f0c5f2cc25117aa76e235f5905e095cf120832a641aa74e0386642e8c354571",
+    "inputs": {
+      "launch_contract": {
+        "path": "configs/t4_selector_utility_launch_v1.json",
+        "physical_sha256": "76ef620573e921eeb8043e7fea78608a9726ed08c611ae6c40bc3f177d8ce1d5",
+        "payload_sha256": "f0e507b475c66d01de5cbd11909f92daa383555dee6a226e79f1e60c5620d4a4"
+      },
+      "request_lock": {
+        "path": "diagnostics/t4_selector_utility_prelock/attempt_1/request_lock.json",
+        "physical_sha256": "9802da3b356ae5f41460a29377640c9a0e3fb866f2e82c46ea581624074ba046",
+        "payload_sha256": "6d49e2a397b662a4425a4a5ee0d17a6223d64c4ac3e0effa594dc8d8c1c52b29"
+      },
+      "scored_result": {
+        "path": "diagnostics/t4_selector_utility_launch/attempt_1/result.json",
+        "physical_sha256": "c7d63593ed4e90b37a7e37a70c288aeee6bc8300dfdf1e97af1d92e315c77f8e",
+        "payload_sha256": "0dffec4a76f86f8fe1a72076e47bdbe966780d5ff5d0c4cba97a6fb34d23071c"
+      },
+      "source_reference_registry": {
+        "path": "docs/GENMOL_T4_SEEDS.json",
+        "physical_sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"
+      },
+      "raw_counterpart_result": {
+        "revision": "977e4bdc624a92a868f70e586327326c9b2508b0",
+        "path": "diagnostics/t4_compositional_generator_utility_launch/attempt_1/result.json",
+        "physical_sha256": "c44d9168591996a0008eeeef617c349f17b83389780d522a3aca62b61ad03b02",
+        "payload_sha256": "3e9a73281ccc3505dad7059ab06609ebf5470328ec08183aea4a4fe67dbbdb1d"
+      }
+    },
+    "execution": {
+      "launch_revision": "eb275132298188edb809566832762a959e1cf335",
+      "modal_app_id": "ap-KTVGX5XP17A4zBUD2ONVkQ",
+      "preflight_call_id": "fc-01M2KNKX5J7V6M11DJRRAZ1RX0",
+      "worker_call_ids": [
+        "fc-01M2KNM1PYRMZXADPFPA7MSPJG",
+        "fc-01M2KNM2DDHCD10FPM5VFMSW78"
+      ],
+      "reducer_call_id": "fc-01M2KNQWWS5E3ACRZBS2DXBJXW",
+      "first_score_calls_charged": 2,
+      "successful_scores": 2,
+      "failed_scores": 0,
+      "incomplete_requests": 0,
+      "automatic_retries": 0,
+      "replacements_or_backfill": 0,
+      "new_generator_calls": 0
+    },
+    "comparisons": [
+      {
+        "cell": "jak2_1",
+        "target": "jak2",
+        "selector_request_id": "a2d0cd20506c4913dc92c33207371b7d2ed7ef3c1afd8a7daa806d4468b59218",
+        "selector_rank": 1,
+        "selector_score": -8.3,
+        "raw_counterpart_request_id": "4b148133e86f93571cee7f4696e3a10d827094e7dd2537b4e8facb5905a7474f",
+        "raw_counterpart_rank": 1,
+        "raw_counterpart_score": -6.8,
+        "selector_minus_raw_counterpart": -1.5,
+        "source_reference_score": -8.0,
+        "selector_minus_source_reference": -0.3,
+        "selector_improves_raw_counterpart": true,
+        "selector_improves_source_reference": true
+      },
+      {
+        "cell": "parp1_0",
+        "target": "parp1",
+        "selector_request_id": "4704ccbc0a7efb17855e4808355bc0480f69e515c9cec8bfbaf11dc4aa925e11",
+        "selector_rank": 2,
+        "selector_score": -7.8,
+        "raw_counterpart_request_id": "c8208357e19b6dfc10c1fa9c24fc05d09ee5667074877dc24145defcb9741368",
+        "raw_counterpart_rank": 2,
+        "raw_counterpart_score": -6.8,
+        "selector_minus_raw_counterpart": -1.0,
+        "source_reference_score": -7.3,
+        "selector_minus_source_reference": -0.5,
+        "selector_improves_raw_counterpart": true,
+        "selector_improves_source_reference": true
+      }
+    ],
+    "summary": {
+      "requests_scored": 2,
+      "selector_mean_score": -8.05,
+      "raw_counterpart_mean_score": -6.8,
+      "source_reference_mean_score": -7.65,
+      "mean_selector_minus_raw_counterpart": -1.25,
+      "mean_selector_minus_source_reference": -0.4,
+      "cells_improving_raw_counterpart": 2,
+      "cells_improving_source_reference": 2
+    },
+    "interpretation": "Both prospectively locked selector endpoints scored better under the bound evaluator than their immutable previously scored raw-order counterparts and their cell source references. The panel contains only two offline-selected development cells, so it is evidence that selector ranking can recover docking utility, not an independent benchmark or an IVG-superiority result.",
+    "negative_findings_and_limits": [
+      "Only two of five declared development cells had a selector-eligible request; three cells abstained before scoring.",
+      "No raw counterpart was rescored in this milestone; comparisons use the immutable previously scored raw results bound by request identity.",
+      "The selector architecture and requests were selected using offline teacher and component diagnostics.",
+      "This result does not measure route recovery, autonomous optimization, final-benchmark generalization or IVG superiority."
+    ]
+  },
+  "payload_sha256": "67fcb8fb304d336e0036c24cc160fa41846237d0a6d1008f60a14f830e99c0c1"
+}
