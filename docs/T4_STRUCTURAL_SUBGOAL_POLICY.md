@@ -213,3 +213,24 @@ yield, candidate shortfall, compiler work, wall time and every abstention.
 Generation is source-sharded into 15 independent units with no automatic retry
 and deterministic fold reduction. This is still a zero-oracle gate. A scored
 T4 launch remains outside this contract.
+
+## Attempt 2 result, 2026-09-15
+
+The clean 15-source comparison completed at revision
+`6626a5f5f6a8a3059647535e50bf35fd13d7177c`. Both policies recovered zero exact
+held subgoals, exact endpoints and radius-2 transformation-equivalent endpoints
+at every predeclared cutoff. The balanced marginal realized 1,700 of 1,920
+attempted candidates (precision 0.885417). The graph-conditioned arm realized
+1,441 of 1,920 (precision 0.750521) and required 6.39 times the summed proposal
+CPU time. No oracle was called.
+
+A post-gate support audit found zero exact template-identifier overlap between
+the train-fold vocabularies and 147 held subgoal instances. The current policy
+selects complete train-fold structural deltas as indivisible classes, so it
+cannot synthesize new combinations of region, topology, atom state, attachment
+and dependency decisions. This is preserved as a failed proposal-support gate.
+The exact conditional realizer remains successful; the next scientific problem
+is generative structural-subgoal support rather than further compiler repair or
+reranking of the same finite template vocabulary. Full metrics and sealed report
+hashes are recorded in
+`diagnostics/t4_structural_subgoal_policy/attempt_2/README.md`.
