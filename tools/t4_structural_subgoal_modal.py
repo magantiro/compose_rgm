@@ -14,9 +14,9 @@ from modal_apps.t4_structural_subgoal_app import APP_NAME, MATERIAL_FILES, VOLUM
 from tools.t4_structural_subgoal_audit import source_groups
 
 ROOT = Path(__file__).resolve().parents[1]
-LOCAL_ROOT = ROOT / "diagnostics/t4_structural_subgoal/attempt_1"
+LOCAL_ROOT = ROOT / "diagnostics/t4_structural_subgoal/attempt_2"
 LAUNCH = LOCAL_ROOT / "launch.json"
-REMOTE_ROOT = "/t4_structural_subgoal/attempt_1"
+REMOTE_ROOT = "/t4_structural_subgoal/attempt_2"
 
 
 def _clean_revision():

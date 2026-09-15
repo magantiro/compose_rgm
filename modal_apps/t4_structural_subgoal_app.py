@@ -14,12 +14,13 @@ from modal_apps.run_process_v2_p50_app import image as base_image
 APP_NAME = "compose-t4-structural-subgoal"
 VOLUME_NAME = "compose-t4-route-distilled-artifacts"
 ARTIFACT_ROOT = Path("/artifacts")
-OUTPUT_ROOT = ARTIFACT_ROOT / "t4_structural_subgoal" / "attempt_1"
+OUTPUT_ROOT = ARTIFACT_ROOT / "t4_structural_subgoal" / "attempt_2"
 MATERIAL_FILES = (
     "AGENTS.md",
     "docs/T4_STRUCTURAL_SUBGOAL_POLICY.md",
     "modal_apps/t4_structural_subgoal_app.py",
     "tools/t4_structural_subgoal_audit.py",
+    "tools/t4_program_vocabulary_audit.py",
     "tools/t4_route_distillation.py",
     "diagnostics/t4_shared_program_controller/attempt_2/shared_library.json",
 )

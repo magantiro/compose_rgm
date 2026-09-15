@@ -397,6 +397,14 @@ training, broader controller integration and Dynamic-v0 optimization wave
 remain unauthorized until this zero-oracle representation, realization and
 proposal gate is sealed.
 
+The first 15-source launch failed in every worker before loading a teacher
+trace because the Modal image omitted the transitive
+`tools/t4_program_vocabulary_audit.py` import. Preserve its launch receipt and
+all 15 durable zero-oracle failure calls. The user explicitly authorized an
+immediate bounded operational repair. Add only that missing module to the
+material-file manifest, publish under `attempt_2`, and relaunch the same 15
+source groups once with unchanged scientific inputs, support and gates.
+
 **Scoped T4 dependency-region horizon audit, 2026-09-14:** while the three
 zero-oracle complete-program decoder fits finish unchanged, the user authorized
 one parallel diagnostic over the same 77 signed T4 teacher traces. Decompose
