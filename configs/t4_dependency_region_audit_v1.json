@@ -1,0 +1,51 @@
+{
+  "payload": {
+    "schema_version": "t4_dependency_region_audit_contract_v1",
+    "authorization": "2026-09-14 user explicitly authorized the zero-oracle dependency-region audit milestone and its contract, runner, focused tests, documentation, and reproducible result artifact",
+    "mode": "retrospective_zero_oracle_horizon_diagnostic",
+    "inputs": {
+      "teacher_library": {
+        "path": "diagnostics/t4_shared_program_controller/attempt_2/shared_library.json",
+        "sha256": "732c67d04af3a0824cfa700906fd73982689af416f337c8eb109499af79afdb5"
+      },
+      "source_registry": {
+        "path": "docs/GENMOL_T4_SEEDS.json",
+        "sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"
+      },
+      "t4_contract": {
+        "path": "configs/t4_frozen_program_benchmark_v2.json",
+        "sha256": "fdc93e9bc97eaae2e81f2189a3b7568b00d1b5525ff0fb7a657668a6190ad280"
+      }
+    },
+    "census": {
+      "teacher_routes": 77,
+      "source_groups": 15,
+      "maximum_primitives": 32
+    },
+    "definitions": {
+      "primary": "action footprints joined by shared atom lifetime, created-handle dependency, cycle open-close dependency, or adjacency in the lifetime molecular bond graph",
+      "strict_sensitivity": "action footprints joined only by shared atom lifetime, created-handle dependency, or cycle open-close dependency",
+      "maximum_regions": 8,
+      "report_component_runs_and_reentries": true
+    },
+    "gates": {
+      "exact_replay_precision": 1.0,
+      "complete_route_census": 77,
+      "refuse_overwrite": true,
+      "preserve_abstentions": true
+    },
+    "oracle": {
+      "calls_authorized": 0
+    },
+    "prohibitions": [
+      "model_training",
+      "decoder_change",
+      "beam_change",
+      "teacher_route_change",
+      "live_run_change",
+      "scored_candidate_evaluation",
+      "forced_component_budget_pass"
+    ]
+  },
+  "contract_sha256": "9db75af00ee669ac38a5eca3fc0dd8d507b9054e21fe898b458b332786dc54c6"
+}

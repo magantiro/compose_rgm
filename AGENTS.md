@@ -372,6 +372,21 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped T4 dependency-region horizon audit, 2026-09-14:** while the three
+zero-oracle complete-program decoder fits finish unchanged, the user authorized
+one parallel diagnostic over the same 77 signed T4 teacher traces. Decompose
+each exact route into dependency-connected structural regions using action
+footprint overlap, created-handle dependencies, cycle open/close dependencies
+and the lifetime molecular bond graph. Preserve primitive order and verify
+exact replay. Report both the PMO-comparable lifetime-neighbor definition and a
+stricter shared-handle sensitivity analysis so horizon reduction is not
+overstated by a permissive connectivity rule. Report route coverage, replay
+precision, component and component-run distributions, reentries, abstentions,
+input hashes, software identity and per-source results. This audit authorizes
+zero oracle calls, no model training, no decoder change, no beam change and no
+live-run mutation. A structural-subgoal controller remains future work until
+this diagnostic and the current decoder comparison are observed.
+
 **Scoped T4 route-distilled complete-program decoder, 2026-09-14:** after the
 grouped route-policy comparison showed that the fitted context actor ranks
 teacher decisions well but autonomously recovers zero teacher-equivalent
