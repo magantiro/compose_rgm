@@ -372,6 +372,35 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped zero-oracle expanded balanced T4 compositional structural-subgoal
+generator, 2026-09-15:** after the separately sealed delta-0.6 route-reference
+export admitted 32 exact COMPOSE-compiled witnesses and 45 address-free
+structural subgoals, the user explicitly authorized one matched data-expansion
+revision of the frozen compositional generator. Preserve the active baseline
+run and its artifacts byte-for-byte. Add only the sealed delta-0.6 corpus to
+the existing training distribution of 77 T4 complete routes, 55 exact
+Full-146 auxiliary routes and 85 exact converted PMO traces. The delta-0.6
+witnesses are inferred COMPOSE realizations of reported IVG endpoints, not
+observed IVG trajectories.
+
+Reuse the baseline architecture, generic Active8 grammar, exact executor,
+sealed structural extractor and realizer, three whole-source T4 folds,
+candidate budgets K=8,32,128, candidate lock, metrics and acceptance gates
+without modification. Exclude delta-0.6 routes from a fold whenever their T4
+source is held out. Fit every statistic after that split. Give equal total
+mass to each training domain, then equal mass to each source or PMO task-family
+lineage, route, component and decision. Keep each canonical source-endpoint
+pair at unit corpus weight so repeated tied endpoint references cannot
+overweight training.
+
+This revision may fit and evaluate only the same zero-oracle CPU generator and
+uniform comparator. It may not inspect the active baseline result before its
+contract is frozen, change model support or gates, call docking or any task
+oracle, launch Modal, access a live run, alter an existing artifact or
+authorize a scored pilot. Preserve failures and abstentions. The self-hashed
+contract is
+`configs/t4_expanded_balanced_compositional_structural_subgoal_generator_v1.json`.
+
 **Scoped zero-oracle T4 compositional structural-subgoal generator,
 2026-09-15:** after the grouped-source component audit found zero whole-patch
 overlap but high low-level graph, atom, bond and dependency reuse, the user
