@@ -22,16 +22,17 @@ scored artifacts and integration code remain immutable.
 ## Coverage-first data gate
 
 The prospective machine-readable contract is
-`configs/t4_target_conditioned_utility_selector_v1.json`. It binds four kinds
+`configs/t4_target_conditioned_utility_selector_v3.json`. It binds four kinds
 of measured artifacts:
 
 Its frozen payload SHA-256 is
-`266a8e02b34155b946bfa71cb059272443356d4dc81eb556d47e6e9bd683c743`.
+`a1fca9322ca916916c6b2b5e4c2c8bc8612ff4cd4e4fece6db731c6147bff3dd`.
 
-1. the 49 first-evaluation rows from the committed T4 second-generation run and
-   all eight exact optimizer archives needed for a candidate, endpoint and
-   observation join;
-2. the charged T4 program-pool result and its exact replay join;
+1. the 49 first-evaluation rows from the committed T4 second-generation run,
+   its sealed query-to-batch selection lock, all hash-bound exact candidate
+   batches and all eight optimizer archives that bind the measured result;
+2. the charged T4 program-pool result, exact replay join, authoritative source
+   registry and exact historical winner-control receipt and protocol;
 3. the sealed 19-request delta-0.6 prospective result and its exact candidate
    and request locks;
 4. the sealed delta-0.4 prospective result, where only two successful finite
@@ -39,9 +40,12 @@ Its frozen payload SHA-256 is
 
 An apparent row is not admitted merely because it has a score. Every label must
 join to an immutable measured receipt, exact endpoint graph, source cell,
-target, delta, protocol and docking seed. Second-generation rows must join by
-candidate and protocol to exactly one exact archive entry and observation.
-Program-pool rows must join to the charged result and exact final replay state.
+target, delta, protocol and docking seed. Second-generation rows must join from
+the measured query through the sealed selection membership to one exact batch
+candidate and complete state trace. Program-pool rows must join to the charged
+result and exact final replay state, and their input state must equal the
+authoritative address-free cell source. A replay from an intermediate context
+is not a row for the original cell even when its endpoint was measured.
 Prospective rows must join through their immutable request and candidate locks.
 Any ambiguous or incomplete join abstains.
 
@@ -53,6 +57,8 @@ Before graph features, normalization or score pairs are derived, records are
 held out by target-local source index. Physical request, endpoint, Bemis-Murcko
 scaffold, source/cell and generator/program lineage groups may not cross folds.
 Any group that conflicts with the predetermined split is excluded in full.
+Connected grouping components are removed together so that a scaffold or
+lineage conflict cannot survive indirectly through another retained row.
 Pairs are formed only within one target, cell, delta, protocol and docking seed.
 
 The fit is allowed only if at least three targets and five held-source strata
@@ -88,3 +94,15 @@ change an existing model or lock, launch the five-cell qualification, impute a
 missing score, pair incomparable protocols, or use an outer-test result to tune
 the fixed model. A positive result is retrospective within-known-target ranking
 evidence. It is not prospective optimization or evidence of beating IVG.
+
+## Repair lineage
+
+The v1 and v2 executions were unsealed coverage previews. They stopped before
+fitting but were not committed with a recoverable producer identity, so they
+are not cited as immutable evidence. They exposed that second-generation query
+identity differed from exact batch-candidate identity and that raw persistent
+slots are not chemical graph identity. Review before the first authoritative
+execution also found that the reused PARP1 winner needed its exact receipt and
+that program-pool rows mixed the true cell source with an intermediate
+post-linker context. V3 freezes those provenance repairs while leaving the
+scientific split, model, metrics and coverage thresholds unchanged.

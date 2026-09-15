@@ -406,7 +406,17 @@ least three targets and five held-source strata, publish only the audit and do
 not fit. Held-target transfer is unsupported. This is CPU-only and zero-oracle;
 it may not call docking, launch Modal, access a live run, alter a frozen
 artifact or launch five-cell qualification. The self-hashed contract is
-`configs/t4_target_conditioned_utility_selector_v1.json`.
+`configs/t4_target_conditioned_utility_selector_v3.json`.
+
+The v1 and v2 data-join runs were unsealed prefit previews, not immutable
+scientific results. Neither fit a model. Before the first authoritative run,
+v3 was explicitly authorized to bind the already sealed second-generation
+query-to-batch lock, use canonical address-free graph identities, bind the
+reused PARP1 winner to its exact historical receipt and protocol, verify every
+program-pool source against the authoritative cell seed, separate physical
+label and representation denominators, and remove complete connected grouping
+components that cross the predetermined folds. The split, features, models,
+metrics and coverage thresholds remain unchanged.
 
 **Scoped zero-oracle T4 complete-macro selector, 2026-09-15:** after the
 compositional structural-subgoal generator passed its K=128 support gate but

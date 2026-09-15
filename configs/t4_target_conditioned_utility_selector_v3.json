@@ -1,0 +1,186 @@
+{
+  "payload": {
+    "schema_version": "t4_target_conditioned_utility_selector_contract_v3",
+    "authorization": "2026-09-15 user explicitly authorized one isolated zero-oracle T4 utility-ranking revision after prospective scoring showed that the structural selector was not aligned with docking utility; after unsealed v1 and v2 coverage previews found provenance-join defects before fitting, the root agent explicitly authorized a new immutable v3 provenance repair with unchanged split, model, metric and coverage gates",
+    "repair_lineage": {
+      "preserved_prior_status": "v1 and v2 were unsealed prefit coverage previews, not immutable scientific results; neither fit a model and neither is cited as authoritative evidence",
+      "allowed_changes": ["add the already-sealed second-generation selection lock", "use canonical address-free molecular-graph identity", "verify zero grouping conflicts after complete conflicting groups are excluded", "bind the reused PARP1 winner to its exact historical docked-control receipt and protocol artifact rather than a score summary", "verify every program-pool representation against the authoritative exact PARP1-0 source graph and exclude non-cell contexts", "separate physical requests, finite labels, program representations and group-conflict removals in the audit denominators"],
+      "frozen_unchanged": ["candidate rows", "source-index folds", "grouping keys", "pairing strata", "features", "models", "optimization", "metrics", "coverage thresholds"]
+    },
+    "mode": "coverage_first_grouped_source_retrospective_measured_utility_ranking",
+    "scientific_problem": "The frozen complete-macro selector ranks source, endpoint and structural-goal features but consumes neither target identity nor measured docking utility. Test whether a shared target-conditioned endpoint utility ranker can order immutable historically scored candidates better than target-blind controls without changing candidate generation, exact realization or any score lock.",
+    "primary_model_output": "A scalar lower-is-better docking-utility rank for one exact source graph and one exact scored endpoint graph, produced by one shared model with explicit target conditioning.",
+    "central_claim_under_test": "Within known T4 targets that have measured training pairs, a shared target-conditioned endpoint utility ranker improves held-source ordering over an otherwise identical target-blind utility ranker and fixed target-blind structural controls on the same immutable candidate rows.",
+    "evaluation_setting": "Retrospective zero-oracle grouped-source comparison over immutable charged T4 docking artifacts. Hold out all rows from one target-local source index before graph preprocessing or pair construction. Pair and evaluate outcomes only inside a common target, cell, delta, oracle protocol and docking-seed stratum.",
+    "project_identity": {
+      "platform": "COMPOSE exact executable molecular programs remain the platform; this milestone changes only retrospective endpoint utility ranking.",
+      "generated_object": "No object is generated. The scored object is an exact source-to-endpoint molecular graph pair already present in an immutable charged artifact.",
+      "declared_support": "Neutral or artifact-declared T4 molecular graphs inside the existing 48-slot, at-most-40-active-atom support, five named T4 docking targets, and only evaluator identities represented by admitted measured rows.",
+      "interpretation_limit": "This is a small retrospective within-known-target ranking diagnostic. It is not held-target transfer, calibration, prospective selection, online optimization, autonomous route recovery or IVG superiority evidence."
+    },
+    "current_selector_audit": {
+      "contract": {
+        "path": "configs/t4_complete_macro_selector_v1.json",
+        "git_revision": "1d209660859d5349396969e4f8efeaf0a0b46437",
+        "sha256": "b949d23b1886506f39abd29136394f0e00ba3dbe9d6d0bbd935a929683e41a63"
+      },
+      "implementation": {
+        "path": "src/compose_v4/control/complete_macro_selector.py",
+        "git_revision": "1d209660859d5349396969e4f8efeaf0a0b46437",
+        "sha256": "5ddbee6219063ce793c8cd7ea26843adb69dbfb096e3d4cf760b10369b0053c6"
+      },
+      "result": {
+        "path": "diagnostics/t4_complete_macro_selector/attempt_1/result.json",
+        "git_revision": "1d209660859d5349396969e4f8efeaf0a0b46437",
+        "sha256": "2cc879e03ead3303ebbd5134a63e6e673f19d7fb0f9b90d173d5b5140ce53b80"
+      },
+      "frozen_limitation_to_verify": "The selector score is a function only of source graph, endpoint graph, complete structural-goal templates and compiler work. Its contract explicitly prohibits task_or_protein_identity, and no measured docking outcome enters its fit or score."
+    },
+    "measured_inputs": {
+      "second_generation": {
+        "git_revision": "1d209660859d5349396969e4f8efeaf0a0b46437",
+        "result": {
+          "path": "diagnostics/t4_second_generation/scoring_1/remote_result.json",
+          "sha256": "7a4dd9dfc0b0f64df5d832bfd2870a303d6954b75a175be237faca5a7145275e"
+        },
+        "archives": [
+          {"path": "diagnostics/t4_second_generation/scoring_1/5ht1b_0_score_blind_archive.json", "sha256": "5fa48f24acb1c3f1f55fc43ea60425073f81852f2669c86bb3d601055cc83f75"},
+          {"path": "diagnostics/t4_second_generation/scoring_1/5ht1b_0_score_rank_archive.json", "sha256": "cb197b0cf7f955372083361bb88b38ff3dce1fe59a487dc3aa85d544838ea750"},
+          {"path": "diagnostics/t4_second_generation/scoring_1/braf_1_score_blind_archive.json", "sha256": "cc7401c9daab11919ca170d209007adf588dec00754a8dbb8bc84cc5bd56ee41"},
+          {"path": "diagnostics/t4_second_generation/scoring_1/braf_1_score_rank_archive.json", "sha256": "83fa3d96638e41d0fa5edc758e1c25d00ae9d91914c102a1d96f09b7309295a0"},
+          {"path": "diagnostics/t4_second_generation/scoring_1/fa7_0_score_blind_archive.json", "sha256": "785f0e67007197af36e48bbb556f91a4bee66909c8a7dfec371c5de54deb8de5"},
+          {"path": "diagnostics/t4_second_generation/scoring_1/fa7_0_score_rank_archive.json", "sha256": "ef922811c06248decba9a5548def13885928f0be74fc96eca47ab000fad78df5"},
+          {"path": "diagnostics/t4_second_generation/scoring_1/jak2_1_score_blind_archive.json", "sha256": "28e49b39a2ccd57b3b57c5a7a59b9ef23e4142b700a74c298c9244dad98eb936"},
+          {"path": "diagnostics/t4_second_generation/scoring_1/jak2_1_score_rank_archive.json", "sha256": "77ca4427f13002d106c113ff0ad3791a2c2b54f45cbe20374a59d0ed5f81e2a5"}
+        ],
+        "selection_lock": {
+          "path": "configs/t4_second_generation_lock.json",
+          "git_revision": "66bec5cf631acc51f4814fbedefbfc29f84859d7",
+          "sha256": "0ff7694ab00f166f15032027e3621fed2870f040d21af5177faed5cf913fa11d",
+          "payload_sha256": "136af7f7e42c1dd101e8b75afd3162ed7005ff7b960fa1bd6f0734397d119044"
+        },
+        "admission_gate": "Every admitted measured result candidate_id must join to selection_lock.memberships.query_id, then through the hash-bound batch_path plus membership.candidate_id to one exact source graph, endpoint graph and complete program. Validate cell, canonical endpoint, oracle protocol and every immutable input hash recorded by the selection lock. Duplicate arm memberships remain provenance only. The scored archives independently bind the same measured result hash and preserve charged observations, but are not the source of the query-to-exact-candidate identity. Otherwise abstain for that row."
+      },
+      "program_pool": {
+        "git_revision": "1d209660859d5349396969e4f8efeaf0a0b46437",
+        "charged_result": {"path": "diagnostics/t4_program_pool/attempt_1/remote_result.json", "sha256": "ab6f92cffd1a72037bcb23ca95482ae82b247f10b5d75803e7140a8651e02441"},
+        "exact_replay_join": {"path": "diagnostics/t4_program_pool/attempt_1/scored_program_replay.json", "sha256": "a7ad7a3da9cca8a40fbeae853e476719b9a5f5d1334c5b6ca3119ce4d25ffdfc"},
+        "review": {"path": "diagnostics/t4_program_pool/attempt_1/review.json", "sha256": "5d912f5c01309fab3c0a0953acb9ec23ca6358f0ed86c1c55321caf1b887ad61"},
+        "docked_controls": {"path": "diagnostics/t4_winner_refinement/attempt_1/docked_controls.json", "sha256": "da005e8d6b6a25e04923061d1616231f0357b74b6e831774fd207a434bbcc192", "payload_sha256": "df28666b37a11f458a1dd02cbd3db7c2bb87437729ae036adc473135152ca0cd"},
+        "winner_protocol_result": {"path": "diagnostics/t4_winner_refinement/attempt_1/resumed_result.json", "sha256": "28bf3be3918835f018db84b27e09bbbe038c0dc00a41d06e92ef09cae9125605"},
+        "admission_gate": "Every ordinary endpoint must join by canonical endpoint and score to one charged result row with exact endpoint state and replayed final state. The previously charged winner control is admissible only when exactly one docked-controls observation matches its canonical endpoint, exact address-free endpoint identity, measured score and docking seed, and the protocol result binds that docked-control artifact plus the same target, delta, docking configuration and immutable evaluator inputs as the replay protocol. Duplicate program representations collapse to one physical source-target-endpoint-protocol measurement; representations with different source graphs are excluded rather than arbitrarily merged."
+      },
+      "delta06_prospective": {
+        "result": {"path": "diagnostics/t4_delta06_structural_subgoal_utility_launch/attempt_1/result.json", "git_revision": "ad78fb05971575daff9db7e920e6ff92e5550b75", "sha256": "e717cc9bfccde01caf20b8cc1b31bc0e500711f96221ff1e797461605480c6d7"},
+        "candidate_lock": {"path": "diagnostics/t4_delta06_structural_subgoal_utility_lock/attempt_1/candidate_lock.json", "git_revision": "f79d4e2f08a2bfe06f58fa8e6c8796daa49f976e", "sha256": "cb99a77a0d721af50a44b85309f105787e18a31f1bc006c3c23be5e9893b4089", "payload_sha256": "5f777aacafde3db5a0e48f2e463444bb5c80c332f317c4a7dad585635c79b7f4"},
+        "request_lock": {"path": "diagnostics/t4_delta06_structural_subgoal_utility_lock/attempt_1/request_lock.json", "git_revision": "f79d4e2f08a2bfe06f58fa8e6c8796daa49f976e", "sha256": "23ccc7250d5f6ac20af3609047b39730a47ab414bba01cf8c7c0479ae2681659", "payload_sha256": "bc0b6ffdbd229e3ba6cf143f53fcc37003326138c43fa249aef629131360a15b"},
+        "fold_candidate_locks": [
+          {"fold": 0, "path": "diagnostics/t4_structural_subgoal_policy/attempt_2/fold_0/candidate_lock.json.gz", "git_revision": "f79d4e2f08a2bfe06f58fa8e6c8796daa49f976e", "sha256": "dd2ab444afdbce49ef798c8a4a467486168290d66b5a910b47bc14bc59f5953f", "payload_sha256": "725e2bf6293a21b476aade97116ed0e5acbf147bd3593b499bbd1b179a9b99b2"},
+          {"fold": 1, "path": "diagnostics/t4_structural_subgoal_policy/attempt_2/fold_1/candidate_lock.json.gz", "git_revision": "f79d4e2f08a2bfe06f58fa8e6c8796daa49f976e", "sha256": "6dee56be08bdc8c19183d3d1cc1623f0cd6024177ffa0407a8e89be626a271f5", "payload_sha256": "a730c4f6c3a7f0464716b65728c7809be32542c380c75cf716b3aa67f04337ee"},
+          {"fold": 2, "path": "diagnostics/t4_structural_subgoal_policy/attempt_2/fold_2/candidate_lock.json.gz", "git_revision": "f79d4e2f08a2bfe06f58fa8e6c8796daa49f976e", "sha256": "f2ffa2501caa240929304ce946dfde43269e054bc8f6e7f2ab5212c2efc0a71c", "payload_sha256": "5da5ad26eb95ffd3977f1554b42ffb585525b20726d3505adf39837d75d75f2f"}
+        ],
+        "admission_gate": "A successful physical request must join through membership.attempt_id and membership.fold to exactly one attempt_id in the corresponding immutable fold candidate lock. Validate cell, source_case_id and canonical_smiles. Multiple policy memberships remain provenance only and never duplicate a numeric label."
+      },
+      "delta04_prospective": {
+        "result": {"path": "diagnostics/t4_compositional_generator_utility_launch/attempt_1/result.json", "git_revision": "977e4bdc624a92a868f70e586327326c9b2508b0", "sha256": "c44d9168591996a0008eeeef617c349f17b83389780d522a3aca62b61ad03b02"},
+        "candidate_lock": {"path": "diagnostics/t4_compositional_generator_utility_lock/attempt_1/candidate_lock.json", "git_revision": "67574d20f8d28c70480974013bc8bca70df7e614", "sha256": "d9b90389443a5906179d93adeaa654bdd65742f60ea6e7da4e27aaf10e2eef60", "payload_sha256": "3c8eafa75073098dd95de99ccdc6a8ac5ae7e9b7a8b91fa97a3bc7340b541be5"},
+        "request_lock": {"path": "diagnostics/t4_compositional_generator_utility_lock/attempt_1/request_lock.json", "git_revision": "67574d20f8d28c70480974013bc8bca70df7e614", "sha256": "3d4a1712cda185d13e5eb66e4b8bc47db7e85960854b4132bb8710bdf7cf4469", "payload_sha256": "420a2b063f1309493c7b283559e517b183a40e9f982fafc12b7093570b3b5247"},
+        "admission_gate": "Only status=complete rows with finite measured score and a 1:1 exact candidate-lock join are utility labels. Failed or null-score requests remain a separate exclusion ledger and are never assigned a worst utility."
+      },
+      "source_registry": {"path": "docs/GENMOL_T4_SEEDS.json", "git_revision": "1d209660859d5349396969e4f8efeaf0a0b46437", "sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"},
+      "excluded_sources": [
+        "reported IVG comparator scores",
+        "published source scores",
+        "unscored structural proximity",
+        "failed or null-score requests",
+        "champion summaries without exact endpoint graphs and immutable measured receipts",
+        "live or uncommitted selector-utility results",
+        "historical GenMol summaries without row-level evaluator and exact-graph receipts"
+      ]
+    },
+    "split_and_leakage": {
+      "folds": [
+        {"fold": 0, "held_target_local_source_idx": 0},
+        {"fold": 1, "held_target_local_source_idx": 1},
+        {"fold": 2, "held_target_local_source_idx": 2}
+      ],
+      "freeze_before_features": true,
+      "graph_identity": "Canonical address-free molecular graph identity derived from the exact persistent-slot state. Raw slot arrays are never treated as chemical identity.",
+      "grouping_keys": ["physical_request", "canonical_endpoint", "bemis_murcko_scaffold", "cell_and_source_state", "generator_or_program_lineage"],
+      "conflict_policy": "If any endpoint, scaffold or lineage group spans predetermined folds, exclude the complete connected group and record every removed row. Never reassign a source fold.",
+      "pairing_stratum": ["target", "cell", "delta", "oracle_protocol", "docking_seed"],
+      "pair_rule": "Form strict measured pairs only within one pairing stratum after splitting and deduplication. Lower docking score is better. Ties generate no pair.",
+      "target_condition_support": "Evaluate a target-conditioned score only when that target has at least one strict measured training pair in the fold. A conditioning level absent from training must abstain.",
+      "held_target_transfer": "unsupported_and_not_evaluated"
+    },
+    "coverage_first_gate": {
+      "run_before_fit": true,
+      "requirements": [
+        "every admitted numeric score has an immutable charged or previously charged measured receipt and exact endpoint graph",
+        "every admitted row has one unambiguous source cell, target, delta, protocol and docking seed",
+        "zero request, endpoint, scaffold, source-state or lineage leakage across predetermined folds",
+        "at least three targets have at least one jointly supported held-source evaluation stratum across the three folds",
+        "at least five jointly supported held-source evaluation strata contain two or more finite measured candidates",
+        "every evaluated target-fold has at least one strict measured training pair"
+      ],
+      "failure_action": "Publish only the deterministic coverage, reconciliation, exclusion and abstention audit. Do not fit a utility model or weaken the split, grouping, target support or comparability rules."
+    },
+    "features": {
+      "graph_representation": "Exact persistent-slot source and endpoint states mapped through the existing target-blind molecule_features representation; source, endpoint and endpoint-minus-source features are concatenated.",
+      "fit_after_split": true,
+      "normalization": "Fit means and scales on training-fold endpoint rows only.",
+      "forbidden_features": ["measured docking score", "IVG or source comparator score", "route identifier", "cell identifier", "source index", "candidate rank selected using its score", "absolute atom address", "teacher endpoint identity"],
+      "target_condition": "One five-level target one-hot is used only through interactions with the shared structural feature vector. There are shared base coefficients and regularized target interaction coefficients, not five independently fitted controllers."
+    },
+    "models": {
+      "fixed_structural_baseline": "Rank by the negative L2 norm of endpoint-minus-source target-blind molecule features. It is fit-free and uses no target or utility label.",
+      "target_blind_utility": "One shared linear pairwise logistic ranker over normalized source, endpoint and delta features.",
+      "target_conditioned_utility": "The identical shared linear pairwise logistic ranker plus target-by-structural-feature interactions. Target main effects are omitted because they cancel inside valid within-target pairs.",
+      "optimization": {
+        "updates": 800,
+        "learning_rate": 0.03,
+        "base_l2": 0.02,
+        "target_interaction_l2": 0.1,
+        "seed": 20260915,
+        "pair_weighting": "Equal total mass per training fold, target, source cell and comparable stratum, then equal mass per strict pair."
+      },
+      "calibration": "unsupported_due_to_sparse_grouped_data; no calibrated probabilities or uncertainty-guided deployment claim"
+    },
+    "evaluation": {
+      "identical_candidate_rule": "All three arms are scored on the exact same supported held rows within each reported stratum. Any baseline-specific missing input removes the stratum from the primary arm comparison and is reported as a coverage abstention.",
+      "metrics": [
+        "admitted_and_excluded_physical_requests_endpoints_cells_targets_protocols",
+        "strict_pair_count_and_pairwise_accuracy",
+        "per_stratum_and_source_balanced_ndcg",
+        "top1_and_top3_regret_in_docking_score_units",
+        "best_candidate_recall_at_1_and_3_and_selection_precision",
+        "candidate_row_stratum_source_target_and_fold_coverage",
+        "abstentions_by_reason",
+        "within_known_target_held_source_results",
+        "held_target_transfer_unsupported",
+        "calibration_unsupported"
+      ],
+      "selection_or_hyperparameter_tuning_on_outer_test": false,
+      "result_interpretation": "A target-conditioned improvement is retrospective evidence that target identity adds ranking signal inside the measured known-target support. It does not authorize a prospective controller or docking campaign."
+    },
+    "outputs": {
+      "directory": "diagnostics/t4_target_conditioned_utility_selector/attempt_3",
+      "required": ["data_audit.json", "exclusion_ledger.json", "split_manifest.json", "result.json", "README.md"],
+      "checkpoint_policy": "If the coverage gate passes, write fold checkpoints containing numeric preprocessing, shared coefficients, target interaction coefficients, target vocabulary and provenance hashes only. No endpoint, source graph, score row, route or executable program may be embedded."
+    },
+    "prohibitions": [
+      "new oracle or docking calls",
+      "Modal or live-run access",
+      "generator compiler current-selector candidate-lock or scored-result modification",
+      "five-cell or benchmark qualification launch",
+      "score imputation or unscored structural-proximity utility labels",
+      "cross-target or cross-protocol absolute-score pairing",
+      "held-source feature-statistic or hyperparameter fitting",
+      "target-specific separately fitted controller",
+      "split or support relaxation after audit or results"
+    ],
+    "costs": {"oracle_calls_authorized": 0, "docking_calls_authorized": 0, "modal_launches_authorized": 0, "device": "cpu", "workers": 1},
+    "negative_result_policy": "Preserve null, failed and abstaining results. If target conditioning does not improve the target-blind utility ranker, report the negative result without modifying data support, folds, features, thresholds or model hyperparameters."
+  },
+  "contract_sha256": "a1fca9322ca916916c6b2b5e4c2c8bc8612ff4cd4e4fece6db731c6147bff3dd"
+}
