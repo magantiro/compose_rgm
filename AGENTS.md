@@ -372,6 +372,42 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped T4 Dynamic-v0 full-suite comparator waves, 2026-09-14:** the user
+explicitly authorized prospective evaluation of the exact previously measured,
+route-free Dynamic-v0 controller across all 15 T4 source cells at similarity
+thresholds 0.6 and 0.4. This comparator is separate from the route-distilled
+policy gate and does not modify, qualify or replace that controller. Preserve
+every existing T4 and PMO run. Bind the scientific image to the sealed
+`t4_no_complete_routes_diagnostic_v1` Dynamic-v0 implementation and
+configuration: zero stored program rows, an empty initial complete-route
+archive, generic one-to-three-module dynamic synthesis, at most 32 primitives
+and eight blocks, the exact executor, and no target-specific route lookup or
+new training.
+
+Run the 0.6 wave first. Its immediate census is all 15 cells under the first
+predeclared paired controller/docking seed (20260913, 1701). Each of the 15
+units has a 1,000-call ceiling and must continue to that
+ceiling unless candidate support is genuinely exhausted or a recorded hard
+failure prevents further calls. Do not apply competitive-plateau stopping,
+confirmation calls, result-dependent replacement, automatic retry, a GPU or
+more than 15 concurrent single-CPU workers. Persist every candidate lock,
+charged call, failure, best-so-far point, round, checkpoint and random state.
+Use a dedicated artifact volume and make one unit the atomic recovery boundary;
+an ambiguous reserved call remains charged and blocks automatic recovery.
+
+Only after all 15 threshold-0.6 units are durable may the identical 15-unit
+threshold-0.4 wave launch. The similarity threshold and corresponding sealed
+oracle-domain identity are the only scientific changes. Keep all controller,
+proposal, archive, support, budget, seed, docking and reporting settings fixed.
+The two waves permit at most 30,000 new docking calls in total. The two additional
+historical replicate pairs remain outside this immediate launch and require a
+separate prospective lock. Publish live
+query/best-score telemetry and matched-call summaries at 50, 100, 200, 400,
+600, 800 and 1,000 calls. This is a frozen Dynamic-v0 benchmark comparator,
+not route-distilled qualification, held-out evidence, or authorization to alter
+PMO. A clean committed revision, self-hashed contracts, zero-oracle preflight
+and immutable launch receipts are required before each wave.
+
 **Scoped PMO route-distillation export and cross-benchmark transfer preparation,
 2026-09-14:** the user explicitly authorized a bounded, zero-oracle revision that
 exports generic route supervision from the locked PMO development artifacts and
