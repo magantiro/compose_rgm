@@ -1,0 +1,199 @@
+{
+  "payload": {
+    "schema_version": "t4_compositional_generator_utility_prelock_contract_v1",
+    "authorization": "2026-09-15 user explicitly authorized a prospective zero-oracle score-blind utility lock for the baseline versus expanded compositional generator comparison; docking remains unauthorized",
+    "mode": "prospective_zero_oracle_rank_first_delta04_endpoint_utility_lock",
+    "scientific_problem": "Prepare a small prospective endpoint panel that can later test whether the baseline and expanded compositional structural-subgoal generators produce useful molecules, without using teacher recovery metrics or task scores for selection.",
+    "primary_output": "A complete per-candidate eligibility and exclusion ledger plus an immutable deduplicated request lock preserving cell-arm memberships.",
+    "central_claim_under_test": "A later separately authorized first-score panel can compare endpoint utility across matched baseline/expanded and uniform/learned arms; this prelock does not establish utility.",
+    "experimental_setting": "Exactly five predeclared held T4 cells, one per protein, and four generator arms under their already ranked 128-candidate pools.",
+    "cells": [
+      "5ht1b_0",
+      "braf_1",
+      "jak2_1",
+      "parp1_0",
+      "fa7_0"
+    ],
+    "arms": [
+      {
+        "arm_id": "baseline_uniform",
+        "generator_revision": "baseline",
+        "policy_id": "uniform_joint_grammar"
+      },
+      {
+        "arm_id": "baseline_learned",
+        "generator_revision": "baseline",
+        "policy_id": "balanced_joint_autoregressive"
+      },
+      {
+        "arm_id": "expanded_uniform",
+        "generator_revision": "expanded",
+        "policy_id": "uniform_joint_grammar"
+      },
+      {
+        "arm_id": "expanded_learned",
+        "generator_revision": "expanded",
+        "policy_id": "balanced_joint_autoregressive"
+      }
+    ],
+    "candidate_bindings": {
+      "baseline": {
+        "logical_path": "diagnostics/t4_compositional_structural_subgoal_generator/attempt_1/candidate_lock.json.gz",
+        "expected_physical_sha256": "f533e70d940ff191df007b28107f12eed9bce6abb43f44f7afc91d47422afd28",
+        "source_revision": "PENDING_ARTIFACT_ONLY_COMMIT",
+        "payload_sha256": "PENDING_UNOPENED_BINDING",
+        "status": "physical_identity_predeclared_candidate_payload_unopened"
+      },
+      "expanded": {
+        "logical_path": "diagnostics/t4_expanded_balanced_compositional_subgoal_generator/attempt_1/candidate_lock.json.gz",
+        "expected_physical_sha256": "PENDING_ARTIFACT_ONLY_COMMIT",
+        "source_revision": "PENDING_ARTIFACT_ONLY_COMMIT",
+        "payload_sha256": "PENDING_UNOPENED_BINDING",
+        "status": "candidate_not_yet_available"
+      }
+    },
+    "binding_protocol": {
+      "final_binding_artifact": "configs/t4_compositional_generator_utility_inputs_v1.json",
+      "allowed_after_prelock": [
+        "record committed source revision for each immutable candidate lock",
+        "record physical and self-hashed payload SHA-256 for each immutable candidate lock",
+        "record selection implementation physical SHA-256 after it is committed"
+      ],
+      "forbidden_after_prelock": [
+        "change cell set",
+        "change arm set or mapping",
+        "change eligibility",
+        "change rank or tie-break rule",
+        "change deduplication",
+        "add replacement or backfill",
+        "inspect evaluation manifests or teacher metrics before input binding"
+      ],
+      "candidate_pool_opening_order": [
+        "verify final binding artifact against this prelock",
+        "verify both committed candidate-lock physical and payload identities",
+        "only then open candidate payloads"
+      ]
+    },
+    "selection_semantics": {
+      "candidate_order": "the original serialized candidate-list order defines one-indexed rank",
+      "eligibility_first": true,
+      "within_cell_arm_canonicalization": "compute an eligibility decision for every candidate, quotient eligible candidates by canonical non-isomeric molecular SMILES, and retain the representative with minimum rank then canonical SMILES then candidate identity",
+      "selection": "select the one retained eligible representative with minimum rank then canonical SMILES then candidate identity",
+      "maximum_selected_per_cell_arm": 1,
+      "unselected_eligible_reason": "eligible_not_lowest_rank_representative",
+      "duplicate_eligible_reason": "eligible_canonical_duplicate_within_cell_arm",
+      "cell_arm_abstention": "no independently eligible canonical endpoint",
+      "cross_arm_deduplication": "after independent cell-arm selection, merge requests with identical target, canonical molecule, docking seed and evaluator identity while preserving every cell-arm membership",
+      "merged_membership_is_abstention": false,
+      "result_dependent_replacement": false,
+      "backfill": false,
+      "reselection": false,
+      "candidate_regeneration": false,
+      "maximum_unique_future_requests": 20
+    },
+    "eligibility": {
+      "valid": true,
+      "connected": true,
+      "null_endpoint": false,
+      "non_self": true,
+      "source_similarity_strictly_greater_than": 0.4,
+      "qed_strictly_greater_than": 0.6,
+      "sa_strictly_less_than": 4.0,
+      "active_atoms_less_than_or_equal_to": 40,
+      "active_heavy_atom_counts_must_match": true,
+      "canonical_molecule": "RDKit canonical non-isomeric SMILES",
+      "fingerprint": {
+        "kind": "Morgan",
+        "radius": 2,
+        "bits": 2048,
+        "include_chirality": false
+      }
+    },
+    "provenance_requirements": {
+      "candidate_ledger": "every candidate from every selected cell/arm with exact source state, exact endpoint state, actions, original rank, candidate identity, recomputed descriptors, eligibility and all exclusion or nonselection reasons",
+      "membership_lock": "exact selected state/action provenance and immutable candidate-lock identity for every selected cell-arm membership",
+      "request_lock": "deduplicated physical request identity with every preserved membership",
+      "abstention_ledger": "all 20 declared cell-arm units, including absent, empty and no-eligible cases",
+      "software": "code revision, selection implementation hash, RDKit and SA implementation identities",
+      "randomness": "none"
+    },
+    "immutable_inputs": {
+      "baseline_generator_contract": {
+        "path": "configs/t4_compositional_structural_subgoal_generator_v1.json",
+        "sha256": "72d5525f0e110f499dfadaadf92a1b92eeedd99d47e1621cb923b6c010c3f093",
+        "payload_sha256": "a91272c148d7b6421f4209a8aadae031fd52d783ac8904e8ac4544d79262c151"
+      },
+      "expanded_generator_contract": {
+        "path": "configs/t4_expanded_balanced_compositional_structural_subgoal_generator_v1.json",
+        "sha256": "5ffb6d880fc35313942355ca31c19724950bf9e608c3090380b9df3ee5e02938",
+        "payload_sha256": "ae907e7387fdcebad29e50544090c92f212cfea22fc5689af364cfac2074a6b7"
+      },
+      "frozen_t4_source_cell_contract": {
+        "path": "configs/t4_frozen_program_benchmark_v2.json",
+        "sha256": "fdc93e9bc97eaae2e81f2189a3b7568b00d1b5525ff0fb7a657668a6190ad280",
+        "payload_sha256": "e8a33a903f54b2cb33f180a844cf1109a0848fe64419e09609e34d2dfcf1e7a2"
+      },
+      "source_registry": {
+        "path": "docs/GENMOL_T4_SEEDS.json",
+        "sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"
+      },
+      "candidate_generator_and_schema": {
+        "path": "tools/t4_compositional_structural_subgoal_generator.py",
+        "sha256": "489f548bc932e9dff9da725fe5a51a66485e2a841800c7344e452fb15e50be00"
+      },
+      "state_canonicalization": {
+        "path": "src/compose_v4/chem/molecular_graph.py",
+        "sha256": "f25e20f52bd56f90299d93e934038f9caf4768b557b68a3d5781ca925efc16a2"
+      },
+      "state_validation": {
+        "path": "src/compose_v4/chem/state.py",
+        "sha256": "4aa1acc257b053a562969ad8cc9b62fd84ce2931b04f1890f1c242888a3cecf5"
+      },
+      "state_decoder": {
+        "path": "src/compose_v4/rewrite/trace_shard.py",
+        "sha256": "6308218c24b68034b294c08a22bd11a96eadda205bc1a865cb06a54403a6f01c"
+      },
+      "docking_scoring_implementation": {
+        "path": "modal_apps/genmol_t4_opt_app.py",
+        "sha256": "9b635a9936493a5900b613cdce52f76c24efcf98f3f43b3b155448e0b1796bf0"
+      }
+    },
+    "environment": {
+      "rdkit": "2024.03.5",
+      "sa_scorer_sha256": "40c66080be6f7e2086375f6e2d76b0a0d41d25c5d7116902a377404a5f260323",
+      "sa_fragment_scores_sha256": "10dcef9340c873e7b987924461b0af5365eb8dd96be607203debe8ddf80c1e73",
+      "numeric_precision": "Python float and RDKit double descriptors",
+      "device": "single CPU",
+      "randomness": "none"
+    },
+    "prohibited_inputs": [
+      "evaluation_manifest",
+      "teacher_endpoint",
+      "teacher_transformation",
+      "teacher_metric",
+      "task_score",
+      "docking_score",
+      "comparator_outcome",
+      "live_run_state"
+    ],
+    "outputs": {
+      "directory": "diagnostics/t4_compositional_generator_utility_lock/attempt_1",
+      "eligibility_ledger": "eligibility_ledger.json.gz",
+      "candidate_lock": "candidate_lock.json",
+      "request_lock": "request_lock.json",
+      "abstention_ledger": "abstention_ledger.json",
+      "result": "result.json",
+      "interpretation": "README.md"
+    },
+    "authority": {
+      "oracle_calls_authorized": 0,
+      "docking_calls_authorized": 0,
+      "modal_launches_authorized": 0,
+      "live_run_access_authorized": false,
+      "scored_launch_authorized": false,
+      "later_authorization_required": "Explicitly authorize the exact sealed request-lock physical and payload SHA-256 and its exact call ceiling; no retries, replacements or backfill."
+    },
+    "interpretation_limit": "This prelock establishes only a prospective score-blind candidate selection protocol. A later sealed panel can establish eligibility coverage, and a separately authorized score run can test endpoint utility. Neither establishes teacher recovery, route recovery, autonomous optimization or an IVG comparison."
+  },
+  "contract_sha256": "a9f941e027f9758102c2874db7c7521a246f087812a7a32ee3110051e0a5c196"
+}

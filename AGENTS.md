@@ -372,6 +372,41 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped prospective zero-oracle T4 compositional-generator utility lock,
+2026-09-15:** after authorizing the small strict-delta-0.6 endpoint-utility
+diagnostic, the user explicitly authorized a separate score-blind comparison
+lock for the baseline and expanded compositional structural-subgoal generators.
+Freeze the selection protocol before the expanded generator's teacher metrics or
+candidate contents are available. Use exactly `5ht1b_0`, `braf_1`, `jak2_1`,
+`parp1_0` and `fa7_0`, one cell per protein, and at most four arms: baseline
+uniform, baseline learned, expanded uniform and expanded learned. From each
+already ranked cell/arm pool, select at most the lowest-rank canonically unique
+endpoint that independently passes the unchanged strict delta-0.4 eligibility
+gate: source Morgan radius-2/2,048-bit similarity greater than 0.4, QED greater
+than 0.6, SA less than 4.0, valid and connected, non-self, and at most 40 active
+atoms. Resolve only rank ties by canonical molecule and candidate identity.
+
+Audit every candidate and exclusion, preserve exact source and endpoint states,
+actions, rank, arm and immutable candidate-lock provenance. Merge identical
+target/canonical-molecule/evaluator/docking-seed requests across arms while
+preserving every arm membership. A merged membership is not an abstention and
+does not trigger replacement. Missing or ineligible arms abstain; there is no
+result-dependent replacement, backfill or reselection. The resulting lock may
+contain at most 20 unique future requests. Candidate-lock binding may add only
+the exact committed baseline and expanded physical and payload identities to the
+already frozen protocol before either candidate pool is opened. Baseline and
+expanded generator artifacts remain read-only.
+
+This milestone may not load evaluation manifests, teacher endpoints,
+transformations or metrics, task scores, docking outcomes, comparator outcomes
+or live-run state. It may not call an oracle or docking function, launch Modal,
+access a live run, regenerate or rerank candidates, or modify either generator
+artifact. The request lock is not launch authority. Any future scoring requires
+separate explicit authorization naming its exact physical and payload SHA-256,
+the exact request count as a call ceiling, and zero retry, replacement or
+backfill. The governing prelock protocol is
+`configs/t4_compositional_generator_utility_prelock_v1.json`.
+
 **Scoped zero-oracle expanded balanced T4 compositional structural-subgoal
 generator, 2026-09-15:** after the separately sealed delta-0.6 route-reference
 export admitted 32 exact COMPOSE-compiled witnesses and 45 address-free
