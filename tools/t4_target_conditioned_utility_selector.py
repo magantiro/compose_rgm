@@ -1002,6 +1002,32 @@ def run(root: Path, output: Path, contract_path: Path = CONTRACT) -> dict[str, A
     contract = contract_document["payload"]
     if canonical_json_hash(contract) != contract_document["contract_sha256"]:
         raise RuntimeError("utility-selector contract self-hash mismatch")
+    code_revision = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    producer = {
+        "code_revision": code_revision,
+        "implementation_sha256": {
+            "src/compose_v4/control/target_conditioned_utility_selector.py": sha256_file(
+                root / "src/compose_v4/control/target_conditioned_utility_selector.py"
+            ),
+            "tools/t4_target_conditioned_utility_selector.py": sha256_file(
+                root / "tools/t4_target_conditioned_utility_selector.py"
+            ),
+        },
+        "software": {
+            "python": platform.python_version(),
+            "numpy": np.__version__,
+            "torch": torch.__version__,
+            "platform": platform.platform(),
+        },
+        "device": "cpu",
+        "precision_if_fit": "float32",
+    }
     rows, exclusions = [], []
     for loader in (
         _load_second_generation,
@@ -1050,6 +1076,7 @@ def run(root: Path, output: Path, contract_path: Path = CONTRACT) -> dict[str, A
         "contract_sha256": contract_document["contract_sha256"],
         "input_contract_path": str(contract_path),
         "input_contract_physical_sha256": sha256_file(root / contract_path),
+        "producer": producer,
         "pre_leakage_census": pre_leakage,
         "post_leakage_census": post_leakage,
         "input_reconciliation": reconciliation,
@@ -1109,6 +1136,7 @@ def run(root: Path, output: Path, contract_path: Path = CONTRACT) -> dict[str, A
                 "new_docking_calls": 0,
                 "modal_launches": 0,
                 "fit_performed": False,
+                "producer": producer,
             }
         else:
             fold_results = []
@@ -1220,12 +1248,7 @@ def run(root: Path, output: Path, contract_path: Path = CONTRACT) -> dict[str, A
                 "new_docking_calls": 0,
                 "modal_launches": 0,
                 "fit_performed": True,
-                "software": {
-                    "python": platform.python_version(),
-                    "numpy": np.__version__,
-                    "torch": torch.__version__,
-                    "platform": platform.platform(),
-                },
+                "producer": producer,
             }
         _write_json(temp / "result.json", result)
         result_sha256 = sha256_file(temp / "result.json")
