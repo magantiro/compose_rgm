@@ -126,6 +126,11 @@ and scored launch.
   byte-identical, with the same result SHA-256.
 - Focused verification before launch: 21 tests passed; Ruff passed; Black
   formatted the new files; `git diff --check` passed.
+- Repository-wide verification was attempted once at the milestone boundary.
+  It encountered numerous failures and errors outside the focused audit tests
+  and was stopped at 58% at the user's direction rather than spending further
+  time enumerating an already-red unrelated suite. It is not recorded as
+  passing, and the repository-wide definition-of-done gate remains unsatisfied.
 
 The first direct-file invocation failed before corpus loading because the
 repository root was absent from Python's module path. It wrote no result and
