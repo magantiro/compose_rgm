@@ -372,6 +372,42 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped zero-oracle T4 target-conditioned utility selector, 2026-09-15:**
+after the first prospective utility rows showed that the frozen complete-macro
+selector learned structural support rather than docking value, the user
+explicitly authorized one isolated measured-utility revision. Preserve the
+generator, grammar, compiler, exact realizer, complete-macro selector,
+candidate locks, scored artifacts and archive integration byte-for-byte. First
+audit and record that the current selector receives no target or task identity
+and no measured utility. Then freeze a self-hashed, coverage-first contract
+before extracting endpoint features, score pairs or fitted statistics.
+
+Admit only immutable historical charged docking rows that join unambiguously to
+an exact source graph, exact endpoint graph, target, cell, delta, evaluator
+protocol and docking seed. Failed or null-score calls are censoring or failure
+records, never numeric negatives. Reported IVG and source scores, unscored
+structural proximity, champion digests without exact endpoint receipts and
+live results are not labels. Hold out whole target-local source indices before
+graph preprocessing or pair construction. Keep every physical request,
+endpoint, scaffold, source/cell and generator/program lineage group in one
+fold; exclude a complete conflicting group rather than changing the frozen
+source split. Form pairs only within the same target, cell, delta, protocol and
+docking seed.
+
+On identical supported candidate rows compare a fit-free target-blind
+structural control, one shared target-blind pairwise endpoint-utility ranker and
+the same shared ranker with regularized target by structural-feature
+interactions. Target is conditioning input, not a switch between separately
+fit controllers. A target-fold absent from measured training pairs must
+abstain. Report coverage and exclusions before metrics, then pairwise accuracy,
+NDCG, top-k regret, best-candidate precision/recall, source/target/fold results,
+abstentions and calibration limits. If the frozen data gate cannot support at
+least three targets and five held-source strata, publish only the audit and do
+not fit. Held-target transfer is unsupported. This is CPU-only and zero-oracle;
+it may not call docking, launch Modal, access a live run, alter a frozen
+artifact or launch five-cell qualification. The self-hashed contract is
+`configs/t4_target_conditioned_utility_selector_v1.json`.
+
 **Scoped zero-oracle T4 complete-macro selector, 2026-09-15:** after the
 compositional structural-subgoal generator passed its K=128 support gate but
 underperformed the matched uniform order at K=8 and K=32, the user explicitly
