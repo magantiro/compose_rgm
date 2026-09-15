@@ -1,0 +1,41 @@
+{
+  "payload": {
+    "configured_application_retries": 0,
+    "docking_calls_authorized": 0,
+    "events": [
+      {
+        "case_failure_payload_sha256": "bcb3a24da2ac56ca0c5f23b1e946372d2617e46884a64ca8833c968be2b04ae5",
+        "case_failure_physical_sha256": "047bba2d7f7958f783588151a7573bbc427e184fa95b9952d205dcabe0a39c80",
+        "case_failure_wall_seconds": 3635.4240200040003,
+        "manual_relaunch_call_id": "fc-01M2H72A1C0AEWD4NJGYPQ3N84",
+        "manual_relaunch_receipt_sha256": "9fc1e023f467cff7f6e25acf45d8c28a59df2b6f7c0ed3e7ecc5ed88ab9102c4",
+        "original_call_cancellation_observation": "FunctionCall.get(timeout=0) raised RemoteError: Function call was cancelled by user or a failure.",
+        "original_call_cancellation_verified": true,
+        "original_call_id": "fc-01M2H36YD23Y3WRY2E02DKANZB",
+        "source_case_index": 6,
+        "task_run_id": "b1cfb420b21728d37013bb26adeda7088304fd0a8c701d25de629746ddcb231d"
+      },
+      {
+        "call_id": "fc-01M2H36ZPJK8EHCM45DB4NZBJ6",
+        "case_failure_payload_sha256": "d5603da1efde7fef3c703cd12931d75b5236795af882407f4388909fb1a0b1b4",
+        "case_failure_physical_sha256": "68a773d05df6fa20cc5d26339315509aeb818dbc0025f0c274b49a806255d848",
+        "case_failure_wall_seconds": 6924.008383013999,
+        "manual_relaunch": false,
+        "post_failure_progress_elapsed_seconds": 563.319379428,
+        "post_failure_progress_status": "running",
+        "source_case_index": 8,
+        "task_run_id": "dbd0e08f6101793399a707419572c637e233d63da0c0eeb0f1f08bc1d9c68cb0",
+        "transparent_infrastructure_recovery_observed": true
+      }
+    ],
+    "launch_receipt_sha256": "1607cdd0c127f227b1b5db6bfe662cde274c515d9980abacc4f44cdf9a71a258",
+    "new_oracle_calls": 0,
+    "observed_at_utc": "2026-09-15T01:21:03Z",
+    "operational_contract_conforming": false,
+    "operational_interpretation": "The launch configured zero application retries, but case 8 resumed under the same call and sealed task after an infrastructure KeyboardInterrupt. This platform-level recovery is preserved as a deviation. Case 6 continues only through the recorded exact-task manual relaunch after the original call was cancelled.",
+    "oracle_calls_authorized": 0,
+    "scientific_candidate_identity_changed": false,
+    "schema_version": "pmo_complete_program_decoder_operational_deviations_v1"
+  },
+  "payload_sha256": "05b750a5ac362f3c734553f421867a05f36575381489666382f9f7578d1a2769"
+}
