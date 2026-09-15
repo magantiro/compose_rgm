@@ -16,6 +16,7 @@ from tools.t4_structural_subgoal_audit import source_groups
 ROOT = Path(__file__).resolve().parents[1]
 LOCAL_ROOT = ROOT / "diagnostics/t4_structural_subgoal/attempt_2"
 LAUNCH = LOCAL_ROOT / "launch.json"
+SUMMARY = LOCAL_ROOT / "summary.json"
 REMOTE_ROOT = "/t4_structural_subgoal/attempt_2"
 
 
@@ -129,11 +130,99 @@ def collect():
     print(json.dumps({"complete": len(complete), "downloaded": downloaded}))
 
 
+def merge():
+    receipt = _receipt()
+    if SUMMARY.exists():
+        raise ValueError("structural-subgoal summary already exists")
+    expected = set(receipt["call_ids"])
+    observed = set()
+    rows = []
+    inputs = {}
+    for source_group in sorted(expected):
+        path = LOCAL_ROOT / "sources" / source_group / "result.json"
+        if not path.exists():
+            raise ValueError(f"missing structural-subgoal source shard: {source_group}")
+        row = json.loads(path.read_text())
+        if (
+            row.get("schema_version") != "t4_structural_subgoal_source_audit_v1"
+            or row.get("source_group") != source_group
+            or row.get("implementation", {}).get("revision") != receipt["commit"]
+            or row.get("costs", {}).get("oracle_calls") != 0
+            or row.get("costs", {}).get("docking_calls") != 0
+        ):
+            raise ValueError(f"incompatible structural-subgoal shard: {source_group}")
+        observed.add(source_group)
+        rows.append(row)
+        inputs[str(path.relative_to(ROOT))] = sha256_file(path)
+    if observed != expected or len(rows) != 15:
+        raise ValueError("structural-subgoal reduction lacks the sealed source census")
+
+    routes = sum(row["census"]["routes"] for row in rows)
+    subgoals = sum(row["census"]["subgoals"] for row in rows)
+    exact = sum(
+        row["gates"]["exact_endpoint_reconstruction"]["covered"] for row in rows
+    )
+    bound_routes = sum(
+        row["gates"]["teacher_binding_recovered_per_route"]["covered"] for row in rows
+    )
+    bound_subgoals = sum(
+        row["gates"]["teacher_binding_recovered_per_subgoal"]["covered"] for row in rows
+    )
+    distribution = {}
+    for row in rows:
+        for count, frequency in row["census"]["subgoal_count_distribution"].items():
+            distribution[count] = distribution.get(count, 0) + frequency
+    body = {
+        "schema_version": "t4_structural_subgoal_audit_summary_v1",
+        "evidence": "answer-known zero-oracle structural-subgoal training-data audit",
+        "implementation_revision": receipt["commit"],
+        "launch_receipt_sha256": sha256_file(LAUNCH),
+        "source_shards": inputs,
+        "census": {
+            "sources": len(rows),
+            "routes": routes,
+            "subgoals": subgoals,
+            "subgoal_count_distribution": dict(sorted(distribution.items())),
+        },
+        "gates": {
+            "exact_endpoint_reconstruction": {
+                "covered": exact,
+                "denominator": routes,
+                "precision": exact / routes,
+            },
+            "teacher_binding_recovered_per_route": {
+                "covered": bound_routes,
+                "denominator": routes,
+                "coverage": bound_routes / routes,
+            },
+            "teacher_binding_recovered_per_subgoal": {
+                "covered": bound_subgoals,
+                "denominator": subgoals,
+                "coverage": bound_subgoals / subgoals,
+            },
+        },
+        "costs": {"oracle_calls": 0, "docking_calls": 0, "gpu_seconds": 0},
+        "decision": (
+            "pass_structural_target_and_binding_gate"
+            if exact == routes and bound_routes == routes and bound_subgoals == subgoals
+            else "fail_structural_target_or_binding_gate"
+        ),
+        "limitations": [
+            "This is teacher-target reconstruction, not autonomous subgoal generation.",
+            "Teacher binding presence measures coverage, not proposal rank.",
+        ],
+    }
+    publish_json(SUMMARY, body)
+    print(json.dumps(body, indent=2, sort_keys=True))
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("action", choices=("launch", "status", "collect"))
+    parser.add_argument("action", choices=("launch", "status", "collect", "merge"))
     args = parser.parse_args()
-    {"launch": launch, "status": status, "collect": collect}[args.action]()
+    {"launch": launch, "status": status, "collect": collect, "merge": merge}[
+        args.action
+    ]()
 
 
 if __name__ == "__main__":
