@@ -18,6 +18,7 @@ from compose_v4.control.compositional_structural_subgoal_generator import (
 )
 from compose_v4.control.docking_value import identity
 from compose_v4.control.structural_subgoal_policy import ContextSubgoalRanker
+from tools import t4_complete_macro_selector as selector_tool
 from tools.t4_complete_macro_selector import _contract, _load_catalog
 
 
@@ -118,3 +119,27 @@ def test_frozen_contract_and_catalog_bind_15_sources_and_77_routes() -> None:
     assert set(evaluations) == {0, 1, 2}
     assert len(catalog) == 15
     assert sum(len(row["teachers"]) for row in catalog.values()) == 77
+
+
+def test_offline_ordering_quality_suppresses_degenerate_zero_time_rates(monkeypatch) -> None:
+    report = {
+        "schema_version": "route_proposal_quality_report_v1",
+        "policies": {
+            "p": {
+                "aggregate": {
+                    "attempts_per_second": 10**15,
+                    "unique_endpoints_per_second": 10**15,
+                }
+            }
+        },
+        "limitations": [],
+        "report_sha256": "old",
+    }
+    monkeypatch.setattr(selector_tool, "evaluate_quality", lambda payload, cutoffs: report)
+
+    observed = selector_tool._offline_ordering_quality({}, cutoffs=(8, 16, 32))
+
+    assert observed["policies"]["p"]["aggregate"]["attempts_per_second"] is None
+    assert observed["policies"]["p"]["aggregate"]["unique_endpoints_per_second"] is None
+    body = {key: value for key, value in observed.items() if key != "report_sha256"}
+    assert observed["report_sha256"] == identity(body)

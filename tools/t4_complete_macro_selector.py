@@ -514,6 +514,21 @@ def _source_balanced_component_summary(source_rows: list[dict], policy: str, cut
     }
 
 
+def _offline_ordering_quality(payload: dict, *, cutoffs: tuple[int, ...]) -> dict:
+    """Evaluate recovery while refusing degenerate zero-time throughput claims."""
+
+    result = evaluate_quality(payload, cutoffs=cutoffs)
+    body = {key: value for key, value in result.items() if key != "report_sha256"}
+    for policy in body["policies"].values():
+        policy["aggregate"]["attempts_per_second"] = None
+        policy["aggregate"]["unique_endpoints_per_second"] = None
+    body["limitations"].append(
+        "Proposal throughput is unsupported because this benchmark reorders an immutable lock "
+        "and performs no candidate generation."
+    )
+    return {**body, "report_sha256": identity(body)}
+
+
 def evaluate_all(input_root: Path, selector_lock_path: Path, output: Path) -> None:
     contract = _contract()
     baseline_lock, evaluations, _ = _load_catalog(contract)
@@ -620,7 +635,7 @@ def evaluate_all(input_root: Path, selector_lock_path: Path, output: Path) -> No
                     "policy_pools": quality_policies,
                 }
             )
-        quality = evaluate_quality(
+        quality = _offline_ordering_quality(
             {
                 "schema_version": QUALITY_SCHEMA,
                 "oracle_calls": 0,
@@ -645,7 +660,7 @@ def evaluate_all(input_root: Path, selector_lock_path: Path, output: Path) -> No
         all_quality_cases.extend(quality_cases)
         all_source_rows.extend(source_rows)
     policies = (POLICY_RAW_UNIFORM, POLICY_RAW_LEARNED, POLICY_SELECTOR)
-    overall_quality = evaluate_quality(
+    overall_quality = _offline_ordering_quality(
         {
             "schema_version": QUALITY_SCHEMA,
             "oracle_calls": 0,
