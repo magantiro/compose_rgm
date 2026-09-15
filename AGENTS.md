@@ -372,6 +372,30 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped zero-oracle T4 macro-to-archive integration plumbing, 2026-09-15:**
+after the baseline and expanded compositional structural-subgoal generators
+produced immutable exact-realized candidate locks and the complete-macro
+selector established a candidate-reference schema, the user authorized a new
+isolated integration-preparation revision. Prepare a typed deterministic
+boundary from selector-ranked learned macros and same-grammar uniform
+exploratory macros through immutable candidate resolution, exact-realization
+receipt validation, an unscored eligibility interface, canonical endpoint
+deduplication, selector/admission, one run-local archive and an adapter to the
+unchanged Dynamic-v0 refinement implementation. Preserve complete collision
+and lane provenance and four independent serializable RNG namespaces for
+learned generation, uniform generation, admission and Dynamic-v0 refinement.
+
+This milestone may use only fixtures and immutable candidate locks. It must
+generate no new candidate, choose no model or selector cutoff, compute no
+benchmark property, mutate no scored archive, call no oracle or docking
+function, launch no Modal job and alter no generator, realizer, selector or
+Dynamic-v0 scientific behavior. Protein identity, comparator outcomes, winner
+routes and endpoints are prohibited runtime inputs. A separate prospective
+five-cell contract may fix the qualification envelope, but it does not
+authorize launch. The self-hashed contracts are
+`configs/t4_macro_archive_v0_integration_v1.json` and
+`configs/t4_macro_archive_v0_five_cell_qualification_v1.json`.
+
 **Scoped zero-oracle expanded balanced T4 compositional structural-subgoal
 generator, 2026-09-15:** after the separately sealed delta-0.6 route-reference
 export admitted 32 exact COMPOSE-compiled witnesses and 45 address-free
