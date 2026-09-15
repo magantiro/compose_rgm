@@ -60,3 +60,8 @@ The prospective five-cell qualification contract is separate at
 `configs/t4_macro_archive_v0_five_cell_qualification_v1.json`. It fixes the
 scientific envelope but does not authorize a launch.
 
+The selector became immutable after the parent integration contract was
+sealed. Its exact artifact and the baseline generator lock that owns its
+candidate identities are therefore bound without rewriting the parent contract
+in `configs/t4_macro_archive_v0_selector_binding_v1.json`. This supplement does
+not choose K or a scored controller.
