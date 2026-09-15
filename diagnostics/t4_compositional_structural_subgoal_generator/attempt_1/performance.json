@@ -1,0 +1,63 @@
+{
+  "schema_version": "t4_compositional_structural_subgoal_performance_v1",
+  "recorded_at_utc": "2026-09-15T20:13:06Z",
+  "implementation_revision": "7ecc138373978421feaab27cd3ae7a5e6a6ebea4",
+  "inputs": {
+    "contract_physical_sha256": "72d5525f0e110f499dfadaadf92a1b92eeedd99d47e1621cb923b6c010c3f093",
+    "contract_payload_sha256": "a91272c148d7b6421f4209a8aadae031fd52d783ac8904e8ac4544d79262c151",
+    "generator_sha256": "b190e48584bfbfd2e6919dd21a965a0bfa28e319074abb449f66551d5c4e8b94",
+    "runner_sha256": "6e462ed924a5eeed1ca0cc467c9f0cfac1eb97e7019023749b6c8712a5016252"
+  },
+  "environment": {
+    "operating_system": "Darwin 25.5.0",
+    "architecture": "arm64",
+    "python": "3.12.9",
+    "device": "cpu",
+    "workers": 1,
+    "numeric_precision": "numpy float64 feature moments and scores",
+    "peak_memory_bytes": null,
+    "peak_memory_note": "Peak-memory instrumentation was not enabled."
+  },
+  "candidate_lock": {
+    "candidate_pools": 30,
+    "candidates_per_pool": 128,
+    "total_candidates": 3840,
+    "first_run_wall_seconds": 3080.16,
+    "first_run_candidates_per_second": 1.2466884837151317,
+    "independent_rerun_wall_seconds": 3082.24,
+    "independent_rerun_candidates_per_second": 1.2458471760797343,
+    "first_run_physical_sha256": "f533e70d940ff191df007b28107f12eed9bce6abb43f44f7afc91d47422afd28",
+    "rerun_physical_sha256": "f533e70d940ff191df007b28107f12eed9bce6abb43f44f7afc91d47422afd28",
+    "payload_sha256": "d9717fc3a7b92fe8b264c7803c43f50f48b14e078b179cbd75f66d769aa65b10",
+    "byte_identical": true
+  },
+  "evaluation": {
+    "preaggregate_wall_seconds": 372.94,
+    "authoritative_wall_seconds": 368.65,
+    "fold_metrics_value_identical": true,
+    "authoritative_result_physical_sha256": "5d084456e5eb9e749751a201045c6d753430753193fa61d4e681b42ba4bb2452"
+  },
+  "local_role_benchmark": {
+    "measurement_order": [
+      "enumerate_complete_fiber_then_filter",
+      "enumerate_local_prefiltered_fiber"
+    ],
+    "repetitions": 1,
+    "source_case_id": "68f31cec53518077b12d37be40bf60d05d99ac94ffc4c92e32f71144e0065baf",
+    "first_rule": "atom_delete",
+    "mutable_slots": 2,
+    "complete_successors": 699,
+    "filtered_local_successors": 23,
+    "optimized_local_successors": 23,
+    "decision_equivalent": true,
+    "complete_then_filter_wall_seconds": 18.88046949999989,
+    "local_prefilter_wall_seconds": 4.740170083001431,
+    "single_measurement_speedup": 3.9830784907289565,
+    "interpretation_limit": "One representative state and one ordered measurement; correctness is independently covered by the exhaustive local-fiber equivalence regression."
+  },
+  "costs": {
+    "new_oracle_calls": 0,
+    "new_docking_calls": 0,
+    "modal_launches": 0
+  }
+}
