@@ -1,0 +1,32 @@
+{
+  "payload": {
+    "schema_version": "t4_compositional_generator_utility_input_binding_v1",
+    "prelock": {
+      "path": "configs/t4_compositional_generator_utility_prelock_v1.json",
+      "sha256": "d03d27256a7a8a7a382fe596ad49762b077bb626ed987a13284f3ef97bdacfae",
+      "contract_sha256": "a9f941e027f9758102c2874db7c7521a246f087812a7a32ee3110051e0a5c196"
+    },
+    "selection_semantics_sha256": "536ac66abd957e8ada0a6fb45fa4ec90c2a21aa262af77ab67f7ae8621dfbcf4",
+    "candidate_locks": {
+      "baseline": {
+        "path": "diagnostics/t4_compositional_structural_subgoal_generator/attempt_1/candidate_lock.json.gz",
+        "sha256": "f533e70d940ff191df007b28107f12eed9bce6abb43f44f7afc91d47422afd28",
+        "payload_sha256": "d9717fc3a7b92fe8b264c7803c43f50f48b14e078b179cbd75f66d769aa65b10",
+        "source_revision": "7d87ff2959845d5c6273e743141ac9c0fe806594"
+      },
+      "expanded": {
+        "path": "diagnostics/t4_expanded_balanced_compositional_subgoal_generator/attempt_1/candidate_lock.json.gz",
+        "sha256": "36af44427cab2fdbb76aa5b330707f048abef8cab74a4af62405a7571b1f69b6",
+        "payload_sha256": "43b7470b73867d2a9805455465c3f594cd9c5edea6e6ed174b622a1b4cf328b6",
+        "source_revision": "0a92b336f7e409df73facb6ba276e7115eea88f4"
+      }
+    },
+    "selection_implementation": {
+      "path": "src/compose_v4/experiments/t4_compositional_utility_lock.py",
+      "sha256": "50929ab8cf5f0238d437a658ca7e0e664b3e3eb5cc281b103dab921e3172ea46",
+      "source_revision": "3a205cdaf171de62700bae85b4078de4f0e16935"
+    },
+    "binding_scope": "Identity binding only; candidate payloads and all evaluation manifests remained unopened until this artifact was committed."
+  },
+  "payload_sha256": "11765bcc72a2f78af2299573ab0025d8793e67e7578e722665e3b7760c89975b"
+}
