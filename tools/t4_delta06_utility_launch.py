@@ -98,6 +98,19 @@ def launch() -> None:
     )
 
 
+def preflight() -> None:
+    task, requests = _common_task()
+    if len(requests) != 19:
+        raise SystemExit("exact request count changed before remote preflight")
+    function = modal.Function.from_name(APP_NAME, "t4_delta06_utility_preflight")
+    call = function.spawn(task)
+    print(f"remote preflight call={call.object_id}; zero docking calls", flush=True)
+    result = call.get()
+    if result.get("status") != "PASS_NO_DOCKING" or result.get("docking_calls") != 0:
+        raise SystemExit(f"remote preflight failed closed: {result}")
+    print(json.dumps(result, indent=2, sort_keys=True))
+
+
 def reduce(receipt_path: Path) -> None:
     receipt = json.loads(receipt_path.read_text())
     if (
@@ -129,10 +142,15 @@ def reduce(receipt_path: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--reduce", action="store_true")
     parser.add_argument("--receipt", type=Path, default=RECEIPT_PATH)
     args = parser.parse_args()
-    if args.reduce:
+    if args.preflight and args.reduce:
+        parser.error("choose only one of --preflight and --reduce")
+    if args.preflight:
+        preflight()
+    elif args.reduce:
         reduce(args.receipt)
     else:
         launch()

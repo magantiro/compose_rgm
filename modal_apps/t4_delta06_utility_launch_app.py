@@ -34,6 +34,22 @@ app = modal.App("compose-t4-delta06-utility")
 @app.function(
     image=image,
     cpu=(1.0, 1.0),
+    memory=2048,
+    timeout=180,
+    max_containers=1,
+    retries=0,
+)
+def t4_delta06_utility_preflight(task: dict[str, Any]) -> dict[str, Any]:
+    from compose_v4.experiments.t4_delta06_utility_launch import remote_preflight
+
+    return remote_preflight(
+        task, REMOTE_ROOT, validate_revision=_validate_remote_revision
+    )
+
+
+@app.function(
+    image=image,
+    cpu=(1.0, 1.0),
     memory=4096,
     timeout=480,
     max_containers=19,

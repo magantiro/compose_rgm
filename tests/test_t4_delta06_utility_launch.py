@@ -72,6 +72,9 @@ def test_repository_contract_and_request_lock_are_exact():
 
 
 def _worker_fixture(tmp_path, monkeypatch, score):
+    monkeypatch.setattr(
+        launch_module, "rdBase", type("PinnedRDKit", (), {"rdkitVersion": "2024.03.5"})
+    )
     repo = tmp_path / "repo"
     artifacts = tmp_path / "artifacts"
     repo.mkdir()

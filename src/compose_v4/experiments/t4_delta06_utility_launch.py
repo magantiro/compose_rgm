@@ -271,6 +271,56 @@ def _copy_pose_artifacts(source: Path, destination: Path) -> dict[str, str]:
     return hashes
 
 
+def remote_preflight(
+    task: dict,
+    repo_root: Path,
+    *,
+    validate_revision: Callable[[dict], None],
+) -> dict:
+    """Attest the exact serialized image and evaluator assets without docking."""
+    import subprocess
+
+    validate_revision(task["image_revision"])
+    contract, _lock, requests = validate_execution_inputs(repo_root)
+    if (
+        rdBase.rdkitVersion != "2024.03.5"
+        or task.get("contract_sha256") != identity(contract)
+        or task.get("run_id")
+        != make_run_id(contract, task.get("launcher_identity", {}))
+    ):
+        raise ValueError("remote scored-launch environment or identity changed")
+    for field, expected in task["launcher_identity"].items():
+        if sha256_file(repo_root / field) != expected:
+            raise ValueError(f"serialized launch implementation changed: {field}")
+    qvina = Path("/opt/dock/qvina02")
+    if sha256_file(qvina) != contract["evaluator"]["qvina02_sha256"]:
+        raise ValueError("QuickVina executable identity changed")
+    receptors = {}
+    for request in requests:
+        evaluator = request["evaluator_payload"]
+        path = Path("/opt/dock/receptors") / f"{request['target']}.pdbqt"
+        observed = sha256_file(path)
+        if observed != evaluator["receptor_sha256"]:
+            raise ValueError(f"receptor identity changed: {request['target']}")
+        receptors[request["target"]] = observed
+    return {
+        "schema_version": "t4_delta06_structural_subgoal_utility_remote_preflight_v1",
+        "status": "PASS_NO_DOCKING",
+        "run_id": task["run_id"],
+        "contract_sha256": identity(contract),
+        "request_lock_physical_sha256": contract["inputs"]["request_lock"][
+            "physical_sha256"
+        ],
+        "requests": len(requests),
+        "memberships": sum(len(row["membership_ids"]) for row in requests),
+        "rdkit": rdBase.rdkitVersion,
+        "openbabel": subprocess.check_output(["obabel", "-V"], text=True).strip(),
+        "qvina02_sha256": sha256_file(qvina),
+        "receptor_sha256": dict(sorted(receptors.items())),
+        "docking_calls": 0,
+    }
+
+
 def run_worker(
     task: dict,
     repo_root: Path,
@@ -282,6 +332,8 @@ def run_worker(
 ) -> dict:
     """Spend one request once, with committed state before and after docking."""
     validate_revision(task["image_revision"])
+    if rdBase.rdkitVersion != "2024.03.5":
+        raise ValueError("scored worker requires RDKit 2024.03.5")
     contract, request = _request_from_task(repo_root, task)
     for field, expected in task["launcher_identity"].items():
         if sha256_file(repo_root / field) != expected:
@@ -427,6 +479,8 @@ def reduce_run(
 ) -> dict:
     """Reduce immutable per-request records in request-ID order without redocking."""
     validate_revision(task["image_revision"])
+    if rdBase.rdkitVersion != "2024.03.5":
+        raise ValueError("scored reducer requires RDKit 2024.03.5")
     contract, _lock, requests = validate_execution_inputs(repo_root)
     if task.get("contract_sha256") != identity(contract) or task.get(
         "run_id"
