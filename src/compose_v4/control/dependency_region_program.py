@@ -63,6 +63,9 @@ def _trace_structure(states: tuple[dict, ...], actions: tuple[dict, ...]) -> dic
         int(slot) for slot in np.flatnonzero(is_element(graphs[0].atom_types))
     ]
     active = {slot: ("source", ordinal) for ordinal, slot in enumerate(initial_slots)}
+    initial_token_slots = {
+        ("source", ordinal): slot for ordinal, slot in enumerate(initial_slots)
+    }
     lifetime_bonds: set[frozenset[tuple[str, int]]] = set()
     footprints = []
     reference_tokens = []
@@ -110,6 +113,7 @@ def _trace_structure(states: tuple[dict, ...], actions: tuple[dict, ...]) -> dic
             handle = {
                 "producer": step,
                 "created_ordinal": len(created_handles),
+                "slot": created_slot,
                 "consumers": [],
             }
             created_handles.append(handle)
@@ -127,7 +131,15 @@ def _trace_structure(states: tuple[dict, ...], actions: tuple[dict, ...]) -> dic
         "created_handles": created_handles,
         "dependency_edges": dependency_edges,
         "lifetime_bonds": lifetime_bonds,
+        "initial_token_slots": initial_token_slots,
+        "final_active_slots": dict(active),
     }
+
+
+def trace_structure(states: tuple[dict, ...], actions: tuple[dict, ...]) -> dict:
+    """Expose exact atom-lifetime structure for downstream subgoal extraction."""
+
+    return _trace_structure(states, actions)
 
 
 def dependency_region_program(
@@ -447,4 +459,5 @@ __all__ = [
     "DependencyRegionConfig",
     "dependency_region_program",
     "dependency_region_summary",
+    "trace_structure",
 ]

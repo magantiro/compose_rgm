@@ -372,6 +372,31 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped T4 structural-subgoal policy and exact realizer, 2026-09-14:** after
+the 77-route dependency audit showed that every route contains at most four
+strict dependency regions (median two), the user explicitly authorized moving
+the primary development direction beyond primitive beam search. Preserve the
+already running complete-program beam jobs as immutable diagnostics, but do
+not wait for them or widen their beam. Define an address-free structural
+subgoal over changed source roles, desired local graph state, boundary
+attachments and inter-region dependencies. First prove that the subgoal corpus
+is derived after the grouped source split, contains no primitive teacher trace
+at runtime, and exactly reconstructs the teacher endpoints within declared
+Active8, 48-slot, 40-active-atom and 32-primitive support. Reuse the legal
+autoregressive machinery only as a conditional realizer of a generated
+subgoal. Compare a generic marginal subgoal proposal with a graph-conditioned
+proposal on the existing three whole-source folds, then measure held-source
+subgoal and endpoint recall from teacher-free runtime checkpoints. Use zero
+oracle calls. On 2026-09-15 the user explicitly authorized Modal fan-out to
+remove local serial delay. The zero-oracle extraction, binding and exact-target
+gate may use at most fifteen concurrent single-CPU source shards; later fitting
+may use the same ceiling only after its split-first inputs and focused tests are
+sealed. Every shard must have a durable call identity, independent result and
+deterministic reduction, with zero automatic retry. A scored T4 launch, PMO
+training, broader controller integration and Dynamic-v0 optimization wave
+remain unauthorized until this zero-oracle representation, realization and
+proposal gate is sealed.
+
 **Scoped T4 dependency-region horizon audit, 2026-09-14:** while the three
 zero-oracle complete-program decoder fits finish unchanged, the user authorized
 one parallel diagnostic over the same 77 signed T4 teacher traces. Decompose
