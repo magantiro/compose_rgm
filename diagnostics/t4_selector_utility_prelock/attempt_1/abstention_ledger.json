@@ -1,0 +1,179 @@
+{
+  "payload": {
+    "candidate_lock_payload_sha256": "b76b41c2d1400ccc115798cc21b02a5768c24de4eea381628cc8ae13c42fc549",
+    "cell_outcomes": [
+      {
+        "cell": "5ht1b_0",
+        "eligible_candidates": 0,
+        "fold": 0,
+        "ineligible_candidates": 128,
+        "pool_candidates": 128,
+        "selected_requests": 0,
+        "source_case_id": "68f31cec53518077b12d37be40bf60d05d99ac94ffc4c92e32f71144e0065baf",
+        "status": "abstain_no_eligible_baseline_learned_candidate",
+        "target": "5ht1b"
+      },
+      {
+        "cell": "braf_1",
+        "eligible_candidates": 0,
+        "fold": 1,
+        "ineligible_candidates": 128,
+        "pool_candidates": 128,
+        "selected_requests": 0,
+        "source_case_id": "20b8505da21dbf1cbb35789cb15d9b24c0842232577d04ea28811a2a4c8a1ce5",
+        "status": "abstain_no_eligible_baseline_learned_candidate",
+        "target": "braf"
+      },
+      {
+        "cell": "fa7_0",
+        "eligible_candidates": 0,
+        "fold": 0,
+        "ineligible_candidates": 128,
+        "pool_candidates": 128,
+        "selected_requests": 0,
+        "source_case_id": "fb490b742636581f75c551fd96218a695b4a3e1b06bd09d4266adc0a4abffbb4",
+        "status": "abstain_no_eligible_baseline_learned_candidate",
+        "target": "fa7"
+      },
+      {
+        "cell": "jak2_1",
+        "eligible_candidates": 54,
+        "fold": 1,
+        "ineligible_candidates": 74,
+        "original_rank": 36,
+        "pool_candidates": 128,
+        "selected_requests": 1,
+        "selector_rank": 1,
+        "skipped_ineligible": 0,
+        "skipped_prior_candidate_identity": 0,
+        "skipped_prior_request_identity": 0,
+        "source_case_id": "72403d1a7d2a79801d3c5bd1fa414c5c9b371564ad854214059111c20466bd31",
+        "status": "selector_candidate_locked",
+        "target": "jak2"
+      },
+      {
+        "cell": "parp1_0",
+        "eligible_candidates": 54,
+        "fold": 0,
+        "ineligible_candidates": 74,
+        "original_rank": 22,
+        "pool_candidates": 128,
+        "selected_requests": 1,
+        "selector_rank": 2,
+        "skipped_ineligible": 1,
+        "skipped_prior_candidate_identity": 0,
+        "skipped_prior_request_identity": 0,
+        "source_case_id": "d89a2937d3eabcabf904d28221f0564d553718f702d2486d8d764f2dbb6dd418",
+        "status": "selector_candidate_locked",
+        "target": "parp1"
+      }
+    ],
+    "immutable_inputs": {
+      "prior_delta04_eligibility_ledger": {
+        "path": "diagnostics/t4_compositional_generator_utility_lock/attempt_1/eligibility_ledger.json.gz",
+        "payload_sha256": "ccb4d2ca43cdf87bc107e611f996cd0460f2d82843356e083873eb8e577169ad",
+        "sha256": "06ff8f02aebe99ba014c81941aab25b92fc952f786db10266e00d6143c4a4c5b",
+        "source_revision": "67574d20f8d28c70480974013bc8bca70df7e614"
+      },
+      "prior_delta04_prelock": {
+        "path": "configs/t4_compositional_generator_utility_prelock_v1.json",
+        "payload_sha256": "a9f941e027f9758102c2874db7c7521a246f087812a7a32ee3110051e0a5c196",
+        "sha256": "d03d27256a7a8a7a382fe596ad49762b077bb626ed987a13284f3ef97bdacfae",
+        "source_revision": "67574d20f8d28c70480974013bc8bca70df7e614"
+      },
+      "prior_delta04_request_lock": {
+        "path": "diagnostics/t4_compositional_generator_utility_lock/attempt_1/request_lock.json",
+        "payload_sha256": "420a2b063f1309493c7b283559e517b183a40e9f982fafc12b7093570b3b5247",
+        "sha256": "3d4a1712cda185d13e5eb66e4b8bc47db7e85960854b4132bb8710bdf7cf4469",
+        "source_revision": "67574d20f8d28c70480974013bc8bca70df7e614"
+      },
+      "prior_delta04_result": {
+        "path": "diagnostics/t4_compositional_generator_utility_lock/attempt_1/result.json",
+        "payload_sha256": "0c471485ce6fe1136912a76d01166ff715dcd18dd0ce8d624573ad482a4eb854",
+        "sha256": "3d036d9af1e383f264d5ee02b3d840b2d12d4a4d1dcb3772ee0da7330d8464e6",
+        "source_revision": "67574d20f8d28c70480974013bc8bca70df7e614"
+      },
+      "request_identity_implementation": {
+        "path": "src/compose_v4/control/docking_value.py",
+        "sha256": "6177a9445f05900334066c1ce17be4e07182d1328cc9740c990dfa254f6003c8",
+        "source_revision": "1d209660859d5349396969e4f8efeaf0a0b46437"
+      },
+      "selector_candidate_lock": {
+        "path": "diagnostics/t4_complete_macro_selector/attempt_1/candidate_lock.json.gz",
+        "payload_sha256": "9ad8cea49864ceb286d0caee0cf714ac5034e78e4b9d7bd6557fb8721f78112f",
+        "sha256": "aab18cc4fd737d3bf5953c79a7e3332459009813626aa6ee65519516c43d77c2",
+        "source_revision": "1d209660859d5349396969e4f8efeaf0a0b46437"
+      },
+      "selector_contract": {
+        "path": "configs/t4_complete_macro_selector_v1.json",
+        "payload_sha256": "2ced5ba49c9b01c026cf1320ddcbe64db4a89431902a9c4a93751962bb022214",
+        "sha256": "b949d23b1886506f39abd29136394f0e00ba3dbe9d6d0bbd935a929683e41a63",
+        "source_revision": "1d209660859d5349396969e4f8efeaf0a0b46437"
+      },
+      "selector_result": {
+        "path": "diagnostics/t4_complete_macro_selector/attempt_1/result.json",
+        "payload_sha256": "03502a8661537635762d0369fd48fc250a6e440f0a3c93da59f50d028b6967b3",
+        "sha256": "2cc879e03ead3303ebbd5134a63e6e673f19d7fb0f9b90d173d5b5140ce53b80",
+        "source_revision": "1d209660859d5349396969e4f8efeaf0a0b46437"
+      }
+    },
+    "implementation": {
+      "code_revision": "f2f59312f584576d17e407e27e99bb9ed689f52b",
+      "path": "src/compose_v4/experiments/t4_selector_utility_prelock.py",
+      "sha256": "e985927445b4aa0fe2ca31db3731740abc35443e0be9b3f2a9cf71c1c48e8a29"
+    },
+    "live_run_accesses": 0,
+    "modal_launches": 0,
+    "new_docking_calls": 0,
+    "new_oracle_calls": 0,
+    "prelock": {
+      "contract_sha256": "0f0958b9aa09a09f6de18e77018cc6be5264f7643f7aa290fe59ebce40f54143",
+      "path": "configs/t4_selector_utility_prelock_v1.json",
+      "sha256": "6ea268cdd67d67d06a1a058408619cca223148fb4189b304abc5766a91e424e3"
+    },
+    "schema_version": "t4_selector_utility_abstention_ledger_v1",
+    "selection_inputs": {
+      "candidate_regeneration": false,
+      "candidate_reranking": false,
+      "docking_score_accessed": false,
+      "eligibility_recomputed": false,
+      "evaluation_manifest_accessed": false,
+      "selector_rank_accessed": true,
+      "selector_score_role": "ordering provenance only",
+      "task_score_accessed": false,
+      "teacher_endpoint_accessed": false,
+      "teacher_metric_accessed": false,
+      "teacher_transformation_accessed": false
+    },
+    "selection_semantics": {
+      "candidate_regeneration": false,
+      "candidate_reranking": false,
+      "cell_support": "A cell is supported only when the immutable baseline learned eligibility ledger contains at least one eligible endpoint and the prior request lock contains its baseline_learned raw-order counterpart.",
+      "maximum_new_requests": 2,
+      "maximum_selected_per_cell": 1,
+      "order": "ascending immutable selector_rank, then original_rank, then candidate_identity",
+      "other_abstentions": [
+        "missing_raw_learned_counterpart",
+        "no_new_request_after_prior_deduplication",
+        "input_or_identity_mismatch"
+      ],
+      "post_publication_backfill": false,
+      "predeclared_eligibility_abstentions": [
+        "5ht1b_0",
+        "braf_1",
+        "fa7_0"
+      ],
+      "predeclared_maximum_supported_cells": [
+        "jak2_1",
+        "parp1_0"
+      ],
+      "prior_candidate_deduplication": "Exclude every selector candidate whose candidate identity appears in any prior delta-0.4 request-lock membership.",
+      "prior_request_deduplication": "Build the exact docking-request identity from target, canonical molecule, docking seed and evaluator. Exclude it when its request_id already appears in the prior delta-0.4 request lock.",
+      "raw_counterpart": "Reuse the already immutable baseline_learned raw-order request for that cell. Never add another raw learned request.",
+      "result_dependent_replacement": false,
+      "selection": "Within each supported cell, select the first eligible selector-ranked candidate remaining after both prior deduplication rules.",
+      "unsupported_cell_abstention": "If immutable eligibility is empty, preserve an explicit no_eligible_baseline_learned_candidate abstention. Ordering cannot change support."
+    }
+  },
+  "payload_sha256": "0acd01e6bfc6043af919c89c694f7c3d3534fda774b1d74b492872c3ffcc82e4"
+}

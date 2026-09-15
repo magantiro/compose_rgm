@@ -1,0 +1,1649 @@
+{
+  "payload": {
+    "immutable_inputs": {
+      "prior_delta04_eligibility_ledger": {
+        "path": "diagnostics/t4_compositional_generator_utility_lock/attempt_1/eligibility_ledger.json.gz",
+        "payload_sha256": "ccb4d2ca43cdf87bc107e611f996cd0460f2d82843356e083873eb8e577169ad",
+        "sha256": "06ff8f02aebe99ba014c81941aab25b92fc952f786db10266e00d6143c4a4c5b",
+        "source_revision": "67574d20f8d28c70480974013bc8bca70df7e614"
+      },
+      "prior_delta04_prelock": {
+        "path": "configs/t4_compositional_generator_utility_prelock_v1.json",
+        "payload_sha256": "a9f941e027f9758102c2874db7c7521a246f087812a7a32ee3110051e0a5c196",
+        "sha256": "d03d27256a7a8a7a382fe596ad49762b077bb626ed987a13284f3ef97bdacfae",
+        "source_revision": "67574d20f8d28c70480974013bc8bca70df7e614"
+      },
+      "prior_delta04_request_lock": {
+        "path": "diagnostics/t4_compositional_generator_utility_lock/attempt_1/request_lock.json",
+        "payload_sha256": "420a2b063f1309493c7b283559e517b183a40e9f982fafc12b7093570b3b5247",
+        "sha256": "3d4a1712cda185d13e5eb66e4b8bc47db7e85960854b4132bb8710bdf7cf4469",
+        "source_revision": "67574d20f8d28c70480974013bc8bca70df7e614"
+      },
+      "prior_delta04_result": {
+        "path": "diagnostics/t4_compositional_generator_utility_lock/attempt_1/result.json",
+        "payload_sha256": "0c471485ce6fe1136912a76d01166ff715dcd18dd0ce8d624573ad482a4eb854",
+        "sha256": "3d036d9af1e383f264d5ee02b3d840b2d12d4a4d1dcb3772ee0da7330d8464e6",
+        "source_revision": "67574d20f8d28c70480974013bc8bca70df7e614"
+      },
+      "request_identity_implementation": {
+        "path": "src/compose_v4/control/docking_value.py",
+        "sha256": "6177a9445f05900334066c1ce17be4e07182d1328cc9740c990dfa254f6003c8",
+        "source_revision": "1d209660859d5349396969e4f8efeaf0a0b46437"
+      },
+      "selector_candidate_lock": {
+        "path": "diagnostics/t4_complete_macro_selector/attempt_1/candidate_lock.json.gz",
+        "payload_sha256": "9ad8cea49864ceb286d0caee0cf714ac5034e78e4b9d7bd6557fb8721f78112f",
+        "sha256": "aab18cc4fd737d3bf5953c79a7e3332459009813626aa6ee65519516c43d77c2",
+        "source_revision": "1d209660859d5349396969e4f8efeaf0a0b46437"
+      },
+      "selector_contract": {
+        "path": "configs/t4_complete_macro_selector_v1.json",
+        "payload_sha256": "2ced5ba49c9b01c026cf1320ddcbe64db4a89431902a9c4a93751962bb022214",
+        "sha256": "b949d23b1886506f39abd29136394f0e00ba3dbe9d6d0bbd935a929683e41a63",
+        "source_revision": "1d209660859d5349396969e4f8efeaf0a0b46437"
+      },
+      "selector_result": {
+        "path": "diagnostics/t4_complete_macro_selector/attempt_1/result.json",
+        "payload_sha256": "03502a8661537635762d0369fd48fc250a6e440f0a3c93da59f50d028b6967b3",
+        "sha256": "2cc879e03ead3303ebbd5134a63e6e673f19d7fb0f9b90d173d5b5140ce53b80",
+        "source_revision": "1d209660859d5349396969e4f8efeaf0a0b46437"
+      }
+    },
+    "implementation": {
+      "code_revision": "f2f59312f584576d17e407e27e99bb9ed689f52b",
+      "path": "src/compose_v4/experiments/t4_selector_utility_prelock.py",
+      "sha256": "e985927445b4aa0fe2ca31db3731740abc35443e0be9b3f2a9cf71c1c48e8a29"
+    },
+    "live_run_accesses": 0,
+    "memberships": [
+      {
+        "actions": [
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  5,
+                  1
+                ]
+              ],
+              "slot": 22
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          }
+        ],
+        "active_atoms": 23,
+        "arm_id": "baseline_learned_complete_macro_selector",
+        "bindings": [
+          [
+            4,
+            20,
+            5,
+            6
+          ]
+        ],
+        "candidate_id": "89ba2c388d5b16dff37e2ebe5c23f727212b467550e6a98ceb42024eca1929cf",
+        "candidate_uid": "210724eb3142343da834ba20905b388bbb61fc1fce54912acb52c6aa1ca11988",
+        "canonical_smiles": "COC(=O)CC1(C)Nc2ccccc2-c2ccnc3[nH]cc1c23",
+        "cell": "jak2_1",
+        "complete_macro_signature": [
+          "66a389b97d1f5acae4d88eae521248500da9aa91b536f5482f3cd51eccb69381"
+        ],
+        "construction_dependencies": [],
+        "docking_seed": 1701,
+        "eligibility_source": "immutable_prior_delta04_eligibility_ledger",
+        "endpoint_state": {
+          "atom_types": [
+            2,
+            4,
+            2,
+            4,
+            2,
+            2,
+            3,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            3,
+            2,
+            3,
+            2,
+            2,
+            2,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "bonds": [
+            [
+              0,
+              1,
+              1
+            ],
+            [
+              1,
+              2,
+              1
+            ],
+            [
+              2,
+              3,
+              2
+            ],
+            [
+              2,
+              4,
+              1
+            ],
+            [
+              4,
+              5,
+              1
+            ],
+            [
+              5,
+              6,
+              1
+            ],
+            [
+              5,
+              20,
+              1
+            ],
+            [
+              5,
+              22,
+              1
+            ],
+            [
+              6,
+              7,
+              1
+            ],
+            [
+              7,
+              8,
+              2
+            ],
+            [
+              7,
+              12,
+              1
+            ],
+            [
+              8,
+              9,
+              1
+            ],
+            [
+              9,
+              10,
+              2
+            ],
+            [
+              10,
+              11,
+              1
+            ],
+            [
+              11,
+              12,
+              2
+            ],
+            [
+              12,
+              13,
+              1
+            ],
+            [
+              13,
+              14,
+              2
+            ],
+            [
+              13,
+              21,
+              1
+            ],
+            [
+              14,
+              15,
+              1
+            ],
+            [
+              15,
+              16,
+              2
+            ],
+            [
+              16,
+              17,
+              1
+            ],
+            [
+              17,
+              18,
+              1
+            ],
+            [
+              17,
+              21,
+              2
+            ],
+            [
+              18,
+              19,
+              1
+            ],
+            [
+              19,
+              20,
+              2
+            ],
+            [
+              20,
+              21,
+              1
+            ]
+          ],
+          "formal_charges": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "implicit_h_counts": [
+            3,
+            0,
+            0,
+            0,
+            2,
+            0,
+            1,
+            0,
+            1,
+            1,
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "n_slots": 48
+        },
+        "endpoint_state_sha256": "9173b3bd43a2b9c735ab3dbc88c2c2e46f4f191b15cff20bd80d520cf7e0e774",
+        "evaluator": "3a9e2c3d9e83f27cff964c342eaed8f06a6f3e9cd043dc88193ab121ccdb2200",
+        "evaluator_payload": {
+          "box_definition": "BOXES in hash-bound modal_apps/genmol_t4_opt_app.py",
+          "docking": {
+            "cpu": 1,
+            "exhaustiveness": 1,
+            "ligand_preparation": "Open Babel --gen3d, unchanged production wrapper",
+            "num_modes": 10
+          },
+          "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+          "receptor_sha256": "cb900f3f75dcf2ac3efe6538528ed1e87ec934a527b3b060c2b09dfe3a11d9b6",
+          "schema_version": "t4_quickvina_endpoint_evaluator_v1",
+          "score_direction": "minimize",
+          "score_unit": "kcal/mol as emitted by the bound QuickVina wrapper",
+          "scoring_implementation_sha256": "9b635a9936493a5900b613cdce52f76c24efcf98f3f43b3b155448e0b1796bf0",
+          "target": "jak2"
+        },
+        "exact_action_replay": true,
+        "fold": 1,
+        "generator_revision": "baseline",
+        "goal": {
+          "schema_version": "structural_goal_v1",
+          "subgoals": [
+            {
+              "environments": [
+                "[[2,0,2,2],[[1,2,0,0,3],[1,2,0,1,3]]]",
+                "[[2,0,0,3],[[1,2,0,0,3],[1,2,0,1,3],[2,2,0,1,2]]]",
+                "[[2,0,1,3],[[1,2,0,0,3],[1,2,0,2,2],[1,3,0,1,2]]]",
+                "[[3,0,1,2],[[1,2,0,0,3],[1,2,0,1,3]]]"
+              ],
+              "input_atoms": [
+                [
+                  2,
+                  0,
+                  2,
+                  2
+                ],
+                [
+                  2,
+                  0,
+                  0,
+                  3
+                ],
+                [
+                  2,
+                  0,
+                  1,
+                  3
+                ],
+                [
+                  3,
+                  0,
+                  1,
+                  2
+                ]
+              ],
+              "input_bonds": [
+                [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                [
+                  1,
+                  1,
+                  0,
+                  1
+                ],
+                [
+                  0,
+                  0,
+                  1,
+                  0
+                ]
+              ],
+              "output_atoms": [
+                [
+                  2,
+                  0,
+                  3,
+                  1
+                ]
+              ],
+              "schema_version": "structural_subgoal_v1",
+              "target_atoms": [
+                [
+                  2,
+                  0,
+                  2,
+                  2
+                ],
+                [
+                  2,
+                  0,
+                  0,
+                  3
+                ],
+                [
+                  2,
+                  0,
+                  0,
+                  4
+                ],
+                [
+                  3,
+                  0,
+                  1,
+                  2
+                ]
+              ],
+              "target_bonds": [
+                [
+                  0,
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  1,
+                  0,
+                  1,
+                  1
+                ],
+                [
+                  0,
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  1,
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "heavy_atoms": 23,
+        "membership_id": "fbfa033a30fc75c77d8f64a65b4532c078412c230a49954b1549742c3357e820",
+        "morgan_radius2_2048_similarity_to_source": 0.559322033898305,
+        "non_self": true,
+        "ordering": "complete_macro_selector_reranked_learned_pool",
+        "patch_ids": [
+          "66a389b97d1f5acae4d88eae521248500da9aa91b536f5482f3cd51eccb69381"
+        ],
+        "proposal_score": -3.5074201052441527,
+        "proposal_score_role": "generator-internal ranking evidence; not a task or docking score",
+        "qed": 0.711789385872205,
+        "rank": 36,
+        "raw_counterpart": {
+          "candidate_id": "26a302e7b449ea5dfaad60db171ae3bcdb6bcd9e256c3f4ab2928a7c75ff5392",
+          "membership_id": "c866c4ab8c5491602ffe28bb668a0494798e8e7ffb08a7cf6439ca547dae5b3e",
+          "rank": 1,
+          "request_id": "4b148133e86f93571cee7f4696e3a10d827094e7dd2537b4e8facb5905a7474f",
+          "role": "immutable prior baseline_learned raw-order counterpart"
+        },
+        "realization": {
+          "attempted": 1,
+          "compiler_strategy": "deterministic_graph_delta_schedule",
+          "endpoint_matches_bound_target": true,
+          "expanded": 1,
+          "primitive_count": 1,
+          "primitive_teacher_actions_used": 0,
+          "status": "realized"
+        },
+        "request_id": "a2d0cd20506c4913dc92c33207371b7d2ed7ef3c1afd8a7daa806d4468b59218",
+        "sa": 3.3704379487882976,
+        "selection_rule": "first_eligible_selector_rank_after_prior_candidate_and_request_deduplication",
+        "selector_rank": 1,
+        "selector_score": 17.29311943604192,
+        "selector_score_role": "offline complete-macro ordering provenance; not a task or docking score",
+        "source_canonical_smiles": "COC(=O)CC1Nc2ccccc2-c2ccnc3[nH]cc1c23",
+        "source_case_id": "72403d1a7d2a79801d3c5bd1fa414c5c9b371564ad854214059111c20466bd31",
+        "source_policy_id": "balanced_joint_autoregressive",
+        "source_state": {
+          "atom_types": [
+            2,
+            4,
+            2,
+            4,
+            2,
+            2,
+            3,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            3,
+            2,
+            3,
+            2,
+            2,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "bonds": [
+            [
+              0,
+              1,
+              1
+            ],
+            [
+              1,
+              2,
+              1
+            ],
+            [
+              2,
+              3,
+              2
+            ],
+            [
+              2,
+              4,
+              1
+            ],
+            [
+              4,
+              5,
+              1
+            ],
+            [
+              5,
+              6,
+              1
+            ],
+            [
+              5,
+              20,
+              1
+            ],
+            [
+              6,
+              7,
+              1
+            ],
+            [
+              7,
+              8,
+              2
+            ],
+            [
+              7,
+              12,
+              1
+            ],
+            [
+              8,
+              9,
+              1
+            ],
+            [
+              9,
+              10,
+              2
+            ],
+            [
+              10,
+              11,
+              1
+            ],
+            [
+              11,
+              12,
+              2
+            ],
+            [
+              12,
+              13,
+              1
+            ],
+            [
+              13,
+              14,
+              2
+            ],
+            [
+              13,
+              21,
+              1
+            ],
+            [
+              14,
+              15,
+              1
+            ],
+            [
+              15,
+              16,
+              2
+            ],
+            [
+              16,
+              17,
+              1
+            ],
+            [
+              17,
+              18,
+              1
+            ],
+            [
+              17,
+              21,
+              2
+            ],
+            [
+              18,
+              19,
+              1
+            ],
+            [
+              19,
+              20,
+              2
+            ],
+            [
+              20,
+              21,
+              1
+            ]
+          ],
+          "formal_charges": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "implicit_h_counts": [
+            3,
+            0,
+            0,
+            0,
+            2,
+            1,
+            1,
+            0,
+            1,
+            1,
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "n_slots": 48
+        },
+        "source_state_sha256": "fb37b2419b60e10a51f563047525248e1740dc92dd9b8e25645e15df1d01e7be",
+        "target": "jak2"
+      },
+      {
+        "actions": [
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  9,
+                  1
+                ]
+              ],
+              "slot": 19
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          }
+        ],
+        "active_atoms": 20,
+        "arm_id": "baseline_learned_complete_macro_selector",
+        "bindings": [
+          [
+            8,
+            10,
+            9
+          ]
+        ],
+        "candidate_id": "47c2c6ee33cfacc56fcbc7be07c0e7fd3b2b1f0635f9839f70ca5577073e5a59",
+        "candidate_uid": "721ba9bd03fc8e2df4dbac2802efd244dcacd92cb75e0ca7a2b25979fb32b7a7",
+        "canonical_smiles": "CC1NC(=O)c2cccn2-c2ccc(CN(C)C)cc21",
+        "cell": "parp1_0",
+        "complete_macro_signature": [
+          "ba5e9d62ac22568f5befd19d1e285fdf591852b05daf204f21938b5b96365077"
+        ],
+        "construction_dependencies": [],
+        "docking_seed": 1701,
+        "eligibility_source": "immutable_prior_delta04_eligibility_ledger",
+        "endpoint_state": {
+          "atom_types": [
+            2,
+            3,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            3,
+            2,
+            4,
+            2,
+            2,
+            2,
+            2,
+            3,
+            2,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "bonds": [
+            [
+              0,
+              1,
+              1
+            ],
+            [
+              1,
+              2,
+              1
+            ],
+            [
+              1,
+              3,
+              1
+            ],
+            [
+              3,
+              4,
+              1
+            ],
+            [
+              4,
+              5,
+              2
+            ],
+            [
+              4,
+              18,
+              1
+            ],
+            [
+              5,
+              6,
+              1
+            ],
+            [
+              6,
+              7,
+              2
+            ],
+            [
+              7,
+              8,
+              1
+            ],
+            [
+              7,
+              17,
+              1
+            ],
+            [
+              8,
+              9,
+              1
+            ],
+            [
+              8,
+              18,
+              2
+            ],
+            [
+              9,
+              10,
+              1
+            ],
+            [
+              9,
+              19,
+              1
+            ],
+            [
+              10,
+              11,
+              1
+            ],
+            [
+              11,
+              12,
+              2
+            ],
+            [
+              11,
+              13,
+              1
+            ],
+            [
+              13,
+              14,
+              2
+            ],
+            [
+              13,
+              17,
+              1
+            ],
+            [
+              14,
+              15,
+              1
+            ],
+            [
+              15,
+              16,
+              2
+            ],
+            [
+              16,
+              17,
+              1
+            ]
+          ],
+          "formal_charges": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "implicit_h_counts": [
+            3,
+            0,
+            3,
+            2,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            1,
+            1,
+            1,
+            0,
+            1,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "n_slots": 48
+        },
+        "endpoint_state_sha256": "28e9a72bffe5630dcf0b195952f965058118dac6bd395a00ee1890e33d82a4ce",
+        "evaluator": "ce25b76ca1f9c2331183b21d2ff2cb52ab8bba1acba53c97d2d4f2416ce3f574",
+        "evaluator_payload": {
+          "box_definition": "BOXES in hash-bound modal_apps/genmol_t4_opt_app.py",
+          "docking": {
+            "cpu": 1,
+            "exhaustiveness": 1,
+            "ligand_preparation": "Open Babel --gen3d, unchanged production wrapper",
+            "num_modes": 10
+          },
+          "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+          "receptor_sha256": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9",
+          "schema_version": "t4_quickvina_endpoint_evaluator_v1",
+          "score_direction": "minimize",
+          "score_unit": "kcal/mol as emitted by the bound QuickVina wrapper",
+          "scoring_implementation_sha256": "9b635a9936493a5900b613cdce52f76c24efcf98f3f43b3b155448e0b1796bf0",
+          "target": "parp1"
+        },
+        "exact_action_replay": true,
+        "fold": 0,
+        "generator_revision": "baseline",
+        "goal": {
+          "schema_version": "structural_goal_v1",
+          "subgoals": [
+            {
+              "environments": [
+                "[[2,0,0,3],[[1,2,0,0,3],[1,2,0,2,2],[2,2,0,1,2]]]",
+                "[[3,0,1,2],[[1,2,0,0,3],[1,2,0,2,2]]]",
+                "[[2,0,2,2],[[1,2,0,0,3],[1,3,0,1,2]]]"
+              ],
+              "input_atoms": [
+                [
+                  2,
+                  0,
+                  0,
+                  3
+                ],
+                [
+                  3,
+                  0,
+                  1,
+                  2
+                ],
+                [
+                  2,
+                  0,
+                  2,
+                  2
+                ]
+              ],
+              "input_bonds": [
+                [
+                  0,
+                  0,
+                  1
+                ],
+                [
+                  0,
+                  0,
+                  1
+                ],
+                [
+                  1,
+                  1,
+                  0
+                ]
+              ],
+              "output_atoms": [
+                [
+                  2,
+                  0,
+                  3,
+                  1
+                ]
+              ],
+              "schema_version": "structural_subgoal_v1",
+              "target_atoms": [
+                [
+                  2,
+                  0,
+                  0,
+                  3
+                ],
+                [
+                  3,
+                  0,
+                  1,
+                  2
+                ],
+                [
+                  2,
+                  0,
+                  1,
+                  3
+                ]
+              ],
+              "target_bonds": [
+                [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                [
+                  1,
+                  1,
+                  0,
+                  1
+                ],
+                [
+                  0,
+                  0,
+                  1,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "heavy_atoms": 20,
+        "membership_id": "6f5d52c7252e64970ea8dcb40d627653d55bff121f05bd8e2a2c022737899a48",
+        "morgan_radius2_2048_similarity_to_source": 0.5961538461538461,
+        "non_self": true,
+        "ordering": "complete_macro_selector_reranked_learned_pool",
+        "patch_ids": [
+          "ba5e9d62ac22568f5befd19d1e285fdf591852b05daf204f21938b5b96365077"
+        ],
+        "proposal_score": -5.883868342401696,
+        "proposal_score_role": "generator-internal ranking evidence; not a task or docking score",
+        "qed": 0.9083389629962358,
+        "rank": 22,
+        "raw_counterpart": {
+          "candidate_id": "f0d654b005aab30993b32e889c3854460ff7828c76ee5e99f72c4c0e6205ddf1",
+          "membership_id": "057530e21adac86e853bba1de76b2fe92a4d85a0784d739edfbb5b213645d1c7",
+          "rank": 2,
+          "request_id": "c8208357e19b6dfc10c1fa9c24fc05d09ee5667074877dc24145defcb9741368",
+          "role": "immutable prior baseline_learned raw-order counterpart"
+        },
+        "realization": {
+          "attempted": 1,
+          "compiler_strategy": "deterministic_graph_delta_schedule",
+          "endpoint_matches_bound_target": true,
+          "expanded": 1,
+          "primitive_count": 1,
+          "primitive_teacher_actions_used": 0,
+          "status": "realized"
+        },
+        "request_id": "4704ccbc0a7efb17855e4808355bc0480f69e515c9cec8bfbaf11dc4aa925e11",
+        "sa": 3.2112380970800274,
+        "selection_rule": "first_eligible_selector_rank_after_prior_candidate_and_request_deduplication",
+        "selector_rank": 2,
+        "selector_score": 23.411995047587727,
+        "selector_score_role": "offline complete-macro ordering provenance; not a task or docking score",
+        "source_canonical_smiles": "CN(C)Cc1ccc2c(c1)CNC(=O)c1cccn1-2",
+        "source_case_id": "d89a2937d3eabcabf904d28221f0564d553718f702d2486d8d764f2dbb6dd418",
+        "source_policy_id": "balanced_joint_autoregressive",
+        "source_state": {
+          "atom_types": [
+            2,
+            3,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            3,
+            2,
+            4,
+            2,
+            2,
+            2,
+            2,
+            3,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "bonds": [
+            [
+              0,
+              1,
+              1
+            ],
+            [
+              1,
+              2,
+              1
+            ],
+            [
+              1,
+              3,
+              1
+            ],
+            [
+              3,
+              4,
+              1
+            ],
+            [
+              4,
+              5,
+              2
+            ],
+            [
+              4,
+              18,
+              1
+            ],
+            [
+              5,
+              6,
+              1
+            ],
+            [
+              6,
+              7,
+              2
+            ],
+            [
+              7,
+              8,
+              1
+            ],
+            [
+              7,
+              17,
+              1
+            ],
+            [
+              8,
+              9,
+              1
+            ],
+            [
+              8,
+              18,
+              2
+            ],
+            [
+              9,
+              10,
+              1
+            ],
+            [
+              10,
+              11,
+              1
+            ],
+            [
+              11,
+              12,
+              2
+            ],
+            [
+              11,
+              13,
+              1
+            ],
+            [
+              13,
+              14,
+              2
+            ],
+            [
+              13,
+              17,
+              1
+            ],
+            [
+              14,
+              15,
+              1
+            ],
+            [
+              15,
+              16,
+              2
+            ],
+            [
+              16,
+              17,
+              1
+            ]
+          ],
+          "formal_charges": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "implicit_h_counts": [
+            3,
+            0,
+            3,
+            2,
+            0,
+            1,
+            1,
+            0,
+            0,
+            2,
+            1,
+            0,
+            0,
+            0,
+            1,
+            1,
+            1,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "n_slots": 48
+        },
+        "source_state_sha256": "d33a59ceb9547bf955296f7cae3c0b196d75d0be1845e7e97365fbe1b0dc1700",
+        "target": "parp1"
+      }
+    ],
+    "modal_launches": 0,
+    "new_docking_calls": 0,
+    "new_oracle_calls": 0,
+    "prelock": {
+      "contract_sha256": "0f0958b9aa09a09f6de18e77018cc6be5264f7643f7aa290fe59ebce40f54143",
+      "path": "configs/t4_selector_utility_prelock_v1.json",
+      "sha256": "6ea268cdd67d67d06a1a058408619cca223148fb4189b304abc5766a91e424e3"
+    },
+    "schema_version": "t4_selector_utility_candidate_lock_v1",
+    "selection_inputs": {
+      "candidate_regeneration": false,
+      "candidate_reranking": false,
+      "docking_score_accessed": false,
+      "eligibility_recomputed": false,
+      "evaluation_manifest_accessed": false,
+      "selector_rank_accessed": true,
+      "selector_score_role": "ordering provenance only",
+      "task_score_accessed": false,
+      "teacher_endpoint_accessed": false,
+      "teacher_metric_accessed": false,
+      "teacher_transformation_accessed": false
+    },
+    "selection_semantics": {
+      "candidate_regeneration": false,
+      "candidate_reranking": false,
+      "cell_support": "A cell is supported only when the immutable baseline learned eligibility ledger contains at least one eligible endpoint and the prior request lock contains its baseline_learned raw-order counterpart.",
+      "maximum_new_requests": 2,
+      "maximum_selected_per_cell": 1,
+      "order": "ascending immutable selector_rank, then original_rank, then candidate_identity",
+      "other_abstentions": [
+        "missing_raw_learned_counterpart",
+        "no_new_request_after_prior_deduplication",
+        "input_or_identity_mismatch"
+      ],
+      "post_publication_backfill": false,
+      "predeclared_eligibility_abstentions": [
+        "5ht1b_0",
+        "braf_1",
+        "fa7_0"
+      ],
+      "predeclared_maximum_supported_cells": [
+        "jak2_1",
+        "parp1_0"
+      ],
+      "prior_candidate_deduplication": "Exclude every selector candidate whose candidate identity appears in any prior delta-0.4 request-lock membership.",
+      "prior_request_deduplication": "Build the exact docking-request identity from target, canonical molecule, docking seed and evaluator. Exclude it when its request_id already appears in the prior delta-0.4 request lock.",
+      "raw_counterpart": "Reuse the already immutable baseline_learned raw-order request for that cell. Never add another raw learned request.",
+      "result_dependent_replacement": false,
+      "selection": "Within each supported cell, select the first eligible selector-ranked candidate remaining after both prior deduplication rules.",
+      "unsupported_cell_abstention": "If immutable eligibility is empty, preserve an explicit no_eligible_baseline_learned_candidate abstention. Ordering cannot change support."
+    }
+  },
+  "payload_sha256": "b76b41c2d1400ccc115798cc21b02a5768c24de4eea381628cc8ae13c42fc549"
+}
