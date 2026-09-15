@@ -143,3 +143,50 @@ def test_offline_ordering_quality_suppresses_degenerate_zero_time_rates(monkeypa
     assert observed["policies"]["p"]["aggregate"]["unique_endpoints_per_second"] is None
     body = {key: value for key, value in observed.items() if key != "report_sha256"}
     assert observed["report_sha256"] == identity(body)
+
+
+def test_fold_quality_reduction_preserves_exact_source_balanced_values() -> None:
+    def fold(source: str, exact: float) -> dict:
+        source_row = {
+            "source_id": source,
+            "exact_mrr": exact,
+            "transformation_mrr": 0.0,
+            "attempts": 2,
+            "complete": 2,
+            "unique_complete": 2,
+            "proposal_seconds": 0.0,
+            "cutoffs": {
+                "8": {
+                    "exact_recall": exact,
+                    "exact_any": exact,
+                    "exact_precision_emitted": exact / 2,
+                    "exact_precision_fixed_k": exact / 8,
+                    "transformation_recall": 0.0,
+                    "transformation_any": 0.0,
+                    "transformation_precision_emitted": 0.0,
+                    "transformation_precision_fixed_k": 0.0,
+                    "unique_yield_fixed_k": 0.25,
+                }
+            },
+        }
+        return {
+            "schema_version": "route_proposal_quality_report_v1",
+            "evidence": "offline",
+            "context_radius": 2,
+            "policies": {"p": {"per_source": [source_row]}},
+            "equivalence_contract": {},
+            "limitations": ["no throughput"],
+        }
+
+    observed = selector_tool._combine_offline_quality(
+        [fold("a", 0.0), fold("b", 1.0)],
+        test_sources=["b", "a"],
+        cutoffs=(8,),
+    )
+
+    aggregate = observed["policies"]["p"]["aggregate"]
+    assert aggregate["source_balanced_exact_mrr"] == 0.5
+    assert aggregate["cutoffs"]["8"]["exact_recall"] == 0.5
+    assert aggregate["execution_precision"] == 1.0
+    assert aggregate["attempts_per_second"] is None
+    assert observed["split"]["test_sources"] == ["a", "b"]

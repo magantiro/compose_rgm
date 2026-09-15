@@ -529,6 +529,89 @@ def _offline_ordering_quality(payload: dict, *, cutoffs: tuple[int, ...]) -> dic
     return {**body, "report_sha256": identity(body)}
 
 
+def _combine_offline_quality(
+    fold_reports: list[dict], *, test_sources: list[str], cutoffs: tuple[int, ...]
+) -> dict:
+    """Combine fold rows exactly without repeating graph-isomorphism work."""
+
+    if not fold_reports:
+        raise ValueError("offline quality reduction requires fold reports")
+    policy_ids = sorted(fold_reports[0]["policies"])
+    if any(sorted(report["policies"]) != policy_ids for report in fold_reports):
+        raise ValueError("offline fold quality policy sets disagree")
+    policies = {}
+    for policy_id in policy_ids:
+        per_source = [
+            row for report in fold_reports for row in report["policies"][policy_id]["per_source"]
+        ]
+        attempts = sum(row["attempts"] for row in per_source)
+        complete = sum(row["complete"] for row in per_source)
+        unique = sum(row["unique_complete"] for row in per_source)
+        aggregate = {
+            "sources": len(per_source),
+            "source_balanced_exact_mrr": float(
+                sum(row["exact_mrr"] for row in per_source) / len(per_source)
+            ),
+            "source_balanced_transformation_mrr": float(
+                sum(row["transformation_mrr"] for row in per_source) / len(per_source)
+            ),
+            "execution_precision": complete / max(1, attempts),
+            "unique_endpoint_yield": unique / max(1, attempts),
+            "attempts": attempts,
+            "complete": complete,
+            "unique_complete": unique,
+            "proposal_seconds": sum(row["proposal_seconds"] for row in per_source),
+            "attempts_per_second": None,
+            "unique_endpoints_per_second": None,
+            "cutoffs": {},
+        }
+        for cutoff in cutoffs:
+            name = str(cutoff)
+            aggregate["cutoffs"][name] = {
+                metric: float(
+                    sum(row["cutoffs"][name][metric] for row in per_source) / len(per_source)
+                )
+                for metric in per_source[0]["cutoffs"][name]
+            }
+        policies[policy_id] = {"aggregate": aggregate, "per_source": per_source}
+    first = fold_reports[0]
+    body = {
+        "schema_version": first["schema_version"],
+        "evidence": first["evidence"],
+        "split": {
+            "evaluation_role": "test",
+            "train_sources": [],
+            "calibration_sources": [],
+            "test_sources": sorted(test_sources),
+        },
+        "context_radius": first["context_radius"],
+        "cutoffs": list(cutoffs),
+        "policies": policies,
+        "oracle_calls": 0,
+        "equivalence_contract": first["equivalence_contract"],
+        "limitations": first["limitations"],
+    }
+    return {**body, "report_sha256": identity(body)}
+
+
+def _inherited_generation_summary(source_rows: list[dict], policy_id: str) -> dict:
+    telemetry = [row["policies"][policy_id]["telemetry"] for row in source_rows]
+    combined = {
+        key: sum(int(row.get(key, 0)) for row in telemetry)
+        for key in sorted({key for row in telemetry for key in row})
+    }
+    compile_denominator = combined["legal_patch_compile_coverage_denominator"]
+    realization_denominator = combined["exact_realization_precision_denominator"]
+    return {
+        "telemetry": combined,
+        "legal_patch_compile_coverage": combined["legal_patch_compile_coverage_numerator"]
+        / compile_denominator,
+        "exact_realization_precision": combined["exact_realization_precision_numerator"]
+        / realization_denominator,
+        "evidence_role": "inherited unchanged from immutable generator lock",
+    }
+
+
 def evaluate_all(input_root: Path, selector_lock_path: Path, output: Path) -> None:
     contract = _contract()
     baseline_lock, evaluations, _ = _load_catalog(contract)
@@ -541,7 +624,7 @@ def evaluate_all(input_root: Path, selector_lock_path: Path, output: Path) -> No
         raise ValueError("selector candidate lock invariant failed")
     selector_folds = {int(row["fold"]): row for row in selector_lock["folds"]}
     fold_reports = []
-    all_quality_cases = []
+    fold_quality_reports = []
     all_source_rows = []
     for locked_fold in baseline_lock["folds"]:
         fold = int(locked_fold["fold"])
@@ -657,21 +740,12 @@ def evaluate_all(input_root: Path, selector_lock_path: Path, output: Path) -> No
                 "endpoint_and_transformation_quality": quality,
             }
         )
-        all_quality_cases.extend(quality_cases)
+        fold_quality_reports.append(quality)
         all_source_rows.extend(source_rows)
     policies = (POLICY_RAW_UNIFORM, POLICY_RAW_LEARNED, POLICY_SELECTOR)
-    overall_quality = _offline_ordering_quality(
-        {
-            "schema_version": QUALITY_SCHEMA,
-            "oracle_calls": 0,
-            "split": {
-                "evaluation_role": "test",
-                "train_sources": [],
-                "calibration_sources": [],
-                "test_sources": sorted(row["source_id"] for row in all_quality_cases),
-            },
-            "cases": all_quality_cases,
-        },
+    overall_quality = _combine_offline_quality(
+        fold_quality_reports,
+        test_sources=[row["source_id"] for row in all_source_rows],
         cutoffs=tuple(contract["selection"]["cutoffs"]),
     )
     summaries = {
@@ -681,6 +755,10 @@ def evaluate_all(input_root: Path, selector_lock_path: Path, output: Path) -> No
                 for cutoff in contract["selection"]["cutoffs"]
             },
             "endpoint_and_transformation_quality": overall_quality["policies"][policy],
+            "inherited_generation": _inherited_generation_summary(
+                all_source_rows,
+                POLICY_RAW_UNIFORM if policy == POLICY_RAW_UNIFORM else POLICY_RAW_LEARNED,
+            ),
         }
         for policy in policies
     }
@@ -725,7 +803,8 @@ def evaluate_all(input_root: Path, selector_lock_path: Path, output: Path) -> No
         "all_folds_evaluated": len(fold_reports) == 3
         and all(row["status"] == "evaluated" for row in fold_reports),
         "selector_changes_order_only": all(
-            len(row["policy_pools"]) == 3 for row in all_quality_cases
+            set(row["policies"]) == {POLICY_RAW_UNIFORM, POLICY_RAW_LEARNED, POLICY_SELECTOR}
+            for row in all_source_rows
         ),
         "all_selected_candidates_exactly_realized": selector_precision == 1.0,
         "diversity_floor": diversity_floor,
