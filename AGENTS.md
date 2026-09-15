@@ -372,6 +372,37 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped zero-oracle T4 structural-subgoal component-novelty audit,
+2026-09-15:** after the grouped whole-template proposal gate recovered zero
+held-source transformations and every held complete template identifier lay
+outside its training-fold vocabulary, the user authorized one split-first
+component audit before choosing a compositional generator architecture. Preserve
+the failed whole-template gate and the sealed exact structural realizer without
+modification. On the same three frozen whole-source folds, measure held-source
+coverage and novelty separately for source-region motifs, target topology, atom
+attributes, bond attributes, attachment patterns, dependency motifs and smaller
+target-patch fragments. Derive every training vocabulary after the fold split,
+use exact address-free graph isomorphism rather than role order or a hash alone,
+and report both instance-weighted and source-balanced coverage, unique coverage,
+train-vocabulary transfer precision, whole-patch overlap, and the fraction of
+held patches that are novel combinations of individually familiar components.
+
+Represent the scientific object as `g=(R,H,alpha,D)`, where `R` is a selected
+source region, `H` is a target patch graph, `alpha` binds it to surviving source
+context and `D` records dependency structure. This audit does not authorize
+independent marginal heads for those coupled variables, a fitted generator, a
+new template retriever, a larger proposal pool or reranking revision. Audit
+whether the remaining 69 non-complete-route programs in Full-146 and the sealed
+PMO dependency-region training corpus can be converted to the same structural
+representation. These are auxiliary-data compatibility checks, not permission
+to merge corpora or train a joint checkpoint. Publish one deterministic
+training-only result under the self-hashed contract in
+`configs/t4_structural_subgoal_component_novelty_v1.json`. Use zero oracle and
+docking calls, do not launch Modal, and do not access or alter any live run. A
+compositional patch generator, PMO/T4 joint training, score-blind candidate lock,
+Dynamic-v0 integration or scored experiment requires a subsequent scoped
+contract.
+
 **Scoped T4 structural-subgoal policy and exact realizer, 2026-09-14:** after
 the 77-route dependency audit showed that every route contains at most four
 strict dependency regions (median two), the user explicitly authorized moving

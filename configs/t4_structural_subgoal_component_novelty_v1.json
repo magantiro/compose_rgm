@@ -1,0 +1,155 @@
+{
+  "payload": {
+    "schema_version": "t4_structural_subgoal_component_novelty_contract_v1",
+    "authorization": "2026-09-15 user authorized a grouped-source component-novelty audit and auxiliary structural-subgoal conversion checks before selecting a compositional generator",
+    "mode": "zero_oracle_split_first_component_support_audit",
+    "scientific_problem": "Determine whether held T4 structural subgoals are novel combinations of familiar address-free components or contain component-level support gaps.",
+    "primary_output": "Grouped-source coverage, novelty and transfer-precision measurements for frozen structural-subgoal component families, plus read-only conversion coverage for remaining Full-146 programs and the PMO dependency-region corpus.",
+    "central_claim_under_test": "Whole-patch template failure may be recoverable by a compositional generator only to the extent that held patch components transfer across source groups or are supported by compatible auxiliary transformation data.",
+    "evaluation_setting": "Three predeclared whole-source folds over 77 T4 teacher routes, 15 source groups and 147 structural subgoal instances, with all fold vocabularies derived from training sources only.",
+    "inputs": {
+      "teacher_library": {
+        "path": "diagnostics/t4_shared_program_controller/attempt_2/shared_library.json",
+        "sha256": "732c67d04af3a0824cfa700906fd73982689af416f337c8eb109499af79afdb5"
+      },
+      "source_registry": {
+        "path": "docs/GENMOL_T4_SEEDS.json",
+        "sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"
+      },
+      "t4_benchmark_contract": {
+        "path": "configs/t4_frozen_program_benchmark_v2.json",
+        "sha256": "fdc93e9bc97eaae2e81f2189a3b7568b00d1b5525ff0fb7a657668a6190ad280"
+      },
+      "structural_subgoal_policy_contract": {
+        "path": "configs/t4_structural_subgoal_policy_v1.json",
+        "sha256": "b2f8db3ac19df2822082ec7b94239dec43968628b8f4673af95e591577f52c57"
+      },
+      "sealed_realizer_summary": {
+        "path": "diagnostics/t4_structural_subgoal/attempt_2/summary.json",
+        "sha256": "76efefd1dd2267c0543cb972ef236a30b50f21b7c6a6da4ffca66cb3e43531c3"
+      },
+      "failed_policy_fold_reports": [
+        {
+          "path": "diagnostics/t4_structural_subgoal_policy/attempt_2/fold_0/report.json",
+          "sha256": "bb1411efc88d089dae21a4a85528beafa2389370d0efc0f5f013d99168876ff0"
+        },
+        {
+          "path": "diagnostics/t4_structural_subgoal_policy/attempt_2/fold_1/report.json",
+          "sha256": "aa850247bd8f8bd2992534d516d2ef7fd350537e51eb9b36a904d3bde8b89ba1"
+        },
+        {
+          "path": "diagnostics/t4_structural_subgoal_policy/attempt_2/fold_2/report.json",
+          "sha256": "82f4ca7a15dc8163c8e333a3c3129ccddc1030a5a1e2202d8921a0a682f2bd7d"
+        }
+      ],
+      "optional_pmo_dependency_region_corpus": {
+        "logical_path": "diagnostics/pmo_dependency_region_program_v2/attempt_1/training_dependency_region_corpus.json.gz",
+        "sha256": "9b35529eae0975dcf977bc1fc51f3bd838e0184d51de3a7d2822edd0bc3d8b54"
+      },
+      "optional_pmo_dependency_region_result": {
+        "logical_path": "diagnostics/pmo_dependency_region_program_v2/attempt_1/result.json",
+        "sha256": "144d80aa378e1326f2e50b269a0d1c89a86fda1fd19013527745f721500da579"
+      }
+    },
+    "split": {
+      "kind": "whole_source_one_seed_per_protein",
+      "folds": [0, 1, 2],
+      "derive_component_vocabularies_after_split": true,
+      "fit_preprocessing_or_models": false
+    },
+    "structural_subgoal": {
+      "factorization": "g=(R,H,alpha,D)",
+      "future_policy_hypothesis": "pi(g|x)=pi(R|x) pi(H,alpha,D|x,R)",
+      "coupled_generation_required": true,
+      "independent_marginal_generator_heads_authorized": false
+    },
+    "component_families": {
+      "source_region_motif": "address-free input-region graph with element, source degree and source bond order",
+      "target_topology": "address-free target graph over surviving source roles and created roles with role type and unlabeled connectivity",
+      "atom_attributes": "multiset of persistent before-to-after atom-state transitions, deletions and created atom states",
+      "bond_attributes": "multiset of input bond-order transitions and target input-output or output-output bond orders",
+      "attachment_pattern": "address-free source-to-created target attachment graph with role type, local degree and bond order",
+      "dependency_motif": "address-free directed primitive dependency graph induced by created-handle and cycle open-close dependencies within the structural region",
+      "source_graphlets_up_to_3": "connected source-region graphlets with one to three vertices and source atom and bond attributes",
+      "target_topology_graphlets_up_to_3": "connected target-patch graphlets with one to three vertices, input-or-output role type and topology but no atom or bond attributes",
+      "atom_attribute_tokens": "individual persistent before-to-after atom transitions, deletions and created atom-state tokens",
+      "bond_attribute_tokens": "individual input bond transitions and target input-output or output-output bond-order tokens",
+      "attachment_edge_tokens": "individual source-to-created attachment motifs, plus an explicit no-created-attachment token",
+      "dependency_tokens": "individual typed producer-consumer dependency motifs, plus an explicit no-dependency token",
+      "target_radius_1_fragments": "rooted attributed target-patch neighborhoods of radius one with boundary degree retained",
+      "target_radius_2_fragments": "rooted attributed target-patch neighborhoods of radius two with boundary degree retained",
+      "target_graphlets_up_to_3": "connected attributed induced target-patch graphlets with one to three vertices"
+    },
+    "exact_equivalence": {
+      "method": "bucket by deterministic Weisfeiler-Lehman signature, then require exact node-and-edge-attributed graph isomorphism within each bucket",
+      "hash_alone_is_evidence": false,
+      "role_order_is_identity": false
+    },
+    "metrics": {
+      "per_fold": [
+        "held_instance_coverage_and_novelty",
+        "held_unique_coverage_and_novelty",
+        "train_vocabulary_transfer_precision",
+        "per_subgoal_all_and_any_component_coverage"
+      ],
+      "aggregate": [
+        "instance_weighted",
+        "source_balanced",
+        "unique_within_fold"
+      ],
+      "combination_diagnosis": [
+        "whole_patch_exact_overlap",
+        "novel_whole_patch_with_all_strict_bundle_components_familiar",
+        "novel_whole_patch_with_at_least_one_strict_bundle_component_unseen",
+        "novel_whole_patch_with_all_granular_components_familiar",
+        "novel_whole_patch_with_at_least_one_granular_component_unseen"
+      ]
+    },
+    "prepublication_definition_revision": "An unsealed implementation sanity preview showed that whole atom-transition multisets and whole dependency graphs remained bundled decisions. Preserve those strict metrics and add finer tokens or graphlets so the audit answers the requested component-level question. No authoritative result or architecture selection preceded this revision.",
+    "auxiliary_conversion": {
+      "remaining_full_146_programs": 69,
+      "pmo_corpus_role": "training_only_auxiliary_compatibility",
+      "no_corpus_merge_or_model_fit": true,
+      "report_exact_replay_and_structural_conversion_coverage_precision_and_abstentions": true,
+      "measure_held_t4_component_coverage_with_auxiliary_vocabularies": true,
+      "full_146_fold_rule": "use only non-complete-route program applications whose origin source is in the T4 training fold",
+      "pmo_fold_rule": "PMO records have no T4 source-group identity and remain separately labelled answer-known auxiliary supervision"
+    },
+    "support": {
+      "t4_teacher_routes": 77,
+      "t4_subgoal_instances": 147,
+      "maximum_active_atoms": 40,
+      "maximum_realized_primitives": 32,
+      "maximum_t4_structural_regions": 4,
+      "exact_executor_and_structural_realizer_unchanged": true
+    },
+    "oracle": {
+      "calls_authorized": 0,
+      "docking_calls_authorized": 0,
+      "modal_launches_authorized": 0,
+      "model_training_authorized": false,
+      "scored_candidate_lock_authorized": false
+    },
+    "prohibitions": [
+      "larger_whole_template_candidate_pools",
+      "whole_template_reranking_repair",
+      "model_training",
+      "teacher_injection",
+      "docking_or_task_oracle_access",
+      "live_run_access_or_change",
+      "sealed_realizer_change",
+      "auxiliary_corpus_merge"
+    ],
+    "acceptance": {
+      "t4_census_exact": true,
+      "zero_group_leakage": true,
+      "exact_isomorphism_verified": true,
+      "all_metric_denominators_and_abstentions_reported": true,
+      "auxiliary_missing_or_incompatible_inputs_fail_or_abstain_explicitly": true,
+      "deterministic_rerun": true,
+      "zero_oracle": true
+    },
+    "interpretation_limit": "This audit selects no generator architecture and establishes no autonomous proposal, docking or IVG result."
+  },
+  "contract_sha256": "d596975381ed99109f80c4f263f3560ecc36b8dbd93fe15bb5da9a2fa4464122"
+}
