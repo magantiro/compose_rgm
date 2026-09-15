@@ -1,0 +1,107 @@
+{
+  "payload": {
+    "schema_version": "t4_structural_subgoal_policy_contract_v1",
+    "authorization": "2026-09-15 user authorized continued zero-oracle structural-subgoal policy development toward a generic T4 controller",
+    "mode": "zero_oracle_whole_source_grouped_development",
+    "scientific_problem": "Generate useful address-free structural graph subgoals on held molecules, then realize them through the exact Active8 executor.",
+    "primary_model_output": "A ranked distribution over one-to-four transferable structural graph deltas and current-state bindings.",
+    "central_claim_under_test": "Graph-conditioned structural-subgoal proposal improves held-source support over a source-balanced marginal using the same train-fold vocabulary, binding support, compiler and candidate budget.",
+    "inputs": {
+      "teacher_library": {
+        "path": "diagnostics/t4_shared_program_controller/attempt_2/shared_library.json",
+        "sha256": "732c67d04af3a0824cfa700906fd73982689af416f337c8eb109499af79afdb5"
+      },
+      "source_registry": {
+        "path": "docs/GENMOL_T4_SEEDS.json",
+        "sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"
+      },
+      "structural_subgoal_representation_audit": {
+        "path": "diagnostics/t4_structural_subgoal/attempt_2/summary.json",
+        "sha256": "76efefd1dd2267c0543cb972ef236a30b50f21b7c6a6da4ffca66cb3e43531c3"
+      }
+    },
+    "split": {
+      "kind": "whole_source_one_seed_per_protein",
+      "folds": [0, 1, 2],
+      "teacher_routes": 77,
+      "source_groups": 15,
+      "fit_vocabulary_preprocessing_and_statistics_on_train_only": true
+    },
+    "support": {
+      "maximum_primitives": 32,
+      "maximum_active_atoms": 40,
+      "maximum_structural_regions": 4,
+      "transfer_binding": "element_degree_and_induced_topology_with_relative_atom_state_delta",
+      "exact_executor": true,
+      "completed_state_evaluation_only": true
+    },
+    "training": {
+      "exploration_floor": 0.1,
+      "negatives_per_source": 32,
+      "negative_beam_width": 16,
+      "negative_expansion_width": 16,
+      "updates": 400,
+      "learning_rate": 0.03,
+      "l2": 0.01,
+      "seed": 20260915,
+      "source_route_region_balancing": true
+    },
+    "proposal": {
+      "pool_size": 128,
+      "beam_width": 64,
+      "expansion_width": 48,
+      "max_bindings_per_template": 8,
+      "cutoffs": [8, 32, 128]
+    },
+    "execution": {
+      "independent_source_shards": 15,
+      "sources_per_fold": 5,
+      "automatic_retry": false,
+      "durable_source_candidate_lock": true,
+      "progress_interval_candidates": 16
+    },
+    "comparison": {
+      "arms": [
+        "source_balanced_marginal_subgoal",
+        "graph_conditioned_subgoal"
+      ],
+      "shared_candidate_support": true,
+      "teacher_free_candidate_lock": true,
+      "separate_teacher_evaluation": true
+    },
+    "gates": {
+      "representation_route_coverage": 1.0,
+      "realizer_route_coverage": 1.0,
+      "realizer_endpoint_precision": 1.0,
+      "realizer_teacher_action_fallback": 0,
+      "report_recall_at": [8, 32, 128],
+      "report_exact_subgoal_endpoint_and_radius2_transformation_metrics": true,
+      "report_validity_uniqueness_support_work_walltime_and_failures": true
+    },
+    "oracle": {
+      "calls_authorized": 0,
+      "docking_calls_authorized": 0,
+      "scored_optimization_authorized": false
+    },
+    "runtime_checkpoint_prohibitions": [
+      "task_or_protein_identity",
+      "route_or_program_identity",
+      "absolute_source_atom_address",
+      "source_graph",
+      "terminal_endpoint_or_smiles",
+      "primitive_teacher_trace",
+      "executable_complete_teacher_route"
+    ],
+    "preserve": [
+      "all_prior_structural_subgoal_and_realizer_attempts",
+      "all_live_runs",
+      "full_146",
+      "dynamic_v0",
+      "dynamic_v1",
+      "dynamic_v21",
+      "dynamic_v22"
+    ],
+    "interpretation_limit": "This gate measures held-source zero-oracle proposal support. It does not establish docking improvement or an IVG comparison."
+  },
+  "contract_sha256": "f1731b85957b16204ffada9604dca6be69d8d9905b055e4359db5a2380ea93fc"
+}

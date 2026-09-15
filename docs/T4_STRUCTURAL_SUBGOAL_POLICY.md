@@ -173,3 +173,43 @@ shard publishes a durable result under its immutable call identity. Reduce only
 after all expected source groups are present and compatible. This changes wall
 time only. It does not change the source folds, representation, gate, support or
 scientific budget.
+
+## Structural-subgoal proposal comparison, 2026-09-15
+
+The exact realizer revision at commit
+`f8854ec78ce7d4c6923797620c55aa97994e785e` passed a clean local regression on
+all 15 source groups: 77 of 77 routes and 147 of 147 subgoal instances were
+exact, endpoint precision was 1.0, no teacher action was used and no oracle was
+called. Seventy-five routes used deterministic graph-delta scheduling. Two
+used target-directed bounded search. The maximum route cost was 64 expansions.
+These results are answer-known compiler coverage, not autonomous proposal.
+
+The next comparison freezes the same three whole-source folds before deriving
+any reusable patch vocabulary, frequency, feature moment or fitted parameter.
+Each training subgoal is reduced to its minimal observed graph delta by removing
+unchanged context roles that neither change atom state nor participate in a
+changed or newly created bond. This reduction reconstructs all 77 training
+endpoints when rebound to their observed roles. The runtime delta records only
+generic before/after role attributes and local bond structure. It carries no
+environment string, absolute atom address, source graph, task or protein,
+route identity, endpoint, SMILES or primitive teacher trace.
+
+At generation time, each train-fold delta is rebound to the current graph by
+element, degree and induced local topology. Charge and hydrogen state are taken
+from the current molecule, and learned atom-state changes are applied as
+relative deltas. Valid bound patches are composed into one-to-four-region goals,
+deduplicated by molecular endpoint, then passed through the unchanged exact
+realizer. The two predeclared arms use the same train-fold vocabulary, binding
+support, composition limits and 128-candidate budget:
+
+1. a source, route and region-balanced marginal;
+2. a graph-conditioned pairwise ranker fitted only against same-training-source
+   executable negatives.
+
+The candidate lock is generated without teacher endpoints. The separate
+evaluator reports held-source exact subgoal, exact endpoint and frozen radius-2
+transformation-equivalence Recall@8/32/128, together with precision, unique
+yield, candidate shortfall, compiler work, wall time and every abstention.
+Generation is source-sharded into 15 independent units with no automatic retry
+and deterministic fold reduction. This is still a zero-oracle gate. A scored
+T4 launch remains outside this contract.
