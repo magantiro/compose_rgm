@@ -372,6 +372,37 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped zero-oracle T4 strict-delta-0.6 structural-subgoal utility lock,
+2026-09-15:** after the attempt-2 held-source structural-subgoal policies
+recovered zero teacher endpoints but emitted 3,141 complete molecular endpoints,
+the user explicitly authorized the score-blind preparation of the previously
+proposed tiny docking diagnostic. Consume only the three immutable attempt-2
+fold candidate locks, reports, source manifests and evaluation manifests bound
+by `configs/t4_delta06_structural_subgoal_utility_lock_v1.json`. Recompute every
+one of the 3,840 attempted records under RDKit 2024.03.5, including canonical
+molecule identity, validity, connectedness, quantitative estimate of
+drug-likeness (QED), synthetic accessibility (SA), Morgan radius-2/2,048-bit
+similarity to its frozen source, active and heavy atom counts, non-self status,
+and explicit exclusion reasons. Strict eligibility is similarity greater than
+0.6, QED greater than 0.6, SA less than 4.0, at most 40 active atoms, valid,
+connected and non-self.
+
+Within each source and policy, lock the lowest-rank eligible canonical endpoint,
+then the distinct eligible endpoint with maximum Morgan distance from that first
+endpoint, breaking ties by rank, canonical key and attempt identifier. Never use
+teacher endpoints, teacher transformations, docking scores or comparator
+outcomes for eligibility or selection. Deduplicate physical requests by target,
+canonical molecule, docking seed and frozen evaluator while preserving every
+source, policy and selection-role membership. Publish a deterministic complete
+eligibility ledger, candidate lock, request lock and explicit 15-cell abstention
+ledger. Do not regenerate, rerank, backfill, retry or replace candidates. The
+candidate artifacts contain endpoints but no executable candidate traces, so a
+later utility result cannot establish route recovery or executable proposal
+precision. This milestone authorizes zero oracle or docking calls, no Modal or
+live-run access, and no scored launch. A later launch requires a separate
+explicit authorization naming the sealed request-lock hash and exact call
+ceiling.
+
 **Scoped T4 structural-subgoal policy and exact realizer, 2026-09-14:** after
 the 77-route dependency audit showed that every route contains at most four
 strict dependency regions (median two), the user explicitly authorized moving
