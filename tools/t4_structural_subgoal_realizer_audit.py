@@ -17,8 +17,8 @@ from compose_v4.experiments.continuation_profile import publish_json, sha256_fil
 from compose_v4.rewrite.trace_shard import decode_state
 from tools.t4_structural_subgoal_audit import LIBRARY, ROOT, teacher_traces
 
-RESULT_SCHEMA = "t4_structural_subgoal_realizer_source_audit_v2"
-PROGRESS_SCHEMA = "t4_structural_subgoal_realizer_progress_v2"
+RESULT_SCHEMA = "t4_structural_subgoal_realizer_source_audit_v3"
+PROGRESS_SCHEMA = "t4_structural_subgoal_realizer_progress_v3"
 
 
 def _percentile(values: list[float], quantile: float) -> float:
@@ -233,6 +233,8 @@ def run_source(
                 "output_role_slots": realized.get("output_role_slots", []),
                 "output_roles": sum(len(subgoal.output_atoms) for subgoal in goal.subgoals),
                 "logical_role_automorphisms": realized.get("logical_role_automorphisms", 0),
+                "compiler_strategy": realized.get("compiler_strategy"),
+                "deterministic_schedule_status": realized.get("deterministic_schedule_status"),
                 "subgoal_targets_match_within_complete_goal": subgoal_matches,
                 "bound_target_receipt": realized["bound_target_receipt"],
                 "elapsed_seconds": route_elapsed_seconds,
@@ -250,6 +252,7 @@ def run_source(
 
     elapsed = time.monotonic() - started
     route_realized_count = route_status_counts["realized"]
+    compiler_strategy_counts = Counter(row["compiler_strategy"] for row in route_rows)
     route_exact_count = sum(row["endpoint_matches_bound_target"] for row in route_rows)
     subgoal_realized_count = subgoal_status_counts["realized"]
     subgoal_exact_count = sum(row["target_matches_within_complete_goal"] for row in subgoal_rows)
@@ -282,6 +285,7 @@ def run_source(
             "subgoal_status_counts": dict(sorted(subgoal_status_counts.items())),
             "search_expansions": total_expansions,
             "action_attempts": total_attempts,
+            "compiler_strategy_counts": dict(sorted(compiler_strategy_counts.items())),
         },
         "gates": {
             "route_realization_coverage": {
@@ -336,6 +340,7 @@ def run_source(
             "The structural targets and audited bindings are answer-known training data.",
             "Subgoal targets are checked inside their coordinated complete-goal endpoint; shared boundary roles make isolated-subgoal execution a different problem.",
             "The bounded compiler uses at most 12 children per expansion; this empirical gate does not prove complete search support for every representable goal.",
+            "The deterministic graph-delta schedule uses an internal persistent-slot allocation after address-free binding; the serialized subgoal contains no persistent output slots.",
             "Exact realization does not establish autonomous subgoal proposal recall.",
             "No task utility or docking score was observed.",
         ],

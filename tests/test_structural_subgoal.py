@@ -138,7 +138,7 @@ def test_realizer_target_prefers_slots_empty_before_source_deletions():
     assert set(receipt["output_slots"][0]) <= initially_empty
 
 
-def test_role_aware_realizer_does_not_fix_output_roles_to_slot_order():
+def test_target_scheduler_does_not_fix_output_roles_to_creation_order():
     source = _methane()
     subgoal = StructuralSubgoal(
         input_atoms=(atom_signature(source, 0),),
@@ -162,7 +162,14 @@ def test_role_aware_realizer_does_not_fix_output_roles_to_slot_order():
     assert result["status"] == "realized"
     assert result["endpoint_matches_bound_target"]
     assert result["subgoal_targets_match_within_complete_goal"] == [True]
-    assert result["output_role_slots"] == [2, 1]
+    inserted_slots = [
+        action["payload"]["slot"]
+        for action in result["actions"]
+        if action["executor_rule"] == "atom_insert"
+    ]
+    assert result["compiler_strategy"] == "deterministic_graph_delta_schedule"
+    assert result["output_role_slots"] == [1, 2]
+    assert inserted_slots == [2, 1]
     assert result["primitive_teacher_actions_used"] == 0
 
 

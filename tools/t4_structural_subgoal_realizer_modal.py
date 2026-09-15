@@ -15,10 +15,10 @@ from modal_apps.t4_structural_subgoal_realizer_app import APP_NAME, MATERIAL_FIL
 from tools.t4_structural_subgoal_audit import source_groups
 
 ROOT = Path(__file__).resolve().parents[1]
-LOCAL_ROOT = ROOT / "diagnostics/t4_structural_subgoal_realizer/attempt_2"
+LOCAL_ROOT = ROOT / "diagnostics/t4_structural_subgoal_realizer/attempt_3"
 LAUNCH = LOCAL_ROOT / "launch.json"
 SUMMARY = LOCAL_ROOT / "summary.json"
-REMOTE_ROOT = "/t4_structural_subgoal_realizer/attempt_2"
+REMOTE_ROOT = "/t4_structural_subgoal_realizer/attempt_3"
 
 
 def _clean_revision():
@@ -33,7 +33,7 @@ def _tasks(image_revision):
     rows = []
     for source_group in source_groups():
         body = {
-            "schema_version": "t4_structural_subgoal_realizer_source_lock_v2",
+            "schema_version": "t4_structural_subgoal_realizer_source_lock_v3",
             "source_group": source_group,
             "output": f"/artifacts{REMOTE_ROOT}/{source_group}/result.json",
             "oracle_calls": 0,
@@ -55,7 +55,7 @@ def launch():
     worker = modal.Function.from_name(APP_NAME, "worker")
     calls = {task["source_group"]: worker.spawn(task).object_id for task in tasks}
     body = {
-        "schema_version": "t4_structural_subgoal_realizer_launch_v2",
+        "schema_version": "t4_structural_subgoal_realizer_launch_v3",
         "commit": commit,
         "tasks": tasks,
         "call_ids": calls,
@@ -185,7 +185,7 @@ def merge():
             raise ValueError(f"missing structural-realizer source shard: {source_group}")
         row = json.loads(path.read_text())
         if (
-            row.get("schema_version") != "t4_structural_subgoal_realizer_source_audit_v2"
+            row.get("schema_version") != "t4_structural_subgoal_realizer_source_audit_v3"
             or row.get("source_group") != source_group
             or row.get("implementation", {}).get("revision") != receipt["commit"]
             or any(
@@ -221,7 +221,7 @@ def merge():
     for row in rows:
         status_counts.update(row["census"]["route_status_counts"])
     body = {
-        "schema_version": "t4_structural_subgoal_realizer_summary_v2",
+        "schema_version": "t4_structural_subgoal_realizer_summary_v3",
         "evidence": "answer-known zero-oracle conditional-realizer audit",
         "implementation_revision": receipt["commit"],
         "launch_receipt_sha256": sha256_file(LAUNCH),
@@ -234,6 +234,14 @@ def merge():
             "status_counts": dict(sorted(status_counts.items())),
             "search_expansions": sum(row["census"]["search_expansions"] for row in rows),
             "action_attempts": sum(row["census"]["action_attempts"] for row in rows),
+            "compiler_strategy_counts": dict(
+                sorted(
+                    sum(
+                        (Counter(row["census"]["compiler_strategy_counts"]) for row in rows),
+                        Counter(),
+                    ).items()
+                )
+            ),
         },
         "gates": {
             "route_realization_coverage": {
@@ -296,6 +304,7 @@ def merge():
             "Targets and audited bindings are answer-known training data.",
             "Subgoal targets are checked inside their coordinated complete-goal endpoint; shared boundary roles make isolated-subgoal execution a different problem.",
             "The bounded compiler uses at most 12 children per expansion; this empirical gate does not prove complete search support for every representable goal.",
+            "The deterministic graph-delta schedule uses an internal persistent-slot allocation after address-free binding; the serialized subgoal contains no persistent output slots.",
             "This does not measure autonomous subgoal proposal or task utility.",
         ],
     }

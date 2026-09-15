@@ -148,6 +148,22 @@ search remains bounded to 12 retained children per expansion. Passing the
 corpus gate establishes empirical coverage on the declared 77-route corpus,
 not complete search support for every representable structural goal.
 
+The role-aware bounded-search revision recovered 76 of 77 routes and 144 of
+147 subgoal instances at precision 1.0 with zero teacher-action fallback. The
+remaining 18-primitive route was fully inside the generic legal target-action
+support but reached the unchanged 16,384-expansion limit at mismatch two.
+This is preserved as a failed zero-oracle gate.
+
+The next revision first derives the explicit bound graph delta and attempts a
+deterministic legal schedule. Persistent output slots are allocated only
+inside the compiler after address-free source binding. They are absent from
+the serialized subgoal and runtime policy target. Every scheduled primitive
+is generated from the current graph and requested target, then verified by
+the unchanged exact executor. If this schedule reaches a local dead end, the
+role-aware bounded search remains available within the same declared work
+limit. Report the strategy used per route and include both paths in compiler
+cost accounting. Do not increase the search limit or use the teacher trace.
+
 ## Parallel execution amendment, 2026-09-15
 
 The user authorized immediate Modal parallelization of this zero-oracle work.

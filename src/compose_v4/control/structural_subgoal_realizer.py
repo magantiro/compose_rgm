@@ -9,6 +9,7 @@ is an exact legal molecular state.
 from __future__ import annotations
 
 import heapq
+import json
 from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -153,6 +154,130 @@ def _target_actions(graph: MolecularGraph, target: MolecularGraph):
             yield "bond_reroute", BondReroute(left, right, new_left, new_right, order)
     if len(reorders) > 1:
         yield "ring_system_restate", RingSystemRestate(tuple(reorders))
+
+
+def _replay_states(source: MolecularGraph, path: tuple[dict, ...]) -> list[dict]:
+    system = editing_v2_semantic_rewrite_system()
+    states = [encode_state(source)]
+    graph = source
+    for action_record in path:
+        family, action = decode_action(action_record)
+        graph = system.apply(graph, family, action)
+        states.append(encode_state(graph))
+    return states
+
+
+def _deterministic_target_schedule(
+    source: MolecularGraph,
+    target: MolecularGraph,
+    *,
+    config: RealizerConfig,
+    progress: ProgressCallback | None,
+) -> dict:
+    """Schedule the explicit graph delta before invoking bounded state search.
+
+    The target's persistent slots are an internal compiler allocation produced
+    after address-free binding. They are not part of the serialized subgoal.
+    Each retained action is generated from the current graph/target delta and
+    executed by the ordinary exact rewrite system. The role-aware search
+    remains the fallback when this deterministic legal schedule reaches a
+    local dead end.
+    """
+
+    system = editing_v2_semantic_rewrite_system()
+    graph = source
+    path: tuple[dict, ...] = ()
+    visited = {exact_graph_key(source)}
+    failures: Counter[str] = Counter()
+    expanded = attempted = 0
+    best_mismatch = target_distance(source, target)
+
+    while expanded < min(config.maximum_expansions, config.maximum_primitives):
+        mismatch = target_distance(graph, target)
+        if mismatch == 0:
+            return {
+                "status": "realized",
+                "actions": list(path),
+                "states": _replay_states(source, path),
+                "expanded": expanded,
+                "attempted": attempted,
+                "best_mismatch": 0,
+                "rejections": dict(sorted(failures.items())),
+                "primitive_teacher_actions_used": 0,
+                "compiler_strategy": "deterministic_graph_delta_schedule",
+            }
+        if len(path) >= config.maximum_primitives:
+            failures["primitive_limit"] += 1
+            break
+        expanded += 1
+        if progress is not None:
+            progress(
+                {
+                    "expanded": expanded,
+                    "attempted": attempted,
+                    "frontier": 1,
+                    "depth": len(path),
+                    "best_mismatch": best_mismatch,
+                    "maximum_expansions": config.maximum_expansions,
+                    "compiler_strategy": "deterministic_graph_delta_schedule",
+                }
+            )
+        children = []
+        current_key = canonical_state_key(graph)
+        for family, action in _target_actions(graph, target):
+            attempted += 1
+            try:
+                product = system.apply(graph, family, action)
+            except (InvalidRewrite, ValueError) as error:
+                failures[f"{family}:{str(error).split(':')[0]}"] += 1
+                continue
+            if product.n_real_atoms > config.maximum_active_atoms:
+                failures["active_atom_limit"] += 1
+                continue
+            product_key = canonical_state_key(product)
+            if product_key == current_key:
+                failures["canonical_self_event"] += 1
+                continue
+            product_exact_key = exact_graph_key(product)
+            if product_exact_key in visited:
+                continue
+            product_mismatch = target_distance(product, target)
+            action_record = encode_action(family, action)
+            children.append(
+                (
+                    product_mismatch,
+                    family,
+                    json.dumps(action_record, sort_keys=True, separators=(",", ":")),
+                    product_exact_key,
+                    product,
+                    action_record,
+                )
+            )
+        if not children:
+            break
+        (
+            product_mismatch,
+            _family,
+            _action_key,
+            product_exact_key,
+            graph,
+            action_record,
+        ) = min(children, key=lambda row: row[:4])
+        visited.add(product_exact_key)
+        best_mismatch = min(best_mismatch, product_mismatch)
+        path += (action_record,)
+
+    return {
+        "status": "deterministic_schedule_abstention",
+        "actions": [],
+        "states": [encode_state(source)],
+        "expanded": expanded,
+        "attempted": attempted,
+        "best_mismatch": best_mismatch,
+        "rejections": dict(sorted(failures.items())),
+        "primitive_teacher_actions_used": 0,
+        "compiler_strategy": "deterministic_graph_delta_schedule",
+    }
 
 
 def _source_role(slot: int) -> Role:
@@ -585,7 +710,33 @@ def _realize_bound_goal(
             "primitive_teacher_actions_used": 0,
             "output_role_slots": [],
             "logical_role_automorphisms": len(bound.output_automorphisms),
+            "compiler_strategy": "charge_policy_abstention",
+            "deterministic_schedule_status": "not_run",
         }
+
+    target_mapping = _canonical_mapping(
+        bound,
+        tuple(int(slot) for group in bound.target_receipt["output_slots"] for slot in group),
+    )
+    if len(target_mapping) != len(bound.output_roles):
+        raise AssertionError("bound target output allocation disagrees with logical roles")
+    scheduled = _deterministic_target_schedule(
+        source,
+        bound.target,
+        config=config,
+        progress=progress,
+    )
+    if scheduled["status"] == "realized":
+        endpoint = decode_state(scheduled["states"][-1])
+        if _role_distance(endpoint, bound, target_mapping) != 0:
+            raise AssertionError("exact target schedule did not satisfy logical role obligations")
+        return {
+            **scheduled,
+            "output_role_slots": list(target_mapping),
+            "logical_role_automorphisms": len(bound.output_automorphisms),
+            "deterministic_schedule_status": "realized",
+        }
+
     system = editing_v2_semantic_rewrite_system()
     target_key = canonical_state_key(bound.target)
     initial_mapping = _canonical_mapping(bound, tuple(-1 for _ in bound.output_roles))
@@ -602,8 +753,12 @@ def _realize_bound_goal(
     ]
     visited: set[tuple] = set()
     failures: Counter[str] = Counter()
-    expanded = attempted = 0
-    best_mismatch = _role_distance(source, bound, initial_mapping)
+    expanded = int(scheduled["expanded"])
+    attempted = int(scheduled["attempted"])
+    best_mismatch = min(
+        int(scheduled["best_mismatch"]),
+        _role_distance(source, bound, initial_mapping),
+    )
 
     while queue and expanded < config.maximum_expansions:
         _mismatch, depth, _, graph, mapping, path = heapq.heappop(queue)
@@ -629,6 +784,8 @@ def _realize_bound_goal(
                 "primitive_teacher_actions_used": 0,
                 "output_role_slots": list(mapping),
                 "logical_role_automorphisms": len(bound.output_automorphisms),
+                "compiler_strategy": "role_aware_bounded_search",
+                "deterministic_schedule_status": scheduled["status"],
             }
         if depth >= config.maximum_primitives:
             failures["primitive_limit"] += 1
@@ -703,6 +860,8 @@ def _realize_bound_goal(
         "primitive_teacher_actions_used": 0,
         "output_role_slots": [],
         "logical_role_automorphisms": len(bound.output_automorphisms),
+        "compiler_strategy": "role_aware_bounded_search",
+        "deterministic_schedule_status": scheduled["status"],
     }
 
 

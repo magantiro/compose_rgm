@@ -11,10 +11,10 @@ import modal
 from modal_apps.run_process_v2_p50_app import REMOTE_ROOT, ROOT, _validate_remote_revision
 from modal_apps.run_process_v2_p50_app import image as base_image
 
-APP_NAME = "compose-t4-structural-subgoal-realizer-v2"
+APP_NAME = "compose-t4-structural-subgoal-realizer-v3"
 VOLUME_NAME = "compose-t4-route-distilled-artifacts"
 ARTIFACT_ROOT = Path("/artifacts")
-OUTPUT_ROOT = ARTIFACT_ROOT / "t4_structural_subgoal_realizer" / "attempt_2"
+OUTPUT_ROOT = ARTIFACT_ROOT / "t4_structural_subgoal_realizer" / "attempt_3"
 MATERIAL_FILES = (
     "AGENTS.md",
     "docs/T4_STRUCTURAL_SUBGOAL_POLICY.md",
@@ -79,7 +79,7 @@ def worker(task):
     state_lock = threading.Lock()
     progress_state = {
         "payload": {
-            "schema_version": "t4_structural_subgoal_realizer_progress_v2",
+            "schema_version": "t4_structural_subgoal_realizer_progress_v3",
             "event": "structural_subgoal_realizer_heartbeat",
             "source_group": task["source_group"],
             "phase": "loading_inputs",
