@@ -160,6 +160,15 @@ def _contract(contract_path: Path = CONTRACT) -> dict:
     return payload
 
 
+def _contract_provenance(contract_path: Path) -> dict:
+    resolved = contract_path.resolve()
+    return {
+        "path": str(resolved.relative_to(ROOT)),
+        "sha256": sha256(resolved),
+        "payload_sha256": identity(_contract(resolved)),
+    }
+
+
 def _component_payload(component: AttributedComponent) -> dict:
     return asdict(component)
 
@@ -935,7 +944,7 @@ def evaluate_all(
     *,
     contract_path: Path = CONTRACT,
 ) -> None:
-    contract = _contract(contract_path)
+    _contract(contract_path)
     lock = load_sealed(lock_path)
     if lock.get("schema_version") != LOCK_SCHEMA or lock.get("teacher_fields_present") is not False:
         raise ValueError("candidate lock schema or separation invariant failed")
@@ -1094,11 +1103,7 @@ def evaluate_all(
         output,
         {
             "schema_version": RESULT_SCHEMA,
-            "contract": {
-                "path": str(contract_path.relative_to(ROOT)),
-                "sha256": sha256(contract_path),
-                "payload_sha256": identity(contract),
-            },
+            "contract": _contract_provenance(contract_path),
             "folds": fold_reports,
             "costs": {
                 "new_oracle_calls": 0,

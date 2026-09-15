@@ -14,6 +14,7 @@ from tools.t4_compositional_structural_subgoal_generator import (
     T4_CONTRACT,
     _balanced_weight_audit,
     _contract,
+    _contract_provenance,
     _delta06_data,
     _training_events,
 )
@@ -38,6 +39,17 @@ def test_expanded_contract_preserves_model_decoder_evaluation_and_gate() -> None
     assert expanded_acceptance.pop("unchanged_from_baseline") is True
     assert expanded_acceptance == baseline["acceptance"]
     assert expanded["decoder"]["cutoffs"] == [8, 32, 128]
+
+
+def test_relative_contract_path_has_repository_relative_provenance() -> None:
+    provenance = _contract_provenance(
+        Path("configs/t4_expanded_balanced_compositional_structural_subgoal_generator_v1.json")
+    )
+
+    assert provenance["path"] == EXPANDED_CONTRACT.relative_to(ROOT).as_posix()
+    assert (
+        provenance["payload_sha256"] == json.loads(EXPANDED_CONTRACT.read_text())["contract_sha256"]
+    )
 
 
 def test_delta06_adapter_admits_exact_deduplicated_witnesses() -> None:

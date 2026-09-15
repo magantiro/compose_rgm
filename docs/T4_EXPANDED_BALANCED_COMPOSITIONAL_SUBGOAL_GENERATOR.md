@@ -45,7 +45,7 @@ auxiliary corpora, and the new delta-0.6 corpus and result.
 Fit from a clean committed revision:
 
 ```bash
-PYTHONPATH=src .venv/bin/python \
+PYTHONPATH=.:src .venv/bin/python \
   tools/t4_compositional_structural_subgoal_generator.py fit-all \
   --contract configs/t4_expanded_balanced_compositional_structural_subgoal_generator_v1.json \
   --output diagnostics/t4_expanded_balanced_compositional_subgoal_generator/attempt_1 \
