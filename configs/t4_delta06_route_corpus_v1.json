@@ -1,0 +1,131 @@
+{
+  "payload": {
+    "schema_version": "t4_delta06_route_corpus_contract_v1",
+    "authorization": "2026-09-15 user authorized a zero-oracle delta-0.6 route-reference corpus and structural-subgoal export",
+    "mode": "training_only_zero_oracle_route_reference_export",
+    "scientific_problem": "Prepare exact, provenance-bound delta-0.6 T4 route supervision for later generic structural-delta model development without making a scored call.",
+    "primary_output": "A deterministic training-only corpus containing all 39 reported endpoint references, exactly 32 COMPOSE-compiled exact witnesses, seven explicit abstentions and address-free dependency-region structural subgoals.",
+    "central_claim_under_test": "The already inventoried delta-0.6 endpoints supply exact executable COMPOSE witnesses and structural-subgoal supervision within the declared support; this export does not test autonomous generation or docking utility.",
+    "evaluation_setting": "Retrospective zero-oracle conversion of the immutable public-IVG endpoint census and its pre-existing COMPOSE witness receipts.",
+    "inputs": {
+      "ivg_t4_census": {
+        "path": "diagnostics/ivg_t4_census/census.json",
+        "sha256": "2c06fdfe65fc31327d865381ccb8f4d2c40553c3925d9dc0a03386c22fda05bb"
+      },
+      "seed_registry": {
+        "path": "docs/GENMOL_T4_SEEDS.json",
+        "sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"
+      },
+      "winner_witness_audit": {
+        "path": "diagnostics/ivg_winner_paths/audit.json",
+        "sha256": "3b7fb79a541b94dd5421f30ffc0516c5cdc4d9316845cd40561d799ec517f922"
+      },
+      "winner_witness_review": {
+        "path": "diagnostics/ivg_winner_paths/review.json",
+        "sha256": "2f9fdd4c6baddb08e727e14064c67ffc1c704ff94540e686cf9fa28fd35e7d26"
+      },
+      "winner_witness_preparation": {
+        "path": "diagnostics/ivg_winner_paths/preparation.json",
+        "sha256": "b39311a4e282a2156c9b7a21e992b85127aad6cf39cd20f6a1146e4e506de7a9"
+      },
+      "sealed_structural_realizer_summary": {
+        "path": "diagnostics/t4_structural_subgoal/attempt_2/summary.json",
+        "sha256": "76efefd1dd2267c0543cb972ef236a30b50f21b7c6a6da4ffca66cb3e43531c3"
+      },
+      "sealed_implementation": {
+        "structural_subgoal": {
+          "path": "src/compose_v4/control/structural_subgoal.py",
+          "sha256": "ba603dbfa82a3130761146498510160d9dfcb74d3aa5b44298afe6bfefe59823"
+        },
+        "structural_subgoal_realizer": {
+          "path": "src/compose_v4/control/structural_subgoal_realizer.py",
+          "sha256": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f"
+        },
+        "dependency_region_program": {
+          "path": "src/compose_v4/control/dependency_region_program.py",
+          "sha256": "8871e27dbea282ddfa6e9ac64a7be8c8786fc14f529ad15757b63ec91a432f6f"
+        },
+        "structural_subgoal_components": {
+          "path": "src/compose_v4/control/structural_subgoal_components.py",
+          "sha256": "21034f3b55257a8ea2ffe6c76ce36c83453109438b33a8fe5f4f8e728f7d7935"
+        },
+        "whole_ring_plan_executor": {
+          "path": "src/compose_v4/experiments/whole_ring_plan.py",
+          "sha256": "2ea6b5552cae5786781bf3faffa50b643341380a4192c642c19e71aae02aa0f0"
+        }
+      },
+      "delta06_receipt_manifest": {
+        "selection_rule": "pair is selected iff at least one audit reference has numeric delta equal to 0.6; keep only delta-0.6 references in the exported reference list",
+        "entries": 39,
+        "witness_found": 32,
+        "abstentions": 7,
+        "run_references": 49,
+        "manifest_identity": "8e6578f1be0bff1929e76d89226f2bc3c7f7d710ae04b2bb012fc7ff633b5055"
+      }
+    },
+    "evidence_labels": {
+      "endpoint": "reported_IVG_endpoint_reference",
+      "route": "COMPOSE_compiled_witness_inferred_from_reported_IVG_endpoint",
+      "forbidden_route_label": "observed_IVG_trajectory"
+    },
+    "deduplication": {
+      "unit": "canonical_source_endpoint_pair",
+      "tied_run_references": "retain all source references on one endpoint record",
+      "endpoint_training_weight": 1.0,
+      "abstention_training_weight": 0.0
+    },
+    "support": {
+      "persistent_slots": 48,
+      "maximum_active_atoms": 40,
+      "maximum_primitives": 32,
+      "maximum_structural_regions": 4,
+      "exact_executor_and_structural_realizer_unchanged": true
+    },
+    "metrics": {
+      "source_edit_radius": "minimum source-graph eccentricity over all source atoms covering every touched source token; null with a reason if no source token is touched",
+      "retained_source_atom_fraction": "number of source-token atoms active in the final state divided by source active atoms",
+      "topology_change": "target cycle rank minus source cycle rank",
+      "diversity": "exact address-free attributed-isomorphism class count divided by component instances for target topology, attachment pattern and dependency motif"
+    },
+    "expected": {
+      "endpoint_references": 39,
+      "exact_witnesses": 32,
+      "abstentions": {
+        "search_unresolved": 2,
+        "unreachable_charge_change": 3,
+        "unsupported_representation": 2
+      },
+      "source_cells": 15,
+      "proteins": 5
+    },
+    "oracle": {
+      "calls_authorized": 0,
+      "docking_calls_authorized": 0,
+      "modal_launches_authorized": 0,
+      "model_training_authorized": false,
+      "scored_launch_contract_authorized": false
+    },
+    "acceptance": {
+      "all_material_inputs_hash_verified": true,
+      "all_manifest_receipts_individually_hash_verified": true,
+      "endpoint_census_exact": true,
+      "witness_and_abstention_census_exact": true,
+      "primitive_replay_coverage_and_precision_reported": true,
+      "structural_extraction_and_realization_coverage_and_precision_reported": true,
+      "deterministic_byte_stable_artifact": true,
+      "zero_oracle": true
+    },
+    "prohibitions": [
+      "docking_or_task_oracle_access",
+      "modal_launch",
+      "model_fit_or_selection",
+      "scored_launch_contract",
+      "live_run_access_or_change",
+      "existing_t4_artifact_mutation",
+      "sealed_representation_realizer_or_executor_change",
+      "post_score_endpoint_selection"
+    ],
+    "interpretation_limit": "This training-only export establishes retrospective route and subgoal availability within declared support. It is not autonomous proposal, docking, prospective or IVG-comparison evidence."
+  },
+  "contract_sha256": "c1250bce42cfe9dfe3c9ee22e18f4c16daa8e6c6f31a9ee1bc0eb4635a957470"
+}

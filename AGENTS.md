@@ -352,6 +352,42 @@ registries, run contracts, decision artifacts, or task-specific acceptance crite
 self-hashed contract is stricter than this prose, the contract governs. When documents disagree, stop,
 identify the conflicting revisions, and resolve the lineage instead of choosing the convenient version.
 
+### Current authorized milestone: T4 delta-0.6 route-reference corpus
+
+**Scoped zero-oracle T4 delta-0.6 route-reference corpus, 2026-09-15:**
+the user explicitly authorized a separate route-aware delta-0.6 curriculum and
+reference-data preparation track while generic structural-subgoal development
+continues elsewhere. Consume only the immutable IVG T4 census, canonical seed
+registry, winner-witness audit, review, preparation receipt and the exact 39
+delta-0.6 pair receipts selected by that audit. Retain all 39 unique endpoint
+references, admit exactly the 32 pairs with exact executable COMPOSE witnesses,
+and preserve the seven abstentions with their original reason codes. Evidence
+must be labelled as COMPOSE-compiled witnesses inferred from reported IVG
+endpoints, never as observed IVG trajectories. A repeated endpoint across tied
+run references remains one training example with all source references retained.
+
+For each admitted witness, preserve exact primitive ancestry, verify exact
+replay, extract dependency regions and address-free structural subgoals using
+the unchanged sealed representation and realizer, and report exact realization
+coverage and precision. Report route length, region count, source edit radius,
+retained-source-atom fraction, topology changes, attachment and component
+diversity, denominators, exclusions and abstentions. Publish a deterministic,
+self-hashed training-only corpus plus a concise audit. The generated object is
+an exact route and its one-to-four address-free structural regions; its declared
+support remains the existing 48-slot, at-most-40-active-atom, at-most-32-primitive
+T4 representation. The intended later claim is only that these examples may
+expand training support for one generic structural-delta generator. This
+milestone does not establish autonomous proposal quality, docking utility or an
+IVG comparison.
+
+This milestone is zero-oracle and local CPU only. It may not call docking or
+any task oracle, launch Modal, fit or select a model, modify the sealed
+structural representation/realizer or executor, access or alter a live run,
+change any existing T4 artifact, create a scored launch contract, or select
+additional endpoints after inspecting task scores. A route-aware scored search,
+additional endpoint harvesting, corpus expansion and generic-controller fitting
+each require a later scoped contract.
+
 ### Objective and primary claim
 
 - **Scientific problem:** learn an executable stochastic molecular editing process whose committed
