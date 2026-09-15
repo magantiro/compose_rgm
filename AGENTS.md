@@ -408,6 +408,21 @@ not route-distilled qualification, held-out evidence, or authorization to alter
 PMO. A clean committed revision, self-hashed contracts, zero-oracle preflight
 and immutable launch receipts are required before each wave.
 
+The first delta-0.6 zero-oracle preflight stopped before launch and before
+any oracle call because it executed every historical Dynamic-v0 cold-start
+batch twice and required byte-identical batch identities. The frozen proposer
+has always bounded each batch by 45 seconds as well as by attempts and
+candidates, so wall-clock scheduling can change the number of attempted
+proposals at that boundary without changing the scientific controller. Preserve
+that failed preflight as a negative artifact. A bounded preflight-v2 repair may
+remove only the invalid second execution and batch-identity comparison. It must
+retain the historical 45-second proposal bound and every scientific setting,
+execute one cold-start batch for each of the same 15 cells, verify nonempty
+attempt ledgers and exact replay of every emitted candidate, make zero oracle
+calls, and seal a new contract/preflight lineage before launching. No scored
+unit has started, and this repair does not authorize a controller, seed,
+threshold, support, budget, stopping, docking or PMO change.
+
 **Scoped PMO route-distillation export and cross-benchmark transfer preparation,
 2026-09-14:** the user explicitly authorized a bounded, zero-oracle revision that
 exports generic route supervision from the locked PMO development artifacts and

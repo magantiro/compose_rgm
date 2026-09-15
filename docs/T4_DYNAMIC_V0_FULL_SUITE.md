@@ -41,3 +41,18 @@ The run records the sealed contract, zero-oracle preflight, launch receipt, ever
 candidate lock and charged query receipt, per-call best-so-far curve, round summary,
 checkpoint including random state, failures, and final cell outcome. Live reporting
 uses the durable artifacts rather than worker log inference.
+
+## Zero-oracle preflight revision
+
+The first remote preflight failed before launch and made zero oracle calls. It
+ran each cold-start proposal batch twice and required identical batch hashes.
+That assertion was not valid for the frozen controller because a batch stops at
+the first of 16 candidates, 128 attempts or 45 seconds of proposal work. Two
+executions can therefore stop after different attempted-proposal counts at the
+wall-clock boundary while using the same controller and random seed.
+
+Preflight v2 preserves that failure and the historical 45-second bound. It
+executes one cold-start batch per cell, requires a nonempty attempt ledger, and
+exactly recompiles and replays every emitted candidate. It also verifies the
+sealed empty route bank, controller identity, input hashes and zero-oracle
+boundary. It does not change any scored-run setting.

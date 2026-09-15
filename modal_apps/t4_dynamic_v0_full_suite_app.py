@@ -8,21 +8,27 @@ from modal_apps.genmol_t4_opt_app import ARTIFACT_ROOT, REMOTE_ROOT, ROOT, _dock
 from modal_apps.genmol_t4_opt_app import image as base_image
 from modal_apps.run_process_v2_p50_app import _validate_remote_revision
 
-CONTRACT = "configs/t4_dynamic_v0_full_suite_delta06.json"
-PREFLIGHT = "diagnostics/t4_dynamic_v0_full_suite_delta06/preflight.json"
+CONTRACT = "configs/t4_dynamic_v0_full_suite_delta06_v2.json"
+PREFLIGHT = "diagnostics/t4_dynamic_v0_full_suite_delta06/preflight_v2.json"
 APP_PATH = "modal_apps/t4_dynamic_v0_full_suite_app.py"
 APP_NAME = "compose-t4-dynamic-v0-full-suite-delta06"
 VOLUME_NAME = "compose-t4-dynamic-v0-full-suite"
 
 manifest = json.loads((ROOT / CONTRACT).read_text())["payload"]
-image = base_image.add_local_file(ROOT / APP_PATH, str(REMOTE_ROOT / APP_PATH), copy=True)
+image = base_image.add_local_file(
+    ROOT / APP_PATH, str(REMOTE_ROOT / APP_PATH), copy=True
+)
 already_serialized = {"modal_apps/genmol_t4_opt_app.py"}
 for relative in manifest["inputs"]:
     if relative.startswith(("src/", "configs/")) or relative in already_serialized:
         continue
-    image = image.add_local_file(ROOT / relative, str(REMOTE_ROOT / relative), copy=True)
+    image = image.add_local_file(
+        ROOT / relative, str(REMOTE_ROOT / relative), copy=True
+    )
 if (ROOT / PREFLIGHT).exists():
-    image = image.add_local_file(ROOT / PREFLIGHT, str(REMOTE_ROOT / PREFLIGHT), copy=True)
+    image = image.add_local_file(
+        ROOT / PREFLIGHT, str(REMOTE_ROOT / PREFLIGHT), copy=True
+    )
 
 artifact_volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
 app = modal.App(APP_NAME)
@@ -39,7 +45,9 @@ def _validate_task(task):
     from compose_v4.control.docking_value import identity
     from compose_v4.experiments.continuation_profile import verify_file
 
-    base = {key: value for key, value in task.items() if key not in ("run_id", "unit_id")}
+    base = {
+        key: value for key, value in task.items() if key not in ("run_id", "unit_id")
+    }
     if identity(base) != task["run_id"]:
         raise ValueError("Dynamic-v0 launch identity changed")
     _validate_remote_revision(task["image_revision"])

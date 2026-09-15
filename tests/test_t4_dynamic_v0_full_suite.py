@@ -1,6 +1,8 @@
+import importlib.util
 import json
 from dataclasses import asdict
 from pathlib import Path
+from types import SimpleNamespace
 
 from compose_v4.control.dynamic_program_synthesis import ONLINE_COMPOSITION_PROBABILITY
 from compose_v4.experiments import t4_frozen_program_benchmark as benchmark
@@ -11,6 +13,16 @@ from compose_v4.experiments.t4_dynamic_v0_full_suite import (
 from compose_v4.experiments.t4_matched_pilot import unseal
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _tool_module():
+    spec = importlib.util.spec_from_file_location(
+        "t4_dynamic_v0_full_suite_tool", ROOT / "tools/t4_dynamic_v0_full_suite.py"
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def test_dynamic_v0_configuration_is_the_historical_route_free_recipe():
@@ -60,3 +72,50 @@ def test_empty_library_literal_has_no_program_rows(tmp_path):
     path = tmp_path / "empty_library.json"
     path.write_text("[]\n")
     assert json.loads(path.read_text()) == []
+
+
+def test_preflight_executes_each_wall_clock_bounded_batch_once(monkeypatch, tmp_path):
+    tool = _tool_module()
+    cells = {f"cell_{index}": {"source_state": {}} for index in range(15)}
+    units = [
+        {
+            "unit_id": f"cell_{index}_r0",
+            "cell": f"cell_{index}",
+            "target": "target",
+            "source_idx": index,
+            "original_seed": "C",
+            "oracle_protocol": f"protocol-{index}",
+        }
+        for index in range(15)
+    ]
+    contract = {"cells": cells, "units": units}
+    calls = []
+
+    def fake_batch(source, entries, config, **kwargs):
+        del source, entries, config, kwargs
+        calls.append(len(calls))
+        return {
+            "attempts": [{"attempt": len(calls)}],
+            "candidates": [],
+            "batch_id": f"batch-{len(calls)}",
+        }
+
+    import compose_v4.control.dynamic_program_synthesis as synthesis
+
+    monkeypatch.setattr(tool, "ROOT", tmp_path)
+    monkeypatch.setattr(tool, "load_contract", lambda root: contract)
+    monkeypatch.setattr(tool, "decode_state", lambda payload: object())
+    monkeypatch.setattr(
+        tool,
+        "configured",
+        lambda contract, unit: SimpleNamespace(max_primitives=32, max_blocks=8),
+    )
+    monkeypatch.setattr(tool, "sha256_file", lambda path: "contract-sha")
+    monkeypatch.setattr(synthesis, "initial_dynamic_program_batch", fake_batch)
+
+    result = tool.build_preflight(code_revision="revision")
+
+    assert result["passed"] is True
+    assert result["schema_version"] == "t4_dynamic_v0_full_suite_preflight_v2"
+    assert result["new_oracle_calls"] == 0
+    assert len(calls) == 15

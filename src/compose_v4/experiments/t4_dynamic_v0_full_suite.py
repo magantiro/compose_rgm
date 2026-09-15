@@ -13,12 +13,20 @@ from compose_v4.control.dynamic_program_synthesis import (
     initial_dynamic_program_batch,
 )
 from compose_v4.experiments import t4_frozen_program_benchmark as benchmark
-from compose_v4.experiments.continuation_profile import canonical_bytes, sha256_file, verify_file
+from compose_v4.experiments.continuation_profile import (
+    canonical_bytes,
+    sha256_file,
+    verify_file,
+)
 from compose_v4.experiments.t4_matched_pilot import unseal
 
 KIND = "t4_dynamic_v0_full_suite_delta06"
-CONTRACT = "configs/t4_dynamic_v0_full_suite_delta06.json"
-PREFLIGHT = "diagnostics/t4_dynamic_v0_full_suite_delta06/preflight.json"
+CONTRACT_V1 = "configs/t4_dynamic_v0_full_suite_delta06_v1.json"
+CONTRACT = "configs/t4_dynamic_v0_full_suite_delta06_v2.json"
+PREFLIGHT_FAILURE_V1 = (
+    "diagnostics/t4_dynamic_v0_full_suite_delta06/prequery_failure_0001.json"
+)
+PREFLIGHT = "diagnostics/t4_dynamic_v0_full_suite_delta06/preflight_v2.json"
 APP = "modal_apps/t4_dynamic_v0_full_suite_app.py"
 APP_NAME = "compose-t4-dynamic-v0-full-suite-delta06"
 EMPTY_LIBRARY = "diagnostics/t4_dynamic_v0_full_suite_delta06/empty_library.json"
@@ -46,7 +54,7 @@ def load_contract(root: Path) -> dict:
     contract = unseal(root / CONTRACT)
     units = contract.get("units", ())
     if (
-        contract.get("schema_version") != "t4_dynamic_v0_full_suite_delta06_v1"
+        contract.get("schema_version") != "t4_dynamic_v0_full_suite_delta06_v2"
         or contract.get("delta") != 0.6
         or contract.get("search_replicates") != 1
         or contract.get("calls_per_unit") != 1000
@@ -64,7 +72,17 @@ def load_contract(root: Path) -> dict:
         or {row.get("docking_seed") for row in units} != {1701}
         or sum(row.get("budget", 0) for row in units) != 15000
     ):
-        raise ValueError("Dynamic-v0 delta-0.6 contract differs from the authorized scope")
+        raise ValueError(
+            "Dynamic-v0 delta-0.6 contract differs from the authorized scope"
+        )
+    repair = contract.get("preflight_repair", {})
+    if (
+        repair.get("source_contract") != CONTRACT_V1
+        or repair.get("failure_artifact") != PREFLIGHT_FAILURE_V1
+        or repair.get("scientific_controller_changed") is not False
+        or repair.get("oracle_calls_before_repair") != 0
+    ):
+        raise ValueError("Dynamic-v0 preflight-repair lineage changed")
     if json.loads((root / EMPTY_LIBRARY).read_text()) != []:
         raise ValueError("Dynamic-v0 initial program bank must be empty")
     for path, digest in contract["inputs"].items():
@@ -123,7 +141,9 @@ def run_unit(task: dict, root: Path, artifacts: Path, volume, validate_revision,
     if task.get("unit_id") not in {row["unit_id"] for row in contract["units"]}:
         raise ValueError("unit is outside the frozen 15-cell Dynamic-v0 census")
     with dynamic_v0_namespace():
-        return benchmark.run_unit(task, root, artifacts, volume, validate_revision, dock)
+        return benchmark.run_unit(
+            task, root, artifacts, volume, validate_revision, dock
+        )
 
 
 def material_hashes(root: Path) -> dict[str, str]:

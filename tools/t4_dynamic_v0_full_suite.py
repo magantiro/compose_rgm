@@ -11,16 +11,21 @@ from pathlib import Path
 
 from compose_v4.control.docking_value import identity
 from compose_v4.control.edit_program import EditProgram
-from compose_v4.control.edit_program_graph import compile_program_graph, execute_program_graph
+from compose_v4.control.edit_program_graph import (
+    compile_program_graph,
+    execute_program_graph,
+)
 from compose_v4.experiments import t4_frozen_program_benchmark as benchmark
 from compose_v4.experiments.continuation_profile import publish_json, sha256_file
 from compose_v4.experiments.t4_dynamic_v0_full_suite import (
     APP,
     APP_NAME,
     CONTRACT,
+    CONTRACT_V1,
     EMPTY_LIBRARY,
     KIND,
     PREFLIGHT,
+    PREFLIGHT_FAILURE_V1,
     SOURCE_CONTRACT,
     configured,
     load_contract,
@@ -45,6 +50,9 @@ MATERIAL = (
     "modal_apps/genmol_t4_opt_app.py",
     APP,
     "tools/t4_dynamic_v0_full_suite.py",
+)
+SOURCE_CONTRACT_V1_SHA256 = (
+    "6549602d2da13162e1691a1583228cdd05d5bf9e0c314391ea1f96a98031a3d4"
 )
 
 
@@ -71,10 +79,17 @@ def _ivg_reported(census: dict, delta: float) -> dict:
 
 
 def prepare():
-    if (ROOT / CONTRACT).exists() or (ROOT / EMPTY_LIBRARY).exists():
+    if (
+        (ROOT / CONTRACT_V1).exists()
+        or (ROOT / CONTRACT).exists()
+        or (ROOT / EMPTY_LIBRARY).exists()
+    ):
         raise ValueError("Dynamic-v0 delta-0.6 inputs already exist; preserve them")
     source = unseal(ROOT / SOURCE_CONTRACT)
-    if source["complete_route_ablation"]["dynamic_only"]["source_library_rows_loaded"] != 0:
+    if (
+        source["complete_route_ablation"]["dynamic_only"]["source_library_rows_loaded"]
+        != 0
+    ):
         raise ValueError("source Dynamic-v0 contract did not use an empty initial bank")
     (ROOT / EMPTY_LIBRARY).parent.mkdir(parents=True, exist_ok=True)
     (ROOT / EMPTY_LIBRARY).write_text("[]\n")
@@ -146,6 +161,78 @@ def prepare():
     print(json.dumps({"status": "prepared", "cells": 15, "units": 15, "calls": 15000}))
 
 
+def repair_preflight_contract():
+    """Seal the one-time zero-oracle preflight repair without changing science."""
+
+    source_path = ROOT / CONTRACT_V1
+    target_path = ROOT / CONTRACT
+    failure_path = ROOT / PREFLIGHT_FAILURE_V1
+    if (
+        target_path.exists()
+        or failure_path.exists()
+        or (ROOT / PREFLIGHT).exists()
+        or LAUNCH.exists()
+    ):
+        raise ValueError(
+            "Dynamic-v0 preflight repair already exists or launch has started"
+        )
+    if sha256_file(source_path) != SOURCE_CONTRACT_V1_SHA256:
+        raise ValueError("Dynamic-v0 v1 contract identity changed")
+    source = unseal(source_path)
+    if source.get("schema_version") != "t4_dynamic_v0_full_suite_delta06_v1":
+        raise ValueError("Dynamic-v0 v1 schema changed")
+
+    failure = {
+        "schema_version": "t4_dynamic_v0_full_suite_prequery_failure_v1",
+        "status": "failed_zero_oracle_preflight",
+        "phase": "structural_preflight_v1",
+        "source_contract": CONTRACT_V1,
+        "source_contract_sha256": SOURCE_CONTRACT_V1_SHA256,
+        "modal_app_id": "ap-tMm3KtHs5HMDRpGwggbioF",
+        "code_revision": "cef4fcd91f147d20043b6bc68a52a0c897b3c238",
+        "error_type": "ValueError",
+        "error": "Dynamic-v0 cold start is nondeterministic: 5ht1b_1_r0",
+        "root_cause": (
+            "preflight required byte-identical batches across two executions even though "
+            "the frozen controller stops proposal batches at a 45-second wall-clock boundary"
+        ),
+        "scientific_controller_changed": False,
+        "new_oracle_calls": 0,
+        "query_reservations": [],
+    }
+    seal(failure_path, failure)
+
+    contract = deepcopy(source)
+    contract["schema_version"] = "t4_dynamic_v0_full_suite_delta06_v2"
+    contract["preflight_repair"] = {
+        "source_contract": CONTRACT_V1,
+        "source_contract_sha256": SOURCE_CONTRACT_V1_SHA256,
+        "failure_artifact": PREFLIGHT_FAILURE_V1,
+        "failure_artifact_sha256": sha256_file(failure_path),
+        "removed_assertion": "second wall-clock-bounded execution must have identical batch_id",
+        "replacement_gate": "one batch per cell with nonempty attempts and exact candidate replay",
+        "scientific_controller_changed": False,
+        "oracle_calls_before_repair": 0,
+    }
+    contract["inputs"] = {path: sha256_file(ROOT / path) for path in MATERIAL}
+    contract["inputs"][EMPTY_LIBRARY] = sha256_file(ROOT / EMPTY_LIBRARY)
+    contract["inputs"][CONTRACT_V1] = SOURCE_CONTRACT_V1_SHA256
+    contract["inputs"][PREFLIGHT_FAILURE_V1] = sha256_file(failure_path)
+    seal(target_path, contract)
+    load_contract(ROOT)
+    print(
+        json.dumps(
+            {
+                "status": "preflight_repair_sealed",
+                "contract": CONTRACT,
+                "contract_sha256": sha256_file(target_path),
+                "failure": PREFLIGHT_FAILURE_V1,
+                "new_oracle_calls": 0,
+            }
+        )
+    )
+
+
 def build_preflight(*, code_revision: str) -> dict:
     contract = load_contract(ROOT)
     results = []
@@ -155,20 +242,25 @@ def build_preflight(*, code_revision: str) -> dict:
         config = configured(contract, unit)
         kwargs = {
             "source_group": identity(
-                {"target": unit["target"], "source_idx": unit["source_idx"], "seed": unit["original_seed"]}
+                {
+                    "target": unit["target"],
+                    "source_idx": unit["source_idx"],
+                    "seed": unit["original_seed"],
+                }
             ),
             "oracle_protocol": unit["oracle_protocol"],
-            "eligibility": benchmark.strict_endpoint_scorer(unit["original_seed"], delta=0.6),
+            "eligibility": benchmark.strict_endpoint_scorer(
+                unit["original_seed"], delta=0.6
+            ),
         }
-        first = __import__(
+        batch = __import__(
             "compose_v4.control.dynamic_program_synthesis", fromlist=["x"]
         ).initial_dynamic_program_batch(source, (), config, **kwargs)
-        second = __import__(
-            "compose_v4.control.dynamic_program_synthesis", fromlist=["x"]
-        ).initial_dynamic_program_batch(source, (), config, **kwargs)
-        if first["batch_id"] != second["batch_id"]:
-            raise ValueError(f"Dynamic-v0 cold start is nondeterministic: {unit['unit_id']}")
-        for candidate in first["candidates"]:
+        if not batch["attempts"]:
+            raise ValueError(
+                f"Dynamic-v0 cold start made no attempts: {unit['unit_id']}"
+            )
+        for candidate in batch["candidates"]:
             program = EditProgram.from_payload(candidate["program"])
             _, replay = execute_program_graph(
                 decode_state(candidate["source_state"]),
@@ -177,19 +269,22 @@ def build_preflight(*, code_revision: str) -> dict:
                 max_primitives=config.max_primitives,
                 max_blocks=config.max_blocks,
             )
-            if replay != candidate["trace"] or replay["endpoint"] != candidate["endpoint"]:
+            if (
+                replay != candidate["trace"]
+                or replay["endpoint"] != candidate["endpoint"]
+            ):
                 raise ValueError(f"Dynamic-v0 replay changed: {unit['unit_id']}")
         results.append(
             {
                 "unit": unit["unit_id"],
-                "candidates": len(first["candidates"]),
-                "attempts": len(first["attempts"]),
-                "batch_id": first["batch_id"],
+                "candidates": len(batch["candidates"]),
+                "attempts": len(batch["attempts"]),
+                "batch_id": batch["batch_id"],
             }
         )
     return {
-        "schema_version": "t4_dynamic_v0_full_suite_preflight_v1",
-        "passed": len(results) == 15,
+        "schema_version": "t4_dynamic_v0_full_suite_preflight_v2",
+        "passed": len(results) == 15 and all(row["attempts"] > 0 for row in results),
         "contract_sha256": sha256_file(ROOT / CONTRACT),
         "units": results,
         "code_revision": code_revision,
@@ -254,7 +349,11 @@ def launch():
             "automatic_retries": 0,
         },
     )
-    print(json.dumps({"status": "launched", "workers": len(calls), "call_ids": calls}, indent=2))
+    print(
+        json.dumps(
+            {"status": "launched", "workers": len(calls), "call_ids": calls}, indent=2
+        )
+    )
 
 
 def _remote_json(volume, path: str) -> dict:
@@ -280,9 +379,18 @@ def status():
             names = {row.path.rsplit("/", 1)[-1] for row in volume.listdir(folder)}
         except modal.exception.NotFoundError:
             names = set()
-        name = next((item for item in ("result.json", "failure.json", "progress.json") if item in names), None)
+        name = next(
+            (
+                item
+                for item in ("result.json", "failure.json", "progress.json")
+                if item in names
+            ),
+            None,
+        )
         value = {} if name is None else _remote_json(volume, f"{folder}/{name}")
-        calls = value.get("oracle_calls", value.get("queries_total", value.get("queries", 0)))
+        calls = value.get(
+            "oracle_calls", value.get("queries_total", value.get("queries", 0))
+        )
         best = value.get("best_score")
         if best is None and value.get("champion"):
             best = value["champion"]["score"]
@@ -304,9 +412,18 @@ def status():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("prepare", "remote-preflight", "launch", "status"))
+    parser.add_argument(
+        "action",
+        choices=("prepare", "repair-preflight", "remote-preflight", "launch", "status"),
+    )
     action = parser.parse_args().action
-    {"prepare": prepare, "remote-preflight": remote_preflight, "launch": launch, "status": status}[action]()
+    {
+        "prepare": prepare,
+        "repair-preflight": repair_preflight_contract,
+        "remote-preflight": remote_preflight,
+        "launch": launch,
+        "status": status,
+    }[action]()
 
 
 if __name__ == "__main__":
