@@ -11,10 +11,10 @@ import modal
 from modal_apps.run_process_v2_p50_app import REMOTE_ROOT, ROOT, _validate_remote_revision
 from modal_apps.run_process_v2_p50_app import image as base_image
 
-APP_NAME = "compose-t4-structural-subgoal-realizer"
+APP_NAME = "compose-t4-structural-subgoal-realizer-v2"
 VOLUME_NAME = "compose-t4-route-distilled-artifacts"
 ARTIFACT_ROOT = Path("/artifacts")
-OUTPUT_ROOT = ARTIFACT_ROOT / "t4_structural_subgoal_realizer" / "attempt_1"
+OUTPUT_ROOT = ARTIFACT_ROOT / "t4_structural_subgoal_realizer" / "attempt_2"
 MATERIAL_FILES = (
     "AGENTS.md",
     "docs/T4_STRUCTURAL_SUBGOAL_POLICY.md",
@@ -79,21 +79,27 @@ def worker(task):
     state_lock = threading.Lock()
     progress_state = {
         "payload": {
-            "schema_version": "t4_structural_subgoal_realizer_progress_v1",
+            "schema_version": "t4_structural_subgoal_realizer_progress_v2",
             "event": "structural_subgoal_realizer_heartbeat",
             "source_group": task["source_group"],
             "phase": "loading_inputs",
             "current_program_id": None,
+            "current_subgoal_index": None,
+            "work_units_completed": 0,
+            "work_units_total": None,
             "routes_completed": 0,
             "routes_total": None,
+            "subgoals_audited": 0,
+            "subgoals_total": None,
             "elapsed_seconds": 0.0,
-            "completed_routes_per_second": 0.0,
+            "completed_work_units_per_second": 0.0,
             "search_expansions": 0,
             "action_attempts": 0,
             "expansions_per_second": 0.0,
             "current_route": {},
-            "status_counts": {},
-            "estimated_remaining_seconds_from_completed_routes": None,
+            "route_status_counts": {},
+            "subgoal_status_counts": {},
+            "estimated_remaining_seconds_from_completed_work": None,
             "estimated_remaining_seconds_to_configured_search_limit": None,
             "eta_is_operational_not_a_stopping_rule": True,
             "at_utc": datetime.now(timezone.utc).isoformat(),
@@ -122,7 +128,7 @@ def worker(task):
                 delta = max(0.0, now - progress_state["at"])
             payload["elapsed_seconds"] = float(payload.get("elapsed_seconds", 0.0)) + delta
             for field in (
-                "estimated_remaining_seconds_from_completed_routes",
+                "estimated_remaining_seconds_from_completed_work",
                 "estimated_remaining_seconds_to_configured_search_limit",
             ):
                 if payload.get(field) is not None:

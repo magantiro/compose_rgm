@@ -48,9 +48,7 @@ class StructuralSubgoal:
             raise ValueError("a structural subgoal needs at least one source role")
         if len(self.environments) != n_input or len(self.target_atoms) != n_input:
             raise ValueError("structural subgoal input dimensions disagree")
-        if len(self.input_bonds) != n_input or any(
-            len(row) != n_input for row in self.input_bonds
-        ):
+        if len(self.input_bonds) != n_input or any(len(row) != n_input for row in self.input_bonds):
             raise ValueError("structural subgoal input bond matrix is malformed")
         if len(self.target_bonds) != n_target or any(
             len(row) != n_target for row in self.target_bonds
@@ -58,9 +56,7 @@ class StructuralSubgoal:
             raise ValueError("structural subgoal target bond matrix is malformed")
         for matrix in (self.input_bonds, self.target_bonds):
             if any(
-                matrix[i][j] != matrix[j][i]
-                for i in range(len(matrix))
-                for j in range(len(matrix))
+                matrix[i][j] != matrix[j][i] for i in range(len(matrix)) for j in range(len(matrix))
             ):
                 raise ValueError("structural subgoal bond matrix must be symmetric")
             if any(matrix[i][i] for i in range(len(matrix))):
@@ -68,9 +64,7 @@ class StructuralSubgoal:
         if (
             all(
                 before == after
-                for before, after in zip(
-                    self.input_atoms, self.target_atoms, strict=True
-                )
+                for before, after in zip(self.input_atoms, self.target_atoms, strict=True)
             )
             and not self.output_atoms
             and self.input_bonds == self.target_bonds
@@ -135,9 +129,7 @@ class StructuralGoal:
             "subgoals",
         }:
             raise ValueError("unexpected structural-goal schema or fields")
-        return cls(
-            tuple(StructuralSubgoal.from_payload(row) for row in payload["subgoals"])
-        )
+        return cls(tuple(StructuralSubgoal.from_payload(row) for row in payload["subgoals"]))
 
 
 @dataclass(frozen=True)
@@ -196,17 +188,11 @@ def _extract_component(
     primitive_indices: tuple[int, ...],
 ) -> tuple[StructuralSubgoal, tuple[int, ...], tuple[int, ...]]:
     initial_token_slots: dict[Token, int] = structure["initial_token_slots"]
-    final_token_slots = {
-        token: slot for slot, token in structure["final_active_slots"].items()
-    }
-    relevant = set().union(
-        *(structure["footprints"][index] for index in primitive_indices)
-    )
+    final_token_slots = {token: slot for slot, token in structure["final_active_slots"].items()}
+    relevant = set().union(*(structure["footprints"][index] for index in primitive_indices))
     source_tokens = {token for token in relevant if token[0] == "source"}
     created_tokens = {
-        token
-        for token in relevant
-        if token[0] == "created" and token in final_token_slots
+        token for token in relevant if token[0] == "created" and token in final_token_slots
     }
 
     initial_slot_tokens = {slot: token for token, slot in initial_token_slots.items()}
@@ -283,15 +269,13 @@ def _extract_component(
     subgoal = StructuralSubgoal(
         input_atoms=tuple(atom_signature(source, slot) for slot in input_slots),
         input_bonds=tuple(
-            tuple(int(source.bonds[left, right]) for right in input_slots)
-            for left in input_slots
+            tuple(int(source.bonds[left, right]) for right in input_slots) for left in input_slots
         ),
         environments=tuple(environment(source, slot) for slot in input_slots),
         target_atoms=tuple(_signature(target, slot) for slot in target_input_slots),
         output_atoms=tuple(atom_signature(target, slot) for slot in output_slots),
         target_bonds=tuple(
-            tuple(_bond(target, left, right) for right in target_slots)
-            for left in target_slots
+            tuple(_bond(target, left, right) for right in target_slots) for left in target_slots
         ),
     )
     # Target output slots are returned only to support exact training-data
@@ -314,9 +298,7 @@ def extract_structural_goal(
     )
     regions = dependency_region_program(states, actions, config)
     if not regions["complete_representation_supported"]:
-        raise ValueError(
-            f"route exceeds structural-goal support: {regions['abstention_reason']}"
-        )
+        raise ValueError(f"route exceeds structural-goal support: {regions['abstention_reason']}")
     structure = trace_structure(states, actions)
     rows = [
         _extract_component(
@@ -347,18 +329,10 @@ def attachment_bindings(
     signatures = {slot: atom_signature(graph, slot) for slot in real}
     contexts = {slot: environment(graph, slot) for slot in real}
     candidates = [
-        [
-            slot
-            for slot in real
-            if signatures[slot] == signature and contexts[slot] == context
-        ]
-        for signature, context in zip(
-            subgoal.input_atoms, subgoal.environments, strict=True
-        )
+        [slot for slot in real if signatures[slot] == signature and contexts[slot] == context]
+        for signature, context in zip(subgoal.input_atoms, subgoal.environments, strict=True)
     ]
-    order = sorted(
-        range(len(candidates)), key=lambda index: (len(candidates[index]), index)
-    )
+    order = sorted(range(len(candidates)), key=lambda index: (len(candidates[index]), index))
     assigned: dict[int, int] = {}
     rows: list[tuple[int, ...]] = []
     visits = 0
@@ -378,8 +352,7 @@ def attachment_bindings(
             if slot in assigned.values():
                 continue
             if any(
-                int(graph.bonds[slot, other_slot])
-                != subgoal.input_bonds[index][other_index]
+                int(graph.bonds[slot, other_slot]) != subgoal.input_bonds[index][other_index]
                 for other_index, other_slot in assigned.items()
             ):
                 continue
@@ -397,20 +370,21 @@ def instantiate_goal(
     source: MolecularGraph,
     goal: StructuralGoal,
     bindings: tuple[tuple[int, ...], ...],
+    *,
+    prefer_initially_empty_output_slots: bool = False,
 ) -> tuple[MolecularGraph, dict]:
     """Construct the complete bound target graph without a primitive teacher trace."""
 
     if len(bindings) != len(goal.subgoals):
         raise ValueError("goal and binding counts disagree")
+    initially_empty = tuple(int(slot) for slot in np.flatnonzero(source.atom_types == NULL_IDX))
     atom_types = source.atom_types.copy()
     charges = source.formal_charges.copy()
     hydrogens = source.implicit_h_counts.copy()
     bonds = source.bonds.copy()
     targets: dict[int, AtomSignature | None] = {}
     for subgoal, assignment in zip(goal.subgoals, bindings, strict=True):
-        if len(assignment) != len(subgoal.input_atoms) or len(set(assignment)) != len(
-            assignment
-        ):
+        if len(assignment) != len(subgoal.input_atoms) or len(set(assignment)) != len(assignment):
             raise ValueError("subgoal binding is malformed")
         for slot, before, after in zip(
             assignment, subgoal.input_atoms, subgoal.target_atoms, strict=True
@@ -418,9 +392,7 @@ def instantiate_goal(
             if atom_signature(source, slot) != before:
                 raise ValueError("subgoal binding violates its source atom role")
             if slot in targets and targets[slot] != after:
-                raise ValueError(
-                    "overlapping subgoals request inconsistent atom targets"
-                )
+                raise ValueError("overlapping subgoals request inconsistent atom targets")
             targets[slot] = after
 
     for slot, target in targets.items():
@@ -434,14 +406,18 @@ def instantiate_goal(
     allocated_output_slots: set[int] = set()
     output_slots: list[tuple[int, ...]] = []
     for subgoal in goal.subgoals:
-        empty = [
+        available = [
             int(slot)
             for slot in np.flatnonzero(atom_types == NULL_IDX)
             if slot not in allocated_output_slots
         ]
-        if len(empty) < len(subgoal.output_atoms):
+        if prefer_initially_empty_output_slots:
+            initially_available = [slot for slot in initially_empty if slot in available]
+            newly_freed = [slot for slot in available if slot not in initially_empty]
+            available = [*initially_available, *newly_freed]
+        if len(available) < len(subgoal.output_atoms):
             raise ValueError("structural goal exceeds persistent-slot capacity")
-        selected = tuple(empty[: len(subgoal.output_atoms)])
+        selected = tuple(available[: len(subgoal.output_atoms)])
         output_slots.append(selected)
         allocated_output_slots.update(selected)
         for slot, signature in zip(selected, subgoal.output_atoms, strict=True):
@@ -451,9 +427,7 @@ def instantiate_goal(
         if target is not None:
             atom_types[slot], charges[slot], hydrogens[slot] = target[:3]
 
-    for subgoal, assignment, outputs in zip(
-        goal.subgoals, bindings, output_slots, strict=True
-    ):
+    for subgoal, assignment, outputs in zip(goal.subgoals, bindings, output_slots, strict=True):
         local_slots = (*assignment, *outputs)
         local_targets = (*subgoal.target_atoms, *subgoal.output_atoms)
         for left_index, left in enumerate(local_slots):
@@ -473,9 +447,7 @@ def instantiate_goal(
                 bonds[left, right] = bonds[right, left] = order
 
     product = MolecularGraph(atom_types, charges, hydrogens, bonds)
-    for subgoal, assignment, outputs in zip(
-        goal.subgoals, bindings, output_slots, strict=True
-    ):
+    for subgoal, assignment, outputs in zip(goal.subgoals, bindings, output_slots, strict=True):
         for slot, expected in zip(
             (*assignment, *outputs),
             (*subgoal.target_atoms, *subgoal.output_atoms),
@@ -492,6 +464,11 @@ def instantiate_goal(
         "goal_id": goal.goal_id,
         "bindings": [list(row) for row in bindings],
         "output_slots": [list(row) for row in output_slots],
+        "output_slot_policy": (
+            "initially_empty_then_freed"
+            if prefer_initially_empty_output_slots
+            else "lowest_available_after_deletion"
+        ),
         "endpoint": canonical_state_key(product),
         "primitive_teacher_actions_used": 0,
     }

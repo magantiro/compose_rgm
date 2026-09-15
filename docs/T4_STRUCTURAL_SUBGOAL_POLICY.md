@@ -111,6 +111,43 @@ failure receipts use the same task identity.
 The estimate is operational telemetry only. It does not authorize early
 stopping, alter the search limit, or turn incomplete work into a result.
 
+## Conditional-realizer revision after attempt 1
+
+The first conditional-realizer implementation converted each address-free
+target into one fixed persistent-slot assignment. Its partial result had one
+FA7 abstention, while a BRAF route had expanded thousands of states without
+finishing. Offline zero-oracle diagnosis showed that teacher-equivalent
+molecules could retain a nonzero slot-level distance and that correct actions
+could be excluded from the fixed-slot target fiber. Attempt 1 remains immutable
+and is a failed gate regardless of its remaining worker outcome.
+
+The next revision carries compiler state as the exact molecular graph plus a
+partial logical-output-role-to-slot mapping. Physical output slots use a single
+canonical first-empty allocation. Logical mappings are quotiented by exact
+automorphisms of the bound target patch, with bound source roles fixed and atom
+and bond attributes preserved. A route succeeds only when both the canonical
+molecular endpoint and its complete logical role obligations match. The
+teacher primitive trace is never available to this search.
+
+The gate reports two levels separately:
+
+- complete-route realization coverage and exact endpoint precision over all 77
+  routes;
+- target coverage and precision for all 147 subgoal instances inside their
+  coordinated complete-goal endpoints.
+
+The second metric is deliberately not called isolated-subgoal execution.
+Dependency regions may share retained boundary roles and jointly determine
+their final atom degree, so executing one region alone can define a different
+target. The aggregate also reports the 137 unique serialized subgoal IDs so
+repeated instances do not masquerade as independent support.
+
+Compiler cost is reported per route and as median, 95th percentile and maximum
+wall time, expansions, action attempts and realized primitive count. The
+search remains bounded to 12 retained children per expansion. Passing the
+corpus gate establishes empirical coverage on the declared 77-route corpus,
+not complete search support for every representable structural goal.
+
 ## Parallel execution amendment, 2026-09-15
 
 The user authorized immediate Modal parallelization of this zero-oracle work.

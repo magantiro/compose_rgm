@@ -17,8 +17,19 @@ from compose_v4.experiments.continuation_profile import publish_json, sha256_fil
 from compose_v4.rewrite.trace_shard import decode_state
 from tools.t4_structural_subgoal_audit import LIBRARY, ROOT, teacher_traces
 
-RESULT_SCHEMA = "t4_structural_subgoal_realizer_source_audit_v1"
-PROGRESS_SCHEMA = "t4_structural_subgoal_realizer_progress_v1"
+RESULT_SCHEMA = "t4_structural_subgoal_realizer_source_audit_v2"
+PROGRESS_SCHEMA = "t4_structural_subgoal_realizer_progress_v2"
+
+
+def _percentile(values: list[float], quantile: float) -> float:
+    ordered = sorted(float(value) for value in values)
+    if not ordered:
+        return 0.0
+    position = (len(ordered) - 1) * quantile
+    lower = int(position)
+    upper = min(lower + 1, len(ordered) - 1)
+    fraction = position - lower
+    return ordered[lower] * (1 - fraction) + ordered[upper] * fraction
 
 
 def run_source(
@@ -43,18 +54,31 @@ def run_source(
     selected = [row for row in teacher_traces() if row["source_group"] == source_group]
     if not selected:
         raise ValueError(f"unknown or empty T4 source group: {source_group}")
+    prepared = []
+    for teacher in selected:
+        trace = teacher["trace"]
+        states, actions = tuple(trace["states"]), tuple(trace["actions"])
+        source = decode_state(states[0])
+        goal, teacher_bindings, regions = extract_structural_goal(states, actions)
+        prepared.append((teacher, source, goal, teacher_bindings, actions, regions))
+    subgoals_total = sum(len(goal.subgoals) for _, _, goal, _, _, _ in prepared)
+    work_total = len(prepared)
     config = RealizerConfig() if config is None else config
     last_heartbeat = float("-inf")
     total_expansions = total_attempts = 0
-    status_counts: Counter[str] = Counter()
+    route_status_counts: Counter[str] = Counter()
+    subgoal_status_counts: Counter[str] = Counter()
 
     def emit(
         *,
         force: bool,
-        completed: int,
+        work_completed: int,
+        routes_completed: int,
+        subgoals_audited: int,
         program_id: str | None,
+        subgoal_index: int | None = None,
         current: dict | None = None,
-        phase: str = "conditional_realization",
+        phase: str = "route_conditional_realization",
     ) -> None:
         nonlocal last_heartbeat
         now = time.monotonic()
@@ -68,33 +92,41 @@ def run_source(
         current_expanded = int(current.get("expanded", 0))
         if current_limit:
             remaining_limit_work = max(0, current_limit - current_expanded)
-            remaining_routes = max(0, len(selected) - completed - 1)
+            remaining_units = max(0, work_total - work_completed - 1)
         else:
             remaining_limit_work = 0
-            remaining_routes = max(0, len(selected) - completed)
-        remaining_limit_work += remaining_routes * config.maximum_expansions
+            remaining_units = max(0, work_total - work_completed)
+        remaining_limit_work += remaining_units * config.maximum_expansions
         expansions_per_second = expanded / elapsed if elapsed > 0 else 0.0
         eta_limit = (
             remaining_limit_work / expansions_per_second if expansions_per_second > 0 else None
         )
-        completed_rate = completed / elapsed if elapsed > 0 else 0.0
-        eta_empirical = (len(selected) - completed) / completed_rate if completed_rate > 0 else None
+        completed_rate = work_completed / elapsed if elapsed > 0 else 0.0
+        eta_empirical = (
+            (work_total - work_completed) / completed_rate if completed_rate > 0 else None
+        )
         payload = {
             "schema_version": PROGRESS_SCHEMA,
             "event": "structural_subgoal_realizer_heartbeat",
             "source_group": source_group,
             "phase": phase,
             "current_program_id": program_id,
-            "routes_completed": completed,
-            "routes_total": len(selected),
+            "current_subgoal_index": subgoal_index,
+            "work_units_completed": work_completed,
+            "work_units_total": work_total,
+            "routes_completed": routes_completed,
+            "routes_total": len(prepared),
+            "subgoals_audited": subgoals_audited,
+            "subgoals_total": subgoals_total,
             "elapsed_seconds": elapsed,
-            "completed_routes_per_second": completed_rate,
+            "completed_work_units_per_second": completed_rate,
             "search_expansions": expanded,
             "action_attempts": attempted,
             "expansions_per_second": expansions_per_second,
             "current_route": current,
-            "status_counts": dict(sorted(status_counts.items())),
-            "estimated_remaining_seconds_from_completed_routes": eta_empirical,
+            "route_status_counts": dict(sorted(route_status_counts.items())),
+            "subgoal_status_counts": dict(sorted(subgoal_status_counts.items())),
+            "estimated_remaining_seconds_from_completed_work": eta_empirical,
             "estimated_remaining_seconds_to_configured_search_limit": eta_limit,
             "eta_is_operational_not_a_stopping_rule": True,
             "at_utc": datetime.now(timezone.utc).isoformat(),
@@ -105,25 +137,45 @@ def run_source(
             print(json.dumps(payload, sort_keys=True), flush=True)
         last_heartbeat = now
 
-    emit(force=True, completed=0, program_id=None, phase="starting")
+    emit(
+        force=True,
+        work_completed=0,
+        routes_completed=0,
+        subgoals_audited=0,
+        program_id=None,
+        phase="starting",
+    )
     route_rows = []
-    for route_index, teacher in enumerate(selected):
-        trace = teacher["trace"]
-        states, actions = tuple(trace["states"]), tuple(trace["actions"])
-        source = decode_state(states[0])
-        goal, teacher_bindings, _ = extract_structural_goal(states, actions)
+    subgoal_rows = []
+    subgoals_audited = 0
+    for route_index, (
+        teacher,
+        source,
+        goal,
+        teacher_bindings,
+        actions,
+        regions,
+    ) in enumerate(prepared):
+        routes_completed = route_index
+        work_completed = route_index
+        route_started = time.monotonic()
 
         def route_progress(
             current: dict,
             *,
-            completed_routes: int = route_index,
+            completed_work: int = work_completed,
+            completed_routes: int = routes_completed,
+            completed_subgoals: int = subgoals_audited,
             program_id: str = teacher["program_id"],
         ) -> None:
             emit(
                 force=False,
-                completed=completed_routes,
+                work_completed=completed_work,
+                routes_completed=completed_routes,
+                subgoals_audited=completed_subgoals,
                 program_id=program_id,
                 current=current,
+                phase="route_conditional_realization",
             )
 
         realized = realize_structural_goal(
@@ -135,7 +187,32 @@ def run_source(
         )
         total_expansions += int(realized["expanded"])
         total_attempts += int(realized["attempted"])
-        status_counts[realized["status"]] += 1
+        route_status_counts[realized["status"]] += 1
+        route_elapsed_seconds = time.monotonic() - route_started
+        subgoal_matches = realized["subgoal_targets_match_within_complete_goal"]
+        if len(subgoal_matches) != len(goal.subgoals):
+            raise AssertionError("realizer returned the wrong number of subgoal results")
+        for subgoal_index, (subgoal, exact) in enumerate(
+            zip(goal.subgoals, subgoal_matches, strict=True)
+        ):
+            subgoal_status = "realized" if realized["status"] == "realized" else "unrealized"
+            subgoal_status_counts[subgoal_status] += 1
+            subgoal_rows.append(
+                {
+                    "program_id": teacher["program_id"],
+                    "teacher_receipt_sha256": teacher["receipt_sha256"],
+                    "parent_goal_id": goal.goal_id,
+                    "subgoal_index": subgoal_index,
+                    "subgoal_id": subgoal.subgoal_id,
+                    "teacher_primitive_indices": list(
+                        regions["components"][subgoal_index]["primitive_indices"]
+                    ),
+                    "realized_within_complete_goal": realized["status"] == "realized",
+                    "target_matches_within_complete_goal": exact,
+                    "primitive_teacher_actions_used": realized["primitive_teacher_actions_used"],
+                }
+            )
+        subgoals_audited += len(goal.subgoals)
         route_rows.append(
             {
                 "program_id": teacher["program_id"],
@@ -153,19 +230,29 @@ def run_source(
                 "realized_actions": realized["actions"],
                 "realized_states": realized["states"],
                 "primitive_teacher_actions_used": realized["primitive_teacher_actions_used"],
+                "output_role_slots": realized.get("output_role_slots", []),
+                "output_roles": sum(len(subgoal.output_atoms) for subgoal in goal.subgoals),
+                "logical_role_automorphisms": realized.get("logical_role_automorphisms", 0),
+                "subgoal_targets_match_within_complete_goal": subgoal_matches,
                 "bound_target_receipt": realized["bound_target_receipt"],
+                "elapsed_seconds": route_elapsed_seconds,
             }
         )
+        work_completed = route_index + 1
         emit(
             force=True,
-            completed=route_index + 1,
+            work_completed=work_completed,
+            routes_completed=route_index + 1,
+            subgoals_audited=subgoals_audited,
             program_id=teacher["program_id"],
             phase="route_complete",
         )
 
     elapsed = time.monotonic() - started
-    realized_count = status_counts["realized"]
-    exact_count = sum(row["endpoint_matches_bound_target"] for row in route_rows)
+    route_realized_count = route_status_counts["realized"]
+    route_exact_count = sum(row["endpoint_matches_bound_target"] for row in route_rows)
+    subgoal_realized_count = subgoal_status_counts["realized"]
+    subgoal_exact_count = sum(row["target_matches_within_complete_goal"] for row in subgoal_rows)
     body = {
         "schema_version": RESULT_SCHEMA,
         "evidence": "answer-known zero-oracle conditional-realizer audit",
@@ -189,41 +276,79 @@ def run_source(
         },
         "census": {
             "routes": len(route_rows),
-            "status_counts": dict(sorted(status_counts.items())),
+            "subgoals": len(subgoal_rows),
+            "unique_subgoal_ids": len({row["subgoal_id"] for row in subgoal_rows}),
+            "route_status_counts": dict(sorted(route_status_counts.items())),
+            "subgoal_status_counts": dict(sorted(subgoal_status_counts.items())),
             "search_expansions": total_expansions,
             "action_attempts": total_attempts,
         },
         "gates": {
-            "realization_coverage": {
-                "covered": realized_count,
+            "route_realization_coverage": {
+                "covered": route_realized_count,
                 "denominator": len(route_rows),
-                "coverage": realized_count / len(route_rows),
+                "coverage": route_realized_count / len(route_rows),
             },
-            "exact_endpoint_precision": {
-                "exact": exact_count,
-                "realized": realized_count,
-                "precision": exact_count / max(1, realized_count),
+            "route_exact_endpoint_precision": {
+                "exact": route_exact_count,
+                "realized": route_realized_count,
+                "precision": route_exact_count / max(1, route_realized_count),
+            },
+            "subgoal_target_coverage_within_complete_goals": {
+                "covered": subgoal_exact_count,
+                "denominator": len(subgoal_rows),
+                "coverage": subgoal_exact_count / len(subgoal_rows),
+            },
+            "subgoal_target_precision_within_realized_complete_goals": {
+                "exact": subgoal_exact_count,
+                "containing_route_realized": subgoal_realized_count,
+                "precision": subgoal_exact_count / max(1, subgoal_realized_count),
             },
             "teacher_action_fallback": {
                 "used": sum(row["primitive_teacher_actions_used"] for row in route_rows),
-                "denominator": len(route_rows),
+                "route_denominator": len(route_rows),
+                "subgoal_denominator": len(subgoal_rows),
             },
         },
+        "subgoals": subgoal_rows,
         "routes": route_rows,
         "timing": {
             "elapsed_seconds": elapsed,
             "expansions_per_second": total_expansions / max(elapsed, 1e-12),
+            "route_seconds": [row["elapsed_seconds"] for row in route_rows],
+        },
+        "compiler_cost": {
+            metric: {
+                "median": _percentile(values, 0.5),
+                "p95": _percentile(values, 0.95),
+                "maximum": max(values, default=0),
+            }
+            for metric, values in {
+                "route_seconds": [row["elapsed_seconds"] for row in route_rows],
+                "expansions": [row["expanded"] for row in route_rows],
+                "action_attempts": [row["attempted"] for row in route_rows],
+                "realized_primitives": [row["realized_primitive_count"] for row in route_rows],
+            }.items()
         },
         "costs": {"oracle_calls": 0, "docking_calls": 0, "gpu_seconds": 0},
         "completed_at_utc": datetime.now(timezone.utc).isoformat(),
         "limitations": [
             "The structural targets and audited bindings are answer-known training data.",
+            "Subgoal targets are checked inside their coordinated complete-goal endpoint; shared boundary roles make isolated-subgoal execution a different problem.",
+            "The bounded compiler uses at most 12 children per expansion; this empirical gate does not prove complete search support for every representable goal.",
             "Exact realization does not establish autonomous subgoal proposal recall.",
             "No task utility or docking score was observed.",
         ],
     }
     publish_json(output, body)
-    emit(force=True, completed=len(selected), program_id=None, phase="complete")
+    emit(
+        force=True,
+        work_completed=work_total,
+        routes_completed=len(route_rows),
+        subgoals_audited=len(subgoal_rows),
+        program_id=None,
+        phase="complete",
+    )
     return body
 
 
