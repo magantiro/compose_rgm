@@ -157,8 +157,8 @@ def _request_identity(row: dict, counterpart: dict) -> dict:
 def _index_selector(selector: dict) -> dict[str, list[dict]]:
     cases: dict[str, list[dict]] = {}
     for fold in selector.get("folds", ()):
-        if fold.get("status") != "fit":
-            raise ValueError(f"selector fold is not fit: {fold.get('fold')}")
+        if fold.get("status") != "ranked":
+            raise ValueError(f"selector fold is not ranked: {fold.get('fold')}")
         for case in fold.get("cases", ()):
             source_case_id = case.get("source_case_id")
             rows = case.get("ranked_candidates")

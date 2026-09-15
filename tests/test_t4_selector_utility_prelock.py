@@ -81,7 +81,7 @@ def _fixture() -> tuple[dict, dict, dict]:
         "folds": [
             {
                 "fold": 0,
-                "status": "fit",
+                "status": "ranked",
                 "cases": [
                     {
                         "source_case_id": rows[0]["source_case_id"],
