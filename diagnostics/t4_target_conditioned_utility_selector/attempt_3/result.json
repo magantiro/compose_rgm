@@ -1,0 +1,27 @@
+{
+  "contract_sha256": "a1fca9322ca916916c6b2b5e4c2c8bc8612ff4cd4e4fece6db731c6147bff3dd",
+  "data_audit_sha256": "6cb69f88f6b77ca808ea34b3869ff0b5cb26252c0a04f4e29e7214b07d860bfe",
+  "exclusion_ledger_sha256": "2446ebbcc3b54717e20ae4b968618ec83aaecc3775bc1ae941c529d18a28fffa",
+  "fit_performed": false,
+  "modal_launches": 0,
+  "new_docking_calls": 0,
+  "new_oracle_calls": 0,
+  "producer": {
+    "code_revision": "50ea8dddd083fa10b43ddc57ea901507d169ddb2",
+    "device": "cpu",
+    "implementation_sha256": {
+      "src/compose_v4/control/target_conditioned_utility_selector.py": "48e0b9251afa7d707c08dbfa0774fbbb5f1f3c2bfd0d6e6bc1b48befb9f3afbf",
+      "tools/t4_target_conditioned_utility_selector.py": "df19c708a4f0be0da3040a9a6c8762f8051824a242e1089b71ec7ff3c71ed20d"
+    },
+    "precision_if_fit": "float32",
+    "software": {
+      "numpy": "2.5.3",
+      "platform": "macOS-26.5.2-arm64-arm-64bit",
+      "python": "3.12.9",
+      "torch": "2.14.0"
+    }
+  },
+  "schema_version": "t4_target_conditioned_utility_selector_result_v1",
+  "split_manifest_sha256": "590fbb1b361793afadfed970ff6140f3bf80f086c43b2aab804503784f942eb0",
+  "status": "abstain_data_gate_failed"
+}

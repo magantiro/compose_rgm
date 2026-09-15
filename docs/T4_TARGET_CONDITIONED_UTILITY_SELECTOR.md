@@ -95,6 +95,34 @@ missing score, pair incomparable protocols, or use an outer-test result to tune
 the fixed model. A positive result is retrospective within-known-target ranking
 evidence. It is not prospective optimization or evidence of beating IVG.
 
+## Authoritative outcome
+
+The v3 coverage gate abstained before feature fitting. The immutable inputs
+contain 99 physical units: 97 finite measured labels and two failed or null
+delta-0.4 requests. Exact source validation admits 84 labels before split-group
+filtering. Thirteen of 27 program-pool endpoints have no representation from
+the authoritative PARP1-0 source and therefore abstain; 25 non-cell program
+representations are reported separately and are not label denominators.
+
+The predetermined endpoint, scaffold, source and per-ancestry grouping graph
+contains one connected component spanning source folds. Removing that complete
+component excludes 37 otherwise admitted rows and leaves 47 rows. Those rows
+support only two held-source strata, both for JAK2. The frozen requirements of
+at least three supported targets and five supported strata therefore fail.
+No target-blind or target-conditioned utility model was fit, no checkpoint or
+prospective candidate lock was emitted, and no oracle, docking or Modal call
+occurred. The 240 remaining within-stratum pairs are descriptive combinations,
+not independent samples and not a basis for bypassing the source-level gate.
+
+The authoritative machine-readable result is
+`diagnostics/t4_target_conditioned_utility_selector/attempt_3/result.json`
+(SHA-256 `1d6b056c3d724443686fe27586e63d70fe70b8af1103b942937b78519cd12627`).
+Its data audit SHA-256 is
+`6cb69f88f6b77ca808ea34b3869ff0b5cb26252c0a04f4e29e7214b07d860bfe`.
+The safe next action is to acquire additional immutable measured candidate
+cohorts across source indices and targets under a separately frozen contract,
+not to relax the grouping, target-support or comparability gates.
+
 ## Repair lineage
 
 The v1 and v2 executions were unsealed coverage previews. They stopped before

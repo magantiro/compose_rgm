@@ -1,0 +1,920 @@
+{
+  "contract_sha256": "a1fca9322ca916916c6b2b5e4c2c8bc8612ff4cd4e4fece6db731c6147bff3dd",
+  "rows": [
+    {
+      "cell": "parp1_0",
+      "endpoint_state_sha256": "dde357b15b0b320a7d9414bead5dcb2dadf43525e42b700e52b90bda9cd3136c",
+      "fold": 0,
+      "lineage_ids": [
+        "macro:7d289940ed8c64e3f3210a51146b9e46f342e0896c91346d0b38914f487e011a",
+        "macro_program:7d289940ed8c64e3f3210a51146b9e46f342e0896c91346d0b38914f487e011a"
+      ],
+      "row_id": "delta04:c8208357e19b6dfc10c1fa9c24fc05d09ee5667074877dc24145defcb9741368",
+      "scaffold": "C=C1CNC(=O)c2cccn2C1=C",
+      "source_state_sha256": "d7b5023975e32585720ac5cb3c630ed53e17493bfc3df19e5e46ab38462d79e6",
+      "stratum": [
+        "parp1",
+        "parp1_0",
+        0.4,
+        "ce25b76ca1f9c2331183b21d2ff2cb52ab8bba1acba53c97d2d4f2416ce3f574",
+        1701
+      ],
+      "target": "parp1"
+    },
+    {
+      "cell": "jak2_0",
+      "endpoint_state_sha256": "5aeb8136e8309b86c67631ccdcab21236bd2af3f468050acc5be6cbaff6b6f93",
+      "fold": 0,
+      "lineage_ids": [
+        "macro:963e0299082b8e2cb23f77982d11b36a6c36d9fdb018120c1930266f3c232629",
+        "macro_program:963e0299082b8e2cb23f77982d11b36a6c36d9fdb018120c1930266f3c232629"
+      ],
+      "row_id": "delta06:0a9d1ad3485ff0141ec9c38c3f0e63264eb99856d994417ed5c0e55a968bf3b2",
+      "scaffold": "c1ccc2c(c1)N=C(CC1CC1)c1c[nH]c3ncnc-2c13",
+      "source_state_sha256": "27a68566911fbf801dc8f65353d12c0796a9dde10f7bcdf7eaaf2e3579bd8a51",
+      "stratum": [
+        "jak2",
+        "jak2_0",
+        0.6,
+        "3a9e2c3d9e83f27cff964c342eaed8f06a6f3e9cd043dc88193ab121ccdb2200",
+        1701
+      ],
+      "target": "jak2"
+    },
+    {
+      "cell": "jak2_2",
+      "endpoint_state_sha256": "0c49035be5adf1db49b22d04162e85d435fa3d350d93d56e3b17978a70e3bf73",
+      "fold": 2,
+      "lineage_ids": [
+        "macro:426b23a3c4bcba7770690309d44b8d2c5496691b65b87bcfac3b076b65366f94",
+        "macro_program:426b23a3c4bcba7770690309d44b8d2c5496691b65b87bcfac3b076b65366f94"
+      ],
+      "row_id": "delta06:14f10da6b80e51411332efdfea7d001270eb86a1898489dc824eab7dde03cb53",
+      "scaffold": "O=C1NC(c2ccccc2)c2c[nH]c3nccc(c23)C2=CCC=CC=C12",
+      "source_state_sha256": "e505001d7660a841ac864b7d3e228445348ad6e5013ff3879130a8fa07e02e04",
+      "stratum": [
+        "jak2",
+        "jak2_2",
+        0.6,
+        "3a9e2c3d9e83f27cff964c342eaed8f06a6f3e9cd043dc88193ab121ccdb2200",
+        1701
+      ],
+      "target": "jak2"
+    },
+    {
+      "cell": "parp1_0",
+      "endpoint_state_sha256": "797c4e4d6b7efb5be64b50ea490310588cf7f0598580ff24890c692db9fd6b3d",
+      "fold": 0,
+      "lineage_ids": [
+        "macro:ad941a894e86ca6de6477ab60971faa1100e54dc5b1c4f19d6bbfd95d5a4f9a7",
+        "macro_program:ad941a894e86ca6de6477ab60971faa1100e54dc5b1c4f19d6bbfd95d5a4f9a7"
+      ],
+      "row_id": "delta06:235808757a0b2d594628c52b225c5d95870676ee9c9bbbdea62f455682e8823e",
+      "scaffold": "O=C1NC(=CC=C2NCc3ccccc3-n3cccc32)c2ccccc21",
+      "source_state_sha256": "d7b5023975e32585720ac5cb3c630ed53e17493bfc3df19e5e46ab38462d79e6",
+      "stratum": [
+        "parp1",
+        "parp1_0",
+        0.6,
+        "ce25b76ca1f9c2331183b21d2ff2cb52ab8bba1acba53c97d2d4f2416ce3f574",
+        1701
+      ],
+      "target": "parp1"
+    },
+    {
+      "cell": "jak2_0",
+      "endpoint_state_sha256": "f4f3db28e00abed92a328d97a85c0ffd58cd4e5630aa5adea6ad4c821b137e0c",
+      "fold": 0,
+      "lineage_ids": [
+        "macro:1a62cebec29145de8c8a3052bd3b4779d2fb2684185979a67fbb7bfb06dd57dc",
+        "macro:419fcb338627327ef904f0261efdfbb9ffce65d36eaba695fbc0380eefc472a8",
+        "macro_program:419fcb338627327ef904f0261efdfbb9ffce65d36eaba695fbc0380eefc472a8:1a62cebec29145de8c8a3052bd3b4779d2fb2684185979a67fbb7bfb06dd57dc"
+      ],
+      "row_id": "delta06:80b8a75cdbb2bd0568bf52221a524e6bd6c065626e72cb60694e93bc82801dee",
+      "scaffold": "C1=Nc2ccccc2-c2nccc3[nH]cc1c23",
+      "source_state_sha256": "27a68566911fbf801dc8f65353d12c0796a9dde10f7bcdf7eaaf2e3579bd8a51",
+      "stratum": [
+        "jak2",
+        "jak2_0",
+        0.6,
+        "3a9e2c3d9e83f27cff964c342eaed8f06a6f3e9cd043dc88193ab121ccdb2200",
+        1701
+      ],
+      "target": "jak2"
+    },
+    {
+      "cell": "jak2_2",
+      "endpoint_state_sha256": "c58ee57dd50544267b6bc6110e125b15002fef43825fcbb6753b736a7f1e86d2",
+      "fold": 2,
+      "lineage_ids": [
+        "macro:426b23a3c4bcba7770690309d44b8d2c5496691b65b87bcfac3b076b65366f94",
+        "macro_program:426b23a3c4bcba7770690309d44b8d2c5496691b65b87bcfac3b076b65366f94"
+      ],
+      "row_id": "delta06:85ab0987a8c78963dbb84a84d975cd64bb05832a4290ec0c552e83b3c2dfd2a2",
+      "scaffold": "O=C1NC(c2ccccc2)c2c[nH]c3nccc(c23)C2=CC=CCC=C12",
+      "source_state_sha256": "e505001d7660a841ac864b7d3e228445348ad6e5013ff3879130a8fa07e02e04",
+      "stratum": [
+        "jak2",
+        "jak2_2",
+        0.6,
+        "3a9e2c3d9e83f27cff964c342eaed8f06a6f3e9cd043dc88193ab121ccdb2200",
+        1701
+      ],
+      "target": "jak2"
+    },
+    {
+      "cell": "parp1_0",
+      "endpoint_state_sha256": "51a2ef204cad6119469557a27bff4ecc0e491de1fa05baddc6d4ac03a64551da",
+      "fold": 0,
+      "lineage_ids": [
+        "macro:6fe6af1376779812b86f7c77c6f3649afe997a5961e25c98b88fcaecd7b0a468",
+        "macro_program:6fe6af1376779812b86f7c77c6f3649afe997a5961e25c98b88fcaecd7b0a468"
+      ],
+      "row_id": "delta06:c472ee28cd9746e0958d843843f18baef8cea786fa321b00fc1ffb577dd548dd",
+      "scaffold": "O=C1NCc2cc(CNC3CC(n4ccccc4=O)C3)ccc2-n2cccc21",
+      "source_state_sha256": "d7b5023975e32585720ac5cb3c630ed53e17493bfc3df19e5e46ab38462d79e6",
+      "stratum": [
+        "parp1",
+        "parp1_0",
+        0.6,
+        "ce25b76ca1f9c2331183b21d2ff2cb52ab8bba1acba53c97d2d4f2416ce3f574",
+        1701
+      ],
+      "target": "parp1"
+    },
+    {
+      "cell": "jak2_0",
+      "endpoint_state_sha256": "616fbd6d05d53afc8db8dfacd9131c85a5f0a15144cffc06031bba32b122efa1",
+      "fold": 0,
+      "lineage_ids": [
+        "macro:419fcb338627327ef904f0261efdfbb9ffce65d36eaba695fbc0380eefc472a8",
+        "macro_program:419fcb338627327ef904f0261efdfbb9ffce65d36eaba695fbc0380eefc472a8"
+      ],
+      "row_id": "delta06:ecfe7dc01ae5a0bb8c2cc3c29f4959fef94c39fb1b8e57849673c2809e50cad8",
+      "scaffold": "C1=Nc2ccccc2-c2nccc3[nH]cc1c23",
+      "source_state_sha256": "27a68566911fbf801dc8f65353d12c0796a9dde10f7bcdf7eaaf2e3579bd8a51",
+      "stratum": [
+        "jak2",
+        "jak2_0",
+        0.6,
+        "3a9e2c3d9e83f27cff964c342eaed8f06a6f3e9cd043dc88193ab121ccdb2200",
+        1701
+      ],
+      "target": "jak2"
+    },
+    {
+      "cell": "parp1_0",
+      "endpoint_state_sha256": "faaa3c0261f4e1d96034a252082ebe233b6cf8691ddef3471ae6df396e6fd61d",
+      "fold": 0,
+      "lineage_ids": [
+        "program:0410e3a24ae8f7832ee1cd05c9af4d5c255bc13d5f126da9fa9e0a3aedbf2206",
+        "program:42bc47f33b92a4b9c8d4bf1b3cc0eecc0473f5d6ee62c632b2d26a8b0c67d571"
+      ],
+      "row_id": "program_pool:12dcf0ef93f5b172b629f3dd75218ad63f27bac57791ceaf31caa0a2955db052",
+      "scaffold": "O=C1NCc2ccccc2-n2cc3c(c1c2=O)CCCC3",
+      "source_state_sha256": "d7b5023975e32585720ac5cb3c630ed53e17493bfc3df19e5e46ab38462d79e6",
+      "stratum": [
+        "parp1",
+        "parp1_0",
+        0.4,
+        "672d91d9e2f9430a7f266a297b214e41b394bb2730343d9d567fc885712c5ee9",
+        1701
+      ],
+      "target": "parp1"
+    },
+    {
+      "cell": "parp1_0",
+      "endpoint_state_sha256": "866f1cbe8da62c80382c4f7b016f9d92223c3780d763f77d9fecd10c0c5c636b",
+      "fold": 0,
+      "lineage_ids": [
+        "program:6af854fba77a7daf5cd935accbc14b82f216a0f8d4dd365020860bee4aa0bebd"
+      ],
+      "row_id": "program_pool:18e7a24ec0224629bd464566ad9140fa05200bc743454831c1293d2891218688",
+      "scaffold": "O=C1CCCc2cc(CCc3ccc4c(c3)CNC(=O)c3cccc(=O)n3-4)ccc21",
+      "source_state_sha256": "d7b5023975e32585720ac5cb3c630ed53e17493bfc3df19e5e46ab38462d79e6",
+      "stratum": [
+        "parp1",
+        "parp1_0",
+        0.4,
+        "672d91d9e2f9430a7f266a297b214e41b394bb2730343d9d567fc885712c5ee9",
+        1701
+      ],
+      "target": "parp1"
+    },
+    {
+      "cell": "parp1_0",
+      "endpoint_state_sha256": "ea1e23cf60f93354a660337f7d808ab6901c52d47429a90d14beda95cd619678",
+      "fold": 0,
+      "lineage_ids": [
+        "program:4a52639845f201dd9b68b973203c5d99289c8d109a4e418599df940d6aff8ef1",
+        "program:dd252e81ef5c4e87c9dca6d3fb97e42e9d169d304a8e4a61023678661421fe38",
+        "program:f3fc1a4b247505f427b7caa3760d8e69d1c65c7bab1479787297b796f6677833"
+      ],
+      "row_id": "program_pool:31a18421a2c062c0dfd6c732c8cc1f34ca679d55d13fd3e42dd96d23a91178f7",
+      "scaffold": "O=C1NCc2ccccc2C(=O)n2cccc1c2=O",
+      "source_state_sha256": "d7b5023975e32585720ac5cb3c630ed53e17493bfc3df19e5e46ab38462d79e6",
+      "stratum": [
+        "parp1",
+        "parp1_0",
+        0.4,
+        "672d91d9e2f9430a7f266a297b214e41b394bb2730343d9d567fc885712c5ee9",
+        1701
+      ],
+      "target": "parp1"
+    },
+    {
+      "cell": "parp1_0",
+      "endpoint_state_sha256": "6ebbd3b71382c9066cfb1015bbabb74b351b338fc98d4b52d568a8fcf0d2a937",
+      "fold": 0,
+      "lineage_ids": [
+        "program:2276e711218f26a59d43e4f660dcb269ad9b5f33176c34ad395752f1c13474d3",
+        "program:6af854fba77a7daf5cd935accbc14b82f216a0f8d4dd365020860bee4aa0bebd",
+        "program:82873ec63aa8227d66c8b45af0ca8ffae206212e5652418e212849a9c3e3e234",
+        "program:970c8abcaeb252aacbcae231c5f30dbb416d66397db09718016033947b60ba7a",
+        "program:f4450bedc7b687ac33b8e84f161f1978a55c5db344c33c4d286978755bcf1fbe"
+      ],
+      "row_id": "program_pool:3cd0cccaaf308a5da5af5f5739a2201e061f615a19cb4b01b66b5ca972573f10",
+      "scaffold": "O=C1CCCc2cc(CCc3ccc4c(c3)CNC(=O)c3cccn3C4=O)ccc21",
+      "source_state_sha256": "d7b5023975e32585720ac5cb3c630ed53e17493bfc3df19e5e46ab38462d79e6",
+      "stratum": [
+        "parp1",
+        "parp1_0",
+        0.4,
+        "672d91d9e2f9430a7f266a297b214e41b394bb2730343d9d567fc885712c5ee9",
+        1701
+      ],
+      "target": "parp1"
+    },
+    {
+      "cell": "parp1_0",
+      "endpoint_state_sha256": "532d51c4eb9ead8c3efe6051beea67e7018623bc7917dcc2797e63f00ac22cf4",
+      "fold": 0,
+      "lineage_ids": [
+        "program:3a7ce9e6907f7b25610a3aaa8382dd0a2accc66b1a67b04ebb0d0a4c1ac66273"
+      ],
+      "row_id": "program_pool:408e17dd384b4da9d01c09a4ea0a687ca14723dd7ffbce2eb4217aa0ea729fbe",
+      "scaffold": "O=C1NCc2ccc3c(c2-n2cccc1c2=O)CCCC3",
+      "source_state_sha256": "d7b5023975e32585720ac5cb3c630ed53e17493bfc3df19e5e46ab38462d79e6",
+      "stratum": [
+        "parp1",
+        "parp1_0",
+        0.4,
+        "672d91d9e2f9430a7f266a297b214e41b394bb2730343d9d567fc885712c5ee9",
+        1701
+      ],
+      "target": "parp1"
+    },
+    {
+      "cell": "parp1_0",
+      "endpoint_state_sha256": "ff4c917f515a013862e136092a8840ad6c4c1b52e2cdef8467efd4e819e0a6ef",
+      "fold": 0,
+      "lineage_ids": [
+        "program:c662b3a4014551b5aee520803eab997a61ce49880bafc8ef7b6a5e62f7dc082f"
+      ],
+      "row_id": "program_pool:649f0a9c488eeee4e0f4643372116a11e828ecdd8bbc2c8ac8159e1e87910bb7",
+      "scaffold": "O=C1NCc2ccccc2-n2c(=O)cccc1c2=O",
+      "source_state_sha256": "d7b5023975e32585720ac5cb3c630ed53e17493bfc3df19e5e46ab38462d79e6",
+      "stratum": [
+        "parp1",
+        "parp1_0",
+        0.4,
+        "672d91d9e2f9430a7f266a297b214e41b394bb2730343d9d567fc885712c5ee9",
+        1701
+      ],
+      "target": "parp1"
+    },
+    {
+      "cell": "parp1_0",
+      "endpoint_state_sha256": "5b014b25b9d70532c88782d319bc775e4fcc57c7e8d8cb1be667de12fa422fe5",
+      "fold": 0,
+      "lineage_ids": [
+        "program:13717a4a3bdc237481816838dd6317279589343905fdb6010c241aee5444868a"
+      ],
+      "row_id": "program_pool:6e1f04fa2cc7543c927be00d64d5c89e096e705db99dad1d02f81cdf68046cf8",
+      "scaffold": "O=C1NCc2ccccc2C(=O)n2cccc21",
+      "source_state_sha256": "d7b5023975e32585720ac5cb3c630ed53e17493bfc3df19e5e46ab38462d79e6",
+      "stratum": [
+        "parp1",
+        "parp1_0",
+        0.4,
+        "672d91d9e2f9430a7f266a297b214e41b394bb2730343d9d567fc885712c5ee9",
+        1701
+      ],
+      "target": "parp1"
+    },
+    {
+      "cell": "parp1_0",
+      "endpoint_state_sha256": "51ed80a605b48a8980d39fb85e7a5c80ab3f5bd00bfad7144b50e9a756463761",
+      "fold": 0,
+      "lineage_ids": [
+        "program:0d77283bacdd8c1fc9c691d5c8a057c83080fc922f3e78af55bcb622b40d57b9"
+      ],
+      "row_id": "program_pool:7296cb85cf267d690a12bf92e1baf8e04f6b5bdb68c8fe7c8d61f4d1d465672e",
+      "scaffold": "O=C1NCc2ccccc2-n2cc(-c3ccccc3)cc1c2=O",
+      "source_state_sha256": "d7b5023975e32585720ac5cb3c630ed53e17493bfc3df19e5e46ab38462d79e6",
+      "stratum": [
+        "parp1",
+        "parp1_0",
+        0.4,
+        "672d91d9e2f9430a7f266a297b214e41b394bb2730343d9d567fc885712c5ee9",
+        1701
+      ],
+      "target": "parp1"
+    },
+    {
+      "cell": "parp1_0",
+      "endpoint_state_sha256": "6c19b94c9b2d12fe30e17cf130d5cabd25027d54ca8f1844901c393d01b3439b",
+      "fold": 0,
+      "lineage_ids": [
+        "program:2276e711218f26a59d43e4f660dcb269ad9b5f33176c34ad395752f1c13474d3",
+        "program:6af854fba77a7daf5cd935accbc14b82f216a0f8d4dd365020860bee4aa0bebd",
+        "program:82873ec63aa8227d66c8b45af0ca8ffae206212e5652418e212849a9c3e3e234",
+        "program:970c8abcaeb252aacbcae231c5f30dbb416d66397db09718016033947b60ba7a"
+      ],
+      "row_id": "program_pool:827ed234f69ea1e2fc53397ae6d2bf44a4606b166887e6a875cc2af8a9e1d4ee",
+      "scaffold": "O=C1CCCc2cc(CCc3ccc4c(c3)CNC(=O)c3cccn-4c3=O)ccc21",
+      "source_state_sha256": "d7b5023975e32585720ac5cb3c630ed53e17493bfc3df19e5e46ab38462d79e6",
+      "stratum": [
+        "parp1",
+        "parp1_0",
+        0.4,
+        "672d91d9e2f9430a7f266a297b214e41b394bb2730343d9d567fc885712c5ee9",
+        1701
+      ],
+      "target": "parp1"
+    },
+    {
+      "cell": "parp1_0",
+      "endpoint_state_sha256": "9942bcf6ad9e33d8db261fbf72a5defb0594f18b561d620e6f2baf110968e2d7",
+      "fold": 0,
+      "lineage_ids": [
+        "program:b0211c437cc63ee3dc81d2c90b808099549b3e3bbe535cc5c44ad2b73759ba74"
+      ],
+      "row_id": "program_pool:cdd22a402e0caeeea604a28c33a91d14c875d1821d8e400ee9b96c7a9984d10a",
+      "scaffold": "O=C1NCc2cc(CNCc3ccccc3)ccc2C(=O)n2cccc21",
+      "source_state_sha256": "d7b5023975e32585720ac5cb3c630ed53e17493bfc3df19e5e46ab38462d79e6",
+      "stratum": [
+        "parp1",
+        "parp1_0",
+        0.4,
+        "672d91d9e2f9430a7f266a297b214e41b394bb2730343d9d567fc885712c5ee9",
+        1701
+      ],
+      "target": "parp1"
+    },
+    {
+      "cell": "parp1_0",
+      "endpoint_state_sha256": "ef3925c2cd6d64683d5119834d3051a317517dc9f5a1e8e72259fced8d8a8a66",
+      "fold": 0,
+      "lineage_ids": [
+        "program:06b4cb33ade0b23df10d5ca34bb8e077db9cd119fba74c8bf920129d229a3bb7",
+        "program:13717a4a3bdc237481816838dd6317279589343905fdb6010c241aee5444868a"
+      ],
+      "row_id": "program_pool:d0e97525c44f0d51f9d8bbccda465085884e0ccc84a6be23111d0e418cfdb29e",
+      "scaffold": "O=C1NCc2ccccc2-n2cccc1c2=O",
+      "source_state_sha256": "d7b5023975e32585720ac5cb3c630ed53e17493bfc3df19e5e46ab38462d79e6",
+      "stratum": [
+        "parp1",
+        "parp1_0",
+        0.4,
+        "672d91d9e2f9430a7f266a297b214e41b394bb2730343d9d567fc885712c5ee9",
+        1701
+      ],
+      "target": "parp1"
+    },
+    {
+      "cell": "parp1_0",
+      "endpoint_state_sha256": "ecdd615eadbde0f5bb9b6e2e2ea2f6805fd80de6699b9499efd3ebbd0fff0a33",
+      "fold": 0,
+      "lineage_ids": [
+        "program:ca7d55796e117bacbf8c6cc803f83f2d2560d507703f96ee34e0f67d14eedc5f"
+      ],
+      "row_id": "program_pool:dd6ed5e18bece2a68f18a2a6eb35b19e231b28cd2667305a28304580a66bada7",
+      "scaffold": "O=C(Cc1ccc2c(c1)CNC(=O)c1cccn1-2)c1ccc2c(c1)CCCC2=O",
+      "source_state_sha256": "d7b5023975e32585720ac5cb3c630ed53e17493bfc3df19e5e46ab38462d79e6",
+      "stratum": [
+        "parp1",
+        "parp1_0",
+        0.4,
+        "672d91d9e2f9430a7f266a297b214e41b394bb2730343d9d567fc885712c5ee9",
+        1701
+      ],
+      "target": "parp1"
+    },
+    {
+      "cell": "parp1_0",
+      "endpoint_state_sha256": "8d9f554c00d1e9e92bbdce66765d1bd129d330ed379ca0e9b3d5e944722fe472",
+      "fold": 0,
+      "lineage_ids": [
+        "program:e50ed83ab97778d1f7b256de2a04c2a6326944c95640dfc3b5097ce838165210"
+      ],
+      "row_id": "program_pool:e69c6a7064e0414901778574f64db9e01ab60de4e8fe63325224d67e4aaec66b",
+      "scaffold": "O=C1NCc2cc(CCc3ccccc3)ccc2C(=O)n2cccc1c(=O)c2=O",
+      "source_state_sha256": "d7b5023975e32585720ac5cb3c630ed53e17493bfc3df19e5e46ab38462d79e6",
+      "stratum": [
+        "parp1",
+        "parp1_0",
+        0.4,
+        "672d91d9e2f9430a7f266a297b214e41b394bb2730343d9d567fc885712c5ee9",
+        1701
+      ],
+      "target": "parp1"
+    },
+    {
+      "cell": "parp1_0",
+      "endpoint_state_sha256": "b0168d009e05dd8f39e5e91eec41df375d7acc430f81fdc5409a44f410eea05e",
+      "fold": 0,
+      "lineage_ids": [
+        "program:024949a54b68a2c6c77605eaff76c60d638f43ff6a58c51e556228823216f8ab",
+        "program:b7b396821411b23da7bf7e5c41c239b24f181ca873b935534a37d2fe8f6f4e94"
+      ],
+      "row_id": "program_pool:fb05ccfcac6f81c0ad7ded2104aea18b2498e20a88e3db339a01b6004783bb6d",
+      "scaffold": "O=C1NC(=O)c2cccn(c2=O)-c2ccccc21",
+      "source_state_sha256": "d7b5023975e32585720ac5cb3c630ed53e17493bfc3df19e5e46ab38462d79e6",
+      "stratum": [
+        "parp1",
+        "parp1_0",
+        0.4,
+        "672d91d9e2f9430a7f266a297b214e41b394bb2730343d9d567fc885712c5ee9",
+        1701
+      ],
+      "target": "parp1"
+    },
+    {
+      "cell": "fa7_0",
+      "endpoint_state_sha256": "a737c4d9010f4eeca3aa12252bf5530f5bffd12ec1f425b900b9b9b4d9470d9e",
+      "fold": 0,
+      "lineage_ids": [
+        "program:903f6efef19147171f59ef60c24e7a2b10e3b839efb31033b1d99f4ad02e685c"
+      ],
+      "row_id": "second_generation:208fe76651d834a60903c59a2bf00545c8e69e360ac43f03fe02a02bbabd0a63",
+      "scaffold": "O=C(CN1CCC1)NCc1ccc2ccccc2c1",
+      "source_state_sha256": "b621111ce6dd697de63d1e77c175781670a63a2cec3df9fb8c1b3c77534bb0f9",
+      "stratum": [
+        "fa7",
+        "fa7_0",
+        0.4,
+        "3a3788d420cc3f289da06c0ef73cfeced02762101ca1d181f397f2f125015e1f",
+        1701
+      ],
+      "target": "fa7"
+    },
+    {
+      "cell": "fa7_0",
+      "endpoint_state_sha256": "5ab3b2b347b369deaf587549f30215665515093779a44105ac0320c26212c5b0",
+      "fold": 0,
+      "lineage_ids": [
+        "program:ef1fc784a0aa46e4e9e1f24323e7129979b9754d29303da5271c4960d2048017"
+      ],
+      "row_id": "second_generation:2867725e6f0390d5bc7bf92adff72f2f95b87a4ce9b34a04522b84e830ae3e03",
+      "scaffold": "O=C(CNC(=O)N1CCC1)NCc1ccc2ccccc2c1",
+      "source_state_sha256": "b621111ce6dd697de63d1e77c175781670a63a2cec3df9fb8c1b3c77534bb0f9",
+      "stratum": [
+        "fa7",
+        "fa7_0",
+        0.4,
+        "3a3788d420cc3f289da06c0ef73cfeced02762101ca1d181f397f2f125015e1f",
+        1701
+      ],
+      "target": "fa7"
+    },
+    {
+      "cell": "5ht1b_0",
+      "endpoint_state_sha256": "411817b3038a5316e053e172d1f8d98c154c68803a50bc249155771060e9898b",
+      "fold": 0,
+      "lineage_ids": [
+        "program:cdbb2c9d56755ada3e229c9c3a79a38a5c6a14337438436d1c04345f12083668"
+      ],
+      "row_id": "second_generation:2e02911b273510dbf91705a99259c1e7456a9362440c661ac347753149768098",
+      "scaffold": "c1ccc(-c2ccnc(CCN3CCc4cc5c(cc43)C3(CC[NH2+]CC3)CO5)c2)cc1",
+      "source_state_sha256": "ec05d0011f1c996975b143869e4b7e12d25367ba786ae05beead5d1934224e33",
+      "stratum": [
+        "5ht1b",
+        "5ht1b_0",
+        0.4,
+        "1890751e78c154b16cba01c2cdb5d2363281c123a2ec5be3afc6ffdf2a9ab3df",
+        1701
+      ],
+      "target": "5ht1b"
+    },
+    {
+      "cell": "fa7_0",
+      "endpoint_state_sha256": "b847792db664dc4b9b779a3766ce24c999b118b5a4ec197a1ab6e4de7a885b3d",
+      "fold": 0,
+      "lineage_ids": [
+        "program:aed67d72bbda05056ef82ae95053404e21fe87c8efa3eb1556fe4482b0a5beb7"
+      ],
+      "row_id": "second_generation:466cd28a6cc0188af49f406fbe996ff3cb5381665fda44a95ae010651527079f",
+      "scaffold": "O=C(NCc1ccc2ccccc2c1)NC(=O)N1CCC1",
+      "source_state_sha256": "b621111ce6dd697de63d1e77c175781670a63a2cec3df9fb8c1b3c77534bb0f9",
+      "stratum": [
+        "fa7",
+        "fa7_0",
+        0.4,
+        "3a3788d420cc3f289da06c0ef73cfeced02762101ca1d181f397f2f125015e1f",
+        1701
+      ],
+      "target": "fa7"
+    },
+    {
+      "cell": "5ht1b_0",
+      "endpoint_state_sha256": "5642259488015e81c27e0cc717b45a928af44ceb238ef1978d3af64505af4fc4",
+      "fold": 0,
+      "lineage_ids": [
+        "program:a52e9ff0202a0eddbf3863ace19099d19fb84a98337797412e746593be37494f"
+      ],
+      "row_id": "second_generation:5280ff40c78730f6e1cd0eeba4ed068226990b988f136648461736f1cbdd36cc",
+      "scaffold": "O=C(c1ccc2ccccc2c1)N1CCc2cc3c(cc21)C1(CCCO3)CC[NH2+]CC1",
+      "source_state_sha256": "ec05d0011f1c996975b143869e4b7e12d25367ba786ae05beead5d1934224e33",
+      "stratum": [
+        "5ht1b",
+        "5ht1b_0",
+        0.4,
+        "1890751e78c154b16cba01c2cdb5d2363281c123a2ec5be3afc6ffdf2a9ab3df",
+        1701
+      ],
+      "target": "5ht1b"
+    },
+    {
+      "cell": "fa7_0",
+      "endpoint_state_sha256": "e9f2acfeb0eb594a3b63931fc1e5da0671ab5ddeae5b8f36ca5929fed10d0637",
+      "fold": 0,
+      "lineage_ids": [
+        "program:ba0b2937493d62fea604472c14d986e8314ab4720351270cc57ec7d08ad317f4"
+      ],
+      "row_id": "second_generation:557379c0a031b729cfabc6fcff576ab255ead355de4e82a5a9819160fed23e4b",
+      "scaffold": "O=C(NCc1ccc2ccccc2c1)N1CCC1",
+      "source_state_sha256": "b621111ce6dd697de63d1e77c175781670a63a2cec3df9fb8c1b3c77534bb0f9",
+      "stratum": [
+        "fa7",
+        "fa7_0",
+        0.4,
+        "3a3788d420cc3f289da06c0ef73cfeced02762101ca1d181f397f2f125015e1f",
+        1701
+      ],
+      "target": "fa7"
+    },
+    {
+      "cell": "fa7_0",
+      "endpoint_state_sha256": "50587cd78385d164b1f0a97993a81fbc5df9cbbde74ad932a48f2f5a3e56d3ab",
+      "fold": 0,
+      "lineage_ids": [
+        "program:b202e6f101a1788b6bb039dea46eed3116d20b12e37913bd7821fd7181569f42"
+      ],
+      "row_id": "second_generation:5db7149a033731e3a121acbdfd78f023053f02f74227e29099cfde8b6e04b9ea",
+      "scaffold": "O=C(NCc1ccc2ccccc2c1)N1CCCCCC1",
+      "source_state_sha256": "b621111ce6dd697de63d1e77c175781670a63a2cec3df9fb8c1b3c77534bb0f9",
+      "stratum": [
+        "fa7",
+        "fa7_0",
+        0.4,
+        "3a3788d420cc3f289da06c0ef73cfeced02762101ca1d181f397f2f125015e1f",
+        1701
+      ],
+      "target": "fa7"
+    },
+    {
+      "cell": "5ht1b_0",
+      "endpoint_state_sha256": "74f8a6342f6c2ac9fd406105e3d75a3770455895f85599d6ffc3c5ae67db78a6",
+      "fold": 0,
+      "lineage_ids": [
+        "program:b2ccd80118ec5471a2f63a137b901014d33550cecb05cb7fc0cb00648a27f4fc"
+      ],
+      "row_id": "second_generation:67323125b4c4d28ef16055e6f3c58d01a5974891e64f6f356d4549679a046d24",
+      "scaffold": "O=C(c1ccc2ccccc2c1)N1CCc2cc3c(cc21)C1(CCCCO3)CC[NH2+]CC1",
+      "source_state_sha256": "ec05d0011f1c996975b143869e4b7e12d25367ba786ae05beead5d1934224e33",
+      "stratum": [
+        "5ht1b",
+        "5ht1b_0",
+        0.4,
+        "1890751e78c154b16cba01c2cdb5d2363281c123a2ec5be3afc6ffdf2a9ab3df",
+        1701
+      ],
+      "target": "5ht1b"
+    },
+    {
+      "cell": "5ht1b_0",
+      "endpoint_state_sha256": "d15d1445ca8b08176fd115eb62829bc661a968cd18a219c3b3acf45aae67043c",
+      "fold": 0,
+      "lineage_ids": [
+        "program:b3ed2ece996e6244975b7d45a21e65fb69ea5eefc4268e8b2b6573e2e4cec41e"
+      ],
+      "row_id": "second_generation:6adcfec255e3eea795febbfff82c5ab513386c7b0e9085f095221e64064862d1",
+      "scaffold": "O=C(c1ccc(-c2ccccc2)cc1)N1CCc2cc3c(cc21)C1(CC[NH2+]CC1)CO3",
+      "source_state_sha256": "ec05d0011f1c996975b143869e4b7e12d25367ba786ae05beead5d1934224e33",
+      "stratum": [
+        "5ht1b",
+        "5ht1b_0",
+        0.4,
+        "1890751e78c154b16cba01c2cdb5d2363281c123a2ec5be3afc6ffdf2a9ab3df",
+        1701
+      ],
+      "target": "5ht1b"
+    },
+    {
+      "cell": "5ht1b_0",
+      "endpoint_state_sha256": "aca1f9dbc862a2be2ab5e8b773d941ffa84c71987798d340ce23543536fa0349",
+      "fold": 0,
+      "lineage_ids": [
+        "program:b5ca06c21492f8de50d0999f374f1a01045046aa2a8161f5dc1596c836a5f6b4"
+      ],
+      "row_id": "second_generation:836a3d907cb7dcd1412f65f63c95a59fd73a172fd20365ae4d9f6791229cb7de",
+      "scaffold": "O=C(c1ccc(-c2ccccc2)cc1)N1CCc2cc3c(cc21)C1(CC[NH2+]CC1)CO3",
+      "source_state_sha256": "ec05d0011f1c996975b143869e4b7e12d25367ba786ae05beead5d1934224e33",
+      "stratum": [
+        "5ht1b",
+        "5ht1b_0",
+        0.4,
+        "1890751e78c154b16cba01c2cdb5d2363281c123a2ec5be3afc6ffdf2a9ab3df",
+        1701
+      ],
+      "target": "5ht1b"
+    },
+    {
+      "cell": "5ht1b_0",
+      "endpoint_state_sha256": "0838e4718b884b9e1e3d5cb2c782bbe33380f5a43ef352007840fd1e37268f94",
+      "fold": 0,
+      "lineage_ids": [
+        "program:5d11c213adb4615e28cf428bc2e8d6268117916fb76ffaaf9a64561d66f6ac9c"
+      ],
+      "row_id": "second_generation:85d3fe25fee4dd1a7cbe378b9bdd0231ada7abe8f2ab7ca6c473c3469c3b5bd4",
+      "scaffold": "O=C(c1ccc2ccccc2c1)N1CCc2cc3c(cc21)C1(CC[NH2+]CC1)CCO3",
+      "source_state_sha256": "ec05d0011f1c996975b143869e4b7e12d25367ba786ae05beead5d1934224e33",
+      "stratum": [
+        "5ht1b",
+        "5ht1b_0",
+        0.4,
+        "1890751e78c154b16cba01c2cdb5d2363281c123a2ec5be3afc6ffdf2a9ab3df",
+        1701
+      ],
+      "target": "5ht1b"
+    },
+    {
+      "cell": "fa7_0",
+      "endpoint_state_sha256": "8859c75c3c5f22416cc97b96280a17ec82ca4897c638affbf90d9b8c6c51687a",
+      "fold": 0,
+      "lineage_ids": [
+        "program:1f41fa7d5d212ea02dc84a829a39efcec357c22c71978809cf50cef5e184d09b"
+      ],
+      "row_id": "second_generation:9b035531ad0a5582203a184b28396f837b2c475c35c94c9bd9951cd977aed19e",
+      "scaffold": "O=C(NCc1ccc2ccccc2c1)N1CCCC1",
+      "source_state_sha256": "b621111ce6dd697de63d1e77c175781670a63a2cec3df9fb8c1b3c77534bb0f9",
+      "stratum": [
+        "fa7",
+        "fa7_0",
+        0.4,
+        "3a3788d420cc3f289da06c0ef73cfeced02762101ca1d181f397f2f125015e1f",
+        1701
+      ],
+      "target": "fa7"
+    },
+    {
+      "cell": "fa7_0",
+      "endpoint_state_sha256": "0aaac4c849f33be5bdf2461c579bed713936688f2e67b8f999fed79991d623ff",
+      "fold": 0,
+      "lineage_ids": [
+        "program:d4db692622e3e86d00bc543d0409df424643814c9da0f41495dbdd060c369ec5"
+      ],
+      "row_id": "second_generation:9f0d3330ce8c86c52315add8952fa53e9e0c0106e6395ec2c8158f8f80ce2963",
+      "scaffold": "O=C(NCc1ccc2ccccc2c1)N1CCCC1",
+      "source_state_sha256": "b621111ce6dd697de63d1e77c175781670a63a2cec3df9fb8c1b3c77534bb0f9",
+      "stratum": [
+        "fa7",
+        "fa7_0",
+        0.4,
+        "3a3788d420cc3f289da06c0ef73cfeced02762101ca1d181f397f2f125015e1f",
+        1701
+      ],
+      "target": "fa7"
+    },
+    {
+      "cell": "5ht1b_0",
+      "endpoint_state_sha256": "b2cbe851a1e79ec01895c8cd0921347448f1feb0d81f37b877ff2090f1912ae4",
+      "fold": 0,
+      "lineage_ids": [
+        "program:a0e63df0cb0e89375dd20958e0feaec5bed4f0dbb55d1d1e9ffc2335404d60a9"
+      ],
+      "row_id": "second_generation:a47b6741375505e3ffddabdb383058c84ffb3b850ea27ddf54deb59aa2c50bfc",
+      "scaffold": "O=C(c1ccc2ccccc2c1)N1CCc2cc3c(cc21)C1(CC[NH2+]CC1)CCO3",
+      "source_state_sha256": "ec05d0011f1c996975b143869e4b7e12d25367ba786ae05beead5d1934224e33",
+      "stratum": [
+        "5ht1b",
+        "5ht1b_0",
+        0.4,
+        "1890751e78c154b16cba01c2cdb5d2363281c123a2ec5be3afc6ffdf2a9ab3df",
+        1701
+      ],
+      "target": "5ht1b"
+    },
+    {
+      "cell": "fa7_0",
+      "endpoint_state_sha256": "f10f2e89d0ef3e0aa93c55942c9d5a8c6df75aba17d1aa93697d7a20bdd0bce6",
+      "fold": 0,
+      "lineage_ids": [
+        "program:5d5e34b5eb02e78da3f97da3f481200679be6d9e6ae0a00f987c86239a33f72a"
+      ],
+      "row_id": "second_generation:a5737be60173bab94fbd6310c7247f7ebc05f03b6536ac059115ec110922b512",
+      "scaffold": "O=C(NCc1ccc2ccccc2c1)N1CCCC1",
+      "source_state_sha256": "b621111ce6dd697de63d1e77c175781670a63a2cec3df9fb8c1b3c77534bb0f9",
+      "stratum": [
+        "fa7",
+        "fa7_0",
+        0.4,
+        "3a3788d420cc3f289da06c0ef73cfeced02762101ca1d181f397f2f125015e1f",
+        1701
+      ],
+      "target": "fa7"
+    },
+    {
+      "cell": "fa7_0",
+      "endpoint_state_sha256": "b72b4061edb1a546f6e51dee44a361a09c943c1a3c6ad9cd7a657592dd1da80b",
+      "fold": 0,
+      "lineage_ids": [
+        "program:7a9be153cf9ba3a5ce526aa63310a5bcbb292e991774eaf39460f37094e215ac"
+      ],
+      "row_id": "second_generation:b3dbfc2b6f05d48f003799411494acd8a21beb18f107e5f1267300e03d52cc41",
+      "scaffold": "O=C(NCc1ccc2ccccc2c1)N1CCCCC1",
+      "source_state_sha256": "b621111ce6dd697de63d1e77c175781670a63a2cec3df9fb8c1b3c77534bb0f9",
+      "stratum": [
+        "fa7",
+        "fa7_0",
+        0.4,
+        "3a3788d420cc3f289da06c0ef73cfeced02762101ca1d181f397f2f125015e1f",
+        1701
+      ],
+      "target": "fa7"
+    },
+    {
+      "cell": "fa7_0",
+      "endpoint_state_sha256": "184fbc310863cdc521f5d0ef18c4b80552f7f268412d5044f295edc2bd6ff2f1",
+      "fold": 0,
+      "lineage_ids": [
+        "program:be84776745d2542db2735611f0c37c9b1381940c442f9bb69bfefb7c9c357541"
+      ],
+      "row_id": "second_generation:c4f7b7e536d90ccc89fda5536c25ab5ab6a23947edace79f398c06f20b005774",
+      "scaffold": "O=C(NCc1ccc2ccccc2c1)N1CCCCC1",
+      "source_state_sha256": "b621111ce6dd697de63d1e77c175781670a63a2cec3df9fb8c1b3c77534bb0f9",
+      "stratum": [
+        "fa7",
+        "fa7_0",
+        0.4,
+        "3a3788d420cc3f289da06c0ef73cfeced02762101ca1d181f397f2f125015e1f",
+        1701
+      ],
+      "target": "fa7"
+    },
+    {
+      "cell": "fa7_0",
+      "endpoint_state_sha256": "9f5d092b023365f65cd5ae2eee96d78d5157912b1528979355e8a482289375f4",
+      "fold": 0,
+      "lineage_ids": [
+        "program:8bb699303853742d8bf6f40f0b7ecf258cfbaf86ac3371ed813fb7f82cca8fb6"
+      ],
+      "row_id": "second_generation:cc542d46c6d55504e9eeac6716b117a125300c192b907b16ef268aec3dcf4a47",
+      "scaffold": "O=C(NCc1ccc2ccccc2c1)N1CCCSC1",
+      "source_state_sha256": "b621111ce6dd697de63d1e77c175781670a63a2cec3df9fb8c1b3c77534bb0f9",
+      "stratum": [
+        "fa7",
+        "fa7_0",
+        0.4,
+        "3a3788d420cc3f289da06c0ef73cfeced02762101ca1d181f397f2f125015e1f",
+        1701
+      ],
+      "target": "fa7"
+    },
+    {
+      "cell": "fa7_0",
+      "endpoint_state_sha256": "ad3151a51692a991df6cd07827ada17444153f73f34d2bacfbd035b47c1bdc60",
+      "fold": 0,
+      "lineage_ids": [
+        "program:b317ca537612b98f4a784c331c2c4eafe8c57f1d409ac637aa9d103a4b20abe0"
+      ],
+      "row_id": "second_generation:ded3eb6c9bd9bff6dd30d1260e8377b8f93b64c7bb6f38d2e6d30613cb7edf55",
+      "scaffold": "O=C(NCc1ccc2ccccc2c1)N1CCC1",
+      "source_state_sha256": "b621111ce6dd697de63d1e77c175781670a63a2cec3df9fb8c1b3c77534bb0f9",
+      "stratum": [
+        "fa7",
+        "fa7_0",
+        0.4,
+        "3a3788d420cc3f289da06c0ef73cfeced02762101ca1d181f397f2f125015e1f",
+        1701
+      ],
+      "target": "fa7"
+    },
+    {
+      "cell": "fa7_0",
+      "endpoint_state_sha256": "840a8c3582276cb2bf41f025fad56125e9e9902782ddf6dd7b0216b26891d136",
+      "fold": 0,
+      "lineage_ids": [
+        "program:83fe6fc0d1094023b3e73a64a4d765f13d0acb0e0be621c829bb01f15d7d8a62"
+      ],
+      "row_id": "second_generation:e6912f85c5f1685dbc6b5687e9bc494eeb06de4bfe3673132b450baf38bf037b",
+      "scaffold": "O=C(NCc1ccc2ccccc2c1)N1CCCCC1",
+      "source_state_sha256": "b621111ce6dd697de63d1e77c175781670a63a2cec3df9fb8c1b3c77534bb0f9",
+      "stratum": [
+        "fa7",
+        "fa7_0",
+        0.4,
+        "3a3788d420cc3f289da06c0ef73cfeced02762101ca1d181f397f2f125015e1f",
+        1701
+      ],
+      "target": "fa7"
+    },
+    {
+      "cell": "fa7_0",
+      "endpoint_state_sha256": "32f68677518f2277cac31b25a9700d683d127c2851bf17537b77cd87d8aa7b7d",
+      "fold": 0,
+      "lineage_ids": [
+        "program:05832d975b5dbfaeae30a3be920eee3cc3a0205c792bcd367285b9f8334a3bfe"
+      ],
+      "row_id": "second_generation:e8a037d3d1cf0d9054ed88f3f17fc51a140f206b533c1db06fd7524d360c7bea",
+      "scaffold": "O=C(NCc1ccc2ccccc2c1)N1CCCCS1",
+      "source_state_sha256": "b621111ce6dd697de63d1e77c175781670a63a2cec3df9fb8c1b3c77534bb0f9",
+      "stratum": [
+        "fa7",
+        "fa7_0",
+        0.4,
+        "3a3788d420cc3f289da06c0ef73cfeced02762101ca1d181f397f2f125015e1f",
+        1701
+      ],
+      "target": "fa7"
+    },
+    {
+      "cell": "5ht1b_0",
+      "endpoint_state_sha256": "cadf90a1051bf55494d179ac69ce1d44cf0220821970cf2906d5c6929b98827a",
+      "fold": 0,
+      "lineage_ids": [
+        "program:10497bf65b513b82b27b5a6f53f59fdf90e9a397048741a0fcbf613bcc6ebd63"
+      ],
+      "row_id": "second_generation:ec4dd6ec35e29cb00328674d710658a417a2511123d0c19e03ce3b2a1291288d",
+      "scaffold": "O=C(c1ccc2ccccc2c1)N1CCc2cc3c(cc21)C1(CC[NH2+]CC1)CCO3",
+      "source_state_sha256": "ec05d0011f1c996975b143869e4b7e12d25367ba786ae05beead5d1934224e33",
+      "stratum": [
+        "5ht1b",
+        "5ht1b_0",
+        0.4,
+        "1890751e78c154b16cba01c2cdb5d2363281c123a2ec5be3afc6ffdf2a9ab3df",
+        1701
+      ],
+      "target": "5ht1b"
+    },
+    {
+      "cell": "5ht1b_0",
+      "endpoint_state_sha256": "a8c1e1c59a8b0e372629bc5f76b32bf2c62ef0c5ff3d7c47cc9e166ab8dca392",
+      "fold": 0,
+      "lineage_ids": [
+        "program:a2e5a9b43a6a80caab3d9ce558205d0badcf2b608ddd7ebdffa9771a15b2c101"
+      ],
+      "row_id": "second_generation:f43e3b54ff9cd536d97f14a2c5942180c922c3dd07fa88dcfab9373e261b95d4",
+      "scaffold": "O=C(c1ccc2ccccc2c1)N1CCc2cc3c(cc21)C1(CC[NH2+]CC1)CCO3",
+      "source_state_sha256": "ec05d0011f1c996975b143869e4b7e12d25367ba786ae05beead5d1934224e33",
+      "stratum": [
+        "5ht1b",
+        "5ht1b_0",
+        0.4,
+        "1890751e78c154b16cba01c2cdb5d2363281c123a2ec5be3afc6ffdf2a9ab3df",
+        1701
+      ],
+      "target": "5ht1b"
+    },
+    {
+      "cell": "5ht1b_0",
+      "endpoint_state_sha256": "622082a06525c5dd98ff94f8b8e68fb752f69ff44ed40e12b98a1acb64427aee",
+      "fold": 0,
+      "lineage_ids": [
+        "program:f615560303efedcede1fb696446c810793b11d11fb0c014c4b3d10f836b34c5b"
+      ],
+      "row_id": "second_generation:f6fa1874ac0bfffdf1c148d49340052b8f9c143010298f7e6b096f769da9827a",
+      "scaffold": "O=C(c1ccc2ccccc2c1)N1CCc2cc3c(cc21)C1(CC[NH2+]CC1)COC3",
+      "source_state_sha256": "ec05d0011f1c996975b143869e4b7e12d25367ba786ae05beead5d1934224e33",
+      "stratum": [
+        "5ht1b",
+        "5ht1b_0",
+        0.4,
+        "1890751e78c154b16cba01c2cdb5d2363281c123a2ec5be3afc6ffdf2a9ab3df",
+        1701
+      ],
+      "target": "5ht1b"
+    },
+    {
+      "cell": "fa7_0",
+      "endpoint_state_sha256": "0447abb098826881ac49fa9c64493391b25aa417883a6d143728c7fd985f72c1",
+      "fold": 0,
+      "lineage_ids": [
+        "program:62fda9c72306dee4f8fefd3e6c95d02c2a6adda93b2ce870b85388e19a64b271"
+      ],
+      "row_id": "second_generation:fe463d319630f17221d83c92d300883f959cdc845c67a3f66486b4d9dcd8b25b",
+      "scaffold": "O=C(NCc1ccc2ccccc2c1)N1CCC1",
+      "source_state_sha256": "b621111ce6dd697de63d1e77c175781670a63a2cec3df9fb8c1b3c77534bb0f9",
+      "stratum": [
+        "fa7",
+        "fa7_0",
+        0.4,
+        "3a3788d420cc3f289da06c0ef73cfeced02762101ca1d181f397f2f125015e1f",
+        1701
+      ],
+      "target": "fa7"
+    }
+  ],
+  "schema_version": "t4_target_conditioned_utility_split_manifest_v1"
+}
