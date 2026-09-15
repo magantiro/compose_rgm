@@ -372,6 +372,45 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped zero-oracle T4 complete-macro selector, 2026-09-15:** after the
+compositional structural-subgoal generator passed its K=128 support gate but
+underperformed the matched uniform order at K=8 and K=32, the user explicitly
+authorized one isolated ordering revision. Preserve the generator, grammar,
+compiler, exact realizer, folds and baseline candidate/result artifacts byte for
+byte. Rerank only the already locked 128 learned candidates per held source.
+The generated object remains a complete, exactly realized one- or
+two-construction-event structural macro and endpoint; the selector must not
+become another generator or expand candidate support.
+
+Fit one small source-conditioned complete-macro pairwise ranker per frozen fold.
+Training positives are exact successful T4 source-to-endpoint structural goals
+from that fold's ten training sources. Hard negatives are the first 32 wrong
+learned candidates for those same sources from the immutable cross-fitted lock,
+where each source had itself been excluded from the generator fit that produced
+its pool. Exclude exact and radius-two transformation-equivalent positives from
+the negative set. Fit feature moments only on those rows and give equal total
+mass to each source, then route, then negative. Reuse the existing complete
+structural-goal feature map and pairwise ranker. Add only a fixed, training-fold
+normalized penalty for observed compiler work already present in each exact
+realization receipt. The lock lacks rejected-candidate rows, so abstain from a
+realizability classifier and report that unsupported label coverage explicitly.
+
+Compare the selector with the immutable raw learned and raw uniform orders at
+K=8, 16 and 32. Report exact endpoint, exact patch and strict radius-two
+transformation recall and precision, held-component coverage and generated-
+component precision, unique endpoint and complete-macro yield, novel patch
+yield, inherited compile coverage, exact-realization precision, compiler work,
+fit coverage, abstentions and fold/source-resolved results. Apply the frozen
+diversity guard that emits unseen exact complete-macro signatures before
+repeats. A scientific pass requires a strict early-rank improvement over the
+raw learned order without lower exact-realization precision or diversity.
+Exact teacher recovery remains diagnostic. A negative result does not authorize
+support expansion, compiler changes or threshold revision. This is CPU-only and
+zero-oracle. It may not generate candidates, call an oracle or docking function,
+launch Modal, access live runs, select a scored controller or alter any prior
+artifact. The self-hashed contract is
+`configs/t4_complete_macro_selector_v1.json`.
+
 **Scoped zero-oracle T4 compositional structural-subgoal generator,
 2026-09-15:** after the grouped-source component audit found zero whole-patch
 overlap but high low-level graph, atom, bond and dependency reuse, the user
