@@ -5,8 +5,8 @@ from pathlib import Path
 import pytest
 
 from compose_v4.control.docking_value import identity
-from compose_v4.experiments import t4_delta06_utility_launch as launch_module
-from compose_v4.experiments.t4_delta06_utility_launch import (
+from compose_v4.experiments import t4_compositional_utility_launch as launch_module
+from compose_v4.experiments.t4_compositional_utility_launch import (
     make_run_id,
     publish_once,
     read_sealed,
@@ -55,7 +55,7 @@ def test_run_identity_binds_launcher_and_sealed_input():
 
 def test_repository_contract_and_request_lock_are_exact():
     root = Path(__file__).resolve().parents[1]
-    path = root / "configs/t4_delta06_structural_subgoal_utility_launch_v1.json"
+    path = root / "configs/t4_compositional_generator_utility_launch_v1.json"
     envelope = json.loads(path.read_text())
     assert envelope["contract_sha256"] == identity(envelope["payload"])
     contract = envelope["payload"]
@@ -66,12 +66,15 @@ def test_repository_contract_and_request_lock_are_exact():
     )
     loaded, lock, requests = validate_local_inputs(root)
     assert loaded == contract
-    assert lock["candidate_trace_available"] is False
-    assert len(requests) == 19
-    assert sum(len(row["membership_ids"]) for row in requests) == 22
+    assert "candidate_trace_available" not in lock
+    assert len(requests) == 4
+    assert sum(len(row["membership_ids"]) for row in requests) == 8
 
 
 def _worker_fixture(tmp_path, monkeypatch, score):
+    monkeypatch.setattr(
+        launch_module, "rdBase", type("PinnedRDKit", (), {"rdkitVersion": "2024.03.5"})
+    )
     repo = tmp_path / "repo"
     artifacts = tmp_path / "artifacts"
     repo.mkdir()
@@ -136,7 +139,7 @@ def _worker_fixture(tmp_path, monkeypatch, score):
     )
     folder = (
         artifacts
-        / "t4_delta06_structural_subgoal_utility_launch"
+        / "t4_compositional_generator_utility_launch"
         / task["run_id"]
         / "requests"
         / request["request_id"]

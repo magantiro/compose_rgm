@@ -1,4 +1,4 @@
-"""Modal workers for the authorized 19-request strict-delta-0.6 utility panel."""
+"""Modal workers for the authorized four-request compositional utility panel."""
 
 from __future__ import annotations
 
@@ -16,10 +16,10 @@ from modal_apps.run_process_v2_p50_app import (
     artifact_volume,
 )
 
-APP_SOURCE = "modal_apps/t4_delta06_utility_launch_app.py"
-TOOL_SOURCE = "tools/t4_delta06_utility_launch.py"
+APP_SOURCE = "modal_apps/t4_compositional_utility_launch_app.py"
+TOOL_SOURCE = "tools/t4_compositional_utility_launch.py"
 REQUEST_LOCK_SOURCE = (
-    "diagnostics/t4_delta06_structural_subgoal_utility_lock/attempt_1/request_lock.json"
+    "diagnostics/t4_compositional_generator_utility_lock/attempt_1/request_lock.json"
 )
 image = (
     _scoring_image.add_local_file(
@@ -28,7 +28,23 @@ image = (
     .add_local_file(ROOT / APP_SOURCE, str(REMOTE_ROOT / APP_SOURCE), copy=True)
     .add_local_file(ROOT / TOOL_SOURCE, str(REMOTE_ROOT / TOOL_SOURCE), copy=True)
 )
-app = modal.App("compose-t4-delta06-utility")
+app = modal.App("compose-t4-compositional-utility")
+
+
+@app.function(
+    image=image,
+    cpu=(1.0, 1.0),
+    memory=2048,
+    timeout=180,
+    max_containers=1,
+    retries=0,
+)
+def t4_compositional_utility_preflight(task: dict[str, Any]) -> dict[str, Any]:
+    from compose_v4.experiments.t4_compositional_utility_launch import remote_preflight
+
+    return remote_preflight(
+        task, REMOTE_ROOT, validate_revision=_validate_remote_revision
+    )
 
 
 @app.function(
@@ -36,13 +52,13 @@ app = modal.App("compose-t4-delta06-utility")
     cpu=(1.0, 1.0),
     memory=4096,
     timeout=480,
-    max_containers=19,
+    max_containers=4,
     retries=0,
     scaledown_window=60,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
-def t4_delta06_utility_worker(task: dict[str, Any]) -> dict[str, Any]:
-    from compose_v4.experiments.t4_delta06_utility_launch import run_worker
+def t4_compositional_utility_worker(task: dict[str, Any]) -> dict[str, Any]:
+    from compose_v4.experiments.t4_compositional_utility_launch import run_worker
 
     return run_worker(
         task,
@@ -63,8 +79,8 @@ def t4_delta06_utility_worker(task: dict[str, Any]) -> dict[str, Any]:
     retries=0,
     volumes={str(ARTIFACT_ROOT): artifact_volume},
 )
-def t4_delta06_utility_reduce(task: dict[str, Any]) -> dict[str, Any]:
-    from compose_v4.experiments.t4_delta06_utility_launch import reduce_run
+def t4_compositional_utility_reduce(task: dict[str, Any]) -> dict[str, Any]:
+    from compose_v4.experiments.t4_compositional_utility_launch import reduce_run
 
     return reduce_run(
         task,

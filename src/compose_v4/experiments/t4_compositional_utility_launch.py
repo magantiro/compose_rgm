@@ -1,4 +1,4 @@
-"""One-shot scored execution of the sealed strict-delta-0.6 utility panel."""
+"""One-shot scored execution of the sealed compositional-generator delta-0.4 utility panel."""
 
 from __future__ import annotations
 
@@ -19,17 +19,17 @@ from rdkit import Chem, rdBase
 
 from compose_v4.control.docking_value import identity
 
-CONTRACT_SCHEMA = "t4_delta06_structural_subgoal_utility_launch_contract_v1"
-REQUEST_LOCK_SCHEMA = "t4_delta06_structural_subgoal_request_lock_v1"
-RESULT_SCHEMA = "t4_delta06_structural_subgoal_utility_launch_result_v1"
+CONTRACT_SCHEMA = "t4_compositional_generator_utility_launch_contract_v1"
+REQUEST_LOCK_SCHEMA = "t4_compositional_generator_utility_request_lock_v1"
+RESULT_SCHEMA = "t4_compositional_generator_utility_launch_result_v1"
 TERMINAL_SCHEMAS = {
-    "result": "t4_delta06_structural_subgoal_utility_docking_result_v1",
-    "failure": "t4_delta06_structural_subgoal_utility_docking_failure_v1",
+    "result": "t4_compositional_generator_utility_docking_result_v1",
+    "failure": "t4_compositional_generator_utility_docking_failure_v1",
 }
-CONTRACT_PATH = "configs/t4_delta06_structural_subgoal_utility_launch_v1.json"
+CONTRACT_PATH = "configs/t4_compositional_generator_utility_launch_v1.json"
 SCORING_PATH = "modal_apps/genmol_t4_opt_app.py"
 REQUEST_LOCK_PATH = (
-    "diagnostics/t4_delta06_structural_subgoal_utility_lock/attempt_1/request_lock.json"
+    "diagnostics/t4_compositional_generator_utility_lock/attempt_1/request_lock.json"
 )
 
 
@@ -99,11 +99,12 @@ def load_contract(repo_root: Path) -> dict:
     execution = contract.get("execution", {})
     if (
         authorization.get("modal_launch_authorized") is not True
-        or authorization.get("first_score_call_ceiling") != 19
+        or authorization.get("isolated_bundle_upload_authorized") is not True
+        or authorization.get("first_score_call_ceiling") != 4
         or execution.get("automatic_retries") != 0
         or execution.get("replacement") is not False
         or execution.get("backfill") is not False
-        or execution.get("maximum_modal_workers") != 19
+        or execution.get("maximum_modal_workers") != 4
         or execution.get("requests_per_worker") != 1
     ):
         raise ValueError(
@@ -177,7 +178,6 @@ def load_requests(repo_root: Path, contract: dict) -> tuple[dict, list[dict]]:
         or lock.get("call_ceiling_if_later_authorized") != expected["expected_requests"]
         or lock.get("automatic_retries") != 0
         or lock.get("replacement_or_backfill") is not False
-        or lock.get("candidate_trace_available") is not False
         or not isinstance(requests, list)
         or len(requests) != expected["expected_requests"]
     ):
@@ -201,7 +201,13 @@ def load_requests(repo_root: Path, contract: dict) -> tuple[dict, list[dict]]:
 
 def validate_local_inputs(repo_root: Path) -> tuple[dict, dict, list[dict]]:
     contract = load_contract(repo_root)
-    for name in ("zero_oracle_contract", "candidate_lock", "zero_oracle_result"):
+    for name in (
+        "zero_oracle_prelock",
+        "input_binding",
+        "candidate_lock",
+        "abstention_ledger",
+        "zero_oracle_result",
+    ):
         entry = contract["inputs"][name]
         path = repo_root / entry["path"]
         if sha256_file(path) != entry["physical_sha256"]:
@@ -227,7 +233,7 @@ def validate_execution_inputs(repo_root: Path) -> tuple[dict, dict, list[dict]]:
 def make_run_id(contract: dict, launcher_identity: dict) -> str:
     return identity(
         {
-            "schema_version": "t4_delta06_structural_subgoal_utility_run_identity_v1",
+            "schema_version": "t4_compositional_generator_utility_run_identity_v1",
             "contract_sha256": identity(contract),
             "request_lock_physical_sha256": contract["inputs"]["request_lock"][
                 "physical_sha256"
@@ -256,7 +262,7 @@ def _request_from_task(repo_root: Path, task: dict) -> tuple[dict, dict]:
         raise ValueError("worker contract identity changed")
     matches = [row for row in requests if row["request_id"] == task.get("request_id")]
     if len(matches) != 1:
-        raise ValueError("worker request is outside exact 19-request lock")
+        raise ValueError("worker request is outside exact four-request lock")
     return contract, matches[0]
 
 
@@ -271,6 +277,56 @@ def _copy_pose_artifacts(source: Path, destination: Path) -> dict[str, str]:
     return hashes
 
 
+def remote_preflight(
+    task: dict,
+    repo_root: Path,
+    *,
+    validate_revision: Callable[[dict], None],
+) -> dict:
+    """Attest the exact serialized image and evaluator assets without docking."""
+    import subprocess
+
+    validate_revision(task["image_revision"])
+    contract, _lock, requests = validate_execution_inputs(repo_root)
+    if (
+        rdBase.rdkitVersion != "2024.03.5"
+        or task.get("contract_sha256") != identity(contract)
+        or task.get("run_id")
+        != make_run_id(contract, task.get("launcher_identity", {}))
+    ):
+        raise ValueError("remote scored-launch environment or identity changed")
+    for field, expected in task["launcher_identity"].items():
+        if sha256_file(repo_root / field) != expected:
+            raise ValueError(f"serialized launch implementation changed: {field}")
+    qvina = Path("/opt/dock/qvina02")
+    if sha256_file(qvina) != contract["evaluator"]["qvina02_sha256"]:
+        raise ValueError("QuickVina executable identity changed")
+    receptors = {}
+    for request in requests:
+        evaluator = request["evaluator_payload"]
+        path = Path("/opt/dock/receptors") / f"{request['target']}.pdbqt"
+        observed = sha256_file(path)
+        if observed != evaluator["receptor_sha256"]:
+            raise ValueError(f"receptor identity changed: {request['target']}")
+        receptors[request["target"]] = observed
+    return {
+        "schema_version": "t4_compositional_generator_utility_remote_preflight_v1",
+        "status": "PASS_NO_DOCKING",
+        "run_id": task["run_id"],
+        "contract_sha256": identity(contract),
+        "request_lock_physical_sha256": contract["inputs"]["request_lock"][
+            "physical_sha256"
+        ],
+        "requests": len(requests),
+        "memberships": sum(len(row["membership_ids"]) for row in requests),
+        "rdkit": rdBase.rdkitVersion,
+        "openbabel": subprocess.check_output(["obabel", "-V"], text=True).strip(),
+        "qvina02_sha256": sha256_file(qvina),
+        "receptor_sha256": dict(sorted(receptors.items())),
+        "docking_calls": 0,
+    }
+
+
 def run_worker(
     task: dict,
     repo_root: Path,
@@ -282,6 +338,8 @@ def run_worker(
 ) -> dict:
     """Spend one request once, with committed state before and after docking."""
     validate_revision(task["image_revision"])
+    if rdBase.rdkitVersion != "2024.03.5":
+        raise ValueError("scored worker requires RDKit 2024.03.5")
     contract, request = _request_from_task(repo_root, task)
     for field, expected in task["launcher_identity"].items():
         if sha256_file(repo_root / field) != expected:
@@ -294,9 +352,7 @@ def run_worker(
         raise ValueError(f"receptor identity changed: {request['target']}")
 
     volume.reload()
-    root = (
-        artifact_root / "t4_delta06_structural_subgoal_utility_launch" / task["run_id"]
-    )
+    root = artifact_root / "t4_compositional_generator_utility_launch" / task["run_id"]
     folder = root / "requests" / request["request_id"]
     reservation_path = folder / "reservation.json"
     started_path = folder / "started.json"
@@ -320,7 +376,7 @@ def run_worker(
         "contract_sha256": identity(contract),
     }
     reservation = {
-        "schema_version": "t4_delta06_structural_subgoal_utility_reservation_v1",
+        "schema_version": "t4_compositional_generator_utility_reservation_v1",
         **common,
         "reserved_at_utc": _stamp(),
         "attempt_ordinal": 1,
@@ -330,7 +386,7 @@ def run_worker(
     publish_once(reservation_path, reservation)
     volume.commit()
     started = {
-        "schema_version": "t4_delta06_structural_subgoal_utility_start_v1",
+        "schema_version": "t4_compositional_generator_utility_start_v1",
         **common,
         "started_at_utc": _stamp(),
         "target": request["target"],
@@ -352,7 +408,7 @@ def run_worker(
         flush=True,
     )
     try:
-        tag = f"t4d06_{task['run_id'][:12]}_{request['request_id']}"
+        tag = f"t4c04_{task['run_id'][:12]}_{request['request_id']}"
         score = dock(
             request["canonical_smiles"],
             request["target"],
@@ -427,6 +483,8 @@ def reduce_run(
 ) -> dict:
     """Reduce immutable per-request records in request-ID order without redocking."""
     validate_revision(task["image_revision"])
+    if rdBase.rdkitVersion != "2024.03.5":
+        raise ValueError("scored reducer requires RDKit 2024.03.5")
     contract, _lock, requests = validate_execution_inputs(repo_root)
     if task.get("contract_sha256") != identity(contract) or task.get(
         "run_id"
@@ -436,9 +494,7 @@ def reduce_run(
         if sha256_file(repo_root / field) != expected:
             raise ValueError(f"serialized launch implementation changed: {field}")
     volume.reload()
-    root = (
-        artifact_root / "t4_delta06_structural_subgoal_utility_launch" / task["run_id"]
-    )
+    root = artifact_root / "t4_compositional_generator_utility_launch" / task["run_id"]
     rows, incomplete = [], []
     for request in requests:
         folder = root / "requests" / request["request_id"]
@@ -515,7 +571,7 @@ def reduce_run(
         "automatic_retries": 0,
         "replacement_or_backfill": False,
         "new_generator_calls": 0,
-        "candidate_trace_available": False,
+        "candidate_trace_available_in_bound_candidate_lock": True,
         "software": {"python": platform.python_version(), "rdkit": rdBase.rdkitVersion},
         "interpretation_limit": contract["interpretation_limit"],
     }
