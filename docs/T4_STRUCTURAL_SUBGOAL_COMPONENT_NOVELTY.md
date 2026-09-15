@@ -103,3 +103,21 @@ establish autonomous patch generation, molecular utility, docking improvement
 or an IVG comparison. Those require a later contract, nonzero and improving
 held-source generated-patch recall with diversity and exact-realization
 precision, then a frozen score-blind docking panel.
+
+## Completed result and decision
+
+The authoritative audit at revision
+`fcc3486b83457f04255ef74eb23a095861a50812` completed with zero oracle or
+docking calls. Whole-patch exact overlap was 0/147. The granular component view
+showed high instance coverage for target-topology graphlets (98.8%), atom
+transition tokens (96.4%), bond tokens (100.0%), dependency tokens (99.7%),
+source graphlets (84.6%), target attributed graphlets (82.4%) and attachment
+edges (82.3%). Only 11/147 patches had every granular component familiar,
+however, so the result is not evidence that fixed familiar components can simply
+be recombined to cover held patches.
+
+The decision is to preserve the exact realizer and move toward joint conditional
+generation of novel address-free patches. Do not reopen whole-template retrieval
+or independent component marginals. The complete machine-readable result and
+interpretation are in
+`diagnostics/t4_structural_subgoal_component_novelty/attempt_1/`.
