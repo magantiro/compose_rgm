@@ -1,0 +1,99 @@
+{
+  "payload": {
+    "schema_version": "t4_delta06_structural_subgoal_utility_launch_contract_v1",
+    "authorization": {
+      "date": "2026-09-15",
+      "basis": "The user explicitly approved the exact 19-request strict-delta-0.6 lock, a ceiling of 19 first-score docking calls, no retries, replacements or backfill, and up to 19 independent concurrent Modal containers with one request per worker.",
+      "request_lock_physical_sha256": "23ccc7250d5f6ac20af3609047b39730a47ab414bba01cf8c7c0479ae2681659",
+      "request_lock_payload_sha256": "bc0b6ffdbd229e3ba6cf143f53fcc37003326138c43fa249aef629131360a15b",
+      "first_score_call_ceiling": 19,
+      "modal_launch_authorized": true
+    },
+    "mode": "prospective_scoring_of_exact_score_blind_request_lock",
+    "scientific_problem": "Determine whether endpoints from the zero-teacher-recall structural-subgoal policies have docking utility despite failing teacher endpoint and transformation recovery.",
+    "primary_output": "A durable per-request docking ledger and deterministic membership-preserving endpoint-utility result over the exact 19 sealed requests.",
+    "central_claim_under_test": "Zero teacher recovery need not imply zero docking utility among already generated strictly eligible endpoints.",
+    "experimental_setting": "Nineteen score-blind strict-delta-0.6 endpoint requests selected before any new docking result from 3,840 frozen attempts across 15 T4 source cells and two policies.",
+    "inputs": {
+      "source_revision": "f79d4e2f08a2bfe06f58fa8e6c8796daa49f976e",
+      "zero_oracle_contract": {
+        "path": "configs/t4_delta06_structural_subgoal_utility_lock_v1.json",
+        "physical_sha256": "77e13579650e8d9255d8dde38beb7b25baa661e96b7ab7beaff7ccdaa4585372",
+        "payload_sha256": "4189297c53cab2dc40c4b5713cec99176efbf6cd7932b2c6fe39707ccffd0748"
+      },
+      "candidate_lock": {
+        "path": "diagnostics/t4_delta06_structural_subgoal_utility_lock/attempt_1/candidate_lock.json",
+        "physical_sha256": "cb99a77a0d721af50a44b85309f105787e18a31f1bc006c3c23be5e9893b4089",
+        "payload_sha256": "5f777aacafde3db5a0e48f2e463444bb5c80c332f317c4a7dad585635c79b7f4"
+      },
+      "request_lock": {
+        "path": "diagnostics/t4_delta06_structural_subgoal_utility_lock/attempt_1/request_lock.json",
+        "physical_sha256": "23ccc7250d5f6ac20af3609047b39730a47ab414bba01cf8c7c0479ae2681659",
+        "payload_sha256": "bc0b6ffdbd229e3ba6cf143f53fcc37003326138c43fa249aef629131360a15b"
+      },
+      "zero_oracle_result": {
+        "path": "diagnostics/t4_delta06_structural_subgoal_utility_lock/attempt_1/result.json",
+        "physical_sha256": "ab34ef5e065ffc7f13cb4a6a3bd0414c9f8bc5abc05cc78abb5554764da995a3",
+        "payload_sha256": "d65a5447743e6ae18e65c59416f7435d5b4917d89fc9d773482170ce399107e8"
+      },
+      "scoring_implementation": {
+        "path": "modal_apps/genmol_t4_opt_app.py",
+        "sha256": "9b635a9936493a5900b613cdce52f76c24efcf98f3f43b3b155448e0b1796bf0",
+        "function": "_dock"
+      }
+    },
+    "request_contract": {
+      "expected_requests": 19,
+      "expected_memberships": 22,
+      "expected_cells_with_requests": 8,
+      "expected_cell_abstentions": 7,
+      "identity_fields": ["target", "canonical_smiles", "docking_seed", "evaluator"],
+      "targets_and_counts": {"5ht1b": 1, "braf": 6, "jak2": 8, "parp1": 4},
+      "candidate_mutation": false,
+      "selection_or_reranking": false,
+      "teacher_or_task_score_access": false
+    },
+    "evaluator": {
+      "schema_version": "t4_quickvina_endpoint_evaluator_v1",
+      "quickvina_cpu_per_request": 1,
+      "num_modes": 10,
+      "exhaustiveness": 1,
+      "ligand_preparation": "Open Babel --gen3d, unchanged production wrapper",
+      "docking_seed": 1701,
+      "score_direction": "minimize",
+      "score_unit": "kcal/mol as emitted by the bound QuickVina wrapper",
+      "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0"
+    },
+    "execution": {
+      "maximum_modal_workers": 19,
+      "requests_per_worker": 1,
+      "cpu_per_worker": 1,
+      "memory_mb_per_worker": 4096,
+      "timeout_seconds_per_worker": 480,
+      "automatic_retries": 0,
+      "replacement": false,
+      "backfill": false,
+      "candidate_regeneration": false,
+      "result_dependent_actions": false,
+      "attempt_accounting": "A successfully published reservation consumes the request's only authorized first-score attempt. A start, docking failure, container failure or missing score receives no retry.",
+      "persistence": "Publish reservation, start and terminal result or failure records atomically in a request-ID directory on the compose-v4-artifacts Modal volume and commit after each transition.",
+      "reduction": "Sort all 19 request identities by request_id; require one terminal record per reservation or report the exact incomplete census without retry. Preserve all memberships from the sealed request lock."
+    },
+    "outputs": {
+      "modal_volume": "compose-v4-artifacts",
+      "volume_prefix": "/t4_delta06_structural_subgoal_utility_launch",
+      "local_receipt": "diagnostics/t4_delta06_structural_subgoal_utility_launch_spawn.json",
+      "request_state_files": ["reservation.json", "started.json", "result.json", "failure.json"],
+      "reduced_result": "result.json"
+    },
+    "prohibitions": [
+      "no request beyond the 19 exact locked request IDs",
+      "no retry, replacement or backfill after reservation",
+      "no candidate regeneration, mutation or reranking",
+      "no teacher endpoint, teacher transformation, teacher score or comparator outcome access",
+      "no optimization continuation, controller selection or live-run mutation"
+    ],
+    "interpretation_limit": "This prospective panel can establish endpoint docking utility only under the bound QuickVina evaluator. Candidate traces are unavailable, so no outcome can establish route recovery, executable proposal precision, teacher recovery or superiority to IVG."
+  },
+  "contract_sha256": "536a981840acc7b5002b07cabf3a2d375a4fbd409f5d0ef152a3f90c5ab88708"
+}

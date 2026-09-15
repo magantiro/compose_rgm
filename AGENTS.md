@@ -372,6 +372,31 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped scored launch of the locked T4 strict-delta-0.6 structural-subgoal
+utility panel, 2026-09-15:** after the zero-oracle utility milestone sealed 19
+score-blind endpoint requests, the user explicitly authorized exactly those
+requests by physical SHA-256
+`23ccc7250d5f6ac20af3609047b39730a47ab414bba01cf8c7c0479ae2681659`
+and payload SHA-256
+`bc0b6ffdbd229e3ba6cf143f53fcc37003326138c43fa249aef629131360a15b`.
+Launch at most 19 first-score QuickVina docking calls, one immutable request per
+independent Modal worker, with up to 19 concurrent single-CPU containers. Use
+only the evaluator, receptor, docking seed and molecular identity already
+embedded in the request lock. Persist reservation, start, result or failure
+atomically for each request and reduce completed records deterministically.
+Every reserved request consumes its one allowed attempt. Do not retry, replace,
+backfill, regenerate or rerank a candidate, and do not access teacher or task
+scores during launch. Preserve all source-policy memberships when reporting a
+deduplicated physical request. The request lock is the candidate authority and
+must not be changed by the launcher.
+
+This launch tests endpoint docking utility only. Candidate traces are absent,
+so a favorable result cannot establish route recovery, executable proposal
+precision or teacher recovery. The self-hashed launch contract is
+`configs/t4_delta06_structural_subgoal_utility_launch_v1.json`. It authorizes no
+additional optimization, controller selection, live-run mutation or calls
+beyond the exact 19-request ceiling.
+
 **Scoped zero-oracle T4 strict-delta-0.6 structural-subgoal utility lock,
 2026-09-15:** after the attempt-2 held-source structural-subgoal policies
 recovered zero teacher endpoints but emitted 3,141 complete molecular endpoints,
