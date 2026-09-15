@@ -372,6 +372,39 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped zero-oracle T4 selector utility prelock, 2026-09-15:** after the
+complete-macro selector improved early held-source structural support on the
+immutable baseline learned pools, the user explicitly authorized one isolated
+prospective development panel. Preserve the generator, selector, folds,
+candidate locks, prior delta-0.4 utility lock and every prior request byte for
+byte. Use only the five cells already declared by the compositional-generator
+utility prelock. The selector can change order but not endpoint eligibility, so
+inherit the exact replay, validity, connectedness, non-self, atom-count,
+delta-0.4 similarity, QED and synthetic-accessibility decisions from that
+immutable audited ledger.
+
+For each supported cell, select at most the first eligible candidate in the
+immutable selector order after excluding every candidate identity and physical
+docking-request identity already present in the prior delta-0.4 request lock.
+The prior baseline-learned request for the same cell is the frozen raw-order
+counterpart; do not add another raw candidate. Abstain when the baseline learned
+pool has no eligible endpoint, when the raw counterpart is absent, or when no
+new selector-ranked request remains. There is no replacement or backfill after
+publication. The maximum new request count is two, one each for `jak2_1` and
+`parp1_0`; `5ht1b_0`, `braf_1` and `fa7_0` must remain explicit eligibility
+abstentions under the shared immutable pool.
+
+The selector architecture was chosen using offline teacher and component
+diagnostics, so any later outcome is development evidence rather than an
+independent final benchmark. Publish only the selected candidate/request locks,
+hashes, coverage and abstentions. Do not inspect a docking or task score, alter
+the selector order, regenerate candidates, change eligibility, add a new raw
+arm, call an oracle or docking function, launch Modal, access a live run or
+score the panel. A future score run requires separate explicit authorization of
+the exact request-lock physical and payload hashes and exact call ceiling, with
+zero retry, replacement or backfill. The self-hashed contract is
+`configs/t4_selector_utility_prelock_v1.json`.
+
 **Scoped zero-oracle T4 complete-macro selector, 2026-09-15:** after the
 compositional structural-subgoal generator passed its K=128 support gate but
 underperformed the matched uniform order at K=8 and K=32, the user explicitly

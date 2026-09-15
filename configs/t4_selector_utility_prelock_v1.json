@@ -1,0 +1,171 @@
+{
+  "payload": {
+    "schema_version": "t4_selector_utility_prelock_contract_v1",
+    "authorization": "2026-09-15 user explicitly authorized an isolated zero-oracle prospective selector-utility prelock after sealing the complete-macro selector; docking remains unauthorized",
+    "mode": "prospective_zero_oracle_selector_ranked_delta04_incremental_request_lock",
+    "scientific_problem": "Prepare the smallest score-blind development panel that can later test whether the offline-selected complete-macro ordering exposes useful endpoints beyond the immutable raw learned delta-0.4 panel.",
+    "primary_output": "An immutable candidate lock and deduplicated request lock containing at most one new selector-ranked eligible baseline-learned endpoint in each supported declared cell, plus explicit abstentions.",
+    "central_claim_under_test": "A later separately authorized development score panel can compare selector-ranked endpoints with the already locked raw learned counterparts. This prelock establishes only request identity, eligibility inheritance and incremental coverage.",
+    "evidence_status": "The selector architecture was selected using offline held-teacher component and exact-patch diagnostics. Any later docking outcome is development evidence, not an independent final benchmark.",
+    "cells": [
+      "5ht1b_0",
+      "braf_1",
+      "jak2_1",
+      "parp1_0",
+      "fa7_0"
+    ],
+    "arm": {
+      "arm_id": "baseline_learned_complete_macro_selector",
+      "generator_revision": "baseline",
+      "source_policy_id": "balanced_joint_autoregressive",
+      "ordering": "complete_macro_selector_reranked_learned_pool"
+    },
+    "immutable_inputs": {
+      "selector_candidate_lock": {
+        "path": "diagnostics/t4_complete_macro_selector/attempt_1/candidate_lock.json.gz",
+        "source_revision": "1d209660859d5349396969e4f8efeaf0a0b46437",
+        "sha256": "aab18cc4fd737d3bf5953c79a7e3332459009813626aa6ee65519516c43d77c2",
+        "payload_sha256": "9ad8cea49864ceb286d0caee0cf714ac5034e78e4b9d7bd6557fb8721f78112f"
+      },
+      "selector_result": {
+        "path": "diagnostics/t4_complete_macro_selector/attempt_1/result.json",
+        "source_revision": "1d209660859d5349396969e4f8efeaf0a0b46437",
+        "sha256": "2cc879e03ead3303ebbd5134a63e6e673f19d7fb0f9b90d173d5b5140ce53b80",
+        "payload_sha256": "03502a8661537635762d0369fd48fc250a6e440f0a3c93da59f50d028b6967b3"
+      },
+      "selector_contract": {
+        "path": "configs/t4_complete_macro_selector_v1.json",
+        "source_revision": "1d209660859d5349396969e4f8efeaf0a0b46437",
+        "sha256": "b949d23b1886506f39abd29136394f0e00ba3dbe9d6d0bbd935a929683e41a63",
+        "payload_sha256": "2ced5ba49c9b01c026cf1320ddcbe64db4a89431902a9c4a93751962bb022214"
+      },
+      "prior_delta04_prelock": {
+        "path": "configs/t4_compositional_generator_utility_prelock_v1.json",
+        "source_revision": "67574d20f8d28c70480974013bc8bca70df7e614",
+        "sha256": "d03d27256a7a8a7a382fe596ad49762b077bb626ed987a13284f3ef97bdacfae",
+        "payload_sha256": "a9f941e027f9758102c2874db7c7521a246f087812a7a32ee3110051e0a5c196"
+      },
+      "prior_delta04_eligibility_ledger": {
+        "path": "diagnostics/t4_compositional_generator_utility_lock/attempt_1/eligibility_ledger.json.gz",
+        "source_revision": "67574d20f8d28c70480974013bc8bca70df7e614",
+        "sha256": "06ff8f02aebe99ba014c81941aab25b92fc952f786db10266e00d6143c4a4c5b",
+        "payload_sha256": "ccb4d2ca43cdf87bc107e611f996cd0460f2d82843356e083873eb8e577169ad"
+      },
+      "prior_delta04_request_lock": {
+        "path": "diagnostics/t4_compositional_generator_utility_lock/attempt_1/request_lock.json",
+        "source_revision": "67574d20f8d28c70480974013bc8bca70df7e614",
+        "sha256": "3d4a1712cda185d13e5eb66e4b8bc47db7e85960854b4132bb8710bdf7cf4469",
+        "payload_sha256": "420a2b063f1309493c7b283559e517b183a40e9f982fafc12b7093570b3b5247"
+      },
+      "prior_delta04_result": {
+        "path": "diagnostics/t4_compositional_generator_utility_lock/attempt_1/result.json",
+        "source_revision": "67574d20f8d28c70480974013bc8bca70df7e614",
+        "sha256": "3d036d9af1e383f264d5ee02b3d840b2d12d4a4d1dcb3772ee0da7330d8464e6",
+        "payload_sha256": "0c471485ce6fe1136912a76d01166ff715dcd18dd0ce8d624573ad482a4eb854"
+      },
+      "request_identity_implementation": {
+        "path": "src/compose_v4/control/docking_value.py",
+        "source_revision": "1d209660859d5349396969e4f8efeaf0a0b46437",
+        "sha256": "6177a9445f05900334066c1ce17be4e07182d1328cc9740c990dfa254f6003c8"
+      }
+    },
+    "input_protocol": {
+      "git_object_inputs": "Prior delta-0.4 artifacts are loaded read-only from the exact committed Git revision and physical hashes above; no branch merge or artifact rewrite is permitted.",
+      "identity_join": "Selector candidate_identity must equal prior eligibility-ledger candidate_id and both artifacts must bind the same baseline generator candidate-lock payload d9717fc3a7b92fe8b264c7803c43f50f48b14e078b179cbd75f66d769aa65b10.",
+      "eligibility_inheritance": "Use the exact prior eligibility Boolean and descriptor values. Do not recompute, relax or supplement eligibility.",
+      "score_access": "Selector score and rank are ordering provenance only. No task score, docking score, teacher endpoint, teacher transformation or evaluation manifest may be loaded."
+    },
+    "eligibility": {
+      "source": "immutable prior delta-0.4 eligibility ledger",
+      "exact_action_replay": true,
+      "valid": true,
+      "connected": true,
+      "non_self": true,
+      "source_similarity_strictly_greater_than": 0.4,
+      "qed_strictly_greater_than": 0.6,
+      "sa_strictly_less_than": 4.0,
+      "active_atoms_less_than_or_equal_to": 40,
+      "active_heavy_atom_counts_must_match": true
+    },
+    "selection_semantics": {
+      "cell_support": "A cell is supported only when the immutable baseline learned eligibility ledger contains at least one eligible endpoint and the prior request lock contains its baseline_learned raw-order counterpart.",
+      "order": "ascending immutable selector_rank, then original_rank, then candidate_identity",
+      "prior_candidate_deduplication": "Exclude every selector candidate whose candidate identity appears in any prior delta-0.4 request-lock membership.",
+      "prior_request_deduplication": "Build the exact docking-request identity from target, canonical molecule, docking seed and evaluator. Exclude it when its request_id already appears in the prior delta-0.4 request lock.",
+      "selection": "Within each supported cell, select the first eligible selector-ranked candidate remaining after both prior deduplication rules.",
+      "maximum_selected_per_cell": 1,
+      "raw_counterpart": "Reuse the already immutable baseline_learned raw-order request for that cell. Never add another raw learned request.",
+      "unsupported_cell_abstention": "If immutable eligibility is empty, preserve an explicit no_eligible_baseline_learned_candidate abstention. Ordering cannot change support.",
+      "other_abstentions": [
+        "missing_raw_learned_counterpart",
+        "no_new_request_after_prior_deduplication",
+        "input_or_identity_mismatch"
+      ],
+      "result_dependent_replacement": false,
+      "post_publication_backfill": false,
+      "candidate_regeneration": false,
+      "candidate_reranking": false,
+      "maximum_new_requests": 2,
+      "predeclared_maximum_supported_cells": [
+        "jak2_1",
+        "parp1_0"
+      ],
+      "predeclared_eligibility_abstentions": [
+        "5ht1b_0",
+        "braf_1",
+        "fa7_0"
+      ]
+    },
+    "outputs": {
+      "directory": "diagnostics/t4_selector_utility_prelock/attempt_1",
+      "candidate_lock": "candidate_lock.json",
+      "request_lock": "request_lock.json",
+      "abstention_ledger": "abstention_ledger.json",
+      "result": "result.json",
+      "interpretation": "README.md"
+    },
+    "acceptance": {
+      "all_input_physical_and_payload_hashes_match": true,
+      "same_five_cells": true,
+      "selector_identity_join_is_total_for_each_declared_case": true,
+      "eligibility_recomputed": false,
+      "prior_candidate_and_request_deduplication_exact": true,
+      "raw_counterparts_added": 0,
+      "new_request_count_less_than_or_equal_to": 2,
+      "all_five_cell_outcomes_recorded": true,
+      "deterministic_byte_identical_rerun": true,
+      "oracle_calls": 0,
+      "docking_calls": 0,
+      "modal_launches": 0,
+      "live_run_accesses": 0
+    },
+    "prohibited_inputs": [
+      "docking_score_or_receipt",
+      "task_score",
+      "teacher_endpoint",
+      "teacher_transformation",
+      "teacher_metric",
+      "evaluation_manifest",
+      "live_run_state"
+    ],
+    "prohibitions": [
+      "prior_artifact_or_request_modification",
+      "generator_selector_fold_or_candidate_support_change",
+      "eligibility_change_or_recomputation",
+      "new_raw_arm_or_counterpart",
+      "post_result_reselection_replacement_or_backfill",
+      "oracle_docking_modal_or_live_run_access",
+      "scored_launch"
+    ],
+    "authority": {
+      "oracle_calls_authorized": 0,
+      "docking_calls_authorized": 0,
+      "modal_launches_authorized": 0,
+      "live_run_access_authorized": false,
+      "scored_launch_authorized": false,
+      "later_authorization_required": "Explicitly authorize the exact sealed request-lock physical and payload SHA-256 and its exact call ceiling, with no retries, replacements or backfill."
+    },
+    "interpretation_limit": "This prelock can establish only incremental eligible request coverage from an offline-selected ordering. It cannot establish docking utility, route recovery, autonomous optimization, final-benchmark performance or superiority over IVG."
+  },
+  "contract_sha256": "0f0958b9aa09a09f6de18e77018cc6be5264f7643f7aa290fe59ebce40f54143"
+}
