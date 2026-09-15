@@ -565,8 +565,12 @@ def build_corpus(
 
 
 def run(output_dir: Path, *, code_revision: str) -> dict:
+    output_dir = output_dir if output_dir.is_absolute() else ROOT / output_dir
     if output_dir.exists():
         raise ValueError(f"refusing to overwrite route-corpus output directory: {output_dir}")
+    staging_dir = output_dir.with_name(output_dir.name + ".tmp")
+    if staging_dir.exists():
+        raise ValueError(f"refusing to overwrite route-corpus staging directory: {staging_dir}")
     actual_revision = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
     ).strip()
@@ -579,20 +583,21 @@ def run(output_dir: Path, *, code_revision: str) -> dict:
     contract = _load_contract()
     audit, rows, verified_inputs = _load_inputs(contract)
     corpus, result = build_corpus(contract, audit, rows, code_revision=code_revision)
-    corpus_path = output_dir / "training_corpus.json.gz"
-    result_path = output_dir / "result.json"
+    corpus_path = staging_dir / "training_corpus.json.gz"
+    result_path = staging_dir / "result.json"
     _atomic_publish(corpus_path, corpus, compressed=True)
     result = {
         **result,
         "inputs": verified_inputs,
         "contract": {"path": str(CONTRACT.relative_to(ROOT)), "sha256": sha256(CONTRACT)},
         "corpus": {
-            "path": str(corpus_path.relative_to(ROOT)),
+            "path": str((output_dir / corpus_path.name).relative_to(ROOT)),
             "sha256": sha256(corpus_path),
             "payload_sha256": identity(corpus),
         },
     }
     _atomic_publish(result_path, result)
+    staging_dir.replace(output_dir)
     return result
 
 

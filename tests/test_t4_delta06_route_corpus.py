@@ -96,3 +96,35 @@ def test_full_conversion_replays_and_realizes_every_admitted_witness():
     assert all(not route["observed_ivg_trajectory"] for route in training["routes"])
     assert all(gate["coverage"] == gate["precision"] == 1.0 for gate in result["gates"].values())
     assert len(result["route_metrics"]["per_cell"]) == 15
+
+
+def test_run_normalizes_relative_output_and_publishes_directory_atomically(
+    monkeypatch, tmp_path: Path
+):
+    output = tmp_path / "result"
+    contract_path = tmp_path / "contract.json"
+    contract_path.write_text("{}")
+    monkeypatch.setattr(corpus, "ROOT", tmp_path)
+    monkeypatch.setattr(corpus, "CONTRACT", contract_path)
+    monkeypatch.setattr(
+        corpus.subprocess,
+        "check_output",
+        lambda command, **kwargs: "rev\n" if command[-1] == "HEAD" else "",
+    )
+    monkeypatch.setattr(corpus, "_load_contract", lambda: {"stub": True})
+    monkeypatch.setattr(corpus, "_load_inputs", lambda contract: ({}, [], []))
+    monkeypatch.setattr(
+        corpus,
+        "build_corpus",
+        lambda contract, audit, rows, code_revision: (
+            {"schema_version": "corpus_fixture_v1"},
+            {"schema_version": "result_fixture_v1"},
+        ),
+    )
+
+    corpus.run(Path("result"), code_revision="rev")
+
+    assert output.is_dir()
+    assert not (tmp_path / "result.tmp").exists()
+    result = json.loads((output / "result.json").read_text())["payload"]
+    assert result["corpus"]["path"] == "result/training_corpus.json.gz"
