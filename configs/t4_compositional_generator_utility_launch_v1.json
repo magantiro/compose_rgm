@@ -1,0 +1,111 @@
+{
+  "payload": {
+    "schema_version": "t4_compositional_generator_utility_launch_contract_v1",
+    "authorization": {
+      "date": "2026-09-15",
+      "basis": "The user explicitly approved the exact four-request delta-0.4 compositional utility lock, a ceiling of four first-score T4 docking calls, no retries, replacements or backfill, upload of the isolated launch bundle to Modal, and four parallel one-CPU containers with one request per worker.",
+      "request_lock_physical_sha256": "3d4a1712cda185d13e5eb66e4b8bc47db7e85960854b4132bb8710bdf7cf4469",
+      "request_lock_payload_sha256": "420a2b063f1309493c7b283559e517b183a40e9f982fafc12b7093570b3b5247",
+      "first_score_call_ceiling": 4,
+      "modal_launch_authorized": true,
+      "isolated_bundle_upload_authorized": true
+    },
+    "mode": "prospective_scoring_of_exact_score_blind_compositional_request_lock",
+    "scientific_problem": "Determine whether the four score-blind delta-0.4 compositional-generator endpoints have docking utility under the bound T4 QuickVina evaluator.",
+    "primary_output": "A durable per-request docking ledger and deterministic membership-preserving endpoint-utility result over the exact four sealed requests.",
+    "central_claim_under_test": "The prospectively locked eligible compositional endpoints can have nonzero docking utility despite the baseline and expanded generators selecting identical molecules in the predeclared cells.",
+    "experimental_setting": "Four score-blind endpoint requests selected before docking from 2,560 frozen candidates across five predeclared T4 cells and four baseline/expanded uniform/learned arms.",
+    "inputs": {
+      "source_revision": "67574d20f8d28c70480974013bc8bca70df7e614",
+      "zero_oracle_prelock": {
+        "path": "configs/t4_compositional_generator_utility_prelock_v1.json",
+        "physical_sha256": "d03d27256a7a8a7a382fe596ad49762b077bb626ed987a13284f3ef97bdacfae",
+        "payload_sha256": "a9f941e027f9758102c2874db7c7521a246f087812a7a32ee3110051e0a5c196"
+      },
+      "input_binding": {
+        "path": "configs/t4_compositional_generator_utility_inputs_v1.json",
+        "physical_sha256": "a2f4af01c21b688dbbf0418d9c2fbaf9173f5abbd5ed918dee13a00a2573869a",
+        "payload_sha256": "11765bcc72a2f78af2299573ab0025d8793e67e7578e722665e3b7760c89975b"
+      },
+      "candidate_lock": {
+        "path": "diagnostics/t4_compositional_generator_utility_lock/attempt_1/candidate_lock.json",
+        "physical_sha256": "d9b90389443a5906179d93adeaa654bdd65742f60ea6e7da4e27aaf10e2eef60",
+        "payload_sha256": "3c8eafa75073098dd95de99ccdc6a8ac5ae7e9b7a8b91fa97a3bc7340b541be5"
+      },
+      "request_lock": {
+        "path": "diagnostics/t4_compositional_generator_utility_lock/attempt_1/request_lock.json",
+        "physical_sha256": "3d4a1712cda185d13e5eb66e4b8bc47db7e85960854b4132bb8710bdf7cf4469",
+        "payload_sha256": "420a2b063f1309493c7b283559e517b183a40e9f982fafc12b7093570b3b5247"
+      },
+      "abstention_ledger": {
+        "path": "diagnostics/t4_compositional_generator_utility_lock/attempt_1/abstention_ledger.json",
+        "physical_sha256": "ffc51e0bfb634c5b2848de0aa73b4cf1f5416f80b7e5895e8b5981047717e4e3",
+        "payload_sha256": "b7c79be59b932f35069f6cee97f27b6c890fd71d36b619039f50753415293803"
+      },
+      "zero_oracle_result": {
+        "path": "diagnostics/t4_compositional_generator_utility_lock/attempt_1/result.json",
+        "physical_sha256": "3d036d9af1e383f264d5ee02b3d840b2d12d4a4d1dcb3772ee0da7330d8464e6",
+        "payload_sha256": "0c471485ce6fe1136912a76d01166ff715dcd18dd0ce8d624573ad482a4eb854"
+      },
+      "scoring_implementation": {
+        "path": "modal_apps/genmol_t4_opt_app.py",
+        "sha256": "9b635a9936493a5900b613cdce52f76c24efcf98f3f43b3b155448e0b1796bf0",
+        "function": "_dock"
+      }
+    },
+    "request_contract": {
+      "expected_requests": 4,
+      "expected_memberships": 8,
+      "expected_cells_with_requests": 2,
+      "expected_cell_abstentions": 3,
+      "identity_fields": ["target", "canonical_smiles", "docking_seed", "evaluator"],
+      "targets_and_counts": {"jak2": 2, "parp1": 2},
+      "candidate_mutation": false,
+      "selection_or_reranking": false,
+      "teacher_or_task_score_access": false
+    },
+    "evaluator": {
+      "schema_version": "t4_quickvina_endpoint_evaluator_v1",
+      "quickvina_cpu_per_request": 1,
+      "num_modes": 10,
+      "exhaustiveness": 1,
+      "ligand_preparation": "Open Babel --gen3d, unchanged production wrapper",
+      "docking_seed": 1701,
+      "score_direction": "minimize",
+      "score_unit": "kcal/mol as emitted by the bound QuickVina wrapper",
+      "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0"
+    },
+    "execution": {
+      "maximum_modal_workers": 4,
+      "requests_per_worker": 1,
+      "cpu_per_worker": 1,
+      "memory_mb_per_worker": 4096,
+      "timeout_seconds_per_worker": 480,
+      "automatic_retries": 0,
+      "replacement": false,
+      "backfill": false,
+      "candidate_regeneration": false,
+      "result_dependent_actions": false,
+      "attempt_accounting": "A successfully published reservation consumes the request's only authorized first-score attempt. A start, docking failure, container failure or missing score receives no retry.",
+      "persistence": "Publish reservation, start and terminal result or failure records atomically in a request-ID directory on the compose-v4-artifacts Modal volume and commit after each transition.",
+      "reduction": "Sort all four request identities by request_id; require one terminal record per reservation or report the exact incomplete census without retry. Preserve all memberships from the sealed request lock."
+    },
+    "outputs": {
+      "modal_app_name": "compose-t4-compositional-utility",
+      "modal_volume": "compose-v4-artifacts",
+      "volume_prefix": "/t4_compositional_generator_utility_launch",
+      "local_receipt": "diagnostics/t4_compositional_generator_utility_launch_spawn.json",
+      "request_state_files": ["reservation.json", "started.json", "result.json", "failure.json"],
+      "reduced_result": "result.json"
+    },
+    "prohibitions": [
+      "no request beyond the four exact locked request IDs",
+      "no retry, replacement or backfill after reservation",
+      "no candidate regeneration, mutation or reranking",
+      "no teacher endpoint, teacher transformation, teacher score or comparator outcome access",
+      "no optimization continuation, controller selection or live-run mutation"
+    ],
+    "interpretation_limit": "This prospective panel can establish endpoint docking utility only under the bound QuickVina evaluator. Because baseline and expanded memberships merge to the same four molecules, it cannot estimate an expanded-versus-baseline effect. It also cannot establish teacher or route recovery, autonomous optimization or superiority to IVG."
+  },
+  "contract_sha256": "4175d28ad705166cfda7cdc05b71ae74339592820df2d2ad6134d21df96706f3"
+}

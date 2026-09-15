@@ -372,6 +372,35 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped prospective scored T4 compositional-generator utility diagnostic,
+2026-09-15:** after the zero-oracle compositional utility prelock sealed four
+unique requests from eight baseline/expanded arm memberships, the user explicitly
+authorized the exact request lock at physical SHA-256
+`3d4a1712cda185d13e5eb66e4b8bc47db7e85960854b4132bb8710bdf7cf4469`
+and payload SHA-256
+`420a2b063f1309493c7b283559e517b183a40e9f982fafc12b7093570b3b5247`.
+Launch at most four first-score T4 QuickVina calls, one request per independent
+one-CPU Modal worker. Persist reservation, start and exactly one terminal result
+or failure per request and reduce deterministically in request-ID order. There
+are no retries, replacements, backfill, candidate changes or additional
+selection. Upload only the isolated launch bundle, exact request lock, contract,
+bound scoring wrapper and required source/config files.
+
+Before any scored call, commit a self-hashed launch contract, validate every
+bound physical and payload identity locally, and run one remote zero-score
+attestation of RDKit 2024.03.5, Open Babel, QuickVina, receptors, request census
+and serialized source revision. The four locked requests contain two JAK2 and
+two PARP1 molecules. Their eight memberships are identical across baseline and
+expanded generator revisions within policy and cell, so scored outcomes can
+establish endpoint utility under the bound evaluator but cannot estimate an
+expanded-versus-baseline generator effect. They also cannot establish teacher or
+route recovery, autonomous optimization, or superiority to IVG.
+
+This authorization does not permit a fifth call, automatic retry, replacement,
+backfill, regenerated candidate, reranking, optimization continuation, teacher
+lookup or live-run mutation. The governing launch contract is
+`configs/t4_compositional_generator_utility_launch_v1.json`.
+
 **Scoped prospective zero-oracle T4 compositional-generator utility lock,
 2026-09-15:** after authorizing the small strict-delta-0.6 endpoint-utility
 diagnostic, the user explicitly authorized a separate score-blind comparison
