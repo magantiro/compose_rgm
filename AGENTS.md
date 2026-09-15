@@ -580,6 +580,14 @@ gate, an official optimization run, or evidence that unscored candidates are
 strong. It may not modify or qualify the route-distilled controller, PMO, or
 any live benchmark.
 
+The initial candidate-lock launch failed before candidate generation or any
+oracle call because the Modal image omitted the already hash-bound
+`tools/t4_route_distillation.py` transitive import. Preserve and seal all nine
+identical prequery failures and the first launch receipt. One bounded packaging
+repair may add only that unchanged file to the image and material-file manifest,
+then launch the same nine tasks once under new immutable task and launch paths.
+No candidate rule, model, source, seed, threshold, budget or retry policy changes.
+
 **Scoped Dynamic COMPOSE v2.2 five-unit quick pilot, 2026-09-14:** after the
 completed PMO Dynamic-v2.1 comparison showed that global channel allocation
 underperformed Dynamic-v0 on three of four tasks, and the live T4 v2.1 run

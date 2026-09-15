@@ -22,6 +22,7 @@ MATERIAL_FILES = (
     "modal_apps/t4_route_candidate_utility_app.py",
     "src/compose_v4/experiments/t4_route_candidate_utility.py",
     "tools/t4_program_vocabulary_audit.py",
+    "tools/t4_route_distillation.py",
     "tools/t4_route_policy_comparison.py",
 )
 

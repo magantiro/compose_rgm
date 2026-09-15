@@ -14,8 +14,10 @@ from modal_apps.run_process_v2_p50_app import local_image_revision
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "diagnostics/t4_route_policy_source_sharded/attempt_1"
 OUTPUT = ROOT / "diagnostics/t4_route_candidate_utility/attempt_1"
-TASKS = OUTPUT / "candidate_lock_tasks.json"
-LAUNCH = OUTPUT / "candidate_lock_launch.json"
+TASKS = OUTPUT / "candidate_lock_tasks_v2.json"
+LAUNCH = OUTPUT / "candidate_lock_launch_v2.json"
+FAILED_LAUNCH = OUTPUT / "candidate_lock_launch.json"
+FAILURE = OUTPUT / "prequery_failure_0001.json"
 APP_NAME = "compose-t4-route-candidate-utility"
 VOLUME_NAME = "compose-t4-route-distilled-artifacts"
 REMOTE_SOURCE = "/artifacts/t4_route_policy_source_sharded/attempt_1"
@@ -27,6 +29,7 @@ MATERIAL_FILES = (
     "modal_apps/t4_route_candidate_utility_app.py",
     "src/compose_v4/experiments/t4_route_candidate_utility.py",
     "tools/t4_program_vocabulary_audit.py",
+    "tools/t4_route_distillation.py",
     "tools/t4_route_policy_comparison.py",
 )
 
@@ -128,11 +131,53 @@ def status():
             value = modal.FunctionCall.from_id(call_id).get(timeout=0)
         except TimeoutError:
             rows.append({"cell": cell, "status": "running"})
-        except modal.exception.Error as error:
+        except (ModuleNotFoundError, modal.exception.Error) as error:
             rows.append({"cell": cell, "status": "failed", "error": str(error)})
         else:
             rows.append({"cell": cell, "status": "complete", "result": value})
     print(json.dumps(rows, indent=2, sort_keys=True))
+
+
+def seal_failure():
+    import modal
+
+    if FAILURE.exists():
+        raise ValueError("prequery failure already sealed")
+    receipt = json.loads(FAILED_LAUNCH.read_text())
+    expected = receipt.pop("receipt_sha256")
+    if identity(receipt) != expected:
+        raise ValueError("failed candidate-lock launch receipt changed")
+    failures = []
+    for cell, call_id in sorted(receipt["call_ids"].items()):
+        try:
+            modal.FunctionCall.from_id(call_id).get(timeout=0)
+        except ModuleNotFoundError as error:
+            if "tools.t4_route_distillation" not in str(error):
+                raise
+            failures.append(
+                {
+                    "cell": cell,
+                    "call_id": call_id,
+                    "error_type": type(error).__name__,
+                    "error": str(error),
+                }
+            )
+        else:
+            raise ValueError(f"failed launch call did not fail closed: {cell}")
+    if len(failures) != 9:
+        raise ValueError("prequery failure census changed")
+    publish_json(
+        FAILURE,
+        {
+            "schema_version": "t4_route_candidate_utility_prequery_failure_v1",
+            "launch_sha256": sha256_file(FAILED_LAUNCH),
+            "failures": failures,
+            "failure_count": len(failures),
+            "cause": "Modal image omitted unchanged tools.t4_route_distillation transitive import",
+            "costs": {"oracle_calls": 0, "docking_calls": 0},
+        },
+    )
+    print(json.dumps({"status": "sealed", "failures": len(failures)}, sort_keys=True))
 
 
 def collect():
@@ -185,10 +230,13 @@ def collect():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("prepare", "launch", "status", "collect"))
+    parser.add_argument(
+        "action", choices=("seal-failure", "prepare", "launch", "status", "collect")
+    )
     args = parser.parse_args()
     {
         "prepare": prepare,
+        "seal-failure": seal_failure,
         "launch": launch,
         "status": status,
         "collect": collect,
