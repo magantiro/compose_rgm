@@ -372,6 +372,36 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped T4 selector utility two-call scored launch, 2026-09-15:** after the
+selector utility prelock sealed exactly two new delta-0.4 requests, the user
+explicitly authorized the request lock with physical SHA-256
+`9802da3b356ae5f41460a29377640c9a0e3fb866f2e82c46ea581624074ba046`
+and payload SHA-256
+`6d49e2a397b662a4425a4a5ee0d17a6223d64c4ac3e0effa594dc8d8c1c52b29`
+for exactly two first-score T4 docking calls. Upload one isolated clean launch
+bundle to Modal, attest it with zero docking calls, then spawn the JAK2 seed-1
+and PARP1 seed-0 requests once in exactly two parallel single-CPU workers.
+
+Reuse the verified narrow one-shot reservation, start, terminal and reduction
+semantics from the completed strict-delta-0.6 utility launch. Each successfully
+published reservation consumes that request's sole authorized attempt. A
+missing score, docking exception, container failure, ambiguous started receipt
+or incomplete terminal state is a charged failure and may not be retried,
+replaced or backfilled. Persist every transition in its request-ID directory,
+retain pose hashes when produced, and reduce only the two exact identities from
+the sealed request lock. Preserve the selector prelock, prior raw panel and all
+generator and selector artifacts byte for byte.
+
+This is a first-score development diagnostic for an ordering chosen with
+offline teacher/component evidence. It may report the two scores and
+descriptive comparisons to immutable source/reference values, but it is not an
+independent final benchmark, route-recovery result, autonomous optimization
+claim or IVG-superiority claim. Do not generate, mutate, rerank or add a
+candidate; do not score a raw counterpart or any third request; do not launch a
+retry, confirmation, replacement, backfill or subsequent optimization step.
+The self-hashed launch contract is
+`configs/t4_selector_utility_launch_v1.json`.
+
 **Scoped zero-oracle T4 selector utility prelock, 2026-09-15:** after the
 complete-macro selector improved early held-source structural support on the
 immutable baseline learned pools, the user explicitly authorized one isolated

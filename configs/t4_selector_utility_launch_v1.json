@@ -1,0 +1,182 @@
+{
+  "payload": {
+    "schema_version": "t4_selector_utility_launch_contract_v1",
+    "authorization": {
+      "date": "2026-09-15",
+      "basis": "The user explicitly authorized the exact selector request lock, a ceiling of two first-score T4 docking calls, no retries, replacements or backfill, upload of an isolated launch bundle to Modal and two parallel one-CPU containers.",
+      "request_lock_physical_sha256": "9802da3b356ae5f41460a29377640c9a0e3fb866f2e82c46ea581624074ba046",
+      "request_lock_payload_sha256": "6d49e2a397b662a4425a4a5ee0d17a6223d64c4ac3e0effa594dc8d8c1c52b29",
+      "first_score_call_ceiling": 2,
+      "modal_bundle_upload_authorized": true,
+      "modal_launch_authorized": true
+    },
+    "mode": "prospective_first_scoring_of_exact_selector_request_lock",
+    "scientific_problem": "Measure whether the two incrementally locked complete-macro-selector endpoints have T4 docking utility without changing their identities or using outcomes to select another candidate.",
+    "primary_output": "A durable one-attempt ledger for the exact JAK2 seed-1 and PARP1 seed-0 requests and one deterministic membership-preserving two-request reduction.",
+    "central_claim_under_test": "The offline-selected complete-macro ordering can expose strictly eligible endpoints with nonzero docking utility beyond its structural teacher-recovery diagnostics.",
+    "evidence_status": "Prospective first-score development evidence. The selector architecture and these requests arose from offline teacher/component diagnostics, so this is not an independent final benchmark.",
+    "experimental_setting": "Exactly two score-blind delta-0.4 requests from the immutable selector utility prelock, one JAK2 seed-1 request and one PARP1 seed-0 request.",
+    "inputs": {
+      "source_revision": "beffed89d1a4ed8ef6d052cc5979062a32c01817",
+      "zero_oracle_contract": {
+        "path": "configs/t4_selector_utility_prelock_v1.json",
+        "physical_sha256": "6ea268cdd67d67d06a1a058408619cca223148fb4189b304abc5766a91e424e3",
+        "payload_sha256": "0f0958b9aa09a09f6de18e77018cc6be5264f7643f7aa290fe59ebce40f54143"
+      },
+      "candidate_lock": {
+        "path": "diagnostics/t4_selector_utility_prelock/attempt_1/candidate_lock.json",
+        "physical_sha256": "715302518749e3120041f48a515e1c94e0df13631a1f423f9aa06554d48b9a00",
+        "payload_sha256": "b76b41c2d1400ccc115798cc21b02a5768c24de4eea381628cc8ae13c42fc549"
+      },
+      "request_lock": {
+        "path": "diagnostics/t4_selector_utility_prelock/attempt_1/request_lock.json",
+        "physical_sha256": "9802da3b356ae5f41460a29377640c9a0e3fb866f2e82c46ea581624074ba046",
+        "payload_sha256": "6d49e2a397b662a4425a4a5ee0d17a6223d64c4ac3e0effa594dc8d8c1c52b29"
+      },
+      "zero_oracle_result": {
+        "path": "diagnostics/t4_selector_utility_prelock/attempt_1/result.json",
+        "physical_sha256": "b2ff9020630caa2b702cff16deddf16c9ac2ca5b8cdc079ad4a5a1be56fb8b25",
+        "payload_sha256": "922d688b781e55e71a0054f98fc1862e4e318ee9a7fc04257072dea9cce2cf21"
+      },
+      "source_reference_registry": {
+        "path": "docs/GENMOL_T4_SEEDS.json",
+        "physical_sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"
+      },
+      "scoring_implementation": {
+        "path": "modal_apps/genmol_t4_opt_app.py",
+        "sha256": "9b635a9936493a5900b613cdce52f76c24efcf98f3f43b3b155448e0b1796bf0",
+        "function": "_dock"
+      }
+    },
+    "verified_one_shot_lineage": {
+      "source_revision": "ad78fb05971575daff9db7e920e6ff92e5550b75",
+      "completed_panel": "The reused implementation pattern previously reserved, scored and reduced 19 of 19 exact strict-delta-0.6 requests with zero retry and zero failure.",
+      "implementation": {
+        "path": "src/compose_v4/experiments/t4_delta06_utility_launch.py",
+        "sha256": "b70fd288b7beb75819427ffc0bef6bc9fd8024ad596c73dd35b7be50d01aa318"
+      },
+      "modal_app": {
+        "path": "modal_apps/t4_delta06_utility_launch_app.py",
+        "sha256": "6bf22a5a43b99e3b3676fa7414ce86d7720f750bcdf78afd1200ac8c116ff739"
+      },
+      "launcher": {
+        "path": "tools/t4_delta06_utility_launch.py",
+        "sha256": "4fbd9ea10e127905b18c676cf56787c9676c996f79a7bb5953c255823ad1e198"
+      },
+      "focused_tests": {
+        "path": "tests/test_t4_delta06_utility_launch.py",
+        "sha256": "768212b5d1f87a37ac3e78af6b458bab2dc7976abbd6c524ac4b8add890663f9"
+      }
+    },
+    "request_contract": {
+      "expected_requests": 2,
+      "expected_memberships": 2,
+      "expected_cells_with_requests": 2,
+      "request_ids": [
+        "4704ccbc0a7efb17855e4808355bc0480f69e515c9cec8bfbaf11dc4aa925e11",
+        "a2d0cd20506c4913dc92c33207371b7d2ed7ef3c1afd8a7daa806d4468b59218"
+      ],
+      "cells": [
+        "jak2_1",
+        "parp1_0"
+      ],
+      "targets_and_counts": {
+        "jak2": 1,
+        "parp1": 1
+      },
+      "identity_fields": [
+        "target",
+        "canonical_smiles",
+        "docking_seed",
+        "evaluator"
+      ],
+      "candidate_mutation": false,
+      "selection_or_reranking": false,
+      "task_or_docking_score_used_for_request_selection": false
+    },
+    "evaluator": {
+      "schema_version": "t4_quickvina_endpoint_evaluator_v1",
+      "quickvina_cpu_per_request": 1,
+      "num_modes": 10,
+      "exhaustiveness": 1,
+      "ligand_preparation": "Open Babel --gen3d, unchanged production wrapper",
+      "docking_seed": 1701,
+      "score_direction": "minimize",
+      "score_unit": "kcal/mol as emitted by the bound QuickVina wrapper",
+      "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor_sha256": {
+        "jak2": "cb900f3f75dcf2ac3efe6538528ed1e87ec934a527b3b060c2b09dfe3a11d9b6",
+        "parp1": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9"
+      }
+    },
+    "zero_score_preflight": {
+      "required_before_worker_spawn": true,
+      "checks": [
+        "exact clean serialized source revision",
+        "launch implementation and request-lock hashes",
+        "RDKit 2024.03.5",
+        "Open Babel availability",
+        "QuickVina executable hash",
+        "JAK2 and PARP1 receptor hashes",
+        "exact two-request and two-membership census"
+      ],
+      "docking_calls": 0,
+      "failure_action": "stop before either scored worker"
+    },
+    "execution": {
+      "maximum_modal_workers": 2,
+      "required_parallel_worker_spawns": 2,
+      "requests_per_worker": 1,
+      "cpu_per_worker": 1,
+      "memory_mb_per_worker": 4096,
+      "timeout_seconds_per_worker": 480,
+      "automatic_retries": 0,
+      "replacement": false,
+      "backfill": false,
+      "confirmation_calls": 0,
+      "candidate_regeneration": false,
+      "result_dependent_actions": false,
+      "attempt_accounting": "A successfully published reservation consumes the request's only authorized first-score attempt. A start, docking failure, container failure, missing score or ambiguous terminal state receives no retry.",
+      "persistence": "Publish reservation, start and exactly one terminal result or failure atomically in a request-ID directory on the compose-v4-artifacts Modal volume and commit after each transition.",
+      "reduction": "Sort the two exact request identities by request_id; require one terminal record per reservation or report the incomplete census without retry. Preserve the exact selector memberships and raw-counterpart references from the sealed request lock."
+    },
+    "outputs": {
+      "modal_app": "compose-t4-selector-utility",
+      "modal_volume": "compose-v4-artifacts",
+      "volume_prefix": "/t4_selector_utility_launch",
+      "local_preflight_receipt": "diagnostics/t4_selector_utility_launch_preflight.json",
+      "local_spawn_receipt": "diagnostics/t4_selector_utility_launch_spawn.json",
+      "local_reduce_receipt": "diagnostics/t4_selector_utility_launch_reduce_spawn.json",
+      "request_state_files": [
+        "reservation.json",
+        "started.json",
+        "result.json",
+        "failure.json"
+      ],
+      "local_result_directory": "diagnostics/t4_selector_utility_launch/attempt_1",
+      "reduced_result": "result.json"
+    },
+    "acceptance": {
+      "exact_clean_committed_launch_source": true,
+      "zero_score_remote_preflight_passes": true,
+      "exact_worker_spawns": 2,
+      "one_cpu_each": true,
+      "one_terminal_receipt_per_reserved_request_or_explicit_incomplete_state": true,
+      "first_score_calls_charged_less_than_or_equal_to": 2,
+      "automatic_retries": 0,
+      "replacements_or_backfill": 0,
+      "all_result_artifacts_self_hashed": true,
+      "deterministic_local_reduction_and_review": true
+    },
+    "prohibitions": [
+      "request outside the two exact locked request identities",
+      "retry, confirmation, replacement or backfill after reservation",
+      "candidate regeneration, mutation, reranking or new raw counterpart scoring",
+      "optimization continuation or controller update",
+      "post-result threshold, eligibility or protocol change",
+      "final-benchmark, route-recovery, autonomous-optimization or IVG-superiority claim"
+    ],
+    "interpretation_limit": "This prospective two-request panel can establish endpoint docking outcomes only under the bound QuickVina evaluator. It is selected development evidence and cannot establish independent final-benchmark performance, route recovery, autonomous optimization or superiority to IVG."
+  },
+  "contract_sha256": "f0e507b475c66d01de5cbd11909f92daa383555dee6a226e79f1e60c5620d4a4"
+}
