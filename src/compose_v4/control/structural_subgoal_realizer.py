@@ -594,7 +594,6 @@ def realize_target(
         }
 
     system = editing_v2_semantic_rewrite_system()
-    target_key = canonical_state_key(target)
     serial = count()
     queue = [(target_distance(source, target), 0, next(serial), source, ())]
     visited: set[tuple] = set()
@@ -608,7 +607,7 @@ def realize_target(
         if key in visited:
             continue
         visited.add(key)
-        if canonical_state_key(graph) == target_key:
+        if target_distance(graph, target) == 0:
             states = [encode_state(source)]
             replay = source
             for action_record in path:
@@ -737,6 +736,40 @@ def _realize_bound_goal(
             "deterministic_schedule_status": "realized",
         }
 
+    # A generated goal can have a legal fixed-slot realization even when the
+    # one-path deterministic schedule makes an unlucky early choice. Search
+    # the explicit physical target delta before expanding logical output-role
+    # permutations. This remains inside the original total expansion budget
+    # and never receives a teacher action or route.
+    remaining = config.maximum_expansions - int(scheduled["expanded"])
+    target_search_limit = min(1_024, max(0, remaining))
+    target_search = None
+    if target_search_limit:
+        target_search = realize_target(
+            source,
+            bound.target,
+            config=RealizerConfig(
+                maximum_primitives=config.maximum_primitives,
+                maximum_active_atoms=config.maximum_active_atoms,
+                maximum_expansions=target_search_limit,
+                children_per_expansion=config.children_per_expansion,
+            ),
+            progress=progress,
+        )
+        if target_search["status"] == "realized":
+            endpoint = decode_state(target_search["states"][-1])
+            if _role_distance(endpoint, bound, target_mapping) != 0:
+                raise AssertionError("fixed-target search did not satisfy logical role obligations")
+            return {
+                **target_search,
+                "expanded": int(scheduled["expanded"]) + int(target_search["expanded"]),
+                "attempted": int(scheduled["attempted"]) + int(target_search["attempted"]),
+                "output_role_slots": list(target_mapping),
+                "logical_role_automorphisms": len(bound.output_automorphisms),
+                "compiler_strategy": "target_directed_bounded_search",
+                "deterministic_schedule_status": scheduled["status"],
+            }
+
     system = editing_v2_semantic_rewrite_system()
     target_key = canonical_state_key(bound.target)
     initial_mapping = _canonical_mapping(bound, tuple(-1 for _ in bound.output_roles))
@@ -753,10 +786,15 @@ def _realize_bound_goal(
     ]
     visited: set[tuple] = set()
     failures: Counter[str] = Counter()
-    expanded = int(scheduled["expanded"])
-    attempted = int(scheduled["attempted"])
+    expanded = int(scheduled["expanded"]) + (
+        0 if target_search is None else int(target_search["expanded"])
+    )
+    attempted = int(scheduled["attempted"]) + (
+        0 if target_search is None else int(target_search["attempted"])
+    )
     best_mismatch = min(
         int(scheduled["best_mismatch"]),
+        *(() if target_search is None else (int(target_search["best_mismatch"]),)),
         _role_distance(source, bound, initial_mapping),
     )
 
