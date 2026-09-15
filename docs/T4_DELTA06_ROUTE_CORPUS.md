@@ -44,3 +44,33 @@ scientific payload is self-hashed for byte-stable reruns.
 This corpus may support a later generic structural-delta generator. It does not
 authorize training, a route-aware scored search, endpoint harvesting, Modal, a
 live-run change or a claim that COMPOSE beats IVG at delta 0.6.
+
+## Authoritative attempt 1
+
+The clean-revision export at commit
+`f5160de53fafd99115db7eedaf69ceb5d2e3f8b9` retained 39 unique endpoint
+references and all 49 tied run references. It admitted 32 exact witnesses and
+preserved seven abstentions: three `unreachable_charge_change`, two
+`search_unresolved` and two `unsupported_representation`.
+
+All 32 admitted routes passed exact primitive replay, dependency-region
+extraction, address-free target reconstruction and the unchanged sealed
+structural realizer, each at 32/32 coverage and 32/32 precision. They contain 45
+structural subgoals. Primitive length ranges from 6 to 24 (median 14.5), while
+dependency-region count ranges from 1 to 3 (median 1). The retained source-atom
+fraction ranges from 0.595 to 1.0 (median 0.842), and source edit radius ranges
+from 0 to 11 (median 4).
+
+Exact attributed-isomorphism counts are 36 target-topology classes, 30
+attachment-pattern classes and 44 dependency-motif classes across 45 subgoals.
+These are retrospective training-data measurements, not autonomous proposal or
+docking results.
+
+Authoritative files:
+
+- `diagnostics/t4_delta06_route_corpus/attempt_1/training_corpus.json.gz`,
+  SHA-256 `d96265ca0f3364a118b10037b8312263f2e627ff629651bca22eca1ae834cded`;
+- `diagnostics/t4_delta06_route_corpus/attempt_1/result.json`, SHA-256
+  `93ed30b94362352d1affadcbf8ddb18105931a84c3e045aa6d706abcd057bdab`.
+
+An independent in-memory rebuild reproduced the compressed corpus byte for byte.
