@@ -1,0 +1,109 @@
+{
+  "payload": {
+    "schema_version": "t4_complete_program_decoder_contract_v1",
+    "authorization": "2026-09-14 user authorized the route-distilled complete-program decoder as the focused T4 modeling priority",
+    "mode": "zero_oracle_grouped_source_development",
+    "inputs": {
+      "route_distillation_result": {
+        "path": "diagnostics/t4_route_distillation/attempt_3/result.json",
+        "sha256": "c4de13f6c810b8baa9f9beaa9256981453b6dde888146a51668d4a9025754832"
+      },
+      "teacher_library": {
+        "path": "diagnostics/t4_shared_program_controller/attempt_2/shared_library.json",
+        "sha256": "732c67d04af3a0824cfa700906fd73982689af416f337c8eb109499af79afdb5"
+      },
+      "source_registry": {
+        "path": "docs/GENMOL_T4_SEEDS.json",
+        "sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"
+      }
+    },
+    "split": {
+      "kind": "whole_source_one_seed_per_protein",
+      "folds": [0, 1, 2],
+      "teacher_routes": 77,
+      "source_groups": 15,
+      "fit_preprocessing_on_train_only": true
+    },
+    "support": {
+      "rules": [
+        "atom_delete",
+        "atom_insert",
+        "atom_restate_semantic",
+        "bond_reorder",
+        "bond_reroute",
+        "cycle_close",
+        "cycle_open",
+        "ring_system_restate"
+      ],
+      "maximum_primitives": 32,
+      "maximum_dependency_regions": 8,
+      "maximum_active_atoms": 40,
+      "explicit_stop": true,
+      "canonical_legal_fibers": true,
+      "created_handle_dependencies": true
+    },
+    "comparison": {
+      "arms": [
+        "marginal_legal_decoder",
+        "learned_legal_decoder",
+        "learned_legal_decoder_plus_sequence_ranker"
+      ],
+      "beam_widths": [1, 8],
+      "snapshot_depths": [8, 16, 24, 32],
+      "initial_programs_per_source": 128,
+      "extended_programs_per_source": 1000,
+      "output_cutoffs": [10, 100, 1000]
+    },
+    "engineering_gate": {
+      "exact_execution_precision": 1.0,
+      "require_novel_endpoint_per_source": true,
+      "require_deterministic_candidate_lock": true,
+      "require_complete_provenance": true,
+      "require_support_enforcement": true
+    },
+    "scientific_metrics": [
+      "teacher_forced_rule_nll",
+      "teacher_forced_successor_rank",
+      "exact_route_recall_precision_mrr",
+      "exact_endpoint_recall_precision_mrr",
+      "radius2_transformation_recall_precision_mrr",
+      "unique_endpoint_yield",
+      "candidate_shortfall",
+      "proposal_work",
+      "wall_time",
+      "peak_memory"
+    ],
+    "candidate_lock": {
+      "teacher_free_generation": true,
+      "separate_teacher_evaluator": true,
+      "refuse_overwrite": true
+    },
+    "oracle": {
+      "calls_authorized": 0,
+      "scored_optimization_authorized": false,
+      "separate_score_blind_utility_contract_required": true
+    },
+    "preserve": [
+      "sealed_prior_zero_recovery_result",
+      "full_146",
+      "dynamic_v0",
+      "dynamic_v1",
+      "dynamic_v21",
+      "dynamic_v22",
+      "live_t4_runs",
+      "candidate_utility_locks"
+    ],
+    "prohibitions": [
+      "teacher_injection_during_generation",
+      "task_or_target_identity_at_runtime",
+      "stored_teacher_route_at_runtime",
+      "endpoint_or_smiles_at_runtime",
+      "absolute_source_atom_address_at_runtime",
+      "action_support_change",
+      "executor_semantics_change",
+      "live_run_change",
+      "retroactive_gate_relaxation"
+    ]
+  },
+  "contract_sha256": "7618ac81873ba3a54309eda225e2ebe08413aa99719e62930ec9bc2b156a1974"
+}

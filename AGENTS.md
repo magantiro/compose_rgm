@@ -372,6 +372,48 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped T4 route-distilled complete-program decoder, 2026-09-14:** after the
+grouped route-policy comparison showed that the fitted context actor ranks
+teacher decisions well but autonomously recovers zero teacher-equivalent
+transformations, the user explicitly authorized one focused generative
+revision. Preserve the sealed route-distillation attempts, the source-sharded
+comparison, Full-146, Dynamic-v0/v1/v2.1/v2.2, the live full-v0 benchmark and
+all candidate-utility locks without modification. Train on the same 77 exact
+complete T4 traces using the already frozen one-source-per-protein grouped
+folds. Replace the three-module coarse generator with a target-free,
+dependency-aware autoregressive decoder over exact legal canonical rewrite
+actions, an explicit STOP action and at most 32 primitives/eight dependency
+regions/40 active atoms. Later decisions may use relative handles created by
+earlier decisions. Runtime artifacts may contain numeric preprocessing,
+generic action support, model parameters and hashes, but no target/protein,
+seed, route ID, endpoint, SMILES, absolute source address, target map or
+executable teacher route.
+
+Compare the learned decoder with the frozen source-balanced marginal decoder
+under identical legal-action support, beams, proposal counts and compute
+accounting. Generate and seal teacher-free candidate locks before a separate
+evaluator loads teacher identities. Report teacher-forced action likelihood,
+exact execution precision, complete-program and endpoint coverage/precision,
+exact and radius-2 transformation recall/rank at 10, 100 and 1,000 generated
+programs, unique yield, abstentions, expansions, wall time and memory. Preserve
+the existing complete-candidate contrastive ranker as an optional downstream
+reranker and preserve an unchanged Dynamic-v0 exploration lane; neither may
+inject teacher candidates. The sealed prior zero-recovery result remains a
+negative result and its gate may not be retroactively relaxed.
+
+The engineering gate requires exact-execution precision 1.0, deterministic
+locks, complete provenance, enforced support and at least one novel completed
+endpoint per held source. Autonomous transformation recovery is a primary
+diagnostic, not the sole authorization for molecular utility measurement. A
+separate score-blind candidate-utility pilot may proceed only from a
+prospectively frozen candidate lock with unchanged T4 endpoint filters and its
+own explicit docking ledger; it cannot replace or alter candidates after
+scores are observed. This milestone is otherwise zero-oracle and CPU-only. It
+does not authorize a five-cell optimization campaign, a full T4 run, delta
+0.6, PMO changes, new edit families, altered executor semantics or changes to
+any live run. The detailed contract is
+`docs/T4_COMPLETE_PROGRAM_DECODER.md`.
+
 **Scoped route-distilled T4 qualification and conditional dual-threshold benchmark,
 2026-09-14:** after explicitly rejecting the stored Full-146 controller as the
 paper controller, the user authorized the newest generic route-distilled
