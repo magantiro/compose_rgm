@@ -1,0 +1,159 @@
+{
+  "payload": {
+    "schema_version": "t4_compositional_structural_subgoal_generator_contract_v1",
+    "authorization": "2026-09-15 user explicitly authorized the zero-oracle compositional structural-subgoal generator milestone and its AGENTS.md entry",
+    "mode": "zero_oracle_split_first_grouped_source_compositional_generation",
+    "scientific_problem": "Learn a local molecular graph distribution that can synthesize executable structural patches on held T4 sources after whole-patch retrieval recovered zero held-source patches.",
+    "primary_model_output": "An address-free source-region distribution pi(R|x), followed by one conditional autoregressive distribution over a complete local target patch H, attachments alpha and construction dependencies D.",
+    "central_claim_under_test": "A split-first source-balanced joint local-patch generator can produce novel, exactly realizable held-source structural deltas from generic executor-supported atom and bond domains without storing or retrieving complete training patches.",
+    "evaluation_setting": "Three frozen whole-source folds over 77 T4 complete routes, 15 source groups and 147 teacher subgoals. Exactly converted Full-146 and PMO routes are training-only auxiliary domains and never enter the held T4 evaluator.",
+    "baselines": [
+      "uniform_joint_grammar_with_identical_support_and_budget",
+      "read_only_failed_whole_patch_retrieval_result"
+    ],
+    "causal_ablation": "Learned balanced region and joint-event densities versus uniform scoring under identical legal fibers, localization rule, beam and output cutoffs.",
+    "inputs": {
+      "component_novelty_result": {
+        "path": "diagnostics/t4_structural_subgoal_component_novelty/attempt_1/result.json",
+        "sha256": "bdd2acaac63b274dc35346ce14bc6a203b62316037056ddbda83b18fb910be0a",
+        "payload_sha256": "bc2549f5f376586d64881969503e91c17ee29a7c00a85e5f59dc7f028b1619f8"
+      },
+      "teacher_library": {
+        "path": "diagnostics/t4_shared_program_controller/attempt_2/shared_library.json",
+        "sha256": "732c67d04af3a0824cfa700906fd73982689af416f337c8eb109499af79afdb5"
+      },
+      "source_registry": {
+        "path": "docs/GENMOL_T4_SEEDS.json",
+        "sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"
+      },
+      "t4_benchmark_contract": {
+        "path": "configs/t4_frozen_program_benchmark_v2.json",
+        "sha256": "fdc93e9bc97eaae2e81f2189a3b7568b00d1b5525ff0fb7a657668a6190ad280"
+      },
+      "sealed_realizer_summary": {
+        "path": "diagnostics/t4_structural_subgoal/attempt_2/summary.json",
+        "sha256": "76efefd1dd2267c0543cb972ef236a30b50f21b7c6a6da4ffca66cb3e43531c3"
+      },
+      "sealed_realizer_source": {
+        "path": "src/compose_v4/control/structural_subgoal_realizer.py",
+        "sha256": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f"
+      },
+      "sealed_structural_extractor_source": {
+        "path": "src/compose_v4/control/structural_subgoal.py",
+        "sha256": "ba603dbfa82a3130761146498510160d9dfcb74d3aa5b44298afe6bfefe59823"
+      },
+      "optional_pmo_dependency_region_corpus": {
+        "logical_path": "diagnostics/pmo_dependency_region_program_v2/attempt_1/training_dependency_region_corpus.json.gz",
+        "sha256": "9b35529eae0975dcf977bc1fc51f3bd838e0184d51de3a7d2822edd0bc3d8b54"
+      },
+      "optional_pmo_dependency_region_result": {
+        "logical_path": "diagnostics/pmo_dependency_region_program_v2/attempt_1/result.json",
+        "sha256": "144d80aa378e1326f2e50b269a0d1c89a86fda1fd19013527745f721500da579"
+      }
+    },
+    "split": {
+      "kind": "whole_source_one_seed_per_protein",
+      "folds": [0, 1, 2],
+      "derive_every_learned_statistic_after_split": true,
+      "t4_auxiliary_rule": "admit Full-146 applications only when their origin source belongs to the T4 training fold",
+      "pmo_rule": "admit only routes that the immutable v1 converter reconstructs exactly; keep PMO training-only and separately labelled",
+      "held_t4_used_for_fit_or_selection": false
+    },
+    "generated_object": {
+      "factorization": "g=(R,H,alpha,D); pi(g|x)=pi_R(R|x) pi_theta(H,alpha,D|x,R)",
+      "region": "The address-free set of source roles referenced by the first local construction event.",
+      "target_patch": "The complete before-to-after graph delta extracted after one or two mutually local generic construction events.",
+      "attachments": "Every generated source-to-created or created-to-created target edge, emitted inside the same event sequence.",
+      "dependencies": "Ordered created-role and shared-role dependencies induced by the same event sequence, not a separately predicted label.",
+      "maximum_construction_events": 2,
+      "maximum_structural_regions": 4,
+      "maximum_realized_primitives": 32,
+      "maximum_active_atoms": 40,
+      "stereochemistry": "out_of_scope",
+      "formal_charge_changes": "out_of_scope"
+    },
+    "model": {
+      "architecture": "weighted_diagonal_density_region_selector_plus_joint_graph_conditioned_autoregressive_patch_event_density",
+      "region_features": "address-free element, degree, bond, cycle and global graph summaries",
+      "joint_event_features": "one vector containing rule, all relative structural operands, typed parameters, current graph, selected region, prior event and partial-patch state",
+      "event_support": "all exact legal Active8 successors admitted by the unchanged generic executor fiber; no finite whole-patch vocabulary",
+      "locality": "after the first event, later events must reference the fixed source region or a role created or changed by the partial patch",
+      "fit": "closed-form weighted diagonal Gaussian moments with a fixed variance floor; no neural accelerator training",
+      "variance_floor": 0.05,
+      "weights": "equal domain mass; within domain equal source or task-family mass; within source equal route mass; within route equal component and decision mass",
+      "checkpoint_contents": "numeric moments, generic support/configuration and input hashes only"
+    },
+    "decoder": {
+      "seed": 20260915,
+      "candidate_pool_size": 128,
+      "cutoffs": [8, 32, 128],
+      "first_event_beam": 64,
+      "second_event_beam": 32,
+      "second_event_expansion_per_prefix": 16,
+      "per_rule_first_event_cap": 32,
+      "exact_canonical_deduplication": true,
+      "uniform_tie_break": "canonical successor key then action serialization",
+      "automatic_retry": false
+    },
+    "evaluation": {
+      "candidate_lock_before_teacher_load": true,
+      "teacher_injection": "not used; if added later it must be a separately labelled rank diagnostic",
+      "metrics": [
+        "exact_endpoint_recall_at_8_32_128",
+        "exact_patch_recall_at_8_32_128",
+        "radius2_transformation_equivalent_recall_at_8_32_128",
+        "unique_endpoint_and_patch_yield_at_8_32_128",
+        "novel_whole_patch_yield_relative_to_train",
+        "held_teacher_component_coverage_by_family",
+        "legal_patch_compile_coverage",
+        "exact_realization_precision",
+        "source_coverage_diversity_abstentions_and_work"
+      ],
+      "aggregates": ["instance_weighted", "source_balanced", "fold_resolved"]
+    },
+    "acceptance": {
+      "t4_census": {"routes": 77, "sources": 15, "teacher_subgoals": 147},
+      "zero_group_leakage": true,
+      "checkpoint_contains_no_patch_route_source_or_task_identity": true,
+      "all_accepted_candidates_exactly_execute": true,
+      "all_held_sources_emit_at_least_one_unique_exactly_realized_patch": true,
+      "at_least_one_novel_whole_patch_per_held_source": true,
+      "generated_held_component_support_is_nonzero": true,
+      "learned_improvement_gate": "At K=32 or K=128, the learned arm must strictly improve the uniform arm on source-balanced held-teacher component coverage or transformation-equivalent recall, with no loss of exact-realization precision.",
+      "exact_teacher_recovery_is_diagnostic_not_required": true,
+      "deterministic_rerun": true,
+      "zero_oracle": true
+    },
+    "runtime_checkpoint_prohibitions": [
+      "whole_patch_or_template_identifier",
+      "serialized_complete_patch",
+      "task_or_protein_identity",
+      "route_program_or_lineage_identifier",
+      "absolute_source_atom_address",
+      "source_graph_or_smiles",
+      "endpoint_or_smiles",
+      "primitive_teacher_trace_or_executable_route"
+    ],
+    "prohibitions": [
+      "whole_patch_retrieval_or_larger_retrieval_pool",
+      "candidate_pool_reranking_as_the_generator",
+      "independent_topology_attribute_attachment_or_dependency_classifiers",
+      "teacher_injection_into_autonomous_candidates",
+      "sealed_realizer_or_extractor_modification",
+      "held_source_vocabulary_or_preprocessing_fit",
+      "oracle_docking_or_task_score_access",
+      "Modal_or_live_run_access",
+      "delta_0_6_route_input_before_its_separate_sealed_exporter"
+    ],
+    "costs": {
+      "oracle_calls_authorized": 0,
+      "docking_calls_authorized": 0,
+      "modal_launches_authorized": 0,
+      "device": "cpu",
+      "workers": 1
+    },
+    "negative_result_policy": "A failed improvement or teacher-recovery gate remains an authoritative negative result and does not authorize support expansion or scored calls.",
+    "interpretation_limit": "This gate establishes only zero-oracle held-source generated structural support. It does not establish molecular utility, docking improvement, autonomous optimization or an IVG comparison."
+  },
+  "contract_sha256": "a91272c148d7b6421f4209a8aadae031fd52d783ac8904e8ac4544d79262c151"
+}

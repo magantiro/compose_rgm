@@ -372,6 +372,45 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped zero-oracle T4 compositional structural-subgoal generator,
+2026-09-15:** after the grouped-source component audit found zero whole-patch
+overlap but high low-level graph, atom, bond and dependency reuse, the user
+explicitly authorized the smallest genuine compositional generator milestone.
+Freeze the complete prospective contract before fitting. On the same three
+whole-source folds, model
+`pi(R|x) pi(H,alpha,D|x,R)`: first select an address-free source region, then
+generate the complete target patch, attachment edges and construction
+dependencies jointly through one graph-conditioned autoregressive local-patch
+law. Its support must be generic executor-supported atom, bond and relative-role
+events, not whole-patch identifiers. Do not replace this generator with a larger
+retrieval pool, a complete-candidate reranker or independent marginal topology,
+attribute, attachment and dependency classifiers.
+
+Derive every learned vocabulary, feature moment and density after the frozen
+split. Give explicit equalized mass to training domains, source or task-family
+lineages, routes, components and decisions. Auxiliary Full-146 applications may
+enter only from T4 training sources. PMO may enter only through its hash-bound
+training-only artifact and only for routes exactly reconstructed by the existing
+immutable conversion path. Do not race the unfinished delta-0.6 exporter or
+repair the 99 PMO extractor abstentions inside this milestone. Keep the exact
+structural realizer and extractor byte-unchanged.
+
+Lock autonomous candidates before loading held teachers. Compare the learned
+joint generator with a uniform scorer over the identical grammar and work
+budget. At K=8, 32 and 128 report exact endpoint and patch recall,
+radius-two transformation-equivalent recall, unique and novel patch yield,
+held-component coverage, legal compile coverage, exact-realization precision,
+diversity, abstentions and work. Exact teacher recovery is diagnostic, not a
+utility objective. The engineering gate requires exact execution for every
+accepted candidate and nonzero novel generated support on every held source.
+The scientific gate requires a strict learned improvement in held component
+coverage or transformation-equivalent recall at K=32 or K=128 without lower
+exact-realization precision. Preserve failed gates as negative results. This is
+single-CPU and zero-oracle. It may not call an oracle or docking function,
+launch Modal, access a live run, alter prior artifacts or authorize a scored
+pilot. The self-hashed contract is
+`configs/t4_compositional_structural_subgoal_generator_v1.json`.
+
 **Scoped zero-oracle T4 structural-subgoal component-novelty audit,
 2026-09-15:** after the grouped whole-template proposal gate recovered zero
 held-source transformations and every held complete template identifier lay
