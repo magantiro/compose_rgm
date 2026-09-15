@@ -103,6 +103,7 @@ The workflow is intentionally split:
 PYTHONPATH=src python tools/pmo_complete_program_decoder.py prepare-sources
 modal deploy modal_apps/pmo_complete_program_decoder_app.py
 PYTHONPATH=src python tools/pmo_complete_program_decoder_parallel.py launch
+PYTHONPATH=src python tools/pmo_complete_program_decoder_parallel.py relaunch --case-index N
 PYTHONPATH=src python tools/pmo_complete_program_decoder_parallel.py status
 PYTHONPATH=src python tools/pmo_complete_program_decoder_parallel.py collect
 PYTHONPATH=src python tools/pmo_complete_program_decoder_parallel.py collate
@@ -116,6 +117,8 @@ durable-shard contract. `prepare-sources` remains local and zero-oracle. The
 Modal evaluator cannot start until all nine source shards and the independent
 collation call are complete. `collect` downloads only immutable completed shards
 and preserved failure records, so it is safe to run while other cases remain live.
+`relaunch` accepts only a case with a locally sealed failure record, reuses the
+exact original task identity and allows at most one explicit manual relaunch.
 
 ## Claim boundary
 

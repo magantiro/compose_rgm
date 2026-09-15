@@ -72,6 +72,31 @@ def _publish_receipt(path: Path, body: dict) -> None:
     publish_json(path, {**body, "receipt_sha256": identity(body)})
 
 
+def _relaunch_path(index: int) -> Path:
+    return LOCAL_OUTPUT / f"case_{index:02d}_relaunch_1.json"
+
+
+def _effective_call_ids(launch_receipt: dict) -> dict[str, str]:
+    call_ids = dict(launch_receipt["call_ids"])
+    tasks = {str(task["source_case_index"]): task for task in launch_receipt["tasks"]}
+    for index, task in tasks.items():
+        path = _relaunch_path(int(index))
+        if not path.exists():
+            continue
+        receipt = _load_receipt(path, "pmo_complete_program_decoder_case_relaunch_v1")
+        if (
+            receipt.get("parent_launch_sha256") != launch_receipt["receipt_sha256"]
+            or receipt.get("source_case_index") != int(index)
+            or receipt.get("task_run_id") != task["run_id"]
+            or receipt.get("manual_relaunch") != 1
+            or receipt.get("automatic_retries") != 0
+            or receipt.get("oracle_calls_authorized") != 0
+        ):
+            raise ValueError(f"invalid PMO decoder case relaunch lineage: {path}")
+        call_ids[index] = receipt["call_id"]
+    return call_ids
+
+
 def launch() -> None:
     import modal
 
@@ -129,6 +154,51 @@ def launch() -> None:
     print(json.dumps({**body, "receipt_sha256": identity(body)}, indent=2))
 
 
+def relaunch(index: int) -> None:
+    """Relaunch one interrupted case with the exact original sealed task."""
+
+    import modal
+
+    launch_receipt = _load_receipt(
+        LAUNCH, "pmo_complete_program_decoder_parallel_launch_v1"
+    )
+    tasks = {int(task["source_case_index"]): task for task in launch_receipt["tasks"]}
+    if index not in tasks:
+        raise ValueError(f"PMO decoder source case does not exist: {index}")
+    path = _relaunch_path(index)
+    if path.exists():
+        raise ValueError(f"PMO decoder case relaunch already exists: {path}")
+    task = tasks[index]
+    failure_path = LOCAL_OUTPUT / "shards" / Path(task["output"]).name / "failure.json"
+    failure_envelope = json.loads(failure_path.read_text())
+    failure = failure_envelope.get("payload")
+    if (
+        not isinstance(failure, dict)
+        or failure_envelope.get("payload_sha256") != identity(failure)
+        or failure.get("task_run_id") != task["run_id"]
+        or failure.get("source_case_index") != index
+        or failure.get("new_oracle_calls") != 0
+    ):
+        raise ValueError("PMO decoder case relaunch requires its sealed failure")
+    call = modal.Function.from_name(APP_NAME, "generate_case").spawn(task)
+    body = {
+        "schema_version": "pmo_complete_program_decoder_case_relaunch_v1",
+        "parent_launch_sha256": launch_receipt["receipt_sha256"],
+        "source_case_index": index,
+        "source_case_id": task["source_case_id"],
+        "task_run_id": task["run_id"],
+        "prior_call_id": launch_receipt["call_ids"][str(index)],
+        "prior_failure_payload_sha256": failure_envelope["payload_sha256"],
+        "call_id": call.object_id,
+        "manual_relaunch": 1,
+        "automatic_retries": 0,
+        "oracle_calls_authorized": 0,
+        "docking_calls_authorized": 0,
+    }
+    _publish_receipt(path, body)
+    print(json.dumps({**body, "receipt_sha256": identity(body)}, indent=2))
+
+
 def _volume_path(path: str | Path) -> str:
     return "/" + Path(path).relative_to(VOLUME_MOUNT).as_posix()
 
@@ -155,7 +225,7 @@ def status() -> dict:
     rows = []
     tasks = {str(task["source_case_index"]): task for task in launch_receipt["tasks"]}
     for index, call_id in sorted(
-        launch_receipt["call_ids"].items(), key=lambda row: int(row[0])
+        _effective_call_ids(launch_receipt).items(), key=lambda row: int(row[0])
     ):
         task = tasks[index]
         progress = _read_progress(volume, task)
@@ -197,7 +267,7 @@ def _all_generation_complete(receipt: dict) -> None:
     import modal
 
     failures = []
-    for index, call_id in sorted(receipt["call_ids"].items()):
+    for index, call_id in sorted(_effective_call_ids(receipt).items()):
         try:
             result = modal.FunctionCall.from_id(call_id).get(timeout=0)
         except (
@@ -363,7 +433,7 @@ def collect() -> None:
     rows = []
     for task in launch_receipt["tasks"]:
         index = str(task["source_case_index"])
-        call_id = launch_receipt["call_ids"][index]
+        call_id = _effective_call_ids(launch_receipt)[index]
         try:
             result = modal.FunctionCall.from_id(call_id).get(timeout=0)
         except TimeoutError:
@@ -414,6 +484,7 @@ def main() -> None:
         "action",
         choices=(
             "launch",
+            "relaunch",
             "status",
             "collect",
             "collate",
@@ -422,8 +493,9 @@ def main() -> None:
             "download",
         ),
     )
+    parser.add_argument("--case-index", type=int)
     args = parser.parse_args()
-    {
+    actions = {
         "launch": launch,
         "status": status,
         "collect": collect,
@@ -431,7 +503,13 @@ def main() -> None:
         "evaluate": evaluate,
         "final-status": final_status,
         "download": download,
-    }[args.action]()
+    }
+    if args.action == "relaunch":
+        if args.case_index is None:
+            parser.error("relaunch requires --case-index")
+        relaunch(args.case_index)
+    else:
+        actions[args.action]()
 
 
 if __name__ == "__main__":

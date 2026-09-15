@@ -41,6 +41,7 @@ from modal_apps.pmo_complete_program_decoder_app import (
     _replace_json,
     _validate_existing_shard,
 )
+from tools import pmo_complete_program_decoder_parallel as decoder_parallel
 from tools.pmo_complete_program_decoder import sha256_file
 from tools.pmo_complete_program_decoder_parallel import (
     _download_file_once,
@@ -326,6 +327,28 @@ def test_incremental_collection_never_replaces_a_completed_shard(tmp_path):
     )
     with pytest.raises(ValueError, match="refusing to replace"):
         _download_file_once(FixedVolume(b"changed\n"), "/case_shard.json", destination)
+
+
+def test_manual_relaunch_replaces_only_the_call_id_not_the_task(monkeypatch, tmp_path):
+    relaunch_path = tmp_path / "case_06_relaunch_1.json"
+    monkeypatch.setattr(decoder_parallel, "_relaunch_path", lambda index: relaunch_path)
+    launch = {
+        "receipt_sha256": "parent-launch",
+        "call_ids": {"6": "original-call"},
+        "tasks": [{"source_case_index": 6, "run_id": "same-task"}],
+    }
+    body = {
+        "schema_version": "pmo_complete_program_decoder_case_relaunch_v1",
+        "parent_launch_sha256": "parent-launch",
+        "source_case_index": 6,
+        "task_run_id": "same-task",
+        "call_id": "replacement-call",
+        "manual_relaunch": 1,
+        "automatic_retries": 0,
+        "oracle_calls_authorized": 0,
+    }
+    _replace_json(relaunch_path, {**body, "receipt_sha256": identity(body)})
+    assert decoder_parallel._effective_call_ids(launch) == {"6": "replacement-call"}
 
 
 def test_contract_is_sealed_and_pins_authoritative_sharded_execution():
