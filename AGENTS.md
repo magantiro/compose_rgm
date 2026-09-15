@@ -372,6 +372,36 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped zero-oracle T4 target-conditioned utility and Dynamic-v0
+qualification contract, 2026-09-15:** after the target-blind structural
+selector showed that structural recovery is not a substitute for docking
+utility, the user authorized one isolated contract-only revision for the next
+five-cell development comparison. Bind the immutable macro-to-archive-to-v0
+integration revision, the frozen target-conditioned utility-selector design
+and the authoritative historical Dynamic-v0 and Full-146 matched-call curves.
+This successor contract narrows the parent integration ban on protein identity
+only for the frozen five-level utility-selector conditioning input. Target
+identity remains forbidden in generation, realization, admission and
+Dynamic-v0 refinement.
+Predeclare exactly `5ht1b_0`, `braf_1`, `jak2_1`, `parp1_0` and `fa7_0`.
+The direct endpoint is lower-is-better docking utility, reported at calls 1,
+5, 10, 20, 50 and 100. Structural or known-route recovery is diagnostic only.
+
+Any later launch must lock one utility-ranked macro jump and one target-blind
+structural-selection jump per cell before scoring. The utility jump must beat
+the structural control across the complete five-cell paired panel and meet or
+beat each available historical Dynamic-v0 call-1 reference. The utility jump
+may become call 1 of an otherwise unchanged Dynamic-v0 continuation. Promotion
+requires pointwise early-call non-inferiority to available Dynamic-v0 curves
+and a reduced matched-budget JAK2 gap to Full-146. PARP1 and FA7 historical
+comparisons must abstain where the bound reference contains no curve. Use no
+plateau stopping, imputed failure score, post-result threshold or structural
+surrogate for docking utility. This revision authorizes zero docking or oracle
+calls and no Modal launch. An exact utility-checkpoint, candidate/admission
+lock, runtime-input and launch-revision hash supplement plus separate explicit
+launch authorization remain required. The self-hashed contract is
+`configs/t4_target_conditioned_utility_v0_qualification_v1.json`.
+
 **Scoped zero-oracle T4 macro-to-archive integration plumbing, 2026-09-15:**
 after the baseline and expanded compositional structural-subgoal generators
 produced immutable exact-realized candidate locks and the complete-macro
