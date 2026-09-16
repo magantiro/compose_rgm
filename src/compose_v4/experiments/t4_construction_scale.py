@@ -31,26 +31,18 @@ from collections import Counter, defaultdict
 
 import numpy as np
 
-from compose_v4.control.dynamic_program_synthesis import (
-    _weighted_module_order,  # the production family-order law, reused rather than copied
-    compile_generic_module,
+from compose_v4.control.constructive_composition import (
+    DEFAULT_BUILDERS,
+    MAX_BLOCKS,
+    MAX_PRIMITIVES,
+    compose,
 )
-from compose_v4.control.edit_program import extract_program
-from compose_v4.control.edit_program_graph import compile_program_graph, execute_program_graph
 
 SCHEMA_VERSION = "t4_construction_scale_v1"
-
-# The declared per-program support. These are read from the contract, never widened.
-MAX_PRIMITIVES = 32
-MAX_BLOCKS = 8
 
 # Descriptive bands. Chosen after inspecting the corpus, so they describe the
 # measurement rather than preregistering it; the prospective gate is separate.
 SIZE_BANDS = ((1, 2), (3, 5), (6, 9), (10, 14), (15, 22), (23, MAX_PRIMITIVES))
-
-# Fallback only. The driver derives the real set from the measured family profile,
-# restricted to the sampler's own families, so this never silently substitutes for it.
-DEFAULT_BUILDERS = ("append_ring", "fuse_ring", "functionalize", "segment_grow")
 
 
 def band_of(primitives: int) -> str:
@@ -184,55 +176,10 @@ def root_construction_density(records, roots, *, threshold: int = 15) -> dict:
 
 # ---- The deep constructive composition law ----
 
-
-def compose_deep(source, rng, modules: int, *, constructive: bool, builders=None):
-    """Compose up to `modules` generic modules, inside the declared support.
-
-    This is a new composition law over the unchanged production pieces, not a
-    modified `synthesize_dynamic_program`: that function caps at three modules and
-    is left exactly as it is, because v0's proven lane depends on it.
-
-    `constructive` moves the builder families to the front of the production family
-    order. It changes which family is tried first, never which families exist.
-
-    `builders` is passed in rather than read from module state. The caller derives it
-    from the measured family profile, and a diagnostic that mutated a global would be
-    the same defect this repository just spent 46 test failures on.
-    """
-    if not 1 <= modules <= MAX_BLOCKS:
-        raise ValueError(f"composition depth must fit the declared {MAX_BLOCKS}-block support")
-    builders = DEFAULT_BUILDERS if builders is None else tuple(builders)
-    current, stages = source, []
-    for _ in range(modules):
-        order = _weighted_module_order(rng, near_capacity=False)
-        if constructive:
-            order = [f for f in order if f in builders] + [f for f in order if f not in builders]
-        accepted = None
-        for family in order:
-            try:
-                product, stage = compile_generic_module(current, rng, family)
-                program, binding = extract_program(source, [*stages, stage])
-            except ValueError:
-                continue
-            if len(program.marks) > MAX_PRIMITIVES or len(program.blocks) > MAX_BLOCKS:
-                continue
-            accepted = (product, stage)
-            break
-        if accepted is None:
-            break
-        current, stage = accepted
-        stages.append(stage)
-    if not stages:
-        raise ValueError("no generic module executed at this source")
-    program, binding = extract_program(source, stages)
-    _, trace = execute_program_graph(
-        source,
-        compile_program_graph(program),
-        binding,
-        max_primitives=MAX_PRIMITIVES,
-        max_blocks=MAX_BLOCKS,
-    )
-    return trace, tuple(stage["name"] for stage in stages)
+# The law itself lives in control/, next to the other proposal code, because it is a
+# proposal law rather than a diagnostic. It is re-exported here under the name this
+# module's tests and report already use, so there is exactly one implementation.
+compose_deep = compose
 
 
 def eligibility_by_size(
