@@ -1,0 +1,183 @@
+{
+  "payload": {
+    "admission_lock": {
+      "payload_sha256": "391cd0372130947ac78bd94706d93375c90c4c572741027165cec4d5ac59c1c4",
+      "physical_sha256": "8d919348f50335cb6373906d56bc8500ac8ccb66f3a45f9c0f33567f59258afd"
+    },
+    "candidate_lock": {
+      "payload_sha256": "f7dcc797aa2d218696920e989f3badae1450ffede2a3ce715b38c6033256a3e5",
+      "physical_sha256": "088dcc7c9a86f1c33447acfb722b5d966e66dc39fec29499fab4e59b3ccaba4a"
+    },
+    "cell_census": [
+      {
+        "cell": "5ht1b_0",
+        "distinct_eligible": 0,
+        "dynamic_v0_start_call": 1,
+        "eligible": 0,
+        "pool": 128,
+        "status": "macro_support_abstention_dynamic_v0_from_call_1"
+      },
+      {
+        "cell": "braf_1",
+        "distinct_eligible": 0,
+        "dynamic_v0_start_call": 1,
+        "eligible": 0,
+        "pool": 128,
+        "status": "macro_support_abstention_dynamic_v0_from_call_1"
+      },
+      {
+        "cell": "jak2_1",
+        "distinct_eligible": 54,
+        "dynamic_v0_start_call": 4,
+        "eligible": 54,
+        "pool": 128,
+        "status": "three_macro_calls_then_dynamic_v0"
+      },
+      {
+        "cell": "parp1_0",
+        "distinct_eligible": 54,
+        "dynamic_v0_start_call": 4,
+        "eligible": 54,
+        "pool": 128,
+        "status": "three_macro_calls_then_dynamic_v0"
+      },
+      {
+        "cell": "fa7_0",
+        "distinct_eligible": 0,
+        "dynamic_v0_start_call": 1,
+        "eligible": 0,
+        "pool": 128,
+        "status": "macro_support_abstention_dynamic_v0_from_call_1"
+      }
+    ],
+    "contract": {
+      "path": "configs/t4_hybrid_top3_v0_controller_v1.json",
+      "payload_sha256": "f88098d7b3098c0aa62c9fff57dc8a5db3ed61ba89dcec1a00e7a96f796dcc50",
+      "physical_sha256": "397e87ba94199901a62cdf39841b26f15bda2df5bf8854f467fbdb1df13f68e3"
+    },
+    "future_scored_call_authorization_requirements": {
+      "calls_by_cell": 100,
+      "current_authority": "none",
+      "dynamic_v0_calls": 494,
+      "initial_locked_macro_calls": 6,
+      "interpretation": "five-cell answer-known development with generic support-conditioned fallback; not a full benchmark or IVG superiority result",
+      "maximum_single_cpu_workers": 5,
+      "maximum_total_charged_calls": 500,
+      "no_retry_no_confirmation_no_plateau": true,
+      "required_exact_bindings": [
+        "candidate_lock physical and payload SHA-256",
+        "admission_lock physical and payload SHA-256",
+        "clean launch Git revision and tree",
+        "unchanged Dynamic-v0 implementation identity",
+        "five target receptor, box, binary, preparation and docking-seed identities",
+        "durable per-call query ledger and restart contract"
+      ]
+    },
+    "input_provenance": {
+      "baseline_generator_lock": {
+        "path": "diagnostics/t4_compositional_structural_subgoal_generator/attempt_1/candidate_lock.json.gz",
+        "payload_sha256": "d9717fc3a7b92fe8b264c7803c43f50f48b14e078b179cbd75f66d769aa65b10",
+        "revision": "7d87ff2959845d5c6273e743141ac9c0fe806594",
+        "sha256": "f533e70d940ff191df007b28107f12eed9bce6abb43f44f7afc91d47422afd28"
+      },
+      "macro_archive_integration": {
+        "dynamic_v0_path": "src/compose_v4/control/dynamic_program_synthesis.py",
+        "dynamic_v0_sha256": "80fcc5f64a04306613fd84955dbed0b4c4ce5d512a3ed2c2ddd119515b899257",
+        "implementation_path": "src/compose_v4/control/macro_archive_integration.py",
+        "implementation_sha256": "2d34549cee0709a9583968f9e1860ffe37ad093a83ded82550267943883fe656",
+        "revision": "2a41b086fb4f109a09bee15c17f1c6ec6551e29d",
+        "tree": "5e24f7a1a114796f8c0938623d30b3f5c046e68c"
+      },
+      "qualification_v2": {
+        "path": "configs/t4_target_conditioned_utility_v0_qualification_v2.json",
+        "payload_sha256": "8132f1351c9fa687f0786739536af245da32dd3542f2f77b15f14883878d60ac",
+        "revision": "d9d074489cab195d6f007f71d771e503ae4a1c3f",
+        "sha256": "496d89b2fb6251a930913f8be28e2289ad19bf55efcc589d362f4f6990e5dd2d",
+        "tree": "225524f249dc85bc89d7d9fb2dc005dde6b5f617"
+      },
+      "strict_eligibility_ledger": {
+        "path": "diagnostics/t4_compositional_generator_utility_lock/attempt_1/eligibility_ledger.json.gz",
+        "payload_sha256": "ccb4d2ca43cdf87bc107e611f996cd0460f2d82843356e083873eb8e577169ad",
+        "revision": "67574d20f8d28c70480974013bc8bca70df7e614",
+        "sha256": "06ff8f02aebe99ba014c81941aab25b92fc952f786db10266e00d6143c4a4c5b"
+      },
+      "v4_fold_checkpoints": [
+        {
+          "fold": 0,
+          "path": "diagnostics/t4_target_conditioned_utility_selector/attempt_4/fold_0_checkpoint.json",
+          "revision": "1e8151f6e590921cace72d1d0b3a8cb4e5175904",
+          "sha256": "245cc1691604432c1fc6bf869d1c97860bc911206e241b2377cde616d0c66ba7"
+        },
+        {
+          "fold": 1,
+          "path": "diagnostics/t4_target_conditioned_utility_selector/attempt_4/fold_1_checkpoint.json",
+          "revision": "1e8151f6e590921cace72d1d0b3a8cb4e5175904",
+          "sha256": "204a076b760339ccdab24178da6de3c5d2c8ebc1a9d1b6cb5e6c5f35c3c8c482"
+        },
+        {
+          "fold": 2,
+          "path": "diagnostics/t4_target_conditioned_utility_selector/attempt_4/fold_2_checkpoint.json",
+          "revision": "1e8151f6e590921cace72d1d0b3a8cb4e5175904",
+          "sha256": "067bd44f01fd93261a882748e9bb7b775b27f7da7768f052523e23ec182e0d0a"
+        }
+      ],
+      "v4_utility_contract": {
+        "path": "configs/t4_target_conditioned_utility_selector_v4.json",
+        "payload_sha256": "f7a2720e2c299449168047d59919c034f68585a0a27c747dedf229a53859ffd7",
+        "revision": "b78c9e97f8a186715dcbeb146e0ddd28a083fe7b",
+        "sha256": "425eae30c4f339fe106916f53cbd7d055eac832c3bba2a44ae1f8691fee83353"
+      },
+      "v4_utility_implementation": {
+        "revision": "b78c9e97f8a186715dcbeb146e0ddd28a083fe7b",
+        "tree": "c5f4f19121b50f9e0e6364db02ffd2a0dc227e4a"
+      },
+      "v4_utility_result": {
+        "path": "diagnostics/t4_target_conditioned_utility_selector/attempt_4/result.json",
+        "revision": "1e8151f6e590921cace72d1d0b3a8cb4e5175904",
+        "sha256": "20c0db5f8e9b11bc7a17f9849c0d02ccf3f1c9993b1539b3d49e4dbcf377aade"
+      },
+      "v4_utility_result_revision": {
+        "revision": "1e8151f6e590921cace72d1d0b3a8cb4e5175904",
+        "tree": "8e8360d30ef53eb67b4350ad0f26baa4ab67f9c5"
+      }
+    },
+    "limitations": [
+      "three of five cells have no exact-eligible endpoint in the bound baseline learned 128-pool and therefore use Dynamic-v0 from call one",
+      "predicted structural and target-blind utility scores are zero-oracle ordering signals, not evidence of docking improvement",
+      "the target-conditioned arm is rejected and absent"
+    ],
+    "live_run_accesses": 0,
+    "modal_launches": 0,
+    "new_docking_calls": 0,
+    "new_oracle_calls": 0,
+    "producer": {
+      "code_revision": "7a8b86ae87b4987d4513f09cf09b3821345214c9",
+      "code_tree": "ec574d2ff25b11a00c53166d269309d48546a5e0",
+      "device": "cpu",
+      "python": "3.12.9",
+      "rdkit": "2026.03.6",
+      "workers": 1
+    },
+    "schema_version": "t4_hybrid_top3_v0_result_v1",
+    "status": "complete_zero_oracle_support_conditioned_lock",
+    "summary": {
+      "abstention_cells": [
+        "5ht1b_0",
+        "braf_1",
+        "fa7_0"
+      ],
+      "all_five_cells_have_three_eligible_independent_candidates": false,
+      "declared_cells": 5,
+      "frozen_initial_macro_calls": 6,
+      "macro_support_abstention_cells": 3,
+      "supported_cells": [
+        "jak2_1",
+        "parp1_0"
+      ],
+      "three_candidate_macro_supported_cells": 2,
+      "total_calls_if_full_five_cell_run_authorized": 500,
+      "unchanged_dynamic_v0_calls_if_full_five_cell_run_authorized": 494
+    }
+  },
+  "payload_sha256": "ebbfb0cfc6edbaf5157b659560d62830a5875ca9980e659ae8d7b38ce635023d"
+}

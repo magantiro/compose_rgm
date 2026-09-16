@@ -145,3 +145,25 @@ def test_contract_is_self_hashed_and_zero_oracle() -> None:
         "model_fitting_authorized": False,
         "candidate_generation_authorized": False,
     }
+
+
+def test_sealed_lock_records_supported_cells_and_fail_closed_abstentions() -> None:
+    root = Path(__file__).resolve().parents[1]
+    result = json.loads(
+        (root / "diagnostics/t4_hybrid_top3_v0_controller/attempt_1/result.json").read_text()
+    )
+
+    assert result["payload_sha256"] == identity(result["payload"])
+    assert result["payload"]["summary"] == {
+        "abstention_cells": ["5ht1b_0", "braf_1", "fa7_0"],
+        "all_five_cells_have_three_eligible_independent_candidates": False,
+        "declared_cells": 5,
+        "frozen_initial_macro_calls": 6,
+        "macro_support_abstention_cells": 3,
+        "supported_cells": ["jak2_1", "parp1_0"],
+        "three_candidate_macro_supported_cells": 2,
+        "total_calls_if_full_five_cell_run_authorized": 500,
+        "unchanged_dynamic_v0_calls_if_full_five_cell_run_authorized": 494,
+    }
+    assert result["payload"]["new_oracle_calls"] == 0
+    assert result["payload"]["new_docking_calls"] == 0
