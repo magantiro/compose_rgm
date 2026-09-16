@@ -95,6 +95,12 @@ completed once: **5,396 tests, 5,225 passed, 110 failed, 58 errors, 3 skipped,
 38m30s**. It is recorded as `completed_and_failed` with `launch_authority: none`.
 A failing receipt is not authorization to bypass the boundary.
 
+Read its `source_revision_disclosure` before citing it: the run started from HEAD
+`52dcfcd9` with the corpus work still uncommitted, and those files were committed
+as `5a650544` while it was in flight. It is a development-time verification
+receipt, not a clean-committed-source launch gate, and must not be presented as
+one.
+
 Provenance is settled by measurement, in
 `verification/full_suite_classification.json`:
 
