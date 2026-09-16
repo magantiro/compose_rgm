@@ -26,6 +26,7 @@ from the hashed mirror instead of from a second, drifting copy.
 from __future__ import annotations
 
 import gzip
+import hashlib
 import json
 import math
 from collections import Counter, defaultdict
@@ -257,15 +258,11 @@ def collapse_observations(admitted) -> list[dict]:
 
 
 def _record_id(cell: str, entry_id: str, protocol: str) -> str:
-    import hashlib
-
     body = canonical_bytes({"cell": cell, "entry_id": entry_id, "protocol": protocol})
     return hashlib.sha256(body).hexdigest()
 
 
 def _text_sha256(text: str) -> str:
-    import hashlib
-
     return hashlib.sha256(text.encode()).hexdigest()
 
 
@@ -552,15 +549,11 @@ def heldout_power(records) -> dict:
 
 
 def _payload_sha256(payload) -> str:
-    import hashlib
-
     return hashlib.sha256(canonical_bytes(payload)).hexdigest()
 
 
 def write_records(path: Path, records) -> str:
     """Byte-stable gzip of the record table, ordered by its content-addressed id."""
-    import hashlib
-
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     body = b"".join(

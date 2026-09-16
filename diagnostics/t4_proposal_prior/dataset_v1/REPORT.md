@@ -10,6 +10,11 @@ Zero oracle calls, zero new labels, no model fit.
 - labelled constructions after collapsing repeat receipts: 34073
 - excluded rows: 0 {}
 
+The recovered pack was already filtered by the audit that produced it, so no
+admission rule rejected anything here. The rules are therefore exercised only by
+their tests, not by this data; that is a property of this input, not evidence that
+the rules are unnecessary.
+
 ## Group disjointness
 
 | Identity | Distinct values | Values crossing a cell |
