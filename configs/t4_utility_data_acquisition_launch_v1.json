@@ -1,0 +1,183 @@
+{
+  "payload": {
+    "schema_version": "t4_utility_data_acquisition_launch_contract_v1",
+    "authorization": {
+      "date": "2026-09-15",
+      "basis": "The user explicitly authorized the exact four hash-bound requests, upload of the isolated scored-launch bundle, a zero-score preflight and exactly four parallel one-CPU scored workers, with no retry, replacement, backfill or confirmation.",
+      "candidate_lock_physical_sha256": "d790389696d729f19ce617b3dcf4afddf0f3ce06110882a1b628889e0c354249",
+      "candidate_lock_payload_sha256": "8b5acdbfca42a122d6a882d48e6bbe00468052c913f79e806b6dbb7164685471",
+      "request_lock_physical_sha256": "e11441244c98d919d42315dcafbdede300bbb6232bdc5a911896bdb3d1010d05",
+      "request_lock_payload_sha256": "f78985599a7ff5e533384ac7d61c2cc77f7c6cf94e064f6a6ec0e3ed692bc279",
+      "first_score_call_ceiling": 4,
+      "first_score_call_ceiling_if_later_authorized": 4,
+      "modal_bundle_upload_authorized": true,
+      "modal_launch_authorized": true,
+      "scored_calls_authorized": true,
+      "required_later_authorization": "SATISFIED_EXACT_HASH_BOUND_FOUR_CALL_AUTHORIZATION"
+    },
+    "mode": "authorized_one_shot_training_data_acquisition",
+    "scientific_problem": "Acquire the smallest independently grouped measured T4 utility panel that can close the frozen target-conditioned utility selector's structural support gap.",
+    "primary_output": "Under this exact authorization, a durable one-attempt ledger for the exact two FA7 seed-1 and two PARP1 seed-2 requests plus one deterministic four-request reduction.",
+    "central_claim_under_test": "Conditional on four finite scores and a non-tied pair in each cell, the unchanged v3 utility-data gate supports FA7, JAK2 and PARP1 across at least five held-source strata.",
+    "evidence_status": "Prospective training-data acquisition only. These labels cannot serve as prospective utility evaluation evidence.",
+    "experimental_setting": "Exactly four score-blind strict delta-0.4 requests from the immutable utility data-acquisition lock, two in fa7_1 and two in parp1_2.",
+    "inputs": {
+      "source_revision": "9bf71eff393bd7e7b706a0d08d005b8ea7e25015",
+      "zero_oracle_contract": {
+        "path": "configs/t4_utility_data_acquisition_lock_v1.json",
+        "physical_sha256": "c405033551f94de4ae19eea193a62f129d1a6a8056c370b832261f0d2fe4435e",
+        "payload_sha256": "8da70ac8e97c35672a635dc6f552601e408ed2ce1937fc78f6616de857e22bd9"
+      },
+      "candidate_lock": {
+        "path": "diagnostics/t4_utility_data_acquisition_lock/attempt_1/candidate_lock.json",
+        "physical_sha256": "d790389696d729f19ce617b3dcf4afddf0f3ce06110882a1b628889e0c354249",
+        "payload_sha256": "8b5acdbfca42a122d6a882d48e6bbe00468052c913f79e806b6dbb7164685471"
+      },
+      "request_lock": {
+        "path": "diagnostics/t4_utility_data_acquisition_lock/attempt_1/request_lock.json",
+        "physical_sha256": "e11441244c98d919d42315dcafbdede300bbb6232bdc5a911896bdb3d1010d05",
+        "payload_sha256": "f78985599a7ff5e533384ac7d61c2cc77f7c6cf94e064f6a6ec0e3ed692bc279"
+      },
+      "zero_oracle_result": {
+        "path": "diagnostics/t4_utility_data_acquisition_lock/attempt_1/result.json",
+        "physical_sha256": "68aa9d7e46e4d0aea3318927e2196caa57e981a4d5a8f2822136ac270df728d1",
+        "payload_sha256": "225d24d5ed08440d7f3bfc4e7425aefb059872776f3937c5741cd8b47fec1cce"
+      },
+      "source_reference_registry": {
+        "path": "docs/GENMOL_T4_SEEDS.json",
+        "physical_sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"
+      },
+      "scoring_implementation": {
+        "path": "modal_apps/genmol_t4_opt_app.py",
+        "sha256": "9b635a9936493a5900b613cdce52f76c24efcf98f3f43b3b155448e0b1796bf0",
+        "function": "_dock"
+      }
+    },
+    "verified_one_shot_lineage": {
+      "implementation_revision": "eb275132298188edb809566832762a959e1cf335",
+      "completed_result_revision": "4be5f93d836e669f4036f3ea6c200f78c40a2a74",
+      "summary": "The reused selector launcher reserved, scored and reduced each exact request once, with a zero-score preflight, durable state transitions and no retry, replacement, backfill or confirmation."
+    },
+    "request_contract": {
+      "expected_requests": 4,
+      "expected_cells_with_requests": 2,
+      "request_ids": [
+        "16684461574437b0d4461d5fd36a63de5f6e38a816db269b58ca897a46cc6ce0",
+        "29b8aab0a016481b3ca1d9cce4b894be78da766dca6207c74a8e412cf495044b",
+        "a72ddc724af7bc26003be357b7b5abc6e80a13f753e2c3f76877648fc490b34e",
+        "e6bd0f87e1689b2dc1389374c8bbd1ebf493243290bbbd94292bddf0a22372db"
+      ],
+      "candidate_ids": [
+        "fd4d754151f7312e8c6d4df7f79e83f77eaae6262f48d3943856138ffd40036c",
+        "6ab68c2df5b637214cdb695ad1fa0b8302f5f17ad9fd38641f29f1355a4950fb",
+        "d7c7b5625111f0c41fa24873e5dc4f0a3048f3d6a5670dc93f44268f645e3345",
+        "705e30bec99bf7ae6a51a7f862d6c4ff06bcb89f9f3964c78edbb5337b22af12"
+      ],
+      "cells_and_counts": {
+        "fa7_1": 2,
+        "parp1_2": 2
+      },
+      "targets_and_counts": {
+        "fa7": 2,
+        "parp1": 2
+      },
+      "identity_fields": [
+        "target",
+        "canonical_smiles",
+        "docking_seed",
+        "evaluator",
+        "evaluator_payload",
+        "candidate_id",
+        "cell"
+      ],
+      "candidate_mutation": false,
+      "selection_or_reranking": false,
+      "task_or_docking_score_used_for_request_selection": false
+    },
+    "evaluator": {
+      "schema_version": "t4_quickvina_endpoint_evaluator_v1",
+      "quickvina_cpu_per_request": 1,
+      "num_modes": 10,
+      "exhaustiveness": 1,
+      "ligand_preparation": "Open Babel --gen3d, unchanged production wrapper",
+      "docking_seed": 1701,
+      "score_direction": "minimize",
+      "score_unit": "kcal/mol as emitted by the bound QuickVina wrapper",
+      "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor_sha256": {
+        "fa7": "bfd705fb8220c52e1b447afce23a3810bc6deddb06983e98a2b0934b24ba092d",
+        "parp1": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9"
+      }
+    },
+    "zero_score_preflight": {
+      "required_before_worker_spawn": true,
+      "checks": [
+        "exact clean serialized source revision",
+        "launch implementation and request-lock hashes",
+        "RDKit 2024.03.5",
+        "Open Babel availability",
+        "QuickVina executable hash",
+        "FA7 and PARP1 receptor hashes",
+        "exact four-request and two-cell census"
+      ],
+      "docking_calls": 0,
+      "failure_action": "stop before every scored worker"
+    },
+    "execution": {
+      "maximum_modal_workers": 4,
+      "required_parallel_worker_spawns": 4,
+      "requests_per_worker": 1,
+      "cpu_per_worker": 1,
+      "memory_mb_per_worker": 4096,
+      "timeout_seconds_per_worker": 480,
+      "automatic_retries": 0,
+      "replacement": false,
+      "backfill": false,
+      "confirmation_calls": 0,
+      "candidate_regeneration": false,
+      "result_dependent_actions": false,
+      "attempt_accounting": "A published reservation consumes the request's only authorized first-score attempt. A start, docking failure, container failure, missing score or ambiguous terminal state receives no retry.",
+      "persistence": "Publish reservation, start and exactly one terminal result or failure atomically in a request-ID directory on the compose-v4-artifacts Modal volume and commit after each transition.",
+      "reduction": "Sort the four exact request identities by request_id; require one terminal record per reservation or report the incomplete census without retry. Preserve candidate and cell identities from the sealed request lock and report within-cell pair readiness without inventing missing labels."
+    },
+    "outputs": {
+      "modal_app": "compose-t4-utility-data-acquisition",
+      "modal_volume": "compose-v4-artifacts",
+      "volume_prefix": "/t4_utility_data_acquisition_launch",
+      "local_preflight_receipt": "diagnostics/t4_utility_data_acquisition_launch_preflight.json",
+      "local_spawn_receipt": "diagnostics/t4_utility_data_acquisition_launch_spawn.json",
+      "local_reduce_receipt": "diagnostics/t4_utility_data_acquisition_launch_reduce_spawn.json",
+      "request_state_files": [
+        "reservation.json",
+        "started.json",
+        "result.json",
+        "failure.json"
+      ],
+      "reduced_result": "result.json"
+    },
+    "acceptance": {
+      "exact_hash_bound_scored_authorization": true,
+      "exact_clean_committed_launch_source": true,
+      "zero_score_remote_preflight_passes": true,
+      "exact_worker_spawns_if_authorized": 4,
+      "one_cpu_each": true,
+      "one_terminal_receipt_per_reserved_request_or_explicit_incomplete_state": true,
+      "first_score_calls_charged_less_than_or_equal_to": 4,
+      "automatic_retries": 0,
+      "replacements_or_backfill": 0,
+      "confirmation_calls": 0,
+      "all_result_artifacts_self_hashed": true,
+      "deterministic_reduction": true
+    },
+    "prohibitions": [
+      "request outside the four exact locked request identities",
+      "retry, confirmation, replacement or backfill after reservation",
+      "candidate regeneration, mutation, reranking or additional candidate scoring",
+      "utility-model fitting or controller update",
+      "post-result split, grouping, threshold, eligibility or protocol change",
+      "prospective-evaluation or controller-performance claim from acquisition labels"
+    ],
+    "interpretation_limit": "The four-request panel is prospective training-data acquisition under one bound QuickVina evaluator. Even complete finite non-tied pairs only establish that the frozen data-support gate can be reevaluated; they are not a prospective utility-model evaluation."
+  },
+  "contract_sha256": "129f9ad786edaecfea7cfeeb78410c92a659845b4c70c4996c363e412070e016"
+}
