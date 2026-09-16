@@ -100,3 +100,22 @@ def test_qualified_receipt_binds_same_package_before_loading(package):
             repo_root=ROOT,
             qualified_source_receipt=(proof, sha256_file(proof)),
         )
+
+
+def test_loading_freezes_the_model_without_disabling_autograd_globally(package):
+    """Loading must not leave process-wide autograd off for every later caller.
+
+    `load_package` previously ended with `torch.set_grad_enabled(False)`, a global
+    flag that outlived the call. In a shared process that silently removed
+    gradients from unrelated work downstream; the loaded model is frozen instead.
+    """
+    path, _, digest = package
+    with torch.enable_grad():
+        loaded, _ = load_package(path, manifest_sha256=digest, repo_root=ROOT)
+        assert torch.is_grad_enabled(), "load_package disabled autograd process-wide"
+        probe = torch.zeros(1, requires_grad=True)
+        (probe * 2.0).sum().backward()
+        assert probe.grad is not None
+    assert not any(p.requires_grad for p in loaded.parameters())
+    weight = next(iter(loaded.parameters()))
+    assert not (weight * 2.0).requires_grad, "a frozen weight still builds an autograd graph"

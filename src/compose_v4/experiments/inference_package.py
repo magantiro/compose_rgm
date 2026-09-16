@@ -123,5 +123,10 @@ def load_package(
     if state_dict_semantic_sha256(model.state_dict()) != manifest["tensor_sha256"]:
         raise ValueError("inference package selected tensor state changed")
     torch.set_num_threads(1)
-    torch.set_grad_enabled(False)
+    # Freeze the returned model rather than disabling autograd process-wide. The
+    # previous `torch.set_grad_enabled(False)` here was a global side effect that
+    # outlived the call and silently removed gradients from every later caller in
+    # the same process; freezing the parameters gives this model the same
+    # graph-free forward pass without touching anyone else's autograd state.
+    model.requires_grad_(False)
     return model, manifest
