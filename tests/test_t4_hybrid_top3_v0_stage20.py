@@ -17,6 +17,8 @@ from compose_v4.experiments.t4_hybrid_top3_v0_stage20 import (
     load_contract,
     run_identity,
 )
+from modal_apps.t4_hybrid_top3_v0_stage20_app import serialized
+from tools.t4_hybrid_top3_v0_stage20 import material_files
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -53,6 +55,13 @@ def test_inputs_and_exact_five_replicate_zero_units_are_bound() -> None:
         row["replicate"] == 0 and row["budget"] == 1000 for row in contract["units"]
     )
     assert len(run_identity(contract)) == 64
+
+
+def test_modal_image_serializes_every_task_validated_material() -> None:
+    contract = load_contract(ROOT)
+    assert serialized == material_files(contract)
+    assert "docs/T4_HYBRID_TOP3_V0_STAGE20_LAUNCH.md" in serialized
+    assert "tests/test_t4_hybrid_top3_v0_stage20.py" in serialized
 
 
 def test_locked_macro_batch_preserves_calls_and_endpoints() -> None:

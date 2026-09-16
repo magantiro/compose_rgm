@@ -15,21 +15,14 @@ from modal_apps.genmol_t4_opt_app import (
 )
 from modal_apps.genmol_t4_opt_app import image as base_image
 from modal_apps.run_process_v2_p50_app import _validate_remote_revision
+from tools.t4_hybrid_top3_v0_stage20 import material_files
 
 CONTRACT = "configs/t4_hybrid_top3_v0_stage20_launch_v1.json"
-APP_SOURCE = "modal_apps/t4_hybrid_top3_v0_stage20_app.py"
-EXPERIMENT_SOURCE = "src/compose_v4/experiments/t4_hybrid_top3_v0_stage20.py"
-TOOL_SOURCE = "tools/t4_hybrid_top3_v0_stage20.py"
 
 payload = json.loads((ROOT / CONTRACT).read_text())["payload"]
-serialized = [CONTRACT, APP_SOURCE, EXPERIMENT_SOURCE, TOOL_SOURCE]
-serialized.extend(
-    spec["path"]
-    for spec in payload["immutable_inputs"].values()
-    if isinstance(spec, dict) and "path" in spec
-)
+serialized = material_files({"launch": payload})
 image = base_image
-for relative in sorted(set(serialized)):
+for relative in serialized:
     image = image.add_local_file(
         ROOT / relative,
         str(REMOTE_ROOT / relative),
