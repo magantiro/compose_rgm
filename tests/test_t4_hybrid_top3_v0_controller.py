@@ -87,6 +87,7 @@ def test_unscored_graph_pair_interface_is_decision_equivalent() -> None:
 
 def test_freeze_cell_schedule_uses_three_distinct_endpoints_then_v0() -> None:
     rows = [_row(1, "CCC"), _row(2, "CCCC"), _row(3, "CCN"), _row(4, "CCO")]
+    rows[1]["final_exclusion_reasons"] = ["eligible_not_selected_by_prior_panel"]
     schedule = freeze_cell_schedule(
         cell="jak2_1",
         candidate_rows=rows,

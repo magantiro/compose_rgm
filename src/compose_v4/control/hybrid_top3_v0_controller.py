@@ -50,7 +50,6 @@ def _validate_candidate_row(row: Mapping[str, Any], *, cell: str) -> None:
         or row.get("policy_id") != "balanced_joint_autoregressive"
         or row.get("eligible") is not True
         or row.get("eligibility_exclusion_reasons") != []
-        or row.get("final_exclusion_reasons") != []
         or row.get("exact_action_replay") is not True
         or realization.get("status") != "realized"
         or realization.get("endpoint_matches_bound_target") is not True
