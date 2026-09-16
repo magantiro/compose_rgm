@@ -740,11 +740,6 @@ def run(contract_path: Path) -> dict:
             "revision": subprocess.check_output(
                 ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
             ).strip(),
-            "working_tree_dirty_at_execution": bool(
-                subprocess.check_output(
-                    ["git", "status", "--porcelain"], cwd=ROOT, text=True
-                ).strip()
-            ),
         },
         "costs": {
             "oracle_calls": 0,
