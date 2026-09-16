@@ -122,6 +122,51 @@ OpenBabel/QuickVina command flags match the historical adapter, including seed
 1701, one CPU and exhaustiveness one. Local chemistry diagnostics use a newer
 RDKit and are explicitly not substituted for pinned-image results.
 
+## Revision 1a: split-clean proposal-prior corpus (zero oracle, no fit)
+
+The learned prior stays separate until its split-clean data and its actual-sampler
+support are verified. This revision closes the first of those two prerequisites and
+fits nothing.
+
+Contract `configs/t4_proposal_prior_dataset_v1.json` (payload
+`d8e5feb4a15bf0aa12eaed883622a256b4f464f618b9dfc6758c27cc5886ebd7`) was frozen before
+any extraction. It declares the atomic group (`cell`), the identities that must not
+cross a group, leave-one-target-out folds, admission rules with reason codes, label
+semantics, the target/cell/lineage/record weight hierarchy, and a coverage gate whose
+required construction families come from sections 4 and 5 of the strategy report
+rather than from a per-fold count. It also discloses that the pooled, fold-blind
+block-label census had already been inspected while the contract was written.
+
+| Module | Responsibility |
+| --- | --- |
+| `experiments/t4_proposal_prior_dataset.py` | Disjointness proof, admission, observation collapse, lineage closure, folds, weights, census, gate |
+| `tools/t4_proposal_prior_dataset.py` | Contract-input verification and artifact publication |
+| `configs/t4_proposal_prior_checkpoint_manifest_v1.json` | Content identity of the 71 historical checkpoints that carry program payloads |
+
+```sh
+PYTHONPATH=src:. .venv/bin/python tools/t4_proposal_prior_dataset.py
+.venv/bin/pytest -q tests/test_t4_proposal_prior_dataset.py
+```
+
+Measured outcome (`diagnostics/t4_proposal_prior/dataset_v1/REPORT.md`, decision
+**GO**): 35,895 recovered rows admit without exclusion and collapse into 34,073
+labelled constructions. No endpoint, source state, entry id or protocol crosses a
+cell, so no lineage component crosses a fold. Eighteen generic construction families
+are dense in every fold, including all six required ones; `ring_path_remodel`,
+`core_carbonyl_insertion` and `ring_carbonyl` are sparse, and `pendant_benzene` and
+`remodel_linker` are confined to one target and absent from some fold's training
+side. A prior over the sparse or absent families is not supported by this corpus.
+
+Two limits matter more than the record count. First, the corpus holds only 133
+lineage components, so a held-out fold contains 16 to 44 independent genealogies
+behind its thousands of records, and its weighted effective sample size is 65 to 676.
+Second, the frozen equal-mass-per-lineage rule over-corrects on this shape: the
+heaviest single record carries 454 times uniform mass and the heaviest hundred carry
+23% of the corpus. Both numbers were computed after the hierarchy was frozen and
+neither changed it; a capped or size-damped variant is a decision for the separate
+fitting contract. Program payloads are bound by checkpoint hash and entry id, not
+copied, so the fitting step resolves them inside its own training fold.
+
 ## Next learned-prior work
 
 Do not train a large whole-patch model first. Use the recovered successful and
