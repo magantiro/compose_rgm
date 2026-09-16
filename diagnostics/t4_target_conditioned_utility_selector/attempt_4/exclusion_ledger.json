@@ -1,0 +1,761 @@
+{
+  "contract_sha256": "f7a2720e2c299449168047d59919c034f68585a0a27c747dedf229a53859ffd7",
+  "count": 77,
+  "reasons": {
+    "cross_fold_group_conflict": 37,
+    "endpoint_lacks_authoritative_cell_source_representation": 13,
+    "failed_or_null_score": 2,
+    "program_representation_source_mismatch": 25
+  },
+  "rows": [
+    {
+      "artifact": "delta04_prospective",
+      "error_type": "RuntimeError",
+      "identity": "26ebbab7c40baf5c1976bdb2b7c834743f290f532d12eaa788108964f49fec44",
+      "identity_level": "physical_request",
+      "reason": "failed_or_null_score"
+    },
+    {
+      "artifact": "delta04_prospective",
+      "error_type": "RuntimeError",
+      "identity": "31be67020a411bde0883f681c3ef62872cba24520beba055bf3cb4bea39444f8",
+      "identity_level": "physical_request",
+      "reason": "failed_or_null_score"
+    },
+    {
+      "artifact": "delta04_prospective",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "delta04:4b148133e86f93571cee7f4696e3a10d827094e7dd2537b4e8facb5905a7474f",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "delta06_prospective",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "delta06:108b2bc625add6b951d5641915e9b6ebe907fbdeedc47c0e5c12710d695dd538",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "delta06_prospective",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "delta06:1fce07be8e55b49c372595f336e82cab86b799230a33cedbdb62cbea1c61927f",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "delta06_prospective",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "delta06:25f8ede33fa14f6353a3897e435c0495eeb6a0d33202768064030666bf1afcb6",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "delta06_prospective",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "delta06:2f669da0432cf476a941d23052653f728bcf1b0ab9f017f29c6173fd3782c1f1",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "delta06_prospective",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "delta06:50a6d33cada046bcc325b555f32d6f6b24349cb2dc4bac6c3ad903c3f52e1b23",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "delta06_prospective",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "delta06:676647116234858a61de7b8c1152a392d9b85c073886664b0397ee68be240e81",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "delta06_prospective",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "delta06:7516d4c76a650ed6b93cb4f5ed872f3d124718c8a05e6f61bc4cbbc802f4ca78",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "delta06_prospective",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "delta06:aa1fd22b3a4c3913282dd53ff9ece0978acb292c16d03f70b2703566b039b358",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "delta06_prospective",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "delta06:c3a80d0fb48fc1cb2f64282936d70897029814d69a1f9240a44d7639b6c6a5c8",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "delta06_prospective",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "delta06:c60c8f9ebb0ead843a4821d923acb963388dd584e5e9135c61d46a65536b79a8",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "delta06_prospective",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "delta06:cccadd31e2f85643d6d1f49b6f90f0a677b2e8c78c9d4e7125b3cd396525bd2a",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "delta06_prospective",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "delta06:ce4e047ed8e29a7ade08ff45678fe4d36efba7f19f652294d10c958b1809a2d6",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "O=C1CCCc2cc(CCc3ccc4c(c3)CNC(=O)c3cccn3C4=O)ccc21",
+      "identity": "00452f2e02672008e84d3b12169720c50f1fd9521fe18064bddffec3df7289b4",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "O=C1NCc2cc(CCc3ccccc3)ccc2C(=O)n2cccc2C(=O)C1=O",
+      "identity": "05203476ed514e52164ed08e47c81f5216a131dc749a9206ce764d69a05def5a",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "O=C1CCCc2cc(CCc3ccc4c(c3)CNC(=O)c3cccn-4c3=O)ccc21",
+      "identity": "0b0db7bfe77e2de6950fad895879b352dc87c64e8b0a39dd119aa9aad8bffbf5",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "O=C1NCc2cc(CCc3ccccc3)ccc2C(=O)n2cccc21",
+      "identity": "11b5348fc3c5fb8bf6a085a94c4f50373feb0068326f01c3ad64f85771357b8b",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "CCc1ccc2c(c1)CNC(=O)c1cccn(c(=O)c1=O)C(=O)C2=O",
+      "identity": "1caea6476b0a93a1fd4028af197f9d68a43ad4095e1cb4127512f9288d42df9b",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "CCc1ccc2c(c1)CNC(=O)c1cccn(c1=O)C2=O",
+      "identity": "250fd243d2b6a53aad268d945fc0d8093156ea718ad0e2b4840ade4024e71280",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "O=C1CCCc2cc(CCc3ccc4c(c3)CNC(=O)c3cccn3C4=O)ccc21",
+      "identity": "4f8b1bda185cfa55e0015b3fd1810095ec547508eff25b6f8a7d057fdf60a866",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "O=C1CCCc2cc(CCc3ccc4c(c3)CNC(=O)c3cccc(=O)n3-4)ccc21",
+      "identity": "52918d0f6a3012c088b574cd745fdb91344dd5fb11ef38365d5a6d31b70e7802",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "O=C1CCCc2cc(CCc3ccc4c(c3)CNC(=O)c3cccn3C4=O)ccc21",
+      "identity": "64ffed6cc4dc1d176f215aeb31ad3ea9c52dc9c3cbf0ca665066b73ebdf5b035",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "CCc1ccc2c(c1)CNC(=O)c1c3c(cn-2c1=O)CCCC3",
+      "identity": "6704357f154ca030982c652a5bf50f520e5af710ec8111209cc3a2230c9d17c0",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "CCc1ccc2c(c1)CNC(=O)c1cccc(=O)n1C2=O",
+      "identity": "68c55f7c0744fe79285625bde09c342e30fe8f0d0b0a5fb4f6db710ef10ed4b4",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "O=C1CCCc2cc(CCc3ccc4c(c3)CNC(=O)c3cccc(=O)n3-4)ccc21",
+      "identity": "7eda2574b523c28aa35ce2830f6fab4f90a9e03f50755a19bb03cb0fbad55dc8",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "CCc1ccc2c(c1)CNC(=O)c1cccc(=O)n1C2=O",
+      "identity": "8bede8f78e3d5ec3e2c40de175ff8c4e3c2ee869ceef441b898149a81e4167cf",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "CCc1ccc2c(c1)CNC(=O)c1cccc(=O)n-2c1=O",
+      "identity": "8dad5b129a26ec5d7446c9ec287740f01e74eb092563dd49d0ea153e82dca9aa",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "O=C1CCCc2cc(CCc3ccc4c(c3)CNC(=O)c3cccn-4c3=O)ccc21",
+      "identity": "951a109343ac307e353c1001725c54d6b76deccea45cd3dd13deefe3943dfc70",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "identity": "CC(=O)c1ccc2c(c1)CNC(=O)c1cccn1C2=O",
+      "identity_level": "physical_endpoint_label",
+      "reason": "endpoint_lacks_authoritative_cell_source_representation"
+    },
+    {
+      "artifact": "program_pool",
+      "identity": "CC(c1ccc2c(c1)CCCC2=O)c1ccc2c(c1)CNC(=O)C(=O)c1cccn1-2",
+      "identity_level": "physical_endpoint_label",
+      "reason": "endpoint_lacks_authoritative_cell_source_representation"
+    },
+    {
+      "artifact": "program_pool",
+      "identity": "CCc1cc2c(c3c1CCCC3)C(=O)n1cccc1C(=O)NC2",
+      "identity_level": "physical_endpoint_label",
+      "reason": "endpoint_lacks_authoritative_cell_source_representation"
+    },
+    {
+      "artifact": "program_pool",
+      "identity": "CCc1ccc2c(c1)CNC(=O)C(=O)c1cccn1C2=O",
+      "identity_level": "physical_endpoint_label",
+      "reason": "endpoint_lacks_authoritative_cell_source_representation"
+    },
+    {
+      "artifact": "program_pool",
+      "identity": "CCc1ccc2c(c1)CNC(=O)c1c3c(cn-2c1=O)CCCC3",
+      "identity_level": "physical_endpoint_label",
+      "reason": "endpoint_lacks_authoritative_cell_source_representation"
+    },
+    {
+      "artifact": "program_pool",
+      "identity": "CCc1ccc2c(c1)CNC(=O)c1cccc(=O)n-2c1=O",
+      "identity_level": "physical_endpoint_label",
+      "reason": "endpoint_lacks_authoritative_cell_source_representation"
+    },
+    {
+      "artifact": "program_pool",
+      "identity": "CCc1ccc2c(c1)CNC(=O)c1cccc(=O)n1C2=O",
+      "identity_level": "physical_endpoint_label",
+      "reason": "endpoint_lacks_authoritative_cell_source_representation"
+    },
+    {
+      "artifact": "program_pool",
+      "identity": "CCc1ccc2c(c1)CNC(=O)c1cccn(c(=O)c1=O)C(=O)C2=O",
+      "identity_level": "physical_endpoint_label",
+      "reason": "endpoint_lacks_authoritative_cell_source_representation"
+    },
+    {
+      "artifact": "program_pool",
+      "identity": "CCc1ccc2c(c1)CNC(=O)c1cccn(c1=O)C2=O",
+      "identity_level": "physical_endpoint_label",
+      "reason": "endpoint_lacks_authoritative_cell_source_representation"
+    },
+    {
+      "artifact": "program_pool",
+      "identity": "O=C1Cc2cc(CCc3ccc4c(c3)CCCC4=O)ccc2-n2cccc2C(=O)N1",
+      "identity_level": "physical_endpoint_label",
+      "reason": "endpoint_lacks_authoritative_cell_source_representation"
+    },
+    {
+      "artifact": "program_pool",
+      "identity": "O=C1NCc2cc(CCc3ccc4c(c3)CCCC4=O)ccc2-n2cccc2C1=O",
+      "identity_level": "physical_endpoint_label",
+      "reason": "endpoint_lacks_authoritative_cell_source_representation"
+    },
+    {
+      "artifact": "program_pool",
+      "identity": "O=C1NCc2cc(CCc3ccccc3)ccc2C(=O)n2cccc21",
+      "identity_level": "physical_endpoint_label",
+      "reason": "endpoint_lacks_authoritative_cell_source_representation"
+    },
+    {
+      "artifact": "program_pool",
+      "identity": "O=C1NCc2cc(CCc3ccccc3)ccc2C(=O)n2cccc2C(=O)C1=O",
+      "identity_level": "physical_endpoint_label",
+      "reason": "endpoint_lacks_authoritative_cell_source_representation"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "O=C1Cc2cc(CCc3ccc4c(c3)CCCC4=O)ccc2-n2cccc2C(=O)N1",
+      "identity": "a8a6ec9d6ce5463336adcbbf74f37603d13d2a4fe7c2a439c87cb9efd20c4922",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "CC(c1ccc2c(c1)CCCC2=O)c1ccc2c(c1)CNC(=O)C(=O)c1cccn1-2",
+      "identity": "b1bf17bd0f87cde9f1dfe51599e3f898f627372cb094889a7f115525c7e65813",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "CC(=O)c1ccc2c(c1)CNC(=O)c1cccn1C2=O",
+      "identity": "bc5b4259134d1d824b465acad490ce581c76eaec9d2a86724590e253e45e17f8",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "O=C1NCc2cc(CCc3ccc4c(c3)CCCC4=O)ccc2-n2cccc2C1=O",
+      "identity": "c1cfc3e3eff2d3fbb6da416e198d7cc11acfc1b4dd4b3f68781865adfecaee47",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "CCc1ccc2c(c1)CNC(=O)C(=O)c1cccn1C2=O",
+      "identity": "c4e67f0007b27e097343ca0733154f63dcc41ed00f6ff8803696f3f82da9b4d4",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "CCc1ccc2c(c1)CNC(=O)c1cccn(c(=O)c1=O)C(=O)C2=O",
+      "identity": "d0da0f173c03628b8d896a6ef9dc7b3de4079ed2384b246a0de34e6b8a7b9e5c",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "CCc1ccc2c(c1)CNC(=O)c1cccn(c(=O)c1=O)C(=O)C2=O",
+      "identity": "d74396d9c6fde1f8d13c11216582d241d6ba94f33d7e29ffbbb6706c63c15fec",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "CCc1ccc2c(c1)CNC(=O)c1cccn(c1=O)C2=O",
+      "identity": "dccc0ca93ebed3bca4c9f55935f055a1c9c789ea49471474813659878e343f00",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "CCc1ccc2c(c1)CNC(=O)c1cccn(c1=O)C2=O",
+      "identity": "f1ceaf999ec3167d690f968d23a0f98c69e69c4dbd2eb5bf3326cec7a61b97a0",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "program_pool",
+      "endpoint": "CCc1cc2c(c3c1CCCC3)C(=O)n1cccc1C(=O)NC2",
+      "identity": "faddd739d408d4805cefda1edccab7f9766eba4f6e0159c182b2e64a8cdac2bb",
+      "identity_level": "program_representation",
+      "reason": "program_representation_source_mismatch"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:1d79ca23183655f137a22bc60fd423d75898dd1af242c129cc74d26d423f056f",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:240892e36987344c5bf1b133749b08bfe725d23bb4ba7d1707f5dbf1258445b0",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:3491dfb23cddc581ef48407e99a749bd8d8d7f04843de5d5e3aa17362af0ce89",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:3666e8bafc7cee46d6b942c2d04d3ef037a5b5bc097e1e0176ab2ed2c94495f3",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:3fa42c42e8dbca2a57fde68d69cb66261fb0ef5386a5542f2dd1706e03cfdc36",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:41ea6f283f0505556448a9b0e632b4fb318bdce0294246df7770b6873ab9b4fe",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:458e2ae2cfc00412b543beb2a76e018f7c8bfd793eabff95613b7ce8270d1b23",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:4efc4eb053fb782f781c5db60f61ddb9a3a71bd74736a49f4307f5d5255b1588",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:537902394a12b5153cccf5f8b0625d2137b418d18a58ba2f3813f823ecdd32aa",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:5f46e4282dfaeff5af11c306259e7cd62aae8ce93771840d63b28ec07d734705",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:6203527864891d9a3d59f05583457d81d8d6881b73b06a3333754b3d3177d137",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:6ed582b441d8af6e296fa01c75be77df77de741fff10c00938adfd0c5fb8327d",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:787bcf418bbbd62f3efc6b5d313a7d8134a7f75fce4f0f2b2159165e5fa08050",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:9a103384600f2b5f2e5dc6dd11438cc055fe1303203a28754cf9702db3ebcec3",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:9ff3cab4df320f6425f49d96c355d230457b2adebeb02a7e77e881bc672c1ec7",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:aff995caccd32b353b07ae9e1a0205bd3f5d3cb2703feda6d25d2fb4140b27e4",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:c038d53faf9c95cdf44f7d3e1309871aa7bdfd6d7af7e4148bf79b30c2abd7ff",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:c1d334739400d5533249c9264bc7e4ae677bf44a0724f877b58c5171d63b80b7",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:ced3b62b9a0f230fcf2ee54bebb472e7511068ef1474699e8a98597a8c5f77af",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:d61554e3b34992a372d54082fca1af394fd0f66667feb9c6a990c60957ee21ad",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:df13cc4452d51636b63dd97ec165a3dd4313d2d26f9b4d2257b9921b62c42952",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:f9353a6b4a529cf24163b636b60f557554a9c3fcc68759ca45bc2422b2054e5b",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:f9cd8997df4380b1e7399f093a81da17949e42f4f6cb7a4455b4e1ac6cea416e",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    },
+    {
+      "artifact": "second_generation",
+      "component_id": "55a58e4e4027406a9a89f1daa8473d55b37b11c967d10998f535a1613905ce56",
+      "component_rows": 37,
+      "directly_conflicting_groups": [
+        "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+        "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+        "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+      ],
+      "identity": "second_generation:fd505a0d94d8e0954a40514877fbb203c854981671ec62ded40a917a3a23280b",
+      "identity_level": "admitted_label",
+      "reason": "cross_fold_group_conflict"
+    }
+  ],
+  "schema_version": "t4_target_conditioned_utility_exclusions_v1"
+}

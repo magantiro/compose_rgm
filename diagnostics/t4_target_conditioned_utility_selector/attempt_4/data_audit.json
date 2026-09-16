@@ -1,0 +1,365 @@
+{
+  "calibration": "unsupported_due_to_sparse_grouped_data",
+  "contract_resolution": {
+    "added_artifact": "utility_acquisition",
+    "base_contract": {
+      "git_revision": "ddc1eb074d4a4a027ba9097604535461d86d78cf",
+      "path": "configs/t4_target_conditioned_utility_selector_v3.json",
+      "payload_sha256": "a1fca9322ca916916c6b2b5e4c2c8bc8612ff4cd4e4fece6db731c6147bff3dd",
+      "sha256": "c21424642542f63979af7d9f5f3c33e6b913eefe1e1ed7fc7d989209263834c9"
+    },
+    "frozen_unchanged": [
+      "candidate rows from v3",
+      "target-local source-index folds",
+      "physical-request endpoint scaffold source-state and lineage grouping keys",
+      "connected-component conflict removal",
+      "pairing strata and strict-pair rule",
+      "graph features and train-fold-only normalization",
+      "fixed structural baseline",
+      "target-blind and target-conditioned model definitions",
+      "optimization steps learning rate regularization seed and pair weighting",
+      "metrics",
+      "three-target and five-stratum coverage thresholds"
+    ],
+    "mode": "add_only_v4_extension"
+  },
+  "contract_sha256": "f7a2720e2c299449168047d59919c034f68585a0a27c747dedf229a53859ffd7",
+  "gate_checks": {
+    "all_labels_have_exact_receipts": true,
+    "at_least_five_supported_strata": true,
+    "at_least_three_supported_targets": true,
+    "every_evaluated_target_has_training_pair": true,
+    "zero_cross_fold_group_leakage": true
+  },
+  "gate_passed": true,
+  "held_target_transfer": "unsupported",
+  "input_contract_path": "configs/t4_target_conditioned_utility_selector_v4.json",
+  "input_contract_physical_sha256": "425eae30c4f339fe106916f53cbd7d055eac832c3bba2a44ae1f8691fee83353",
+  "input_reconciliation": {
+    "artifacts": {
+      "delta04_prospective": {
+        "admitted_labels_before_group_filter": 2,
+        "cross_fold_group_removals": 1,
+        "failed_or_null_physical_units": 2,
+        "final_labels": 1,
+        "finite_measured_labels": 2,
+        "invalid_or_out_of_cell_physical_labels": 0,
+        "observed_physical_units": 4,
+        "physical_identity_level": "physical_request"
+      },
+      "delta06_prospective": {
+        "admitted_labels_before_group_filter": 19,
+        "cross_fold_group_removals": 12,
+        "failed_or_null_physical_units": 0,
+        "final_labels": 7,
+        "finite_measured_labels": 19,
+        "invalid_or_out_of_cell_physical_labels": 0,
+        "observed_physical_units": 19,
+        "physical_identity_level": "physical_request"
+      },
+      "program_pool": {
+        "admitted_labels_before_group_filter": 14,
+        "cross_fold_group_removals": 0,
+        "failed_or_null_physical_units": 0,
+        "final_labels": 14,
+        "finite_measured_labels": 27,
+        "invalid_or_out_of_cell_physical_labels": 13,
+        "observed_physical_units": 27,
+        "physical_identity_level": "physical_endpoint"
+      },
+      "second_generation": {
+        "admitted_labels_before_group_filter": 49,
+        "cross_fold_group_removals": 24,
+        "failed_or_null_physical_units": 0,
+        "final_labels": 25,
+        "finite_measured_labels": 49,
+        "invalid_or_out_of_cell_physical_labels": 0,
+        "observed_physical_units": 49,
+        "physical_identity_level": "physical_request"
+      },
+      "utility_acquisition": {
+        "admitted_labels_before_group_filter": 4,
+        "cross_fold_group_removals": 0,
+        "failed_or_null_physical_units": 0,
+        "final_labels": 4,
+        "finite_measured_labels": 4,
+        "invalid_or_out_of_cell_physical_labels": 0,
+        "observed_physical_units": 4,
+        "physical_identity_level": "physical_request"
+      }
+    },
+    "representation_diagnostics": {
+      "note": "Representation exclusions are provenance diagnostics and are not physical label denominators.",
+      "program_pool_observed_representations": 54,
+      "program_pool_source_mismatch_representations": 25
+    },
+    "schema_version": "t4_target_conditioned_utility_reconciliation_v1",
+    "totals": {
+      "admitted_labels_before_group_filter": 88,
+      "cross_fold_group_removals": 37,
+      "failed_or_null_physical_units": 2,
+      "final_labels": 51,
+      "finite_measured_labels": 101,
+      "invalid_or_out_of_cell_physical_labels": 13,
+      "observed_physical_units": 103
+    }
+  },
+  "leakage": {
+    "conflicting_connected_components": 1,
+    "excluded_rows": 37,
+    "group_count": 354,
+    "post_exclusion_conflicting_group_count": 0,
+    "post_exclusion_conflicting_groups": [],
+    "post_exclusion_group_count": 215,
+    "pre_exclusion_conflicting_group_count": 3,
+    "pre_exclusion_conflicting_groups": [
+      "lineage:macro:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd",
+      "lineage:macro:fd476b8e866f2ff9d027c130755bd461dfbd76685ac740108eebe38fe6d47cd8",
+      "lineage:macro_program:953575a4b0d59863c7dc8ef09f6f0193756e0ffc2a12ec5066cbcf54bbedfacd"
+    ],
+    "pre_exclusion_connected_components": 8
+  },
+  "post_leakage_census": {
+    "artifacts": {
+      "delta04_prospective": 1,
+      "delta06_prospective": 7,
+      "program_pool": 14,
+      "second_generation": 25,
+      "utility_acquisition": 4
+    },
+    "cells": {
+      "5ht1b_0": 10,
+      "fa7_0": 15,
+      "fa7_1": 2,
+      "jak2_0": 3,
+      "jak2_2": 2,
+      "parp1_0": 17,
+      "parp1_2": 2
+    },
+    "comparable_strata": 8,
+    "folds": {
+      "0": 45,
+      "1": 2,
+      "2": 4
+    },
+    "rows": 51,
+    "strata": 9,
+    "strict_pairs": 242,
+    "targets": {
+      "5ht1b": 10,
+      "fa7": 17,
+      "jak2": 5,
+      "parp1": 19
+    },
+    "unique_endpoints": 51
+  },
+  "pre_leakage_census": {
+    "artifacts": {
+      "delta04_prospective": 2,
+      "delta06_prospective": 19,
+      "program_pool": 14,
+      "second_generation": 49,
+      "utility_acquisition": 4
+    },
+    "cells": {
+      "5ht1b_0": 10,
+      "5ht1b_1": 1,
+      "braf_1": 17,
+      "braf_2": 2,
+      "fa7_0": 15,
+      "fa7_1": 2,
+      "jak2_0": 3,
+      "jak2_1": 15,
+      "jak2_2": 2,
+      "parp1_0": 17,
+      "parp1_1": 2,
+      "parp1_2": 2
+    },
+    "comparable_strata": 14,
+    "folds": {
+      "0": 45,
+      "1": 37,
+      "2": 6
+    },
+    "rows": 88,
+    "strata": 17,
+    "strict_pairs": 380,
+    "targets": {
+      "5ht1b": 11,
+      "braf": 19,
+      "fa7": 17,
+      "jak2": 20,
+      "parp1": 21
+    },
+    "unique_endpoints": 88
+  },
+  "producer": {
+    "code_revision": "b78c9e97f8a186715dcbeb146e0ddd28a083fe7b",
+    "device": "cpu",
+    "implementation_sha256": {
+      "src/compose_v4/control/target_conditioned_utility_selector.py": "48e0b9251afa7d707c08dbfa0774fbbb5f1f3c2bfd0d6e6bc1b48befb9f3afbf",
+      "tools/t4_target_conditioned_utility_selector.py": "821528cb3e48d721bcfc4288a99089fdbee7a9f0ed71a3738b2a708c9218909f"
+    },
+    "precision_if_fit": "float32",
+    "software": {
+      "numpy": "2.5.3",
+      "platform": "macOS-26.5.2-arm64-arm-64bit",
+      "python": "3.12.9",
+      "torch": "2.14.0"
+    }
+  },
+  "schema_version": "t4_target_conditioned_utility_data_audit_v1",
+  "support": {
+    "folds": [
+      {
+        "abstentions": [
+          {
+            "cell": "5ht1b_0",
+            "reason": "target_absent_from_training_pairs",
+            "rows": 10,
+            "target": "5ht1b"
+          },
+          {
+            "cell": "parp1_0",
+            "reason": "held_stratum_lacks_strict_pair",
+            "rows": 1,
+            "target": "parp1"
+          }
+        ],
+        "fold": 0,
+        "supported_test_strata": [
+          {
+            "cell": "fa7_0",
+            "rows": 15,
+            "stratum": [
+              "fa7",
+              "fa7_0",
+              0.4,
+              "3a3788d420cc3f289da06c0ef73cfeced02762101ca1d181f397f2f125015e1f",
+              1701
+            ],
+            "target": "fa7"
+          },
+          {
+            "cell": "jak2_0",
+            "rows": 3,
+            "stratum": [
+              "jak2",
+              "jak2_0",
+              0.6,
+              "3a9e2c3d9e83f27cff964c342eaed8f06a6f3e9cd043dc88193ab121ccdb2200",
+              1701
+            ],
+            "target": "jak2"
+          },
+          {
+            "cell": "parp1_0",
+            "rows": 14,
+            "stratum": [
+              "parp1",
+              "parp1_0",
+              0.4,
+              "672d91d9e2f9430a7f266a297b214e41b394bb2730343d9d567fc885712c5ee9",
+              1701
+            ],
+            "target": "parp1"
+          },
+          {
+            "cell": "parp1_0",
+            "rows": 2,
+            "stratum": [
+              "parp1",
+              "parp1_0",
+              0.6,
+              "ce25b76ca1f9c2331183b21d2ff2cb52ab8bba1acba53c97d2d4f2416ce3f574",
+              1701
+            ],
+            "target": "parp1"
+          }
+        ],
+        "test_rows": 45,
+        "train_rows": 6,
+        "training_pair_counts_by_target": {
+          "5ht1b": 0,
+          "braf": 0,
+          "fa7": 1,
+          "jak2": 1,
+          "parp1": 1
+        }
+      },
+      {
+        "abstentions": [],
+        "fold": 1,
+        "supported_test_strata": [
+          {
+            "cell": "fa7_1",
+            "rows": 2,
+            "stratum": [
+              "fa7",
+              "fa7_1",
+              0.4,
+              "27e2a7872554b22c47f5fabb973245401b57fcf4e4406350cb791f102ac246b9",
+              1701
+            ],
+            "target": "fa7"
+          }
+        ],
+        "test_rows": 2,
+        "train_rows": 49,
+        "training_pair_counts_by_target": {
+          "5ht1b": 44,
+          "braf": 0,
+          "fa7": 101,
+          "jak2": 4,
+          "parp1": 92
+        }
+      },
+      {
+        "abstentions": [],
+        "fold": 2,
+        "supported_test_strata": [
+          {
+            "cell": "jak2_2",
+            "rows": 2,
+            "stratum": [
+              "jak2",
+              "jak2_2",
+              0.6,
+              "3a9e2c3d9e83f27cff964c342eaed8f06a6f3e9cd043dc88193ab121ccdb2200",
+              1701
+            ],
+            "target": "jak2"
+          },
+          {
+            "cell": "parp1_2",
+            "rows": 2,
+            "stratum": [
+              "parp1",
+              "parp1_2",
+              0.4,
+              "ce25b76ca1f9c2331183b21d2ff2cb52ab8bba1acba53c97d2d4f2416ce3f574",
+              1701
+            ],
+            "target": "parp1"
+          }
+        ],
+        "test_rows": 4,
+        "train_rows": 47,
+        "training_pair_counts_by_target": {
+          "5ht1b": 44,
+          "braf": 0,
+          "fa7": 102,
+          "jak2": 3,
+          "parp1": 91
+        }
+      }
+    ],
+    "supported_strata": 7,
+    "supported_target_count": 3,
+    "supported_targets": [
+      "fa7",
+      "jak2",
+      "parp1"
+    ]
+  }
+}

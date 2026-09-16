@@ -95,7 +95,7 @@ missing score, pair incomparable protocols, or use an outer-test result to tune
 the fixed model. A positive result is retrospective within-known-target ranking
 evidence. It is not prospective optimization or evidence of beating IVG.
 
-## Authoritative outcome
+## V3 authoritative abstention
 
 The v3 coverage gate abstained before feature fitting. The immutable inputs
 contain 99 physical units: 97 finite measured labels and two failed or null
@@ -122,6 +122,82 @@ Its data audit SHA-256 is
 The safe next action is to acquire additional immutable measured candidate
 cohorts across source indices and targets under a separately frozen contract,
 not to relax the grouping, target-support or comparability gates.
+
+## V4 authoritative outcome
+
+V4 is an add-only extension of V3. Its self-hashed contract is
+`configs/t4_target_conditioned_utility_selector_v4.json` (payload SHA-256
+`f7a2720e2c299449168047d59919c034f68585a0a27c747dedf229a53859ffd7`).
+It inherits the V3 candidates, folds, connected grouping, features, models,
+optimization, metrics and gates byte-for-byte and adds only the sealed
+four-call acquisition cohort at evidence revision
+`fa3accc57124e1be20e4051a3af636803162174e`. All four requests succeeded with
+finite, non-tied scores and no retry or replacement: PARP1-2 scored -7.8 and
+-8.3; FA7-1 scored -6.9 and -8.0.
+
+The unchanged coverage gate passed. Of 103 observed physical units, 101 had
+finite measured labels. Exact source and receipt validation admitted 88 labels
+before grouping; connected conflict removal excluded 37 labels and left 51
+rows with no cross-fold group conflict. The held evaluation used the same 40
+supported rows for every arm, comprising 198 strict pairs across seven strata,
+three targets (FA7, JAK2 and PARP1) and three source-index folds. Ten retained
+5HT1B-0 rows were not evaluated because the corresponding folds contained no
+strict measured 5HT1B training pair. BRAF remained excluded by the unchanged
+grouping and support rules. Calibration and held-target transfer remain
+unsupported.
+
+The aggregate result is a negative for the frozen target-conditioning
+hypothesis:
+
+| Arm | Pair precision | NDCG | Top-1 regret | Top-3 regret | Best recall@1 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Fixed structural | 0.3897 | 0.8339 | 1.1143 | 0.6571 | 0.5714 |
+| Target-blind utility | 0.5699 | 0.7805 | 1.1143 | 0.0857 | 0.2857 |
+| Target-conditioned utility | 0.5376 | 0.7256 | 1.3143 | 0.0857 | 0.1429 |
+
+The frozen primary criterion required target conditioning to reduce top-1
+regret and increase NDCG relative to the target-blind utility arm. It did
+neither: top-1 regret was 0.20 worse and NDCG was 0.0549 lower. Pair precision
+also fell by 0.0323. The largest direct degradation occurred in the held
+PARP1-0, delta-0.6 stratum, where the target-blind model selected the measured
+best candidate at -11.4 while the conditioned model selected -10.0.
+
+The target-blind utility model does learn measured ordering signal, but it does
+not uniformly dominate the fit-free structural control. It materially improves
+pair precision (0.5699 versus 0.3897) and top-3 regret (0.0857 versus 0.6571),
+while aggregate top-1 regret is unchanged, NDCG is lower (0.7805 versus
+0.8339), and best recall@1 is lower (0.2857 versus 0.5714). It is therefore a
+mixed retrospective result, not evidence for promotion.
+
+Fold coverage and source-balanced metrics expose the small-data limitation:
+
+| Fold | Held strata (rows) | Arm | Pair precision | NDCG | Top-1 regret | Top-3 regret |
+| ---: | --- | --- | ---: | ---: | ---: | ---: |
+| 0 | FA7-0, JAK2-0, PARP1-0 at delta 0.4/0.6 (34) | Structural | 0.3854 | 0.8016 | 1.6750 | 1.1500 |
+| 0 | same | Target blind | 0.5738 | 0.8005 | 1.5500 | 0.1500 |
+| 0 | same | Target conditioned | 0.5410 | 0.7043 | 1.9000 | 0.1500 |
+| 1 | FA7-1 (2) | All three arms | 0.0000 | 0.6309 | 1.1000 | 0.0000 |
+| 2 | JAK2-2, PARP1-2 (4) | Structural | 1.0000 | 1.0000 | 0.0000 | 0.0000 |
+| 2 | same | Target blind | 0.5000 | 0.8155 | 0.2500 | 0.0000 |
+| 2 | same | Target conditioned | 0.5000 | 0.8155 | 0.2500 | 0.0000 |
+
+Every target/cell/delta stratum, selected endpoint, direct measured score and
+regret is recorded under `aggregate.*.per_stratum` and `folds[*].arms` in the
+machine-readable result. The target-conditioned arm is not promoted and no
+prospective lock was emitted. This V4 execution made zero oracle calls, zero
+docking calls and zero Modal launches.
+
+The authoritative result is
+`diagnostics/t4_target_conditioned_utility_selector/attempt_4/result.json`
+(SHA-256 `20c0db5f8e9b11bc7a17f9849c0d02ccf3f1c9993b1539b3d49e4dbcf377aade`).
+Its data audit, exclusion ledger and split manifest SHA-256 values are,
+respectively,
+`ed16e0be1979610a0d94fa16f6f2e194fb6a982cc3517b248e93ff94c2e2879b`,
+`071ea400ac55fe0719e60447c1a00dff30c1f709762b887ae06e799f222e33a1`
+and `41bdbda9a85afe1bb47e669b9d954a3a70da168290daf0a6f49c548e35f7d662`.
+The result was produced at code revision
+`b78c9e97f8a186715dcbeb146e0ddd28a083fe7b` and reproduced byte-identically on
+an immediate rerun.
 
 ## Repair lineage
 
