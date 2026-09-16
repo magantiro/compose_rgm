@@ -1,0 +1,29 @@
+{
+  "payload": {
+    "baseline_admitted_rows_before_grouping": 84,
+    "baseline_final_rows": 47,
+    "candidate_lock_payload_sha256": "8b5acdbfca42a122d6a882d48e6bbe00468052c913f79e806b6dbb7164685471",
+    "evidence_status": "CONDITIONAL_STRUCTURAL_SIMULATION_NOT_MEASURED_UTILITY",
+    "hypothetical_scores_persisted": false,
+    "locked_request_rows": 4,
+    "locked_rows_surviving_grouping": 4,
+    "original_cross_fold_group_removals": 37,
+    "passes_if_condition_holds": true,
+    "post_exclusion_conflicting_groups": 0,
+    "projected_final_rows": 51,
+    "schema_version": "t4_utility_data_acquisition_gate_simulation_v1",
+    "simulation_condition": "All four future calls return finite values and each two-row cell has a strict non-tied pair.",
+    "supported_strata": 7,
+    "supported_target_count": 3,
+    "supported_targets": [
+      "fa7",
+      "jak2",
+      "parp1"
+    ],
+    "unchanged_gate": {
+      "minimum_supported_strata": 5,
+      "minimum_supported_targets": 3
+    }
+  },
+  "payload_sha256": "bf6da0572b0d90b257fd8c878e4f0f19b63145fe5c846417fa17a3b8a6f6f7e2"
+}

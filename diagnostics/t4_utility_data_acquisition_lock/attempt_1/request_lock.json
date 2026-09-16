@@ -1,0 +1,125 @@
+{
+  "payload": {
+    "automatic_retries": 0,
+    "call_ceiling_if_later_exactly_authorized": 4,
+    "candidate_lock_payload_sha256": "8b5acdbfca42a122d6a882d48e6bbe00468052c913f79e806b6dbb7164685471",
+    "contract_sha256": "8da70ac8e97c35672a635dc6f552601e408ed2ce1937fc78f6616de857e22bd9",
+    "live_run_accesses": 0,
+    "modal_launches": 0,
+    "new_docking_calls": 0,
+    "new_oracle_calls": 0,
+    "prospective_evaluation_separate": true,
+    "replacement_or_backfill": false,
+    "requests": [
+      {
+        "candidate_id": "fd4d754151f7312e8c6d4df7f79e83f77eaae6262f48d3943856138ffd40036c",
+        "canonical_smiles": "N=Cc1cn2c3c(cccc13)C(=O)NCC2",
+        "cell": "parp1_2",
+        "docking_seed": 1701,
+        "evaluator": "ce25b76ca1f9c2331183b21d2ff2cb52ab8bba1acba53c97d2d4f2416ce3f574",
+        "evaluator_payload": {
+          "box_definition": "BOXES in hash-bound modal_apps/genmol_t4_opt_app.py",
+          "docking": {
+            "cpu": 1,
+            "exhaustiveness": 1,
+            "ligand_preparation": "Open Babel --gen3d, unchanged production wrapper",
+            "num_modes": 10
+          },
+          "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+          "receptor_sha256": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9",
+          "schema_version": "t4_quickvina_endpoint_evaluator_v1",
+          "score_direction": "minimize",
+          "score_unit": "kcal/mol as emitted by the bound QuickVina wrapper",
+          "scoring_implementation_sha256": "9b635a9936493a5900b613cdce52f76c24efcf98f3f43b3b155448e0b1796bf0",
+          "target": "parp1"
+        },
+        "request_id": "16684461574437b0d4461d5fd36a63de5f6e38a816db269b58ca897a46cc6ce0",
+        "schema_version": "t4_docking_request_identity_v1",
+        "target": "parp1"
+      },
+      {
+        "candidate_id": "6ab68c2df5b637214cdb695ad1fa0b8302f5f17ad9fd38641f29f1355a4950fb",
+        "canonical_smiles": "CON=Cc1cn2c3c(cccc13)C(=O)NCC2",
+        "cell": "parp1_2",
+        "docking_seed": 1701,
+        "evaluator": "ce25b76ca1f9c2331183b21d2ff2cb52ab8bba1acba53c97d2d4f2416ce3f574",
+        "evaluator_payload": {
+          "box_definition": "BOXES in hash-bound modal_apps/genmol_t4_opt_app.py",
+          "docking": {
+            "cpu": 1,
+            "exhaustiveness": 1,
+            "ligand_preparation": "Open Babel --gen3d, unchanged production wrapper",
+            "num_modes": 10
+          },
+          "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+          "receptor_sha256": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9",
+          "schema_version": "t4_quickvina_endpoint_evaluator_v1",
+          "score_direction": "minimize",
+          "score_unit": "kcal/mol as emitted by the bound QuickVina wrapper",
+          "scoring_implementation_sha256": "9b635a9936493a5900b613cdce52f76c24efcf98f3f43b3b155448e0b1796bf0",
+          "target": "parp1"
+        },
+        "request_id": "29b8aab0a016481b3ca1d9cce4b894be78da766dca6207c74a8e412cf495044b",
+        "schema_version": "t4_docking_request_identity_v1",
+        "target": "parp1"
+      },
+      {
+        "candidate_id": "d7c7b5625111f0c41fa24873e5dc4f0a3048f3d6a5670dc93f44268f645e3345",
+        "canonical_smiles": "CC(=O)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1",
+        "cell": "fa7_1",
+        "docking_seed": 1701,
+        "evaluator": "27e2a7872554b22c47f5fabb973245401b57fcf4e4406350cb791f102ac246b9",
+        "evaluator_payload": {
+          "box_definition": "BOXES in hash-bound modal_apps/genmol_t4_opt_app.py",
+          "docking": {
+            "cpu": 1,
+            "exhaustiveness": 1,
+            "ligand_preparation": "Open Babel --gen3d, unchanged production wrapper",
+            "num_modes": 10
+          },
+          "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+          "receptor_sha256": "bfd705fb8220c52e1b447afce23a3810bc6deddb06983e98a2b0934b24ba092d",
+          "schema_version": "t4_quickvina_endpoint_evaluator_v1",
+          "score_direction": "minimize",
+          "score_unit": "kcal/mol as emitted by the bound QuickVina wrapper",
+          "scoring_implementation_sha256": "9b635a9936493a5900b613cdce52f76c24efcf98f3f43b3b155448e0b1796bf0",
+          "target": "fa7"
+        },
+        "request_id": "a72ddc724af7bc26003be357b7b5abc6e80a13f753e2c3f76877648fc490b34e",
+        "schema_version": "t4_docking_request_identity_v1",
+        "target": "fa7"
+      },
+      {
+        "candidate_id": "705e30bec99bf7ae6a51a7f862d6c4ff06bcb89f9f3964c78edbb5337b22af12",
+        "canonical_smiles": "NC(Cc1ccccc1)C(=O)N1CCCCC1C1CCCN1C(=O)CN1CCCC1=O",
+        "cell": "fa7_1",
+        "docking_seed": 1701,
+        "evaluator": "27e2a7872554b22c47f5fabb973245401b57fcf4e4406350cb791f102ac246b9",
+        "evaluator_payload": {
+          "box_definition": "BOXES in hash-bound modal_apps/genmol_t4_opt_app.py",
+          "docking": {
+            "cpu": 1,
+            "exhaustiveness": 1,
+            "ligand_preparation": "Open Babel --gen3d, unchanged production wrapper",
+            "num_modes": 10
+          },
+          "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+          "receptor_sha256": "bfd705fb8220c52e1b447afce23a3810bc6deddb06983e98a2b0934b24ba092d",
+          "schema_version": "t4_quickvina_endpoint_evaluator_v1",
+          "score_direction": "minimize",
+          "score_unit": "kcal/mol as emitted by the bound QuickVina wrapper",
+          "scoring_implementation_sha256": "9b635a9936493a5900b613cdce52f76c24efcf98f3f43b3b155448e0b1796bf0",
+          "target": "fa7"
+        },
+        "request_id": "e6bd0f87e1689b2dc1389374c8bbd1ebf493243290bbbd94292bddf0a22372db",
+        "schema_version": "t4_docking_request_identity_v1",
+        "target": "fa7"
+      }
+    ],
+    "required_later_authorization": "A separate explicit authorization must name the final physical and payload SHA-256 hashes of both candidate_lock.json and request_lock.json and authorize exactly four scored calls.",
+    "schema_version": "t4_utility_data_acquisition_request_lock_v1",
+    "scoring_status": "UNAUTHORIZED_NOT_LAUNCHED",
+    "training_data_acquisition_only": true
+  },
+  "payload_sha256": "f78985599a7ff5e533384ac7d61c2cc77f7c6cf94e064f6a6ec0e3ed692bc279"
+}

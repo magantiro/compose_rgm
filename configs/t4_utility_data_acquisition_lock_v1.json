@@ -1,0 +1,108 @@
+{
+  "contract_sha256": "8da70ac8e97c35672a635dc6f552601e408ed2ce1937fc78f6616de857e22bd9",
+  "payload": {
+    "schema_version": "t4_utility_data_acquisition_lock_contract_v1",
+    "mode": "zero_oracle_score_blind_training_data_acquisition",
+    "scientific_problem": "Add the smallest independently grouped measured-data request set that could make the frozen target-conditioned T4 utility benchmark evaluable on at least three targets and five held-source strata.",
+    "primary_model_output": "No model is fit. The output is a deterministic four-request docking acquisition lock.",
+    "central_claim_under_test": "Conditional on four later authorized finite, non-tied docking results, the unchanged v3 split and connected-group gate supports FA7, JAK2 and PARP1.",
+    "evaluation_setting": "Training-data acquisition only. Prospective utility evaluation remains a separate future revision after the acquired labels are frozen.",
+    "inputs": {
+      "v3_contract": {
+        "git_revision": "ddc1eb074d4a4a027ba9097604535461d86d78cf",
+        "path": "configs/t4_target_conditioned_utility_selector_v3.json",
+        "sha256": "c21424642542f63979af7d9f5f3c33e6b913eefe1e1ed7fc7d989209263834c9"
+      },
+      "v3_result": {
+        "git_revision": "ddc1eb074d4a4a027ba9097604535461d86d78cf",
+        "path": "diagnostics/t4_target_conditioned_utility_selector/attempt_3/result.json",
+        "sha256": "1d6b056c3d724443686fe27586e63d70fe70b8af1103b942937b78519cd12627"
+      },
+      "v3_data_audit": {
+        "git_revision": "ddc1eb074d4a4a027ba9097604535461d86d78cf",
+        "path": "diagnostics/t4_target_conditioned_utility_selector/attempt_3/data_audit.json",
+        "sha256": "6cb69f88f6b77ca808ea34b3869ff0b5cb26252c0a04f4e29e7214b07d860bfe"
+      },
+      "v3_exclusion_ledger": {
+        "git_revision": "ddc1eb074d4a4a027ba9097604535461d86d78cf",
+        "path": "diagnostics/t4_target_conditioned_utility_selector/attempt_3/exclusion_ledger.json",
+        "sha256": "2446ebbcc3b54717e20ae4b968618ec83aaecc3775bc1ae941c529d18a28fffa"
+      },
+      "v3_split_manifest": {
+        "git_revision": "ddc1eb074d4a4a027ba9097604535461d86d78cf",
+        "path": "diagnostics/t4_target_conditioned_utility_selector/attempt_3/split_manifest.json",
+        "sha256": "590fbb1b361793afadfed970ff6140f3bf80f086c43b2aab804503784f942eb0"
+      },
+      "compositional_candidate_lock": {
+        "git_revision": "7d87ff2959845d5c6273e743141ac9c0fe806594",
+        "path": "diagnostics/t4_compositional_structural_subgoal_generator/attempt_1/candidate_lock.json.gz",
+        "sha256": "f533e70d940ff191df007b28107f12eed9bce6abb43f44f7afc91d47422afd28",
+        "payload_sha256": "d9717fc3a7b92fe8b264c7803c43f50f48b14e078b179cbd75f66d769aa65b10"
+      },
+      "compositional_fold_2_evaluation": {
+        "git_revision": "7d87ff2959845d5c6273e743141ac9c0fe806594",
+        "path": "diagnostics/t4_compositional_structural_subgoal_generator/attempt_1/fold_2/evaluation_manifest.json.gz",
+        "sha256": "6dadc677355df227e6cc30e3c84640e6ff53ba333e96267a7115d15636fa01e3",
+        "payload_sha256": "a2bc3fccb7524f29732628cc6e02fd67a5abc4b9f227f88aafb189c2e29bb17a"
+      },
+      "program_retrieval_fa7_1": {
+        "git_revision": "74a14ee365bacaf3ac8bd614a24e5db0623803c9",
+        "path": "diagnostics/t4_program_retrieval/attempt_2/control/fa7_1.json",
+        "sha256": "21789912785205e6601c914423e21febd9431c9be3329b0d2ef072d1dec0b4ef",
+        "payload_sha256": "e9e08557d3b0ea84810534a75eb07cda2ab1ad91fec9262341f086f97f6c34cc"
+      },
+      "program_library": {
+        "git_revision": "74a14ee365bacaf3ac8bd614a24e5db0623803c9",
+        "path": "diagnostics/t4_shared_program_controller/attempt_2/shared_library.json",
+        "sha256": "732c67d04af3a0824cfa700906fd73982689af416f337c8eb109499af79afdb5"
+      }
+    },
+    "selection": {
+      "rule": "Predeclared exact candidate identities after exact replay, strict delta-0.4 endpoint eligibility, prior-request deduplication and full v3 connected-group independence. Docking values are neither read nor available.",
+      "candidates": [
+        {
+          "candidate_id": "6ab68c2df5b637214cdb695ad1fa0b8302f5f17ad9fd38641f29f1355a4950fb",
+          "cell": "parp1_2"
+        },
+        {
+          "candidate_id": "fd4d754151f7312e8c6d4df7f79e83f77eaae6262f48d3943856138ffd40036c",
+          "cell": "parp1_2"
+        },
+        {
+          "candidate_id": "705e30bec99bf7ae6a51a7f862d6c4ff06bcb89f9f3964c78edbb5337b22af12",
+          "cell": "fa7_1"
+        },
+        {
+          "candidate_id": "d7c7b5625111f0c41fa24873e5dc4f0a3048f3d6a5670dc93f44268f645e3345",
+          "cell": "fa7_1"
+        }
+      ],
+      "counts_per_cell": {
+        "fa7_1": 2,
+        "parp1_2": 2
+      },
+      "lower_bound": "Each newly supported target needs a strict pair in an independent held-source cell. Existing v3 supports only JAK2, so adding two targets requires at least four finite non-tied measurements."
+    },
+    "gate": {
+      "unchanged_minimum_supported_targets": 3,
+      "unchanged_minimum_supported_strata": 5,
+      "simulation_only_condition": "Every locked request later returns one finite score and the two scores within each new cell are non-tied.",
+      "no_synthetic_labels_persisted": true
+    },
+    "authorization": {
+      "docking_status": "UNAUTHORIZED_NOT_LAUNCHED",
+      "call_ceiling_if_later_exactly_authorized": 4,
+      "automatic_retries": 0,
+      "replacement_or_backfill": false,
+      "required_later_authorization": "A separate explicit authorization must name the final physical and payload SHA-256 hashes of both candidate_lock.json and request_lock.json and authorize exactly four scored calls."
+    },
+    "prohibitions": [
+      "No docking or oracle call in this revision.",
+      "No Modal launch or live-run inspection.",
+      "Do not fit or change the utility model.",
+      "Do not change the split, connected-group gate, compiler or generator.",
+      "Do not use target-specific route lookup at runtime.",
+      "Do not treat acquisition labels as prospective evaluation evidence."
+    ]
+  }
+}

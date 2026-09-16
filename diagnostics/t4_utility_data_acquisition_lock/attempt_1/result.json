@@ -1,0 +1,30 @@
+{
+  "payload": {
+    "candidate_lock_payload_sha256": "8b5acdbfca42a122d6a882d48e6bbe00468052c913f79e806b6dbb7164685471",
+    "conditional_gate_result": {
+      "passes_if_all_four_are_finite_and_non_tied_within_cell": true,
+      "supported_strata": 7,
+      "supported_target_count": 3,
+      "supported_targets": [
+        "fa7",
+        "jak2",
+        "parp1"
+      ]
+    },
+    "counts_per_cell": {
+      "fa7_1": 2,
+      "parp1_2": 2
+    },
+    "gate_simulation_payload_sha256": "bf6da0572b0d90b257fd8c878e4f0f19b63145fe5c846417fa17a3b8a6f6f7e2",
+    "live_run_accesses": 0,
+    "modal_launches": 0,
+    "new_docking_calls": 0,
+    "new_oracle_calls": 0,
+    "request_count": 4,
+    "request_lock_payload_sha256": "f78985599a7ff5e533384ac7d61c2cc77f7c6cf94e064f6a6ec0e3ed692bc279",
+    "schema_version": "t4_utility_data_acquisition_lock_result_v1",
+    "scientific_interpretation": "This is a score-blind training-data acquisition lock, not measured utility evidence and not prospective evaluation.",
+    "status": "LOCKED_UNAUTHORIZED"
+  },
+  "payload_sha256": "225d24d5ed08440d7f3bfc4e7425aefb059872776f3937c5741cd8b47fec1cce"
+}
