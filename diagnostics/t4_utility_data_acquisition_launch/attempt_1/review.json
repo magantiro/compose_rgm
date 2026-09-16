@@ -1,0 +1,113 @@
+{
+  "payload": {
+    "schema_version": "t4_utility_data_acquisition_review_v1",
+    "evidence_status": "prospective training-data acquisition only",
+    "score_direction": "minimize",
+    "score_unit": "kcal/mol as emitted by the bound QuickVina wrapper",
+    "run_id": "2d8bc03cd6b55b0a0453ed80241ca0829b233dc7db3a4b124f06d952b2ad6726",
+    "inputs": {
+      "launch_contract": {
+        "path": "configs/t4_utility_data_acquisition_launch_v1.json",
+        "physical_sha256": "fc4e0ce03f7c11973910d1a522864de2299726cea661ffa2f6270ef54b3230a5",
+        "payload_sha256": "129f9ad786edaecfea7cfeeb78410c92a659845b4c70c4996c363e412070e016"
+      },
+      "candidate_lock": {
+        "path": "diagnostics/t4_utility_data_acquisition_lock/attempt_1/candidate_lock.json",
+        "physical_sha256": "d790389696d729f19ce617b3dcf4afddf0f3ce06110882a1b628889e0c354249",
+        "payload_sha256": "8b5acdbfca42a122d6a882d48e6bbe00468052c913f79e806b6dbb7164685471"
+      },
+      "request_lock": {
+        "path": "diagnostics/t4_utility_data_acquisition_lock/attempt_1/request_lock.json",
+        "physical_sha256": "e11441244c98d919d42315dcafbdede300bbb6232bdc5a911896bdb3d1010d05",
+        "payload_sha256": "f78985599a7ff5e533384ac7d61c2cc77f7c6cf94e064f6a6ec0e3ed692bc279"
+      },
+      "scored_result": {
+        "path": "diagnostics/t4_utility_data_acquisition_launch/attempt_1/result.json",
+        "physical_sha256": "42539073e6a62b470d6e00c2565f35aa47bc44aa48fad3e8d1ee2ecbb816b639",
+        "payload_sha256": "47646fc8ea9016098ee98615f08b9f3b673333c50a269e41a420934460b069ba"
+      }
+    },
+    "execution": {
+      "launch_revision": "83e8092f97b8d1f784e7cbc82f462948c02e30d3",
+      "app_name": "compose-t4-utility-data-acquisition",
+      "preflight_call_id": "fc-01M2KV39E36Y7WGAZDERWH9J2M",
+      "worker_call_ids": [
+        "fc-01M2KV3E9CWBM3CRS9A7RVPNET",
+        "fc-01M2KV3EWH7FRFMWQPSZM5H6FF",
+        "fc-01M2KV3F9NME289WE2E7FSB7CX",
+        "fc-01M2KV3FS613F2HZZHDQF9WZ9P"
+      ],
+      "reducer_call_id": "fc-01M2KV5Y1XJ39B68YE51EQQAN3",
+      "first_score_calls_charged": 4,
+      "successful_scores": 4,
+      "failed_scores": 0,
+      "incomplete_requests": 0,
+      "automatic_retries": 0,
+      "replacements_or_backfill": 0,
+      "confirmation_calls": 0,
+      "new_generator_calls": 0
+    },
+    "requests": [
+      {
+        "request_id": "16684461574437b0d4461d5fd36a63de5f6e38a816db269b58ca897a46cc6ce0",
+        "candidate_id": "fd4d754151f7312e8c6d4df7f79e83f77eaae6262f48d3943856138ffd40036c",
+        "cell": "parp1_2",
+        "target": "parp1",
+        "score": -7.8,
+        "status": "complete"
+      },
+      {
+        "request_id": "29b8aab0a016481b3ca1d9cce4b894be78da766dca6207c74a8e412cf495044b",
+        "candidate_id": "6ab68c2df5b637214cdb695ad1fa0b8302f5f17ad9fd38641f29f1355a4950fb",
+        "cell": "parp1_2",
+        "target": "parp1",
+        "score": -8.3,
+        "status": "complete"
+      },
+      {
+        "request_id": "a72ddc724af7bc26003be357b7b5abc6e80a13f753e2c3f76877648fc490b34e",
+        "candidate_id": "d7c7b5625111f0c41fa24873e5dc4f0a3048f3d6a5670dc93f44268f645e3345",
+        "cell": "fa7_1",
+        "target": "fa7",
+        "score": -6.9,
+        "status": "complete"
+      },
+      {
+        "request_id": "e6bd0f87e1689b2dc1389374c8bbd1ebf493243290bbbd94292bddf0a22372db",
+        "candidate_id": "705e30bec99bf7ae6a51a7f862d6c4ff06bcb89f9f3964c78edbb5337b22af12",
+        "cell": "fa7_1",
+        "target": "fa7",
+        "score": -8.0,
+        "status": "complete"
+      }
+    ],
+    "cell_summary": {
+      "fa7_1": {
+        "scores": [-6.9, -8.0],
+        "mean_score": -7.45,
+        "absolute_spread": 1.1,
+        "finite_non_tied_pair": true
+      },
+      "parp1_2": {
+        "scores": [-7.8, -8.3],
+        "mean_score": -8.05,
+        "absolute_spread": 0.5,
+        "finite_non_tied_pair": true
+      }
+    },
+    "summary": {
+      "requests_scored": 4,
+      "cells_with_two_finite_scores": 2,
+      "cells_with_non_tied_pairs": 2,
+      "conditional_data_gate_ready": true
+    },
+    "interpretation": "All four prospectively locked acquisition requests completed once, and both exact cells contain finite non-tied score pairs. This satisfies the launch and acquisition acceptance criteria and makes the frozen conditional data-support gate eligible for reevaluation.",
+    "negative_findings_and_limits": [
+      "These four labels are training-data acquisition and cannot be reused as prospective utility-model or controller evaluation evidence.",
+      "The acquisition result does not itself establish that the unchanged v3 utility-data gate passes; that requires a separate frozen reevaluation.",
+      "Each endpoint was scored once with one bound docking seed, so the within-cell ordering is not a repeated-measure stability claim.",
+      "No utility model was fit and no controller was changed or evaluated in this launch."
+    ]
+  },
+  "payload_sha256": "626aaa696c2d55ed7f14319d68c7a9788badf1ef39b4817cd617e2a2425a412e"
+}
