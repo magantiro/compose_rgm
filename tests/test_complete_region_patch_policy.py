@@ -10,9 +10,12 @@ import pytest
 
 from compose_v4.chem.molecular_graph import MolecularGraph
 from compose_v4.control.complete_region_patch_policy import (
+    ConditionalPatchPolicy,
+    PatchPolicyTrainingRow,
     SourceRegionContext,
     decode_patch_stream,
     encode_patch_stream,
+    fit_conditional_patch_policy,
     patch_stream_support,
 )
 from compose_v4.control.docking_value import identity
@@ -99,3 +102,28 @@ def test_complete_region_patch_policy_tool_has_no_external_runtime_import() -> N
     imports.update(node.module or "" for node in ast.walk(tree) if isinstance(node, ast.ImportFrom))
     assert not any(name == "modal" or name.startswith("modal.") for name in imports)
     assert not any("oracle" in name or "docking_oracle" in name for name in imports)
+
+
+def test_split_first_complete_patch_policy_roundtrip_and_score() -> None:
+    patch = _append_carbon_patch()
+    row = PatchPolicyTrainingRow(
+        source_group="source-a",
+        route_id="route-a",
+        region_index=0,
+        route_region_count=1,
+        context=SourceRegionContext.from_subgoal(patch),
+        tokens=encode_patch_stream(patch),
+        control_after="stop",
+    )
+
+    policy = fit_conditional_patch_policy([row], smoothing_alpha=0.25)
+    restored = ConditionalPatchPolicy.from_checkpoint(policy.checkpoint())
+    learned = restored.score_stream(row.context, row.tokens, learned=True)
+    marginal = restored.score_stream(row.context, row.tokens, learned=False)
+
+    assert learned["supported"] is True
+    assert marginal["supported"] is True
+    assert learned["nll"] <= marginal["nll"]
+    serialized = json.dumps(restored.checkpoint(), sort_keys=True)
+    for forbidden in ("source-a", "route-a", "source_state", "endpoint", "actions"):
+        assert forbidden not in serialized
