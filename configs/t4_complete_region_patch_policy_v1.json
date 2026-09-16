@@ -1,0 +1,80 @@
+{
+  "contract_sha256": "36405306732df220effe49f725f80e3f1d4b78141d87a5d5598bd200a3125542",
+  "payload": {
+    "schema_version": "t4_complete_region_patch_policy_contract_v1",
+    "authorization": "User-authorized split-first zero-oracle Gate 3-4 milestone following immutable complete-region runtime Gates 1-2.",
+    "scientific_problem": "Learn a source-conditioned distribution over one to four complete address-free dependency-region target patches without decoding executor primitive traces.",
+    "primary_output": "A target-independent runtime checkpoint that generates CompleteRegionProgram decisions containing whole StructuralSubgoal patches and explicit CONTINUE/STOP control.",
+    "claim_under_test": "A split-first conditional graph-delta grammar can support held-source teacher patches and autonomously generate valid complete protected programs through the sealed exact runtime.",
+    "validation_setting": "Three frozen whole-source folds over the 77 T4 routes and 147 complete regions, CPU-only, zero-oracle teacher-forced diagnostics and autonomous matched-budget generation.",
+    "inputs": {
+      "gate1_support": {"path": "diagnostics/t4_complete_region_runtime/attempt_1/support.json", "sha256": "33c29e5369ec49c95af5cb309a02f9cb9388e5989ed51c69166ec82a6f0e43f1"},
+      "gate2_result": {"path": "diagnostics/t4_complete_region_runtime/attempt_1/result.json", "sha256": "8ce954f8a17210f0334fa94162ab620210b22f6d3a352c2be084eb512c7abb90"},
+      "teacher_library": {"path": "diagnostics/t4_shared_program_controller/attempt_2/shared_library.json", "sha256": "732c67d04af3a0824cfa700906fd73982689af416f337c8eb109499af79afdb5"},
+      "source_registry": {"path": "docs/GENMOL_T4_SEEDS.json", "sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"},
+      "benchmark_contract": {"path": "configs/t4_frozen_program_benchmark_v2.json", "sha256": "fdc93e9bc97eaae2e81f2189a3b7568b00d1b5525ff0fb7a657668a6190ad280"},
+      "complete_region_runtime": {"path": "src/compose_v4/control/complete_region_program.py", "sha256": "275f59b7cd47c2ed071a049a57fc52a9bd9a0f878ae6fcb20fa0b3fa0ac6c261"},
+      "structural_subgoal": {"path": "src/compose_v4/control/structural_subgoal.py", "sha256": "ba603dbfa82a3130761146498510160d9dfcb74d3aa5b44298afe6bfefe59823"},
+      "sealed_realizer": {"path": "src/compose_v4/control/structural_subgoal_realizer.py", "sha256": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f"},
+      "frozen_fold_implementation": {"path": "src/compose_v4/experiments/t4_route_policy_comparison.py", "sha256": "67967271938556944b2500b47a3e2ba39e08c59a1cb4060ea478f9764dfe0d7f"},
+      "prior_component_audit": {"path": "diagnostics/t4_structural_subgoal_component_novelty/attempt_1/result.json", "sha256": "bdd2acaac63b274dc35346ce14bc6a203b62316037056ddbda83b18fb910be0a"}
+    },
+    "split": {
+      "kind": "whole_source_one_seed_per_protein",
+      "folds": [0, 1, 2],
+      "freeze_before_derivation": true,
+      "training_fold_only_statistics_and_conditionals": true,
+      "held_sources_used_for_fit_or_selection": false
+    },
+    "generated_object": {
+      "program_decisions": [1, 4],
+      "decision": "one whole address-free StructuralSubgoal target patch",
+      "factorization": "WHERE source-role set, then one conditional canonical graph-delta token stream jointly encoding survival/deletion, output roles, atom attributes, target topology/bond attributes, boundary attachments and within-patch dependencies, then CONTINUE/STOP",
+      "maximum_input_roles": 40,
+      "maximum_output_roles": 40,
+      "maximum_target_roles": 40,
+      "maximum_realized_primitives": 32,
+      "maximum_active_atoms": 40,
+      "formal_charge_support": [-2, 2],
+      "implicit_hydrogen_support": [0, 4],
+      "degree_support": [0, 6],
+      "bond_order_support": [0, 4],
+      "atom_type_support": "fixed platform organic vocabulary",
+      "cross_region_created_role_learning": "abstain when the training fold has no positive CreatedRoleReference example; runtime capability remains unchanged"
+    },
+    "policy": {
+      "architecture": "source-balanced conditional categorical graph-delta decoder with additive smoothing and legality masks",
+      "learned": "context-conditioned canonical token probabilities fit on training-fold complete patches",
+      "control": "same-grammar source-balanced marginal token probabilities",
+      "balancing": "equal source mass, within source equal route mass, within route equal region/token mass",
+      "smoothing_alpha": 0.25,
+      "teacher_rank_candidates": 128,
+      "autonomous_program_budget_per_source_per_arm": 32,
+      "seed": 20260916,
+      "teacher_injection": "Gate 3 diagnostic only and always labelled separately",
+      "primitive_executor_actions_decoded": false
+    },
+    "gate0_support": {
+      "require_routes": 77,
+      "require_regions": 147,
+      "require_teacher_patch_grammar_support": 147,
+      "require_roundtrip_precision": 1.0,
+      "action_on_failure": "stop before fitting and publish missing token/context support"
+    },
+    "gate3": {
+      "metrics": ["where_support_rank_nll", "joint_target_patch_support_rank_nll", "topology_conditional_nll", "atom_attribute_conditional_nll", "bond_and_attachment_conditional_nll", "dependency_conditional_nll_or_abstention", "continue_stop_rank_probability", "full_complete_patch_decision_rank_nll", "candidate_fiber_size", "coverage", "precision", "calibration", "abstentions_and_failure_reasons"],
+      "comparison": "learned versus same-grammar source-balanced marginal control at 128 candidates",
+      "held_teacher_used_for_fit": false
+    },
+    "gate4": {
+      "metrics": ["exact_endpoint_recovery", "transformation_equivalent_recovery", "coverage", "precision", "unique_programs", "unique_endpoints", "route_component_and_combination_novelty", "realization_yield", "stop_abstention_and_failure_counts", "runtime_and_compute"],
+      "candidate_budget_per_source_per_arm": 32,
+      "teacher_injection": false,
+      "partial_endpoint_evaluation_or_lock": false,
+      "gate_relaxation_after_inspection": false
+    },
+    "checkpoint_prohibitions": ["task identity", "target identity", "route identifier", "endpoint lookup", "absolute atom address", "source graph", "SMILES", "executable teacher route", "executor teacher action trace"],
+    "prohibitions": ["Do not modify immutable Gate 1-2 artifacts.", "Do not decode 5-32 executor primitive actions.", "Do not fit or tune a selector, value model, Dynamic-v0 controller, compiler or scoring function.", "Do not use held-source records to derive a vocabulary, statistic, condition, negative or candidate policy.", "Do not call an oracle or docking function, launch Modal, use the network or access a live run.", "Do not relax gates after inspecting results."],
+    "costs": {"oracle_calls_authorized": 0, "docking_calls_authorized": 0, "modal_launches_authorized": 0, "network_calls_authorized": 0, "gpu_seconds_authorized": 0}
+  }
+}
