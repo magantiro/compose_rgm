@@ -40,6 +40,19 @@ KIND = "t4_hybrid_top3_v0_stage20"
 STAGE_CEILING = 20
 FULL_FROZEN_CEILING = 100
 REPORT_CALLS = (1, 5, 10, 20)
+ADMISSION_CALL_FIELDS = (
+    "call",
+    "candidate_id",
+    "canonical_smiles",
+    "selection_role",
+)
+ADMISSION_CELL_FIELDS = (
+    "status",
+    "dynamic_v0_start_call",
+    "dynamic_v0_calls_through_100",
+    "rng_root_seed",
+    "rng_namespaces",
+)
 
 
 def _read_self_hashed(
@@ -143,6 +156,27 @@ def _locks(root: Path, contract: dict) -> tuple[dict, dict]:
     return candidate, admission
 
 
+def _validate_admission_projection(schedule: dict, admission: dict) -> None:
+    """Validate the admission lock's intentional projection of candidate rows."""
+
+    if schedule.get("cell") != admission.get("cell"):
+        raise ValueError("candidate/admission cell differs")
+    projected_calls = [
+        {field: call[field] for field in ADMISSION_CALL_FIELDS}
+        for call in schedule["initial_macro_calls"]
+    ]
+    if projected_calls != admission.get("initial_macro_calls"):
+        raise ValueError(
+            f"candidate/admission call schedule differs: {schedule['cell']}"
+        )
+    if any(
+        schedule.get(field) != admission.get(field) for field in ADMISSION_CELL_FIELDS
+    ):
+        raise ValueError(
+            f"candidate/admission continuation differs: {schedule['cell']}"
+        )
+
+
 def run_identity(contract: dict) -> str:
     inputs = contract["launch"]["immutable_inputs"]
     return identity(
@@ -207,13 +241,9 @@ def remote_preflight(
         schedules
     ):
         raise ValueError("Stage-20 lock census changed")
-    for cell in schedules:
-        if (
-            schedules[cell]["initial_macro_calls"]
-            != admissions[cell]["initial_macro_calls"]
-        ):
-            raise ValueError(f"candidate/admission schedule differs: {cell}")
-        for call in schedules[cell]["initial_macro_calls"]:
+    for cell, schedule in schedules.items():
+        _validate_admission_projection(schedule, admissions[cell])
+        for call in schedule["initial_macro_calls"]:
             source = decode_state(call["candidate"]["source_state"])
             endpoint, trace = execute_program(source, call["candidate"]["actions"])
             if (
@@ -364,8 +394,7 @@ def run_unit(
     admission = next(
         row for row in admission_lock["cells"] if row["cell"] == unit["cell"]
     )
-    if schedule["initial_macro_calls"] != admission["initial_macro_calls"]:
-        raise ValueError("candidate and admission locks disagree")
+    _validate_admission_projection(schedule, admission)
 
     volume.reload()
     folder = artifacts / KIND / task["run_id"] / "units" / unit["unit_id"]
@@ -735,6 +764,7 @@ __all__ = [
     "REPORT_CALLS",
     "SCHEMA",
     "STAGE_CEILING",
+    "_validate_admission_projection",
     "load_contract",
     "remote_preflight",
     "run_identity",

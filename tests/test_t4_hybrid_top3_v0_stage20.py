@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from compose_v4.control.docking_value import identity
 from compose_v4.control.dynamic_program_synthesis import DynamicProgramOptimizer
@@ -14,6 +15,7 @@ from compose_v4.experiments.t4_hybrid_top3_v0_stage20 import (
     _configure_refinement_rng,
     _macro_batch,
     _summary_points,
+    _validate_admission_projection,
     load_contract,
     run_identity,
 )
@@ -62,6 +64,63 @@ def test_modal_image_serializes_every_task_validated_material() -> None:
     assert serialized == material_files(contract)
     assert "docs/T4_HYBRID_TOP3_V0_STAGE20_LAUNCH.md" in serialized
     assert "tests/test_t4_hybrid_top3_v0_stage20.py" in serialized
+
+
+def test_admission_lock_is_exact_projection_not_full_candidate_row() -> None:
+    contract = load_contract(ROOT)
+    candidate_spec = contract["launch"]["immutable_inputs"]["candidate_lock"]
+    admission_spec = contract["launch"]["immutable_inputs"]["admission_lock"]
+    candidate = json.loads((ROOT / candidate_spec["path"]).read_text())["payload"]
+    admission = json.loads((ROOT / admission_spec["path"]).read_text())["payload"]
+    candidate_rows = {row["cell"]: row for row in candidate["cells"]}
+    admission_rows = {row["cell"]: row for row in admission["cells"]}
+    for cell in contract["launch"]["cells"]:
+        schedule = candidate_rows[cell]
+        projected = admission_rows[cell]
+        _validate_admission_projection(schedule, projected)
+        if schedule["initial_macro_calls"]:
+            assert schedule["initial_macro_calls"] != projected["initial_macro_calls"]
+
+
+def test_admission_projection_rejects_changed_order_or_identity() -> None:
+    schedule = {
+        "cell": "fixture_0",
+        "status": "supported",
+        "dynamic_v0_start_call": 2,
+        "dynamic_v0_calls_through_100": 99,
+        "rng_root_seed": 7,
+        "rng_namespaces": {"dynamic_v0_refinement": [1, 2, 3, 4]},
+        "initial_macro_calls": [
+            {
+                "call": 1,
+                "candidate_id": "a" * 64,
+                "canonical_smiles": "CC",
+                "selection_role": "fixed",
+                "candidate": {"actions": []},
+            }
+        ],
+    }
+    admission = {
+        key: schedule[key]
+        for key in (
+            "cell",
+            "status",
+            "dynamic_v0_start_call",
+            "dynamic_v0_calls_through_100",
+            "rng_root_seed",
+            "rng_namespaces",
+        )
+    }
+    admission["initial_macro_calls"] = [
+        {
+            "call": 1,
+            "candidate_id": "b" * 64,
+            "canonical_smiles": "CC",
+            "selection_role": "fixed",
+        }
+    ]
+    with pytest.raises(ValueError, match="call schedule differs"):
+        _validate_admission_projection(schedule, admission)
 
 
 def test_locked_macro_batch_preserves_calls_and_endpoints() -> None:
