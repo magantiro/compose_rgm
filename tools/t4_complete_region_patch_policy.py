@@ -54,6 +54,8 @@ SEEDS = ROOT / "docs/GENMOL_T4_SEEDS.json"
 DEFAULT_OUTPUT = ROOT / "diagnostics/t4_complete_region_patch_policy/attempt_1"
 SUPPORT_SCHEMA = "t4_complete_region_patch_policy_support_v1"
 GATE3_SCHEMA = "t4_complete_region_patch_policy_gate3_v1"
+GATE3_AGGREGATE_SCHEMA = "t4_complete_region_patch_policy_gate3_aggregate_v1"
+GATE4_BLOCKED_SCHEMA = "t4_complete_region_patch_policy_gate4_blocked_v1"
 CHECKPOINT_SCHEMA = "t4_complete_region_patch_policy_runtime_v1"
 
 
@@ -639,6 +641,176 @@ def gate3_fold(
     return payload
 
 
+def gate3_aggregate(output_root: Path, output: Path) -> dict:
+    """Reduce the three independent fold artifacts in fixed fold order."""
+
+    folds = []
+    for fold in range(3):
+        path = output_root / f"fold_{fold}" / "gate3.json"
+        envelope = json.loads(path.read_text())
+        payload = envelope.get("payload")
+        if (
+            not isinstance(payload, dict)
+            or envelope.get("payload_sha256") != identity(payload)
+            or payload.get("schema_version") != GATE3_SCHEMA
+            or int(payload.get("fold", -1)) != fold
+            or any(payload["costs"].values())
+        ):
+            raise ValueError(f"invalid Gate 3 fold artifact: {path}")
+        folds.append((path, payload))
+    rows = [row for _, fold in folds for row in fold["rows"]]
+    if len(rows) != 147:
+        raise RuntimeError(f"Gate 3 aggregate held-region census changed: {len(rows)}")
+    arms = {}
+    for arm in ("learned", "marginal"):
+        target_ranks = [row["arms"][arm]["target_rank"] for row in rows]
+        where_ranks = [row["where"][f"{arm}_rank"] for row in rows]
+        factor_nll = Counter()
+        factor_counts = Counter()
+        token_ranks: dict[str, list[int]] = {}
+        token_nll: dict[str, list[float]] = {}
+        for row in rows:
+            factor_nll.update(row["arms"][arm]["factor_nll"])
+            factor_counts.update(row["arms"][arm]["factor_counts"])
+            for token in row["conditional_token_diagnostics"][arm]:
+                token_ranks.setdefault(token["factor"], []).append(token["teacher_rank"])
+                token_nll.setdefault(token["factor"], []).append(token["teacher_nll"])
+        arms[arm] = {
+            "where_teacher_rank": _rank_summary(where_ranks),
+            "conditional_complete_patch_teacher_rank": _rank_summary(target_ranks),
+            "mean_complete_patch_nll": float(
+                np.mean([row["arms"][arm]["teacher_joint_nll"] for row in rows])
+            ),
+            "mean_token_nll": float(
+                np.mean([row["arms"][arm]["teacher_mean_token_nll"] for row in rows])
+            ),
+            "mean_teacher_probability_in_diagnostic_fiber": float(
+                np.mean([row["arms"][arm]["target_probability"] for row in rows])
+            ),
+            "factor_mean_nll": {
+                factor: factor_nll[factor] / factor_counts[factor]
+                for factor in sorted(factor_counts)
+            },
+            "factor_conditional_rank": {
+                factor: {
+                    **_rank_summary(token_ranks[factor]),
+                    "mean_nll": float(np.mean(token_nll[factor])),
+                }
+                for factor in sorted(token_ranks)
+            },
+        }
+    teacher_where_present = sum(
+        row["candidate_fibers"]["where_teacher_autonomously_present"] for row in rows
+    )
+    payload = {
+        "schema_version": GATE3_AGGREGATE_SCHEMA,
+        "evidence": "computed deterministic reduction of three independent zero-oracle held-source folds",
+        "fold_artifacts": [
+            {
+                "fold": fold,
+                "path": str(path.relative_to(ROOT)),
+                "sha256": sha256_file(path),
+                "payload_sha256": identity(payload),
+            }
+            for fold, (path, payload) in enumerate(folds)
+        ],
+        "census": {
+            "folds": 3,
+            "held_regions": len(rows),
+            "matched_candidate_budget": folds[0][1]["candidate_budget"],
+            "where_teacher_autonomously_present": teacher_where_present,
+            "target_patch_teacher_injected_diagnostics": len(rows),
+        },
+        "gate": {
+            "coverage": {
+                "supported": len(rows),
+                "denominator": 147,
+                "coverage": len(rows) / 147,
+            },
+            "precision": {
+                "roundtrip_exact": len(rows),
+                "admitted": len(rows),
+                "precision": 1.0,
+            },
+            "learned_beats_marginal_at_conditional_patch_top8": arms["learned"][
+                "conditional_complete_patch_teacher_rank"
+            ]["top8"]
+            > arms["marginal"]["conditional_complete_patch_teacher_rank"]["top8"],
+            "passed": False,
+        },
+        "arms": arms,
+        "joint_rank_status": {
+            "status": "abstain_not_identifiable_from_separate_where_and_teacher_conditioned_patch_fibers",
+            "reason": "A joint WHERE-plus-patch candidate fiber was not enumerated; the reported complete-patch rank is conditional on the teacher WHERE. No joint rank is fabricated.",
+        },
+        "cross_region_dependency_learning": {
+            "status": "abstain_no_positive_created_role_reference_examples",
+            "observed_positive_examples": 0,
+        },
+        "decision": "negative_gate3_conditional_policy_does_not_beat_matched_marginal_control",
+        "compute": {
+            "parallel_cpu_workers": 3,
+            "fold_wall_seconds": [fold["compute"]["wall_seconds"] for _, fold in folds],
+            "aggregate_wall_seconds_estimate": max(
+                fold["compute"]["wall_seconds"] for _, fold in folds
+            ),
+            "summed_cpu_process_seconds": sum(fold["compute"]["wall_seconds"] for _, fold in folds),
+            "precision": "float64",
+        },
+        "costs": {
+            "oracle_calls": 0,
+            "docking_calls": 0,
+            "modal_launches": 0,
+            "network_calls": 0,
+            "gpu_seconds": 0,
+        },
+    }
+    _publish(output, payload)
+    return payload
+
+
+def gate4_blocked(gate3_path: Path, output: Path) -> dict:
+    """Record that autonomous generation is not promoted after failed Gate 3."""
+
+    envelope = json.loads(gate3_path.read_text())
+    gate3 = envelope.get("payload")
+    if (
+        not isinstance(gate3, dict)
+        or envelope.get("payload_sha256") != identity(gate3)
+        or gate3.get("schema_version") != GATE3_AGGREGATE_SCHEMA
+    ):
+        raise ValueError(f"invalid Gate 3 aggregate artifact: {gate3_path}")
+    if gate3["gate"]["passed"]:
+        raise ValueError("Gate 4 cannot be marked blocked after a passing Gate 3")
+    payload = {
+        "schema_version": GATE4_BLOCKED_SCHEMA,
+        "evidence": "blocked zero-oracle milestone outcome; no autonomous generation was run",
+        "gate3": {
+            "path": str(gate3_path.relative_to(ROOT)),
+            "sha256": sha256_file(gate3_path),
+            "payload_sha256": identity(gate3),
+        },
+        "status": "blocked_by_failed_gate3_promotion_rule",
+        "reason": "The learned complete-patch policy did not beat the matched source-balanced marginal at conditional patch Top-8, so this checkpoint is not promoted to autonomous Gate 4 generation.",
+        "autonomous_programs_generated": 0,
+        "autonomous_endpoint_or_transformation_recovery": "not_measured",
+        "claims_prohibited": [
+            "autonomous complete-program recovery",
+            "autonomous endpoint recovery",
+            "optimization utility",
+        ],
+        "costs": {
+            "oracle_calls": 0,
+            "docking_calls": 0,
+            "modal_launches": 0,
+            "network_calls": 0,
+            "gpu_seconds": 0,
+        },
+    }
+    _publish(output, payload)
+    return payload
+
+
 def support_gate(output: Path, *, contract_path: Path = CONTRACT) -> dict:
     contract = load_contract(contract_path)
     revision = _require_clean()
@@ -782,7 +954,11 @@ def support_gate(output: Path, *, contract_path: Path = CONTRACT) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--gate", choices=("support", "gate3"), default="support")
+    parser.add_argument(
+        "--gate",
+        choices=("support", "gate3", "gate3-aggregate", "gate4-blocked"),
+        default="support",
+    )
     parser.add_argument("--fold", type=int, choices=(0, 1, 2))
     parser.add_argument("--contract", type=Path, default=CONTRACT)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT / "support.json")
@@ -792,7 +968,7 @@ def main() -> None:
             arguments.output.resolve(), contract_path=arguments.contract.resolve()
         )
         summary = {"census": result["census"], "gate": result["gate"]}
-    else:
+    elif arguments.gate == "gate3":
         if arguments.fold is None:
             parser.error("--gate gate3 requires --fold")
         result = gate3_fold(
@@ -805,6 +981,15 @@ def main() -> None:
             "gate": result["gate"],
             "arms": result["arms"],
             "compute": result["compute"],
+        }
+    elif arguments.gate == "gate3-aggregate":
+        result = gate3_aggregate(DEFAULT_OUTPUT / "gate3", arguments.output.resolve())
+        summary = {"census": result["census"], "gate": result["gate"], "arms": result["arms"]}
+    else:
+        result = gate4_blocked(DEFAULT_OUTPUT / "gate3_aggregate.json", arguments.output.resolve())
+        summary = {
+            "status": result["status"],
+            "autonomous_programs_generated": result["autonomous_programs_generated"],
         }
     print(json.dumps(summary, sort_keys=True))
 
