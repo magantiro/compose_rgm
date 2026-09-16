@@ -206,14 +206,12 @@ def _route_result(teacher: dict, *, revision: str, config_payload: dict) -> dict
     source = decode_state(trace["states"][0])
     target = decode_state(trace["states"][-1])
     config = RealizerConfig(**config_payload)
-    started = time.monotonic()
     execution = execute_complete_region_program(
         source,
         program,
         resolved_bindings=bindings,
         config=config,
     )
-    elapsed = time.monotonic() - started
     committed = execution["committed_endpoint_state"]
     exact = committed is not None and canonical_state_key(
         decode_state(committed)
@@ -235,7 +233,6 @@ def _route_result(teacher: dict, *, revision: str, config_payload: dict) -> dict
         "realization_precision": (
             float(exact) if execution["committed_endpoint_count"] else None
         ),
-        "elapsed_seconds": elapsed,
         "configuration": config_payload,
         "costs": {
             "oracle_calls": 0,
@@ -256,7 +253,6 @@ def _route_worker(arguments: tuple[dict, str, dict, str]) -> dict:
         "teacher_program_id": teacher["program_id"],
         "status": result["execution"]["status"],
         "exact": result["exact_endpoint_reconstruction"],
-        "elapsed_seconds": result["elapsed_seconds"],
         "path": output_text,
         "sha256": sha256_file(output),
     }
@@ -334,7 +330,6 @@ def aggregate(output: Path, *, route_root: Path, contract_path: Path) -> dict:
                 "realized_primitive_count": payload["execution"].get(
                     "realized_primitive_count", 0
                 ),
-                "elapsed_seconds": payload["elapsed_seconds"],
             }
         )
     if len(rows) != 77 or len({row["teacher_program_id"] for row in rows}) != 77:
