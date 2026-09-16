@@ -1,0 +1,74 @@
+{
+  "contract_sha256": "349b9005a4c47cb6cd81952cc6cee3fff150f83c9c36454ff5b314ce56bb58b7",
+  "payload": {
+    "schema_version": "t4_complete_region_patch_policy_contract_v2",
+    "authorization": "User-authorized zero-oracle attempt_2 correcting only the sealed attempt_1 WHERE search and sparse conditional-policy failures.",
+    "scientific_problem": "Learn a source-conditioned distribution over complete address-free dependency-region target patches while guaranteeing declared WHERE support for every nonempty current-graph role set.",
+    "primary_output": "One target-independent runtime checkpoint per frozen whole-source fold containing a structured WHERE policy and a shared feature-conditioned autoregressive whole-patch policy.",
+    "claim_under_test": "Shared graph/prefix features with training-only source-group calibration improve held-source complete-patch ordering over the unchanged balanced marginal without changing grammar, runtime, compiler, or candidate budget.",
+    "validation_setting": "The unchanged three whole-source folds over 77 routes and 147 complete regions, CPU-only and zero-oracle, with a 128-candidate diagnostic budget.",
+    "inputs": {
+      "attempt_1_negative_gate3": {"path": "diagnostics/t4_complete_region_patch_policy/attempt_1/gate3_aggregate.json", "sha256": "8dd7382e01c3cea9b194e11a6781128d69cce0acb7813327f7080b87ff29f918"},
+      "attempt_1_support": {"path": "diagnostics/t4_complete_region_patch_policy/attempt_1/support.json", "sha256": "21829a9f606aaf9373b5c60cb2c5c392037ea8a455cb3c9c9d2634173ad19ccf"},
+      "attempt_1_contract": {"path": "configs/t4_complete_region_patch_policy_v1.json", "sha256": "5ba065680834a308067f442abddca5e3be282c13b4452376abd9a5c2f23a42a5"},
+      "frozen_patch_grammar": {"path": "src/compose_v4/control/complete_region_patch_policy.py", "sha256": "7da16c21e8a463cff1edb3d5b4b3d9ac7202c364ff8a6b9d96d2dfe6c8f5d83a"},
+      "complete_region_runtime": {"path": "src/compose_v4/control/complete_region_program.py", "sha256": "275f59b7cd47c2ed071a049a57fc52a9bd9a0f878ae6fcb20fa0b3fa0ac6c261"},
+      "structural_subgoal": {"path": "src/compose_v4/control/structural_subgoal.py", "sha256": "ba603dbfa82a3130761146498510160d9dfcb74d3aa5b44298afe6bfefe59823"},
+      "sealed_realizer": {"path": "src/compose_v4/control/structural_subgoal_realizer.py", "sha256": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f"},
+      "frozen_fold_implementation": {"path": "src/compose_v4/experiments/t4_route_policy_comparison.py", "sha256": "67967271938556944b2500b47a3e2ba39e08c59a1cb4060ea478f9764dfe0d7f"},
+      "teacher_library": {"path": "diagnostics/t4_shared_program_controller/attempt_2/shared_library.json", "sha256": "732c67d04af3a0824cfa700906fd73982689af416f337c8eb109499af79afdb5"},
+      "source_registry": {"path": "docs/GENMOL_T4_SEEDS.json", "sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"},
+      "benchmark_contract": {"path": "configs/t4_frozen_program_benchmark_v2.json", "sha256": "fdc93e9bc97eaae2e81f2189a3b7568b00d1b5525ff0fb7a657668a6190ad280"}
+    },
+    "frozen": {
+      "corpus": "77 routes / 147 regions",
+      "folds": [0, 1, 2],
+      "split": "whole source; one seed per protein held in each fold",
+      "patch_grammar_runtime_compiler": "byte-identical attempt_1 inputs",
+      "platform_token_support": "byte-identical attempt_1 domains",
+      "teacher_patch_candidate_budget": 128,
+      "autonomous_program_budget_per_source_per_arm": 32,
+      "seed": 20260916
+    },
+    "where": {
+      "declared_support": "all nonempty subsets of the current graph live roles",
+      "declared_support_cardinality": "2^n_live - 1",
+      "canonical_decoder": "address-free graph-feature-conditioned include/exclude mask over canonical current-role order",
+      "legality": "last role forced included only when the prefix selected no role",
+      "inference": "deterministic beam; common diagnostic pool from learned and marginal beams; no teacher insertion counted as autonomous",
+      "beam_budget": 128,
+      "report": ["declared full-support size", "beam candidates before and after deduplication", "teacher autonomous beam inclusion", "deterministic pruning"]
+    },
+    "patch_policy": {
+      "stream": "unchanged canonical autoregressive whole StructuralSubgoal token stream",
+      "features": "shared deterministic hashed source-graph, source-region and complete-prefix features",
+      "hash_dimension": 128,
+      "heads": "regularized multinomial logistic conditional head per factor/token-kind with a shared feature schema",
+      "regularization_C_grid": [0.1, 1.0],
+      "marginal_shrinkage_grid": [0.0, 0.25, 0.5, 0.75, 1.0],
+      "selection": "training-fold internal leave-one-source-group-out NLL only",
+      "balancing": "equal source mass, within source equal route mass, within route equal region and decision mass",
+      "feature_cache": "materialize each outer-fold matrix once and reuse it for every head and internal LOSO fit",
+      "legality_masks": "unchanged frozen token_domain support",
+      "independent_patch_marginals": false
+    },
+    "prefit_gates": {
+      "patch_support_roundtrip": "147/147 required",
+      "where_declared_support": "147/147 required without teacher injection",
+      "on_failure": "publish missing taxonomy and stop before fitting"
+    },
+    "gate3": {
+      "comparison": "learned attempt_2 versus unchanged source-balanced marginal under identical diagnostic candidate fibers and 128 budget",
+      "metrics": ["Top1/8/16/32/128", "mean and median rank", "NLL and calibration", "factor diagnostics", "coverage and precision", "declared WHERE support", "autonomous WHERE beam inclusion", "runtime"],
+      "promotion": "learned must materially beat marginal under this frozen contract; no post-result relaxation"
+    },
+    "gate4": {
+      "authorization": "only after Gate 3 promotion passes",
+      "on_gate3_failure": "publish blocked exactly as attempt_1 with zero autonomous claims",
+      "metrics_if_promoted": ["exact endpoint and transformation-equivalent recovery", "coverage and precision", "unique yield and diversity", "realization", "STOP and abstention", "matched compute"]
+    },
+    "checkpoint_prohibitions": ["task identity", "target identity", "route identifier", "endpoint lookup", "absolute atom address", "source graph", "SMILES", "executable teacher route", "executor teacher action trace"],
+    "prohibitions": ["Do not modify attempt_1 artifacts.", "Do not change the complete-region grammar, runtime, compiler, realizer, folds, corpus, candidate budgets or seeds.", "Do not fit on an outer held source or derive a vocabulary/statistic from it.", "Do not decode executor primitive traces.", "Do not tune a selector, value model, Dynamic controller or scoring function.", "Do not call an oracle or docking function, launch Modal, use the network or access a live run.", "Do not relax a gate after inspecting results."],
+    "costs": {"oracle_calls_authorized": 0, "docking_calls_authorized": 0, "modal_launches_authorized": 0, "network_calls_authorized": 0, "gpu_seconds_authorized": 0}
+  }
+}
