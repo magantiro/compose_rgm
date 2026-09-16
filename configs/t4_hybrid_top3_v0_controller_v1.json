@@ -1,0 +1,135 @@
+{
+  "contract_sha256": "f88098d7b3098c0aa62c9fff57dc8a5db3ed61ba89dcec1a00e7a96f796dcc50",
+  "payload": {
+    "schema_version": "t4_hybrid_top3_v0_controller_contract_v1",
+    "status": "zero_oracle_candidate_and_admission_lock_authorized_only",
+    "scientific_problem": "Test whether three score-blind, executable macro candidates can provide a stronger initial archive for unchanged Dynamic-v0 without using the failed target-conditioned utility arm.",
+    "primary_output": "A deterministic five-cell support-conditioned initial schedule and conditional archive-admission lock, with three macro calls where support exists and unchanged Dynamic-v0 from call one otherwise.",
+    "central_claim_under_test": "The frozen structural control plus cross-fitted target-blind utility prior may provide useful initial archive diversity while preserving Dynamic-v0 as the complete fallback and refinement law.",
+    "validation_setting": "Five declared T4 delta-0.4 development cells, at most 100 charged calls per cell in a separately authorized prospective run, reported at calls 1, 5, 10, 20, 50 and 100.",
+    "support": "Only exact-realized candidates in the baseline cross-fitted learned 128-pool that pass the frozen strict delta-0.4 eligibility ledger. A cell with fewer than three canonical-distinct eligible endpoints abstains from the macro bootstrap and starts unchanged Dynamic-v0 at call one.",
+    "cells": [
+      "5ht1b_0",
+      "braf_1",
+      "jak2_1",
+      "parp1_0",
+      "fa7_0"
+    ],
+    "selection": {
+      "candidate_revision": "baseline",
+      "candidate_policy": "balanced_joint_autoregressive",
+      "candidate_pool_per_cell": 128,
+      "call_1": "highest fit-free fixed target-blind structural-control score among canonical-distinct exact-eligible endpoints",
+      "calls_2_and_3": "two highest cross-fitted target-blind utility scores after canonical endpoint deduplication and exclusion of call 1",
+      "score_direction": "higher predicted utility ranker score first; lower measured docking remains the future endpoint",
+      "tie_break": [
+        "original_generator_rank_ascending",
+        "candidate_identity_ascending"
+      ],
+      "target_conditioned_arm": "rejected_by_authoritative_v4_result_and_not_used",
+      "insufficient_support": "fail_closed_macro_abstention_then_unchanged_dynamic_v0_from_call_1",
+      "score_aware_fill": false,
+      "replacement_or_backfill": false
+    },
+    "continuation": {
+      "supported_cell": "charge the three frozen macro candidates at calls 1-3, admit every finite scored candidate to one run-local archive in charged-call order, retain every charged failure without replacement, then invoke unchanged Dynamic-v0 at call 4",
+      "unsupported_cell": "record explicit macro support abstention and invoke unchanged Dynamic-v0 at call 1",
+      "maximum_charged_calls_per_cell": 100,
+      "report_calls": [1, 5, 10, 20, 50, 100],
+      "plateau_stopping": false,
+      "automatic_retry": false,
+      "confirmation_calls": 0,
+      "one_shared_archive_per_cell": true,
+      "independent_rng_namespaces": [
+        "learned_macro_generation",
+        "uniform_macro_generation",
+        "archive_admission",
+        "dynamic_v0_refinement"
+      ],
+      "rng_root_seed": 20260916
+    },
+    "immutable_inputs": {
+      "v4_utility_implementation": {
+        "revision": "b78c9e97f8a186715dcbeb146e0ddd28a083fe7b",
+        "tree": "c5f4f19121b50f9e0e6364db02ffd2a0dc227e4a"
+      },
+      "v4_utility_result_revision": {
+        "revision": "1e8151f6e590921cace72d1d0b3a8cb4e5175904",
+        "tree": "8e8360d30ef53eb67b4350ad0f26baa4ab67f9c5"
+      },
+      "v4_utility_contract": {
+        "revision": "b78c9e97f8a186715dcbeb146e0ddd28a083fe7b",
+        "path": "configs/t4_target_conditioned_utility_selector_v4.json",
+        "sha256": "425eae30c4f339fe106916f53cbd7d055eac832c3bba2a44ae1f8691fee83353",
+        "payload_sha256": "f7a2720e2c299449168047d59919c034f68585a0a27c747dedf229a53859ffd7"
+      },
+      "v4_utility_result": {
+        "revision": "1e8151f6e590921cace72d1d0b3a8cb4e5175904",
+        "path": "diagnostics/t4_target_conditioned_utility_selector/attempt_4/result.json",
+        "sha256": "20c0db5f8e9b11bc7a17f9849c0d02ccf3f1c9993b1539b3d49e4dbcf377aade"
+      },
+      "v4_fold_checkpoints": [
+        {
+          "fold": 0,
+          "revision": "1e8151f6e590921cace72d1d0b3a8cb4e5175904",
+          "path": "diagnostics/t4_target_conditioned_utility_selector/attempt_4/fold_0_checkpoint.json",
+          "sha256": "245cc1691604432c1fc6bf869d1c97860bc911206e241b2377cde616d0c66ba7"
+        },
+        {
+          "fold": 1,
+          "revision": "1e8151f6e590921cace72d1d0b3a8cb4e5175904",
+          "path": "diagnostics/t4_target_conditioned_utility_selector/attempt_4/fold_1_checkpoint.json",
+          "sha256": "204a076b760339ccdab24178da6de3c5d2c8ebc1a9d1b6cb5e6c5f35c3c8c482"
+        },
+        {
+          "fold": 2,
+          "revision": "1e8151f6e590921cace72d1d0b3a8cb4e5175904",
+          "path": "diagnostics/t4_target_conditioned_utility_selector/attempt_4/fold_2_checkpoint.json",
+          "sha256": "067bd44f01fd93261a882748e9bb7b775b27f7da7768f052523e23ec182e0d0a"
+        }
+      ],
+      "baseline_generator_lock": {
+        "revision": "7d87ff2959845d5c6273e743141ac9c0fe806594",
+        "path": "diagnostics/t4_compositional_structural_subgoal_generator/attempt_1/candidate_lock.json.gz",
+        "sha256": "f533e70d940ff191df007b28107f12eed9bce6abb43f44f7afc91d47422afd28",
+        "payload_sha256": "d9717fc3a7b92fe8b264c7803c43f50f48b14e078b179cbd75f66d769aa65b10"
+      },
+      "strict_eligibility_ledger": {
+        "revision": "67574d20f8d28c70480974013bc8bca70df7e614",
+        "path": "diagnostics/t4_compositional_generator_utility_lock/attempt_1/eligibility_ledger.json.gz",
+        "sha256": "06ff8f02aebe99ba014c81941aab25b92fc952f786db10266e00d6143c4a4c5b",
+        "payload_sha256": "ccb4d2ca43cdf87bc107e611f996cd0460f2d82843356e083873eb8e577169ad"
+      },
+      "macro_archive_integration": {
+        "revision": "2a41b086fb4f109a09bee15c17f1c6ec6551e29d",
+        "tree": "5e24f7a1a114796f8c0938623d30b3f5c046e68c",
+        "implementation_path": "src/compose_v4/control/macro_archive_integration.py",
+        "implementation_sha256": "2d34549cee0709a9583968f9e1860ffe37ad093a83ded82550267943883fe656",
+        "dynamic_v0_path": "src/compose_v4/control/dynamic_program_synthesis.py",
+        "dynamic_v0_sha256": "80fcc5f64a04306613fd84955dbed0b4c4ce5d512a3ed2c2ddd119515b899257"
+      },
+      "qualification_v2": {
+        "revision": "d9d074489cab195d6f007f71d771e503ae4a1c3f",
+        "tree": "225524f249dc85bc89d7d9fb2dc005dde6b5f617",
+        "path": "configs/t4_target_conditioned_utility_v0_qualification_v2.json",
+        "sha256": "496d89b2fb6251a930913f8be28e2289ad19bf55efcc589d362f4f6990e5dd2d",
+        "payload_sha256": "8132f1351c9fa687f0786739536af245da32dd3542f2f77b15f14883878d60ac"
+      }
+    },
+    "authority": {
+      "oracle_calls_authorized": 0,
+      "docking_calls_authorized": 0,
+      "modal_launches_authorized": 0,
+      "live_run_access_authorized": false,
+      "model_fitting_authorized": false,
+      "candidate_generation_authorized": false
+    },
+    "outputs": {
+      "directory": "diagnostics/t4_hybrid_top3_v0_controller/attempt_1",
+      "candidate_lock": "candidate_lock.json",
+      "admission_lock": "admission_lock.json",
+      "result": "result.json",
+      "readme": "README.md"
+    }
+  }
+}

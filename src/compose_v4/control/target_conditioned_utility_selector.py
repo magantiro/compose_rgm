@@ -108,23 +108,37 @@ class MeasuredEndpoint:
         }
 
 
+def graph_pair_features(source_smiles: str, endpoint_smiles: str) -> np.ndarray:
+    """Target-blind features for one exact, potentially unscored graph pair."""
+
+    if not source_smiles or not endpoint_smiles:
+        raise ValueError("graph-pair features require source and endpoint molecules")
+    source = molecule_features(source_smiles).astype(np.float32)
+    endpoint = molecule_features(endpoint_smiles).astype(np.float32)
+    result = np.concatenate((source, endpoint, endpoint - source)).astype(np.float32)
+    if not np.isfinite(result).all():
+        raise RuntimeError("nonfinite graph-pair features")
+    return result
+
+
 def endpoint_features(row: MeasuredEndpoint) -> np.ndarray:
     """Target-blind structural features shared by both fitted utility arms."""
 
-    source = molecule_features(row.source_smiles).astype(np.float32)
-    endpoint = molecule_features(row.endpoint_smiles).astype(np.float32)
-    result = np.concatenate((source, endpoint, endpoint - source)).astype(np.float32)
-    if not np.isfinite(result).all():
-        raise RuntimeError(f"nonfinite endpoint features: {row.row_id}")
-    return result
+    return graph_pair_features(row.source_smiles, row.endpoint_smiles)
+
+
+def fixed_structural_graph_pair_score(source_smiles: str, endpoint_smiles: str) -> float:
+    """Fit-free structural-control score for an unscored graph pair."""
+
+    features = graph_pair_features(source_smiles, endpoint_smiles)
+    width = len(features) // 3
+    return -float(np.linalg.norm(features[-width:]))
 
 
 def fixed_structural_score(row: MeasuredEndpoint) -> float:
     """Fit-free target-blind control favoring smaller feature displacement."""
 
-    features = endpoint_features(row)
-    width = len(features) // 3
-    return -float(np.linalg.norm(features[-width:]))
+    return fixed_structural_graph_pair_score(row.source_smiles, row.endpoint_smiles)
 
 
 def strict_pairs(rows: Sequence[MeasuredEndpoint]) -> list[tuple[str, str]]:
@@ -234,16 +248,27 @@ class UtilityRanker:
         return not self.conditioned or target in self.training_targets
 
     def score(self, row: MeasuredEndpoint) -> float:
-        if not self.supports(row.target):
-            raise ValueError(f"target absent from ranker training pairs: {row.target}")
-        values = (endpoint_features(row) - np.asarray(self.mean)) / np.asarray(
-            self.scale
+        return self.score_graph_pair(
+            row.source_smiles,
+            row.endpoint_smiles,
+            target=row.target,
         )
+
+    def score_graph_pair(
+        self, source_smiles: str, endpoint_smiles: str, *, target: str
+    ) -> float:
+        """Score one unmeasured pair without fabricating a measured label row."""
+
+        if not self.supports(target):
+            raise ValueError(f"target absent from ranker training pairs: {target}")
+        values = (
+            graph_pair_features(source_smiles, endpoint_smiles) - np.asarray(self.mean)
+        ) / np.asarray(self.scale)
         score = float(values @ np.asarray(self.base_coefficients))
         if self.conditioned:
             score += float(
                 values
-                @ np.asarray(self.target_coefficients)[self.targets.index(row.target)]
+                @ np.asarray(self.target_coefficients)[self.targets.index(target)]
             )
         return score
 
@@ -531,7 +556,9 @@ __all__ = [
     "endpoint_features",
     "evaluate_scores",
     "fit_utility_ranker",
+    "fixed_structural_graph_pair_score",
     "fixed_structural_score",
+    "graph_pair_features",
     "rows_by_fold",
     "stable_identity",
     "strict_pairs",
