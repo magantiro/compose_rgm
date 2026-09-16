@@ -1,0 +1,79 @@
+{
+  "contract_sha256": "ce8ac067863c7b850d33eb9a4f64e35cfc9737f2ae8f6fb5a3a861787bf6fd8e",
+  "payload": {
+    "schema_version": "t4_known_good_transformation_forensics_contract_v1",
+    "authorization": "bounded zero-oracle known-good transformation loss-map audit",
+    "mode": "read_only_teacher_forced_diagnostic",
+    "scientific_problem": "Locate the first stage at which the frozen generic T4 controller loses exact known-good transformations.",
+    "primary_output": "A deterministic per-probe representability, exact-realization, proposal-support, and selector-rank loss map with explicit abstentions.",
+    "claim_under_test": "The frozen controller may execute known-good structural transformations exactly while losing them in proposal support, proposal ordering, or downstream value ranking.",
+    "scope": {
+      "required_provenance_probes": [
+        "jak2_1_dynamic_v0_query_1_score_minus_9_6",
+        "jak2_1_full_146_query_1_score_minus_9_9"
+      ],
+      "exact_teacher_corpus": "all 77 complete Full-146 teacher routes admitted by the sealed shared library",
+      "early_and_final_records_are_not_interchangeable": true
+    },
+    "inputs": {
+      "comparison_reference": {"path": "diagnostics/t4_dynamic_v1/comparison_reference.json", "sha256": "cb8ecd39594be2cb7d4ed7e172df972736359e0e8616295892dcc1bd2e4fc5f9"},
+      "teacher_library": {"path": "diagnostics/t4_shared_program_controller/attempt_2/shared_library.json", "sha256": "732c67d04af3a0824cfa700906fd73982689af416f337c8eb109499af79afdb5"},
+      "structural_summary": {"path": "diagnostics/t4_structural_subgoal/attempt_2/summary.json", "sha256": "76efefd1dd2267c0543cb972ef236a30b50f21b7c6a6da4ffca66cb3e43531c3"},
+      "structural_realizer_launch": {"path": "diagnostics/t4_structural_subgoal_realizer/attempt_1/launch.json", "sha256": "32d7805a860b099a6a2817f52877b100c4e05ece4bc69fe0adaaa8eba63dc8da"},
+      "realizer_identity_report": {"path": "diagnostics/t4_compositional_structural_subgoal_generator/attempt_1/README.md", "sha256": "680ca6ecdd5b2a86f4adfc3aeca108da8c30b74b4b71707683837a0690fd9f25"},
+      "generator_candidate_lock": {"path": "diagnostics/t4_compositional_structural_subgoal_generator/attempt_1/candidate_lock.json.gz", "sha256": "f533e70d940ff191df007b28107f12eed9bce6abb43f44f7afc91d47422afd28"},
+      "selector_candidate_lock": {"path": "diagnostics/t4_complete_macro_selector/attempt_1/candidate_lock.json.gz", "sha256": "aab18cc4fd737d3bf5953c79a7e3332459009813626aa6ee65519516c43d77c2"},
+      "utility_result": {"path": "diagnostics/t4_target_conditioned_utility_selector/attempt_4/result.json", "sha256": "20c0db5f8e9b11bc7a17f9849c0d02ccf3f1c9993b1539b3d49e4dbcf377aade"},
+      "seed_registry": {"path": "docs/GENMOL_T4_SEEDS.json", "sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"},
+      "benchmark_contract": {"path": "configs/t4_frozen_program_benchmark_v2.json", "sha256": "fdc93e9bc97eaae2e81f2189a3b7568b00d1b5525ff0fb7a657668a6190ad280"},
+      "public_census": {"path": "diagnostics/ivg_t4_census/census.json", "sha256": "2c06fdfe65fc31327d865381ccb8f4d2c40553c3925d9dc0a03386c22fda05bb"},
+      "generator_checkpoints": [
+        {"path": "diagnostics/t4_compositional_structural_subgoal_generator/attempt_1/fold_0/runtime_checkpoint.json.gz", "sha256": "8324da1f84b14a2e4954d4fac355e77cf208354374458ad01f8b21622c76a697"},
+        {"path": "diagnostics/t4_compositional_structural_subgoal_generator/attempt_1/fold_1/runtime_checkpoint.json.gz", "sha256": "8a0b45411e373657da5bf27b2099cc587d33933528f1ec7436d2279a95f10340"},
+        {"path": "diagnostics/t4_compositional_structural_subgoal_generator/attempt_1/fold_2/runtime_checkpoint.json.gz", "sha256": "d42c4432ae6c0abed13edbd0a920fecec6bff0d42e765d0d8dbb34c89083605d"}
+      ],
+      "structural_selector_checkpoints": [
+        {"path": "diagnostics/t4_complete_macro_selector/attempt_1/fold_0/runtime_checkpoint.json.gz", "sha256": "616032094f84626a98381378eb2225ca3e2831c85e7c3b8df9cfabc1dbf78920"},
+        {"path": "diagnostics/t4_complete_macro_selector/attempt_1/fold_1/runtime_checkpoint.json.gz", "sha256": "d7099a1dcab3ed82553e06a2bf313958d36e69e02f50ca4e984c519e2cedbfbf"},
+        {"path": "diagnostics/t4_complete_macro_selector/attempt_1/fold_2/runtime_checkpoint.json.gz", "sha256": "bcb543991bc9d9c21b2aaf6a9c6b051502e9723907459a5344836921cd97966a"}
+      ],
+      "utility_selector_checkpoints": [
+        {"path": "diagnostics/t4_target_conditioned_utility_selector/attempt_4/fold_0_checkpoint.json", "sha256": "245cc1691604432c1fc6bf869d1c97860bc911206e241b2377cde616d0c66ba7"},
+        {"path": "diagnostics/t4_target_conditioned_utility_selector/attempt_4/fold_1_checkpoint.json", "sha256": "204a076b760339ccdab24178da6de3c5d2c8ebc1a9d1b6cb5e6c5f35c3c8c482"},
+        {"path": "diagnostics/t4_target_conditioned_utility_selector/attempt_4/fold_2_checkpoint.json", "sha256": "067bd44f01fd93261a882748e9bb7b775b27f7da7768f052523e23ec182e0d0a"}
+      ]
+    },
+    "missing_required_assets": [
+      {"probe_id": "jak2_1_dynamic_v0_query_1_score_minus_9_6", "expected_path": "/tmp/dyn0_jak2_1_r0_result.json", "expected_sha256": "bf41d37022f5abcca943ab22a9f1ce68a8fb9df5b8328c47b96daaf65024aeb2", "expected_payload_sha256": "db72bc0f78cb202142fbb41a3e76736d654d8cd8408d9ae3586e2edc09ec2976"},
+      {"probe_id": "jak2_1_full_146_query_1_score_minus_9_9", "expected_path": "/tmp/full146_jak2_1_r0_result.json", "expected_sha256": "b939a5b9ee31d1732037104fd5951c37b5264355944037b5374fb1c6cecc29ec", "expected_payload_sha256": "9295912717a6e803d44f9705ac967a3fb6ab2bff55f5aa2dd7fbbaa411f2cdea"}
+    ],
+    "frozen_protocol": {
+      "candidate_pool": "unchanged baseline generator lock; teacher is scored only in an in-memory diagnostic augmentation",
+      "generator": "fold-matched baseline compositional generator; no refit",
+      "generator_single_invocation_support": "one local patch containing one or two primitive construction events",
+      "current_hybrid_sequence": "one source-only compositional-generator invocation, then unchanged Dynamic-v0; no repeated compositional generation on descendants",
+      "support_reporting": "dependency-region count, per-region one-to-two-event horizon, counterfactual repeated-decision segmentation, and actual frozen runtime support are separate fields",
+      "compiler": "sealed structural subgoal realizer with 32 primitive support and zero teacher-action fallback; this audit does not recompute its 77-route gate",
+      "compiler_result_availability": "launch receipt and reported sealed identity are committed locally; per-route realizer result payloads are not committed locally, so per-route compiler outcomes abstain",
+      "selectors": ["fold-matched complete-macro selector", "fold-matched target-blind utility selector", "fold-matched target-conditioned selector only when supports(target)"],
+      "rank_ties": "minimum one-based rank among deterministic descending scores",
+      "autonomous_recovery_is_separate": true
+    },
+    "costs": {"oracle_calls_authorized": 0, "docking_calls_authorized": 0, "modal_launches_authorized": 0, "network_calls_authorized": 0},
+    "prohibitions": [
+      "Do not modify a frozen model, compiler, candidate lock, selector, split, or gate.",
+      "Do not substitute a final champion or public-winner route for a missing early-call trace.",
+      "Do not fabricate a parent, endpoint, program, score, or rank for an unavailable trace.",
+      "Do not access live runs, Modal, docking, or any oracle."
+    ],
+    "acceptance": {
+      "required_provenance_abstentions_reported": 2,
+      "exact_teacher_route_census": 77,
+      "per_probe_first_divergence_required": true,
+      "selector_injection_only_inside_current_single_invocation_generator_support": true,
+      "coverage_and_precision_reported_separately": true,
+      "mutation_must_fail": true,
+      "deterministic_rerun_required": true
+    }
+  }
+}
