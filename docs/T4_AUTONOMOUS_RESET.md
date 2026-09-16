@@ -167,6 +167,70 @@ neither changed it; a capped or size-damped variant is a decision for the separa
 fitting contract. Program payloads are bound by checkpoint hash and entry id, not
 copied, so the fitting step resolves them inside its own training fold.
 
+## Revision 1b: actual-sampler support probe (zero oracle, no fit)
+
+The second prerequisite the reset contract sets before any learned prior. Contract
+`configs/t4_proposal_access_probe_v1.json`, artifact
+`diagnostics/t4_proposal_prior/access_probe_v1/`. Two lanes over the five recovered
+champion contexts: a teacher-free **bootstrap** lane from the frozen benchmark root,
+which is the autonomous measurement, and an answer-known **archive** lane that
+injects one historical champion for diagnostics only. Decision **PASS** on all three
+frozen criteria.
+
+```sh
+PYTHONPATH=src:. .venv/bin/python tools/t4_proposal_access_probe.py
+.venv/bin/pytest -q tests/test_t4_proposal_access_probe.py
+```
+
+**The JAK2 support loss is closed.** Strategy report section 5 measured that the
+substituted-ring construction the productive JAK2 transformation needed was absent
+from all four deterministically seeded v1 panels, so a compiler that reached the
+endpoint when the target was supplied could not reach it through the runtime
+sampler. Through the repaired progressive sampler, pooled over 1,280 teacher-free
+bootstrap attempts and 1,600 archive attempts, every one of the fifteen declared
+generic families is realized, and `construct_substituted_ring` is realized 359 times
+against 374 attempts. `ring_path_remodel`, the other v1-only construction, is 263 of
+263.
+
+**The repetition defect is repaired at scale.** 198 to 255 distinct proposals per 256
+attempts per cell, and every round after the first draws proposals never drawn
+before. Exploration is judged on proposal identity, not endpoint identity, because a
+small legal endpoint space would otherwise read as the defect.
+
+**All five supplied champions still realize exactly** through unchanged archive
+admission, which replays the program and asserts endpoint identity.
+
+### The measured cause of low and zero yield is the endpoint gate, not the sampler
+
+| Cell | Root QED | Root passes its own gate | Bootstrap eligible / 256 |
+| --- | ---: | --- | ---: |
+| parp1_0 | 0.888 | yes | 84 |
+| jak2_1 | 0.712 | yes | 55 |
+| 5ht1b_0 | 0.438 | no | 16 |
+| braf_1 | 0.346 | no | 5 |
+| fa7_0 | 0.284 | no | 0 |
+
+FA7-0 produced 255 distinct proposals and 240 unique endpoints from 256 attempts,
+realized all fifteen families, and had **zero** executor rejections: the chemistry
+runs, and then 239 of 256 completed endpoints fail the endpoint filter. On the pinned
+production image, all 34 recorded FA7 bootstrap attempts fail for one reason, QED not
+strictly above 0.6, while similarity sits at 0.51 to 0.72, comfortably inside the
+delta-0.4 gate. The cell's own root has QED 0.284.
+
+So FA7's zero yield is not a proposal-support or repetition problem, and widening the
+sampler will not address it: a proposal must clear QED 0.6 at the endpoint while
+staying similar to a molecule at QED 0.284, and those two demands pull against each
+other. This supersedes the reading that repairing the deterministic retry defect would
+recover FA7 yield; that defect was real and is repaired, and the yield did not follow.
+Eligible yield is ordered by root QED across all five cells. That is a measured
+association over five cells, not a proof that no supported program clears the gate;
+256 draws is not an impossibility result and the contract says so.
+
+**Consequence for the 120-call pilot.** FA7-0 is one of the three declared cells. On
+this evidence it will most likely consume its charged allowance producing no eligible
+candidate, exactly as v2.1 FA7 did historically. That is a budget decision to take
+with this number in hand, not a reason to relax the endpoint gate.
+
 ## Next learned-prior work
 
 Do not train a large whole-patch model first. Use the recovered successful and
