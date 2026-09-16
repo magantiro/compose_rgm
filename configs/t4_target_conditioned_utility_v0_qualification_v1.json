@@ -1,0 +1,301 @@
+{
+  "payload": {
+    "schema_version": "t4_target_conditioned_utility_v0_qualification_contract_v1",
+    "status": "prepared_zero_oracle_not_launch_authorized",
+    "authorization": "2026-09-15 user authorized a minimal zero-oracle qualification contract only; no docking, oracle, Modal or live-run action is authorized",
+    "scientific_problem": "Test whether a prospectively locked target-conditioned utility-ranked complete macro provides a useful first jump and, when admitted to one run-local archive, lets unchanged Dynamic-v0 preserve early efficiency while narrowing the hard-case gap to the complete-route controller.",
+    "primary_output": "Direct lower-is-better docking best-so-far trajectories with complete charged-query ledgers for one utility-ranked jump, one target-blind structural jump and the utility-jump plus unchanged Dynamic-v0 continuation.",
+    "central_claim_under_test": "On five declared development cells, target-conditioned utility ranking improves direct docking utility over target-blind structural selection, and its archive handoff improves the hard-case matched-budget trajectory without sacrificing available Dynamic-v0 early-call performance.",
+    "evidence_boundary": "This is a prospective five-cell development qualification, not held-out target transfer, a full T4 benchmark, IVG superiority or a claim that structural recovery predicts docking utility.",
+    "contract_precedence": "This successor contract narrows the parent integration prohibition on protein identity only for the frozen five-level target-conditioning input to the utility selector before candidate lock. Target identity remains forbidden in macro generation, exact realization, common eligibility, archive admission and Dynamic-v0 refinement. Every other parent integration invariant remains binding.",
+    "cells": [
+      "5ht1b_0",
+      "braf_1",
+      "jak2_1",
+      "parp1_0",
+      "fa7_0"
+    ],
+    "hard_cases": [
+      "jak2_1",
+      "fa7_0"
+    ],
+    "frozen_protocol": {
+      "delta": 0.4,
+      "similarity": "strictly_greater_than_0.4",
+      "qed": "strictly_greater_than_0.6",
+      "sa": "strictly_less_than_4.0",
+      "maximum_heavy_atoms": 40,
+      "oracle": "unchanged frozen T4 docking adapter",
+      "score_direction": "lower_is_better",
+      "automatic_retry": false,
+      "confirmation_calls": 0,
+      "plateau_stopping": false
+    },
+    "frozen_inputs": {
+      "macro_archive_v0_integration_revision": {
+        "git_revision": "2a41b086fb4f109a09bee15c17f1c6ec6551e29d",
+        "git_tree": "5e24f7a1a114796f8c0938623d30b3f5c046e68c",
+        "integration_contract": {
+          "path": "configs/t4_macro_archive_v0_integration_v1.json",
+          "sha256": "c26a83c5f796174453a79d8437d4de48570af187e84a015ce047f03baaa1faa6",
+          "payload_sha256": "a632395389ce13e50a05a410d8821549a755f39f63130005425e55482e8e3602"
+        },
+        "selector_binding": {
+          "path": "configs/t4_macro_archive_v0_selector_binding_v1.json",
+          "sha256": "9fd8e89ea676ce6f733b5879e83a1fd1c456839c90605677664ebadecdf9c565",
+          "payload_sha256": "fcc6f35c4084add44c174726c3108c6833c11d1cad324dd280e25c7007f11a6f"
+        },
+        "integration_implementation": {
+          "path": "src/compose_v4/control/macro_archive_integration.py",
+          "sha256": "2d34549cee0709a9583968f9e1860ffe37ad093a83ded82550267943883fe656"
+        },
+        "dynamic_v0_implementation": {
+          "path": "src/compose_v4/control/dynamic_program_synthesis.py",
+          "sha256": "80fcc5f64a04306613fd84955dbed0b4c4ce5d512a3ed2c2ddd119515b899257"
+        }
+      },
+      "target_conditioned_utility_selector_design": {
+        "git_revision": "fe9545eae766f3cd8558af1aaa5576f1c11a6be3",
+        "path": "configs/t4_target_conditioned_utility_selector_v1.json",
+        "sha256": "f031fed9e6bd43bd7b6188b106986a6ee863f5ff259d14fe409c2e9348e022b2",
+        "payload_sha256": "266a8e02b34155b946bfa71cb059272443356d4dc81eb556d47e6e9bd683c743",
+        "runtime_status": "design_bound_but_authoritative_result_and_fold_checkpoint_hashes_pending",
+        "required_split": "use the frozen fold whose held target-local source index matches the development cell; no row from that held source may fit features, preprocessing, pairs or coefficients"
+      },
+      "historical_matched_call_reference": {
+        "git_revision": "8851514cca7a15e43a23f65caeaa8604ab7618a7",
+        "path": "diagnostics/t4_dynamic_v1/comparison_reference.json",
+        "sha256": "cb8ecd39594be2cb7d4ed7e172df972736359e0e8616295892dcc1bd2e4fc5f9",
+        "payload_sha256": "e72ab7d03b23077a4e1dbba3e20921bcc259456206326b350ae09322e6d797ea",
+        "schema_version": "t4_dynamic_v1_comparison_reference_v1",
+        "role": "read_only_historical_threshold_authority"
+      }
+    },
+    "candidate_freeze": {
+      "candidate_universe": "All immutable candidate identities available for the cell in the bound complete-macro selector lock, resolved through the bound generator lock and then passed through the common exact-realization, eligibility and canonical-deduplication boundary. No result-tuned K or prefix is permitted.",
+      "utility_ranked_jump": "Select the lowest predicted docking-utility candidate using the exact held-source fold checkpoint of the target-conditioned utility selector. Freeze candidate identity, predicted score, rank, checkpoint hash and tie break before any new docking score is observed.",
+      "target_blind_structural_jump": "Select structural selector_rank=1 from the same post-gate candidate universe using the immutable complete-macro selector. Freeze candidate identity and tie break before any new docking score is observed.",
+      "common_gate": "Both jumps use the same resolver, exact-realization receipt, strict unscored T4 eligibility interface and canonical endpoint deduplication. If their endpoints collide, reuse one identical physical query and record a paired tie.",
+      "forbidden_selection_inputs": [
+        "new docking result",
+        "historical comparator outcome at runtime",
+        "winner route or endpoint",
+        "cell-specific rule or manually chosen candidate",
+        "known-route or structural-recovery label"
+      ]
+    },
+    "prospective_design": {
+      "arms": {
+        "target_blind_structural_jump": "One locked direct docking query per cell; no continuation.",
+        "utility_jump_plus_dynamic_v0": "The locked utility jump is charged as call 1. Reuse that exact observation as the initial run-local archive entry when successful, then continue only through the unchanged Dynamic-v0 refinement adapter to call 100 total. A failed call remains a charged failure and is not replaced or imputed."
+      },
+      "report_at_charged_calls": [
+        1,
+        5,
+        10,
+        20,
+        50,
+        100
+      ],
+      "conditionally_report_if_later_calls_are_separately_authorized": [
+        250,
+        500,
+        1000,
+        "final"
+      ],
+      "initial_qualification_ceiling_if_separately_authorized": {
+        "structural_jump_calls_per_cell": 1,
+        "utility_plus_v0_total_calls_per_cell": 100,
+        "maximum_new_charged_calls": 505,
+        "maximum_concurrent_single_cpu_workers": 5,
+        "gpu": false,
+        "automatic_retry": false,
+        "confirmation_calls": 0,
+        "plateau_stopping": false,
+        "later_calls_authorized": false
+      },
+      "continuation_rule": "Run every cell to exactly 100 charged utility-plus-v0 calls unless an explicit failure prevents continuation. Weak scores never stop a cell. Any extension beyond 100 requires a separate bounded authorization and must retain this frozen controller, thresholds, reference file and reporting rule.",
+      "query_identity_rule": "An exact endpoint, receptor, box, docking seed, protocol and preparation identity may be reused once across arms. Never redock an identical query merely to fill an arm."
+    },
+    "historical_references": {
+      "checkpoint_source": "Read directly from payload.dynamic_v0 and payload.full_146 curves in the bound historical reference; lower scores are better.",
+      "by_cell": {
+        "5ht1b_0": {
+          "dynamic_v0": {
+            "status": "available",
+            "unit_id": "5ht1b_0_r0",
+            "best_score_by_call": {
+              "1": -11.1,
+              "5": -12.1,
+              "10": -12.1,
+              "20": -12.1,
+              "50": -12.6,
+              "100": -12.6
+            }
+          },
+          "full_146": {
+            "status": "available",
+            "unit_id": "5ht1b_0_r0",
+            "best_score_by_call": {
+              "1": -12.3,
+              "5": -12.4,
+              "10": -13.1,
+              "20": -13.1,
+              "50": -13.1,
+              "100": -13.1
+            }
+          }
+        },
+        "braf_1": {
+          "dynamic_v0": {
+            "status": "available",
+            "unit_id": "braf_1_r0",
+            "best_score_by_call": {
+              "1": -9.1,
+              "5": -9.8,
+              "10": -10.4,
+              "20": -10.4,
+              "50": -10.4,
+              "100": -10.6
+            }
+          },
+          "full_146": {
+            "status": "available",
+            "unit_id": "braf_1_r0",
+            "best_score_by_call": {
+              "1": -10.1,
+              "5": -10.5,
+              "10": -10.5,
+              "20": -10.5,
+              "50": -11.0,
+              "100": -11.0
+            }
+          }
+        },
+        "jak2_1": {
+          "dynamic_v0": {
+            "status": "available",
+            "unit_id": "jak2_1_r0",
+            "best_score_by_call": {
+              "1": -9.6,
+              "5": -9.9,
+              "10": -9.9,
+              "20": -9.9,
+              "50": -9.9,
+              "100": -10.2
+            }
+          },
+          "full_146": {
+            "status": "available",
+            "unit_id": "jak2_1_r0",
+            "best_score_by_call": {
+              "1": -9.9,
+              "5": -9.9,
+              "10": -10.5,
+              "20": -11.3,
+              "50": -11.3,
+              "100": -11.4
+            }
+          }
+        },
+        "parp1_0": {
+          "dynamic_v0": {
+            "status": "abstain_missing_historical_curve"
+          },
+          "full_146": {
+            "status": "abstain_missing_historical_curve"
+          }
+        },
+        "fa7_0": {
+          "dynamic_v0": {
+            "status": "abstain_missing_historical_curve"
+          },
+          "full_146": {
+            "status": "abstain_missing_historical_curve"
+          }
+        }
+      }
+    },
+    "promotion_gates": {
+      "authoritative_endpoint": "Only direct measured docking utility from the frozen evaluator and exact query ledger can promote. Known-route recovery, exact transformation recovery, structural distance, selector score and predicted utility remain diagnostics.",
+      "utility_jump_beats_structural_selection": {
+        "complete_panel_required": "All five cells must have comparable finite utility and structural jump observations. A failure, missing score or unsupported candidate blocks promotion rather than shrinking the denominator.",
+        "cell_balanced_mean": "mean(utility_jump_score - structural_jump_score) must be strictly less than 0 across the five cells",
+        "paired_wins": "utility_jump_score must be strictly lower in at least 3 of 5 cells",
+        "dynamic_v0_call_1": "For each available reference cell, utility_jump_score must be less than or equal to the bound Dynamic-v0 call-1 best score. This is required simultaneously for 5ht1b_0, braf_1 and jak2_1.",
+        "missing_reference_policy": "Record explicit historical-reference abstentions for parp1_0 and fa7_0. Their new measured scores remain in the paired structural comparison but cannot be called a Dynamic-v0 call-1 win."
+      },
+      "integrated_controller_preserves_early_v0": {
+        "calls": [
+          1,
+          5,
+          10,
+          20
+        ],
+        "rule": "At every listed call and for every cell with a bound Dynamic-v0 curve, the utility-plus-v0 best-so-far score must be less than or equal to the corresponding Dynamic-v0 score. No averaging may conceal a cell or checkpoint regression.",
+        "reference_cells": [
+          "5ht1b_0",
+          "braf_1",
+          "jak2_1"
+        ]
+      },
+      "integrated_controller_reduces_hard_case_full_route_gap": {
+        "gap_definition": "gap(controller, full_146, call) = max(0, controller_best_score_at_call - full_146_best_score_at_call) because lower docking score is better",
+        "reference_hard_case": "jak2_1",
+        "matched_calls": [
+          50,
+          100
+        ],
+        "rule": "The utility-plus-v0 gap must be no larger than the Dynamic-v0 gap at both matched calls and must be strictly smaller at at least one matched call.",
+        "fa7_status": "abstain_missing_historical_dynamic_v0_and_full_146_curves; no FA7 gap-reduction claim is permitted",
+        "claim_limit": "Passing supports qualification only on the referenced JAK2 hard case, not a general hard-case or FA7 claim."
+      },
+      "one_shot_is_insufficient": "A strong utility jump alone cannot promote the integrated controller. Every applicable one-shot, early non-inferiority and hard-case gap rule must pass without post-result threshold changes.",
+      "threshold_provenance": "All numeric comparator values come from the immutable historical reference. Remaining gates are exact equality/non-inferiority or strict improvement rules fixed before the new model is scored; no threshold is estimated from the new utility selector."
+    },
+    "required_reporting": [
+      "complete query identity and charged-call ledger for both jumps and every continuation call",
+      "best-so-far direct docking score at calls 1, 5, 10, 20, 50 and 100 for every cell",
+      "paired utility-minus-structural jump differences with five-cell denominator",
+      "pointwise Dynamic-v0 differences only where the bound curve exists",
+      "pointwise Full-146 gaps and Dynamic-v0 gap reduction on referenced matched budgets",
+      "candidate shortfalls, exact-realization failures, eligibility rejections, canonical collisions, docking failures and abstentions",
+      "archive ancestry, v0 refinement lineage, independent RNG states, resume state, wall time and CPU accounting",
+      "all later predeclared checkpoints and the final charged call if a later extension is separately authorized"
+    ],
+    "failure_and_abstention_policy": {
+      "docking_failure": "charged missing observation; no retry, score imputation or replacement candidate",
+      "candidate_shortfall": "abstain for the affected arm and block promotion",
+      "missing_historical_reference": "report missing-reference abstention; do not borrow another cell, target, seed, delta or controller curve",
+      "incomplete_run": "report every durable call and failure; do not fill an unobserved checkpoint or call the gate passed",
+      "negative_result": "preserve and report it; do not change cells, candidate universe, utility checkpoint, thresholds, budgets or reference curves"
+    },
+    "pending_exact_hash_launch_requirements": [
+      "authoritative target-conditioned utility-selector result and every used held-source fold checkpoint physical and payload SHA-256",
+      "five-cell resolved candidate universe, utility-rank and structural-rank lock with exact candidate, endpoint, realization, eligibility, collision and tie-break identities",
+      "archive-admission lock and the four independent RNG namespace seeds and initial states",
+      "exact launch revision and tree proving the bound integration and Dynamic-v0 implementations remain byte-identical",
+      "source states, receptors, boxes, docking binary, ligand preparation, evaluator protocol, docking seeds and runtime environment hashes",
+      "clean-source focused integration, resume, query-accounting and contract verification results",
+      "a separate explicit launch authorization naming the exact lock hash and at most 505 new charged calls"
+    ],
+    "authorized_actions": {
+      "oracle_calls": 0,
+      "docking_calls": 0,
+      "modal_launches": 0,
+      "live_run_reads": 0,
+      "frozen_artifact_mutations": 0
+    },
+    "prohibitions": [
+      "launching or scoring under this contract-only revision",
+      "inspecting a live run or using uncommitted live outcomes",
+      "changing the macro generator, exact realizer, structural selector, archive boundary or Dynamic-v0 behavior",
+      "choosing a candidate prefix, checkpoint, threshold or stopping rule after inspecting new docking scores",
+      "using structural or known-route recovery as a substitute for direct docking utility",
+      "claiming Dynamic-v0 or Full-146 improvement where the historical curve is absent",
+      "automatic retry, confirmation calls, plateau stopping or replacement of a failed query",
+      "wider T4, another replicate, delta 0.6, PMO, IVG or benchmark-wide claims"
+    ]
+  },
+  "contract_sha256": "5966fb58abe4443ecee02feea571f723a1f81e85610fed7f2d477f703af8be6c"
+}

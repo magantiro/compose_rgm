@@ -1,0 +1,34 @@
+{
+  "payload": {
+    "schema_version": "t4_macro_archive_v0_selector_binding_contract_v1",
+    "parent_integration_contract": {
+      "path": "configs/t4_macro_archive_v0_integration_v1.json",
+      "payload_sha256": "a632395389ce13e50a05a410d8821549a755f39f63130005425e55482e8e3602",
+      "commit": "fbd82f344f2891ac5c6123025f2ebeec599c6125"
+    },
+    "selector": {
+      "source_commit": "1d209660859d5349396969e4f8efeaf0a0b46437",
+      "path": "diagnostics/t4_complete_macro_selector/attempt_1/candidate_lock.json.gz",
+      "sha256": "aab18cc4fd737d3bf5953c79a7e3332459009813626aa6ee65519516c43d77c2",
+      "payload_sha256": "9ad8cea49864ceb286d0caee0cf714ac5034e78e4b9d7bd6557fb8721f78112f",
+      "schema_version": "t4_complete_macro_selector_candidate_lock_v1",
+      "candidate_generation_calls": 0
+    },
+    "selector_result": {
+      "path": "diagnostics/t4_complete_macro_selector/attempt_1/result.json",
+      "sha256": "2cc879e03ead3303ebbd5134a63e6e673f19d7fb0f9b90d173d5b5140ce53b80",
+      "payload_sha256": "03502a8661537635762d0369fd48fc250a6e440f0a3c93da59f50d028b6967b3"
+    },
+    "resolved_generator_lock": {
+      "path": "diagnostics/t4_compositional_structural_subgoal_generator/attempt_1/candidate_lock.json.gz",
+      "sha256": "f533e70d940ff191df007b28107f12eed9bce6abb43f44f7afc91d47422afd28",
+      "payload_sha256": "d9717fc3a7b92fe8b264c7803c43f50f48b14e078b179cbd75f66d769aa65b10"
+    },
+    "binding": "Every selector candidate_identity resolves read-only against the baseline learned pool. K=8,16,32 are prefixes of selector_rank over the same 128 identities and do not alter support.",
+    "scientific_boundary": "This binding does not select K, authorize utility scoring or select baseline over expanded generator evidence.",
+    "oracle_calls": 0,
+    "docking_calls": 0,
+    "modal_launches": 0
+  },
+  "contract_sha256": "fcc6f35c4084add44c174726c3108c6833c11d1cad324dd280e25c7007f11a6f"
+}

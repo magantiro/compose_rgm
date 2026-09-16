@@ -468,6 +468,88 @@ zero-oracle. It may not generate candidates, call an oracle or docking function,
 launch Modal, access live runs, select a scored controller or alter any prior
 artifact. The self-hashed contract is
 `configs/t4_complete_macro_selector_v1.json`.
+**Scoped zero-oracle T4 target-conditioned utility and Dynamic-v0
+qualification contract, 2026-09-15:** after the target-blind structural
+selector showed that structural recovery is not a substitute for docking
+utility, the user authorized one isolated contract-only revision for the next
+five-cell development comparison. Bind the immutable macro-to-archive-to-v0
+integration revision, the frozen target-conditioned utility-selector design
+and the authoritative historical Dynamic-v0 and Full-146 matched-call curves.
+This successor contract narrows the parent integration ban on protein identity
+only for the frozen five-level utility-selector conditioning input. Target
+identity remains forbidden in generation, realization, admission and
+Dynamic-v0 refinement.
+Predeclare exactly `5ht1b_0`, `braf_1`, `jak2_1`, `parp1_0` and `fa7_0`.
+The direct endpoint is lower-is-better docking utility, reported at calls 1,
+5, 10, 20, 50 and 100. Structural or known-route recovery is diagnostic only.
+
+Any later launch must lock one utility-ranked macro jump and one target-blind
+structural-selection jump per cell before scoring. The utility jump must beat
+the structural control across the complete five-cell paired panel and meet or
+beat each available historical Dynamic-v0 call-1 reference. The utility jump
+may become call 1 of an otherwise unchanged Dynamic-v0 continuation. Promotion
+requires pointwise early-call non-inferiority to available Dynamic-v0 curves
+and a reduced matched-budget JAK2 gap to Full-146. PARP1 and FA7 historical
+comparisons must abstain where the bound reference contains no curve. Use no
+plateau stopping, imputed failure score, post-result threshold or structural
+surrogate for docking utility. This revision authorizes zero docking or oracle
+calls and no Modal launch. An exact utility-checkpoint, candidate/admission
+lock, runtime-input and launch-revision hash supplement plus separate explicit
+launch authorization remain required. The self-hashed contract is
+`configs/t4_target_conditioned_utility_v0_qualification_v1.json`.
+
+**Scoped zero-oracle T4 macro-to-archive integration plumbing, 2026-09-15:**
+after the baseline and expanded compositional structural-subgoal generators
+produced immutable exact-realized candidate locks and the complete-macro
+selector established a candidate-reference schema, the user authorized a new
+isolated integration-preparation revision. Prepare a typed deterministic
+boundary from selector-ranked learned macros and same-grammar uniform
+exploratory macros through immutable candidate resolution, exact-realization
+receipt validation, an unscored eligibility interface, canonical endpoint
+deduplication, selector/admission, one run-local archive and an adapter to the
+unchanged Dynamic-v0 refinement implementation. Preserve complete collision
+and lane provenance and four independent serializable RNG namespaces for
+learned generation, uniform generation, admission and Dynamic-v0 refinement.
+
+This milestone may use only fixtures and immutable candidate locks. It must
+generate no new candidate, choose no model or selector cutoff, compute no
+benchmark property, mutate no scored archive, call no oracle or docking
+function, launch no Modal job and alter no generator, realizer, selector or
+Dynamic-v0 scientific behavior. Protein identity, comparator outcomes, winner
+routes and endpoints are prohibited runtime inputs. A separate prospective
+five-cell contract may fix the qualification envelope, but it does not
+authorize launch. The self-hashed contracts are
+`configs/t4_macro_archive_v0_integration_v1.json` and
+`configs/t4_macro_archive_v0_five_cell_qualification_v1.json`.
+
+**Scoped zero-oracle expanded balanced T4 compositional structural-subgoal
+generator, 2026-09-15:** after the separately sealed delta-0.6 route-reference
+export admitted 32 exact COMPOSE-compiled witnesses and 45 address-free
+structural subgoals, the user explicitly authorized one matched data-expansion
+revision of the frozen compositional generator. Preserve the active baseline
+run and its artifacts byte-for-byte. Add only the sealed delta-0.6 corpus to
+the existing training distribution of 77 T4 complete routes, 55 exact
+Full-146 auxiliary routes and 85 exact converted PMO traces. The delta-0.6
+witnesses are inferred COMPOSE realizations of reported IVG endpoints, not
+observed IVG trajectories.
+
+Reuse the baseline architecture, generic Active8 grammar, exact executor,
+sealed structural extractor and realizer, three whole-source T4 folds,
+candidate budgets K=8,32,128, candidate lock, metrics and acceptance gates
+without modification. Exclude delta-0.6 routes from a fold whenever their T4
+source is held out. Fit every statistic after that split. Give equal total
+mass to each training domain, then equal mass to each source or PMO task-family
+lineage, route, component and decision. Keep each canonical source-endpoint
+pair at unit corpus weight so repeated tied endpoint references cannot
+overweight training.
+
+This revision may fit and evaluate only the same zero-oracle CPU generator and
+uniform comparator. It may not inspect the active baseline result before its
+contract is frozen, change model support or gates, call docking or any task
+oracle, launch Modal, access a live run, alter an existing artifact or
+authorize a scored pilot. Preserve failures and abstentions. The self-hashed
+contract is
+`configs/t4_expanded_balanced_compositional_structural_subgoal_generator_v1.json`.
 
 **Scoped zero-oracle T4 compositional structural-subgoal generator,
 2026-09-15:** after the grouped-source component audit found zero whole-patch

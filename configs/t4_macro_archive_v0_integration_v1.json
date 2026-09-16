@@ -1,0 +1,82 @@
+{
+  "payload": {
+    "schema_version": "t4_macro_archive_v0_integration_contract_v1",
+    "authorization": "2026-09-15 user authorized continued zero-oracle generic-controller integration preparation",
+    "scientific_problem": "Prepare a provenance-preserving shared-archive boundary for selector-ranked learned structural macros, uniform exploratory structural macros and unchanged Dynamic-v0 refinement.",
+    "primary_output": "A deterministic typed integration receipt over immutable candidate references, with exact-realization, unscored filter, canonical deduplication, selector disposition, archive admission and Dynamic-v0 handoff records.",
+    "central_claim_under_test": "Implementation only: both macro lanes can share one archive and hand candidates to unchanged Dynamic-v0 without changing generator, compiler, support or scientific evidence.",
+    "mode": "zero_oracle_integration_plumbing_only",
+    "interfaces": {
+      "selector_schema": "t4_complete_macro_selector_candidate_lock_v1",
+      "raw_candidate_schema": "generated_compositional_structural_patch_v1",
+      "archive_schema": "t4_macro_shared_archive_v1",
+      "receipt_schema": "t4_macro_archive_integration_receipt_v1",
+      "learned_lane": "selector-ranked immutable candidate references",
+      "uniform_lane": "immutable uniform candidate references under the same generator grammar",
+      "candidate_resolution": "read-only identity lookup against an immutable generator candidate lock",
+      "exact_realization_gate": "realization.status=realized, endpoint_matches_bound_target=true and primitive_teacher_actions_used=0",
+      "filter_boundary": "typed caller-provided zero-oracle eligibility receipt; this milestone supplies no benchmark computation",
+      "deduplication": "canonical endpoint-state identity with a complete collision/provenance ledger",
+      "admission": "deterministic selector interface after common validation and deduplication",
+      "v0_handoff": "archive entries only; DynamicProgramOptimizer implementation remains byte-identical"
+    },
+    "rng_namespaces": [
+      "learned_macro_generation",
+      "uniform_macro_generation",
+      "archive_admission",
+      "dynamic_v0_refinement"
+    ],
+    "input_identities": {
+      "dynamic_v0_source": {
+        "path": "src/compose_v4/control/dynamic_program_synthesis.py",
+        "sha256": "80fcc5f64a04306613fd84955dbed0b4c4ce5d512a3ed2c2ddd119515b899257"
+      },
+      "expanded_generator_result": {
+        "path": "diagnostics/t4_expanded_balanced_compositional_subgoal_generator/attempt_1/result.json",
+        "sha256": "9c305507d53db6b42933fe4b29fc3c791329cebe0280a79971a26ac2193635c5",
+        "payload_sha256": "ef36d32fc691a2c9b98107e9e33917025c16b026695a48d58b1dc26f98b09f8d"
+      },
+      "expanded_generator_candidate_lock": {
+        "path": "diagnostics/t4_expanded_balanced_compositional_subgoal_generator/attempt_1/candidate_lock.json.gz",
+        "sha256": "36af44427cab2fdbb76aa5b330707f048abef8cab74a4af62405a7571b1f69b6",
+        "payload_sha256": "43b7470b73867d2a9805455465c3f594cd9c5edea6e6ed174b622a1b4cf328b6"
+      },
+      "selector": {
+        "schema_version": "t4_complete_macro_selector_candidate_lock_v1",
+        "artifact_identity": "must be frozen before any candidate-resolution or qualification lock",
+        "candidate_generation_calls": 0
+      }
+    },
+    "budgets": {
+      "candidates_generated": 0,
+      "oracle_calls": 0,
+      "docking_calls": 0,
+      "modal_launches": 0,
+      "archive_mutations_with_scored_data": 0
+    },
+    "invariants": [
+      "candidate identities resolve exactly once against their declared immutable lock",
+      "teacher fields and task identity are absent from selector runtime input",
+      "all accepted candidates carry a passing exact-realization receipt",
+      "all lanes use the same validation, filter and endpoint-deduplication path",
+      "canonical endpoint duplicates produce one archive entry and retain all provenance",
+      "lane input order cannot change the archive payload",
+      "random streams are independent, serializable and do not share mutable state",
+      "DynamicProgramOptimizer source hash remains unchanged",
+      "no comparator outcome, target-specific rule, oracle value or winner route enters runtime"
+    ],
+    "unresolved_freeze_decisions": [
+      "baseline versus expanded learned generator input",
+      "selector K among already evaluated fixed prefixes",
+      "prospective macro admission count within the later qualification budget"
+    ],
+    "prohibitions": [
+      "generator compiler selector or Dynamic-v0 scientific changes",
+      "target protein or seed specific policy logic",
+      "oracle docking Modal or scored experiment launch",
+      "using delta-0.6 utility outcomes to alter the frozen generator comparison",
+      "claiming molecular utility or IVG comparison from this plumbing milestone"
+    ]
+  },
+  "contract_sha256": "a632395389ce13e50a05a410d8821549a755f39f63130005425e55482e8e3602"
+}

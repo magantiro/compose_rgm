@@ -1,0 +1,69 @@
+{
+  "payload": {
+    "schema_version": "t4_macro_archive_v0_five_cell_qualification_prospective_contract_v1",
+    "status": "prepared_not_authorized_for_launch",
+    "scientific_problem": "Prospectively compare the frozen generic macro-to-archive controller with read-only baselines on one seed from each T4 protein before any full benchmark.",
+    "primary_output": "Best-so-far docking trajectory and complete charged-query ledger for each of five cells.",
+    "cells": ["parp1_0", "fa7_0", "5ht1b_0", "braf_1", "jak2_1"],
+    "adapter": {
+      "delta": 0.4,
+      "similarity": "strictly_greater_than_0.4",
+      "qed": "strictly_greater_than_0.6",
+      "sa": "strictly_less_than_4.0",
+      "maximum_heavy_atoms": 40,
+      "oracle": "unchanged frozen T4 docking adapter"
+    },
+    "budget": {
+      "maximum_charged_calls_per_cell": 1000,
+      "maximum_total_charged_calls": 5000,
+      "automatic_retry": false,
+      "confirmation_calls": 0,
+      "plateau_stopping": false,
+      "finish_full_budget": true
+    },
+    "controller": {
+      "shared_archive": true,
+      "initial_task_specific_complete_routes": 0,
+      "learned_lane": "selector-ranked generic compositional macros",
+      "uniform_lane": "same-grammar exploratory macros",
+      "refinement_lane": "unchanged Dynamic-v0",
+      "one_shared_configuration_across_cells": true,
+      "independent_rng_namespaces": [
+        "learned_macro_generation",
+        "uniform_macro_generation",
+        "archive_admission",
+        "dynamic_v0_refinement"
+      ],
+      "selector_k": "must_be_frozen_score_blind_before_launch",
+      "learned_generator_revision": "must_be_frozen_score_blind_before_launch"
+    },
+    "logging": [
+      "every proposed candidate and lane",
+      "exact-realization and filter receipt",
+      "canonical duplicate collisions",
+      "selector rank and admission decision",
+      "every charged call and failure",
+      "best-so-far at every charged call",
+      "archive ancestry and v0 refinement lineage",
+      "independent RNG states and resume checkpoints"
+    ],
+    "comparators": ["Dynamic-v0", "Dynamic-v1", "Full-146", "IVG"],
+    "comparator_outcomes_available_to_runtime": false,
+    "launch_requirements": [
+      "immutable selector artifact identity",
+      "score-blind learned-generator and selector-K decision",
+      "sealed candidate/admission lock",
+      "focused integration and resume tests",
+      "repository launch-boundary verification",
+      "separate explicit launch authorization"
+    ],
+    "prohibitions": [
+      "launch under this prepared contract",
+      "target-specific controller settings",
+      "winner route or endpoint lookup at runtime",
+      "changing candidate budgets or gates after inspecting scores",
+      "describing five development cells as held-out or a full T4 benchmark"
+    ]
+  },
+  "contract_sha256": "8073ce790f6652721a57998d17e536831a2aa2a18a202d5eee37602a6f3d3a2b"
+}
