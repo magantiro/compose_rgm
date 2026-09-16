@@ -1,0 +1,74 @@
+{
+  "contract_sha256": "18f630f6c4f6b2d9555f63afd3384a38ff32a8d604e94deddbe06fd5977af4b1",
+  "payload": {
+    "schema_version": "t4_complete_region_runtime_contract_v1",
+    "authorization": "bounded zero-oracle complete dependency-region runtime correction",
+    "scientific_problem": "Correct the deployed T4 macro runtime so one protected program contains one to four complete address-free dependency-region target patches rather than one to two primitive construction events.",
+    "primary_output": "A typed complete-region runtime plus a deterministic 77-route support and exact teacher-forced realization audit with every per-route payload committed locally.",
+    "claim_under_test": "The existing address-free structural-region representation and exact realizer can execute the 77 known-good Full-146 transformations through the corrected deployed 1-4-region protected-program contract without teacher-action fallback.",
+    "validation_setting": "zero-oracle answer-known runtime support and exact-realization gate on the frozen 77-route, 15-source T4 corpus",
+    "declared_support": {
+      "program_decisions": [1, 4],
+      "decision_object": "complete address-free StructuralSubgoal target patch",
+      "maximum_total_primitives_after_compilation": 32,
+      "maximum_active_atoms": 40,
+      "binding": "address-free current-state enumeration with optional relative created-role provenance",
+      "execution": "protected until explicit STOP; no benchmark eligibility, score, lock or endpoint publication before completion"
+    },
+    "semantic_path": {
+      "independent_regions": "accumulate complete decisions and realize their combined StructuralGoal once at STOP",
+      "created_role_dependencies": "sequentially realize the dependent region on the protected current state and constrain its input binding by relative prior-region output provenance",
+      "atomicity": "abort returns no committed endpoint and exposes no partial endpoint for evaluation or locking",
+      "same_endpoint_different_schedule": "success by canonical completed endpoint; primitive trace identity is not required"
+    },
+    "inputs": {
+      "attempt_1_loss_map": {"path": "diagnostics/t4_known_good_transformation_forensics/attempt_1/result.json", "sha256": "b332e768d2ffd4b2b298d565aea4270fcef890c0e6c6e4b01add10ea8cc33724"},
+      "teacher_library": {"path": "diagnostics/t4_shared_program_controller/attempt_2/shared_library.json", "sha256": "732c67d04af3a0824cfa700906fd73982689af416f337c8eb109499af79afdb5"},
+      "structural_goal_summary": {"path": "diagnostics/t4_structural_subgoal/attempt_2/summary.json", "sha256": "76efefd1dd2267c0543cb972ef236a30b50f21b7c6a6da4ffca66cb3e43531c3"},
+      "previous_contract": {"path": "configs/t4_known_good_transformation_forensics_v1.json", "sha256": "74dcd0a2c429e7aa415b303359c6a70ecf982dd28800c738366c87b5881f1327"}
+    },
+    "frozen_protocol": {
+      "whole_source_groups": 15,
+      "exact_teacher_routes": 77,
+      "exact_structural_regions": 147,
+      "region_count_distribution": {"1": 26, "2": 35, "3": 13, "4": 3},
+      "teacher_region_targets_are_answer_known_diagnostics_only": true,
+      "teacher_primitive_actions_may_not_enter_runtime": true,
+      "runtime_result_payload_per_route_required": true,
+      "eligibility_or_scoring_before_stop": false,
+      "gate_relaxation_after_results": false
+    },
+    "authorized_gates": {
+      "gate_1_runtime_support": "77/77 routes serialize and validate as 1-4 complete region decisions under the deployed OPEN/CONTINUE/STOP grammar",
+      "gate_2_exact_teacher_forced_runtime_realization": "77/77 completed protected programs canonically reach the known endpoint with no teacher-action fallback and every route result is persisted locally",
+      "gate_3_learned_factor_rank": "deferred because explicit complete-patch factor learning is materially new modeling",
+      "gate_4_autonomous_generation": "deferred until a subsequent split-first learned complete-region generator contract"
+    },
+    "costs": {
+      "oracle_calls_authorized": 0,
+      "docking_calls_authorized": 0,
+      "modal_launches_authorized": 0,
+      "network_calls_authorized": 0,
+      "gpu_seconds_authorized": 0
+    },
+    "prohibitions": [
+      "Do not modify attempt_1 or any frozen generator, selector, scored artifact, split or scientific gate.",
+      "Do not use target IDs, route IDs, endpoint lookup, absolute atom addresses or executable teacher routes in a runtime program.",
+      "Do not evaluate, filter, score, lock or publish a partial protected-program state.",
+      "Do not call an oracle or docking function, launch Modal, use the network or access a live run.",
+      "Do not fit a selector, value model or autonomous generator under this contract.",
+      "Do not return to primitive 5-32-step autoregressive or beam decoding."
+    ],
+    "acceptance": {
+      "gate_1_required": true,
+      "gate_2_required": true,
+      "relative_created_role_regression_required": true,
+      "stop_abort_atomicity_regression_required": true,
+      "per_route_payload_hashes_required": true,
+      "coverage_and_precision_reported_separately": true,
+      "deterministic_rerun_required": true,
+      "mutation_must_fail": true,
+      "full_suite_during_iteration": false
+    }
+  }
+}
