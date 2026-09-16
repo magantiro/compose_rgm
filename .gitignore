@@ -16,6 +16,8 @@ __pycache__/
 htmlcov/
 
 # Local scratch space and generated training artifacts
+# Persistent branch checkouts live here; each has its own Git index.
+/.worktrees/
 tmp/
 *.pt
 *.pth

@@ -2,12 +2,18 @@
 
 The active T4 strategy-reset implementation is isolated on branch
 `t4-objective-dynamic-reset-20260916`, currently checked out at
-`/private/tmp/compose-t4-objective-dynamic-reset-20260916`.
+`/Users/rmaganti/compose_rgm_git/.worktrees/t4-objective-dynamic-reset-20260916`.
 
-Read that branch's `HANDOFF.md` first, then `docs/T4_AUTONOMOUS_RESET.md`.
+Open that persistent subfolder for active T4 development. Read its `AGENTS.md`
+completely, then [HANDOFF.md](.worktrees/t4-objective-dynamic-reset-20260916/HANDOFF.md)
+and `docs/T4_AUTONOMOUS_RESET.md`.
 Those files contain the one-hour handoff ending 2026-09-16 07:44:57 UTC.
 Do not mistake this original working tree's HEAD for the latest T4 implementation.
 The branch is in this same Git repository and its runtime commit is `80dc1aa3`.
+The checkout was moved out of `/private/tmp` with `git worktree move` on
+2026-09-16. The move preserves branch history and experimental payloads.
+`.worktrees/` is ignored by this parent checkout to prevent accidental nested
+repository commits. Each nested worktree still tracks its own files normally.
 
 The forensic evidence is at `diagnostics/t4_strategy_reset/20260916/REPORT.md`.
 Raw historical data and normalized scored records remain here in that directory;
