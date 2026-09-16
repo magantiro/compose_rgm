@@ -1,0 +1,144 @@
+{
+  "payload": {
+    "schema_version": "t4_hybrid_top3_v0_stage20_launch_contract_v1",
+    "status": "prepared_exact_launch_revision_pending_hash_acceptance",
+    "scientific_problem": "Measure whether the frozen score-blind hybrid top-three macro bootstrap followed by unchanged Dynamic-v0 produces a competitive early T4 trajectory through charged call 20.",
+    "primary_output": "Five durable lower-is-better docking best-so-far trajectories at calls 1, 5, 10 and 20, with complete query, archive, program-lineage, RNG and resume state.",
+    "evidence_boundary": "Five answer-known delta-0.4 development cells and one search replicate. This is not a full T4 benchmark, held-out evidence or IVG superiority evidence.",
+    "cells": [
+      "5ht1b_0",
+      "braf_1",
+      "jak2_1",
+      "parp1_0",
+      "fa7_0"
+    ],
+    "units": [
+      "5ht1b_0_r0",
+      "braf_1_r0",
+      "jak2_1_r0",
+      "parp1_0_r0",
+      "fa7_0_r0"
+    ],
+    "protocol": {
+      "delta": 0.4,
+      "strict_similarity_greater_than": 0.4,
+      "strict_qed_greater_than": 0.6,
+      "strict_sa_less_than": 4.0,
+      "maximum_heavy_atoms": 40,
+      "score_direction": "lower_is_better",
+      "stage_call_ceiling_per_cell": 20,
+      "full_frozen_run_call_ceiling_per_cell": 100,
+      "stage_total_call_ceiling": 100,
+      "report_calls": [1, 5, 10, 20],
+      "later_extension_report_calls": [50, 100],
+      "maximum_concurrent_single_cpu_workers": 5,
+      "gpu": false,
+      "automatic_retry": false,
+      "replacement": false,
+      "backfill": false,
+      "confirmation_calls": 0,
+      "plateau_stopping": false
+    },
+    "controller": {
+      "supported_cells": "JAK2_1 and PARP1_0 charge the three exact locked macro candidates at calls 1-3 in frozen order, admit each finite observation to one run-local archive, then invoke unchanged Dynamic-v0 at call 4.",
+      "unsupported_cells": "5HT1B_0, BRAF_1 and FA7_0 preserve the explicit macro-support abstention and invoke unchanged Dynamic-v0 at call 1.",
+      "failed_locked_macro": "A failed call remains charged and is not admitted, retried, replaced or backfilled.",
+      "dynamic_v0": "The proposal law, exact executor, score-blind parent allocation, mutation/recombination, eligibility and archive update remain byte-identical to the bound implementation.",
+      "initial_route_archive": "Empty except for finite observations produced by the three frozen macro calls during this same run.",
+      "rng": "Use the admission lock's dynamic_v0_refinement namespace for optimizer proposals and persist the exact bit-generator state after every completed round."
+    },
+    "immutable_inputs": {
+      "hybrid_lock_revision": {
+        "revision": "1249e9a1fec33efcb05ba124948fe2e50a136c80",
+        "tree": "1ee648065a997cf85a5d6ccce57477e2d1926359"
+      },
+      "hybrid_contract": {
+        "path": "configs/t4_hybrid_top3_v0_controller_v1.json",
+        "physical_sha256": "397e87ba94199901a62cdf39841b26f15bda2df5bf8854f467fbdb1df13f68e3",
+        "payload_sha256": "f88098d7b3098c0aa62c9fff57dc8a5db3ed61ba89dcec1a00e7a96f796dcc50"
+      },
+      "candidate_lock": {
+        "path": "diagnostics/t4_hybrid_top3_v0_controller/attempt_1/candidate_lock.json",
+        "physical_sha256": "088dcc7c9a86f1c33447acfb722b5d966e66dc39fec29499fab4e59b3ccaba4a",
+        "payload_sha256": "f7dcc797aa2d218696920e989f3badae1450ffede2a3ce715b38c6033256a3e5"
+      },
+      "admission_lock": {
+        "path": "diagnostics/t4_hybrid_top3_v0_controller/attempt_1/admission_lock.json",
+        "physical_sha256": "8d919348f50335cb6373906d56bc8500ac8ccb66f3a45f9c0f33567f59258afd",
+        "payload_sha256": "391cd0372130947ac78bd94706d93375c90c4c572741027165cec4d5ac59c1c4"
+      },
+      "qualification_v2": {
+        "revision": "d9d074489cab195d6f007f71d771e503ae4a1c3f",
+        "tree": "225524f249dc85bc89d7d9fb2dc005dde6b5f617",
+        "path": "configs/t4_target_conditioned_utility_v0_qualification_v2.json",
+        "physical_sha256": "496d89b2fb6251a930913f8be28e2289ad19bf55efcc589d362f4f6990e5dd2d",
+        "payload_sha256": "8132f1351c9fa687f0786739536af245da32dd3542f2f77b15f14883878d60ac"
+      },
+      "source_protocol": {
+        "path": "configs/t4_dynamic_v1_development_v1.json",
+        "physical_sha256": "3cfc4c0c2e96ea60e6a0c092dd3c4991a6901cf1ce6954d7d95ca296c650a02d",
+        "payload_sha256": "d9edd6a5fdcf38c94b8c19920947aba0cde68d35b2024f412aefe0499404c37c"
+      },
+      "dynamic_v0_implementation": {
+        "revision": "2a41b086fb4f109a09bee15c17f1c6ec6551e29d",
+        "path": "src/compose_v4/control/dynamic_program_synthesis.py",
+        "physical_sha256": "80fcc5f64a04306613fd84955dbed0b4c4ce5d512a3ed2c2ddd119515b899257"
+      },
+      "macro_archive_integration": {
+        "revision": "2a41b086fb4f109a09bee15c17f1c6ec6551e29d",
+        "path": "src/compose_v4/control/macro_archive_integration.py",
+        "physical_sha256": "2d34549cee0709a9583968f9e1860ffe37ad093a83ded82550267943883fe656"
+      },
+      "scoring_implementation": {
+        "path": "modal_apps/genmol_t4_opt_app.py",
+        "physical_sha256": "9b635a9936493a5900b613cdce52f76c24efcf98f3f43b3b155448e0b1796bf0"
+      }
+    },
+    "runtime_assets": {
+      "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor_sha256": {
+        "5ht1b": "6ab5ac2d63be05c4d7992f96175258c2b253ccc41539833af4fb12465ee3a59f",
+        "braf": "707b21bfb654321cb14d33ea07e9accab4cb9a884378285cd562c2324a31213a",
+        "fa7": "bfd705fb8220c52e1b447afce23a3810bc6deddb06983e98a2b0934b24ba092d",
+        "jak2": "cb900f3f75dcf2ac3efe6538528ed1e87ec934a527b3b060c2b09dfe3a11d9b6",
+        "parp1": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9"
+      },
+      "box_definition": "BOXES in the hash-bound scoring implementation",
+      "ligand_preparation": "Open Babel --gen3d in the hash-bound production docking wrapper",
+      "quickvina": {
+        "cpu_per_worker": 1,
+        "exhaustiveness": 1,
+        "num_modes": 10
+      }
+    },
+    "persistence": {
+      "commit_before_each_docking_call": true,
+      "commit_after_each_docking_call": true,
+      "durable_query_ledger": true,
+      "best_so_far_curve": true,
+      "full_round_candidate_lock": true,
+      "full_program_and_archive_lineage_in_checkpoint": true,
+      "rng_state_in_checkpoint": true,
+      "resume_from_q20_for_later_q50_q100": true,
+      "stage20_is_not_a_terminal_full_run_result": true
+    },
+    "authorization": {
+      "bounded_scientific_scope_authorized": true,
+      "authorized_stage_calls": 100,
+      "authorized_workers": 5,
+      "modal_bundle_upload_scope": "The user authorized Modal use for this bounded five-cell Stage-20 run, but launch remains fail-closed until the clean launch revision, tree and self-hashed contract are surfaced and explicitly accepted by the root agent under the exact-hash launch guard.",
+      "exact_launch_revision_authorization_required_at_invocation": true,
+      "exact_launch_revision_recording": "The launcher records the exact accepted clean revision and contract physical SHA-256 in the immutable spawn receipt."
+    },
+    "prohibitions": [
+      "launch before exact clean revision and contract hash authorization",
+      "more than 20 charged calls in any cell or 100 total in this stage",
+      "automatic retry, replacement, backfill, confirmation or plateau stopping",
+      "changing a frozen candidate, candidate order, Dynamic-v0 law, evaluator, seed or eligibility rule",
+      "filling a short trajectory after proposal exhaustion or docking failure",
+      "continuing to calls 50 or 100 without a separate exact authorization",
+      "full-suite, held-out or IVG-superiority claims"
+    ]
+  },
+  "contract_sha256": "1bc6832d3b4ac2781fac19ee9ebe0673d6715b5efcca5fc738c813b8652d77c7"
+}
