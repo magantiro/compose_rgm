@@ -372,6 +372,32 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**T4 autonomous-search strategy reset and collaborator handoff, 2026-09-16:**
+the user authorized implementing the evidence-backed search reset and a one-hour
+handoff. Preserve all earlier controllers, contracts, results, and unrelated PMO
+work. The immediate new revision repairs repeated bootstrap exploration and
+fixed structured-parameter panels, retains the complete v0 mutation/recombination/
+composition lane, and compares score-blind with objective/diversity-aware archive
+allocation. Keep learned proposal-prior training explicitly separate until its
+split-clean data and actual-sampler support are verified. Reuse the exact executor
+and completed-endpoint eligibility unchanged. No new primitive search or compiler
+work is in scope. New code must be modular, tested, resumable, and documented in
+`docs/T4_AUTONOMOUS_RESET.md`; `HANDOFF.md` is the collaborator entry point.
+
+The user's standing Modal authorization covers bounded independent CPU jobs for
+this new revision, not modification of previous frozen jobs or unbounded spending.
+A later scored pilot in this revision is capped at 180 charged calls across
+BRAF-1, JAK2-1 and FA7-0 at delta .4, with no automatic retry, no replacement,
+unchanged docking/eligibility, prospective candidate locks, and durable call logs.
+Freeze the implemented arms and exact launch inputs before any calls; an
+unimplemented learned-prior arm must not be advertised or silently substituted.
+No full benchmark is authorized by this implementation milestone. Relevant tests
+are the iteration gate; a scientific launch additionally needs the existing
+repository's one-time clean-candidate verification boundary. If it is not ready
+by handoff, report that and leave an exact next command instead of bypassing it.
+This is a new development revision, not a relaxation of any previous failed gate.
+
+
 **Scoped zero-oracle T4 target-conditioned utility selector, 2026-09-15:**
 after the first prospective utility rows showed that the frozen complete-macro
 selector learned structural support rather than docking value, the user
