@@ -67,3 +67,8 @@ PYTHONPATH=src:. .venv/bin/python -m tools.t4_known_good_transformation_forensic
 The machine-readable result is `result.json`; its envelope self-hashes the
 payload. The frozen contract is
 `configs/t4_known_good_transformation_forensics_v1.json`.
+
+- Result physical SHA-256: `b332e768d2ffd4b2b298d565aea4270fcef890c0e6c6e4b01add10ea8cc33724`
+- Result payload SHA-256: `2a324fbae3295fb54f867927d313fc57b4c1182bdc2bb4d0bfb7186c6cd1a0e7`
+- Scientific implementation revision: `a34cc6931e40b4d03a33d55d53bd1622cf1581f9`
+- Determinism: an independent rerun was byte-identical to the published result.
