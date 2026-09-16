@@ -22,6 +22,7 @@ from tools.t4_target_conditioned_utility_selector import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
+V4_CONTRACT = Path("configs/t4_target_conditioned_utility_selector_v4.json")
 
 
 def _row(identity: int, *, target: str = "jak2", score: float) -> MeasuredEndpoint:
@@ -141,3 +142,26 @@ def test_repaired_coverage_gate_abstains_without_fitting(tmp_path: Path) -> None
     assert audit["gate_checks"]["at_least_five_supported_strata"] is False
     assert audit["support"]["supported_targets"] == ["jak2"]
     assert not list((tmp_path / "result").glob("fold_*_checkpoint.json"))
+
+
+def test_v4_add_only_acquisition_passes_gate_and_fits_unchanged_arms(
+    tmp_path: Path,
+) -> None:
+    result = run(ROOT, tmp_path / "result-v4", V4_CONTRACT)
+    assert result["status"] == "complete_retrospective_within_known_target_diagnostic"
+    assert result["fit_performed"] is True
+    audit = json.loads((tmp_path / "result-v4" / "data_audit.json").read_text())
+    assert audit["contract_resolution"]["mode"] == "add_only_v4_extension"
+    assert audit["pre_leakage_census"]["artifacts"]["utility_acquisition"] == 4
+    assert audit["post_leakage_census"]["artifacts"]["utility_acquisition"] == 4
+    assert audit["gate_checks"] == {
+        "all_labels_have_exact_receipts": True,
+        "at_least_five_supported_strata": True,
+        "at_least_three_supported_targets": True,
+        "every_evaluated_target_has_training_pair": True,
+        "zero_cross_fold_group_leakage": True,
+    }
+    assert audit["support"]["supported_targets"] == ["fa7", "jak2", "parp1"]
+    assert audit["support"]["supported_strata"] == 7
+    assert len(list((tmp_path / "result-v4").glob("fold_*_checkpoint.json"))) == 3
+    assert result["target_conditioning_improved_primary_metrics"] is False

@@ -418,6 +418,18 @@ label and representation denominators, and remove complete connected grouping
 components that cross the predetermined folds. The split, features, models,
 metrics and coverage thresholds remain unchanged.
 
+After v3 abstained, the user separately authorized exactly four prospectively
+locked training-data acquisitions. All four completed once, with finite and
+non-tied pairs for FA7 seed 1 and PARP1 seed 2. A bounded v4 zero-oracle
+revision may add only that hash-bound cohort to v3, recompute the unchanged
+connected grouping and coverage gate, and fit the unchanged target-blind and
+shared target-conditioned arms only if the original three-target/five-stratum
+gate passes. The four new scores are training data, not prospective model
+evaluation. V4 may not alter features, folds, groups, models, optimization,
+metrics, thresholds or prior artifacts, access Modal or docking, emit a
+prospective lock, or launch qualification. The extension contract is
+`configs/t4_target_conditioned_utility_selector_v4.json`.
+
 **Scoped zero-oracle T4 complete-macro selector, 2026-09-15:** after the
 compositional structural-subgoal generator passed its K=128 support gate but
 underperformed the matched uniform order at K=8 and K=32, the user explicitly

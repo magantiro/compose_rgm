@@ -83,6 +83,49 @@ def _load_bound_json(
     return payload
 
 
+def _resolve_contract(
+    root: Path, contract_document: Mapping[str, Any]
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Resolve the v4 add-only extension onto the immutable v3 payload."""
+
+    payload = contract_document["payload"]
+    if canonical_json_hash(payload) != contract_document["contract_sha256"]:
+        raise RuntimeError("utility-selector contract self-hash mismatch")
+    if (
+        payload.get("schema_version")
+        != "t4_target_conditioned_utility_selector_contract_v4"
+    ):
+        return dict(payload), {"mode": "standalone_contract"}
+
+    base_spec = payload["base_contract"]
+    raw = _git_bytes(root, base_spec["git_revision"], base_spec["path"])
+    observed = sha256_bytes(raw)
+    if observed != base_spec["sha256"]:
+        raise RuntimeError(
+            "v4 base-contract physical hash mismatch: "
+            f"expected {base_spec['sha256']}, observed {observed}"
+        )
+    base_document = json.loads(raw)
+    if (
+        base_document.get("contract_sha256") != base_spec["payload_sha256"]
+        or canonical_json_hash(base_document["payload"]) != base_spec["payload_sha256"]
+    ):
+        raise RuntimeError("v4 base-contract payload seal does not verify")
+    effective = json.loads(json.dumps(base_document["payload"]))
+    if "utility_acquisition" in effective["measured_inputs"]:
+        raise RuntimeError("v4 base contract already contains utility acquisition")
+    effective["measured_inputs"]["utility_acquisition"] = json.loads(
+        json.dumps(payload["added_measured_input"])
+    )
+    effective["outputs"] = json.loads(json.dumps(payload["outputs"]))
+    return effective, {
+        "mode": "add_only_v4_extension",
+        "base_contract": dict(base_spec),
+        "frozen_unchanged": list(payload["frozen_unchanged"]),
+        "added_artifact": payload["added_measured_input"]["artifact_id"],
+    }
+
+
 def _canonical_smiles(state: Mapping[str, Any]) -> str:
     smiles = molecular_graph_to_smiles(decode_state(dict(state)))
     if smiles is None:
@@ -651,6 +694,148 @@ def _load_delta04(
     return admitted, exclusions
 
 
+def _load_utility_acquisition(
+    root: Path, config: Mapping[str, Any]
+) -> tuple[list[MeasuredEndpoint], list[dict]]:
+    """Load only the four sealed one-shot utility-acquisition outcomes."""
+
+    spec = config["measured_inputs"]["utility_acquisition"]
+    revision = spec["git_revision"]
+    candidate_document = _load_bound_json(
+        root, {**spec["candidate_lock"], "git_revision": revision}
+    )
+    request_document = _load_bound_json(
+        root, {**spec["request_lock"], "git_revision": revision}
+    )
+    result_document = _load_bound_json(
+        root, {**spec["result"], "git_revision": revision}
+    )
+    review_document = _load_bound_json(
+        root, {**spec["review"], "git_revision": revision}
+    )
+    candidates = {
+        row["candidate_id"]: row for row in candidate_document["payload"]["candidates"]
+    }
+    requests = {
+        row["request_id"]: row for row in request_document["payload"]["requests"]
+    }
+    result = result_document["payload"]
+    review = review_document["payload"]
+    expected = int(spec["expected_request_count"])
+    if (
+        len(candidates) != expected
+        or len(requests) != expected
+        or len(result["requests"]) != expected
+        or result["request_count"] != expected
+        or result["successful_scores"] != expected
+        or result["failed_scores"] != 0
+        or result["automatic_retries"] != 0
+        or result["replacement_or_backfill"] is not False
+    ):
+        raise RuntimeError("utility-acquisition four-call census is not exact")
+    if (
+        result["request_lock_physical_sha256"] != spec["request_lock"]["sha256"]
+        or result["request_lock_payload_sha256"]
+        != spec["request_lock"]["payload_sha256"]
+        or request_document["payload"]["candidate_lock_payload_sha256"]
+        != spec["candidate_lock"]["payload_sha256"]
+    ):
+        raise RuntimeError("utility-acquisition result does not bind the exact locks")
+    review_inputs = review["inputs"]
+    for key, input_key in (
+        ("candidate_lock", "candidate_lock"),
+        ("request_lock", "request_lock"),
+        ("scored_result", "result"),
+    ):
+        bound = review_inputs[key]
+        expected_spec = spec[input_key]
+        if (
+            bound["physical_sha256"] != expected_spec["sha256"]
+            or bound["payload_sha256"] != expected_spec["payload_sha256"]
+        ):
+            raise RuntimeError(f"utility-acquisition review mismatch: {key}")
+    if (
+        review["execution"]["first_score_calls_charged"] != expected
+        or review["execution"]["successful_scores"] != expected
+        or review["execution"]["failed_scores"] != 0
+        or review["execution"]["automatic_retries"] != 0
+        or review["execution"]["replacements_or_backfill"] != 0
+        or review["summary"]["conditional_data_gate_ready"] is not True
+        or any(
+            value["finite_non_tied_pair"] is not True
+            for value in review["cell_summary"].values()
+        )
+    ):
+        raise RuntimeError("utility-acquisition review did not pass its frozen gate")
+
+    admitted, exclusions = [], []
+    observed_cells = set()
+    for scored in sorted(result["requests"], key=lambda row: row["request_id"]):
+        identity = scored["request_id"]
+        try:
+            if scored["status"] != "complete" or not math.isfinite(
+                float(scored["score"])
+            ):
+                raise ValueError("request is not a finite completed score")
+            locked = requests[identity]
+            candidate = candidates[locked["candidate_id"]]
+            if (
+                scored["candidate_id"] != locked["candidate_id"]
+                or scored["candidate_id"] != candidate["candidate_id"]
+                or scored["target"] != locked["target"]
+                or scored["target"] != candidate["target"]
+                or scored["cell"] != locked["cell"]
+                or scored["cell"] != candidate["cell"]
+                or scored["canonical_smiles"] != locked["canonical_smiles"]
+                or scored["canonical_smiles"] != candidate["canonical_smiles"]
+                or scored["evaluator"] != locked["evaluator"]
+                or int(scored["docking_seed"]) != int(locked["docking_seed"])
+                or _canonical_smiles(candidate["endpoint_state"])
+                != candidate["canonical_smiles"]
+                or _canonical_smiles(candidate["source_state"])
+                != candidate["source_smiles"]
+            ):
+                raise ValueError("result/request/candidate identity mismatch")
+            observed_cells.add(scored["cell"])
+            admitted.append(
+                _make_row(
+                    row_id=f"utility_acquisition:{identity}",
+                    artifact="utility_acquisition",
+                    target=scored["target"],
+                    cell=scored["cell"],
+                    delta=float(spec["delta"]),
+                    oracle_protocol=scored["evaluator"],
+                    docking_seed=int(scored["docking_seed"]),
+                    docking_score=float(scored["score"]),
+                    source_state=candidate["source_state"],
+                    endpoint_state=candidate["endpoint_state"],
+                    lineage_ids=list(candidate["lineage_ids"]),
+                    provenance={
+                        "request_id": identity,
+                        "candidate_id": candidate["candidate_id"],
+                        "training_data_acquisition_only": True,
+                        "source_artifact": candidate["source_artifact"],
+                    },
+                )
+            )
+        except (KeyError, TypeError, ValueError) as error:
+            exclusions.append(
+                {
+                    "artifact": "utility_acquisition",
+                    "identity": identity,
+                    "identity_level": "physical_request",
+                    "reason": "invalid_exact_candidate_join",
+                    "detail": str(error),
+                }
+            )
+    if observed_cells != set(spec["expected_cells"]):
+        raise RuntimeError(
+            "utility-acquisition cells differ from frozen expectation: "
+            f"{sorted(observed_cells)}"
+        )
+    return admitted, exclusions
+
+
 def _leakage_filter(
     rows: list[MeasuredEndpoint], exclusions: list[dict]
 ) -> tuple[list[MeasuredEndpoint], list[dict], dict[str, Any]]:
@@ -835,6 +1020,25 @@ def _input_reconciliation(
             "physical_request",
         ),
     }
+    acquisition_spec = measured.get("utility_acquisition")
+    if acquisition_spec is not None:
+        acquisition = _load_bound_json(
+            root,
+            {
+                **acquisition_spec["result"],
+                "git_revision": acquisition_spec["git_revision"],
+            },
+        )["payload"]["requests"]
+        observed["utility_acquisition"] = (
+            len(acquisition),
+            sum(
+                row["status"] == "complete"
+                and row.get("score") is not None
+                and math.isfinite(float(row["score"]))
+                for row in acquisition
+            ),
+            "physical_request",
+        )
     pre_counts = Counter(row.artifact for row in admitted_before_leakage)
     final_counts = Counter(row.artifact for row in admitted_after_leakage)
     physical_exclusions = Counter()
@@ -999,9 +1203,7 @@ def _write_json(path: Path, value: Mapping[str, Any]) -> None:
 
 def run(root: Path, output: Path, contract_path: Path = CONTRACT) -> dict[str, Any]:
     contract_document = json.loads((root / contract_path).read_text())
-    contract = contract_document["payload"]
-    if canonical_json_hash(contract) != contract_document["contract_sha256"]:
-        raise RuntimeError("utility-selector contract self-hash mismatch")
+    contract, contract_resolution = _resolve_contract(root, contract_document)
     code_revision = subprocess.run(
         ["git", "rev-parse", "HEAD"],
         cwd=root,
@@ -1036,6 +1238,10 @@ def run(root: Path, output: Path, contract_path: Path = CONTRACT) -> dict[str, A
         _load_delta04,
     ):
         accepted, rejected = loader(root, contract)
+        rows.extend(accepted)
+        exclusions.extend(rejected)
+    if "utility_acquisition" in contract["measured_inputs"]:
+        accepted, rejected = _load_utility_acquisition(root, contract)
         rows.extend(accepted)
         exclusions.extend(rejected)
     if len({row.row_id for row in rows}) != len(rows):
@@ -1077,6 +1283,7 @@ def run(root: Path, output: Path, contract_path: Path = CONTRACT) -> dict[str, A
         "input_contract_path": str(contract_path),
         "input_contract_physical_sha256": sha256_file(root / contract_path),
         "producer": producer,
+        "contract_resolution": contract_resolution,
         "pre_leakage_census": pre_leakage,
         "post_leakage_census": post_leakage,
         "input_reconciliation": reconciliation,

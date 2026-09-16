@@ -1,0 +1,96 @@
+{
+  "payload": {
+    "schema_version": "t4_target_conditioned_utility_selector_contract_v4",
+    "authorization": "2026-09-16 user authorized the previously sealed four-call T4 utility-data acquisition and the root agent authorized one zero-oracle v4 reevaluation that adds only that hash-bound measured cohort to the immutable v3 audit, preserves the v3 model, features, split, grouping, metrics, thresholds and gates, and fits only if the unchanged coverage gate passes",
+    "scientific_problem": "Test whether adding the prospectively locked FA7-1 and PARP1-2 measured candidate pairs supplies enough split-clean coverage to run the already frozen target-blind versus shared target-conditioned endpoint-utility comparison.",
+    "primary_model_output": "The unchanged v3 scalar lower-is-better docking-utility rank for one exact source graph and one exact scored endpoint graph.",
+    "central_claim_under_test": "Within known T4 targets that have measured training pairs, the unchanged shared target-conditioned endpoint utility ranker improves held-source ordering over the unchanged target-blind controls on identical candidate rows.",
+    "evaluation_setting": "Retrospective zero-oracle grouped-source comparison. The four added scores are training-data acquisition and not prospective evaluation evidence.",
+    "base_contract": {
+      "path": "configs/t4_target_conditioned_utility_selector_v3.json",
+      "git_revision": "ddc1eb074d4a4a027ba9097604535461d86d78cf",
+      "sha256": "c21424642542f63979af7d9f5f3c33e6b913eefe1e1ed7fc7d989209263834c9",
+      "payload_sha256": "a1fca9322ca916916c6b2b5e4c2c8bc8612ff4cd4e4fece6db731c6147bff3dd"
+    },
+    "frozen_unchanged": [
+      "candidate rows from v3",
+      "target-local source-index folds",
+      "physical-request endpoint scaffold source-state and lineage grouping keys",
+      "connected-component conflict removal",
+      "pairing strata and strict-pair rule",
+      "graph features and train-fold-only normalization",
+      "fixed structural baseline",
+      "target-blind and target-conditioned model definitions",
+      "optimization steps learning rate regularization seed and pair weighting",
+      "metrics",
+      "three-target and five-stratum coverage thresholds"
+    ],
+    "added_measured_input": {
+      "artifact_id": "utility_acquisition",
+      "evidence_class": "prospective_training_data_acquisition_not_prospective_model_evaluation",
+      "git_revision": "fa3accc57124e1be20e4051a3af636803162174e",
+      "candidate_lock": {
+        "path": "diagnostics/t4_utility_data_acquisition_lock/attempt_1/candidate_lock.json",
+        "sha256": "d790389696d729f19ce617b3dcf4afddf0f3ce06110882a1b628889e0c354249",
+        "payload_sha256": "8b5acdbfca42a122d6a882d48e6bbe00468052c913f79e806b6dbb7164685471"
+      },
+      "request_lock": {
+        "path": "diagnostics/t4_utility_data_acquisition_lock/attempt_1/request_lock.json",
+        "sha256": "e11441244c98d919d42315dcafbdede300bbb6232bdc5a911896bdb3d1010d05",
+        "payload_sha256": "f78985599a7ff5e533384ac7d61c2cc77f7c6cf94e064f6a6ec0e3ed692bc279"
+      },
+      "result": {
+        "path": "diagnostics/t4_utility_data_acquisition_launch/attempt_1/result.json",
+        "sha256": "42539073e6a62b470d6e00c2565f35aa47bc44aa48fad3e8d1ee2ecbb816b639",
+        "payload_sha256": "47646fc8ea9016098ee98615f08b9f3b673333c50a269e41a420934460b069ba"
+      },
+      "review": {
+        "path": "diagnostics/t4_utility_data_acquisition_launch/attempt_1/review.json",
+        "sha256": "d35a0a64bcca4e52ac32a017ab7c6d898e7b93b633cdf2948ebe4cc95f0b916e",
+        "payload_sha256": "626aaa696c2d55ed7f14319d68c7a9788badf1ef39b4817cd617e2a2425a412e"
+      },
+      "expected_request_count": 4,
+      "expected_cells": [
+        "fa7_1",
+        "parp1_2"
+      ],
+      "delta": 0.4,
+      "admission_gate": "Every result row must be a finite one-shot complete score and join one-to-one through the immutable request lock to one candidate in the immutable candidate lock. Candidate ID, request ID, target, cell, canonical endpoint, evaluator and docking seed must agree. The result and review must bind the exact request and candidate lock identities, report four successful scores, zero retry, zero replacement and finite non-tied pairs in both cells. Otherwise the row or cohort abstains."
+    },
+    "revision_policy": {
+      "allowed_changes": [
+        "add exactly the four hash-bound measured acquisition rows",
+        "recompute the unchanged reconciliation and connected grouping",
+        "fit and evaluate the unchanged arms only if the unchanged data gate passes",
+        "write attempt_4 deterministic artifacts"
+      ],
+      "failure_action": "Publish the v4 audit and abstain without fitting if any unchanged coverage or leakage gate fails.",
+      "prospective_scoring": "unauthorized; a future scored candidate lock requires a separate exact authorization"
+    },
+    "outputs": {
+      "directory": "diagnostics/t4_target_conditioned_utility_selector/attempt_4",
+      "required": [
+        "data_audit.json",
+        "exclusion_ledger.json",
+        "split_manifest.json",
+        "result.json",
+        "README.md"
+      ]
+    },
+    "prohibitions": [
+      "new oracle or docking calls",
+      "Modal or live-run access",
+      "altering the v3 rows split grouping model metrics thresholds or gates",
+      "using the four acquisition scores as prospective model evidence",
+      "emitting or scoring a prospective candidate lock",
+      "launching five-cell qualification"
+    ],
+    "costs": {
+      "new_oracle_calls": 0,
+      "new_docking_calls": 0,
+      "modal_launches": 0,
+      "device": "cpu"
+    }
+  },
+  "contract_sha256": "f7a2720e2c299449168047d59919c034f68585a0a27c747dedf229a53859ffd7"
+}
