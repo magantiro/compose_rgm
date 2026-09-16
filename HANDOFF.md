@@ -12,9 +12,13 @@ Read the final status section before launching anything.
    Do not infer a launch or successful docking from implementation alone.
 
 Active branch: `t4-objective-dynamic-reset-20260916`.
-Current worktree: `/private/tmp/compose-t4-objective-dynamic-reset-20260916`.
+Current worktree:
+`/Users/rmaganti/compose_rgm_git/.worktrees/t4-objective-dynamic-reset-20260916`.
 This branch is in the same Git repository as `/Users/rmaganti/compose_rgm_git`.
 Do not reset the original tree: it contains unrelated, user-owned PMO changes.
+The active checkout was moved here from `/private/tmp` with `git worktree move`
+on 2026-09-16. This is a location-only change, not a scientific revision or merge.
+Historical paths in frozen receipts retain their original provenance.
 
 ## Scientific direction
 
@@ -127,7 +131,13 @@ edits. It is intentionally not globally clean. `NEXT_AGENT.md` there points here
 Do not overwrite it, reset it or merge blindly. This implementation branch is
 local and unpushed; Git push was not part of the user authorization.
 
-If this temporary worktree disappears, recreate the branch in a new directory
-with `git worktree add <new-directory> t4-objective-dynamic-reset-20260916` after
-resolving any stale worktree registration. All implementation, compact evidence
-and compressed scored data are committed in the same repository.
+This checkout is now in the persistent project folder, not temporary storage.
+Its Git history is stored in the parent repository's `.git` directory. The
+parent ignores `.worktrees/`; the nested checkout has its own branch and index
+and tracks its files normally. Do not copy its files over the PMO checkout or
+merge the branches without reviewing overlapping work.
+
+If another checkout is needed, use Git to create or move it into a persistent
+directory. All implementation, compact evidence and compressed scored data are
+committed in the same repository. A local worktree is not an off-machine backup;
+the branch remains unpushed.
