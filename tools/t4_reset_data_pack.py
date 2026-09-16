@@ -27,13 +27,16 @@ def main():
         raise FileExistsError("evidence pack is immutable; choose a new version")
     arms, rows = Counter(), 0
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    with args.source.open("rb") as source, args.output.open("xb") as target:
-        with gzip.GzipFile(filename="", mode="wb", fileobj=target, mtime=0) as compressed:
-            for line in source:
-                row = json.loads(line)
-                arms[row["arm"]] += 1
-                rows += 1
-                compressed.write(line)
+    with (
+        args.source.open("rb") as source,
+        args.output.open("xb") as target,
+        gzip.GzipFile(filename="", mode="wb", fileobj=target, mtime=0) as compressed,
+    ):
+        for line in source:
+            row = json.loads(line)
+            arms[row["arm"]] += 1
+            rows += 1
+            compressed.write(line)
     with gzip.open(args.output, "rb") as restored:
         digest = hashlib.file_digest(restored, "sha256").hexdigest()
     source_hash = sha256_file(args.source)

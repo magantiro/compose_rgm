@@ -1,0 +1,14 @@
+{
+  "schema_version": "t4_reset_full_suite_operational_status_v1",
+  "command": "PYTHONPATH=src:. /Users/rmaganti/compose_rgm_git/.venv/bin/python -m pytest -q --junitxml=diagnostics/t4_objective_reset/verification/full_suite.xml",
+  "status": "failed_and_incomplete",
+  "exit_code": 143,
+  "terminated_at_utc": "2026-09-16T07:40:11Z",
+  "last_reported_collection_progress_percent": 54,
+  "failures_and_errors_observed": true,
+  "authoritative_complete_test_count": null,
+  "junit_completed": false,
+  "reason": "Long repository-wide check already contained failures/errors and was terminated at the one-hour handoff boundary. Two interrupt signals did not terminate it. No passing gate is claimed.",
+  "earlier_collection_failure": "full_suite_collection_failure.xml records an initial invocation without the required repository PYTHONPATH; that setup error was corrected before the actual run.",
+  "scope": "Only the test process started for this handoff was stopped. No Modal or historical experiment was cancelled."
+}

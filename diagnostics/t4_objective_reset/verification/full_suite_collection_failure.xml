@@ -1,0 +1,873 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="108" failures="0" skipped="1" tests="109" time="12.757" timestamp="2026-09-16T03:17:22.584209-04:00" hostname="BGS-STU23-147"><testcase classname="" name="tests.test_adaptive_program_optimizer" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_adaptive_program_optimizer.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_adaptive_program_optimizer.py:15: in &lt;module&gt;
+    from tests.test_edit_program import ring_and_carbonyl
+E   ModuleNotFoundError: No module named 'tests'</error></testcase><testcase classname="" name="tests.test_apply_provenance_overlays_app" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_apply_provenance_overlays_app.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_apply_provenance_overlays_app.py:10: in &lt;module&gt;
+    from modal_apps.apply_provenance_overlays_app import (
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_benchmark_lead_scope_coverage" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_benchmark_lead_scope_coverage.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_benchmark_lead_scope_coverage.py:5: in &lt;module&gt;
+    from scripts.benchmark_lead_scope_coverage import REPO, build_artifact, coverage
+E   ModuleNotFoundError: No module named 'scripts'</error></testcase><testcase classname="" name="tests.test_build_editing_v2_semantic_t1_successor_cache_app" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_build_editing_v2_semantic_t1_successor_cache_app.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_build_editing_v2_semantic_t1_successor_cache_app.py:11: in &lt;module&gt;
+    from modal_apps import build_editing_v2_semantic_t1_successor_cache_app as app
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_compatible_checkpoint_initialization" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_compatible_checkpoint_initialization.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_compatible_checkpoint_initialization.py:6: in &lt;module&gt;
+    from scripts.train_tracelet_cnof_gate import _compatible_checkpoint_initialization
+E   ModuleNotFoundError: No module named 'scripts'</error></testcase><testcase classname="" name="tests.test_complete_macro_selector" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_complete_macro_selector.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_complete_macro_selector.py:21: in &lt;module&gt;
+    from tools import t4_complete_macro_selector as selector_tool
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_complete_region_patch_policy" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_complete_region_patch_policy.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_complete_region_patch_policy.py:24: in &lt;module&gt;
+    from tools.t4_complete_region_patch_policy import CONTRACT, load_contract
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_compositional_structural_subgoal_generator" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_compositional_structural_subgoal_generator.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_compositional_structural_subgoal_generator.py:22: in &lt;module&gt;
+    from tools.t4_compositional_structural_subgoal_generator import _overall_summary
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_ddsbm_resume" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_ddsbm_resume.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_ddsbm_resume.py:16: in &lt;module&gt;
+    from modal_apps.ddsbm_endpoint_competence_app import resume_from_partial
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_dynamic_v22" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_dynamic_v22.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_dynamic_v22.py:33: in &lt;module&gt;
+    from tools.dynamic_v22_pilot import (
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_edit_learning_data" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_edit_learning_data.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_edit_learning_data.py:14: in &lt;module&gt;
+    from tests.test_adaptive_program_optimizer import eligible, optimizer, outcomes
+E   ModuleNotFoundError: No module named 'tests'</error></testcase><testcase classname="" name="tests.test_editing_active8_aromatic_cycle_open_impact" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_editing_active8_aromatic_cycle_open_impact.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_editing_active8_aromatic_cycle_open_impact.py:45: in &lt;module&gt;
+    from modal_apps.audit_editing_active8_aromatic_cycle_open_impact import (
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_editing_cycle_open_component_equivalence" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_editing_cycle_open_component_equivalence.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_editing_cycle_open_component_equivalence.py:39: in &lt;module&gt;
+    from modal_apps.audit_editing_cycle_open_component_equivalence import (
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_editing_p50_prerequisites" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_editing_p50_prerequisites.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_editing_p50_prerequisites.py:55: in &lt;module&gt;
+    from scripts.train_tracelet_cnof_gate import _p50_launch_recipe_projection
+E   ModuleNotFoundError: No module named 'scripts'</error></testcase><testcase classname="" name="tests.test_editing_step_zero_gate" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_editing_step_zero_gate.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_editing_step_zero_gate.py:38: in &lt;module&gt;
+    from scripts.train_tracelet_cnof_gate import (
+E   ModuleNotFoundError: No module named 'scripts'</error></testcase><testcase classname="" name="tests.test_editing_successor_trainer" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_editing_successor_trainer.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_editing_successor_trainer.py:84: in &lt;module&gt;
+    from scripts.train_tracelet_cnof_gate import (
+E   ModuleNotFoundError: No module named 'scripts'</error></testcase><testcase classname="" name="tests.test_editing_t1_modal_surface" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_editing_t1_modal_surface.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_editing_t1_modal_surface.py:13: in &lt;module&gt;
+    import modal_apps.run_editing_t1_successor_gate as t1_modal
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_editing_t1_p50_decision_cli" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_editing_t1_p50_decision_cli.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_editing_t1_p50_decision_cli.py:10: in &lt;module&gt;
+    import scripts.build_editing_t1_p50_decision as decision_cli
+E   ModuleNotFoundError: No module named 'scripts'</error></testcase><testcase classname="" name="tests.test_editing_t1_receipt_collector" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_editing_t1_receipt_collector.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_editing_t1_receipt_collector.py:14: in &lt;module&gt;
+    import modal_apps.run_editing_t1_successor_gate as t1_modal
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_editing_t1_successor_cache" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_editing_t1_successor_cache.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_editing_t1_successor_cache.py:14: in &lt;module&gt;
+    from scripts import run_editing_t1_successor_gate as t1_worker
+E   ModuleNotFoundError: No module named 'scripts'</error></testcase><testcase classname="" name="tests.test_editing_t1_uniform_successor_capacity" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_editing_t1_uniform_successor_capacity.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_editing_t1_uniform_successor_capacity.py:10: in &lt;module&gt;
+    import modal_apps.run_editing_t1_uniform_successor_capacity as modal_runner
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_editing_t1_uniform_successor_capacity_v2" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_editing_t1_uniform_successor_capacity_v2.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_editing_t1_uniform_successor_capacity_v2.py:12: in &lt;module&gt;
+    import modal_apps.run_editing_t1_uniform_successor_capacity_v2 as modal_runner
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_editing_v2_execution_source_revision_integration" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_editing_v2_execution_source_revision_integration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_editing_v2_execution_source_revision_integration.py:10: in &lt;module&gt;
+    from modal_apps import (
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_editing_v2_packed_candidate_materializer" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_editing_v2_packed_candidate_materializer.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_editing_v2_packed_candidate_materializer.py:34: in &lt;module&gt;
+    from modal_apps.apply_provenance_overlays_app import (
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_editing_v2_role_lane_mapreduce" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_editing_v2_role_lane_mapreduce.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_editing_v2_role_lane_mapreduce.py:43: in &lt;module&gt;
+    from tests.test_editing_v2_active8_source_adapter import (
+E   ModuleNotFoundError: No module named 'tests'</error></testcase><testcase classname="" name="tests.test_editing_v2_role_lane_packed_materializer" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_editing_v2_role_lane_packed_materializer.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_editing_v2_role_lane_packed_materializer.py:33: in &lt;module&gt;
+    from tests.test_editing_v2_active8_source_adapter import (
+E   ModuleNotFoundError: No module named 'tests'</error></testcase><testcase classname="" name="tests.test_editing_v2_semantic_p50_source_inventory" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_editing_v2_semantic_p50_source_inventory.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_editing_v2_semantic_p50_source_inventory.py:17: in &lt;module&gt;
+    from tests import test_editing_v2_semantic_active8_decision_source as source_fixtures
+E   ModuleNotFoundError: No module named 'tests'</error></testcase><testcase classname="" name="tests.test_editing_v2_semantic_p50_successor_cache_modal_surface" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_editing_v2_semantic_p50_successor_cache_modal_surface.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_editing_v2_semantic_p50_successor_cache_modal_surface.py:11: in &lt;module&gt;
+    from modal_apps import build_editing_v2_semantic_p50_successor_cache_app as app
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_editing_v2_split_census" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_editing_v2_split_census.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_editing_v2_split_census.py:10: in &lt;module&gt;
+    from scripts import build_editing_v2_split_census as split_census_cli
+E   ModuleNotFoundError: No module named 'scripts'</error></testcase><testcase classname="" name="tests.test_evaluation_batch_cache" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_evaluation_batch_cache.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_evaluation_batch_cache.py:12: in &lt;module&gt;
+    from scripts.train_tracelet_cnof_gate import (
+E   ModuleNotFoundError: No module named 'scripts'</error></testcase><testcase classname="" name="tests.test_fast_pmo_run" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_fast_pmo_run.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_fast_pmo_run.py:15: in &lt;module&gt;
+    from tests.test_edit_program import ring_and_carbonyl
+E   ModuleNotFoundError: No module named 'tests'</error></testcase><testcase classname="" name="tests.test_fast_program_search" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_fast_program_search.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_fast_program_search.py:9: in &lt;module&gt;
+    from tools.fast_program_search import compare_profiles
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_freeze_training_run" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_freeze_training_run.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_freeze_training_run.py:11: in &lt;module&gt;
+    module = importlib.import_module("modal_apps.freeze_training_run")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_griddd_qed_protocol" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_griddd_qed_protocol.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_griddd_qed_protocol.py:16: in &lt;module&gt;
+    from modal_apps.griddd_qed_app import (
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_legacy_evaluation_cache" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_legacy_evaluation_cache.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_legacy_evaluation_cache.py:6: in &lt;module&gt;
+    from scripts.train_tracelet_cnof_gate import (
+E   ModuleNotFoundError: No module named 'scripts'</error></testcase><testcase classname="" name="tests.test_materialize_editing_v2_candidate_provenance_modal_surface" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_materialize_editing_v2_candidate_provenance_modal_surface.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_materialize_editing_v2_candidate_provenance_modal_surface.py:12: in &lt;module&gt;
+    import modal_apps.materialize_editing_v2_candidate_provenance_app as launcher
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_materialize_editing_v2_candidates_modal_surface" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_materialize_editing_v2_candidates_modal_surface.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_materialize_editing_v2_candidates_modal_surface.py:9: in &lt;module&gt;
+    from modal_apps.materialize_editing_v2_candidates_app import (
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_materialize_editing_v2_refined_role_lane_app" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_materialize_editing_v2_refined_role_lane_app.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_materialize_editing_v2_refined_role_lane_app.py:9: in &lt;module&gt;
+    from modal_apps import materialize_editing_v2_refined_role_lane_app as refined_app
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_materialize_editing_v2_refined_role_lane_mapreduce_app" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_materialize_editing_v2_refined_role_lane_mapreduce_app.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_materialize_editing_v2_refined_role_lane_mapreduce_app.py:11: in &lt;module&gt;
+    from modal_apps import (
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_materialize_editing_v2_semantic_p50_source_recipe_app" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_materialize_editing_v2_semantic_p50_source_recipe_app.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_materialize_editing_v2_semantic_p50_source_recipe_app.py:12: in &lt;module&gt;
+    from modal_apps import (
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_materialize_editing_v2_semantic_p50_validation_baseline_app" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_materialize_editing_v2_semantic_p50_validation_baseline_app.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_materialize_editing_v2_semantic_p50_validation_baseline_app.py:12: in &lt;module&gt;
+    from modal_apps import (
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_materialize_editing_v2_semantic_t1_panel_cache_app" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_materialize_editing_v2_semantic_t1_panel_cache_app.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_materialize_editing_v2_semantic_t1_panel_cache_app.py:13: in &lt;module&gt;
+    from modal_apps import materialize_editing_v2_semantic_t1_panel_cache_app as t1_app
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_materialize_editing_v2_semantic_v4_migration_app" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_materialize_editing_v2_semantic_v4_migration_app.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_materialize_editing_v2_semantic_v4_migration_app.py:14: in &lt;module&gt;
+    from modal_apps import materialize_editing_v2_semantic_v4_migration_app as migration_app
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_materialize_editing_v2_split_pipeline_app" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_materialize_editing_v2_split_pipeline_app.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_materialize_editing_v2_split_pipeline_app.py:13: in &lt;module&gt;
+    from modal_apps import materialize_editing_v2_split_pipeline_app as split_app
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_modal_runtime" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_modal_runtime.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_modal_runtime.py:12: in &lt;module&gt;
+    modal_entrypoint = importlib.import_module("modal_apps.train_tracelet_gm")
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_modal_sharded_rollout_evaluation" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_modal_sharded_rollout_evaluation.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_modal_sharded_rollout_evaluation.py:5: in &lt;module&gt;
+    from modal_apps.evaluate_rollout_shards import (
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_pan_lung_filtering" time="0.000"><skipped message="collection skipped">('/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_pan_lung_filtering.py', 9, "Skipped: could not import 'joblib': No module named 'joblib'")</skipped></testcase><testcase classname="" name="tests.test_parent_edit_capabilities" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_parent_edit_capabilities.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_parent_edit_capabilities.py:18: in &lt;module&gt;
+    from tests.test_adaptive_program_optimizer import optimizer
+E   ModuleNotFoundError: No module named 'tests'</error></testcase><testcase classname="" name="tests.test_parent_edit_cycles" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_parent_edit_cycles.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_parent_edit_cycles.py:20: in &lt;module&gt;
+    from tests.test_adaptive_program_optimizer import optimizer
+E   ModuleNotFoundError: No module named 'tests'</error></testcase><testcase classname="" name="tests.test_parent_edit_model" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_parent_edit_model.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_parent_edit_model.py:16: in &lt;module&gt;
+    from tests.test_edit_program import graph
+E   ModuleNotFoundError: No module named 'tests'</error></testcase><testcase classname="" name="tests.test_particle_depth_report" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_particle_depth_report.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_particle_depth_report.py:4: in &lt;module&gt;
+    from tools.pmo_option_particle_report import proposal_depths, slot_policy_identity
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_pmo_cached_neighborhood" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_pmo_cached_neighborhood.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_pmo_cached_neighborhood.py:10: in &lt;module&gt;
+    from tools.pmo_cached_neighborhood import census, query_subset
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_pmo_cross_parent_selection" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_pmo_cross_parent_selection.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_pmo_cross_parent_selection.py:5: in &lt;module&gt;
+    from tools.pmo_cross_parent_selection import decision, predict_frozen, transfer_arms
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_pmo_dynamic_v21" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_pmo_dynamic_v21.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_pmo_dynamic_v21.py:27: in &lt;module&gt;
+    from tests.test_edit_program import ring_and_carbonyl
+E   ModuleNotFoundError: No module named 'tests'</error></testcase><testcase classname="" name="tests.test_pmo_local_guidance" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_pmo_local_guidance.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_pmo_local_guidance.py:16: in &lt;module&gt;
+    from tools.pmo_cross_parent_selection import predict_frozen
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_pmo_local_guidance_evidence" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_pmo_local_guidance_evidence.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_pmo_local_guidance_evidence.py:3: in &lt;module&gt;
+    from tools.pmo_local_guidance_evidence import ranking_evidence
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_pmo_local_query_selection" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_pmo_local_query_selection.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_pmo_local_query_selection.py:4: in &lt;module&gt;
+    from tools.pmo_local_query_selection import partition, query_arms
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_pmo_online_audit" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_pmo_online_audit.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_pmo_online_audit.py:7: in &lt;module&gt;
+    from tools.pmo_online_audit import summarize
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_pmo_persistent_lookahead" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_pmo_persistent_lookahead.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_pmo_persistent_lookahead.py:1: in &lt;module&gt;
+    from tools.pmo_persistent_lookahead import best_first, continuation_tasks
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_pmo_route_distillation" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_pmo_route_distillation.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_pmo_route_distillation.py:13: in &lt;module&gt;
+    from tools.pmo_route_distillation import (
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_process_v2_active8_fast_finalize_modal_surface" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_process_v2_active8_fast_finalize_modal_surface.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_process_v2_active8_fast_finalize_modal_surface.py:11: in &lt;module&gt;
+    import modal_apps.run_process_v2_active8_fast_finalize_app as launcher
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_process_v2_active8_modal_surface" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_process_v2_active8_modal_surface.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_process_v2_active8_modal_surface.py:12: in &lt;module&gt;
+    import modal_apps.run_process_v2_active8_app as launcher
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_process_v2_gate_zero_modal_surface" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_process_v2_gate_zero_modal_surface.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_process_v2_gate_zero_modal_surface.py:11: in &lt;module&gt;
+    import modal_apps.run_process_v2_gate_zero_app as launcher
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_process_v2_p50_modal_surface" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_process_v2_p50_modal_surface.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_process_v2_p50_modal_surface.py:14: in &lt;module&gt;
+    import modal_apps.run_process_v2_p50_app as launcher
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_process_v2_t1_collated_modal_surface" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_process_v2_t1_collated_modal_surface.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_process_v2_t1_collated_modal_surface.py:7: in &lt;module&gt;
+    from modal_apps import run_process_v2_t1_app as launcher
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_process_v2_t1_modal_surface" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_process_v2_t1_modal_surface.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_process_v2_t1_modal_surface.py:14: in &lt;module&gt;
+    import modal_apps.run_process_v2_t1_app as launcher
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_process_v2_t1_publication_recovery" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_process_v2_t1_publication_recovery.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_process_v2_t1_publication_recovery.py:8: in &lt;module&gt;
+    from modal_apps import run_process_v2_t1_app as recovery
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_process_v2_t1_terminal_audit" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_process_v2_t1_terminal_audit.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_process_v2_t1_terminal_audit.py:5: in &lt;module&gt;
+    from modal_apps import run_process_v2_t1_app as app
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_program_campaign" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_program_campaign.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_program_campaign.py:15: in &lt;module&gt;
+    from tests.test_edit_program import ring_and_carbonyl
+E   ModuleNotFoundError: No module named 'tests'</error></testcase><testcase classname="" name="tests.test_program_mutation" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_program_mutation.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_program_mutation.py:17: in &lt;module&gt;
+    from tests.test_edit_program import graph, ring_and_carbonyl
+E   ModuleNotFoundError: No module named 'tests'</error></testcase><testcase classname="" name="tests.test_program_ranking" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_program_ranking.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_program_ranking.py:3: in &lt;module&gt;
+    from tools.pmo_program_ranking import ranking_metrics, reconcile
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_program_transfer" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_program_transfer.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_program_transfer.py:10: in &lt;module&gt;
+    from tests.test_edit_program import graph, ring_and_carbonyl
+E   ModuleNotFoundError: No module named 'tests'</error></testcase><testcase classname="" name="tests.test_property_conditioning" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_property_conditioning.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_property_conditioning.py:26: in &lt;module&gt;
+    from scripts.evaluate_property_conditioned_rollouts import _rank_correlation
+E   ModuleNotFoundError: No module named 'scripts'</error></testcase><testcase classname="" name="tests.test_qed_successor_guidance" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_qed_successor_guidance.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_qed_successor_guidance.py:6: in &lt;module&gt;
+    from scripts.evaluate_qed_successor_guidance import (
+E   ModuleNotFoundError: No module named 'scripts'</error></testcase><testcase classname="" name="tests.test_refine_editing_v2_split_assignment_app" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_refine_editing_v2_split_assignment_app.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_refine_editing_v2_split_assignment_app.py:13: in &lt;module&gt;
+    from modal_apps import refine_editing_v2_split_assignment_app as refine_app
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_ring_expansion" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_ring_expansion.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_ring_expansion.py:35: in &lt;module&gt;
+    from tools.ring_expansion_audit import fixture_law, initial
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_rollout_checkpoint_evaluation" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_rollout_checkpoint_evaluation.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_rollout_checkpoint_evaluation.py:22: in &lt;module&gt;
+    from scripts.evaluate_tracelet_rollouts import (
+E   ModuleNotFoundError: No module named 'scripts'</error></testcase><testcase classname="" name="tests.test_route_distilled_dynamic_optimizer" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_route_distilled_dynamic_optimizer.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_route_distilled_dynamic_optimizer.py:23: in &lt;module&gt;
+    from tools.t4_route_policy_select import actor_selection_gate
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_route_distilled_program_policy" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_route_distilled_program_policy.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_route_distilled_program_policy.py:24: in &lt;module&gt;
+    from tools.t4_route_distillation import _json_ready
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_route_proposal_quality" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_route_proposal_quality.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_route_proposal_quality.py:15: in &lt;module&gt;
+    from tools.t4_route_proposal_quality import run
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_run_editing_v2_semantic_gate_zero_app" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_run_editing_v2_semantic_gate_zero_app.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_run_editing_v2_semantic_gate_zero_app.py:11: in &lt;module&gt;
+    from modal_apps import run_editing_v2_semantic_gate_zero_app as gate_app
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_run_editing_v2_semantic_p50_app" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_run_editing_v2_semantic_p50_app.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_run_editing_v2_semantic_p50_app.py:15: in &lt;module&gt;
+    from modal_apps import run_editing_v2_semantic_p50_app as launcher
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_run_editing_v2_semantic_t1_capacity_app" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_run_editing_v2_semantic_t1_capacity_app.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_run_editing_v2_semantic_t1_capacity_app.py:10: in &lt;module&gt;
+    from modal_apps import build_editing_v2_semantic_t1_successor_cache_app as cache_app
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_scored_program_replay" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_scored_program_replay.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_scored_program_replay.py:7: in &lt;module&gt;
+    from tools.prepare_scored_program_replay import normalize_endpoint_mass
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_semantic_modal_provenance_mount_closure" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_semantic_modal_provenance_mount_closure.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_semantic_modal_provenance_mount_closure.py:11: in &lt;module&gt;
+    from modal_apps import build_editing_v2_semantic_t1_successor_cache_app as cache_app
+E   ModuleNotFoundError: No module named 'modal_apps'</error></testcase><testcase classname="" name="tests.test_sharded_path_cache" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_sharded_path_cache.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_sharded_path_cache.py:9: in &lt;module&gt;
+    from scripts.train_tracelet_cnof_gate import (
+E   ModuleNotFoundError: No module named 'scripts'</error></testcase><testcase classname="" name="tests.test_t4_append_contract_audit" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_append_contract_audit.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_append_contract_audit.py:13: in &lt;module&gt;
+    from tools.t4_append_contract_audit import SCHEMA, audit_fixture
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_t4_complete_region_runtime_audit" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_complete_region_runtime_audit.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_complete_region_runtime_audit.py:8: in &lt;module&gt;
+    from tools.t4_complete_region_runtime_audit import DEFAULT_CONTRACT, load_contract
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_t4_curriculum_review" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_curriculum_review.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_curriculum_review.py:7: in &lt;module&gt;
+    from tools.review_t4_program_curriculum import validate_outcomes
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_t4_donor_report" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_donor_report.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_donor_report.py:3: in &lt;module&gt;
+    from tools.t4_donor_report import validate_locked_row
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_t4_endpoint_selection" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_endpoint_selection.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_endpoint_selection.py:15: in &lt;module&gt;
+    from tools.t4_ring_quality_audit import benchmark_limits, ring_descriptors
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_t4_expanded_balanced_compositional_generator" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_expanded_balanced_compositional_generator.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_expanded_balanced_compositional_generator.py:10: in &lt;module&gt;
+    from tools.t4_compositional_structural_subgoal_generator import (
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_t4_feedback_audit" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_feedback_audit.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_feedback_audit.py:7: in &lt;module&gt;
+    from tools.t4_warm_audit import report
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_t4_known_good_transformation_forensics" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_known_good_transformation_forensics.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_known_good_transformation_forensics.py:8: in &lt;module&gt;
+    from tools.t4_known_good_transformation_forensics import (
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_t4_no_complete_routes" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_no_complete_routes.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_no_complete_routes.py:29: in &lt;module&gt;
+    from tools.t4_no_complete_routes import _preflight_code_revision
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_t4_partial_audit" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_partial_audit.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_partial_audit.py:7: in &lt;module&gt;
+    from tools import t4_partial_audit
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_t4_program_curriculum" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_program_curriculum.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_program_curriculum.py:6: in &lt;module&gt;
+    from tests.test_edit_program import ring_and_carbonyl
+E   ModuleNotFoundError: No module named 'tests'</error></testcase><testcase classname="" name="tests.test_t4_program_pool_review" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_program_pool_review.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_program_pool_review.py:5: in &lt;module&gt;
+    from tools.review_t4_program_pool import arm_summary
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_t4_program_replay_audit" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_program_replay_audit.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_program_replay_audit.py:10: in &lt;module&gt;
+    from tests.test_t4_append_contract_audit import fixture
+E   ModuleNotFoundError: No module named 'tests'</error></testcase><testcase classname="" name="tests.test_t4_program_vocabulary_audit" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_program_vocabulary_audit.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_program_vocabulary_audit.py:9: in &lt;module&gt;
+    from tools.t4_program_vocabulary_audit import (
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_t4_ring_feasibility" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_ring_feasibility.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_ring_feasibility.py:3: in &lt;module&gt;
+    from tools.t4_ring_feasibility import Properties, fingerprint_accounting, refinement_start
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_t4_route_diagnosis" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_route_diagnosis.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_route_diagnosis.py:3: in &lt;module&gt;
+    from diagnostics.t4_route_diagnosis.analyze import flatten
+E   ModuleNotFoundError: No module named 'diagnostics.t4_route_diagnosis'</error></testcase><testcase classname="" name="tests.test_t4_route_policy_comparison" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_route_policy_comparison.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_route_policy_comparison.py:19: in &lt;module&gt;
+    from tools.t4_route_policy_comparison import _select_folds, _select_test_sources
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_t4_second_generation" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_second_generation.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_second_generation.py:11: in &lt;module&gt;
+    from tests.test_edit_program import ring_and_carbonyl
+E   ModuleNotFoundError: No module named 'tests'</error></testcase><testcase classname="" name="tests.test_t4_target_conditioned_utility_selector" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_target_conditioned_utility_selector.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_target_conditioned_utility_selector.py:16: in &lt;module&gt;
+    from tools.t4_target_conditioned_utility_selector import (
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_t4_target_path_values" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_target_path_values.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_target_path_values.py:5: in &lt;module&gt;
+    from tools.t4_target_path_values import curve_summary, score_saved_path
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_t4_utility_data_acquisition_lock" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_utility_data_acquisition_lock.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_utility_data_acquisition_lock.py:4: in &lt;module&gt;
+    from tools.t4_utility_data_acquisition_lock import canonical_hash, run
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_t4_warm_audit" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_t4_warm_audit.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_t4_warm_audit.py:11: in &lt;module&gt;
+    from tools.t4_warm_audit import candidate_summary, counts, report
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.test_training_resume_baseline" time="0.000"><error message="collection failure">ImportError while importing test module '/private/tmp/compose-t4-objective-dynamic-reset-20260916/tests/test_training_resume_baseline.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/rmaganti/.local/share/uv/python/cpython-3.12.9-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_training_resume_baseline.py:5: in &lt;module&gt;
+    from scripts.train_tracelet_cnof_gate import _validation_baseline_for_run
+E   ModuleNotFoundError: No module named 'scripts'</error></testcase></testsuite></testsuites>

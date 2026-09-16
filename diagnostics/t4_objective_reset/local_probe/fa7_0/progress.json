@@ -1,0 +1,1 @@
+{"payload":{"attempts":18,"cell":"fa7_0","cursor":73,"elapsed_seconds":87.24698262500169,"eligible":0,"lane_counts":{"shallow":9,"structured":9},"new_oracle_calls":0,"phase":"bootstrap","round":3,"status_counts":{"duplicate":2,"ineligible":16}},"payload_sha256":"f046ecdc6c2b35f990e671087516ba98771c03b2d1203d6caf2cb67110033f17"}
