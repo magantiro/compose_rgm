@@ -1,5 +1,18 @@
 """Parallel WHERE-support audit across containers. Zero oracle calls.
 
+REGION DEFINITION, and the correction that forced it. A first version of this audit took
+the teacher region to be every slot appearing in the region's primitive payloads. That set
+includes CREATED slot indices -- atoms the transformation inserts, numbered at or above
+the source's real-atom count -- and 80.4% of teacher regions carry at least one. The
+runtime region is `assignment` plus `changed_original_slots`, which by construction only
+ever names SOURCE slots. So four fifths of the comparison was uncoverable no matter what
+the sampler proposed, and it reported 10.6% coverage with 0 of 42 single-region routes
+covered. That number was an artifact of comparing two different objects.
+
+What a WHERE proposal can be judged on is the ORIGINAL slots a transformation must
+occupy. Created atoms are a consequence of the program, not a precondition of the region,
+so they are excluded here.
+
 The question is support coverage, not teacher imitation: for every strong-route structural
 region, does the production sampler ever propose a region that CONTAINS it? If it does
 not, reward was never given the chance to select that region, and no acquisition rule
@@ -41,6 +54,7 @@ def audit_shard(payload: str) -> str:
 
     import numpy as np
 
+    from compose_v4.chem.molecular_graph import is_element
     from compose_v4.control.dependency_region_program import dependency_region_program
     from compose_v4.control.dynamic_program_synthesis import synthesize_dynamic_program
     from compose_v4.rewrite.trace_shard import decode_state
@@ -70,6 +84,7 @@ def audit_shard(payload: str) -> str:
             refused += 1
             continue
 
+        real_atoms = int(np.count_nonzero(is_element(source.atom_types)))
         wanted = []
         for component in program["components"]:
             touched = set()
@@ -83,8 +98,10 @@ def audit_shard(payload: str) -> str:
                     slot = neighbour[0] if isinstance(neighbour, (list, tuple)) else neighbour
                     if isinstance(slot, int):
                         touched.add(slot)
-            if touched:
-                wanted.append(frozenset(touched))
+            # keep only ORIGINAL slots: created indices cannot appear in a runtime region
+            original = {slot for slot in touched if slot < real_atoms}
+            if original:
+                wanted.append(frozenset(original))
         if not wanted:
             continue
 
