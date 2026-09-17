@@ -61,3 +61,54 @@ CAUTION on a near miss: the first run of this reported 0 varyable bindings for a
 patches, because the census field is `assignments` and the probe read a non-existent
 `bindings` attribute through `getattr(..., default)`. A defaulted attribute read returns a
 confident, wrong, and entirely plausible number.
+
+---
+
+# Minimal intervention closures: the block generator
+
+Zero oracle calls. Same 147 teacher subgoals.
+
+To intervene on a semantic decision, find the smallest set of decisions whose existence,
+domain or value must also change for the program to stay legal, resample exactly those,
+and preserve the maximal compatible complement. A free coordinate is a singleton closure
+and a coupled coordinate is a larger one, from one rule rather than two mechanisms.
+
+| coordinate | kind | tried | legal | round-trips | complement preserved | binds to source | mean closure |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| element | free | 702 | 702 | 702 | 702 | 702 | 1.0 |
+| bond_order | free | 294 | 294 | 294 | 294 | 294 | 1.0 |
+| scale (`output_count`) | BLOCK | 365 | 281 | 281 | 281 | 281 | **3.6** |
+| edge_presence | BLOCK | 147 | 147 | **72** | 147 | 147 | 2.0 |
+
+Closure size 3.6 against 1.0 is the grammar-induced coupling made concrete: a scale
+intervention moves the created-atom count plus the roles and bonds it drags, and nothing
+else. `complement_preserved` verifies the source context never moved, which is what the
+parent-cancellation argument requires.
+
+## The JAK2 gate is met
+
+Scale-block siblings per target (legal and round-trip coincide exactly for scale, so these
+are usable counts):
+
+| target | scale siblings | of attempts | edge siblings |
+| --- | ---: | ---: | ---: |
+| **jak2** | **73** | 81 (90.1%) | 32 |
+| parp1 | 71 | 79 (89.9%) | 28 |
+| braf | 42 | 54 (77.8%) | 23 |
+| fa7 | 58 | 90 (64.4%) | 38 |
+| 5ht1b | 37 | 61 (60.7%) | 26 |
+
+JAK2 has the HIGHEST block-intervention rate of all five targets, on the target where the
+binding coordinate offers no alternatives at all (0% of patches). The coupled-block
+mechanism therefore supplies exactly the contrast JAK2 was missing, and a JAK2 matched
+bundle no longer has to rely on element identity alone.
+
+## Defect: half of edge interventions do not round-trip
+
+`edge_presence` is legal on 147 of 147 and round-trips on only 72. Those 75 encode to a
+stream that decodes back to a DIFFERENT patch, so the runtime would execute something
+other than what was constructed. They are not safe siblings.
+
+ADMISSION RULE: a candidate is usable only if `legal AND round_trips AND
+complement_preserved AND binds`. Legality alone is not sufficient and was not sufficient
+here. `scale` is unaffected (281 of 281 round-trip), so the JAK2 result stands.

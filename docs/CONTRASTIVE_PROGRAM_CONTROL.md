@@ -74,16 +74,33 @@ This is the sense in which the process is semi-Markov: options have variable dur
 primitive time and unit duration in oracle time. No discounting over primitive time
 appears anywhere, which is what stops M3 from re-entering through the back door.
 
-### 1.2 Where the randomness lives (ASSUMED, matching the implementation)
+### 1.2 Where the randomness lives, and the reference law (ASSUMED)
 
-    P_0(tau) = mu(G_0) * prod_t q_0(O_t | G_t)
+    P_ref(tau) = mu(G_0) * prod_t q_ref(O_t | G_t)
 
-with no executor term, because `T` is deterministic and unchanged under control. This is
-a real structural simplification relative to diffusion fine-tuning, where the transition
-kernel is itself stochastic and controlled: here every term except `q_0` cancels in a
-likelihood ratio. The controlled law must share the reference support,
-`pi << q_0`, which is enforced by construction if `pi` only reweights options the
-generator can emit.
+with no executor term, because `T` is deterministic and unchanged under control. This is a
+real structural simplification relative to diffusion fine-tuning, where the transition
+kernel is itself stochastic and controlled: here the executor factor is a delta on both
+sides and cancels, leaving only the option law in any likelihood ratio.
+
+**Support is a hard requirement, not a detail.** Control can only reweight what the
+reference already emits: if `q_ref(O|G) = 0` for a legal option, no reward tilt of any
+strength reaches it, and the option is unreachable for the entire run. A purely
+route-derived law is exactly the kind that would assign zero mass to legal novel options,
+because it is fitted on 77 trajectories. The reference is therefore a mixture
+
+    q_ref  =  (1 - eps) * q_route  +  eps * q_generic,
+
+where `q_route` carries the route-derived chemistry prior and `q_generic` preserves
+support over the legal COMPOSE option space -- the fiber that `token_domain` and the
+executor already define. This buys absolute continuity by construction:
+
+    pi << q_ref   whenever   pi only reweights options with q_generic(O|G) > 0.
+
+`eps` should be set by a support/reachability requirement, NOT tuned against T4 scores;
+tuning it on the benchmark would make the reachability guarantee a fitted quantity.
+AUDIT REQUIRED (open): measure whether the fitted `q_route` actually zeroes legal block
+interventions that the controller must be able to discover.
 
 ### 1.3 The option factorisation the measurement licenses
 
@@ -102,10 +119,10 @@ By M4, `theta` splits into a free part and coupled blocks:
 
 so the reference law factors as
 
-    q_0(O|G) = q_0(H|G)
-             * q_0(theta_blocks | H, G)
-             * prod_{c in free} q_0(theta_free,c | H, theta_blocks, G)
-             * q_0(beta | H, theta, G).
+    q_ref(O|G) = q_ref(H|G)
+               * q_ref(theta_blocks | H, G)
+               * prod_{c in free} q_ref(theta_free,c | H, theta_blocks, G)
+               * q_ref(beta | H, theta, G).
 
 This is the honest version of "hierarchical credit". Credit flows to `H`, to each BLOCK,
 and to each free coordinate -- not to fifteen primitives, and not to a factorial grid
@@ -115,23 +132,23 @@ over coordinates that cannot move independently.
 
 For terminal utility `U` and inverse temperature `beta_T`,
 
-    P*(tau)  =  (1/Z) P_0(tau) exp( beta_T * U(G_K) ),
+    P*(tau)  =  (1/Z) P_ref(tau) exp( beta_T * U(G_K) ),
 
-    h(G)     =  E_{P_0}[ exp( beta_T * U(G_K) ) | G ],
+    h(G)     =  E_{P_ref}[ exp( beta_T * U(G_K) ) | G ],
 
-    pi*(O|G) ∝ q_0(O|G) * h(T(G,O)) / h(G).
+    pi*(O|G) ∝ q_ref(O|G) * h(T(G,O)) / h(G).
 
 Because `T` is deterministic, `h(T(G,O))` is an ordinary function evaluation rather than
 an expectation over successors -- the Doob ratio is computable wherever `h` is. The
 Radon-Nikodym derivative is
 
-    dP_pi/dP_0 (tau) = prod_t [ pi(O_t|G_t) / q_0(O_t|G_t) ]
+    dP_pi/dP_ref (tau) = prod_t [ pi(O_t|G_t) / q_ref(O_t|G_t) ]
 
 and, by 1.3, factors over `H`, blocks, free coordinates and binding. That factorisation
 is the formal statement of hierarchical credit.
 
 **Path cost (OPTIONAL).** Since many option sequences reach the same `G*`, terminal
-reward alone leaves their relative probability inherited from `q_0`. A path cost
+reward alone leaves their relative probability inherited from `q_ref`. A path cost
 `U(G_K) - lambda C(tau)` can penalise fragile execution or gratuitous destruction. By M3,
 `C` must NOT be program length.
 
@@ -290,7 +307,7 @@ the REFERENCE DYNAMICS, never the answers.
 | which coordinates are free vs coupled blocks | `token_domain` + decode; M4 | MEASURED |
 | legal counterfactual family for a coordinate | `token_domain` frozen fiber | MEASURED |
 | binding support per target | `attachment_bindings`; M4 | MEASURED |
-| `q_0(H | G)` and `q_0(theta | H,G)` | route corpus, context-relative roles | TO FIT |
+| `q_route(H | G)` and `q_route(theta | H,G)` | route corpus, context-relative roles | TO FIT |
 | prior over `Theta` (structural effects) | archive contrasts, observational | TO FIT |
 | widening order | hierarchy in 1.3 | DERIVED |
 
@@ -298,7 +315,7 @@ The distinction that must survive into every artifact:
 
     route-informed DIAGNOSTIC     evaluated route available -- debugging only
     route-informed DEVELOPMENT    other routes available, this cell's route withheld
-    held-route QUALIFICATION      no route from this target contributes to q_0
+    held-route QUALIFICATION      no route from this target contributes to q_route
 
 A result from the first is never reported as autonomous discovery.
 
@@ -311,7 +328,7 @@ A result from the first is never reported as autonomous discovery.
    dependency need coherent re-decode, and on JAK2 those carry most of the available
    contrast because binding offers none. Until it exists, a JAK2 bundle can vary only
    element identity and bond order.
-3. `q_0(H|G)` has not been fit at the hypothesis level; the fitted `q_theta` was at
+3. `q_route(H|G)` has not been fit at the hypothesis level; the fitted `q_theta` was at
    `(site, mode)` level and was measured to be value-blind.
 4. No evidence yet that a first contrastive batch improves the targeting of a second.
    That is the gate before any scaled run, and it needs prospective calls -- a replay
