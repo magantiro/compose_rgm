@@ -209,3 +209,72 @@ everywhere, so the tail is expensive on every target.
 
 The class-level transfer (0.866) and the probability-level transfer (1.7x mean, 0.8x
 worst) are different quantities and should not be quoted as one result.
+
+---
+
+# Does conditioning improve the route prior? No.
+
+Leave-target-out held-out NLL over the 30 anchor classes, 147 observations:
+
+| conditioning | mean NLL | vs marginal |
+| --- | ---: | ---: |
+| marginal | 3.304 | -- |
+| given the previous option | 3.252 | -0.052 |
+| given local source context | 3.299 | -0.005 |
+| given molecule features | 5.001 | **+1.696** |
+| uniform over 30 classes | 3.401 | +0.097 |
+
+Nothing transferable beyond the marginal, and the marginal itself beats uniform by only
+0.097 nats. Molecule features actively hurt, matching the macro-goal audit where the same
+descriptors lost to a majority baseline.
+
+CONSEQUENCE, taken as simplification rather than added capacity: routes supply the
+intervention GEOMETRY -- anchor vocabulary, closure structure, support, and the
+option-transition prior (global to local 0.625) -- and target reward supplies the
+probability adaptation. Do not regularise a controller strongly toward `q_route`: it is
+worse than uniform on BRAF and PARP1 by the accessibility measure above.
+
+---
+
+# Credit-horizon audit: how far ahead must an option be credited?
+
+21 runs, 7,352 option nodes with descendants. One option is one charged call.
+`Delta_h(O)` is the best improvement over `O` among descendants within `h` option
+generations.
+
+| horizon h | rank correlation with Delta_1 | mean Delta_h | fraction > 0 |
+| ---: | ---: | ---: | ---: |
+| 1 | 1.000 | 0.645 | 0.566 |
+| 2 | 0.863 | 0.817 | 0.659 |
+| **3** | **0.820** | **0.884** | **0.682** |
+| 5 | 0.792 | 0.925 | 0.690 |
+| 8 | 0.785 | 0.937 | 0.691 |
+
+Ancestors of the eventual winner, up to six generations back (n=99):
+
+| | |
+| --- | ---: |
+| attractive at h=1 (`Delta_1 > 0`) | 0.808 |
+| attractive at h=3 | 0.980 |
+| attractive at h=5 | 1.000 |
+| **`Delta_1 <= 0` but `Delta_3 > 0`** | **0.172** |
+| `Delta_1 <= 0` but `Delta_5 > 0` | 0.192 |
+| median `Delta_1` / `Delta_3` / `Delta_5` | +0.50 / +1.30 / +1.90 |
+
+**NECESSARY HORIZON IS ABOUT THREE OPTIONS.** Everything saturates there: the rank
+correlation stabilises (0.820 at h=3 against 0.785 at h=8), mean `Delta` flattens, and
+98% of winner ancestors are already attractive. Extending from 3 to 5 buys two percentage
+points and beyond 5 buys nothing.
+
+A one-step rule is INSUFFICIENT BUT NOT BROKEN: it identifies 80.8% of winner ancestors
+and misses 17.2%. That is a minority correction, not a reversal, and should not be
+reported as "myopic search fails".
+
+CONSEQUENCE: a receding-horizon belief-space rollout of DEPTH 3 is the right
+approximation to `V_b`. Deeper lookahead is unsupported by this evidence, and with a prior
+that is worse than uniform on two of five targets, compounding prediction error over a
+long rollout is a real risk rather than a theoretical one.
+
+CAVEAT: these are behaviour-policy descendants -- only the continuations the historical
+search actually generated -- so every `Delta_h` is a LOWER bound on true continuation
+value, and the necessary horizon could be longer under a policy that expands differently.
