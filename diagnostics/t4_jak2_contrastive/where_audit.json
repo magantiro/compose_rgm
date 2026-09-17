@@ -1,0 +1,1019 @@
+[
+ {
+  "target": "jak2",
+  "region_size": 8,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.5,
+  "mean_overlap": 0.17,
+  "multi_region": false
+ },
+ {
+  "target": "braf",
+  "region_size": 26,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.5,
+  "mean_overlap": 0.17230769230769233,
+  "multi_region": false
+ },
+ {
+  "target": "fa7",
+  "region_size": 6,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.8333333333333334,
+  "mean_overlap": 0.1383333333333333,
+  "multi_region": true
+ },
+ {
+  "target": "fa7",
+  "region_size": 8,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.875,
+  "mean_overlap": 0.145,
+  "multi_region": true
+ },
+ {
+  "target": "braf",
+  "region_size": 21,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.7142857142857143,
+  "mean_overlap": 0.16285714285714284,
+  "multi_region": false
+ },
+ {
+  "target": "fa7",
+  "region_size": 4,
+  "proposals": 100,
+  "fully_covered": 13,
+  "best_overlap": 1.0,
+  "mean_overlap": 0.2875,
+  "multi_region": true
+ },
+ {
+  "target": "fa7",
+  "region_size": 19,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.5789473684210527,
+  "mean_overlap": 0.20157894736842105,
+  "multi_region": true
+ },
+ {
+  "target": "braf",
+  "region_size": 23,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.6086956521739131,
+  "mean_overlap": 0.1678260869565217,
+  "multi_region": false
+ },
+ {
+  "target": "jak2",
+  "region_size": 11,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.2727272727272727,
+  "mean_overlap": 0.10363636363636364,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 4,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.75,
+  "mean_overlap": 0.24,
+  "multi_region": true
+ },
+ {
+  "target": "parp1",
+  "region_size": 16,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.25,
+  "mean_overlap": 0.095625,
+  "multi_region": false
+ },
+ {
+  "target": "5ht1b",
+  "region_size": 18,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.7222222222222222,
+  "mean_overlap": 0.2544444444444445,
+  "multi_region": false
+ },
+ {
+  "target": "fa7",
+  "region_size": 5,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.4,
+  "mean_overlap": 0.07800000000000001,
+  "multi_region": true
+ },
+ {
+  "target": "fa7",
+  "region_size": 15,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.4,
+  "mean_overlap": 0.08933333333333332,
+  "multi_region": true
+ },
+ {
+  "target": "5ht1b",
+  "region_size": 5,
+  "proposals": 100,
+  "fully_covered": 30,
+  "best_overlap": 1.0,
+  "mean_overlap": 0.446,
+  "multi_region": true
+ },
+ {
+  "target": "5ht1b",
+  "region_size": 2,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.5,
+  "mean_overlap": 0.03,
+  "multi_region": true
+ },
+ {
+  "target": "parp1",
+  "region_size": 14,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.14285714285714285,
+  "mean_overlap": 0.05,
+  "multi_region": true
+ },
+ {
+  "target": "parp1",
+  "region_size": 4,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.75,
+  "mean_overlap": 0.15,
+  "multi_region": true
+ },
+ {
+  "target": "5ht1b",
+  "region_size": 24,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.2916666666666667,
+  "mean_overlap": 0.10125,
+  "multi_region": false
+ },
+ {
+  "target": "5ht1b",
+  "region_size": 11,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.5454545454545454,
+  "mean_overlap": 0.14727272727272728,
+  "multi_region": true
+ },
+ {
+  "target": "5ht1b",
+  "region_size": 10,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.1,
+  "mean_overlap": 0.032,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 10,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.2,
+  "mean_overlap": 0.084,
+  "multi_region": false
+ },
+ {
+  "target": "5ht1b",
+  "region_size": 15,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.8,
+  "mean_overlap": 0.10666666666666666,
+  "multi_region": false
+ },
+ {
+  "target": "parp1",
+  "region_size": 15,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.5333333333333333,
+  "mean_overlap": 0.13399999999999998,
+  "multi_region": true
+ },
+ {
+  "target": "parp1",
+  "region_size": 11,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.18181818181818182,
+  "mean_overlap": 0.03363636363636363,
+  "multi_region": true
+ },
+ {
+  "target": "parp1",
+  "region_size": 16,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.25,
+  "mean_overlap": 0.095625,
+  "multi_region": true
+ },
+ {
+  "target": "parp1",
+  "region_size": 2,
+  "proposals": 100,
+  "fully_covered": 14,
+  "best_overlap": 1.0,
+  "mean_overlap": 0.155,
+  "multi_region": true
+ },
+ {
+  "target": "parp1",
+  "region_size": 2,
+  "proposals": 100,
+  "fully_covered": 13,
+  "best_overlap": 1.0,
+  "mean_overlap": 0.26,
+  "multi_region": true
+ },
+ {
+  "target": "fa7",
+  "region_size": 15,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.6666666666666666,
+  "mean_overlap": 0.13399999999999998,
+  "multi_region": false
+ },
+ {
+  "target": "5ht1b",
+  "region_size": 22,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.2727272727272727,
+  "mean_overlap": 0.10318181818181818,
+  "multi_region": false
+ },
+ {
+  "target": "fa7",
+  "region_size": 4,
+  "proposals": 100,
+  "fully_covered": 14,
+  "best_overlap": 1.0,
+  "mean_overlap": 0.255,
+  "multi_region": true
+ },
+ {
+  "target": "fa7",
+  "region_size": 22,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.5,
+  "mean_overlap": 0.14363636363636365,
+  "multi_region": true
+ },
+ {
+  "target": "fa7",
+  "region_size": 6,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.8333333333333334,
+  "mean_overlap": 0.14833333333333334,
+  "multi_region": true
+ },
+ {
+  "target": "fa7",
+  "region_size": 10,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.8,
+  "mean_overlap": 0.122,
+  "multi_region": true
+ },
+ {
+  "target": "fa7",
+  "region_size": 22,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.4090909090909091,
+  "mean_overlap": 0.07590909090909091,
+  "multi_region": true
+ },
+ {
+  "target": "fa7",
+  "region_size": 3,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.6666666666666666,
+  "mean_overlap": 0.15,
+  "multi_region": true
+ },
+ {
+  "target": "parp1",
+  "region_size": 5,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.6,
+  "mean_overlap": 0.19399999999999998,
+  "multi_region": true
+ },
+ {
+  "target": "parp1",
+  "region_size": 9,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.3333333333333333,
+  "mean_overlap": 0.06444444444444444,
+  "multi_region": true
+ },
+ {
+  "target": "braf",
+  "region_size": 11,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.9090909090909091,
+  "mean_overlap": 0.24454545454545457,
+  "multi_region": true
+ },
+ {
+  "target": "braf",
+  "region_size": 13,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.7692307692307693,
+  "mean_overlap": 0.22384615384615386,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 11,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.2727272727272727,
+  "mean_overlap": 0.0890909090909091,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 3,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.6666666666666666,
+  "mean_overlap": 0.14333333333333334,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 11,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.2727272727272727,
+  "mean_overlap": 0.09909090909090908,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 4,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.75,
+  "mean_overlap": 0.185,
+  "multi_region": true
+ },
+ {
+  "target": "5ht1b",
+  "region_size": 24,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.25,
+  "mean_overlap": 0.0866666666666667,
+  "multi_region": false
+ },
+ {
+  "target": "5ht1b",
+  "region_size": 15,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.6666666666666666,
+  "mean_overlap": 0.22466666666666665,
+  "multi_region": false
+ },
+ {
+  "target": "parp1",
+  "region_size": 22,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.3181818181818182,
+  "mean_overlap": 0.11772727272727274,
+  "multi_region": false
+ },
+ {
+  "target": "braf",
+  "region_size": 7,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.8571428571428571,
+  "mean_overlap": 0.4028571428571429,
+  "multi_region": true
+ },
+ {
+  "target": "braf",
+  "region_size": 10,
+  "proposals": 100,
+  "fully_covered": 1,
+  "best_overlap": 1.0,
+  "mean_overlap": 0.251,
+  "multi_region": true
+ },
+ {
+  "target": "parp1",
+  "region_size": 19,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.15789473684210525,
+  "mean_overlap": 0.06526315789473686,
+  "multi_region": false
+ },
+ {
+  "target": "fa7",
+  "region_size": 12,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.75,
+  "mean_overlap": 0.1575,
+  "multi_region": false
+ },
+ {
+  "target": "jak2",
+  "region_size": 12,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.25,
+  "mean_overlap": 0.08833333333333332,
+  "multi_region": false
+ },
+ {
+  "target": "jak2",
+  "region_size": 20,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.55,
+  "mean_overlap": 0.18000000000000005,
+  "multi_region": false
+ },
+ {
+  "target": "5ht1b",
+  "region_size": 24,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.25,
+  "mean_overlap": 0.07291666666666667,
+  "multi_region": false
+ },
+ {
+  "target": "5ht1b",
+  "region_size": 21,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.6666666666666666,
+  "mean_overlap": 0.22285714285714284,
+  "multi_region": false
+ },
+ {
+  "target": "5ht1b",
+  "region_size": 16,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.8125,
+  "mean_overlap": 0.255625,
+  "multi_region": true
+ },
+ {
+  "target": "5ht1b",
+  "region_size": 3,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.3333333333333333,
+  "mean_overlap": 0.01,
+  "multi_region": true
+ },
+ {
+  "target": "fa7",
+  "region_size": 19,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.2631578947368421,
+  "mean_overlap": 0.06157894736842105,
+  "multi_region": true
+ },
+ {
+  "target": "fa7",
+  "region_size": 12,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.75,
+  "mean_overlap": 0.19833333333333333,
+  "multi_region": true
+ },
+ {
+  "target": "fa7",
+  "region_size": 25,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.4,
+  "mean_overlap": 0.05960000000000001,
+  "multi_region": false
+ },
+ {
+  "target": "fa7",
+  "region_size": 4,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.75,
+  "mean_overlap": 0.1675,
+  "multi_region": true
+ },
+ {
+  "target": "fa7",
+  "region_size": 9,
+  "proposals": 100,
+  "fully_covered": 24,
+  "best_overlap": 1.0,
+  "mean_overlap": 0.2611111111111111,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 23,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.5652173913043478,
+  "mean_overlap": 0.15695652173913044,
+  "multi_region": false
+ },
+ {
+  "target": "braf",
+  "region_size": 7,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.8571428571428571,
+  "mean_overlap": 0.4114285714285713,
+  "multi_region": true
+ },
+ {
+  "target": "braf",
+  "region_size": 11,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.9090909090909091,
+  "mean_overlap": 0.18545454545454543,
+  "multi_region": true
+ },
+ {
+  "target": "parp1",
+  "region_size": 14,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.14285714285714285,
+  "mean_overlap": 0.02214285714285714,
+  "multi_region": false
+ },
+ {
+  "target": "jak2",
+  "region_size": 13,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.5384615384615384,
+  "mean_overlap": 0.18615384615384614,
+  "multi_region": false
+ },
+ {
+  "target": "parp1",
+  "region_size": 16,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.25,
+  "mean_overlap": 0.09375,
+  "multi_region": false
+ },
+ {
+  "target": "fa7",
+  "region_size": 16,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.6875,
+  "mean_overlap": 0.128125,
+  "multi_region": false
+ },
+ {
+  "target": "jak2",
+  "region_size": 10,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.2,
+  "mean_overlap": 0.09699999999999999,
+  "multi_region": false
+ },
+ {
+  "target": "parp1",
+  "region_size": 25,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.28,
+  "mean_overlap": 0.1016,
+  "multi_region": false
+ },
+ {
+  "target": "jak2",
+  "region_size": 3,
+  "proposals": 100,
+  "fully_covered": 30,
+  "best_overlap": 1.0,
+  "mean_overlap": 0.32666666666666666,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 3,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.6666666666666666,
+  "mean_overlap": 0.26,
+  "multi_region": true
+ },
+ {
+  "target": "fa7",
+  "region_size": 10,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.4,
+  "mean_overlap": 0.05700000000000001,
+  "multi_region": true
+ },
+ {
+  "target": "fa7",
+  "region_size": 14,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.7142857142857143,
+  "mean_overlap": 0.11357142857142855,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 3,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.6666666666666666,
+  "mean_overlap": 0.25,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 8,
+  "proposals": 100,
+  "fully_covered": 2,
+  "best_overlap": 1.0,
+  "mean_overlap": 0.2325,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 13,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.23076923076923078,
+  "mean_overlap": 0.07230769230769231,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 3,
+  "proposals": 100,
+  "fully_covered": 9,
+  "best_overlap": 1.0,
+  "mean_overlap": 0.3133333333333333,
+  "multi_region": true
+ },
+ {
+  "target": "5ht1b",
+  "region_size": 19,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.8947368421052632,
+  "mean_overlap": 0.2205263157894737,
+  "multi_region": false
+ },
+ {
+  "target": "parp1",
+  "region_size": 16,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.25,
+  "mean_overlap": 0.109375,
+  "multi_region": false
+ },
+ {
+  "target": "parp1",
+  "region_size": 23,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.30434782608695654,
+  "mean_overlap": 0.10391304347826086,
+  "multi_region": false
+ },
+ {
+  "target": "jak2",
+  "region_size": 14,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.21428571428571427,
+  "mean_overlap": 0.08428571428571426,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 4,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.75,
+  "mean_overlap": 0.1925,
+  "multi_region": true
+ },
+ {
+  "target": "braf",
+  "region_size": 11,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.8181818181818182,
+  "mean_overlap": 0.18909090909090906,
+  "multi_region": true
+ },
+ {
+  "target": "braf",
+  "region_size": 13,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.8461538461538461,
+  "mean_overlap": 0.25153846153846154,
+  "multi_region": true
+ },
+ {
+  "target": "parp1",
+  "region_size": 13,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.15384615384615385,
+  "mean_overlap": 0.05538461538461539,
+  "multi_region": false
+ },
+ {
+  "target": "braf",
+  "region_size": 14,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.8571428571428571,
+  "mean_overlap": 0.23999999999999996,
+  "multi_region": false
+ },
+ {
+  "target": "braf",
+  "region_size": 24,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.625,
+  "mean_overlap": 0.14291666666666666,
+  "multi_region": true
+ },
+ {
+  "target": "braf",
+  "region_size": 9,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.8888888888888888,
+  "mean_overlap": 0.27222222222222225,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 15,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.6666666666666666,
+  "mean_overlap": 0.19066666666666662,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 3,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.6666666666666666,
+  "mean_overlap": 0.2766666666666666,
+  "multi_region": true
+ },
+ {
+  "target": "fa7",
+  "region_size": 12,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.8333333333333334,
+  "mean_overlap": 0.16333333333333333,
+  "multi_region": false
+ },
+ {
+  "target": "fa7",
+  "region_size": 13,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.7692307692307693,
+  "mean_overlap": 0.15615384615384614,
+  "multi_region": false
+ },
+ {
+  "target": "braf",
+  "region_size": 24,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.5,
+  "mean_overlap": 0.13708333333333333,
+  "multi_region": false
+ },
+ {
+  "target": "fa7",
+  "region_size": 8,
+  "proposals": 100,
+  "fully_covered": 3,
+  "best_overlap": 1.0,
+  "mean_overlap": 0.185,
+  "multi_region": true
+ },
+ {
+  "target": "fa7",
+  "region_size": 4,
+  "proposals": 100,
+  "fully_covered": 28,
+  "best_overlap": 1.0,
+  "mean_overlap": 0.315,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 12,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.25,
+  "mean_overlap": 0.08833333333333333,
+  "multi_region": false
+ },
+ {
+  "target": "parp1",
+  "region_size": 13,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.07692307692307693,
+  "mean_overlap": 0.034615384615384624,
+  "multi_region": false
+ },
+ {
+  "target": "jak2",
+  "region_size": 12,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.25,
+  "mean_overlap": 0.11499999999999998,
+  "multi_region": false
+ },
+ {
+  "target": "fa7",
+  "region_size": 16,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.375,
+  "mean_overlap": 0.080625,
+  "multi_region": false
+ },
+ {
+  "target": "parp1",
+  "region_size": 19,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.15789473684210525,
+  "mean_overlap": 0.06736842105263158,
+  "multi_region": false
+ },
+ {
+  "target": "braf",
+  "region_size": 24,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.5416666666666666,
+  "mean_overlap": 0.13666666666666666,
+  "multi_region": true
+ },
+ {
+  "target": "braf",
+  "region_size": 8,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.875,
+  "mean_overlap": 0.32125,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 11,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.2727272727272727,
+  "mean_overlap": 0.10363636363636364,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 4,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.75,
+  "mean_overlap": 0.17,
+  "multi_region": true
+ },
+ {
+  "target": "parp1",
+  "region_size": 14,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.42857142857142855,
+  "mean_overlap": 0.1521428571428571,
+  "multi_region": true
+ },
+ {
+  "target": "parp1",
+  "region_size": 8,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.5,
+  "mean_overlap": 0.1075,
+  "multi_region": true
+ },
+ {
+  "target": "braf",
+  "region_size": 32,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.4375,
+  "mean_overlap": 0.1315625,
+  "multi_region": false
+ },
+ {
+  "target": "fa7",
+  "region_size": 3,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.6666666666666666,
+  "mean_overlap": 0.10666666666666666,
+  "multi_region": true
+ },
+ {
+  "target": "fa7",
+  "region_size": 23,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.30434782608695654,
+  "mean_overlap": 0.07347826086956522,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 5,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.8,
+  "mean_overlap": 0.24200000000000002,
+  "multi_region": true
+ },
+ {
+  "target": "jak2",
+  "region_size": 3,
+  "proposals": 100,
+  "fully_covered": 0,
+  "best_overlap": 0.6666666666666666,
+  "mean_overlap": 0.15999999999999998,
+  "multi_region": true
+ }
+]
