@@ -65,6 +65,25 @@ GENERIC_MODULES = (
 )
 MODULE_COUNT_PROBABILITIES = (0.4, 0.4, 0.2)
 NEAR_CAPACITY_MODULE_COUNT_PROBABILITIES = (0.15, 0.6, 0.25)
+# The three-module ceiling was a v0 design choice, not a property of the compiler. It
+# binds hard: payoff from a benchmark root sits at 15-22 primitives and Dynamic proposes
+# a median of 5.5, so the ceiling is one candidate explanation for why autonomous runs
+# never reach the productive band. Counts beyond the declared table decay geometrically
+# rather than being uniform, so raising the cap widens the tail without inverting the
+# preference for small coordinated programs.
+MAX_GENERIC_MODULES = 8
+EXTENDED_MODULE_DECAY = 0.5
+
+
+def module_count_distribution(table, max_modules: int) -> np.ndarray:
+    """Probabilities over 1..max_modules, extending the declared table if needed."""
+    if max_modules <= len(table):
+        weights = np.asarray(table[:max_modules], dtype=float)
+    else:
+        tail = [table[-1] * EXTENDED_MODULE_DECAY ** (i + 1)
+                for i in range(max_modules - len(table))]
+        weights = np.asarray([*table, *tail], dtype=float)
+    return weights / weights.sum()
 FRESH_SYNTHESIS_PROBABILITY = 0.5
 ONLINE_COMPOSITION_PROBABILITY = 0.25
 MAX_SEGMENT_LENGTH = 8
@@ -461,9 +480,9 @@ def synthesize_dynamic_program(
     max_primitives: int = 32,
     max_blocks: int = 8,
 ):
-    """Construct one complete K=1..3 program without any task evaluation."""
-    if not 1 <= max_modules <= 3:
-        raise ValueError("dynamic-v0 supports one to three generic modules")
+    """Construct one complete K-module program without any task evaluation."""
+    if not 1 <= max_modules <= MAX_GENERIC_MODULES:
+        raise ValueError(f"generic module count must be 1 to {MAX_GENERIC_MODULES}")
     near_capacity = source.n_real_atoms >= CAPACITY_AWARE_THRESHOLD
     count_probabilities = (
         NEAR_CAPACITY_MODULE_COUNT_PROBABILITIES
@@ -473,8 +492,7 @@ def synthesize_dynamic_program(
     count = int(
         rng.choice(
             np.arange(1, max_modules + 1),
-            p=np.asarray(count_probabilities[:max_modules])
-            / sum(count_probabilities[:max_modules]),
+            p=module_count_distribution(count_probabilities, max_modules),
         )
     )
     current, stages, selected, failures = source, [], [], Counter()
