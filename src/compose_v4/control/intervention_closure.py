@@ -31,6 +31,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 
+from compose_v4.chem.molecular_graph import IDX_TO_ELEMENT, STANDARD_VALENCE
 from compose_v4.control.complete_region_patch_policy import (
     SourceRegionContext,
     decode_patch_stream,
@@ -62,7 +63,8 @@ def intervene_element(subgoal: StructuralSubgoal, *, output_index: int, element:
         raise ValueError("output index outside the patch")
     old = tuple(int(v) for v in atoms[output_index])
     atoms[output_index] = (int(element), old[1], old[2], old[3])
-    return replace(subgoal, output_atoms=tuple(atoms)), {"output_atoms": [output_index]}
+    candidate = _rebalance(subgoal, replace(subgoal, output_atoms=tuple(atoms)))
+    return candidate, {"output_atoms": [output_index], "signatures_rebalanced": True}
 
 
 def intervene_bond_order(subgoal: StructuralSubgoal, *, left: int, right: int, order: int):
@@ -73,9 +75,8 @@ def intervene_bond_order(subgoal: StructuralSubgoal, *, left: int, right: int, o
     if order < 1:
         raise ValueError("removing a bond is an edge_presence intervention, not bond_order")
     _symmetric_set(bonds, left, right, order)
-    return replace(subgoal, target_bonds=tuple(tuple(r) for r in bonds)), {
-        "target_bonds": [(left, right)]
-    }
+    candidate = _rebalance(subgoal, replace(subgoal, target_bonds=tuple(tuple(r) for r in bonds)))
+    return candidate, {"target_bonds": [(left, right)], "signatures_rebalanced": True}
 
 
 def intervene_edge(
@@ -84,30 +85,82 @@ def intervene_edge(
     """Coupled block: edge presence drags its bond order in or out with it."""
     bonds = _matrix(subgoal.target_bonds)
     _symmetric_set(bonds, left, right, order if present else 0)
-    closure = {"target_bonds": [(left, right)]}
-    if present:
-        closure["bond_order_created"] = [(left, right)]
-    else:
-        closure["bond_order_removed"] = [(left, right)]
-    return replace(subgoal, target_bonds=tuple(tuple(r) for r in bonds)), closure
+    closure = {"target_bonds": [(left, right)], "signatures_rebalanced": True}
+    closure["bond_order_created" if present else "bond_order_removed"] = [(left, right)]
+    candidate = _rebalance(subgoal, replace(subgoal, target_bonds=tuple(tuple(r) for r in bonds)))
+    return candidate, closure
 
 
-def _retype(signature, *, degree_delta: int):
-    """Adjust a declared atom signature for a change in its own connectivity.
+def _row_sums(bonds) -> list[int]:
+    """Sum of bond ORDERS per role -- the quantity the valence equation uses."""
+    return [sum(int(v) for v in row) for row in bonds]
 
-    An atom signature is `(element, charge, hydrogens, degree)` and the last two are
-    DECLARED, so gaining a bond is not a free change: degree rises and an implicit
-    hydrogen is consumed. Omitting this is what made an earlier version of the scale
-    closure produce patches that encoded, decoded, and bound cleanly and then failed
-    instantiation with "instantiated target does not satisfy an atom role" on every
-    attempt -- the closure was arithmetically too small.
+
+def _neighbours(bonds) -> list[int]:
+    """Count of bonded roles -- the quantity the signature's fourth field records."""
+    return [sum(1 for v in row if v) for row in bonds]
+
+
+def _rebalance(before: StructuralSubgoal, after: StructuralSubgoal) -> StructuralSubgoal:
+    """Restore the valence equation after an intervention changed connectivity.
+
+    An atom signature is `(element, charge, implicit_h, neighbour_count)` and the
+    codebase's own equation is
+
+        implicit_h = standard_valence(element) + formal_charge - row_sum
+
+    where `row_sum` is the sum of BOND ORDERS, not the number of neighbours. Getting that
+    wrong does not raise: `instantiate_goal` checks that the built atom matches the
+    DECLARED signature, so a nitrogen declared with one hydrogen and one single bond is
+    faithfully built as a nitrogen radical and the role counts as satisfied. The executor
+    is correct; the declaration was impossible.
+
+    Measured before this existed: bond-order interventions produced radicals 100% of the
+    time (25 of 25), element interventions 54%, scale 29% -- while the production
+    generator with no intervention produced 0 in 4,000 archive molecules. The failure
+    rate tracked exactly how much valence arithmetic each intervention skipped.
+
+    Input roles keep bonds to the rest of the molecule that the patch cannot see, so
+    their hydrogens are adjusted by the CHANGE in in-patch row sum. Output roles exist
+    only inside the patch, so their hydrogens are computed outright.
     """
-    element, charge, hydrogens, degree = (int(v) for v in signature)
-    new_degree = degree + degree_delta
-    new_hydrogens = hydrogens - degree_delta
-    if new_degree < 0 or new_hydrogens < 0:
-        raise ValueError("connectivity change is not satisfiable at this role")
-    return (element, charge, new_hydrogens, new_degree)
+    n_input = len(after.input_atoms)
+    old_rows, new_rows = _row_sums(before.target_bonds), _row_sums(after.target_bonds)
+    new_neighbours = _neighbours(after.target_bonds)
+
+    old_neighbours = _neighbours(before.target_bonds)
+    targets = list(after.target_atoms)
+    for slot, signature in enumerate(targets):
+        if signature is None:
+            continue
+        element, charge, hydrogens, degree = (int(v) for v in signature)
+        # A retained role keeps bonds to the rest of the molecule that this patch cannot
+        # see, so both its hydrogens and its neighbour count move by the DELTA inside the
+        # patch. Overwriting them with in-patch absolutes silently deletes the external
+        # context and makes every realization refuse.
+        row_delta = new_rows[slot] - (old_rows[slot] if slot < len(old_rows) else 0)
+        neighbour_delta = new_neighbours[slot] - (
+            old_neighbours[slot] if slot < len(old_neighbours) else 0
+        )
+        adjusted = hydrogens - row_delta
+        if adjusted < 0:
+            raise ValueError("intervention leaves a retained role with negative hydrogens")
+        targets[slot] = (element, charge, adjusted, degree + neighbour_delta)
+
+    outputs = list(after.output_atoms)
+    for index, signature in enumerate(outputs):
+        element, charge, _, _ = (int(v) for v in signature)
+        symbol = IDX_TO_ELEMENT.get(element)
+        valence = STANDARD_VALENCE.get(symbol)
+        if valence is None:
+            raise ValueError(f"no standard valence for element {symbol!r}")
+        row = new_rows[n_input + index]
+        hydrogens = valence + charge - row
+        if hydrogens < 0:
+            raise ValueError("intervention over-bonds a created role")
+        outputs[index] = (element, charge, hydrogens, new_neighbours[n_input + index])
+
+    return replace(after, target_atoms=tuple(targets), output_atoms=tuple(outputs))
 
 
 def intervene_scale(subgoal: StructuralSubgoal, *, output_count: int, donor: int = -1):
@@ -166,25 +219,22 @@ def intervene_scale(subgoal: StructuralSubgoal, *, output_count: int, donor: int
         outputs = outputs[:output_count]
         closure["output_atoms_removed"] = dropped
 
-    # the declared attributes of every role whose connectivity moved are IN the closure
-    for slot, delta in sorted(touched.items()):
-        if slot < n_input:
-            if targets[slot] is None:
-                raise ValueError("cannot attach to a role the patch deletes")
-            targets[slot] = _retype(targets[slot], degree_delta=delta)
-        else:
-            index = slot - n_input
-            if index < len(outputs):
-                outputs[index] = _retype(outputs[index], degree_delta=delta)
     if touched:
-        closure["signatures_retyped"] = sorted(touched)
+        closure["signatures_rebalanced"] = sorted(touched)
+    for slot in touched:
+        if slot < n_input and targets[slot] is None:
+            raise ValueError("cannot attach to a role the patch deletes")
 
-    return replace(
+    candidate = _rebalance(
         subgoal,
-        target_atoms=tuple(targets),
-        output_atoms=tuple(outputs),
-        target_bonds=tuple(tuple(row) for row in bonds),
-    ), closure
+        replace(
+            subgoal,
+            target_atoms=tuple(targets),
+            output_atoms=tuple(outputs),
+            target_bonds=tuple(tuple(row) for row in bonds),
+        ),
+    )
+    return candidate, closure
 
 
 def validate(original: StructuralSubgoal, candidate: StructuralSubgoal) -> dict:

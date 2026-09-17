@@ -68,22 +68,39 @@ UNSTABLE_MOTIFS = (
     ("thiol", "[SX2H]"),
     ("hydrazine", "[NX3][NX3]"),
     ("hydroxylamine", "[NX3][OX2H,OX2]"),
-    ("radical_or_open_valence", "[#6&v0,#6&v1,#6&v2,#7&v0,#7&v1,#8&v0]"),
 )
 
 _COMPILED = tuple((name, Chem.MolFromSmarts(pattern)) for name, pattern in UNSTABLE_MOTIFS)
 
 
 def instability(smiles: str) -> list[str]:
-    """Every unstable motif this molecule carries, by name. Empty means clean."""
+    """Every unstable motif this molecule carries, by name. Empty means clean.
+
+    Radicals are counted with `GetNumRadicalElectrons`, NOT matched with a valence
+    SMARTS. The SMARTS form missed them completely and the cost was concrete: a
+    route-assisted ceiling run reported a best score of -11.60 on
+    `CC1CC([C]([O])O)CCN1C(=O)...`, which carries two radical electrons and is a diradical
+    rather than a molecule, and -11.20 on a nitrogen radical. Both parse, both pass QED
+    and SA, and both were about to be reported as reaching the known route's score.
+
+    An open-shell species is not a candidate however well it docks. Ask RDKit what the
+    electrons are doing instead of pattern-matching the string.
+    """
     mol = Chem.MolFromSmiles(smiles) if smiles else None
     if mol is None:
         return ["unparseable"]
-    return [
+    found = [
         name
         for name, pattern in _COMPILED
         if pattern is not None and mol.HasSubstructMatch(pattern)
     ]
+    radicals = sum(atom.GetNumRadicalElectrons() for atom in mol.GetAtoms())
+    if radicals:
+        found.append(f"radical_electrons_{radicals}")
+    charge = sum(atom.GetFormalCharge() for atom in mol.GetAtoms())
+    if abs(charge) > 1:
+        found.append(f"net_charge_{charge}")
+    return found
 
 
 def admit(
@@ -103,7 +120,17 @@ def admit(
     """
     from rdkit.Chem import DataStructs
 
-    verdict = {"smiles": smiles, "admitted": False, "failed": []}
+    # T4 ELIGIBILITY and CHEMISTRY SANITY are reported separately and must stay separate.
+    # The benchmark's endpoint criterion is QED, SA and similarity; the stability
+    # predicate is ours. Folding them together would let a house filter silently redefine
+    # what counts as a benchmark hit, in either direction.
+    verdict = {
+        "smiles": smiles,
+        "admitted": False,
+        "t4_eligible": False,
+        "failed": [],
+        "t4_failed": [],
+    }
     mol = Chem.MolFromSmiles(smiles) if smiles else None
     if mol is None:
         verdict["failed"].append("unparseable")
@@ -113,15 +140,18 @@ def admit(
 
     if "." in canonical:
         verdict["failed"].append("disconnected")
+        verdict["t4_failed"].append("disconnected")
     heavy = mol.GetNumHeavyAtoms()
     verdict["heavy_atoms"] = heavy
     if not heavy_range[0] <= heavy <= heavy_range[1]:
         verdict["failed"].append("size")
+        verdict["t4_failed"].append("size")
 
     quality = QED.qed(mol)
     verdict["qed"] = round(quality, 3)
     if quality <= qed_floor:
         verdict["failed"].append("qed")
+        verdict["t4_failed"].append("qed")
 
     similarity = DataStructs.TanimotoSimilarity(
         reference_fingerprint, generator.GetFingerprint(mol)
@@ -129,6 +159,7 @@ def admit(
     verdict["similarity"] = round(similarity, 3)
     if similarity <= similarity_floor:
         verdict["failed"].append("similarity")
+        verdict["t4_failed"].append("similarity")
 
     motifs = instability(canonical)
     verdict["unstable_motifs"] = motifs
@@ -139,6 +170,8 @@ def admit(
     verdict["sa"] = round(accessibility, 2)
     if accessibility >= sa_ceiling:
         verdict["failed"].append("sa")
+        verdict["t4_failed"].append("sa")
 
+    verdict["t4_eligible"] = not verdict["t4_failed"]
     verdict["admitted"] = not verdict["failed"]
     return verdict
