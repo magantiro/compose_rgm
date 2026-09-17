@@ -1,0 +1,166 @@
+{
+ "target": "jak2",
+ "seed": 20260917,
+ "candidates": [
+  {
+   "index": 0,
+   "bundle": 0,
+   "coordinate": "scale",
+   "value": 4,
+   "role": "base",
+   "smiles": "CC1CCCc2nc3[nH]cc4c3c(c21)-c1ccccc1NC4CC(=O)O",
+   "qed": 0.632,
+   "similarity": 0.429
+  },
+  {
+   "index": 1,
+   "bundle": 0,
+   "coordinate": "scale",
+   "value": 3,
+   "role": "sibling",
+   "smiles": "Cc1nc2[nH]cc3c2c(c1C(C)C)-c1ccccc1NC3CC(=O)O",
+   "qed": 0.653,
+   "similarity": 0.469
+  },
+  {
+   "index": 2,
+   "bundle": 0,
+   "coordinate": "scale",
+   "value": 5,
+   "role": "sibling",
+   "smiles": "CC1c2c(nc3[nH]cc4c3c2-c2ccccc2NC4CC(=O)O)C2CC1C2",
+   "qed": 0.615,
+   "similarity": 0.429
+  },
+  {
+   "index": 3,
+   "bundle": 0,
+   "coordinate": "scale",
+   "value": 6,
+   "role": "sibling",
+   "smiles": "CC1c2c(nc3[nH]cc4c3c2-c2ccccc2NC4CC(=O)O)C23CC1(C2)C3",
+   "qed": 0.61,
+   "similarity": 0.423
+  },
+  {
+   "index": 4,
+   "bundle": 1,
+   "coordinate": "scale",
+   "value": 4,
+   "role": "base",
+   "smiles": "COCCC1Nc2c(ccc3c2CCCN3)-c2ccnc3[nH]cc1c23",
+   "qed": 0.675,
+   "similarity": 0.435
+  },
+  {
+   "index": 5,
+   "bundle": 1,
+   "coordinate": "scale",
+   "value": 3,
+   "role": "sibling",
+   "smiles": "CNc1ccc2c(c1C)NC(CCOC)c1c[nH]c3nccc-2c13",
+   "qed": 0.677,
+   "similarity": 0.439
+  },
+  {
+   "index": 6,
+   "bundle": 1,
+   "coordinate": "scale",
+   "value": 5,
+   "role": "sibling",
+   "smiles": "COCCC1Nc2c(ccc3c2C2CC(C2)N3)-c2ccnc3[nH]cc1c23",
+   "qed": 0.658,
+   "similarity": 0.435
+  },
+  {
+   "index": 7,
+   "bundle": 1,
+   "coordinate": "scale",
+   "value": 6,
+   "role": "sibling",
+   "smiles": "COCCC1Nc2c(ccc3c2C24CC(C2)(C4)N3)-c2ccnc3[nH]cc1c23",
+   "qed": 0.652,
+   "similarity": 0.423
+  },
+  {
+   "index": 8,
+   "bundle": 2,
+   "coordinate": "scale",
+   "value": 4,
+   "role": "base",
+   "smiles": "COC(=O)CC1Nc2ccccc2-c2ccnc3c2c1c1n3CCCC1",
+   "qed": 0.71,
+   "similarity": 0.562
+  },
+  {
+   "index": 9,
+   "bundle": 2,
+   "coordinate": "scale",
+   "value": 3,
+   "role": "sibling",
+   "smiles": "CCc1c2c3c(ccnc3n1C)-c1ccccc1NC2CC(=O)OC",
+   "qed": 0.739,
+   "similarity": 0.6
+  },
+  {
+   "index": 10,
+   "bundle": 2,
+   "coordinate": "scale",
+   "value": 5,
+   "role": "sibling",
+   "smiles": "COC(=O)CC1Nc2ccccc2-c2ccnc3c2c1c1n3C2CC(C1)C2",
+   "qed": 0.696,
+   "similarity": 0.554
+  },
+  {
+   "index": 11,
+   "bundle": 2,
+   "coordinate": "scale",
+   "value": 6,
+   "role": "sibling",
+   "smiles": "COC(=O)CC1Nc2ccccc2-c2ccnc3c2c1c1n3C23CC(C1)(C2)C3",
+   "qed": 0.687,
+   "similarity": 0.545
+  },
+  {
+   "index": 12,
+   "bundle": 3,
+   "coordinate": "scale",
+   "value": 3,
+   "role": "base",
+   "smiles": "COC(=O)CC1Nc2ccccc2-c2ccnc3c2c1c1n3CCC1",
+   "qed": 0.727,
+   "similarity": 0.571
+  },
+  {
+   "index": 13,
+   "bundle": 3,
+   "coordinate": "scale",
+   "value": 2,
+   "role": "sibling",
+   "smiles": "COC(=O)CC1Nc2ccccc2-c2ccnc3c2c1c(C)n3C",
+   "qed": 0.733,
+   "similarity": 0.621
+  },
+  {
+   "index": 14,
+   "bundle": 3,
+   "coordinate": "scale",
+   "value": 4,
+   "role": "sibling",
+   "smiles": "COC(=O)CC1Nc2ccccc2-c2ccnc3c2c1c1n3C2CC1C2",
+   "qed": 0.709,
+   "similarity": 0.571
+  },
+  {
+   "index": 15,
+   "bundle": 3,
+   "coordinate": "scale",
+   "value": 5,
+   "role": "sibling",
+   "smiles": "COC(=O)CC1Nc2ccccc2-c2ccnc3c2c1c1n3C23CC1(C2)C3",
+   "qed": 0.707,
+   "similarity": 0.562
+  }
+ ]
+}
