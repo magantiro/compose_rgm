@@ -79,3 +79,69 @@ Two independent gates, previously conflated:
   transformation on the table? Size support exists; productive-content support is unproven.
 - RECOGNITION -- given such a set, can a target-aware controller identify it? Measured,
   and currently no: every selector sits between 0.45 and 0.51 against 0.40 chance.
+
+---
+
+# Allocation replay: would a hierarchical allocator have spent the budget better?
+
+Zero oracle calls. Historical runs replayed causally: at charged call `t` the allocator
+sees only outcomes with `query <= t`, and names the structural-hypothesis branch it would
+fund next. Scored against the branch that eventually produced that run's best molecule.
+
+## Both allocators fail once the circularity is removed
+
+| allocator | share of budget to the winning branch | vs historical policy |
+| --- | ---: | ---: |
+| Thompson on frontier-advance rate | 0.001 - 0.460 | 0.00x - 20.9x, WORSE on 6 of 7 |
+| extreme-value (branch best-so-far) | 0.189 - 0.938 | 1.8x - 45x on 10 of 11 |
+
+The second looks like a pass and is not one. `branch_best` funds whichever branch holds
+the best score so far, and the winning branch is BY DEFINITION the one holding the best
+score, so most of that share is exploitation after the winner already appeared. Splitting
+on the call at which the winning molecule was first observed:
+
+| run | PRE-discovery share | decisions | POST-discovery share |
+| --- | ---: | ---: | ---: |
+| v0_braf_1_r0 | **0.000** | 287 | 0.989 |
+| v0_5ht1b_0_r0 | **0.000** | 17 | 0.469 |
+| v21_braf_1_r0 | **0.000** | 381 | 0.981 |
+| v1_braf_1_r0 | **0.000** | 155 | 0.976 |
+| v21_5ht1b_0_r0 | **0.000** | 44 | 0.925 |
+| v1_5ht1b_0_r0 | **0.000** | 142 | 0.996 |
+| v0d06_braf_2_r0 | **0.000** | 48 | 0.000 |
+| v21_parp1_0_r0 | **0.000** | 125 | 0.999 |
+| v0d06_parp1_0_r0 | **0.000** | 222 | 0.996 |
+| v0_jak2_1_r0 | 0.017 | 709 | 0.996 |
+| v21_jak2_1_r0 | **0.860** | 293 | 0.972 |
+
+Mean 0.088 against 0.046 for uniform, but that is carried entirely by one run; without
+`v21_jak2_1_r0` the pre-discovery share is worse than allocating at random.
+
+GATE VERDICT: FAIL. The allocator does not find the productive branch before that branch
+produces its result, so it is not ready for a JAK2 docking budget.
+
+## Why the first allocator was the wrong shape
+
+Frontier advances are too rare for a rate to exist. On the runs Dynamic won, the winning
+branch advanced ONCE in 39 calls (BRAF, rate 0.026) and once in 64 (5HT1B, rate 0.016),
+and every branch that ever wins does so with a single advance. A Bernoulli rate is then
+`1/calls`, which PUNISHES whichever branch has been invested in. Thompson duly chased a
+branch at rate 0.143 whose ceiling was -10.1 while the winner reached -11.2.
+
+This is an extreme-value problem, not a rate-estimation problem. That correction is real
+and is kept. It is simply not sufficient, because the branch maximum carries no signal
+before the branch has produced anything.
+
+## What this rules out
+
+Neither of the two available signals identifies the productive structural direction in
+advance:
+
+- STRUCTURE -- every surrogate tried on whole transitions tops out near chance at the
+  extreme tail (best 8.2% top-10 against 6.1%).
+- SEARCH HISTORY -- within-run docking outcomes do not flag the winning branch before it
+  wins, on 9 of 11 runs.
+
+A better bandit cannot fix the second, because the information is not in the statistic.
+Anything that claims to allocate toward the win must be checked PRE-discovery; three
+separate arms in this work looked strong and collapsed under that split.
