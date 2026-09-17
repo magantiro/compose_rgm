@@ -180,3 +180,106 @@ def rank_of_truth(model, example) -> dict:
         "mode_rank_given_site": mode_rank,
         "mode_candidates": n_modes,
     }
+
+
+# ---- Shared-vocabulary fitting ----
+#
+# Every decision is scored against the same mode vocabulary, so the whole corpus is one
+# segment-wise softmax rather than a Python loop over examples. On 7,294 decisions the
+# looped form did not finish a single fold; this form fits all five in seconds, and the
+# equivalence is pinned by test_the_vectorised_fit_matches_the_looped_one.
+
+
+def stack_examples(examples, mode_matrix):
+    """Concatenate per-example site matrices into one design with an owner index."""
+    sites = np.concatenate([e["sites"] for e in examples], axis=0)
+    counts = np.asarray([e["sites"].shape[0] for e in examples])
+    offsets = np.concatenate([[0], np.cumsum(counts)[:-1]])
+    owner = np.repeat(np.arange(len(examples)), counts)
+    targets = offsets + np.asarray([e["site_index"] for e in examples])
+    modes = np.asarray([e["mode_index"] for e in examples])
+    return {
+        "sites": sites,
+        "modes": np.asarray(mode_matrix, dtype=float),
+        "owner": owner,
+        "offsets": offsets,
+        "counts": counts,
+        "target_row": targets,
+        "target_mode": modes,
+        "examples": len(examples),
+    }
+
+
+def _stacked_objective(theta, shape, packed, penalties):
+    a, b, w = unpack(theta, shape)
+    sites, modes, owner = packed["sites"], packed["modes"], packed["owner"]
+    n_examples = packed["examples"]
+    scores = (sites @ a)[:, None] + (modes @ b)[None, :] + sites @ w @ modes.T
+
+    # segment-wise log-sum-exp: shift by each example's own maximum for stability
+    row_max = scores.max(axis=1)
+    shift = np.full(n_examples, -np.inf)
+    np.maximum.at(shift, owner, row_max)
+    exponent = np.exp(scores - shift[owner][:, None])
+    totals = np.zeros(n_examples)
+    np.add.at(totals, owner, exponent.sum(axis=1))
+    log_partition = shift + np.log(totals)
+
+    chosen = scores[packed["target_row"], packed["target_mode"]]
+    loss = float(np.mean(log_partition - chosen))
+
+    probability = exponent / totals[owner][:, None]
+    probability[packed["target_row"], packed["target_mode"]] -= 1.0
+    probability /= n_examples
+
+    grad_a = sites.T @ probability.sum(axis=1)
+    grad_b = modes.T @ probability.sum(axis=0)
+    grad_w = sites.T @ probability @ modes
+
+    ridge = (
+        penalties["site"] * float(a @ a)
+        + penalties["mode"] * float(b @ b)
+        + penalties["interaction"] * float((w * w).sum())
+    )
+    grad = np.concatenate(
+        [
+            grad_a + 2 * penalties["site"] * a,
+            grad_b + 2 * penalties["mode"] * b,
+            (grad_w + 2 * penalties["interaction"] * w).reshape(-1),
+        ]
+    )
+    return loss + ridge, grad
+
+
+def fit_shared(examples, shape, mode_matrix, *, penalties=None, maxiter: int = 500):
+    """Fit over a shared mode vocabulary. Same objective as `fit`, one matrix at a time."""
+    from scipy.optimize import minimize
+
+    if not examples:
+        raise ValueError("cannot fit a constructive policy without examples")
+    penalties = penalties or {"site": 1e-3, "mode": 1e-3, "interaction": 1.0}
+    if penalties["interaction"] < max(penalties["site"], penalties["mode"]):
+        raise ValueError(
+            "the interaction term must be shrunk at least as hard as the pooled terms; "
+            "the joint data is far sparser than either marginal"
+        )
+    packed = stack_examples(examples, mode_matrix)
+    result = minimize(
+        _stacked_objective,
+        np.zeros(shape.size),
+        args=(shape, packed, penalties),
+        jac=True,
+        method="L-BFGS-B",
+        options={"maxiter": maxiter, "ftol": 1e-12, "gtol": 1e-9},
+    )
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "theta": result.x,
+        "shape": shape,
+        "penalties": penalties,
+        "objective": float(result.fun),
+        "iterations": int(result.nit),
+        "converged": bool(result.success),
+        "examples": len(examples),
+        "interaction_norm": float(np.linalg.norm(unpack(result.x, shape)[2])),
+    }

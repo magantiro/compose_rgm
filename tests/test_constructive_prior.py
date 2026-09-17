@@ -231,3 +231,28 @@ def test_fold_averaging_never_compares_two_folds_scores_against_each_other():
 
 def test_spearman_is_zero_for_a_column_with_no_variation():
     assert spearman(np.ones(10), np.arange(10.0)) == 0.0
+
+
+def test_the_vectorised_fit_matches_the_looped_one():
+    """The shared-vocabulary path must optimise the same objective, not an approximation."""
+    from compose_v4.control.constructive_policy import fit_shared
+
+    rng = np.random.default_rng(7)
+    modes = rng.normal(size=(4, 3))
+    examples = []
+    for _ in range(40):
+        n_sites = int(rng.integers(3, 8))
+        examples.append(
+            {
+                "sites": rng.normal(size=(n_sites, 3)),
+                "modes": modes,
+                "site_index": int(rng.integers(n_sites)),
+                "mode_index": int(rng.integers(4)),
+            }
+        )
+    shape = PolicyShape(3, 3)
+    penalties = {"site": 1e-2, "mode": 1e-2, "interaction": 1e-1}
+    looped = fit(examples, shape, penalties=penalties)
+    shared = fit_shared(examples, shape, modes, penalties=penalties)
+    assert shared["objective"] == pytest.approx(looped["objective"], abs=1e-6)
+    assert np.allclose(shared["theta"], looped["theta"], atol=1e-3)
