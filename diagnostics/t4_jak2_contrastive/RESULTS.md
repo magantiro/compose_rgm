@@ -1,20 +1,48 @@
 # JAK2 contrastive mechanism experiment: results
 
+> **CORRECTED.** The first version of this file omitted the `SA < 4` gate, which is part
+> of the T4 endpoint criterion and which this work has cited all along. Applying it
+> changes the headline: only 11 of the 28 docked candidates pass it, and NONE of the six
+> control candidates do, so the controller-against-control comparison cannot be made on
+> benchmark-eligible molecules. The corrected numbers are below; the original
+> gate-omitting numbers are kept at the bottom so the correction is legible.
+
 32 docking calls, exactly the preregistered budget
 (`docs/JAK2_PROSPECTIVE_PREREGISTRATION.md`). Selections were committed before any
 Stage-2 candidate was docked.
 
-## Headline
+## Headline, on fully qualified molecules
 
-| arm | best | mean | n |
-| --- | ---: | ---: | ---: |
-| **controller** | **-10.60** | **-9.40** | 6 |
-| uniform from the same pool | -9.30 | -8.65 | 6 |
+A molecule is FULLY QUALIFIED when it passes every gate the benchmark applies -- QED > 0.6,
+similarity > 0.4, **SA < 4** -- and carries no unstable motif.
 
-The controller beats uniform selection by **1.30 on best and 0.75 on mean**, drawing from
-an identical 174-candidate pool. That is the mechanism the experiment was built to test:
-information from 16 designed contrastive interventions changed later selection for the
-better.
+    BEST FULLY QUALIFIED:  -10.00
+    COC(=O)CC1Nc2ccccc2-c2ccnc3c2c1c1n3CCCC1      SA 3.35   QED 0.710
+
+It came from STAGE 1, not from the controller's Stage-2 picks.
+
+10 of 28 docked candidates are fully qualified. By arm:
+
+| arm | fully qualified | best fully qualified |
+| --- | ---: | ---: |
+| controller (h3) | 2 of 6 | -8.90 |
+| uniform control | **0 of 6** | none |
+| Stage-1 bundles | 8 of 16 | **-10.00** |
+
+The one comparison that survives the correction is that the controller produced two
+qualified candidates and the control produced none. That is directionally favourable and
+it is two against zero, which is not evidence of much.
+
+WHAT THE ORIGINAL HEADLINE CLAIMED, and why it does not stand: the controller beat uniform
+by 1.30 on best and 0.75 on mean. Both arms were drawn from the same pool, so the
+comparison was internally fair, but the pool itself was never filtered for synthetic
+accessibility. Seventeen of the twenty-eight molecules compared were not benchmark
+eligible, including the -10.60 top hit's nearest rivals, so the margin describes a
+population the benchmark would not accept.
+
+The -10.60 that headlined the original version is an acyl-nitroso / mixed anhydride. It
+passes SA at 3.85 and reproduces across seeds, and it is not a molecule anyone would
+carry forward. It is now refused by the stability gate in `queryable_fiber`.
 
 Confirmed at fresh docking seeds:
 
@@ -67,11 +95,16 @@ different continuation sets.
 and below the winner-bank arm (-11.6) and IVG. What is demonstrated is a mechanism, on 32
 calls, not a competitive number.
 
-**The top hit is chemically suspect.** `CC(=O)ONOC(=O)-` is an acyl-nitroso / mixed
-anhydride: reactive and unstable whatever its QED says. It reproduces across seeds, so it
-is a real docking score on an unrealistic molecule -- a reminder that QED, SA and
-similarity do not constitute a stability filter. The clean runner-up at -9.80 carries no
-such motif.
+**Two gates were missing, and both mattered.** `SA < 4` was never applied -- a plain
+omission, since it is part of the endpoint criterion this work has cited throughout. And
+nothing tested chemical stability, which let an acyl-nitroso species top the table. Both
+are now enforced in `compose_v4.control.queryable_fiber` before a call is spent. The
+runner-up praised as "clean" in the original version scores SA 5.37 and is itself
+ineligible.
+
+**The corrected result is weaker than reported.** Best fully qualified is -10.00 from
+Stage 1, against an autonomous record of -10.7. The controller did not produce the best
+molecule in this experiment; Stage-1 exploration did.
 
 ## Provenance
 
