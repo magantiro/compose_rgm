@@ -145,3 +145,54 @@ advance:
 A better bandit cannot fix the second, because the information is not in the statistic.
 Anything that claims to allocate toward the win must be checked PRE-discovery; three
 separate arms in this work looked strong and collapsed under that split.
+
+## Forensic: the one pre-discovery exception, and what it classifies
+
+`v21_jak2_1_r0` allocated 0.860 of its pre-discovery budget to the winning branch while
+nine other runs allocated zero. The cause is not early signal and not leakage.
+
+That branch ALREADY HELD THE INCUMBENT. Its best before discovery was -10.10, the
+incumbent standing just before the winner was -10.10 -- the same molecule -- and the
+"win" was an incremental -10.10 to -10.7 inside the leading branch. It ranked 1 of 22 by
+best-so-far. Checks requested and passed: deleting the winner and every later row leaves
+it rank 1 of 22; it ranks 1 at every granularity (lane, lane+family, +scale, full path);
+it is not a singleton (70 of 981 calls, 23 before discovery, against 80 for the
+most-sampled branch).
+
+Classifying every replayed run by where the winning branch stood at the moment the
+decision had to be made:
+
+| regime | runs | rank of the winning branch by best-so-far |
+| --- | ---: | --- |
+| CONTINUATION | 3 | **1** -- the winner extended the branch already leading |
+| DISCOVERY | 8 | **3 to 12** of 8 to 29 -- the winner came from a branch that did not lead |
+
+| run | winner | winning branch's best | incumbent | rank | regime |
+| --- | ---: | ---: | ---: | ---: | --- |
+| v0_braf_1_r0 | -11.2 | -10.40 | -10.80 | 6 of 21 | DISCOVERY |
+| v0_5ht1b_0_r0 | -12.6 | -10.80 | -12.10 | 4 of 11 | DISCOVERY |
+| v21_braf_1_r0 | -10.7 | -10.40 | -10.40 | 3 of 26 | DISCOVERY |
+| v21_5ht1b_0_r0 | -13.7 | -9.50 | -12.30 | 10 of 13 | DISCOVERY |
+| v21_parp1_0_r0 | -11.7 | -8.00 | -9.80 | 12 of 18 | DISCOVERY |
+| v0d06_parp1_0_r0 | -11.0 | -7.00 | -8.90 | 11 of 11 | DISCOVERY |
+| v0_jak2_1_r0 | -10.3 | -10.00 | -10.20 | 5 of 29 | DISCOVERY |
+| v0d06_braf_2_r0 | -10.2 | -9.60 | -10.10 | 4 of 8 | DISCOVERY |
+| v1_braf_1_r0 | -10.4 | -9.90 | -9.90 | 1 of 19 | CONTINUATION |
+| v1_5ht1b_0_r0 | -14.0 | -12.70 | -12.70 | 1 of 15 | CONTINUATION |
+| v21_jak2_1_r0 | -10.7 | -10.10 | -10.10 | 1 of 22 | CONTINUATION |
+
+EIGHT OF ELEVEN WINS ARE DISCOVERY. At the moment the decision had to be made the
+winning branch sat third to twelfth. No passive rule over the branches the historical
+search happened to sample can find those, because the ordering information is not
+present. The single exception is a continuation win, which is the case where allocation
+is least consequential.
+
+Two of the three continuation runs still scored 0.000 pre-discovery share. That is the
+exploration constant in `branch_best_scores`, not the data: the bonus reaches roughly
+0.87 for an unsampled branch against a quality term capped at 1.0, so thin branches
+outrank the leader. It does not affect the eight discovery runs, which no constant fixes.
+
+CONSEQUENCE: a replay over passively collected history can falsify a passive allocator,
+and cannot validate an ACTIVE experimental-design policy, because the counterfactual
+scores such a policy would request were never measured. The replay has done its job and
+should not gate the next algorithm.
