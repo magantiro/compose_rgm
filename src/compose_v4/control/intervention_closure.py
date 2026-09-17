@@ -92,17 +92,38 @@ def intervene_edge(
     return replace(subgoal, target_bonds=tuple(tuple(r) for r in bonds)), closure
 
 
+def _retype(signature, *, degree_delta: int):
+    """Adjust a declared atom signature for a change in its own connectivity.
+
+    An atom signature is `(element, charge, hydrogens, degree)` and the last two are
+    DECLARED, so gaining a bond is not a free change: degree rises and an implicit
+    hydrogen is consumed. Omitting this is what made an earlier version of the scale
+    closure produce patches that encoded, decoded, and bound cleanly and then failed
+    instantiation with "instantiated target does not satisfy an atom role" on every
+    attempt -- the closure was arithmetically too small.
+    """
+    element, charge, hydrogens, degree = (int(v) for v in signature)
+    new_degree = degree + degree_delta
+    new_hydrogens = hydrogens - degree_delta
+    if new_degree < 0 or new_hydrogens < 0:
+        raise ValueError("connectivity change is not satisfiable at this role")
+    return (element, charge, new_hydrogens, new_degree)
+
+
 def intervene_scale(subgoal: StructuralSubgoal, *, output_count: int, donor: int = -1):
     """Coupled block: the number of created atoms, with everything it drags.
 
-    Growing copies a donor atom's signature and attaches the new role wherever the donor
-    was attached, which is the smallest coherent extension: it introduces no element or
-    topology choice that the original patch had not already made. Shrinking drops trailing
-    output roles and their incident bonds. Every surviving decision -- input survival,
-    retained target signatures, all bonds among surviving roles -- is preserved exactly.
+    Growing copies a donor role's signature and attaches the new role where the donor is
+    attached. The closure therefore contains the new role, the bonds it introduces, AND
+    the declared degree and hydrogen count of every role it bonds to -- connectivity is
+    not separable from the signatures that describe it. Shrinking is the mirror image.
+
+    Every decision outside that closure is preserved exactly: input survival, retained
+    signatures on untouched roles, and all bonds among roles that survive the resize.
     """
     n_input = len(subgoal.input_atoms)
     outputs = list(subgoal.output_atoms)
+    targets = list(subgoal.target_atoms)
     current = len(outputs)
     if output_count < 0 or output_count == current:
         raise ValueError("scale intervention must change the created-atom count")
@@ -114,33 +135,53 @@ def intervene_scale(subgoal: StructuralSubgoal, *, output_count: int, donor: int
     size = n_input + output_count
     bonds = [[0 for _ in range(size)] for _ in range(size)]
     kept = min(current, output_count)
-    # preserve every bond among roles that survive the resize
     for i in range(n_input + kept):
         for j in range(n_input + kept):
             bonds[i][j] = old[i][j]
 
     closure: dict[str, list] = {"output_count": [current, output_count]}
+    touched: dict[int, int] = {}
+
     if output_count > current:
         signature = tuple(int(v) for v in outputs[donor_index])
         donor_row = n_input + donor_index
         added = []
         for k in range(current, output_count):
-            outputs.append(signature)
             new_row = n_input + k
-            # attach the new role exactly where the donor is attached
+            outputs.append(signature)
             for j in range(n_input + current):
-                if old[donor_row][j]:
-                    _symmetric_set(bonds, new_row, j, old[donor_row][j])
+                order = old[donor_row][j]
+                if order:
+                    _symmetric_set(bonds, new_row, j, order)
+                    touched[j] = touched.get(j, 0) + 1
             added.append(k)
         closure["output_atoms_added"] = added
     else:
         dropped = list(range(output_count, current))
+        for k in dropped:
+            row = n_input + k
+            for j in range(n_input + current):
+                if old[row][j] and j < n_input + output_count:
+                    touched[j] = touched.get(j, 0) - 1
         outputs = outputs[:output_count]
         closure["output_atoms_removed"] = dropped
-        closure["bonds_removed_with_roles"] = [n_input + k for k in dropped]
+
+    # the declared attributes of every role whose connectivity moved are IN the closure
+    for slot, delta in sorted(touched.items()):
+        if slot < n_input:
+            if targets[slot] is None:
+                raise ValueError("cannot attach to a role the patch deletes")
+            targets[slot] = _retype(targets[slot], degree_delta=delta)
+        else:
+            index = slot - n_input
+            if index < len(outputs):
+                outputs[index] = _retype(outputs[index], degree_delta=delta)
+    if touched:
+        closure["signatures_retyped"] = sorted(touched)
 
     return replace(
         subgoal,
+        target_atoms=tuple(targets),
         output_atoms=tuple(outputs),
         target_bonds=tuple(tuple(row) for row in bonds),
     ), closure
