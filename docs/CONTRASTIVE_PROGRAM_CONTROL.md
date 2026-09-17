@@ -129,6 +129,36 @@ unmeasured. That audit cannot invalidate the siblings -- they demonstrably exist
 execute -- it can only show that the route law alone cannot reach them, which is what the
 mixture exists to fix.
 
+### 1.2b The proposal is a latent triple, not a program
+
+`q_block` is local around an existing program, so the reference must say what that program
+is. Marginalising the anchor away hides it and forces the likelihood into a sum over
+latent histories whenever one patch is reachable from several anchors. Keep it:
+
+    Z = (A, C, z'_C)        O' = I(A, C, z'_C)
+
+    A     anchor program
+    C     grammar-induced minimal closure to intervene on
+    z'_C  values that closure takes
+    I     the exact minimal-closure intervention map
+
+    q_ref(Z | G) = q_anchor(A|G) * q_block(C|G,A) * q_value(z'_C|G,A,C)
+
+    dP_pi/dP_ref (tau) = prod_t [ pi(Z_t | S_t) / q_ref(Z_t | S_t) ]
+
+Hierarchical credit is then a property of the factorisation rather than an extra
+assumption: reward tilts the anchor, the closure and the values as separate factors.
+
+The reference carries three components with different jobs:
+
+    q_ref = (1 - eps_loc - eps_glob) q_route + eps_loc q_local + eps_glob q_legal
+
+`q_route` supplies structure, `q_local` is the anchor-plus-closure kernel that supplies
+operational exploration at ~24 draws, and `q_legal` is a small floor whose only job is
+that no legal option has probability exactly zero. MEASURED: `q_legal` needs 10^85 draws
+to produce a specific sibling, so `eps_glob << eps_loc` and `q_legal` must not be expected
+to discover chemistry inside a run.
+
 ### 1.3 The option factorisation the measurement licenses
 
 Write `O = (H, theta, beta)`:

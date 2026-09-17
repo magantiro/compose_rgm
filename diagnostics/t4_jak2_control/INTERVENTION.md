@@ -153,3 +153,59 @@ independently the only tractable broad-support reference. Same object, two reaso
 STRUCTURAL CONSEQUENCE: `q_block` is a kernel over patches rather than a marginal law over
 options given G, so the reference process is patch-local and the inner path measure is
 over (current patch, intervention) pairs.
+
+---
+
+# The route-derived anchor prior, leave-target-out
+
+Zero oracle calls, zero docking scores seen. 147 subgoals from 77 routes.
+
+An anchor class is the coarse identity a reference law places mass on:
+`(scale band, topology class, heteroatom pattern)`. Deliberately not the exact patch --
+the objective is mass around productive neighbourhoods, not teacher reproduction.
+
+**30 distinct anchor classes over 147 subgoals**, and the class space transfers:
+**86.6% of held-out anchor classes had already been seen in other targets.** The
+coordinate system generalises even where the probabilities do not.
+
+Largest classes are chemically legible: `(none, tree, none)` n=24 (pure deletion),
+`(large, cyclic, 3+4)` n=23 (large cyclic patch creating N and O),
+`(single, tree, carbon_only)` n=19.
+
+## Routes go global first, then refine locally
+
+| statistic | value |
+| --- | --- |
+| options per route | median 2, max 4 |
+| first option | global 56, local 21 |
+| global -> local | **0.625** |
+| global -> global | 0.375 |
+| local -> local | 0.533 |
+| local -> global | 0.467 |
+
+Global-then-local-refinement is the dominant pattern, measured rather than assumed, and
+it is the compounding behaviour that has to survive into the option formulation.
+
+## Accessibility is usable on JAK2 and does NOT transfer uniformly
+
+Expected draws until the held-out target's own anchor neighbourhood appears, under a
+prior fitted with that target excluded:
+
+| held-out | subgoals | median draws | p90 | uniform over classes | gain |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| **jak2** | 32 | **10.3** | 86.0 | 30 | **2.9x** |
+| fa7 | 38 | 11.7 | 130.7 | 30 | 2.6x |
+| 5ht1b | 26 | 20.8 | 90.3 | 30 | 1.4x |
+| braf | 23 | 39.1 | 274.0 | 30 | **0.8x** |
+| parp1 | 28 | 37.7 | 264.0 | 30 | **0.8x** |
+
+Mean 1.7x, carried by JAK2 and FA7.
+
+HONEST READING. The prior is usable exactly where it is needed next: JAK2 reaches its own
+held-out neighbourhood in a median 10.3 draws, which fits inside a 16-32 call stage. It is
+WORSE THAN UNIFORM on BRAF and PARP1, whose held-out classes are rare in the remaining
+corpus, so this is not a general claim about route transfer. And p90 is 86-274 draws
+everywhere, so the tail is expensive on every target.
+
+The class-level transfer (0.866) and the probability-level transfer (1.7x mean, 0.8x
+worst) are different quantities and should not be quoted as one result.
