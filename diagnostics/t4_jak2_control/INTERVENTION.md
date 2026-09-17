@@ -338,3 +338,35 @@ Global-then-local is the single most common continuation at 0.357, but it is not
 dominant: the four length-2 transitions span 0.200 to 0.357. The route corpus says
 global-first-then-refine is a tendency, not a rule, and a controller that hard-codes it
 would be overreading this table.
+
+---
+
+# Historical contrasts: the archive cannot supply them
+
+Strict matching: same run, same genealogical parent, same source molecule, and program
+descriptors differing in EXACTLY ONE coordinate. No loosening.
+
+| | count |
+| --- | ---: |
+| same (run, parent, source) groups with >= 2 children | 8,236 |
+| candidate same-parent pairs examined | 19,887 |
+| pairs differing in exactly one coordinate | **372 (1.87%)** |
+
+Coordinate breakdown is what matters, not the total:
+
+| coordinate | pairs |
+| --- | ---: |
+| `changed_slot_count` | 324 |
+| rule-family mix | 43 |
+| ring count change | **5** |
+| `net_created` (scale) | **0** |
+
+`changed_slot_count` is a CONSEQUENCE descriptor rather than a designed coordinate, so
+the genuinely structural contrasts number 48 in total across five targets, and scale --
+the coordinate carrying most of the available JAK2 contrast -- has none at all.
+
+CONSEQUENCE: the historical archive cannot initialise the structural-effect prior for the
+coordinates that matter. This is not a disappointment, it is the measured argument for
+the prospective design: the contrasts the controller needs must be CONSTRUCTED, because
+the historical search never ran them. 159 of the 372 are on JAK2 but almost all are the
+slot-count kind.
