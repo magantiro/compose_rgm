@@ -1,122 +1,177 @@
-"""Hierarchical belief over what intervention coordinates do to docking score.
+"""Joint Gaussian belief over what intervention coordinates do to docking score.
 
 Latent utility is separated from measurement throughout:
 
-    Y(x) = U(x) + epsilon,        epsilon ~ N(0, sigma^2)
+    Y_{p,i} = mu_p + theta_i + eps_{p,i},     eps ~ N(0, sigma^2)
 
-Under an extreme-value objective this is not pedantry. A controller that treats one
-lucky -12 as truth will chase measurement noise, and the objective rewards exactly that
-mistake by taking a maximum. So the posterior is over the latent effect and the reported
-incumbent is a posterior quantity, not the best number ever seen.
+`mu_p` is the parent's own unknown quality. For two siblings of the SAME parent
 
-The effect of setting coordinate `c` to value `v` is modelled as
+    Y_{p,i} - Y_{p,j} = theta_i - theta_j + (eps_{p,i} - eps_{p,j})
 
-    theta[c, v] ~ N(theta[c], tau^2)        theta[c] ~ N(0, tau0^2)
+and `mu_p` cancels identically. That cancellation, not a noise discount, is the reason
+matched interventions are informative, so it is modelled rather than approximated: a
+contrast is a linear observation on `theta_i - theta_j`, and an unmatched observation
+carries the full variance of `mu_p` on top of the measurement noise.
 
-so a value borrows strength from its coordinate and a coordinate from zero. With twenty
-observations that partial pooling is the whole game: an unpooled estimate of a value seen
-twice is noise, and the earlier failures on this branch came from point estimates that
-hid exactly that.
+The posterior is therefore a JOINT Gaussian over the effect vector with a full precision
+matrix. A contrast contributes
 
-Observations arrive as CONTRASTS. For two options from the same parent differing in one
-coordinate, the difference cancels every parent-level term exactly, which is what makes
-the effect identifiable (see docs/CONTRASTIVE_PROGRAM_CONTROL.md section 3.2). Absolute
-observations are accepted too but are far less informative, because they confound the
-effect with the parent.
+    (1 / 2 sigma^2) * (e_i - e_j)(e_i - e_j)^T
 
-All updates are conjugate and closed form. There is no sampler to tune and no seed.
+which is rank one and correlates the two effects; it constrains their DIFFERENCE and says
+nothing about their common level. An independent per-effect update cannot represent that,
+and splitting a contrast's credit evenly between two independent precisions -- which is
+what this module did first -- makes matched and unmatched evidence numerically identical.
+A test caught it; the docstring had claimed an advantage the arithmetic did not deliver.
+
+Partial pooling toward a per-coordinate mean, and that mean toward zero, is what keeps
+twenty observations from being over-read.
 """
 
 from __future__ import annotations
 
 import math
 from collections import defaultdict
-from dataclasses import dataclass, field
 
 import numpy as np
 
-SCHEMA_VERSION = "structural_effect_belief_v1"
+SCHEMA_VERSION = "structural_effect_belief_v2"
 
 
-@dataclass
 class EffectBelief:
-    """Posterior over coordinate-value effects, updated from contrasts."""
+    """Joint posterior over coordinate-value effects, updated from contrasts."""
 
-    noise: float = 0.35  # docking measurement sd, kcal/mol
-    value_scale: float = 0.8  # tau: spread of values within a coordinate
-    coordinate_scale: float = 0.5  # tau0: spread of coordinates around zero
-    parent_confound: float = 1.0
-    """Spread of the unmeasured parent effect.
+    def __init__(
+        self,
+        *,
+        noise: float = 0.35,
+        value_scale: float = 0.8,
+        coordinate_scale: float = 0.5,
+        parent_confound: float = 1.0,
+    ):
+        self.noise = noise
+        self.value_scale = value_scale
+        self.coordinate_scale = coordinate_scale
+        self.parent_confound = parent_confound
+        self._index: dict[tuple, int] = {}
+        self._keys: list[tuple] = []
+        self._information = np.zeros((0, 0))  # accumulated precision from data
+        self._score = np.zeros(0)  # accumulated precision-weighted evidence
+        self._coordinate_evidence = defaultdict(list)
 
-    This is what makes an unmatched observation weaker, and omitting it is not a
-    simplification -- it silently makes absolute and contrastive evidence equally
-    informative, which contradicts the entire argument for matched bundles. Left out,
-    both routes reduced to precision 1/(4 sigma^2) and were numerically identical; the
-    docstring claimed an advantage the code did not implement."""
-    _precision: dict = field(default_factory=lambda: defaultdict(float))
-    _weighted: dict = field(default_factory=lambda: defaultdict(float))
-    _coordinate: dict = field(default_factory=lambda: defaultdict(list))
+    # ---- structure ----
+
+    def _slot(self, coordinate: str, value) -> int:
+        key = (coordinate, value)
+        if key not in self._index:
+            self._index[key] = len(self._keys)
+            self._keys.append(key)
+            size = len(self._keys)
+            grown = np.zeros((size, size))
+            grown[: size - 1, : size - 1] = self._information
+            self._information = grown
+            self._score = np.append(self._score, 0.0)
+        return self._index[key]
+
+    def _prior(self):
+        """Prior mean and precision, with each effect pooled toward its coordinate."""
+        n = len(self._keys)
+        mean = np.asarray([self.coordinate_mean(c) for c, _ in self._keys])
+        precision = np.eye(n) / (self.value_scale**2)
+        return mean, precision
+
+    # ---- evidence ----
 
     def observe_contrast(self, coordinate: str, better_value, worse_value, gain: float) -> None:
-        """One matched pair: setting `better_value` beat `worse_value` by `gain`.
+        """A matched pair: `better_value` beat `worse_value` by `gain` from one parent.
 
-        The contrast variance is 2 sigma^2 because both arms are measured. Credit is
-        split symmetrically -- the pair says the difference, not which side moved -- and
-        an asymmetric attribution would invent information the design does not carry.
+        Contributes a rank-one precision on the DIFFERENCE. The pair is silent about the
+        common level of the two effects, and the joint form represents that honestly
+        instead of inventing a level for each.
         """
-        variance = 2.0 * self.noise**2
-        precision = 1.0 / variance
-        for value, sign in ((better_value, +1.0), (worse_value, -1.0)):
-            key = (coordinate, value)
-            self._precision[key] += precision * 0.5
-            self._weighted[key] += precision * 0.5 * sign * gain
-            self._coordinate[coordinate].append(sign * gain * 0.5)
+        i, j = self._slot(coordinate, better_value), self._slot(coordinate, worse_value)
+        contrast = np.zeros(len(self._keys))
+        contrast[i], contrast[j] = 1.0, -1.0
+        precision = 1.0 / (2.0 * self.noise**2)
+        self._information += precision * np.outer(contrast, contrast)
+        self._score += precision * contrast * gain
+        self._coordinate_evidence[coordinate].append(gain / 2.0)
 
     def observe_absolute(self, coordinate: str, value, gain: float) -> None:
-        """An unmatched observation: the effect is confounded with the parent's own quality.
-
-        Its variance carries the parent spread as well as measurement noise, so it is
-        strictly less informative than a contrast between two children of one parent,
-        where the parent term cancels exactly.
-        """
+        """An unmatched observation: the parent's own quality is not cancelled."""
+        i = self._slot(coordinate, value)
+        direction = np.zeros(len(self._keys))
+        direction[i] = 1.0
         precision = 1.0 / (self.noise**2 + self.parent_confound**2)
-        key = (coordinate, value)
-        self._precision[key] += precision
-        self._weighted[key] += precision * gain
-        self._coordinate[coordinate].append(gain)
+        self._information += precision * np.outer(direction, direction)
+        self._score += precision * direction * gain
+        self._coordinate_evidence[coordinate].append(gain)
+
+    # ---- posterior ----
 
     def coordinate_mean(self, coordinate: str) -> float:
-        """Partially pooled mean for a coordinate, shrunk toward zero."""
-        observations = self._coordinate.get(coordinate, [])
-        if not observations:
+        evidence = self._coordinate_evidence.get(coordinate, [])
+        if not evidence:
             return 0.0
-        n = len(observations)
+        n = len(evidence)
         shrink = (self.coordinate_scale**2) / (self.coordinate_scale**2 + self.noise**2 / n)
-        return shrink * float(np.mean(observations))
+        return shrink * float(np.mean(evidence))
+
+    def _moments(self):
+        if not self._keys:
+            return np.zeros(0), np.zeros((0, 0))
+        prior_mean, prior_precision = self._prior()
+        precision = prior_precision + self._information
+        covariance = np.linalg.inv(precision)
+        mean = covariance @ (prior_precision @ prior_mean + self._score)
+        return mean, covariance
 
     def posterior(self, coordinate: str, value) -> tuple[float, float]:
-        """Mean and sd of the latent effect of setting `coordinate` to `value`."""
-        prior_mean = self.coordinate_mean(coordinate)
-        prior_precision = 1.0 / (self.value_scale**2)
         key = (coordinate, value)
-        precision = prior_precision + self._precision.get(key, 0.0)
-        mean = (prior_precision * prior_mean + self._weighted.get(key, 0.0)) / precision
-        return mean, math.sqrt(1.0 / precision)
+        if key not in self._index:
+            return self.coordinate_mean(coordinate), self.value_scale
+        mean, covariance = self._moments()
+        i = self._index[key]
+        return float(mean[i]), float(math.sqrt(max(covariance[i, i], 1e-12)))
 
     def sample(self, coordinate: str, value, rng) -> float:
         mean, sd = self.posterior(coordinate, value)
         return float(rng.normal(mean, sd))
 
+    def sample_joint(self, pairs, rng) -> np.ndarray:
+        """One coherent draw over several effects, respecting their correlations.
+
+        Sampling each effect independently would break the correlation a contrast
+        induces, and a rollout that does so can believe both arms of a measured pair are
+        simultaneously excellent -- which the pair explicitly did not say.
+        """
+        if not pairs:
+            return np.zeros(0)
+        known = [p for p in pairs if p in self._index]
+        draws = {}
+        if known:
+            mean, covariance = self._moments()
+            rows = [self._index[p] for p in known]
+            sub_mean = mean[rows]
+            sub_cov = covariance[np.ix_(rows, rows)]
+            sub_cov = sub_cov + 1e-9 * np.eye(len(rows))
+            values = rng.multivariate_normal(sub_mean, sub_cov)
+            draws = dict(zip(known, values))
+        return np.asarray(
+            [draws.get(p, rng.normal(self.coordinate_mean(p[0]), self.value_scale)) for p in pairs]
+        )
+
     def observations(self) -> int:
-        return sum(len(v) for v in self._coordinate.values())
+        return sum(len(v) for v in self._coordinate_evidence.values())
 
 
 def posterior_incumbent(scores, *, noise: float) -> float:
     """A noise-aware incumbent.
 
-    The best measured score is a biased estimate of the best latent utility, because
-    taking a maximum over noisy measurements selects for upward errors. Shrinking the
-    extreme toward the runner-up keeps an outlier from anchoring the whole search.
+    The best measured score is a biased estimate of the best latent utility, because a
+    maximum over noisy measurements selects for upward error. Under an extreme-value
+    objective that is the mistake the objective would reward, so an extreme sitting
+    inside the noise is pulled toward the field.
     """
     if not scores:
         return float("inf")
@@ -125,6 +180,5 @@ def posterior_incumbent(scores, *, noise: float) -> float:
         return ordered[0]
     best, second = ordered[0], ordered[1]
     gap = second - best
-    # with a gap far above the noise the best is trusted; within noise it is pulled in
     trust = gap / (gap + 2.0 * noise) if gap > 0 else 0.0
     return best + (1.0 - trust) * min(gap, 2.0 * noise) * 0.5

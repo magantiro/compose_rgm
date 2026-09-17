@@ -370,3 +370,56 @@ coordinates that matter. This is not a disappointment, it is the measured argume
 the prospective design: the contrasts the controller needs must be CONSTRUCTED, because
 the historical search never ran them. 159 of the 372 are on JAK2 but almost all are the
 slot-count kind.
+
+---
+
+# Controller correctness, before any docking call
+
+## The contrast likelihood is now the model, not a discount
+
+    Y_{p,i} = mu_p + theta_i + eps_{p,i}
+
+For two siblings of one parent, `mu_p` cancels identically in `Y_i - Y_j`. That is modelled
+rather than approximated: the posterior is a JOINT Gaussian and a contrast contributes a
+rank-one precision `(1/2 sigma^2)(e_i - e_j)(e_i - e_j)^T` on the difference, while an
+unmatched observation carries the full variance of `mu_p` on top of measurement noise.
+
+Consequences, measured:
+
+| quantity | value |
+| --- | --- |
+| posterior correlation between two contrasted effects | **+0.723** |
+| effect of 9 contrasts on the DIFFERENCE sd | narrows by more than half |
+| effect of 9 contrasts on either MARGINAL sd | stays wide (0.572) |
+
+A pair pins the difference and says nothing about the common level, so the marginals must
+stay wide. Two tests originally asserted on marginals and failed; the tests were wrong,
+not the model. The controller ranks values WITHIN a coordinate, so the difference is the
+quantity it uses.
+
+## Simulated information is not free
+
+An earlier rollout took `argmax` over sampled latent gains at each step, which let the
+simulation learn which option was best without measuring it. Every branch with a wide
+posterior was inflated for free. The rollout now acts on the posterior MEAN, pays a
+simulated oracle call, updates the belief on the resulting measurement, and only then
+proceeds; terminal value uses latent utility, never the noisier simulated observation. A
+test asserts a depth-3 rollout adds exactly three observations to the belief it was given.
+
+Legitimate optimism survives this. Under an extreme-value objective a genuinely wide
+posterior SHOULD attract budget; what is removed is learning a latent value without
+paying for it.
+
+## Depth changes the policy, and only when it should
+
+| scenario | depth 1 | depth 3 |
+| --- | --- | --- |
+| E_B opens a strong follow-on | E_A | **E_B** |
+| E_B opens nothing useful | E_A | E_A |
+
+Common random numbers are used across competing bundles, so a bundle cannot win by
+drawing luckier simulations. The depth-3 choice is stable across 8 Monte Carlo seeds.
+
+This is a correctness result, not scientific evidence: it shows the measured h=3 credit
+horizon can enter the decision, not that it improves optimisation. That question needs
+docking calls.

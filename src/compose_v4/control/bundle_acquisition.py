@@ -62,19 +62,33 @@ def simulate_outcomes(belief, bundle, parent_score: float, rng) -> np.ndarray:
 def _rollout(belief, incumbent: float, lane: str, depth: int, coordinates, rng) -> float:
     """Best latent utility reachable in `depth` further option decisions.
 
-    Each step samples a lane from the transition prior, picks the coordinate the belief
-    currently likes best in that lane, and advances the incumbent by the sampled latent
-    effect. No measurement noise is added: the rollout estimates what is achievable, and
-    the noise has already entered through the belief's own width.
+    Simulated information is NOT free. At each step the controller must choose using what
+    it currently believes -- the posterior MEAN, which is what it could actually act on --
+    then pay a simulated oracle call to learn the outcome, and only then may the next step
+    exploit what that call revealed.
+
+    An earlier version took `argmax` over sampled latent gains at every step, which let
+    the rollout pick the best option without measuring which one it was. That is free
+    information, and it inflates every branch whose posterior is merely wide. The
+    distinction matters because under an extreme-value objective genuine upside SHOULD
+    attract budget; what must not happen is learning a latent value without paying for it.
+
+    Terminal value uses latent utility, never the noisier simulated measurement.
     """
     best = incumbent
     for _ in range(depth):
         options = coordinates.get(lane) or []
         if not options:
             break
-        gains = [belief.sample(c, v, rng) for c, v in options]
-        index = int(np.argmax(gains))
-        best = min(best, best - max(gains[index], 0.0))
+        # act on belief, not on the answer
+        means = [belief.posterior(c, v)[0] for c, v in options]
+        chosen = options[int(np.argmax(means))]
+        # pay a call: draw the latent effect, then the measurement it would produce
+        latent = belief.sample(chosen[0], chosen[1], rng)
+        observed = latent + rng.normal(0.0, belief.noise)
+        belief.observe_absolute(chosen[0], chosen[1], float(observed))
+        # the incumbent advances by the LATENT gain, and never degrades
+        best = min(best, best - max(latent, 0.0))
         choices, weights = zip(*TRANSITION_PRIOR[lane].items())
         lane = str(rng.choice(choices, p=np.asarray(weights, dtype=float)))
     return best
@@ -87,9 +101,10 @@ def bundle_value(
     parent_score: float,
     incumbent: float,
     coordinates,
-    rng,
+    rng=None,
     samples: int = 256,
     depth: int = INNER_DEPTH,
+    seed: int = 0,
 ) -> dict:
     """Q(E): expected best latent utility after running this bundle and continuing.
 
@@ -102,7 +117,10 @@ def bundle_value(
     terminal = np.empty(samples)
     direct = np.empty(samples)
     for s in range(samples):
-        outcomes = simulate_outcomes(belief, bundle, parent_score, rng)
+        # COMMON RANDOM NUMBERS: every candidate bundle is evaluated against the same
+        # stream, so a bundle cannot win by drawing luckier simulations than its rivals.
+        draw = np.random.default_rng((seed, s))
+        outcomes = simulate_outcomes(belief, bundle, parent_score, draw)
         direct[s] = min(incumbent, outcomes.min())
 
         trial = deepcopy(belief)
@@ -121,7 +139,7 @@ def bundle_value(
                     option["coordinate"], option["value"], float(parent_score - y)
                 )
         lane = bundle[0].get("lane", "G")
-        terminal[s] = _rollout(trial, direct[s], lane, depth, coordinates, rng)
+        terminal[s] = _rollout(trial, direct[s], lane, depth, coordinates, draw)
 
     return {
         "value": float(terminal.mean()),
@@ -139,8 +157,10 @@ def select_bundle(
     parent_score: float,
     incumbent: float,
     coordinates,
-    rng,
+    rng=None,
     samples: int = 256,
+    depth: int = INNER_DEPTH,
+    seed: int = 0,
 ) -> dict:
     """Choose the experiment with the best finite-budget value. Execute only this one."""
     if not candidates:
@@ -153,8 +173,9 @@ def select_bundle(
             parent_score=parent_score,
             incumbent=incumbent,
             coordinates=coordinates,
-            rng=rng,
             samples=samples,
+            depth=depth,
+            seed=seed,
         )
         scored.append((report["value"], bundle, report))
     scored.sort(key=lambda t: t[0])

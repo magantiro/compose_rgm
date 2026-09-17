@@ -25,23 +25,57 @@ def test_a_matched_contrast_moves_both_arms_in_opposite_directions():
     assert better > 0 > worse, "a contrast says which side won, symmetrically"
 
 
-def test_repeated_evidence_narrows_the_posterior():
+def _difference_sd(belief, coordinate, left, right):
+    _, covariance = belief._moments()
+    i, j = belief._index[(coordinate, left)], belief._index[(coordinate, right)]
+    return float(np.sqrt(covariance[i, i] + covariance[j, j] - 2 * covariance[i, j]))
+
+
+def test_repeated_contrasts_narrow_the_difference_they_measure():
+    """Evidence must accumulate on the quantity the pair actually reports.
+
+    The marginal of a single effect stays wide under any number of contrasts, because a
+    pair never pins the common level. Asserting on the marginal is asserting the model is
+    wrong.
+    """
     belief = EffectBelief()
-    _, wide = belief.posterior("scale", 6)
+    belief.observe_contrast("scale", 6, 5, gain=0.5)
+    wide = _difference_sd(belief, "scale", 6, 5)
     for _ in range(8):
         belief.observe_contrast("scale", 6, 5, gain=0.5)
-    _, narrow = belief.posterior("scale", 6)
-    assert narrow < wide / 2
+    assert _difference_sd(belief, "scale", 6, 5) < wide / 2
 
 
-def test_an_unmatched_observation_is_weaker_than_a_matched_one():
-    """Absolute observations confound the effect with the parent, so they count for less."""
+def test_a_contrast_constrains_the_difference_not_the_common_level():
+    """What a matched pair informs is `theta_i - theta_j`, and the test must ask that.
+
+    An earlier version of this test compared MARGINAL widths and failed, which was the
+    test being wrong rather than the model: a pair says nothing about the common level of
+    the two effects, so each marginal stays wide while their difference becomes sharp.
+    The controller ranks values WITHIN a coordinate, so the difference is the quantity it
+    actually uses.
+    """
     matched, absolute = EffectBelief(), EffectBelief()
     matched.observe_contrast("scale", 6, 5, gain=1.0)
     absolute.observe_absolute("scale", 6, gain=1.0)
-    _, matched_sd = matched.posterior("scale", 6)
-    _, absolute_sd = absolute.posterior("scale", 6)
-    assert matched_sd < absolute_sd
+    absolute.observe_absolute("scale", 5, gain=0.0)
+
+    def difference_sd(belief):
+        _, covariance = belief._moments()
+        i, j = belief._index[("scale", 6)], belief._index[("scale", 5)]
+        return np.sqrt(covariance[i, i] + covariance[j, j] - 2 * covariance[i, j])
+
+    assert difference_sd(matched) < difference_sd(absolute)
+
+
+def test_a_contrast_leaves_the_two_effects_positively_correlated():
+    """Pinning a difference leaves the common level free, so the pair moves together."""
+    belief = EffectBelief()
+    belief.observe_contrast("scale", 6, 5, gain=1.0)
+    _, covariance = belief._moments()
+    i, j = belief._index[("scale", 6)], belief._index[("scale", 5)]
+    correlation = covariance[i, j] / np.sqrt(covariance[i, i] * covariance[j, j])
+    assert correlation > 0.5
 
 
 def test_an_unobserved_coordinate_keeps_its_prior_width():
@@ -122,6 +156,112 @@ def test_selection_returns_the_lowest_value_bundle_and_its_margin():
     assert chosen["bundle"][0]["coordinate"] == "scale", "evidence should steer the choice"
     assert chosen["considered"] == 2
     assert chosen["runner_up_gap"] >= 0
+
+
+def test_lookahead_depth_changes_the_policy_when_continuation_value_differs():
+    """The depth parameter must be able to change a DECISION, not only a score.
+
+    E_A pays best immediately and opens nothing. E_B pays less and opens a strong
+    follow-on. A one-step controller should take E_A and a three-step controller E_B.
+    The converse case pins the other side: when E_B opens nothing useful, both depths
+    must take E_A, so depth cannot be flipping choices for its own sake.
+    """
+    import compose_v4.control.bundle_acquisition as acquisition
+
+    original = acquisition.TRANSITION_PRIOR
+    acquisition.TRANSITION_PRIOR = {"A": {"A": 1.0}, "B": {"B": 1.0}}
+    try:
+        for strong_continuation, expected in ((True, "E_B"), (False, "E_A")):
+            belief = EffectBelief()
+            for _ in range(8):
+                belief.observe_contrast("capA", 1, 0, gain=1.2)
+                belief.observe_contrast("capB", 1, 0, gain=0.4)
+                if strong_continuation:
+                    belief.observe_contrast("followup", 1, 0, gain=1.6)
+            coordinates = {
+                "A": [("capA", 1)],
+                "B": [("followup", 1)] if strong_continuation else [("capB", 0)],
+            }
+            a = [
+                {"coordinate": "capA", "value": 1, "lane": "A"},
+                {"coordinate": "capA", "value": 0, "lane": "A"},
+            ]
+            b = [
+                {"coordinate": "capB", "value": 1, "lane": "B"},
+                {"coordinate": "capB", "value": 0, "lane": "B"},
+            ]
+            picks = {}
+            for depth in (1, 3):
+                qa = bundle_value(
+                    belief,
+                    a,
+                    parent_score=-9.0,
+                    incumbent=-9.0,
+                    coordinates=coordinates,
+                    samples=400,
+                    depth=depth,
+                    seed=11,
+                )
+                qb = bundle_value(
+                    belief,
+                    b,
+                    parent_score=-9.0,
+                    incumbent=-9.0,
+                    coordinates=coordinates,
+                    samples=400,
+                    depth=depth,
+                    seed=11,
+                )
+                picks[depth] = "E_A" if qa["value"] < qb["value"] else "E_B"
+            assert picks[1] == "E_A", strong_continuation
+            assert picks[3] == expected, strong_continuation
+    finally:
+        acquisition.TRANSITION_PRIOR = original
+
+
+def test_common_random_numbers_make_the_comparison_seed_stable():
+    """Competing bundles must not win by drawing luckier simulations than their rivals."""
+    belief = EffectBelief()
+    for _ in range(6):
+        belief.observe_contrast("scale", 6, 5, gain=1.5)
+    candidates = [
+        [
+            {"coordinate": "scale", "value": 6, "lane": "G"},
+            {"coordinate": "scale", "value": 5, "lane": "G"},
+        ],
+        [
+            {"coordinate": "bond_order", "value": 2, "lane": "L"},
+            {"coordinate": "bond_order", "value": 1, "lane": "L"},
+        ],
+    ]
+    picks = {
+        select_bundle(
+            belief,
+            candidates,
+            parent_score=-9.0,
+            incumbent=-9.0,
+            coordinates=_coordinates(),
+            samples=300,
+            seed=s,
+        )["bundle"][0]["coordinate"]
+        for s in range(6)
+    }
+    assert len(picks) == 1, f"selection flipped across seeds: {picks}"
+
+
+def test_the_rollout_pays_an_oracle_call_for_what_it_learns():
+    """A rollout step must not discover which option is best without measuring it.
+
+    Taking argmax over sampled latent gains would let the simulation peek. The honest
+    version acts on the posterior mean and then pays for the outcome, so a step adds one
+    observation to the belief it was handed.
+    """
+    from compose_v4.control.bundle_acquisition import _rollout
+
+    belief = EffectBelief()
+    before = belief.observations()
+    _rollout(belief, -9.0, "G", 3, _coordinates(), np.random.default_rng(0))
+    assert belief.observations() == before + 3
 
 
 def test_the_transition_prior_is_a_normalised_length_two_table():
