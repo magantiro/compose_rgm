@@ -42,8 +42,8 @@ from compose_v4.control.structural_subgoal import StructuralSubgoal
 SCHEMA_VERSION = "intervention_closure_v1"
 
 # Semantic coordinates, named by the factor the patch grammar already tags tokens with.
-FREE_COORDINATES = ("output_element", "bond_order")
-BLOCK_COORDINATES = ("scale", "edge_presence")
+FREE_COORDINATES = ("output_element", "bond_order", "retained_element")
+BLOCK_COORDINATES = ("scale", "edge_presence", "retained_deletion")
 COORDINATES = (*FREE_COORDINATES, *BLOCK_COORDINATES)
 
 
@@ -65,6 +65,78 @@ def intervene_element(subgoal: StructuralSubgoal, *, output_index: int, element:
     atoms[output_index] = (int(element), old[1], old[2], old[3])
     candidate = _rebalance(subgoal, replace(subgoal, output_atoms=tuple(atoms)))
     return candidate, {"output_atoms": [output_index], "signatures_rebalanced": True}
+
+
+def intervene_retained_element(subgoal: StructuralSubgoal, *, input_index: int, element: int):
+    """Retype a RETAINED source role: the scaffold atom identity itself.
+
+    This is the largest capability the intervention wrapper was missing, and its absence
+    was measured rather than guessed. Refining a valid -11.30 JAK2 molecule produced 0
+    improvements in 91 docked candidates, because the one edit separating it from the
+    archive's -11.70 is a retained aromatic nitrogen becoming carbon -- an atom the patch
+    keeps rather than creates. `intervene_element` only ever touched `output_atoms`, so
+    that direction had probability zero under the controller's action interface while the
+    production `heteroatom_substitute` family could express it perfectly well.
+
+    Hydrogens are recomputed from the new element's standard valence against the role's
+    unchanged bond-order sum, so a retype that cannot satisfy valence refuses instead of
+    emitting an open shell.
+    """
+    targets = list(subgoal.target_atoms)
+    if not 0 <= input_index < len(targets):
+        raise ValueError("input index outside the patch")
+    if targets[input_index] is None:
+        raise ValueError("cannot retype a role the patch deletes")
+    old_element, charge, _hydrogens, degree = (int(v) for v in targets[input_index])
+    if int(element) == old_element:
+        raise ValueError("retained retype must change the element")
+    symbol = IDX_TO_ELEMENT.get(int(element))
+    valence = STANDARD_VALENCE.get(symbol)
+    if valence is None:
+        raise ValueError(f"no standard valence for element {symbol!r}")
+    # the role's bonds do not move, so its bond-order sum is whatever it already was
+    row = sum(int(v) for v in subgoal.target_bonds[input_index])
+    adjusted = valence + charge - row
+    if adjusted < 0:
+        raise ValueError("retained retype cannot satisfy valence at this role")
+    targets[input_index] = (int(element), charge, adjusted, degree)
+    return replace(subgoal, target_atoms=tuple(targets)), {
+        "retained_element": [input_index, old_element, int(element)],
+        "signatures_rebalanced": True,
+    }
+
+
+def intervene_retained_deletion(subgoal: StructuralSubgoal, *, input_index: int):
+    """Delete a RETAINED source role, which is what strong routes do most often.
+
+    Measured over the 77 strong routes: 109 subgoals delete a retained role, more than
+    any other operation, and the wrapper could not express a single one. Deleting a role
+    drops its bonds, so every role it was bonded to gains hydrogens -- which is exactly
+    what `_rebalance` computes from the change in bond-order sum.
+    """
+    targets = list(subgoal.target_atoms)
+    if not 0 <= input_index < len(targets):
+        raise ValueError("input index outside the patch")
+    if targets[input_index] is None:
+        raise ValueError("role is already deleted by this patch")
+    if sum(1 for t in targets if t is not None) <= 1:
+        raise ValueError("refusing to delete the patch's last retained role")
+    bonds = _matrix(subgoal.target_bonds)
+    dropped = [j for j in range(len(bonds)) if bonds[input_index][j]]
+    for j in dropped:
+        _symmetric_set(bonds, input_index, j, 0)
+    targets[input_index] = None
+    candidate = _rebalance(
+        subgoal,
+        replace(
+            subgoal, target_atoms=tuple(targets), target_bonds=tuple(tuple(row) for row in bonds)
+        ),
+    )
+    return candidate, {
+        "retained_deleted": [input_index],
+        "bonds_dropped": dropped,
+        "signatures_rebalanced": True,
+    }
 
 
 def intervene_bond_order(subgoal: StructuralSubgoal, *, left: int, right: int, order: int):
