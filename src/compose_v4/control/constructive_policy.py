@@ -190,15 +190,29 @@ def rank_of_truth(model, example) -> dict:
 # equivalence is pinned by test_the_vectorised_fit_matches_the_looped_one.
 
 
-def stack_examples(examples, mode_matrix):
-    """Concatenate per-example site matrices into one design with an owner index."""
+def stack_examples(examples, mode_matrix, weights=None):
+    """Concatenate per-example site matrices into one design with an owner index.
+
+    `weights` reweights each decision's contribution to the likelihood. Fitted flat, the
+    law reproduces what the controller did MOST OFTEN, and the archive is dominated by
+    unproductive constructions -- measured, on held-out JAK2 the flat fit ranks top-decile
+    constructions at median 156 and bottom-decile at 11, and on PARP1 at 329 against 30.
+    A faithful model of the archive is a faithful model of failure. Weighting by realized
+    docking quality is what makes it a model of what WORKED.
+    """
     sites = np.concatenate([e["sites"] for e in examples], axis=0)
     counts = np.asarray([e["sites"].shape[0] for e in examples])
     offsets = np.concatenate([[0], np.cumsum(counts)[:-1]])
     owner = np.repeat(np.arange(len(examples)), counts)
     targets = offsets + np.asarray([e["site_index"] for e in examples])
     modes = np.asarray([e["mode_index"] for e in examples])
+    if weights is None:
+        weights = np.ones(len(examples))
+    weights = np.asarray(weights, dtype=float)
+    if weights.shape != (len(examples),) or (weights < 0).any():
+        raise ValueError("weights must be one non-negative value per example")
     return {
+        "weights": weights / weights.mean(),
         "sites": sites,
         "modes": np.asarray(mode_matrix, dtype=float),
         "owner": owner,
@@ -226,10 +240,12 @@ def _stacked_objective(theta, shape, packed, penalties):
     log_partition = shift + np.log(totals)
 
     chosen = scores[packed["target_row"], packed["target_mode"]]
-    loss = float(np.mean(log_partition - chosen))
+    weights = packed["weights"]
+    loss = float(np.mean(weights * (log_partition - chosen)))
 
     probability = exponent / totals[owner][:, None]
     probability[packed["target_row"], packed["target_mode"]] -= 1.0
+    probability *= weights[owner][:, None]
     probability /= n_examples
 
     grad_a = sites.T @ probability.sum(axis=1)
@@ -251,7 +267,7 @@ def _stacked_objective(theta, shape, packed, penalties):
     return loss + ridge, grad
 
 
-def fit_shared(examples, shape, mode_matrix, *, penalties=None, maxiter: int = 500):
+def fit_shared(examples, shape, mode_matrix, *, penalties=None, weights=None, maxiter: int = 500):
     """Fit over a shared mode vocabulary. Same objective as `fit`, one matrix at a time."""
     from scipy.optimize import minimize
 
@@ -263,7 +279,7 @@ def fit_shared(examples, shape, mode_matrix, *, penalties=None, maxiter: int = 5
             "the interaction term must be shrunk at least as hard as the pooled terms; "
             "the joint data is far sparser than either marginal"
         )
-    packed = stack_examples(examples, mode_matrix)
+    packed = stack_examples(examples, mode_matrix, weights)
     result = minimize(
         _stacked_objective,
         np.zeros(shape.size),
