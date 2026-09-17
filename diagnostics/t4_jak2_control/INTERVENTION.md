@@ -112,3 +112,44 @@ other than what was constructed. They are not safe siblings.
 ADMISSION RULE: a candidate is usable only if `legal AND round_trips AND
 complement_preserved AND binds`. Legality alone is not sufficient and was not sufficient
 here. `scale` is unaffected (281 of 281 round-trip), so the JAK2 result stands.
+
+---
+
+# Reference-process support audit
+
+Zero oracle calls. Can any reference process actually PROPOSE the admitted siblings?
+
+| law | median log q | expected draws |
+| --- | ---: | ---: |
+| `q_legal` (uniform over the grammar fiber), teacher patch | -105.2 | 10^46 |
+| `q_legal`, admitted scale sibling | -196.8 | **10^85** |
+| `q_block` (closure-conditional on the current patch) | **-3.18** | **24** |
+
+Teacher patches carry a median 79 real decisions at mean fiber width 4.9.
+
+Every admitted sibling has strictly positive mass under `q_legal`: absolute continuity
+holds, and there are no literal zeros anywhere. It is still useless. Reaching one specific
+patch needs 10^85 draws against a budget of 10^3.
+
+| target | admitted scale siblings | median log q_legal | expected draws |
+| --- | ---: | ---: | ---: |
+| 5ht1b | 37 | -231.5 | 10^101 |
+| braf | 42 | -138.3 | 10^60 |
+| fa7 | 58 | -113.0 | 10^49 |
+| jak2 | 73 | -184.1 | 10^80 |
+| parp1 | 71 | -249.5 | 10^108 |
+
+`q_block` reaches the same sibling in 24 expected draws, probability 0.744 within 32.
+
+CONCLUSION: the exploration floor must be LOCAL IN PROGRAM SPACE. A uniform-over-grammar
+component satisfies absolute continuity on paper and cannot be sampled in practice, so it
+is not a usable epsilon-component. Conditioning on the current patch and resampling one
+minimal closure is both a valid process over the legal fiber and reachable inside a
+budget.
+
+The closure was derived to make contrasts identifiable by cancelling parent terms. It is
+independently the only tractable broad-support reference. Same object, two reasons.
+
+STRUCTURAL CONSEQUENCE: `q_block` is a kernel over patches rather than a marginal law over
+options given G, so the reference process is patch-local and the inner path measure is
+over (current patch, intervention) pairs.

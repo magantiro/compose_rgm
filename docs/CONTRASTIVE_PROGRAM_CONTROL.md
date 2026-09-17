@@ -89,18 +89,45 @@ strength reaches it, and the option is unreachable for the entire run. A purely
 route-derived law is exactly the kind that would assign zero mass to legal novel options,
 because it is fitted on 77 trajectories. The reference is therefore a mixture
 
-    q_ref  =  (1 - eps) * q_route  +  eps * q_generic,
+    q_ref  =  (1 - eps) * q_route  +  eps * q_block( . | O_cur , G ),
 
-where `q_route` carries the route-derived chemistry prior and `q_generic` preserves
-support over the legal COMPOSE option space -- the fiber that `token_domain` and the
-executor already define. This buys absolute continuity by construction:
+and the second component is NOT a uniform draw over the grammar. MEASURED: the uniform
+law `q_legal`, which draws every token from the fiber `token_domain` returns, assigns
+strictly positive mass to every admitted intervention sibling -- so absolute continuity
+holds and there are no literal zeros -- at a median log-probability of -196.8, which is
+10^85 expected draws against a budget of 10^3. Per target that is 10^80 for JAK2 and
+10^108 for PARP1. A teacher patch itself sits at -105.2, or 10^46.
 
-    pi << q_ref   whenever   pi only reweights options with q_generic(O|G) > 0.
+    q_legal:  support everywhere, accessibility nowhere.
 
-`eps` should be set by a support/reachability requirement, NOT tuned against T4 scores;
-tuning it on the benchmark would make the reachability guarantee a fitted quantity.
-AUDIT REQUIRED (open): measure whether the fitted `q_route` actually zeroes legal block
-interventions that the controller must be able to discover.
+So the exploration floor has to be LOCAL IN PROGRAM SPACE. `q_block` conditions on the
+current patch, picks one semantic coordinate, and resamples that coordinate's minimal
+closure from its own fiber while holding the compatible complement fixed. MEASURED: a
+median log-probability of -3.18, i.e. 24 expected draws, with probability 0.744 of being
+seen within 32 draws. It is a genuine stochastic process over the legal fiber, so
+
+    pi << q_ref   whenever   pi only reweights options reachable by some closure,
+
+and it is reachable inside an actual budget.
+
+STRUCTURAL CONSEQUENCE, not a detail: `q_block` is a KERNEL over patches, not a marginal
+law over options given `G`. The reference process is therefore patch-local, and the inner
+path measure is over (current patch, intervention) pairs rather than over freshly drawn
+options. This is the formal price of buying reachability, and it should be carried
+explicitly wherever the path measure is written.
+
+Note the convergence. The intervention closure was derived to make contrasts
+IDENTIFIABLE, by cancelling parent terms. It turns out to be the only tractable
+broad-support reference as well. One object, two independent justifications.
+
+`eps` is a support floor and must NOT be tuned against T4 scores; tuning it on the
+benchmark would make a reachability guarantee a fitted quantity. Report sensitivity
+separately.
+
+STILL OPEN: `q_route` is not yet fitted, so the mass it places on admitted siblings is
+unmeasured. That audit cannot invalidate the siblings -- they demonstrably exist and
+execute -- it can only show that the route law alone cannot reach them, which is what the
+mixture exists to fix.
 
 ### 1.3 The option factorisation the measurement licenses
 
