@@ -278,3 +278,63 @@ long rollout is a real risk rather than a theoretical one.
 CAVEAT: these are behaviour-policy descendants -- only the continuations the historical
 search actually generated -- so every `Delta_h` is a LOWER bound on true continuation
 value, and the necessary horizon could be longer under a policy that expands differently.
+
+---
+
+# Maneuverability audit: does future program accessibility predict beyond score?
+
+7,515 states with descendants, 68.1% with `Delta_3 > 0`. Predicting `Delta_3 > 0`,
+leave-target-out, per-fold AUC averaged. Expansion count and call index are covariates in
+EVERY arm, so the comparison isolates the maneuverability block rather than rediscovering
+the expansion confound.
+
+| arm | AUC |
+| --- | ---: |
+| score + gap to incumbent | **0.763** |
+| + maneuverability | 0.761 |
+| maneuverability alone | 0.691 |
+
+Pooled standardised coefficients: expansion +0.702, score +0.634, gap +0.540, call index
+-0.298, and then every maneuverability term at or below 0.100 -- the largest being
+`region_diversity` at **-0.100**, which points the opposite way to the hypothesis.
+
+VERDICT: NEGATIVE. Open valences, cap slack, ring-edit surface, pendant count, heteroatom
+sites and environment diversity carry real information alone (0.691, well above chance)
+and none of it is additional to current score and gap. Redundant, not additive. Discarded.
+
+SCOPE OF THE NEGATIVE, stated because it is narrower than the hypothesis. These are CHEAP
+PROXIES for the option space computed from the molecule, not the enumerated legal fiber
+and not the admitted-intervention count from the closure operator. The stronger test --
+run the closure machinery per state and count admitted interventions -- is expensive and
+untested. This result rules out the proxies, not the idea.
+
+---
+
+# Route option motifs
+
+14 distinct motifs over 77 routes, 8 appearing in at least two targets, and **85.7% of
+route mass sits on motifs seen in more than one target**. G is a global remodel
+(medium/large scale, or a cyclic patch), L a local refinement.
+
+| length-2 submotif | count | share |
+| --- | ---: | ---: |
+| G -> L | 25 | 0.357 |
+| L -> L | 16 | 0.229 |
+| G -> G | 15 | 0.214 |
+| L -> G | 14 | 0.200 |
+
+| length-3 submotif | count |
+| --- | ---: |
+| GLL | 5 |
+| LLG, LGL, GLG, LLL | 3 each |
+| LGG, GGG | 1 each |
+
+USABLE DEPTH IS 2. The length-2 table rests on 70 transitions and is a usable rollout
+prior. The length-3 table rests on 19 and every cell holds between one and five
+observations; fitting it would be fitting noise. So a depth-3 rollout must ITERATE the
+length-2 transition matrix rather than consult learned length-3 motifs.
+
+Global-then-local is the single most common continuation at 0.357, but it is not
+dominant: the four length-2 transitions span 0.200 to 0.357. The route corpus says
+global-first-then-refine is a tendency, not a rule, and a controller that hard-codes it
+would be overreading this table.
