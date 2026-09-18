@@ -399,6 +399,32 @@ def test_structured_proposals_use_the_same_completed_endpoint_gate():
     assert all(fiber.check(record["smiles"]) is not None for record in found)
 
 
+def test_anchored_replacement_reaches_a_feasible_jak2_diamine_basin():
+    fiber = Fiber(JAK2_ROOT, 0.6)
+    found = expand(
+        JAK2_ROOT,
+        -8.0,
+        fiber,
+        np.random.default_rng(5),
+        draws=1,
+        proposal_lane="anchored_replacement",
+    )
+
+    assert found
+    assert all(record["proposal_lane"] == "anchored_replacement" for record in found)
+    assert all(
+        record["program_families"]
+        == ["substituent_delete", "construct_substituted_ring"]
+        for record in found
+    )
+    assert all(fiber.check(record["smiles"]) is not None for record in found)
+    assert any(Chem.MolFromSmiles(record["smiles"]).HasSubstructMatch(
+        Chem.MolFromSmarts("[NX3;R][CX4;R][CX4;R][NX3;R]")
+    ) or Chem.MolFromSmiles(record["smiles"]).HasSubstructMatch(
+        Chem.MolFromSmarts("[NX3;R][CX4;R][NX3;R]")
+    ) for record in found)
+
+
 # ---- Features ----
 
 

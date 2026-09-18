@@ -1,0 +1,41 @@
+{
+  "payload": {
+    "schema_version": "t4_anchored_replacement_support_contract_v1",
+    "scientific_problem": "The exact executor can realize IVG-level protected JAK2 transformations, but shallow-v0 and progressive-v1 assign negligible mass to the coupled retained-anchor replacement that enters that feasible basin.",
+    "primary_model_output": "One complete protected executable program and its canonical eligible endpoint.",
+    "central_claim_under_test": "A target-free proposal expert that couples generic one-boundary deletion with saturated two-nitrogen ring construction at the same retained anchor increases feasible JAK2 basin support over unchanged shallow-v0 and progressive-v1.",
+    "validation_setting": "Zero-oracle matched proposal-support comparison on the answer-known JAK2 seed-1 delta-0.6 development cell.",
+    "baselines": [
+      "unchanged shallow Dynamic-v0 proposal lane",
+      "unchanged progressive Dynamic-v1 structured proposal lane"
+    ],
+    "declared_support": "Neutral charge-preserving 48-slot molecular graphs, at most 40 active atoms, one or two exact existing Dynamic-v1 modules, at most 32 primitives and eight blocks; pendant five- or six-member saturated C/N rings with exactly two nitrogens and existing bounded generic branch templates.",
+    "root_smiles": "COC(=O)CC2Nc1ccccc1c3ccnc4[nH]cc2c34",
+    "root_score": -8.1,
+    "delta": 0.6,
+    "support": "compose_valid",
+    "lanes": [
+      "shallow",
+      "structured",
+      "anchored_replacement"
+    ],
+    "attempts_per_lane": 64,
+    "draws_per_attempt": 8,
+    "horizon": 3,
+    "seed": 2026091831,
+    "maximum_concurrent_single_cpu_workers": 64,
+    "automatic_retry": false,
+    "new_oracle_calls": 0,
+    "promotion_rule": "anchored replacement must produce strictly more unique eligible amide-plus-diamine endpoints than both unchanged shallow and progressive structured lanes at equal proposal budget, with zero worker failures",
+    "kill_rule": "do not dock or integrate this proposal expert if it fails the frozen promotion rule",
+    "inputs": {
+      "src/compose_v4/control/progressive_structured_sampler.py": "f3716d34d9e53ffff78ec8c753a34ee9d3a46082f1877e51766d990c1ff4a6e6",
+      "src/compose_v4/experiments/t4_fiber_campaign.py": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+      "src/compose_v4/experiments/t4_fiber_lane_support.py": "24e7673bed8a8fd2aa2c8c9e0966f7bbf9ed8c913cf459a4de2e0ea36dd7bca8",
+      "src/compose_v4/experiments/t4_anchored_replacement_support.py": "cf2a6092e240e2a0052efa1de1f921a517623c9f538f4c764fbb6668676a5109",
+      "src/compose_v4/experiments/t4_route_guided_support.py": "8463e033043e03951d48be1307f76be7052c90f084a0bae019ea6edfcb98804e",
+      "modal_apps/t4_anchored_replacement_support_app.py": "190f37bc3e6d231fa402d778768e1c17bbecf88eded848b6bc7a784a22a50f1f"
+    }
+  },
+  "payload_sha256": "c4743d0b3621e4c23b387f823488b7172fefa59d99b0daac5906fe3bc297cd4b"
+}

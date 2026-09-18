@@ -37,7 +37,10 @@ from compose_v4.control.intervention_closure import (
     intervene_scale,
     validate,
 )
-from compose_v4.control.progressive_structured_sampler import synthesize_progressive_program
+from compose_v4.control.progressive_structured_sampler import (
+    synthesize_anchored_replacement_program,
+    synthesize_progressive_program,
+)
 from compose_v4.control.queryable_fiber import instability
 from compose_v4.control.structural_subgoal import (
     attachment_bindings,
@@ -246,8 +249,10 @@ def expand(
     """
     if horizon < 1:
         raise ValueError("horizon must be at least one module")
-    if proposal_lane not in ("shallow", "structured"):
-        raise ValueError("proposal_lane must be 'shallow' or 'structured'")
+    if proposal_lane not in ("shallow", "structured", "anchored_replacement"):
+        raise ValueError(
+            "proposal_lane must be 'shallow', 'structured' or 'anchored_replacement'"
+        )
     try:
         source = pad_molecular_graph(smiles_to_molecular_graph(parent), 48)
     except (ValueError, KeyError):
@@ -259,8 +264,12 @@ def expand(
                 _, _, _, trace, metadata = synthesize_dynamic_program(
                     source, rng, max_modules=horizon
                 )
-            else:
+            elif proposal_lane == "structured":
                 _, _, _, trace, metadata = synthesize_progressive_program(source, rng)
+            else:
+                _, _, _, trace, metadata = synthesize_anchored_replacement_program(
+                    source, rng
+                )
             goal, _, _ = extract_structural_goal(tuple(trace["states"]), tuple(trace["actions"]))
         except (ValueError, RuntimeError, KeyError, IndexError, TypeError):
             continue
