@@ -376,9 +376,27 @@ def test_the_horizon_is_a_parameter_of_one_code_path():
     rng = np.random.default_rng(11)
     with pytest.raises(ValueError):
         expand(JAK2_ROOT, -8.0, fiber, rng, draws=1, horizon=0)
+    with pytest.raises(ValueError):
+        expand(JAK2_ROOT, -8.0, fiber, rng, draws=1, proposal_lane="unknown")
     for horizon in (1, 3):
         found = expand(JAK2_ROOT, -8.0, fiber, rng, draws=2, horizon=horizon)
         assert all(fiber.check(r["smiles"]) is not None for r in found)
+
+
+def test_structured_proposals_use_the_same_completed_endpoint_gate():
+    fiber = Fiber(JAK2_ROOT, 0.6)
+    found = expand(
+        JAK2_ROOT,
+        -8.0,
+        fiber,
+        np.random.default_rng(1701),
+        draws=8,
+        proposal_lane="structured",
+    )
+    assert found
+    assert all(record["proposal_lane"] == "structured" for record in found)
+    assert all(record["program_families"] for record in found)
+    assert all(fiber.check(record["smiles"]) is not None for record in found)
 
 
 # ---- Features ----

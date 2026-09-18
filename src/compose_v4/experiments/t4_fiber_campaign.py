@@ -37,6 +37,7 @@ from compose_v4.control.intervention_closure import (
     intervene_scale,
     validate,
 )
+from compose_v4.control.progressive_structured_sampler import synthesize_progressive_program
 from compose_v4.control.queryable_fiber import instability
 from compose_v4.control.structural_subgoal import (
     attachment_bindings,
@@ -234,6 +235,7 @@ def expand(
     draws: int,
     multi_region: bool = True,
     horizon: int = 3,
+    proposal_lane: str = "shallow",
 ) -> list[dict]:
     """Free complete programs from one parent; only queryable endpoints are returned.
 
@@ -244,6 +246,8 @@ def expand(
     """
     if horizon < 1:
         raise ValueError("horizon must be at least one module")
+    if proposal_lane not in ("shallow", "structured"):
+        raise ValueError("proposal_lane must be 'shallow' or 'structured'")
     try:
         source = pad_molecular_graph(smiles_to_molecular_graph(parent), 48)
     except (ValueError, KeyError):
@@ -251,10 +255,20 @@ def expand(
     found: dict[str, dict] = {}
     for _ in range(draws):
         try:
-            _, _, _, trace, _ = synthesize_dynamic_program(source, rng, max_modules=horizon)
+            if proposal_lane == "shallow":
+                _, _, _, trace, metadata = synthesize_dynamic_program(
+                    source, rng, max_modules=horizon
+                )
+            else:
+                _, _, _, trace, metadata = synthesize_progressive_program(source, rng)
             goal, _, _ = extract_structural_goal(tuple(trace["states"]), tuple(trace["actions"]))
-        except (ValueError, KeyError, IndexError, TypeError):
+        except (ValueError, RuntimeError, KeyError, IndexError, TypeError):
             continue
+        program_families = [
+            module.get("family")
+            for module in metadata.get("modules", [])
+            if module.get("family")
+        ]
         variants = {i: _variants(sg) for i, sg in enumerate(goal.subgoals)}
         edits = [{i: c} for i, vs in variants.items() for _, c in vs]
         labels = [[n] for i, vs in variants.items() for n, _ in vs]
@@ -293,6 +307,8 @@ def expand(
                 "parent": parent,
                 "parent_score": parent_score,
                 "families": families,
+                "program_families": program_families,
+                "proposal_lane": proposal_lane,
                 "regions": len(edit),
                 "created": created,
                 "deleted": sum(1 for c in edit.values() for t in c.target_atoms if t is None),

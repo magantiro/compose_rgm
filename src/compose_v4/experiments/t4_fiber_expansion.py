@@ -62,6 +62,7 @@ def expand_wide(
     shards: int = 8,
     horizon: int = 3,
     multi_region: bool = True,
+    proposal_lane: str = "shallow",
     seed: int = 0,
     timeout: float = 3600.0,
 ) -> list[dict]:
@@ -102,6 +103,7 @@ def expand_wide(
                 "draws": count,
                 "horizon": horizon,
                 "multi_region": multi_region,
+                "proposal_lane": proposal_lane,
                 "seed": int(seed) + 1000 * index + 1,
                 "output": str(output),
             }
@@ -141,6 +143,7 @@ def expand_frontier(
     workers: int = 8,
     horizon: int = 3,
     multi_region: bool = True,
+    proposal_lane: str = "shallow",
     seed: int = 0,
     support: str = "compose_valid",
     timeout: float = 3600.0,
@@ -183,7 +186,8 @@ def expand_frontier(
             request = {
                 "parent": parent, "parent_score": parent_score, "seed_smiles": seed_smiles,
                 "delta": delta, "draws": count, "horizon": horizon,
-                "multi_region": multi_region, "support": support,
+                "multi_region": multi_region, "proposal_lane": proposal_lane,
+                "support": support,
                 "seed": int(seed) + 1000 * slot + 7 * index + 1, "output": str(output),
             }
             process = subprocess.Popen(
@@ -313,6 +317,7 @@ def _shard_main() -> None:
         draws=request["draws"],
         multi_region=request.get("multi_region", True),
         horizon=request.get("horizon", 3),
+        proposal_lane=request.get("proposal_lane", "shallow"),
     )
     Path(request["output"]).write_text(json.dumps(records))
 
