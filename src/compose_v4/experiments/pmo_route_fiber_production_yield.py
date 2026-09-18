@@ -443,12 +443,18 @@ def _arm_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "unique_yield": len(set(endpoints)) / len(rows) if rows else None,
         "exact_execution_precision": len(exact) / len(complete) if complete else None,
         "wall_seconds": sum(float(row["seconds"]) for row in rows),
-        "primitive_count_distribution": dict(
-            sorted(Counter(row["primitive_count"] for row in complete).items())
-        ),
-        "component_count_distribution": dict(
-            sorted(Counter(row["component_count"] for row in complete).items())
-        ),
+        "primitive_count_distribution": {
+            str(key): value
+            for key, value in sorted(
+                Counter(row["primitive_count"] for row in complete).items()
+            )
+        },
+        "component_count_distribution": {
+            str(key): value
+            for key, value in sorted(
+                Counter(row["component_count"] for row in complete).items()
+            )
+        },
         "failure_counts": dict(
             sorted(Counter(row["status"] for row in rows if row["status"] != "complete").items())
         ),

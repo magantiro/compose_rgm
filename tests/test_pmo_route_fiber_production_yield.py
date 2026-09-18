@@ -8,6 +8,7 @@ from compose_v4.experiments.pmo_route_fiber_production_yield import (
     CORPUS,
     RUNTIME_FORBIDDEN_KEYS,
     TASK_FOLDS,
+    _arm_summary,
     _recursive_keys,
     contract_envelope,
     fit_route_transition_checkpoint,
@@ -60,3 +61,19 @@ def test_contract_matches_two_attempt_additive_comparison_without_scoring():
     assert contract["sources"] == 16
     assert contract["oracle_calls_authorized"] == 0
     assert contract["scored_launch_authorized"] is False
+
+
+def test_numeric_histograms_survive_json_round_trip():
+    summary = _arm_summary(
+        [
+            {
+                "status": "complete",
+                "endpoint": "A",
+                "exact_replay": True,
+                "seconds": 1.0,
+                "primitive_count": 2,
+                "component_count": 1,
+            }
+        ]
+    )
+    assert json.loads(json.dumps(summary)) == summary
