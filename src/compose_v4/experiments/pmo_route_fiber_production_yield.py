@@ -453,6 +453,34 @@ def _arm_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _route_source_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    summary = _arm_summary(rows)
+    complete = [row for row in rows if row["status"] == "complete"]
+    rule_counts: Counter[str] = Counter()
+    for row in complete:
+        rule_counts.update(row["telemetry"]["chosen_rule_sequence"])
+    summary.update(
+        route_programs_with_created_dependencies=sum(
+            bool(row["created_dependency_edges"]) for row in complete
+        ),
+        route_programs_with_cycle_dependencies=sum(
+            bool(row["cycle_dependency_edges"]) for row in complete
+        ),
+        stopped_before_horizon=sum(row["telemetry"]["stopped"] for row in complete),
+        reached_primitive_horizon=sum(
+            row["primitive_count"] == MAXIMUM_PRIMITIVES for row in complete
+        ),
+        legal_successors_enumerated=sum(
+            row["telemetry"]["legal_successors_enumerated"] for row in complete
+        ),
+        empty_rule_fibers=sum(
+            row["telemetry"]["empty_rule_fibers"] for row in complete
+        ),
+        chosen_rule_counts=dict(sorted(rule_counts.items())),
+    )
+    return summary
+
+
 def run_matched_yield(
     initialization: dict[str, Any],
     transition_runtime: dict[str, Any],
@@ -519,6 +547,17 @@ def run_matched_yield(
             "held_task_family": TASK_FAMILIES[task],
             "sources": source_rows,
             "arms": {name: _arm_summary(rows) for name, rows in arm_rows.items()},
+            "proposal_sources": {
+                "shared_first_v0": _arm_summary(
+                    [row["shared_v0"] for row in source_rows]
+                ),
+                "baseline_second_v0": _arm_summary(
+                    [row["baseline_second_v0"] for row in source_rows]
+                ),
+                "route_transition_prior": _route_source_summary(
+                    [row["additive_route_draw"] for row in source_rows]
+                ),
+            },
         }
     return tasks
 
