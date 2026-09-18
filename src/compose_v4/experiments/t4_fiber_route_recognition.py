@@ -53,7 +53,12 @@ def _canonical_smiles(smiles: str) -> str:
     molecule = Chem.MolFromSmiles(smiles)
     if molecule is None:
         raise ValueError(f"invalid archived SMILES: {smiles!r}")
-    return Chem.MolToSmiles(molecule)
+    # The exact persistent-slot T4 representation deliberately excludes
+    # stereochemistry.  Query receipts can retain input stereotags, so identity for
+    # this graph-level diagnostic must use the declared representation rather than
+    # treating an out-of-scope coordinate as a route mismatch.
+    Chem.RemoveStereochemistry(molecule)
+    return Chem.MolToSmiles(molecule, isomericSmiles=False)
 
 
 def _archive_rows(archive: dict, *, delta: float) -> tuple[str, float, list[dict]]:

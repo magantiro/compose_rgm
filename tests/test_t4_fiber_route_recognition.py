@@ -9,6 +9,7 @@ from compose_v4.control.fiber_control import ProgramValue, SearchState
 from compose_v4.experiments.t4_fiber_campaign import Fiber
 from compose_v4.experiments.t4_fiber_route_recognition import (
     _archive_rows,
+    _canonical_smiles,
     choose_probe,
     rank_probe,
 )
@@ -28,6 +29,10 @@ def test_frozen_probe_rule_selects_only_after_model_can_fit() -> None:
     assert probe["score"] == -11.1
     assert probe["trace_complete"] is True
     assert sum(row["query_index"] < probe["query_index"] for row in rows) == 7
+
+
+def test_graph_identity_ignores_out_of_scope_stereochemistry() -> None:
+    assert _canonical_smiles("C[C@H](O)N") == _canonical_smiles("C[C@@H](O)N")
 
 
 def test_rank_reports_tie_interval_without_using_outcomes() -> None:
