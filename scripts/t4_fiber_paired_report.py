@@ -14,8 +14,10 @@ the selection mechanism even when the best-so-far curves are close.
 
 Three diagnostics separate the three failure modes the plan names:
 
-  generation   -- was anything better than the incumbent present in the pool at all?
-                  Bounded below by what was docked, which is a sample of the pool.
+  generation   -- NOT answerable from this run alone. The only scores available are for
+                  molecules an arm chose to dock, so "best observed" is a lower bound on
+                  the pool ceiling and is selected, not random. Answering it needs a
+                  separate bounded probe that docks a RANDOM sample of an undocked pool.
   reward model -- where did the arm's picks land in the realized ranking of that round's
                   docked molecules? A model that ranks well puts its picks near the top.
   acquisition  -- did the arm's own predicted endpoint score correlate with what came back?
@@ -118,7 +120,17 @@ def report(payload: dict) -> str:
         ]
 
     # ---- the three failure-mode diagnostics ----
-    lines += ["", "## Which stage is limiting", "", "| round | pool best observed | adaptive pick rank | blind pick rank |", "| ----: | -----------------: | -----------------: | --------------: |"]
+    lines += [
+        "",
+        "## Where each arm's picks landed among what was docked",
+        "",
+        "Ranks are over that round's docked molecules only. This is a selected sample, so "
+        "the `best docked` column is a LOWER BOUND on the pool ceiling and says nothing "
+        "about whether stronger candidates went unchosen.",
+        "",
+        "| round | best docked | adaptive best rank | blind best rank |",
+        "| ----: | ----------: | -----------------: | --------------: |",
+    ]
     for index, entry in enumerate(rounds, start=1):
         everything = []
         for name in names:
