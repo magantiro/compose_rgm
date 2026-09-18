@@ -256,3 +256,43 @@ def test_the_vectorised_fit_matches_the_looped_one():
     shared = fit_shared(examples, shape, modes, penalties=penalties)
     assert shared["objective"] == pytest.approx(looped["objective"], abs=1e-6)
     assert np.allclose(shared["theta"], looped["theta"], atol=1e-3)
+
+
+def test_additive_objective_is_the_exact_shared_objective_with_zero_interaction():
+    """The fast operating-law objective is exact under its declared W=0 constraint."""
+    from compose_v4.control.constructive_policy import (
+        _stacked_additive_objective,
+        objective,
+        stack_examples,
+    )
+
+    rng = np.random.default_rng(8)
+    modes = rng.normal(size=(5, 3))
+    examples = []
+    for _ in range(36):
+        n_sites = int(rng.integers(3, 8))
+        examples.append(
+            {
+                "sites": rng.normal(size=(n_sites, 3)),
+                "modes": modes,
+                "site_index": int(rng.integers(n_sites)),
+                "mode_index": int(rng.integers(5)),
+            }
+        )
+    shape = PolicyShape(3, 3)
+    penalties = {"site": 1e-2, "mode": 1e-2, "interaction": 1.0}
+    additive_theta = rng.normal(size=shape.site_features + shape.mode_features)
+    full_theta = np.concatenate(
+        [additive_theta, np.zeros(shape.site_features * shape.mode_features)]
+    )
+    packed = stack_examples(examples, modes)
+    additive_loss, additive_gradient = _stacked_additive_objective(
+        additive_theta, shape, packed, penalties
+    )
+    full_loss, full_gradient = objective(full_theta, shape, examples, penalties)
+    assert additive_loss == pytest.approx(full_loss, abs=1e-10)
+    assert np.allclose(
+        additive_gradient,
+        full_gradient[: shape.site_features + shape.mode_features],
+        atol=1e-10,
+    )

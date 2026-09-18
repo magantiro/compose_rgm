@@ -25,6 +25,7 @@ import json
 from collections import Counter
 from pathlib import Path
 
+from compose_v4.control.constructive_decision import attachment_sites
 from compose_v4.control.dependency_region_program import dependency_region_program
 
 SCHEMA_VERSION = "t4_constructive_decisions_v1"
@@ -34,27 +35,6 @@ SCHEMA_VERSION = "t4_constructive_decisions_v1"
 # and restatements are the half the sampler already reproduces at 4.5 to 10.8%.
 def is_constructive(component: dict) -> bool:
     return bool(component["created_outputs"]) or component["contains_cycle_close"]
-
-
-def attachment_sites(actions, indices, source_atom_count: int) -> list[int]:
-    """Pre-existing atoms a component builds onto.
-
-    An inserted atom names its neighbours in the payload; a neighbour whose slot
-    predates the component is an attachment point, which is the WHERE a prior has to
-    choose. Slots created inside the component are excluded.
-    """
-    created, sites = set(), set()
-    for index in indices:
-        payload = actions[index].get("payload") or {}
-        for key in ("v", "slot", "fresh", "target"):
-            value = payload.get(key)
-            if isinstance(value, int):
-                created.add(value)
-        for neighbour in payload.get("neighbors") or payload.get("neighbours") or []:
-            slot = neighbour[0] if isinstance(neighbour, (list, tuple)) else neighbour
-            if isinstance(slot, int) and slot < source_atom_count and slot not in created:
-                sites.add(slot)
-    return sorted(sites)
 
 
 def describe_component(component: dict, actions, source_atom_count: int) -> dict:

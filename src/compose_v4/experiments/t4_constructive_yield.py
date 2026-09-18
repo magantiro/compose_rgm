@@ -25,42 +25,13 @@ from __future__ import annotations
 
 import numpy as np
 
+from compose_v4.control.constructive_decision import stage_decision
 from compose_v4.control.constructive_features import mode_identity, mode_matrix, site_features
 from compose_v4.control.constructive_policy import pair_scores
 from compose_v4.control.dynamic_program_synthesis import GENERIC_MODULES, compile_generic_module
-from compose_v4.experiments.t4_constructive_decisions import attachment_sites
 from compose_v4.rewrite.trace_shard import decode_state
 
 SCHEMA_VERSION = "t4_constructive_yield_v1"
-
-
-def stage_decision(source_state, actions) -> dict | None:
-    """The `(site, mode)` a realized proposal landed on, or None if it built nothing.
-
-    Mirrors the corpus extractor's definition so a realized proposal and a teacher
-    decision are described by the same quantities; otherwise the ranking would compare
-    two different things and read as a miss.
-    """
-    if not actions:
-        return None
-    created = sum(1 for a in actions if a.get("executor_rule") in ("atom_insert",))
-    closes = any(a.get("executor_rule") == "cycle_close" for a in actions)
-    if not created and not closes:
-        return None
-    source_atoms = len(source_state.get("atom_types", []))
-    sites = attachment_sites(actions, range(len(actions)), source_atoms)
-    if not sites:
-        return None
-    return {
-        "site": min(sites),
-        "mode": {
-            "attachment_count": len(sites),
-            "created_atoms": created,
-            "closes_ring": closes,
-            "opens_ring": any(a.get("executor_rule") == "cycle_open" for a in actions),
-            "primitive_count": len(actions),
-        },
-    }
 
 
 def realized_pairs(source_state, rng, *, samples: int, families=GENERIC_MODULES) -> dict:

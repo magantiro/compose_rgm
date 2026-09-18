@@ -299,3 +299,100 @@ def fit_shared(examples, shape, mode_matrix, *, penalties=None, weights=None, ma
         "examples": len(examples),
         "interaction_norm": float(np.linalg.norm(unpack(result.x, shape)[2])),
     }
+
+
+def _stacked_additive_objective(theta, shape, packed, penalties):
+    """Exact ``A(site) + B(mode)`` objective without materialising pair matrices."""
+    ds, dm = shape.site_features, shape.mode_features
+    if theta.shape != (ds + dm,):
+        raise ValueError(f"additive parameter vector must have length {ds + dm}")
+    a, b = theta[:ds], theta[ds:]
+    sites, modes, owner = packed["sites"], packed["modes"], packed["owner"]
+    weights = packed["weights"]
+    n_examples = packed["examples"]
+
+    site_scores = sites @ a
+    site_shift = np.full(n_examples, -np.inf)
+    np.maximum.at(site_shift, owner, site_scores)
+    site_exp = np.exp(site_scores - site_shift[owner])
+    site_totals = np.zeros(n_examples)
+    np.add.at(site_totals, owner, site_exp)
+    site_log_partition = site_shift + np.log(site_totals)
+    chosen_sites = site_scores[packed["target_row"]]
+
+    mode_scores = modes @ b
+    mode_shift = mode_scores.max()
+    mode_exp = np.exp(mode_scores - mode_shift)
+    mode_total = mode_exp.sum()
+    mode_log_partition = mode_shift + np.log(mode_total)
+    chosen_modes = mode_scores[packed["target_mode"]]
+
+    loss = float(
+        np.mean(weights * (site_log_partition - chosen_sites + mode_log_partition - chosen_modes))
+    )
+
+    site_probability = site_exp / site_totals[owner]
+    site_probability *= weights[owner]
+    site_probability[packed["target_row"]] -= weights
+    site_probability /= n_examples
+    grad_a = sites.T @ site_probability
+
+    mode_probability = mode_exp / mode_total
+    target_mass = np.bincount(packed["target_mode"], weights=weights, minlength=modes.shape[0])
+    grad_mode_scores = mode_probability * weights.sum() - target_mass
+    grad_b = modes.T @ (grad_mode_scores / n_examples)
+
+    ridge = penalties["site"] * float(a @ a) + penalties["mode"] * float(b @ b)
+    grad = np.concatenate(
+        [
+            grad_a + 2 * penalties["site"] * a,
+            grad_b + 2 * penalties["mode"] * b,
+        ]
+    )
+    return loss + ridge, grad
+
+
+def fit_additive_shared(
+    examples,
+    shape,
+    mode_matrix,
+    *,
+    penalties=None,
+    weights=None,
+    maxiter: int = 500,
+):
+    """Fit the selected additive law efficiently and keep the shared inference shape.
+
+    With ``W=0``, the joint softmax over site-mode pairs factorises exactly into a site
+    softmax and a mode softmax. Evaluating those two terms avoids allocating the large
+    ``all sites x all modes`` matrix on every optimiser step. The returned parameter
+    vector includes a zero interaction block, so inference remains compatible with
+    :func:`pair_scores`.
+    """
+    from scipy.optimize import minimize
+
+    if not examples:
+        raise ValueError("cannot fit a constructive policy without examples")
+    penalties = penalties or {"site": 1e-3, "mode": 1e-3, "interaction": 1.0}
+    packed = stack_examples(examples, mode_matrix, weights)
+    result = minimize(
+        _stacked_additive_objective,
+        np.zeros(shape.site_features + shape.mode_features),
+        args=(shape, packed, penalties),
+        jac=True,
+        method="L-BFGS-B",
+        options={"maxiter": maxiter, "ftol": 1e-12, "gtol": 1e-9},
+    )
+    theta = np.concatenate([result.x, np.zeros(shape.site_features * shape.mode_features)])
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "theta": theta,
+        "shape": shape,
+        "penalties": penalties,
+        "objective": float(result.fun),
+        "iterations": int(result.nit),
+        "converged": bool(result.success),
+        "examples": len(examples),
+        "interaction_norm": 0.0,
+        "additive": True,
+    }

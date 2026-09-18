@@ -29,6 +29,7 @@ from pathlib import Path
 
 import numpy as np
 
+from compose_v4.control.constructive_decision import attachment_sites
 from compose_v4.control.constructive_features import (
     MODE_FEATURE_NAMES,
     SITE_FEATURE_NAMES,
@@ -38,7 +39,7 @@ from compose_v4.control.constructive_features import (
 )
 from compose_v4.control.constructive_policy import PolicyShape, fit, pair_scores, rank_of_truth
 from compose_v4.control.dependency_region_program import dependency_region_program
-from compose_v4.experiments.t4_constructive_decisions import attachment_sites, is_constructive
+from compose_v4.experiments.t4_constructive_decisions import is_constructive
 
 SCHEMA_VERSION = "t4_constructive_prior_v1"
 
