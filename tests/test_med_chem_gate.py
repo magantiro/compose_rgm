@@ -144,3 +144,27 @@ def test_one_saturated_nn_bond_is_still_allowed():
     """Pyrazolidine is rare but real; the rule triggers at two N-N bonds."""
     from compose_v4.gates.med_chem_gate import is_valid
     assert is_valid("C1CNNC1")
+
+
+def test_terminal_hypervalent_sulfur_is_flagged():
+    """The rule has been wrong twice, in opposite directions; both are pinned here.
+
+    Absent, it let `C1#[SH2]CNC=N1` -- a triple bond to hypervalent sulfur -- into macro
+    endpoints. Written as `H and degree >= 2`, it missed TERMINAL hypervalent sulfur:
+    `CC([SH3])...` has one carbon neighbour and three hydrogens, so degree is 1 and the
+    rule never fired. That molecule was docked in an autonomous delta=0.6 round.
+    """
+    for smiles in ("CC([SH3])CC(=O)CC1Nc2ccccc2-c2ccnc3[nH]cc1c23", "C1#[SH2]CNC=N1"):
+        reasons = validity_reasons(smiles)
+        assert any(r.startswith("hypervalent_S") for r in reasons), (smiles, reasons)
+
+
+def test_ordinary_sulfur_chemistry_still_passes():
+    """Counting bonds to non-oxygen is what separates hypervalent from ordinary.
+
+    Thiol, thioether and thiophene sit at two; sulfoxide and sulfone spend their extra
+    bonds on oxygen. A rule that rejected any of these would be worse than the bug.
+    """
+    for smiles in ("CSC", "CCS", "CS(=O)C", "CS(=O)(=O)C", "c1ccsc1",
+                   "CS(=O)(=O)N", "O=S(=O)(N)c1ccccc1", "CSSC"):
+        assert validity_reasons(smiles) == [], smiles

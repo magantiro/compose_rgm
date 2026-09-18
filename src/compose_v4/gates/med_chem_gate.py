@@ -49,12 +49,24 @@ def validity_reasons(smiles: str) -> list[str]:
         # [IH2] (2 bonds + 2 H) and [IH4] (1 bond + 4 H) are hypervalent iodine.
         if s in HALOGENS and (a.GetTotalNumHs() or a.GetDegree() != 1):
             out.append(f"hypervalent_halogen:{s}H{a.GetTotalNumHs()}d{a.GetDegree()}")
-        # Sulfur: thioether/thiol/sulfoxide/sulfone/thiophene are all fine, but
-        # S-H inside a ring or with >2 heavy neighbours is not drug chemistry.
-        # Missed on the first pass, which let C1#[SH2]CNC=N1 -- a triple bond to
-        # a hypervalent sulfur -- through the gate and into macro endpoints.
-        if s == "S" and a.GetTotalNumHs() and a.GetDegree() >= 2:
-            out.append(f"hypervalent_S:H{a.GetTotalNumHs()}d{a.GetDegree()}")
+        # Sulfur: thiol, thioether, sulfoxide, sulfone and thiophene are all fine;
+        # anything with more than two bonds to non-oxygen is not drug chemistry.
+        #
+        # This rule has now been wrong twice, in opposite directions. First it was
+        # absent, which let C1#[SH2]CNC=N1 -- a triple bond to a hypervalent sulfur --
+        # into macro endpoints. Then it was written as `H and degree >= 2`, which misses
+        # TERMINAL hypervalent sulfur: `CC([SH3])CC(=O)...` has one carbon neighbour and
+        # three hydrogens, so degree is 1 and the rule never fires. That molecule was
+        # docked in an autonomous delta=0.6 round before anyone noticed.
+        #
+        # Counting bonds to non-oxygen is what separates the two cases: thiol 1+1,
+        # thioether 0+2 and thiophene 0+2 all sit at two, sulfoxide and sulfone spend
+        # their extra bonds on oxygen, and [SH3] reaches four.
+        if s == "S":
+            oxygens = sum(1 for n in a.GetNeighbors() if n.GetSymbol() == "O")
+            non_oxygen = a.GetTotalNumHs() + a.GetDegree() - oxygens
+            if non_oxygen > 2:
+                out.append(f"hypervalent_S:H{a.GetTotalNumHs()}d{a.GetDegree()}o{oxygens}")
         # Drug phosphorus is phosphate/phosphonate: P(=O) with O neighbours, no P-H.
         if s == "P":
             nb = [n.GetSymbol() for n in a.GetNeighbors()]

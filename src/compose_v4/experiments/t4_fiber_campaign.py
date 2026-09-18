@@ -43,6 +43,7 @@ from compose_v4.control.structural_subgoal import (
     extract_structural_goal,
     instantiate_goal,
 )
+from compose_v4.gates.med_chem_gate import is_valid as structurally_valid
 
 SCHEMA_VERSION = "t4_fiber_campaign_v1"
 
@@ -65,8 +66,26 @@ class Fiber:
     `support` decides WHOSE criterion this is, and the distinction is load-bearing for
     any comparison against a published number.
 
-    `BENCHMARK` is the benchmark's own criterion and nothing else. Use it for anything
-    that will be compared to IVG.
+    `BENCHMARK` is the benchmark's thresholds plus a STRUCTURAL VALIDITY gate, and
+    nothing else. Use it for anything that will be compared to IVG.
+
+    The validity gate is `med_chem_gate.is_valid`, and including it is a measurement
+    rather than a preference: that gate is calibrated to accept all 15 T4 seeds and all
+    25 published InVirtuoGen winners, so it provably cannot cost us anything IVG
+    achieved. What it removes is species that are not molecules -- radicals, hypervalent
+    sulfur and iodine, cumulenes, strained N-N rings.
+
+    This is here because removing it was tried and failed loudly. A first version of the
+    benchmark support tested only similarity, QED and SA, on the reasoning that anything
+    else is our own addition. Two rounds later the leading endpoint was
+    `COC(=O)CC1Nc2cc(C3(C[NH])CCCCC3)ccc2-...`, an aminyl RADICAL at -9.70, with two
+    carbon radicals and one `[SH3]` in the same batch. The radical check had lived inside
+    the `instability` bundle that was removed, so stripping the bundle silently deleted
+    it. A radical is not a candidate the benchmark or anyone else would score.
+
+    It also means our own intervention layer still emits radicals. `_rebalance` exists to
+    prevent exactly that, and `retained_deletion` and `retained_element` are still
+    producing them -- which the old bundled gate was concealing rather than fixing.
 
     `LEGACY_SCREENED` additionally applies `queryable_fiber.instability`, which bundles a
     medicinal-chemistry preference list and a net-charge rule into the SEARCH support.
@@ -108,6 +127,8 @@ class Fiber:
         quality = QED.qed(mol)
         access = sascorer.calculateScore(mol)
         if similarity < self.delta or quality < QED_MIN or access > SA_MAX:
+            return None
+        if not structurally_valid(smiles):
             return None
         if self.support == LEGACY_SCREENED and instability(smiles):
             return None
