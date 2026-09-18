@@ -85,3 +85,66 @@ Raise proposal mass on the coordinated conjunction, not on lookahead and not on 
 reward model. The basin needs three changes together: replace the ester oxygen by a ring
 nitrogen, construct the 1,2-diamine ring, acylate the distal nitrogen. The runtime pairs
 at most TWO regions and multi-region endpoints were 0 to 7% of any pool.
+
+---
+
+# Factoring the teacher-program probability (3,000 programs, zero oracle calls)
+
+A whole-program frequency cannot say WHICH conditional carries the smallness, so the
+factors of `q0(Z|G) = q(R|G) q(A|G,R) q(C|G,R,A) q(z|...)` are estimated by conditioning
+on sampled draws. 3,000 programs from the root, 41,591 realized variants, 1,610 feasible
+endpoints at delta=0.6.
+
+| factor | rate | detail |
+| --- | ---: | --- |
+| q(R): WHERE touches the ester group (slots 0-3) | **65.4%** | 1949/2978 bound programs |
+| q(R): WHERE touches the ESTER OXYGEN (slot 1) | **55.4%** | 1649/2978 |
+| q(A\|R): ester oxygen RETYPED TO NITROGEN | **0.77%** | 321/41591 variants; 48 feasible |
+| q(amide \| R hit, feasible) | **6.6%** | 55/828 |
+| q(diamine ring \| R hit, feasible) | **0.12%** | 1/828 |
+| q(amide AND diamine ring) | **0/828**, < 0.36% by rule of three | the wall |
+| q(urea on a ring N) | 0/1610, < 0.19% | never observed |
+
+## What this rules in and out
+
+**WHERE is not the defect.** Over half of all programs bind the exact atom the strong
+basin retypes, which matches the historical 96.6% JAK2 WHERE coverage. Region selection
+needs no redesign.
+
+**The retype is not the defect either.** 321 variants perform the O-to-N retype and 48 of
+them are feasible. **308 of the 321 come from `retained_element`** -- the retained-role
+retyping capability added earlier in this project is doing exactly its job.
+
+**Coordination is the defect.** Conditional on a program that hits the right atom AND
+yields a feasible amide (6.6%), the diamine ring co-occurs in 0 of 828. The two decisions
+are drawn as independent rare events, so the joint sits near 1e-4.
+
+## The mechanism, concretely
+
+`_variants` can only intervene on a program `synthesize_dynamic_program` already drew. If
+that program did not happen to construct a ring at the ester position, no variant can add
+one. So "build a ring here" and "retype this atom to nitrogen" have to coincide across two
+independent samples rather than being one semantic intervention.
+
+## Consequences for the fix
+
+THREE CHEMICAL CHANGES ARE NOT THREE REGIONS. The move is a single dependency closure
+around slot 1: retype that atom and build a ring incorporating it. Admitting arbitrary
+3-region conjunctions would enlarge the search space without addressing this, and is
+therefore the wrong fix.
+
+What the measurement points to instead is sampling a structural replacement GOAL and then
+generating its mutually dependent edits jointly -- and learning that coupling from route
+structure across targets rather than hard-coding a piperazine operation for JAK2, since
+route COMPONENTS are already known to transfer where whole templates do not (0 of 147
+exact whole-patch overlap against 68.1% region-level coverage, 96.6% on JAK2).
+
+## Two claims from the earlier section, corrected
+
+- "zero support" overstated a zero count. 0 of 2,400 bounds the joint rate at roughly
+  3/2400 = 0.00125 at 95%; it is a proposal-MASS problem, not proven absent support.
+- "there is no reward valley" does not follow from the endpoint's Tanimoto distance.
+  Similarity 0.629 to the root means the endpoint satisfies the delta=0.6 constraint; it
+  says nothing about the rewards of intermediates along any particular route. Settling
+  that needs the route-prefix scoring diagnostic, which costs oracle calls and has not
+  been run.

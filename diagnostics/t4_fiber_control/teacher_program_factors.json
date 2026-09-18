@@ -1,0 +1,32 @@
+{
+ "tally": {
+  "programs": 3000,
+  "bound": 2978,
+  "where_ester_oxygen": 1649,
+  "where_methyl_carbon": 1425,
+  "where_ester_group": 1949,
+  "variants": 41591,
+  "feasible": 1610,
+  "ester_oxygen_deleted": 6321,
+  "ester_oxygen_to_nitrogen": 321,
+  "feasible_ester_broken": 879,
+  "feasible_amide": 55,
+  "feasible_diamine_ring": 1,
+  "feasible_urea": 0,
+  "feasible_amide_and_ring": 0,
+  "feasible_basin": 0,
+  "at_ester_feasible": 828,
+  "at_ester_amide": 55,
+  "at_ester_ring": 1,
+  "at_ester_amide_and_ring": 0,
+  "synthesis_failed": 22,
+  "ester_oxygen_to_nitrogen_feasible": 48
+ },
+ "families": {
+  "retained_element": 308,
+  "base": 2,
+  "retained_deletion": 9,
+  "bond_order": 2
+ },
+ "programs": 3000
+}
