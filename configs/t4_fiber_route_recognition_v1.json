@@ -1,0 +1,47 @@
+{
+  "schema_version": "t4_fiber_route_recognition_contract_v1",
+  "scientific_problem": "Determine whether the existing FiberControl ProgramValue model recognizes high-value complete protected COMPOSE programs when those programs are present in a same-source candidate menu.",
+  "primary_output": "Chronological and final pre-probe rank of one answer-known high-value complete program per cell under the unchanged FiberControl value law.",
+  "claim_boundary": "This is a retrospective zero-oracle recognition diagnostic, not autonomous route generation, route following, prospective docking evidence, or a performance estimate.",
+  "selection_rule": {
+    "cells": [
+      "5ht1b_0",
+      "braf_1",
+      "fa7_0"
+    ],
+    "probe": "lowest historical docking score among complete-program candidates with at least four earlier same-cell candidate outcomes",
+    "reason": "ProgramValue abstains below four observations; this rule chooses an informative known-positive probe without using its label in fitting or ranking.",
+    "minimum_prior_outcomes": 4
+  },
+  "candidate_menu": {
+    "route_siblings": "all still-unobserved complete programs from the immutable same-source curriculum archive",
+    "ordinary_shallow": {
+      "draws": 128,
+      "horizon": 3,
+      "support": "compose_valid",
+      "seed": 20260919
+    },
+    "deduplication": "canonical endpoint SMILES"
+  },
+  "runtime": {
+    "delta": 0.4,
+    "program_value_penalty": 1.0,
+    "rank_tolerance": 1e-12,
+    "oracle_calls": 0,
+    "modal_launches": 0
+  },
+  "inputs": {
+    "5ht1b_0": {
+      "path": "diagnostics/t4_program_curriculum/attempt_1/5ht1b_0_archive.json",
+      "sha256": "26b240583f980b00db9539830de34fcacc539b7ffc1c6a2840b11b0b251fc916"
+    },
+    "braf_1": {
+      "path": "diagnostics/t4_program_curriculum/attempt_1/braf_1_archive.json",
+      "sha256": "82b12c929080792015b0c8630b7936cc05fdd80f9cb9e295b553f7faf7a87c72"
+    },
+    "fa7_0": {
+      "path": "diagnostics/t4_program_curriculum/attempt_1/fa7_0_archive.json",
+      "sha256": "4cad2c4b4f6263166c568611dab6bd0ef5de7a3fd803fb90cecda61f568a59f9"
+    }
+  }
+}
