@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import pytest
 
-from compose_v4.experiments.t4_anchored_replacement_pilot import summarize_docking
+from compose_v4.experiments.t4_anchored_replacement_pilot import (
+    summarize_confirmation,
+    summarize_docking,
+)
 
 
 def row(digest: str, score: float | None) -> dict:
@@ -37,3 +40,23 @@ def test_query_order_or_count_mismatch_fails_closed():
         summarize_docking([row("b", -10.0)], expected_digests=["a"])
     with pytest.raises(ValueError, match="expected 2"):
         summarize_docking([row("a", -10.0)], expected_digests=["a", "b"])
+
+
+def test_confirmation_uses_complete_fresh_seed_means():
+    rows = [
+        {**row(digest, score), "smiles": digest, "docking_seed": seed}
+        for digest, scores in (("a", [-10.5, -10.4]), ("b", [-9.8, -10.0]))
+        for seed, score in zip((1, 2), scores)
+    ]
+    result = summarize_confirmation(
+        rows, expected_digests=["a", "b"], expected_seeds=[1, 2]
+    )
+    assert result["confirmation"] == "PASS_REPLICATED_IVG_LEVEL"
+    assert result["best_by_mean"]["endpoint_sha256"] == "a"
+    assert result["best_by_mean"]["mean_score"] == pytest.approx(-10.45)
+
+
+def test_confirmation_grid_mismatch_fails_closed():
+    rows = [{**row("a", -10.5), "smiles": "a", "docking_seed": 1}]
+    with pytest.raises(ValueError, match="grid mismatch"):
+        summarize_confirmation(rows, expected_digests=["a"], expected_seeds=[1, 2])

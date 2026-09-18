@@ -28,7 +28,7 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-@app.function(image=image, cpu=8, timeout=60 * 60, max_containers=1)
+@app.function(image=image, cpu=8, timeout=60 * 60, max_containers=3)
 def dock_locked(payload: str) -> str:
     """Run every locked query once and stream per-query progress."""
 
@@ -216,5 +216,86 @@ def main(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     temporary = output_path.with_suffix(output_path.suffix + ".tmp")
     seal(temporary, payload)
+    temporary.replace(output_path)
+    print(json.dumps(summary, indent=2), flush=True)
+
+
+@app.local_entrypoint()
+def confirm(
+    contract: str = "configs/t4_anchored_replacement_confirmation_v1.json",
+    output: str = "diagnostics/t4_anchored_replacement_confirmation_v1/result.json",
+) -> None:
+    """Run the frozen top-three by fresh-seed confirmation grid."""
+
+    import platform
+    import subprocess
+
+    from rdkit import rdBase
+
+    from compose_v4.experiments.t4_anchored_replacement_pilot import summarize_confirmation
+    from compose_v4.experiments.t4_matched_pilot import _stamp, seal, unseal
+
+    contract_path, output_path = Path(contract), Path(output)
+    if output_path.exists():
+        raise FileExistsError(f"refusing to overwrite confirmation result: {output_path}")
+    envelope = json.loads(contract_path.read_text())
+    payload = unseal(contract_path)
+    first_pass_path = Path(payload["inputs"]["first_pass_result"])
+    if _sha256(first_pass_path) != payload["inputs"]["first_pass_result_sha256"]:
+        raise ValueError("first-pass result hash disagrees with confirmation contract")
+
+    handles = []
+    for seed in payload["docking_seeds"]:
+        request = {
+            "target": payload["target"],
+            "docking_seed": seed,
+            "evaluator_sha256": payload["evaluator_sha256"],
+            "candidates": [
+                {
+                    "index": index,
+                    "smiles": row["smiles"],
+                    "endpoint_sha256": row["endpoint_sha256"],
+                    "first_pass_score": row["first_pass_score"],
+                }
+                for index, row in enumerate(payload["candidates"])
+            ],
+        }
+        handles.append((seed, dock_locked.spawn(json.dumps(request, sort_keys=True))))
+
+    rows, evaluator = [], None
+    for seed, handle in handles:
+        answer = json.loads(handle.get())
+        if evaluator is None:
+            evaluator = answer["evaluator_sha256"]
+        elif evaluator != answer["evaluator_sha256"]:
+            raise ValueError("confirmation workers used different evaluator identities")
+        rows.extend({**row, "docking_seed": seed} for row in answer["results"])
+    summary = summarize_confirmation(
+        rows,
+        expected_digests=[row["endpoint_sha256"] for row in payload["candidates"]],
+        expected_seeds=[int(seed) for seed in payload["docking_seeds"]],
+    )
+    revision = subprocess.run(
+        ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
+    ).stdout.strip()
+    result = {
+        "schema_version": "t4_anchored_replacement_confirmation_publication_v1",
+        "contract_file_sha256": _sha256(contract_path),
+        "contract_payload_sha256": envelope["payload_sha256"],
+        "code_revision": revision,
+        "results": rows,
+        "summary": summary,
+        "evaluator_sha256": evaluator,
+        "new_oracle_calls": summary["charged_calls"],
+        "runtime": {"python": platform.python_version(), "rdkit": rdBase.rdkitVersion},
+        "completed_at_utc": _stamp(),
+        "claim_boundary": (
+            "post-selection confirmation of three answer-known JAK2 development "
+            "endpoints; not a fresh candidate evaluation or benchmark-wide result"
+        ),
+    }
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = output_path.with_suffix(output_path.suffix + ".tmp")
+    seal(temporary, result)
     temporary.replace(output_path)
     print(json.dumps(summary, indent=2), flush=True)

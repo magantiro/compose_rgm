@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import statistics
 from typing import Any
 
 SCHEMA_VERSION = "t4_anchored_replacement_pilot_result_v1"
@@ -46,5 +47,59 @@ def summarize_docking(
             "promote anchored replacement into a bounded FiberControl integration if "
             "at least one novel locked endpoint scores at or below -10.0; classify a "
             "score at or below the published IVG mean -10.4 as a strong signal"
+        ),
+    }
+
+
+def summarize_confirmation(
+    rows: list[dict[str, Any]],
+    *,
+    expected_digests: list[str],
+    expected_seeds: list[int],
+) -> dict[str, Any]:
+    """Reduce the complete candidate-by-seed confirmation grid."""
+
+    expected = {(digest, seed) for digest in expected_digests for seed in expected_seeds}
+    observed = {
+        (str(row["endpoint_sha256"]), int(row["docking_seed"])) for row in rows
+    }
+    if observed != expected or len(rows) != len(expected):
+        missing = sorted(expected - observed)
+        extra = sorted(observed - expected)
+        raise ValueError(f"confirmation grid mismatch; missing={missing}, extra={extra}")
+
+    candidates = []
+    for digest in expected_digests:
+        group = [row for row in rows if row["endpoint_sha256"] == digest]
+        scores = [float(row["score"]) for row in group if row.get("score") is not None]
+        candidates.append(
+            {
+                "endpoint_sha256": digest,
+                "smiles": group[0]["smiles"],
+                "successful_replicates": len(scores),
+                "failed_replicates": len(group) - len(scores),
+                "mean_score": statistics.fmean(scores) if scores else None,
+                "median_score": statistics.median(scores) if scores else None,
+                "score_min": min(scores) if scores else None,
+                "score_max": max(scores) if scores else None,
+                "scores": scores,
+            }
+        )
+    complete = [row for row in candidates if row["successful_replicates"] == len(expected_seeds)]
+    best = min(complete, key=lambda row: row["mean_score"]) if complete else None
+    return {
+        "charged_calls": len(rows),
+        "successful_calls": sum(row.get("score") is not None for row in rows),
+        "failed_calls": sum(row.get("score") is None for row in rows),
+        "candidates": candidates,
+        "best_by_mean": best,
+        "confirmation": (
+            "PASS_REPLICATED_IVG_LEVEL"
+            if best is not None and best["mean_score"] <= -10.4
+            else "FAIL_NOT_REPLICATED_AT_IVG_LEVEL"
+        ),
+        "frozen_rule": (
+            "confirm if at least one prospectively selected top-three first-pass "
+            "endpoint completes every fresh seed and has mean score at or below -10.4"
         ),
     }
