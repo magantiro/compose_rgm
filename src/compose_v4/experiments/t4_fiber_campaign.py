@@ -47,11 +47,53 @@ from compose_v4.control.structural_subgoal import (
 SCHEMA_VERSION = "t4_fiber_campaign_v1"
 
 
-class Fiber:
-    """The exact task gate. Free to evaluate; the oracle is never asked about it."""
+#: What the benchmark itself requires of a returned molecule, verbatim from the task
+#: contract in `modal_apps/genmol_t4_opt_app.py`: "RETURNED only QED>=0.6, SA<=4,
+#: sim>=delta; among those, best docking", with QED_MIN, SA_MAX = 0.6, 4.0.
+QED_MIN, SA_MAX = 0.6, 4.0
 
-    def __init__(self, seed_smiles: str, delta: float):
+#: Heavy-atom ceiling. This is a REPRESENTATION limit of the padded state, not a
+#: benchmark criterion, and is recorded separately for exactly that reason.
+REPRESENTABLE_HEAVY_ATOMS = 40
+
+BENCHMARK, LEGACY_SCREENED = "benchmark", "legacy_screened"
+
+
+class Fiber:
+    """The task gate. Free to evaluate; the oracle is never asked about it.
+
+    `support` decides WHOSE criterion this is, and the distinction is load-bearing for
+    any comparison against a published number.
+
+    `BENCHMARK` is the benchmark's own criterion and nothing else. Use it for anything
+    that will be compared to IVG.
+
+    `LEGACY_SCREENED` additionally applies `queryable_fiber.instability`, which bundles a
+    medicinal-chemistry preference list and a net-charge rule into the SEARCH support.
+    Measured, that bundle refuses 7.0% of the benchmark's own Jin QED lead set and 13.8%
+    of held-out GuacaMol, chiefly through a plain-enone rule firing on 9.0% of GuacaMol.
+    A run under it is searching a strictly smaller fiber than the task defines, so its
+    score is not comparable to a number obtained on the full one. It is retained only to
+    reproduce runs already made under it.
+
+    Three ways the screened form was tighter than the task, all now separated:
+      * it required QED strictly above 0.6 and SA strictly below 4.0, where the contract
+        says `>=0.6` and `<=4`. Strong solutions hug active constraints -- the delta=0.6
+        leaders carry a median similarity margin of +0.019 and several sit at exactly
+        0.600 -- so a boundary-exclusive comparison is not a small difference;
+      * it imposed an 18-heavy-atom floor that appears nowhere in the task;
+      * it folded the med-chem bundle into the support.
+
+    Medicinal-chemistry judgement belongs to the RETURNED molecule, where the repo
+    already puts it (`t4_endpoint_selection.acceptable_endpoint`, documented as "a
+    heuristic, not an additional benchmark threshold"). Report it as a second number.
+    """
+
+    def __init__(self, seed_smiles: str, delta: float, *, support: str = BENCHMARK):
+        if support not in (BENCHMARK, LEGACY_SCREENED):
+            raise ValueError(f"unknown fiber support {support!r}")
         self.delta = delta
+        self.support = support
         self.generator = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
         self.seed = self.generator.GetFingerprint(Chem.MolFromSmiles(seed_smiles))
 
@@ -60,12 +102,14 @@ class Fiber:
         if mol is None or "." in smiles:
             return None
         heavy = mol.GetNumHeavyAtoms()
-        if not 18 <= heavy <= 40:
+        if heavy > REPRESENTABLE_HEAVY_ATOMS:
             return None
         similarity = DataStructs.TanimotoSimilarity(self.seed, self.generator.GetFingerprint(mol))
         quality = QED.qed(mol)
         access = sascorer.calculateScore(mol)
-        if similarity < self.delta or quality <= 0.6 or access >= 4.0 or instability(smiles):
+        if similarity < self.delta or quality < QED_MIN or access > SA_MAX:
+            return None
+        if self.support == LEGACY_SCREENED and instability(smiles):
             return None
         return {
             "smiles": Chem.MolToSmiles(mol),

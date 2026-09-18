@@ -142,6 +142,7 @@ def expand_frontier(
     horizon: int = 3,
     multi_region: bool = True,
     seed: int = 0,
+    support: str = "benchmark",
     timeout: float = 3600.0,
 ) -> dict[str, dict]:
     """Expand every parent on the frontier at once, under one global worker cap.
@@ -182,7 +183,7 @@ def expand_frontier(
             request = {
                 "parent": parent, "parent_score": parent_score, "seed_smiles": seed_smiles,
                 "delta": delta, "draws": count, "horizon": horizon,
-                "multi_region": multi_region,
+                "multi_region": multi_region, "support": support,
                 "seed": int(seed) + 1000 * slot + 7 * index + 1, "output": str(output),
             }
             process = subprocess.Popen(
@@ -299,7 +300,10 @@ def _shard_main() -> None:
     from compose_v4.experiments.t4_fiber_campaign import Fiber, expand
 
     request = json.loads(sys.stdin.read())
-    fiber = Fiber(request["seed_smiles"], request["delta"])
+    fiber = Fiber(
+        request["seed_smiles"], request["delta"],
+        support=request.get("support", "benchmark"),
+    )
     rng = np.random.default_rng(request["seed"])
     records = expand(
         request["parent"],

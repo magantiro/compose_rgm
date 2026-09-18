@@ -73,20 +73,61 @@ def test_the_fiber_refuses_ineligible_endpoints(smiles, reason):
 
 
 # Real endpoints the production program process emits from the JAK2 root, each one
-# eligible on every gate but one. They exist because a gate omitted from an earlier
-# version of this fiber invalidated a 32-call experiment: only 11 of its 28 docked
-# candidates passed `SA < 4` and none of its six controls did.
+# eligible on every BENCHMARK threshold but one. They exist because a threshold omitted
+# from an earlier version of this fiber invalidated a 32-call experiment: only 11 of its
+# 28 docked candidates passed `SA <= 4` and none of its six controls did.
+#
+# An aldehyde witness used to live in this list, and that was the very conflation this
+# module now separates: an aldehyde violates no benchmark threshold. It moved to the
+# legacy-screened test, where a medicinal-chemistry preference belongs.
 GATE_WITNESSES = (
-    ("COC(=O)CC1Nc2ccpcc2-c2ccnc3[nH]cc1c23", "SA 4.07", "sim 0.741, QED 0.706"),
-    ("OC1Nc2ccccc2-c2ccnc3[nH]cc1c23", "QED 0.563", "sim 0.600, SA 3.15"),
-    ("O=CCC1Nc2ccccc2-c2ccnc3[nH]cc1c23", "an aldehyde", "sim 0.686, QED 0.697, SA 3.33"),
+    ("COC(=O)CC1Nc2ccpcc2-c2ccnc3[nH]cc1c23", "SA 4.07 > 4.0", "sim 0.741, QED 0.706"),
+    ("OC1Nc2ccccc2-c2ccnc3[nH]cc1c23", "QED 0.563 < 0.6", "sim 0.600, SA 3.15"),
 )
 
 
 @pytest.mark.parametrize("smiles, refused_for, otherwise", GATE_WITNESSES)
-def test_every_benchmark_gate_refuses_before_a_call_is_spent(smiles, refused_for, otherwise):
+def test_every_benchmark_threshold_refuses_before_a_call_is_spent(smiles, refused_for, otherwise):
     assert Chem.MolFromSmiles(smiles) is not None, "the witness must be a real molecule"
     assert Fiber(JAK2_ROOT, 0.6).check(smiles) is None, f"{refused_for}, though {otherwise}"
+
+
+def test_the_benchmark_fiber_is_the_benchmark_criterion_and_nothing_else():
+    """Three ways the screened fiber was tighter than the task it claims to serve.
+
+    The contract is "RETURNED only QED>=0.6, SA<=4, sim>=delta". Searching under anything
+    narrower and then comparing to a published number obtained on the full criterion is
+    not a comparison. The screened bundle refuses 7.0% of the benchmark's own lead set.
+    """
+    from compose_v4.experiments.t4_fiber_campaign import BENCHMARK, LEGACY_SCREENED
+
+    official = Fiber(JAK2_ROOT, 0.6, support=BENCHMARK)
+    screened = Fiber(JAK2_ROOT, 0.6, support=LEGACY_SCREENED)
+
+    # A molecule the med-chem bundle refuses but the task accepts.
+    aldehyde = "O=CCC1Nc2ccccc2-c2ccnc3[nH]cc1c23"
+    assert official.check(aldehyde) is not None, "the task does not screen aldehydes"
+    assert screened.check(aldehyde) is None, "the legacy bundle does"
+
+    with pytest.raises(ValueError):
+        Fiber(JAK2_ROOT, 0.6, support="something_else")
+
+
+def test_the_gate_is_inclusive_at_its_own_thresholds():
+    """QED >= 0.6 and SA <= 4, not strictly-greater and strictly-less.
+
+    This is not pedantry: the delta=0.6 leaders carry a median similarity margin of
+    +0.019 and several sit at exactly 0.600, so high reward concentrates ON the active
+    constraint and a boundary-exclusive gate excludes exactly the interesting corner.
+    """
+    import inspect
+
+    from compose_v4.experiments import t4_fiber_campaign
+
+    source = inspect.getsource(t4_fiber_campaign.Fiber.check)
+    assert "quality < QED_MIN" in source, "QED must be admitted AT the threshold"
+    assert "access > SA_MAX" in source, "SA must be admitted AT the threshold"
+    assert "18 <=" not in source, "the 18-heavy-atom floor is not a benchmark criterion"
 
 
 def test_the_similarity_gate_is_the_delta_that_was_asked_for():

@@ -80,6 +80,23 @@ def test_the_enone_rule_is_excluded_and_would_fail_admission():
     )
 
 
+def test_no_published_ivg_winner_is_rejected():
+    """The strongest anti-handicap test available.
+
+    These 25 molecules are the published winners of the method we are trying to beat. If
+    our secondary screen refused any of them, every "vetted" number we reported would be
+    measured on a population IVG was never held to, and the comparison would be rigged in
+    our own disfavour while looking rigorous.
+    """
+    import json
+
+    payload = json.loads(Path("diagnostics/ivg_winners.json").read_text())
+    winners = [w["smiles"] for cell in payload.values() for w in cell["winners"]]
+    assert len(winners) >= 25, "the calibration population must be the published set"
+    refused = {smiles: screen(smiles) for smiles in winners if screen(smiles)}
+    assert not refused, f"the screen refuses published IVG winners: {refused}"
+
+
 def test_the_official_t4_seeds_all_pass():
     """The screen may never refuse a molecule the benchmark itself starts from."""
     import json

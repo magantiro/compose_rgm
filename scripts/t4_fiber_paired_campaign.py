@@ -92,6 +92,10 @@ def main() -> None:
     parser.add_argument("--shards", type=int, default=8)
     parser.add_argument("--parents", type=int, default=4, help="frontier width PER ARM")
     parser.add_argument("--horizon", type=int, default=3, help="modules per program")
+    parser.add_argument("--support", default="benchmark",
+                        choices=("benchmark", "legacy_screened"),
+                        help="benchmark = the task's own criterion, the only fair one "
+                             "for an IVG comparison")
     parser.add_argument("--exploration", type=int, default=2,
                         help="random picks per batch; the rest are the model's ranking")
     parser.add_argument("--seed", type=int, default=20260918)
@@ -101,7 +105,7 @@ def main() -> None:
     destination = require_durable_path(options.out, role="paired campaign result")
     destination.parent.mkdir(parents=True, exist_ok=True)
 
-    fiber = Fiber(options.root, options.delta)
+    fiber = Fiber(options.root, options.delta, support=options.support)
     rng = np.random.default_rng(options.seed)
     dock = _docker(options.target, options.seed)
 
@@ -126,7 +130,8 @@ def main() -> None:
     print(f"[paired] {options.target} delta={options.delta}; {options.budget} charged calls per arm", flush=True)
     print(f"[paired] root {options.root} scores {root_score[options.root]:.2f}", flush=True)
     print(f"[paired] pool from {options.draws} raw programs per parent over {options.shards} shards", flush=True)
-    print(f"[paired] selection: predicted ENDPOINT score, one step, program depth {options.horizon}\n", flush=True)
+    print(f"[paired] selection: predicted ENDPOINT score, one step, program depth "
+          f"{options.horizon}; fiber support = {options.support}\n", flush=True)
 
     rounds, round_index = [], 0
     while any(a["state"].budget >= options.batch and not a["stopped"] for a in arms.values()):
@@ -153,7 +158,7 @@ def main() -> None:
         pool = expand_frontier(
             scored_frontier, options.root, options.delta,
             draws=options.draws, workers=options.shards, horizon=options.horizon,
-            seed=options.seed + 104729 * round_index,
+            seed=options.seed + 104729 * round_index, support=options.support,
         )
         generated = time.time() - started
 
