@@ -1,0 +1,55 @@
+{
+  "payload": {
+    "schema_version": "t4_anchored_replacement_confirmation_contract_v1",
+    "scientific_problem": "The first prospectively locked anchored-replacement panel produced three IVG-level single-call JAK2 scores, including -11.1, under known approximately 0.5 single-call variability. Determine whether the signal persists across fresh docking seeds.",
+    "primary_output": "A complete three-candidate by three-fresh-seed score grid and per-candidate mean docking score.",
+    "validation_setting": "Post-selection confirmation on the answer-known JAK2 seed-1 delta-0.6 development cell; not a fresh candidate evaluation and not a benchmark-wide result.",
+    "authorization": "The user approved aggressive continued JAK2 route-distilled plus FiberControl development, Modal execution, and obtaining a quick reliable answer. This contract narrows that authority to nine fixed confirmation calls.",
+    "target": "jak2",
+    "cell": "jak2_1",
+    "delta": 0.6,
+    "docking_seeds": [1701, 1702, 1703],
+    "candidates": [
+      {
+        "endpoint_sha256": "940b4ad72693bdbd6c1438155cb241673359ea06fbfbb2303a1d663f63c3a56b",
+        "smiles": "CN1CCN(C(=O)O)CN1C(=O)CC1Nc2ccccc2-c2ccnc3[nH]cc1c23",
+        "first_pass_score": -11.1
+      },
+      {
+        "endpoint_sha256": "30013f6201ca30ebff33caa3f26af0896f57c77858955958cdb4d30b7b563efa",
+        "smiles": "O=C(O)N1CCN(C(=O)CC2Nc3ccccc3-c3ccnc4[nH]cc2c34)CC1",
+        "first_pass_score": -10.6
+      },
+      {
+        "endpoint_sha256": "b8ee253075d970f1f74d910a86fff554cdf9802643967dcff2b577d538269d27",
+        "smiles": "CN1CCN(C(=O)CC2Nc3ccccc3-c3ccnc4[nH]cc2c34)CC1C(=O)O",
+        "first_pass_score": -10.4
+      }
+    ],
+    "selection_rule": "The three endpoints at or better than the published IVG mean in the immutable first-pass result, selected once before any fresh-seed confirmation score exists.",
+    "charged_call_limit": 9,
+    "automatic_retries": 0,
+    "replacement_after_scoring": false,
+    "promotion_rule": "Pass if at least one candidate succeeds on all three fresh seeds and its fresh-seed mean is at or below -10.4.",
+    "failure_rule": "If no complete candidate mean reaches -10.4, retain the single-call pilot as a positive proposal-support result but do not quote an IVG-level replicated score.",
+    "evaluator_sha256": {
+      "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor": "cb900f3f75dcf2ac3efe6538528ed1e87ec934a527b3b060c2b09dfe3a11d9b6"
+    },
+    "inputs": {
+      "first_pass_result": "diagnostics/t4_anchored_replacement_pilot_v1/result.json",
+      "first_pass_result_sha256": "770f3b69f8e1fd82a0b06c6b338899335c9d8c9403e5d33888a6cd407dc6e233",
+      "pilot_app_sha256": "2077efd938f5e96fe28b1dd571d3ac868bb21042af48d4244ccc4d88c5db2e86",
+      "result_reducer_sha256": "5ed199fea877b51362c58cf36292dbd47eb6d889c33d84d9fbb692c09bcd0ad8",
+      "scientific_code_revision": "58ae0e2a6f7a371c70b7c218a4dbe82e4a8d6409"
+    },
+    "output": "diagnostics/t4_anchored_replacement_confirmation_v1/result.json",
+    "prohibitions": [
+      "no candidate replacement or backfill",
+      "no retry of failed physical calls",
+      "no use of confirmation results to rewrite the first-pass result",
+      "no held-out or benchmark-wide IVG claim"
+    ]
+  },
+  "payload_sha256": "55e84541f7a365586b171eaee7a3a8dba696a74ec55364fd59403498303e76da"
+}
