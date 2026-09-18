@@ -36,9 +36,11 @@ SCHEMA_VERSION = "fiber_control_v1"
 
 STOP = "stop"
 
-# Reproducibility of one docking call on this target, measured: the benchmark root was
-# submitted twice under identical requests and returned -8.00 and -8.50.
-NOISE_FLOOR = 0.5
+# Reproducibility of ONE docking call on this target, measured: the benchmark root was
+# submitted twice under identical requests and returned -8.00 and -8.50, and later -8.10.
+# It bounds what a single-call margin can mean. It is NOT an exploration scale -- using it
+# as one drowned a live campaign's reward signal; see `acquisition`.
+SINGLE_CALL_REPRODUCIBILITY = 0.5
 
 
 @dataclass
@@ -109,6 +111,15 @@ def program_features(record: dict, state: SearchState) -> np.ndarray:
 class ProgramValue:
     """Ridge model of realized improvement, fitted only on counted docking outcomes.
 
+    The penalty is defined against the MEAN squared loss, so the normal equations carry
+    `n * penalty` and shrinkage does not vanish as observations accumulate. That is
+    ordinary fixed-strength regularisation and it is a deliberate choice, not an oversight:
+    the Bayesian form with a fixed prior precision (`Z'Z + lambda I`) would let data
+    progressively overwhelm the prior instead. Both are legitimate. It is left as it is
+    because selection ranks candidates, and a ranking is largely insensitive to the
+    overall shrinkage level -- so this is not the lever worth moving while the open
+    question is whether the ordering carries signal at all.
+
     The target is the improvement over the parent, not the endpoint score, because the
     parent term cancels: siblings of one parent share it exactly, so a contrast between
     them identifies the program's own effect with no confound. The parent offset is NOT
@@ -149,6 +160,20 @@ class ProgramValue:
         return ((x - self._mean) / self._scale) @ self.weights
 
 
+def endpoint_utility(candidates, value: ProgramValue) -> np.ndarray:
+    """Predicted ENDPOINT score of each candidate, negated so larger is better.
+
+    The value model targets improvement over the parent, because siblings of one parent
+    share the parent term exactly and a contrast between them identifies the program's own
+    effect. The objective is written over the endpoint, so the parent offset is added back
+    here: `endpoint = parent_score - gain`. Ranking gain alone bought -6.8 endpoints from
+    weak parents while a -9.10 incumbent stood.
+    """
+    x = np.asarray([c["features"] for c in candidates])
+    parent = np.asarray([c.get("parent_score", 0.0) for c in candidates], dtype=float)
+    return value.predict(x) - parent
+
+
 def acquisition(
     candidates,
     value: ProgramValue,
@@ -158,6 +183,7 @@ def acquisition(
     beta: float = 1.0,
     batch: int = 8,
     diversity: float = 0.5,
+    exploration: int = 2,
 ) -> list[int]:
     """Choose the next docking batch, or STOP.
 
@@ -170,41 +196,51 @@ def acquisition(
     autonomous run docked endpoints at -6.8, -7.0 and -7.3 while the incumbent stood at
     -9.10, and the run gained 0.30 over its last 24 calls.
 
-    Optimism is Thompson-style: a value model fitted on few observations is sampled
-    rather than trusted. The noise floor is a measurement, not a taste -- the same root
-    molecule submitted twice under identical requests came back -8.00 and -8.50, so a
-    ranking margin under about half a unit is not a real ordering and exploration must
-    still be able to overturn it. Diversity is enforced structurally, because a batch of
+    EXPLORATION IS A QUOTA, NOT NOISE. An earlier version added Gaussian noise to every
+    predicted score at a scale of 0.5, taken from the oracle's single-call
+    reproducibility: the same root returned -8.00 and -8.50 under identical requests. That
+    is the wrong quantity to explore with, and the cost was measured on a live campaign --
+    the model's predicted endpoint scores spanned 0.10 to 0.21 across a chosen batch while
+    0.5 of noise sat on top, so the reward-guided arm was approximately its reward-blind
+    control by construction, finishing 3-2 over five matched rounds at p = 1.00.
+
+    So the model now decides `batch - exploration` picks by its ranking, plainly, and
+    `exploration` picks are drawn at random from what is left. That keeps the question
+    answerable: whether the learned ordering carries signal is visible in what the model's
+    own picks return, and the random quota still seeds branches the ranking would never
+    try. No calibrated uncertainty is claimed, because none is needed to answer it.
+
+    Diversity is enforced structurally among the model's picks, because a batch of
     near-identical candidates buys one observation at the price of several calls.
     """
     if not candidates:
         return []
-    x = np.asarray([c["features"] for c in candidates])
-    parent = np.asarray([c.get("parent_score", 0.0) for c in candidates], dtype=float)
-    predicted = value.predict(x)
-    spread = float(np.std(predicted)) if value.weights is not None else 1.0
-    sampled = predicted + rng.normal(0.0, max(spread, NOISE_FLOOR), size=predicted.shape)
-    # utility is minus the predicted endpoint score, so larger is better throughout
-    sampled = sampled - parent
+    utility = endpoint_utility(candidates, value)
+    room = min(batch, len(candidates))
+    by_model = max(0, room - exploration) if value.weights is not None else 0
 
-    chosen, taken = [], []
-    for _ in range(min(batch, len(candidates))):
+    chosen: list[int] = []
+    for _ in range(by_model):
         best, best_score = None, -np.inf
         for i, candidate in enumerate(candidates):
             if i in chosen:
                 continue
             penalty = 0.0
-            for j in taken:
+            for j in chosen:
                 overlap = len(candidate["fingerprint"] & candidates[j]["fingerprint"])
                 union = len(candidate["fingerprint"] | candidates[j]["fingerprint"]) or 1
                 penalty = max(penalty, overlap / union)
-            score = beta * sampled[i] - diversity * penalty
+            score = beta * utility[i] - diversity * penalty
             if score > best_score:
                 best, best_score = i, score
         if best is None:
             break
         chosen.append(best)
-        taken.append(best)
+
+    remaining = [i for i in range(len(candidates)) if i not in chosen]
+    if remaining:
+        extra = min(room - len(chosen), len(remaining))
+        chosen += [remaining[i] for i in rng.choice(len(remaining), extra, replace=False)]
     return chosen
 
 

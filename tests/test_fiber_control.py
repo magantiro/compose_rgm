@@ -149,9 +149,14 @@ def test_acquisition_spends_its_batch_on_distinct_structures():
     # at the price of several calls.
     twins = [_candidate(i, range(100)) for i in range(12)]
     distinct = [_candidate(100 + i, range(500 * (i + 1), 500 * (i + 1) + 40)) for i in range(4)]
+    candidates = twins + distinct
+    # Diversity only governs the MODEL's slots, so the model must be fitted and the
+    # random quota closed for this to be a test of diversity rather than of luck.
+    value = ProgramValue()
+    value.fit([c["features"] for c in candidates] * 4, [0.0] * (len(candidates) * 4))
     picked = acquisition(
-        twins + distinct, ProgramValue(), SearchState(), np.random.default_rng(3),
-        batch=4, diversity=50.0,
+        candidates, value, SearchState(), np.random.default_rng(3),
+        batch=4, diversity=50.0, exploration=0,
     )
     assert sum(1 for i in picked if i >= 12) >= 3
 
@@ -176,13 +181,52 @@ def test_acquisition_ranks_by_the_endpoint_score_not_by_the_gain():
     strong = _candidate(0, range(40), parent_score=-11.0)
     weak = _candidate(1, range(500, 540), parent_score=-7.0)
     rng = np.random.default_rng(0)
-    first = [acquisition([strong, weak], _Flat(), SearchState(), rng, batch=1)[0] for _ in range(200)]
-    assert sum(1 for pick in first if pick == 0) > 150, "the strong parent must usually win"
+    first = [acquisition([strong, weak], _Flat(), SearchState(), rng, batch=1, exploration=0)[0]
+             for _ in range(50)]
+    assert all(pick == 0 for pick in first), "the strong parent's candidate must win"
 
 
-def test_acquisition_exploration_can_still_overturn_a_parent_gap():
-    # A gap under the measured single-call reproducibility (-8.00 / -8.50 on one root)
-    # is not a real ordering, so the sampler must not treat it as one.
+def test_exploration_is_a_quota_of_picks_not_noise_on_the_scores():
+    """The defect that made a live campaign's reward arm equal its own control.
+
+    Gaussian noise at 0.5 -- the oracle's single-call reproducibility -- was added to
+    predictions whose spread across a chosen batch was 0.10 to 0.21, so the exploration
+    term decided the batch. A quota keeps the two roles separate: the model's picks are
+    its ranking, plainly, and the random picks are visibly random.
+    """
+    strong = _candidate(0, range(40), parent_score=-11.0)
+    middling = [_candidate(i, range(500 * i, 500 * i + 40), parent_score=-8.0)
+                for i in range(1, 12)]
+    candidates = [strong] + middling
+    value = ProgramValue()
+    value.fit([c["features"] for c in candidates] * 6, [0.0] * (len(candidates) * 6))
+    rng = np.random.default_rng(0)
+
+    # With four of six slots decided by the model, the -11.0 parent's candidate is
+    # ranked first on endpoint score and must be taken every time.
+    picked = [acquisition(candidates, value, SearchState(), rng, batch=6, exploration=2)
+              for _ in range(50)]
+    assert all(0 in batch for batch in picked), "the model's own top pick must survive"
+    assert all(len(batch) == 6 for batch in picked)
+
+    # And the quota really is spent at random rather than on the ranking's next choices.
+    tail = {i for batch in picked for i in batch if i != 0}
+    assert len(tail) > 6, "a random quota should reach most of the pool over 50 draws"
+
+
+def test_an_unfitted_model_defers_entirely_to_the_random_quota():
+    candidates = [_candidate(i, range(50 * i, 50 * i + 40)) for i in range(20)]
+    rng = np.random.default_rng(1)
+    picked = acquisition(candidates, ProgramValue(), SearchState(), rng, batch=8)
+    assert len(picked) == len(set(picked)) == 8
+
+
+def test_endpoint_utility_adds_the_parent_offset_back():
+    from compose_v4.control.fiber_control import endpoint_utility
+
+    strong = _candidate(0, range(40), parent_score=-11.0)
+    weak = _candidate(1, range(500, 540), parent_score=-7.0)
+
     class _Flat(ProgramValue):
         def __init__(self):
             super().__init__()
@@ -191,11 +235,8 @@ def test_acquisition_exploration_can_still_overturn_a_parent_gap():
         def predict(self, features):
             return np.zeros(np.asarray(features).shape[0])
 
-    better = _candidate(0, range(40), parent_score=-9.2)
-    other = _candidate(1, range(500, 540), parent_score=-9.0)
-    rng = np.random.default_rng(0)
-    first = [acquisition([better, other], _Flat(), SearchState(), rng, batch=1)[0] for _ in range(200)]
-    assert 20 < sum(1 for pick in first if pick == 1) < 100
+    utility = endpoint_utility([strong, weak], _Flat())
+    assert utility[0] == pytest.approx(11.0) and utility[1] == pytest.approx(7.0)
 
 
 # ---- STOP ----

@@ -38,7 +38,13 @@ import time
 
 import numpy as np
 
-from compose_v4.control.fiber_control import ProgramValue, SearchState, acquisition, should_stop
+from compose_v4.control.fiber_control import (
+    ProgramValue,
+    SearchState,
+    acquisition,
+    endpoint_utility,
+    should_stop,
+)
 from compose_v4.data.durable_path import require_durable_path
 from compose_v4.experiments.t4_fiber_campaign import Fiber, prepare
 from compose_v4.experiments.t4_fiber_expansion import expand_frontier
@@ -86,6 +92,8 @@ def main() -> None:
     parser.add_argument("--shards", type=int, default=8)
     parser.add_argument("--parents", type=int, default=4, help="frontier width PER ARM")
     parser.add_argument("--horizon", type=int, default=3, help="modules per program")
+    parser.add_argument("--exploration", type=int, default=2,
+                        help="random picks per batch; the rest are the model's ranking")
     parser.add_argument("--seed", type=int, default=20260918)
     parser.add_argument("--out", default="diagnostics/t4_fiber_control/paired.json")
     options = parser.parse_args()
@@ -150,7 +158,7 @@ def main() -> None:
         generated = time.time() - started
 
         # ---- each arm selects from the identical list ----
-        picks, requested = {}, {}
+        picks, requested, ranking = {}, {}, {}
         for name, arm in arms.items():
             if arm["stopped"] or arm["state"].budget < options.batch:
                 continue
@@ -163,9 +171,25 @@ def main() -> None:
             if arm["value"] is not None and should_stop(arm["state"], prepared, model):
                 arm["stopped"] = True
                 continue
-            chosen = [prepared[i] for i in acquisition(prepared, model, arm["state"], rng, batch=options.batch)]
+            selected = acquisition(
+                prepared, model, arm["state"], rng,
+                batch=options.batch,
+                exploration=options.batch if arm["value"] is None else options.exploration,
+            )
+            chosen = [prepared[i] for i in selected]
             predicted = model.predict(np.asarray([c["features"] for c in chosen]))
             picks[name] = list(zip(chosen, (float(p) for p in predicted)))
+            # The ranking the model assigned to the WHOLE pool before anything was
+            # docked. Used after the fact to place the round's best molecule in it: if a
+            # -10.7 candidate was present and ranked 180th, reward learning is the
+            # remaining problem, and no amount of acquisition machinery fixes it.
+            if arm["value"] is not None:
+                order = np.argsort(-endpoint_utility(prepared, model))
+                ranking[name] = {
+                    prepared[index]["smiles"]: position
+                    for position, index in enumerate(order, start=1)
+                }
+                ranking[f"{name}_pool"] = len(prepared)
             for candidate, _ in picks[name]:
                 requested[candidate["smiles"]] = candidate
         if not picks:
@@ -218,6 +242,32 @@ def main() -> None:
                 "improving_families": winner["families"] if improved and winner else None,
                 "round_best": winner["score"] if winner else None,
             }
+        # Where the round's actual best molecule sat in the adaptive model's pre-docking
+        # ranking of the entire pool, and how well that ranking predicted what came back.
+        every = [
+            d for arm in record["arms"].values() for d in arm.get("docked", [])
+            if d["score"] is not None
+        ]
+        if every and "adaptive" in ranking:
+            champion = min(every, key=lambda d: d["score"])
+            record["model_rank_of_round_best"] = ranking["adaptive"].get(champion["smiles"])
+            record["ranked_pool"] = ranking.get("adaptive_pool")
+            record["round_best_score"] = champion["score"]
+        history_x = arms["adaptive"]["x"]
+        if len(history_x) >= 8:
+            pairs = [
+                (d["predicted_endpoint"], d["score"])
+                for entry in rounds + [record]
+                for d in entry["arms"].get("adaptive", {}).get("docked", [])
+                if d["score"] is not None and d.get("predicted_endpoint") is not None
+            ]
+            if len(pairs) >= 8:
+                predicted_all = np.asarray([a for a, _ in pairs])
+                realized_all = np.asarray([b for _, b in pairs])
+                if predicted_all.std() > 1e-9:
+                    record["rho_predicted_realized"] = float(
+                        np.corrcoef(predicted_all, realized_all)[0, 1]
+                    )
         rounds.append(record)
 
         line = (f"[round {round_index}] pool {len(pool):>5} "
@@ -227,6 +277,11 @@ def main() -> None:
             arm = record["arms"][name]
             mark = "*" if arm.get("improved") else " "
             line += f" | {name} {arm['best']:6.2f}{mark}@{arm.get('calls', '-')}"
+        rho = record.get("rho_predicted_realized")
+        rank, ranked = record.get("model_rank_of_round_best"), record.get("ranked_pool")
+        line += f" | rho {rho:+.3f}" if rho is not None else " | rho     -"
+        if rank is not None and ranked:
+            line += f" | best ranked {rank}/{ranked} ({record['round_best_score']:.2f})"
         print(line, flush=True)
         destination.write_text(json.dumps({
             "schema_version": SCHEMA_VERSION, "options": vars(options),
