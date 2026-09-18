@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import gzip
 import json
+import platform
 import subprocess
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -17,6 +18,7 @@ from time import perf_counter
 from typing import Any
 
 import numpy as np
+from rdkit import rdBase
 
 from compose_v4.control.docking_value import identity
 from compose_v4.control.dynamic_program_synthesis import (
@@ -25,7 +27,7 @@ from compose_v4.control.dynamic_program_synthesis import (
     synthesize_dynamic_program,
     synthesize_named_module_sequence,
 )
-from compose_v4.experiments.continuation_profile import verify_file
+from compose_v4.experiments.continuation_profile import sha256_file, verify_file
 from compose_v4.experiments.pmo_dependency_region_program import (
     DependencyRegionConfig,
     dependency_region_program,
@@ -614,21 +616,50 @@ def build_production_yield(root: Path, *, progress=None) -> tuple[dict, dict]:
         capture_output=True,
         text=True,
     ).stdout.strip()
+    implementation_paths = (
+        "src/compose_v4/experiments/pmo_route_fiber_production_yield.py",
+        "tools/pmo_route_fiber_production_yield.py",
+        "docs/PMO_ROUTE_FIBER_PRODUCTION_YIELD.md",
+        "tests/test_pmo_route_fiber_production_yield.py",
+    )
     payload = {
         "schema_version": SCHEMA,
-        "decision": "ZERO_ORACLE_MATCHED_PRODUCTION_YIELD_COMPLETE",
+        "decision": "ZERO_ORACLE_PRODUCTION_SUPPORT_PASSED_YIELD_TIED",
         "new_oracle_calls": 0,
         "scored_launch_authorized": False,
         "contract": contract["payload"],
         "contract_payload_sha256": contract["payload_sha256"],
         "inputs": EXPECTED_SHA256,
         "code_revision": revision,
+        "implementation_sha256": {
+            path: sha256_file(root / path) for path in implementation_paths
+        },
+        "compute": {
+            "device": "cpu",
+            "machine": platform.machine(),
+            "processor": platform.processor(),
+            "python": platform.python_version(),
+            "numpy": np.__version__,
+            "rdkit": rdBase.rdkitVersion,
+            "seed": SEED,
+        },
         "tasks": tasks,
         "training_audit": checkpoint.pop("training_audit"),
         "checkpoint_payload_sha256": checkpoint["payload_sha256"],
         "claim_boundary": (
             "actual zero-oracle executable proposal yield only; no PMO reward, "
             "optimization advantage or IVG comparison is measured"
+        ),
+        "interpretation": (
+            "the held-family route prior is a real exact executable proposer and "
+            "adds multi-region and created-handle-dependent programs, but validity "
+            "and unique yield are tied because unchanged PMO v0 already saturates "
+            "both at this 32-attempt scale; route utility remains unmeasured"
+        ),
+        "next_safe_action": (
+            "freeze a small scored factorial on the declared PMO tasks to test "
+            "whether route-prior structural breadth improves reward under blind "
+            "selection and online FiberControl"
         ),
     }
     return checkpoint, {"payload": payload, "payload_sha256": identity(payload)}
