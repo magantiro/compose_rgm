@@ -53,7 +53,34 @@ from compose_v4.experiments.t4_fiber_expansion import expand_frontier
 SCHEMA_VERSION = "t4_fiber_paired_campaign_v1"
 
 JAK2_ROOT = "COC(=O)CC2Nc1ccccc1c3ccnc4[nH]cc2c34"
-ROOT_CONTEXT = {"qed": 0.712, "similarity": 1.0, "sa": 3.09}
+
+
+def root_context(smiles: str) -> dict:
+    """The root's own properties, computed rather than hardcoded.
+
+    A seed is NOT necessarily a feasible endpoint. braf_9 carries QED 0.235 against the
+    task's 0.6 floor, so on that cell the control problem is to repair a violated
+    constraint while holding the similarity corridor -- which is why the published BRAF
+    winners prune 7 to 14 heavy atoms. Hardcoding one cell's descriptors would have
+    silently mislabelled every other cell's root.
+    """
+    import os
+    import sys
+
+    from rdkit import Chem
+    from rdkit.Chem import QED, RDConfig
+
+    sys.path.append(os.path.join(RDConfig.RDContribDir, "SA_Score"))
+    import sascorer
+
+    molecule = Chem.MolFromSmiles(smiles)
+    if molecule is None:
+        raise ValueError(f"the root does not parse: {smiles!r}")
+    return {
+        "qed": float(QED.qed(molecule)),
+        "sa": float(sascorer.calculateScore(molecule)),
+        "similarity": 1.0,
+    }
 
 
 def _docker(target: str, seed: int):
@@ -143,7 +170,7 @@ def main() -> None:
         root_score = {options.root: resumed["root_score"]}
         print(f"[paired] resuming {options.resume} at {len(resumed['rounds'])} rounds", flush=True)
     else:
-        root_score = dock([{"smiles": options.root, **ROOT_CONTEXT}], "root")
+        root_score = dock([{"smiles": options.root, **root_context(options.root)}], "root")
         if options.root not in root_score:
             raise RuntimeError("the root failed to dock; nothing downstream is interpretable")
     arms = {
@@ -357,8 +384,14 @@ def main() -> None:
     print("\n[paired] FINAL", flush=True)
     for name, arm in arms.items():
         state = arm["state"]
-        print(f"  {name:>8}  best {state.incumbent:6.2f}  after {options.budget - state.budget} calls"
-              f"  archive {len(state.archive)}", flush=True)
+        # The root is a starting point, not an answer: it need not satisfy the task gate,
+        # and on braf_9 it does not (QED 0.235 against a 0.6 floor). Every other archive
+        # entry came through fiber.check, so the best FEASIBLE score excludes only it.
+        feasible = {s: v for s, v in state.archive.items() if s != options.root}
+        best_feasible = min(feasible.values()) if feasible else float("inf")
+        print(f"  {name:>8}  best {state.incumbent:6.2f}  best FEASIBLE {best_feasible:6.2f}"
+              f"  after {options.budget - state.budget} calls  archive {len(state.archive)}",
+              flush=True)
         for smiles, score in sorted(state.archive.items(), key=lambda kv: kv[1])[:3]:
             print(f"            {score:7.2f}  {smiles}", flush=True)
     print(f"\n[paired] written to {destination}", flush=True)

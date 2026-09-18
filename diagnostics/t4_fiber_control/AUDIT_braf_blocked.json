@@ -1,0 +1,27 @@
+{
+  "question": "Can the current proposal law reach a feasible endpoint from the braf seeds?",
+  "answer": "No. 240 free programs from braf_9 produced 0 feasible endpoints in 55 s.",
+  "cost": "zero oracle calls; saved the 56 that were about to be spent",
+  "cause": "the braf seeds violate the task's QED floor themselves",
+  "seeds": {
+    "braf_9": {
+      "heavy": 40,
+      "qed": 0.235,
+      "sa": 2.69,
+      "smiles": "CCN(CC)CCNC(=O)c3cnn4c(c2cccc(NC(=O)Nc1ccc(Cl)c(C(F)(F)F)c1)c2)ccnc34"
+    },
+    "braf_10": {
+      "heavy": 39,
+      "qed": 0.346,
+      "sa": 2.49
+    },
+    "braf_11": {
+      "heavy": 37,
+      "qed": 0.255,
+      "sa": 2.38
+    }
+  },
+  "qed_floor": 0.6,
+  "implication": "on braf the control problem is to REPAIR a violated constraint while holding the similarity corridor, which is why the published winners prune 7 to 14 heavy atoms. JAK2's basin instead GROWS by 7 and keeps every aromatic ring, so the two cells need different capabilities.",
+  "do_not": "spend docking calls on braf until a free pool yields feasible endpoints"
+}
