@@ -124,9 +124,11 @@ def report(payload: dict) -> str:
         "",
         "## Where each arm's picks landed among what was docked",
         "",
-        "Ranks are over that round's docked molecules only. This is a selected sample, so "
-        "the `best docked` column is a LOWER BOUND on the pool ceiling and says nothing "
-        "about whether stronger candidates went unchosen.",
+        (
+            "Ranks are over that round's docked molecules only. This is a selected "
+            "sample, so the `best docked` column is a LOWER BOUND on the pool ceiling "
+            "and says nothing about whether stronger candidates went unchosen."
+        ),
         "",
         "| round | best docked | adaptive best rank | blind best rank |",
         "| ----: | ----------: | -----------------: | --------------: |",
