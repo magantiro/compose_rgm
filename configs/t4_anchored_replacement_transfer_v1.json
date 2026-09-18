@@ -1,0 +1,64 @@
+{
+  "payload": {
+    "schema_version": "t4_anchored_replacement_transfer_contract_v1",
+    "scientific_problem": "Does the frozen generic anchored-replacement proposal expert autonomously produce feasible candidates on the two JAK2 delta-0.6 source molecules that did not motivate its development?",
+    "primary_model_output": "A complete exact-executed COMPOSE program endpoint from either the unchanged shallow Dynamic-v0 lane or the frozen anchored-replacement lane.",
+    "central_claim_under_test": "The coordinated delete-retain-construct proposal is a transferable structural action rather than a seed-1 endpoint lookup.",
+    "validation_setting": "Zero-oracle matched proposal generation on JAK2 seeds 0 and 2 at delta 0.6, with the implementation frozen after observing seed 1.",
+    "primary_baseline": "Unchanged shallow Dynamic-v0 proposal generation at the same 512-program budget on each source.",
+    "causal_ablation": "The anchored lane differs only by composing existing pendant deletion and substituted-ring construction through one retained boundary anchor; exact execution and endpoint filtering are shared.",
+    "declared_support": {
+      "molecules": "connected COMPOSE-supported molecular graphs with at most 40 active heavy atoms",
+      "programs": "existing generic Dynamic-v1 pendant-deletion and substituted-ring modules compiled into a protected program, plus the unchanged shallow Dynamic-v0 baseline",
+      "runtime_inputs": "source molecule, fixed generic proposal configuration and exact endpoint gate; no target route, endpoint, docking score or target-conditioned lookup",
+      "limits": "transfer within one protein only; utility remains unmeasured until a separate score-blind lock is frozen"
+    },
+    "cells": {
+      "jak2_0": {
+        "root_smiles": "OCCCCc2nc1ccccc1c4ncnc3[nH]cc2c34",
+        "source_idx": 0
+      },
+      "jak2_2": {
+        "root_smiles": "Oc5ccc(C2NC(=O)c1ccccc1c3ccnc4[nH]cc2c34)c(F)c5",
+        "source_idx": 2
+      }
+    },
+    "delta": 0.6,
+    "support": "compose_valid",
+    "lanes": [
+      "shallow",
+      "anchored_replacement"
+    ],
+    "attempts_per_lane_per_cell": 64,
+    "draws_per_attempt": 8,
+    "programs_per_lane_per_cell": 512,
+    "horizon": 3,
+    "seed": 202609190000,
+    "minimum_panel_yield": 12,
+    "promotion_and_kill_criteria": {
+      "engineering": "Every one of the 256 independent workers returns exactly once without failure, every accepted endpoint passes the unchanged compose_valid gate, and oracle calls equal zero.",
+      "transfer_support": "Anchored replacement produces at least one unique eligible endpoint on both JAK2 seeds 0 and 2.",
+      "full_panel_yield": "Anchored replacement produces at least twelve unique eligible endpoints on each source, sufficient for a matched small score-blind utility panel without regeneration.",
+      "negative": "If a source has zero anchored eligible endpoints, record the transfer failure and do not score that source under this frozen proposal expert."
+    },
+    "next_step_if_promoted": "Deduplicate against exact historical charged endpoints, freeze up to twelve novel anchored endpoints per source by canonical endpoint digest before scores are loaded, then run a separately authorized small utility/FiberControl pilot.",
+    "new_oracle_call_ceiling": 0,
+    "modal": {
+      "max_containers": 64,
+      "cpu_per_worker": 1,
+      "automatic_retries": 0,
+      "restart_unit": "one independently seeded eight-program attempt"
+    },
+    "inputs": {
+      "configs/t4_frozen_program_benchmark.json": "e831072c231994267d67244f859a5b545f715bcbc44af5522a8fc6d10413e1af",
+      "src/compose_v4/experiments/t4_anchored_replacement_transfer.py": "52b4dc2f673b459e28317bfd8fa3152918d8d1b874cf887bffc265d6576be332",
+      "src/compose_v4/experiments/t4_fiber_campaign.py": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+      "src/compose_v4/experiments/t4_fiber_lane_support.py": "24e7673bed8a8fd2aa2c8c9e0966f7bbf9ed8c913cf459a4de2e0ea36dd7bca8",
+      "src/compose_v4/experiments/t4_route_guided_support.py": "8463e033043e03951d48be1307f76be7052c90f084a0bae019ea6edfcb98804e",
+      "src/compose_v4/control/progressive_structured_sampler.py": "f3716d34d9e53ffff78ec8c753a34ee9d3a46082f1877e51766d990c1ff4a6e6",
+      "modal_apps/t4_anchored_replacement_transfer_app.py": "e3142d75203559130fa620f9dca37cb0dea256142c0be032ee783c1f9e8f9f04",
+      "modal_apps/genmol_t4_opt_app.py": "9b635a9936493a5900b613cdce52f76c24efcf98f3f43b3b155448e0b1796bf0"
+    }
+  },
+  "payload_sha256": "535126f618b576c2c3c22f684b396e8b2ed35aa45cdda1719dc076e4066ea511"
+}
