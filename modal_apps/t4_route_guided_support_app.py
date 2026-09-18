@@ -15,9 +15,15 @@ from modal_apps.genmol_t4_opt_app import REMOTE_ROOT, ROOT
 from modal_apps.genmol_t4_opt_app import image as base_image
 
 APP_NAME = "compose-t4-route-guided-support"
-CONTRACT = "configs/t4_route_guided_support_probe_v1.json"
+CONTRACT = "configs/t4_route_guided_support_probe_v2.json"
 
 image = base_image
+image = image.add_local_dir(
+    ROOT / "src",
+    str(REMOTE_ROOT / "src"),
+    copy=True,
+    ignore=("**/__pycache__/**", "**/*.pyc"),
+)
 for relative in (
     "modal_apps/t4_route_guided_support_app.py",
     "diagnostics/t4_proposal_prior/construction_corpus_v1/decisions.jsonl.gz",

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 
 from compose_v4.control.constructive_features import MODE_FEATURE_NAMES, SITE_FEATURE_NAMES
@@ -128,3 +130,14 @@ def test_independent_attempt_reduction_preserves_counts_and_unique_endpoints():
     assert merged["unique_feasible_endpoints"] == 2
     assert merged["raw_factor_rates"]["basin"]["count"] == 3
     assert merged["new_oracle_calls"] == 0
+
+
+def test_modal_image_explicitly_contains_current_source_tree():
+    """The inherited image can be cached before a newly added experiment exists."""
+
+    source = (
+        Path(__file__).resolve().parents[1]
+        / "modal_apps"
+        / "t4_route_guided_support_app.py"
+    ).read_text()
+    assert 'image = image.add_local_dir(\n    ROOT / "src"' in source
