@@ -1,0 +1,45 @@
+{
+  "payload": {
+    "schema_version": "t4_anchored_transfer_pilot_contract_v1",
+    "scientific_problem": "Does the frozen generic anchored-replacement option transfer useful JAK2 docking chemistry from answer-known seed 1 to independently generated eligible endpoints on seed 0?",
+    "primary_model_output": "One complete eligible COMPOSE endpoint from the prospectively frozen JAK2 seed-0 anchored-replacement pool.",
+    "central_claim_under_test": "The generic coordinated deletion-retained-anchor-ring-construction option transfers docking utility to a second source, rather than only reproducing the seed-1 development basin.",
+    "validation_setting": "Twelve score-blind, exact-historical-novel, diversity-locked endpoints; one JAK2 docking call each; no retry, replacement or adaptation.",
+    "declared_support": "JAK2 seed 0 at delta 0.6, compose_valid endpoint support, frozen anchored-replacement programs with exact execution; this pilot does not test seed 2, FiberControl, route distillation or benchmark-wide performance.",
+    "authorization": {
+      "basis": "The user explicitly instructed us to freeze anchored replacement, test the remaining JAK2 seeds quickly, approved Modal use, and directed continued aggressive development toward IVG-beating performance.",
+      "scope": "Exactly the 12 candidates in the immutable lock, one docking attempt per endpoint, no retry or replacement."
+    },
+    "candidate_lock_id": "d6314db30bcbc94e1b333145f182bbf4401ceff367e04125055b1df94a146f1a",
+    "target": "jak2",
+    "cell": "jak2_0",
+    "delta": 0.6,
+    "docking_seed": 20260919,
+    "charged_call_limit": 12,
+    "automatic_retries": 0,
+    "replacement_after_scoring": false,
+    "ivg_reported_mean": -9.7,
+    "promotion_and_kill_criteria": {
+      "engineering": "All 12 locked endpoints are attempted exactly once and every result, including a failure, is retained.",
+      "utility": "At least one successful candidate scores at or below the published IVG mean of -9.7.",
+      "strong_transfer": "At least one successful candidate scores at or below -10.2, the published delta-0.4 IVG mean on this cell.",
+      "negative": "If no candidate reaches -9.7, retain the negative result and do not infer cross-source docking transfer from proposal support alone."
+    },
+    "evaluator_sha256": {
+      "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor": "cb900f3f75dcf2ac3efe6538528ed1e87ec934a527b3b060c2b09dfe3a11d9b6"
+    },
+    "inputs": {
+      "candidate_lock": "diagnostics/t4_anchored_replacement_transfer_pilot_v1/candidate_lock.json",
+      "candidate_lock_sha256": "c29c6f744793e7345f37aab12b486cceab43ccae252d72ad94b5048991180639",
+      "lock_module": "src/compose_v4/experiments/t4_anchored_transfer_lock.py",
+      "lock_module_sha256": "31fa2059953973e0aa1e8ea7d4a71a28bbd358363c19f2a0bcccea77d4d0b015",
+      "modal_app": "modal_apps/t4_anchored_transfer_pilot_app.py",
+      "modal_app_sha256": "7bffb12dacbeccb65291e5bf8e05a43614fa62cf2fef81e9fc3d948499c36f63",
+      "docking_wrapper": "modal_apps/genmol_t4_opt_app.py",
+      "docking_wrapper_sha256": "9b635a9936493a5900b613cdce52f76c24efcf98f3f43b3b155448e0b1796bf0"
+    },
+    "claim_boundary": "Prospective bounded development evidence on one second-source JAK2 cell. It is not a held-out benchmark result, not replicated, and not evidence for FiberControl or route distillation."
+  },
+  "payload_sha256": "cb0ca9a31ae97519aeb08bc8a8e8dd4785c1610db4de6fad5ef926a4e3c1f222"
+}

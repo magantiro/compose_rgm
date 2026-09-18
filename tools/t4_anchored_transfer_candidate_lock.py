@@ -32,7 +32,8 @@ def main() -> None:
     parser.add_argument(
         "--transfer-ledger",
         type=Path,
-        default=ROOT / "diagnostics/t4_anchored_replacement_transfer_v1/result.jsonl.gz",
+        default=ROOT
+        / "diagnostics/t4_anchored_replacement_transfer_v1/result.jsonl.gz",
     )
     parser.add_argument(
         "--historical-corpus",
@@ -42,7 +43,8 @@ def main() -> None:
     parser.add_argument(
         "--output",
         type=Path,
-        default=ROOT / "diagnostics/t4_anchored_replacement_transfer_pilot_v1/candidate_lock.json",
+        default=ROOT
+        / "diagnostics/t4_anchored_replacement_transfer_pilot_v1/candidate_lock.json",
     )
     args = parser.parse_args()
 
@@ -75,7 +77,11 @@ def main() -> None:
     )
     verify_transfer_lock(assessment["lock"])
     revision = subprocess.run(
-        ["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True, check=True
+        ["git", "rev-parse", "HEAD"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=True,
     ).stdout.strip()
     payload = {
         "schema_version": "t4_anchored_transfer_lock_publication_v1",
