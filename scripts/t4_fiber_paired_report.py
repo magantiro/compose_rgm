@@ -153,6 +153,87 @@ def report(payload: dict) -> str:
             cells.append(f"{min(picks)} of {len(ordering)}" if picks else "-")
         lines.append(f"| {index} | {ordering[0][1]:.2f} | " + " | ".join(cells) + " |")
 
+    # ---- tail-focused ranking: the only regime the controller has to be good in ----
+    lines += [
+        "",
+        "## Top-tail ranking skill",
+        "",
+        (
+            "A controller does not need to fit the pool; it needs to be right about the "
+            "few molecules worth a call. So this reports where the round's ACTUAL best "
+            "molecule sat in the model's pre-docking ranking of the whole pool, which is "
+            "answerable because the pool is shared and the ranking is recorded before any "
+            "score comes back."
+        ),
+        "",
+        "| round | pool | rank of the round's best | percentile | round best | regret |",
+        "| ----: | ---: | -----------------------: | ---------: | ---------: | -----: |",
+    ]
+    percentiles, in_top_decile, in_top_ten = [], 0, 0
+    for entry in rounds:
+        rank, ranked = entry.get("model_rank_of_round_best"), entry.get("ranked_pool")
+        if rank is None or not ranked:
+            continue
+        percentile = 100.0 * rank / ranked
+        percentiles.append(percentile)
+        in_top_decile += percentile <= 10.0
+        in_top_ten += rank <= 10
+        adaptive = entry["arms"].get("adaptive", {})
+        scored = _finite(d["score"] for d in adaptive.get("docked", []))
+        regret = (min(scored) - entry["round_best_score"]) if scored else None
+        lines.append(
+            f"| {entry['round']} | {ranked} | {rank} | {percentile:.1f}% | "
+            f"{entry['round_best_score']:.2f} | "
+            + (f"{regret:+.2f} |" if regret is not None else "- |")
+        )
+    if percentiles:
+        ordered = sorted(percentiles)
+        median = ordered[len(ordered) // 2]
+        lines += [
+            "",
+            (
+                f"Median percentile of the round's best molecule: **{median:.1f}%**. "
+                f"In the model's top decile on **{in_top_decile} of {len(percentiles)}** "
+                f"rounds, and in its top ten candidates on {in_top_ten}."
+            ),
+            (
+                "`regret` is the adaptive arm's own best minus the best molecule docked "
+                "that round by either arm, so 0.00 means it did not leave anything on the "
+                "table among what was actually scored."
+            ),
+        ]
+
+    # ---- does the model's share of the batch beat its own random share ----
+    model_share, random_share = [], []
+    for entry in rounds:
+        adaptive = entry["arms"].get("adaptive", {})
+        docked = [d for d in adaptive.get("docked", []) if d["score"] is not None]
+        if len(docked) < 4:
+            continue
+        # The selector fills its model slots first, so batch order is model-then-random.
+        split = len(docked) - 2
+        model_share += [d["score"] for d in docked[:split]]
+        random_share += [d["score"] for d in docked[split:]]
+    lines += ["", "## The model's picks against its own random quota", ""]
+    if model_share and random_share:
+        mean_model = sum(model_share) / len(model_share)
+        mean_random = sum(random_share) / len(random_share)
+        lines += [
+            f"- model-selected picks: **{mean_model:.3f}** mean over {len(model_share)} calls",
+            f"- random-quota picks: **{mean_random:.3f}** mean over {len(random_share)} calls",
+            (
+                f"- difference **{mean_model - mean_random:+.3f}** (negative favours the "
+                f"model, since a lower docking score is better)"
+            ),
+            (
+                "This is the cleanest within-arm read available: the same round, the same "
+                "pool, the same parents, six picks chosen by the ranking against two "
+                "chosen at random."
+            ),
+        ]
+    else:
+        lines.append("Too few rounds to split the batch.")
+
     lines += ["", "## Calibration of the adaptive arm's own predictions", ""]
     predicted, realized = [], []
     for entry in rounds:

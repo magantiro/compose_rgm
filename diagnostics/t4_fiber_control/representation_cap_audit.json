@@ -1,0 +1,80 @@
+{
+ "representable_heavy_atoms": 40,
+ "status": "NON-BINDING on every published molecule",
+ "note": "A representation limit of the padded executable state, NOT a benchmark criterion. Audited so a method limitation is never reported as part of the official gate. Recorded per the reviewer's request before any seed-to-seed claim is made.",
+ "t4_seeds": {
+  "n": 15,
+  "over_cap": 0,
+  "max": 40,
+  "min": 16
+ },
+ "ivg_published_winners": {
+  "per_cell": {
+   "5ht1b_s7_d0.4": {
+    "delta": 0.4,
+    "sizes": [
+     31,
+     31,
+     31,
+     31,
+     29
+    ]
+   },
+   "braf_s9_d0.6": {
+    "delta": 0.6,
+    "sizes": [
+     27,
+     27,
+     26,
+     26,
+     26
+    ]
+   },
+   "braf_s10_d0.6": {
+    "delta": 0.6,
+    "sizes": [
+     32,
+     32,
+     31,
+     31,
+     31
+    ]
+   },
+   "braf_s11_d0.6": {
+    "delta": 0.6,
+    "sizes": [
+     30,
+     27,
+     27,
+     27,
+     27
+    ]
+   },
+   "parp1_s0_d0.4": {
+    "delta": 0.4,
+    "sizes": [
+     33,
+     33,
+     31,
+     30,
+     30
+    ]
+   }
+  },
+  "n": 25,
+  "over_cap": 0,
+  "max": 33
+ },
+ "jak2_cells": {
+  "jak2_14": 27,
+  "jak2_12": 22,
+  "jak2_13": 22
+ },
+ "cells_where_the_cap_binds_immediately": [
+  {
+   "cell": "braf_9",
+   "heavy_atoms": 40,
+   "consequence": "at or above the ceiling, so the representable fiber permits no net atom growth from this seed; edits must be size-neutral or shrinking"
+  }
+ ]
+}
