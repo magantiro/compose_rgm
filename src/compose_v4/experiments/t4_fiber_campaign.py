@@ -57,7 +57,24 @@ QED_MIN, SA_MAX = 0.6, 4.0
 #: benchmark criterion, and is recorded separately for exactly that reason.
 REPRESENTABLE_HEAVY_ATOMS = 40
 
-BENCHMARK, LEGACY_SCREENED = "benchmark", "legacy_screened"
+#: Three nested supports, named for what they actually are. The distinction matters for
+#: any claim: a method may search a STRICTER subset and still beat a published number --
+#: arguably more convincingly -- but it may not call that subset "the benchmark".
+#:
+#:     Q_legacy_screened  subset of  Q_compose_valid  subset of  Q_benchmark
+#:
+#: BENCHMARK_ONLY is the task contract verbatim and nothing else.
+#: COMPOSE_VALID adds structural validity, because COMPOSE will not spend an oracle call
+#:   on a species that is not a molecule. Accepting all 25 published winners shows this
+#:   gate does not remove what IVG found; it does NOT show the gate equals the task.
+#: LEGACY_SCREENED further adds a medicinal-chemistry preference list that refuses 7.0%
+#:   of the benchmark's own leads, and exists only to reproduce runs already made on it.
+BENCHMARK_ONLY, COMPOSE_VALID, LEGACY_SCREENED = (
+    "benchmark_only",
+    "compose_valid",
+    "legacy_screened",
+)
+_SUPPORTS = (BENCHMARK_ONLY, COMPOSE_VALID, LEGACY_SCREENED)
 
 
 class Fiber:
@@ -66,14 +83,17 @@ class Fiber:
     `support` decides WHOSE criterion this is, and the distinction is load-bearing for
     any comparison against a published number.
 
-    `BENCHMARK` is the benchmark's thresholds plus a STRUCTURAL VALIDITY gate, and
-    nothing else. Use it for anything that will be compared to IVG.
+    `COMPOSE_VALID` is the task thresholds plus a structural validity gate. It is a
+    STRICT SUBSET of the benchmark support, not a restatement of it, and that is the
+    honest description: a method is allowed to search a smaller set and still beat a
+    published number.
 
-    The validity gate is `med_chem_gate.is_valid`, and including it is a measurement
-    rather than a preference: that gate is calibrated to accept all 15 T4 seeds and all
-    25 published InVirtuoGen winners, so it provably cannot cost us anything IVG
-    achieved. What it removes is species that are not molecules -- radicals, hypervalent
-    sulfur and iodine, cumulenes, strained N-N rings.
+    The validity gate is `med_chem_gate.is_valid`. Calibration shows it accepts all 15
+    T4 seeds and all 25 published InVirtuoGen winners, which establishes that it does not
+    remove what IVG found -- it does NOT establish that the gate equals the task
+    criterion, and the two claims must not be confused. What it removes is species that
+    are not molecules: radicals, hypervalent sulfur and iodine, cumulenes, strained N-N
+    rings.
 
     This is here because removing it was tried and failed loudly. A first version of the
     benchmark support tested only similarity, QED and SA, on the reasoning that anything
@@ -108,9 +128,9 @@ class Fiber:
     heuristic, not an additional benchmark threshold"). Report it as a second number.
     """
 
-    def __init__(self, seed_smiles: str, delta: float, *, support: str = BENCHMARK):
-        if support not in (BENCHMARK, LEGACY_SCREENED):
-            raise ValueError(f"unknown fiber support {support!r}")
+    def __init__(self, seed_smiles: str, delta: float, *, support: str = COMPOSE_VALID):
+        if support not in _SUPPORTS:
+            raise ValueError(f"unknown fiber support {support!r}; expected one of {_SUPPORTS}")
         self.delta = delta
         self.support = support
         self.generator = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
@@ -128,7 +148,7 @@ class Fiber:
         access = sascorer.calculateScore(mol)
         if similarity < self.delta or quality < QED_MIN or access > SA_MAX:
             return None
-        if not structurally_valid(smiles):
+        if self.support != BENCHMARK_ONLY and not structurally_valid(smiles):
             return None
         if self.support == LEGACY_SCREENED and instability(smiles):
             return None

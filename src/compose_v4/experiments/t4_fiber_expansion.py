@@ -142,7 +142,7 @@ def expand_frontier(
     horizon: int = 3,
     multi_region: bool = True,
     seed: int = 0,
-    support: str = "benchmark",
+    support: str = "compose_valid",
     timeout: float = 3600.0,
 ) -> dict[str, dict]:
     """Expand every parent on the frontier at once, under one global worker cap.
@@ -302,7 +302,7 @@ def _shard_main() -> None:
     request = json.loads(sys.stdin.read())
     fiber = Fiber(
         request["seed_smiles"], request["delta"],
-        support=request.get("support", "benchmark"),
+        support=request.get("support", "compose_valid"),
     )
     rng = np.random.default_rng(request["seed"])
     records = expand(

@@ -92,22 +92,42 @@ def test_every_benchmark_threshold_refuses_before_a_call_is_spent(smiles, refuse
     assert Fiber(JAK2_ROOT, 0.6).check(smiles) is None, f"{refused_for}, though {otherwise}"
 
 
-def test_the_benchmark_fiber_is_the_benchmark_criterion_and_nothing_else():
-    """Three ways the screened fiber was tighter than the task it claims to serve.
+def test_the_three_supports_are_strictly_nested():
+    """`Q_legacy_screened` subset of `Q_compose_valid` subset of `Q_benchmark`.
 
-    The contract is "RETURNED only QED>=0.6, SA<=4, sim>=delta". Searching under anything
-    narrower and then comparing to a published number obtained on the full criterion is
-    not a comparison. The screened bundle refuses 7.0% of the benchmark's own lead set.
+    The nesting is the honest description and the naming has to carry it. Accepting all
+    25 published IVG winners shows the validity gate does not remove what IVG found; it
+    does NOT show the gate equals the task criterion, and conflating those two claims is
+    how an "official fiber" that is not the official fiber gets into a paper.
+
+    Each witness below is admitted by one support and refused by the next one in.
     """
-    from compose_v4.experiments.t4_fiber_campaign import BENCHMARK, LEGACY_SCREENED
+    from compose_v4.experiments.t4_fiber_campaign import (
+        BENCHMARK_ONLY,
+        COMPOSE_VALID,
+        LEGACY_SCREENED,
+    )
 
-    official = Fiber(JAK2_ROOT, 0.6, support=BENCHMARK)
+    task = Fiber(JAK2_ROOT, 0.6, support=BENCHMARK_ONLY)
+    compose = Fiber(JAK2_ROOT, 0.6, support=COMPOSE_VALID)
     screened = Fiber(JAK2_ROOT, 0.6, support=LEGACY_SCREENED)
 
-    # A molecule the med-chem bundle refuses but the task accepts.
+    # An aldehyde violates no task threshold and no structural validity rule; only the
+    # medicinal-chemistry preference list refuses it.
     aldehyde = "O=CCC1Nc2ccccc2-c2ccnc3[nH]cc1c23"
-    assert official.check(aldehyde) is not None, "the task does not screen aldehydes"
-    assert screened.check(aldehyde) is None, "the legacy bundle does"
+    assert task.check(aldehyde) is not None, "the task does not screen aldehydes"
+    assert compose.check(aldehyde) is not None, "nor does structural validity"
+    assert screened.check(aldehyde) is None, "the legacy preference list does"
+
+    # An aminyl radical satisfies every task threshold and is not a molecule. It was the
+    # leading endpoint of a run that searched BENCHMARK_ONLY by accident, at -9.70.
+    radical = "COC(=O)CC1Nc2cc(C3(C[NH])CCCCC3)ccc2-c2ccnc3[nH]cc1c23"
+    assert task.check(radical) is not None, "the task thresholds alone admit a radical"
+    assert compose.check(radical) is None, "structural validity is what refuses it"
+
+    # And the seed itself is in all three.
+    for fiber in (task, compose, screened):
+        assert fiber.check(JAK2_ROOT) is not None
 
     with pytest.raises(ValueError):
         Fiber(JAK2_ROOT, 0.6, support="something_else")

@@ -35,6 +35,7 @@ from __future__ import annotations
 import argparse
 import json
 import time
+from pathlib import Path
 
 import numpy as np
 
@@ -92,14 +93,18 @@ def main() -> None:
     parser.add_argument("--shards", type=int, default=8)
     parser.add_argument("--parents", type=int, default=4, help="frontier width PER ARM")
     parser.add_argument("--horizon", type=int, default=3, help="modules per program")
-    parser.add_argument("--support", default="benchmark",
-                        choices=("benchmark", "legacy_screened"),
-                        help="benchmark = the task's own criterion, the only fair one "
-                             "for an IVG comparison")
+    parser.add_argument("--support", default="compose_valid",
+                        choices=("benchmark_only", "compose_valid", "legacy_screened"),
+                        help="compose_valid = task thresholds plus structural validity, "
+                             "a strict SUBSET of the benchmark support; benchmark_only = "
+                             "the task contract verbatim")
     parser.add_argument("--exploration", type=int, default=2,
                         help="random picks per batch; the rest are the model's ranking")
     parser.add_argument("--seed", type=int, default=20260918)
     parser.add_argument("--out", default="diagnostics/t4_fiber_control/paired.json")
+    parser.add_argument("--resume", default=None,
+                        help="a previous result to continue: its archives, spent budget "
+                             "and reward-model rows are restored")
     options = parser.parse_args()
 
     destination = require_durable_path(options.out, role="paired campaign result")
@@ -121,9 +126,26 @@ def main() -> None:
 
     # One shared starting archive: the root is docked once and both arms are given that
     # same number, so neither arm starts from a luckier measurement of the same molecule.
-    root_score = dock([{"smiles": options.root, **ROOT_CONTEXT}], "root")
-    if options.root not in root_score:
-        raise RuntimeError("the root failed to dock; nothing downstream is interpretable")
+    # A machine reboot has now destroyed two runs mid-flight, and oracle calls are the
+    # scarce resource here, so a partial result is resumed rather than repeated. Docked
+    # scores, the per-arm archives and the reward model's training rows are all
+    # reconstructible from the saved record; only the RNG stream is not, which changes
+    # which candidates are proposed next but not the validity of what was measured.
+    resumed = None
+    if options.resume:
+        resumed = json.loads(Path(options.resume).read_text())
+        if resumed["options"]["root"] != options.root:
+            raise ValueError("cannot resume a run that started from a different root")
+        if resumed["options"]["support"] != options.support:
+            raise ValueError("cannot resume a run that searched a different support")
+
+    if resumed is not None:
+        root_score = {options.root: resumed["root_score"]}
+        print(f"[paired] resuming {options.resume} at {len(resumed['rounds'])} rounds", flush=True)
+    else:
+        root_score = dock([{"smiles": options.root, **ROOT_CONTEXT}], "root")
+        if options.root not in root_score:
+            raise RuntimeError("the root failed to dock; nothing downstream is interpretable")
     arms = {
         "adaptive": {
             "state": SearchState(archive=dict(root_score), budget=options.budget - 1),
@@ -134,6 +156,33 @@ def main() -> None:
             "value": None, "x": [], "y": [], "previous": None, "stopped": False,
         },
     }
+    if resumed is not None:
+        from compose_v4.control.fiber_control import program_features
+
+        for name, arm in arms.items():
+            arm["state"].archive.update(resumed["archives"].get(name, {}))
+            spent = max(
+                (entry["arms"].get(name, {}).get("calls") or 0) for entry in resumed["rounds"]
+            )
+            arm["state"].budget = options.budget - spent
+            arm["state"].rounds = len(resumed["rounds"])
+            for entry in resumed["rounds"]:
+                record = entry["arms"].get(name, {})
+                if "improved" in record:
+                    arm["state"].history.append(
+                        {"round": entry["round"], "improved": record["improved"]}
+                    )
+                if arm["value"] is None:
+                    continue
+                for docked_row in record.get("docked", []):
+                    if docked_row.get("score") is None:
+                        continue
+                    arm["x"].append(program_features(docked_row, arm["state"]))
+                    arm["y"].append(docked_row["parent_score"] - docked_row["score"])
+            if arm["value"] is not None:
+                arm["value"].fit(arm["x"], arm["y"])
+            print(f"[paired]   {name}: {len(arm['state'].archive)} molecules, "
+                  f"{spent} calls spent, {len(arm['y'])} training rows", flush=True)
     for arm in arms.values():
         arm["previous"] = arm["state"].incumbent
 
@@ -143,7 +192,8 @@ def main() -> None:
     print(f"[paired] selection: predicted ENDPOINT score, one step, program depth "
           f"{options.horizon}; fiber support = {options.support}\n", flush=True)
 
-    rounds, round_index = [], 0
+    rounds = list(resumed["rounds"]) if resumed is not None else []
+    round_index = len(rounds)
     while any(a["state"].budget >= options.batch and not a["stopped"] for a in arms.values()):
         round_index += 1
         started = time.time()
